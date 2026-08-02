@@ -1,0 +1,222 @@
+# =============================================================
+# Docker Compose - Development
+# اجرا:
+# docker compose -f docker-compose.dev.yml up
+# =============================================================
+
+services:
+
+  # ────────────────────────────────────────────────────────────
+  # PostgreSQL
+  # ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:18.4-bookworm
+    container_name: telecom_db_dev
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: telecom
+      POSTGRES_PASSWORD: telecom_pass
+      POSTGRES_DB: telecom_marketplace
+
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql
+
+    ports:
+      - "5438:5432"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U telecom -d telecom_marketplace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - telecom_net
+
+  # ────────────────────────────────────────────────────────────
+  # Backend (Development)
+  # ────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+
+    container_name: telecom_backend_dev
+
+    restart: unless-stopped
+
+    mem_limit: 1g
+    memswap_limit: 1g
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://telecom:telecom_pass@postgres:5432/telecom_marketplace?schema=public
+      CHOKIDAR_USEPOLLING: "true"
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - telecom_net
+
+  # ────────────────────────────────────────────────────────────
+  # Website (Development - Vite hot reload)
+  # ────────────────────────────────────────────────────────────
+  website:
+    build:
+      context: .
+      dockerfile: apps/website/Dockerfile.dev
+
+    container_name: telecom_website_dev
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: development
+      # Relative base → the browser hits the app's own origin and Vite's dev
+      # proxy forwards /api → backend. NEVER use the internal docker hostname
+      # (backend:3000) here: it is not resolvable from the user's browser.
+      VITE_API_BASE_URL: /api/v1
+      CHOKIDAR_USEPOLLING: "true"
+
+    ports:
+      - "3001:3001"
+
+
+    volumes:
+      - ./apps/website:/app/apps/website
+      - ./packages/shared-core:/app/packages/shared-core
+      - ./packages/shared-ui:/app/packages/shared-ui
+      - ./packages/api-client:/app/packages/api-client
+      - ./packages/auth:/app/packages/auth
+      - ./packages/permissions:/app/packages/permissions
+      - ./packages/vite-config:/app/packages/vite-config
+      # Preserve pnpm-installed node_modules (host bind mounts must not shadow them)
+      - /app/node_modules
+      - /app/apps/website/node_modules
+      - /app/packages/shared-core/node_modules
+      - /app/packages/shared-ui/node_modules
+      - /app/packages/api-client/node_modules
+      - /app/packages/auth/node_modules
+      - /app/packages/permissions/node_modules
+      - /app/packages/vite-config/node_modules
+
+    depends_on:
+      - backend
+
+    networks:
+      - telecom_net
+
+  # ────────────────────────────────────────────────────────────
+  # Company (Development - Vite hot reload)
+  # ────────────────────────────────────────────────────────────
+  company:
+    build:
+      context: .
+      dockerfile: apps/company/Dockerfile.dev
+
+    container_name: telecom_company_dev
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: development
+      # Relative base → proxied to backend (see website note above).
+      VITE_API_BASE_URL: /api/v1
+      # Cross-app links (dashboard-only app): back-to-site + role redirects.
+      VITE_WEBSITE_APP_URL: http://localhost:3001
+      VITE_ADMIN_APP_URL: http://localhost:3003
+      CHOKIDAR_USEPOLLING: "true"
+
+    ports:
+      - "3002:3002"
+
+
+    volumes:
+      - ./apps/company:/app/apps/company
+      - ./packages/shared-core:/app/packages/shared-core
+      - ./packages/shared-ui:/app/packages/shared-ui
+      - ./packages/api-client:/app/packages/api-client
+      - ./packages/auth:/app/packages/auth
+      - ./packages/permissions:/app/packages/permissions
+      - ./packages/vite-config:/app/packages/vite-config
+      # Preserve pnpm-installed node_modules (host bind mounts must not shadow them)
+      - /app/node_modules
+      - /app/apps/company/node_modules
+      - /app/packages/shared-core/node_modules
+      - /app/packages/shared-ui/node_modules
+      - /app/packages/api-client/node_modules
+      - /app/packages/auth/node_modules
+      - /app/packages/permissions/node_modules
+      - /app/packages/vite-config/node_modules
+
+    depends_on:
+      - backend
+
+    networks:
+      - telecom_net
+
+  # ────────────────────────────────────────────────────────────
+  # Admin (Development - Vite hot reload)
+  # ────────────────────────────────────────────────────────────
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile.dev
+
+    container_name: telecom_admin_dev
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: development
+      # Relative base → proxied to backend (see website note above).
+      VITE_API_BASE_URL: /api/v1
+      # Cross-app links (dashboard-only app): back-to-site + role redirects.
+      VITE_WEBSITE_APP_URL: http://localhost:3001
+      VITE_COMPANY_APP_URL: http://localhost:3002
+      CHOKIDAR_USEPOLLING: "true"
+
+    ports:
+      - "3003:3003"
+
+
+    volumes:
+      - ./apps/admin:/app/apps/admin
+      - ./packages/shared-core:/app/packages/shared-core
+      - ./packages/shared-ui:/app/packages/shared-ui
+      - ./packages/api-client:/app/packages/api-client
+      - ./packages/auth:/app/packages/auth
+      - ./packages/permissions:/app/packages/permissions
+      - ./packages/vite-config:/app/packages/vite-config
+      # Preserve pnpm-installed node_modules (host bind mounts must not shadow them)
+      - /app/node_modules
+      - /app/apps/admin/node_modules
+      - /app/packages/shared-core/node_modules
+      - /app/packages/shared-ui/node_modules
+      - /app/packages/api-client/node_modules
+      - /app/packages/auth/node_modules
+      - /app/packages/permissions/node_modules
+      - /app/packages/vite-config/node_modules
+
+    depends_on:
+      - backend
+
+    networks:
+      - telecom_net
+
+networks:
+  telecom_net:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:

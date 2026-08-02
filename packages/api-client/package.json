@@ -1,0 +1,18 @@
+{
+  "name": "@telecom/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API client, endpoints, HTTP framework, and error handling",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./endpoints": "./endpoints.js",
+    "./apiClient": "./apiClient.js",
+    "./errorHandler": "./errorHandler.js"
+  },
+  "dependencies": {
+    "@telecom/shared-core": "workspace:*",
+    "vue": "^3.4.5"
+  }
+}

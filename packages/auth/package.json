@@ -1,0 +1,21 @@
+{
+  "name": "@telecom/auth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authentication store, auth bridge, and permission composables",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./store": "./store.js",
+    "./authBridge": "./authBridge.js",
+    "./composables/*": "./composables/*"
+  },
+  "dependencies": {
+    "@telecom/api-client": "workspace:*",
+    "@telecom/shared-core": "workspace:*",
+    "pinia": "^2.3.1",
+    "vue": "^3.4.5",
+    "vue-router": "^4.2.5"
+  }
+}

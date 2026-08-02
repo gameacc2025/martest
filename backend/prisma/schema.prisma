@@ -1,0 +1,616 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  label       String
+  description String?
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@index([isSystem])
+}
+
+model Permission {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  label       String
+  description String?
+  group       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles RolePermission[]
+
+  @@index([group])
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  assignedAt   DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  userId     Int
+  roleId     Int
+  assignedAt DateTime @default(now())
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model AccessProfile {
+  id        Int               @id @default(autoincrement())
+  userId    Int               @unique
+  type      AccessProfileType
+  companyId Int?
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  user      User              @relation(fields:[userId], references:[id], onDelete:Cascade)
+  company   Company?          @relation(fields:[companyId], references:[id])
+
+  @@index([type])
+  @@index([companyId])
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  firstName String?
+  lastName  String?
+  avatar    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id                  Int                  @id @default(autoincrement())
+  name                String               @unique
+  nameEn              String?
+  nationalId          String?              @unique
+  registrationNumber  String?
+  type                CompanyType?
+  description         String?
+  logo                String?
+  email               String?
+  phone               String?
+  address             String?
+  website             String?
+  status              CompanyStatus        @default(PENDING)
+  isVerified          Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
+  accessProfiles      AccessProfile[]
+  products            Product[]
+  inquiries           Inquiry[]
+  responses           InquiryResponse[]
+  inquiryLimit        CompanyInquiryLimit?
+  limits              CompanyLimit[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@index([isVerified])
+  @@index([nationalId])
+}
+
+model User {
+  id            Int              @id @default(autoincrement())
+  email         String           @unique
+  phone         String?          @unique
+  passwordHash  String
+  status        UserStatus       @default(ACTIVE)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  profile       Profile?
+  accessProfile   AccessProfile?
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+  notifications Notification[]
+  products      Product[]        @relation("ProductCreatedBy")
+  productStatusChanges ProductStatusHistory[]
+  inquiryStatusChanges InquiryStatusHistory[]
+
+  @@index([email])
+  @@index([status])
+  @@index([phone])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Category {
+  id            Int            @id @default(autoincrement())
+  slug          String         @unique
+  nameFa        String
+  nameEn        String
+  status        CategoryStatus @default(ACTIVE)
+  showInMenu    Boolean        @default(true)
+  sortOrder     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subcategories Subcategory[]
+  products      Product[]
+
+  @@index([status])
+  @@index([showInMenu])
+  @@index([sortOrder])
+}
+
+model Subcategory {
+  id                    Int                               @id @default(autoincrement())
+  categoryId            Int
+  slug                  String                            @unique
+  nameFa                String
+  nameEn                String
+  status                CategoryStatus                    @default(ACTIVE)
+  sortOrder             Int                               @default(0)
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  category              Category                          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  specificationTemplate SpecificationTemplate?
+  products              Product[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model SpecificationTemplate {
+  id            Int                  @id @default(autoincrement())
+  subcategoryId Int                  @unique
+  name          String
+  description   String?
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  subcategory   Subcategory          @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  fields        SpecificationField[]
+
+  @@index([isActive])
+}
+
+model SpecificationField {
+  id         Int                    @id @default(autoincrement())
+  templateId Int
+  name       String
+  key        String
+  type       SpecificationFieldType
+  isRequired Boolean                @default(false)
+  unit       String?
+  options    Json?
+  sortOrder  Int                    @default(0)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  template   SpecificationTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, key])
+  @@index([templateId])
+  @@index([sortOrder])
+}
+
+// Global, reusable specification field library.
+// These are NOT attached to any template — they are a shared catalogue
+// of predefined fields (توان, ولتاژ, نوع کانکتور, ...) that can be
+// referenced when building product `attributes` (via fieldId) or when
+// composing subcategory templates.
+model SpecificationLibraryField {
+  id          Int                    @id @default(autoincrement())
+  title       String
+  slug        String                 @unique
+  type        SpecificationFieldType
+  defaultUnit String?
+  description String?
+  isActive    Boolean                @default(true)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([isActive])
+  @@index([slug])
+}
+
+
+model Product {
+
+  id               Int                @id @default(autoincrement())
+  title            String
+  slug             String             @unique
+  shortDescription String?
+  description      String?
+  sku              String?
+  brand            String?
+  model            String?
+  specifications   Json?
+  status           ProductStatus      @default(DRAFT)
+  visibility       ProductVisibility  @default(PUBLIC)
+  isFeatured       Boolean            @default(false)
+  companyId        Int
+  categoryId       Int
+  subcategoryId    Int
+  createdByUserId  Int
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  deletedAt        DateTime?
+  company          Company            @relation(fields: [companyId], references: [id])
+  category         Category           @relation(fields: [categoryId], references: [id])
+  subcategory      Subcategory        @relation(fields: [subcategoryId], references: [id])
+  createdBy        User               @relation("ProductCreatedBy", fields: [createdByUserId], references: [id])
+
+  images           ProductImage[]
+  documents        ProductDocument[]
+  prices           ProductPriceTier[]
+  statusHistory    ProductStatusHistory[]
+  inquiryItems     InquiryItem[]
+
+  @@index([companyId])
+  @@index([categoryId])
+  @@index([createdByUserId])
+  @@index([status])
+  @@index([visibility])
+  @@index([isFeatured])
+  @@index([deletedAt])
+  @@index([sku])
+}
+
+model ProductStatusHistory {
+  id             Int           @id @default(autoincrement())
+  productId      Int
+  previousStatus ProductStatus
+  newStatus      ProductStatus
+  changedByUserId Int
+  comment        String?
+  createdAt      DateTime      @default(now())
+  product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  changedBy      User          @relation(fields: [changedByUserId], references: [id])
+
+  @@index([productId])
+  @@index([changedByUserId])
+  @@index([newStatus])
+  @@index([createdAt])
+}
+
+model ProductImage {
+  id           Int      @id @default(autoincrement())
+  productId    Int
+  url          String
+  thumbnailUrl String?
+  altText      String?
+  isPrimary    Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([isPrimary])
+  @@index([sortOrder])
+}
+
+model ProductDocument {
+  id        Int                 @id @default(autoincrement())
+  productId Int
+  type      ProductDocumentType
+  title     String?
+  url       String
+  sortOrder Int                 @default(0)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([type])
+  @@index([sortOrder])
+}
+
+model ProductPriceTier {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  minQuantity Int
+  maxQuantity Int?
+  price       Decimal   @db.Decimal(18, 2)
+  unit        String?
+  validFrom   DateTime  @default(now())
+  validTo     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([minQuantity])
+  @@index([validFrom])
+  @@index([validTo])
+}
+
+model Inquiry {
+  id               Int               @id @default(autoincrement())
+  title            String
+  description      String?
+  companyId        Int
+  status           InquiryStatus     @default(DRAFT)
+
+  // ── Phase 2: professional inquiry model ────────────────────
+  priority         InquiryPriority       @default(NORMAL)
+  visibilityMode   InquiryVisibilityMode @default(NORMAL)
+  confidential     Boolean               @default(false)
+
+  // Scheduling
+  publishDate      DateTime?
+  responseDeadline DateTime?
+  autoClose        Boolean               @default(true)
+
+  // Sealed-bid reveal settings
+  allowEarlyReveal Boolean               @default(false)
+  revealedAt       DateTime?
+
+  // Response controls
+  allowEditResponse     Boolean          @default(true)
+  allowWithdrawResponse Boolean          @default(false)
+
+  closedAt         DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  company          Company           @relation(fields: [companyId], references: [id])
+  items            InquiryItem[]
+  responses        InquiryResponse[]
+  statusHistory    InquiryStatusHistory[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([priority])
+  @@index([visibilityMode])
+  @@index([confidential])
+  @@index([publishDate])
+  @@index([responseDeadline])
+  @@index([revealedAt])
+  @@index([closedAt])
+}
+
+
+model InquiryStatusHistory {
+  id             Int           @id @default(autoincrement())
+  inquiryId      Int
+  previousStatus InquiryStatus
+  newStatus      InquiryStatus
+  changedByUserId Int
+  comment        String?
+  createdAt      DateTime      @default(now())
+  inquiry        Inquiry       @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  changedBy      User          @relation(fields: [changedByUserId], references: [id])
+
+  @@index([inquiryId])
+  @@index([changedByUserId])
+  @@index([newStatus])
+  @@index([createdAt])
+}
+
+model InquiryItem {
+  id            Int                   @id @default(autoincrement())
+  inquiryId     Int
+  productId     Int
+  description   String?
+  quantity      Int
+  attachment    String?
+  createdAt     DateTime              @default(now())
+  inquiry       Inquiry               @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  product       Product               @relation(fields: [productId], references: [id])
+  responseItems InquiryResponseItem[]
+
+  @@index([inquiryId])
+  @@index([productId])
+}
+
+model InquiryResponse {
+  id          Int                   @id @default(autoincrement())
+  inquiryId   Int
+  companyId   Int
+  status      InquiryResponseStatus @default(PENDING)
+  withdrawnAt DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  inquiry     Inquiry               @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  company     Company               @relation(fields: [companyId], references: [id])
+  items       InquiryResponseItem[]
+  attachments InquiryResponseAttachment[]
+
+  @@unique([inquiryId, companyId])
+  @@index([inquiryId])
+  @@index([companyId])
+  @@index([status])
+}
+
+model InquiryResponseAttachment {
+  id         Int             @id @default(autoincrement())
+  responseId Int
+  url        String
+  filename   String
+  mimetype   String?
+  size       Int?
+  createdAt  DateTime        @default(now())
+  response   InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+}
+
+
+model InquiryResponseItem {
+  id                Int             @id @default(autoincrement())
+  responseId        Int
+  inquiryItemId     Int
+  price             Decimal         @db.Decimal(18, 2)
+  currency          String          @default("IRR")
+  availableQuantity Int
+  deliveryTime      String?
+  description       String?
+  response          InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  inquiryItem       InquiryItem     @relation(fields: [inquiryItemId], references: [id])
+
+  @@unique([responseId, inquiryItemId])
+  @@index([responseId])
+  @@index([inquiryItemId])
+  @@index([currency])
+}
+
+model CompanyInquiryLimit {
+  id                 Int      @id @default(autoincrement())
+  companyId          Int      @unique
+  maxOpenInquiries   Int      @default(5)
+  maxActiveResponses Int      @default(20)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model CompanyLimit {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  key       String
+  value     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, key])
+  @@index([companyId])
+  @@index([key])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+enum CompanyType {
+  MANUFACTURER
+  IMPORTER
+  TELECOM_OPERATOR
+}
+
+enum CompanyStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
+enum AccessProfileType {
+  STAFF
+  COMPANY
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SpecificationFieldType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  SELECT
+  MULTI_SELECT
+  DATE
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+  HIDDEN
+  ARCHIVED
+}
+
+enum ProductVisibility {
+  PUBLIC
+  PRIVATE
+  COMPANY_ONLY
+}
+
+enum ProductDocumentType {
+  DATASHEET
+  CATALOG
+  MANUAL
+  CERTIFICATE
+}
+
+enum InquiryStatus {
+  DRAFT
+  SUBMITTED
+  OPEN
+  CLOSED
+  EXPIRED
+  COMPLETED
+  CANCELLED
+}
+
+enum InquiryResponseStatus {
+  PENDING
+  SELECTED
+  REJECTED
+  EXPIRED
+  WITHDRAWN
+}
+
+
+enum InquiryPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum InquiryVisibilityMode {
+  NORMAL
+  SEALED
+  ANONYMOUS_SEALED
+}
+

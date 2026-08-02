@@ -1,0 +1,15 @@
+{
+  "name": "telecom-marketplace",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev:website": "pnpm --filter @telecom/website dev",
+    "dev:company": "pnpm --filter @telecom/company dev",
+    "dev:admin": "pnpm --filter @telecom/admin dev",
+    "dev:all": "pnpm run --parallel dev:website dev:company dev:admin",
+    "build": "pnpm run --parallel build:website build:company build:admin",
+    "build:website": "pnpm --filter @telecom/website build",
+    "build:company": "pnpm --filter @telecom/company build",
+    "build:admin": "pnpm --filter @telecom/admin build"
+  }
+}

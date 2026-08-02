@@ -1,0 +1,40 @@
+# ── Root .dockerignore ─────────────────────────────────────
+# Applied to ALL builds with context: .
+# Keep this in sync with what Dockerfiles actually COPY.
+
+node_modules
+**/node_modules
+
+.git
+.gitignore
+
+# Logs
+*.log
+
+# Environment files (secrets — never bake into images)
+.env
+.env.*
+!.env.example
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Build artifacts (rebuild inside container)
+**/dist
+**/.next
+
+# Legacy frontend directory
+frontend/
+
+# Dev / docs / tooling
+.mimocode
+docs
+*.md
+!packages/*/README.md
+
+# OS files
+.DS_Store
+Thumbs.db
