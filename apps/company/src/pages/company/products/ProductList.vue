@@ -46,11 +46,14 @@
             <div class="flex gap-2">
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text @click="editProduct(data)" />
-              <Button v-if="data.status === 'PENDING_REVIEW'" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
-              <Button v-if="data.status === 'PENDING_REVIEW'" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
+              <!-- Approve/Reject are STAFF-only actions (products.approve / products.reject —
+                   see backend/prisma/seed.js). Company roles never hold these permissions;
+                   the backend already 403s them, but the buttons don't belong in this panel
+                   at all — the review happens in the Admin Panel. -->
               <Button icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
               <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
-              <Button icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
+              <!-- products.delete: COMPANY_MANAGER only, COMPANY_USER does not have it -->
+              <Button v-if="canDelete" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
             </div>
           </template>
         </Column>
@@ -101,17 +104,6 @@
       </template>
     </Dialog>
 
-    <!-- Reject product dialog -->
-    <Dialog v-model:visible="showRejectDialog" header="رد محصول" :modal="true" :style="{ width: '32rem' }" :breakpoints="{ '640px': '92vw' }">
-      <div class="field">
-        <label>علت رد <span style="color: var(--p-red-500)">*</span></label>
-        <Textarea v-model="rejectReason" placeholder="علت رد محصول را وارد کنید..." rows="3" class="w-full" />
-      </div>
-      <template #footer>
-        <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="showRejectDialog = false" />
-        <Button label="رد محصول" icon="pi pi-times" severity="danger" :loading="rejectingId !== null" @click="rejectProduct" />
-      </template>
-    </Dialog>
   </div>
 </template>
 
@@ -133,6 +125,10 @@ const auth = useAuthStore()
 // list endpoint is not fetched for them (it would 403).
 const canChooseCompany = computed(() => auth.isSuperAdmin)
 
+// products.delete is granted to COMPANY_MANAGER only (see backend/prisma/seed.js
+// ROLE_PERMISSIONS.COMPANY_USER) — hide the delete action for COMPANY_USER
+// instead of showing a button that will always 403.
+const canDelete = computed(() => auth.hasPermission('products.delete'))
 
 const products = ref([])
 const companies = ref([])
@@ -147,13 +143,6 @@ const rejectionReason = ref('')
 const searchQuery = ref('')
 const statusFilter = ref(null)
 const statusOptions = STATUS_OPTIONS
-
-// Approve / reject workflow (PENDING_REVIEW products)
-const approvingId = ref(null)
-const rejectingId = ref(null)
-const showRejectDialog = ref(false)
-const rejectReason = ref('')
-const productToReject = ref(null)
 
 // Use centralized status helpers from config/product.js
 const statusLabel = getStatusLabel
@@ -296,43 +285,6 @@ async function duplicateProduct(product) {
     await fetchProducts(pagination.value.page)
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در کپی محصول', life: 3000 })
-  }
-}
-
-async function approveProduct(product) {
-  try {
-    approvingId.value = product.id
-    await productsApi.approve(product.id, 'تأیید توسط مدیر سیستم')
-    toast.add({ severity: 'success', summary: 'موفقیت', detail: `محصول "${product.title}" تأیید شد`, life: 3000 })
-    await fetchProducts(pagination.value.page)
-  } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: err.response?.data?.error?.message || err.message || 'خطا در تأیید محصول', life: 4000 })
-  } finally {
-    approvingId.value = null
-  }
-}
-
-function openRejectDialog(product) {
-  productToReject.value = product
-  rejectReason.value = ''
-  showRejectDialog.value = true
-}
-
-async function rejectProduct() {
-  if (!rejectReason.value.trim()) {
-    toast.add({ severity: 'warn', summary: 'خطا', detail: 'لطفاً علت رد را وارد کنید', life: 3000 })
-    return
-  }
-  try {
-    rejectingId.value = productToReject.value.id
-    await productsApi.reject(productToReject.value.id, rejectReason.value)
-    toast.add({ severity: 'success', summary: 'موفقیت', detail: `محصول "${productToReject.value.title}" رد شد`, life: 3000 })
-    showRejectDialog.value = false
-    await fetchProducts(pagination.value.page)
-  } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: err.response?.data?.error?.message || err.message || 'خطا در رد محصول', life: 4000 })
-  } finally {
-    rejectingId.value = null
   }
 }
 

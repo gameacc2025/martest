@@ -319,6 +319,7 @@ const ROLE_PERMISSIONS = {
     'inquiries.create', 'inquiries.read', 'inquiries.respond',
     'sales.create', 'sales.read', 'sales.update',
     'commissions.read',
+    'reports.read',
     'notifications.read',
     'tickets.create', 'tickets.read', 'tickets.reply',
     'media.upload', 'media.read',

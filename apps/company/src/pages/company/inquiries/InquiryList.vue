@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi } from '@telecom/api-client'
+import { useAuthStore } from '../../../stores/auth'
 import Button from 'primevue/button'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -18,6 +19,11 @@ import Tabs from 'primevue/tabs'
 
 const router = useRouter()
 const toast = useToast()
+const auth = useAuthStore()
+
+// inquiries.create is granted to COMPANY_MANAGER only — COMPANY_USER can view
+// and respond to inquiries but not open new ones (backend/prisma/seed.js).
+const canCreate = computed(() => auth.hasPermission('inquiries.create'))
 
 const inquiries = ref([])
 const loading = ref(false)
@@ -126,7 +132,7 @@ function createInquiry() {
     <div class="page-header">
       <h1>استعلام‌ها</h1>
       <div class="page-header-actions">
-        <Button label="استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
+        <Button v-if="canCreate" label="استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
       </div>
     </div>
 
@@ -219,7 +225,7 @@ function createInquiry() {
                   <i class="pi pi-inbox state-icon"></i>
                   <h3>استعلامی یافت نشد</h3>
                   <p>هنوز استعلامی ثبت نشده است یا با فیلترهای فعلی نتیجه‌ای وجود ندارد.</p>
-                  <Button label="ایجاد استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
+                  <Button v-if="canCreate" label="ایجاد استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
                 </div>
               </template>
             </DataTable>
