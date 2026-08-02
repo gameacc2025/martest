@@ -27,6 +27,12 @@
 
 export const PUBLIC_SITE_URL = import.meta.env.VITE_PUBLIC_SITE_URL || '/'
 
+// Real backend role names (see backend/prisma/seed.js → ROLES):
+//   STAFF:    SUPER_ADMIN, ADMIN, MODERATOR
+//   COMPANY:  COMPANY_MANAGER, COMPANY_USER
+//   CUSTOMER: CUSTOMER_USER
+// NOTE: There is no "COMPANY_ADMIN" role in the system — using it here made
+// every `roles: ['COMPANY_ADMIN']` item invisible to real company users.
 export const dashboardMenu = [
   {
     section: 'پیشخوان',
@@ -35,14 +41,14 @@ export const dashboardMenu = [
         title: 'داشبورد مدیریت',
         icon: 'pi pi-home',
         route: 'admin-dashboard',
-        roles: ['SUPER_ADMIN'],
+        roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
         permission: 'dashboard.read',
       },
       {
         title: 'داشبورد شرکت',
         icon: 'pi pi-home',
         route: 'company-dashboard',
-        roles: ['COMPANY_ADMIN'],
+        roles: ['COMPANY_MANAGER', 'COMPANY_USER'],
       },
     ],
   },
@@ -65,9 +71,11 @@ export const dashboardMenu = [
   {
     section: 'بازرگانی',
     items: [
-      { title: 'محصولات (ادمین)', icon: 'pi pi-box', route: 'admin-products', permission: 'products.read', roles: ['SUPER_ADMIN'] },
-      { title: 'محصولات', icon: 'pi pi-box', route: 'manage-products', roles: ['COMPANY_ADMIN'] },
-      { title: 'سفارشات', icon: 'pi pi-shopping-cart', route: 'admin-orders', permission: 'orders.read' },
+      // Was scoped to `roles: ['SUPER_ADMIN']` in addition to the permission
+      // check, which hid it from ADMIN/MODERATOR even though they hold
+      // `products.read` in the backend role→permission table. The permission
+      // check alone is the correct (and already sufficient) gate here.
+      { title: 'محصولات', icon: 'pi pi-box', route: 'admin-products', permission: 'products.read' },
       {
         title: 'استعلام‌ها',
         icon: 'pi pi-question-circle',
@@ -75,16 +83,27 @@ export const dashboardMenu = [
         permission: 'inquiries.read',
         badge: { value: 'جدید', severity: 'info' },
       },
+      // "سفارشات" (Orders) was removed here: the Orders backend module no
+      // longer exists (no Order model, no /api/v1/orders routes — see
+      // BACKEND_AUDIT_REPORT.md and backend/src/app.js), and `orders.read`
+      // isn't even a permission in the catalogue anymore. The item still
+      // rendered for SUPER_ADMIN (wildcard bypass) and led to a dead page
+      // that only threw 404s. RFQ/order-equivalent flows live under
+      // "استعلام‌ها" (Inquiries) instead.
     ],
   },
   {
     section: 'شرکت من',
     items: [
-      { title: 'پروفایل شرکت', icon: 'pi pi-building', route: 'company-settings', roles: ['COMPANY_ADMIN'] },
-      { title: 'محصولات شرکت', icon: 'pi pi-box', route: 'manage-products', roles: ['COMPANY_ADMIN'] },
-      { title: 'استعلام‌ها', icon: 'pi pi-inbox', route: 'company-inquiries', roles: ['COMPANY_ADMIN'] },
-      { title: 'کاربران شرکت', icon: 'pi pi-users', route: 'company-users', roles: ['COMPANY_ADMIN'] },
-      { title: 'گزارش‌ها', icon: 'pi pi-chart-bar', route: 'company-reports', roles: ['COMPANY_ADMIN'] },
+      // Management-only: requires company_profile.update / users.* which
+      // COMPANY_USER does not hold.
+      { title: 'پروفایل شرکت', icon: 'pi pi-building', route: 'company-settings', roles: ['COMPANY_MANAGER'] },
+      { title: 'کاربران شرکت', icon: 'pi pi-users', route: 'company-users', roles: ['COMPANY_MANAGER'] },
+      { title: 'گزارش‌ها', icon: 'pi pi-chart-bar', route: 'company-reports', roles: ['COMPANY_MANAGER'] },
+      // Operational: both COMPANY_MANAGER and COMPANY_USER hold
+      // products.read/inquiries.read in the backend role→permission table.
+      { title: 'محصولات شرکت', icon: 'pi pi-box', route: 'manage-products', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+      { title: 'استعلام‌ها', icon: 'pi pi-inbox', route: 'company-inquiries', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
     ],
   },
   {

@@ -164,9 +164,10 @@ export function createAuthStore() {
         .filter(Boolean)
     )
     const isSuperAdmin = computed(() => roleNames.value.includes('SUPER_ADMIN'))
-    const isCompanyAdmin = computed(
-      () => roleNames.value.includes('COMPANY_ADMIN') || roleNames.value.includes('COMPANY')
-    )
+    // Real backend role name is COMPANY_MANAGER (see backend/prisma/seed.js →
+    // ROLES). 'COMPANY_ADMIN'/'COMPANY' never exist as role names, so this
+    // previously never matched a real company user.
+    const isCompanyAdmin = computed(() => roleNames.value.includes('COMPANY_MANAGER'))
     // Convenience label: any administrative role (platform or company admin).
     // UI-only, mirrors the two role labels above; never used for app selection.
     const isAdmin = computed(() => isSuperAdmin.value || isCompanyAdmin.value)
@@ -203,10 +204,11 @@ export function createAuthStore() {
     // choose the app. App choice is accessProfile.type only.
     function hasRole(roleName) {
       if (!roleName) return true
-      // COMPANY and COMPANY_ADMIN are treated as aliases for menu scoping.
+      // Legacy aliases kept for callers still passing the old placeholder
+      // names; real backend roles are COMPANY_MANAGER / COMPANY_USER.
       const aliases = {
-        COMPANY_ADMIN: ['COMPANY_ADMIN', 'COMPANY'],
-        COMPANY: ['COMPANY', 'COMPANY_ADMIN'],
+        COMPANY_ADMIN: ['COMPANY_MANAGER'],
+        COMPANY: ['COMPANY_MANAGER', 'COMPANY_USER'],
       }
       const namesToCheck = aliases[roleName] || [roleName]
       return roleNames.value.some(r => namesToCheck.includes(r))
