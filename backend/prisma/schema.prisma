@@ -13,12 +13,26 @@ model Role {
   label       String
   description String?
   isSystem    Boolean          @default(false)
+  // Which domain this role belongs to (STAFF / COMPANY / CUSTOMER). Set
+  // explicitly when the role is created — NOT inferred from the role name.
+  // This is what lets a brand-new custom role (e.g. "COMPANY_ACCOUNTANT")
+  // be correctly recognized as a company-scoped role without any code
+  // change, and is the source of truth for GET /roles/assignable and for
+  // the role-scope check in user.service.js createUser().
+  scope       RoleScope
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   permissions RolePermission[]
   users       UserRole[]
 
   @@index([isSystem])
+  @@index([scope])
+}
+
+enum RoleScope {
+  STAFF
+  COMPANY
+  CUSTOMER
 }
 
 model Permission {

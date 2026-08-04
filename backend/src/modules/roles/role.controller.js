@@ -15,6 +15,10 @@ async function listRoles(request, reply) {
   return reply.send(result);
 }
 
+async function listAssignableRoles(request, reply) {
+  return reply.send(success(await roleService.listAssignableRoles(request.user)));
+}
+
 async function getRole(request, reply) {
   return reply.send(success(await roleService.getRole(parseInt(request.params.id, 10))));
 }
@@ -31,4 +35,4 @@ async function deleteRole(request, reply) {
   return reply.send(success(await roleService.deleteRole(parseInt(request.params.id, 10))));
 }
 
-module.exports = { listRoles, getRole, createRole, updateRole, deleteRole };
+module.exports = { listRoles, listAssignableRoles, getRole, createRole, updateRole, deleteRole };

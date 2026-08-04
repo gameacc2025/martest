@@ -68,7 +68,7 @@ async function userRoutes(fastify) {
 
   fastify.patch('/:id/access-active', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('users.update')],
+    preHandler: [requireAnyPermission('users.activate', 'users.deactivate')],
     schema: {
       summary: 'Activate/deactivate AccessProfile panel access',
       tags: ['Users'],

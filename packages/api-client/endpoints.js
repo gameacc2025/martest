@@ -26,6 +26,7 @@ export const endpoints = {
     update: (id) => `/users/${id}`,
     delete: (id) => `/users/${id}`,
     access: (id) => `/users/${id}/access`,
+    accessActive: (id) => `/users/${id}/access-active`,
     resetPassword: (id) => `/auth/users/${id}/password`
   },
 
@@ -68,6 +69,7 @@ export const endpoints = {
   // Categories
   categories: {
     list: '/categories',
+    manage: '/categories/manage',
     get: (id) => `/categories/${id}`,
     products: (id) => `/categories/${id}/products`,
     subcategories: (id) => `/categories/${id}/subcategories`,
@@ -114,6 +116,7 @@ export const endpoints = {
     stats: '/admin/stats',
     roles: '/roles',
     getRole: (id) => `/roles/${id}`,
+    assignableRoles: '/roles/assignable',
     permissions: '/permissions',
     getPermission: (id) => `/permissions/${id}`,
   },

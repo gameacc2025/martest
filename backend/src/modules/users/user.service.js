@@ -150,16 +150,29 @@ async function getUser(userId, caller) {
  * by roles. Roles only control permissions within the selected app.
  */
 async function createUser(data, caller) {
-  const isSuperAdmin = caller.roles.includes(SUPER_ADMIN_ROLE);
+  // A caller whose OWN accessType is COMPANY (e.g. COMPANY_MANAGER) must only
+  // ever be able to create COMPANY users inside their own company — never a
+  // STAFF or CUSTOMER account, and never in another company. This is
+  // independent of whatever `type`/`companyId` the client sends in the body.
+  const callerIsCompanyScoped = caller.accessType === 'COMPANY';
 
-  // Company scoping: non-super-admins can only create users in their own company.
-  let companyId = data.companyId ? parseInt(data.companyId, 10) : null;
-  if (!isSuperAdmin) companyId = callerCompanyId(caller);
+  let companyId;
+  let accessType;
 
-  // Determine access type. Default: COMPANY when a companyId is present,
-  // otherwise CUSTOMER. STAFF must be explicitly requested by an admin.
-  let accessType = data.type;
-  if (!accessType) accessType = companyId ? 'COMPANY' : 'CUSTOMER';
+  if (callerIsCompanyScoped) {
+    companyId = callerCompanyId(caller);
+    accessType = 'COMPANY';
+  } else {
+    // Company scoping: non-super-admin STAFF can still target any company
+    // (that's their job), but only super-admin's choice of companyId is
+    // otherwise unrestricted too — both branches read straight from the body.
+    companyId = data.companyId ? parseInt(data.companyId, 10) : null;
+    // Determine access type. Default: COMPANY when a companyId is present,
+    // otherwise CUSTOMER. STAFF must be explicitly requested by an admin.
+    accessType = data.type;
+    if (!accessType) accessType = companyId ? 'COMPANY' : 'CUSTOMER';
+  }
+
   if (accessType === 'COMPANY' && !companyId) {
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'برای کاربر شرکت، انتخاب شرکت الزامی است.' };
   }
@@ -167,8 +180,14 @@ async function createUser(data, caller) {
 
   const rIds = (data.roleIds || []).map(Number);
   if (rIds.length) {
-    const count = await prisma.role.count({ where: { id: { in: rIds } } });
-    if (count !== rIds.length) throw { statusCode: 400, code: 'INVALID_ROLE', message: 'نقش نامعتبر.' };
+    const roles = await prisma.role.findMany({ where: { id: { in: rIds } }, select: { id: true, name: true, scope: true } });
+    if (roles.length !== rIds.length) throw { statusCode: 400, code: 'INVALID_ROLE', message: 'نقش نامعتبر.' };
+    if (callerIsCompanyScoped) {
+      const invalid = roles.filter((r) => r.scope !== 'COMPANY');
+      if (invalid.length) {
+        throw { statusCode: 403, code: 'ROLE_OUT_OF_SCOPE', message: 'شما فقط مجاز به تخصیص نقش‌های شرکتی هستید.' };
+      }
+    }
   }
 
   const normalizedEmail = data.email.toLowerCase().trim();
@@ -296,8 +315,15 @@ async function setUserAccess(userId, roleId, permissionIds, caller) {
   const rId = roleId ? Number(roleId) : null;
 
   if (rId) {
-    const exists = await prisma.role.findUnique({ where: { id: rId } });
-    if (!exists) throw { statusCode: 400, code: 'INVALID_ROLE', message: 'نقش نامعتبر.' };
+    const role = await prisma.role.findUnique({ where: { id: rId }, select: { id: true, scope: true } });
+    if (!role) throw { statusCode: 400, code: 'INVALID_ROLE', message: 'نقش نامعتبر.' };
+    // A COMPANY-scoped caller (e.g. COMPANY_MANAGER) can only assign a
+    // COMPANY-domain role — this closes the same privilege-escalation path
+    // fixed in createUser() (was previously unchecked here entirely: any
+    // existing role id, including SUPER_ADMIN's, would be accepted).
+    if (caller.accessType === 'COMPANY' && role.scope !== 'COMPANY') {
+      throw { statusCode: 403, code: 'ROLE_OUT_OF_SCOPE', message: 'شما فقط مجاز به تخصیص نقش‌های شرکتی هستید.' };
+    }
   }
 
   // NOTE: Direct user-permissions were removed from the domain model — roles are
@@ -358,6 +384,10 @@ async function deleteUser(userId, caller) {
  * Toggles AccessProfile.isActive without touching the auth identity.
  */
 async function setAccessActive(userId, isActive, caller) {
+  if (Number(userId) === Number(caller.id)) {
+    throw { statusCode: 403, code: 'CANNOT_SELF_MODIFY', message: 'شما نمی‌توانید دسترسی خودتان را فعال یا غیرفعال کنید.' };
+  }
+
   const existing = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, accessProfile: { select: { id: true, companyId: true } } },

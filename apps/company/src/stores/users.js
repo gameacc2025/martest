@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { apiGet, apiPatch, apiDelete } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiPost, apiPatch, apiDelete } from '@telecom/shared-core/http/apiClient'
 import { handleApiError } from '@telecom/api-client'
 import { endpoints } from '@telecom/api-client'
 
@@ -40,14 +40,36 @@ export const useCompanyUsersStore = defineStore('companyUsers', () => {
     }
   }
 
-  const updatePermissions = async (id, permissionIds) => {
+  const create = async (data) => {
     try {
       loading.value = true
       error.value = null
-      const user = await apiPatch(endpoints.users.update(id), { permissionIds })
+      const user = await apiPost(endpoints.users.create, data)
       return user
     } catch (err) {
-      error.value = handleApiError(err).message || 'خطا در بروزرسانی مجوزها'
+      error.value = handleApiError(err).message || 'خطا در ایجاد کاربر'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Roles are the single source of truth for permissions in this system —
+  // there is no per-user direct-permission override (see
+  // backend/src/modules/users/user.service.js setUserAccess: "Direct
+  // user-permissions were removed from the domain model"). This previously
+  // tried to PATCH /users/:id with a `permissionIds` field that
+  // updateUserBody doesn't even declare — it never worked, for anyone,
+  // regardless of role. Changing a user's ROLE via the dedicated /access
+  // endpoint is the actual supported mechanism.
+  const setRole = async (id, roleId) => {
+    try {
+      loading.value = true
+      error.value = null
+      const user = await apiPatch(endpoints.users.access(id), { roleId })
+      return user
+    } catch (err) {
+      error.value = handleApiError(err).message || 'خطا در تغییر نقش کاربر'
       throw err
     } finally {
       loading.value = false
@@ -68,14 +90,18 @@ export const useCompanyUsersStore = defineStore('companyUsers', () => {
     }
   }
 
-  const deactivate = async (id) => {
+  // Toggles AccessProfile.isActive — the real panel-access on/off switch.
+  // (Previously this store had a `deactivate()` that PATCHed User.status to
+  // 'REJECTED', which is the account-approval field, not an active/inactive
+  // toggle — wrong field, and with no way to reverse it from the UI at all.)
+  const setAccessActive = async (id, isActive) => {
     try {
       loading.value = true
       error.value = null
-      await apiPatch(endpoints.users.update(id), { status: 'REJECTED' })
-      return true
+      const user = await apiPatch(endpoints.users.accessActive(id), { isActive })
+      return user
     } catch (err) {
-      error.value = handleApiError(err).message || 'خطا در غیرفعال‌سازی کاربر'
+      error.value = handleApiError(err).message || 'خطا در تغییر وضعیت دسترسی'
       throw err
     } finally {
       loading.value = false
@@ -98,6 +124,6 @@ export const useCompanyUsersStore = defineStore('companyUsers', () => {
 
   return {
     users, loading, error, total,
-    list, getUserById, updatePermissions, updateUser, deactivate, remove,
+    list, getUserById, create, setRole, updateUser, setAccessActive, remove,
   }
 })

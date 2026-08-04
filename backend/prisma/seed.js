@@ -57,6 +57,7 @@ const ROLES = [
     label: 'Super Admin',
     description: 'دسترسی کامل به کل سامانه (bypass تمام مجوزها).',
     isSystem: true,
+    scope: 'STAFF',
   },
   {
     name: 'ADMIN',
@@ -64,6 +65,7 @@ const ROLES = [
     description:
       'مدیر سامانه با دسترسی گسترده برای مدیریت کاربران، شرکت‌ها، محصولات، دسته‌بندی‌ها، گزارش‌ها و عملیات روزمره سیستم. این نقش معمولاً به تنظیمات بسیار حساس و مدیریت نقش‌ها دسترسی ندارد.',
     isSystem: true,
+    scope: 'STAFF',
   },
   {
     name: 'MODERATOR',
@@ -71,6 +73,7 @@ const ROLES = [
     description:
       'مسئول بررسی و کنترل محتوا. این نقش می‌تواند محصولات را تأیید، رد یا از انتشار خارج کند و بر کیفیت محتوای ثبت‌شده نظارت داشته باشد.',
     isSystem: true,
+    scope: 'STAFF',
   },
 
   // ── COMPANY domain ────────────────────────────────────────
@@ -80,6 +83,7 @@ const ROLES = [
     description:
       'مدیر شرکت عضو پلتفرم. مدیریت کامل اطلاعات شرکت، کاربران شرکت، محصولات و پاسخ به استعلام‌ها را بر عهده دارد و به اطلاعات سایر شرکت‌ها دسترسی ندارد.',
     isSystem: true,
+    scope: 'COMPANY',
   },
   {
     name: 'COMPANY_USER',
@@ -87,6 +91,7 @@ const ROLES = [
     description:
       'کاربر عضو شرکت با دسترسی عملیاتی محدود به محصولات و استعلام‌های شرکت خود. امکان مدیریت تنظیمات شرکت یا کاربران را ندارد.',
     isSystem: true,
+    scope: 'COMPANY',
   },
 
   // ── CUSTOMER domain ───────────────────────────────────────
@@ -96,6 +101,7 @@ const ROLES = [
     description:
       'کاربر خریدار که می‌تواند کاتالوگ محصولات را مشاهده کند و استعلام قیمت (RFQ) ثبت کند.',
     isSystem: true,
+    scope: 'CUSTOMER',
   },
 ];
 
@@ -388,7 +394,7 @@ async function main() {
   for (const r of ROLES) {
     roleBy[r.name] = await prisma.role.upsert({
       where: { name: r.name },
-      update: { label: r.label, description: r.description, isSystem: r.isSystem },
+      update: { label: r.label, description: r.description, isSystem: r.isSystem, scope: r.scope },
       create: r,
     });
   }

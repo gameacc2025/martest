@@ -116,7 +116,7 @@ function debounceSearch() {
 async function fetchCategories(page = 1) {
   loading.value = true
   try {
-    const res = await categoriesApi.list({ page, search: searchQuery.value })
+    const res = await categoriesApi.listForManagement({ page, search: searchQuery.value })
     const body = res.data
     const items = body?.data?.data || body?.data || body?.items || body || []
     categories.value = Array.isArray(items) ? items : []

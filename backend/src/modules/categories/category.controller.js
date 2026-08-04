@@ -2,13 +2,28 @@ const svc = require('./category.service');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const { success } = require('../../utils/success');
 
-function isPublicCatalogUser(request) {
-  const roles = request.user?.roles || [];
-  return roles.includes('BUYER') && !roles.includes('SUPER_ADMIN') && !roles.includes('ADMIN');
-}
+// These handlers are mounted on PUBLIC (unauthenticated) routes only, so
+// request.user is never populated here — always restrict to active/published.
+// NOTE: this previously tried to detect staff via `roles.includes('BUYER')`,
+// but 'BUYER' is not a role in the current system (see
+// backend/prisma/seed.js → ROLES) — a leftover from before the
+// CUSTOMER_USER/COMPANY_MANAGER refactor — so the filter never applied to
+// anyone and inactive categories leaked to the public catalog. Staff needing
+// to see inactive categories now use the authenticated GET /manage route
+// (listForManagement below), the same split used by products
+// (public GET / vs authenticated GET /my-products).
 
 async function list(request, reply) {
-  const items = await svc.listCategories({ activeOnly: isPublicCatalogUser(request) });
+  const items = await svc.listCategories({ activeOnly: true });
+  return reply.send(success(items));
+}
+
+/**
+ * GET /api/v1/categories/manage (authenticated, STAFF-only)
+ * Full category list including inactive ones, for the admin panel.
+ */
+async function listForManagement(request, reply) {
+  const items = await svc.listCategories({ activeOnly: false });
   return reply.send(success(items));
 }
 
@@ -25,7 +40,7 @@ async function getOne(request, reply) {
 async function listSubcategories(request, reply) {
   const category = await svc.getCategoryById(request.params.id);
   if (!category) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'دسته‌بندی یافت نشد' } });
-  const items = await svc.listSubcategoriesByCategory(request.params.id, { activeOnly: isPublicCatalogUser(request) });
+  const items = await svc.listSubcategoriesByCategory(request.params.id, { activeOnly: true });
   return reply.send(success(items));
 }
 
@@ -41,8 +56,7 @@ async function getSubcategory(request, reply) {
  */
 async function getProducts(request, reply) {
   const { page, limit, skip, take } = getPaginationParams(request.query);
-  const publishedOnly = isPublicCatalogUser(request);
-  const { items, total } = await svc.getCategoryProducts(request.params.id, { skip, take, publishedOnly });
+  const { items, total } = await svc.getCategoryProducts(request.params.id, { skip, take, publishedOnly: true });
   return reply.send(buildPaginatedResponse(items, total, page, limit));
 }
 
@@ -78,6 +92,7 @@ async function removeSubcategory(request, reply) {
 
 module.exports = {
   list,
+  listForManagement,
   getOne,
   listSubcategories,
   getSubcategory,

@@ -18,7 +18,7 @@
 // =============================================================
 
 const ctrl = require('./role.controller');
-const { requirePermission } = require('../../middlewares/rbac');
+const { requirePermission, requireAnyPermission } = require('../../middlewares/rbac');
 const { createRoleBody, updateRoleBody } = require('./role.schemas');
 
 const idParam = { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } };
@@ -29,6 +29,15 @@ async function roleRoutes(fastify) {
     preHandler: [requirePermission('roles.read')],
     schema: { summary: 'List all roles with their permissions', tags: ['Roles'] },
   }, ctrl.listRoles);
+
+  // Not role management — lets a caller (e.g. COMPANY_MANAGER, who lacks
+  // roles.read) pick a role while creating/editing a user in their own
+  // domain. Must be registered before GET /:id.
+  fastify.get('/assignable', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requireAnyPermission('users.create', 'users.assign_roles')],
+    schema: { summary: 'List roles assignable by the caller (scoped to their own accessType)', tags: ['Roles'] },
+  }, ctrl.listAssignableRoles);
 
   fastify.post('/', {
     onRequest: [fastify.authenticate],

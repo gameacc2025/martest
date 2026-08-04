@@ -21,6 +21,11 @@
         <Column field="id" header="شناسه" sortable></Column>
         <Column field="label" header="عنوان" sortable></Column>
         <Column field="name" header="نام نقش" sortable></Column>
+        <Column header="دامنه">
+          <template #body="slotProps">
+            <Tag :value="scopeLabels[slotProps.data.scope] || slotProps.data.scope" :severity="scopeSeverity[slotProps.data.scope]" />
+          </template>
+        </Column>
         <Column field="description" header="توضیحات"></Column>
         <Column header="مجوزها">
           <template #body="slotProps">
@@ -63,6 +68,23 @@
       <div class="field">
         <label for="description">توضیحات</label>
         <InputText id="description" v-model="currentRole.description" />
+      </div>
+      <div class="field">
+        <label for="scope">دامنه‌ی نقش <span style="color: var(--p-red-500)">*</span></label>
+        <Select
+          id="scope"
+          v-model="currentRole.scope"
+          :options="scopeOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="انتخاب دامنه"
+          :disabled="isEditMode && currentRole.isSystem"
+          class="w-full"
+        />
+        <small class="field-hint">
+          مشخص می‌کند این نقش به کدام پنل تعلق دارد: ادمین سیستم (STAFF)، شرکت (COMPANY)، یا مشتری (CUSTOMER).
+          نقشی که به کاربران شرکتی داده می‌شود باید COMPANY باشد تا مدیر شرکت بتواند آن را هنگام افزودن کاربر انتخاب کند.
+        </small>
       </div>
       <div class="field">
         <label>مجوزها</label>
@@ -134,6 +156,7 @@ import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoleStore } from '@/stores/admin/roles'
 import { usePermissionStore } from '@/stores/admin/permissions'
 import { useToast } from 'primevue/usetoast'
+import Select from 'primevue/select'
 
 const toast = useToast()
 const roleStore = useRoleStore()
@@ -157,6 +180,14 @@ const showDeleteDialog = ref(false)
 const roleToDelete = ref(null)
 const permissionSearch = ref('')
 const expandedGroups = reactive({})
+
+const scopeOptions = [
+  { label: 'ادمین سیستم (STAFF)', value: 'STAFF' },
+  { label: 'شرکت (COMPANY)', value: 'COMPANY' },
+  { label: 'مشتری (CUSTOMER)', value: 'CUSTOMER' },
+]
+const scopeLabels = { STAFF: 'ادمین سیستم', COMPANY: 'شرکت', CUSTOMER: 'مشتری' }
+const scopeSeverity = { STAFF: 'danger', COMPANY: 'info', CUSTOMER: 'success' }
 
 const dialogHeader = computed(() => {
   return isEditMode.value ? 'ویرایش نقش' : 'ایجاد نقش جدید'
@@ -254,6 +285,7 @@ function openCreateDialog() {
     name: '',
     label: '',
     description: '',
+    scope: null,
     permissionIds: []
   }
   permissionSearch.value = ''
@@ -331,6 +363,7 @@ async function saveRole() {
       await roleStore.updateRole(currentRole.value.id, {
         label: currentRole.value.label,
         description: currentRole.value.description,
+        scope: currentRole.value.scope,
         permissionIds: currentRole.value.permissionIds,
       })
       toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نقش با موفقیت بروزرسانی شد', life: 3000 })
@@ -339,6 +372,7 @@ async function saveRole() {
         name: currentRole.value.name,
         label: currentRole.value.label,
         description: currentRole.value.description,
+        scope: currentRole.value.scope,
         permissionIds: currentRole.value.permissionIds,
       })
       toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نقش با موفقیت ایجاد شد', life: 3000 })

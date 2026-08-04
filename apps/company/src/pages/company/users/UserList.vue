@@ -8,6 +8,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import InputText from 'primevue/inputtext'
+import Password from 'primevue/password'
 import Select from 'primevue/select'
 import Dialog from 'primevue/dialog'
 import MultiSelect from 'primevue/multiselect'
@@ -44,16 +45,47 @@ const showEditDialog = ref(false)
 const editUser = ref(null)
 const editLoading = ref(false)
 const saving = ref(false)
-const availablePermissions = ref([])
-const permissionsLoading = ref(false)
 
-const showDeactivateDialog = ref(false)
-const userToDeactivate = ref(null)
+// Activate/deactivate — toggles AccessProfile.isActive (panel access),
+// NOT User.status. Same dialog handles both directions.
+const showToggleActiveDialog = ref(false)
+const userToToggle = ref(null)
+const togglingActive = ref(false)
+
 const showDeleteDialog = ref(false)
 const userToDelete = ref(null)
 
+// Add user
+const showCreateDialog = ref(false)
+const creating = ref(false)
+const assignableRoles = ref([])
+const rolesLoading = ref(false)
+const createForm = ref(emptyCreateForm())
+const createErrors = ref({})
+
+function emptyCreateForm() {
+  return { email: '', phone: '', password: '', firstName: '', lastName: '', roleIds: [] }
+}
+
 const companyId = computed(() => auth.companyId)
 
+// users.create is granted to COMPANY_MANAGER only — COMPANY_USER has no
+// users.* permission at all (see backend/prisma/seed.js ROLE_PERMISSIONS).
+// Kept permission-based (not role-hardcoded) so a future custom company
+// role can be granted just this one capability independently.
+const canCreate = computed(() => auth.hasPermission('users.create'))
+const canActivate = computed(() => auth.hasPermission('users.activate'))
+const canDeactivate = computed(() => auth.hasPermission('users.deactivate'))
+const canDelete = computed(() => auth.hasPermission('users.delete'))
+const canAssignRole = computed(() => auth.hasPermission('users.assign_roles'))
+
+function isSelf(row) {
+  return row?.id === auth.user?.id
+}
+
+function isActive(row) {
+  return row?.accessProfile?.isActive !== false
+}
 
 function statusLabel(s) { return statusLabels[s] || s || '—' }
 function formatDate(v) {
@@ -112,16 +144,21 @@ async function openInfo(row) {
   }
 }
 
-// ── Edit permissions dialog ──────────────────────────────────
+// ── Change role dialog ───────────────────────────────────────
+// Roles are the single source of truth for permissions in this system
+// (backend/src/modules/users/user.service.js — direct per-user permission
+// overrides were removed from the domain model). So "editing a user's
+// access" means changing their ROLE, via the same PATCH /:id/access
+// endpoint and the same accessType-scoped role list used by "Add User".
 async function openEdit(row) {
   editLoading.value = true
   showEditDialog.value = true
-  ensurePermissionsLoaded()
+  ensureRolesLoaded()
   try {
     const user = await userStore.getUserById(row.id)
     editUser.value = {
       ...user,
-      permissionIds: (user.permissions || []).map((p) => (typeof p === 'object' ? p.id : p)).filter(Boolean),
+      roleId: user.roles?.[0]?.id ?? user.roles?.[0]?.role?.id ?? null,
     }
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت اطلاعات کاربر', life: 3000 })
@@ -131,51 +168,46 @@ async function openEdit(row) {
   }
 }
 
-async function ensurePermissionsLoaded() {
-  if (availablePermissions.value.length) return
-  permissionsLoading.value = true
-  try {
-    const { apiGet } = await import('@telecom/shared-core/http/apiClient')
-    const { endpoints } = await import('@telecom/api-client')
-    const result = await apiGet(endpoints.admin.permissions, { params: { limit: 200 } })
-    const body = result?.data ?? result
-    availablePermissions.value = body?.data?.data || body?.data || body || []
-  } catch {
-    // Silent — permissions list is optional
-  } finally {
-    permissionsLoading.value = false
-  }
-}
-
-async function savePermissions() {
+async function saveRole() {
   if (!editUser.value) return
   saving.value = true
   try {
-    await userStore.updatePermissions(editUser.value.id, editUser.value.permissionIds)
-    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'مجوزها بروزرسانی شد', life: 3000 })
+    await userStore.setRole(editUser.value.id, editUser.value.roleId)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نقش کاربر بروزرسانی شد', life: 3000 })
     showEditDialog.value = false
     loadUsers()
   } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در بروزرسانی مجوزها', life: 3000 })
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در بروزرسانی نقش', life: 3000 })
   } finally {
     saving.value = false
   }
 }
 
-// ── Deactivate ───────────────────────────────────────────────
-function confirmDeactivate(user) {
-  userToDeactivate.value = user
-  showDeactivateDialog.value = true
+// ── Activate / Deactivate ────────────────────────────────────
+function confirmToggleActive(user) {
+  userToToggle.value = user
+  showToggleActiveDialog.value = true
 }
 
-async function doDeactivate() {
+async function doToggleActive() {
+  const target = userToToggle.value
+  if (!target) return
+  togglingActive.value = true
   try {
-    await userStore.deactivate(userToDeactivate.value.id)
-    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'کاربر غیرفعال شد', life: 3000 })
-    showDeactivateDialog.value = false
+    const nextActive = !isActive(target)
+    await userStore.setAccessActive(target.id, nextActive)
+    toast.add({
+      severity: 'success',
+      summary: 'موفقیت',
+      detail: nextActive ? 'دسترسی کاربر فعال شد' : 'دسترسی کاربر غیرفعال شد',
+      life: 3000,
+    })
+    showToggleActiveDialog.value = false
     loadUsers()
   } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در غیرفعال‌سازی', life: 3000 })
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در تغییر وضعیت دسترسی', life: 3000 })
+  } finally {
+    togglingActive.value = false
   }
 }
 
@@ -195,12 +227,75 @@ async function doDelete() {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در حذف کاربر', life: 3000 })
   }
 }
+
+// ── Add user ─────────────────────────────────────────────────
+async function ensureRolesLoaded() {
+  if (assignableRoles.value.length) return
+  rolesLoading.value = true
+  try {
+    const { apiGet } = await import('@telecom/shared-core/http/apiClient')
+    const { endpoints } = await import('@telecom/api-client')
+    // GET /roles/assignable — scoped to the caller's own accessType on the
+    // backend (COMPANY_MANAGER only ever gets COMPANY_MANAGER/COMPANY_USER
+    // back), so there is no need to filter again here.
+    const result = await apiGet(endpoints.admin.assignableRoles)
+    const body = result?.data ?? result
+    assignableRoles.value = body?.data || body || []
+  } catch {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت لیست نقش‌ها', life: 3000 })
+  } finally {
+    rolesLoading.value = false
+  }
+}
+
+function openCreate() {
+  createForm.value = emptyCreateForm()
+  createErrors.value = {}
+  showCreateDialog.value = true
+  ensureRolesLoaded()
+}
+
+function validateCreateForm() {
+  const errs = {}
+  if (!createForm.value.email) errs.email = 'ایمیل الزامی است'
+  if (!createForm.value.firstName) errs.firstName = 'نام الزامی است'
+  if (!createForm.value.lastName) errs.lastName = 'نام خانوادگی الزامی است'
+  if (!createForm.value.password || createForm.value.password.length < 6) errs.password = 'رمز عبور باید حداقل ۶ کاراکتر باشد'
+  createErrors.value = errs
+  return Object.keys(errs).length === 0
+}
+
+async function saveCreate() {
+  if (!validateCreateForm()) return
+  creating.value = true
+  try {
+    // No `type`/`companyId` sent: the backend forces both to the caller's
+    // own company for a COMPANY-scoped caller regardless of what's sent
+    // (see backend/src/modules/users/user.service.js createUser).
+    await userStore.create({
+      email: createForm.value.email,
+      phone: createForm.value.phone || undefined,
+      password: createForm.value.password,
+      firstName: createForm.value.firstName,
+      lastName: createForm.value.lastName,
+      roleIds: createForm.value.roleIds,
+    })
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'کاربر جدید ایجاد شد', life: 3000 })
+    showCreateDialog.value = false
+    loadUsers(1)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در ایجاد کاربر', life: 4000 })
+  } finally {
+    creating.value = false
+  }
+}
 </script>
 
 <template>
   <div class="user-list-page">
     <div class="page-header">
       <h1>کاربران شرکت</h1>
+      <Button v-if="canCreate" label="افزودن کاربر" icon="pi pi-plus" @click="openCreate" />
     </div>
 
     <div class="card">
@@ -253,7 +348,10 @@ async function doDelete() {
           </template>
         </Column>
         <Column field="fullName" header="نام" sortable>
-          <template #body="{ data }">{{ data.fullName || data.displayName || data.username || '—' }}</template>
+          <template #body="{ data }">
+            {{ data.fullName || data.displayName || data.username || '—' }}
+            <Tag v-if="isSelf(data)" value="شما" severity="info" style="margin-inline-start: 0.35rem" />
+          </template>
         </Column>
         <Column field="email" header="ایمیل" sortable></Column>
         <Column header="تلفن">
@@ -262,6 +360,11 @@ async function doDelete() {
         <Column field="status" header="وضعیت" sortable>
           <template #body="{ data }">
             <Tag :value="statusLabel(data.status)" :severity="statusSeverity[data.status]" />
+          </template>
+        </Column>
+        <Column header="دسترسی به پنل">
+          <template #body="{ data }">
+            <Tag :value="isActive(data) ? 'فعال' : 'غیرفعال'" :severity="isActive(data) ? 'success' : 'danger'" />
           </template>
         </Column>
         <Column header="نقش‌ها">
@@ -277,13 +380,35 @@ async function doDelete() {
         <Column header="آخرین ورود">
           <template #body="{ data }">{{ formatDate(data.lastLoginAt) }}</template>
         </Column>
-        <Column header="عملیات" style="width: 9rem">
+        <Column header="عملیات" style="width: 10rem">
           <template #body="{ data }">
             <div class="flex gap-2">
               <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'مشاهده'" @click="openInfo(data)" />
-              <Button icon="pi pi-key" severity="info" rounded text v-tooltip.top="'مجوزها'" @click="openEdit(data)" />
-              <Button icon="pi pi-ban" severity="warn" rounded text v-tooltip.top="'غیرفعال'" @click="confirmDeactivate(data)" />
-              <Button icon="pi pi-trash" severity="danger" rounded text v-tooltip.top="'حذف'" @click="confirmDelete(data)" />
+              <Button v-if="canAssignRole && !isSelf(data)" icon="pi pi-key" severity="info" rounded text v-tooltip.top="'تغییر نقش'" @click="openEdit(data)" />
+              <!-- A user can never activate/deactivate their own access —
+                   hidden entirely for the row matching the logged-in user,
+                   not just disabled (see backend setAccessActive guard too). -->
+              <template v-if="!isSelf(data)">
+                <Button
+                  v-if="isActive(data) && canDeactivate"
+                  icon="pi pi-ban"
+                  severity="warn"
+                  rounded
+                  text
+                  v-tooltip.top="'غیرفعال کردن دسترسی'"
+                  @click="confirmToggleActive(data)"
+                />
+                <Button
+                  v-else-if="!isActive(data) && canActivate"
+                  icon="pi pi-check"
+                  severity="success"
+                  rounded
+                  text
+                  v-tooltip.top="'فعال کردن دسترسی'"
+                  @click="confirmToggleActive(data)"
+                />
+              </template>
+              <Button v-if="canDelete && !isSelf(data)" icon="pi pi-trash" severity="danger" rounded text v-tooltip.top="'حذف'" @click="confirmDelete(data)" />
             </div>
           </template>
         </Column>
@@ -310,6 +435,7 @@ async function doDelete() {
             <h3>{{ infoUser.fullName || infoUser.displayName || infoUser.username }}</h3>
             <p>{{ infoUser.email }}</p>
             <Tag :severity="statusSeverity[infoUser.status]">{{ statusLabel(infoUser.status) }}</Tag>
+            <Tag :severity="isActive(infoUser) ? 'success' : 'danger'">{{ isActive(infoUser) ? 'دسترسی فعال' : 'دسترسی غیرفعال' }}</Tag>
           </div>
         </div>
         <section class="info-section">
@@ -331,13 +457,13 @@ async function doDelete() {
         </section>
       </div>
       <template #footer>
-        <Button label="ویرایش مجوزها" icon="pi pi-key" text @click="showInfoDialog = false; openEdit(infoUser)" />
+        <Button v-if="canAssignRole && !isSelf(infoUser)" label="تغییر نقش" icon="pi pi-key" text @click="showInfoDialog = false; openEdit(infoUser)" />
         <Button label="بستن" icon="pi pi-times" severity="secondary" text @click="showInfoDialog = false" />
       </template>
     </Dialog>
 
     <!-- Edit Permissions Dialog -->
-    <Dialog v-model:visible="showEditDialog" header="ویرایش مجوزها" :modal="true" :style="{ width: '40rem' }" :breakpoints="{ '640px': '95vw' }">
+    <Dialog v-model:visible="showEditDialog" header="تغییر نقش کاربر" :modal="true" :style="{ width: '32rem' }" :breakpoints="{ '640px': '95vw' }">
       <div v-if="editLoading" class="text-center py-6">
         <ProgressSpinner style="width: 40px; height: 40px" />
       </div>
@@ -347,33 +473,42 @@ async function doDelete() {
           <InputText :modelValue="editUser.fullName || editUser.username" disabled />
         </div>
         <div class="field">
-          <label>مجوزهای مستقیم</label>
-          <MultiSelect
-            v-model="editUser.permissionIds"
-            :options="availablePermissions"
+          <label>نقش</label>
+          <Select
+            v-model="editUser.roleId"
+            :options="assignableRoles"
             optionLabel="label"
             optionValue="id"
-            :loading="permissionsLoading"
-            placeholder="انتخاب مجوزها"
-            display="chip"
-            filter
+            :loading="rolesLoading"
+            placeholder="انتخاب نقش"
             class="w-full"
           />
-          <small class="field-hint">مجوزهای مستقیم علاوه بر مجوزهای نقش اعمال می‌شوند.</small>
+          <small class="field-hint">نقش، مجموعه‌ی دسترسی‌های این کاربر در پنل شرکت را تعیین می‌کند.</small>
         </div>
       </template>
       <template #footer>
         <Button label="لغو" icon="pi pi-times" severity="secondary" text @click="showEditDialog = false" />
-        <Button label="ذخیره" icon="pi pi-check" :loading="saving" @click="savePermissions" />
+        <Button label="ذخیره" icon="pi pi-check" :loading="saving" @click="saveRole" />
       </template>
     </Dialog>
 
-    <!-- Deactivate Dialog -->
-    <Dialog v-model:visible="showDeactivateDialog" header="غیرفعال‌سازی کاربر" :modal="true">
-      <p>آیا از غیرفعال کردن کاربر "{{ userToDeactivate?.fullName || userToDeactivate?.username }}" مطمئن هستید؟</p>
+    <!-- Activate/Deactivate Dialog -->
+    <Dialog v-model:visible="showToggleActiveDialog" :header="isActive(userToToggle) ? 'غیرفعال‌سازی دسترسی' : 'فعال‌سازی دسترسی'" :modal="true">
+      <p v-if="isActive(userToToggle)">
+        آیا از غیرفعال کردن دسترسی "{{ userToToggle?.fullName || userToToggle?.username }}" به پنل شرکت مطمئن هستید؟
+      </p>
+      <p v-else>
+        آیا از فعال کردن دسترسی "{{ userToToggle?.fullName || userToToggle?.username }}" به پنل شرکت مطمئن هستید؟
+      </p>
       <template #footer>
-        <Button label="خیر" icon="pi pi-times" severity="secondary" text @click="showDeactivateDialog = false" />
-        <Button label="بله، غیرفعال شود" icon="pi pi-ban" severity="warn" @click="doDeactivate" />
+        <Button label="خیر" icon="pi pi-times" severity="secondary" text @click="showToggleActiveDialog = false" />
+        <Button
+          :label="isActive(userToToggle) ? 'بله، غیرفعال شود' : 'بله، فعال شود'"
+          :icon="isActive(userToToggle) ? 'pi pi-ban' : 'pi pi-check'"
+          :severity="isActive(userToToggle) ? 'warn' : 'success'"
+          :loading="togglingActive"
+          @click="doToggleActive"
+        />
       </template>
     </Dialog>
 
@@ -383,6 +518,54 @@ async function doDelete() {
       <template #footer>
         <Button label="خیر" icon="pi pi-times" severity="secondary" text @click="showDeleteDialog = false" />
         <Button label="بله، حذف شود" icon="pi pi-trash" severity="danger" @click="doDelete" />
+      </template>
+    </Dialog>
+
+    <!-- Add User Dialog -->
+    <Dialog v-model:visible="showCreateDialog" header="افزودن کاربر شرکت" :modal="true" :style="{ width: '32rem' }" :breakpoints="{ '640px': '95vw' }">
+      <div class="field">
+        <label>ایمیل <span class="req">*</span></label>
+        <InputText v-model="createForm.email" class="w-full" :class="{ 'p-invalid': createErrors.email }" />
+        <small v-if="createErrors.email" class="field-error">{{ createErrors.email }}</small>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>نام <span class="req">*</span></label>
+          <InputText v-model="createForm.firstName" class="w-full" :class="{ 'p-invalid': createErrors.firstName }" />
+          <small v-if="createErrors.firstName" class="field-error">{{ createErrors.firstName }}</small>
+        </div>
+        <div class="field">
+          <label>نام خانوادگی <span class="req">*</span></label>
+          <InputText v-model="createForm.lastName" class="w-full" :class="{ 'p-invalid': createErrors.lastName }" />
+          <small v-if="createErrors.lastName" class="field-error">{{ createErrors.lastName }}</small>
+        </div>
+      </div>
+      <div class="field">
+        <label>تلفن</label>
+        <InputText v-model="createForm.phone" class="w-full" />
+      </div>
+      <div class="field">
+        <label>رمز عبور <span class="req">*</span></label>
+        <Password v-model="createForm.password" class="w-full" inputClass="w-full" toggleMask :feedback="false" :class="{ 'p-invalid': createErrors.password }" />
+        <small v-if="createErrors.password" class="field-error">{{ createErrors.password }}</small>
+      </div>
+      <div class="field">
+        <label>نقش</label>
+        <MultiSelect
+          v-model="createForm.roleIds"
+          :options="assignableRoles"
+          optionLabel="label"
+          optionValue="id"
+          :loading="rolesLoading"
+          placeholder="انتخاب نقش"
+          display="chip"
+          class="w-full"
+        />
+        <small class="field-hint">نقش تعیین می‌کند این کاربر در پنل شرکت چه کاری مجاز به انجام آن است.</small>
+      </div>
+      <template #footer>
+        <Button label="لغو" icon="pi pi-times" severity="secondary" text @click="showCreateDialog = false" />
+        <Button label="ایجاد کاربر" icon="pi pi-check" :loading="creating" @click="saveCreate" />
       </template>
     </Dialog>
   </div>
@@ -466,6 +649,10 @@ async function doDelete() {
   font-size: 0.85rem;
 }
 
+.profile-meta .p-tag {
+  margin-inline-end: 0.35rem;
+}
+
 .info-section h4 {
   margin: 0 0 0.5rem;
   font-size: 0.9rem;
@@ -490,6 +677,37 @@ async function doDelete() {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.field-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.field-row .field {
+  flex: 1;
+}
+
+.req {
+  color: var(--p-red-500);
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--p-red-500);
 }
 
 .field-hint {

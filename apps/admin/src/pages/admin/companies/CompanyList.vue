@@ -200,9 +200,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useCompanyStore } from '@/stores/companies'
+import { useAuthStore } from '@/stores/auth'
 
 const toast = useToast()
 const companyStore = useCompanyStore()
+const auth = useAuthStore()
 
 const companies = ref([])
 const loading = ref(false)
@@ -239,7 +241,7 @@ const typeOptions = ref([
 const companyTypeOptions = computed(() => typeOptions.value.filter((item) => item.value))
 
 const first = computed(() => (pagination.value.page - 1) * pagination.value.limit)
-const canCreateCompany = computed(() => hasPermission('companies.create'))
+const canCreateCompany = computed(() => auth.hasPermission('companies.create'))
 
 onMounted(() => {
   loadCompanies()
@@ -345,24 +347,6 @@ async function submitCreateCompany() {
   } finally {
     creating.value = false
   }
-}
-
-function getRoleName(role) {
-  return typeof role === 'string' ? role : role?.name || role?.role?.name
-}
-
-function getPermissionName(permission) {
-  return typeof permission === 'string' ? permission : permission?.name || permission?.action
-}
-
-function hasPermission(permissionName) {
-  const user = JSON.parse(localStorage.getItem('user') || 'null')
-  if (!user) return false
-  if (user.roles?.some((role) => getRoleName(role) === 'SUPER_ADMIN')) return true
-  if (user.permissions?.map(getPermissionName).includes('*')) return true
-  if (user.permissions?.map(getPermissionName).includes(permissionName)) return true
-
-  return user.roles?.some((role) => role?.permissions?.map(getPermissionName).includes(permissionName)) || false
 }
 
 function getCompanyLogo(company) {

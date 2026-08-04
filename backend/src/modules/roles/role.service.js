@@ -14,7 +14,7 @@ const prisma = require('../../config/db');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 
 const ROLE_SELECT = {
-  id: true, name: true, label: true, description: true, isSystem: true,
+  id: true, name: true, label: true, description: true, isSystem: true, scope: true,
   permissions: { select: { permission: { select: { id: true, name: true, label: true, group: true } } } },
   _count: { select: { users: true } },
   createdAt: true, updatedAt: true,
@@ -49,6 +49,23 @@ async function listRoles(query = {}) {
   return buildPaginatedResponse(roles, total, page, limit);
 }
 
+/**
+ * List roles assignable by the caller when creating/editing a user in their
+ * own domain. Intentionally NOT gated by `roles.read` (role management) — a
+ * COMPANY_MANAGER needs to pick a role for a new company user without being
+ * able to browse/manage the full role catalogue. Filtering is done purely
+ * via the role's `scope` column (set explicitly when the role is
+ * created) — NOT by role name — so any newly created role in the caller's
+ * own domain shows up automatically with no code change.
+ */
+async function listAssignableRoles(caller) {
+  return prisma.role.findMany({
+    where: { scope: caller.accessType },
+    select: { id: true, name: true, label: true, scope: true },
+    orderBy: { name: 'asc' },
+  });
+}
+
 async function getRole(roleId) {
   const role = await prisma.role.findUnique({
     where: { id: roleId }, select: ROLE_SELECT,
@@ -72,6 +89,7 @@ async function createRole(data) {
       name: data.name.trim().toUpperCase().replace(/\s+/g, '_'),
       label: data.label.trim(),
       description: data.description || null,
+      scope: data.scope,
       isSystem: false,
       permissions: permIds.length
         ? { create: permIds.map((id) => ({ permissionId: id })) }
@@ -88,6 +106,12 @@ async function updateRole(roleId, data) {
   const updateData = {};
   if (data.label !== undefined) updateData.label = data.label.trim();
   if (data.description !== undefined) updateData.description = data.description;
+  if (data.scope !== undefined) {
+    if (role.isSystem) {
+      throw { statusCode: 400, code: 'SYSTEM_ROLE', message: 'دامنه‌ی نقش‌های سیستمی قابل تغییر نیست.' };
+    }
+    updateData.scope = data.scope;
+  }
 
   const permIds = (data.permissionIds || []).map(Number);
   if (data.permissionIds !== undefined) {
@@ -119,4 +143,4 @@ async function deleteRole(roleId) {
   return { message: 'نقش با موفقیت حذف شد.' };
 }
 
-module.exports = { listRoles, getRole, createRole, updateRole, deleteRole };
+module.exports = { listRoles, listAssignableRoles, getRole, createRole, updateRole, deleteRole };

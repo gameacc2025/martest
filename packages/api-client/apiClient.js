@@ -113,6 +113,9 @@ export const companiesApi = {
 // Categories API
 export const categoriesApi = {
   list: (params = {}) => api.get(endpoints.categories.list, { params }),
+  // Authenticated STAFF-only listing — includes inactive categories, unlike
+  // the public `list` above. Used by the admin management page.
+  listForManagement: (params = {}) => api.get(endpoints.categories.manage, { params }),
   getById: (id) => api.get(endpoints.categories.get(id)),
   getProducts: (id, params = {}) => api.get(endpoints.categories.products(id), { params }),
   getSubcategories: (id) => api.get(endpoints.categories.subcategories(id)),
