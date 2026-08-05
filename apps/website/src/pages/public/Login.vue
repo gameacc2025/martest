@@ -99,6 +99,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import { buildSessionHandoffUrl, isExternalUrl } from '@telecom/auth'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
@@ -112,6 +113,34 @@ const route = useRoute()
 // send those users to the external app origins instead of router.push().
 const companyAppUrl = import.meta.env.VITE_COMPANY_APP_URL || ''
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || ''
+
+// Login/register are centralized here. `?redirect=` may now be a FULL url
+// on a different app's origin (e.g. company/admin sent us here because the
+// user hit their own /login). Only ever redirect to an origin we know
+// about — never trust an arbitrary external URL from the query string.
+const allowedRedirectOrigins = [companyAppUrl, adminAppUrl, window.location.origin]
+  .filter(Boolean)
+  .map((url) => { try { return new URL(url).origin } catch { return null } })
+  .filter(Boolean)
+
+function isAllowedRedirect(url) {
+  if (!isExternalUrl(url)) return true // internal path — always fine
+  try {
+    return allowedRedirectOrigins.includes(new URL(url).origin)
+  } catch {
+    return false
+  }
+}
+
+// Go to `target` (internal path or external app URL) after a successful
+// login, carrying the session along if we're leaving this origin.
+function goTo(target, authContext) {
+  if (isExternalUrl(target)) {
+    window.location.href = buildSessionHandoffUrl(target, authContext)
+  } else {
+    router.push(target)
+  }
+}
 
 const form = ref({
   email: '',
@@ -137,15 +166,15 @@ async function handleSubmit() {
     //   CUSTOMER → website home (internal route)
     // Roles/permissions never choose the app — they only gate features inside it.
     const redirect = route.query.redirect
-    if (redirect) {
-      router.push(redirect)
+    if (redirect && isAllowedRedirect(redirect)) {
+      goTo(redirect, response)
     } else {
       const type = response.accessProfile?.type
 
       if (type === 'STAFF') {
-        window.location.href = `${adminAppUrl}/admin`
+        goTo(`${adminAppUrl}/admin`, response)
       } else if (type === 'COMPANY') {
-        window.location.href = `${companyAppUrl}/company-dashboard`
+        goTo(`${companyAppUrl}/company-dashboard`, response)
       } else {
         router.push('/')
       }

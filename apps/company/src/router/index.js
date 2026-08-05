@@ -5,12 +5,27 @@ import CompanyLayout from "../layouts/CompanyLayout.vue";
 
 // Auth / gate
 import Landing from "../pages/Landing.vue";
-import Login from "../pages/auth/Login.vue";
-import Register from "../pages/auth/Register.vue";
 import ForgotPassword from "../pages/auth/ForgotPassword.vue";
 
 // User Pages
 import UserProfile from "../pages/user/UserProfile.vue";
+
+// Login/Register are centralized on the website app (see
+// apps/website/src/pages/public/{Login,Register}.vue). This app no longer
+// has its own login/register forms — hitting /login or /register here just
+// bounces the browser there, carrying the current URL as `?redirect=` so
+// the user lands back on the page they meant to reach. On success the
+// website hands the freshly-created session back to us via a URL fragment
+// (see @telecom/auth's buildSessionHandoffUrl / bootstrapSessionFromUrl,
+// consumed in main.js before the app mounts).
+const websiteAppUrl = import.meta.env.VITE_WEBSITE_APP_URL || '/';
+
+function redirectToWebsite(page) {
+  return (to) => {
+    const target = `${window.location.origin}${to.fullPath}`;
+    window.location.href = `${websiteAppUrl}/${page}?redirect=${encodeURIComponent(target)}`;
+  };
+}
 
 const routes = [
   // ── Root gate ──────────────────────────────────────────────
@@ -18,9 +33,9 @@ const routes = [
   // whether to show the dashboard or send the user to login. No PublicLayout.
   { path: "/", name: "root", component: Landing, meta: { title: "شرکت" } },
 
-  // ── Auth routes (standalone, no layout) ────────────────────
-  { path: "/login", name: "login", component: Login, meta: { title: "ورود", guestOnly: true } },
-  { path: "/register", name: "register", component: Register, meta: { title: "ثبت نام", guestOnly: true } },
+  // ── Auth routes (redirect to the centralized website pages) ─
+  { path: "/login", name: "login", beforeEnter: redirectToWebsite('login'), component: { render: () => null } },
+  { path: "/register", name: "register", beforeEnter: redirectToWebsite('register'), component: { render: () => null } },
   { path: "/forgot-password", name: "forgot-password", component: ForgotPassword, meta: { title: "فراموشی رمز عبور", guestOnly: true } },
 
   // ── Company dashboard routes ───────────────────────────────

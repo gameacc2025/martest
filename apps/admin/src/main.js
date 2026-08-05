@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { bootstrapSessionFromUrl } from '@telecom/auth'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
@@ -33,6 +34,12 @@ import router from './router'
 import '@telecom/shared-ui/assets/main.scss'
 
 import { theme as TelecomPreset } from '@telecom/shared-ui'
+
+// Consume a cross-app session handoff (e.g. arriving here right after
+// logging in on the centralized website login page) BEFORE anything else
+// runs, so the very first route guard evaluation already sees a valid
+// token in localStorage instead of bouncing back out to /login.
+bootstrapSessionFromUrl()
 
 const app = createApp(App)
 

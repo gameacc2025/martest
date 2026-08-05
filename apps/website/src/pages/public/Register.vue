@@ -340,7 +340,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -350,6 +350,7 @@ import RadioButton from 'primevue/radiobutton'
 import Textarea from 'primevue/textarea'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const userType = ref('customer')
@@ -418,10 +419,16 @@ const handleSubmit = async () => {
       })
     }
 
-    // Redirect to login with success message
+    // Redirect to login with success message. Carry along `redirect` if the
+    // user was sent here FROM another app's /register (see company/admin
+    // router) so they land back there after logging in.
     router.push({
       name: 'login',
-      query: { registered: 'true', email: form.value.email }
+      query: {
+        registered: 'true',
+        email: form.value.email,
+        ...(route.query.redirect ? { redirect: route.query.redirect } : {}),
+      }
     })
   } catch (error) {
     console.error('Registration error:', error)
