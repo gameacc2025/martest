@@ -53,6 +53,27 @@ async function buildApp() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
+  // ── Security headers (helmet) ──────────────────────────────────
+  // Sets CSP, HSTS, X-Frame-Options, X-Content-Type-Options, etc.
+  // crossOriginResourcePolicy is relaxed to "cross-origin" so that
+  // uploaded product images/documents served from /uploads can be
+  // embedded by the separate website/company/admin frontend origins.
+  await app.register(require('@fastify/helmet'), {
+    global: true,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: nodeEnv === 'production' ? undefined : false,
+  });
+
+  // ── Rate limiting (global default) ─────────────────────────────
+  // Generic ceiling for the whole API to blunt scraping/DoS attempts.
+  // Sensitive auth endpoints (login/register) get a much stricter
+  // per-route limit — see auth.routes.js.
+  await app.register(require('@fastify/rate-limit'), {
+    max: 300,
+    timeWindow: '1 minute',
+    allowList: ['127.0.0.1'],
+  });
+
   await app.register(require('@fastify/multipart'), {
     attachFieldsToBody: false,
     limits: {

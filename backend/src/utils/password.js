@@ -5,6 +5,7 @@
  */
 
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 /**
  * Hash a password
@@ -35,8 +36,11 @@ function generateRandomPassword(length = 12) {
   const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
   let password = '';
 
+  // crypto.randomInt is a CSPRNG — unlike Math.random(), its output
+  // cannot be predicted/reproduced by an attacker who wants to guess
+  // generated passwords (e.g. admin-issued temporary passwords).
   for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * charset.length);
+    const randomIndex = crypto.randomInt(0, charset.length);
     password += charset[randomIndex];
   }
 

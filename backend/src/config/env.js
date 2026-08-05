@@ -51,4 +51,15 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
+// In production, never allow the seed script to fall back to the
+// well-known default super-admin password ('123456'). If it's not
+// explicitly set, crash on boot instead of silently seeding a
+// guessable credential — better to fail loudly than to ship a
+// known-password super-admin account.
+if (env.nodeEnv === 'production' && !process.env.SUPER_ADMIN_PASSWORD) {
+  console.error('[env] SUPER_ADMIN_PASSWORD must be explicitly set in production.');
+  console.error('[env] Refusing to start with the default seed password.');
+  process.exit(1);
+}
+
 module.exports = env;

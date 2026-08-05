@@ -34,6 +34,7 @@ services:
     networks:
       - telecom_net
 
+
   # ────────────────────────────────────────────────────────────
   # Backend (Development)
   # ────────────────────────────────────────────────────────────
@@ -71,6 +72,7 @@ services:
     networks:
       - telecom_net
 
+
   # ────────────────────────────────────────────────────────────
   # Website (Development - Vite hot reload)
   # ────────────────────────────────────────────────────────────
@@ -84,15 +86,11 @@ services:
 
     environment:
       NODE_ENV: development
-      # Relative base → the browser hits the app's own origin and Vite's dev
-      # proxy forwards /api → backend. NEVER use the internal docker hostname
-      # (backend:3000) here: it is not resolvable from the user's browser.
       VITE_API_BASE_URL: /api/v1
       CHOKIDAR_USEPOLLING: "true"
 
     ports:
       - "3001:3001"
-
 
     volumes:
       - ./apps/website:/app/apps/website
@@ -102,7 +100,7 @@ services:
       - ./packages/auth:/app/packages/auth
       - ./packages/permissions:/app/packages/permissions
       - ./packages/vite-config:/app/packages/vite-config
-      # Preserve pnpm-installed node_modules (host bind mounts must not shadow them)
+
       - /app/node_modules
       - /app/apps/website/node_modules
       - /app/packages/shared-core/node_modules
@@ -118,6 +116,7 @@ services:
     networks:
       - telecom_net
 
+
   # ────────────────────────────────────────────────────────────
   # Company (Development - Vite hot reload)
   # ────────────────────────────────────────────────────────────
@@ -131,16 +130,13 @@ services:
 
     environment:
       NODE_ENV: development
-      # Relative base → proxied to backend (see website note above).
       VITE_API_BASE_URL: /api/v1
-      # Cross-app links (dashboard-only app): back-to-site + role redirects.
       VITE_WEBSITE_APP_URL: http://localhost:3001
       VITE_ADMIN_APP_URL: http://localhost:3003
       CHOKIDAR_USEPOLLING: "true"
 
     ports:
       - "3002:3002"
-
 
     volumes:
       - ./apps/company:/app/apps/company
@@ -150,7 +146,7 @@ services:
       - ./packages/auth:/app/packages/auth
       - ./packages/permissions:/app/packages/permissions
       - ./packages/vite-config:/app/packages/vite-config
-      # Preserve pnpm-installed node_modules (host bind mounts must not shadow them)
+
       - /app/node_modules
       - /app/apps/company/node_modules
       - /app/packages/shared-core/node_modules
@@ -166,6 +162,7 @@ services:
     networks:
       - telecom_net
 
+
   # ────────────────────────────────────────────────────────────
   # Admin (Development - Vite hot reload)
   # ────────────────────────────────────────────────────────────
@@ -179,16 +176,13 @@ services:
 
     environment:
       NODE_ENV: development
-      # Relative base → proxied to backend (see website note above).
       VITE_API_BASE_URL: /api/v1
-      # Cross-app links (dashboard-only app): back-to-site + role redirects.
       VITE_WEBSITE_APP_URL: http://localhost:3001
       VITE_COMPANY_APP_URL: http://localhost:3002
       CHOKIDAR_USEPOLLING: "true"
 
     ports:
       - "3003:3003"
-
 
     volumes:
       - ./apps/admin:/app/apps/admin
@@ -198,7 +192,7 @@ services:
       - ./packages/auth:/app/packages/auth
       - ./packages/permissions:/app/packages/permissions
       - ./packages/vite-config:/app/packages/vite-config
-      # Preserve pnpm-installed node_modules (host bind mounts must not shadow them)
+
       - /app/node_modules
       - /app/apps/admin/node_modules
       - /app/packages/shared-core/node_modules
@@ -214,9 +208,11 @@ services:
     networks:
       - telecom_net
 
+
 networks:
   telecom_net:
     driver: bridge
+
 
 volumes:
   postgres_data_dev:

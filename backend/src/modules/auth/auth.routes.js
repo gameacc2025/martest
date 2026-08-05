@@ -28,6 +28,14 @@ async function authRoutes(fastify) {
   // ── Public routes (no authentication) ────────────────────────
 
   fastify.post('/login', {
+    // Strict limit: brute-force protection. 10 attempts / 5 min / IP,
+    // independent of the looser global API limit in app.js.
+    config: {
+      rateLimit: {
+        max: 10,
+        timeWindow: '5 minutes',
+      },
+    },
     schema: {
       summary: 'Login with email and password',
       tags: ['Auth'],
@@ -37,6 +45,13 @@ async function authRoutes(fastify) {
   }, ctrl.login);
 
   fastify.post('/register', {
+    // Prevent scripted mass account creation.
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: '10 minutes',
+      },
+    },
     schema: {
       summary: 'Register a new customer account (requires admin approval)',
       tags: ['Auth'],
@@ -55,6 +70,13 @@ async function authRoutes(fastify) {
   }, ctrl.register);
 
   fastify.post('/register-company', {
+    // Prevent scripted mass account/company creation.
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: '10 minutes',
+      },
+    },
     schema: {
       summary: 'Register a new company with manager (requires admin approval)',
       tags: ['Auth'],

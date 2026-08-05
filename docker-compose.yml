@@ -15,15 +15,22 @@ services:
     restart: unless-stopped
 
     environment:
+      # No insecure defaults: POSTGRES_PASSWORD is required (see .env /
+      # .env.example). Compose fails to start rather than silently
+      # falling back to a well-known password like the old "telecom_pass".
       POSTGRES_USER: ${POSTGRES_USER:-telecom}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-telecom_pass}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       POSTGRES_DB: ${POSTGRES_DB:-telecom_marketplace}
 
     volumes:
       - postgres_data:/var/lib/postgresql
 
-    ports:
-      - "5432:5432"
+    # Deliberately NOT publishing 5432 to the host. Postgres only needs
+    # to be reachable by the "backend" service over the internal
+    # "telecom_net" bridge network. If you need direct DB access for
+    # local debugging, use `docker compose exec postgres psql ...` or a
+    # temporary `docker run --network telecom_net ...` instead of
+    # widening the container's attack surface permanently.
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-telecom} -d ${POSTGRES_DB:-telecom_marketplace}"]
@@ -51,7 +58,7 @@ services:
 
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-telecom}:${POSTGRES_PASSWORD:-telecom_pass}@postgres:5432/${POSTGRES_DB:-telecom_marketplace}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-telecom}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@postgres:5432/${POSTGRES_DB:-telecom_marketplace}?schema=public
 
     ports:
       - "3000:3000"
