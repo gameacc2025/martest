@@ -4,3 +4,9 @@ node_modules
 .env
 dist/
 .git
+
+# Test files stay co-located with the source they test (backend/src/**/*.test.js)
+# for discoverability and to avoid directory-structure drift at scale — but
+# they have no business in a production image. This one pattern keeps them
+# out of every build stage regardless of how many accumulate or where they live.
+**/*.test.js
