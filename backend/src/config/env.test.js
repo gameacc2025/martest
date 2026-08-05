@@ -14,16 +14,27 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
+const os = require('node:os');
 
 const envPath = path.join(__dirname, 'env.js');
 
 function runWithEnv(extraEnv) {
   return spawnSync(process.execPath, ['-e', `require(${JSON.stringify(envPath)})`], {
+    // IMPORTANT: run from a directory with no .env file. env.js calls
+    // dotenv.config(), which reads .env from process.cwd() by default —
+    // if we ran from backend/ (which has a real .env for local dev),
+    // dotenv would silently backfill exactly the variables these tests
+    // are trying to prove are "missing", making the negative cases
+    // pass for the wrong reason (or not fail at all).
+    cwd: os.tmpdir(),
     env: {
       ...process.env,
       DATABASE_URL: 'postgresql://u:p@127.0.0.1:5432/db',
       JWT_ACCESS_SECRET: 'a'.repeat(32),
       JWT_REFRESH_SECRET: 'b'.repeat(32),
+      // Never let a real SUPER_ADMIN_PASSWORD leak in from this test
+      // runner's own environment — each case sets it explicitly (or not).
+      SUPER_ADMIN_PASSWORD: undefined,
       ...extraEnv,
     },
     encoding: 'utf8',
@@ -48,10 +59,14 @@ test('development boot succeeds without SUPER_ADMIN_PASSWORD (falls back to dev 
 
 test('boot fails when a genuinely required var (JWT secret) is missing, in any env', () => {
   const result = spawnSync(process.execPath, ['-e', `require(${JSON.stringify(envPath)})`], {
+    cwd: os.tmpdir(), // same reasoning as runWithEnv() above
     env: {
       ...process.env,
       DATABASE_URL: 'postgresql://u:p@127.0.0.1:5432/db',
-      // JWT_ACCESS_SECRET / JWT_REFRESH_SECRET intentionally omitted
+      // JWT_ACCESS_SECRET / JWT_REFRESH_SECRET intentionally omitted —
+      // and explicitly unset in case this shell already has them.
+      JWT_ACCESS_SECRET: undefined,
+      JWT_REFRESH_SECRET: undefined,
       NODE_ENV: 'development',
     },
     encoding: 'utf8',
