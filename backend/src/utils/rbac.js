@@ -1,105 +1,196 @@
 // =============================================================
-// RBAC Helpers (server-side)
+// Unit tests — utils/rbac.js (loadUserAccess, loadUserAccessDetailed)
 //
-// Loads a user's effective roles + permissions from the DB.
-// Effective permissions = union of all role permissions.
-// (Direct user permissions were removed — roles are the single source
-//  of truth in the new domain model.) SUPER_ADMIN role grants "*".
+// This is the module that decides what a user is allowed to do
+// (SUPER_ADMIN wildcard, role→permission union, de-duplication). It's
+// consumed by auth.service (embedded in the access token) and
+// user.service (returned to the admin UI) — a bug here silently
+// over- or under-grants access across the whole app, so it gets
+// dedicated, thorough coverage rather than relying on it being
+// exercised indirectly by auth.service's tests.
 //
-// Used by:
-//   - auth.service  → to embed roles/permissions in the access token
-//   - users.service → to return roles/permissions with the user object
+// Run with:  node --test
 // =============================================================
 
-const prisma = require('../config/db');
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const Module = require('node:module');
 
-// The system super-admin role name. A user holding this role bypasses
-// all permission checks (handled in middlewares/rbac.js).
-const SUPER_ADMIN_ROLE = 'SUPER_ADMIN';
-
-/**
- * Load a user's roles (names) and effective permissions (names).
- *
- * @param {number} userId
- * @returns {Promise<{ roles: string[], permissions: string[] }>}
- *   - roles:       e.g. ['SUPER_ADMIN'] or ['COMPANY_ADMIN']
- *   - permissions: e.g. ['users.create', 'users.read', ...]
- *                  SUPER_ADMIN gets ['*'] (matches everything)
- */
-async function loadUserAccess(userId) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      roles: {
-        select: {
-          role: {
-            select: {
-              name: true,
-              permissions: { select: { permission: { select: { name: true } } } },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!user) return { roles: [], permissions: [] };
-
-  const roles = user.roles.map((ur) => ur.role.name);
-
-  // SUPER_ADMIN bypasses everything
-  if (roles.includes(SUPER_ADMIN_ROLE)) {
-    return { roles, permissions: ['*'] };
-  }
-
-  // union of role permissions (roles are the only source of permissions)
-  const rolePerms = user.roles.flatMap(
-    (ur) => ur.role.permissions.map((rp) => rp.permission.name)
-  );
-
-  // de-duplicate
-  const permissions = [...new Set(rolePerms)];
-
-  return { roles, permissions };
+function injectMock(relativePath, exportsObj) {
+  const resolved = require.resolve(path.join(__dirname, relativePath));
+  require.cache[resolved] = new Module(resolved);
+  require.cache[resolved].exports = exportsObj;
+  require.cache[resolved].loaded = true;
+  return resolved;
 }
 
-/**
- * Full access object including the role + permission records (for UI).
- * Returns roles[] and permissions[] with id+name+label so the admin
- * panel can display and edit them.
- *
- * @param {number} userId
- */
-async function loadUserAccessDetailed(userId) {
-  const { roles, permissions } = await loadUserAccess(userId);
-
-  const roleRecords = await prisma.role.findMany({
-    where: { name: { in: roles } },
-    select: { id: true, name: true, label: true, isSystem: true },
-    orderBy: { name: 'asc' },
-  });
-
-  // For SUPER_ADMIN, show all permissions (wildcard) in detail listing
-  let permRecords;
-  if (permissions.includes('*')) {
-    permRecords = await prisma.permission.findMany({
-      select: { id: true, name: true, label: true, group: true },
-      orderBy: { group: 'asc' },
-    });
-  } else {
-    permRecords = await prisma.permission.findMany({
-      where: { name: { in: permissions } },
-      select: { id: true, name: true, label: true, group: true },
-      orderBy: { group: 'asc' },
-    });
-  }
-
-  return { roles: roleRecords, permissions: permRecords };
-}
-
-module.exports = {
-  SUPER_ADMIN_ROLE,
-  loadUserAccess,
-  loadUserAccessDetailed,
+// ── Mock Prisma client ───────────────────────────────────────
+const calls = {
+  userFindUnique: [],
+  roleFindMany: [],
+  permissionFindMany: [],
 };
+
+let fx; // fixtures, reset before each test
+
+function resetMocks() {
+  calls.userFindUnique = [];
+  calls.roleFindMany = [];
+  calls.permissionFindMany = [];
+  fx = {
+    user: null,           // what prisma.user.findUnique should return
+    roleRecords: [],       // what prisma.role.findMany should return
+    permissionRecords: [], // what prisma.permission.findMany should return
+  };
+}
+
+const mockPrisma = {
+  user: {
+    findUnique: async (args) => {
+      calls.userFindUnique.push(args);
+      return fx.user;
+    },
+  },
+  role: {
+    findMany: async (args) => {
+      calls.roleFindMany.push(args);
+      return fx.roleRecords;
+    },
+  },
+  permission: {
+    findMany: async (args) => {
+      calls.permissionFindMany.push(args);
+      return fx.permissionRecords;
+    },
+  },
+};
+
+injectMock('../config/db', mockPrisma);
+
+const { SUPER_ADMIN_ROLE, loadUserAccess, loadUserAccessDetailed } = require('./rbac');
+
+// Helper: build the nested shape prisma.user.findUnique's `select` returns.
+function userWithRoles(roleDefs) {
+  // roleDefs: [{ name: 'COMPANY_ADMIN', permissions: ['products.manage', ...] }, ...]
+  return {
+    id: 1,
+    roles: roleDefs.map((r) => ({
+      role: {
+        name: r.name,
+        permissions: r.permissions.map((p) => ({ permission: { name: p } })),
+      },
+    })),
+  };
+}
+
+// ── loadUserAccess ─────────────────────────────────────────────
+
+test('loadUserAccess: returns empty roles/permissions when the user does not exist', async () => {
+  resetMocks();
+  fx.user = null;
+
+  const result = await loadUserAccess(999);
+  assert.deepEqual(result, { roles: [], permissions: [] });
+});
+
+test('loadUserAccess: a role with no permissions yields an empty permissions array', async () => {
+  resetMocks();
+  fx.user = userWithRoles([{ name: 'VIEWER', permissions: [] }]);
+
+  const result = await loadUserAccess(1);
+  assert.deepEqual(result, { roles: ['VIEWER'], permissions: [] });
+});
+
+test('loadUserAccess: permissions are the union of all held roles', async () => {
+  resetMocks();
+  fx.user = userWithRoles([
+    { name: 'PRODUCT_MANAGER', permissions: ['products.create', 'products.update'] },
+    { name: 'SUPPORT_AGENT', permissions: ['inquiries.read'] },
+  ]);
+
+  const result = await loadUserAccess(1);
+  assert.deepEqual(result.roles.sort(), ['PRODUCT_MANAGER', 'SUPPORT_AGENT']);
+  assert.deepEqual(
+    result.permissions.sort(),
+    ['inquiries.read', 'products.create', 'products.update'].sort()
+  );
+});
+
+test('loadUserAccess: duplicate permissions across roles are de-duplicated', async () => {
+  resetMocks();
+  fx.user = userWithRoles([
+    { name: 'ROLE_A', permissions: ['products.read', 'products.update'] },
+    { name: 'ROLE_B', permissions: ['products.read', 'inquiries.read'] }, // products.read overlaps
+  ]);
+
+  const result = await loadUserAccess(1);
+  const readCount = result.permissions.filter((p) => p === 'products.read').length;
+  assert.equal(readCount, 1, 'products.read should appear exactly once, not per-role');
+  assert.equal(result.permissions.length, 3);
+});
+
+test('loadUserAccess: SUPER_ADMIN role always returns the ["*"] wildcard', async () => {
+  resetMocks();
+  // Even with other roles/permissions attached, SUPER_ADMIN wins.
+  fx.user = userWithRoles([
+    { name: SUPER_ADMIN_ROLE, permissions: [] }, // SUPER_ADMIN itself carries no explicit perms in DB
+    { name: 'VIEWER', permissions: ['products.read'] },
+  ]);
+
+  const result = await loadUserAccess(1);
+  assert.deepEqual(result.permissions, ['*']);
+  assert.ok(result.roles.includes(SUPER_ADMIN_ROLE));
+});
+
+test('loadUserAccess: queries by the given userId', async () => {
+  resetMocks();
+  fx.user = userWithRoles([]);
+
+  await loadUserAccess(42);
+  assert.equal(calls.userFindUnique.length, 1);
+  assert.equal(calls.userFindUnique[0].where.id, 42);
+});
+
+// ── loadUserAccessDetailed ──────────────────────────────────────
+
+test('loadUserAccessDetailed: fetches role + permission records matching the user\'s access', async () => {
+  resetMocks();
+  fx.user = userWithRoles([{ name: 'VIEWER', permissions: ['products.read'] }]);
+  fx.roleRecords = [{ id: 1, name: 'VIEWER', label: 'Viewer', isSystem: false }];
+  fx.permissionRecords = [{ id: 5, name: 'products.read', label: 'Read products', group: 'products' }];
+
+  const result = await loadUserAccessDetailed(1);
+
+  assert.deepEqual(result.roles, fx.roleRecords);
+  assert.deepEqual(result.permissions, fx.permissionRecords);
+  // Non-wildcard case: permission lookup must be filtered to the user's
+  // actual permission names, not fetch the whole table.
+  assert.deepEqual(calls.permissionFindMany[0].where, { name: { in: ['products.read'] } });
+});
+
+test('loadUserAccessDetailed: SUPER_ADMIN gets ALL permissions (no name filter), not just an explicit list', async () => {
+  resetMocks();
+  fx.user = userWithRoles([{ name: SUPER_ADMIN_ROLE, permissions: [] }]);
+  fx.roleRecords = [{ id: 1, name: SUPER_ADMIN_ROLE, label: 'Super Admin', isSystem: true }];
+  fx.permissionRecords = [
+    { id: 1, name: 'products.read', label: 'x', group: 'products' },
+    { id: 2, name: 'users.delete', label: 'y', group: 'users' },
+  ];
+
+  const result = await loadUserAccessDetailed(1);
+
+  assert.deepEqual(result.permissions, fx.permissionRecords);
+  // The wildcard path must NOT pass a `where` filter — it should ask for everything.
+  assert.equal(calls.permissionFindMany[0].where, undefined);
+});
+
+test('loadUserAccessDetailed: a user with no roles returns empty role/permission lists', async () => {
+  resetMocks();
+  fx.user = null; // unknown/deleted user
+  fx.roleRecords = [];
+  fx.permissionRecords = [];
+
+  const result = await loadUserAccessDetailed(999);
+  assert.deepEqual(result, { roles: [], permissions: [] });
+});
