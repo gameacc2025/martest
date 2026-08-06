@@ -30,9 +30,18 @@ const mockPrisma = {
 };
 
 const dbPath = require.resolve(path.join(__dirname, 'config/db'));
+const originalDbEntry = require.cache[dbPath];
 require.cache[dbPath] = new Module(dbPath);
 require.cache[dbPath].exports = mockPrisma;
 require.cache[dbPath].loaded = true;
+
+// require.cache is process-global — in newer Node versions test files
+// share a process by default, so this mock must be restored once this
+// file's tests finish, or it'd leak into whichever file runs next.
+test.after(() => {
+  if (originalDbEntry) require.cache[dbPath] = originalDbEntry;
+  else delete require.cache[dbPath];
+});
 
 const buildApp = require('./app');
 

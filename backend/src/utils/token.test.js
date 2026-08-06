@@ -180,6 +180,10 @@ test('getRefreshTokenExpiry parses hour and minute suffixes correctly (subproces
   const twoHoursMs = expiryMsFor('2h');
   const thirtyMinMs = expiryMsFor('30m');
 
-  assert.ok(Math.abs(twoHoursMs - 2 * 3600000) < 2000);
-  assert.ok(Math.abs(thirtyMinMs - 30 * 60000) < 2000);
+  // Generous tolerance: this spawns a real child process, so on a loaded
+  // machine (antivirus scanning node.exe, a noisy parallel test run) the
+  // measured gap can occasionally run into the low seconds even though
+  // the underlying parsing logic is exact.
+  assert.ok(Math.abs(twoHoursMs - 2 * 3600000) < 10000, `twoHoursMs=${twoHoursMs}`);
+  assert.ok(Math.abs(thirtyMinMs - 30 * 60000) < 10000, `thirtyMinMs=${thirtyMinMs}`);
 });

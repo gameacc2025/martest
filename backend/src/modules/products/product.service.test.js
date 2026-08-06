@@ -26,9 +26,18 @@ const Module = require('node:module');
 
 function injectMock(relativePath, exportsObj) {
   const resolved = require.resolve(path.join(__dirname, relativePath));
+  const original = require.cache[resolved];
   require.cache[resolved] = new Module(resolved);
   require.cache[resolved].exports = exportsObj;
   require.cache[resolved].loaded = true;
+  // require.cache is process-global — in newer Node versions test files
+  // share a process by default, so leaving this in place would corrupt
+  // whichever test file runs next and needs the real module (this file's
+  // stubbed utils/rbac is exactly what broke utils/rbac.test.js).
+  test.after(() => {
+    if (original) require.cache[resolved] = original;
+    else delete require.cache[resolved];
+  });
   return resolved;
 }
 

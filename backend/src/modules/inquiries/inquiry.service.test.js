@@ -50,16 +50,28 @@ const serviceDir = path.join(__dirname);
 const dbPath = require.resolve(path.join(serviceDir, '../../config/db'));
 const companyRulePath = require.resolve(path.join(serviceDir, '../companies/company-rule.service'));
 
+const originalDbEntry = require.cache[dbPath];
 require.cache[dbPath] = new Module(dbPath);
 require.cache[dbPath].exports = mockPrisma;
 require.cache[dbPath].loaded = true;
 
+const originalCompanyRuleEntry = require.cache[companyRulePath];
 require.cache[companyRulePath] = new Module(companyRulePath);
 require.cache[companyRulePath].exports = {
   validateInquiryCreationCapacity: async () => {},
   validateResponseSubmissionCapacity: async () => {},
 };
 require.cache[companyRulePath].loaded = true;
+
+// require.cache is process-global — in newer Node versions test files
+// share a process by default, so these mocks must be restored once this
+// file's tests finish, or they'd leak into whichever file runs next.
+test.after(() => {
+  if (originalDbEntry) require.cache[dbPath] = originalDbEntry;
+  else delete require.cache[dbPath];
+  if (originalCompanyRuleEntry) require.cache[companyRulePath] = originalCompanyRuleEntry;
+  else delete require.cache[companyRulePath];
+});
 
 // Now load the service (it will pick up the mocks above)
 const inquiryService = require('./inquiry.service');

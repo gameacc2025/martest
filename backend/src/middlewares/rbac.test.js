@@ -15,9 +15,19 @@ const Module = require('node:module');
 
 // ── Mock utils/rbac (only SUPER_ADMIN_ROLE is used by the middleware) ──
 const rbacUtilsPath = require.resolve(path.join(__dirname, '../utils/rbac'));
+const originalRbacUtilsEntry = require.cache[rbacUtilsPath];
 require.cache[rbacUtilsPath] = new Module(rbacUtilsPath);
 require.cache[rbacUtilsPath].exports = { SUPER_ADMIN_ROLE: 'SUPER_ADMIN' };
 require.cache[rbacUtilsPath].loaded = true;
+
+// require.cache is process-global — in newer Node versions test files
+// share a process by default, so this stub (missing loadUserAccess /
+// loadUserAccessDetailed) must be restored once this file's tests
+// finish, or utils/rbac.test.js (which needs the REAL module) breaks.
+test.after(() => {
+  if (originalRbacUtilsEntry) require.cache[rbacUtilsPath] = originalRbacUtilsEntry;
+  else delete require.cache[rbacUtilsPath];
+});
 
 const {
   hasPermission,

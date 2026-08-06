@@ -19,9 +19,19 @@ const Module = require('node:module');
 
 function injectMock(relativePath, exportsObj) {
   const resolved = require.resolve(path.join(__dirname, relativePath));
+  const original = require.cache[resolved]; // may be undefined if never loaded yet
   require.cache[resolved] = new Module(resolved);
   require.cache[resolved].exports = exportsObj;
   require.cache[resolved].loaded = true;
+  // IMPORTANT: require.cache is process-global. When multiple test files
+  // run in the same process (the default in newer Node versions), a mock
+  // left in place after this file finishes would leak into whichever
+  // test file runs next and genuinely needs the real module — restore it
+  // once this file's tests are done.
+  test.after(() => {
+    if (original) require.cache[resolved] = original;
+    else delete require.cache[resolved];
+  });
   return resolved;
 }
 
