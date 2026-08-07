@@ -1,3 +1,4 @@
+// مسیر فایل: backend/src/utils/token.test.js
 // =============================================================
 // Unit tests — utils/token.js
 //
@@ -157,10 +158,18 @@ test('getRefreshTokenExpiry parses hour and minute suffixes correctly (subproces
   const tokenPath = require.resolve('./token');
 
   function expiryMsFor(expiresIn) {
+    // Wrap the result in a unique marker and read it out with a regex
+    // instead of `Number(stdout.trim())`. Anything else the child process
+    // writes to stdout before/after our line — a dotenv "injecting env"
+    // notice, a differently-versioned dotenv that isn't quiet by default,
+    // an antivirus/Node warning banner, etc. — would otherwise turn a
+    // clean number into "some text\n7200000", which Number() silently
+    // turns into NaN. The marker makes this robust regardless of what
+    // else lands on stdout, instead of guessing at a specific cause.
     const script = `
       const env = require(${JSON.stringify(envPath)});
       const { getRefreshTokenExpiry } = require(${JSON.stringify(tokenPath)});
-      console.log(getRefreshTokenExpiry().getTime() - Date.now());
+      process.stdout.write('##RESULT_START##' + (getRefreshTokenExpiry().getTime() - Date.now()) + '##RESULT_END##');
     `;
     const result = spawnSync(process.execPath, ['-e', script], {
       cwd: os.tmpdir(), // avoid a real .env backfilling JWT_REFRESH_EXPIRES_IN — see env.test.js
@@ -174,7 +183,14 @@ test('getRefreshTokenExpiry parses hour and minute suffixes correctly (subproces
       encoding: 'utf8',
     });
     assert.equal(result.status, 0, result.stderr);
-    return Number(result.stdout.trim());
+
+    const match = /##RESULT_START##(-?\d+)##RESULT_END##/.exec(result.stdout);
+    assert.ok(
+      match,
+      `could not find the result marker in subprocess stdout — something else was printed. ` +
+        `stdout=${JSON.stringify(result.stdout)} stderr=${JSON.stringify(result.stderr)}`
+    );
+    return Number(match[1]);
   }
 
   const twoHoursMs = expiryMsFor('2h');
