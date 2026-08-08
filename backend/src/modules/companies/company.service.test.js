@@ -246,19 +246,15 @@ test('listCompanies: a genuinely unknown sort field falls back to createdAt', as
   assert.deepEqual(calls.companyFindMany[0].orderBy, { createdAt: 'asc' });
 });
 
-// KNOWN BUG (documented, not yet fixed): `SORT_FIELDS[field] || 'createdAt'`
-// uses plain-object property lookup, so field="__proto__" reads the
-// inherited Object.prototype (truthy) instead of falling through to
-// undefined -> 'createdAt'. The "whitelist to prevent injection" comment
-// on buildOrderBy does not actually hold for this key. Not exploitable as
-// classic prototype pollution (nothing is *written* here), but it does
-// produce a nonsense orderBy clause ({'[object Object]': 'asc'}) that will
-// blow up against a real Prisma client instead of degrading safely.
-// Fix: `Object.prototype.hasOwnProperty.call(SORT_FIELDS, field) ? SORT_FIELDS[field] : 'createdAt'`.
-test('listCompanies: BUG — sort="__proto__" bypasses the whitelist fallback', async () => {
+// Regression test for a real bug found via testing: `SORT_FIELDS[field] ||
+// 'createdAt'` used plain-object property lookup, so field="__proto__" read
+// the inherited Object.prototype (truthy) instead of falling through to
+// undefined -> 'createdAt', bypassing the whitelist. Fixed by using
+// Object.prototype.hasOwnProperty.call(SORT_FIELDS, field) instead.
+test('listCompanies: sort="__proto__" does NOT bypass the whitelist (regression test)', async () => {
   resetMocks();
   await listCompanies({ sort: '__proto__:asc' });
-  assert.deepEqual(calls.companyFindMany[0].orderBy, { '[object Object]': 'asc' });
+  assert.deepEqual(calls.companyFindMany[0].orderBy, { createdAt: 'asc' });
 });
 
 test('listCompanies: skip/take are forwarded and excluded from the filters', async () => {

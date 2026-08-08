@@ -136,7 +136,9 @@ function buildWhereClause(query = {}) {
 function buildOrderBy(sort) {
   if (!sort) return { createdAt: 'desc' };
   const [field, order] = sort.split(':');
-  const mapped = SORT_FIELDS[field] || 'createdAt';
+  const mapped = Object.prototype.hasOwnProperty.call(SORT_FIELDS, field)
+    ? SORT_FIELDS[field]
+    : 'createdAt';
   return { [mapped]: order === 'asc' ? 'asc' : 'desc' };
 }
 

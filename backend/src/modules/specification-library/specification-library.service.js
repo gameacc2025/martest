@@ -8,7 +8,8 @@ async function searchFields(query, { limit = 20 } = {}) {
   const trimmed = (query || '').trim();
   if (!trimmed) return [];
 
-  const take = Math.min(Math.max(Number(limit) || 20, 1), 50);
+  const numericLimit = Number(limit);
+  const take = Math.min(Math.max(Number.isFinite(numericLimit) ? numericLimit : 20, 1), 50);
 
   const results = await prisma.specificationLibraryField.findMany({
     where: {

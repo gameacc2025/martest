@@ -32,12 +32,20 @@ test('getPaginationParams: page is floored at 1 — zero, negative, and non-nume
   assert.equal(getPaginationParams({ page: 'abc' }).page, 1);
 });
 
-test('getPaginationParams: limit=0 or a non-numeric value falls back to the default of 20 (0 is falsy, so `0 || 20` wins)', () => {
-  assert.equal(getPaginationParams({ limit: '0' }).limit, 20);
+test('getPaginationParams: a non-numeric limit falls back to the default of 20', () => {
   assert.equal(getPaginationParams({ limit: 'abc' }).limit, 20);
 });
 
-test('getPaginationParams: a negative limit is truthy, so it skips the default and gets floored to 1 instead', () => {
+// Regression test for a real bug found via testing: `parseInt(query.limit, 10)
+// || 20` treated limit=0 as falsy and silently fell back to the default of 20,
+// inconsistent with how a negative limit was clamped to the floor of 1. Fixed
+// to distinguish "not a number" (falls back to default) from "a number that's
+// out of range" (clamped), using Number.isFinite() instead of truthiness.
+test('getPaginationParams: limit=0 clamps to the floor of 1, consistent with a negative limit (regression test)', () => {
+  assert.equal(getPaginationParams({ limit: '0' }).limit, 1);
+});
+
+test('getPaginationParams: a negative limit clamps to the floor of 1', () => {
   assert.equal(getPaginationParams({ limit: '-5' }).limit, 1);
 });
 

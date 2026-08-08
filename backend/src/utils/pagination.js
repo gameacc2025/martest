@@ -12,8 +12,12 @@
  * @returns {{ page, limit, skip, take }}
  */
 function getPaginationParams(query) {
-  const page = Math.max(parseInt(query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(query.limit, 10) || 20, 1), 100); // cap at 100
+  const parsedPage = parseInt(query.page, 10);
+  const page = Math.max(Number.isFinite(parsedPage) ? parsedPage : 1, 1);
+
+  const parsedLimit = parseInt(query.limit, 10);
+  const limit = Math.min(Math.max(Number.isFinite(parsedLimit) ? parsedLimit : 20, 1), 100); // cap at 100
+
   const skip = (page - 1) * limit;
   return { page, limit, skip, take: limit };
 }

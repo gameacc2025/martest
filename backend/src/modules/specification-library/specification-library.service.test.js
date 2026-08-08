@@ -91,14 +91,14 @@ test('searchFields: clamps a negative limit up to 1', async () => {
   assert.equal(calls.findMany[0].take, 1);
 });
 
-// `Number(limit) || 20` treats limit=0 as falsy, so it silently falls back
-// to the default of 20 instead of clamping to the floor of 1 the way a
-// negative limit does. Documenting the actual behavior rather than the
-// (arguably more consistent) clamped-to-1 behavior one might expect.
-test('searchFields: limit=0 is treated as "not provided" and falls back to 20, NOT clamped to 1', async () => {
+// Regression test for a real bug found via testing: `Number(limit) || 20`
+// treated limit=0 as falsy and silently fell back to the default of 20,
+// inconsistent with how a negative limit was clamped to 1. Fixed to check
+// Number.isFinite() instead of relying on truthiness.
+test('searchFields: limit=0 clamps to the floor of 1, consistent with a negative limit (regression test)', async () => {
   resetMocks();
   await searchFields('ram', { limit: 0 });
-  assert.equal(calls.findMany[0].take, 20);
+  assert.equal(calls.findMany[0].take, 1);
 });
 
 test('searchFields: a non-numeric limit falls back to the default of 20', async () => {

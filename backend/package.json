@@ -12,7 +12,9 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seed.js",
-    "test": "node --experimental-test-isolation=process --test"
+    "test": "node --experimental-test-isolation=process --test",
+    "test:coverage": "node --experimental-test-isolation=process --test --experimental-test-coverage --test-coverage-exclude=\"**/*.test.js\" --test-coverage-exclude=\"prisma/**\"",
+    "test:ci": "node --experimental-test-isolation=process --test --experimental-test-coverage --test-coverage-exclude=\"**/*.test.js\" --test-coverage-exclude=\"prisma/**\" --test-coverage-lines=85 --test-coverage-branches=85 --test-coverage-functions=75"
   },
   "dependencies": {
     "@fastify/cookie": "^9.4.0",
