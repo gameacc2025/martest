@@ -144,7 +144,7 @@ const viewCategoryProducts = (categoryId) => {
 
 .cat-error-icon {
   font-size: 2.5rem;
-  color: var(--p-red-500);
+  color: var(--ds-color-danger);
   margin-bottom: 1rem;
 }
 
@@ -182,7 +182,7 @@ const viewCategoryProducts = (categoryId) => {
 
 .category-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ds-shadow-lg);
 }
 
 .cat-thumb {

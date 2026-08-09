@@ -14,6 +14,7 @@ import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Dropdown from 'primevue/dropdown'
+import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -365,9 +366,8 @@ onBeforeUnmount(() => {
               <h2 class="section-title"><i class="pi pi-star-fill"></i> محصولات</h2>
             </div>
 
-            <div v-if="loading" class="state-box">
-              <i class="pi pi-spin pi-spinner"></i>
-              <p>در حال دریافت محصولات...</p>
+            <div v-if="loading" class="products-grid">
+              <ProductCard v-for="n in 6" :key="n" skeleton />
             </div>
             <div v-else-if="error" class="state-box error">
               <i class="pi pi-exclamation-triangle"></i>
@@ -550,7 +550,7 @@ onBeforeUnmount(() => {
 }
 .filters-card {
   border-radius: 1rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--ds-shadow-sm);
 }
 .filters-card :deep(.p-card-body) { padding: 1.25rem; }
 .filters-card :deep(.p-card-title) { margin-bottom: 1rem; }
@@ -620,7 +620,7 @@ onBeforeUnmount(() => {
 }
 .category-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ds-shadow-lg);
 }
 .cat-thumb {
   aspect-ratio: 16 / 9;
@@ -657,7 +657,7 @@ onBeforeUnmount(() => {
   overflow: hidden; cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s;
 }
-.product-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.product-card:hover { box-shadow: var(--ds-shadow-md); transform: translateY(-2px); }
 .product-image {
   position: relative; height: 150px; background: var(--surface-ground);
   overflow: hidden; display: flex; align-items: center; justify-content: center;
@@ -675,7 +675,7 @@ onBeforeUnmount(() => {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .product-vendor { margin: 0 0 0.5rem; font-size: 0.75rem; color: var(--text-color-secondary); }
-.product-price { font-weight: 800; color: var(--primary-color); font-size: 0.9rem; }
+.product-price { font-weight: 800; color: var(--ds-color-primary); font-size: 0.9rem; }
 
 /* Nav buttons */
 .nav-btn {
@@ -693,7 +693,7 @@ onBeforeUnmount(() => {
   justify-content: center; gap: 0.5rem; padding: 2rem 1rem; color: var(--text-color-secondary);
 }
 .state-box i { font-size: 2rem; }
-.state-box.error i { color: var(--p-red-500); }
+.state-box.error i { color: var(--ds-color-danger); }
 .state-box p { margin: 0; }
 
 /* Stats */

@@ -36,7 +36,7 @@ defineProps({
   background: var(--surface-card);
   border: 1px solid var(--surface-border);
   border-radius: var(--content-border-radius, 12px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--ds-shadow-xs);
 }
 
 .page-header-pro__breadcrumb {

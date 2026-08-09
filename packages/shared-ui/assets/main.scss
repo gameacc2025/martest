@@ -113,7 +113,7 @@
     transition: box-shadow var(--transition-duration);
 
     &:hover {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--ds-shadow-md);
     }
 
     .stat-icon {
@@ -170,7 +170,7 @@
     &:hover {
         background: var(--surface-hover);
         border-color: var(--primary-color);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--ds-shadow-md);
     }
 }
 
@@ -380,7 +380,7 @@
 .p-select-overlay,
 .p-multiselect-overlay {
     border-radius: var(--content-border-radius);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--ds-shadow-md);
 
     .p-dropdown-item,
     .p-select-option,
@@ -469,7 +469,7 @@
 /* ---- Dialog ---- */
 .p-dialog {
     border-radius: var(--content-border-radius);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--ds-shadow-xl);
 
     .p-dialog-header {
         padding: 1.5rem 2rem 1rem 2rem;
@@ -588,7 +588,7 @@
 .p-toast {
     .p-toast-message {
         border-radius: var(--content-border-radius);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        box-shadow: var(--ds-shadow-md);
 
         .p-toast-message-content {
             padding: 1rem 1.25rem;

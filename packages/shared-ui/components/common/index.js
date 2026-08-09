@@ -9,8 +9,6 @@ export { default as Input } from './Input.vue'
 export { default as Card } from './Card.vue'
 export { default as Dialog } from './Dialog.vue'
 export { default as Pagination } from './Pagination.vue'
-// `Modal` kept as a backward-compatible alias for the DS `Dialog`.
-export { default as Modal } from './Modal.vue'
 export { default as Loading } from './Loading.vue'
 
 // Enterprise page header — breadcrumb + icon/title/description + actions slot.

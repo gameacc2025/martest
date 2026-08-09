@@ -960,6 +960,7 @@ async function removeExistingDocument(docId) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+  align-items: start;
 }
 
 .form-section {
@@ -967,6 +968,8 @@ async function removeExistingDocument(docId) {
   border: 1px solid var(--surface-border);
   border-radius: var(--content-border-radius);
   padding: 1.5rem;
+  box-shadow: var(--ds-shadow-sm);
+  border-inline-start: 3px solid var(--ds-color-primary);
 }
 
 .form-section.full-width {
@@ -1005,7 +1008,7 @@ async function removeExistingDocument(docId) {
 }
 
 .required {
-  color: var(--p-red-500);
+  color: var(--ds-color-danger);
 }
 
 .empty-section {
@@ -1073,6 +1076,7 @@ async function removeExistingDocument(docId) {
   padding: 1rem;
   background: var(--surface-hover);
   border-radius: var(--content-border-radius);
+  border: 1px solid var(--surface-border);
 }
 
 .images-grid {
@@ -1122,6 +1126,7 @@ async function removeExistingDocument(docId) {
   padding: 0.75rem;
   background: var(--surface-hover);
   border-radius: var(--content-border-radius);
+  border: 1px solid var(--surface-border);
 }
 
 @media (max-width: 767px) {

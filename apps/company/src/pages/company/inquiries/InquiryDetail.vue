@@ -13,6 +13,7 @@ import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
+import Textarea from 'primevue/textarea'
 import ProgressSpinner from 'primevue/progressspinner'
 import ConfirmDialog from 'primevue/confirmdialog'
 
@@ -40,6 +41,10 @@ const statusSeverity = {
   DRAFT: 'secondary', SUBMITTED: 'info', OPEN: 'success',
   CLOSED: 'warn', EXPIRED: 'danger', COMPLETED: 'success', CANCELLED: 'danger',
 }
+const statusIcons = {
+  DRAFT: 'pi-file-edit', SUBMITTED: 'pi-send', OPEN: 'pi-circle-fill',
+  CLOSED: 'pi-lock', EXPIRED: 'pi-clock', COMPLETED: 'pi-check-circle', CANCELLED: 'pi-times-circle',
+}
 const responseStatusLabels = {
   PENDING: 'در انتظار', SELECTED: 'انتخاب شده', REJECTED: 'رد شده',
   EXPIRED: 'منقضی شده', WITHDRAWN: 'پس گرفته شده',
@@ -49,12 +54,23 @@ const responseStatusSeverity = {
   EXPIRED: 'warn', WITHDRAWN: 'secondary',
 }
 
-const myCompanyId = computed(() => Number(auth.companyId) || null)
+const PRIORITY_LABELS = { LOW: 'کم', NORMAL: 'عادی', HIGH: 'زیاد', URGENT: 'فوری' }
+const PRIORITY_SEVERITY = { LOW: 'secondary', NORMAL: 'info', HIGH: 'warn', URGENT: 'danger' }
 
+const myCompanyId = computed(() => Number(auth.companyId) || null)
 
 const deadlinePassed = computed(() => {
   const d = inquiry.value?.responseDeadline
   return d ? new Date(d) <= new Date() : false
+})
+
+const deadlineApproaching = computed(() => {
+  const d = inquiry.value?.responseDeadline
+  if (!d) return false
+  const deadline = new Date(d)
+  const now = new Date()
+  const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24))
+  return daysLeft <= 3 && daysLeft >= 0
 })
 
 const isOpen = computed(() => inquiry.value?.status === 'OPEN' && !inquiry.value?.closedAt)
@@ -81,6 +97,16 @@ function canWithdrawResponse(response) {
 
 function isMyResponse(response) {
   return myCompanyId.value && response.company?.id === myCompanyId.value
+}
+
+function formatDate(v) {
+  if (!v) return '—'
+  try { return new Date(v).toLocaleDateString('fa-IR') } catch { return '—' }
+}
+
+function formatDateTime(v) {
+  if (!v) return '—'
+  try { return new Date(v).toLocaleString('fa-IR') } catch { return '—' }
 }
 
 onMounted(() => fetchInquiry())
@@ -243,149 +269,201 @@ function formatPrice(price) {
 <template>
   <div class="inquiry-detail-page">
     <ConfirmDialog />
-    <div class="page-header">
-      <div>
-        <Button icon="pi pi-arrow-right" text @click="router.push({ name: 'company-inquiries' })" />
-        <h1>جزئیات استعلام</h1>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="detail-skeleton">
+      <div class="skeleton-header">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line skeleton-subtitle"></div>
       </div>
-      <div class="page-header-actions" v-if="canCreateResponse">
-        <Button label="ارسال پاسخ" icon="pi pi-send" @click="openCreateDialog" />
+      <div class="skeleton-card">
+        <div class="skeleton-line skeleton-heading"></div>
+        <div class="skeleton-grid">
+          <div class="skeleton-line skeleton-field" v-for="i in 6" :key="i"></div>
+        </div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton-line skeleton-heading"></div>
+        <div class="skeleton-line skeleton-field" v-for="i in 3" :key="i"></div>
       </div>
     </div>
 
-    <div v-if="loading" class="text-center py-8">
-      <ProgressSpinner />
-    </div>
-
+    <!-- Error State -->
     <div v-else-if="errored" class="state-block">
-      <i class="pi pi-exclamation-triangle state-icon" style="color: var(--p-red-500)"></i>
+      <i class="pi pi-exclamation-triangle state-icon error"></i>
       <h3>خطا در دریافت اطلاعات</h3>
       <p>دریافت جزئیات استعلام با مشکل مواجه شد.</p>
-      <div class="flex gap-2">
+      <div class="state-actions">
         <Button label="تلاش مجدد" icon="pi pi-refresh" @click="fetchInquiry" />
         <Button label="بازگشت" icon="pi pi-arrow-right" severity="secondary" text @click="router.push({ name: 'company-inquiries' })" />
       </div>
     </div>
 
-    <div v-else-if="inquiry" class="detail-grid">
-      <Card class="detail-card">
-        <template #title>اطلاعات استعلام</template>
-        <template #content>
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">عنوان</span>
-              <span class="info-value">{{ inquiry.title }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">شرکت درخواست‌کننده</span>
-              <span class="info-value">{{ inquiry.company?.name }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">وضعیت</span>
-              <Tag :value="statusLabels[inquiry.status]" :severity="statusSeverity[inquiry.status]" />
-            </div>
-            <div class="info-item">
-              <span class="info-label">تاریخ ایجاد</span>
-              <span class="info-value">{{ new Date(inquiry.createdAt).toLocaleDateString('fa-IR') }}</span>
-            </div>
-            <div class="info-item" v-if="inquiry.description">
-              <span class="info-label">توضیحات</span>
-              <span class="info-value">{{ inquiry.description }}</span>
-            </div>
-            <div class="info-item" v-if="inquiry.responseDeadline">
-              <span class="info-label">مهلت پاسخ</span>
-              <span class="info-value" :class="{ 'text-danger': deadlinePassed }">
-                {{ new Date(inquiry.responseDeadline).toLocaleString('fa-IR') }}
-                <Tag v-if="deadlinePassed" value="گذشته" severity="danger" class="ms-1" />
+    <!-- Inquiry Detail -->
+    <template v-else-if="inquiry">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <Button icon="pi pi-arrow-right" text @click="router.push({ name: 'company-inquiries' })" />
+          <div class="page-title-group">
+            <h1>{{ inquiry.title }}</h1>
+            <div class="page-meta">
+              <Tag :value="statusLabels[inquiry.status]" :severity="statusSeverity[inquiry.status]" :icon="statusIcons[inquiry.status]" />
+              <Tag v-if="inquiry.priority && inquiry.priority !== 'NORMAL'" :value="PRIORITY_LABELS[inquiry.priority]" :severity="PRIORITY_SEVERITY[inquiry.priority]" />
+              <span v-if="inquiry.company?.name" class="meta-company">
+                <i class="pi pi-building"></i>
+                {{ inquiry.company.name }}
               </span>
             </div>
           </div>
-        </template>
-      </Card>
+        </div>
+        <div class="page-header-actions" v-if="canCreateResponse">
+          <Button label="ارسال پاسخ" icon="pi pi-send" size="large" @click="openCreateDialog" />
+        </div>
+      </div>
 
-      <Card class="detail-card">
-        <template #title>اقلام درخواست ({{ inquiry.items?.length || 0 }})</template>
-        <template #content>
-          <DataTable :value="inquiry.items || []" responsiveLayout="scroll">
-            <Column field="product.title" header="محصول"></Column>
-            <Column field="quantity" header="تعداد"></Column>
-            <Column field="description" header="توضیحات"></Column>
-          </DataTable>
-        </template>
-      </Card>
+      <!-- Deadline Banner -->
+      <div v-if="inquiry.responseDeadline" class="deadline-banner" :class="{ 'deadline-urgent': deadlineApproaching, 'deadline-passed': deadlinePassed }">
+        <i class="pi" :class="deadlinePassed ? 'pi-times-circle' : 'pi-clock'"></i>
+        <span v-if="deadlinePassed">مهلت پاسخ گذشته است</span>
+        <span v-else-if="deadlineApproaching">مهلت پاسخ نزدیک است — {{ formatDateTime(inquiry.responseDeadline) }}</span>
+        <span v-else>مهلت پاسخ: {{ formatDateTime(inquiry.responseDeadline) }}</span>
+      </div>
 
-      <Card class="detail-card" v-if="inquiry.responses?.length">
-        <template #title>پاسخ‌ها ({{ inquiry.responses.length }})</template>
-        <template #content>
-          <div v-for="response in inquiry.responses" :key="response.id" class="response-card">
-            <div class="response-header">
-              <div class="response-header-info">
-                <span class="font-semibold">{{ response.company?.name }}</span>
-                <Tag :value="responseStatusLabels[response.status] || response.status" :severity="responseStatusSeverity[response.status] || 'info'" />
-                <Tag v-if="isMyResponse(response)" value="پاسخ شما" severity="contrast" />
-              </div>
-              <div class="response-actions" v-if="isMyResponse(response)">
-                <Button v-if="canEditResponse(response)" label="ویرایش" icon="pi pi-pencil" size="small" text @click="openEditDialog(response)" />
-                <Button v-if="canEditResponse(response)" label="افزودن فایل" icon="pi pi-paperclip" size="small" text :loading="uploadingResponseId === response.id" @click="triggerUpload(response)" />
-                <Button v-if="canWithdrawResponse(response)" label="انصراف" icon="pi pi-times-circle" size="small" text severity="danger" @click="confirmWithdraw(response)" />
+      <!-- Main Content Grid -->
+      <div class="detail-grid">
+        <!-- Left Column: Inquiry Info -->
+        <div class="detail-main">
+          <!-- Description -->
+          <div class="detail-section" v-if="inquiry.description">
+            <h2>توضیحات</h2>
+            <p class="description-text">{{ inquiry.description }}</p>
+          </div>
+
+          <!-- Requested Items -->
+          <div class="detail-section">
+            <h2>اقلام درخواست <span class="count-badge">{{ inquiry.items?.length || 0 }}</span></h2>
+            <div v-if="inquiry.items?.length" class="items-list">
+              <div v-for="item in inquiry.items" :key="item.id" class="item-card">
+                <div class="item-header">
+                  <span class="item-product">{{ item.product?.title || 'محصول نامشخص' }}</span>
+                  <span class="item-quantity">×{{ item.quantity }}</span>
+                </div>
+                <p v-if="item.description" class="item-description">{{ item.description }}</p>
               </div>
             </div>
-            <DataTable :value="response.items || []" responsiveLayout="scroll" size="small">
-              <Column header="محصول">
-                <template #body="{ data }">{{ data.inquiryItem?.product?.title || '-' }}</template>
-              </Column>
-              <Column field="price" header="قیمت">
-                <template #body="{ data }">{{ formatPrice(data.price) }}</template>
-              </Column>
-              <Column field="availableQuantity" header="تعداد موجود"></Column>
-              <Column field="deliveryTime" header="زمان تحویل"></Column>
-              <Column field="description" header="توضیحات"></Column>
-            </DataTable>
-            <div v-if="response.attachments?.length" class="attachments">
-              <span class="attachments-label"><i class="pi pi-paperclip"></i> فایل‌های پیوست:</span>
-              <div class="attachment-list">
-                <div v-for="att in response.attachments" :key="att.id" class="attachment-chip">
-                  <a :href="attachmentUrl(att.url)" target="_blank" rel="noopener">
-                    <i class="pi pi-file"></i> {{ att.filename }}
-                  </a>
-                  <Button v-if="isMyResponse(response) && canEditResponse(response)" icon="pi pi-times" text rounded size="small" severity="danger" @click="deleteAttachment(response, att)" />
+            <div v-else class="empty-section">
+              <p>آیتمی ثبت نشده است</p>
+            </div>
+          </div>
+
+          <!-- Responses Section -->
+          <div class="detail-section" v-if="inquiry.responses?.length">
+            <h2>پاسخ‌ها <span class="count-badge">{{ inquiry.responses.length }}</span></h2>
+            <div class="responses-list">
+              <div v-for="response in inquiry.responses" :key="response.id" class="response-card" :class="{ 'response-mine': isMyResponse(response) }">
+                <div class="response-header">
+                  <div class="response-header-info">
+                    <span class="response-company">{{ response.company?.name }}</span>
+                    <Tag :value="responseStatusLabels[response.status] || response.status" :severity="responseStatusSeverity[response.status] || 'info'" />
+                    <Tag v-if="isMyResponse(response)" value="پاسخ شما" severity="contrast" />
+                  </div>
+                  <div class="response-actions" v-if="isMyResponse(response)">
+                    <Button v-if="canEditResponse(response)" label="ویرایش" icon="pi pi-pencil" size="small" text @click="openEditDialog(response)" />
+                    <Button v-if="canEditResponse(response)" label="افزودن فایل" icon="pi pi-paperclip" size="small" text :loading="uploadingResponseId === response.id" @click="triggerUpload(response)" />
+                    <Button v-if="canWithdrawResponse(response)" label="انصراف" icon="pi pi-times-circle" size="small" text severity="danger" @click="confirmWithdraw(response)" />
+                  </div>
+                </div>
+                <DataTable :value="response.items || []" responsiveLayout="scroll" size="small">
+                  <Column header="محصول">
+                    <template #body="{ data }">{{ data.inquiryItem?.product?.title || '-' }}</template>
+                  </Column>
+                  <Column field="price" header="قیمت">
+                    <template #body="{ data }">{{ formatPrice(data.price) }}</template>
+                  </Column>
+                  <Column field="availableQuantity" header="تعداد موجود"></Column>
+                  <Column field="deliveryTime" header="زمان تحویل"></Column>
+                  <Column field="description" header="توضیحات"></Column>
+                </DataTable>
+                <div v-if="response.attachments?.length" class="attachments">
+                  <span class="attachments-label"><i class="pi pi-paperclip"></i> فایل‌های پیوست:</span>
+                  <div class="attachment-list">
+                    <div v-for="att in response.attachments" :key="att.id" class="attachment-chip">
+                      <a :href="attachmentUrl(att.url)" target="_blank" rel="noopener">
+                        <i class="pi pi-file"></i> {{ att.filename }}
+                      </a>
+                      <Button v-if="isMyResponse(response) && canEditResponse(response)" icon="pi pi-times" text rounded size="small" severity="danger" @click="deleteAttachment(response, att)" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </template>
-      </Card>
+        </div>
 
-      <Card class="detail-card" v-if="inquiry.statusHistory?.length">
-        <template #title>تاریخچه وضعیت</template>
-        <template #content>
-          <DataTable :value="inquiry.statusHistory" responsiveLayout="scroll" size="small">
-            <Column header="از وضعیت">
-              <template #body="{ data }">
-                <Tag :value="statusLabels[data.previousStatus]" :severity="statusSeverity[data.previousStatus]" size="small" />
-              </template>
-            </Column>
-            <Column header="به وضعیت">
-              <template #body="{ data }">
-                <Tag :value="statusLabels[data.newStatus]" :severity="statusSeverity[data.newStatus]" size="small" />
-              </template>
-            </Column>
-            <Column header="تغییر دهنده">
-              <template #body="{ data }">{{ data.changedBy?.fullName || '-' }}</template>
-            </Column>
-            <Column field="comment" header="توضیحات"></Column>
-            <Column header="تاریخ">
-              <template #body="{ data }">{{ new Date(data.createdAt).toLocaleDateString('fa-IR') }}</template>
-            </Column>
-          </DataTable>
-        </template>
-      </Card>
-    </div>
+        <!-- Right Column: Sidebar -->
+        <div class="detail-sidebar">
+          <!-- Quick Info Card -->
+          <div class="sidebar-card">
+            <h3>اطلاعات کلی</h3>
+            <div class="sidebar-info">
+              <div class="sidebar-info-item">
+                <span class="info-label">تاریخ ایجاد</span>
+                <span class="info-value">{{ formatDate(inquiry.createdAt) }}</span>
+              </div>
+              <div class="sidebar-info-item" v-if="inquiry.responseDeadline">
+                <span class="info-label">مهلت پاسخ</span>
+                <span class="info-value" :class="{ 'deadline-urgent': deadlineApproaching, 'deadline-passed': deadlinePassed }">
+                  {{ formatDateTime(inquiry.responseDeadline) }}
+                </span>
+              </div>
+              <div class="sidebar-info-item">
+                <span class="info-label">تعداد اقلام</span>
+                <span class="info-value">{{ inquiry.items?.length || 0 }}</span>
+              </div>
+              <div class="sidebar-info-item">
+                <span class="info-label">تعداد پاسخ‌ها</span>
+                <span class="info-value">{{ inquiry.responses?.length || 0 }}</span>
+              </div>
+              <div class="sidebar-info-item" v-if="inquiry.visibilityMode">
+                <span class="info-label">حالت نمایش</span>
+                <span class="info-value">{{ inquiry.visibilityMode }}</span>
+              </div>
+              <div class="sidebar-info-item" v-if="inquiry.confidential">
+                <span class="info-label">محرمانه</span>
+                <Tag value="بله" severity="danger" />
+              </div>
+            </div>
+          </div>
 
+          <!-- Status History Card -->
+          <div class="sidebar-card" v-if="inquiry.statusHistory?.length">
+            <h3>تاریخچه وضعیت</h3>
+            <div class="status-timeline">
+              <div v-for="entry in inquiry.statusHistory" :key="entry.id" class="timeline-item">
+                <div class="timeline-dot" :class="'dot-' + (statusSeverity[entry.newStatus] || 'secondary')"></div>
+                <div class="timeline-content">
+                  <div class="timeline-transition">
+                    <Tag :value="statusLabels[entry.previousStatus]" :severity="statusSeverity[entry.previousStatus]" size="small" />
+                    <i class="pi pi-arrow-left"></i>
+                    <Tag :value="statusLabels[entry.newStatus]" :severity="statusSeverity[entry.newStatus]" size="small" />
+                  </div>
+                  <span class="timeline-user">{{ entry.changedBy?.fullName || '-' }}</span>
+                  <span class="timeline-date">{{ formatDate(entry.createdAt) }}</span>
+                  <p v-if="entry.comment" class="timeline-comment">{{ entry.comment }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Response Dialog -->
     <Dialog v-model:visible="showResponseDialog" :header="editingResponseId ? 'ویرایش پاسخ' : 'ارسال پاسخ'" :modal="true" :style="{ width: '700px' }">
       <div v-for="(item, index) in responseItems" :key="index" class="response-item-form">
-        <h4 class="mb-2">{{ item.productTitle }}</h4>
-        <div class="grid grid-cols-2 gap-4">
+        <h4 class="response-item-title">{{ item.productTitle }}</h4>
+        <div class="response-item-grid">
           <div class="field">
             <label>قیمت (ریال)</label>
             <InputNumber v-model="item.price" :min="0" class="w-full" />
@@ -400,7 +478,7 @@ function formatPrice(price) {
           </div>
           <div class="field">
             <label>توضیحات</label>
-            <InputText v-model="item.description" placeholder="توضیحات پاسخ" class="w-full" />
+            <Textarea v-model="item.description" placeholder="توضیحات پاسخ" rows="2" class="w-full" />
           </div>
         </div>
       </div>
@@ -415,63 +493,208 @@ function formatPrice(price) {
 <style scoped>
 .inquiry-detail-page {
   direction: rtl;
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
+/* ── Page Header ────────────────────────────────────── */
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.page-header h1 {
+.page-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.page-title-group h1 {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
-  display: inline;
-  margin-inline-start: 0.5rem;
+  color: var(--text-color);
+  line-height: 1.4;
 }
 
+.page-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.meta-company {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--text-color-secondary);
+}
+
+.page-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ── Deadline Banner ────────────────────────────────── */
+.deadline-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  background: var(--surface-hover);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.deadline-banner.deadline-urgent {
+  background: color-mix(in srgb, var(--ds-color-warning) 10%, transparent);
+  border-color: var(--ds-color-warning);
+  color: var(--ds-color-warning);
+}
+
+.deadline-banner.deadline-passed {
+  background: color-mix(in srgb, var(--ds-color-danger) 10%, transparent);
+  border-color: var(--ds-color-danger);
+  color: var(--ds-color-danger);
+}
+
+/* ── Main Grid ──────────────────────────────────────── */
 .detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.detail-main {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.info-item {
+.detail-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1.5rem;
 }
 
-.info-label {
-  font-size: 0.875rem;
+/* ── Sections ───────────────────────────────────────── */
+.detail-section {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--ds-shadow-sm);
+}
+
+.detail-section h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
+  background: var(--surface-hover);
+  border-radius: var(--ds-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--text-color-secondary);
 }
 
-.info-value {
+.description-text {
+  color: var(--text-color);
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ── Items List ─────────────────────────────────────── */
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item-card {
+  padding: 1rem;
+  background: var(--surface-hover);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.item-product {
   font-weight: 600;
+  color: var(--text-color);
 }
 
-.text-danger {
-  color: var(--p-red-500);
+.item-quantity {
+  font-size: 0.875rem;
+  color: var(--text-color-secondary);
+  font-weight: 500;
 }
 
-.ms-1 {
-  margin-inline-start: 0.5rem;
+.item-description {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+}
+
+.empty-section {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-color-secondary);
+}
+
+.empty-section p {
+  margin: 0;
+}
+
+/* ── Responses ──────────────────────────────────────── */
+.responses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .response-card {
   border: 1px solid var(--surface-border);
   border-radius: var(--content-border-radius);
   padding: 1rem;
-  margin-bottom: 1rem;
+  background: var(--surface-card);
+}
+
+.response-card.response-mine {
+  border-color: var(--ds-color-primary);
+  background: color-mix(in srgb, var(--ds-color-primary) 3%, transparent);
 }
 
 .response-header {
@@ -490,19 +713,18 @@ function formatPrice(price) {
   flex-wrap: wrap;
 }
 
+.response-company {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
 .response-actions {
   display: flex;
   gap: 0.25rem;
   flex-wrap: wrap;
 }
 
-.response-item-form {
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
+/* ── Attachments ────────────────────────────────────── */
 .attachments {
   margin-top: 1rem;
   padding-top: 0.75rem;
@@ -526,36 +748,225 @@ function formatPrice(price) {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.375rem 0.625rem;
   border: 1px solid var(--surface-border);
   border-radius: var(--content-border-radius);
-  background: var(--surface-ground);
+  background: var(--surface-hover);
 }
 
 .attachment-chip a {
-  color: var(--primary-color);
+  color: var(--ds-color-primary);
   text-decoration: none;
   font-size: 0.85rem;
 }
 
+.attachment-chip a:hover {
+  text-decoration: underline;
+}
+
+/* ── Sidebar ────────────────────────────────────────── */
+.sidebar-card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  padding: 1.25rem;
+  box-shadow: var(--ds-shadow-sm);
+}
+
+.sidebar-card h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+  color: var(--text-color);
+}
+
+.sidebar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sidebar-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar-info-item .info-label {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+}
+
+.sidebar-info-item .info-value {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* ── Status Timeline ────────────────────────────────── */
+.status-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.timeline-item:last-child {
+  border-bottom: none;
+}
+
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 0.375rem;
+  flex-shrink: 0;
+}
+
+.timeline-dot.dot-secondary { background: var(--text-color-secondary); }
+.timeline-dot.dot-info { background: var(--ds-color-info); }
+.timeline-dot.dot-success { background: var(--ds-color-success); }
+.timeline-dot.dot-warn { background: var(--ds-color-warning); }
+.timeline-dot.dot-danger { background: var(--ds-color-danger); }
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.timeline-transition {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.timeline-user {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+}
+
+.timeline-comment {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  line-height: 1.4;
+}
+
+/* ── Response Dialog ────────────────────────────────── */
+.response-item-form {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.response-item-title {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.response-item-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Skeleton Loading ───────────────────────────────── */
+.detail-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  padding: 1.5rem;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, var(--surface-hover) 25%, var(--surface-border) 50%, var(--surface-hover) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: var(--ds-radius-sm);
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 1.5rem;
+}
+
+.skeleton-subtitle {
+  width: 40%;
+  height: 1rem;
+}
+
+.skeleton-heading {
+  width: 30%;
+  height: 1rem;
+  margin-bottom: 1rem;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.skeleton-field {
+  height: 2.5rem;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Error State ────────────────────────────────────── */
 .state-block {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: 3rem 1rem;
+  padding: 3rem 1.5rem;
   text-align: center;
 }
 
 .state-icon {
   font-size: 2.5rem;
-  color: var(--text-color-secondary);
   margin-bottom: 0.25rem;
+}
+
+.state-icon.error {
+  color: var(--ds-color-danger);
 }
 
 .state-block h3 {
   margin: 0;
   font-size: 1.05rem;
+  color: var(--text-color);
 }
 
 .state-block p {
@@ -565,8 +976,52 @@ function formatPrice(price) {
   max-width: 24rem;
 }
 
-@media (max-width: 640px) {
-  .info-grid {
+.state-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ── Deadline Classes ───────────────────────────────── */
+.deadline-urgent {
+  color: var(--ds-color-warning) !important;
+  font-weight: 600;
+}
+
+.deadline-passed {
+  color: var(--ds-color-danger) !important;
+  font-weight: 600;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .inquiry-detail-page {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header-left {
+    flex-direction: column;
+  }
+
+  .response-item-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-grid {
     grid-template-columns: 1fr;
   }
 }

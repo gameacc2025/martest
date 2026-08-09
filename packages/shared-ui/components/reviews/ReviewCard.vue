@@ -205,11 +205,11 @@ const openImage = (imageUrl) => {
   align-items: center;
   gap: 0.25rem;
   font-size: 0.75rem;
-  color: var(--p-green-600);
+  color: var(--ds-color-success);
 }
 
 .review-verified i {
-  color: var(--p-green-500);
+  color: var(--ds-color-success);
   font-size: 0.875rem;
 }
 
@@ -260,11 +260,11 @@ const openImage = (imageUrl) => {
 }
 
 .pros-section h4 {
-  color: var(--p-green-600);
+  color: var(--ds-color-success);
 }
 
 .cons-section h4 {
-  color: var(--p-red-600);
+  color: var(--ds-color-danger);
 }
 
 .pros-section ul,
@@ -277,11 +277,11 @@ const openImage = (imageUrl) => {
 }
 
 .pros-section li {
-  color: var(--p-green-500);
+  color: var(--ds-color-success);
 }
 
 .cons-section li {
-  color: var(--p-red-500);
+  color: var(--ds-color-danger);
 }
 
 .review-actions {
@@ -295,7 +295,7 @@ const openImage = (imageUrl) => {
 }
 
 .review-actions :deep(.is-active) {
-  color: var(--p-blue-500);
+  color: var(--ds-color-primary);
 }
 
 .review-report-btn {

@@ -16,6 +16,7 @@ import TabList from 'primevue/tablist'
 import TabPanel from 'primevue/tabpanel'
 import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
+import ProgressSpinner from 'primevue/progressspinner'
 
 const router = useRouter()
 const toast = useToast()
@@ -69,6 +70,23 @@ function statusLabel(s) { return statusLabels[s] || s || '—' }
 function formatDate(v) {
   if (!v) return '—'
   try { return new Date(v).toLocaleDateString('fa-IR') } catch { return '—' }
+}
+
+function isActionable(inquiry) {
+  return ['SUBMITTED', 'OPEN'].includes(inquiry.status)
+}
+
+function isDeadlineApproaching(inquiry) {
+  if (!inquiry.responseDeadline) return false
+  const deadline = new Date(inquiry.responseDeadline)
+  const now = new Date()
+  const daysLeft = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24))
+  return daysLeft <= 3 && daysLeft >= 0
+}
+
+function isDeadlinePassed(inquiry) {
+  if (!inquiry.responseDeadline) return false
+  return new Date(inquiry.responseDeadline) < new Date()
 }
 
 onMounted(() => fetchInquiries())
@@ -140,8 +158,7 @@ function createInquiry() {
       <Toolbar class="list-toolbar">
         <template #start>
           <div class="toolbar-filters">
-            <span class="p-input-icon-right search-wrap">
-              <i class="pi pi-search" />
+            <span class="search-wrap">
               <InputText
                 v-model="searchQuery"
                 placeholder="جستجو در عنوان/توضیحات..."
@@ -171,6 +188,7 @@ function createInquiry() {
         <TabPanels>
           <TabPanel v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
             <DataTable
+              v-if="inquiries.length > 0 || loading"
               :value="inquiries"
               :loading="loading"
               lazy
@@ -185,32 +203,57 @@ function createInquiry() {
               @sort="onSort"
               responsiveLayout="scroll"
               dataKey="id"
+              :rowHover="true"
             >
               <Column field="id" header="شناسه" sortable style="width: 5rem"></Column>
-              <Column field="title" header="عنوان" sortable></Column>
+              <Column field="title" header="عنوان" sortable>
+                <template #body="{ data }">
+                  <div class="inquiry-title-cell">
+                    <span class="inquiry-title" :class="{ 'actionable': isActionable(data) }">
+                      {{ data.title }}
+                    </span>
+                    <span v-if="data.description" class="inquiry-desc">
+                      {{ data.description.substring(0, 60) }}{{ data.description.length > 60 ? '...' : '' }}
+                    </span>
+                  </div>
+                </template>
+              </Column>
               <Column header="شرکت">
                 <template #body="{ data }">{{ data.company?.name || '—' }}</template>
               </Column>
-              <Column header="اولویت">
+              <Column header="اولویت" style="width: 80px">
                 <template #body="{ data }">
-                  <Tag v-if="data.priority" :severity="PRIORITY_SEVERITY[data.priority] || 'secondary'">
-                    {{ PRIORITY_LABELS[data.priority] || data.priority }}
-                  </Tag>
-                  <span v-else class="muted">—</span>
+                  <Tag v-if="data.priority && data.priority !== 'NORMAL'" :severity="PRIORITY_SEVERITY[data.priority] || 'secondary'" :value="PRIORITY_LABELS[data.priority] || data.priority" />
+                  <span v-else class="muted">عادی</span>
                 </template>
               </Column>
-              <Column field="status" header="وضعیت" sortable>
+              <Column field="status" header="وضعیت" sortable style="width: 120px">
                 <template #body="{ data }">
                   <Tag :value="statusLabel(data.status)" :severity="statusSeverity[data.status]" />
                 </template>
               </Column>
               <Column header="اقلام" style="width: 5rem">
-                <template #body="{ data }">{{ data._count?.items ?? data.items?.length ?? 0 }}</template>
+                <template #body="{ data }">
+                  <span class="count-badge">{{ data._count?.items ?? data.items?.length ?? 0 }}</span>
+                </template>
               </Column>
               <Column header="پاسخ‌ها" style="width: 5rem">
-                <template #body="{ data }">{{ data._count?.responses ?? data.responses?.length ?? 0 }}</template>
+                <template #body="{ data }">
+                  <span class="count-badge">{{ data._count?.responses ?? data.responses?.length ?? 0 }}</span>
+                </template>
               </Column>
-              <Column field="createdAt" header="تاریخ ایجاد" sortable>
+              <Column field="responseDeadline" header="ددلاین" sortable style="width: 100px">
+                <template #body="{ data }">
+                  <span v-if="data.responseDeadline" :class="{
+                    'deadline-urgent': isDeadlineApproaching(data),
+                    'deadline-passed': isDeadlinePassed(data)
+                  }">
+                    {{ formatDate(data.responseDeadline) }}
+                  </span>
+                  <span v-else class="muted">—</span>
+                </template>
+              </Column>
+              <Column field="createdAt" header="تاریخ ایجاد" sortable style="width: 100px">
                 <template #body="{ data }">{{ formatDate(data.createdAt) }}</template>
               </Column>
               <Column header="عملیات" style="width: 5rem">
@@ -221,14 +264,23 @@ function createInquiry() {
               </Column>
 
               <template #empty>
-                <div class="state-block">
+                <div v-if="!loading" class="state-block">
                   <i class="pi pi-inbox state-icon"></i>
-                  <h3>استعلامی یافت نشد</h3>
-                  <p>هنوز استعلامی ثبت نشده است یا با فیلترهای فعلی نتیجه‌ای وجود ندارد.</p>
-                  <Button v-if="canCreate" label="ایجاد استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
+                  <h3 v-if="searchQuery || statusFilter">نتیجه‌ای یافت نشد</h3>
+                  <h3 v-else>استعلامی ثبت نشده</h3>
+                  <p v-if="searchQuery || statusFilter">فیلترها را تغییر دهید یا جستجو را پاک کنید.</p>
+                  <p v-else>هنوز استعلامی ایجاد نشده است.</p>
+                  <Button v-if="canCreate && !searchQuery && !statusFilter" label="ایجاد استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
                 </div>
               </template>
             </DataTable>
+
+            <div v-else-if="!loading" class="state-block">
+              <i class="pi pi-inbox state-icon"></i>
+              <h3>استعلامی ثبت نشده</h3>
+              <p>هنوز استعلامی ایجاد نشده است.</p>
+              <Button v-if="canCreate" label="ایجاد استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
+            </div>
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -239,36 +291,176 @@ function createInquiry() {
 <style scoped>
 .inquiry-list-page {
   direction: rtl;
+  padding: 1.5rem;
 }
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
 .page-header h1 {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+  color: var(--text-color);
+}
+
+.page-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  box-shadow: var(--ds-shadow-sm);
+  overflow: hidden;
+}
+
+:deep(.p-toolbar) {
+  background: var(--surface-card);
+  border: none;
+  border-bottom: 1px solid var(--surface-border);
+  border-radius: 0;
+  padding: 1rem 1.25rem;
+  gap: 0.75rem;
 }
 
 .toolbar-filters {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.search-wrap {
+  min-width: 240px;
 }
 
 .status-filter {
   min-width: 150px;
 }
 
+:deep(.p-tabs) {
+  background: transparent;
+}
+
+:deep(.p-tablist) {
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--surface-border);
+  padding: 0 1.25rem;
+}
+
+:deep(.p-tab) {
+  padding: 0.875rem 1.25rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+:deep(.p-tab.p-tab-active) {
+  color: var(--ds-color-primary);
+  border-color: var(--ds-color-primary);
+}
+
+:deep(.p-tabpanels) {
+  background: transparent;
+  padding: 0;
+}
+
+:deep(.p-tabpanel) {
+  padding: 0;
+}
+
+:deep(.p-datatable) {
+  background: transparent;
+  border: none;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--surface-hover);
+  color: var(--text-color-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background 0.15s ease;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background: var(--surface-hover);
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-color);
+  vertical-align: middle;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:last-child > td) {
+  border-bottom: none;
+}
+
+.inquiry-title-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.inquiry-title {
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+.inquiry-title.actionable {
+  color: var(--ds-color-primary);
+}
+
+.inquiry-desc {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  line-height: 1.4;
+}
+
 .muted {
   color: var(--text-color-secondary);
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.375rem;
+  background: var(--surface-hover);
+  border-radius: var(--ds-radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-color-secondary);
+}
+
+.deadline-urgent {
+  color: var(--ds-color-warning);
+  font-weight: 600;
+}
+
+.deadline-passed {
+  color: var(--ds-color-danger);
+  font-weight: 600;
 }
 
 .state-block {
@@ -276,7 +468,7 @@ function createInquiry() {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  padding: 2.5rem 1rem;
+  padding: 3rem 1.5rem;
   text-align: center;
 }
 
@@ -284,11 +476,13 @@ function createInquiry() {
   font-size: 2.5rem;
   color: var(--text-color-secondary);
   margin-bottom: 0.25rem;
+  opacity: 0.5;
 }
 
 .state-block h3 {
   margin: 0;
   font-size: 1.05rem;
+  color: var(--text-color);
 }
 
 .state-block p {
@@ -298,13 +492,35 @@ function createInquiry() {
   max-width: 24rem;
 }
 
-@media (max-width: 640px) {
+:deep(.p-paginator) {
+  background: var(--surface-card);
+  border-top: 1px solid var(--surface-border);
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+}
+
+@media (max-width: 767px) {
+  .inquiry-list-page {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .toolbar-filters {
     width: 100%;
   }
-  .toolbar-filters .search-wrap,
+
+  .search-wrap,
   .status-filter {
     width: 100%;
+  }
+
+  :deep(.p-datatable .p-datatable-thead > tr > th),
+  :deep(.p-datatable .p-datatable-tbody > tr > td) {
+    padding: 0.625rem 0.75rem;
   }
 }
 </style>

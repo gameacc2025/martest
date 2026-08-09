@@ -1,5 +1,26 @@
 <template>
-  <div class="product-card">
+  <!-- Skeleton variant -->
+  <div v-if="skeleton" class="product-card product-card--skeleton">
+    <div class="product-card-skeleton">
+      <div class="sk-image"></div>
+      <div class="sk-body">
+        <div class="sk-line sk-line--lg"></div>
+        <div class="sk-line sk-line--sm"></div>
+        <div class="sk-line sk-line--md"></div>
+        <div class="sk-price-row">
+          <div class="sk-price"></div>
+          <div class="sk-price sk-price--old"></div>
+        </div>
+        <div class="sk-actions">
+          <div class="sk-btn"></div>
+          <div class="sk-btn"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Normal variant -->
+  <div v-else class="product-card">
     <Card class="product-card-inner">
       <template #header>
         <div class="product-media">
@@ -86,9 +107,10 @@ import Badge from 'primevue/badge'
 import Rating from 'primevue/rating'
 
 const props = defineProps({
+  skeleton: { type: Boolean, default: false },
   product: {
     type: Object,
-    required: true,
+    required: false,
     default: () => ({
       id: '',
       name: '',
@@ -175,7 +197,7 @@ const formatPrice = (price) => {
 }
 
 .product-wishlist :deep(.is-active) {
-  color: var(--p-red-500);
+  color: var(--ds-color-danger);
 }
 
 .discount-badge {
@@ -228,7 +250,7 @@ const formatPrice = (price) => {
 }
 
 .final-price {
-  color: var(--p-red-500);
+  color: var(--ds-color-danger);
   font-weight: 700;
   font-size: 1.125rem;
 }
@@ -259,5 +281,106 @@ const formatPrice = (price) => {
 
 .product-action {
   flex: 1;
+}
+
+/* Skeleton */
+.product-card--skeleton {
+  height: 100%;
+}
+.product-card-skeleton {
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.sk-image {
+  height: 12rem;
+  background: linear-gradient(
+    90deg,
+    var(--ds-color-surface-alt) 25%,
+    var(--ds-color-surface-hover) 37%,
+    var(--ds-color-surface-alt) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease infinite;
+}
+.sk-body {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+.sk-line {
+  height: 0.875rem;
+  border-radius: var(--ds-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--ds-color-surface-alt) 25%,
+    var(--ds-color-surface-hover) 37%,
+    var(--ds-color-surface-alt) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease infinite;
+}
+.sk-line--lg { width: 80%; height: 1rem; }
+.sk-line--md { width: 60%; }
+.sk-line--sm { width: 40%; height: 0.75rem; }
+.sk-price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.sk-price {
+  width: 5rem;
+  height: 1.125rem;
+  border-radius: var(--ds-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--ds-color-surface-alt) 25%,
+    var(--ds-color-surface-hover) 37%,
+    var(--ds-color-surface-alt) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease infinite;
+}
+.sk-price--old {
+  width: 3rem;
+  height: 0.875rem;
+}
+.sk-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ds-color-border);
+}
+.sk-btn {
+  flex: 1;
+  height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--ds-color-surface-alt) 25%,
+    var(--ds-color-surface-hover) 37%,
+    var(--ds-color-surface-alt) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease infinite;
+}
+@keyframes sk-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-image,
+  .sk-line,
+  .sk-price,
+  .sk-btn {
+    animation: none;
+  }
 }
 </style>

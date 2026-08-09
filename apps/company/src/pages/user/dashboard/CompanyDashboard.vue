@@ -1,40 +1,14 @@
 <template>
   <div class="company-dashboard">
-    <!-- Page header (simple, uniform with other dashboard pages) -->
+    <!-- Page header -->
     <div class="page-header">
       <h1>داشبورد شرکت</h1>
       <div class="page-header-actions">
-        <router-link :to="{ name: 'my-products' }">
+        <router-link :to="{ name: 'manage-product-create' }">
           <Button label="افزودن محصول" icon="pi pi-plus" />
         </router-link>
       </div>
     </div>
-
-    <!-- Company summary -->
-    <DashboardPanel title="خلاصه شرکت" icon="pi pi-building">
-      <template #actions>
-        <router-link :to="{ name: 'company-settings' }" class="cd-link">ویرایش پروفایل</router-link>
-      </template>
-      <div class="cd-summary">
-        <span class="cd-summary-logo">
-          <img v-if="companyLogo" :src="companyLogo" :alt="companyName" />
-          <i v-else class="pi pi-building"></i>
-        </span>
-        <div class="cd-summary-main">
-          <h3 class="cd-summary-name">{{ companyName || '—' }}</h3>
-          <p v-if="company?.nameEn" class="cd-summary-sub">{{ company.nameEn }}</p>
-          <div class="cd-summary-tags">
-            <span class="cd-tag" :class="company?.status === 'ACTIVE' ? 'cd-tag--success' : 'cd-tag--warning'">
-              <i class="pi pi-circle-fill"></i>
-              {{ companyStatusLabel }}
-            </span>
-            <span v-if="company?.isVerified" class="cd-tag cd-tag--info">
-              <i class="pi pi-verified"></i> تأیید شده
-            </span>
-          </div>
-        </div>
-      </div>
-    </DashboardPanel>
 
     <!-- Stats error (non-blocking) -->
     <DashboardPanel v-if="statsError" title="آمار داشبورد" icon="pi pi-exclamation-triangle">
@@ -49,18 +23,23 @@
       />
     </DashboardPanel>
 
-    <!-- Alerts / Warnings -->
-    <DashboardPanel v-if="alerts.length" title="هشدارها" icon="pi pi-exclamation-triangle">
-      <div class="cd-alerts">
-        <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
+    <!-- 1. Alerts — actionable items first (skill: "pending actions most visible") -->
+    <div v-if="alerts.length" class="cd-alerts">
+      <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
+        <div class="cd-alert-icon">
           <i :class="alert.icon"></i>
-          <span>{{ alert.message }}</span>
-          <router-link v-if="alert.to" :to="alert.to" class="cd-alert-link">مشاهده</router-link>
         </div>
+        <div class="cd-alert-body">
+          <span class="cd-alert-message">{{ alert.message }}</span>
+        </div>
+        <router-link v-if="alert.to" :to="alert.to" class="cd-alert-action">
+          مشاهده
+          <i class="pi pi-angle-left"></i>
+        </router-link>
       </div>
-    </DashboardPanel>
+    </div>
 
-    <!-- KPI cards -->
+    <!-- 2. KPI cards — business health metrics -->
     <div class="cd-kpis">
       <KpiCard
         label="محصولات منتشر شده"
@@ -68,7 +47,15 @@
         icon="pi pi-check-circle"
         tone="success"
         :loading="productsLoading"
-        :to="{ name: 'company-products' }"
+        :to="{ name: 'manage-products' }"
+      />
+      <KpiCard
+        label="در انتظار بررسی"
+        :value="pendingReviewProducts"
+        icon="pi pi-clock"
+        tone="warning"
+        :loading="productsLoading"
+        :to="{ name: 'manage-products' }"
       />
       <KpiCard
         label="استعلام‌های دریافتی"
@@ -81,30 +68,71 @@
       <KpiCard
         label="پاسخ‌های در انتظار"
         :value="pendingResponses"
-        icon="pi pi-clock"
-        tone="warning"
+        icon="pi pi-reply"
+        tone="danger"
         :loading="statsLoading"
         :to="{ name: 'company-inquiries' }"
       />
-      <KpiCard
-        label="محصولات فعال"
-        :value="activeProducts"
-        icon="pi pi-box"
-        tone="info"
-        :loading="productsLoading"
-        :to="{ name: 'company-products' }"
-      />
     </div>
 
-    <!-- Inquiry pipeline -->
+    <!-- 3. Inquiry pipeline — operational flow -->
     <DashboardPanel title="جریان استعلام‌ها" icon="pi pi-sitemap">
       <InquiryPipeline :stages="pipelineStages" :loading="statsLoading" />
     </DashboardPanel>
 
-    <!-- Two column: recent products + score -->
+    <!-- 4. Activity: deadlines + recent activities -->
+    <div class="cd-grid cd-grid--1-1">
+      <DashboardPanel title="مهلت‌های پیش‌رو" icon="pi pi-calendar-clock" :to="{ name: 'company-inquiries' }">
+        <EntityList
+          :items="upcomingDeadlines"
+          :loading="inquiriesLoading"
+          empty-message="مهلت نزدیکی وجود ندارد."
+        />
+      </DashboardPanel>
+
+      <DashboardPanel title="فعالیت‌های اخیر" icon="pi pi-history">
+        <EntityList :items="recentActivities" :loading="statsLoading" empty-message="فعالیتی ثبت نشده است." />
+      </DashboardPanel>
+    </div>
+
+    <!-- 5. Secondary: company summary + score -->
     <div class="cd-grid cd-grid--2-1">
-      <DashboardPanel title="محصولات اخیر" icon="pi pi-box" :to="{ name: 'company-products' }">
-        <EntityList :items="recentProducts" :loading="productsLoading" empty-message="هنوز محصولی ثبت نشده است." />
+      <DashboardPanel title="خلاصه شرکت" icon="pi pi-building">
+        <template #actions>
+          <router-link :to="{ name: 'company-settings' }" class="cd-link">ویرایش پروفایل</router-link>
+        </template>
+        <!-- Loading skeleton -->
+        <div v-if="companyLoading" class="cd-summary">
+          <span class="cd-summary-logo cd-skeleton"></span>
+          <div class="cd-summary-main">
+            <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--lg"></span>
+            <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--sm"></span>
+            <div class="cd-skeleton-tags">
+              <span class="cd-skeleton cd-skeleton-tag"></span>
+              <span class="cd-skeleton cd-skeleton-tag"></span>
+            </div>
+          </div>
+        </div>
+        <!-- Loaded state -->
+        <div v-else class="cd-summary">
+          <span class="cd-summary-logo">
+            <img v-if="companyLogo" :src="companyLogo" :alt="companyName" />
+            <i v-else class="pi pi-building"></i>
+          </span>
+          <div class="cd-summary-main">
+            <h3 class="cd-summary-name">{{ companyName || '—' }}</h3>
+            <p v-if="company?.nameEn" class="cd-summary-sub">{{ company.nameEn }}</p>
+            <div class="cd-summary-tags">
+              <span class="cd-tag" :class="company?.status === 'ACTIVE' ? 'cd-tag--success' : 'cd-tag--warning'">
+                <i class="pi pi-circle-fill"></i>
+                {{ companyStatusLabel }}
+              </span>
+              <span v-if="company?.isVerified" class="cd-tag cd-tag--info">
+                <i class="pi pi-verified"></i> تأیید شده
+              </span>
+            </div>
+          </div>
+        </div>
       </DashboardPanel>
 
       <DashboardPanel title="امتیاز و رتبه شرکت" icon="pi pi-star">
@@ -120,22 +148,12 @@
       </DashboardPanel>
     </div>
 
-    <!-- Two column: recent activities + upcoming deadlines -->
-    <div class="cd-grid cd-grid--1-1">
-      <DashboardPanel title="فعالیت‌های اخیر" icon="pi pi-history">
-        <EntityList :items="recentActivities" :loading="statsLoading" empty-message="فعالیتی ثبت نشده است." />
-      </DashboardPanel>
+    <!-- 6. Recent products -->
+    <DashboardPanel title="محصولات اخیر" icon="pi pi-box" :to="{ name: 'manage-products' }">
+      <EntityList :items="recentProducts" :loading="productsLoading" empty-message="هنوز محصولی ثبت نشده است." />
+    </DashboardPanel>
 
-      <DashboardPanel title="مهلت‌های پیش‌رو" icon="pi pi-calendar-clock" :to="{ name: 'company-inquiries' }">
-        <EntityList
-          :items="upcomingDeadlines"
-          :loading="inquiriesLoading"
-          empty-message="مهلت نزدیکی وجود ندارد."
-        />
-      </DashboardPanel>
-    </div>
-
-    <!-- Quick actions -->
+    <!-- 7. Quick actions -->
     <DashboardPanel title="دسترسی سریع" icon="pi pi-bolt">
       <QuickActions :actions="quickActions" />
     </DashboardPanel>
@@ -186,6 +204,8 @@ const productsLoading = ref(true)
 const openInquiries = ref([])
 const inquiriesLoading = ref(true)
 
+const companyLoading = ref(true)
+
 // ── Identity ────────────────────────────────────────────────
 const company = computed(() => auth.company || null)
 
@@ -201,8 +221,8 @@ const pendingResponses = computed(() => stats.value?.responses?.awaiting ?? 0)
 const publishedProducts = computed(
   () => products.value.filter((p) => p.status === 'PUBLISHED' || p.status === 'APPROVED').length
 )
-const activeProducts = computed(
-  () => products.value.filter((p) => p.status !== 'ARCHIVED' && p.status !== 'REJECTED').length
+const pendingReviewProducts = computed(
+  () => products.value.filter((p) => p.status === 'PENDING_REVIEW').length
 )
 
 // ── Inquiry pipeline (real received.byStatus) ───────────────
@@ -460,6 +480,19 @@ onMounted(() => {
   fetchStats()
   fetchProducts()
   fetchOpenInquiries()
+  // Company data comes from auth store — mark loaded once available
+  if (company.value) {
+    companyLoading.value = false
+  } else {
+    const unwatch = setInterval(() => {
+      if (company.value) {
+        companyLoading.value = false
+        clearInterval(unwatch)
+      }
+    }, 50)
+    // Safety: stop checking after 3s even if no company data
+    setTimeout(() => { companyLoading.value = false }, 3000)
+  }
 })
 </script>
 
@@ -471,7 +504,7 @@ onMounted(() => {
   gap: var(--ds-space-6);
 }
 
-/* Simple page header — uniform with other dashboard pages (Products, etc.). */
+/* Page header */
 .page-header {
   display: flex;
   align-items: center;
@@ -480,8 +513,8 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 .page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: var(--ds-font-size-2xl);
+  font-weight: var(--ds-font-weight-bold);
   margin: 0;
 }
 .page-header-actions {
@@ -497,7 +530,77 @@ onMounted(() => {
 }
 .cd-link:hover { text-decoration: underline; }
 
-/* Company summary */
+/* ── Alerts — card-style with icon + action (skill: "helpful message + action") */
+.cd-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+.cd-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-font-size-sm);
+  border: 1px solid transparent;
+}
+.cd-alert-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+  flex-shrink: 0;
+}
+.cd-alert-icon i { font-size: 1.1rem; }
+.cd-alert-body { flex: 1; min-width: 0; }
+.cd-alert-message { font-weight: var(--ds-font-weight-medium); }
+.cd-alert-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  text-decoration: none;
+  color: inherit;
+  white-space: nowrap;
+  transition: opacity var(--ds-transition);
+}
+.cd-alert-action:hover { opacity: 0.8; }
+.cd-alert--warning {
+  background: var(--ds-color-warning-soft);
+  color: var(--ds-color-warning);
+  border-color: var(--ds-color-warning);
+  border-opacity: 0.2;
+}
+.cd-alert--warning .cd-alert-icon { background: var(--ds-color-warning); color: var(--ds-color-surface); }
+.cd-alert--warning .cd-alert-action { background: var(--ds-color-warning); color: var(--ds-color-surface); }
+.cd-alert--danger {
+  background: var(--ds-color-danger-soft);
+  color: var(--ds-color-danger);
+  border-color: var(--ds-color-danger);
+  border-opacity: 0.2;
+}
+.cd-alert--danger .cd-alert-icon { background: var(--ds-color-danger); color: var(--ds-color-surface); }
+.cd-alert--danger .cd-alert-action { background: var(--ds-color-danger); color: var(--ds-color-surface); }
+
+/* ── KPI grid */
+.cd-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--ds-space-4);
+}
+
+/* ── Two-column grids */
+.cd-grid { display: grid; gap: var(--ds-space-6); }
+.cd-grid--2-1 { grid-template-columns: 2fr 1fr; }
+.cd-grid--1-1 { grid-template-columns: 1fr 1fr; }
+
+/* ── Company summary */
 .cd-summary {
   display: flex;
   align-items: center;
@@ -548,42 +651,23 @@ onMounted(() => {
 .cd-tag--warning { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
 .cd-tag--info { background: var(--ds-color-info-soft); color: var(--ds-color-info); }
 
-/* KPI grid */
-.cd-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--ds-space-4);
+/* ── Skeleton loading for company summary */
+.cd-skeleton {
+  background: var(--ds-color-surface-alt);
+  border-radius: var(--ds-radius-sm);
+  animation: cd-pulse 1.2s ease-in-out infinite;
+}
+.cd-skeleton-line { display: block; height: 1rem; margin-bottom: var(--ds-space-2); }
+.cd-skeleton-line--lg { width: 10rem; }
+.cd-skeleton-line--sm { width: 6rem; margin-bottom: 0; }
+.cd-skeleton-tags { display: flex; gap: var(--ds-space-2); margin-top: var(--ds-space-2); }
+.cd-skeleton-tag { width: 4rem; height: 1.25rem; border-radius: var(--ds-radius-pill); }
+@keyframes cd-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
-/* Two-column grids */
-.cd-grid { display: grid; gap: var(--ds-space-6); }
-.cd-grid--2-1 { grid-template-columns: 2fr 1fr; }
-.cd-grid--1-1 { grid-template-columns: 1fr 1fr; }
-
-/* Alerts */
-.cd-alerts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-2);
-}
-.cd-alert {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-  padding: var(--ds-space-3) var(--ds-space-4);
-  border-radius: var(--ds-radius-md);
-  font-size: var(--ds-font-size-sm);
-}
-.cd-alert i { font-size: 1.1rem; flex-shrink: 0; }
-.cd-alert--warning { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
-.cd-alert--danger { background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
-.cd-alert-link {
-  margin-inline-start: auto;
-  color: inherit;
-  font-weight: var(--ds-font-weight-semibold);
-  text-decoration: underline;
-}
-
+/* ── Responsive */
 @media (max-width: 1200px) {
   .cd-kpis { grid-template-columns: repeat(2, 1fr); }
 }
@@ -593,5 +677,7 @@ onMounted(() => {
 }
 @media (max-width: 575px) {
   .cd-kpis { grid-template-columns: 1fr; }
+  .cd-alert { flex-wrap: wrap; }
+  .cd-alert-action { width: 100%; justify-content: center; margin-top: var(--ds-space-1); }
 }
 </style>

@@ -1,22 +1,22 @@
 <template>
   <div class="products-page">
-    <div class="container mx-auto px-4 py-8">
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold">محصولات</h1>
-        <Breadcrumb :home="home" :model="items" class="mt-2" />
+    <div class="products-container">
+      <div class="products-head">
+        <h1 class="products-title">محصولات</h1>
+        <Breadcrumb :home="home" :model="items" class="products-breadcrumb" />
       </div>
 
       <!-- Search and Filters -->
-      <div class="mb-8">
+      <div class="products-filters">
         <Card>
           <template #content>
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-              <div class="lg:col-span-3">
+            <div class="filters-row">
+              <div class="filters-search">
                 <div class="p-inputgroup">
                   <InputText
                     v-model="searchQuery"
                     placeholder="جستجوی محصولات..."
-                    class="flex-1"
+                    class="filters-search-input"
                     @keyup.enter="searchProducts"
                   />
                   <Button
@@ -26,7 +26,7 @@
                   />
                 </div>
               </div>
-              <div>
+              <div class="filters-category">
                 <Dropdown
                   v-model="categoryFilter"
                   :options="categoryOptions"
@@ -39,7 +39,7 @@
               </div>
             </div>
 
-            <div class="mt-4 flex gap-2 flex-wrap">
+            <div class="filters-quick">
               <Button
                 label="همه"
                 class="p-button-outlined"
@@ -70,9 +70,9 @@
       </div>
 
       <!-- Featured Products -->
-      <div v-if="featuredProducts.length > 0" class="mb-12">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-bold">محصولات ویژه</h2>
+      <div v-if="featuredProducts.length > 0" class="products-section">
+        <div class="section-head">
+          <h2 class="section-title">محصولات ویژه</h2>
           <Button
             label="مشاهده همه"
             icon="pi pi-arrow-left"
@@ -80,7 +80,7 @@
             @click="viewAllFeatured"
           />
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div class="products-grid products-grid--5">
           <ProductCard
             v-for="product in featuredProducts"
             :key="product.id"
@@ -92,19 +92,19 @@
       </div>
 
       <!-- Products Grid -->
-      <div class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">
+      <div class="products-section">
+        <div class="section-head">
+          <h2 class="section-title">
             همه محصولات
-            <span class="text-gray-500 text-sm">({{ totalProducts }} محصول)</span>
+            <span class="section-count">({{ totalProducts }} محصول)</span>
           </h2>
-          <div class="flex gap-2">
+          <div class="section-actions">
             <Dropdown
               v-model="sortOption"
               :options="sortOptions"
               optionLabel="label"
               optionValue="value"
-              class="w-full md:w-14rem"
+              class="sort-dropdown"
               @change="applyFilters"
             />
             <Button
@@ -115,26 +115,25 @@
           </div>
         </div>
 
-        <div v-if="loading" class="text-center py-8">
-          <ProgressSpinner />
-          <p class="mt-4">در حال بارگذاری...</p>
+        <div v-if="loading" class="products-grid products-grid--4">
+          <ProductCard v-for="n in 8" :key="n" skeleton />
         </div>
 
-        <div v-else-if="products.length === 0" class="text-center py-8">
-          <i class="pi pi-shopping-bag text-4xl text-gray-400 mb-4"></i>
-          <h3 class="text-xl font-semibold mb-2">هیچ محصولی یافت نشد</h3>
-          <p class="text-gray-500">با فیلترهای فعلی هیچ محصولی یافت نشد</p>
+        <div v-else-if="products.length === 0" class="products-empty">
+          <i class="pi pi-shopping-bag"></i>
+          <h3>هیچ محصولی یافت نشد</h3>
+          <p>با فیلترهای فعلی هیچ محصولی یافت نشد</p>
           <Button
             label="حذف فیلترها"
             icon="pi pi-times"
-            class="p-button-outlined mt-4"
+            class="p-button-outlined"
             @click="clearFilters"
           />
         </div>
 
         <div v-else>
           <!-- Grid View -->
-          <div v-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-if="viewMode === 'grid'" class="products-grid products-grid--4">
             <ProductCard
               v-for="product in products"
               :key="product.id"
@@ -145,51 +144,46 @@
           </div>
 
           <!-- List View -->
-          <div v-else class="space-y-4">
+          <div v-else class="products-list">
             <Card v-for="product in products" :key="product.id" class="product-list-item">
               <template #content>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                  <div class="md:col-span-1">
+                <div class="product-list-layout">
+                  <div class="product-list-image">
                     <img
                       :src="product.image || '/placeholder-product.jpg'"
                       :alt="product.name"
-                      class="w-full h-48 object-cover rounded"
                     />
                   </div>
-                  <div class="md:col-span-2">
-                    <div class="flex justify-between items-start">
+                  <div class="product-list-info">
+                    <div class="product-list-head">
                       <div>
-                        <h3 class="text-lg font-semibold mb-2">{{ product.name }}</h3>
-                        <p class="text-gray-600 mb-2">{{ product.description }}</p>
-                        <div class="flex gap-2 mb-2">
+                        <h3 class="product-list-name">{{ product.name }}</h3>
+                        <p class="product-list-desc">{{ product.description }}</p>
+                        <div class="product-list-rating">
                           <Rating :modelValue="product.rating || 0" :cancel="false" readonly />
-                          <span class="text-sm text-gray-500">({{ product.reviewCount || 0 }} نظر)</span>
+                          <span>({{ product.reviewCount || 0 }} نظر)</span>
                         </div>
-                        <div class="flex gap-4 text-sm text-gray-500">
+                        <div class="product-list-meta">
                           <span>دسته بندی: {{ product.category?.name || 'نامشخص' }}</span>
                           <span>برند: {{ product.brand?.name || 'نامشخص' }}</span>
                         </div>
                       </div>
-                      <div class="text-right">
-                        <div class="space-y-2">
-                          <p class="text-xl font-bold text-primary">{{ formatPrice(product.price) }}</p>
-                          <p v-if="product.oldPrice" class="text-sm text-gray-500 line-through">
-                            {{ formatPrice(product.oldPrice) }}
-                          </p>
-                          <div class="space-y-1">
-                            <Button
-                              label="افزودن به سبد"
-                              icon="pi pi-shopping-cart"
-                              class="p-button-primary p-button-sm w-full"
-                              @click="addToCart(product)"
-                            />
-                            <Button
-                              icon="pi pi-heart"
-                              class="p-button-text p-button-sm w-full"
-                              :class="{ 'text-red-500': isInWishlist(product.id) }"
-                              @click="toggleWishlist(product)"
-                            />
-                          </div>
+                      <div class="product-list-price">
+                        <p class="price-main">{{ formatPrice(product.price) }}</p>
+                        <p v-if="product.oldPrice" class="price-old">{{ formatPrice(product.oldPrice) }}</p>
+                        <div class="product-list-actions">
+                          <Button
+                            label="افزودن به سبد"
+                            icon="pi pi-shopping-cart"
+                            class="p-button-primary p-button-sm w-full"
+                            @click="addToCart(product)"
+                          />
+                          <Button
+                            icon="pi pi-heart"
+                            class="p-button-text p-button-sm w-full"
+                            :class="{ 'text-red-500': isInWishlist(product.id) }"
+                            @click="toggleWishlist(product)"
+                          />
                         </div>
                       </div>
                     </div>
@@ -200,7 +194,7 @@
           </div>
         </div>
 
-        <div class="mt-8">
+        <div class="products-paginator">
           <Paginator
             :rows="perPage"
             :totalRecords="totalProducts"
@@ -211,43 +205,43 @@
       </div>
 
       <!-- Categories -->
-      <div class="mb-8">
-        <h2 class="text-xl font-bold mb-6">دسته بندی محصولات</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div class="products-section">
+        <h2 class="section-title">دسته بندی محصولات</h2>
+        <div class="categories-grid">
           <div
             v-for="category in categories"
             :key="category.id"
-            class="category-card p-4 border rounded-lg text-center cursor-pointer hover:bg-gray-50"
+            class="category-card"
             @click="filterByCategory(category.id)"
           >
             <img
               :src="category.image || '/placeholder-category.jpg'"
               :alt="category.name"
-              class="w-12 h-12 mx-auto mb-2 object-cover rounded"
+              class="category-image"
             />
-            <h3 class="font-semibold">{{ category.name }}</h3>
-            <p class="text-sm text-gray-500">{{ category.productCount }} محصول</p>
+            <h3 class="category-name">{{ category.name }}</h3>
+            <p class="category-count">{{ category.productCount }} محصول</p>
           </div>
         </div>
       </div>
 
       <!-- Brands -->
-      <div class="mb-8">
-        <h2 class="text-xl font-bold mb-6">برندها</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div class="products-section">
+        <h2 class="section-title">برندها</h2>
+        <div class="categories-grid">
           <div
             v-for="brand in brands"
             :key="brand.id"
-            class="brand-card p-4 border rounded-lg text-center cursor-pointer hover:bg-gray-50"
+            class="category-card"
             @click="filterByBrand(brand.id)"
           >
             <img
               :src="brand.logo || '/placeholder-brand.jpg'"
               :alt="brand.name"
-              class="h-8 mx-auto mb-2 object-contain"
+              class="brand-image"
             />
-            <h3 class="font-semibold">{{ brand.name }}</h3>
-            <p class="text-sm text-gray-500">{{ brand.productCount }} محصول</p>
+            <h3 class="category-name">{{ brand.name }}</h3>
+            <p class="category-count">{{ brand.productCount }} محصول</p>
           </div>
         </div>
       </div>
@@ -266,7 +260,6 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
-import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 import Rating from 'primevue/rating'
 import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
@@ -496,29 +489,341 @@ const isInWishlist = (productId) => {
   direction: rtl;
 }
 
+.products-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--ds-space-8) var(--ds-space-4);
+}
+
+.products-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ds-space-6);
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+}
+
+.products-title {
+  font-size: var(--ds-font-size-2xl);
+  font-weight: var(--ds-font-weight-bold);
+  margin: 0;
+}
+
+/* ── Filters ─────────────────────────────────── */
+.products-filters {
+  margin-bottom: var(--ds-space-6);
+}
+
+.filters-row {
+  display: flex;
+  gap: var(--ds-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-space-4);
+}
+
+.filters-search {
+  flex: 1;
+  min-width: 14rem;
+}
+
+.filters-category {
+  min-width: 12rem;
+}
+
+.filters-quick {
+  display: flex;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+
+/* ── Sections ────────────────────────────────── */
+.products-section {
+  margin-bottom: var(--ds-space-8);
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ds-space-4);
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+}
+
+.section-title {
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.section-count {
+  font-weight: var(--ds-font-weight-normal);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+}
+
+.section-actions {
+  display: flex;
+  gap: var(--ds-space-2);
+  align-items: center;
+}
+
+.sort-dropdown {
+  width: 14rem;
+}
+
+/* ── Grid ────────────────────────────────────── */
+.products-grid {
+  display: grid;
+  gap: var(--ds-space-4);
+}
+
+.products-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.products-grid--5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 1200px) {
+  .products-grid--4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .products-grid--5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .products-grid--4,
+  .products-grid--5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .products-grid--4,
+  .products-grid--5 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Empty State ─────────────────────────────── */
+.products-empty {
+  text-align: center;
+  padding: var(--ds-space-12) var(--ds-space-4);
+  color: var(--ds-color-text-muted);
+}
+
+.products-empty i {
+  font-size: 3rem;
+  margin-bottom: var(--ds-space-4);
+  display: block;
+}
+
+.products-empty h3 {
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-semibold);
+  margin: 0 0 var(--ds-space-2) 0;
+  color: var(--ds-color-text);
+}
+
+.products-empty p {
+  margin: 0 0 var(--ds-space-4) 0;
+}
+
+/* ── List View ───────────────────────────────── */
+.products-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+.product-list-item {
+  transition: box-shadow var(--ds-transition);
+}
+
+.product-list-item:hover {
+  box-shadow: var(--ds-shadow-md);
+}
+
+.product-list-layout {
+  display: flex;
+  gap: var(--ds-space-6);
+}
+
+.product-list-image {
+  width: 12rem;
+  flex-shrink: 0;
+}
+
+.product-list-image img {
+  width: 100%;
+  height: 8rem;
+  object-fit: cover;
+  border-radius: var(--ds-radius-md);
+}
+
+.product-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-list-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+}
+
+.product-list-name {
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-semibold);
+  margin: 0 0 var(--ds-space-1) 0;
+}
+
+.product-list-desc {
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+  margin: 0 0 var(--ds-space-2) 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-list-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+  margin-bottom: var(--ds-space-2);
+}
+
+.product-list-meta {
+  display: flex;
+  gap: var(--ds-space-4);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+}
+
+.product-list-price {
+  text-align: start;
+  flex-shrink: 0;
+}
+
+.price-main {
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  color: var(--ds-color-primary);
+  margin: 0 0 var(--ds-space-1) 0;
+}
+
+.price-old {
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+  text-decoration: line-through;
+  margin: 0 0 var(--ds-space-3) 0;
+}
+
+.product-list-actions {
+  display: flex;
+  gap: var(--ds-space-2);
+  flex-direction: column;
+  min-width: 10rem;
+}
+
+@media (max-width: 768px) {
+  .product-list-layout {
+    flex-direction: column;
+  }
+  .product-list-image {
+    width: 100%;
+  }
+  .product-list-image img {
+    height: 12rem;
+  }
+  .product-list-head {
+    flex-direction: column;
+  }
+  .product-list-price {
+    text-align: start;
+  }
+}
+
+/* ── Paginator ───────────────────────────────── */
+.products-paginator {
+  margin-top: var(--ds-space-6);
+}
+
+/* ── Categories / Brands Grid ────────────────── */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--ds-space-4);
+}
+
+@media (max-width: 1200px) {
+  .categories-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .category-card {
-  transition: all 0.2s ease;
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--ds-transition), box-shadow var(--ds-transition);
+  text-align: center;
 }
 
 .category-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--ds-shadow-md);
 }
 
-.brand-card {
-  transition: all 0.2s ease;
+.category-image,
+.brand-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--ds-color-surface-alt);
 }
 
-.brand-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.category-name {
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  margin: var(--ds-space-3) var(--ds-space-3) var(--ds-space-1) 0;
 }
 
-.product-list-item {
-  transition: all 0.2s ease;
-}
-
-.product-list-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.category-count {
+  font-size: var(--ds-font-size-xs);
+  color: var(--ds-color-text-muted);
+  margin: 0 0 var(--ds-space-3) 0;
 }
 </style>

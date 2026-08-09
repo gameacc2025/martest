@@ -12,20 +12,29 @@
     <div class="card">
       <Toolbar>
         <template #start>
-          <span class="p-input-icon-right">
-            <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
+          <span class="search-input">
+            <InputText v-model="searchQuery" placeholder="جستجوی محصول..." @input="debounceSearch" />
           </span>
           <Dropdown v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value"
-            placeholder="فیلتر وضعیت" class="ml-2" style="min-width: 160px" @change="fetchProducts(1)" />
+            placeholder="فیلتر وضعیت" class="filter-dropdown" @change="fetchProducts(1)" />
         </template>
       </Toolbar>
 
       <DataTable :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
         :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll">
-        <Column field="id" header="شناسه" sortable></Column>
-        <Column field="title" header="عنوان" sortable></Column>
+        @page="onPageChange" responsiveLayout="scroll" :rowHover="true"
+        v-if="products.length > 0 || loading">
+        <Column field="id" header="شناسه" sortable style="width: 80px"></Column>
+        <Column field="title" header="عنوان" sortable>
+          <template #body="{ data }">
+            <div>
+              <div class="product-title">{{ data.title }}</div>
+              <div v-if="data.brand || data.model" class="product-meta">
+                {{ [data.brand, data.model].filter(Boolean).join(' · ') }}
+              </div>
+            </div>
+          </template>
+        </Column>
         <Column header="شرکت">
           <template #body="{ data }">
             {{ data.company?.name || '-' }}
@@ -36,14 +45,14 @@
             {{ data.category?.name || '-' }}
           </template>
         </Column>
-        <Column field="status" header="وضعیت">
+        <Column field="status" header="وضعیت" style="width: 140px">
           <template #body="{ data }">
             <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
           </template>
         </Column>
-        <Column header="عملیات">
+        <Column header="عملیات" style="width: 160px">
           <template #body="{ data }">
-            <div class="flex gap-2">
+            <div class="actions-cell">
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text @click="editProduct(data)" />
               <!-- Approve/Reject are STAFF-only actions (products.approve / products.reject —
@@ -58,6 +67,11 @@
           </template>
         </Column>
       </DataTable>
+
+      <div v-else-if="!loading" class="empty-state">
+        <i class="pi pi-box"></i>
+        <p>محصولی یافت نشد</p>
+      </div>
     </div>
 
     <!-- Create/Edit Product Dialog -->
@@ -320,5 +334,149 @@ onMounted(() => {
 <style scoped>
 .product-list-page {
   direction: rtl;
+  padding: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-color);
+}
+
+.page-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--content-border-radius);
+  box-shadow: var(--ds-shadow-sm);
+  overflow: hidden;
+}
+
+:deep(.p-toolbar) {
+  background: var(--surface-card);
+  border: none;
+  border-bottom: 1px solid var(--surface-border);
+  border-radius: 0;
+  padding: 1rem 1.25rem;
+  gap: 0.75rem;
+}
+
+:deep(.p-datatable) {
+  background: transparent;
+  border: none;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--surface-hover);
+  color: var(--text-color-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr) {
+  transition: background 0.15s ease;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background: var(--surface-hover);
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-color);
+  vertical-align: middle;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr:last-child > td) {
+  border-bottom: none;
+}
+
+.search-input {
+  min-width: 240px;
+}
+
+.filter-dropdown {
+  min-width: 160px;
+}
+
+.product-title {
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+.product-meta {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  margin-top: 0.25rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-color-secondary);
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}
+
+:deep(.p-paginator) {
+  background: var(--surface-card);
+  border-top: 1px solid var(--surface-border);
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+}
+
+@media (max-width: 767px) {
+  .product-list-page {
+    padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-input {
+    min-width: 100%;
+  }
+
+  :deep(.p-datatable .p-datatable-thead > tr > th),
+  :deep(.p-datatable .p-datatable-tbody > tr > td) {
+    padding: 0.625rem 0.75rem;
+  }
 }
 </style>

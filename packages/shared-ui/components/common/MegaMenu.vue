@@ -142,7 +142,7 @@ function goToSubcategory(categorySlug, subcategorySlug) {
   background: var(--surface-card);
   border: 1px solid var(--surface-border);
   border-radius: var(--content-border-radius);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--ds-shadow-lg);
   z-index: 1000;
   overflow: hidden;
 }
