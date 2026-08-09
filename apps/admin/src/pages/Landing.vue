@@ -12,7 +12,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 onMounted(async () => {
-  const ok = await authStore.ensureAuthenticated('/admin')
+  const ok = await authStore.ensureAuthenticated('/admin-dashboard')
   if (!ok) return // ensureAuthenticated already redirected to /login
 
   // App selection is driven SOLELY by accessProfile.type — STAFF belongs to

@@ -172,7 +172,7 @@ async function handleSubmit() {
       const type = response.accessProfile?.type
 
       if (type === 'STAFF') {
-        goTo(`${adminAppUrl}/admin`, response)
+        goTo(`${adminAppUrl}/admin-dashboard`, response)
       } else if (type === 'COMPANY') {
         goTo(`${companyAppUrl}/company-dashboard`, response)
       } else {

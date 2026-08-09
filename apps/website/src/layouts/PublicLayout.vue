@@ -62,7 +62,7 @@ const userMenuItems = computed(() => {
     items.push({
       label: 'پنل مدیریت',
       icon: 'pi pi-th-large',
-      command: () => goToAdminApp('/admin'),
+      command: () => goToAdminApp('/admin-dashboard'),
     })
   } else if (canAccessCompanyDashboard.value) {
     items.push({
@@ -220,7 +220,7 @@ function logout() {
             </router-link>
           </li>
           <li v-if="user" class="public-mobile-auth">
-            <a v-if="canAccessDashboard" :href="`${adminAppUrl}/admin`" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <a v-if="canAccessDashboard" :href="`${adminAppUrl}/admin-dashboard`" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-th-large"></i>
               <span>پنل مدیریت</span>
             </a>

@@ -21,7 +21,25 @@ import UserProfile from "../pages/user/UserProfile.vue";
 const websiteAppUrl = import.meta.env.VITE_WEBSITE_APP_URL || '/';
 
 function redirectToWebsite(page) {
-  return (to) => {
+  return async (to) => {
+    // Guard against the "double hop" trap: logout()/ensureAuthenticated()
+    // push to this app's OWN `/login` route first (to preserve the intended
+    // path in the query string) before the actual external bounce happens.
+    // If a session handoff (see bootstrapSessionFromUrl in main.js, which
+    // always runs before the router resolves the first navigation) already
+    // landed a valid COMPANY session in localStorage by the time we get
+    // here, the user is NOT actually logged out — sending them back to the
+    // website again would bounce them in an endless redirect loop instead
+    // of ever reaching the app. So: check auth first, and only bounce out
+    // if there really is no valid session for this app.
+    const { useAuthStore } = await import("../stores/auth");
+    const authStore = useAuthStore();
+    if (authStore.isAuthenticated && authStore.isCompany) {
+      const redirect = typeof to.query.redirect === "string" ? to.query.redirect : null;
+      if (redirect && !/^https?:\/\//i.test(redirect)) return redirect;
+      return { name: "company-dashboard" };
+    }
+
     const target = `${window.location.origin}${to.fullPath}`;
     window.location.href = `${websiteAppUrl}/${page}?redirect=${encodeURIComponent(target)}`;
   };
@@ -127,7 +145,7 @@ router.beforeEach(async (to, from, next) => {
     const adminUrl = import.meta.env.VITE_ADMIN_APP_URL || '';
     const websiteUrl = import.meta.env.VITE_WEBSITE_APP_URL || '/';
     const target = authStore.isStaff && adminUrl
-      ? `${adminUrl}/admin`
+      ? `${adminUrl}/admin-dashboard`
       : websiteUrl;
     await authStore.logout({ redirectTo: null });
     window.location.href = target;
