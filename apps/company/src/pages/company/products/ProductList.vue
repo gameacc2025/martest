@@ -45,16 +45,22 @@
             {{ data.category?.name || '-' }}
           </template>
         </Column>
-        <Column field="status" header="وضعیت" style="width: 140px">
+        <Column field="status" header="وضعیت" style="width: 170px">
           <template #body="{ data }">
-            <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
+            <div class="status-cell">
+              <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
+              <span v-if="getUnreviewedEditCount(data) > 0" class="unreviewed-badge" v-tooltip.top="'شمار ویرایش‌های پس از تأیید که هنوز بازبینی نشده‌اند'">
+                <i class="pi pi-pencil" />
+                {{ getUnreviewedEditCount(data) }} ویرایش بدون بازبینی
+              </span>
+            </div>
           </template>
         </Column>
         <Column header="عملیات" style="width: 160px">
           <template #body="{ data }">
             <div class="actions-cell">
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
-              <Button v-if="data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text @click="editProduct(data)" />
+              <Button v-if="canEdit(data)" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
               <!-- Approve/Reject are STAFF-only actions (products.approve / products.reject —
                    see backend/prisma/seed.js). Company roles never hold these permissions;
                    the backend already 403s them, but the buttons don't belong in this panel
@@ -67,6 +73,12 @@
           </template>
         </Column>
       </DataTable>
+
+      <div v-else-if="loadError" class="empty-state">
+        <i class="pi pi-exclamation-triangle"></i>
+        <p>{{ loadError }}</p>
+        <Button label="تلاش مجدد" icon="pi pi-refresh" severity="secondary" @click="fetchProducts(pagination.page)" />
+      </div>
 
       <div v-else-if="!loading" class="empty-state">
         <i class="pi pi-box"></i>
@@ -127,7 +139,7 @@ import { useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
-import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS } from '../../../config/product'
+import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, canEdit, getUnreviewedEditCount } from '../../../config/product'
 import Dropdown from 'primevue/dropdown'
 
 const toast = useToast()
@@ -148,6 +160,7 @@ const products = ref([])
 const companies = ref([])
 const categories = ref([])
 const loading = ref(false)
+const loadError = ref('')
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
 const showReasonDialog = ref(false)
@@ -191,6 +204,7 @@ function debounceSearch() {
 
 async function fetchProducts(page = 1) {
   loading.value = true
+  loadError.value = ''
   try {
     // Management listing: use the authenticated endpoint so the caller sees
     // ALL statuses (SUPER_ADMIN → every company, company user → own company).
@@ -212,7 +226,12 @@ async function fetchProducts(page = 1) {
       }
     }
   } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت محصولات', life: 3000 })
+    // Inline error state (with retry) instead of a misleading empty list.
+    // Network failures (no HTTP status) get a dedicated, human-readable message.
+    const status = err.status ?? err.response?.status
+    loadError.value = err.response?.data?.error?.message || err.serverMessage || (status ? (err.message || 'خطا در دریافت محصولات') : 'ارتباط با سرور برقرار نشد')
+    products.value = []
+    toast.add({ severity: 'error', summary: 'خطا', detail: loadError.value, life: 4000 })
   } finally {
     loading.value = false
   }
@@ -451,6 +470,26 @@ onMounted(() => {
   display: flex;
   gap: 0.25rem;
   justify-content: flex-end;
+}
+
+.status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.unreviewed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
 }
 
 :deep(.p-paginator) {

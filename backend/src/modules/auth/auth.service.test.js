@@ -68,7 +68,7 @@ function resetMocks() {
     companyByNationalId: null,
     accessProfile: null,      // prisma.accessProfile.findUnique
     refreshTokenDeleteCount: 1,
-    createdUser: { id: 100, email: 'new@example.com', phone: null, status: 'ACTIVE' },
+    createdUser: { id: 100, email: 'new@example.com', phone: '09120000000', status: 'ACTIVE' },
     createdCompany: { id: 200, name: 'ACME' },
     createdAccessProfile: { id: 300, type: 'COMPANY', companyId: 200, isActive: false },
     role: { id: 5, name: 'CUSTOMER_USER' },
@@ -218,108 +218,108 @@ function baseResetAll() {
   tokenCalls.signRefresh = [];
 }
 
-// ── login ────────────────────────────────────────────────────
+// ── login (phone only) ───────────────────────────────────────
 
 test('login: rejects with INVALID_CREDENTIALS when the user does not exist', async () => {
   baseResetAll();
-  fx.userByEmail = null;
+  fx.userByPhone = null;
   await assert.rejects(
-    () => authService.login(fakeFastify, 'nobody@example.com', 'pw'),
+    () => authService.login(fakeFastify, '09120000000', 'pw'),
     (err) => err.statusCode === 401 && err.code === 'INVALID_CREDENTIALS',
   );
 });
 
 test('login: rejects PENDING accounts with ACCOUNT_PENDING', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'a@a.com', status: 'PENDING', passwordHash: 'h' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'PENDING', passwordHash: 'h' };
   await assert.rejects(
-    () => authService.login(fakeFastify, 'a@a.com', 'pw'),
+    () => authService.login(fakeFastify, '09120000000', 'pw'),
     (err) => err.statusCode === 403 && err.code === 'ACCOUNT_PENDING',
   );
 });
 
 test('login: rejects REJECTED accounts with ACCOUNT_REJECTED', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'a@a.com', status: 'REJECTED', passwordHash: 'h' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'REJECTED', passwordHash: 'h' };
   await assert.rejects(
-    () => authService.login(fakeFastify, 'a@a.com', 'pw'),
+    () => authService.login(fakeFastify, '09120000000', 'pw'),
     (err) => err.statusCode === 403 && err.code === 'ACCOUNT_REJECTED',
   );
 });
 
 test('login: rejects a wrong password with INVALID_CREDENTIALS (no user enumeration)', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'a@a.com', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
   nextVerifyPasswordResult = false;
   await assert.rejects(
-    () => authService.login(fakeFastify, 'a@a.com', 'wrong'),
+    () => authService.login(fakeFastify, '09120000000', 'wrong'),
     (err) => err.statusCode === 401 && err.code === 'INVALID_CREDENTIALS',
   );
 });
 
 test('login: rejects a deactivated STAFF AccessProfile with ACCESS_DISABLED', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'staff@a.com', status: 'ACTIVE', passwordHash: 'h' };
-  fx.userById = { id: 1, email: 'staff@a.com', status: 'ACTIVE' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
   fx.accessProfile = { id: 1, type: 'STAFF', companyId: null, isActive: false };
   nextAccess = { roles: ['ADMIN'], permissions: ['users.read'] };
   await assert.rejects(
-    () => authService.login(fakeFastify, 'staff@a.com', 'pw'),
+    () => authService.login(fakeFastify, '09120000000', 'pw'),
     (err) => err.statusCode === 403 && err.code === 'ACCESS_DISABLED',
   );
 });
 
 test('login: does NOT gate a deactivated CUSTOMER access (no panel)', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'c@a.com', status: 'ACTIVE', passwordHash: 'h' };
-  fx.userById = { id: 1, email: 'c@a.com', status: 'ACTIVE' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
   fx.accessProfile = null; // customers have no AccessProfile
   nextAccess = { roles: ['CUSTOMER_USER'], permissions: [] };
-  const result = await authService.login(fakeFastify, 'c@a.com', 'pw');
+  const result = await authService.login(fakeFastify, '09120000000', 'pw');
   assert.equal(result.accessToken, 'access-token-for-1');
 });
 
 test('login: app="admin" rejects a non-STAFF access type with APP_ACCESS_DENIED', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'c@a.com', status: 'ACTIVE', passwordHash: 'h' };
-  fx.userById = { id: 1, email: 'c@a.com', status: 'ACTIVE' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
   fx.accessProfile = { id: 1, type: 'COMPANY', companyId: 10, isActive: true };
   nextAccess = { roles: ['COMPANY_ADMIN'], permissions: [] };
   await assert.rejects(
-    () => authService.login(fakeFastify, 'c@a.com', 'pw', 'admin'),
+    () => authService.login(fakeFastify, '09120000000', 'pw', 'admin'),
     (err) => err.statusCode === 403 && err.code === 'APP_ACCESS_DENIED',
   );
 });
 
 test('login: app="company" rejects a non-COMPANY access type with APP_ACCESS_DENIED', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 's@a.com', status: 'ACTIVE', passwordHash: 'h' };
-  fx.userById = { id: 1, email: 's@a.com', status: 'ACTIVE' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
   fx.accessProfile = { id: 1, type: 'STAFF', companyId: null, isActive: true };
   nextAccess = { roles: ['ADMIN'], permissions: [] };
   await assert.rejects(
-    () => authService.login(fakeFastify, 's@a.com', 'pw', 'company'),
+    () => authService.login(fakeFastify, '09120000000', 'pw', 'company'),
     (err) => err.statusCode === 403 && err.code === 'APP_ACCESS_DENIED',
   );
 });
 
 test('login: SUPER_ADMIN bypasses the app-type guard entirely', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'root@a.com', status: 'ACTIVE', passwordHash: 'h' };
-  fx.userById = { id: 1, email: 'root@a.com', status: 'ACTIVE' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
   fx.accessProfile = null;
   nextAccess = { roles: ['SUPER_ADMIN'], permissions: ['*'] };
-  const result = await authService.login(fakeFastify, 'root@a.com', 'pw', 'company');
+  const result = await authService.login(fakeFastify, '09120000000', 'pw', 'company');
   assert.equal(result.accessToken, 'access-token-for-1');
 });
 
 test('login: succeeds and returns token pair + expiresIn for a valid ACTIVE user', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 42, email: 'ok@a.com', status: 'ACTIVE', passwordHash: 'h' };
-  fx.userById = { id: 42, email: 'ok@a.com', status: 'ACTIVE' };
+  fx.userByPhone = { id: 42, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 42, phone: '09120000000', status: 'ACTIVE' };
   fx.accessProfile = null;
   nextAccess = { roles: ['CUSTOMER_USER'], permissions: [] };
-  const result = await authService.login(fakeFastify, 'OK@A.com ', 'pw');
+  const result = await authService.login(fakeFastify, '09120000000', 'pw');
   assert.equal(result.accessToken, 'access-token-for-42');
   assert.equal(result.refreshToken, 'refresh-token-for-42');
   assert.equal(result.expiresIn, 15 * 60);
@@ -329,13 +329,13 @@ test('login: succeeds and returns token pair + expiresIn for a valid ACTIVE user
   assert.equal(calls.refreshTokenCreate.length, 1);
 });
 
-test('login: normalizes email (trims + lowercases) before lookup', async () => {
+test('login: trims phone before lookup', async () => {
   baseResetAll();
-  fx.userByEmail = { id: 1, email: 'ok@a.com', status: 'ACTIVE', passwordHash: 'h' };
-  fx.userById = { id: 1, email: 'ok@a.com', status: 'ACTIVE' };
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
   nextAccess = { roles: [], permissions: [] };
-  await authService.login(fakeFastify, '  OK@A.com  ', 'pw');
-  assert.equal(calls.userFindUnique[0].where.email, 'ok@a.com');
+  await authService.login(fakeFastify, '  09120000000  ', 'pw');
+  assert.equal(calls.userFindUnique[0].where.phone, '09120000000');
 });
 
 // ── refresh ──────────────────────────────────────────────────
@@ -414,7 +414,7 @@ test('getMe: throws NOT_FOUND when the user no longer exists', async () => {
 
 test('getMe: returns the assembled user context', async () => {
   baseResetAll();
-  fx.userById = { id: 8, email: 'x@a.com', status: 'ACTIVE' };
+  fx.userById = { id: 8, phone: '09120000000', status: 'ACTIVE' };
   nextAccess = { roles: ['CUSTOMER_USER'], permissions: [] };
   const result = await authService.getMe(8);
   assert.equal(result.user.id, 8);
@@ -501,12 +501,12 @@ test('changeUserPassword: succeeds without requiring the current password', asyn
   assert.equal(calls.refreshTokenDeleteMany[0].where.userId, 2);
 });
 
-// ── register (customer) ─────────────────────────────────────
+// ── register (customer) — phone required, email optional ────
 
-test('register: rejects missing required fields', async () => {
+test('register: rejects missing required fields (phone required)', async () => {
   baseResetAll();
   await assert.rejects(
-    () => authService.register({ email: 'a@a.com', password: 'password1' }),
+    () => authService.register({ email: 'a@a.com', password: 'password1', firstName: 'A', lastName: 'B' }),
     (err) => err.statusCode === 400 && err.code === 'VALIDATION_ERROR',
   );
 });
@@ -514,52 +514,69 @@ test('register: rejects missing required fields', async () => {
 test('register: rejects a weak password', async () => {
   baseResetAll();
   await assert.rejects(
-    () => authService.register({ email: 'a@a.com', password: 'short', firstName: 'A', lastName: 'B' }),
+    () => authService.register({ phone: '09120000000', password: 'short', firstName: 'A', lastName: 'B' }),
     (err) => err.statusCode === 400 && err.code === 'WEAK_PASSWORD',
-  );
-});
-
-test('register: rejects a duplicate email', async () => {
-  baseResetAll();
-  fx.userByEmail = { id: 1 };
-  await assert.rejects(
-    () => authService.register({ email: 'dup@a.com', password: 'password1', firstName: 'A', lastName: 'B' }),
-    (err) => err.statusCode === 409 && err.code === 'DUPLICATE_EMAIL',
   );
 });
 
 test('register: rejects a duplicate phone', async () => {
   baseResetAll();
-  fx.userByEmail = null;
   fx.userByPhone = { id: 2 };
   await assert.rejects(
     () => authService.register({
-      email: 'new@a.com', password: 'password1', firstName: 'A', lastName: 'B', phone: '0912',
+      phone: '09120000000', password: 'password1', firstName: 'A', lastName: 'B',
     }),
     (err) => err.statusCode === 409 && err.code === 'DUPLICATE_PHONE',
   );
 });
 
-test('register: creates a CUSTOMER_USER with no AccessProfile', async () => {
+test('register: rejects a duplicate email when provided', async () => {
   baseResetAll();
-  fx.userByEmail = null;
   fx.userByPhone = null;
+  fx.userByEmail = { id: 1 };
+  await assert.rejects(
+    () => authService.register({
+      phone: '09120000000', email: 'dup@a.com', password: 'password1', firstName: 'A', lastName: 'B',
+    }),
+    (err) => err.statusCode === 409 && err.code === 'DUPLICATE_EMAIL',
+  );
+});
+
+test('register: creates a CUSTOMER_USER with no AccessProfile (email optional)', async () => {
+  baseResetAll();
+  fx.userByPhone = null;
+  fx.userByEmail = null;
   fx.role = { id: 5, name: 'CUSTOMER_USER' };
   const result = await authService.register({
-    email: 'new@a.com', password: 'password1', firstName: 'A', lastName: 'B',
+    phone: '09120000000', password: 'password1', firstName: 'A', lastName: 'B',
   });
   assert.deepEqual(result.roles, ['CUSTOMER_USER']);
   assert.equal(result.accessProfile, null);
   assert.equal(calls.accessProfileCreate.length, 0);
   assert.equal(calls.userRoleCreate.length, 1);
+  // phone is stored, email is null
+  assert.equal(calls.userCreate[0].data.phone, '09120000000');
+  assert.equal(calls.userCreate[0].data.email, null);
 });
 
-// ── registerCompany ──────────────────────────────────────────
+test('register: stores email when provided', async () => {
+  baseResetAll();
+  fx.userByPhone = null;
+  fx.userByEmail = null;
+  fx.role = { id: 5, name: 'CUSTOMER_USER' };
+  await authService.register({
+    phone: '09120000000', email: 'new@a.com', password: 'password1', firstName: 'A', lastName: 'B',
+  });
+  assert.equal(calls.userCreate[0].data.phone, '09120000000');
+  assert.equal(calls.userCreate[0].data.email, 'new@a.com');
+});
+
+// ── registerCompany — manager phone required, email optional ─
 
 const validCompanyPayload = {
   companyName: 'ACME', nationalId: '111', registrationNumber: '222',
   companyEmail: 'c@acme.com', phone: '021', address: 'Tehran',
-  managerEmail: 'manager@acme.com', password: 'password1',
+  managerPhone: '09120000000', password: 'password1',
   managerFirstName: 'M', managerLastName: 'N',
 };
 
@@ -571,10 +588,10 @@ test('registerCompany: rejects missing company fields', async () => {
   );
 });
 
-test('registerCompany: rejects missing manager fields', async () => {
+test('registerCompany: rejects missing manager phone (required)', async () => {
   baseResetAll();
   await assert.rejects(
-    () => authService.registerCompany({ ...validCompanyPayload, managerEmail: undefined }),
+    () => authService.registerCompany({ ...validCompanyPayload, managerPhone: undefined }),
     (err) => err.statusCode === 400 && err.code === 'VALIDATION_ERROR',
   );
 });
@@ -596,12 +613,23 @@ test('registerCompany: rejects a duplicate nationalId', async () => {
   );
 });
 
-test('registerCompany: rejects a duplicate manager email', async () => {
+test('registerCompany: rejects a duplicate manager phone', async () => {
   baseResetAll();
   fx.companyByNationalId = null;
-  fx.userByEmail = { id: 5 };
+  fx.userByPhone = { id: 5 };
   await assert.rejects(
     () => authService.registerCompany(validCompanyPayload),
+    (err) => err.statusCode === 409 && err.code === 'DUPLICATE_PHONE',
+  );
+});
+
+test('registerCompany: rejects a duplicate manager email when provided', async () => {
+  baseResetAll();
+  fx.companyByNationalId = null;
+  fx.userByPhone = null;
+  fx.userByEmail = { id: 5 };
+  await assert.rejects(
+    () => authService.registerCompany({ ...validCompanyPayload, managerEmail: 'm@acme.com' }),
     (err) => err.statusCode === 409 && err.code === 'DUPLICATE_EMAIL',
   );
 });
@@ -609,8 +637,8 @@ test('registerCompany: rejects a duplicate manager email', async () => {
 test('registerCompany: creates a PENDING company + inactive COMPANY access, no role assigned', async () => {
   baseResetAll();
   fx.companyByNationalId = null;
-  fx.userByEmail = null;
   fx.userByPhone = null;
+  fx.userByEmail = null;
   const result = await authService.registerCompany(validCompanyPayload);
 
   assert.equal(calls.companyCreate[0].data.status, 'PENDING');
@@ -619,4 +647,7 @@ test('registerCompany: creates a PENDING company + inactive COMPANY access, no r
   assert.equal(calls.userRoleCreate.length, 0); // no role auto-assigned
   assert.equal(result.company.id, fx.createdCompany.id);
   assert.equal(result.accessProfile.id, fx.createdAccessProfile.id);
+  // manager phone is stored, email is null
+  assert.equal(calls.userCreate[0].data.phone, '09120000000');
+  assert.equal(calls.userCreate[0].data.email, null);
 });

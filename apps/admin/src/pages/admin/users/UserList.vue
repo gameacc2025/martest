@@ -243,12 +243,12 @@
         <h4 class="form-section-title">اطلاعات هویتی</h4>
         <div class="form-grid">
           <div class="field">
-            <label for="email">ایمیل <span class="req">*</span></label>
-            <InputText id="email" v-model="currentUser.email" type="email" />
+            <label for="phone">شماره تلفن <span class="req">*</span></label>
+            <InputText id="phone" v-model="currentUser.phone" />
           </div>
           <div class="field">
-            <label for="phone">تلفن</label>
-            <InputText id="phone" v-model="currentUser.phone" />
+            <label for="email">ایمیل <span class="opt">(اختیاری)</span></label>
+            <InputText id="email" v-model="currentUser.email" type="email" />
           </div>
         </div>
 
@@ -600,7 +600,7 @@ function closeDialog() {
 
 function validateForm() {
   const u = currentUser.value;
-  if (!u.email) return "ایمیل الزامی است.";
+  if (!u.phone) return "شماره تلفن الزامی است.";
   if (!u.firstName) return "نام الزامی است.";
   if (!u.lastName) return "نام خانوادگی الزامی است.";
   if (!isEditMode.value && !u.password) return "رمز عبور الزامی است.";
@@ -619,8 +619,8 @@ async function saveUser() {
     const u = currentUser.value;
     if (isEditMode.value) {
       const payload = {
-        email: u.email,
-        phone: u.phone ?? null,
+        email: u.email || null,
+        phone: u.phone,
         firstName: u.firstName ?? null,
         lastName: u.lastName ?? null,
         avatar: u.avatar || null,
@@ -641,8 +641,8 @@ async function saveUser() {
       toast.add({ severity: "success", summary: "موفقیت", detail: "کاربر بروزرسانی شد", life: 3000 });
     } else {
       await userStore.createUser({
-        email: u.email,
-        phone: u.phone || undefined,
+        email: u.email || undefined,
+        phone: u.phone,
         password: u.password,
         firstName: u.firstName,
         lastName: u.lastName,
@@ -734,6 +734,12 @@ async function deleteUser() {
 
 .req {
   color: var(--red-500, #ef4444);
+}
+
+.opt {
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
 .field-hint {

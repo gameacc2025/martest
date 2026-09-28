@@ -83,26 +83,26 @@ function makeRequest(overrides = {}) {
 
 // ── login ─────────────────────────────────────────────────────
 
-test('login: 400s with VALIDATION_ERROR when email or password is missing', async () => {
+test('login: 400s with VALIDATION_ERROR when phone or password is missing', async () => {
   const reply = makeReply();
-  await controller.login(makeRequest({ body: { email: '', password: '' } }), reply);
+  await controller.login(makeRequest({ body: { phone: '', password: '' } }), reply);
   assert.equal(reply._statusCode, 400);
   assert.equal(reply._body.error.code, 'VALIDATION_ERROR');
   assert.equal(calls.login, undefined); // service never called
 });
 
-test('login: 400s when email is only whitespace', async () => {
+test('login: 400s when phone is only whitespace', async () => {
   const reply = makeReply();
-  await controller.login(makeRequest({ body: { email: '   ', password: 'x' } }), reply);
+  await controller.login(makeRequest({ body: { phone: '   ', password: 'x' } }), reply);
   assert.equal(reply._statusCode, 400);
 });
 
-test('login: trims the email before passing it to the service', async () => {
+test('login: trims the phone before passing it to the service', async () => {
   fx.loginResult = { user: {}, profile: {}, accessProfile: {}, roles: [], permissions: [], accessToken: 'AT', refreshToken: 'RT', expiresIn: 900 };
   const reply = makeReply();
-  await controller.login(makeRequest({ body: { email: '  a@a.com  ', password: 'x', app: 'company' } }), reply);
+  await controller.login(makeRequest({ body: { phone: '  09120000000  ', password: 'x', app: 'company' } }), reply);
   const [, loginValue, password, app] = calls.login;
-  assert.equal(loginValue, 'a@a.com');
+  assert.equal(loginValue, '09120000000');
   assert.equal(password, 'x');
   assert.equal(app, 'company');
 });
@@ -110,7 +110,7 @@ test('login: trims the email before passing it to the service', async () => {
 test('login: sets the refresh cookie with the correct security flags (dev: secure=false)', async () => {
   fx.loginResult = { user: {}, profile: {}, accessProfile: {}, roles: [], permissions: [], accessToken: 'AT', refreshToken: 'RT', expiresIn: 900 };
   const reply = makeReply();
-  await controller.login(makeRequest({ body: { email: 'a@a.com', password: 'x' } }), reply);
+  await controller.login(makeRequest({ body: { phone: '09120000000', password: 'x' } }), reply);
 
   assert.equal(reply._cookies.length, 1);
   const { name, value, opts } = reply._cookies[0];
@@ -128,7 +128,7 @@ test('login: 200s with tokens + full auth context in the body, refreshToken neve
     roles: ['CUSTOMER'], permissions: [], accessToken: 'AT', refreshToken: 'RT', expiresIn: 900,
   };
   const reply = makeReply();
-  await controller.login(makeRequest({ body: { email: 'a@a.com', password: 'x' } }), reply);
+  await controller.login(makeRequest({ body: { phone: '09120000000', password: 'x' } }), reply);
 
   assert.equal(reply._statusCode, 200);
   assert.deepEqual(reply._body.data.tokens, { accessToken: 'AT', refreshToken: 'RT', expiresIn: 900 });

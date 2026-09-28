@@ -36,10 +36,11 @@ const { seedSpecificationTemplates } = require('./seeds/specification-templates'
 
 const prisma = new PrismaClient();
 
-// Initial Super Admin — email is the authentication identity.
+// Initial Super Admin — phone is the authentication identity (required),
+// email is optional.
 const SUPER_ADMIN_USER = {
   email: process.env.SUPER_ADMIN_EMAIL || 'admin@telecommarketplace.local',
-  phone: null,
+  phone: process.env.SUPER_ADMIN_PHONE || '09120000000',
   password: process.env.SUPER_ADMIN_PASSWORD || 'Admin@123456',
   status: 'ACTIVE',
 };
@@ -174,6 +175,10 @@ const PERMISSIONS = [
   { name: 'products.export',        label: 'خروجی محصولات',      group: 'محصولات', description: 'دریافت خروجی محصولات در قالب Excel یا CSV.' },
   { name: 'products.change_status', label: 'تغییر وضعیت محصول',  group: 'محصولات', description: 'تغییر وضعیت محصول بین Draft، Pending، Approved و Archived.' },
 
+  // System settings (admin-managed platform configuration, e.g. the count of
+  // post-approval product edits that triggers re-review).
+  { name: 'system_settings.manage', label: 'مدیریت تنظیمات سیستم', group: 'تنظیمات سیستم', description: 'مشاهده و تغییر تنظیمات سراسری سیستم (مانند سقف ویرایش‌های پس از تأیید محصول).' },
+
   // Product Images
   { name: 'product_images.read',   label: 'مشاهده تصاویر محصول', group: 'تصاویر محصول', description: 'مشاهده تصاویر محصولات.' },
   { name: 'product_images.create', label: 'افزودن تصویر محصول', group: 'تصاویر محصول', description: 'افزودن تصویر به محصول.' },
@@ -299,6 +304,7 @@ const ROLE_PERMISSIONS = {
     'reports.read', 'reports.export',
     'notifications.read', 'notifications.send', 'notifications.delete',
     'tickets.create', 'tickets.read', 'tickets.update', 'tickets.reply', 'tickets.close',
+    'system_settings.manage',
     'banners.create', 'banners.read', 'banners.update', 'banners.delete',
     'media.upload', 'media.read', 'media.delete',
     'audit_logs.read',
@@ -431,11 +437,11 @@ async function main() {
   const passwordHash = await hashPassword(SUPER_ADMIN_USER.password);
 
   const admin = await prisma.user.upsert({
-    where: { email: SUPER_ADMIN_USER.email },
+    where: { phone: SUPER_ADMIN_USER.phone },
     update: {
       passwordHash,
       status: SUPER_ADMIN_USER.status,
-      phone: SUPER_ADMIN_USER.phone,
+      email: SUPER_ADMIN_USER.email,
     },
     create: {
       email: SUPER_ADMIN_USER.email,
@@ -484,7 +490,7 @@ async function main() {
   console.log(`  Companies:   ${DEFAULT_COMPANIES.length + 1}`);
   console.log(`  Spec Fields: ~${LIBRARY_FIELDS.length} predefined`);
   console.log('\nSuper Admin login:');
-  console.log(`  email:    ${SUPER_ADMIN_USER.email}`);
+  console.log(`  phone:    ${SUPER_ADMIN_USER.phone}`);
   console.log(`  password: ${SUPER_ADMIN_USER.password}`);
   console.log('\n⚠️  After first login, change the password from the admin panel.');
   console.log('─────────────────────────────────────────');

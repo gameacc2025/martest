@@ -120,7 +120,7 @@ async function fetchProducts() {
     if (maxPrice.value != null) params.maxPrice = Number(maxPrice.value)
 
     const response = await productsApi.list(params)
-    const items = response?.data?.items ?? response?.data?.data?.items ?? []
+    const items = response?.data?.data ?? []
     products.value = Array.isArray(items) ? items : []
     featuredProducts.value = products.value.slice(0, 8)
     bestSellers.value = products.value.slice(0, 4)

@@ -64,6 +64,7 @@ export const endpoints = {
     hide: (id) => `/products/${id}/hide`,
     archive: (id) => `/products/${id}/archive`,
     restoreDraft: (id) => `/products/${id}/restore-draft`,
+    activity: (id) => `/products/${id}/activity`,
     byCompany: (companyId) => `/products?companyId=${companyId}`
   },
   // Categories
@@ -114,6 +115,8 @@ export const endpoints = {
   // Admin
   admin: {
     stats: '/admin/stats',
+    settings: '/admin/settings',
+    productReviewThreshold: '/admin/settings/product-review-threshold',
     roles: '/roles',
     getRole: (id) => `/roles/${id}`,
     assignableRoles: '/roles/assignable',

@@ -257,7 +257,7 @@ function openCreate() {
 
 function validateCreateForm() {
   const errs = {}
-  if (!createForm.value.email) errs.email = 'ایمیل الزامی است'
+  if (!createForm.value.phone) errs.phone = 'شماره تلفن الزامی است'
   if (!createForm.value.firstName) errs.firstName = 'نام الزامی است'
   if (!createForm.value.lastName) errs.lastName = 'نام خانوادگی الزامی است'
   if (!createForm.value.password || createForm.value.password.length < 6) errs.password = 'رمز عبور باید حداقل ۶ کاراکتر باشد'
@@ -273,8 +273,8 @@ async function saveCreate() {
     // own company for a COMPANY-scoped caller regardless of what's sent
     // (see backend/src/modules/users/user.service.js createUser).
     await userStore.create({
-      email: createForm.value.email,
-      phone: createForm.value.phone || undefined,
+      email: createForm.value.email || undefined,
+      phone: createForm.value.phone,
       password: createForm.value.password,
       firstName: createForm.value.firstName,
       lastName: createForm.value.lastName,
@@ -524,7 +524,12 @@ async function saveCreate() {
     <!-- Add User Dialog -->
     <Dialog v-model:visible="showCreateDialog" header="افزودن کاربر شرکت" :modal="true" :style="{ width: '32rem' }" :breakpoints="{ '640px': '95vw' }">
       <div class="field">
-        <label>ایمیل <span class="req">*</span></label>
+        <label>شماره تلفن <span class="req">*</span></label>
+        <InputText v-model="createForm.phone" class="w-full" :class="{ 'p-invalid': createErrors.phone }" />
+        <small v-if="createErrors.phone" class="field-error">{{ createErrors.phone }}</small>
+      </div>
+      <div class="field">
+        <label>ایمیل <span class="opt">(اختیاری)</span></label>
         <InputText v-model="createForm.email" class="w-full" :class="{ 'p-invalid': createErrors.email }" />
         <small v-if="createErrors.email" class="field-error">{{ createErrors.email }}</small>
       </div>
@@ -539,10 +544,6 @@ async function saveCreate() {
           <InputText v-model="createForm.lastName" class="w-full" :class="{ 'p-invalid': createErrors.lastName }" />
           <small v-if="createErrors.lastName" class="field-error">{{ createErrors.lastName }}</small>
         </div>
-      </div>
-      <div class="field">
-        <label>تلفن</label>
-        <InputText v-model="createForm.phone" class="w-full" />
       </div>
       <div class="field">
         <label>رمز عبور <span class="req">*</span></label>
@@ -701,6 +702,12 @@ async function saveCreate() {
 
 .req {
   color: var(--p-red-500);
+}
+
+.opt {
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
 .field-error {

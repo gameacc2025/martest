@@ -29,7 +29,7 @@ injectMock('../../config/db', {});
 const hit = {};
 const trivialController = {};
 const controllerMethods = [
-  'list', 'getOne', 'myProducts', 'getHistory', 'create', 'update', 'remove',
+  'list', 'getOne', 'myProducts', 'getHistory', 'getActivity', 'create', 'update', 'remove',
   'submitReview', 'approve', 'reject', 'publish', 'hide', 'archive', 'restoreDraft',
   'addPriceTier', 'updatePriceTier', 'deletePriceTier',
   'uploadImage', 'deleteImage', 'setPrimaryImage', 'sortImages',

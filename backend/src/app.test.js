@@ -52,7 +52,7 @@ injectMock('./config/env', {
   jwtRefreshExpiresIn: '7d',
   bcryptSaltRounds: 4,
   frontendUrl: 'http://localhost:3001',
-  superAdminUsername: 'admin',
+  superAdminPhone: '09120000000',
   superAdminPassword: 'test-password',
   superAdminEmail: 'admin@test.local',
 });

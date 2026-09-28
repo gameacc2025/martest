@@ -73,6 +73,7 @@ export const dashboardMenu = [
       // top-level link.
       { title: 'نقش‌ها', icon: 'pi pi-id-card', route: 'admin-roles', permission: 'roles.read' },
       { title: 'مجوزها', icon: 'pi pi-lock', route: 'admin-permissions', permission: 'permissions.read' },
+      { title: 'تنظیمات سیستم', icon: 'pi pi-cog', route: 'admin-settings', permission: 'system_settings.manage' },
     ],
   },
   {

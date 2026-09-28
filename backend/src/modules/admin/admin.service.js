@@ -3,6 +3,48 @@
 // =============================================================
 
 const prisma = require('../../config/db');
+const { AppError } = require('../../utils/error');
+
+// System settings keys. Value is shared with the products module
+// (product.service.js REVIEW_EDIT_THRESHOLD_KEY) — keep both in sync.
+const REVIEW_EDIT_THRESHOLD_KEY = 'catalog.productReviewEditThreshold';
+const DEFAULT_REVIEW_EDIT_THRESHOLD = 5;
+
+/**
+ * Read an admin-managed system setting; falls back to `fallback` when
+ * missing or invalid.
+ */
+async function readSetting(key, fallback) {
+  const setting = await prisma.systemSetting.findUnique({ where: { key }, select: { value: true } });
+  const parsed = setting ? Number(setting.value) : NaN;
+  return Number.isInteger(parsed) && parsed >= 1 ? parsed : fallback;
+}
+
+/**
+ * Get admin-visible system settings.
+ */
+async function getSettings() {
+  return {
+    productReviewEditThreshold: await readSetting(REVIEW_EDIT_THRESHOLD_KEY, DEFAULT_REVIEW_EDIT_THRESHOLD),
+  };
+}
+
+/**
+ * Update the number of post-approval edits that send a product back into
+ * review. Positive integer ≥ 1.
+ */
+async function updateReviewEditThreshold(value, adminUserId) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new AppError('Review threshold must be a positive integer.', 400, true, 'INVALID_REVIEW_THRESHOLD');
+  }
+  await prisma.systemSetting.upsert({
+    where: { key: REVIEW_EDIT_THRESHOLD_KEY },
+    create: { key: REVIEW_EDIT_THRESHOLD_KEY, value: String(parsed), updatedByUserId: adminUserId },
+    update: { value: String(parsed), updatedByUserId: adminUserId },
+  });
+  return getSettings();
+}
 
 /**
  * Get admin dashboard statistics.
@@ -77,4 +119,4 @@ async function getStats() {
   };
 }
 
-module.exports = { getStats };
+module.exports = { getStats, getSettings, updateReviewEditThreshold };

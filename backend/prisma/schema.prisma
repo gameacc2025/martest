@@ -133,8 +133,8 @@ model Company {
 
 model User {
   id            Int              @id @default(autoincrement())
-  email         String           @unique
-  phone         String?          @unique
+  email         String?          @unique
+  phone         String           @unique
   passwordHash  String
   status        UserStatus       @default(ACTIVE)
   createdAt     DateTime         @default(now())
@@ -147,6 +147,7 @@ model User {
   notifications Notification[]
   products      Product[]        @relation("ProductCreatedBy")
   productStatusChanges ProductStatusHistory[]
+  productActivityLogs ProductActivityLog[]
   inquiryStatusChanges InquiryStatusHistory[]
 
   @@index([email])
@@ -271,6 +272,10 @@ model Product {
   status           ProductStatus      @default(DRAFT)
   visibility       ProductVisibility  @default(PUBLIC)
   isFeatured       Boolean            @default(false)
+  // Number of post-approval edits made by a company user. Reset to 0 on every
+  // approve; once it reaches the system-configured review threshold the product
+  // is automatically sent back to PENDING_REVIEW (see product.service.js).
+  editsSinceApproval Int             @default(0)
   companyId        Int
   categoryId       Int
   subcategoryId    Int
@@ -287,6 +292,7 @@ model Product {
   documents        ProductDocument[]
   prices           ProductPriceTier[]
   statusHistory    ProductStatusHistory[]
+  activityLog      ProductActivityLog[]
   inquiryItems     InquiryItem[]
 
   @@index([companyId])
@@ -313,6 +319,27 @@ model ProductStatusHistory {
   @@index([productId])
   @@index([changedByUserId])
   @@index([newStatus])
+  @@index([createdAt])
+}
+
+// Immutable audit trail of every product change: field edits, price-tier
+// changes, media changes, and status workflow transitions. Unlike
+// ProductStatusHistory (which only records status transitions), this captures
+// every content mutation so staff can see exactly what a company changed.
+model ProductActivityLog {
+  id           Int                  @id @default(autoincrement())
+  productId    Int
+  actorUserId  Int
+  action       ProductActivityAction
+  detail       String?
+  comment      String?
+  createdAt    DateTime             @default(now())
+  product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  actor        User                 @relation(fields: [actorUserId], references: [id])
+
+  @@index([productId])
+  @@index([actorUserId])
+  @@index([action])
   @@index([createdAt])
 }
 
@@ -521,6 +548,19 @@ model CompanyLimit {
   @@index([key])
 }
 
+// Platform-wide, admin-managed key/value settings (e.g. the threshold of
+// post-approval edits that pushes a PUBLISHED product back into review).
+model SystemSetting {
+  id            Int      @id @default(autoincrement())
+  key           String   @unique
+  value         String
+  updatedByUserId Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([key])
+}
+
 model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int
@@ -581,6 +621,27 @@ enum ProductStatus {
   PUBLISHED
   HIDDEN
   ARCHIVED
+}
+
+enum ProductActivityAction {
+  CREATE
+  EDIT
+  PRICE_TIER_CREATE
+  PRICE_TIER_UPDATE
+  PRICE_TIER_DELETE
+  IMAGE_UPLOAD
+  IMAGE_DELETE
+  IMAGE_SET_PRIMARY
+  IMAGE_SORT
+  DOCUMENT_UPLOAD
+  DOCUMENT_DELETE
+  SUBMIT_REVIEW
+  APPROVE
+  REJECT
+  PUBLISH
+  HIDE
+  ARCHIVE
+  RESTORE_DRAFT
 }
 
 enum ProductVisibility {

@@ -55,6 +55,7 @@ function resetMocks() {
     updatedProduct: { id: 1 },
     superAdminUserIds: [],
     companyUserIds: [],
+    systemSetting: null,   // null → getReviewEditThreshold falls back to default 5
   };
 }
 
@@ -91,6 +92,14 @@ const mockPrisma = {
   },
   user: { findMany: async () => fx.superAdminUserIds.map((id) => ({ id })) },
   notification: { createMany: async (args) => { recordCall('notification.createMany', args); } },
+  systemSetting: {
+    // null (fx.systemSetting) → fall back to the default threshold.
+    findUnique: async () => fx.systemSetting,
+  },
+  productActivityLog: {
+    create: async (args) => { recordCall('productActivityLog.create', args); return { id: 1 }; },
+    findMany: async () => [],
+  },
   $transaction: async (arg) => {
     if (typeof arg === 'function') return arg(mockPrisma);
     return Promise.all(arg);
@@ -135,12 +144,20 @@ test('tenant isolation: SUPER_ADMIN can manage any company\'s product', async ()
   assert.ok(result);
 });
 
-test('tenant isolation: a company can only edit its own DRAFT products, not e.g. PUBLISHED ones', async () => {
-  fx.product = draftProduct({ companyId: 10, status: 'PUBLISHED' });
-  await assert.rejects(
-    () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, companyA),
-    (err) => err.statusCode === 403 && err.code === 'PRODUCT_NOT_EDITABLE'
-  );
+test('tenant isolation: a company CAN manage its own post-approval (PUBLISHED) product — review threshold decides re-review', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'PUBLISHED', editsSinceApproval: 0 });
+  const result = await service.addPriceTier(1, { minQuantity: 1, price: 100 }, companyA);
+  assert.ok(result); // did not throw: post-approval products are editable
+});
+
+test('tenant isolation: a company CANNOT edit a product that is pending review or archived', async () => {
+  for (const status of ['PENDING_REVIEW', 'ARCHIVED']) {
+    fx.product = draftProduct({ companyId: 10, status });
+    await assert.rejects(
+      () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, companyA),
+      (err) => err.statusCode === 403 && err.code === 'PRODUCT_NOT_EDITABLE'
+    );
+  }
 });
 
 test('tenant isolation: a missing/soft-deleted product 404s regardless of caller', async () => {
@@ -366,4 +383,113 @@ test('uploadDocument: rejects a non-PDF file', async () => {
     () => service.uploadDocument(1, fakeFile, companyA),
     (err) => err.statusCode === 400 && err.code === 'INVALID_DOCUMENT_TYPE'
   );
+});
+
+// ── Review-edit threshold (post-approval edits) ────────────────
+// updateProduct is exercised here. In the mock, category/subcategory always
+// resolve and slug lookups always return a free slug, so only the policy
+// logic (status / editsSinceApproval / activity / notifications) is asserted.
+
+function publishedProduct(overrides = {}) {
+  return draftProduct({
+    companyId: 10,
+    status: 'PUBLISHED',
+    categoryId: 1,
+    subcategoryId: 1,
+    editsSinceApproval: 0,
+    ...overrides,
+  });
+}
+
+test('updateProduct: below threshold — PUBLISHED edit keeps status and increments editsSinceApproval', async () => {
+  fx.product = publishedProduct({ editsSinceApproval: 2, title: 'Old' });
+  await service.updateProduct(1, { title: 'New' }, companyA);
+  const updateArgs = calls['product.update'].at(-1);
+  // Status field is not touched (still PUBLISHED); only the counter is bumped.
+  assert.equal(updateArgs.data.status, undefined);
+  assert.equal(updateArgs.data.editsSinceApproval, 3);
+});
+
+test('updateProduct: at threshold — PUBLISHED edit goes back to PENDING_REVIEW, counter resets, super admins notified', async () => {
+  fx.product = publishedProduct({ editsSinceApproval: 4, title: 'Old' });
+  fx.superAdminUserIds = [10, 11];
+  await service.updateProduct(1, { description: 'New desc' }, companyA);
+
+  const updateArgs = calls['product.update'].at(-1);
+  assert.equal(updateArgs.data.status, 'PENDING_REVIEW');
+  assert.equal(updateArgs.data.editsSinceApproval, 0);
+
+  // Status history records the auto re-review.
+  const historyCall = calls['productStatusHistory.create'].at(-1);
+  assert.equal(historyCall.data.previousStatus, 'PUBLISHED');
+  assert.equal(historyCall.data.newStatus, 'PENDING_REVIEW');
+
+  // Every edit is written to the immutable activity trail.
+  const activity = calls['productActivityLog.create'].at(-1);
+  assert.equal(activity.data.action, 'EDIT');
+  assert.equal(activity.data.productId, 1);
+
+  // Staff are notified that the product needs re-review.
+  const notify = calls['notification.createMany'].at(-1);
+  assert.deepEqual(notify.data.map((item) => item.userId), [10, 11]);
+});
+
+test('updateProduct: a company user with a customized threshold crosses earlier', async () => {
+  fx.systemSetting = { value: '2' };
+  fx.product = publishedProduct({ editsSinceApproval: 1 });
+  await service.updateProduct(1, { title: 'New' }, companyA);
+  const updateArgs = calls['product.update'].at(-1);
+  assert.equal(updateArgs.data.status, 'PENDING_REVIEW');
+  assert.equal(updateArgs.data.editsSinceApproval, 0);
+});
+
+test('updateProduct: admin edits never bump editsSinceApproval and never auto re-review', async () => {
+  fx.product = publishedProduct({ editsSinceApproval: 3 });
+  await service.updateProduct(1, { title: 'New' }, superAdmin);
+  const updateArgs = calls['product.update'].at(-1);
+  assert.equal(updateArgs.data.status, undefined);
+  assert.equal(updateArgs.data.editsSinceApproval, undefined);
+});
+
+test('updateProduct: company cannot edit PENDING_REVIEW / ARCHIVED post-approval or not', async () => {
+  for (const status of ['PENDING_REVIEW', 'ARCHIVED']) {
+    fx.product = publishedProduct({ status });
+    await assert.rejects(
+      () => service.updateProduct(1, { title: 'New' }, companyA),
+      (err) => err.statusCode === 403 && err.code === 'PRODUCT_NOT_EDITABLE'
+    );
+  }
+});
+
+test('getReviewEditThreshold: reads the configured value and falls back to the default', async () => {
+  fx.systemSetting = { value: '7' };
+  assert.equal(await service.getReviewEditThreshold(), 7);
+  fx.systemSetting = { value: 'bogus' };
+  assert.equal(await service.getReviewEditThreshold(), 5);
+  fx.systemSetting = null;
+  assert.equal(await service.getReviewEditThreshold(), 5);
+});
+
+test('changeProductStatus: approve resets editsSinceApproval to 0', async () => {
+  fx.product = draftProduct({ status: 'PENDING_REVIEW', editsSinceApproval: 3 });
+  await service.changeProductStatus(1, 'approve', superAdmin);
+  const updateArgs = calls['product.update'].at(-1);
+  assert.equal(updateArgs.data.status, 'APPROVED');
+  assert.equal(updateArgs.data.editsSinceApproval, 0);
+});
+
+test('changeProductStatus: every transition writes an activity log row', async () => {
+  fx.product = draftProduct({ status: 'PUBLISHED' });
+  await service.changeProductStatus(1, 'archive', superAdmin);
+  const activity = calls['productActivityLog.create'].at(-1);
+  assert.equal(activity.data.action, 'ARCHIVE');
+  assert.equal(activity.data.detail, 'Status PUBLISHED → ARCHIVED');
+});
+
+test('createProduct: logs a CREATE activity row for the new product', async () => {
+  fx.createdProduct = { id: 15 };
+  await service.createProduct({ title: 'New', categoryId: 1, subcategoryId: 1 }, companyA);
+  const activity = calls['productActivityLog.create'].at(-1);
+  assert.equal(activity.data.action, 'CREATE');
+  assert.equal(activity.data.productId, 15);
 });

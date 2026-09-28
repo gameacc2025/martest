@@ -355,9 +355,9 @@ const loadProducts = async () => {
     }
 
     const data = await productsStore.getProducts(params) || {}
-    const list = data.products ?? data.items ?? []
+    const list = data.data ?? []
     products.value = Array.isArray(list) ? list : []
-    totalProducts.value = data.total || 0
+    totalProducts.value = data.meta?.total || 0
   } catch (error) {
     products.value = []
     console.error('Error loading products:', error)

@@ -37,7 +37,7 @@ async function authRoutes(fastify) {
       },
     },
     schema: {
-      summary: 'Login with email and password',
+      summary: 'Login with phone and password',
       tags: ['Auth'],
       body: loginBody,
       response: loginResponse,
@@ -53,17 +53,17 @@ async function authRoutes(fastify) {
       },
     },
     schema: {
-      summary: 'Register a new customer account (requires admin approval)',
+      summary: 'Register a new customer account (phone required, email optional)',
       tags: ['Auth'],
       body: {
         type: 'object',
-        required: ['email', 'password', 'firstName', 'lastName'],
+        required: ['phone', 'password', 'firstName', 'lastName'],
         properties: {
+          phone: { type: 'string', minLength: 1, maxLength: 20 },
           email: { type: 'string', format: 'email' },
           password: { type: 'string', minLength: 8 },
           firstName: { type: 'string', minLength: 1 },
           lastName: { type: 'string', minLength: 1 },
-          phone: { type: 'string' },
         },
       },
     },
@@ -82,7 +82,7 @@ async function authRoutes(fastify) {
       tags: ['Auth'],
       body: {
         type: 'object',
-        required: ['companyName', 'nationalId', 'registrationNumber', 'companyEmail', 'phone', 'address', 'managerFirstName', 'managerLastName', 'managerEmail', 'password'],
+        required: ['companyName', 'nationalId', 'registrationNumber', 'phone', 'address', 'managerFirstName', 'managerLastName', 'managerPhone', 'password'],
         properties: {
           companyName: { type: 'string', minLength: 1 },
           nameEn: { type: 'string' },
@@ -97,7 +97,7 @@ async function authRoutes(fastify) {
           managerFirstName: { type: 'string', minLength: 1 },
           managerLastName: { type: 'string', minLength: 1 },
           managerEmail: { type: 'string', format: 'email' },
-          managerPhone: { type: 'string' },
+          managerPhone: { type: 'string', minLength: 1, maxLength: 20 },
           password: { type: 'string', minLength: 8 },
         },
       },

@@ -337,7 +337,7 @@ test('createUser: a COMPANY-scoped caller is forced into their own company, igno
   fx.userById = dbUser({ id: 100, accessProfile: { companyId: 10 } }); // for the getUser() call at the end
 
   await createUser(
-    { email: 'new@x.com', password: 'p', companyId: '999', type: 'STAFF' },
+    { email: 'new@x.com', phone: '09120000000', password: 'p', companyId: '999', type: 'STAFF' },
     caller({ accessType: 'COMPANY', companyId: 10 })
   );
 
@@ -346,12 +346,26 @@ test('createUser: a COMPANY-scoped caller is forced into their own company, igno
   assert.equal(accessProfileData.companyId, 10);
 });
 
+test('createUser: rejects a missing phone (phone required)', async () => {
+  resetMocks();
+  fx.userByEmail = null;
+
+  await assert.rejects(
+    () => createUser({ email: 'x@x.com', password: 'p' }, caller({ roles: [SUPER_ADMIN_ROLE] })),
+    (err) => {
+      assert.equal(err.statusCode, 400);
+      assert.equal(err.code, 'PHONE_REQUIRED');
+      return true;
+    }
+  );
+});
+
 test('createUser: rejects a duplicate email before touching passwords/roles', async () => {
   resetMocks();
   fx.userByEmail = { id: 1 };
 
   await assert.rejects(
-    () => createUser({ email: 'dup@x.com', password: 'p' }, caller({ roles: [SUPER_ADMIN_ROLE] })),
+    () => createUser({ email: 'dup@x.com', phone: '09120000000', password: 'p' }, caller({ roles: [SUPER_ADMIN_ROLE] })),
     (err) => {
       assert.equal(err.statusCode, 409);
       assert.equal(err.code, 'DUPLICATE_EMAIL');
@@ -379,7 +393,7 @@ test('createUser: COMPANY type without a companyId is rejected', async () => {
   fx.userByEmail = null;
 
   await assert.rejects(
-    () => createUser({ email: 'x@x.com', password: 'p', type: 'COMPANY' }, caller({ roles: [SUPER_ADMIN_ROLE] })),
+    () => createUser({ email: 'x@x.com', phone: '09120000000', password: 'p', type: 'COMPANY' }, caller({ roles: [SUPER_ADMIN_ROLE] })),
     (err) => {
       assert.equal(err.code, 'COMPANY_REQUIRED');
       return true;
@@ -395,7 +409,7 @@ test('createUser: a COMPANY-scoped caller cannot assign a non-COMPANY-scope role
   await assert.rejects(
     () =>
       createUser(
-        { email: 'x@x.com', password: 'p', roleIds: [1] },
+        { email: 'x@x.com', phone: '09120000000', password: 'p', roleIds: [1] },
         caller({ accessType: 'COMPANY', companyId: 10 })
       ),
     (err) => {
@@ -412,7 +426,7 @@ test('createUser: an invalid role id (not found in DB) is rejected', async () =>
   fx.roles = []; // none of the requested ids exist
 
   await assert.rejects(
-    () => createUser({ email: 'x@x.com', password: 'p', roleIds: [999] }, caller({ roles: [SUPER_ADMIN_ROLE] })),
+    () => createUser({ email: 'x@x.com', phone: '09120000000', password: 'p', roleIds: [999] }, caller({ roles: [SUPER_ADMIN_ROLE] })),
     (err) => {
       assert.equal(err.code, 'INVALID_ROLE');
       return true;
@@ -425,7 +439,7 @@ test('createUser: hashes the password before persisting', async () => {
   fx.userByEmail = null;
   fx.userById = dbUser({ id: 100 });
 
-  await createUser({ email: 'x@x.com', password: 'plaintext' }, caller({ roles: [SUPER_ADMIN_ROLE] }));
+  await createUser({ email: 'x@x.com', phone: '09120000000', password: 'plaintext' }, caller({ roles: [SUPER_ADMIN_ROLE] }));
 
   assert.equal(calls.userCreate[0].data.passwordHash, 'hashed(plaintext)');
 });

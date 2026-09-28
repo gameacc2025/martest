@@ -19,7 +19,7 @@
 
       <DataTable :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
         :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll">
+        @page="onPageChange" responsiveLayout="scroll" v-if="products.length > 0 || loading">
         <Column field="id" header="شناسه" sortable></Column>
         <Column field="title" header="عنوان" sortable></Column>
         <Column header="شرکت">
@@ -34,12 +34,19 @@
         </Column>
         <Column field="status" header="وضعیت">
           <template #body="{ data }">
-            <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
+            <div class="status-cell">
+              <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
+              <span v-if="getUnreviewedEditCount(data) > 0" class="unreviewed-badge" v-tooltip.top="'تغییرات پس از تأیید که هنوز بازبینی نشده‌اند'">
+                <i class="pi pi-pencil" />
+                {{ getUnreviewedEditCount(data) }} ویرایش
+              </span>
+            </div>
           </template>
         </Column>
         <Column header="عملیات">
           <template #body="{ data }">
             <div class="flex gap-2">
+              <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'پیش‌نمایش'" @click="showPreview(data)" />
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text @click="editProduct(data)" />
               <Button v-if="data.status === 'PENDING_REVIEW'" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
@@ -51,6 +58,17 @@
           </template>
         </Column>
       </DataTable>
+
+      <div v-else-if="loadError" class="table-state">
+        <i class="pi pi-exclamation-triangle" />
+        <p>{{ loadError }}</p>
+        <Button label="تلاش مجدد" icon="pi pi-refresh" severity="secondary" @click="fetchProducts(pagination.page)" />
+      </div>
+
+      <div v-else class="table-state">
+        <i class="pi pi-box" />
+        <p>محصولی یافت نشد</p>
+      </div>
     </div>
 
     <!-- Create/Edit Product Dialog -->
@@ -108,6 +126,12 @@
         <Button label="رد محصول" icon="pi pi-times" severity="danger" :loading="rejectingId !== null" @click="rejectProduct" />
       </template>
     </Dialog>
+
+    <!-- Product preview (marketplace-style review) -->
+    <Dialog v-model:visible="showPreviewDialog" header="پیش‌نمایش محصول" :modal="true"
+      :style="{ width: '46rem' }" :breakpoints="{ '640px': '94vw' }" :contentStyle="{ maxHeight: '70vh', overflow: 'auto' }">
+      <ProductPreviewCard v-if="previewProduct" :product="previewProduct" />
+    </Dialog>
   </div>
 </template>
 
@@ -117,7 +141,8 @@ import { useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
-import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS } from '../../../config/product'
+import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, getUnreviewedEditCount } from '../../../config/product'
+import ProductPreviewCard from '../../../components/ProductPreviewCard.vue'
 import Dropdown from 'primevue/dropdown'
 
 const toast = useToast()
@@ -134,6 +159,7 @@ const products = ref([])
 const companies = ref([])
 const categories = ref([])
 const loading = ref(false)
+const loadError = ref('')
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
 const showReasonDialog = ref(false)
@@ -150,6 +176,10 @@ const rejectingId = ref(null)
 const showRejectDialog = ref(false)
 const rejectReason = ref('')
 const productToReject = ref(null)
+
+// Marketplace-style preview
+const showPreviewDialog = ref(false)
+const previewProduct = ref(null)
 
 // Use centralized status helpers from config/product.js
 const statusLabel = getStatusLabel
@@ -184,6 +214,7 @@ function debounceSearch() {
 
 async function fetchProducts(page = 1) {
   loading.value = true
+  loadError.value = ''
   try {
     // Management listing: use the authenticated endpoint so the caller sees
     // ALL statuses (SUPER_ADMIN → every company, company user → own company).
@@ -205,7 +236,12 @@ async function fetchProducts(page = 1) {
       }
     }
   } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت محصولات', life: 3000 })
+    // Inline error state (with retry) instead of a misleading empty list.
+    // Network failures (no HTTP status) get a dedicated, human-readable message.
+    const status = err.status ?? err.response?.status
+    loadError.value = err.response?.data?.error?.message || err.serverMessage || (status ? (err.message || 'خطا در دریافت محصولات') : 'ارتباط با سرور برقرار نشد')
+    products.value = []
+    toast.add({ severity: 'error', summary: 'خطا', detail: loadError.value, life: 4000 })
   } finally {
     loading.value = false
   }
@@ -337,6 +373,11 @@ function showRejection(product) {
   showReasonDialog.value = true
 }
 
+function showPreview(product) {
+  previewProduct.value = product
+  showPreviewDialog.value = true
+}
+
 function confirmDelete(product) {
   productToDelete.value = product
   showDeleteDialog.value = true
@@ -364,5 +405,46 @@ onMounted(() => {
 <style scoped>
 .product-list-page {
   direction: rtl;
+}
+
+.status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.unreviewed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+}
+
+.table-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  color: var(--text-color-secondary);
+  text-align: center;
+}
+
+.table-state i {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+
+.table-state p {
+  margin: 0;
+  font-size: 0.95rem;
 }
 </style>

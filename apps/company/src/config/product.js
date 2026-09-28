@@ -80,12 +80,28 @@ export function canSubmitForReview(product) {
 
 /**
  * Check if a product can be edited.
- * Company users can only edit DRAFT products.
+ * Backend truth (product.service.js): company users may edit DRAFT, REJECTED,
+ * APPROVED, PUBLISHED and HIDDEN products. Only PENDING_REVIEW and ARCHIVED
+ * are locked. Post-approval edits are allowed up to the system-configured
+ * review threshold before the product is sent back into review.
  * @param {object} product
  * @returns {boolean}
  */
 export function canEdit(product) {
-  return product?.status === 'DRAFT'
+  return product?.status !== 'PENDING_REVIEW' && product?.status !== 'ARCHIVED'
+}
+
+/**
+ * Number of post-approval edits made on a published/approved product that are
+ * not yet covered by a re-review. 0 for everything else (DRAFT, REJECTED,
+ * PENDING_REVIEW, ARCHIVED) — the counter only exists on post-approval statuses.
+ * @param {object} product
+ * @returns {number}
+ */
+export function getUnreviewedEditCount(product) {
+  return ['APPROVED', 'PUBLISHED', 'HIDDEN'].includes(product?.status)
+    ? (product?.editsSinceApproval || 0)
+    : 0
 }
 
 /**

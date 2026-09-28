@@ -82,7 +82,7 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>ایمیل</label>
+                  <label>ایمیل <span class="reg-optional">(اختیاری)</span></label>
                   <InputText
                     v-model="form.email"
                     placeholder="آدرس ایمیل خود را وارد کنید"
@@ -93,7 +93,7 @@
                   <small v-if="errors.email" class="p-error block">{{ errors.email }}</small>
                 </div>
                 <div class="field">
-                  <label>شماره تلفن</label>
+                  <label>شماره تلفن <span class="reg-required">*</span></label>
                   <InputText
                     v-model="form.phone"
                     placeholder="شماره تلفن خود را وارد کنید"
@@ -253,7 +253,7 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>ایمیل مدیر</label>
+                  <label>ایمیل مدیر <span class="reg-optional">(اختیاری)</span></label>
                   <InputText
                     v-model="form.managerEmail"
                     placeholder="ایمیل مدیر شرکت"
@@ -264,12 +264,14 @@
                   <small v-if="errors.managerEmail" class="p-error block">{{ errors.managerEmail }}</small>
                 </div>
                 <div class="field">
-                  <label>شماره همراه مدیر</label>
+                  <label>شماره همراه مدیر <span class="reg-required">*</span></label>
                   <InputText
                     v-model="form.managerPhone"
                     placeholder="شماره همراه مدیر"
                     class="auth-input"
+                    :class="{ 'p-invalid': errors.managerPhone }"
                   />
+                  <small v-if="errors.managerPhone" class="p-error block">{{ errors.managerPhone }}</small>
                 </div>
               </div>
 
@@ -446,6 +448,8 @@ const validateForm = () => {
   if (userType.value === 'customer') {
     if (!form.value.firstName) errors.value.firstName = 'وارد کردن نام الزامی است'
     if (!form.value.lastName) errors.value.lastName = 'وارد کردن نام خانوادگی الزامی است'
+    if (!form.value.phone) errors.value.phone = 'وارد کردن شماره تلفن الزامی است'
+    if (form.value.email && !isValidEmail(form.value.email)) errors.value.email = 'ایمیل وارد شده معتبر نیست'
   } else {
     // Company validation
     if (!form.value.companyName) errors.value.companyName = 'وارد کردن نام شرکت الزامی است'
@@ -455,18 +459,8 @@ const validateForm = () => {
     // Manager validation
     if (!form.value.managerFirstName) errors.value.managerFirstName = 'وارد کردن نام مدیر الزامی است'
     if (!form.value.managerLastName) errors.value.managerLastName = 'وارد کردن نام خانوادگی مدیر الزامی است'
-    if (!form.value.managerEmail) errors.value.managerEmail = 'وارد کردن ایمیل مدیر الزامی است'
-    else if (!isValidEmail(form.value.managerEmail)) errors.value.managerEmail = 'ایمیل مدیر معتبر نیست'
-  }
-
-  if (!form.value.email) {
-    errors.value.email = 'وارد کردن ایمیل الزامی است'
-  } else if (!isValidEmail(form.value.email)) {
-    errors.value.email = 'ایمیل وارد شده معتبر نیست'
-  }
-
-  if (!form.value.phone) {
-    errors.value.phone = 'وارد کردن شماره تلفن الزامی است'
+    if (!form.value.managerPhone) errors.value.managerPhone = 'وارد کردن شماره تلفن مدیر الزامی است'
+    if (form.value.managerEmail && !isValidEmail(form.value.managerEmail)) errors.value.managerEmail = 'ایمیل مدیر معتبر نیست'
   }
 
   if (!form.value.password) {
@@ -709,6 +703,16 @@ const isValidEmail = (email) => {
   color: var(--primary-color);
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;
+}
+
+.reg-required {
+  color: var(--p-red-500);
+}
+
+.reg-optional {
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  font-weight: 400;
 }
 
 .auth-hint {

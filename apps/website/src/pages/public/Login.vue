@@ -40,13 +40,12 @@
             </div>
 
             <div class="field">
-              <label>ایمیل</label>
+              <label>شماره تلفن</label>
               <InputText
-                v-model="form.email"
-                type="email"
-                placeholder="example@email.com"
+                v-model="form.phone"
+                placeholder="شماره تلفن خود را وارد کنید"
                 class="auth-input"
-                :class="{ 'p-invalid': error && !form.email }"
+                :class="{ 'p-invalid': error && !form.phone }"
               />
             </div>
 
@@ -143,7 +142,7 @@ function goTo(target, authContext) {
 }
 
 const form = ref({
-  email: '',
+  phone: '',
   password: ''
 })
 
@@ -156,7 +155,7 @@ async function handleSubmit() {
     error.value = ''
 
     const response = await authStore.login({
-      email: form.value.email,
+      phone: form.value.phone,
       password: form.value.password
     })
 

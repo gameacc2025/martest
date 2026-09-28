@@ -14,14 +14,14 @@
 
 const loginBody = {
   type: 'object',
-  required: ['email', 'password'],
+  required: ['phone', 'password'],
   additionalProperties: false,
   properties: {
-    email: {
+    phone: {
       type: 'string',
       minLength: 1,
-      maxLength: 255,
-      description: 'Username or email address.',
+      maxLength: 20,
+      description: 'Phone number (the sole login identity).',
     },
     password: { type: 'string', minLength: 1, maxLength: 128 },
     app: {
@@ -58,8 +58,8 @@ const userResponse = {
   type: 'object',
   properties: {
     id: { type: 'integer' },
-    email: { type: 'string' },
-    phone: { type: ['string', 'null'] },
+    email: { type: ['string', 'null'] },
+    phone: { type: 'string' },
     status: { type: 'string' },
     createdAt: { type: 'string' },
     updatedAt: { type: 'string' },

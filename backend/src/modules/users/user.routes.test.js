@@ -99,7 +99,7 @@ test('POST /: requires users.create', async () => {
     method: 'POST',
     url: '/api/v1/users',
     headers: userHeader(['users.create']),
-    payload: { email: 'a@a.com', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
+    payload: { phone: '09120000000', email: 'a@a.com', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.create, true);
@@ -112,7 +112,7 @@ test('POST /: without permission -> 403', async () => {
     method: 'POST',
     url: '/api/v1/users',
     headers: userHeader([]),
-    payload: { email: 'a@a.com', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
+    payload: { phone: '09120000000', email: 'a@a.com', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
   });
   assert.equal(res.statusCode, 403);
   await app.close();

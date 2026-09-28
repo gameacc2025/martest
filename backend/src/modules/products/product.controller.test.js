@@ -46,6 +46,7 @@ const mockProductService = {
   MAX_DOCUMENT_BYTES: 10_000_000,
   listProducts: async (...args) => { calls.listProducts = args; return fx.listResult ?? { items: [], total: 0 }; },
   getProductHistory: async (...args) => { calls.getProductHistory = args; return fx.history; },
+  getProductActivityLog: async (...args) => { calls.getProductActivityLog = args; return fx.activity; },
   getProductById: async (...args) => { calls.getProductById = args; return fx.product; },
   createProduct: async (...args) => { calls.createProduct = args; return fx.created; },
   updateProduct: async (...args) => { calls.updateProduct = args; return fx.updated; },
@@ -137,6 +138,14 @@ test('getOne: passes params.id and request.user (for visibility scoping) to the 
   const user = { companyId: 5 };
   await controller.getOne(makeRequest({ params: { id: '1' }, user }), reply);
   assert.deepEqual(calls.getProductById, ['1', user]);
+});
+
+test('getActivity: forwards id and wraps the result', async () => {
+  fx.activity = [{ id: 1, action: 'EDIT' }];
+  const reply = makeReply();
+  await controller.getActivity(makeRequest({ params: { id: '1' } }), reply);
+  assert.deepEqual(calls.getProductActivityLog, ['1']);
+  assert.deepEqual(reply._body, { data: fx.activity });
 });
 
 // ── create / update / remove ─────────────────────────────────

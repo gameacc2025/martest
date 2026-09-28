@@ -74,12 +74,12 @@
 ## APIهای Auth
 
 ### `POST /api/auth/login`
-**توضیح**: ورود به سیستم با نام کاربری/ایمیل و رمز عبور
+**توضیح**: ورود به سیستم با شماره تلفن و رمز عبور (تلفن تنها شناسه ورود است)
 
 **Request Body**:
 ```json
 {
-  "username": "string",
+  "phone": "string",
   "password": "string"
 }
 ```
@@ -89,15 +89,28 @@
 {
   "status": "success",
   "data": {
-    "accessToken": "jwt_token",
+    "tokens": {
+      "accessToken": "jwt_token",
+      "refreshToken": "refresh_token",
+      "expiresIn": 900
+    },
     "user": {
       "id": 1,
-      "username": "admin",
-      "fullName": "مدیر سیستم",
+      "phone": "09120000000",
       "email": "admin@example.com",
-      "roles": [{"id": 1, "name": "SUPER_ADMIN", "label": "مدیر کل سیستم"}],
-      "permissions": ["users.read", "users.create"]
-    }
+      "status": "ACTIVE"
+    },
+    "profile": {
+      "firstName": "مدیر",
+      "lastName": "سیستم"
+    },
+    "accessProfile": {
+      "type": "STAFF",
+      "companyId": null,
+      "isActive": true
+    },
+    "roles": ["SUPER_ADMIN"],
+    "permissions": ["*"]
   }
 }
 ```

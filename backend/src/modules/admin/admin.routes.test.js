@@ -32,6 +32,14 @@ const trivialController = {
     hit.getStats = true;
     return reply.code(200).send({ ok: true });
   },
+  getSettings: async (request, reply) => {
+    hit.getSettings = true;
+    return reply.code(200).send({ productReviewEditThreshold: 5 });
+  },
+  updateReviewEditThreshold: async (request, reply) => {
+    hit.updateReviewEditThreshold = request.body;
+    return reply.code(200).send({ productReviewEditThreshold: request.body.value });
+  },
 };
 injectMock('./admin.controller', trivialController);
 
@@ -97,5 +105,68 @@ test('GET /stats: SUPER_ADMIN bypasses permission check', async () => {
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.getStats, true);
+  await app.close();
+});
+
+test('GET /settings: requires system_settings.manage permission', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/admin/settings',
+    headers: userHeader(['system_settings.manage']),
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.getSettings, true);
+  await app.close();
+});
+
+test('GET /settings: without permission -> 403 (users.read is not enough)', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/admin/settings',
+    headers: userHeader(['users.read']),
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.getSettings, undefined);
+  await app.close();
+});
+
+test('PATCH /settings/product-review-threshold: validates body and forwards it', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/admin/settings/product-review-threshold',
+    headers: userHeader(['system_settings.manage']),
+    payload: { value: 3 },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(hit.updateReviewEditThreshold, { value: 3 });
+  await app.close();
+});
+
+test('PATCH /settings/product-review-threshold: rejects a non-positive value (schema)', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/admin/settings/product-review-threshold',
+    headers: userHeader(['system_settings.manage']),
+    payload: { value: 0 },
+  });
+  assert.equal(res.statusCode, 400);
+  assert.equal(hit.updateReviewEditThreshold, undefined);
+  await app.close();
+});
+
+test('PATCH /settings/product-review-threshold: SUPER_ADMIN bypasses permission check', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/admin/settings/product-review-threshold',
+    headers: { 'x-test-user': JSON.stringify({ roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
+    payload: { value: 7 },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(hit.updateReviewEditThreshold, { value: 7 });
   await app.close();
 });

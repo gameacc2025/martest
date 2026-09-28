@@ -48,7 +48,7 @@ const multipartFileBody = (fieldName = 'file') => ({
 const docs = {
   'POST /api/v1/auth/login': {
     summary: 'Login',
-    description: 'Authenticates a user with email and password. Returns an access token and sets the refresh token cookie when login succeeds. Authentication required: none. Permission required: none.',
+    description: 'Authenticates a user with phone and password. Returns an access token and sets the refresh token cookie when login succeeds. Authentication required: none. Permission required: none.',
     tags: ['Authentication'],
     authRequired: false,
     includeNotFound: false,
@@ -218,6 +218,8 @@ const docs = {
 
 Object.assign(docs, {
   'GET /api/v1/admin/stats': { summary: 'Get admin statistics', description: 'Returns dashboard statistics for administrative views. Authentication required: Bearer JWT. Permission required: users.read.', tags: ['Admin'], permission: 'users.read', responses: resourceResponse('Dashboard statistics returned successfully.') },
+  'GET /api/v1/admin/settings': { summary: 'Get system settings', description: 'Returns admin-managed system settings (e.g. the product review-edit threshold). Authentication required: Bearer JWT. Permission required: system_settings.manage.', tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('System settings returned successfully.') },
+  'PATCH /api/v1/admin/settings/product-review-threshold': { summary: 'Update product review threshold', description: 'Updates the number of post-approval product edits that trigger re-review. Authentication required: Bearer JWT. Permission required: system_settings.manage.', tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Review threshold updated successfully.') },
 
   'GET /api/v1/settings/profile': { summary: 'Get current profile', description: 'Returns the authenticated user profile settings. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: resourceResponse('Profile returned successfully.') },
   'PATCH /api/v1/settings/profile': { summary: 'Update current profile', description: 'Updates the authenticated user profile settings. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: resourceResponse('Profile updated successfully.') },
@@ -283,6 +285,7 @@ Object.assign(docs, {
   'PATCH /api/v1/products/:id/images/sort': { summary: 'Sort product images', description: 'Updates product image display order. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN or company user (product ownership enforced).', tags: ['Products'], permission: 'SUPER_ADMIN role OR company user account', params: idParam(), responses: resourceResponse('Product image order updated successfully.') },
   'POST /api/v1/products/:id/documents': { summary: 'Upload product document', description: 'Uploads a product document. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN or company user (product ownership enforced).', tags: ['Products'], permission: 'SUPER_ADMIN role OR company user account', params: idParam(), consumes: ['multipart/form-data'], body: multipartFileBody('document'), responses: createdResponse('Product document uploaded successfully.') },
   'DELETE /api/v1/products/:id/documents/:documentId': { summary: 'Delete product document', description: 'Deletes a product document. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN or company user (product ownership enforced).', tags: ['Products'], permission: 'SUPER_ADMIN role OR company user account', params: twoIdParams('id', 'documentId'), responses: messageResponse('Product document deleted successfully.') },
+  'GET /api/v1/products/:id/activity': { summary: 'Get product activity log', description: 'Returns the immutable activity trail for a product (field edits, price/media changes, workflow transitions). Authentication required: Bearer JWT. Permission required: authenticated user (product ownership enforced).', tags: ['Products'], params: idParam(), responses: resourceResponse('Product activity returned successfully.') },
 });
 
 const inquiryListQuery = {

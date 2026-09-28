@@ -234,51 +234,43 @@ model RefreshToken {
 ## مدلهای اصلی کسب و کار
 
 ### 1. User (کاربر)
-**توضیح**: کاربران سیستم
+**توضیح**: کاربران سیستم — تلفن تنها شناسه ورود است (اجباری)، ایمیل اختیاری است
 
 ```prisma
 model User {
-  id            Int            @id @default(autoincrement())
-  username      String         @unique // login name, e.g. "admin"
-  fullName      String
-  email         String         @unique
-  password      String         // bcrypt hashed - never stored as plaintext
+  id            Int              @id @default(autoincrement())
+  email         String?          @unique // اختیاری
+  phone         String           @unique // اجباری — تنها شناسه ورود
+  passwordHash  String           // bcrypt hashed - never stored as plaintext
+  status        UserStatus       @default(ACTIVE)
 
-  isActive      Boolean        @default(true)
-
-  // COMPANY_ADMIN and BUYER belong to a company
-  // SUPER_ADMIN has companyId = null
-  companyId     Int?
-  company       Company?       @relation(fields: [companyId], references: [id])
-
-  // RBAC relations
+  profile       Profile?
+  accessProfile AccessProfile?
   roles         UserRole[]
-  permissions   UserPermission[]
-
-  // Refresh tokens for this user (a user can have multiple active sessions)
   refreshTokens RefreshToken[]
+  notifications Notification[]
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([email])
-  @@index([companyId])
+  @@index([status])
+  @@index([phone])
 }
 ```
 
 **فیلدها**:
 - `id`: شناسه یکتا
-- `username`: نام کاربری (منحصر به فرد)
-- `fullName`: نام کامل
-- `email`: ایمیل (منحصر به فرد)
-- `password`: رمز عبور هش شده (bcrypt)
-- `isActive`: آیا کاربر فعال است؟
-- `companyId`: شناسه شرکت (برای COMPANY_ADMIN و BUYER)
+- `email`: ایمیل (اختیاری، منحصر به فرد)
+- `phone`: شماره تلفن (اجباری، منحصر به فرد) — تنها شناسه ورود
+- `passwordHash`: رمز عبور هش شده (bcrypt)
+- `status`: وضعیت کاربر (PENDING / ACTIVE / REJECTED)
 - `createdAt/updatedAt`: زمان ایجاد و بهروزرسانی
 
 **ایندکسها**:
+- تلفن: برای جستجوی سریع (ورود)
 - ایمیل: برای جستجوی سریع
-- شرکت: برای فیلتر کردن کاربران یک شرکت
+- وضعیت: برای فیلتر کردن کاربران
 
 ---
 

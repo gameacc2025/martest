@@ -12,12 +12,12 @@
 
 const createUserBody = {
   type: 'object',
-  required: ['email', 'password', 'firstName', 'lastName'],
+  required: ['phone', 'password', 'firstName', 'lastName'],
   additionalProperties: false,
   properties: {
-    // Auth identity
+    // Auth identity — phone is the sole login identity (required), email optional.
     email:       { type: 'string', format: 'email', maxLength: 255 },
-    phone:       { type: ['string', 'null'], maxLength: 32 },
+    phone:       { type: 'string', minLength: 1, maxLength: 32 },
     password:    { type: 'string', minLength: 6, maxLength: 128 },
     // Personal info (Profile)
     firstName:   { type: 'string', minLength: 1, maxLength: 50 },
@@ -36,9 +36,10 @@ const updateUserBody = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    // Auth identity
-    email:       { type: 'string', format: 'email', maxLength: 255 },
-    phone:       { type: ['string', 'null'], maxLength: 32 },
+    // Auth identity — phone is the sole login identity (cannot be cleared),
+    // email optional.
+    email:       { type: ['string', 'null'], format: 'email', maxLength: 255 },
+    phone:       { type: 'string', minLength: 1, maxLength: 32 },
     status:      { type: 'string', enum: ['PENDING', 'ACTIVE', 'REJECTED'] },
     isActive:    { type: 'boolean', description: 'Deprecated: use status instead' },
     // Personal info (Profile)

@@ -69,7 +69,7 @@ test('helmet security headers are present', async () => {
 
 test('repeated failed logins from the same IP get rate-limited (429)', async () => {
   const remoteAddress = '203.0.113.9'; // arbitrary external IP, NOT in the allowList
-  const payload = { email: 'nobody@example.com', password: 'wrong-password' };
+  const payload = { phone: '09120000000', password: 'wrong-password' };
 
   const statuses = [];
   for (let i = 0; i < 12; i++) {
@@ -93,7 +93,7 @@ test('a different IP is NOT affected by another IP\'s rate limit', async () => {
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/login',
-    payload: { email: 'someone-else@example.com', password: 'wrong-password' },
+    payload: { phone: '09120000000', password: 'wrong-password' },
     remoteAddress: '198.51.100.42',
   });
   assert.equal(res.statusCode, 401); // not 429 — rate limiting is per-IP

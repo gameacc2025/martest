@@ -109,15 +109,15 @@ function normalizeEmail(email) {
 }
 
 /**
- * Find a user (with passwordHash) by email — the sole login identity.
- * @param {string} email
+ * Find a user (with passwordHash) by phone — the sole login identity.
+ * @param {string} phone
  */
-async function findUserByEmail(email) {
-  const value = normalizeEmail(email);
+async function findUserByPhone(phone) {
+  const value = String(phone || '').trim();
   if (!value) return null;
 
   return prisma.user.findUnique({
-    where: { email: value },
+    where: { phone: value },
     select: { ...USER_SELECT, passwordHash: true },
   });
 }
@@ -183,19 +183,19 @@ async function issueTokens(fastify, { userId, email, roles, permissions, accessP
 }
 
 /**
- * Login with email + password.
+ * Login with phone + password.
  * @param {object} fastify
- * @param {string} email
+ * @param {string} phone
  * @param {string} password
  * @param {string} [app] - 'admin' | 'company' — optional app-type guard
  */
-async function login(fastify, email, password, app) {
-  const user = await findUserByEmail(email);
+async function login(fastify, phone, password, app) {
+  const user = await findUserByPhone(phone);
 
   const INVALID_CREDENTIALS = createError(
     401,
     'INVALID_CREDENTIALS',
-    'ایمیل یا رمز عبور اشتباه است.'
+    'شماره تلفن یا رمز عبور اشتباه است.'
   );
 
   if (!user) {
@@ -433,31 +433,33 @@ async function changeUserPassword(targetUserId, newPassword) {
  * is treated as a plain website customer (see login()'s app guard, which only
  * restricts the 'admin'/'company' panels).
  *
- * @param {object} data - { email, password, firstName, lastName, phone }
+ * @param {object} data - { phone, password, firstName, lastName, email }
  * @returns {Promise<object>} { user, profile, accessProfile, roles }
  */
 async function register(data) {
   const { email, password, firstName, lastName, phone } = data;
 
-  if (!email || !password || !firstName || !lastName) {
-    throw createError(400, 'VALIDATION_ERROR', 'ایمیل، رمز عبور، نام و نام خانوادگی الزامی است.');
+  if (!phone || !password || !firstName || !lastName) {
+    throw createError(400, 'VALIDATION_ERROR', 'شماره تلفن، رمز عبور، نام و نام خانوادگی الزامی است.');
   }
 
   if (password.length < 8) {
     throw createError(400, 'WEAK_PASSWORD', 'رمز عبور باید حداقل ۸ کاراکتر باشد.');
   }
 
-  const normalizedEmail = normalizeEmail(email);
+  const normalizedPhone = String(phone).trim();
 
-  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-  if (existingEmail) {
-    throw createError(409, 'DUPLICATE_EMAIL', 'ایمیل قبلاً ثبت شده است.');
+  const existingPhone = await prisma.user.findUnique({ where: { phone: normalizedPhone } });
+  if (existingPhone) {
+    throw createError(409, 'DUPLICATE_PHONE', 'شماره تلفن قبلاً ثبت شده است.');
   }
 
-  if (phone) {
-    const existingPhone = await prisma.user.findUnique({ where: { phone } });
-    if (existingPhone) {
-      throw createError(409, 'DUPLICATE_PHONE', 'شماره تلفن قبلاً ثبت شده است.');
+  const normalizedEmail = normalizeEmail(email);
+
+  if (normalizedEmail) {
+    const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existingEmail) {
+      throw createError(409, 'DUPLICATE_EMAIL', 'ایمیل قبلاً ثبت شده است.');
     }
   }
 
@@ -467,7 +469,7 @@ async function register(data) {
     const user = await tx.user.create({
       data: {
         email: normalizedEmail,
-        phone: phone || null,
+        phone: normalizedPhone,
         passwordHash,
         status: 'ACTIVE',
       },
@@ -530,12 +532,12 @@ async function registerCompany(data) {
     managerFirstName, managerLastName,
   } = data;
 
-  if (!companyName || !nationalId || !registrationNumber || !companyEmail || !phone || !address) {
-    throw createError(400, 'VALIDATION_ERROR', 'نام شرکت، شناسه ملی، شماره ثبت، ایمیل، تلفن و آدرس الزامی است.');
+  if (!companyName || !nationalId || !registrationNumber || !phone || !address) {
+    throw createError(400, 'VALIDATION_ERROR', 'نام شرکت، شناسه ملی، شماره ثبت، تلفن و آدرس الزامی است.');
   }
 
-  if (!managerEmail || !password || !managerFirstName || !managerLastName) {
-    throw createError(400, 'VALIDATION_ERROR', 'ایمیل، رمز عبور، نام و نام خانوادگی مدیر الزامی است.');
+  if (!managerPhone || !password || !managerFirstName || !managerLastName) {
+    throw createError(400, 'VALIDATION_ERROR', 'شماره تلفن مدیر، رمز عبور، نام و نام خانوادگی مدیر الزامی است.');
   }
 
   if (password.length < 8) {
@@ -547,17 +549,19 @@ async function registerCompany(data) {
     throw createError(409, 'DUPLICATE_COMPANY', 'شرکتی با این شناسه ملی قبلاً ثبت شده است.');
   }
 
-  const normalizedManagerEmail = normalizeEmail(managerEmail);
+  const normalizedManagerPhone = String(managerPhone).trim();
 
-  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedManagerEmail } });
-  if (existingEmail) {
-    throw createError(409, 'DUPLICATE_EMAIL', 'ایمیل مدیر قبلاً ثبت شده است.');
+  const existingPhone = await prisma.user.findUnique({ where: { phone: normalizedManagerPhone } });
+  if (existingPhone) {
+    throw createError(409, 'DUPLICATE_PHONE', 'شماره تلفن مدیر قبلاً ثبت شده است.');
   }
 
-  if (managerPhone) {
-    const existingPhone = await prisma.user.findUnique({ where: { phone: managerPhone } });
-    if (existingPhone) {
-      throw createError(409, 'DUPLICATE_PHONE', 'شماره تلفن مدیر قبلاً ثبت شده است.');
+  const normalizedManagerEmail = normalizeEmail(managerEmail);
+
+  if (normalizedManagerEmail) {
+    const existingEmail = await prisma.user.findUnique({ where: { email: normalizedManagerEmail } });
+    if (existingEmail) {
+      throw createError(409, 'DUPLICATE_EMAIL', 'ایمیل مدیر قبلاً ثبت شده است.');
     }
   }
 
@@ -591,7 +595,7 @@ async function registerCompany(data) {
     const user = await tx.user.create({
       data: {
         email: normalizedManagerEmail,
-        phone: managerPhone || null,
+        phone: normalizedManagerPhone,
         passwordHash,
         status: 'PENDING',
       },

@@ -139,3 +139,16 @@ export function getAllowedActions(product) {
   actions.push('duplicate')
   return actions
 }
+
+/**
+ * Number of post-approval edits a company made that are not yet covered by a
+ * re-review (Product.editsSinceApproval). Only meaningful on APPROVED /
+ * PUBLISHED / HIDDEN; 0 elsewhere.
+ * @param {object} product
+ * @returns {number}
+ */
+export function getUnreviewedEditCount(product) {
+  return ['APPROVED', 'PUBLISHED', 'HIDDEN'].includes(product?.status)
+    ? (product?.editsSinceApproval || 0)
+    : 0
+}

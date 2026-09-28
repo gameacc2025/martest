@@ -90,7 +90,8 @@ export const productsApi = {
   setPrimaryImage: (id, imageId) => api.patch(`${endpoints.products.get(id)}/images/${imageId}/primary`),
   sortImages: (id, images) => api.patch(`${endpoints.products.get(id)}/images/sort`, { images }),
   uploadDocument: (id, formData) => api.post(`${endpoints.products.get(id)}/documents`, formData),
-  deleteDocument: (id, documentId) => api.delete(`${endpoints.products.get(id)}/documents/${documentId}`)
+  deleteDocument: (id, documentId) => api.delete(`${endpoints.products.get(id)}/documents/${documentId}`),
+  getActivity: (id) => api.get(endpoints.products.activity(id)),
 }
 
 // Companies API
@@ -169,6 +170,8 @@ export const adminApi = {
   createPermission: (data) => api.post(endpoints.admin.permissions, data),
   updatePermission: (id, data) => api.patch(endpoints.admin.getPermission(id), data),
   deletePermission: (id) => api.delete(endpoints.admin.getPermission(id)),
+  getSystemSettings: () => api.get(endpoints.admin.settings),
+  updateProductReviewThreshold: (value) => api.patch(endpoints.admin.productReviewThreshold, { value }),
 }
 
 // Inquiries API

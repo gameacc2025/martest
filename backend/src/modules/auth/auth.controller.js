@@ -33,37 +33,36 @@ const REFRESH_COOKIE_OPTIONS = {
  *
  * Body:
  * {
- *   email,
+ *   phone,
  *   password
  * }
  *
- * email can be:
- * - email address
+ * phone is the sole login identity.
  */
 async function login(request, reply) {
 
-  const { email, password, app } = request.body || {};
+  const { phone, password, app } = request.body || {};
 
-  if (!email || !password) {
+  if (!phone || !password) {
     return reply.code(400).send({
       error: {
         code: 'VALIDATION_ERROR',
-        message: 'نام کاربری/ایمیل و رمز عبور الزامی است.',
+        message: 'شماره تلفن و رمز عبور الزامی است.',
         details: [
-          ...(!email ? [{ field: 'email', message: 'Email is required.' }] : []),
+          ...(!phone ? [{ field: 'phone', message: 'Phone is required.' }] : []),
           ...(!password ? [{ field: 'password', message: 'Password is required.' }] : []),
         ],
       },
     });
   }
 
-  const loginValue = String(email).trim();
+  const loginValue = String(phone).trim();
 
   if (!loginValue) {
     return reply.code(400).send({
       error: {
         code: 'VALIDATION_ERROR',
-        message: 'نام کاربری یا ایمیل معتبر نیست.',
+        message: 'شماره تلفن معتبر نیست.',
       },
     });
   }

@@ -32,7 +32,8 @@ const env = {
 
   // Initial Super Admin credentials (used by seed.js on first run only).
   // After seeding, change the password via the admin change-password endpoint.
-  superAdminUsername: process.env.SUPER_ADMIN_USERNAME || 'admin',
+  // Phone is the sole login identity (SUPER_ADMIN_USERNAME no longer exists).
+  superAdminPhone: process.env.SUPER_ADMIN_PHONE || '09120000000',
   superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || 'Admin@123456',
   superAdminEmail: process.env.SUPER_ADMIN_EMAIL || 'admin@telecommarketplace.local',
 };

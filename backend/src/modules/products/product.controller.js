@@ -26,6 +26,11 @@ async function getHistory(request, reply) {
   return reply.send(success(history));
 }
 
+async function getActivity(request, reply) {
+  const activity = await svc.getProductActivityLog(request.params.id);
+  return reply.send(success(activity));
+}
+
 async function getOne(request, reply) {
   const product = await svc.getProductById(request.params.id, request.user);
   if (!product) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'محصول یافت نشد' } });
@@ -138,6 +143,7 @@ module.exports = {
   list,
   myProducts,
   getHistory,
+  getActivity,
   getOne,
   create,
   update,

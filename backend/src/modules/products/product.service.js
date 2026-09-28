@@ -12,6 +12,16 @@ const SUPPORTED_DOCUMENT_TYPES = new Set(['application/pdf']);
 const SUPPORTED_DOCUMENT_ENUMS = new Set(['DATASHEET', 'CATALOG', 'MANUAL', 'CERTIFICATE']);
 const UPLOAD_ROOT = path.join(process.cwd(), 'uploads', 'products');
 
+// ── Review-on-edit policy ──────────────────────────────────────
+// Company users may edit post-approval products (APPROVED / PUBLISHED /
+// HIDDEN). Each edit increments Product.editsSinceApproval; at the system-
+// configured threshold (SystemSetting 'catalog.productReviewEditThreshold',
+// default 5) the product is automatically sent back to PENDING_REVIEW and the
+// counter resets. Below the threshold the product keeps its current status.
+const REVIEW_EDIT_THRESHOLD_KEY = 'catalog.productReviewEditThreshold';
+const DEFAULT_REVIEW_EDIT_THRESHOLD = 5;
+const POST_APPROVAL_STATUSES = new Set(['APPROVED', 'PUBLISHED', 'HIDDEN']);
+
 // The `specifications` JSON has exactly two top-level keys:
 //   - `standard`:   an object of template-driven values keyed by field.key
 //   - `attributes`: an array of user-defined { fieldId, title, value } entries
@@ -46,6 +56,7 @@ function isReservedSpecTitle(value) {
 
 
 
+// پیاده‌سازی: transition های وضعیت محصول
 const TRANSITIONS = {
   submitReview: { from: ['DRAFT', 'REJECTED'], to: 'PENDING_REVIEW' },
   approve: { from: ['PENDING_REVIEW'], to: 'APPROVED' },
@@ -249,9 +260,97 @@ function assertCanManageProduct(product, caller) {
 
 function assertCompanyCanEdit(product, caller) {
   assertCanManageProduct(product, caller);
-  if (isCompanyUser(caller) && product.status !== 'DRAFT') {
-    throw { statusCode: 403, code: 'PRODUCT_NOT_EDITABLE', message: 'Company users can only edit draft products.' };
+  // Post-approval products (APPROVED / PUBLISHED / HIDDEN) ARE editable now —
+  // the review-threshold policy in updateProduct decides whether that edit
+  // sends the product back to PENDING_REVIEW. Only products mid-review or
+  // archived are locked for company users.
+  if (isCompanyUser(caller) && (product.status === 'PENDING_REVIEW' || product.status === 'ARCHIVED')) {
+    throw { statusCode: 403, code: 'PRODUCT_NOT_EDITABLE', message: 'Company users cannot edit products that are pending review or archived.' };
   }
+}
+
+function isPostApprovalStatus(status) {
+  return POST_APPROVAL_STATUSES.has(status);
+}
+
+/**
+ * Read the admin-configurable "edits before re-review" threshold.
+ * Falls back to DEFAULT_REVIEW_EDIT_THRESHOLD when the SystemSetting is
+ * missing or invalid. Uses the passed `tx` so it can run inside a transaction.
+ */
+async function getReviewEditThreshold(tx = prisma) {
+  const setting = await tx.systemSetting.findUnique({ where: { key: REVIEW_EDIT_THRESHOLD_KEY }, select: { value: true } });
+  const parsed = setting ? Number(setting.value) : NaN;
+  return Number.isInteger(parsed) && parsed >= 1 ? parsed : DEFAULT_REVIEW_EDIT_THRESHOLD;
+}
+
+/**
+ * Decide the effect of a company edit on a post-approval product.
+ * Returns { nextStatus, editsSinceApproval, crossedThreshold, threshold }.
+ * - qty < threshold  → keep status, increment the counter
+ * - qty >= threshold → back to PENDING_REVIEW, reset the counter
+ * Non-company callers / non-post-approval statuses pass through unchanged.
+ */
+async function applyEditPolicy(product, caller) {
+  if (!isCompanyUser(caller) || !isPostApprovalStatus(product.status)) {
+    return { nextStatus: product.status, editsSinceApproval: product.editsSinceApproval ?? 0, crossedThreshold: false, threshold: DEFAULT_REVIEW_EDIT_THRESHOLD };
+  }
+  const threshold = await getReviewEditThreshold();
+  const newCount = (product.editsSinceApproval ?? 0) + 1;
+  if (newCount >= threshold) {
+    return { nextStatus: 'PENDING_REVIEW', editsSinceApproval: 0, crossedThreshold: true, threshold };
+  }
+  return { nextStatus: product.status, editsSinceApproval: newCount, crossedThreshold: false, threshold };
+}
+
+/**
+ * Append an entry to the immutable audit trail.
+ * @param {Prisma.TransactionClient} tx
+ * @param {number} productId
+ * @param {number} actorUserId
+ * @param {import('@prisma/client').ProductActivityAction} action
+ * @param {string|null} detail - one-line Persian/human description
+ * @param {string|null} comment - free-form note (e.g. change reason)
+ */
+async function addActivityLog(tx, productId, actorUserId, action, detail = null, comment = null) {
+  await tx.productActivityLog.create({ data: { productId, actorUserId, comment, detail, action } });
+}
+
+// Status workflow action → ProductActivityAction enum value.
+const STATUS_TO_ACTIVITY = {
+  submitReview: 'SUBMIT_REVIEW',
+  approve: 'APPROVE',
+  reject: 'REJECT',
+  publish: 'PUBLISH',
+  hide: 'HIDE',
+  archive: 'ARCHIVE',
+  restoreDraft: 'RESTORE_DRAFT',
+};
+
+// Top-level scalar columns tracked by the edit-change summary.
+const TRACKED_EDIT_FIELDS = ['title', 'shortDescription', 'description', 'sku', 'brand', 'model', 'visibility', 'isFeatured'];
+
+/**
+ * Build a human-readable "what changed" summary for a field edit, listing the
+ * changed column keys. Category/subcategory are compared by id. Kept short on
+ * purpose — the full before/after values are the product's own rows/history.
+ */
+function summarizeEdit(previous, applied) {
+  const changed = TRACKED_EDIT_FIELDS.filter((field) => applied[field] !== undefined && applied[field] !== previous[field]);
+  if (applied.categoryId !== undefined && applied.categoryId !== previous.categoryId) changed.push('category');
+  if (applied.subcategoryId !== undefined && applied.subcategoryId !== previous.subcategoryId) changed.push('subcategory');
+  return changed.length ? `Edited: ${changed.join(', ')}` : 'Product edited';
+}
+
+// Notify staff that a post-approval product hit the edit threshold and was
+// automatically pushed back to PENDING_REVIEW.
+async function notifyStaffForAutoReReview(tx, product, threshold) {
+  const notification = {
+    title: 'بازبینی مجدد محصول',
+    message: `محصول «${product.title}» پس از ${threshold} ویرایش پس از تأیید به وضعیت در انتظار بررسی برگشت.`,
+  };
+  const recipients = await getSuperAdminUserIds(tx);
+  await notifyUsers(recipients, notification.title, notification.message, tx);
 }
 
 function assertTransition(product, action) {
@@ -349,10 +448,17 @@ async function changeProductStatus(id, action, caller, comment) {
 
   const nextStatus = TRANSITIONS[action].to;
   const updated = await prisma.$transaction(async (tx) => {
-    const saved = await tx.product.update({ where: { id: productId }, data: { status: nextStatus }, include: productInclude });
+    const saved = await tx.product.update({
+      where: { id: productId },
+      // Fresh approval = fresh counter: the approved product starts with zero
+      // post-approval edits budgeted against the review threshold.
+      data: { status: nextStatus, ...(nextStatus === 'APPROVED' ? { editsSinceApproval: 0 } : {}) },
+      include: productInclude,
+    });
     await tx.productStatusHistory.create({
       data: { productId, previousStatus: product.status, newStatus: nextStatus, changedByUserId: Number(caller.id), comment: comment?.trim() || null },
     });
+    await addActivityLog(tx, productId, Number(caller.id), STATUS_TO_ACTIVITY[action], `Status ${product.status} → ${nextStatus}`, comment?.trim() || null);
     const notification = getWorkflowNotification(nextStatus, product, comment);
     const recipients = action === 'submitReview' ? await getSuperAdminUserIds(tx) : await getCompanyUserIds(product.companyId, tx);
     await notifyUsers(recipients, notification.title, notification.message, tx);
@@ -649,18 +755,22 @@ async function createProduct(data, caller) {
     ...productData
   } = data;
 
-  return prisma.product.create({
-    data: {
-      ...productData,
-      title: data.title.trim(),
-      slug: await buildUniqueSlug(data.title),
-      companyId,
-      categoryId,
-      subcategoryId,
-      createdByUserId: Number(caller.id),
-      prices: priceTiers.length ? { create: priceTiers } : undefined,
-    },
-    include: productInclude,
+  return prisma.$transaction(async (tx) => {
+    const created = await tx.product.create({
+      data: {
+        ...productData,
+        title: data.title.trim(),
+        slug: await buildUniqueSlug(data.title),
+        companyId,
+        categoryId,
+        subcategoryId,
+        createdByUserId: Number(caller.id),
+        prices: priceTiers.length ? { create: priceTiers } : undefined,
+      },
+      include: productInclude,
+    });
+    await addActivityLog(tx, created.id, Number(caller.id), 'CREATE', 'محصول ایجاد شد', null);
+    return created;
   });
 }
 
@@ -705,25 +815,46 @@ async function updateProduct(id, data, caller) {
     updateData.slug = await buildUniqueSlug(data.title, productId);
   }
 
-  // When company user edits, set status back to PENDING_REVIEW for re-approval
-  if (!isSuperAdmin(caller) && product.status === 'PUBLISHED') {
-    updateData.status = 'PENDING_REVIEW';
+  // Company-user edit policy on post-approval products (review threshold):
+  //   edits < threshold → keep status, bump editsSinceApproval
+  //   edits >= threshold → back to PENDING_REVIEW, reset counter, notify staff
+  let policy = { nextStatus: product.status, editsSinceApproval: product.editsSinceApproval ?? 0, crossedThreshold: false, threshold: DEFAULT_REVIEW_EDIT_THRESHOLD };
+  if (isCompanyUser(caller)) {
+    policy = await applyEditPolicy(product, caller);
+    if (policy.nextStatus !== product.status) updateData.status = policy.nextStatus;
+    if (policy.editsSinceApproval !== (product.editsSinceApproval ?? 0)) updateData.editsSinceApproval = policy.editsSinceApproval;
   }
 
-  const updated = await prisma.product.update({ where: { id: productId }, data: updateData, include: productInclude });
+  const previousStatus = product.status;
+  const statusChanged = updateData.status && updateData.status !== previousStatus;
 
-  // Record status change if status was updated
-  if (updateData.status && updateData.status !== product.status) {
-    await prisma.productStatusHistory.create({
-      data: {
-        productId,
-        previousStatus: product.status,
-        newStatus: updateData.status,
-        changedByUserId: Number(caller.id),
-        comment: data.changeReason || `Status changed to ${updateData.status}`,
-      },
-    });
-  }
+  const updated = await prisma.$transaction(async (tx) => {
+    const saved = await tx.product.update({ where: { id: productId }, data: updateData, include: productInclude });
+
+    // Audit trail: every edit is logged, staff and company alike.
+    await addActivityLog(tx, productId, Number(caller.id), 'EDIT', summarizeEdit(product, updateData), data.changeReason || null);
+
+    // A status change (admin override or threshold auto-re-review) is recorded
+    // in the existing status history so both timelines stay consistent.
+    if (statusChanged) {
+      await tx.productStatusHistory.create({
+        data: {
+          productId,
+          previousStatus,
+          newStatus: updateData.status,
+          changedByUserId: Number(caller.id),
+          comment: data.changeReason || (policy.crossedThreshold ? `تغییرات بیش از سقف بازبینی (${policy.threshold} ویرایش).` : `Status changed to ${updateData.status}`),
+        },
+      });
+    }
+
+    // Threshold crossed → notify staff so they can re-review.
+    if (policy.crossedThreshold) {
+      await notifyStaffForAutoReReview(tx, product, policy.threshold);
+    }
+
+    return saved;
+  });
 
   return updated;
 }
@@ -749,24 +880,32 @@ async function addPriceTier(productId, data, caller) {
   const tier = normalizePriceTier(data);
   await ensurePriceTierDoesNotOverlap(product.id, tier);
 
-  const created = await prisma.productPriceTier.create({ data: { ...tier, productId: product.id } });
+  // Price changes are content edits too — apply the same review-threshold
+  // policy that governs field edits on post-approval products.
+  const policy = await applyEditPolicy(product, caller);
+  const previousStatus = product.status;
+  const statusChanged = policy.nextStatus !== previousStatus;
 
-  // When company user changes price, set status back to PENDING_REVIEW
-  let newStatus = product.status;
-  if (!isSuperAdmin(caller) && product.status === 'PUBLISHED') {
-    newStatus = 'PENDING_REVIEW';
-    await prisma.product.update({ where: { id: product.id }, data: { status: newStatus } });
-  }
+  const created = await prisma.$transaction(async (tx) => {
+    const record = await tx.productPriceTier.create({ data: { ...tier, productId: product.id } });
 
-  // Record price change in history
-  await prisma.productStatusHistory.create({
-    data: {
-      productId: product.id,
-      previousStatus: product.status,
-      newStatus,
-      changedByUserId: Number(caller.id),
-      comment: `افزودن ردیف قیمت: ${tier.minQuantity}+ → ${tier.price} ریال`,
-    },
+    if (policy.editsSinceApproval !== (product.editsSinceApproval ?? 0) || statusChanged) {
+      await tx.product.update({ where: { id: product.id }, data: { status: policy.nextStatus, editsSinceApproval: policy.editsSinceApproval } });
+    }
+
+    await tx.productStatusHistory.create({
+      data: {
+        productId: product.id,
+        previousStatus,
+        newStatus: policy.nextStatus,
+        changedByUserId: Number(caller.id),
+        comment: `افزودن ردیف قیمت: ${tier.minQuantity}+ → ${tier.price} ریال`,
+      },
+    });
+    await addActivityLog(tx, product.id, Number(caller.id), 'PRICE_TIER_CREATE', `افزودن ردیف قیمت: ${tier.minQuantity}+ → ${tier.price} ریال`);
+    if (policy.crossedThreshold) await notifyStaffForAutoReReview(tx, product, policy.threshold);
+
+    return record;
   });
 
   return created;
@@ -780,32 +919,38 @@ async function updatePriceTier(productId, tierId, data, caller) {
   const tier = normalizePriceTier({ ...existing, ...data });
   await ensurePriceTierDoesNotOverlap(product.id, tier, existing.id);
 
-  const updated = await prisma.productPriceTier.update({ where: { id: existing.id }, data: tier });
+  const policy = await applyEditPolicy(product, caller);
+  const previousStatus = product.status;
+  const statusChanged = policy.nextStatus !== previousStatus;
 
-  // When company user changes price, set status back to PENDING_REVIEW
-  let newStatus = product.status;
-  if (!isSuperAdmin(caller) && product.status === 'PUBLISHED') {
-    newStatus = 'PENDING_REVIEW';
-    await prisma.product.update({ where: { id: product.id }, data: { status: newStatus } });
-  }
-
-  // Record price change in history
   const changes = [];
   if (existing.price !== tier.price) changes.push(`قیمت: ${existing.price} → ${tier.price}`);
   if (existing.minQuantity !== tier.minQuantity) changes.push(`حداقل تعداد: ${existing.minQuantity} → ${tier.minQuantity}`);
   if (existing.maxQuantity !== tier.maxQuantity) changes.push(`حداکثر تعداد: ${existing.maxQuantity || '-'} → ${tier.maxQuantity || '-'}`);
 
-  if (changes.length) {
-    await prisma.productStatusHistory.create({
-      data: {
-        productId: product.id,
-        previousStatus: product.status,
-        newStatus,
-        changedByUserId: Number(caller.id),
-        comment: `تغییر ردیف قیمت: ${changes.join(', ')}`,
-      },
-    });
-  }
+  const updated = await prisma.$transaction(async (tx) => {
+    const record = await tx.productPriceTier.update({ where: { id: existing.id }, data: tier });
+
+    if (policy.editsSinceApproval !== (product.editsSinceApproval ?? 0) || statusChanged) {
+      await tx.product.update({ where: { id: product.id }, data: { status: policy.nextStatus, editsSinceApproval: policy.editsSinceApproval } });
+    }
+
+    if (changes.length) {
+      await tx.productStatusHistory.create({
+        data: {
+          productId: product.id,
+          previousStatus,
+          newStatus: policy.nextStatus,
+          changedByUserId: Number(caller.id),
+          comment: `تغییر ردیف قیمت: ${changes.join(', ')}`,
+        },
+      });
+    }
+    await addActivityLog(tx, product.id, Number(caller.id), 'PRICE_TIER_UPDATE', changes.join('؛ ') || 'ردیف قیمت ویرایش شد');
+    if (policy.crossedThreshold) await notifyStaffForAutoReReview(tx, product, policy.threshold);
+
+    return record;
+  });
 
   return updated;
 }
@@ -815,7 +960,11 @@ async function deletePriceTier(productId, tierId, caller) {
   const existing = await prisma.productPriceTier.findFirst({ where: { id: Number(tierId), productId: product.id } });
   if (!existing) throw { statusCode: 404, code: 'PRICE_TIER_NOT_FOUND', message: 'Price tier not found.' };
 
-  return prisma.productPriceTier.delete({ where: { id: existing.id } });
+  return prisma.$transaction(async (tx) => {
+    const deleted = await tx.productPriceTier.delete({ where: { id: existing.id } });
+    await addActivityLog(tx, product.id, Number(caller.id), 'PRICE_TIER_DELETE', `حذف ردیف قیمت ${existing.minQuantity}+ → ${existing.price}`);
+    return deleted;
+  });
 }
 
 async function upsertPrice(productId, data, caller) {
@@ -837,7 +986,7 @@ async function uploadImage(productId, file, caller) {
   try {
     return await prisma.$transaction(async (tx) => {
       if (isPrimary) await tx.productImage.updateMany({ where: { productId: product.id }, data: { isPrimary: false } });
-      return tx.productImage.create({
+      const image = await tx.productImage.create({
         data: {
           productId: product.id,
           url: stored.url,
@@ -847,6 +996,8 @@ async function uploadImage(productId, file, caller) {
           sortOrder: sortOrder ?? imageCount,
         },
       });
+      await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_UPLOAD', `آپلود تصویر ${stored.url}`);
+      return image;
     });
   } catch (error) {
     await removeStoredFile(stored.url);
@@ -859,13 +1010,16 @@ async function deleteImage(productId, imageId, caller) {
   const image = await prisma.productImage.findFirst({ where: { id: Number(imageId), productId: product.id } });
   if (!image) throw { statusCode: 404, code: 'IMAGE_NOT_FOUND', message: 'Product image not found.' };
 
-  await prisma.productImage.delete({ where: { id: image.id } });
-  await removeStoredFile(image.url);
+  await prisma.$transaction(async (tx) => {
+    await tx.productImage.delete({ where: { id: image.id } });
+    await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_DELETE', `حذف تصویر ${image.url}`);
 
-  if (image.isPrimary) {
-    const nextImage = await prisma.productImage.findFirst({ where: { productId: product.id }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
-    if (nextImage) await prisma.productImage.update({ where: { id: nextImage.id }, data: { isPrimary: true } });
-  }
+    if (image.isPrimary) {
+      const nextImage = await tx.productImage.findFirst({ where: { productId: product.id }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
+      if (nextImage) await tx.productImage.update({ where: { id: nextImage.id }, data: { isPrimary: true } });
+    }
+  });
+  await removeStoredFile(image.url);
 }
 
 async function setPrimaryImage(productId, imageId, caller) {
@@ -875,7 +1029,9 @@ async function setPrimaryImage(productId, imageId, caller) {
 
   return prisma.$transaction(async (tx) => {
     await tx.productImage.updateMany({ where: { productId: product.id }, data: { isPrimary: false } });
-    return tx.productImage.update({ where: { id: image.id }, data: { isPrimary: true } });
+    const updated = await tx.productImage.update({ where: { id: image.id }, data: { isPrimary: true } });
+    await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_SET_PRIMARY', `تصویر اصلی: ${image.url}`);
+    return updated;
   });
 }
 
@@ -892,10 +1048,13 @@ async function sortImages(productId, images, caller) {
     throw { statusCode: 400, code: 'INVALID_IMAGE_SORT', message: 'All images must belong to the product.' };
   }
 
-  await prisma.$transaction(images.map((image) => prisma.productImage.update({
-    where: { id: Number(image.id) },
-    data: { sortOrder: Number(image.sortOrder) },
-  })));
+  await prisma.$transaction(async (tx) => {
+    await Promise.all(images.map((image) => tx.productImage.update({
+      where: { id: Number(image.id) },
+      data: { sortOrder: Number(image.sortOrder) },
+    })));
+    await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_SORT', 'ترتیب تصاویر تغییر کرد');
+  });
 
   return prisma.productImage.findMany({ where: { productId: product.id }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
 }
@@ -916,14 +1075,18 @@ async function uploadDocument(productId, file, caller) {
   const stored = await saveUploadedFile(file, 'documents', MAX_DOCUMENT_BYTES);
 
   try {
-    return await prisma.productDocument.create({
-      data: {
-        productId: product.id,
-        type,
-        title,
-        url: stored.url,
-        sortOrder: sortOrder ?? documentCount,
-      },
+    return await prisma.$transaction(async (tx) => {
+      const document = await tx.productDocument.create({
+        data: {
+          productId: product.id,
+          type,
+          title,
+          url: stored.url,
+          sortOrder: sortOrder ?? documentCount,
+        },
+      });
+      await addActivityLog(tx, product.id, Number(caller.id), 'DOCUMENT_UPLOAD', `آپلود سند ${type}: ${title}`);
+      return document;
     });
   } catch (error) {
     await removeStoredFile(stored.url);
@@ -936,7 +1099,10 @@ async function deleteDocument(productId, documentId, caller) {
   const document = await prisma.productDocument.findFirst({ where: { id: Number(documentId), productId: product.id } });
   if (!document) throw { statusCode: 404, code: 'DOCUMENT_NOT_FOUND', message: 'Product document not found.' };
 
-  await prisma.productDocument.delete({ where: { id: document.id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.productDocument.delete({ where: { id: document.id } });
+    await addActivityLog(tx, product.id, Number(caller.id), 'DOCUMENT_DELETE', `حذف سند ${document.title}`);
+  });
   await removeStoredFile(document.url);
 }
 
@@ -959,6 +1125,24 @@ async function getProductHistory(productId) {
   return history;
 }
 
+/**
+ * Get the immutable activity trail for a product (every field edit,
+ * price/media change, and workflow transition).
+ */
+async function getProductActivityLog(productId) {
+  const id = Number(productId);
+  const product = await prisma.product.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
+  if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
+
+  return prisma.productActivityLog.findMany({
+    where: { productId: id },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      actor: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
+    },
+  });
+}
+
 module.exports = {
   MAX_IMAGE_BYTES,
   MAX_DOCUMENT_BYTES,
@@ -979,4 +1163,6 @@ module.exports = {
   deleteDocument,
   changeProductStatus,
   getProductHistory,
+  getProductActivityLog,
+  getReviewEditThreshold,
 };

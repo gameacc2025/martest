@@ -190,13 +190,18 @@ async function createUser(data, caller) {
     }
   }
 
-  const normalizedEmail = data.email.toLowerCase().trim();
-  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-  if (existingEmail) throw { statusCode: 409, code: 'DUPLICATE_EMAIL', message: 'ایمیل قبلاً ثبت شده است.' };
+  if (!data.phone) {
+    throw { statusCode: 400, code: 'PHONE_REQUIRED', message: 'شماره تلفن الزامی است.' };
+  }
 
-  if (data.phone) {
-    const existingPhone = await prisma.user.findUnique({ where: { phone: data.phone } });
-    if (existingPhone) throw { statusCode: 409, code: 'DUPLICATE_PHONE', message: 'شماره تلفن قبلاً ثبت شده است.' };
+  const normalizedPhone = String(data.phone).trim();
+  const existingPhone = await prisma.user.findUnique({ where: { phone: normalizedPhone } });
+  if (existingPhone) throw { statusCode: 409, code: 'DUPLICATE_PHONE', message: 'شماره تلفن قبلاً ثبت شده است.' };
+
+  const normalizedEmail = data.email ? data.email.toLowerCase().trim() : null;
+  if (normalizedEmail) {
+    const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existingEmail) throw { statusCode: 409, code: 'DUPLICATE_EMAIL', message: 'ایمیل قبلاً ثبت شده است.' };
   }
 
   const hashed = await hashPassword(data.password);
@@ -206,7 +211,7 @@ async function createUser(data, caller) {
     const user = await tx.user.create({
       data: {
         email: normalizedEmail,
-        phone: data.phone || null,
+        phone: normalizedPhone,
         passwordHash: hashed,
         status,
         roles: rIds.length ? { create: rIds.map((id) => ({ roleId: id })) } : undefined,
@@ -253,8 +258,13 @@ async function updateUser(userId, data, caller) {
 
   // User identity fields
   const userData = {};
-  if (data.email !== undefined) userData.email = data.email.toLowerCase().trim();
-  if (data.phone !== undefined) userData.phone = data.phone === null ? null : String(data.phone).trim();
+  if (data.email !== undefined) userData.email = data.email === null ? null : data.email.toLowerCase().trim();
+  if (data.phone !== undefined) {
+    if (data.phone === null || data.phone === '') {
+      throw { statusCode: 400, code: 'PHONE_REQUIRED', message: 'شماره تلفن نمی‌تواند خالی باشد.' };
+    }
+    userData.phone = String(data.phone).trim();
+  }
   if (data.status !== undefined) userData.status = data.status;
   else if (data.isActive !== undefined) userData.status = data.isActive ? 'ACTIVE' : 'PENDING';
 

@@ -30,6 +30,8 @@ const calls = {
   productCount: [],
   userFindMany: [],
   productFindMany: [],
+  systemSettingFindUnique: [],
+  systemSettingUpsert: [],
 };
 let fx;
 function resetMocks() {
@@ -45,6 +47,7 @@ function resetMocks() {
     totalPermissions: 0,
     recentUsers: [],
     pendingProductsList: [],
+    systemSetting: null, // null → getSettings falls back to the default threshold
   };
 }
 resetMocks();
@@ -76,11 +79,21 @@ const mockPrisma = {
   inquiry: { count: async () => fx.totalInquiries },
   role: { count: async () => fx.totalRoles },
   permission: { count: async () => fx.totalPermissions },
+  systemSetting: {
+    findUnique: async (args) => {
+      calls.systemSettingFindUnique.push(args);
+      return fx.systemSetting; // null → default threshold
+    },
+    upsert: async (args) => {
+      calls.systemSettingUpsert.push(args);
+      return {};
+    },
+  },
 };
 
 injectMock('../../config/db', mockPrisma);
 
-const { getStats } = require('./admin.service');
+const { getStats, getSettings, updateReviewEditThreshold } = require('./admin.service');
 
 test('getStats: assembles all counts into the counts object with correct key names', async () => {
   resetMocks();
@@ -145,4 +158,42 @@ test('getStats: returns an empty-but-well-formed shape when there is no data yet
   });
   assert.deepEqual(result.recentUsers, []);
   assert.deepEqual(result.pendingProducts, []);
+});
+
+test('getSettings: falls back to the default review threshold when no setting exists', async () => {
+  resetMocks();
+  fx.systemSetting = null;
+  const result = await getSettings();
+  assert.deepEqual(result, { productReviewEditThreshold: 5 });
+});
+
+test('getSettings: reads the configured threshold', async () => {
+  resetMocks();
+  fx.systemSetting = { value: '7' };
+  const result = await getSettings();
+  assert.deepEqual(result, { productReviewEditThreshold: 7 });
+});
+
+test('updateReviewEditThreshold: persists the value and returns the updated settings', async () => {
+  resetMocks();
+  fx.systemSetting = { value: '3' };
+  const result = await updateReviewEditThreshold(3, 9);
+  const upsert = calls.systemSettingUpsert[0];
+  assert.equal(upsert.where.key, 'catalog.productReviewEditThreshold');
+  assert.equal(upsert.create.value, '3');
+  assert.equal(upsert.create.updatedByUserId, 9);
+  assert.deepEqual(result, { productReviewEditThreshold: 3 });
+});
+
+test('updateReviewEditThreshold: rejects a non-positive value', async () => {
+  resetMocks();
+  await assert.rejects(
+    () => updateReviewEditThreshold(0, 9),
+    (err) => err.statusCode === 400 && err.code === 'INVALID_REVIEW_THRESHOLD'
+  );
+  await assert.rejects(
+    () => updateReviewEditThreshold(2.5, 9),
+    (err) => err.statusCode === 400 && err.code === 'INVALID_REVIEW_THRESHOLD'
+  );
+  assert.equal(calls.systemSettingUpsert.length, 0);
 });

@@ -18,4 +18,22 @@ async function getStats(request, reply) {
   return reply.send(success(stats));
 }
 
-module.exports = { getStats };
+/**
+ * GET /api/v1/admin/settings
+ * Get admin-visible system settings (e.g. product review threshold).
+ */
+async function getSettings(request, reply) {
+  const settings = await adminService.getSettings();
+  return reply.send(success(settings));
+}
+
+/**
+ * PATCH /api/v1/admin/settings/product-review-threshold
+ * Update the number of post-approval edits before a product is re-reviewed.
+ */
+async function updateReviewEditThreshold(request, reply) {
+  const settings = await adminService.updateReviewEditThreshold(request.body.value, Number(request.user.id));
+  return reply.send(success(settings));
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold };

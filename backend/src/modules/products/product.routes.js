@@ -173,6 +173,12 @@ async function productRoutes(fastify) {
       schema: { params: idParamSchema, summary: 'Get product change history', tags: ['Products'] },
     }, ctrl.getHistory);
 
+    // Immutable audit trail of every content mutation + workflow transition.
+    // Ownership/404 is enforced in the service (same as /history).
+    authenticated.get('/:id/activity', {
+      schema: { params: idParamSchema, summary: 'Get product activity log', tags: ['Products'] },
+    }, ctrl.getActivity);
+
     // ── Core product CRUD ───────────────────────────────────
     // Two-layer RBAC: domain boundary (COMPANY|STAFF) + fine-grained
     // permission. Resource ownership ("only your own company's products")

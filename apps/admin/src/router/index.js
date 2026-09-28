@@ -75,6 +75,8 @@ const routes = [
       // ── Roles & Permissions ───────────────────────────────
       { path: "/roles", name: "admin-roles", component: () => import("../pages/admin/roles/RoleList.vue"), meta: { title: "مدیریت نقش‌ها" } },
       { path: "/permissions", name: "admin-permissions", component: () => import("../pages/admin/permissions/PermissionList.vue"), meta: { title: "مدیریت مجوزها" } },
+      // ── System settings ────────────────────────────────────
+      { path: "/settings", name: "admin-settings", component: () => import("../pages/admin/settings/SystemSettings.vue"), meta: { title: "تنظیمات سیستم" } },
     ],
   },
 

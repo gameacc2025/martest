@@ -77,7 +77,7 @@ test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
 
 test('POST /login: a well-formed body reaches the controller', async () => {
   const app = await buildApp();
-  const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { email: 'a@a.com', password: 'secret' } });
+  const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { phone: '09120000000', password: 'secret' } });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.login, true);
   await app.close();
@@ -85,14 +85,14 @@ test('POST /login: a well-formed body reaches the controller', async () => {
 
 test('POST /login: is public — reaches the controller with NO Authorization header at all', async () => {
   const app = await buildApp();
-  const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { email: 'a@a.com', password: 'secret' } });
+  const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { phone: '09120000000', password: 'secret' } });
   assert.equal(res.statusCode, 200);
   await app.close();
 });
 
 test('POST /login: missing password -> 400, controller never reached', async () => {
   const app = await buildApp();
-  const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { email: 'a@a.com' } });
+  const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { phone: '09120000000' } });
   assert.equal(res.statusCode, 400);
   assert.equal(hit.login, undefined);
   await app.close();
@@ -103,7 +103,7 @@ test('POST /login: an unexpected extra field does not itself cause a 400 (Fastif
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/login',
-    payload: { email: 'a@a.com', password: 'secret', isAdmin: true },
+    payload: { phone: '09120000000', password: 'secret', isAdmin: true },
   });
   assert.equal(res.statusCode, 200);
   await app.close();
@@ -111,7 +111,7 @@ test('POST /login: an unexpected extra field does not itself cause a 400 (Fastif
 
 test('POST /login: brute-force rate limit is 10 requests / 5 minutes, independent of the global API limit', async () => {
   const app = await buildApp();
-  const payload = { email: 'a@a.com', password: 'secret' };
+  const payload = { phone: '09120000000', password: 'secret' };
   for (let i = 0; i < 10; i++) {
     const res = await app.inject({ method: 'POST', url: '/api/v1/auth/login', payload });
     assert.equal(res.statusCode, 200, `request ${i + 1} should succeed`);
@@ -128,7 +128,7 @@ test('POST /register: a well-formed body reaches the controller', async () => {
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/register',
-    payload: { email: 'a@a.com', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
+    payload: { phone: '09120000000', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
   });
   assert.equal(res.statusCode, 200);
   await app.close();
@@ -139,19 +139,31 @@ test('POST /register: password shorter than 8 chars -> 400', async () => {
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/register',
-    payload: { email: 'a@a.com', password: 'short', firstName: 'Ali', lastName: 'Rezaei' },
+    payload: { phone: '09120000000', password: 'short', firstName: 'Ali', lastName: 'Rezaei' },
   });
   assert.equal(res.statusCode, 400);
   assert.equal(hit.register, undefined);
   await app.close();
 });
 
-test('POST /register: invalid email format -> 400', async () => {
+test('POST /register: missing phone -> 400 (phone required)', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/register',
-    payload: { email: 'not-an-email', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
+    payload: { email: 'a@a.com', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
+  });
+  assert.equal(res.statusCode, 400);
+  assert.equal(hit.register, undefined);
+  await app.close();
+});
+
+test('POST /register: invalid email format (when provided) -> 400', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/register',
+    payload: { phone: '09120000000', email: 'not-an-email', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' },
   });
   assert.equal(res.statusCode, 400);
   await app.close();
@@ -159,7 +171,7 @@ test('POST /register: invalid email format -> 400', async () => {
 
 test('POST /register: the stricter rate limit is 5 requests / 10 minutes (tighter than /login\'s 10/5min)', async () => {
   const app = await buildApp();
-  const payload = { email: 'a@a.com', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' };
+  const payload = { phone: '09120000000', password: 'password123', firstName: 'Ali', lastName: 'Rezaei' };
   for (let i = 0; i < 5; i++) {
     const res = await app.inject({ method: 'POST', url: '/api/v1/auth/register', payload });
     assert.equal(res.statusCode, 200, `request ${i + 1} should succeed`);
@@ -179,7 +191,7 @@ test('POST /register-company: a well-formed body reaches the controller', async 
     payload: {
       companyName: 'Acme', nationalId: '123', registrationNumber: '456',
       companyEmail: 'c@c.com', phone: '0912', address: 'Tehran',
-      managerFirstName: 'Ali', managerLastName: 'Rezaei', managerEmail: 'm@c.com', password: 'password123',
+      managerFirstName: 'Ali', managerLastName: 'Rezaei', managerPhone: '09120000000', password: 'password123',
     },
   });
   assert.equal(res.statusCode, 200);
@@ -194,7 +206,22 @@ test('POST /register-company: missing a required field (e.g. address) -> 400', a
     payload: {
       companyName: 'Acme', nationalId: '123', registrationNumber: '456',
       companyEmail: 'c@c.com', phone: '0912',
-      managerFirstName: 'Ali', managerLastName: 'Rezaei', managerEmail: 'm@c.com', password: 'password123',
+      managerFirstName: 'Ali', managerLastName: 'Rezaei', managerPhone: '09120000000', password: 'password123',
+    },
+  });
+  assert.equal(res.statusCode, 400);
+  await app.close();
+});
+
+test('POST /register-company: missing manager phone -> 400 (manager phone required)', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/register-company',
+    payload: {
+      companyName: 'Acme', nationalId: '123', registrationNumber: '456',
+      companyEmail: 'c@c.com', phone: '0912', address: 'Tehran',
+      managerFirstName: 'Ali', managerLastName: 'Rezaei', password: 'password123',
     },
   });
   assert.equal(res.statusCode, 400);
@@ -209,7 +236,7 @@ test('POST /register-company: an invalid `type` enum value -> 400', async () => 
     payload: {
       companyName: 'Acme', nationalId: '123', registrationNumber: '456',
       companyEmail: 'c@c.com', phone: '0912', address: 'Tehran', type: 'NOT_A_REAL_TYPE',
-      managerFirstName: 'Ali', managerLastName: 'Rezaei', managerEmail: 'm@c.com', password: 'password123',
+      managerFirstName: 'Ali', managerLastName: 'Rezaei', managerPhone: '09120000000', password: 'password123',
     },
   });
   assert.equal(res.statusCode, 400);
