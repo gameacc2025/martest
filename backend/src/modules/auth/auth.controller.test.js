@@ -69,8 +69,10 @@ function makeReply() {
     _body: undefined,
     _cookies: [],
     _clearedCookies: [],
+    _headers: {},
     code(c) { this._statusCode = c; return this; },
     send(b) { this._body = b; return this; },
+    header(name, value) { this._headers[name] = value; return this; },
     setCookie(name, value, opts) { this._cookies.push({ name, value, opts }); return this; },
     clearCookie(name, opts) { this._clearedCookies.push({ name, opts }); return this; },
   };
@@ -118,11 +120,11 @@ test('login: sets the refresh cookie with the correct security flags (dev: secur
   assert.equal(value, 'RT');
   assert.equal(opts.httpOnly, true);   // XSS protection — never negotiable
   assert.equal(opts.secure, false);    // dev env in this test
-  assert.equal(opts.sameSite, 'lax');  // CSRF protection
+  assert.equal(opts.sameSite, 'strict'); // CSRF protection
   assert.equal(opts.path, '/api/v1/auth');
 });
 
-test('login: 200s with tokens + full auth context in the body, refreshToken never duplicated outside the cookie logic path', async () => {
+test('login: 200s with tokens + full auth context in the body; refreshToken only ever rides the cookie', async () => {
   fx.loginResult = {
     user: { id: 1 }, profile: { firstName: 'Ali' }, accessProfile: { type: 'CUSTOMER' },
     roles: ['CUSTOMER'], permissions: [], accessToken: 'AT', refreshToken: 'RT', expiresIn: 900,
@@ -131,14 +133,18 @@ test('login: 200s with tokens + full auth context in the body, refreshToken neve
   await controller.login(makeRequest({ body: { phone: '09120000000', password: 'x' } }), reply);
 
   assert.equal(reply._statusCode, 200);
-  assert.deepEqual(reply._body.data.tokens, { accessToken: 'AT', refreshToken: 'RT', expiresIn: 900 });
+  // Body: access token + expiry. The refresh token is deliberately absent —
+  // it was already placed in the httpOnly cookie above and must never be
+  // duplicated into a JS-readable response.
+  assert.deepEqual(reply._body.data.tokens, { accessToken: 'AT', expiresIn: 900 });
+  assert.equal(reply._cookies[0].value, 'RT');
   assert.deepEqual(reply._body.data.user, { id: 1 });
   assert.deepEqual(reply._body.data.accessProfile, { type: 'CUSTOMER' });
 });
 
 // ── refresh ───────────────────────────────────────────────────
 
-test('refresh: rotates the cookie and returns the new token pair', async () => {
+test('refresh: rotates the cookie and returns a fresh access token (no refresh token in the body)', async () => {
   fx.refreshResult = { accessToken: 'AT2', refreshToken: 'RT2', expiresIn: 900 };
   const reply = makeReply();
   const req = makeRequest({ refreshTokenRecord: { id: 7 } });
@@ -147,7 +153,7 @@ test('refresh: rotates the cookie and returns the new token pair', async () => {
   assert.deepEqual(calls.refresh[1], { id: 7 });
   assert.equal(reply._cookies[0].value, 'RT2');
   assert.equal(reply._statusCode, 200);
-  assert.deepEqual(reply._body.data.tokens, { accessToken: 'AT2', refreshToken: 'RT2', expiresIn: 900 });
+  assert.deepEqual(reply._body.data.tokens, { accessToken: 'AT2', expiresIn: 900 });
 });
 
 // ── logout / logoutAll ───────────────────────────────────────

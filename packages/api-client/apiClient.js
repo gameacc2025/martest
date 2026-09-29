@@ -6,6 +6,7 @@
  */
 
 import createBrowserClient from '@telecom/shared-core/http/presets/browser.js'
+import { getAccessToken } from '@telecom/shared-core/http/tokenMemory.js'
 import { endpoints } from './endpoints.js'
 
 // API base URL - will be configured from environment variables
@@ -15,6 +16,9 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env
 //
 // Auth handling:
 //   - The AuthMiddleware only READS the token here and injects the header.
+//     The token comes from shared tokenMemory (in-memory only — Web Storage
+//     never holds secrets), the single source of truth for both this client
+//     and the one in @telecom/shared-core/http/apiClient.
 //   - Token refresh + logout are owned entirely by the auth store and are
 //     invoked by the middleware through the authBridge. This module no longer
 //     performs refresh or touches window.location — that keeps the auth store
@@ -29,7 +33,7 @@ export const apiClient = createBrowserClient({
   enableParser: true,
   enableAuth: true,
   auth: {
-    getToken: () => localStorage.getItem('token'),
+    getToken: () => getAccessToken(),
     tokenHeader: 'Authorization',
     tokenType: 'Bearer'
   }

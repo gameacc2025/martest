@@ -9,11 +9,17 @@
 // Cookie strategy for the refresh token:
 //   httpOnly:true   → JS cannot read it (XSS protection)
 //   secure:true     → only sent over HTTPS (set false in dev)
-//   sameSite:Lax    → CSRF protection
+//   sameSite:Strict → CSRF protection; every app calls the API
+//                     same-site (relative /api/v1 via the Vite/nginx proxy)
 //   path:/api/v1/auth → cookie only sent to auth endpoints
+//
+// The refresh token NEVER appears in a response body — only the
+// httpOnly cookie carries it. The access token is the only secret
+// the JS layer ever sees, and it lives in memory only.
 // =============================================================
 
 const authService = require('./auth.service');
+const handoffService = require('./handoff.service');
 const { nodeEnv } = require('../../config/env');
 const { success } = require('../../utils/success');
 
@@ -22,7 +28,7 @@ const IS_PRODUCTION = nodeEnv === 'production';
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: IS_PRODUCTION,
-  sameSite: 'lax',
+  sameSite: 'strict',
   path: '/api/v1/auth',
   maxAge: 7 * 24 * 60 * 60,
 };
@@ -91,9 +97,10 @@ async function login(request, reply) {
     REFRESH_COOKIE_OPTIONS
   );
 
+  reply.header('Cache-Control', 'no-store');
 
   return reply.code(200).send(success({
-    tokens: { accessToken, refreshToken, expiresIn },
+    tokens: { accessToken, expiresIn },
     user,
     profile,
     accessProfile,
@@ -124,9 +131,10 @@ async function refresh(request, reply) {
     REFRESH_COOKIE_OPTIONS
   );
 
+  reply.header('Cache-Control', 'no-store');
 
   return reply.code(200).send(success({
-    tokens: { accessToken, refreshToken, expiresIn },
+    tokens: { accessToken, expiresIn },
   }));
 }
 
@@ -272,6 +280,52 @@ async function registerCompany(request, reply) {
 }
 
 
+/**
+ * POST /api/v1/auth/handoff
+ *
+ * Mint a one-time, PKCE-bound code the website uses to hand the
+ * session off to the admin/company panel. Authenticated (access token).
+ */
+async function createHandoff(request, reply) {
+  const { app, challenge } = request.body || {};
+
+  const result = await handoffService.createHandoffCode(
+    request.user.id,
+    app,
+    challenge
+  );
+
+  reply.header('Cache-Control', 'no-store');
+  return reply.code(201).send(success(result));
+}
+
+
+/**
+ * POST /api/v1/auth/handoff/redeem
+ *
+ * Exchange code + PKCE verifier for a fresh session in the panel.
+ * Sets the refresh cookie; the body carries only the access token.
+ */
+async function redeemHandoff(request, reply) {
+  const {
+    accessToken,
+    refreshToken,
+    expiresIn,
+    ...context
+  } = await handoffService.redeemHandoffCode(
+    request.server,
+    request.body || {}
+  );
+
+  reply.setCookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
+  reply.header('Cache-Control', 'no-store');
+  return reply.code(200).send(success({
+    tokens: { accessToken, expiresIn },
+    ...context,
+  }));
+}
+
+
 module.exports = {
   login,
   refresh,
@@ -281,4 +335,6 @@ module.exports = {
   adminChangeUserPassword,
   register,
   registerCompany,
+  createHandoff,
+  redeemHandoff,
 };

@@ -13,6 +13,10 @@ export const endpoints = {
     logout: '/auth/logout',
     logoutAll: '/auth/logout-all',
     refresh: '/auth/refresh',
+    // Cross-app session handoff (PKCE): mint a one-time code on the
+    // website, redeem it in the admin/company panel.
+    handoff: '/auth/handoff',
+    handoffRedeem: '/auth/handoff/redeem',
     me: '/auth/me',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',

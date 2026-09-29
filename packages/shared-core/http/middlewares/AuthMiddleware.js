@@ -24,6 +24,7 @@
  */
 
 import { bridgeRefresh, bridgeLogout } from '../authBridge.js'
+import { getAccessToken } from '../tokenMemory.js'
 
 const REFRESH_URL_FRAGMENT = '/auth/refresh'
 
@@ -39,7 +40,8 @@ class AuthMiddleware {
    * @param {string} [options.tokenType='Bearer']
    */
   constructor(options = {}) {
-    this.getToken = options.getToken || (() => localStorage.getItem('token'))
+    // Default source is the shared in-memory token (never Web Storage).
+    this.getToken = options.getToken || (() => getAccessToken())
     this.tokenHeader = options.tokenHeader || 'Authorization'
     this.tokenType = options.tokenType || 'Bearer'
   }

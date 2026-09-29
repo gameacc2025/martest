@@ -18,6 +18,7 @@
  */
 
 import createBrowserClient from './presets/browser.js'
+import { getAccessToken } from './tokenMemory.js'
 
 const _apiBaseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.NEXT_PUBLIC_API_URL || '/api/v1'
 const api = createBrowserClient({
@@ -26,7 +27,8 @@ const api = createBrowserClient({
   defaultHeaders: { 'Content-Type': 'application/json' },
   enableParser: true,
   enableAuth: true,
-  auth: { getToken: () => localStorage.getItem('token'), tokenHeader: 'Authorization', tokenType: 'Bearer' },
+  // Access token lives in memory only (never Web Storage).
+  auth: { getToken: () => getAccessToken(), tokenHeader: 'Authorization', tokenType: 'Bearer' },
 })
 
 /**

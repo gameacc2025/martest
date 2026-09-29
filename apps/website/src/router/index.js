@@ -175,7 +175,12 @@ router.beforeEach(async (to, from, next) => {
   const isAuthed = authStore.isAuthenticated;
 
   // Guest-only routes (login/register)
-  if (to.meta.guestOnly && isAuthed) {
+  //
+  // Exception: a PKCE handoff in flight (?app&challenge on /login) must keep
+  // the login page mounted even for an authenticated user — it is precisely
+  // the step that mints the panel's one-time code (see Login.vue).
+  const handoffMinting = to.name === "login" && !!to.query.app && !!to.query.challenge;
+  if (to.meta.guestOnly && isAuthed && !handoffMinting) {
     return next({ name: "home" });
   }
 

@@ -44,7 +44,7 @@ injectMock('../../config/db', {});
 
 const hit = {};
 const trivialController = {};
-for (const name of ['login', 'register', 'registerCompany', 'refresh', 'logout', 'logoutAll', 'me', 'adminChangeUserPassword']) {
+for (const name of ['login', 'register', 'registerCompany', 'refresh', 'logout', 'logoutAll', 'me', 'adminChangeUserPassword', 'createHandoff', 'redeemHandoff']) {
   trivialController[name] = async (request, reply) => {
     hit[name] = true;
     return reply.code(200).send({ ok: true });
@@ -289,6 +289,71 @@ test('GET /me: requires authenticate', async () => {
   const res = await app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { 'x-test-user': JSON.stringify({ id: 1 }) } });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.me, true);
+  await app.close();
+});
+
+// ── /handoff (mint) and /handoff/redeem — PKCE session transfer ──
+
+const VALID_CHALLENGE = 'A'.repeat(43); // base64url(SHA-256) is exactly 43 chars
+
+test('POST /handoff: a well-formed body reaches the controller', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/handoff',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+    payload: { app: 'admin', challenge: VALID_CHALLENGE },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.createHandoff, true);
+  await app.close();
+});
+
+test('POST /handoff: a malformed challenge or unknown app -> 400, controller never reached', async () => {
+  const app = await buildApp();
+
+  const short = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/handoff',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+    payload: { app: 'admin', challenge: 'too-short' },
+  });
+  assert.equal(short.statusCode, 400);
+
+  const badApp = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/handoff',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+    payload: { app: 'root', challenge: VALID_CHALLENGE },
+  });
+  assert.equal(badApp.statusCode, 400);
+
+  assert.equal(hit.createHandoff, undefined);
+  await app.close();
+});
+
+test('POST /handoff/redeem: needs no access token (code+verifier are the credential)', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/handoff/redeem',
+    payload: { app: 'admin', code: 'C'.repeat(43), verifier: 'V'.repeat(43) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.redeemHandoff, true);
+  await app.close();
+});
+
+test('POST /handoff/redeem: a cross-site Origin -> 403, controller never reached', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/handoff/redeem',
+    headers: { origin: 'https://evil.example.com' },
+    payload: { app: 'admin', code: 'C'.repeat(43), verifier: 'V'.repeat(43) },
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.redeemHandoff, undefined);
   await app.close();
 });
 

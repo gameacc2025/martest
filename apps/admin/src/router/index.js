@@ -6,6 +6,8 @@ import AdminLayout from "../layouts/AdminLayout.vue";
 // Auth / gate
 import Landing from "../pages/Landing.vue";
 import ForgotPassword from "../pages/auth/ForgotPassword.vue";
+import HandoffStart from "@telecom/shared-ui/components/auth/HandoffStart.vue";
+import HandoffCallback from "@telecom/shared-ui/components/auth/HandoffCallback.vue";
 
 // User Pages
 import UserProfile from "../pages/user/UserProfile.vue";
@@ -14,10 +16,10 @@ import UserProfile from "../pages/user/UserProfile.vue";
 // apps/website/src/pages/public/{Login,Register}.vue). This app no longer
 // has its own login/register forms — hitting /login or /register here just
 // bounces the browser there, carrying the current URL as `?redirect=` so
-// the user lands back on the page they meant to reach. On success the
-// website hands the freshly-created session back to us via a URL fragment
-// (see @telecom/auth's buildSessionHandoffUrl / bootstrapSessionFromUrl,
-// consumed in main.js before the app mounts).
+// the user lands back on the page they meant to reach. The session comes
+// back through the PKCE handoff (see @telecom/auth's beginPanelHandoff /
+// redeemHandoffCode): /auth/start mints the challenge, and /auth/callback
+// redeems the one-time code — never a token in a URL.
 const websiteAppUrl = import.meta.env.VITE_WEBSITE_APP_URL || '/';
 
 function redirectToWebsite(page) {
@@ -45,6 +47,12 @@ const routes = [
   { path: "/login", name: "login", beforeEnter: redirectToWebsite('login'), component: { render: () => null } },
   { path: "/register", name: "register", beforeEnter: redirectToWebsite('register'), component: { render: () => null } },
   { path: "/forgot-password", name: "forgot-password", component: ForgotPassword, meta: { title: "فراموشی رمز عبور", guestOnly: true } },
+
+  // ── PKCE session handoff (website login ⇄ this panel) ──────
+  // Both are PUBLIC routes on purpose: the guard must not demand a token
+  // that only the callback is about to create.
+  { path: "/auth/start", name: "auth-start", component: HandoffStart, props: { app: "admin" }, meta: { title: "ورود به پنل" } },
+  { path: "/auth/callback", name: "auth-callback", component: HandoffCallback, props: { app: "admin", defaultRedirect: "/admin-dashboard" }, meta: { title: "ورود به پنل" } },
 
   // ── Admin dashboard routes ─────────────────────────────────
   {

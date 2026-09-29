@@ -1,56 +1,53 @@
 // =============================================================
-// Unit tests — session handoff (buildSessionHandoffUrl,
-// bootstrapSessionFromUrl, isExternalUrl)
+// Unit tests — PKCE cross-app session handoff helpers
+// (beginPanelHandoff / readPendingHandoff / parseCallbackHash /
+//  readMintRequest / buildCallbackUrl / challengeFor / isExternalUrl)
 //
 // This is the mechanism that lets a STAFF/COMPANY user, after logging
-// in on the centralized website app, land already-authenticated on
-// the admin/company app (a different origin) instead of hitting a
-// second login page. It works by putting the access token + auth
-// context in a URL fragment (never sent to any server) and reading it
-// back on the target app's first paint.
+// in on the centralized website app, land already-authenticated on the
+// admin/company app (a different origin).
 //
-// The property that matters most here, security-wise: the REFRESH
-// token must never travel through this mechanism — only the
-// short-lived access token. That's asserted explicitly below, not
-// just assumed.
+// The properties that matter most here, security-wise:
+//   1. The PKCE VERIFIER never travels — it stays in the panel tab's
+//      sessionStorage; only its SHA-256 challenge goes over the URL.
+//   2. No token of any kind ever appears in a URL.
+//   3. A callback is only accepted by the tab that started the flow
+//      (state match) and only while the pending verifier is fresh.
 //
-// This package has no test runner configured of its own; run these
-// via node's built-in runner directly:
-//   node --test packages/auth/store.test.js
-// (requires a workspace install — `pnpm install` at the repo root —
-// since store.js's other exports pull in @telecom/shared-core etc.)
+// This package has no test runner configured of its own; run these via
+// node's built-in runner directly:
+//   node --test packages/auth/sessionHandoff.test.js
+// (requires a workspace install — `pnpm install` at the repo root).
 // =============================================================
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildSessionHandoffUrl, bootstrapSessionFromUrl, isExternalUrl } from './sessionHandoff.js';
+import { createHash } from 'node:crypto';
+import {
+  isExternalUrl,
+  generateVerifier,
+  generateState,
+  challengeFor,
+  beginPanelHandoff,
+  readPendingHandoff,
+  clearPendingHandoff,
+  parseCallbackHash,
+  readMintRequest,
+  buildCallbackUrl,
+} from './sessionHandoff.js';
 
 // ── Minimal browser stubs ───────────────────────────────────────
-// store.js's handoff functions only touch window.location, history,
-// localStorage, btoa/atob — stub exactly that, nothing more.
-function installBrowserStubs({ pathname = '/dashboard', search = '' } = {}) {
-  const state = { hash: '', pathname, search };
-  const historyLog = [];
-
-  globalThis.window = {
-    location: {
-      get hash() { return state.hash; },
-      set hash(v) { state.hash = v; },
-      get pathname() { return state.pathname; },
-      get search() { return state.search; },
-    },
-    history: {
-      replaceState(_data, _title, url) {
-        historyLog.push(url);
-        const [path, ...rest] = url.split('?');
-        state.pathname = path;
-        state.search = rest.length ? '?' + rest.join('?') : '';
-        state.hash = '';
-      },
-    },
-  };
-
+// sessionHandoff.js only touches window.location/history equivalents,
+// sessionStorage, btoa/atob, crypto — stub exactly that, nothing more.
+function installBrowserStubs() {
+  const session = {};
   const store = {};
+
+  globalThis.sessionStorage = {
+    getItem: (k) => (k in session ? session[k] : null),
+    setItem: (k, v) => { session[k] = String(v); },
+    removeItem: (k) => { delete session[k]; },
+  };
   globalThis.localStorage = {
     getItem: (k) => (k in store ? store[k] : null),
     setItem: (k, v) => { store[k] = v; },
@@ -60,21 +57,12 @@ function installBrowserStubs({ pathname = '/dashboard', search = '' } = {}) {
   globalThis.btoa = (s) => Buffer.from(s, 'binary').toString('base64');
   globalThis.atob = (s) => Buffer.from(s, 'base64').toString('binary');
 
-  return { state, historyLog, store };
+  return { session, store };
 }
 
-const sampleCtx = {
-  user: { id: 1, email: 'manager@acme.test' },
-  profile: { firstName: 'Ali', lastName: 'Rezaei' },
-  accessProfile: { type: 'COMPANY', companyId: 5 },
-  roles: ['COMPANY_MANAGER'],
-  permissions: ['products.manage', 'inquiries.view'],
-  tokens: {
-    accessToken: 'ACCESS.TOKEN.VALUE',
-    refreshToken: 'REFRESH.TOKEN.SHOULD.NEVER.LEAK',
-    expiresIn: 900,
-  },
-};
+const B64URL_43 = /^[A-Za-z0-9_-]{43}$/;
+
+// ── isExternalUrl ───────────────────────────────────────────────
 
 test('isExternalUrl distinguishes cross-origin URLs from internal paths', () => {
   assert.equal(isExternalUrl('https://admin.example.com/admin'), true);
@@ -85,77 +73,212 @@ test('isExternalUrl distinguishes cross-origin URLs from internal paths', () => 
   assert.equal(isExternalUrl(undefined), false);
 });
 
-test('buildSessionHandoffUrl never includes the refresh token', () => {
+// ── Verifier / challenge ────────────────────────────────────────
+
+test('generateVerifier produces a 43-char base64url secret that differs every call', () => {
   installBrowserStubs();
-  const url = buildSessionHandoffUrl('https://company.example.com/company-dashboard', sampleCtx);
-
-  assert.ok(!url.includes('REFRESH.TOKEN.SHOULD.NEVER.LEAK'), 'refresh token leaked into the handoff URL');
-  assert.ok(url.startsWith('https://company.example.com/company-dashboard#session='));
+  const a = generateVerifier();
+  const b = generateVerifier();
+  assert.match(a, B64URL_43);
+  assert.match(b, B64URL_43);
+  assert.notEqual(a, b);
 });
 
-test('buildSessionHandoffUrl + bootstrapSessionFromUrl round-trip the auth context correctly', () => {
-  const { state } = installBrowserStubs({ pathname: '/company-dashboard', search: '' });
-
-  const url = buildSessionHandoffUrl('https://company.example.com/company-dashboard', sampleCtx);
-  // Simulate arriving on the target app: only the fragment survives a
-  // full-page navigation, so put just that part into our stub location.
-  state.hash = '#' + url.split('#')[1];
-
-  const applied = bootstrapSessionFromUrl();
-  assert.equal(applied, true);
-
-  assert.equal(localStorage.getItem('token'), 'ACCESS.TOKEN.VALUE');
-  assert.deepEqual(JSON.parse(localStorage.getItem('user')), sampleCtx.user);
-  assert.deepEqual(JSON.parse(localStorage.getItem('profile')), sampleCtx.profile);
-  assert.deepEqual(JSON.parse(localStorage.getItem('accessProfile')), sampleCtx.accessProfile);
-  assert.deepEqual(JSON.parse(localStorage.getItem('roles')), sampleCtx.roles);
-  assert.deepEqual(JSON.parse(localStorage.getItem('permissions')), sampleCtx.permissions);
-
-  const storedTokens = JSON.parse(localStorage.getItem('tokens'));
-  assert.equal(storedTokens.accessToken, 'ACCESS.TOKEN.VALUE');
-  assert.equal(storedTokens.expiresIn, 900);
-  // The refresh token must not have been written to localStorage either
-  // — it was never in the payload to begin with (see the test above).
-  assert.equal(storedTokens.refreshToken, undefined);
-});
-
-test('bootstrapSessionFromUrl strips the fragment from the URL after use', () => {
-  const { state } = installBrowserStubs({ pathname: '/company-dashboard', search: '?x=1' });
-  const url = buildSessionHandoffUrl('https://company.example.com/company-dashboard', sampleCtx);
-  state.hash = '#' + url.split('#')[1];
-
-  bootstrapSessionFromUrl();
-
-  assert.equal(state.hash, '');
-  assert.equal(state.pathname, '/company-dashboard');
-  assert.equal(state.search, '?x=1');
-});
-
-test('bootstrapSessionFromUrl is a no-op (returns false) when there is no handoff fragment', () => {
-  installBrowserStubs({ pathname: '/company-dashboard' });
-  const applied = bootstrapSessionFromUrl();
-  assert.equal(applied, false);
-  assert.equal(localStorage.getItem('token'), null);
-});
-
-test('bootstrapSessionFromUrl safely ignores a malformed/corrupted fragment (and still strips it)', () => {
-  const { state } = installBrowserStubs({ pathname: '/company-dashboard' });
-  state.hash = '#session=not-valid-base64!!!';
-
-  const applied = bootstrapSessionFromUrl();
-
-  assert.equal(applied, false);
-  assert.equal(localStorage.getItem('token'), null);
-  assert.equal(state.hash, ''); // still cleaned up — no stale payload left in the URL
-});
-
-test('bootstrapSessionFromUrl ignores an unrelated hash (e.g. an in-page anchor)', () => {
+test('generateState produces a non-empty base64url value that differs every call', () => {
   installBrowserStubs();
-  window.location.hash = '#some-other-anchor';
+  const a = generateState();
+  const b = generateState();
+  assert.ok(a.length > 10);
+  assert.notEqual(a, b);
+  assert.match(a, /^[A-Za-z0-9_-]+$/);
+});
 
-  const applied = bootstrapSessionFromUrl();
+test('challengeFor is base64url(SHA-256(verifier)) — deterministic and verifier-independent', async () => {
+  installBrowserStubs();
+  const verifier = generateVerifier();
 
-  assert.equal(applied, false);
-  // Not our prefix — must be left completely alone, not stripped.
-  assert.equal(window.location.hash, '#some-other-anchor');
+  const challenge = await challengeFor(verifier);
+  assert.match(challenge, B64URL_43);
+
+  // Deterministic: same input → same challenge (the server recomputes it).
+  assert.equal(await challengeFor(verifier), challenge);
+
+  // Correct algorithm: matches Node's own SHA-256 → base64url.
+  const expected = createHash('sha256').update(verifier, 'utf8').digest('base64url');
+  assert.equal(challenge, expected);
+
+  // A different verifier yields a different challenge.
+  assert.notEqual(await challengeFor(generateVerifier()), challenge);
+});
+
+// ── beginPanelHandoff (step 1) ──────────────────────────────────
+
+test('beginPanelHandoff sends challenge+state to the website, verifier stays local', async () => {
+  const { session } = installBrowserStubs();
+
+  const url = await beginPanelHandoff({
+    app: 'admin',
+    websiteUrl: 'https://site.example.com',
+    redirect: '/admin-dashboard',
+  });
+
+  const parsed = new URL(url);
+  assert.equal(parsed.origin + parsed.pathname, 'https://site.example.com/login');
+  assert.equal(parsed.searchParams.get('app'), 'admin');
+  assert.match(parsed.searchParams.get('challenge'), B64URL_43);
+  assert.ok(parsed.searchParams.get('state'));
+
+  // THE critical property: the verifier must not appear in the URL.
+  const pending = JSON.parse(session['telecom.handoff.pending.admin']);
+  assert.ok(pending.verifier, 'verifier was not stored for later redemption');
+  assert.ok(!url.includes(pending.verifier), 'verifier leaked into the website URL');
+
+  // …and the challenge really is the hash of that verifier.
+  assert.equal(parsed.searchParams.get('challenge'), await challengeFor(pending.verifier));
+});
+
+test('beginPanelHandoff only accepts an internal redirect path (and keeps it local)', async () => {
+  installBrowserStubs();
+  await beginPanelHandoff({
+    app: 'company',
+    websiteUrl: 'https://site.example.com',
+    redirect: '/company-dashboard?tab=1',
+  });
+  let pending = readPendingHandoff('company');
+  assert.equal(pending.redirect, '/company-dashboard?tab=1');
+
+  await beginPanelHandoff({
+    app: 'company',
+    websiteUrl: 'https://site.example.com',
+    redirect: 'https://evil.example.com/steal',
+  });
+  pending = readPendingHandoff('company');
+  assert.equal(pending.redirect, null, 'absolute URL accepted as a redirect target');
+});
+
+test('beginPanelHandoff rejects an unknown app', async () => {
+  installBrowserStubs();
+  await assert.rejects(
+    () => beginPanelHandoff({ app: 'root', websiteUrl: 'https://site.example.com' }),
+    /Unknown handoff app/
+  );
+});
+
+// ── readPendingHandoff / clearPendingHandoff ────────────────────
+
+test('readPendingHandoff returns null when this tab never started a handoff', () => {
+  installBrowserStubs();
+  assert.equal(readPendingHandoff('admin'), null);
+  // Even if SOME other app left something behind.
+  globalThis.sessionStorage.setItem('telecom.handoff.pending.company', JSON.stringify({
+    verifier: 'x', state: 'y', createdAt: Date.now(),
+  }));
+  assert.equal(readPendingHandoff('admin'), null);
+});
+
+test('readPendingHandoff round-trips verifier, state and redirect', async () => {
+  installBrowserStubs();
+  await beginPanelHandoff({
+    app: 'company',
+    websiteUrl: 'https://site.example.com',
+    redirect: '/company-dashboard',
+  });
+
+  const pending = readPendingHandoff('company');
+  assert.match(pending.verifier, B64URL_43);
+  assert.ok(pending.state);
+  assert.equal(pending.redirect, '/company-dashboard');
+});
+
+test('readPendingHandoff drops expired pending flows', async () => {
+  installBrowserStubs();
+  globalThis.sessionStorage.setItem('telecom.handoff.pending.admin', JSON.stringify({
+    verifier: 'v', state: 's', createdAt: Date.now() - 6 * 60 * 1000,
+  }));
+  assert.equal(readPendingHandoff('admin'), null);
+  assert.equal(globalThis.sessionStorage.getItem('telecom.handoff.pending.admin'), null);
+});
+
+test('readPendingHandoff ignores corrupt storage', () => {
+  installBrowserStubs();
+  globalThis.sessionStorage.setItem('telecom.handoff.pending.admin', '{not json');
+  assert.equal(readPendingHandoff('admin'), null);
+});
+
+test('clearPendingHandoff removes only the given app entry', async () => {
+  installBrowserStubs();
+  await beginPanelHandoff({ app: 'admin', websiteUrl: 'https://site.example.com' });
+  await beginPanelHandoff({ app: 'company', websiteUrl: 'https://site.example.com' });
+
+  clearPendingHandoff('admin');
+  assert.equal(readPendingHandoff('admin'), null);
+  assert.ok(readPendingHandoff('company'));
+});
+
+// ── parseCallbackHash (step 3 input) ────────────────────────────
+
+test('parseCallbackHash extracts code and state from the panel fragment', () => {
+  assert.deepEqual(parseCallbackHash('#code=ABC123&state=xyz'), { code: 'ABC123', state: 'xyz' });
+  assert.deepEqual(parseCallbackHash('#state=xyz&code=ABC123'), { code: 'ABC123', state: 'xyz' });
+});
+
+test('parseCallbackHash rejects anything that is not a complete callback', () => {
+  assert.equal(parseCallbackHash(''), null);
+  assert.equal(parseCallbackHash('#code=ABC123'), null);            // no state
+  assert.equal(parseCallbackHash('#state=xyz'), null);               // no code
+  assert.equal(parseCallbackHash('#/auth/callback'), null);
+  assert.equal(parseCallbackHash('#some-other-anchor'), null);
+  assert.equal(parseCallbackHash(undefined), null);
+});
+
+// ── readMintRequest (website side of step 2) ────────────────────
+
+test('readMintRequest parses a well-formed handoff request', () => {
+  const challenge = 'A'.repeat(43);
+  const req = readMintRequest(`?app=admin&challenge=${challenge}&state=abc`);
+  assert.deepEqual(req, { app: 'admin', challenge, state: 'abc' });
+
+  // Accepts a URLSearchParams instance too.
+  const params = new URLSearchParams();
+  params.set('app', 'company');
+  params.set('challenge', challenge);
+  params.set('state', 'abc');
+  assert.equal(readMintRequest(params).app, 'company');
+});
+
+test('readMintRequest rejects malformed or foreign requests', () => {
+  const challenge = 'A'.repeat(43);
+  assert.equal(readMintRequest(''), null);
+  assert.equal(readMintRequest(`?challenge=${challenge}&state=abc`), null);                 // no app
+  assert.equal(readMintRequest(`?app=hacker&challenge=${challenge}&state=abc`), null);      // bad app
+  assert.equal(readMintRequest('?app=admin&challenge=short&state=abc'), null);              // bad challenge
+  assert.equal(readMintRequest(`?app=admin&challenge=${challenge}`), null);                 // no state
+  // A challenge carrying URL-safe-alphabet junk outside the 43-char shape.
+  assert.equal(readMintRequest('?app=admin&challenge=../../../etc/passwd&state=abc'), null);
+});
+
+// ── buildCallbackUrl (website → panel return leg) ───────────────
+
+test('buildCallbackUrl points at the panel callback and carries only code+state', () => {
+  const url = buildCallbackUrl('https://admin.example.com', { code: 'C0DE', state: 'xyz' });
+  const parsed = new URL(url);
+  assert.equal(parsed.origin + parsed.pathname, 'https://admin.example.com/auth/callback');
+  assert.equal(parsed.hash, '#code=C0DE&state=xyz');
+  assert.equal(parsed.search, '');
+});
+
+test('no helper ever puts a token or verifier in a URL', async () => {
+  const { session } = installBrowserStubs();
+  const start = await beginPanelHandoff({
+    app: 'admin',
+    websiteUrl: 'https://site.example.com',
+    redirect: '/admin-dashboard',
+  });
+  const callback = buildCallbackUrl('https://admin.example.com', { code: 'C0DE', state: 'xyz' });
+  const { verifier } = JSON.parse(session['telecom.handoff.pending.admin']);
+
+  for (const url of [start, callback]) {
+    assert.ok(!/accessToken|refreshToken|bearer/i.test(url), `token-ish material in ${url}`);
+    assert.ok(!url.includes(verifier), 'the PKCE verifier leaked into a URL');
+  }
 });

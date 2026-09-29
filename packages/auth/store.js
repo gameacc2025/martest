@@ -4,16 +4,17 @@ import { apiGet, apiPost, apiPatch, apiDelete } from '@telecom/shared-core/http/
 import { handleApiError } from '@telecom/api-client'
 import { endpoints } from '@telecom/api-client'
 import { registerAuthBridge, getAuthRouter } from '@telecom/shared-core/http/authBridge'
+import { getAccessToken, setAccessToken as setMemoryToken, clearAccessToken, onAccessTokenChange } from '@telecom/shared-core/http/tokenMemory.js'
 import { showSessionToast } from '@telecom/api-client'
-import { STORAGE_KEYS, readStored, writeStored } from './storageKeys.js'
+import { STORAGE_KEYS, LEGACY_RAW_TOKEN_KEY, readStored, writeStored } from './storageKeys.js'
 
-// Cross-app session handoff (buildSessionHandoffUrl / bootstrapSessionFromUrl
-// / isExternalUrl) now lives in sessionHandoff.js — re-exported here so any
-// existing `import { buildSessionHandoffUrl } from './store.js'` keeps
-// working. It was moved out because it has nothing to do with Pinia and
-// needs to stay dependency-free to unit-test without a bundler; see that
-// file's header comment for the full rationale.
-export { isExternalUrl, buildSessionHandoffUrl, bootstrapSessionFromUrl } from './sessionHandoff.js'
+// `isExternalUrl` is re-exported here so any existing
+// `import { isExternalUrl } from './store.js'` keeps working. The rest of
+// the cross-app handoff (now a PKCE code flow — never a token in a URL)
+// lives in sessionHandoff.js (pure helpers) and handoffClient.js (the two
+// API calls), re-exported from index.js. See those files' headers.
+export { isExternalUrl } from './sessionHandoff.js'
+
 
 // ─────────────────────────────────────────────────────────────
 // Auth store — state mirrors the backend auth context EXACTLY.
@@ -27,7 +28,10 @@ export { isExternalUrl, buildSessionHandoffUrl, bootstrapSessionFromUrl } from '
 //   auth.accessProfile   — application context { type, companyId, company }
 //   auth.roles           — string[] (permission source inside the app)
 //   auth.permissions     — string[] (page/feature access; '*' = all)
-//   auth.tokens          — { accessToken, refreshToken, expiresIn }
+//   auth.tokens          — { accessToken?, expiresIn } metadata persisted
+//                          WITHOUT secrets: the access token is mirrored
+//                          into tokenMemory (memory only) and the refresh
+//                          token only ever exists in the httpOnly cookie
 //
 // APPLICATION SELECTION uses ONLY accessProfile.type:
 //   STAFF    → Admin App
@@ -107,10 +111,31 @@ export function createAuthStore() {
     const loading = ref(false)
     const error = ref(null)
 
+    // ── Access token: MEMORY ONLY ──────────────────────────────
+    // The raw token is never persisted (Web Storage is readable by any
+    // XSS). It lives in tokenMemory and every HTTP client reads it from
+    // there. This ref is a reactive mirror so Vue state (isAuthenticated,
+    // guards, header UI) updates whenever the memory token changes.
+    const accessToken = ref(getAccessToken())
+    onAccessTokenChange((next) => { accessToken.value = next })
+
+    // One-time upgrade path: older builds persisted the raw token in Web
+    // Storage. Pull it into memory, strip it from the bundle, and wipe the
+    // legacy key so no secret survives on disk.
+    if (tokens.value?.accessToken) {
+      setMemoryToken(tokens.value.accessToken)
+    }
+    localStorage.removeItem(LEGACY_RAW_TOKEN_KEY)
+    if (tokens.value && ('accessToken' in tokens.value || 'refreshToken' in tokens.value)) {
+      const { accessToken: _legacyAccess, refreshToken: _legacyRefresh, ...rest } = tokens.value
+      tokens.value = rest
+      persistTokens()
+    }
+
     // ── Derived identity ──────────────────────────────────────
 
     // Raw access token (for the HTTP layer + local expiry checks).
-    const token = computed(() => tokens.value?.accessToken || null)
+    const token = computed(() => accessToken.value || null)
     const isAuthenticated = computed(() => !!token.value)
 
     // APPLICATION CONTEXT — the ONLY thing that selects the app.
@@ -219,24 +244,22 @@ export function createAuthStore() {
       }
     }
 
-    // Persist the token bundle and keep the raw access token mirrored for the
-    // HTTP layer (AuthMiddleware reads localStorage 'token' directly).
-    function setTokens(newTokens) {
-      tokens.value = newTokens || null
-      writeStored(STORAGE_KEYS.tokens, tokens.value)
-      const accessToken = newTokens?.accessToken || null
-      if (accessToken) {
-        localStorage.setItem(STORAGE_KEYS.token, accessToken)
-      } else {
-        localStorage.removeItem(STORAGE_KEYS.token)
+    // Persist the token bundle WITHOUT its secrets: the access token goes
+    // to memory only (tokenMemory) and the refresh token never leaves the
+    // httpOnly cookie, so the stored copy is just non-secret metadata.
+    function persistTokens() {
+      if (!tokens.value) {
+        writeStored(STORAGE_KEYS.tokens, null)
+        return
       }
+      const { accessToken: _a, refreshToken: _r, ...safe } = tokens.value
+      writeStored(STORAGE_KEYS.tokens, safe)
     }
 
-    // Update only the access token (used by refresh()), preserving the rest of
-    // the token bundle where possible.
-    function setAccessToken(accessToken, extra = {}) {
-      const next = { ...(tokens.value || {}), ...extra, accessToken }
-      setTokens(next)
+    function setTokens(newTokens) {
+      tokens.value = newTokens || null
+      setMemoryToken(newTokens?.accessToken || null)
+      persistTokens()
     }
 
     // Clears in-memory + storage state. Does NOT redirect or toast — the
@@ -248,7 +271,9 @@ export function createAuthStore() {
       roles.value = []
       permissions.value = []
       tokens.value = null
+      clearAccessToken()
       Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key))
+      localStorage.removeItem(LEGACY_RAW_TOKEN_KEY)
     }
 
     // ── Profile ──────────────────────────────────────────────
@@ -303,8 +328,9 @@ export function createAuthStore() {
         loading.value = true
         error.value = null
 
-        // Response: { tokens: { accessToken, refreshToken, expiresIn },
-        //             user, profile, accessProfile, roles, permissions }
+        // Response: { tokens: { accessToken, expiresIn },   (refresh token
+        //             user, profile, accessProfile, roles, permissions }  ←
+        //             never in the body; httpOnly cookie only)
         const loginData = await apiPost(endpoints.auth.login, credentials)
         setAuthContext(loginData)
         return loginData
@@ -458,13 +484,52 @@ export function createAuthStore() {
       }
     }
 
+    // ── restoreSession (called once at app boot) ──────────────
+    //
+    // The access token lives in memory only, so every page load starts with
+    // none. If we still hold a persisted auth context, there is (or was) an
+    // httpOnly refresh cookie — try to silently mint a fresh access token
+    // before the router guard judges us logged-out.
+    //
+    // Never throws, never blocks boot for long: on failure the app simply
+    // starts logged-out (the guard then routes to login as usual).
+    async function restoreSession() {
+      if (accessToken.value) return true
+      if (!readStored(STORAGE_KEYS.user, null)) return false
+      try {
+        // Hard cap so a hung API can't stall the app's first paint. The
+        // underlying refresh keeps running and populates memory when/if it
+        // resolves (refresh() is shared/idempotent, so the guard's own call
+        // would await the very same promise).
+        await Promise.race([
+          refresh(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('restore timeout')), 5000)),
+        ])
+        return true
+      } catch {
+        return false
+      }
+    }
+
     // ── ensureAuthenticated (called by router guard) ─────────
     //
     // Returns true if the user is authenticated with a usable token.
-    // Transparently refreshes an expired token. On refresh failure it
-    // performs a full logout (with session_expired toast) and returns false.
+    // Transparently refreshes an expired token — or obtains the FIRST token
+    // of the session after a page reload (memory-only token ⇒ none yet).
+    // On refresh failure it performs a full logout (with session_expired
+    // toast) and returns false.
     async function ensureAuthenticated(intendedPath = null) {
       if (!token.value) {
+        // Could be a plain anonymous visitor, or a reload of a live session.
+        // A persisted auth context means "try the cookie first".
+        if (readStored(STORAGE_KEYS.user, null)) {
+          try {
+            await refresh()
+            return true
+          } catch {
+            // Cookie gone/expired → real logout below.
+          }
+        }
         // Not logged in at all. Send them to login, preserving the target so
         // they land back here after signing in.
         await logout({ redirectTo: null, reason: null, intendedPath })
@@ -614,6 +679,10 @@ export function createAuthStore() {
       registerCompany,
       logout,
       refresh,
+      restoreSession,
+      // Used by the PKCE handoff callback: the redeem response has exactly
+      // the same shape as a login response, so it funnels through here.
+      setAuthContext,
       ensureAuthenticated,
       forgotPassword,
       resetPassword,

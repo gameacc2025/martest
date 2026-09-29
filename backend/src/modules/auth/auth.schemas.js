@@ -51,6 +51,31 @@ const adminChangePasswordBody = {
   },
 };
 
+// PKCE handoff: 32-byte base64url values (SHA-256 output / random bytes).
+const B64URL_43 = { type: 'string', pattern: '^[A-Za-z0-9_-]{43}$' };
+const HANDOFF_APP = { type: 'string', enum: ['admin', 'company'] };
+
+const handoffBody = {
+  type: 'object',
+  required: ['app', 'challenge'],
+  additionalProperties: false,
+  properties: {
+    app: HANDOFF_APP,
+    challenge: { ...B64URL_43, description: 'base64url(SHA-256(verifier))' },
+  },
+};
+
+const handoffRedeemBody = {
+  type: 'object',
+  required: ['app', 'code', 'verifier'],
+  additionalProperties: false,
+  properties: {
+    app: HANDOFF_APP,
+    code: { ...B64URL_43, description: 'One-time handoff code (60s TTL).' },
+    verifier: { ...B64URL_43, description: 'PKCE verifier kept in the panel tab.' },
+  },
+};
+
 // ── Response schemas ──────────────────────────────────────────
 
 // User = authentication identity only (no profile fields here).
@@ -120,6 +145,9 @@ const authContextResponse = {
   },
 };
 
+// NOTE: the refresh token is intentionally absent — it only ever travels
+// in the httpOnly cookie. Response schemas act as a second safety net:
+// Fastify strips any field that isn't declared here.
 const loginResponse = {
   200: {
     type: 'object',
@@ -131,7 +159,6 @@ const loginResponse = {
             type: 'object',
             properties: {
               accessToken: { type: 'string' },
-              refreshToken: { type: 'string' },
               expiresIn: { type: 'integer', description: 'Token expiry in seconds' },
             },
           },
@@ -140,6 +167,26 @@ const loginResponse = {
           accessProfile: accessProfileResponse,
           roles: rolesResponse,
           permissions: permissionsResponse,
+        },
+      },
+    },
+  },
+};
+
+const refreshResponse = {
+  200: {
+    type: 'object',
+    properties: {
+      data: {
+        type: 'object',
+        properties: {
+          tokens: {
+            type: 'object',
+            properties: {
+              accessToken: { type: 'string' },
+              expiresIn: { type: 'integer', description: 'Token expiry in seconds' },
+            },
+          },
         },
       },
     },
@@ -157,7 +204,10 @@ module.exports = {
   loginBody,
   changePasswordBody,
   adminChangePasswordBody,
+  handoffBody,
+  handoffRedeemBody,
   loginResponse,
+  refreshResponse,
   meResponse,
   userResponse,
   profileResponse,

@@ -5,10 +5,24 @@
  */
 export { createAuthStore } from './store.js'
 
-// Cross-app session handoff — used by the website's Login/Register pages
-// to send an authenticated STAFF/COMPANY user to the admin/company app
-// already signed in, and by those apps on boot to consume it.
-export { buildSessionHandoffUrl, bootstrapSessionFromUrl, isExternalUrl } from './store.js'
+// Cross-app session handoff — PKCE code flow, never a token in a URL.
+//   sessionHandoff.js  pure helpers (verifier/challenge/state, URL parsing)
+//   handoffClient.js   the two API calls (mint on the website, redeem in
+//                      the panel)
+export {
+  isExternalUrl,
+  beginPanelHandoff,
+  readPendingHandoff,
+  clearPendingHandoff,
+  parseCallbackHash,
+  readMintRequest,
+  buildCallbackUrl,
+  generateVerifier,
+  generateState,
+  challengeFor,
+  HANDOFF_APPS,
+} from './sessionHandoff.js'
+export { mintHandoffCode, redeemHandoffCode } from './handoffClient.js'
 
 // Router injection helpers — re-exported so apps can wire their router into
 // the auth layer without reaching into @telecom/shared-core directly.

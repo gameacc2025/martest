@@ -48,7 +48,7 @@ ForbiddenError 403, ConflictError 409) and `handlePrismaError`/
 - Do not introduce Tailwind or a second UI kit — PrimeVue is the established system for admin/company.
 
 ## 6. Shared packages (`packages/*`)
-- **`@telecom/auth`** — `store.js` (Pinia auth store: `auth.user` / `auth.profile` / `auth.accessProfile` / `auth.roles` / `auth.permissions` / `auth.tokens`, kept as 6 SEPARATE domains, never merged into one `user` blob — mirrors the backend's auth response shape exactly), `sessionHandoff.js` (cross-app SSO handoff via URL — website login → hands off an already-authenticated STAFF/COMPANY session to admin/company app; has its own dependency-free unit test, `sessionHandoff.test.js`), `storageKeys.js`.
+- **`@telecom/auth`** — `store.js` (Pinia auth store: `auth.user` / `auth.profile` / `auth.accessProfile` / `auth.roles` / `auth.permissions` / `auth.tokens`, kept as 6 SEPARATE domains, never merged into one `user` blob — mirrors the backend's auth response shape exactly; `auth.tokens` is persisted WITHOUT secrets), `sessionHandoff.js` (PKCE cross-app session handoff — dependency-free helpers: verifier/challenge/state generation, pending-flow storage in the panel tab's sessionStorage, callback parsing; a token NEVER appears in a URL), `handoffClient.js` (the flow's two API calls: mint `POST /auth/handoff`, redeem `POST /auth/handoff/redeem`), `storageKeys.js` (localStorage keys — there is NO token key: the access token lives only in `@telecom/shared-core/http/tokenMemory.js`), plus `sessionHandoff.test.js` (18 dependency-free unit tests, `node --test packages/auth/sessionHandoff.test.js`).
 - **`@telecom/permissions`** — `PERMISSIONS` constant object, single source of truth for permission-string constants across all 3 apps (was previously duplicated per-app under `src/config/permissions.js`; now everything re-maps here). SUPER_ADMIN bypasses all checks (handled in the auth store, `roles.includes('SUPER_ADMIN')`-style, mirroring backend `utils/rbac.js`).
 - **`@telecom/api-client`** — `apiClient.js`, `endpoints.js`, `errorHandler.js` — HTTP client + centralized endpoint URL builder + error normalization.
 - **`@telecom/shared-core`** — ALSO has `http/apiClient.js` and `http/authBridge.js`. **Note: there are two apiClient implementations (`packages/api-client` and `packages/shared-core/http`)** — `auth/store.js` imports from BOTH (`apiGet/apiPost/...` from shared-core/http/apiClient, but `handleApiError`/`endpoints`/`showSessionToast` from api-client). This split is real, not a mistake to "clean up" reflexively — confirm intent before consolidating (see Known Issues §15).
@@ -71,8 +71,27 @@ in DB (`RefreshToken` model, hashed via SHA-256 — see `backend/src/utils/token
 accessType, companyId}`) and `fastify.authenticateRefresh` (refresh token
 from an httpOnly cookie, checks DB record exists / not expired / user
 ACTIVE). Frontend mirrors this exactly in `packages/auth/store.js` (see §6).
-Cross-app SSO: `sessionHandoff.js` passes an authenticated session between
-apps via URL on login (website → admin/company).
+Cross-app session handoff (website → admin/company panel) uses a **PKCE code
+flow**, never a token in a URL: panel `/auth/start` (`beginPanelHandoff`) keeps
+a random verifier in its own sessionStorage and sends only
+`challenge = base64url(SHA-256(verifier))` + `state` to the website login;
+`Login.vue` mints a 60s one-time code bound to that challenge
+(`POST /auth/handoff`, authenticated) and redirects to
+`<panel>/auth/callback#code&state`; the panel redeems code+verifier
+(`POST /auth/handoff/redeem`) and applies the context through
+`setAuthContext`. Server side: `backend/src/modules/auth/handoff.service.js`
+(single-use, hashed at rest, target-app bound, access re-checked at redeem).
+Related: cookie-authenticated routes (`/refresh`, `/logout`, `/handoff/redeem`)
+are guarded by `middlewares/originGuard.js` + the CORS allow-list
+(`ALLOWED_ORIGINS`).
+
+Frontend token storage: the access token exists **in memory only**
+(`packages/shared-core/http/tokenMemory.js`, read by both HTTP clients and
+`AuthMiddleware`). Web Storage never holds a secret — `store.js` strips
+`accessToken` before persisting the `tokens` bundle, and the refresh token
+only ever exists as the httpOnly cookie. Because memory dies on reload,
+each app boots with `store.js restoreSession()` (silent `/auth/refresh`,
+5s cap) before the first router guard runs.
 
 ## 9. Authorization / RBAC
 Backend: `backend/src/utils/rbac.js` (pure helpers incl. `SUPER_ADMIN_ROLE`

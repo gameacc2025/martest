@@ -95,10 +95,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
-import { buildSessionHandoffUrl, isExternalUrl } from '@telecom/auth'
+import { isExternalUrl, readMintRequest, buildCallbackUrl, mintHandoffCode } from '@telecom/auth'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
@@ -112,6 +112,12 @@ const route = useRoute()
 // send those users to the external app origins instead of router.push().
 const companyAppUrl = import.meta.env.VITE_COMPANY_APP_URL || ''
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || ''
+
+// PKCE handoff in flight: the panel redirected here through its own
+// /auth/start with `?app&state&challenge` (see beginPanelHandoff in
+// @telecom/auth). We only ever mint a one-time code — never a token —
+// and bounce back to the panel's /auth/callback.
+const mintRequest = readMintRequest(window.location.search)
 
 // Login/register are centralized here. `?redirect=` may now be a FULL url
 // on a different app's origin (e.g. company/admin sent us here because the
@@ -132,14 +138,72 @@ function isAllowedRedirect(url) {
 }
 
 // Go to `target` (internal path or external app URL) after a successful
-// login, carrying the session along if we're leaving this origin.
-function goTo(target, authContext) {
+// login.
+//
+// External targets never carry a session themselves: the destination panel
+// must start the PKCE flow itself (only that tab may generate the verifier,
+// and no token may ever travel in a URL). So we send the browser to the
+// panel's /auth/start with the intended path, and the round trip
+// start → here → mint → callback completes the sign-in.
+function goTo(target) {
   if (isExternalUrl(target)) {
-    window.location.href = buildSessionHandoffUrl(target, authContext)
-  } else {
-    router.push(target)
+    const panel = panelFor(target)
+    if (panel) {
+      const { pathname, search } = new URL(target)
+      window.location.href =
+        `${panel.url}/auth/start?redirect=${encodeURIComponent(pathname + search)}`
+      return
+    }
+    // Origin we don't recognize — never hand a session off to it.
+    router.push('/')
+    return
+  }
+  router.push(target)
+}
+
+// Which panel app does this external URL belong to (if any)?
+function panelFor(url) {
+  try {
+    const origin = new URL(url).origin
+    if (adminAppUrl && new URL(adminAppUrl).origin === origin) return { app: 'admin', url: adminAppUrl }
+    if (companyAppUrl && new URL(companyAppUrl).origin === origin) return { app: 'company', url: companyAppUrl }
+  } catch { /* not a URL at all */ }
+  return null
+}
+
+// Mint the one-time handoff code and leave for the panel's callback.
+async function mintAndRedirect() {
+  loading.value = true
+  try {
+    const { code } = await mintHandoffCode({
+      app: mintRequest.app,
+      challenge: mintRequest.challenge,
+    })
+    window.location.href = buildCallbackUrl(
+      mintRequest.app === 'admin' ? adminAppUrl : companyAppUrl,
+      { code, state: mintRequest.state }
+    )
+  } finally {
+    loading.value = false
   }
 }
+
+// The panel's handoff lands here before the form is ever shown. A page
+// load starts with an empty token memory, so try the httpOnly refresh
+// cookie first — if it still works the user never has to type anything.
+onMounted(async () => {
+  if (!mintRequest) return
+  if (!authStore.isAuthenticated) {
+    try { await authStore.refresh() } catch { /* show the form instead */ }
+  }
+  if (authStore.isAuthenticated) {
+    try {
+      await mintAndRedirect()
+    } catch (err) {
+      error.value = err?.serverMessage || err?.message || 'خطا در انتقال نشست. لطفا دوباره تلاش کنید.'
+    }
+  }
+})
 
 const form = ref({
   phone: '',
@@ -159,6 +223,17 @@ async function handleSubmit() {
       password: form.value.password
     })
 
+    // A panel-initiated handoff takes priority over any local redirect:
+    // the panel is where the user is actually going.
+    if (mintRequest) {
+      try {
+        await mintAndRedirect()
+      } catch (err) {
+        error.value = err?.serverMessage || err?.message || 'خطا در انتقال نشست. لطفا دوباره تلاش کنید.'
+      }
+      return
+    }
+
     // App selection is driven SOLELY by accessProfile.type.
     //   STAFF    → admin control panel (SEPARATE app)
     //   COMPANY  → company dashboard (SEPARATE app)
@@ -166,14 +241,14 @@ async function handleSubmit() {
     // Roles/permissions never choose the app — they only gate features inside it.
     const redirect = route.query.redirect
     if (redirect && isAllowedRedirect(redirect)) {
-      goTo(redirect, response)
+      goTo(redirect)
     } else {
       const type = response.accessProfile?.type
 
       if (type === 'STAFF') {
-        goTo(`${adminAppUrl}/admin-dashboard`, response)
+        goTo(`${adminAppUrl}/admin-dashboard`)
       } else if (type === 'COMPANY') {
-        goTo(`${companyAppUrl}/company-dashboard`, response)
+        goTo(`${companyAppUrl}/company-dashboard`)
       } else {
         router.push('/')
       }

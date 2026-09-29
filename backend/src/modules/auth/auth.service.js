@@ -152,12 +152,17 @@ async function buildUserContext(userId) {
 
 /**
  * Issue a fresh access + refresh token pair for a user and persist the
- * refresh token (hashed). Any previous refresh tokens are revoked.
+ * refresh token (hashed). By default any previous refresh tokens are
+ * revoked; pass { revokeExisting: false } to keep other sessions alive
+ * (used by the PKCE handoff redeem, where the website tab must stay
+ * logged in while the panel gets its own token).
  *
  * @param {object} fastify
  * @param {object} params - { userId, email, roles, permissions, accessProfile }
+ * @param {object} [options] - { revokeExisting = true }
  */
-async function issueTokens(fastify, { userId, email, roles, permissions, accessProfile }) {
+async function issueTokens(fastify, { userId, email, roles, permissions, accessProfile },
+                           { revokeExisting = true } = {}) {
   const accessToken = signAccessToken(fastify, {
     id: userId,
     email,
@@ -169,8 +174,10 @@ async function issueTokens(fastify, { userId, email, roles, permissions, accessP
 
   const refreshToken = signRefreshToken(fastify, userId);
 
-  // Revoke existing refresh tokens, then persist the new one.
-  await prisma.refreshToken.deleteMany({ where: { userId } });
+  // Revoke existing refresh tokens (unless caller opts out), then persist the new one.
+  if (revokeExisting) {
+    await prisma.refreshToken.deleteMany({ where: { userId } });
+  }
   await prisma.refreshToken.create({
     data: {
       token: hashRefreshToken(refreshToken),
@@ -640,4 +647,8 @@ module.exports = {
   changeUserPassword,
   register,
   registerCompany,
+  // Shared with handoff.service.js
+  buildUserContext,
+  issueTokens,
+  expiryToSeconds,
 };

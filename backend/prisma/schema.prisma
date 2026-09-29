@@ -144,6 +144,7 @@ model User {
   accessProfile   AccessProfile?
   roles         UserRole[]
   refreshTokens RefreshToken[]
+  handoffCodes  HandoffCode[]
   notifications Notification[]
   products      Product[]        @relation("ProductCreatedBy")
   productStatusChanges ProductStatusHistory[]
@@ -165,6 +166,23 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+}
+
+// One-time, PKCE-bound code used to hand a live session from the website
+// to the admin/company panel (see handoff.service.js). Stored hashed;
+// single-use (deleted atomically on redeem); 60-second TTL.
+model HandoffCode {
+  id        Int      @id @default(autoincrement())
+  codeHash  String   @unique
+  userId    Int
+  app       String   // 'admin' | 'company'
+  challenge String   // base64url(SHA-256(verifier)) supplied by the panel
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Category {

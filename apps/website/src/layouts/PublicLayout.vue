@@ -21,11 +21,21 @@ const route = useRoute()
 const companyAppUrl = import.meta.env.VITE_COMPANY_APP_URL || ''
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || ''
 
+// Never link straight into a panel page: the panel has no session of its
+// own yet (the access token is memory-only and dies with this tab), so a
+// bare deep link would bounce the user out to /login. Instead we aim at the
+// panel's /auth/start, which runs the PKCE handoff — website → start →
+// mint → callback — and lands the user on `path` already signed in.
+// No token ever travels in a URL.
+function panelStartUrl(appUrl, path = '/') {
+  return `${appUrl}/auth/start?redirect=${encodeURIComponent(path)}`
+}
+
 function goToCompanyApp(path = '/') {
-  window.location.href = `${companyAppUrl}${path}`
+  window.location.href = panelStartUrl(companyAppUrl, path)
 }
 function goToAdminApp(path = '/') {
-  window.location.href = `${adminAppUrl}${path}`
+  window.location.href = panelStartUrl(adminAppUrl, path)
 }
 
 
@@ -158,7 +168,7 @@ function logout() {
             </div>
 
             <template v-if="user">
-              <a :href="`${companyAppUrl}/notifications`" class="public-icon-link public-notifications-link">
+              <a :href="panelStartUrl(companyAppUrl, '/notifications')" class="public-icon-link public-notifications-link">
                 <i class="pi pi-bell"></i>
                 <span v-if="notificationCount > 0" class="public-cart-badge">{{ notificationCount }}</span>
               </a>
@@ -220,20 +230,20 @@ function logout() {
             </router-link>
           </li>
           <li v-if="user" class="public-mobile-auth">
-            <a v-if="canAccessDashboard" :href="`${adminAppUrl}/admin-dashboard`" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <a v-if="canAccessDashboard" :href="panelStartUrl(adminAppUrl, '/admin-dashboard')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-th-large"></i>
               <span>پنل مدیریت</span>
             </a>
-            <a v-else-if="canAccessCompanyDashboard" :href="`${companyAppUrl}/company-dashboard`" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <a v-else-if="canAccessCompanyDashboard" :href="panelStartUrl(companyAppUrl, '/company-dashboard')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-th-large"></i>
               <span>داشبورد شرکت</span>
             </a>
 
-            <a :href="`${companyAppUrl}/notifications`" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <a :href="panelStartUrl(companyAppUrl, '/notifications')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-bell"></i>
               <span>اعلان‌ها {{ notificationCount > 0 ? `(${notificationCount})` : '' }}</span>
             </a>
-            <a :href="`${companyAppUrl}/profile`" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <a :href="panelStartUrl(companyAppUrl, '/profile')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-user"></i>
               <span>{{ displayName }}</span>
             </a>

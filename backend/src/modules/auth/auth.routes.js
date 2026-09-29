@@ -3,9 +3,11 @@
 //
 // Route map:
 //   POST   /api/v1/auth/login                   → login (public)
-//   POST   /api/v1/auth/refresh                 → refresh access token (cookie auth)
-//   POST   /api/v1/auth/logout                  → logout current device (cookie auth)
+//   POST   /api/v1/auth/refresh                 → refresh access token (cookie auth + origin guard)
+//   POST   /api/v1/auth/logout                  → logout current device (cookie auth + origin guard)
 //   POST   /api/v1/auth/logout-all              → logout all devices (access token)
+//   POST   /api/v1/auth/handoff                 → mint one-time PKCE handoff code (access token)
+//   POST   /api/v1/auth/handoff/redeem          → redeem handoff code for a session (origin guard)
 //   GET    /api/v1/auth/me                      → current user profile + access (any role)
 //   PATCH  /api/v1/auth/users/:id/password      → admin reset another user's password
 //                                               (requires permission: users.update)
@@ -16,10 +18,14 @@
 
 const ctrl = require('./auth.controller');
 const { requirePermission } = require('../../middlewares/rbac');
+const { requireTrustedOrigin } = require('../../middlewares/originGuard');
 const {
   loginBody,
   adminChangePasswordBody,
+  handoffBody,
+  handoffRedeemBody,
   loginResponse,
+  refreshResponse,
   meResponse,
 } = require('./auth.schemas');
 
@@ -105,16 +111,49 @@ async function authRoutes(fastify) {
   }, ctrl.registerCompany);
 
   // ── Cookie-authenticated routes (use refresh token) ───────────
+  // requireTrustedOrigin runs first: a cross-site request never gets
+  // to touch the cookie. (Requests without an Origin header — non-
+  // browser clients — are let through; they cannot ride cookies.)
 
   fastify.post('/refresh', {
-    onRequest: [fastify.authenticateRefresh],
-    schema: { summary: 'Refresh access token using refresh token cookie', tags: ['Auth'] },
+    onRequest: [requireTrustedOrigin, fastify.authenticateRefresh],
+    schema: {
+      summary: 'Refresh access token using refresh token cookie',
+      tags: ['Auth'],
+      response: refreshResponse,
+    },
   }, ctrl.refresh);
 
   fastify.post('/logout', {
-    onRequest: [fastify.authenticateRefresh],
+    onRequest: [requireTrustedOrigin, fastify.authenticateRefresh],
     schema: { summary: 'Logout from current device', tags: ['Auth'] },
   }, ctrl.logout);
+
+  // ── Cross-app session handoff (PKCE) ──────────────────────────
+  // The panel generates a verifier, the website mints a 60s code bound
+  // to SHA-256(verifier), the panel redeems code+verifier. No token
+  // ever travels in a URL.
+
+  fastify.post('/handoff', {
+    onRequest: [fastify.authenticate],
+    config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
+    schema: {
+      summary: 'Mint a one-time PKCE-bound code to open an admin/company panel',
+      tags: ['Auth'],
+      body: handoffBody,
+    },
+  }, ctrl.createHandoff);
+
+  fastify.post('/handoff/redeem', {
+    onRequest: [requireTrustedOrigin],
+    config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
+    schema: {
+      summary: 'Exchange a handoff code + PKCE verifier for a session',
+      tags: ['Auth'],
+      body: handoffRedeemBody,
+      response: loginResponse,
+    },
+  }, ctrl.redeemHandoff);
 
   // ── Access-token-authenticated routes ────────────────────────
 

@@ -15,11 +15,16 @@ export const STORAGE_KEYS = {
   accessProfile: 'accessProfile',
   roles: 'roles',
   permissions: 'permissions',
+  // Token BUNDLE metadata only (e.g. expiresIn). The access token itself
+  // lives exclusively in memory — see @telecom/shared-core/http/tokenMemory.js
+  // — and is stripped before this bundle is persisted.
   tokens: 'tokens',
-  // Raw access token, kept in sync for the HTTP layer (AuthMiddleware reads
-  // localStorage.getItem('token') directly to attach the Authorization header).
-  token: 'token',
 }
+
+// Pre-migration builds persisted the raw access token under this key (and
+// inside the `tokens` bundle). It is wiped on startup so no stale secret
+// survives an upgrade.
+export const LEGACY_RAW_TOKEN_KEY = 'token'
 
 /**
  * Safely parse a JSON value from localStorage. Returns `fallback` on any

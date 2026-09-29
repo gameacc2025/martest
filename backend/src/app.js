@@ -14,7 +14,7 @@
 // =============================================================
 
 const fastify = require('fastify');
-const { nodeEnv, frontendUrl } = require('./config/env');
+const { nodeEnv, frontendUrl, allowedOrigins } = require('./config/env');
 
 async function buildApp() {
   const app = fastify({
@@ -47,8 +47,12 @@ async function buildApp() {
   await app.register(require('./plugins/error-handler.plugin'), { prefix: '/api/v1' });
 
   // ── 2. CORS ───────────────────────────────────────────────────
+  // Production: explicit allow-list (all three frontend origins —
+  // ALLOWED_ORIGINS in backend/.env). Dev: reflect any origin.
   await app.register(require('@fastify/cors'), {
-    origin: nodeEnv === 'production' ? [frontendUrl] : true,
+    origin: nodeEnv === 'production'
+      ? (Array.isArray(allowedOrigins) && allowedOrigins.length ? allowedOrigins : [frontendUrl])
+      : true,
     credentials: true,   // allow cookies to be sent cross-origin
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });

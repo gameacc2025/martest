@@ -44,3 +44,7 @@ export { default as createClient } from './factory/createClient.js'
 export { default as createBrowserClient } from './presets/browser.js'
 export { default as createNodeClient } from './presets/node.js'
 export { default as createUniversalClient } from './presets/universal.js'
+
+// Access token storage — MEMORY ONLY (Web Storage never holds a secret;
+// on reload the auth store re-mints one through /auth/refresh).
+export { getAccessToken, setAccessToken, clearAccessToken, onAccessTokenChange } from './tokenMemory.js'

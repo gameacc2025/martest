@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { useAuthStore } from './stores/auth'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
@@ -83,4 +84,9 @@ app.component('Avatar', Avatar)
 
 app.directive('tooltip', Tooltip)
 
-app.mount('#app')
+// The access token is memory-only, so every reload starts with none even
+// when the httpOnly refresh cookie is alive. Restore the session before the
+// first paint so the header and guards see the real auth state. Visitors
+// without a stored session skip this without any network call, and the
+// restore is time-capped, so boot never hangs.
+useAuthStore().restoreSession().finally(() => app.mount('#app'))

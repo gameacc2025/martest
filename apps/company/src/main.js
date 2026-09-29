@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { bootstrapSessionFromUrl } from '@telecom/auth'
+import { useAuthStore } from './stores/auth'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
@@ -34,12 +34,6 @@ import router from './router'
 import '@telecom/shared-ui/assets/main.scss'
 
 import { theme as TelecomPreset } from '@telecom/shared-ui'
-
-// Consume a cross-app session handoff (e.g. arriving here right after
-// logging in on the centralized website login page) BEFORE anything else
-// runs, so the very first route guard evaluation already sees a valid
-// token in localStorage instead of bouncing back out to /login.
-bootstrapSessionFromUrl()
 
 const app = createApp(App)
 
@@ -87,4 +81,9 @@ app.component('Avatar', Avatar)
 
 app.directive('tooltip', Tooltip)
 
-app.mount('#app')
+// The access token is memory-only, so a fresh page load starts with none.
+// Re-mint it from the httpOnly refresh cookie BEFORE the first route guard
+// runs (replaces the old bootstrapSessionFromUrl(): the handoff no longer
+// carries a token in a URL — it redeems a one-time code at /auth/callback).
+// restoreSession() never throws and is time-capped, so boot can't hang.
+useAuthStore().restoreSession().finally(() => app.mount('#app'))

@@ -27,8 +27,18 @@ const env = {
   // Security
   bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS, 10) || 10,
 
-  // CORS - allowed frontend origin
+  // CORS - allowed frontend origin(s)
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3001',
+
+  // Trusted browser origins (CORS allow-list AND the Origin guard applied to
+  // cookie-authenticated routes: /refresh, /logout, /handoff/redeem).
+  // Comma-separated, e.g. "https://site.x,https://company.x,https://admin.x".
+  // Falls back to FRONTEND_URL, then to the three local dev origins.
+  allowedOrigins: (
+    process.env.ALLOWED_ORIGINS
+    || process.env.FRONTEND_URL
+    || 'http://localhost:3001,http://localhost:3002,http://localhost:3003'
+  ).split(',').map((s) => s.trim()).filter(Boolean),
 
   // Initial Super Admin credentials (used by seed.js on first run only).
   // After seeding, change the password via the admin change-password endpoint.
