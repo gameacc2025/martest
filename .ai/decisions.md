@@ -65,3 +65,19 @@ during context creation to say which.
 Impact: Don't consolidate these two packages as a "cleanup" side-effect of
 an unrelated task. If asked to investigate, read both packages fully
 first, then propose a decision here.
+
+---
+
+Date: 2026-09-29
+Decision: The `test:ci` coverage gate was raised from 85/85/75 to
+95 lines / 90 branches / 90 functions, now that the two files that held
+the baseline down are done.
+Reason: `inquiry.service.js` (was 31% lines) and `product.service.js`
+(was ~66%) were completed to 100% lines / >92% branches / >96% functions,
+so repo-wide coverage is 97.9/92.6/95.9 — the 2026-08-08 entry explicitly
+said to raise the gate once that happened rather than leave it at the old
+baseline forever.
+Impact: CI now fails if a change drops repo-wide line coverage below 95%.
+If a legitimately hard-to-cover area lands (e.g. a new file with no tests
+yet), prefer writing the tests over lowering the gate; lowering it needs a
+new dated entry here saying why.

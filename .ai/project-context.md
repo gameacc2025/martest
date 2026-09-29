@@ -115,14 +115,17 @@ full pass: full coverage on `companies`, `specification-library` modules,
 all controllers, pure utils (`pagination`/`success`/`error`/
 `openapi-route-docs`), both plugins (`auth.plugin`, `error-handler.plugin`),
 plus integration tests (`company.routes.test.js`, `auth.routes.test.js`,
-`app.test.js` boot smoke test, `schemas.structural.test.js`). Coverage
-gaps remain in `inquiry.service.js` (~31% lines) and `product.service.js`
-(~58% lines) — these had PRE-EXISTING partial test files that were never
-brought to full coverage (out of scope for the last pass; flagged as next
-work). Run: `cd backend && npm test` (fast, no coverage) or `npm run
-test:ci` (with 85%/85%/75% line/branch/function coverage gate — see
-`package.json`). CI: `.github/workflows/backend-tests.yml`, Node 20.x +
-22.x, no live DB needed (every test mocks `config/db`).
+`app.test.js` boot smoke test, `schemas.structural.test.js`). The two
+former gaps are now closed: `inquiry.service.js` and `product.service.js`
+are both at 100% lines / >92% branches / >96% functions (their test files
+were completed in a dedicated pass — `inquiry.service.test.js` 107 tests,
+`product.service.test.js` 117 tests; repo total 1062). Run: `cd backend &&
+npm test` (fast, no coverage) or `npm run
+test:ci` (with 95%/90%/90% line/branch/function coverage gate — see
+`package.json`). No CI workflow exists yet (`.ai` previously referenced
+`.github/workflows/backend-tests.yml`, but there is no `.github/` directory
+in the repo — add one if/when CI is wanted). Every test mocks `config/db`,
+so no live DB is needed.
 **Frontend**: effectively no test coverage. Only
 `packages/auth/sessionHandoff.test.js` exists across all of `apps/*` and
 `packages/*`. This is the single biggest testing gap in the repo.
@@ -153,21 +156,28 @@ are missing (`backend/src/config/env.js`).
 
 ## 14. Current development state
 Backend test coverage was just brought from ~0 (on several modules) to
-comprehensive (706 tests passing) — see §10. Previous engineer had left the
-backend under-tested; that gap is now largely closed for controllers/utils/
-plugins/companies/specification-library. Frontend has essentially no
-automated tests — likely the next major gap to address. No active feature
-work in flight as of this writing (see `.ai/current-task.md`).
+comprehensive (1062 tests passing) — see §10. Previous engineer had left the
+backend under-tested; that gap is now closed for controllers/utils/
+plugins/companies/specification-library/inquiries/products. Frontend has
+essentially no automated tests — likely the next major gap to address. No
+active feature work in flight as of this writing (see
+`.ai/current-task.md`).
 
 ## 15. Known issues / technical debt
 - Two parallel HTTP client implementations (`packages/api-client` vs `packages/shared-core/http`), both actively imported by `packages/auth/store.js` for different exports — needs an intentional decision (consolidate or document why both exist), not a reflexive cleanup.
 - `project-structure.txt` at repo root is a 2MB generated file dump — never read it; if it needs regenerating, regenerate, don't cat it into context.
 - Frontend has ~zero test coverage (see §10).
-- `inquiry.service.js` / `product.service.js` backend coverage still low (see §10) — pre-existing partial tests never completed.
 - Root `.env.example` (`JWT_SECRET`) looks stale/inconsistent with `backend/.env.example` (`JWT_ACCESS_SECRET`/`JWT_REFRESH_SECRET`) — verify which is current before relying on either for a fresh setup.
 - `BACKEND_AUDIT_REPORT.md` at repo root documents a completed `User`→`Profile`+`AccessProfile` migration; worth a skim if touching identity/auth models, but don't treat it as current-state documentation — it's a point-in-time audit.
 
 ## 16. Important recent changes
+- Backend: `inquiry.service.js` and `product.service.js` were completed to
+  100% line coverage (their pre-existing partial test files were finished:
+  file-upload paths write into `backend/uploads/…` and clean up after
+  themselves, size-limit paths stream >5/20MB through the real `pipeline`).
+  Repo-wide coverage now 97.9% lines / 92.6% branches / 95.9% functions,
+  so the `test:ci` gate (85/85/75) is now well under the real baseline and
+  could be raised (see `decisions.md`).
 - Backend: `companies` module (service/rule-engine/controller) and
   `specification-library` module went from zero test coverage to full
   coverage; all backend controllers gained tests; 3 real bugs found and
