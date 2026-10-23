@@ -23,3 +23,17 @@ export {
   setDefaultToast,
   showSessionToast
 } from './errorHandler.js'
+
+// Backward-compatible exports for apps that import low-level HTTP helpers from the package root.
+export {
+  apiGet,
+  apiGetPaginated,
+  apiPost,
+  apiPut,
+  apiPatch,
+  apiDelete,
+  getErrorStatus,
+  getErrorCode,
+  getErrorMessage,
+  getErrorDetails
+} from '@telecom/shared-core/http/apiClient.js'
