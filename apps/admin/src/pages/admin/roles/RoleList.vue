@@ -47,7 +47,7 @@
         <Column header="عملیات">
           <template #body="slotProps">
             <div class="flex gap-2">
-              <Button icon="pi pi-pencil" severity="info" rounded text @click="editRole(slotProps.data)" :disabled="slotProps.data.isSystem" />
+              <Button icon="pi pi-pencil" severity="info" rounded text @click="editRole(slotProps.data)" v-tooltip.top="slotProps.data.isSystem ? 'ویرایش عنوان، توضیحات و مجوزها؛ دامنه ثابت می‌ماند' : 'ویرایش نقش'" />
               <Button icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(slotProps.data)" :disabled="slotProps.data.isSystem" />
             </div>
           </template>
