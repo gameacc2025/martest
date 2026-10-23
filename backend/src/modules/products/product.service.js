@@ -437,8 +437,12 @@ async function changeProductStatus(id, action, caller, comment) {
   const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
 
-  if (action === 'submitReview') {
+  if (action === 'submitReview' || action === 'publish') {
+    // Company users may publish only their own products; STAFF moderation
+    // remains cross-company. The route additionally checks access type and permission.
     assertCanManageProduct(product, caller);
+  }
+  if (action === 'submitReview') {
     await validateProductReadyForReview(productId);
   }
   if (action === 'reject' && !comment?.trim()) {
