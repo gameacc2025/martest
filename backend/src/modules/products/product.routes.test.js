@@ -275,6 +275,31 @@ test('POST /:id/publish: STAFF with products.publish -> 200', async () => {
   await app.close();
 });
 
+test('POST /:id/publish: COMPANY with products.publish -> 200', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/products/1/publish',
+    headers: userHeader('COMPANY', ['products.publish']),
+    payload: {},
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.publish, true);
+  await app.close();
+});
+
+test('POST /:id/publish: COMPANY without products.publish -> 403', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/products/1/publish',
+    headers: userHeader('COMPANY', []),
+    payload: {},
+  });
+  assert.equal(res.statusCode, 403);
+  await app.close();
+});
+
 // ── Workflow: hide — STAFF ONLY + products.hide ──────────────
 
 test('POST /:id/hide: STAFF with products.hide -> 200', async () => {
