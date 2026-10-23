@@ -35,7 +35,10 @@ const minPrice = ref(null)
 const maxPrice = ref(null)
 const categoryOptions = computed(() => [
   { id: null, name: 'همه دسته‌ها' },
-  ...categories.value
+  ...categories.value.map((category) => ({
+    ...category,
+    name: category.nameFa || category.nameEn || category.name || category.slug,
+  }))
 ])
 
 // ── Category carousel responsive breakpoints ─────────────
@@ -115,7 +118,7 @@ async function fetchProducts() {
     error.value = null
     const params = { page: 1, limit: 12, status: 'PUBLISHED' }
     if (searchQuery.value) params.search = searchQuery.value
-    if (selectedCategory.value) params.category = selectedCategory.value
+    if (selectedCategory.value) params.categoryId = Number(selectedCategory.value)
     if (minPrice.value != null) params.minPrice = Number(minPrice.value)
     if (maxPrice.value != null) params.maxPrice = Number(maxPrice.value)
 
@@ -338,14 +341,14 @@ onBeforeUnmount(() => {
                         <img
                           v-if="category.image"
                           :src="category.image"
-                          :alt="category.name"
+                          :alt="category.nameFa || category.nameEn || category.slug"
                           class="cat-thumb-img"
                         />
                         <div v-else class="cat-thumb-placeholder">
                           <i class="pi pi-folder"></i>
                         </div>
                       </div>
-                      <h3 class="cat-name">{{ category.name }}</h3>
+                      <h3 class="cat-name">{{ category.nameFa || category.nameEn || category.slug }}</h3>
                       <div class="cat-footer-row">
                         <Badge :value="(category.productCount || 0).toLocaleString('fa-IR')" severity="info" />
                         <span class="cat-link">مشاهده <i class="pi pi-arrow-left"></i></span>
@@ -381,7 +384,7 @@ onBeforeUnmount(() => {
             <div v-else class="products-grid">
               <div v-for="product in featuredProducts" :key="product.id" class="product-card" @click="goToProduct(product)">
                 <div class="product-image">
-                  <img v-if="product.images && product.images[0]" :src="product.images[0]" :alt="product.title" />
+                  <img v-if="product.images && product.images[0]?.url" :src="product.images[0].url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
                 </div>
                 <div class="product-info">
