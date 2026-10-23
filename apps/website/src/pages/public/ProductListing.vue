@@ -110,8 +110,8 @@
             >
               <div class="product-image">
                 <img
-                  v-if="product.images && product.images[0]"
-                  :src="product.images[0]"
+                  v-if="product.images && product.images[0]?.url"
+                  :src="product.images[0].url"
                   :alt="product.title"
                 />
                 <div v-else class="empty-image">
@@ -187,18 +187,21 @@ const items = ref([{ label: 'محصولات' }])
 const categoryOptions = ref([{ id: null, name: 'همه دسته‌ها' }])
 
 onMounted(async () => {
-  await loadCategories()
-  await loadProducts()
   if (route.query.category) {
-    selectedCategory.value = route.query.category
-    filters.value.category = route.query.category
+    const categoryId = Number(route.query.category)
+    selectedCategory.value = Number.isInteger(categoryId) && categoryId > 0 ? categoryId : null
+    filters.value.category = selectedCategory.value
   }
+  await Promise.all([loadCategories(), loadProducts()])
 })
 
 const loadCategories = async () => {
   try {
     const data = await productsStore.getCategories()
-    categoryOptions.value = [{ id: null, name: 'همه دسته‌ها' }, ...(data || [])]
+    categoryOptions.value = [{ id: null, name: 'همه دسته‌ها' }, ...(data || []).map((category) => ({
+      ...category,
+      name: category.nameFa || category.nameEn || category.name || category.slug,
+    }))]
   } catch (err) {
     console.error('Error loading categories:', err)
   }
@@ -214,15 +217,19 @@ const loadProducts = async () => {
       status: 'PUBLISHED'
     }
     if (filters.value.search) params.search = filters.value.search
-    if (filters.value.category) params.category = filters.value.category
+    if (filters.value.category) params.categoryId = Number(filters.value.category)
     if (filters.value.minPrice) params.minPrice = Number(filters.value.minPrice)
     if (filters.value.maxPrice) params.maxPrice = Number(filters.value.maxPrice)
 
-    const data = await productsStore.getProducts(params) || {}
-    const list = data.products ?? data.items ?? []
+    const result = await productsStore.getProducts(params) || {}
+    // getProducts() returns { data, meta } from apiGetPaginated(); `data` is
+    // the product array and pagination totals live under `meta`.
+    const list = Array.isArray(result.data)
+      ? result.data
+      : (result.data?.products ?? result.data?.items ?? result.products ?? result.items ?? [])
     products.value = Array.isArray(list) ? list : []
-    totalPages.value = data.totalPages || 1
-    totalItems.value = data.total || 0
+    totalPages.value = result.meta?.totalPages ?? result.totalPages ?? 1
+    totalItems.value = result.meta?.total ?? result.total ?? products.value.length
   } catch (err) {
     error.value = 'خطا در دریافت محصولات'
     products.value = []
@@ -267,11 +274,12 @@ const formatPrice = (price) => {
 }
 
 watch(() => route.query.category, (newVal) => {
-  if (newVal) {
-    selectedCategory.value = newVal
-    filters.value.category = newVal
-    loadProducts()
-  }
+  const parsed = Number(newVal)
+  const categoryId = newVal && Number.isInteger(parsed) && parsed > 0 ? parsed : null
+  selectedCategory.value = categoryId
+  filters.value.category = categoryId
+  filters.value.page = 1
+  loadProducts()
 })
 </script>
 
