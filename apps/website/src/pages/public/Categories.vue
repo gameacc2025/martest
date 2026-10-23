@@ -29,14 +29,14 @@
                 <img
                   v-if="category.image"
                   :src="category.image"
-                  :alt="category.name"
+                  :alt="category.nameFa || category.nameEn || category.slug"
                   class="cat-thumb-img"
                 />
                 <div v-else class="cat-thumb-placeholder">
                   <i class="pi pi-folder"></i>
                 </div>
               </div>
-              <h3 class="cat-name">{{ category.name }}</h3>
+              <h3 class="cat-name">{{ category.nameFa || category.nameEn || category.slug }}</h3>
               <p v-if="category.description" class="cat-desc">{{ category.description }}</p>
               <div class="cat-footer-row">
                 <Badge :value="(category.productCount || 0).toLocaleString('fa-IR')" severity="info" />
