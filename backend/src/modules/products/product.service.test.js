@@ -349,6 +349,34 @@ test('changeProductStatus: an invalid transition (e.g. DRAFT -> publish) is reje
   );
 });
 
+test('changeProductStatus: company can publish its own product after STAFF approval', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'APPROVED' });
+
+  await service.changeProductStatus(1, 'publish', companyA);
+
+  const updateArgs = calls['product.update'].at(-1);
+  assert.equal(updateArgs.data.status, 'PUBLISHED');
+});
+
+test('changeProductStatus: company cannot publish a HIDDEN product without renewed STAFF approval', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'HIDDEN' });
+
+  await assert.rejects(
+    () => service.changeProductStatus(1, 'publish', companyA),
+    (err) => err.statusCode === 403 && err.code === 'PRODUCT_REQUIRES_STAFF_APPROVAL'
+  );
+  assert.equal((calls['product.update'] || []).length, 0, 'product status must not change');
+});
+
+test('changeProductStatus: STAFF can republish a previously approved HIDDEN product', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'HIDDEN' });
+
+  await service.changeProductStatus(1, 'publish', superAdmin);
+
+  const updateArgs = calls['product.update'].at(-1);
+  assert.equal(updateArgs.data.status, 'PUBLISHED');
+});
+
 test('changeProductStatus: reject requires a non-empty comment', async () => {
   fx.product = draftProduct({ status: 'PENDING_REVIEW' });
   await assert.rejects(
