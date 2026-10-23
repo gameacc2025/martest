@@ -190,6 +190,7 @@ model Category {
   slug          String         @unique
   nameFa        String
   nameEn        String
+  image         String?
   status        CategoryStatus @default(ACTIVE)
   showInMenu    Boolean        @default(true)
   sortOrder     Int            @default(0)
