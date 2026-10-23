@@ -679,30 +679,31 @@ async function ensurePriceTierDoesNotOverlap(productId, tier, excludeTierId) {
   }
 }
 
-async function listProducts({ skip, take, filters = {}, caller }) {
+async function listProducts({ skip, take, filters = {}, caller, publicOnly = false }) {
   const where = { deletedAt: null };
 
-  // Three distinct visibility tiers:
-  //   1. Anonymous / non-privileged  → public marketplace: PUBLISHED + PUBLIC only
-  //   2. Company user                → their own company's products, ANY status
-  //   3. SUPER_ADMIN                 → every company's products, ANY status
-  const isPublicCaller = !caller || (!isSuperAdmin(caller) && !isCompanyUser(caller));
+  // Public marketplace routes must remain public-catalog queries even when a
+  // visitor has a COMPANY/STAFF session. Management pages use /my-products.
+  //   1. Public marketplace           → PUBLISHED + PUBLIC across all companies
+  //   2. Company management          → own company's products, any status
+  //   3. SUPER_ADMIN management      → every company's products, any status
+  const isPublicCaller = publicOnly || !caller || (!isSuperAdmin(caller) && !isCompanyUser(caller));
 
   if (isPublicCaller) {
     where.status = 'PUBLISHED';
     where.visibility = 'PUBLIC';
   }
 
-  if (isCompanyUser(caller)) {
+  // A public listing can optionally be narrowed to a company, but must never
+  // be silently scoped to the signed-in user's company.
+  if (!publicOnly && isCompanyUser(caller)) {
     where.companyId = Number(caller.companyId);
   } else if (filters.companyId) {
     where.companyId = Number(filters.companyId);
   }
 
   if (filters.categoryId) where.categoryId = Number(filters.categoryId);
-  // A status filter is only honored for authenticated callers. Anonymous
-  // marketplace visitors are always clamped to PUBLISHED above and must not be
-  // able to reveal DRAFT/PENDING_REVIEW/etc. products via ?status=...
+  // Never allow a query-string status to override the public-catalog rule.
   if (filters.status && !isPublicCaller) where.status = filters.status;
   if (filters.search) {
     where.OR = [
