@@ -107,10 +107,12 @@ async function updateRole(roleId, data) {
   if (data.label !== undefined) updateData.label = data.label.trim();
   if (data.description !== undefined) updateData.description = data.description;
   if (data.scope !== undefined) {
-    if (role.isSystem) {
+    // System roles may have their label, description and permissions edited,
+    // but their domain (STAFF / COMPANY / CUSTOMER) is immutable.
+    if (role.isSystem && data.scope !== role.scope) {
       throw { statusCode: 400, code: 'SYSTEM_ROLE', message: 'دامنه‌ی نقش‌های سیستمی قابل تغییر نیست.' };
     }
-    updateData.scope = data.scope;
+    if (!role.isSystem) updateData.scope = data.scope;
   }
 
   const permIds = (data.permissionIds || []).map(Number);
