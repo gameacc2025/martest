@@ -324,7 +324,7 @@ const ROLE_PERMISSIONS = {
     'dashboard.read',
     'company_profile.read', 'company_profile.update',
     'users.create', 'users.read', 'users.update', 'users.activate', 'users.deactivate', 'users.assign_roles',
-    'products.create', 'products.read', 'products.update', 'products.delete', 'products.submit_review', 'products.import', 'products.export',
+    'products.create', 'products.read', 'products.update', 'products.delete', 'products.submit_review', 'products.publish', 'products.import', 'products.export',
     'product_images.create', 'product_images.update', 'product_images.delete',
     'product_documents.create', 'product_documents.update', 'product_documents.delete',
     'leads.read', 'leads.update', 'leads.change_status',
@@ -341,7 +341,7 @@ const ROLE_PERMISSIONS = {
   COMPANY_USER: [
     'dashboard.read',
     'company_profile.read',
-    'products.create', 'products.read', 'products.update', 'products.submit_review',
+    'products.create', 'products.read', 'products.update', 'products.submit_review', 'products.publish',
     'product_images.create', 'product_images.update',
     'product_documents.create', 'product_documents.update',
     'leads.read',
