@@ -23,13 +23,15 @@
         :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
         @page="onPageChange" responsiveLayout="scroll">
         <Column field="id" header="شناسه" sortable></Column>
-        <Column field="name" header="نام" sortable></Column>
-        <Column field="slug" header="اسلاگ"></Column>
-        <Column header="دسته والد">
+        <Column field="nameFa" header="نام فارسی" sortable></Column>
+        <Column field="nameEn" header="نام انگلیسی"></Column>
+        <Column header="تصویر">
           <template #body="{ data }">
-            {{ data.parent?.name || '-' }}
+            <img v-if="data.image" :src="data.image" :alt="data.nameFa" style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px;" />
+            <span v-else>-</span>
           </template>
         </Column>
+        <Column field="slug" header="اسلاگ"></Column>
         <Column header="عملیات">
           <template #body="{ data }">
             <div class="flex gap-2">
@@ -44,16 +46,22 @@
     <!-- Create/Edit Category Dialog -->
     <Dialog v-model:visible="showDialog" :header="dialogHeader" :modal="true" class="p-fluid">
       <div class="field">
-        <label for="name">نام</label>
-        <InputText id="name" v-model="form.name" />
+        <label for="nameFa">نام فارسی</label>
+        <InputText id="nameFa" v-model="form.nameFa" required />
+      </div>
+      <div class="field">
+        <label for="nameEn">نام انگلیسی</label>
+        <InputText id="nameEn" v-model="form.nameEn" required />
       </div>
       <div class="field">
         <label for="slug">اسلاگ</label>
-        <InputText id="slug" v-model="form.slug" />
+        <InputText id="slug" v-model="form.slug" required />
       </div>
       <div class="field">
-        <label for="parent">دسته والد</label>
-        <Dropdown id="parent" v-model="form.parentId" :options="parentCategories" optionLabel="name" optionValue="id" placeholder="بدون والد" showClear />
+        <label for="image">آدرس تصویر دسته‌بندی</label>
+        <InputText id="image" v-model="form.image" placeholder="https://... یا /uploads/..." />
+        <small>آدرس عمومی تصویر را وارد کنید؛ تصویر در صفحه دسته‌بندی‌ها و صفحه اصلی نمایش داده می‌شود.</small>
+        <img v-if="form.image" :src="form.image" :alt="form.nameFa" style="display: block; max-width: 100%; max-height: 160px; margin-top: 0.75rem; object-fit: contain;" />
       </div>
       <template #footer>
         <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="closeDialog" />
@@ -95,12 +103,14 @@ const pagination = ref({
 })
 
 const form = ref({
-  name: '',
+  nameFa: '',
+  nameEn: '',
   slug: '',
-  parentId: null
+  image: '',
+  status: 'ACTIVE',
+  showInMenu: true,
+  sortOrder: 0,
 })
-
-const parentCategories = ref([])
 
 const dialogHeader = computed(() => {
   return editingId.value ? 'ویرایش دسته‌بندی' : 'ایجاد دسته‌بندی جدید'
@@ -120,7 +130,6 @@ async function fetchCategories(page = 1) {
     const body = res.data
     const items = body?.data?.data || body?.data || body?.items || body || []
     categories.value = Array.isArray(items) ? items : []
-    parentCategories.value = categories.value
     const meta = body?.data?.meta || body?.meta
     if (meta) {
       pagination.value = {
@@ -143,13 +152,21 @@ function onPageChange(event) {
 
 function openCreateDialog() {
   editingId.value = null
-  form.value = { name: '', slug: '', parentId: null }
+  form.value = { nameFa: '', nameEn: '', slug: '', image: '', status: 'ACTIVE', showInMenu: true, sortOrder: 0 }
   showDialog.value = true
 }
 
 function editCategory(category) {
   editingId.value = category.id
-  form.value = { ...category }
+  form.value = {
+    nameFa: category.nameFa || '',
+    nameEn: category.nameEn || '',
+    slug: category.slug || '',
+    image: category.image || '',
+    status: category.status || 'ACTIVE',
+    showInMenu: category.showInMenu ?? true,
+    sortOrder: category.sortOrder ?? 0,
+  }
   showDialog.value = true
 }
 
@@ -168,7 +185,7 @@ async function saveCategory() {
     }
     showDialog.value = false
     editingId.value = null
-    form.value = { name: '', slug: '', parentId: null }
+    form.value = { nameFa: '', nameEn: '', slug: '', image: '', status: 'ACTIVE', showInMenu: true, sortOrder: 0 }
     await fetchCategories()
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در ذخیره دسته‌بندی', life: 3000 })
