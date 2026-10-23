@@ -69,6 +69,12 @@ function resetMocks() {
     imageCreateError: null,
     documentCreateError: null,
   };
+  // The call log must be cleared too: it used to accumulate across tests,
+  // which made count-based assertions (e.g. "no product.update happened")
+  // depend on execution order and fail depending on what earlier tests did.
+  Object.keys(calls).forEach((key) => {
+    calls[key].length = 0;
+  });
 }
 
 const calls = {};

@@ -146,6 +146,8 @@ model User {
   refreshTokens RefreshToken[]
   handoffCodes  HandoffCode[]
   notifications Notification[]
+  notificationPreferences NotificationPreference[]
+  notificationDeliveries  NotificationDelivery[]
   products      Product[]        @relation("ProductCreatedBy")
   productStatusChanges ProductStatusHistory[]
   productActivityLogs ProductActivityLog[]
@@ -583,6 +585,12 @@ model SystemSetting {
 model Notification {
   id        Int      @id @default(autoincrement())
   userId    Int
+  // Event key from src/modules/notifications/notification.events.js
+  // (e.g. 'PRODUCT_STATUS_CHANGED'). Null = legacy/untyped row created
+  // before the central dispatch service existed.
+  type      String?
+  // Structured event payload (e.g. { productId, status }) for deep-linking.
+  data      Json?
   title     String
   message   String
   isRead    Boolean  @default(false)
@@ -592,6 +600,79 @@ model Notification {
   @@index([userId])
   @@index([isRead])
   @@index([createdAt])
+  @@index([type])
+}
+
+// Per-user, per-event, per-channel opt-in/out matrix (flow/06 §3: NO channel
+// is mandatory — every (user, event, channel) can be switched off, only the
+// defaults are sensible: IN_APP + EMAIL on, SMS off).
+// A missing row means "use the event's channel defaults".
+model NotificationPreference {
+  id        Int                 @id @default(autoincrement())
+  userId    Int
+  eventType String
+  channel   NotificationChannel
+  enabled   Boolean
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventType, channel])
+  @@index([userId])
+}
+
+// Delivery log + outbox — one row per (dispatch, recipient, channel).
+// External delivery (email) happens OUTSIDE the business transaction: the
+// dispatch persists a PENDING row atomically with the business op, and the
+// delivery worker (notification.delivery.service.js) later hands it to the
+// configured provider. A provider outage therefore never corrupts or
+// blocks the business transaction that requested the notification.
+model NotificationDelivery {
+  id             Int                        @id @default(autoincrement())
+  userId         Int
+  // Set for IN_APP rows for traceability. EMAIL rows are standalone
+  // (a user may disable the in-app channel while keeping email).
+  notificationId Int?
+  eventType      String
+  channel        NotificationChannel
+  status         NotificationDeliveryStatus @default(PENDING)
+  // Frozen snapshot of the message — the worker sends it without re-reading
+  // the (possibly long-gone) business context that produced it.
+  recipient      String?                    // email address (EMAIL); phone for future SMS
+  subject        String?
+  body           String?
+  provider       String?                    // adapter that (last) handled it: 'smtp' | 'console' | ...
+  attempts       Int                        @default(0)
+  maxAttempts    Int                        @default(3)
+  nextAttemptAt  DateTime                   @default(now())
+  lastError      String?
+  sentAt         DateTime?
+  // Event-level idempotency key. A second dispatch with the same
+  // (eventType, dedupeKey, channel) is a silent no-op — safe duplicate dispatch.
+  dedupeKey      String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  user           User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Idempotency: the same (event, dedupeKey, channel) can only be queued once.
+  // Rows without a dedupeKey (NULL) are exempt (Postgres allows NULL duplicates).
+  @@unique([eventType, dedupeKey, channel])
+  @@index([userId])
+  @@index([eventType])
+  @@index([channel, status, nextAttemptAt])
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
 }
 
 enum CompanyType {
