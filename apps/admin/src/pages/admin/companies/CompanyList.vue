@@ -127,7 +127,130 @@
             {{ formatDate(data.createdAt) }}
           </template>
         </Column>
+        <Column header="عملیات" :exportable="false" style="min-width: 12rem">
+          <template #body="{ data }">
+            <div class="flex align-items-center gap-2">
+              <Button
+                v-if="canEditCompany"
+                icon="pi pi-pencil"
+                severity="info"
+                text
+                rounded
+                v-tooltip.top="'ویرایش شرکت'"
+                aria-label="ویرایش شرکت"
+                @click="openEditDialog(data)"
+              />
+              <Button
+                v-if="data.status === 'PENDING' && canManageCompanyStatus"
+                icon="pi pi-check"
+                severity="success"
+                text
+                rounded
+                v-tooltip.top="'تأیید و فعال‌سازی شرکت'"
+                aria-label="تأیید و فعال‌سازی شرکت"
+                :loading="processingCompanyId === data.id"
+                @click="approveCompany(data)"
+              />
+              <Button
+                v-if="!data.isVerified && canVerifyCompany"
+                icon="pi pi-shield"
+                severity="success"
+                text
+                rounded
+                v-tooltip.top="'تأیید مدارک شرکت'"
+                aria-label="تأیید مدارک شرکت"
+                :loading="processingCompanyId === data.id"
+                @click="setCompanyVerification(data, true)"
+              />
+              <Button
+                v-if="data.isVerified && canVerifyCompany"
+                icon="pi pi-shield"
+                severity="secondary"
+                text
+                rounded
+                v-tooltip.top="'لغو تأیید مدارک'"
+                aria-label="لغو تأیید مدارک شرکت"
+                :loading="processingCompanyId === data.id"
+                @click="setCompanyVerification(data, false)"
+              />
+              <Button
+                v-if="data.status === 'ACTIVE' && canManageCompanyStatus"
+                icon="pi pi-ban"
+                severity="danger"
+                text
+                rounded
+                v-tooltip.top="'غیرفعال‌سازی شرکت'"
+                aria-label="غیرفعال‌سازی شرکت"
+                :loading="processingCompanyId === data.id"
+                @click="changeCompanyStatus(data, 'INACTIVE')"
+              />
+            </div>
+          </template>
+        </Column>
       </DataTable>
+
+      <Dialog
+        v-model:visible="editDialogVisible"
+        header="ویرایش شرکت"
+        modal
+        :style="{ width: 'min(92vw, 560px)' }"
+      >
+        <form class="company-form" @submit.prevent="submitUpdateCompany">
+          <div class="form-field">
+            <label for="edit-company-name">نام شرکت</label>
+            <InputText id="edit-company-name" v-model="editForm.name" required autofocus />
+          </div>
+
+          <div class="form-field">
+            <label for="edit-company-type">نوع شرکت</label>
+            <Select
+              id="edit-company-type"
+              v-model="editForm.type"
+              :options="companyTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="انتخاب نوع شرکت"
+            />
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="edit-company-email">ایمیل</label>
+              <InputText id="edit-company-email" v-model="editForm.email" type="email" />
+            </div>
+            <div class="form-field">
+              <label for="edit-company-phone">تلفن</label>
+              <InputText id="edit-company-phone" v-model="editForm.phone" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="edit-company-website">وب‌سایت</label>
+            <InputText id="edit-company-website" v-model="editForm.website" />
+          </div>
+
+          <div class="form-field">
+            <label for="edit-company-address">آدرس</label>
+            <InputText id="edit-company-address" v-model="editForm.address" />
+          </div>
+
+          <div class="form-field">
+            <label for="edit-company-description">توضیحات</label>
+            <Textarea id="edit-company-description" v-model="editForm.description" rows="3" autoResize />
+          </div>
+
+          <div class="dialog-actions">
+            <Button
+              type="button"
+              label="انصراف"
+              severity="secondary"
+              outlined
+              @click="editDialogVisible = false"
+            />
+            <Button type="submit" label="ذخیره تغییرات" icon="pi pi-check" :loading="updating" />
+          </div>
+        </form>
+      </Dialog>
 
       <Dialog
         v-model:visible="createDialogVisible"
@@ -214,7 +337,12 @@ const searchQuery = ref('')
 const statusFilter = ref(null)
 const typeFilter = ref(null)
 const createDialogVisible = ref(false)
+const editDialogVisible = ref(false)
+const updating = ref(false)
+const processingCompanyId = ref(null)
+const editingCompanyId = ref(null)
 const createForm = ref(getEmptyCreateForm())
+const editForm = ref(getEmptyCreateForm())
 
 const pagination = ref({
   page: 1,
@@ -242,6 +370,13 @@ const companyTypeOptions = computed(() => typeOptions.value.filter((item) => ite
 
 const first = computed(() => (pagination.value.page - 1) * pagination.value.limit)
 const canCreateCompany = computed(() => auth.hasPermission('companies.create'))
+const canEditCompany = computed(() =>
+  auth.hasPermission('companies.update') || auth.hasPermission('company_profile.update')
+)
+const canManageCompanyStatus = computed(() =>
+  auth.hasPermission('companies.activate') || auth.hasPermission('companies.deactivate')
+)
+const canVerifyCompany = computed(() => auth.hasPermission('companies.update'))
 
 onMounted(() => {
   loadCompanies()
@@ -346,6 +481,99 @@ async function submitCreateCompany() {
     })
   } finally {
     creating.value = false
+  }
+}
+
+function openEditDialog(company) {
+  editingCompanyId.value = company.id
+  editForm.value = {
+    name: company.name || company.companyName || '',
+    type: company.type || null,
+    email: company.email || '',
+    phone: company.phone || company.phoneNumber || '',
+    website: company.website || '',
+    address: company.address || '',
+    description: company.description || '',
+  }
+  editDialogVisible.value = true
+}
+
+async function submitUpdateCompany() {
+  if (!editingCompanyId.value) return
+
+  try {
+    updating.value = true
+    const payload = Object.fromEntries(
+      Object.entries(editForm.value).filter(([, value]) => value !== '' && value !== null)
+    )
+    await companyStore.updateCompany(editingCompanyId.value, payload)
+    editDialogVisible.value = false
+    toast.add({
+      severity: 'success',
+      summary: 'موفق',
+      detail: 'اطلاعات شرکت با موفقیت ویرایش شد',
+      life: 3000,
+    })
+    await loadCompanies()
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطا',
+      detail: error.message || 'خطا در ویرایش شرکت',
+      life: 4000,
+    })
+  } finally {
+    updating.value = false
+  }
+}
+
+async function approveCompany(company) {
+  await changeCompanyStatus(company, 'ACTIVE', 'شرکت با موفقیت تأیید و فعال شد')
+}
+
+async function changeCompanyStatus(company, status, successMessage) {
+  try {
+    processingCompanyId.value = company.id
+    await companyStore.changeStatus(company.id, status)
+    toast.add({
+      severity: 'success',
+      summary: 'موفق',
+      detail: successMessage || 'وضعیت شرکت تغییر کرد',
+      life: 3000,
+    })
+    await loadCompanies()
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطا',
+      detail: error.message || 'خطا در تغییر وضعیت شرکت',
+      life: 4000,
+    })
+  } finally {
+    processingCompanyId.value = null
+  }
+}
+
+async function setCompanyVerification(company, isVerified) {
+  try {
+    processingCompanyId.value = company.id
+    await companyStore.toggleVerify(company.id, isVerified)
+    toast.add({
+      severity: 'success',
+      summary: 'موفق',
+      detail: isVerified ? 'مدارک شرکت تأیید شد' : 'تأیید مدارک شرکت لغو شد',
+      life: 3000,
+    })
+    await loadCompanies()
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'خطا',
+      detail: error.message || 'خطا در تغییر وضعیت تأیید شرکت',
+      life: 4000,
+    })
+  } finally {
+    processingCompanyId.value = null
   }
 }
 
