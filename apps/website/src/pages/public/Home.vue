@@ -411,7 +411,7 @@ onBeforeUnmount(() => {
             <div v-else class="products-grid">
               <div v-for="product in bestSellers" :key="product.id" class="product-card" @click="goToProduct(product)">
                 <div class="product-image">
-                  <img v-if="product.images && product.images[0]" :src="product.images[0]" :alt="product.title" />
+                  <img v-if="product.images && product.images[0]?.url" :src="product.images[0].url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
                   <span class="tile-badge">پرفروش</span>
                 </div>
