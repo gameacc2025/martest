@@ -282,8 +282,7 @@ const specRows = computed(() => {
 
 const isInWishlist = computed(() => {
   wishlistVersion.value
-  const list = wishlistStore.items || wishlistStore.wishlist || []
-  return Array.isArray(list) && list.some((item) => String(item.id) === String(product.value.id))
+  return product.value.id != null && wishlistStore.isInWishlist(product.value.id)
 })
 
 const loadProduct = async () => {
@@ -345,18 +344,17 @@ function formatPrice(value) {
 
 const addToCart = () => {
   if (!product.value.id) return
-  cartStore.addToCart({
+  cartStore.addItem({
     id: product.value.id,
-    name: product.value.title || 'بدون عنوان',
-    price: minPrice.value ?? 0,
-    image: activeImage.value,
-    quantity: 1
-  })
+    title: product.value.title || 'بدون عنوان',
+    prices: [{ price: minPrice.value ?? 0, currency: 'IRR' }],
+    images: activeImage.value ? [activeImage.value] : []
+  }, 1)
 }
 
 const addToWishlist = () => {
   if (!product.value.id) return
-  wishlistStore.addToWishlist(product.value)
+  wishlistStore.toggleWishlist(product.value)
   wishlistVersion.value += 1
 }
 
