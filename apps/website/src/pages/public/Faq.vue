@@ -5,10 +5,15 @@
 
       <div class="faq-list">
         <div v-for="(faq, index) in faqs" :key="index" class="faq-item">
-          <div class="faq-question" @click="toggleFaq(index)">
+          <button
+            type="button"
+            class="faq-question"
+            :aria-expanded="faq.open"
+            @click="toggleFaq(index)"
+          >
             <h3>{{ faq.question }}</h3>
-            <i class="pi" :class="faq.open ? 'pi-minus' : 'pi-plus'"></i>
-          </div>
+            <i class="pi" :class="faq.open ? 'pi-minus' : 'pi-plus'" aria-hidden="true"></i>
+          </button>
 
           <div v-if="faq.open" class="faq-answer">
             <p>{{ faq.answer }}</p>
@@ -83,10 +88,20 @@ const toggleFaq = (index) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: 1rem;
   background: var(--surface-ground);
+  border: none;
   border-radius: var(--content-border-radius);
   cursor: pointer;
+  text-align: right;
+  font: inherit;
+  color: var(--text-color);
+}
+
+.faq-question:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .faq-question h3 {

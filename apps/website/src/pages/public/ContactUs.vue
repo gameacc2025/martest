@@ -169,13 +169,13 @@
               <div>
                 <h4>شبکه‌های اجتماعی</h4>
                 <div class="social-icons">
-                  <a href="https://instagram.com/telecom-marketplace" target="_blank" class="social-link">
+                  <a href="https://instagram.com/telecom-marketplace" target="_blank" class="social-link" aria-label="اینستاگرام">
                     <i class="pi pi-instagram"></i>
                   </a>
-                  <a href="https://t.me/telecom_marketplace" target="_blank" class="social-link">
+                  <a href="https://t.me/telecom_marketplace" target="_blank" class="social-link" aria-label="تلگرام">
                     <i class="pi pi-telegram"></i>
                   </a>
-                  <a href="https://linkedin.com/company/telecom-marketplace" target="_blank" class="social-link">
+                  <a href="https://linkedin.com/company/telecom-marketplace" target="_blank" class="social-link" aria-label="لینکدین">
                     <i class="pi pi-linkedin"></i>
                   </a>
                 </div>

@@ -199,6 +199,7 @@ function logout() {
               text
               rounded
               class="public-mobile-toggle"
+              aria-label="باز کردن منوی موبایل"
               @click="mobileMenuOpen = !mobileMenuOpen"
             />
           </div>

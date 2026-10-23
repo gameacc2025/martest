@@ -169,10 +169,10 @@
             <p class="team-position">{{ member.position }}</p>
             <p class="team-desc">{{ member.description }}</p>
             <div class="team-social">
-              <a v-if="member.linkedin" :href="member.linkedin" target="_blank" class="social-link">
+              <a v-if="member.linkedin" :href="member.linkedin" target="_blank" class="social-link" aria-label="پروفایل لینکدین">
                 <i class="pi pi-linkedin"></i>
               </a>
-              <a v-if="member.twitter" :href="member.twitter" target="_blank" class="social-link">
+              <a v-if="member.twitter" :href="member.twitter" target="_blank" class="social-link" aria-label="پروفایل توییتر">
                 <i class="pi pi-twitter"></i>
               </a>
             </div>

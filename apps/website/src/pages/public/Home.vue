@@ -522,9 +522,13 @@ onBeforeUnmount(() => {
   display: flex; justify-content: center; gap: 0.4rem; margin-top: 0.75rem;
 }
 .hero-dot {
-  width: 0.5rem; height: 0.5rem; border-radius: 50%; border: none;
+  width: 0.5rem; height: 0.5rem; border-radius: 50%;
   background: var(--surface-border); cursor: pointer; transition: all 0.25s;
   padding: 0;
+}
+.hero-dot:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 .hero-dot.active { background: var(--primary-color); width: 1.5rem; border-radius: 1rem; }
 
