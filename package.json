@@ -11,9 +11,12 @@
     "build:website": "pnpm --filter @telecom/website build",
     "build:company": "pnpm --filter @telecom/company build",
     "build:admin": "pnpm --filter @telecom/admin build",
-    "test": "vitest run",
+    "test": "vitest run && node --test packages/auth/sessionHandoff.test.js",
     "test:watch": "vitest",
-    "test:shared-ui": "pnpm --filter @telecom/shared-ui test"
+    "test:shared-ui": "pnpm --filter @telecom/shared-ui test",
+    "test:shared-core": "pnpm --filter @telecom/shared-core test",
+    "test:api-client": "pnpm --filter @telecom/api-client test",
+    "test:auth": "pnpm --filter @telecom/auth test"
   },
   "devDependencies": {
     "@vue/test-utils": "2.5.1",

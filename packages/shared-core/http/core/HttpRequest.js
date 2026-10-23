@@ -271,11 +271,14 @@ buildURL() {
   async execute() {
     this.startTiming()
     const url = this.buildURL()
-    const options = this.createFetchOptions()
 
-    // Setup timeout
+    // Setup timeout BEFORE building the fetch options: createFetchOptions()
+    // only attaches `signal` when the AbortController exists, so building the
+    // options first would ship a request that no timeout can ever abort.
     const timeout = this.config.timeout || 0
     this.createTimeoutController(timeout)
+
+    const options = this.createFetchOptions()
 
     try {
       const response = await fetch(url.toString(), options)

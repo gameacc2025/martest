@@ -11,8 +11,15 @@
     "./apiClient": "./apiClient.js",
     "./errorHandler": "./errorHandler.js"
   },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "dependencies": {
     "@telecom/shared-core": "workspace:*",
     "vue": "^3.4.5"
+  },
+  "devDependencies": {
+    "vitest": "5.0.5"
   }
 }

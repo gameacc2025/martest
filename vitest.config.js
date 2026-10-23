@@ -22,6 +22,6 @@ import { defineConfig } from 'vitest/config'
  */
 export default defineConfig({
   test: {
-    projects: ['packages/shared-ui'],
+    projects: ['packages/shared-ui', 'packages/shared-core', 'packages/api-client', 'packages/auth'],
   },
 })

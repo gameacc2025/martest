@@ -11,11 +11,18 @@
     "./authBridge": "./authBridge.js",
     "./composables/*": "./composables/*"
   },
+  "scripts": {
+    "test": "node --test sessionHandoff.test.js && vitest run",
+    "test:watch": "vitest"
+  },
   "dependencies": {
     "@telecom/api-client": "workspace:*",
     "@telecom/shared-core": "workspace:*",
     "pinia": "^2.3.1",
     "vue": "^3.4.5",
     "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "vitest": "5.0.5"
   }
 }
