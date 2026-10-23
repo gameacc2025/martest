@@ -580,9 +580,35 @@ function logout() {
 }
 
 .public-footer {
-  background: #004d6f;
-  border-top: 1px solid #003a54;
-  color: #d7eef6;
+  /* Footer colors use a deliberate dark-teal palette that is
+     intentionally not the same as the light-mode surface tokens.
+     Scoped variables preserve the current visual result and
+     enable dark-mode adaptation via .app-dark. */
+  --footer-bg: #004d6f;
+  --footer-border: #003a54;
+  --footer-text: #d7eef6;
+  --footer-heading: #ffffff;
+  --footer-muted: #b9dcea;
+  --footer-muted-hover: #ffffff;
+  --footer-bottom: #9cc9da;
+  --footer-accent: var(--primary-color);
+  --footer-accent-hover: var(--p-primary-400);
+
+  background: var(--footer-bg);
+  border-top: 1px solid var(--footer-border);
+  color: var(--footer-text);
+}
+
+/* Dark mode: use the same teal primary scale, shifted for dark surfaces.
+   The accent teal remains the brand color. */
+:global(.app-dark) .public-footer {
+  --footer-bg: var(--p-surface-950);
+  --footer-border: var(--p-surface-900);
+  --footer-text: var(--p-surface-300);
+  --footer-heading: var(--p-surface-0);
+  --footer-muted: var(--p-surface-400);
+  --footer-muted-hover: var(--p-surface-100);
+  --footer-bottom: var(--p-surface-500);
 }
 
 .public-footer-inner {
@@ -608,19 +634,19 @@ function logout() {
   gap: 0.5rem;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--footer-heading);
   margin-bottom: 1rem;
 }
 
 .public-footer-brand i {
   font-size: 1.5rem;
-  color: var(--primary-color);
+  color: var(--footer-accent);
 }
 
 .public-footer-about-text {
   font-size: 0.9rem;
   line-height: 2;
-  color: #b9dcea;
+  color: var(--footer-muted);
   margin: 0 0 1.25rem;
 }
 
@@ -629,8 +655,8 @@ function logout() {
   align-items: center;
   padding: 0.7rem 1.5rem;
   border-radius: 0.6rem;
-  background: var(--primary-color);
-  color: #ffffff;
+  background: var(--footer-accent);
+  color: var(--primary-contrast-color);
   font-weight: 700;
   font-size: 0.9rem;
   text-decoration: none;
@@ -638,12 +664,12 @@ function logout() {
 }
 
 .public-footer-about-btn:hover {
-  background: var(--p-primary-400);
+  background: var(--footer-accent-hover);
 }
 
 .public-footer-heading {
   font-weight: 700;
-  color: #ffffff;
+  color: var(--footer-heading);
   margin: 0 0 1rem 0;
 }
 
@@ -658,12 +684,12 @@ function logout() {
 
 .public-footer-link {
   font-size: 0.875rem;
-  color: #b9dcea;
+  color: var(--footer-muted);
   transition: color 0.2s ease;
 }
 
 .public-footer-link:hover {
-  color: #ffffff;
+  color: var(--footer-muted-hover);
 }
 
 .public-footer-bottom {
@@ -672,7 +698,7 @@ function logout() {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   text-align: center;
   font-size: 0.875rem;
-  color: #9cc9da;
+  color: var(--footer-bottom);
 }
 
 @media (min-width: 768px) {

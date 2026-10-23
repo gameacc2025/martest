@@ -474,12 +474,17 @@ onBeforeUnmount(() => {
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 2rem;
-  background: linear-gradient(135deg, var(--p-primary-50) 0%, #ffffff 55%, var(--p-primary-100) 100%);
+  background: linear-gradient(135deg, var(--p-primary-50) 0%, var(--hero-center, var(--surface-card)) 55%, var(--p-primary-100) 100%);
   border: 1px solid var(--surface-border);
   border-radius: 1rem;
   padding: 2.5rem 3rem;
   overflow: hidden;
 }
+
+:global(.app-dark) .hero {
+  --hero-center: var(--p-surface-800);
+}
+
 .hero-content { text-align: right; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
@@ -489,6 +494,11 @@ onBeforeUnmount(() => {
   color: var(--p-primary-900); font-size: 2.5rem; font-weight: 800;
   line-height: 1.3; margin: 0 0 1rem;
 }
+
+:global(.app-dark) .hero-title {
+  color: var(--p-primary-200);
+}
+
 .hero-desc {
   color: var(--text-color-secondary); font-size: 1.05rem; line-height: 1.9; margin: 0 0 1.5rem;
 }
@@ -534,8 +544,13 @@ onBeforeUnmount(() => {
 }
 .btn-primary { background: var(--p-primary-900); color: #fff; }
 .btn-primary:hover { background: var(--p-primary-800); }
-.btn-outline { background: transparent; color: var(--p-primary-900); border-color: var(--surface-border); }
+.btn-outline { background: transparent; color: var(--btn-outline-color, var(--p-primary-900)); border-color: var(--surface-border); }
 .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+/* Dark mode: outline button needs lighter text on dark backgrounds */
+:global(.app-dark) .btn-outline {
+  --btn-outline-color: var(--p-primary-300);
+}
 
 /* Two Column Layout */
 .home-layout {
