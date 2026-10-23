@@ -9,8 +9,9 @@ const { requireAccessType, requirePermission } = require('../../middlewares/rbac
 // Product management is a COMPANY + STAFF concern. CUSTOMER is buyer-only
 // (Architecture Decision AD-1) and must never reach management routes.
 const MANAGE_TYPES = ['COMPANY', 'STAFF'];
-// Workflow transitions (approve/reject/publish/hide/archive/restore) are STAFF
-// operations — only STAFF roles hold these permissions in the seed.
+// Approval/rejection/hide/archive/restore are STAFF-only. Publishing is
+// allowed to STAFF with products.publish and to the owning COMPANY after
+// STAFF approval; service-level checks enforce ownership and approval state.
 const STAFF_ONLY = ['STAFF'];
 
 
