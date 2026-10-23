@@ -60,6 +60,7 @@
           <template #body="{ data }">
             <div class="actions-cell">
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
+              <Button v-if="data.status === 'APPROVED' || data.status === 'HIDDEN'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت'" @click="publishProduct(data)" />
               <Button v-if="canEdit(data)" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
               <!-- Approve/Reject are STAFF-only actions (products.approve / products.reject —
                    see backend/prisma/seed.js). Company roles never hold these permissions;
@@ -160,6 +161,7 @@ const products = ref([])
 const companies = ref([])
 const categories = ref([])
 const loading = ref(false)
+const publishingId = ref(null)
 const loadError = ref('')
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
@@ -258,6 +260,20 @@ function openCreateDialog() {
 
 function editProduct(product) {
   router.push({ name: 'manage-product-edit', params: { id: product.id } })
+}
+
+async function publishProduct(product) {
+  publishingId.value = product.id
+  try {
+    await productsApi.publish(product.id, 'انتشار توسط شرکت پس از تأیید STAFF')
+    toast.add({ severity: 'success', summary: 'انتشار موفق', detail: 'محصول در سایت منتشر شد', life: 3500 })
+    await fetchProducts(pagination.value.page)
+  } catch (err) {
+    const message = err.response?.data?.error?.message || err.serverMessage || err.message || 'انتشار محصول ناموفق بود'
+    toast.add({ severity: 'error', summary: 'خطا در انتشار', detail: message, life: 5000 })
+  } finally {
+    publishingId.value = null
+  }
 }
 
 function closeDialog() {
