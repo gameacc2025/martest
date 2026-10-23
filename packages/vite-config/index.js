@@ -47,6 +47,9 @@ export function createAppConfig({ appDir, port, apiTarget = 'http://localhost:30
       watch: { usePolling: true, interval: 1000 },
       proxy: {
         '/api': { target: apiTarget, changeOrigin: true },
+        // Uploaded product/category media is served by Fastify at /uploads.
+        // Proxy it in development just like API calls so images work across app ports.
+        '/uploads': { target: apiTarget, changeOrigin: true },
       },
     },
 
