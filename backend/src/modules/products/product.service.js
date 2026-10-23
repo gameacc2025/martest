@@ -438,9 +438,19 @@ async function changeProductStatus(id, action, caller, comment) {
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
 
   if (action === 'submitReview' || action === 'publish') {
-    // Company users may publish only their own products; STAFF moderation
+    // Company users may act only on their own products; STAFF moderation
     // remains cross-company. The route additionally checks access type and permission.
     assertCanManageProduct(product, caller);
+  }
+  if (action === 'publish' && isCompanyUser(caller) && product.status !== 'APPROVED') {
+    // A company must never bypass staff review or re-publish a product that
+    // STAFF deliberately hid. Only a freshly approved product can be published
+    // by its owning company; STAFF with products.publish may republish HIDDEN.
+    throw {
+      statusCode: 403,
+      code: 'PRODUCT_REQUIRES_STAFF_APPROVAL',
+      message: 'انتشار محصول توسط شرکت فقط پس از تأیید نهایی STAFF مجاز است.',
+    };
   }
   if (action === 'submitReview') {
     await validateProductReadyForReview(productId);
