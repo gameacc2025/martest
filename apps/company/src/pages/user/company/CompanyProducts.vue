@@ -104,7 +104,7 @@ function formatPrice(price) {
         </Column>
         <Column header="عملیات">
           <template #body="{ data }">
-            <Button v-if="data.status === 'APPROVED' || data.status === 'HIDDEN'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت'" @click="publishProduct(data)" />
+            <Button v-if="data.status === 'APPROVED'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت پس از تأیید STAFF'" @click="publishProduct(data)" />
             <Button icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش'" @click="editProduct(data)" />
           </template>
         </Column>
