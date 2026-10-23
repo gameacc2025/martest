@@ -197,9 +197,9 @@ async function productRoutes(fastify) {
     }, ctrl.remove);
 
     // ── Workflow transitions ─────────────────────────────────
-    // submit-review is the COMPANY hand-off; approve/reject/publish/hide/
-    // archive/restore are STAFF moderation actions. Each is additionally
-    // gated by its specific permission.
+    // submit-review is the COMPANY hand-off; approve/reject/hide/archive/restore
+    // remain STAFF moderation actions. Publication is allowed to the owning
+    // COMPANY after STAFF approval, and is gated by products.publish.
     authenticated.post('/:id/submit-review', {
       preHandler: [requireAccessType(...MANAGE_TYPES), requirePermission('products.submit_review')],
       schema: statusActionSchema,
@@ -213,7 +213,7 @@ async function productRoutes(fastify) {
       schema: statusActionSchema,
     }, ctrl.reject);
     authenticated.post('/:id/publish', {
-      preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('products.publish')],
+      preHandler: [requireAccessType(...MANAGE_TYPES), requirePermission('products.publish')],
       schema: statusActionSchema,
     }, ctrl.publish);
     authenticated.post('/:id/hide', {
