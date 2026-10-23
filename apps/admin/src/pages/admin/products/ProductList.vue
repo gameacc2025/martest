@@ -51,6 +51,7 @@
               <Button v-if="data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text @click="editProduct(data)" />
               <Button v-if="data.status === 'PENDING_REVIEW'" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
               <Button v-if="data.status === 'PENDING_REVIEW'" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
+              <Button v-if="['APPROVED', 'HIDDEN'].includes(data.status)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
               <Button icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
               <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
               <Button icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
@@ -172,6 +173,7 @@ const statusOptions = STATUS_OPTIONS
 
 // Approve / reject workflow (PENDING_REVIEW products)
 const approvingId = ref(null)
+const publishingId = ref(null)
 const rejectingId = ref(null)
 const showRejectDialog = ref(false)
 const rejectReason = ref('')
@@ -341,6 +343,19 @@ async function approveProduct(product) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.response?.data?.error?.message || err.message || 'خطا در تأیید محصول', life: 4000 })
   } finally {
     approvingId.value = null
+  }
+}
+
+async function publishProduct(product) {
+  try {
+    publishingId.value = product.id
+    await productsApi.publish(product.id, 'انتشار توسط مدیر سیستم')
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: `محصول "${product.title}" در سایت منتشر شد`, life: 3000 })
+    await fetchProducts(pagination.value.page)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.response?.data?.error?.message || err.message || 'خطا در انتشار محصول', life: 4000 })
+  } finally {
+    publishingId.value = null
   }
 }
 
