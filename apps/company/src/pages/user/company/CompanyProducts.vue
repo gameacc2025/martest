@@ -14,6 +14,7 @@ const toast = useToast()
 
 const products = ref([])
 const loading = ref(false)
+const publishingId = ref(null)
 const pagination = ref({ page: 1, limit: 10, total: 0, totalPages: 1 })
 
 const statusLabels = {
@@ -56,6 +57,20 @@ function editProduct(product) {
   router.push({ name: 'manage-product-edit', params: { id: product.id } })
 }
 
+async function publishProduct(product) {
+  publishingId.value = product.id
+  try {
+    await productsApi.publish(product.id, 'انتشار توسط شرکت پس از تأیید STAFF')
+    toast.add({ severity: 'success', summary: 'انتشار موفق', detail: 'محصول در سایت منتشر شد', life: 3500 })
+    await fetchProducts(pagination.value.page)
+  } catch (err) {
+    const message = err.response?.data?.error?.message || err.serverMessage || err.message || 'انتشار محصول ناموفق بود'
+    toast.add({ severity: 'error', summary: 'خطا در انتشار', detail: message, life: 5000 })
+  } finally {
+    publishingId.value = null
+  }
+}
+
 function formatPrice(price) {
   return new Intl.NumberFormat('fa-IR', { style: 'currency', currency: 'IRR' }).format(price)
 }
@@ -89,6 +104,7 @@ function formatPrice(price) {
         </Column>
         <Column header="عملیات">
           <template #body="{ data }">
+            <Button v-if="data.status === 'APPROVED' || data.status === 'HIDDEN'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت'" @click="publishProduct(data)" />
             <Button icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش'" @click="editProduct(data)" />
           </template>
         </Column>
