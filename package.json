@@ -10,6 +10,14 @@
     "build": "pnpm run --parallel build:website build:company build:admin",
     "build:website": "pnpm --filter @telecom/website build",
     "build:company": "pnpm --filter @telecom/company build",
-    "build:admin": "pnpm --filter @telecom/admin build"
+    "build:admin": "pnpm --filter @telecom/admin build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:shared-ui": "pnpm --filter @telecom/shared-ui test"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "2.5.1",
+    "happy-dom": "21.0.4",
+    "vitest": "5.0.5"
   }
 }

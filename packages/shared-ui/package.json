@@ -13,6 +13,10 @@
     "./composables/*": "./composables/*",
     "./config/*": "./config/*"
   },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "dependencies": {
     "@telecom/api-client": "workspace:*",
     "@telecom/auth": "workspace:*",
@@ -23,7 +27,11 @@
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/test-utils": "2.5.1",
     "sass": "^1.101.0",
-    "sass-embedded": "^1.89.0"
+    "sass-embedded": "^1.89.0",
+    "vite": "^8.1.3",
+    "vitest": "5.0.5"
   }
 }
