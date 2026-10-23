@@ -252,6 +252,18 @@ test('updateRole: refuses to change the scope of a system role', async () => {
   });
 });
 
+test('updateRole: allows updating permissions on a system role when its scope is unchanged', async () => {
+  resetMocks();
+  fx.role = { id: 1, isSystem: true, scope: 'STAFF' };
+  fx.permissionCount = 1;
+
+  await updateRole(1, { label: 'مدیر محتوا', scope: 'STAFF', permissionIds: [1] });
+
+  assert.equal(calls.roleUpdate[0].data.label, 'مدیر محتوا');
+  assert.equal(calls.roleUpdate[0].data.scope, undefined, 'system role scope must remain immutable');
+  assert.equal(calls.transaction.length, 1, 'permissions should be replaced');
+});
+
 test('updateRole: allows changing the scope of a non-system role', async () => {
   resetMocks();
   fx.role = { id: 1, isSystem: false };
