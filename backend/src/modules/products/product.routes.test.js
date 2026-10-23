@@ -260,7 +260,7 @@ test('POST /:id/reject: STAFF with products.reject -> 200', async () => {
   await app.close();
 });
 
-// ── Workflow: publish — STAFF ONLY + products.publish ─────────
+// ── Workflow: publish — STAFF or COMPANY + products.publish ────
 
 test('POST /:id/publish: STAFF with products.publish -> 200', async () => {
   const app = await buildApp();
