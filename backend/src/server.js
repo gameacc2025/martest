@@ -6,7 +6,8 @@
 // =============================================================
 
 const buildApp = require('./app');
-const { port } = require('./config/env');
+const { port, nodeEnv } = require('./config/env');
+const { processPendingDeliveries } = require('./modules/notifications/notification.delivery.service');
 
 async function start() {
   const app = await buildApp();
@@ -18,6 +19,32 @@ async function start() {
     app.log.error(err, 'Failed to start server');
     process.exit(1);
   }
+
+  // ── Delivery worker ──────────────────────────────────────────
+  // Polls for PENDING EMAIL deliveries and processes them.
+  // Only runs when a real email provider is configured; otherwise
+  // deliveries remain PENDING until SMTP is configured.
+  let workerRunning = false;
+  async function runDeliveryWorker() {
+    if (workerRunning) return; // Prevent overlapping runs
+    workerRunning = true;
+    try {
+      await processPendingDeliveries({ limit: 100 });
+    } catch (err) {
+      app.log.error(err, 'Delivery worker error');
+    } finally {
+      workerRunning = false;
+    }
+  }
+
+  const pollInterval = parseInt(process.env.NOTIFICATION_POLL_INTERVAL_MS, 10) || 5000;
+  if (nodeEnv !== 'test') {
+    setInterval(runDeliveryWorker, pollInterval);
+    app.log.info(`Delivery worker started — polling every ${pollInterval}ms`);
+  }
+
+  // Run once immediately on startup
+  setImmediate(runDeliveryWorker);
 }
 
 start();

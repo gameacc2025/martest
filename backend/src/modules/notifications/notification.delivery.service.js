@@ -12,7 +12,7 @@
 // =============================================================
 
 const prisma = require('../../config/db');
-const { sendEmail, hasRealProvider } = require('./notification.email.provider');
+const emailProvider = require('./notification.email.provider');
 const { notificationMaxAttempts, notificationPollIntervalMs } = require('../../config/env');
 
 // Default poll limit if not configured
@@ -29,7 +29,7 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
   const results = { processed: 0, sent: 0, failed: 0, errors: [] };
 
   // If no real email provider is configured, log and return early
-  const realProvider = hasRealProvider();
+  const realProvider = emailProvider.hasRealProvider();
   if (!realProvider) {
     console.log('[delivery] No email provider configured — skipping delivery processing');
     return { processed: 0, sent: 0, failed: 0, skipped: limit, reason: 'no_provider' };
@@ -76,7 +76,7 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
         html: undefined, // Could add HTML template support later
       };
 
-      await sendEmail(emailOpts);
+      await emailProvider.sendEmail(emailOpts);
 
       // Mark as sent
       await prisma.notificationDelivery.update({
@@ -110,6 +110,7 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
         results.failed += 1;
         results.errors.push({ id: delivery.id, error: error.message });
       } else {
+        results.failed += 1;
         console.log(`[delivery] Will retry delivery #${delivery.id} (attempt ${newAttempts})`);
       }
     }
