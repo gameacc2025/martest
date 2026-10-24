@@ -607,6 +607,12 @@ model Notification {
 // is mandatory — every (user, event, channel) can be switched off, only the
 // defaults are sensible: IN_APP + EMAIL on, SMS off).
 // A missing row means "use the event's channel defaults".
+//
+// VERIFIED against the live database (2026-10-24, `prisma db pull`): column
+// types, nullability, the (userId, eventType, channel) unique index and the
+// CASCADE FK to User all match this definition 1:1. `updatedAt` is NOT NULL
+// with NO database default — `@updatedAt` is populated by the Prisma Client on
+// write, so raw-SQL inserts must supply it explicitly.
 model NotificationPreference {
   id        Int                 @id @default(autoincrement())
   userId    Int
@@ -627,11 +633,37 @@ model NotificationPreference {
 // delivery worker (notification.delivery.service.js) later hands it to the
 // configured provider. A provider outage therefore never corrupts or
 // blocks the business transaction that requested the notification.
+//
+// VERIFIED against the live database (2026-10-24, `prisma db pull`): all 18
+// columns, both enums, the (eventType, dedupeKey, channel) unique index, the
+// three supporting indexes and the CASCADE FK to User match this definition
+// 1:1. `nextAttemptAt` DOES have a DB default (CURRENT_TIMESTAMP); `updatedAt`
+// does NOT (client-side `@updatedAt`). Rows with a NULL `dedupeKey` are exempt
+// from the unique index (PostgreSQL allows duplicate NULLs).
 model NotificationDelivery {
   id             Int                        @id @default(autoincrement())
   userId         Int
-  // Set for IN_APP rows for traceability. EMAIL rows are standalone
-  // (a user may disable the in-app channel while keeping email).
+  // Optional link to the in-app Notification row this delivery corresponds to.
+  //
+  // DELIBERATELY a scalar `Int?` with NO `@relation`: the live PostgreSQL table
+  // has NO foreign key on this column (verified via `prisma db pull` against the
+  // running database — only `userId` carries an FK). Declaring `@relation` here
+  // would make Prisma believe a constraint exists that the database does not
+  // have, so `db pull` / `migrate diff` would report phantom drift and any
+  // future `migrate dev` would try to ALTER the table.
+  //
+  // Per the no-destructive-migrations rule we preserve the actual database
+  // structure instead of inventing a constraint. To adopt a real relation later:
+  //   1. verify no orphaned values (SQL below currently returns 0);
+  //   2. add the FK + `@relation` in one reviewed migration.
+  //     SELECT COUNT(*) FROM "NotificationDelivery" d
+  //     WHERE d."notificationId" IS NOT NULL AND NOT EXISTS
+  //       (SELECT 1 FROM "Notification" n WHERE n.id = d."notificationId");
+  //
+  // Usage today: dispatch only queues EMAIL delivery rows, so this stays NULL
+  // (all current rows are NULL). It is reserved for traceability if/when
+  // IN_APP deliveries are logged as rows too. EMAIL rows are standalone
+  // because a user may disable the in-app channel while keeping email.
   notificationId Int?
   eventType      String
   channel        NotificationChannel
