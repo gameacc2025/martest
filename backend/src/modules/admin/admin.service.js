@@ -3,6 +3,7 @@
 // =============================================================
 
 const prisma = require('../../config/db');
+const deliveryService = require('../notifications/notification.delivery.service');
 const { AppError } = require('../../utils/error');
 
 // System settings keys. Value is shared with the products module
@@ -119,4 +120,18 @@ async function getStats() {
   };
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold };
+/**
+ * Admin: Get delivery statistics for monitoring dashboard.
+ */
+async function getDeliveryStats(options = {}) {
+  return deliveryService.getDeliveryStats(options);
+}
+
+/**
+ * Admin: List deliveries for monitoring page.
+ */
+async function listDeliveries(options = {}) {
+  return deliveryService.listDeliveries(options);
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold, getDeliveryStats, listDeliveries };

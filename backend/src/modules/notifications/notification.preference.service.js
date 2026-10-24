@@ -15,7 +15,7 @@
 // =============================================================
 
 const prisma = require('../../config/db');
-const { getEvent, isKnownEvent, listEventKeys, DEFAULT_CHANNELS } = require('./notification.events');
+const { getEvent, isKnownEvent, listEventKeys, listEvents, DEFAULT_CHANNELS } = require('./notification.events');
 
 // Channel order is significant for the preferences UI (IN_APP, EMAIL, SMS).
 const CHANNELS = ['IN_APP', 'EMAIL', 'SMS'];
@@ -36,7 +36,7 @@ async function getPreferences(userId) {
   const data = listEvents().map((event) => {
     const channels = {};
     for (const channel of Object.keys(DEFAULT_CHANNELS)) {
-      const stored = byKey.get(`${event.key}:${channel}`);
+      const stored = storedBySlot.get(`${event.key}:${channel}`);
       channels[channel] =
         stored === undefined ? (event.channels[channel] ?? DEFAULT_CHANNELS[channel]) : stored;
     }

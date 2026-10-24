@@ -53,6 +53,25 @@ async function adminRoutes(fastify) {
       body: thresholdBodySchema,
     },
   }, ctrl.updateReviewEditThreshold);
+
+  // ── Notification delivery monitoring ──────────────────────────
+  fastify.get('/notifications/delivery-stats', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('delivery.view')],
+    schema: {
+      summary: 'Get notification delivery statistics',
+      tags: ['Admin'],
+    },
+  }, ctrl.getDeliveryStatsCtrl);
+
+  fastify.get('/notifications/deliveries', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('delivery.view')],
+    schema: {
+      summary: 'List notification deliveries for monitoring',
+      tags: ['Admin'],
+    },
+  }, ctrl.listDeliveriesCtrl);
 }
 
 module.exports = adminRoutes;
