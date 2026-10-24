@@ -31,7 +31,7 @@
               <!-- Category -->
               <div class="filter-group">
                 <label>دسته‌بندی</label>
-                <Dropdown
+                <Select
                   v-model="selectedCategory"
                   :options="categoryOptions"
                   optionLabel="name"
@@ -153,7 +153,7 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 
@@ -286,16 +286,41 @@ watch(() => route.query.category, (newVal) => {
 <style scoped>
 .products-page {
   direction: rtl;
+  width: 100%;
+  max-width: var(--ds-container-max-wide);
+  margin-inline: auto;
+  padding-inline: var(--ds-container-pad);
+  padding-block: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .products-page {
+    padding-inline: var(--ds-container-pad-lg);
+    padding-block: var(--ds-space-8);
+  }
+}
+
+@media (min-width: 1920px) {
+  .products-page {
+    padding-inline: var(--ds-container-pad-xl);
+  }
+}
+
+@media (min-width: 1920px) {
+  .products-page {
+    padding-inline: var(--ds-container-pad-xl);
+  }
 }
 
 /* Breadcrumb */
-.breadcrumb-wrap { margin-bottom: 1rem; }
+.breadcrumb-wrap { margin-bottom: var(--ds-space-4); }
 
 /* Two Column Layout */
 .products-grid-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: minmax(240px, 280px) 1fr;
+  gap: var(--ds-space-6);
+  align-items: start;
 }
 
 /* Filters Sidebar */
@@ -304,35 +329,37 @@ watch(() => route.query.category, (newVal) => {
   top: 5rem;
   align-self: start;
 }
-.filters-card { border-radius: 0.75rem; }
-.filters-card :deep(.p-card-content) { padding: 1rem; }
+.filters-card { border-radius: var(--ds-radius-lg); }
+.filters-card :deep(.p-card-content) { padding: var(--ds-space-4); }
 .filters-inner {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--ds-space-4);
 }
 .filter-group label {
   display: block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-color-secondary);
-  margin-bottom: 0.375rem;
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  color: var(--ds-color-text-muted);
+  margin-bottom: var(--ds-space-2);
 }
 .price-range {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--ds-space-2);
 }
 .price-separator {
-  font-size: 0.8rem;
-  color: var(--text-color-secondary);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-color-text-muted);
+  text-align: center;
 }
 .filter-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--surface-border);
+  gap: var(--ds-space-2);
+  padding-top: var(--ds-space-3);
+  border-top: 1px solid var(--ds-color-border);
 }
 
 /* Products Main */
@@ -348,26 +375,27 @@ watch(() => route.query.category, (newVal) => {
 /* Products Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--ds-space-4);
 }
 
 .product-card {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: 0.75rem;
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
 }
 .product-card:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  box-shadow: var(--ds-shadow-lg);
   transform: translateY(-2px);
+  border-color: var(--ds-color-primary);
 }
 
 .product-image {
   position: relative;
-  height: 160px;
+  aspect-ratio: 4 / 3;
   background: var(--surface-ground);
   display: flex;
   align-items: center;
@@ -378,6 +406,10 @@ watch(() => route.query.category, (newVal) => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--ds-transition);
+}
+.product-card:hover .product-image img {
+  transform: scale(1.05);
 }
 .empty-image i {
   font-size: 2.5rem;
@@ -450,15 +482,20 @@ watch(() => route.query.category, (newVal) => {
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-  .products-grid { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 900px) {
+  .products-grid-layout {
+    grid-template-columns: 1fr;
+    gap: var(--ds-space-4);
+  }
+  .filters-sidebar {
+    position: static;
+    order: -1;
+  }
 }
-@media (max-width: 768px) {
-  .products-grid-layout { grid-template-columns: 1fr; }
-  .filters-sidebar { position: static; }
-  .products-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 480px) {
-  .products-grid { grid-template-columns: 1fr; }
+
+@media (max-width: 576px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

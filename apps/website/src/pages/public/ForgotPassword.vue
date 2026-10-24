@@ -162,9 +162,17 @@ const goToLogin = () => {
 }
 
 .fp-container {
-  max-width: 1200px;
+  max-width: var(--ds-container-max);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding-inline: var(--ds-container-pad);
+  padding-block: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .fp-container {
+    padding-inline: var(--ds-container-pad-lg);
+    padding-block: var(--ds-space-8);
+  }
 }
 
 .fp-inner {

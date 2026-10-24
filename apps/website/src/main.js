@@ -11,7 +11,6 @@ import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import Dialog from 'primevue/dialog'
 import MultiSelect from 'primevue/multiselect'
-import Dropdown from 'primevue/dropdown'
 import InputSwitch from 'primevue/inputswitch'
 import Select from 'primevue/select'
 import Card from 'primevue/card'
@@ -65,7 +64,6 @@ app.component('Column', Column)
 app.component('Tag', Tag)
 app.component('Dialog', Dialog)
 app.component('MultiSelect', MultiSelect)
-app.component('Dropdown', Dropdown)
 app.component('InputSwitch', InputSwitch)
 app.component('Select', Select)
 app.component('Card', Card)

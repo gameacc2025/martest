@@ -1,6 +1,6 @@
 <template>
   <div class="notifications-page">
-    <div class="container mx-auto px-4 py-8">
+    <div class="ds-container ds-page">
       <div class="mb-6">
         <h1 class="text-2xl font-bold">اعلان ها</h1>
         <Breadcrumb :home="home" :model="items" class="mt-2" />
@@ -80,7 +80,7 @@
               {{ totalNotifications }} اعلان یافت شد
             </div>
             <div class="flex gap-2">
-              <Dropdown
+              <Select
                 v-model="sortOption"
                 :options="sortOptions"
                 optionLabel="label"
@@ -181,7 +181,7 @@ import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import SelectButton from 'primevue/selectbutton'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 

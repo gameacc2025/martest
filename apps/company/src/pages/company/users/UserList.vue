@@ -293,12 +293,10 @@ async function saveCreate() {
 
 <template>
   <div class="user-list-page">
-    <div class="page-header">
-      <h1>کاربران شرکت</h1>
-      <Button v-if="canCreate" label="افزودن کاربر" icon="pi pi-plus" @click="openCreate" />
-    </div>
-
     <div class="card">
+      <div class="card-head">
+        <h1 class="card-head-title"><i class="pi pi-users"></i> کاربران شرکت</h1>
+      </div>
       <Toolbar>
         <template #start>
           <div class="toolbar-filters">
@@ -317,6 +315,9 @@ async function saveCreate() {
               @change="loadUsers(1)"
             />
           </div>
+        </template>
+        <template #end>
+          <Button v-if="canCreate" label="افزودن کاربر" icon="pi pi-plus" @click="openCreate" />
         </template>
       </Toolbar>
 

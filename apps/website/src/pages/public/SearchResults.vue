@@ -80,7 +80,7 @@
               <Button icon="pi pi-sort-amount-up" class="p-button-text" @click="sortBy('price', 'asc')" title="مرتب سازی بر اساس قیمت (صعودی)" />
               <Button icon="pi pi-sort-amount-down" class="p-button-text" @click="sortBy('price', 'desc')" title="مرتب سازی بر اساس قیمت (نزولی)" />
               <Button icon="pi pi-sort-alpha-up" class="p-button-text" @click="sortBy('name', 'asc')" title="مرتب سازی بر اساس نام" />
-              <Dropdown v-model="sortOption" :options="sortOptions" optionLabel="label" optionValue="value" class="sr-sort-dropdown" @change="onSortChange" />
+              <Select v-model="sortOption" :options="sortOptions" optionLabel="label" optionValue="value" class="sr-sort-dropdown" @change="onSortChange" />
             </div>
           </div>
 
@@ -128,7 +128,7 @@ import Slider from 'primevue/slider'
 import MultiSelect from 'primevue/multiselect'
 import Rating from 'primevue/rating'
 import Checkbox from 'primevue/checkbox'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
@@ -315,9 +315,17 @@ const addToWishlist = (product) => {
 }
 
 .sr-container {
-  max-width: 1200px;
+  max-width: var(--ds-container-max);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding-inline: var(--ds-container-pad);
+  padding-block: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .sr-container {
+    padding-inline: var(--ds-container-pad-lg);
+    padding-block: var(--ds-space-8);
+  }
 }
 
 .sr-head {

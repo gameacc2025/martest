@@ -10,8 +10,11 @@
 
 html {
     height: 100%;
-    font-size: 14px;
-    line-height: 1.2;
+    /* 16px is the web standard base size. The old 14px made every rem-based
+       size 12.5% smaller than intended, which is why text read as "too small". */
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {

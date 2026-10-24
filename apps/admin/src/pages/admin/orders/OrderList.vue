@@ -1,12 +1,10 @@
 <template>
   <div class="order-list-page">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1>مدیریت سفارشات</h1>
-    </div>
-
     <!-- Card with Toolbar -->
     <div class="card">
+      <div class="card-head">
+        <h1 class="card-head-title"><i class="pi pi-shopping-cart"></i> مدیریت سفارشات</h1>
+      </div>
       <Toolbar>
         <template #start>
           <span class="p-input-icon-right">
@@ -64,7 +62,7 @@
     <Dialog v-model:visible="showDialog" header="تغییر وضعیت سفارش" :modal="true" class="p-fluid">
       <div class="field">
         <label for="status">وضعیت</label>
-        <Dropdown id="status" v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="انتخاب کنید" />
+        <Select id="status" v-model="form.status" :options="statusOptions" optionLabel="label" optionValue="value" placeholder="انتخاب کنید" />
       </div>
       <template #footer>
         <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="showDialog = false" />

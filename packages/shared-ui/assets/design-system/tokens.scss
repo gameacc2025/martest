@@ -66,8 +66,8 @@
      -------------------------------------------------------- */
   --ds-font-family: var(--font-family, 'Vazirmatn', -apple-system, 'Segoe UI', Tahoma, sans-serif);
 
-  --ds-font-size-xs: 0.75rem;   /* 12px — captions, badges */
-  --ds-font-size-sm: 0.875rem;  /* 14px — body small, table cells */
+  --ds-font-size-xs: 0.8125rem; /* 13px — captions, badges */
+  --ds-font-size-sm: 0.9375rem; /* 15px — body small, table cells */
   --ds-font-size-md: 1rem;      /* 16px — base body */
   --ds-font-size-lg: 1.125rem;  /* 18px — card titles */
   --ds-font-size-xl: 1.375rem;  /* 22px — section headings */
@@ -97,6 +97,18 @@
   --ds-space-10: 2.5rem;  /* 40 */
   --ds-space-12: 3rem;    /* 48 */
   --ds-space-16: 4rem;    /* 64 */
+
+  /* --------------------------------------------------------
+     LAYOUT — canonical content container.
+     Every page/section uses these so the whole marketplace has
+     ONE content width and ONE gutter scale (the biggest source
+     of the "misaligned / no proportions" look before).
+     -------------------------------------------------------- */
+  --ds-container-max: 1280px;
+  --ds-container-max-wide: 1760px;  /* for content-heavy pages (products with sidebar) */
+  --ds-container-pad: 1rem;         /* small screens */
+  --ds-container-pad-lg: 2rem;      /* >= 768px */
+  --ds-container-pad-xl: 3rem;      /* >= 1920px for better spacing */
 
   /* --------------------------------------------------------
      BORDER RADIUS

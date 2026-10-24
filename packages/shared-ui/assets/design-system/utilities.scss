@@ -9,6 +9,33 @@
    Prefix: `ds-` to avoid clashing with PrimeVue/Sakai classes.
    ============================================================ */
 
+/* ---- Layout container (single source of content width) ----
+   Use this on EVERY page root so the header, footer and all pages
+   line up on the same vertical grid. */
+.ds-container {
+  width: 100%;
+  max-width: var(--ds-container-max);
+  margin-inline: auto;
+  padding-inline: var(--ds-container-pad);
+}
+
+@media (min-width: 768px) {
+  .ds-container {
+    padding-inline: var(--ds-container-pad-lg);
+  }
+}
+
+/* Page-level vertical rhythm wrapper (used with .ds-container). */
+.ds-page {
+  padding-block: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .ds-page {
+    padding-block: var(--ds-space-8);
+  }
+}
+
 /* ---- Surface / panel ---- */
 .ds-surface {
   background: var(--ds-color-surface);

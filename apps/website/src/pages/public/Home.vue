@@ -13,7 +13,7 @@ import Badge from 'primevue/badge'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
 
 const router = useRouter()
@@ -153,6 +153,15 @@ function goToProduct(product) {
   router.push({ name: 'product-details', params: { id: product.id } })
 }
 
+// Hero search follows the marketplace convention: it takes the visitor to the
+// dedicated search-results page (same target as the header search), rather than
+// silently re-filtering the homepage grid.
+function heroSearch() {
+  const q = searchQuery.value.trim()
+  router.push({ name: 'search', query: q ? { q } : {} })
+  searchQuery.value = ''
+}
+
 function viewCategoryProducts(categoryId) {
   router.push({ name: 'products', query: { category: categoryId } })
 }
@@ -192,33 +201,50 @@ onBeforeUnmount(() => {
         @mouseenter="stopSlideshow"
         @mouseleave="startSlideshow"
       >
-        <div class="hero-track">
-          <transition name="slide-fade" mode="out-in">
-            <div class="hero" :key="currentSlide">
-              <div class="hero-content">
+        <div class="hero">
+          <div class="hero-content">
+            <!-- Rotating headline only. The search bar below stays mounted so
+                 typing is never interrupted by a slide change. -->
+            <transition name="slide-fade" mode="out-in">
+              <div class="hero-copy" :key="currentSlide">
                 <span class="hero-badge">
                   <i class="pi pi-check-circle"></i>
                   {{ slides[currentSlide].badge }}
                 </span>
                 <h1 class="hero-title">{{ slides[currentSlide].title }}</h1>
                 <p class="hero-desc">{{ slides[currentSlide].desc }}</p>
-                <div class="hero-actions">
-                  <router-link :to="slides[currentSlide].primary.to" class="btn btn-primary">
-                    {{ slides[currentSlide].primary.label }}
-                    <i class="pi pi-angle-left"></i>
-                  </router-link>
-                  <router-link :to="slides[currentSlide].outline.to" class="btn btn-outline">
-                    <i class="pi pi-th-large"></i>
-                    {{ slides[currentSlide].outline.label }}
-                  </router-link>
-                </div>
               </div>
-              <div class="hero-visual">
-                <div class="hero-glow"></div>
-                <i :class="slides[currentSlide].icon" class="hero-icon"></i>
-              </div>
+            </transition>
+
+            <!-- Marketplace pattern: the search bar IS the primary CTA -->
+            <form class="hero-search" role="search" @submit.prevent="heroSearch">
+              <i class="pi pi-search hero-search-icon" aria-hidden="true"></i>
+              <input
+                v-model="searchQuery"
+                type="search"
+                class="hero-search-input"
+                placeholder="نام محصول، برند یا دستهبندی را جستجو کنید…"
+                aria-label="جستجوی محصولات"
+              />
+              <button type="submit" class="hero-search-btn">جستجو</button>
+            </form>
+
+            <div class="hero-actions">
+              <router-link :to="slides[currentSlide].primary.to" class="btn btn-primary">
+                {{ slides[currentSlide].primary.label }}
+                <i class="pi pi-angle-left"></i>
+              </router-link>
+              <router-link :to="slides[currentSlide].outline.to" class="btn btn-outline">
+                <i class="pi pi-th-large"></i>
+                {{ slides[currentSlide].outline.label }}
+              </router-link>
             </div>
-          </transition>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-glow"></div>
+            <i :class="slides[currentSlide].icon" class="hero-icon"></i>
+          </div>
         </div>
 
         <!-- Slideshow dots -->
@@ -263,7 +289,7 @@ onBeforeUnmount(() => {
                 <!-- Category -->
                 <div class="filter-group">
                   <label>دسته‌بندی</label>
-                  <Dropdown
+                  <Select
                     v-model="selectedCategory"
                     :options="categoryOptions"
                     optionLabel="name"
@@ -459,25 +485,43 @@ onBeforeUnmount(() => {
 }
 .home-container {
   width: 100%;
-  max-width: 1720px;
+  max-width: var(--ds-container-max-wide);
   margin: 0 auto;
-  padding: 0 2.5rem;
+  padding-inline: var(--ds-container-pad);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .home-container {
+    padding-inline: var(--ds-container-pad-lg);
+  }
+}
+
+@media (min-width: 1920px) {
+  .home-container {
+    padding-inline: var(--ds-container-pad-xl);
+  }
+}
+
+@media (min-width: 1920px) {
+  .home-container {
+    padding-inline: var(--ds-container-pad-xl);
+  }
 }
 
 
 /* Hero */
 .hero {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.15fr 0.85fr;
   align-items: center;
-  gap: 2rem;
+  gap: var(--ds-space-8);
   background: linear-gradient(135deg, var(--p-primary-50) 0%, var(--hero-center, var(--surface-card)) 55%, var(--p-primary-100) 100%);
   border: 1px solid var(--surface-border);
-  border-radius: 1rem;
-  padding: 2.5rem 3rem;
+  border-radius: var(--ds-radius-xl);
+  padding: var(--ds-space-8);
   overflow: hidden;
 }
 
@@ -485,14 +529,82 @@ onBeforeUnmount(() => {
   --hero-center: var(--p-surface-800);
 }
 
-.hero-content { text-align: right; }
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  text-align: start;
+  min-width: 0;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+
+/* Search-first CTA (marketplace pattern) */
+.hero-search {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--ds-space-2);
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ds-radius-pill);
+  padding-block: 0.375rem;
+  padding-inline: 1.125rem 0.375rem;
+  box-shadow: var(--ds-shadow-md);
+  max-width: 36rem;
+}
+
+.hero-search:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: var(--ds-shadow-md);
+}
+
+.hero-search-icon {
+  color: var(--text-color-secondary);
+  font-size: 1rem;
+}
+
+.hero-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  color: var(--text-color);
+  width: 100%;
+  min-width: 0;
+  padding-block: 0.5rem;
+}
+
+.hero-search-input::placeholder {
+  color: var(--text-color-secondary);
+}
+
+.hero-search-btn {
+  border: none;
+  cursor: pointer;
+  background: var(--primary-color);
+  color: var(--primary-contrast-color);
+  font: inherit;
+  font-weight: 700;
+  padding: 0.625rem 1.5rem;
+  border-radius: var(--ds-radius-pill);
+  transition: background var(--ds-transition-fast);
+}
+
+.hero-search-btn:hover {
+  background: var(--ds-color-primary-hover);
+}
 .hero-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
-  color: var(--primary-color); font-weight: 700; font-size: 0.95rem; margin-bottom: 1rem;
+  color: var(--primary-color); font-weight: 700; font-size: 0.95rem;
 }
 .hero-title {
-  color: var(--p-primary-900); font-size: 2.5rem; font-weight: 800;
-  line-height: 1.3; margin: 0 0 1rem;
+  color: var(--p-primary-900); font-size: 2.25rem; font-weight: 800;
+  line-height: 1.3; margin: 0;
 }
 
 :global(.app-dark) .hero-title {
@@ -500,9 +612,9 @@ onBeforeUnmount(() => {
 }
 
 .hero-desc {
-  color: var(--text-color-secondary); font-size: 1.05rem; line-height: 1.9; margin: 0 0 1.5rem;
+  color: var(--text-color-secondary); font-size: 1.05rem; line-height: 1.9; margin: 0;
 }
-.hero-actions { display: flex; gap: 0.75rem; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .hero-visual {
   position: relative; height: 260px; border-radius: 0.75rem;
   background: linear-gradient(135deg, var(--p-primary-100), var(--p-primary-300));
@@ -516,10 +628,8 @@ onBeforeUnmount(() => {
 
 /* Hero Slideshow */
 .hero-slideshow { position: relative; }
-.hero-track { position: relative; }
-.hero-track .hero { margin: 0; }
 .hero-dots {
-  display: flex; justify-content: center; gap: 0.4rem; margin-top: 0.75rem;
+  display: flex; justify-content: center; gap: 0.5rem; margin-top: var(--ds-space-4);
 }
 .hero-dot {
   width: 0.5rem; height: 0.5rem; border-radius: 50%;
@@ -546,9 +656,9 @@ onBeforeUnmount(() => {
   font-size: 0.95rem; cursor: pointer; text-decoration: none;
   transition: all 0.2s ease; border: 1px solid transparent;
 }
-.btn-primary { background: var(--p-primary-900); color: #fff; }
-.btn-primary:hover { background: var(--p-primary-800); }
-.btn-outline { background: transparent; color: var(--btn-outline-color, var(--p-primary-900)); border-color: var(--surface-border); }
+.btn-primary { background: var(--primary-color); color: var(--primary-contrast-color); }
+.btn-primary:hover { background: var(--ds-color-primary-hover); }
+.btn-outline { background: transparent; color: var(--btn-outline-color, var(--text-color)); border-color: var(--surface-border); }
 .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
 
 /* Dark mode: outline button needs lighter text on dark backgrounds */
@@ -589,7 +699,7 @@ onBeforeUnmount(() => {
 }
 /* Make PrimeVue inputs fill the sidebar width uniformly */
 .filters-inner :deep(.p-inputtext),
-.filters-inner :deep(.p-dropdown),
+.filters-inner :deep(.p-select),
 .filters-inner :deep(.p-inputnumber),
 .filters-inner :deep(.p-inputnumber-input) {
   width: 100%;
@@ -626,7 +736,7 @@ onBeforeUnmount(() => {
   display: flex; align-items: center; gap: 0.5rem;
   margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-color);
 }
-.section-title i { color: #f5a623; }
+.section-title i { color: var(--primary-color); }
 .panel-link {
   font-size: 0.85rem; color: var(--primary-color); text-decoration: none; font-weight: 600;
 }
@@ -671,17 +781,23 @@ onBeforeUnmount(() => {
 
 /* Products Grid */
 .products-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--ds-space-4);
 }
 .product-card {
   background: var(--surface-card);
-  border: 1px solid var(--surface-border); border-radius: 0.75rem;
+  border: 1px solid var(--surface-border); border-radius: var(--ds-radius-lg);
   overflow: hidden; cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
 }
-.product-card:hover { box-shadow: var(--ds-shadow-md); transform: translateY(-2px); }
+.product-card:hover {
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
 .product-image {
-  position: relative; height: 150px; background: var(--surface-ground);
+  position: relative; aspect-ratio: 4 / 3; background: var(--surface-ground);
   overflow: hidden; display: flex; align-items: center; justify-content: center;
 }
 .product-image img { width: 100%; height: 100%; object-fit: cover; }
@@ -689,15 +805,16 @@ onBeforeUnmount(() => {
 .tile-badge {
   position: absolute; top: 0.5rem; inset-inline-start: 0.5rem;
   background: var(--primary-color); color: var(--primary-contrast-color);
-  font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 1rem;
+  font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.625rem; border-radius: var(--ds-radius-pill);
 }
-.product-info { padding: 0.75rem; }
+.product-info { padding: var(--ds-space-3); }
 .product-title {
-  margin: 0 0 0.25rem; font-size: 0.9rem; font-weight: 700; line-height: 1.4;
+  margin: 0 0 0.375rem; font-size: 0.95rem; font-weight: 700; line-height: 1.5;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  min-height: 2.85em;
 }
-.product-vendor { margin: 0 0 0.5rem; font-size: 0.75rem; color: var(--text-color-secondary); }
-.product-price { font-weight: 800; color: var(--ds-color-primary); font-size: 0.9rem; }
+.product-vendor { margin: 0 0 0.625rem; font-size: 0.8rem; color: var(--text-color-secondary); }
+.product-price { font-weight: 800; color: var(--ds-color-primary); font-size: 1rem; }
 
 /* Nav buttons */
 .nav-btn {

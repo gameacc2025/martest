@@ -383,8 +383,16 @@ const goBack = () => router.push('/products')
 }
 
 .product-shell {
-  width: min(1240px, calc(100% - 2.5rem));
+  width: 100%;
+  max-width: var(--ds-container-max);
   margin-inline: auto;
+  padding-inline: var(--ds-container-pad);
+}
+
+@media (min-width: 768px) {
+  .product-shell {
+    padding-inline: var(--ds-container-pad-lg);
+  }
 }
 
 .product-breadcrumb {
@@ -1024,7 +1032,7 @@ const goBack = () => router.push('/products')
   }
 
   .product-shell {
-    width: min(100% - 1.25rem, 620px);
+    padding-inline: var(--ds-container-pad);
   }
 
   .product-heading {

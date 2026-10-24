@@ -326,9 +326,15 @@ function logout() {
 
 .public-container {
   width: 100%;
-  max-width: 1440px;
+  max-width: var(--ds-container-max);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding-inline: var(--ds-container-pad);
+}
+
+@media (min-width: 768px) {
+  .public-container {
+    padding-inline: var(--ds-container-pad-lg);
+  }
 }
 
 .public-header {

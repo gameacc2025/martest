@@ -27,7 +27,7 @@
                 </div>
               </div>
               <div class="filters-category">
-                <Dropdown
+                <Select
                   v-model="categoryFilter"
                   :options="categoryOptions"
                   optionLabel="name"
@@ -99,7 +99,7 @@
             <span class="section-count">({{ totalProducts }} محصول)</span>
           </h2>
           <div class="section-actions">
-            <Dropdown
+            <Select
               v-model="sortOption"
               :options="sortOptions"
               optionLabel="label"
@@ -259,7 +259,7 @@ import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import Paginator from 'primevue/paginator'
 import Rating from 'primevue/rating'
 import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
@@ -490,7 +490,7 @@ const isInWishlist = (productId) => {
 }
 
 .products-container {
-  max-width: 1200px;
+  max-width: var(--ds-container-max);
   margin: 0 auto;
   padding: var(--ds-space-8) var(--ds-space-4);
 }
@@ -583,27 +583,11 @@ const isInWishlist = (productId) => {
 }
 
 .products-grid--4 {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 }
 
 .products-grid--5 {
-  grid-template-columns: repeat(5, 1fr);
-}
-
-@media (max-width: 1200px) {
-  .products-grid--4 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .products-grid--5 {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 992px) {
-  .products-grid--4,
-  .products-grid--5 {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
 }
 
 @media (max-width: 576px) {

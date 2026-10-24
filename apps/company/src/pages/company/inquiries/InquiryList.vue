@@ -147,14 +147,10 @@ function createInquiry() {
 
 <template>
   <div class="inquiry-list-page">
-    <div class="page-header">
-      <h1>استعلام‌ها</h1>
-      <div class="page-header-actions">
-        <Button v-if="canCreate" label="استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
-      </div>
-    </div>
-
     <div class="card">
+      <div class="card-head">
+        <h1 class="card-head-title"><i class="pi pi-inbox"></i> استعلام‌ها</h1>
+      </div>
       <Toolbar class="list-toolbar">
         <template #start>
           <div class="toolbar-filters">
@@ -176,6 +172,9 @@ function createInquiry() {
               @change="applyStatusFilter"
             />
           </div>
+        </template>
+        <template #end>
+          <Button v-if="canCreate" label="استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
         </template>
       </Toolbar>
 

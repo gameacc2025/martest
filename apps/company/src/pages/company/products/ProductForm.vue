@@ -14,7 +14,7 @@ import Textarea from 'primevue/textarea'
 import SpecificationTitleAutoComplete from '@telecom/shared-ui/components/products/SpecificationTitleAutoComplete.vue'
 import { isReservedSpecTitle } from '@telecom/shared-ui/config/productReservedSpecificationKeys'
 
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import MultiSelect from 'primevue/multiselect'
 import Calendar from 'primevue/calendar'
 import InputNumber from 'primevue/inputnumber'
@@ -695,27 +695,27 @@ async function removeExistingDocument(docId) {
 
         <div v-if="canChooseCompany" class="field">
           <label>شرکت <span class="required">*</span></label>
-          <Dropdown v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب شرکت" class="w-full" :class="{ 'p-invalid': errors.companyId }" />
+          <Select v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب شرکت" class="w-full" :class="{ 'p-invalid': errors.companyId }" />
           <small v-if="errors.companyId" class="p-error">{{ errors.companyId }}</small>
         </div>
 
 
         <div class="field">
           <label>دسته‌بندی <span class="required">*</span></label>
-          <Dropdown v-model="form.categoryId" :options="categories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب دسته‌بندی" class="w-full" :class="{ 'p-invalid': errors.categoryId }" />
+          <Select v-model="form.categoryId" :options="categories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب دسته‌بندی" class="w-full" :class="{ 'p-invalid': errors.categoryId }" />
           <small v-if="errors.categoryId" class="p-error">{{ errors.categoryId }}</small>
         </div>
 
         <div class="field">
           <label>زیردسته <span class="required">*</span></label>
-          <Dropdown v-model="form.subcategoryId" :options="subcategories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب زیردسته" class="w-full" :disabled="!form.categoryId" :class="{ 'p-invalid': errors.subcategoryId }" />
+          <Select v-model="form.subcategoryId" :options="subcategories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب زیردسته" class="w-full" :disabled="!form.categoryId" :class="{ 'p-invalid': errors.subcategoryId }" />
           <small v-if="errors.subcategoryId" class="p-error">{{ errors.subcategoryId }}</small>
         </div>
 
         <div class="field-grid">
           <div class="field">
             <label>قابلیت نمایش</label>
-            <Dropdown v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
+            <Select v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
           </div>
           <div class="field">
             <label>محصول ویژه</label>
@@ -774,7 +774,7 @@ async function removeExistingDocument(docId) {
                 <InputSwitch v-model="specValues[field.key]" />
                 <span>{{ specValues[field.key] ? 'بله' : 'خیر' }}</span>
               </div>
-              <Dropdown
+              <Select
                 v-else-if="field.type === 'SELECT'"
                 v-model="specValues[field.key]"
                 :options="specFieldOptions(field)"
@@ -920,7 +920,7 @@ async function removeExistingDocument(docId) {
           <div v-for="(doc, index) in newDocuments" :key="index" class="document-item">
             <i class="pi pi-file-pdf"></i>
             <InputText v-model="doc.title" placeholder="عنوان سند" class="w-6" />
-            <Dropdown v-model="doc.type" :options="['DATASHEET', 'CATALOG', 'MANUAL', 'CERTIFICATE']" class="w-4" />
+            <Select v-model="doc.type" :options="['DATASHEET', 'CATALOG', 'MANUAL', 'CERTIFICATE']" class="w-4" />
             <Button icon="pi pi-trash" severity="danger" text @click="removeNewDocument(index)" />
           </div>
         </div>

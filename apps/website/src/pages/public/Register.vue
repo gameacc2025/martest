@@ -496,25 +496,28 @@ const isValidEmail = (email) => {
 
 .auth-back {
   position: absolute;
-  top: 1.5rem;
-  inset-inline-end: 1.5rem;
+  top: var(--ds-space-6);
+  inset-inline-end: var(--ds-space-6);
   z-index: 10;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--p-primary-900);
-  font-weight: 700;
-  font-size: 0.9rem;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  border-radius: var(--ds-radius-lg);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-bold);
+  font-size: var(--ds-font-size-sm);
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
+  box-shadow: var(--ds-shadow-md);
+  transition: all var(--ds-transition);
 }
 .auth-back:hover {
   background: #ffffff;
-  color: var(--primary-color);
+  color: var(--ds-color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-lg);
 }
 
 .auth-split {

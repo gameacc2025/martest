@@ -49,3 +49,7 @@ postgres_data_dev/
 coverage/
 .nyc_output/
 mimo.exe
+
+# Graphify output (tool cache, not source)
+graphify-out/
+temp_style_check.txt

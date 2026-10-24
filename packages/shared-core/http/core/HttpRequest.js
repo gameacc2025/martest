@@ -288,7 +288,19 @@ buildURL() {
       this.endTiming()
       throw error
     } finally {
-      this.cleanup()
+      // Cancel the timeout timer so it can never fire once fetch() has settled.
+      //
+      // IMPORTANT: we deliberately DO NOT call cleanup()/cancel() here. After
+      // fetch() resolves, the response BODY stream is still unread; aborting
+      // the AbortController at this point errors that stream, so any later
+      // `response.json()` rejects with AbortError, which surfaces to callers as
+      // "Failed to parse response as json". The signal only needs to stay armed
+      // while fetch() itself is pending — the timeout callback (see
+      // createTimeoutController) aborts it if the request is still in flight.
+      if (this._timeoutId) {
+        clearTimeout(this._timeoutId)
+        this._timeoutId = null
+      }
     }
   }
 

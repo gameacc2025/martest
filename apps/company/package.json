@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@telecom/api-client": "workspace:*",
@@ -27,6 +29,7 @@
     "@vitejs/plugin-vue": "^6.0.1",
     "sass": "^1.101.0",
     "sass-embedded": "^1.89.0",
-    "vite": "^8.1.3"
+    "vite": "^8.1.3",
+    "vitest": "5.0.5"
   }
 }

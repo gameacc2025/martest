@@ -1,6 +1,6 @@
 <template>
   <div class="order-details-page">
-    <div class="container mx-auto px-4 py-8">
+    <div class="ds-container ds-page">
       <div class="mb-6">
         <h1 class="text-2xl font-bold">جزئیات سفارش</h1>
         <Breadcrumb :home="home" :model="items" class="mt-2" />

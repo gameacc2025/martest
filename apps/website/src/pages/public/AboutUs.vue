@@ -288,12 +288,20 @@ const partners = ref([
 }
 .about-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--ds-container-max);
   margin: 0 auto;
-  padding: 0 1rem;
+  padding-inline: var(--ds-container-pad);
+  padding-block: var(--ds-space-6);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .about-container {
+    padding-inline: var(--ds-container-pad-lg);
+    padding-block: var(--ds-space-8);
+  }
 }
 
 /* Breadcrumb */

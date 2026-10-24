@@ -23,7 +23,7 @@
                 </div>
               </div>
               <div>
-                <Dropdown
+                <Select
                   v-model="categoryFilter"
                   :options="categoryOptions"
                   optionLabel="name"
@@ -77,7 +77,7 @@
         <div class="comp-list-head">
           <h2 class="comp-h2">همه شرکت ها</h2>
           <div>
-            <Dropdown
+            <Select
               v-model="sortOption"
               :options="sortOptions"
               optionLabel="label"
@@ -146,7 +146,7 @@ import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 import CompanyCard from '../../components/companies/CompanyCard.vue'
@@ -302,9 +302,17 @@ const toggleFollow = async (companyId) => {
 }
 
 .comp-container {
-  max-width: 1200px;
+  max-width: var(--ds-container-max);
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding-inline: var(--ds-container-pad);
+  padding-block: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .comp-container {
+    padding-inline: var(--ds-container-pad-lg);
+    padding-block: var(--ds-space-8);
+  }
 }
 
 .comp-head {

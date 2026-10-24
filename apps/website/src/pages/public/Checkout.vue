@@ -1,6 +1,6 @@
 <template>
   <div class="checkout-page">
-    <div class="container mx-auto px-4 py-8">
+    <div class="ds-container ds-page">
       <div class="mb-6">
         <h1 class="text-2xl font-bold">تسویه حساب</h1>
         <Breadcrumb :home="home" :model="items" class="mt-2" />
@@ -44,7 +44,7 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm font-medium mb-2">استان</label>
-                      <Dropdown
+                      <Select
                         v-model="shippingInfo.province"
                         :options="provinces"
                         optionLabel="name"
@@ -56,7 +56,7 @@
                     </div>
                     <div>
                       <label class="block text-sm font-medium mb-2">شهر</label>
-                      <Dropdown
+                      <Select
                         v-model="shippingInfo.city"
                         :options="cities"
                         optionLabel="name"
@@ -376,7 +376,7 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import RadioButton from 'primevue/radiobutton'
 import Steps from 'primevue/steps'
 

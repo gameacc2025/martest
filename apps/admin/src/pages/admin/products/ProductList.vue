@@ -8,7 +8,7 @@
             <i class="pi pi-search" />
             <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
           </span>
-          <Dropdown v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value"
+          <Select v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value"
             placeholder="فیلتر وضعیت" class="ml-2" style="min-width: 160px" @change="fetchProducts(1)" />
         </template>
 
@@ -84,15 +84,15 @@
       </div>
       <div class="field">
         <label for="company">شرکت</label>
-        <Dropdown id="company" v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
+        <Select id="company" v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
       </div>
       <div class="field">
         <label for="category">دسته‌بندی</label>
-        <Dropdown id="category" v-model="form.categoryId" :options="categories" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
+        <Select id="category" v-model="form.categoryId" :options="categories" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
       </div>
       <div class="field">
         <label for="status">وضعیت</label>
-        <Dropdown id="status" v-model="form.status" :options="['DRAFT', 'PUBLISHED', 'ARCHIVED']" placeholder="انتخاب کنید" />
+        <Select id="status" v-model="form.status" :options="['DRAFT', 'PUBLISHED', 'ARCHIVED']" placeholder="انتخاب کنید" />
       </div>
       <template #footer>
         <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="closeDialog" />
@@ -144,7 +144,7 @@ import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
 import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, getUnreviewedEditCount } from '../../../config/product'
 import ProductPreviewCard from '../../../components/ProductPreviewCard.vue'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 
 const toast = useToast()
 const router = useRouter()

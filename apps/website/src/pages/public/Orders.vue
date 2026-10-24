@@ -1,6 +1,6 @@
 <template>
   <div class="orders-page">
-    <div class="container mx-auto px-4 py-8">
+    <div class="ds-container ds-page">
       <div class="mb-6">
         <h1 class="text-2xl font-bold">سفارشات من</h1>
         <Breadcrumb :home="home" :model="items" class="mt-2" />
@@ -82,7 +82,7 @@
               {{ totalOrders }} سفارش یافت شد
             </div>
             <div class="flex gap-2">
-              <Dropdown
+              <Select
                 v-model="sortOption"
                 :options="sortOptions"
                 optionLabel="label"
@@ -216,7 +216,7 @@ import Card from 'primevue/card'
 import Calendar from 'primevue/calendar'
 import Slider from 'primevue/slider'
 import SelectButton from 'primevue/selectbutton'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 

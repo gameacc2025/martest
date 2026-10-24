@@ -52,7 +52,7 @@
 
             <FormField label="موضوع" :error="errors.subject" required>
               <template #default="{ invalid }">
-                <Dropdown
+                <Select
                   v-model="form.subject"
                   :options="subjectOptions"
                   optionLabel="label"
@@ -225,7 +225,7 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 import Dialog from 'primevue/dialog'
 import { FormSection, FormField, FormGrid, FormActions, FormAlert } from '@telecom/shared-ui/components/common/form'
 
@@ -281,6 +281,18 @@ const resetForm = () => {
 <style scoped>
 .contact-page {
   direction: rtl;
+  width: 100%;
+  max-width: var(--ds-container-max);
+  margin-inline: auto;
+  padding-inline: var(--ds-container-pad);
+  padding-block: var(--ds-space-6);
+}
+
+@media (min-width: 768px) {
+  .contact-page {
+    padding-inline: var(--ds-container-pad-lg);
+    padding-block: var(--ds-space-8);
+  }
 }
 
 /* Breadcrumb */

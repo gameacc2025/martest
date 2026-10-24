@@ -1,21 +1,19 @@
 <template>
   <div class="permission-list-page">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1>لیست مجوزها</h1>
-      <div class="page-header-actions">
-        <Button label="مجوز جدید" icon="pi pi-plus" @click="openCreateDialog" />
-      </div>
-    </div>
-
     <!-- Card with Toolbar -->
     <div class="card">
+      <div class="card-head">
+        <h1 class="card-head-title"><i class="pi pi-lock"></i> لیست مجوزها</h1>
+      </div>
       <Toolbar>
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
             <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
           </span>
+        </template>
+        <template #end>
+          <Button label="مجوز جدید" icon="pi pi-plus" @click="openCreateDialog" />
         </template>
       </Toolbar>
 

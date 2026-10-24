@@ -1,22 +1,20 @@
 <template>
   <div class="product-list-page">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1>مدیریت محصولات</h1>
-      <div class="page-header-actions">
-        <Button label="محصول جدید" icon="pi pi-plus" @click="openCreateDialog" />
-      </div>
-    </div>
-
     <!-- Card with Toolbar -->
     <div class="card">
+      <div class="card-head">
+        <h1 class="card-head-title"><i class="pi pi-box"></i> مدیریت محصولات</h1>
+      </div>
       <Toolbar>
         <template #start>
           <span class="search-input">
             <InputText v-model="searchQuery" placeholder="جستجوی محصول..." @input="debounceSearch" />
           </span>
-          <Dropdown v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value"
+          <Select v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value"
             placeholder="فیلتر وضعیت" class="filter-dropdown" @change="fetchProducts(1)" />
+        </template>
+        <template #end>
+          <Button label="محصول جدید" icon="pi pi-plus" @click="openCreateDialog" />
         </template>
       </Toolbar>
 
@@ -99,15 +97,15 @@
       </div>
       <div class="field">
         <label for="company">شرکت</label>
-        <Dropdown id="company" v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
+        <Select id="company" v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
       </div>
       <div class="field">
         <label for="category">دسته‌بندی</label>
-        <Dropdown id="category" v-model="form.categoryId" :options="categories" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
+        <Select id="category" v-model="form.categoryId" :options="categories" optionLabel="name" optionValue="id" placeholder="انتخاب کنید" />
       </div>
       <div class="field">
         <label for="status">وضعیت</label>
-        <Dropdown id="status" v-model="form.status" :options="['DRAFT', 'PUBLISHED', 'ARCHIVED']" placeholder="انتخاب کنید" />
+        <Select id="status" v-model="form.status" :options="['DRAFT', 'PUBLISHED', 'ARCHIVED']" placeholder="انتخاب کنید" />
       </div>
       <template #footer>
         <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="closeDialog" />
@@ -141,7 +139,7 @@ import { productsApi, companiesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
 import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, canEdit, getUnreviewedEditCount } from '../../../config/product'
-import Dropdown from 'primevue/dropdown'
+import Select from 'primevue/select'
 
 const toast = useToast()
 const router = useRouter()
