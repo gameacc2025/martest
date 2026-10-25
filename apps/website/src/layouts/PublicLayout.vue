@@ -109,8 +109,8 @@ onMounted(async () => {
   // Fetch notification count for logged-in users
   if (isAuthenticated.value) {
     try {
-      const result = await apiGet('/api/v1/notifications/unread-count')
-      notificationCount.value = result.count || 0
+      const result = await apiGet(endpoints.notifications.unreadCount)
+      notificationCount.value = Number(result?.count ?? result?.data?.count ?? 0)
     } catch (err) {
       // Ignore
     }
