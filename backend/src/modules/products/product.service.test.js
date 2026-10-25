@@ -1153,6 +1153,28 @@ test('updateProduct: replaces changed price tiers atomically and records the pri
   assert.equal(calls['productStatusHistory.create'].some((call) => call.data.comment === 'تغییر ردیف‌های قیمت محصول'), true);
 });
 
+test('updateProduct: updates an existing price tier by ID and preserves validity metadata', async () => {
+  const validFrom = new Date('2020-01-01T00:00:00.000Z');
+  fx.product = editableProduct({ status: 'DRAFT' });
+  fx.priceTiers = [{
+    id: 7, productId: 1, minQuantity: 1, maxQuantity: 10, price: '100', unit: 'box',
+    validFrom, validTo: null,
+  }];
+
+  await service.updateProduct(1, {
+    title: 'Updated',
+    priceTiers: [{ id: 7, minQuantity: 1, maxQuantity: 10, price: 125, unit: 'box' }],
+  }, companyA);
+
+  const update = calls['productPriceTier.update'].at(-1);
+  assert.equal(update.where.id, 7);
+  assert.equal(update.data.price, 125);
+  assert.equal(update.data.validFrom.getTime(), validFrom.getTime());
+  assert.equal(update.data.validTo, null);
+  assert.equal((calls['productPriceTier.delete'] || []).length, 0);
+  assert.equal((calls['productPriceTier.create'] || []).length, 0);
+});
+
 test('updateProduct: does not recreate unchanged price tiers', async () => {
   fx.product = editableProduct({ status: 'DRAFT' });
   fx.priceTiers = [{
