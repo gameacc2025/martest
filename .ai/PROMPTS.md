@@ -1,3 +1,7 @@
+> **MANDATORY POLICY OVERRIDE (2026-10-25):** Before using any prompt in this legacy catalog, read the root `AGENTS.md`, `.ai/PROTOCOL.md`, the latest `.ai/WORKLOG.md` entries, and `.ai/current-task.md`. Those files are the current repository-wide policy and supersede conflicting instructions below, including old branch names, task/claim procedures, and commit/push rules. The canonical long-lived branch is `main`; do not create branches, rewrite history, discard user changes, or push unless authorized. Persist progress, actual test results, commit SHA, push state, blockers, and next steps in the project memory files. This catalog is retained as historical task prompts; do not assume every listed phase is still open or current—inspect the implementation and current task first.
+
+---
+
 # پرامپت‌های مرحله‌به‌مرحله برای دستیارهای هوش مصنوعی — پروژه Martest
 
 ## راهنمای استفاده (اول این بخش را بخوانید)
