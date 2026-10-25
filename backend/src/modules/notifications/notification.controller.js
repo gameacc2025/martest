@@ -67,6 +67,7 @@ async function changeFolder(request, reply) {
     Number(request.params.id),
     Number(request.body.folderId),
     request.body.action,
+    request.body.app,
     request.body.sourceFolderId === undefined ? null : Number(request.body.sourceFolderId),
   );
   return reply.send(result);
