@@ -4,8 +4,14 @@ const { success } = require('../../utils/success');
 
 async function list(request, reply) {
   const { page, limit, skip, take } = getPaginationParams(request.query);
-  const { search, companyId, categoryId, status } = request.query;
-  const { items, total } = await svc.listProducts({ skip, take, filters: { search, companyId, categoryId, status }, caller: request.user, publicOnly: true });
+  const { search, companyId, categoryId, status, minPrice, maxPrice, featured, sortBy, sortOrder } = request.query;
+  const { items, total } = await svc.listProducts({
+    skip,
+    take,
+    filters: { search, companyId, categoryId, status, minPrice, maxPrice, featured, sortBy, sortOrder },
+    caller: request.user,
+    publicOnly: true,
+  });
   return reply.send(buildPaginatedResponse(items, total, page, limit));
 }
 
