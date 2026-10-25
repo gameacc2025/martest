@@ -1143,27 +1143,31 @@ test('updateProduct: replaces changed price tiers atomically and records the pri
     ],
   }, companyA);
 
-  assert.equal(calls['productPriceTier.deleteMany'].at(-1).where.productId, 1);
-  const created = calls['productPriceTier.createMany'].at(-1).data;
+  assert.equal(calls['productPriceTier.delete'].at(-1).where.id, 1);
+  const created = calls['productPriceTier.create'];
   assert.equal(created.length, 2);
-  assert.equal(created[0].price, 125);
-  assert.equal(created[1].minQuantity, 10);
-  assert.equal(created[1].productId, 1);
+  assert.equal(created[0].data.price, 125);
+  assert.equal(created[1].data.minQuantity, 10);
+  assert.equal(created[1].data.productId, 1);
   assert.equal(calls['productActivityLog.create'].some((call) => call.data.action === 'PRICE_TIER_UPDATE'), true);
   assert.equal(calls['productStatusHistory.create'].some((call) => call.data.comment === 'تغییر ردیف‌های قیمت محصول'), true);
 });
 
 test('updateProduct: does not recreate unchanged price tiers', async () => {
   fx.product = editableProduct({ status: 'DRAFT' });
-  fx.priceTiers = [{ id: 1, productId: 1, minQuantity: 1, maxQuantity: null, price: '100', unit: null }];
+  fx.priceTiers = [{
+    id: 1, productId: 1, minQuantity: 1, maxQuantity: null, price: '100', unit: null,
+    validFrom: new Date('2020-01-01T00:00:00.000Z'), validTo: null,
+  }];
 
   await service.updateProduct(1, {
     title: 'Updated',
-    priceTiers: [{ minQuantity: 1, price: 100 }],
+    priceTiers: [{ id: 1, minQuantity: 1, price: 100 }],
   }, companyA);
 
-  assert.equal((calls['productPriceTier.deleteMany'] || []).length, 0);
-  assert.equal((calls['productPriceTier.createMany'] || []).length, 0);
+  assert.equal((calls['productPriceTier.delete'] || []).length, 0);
+  assert.equal((calls['productPriceTier.create'] || []).length, 0);
+  assert.equal((calls['productPriceTier.update'] || []).length, 0);
 });
 
 test('updateProduct: a company user may not transfer the product', async () => {
