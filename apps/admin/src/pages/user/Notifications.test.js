@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import Notifications from './Notifications.vue'
-import { apiGet, apiGetPaginated, apiPatch } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiGetPaginated, apiPatch, apiPost } from '@telecom/shared-core/http/apiClient'
 
 vi.mock('@telecom/shared-core/http/apiClient', () => ({
   apiGet: vi.fn(),
   apiGetPaginated: vi.fn(),
   apiPatch: vi.fn(),
   apiDelete: vi.fn(),
+  apiPost: vi.fn(),
 }))
 
 vi.mock('primevue/usetoast', () => ({
@@ -21,6 +22,7 @@ describe('Admin notification inbox', () => {
     vi.clearAllMocks()
     apiGet.mockResolvedValue({ count: 13 })
     apiPatch.mockResolvedValue({ success: true })
+    apiPost.mockResolvedValue({ success: true, count: 1 })
     apiGetPaginated.mockResolvedValue({
       data: [
         {
@@ -102,12 +104,18 @@ describe('Admin notification inbox', () => {
     expect(apiGet).toHaveBeenCalledWith('/settings/notifications/unread-count')
   })
 
-  it('marks a message read when opened by clicking its row', async () => {
+  it('marks a message read only on double-click, not on a single click', async () => {
     wrapper = shallowMount(Notifications, {
       global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
     })
+
     await flushPromises()
     await wrapper.findAll('.message-row')[1].trigger('click')
+    await flushPromises()
+    expect(apiPatch).not.toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
+    expect(wrapper.findAll('.message-row')[1].classes()).toContain('unread')
+
+    await wrapper.findAll('.message-row')[1].trigger('dblclick')
     await flushPromises()
     expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).not.toContain('unread')
