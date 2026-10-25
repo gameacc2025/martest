@@ -20,9 +20,8 @@ const router = useRouter()
 const cartStore = useCartStore()
 const productsStore = useProductsStore()
 
-const products = ref([])
 const featuredProducts = ref([])
-const bestSellers = ref([])
+const recentProducts = ref([])
 const categories = ref([])
 const loading = ref(false)
 const categoriesLoading = ref(false)
@@ -124,14 +123,21 @@ async function fetchProducts() {
 
     const response = await productsApi.list(params)
     const items = response?.data?.data ?? []
-    products.value = Array.isArray(items) ? items : []
-    featuredProducts.value = products.value.slice(0, 8)
-    bestSellers.value = products.value.slice(0, 4)
+    const recent = Array.isArray(items) ? items : []
+    recentProducts.value = recent.slice(0, 4)
+
+    // Featured is a server-side product flag, not a slice of recent results.
+    try {
+      const featuredResponse = await productsApi.list({ ...params, limit: 8, featured: true })
+      const featuredItems = featuredResponse?.data?.data ?? []
+      featuredProducts.value = Array.isArray(featuredItems) ? featuredItems : []
+    } catch (featuredError) {
+      featuredProducts.value = []
+    }
   } catch (err) {
     error.value = 'خطا در دریافت محصولات'
-    products.value = []
     featuredProducts.value = []
-    bestSellers.value = []
+    recentProducts.value = []
   } finally {
     loading.value = false
   }
@@ -392,7 +398,7 @@ onBeforeUnmount(() => {
               <button class="nav-btn" @click="fetchProducts" :disabled="loading" aria-label="بارگذاری مجدد">
                 <i class="pi" :class="loading ? 'pi-spin pi-spinner' : 'pi-refresh'"></i>
               </button>
-              <h2 class="section-title"><i class="pi pi-star-fill"></i> محصولات</h2>
+              <h2 class="section-title"><i class="pi pi-star-fill"></i> محصولات ویژه</h2>
             </div>
 
             <div v-if="loading" class="products-grid">
@@ -404,7 +410,7 @@ onBeforeUnmount(() => {
             </div>
             <div v-else-if="featuredProducts.length === 0" class="state-box">
               <i class="pi pi-box"></i>
-              <p>محصولی با فیلترهای فعلی یافت نشد</p>
+              <p>محصول ویژه‌ای با فیلترهای فعلی یافت نشد</p>
               <Button label="حذف فیلترها" icon="pi pi-times" severity="secondary" text @click="resetFilters" />
             </div>
             <div v-else class="products-grid">
@@ -424,22 +430,22 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <!-- Best Sellers -->
+          <!-- Recent Products -->
           <section class="section-block">
             <div class="section-head">
-              <router-link v-if="bestSellers.length > 0" :to="{ name: 'products' }" class="panel-link">مشاهده همه</router-link>
-              <h2 class="section-title"><i class="pi pi-bolt"></i> محصولات پرفروش</h2>
+              <router-link v-if="recentProducts.length > 0" :to="{ name: 'products' }" class="panel-link">مشاهده همه</router-link>
+              <h2 class="section-title"><i class="pi pi-clock"></i> جدیدترین محصولات</h2>
             </div>
-            <div v-if="bestSellers.length === 0 && !loading" class="state-box">
+            <div v-if="recentProducts.length === 0 && !loading" class="state-box">
               <i class="pi pi-box"></i>
               <p>در حال حاضر محصولی موجود نیست</p>
             </div>
             <div v-else class="products-grid">
-              <div v-for="product in bestSellers" :key="product.id" class="product-card" @click="goToProduct(product)">
+              <div v-for="product in recentProducts" :key="product.id" class="product-card" @click="goToProduct(product)">
                 <div class="product-image">
                   <img v-if="product.images && product.images[0]?.url" :src="product.images[0].url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
-                  <span class="tile-badge">پرفروش</span>
+                  <span class="tile-badge">جدید</span>
                 </div>
                 <div class="product-info">
                   <h3 class="product-title">{{ product.title }}</h3>
