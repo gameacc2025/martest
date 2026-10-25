@@ -1,14 +1,10 @@
 # Current Task / Agent Handoff
 
-## Latest completed task — NOTIFICATIONS-INBOX-UX
-- **Status:** PARTIAL — UI implementation committed; runtime/build verification remains outstanding.
-- **Objective:** Redesign the Company Portal notification inbox as an email-style inbox.
-- **Implementation:** apps/company/src/pages/user/Notifications.vue now includes All/Unread/Read folders, event-type categories, search, a message list, a reading pane, read/delete actions, refresh, and pagination. Persian UI copy and existing API endpoints are preserved.
-- **Commit:** a244a9799745b86cf47ae9ce65d7ef6e93632955
-- **Documentation:** docs/NOTIFICATION_SYSTEM.md updated to describe the new inbox and its current-page category/search limitation.
-- **Verification:** Re-fetched the updated Vue file from GitHub and confirmed expected UI/actions/API endpoint strings are present. Build, tests, and browser interaction are NOT RUN because no local checkout/runtime was available in this session.
-- **Known limitation:** Category and text search filtering currently operate on the currently loaded server page (20 items), not all notifications across every page. Full-server filtering requires adding and testing query parameters in the backend API.
-- **Next action:** Pull main locally, run the Company Portal build/tests, and manually test folders, search, selected-message reading, read/unread counts, deletion, and pagination. Consider server-side category/search filters as a separate scoped task if needed.
-
-## Agent policy note
-The repository's English-only communication rule applies to coding agents working through command-line tools; ChatGPT conversation with the user remains in Persian as requested.
+## Active task — NOTIFICATIONS-INBOX-DATA-FLOW
+- **Status:** IN_PROGRESS
+- **Objective:** Fix the Company Portal notification inbox showing no message rows and keep working until automated checks pass.
+- **Root cause found:** `apps/company/src/pages/user/Notifications.vue` calls `apiGet()` for the paginated notifications endpoint. In `packages/shared-core/http/apiClient.js`, `apiGet()` unwraps the standard `{ data, meta }` response to just `data`, so the page then reads `result.data` from an array and assigns an empty list. The backend's `notification.service.js` returns the paginated `{ data, meta }` shape and the canonical client provides `apiGetPaginated()` for exactly this contract.
+- **Scope:** Fix the page to use the paginated client; add a component regression test proving server-returned notification rows render; wire the Company app into the root Vitest CI project list if needed; run CI tests/build and inspect results; update docs and worklog with exact outcomes.
+- **Files expected:** `apps/company/src/pages/user/Notifications.vue`, new Company app Vitest config/test, root `vitest.config.js`, `.ai/current-task.md`, `.ai/WORKLOG.md`, and notification docs if behavior notes change.
+- **Verification required:** Company notification regression test; `pnpm test`; `pnpm build`; backend notification tests if backend behavior is touched; inspect GitHub Actions result. Do not report success until observed.
+- **Environment constraint:** This session has GitHub repository tools but no local checkout/terminal for running pnpm directly. Use the repository's CI workflow as an execution environment and inspect its actual run results/logs after commits.
