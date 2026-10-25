@@ -1,4 +1,5 @@
 <script setup>
+import BrandMark from '../common/BrandMark.vue'
 /**
  * DashboardSidebar — the single, reusable enterprise sidebar.
  *
@@ -107,7 +108,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
     <!-- Brand + collapse button -->
     <div class="dash-sidebar-brand">
       <div class="dash-sidebar-brand-main">
-        <i class="pi pi-wifi dash-sidebar-brand-icon"></i>
+        <BrandMark class="dash-sidebar-brand-icon" :size="32" />
         <span class="dash-sidebar-brand-text">Telecom Market</span>
       </div>
       <button
@@ -242,8 +243,9 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   flex-direction: column;
   width: var(--dash-sidebar-expanded);
   height: 100%;
-  background: var(--surface-card);
-  border-inline-end: 1px solid var(--surface-border);
+  background: var(--ds-sidebar-bg);
+  color: var(--ds-sidebar-fg);
+  border-inline-end: 1px solid var(--ds-sidebar-border);
   overflow-x: hidden;
   overflow-y: auto;
   transition: width 0.25s ease;
@@ -257,10 +259,10 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   gap: 0.5rem;
   padding: 0 1rem;
   height: var(--dash-header-height, 4rem);
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--ds-sidebar-border);
   position: sticky;
   top: 0;
-  background: var(--surface-card);
+  background: var(--ds-sidebar-bg);
   z-index: 1;
 }
 
@@ -272,15 +274,13 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 }
 
 .dash-sidebar-brand-icon {
-  font-size: 1.4rem;
-  color: var(--primary-color);
   flex-shrink: 0;
 }
 
 .dash-sidebar-brand-text {
   font-weight: 700;
   font-size: 1rem;
-  color: var(--text-color);
+  color: var(--ds-sidebar-fg-strong);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -296,14 +296,14 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   border: none;
   background: transparent;
   border-radius: var(--content-border-radius, 8px);
-  color: var(--text-color-secondary);
+  color: var(--ds-sidebar-muted);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .dash-sidebar-collapse-btn:hover {
-  background: var(--surface-hover);
-  color: var(--text-color);
+  background: var(--ds-sidebar-hover);
+  color: var(--ds-sidebar-fg-strong);
 }
 
 /* ---- Nav ---- */
@@ -317,7 +317,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--text-color-secondary);
+  color: var(--ds-sidebar-muted);
   white-space: nowrap;
   opacity: 1;
   transition: opacity 0.2s;
@@ -342,8 +342,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   padding: 0.6rem 0.75rem;
   border: none;
   background: transparent;
-  border-radius: var(--content-border-radius, 8px);
-  color: var(--text-color-secondary);
+  border-radius: var(--content-border-radius, 10px);
+  color: var(--ds-sidebar-fg);
   font-size: 0.9rem;
   font-weight: 500;
   font-family: inherit;
@@ -354,8 +354,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 }
 
 .dash-sidebar-link:hover {
-  background: var(--surface-hover);
-  color: var(--text-color);
+  background: var(--ds-sidebar-hover);
+  color: var(--ds-sidebar-fg-strong);
 }
 
 /* Subtle inward nudge on hover (RTL-safe, expanded mode only). */
@@ -364,14 +364,19 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 }
 
 
+/* Active item: translucent brand wash + white text + brand-colored icon (never color alone: the bar marks it too). */
 .dash-sidebar-link--active {
-  background: var(--primary-color);
-  color: var(--primary-contrast-color);
+  background: var(--ds-sidebar-active-bg);
+  color: var(--ds-sidebar-fg-strong);
+}
+
+.dash-sidebar-link--active .dash-sidebar-link-icon {
+  color: var(--ds-sidebar-accent);
 }
 
 .dash-sidebar-link--active:hover {
-  background: var(--primary-color);
-  color: var(--primary-contrast-color);
+  background: var(--ds-sidebar-active-bg);
+  color: var(--ds-sidebar-fg-strong);
 }
 
 /* Active indicator bar (inline-start edge) */
@@ -383,7 +388,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   width: 3px;
   height: 60%;
   border-radius: 0 3px 3px 0;
-  background: var(--primary-color);
+  background: var(--ds-sidebar-accent);
 }
 
 .dash-sidebar-link-icon {

@@ -62,6 +62,27 @@
   --ds-color-info-soft: var(--p-primary-50);
 
   /* --------------------------------------------------------
+     BRAND + SHELL (constant brand surfaces; flipped in dark below)
+     Primary brand #01bec2 · secondary deep blue #003a54.
+     Use these for hero/sidebar/footer surfaces instead of raw hex.
+     -------------------------------------------------------- */
+  --ds-brand: #01bec2;
+  --ds-navy: #003a54;
+  --ds-petrol: #004d6f;
+  --ds-on-navy: #ffffff;
+  --ds-on-navy-muted: #b9dbe6;
+  --ds-hero-gradient: linear-gradient(135deg, #003a54 0%, #004d6f 100%);
+
+  --ds-sidebar-bg: #003a54;
+  --ds-sidebar-border: rgba(255, 255, 255, 0.08);
+  --ds-sidebar-fg: #cfe6ee;          /* 9.35:1 on #003a54 */
+  --ds-sidebar-fg-strong: #ffffff;
+  --ds-sidebar-muted: #9fc3d1;       /* 6.46:1 on #003a54 */
+  --ds-sidebar-hover: rgba(255, 255, 255, 0.07);
+  --ds-sidebar-active-bg: rgba(1, 190, 194, 0.18);
+  --ds-sidebar-accent: #01bec2;
+
+  /* --------------------------------------------------------
      TYPOGRAPHY SCALE (modular, ~1.2 ratio)
      -------------------------------------------------------- */
   --ds-font-family: var(--font-family, 'Vazirmatn', -apple-system, 'Segoe UI', Tahoma, sans-serif);
@@ -114,20 +135,21 @@
      BORDER RADIUS
      -------------------------------------------------------- */
   --ds-radius-sm: 6px;
-  --ds-radius-md: var(--content-border-radius, 8px);
-  --ds-radius-lg: 12px;
-  --ds-radius-xl: 16px;
+  --ds-radius-md: var(--content-border-radius, 10px);
+  --ds-radius-lg: 14px;
+  --ds-radius-xl: 18px;
   --ds-radius-pill: 999px;
   --ds-radius-circle: 50%;
 
   /* --------------------------------------------------------
      SHADOW SYSTEM (elevation)
      -------------------------------------------------------- */
-  --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+  /* Navy-tinted so elevation reads as part of the brand, not neutral grey. */
+  --ds-shadow-xs: 0 1px 2px rgba(0, 58, 84, 0.06);
+  --ds-shadow-sm: 0 1px 3px rgba(0, 58, 84, 0.08), 0 1px 2px rgba(0, 58, 84, 0.04);
+  --ds-shadow-md: 0 4px 12px rgba(0, 58, 84, 0.09);
+  --ds-shadow-lg: 0 8px 24px rgba(0, 58, 84, 0.13);
+  --ds-shadow-xl: 0 20px 40px rgba(0, 58, 84, 0.16);
 
   /* --------------------------------------------------------
      MOTION
@@ -153,6 +175,8 @@
    need to soften the elevation shadows for dark surfaces.
    ------------------------------------------------------------ */
 :root.app-dark {
+  --ds-hero-gradient: linear-gradient(135deg, #021824 0%, #003a54 100%);
+  --ds-sidebar-bg: #021824;
   --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
   --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
