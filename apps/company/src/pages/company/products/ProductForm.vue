@@ -1138,6 +1138,16 @@ async function removeExistingDocument(docId) {
   object-fit: cover;
 }
 
+.image-actions {
+  position: absolute;
+  top: 0.25rem;
+  inset-inline-start: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  z-index: 1;
+}
+
 .image-remove {
   position: absolute;
   top: 0.25rem;
