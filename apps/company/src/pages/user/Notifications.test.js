@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import Notifications from './Notifications.vue'
-import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiGetPaginated, apiPatch } from '@telecom/shared-core/http/apiClient'
 
 vi.mock('@telecom/shared-core/http/apiClient', () => ({
   apiGet: vi.fn(),
