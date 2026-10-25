@@ -1,385 +1,128 @@
-<template>
-  <div class="notifications-page">
-    <div class="ds-container ds-page">
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold">اعلان ها</h1>
-        <Breadcrumb :home="home" :model="items" class="mt-2" />
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Sidebar -->
-        <div class="lg:col-span-1">
-          <Card>
-            <template #title>فیلتر اعلان ها</template>
-            <template #content>
-              <div class="space-y-4">
-                <div>
-                  <h3 class="font-semibold mb-2">نوع اعلان</h3>
-                  <SelectButton
-                    v-model="typeFilter"
-                    :options="typeOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    multiple
-                    class="w-full"
-                  />
-                </div>
-
-                <div>
-                  <h3 class="font-semibold mb-2">وضعیت</h3>
-                  <SelectButton
-                    v-model="statusFilter"
-                    :options="statusOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    class="w-full"
-                  />
-                </div>
-
-                <Button
-                  label="اعمال فیلترها"
-                  icon="pi pi-check"
-                  class="w-full p-button-primary"
-                  @click="applyFilters"
-                />
-                <Button
-                  label="حذف فیلترها"
-                  icon="pi pi-times"
-                  class="w-full p-button-outlined p-button-secondary mt-2"
-                  @click="clearFilters"
-                />
-              </div>
-            </template>
-          </Card>
-
-          <Card class="mt-4">
-            <template #title>عملیات گروهی</template>
-            <template #content>
-              <div class="space-y-2">
-                <Button
-                  label="علامت گذاری همه به عنوان خوانده شده"
-                  icon="pi pi-envelope-open"
-                  class="w-full p-button-outlined"
-                  @click="markAllAsRead"
-                />
-                <Button
-                  label="حذف همه اعلان ها"
-                  icon="pi pi-trash"
-                  class="w-full p-button-outlined p-button-danger"
-                  @click="deleteAllNotifications"
-                />
-              </div>
-            </template>
-          </Card>
-        </div>
-
-        <!-- Notifications List -->
-        <div class="lg:col-span-3">
-          <div class="flex justify-between items-center mb-4">
-            <div class="text-gray-600">
-              {{ totalNotifications }} اعلان یافت شد
-            </div>
-            <div class="flex gap-2">
-              <Select
-                v-model="sortOption"
-                :options="sortOptions"
-                optionLabel="label"
-                optionValue="value"
-                class="w-full md:w-14rem"
-                @change="onSortChange"
-              />
-            </div>
-          </div>
-
-          <div v-if="loading" class="text-center py-8">
-            <ProgressSpinner />
-            <p class="mt-4">در حال بارگذاری...</p>
-          </div>
-
-          <div v-else-if="notifications.length === 0" class="text-center py-8">
-            <i class="pi pi-bell text-4xl text-gray-400 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">هیچ اعلانی یافت نشد</h3>
-            <p class="text-gray-500">شما هیچ اعلانی ندارید</p>
-          </div>
-
-              <div v-else class="space-y-4">
-                <Card
-                  v-for="notification in notifications"
-                  :key="notification.id"
-                  class="notification-card"
-                  :class="{ 'bg-blue-50 border-blue-200': !notification.read }"
-                >
-              <template #content>
-                <div class="flex gap-3">
-                  <div class="flex-shrink-0">
-                    <i
-                      :class="[getNotificationIcon(notification.type), {
-                        'text-blue-500': notification.type === 'info',
-                        'text-green-500': notification.type === 'success',
-                        'text-yellow-500': notification.type === 'warning',
-                        'text-red-500': notification.type === 'error'
-                      }]"
-                      class="text-2xl"
-                    ></i>
-                  </div>
-                  <div class="flex-1">
-                    <div class="flex justify-between items-start">
-                      <div>
-                        <h3 class="font-semibold">{{ notification.title }}</h3>
-                        <p class="text-sm text-gray-500 mt-1">
-                          {{ formatDate(notification.createdAt) }}
-                        </p>
-                      </div>
-                      <span
-                        v-if="!notification.read"
-                        class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium"
-                      >
-                        جدید
-                      </span>
-                    </div>
-                    <p class="mt-2 text-gray-600">{{ notification.message }}</p>
-                    <div class="mt-3 flex gap-2">
-                      <Button
-                        v-if="notification.actionUrl"
-                        label="مشاهده"
-                        icon="pi pi-eye"
-                        class="p-button-text p-button-sm"
-                        @click="viewNotification(notification)"
-                      />
-                      <Button
-                        label="حذف"
-                        icon="pi pi-trash"
-                        class="p-button-text p-button-danger p-button-sm"
-                        @click="deleteNotification(notification.id)"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </Card>
-          </div>
-
-          <div class="mt-8">
-            <Paginator
-              :rows="perPage"
-              :totalRecords="totalNotifications"
-              :rowsPerPageOptions="[10, 20, 50, 100]"
-              @page="onPageChange"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
-import Breadcrumb from 'primevue/breadcrumb'
-import Button from 'primevue/button'
-import Card from 'primevue/card'
-import SelectButton from 'primevue/selectbutton'
-import Select from 'primevue/select'
-import ProgressSpinner from 'primevue/progressspinner'
-import Paginator from 'primevue/paginator'
-
-const router = useRouter()
-const authStore = useAuthStore()
+import { apiGet, apiPatch, apiDelete } from '@telecom/shared-core/http/apiClient'
+import { endpoints } from '@telecom/api-client'
 
 const notifications = ref([])
+const unreadCount = ref(0)
 const loading = ref(false)
-const totalNotifications = ref(0)
-const perPage = ref(10)
-const currentPage = ref(1)
+const errorMessage = ref('')
+const page = ref(1)
+const limit = ref(20)
+const total = ref(0)
+const totalPages = ref(1)
+const busyIds = ref(new Set())
 
-const typeFilter = ref([])
-const statusFilter = ref('all')
-const sortOption = ref('date_desc')
+onMounted(load)
 
-const home = ref({
-  icon: 'pi pi-home',
-  to: '/'
-})
-
-const items = ref([
-  { label: 'اعلان ها', to: '/notifications' }
-])
-
-const typeOptions = ref([
-  { label: 'همه', value: '' },
-  { label: 'اطلاع رسانی', value: 'info' },
-  { label: 'موفقیت', value: 'success' },
-  { label: 'هشدار', value: 'warning' },
-  { label: 'خطا', value: 'error' },
-  { label: 'سفارش', value: 'order' },
-  { label: 'پرداخت', value: 'payment' },
-  { label: 'تخفیف', value: 'promotion' }
-])
-
-const statusOptions = ref([
-  { label: 'همه', value: 'all' },
-  { label: 'خوانده نشده', value: 'unread' },
-  { label: 'خوانده شده', value: 'read' }
-])
-
-const sortOptions = ref([
-  { label: 'تاریخ: جدیدترین', value: 'date_desc' },
-  { label: 'تاریخ: قدیمی ترین', value: 'date_asc' },
-  { label: 'نوع: A به Z', value: 'type_asc' },
-  { label: 'نوع: Z به A', value: 'type_desc' }
-])
-
-onMounted(async () => {
-  await loadNotifications()
-})
-
-const loadNotifications = async () => {
+async function load() {
   loading.value = true
+  errorMessage.value = ''
   try {
-    const params = {
-      page: currentPage.value,
-      limit: perPage.value,
-      types: typeFilter.value.length > 0 ? typeFilter.value.join(',') : undefined,
-      status: statusFilter.value === 'all' ? undefined : statusFilter.value,
-      sortBy: getSortField(),
-      sortOrder: getSortOrder()
-    }
-
-    const data = await authStore.getNotifications(params)
-    notifications.value = data.notifications
-    totalNotifications.value = data.total
-  } catch (error) {
-    console.error('Error loading notifications:', error)
+    const result = await apiGet(`${endpoints.notifications.list}?page=${page.value}&limit=${limit.value}`)
+    notifications.value = Array.isArray(result?.data) ? result.data : (Array.isArray(result?.data?.data) ? result.data.data : [])
+    const meta = result?.meta || result?.data?.meta || {}
+    total.value = Number(meta.total || notifications.value.length)
+    totalPages.value = Math.max(1, Number(meta.totalPages || 1))
+    const count = await apiGet(endpoints.notifications.unreadCount)
+    unreadCount.value = Number(count?.count ?? count?.data?.count ?? 0)
+  } catch {
+    errorMessage.value = 'دریافت اعلان‌ها با خطا مواجه شد. دوباره تلاش کنید.'
   } finally {
     loading.value = false
   }
 }
 
-const applyFilters = () => {
-  currentPage.value = 1
-  loadNotifications()
-}
-
-const clearFilters = () => {
-  typeFilter.value = []
-  statusFilter.value = 'all'
-  sortOption.value = 'date_desc'
-  currentPage.value = 1
-  loadNotifications()
-}
-
-const onSortChange = () => {
-  loadNotifications()
-}
-
-const onPageChange = (event) => {
-  currentPage.value = event.page + 1
-  perPage.value = event.rows
-  loadNotifications()
-}
-
-const getSortField = () => {
-  const [field] = sortOption.value.split('_')
-  return field === 'date' ? 'createdAt' : field
-}
-
-const getSortOrder = () => {
-  const [, order] = sortOption.value.split('_')
-  return order
-}
-
-const formatDate = (date) => {
-  if (!date) return 'نامشخص'
-  return new Date(date).toLocaleDateString('fa-IR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-const getNotificationIcon = (type) => {
-  const iconMap = {
-    info: 'pi pi-info-circle',
-    success: 'pi pi-check-circle',
-    warning: 'pi pi-exclamation-triangle',
-    error: 'pi pi-exclamation-circle',
-    order: 'pi pi-shopping-bag',
-    payment: 'pi pi-credit-card',
-    promotion: 'pi pi-gift'
-  }
-  return iconMap[type] || 'pi pi-bell'
-}
-
-const viewNotification = (notification) => {
-  if (notification.actionUrl) {
-    router.push(notification.actionUrl)
-  }
-  // Mark as read
-  markAsRead(notification.id)
-}
-
-const markAsRead = async (notificationId) => {
+async function markAsRead(item) {
+  if (item.isRead) return
+  busyIds.value = new Set([...busyIds.value, item.id])
   try {
-    await authStore.markNotificationAsRead(notificationId)
-    const notification = notifications.value.find(n => n.id === notificationId)
-    if (notification) {
-      notification.read = true
-    }
-  } catch (error) {
-    console.error('Error marking notification as read:', error)
+    await apiPatch(endpoints.notifications.read(item.id))
+    item.isRead = true
+    unreadCount.value = Math.max(0, unreadCount.value - 1)
+  } catch {
+    errorMessage.value = 'به‌روزرسانی وضعیت اعلان انجام نشد.'
+  } finally {
+    const next = new Set(busyIds.value)
+    next.delete(item.id)
+    busyIds.value = next
   }
 }
 
-const markAllAsRead = async () => {
+async function markAllAsRead() {
   try {
-    await authStore.markAllNotificationsAsRead()
-    notifications.value.forEach(n => n.read = true)
-  } catch (error) {
-    console.error('Error marking all notifications as read:', error)
+    await apiPatch(endpoints.notifications.readAll)
+    notifications.value = notifications.value.map(item => ({ ...item, isRead: true }))
+    unreadCount.value = 0
+  } catch {
+    errorMessage.value = 'علامت‌گذاری اعلان‌ها انجام نشد.'
   }
 }
 
-const deleteNotification = async (notificationId) => {
+async function removeNotification(item) {
   try {
-    await authStore.deleteNotification(notificationId)
-    notifications.value = notifications.value.filter(n => n.id !== notificationId)
-    totalNotifications.value--
-  } catch (error) {
-    console.error('Error deleting notification:', error)
+    await apiDelete(endpoints.notifications.remove(item.id))
+    notifications.value = notifications.value.filter(row => row.id !== item.id)
+    total.value = Math.max(0, total.value - 1)
+    if (!item.isRead) unreadCount.value = Math.max(0, unreadCount.value - 1)
+  } catch {
+    errorMessage.value = 'حذف اعلان انجام نشد.'
   }
 }
 
-const deleteAllNotifications = async () => {
-  try {
-    await authStore.deleteAllNotifications()
-    notifications.value = []
-    totalNotifications.value = 0
-  } catch (error) {
-    console.error('Error deleting all notifications:', error)
-  }
+function formatDate(value) {
+  if (!value) return '—'
+  return new Date(value).toLocaleString('fa-IR')
 }
 </script>
 
+<template>
+  <section class="ds-container ds-page notification-page" dir="rtl">
+    <header class="page-heading">
+      <div>
+        <p class="eyebrow">حساب کاربری</p>
+        <h1>اعلان‌های من</h1>
+        <p class="muted">اعلان‌های مربوط به حساب و فعالیت‌های شما</p>
+      </div>
+      <div class="heading-actions">
+        <span class="count">{{ unreadCount }} خوانده‌نشده</span>
+        <button v-if="unreadCount" class="button button-secondary" :disabled="loading" @click="markAllAsRead">خواندن همه</button>
+        <router-link class="button button-primary" to="/notification-preferences">تنظیمات اعلان</router-link>
+      </div>
+    </header>
+
+    <p v-if="errorMessage" class="message message-error" role="alert">{{ errorMessage }}</p>
+    <div v-if="loading" class="state">در حال دریافت اعلان‌ها…</div>
+    <div v-else-if="!notifications.length" class="state empty">
+      <i class="pi pi-bell-slash" aria-hidden="true"></i>
+      <h2>هنوز اعلانی ندارید</h2>
+      <p>اعلان‌های مربوط به حساب شما در این قسمت نمایش داده می‌شوند.</p>
+    </div>
+    <div v-else class="notification-list">
+      <article v-for="item in notifications" :key="item.id" class="notification-card" :class="{ unread: !item.isRead }">
+        <span class="notification-icon"><i class="pi pi-bell" aria-hidden="true"></i></span>
+        <div class="notification-body">
+          <div class="notification-title-row">
+            <h2>{{ item.title }}</h2>
+            <span v-if="!item.isRead" class="new-badge">جدید</span>
+          </div>
+          <p>{{ item.message }}</p>
+          <time :datetime="item.createdAt">{{ formatDate(item.createdAt) }}</time>
+        </div>
+        <div class="notification-actions">
+          <button v-if="!item.isRead" class="icon-button" :disabled="busyIds.has(item.id)" aria-label="علامت‌گذاری به‌عنوان خوانده‌شده" @click="markAsRead(item)"><i class="pi pi-check"></i></button>
+          <button class="icon-button danger" aria-label="حذف اعلان" @click="removeNotification(item)"><i class="pi pi-trash"></i></button>
+        </div>
+      </article>
+    </div>
+    <footer v-if="totalPages > 1" class="pagination">
+      <button class="button button-secondary" :disabled="page <= 1 || loading" @click="page--; load()">قبلی</button>
+      <span>صفحه {{ page }} از {{ totalPages }} · {{ total }} اعلان</span>
+      <button class="button button-secondary" :disabled="page >= totalPages || loading" @click="page++; load()">بعدی</button>
+    </footer>
+  </section>
+</template>
+
 <style scoped>
-.notifications-page {
-  direction: rtl;
-}
-
-.notification-card {
-  transition: all 0.2s ease;
-  border-left: 4px solid transparent;
-}
-
-.notification-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.notification-card:not(.bg-blue-50) {
-  border-left-color: #e5e7eb;
-}
-
-.notification-card.bg-blue-50 {
-  border-left-color: #3b82f6;
-}
+.notification-page{direction:rtl}.page-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}.page-heading h1{margin:.2rem 0;font-size:1.6rem;font-weight:800}.eyebrow{margin:0;color:var(--primary-color);font-size:.85rem}.muted,time{color:var(--text-color-secondary);font-size:.85rem}.heading-actions,.notification-title-row,.notification-actions,.pagination{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.count,.new-badge{border-radius:999px;padding:.3rem .65rem;background:color-mix(in srgb,var(--primary-color) 12%,var(--surface-card));color:var(--primary-color);font-size:.8rem}.button{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:8px;padding:.65rem .9rem;font:inherit;text-decoration:none;cursor:pointer}.button:disabled,.icon-button:disabled{opacity:.5;cursor:not-allowed}.button-primary{background:var(--primary-color);color:#fff}.button-secondary{background:var(--surface-card);border-color:var(--surface-border);color:var(--text-color)}.state{padding:3rem 1rem;text-align:center;color:var(--text-color-secondary)}.empty i{font-size:2rem}.empty h2{color:var(--text-color);font-size:1.1rem}.notification-list{display:grid;gap:.75rem}.notification-card{display:flex;align-items:flex-start;gap:1rem;padding:1rem;border:1px solid var(--surface-border);border-radius:12px;background:var(--surface-card)}.notification-card.unread{border-color:var(--primary-color);background:color-mix(in srgb,var(--primary-color) 4%,var(--surface-card))}.notification-icon{width:2.5rem;height:2.5rem;display:grid;place-items:center;flex:none;border-radius:50%;background:var(--surface-ground);color:var(--primary-color)}.notification-body{flex:1;min-width:0}.notification-title-row{justify-content:space-between}.notification-body h2{margin:0;font-size:1rem;font-weight:700}.notification-body p{margin:.45rem 0;line-height:1.8;overflow-wrap:anywhere}.notification-actions{align-self:center}.icon-button{border:0;background:transparent;color:var(--text-color-secondary);padding:.5rem;border-radius:8px;cursor:pointer}.icon-button:hover{background:var(--surface-hover)}.icon-button.danger:hover{color:var(--red-500)}.pagination{justify-content:center;margin-top:1.5rem}.message-error{padding:.75rem 1rem;border-radius:8px;background:var(--red-50);color:var(--red-700);margin-bottom:1rem}@media(max-width:640px){.page-heading{align-items:flex-start}.notification-card{gap:.65rem;padding:.75rem}.notification-actions{flex-direction:column}}
 </style>
