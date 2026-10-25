@@ -45,6 +45,7 @@ Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, an
 - Website/customer inbox: `apps/website/src/pages/public/Notifications.vue` — same categorized inbox and response normalization for ordinary users.
 - Admin inbox: `apps/admin/src/pages/user/Notifications.vue` — same categorized inbox for staff, with the separate notification management/send page still available. Regression tests cover the inbox in all three apps.
 - Shared dashboard navigation includes notification preferences in both Company/Admin apps and exposes the admin send/monitor page only when the current app route exists and the user has the `notifications.send` permission. The Website header unread badge uses `endpoints.notifications.unreadCount` (`/settings/notifications/unread-count`) rather than the obsolete `/api/v1/notifications/unread-count` path.
+- When the inbox opens, the first visible notification is automatically selected in the reading pane and is marked as read; clicking another unread row marks that notification as read after the PATCH succeeds. The unread counter is fetched after initial selection so it reflects the persisted state.
 - Category/search filters operate on the currently loaded server page; global category filtering across all pages would require a backend query contract.
 - Company preferences: `apps/company/src/pages/user/NotificationPreferences.vue` — route `/notification-preferences`.
 - Admin preferences: `apps/admin/src/pages/user/NotificationPreferences.vue` — route `/notification-preferences`.
