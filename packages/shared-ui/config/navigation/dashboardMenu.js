@@ -118,6 +118,7 @@ export const dashboardMenu = [
     section: 'ارتباط با کاربران',
     items: [
       { title: 'ارسال و پایش اعلان‌ها', icon: 'pi pi-send', route: 'admin-notification-management', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], permission: 'notifications.send' },
+      { title: 'مدیریت پوشه‌های اعلان', icon: 'pi pi-folder-open', route: 'admin-notification-folders', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], permission: 'system_settings.manage' },
     ],
   },
   {
