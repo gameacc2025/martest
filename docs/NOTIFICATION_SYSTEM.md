@@ -71,3 +71,22 @@ The shared API client lives in `packages/api-client`; use it instead of adding p
 5. Verify all three frontend apps build if shared API contracts or routes change.
 6. If SMTP or a production worker is not available, state explicitly that live delivery was not tested.
 7. Update this document and `.ai/WORKLOG.md` when the implementation changes.
+
+
+## Notification folders (2026-10-25)
+
+The additive migration `20261025130000_notification_folders` introduces admin-managed
+folder definitions and notification-to-folder memberships. The fixed system folders
+are `INBOX` (دریافتی‌ها) and `SAVED` (ذخیره‌شده‌ها); system folders cannot be
+renamed, deactivated, or deleted through the admin API. New notifications are
+automatically associated with Inbox by a PostgreSQL trigger, and existing notifications
+are backfilled to Inbox by the migration.
+
+Custom folders have a scope of `ALL`, `WEBSITE`, `COMPANY`, or `ADMIN`, and can
+be disabled without deleting their memberships. Folder administration is restricted to
+`system_settings.manage` and is available at `/notification-folders` in the Admin
+app. The API is under `/api/v1/admin/notifications/folders`.
+
+Copy/move membership actions and user-facing folder filtering are intentionally the
+next phase; do not imply they are already available. Apply the migration through the
+project's reviewed Prisma migration deployment workflow before using the folder API.
