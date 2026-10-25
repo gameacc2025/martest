@@ -46,6 +46,18 @@ const trivialController = {
   },
   getDeliveryStatsCtrl: async (request, reply) => reply.code(200).send({ data: {} }),
   listDeliveriesCtrl: async (request, reply) => reply.code(200).send({ data: [], meta: { total: 0, totalPages: 1 } }),
+  listNotificationFoldersCtrl: async (request, reply) => {
+    hit.listNotificationFolders = true;
+    return reply.code(200).send({ data: [] });
+  },
+  createNotificationFolderCtrl: async (request, reply) => {
+    hit.createNotificationFolder = request.body;
+    return reply.code(201).send({ data: { id: 1, ...request.body } });
+  },
+  updateNotificationFolderCtrl: async (request, reply) => {
+    hit.updateNotificationFolder = { id: Number(request.params.id), body: request.body };
+    return reply.code(200).send({ data: { id: Number(request.params.id), ...request.body } });
+  },
 };
 injectMock('./admin.controller', trivialController);
 
@@ -205,5 +217,53 @@ test('PATCH /settings/product-review-threshold: SUPER_ADMIN bypasses permission 
   });
   assert.equal(res.statusCode, 200);
   assert.deepEqual(hit.updateReviewEditThreshold, { value: 7 });
+  await app.close();
+});
+
+
+test('GET /notifications/folders: requires system_settings.manage permission', async () => {
+  const app = await buildApp();
+  const allowed = await app.inject({
+    method: 'GET',
+    url: '/api/v1/admin/notifications/folders',
+    headers: userHeader(['system_settings.manage']),
+  });
+  assert.equal(allowed.statusCode, 200);
+  assert.equal(hit.listNotificationFolders, true);
+
+  const denied = await app.inject({
+    method: 'GET',
+    url: '/api/v1/admin/notifications/folders',
+    headers: userHeader(['users.read']),
+  });
+  assert.equal(denied.statusCode, 403);
+  await app.close();
+});
+
+test('POST /notifications/folders: validates and forwards a permitted create request', async () => {
+  const app = await buildApp();
+  const payload = { name: 'پیگیری', scope: 'COMPANY', sortOrder: 2 };
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/admin/notifications/folders',
+    headers: userHeader(['system_settings.manage']),
+    payload,
+  });
+  assert.equal(res.statusCode, 201);
+  assert.deepEqual(hit.createNotificationFolder, payload);
+  await app.close();
+});
+
+test('PATCH /notifications/folders/:id: validates and forwards a permitted update request', async () => {
+  const app = await buildApp();
+  const payload = { name: 'پیگیری‌های مهم', isActive: true };
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/admin/notifications/folders/3',
+    headers: userHeader(['system_settings.manage']),
+    payload,
+  });
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(hit.updateNotificationFolder, { id: 3, body: payload });
   await app.close();
 });
