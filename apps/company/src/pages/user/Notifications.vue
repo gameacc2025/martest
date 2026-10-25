@@ -34,6 +34,15 @@ const categoryDefinitions = [
   { id: 'other', label: 'سایر پیام‌ها', icon: 'pi-bell', matches: type => !type || !['PRODUCT_', 'INQUIRY_', 'COMPANY_', 'USER_', 'ACCOUNT_', 'AUTH_', 'ANNOUNCEMENT_', 'SYSTEM_'].some(prefix => type.startsWith(prefix)) },
 ]
 
+function normalizeNotificationPage(result) {
+  const data = Array.isArray(result) ? result
+    : Array.isArray(result?.data) ? result.data
+      : Array.isArray(result?.data?.data) ? result.data.data
+        : Array.isArray(result?.notifications) ? result.notifications : []
+  const meta = result?.meta || result?.data?.meta || result?.pagination || {}
+  return { data, meta }
+}
+
 function categoryFor(item) {
   const type = String(item?.type || '').toUpperCase()
   return categoryDefinitions.find(category => category.matches(type))?.id || 'other'
@@ -75,9 +84,10 @@ async function fetchNotifications() {
   loading.value = true
   try {
     const result = await apiGetPaginated(`${endpoints.settings.notifications}?page=${page.value}&limit=20`)
-    notifications.value = Array.isArray(result?.data) ? result.data : []
-    total.value = Number(result?.meta?.total ?? notifications.value.length)
-    totalPages.value = Math.max(1, Number(result?.meta?.totalPages || 1))
+    const normalized = normalizeNotificationPage(result)
+    notifications.value = normalized.data
+    total.value = Number(normalized.meta?.total ?? notifications.value.length)
+    totalPages.value = Math.max(1, Number(normalized.meta?.totalPages || 1))
     if (!notifications.value.some(item => item.id === selectedId.value)) {
       selectedId.value = notifications.value[0]?.id ?? null
     }
