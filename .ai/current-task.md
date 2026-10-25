@@ -1,17 +1,14 @@
 # Current Task / Agent Handoff
 
-## Active task — NOTIFICATIONS-INBOX-UX
-- **Status:** IN_PROGRESS
-- **Date:** 2026-10-25
-- **Objective:** Redesign the Company Portal notification inbox as an email-style inbox with folders, category filters, search, a message list, and a reading pane.
-- **Scope:** apps/company/src/pages/user/Notifications.vue plus this handoff and .ai/WORKLOG.md. Preserve existing API contracts and notification actions; no schema/backend changes.
-- **Observed behavior:** The current Company inbox renders a basic vertical list. The user reports that the unread count is visible but the page does not provide a useful message-browsing experience. Backend notification records include type, title, message, isRead, and createdAt.
-- **Plan:** Inspect current page/API/event catalog; build a responsive email-style layout with All, Unread, Read folders, event-based categories, search, selected-message reading pane, mark-read, mark-all-read, delete, and pagination while keeping Persian UI text and current design tokens.
-- **Verification plan:** Review the updated source and run Company Portal build/tests if a local checkout is available. GitHub-only edits cannot establish a local build result; mark checks NOT RUN if not executed.
-- **Push policy:** User requested the implementation in the current project workflow; write scoped commits directly to remote main using the connected GitHub repository tools, then re-fetch the committed file.
-- **Next action:** Implement and review the Company Portal inbox UI, then record exact verification and commit SHA.
+## Latest completed task — NOTIFICATIONS-INBOX-UX
+- **Status:** PARTIAL — UI implementation committed; runtime/build verification remains outstanding.
+- **Objective:** Redesign the Company Portal notification inbox as an email-style inbox.
+- **Implementation:** apps/company/src/pages/user/Notifications.vue now includes All/Unread/Read folders, event-type categories, search, a message list, a reading pane, read/delete actions, refresh, and pagination. Persian UI copy and existing API endpoints are preserved.
+- **Commit:** a244a9799745b86cf47ae9ce65d7ef6e93632955
+- **Documentation:** docs/NOTIFICATION_SYSTEM.md updated to describe the new inbox and its current-page category/search limitation.
+- **Verification:** Re-fetched the updated Vue file from GitHub and confirmed expected UI/actions/API endpoint strings are present. Build, tests, and browser interaction are NOT RUN because no local checkout/runtime was available in this session.
+- **Known limitation:** Category and text search filtering currently operate on the currently loaded server page (20 items), not all notifications across every page. Full-server filtering requires adding and testing query parameters in the backend API.
+- **Next action:** Pull main locally, run the Company Portal build/tests, and manually test folders, search, selected-message reading, read/unread counts, deletion, and pagination. Consider server-side category/search filters as a separate scoped task if needed.
 
-## Latest completed task
-- **ID:** AGENT-ENGLISH-COMMUNICATION
-- **Status:** DONE — the repository policy for coding agents is recorded on remote main.
-- **Note:** This repository rule applies to coding agents; it does not change the language of the user's conversation with ChatGPT.
+## Agent policy note
+The repository's English-only communication rule applies to coding agents working through command-line tools; ChatGPT conversation with the user remains in Persian as requested.
