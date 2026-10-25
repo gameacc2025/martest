@@ -97,3 +97,11 @@ Date: 2026-10-25
 Decision: All AI agents and coding assistants must communicate with the user in English regardless of the language used in the user's messages.
 Reason: The user explicitly requires consistent English communication across all models and agents.
 Impact: Plans, questions, progress updates, explanations, recommendations, and final reports are English. Product deliverables such as localized UI text or translations may use their required language, while explanations to the user remain English.
+
+
+---
+
+Date: 2026-10-25
+Decision: Notification folders must remain simple for end users: Saved is a fixed system folder and users cannot create or manage folders. Admin owns folder configuration, with options for system-wide availability or availability scoped to Website, Company Portal, or Admin.
+Reason: The user explicitly requested centralized admin control and wants to avoid the complexity of user-created folders.
+Impact: Future folder work must include admin controls and app-scope authorization. Copy adds a notification-folder association without removing the source association; Move changes the association without deleting the canonical notification. Read state belongs to the canonical notification, not to each folder association. The schema/API design and implementation remain pending separate user approval; do not change them during the read-state fix.
