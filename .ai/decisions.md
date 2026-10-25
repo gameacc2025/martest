@@ -81,3 +81,11 @@ Impact: CI now fails if a change drops repo-wide line coverage below 95%.
 If a legitimately hard-to-cover area lands (e.g. a new file with no tests
 yet), prefer writing the tests over lowering the gate; lowering it needs a
 new dated entry here saying why.
+
+
+---
+
+Date: 2026-10-25
+Decision: `main` is the only intended long-lived branch. All coding agents must read root `AGENTS.md` and `.ai/PROTOCOL.md`, claim work in `.ai/WORKLOG.md`, update durable project memory, verify changes, and record commit/push state before handoff.
+Reason: Multiple AI tools/agents need one consistent project context and should not create divergent long-lived branches or repeat work from missing conversation history.
+Impact: Do not create feature branches by default. Preserve user changes, coordinate overlapping tasks through WORKLOG, do not rewrite history, and do not delete a branch unless its work is confirmed integrated and deletion is authorized. The repository owner may still authorize temporary branches for a specific workflow.
