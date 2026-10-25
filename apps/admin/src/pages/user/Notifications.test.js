@@ -81,5 +81,13 @@ describe('Admin notification inbox', () => {
     expect(wrapper.text()).toContain('اطلاعیه‌ها')
     expect(wrapper.text()).toContain('محصولات')
     expect(wrapper.text()).toContain('استعلام‌ها')
+
+    // Legacy type:null notifications must be categorized by their text,
+    // not swallowed by the generic "other" category.
+    const categoryButtons = wrapper.findAll('.category-link')
+    expect(categoryButtons.map(button => button.text())).toContain('محصولات1')
+    await categoryButtons.find(button => button.text().includes('محصولات')).trigger('click')
+    expect(wrapper.findAll('.message-row')).toHaveLength(1)
+    expect(wrapper.find('.message-row').text()).toContain('وضعیت محصول تغییر کرد')
   })
 })
