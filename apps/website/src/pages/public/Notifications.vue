@@ -113,7 +113,7 @@ const activeCategoryLabel = computed(() => {
 onMounted(async () => {
   // Load server-managed folders before displaying messages.
   await fetchUserFolders()
-  // Keep the unread counter in sync after the initially opened message is marked read.
+  // Load independent folder totals and the global unread count.
   await fetchNotifications()
   await fetchUnreadCount()
 })
