@@ -149,7 +149,7 @@ const EVENT_CATALOG = {
     channels: { IN_APP: true, EMAIL: true, SMS: false },
     template: ({ title, message }) => ({
       title: String(title || 'اطلاعیه جدید').trim(),
-      message: String(message || '').trim(),
+      message: String(message || 'اطلاعیه جدید از مدیریت').trim(),
       data: { source: 'admin' },
     }),
   },
