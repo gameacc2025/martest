@@ -100,8 +100,10 @@ const mockPrisma = {
   subcategory: { findUnique: async () => fx.subcategory },
   company: { findFirst: async () => fx.company },
   productPriceTier: {
-    findMany: async () => fx.priceTiers,
+    findMany: async (args) => { recordCall('productPriceTier.findMany', args); return fx.priceTiers; },
     create: async (args) => { recordCall('productPriceTier.create', args); return { id: 99, ...args.data }; },
+    createMany: async (args) => { recordCall('productPriceTier.createMany', args); return { count: args.data.length }; },
+    deleteMany: async (args) => { recordCall('productPriceTier.deleteMany', args); return { count: fx.priceTiers.length }; },
     findFirst: async () => fx.existingTier,
     update: async (args) => { recordCall('productPriceTier.update', args); return { id: args.where?.id, ...args.data }; },
     delete: async (args) => { recordCall('productPriceTier.delete', args); return { id: args.where?.id }; },
@@ -1127,6 +1129,41 @@ test('updateProduct: SUPER_ADMIN may transfer the product to another company', a
   fx.product = editableProduct();
   await service.updateProduct(1, { companyId: 55 }, superAdmin);
   assert.equal(calls['product.update'].at(-1).data.companyId, 55);
+});
+
+test('updateProduct: replaces changed price tiers atomically and records the price audit', async () => {
+  fx.product = editableProduct({ status: 'DRAFT' });
+  fx.priceTiers = [{ id: 1, productId: 1, minQuantity: 1, maxQuantity: null, price: 100, unit: null }];
+
+  await service.updateProduct(1, {
+    title: 'Updated',
+    priceTiers: [
+      { minQuantity: 1, price: 125 },
+      { minQuantity: 10, price: 100, unit: 'box' },
+    ],
+  }, companyA);
+
+  assert.equal(calls['productPriceTier.deleteMany'].at(-1).where.productId, 1);
+  const created = calls['productPriceTier.createMany'].at(-1).data;
+  assert.equal(created.length, 2);
+  assert.equal(created[0].price, 125);
+  assert.equal(created[1].minQuantity, 10);
+  assert.equal(created[1].productId, 1);
+  assert.equal(calls['productActivityLog.create'].some((call) => call.data.action === 'PRICE_TIER_UPDATE'), true);
+  assert.equal(calls['productStatusHistory.create'].some((call) => call.data.comment === 'تغییر ردیف‌های قیمت محصول'), true);
+});
+
+test('updateProduct: does not recreate unchanged price tiers', async () => {
+  fx.product = editableProduct({ status: 'DRAFT' });
+  fx.priceTiers = [{ id: 1, productId: 1, minQuantity: 1, maxQuantity: null, price: '100', unit: null }];
+
+  await service.updateProduct(1, {
+    title: 'Updated',
+    priceTiers: [{ minQuantity: 1, price: 100 }],
+  }, companyA);
+
+  assert.equal((calls['productPriceTier.deleteMany'] || []).length, 0);
+  assert.equal((calls['productPriceTier.createMany'] || []).length, 0);
 });
 
 test('updateProduct: a company user may not transfer the product', async () => {
