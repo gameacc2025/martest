@@ -165,7 +165,6 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  folderMemberships NotificationFolderMembership[]
 
   @@index([userId])
   @@index([token])
@@ -598,6 +597,7 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderMemberships NotificationFolderMembership[]
 
   @@index([userId])
   @@index([isRead])
