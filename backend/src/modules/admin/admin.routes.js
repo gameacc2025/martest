@@ -75,6 +75,45 @@ async function adminRoutes(fastify) {
     },
   }, ctrl.sendNotificationCtrl);
 
+  // ── Admin-managed notification folders ───────────────────────
+  fastify.get('/notifications/folders', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('system_settings.manage')],
+    schema: { summary: 'List notification folders', tags: ['Notifications'] },
+  }, ctrl.listNotificationFoldersCtrl);
+
+  fastify.post('/notifications/folders', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('system_settings.manage')],
+    schema: {
+      summary: 'Create a notification folder', tags: ['Notifications'],
+      body: { type: 'object', required: ['name', 'scope'], additionalProperties: false,
+        properties: {
+          name: { type: 'string', minLength: 2, maxLength: 60 },
+          scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+          sortOrder: { type: 'integer', minimum: 0, maximum: 10000 },
+        },
+      },
+    },
+  }, ctrl.createNotificationFolderCtrl);
+
+  fastify.patch('/notifications/folders/:id', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('system_settings.manage')],
+    schema: {
+      summary: 'Update a notification folder', tags: ['Notifications'],
+      params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      body: { type: 'object', minProperties: 1, additionalProperties: false,
+        properties: {
+          name: { type: 'string', minLength: 2, maxLength: 60 },
+          scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+          sortOrder: { type: 'integer', minimum: 0, maximum: 10000 },
+          isActive: { type: 'boolean' },
+        },
+      },
+    },
+  }, ctrl.updateNotificationFolderCtrl);
+
   // ── Notification delivery monitoring ──────────────────────────
   fastify.get('/notifications/delivery-stats', {
     onRequest: [fastify.authenticate],
