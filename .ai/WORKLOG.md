@@ -26,3 +26,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Changes were written directly to the remote `main` branch and verified there.
 - **Risks / open questions:** The available GitHub connector does not expose a branch-delete action. Therefore `feat/notifications-complete` was NOT deleted. The PR was squash-merged earlier; after confirming no one needs the feature branch locally, delete it through GitHub UI or with `git push origin --delete feat/notifications-complete`.
 - **Next action:** Sync local Windows checkout with `origin/main` after checking for uncommitted changes; then delete the obsolete feature branch if desired.
+
+- **Additional alignment:** Prepended a mandatory policy notice to legacy `.ai/PROMPTS.md` so old phase prompts cannot silently override the new root agent policy. Commit: `f8fcf67`.
+- **Final branch check:** `main` and `feat/notifications-complete` are still listed by GitHub. The branch-deletion action is not exposed by the connected GitHub tool, so the request to leave only `main` is not fully completed yet.
+- **Latest content commit before this worklog update:** `f8fcf671bdfe9389453c605823b9c0bb238bec03`.
