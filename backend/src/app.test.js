@@ -99,7 +99,7 @@ const protectedProbes = [
   { method: 'GET', url: '/api/v1/companies' },
   { method: 'GET', url: '/api/v1/products/my-products' },
   { method: 'GET', url: '/api/v1/inquiries' },
-  { method: 'GET', url: '/api/v1/notifications' },
+  { method: 'GET', url: '/api/v1/settings/notifications' },
   { method: 'GET', url: '/api/v1/auth/me' },
 ];
 
