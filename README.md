@@ -1,5 +1,8 @@
 # Telecom Marketplace
 
+
+**Language rule for agents:** Always respond to the user in English, regardless of the language they use. Only explicitly requested localized deliverable content may use another language; agent explanations and reports remain English.
+
 A Persian B2B telecom equipment marketplace built as a pnpm monorepo with three Vue frontend applications and a shared Fastify/Prisma backend.
 
 ## Start here — mandatory for every AI agent
