@@ -14,7 +14,7 @@ async function notificationRoutes(fastify) {
   fastify.get('/unread-count', ctrl.getUnreadCount);
   fastify.get('/folders', ctrl.listFolders);
   fastify.post('/:id/folders', {
-    schema: { body: { type: 'object', required: ['folderId', 'action'], additionalProperties: false, properties: { folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 } } } },
+    schema: { body: { type: 'object', required: ['folderId', 'action', 'app'], additionalProperties: false, properties: { folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 }, app: { type: 'string', enum: ['WEBSITE', 'COMPANY', 'ADMIN'] } } } },
   }, ctrl.changeFolder);
   fastify.patch('/:id/read', ctrl.markAsRead);
   fastify.patch('/read-all', ctrl.markAllAsRead);
