@@ -79,4 +79,19 @@ async function listDeliveriesCtrl(request, reply) {
   return reply.send({ data: result.data, meta: result.meta });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl };
+async function listNotificationFoldersCtrl(request, reply) {
+  const folders = await adminService.listNotificationFolders();
+  return reply.send({ data: folders });
+}
+
+async function createNotificationFolderCtrl(request, reply) {
+  const folder = await adminService.createNotificationFolder(request.body);
+  return reply.code(201).send({ data: folder });
+}
+
+async function updateNotificationFolderCtrl(request, reply) {
+  const folder = await adminService.updateNotificationFolder(Number(request.params.id), request.body);
+  return reply.send({ data: folder });
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl, listNotificationFoldersCtrl, createNotificationFolderCtrl, updateNotificationFolderCtrl };
