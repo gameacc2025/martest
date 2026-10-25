@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import Notifications from './Notifications.vue'
+import Button from 'primevue/button'
 import { apiGet, apiGetPaginated, apiPatch, apiPost } from '@telecom/shared-core/http/apiClient'
 
 vi.mock('@telecom/shared-core/http/apiClient', () => ({
@@ -119,6 +120,26 @@ describe('Company notification inbox', () => {
     await flushPromises()
     expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).not.toContain('unread')
+  })
+
+  it('sends selected notification IDs to the bulk read-state endpoint', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+
+    await wrapper.findAll('.row-checkbox')[1].setValue(true)
+    await flushPromises()
+    const markReadButton = wrapper.findAllComponents(Button)
+      .find(component => component.props('label') === 'خوانده‌شده')
+    expect(markReadButton).toBeTruthy()
+    markReadButton.vm.$emit('click')
+    await flushPromises()
+
+    expect(apiPost).toHaveBeenCalledWith('/settings/notifications/bulk-read-state', {
+      ids: [7],
+      isRead: true,
+    })
   })
 
 })
