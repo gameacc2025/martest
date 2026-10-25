@@ -102,8 +102,6 @@ const mockPrisma = {
   productPriceTier: {
     findMany: async (args) => { recordCall('productPriceTier.findMany', args); return fx.priceTiers; },
     create: async (args) => { recordCall('productPriceTier.create', args); return { id: 99, ...args.data }; },
-    createMany: async (args) => { recordCall('productPriceTier.createMany', args); return { count: args.data.length }; },
-    deleteMany: async (args) => { recordCall('productPriceTier.deleteMany', args); return { count: fx.priceTiers.length }; },
     findFirst: async () => fx.existingTier,
     update: async (args) => { recordCall('productPriceTier.update', args); return { id: args.where?.id, ...args.data }; },
     delete: async (args) => { recordCall('productPriceTier.delete', args); return { id: args.where?.id }; },
