@@ -15,13 +15,13 @@
 - **Next:** Check CI for the latest counter/double-click follow-up, then pull `main` locally and verify independent folder counts, double-click read, selected bulk read/unread, mark all read, and bulk delete.
 
 
-## In progress — Product lifecycle audit (#2)
+## In progress — Product lifecycle audit (#2; catalog follow-up #3)
 
 - **Task ID:** PRODUCT-LIFECYCLE-AUDIT-2026-10-25
 - **Status:** IN_PROGRESS — remote inspection and initial findings only; no product code changed yet.
-- **Issue:** https://github.com/gameacc2025/martest/issues/2
+- **Issues:** https://github.com/gameacc2025/martest/issues/2 (lifecycle audit); https://github.com/gameacc2025/martest/issues/3 (catalog query/filter contract)
 - **Scope:** Backend product service/controller/routes/tests; Company/Admin product forms and lists; Website listing/detail/store; product media/pricing/specifications; roadmap and AI-agent docs.
 - **Initial repository evidence:** `main` HEAD observed at `6e19a2e6cb248273d4f0fd4115d722eda41ee504`. No open issues were returned before this task; issue #2 now tracks the audit. The current remote implementation includes a review-on-edit threshold and a `myProducts` controller branch intended to avoid scoping SUPER_ADMIN to a company.
-- **Potential concerns to verify, not yet confirmed defects:** frontend action availability versus server permissions; public list/detail/featured response shape and image URL resolution; status transitions including rejected-product resubmission and post-approval edits; coverage gaps around authorization/ownership and media.
+- **Findings:** public list/detail source enforces PUBLISHED + PUBLIC for public callers; lifecycle transitions and review-on-edit policy are defined in the service; SUPER_ADMIN company-scope branch exists in `myProducts`. Catalog contract mismatch is tracked in #3: homepage labels first recent products as featured/best sellers, while list endpoint currently only consumes search/company/category/status; frontend sends price/stock/sort/featured parameters that the controller/service do not apply. The currently routed `/products` page is `ProductListing.vue`; `Products.vue` may be legacy and must not be edited without confirming use.
 - **Verification available so far:** GitHub source inspection only. Local `git status`, runtime tests, builds, and browser checks are NOT RUN because no local checkout/runtime is available in this session.
-- **Next:** Complete the cross-layer trace, inspect CI and latest product-specific tests/docs, record confirmed findings in issue #2, and implement only changes that can be safely verified. Obtain approval before consequential permission/schema/business-rule changes.
+- **Next:** Continue tracing product lifecycle permissions and media persistence; inspect latest CI and product-specific tests; use a local checkout to reproduce and implement the catalog contract work in #3. Do not claim runtime verification from remote source inspection. Obtain approval before consequential permission/schema/business-rule changes.
