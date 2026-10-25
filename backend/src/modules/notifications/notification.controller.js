@@ -15,6 +15,7 @@ async function list(request, reply) {
     page: Number(page),
     limit: Number(limit),
     unreadOnly: unreadOnly === 'true',
+    folderId: request.query.folderId ? Number(request.query.folderId) : null,
   });
   return reply.send(result);
 }
@@ -55,7 +56,25 @@ async function remove(request, reply) {
   return reply.send({ success: true });
 }
 
+async function listFolders(request, reply) {
+  const data = await notificationService.getUserFolders(String(request.query.app || '').toUpperCase());
+  return reply.send({ data });
+}
+
+async function changeFolder(request, reply) {
+  const result = await notificationService.changeNotificationFolder(
+    request.user.id,
+    Number(request.params.id),
+    Number(request.body.folderId),
+    request.body.action,
+    request.body.sourceFolderId === undefined ? null : Number(request.body.sourceFolderId),
+  );
+  return reply.send(result);
+}
+
 module.exports = {
+  listFolders,
+  changeFolder,
   list,
   getUnreadCount,
   markAsRead,
