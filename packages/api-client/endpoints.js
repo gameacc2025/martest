@@ -119,6 +119,8 @@ export const endpoints = {
   // Notifications (user-facing inbox and preferences)
   notifications: {
     list: '/settings/notifications',
+    folders: (app) => `/settings/notifications/folders?app=${app}`,
+    changeFolder: (id) => `/settings/notifications/${id}/folders`,
     unreadCount: '/settings/notifications/unread-count',
     read: (id) => `/settings/notifications/${id}/read`,
     readAll: '/settings/notifications/read-all',
