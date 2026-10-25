@@ -148,3 +148,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit trail:** schema `34402cf`; migration `32271e0` then trigger follow-up `c23de53`; routes `f03001c`; controller `4964b59`; service `d9da5b6`; API endpoints `133942c`; Admin route `835c100`; Admin page `ee7bff1`; navigation `418d839`; docs `5e83c0c`.
 - **Risks / open questions:** Apply the migration via the approved Prisma deployment workflow before using the API. Copy/move and user-facing folder filtering are NOT implemented yet; those belong to stage 3. The current folder model is shared globally with app scopes; INBOX/SAVED are shared system definitions and per-notification memberships are attached to the canonical Notification.
 - **Next action:** Verify CI/builds and Prisma migration in the local/dev environment; then implement stage 3 folder membership operations (copy/move/save) with ownership and scope checks.
+
+
+## 2026-10-25 — NOTIFICATION-FOLDERS-ACTIONS — Stage 3 folder UI and copy/move
+- **Status:** IMPLEMENTED ON `main`; CI verification pending.
+- **Changes:** User-facing API lists app-scoped active folders, filters notifications by folder membership, and supports copy/move using canonical notification IDs. All three inbox pages now show admin-managed folders and actions for save, copy, and move.
+- **Security:** Endpoints require authentication; service checks notification ownership, destination scope/active state, and source membership/scope. Move uses a DB transaction. Inactive folders remain valid as a source to allow users to move messages out.
+- **Tests:** Added route wiring tests for folder list and copy/move route; adjusted controller options to keep previous list contract stable. CI runs for latest commits are in progress; do not claim green until checked.
+- **Migration:** Not applied to a live/dev DB. Must apply via reviewed Prisma workflow before testing runtime.
+- **Next:** Confirm CI success, inspect any remaining failures, and run migration/app smoke tests in a controlled environment.
