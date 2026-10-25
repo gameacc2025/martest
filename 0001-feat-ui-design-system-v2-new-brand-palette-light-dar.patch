@@ -1,0 +1,471 @@
+From 97ad04da36ddf9825847554537fc97fefdde3794 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 25 Oct 2026 20:14:56 +0000
+Subject: [PATCH 1/2] feat(ui): design system v2 - new brand palette,
+ light/dark preset, navy sidebar, BrandMark
+
+- PrimeVue preset: brand ramp around #01bec2, deep-blue #003a54 secondary,
+  cool neutral surfaces, a real dark scheme, visible focus ring, calmer
+  component shapes (buttons, cards, tags, datatable header).
+- Contrast-safe action color: white on #01bec2 is 2.30:1 (fails AA), so the
+  light-theme action shade is #00797f (white 5.20:1); dark theme keeps bright
+  teal with deep-blue text (5.28:1).
+- tokens.scss: brand/hero/sidebar tokens, navy-tinted shadows, larger radii.
+- DashboardSidebar: deep-blue shell via tokens, translucent active state.
+- New BrandMark SVG logo component.
+---
+ .../assets/design-system/tokens.scss          |  40 ++++-
+ .../shared-ui/components/common/BrandMark.vue |  43 +++++
+ .../components/dashboard/DashboardSidebar.vue |  47 +++---
+ packages/shared-ui/theme.js                   | 154 +++++++++++++++---
+ 4 files changed, 230 insertions(+), 54 deletions(-)
+ create mode 100644 packages/shared-ui/components/common/BrandMark.vue
+
+diff --git a/packages/shared-ui/assets/design-system/tokens.scss b/packages/shared-ui/assets/design-system/tokens.scss
+index a565a30..1aa3032 100644
+--- a/packages/shared-ui/assets/design-system/tokens.scss
++++ b/packages/shared-ui/assets/design-system/tokens.scss
+@@ -61,6 +61,27 @@
+   --ds-color-info-contrast: var(--p-primary-contrast-color);
+   --ds-color-info-soft: var(--p-primary-50);
+ 
++  /* --------------------------------------------------------
++     BRAND + SHELL (constant brand surfaces; flipped in dark below)
++     Primary brand #01bec2 · secondary deep blue #003a54.
++     Use these for hero/sidebar/footer surfaces instead of raw hex.
++     -------------------------------------------------------- */
++  --ds-brand: #01bec2;
++  --ds-navy: #003a54;
++  --ds-petrol: #004d6f;
++  --ds-on-navy: #ffffff;
++  --ds-on-navy-muted: #b9dbe6;
++  --ds-hero-gradient: linear-gradient(135deg, #003a54 0%, #004d6f 100%);
++
++  --ds-sidebar-bg: #003a54;
++  --ds-sidebar-border: rgba(255, 255, 255, 0.08);
++  --ds-sidebar-fg: #cfe6ee;          /* 9.35:1 on #003a54 */
++  --ds-sidebar-fg-strong: #ffffff;
++  --ds-sidebar-muted: #9fc3d1;       /* 6.46:1 on #003a54 */
++  --ds-sidebar-hover: rgba(255, 255, 255, 0.07);
++  --ds-sidebar-active-bg: rgba(1, 190, 194, 0.18);
++  --ds-sidebar-accent: #01bec2;
++
+   /* --------------------------------------------------------
+      TYPOGRAPHY SCALE (modular, ~1.2 ratio)
+      -------------------------------------------------------- */
+@@ -102,20 +123,21 @@
+      BORDER RADIUS
+      -------------------------------------------------------- */
+   --ds-radius-sm: 6px;
+-  --ds-radius-md: var(--content-border-radius, 8px);
+-  --ds-radius-lg: 12px;
+-  --ds-radius-xl: 16px;
++  --ds-radius-md: var(--content-border-radius, 10px);
++  --ds-radius-lg: 14px;
++  --ds-radius-xl: 18px;
+   --ds-radius-pill: 999px;
+   --ds-radius-circle: 50%;
+ 
+   /* --------------------------------------------------------
+      SHADOW SYSTEM (elevation)
+      -------------------------------------------------------- */
+-  --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+-  --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+-  --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+-  --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+-  --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
++  /* Navy-tinted so elevation reads as part of the brand, not neutral grey. */
++  --ds-shadow-xs: 0 1px 2px rgba(0, 58, 84, 0.06);
++  --ds-shadow-sm: 0 1px 3px rgba(0, 58, 84, 0.08), 0 1px 2px rgba(0, 58, 84, 0.04);
++  --ds-shadow-md: 0 4px 12px rgba(0, 58, 84, 0.09);
++  --ds-shadow-lg: 0 8px 24px rgba(0, 58, 84, 0.13);
++  --ds-shadow-xl: 0 20px 40px rgba(0, 58, 84, 0.16);
+ 
+   /* --------------------------------------------------------
+      MOTION
+@@ -141,6 +163,8 @@
+    need to soften the elevation shadows for dark surfaces.
+    ------------------------------------------------------------ */
+ :root.app-dark {
++  --ds-hero-gradient: linear-gradient(135deg, #021824 0%, #003a54 100%);
++  --ds-sidebar-bg: #021824;
+   --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+   --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
+diff --git a/packages/shared-ui/components/common/BrandMark.vue b/packages/shared-ui/components/common/BrandMark.vue
+new file mode 100644
+index 0000000..a317755
+--- /dev/null
++++ b/packages/shared-ui/components/common/BrandMark.vue
+@@ -0,0 +1,43 @@
++<script setup>
++/**
++ * BrandMark — the product logo mark (teal rounded square, deep-blue signal glyph).
++ *
++ * Purely presentational and decorative: the visible product name next to it
++ * carries the accessible text, so the SVG is hidden from assistive tech.
++ * Colors are the fixed brand pair (#01bec2 primary, #003a54 secondary) and do
++ * not change with the light/dark theme, because the logo must stay recognisable.
++ *
++ * @prop {number|string} size - Rendered width/height in px (default 32).
++ */
++defineProps({
++  size: { type: [Number, String], default: 32 }
++})
++</script>
++
++<template>
++  <svg
++    class="brand-mark"
++    :width="size"
++    :height="size"
++    viewBox="0 0 32 32"
++    aria-hidden="true"
++    focusable="false"
++  >
++    <rect width="32" height="32" rx="9" fill="#01bec2" />
++    <path
++      d="M9 20.5a9 9 0 0 1 14 0M12.5 17a4.5 4.5 0 0 1 7 0"
++      fill="none"
++      stroke="#003a54"
++      stroke-width="2.4"
++      stroke-linecap="round"
++    />
++    <circle cx="16" cy="23.5" r="1.8" fill="#003a54" />
++  </svg>
++</template>
++
++<style scoped>
++.brand-mark {
++  flex-shrink: 0;
++  display: block;
++}
++</style>
+diff --git a/packages/shared-ui/components/dashboard/DashboardSidebar.vue b/packages/shared-ui/components/dashboard/DashboardSidebar.vue
+index 60f2d2c..7ae274f 100644
+--- a/packages/shared-ui/components/dashboard/DashboardSidebar.vue
++++ b/packages/shared-ui/components/dashboard/DashboardSidebar.vue
+@@ -1,4 +1,5 @@
+ <script setup>
++import BrandMark from '../common/BrandMark.vue'
+ /**
+  * DashboardSidebar — the single, reusable enterprise sidebar.
+  *
+@@ -107,7 +108,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+     <!-- Brand + collapse button -->
+     <div class="dash-sidebar-brand">
+       <div class="dash-sidebar-brand-main">
+-        <i class="pi pi-wifi dash-sidebar-brand-icon"></i>
++        <BrandMark class="dash-sidebar-brand-icon" :size="32" />
+         <span class="dash-sidebar-brand-text">Telecom Market</span>
+       </div>
+       <button
+@@ -242,8 +243,9 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+   flex-direction: column;
+   width: var(--dash-sidebar-expanded);
+   height: 100%;
+-  background: var(--surface-card);
+-  border-inline-end: 1px solid var(--surface-border);
++  background: var(--ds-sidebar-bg);
++  color: var(--ds-sidebar-fg);
++  border-inline-end: 1px solid var(--ds-sidebar-border);
+   overflow-x: hidden;
+   overflow-y: auto;
+   transition: width 0.25s ease;
+@@ -257,10 +259,10 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+   gap: 0.5rem;
+   padding: 0 1rem;
+   height: var(--dash-header-height, 4rem);
+-  border-bottom: 1px solid var(--surface-border);
++  border-bottom: 1px solid var(--ds-sidebar-border);
+   position: sticky;
+   top: 0;
+-  background: var(--surface-card);
++  background: var(--ds-sidebar-bg);
+   z-index: 1;
+ }
+ 
+@@ -272,15 +274,13 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+ }
+ 
+ .dash-sidebar-brand-icon {
+-  font-size: 1.4rem;
+-  color: var(--primary-color);
+   flex-shrink: 0;
+ }
+ 
+ .dash-sidebar-brand-text {
+   font-weight: 700;
+   font-size: 1rem;
+-  color: var(--text-color);
++  color: var(--ds-sidebar-fg-strong);
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+@@ -296,14 +296,14 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+   border: none;
+   background: transparent;
+   border-radius: var(--content-border-radius, 8px);
+-  color: var(--text-color-secondary);
++  color: var(--ds-sidebar-muted);
+   cursor: pointer;
+   transition: background-color 0.2s;
+ }
+ 
+ .dash-sidebar-collapse-btn:hover {
+-  background: var(--surface-hover);
+-  color: var(--text-color);
++  background: var(--ds-sidebar-hover);
++  color: var(--ds-sidebar-fg-strong);
+ }
+ 
+ /* ---- Nav ---- */
+@@ -317,7 +317,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+   font-weight: 700;
+   letter-spacing: 0.03em;
+   text-transform: uppercase;
+-  color: var(--text-color-secondary);
++  color: var(--ds-sidebar-muted);
+   white-space: nowrap;
+   opacity: 1;
+   transition: opacity 0.2s;
+@@ -342,8 +342,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+   padding: 0.6rem 0.75rem;
+   border: none;
+   background: transparent;
+-  border-radius: var(--content-border-radius, 8px);
+-  color: var(--text-color-secondary);
++  border-radius: var(--content-border-radius, 10px);
++  color: var(--ds-sidebar-fg);
+   font-size: 0.9rem;
+   font-weight: 500;
+   font-family: inherit;
+@@ -354,8 +354,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+ }
+ 
+ .dash-sidebar-link:hover {
+-  background: var(--surface-hover);
+-  color: var(--text-color);
++  background: var(--ds-sidebar-hover);
++  color: var(--ds-sidebar-fg-strong);
+ }
+ 
+ /* Subtle inward nudge on hover (RTL-safe, expanded mode only). */
+@@ -364,14 +364,19 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+ }
+ 
+ 
++/* Active item: translucent brand wash + white text + brand-colored icon (never color alone: the bar marks it too). */
+ .dash-sidebar-link--active {
+-  background: var(--primary-color);
+-  color: var(--primary-contrast-color);
++  background: var(--ds-sidebar-active-bg);
++  color: var(--ds-sidebar-fg-strong);
++}
++
++.dash-sidebar-link--active .dash-sidebar-link-icon {
++  color: var(--ds-sidebar-accent);
+ }
+ 
+ .dash-sidebar-link--active:hover {
+-  background: var(--primary-color);
+-  color: var(--primary-contrast-color);
++  background: var(--ds-sidebar-active-bg);
++  color: var(--ds-sidebar-fg-strong);
+ }
+ 
+ /* Active indicator bar (inline-start edge) */
+@@ -383,7 +388,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
+   width: 3px;
+   height: 60%;
+   border-radius: 0 3px 3px 0;
+-  background: var(--primary-color);
++  background: var(--ds-sidebar-accent);
+ }
+ 
+ .dash-sidebar-link-icon {
+diff --git a/packages/shared-ui/theme.js b/packages/shared-ui/theme.js
+index 5cc144a..bbc8025 100644
+--- a/packages/shared-ui/theme.js
++++ b/packages/shared-ui/theme.js
+@@ -1,48 +1,152 @@
+ /**
+- * @telecom/shared-ui — PrimeVue Theme
++ * @telecom/shared-ui — PrimeVue Theme (design system v2)
+  *
+- * Telecom Market brand preset for all apps.
+- * All three apps import this to share the same visual identity.
++ * One preset shared by website, company and admin apps. Every visual decision
++ * (palette, surfaces, focus ring, component shape) lives here or in
++ * assets/design-system/tokens.scss; pages must not hardcode brand colors.
++ *
++ * Brand palette
++ *   Primary (brand)  #01bec2  logo, icons, indicators, focus ring in dark mode
++ *   Secondary (deep) #003a54  hero/sidebar surfaces, headings in light mode
++ *   Petrol           #004d6f  pressed states, footer
++ *   Text on teal     #0a6a78  links / text that sits on light surfaces
++ *
++ * ACCESSIBILITY RULE (WCAG 2.1 AA, verified numerically):
++ *   white on #01bec2 is only 2.30:1 and FAILS. Therefore the light-theme
++ *   *action* color (buttons, links, checked states) is the deeper shade
++ *   {primary.700} #00797f (white 5.20:1, 4.90:1 on the #f4f9fb page).
++ *   In the dark theme the bright brand teal is used with deep-blue text
++ *   (#003a54 on #01bec2 = 5.28:1; #01bec2 on #08293a = 6.59:1).
++ *   To change the action color later, edit ONLY the two `primary` blocks below
++ *   and re-check contrast.
+  */
+ import { definePreset } from '@primevue/themes'
+ import Lara from '@primevue/themes/lara'
+ 
+ const TelecomPreset = definePreset(Lara, {
+   semantic: {
++    // Brand ramp built around #01bec2 (500). 700 is the light-theme action shade.
+     primary: {
+-      50: '#eafcff',
+-      100: '#c9f6fb',
+-      200: '#a2eef6',
+-      300: '#6fe4f2',
+-      400: '#48d9f0',
+-      500: '#0dafbe',
+-      600: '#01bec2',
+-      700: '#0a8a99',
++      50: '#e8fafb',
++      100: '#c6f3f5',
++      200: '#93e8eb',
++      300: '#55dbdf',
++      400: '#1ecbd0',
++      500: '#01bec2',
++      600: '#00a3a8',
++      700: '#00797f',
+       800: '#0a6a78',
+       900: '#004d6f',
+       950: '#003a54'
+     },
++    // Slightly softer corners than the stock Lara template: calmer, more "enterprise".
++    formField: { borderRadius: '10px' },
++    content: { borderRadius: '10px' },
++    // Lara ships an invisible focus ring (width 0). A visible ring is mandatory
++    // for keyboard users (WCAG 2.4.7).
++    focusRing: { width: '2px', style: 'solid', color: '{primary.color}', offset: '2px' },
+     colorScheme: {
+       light: {
+         primary: {
+-          color: '#01bec2',
++          color: '{primary.700}',
+           contrastColor: '#ffffff',
+-          hoverColor: '#0dafbe',
+-          activeColor: '#0a8a99'
++          hoverColor: '{primary.800}',
++          activeColor: '{primary.900}'
++        },
++        highlight: {
++          background: '#def5fb',
++          focusBackground: '#c6edf6',
++          color: '#0a6a78',
++          focusColor: '#004d6f'
++        },
++        // Cool, blue-tinted neutral ramp. 200 = hairline border, 600 = secondary text.
++        surface: {
++          0: '#ffffff',
++          50: '#f9fcfd',
++          100: '#f4f9fb',
++          200: '#d5e6ed',
++          300: '#b9d3de',
++          400: '#8fb0bf',
++          500: '#6b8c9b',
++          600: '#476a79',
++          700: '#2c5062',
++          800: '#16435a',
++          900: '#003a54',
++          950: '#022a3d'
++        },
++        text: {
++          color: '#003a54',
++          hoverColor: '#022a3d',
++          mutedColor: '#476a79',
++          hoverMutedColor: '#2c5062'
++        },
++        formField: {
++          // 3:1 against white for the control boundary (WCAG 1.4.11).
++          borderColor: '{surface.500}',
++          placeholderColor: '{surface.600}'
++        }
++      },
++      dark: {
++        primary: {
++          color: '{primary.500}',
++          contrastColor: '#003a54',
++          hoverColor: '{primary.400}',
++          activeColor: '{primary.300}'
+         },
++        highlight: {
++          background: 'rgba(1, 190, 194, 0.16)',
++          focusBackground: 'rgba(1, 190, 194, 0.24)',
++          color: '{primary.300}',
++          focusColor: '{primary.200}'
++        },
++        // page #04202e (950), card #08293a (900), hover #0c3347 (800), border #16495f (700)
+         surface: {
+           0: '#ffffff',
+-          50: '#f7fbfe',
+-          100: '#def5fb',
+-          200: '#c9edf6',
+-          300: '#a9dfec',
+-          400: '#7cc6d8',
+-          500: '#52798a',
+-          600: '#3f6675',
+-          700: '#2f505c',
+-          800: '#1f3944',
+-          900: '#12262e',
+-          950: '#0a181e'
++          50: '#e8f4f8',
++          100: '#cfe6ee',
++          200: '#b0d0dc',
++          300: '#8fb5c5',
++          400: '#6d98ac',
++          500: '#4f7f95',
++          600: '#2f5f77',
++          700: '#16495f',
++          800: '#0c3347',
++          900: '#08293a',
++          950: '#04202e'
++        },
++        text: {
++          color: '#e8f4f8',
++          hoverColor: '#ffffff',
++          mutedColor: '#9fc3d1',
++          hoverMutedColor: '#cfe6ee'
++        }
++      }
++    }
++  },
++  components: {
++    button: {
++      root: {
++        borderRadius: '10px',
++        paddingX: '1.1rem',
++        label: { fontWeight: '600' }
++      }
++    },
++    card: {
++      root: {
++        borderRadius: '14px',
++        // Navy-tinted elevation instead of neutral black: reads as one family with the brand.
++        shadow: '0 1px 2px rgba(0, 58, 84, 0.06), 0 6px 16px rgba(0, 58, 84, 0.07)'
++      }
++    },
++    tag: {
++      root: { fontSize: '0.8125rem', fontWeight: '600' }
++    },
++    datatable: {
++      colorScheme: {
++        light: {
++          header: { background: '{surface.100}' },
++          headerCell: { background: '{surface.100}', hoverBackground: '{surface.200}', color: '{text.muted.color}' },
++          row: { stripedBackground: '{surface.50}' }
+         }
+       }
+     }
+-- 
+2.43.0
+

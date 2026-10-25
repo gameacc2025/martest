@@ -1,0 +1,49 @@
+From cfc8bb3f2a691fe619c416bcefed2ffbf2deac74 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 25 Oct 2026 20:15:19 +0000
+Subject: [PATCH] docs(.ai): record UI design system v2 (FE-15) and follow-up
+ FE-16
+
+---
+ .ai/WORKLOG.md                | 11 +++++++++++
+ .ai/areas/07-frontend-apps.md |  4 ++++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/.ai/WORKLOG.md b/.ai/WORKLOG.md
+index 941e588..bd953b9 100644
+--- a/.ai/WORKLOG.md
++++ b/.ai/WORKLOG.md
+@@ -60,4 +60,15 @@ Hot files (one claim at a time): `backend/prisma/schema.prisma`, `backend/prisma
+ - Decisions made or proposed: none new. Note: existing `.ai/decisions.md` already states that STAFF/COMPANY/CUSTOMER select the app via `AccessProfile.type`, which supports ADR-08.
+ - Follow-ups / blockers: prompt P00 next.
+ 
++### W-20261024-FE-15-1 — UI design system v2
++- Date: 2026-10-24 · Agent: Claude (review session with the owner) · Branch: main (local commits, not pushed) · Commit: 97ad04d, 691e6d3
++- Tasks: FE-15 (added) [ ]→[x]; FE-16 (added) opened
++- Outcome: PARTIAL (design system and shell done; visual QA of every page pending)
++- What changed and why: The UI looked flat and "childish". The PrimeVue preset and `--ds-*` tokens were redesigned so all three apps change together: brand teal #01bec2 + deep blue #003a54, cool neutral surfaces, a real dark scheme, visible focus ring, navy-tinted shadows, calmer shapes. White on #01bec2 is 2.30:1 (fails WCAG AA), so the light-theme action color is the deeper shade #00797f (white 5.20:1); dark theme uses bright teal with deep-blue text (5.28:1). Added `BrandMark` logo, navy sidebar, deep-blue public hero, token-based footer/auth panels/ContactUs.
++- Files: `packages/shared-ui/theme.js`, `assets/design-system/tokens.scss`, `components/common/BrandMark.vue`, `components/dashboard/DashboardSidebar.vue`, `apps/website/src/{layouts/PublicLayout.vue,pages/public/{Home,Login,Register,ContactUs}.vue}`.
++- Verification: three app builds pass; `sessionHandoff` tests 18/18. NOT VERIFIED: any screen in a real browser; light/dark visual QA.
++- Behavior change / IMPACT: visual only. No API, auth or routing change.
++- Decisions made or proposed: action-color shade #00797f is a proposal (owner had not chosen between options A/B/C).
++- Follow-ups / blockers: FE-16. Push to GitHub blocked: no credentials in the sandbox.
++
+ <!-- Append new entries below this line. Do not edit entries above. -->
+diff --git a/.ai/areas/07-frontend-apps.md b/.ai/areas/07-frontend-apps.md
+index 4b8823a..3570cb8 100644
+--- a/.ai/areas/07-frontend-apps.md
++++ b/.ai/areas/07-frontend-apps.md
+@@ -98,6 +98,10 @@ Vue 3.4 (Composition API), vue-router 4, Vite 8 (`@telecom/vite-config`), `@vite
+ - [ ] FE-12 — Permissions constants and navigation
+   - Depends on: COM-03. Add new permission constants to `@telecom/permissions`; add menu entries in `dashboardMenu.js` for company/admin orders gated by those permissions.
+ - [ ] FE-13 — Resolve the two-HTTP-client question per the approved ADR from ARC-10 (only after owner approval)
++- [x] FE-15 — UI design system v2 (palette, light/dark preset, navy sidebar, BrandMark, restyled public site)  _(Added by agent at the owner's request)_
++  - ✔ 2026-10-24 · local commits `97ad04d`, `691e6d3` on main · tests: `pnpm --filter @telecom/website|company|admin build` → all three built; `node --test packages/auth/sessionHandoff.test.js` → 18/18 · notes: NOT VERIFIED visually (no browser in the sandbox); contrast numbers computed, not eyeballed.
++- [ ] FE-16 — Visual QA and cleanup after FE-15
++  - Open every page of the three apps in light AND dark mode and fix glitches; replace remaining raw hex with tokens (`HandoffCallback.vue`, `HandoffStart.vue`, `ProductPreviewCard.vue`, `StatDonut.vue`, `Checkout.vue`, `Notifications.vue`, `AboutUs.vue`); restyle admin/company `Landing.vue` and the dashboard header; delete the dead duplicate stylesheets `apps/*/src/assets/assets/` (not imported by any app); decide the final action-color shade (currently `{primary.700}` #00797f) with the owner.
+ - [ ] FE-14 — Build + smoke verification
+   - All three `vite build`s pass; a documented manual walkthrough (customer: browse → add → checkout with mock gateway → order visible; company: confirm → ship; customer sees shipped; admin sees order) is recorded in the Done log with the dev stack running.
+ 
+-- 
+2.43.0
+
