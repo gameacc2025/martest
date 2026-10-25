@@ -68,3 +68,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Written directly to remote main through GitHub repository tools; each file update creates a commit.
 - **Risks / open questions:** Category and search filters apply only to the currently fetched page (20 notifications), not all pages. A backend query contract would be needed for global filtering. Visual rendering and PrimeVue/Vue build compatibility remain NOT VERIFIED.
 - **Next action:** Pull main locally, run Company Portal build/tests, and manually verify inbox interactions in the browser.
+
+
+## 2026-10-25 — NOTIFICATIONS-INBOX-DATA-FLOW — Fix empty notification list
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Fix the Company Portal inbox showing no messages and verify the fix with a regression test and CI.
+- **Claimed scope:** `apps/company/src/pages/user/Notifications.vue`, Company app Vitest setup/test, root Vitest project registration, and task/docs records if required.
+- **Evidence/root cause:** The page uses `apiGet()` but expects a paginated object. The shared-core `apiGet()` unwraps `{ data, meta }` to `data`, so the page receives an array and `result.data` evaluates to undefined; it consequently renders an empty list. The backend service returns `{ data, meta }`, and `apiGetPaginated()` is the matching wrapper.
+- **Plan:** Switch the list request to `apiGetPaginated()`; add a regression test that mounts the page with a paginated response and asserts the notification appears; include that test in root CI; run and inspect CI test/build results; fix any failures before handoff.
+- **Verification:** NOT RUN at claim time. This session has no local checkout/terminal, so use GitHub Actions CI and inspect run/job logs.
+- **Commit:** Pending
+- **Push:** Direct remote-main writes only; commits will be made through the repository connector.
+- **Risks / open questions:** Must ensure the Company app test project compiles Vue SFCs and is included in the root Vitest project list without disrupting existing workspace tests.
+- **Next action:** Implement the API contract fix and regression test, then inspect the triggered CI run.
