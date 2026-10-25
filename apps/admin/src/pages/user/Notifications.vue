@@ -45,7 +45,19 @@ function normalizeNotificationPage(result) {
 
 function categoryFor(item) {
   const type = String(item?.type || '').toUpperCase()
-  return categoryDefinitions.find(category => category.matches(type))?.id || 'other'
+  if (type === 'ADMIN_ANNOUNCEMENT' || type.startsWith('ANNOUNCEMENT_') || type.startsWith('SYSTEM_')) return 'system'
+  const typedCategory = categoryDefinitions.find(category => category.matches(type))
+  if (type && typedCategory) return typedCategory.id
+
+  // Legacy notifications may have a null type. Classify those from their
+  // human-readable title/message so they do not all fall into "Other".
+  const text = `${item?.title || ''} ${item?.message || ''}`.toLocaleLowerCase()
+  if (/محصول|product|مودم|سوئیچ شبکه/.test(text)) return 'product'
+  if (/استعلام|inquiry|مهلت پاسخ|پاسخ جدید/.test(text)) return 'inquiry'
+  if (/شرکت|عضویت|ثبت شرکت/.test(text)) return 'company'
+  if (/حساب کاربری|خوش آمدید|رمز عبور|ورود|account|welcome/.test(text)) return 'account'
+  if (/اطلاعیه|announcement|system/.test(text)) return 'system'
+  return 'other'
 }
 
 const categoryFolders = computed(() => categoryDefinitions
