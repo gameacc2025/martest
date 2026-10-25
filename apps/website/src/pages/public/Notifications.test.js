@@ -99,7 +99,7 @@ describe('Website notification inbox', () => {
 
     await flushPromises()
 
-    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/26/read')
+    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/26/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[0].classes()).not.toContain('unread')
     expect(wrapper.findAll('.message-row')[0].find('.unread-dot').exists()).toBe(false)
     expect(apiGet).toHaveBeenCalledWith('/settings/notifications/unread-count')
@@ -114,7 +114,7 @@ describe('Website notification inbox', () => {
     await wrapper.findAll('.message-row')[1].trigger('click')
     await flushPromises()
 
-    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read')
+    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).not.toContain('unread')
   })
 

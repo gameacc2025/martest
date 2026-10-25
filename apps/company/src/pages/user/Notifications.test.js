@@ -96,7 +96,7 @@ describe('Company notification inbox', () => {
       global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
     })
     await flushPromises()
-    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/26/read')
+    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/26/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[0].classes()).not.toContain('unread')
   })
 
@@ -107,7 +107,7 @@ describe('Company notification inbox', () => {
     await flushPromises()
     await wrapper.findAll('.message-row')[1].trigger('click')
     await flushPromises()
-    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read')
+    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).not.toContain('unread')
   })
 
