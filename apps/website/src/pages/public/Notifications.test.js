@@ -131,4 +131,13 @@ describe('Website notification inbox', () => {
     expect(wrapper.findAll('.message-row')[1].classes()).toContain('unread')
   })
 
+  it('marks the initially opened message as read', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/26/read')
+    expect(wrapper.findAll('.message-row')[0].classes()).not.toContain('unread')
+  })
+
 })
