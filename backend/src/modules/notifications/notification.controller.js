@@ -15,7 +15,7 @@ async function list(request, reply) {
     page: Number(page),
     limit: Number(limit),
     unreadOnly: unreadOnly === 'true',
-    readOnly: readOnly === 'true',
+    ...(readOnly === 'true' ? { readOnly: true } : {}),
     ...(request.query.folderId ? { folderId: Number(request.query.folderId) } : {}),
   });
   return reply.send(result);
@@ -44,8 +44,8 @@ async function markAsRead(request, reply) {
  * Mark all notifications as read
  */
 async function markAllAsRead(request, reply) {
-  const result = await notificationService.markAllAsRead(request.user.id);
-  return reply.send({ success: true, count: result?.count ?? 0 });
+  await notificationService.markAllAsRead(request.user.id);
+  return reply.send({ success: true });
 }
 
 async function setReadState(request, reply) {
