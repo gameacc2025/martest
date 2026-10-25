@@ -13,7 +13,7 @@
 
 const prisma = require('../../config/db');
 const emailProvider = require('./notification.email.provider');
-const { notificationMaxAttempts, notificationPollIntervalMs } = require('../../config/env');
+const { notificationMaxAttempts } = require('../../config/env');
 
 // Default poll limit if not configured
 const POLL_LIMIT = 100;
