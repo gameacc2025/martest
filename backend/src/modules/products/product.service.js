@@ -841,38 +841,72 @@ async function updateProduct(id, data, caller) {
 
   // The product editor submits its full price-tier collection. Reconcile it
   // atomically with the product edit so a threshold-crossing edit cannot leave
-  // a half-saved set of prices, and so tier changes count as one form edit.
-  const submittedPriceTiers = Array.isArray(data.priceTiers)
-    ? data.priceTiers.map(normalizePriceTier)
-    : undefined;
+  // a half-saved set of prices. Existing tier IDs preserve validity dates and
+  // make the complete-set replacement unambiguous.
+  const incomingPriceTiers = Array.isArray(data.priceTiers) ? data.priceTiers : undefined;
+  const existingPriceTiers = incomingPriceTiers === undefined
+    ? undefined
+    : await prisma.productPriceTier.findMany({
+      where: { productId },
+      orderBy: [{ minQuantity: 'asc' }, { createdAt: 'asc' }],
+    });
+  const existingTiersById = new Map((existingPriceTiers || []).map((tier) => [Number(tier.id), tier]));
+  const submittedPriceTiers = incomingPriceTiers === undefined
+    ? undefined
+    : incomingPriceTiers.map((rawTier) => {
+      const tierId = rawTier.id === undefined ? undefined : toPositiveInt(rawTier.id, 'priceTierId');
+      const existing = tierId === undefined ? undefined : existingTiersById.get(tierId);
+      if (tierId !== undefined && !existing) {
+        throw { statusCode: 400, code: 'INVALID_PRICE_TIER_ID', message: 'A submitted price tier does not belong to this product.' };
+      }
+      return {
+        ...(tierId !== undefined ? { id: tierId } : {}),
+        ...normalizePriceTier({
+          ...rawTier,
+          maxQuantity: rawTier.maxQuantity === undefined ? existing?.maxQuantity : rawTier.maxQuantity,
+          unit: rawTier.unit === undefined ? existing?.unit : rawTier.unit,
+          validFrom: rawTier.validFrom === undefined ? existing?.validFrom : rawTier.validFrom,
+          validTo: rawTier.validTo === undefined ? existing?.validTo : rawTier.validTo,
+        }),
+      };
+    });
+
   if (submittedPriceTiers) {
+    const submittedIds = submittedPriceTiers.filter((tier) => tier.id !== undefined).map((tier) => tier.id);
+    if (new Set(submittedIds).size !== submittedIds.length) {
+      throw { statusCode: 400, code: 'DUPLICATE_PRICE_TIER_ID', message: 'Price tier IDs must be unique.' };
+    }
     submittedPriceTiers.forEach((tier, index) => {
       if (submittedPriceTiers.slice(0, index).some((prior) => rangesOverlap(prior, tier))) {
         throw { statusCode: 400, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' };
       }
     });
   }
-  const existingPriceTiers = submittedPriceTiers === undefined
-    ? undefined
-    : await prisma.productPriceTier.findMany({
-      where: { productId },
-      orderBy: [{ minQuantity: 'asc' }, { createdAt: 'asc' }],
-    });
+
   const comparableTier = (tier) => ({
     minQuantity: Number(tier.minQuantity),
     maxQuantity: tier.maxQuantity === undefined || tier.maxQuantity === null ? null : Number(tier.maxQuantity),
     price: Number(tier.price),
     unit: tier.unit || null,
+    validFrom: tier.validFrom ? new Date(tier.validFrom).getTime() : null,
+    validTo: tier.validTo ? new Date(tier.validTo).getTime() : null,
   });
+  const submittedTierIds = new Set((submittedPriceTiers || []).filter((tier) => tier.id !== undefined).map((tier) => tier.id));
   const priceTiersChanged = submittedPriceTiers !== undefined && (
     existingPriceTiers.length !== submittedPriceTiers.length
-    || existingPriceTiers.some((tier, index) => {
-      const before = comparableTier(tier);
-      const after = comparableTier(submittedPriceTiers[index]);
+    || existingPriceTiers.some((tier) => !submittedTierIds.has(Number(tier.id)))
+    || submittedPriceTiers.some((tier) => {
+      if (tier.id === undefined) return true;
+      const existing = existingTiersById.get(tier.id);
+      if (!existing) return true;
+      const before = comparableTier(existing);
+      const after = comparableTier(tier);
       return before.minQuantity !== after.minQuantity
         || before.maxQuantity !== after.maxQuantity
         || before.price !== after.price
-        || before.unit !== after.unit;
+        || before.unit !== after.unit
+        || before.validFrom !== after.validFrom
+        || before.validTo !== after.validTo;
     })
   );
   // `changeReason` is not a Product column — it's recorded in the status
