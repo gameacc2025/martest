@@ -57,3 +57,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Not yet written
 - **Risks / open questions:** Category filtering can only group notifications returned by the current server page; no backend query contract exists for category-specific pagination. Keep this explicit in UI behavior and preserve existing pagination.
 - **Next action:** Implement the scoped UI, review the full source, re-fetch from GitHub, and report tests as NOT RUN unless actually executed.
+
+
+### Completion record — NOTIFICATIONS-INBOX-UX (2026-10-25)
+- **Status:** PARTIAL — scoped UI implementation committed; build/runtime verification not performed.
+- **Changes:** Redesigned apps/company/src/pages/user/Notifications.vue into a responsive email-style inbox with All/Unread/Read folders, event-type category filters, search, message list and reading pane, auto-mark-read on open, mark-all-read, delete, refresh, and pagination. Preserved the existing notification API paths and Persian UI text.
+- **Documentation:** Updated docs/NOTIFICATION_SYSTEM.md with the inbox capabilities and the current-page filtering limitation.
+- **Verification:** Re-fetched the changed Vue file from GitHub and ran textual source checks for folders, categories, search, reading pane, read/delete actions, pagination, and existing API endpoints — all checks true. Build, unit tests, and browser interaction are NOT RUN; no local repository/runtime was available.
+- **Commit:** UI a244a9799745b86cf47ae9ce65d7ef6e93632955; documentation and handoff commits recorded by their update results.
+- **Push:** Written directly to remote main through GitHub repository tools; each file update creates a commit.
+- **Risks / open questions:** Category and search filters apply only to the currently fetched page (20 notifications), not all pages. A backend query contract would be needed for global filtering. Visual rendering and PrimeVue/Vue build compatibility remain NOT VERIFIED.
+- **Next action:** Pull main locally, run Company Portal build/tests, and manually verify inbox interactions in the browser.
