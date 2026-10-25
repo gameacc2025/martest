@@ -13,3 +13,15 @@
 - **Verification:** GitHub Actions run [40201945241](https://github.com/gameacc2025/martest/actions/runs/40201945241) passed: frontend/shared tests 18/18, backend tests 1156/1156, Prisma Client generation, and production builds for Website, Company, and Admin.
 - **Commits:** `5fa5c68` UI controls and folder filtering; `46bf7dc` read-state and bulk endpoints; `69dcf1a` endpoint test expectations; `f3eebbe` initial-selection test update; `39e660b` preserve controller response contracts.
 - **Next:** Check CI for the latest counter/double-click follow-up, then pull `main` locally and verify independent folder counts, double-click read, selected bulk read/unread, mark all read, and bulk delete.
+
+
+## In progress — Product lifecycle audit (#2)
+
+- **Task ID:** PRODUCT-LIFECYCLE-AUDIT-2026-10-25
+- **Status:** IN_PROGRESS — remote inspection and initial findings only; no product code changed yet.
+- **Issue:** https://github.com/gameacc2025/martest/issues/2
+- **Scope:** Backend product service/controller/routes/tests; Company/Admin product forms and lists; Website listing/detail/store; product media/pricing/specifications; roadmap and AI-agent docs.
+- **Initial repository evidence:** `main` HEAD observed at `6e19a2e6cb248273d4f0fd4115d722eda41ee504`. No open issues were returned before this task; issue #2 now tracks the audit. The current remote implementation includes a review-on-edit threshold and a `myProducts` controller branch intended to avoid scoping SUPER_ADMIN to a company.
+- **Potential concerns to verify, not yet confirmed defects:** frontend action availability versus server permissions; public list/detail/featured response shape and image URL resolution; status transitions including rejected-product resubmission and post-approval edits; coverage gaps around authorization/ownership and media.
+- **Verification available so far:** GitHub source inspection only. Local `git status`, runtime tests, builds, and browser checks are NOT RUN because no local checkout/runtime is available in this session.
+- **Next:** Complete the cross-layer trace, inspect CI and latest product-specific tests/docs, record confirmed findings in issue #2, and implement only changes that can be safely verified. Obtain approval before consequential permission/schema/business-rule changes.
