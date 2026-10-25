@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { apiGet, apiGetPaginated, apiPatch, apiDelete } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiGetPaginated, apiPatch, apiDelete, apiPost } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -18,11 +18,20 @@ const activeFolder = ref('all')
 const activeCategory = ref('all')
 const searchQuery = ref('')
 const busyIds = ref(new Set())
+const userFolders = ref([])
+const targetFolderId = ref(null)
+const appScope = 'COMPANY'
 
 const folders = computed(() => [
   { id: 'all', label: 'همه پیام‌ها', icon: 'pi-inbox', count: total.value },
   { id: 'unread', label: 'خوانده‌نشده', icon: 'pi-envelope', count: unreadCount.value },
   { id: 'read', label: 'خوانده‌شده', icon: 'pi-check-circle', count: Math.max(0, total.value - unreadCount.value) },
+  ...userFolders.value.map(folder => ({
+    id: folder.id,
+    label: folder.name,
+    icon: folder.key === 'SAVED' ? 'pi-bookmark' : folder.key === 'INBOX' ? 'pi-inbox' : 'pi-folder',
+    count: notifications.value.filter(item => (item.folderMemberships || []).some(m => m.folderId === folder.id || m.folder?.id === folder.id)).length,
+  })),
 ])
 
 const categoryDefinitions = [
@@ -91,10 +100,23 @@ const activeCategoryLabel = computed(() => {
 })
 
 onMounted(async () => {
+  // Load server-managed folders before displaying messages.
+  await fetchUserFolders()
   // Keep the unread counter in sync after the initially opened message is marked read.
   await fetchNotifications()
   await fetchUnreadCount()
 })
+
+async function fetchUserFolders() {
+  try {
+    const result = await apiGet(endpoints.notifications.folders(appScope))
+    userFolders.value = Array.isArray(result) ? result : []
+    const saved = userFolders.value.find(folder => folder.key === 'SAVED')
+    targetFolderId.value = saved?.id ?? userFolders.value.find(folder => !folder.isSystem)?.id ?? null
+  } catch {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'دریافت پوشه‌ها انجام نشد.', life: 3000 })
+  }
+}
 
 async function fetchNotifications() {
   loading.value = true
@@ -174,6 +196,35 @@ async function deleteNotification(item) {
   }
 }
 
+async function applyFolderAction(item, action, folderId = targetFolderId.value) {
+  if (!folderId) {
+    toast.add({ severity: 'warn', summary: 'پوشه انتخاب نشده', detail: 'ابتدا پوشه مقصد را انتخاب کنید.', life: 3000 })
+    return
+  }
+  const memberships = (item.folderMemberships || []).map(m => m.folderId ?? m.folder?.id)
+  const inbox = userFolders.value.find(folder => folder.key === 'INBOX')
+  let sourceFolderId = Number.isInteger(Number(activeFolder.value)) ? Number(activeFolder.value) : null
+  if (!sourceFolderId || !memberships.includes(sourceFolderId)) {
+    sourceFolderId = inbox && memberships.includes(inbox.id) ? inbox.id : (memberships[0] ?? inbox?.id)
+  }
+  try {
+    await apiPost(endpoints.notifications.changeFolder(item.id), {
+      folderId: Number(folderId), action, app: appScope,
+      ...(action === 'move' && sourceFolderId ? { sourceFolderId } : {}),
+    })
+    toast.add({ severity: 'success', summary: 'انجام شد', detail: action === 'copy' ? 'پیام در پوشه مقصد هم قرار گرفت.' : 'پیام به پوشه مقصد منتقل شد.', life: 2500 })
+    await fetchNotifications()
+  } catch {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'تغییر پوشه پیام انجام نشد.', life: 3000 })
+  }
+}
+
+async function saveNotification(item) {
+  const saved = userFolders.value.find(folder => folder.key === 'SAVED')
+  if (!saved) return
+  await applyFolderAction(item, 'copy', saved.id)
+}
+
 function setBusy(id, value) {
   const next = new Set(busyIds.value)
   if (value) next.add(id)
@@ -184,7 +235,8 @@ function setBusy(id, value) {
 function selectFolder(folder) {
   activeFolder.value = folder
   selectedId.value = null
-  if (folder === 'all') activeCategory.value = 'all'
+  if (folder === 'all' || Number.isInteger(Number(folder))) activeCategory.value = 'all'
+  fetchNotifications()
 }
 
 function selectCategory(category) {
@@ -312,6 +364,16 @@ function typeLabel(item) {
               <div><strong>سامانه مخابرات</strong><time>{{ formatFullDate(selectedNotification.createdAt) }}</time></div>
             </div>
             <div class="message-body">{{ selectedNotification.message }}</div>
+            <div class="folder-actions">
+              <Button label="ذخیره‌شده‌ها" icon="pi pi-bookmark" severity="secondary" outlined @click="saveNotification(selectedNotification)" />
+              <label class="folder-target">پوشه مقصد
+                <select v-model="targetFolderId" aria-label="پوشه مقصد">
+                  <option v-for="folder in userFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
+                </select>
+              </label>
+              <Button label="کپی" icon="pi pi-copy" severity="secondary" outlined @click="applyFolderAction(selectedNotification, 'copy')" />
+              <Button label="انتقال" icon="pi pi-folder-open" severity="secondary" @click="applyFolderAction(selectedNotification, 'move')" />
+            </div>
             <div class="message-footer"><i class="pi pi-shield"></i> این پیام از طرف سامانه ارسال شده است.</div>
           </article>
         </template>
@@ -401,4 +463,9 @@ function typeLabel(item) {
 .pagination span{font-size:.75rem;color:var(--text-color-secondary)}
 @media(max-width:1180px){.mail-layout{grid-template-columns:170px minmax(260px,1fr)}.reading-panel{grid-column:1/-1;border-top:1px solid var(--surface-border)}.message-list-panel{border-left:0}.reading-panel .message-detail{padding:1rem 1.2rem}}
 @media(max-width:700px){.mail-header{align-items:flex-start}.mail-header h1{font-size:1.35rem}.mail-layout{grid-template-columns:minmax(0,1fr)}.mail-sidebar{border-left:0;border-bottom:1px solid var(--surface-border);padding:.8rem}.mail-sidebar .folder-link{display:inline-flex;width:auto;margin:.1rem}.mail-sidebar .sidebar-heading,.mail-sidebar .sidebar-divider,.mail-sidebar .sidebar-note{display:none}.mail-sidebar .category-link{font-size:.75rem}.message-list-panel{border-bottom:1px solid var(--surface-border)}.reading-panel{grid-column:auto}.mail-toolbar{align-items:stretch}.search-box{max-width:none}.toolbar-actions{justify-content:space-between}.message-detail{padding:1rem}.row-topline{align-items:flex-start;flex-direction:column;gap:.15rem}}
+
+.folder-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--surface-border,#e5e7eb)}
+.folder-target{display:flex;align-items:center;gap:.5rem;font-size:.9rem}
+.folder-target select{max-width:15rem;min-width:10rem;padding:.55rem;border:1px solid var(--surface-border,#d1d5db);border-radius:6px;background:var(--surface-card,#fff);color:inherit}
+@media(max-width:560px){.folder-actions{align-items:stretch;flex-direction:column}.folder-target{align-items:stretch;flex-direction:column}.folder-target select{max-width:none;width:100%}}
 </style>
