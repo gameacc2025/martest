@@ -1,5 +1,13 @@
 # Mandatory AI Agent Rules — Telecom Marketplace
 
+
+## Mandatory user-facing language
+
+- **Always communicate with the user in English, regardless of the language the user uses to message you.** This applies to plans, clarifying questions, progress updates, explanations, recommendations, commit summaries, and final reports.
+- Do not switch the conversation language just because the user writes in Persian or another language.
+- This rule governs agent-to-user communication, not the language required inside the product: when implementing localized UI, translations, sample content, or other explicitly requested deliverables, follow the product requirements and the user's requested deliverable language while keeping explanations to the user in English.
+- Keep code identifiers, API names, logs, and quoted source text unchanged when necessary for accuracy; explain them in English.
+
 **Read this file before doing anything else in this repository.** These rules apply to every AI agent, coding assistant, automated worker, and human following the agent workflow. If another instruction conflicts, follow the more restrictive rule and explain the conflict.
 
 ## Required reading order
