@@ -2,16 +2,16 @@
 
 ## Latest completed task
 - **ID:** REPO-AGENT-RULES
-- **Status:** DONE
+- **Status:** DONE — agent rules and documentation are on remote `main`.
 - **Objective:** Establish mandatory agent rules, durable project memory, verification/commit workflow, and update repository documentation.
 - **Canonical repository/branch:** `gameacc2025/martest` / `main`
-- **Latest main HEAD before this handoff update:** `c7be7dc7dd8b96224fd94a283e092f5a751a7dda`
-- **Key entrypoints:** `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`
-- **Protocol/memory:** `.ai/PROTOCOL.md`, `.ai/WORKLOG.md`, `.ai/project-context.md`, `.ai/decisions.md`
-- **Docs:** `docs/AI_AGENT_WORKFLOW.md`, `docs/NOTIFICATION_SYSTEM.md`, updated README/API docs/architecture roadmap.
-- **Verification:** Files were fetched back from remote successfully. No local test/build was run for this documentation-only task.
-- **Branch state:** Both `main` and `feat/notifications-complete` exist. The available GitHub connector has no branch-delete operation, so deletion is still pending. Do not claim there is only one branch yet.
-- **Next action:** On the user's Windows checkout, inspect `git status --short --branch`, sync `main`, then delete the obsolete feature branch only after confirming no unique unpushed work is needed.
+- **Latest verified content commit before the final handoff update:** `f8fcf671bdfe9389453c605823b9c0bb238bec03`; WORKLOG completion record is committed separately.
+- **Entrypoints:** `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`
+- **Protocol/memory:** `.ai/PROTOCOL.md`, `.ai/WORKLOG.md`, `.ai/current-task.md`, `.ai/project-context.md`, `.ai/decisions.md`
+- **Docs updated:** `README.md`, `docs/AI_AGENT_WORKFLOW.md`, `docs/NOTIFICATION_SYSTEM.md`, `docs/API_DOCUMENTATION.md`, `Telecom_Marketplace_Project_Architecture_and_Roadmap.md`, and legacy `.ai/PROMPTS.md`.
+- **Verification:** Required files were fetched back from GitHub successfully. No local tests/builds were run because this was a documentation-only change made through GitHub API.
+- **Branch status:** GitHub still lists `main` and `feat/notifications-complete`. The available connector has no delete-branch operation; therefore only-main branch cleanup remains pending.
+- **Next action:** On the Windows checkout, first inspect `git status --short --branch`; sync main without discarding local changes, then delete the old feature branch only after confirming no unpushed work is needed.
 
 ## Rules for the next agent
-Read `AGENTS.md`, `.ai/PROTOCOL.md`, the latest WORKLOG entry, and the relevant project docs before any new task. Check current Git state and active claims first. Append the outcome to WORKLOG; do not erase history.
+Read `AGENTS.md`, `.ai/PROTOCOL.md`, latest WORKLOG entries, and relevant docs before any new task. Check current Git state and active claims first. Append outcomes to WORKLOG; do not erase history.
