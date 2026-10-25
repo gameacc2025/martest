@@ -176,6 +176,21 @@ test('POST /: missing required title -> 400', async () => {
 
 // ── PATCH /:id (update) — COMPANY|STAFF + products.update ────
 
+test('PATCH /:id: accepts existing price tier IDs and null optional tier fields', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/products/1',
+    headers: userHeader('COMPANY', ['products.update']),
+    payload: {
+      priceTiers: [{ id: 1, minQuantity: 1, maxQuantity: null, price: 100, unit: null }],
+    },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.update, true);
+  await app.close();
+});
+
 test('PATCH /:id: COMPANY with products.update -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
