@@ -90,9 +90,10 @@ const activeCategoryLabel = computed(() => {
   return categoryDefinitions.find(item => item.id === activeCategory.value)?.label || 'سایر پیام‌ها'
 })
 
-onMounted(() => {
-  fetchNotifications()
-  fetchUnreadCount()
+onMounted(async () => {
+  // Keep the unread counter in sync after the initially opened message is marked read.
+  await fetchNotifications()
+  await fetchUnreadCount()
 })
 
 async function fetchNotifications() {
@@ -103,8 +104,15 @@ async function fetchNotifications() {
     notifications.value = normalized.data
     total.value = Number(normalized.meta?.total ?? notifications.value.length)
     totalPages.value = Math.max(1, Number(normalized.meta?.totalPages || 1))
-    if (!notifications.value.some(item => item.id === selectedId.value)) {
-      selectedId.value = notifications.value[0]?.id ?? null
+    let openedNotification = notifications.value.find(item => item.id === selectedId.value)
+    if (!openedNotification) {
+      openedNotification = notifications.value[0] ?? null
+      selectedId.value = openedNotification?.id ?? null
+    }
+
+    // The reading pane opens this message automatically, so persist its read state too.
+    if (openedNotification && !openedNotification.isRead) {
+      await markAsRead(openedNotification)
     }
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'دریافت اعلان‌ها انجام نشد. دوباره تلاش کنید.', life: 3500 })
