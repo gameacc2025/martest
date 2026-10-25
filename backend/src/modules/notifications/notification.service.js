@@ -12,11 +12,12 @@ const prisma = require('../../config/db');
  * @returns {Object} { data, meta }
  */
 async function getNotifications(userId, options = {}) {
-  const { page = 1, limit = 20, unreadOnly = false } = options;
+  const { page = 1, limit = 20, unreadOnly = false, folderId = null } = options;
   const skip = (page - 1) * limit;
 
   const where = { userId };
   if (unreadOnly) where.isRead = false;
+  if (folderId !== null && folderId !== undefined) where.folderMemberships = { some: { folderId: Number(folderId) } };
 
   const [data, total] = await Promise.all([
     prisma.notification.findMany({
@@ -24,6 +25,7 @@ async function getNotifications(userId, options = {}) {
       orderBy: { createdAt: 'desc' },
       skip,
       take: limit,
+      include: { folderMemberships: { include: { folder: { select: { id: true, key: true, name: true, scope: true } } } } },
     }),
     prisma.notification.count({ where }),
   ]);
@@ -112,6 +114,65 @@ async function createNotification(userId, title, message) {
   });
 }
 
+
+const VALID_FOLDER_SCOPES = new Set(['WEBSITE', 'COMPANY', 'ADMIN']);
+
+async function getUserFolders(app) {
+  if (!VALID_FOLDER_SCOPES.has(app)) {
+    throw { statusCode: 400, code: 'INVALID_APP_SCOPE', message: 'دامنه برنامه نامعتبر است.' };
+  }
+  return prisma.notificationFolder.findMany({
+    where: { isActive: true, OR: [{ scope: 'ALL' }, { scope: app }] },
+    orderBy: [{ isSystem: 'desc' }, { sortOrder: 'asc' }, { id: 'asc' }],
+    select: { id: true, key: true, name: true, scope: true, isSystem: true, sortOrder: true },
+  });
+}
+
+async function changeNotificationFolder(userId, notificationId, folderId, action, sourceFolderId = null) {
+  if (!['copy', 'move'].includes(action)) {
+    throw { statusCode: 400, code: 'INVALID_FOLDER_ACTION', message: 'عملیات پوشه نامعتبر است.' };
+  }
+  const [notification, destination] = await Promise.all([
+    prisma.notification.findFirst({ where: { id: notificationId, userId }, select: { id: true } }),
+    prisma.notificationFolder.findUnique({ where: { id: folderId } }),
+  ]);
+  if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان پیدا نشد.' };
+  if (!destination || !destination.isActive) throw { statusCode: 404, code: 'FOLDER_NOT_FOUND', message: 'پوشه مقصد در دسترس نیست.' };
+
+  if (action === 'copy') {
+    await prisma.notificationFolderMembership.upsert({
+      where: { notificationId_folderId: { notificationId, folderId } },
+      create: { notificationId, folderId },
+      update: {},
+    });
+    return { success: true, action, notificationId, folderId };
+  }
+
+  const sourceId = sourceFolderId === null || sourceFolderId === undefined
+    ? (await prisma.notificationFolder.findUnique({ where: { key: 'INBOX' }, select: { id: true } }))?.id
+    : Number(sourceFolderId);
+  if (!sourceId) throw { statusCode: 500, code: 'INBOX_FOLDER_MISSING', message: 'پوشه دریافتی‌ها پیدا نشد.' };
+  if (sourceId === folderId) return { success: true, action, notificationId, folderId };
+
+  const sourceMembership = await prisma.notificationFolderMembership.findUnique({
+    where: { notificationId_folderId: { notificationId, folderId: sourceId } },
+  });
+  if (!sourceMembership) {
+    throw { statusCode: 400, code: 'SOURCE_MEMBERSHIP_MISSING', message: 'این پیام در پوشه مبدا نیست.' };
+  }
+  await prisma.$transaction([
+    prisma.notificationFolderMembership.upsert({
+      where: { notificationId_folderId: { notificationId, folderId } },
+      create: { notificationId, folderId },
+      update: {},
+    }),
+    prisma.notificationFolderMembership.delete({
+      where: { notificationId_folderId: { notificationId, folderId: sourceId } },
+    }),
+  ]);
+  return { success: true, action, notificationId, folderId };
+}
+
 module.exports = {
   getNotifications,
   getUnreadCount,
@@ -119,4 +180,6 @@ module.exports = {
   markAllAsRead,
   deleteNotification,
   createNotification,
+  getUserFolders,
+  changeNotificationFolder,
 };
