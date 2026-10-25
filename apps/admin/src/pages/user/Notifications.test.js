@@ -91,3 +91,4 @@ describe('Admin notification inbox', () => {
     expect(wrapper.find('.message-row').text()).toContain('وضعیت محصول تغییر کرد')
   })
 })
+
