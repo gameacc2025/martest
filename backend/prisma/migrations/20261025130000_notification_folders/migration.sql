@@ -44,3 +44,18 @@ FROM "Notification" n
 CROSS JOIN "NotificationFolder" f
 WHERE f."key" = 'INBOX';
 
+
+-- Keep future notifications in Inbox regardless of which existing service
+-- creates them; this avoids a partial rollout across event producers.
+CREATE OR REPLACE FUNCTION notification_folder_default_inbox() RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO "NotificationFolderMembership" ("notificationId", "folderId")
+  SELECT NEW.id, id FROM "NotificationFolder" WHERE "key" = 'INBOX'
+  ON CONFLICT ("notificationId", "folderId") DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER "Notification_default_inbox_membership"
+AFTER INSERT ON "Notification"
+FOR EACH ROW EXECUTE FUNCTION notification_folder_default_inbox();
