@@ -12,6 +12,10 @@ async function notificationRoutes(fastify) {
   // ── User-facing notification CRUD ─────────────────────────────
   fastify.get('/', ctrl.list);
   fastify.get('/unread-count', ctrl.getUnreadCount);
+  fastify.get('/folders', ctrl.listFolders);
+  fastify.post('/:id/folders', {
+    schema: { body: { type: 'object', required: ['folderId', 'action'], additionalProperties: false, properties: { folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 } } } },
+  }, ctrl.changeFolder);
   fastify.patch('/:id/read', ctrl.markAsRead);
   fastify.patch('/read-all', ctrl.markAllAsRead);
   fastify.delete('/:id', ctrl.remove);
