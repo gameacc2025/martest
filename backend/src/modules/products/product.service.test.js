@@ -291,6 +291,41 @@ test('listProducts: anonymous callers are clamped to PUBLISHED + PUBLIC, and can
   assert.equal(capturedWhere.visibility, 'PUBLIC');
 });
 
+test('listProducts: applies price range, featured flag, and allowlisted sorting without weakening public visibility', async () => {
+  let capturedWhere;
+  let capturedOrderBy;
+  mockPrisma.product.findMany = async (args) => {
+    capturedWhere = args.where;
+    capturedOrderBy = args.orderBy;
+    return [];
+  };
+  mockPrisma.product.count = async (args) => { recordCall('product.count', args); return 0; };
+
+  await service.listProducts({
+    skip: 0,
+    take: 10,
+    filters: { minPrice: '100', maxPrice: '500', featured: 'true', sortBy: 'title', sortOrder: 'asc', status: 'DRAFT' },
+    caller: anonymous,
+  });
+
+  assert.equal(capturedWhere.status, 'PUBLISHED');
+  assert.equal(capturedWhere.visibility, 'PUBLIC');
+  assert.equal(capturedWhere.isFeatured, true);
+  assert.deepEqual(capturedWhere.prices, { some: { price: { gte: 100, lte: 500 } } });
+  assert.deepEqual(capturedOrderBy, { title: 'asc' });
+});
+
+test('listProducts: rejects invalid price ranges and unsupported sort fields', async () => {
+  await assert.rejects(
+    () => service.listProducts({ skip: 0, take: 10, filters: { minPrice: 900, maxPrice: 100 }, caller: anonymous }),
+    (err) => err.statusCode === 400 && err.code === 'INVALID_PRICE_RANGE'
+  );
+  await assert.rejects(
+    () => service.listProducts({ skip: 0, take: 10, filters: { sortBy: 'password' }, caller: anonymous }),
+    (err) => err.statusCode === 400 && err.code === 'INVALID_SORT_FIELD'
+  );
+});
+
 test('listProducts: a company user is forced to their own companyId, ignoring any filters.companyId', async () => {
   let capturedWhere;
   mockPrisma.product.findMany = async (args) => { capturedWhere = args.where; return []; };
