@@ -91,4 +91,24 @@ describe('Company notification inbox', () => {
     expect(wrapper.findAll('.message-row')).toHaveLength(1)
     expect(wrapper.find('.message-row').text()).toContain('وضعیت محصول تغییر کرد')
   })
+  it('marks the automatically opened message as read', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/26/read')
+    expect(wrapper.findAll('.message-row')[0].classes()).not.toContain('unread')
+  })
+
+  it('marks a message read when opened by clicking its row', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+    await wrapper.findAll('.message-row')[1].trigger('click')
+    await flushPromises()
+    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read')
+    expect(wrapper.findAll('.message-row')[1].classes()).not.toContain('unread')
+  })
+
 })
