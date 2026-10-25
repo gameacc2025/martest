@@ -13,5 +13,10 @@
 - **Branch status:** GitHub still lists `main` and `feat/notifications-complete`. The available connector has no delete-branch operation; therefore only-main branch cleanup remains pending.
 - **Next action:** On the Windows checkout, first inspect `git status --short --branch`; sync main without discarding local changes, then delete the old feature branch only after confirming no unpushed work is needed.
 
+## Latest policy addition (2026-10-25)
+- All agents must communicate with the user in English regardless of the user's message language.
+- Rule recorded in `AGENTS.md`, `CLAUDE.md`, `.ai/PROTOCOL.md`, `.github/copilot-instructions.md`, `docs/AI_AGENT_WORKFLOW.md`, `README.md`, and `.ai/decisions.md`.
+- Worklog entry: `AGENT-ENGLISH-COMMUNICATION`.
+
 ## Rules for the next agent
 Read `AGENTS.md`, `.ai/PROTOCOL.md`, latest WORKLOG entries, and relevant docs before any new task. Check current Git state and active claims first. Append outcomes to WORKLOG; do not erase history.
