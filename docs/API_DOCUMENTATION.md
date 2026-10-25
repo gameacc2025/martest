@@ -1228,3 +1228,26 @@
 | PATCH | `/notifications/folders/:id` | ویرایش نام، دامنه، ترتیب یا وضعیت فعال‌بودن پوشه |
 
 پوشه‌های سیستمی `INBOX` و `SAVED` ثابت هستند و کاربر عادی نمی‌تواند پوشه ایجاد یا مدیریت کند. برای جزئیات پیاده‌سازی، دامنهٔ پوشه‌ها و الزامات عملیاتی به [مستند سیستم اعلان‌ها](NOTIFICATION_SYSTEM.md) مراجعه کنید.
+
+
+---
+
+## Product catalog listing query contract
+
+`GET /api/v1/products` is the public catalog endpoint. It always returns only products whose status is `PUBLISHED` and visibility is `PUBLIC`; query parameters cannot override that restriction, including when a signed-in STAFF or COMPANY user calls the public route.
+
+Supported optional query parameters:
+
+| Parameter | Behavior |
+| --- | --- |
+| `search` | Case-insensitive search over product title, description, and SKU. |
+| `companyId` | Restricts results to one company for the public catalog. |
+| `categoryId` | Restricts results to one category. |
+| `minPrice` / `maxPrice` | Non-negative numeric bounds; a product matches when at least one single price tier falls inside the supplied range. If both are supplied, `minPrice` must not exceed `maxPrice`. |
+| `featured` | Boolean (`true`/`false`, also `1`/`0`); filters by the persisted `Product.isFeatured` flag. |
+| `sortBy` | One of `createdAt`, `updatedAt`, or `title`; defaults to `createdAt`. |
+| `sortOrder` | `asc` or `desc`; defaults to `desc`. |
+
+Pagination uses the existing `page` and `limit` parameters. Invalid price bounds, sort fields, or sort directions return a validation error rather than silently changing the query.
+
+The current Product schema has no stock quantity or order/sales aggregate, so stock filtering and a genuine best-seller ranking are not available. The homepage therefore uses `isFeatured` for its featured section and labels the recent catalog slice as newest products instead of implying sales ranking.
