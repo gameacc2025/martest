@@ -44,6 +44,8 @@ const trivialController = {
     hit.sendNotification = request.body;
     return reply.code(202).send({ data: { recipients: 3 } });
   },
+  getDeliveryStatsCtrl: async (request, reply) => reply.code(200).send({ data: {} }),
+  listDeliveriesCtrl: async (request, reply) => reply.code(200).send({ data: [], meta: { total: 0, totalPages: 1 } }),
 };
 injectMock('./admin.controller', trivialController);
 
