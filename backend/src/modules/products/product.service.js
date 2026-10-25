@@ -838,6 +838,43 @@ async function updateProduct(id, data, caller) {
   const updateData = { ...data };
   delete updateData.companyId;
   delete updateData.priceTiers;
+
+  // The product editor submits its full price-tier collection. Reconcile it
+  // atomically with the product edit so a threshold-crossing edit cannot leave
+  // a half-saved set of prices, and so tier changes count as one form edit.
+  const submittedPriceTiers = Array.isArray(data.priceTiers)
+    ? data.priceTiers.map(normalizePriceTier)
+    : undefined;
+  if (submittedPriceTiers) {
+    submittedPriceTiers.forEach((tier, index) => {
+      if (submittedPriceTiers.slice(0, index).some((prior) => rangesOverlap(prior, tier))) {
+        throw { statusCode: 400, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' };
+      }
+    });
+  }
+  const existingPriceTiers = submittedPriceTiers === undefined
+    ? undefined
+    : await prisma.productPriceTier.findMany({
+      where: { productId },
+      orderBy: [{ minQuantity: 'asc' }, { createdAt: 'asc' }],
+    });
+  const comparableTier = (tier) => ({
+    minQuantity: Number(tier.minQuantity),
+    maxQuantity: tier.maxQuantity === undefined || tier.maxQuantity === null ? null : Number(tier.maxQuantity),
+    price: Number(tier.price),
+    unit: tier.unit || null,
+  });
+  const priceTiersChanged = submittedPriceTiers !== undefined && (
+    existingPriceTiers.length !== submittedPriceTiers.length
+    || existingPriceTiers.some((tier, index) => {
+      const before = comparableTier(tier);
+      const after = comparableTier(submittedPriceTiers[index]);
+      return before.minQuantity !== after.minQuantity
+        || before.maxQuantity !== after.maxQuantity
+        || before.price !== after.price
+        || before.unit !== after.unit;
+    })
+  );
   // `changeReason` is not a Product column — it's recorded in the status
   // history below. Strip it so Prisma doesn't reject an unknown argument.
   delete updateData.changeReason;
@@ -884,6 +921,32 @@ async function updateProduct(id, data, caller) {
 
   const updated = await prisma.$transaction(async (tx) => {
     const saved = await tx.product.update({ where: { id: productId }, data: updateData, include: productInclude });
+
+    if (priceTiersChanged) {
+      await tx.productPriceTier.deleteMany({ where: { productId } });
+      if (submittedPriceTiers.length) {
+        await tx.productPriceTier.createMany({
+          data: submittedPriceTiers.map((tier) => ({ ...tier, productId })),
+        });
+      }
+      await tx.productStatusHistory.create({
+        data: {
+          productId,
+          previousStatus,
+          newStatus: updateData.status || previousStatus,
+          changedByUserId: Number(caller.id),
+          comment: data.changeReason || 'تغییر ردیف‌های قیمت محصول',
+        },
+      });
+      await addActivityLog(
+        tx,
+        productId,
+        Number(caller.id),
+        'PRICE_TIER_UPDATE',
+        `به‌روزرسانی ردیف‌های قیمت: ${existingPriceTiers.length} → ${submittedPriceTiers.length}`,
+        data.changeReason || null,
+      );
+    }
 
     // Audit trail: every edit is logged, staff and company alike.
     await addActivityLog(tx, productId, Number(caller.id), 'EDIT', summarizeEdit(product, updateData), data.changeReason || null);
