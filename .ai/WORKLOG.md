@@ -223,3 +223,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Documentation commit:** `be84ac7408f19442913a40c6594c57cd7999e3d1` — updated current-task findings and handoff. Earlier claim commit: `ec09fe3e95db860b18757da83879ac0da391176b`.
 - **Verification:** Source inspection only. Tests/builds/browser/manual reproduction and local Git status remain **NOT RUN** because this session has no active local checkout/runtime. No product implementation changes have been made.
 - **Next:** Obtain/use local checkout, inspect CI status and all product tests; reproduce catalog behavior; implement and verify fixes in scoped commits; update product/API docs and AI-agent context at each milestone.
+
+
+## 2026-10-25 — PRODUCT-CATALOG-CONTRACT-01 — Implement supported public catalog filters
+
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Fix the active website catalog contract first, without introducing unsupported stock/sales semantics or weakening public visibility.
+- **Claimed scope:** `backend/src/modules/products/product.controller.js`, `backend/src/modules/products/product.service.js`, relevant product service/controller tests, `apps/website/src/pages/public/Home.vue`, and `docs/API_DOCUMENTATION.md`.
+- **Evidence:** Active `/products` route uses `ProductListing.vue`; it sends min/max price filters. The backend list controller currently forwards only search/company/category/status and service always sorts by newest. Product model supports `isFeatured` and `prices` tiers but has no stock quantity or sales metric. Homepage currently derives featured/best-seller sections from arbitrary slices.
+- **Plan:** Implement validated min/max price and featured filters plus allowlisted sort order in the backend; preserve PUBLISHED+PUBLIC clamp for public queries; update homepage to request actual featured products and remove unsupported “best sellers” claim in favor of an explicitly named recent-products section; add regression tests and API docs.
+- **Verification:** Source inspection only at claim time. Local checkout, test execution, build, and browser checks are NOT RUN in this session.
+- **Commit:** Claim/handoff update committed as `ac7ca1b97a8e7884a294114a5c05542c019aa55d`; implementation pending.
+- **Push:** Documentation write is on remote `main` through the GitHub repository integration.
+- **Risks / open questions:** No stock quantity or sales data exists in the Product schema, so stock filtering and best-seller ranking cannot be implemented honestly from current model. Product price filtering is based on related price tiers. No Prisma schema changes are planned.
+- **Next action:** Implement and review the catalog query contract, then move to lifecycle/media permission checks under issue #2.
