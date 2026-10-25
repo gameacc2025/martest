@@ -165,6 +165,7 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderMemberships NotificationFolderMembership[]
 
   @@index([userId])
   @@index([token])
@@ -613,6 +614,44 @@ model Notification {
 // CASCADE FK to User all match this definition 1:1. `updatedAt` is NOT NULL
 // with NO database default — `@updatedAt` is populated by the Prisma Client on
 // write, so raw-SQL inserts must supply it explicitly.
+ 
+// Admin-managed folders. INBOX and SAVED are immutable system folders.
+// Scope controls which app inboxes can display a folder; memberships are
+// associations, so copy adds a second association and move swaps one.
+model NotificationFolder {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  name      String
+  scope     NotificationFolderScope @default(ALL)
+  isSystem  Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memberships NotificationFolderMembership[]
+
+  @@index([scope, isActive, sortOrder])
+}
+
+model NotificationFolderMembership {
+  id             Int @id @default(autoincrement())
+  notificationId Int
+  folderId       Int
+  createdAt      DateTime @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  folder         NotificationFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, folderId])
+  @@index([folderId])
+}
+
+enum NotificationFolderScope {
+  ALL
+  WEBSITE
+  COMPANY
+  ADMIN
+}
+
 model NotificationPreference {
   id        Int                 @id @default(autoincrement())
   userId    Int
