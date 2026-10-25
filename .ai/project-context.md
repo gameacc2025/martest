@@ -189,3 +189,20 @@ active feature work in flight as of this writing (see
   smoke test (`app.test.js`), schema structural tests, coverage
   thresholds (`npm run test:ci`), and GitHub Actions CI
   (`.github/workflows/backend-tests.yml`).
+
+
+## 17. Agent workflow and durable project memory (2026-10-25)
+
+- Root `AGENTS.md` is the mandatory first-read policy for every coding agent. `CLAUDE.md` and `.github/copilot-instructions.md` point their respective tools to the same policy.
+- `.ai/PROTOCOL.md` defines startup reading, task claims, planning/approval gates, verification, commit/push rules, and handoff requirements.
+- `.ai/WORKLOG.md` is the append-only, version-controlled task journal. `.ai/current-task.md` is the active handoff and may be replaced as tasks change; move completed history to WORKLOG first.
+- `docs/AI_AGENT_WORKFLOW.md` is the human-facing explanation. `README.md` points new contributors and agents to these files.
+- `main` is the intended only long-lived branch. Do not create branches by default; never rewrite history or delete a branch without authorization and safe-integration verification.
+
+## 18. Notifications (2026-10-25)
+
+- User notification routes are registered at `/api/v1/settings/notifications`: list, unread count, mark one/all read, delete, and get/update preferences. Inspect `backend/src/modules/notifications/notification.routes.js` for the authoritative current route contract.
+- Admin announcement and delivery monitoring routes are defined in `backend/src/modules/admin/admin.routes.js`; permissions include `notifications.send` and `delivery.view`.
+- Website notification inbox is `apps/website/src/pages/public/Notifications.vue`; website, company, and admin each have notification preference pages. Admin management/composition is `apps/admin/src/pages/admin/notifications/NotificationManagement.vue`.
+- See `docs/NOTIFICATION_SYSTEM.md` for route inventory, frontend entry points, SMTP requirements, and verification checklist.
+- CI/build success does not verify live SMTP credentials/connectivity; record external delivery as NOT VERIFIED until exercised in a configured environment.
