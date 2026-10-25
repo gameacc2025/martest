@@ -47,7 +47,7 @@ Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, an
 - Admin management/composition/monitoring: `apps/admin/src/pages/admin/notifications/NotificationManagement.vue` — route `/notification-management`.
 - Company/Admin inbox routes and navigation should be verified in each app's router before changing links.
 
-The shared API client lives in `packages/api-client`; use it instead of adding page-specific HTTP clients.
+The shared API client lives in `packages/api-client`; use it instead of adding page-specific HTTP clients. For paginated inbox lists, the Company page must call `apiGetPaginated()` from `packages/shared-core/http/apiClient.js`: `apiGet()` unwraps `{ data, meta }` to the inner `data` value and therefore discards pagination metadata. The Company inbox has a regression test for rendering rows from the paginated response (`apps/company/src/pages/user/Notifications.test.js`).
 
 ## Delivery and operational requirements
 
