@@ -957,11 +957,19 @@ async function updateProduct(id, data, caller) {
     const saved = await tx.product.update({ where: { id: productId }, data: updateData, include: productInclude });
 
     if (priceTiersChanged) {
-      await tx.productPriceTier.deleteMany({ where: { productId } });
-      if (submittedPriceTiers.length) {
-        await tx.productPriceTier.createMany({
-          data: submittedPriceTiers.map((tier) => ({ ...tier, productId })),
-        });
+      const submittedIds = new Set(submittedPriceTiers.filter((tier) => tier.id !== undefined).map((tier) => tier.id));
+      for (const existingTier of existingPriceTiers) {
+        if (!submittedIds.has(Number(existingTier.id))) {
+          await tx.productPriceTier.delete({ where: { id: Number(existingTier.id) } });
+        }
+      }
+      for (const tier of submittedPriceTiers) {
+        const { id: tierId, ...tierData } = tier;
+        if (tierId !== undefined) {
+          await tx.productPriceTier.update({ where: { id: tierId }, data: tierData });
+        } else {
+          await tx.productPriceTier.create({ data: { ...tierData, productId } });
+        }
       }
       await tx.productStatusHistory.create({
         data: {
