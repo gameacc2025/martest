@@ -91,13 +91,15 @@ describe('Company notification inbox', () => {
     expect(wrapper.findAll('.message-row')).toHaveLength(1)
     expect(wrapper.find('.message-row').text()).toContain('وضعیت محصول تغییر کرد')
   })
-  it('marks the automatically opened message as read', async () => {
+  it('does not mark a notification as read just because it is selected on initial load', async () => {
     wrapper = shallowMount(Notifications, {
       global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
     })
     await flushPromises()
-    expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/26/read-state', { isRead: true })
-    expect(wrapper.findAll('.message-row')[0].classes()).not.toContain('unread')
+    expect(apiPatch).not.toHaveBeenCalled()
+    expect(wrapper.findAll('.message-row')[0].classes()).toContain('unread')
+    expect(wrapper.findAll('.message-row')[0].find('.unread-dot').exists()).toBe(true)
+    expect(apiGet).toHaveBeenCalledWith('/settings/notifications/unread-count')
   })
 
   it('marks a message read when opened by clicking its row', async () => {
