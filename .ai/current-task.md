@@ -12,3 +12,10 @@
 
 ## Agent policy note
 The repository's English-only communication rule applies to coding agents working through command-line tools; ChatGPT conversation with the user remains in Persian as requested.
+
+## Follow-up — unread badge and notification navigation (2026-10-25)
+- Fixed Website header badge to call `endpoints.notifications.unreadCount` (`/settings/notifications/unread-count`), not obsolete `/api/v1/notifications/unread-count`.
+- Added shared navigation for notification preferences and permission-gated admin send/monitor page (`notifications.send`). Route-existence filtering hides admin management from Company app.
+- Commits: `e98e604bec76dacacd811bf32510314bdfd9d219`, `335cbc2162862dc6c55dbb655eddc349c0454836`, docs `631ee482915efae97fb98ee501fe8e2ba60776eb`, worklog `5ff80cfd55bcf06d2f0a5c3a4b9d8112c45a19ee`.
+- Verification: CI run https://github.com/gameacc2025/martest/actions/runs/40185053151 succeeded: 17 frontend/shared test files, 148 tests passed; backend 1,136 passed/0 failed; handoff 18 passed/0 failed; all three frontend production builds passed.
+- Remaining limitation: live local browser/session not accessible here. After syncing `origin/main`, restart dev servers and verify all three routes. If still blank, capture component runtime state and loaded bundle version.
