@@ -15,9 +15,8 @@ const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-// The website is a PUBLIC marketplace only — it has no dashboard, profile, or
-// notifications routes. Those live in separate apps (company / admin). We link
-// out to them via env-configured origins instead of internal router names.
+// CUSTOMER notifications live on the website. COMPANY and STAFF users are
+// redirected to their own panels through the configured PKCE handoff URLs.
 const companyAppUrl = import.meta.env.VITE_COMPANY_APP_URL || ''
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || ''
 
