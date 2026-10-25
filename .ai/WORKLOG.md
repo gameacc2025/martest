@@ -28,6 +28,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Next action:** Sync local Windows checkout with `origin/main` after checking for uncommitted changes; then delete the obsolete feature branch if desired.
 
 - **Additional alignment:** Prepended a mandatory policy notice to legacy `.ai/PROMPTS.md` so old phase prompts cannot silently override the new root agent policy. Commit: `f8fcf67`.
+
+## 2026-10-26 — Notifications page email-inspired redesign
+- **Status:** DONE
+- **Agent:** Cline
+- **Goal:** Lighten the crowded/dark Notifications page with an email-inspired design while preserving all features
+- **Changes:** Lightened backgrounds (surface-ground→#f8fafc, surface-card→#fff), borders (surface-border→#e2e8f0/#f1f5f9), hover states (surface-hover→#f8fafc), sidebar (#f8fafc), reading panel (#fff/#f8fafc), empty states (#f1f5f9), search box (#f8fafc), bulk actions (#f8fafc). Added subtle box-shadow to mail layout. Made unread rows more distinct (#fbfdff).
+- **Features preserved:** Folder/category filtering, search, bulk actions (mark read/unread/delete), mark all as read, single-click select/double-click read, delete individual messages, save to folder, reading panel detail view, pagination, loading states, empty states, RTL support, responsive breakpoints
+- **Verification:** 4/5 vitest tests pass; 1 pre-existing failure unrelated to changes (bulk read-state endpoint test fails on original code too)
+- **Commit:** `2ea32f1` — `style: lighten Notifications page with email-inspired design`
+- **Push:** Not yet pushed
 - **Final branch check:** `main` and `feat/notifications-complete` are still listed by GitHub. The branch-deletion action is not exposed by the connected GitHub tool, so the request to leave only `main` is not fully completed yet.
 - **Latest content commit before this worklog update:** `f8fcf671bdfe9389453c605823b9c0bb238bec03`.
 

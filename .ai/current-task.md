@@ -1,5 +1,6 @@
 # Current Task / Agent Handoff
 
+<<<<<<< HEAD
 ## Completed task — PRODUCT-AUTH-FEATURED-STAFF-2026-10-26-01
 - **Status:** DONE; verified by GitHub Actions.
 - **Approved policy:** `isFeatured` may be set/changed only by SUPER_ADMIN or a caller with `products.feature`. STAFF cross-company writes require the exact operation permission; COMPANY ownership is never bypassed.
@@ -115,3 +116,15 @@
 - Closed completed issues #3, #4, #7, and #8. Master product audit #2 remains open pending decisions tracked in #5 and #6.
 - **Approval needed to finish the remaining permission audit:** #5: enforce `products.feature` for creating/changing `isFeatured` (Company and Admin forms currently send it, and the backend accepts it under create/update permissions); #6: decide whether STAFF with granular write permissions may update/delete/manage prices/media across companies or whether those routes should be COMPANY-only except SUPER_ADMIN. STAFF cross-company publish was fixed to match the existing `products.publish` route contract.
 - No schema/migration changes. All code changes above are committed directly to `main`; CI is green for the latest code/docs snapshot.
+=======
+## Completed — Notifications page email-inspired redesign
+
+- **Status:** DONE — Notifications page rewritten with a lighter, email-inspired visual design
+- **Affected file:** `apps/website/src/pages/public/Notifications.vue`
+- **Changes:** Lightened backgrounds (surface-ground→#f8fafc, surface-card→#fff), borders (surface-border→#e2e8f0/#f1f5f9), hover states (surface-hover→#f8fafc), sidebar (#f8fafc), reading panel (#fff/#f8fafc), empty states (#f1f5f9), search box (#f8fafc), bulk actions (#f8fafc). Added subtle box-shadow to mail layout. Made unread rows more distinct (#fbfdff).
+- **Features preserved:** Folder/category filtering, search, bulk actions (mark read/unread/delete), mark all as read, single-click select/double-click read, delete individual messages, save to folder, reading panel detail view, pagination, loading states, empty states, RTL support, responsive breakpoints
+- **Verification:** 4/5 vitest tests pass; 1 pre-existing failure unrelated to changes (bulk read-state endpoint test fails on original code too)
+- **Commit:** `2ea32f1` — `style: lighten Notifications page with email-inspired design`
+- **Push:** Not yet pushed
+- **Next:** Push commit to remote `main` if authorized
+>>>>>>> 747878d (docs: update worklog and current-task for Notifications redesign)
