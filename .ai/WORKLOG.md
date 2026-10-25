@@ -183,3 +183,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commits:** `5fa5c68f9eb235b4a5135ba155467ef33f477fde`; `46bf7dcbf7c9860f7b4c16064b0f478d179245ec`; `69dcf1a71ee64d3acc62c733815f2b75ef579170`; `f3eebbe340eb5d70f0d141e4fc6edcc5f7ca0b35`; `39e660bd5a280d4acea48b6a280d720d6d29891d`.
 - **Open verification:** Browser-level checks on the user's live environment have not been performed by the agent. User should validate the interactions after pulling the latest main.
 - **Next:** User syncs local main and smoke-tests inbox filtering, single read/unread, mark all read, and selected bulk delete.
+
+
+## 2026-10-25 — NOTIFICATIONS-COUNTERS-DOUBLE-CLICK — Stable folder counters and explicit read interaction
+
+- **Status:** IMPLEMENTED; CI pending.
+- **User-reported symptoms:** Folder badge numbers changed or disappeared when switching folders; selected-message read/unread action appeared to do nothing; desired double-click-to-read behavior.
+- **Root cause identified:** The All/Read folder counts were derived from `total`, which represented only the currently active query. Custom folder definitions did not include their own count, so their badges disappeared.
+- **Changes:** Website, Company, and Admin now fetch independent total counts for All and each server-managed folder; Read is calculated from the independent All total and global unread count. Zero counts remain visible. A single click selects a message without mutating its read state; double-click selects and marks it read. Bulk read/unread updates visible rows immediately after server success, then refreshes the list and all counts. Folder membership changes refresh counts too.
+- **Tests:** Updated the three inbox tests to assert a single click does not mark read, double-click does, and read-request failure leaves the message unread.
+- **Commits:** Implementation and test changes are being committed directly to `main` via the GitHub repository integration; exact commit IDs are available from the commit history.
+- **Verification:** Automated GitHub Actions validation pending. No local browser or local checkout was available in this session, so live UI interaction is NOT VERIFIED.
+- **Next:** Check CI, correct any failures, then sync local `main` and verify counts, double-click read, selected bulk read/unread, and bulk delete in the browser.
