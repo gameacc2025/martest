@@ -134,6 +134,8 @@ export const endpoints = {
       send: '/admin/notifications/send',
       deliveryStats: '/admin/notifications/delivery-stats',
       deliveries: '/admin/notifications/deliveries',
+      folders: '/admin/notifications/folders',
+      folder: (id) => `/admin/notifications/folders/${id}`,
     },
     roles: '/roles',
     getRole: (id) => `/roles/${id}`,
