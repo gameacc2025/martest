@@ -139,7 +139,7 @@ async function fillMissingEmails(client, resolved) {
  * @returns {Promise<Object>} delivery summary (what was created/queued/skipped)
  * @throws {{ statusCode: 400, code: 'UNKNOWN_NOTIFICATION_EVENT' }} unknown key
  */
-async function dispatchNotification(eventKey, recipients, context = {}, { tx = null, dedupeKey = null } = {}) {
+async function dispatchNotification(eventKey, recipients, context = {}, { tx = null, dedupeKey = null, channels = null } = {}) {
   const client = tx || prisma;
   const event = getEvent(eventKey);
   if (!event) {
@@ -168,7 +168,9 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
     where: { userId: { in: userIds }, eventType: event.key },
   });
   const prefMap = new Map(prefs.map((p) => [`${p.userId}:${p.channel}`, p.enabled]));
+  const requestedChannels = Array.isArray(channels) && channels.length ? new Set(channels) : null;
   const channelEnabled = (userId, channel) => {
+    if (requestedChannels && !requestedChannels.has(channel)) return false;
     const pref = prefMap.get(`${userId}:${channel}`);
     if (pref !== undefined) return pref;
     const eventDefault = event.channels[channel];
