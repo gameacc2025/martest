@@ -79,7 +79,8 @@
               :key="product.id"
               :product="product"
               @add-to-cart="addToCart"
-              @add-to-wishlist="addToWishlist"
+              @toggle-wishlist="addToWishlist"
+              @view-product="viewProduct"
             />
           </div>
 
@@ -189,7 +190,20 @@ const performSearch = async () => {
     if (selectedCompany.value) params.companyId = selectedCompany.value
 
     const result = await productsStore.searchProducts(searchQuery.value, params)
-    products.value = Array.isArray(result.data) ? result.data : []
+    const catalogProducts = Array.isArray(result.data) ? result.data : []
+    products.value = catalogProducts.map((product) => {
+      const primaryImage = product?.images?.find((image) => image?.isPrimary && image?.url)
+        || product?.images?.find((image) => image?.url)
+      const price = Number(product?.prices?.[0]?.price ?? product?.price ?? 0)
+      return {
+        ...product,
+        name: product?.title || product?.name || '',
+        image: primaryImage?.url || product?.image || '',
+        price,
+        finalPrice: price,
+        specs: product?.specifications?.standard || product?.specifications || {},
+      }
+    })
     totalResults.value = result.meta?.total ?? products.value.length
 
     // Keep the heading and URL in sync without triggering a duplicate search.
@@ -271,6 +285,10 @@ const addToCart = (product) => {
 
 const addToWishlist = (product) => {
   wishlistStore.addToWishlist(product)
+}
+
+const viewProduct = (product) => {
+  router.push({ name: 'product-details', params: { id: product.id } })
 }
 </script>
 
