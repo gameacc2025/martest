@@ -1535,3 +1535,24 @@ Prompt پایه پیشنهادی:
 > «این قابلیت متعلق به کدام business context است، مالک داده چه کسی است، business rule آن چیست، و کدام layer باید مسئول enforce کردن آن باشد؟»
 
 این سؤال باید مبنای تصمیم‌های معماری آینده باشد.
+
+
+---
+
+# 30. AI Agent Workflow and Persistent Project Memory
+
+The repository's binding instructions live in the root `AGENTS.md`. Every AI agent must read that file before starting any task, then follow `.ai/PROTOCOL.md` and check the latest entries in `.ai/WORKLOG.md`.
+
+Persistent project memory is version-controlled:
+- `.ai/WORKLOG.md`: append-only record of completed/in-progress tasks, tests, commit SHAs, blockers, and next steps.
+- `.ai/current-task.md`: current focus and handoff; completed history must first be moved into WORKLOG.
+- `.ai/project-context.md`: durable architecture and implementation facts.
+- `.ai/decisions.md`: accepted decisions and rationale.
+- `docs/AI_AGENT_WORKFLOW.md`: human-facing workflow.
+- `CLAUDE.md` and `.github/copilot-instructions.md`: tool-specific entrypoints pointing back to the same rules.
+
+Agents must inspect Git state before edits, preserve user changes, diagnose before implementing, run applicable tests, review diffs, update docs, and record the actual commit/push state. Do not claim checks passed if they were not run. `main` is the only intended long-lived branch; do not create branches by default, rewrite history, or delete branches without authorization and safe-integration verification.
+
+# 31. Notification System Documentation
+
+The current notification route inventory, user preferences, admin announcement endpoints, frontend entry points, and SMTP verification requirements are documented in `docs/NOTIFICATION_SYSTEM.md`. When notification implementation changes, update that document and the relevant API docs in the same task. Live SMTP delivery must be marked NOT VERIFIED unless tested with configured credentials and a real delivery path.
