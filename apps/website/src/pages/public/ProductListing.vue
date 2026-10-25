@@ -110,8 +110,8 @@
             >
               <div class="product-image">
                 <img
-                  v-if="product.images && product.images[0]?.url"
-                  :src="product.images[0].url"
+                  v-if="getProductImage(product)?.url"
+                  :src="getProductImage(product).url"
                   :alt="product.title"
                 />
                 <div v-else class="empty-image">
@@ -268,6 +268,12 @@ const onPageChange = (event) => {
 const goToProduct = (product) => {
   router.push({ name: 'product-details', params: { id: product.id } })
 }
+
+const getProductImage = (product) => (
+  product?.images?.find((image) => image?.isPrimary && image?.url)
+  || product?.images?.find((image) => image?.url)
+  || null
+)
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('fa-IR', { style: 'currency', currency: 'IRR' }).format(price)
