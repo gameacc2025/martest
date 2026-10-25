@@ -88,7 +88,7 @@ test('POST /notifications/send: rejects invalid audience and missing permission'
   const denied = await app.inject({
     method: 'POST', url: '/api/v1/admin/notifications/send',
     headers: userHeader(['users.read']),
-    payload: { title: 'اطلاعیه', message: 'متن', audience: 'UNKNOWN', channels: ['IN_APP'] },
+    payload: { title: 'اطلاعیه', message: 'متن', audience: 'CUSTOMER', channels: ['IN_APP'] },
   });
   assert.equal(denied.statusCode, 403);
   const invalid = await app.inject({
