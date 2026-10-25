@@ -89,3 +89,11 @@ Date: 2026-10-25
 Decision: `main` is the only intended long-lived branch. All coding agents must read root `AGENTS.md` and `.ai/PROTOCOL.md`, claim work in `.ai/WORKLOG.md`, update durable project memory, verify changes, and record commit/push state before handoff.
 Reason: Multiple AI tools/agents need one consistent project context and should not create divergent long-lived branches or repeat work from missing conversation history.
 Impact: Do not create feature branches by default. Preserve user changes, coordinate overlapping tasks through WORKLOG, do not rewrite history, and do not delete a branch unless its work is confirmed integrated and deletion is authorized. The repository owner may still authorize temporary branches for a specific workflow.
+
+
+---
+
+Date: 2026-10-25
+Decision: All AI agents and coding assistants must communicate with the user in English regardless of the language used in the user's messages.
+Reason: The user explicitly requires consistent English communication across all models and agents.
+Impact: Plans, questions, progress updates, explanations, recommendations, and final reports are English. Product deliverables such as localized UI text or translations may use their required language, while explanations to the user remain English.
