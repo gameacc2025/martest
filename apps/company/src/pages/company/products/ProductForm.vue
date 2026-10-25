@@ -617,13 +617,43 @@ function removeNewDocument(index) {
   newDocuments.value.splice(index, 1)
 }
 
+async function setPrimaryImage(imageId) {
+  try {
+    await productsApi.setPrimaryImage(route.params.id, imageId)
+    productImages.value = productImages.value.map((img) => ({ ...img, isPrimary: img.id === imageId }))
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: extractApiError(err, 'خطا در انتخاب تصویر اصلی'), life: 4000 })
+  }
+}
+
+async function moveExistingImage(imageId, direction) {
+  const currentIndex = productImages.value.findIndex((img) => img.id === imageId)
+  const targetIndex = currentIndex + direction
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= productImages.value.length) return
+
+  const reordered = [...productImages.value]
+  ;[reordered[currentIndex], reordered[targetIndex]] = [reordered[targetIndex], reordered[currentIndex]]
+  const orderedImages = reordered.map((img, index) => ({ ...img, sortOrder: index }))
+  try {
+    await productsApi.sortImages(route.params.id, orderedImages.map(({ id, sortOrder }) => ({ id, sortOrder })))
+    productImages.value = orderedImages
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: extractApiError(err, 'خطا در تغییر ترتیب تصاویر'), life: 4000 })
+  }
+}
+
 async function removeExistingImage(imageId) {
   try {
+    const wasPrimary = productImages.value.some((img) => img.id === imageId && img.isPrimary)
     await productsApi.deleteImage(route.params.id, imageId)
-    productImages.value = productImages.value.filter(img => img.id !== imageId)
+    const remaining = productImages.value.filter((img) => img.id !== imageId)
+    productImages.value = remaining.map((img, index) => ({
+      ...img,
+      isPrimary: wasPrimary ? index === 0 : img.isPrimary,
+    }))
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'تصویر حذف شد', life: 3000 })
   } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در حذف تصویر', life: 3000 })
+    toast.add({ severity: 'error', summary: 'خطا', detail: extractApiError(err, 'خطا در حذف تصویر'), life: 4000 })
   }
 }
 
@@ -887,10 +917,15 @@ async function removeExistingDocument(docId) {
         <h2>تصاویر محصول</h2>
 
         <div v-if="isEditMode && productImages.length > 0" class="images-grid">
-          <div v-for="img in productImages" :key="img.id" class="image-item">
+          <div v-for="(img, index) in productImages" :key="img.id" class="image-item">
             <img :src="resolveMediaUrl(img.url)" :alt="img.altText" />
 
-            <Button icon="pi pi-times" severity="danger" rounded class="image-remove" @click="removeExistingImage(img.id)" />
+            <div class="image-actions">
+              <Button v-if="!img.isPrimary" icon="pi pi-star" severity="success" rounded text v-tooltip.top="'انتخاب به‌عنوان تصویر اصلی'" @click="setPrimaryImage(img.id)" />
+              <Button icon="pi pi-arrow-up" severity="secondary" rounded text :disabled="index === 0" v-tooltip.top="'انتقال به بالا'" @click="moveExistingImage(img.id, -1)" />
+              <Button icon="pi pi-arrow-down" severity="secondary" rounded text :disabled="index === productImages.length - 1" v-tooltip.top="'انتقال به پایین'" @click="moveExistingImage(img.id, 1)" />
+              <Button icon="pi pi-times" severity="danger" rounded class="image-remove" @click="removeExistingImage(img.id)" />
+            </div>
             <Tag v-if="img.isPrimary" value="اصلی" severity="success" class="image-badge" />
           </div>
         </div>
