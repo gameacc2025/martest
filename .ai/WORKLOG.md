@@ -111,3 +111,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** CI run https://github.com/gameacc2025/martest/actions/runs/40185053151 completed successfully. Frontend/shared suite: 17 test files, 148 tests passed; backend suite: 1,136 passed, 0 failed; root handoff tests: 18 passed, 0 failed; Website, Company, and Admin production builds all succeeded.
 - **Not verified:** The user's actual local browser/session is not accessible through this workflow. Runtime confirmation still requires syncing `origin/main`, restarting dev servers, and checking the live account.
 - **Next action:** User should pull latest `main`, restart Website/Company/Admin dev servers, and check `/notifications` in all three apps. If rows are still absent, inspect the runtime bundle and Vue component state after `fetchNotifications()`; the backend response contract and row rendering are now covered by app-specific tests.
+
+
+## 2026-10-25 — NOTIFICATION-READ-STATE — Fix opening notifications as read
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Ensure opening a notification marks it read consistently in Website, Company Portal, and Admin.
+- **Claimed scope:** Three notification inbox Vue pages and their existing tests; update current-task/worklog. No database schema or API contract changes in this phase.
+- **Evidence:** Each inbox automatically selects the first notification in `fetchNotifications()` but does not call `markAsRead()`. Manual click handlers do call the read endpoint, but the user's manual-click failure is not yet reproduced; verify endpoint registration and test both auto-selection and click behavior before attributing that symptom to a root cause.
+- **Plan:** Trace actual route prefixes and API client behavior; implement the smallest frontend-only correction; add regression tests in all three app test suites for auto-selection and manual opening, including success/failure state behavior; inspect CI after commits.
+- **Verification:** NOT RUN at claim time. GitHub connector can edit/fetch repository files but no local checkout/test terminal is available in this workflow; do not claim tests pass unless an actual CI result is inspected.
+- **Commit:** Pending
+- **Push:** No changes written yet. Repository connector updates create commits directly on remote `main`; only scoped files will be changed.
+- **Risks / open questions:** The auto-selected message is visibly not marked read; the reported manual-click failure may be a separate runtime/API issue. Do not modify backend routes or API contract without a separate approval.
+- **Next action:** Verify endpoint prefixes, client PATCH semantics, and template click handlers; then make scoped changes and inspect CI.
