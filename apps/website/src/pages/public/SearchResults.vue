@@ -170,9 +170,9 @@ const buildCategoryTree = (categories, parentId = null) => {
     }))
 }
 
-const performSearch = async () => {
+const performSearch = async ({ resetPage = true } = {}) => {
   loading.value = true
-  currentPage.value = 1
+  if (resetPage) currentPage.value = 1
 
   try {
     const params = {
@@ -263,7 +263,7 @@ const getSortOrder = () => {
 const onPageChange = (event) => {
   currentPage.value = event.page + 1
   perPage.value = event.rows
-  performSearch()
+  performSearch({ resetPage: false })
 }
 
 const formatPrice = (price) => {
