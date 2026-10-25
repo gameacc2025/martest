@@ -53,3 +53,6 @@ mimo.exe
 # Graphify output (tool cache, not source)
 graphify-out/
 temp_style_check.txt
+
+# Local database backups
+*.dump
