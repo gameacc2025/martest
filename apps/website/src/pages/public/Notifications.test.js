@@ -128,7 +128,7 @@ describe('Website notification inbox', () => {
 
     await flushPromises()
     apiPatch.mockRejectedValueOnce(new Error('network failure'))
-    await wrapper.findAll('.message-row')[1].trigger('click')
+    await wrapper.findAll('.message-row')[1].trigger('dblclick')
     await flushPromises()
 
     expect(wrapper.findAll('.message-row')[1].classes()).toContain('unread')
