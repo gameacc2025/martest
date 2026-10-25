@@ -45,27 +45,6 @@
                 </div>
               </div>
 
-              <!-- Brand Filter -->
-              <div class="sr-filter-block">
-                <h3>برند</h3>
-                <MultiSelect v-model="selectedBrands" :options="brands" optionLabel="name" placeholder="انتخاب برند" class="sr-full" />
-              </div>
-
-              <!-- Rating Filter -->
-              <div class="sr-filter-block">
-                <h3>امتیاز</h3>
-                <Rating v-model="minRating" :cancel="false" />
-                <span class="sr-rating-hint">و بالاتر</span>
-              </div>
-
-              <!-- Availability Filter -->
-              <div class="sr-filter-block">
-                <h3>موجودی</h3>
-                <div class="sr-checkbox-row">
-                  <Checkbox v-model="inStockOnly" :binary="true" inputId="inStock" label="فقط کالاهای موجود" />
-                </div>
-              </div>
-
               <Button label="اعمال فیلترها" icon="pi pi-check" class="sr-full p-button-primary" @click="applyFilters" />
               <Button label="حذف فیلترها" icon="pi pi-times" class="sr-full p-button-outlined p-button-secondary sr-mt" @click="clearFilters" />
             </template>
@@ -77,8 +56,7 @@
           <div class="sr-results-head">
             <div class="sr-results-count">{{ totalResults }} نتیجه یافت شد</div>
             <div class="sr-sort-actions">
-              <Button icon="pi pi-sort-amount-up" class="p-button-text" @click="sortBy('price', 'asc')" title="مرتب سازی بر اساس قیمت (صعودی)" />
-              <Button icon="pi pi-sort-amount-down" class="p-button-text" @click="sortBy('price', 'desc')" title="مرتب سازی بر اساس قیمت (نزولی)" />
+              <Button icon="pi pi-calendar" class="p-button-text" @click="sortBy('date', 'desc')" title="جدیدترین محصولات" />
               <Button icon="pi pi-sort-alpha-up" class="p-button-text" @click="sortBy('name', 'asc')" title="مرتب سازی بر اساس نام" />
               <Select v-model="sortOption" :options="sortOptions" optionLabel="label" optionValue="value" class="sr-sort-dropdown" @change="onSortChange" />
             </div>
@@ -125,9 +103,6 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Tree from 'primevue/tree'
 import Slider from 'primevue/slider'
-import MultiSelect from 'primevue/multiselect'
-import Rating from 'primevue/rating'
-import Checkbox from 'primevue/checkbox'
 import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
@@ -143,7 +118,6 @@ const query = ref(route.query.q || '')
 const searchQuery = ref(query.value)
 const products = ref([])
 const categories = ref([])
-const brands = ref([])
 const loading = ref(false)
 const showFilters = ref(false)
 const totalResults = ref(0)
@@ -152,25 +126,19 @@ const currentPage = ref(1)
 const maxPrice = ref(10000000)
 const priceRange = ref([0, 10000000])
 const selectedCategory = ref(null)
-const selectedBrands = ref([])
-const minRating = ref(0)
-const inStockOnly = ref(false)
 const sortOption = ref('relevance')
 const selectedCompany = ref(null)
 
 const sortOptions = ref([
-  { label: 'مرتب سازی پیش فرض', value: 'relevance' },
-  { label: 'قیمت: کم به زیاد', value: 'price_asc' },
-  { label: 'قیمت: زیاد به کم', value: 'price_desc' },
+  { label: 'مرتب سازی پیش فرض (جدیدترین)', value: 'relevance' },
   { label: 'نام: A به Z', value: 'name_asc' },
   { label: 'نام: Z به A', value: 'name_desc' },
-  { label: 'امتیاز: بالا به پایین', value: 'rating_desc' },
-  { label: 'تاریخ: جدیدترین', value: 'date_desc' }
+  { label: 'تاریخ: جدیدترین', value: 'date_desc' },
+  { label: 'تاریخ: قدیمی‌ترین', value: 'date_asc' }
 ])
 
 onMounted(async () => {
   await loadCategories()
-  await loadBrands()
   await performSearch()
 })
 
@@ -191,15 +159,6 @@ const loadCategories = async () => {
   }
 }
 
-const loadBrands = async () => {
-  try {
-    const data = await productsStore.getBrands()
-    brands.value = data
-  } catch (error) {
-    console.error('Error loading brands:', error)
-  }
-}
-
 const buildCategoryTree = (categories, parentId = null) => {
   return categories
     .filter(cat => cat.parentId === parentId)
@@ -216,28 +175,26 @@ const performSearch = async () => {
 
   try {
     const params = {
-      q: searchQuery.value,
       page: currentPage.value,
       limit: perPage.value,
-      category: selectedCategory.value?.[0],
-      minPrice: priceRange.value[0],
-      maxPrice: priceRange.value[1],
-      brands: selectedBrands.value.map(b => b.id),
-      minRating: minRating.value,
-      inStock: inStockOnly.value,
       sortBy: getSortField(),
       sortOrder: getSortOrder(),
-      companyId: selectedCompany.value
     }
+    const categoryId = getSelectedCategoryId()
+    if (categoryId) params.categoryId = categoryId
+    // Do not constrain the default range: the schema has no stock/rating data,
+    // and a fixed slider maximum must not hide otherwise valid products.
+    if (priceRange.value[0] > 0) params.minPrice = priceRange.value[0]
+    if (priceRange.value[1] < maxPrice.value) params.maxPrice = priceRange.value[1]
+    if (selectedCompany.value) params.companyId = selectedCompany.value
 
-    const data = await productsStore.searchProducts(params)
-    products.value = data.products
-    totalResults.value = data.total
-    maxPrice.value = data.maxPrice || 10000000
-    priceRange.value = [0, maxPrice.value]
+    const result = await productsStore.searchProducts(searchQuery.value, params)
+    products.value = Array.isArray(result.data) ? result.data : []
+    totalResults.value = result.meta?.total ?? products.value.length
 
-    // Update URL with search query
-    router.push({ query: { q: searchQuery.value } })
+    // Keep the heading and URL in sync without triggering a duplicate search.
+    query.value = searchQuery.value
+    router.push({ query: searchQuery.value ? { q: searchQuery.value } : {} })
   } catch (error) {
     console.error('Error searching products:', error)
   } finally {
@@ -251,9 +208,6 @@ const applyFilters = () => {
 
 const clearFilters = () => {
   selectedCategory.value = null
-  selectedBrands.value = []
-  minRating.value = 0
-  inStockOnly.value = false
   priceRange.value = [0, maxPrice.value]
   performSearch()
 }
@@ -271,9 +225,20 @@ const onSortChange = () => {
   performSearch()
 }
 
+const getSelectedCategoryId = () => {
+  const keys = selectedCategory.value && typeof selectedCategory.value === 'object'
+    ? selectedCategory.value
+    : {}
+  const selectedKey = Object.entries(keys).find(([, value]) => value === true || value?.checked)?.[0]
+  const id = Number(selectedKey)
+  return Number.isInteger(id) && id > 0 ? id : null
+}
+
 const getSortField = () => {
   const [field] = sortOption.value.split('_')
-  return field === 'relevance' ? undefined : field
+  if (field === 'name') return 'title'
+  if (field === 'date') return 'createdAt'
+  return 'createdAt'
 }
 
 const getSortOrder = () => {
