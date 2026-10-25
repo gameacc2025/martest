@@ -15,7 +15,7 @@ async function list(request, reply) {
     page: Number(page),
     limit: Number(limit),
     unreadOnly: unreadOnly === 'true',
-    folderId: request.query.folderId ? Number(request.query.folderId) : null,
+    ...(request.query.folderId ? { folderId: Number(request.query.folderId) } : {}),
   });
   return reply.send(result);
 }
