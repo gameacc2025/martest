@@ -155,6 +155,12 @@ function resetFilters() {
   fetchProducts()
 }
 
+function getProductImage(product) {
+  return product?.images?.find((image) => image?.isPrimary && image?.url)
+    || product?.images?.find((image) => image?.url)
+    || null
+}
+
 function goToProduct(product) {
   router.push({ name: 'product-details', params: { id: product.id } })
 }
@@ -416,7 +422,7 @@ onBeforeUnmount(() => {
             <div v-else class="products-grid">
               <div v-for="product in featuredProducts" :key="product.id" class="product-card" @click="goToProduct(product)">
                 <div class="product-image">
-                  <img v-if="product.images && product.images[0]?.url" :src="product.images[0].url" :alt="product.title" />
+                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
                 </div>
                 <div class="product-info">
@@ -443,7 +449,7 @@ onBeforeUnmount(() => {
             <div v-else class="products-grid">
               <div v-for="product in recentProducts" :key="product.id" class="product-card" @click="goToProduct(product)">
                 <div class="product-image">
-                  <img v-if="product.images && product.images[0]?.url" :src="product.images[0].url" :alt="product.title" />
+                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
                   <span class="tile-badge">جدید</span>
                 </div>
