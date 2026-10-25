@@ -66,6 +66,7 @@ const routes = [
       { path: "/notifications", name: "notifications", component: () => import("../pages/user/Notifications.vue"), meta: { title: "اعلان‌ها" } },
       { path: "/notification-preferences", name: "admin-notification-preferences", component: () => import("../pages/user/NotificationPreferences.vue"), meta: { title: "تنظیمات اعلان‌ها" } },
       { path: "/notification-management", name: "admin-notification-management", component: () => import("../pages/admin/notifications/NotificationManagement.vue"), meta: { title: "مدیریت اعلان‌ها" } },
+      { path: "/notification-folders", name: "admin-notification-folders", component: () => import("../pages/admin/notifications/NotificationFolders.vue"), meta: { title: "مدیریت پوشه‌های اعلان" } },
       // ── Users ──────────────────────────────────────────────
       { path: "/users", name: "admin-users", component: () => import("../pages/admin/users/UserList.vue"), meta: { title: "مدیریت کاربران" } },
       // ── Companies ─────────────────────────────────────────
