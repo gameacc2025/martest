@@ -128,7 +128,9 @@ async function getUserFolders(app) {
   });
 }
 
-async function changeNotificationFolder(userId, notificationId, folderId, action, sourceFolderId = null) {
+async function changeNotificationFolder(userId, notificationId, folderId, action, app, sourceFolderId = null) {
+  app = String(app || '').toUpperCase();
+  if (!VALID_FOLDER_SCOPES.has(app)) throw { statusCode: 400, code: 'INVALID_APP_SCOPE', message: 'دامنه برنامه نامعتبر است.' };
   if (!['copy', 'move'].includes(action)) {
     throw { statusCode: 400, code: 'INVALID_FOLDER_ACTION', message: 'عملیات پوشه نامعتبر است.' };
   }
@@ -137,7 +139,7 @@ async function changeNotificationFolder(userId, notificationId, folderId, action
     prisma.notificationFolder.findUnique({ where: { id: folderId } }),
   ]);
   if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان پیدا نشد.' };
-  if (!destination || !destination.isActive) throw { statusCode: 404, code: 'FOLDER_NOT_FOUND', message: 'پوشه مقصد در دسترس نیست.' };
+  if (!destination || !destination.isActive || !['ALL', app].includes(destination.scope)) throw { statusCode: 404, code: 'FOLDER_NOT_FOUND', message: 'پوشه مقصد در دسترس نیست.' };
 
   if (action === 'copy') {
     await prisma.notificationFolderMembership.upsert({
@@ -152,6 +154,8 @@ async function changeNotificationFolder(userId, notificationId, folderId, action
     ? (await prisma.notificationFolder.findUnique({ where: { key: 'INBOX' }, select: { id: true } }))?.id
     : Number(sourceFolderId);
   if (!sourceId) throw { statusCode: 500, code: 'INBOX_FOLDER_MISSING', message: 'پوشه دریافتی‌ها پیدا نشد.' };
+  const sourceFolder = await prisma.notificationFolder.findUnique({ where: { id: sourceId }, select: { scope: true, isActive: true } });
+  if (!sourceFolder || !sourceFolder.isActive || !['ALL', app].includes(sourceFolder.scope)) throw { statusCode: 404, code: 'SOURCE_FOLDER_NOT_FOUND', message: 'پوشه مبدا در دسترس نیست.' };
   if (sourceId === folderId) return { success: true, action, notificationId, folderId };
 
   const sourceMembership = await prisma.notificationFolderMembership.findUnique({
