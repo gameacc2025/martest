@@ -116,3 +116,12 @@ Verification and environment status:
 The inbox now filters folders by membership in both the API query and the visible list. Read/unread filtering is server-side to preserve pagination. Website, Company, and Admin provide per-message read/unread and delete controls, page selection checkboxes, bulk read/unread, and bulk delete. The transfer controls are compact in the message toolbar. Bulk operations are authenticated, ownership-scoped, and limited to 100 IDs per request.
 
 Verification: GitHub Actions run [40201945241](https://github.com/gameacc2025/martest/actions/runs/40201945241) passed frontend/shared tests (18/18), backend tests (1156/1156), Prisma Client generation, and production builds for all three frontend apps. Live browser click-through remains for the user to verify after pulling `main`.
+
+
+## Inbox follow-up — stable counters and double-click read (2026-10-25)
+
+The three inbox pages now fetch independent totals for all notifications and each server-managed folder, instead of deriving the read count from whichever folder is currently selected. Folder badges retain their positions and display zero counts instead of disappearing. Counts are refreshed after read-state, deletion, and folder membership changes.
+
+A single click now only selects a message and opens its reading pane. A double-click marks that message as read. Bulk read/unread now updates visible row state immediately after the server confirms the operation, then refreshes the list and counts.
+
+Verification for this follow-up: frontend tests were updated to assert single-click selection does not mark a message read and double-click does. GitHub Actions validation is pending; live browser interactions remain NOT VERIFIED until tested after syncing the local checkout.
