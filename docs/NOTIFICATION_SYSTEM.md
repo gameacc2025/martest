@@ -41,7 +41,10 @@ Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, an
 
 - Website inbox: `apps/website/src/pages/public/Notifications.vue` — route `/notifications`.
 - Website preferences: `apps/website/src/pages/public/NotificationPreferences.vue` — route `/notification-preferences`.
-- Company inbox: `apps/company/src/pages/user/Notifications.vue` — email-style inbox with All/Unread/Read folders, event-type categories, search, message list/reading pane, read/delete actions, and pagination. Category/search filters operate on the currently loaded server page; global category filtering across all pages would require a backend query contract.
+- Company inbox: `apps/company/src/pages/user/Notifications.vue` — email-style inbox with All/Unread/Read folders, event-type categories, search, message list/reading pane, read/delete actions, and pagination. Uses `apiGetPaginated()` and normalizes both paginated envelopes and legacy/nested response shapes. Legacy `type: null` notifications are categorized from title/message text; `ADMIN_ANNOUNCEMENT` is categorized as an announcement.
+- Website/customer inbox: `apps/website/src/pages/public/Notifications.vue` — same categorized inbox and response normalization for ordinary users.
+- Admin inbox: `apps/admin/src/pages/user/Notifications.vue` — same categorized inbox for staff, with the separate notification management/send page still available. Regression tests cover the inbox in all three apps.
+- Category/search filters operate on the currently loaded server page; global category filtering across all pages would require a backend query contract.
 - Company preferences: `apps/company/src/pages/user/NotificationPreferences.vue` — route `/notification-preferences`.
 - Admin preferences: `apps/admin/src/pages/user/NotificationPreferences.vue` — route `/notification-preferences`.
 - Admin management/composition/monitoring: `apps/admin/src/pages/admin/notifications/NotificationManagement.vue` — route `/notification-management`.
