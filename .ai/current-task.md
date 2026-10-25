@@ -1,21 +1,13 @@
 # Current Task / Agent Handoff
 
-## Active — NOTIFICATION-FOLDERS-ADMIN (Stage 2)
-- **Status:** PARTIAL — implementation committed to `main`; verification NOT RUN.
-- **Goal:** Provide fixed Inbox/Saved system folders and admin-managed folder definitions with app scopes.
-- **Implemented:** Prisma models and additive migration; existing notification backfill to Inbox; PostgreSQL trigger puts newly inserted notifications into Inbox; admin-only GET/POST/PATCH folder API; Admin folder management page and navigation; API endpoint constants; notification docs.
-- **Security:** Folder admin endpoints require `system_settings.manage`; system folders cannot be modified through the API; custom folders are deactivated rather than deleted.
-- **Not implemented:** User-facing folder filtering and copy/move/save actions — stage 3.
-- **Verification:** Only GitHub re-fetch/content checks completed. Prisma validation/generation, DB migration application, backend tests, frontend tests/build, and CI are NOT VERIFIED.
-- **Next action:** Run verification and apply migration in a controlled dev environment, then implement stage 3 copy/move/save with ownership and scope enforcement.
+## Active — NOTIFICATION-FOLDERS (Stages 2 and 3)
+- **Status:** Implemented on `main`; CI verification pending.
+- **Stage 2:** Prisma models, additive migration, fixed INBOX/SAVED system folders, backfill of existing notifications to INBOX, trigger assigning future notifications to INBOX; admin-only list/create/update API; Admin management page/navigation; docs.
+- **Stage 3:** App-scoped user folder list API; server-side notification filtering by folder; copy/move API using folder membership; Website, Company, and Admin inbox UIs expose folders, save-to-SAVED, copy and move.
+- **Security:** Admin folder management requires `system_settings.manage`; user endpoints require auth and check notification ownership, app scope, destination active state, and source membership. Copy preserves source membership. Move atomically adds destination and removes source. Canonical notification/read state remains singular.
+- **Verification:** Prisma generation passed on an intermediate commit after correcting the misplaced relation. Backend tests failed on the next commit due route test mocks and old controller expectation; both were corrected. Latest CI runs must be checked before marking green. DB migration has not been applied in a runtime environment.
+- **Next action:** Check latest CI run conclusions; fix any failures. Then apply migration in dev and smoke-test list/save/copy/move. Do not claim runtime verified until actually run.
 
 ## Previous — NOTIFICATION-READ-STATE
-- **Status:** PARTIAL — implementation and tests committed; automated verification NOT VERIFIED.
-- **Goal:** Mark opened notifications as read consistently in Website, Company Portal, and Admin.
-- **Changes:** All three inboxes mark the initially selected unread message as read after loading; manual selection uses existing read endpoint; tests were added but not run locally.
-- **Scope:** No schema/API changes in that task.
-- **Next action:** Verify CI and local browser/runtime after syncing `main`.
-
-## Latest completed task — ALL-APP-NOTIFICATION-INBOX
-- **Status:** DONE — Company, Website/customer, and Admin inboxes updated; prior CI and builds passed for that earlier task.
-- **Prior CI:** https://github.com/gameacc2025/martest/actions/runs/40177071576 (not verification of later changes).
+- **Status:** PARTIAL — implementation and tests committed; automated verification not fully confirmed.
+- **Goal:** Mark opened notifications as read in Website, Company Portal, and Admin.
