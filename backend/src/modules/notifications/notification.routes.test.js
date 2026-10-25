@@ -28,7 +28,7 @@ injectMock('../../config/db', {});
 
 const hit = {};
 const trivialController = {};
-for (const name of ['list', 'getUnreadCount', 'markAsRead', 'markAllAsRead', 'remove']) {
+for (const name of ['list', 'getUnreadCount', 'markAsRead', 'markAllAsRead', 'remove', 'listFolders', 'changeFolder']) {
   trivialController[name] = async (request, reply) => {
     hit[name] = true;
     return reply.code(200).send({ ok: true });
@@ -125,5 +125,30 @@ test('DELETE /:id: without auth -> 401', async () => {
   const app = await buildApp();
   const res = await app.inject({ method: 'DELETE', url: '/api/v1/settings/notifications/1' });
   assert.equal(res.statusCode, 401);
+  await app.close();
+});
+
+test('GET /folders: requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/settings/notifications/folders?app=WEBSITE',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.listFolders, true);
+  await app.close();
+});
+
+test('POST /:id/folders: requires authentication and valid action', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/settings/notifications/1/folders',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }), 'content-type': 'application/json' },
+    payload: { folderId: 2, action: 'copy', app: 'WEBSITE' },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.changeFolder, true);
   await app.close();
 });
