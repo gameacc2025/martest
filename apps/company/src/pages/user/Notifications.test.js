@@ -19,17 +19,41 @@ describe('Company notification inbox', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    apiGet.mockResolvedValue({ count: 1 })
+    apiGet.mockResolvedValue({ count: 13 })
     apiGetPaginated.mockResolvedValue({
-      data: [{
-        id: 101,
-        type: 'PRODUCT_APPROVED',
-        title: 'محصول تأیید شد',
-        message: 'محصول شما پس از بررسی تأیید شد.',
-        isRead: false,
-        createdAt: '2026-10-24T12:00:00.000Z',
-      }],
-      meta: { page: 1, limit: 20, total: 1, totalPages: 1 },
+      data: [
+        {
+          id: 26,
+          userId: 4,
+          type: 'ADMIN_ANNOUNCEMENT',
+          data: { source: 'admin' },
+          title: 'تست1',
+          message: 'تست1',
+          isRead: false,
+          createdAt: '2026-10-25T06:40:52.060Z',
+        },
+        {
+          id: 7,
+          userId: 4,
+          type: null,
+          data: null,
+          title: 'وضعیت محصول تغییر کرد',
+          message: 'محصول «مودم فیبر نوری GPON» برای بررسی کارشناسی ارسال شد.',
+          isRead: false,
+          createdAt: '2026-10-24T16:51:12.496Z',
+        },
+        {
+          id: 8,
+          userId: 4,
+          type: null,
+          data: null,
+          title: 'پاسخ جدید به استعلام',
+          message: 'یک شرکت تأمین‌کننده به استعلام تجهیزات شبکه شما پاسخ داده است.',
+          isRead: false,
+          createdAt: '2026-10-24T16:26:12.496Z',
+        },
+      ],
+      meta: { page: 1, limit: 20, total: 14, totalPages: 1 },
     })
   })
 
@@ -38,7 +62,7 @@ describe('Company notification inbox', () => {
     wrapper = undefined
   })
 
-  it('renders notification rows from the paginated API response', async () => {
+  it('renders messages from the paginated response, including legacy null types', async () => {
     wrapper = shallowMount(Notifications, {
       global: {
         stubs: {
@@ -50,8 +74,12 @@ describe('Company notification inbox', () => {
     await flushPromises()
 
     expect(apiGetPaginated).toHaveBeenCalledWith('/settings/notifications?page=1&limit=20')
-    expect(wrapper.findAll('.message-row')).toHaveLength(1)
-    expect(wrapper.find('.message-row').text()).toContain('محصول تأیید شد')
-    expect(wrapper.text()).toContain('محصول شما پس از بررسی تأیید شد.')
+    expect(wrapper.findAll('.message-row')).toHaveLength(3)
+    expect(wrapper.text()).toContain('تست1')
+    expect(wrapper.text()).toContain('وضعیت محصول تغییر کرد')
+    expect(wrapper.text()).toContain('پاسخ جدید به استعلام')
+    expect(wrapper.text()).toContain('اطلاعیه‌ها')
+    expect(wrapper.text()).toContain('محصولات')
+    expect(wrapper.text()).toContain('استعلام‌ها')
   })
 })
