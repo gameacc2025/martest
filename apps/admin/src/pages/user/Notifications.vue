@@ -18,6 +18,8 @@ const activeFolder = ref('all')
 const activeCategory = ref('all')
 const searchQuery = ref('')
 const busyIds = ref(new Set())
+const selectedIds = ref(new Set())
+const bulkBusy = ref(false)
 const userFolders = ref([])
 const targetFolderId = ref(null)
 const appScope = 'ADMIN'
@@ -84,6 +86,11 @@ const visibleNotifications = computed(() => {
   return notifications.value.filter(item => {
     if (activeFolder.value === 'unread' && item.isRead) return false
     if (activeFolder.value === 'read' && !item.isRead) return false
+    if (Number.isInteger(Number(activeFolder.value))) {
+      const folderId = Number(activeFolder.value)
+      const memberships = (item.folderMemberships || []).map(m => Number(m.folderId ?? m.folder?.id))
+      if (!memberships.includes(folderId)) return false
+    }
     if (activeCategory.value !== 'all' && categoryFor(item) !== activeCategory.value) return false
     if (query && ![item.title, item.message, item.type].some(value => String(value || '').toLocaleLowerCase().includes(query))) return false
     return true
@@ -92,6 +99,9 @@ const visibleNotifications = computed(() => {
 
 const selectedNotification = computed(() =>
   visibleNotifications.value.find(item => item.id === selectedId.value) || null
+)
+const allVisibleSelected = computed(() =>
+  visibleNotifications.value.length > 0 && visibleNotifications.value.every(item => selectedIds.value.has(item.id))
 )
 
 const activeCategoryLabel = computed(() => {
@@ -121,22 +131,17 @@ async function fetchUserFolders() {
 async function fetchNotifications() {
   loading.value = true
   try {
-    const folderQuery = Number.isInteger(Number(activeFolder.value)) ? `&folderId=${Number(activeFolder.value)}` : ''
-    const result = await apiGetPaginated(`${endpoints.notifications.list}?page=${page.value}&limit=20${folderQuery}`)
+    const params = new URLSearchParams({ page: String(page.value), limit: '20' })
+    if (Number.isInteger(Number(activeFolder.value))) params.set('folderId', String(Number(activeFolder.value)))
+    if (activeFolder.value === 'unread') params.set('unreadOnly', 'true')
+    if (activeFolder.value === 'read') params.set('readOnly', 'true')
+    const result = await apiGetPaginated(`${endpoints.notifications.list}?${params.toString()}`)
     const normalized = normalizeNotificationPage(result)
     notifications.value = normalized.data
     total.value = Number(normalized.meta?.total ?? notifications.value.length)
     totalPages.value = Math.max(1, Number(normalized.meta?.totalPages || 1))
-    let openedNotification = notifications.value.find(item => item.id === selectedId.value)
-    if (!openedNotification) {
-      openedNotification = notifications.value[0] ?? null
-      selectedId.value = openedNotification?.id ?? null
-    }
-
-    // The reading pane opens this message automatically, so persist its read state too.
-    if (openedNotification && !openedNotification.isRead) {
-      await markAsRead(openedNotification)
-    }
+    if (!notifications.value.some(item => item.id === selectedId.value)) selectedId.value = notifications.value[0]?.id ?? null
+    selectedIds.value = new Set([...selectedIds.value].filter(id => notifications.value.some(item => item.id === id)))
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'دریافت اعلان‌ها انجام نشد. دوباره تلاش کنید.', life: 3500 })
   } finally {
@@ -155,46 +160,92 @@ async function fetchUnreadCount() {
 
 function openNotification(item) {
   selectedId.value = item.id
-  if (!item.isRead) markAsRead(item)
+  if (!item.isRead) setNotificationReadState(item, true)
 }
 
-async function markAsRead(item) {
-  if (item.isRead || busyIds.value.has(item.id)) return
+async function setNotificationReadState(item, isRead) {
+  if (item.isRead === isRead || busyIds.value.has(item.id)) return
   setBusy(item.id, true)
   try {
-    await apiPatch(endpoints.notifications.read(item.id))
-    item.isRead = true
-    unreadCount.value = Math.max(0, unreadCount.value - 1)
+    await apiPatch(endpoints.notifications.readState(item.id), { isRead })
+    item.isRead = isRead
+    unreadCount.value = Math.max(0, unreadCount.value + (isRead ? -1 : 1))
+    if ((activeFolder.value === 'unread' || activeFolder.value === 'read') && !visibleNotifications.value.some(row => row.id === item.id)) {
+      selectedId.value = null
+      await fetchNotifications()
+    }
+    await fetchUnreadCount()
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'وضعیت پیام به‌روزرسانی نشد.', life: 3000 })
-  } finally {
-    setBusy(item.id, false)
-  }
+  } finally { setBusy(item.id, false) }
 }
 
 async function markAllAsRead() {
-  if (!unreadCount.value) return
+  bulkBusy.value = true
   try {
     await apiPatch(endpoints.notifications.readAll)
     notifications.value.forEach(item => { item.isRead = true })
     unreadCount.value = 0
-    toast.add({ severity: 'success', summary: 'انجام شد', detail: 'همه پیام‌های این صفحه خوانده شدند.', life: 3000 })
+    toast.add({ severity: 'success', summary: 'انجام شد', detail: 'همه پیام‌های خوانده‌نشده به‌عنوان خوانده‌شده علامت خوردند.', life: 3000 })
+    await fetchNotifications()
+    await fetchUnreadCount()
   } catch {
-    toast.add({ severity: 'error', summary: 'خطا', detail: 'علامت‌گذاری پیام‌ها انجام نشد.', life: 3000 })
-  }
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خواندن همه پیام‌ها انجام نشد.', life: 3000 })
+  } finally { bulkBusy.value = false }
+}
+
+function toggleSelection(id, checked) {
+  const next = new Set(selectedIds.value)
+  if (checked) next.add(id); else next.delete(id)
+  selectedIds.value = next
+}
+function toggleVisibleSelection(checked) {
+  const next = new Set(selectedIds.value)
+  for (const item of visibleNotifications.value) { if (checked) next.add(item.id); else next.delete(item.id) }
+  selectedIds.value = next
+}
+function clearSelection() { selectedIds.value = new Set() }
+
+async function bulkSetReadState(isRead) {
+  const ids = [...selectedIds.value]
+  if (!ids.length) return
+  bulkBusy.value = true
+  try {
+    await apiPost(endpoints.notifications.bulkReadState, { ids, isRead })
+    clearSelection()
+    await fetchNotifications(); await fetchUnreadCount()
+    toast.add({ severity: 'success', summary: 'انجام شد', detail: isRead ? 'پیام‌های انتخاب‌شده خوانده شدند.' : 'پیام‌های انتخاب‌شده خوانده‌نشده شدند.', life: 3000 })
+  } catch {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'به‌روزرسانی پیام‌های انتخاب‌شده انجام نشد.', life: 3000 })
+  } finally { bulkBusy.value = false }
 }
 
 async function deleteNotification(item) {
+  if (busyIds.value.has(item.id)) return
+  setBusy(item.id, true)
   try {
     await apiDelete(endpoints.notifications.remove(item.id))
-    notifications.value = notifications.value.filter(row => row.id !== item.id)
-    total.value = Math.max(0, total.value - 1)
-    if (!item.isRead) unreadCount.value = Math.max(0, unreadCount.value - 1)
-    if (selectedId.value === item.id) selectedId.value = visibleNotifications.value[0]?.id ?? notifications.value[0]?.id ?? null
+    selectedIds.value = new Set([...selectedIds.value].filter(id => id !== item.id))
+    if (selectedId.value === item.id) selectedId.value = null
+    await fetchNotifications(); await fetchUnreadCount()
     toast.add({ severity: 'success', summary: 'حذف شد', detail: 'پیام حذف شد.', life: 2500 })
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'حذف پیام انجام نشد.', life: 3000 })
-  }
+  } finally { setBusy(item.id, false) }
+}
+
+async function bulkDeleteNotifications() {
+  const ids = [...selectedIds.value]
+  if (!ids.length) return
+  bulkBusy.value = true
+  try {
+    await apiPost(endpoints.notifications.bulkDelete, { ids })
+    clearSelection(); selectedId.value = null
+    await fetchNotifications(); await fetchUnreadCount()
+    toast.add({ severity: 'success', summary: 'حذف شد', detail: `${ids.length} پیام حذف شد.`, life: 3000 })
+  } catch {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'حذف گروهی پیام‌ها انجام نشد.', life: 3000 })
+  } finally { bulkBusy.value = false }
 }
 
 async function applyFolderAction(item, action, folderId = targetFolderId.value) {
@@ -235,14 +286,18 @@ function setBusy(id, value) {
 
 function selectFolder(folder) {
   activeFolder.value = folder
+  page.value = 1
   selectedId.value = null
-  if (folder === 'all' || Number.isInteger(Number(folder))) activeCategory.value = 'all'
+  clearSelection()
+  activeCategory.value = 'all'
   fetchNotifications()
 }
 
 function selectCategory(category) {
   activeCategory.value = category
+  page.value = 1
   selectedId.value = null
+  clearSelection()
 }
 
 function formatTime(value) {
@@ -287,7 +342,14 @@ function typeLabel(item) {
       </label>
       <div class="toolbar-actions">
         <span class="result-count">{{ visibleNotifications.length }} پیام در این صفحه</span>
-        <Button v-if="unreadCount > 0" label="خواندن همه" icon="pi pi-check-circle" severity="secondary" text @click="markAllAsRead" />
+        <div v-if="selectedIds.size" class="bulk-actions">
+          <span>{{ selectedIds.size }} انتخاب‌شده</span>
+          <Button label="خوانده‌شده" icon="pi pi-envelope-open" severity="secondary" text size="small" :disabled="bulkBusy" @click="bulkSetReadState(true)" />
+          <Button label="خوانده‌نشده" icon="pi pi-envelope" severity="secondary" text size="small" :disabled="bulkBusy" @click="bulkSetReadState(false)" />
+          <Button label="حذف" icon="pi pi-trash" severity="danger" text size="small" :disabled="bulkBusy" @click="bulkDeleteNotifications" />
+          <Button icon="pi pi-times" severity="secondary" text rounded size="small" aria-label="لغو انتخاب" :disabled="bulkBusy" @click="clearSelection" />
+        </div>
+        <Button label="خواندن همه" icon="pi pi-check-circle" severity="secondary" text :loading="bulkBusy" @click="markAllAsRead" />
         <Button icon="pi pi-refresh" severity="secondary" text rounded aria-label="تازه‌سازی پیام‌ها" :loading="loading" @click="fetchNotifications(); fetchUnreadCount()" />
       </div>
     </div>
@@ -321,6 +383,10 @@ function typeLabel(item) {
             <h2>{{ activeCategoryLabel }}</h2>
             <span>{{ activeFolder === 'unread' ? 'پیام‌های خوانده‌نشده' : activeFolder === 'read' ? 'پیام‌های خوانده‌شده' : 'جدیدترین پیام‌ها' }}</span>
           </div>
+          <label class="select-visible">
+            <input type="checkbox" :checked="allVisibleSelected" :indeterminate="selectedIds.size > 0 && !allVisibleSelected" :disabled="!visibleNotifications.length" @change="toggleVisibleSelection($event.target.checked)">
+            <span>انتخاب صفحه</span>
+          </label>
           <span class="list-count">{{ visibleNotifications.length }}</span>
         </div>
 
@@ -331,8 +397,11 @@ function typeLabel(item) {
           <span>{{ searchQuery ? 'عبارت دیگری را جستجو کنید.' : 'در این پوشه اعلانی وجود ندارد.' }}</span>
         </div>
         <div v-else class="message-items">
-          <button v-for="item in visibleNotifications" :key="item.id" type="button" class="message-row"
-            :class="{ selected: selectedId === item.id, unread: !item.isRead }" @click="openNotification(item)">
+          <div v-for="item in visibleNotifications" :key="item.id" class="message-row"
+            :class="{ selected: selectedId === item.id, unread: !item.isRead }" role="button" tabindex="0"
+            @click="openNotification(item)" @keydown.enter.prevent="openNotification(item)">
+            <input type="checkbox" class="row-checkbox" :checked="selectedIds.has(item.id)" :aria-label="`انتخاب پیام ${item.title}`"
+              @click.stop @change="toggleSelection(item.id, $event.target.checked)">
             <span class="row-status" :class="{ 'is-unread': !item.isRead }"><i :class="['pi', item.isRead ? 'pi-envelope-open' : 'pi-envelope']"></i></span>
             <span class="row-content">
               <span class="row-topline"><strong>{{ item.title }}</strong><time>{{ formatTime(item.createdAt) }}</time></span>
@@ -340,7 +409,13 @@ function typeLabel(item) {
               <span class="row-preview">{{ item.message }}</span>
             </span>
             <span v-if="!item.isRead" class="unread-dot" aria-label="خوانده‌نشده"></span>
-          </button>
+            <span class="row-actions" @click.stop>
+              <Button :icon="item.isRead ? 'pi pi-envelope' : 'pi pi-envelope-open'" severity="secondary" text rounded size="small"
+                :aria-label="item.isRead ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان خوانده‌شده'"
+                :loading="busyIds.has(item.id)" @click="setNotificationReadState(item, !item.isRead)" />
+              <Button icon="pi pi-trash" severity="danger" text rounded size="small" aria-label="حذف پیام" :loading="busyIds.has(item.id)" @click="deleteNotification(item)" />
+            </span>
+          </div>
         </div>
 
         <footer v-if="totalPages > 1" class="pagination">
@@ -355,8 +430,15 @@ function typeLabel(item) {
           <div class="reading-toolbar">
             <span class="reading-category"><i class="pi pi-tag"></i>{{ typeLabel(selectedNotification) }}</span>
             <div class="reading-actions">
-              <Button v-if="!selectedNotification.isRead" icon="pi pi-envelope-open" severity="secondary" text rounded aria-label="علامت‌گذاری به‌عنوان خوانده‌شده" :loading="busyIds.has(selectedNotification.id)" @click="markAsRead(selectedNotification)" />
-              <Button icon="pi pi-trash" severity="danger" text rounded aria-label="حذف پیام" @click="deleteNotification(selectedNotification)" />
+              <Button :icon="selectedNotification.isRead ? 'pi pi-envelope' : 'pi pi-envelope-open'" severity="secondary" text rounded
+                :aria-label="selectedNotification.isRead ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان خوانده‌شده'"
+                :loading="busyIds.has(selectedNotification.id)" @click="setNotificationReadState(selectedNotification, !selectedNotification.isRead)" />
+              <Button icon="pi pi-trash" severity="danger" text rounded aria-label="حذف پیام" :loading="busyIds.has(selectedNotification.id)" @click="deleteNotification(selectedNotification)" />
+              <Button icon="pi pi-bookmark" severity="secondary" text rounded aria-label="ذخیره پیام" @click="saveNotification(selectedNotification)" />
+              <select v-model="targetFolderId" class="inline-folder-select" aria-label="انتقال به پوشه">
+                <option v-for="folder in userFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
+              </select>
+              <Button icon="pi pi-folder-open" severity="secondary" text rounded aria-label="انتقال به پوشه انتخاب‌شده" @click="applyFolderAction(selectedNotification, 'move')" />
             </div>
           </div>
           <article class="message-detail">
@@ -366,16 +448,6 @@ function typeLabel(item) {
               <div><strong>سامانه مخابرات</strong><time>{{ formatFullDate(selectedNotification.createdAt) }}</time></div>
             </div>
             <div class="message-body">{{ selectedNotification.message }}</div>
-            <div class="folder-actions">
-              <Button label="ذخیره‌شده‌ها" icon="pi pi-bookmark" severity="secondary" outlined @click="saveNotification(selectedNotification)" />
-              <label class="folder-target">پوشه مقصد
-                <select v-model="targetFolderId" aria-label="پوشه مقصد">
-                  <option v-for="folder in userFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
-                </select>
-              </label>
-              <Button label="کپی" icon="pi pi-copy" severity="secondary" outlined @click="applyFolderAction(selectedNotification, 'copy')" />
-              <Button label="انتقال" icon="pi pi-folder-open" severity="secondary" @click="applyFolderAction(selectedNotification, 'move')" />
-            </div>
             <div class="message-footer"><i class="pi pi-shield"></i> این پیام از طرف سامانه ارسال شده است.</div>
           </article>
         </template>
@@ -423,11 +495,22 @@ function typeLabel(item) {
 .sidebar-note i{margin-top:.15rem;color:var(--primary-color)}
 .message-list-panel{min-width:0;border-left:1px solid var(--surface-border);display:flex;flex-direction:column}
 .list-heading{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.9rem 1rem;border-bottom:1px solid var(--surface-border)}
+.select-visible{display:flex;align-items:center;gap:.35rem;color:var(--text-color-secondary);font-size:.72rem;white-space:nowrap}
+.select-visible input,.row-checkbox{accent-color:var(--primary-color);cursor:pointer}
+.bulk-actions{display:flex;align-items:center;gap:.25rem;flex-wrap:wrap;padding:.25rem .45rem;border:1px solid var(--surface-border);border-radius:8px;background:var(--surface-card)}
+.bulk-actions>span{font-size:.75rem;color:var(--text-color-secondary);padding:0 .3rem}
+
 .list-heading h2{margin:0 0 .2rem;font-size:.95rem;font-weight:800}
 .list-heading span{font-size:.73rem;color:var(--text-color-secondary)}
 .list-count{display:grid;place-items:center;min-width:1.6rem;height:1.6rem;border-radius:6px;background:var(--surface-ground);color:var(--text-color-secondary);font-weight:700}
 .message-items{flex:1}
-.message-row{display:flex;align-items:flex-start;gap:.6rem;width:100%;padding:.85rem .75rem;border:0;border-bottom:1px solid var(--surface-border);background:var(--surface-card);color:var(--text-color);text-align:right;font:inherit;cursor:pointer}
+.message-row{display:flex;align-items:flex-start;gap:.55rem;width:100%;padding:.75rem .65rem;border:0;border-bottom:1px solid var(--surface-border);background:var(--surface-card);color:var(--text-color);text-align:right;font:inherit;cursor:pointer}
+.message-row:focus-visible{outline:2px solid var(--primary-color);outline-offset:-2px}
+.row-checkbox{flex:none;margin:.45rem 0 0}
+.row-actions{display:flex;align-items:center;gap:0;flex:none;opacity:.78}
+.message-row:hover .row-actions,.message-row.selected .row-actions{opacity:1}
+.inline-folder-select{max-width:8.5rem;min-width:6rem;padding:.35rem .4rem;border:1px solid var(--surface-border);border-radius:6px;background:var(--surface-card);color:var(--text-color);font:inherit;font-size:.72rem}
+
 .message-row:hover{background:var(--surface-hover)}
 .message-row.selected{background:color-mix(in srgb,var(--primary-color) 8%,var(--surface-card));box-shadow:inset -3px 0 var(--primary-color)}
 .message-row.unread .row-content>span:first-child strong{font-weight:800}
@@ -465,9 +548,6 @@ function typeLabel(item) {
 .pagination span{font-size:.75rem;color:var(--text-color-secondary)}
 @media(max-width:1180px){.mail-layout{grid-template-columns:170px minmax(260px,1fr)}.reading-panel{grid-column:1/-1;border-top:1px solid var(--surface-border)}.message-list-panel{border-left:0}.reading-panel .message-detail{padding:1rem 1.2rem}}
 @media(max-width:700px){.mail-header{align-items:flex-start}.mail-header h1{font-size:1.35rem}.mail-layout{grid-template-columns:minmax(0,1fr)}.mail-sidebar{border-left:0;border-bottom:1px solid var(--surface-border);padding:.8rem}.mail-sidebar .folder-link{display:inline-flex;width:auto;margin:.1rem}.mail-sidebar .sidebar-heading,.mail-sidebar .sidebar-divider,.mail-sidebar .sidebar-note{display:none}.mail-sidebar .category-link{font-size:.75rem}.message-list-panel{border-bottom:1px solid var(--surface-border)}.reading-panel{grid-column:auto}.mail-toolbar{align-items:stretch}.search-box{max-width:none}.toolbar-actions{justify-content:space-between}.message-detail{padding:1rem}.row-topline{align-items:flex-start;flex-direction:column;gap:.15rem}}
-
-.folder-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--surface-border,#e5e7eb)}
-.folder-target{display:flex;align-items:center;gap:.5rem;font-size:.9rem}
-.folder-target select{max-width:15rem;min-width:10rem;padding:.55rem;border:1px solid var(--surface-border,#d1d5db);border-radius:6px;background:var(--surface-card,#fff);color:inherit}
-@media(max-width:560px){.folder-actions{align-items:stretch;flex-direction:column}.folder-target{align-items:stretch;flex-direction:column}.folder-target select{max-width:none;width:100%}}
+ 
+@media(max-width:560px){.inline-folder-select{max-width:7rem;min-width:5rem}.bulk-actions{width:100%;justify-content:flex-start}}
 </style>
