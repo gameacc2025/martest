@@ -1110,7 +1110,7 @@
 ```
 
 ---
-**Price tier update contract:** `priceTiers` is optional in the PATCH body. If omitted, existing price tiers are unchanged. If supplied, it represents the complete desired set: the backend validates all ranges and atomically replaces the stored set only when the values differ. A price-tier change is recorded in the status/activity history and is included in the product edit review-threshold policy. Do not send only the changed tier; send the complete collection.
+**Price tier update contract:** `priceTiers` is optional in the PATCH body. If omitted, existing price tiers are unchanged. If supplied, it represents the complete desired set: the backend validates all ranges and atomically reconciles the stored set only when the values differ. Include each existing tier's `id` to preserve its identity and validity dates; omit `id` for new tiers. Existing tiers omitted from the submitted collection are deleted. A price-tier change is recorded in the status/activity history and is included in the product edit review-threshold policy. Do not send only the changed tier; send the complete collection.
 
 ---
 
