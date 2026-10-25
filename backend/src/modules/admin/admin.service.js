@@ -136,21 +136,21 @@ async function sendNotification({ title, message, audience, channels }) {
     orderBy: { id: 'asc' },
   });
 
-  const summary = { audience, recipients: users.length, inAppCreated: 0, emailQueued: 0, emailSkipped: 0, smsNotImplemented: 0 };
   const campaignId = require('node:crypto').randomUUID();
-  for (const user of users) {
-    const result = await dispatchNotification(
-      'ADMIN_ANNOUNCEMENT',
-      [{ userId: user.id, email: user.email }],
-      { title, message },
-      { channels, dedupeKey: campaignId + ':' + user.id },
-    );
-    summary.inAppCreated += result.inApp.created;
-    summary.emailQueued += result.email.queued;
-    summary.emailSkipped += result.email.preferenceDisabled + result.email.noEmailAddress;
-    summary.smsNotImplemented += result.sms.notImplemented;
-  }
-  return summary;
+  const result = await dispatchNotification(
+    'ADMIN_ANNOUNCEMENT',
+    users.map((user) => ({ userId: user.id, email: user.email })),
+    { title, message },
+    { channels, dedupeKey: (userId) => campaignId + ':' + userId },
+  );
+  return {
+    audience,
+    recipients: result.recipients,
+    inAppCreated: result.inApp.created,
+    emailQueued: result.email.queued,
+    emailSkipped: result.email.preferenceDisabled + result.email.noEmailAddress,
+    smsNotImplemented: result.sms.notImplemented,
+  };
 }
 
 /**
