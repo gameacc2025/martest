@@ -92,8 +92,23 @@ test('list: forwards pagination + filters + caller to the service', async () => 
   await controller.list(makeRequest({ query: { page: '1', limit: '20', search: 'x', companyId: '3' }, user }), reply);
 
   const [opts] = calls.listProducts;
-  assert.deepEqual(opts.filters, { search: 'x', companyId: '3', categoryId: undefined, status: undefined });
+  assert.deepEqual(opts.filters, {
+    search: 'x', companyId: '3', categoryId: undefined, status: undefined,
+    minPrice: undefined, maxPrice: undefined, featured: undefined, sortBy: undefined, sortOrder: undefined,
+  });
   assert.equal(opts.caller, user);
+});
+
+test('list: forwards price, featured, and sorting query filters', async () => {
+  const reply = makeReply();
+  await controller.list(makeRequest({
+    query: { minPrice: '100', maxPrice: '500', featured: 'true', sortBy: 'title', sortOrder: 'asc' },
+  }), reply);
+
+  assert.deepEqual(calls.listProducts[0].filters, {
+    search: undefined, companyId: undefined, categoryId: undefined, status: undefined,
+    minPrice: '100', maxPrice: '500', featured: 'true', sortBy: 'title', sortOrder: 'asc',
+  });
 });
 
 // ── myProducts — the admin-vs-company scoping branch ────────────
