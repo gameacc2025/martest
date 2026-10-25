@@ -16,7 +16,7 @@ const emailProvider = require('./notification.email.provider');
 const { notificationMaxAttempts, notificationPollIntervalMs } = require('../../config/env');
 
 // Default poll limit if not configured
-const POLL_LIMIT = notificationPollIntervalMs || 100;
+const POLL_LIMIT = 100;
 
 /**
  * Process pending EMAIL deliveries.
@@ -128,7 +128,7 @@ async function markDeliverySkipped(id, reason) {
     data: {
       status: 'SKIPPED',
       lastError: reason,
-      sentAt: new Date(),
+      sentAt: null,
       updatedAt: new Date(),
     },
   });
