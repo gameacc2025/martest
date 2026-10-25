@@ -76,13 +76,14 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
         html: undefined, // Could add HTML template support later
       };
 
-      await emailProvider.sendEmail(emailOpts);
+      const providerResult = await emailProvider.sendEmail(emailOpts);
 
       // Mark as sent
       await prisma.notificationDelivery.update({
         where: { id: delivery.id },
         data: {
           status: 'SENT',
+          provider: providerResult?.provider || 'smtp',
           sentAt: new Date(),
           attempts: delivery.attempts + 1,
           updatedAt: new Date(),
