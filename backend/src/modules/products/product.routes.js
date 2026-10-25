@@ -88,6 +88,23 @@ const updateProductSchema = {
     // before persisting. It is intentionally NOT part of the create schema.
     properties: {
       ...productBodyProperties,
+      priceTiers: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['minQuantity', 'price'],
+          additionalProperties: false,
+          properties: {
+            id: { type: 'integer', minimum: 1 },
+            minQuantity: { type: 'integer', minimum: 1 },
+            maxQuantity: { anyOf: [{ type: 'integer', minimum: 1 }, { type: 'null' }] },
+            price: { type: 'number', minimum: 0 },
+            unit: { anyOf: [{ type: 'string' }, { type: 'null' }] },
+            validFrom: { type: 'string', format: 'date-time' },
+            validTo: { type: 'string', format: 'date-time' },
+          },
+        },
+      },
       changeReason: { type: 'string', maxLength: 2000 },
     },
   },
