@@ -1,5 +1,14 @@
 # Shared AI Agent Protocol
 
+
+## 0. User-facing language rule
+
+- All agent-to-user communication must be in **English**, regardless of the language used by the user.
+- This includes task plans, clarifying questions, status/progress updates, explanations, recommendations, test reports, handoffs, and final answers.
+- Do not answer in the user's language merely to mirror it.
+- Product content is separate: when the task requires localized UI, translations, test fixtures, or copy in another language, produce that deliverable in the required language, but explain the work to the user in English.
+- Preserve exact technical names and quoted text where necessary; provide the surrounding explanation in English.
+
 This is the operational companion to root `AGENTS.md`. Every agent must follow both.
 
 ## 1. Startup gate (every new task/session)
