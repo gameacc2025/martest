@@ -37,6 +37,15 @@ async function updateReviewEditThreshold(request, reply) {
 }
 
 /**
+ * POST /api/v1/admin/notifications/send
+ * Send an announcement to an authorized audience.
+ */
+async function sendNotificationCtrl(request, reply) {
+  const result = await adminService.sendNotification(request.body);
+  return reply.code(202).send({ data: result });
+}
+
+/**
  * GET /api/v1/admin/notifications/delivery-stats
  * Get delivery statistics for monitoring dashboard.
  */
@@ -70,4 +79,4 @@ async function listDeliveriesCtrl(request, reply) {
   return reply.send({ data: result.data, meta: result.meta });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, getDeliveryStatsCtrl, listDeliveriesCtrl };
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl };
