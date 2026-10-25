@@ -115,10 +115,17 @@ export const dashboardMenu = [
     ],
   },
   {
+    section: 'ارتباط با کاربران',
+    items: [
+      { title: 'ارسال و پایش اعلان‌ها', icon: 'pi pi-send', route: 'admin-notification-management', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], permission: 'notifications.send' },
+    ],
+  },
+  {
     section: 'حساب کاربری',
     items: [
       { title: 'پروفایل من', icon: 'pi pi-user', route: 'profile' },
       { title: 'اعلان‌ها', icon: 'pi pi-bell', route: 'notifications' },
+      { title: 'تنظیمات اعلان‌ها', icon: 'pi pi-sliders-h', route: 'notification-preferences' },
       { title: 'تغییر رمز عبور', icon: 'pi pi-key', route: 'change-password' },
       // Flattened out of a "تنظیمات" submenu it didn't belong under — this
       // is a link out of the app, not a setting.
