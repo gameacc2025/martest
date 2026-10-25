@@ -244,7 +244,7 @@ function logout() {
               <span>داشبورد شرکت</span>
             </a>
 
-            <a :href="panelStartUrl(companyAppUrl, '/notifications')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <a :href="notificationHref" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-bell"></i>
               <span>اعلان‌ها {{ notificationCount > 0 ? `(${notificationCount})` : '' }}</span>
             </a>
