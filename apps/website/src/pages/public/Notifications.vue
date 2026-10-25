@@ -46,8 +46,11 @@ function normalizeNotificationPage(result) {
 function categoryFor(item) {
   const type = String(item?.type || '').toUpperCase()
   if (type === 'ADMIN_ANNOUNCEMENT' || type.startsWith('ANNOUNCEMENT_') || type.startsWith('SYSTEM_')) return 'system'
-  const typedCategory = categoryDefinitions.find(category => category.matches(type))
-  if (type && typedCategory) return typedCategory.id
+  if (type) {
+    const typedCategory = categoryDefinitions.find(category => category.id !== 'other' && category.matches(type))
+    if (typedCategory) return typedCategory.id
+    return 'other'
+  }
 
   // Legacy notifications may have a null type. Classify those from their
   // human-readable title/message so they do not all fall into "Other".
