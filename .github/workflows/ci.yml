@@ -30,6 +30,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Run frontend/shared tests
         run: pnpm test
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
       - name: Run backend tests
         run: pnpm --dir backend test
       - name: Build all frontend apps
