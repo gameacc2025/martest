@@ -43,3 +43,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Changes written directly to remote `main`.
 - **Risks / open questions:** Existing external agent sessions will only follow this policy after they load the updated repository instructions; this file change cannot retroactively change an already-running model's system-level instructions.
 - **Next action:** Ensure each agent tool/session loads `AGENTS.md` and its tool-specific instructions before work.
+
+
+## 2026-10-25 — NOTIFICATIONS-INBOX-UX — Email-style notification inbox
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Replace the plain Company Portal notification list with an email-like inbox so users can browse messages by folder/category and read selected messages.
+- **Claimed scope:** apps/company/src/pages/user/Notifications.vue, .ai/current-task.md, and this worklog entry. No backend/schema changes planned.
+- **Evidence:** Current page is a basic vertical list; Notification records include type, title, message, isRead, and createdAt. Existing APIs support listing, unread count, mark one/all read, and delete.
+- **Plan:** Add All/Unread/Read folders, event-type category filters, local search, a message list and reading pane, responsive behavior, and retain current API actions.
+- **Verification:** NOT RUN yet. This task is being edited via GitHub tools, not a local checkout.
+- **Commit:** Pending
+- **Push:** Not yet written
+- **Risks / open questions:** Category filtering can only group notifications returned by the current server page; no backend query contract exists for category-specific pagination. Keep this explicit in UI behavior and preserve existing pagination.
+- **Next action:** Implement the scoped UI, review the full source, re-fetch from GitHub, and report tests as NOT RUN unless actually executed.
