@@ -1151,6 +1151,26 @@ test('updateProduct: replaces changed price tiers atomically and records the pri
   assert.equal(calls['productStatusHistory.create'].some((call) => call.data.comment === 'تغییر ردیف‌های قیمت محصول'), true);
 });
 
+test('updateProduct: price tier reconciliation still completes when the edit threshold is crossed', async () => {
+  fx.product = publishedProduct({ editsSinceApproval: 4 });
+  fx.priceTiers = [{
+    id: 7, productId: 1, minQuantity: 1, maxQuantity: null, price: '100', unit: null,
+    validFrom: new Date('2020-01-01T00:00:00.000Z'), validTo: null,
+  }];
+  fx.superAdminUserIds = [99];
+
+  await service.updateProduct(1, {
+    title: 'Updated',
+    priceTiers: [{ id: 7, minQuantity: 1, price: 125 }],
+  }, companyA);
+
+  const productUpdate = calls['product.update'].at(-1);
+  assert.equal(productUpdate.data.status, 'PENDING_REVIEW');
+  assert.equal(productUpdate.data.editsSinceApproval, 0);
+  assert.equal(calls['productPriceTier.update'].at(-1).data.price, 125);
+  assert.equal(calls['notification.createMany'].length > 0, true);
+});
+
 test('updateProduct: updates an existing price tier by ID and preserves validity metadata', async () => {
   const validFrom = new Date('2020-01-01T00:00:00.000Z');
   fx.product = editableProduct({ status: 'DRAFT' });
