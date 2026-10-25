@@ -50,9 +50,9 @@
             </div>
           </div>
 
-          <div class="product-rating">
-            <Rating :modelValue="product.rating || 0" :cancel="false" readonly />
-            <span class="product-reviews-count">({{ product.reviewsCount || 0 }})</span>
+          <div v-if="Number(product.rating) > 0" class="product-rating">
+            <Rating :modelValue="Number(product.rating)" :cancel="false" readonly />
+            <span v-if="Number(product.reviewsCount) > 0" class="product-reviews-count">({{ product.reviewsCount }})</span>
           </div>
 
           <div class="price-section">
