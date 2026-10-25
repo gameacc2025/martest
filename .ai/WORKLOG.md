@@ -212,3 +212,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** The current-task documentation commit was written directly to remote `main` using the GitHub repository integration; remote head verification still required.
 - **Risks / open questions:** Need to inspect the full route/service behavior and current CI before choosing code changes. Do not modify permission/business rules, Prisma schema, or migrations without approval when impact is consequential.
 - **Next:** Continue cross-layer audit; add confirmed findings to issue #2; then implement narrowly scoped, test-backed fixes or leave clearly prioritized follow-up tasks.
+
+
+### Product audit milestone — 2026-10-25
+
+- **Status:** IN_PROGRESS; remote inspection milestone complete, implementation pending local verification capability.
+- **Confirmed from source:** Public list queries are forced to `PUBLISHED` + `PUBLIC`; public detail fetches enforce the same for anonymous/non-company callers. Product service defines lifecycle transitions and the configurable post-approval edit threshold. Company ownership checks are present in service helpers, and the management controller contains a SUPER_ADMIN branch that avoids companyId scoping.
+- **Confirmed catalog contract gap:** Homepage derives “featured” and “best sellers” from slices of the first returned products rather than the `isFeatured` field or sales data. Product controller listing extracts only search/company/category/status; the service does not apply the website's price-range, stock, featured, or sort parameters. Tracked in [issue #3](https://github.com/gameacc2025/martest/issues/3). The current route maps `/products` to `ProductListing.vue`; `Products.vue` may be legacy and must be confirmed before changes.
+- **Issue tracking:** Lifecycle end-to-end audit #2; listing/filter/featured contract #3.
+- **Documentation commit:** `be84ac7408f19442913a40c6594c57cd7999e3d1` — updated current-task findings and handoff. Earlier claim commit: `ec09fe3e95db860b18757da83879ac0da391176b`.
+- **Verification:** Source inspection only. Tests/builds/browser/manual reproduction and local Git status remain **NOT RUN** because this session has no active local checkout/runtime. No product implementation changes have been made.
+- **Next:** Obtain/use local checkout, inspect CI status and all product tests; reproduce catalog behavior; implement and verify fixes in scoped commits; update product/API docs and AI-agent context at each milestone.
