@@ -141,6 +141,19 @@ const EVENT_CATALOG = {
     }),
   },
 
+  // Admin-created announcement sent to an explicitly selected audience.
+  ADMIN_ANNOUNCEMENT: {
+    key: 'ADMIN_ANNOUNCEMENT',
+    label: 'اطلاعیه مدیریت',
+    recipients: 'Active users selected by an authorized staff member',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ title, message }) => ({
+      title: String(title || 'اطلاعیه جدید').trim(),
+      message: String(message || '').trim(),
+      data: { source: 'admin' },
+    }),
+  },
+
   // ── Order / Cart (flow/04) — RESERVED contract, no Order model yet ──
   ORDER_PLACED: {
     key: 'ORDER_PLACED',
