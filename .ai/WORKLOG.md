@@ -157,3 +157,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Added route wiring tests for folder list and copy/move route; adjusted controller options to keep previous list contract stable. CI runs for latest commits are in progress; do not claim green until checked.
 - **Migration:** Not applied to a live/dev DB. Must apply via reviewed Prisma workflow before testing runtime.
 - **Next:** Confirm CI success, inspect any remaining failures, and run migration/app smoke tests in a controlled environment.
+
+
+## 2026-10-25 — NOTIFICATION-FOLDERS-CLOSEOUT — Complete Stage 2/3 verification
+- **Status:** DONE — folder implementation is committed to `main`; CI passed for the folder-action test suite.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Close the notification folder task by repairing CI, adding security-focused service coverage, and synchronizing documentation/handoff.
+- **Claimed scope:** Admin route tests, notification folder service tests, notification/API docs, current-task handoff. No schema or production-data changes.
+- **Changes:** Updated admin route test mocks for the three folder-management handlers and added tests for folder list/create/update permission wiring (commit `53dcf7e3fcf910461bd500ff284f0bd41c87466f`). Added service tests for app scope, notification ownership, active/scope-valid destinations, copy membership, transactional move, and invalid source membership (commit `a7473f22637415f36ecd2ec90df272e4a9403c24`). Updated notification and API documentation and this handoff.
+- **Verification:** GitHub Actions run [40199219352](https://github.com/gameacc2025/martest/actions/runs/40199219352) passed: frontend/shared tests 18/18; backend tests 1149/1149; Prisma Client generation; Website, Company, and Admin production builds. Run [40199100910](https://github.com/gameacc2025/martest/actions/runs/40199100910) also passed after the admin-route test fix.
+- **Development database:** User created `telecom_marketplace_backup.dump`, applied `20261025130000_notification_folders`, verified `INBOX` and `SAVED` and 26 Inbox memberships, confirmed an empty Prisma schema diff, and confirmed `prisma migrate status` reports the database schema up to date.
+- **Runtime limits:** User confirmed the notification folder UI works; this session did not independently click through copy/move in the live browser. Live copy/move behavior remains NOT VERIFIED. The Prisma package.json configuration deprecation warning remains non-blocking.
+- **Commit:** Test commits above; documentation/handoff closeout committed together after CI passed.
+- **Push:** Directly committed to remote `main` through the GitHub repository API; verify the new HEAD after updating the ref.
+- **Risks / open questions:** The development database was baselined because its existing schema had no `_prisma_migrations` table; other environments require their own reviewed migration/baseline procedure. Do not re-run the folder SQL against the already-migrated development database.
+- **Next action:** User syncs local `main`; if live copy/move clicks fail, capture the network request/response for diagnosis. Otherwise await the next prioritized project task.

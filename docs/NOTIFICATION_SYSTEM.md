@@ -87,9 +87,10 @@ be disabled without deleting their memberships. Folder administration is restric
 `system_settings.manage` and is available at `/notification-folders` in the Admin
 app. The API is under `/api/v1/admin/notifications/folders`.
 
-Copy/move membership actions and user-facing folder filtering are intentionally the
-next phase; do not imply they are already available. Apply the migration through the
-project's reviewed Prisma migration deployment workflow before using the folder API.
+User-facing folder filtering and copy/move membership actions are implemented below.
+The development database used for this task has been migrated and verified. For other
+environments, follow the reviewed Prisma migration/baseline workflow; do not re-run the
+folder migration against a database where it has already been applied.
 
 
 ## User folder actions (2026-10-25)
@@ -102,6 +103,9 @@ destination membership and removes the selected source membership in a transacti
 pages expose folder selection, save-to-SAVED, copy, and move actions. The canonical notification row
 and its read state are not duplicated by folder operations.
 
-Verification is pending CI for the latest commits. The database migration has not been applied to any
-runtime environment as part of this change; apply it through the project's approved development migration
-workflow before trying the folder endpoints against a live database.
+Verification and environment status:
+- GitHub Actions run [40199219352](https://github.com/gameacc2025/martest/actions/runs/40199219352) passed: frontend/shared tests (18/18), backend tests (1149/1149), Prisma Client generation, and production builds for Website, Company, and Admin.
+- The user applied the folder migration in the development database after creating a backup. The two system folders were confirmed, with 26 existing notifications associated with INBOX and none with SAVED.
+- `prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script` returned an empty migration, and `prisma migrate status` reported `Database schema is up to date!`.
+- The user confirmed the folder UI is working. Live copy/move clicks were not independently exercised in this session and remain NOT VERIFIED.
+- The Prisma `package.json#prisma` deprecation warning is non-blocking and was not changed as part of this task.
