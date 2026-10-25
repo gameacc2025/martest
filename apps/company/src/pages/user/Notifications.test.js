@@ -20,6 +20,7 @@ describe('Company notification inbox', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     apiGet.mockResolvedValue({ count: 13 })
+    apiPatch.mockResolvedValue({ success: true })
     apiGetPaginated.mockResolvedValue({
       data: [
         {
