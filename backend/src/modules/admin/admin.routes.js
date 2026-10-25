@@ -53,6 +53,46 @@ async function adminRoutes(fastify) {
       body: thresholdBodySchema,
     },
   }, ctrl.updateReviewEditThreshold);
+
+  // ── Admin-created announcements ───────────────────────────────
+  fastify.post('/notifications/send', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('notifications.send')],
+    schema: {
+      summary: 'Send an announcement to active users',
+      tags: ['Notifications'],
+      body: {
+        type: 'object',
+        required: ['title', 'message', 'audience', 'channels'],
+        additionalProperties: false,
+        properties: {
+          title: { type: 'string', minLength: 1, maxLength: 120 },
+          message: { type: 'string', minLength: 1, maxLength: 5000 },
+          audience: { type: 'string', enum: ['ALL_ACTIVE', 'CUSTOMER', 'COMPANY', 'STAFF'] },
+          channels: { type: 'array', minItems: 1, uniqueItems: true, items: { type: 'string', enum: ['IN_APP', 'EMAIL'] } },
+        },
+      },
+    },
+  }, ctrl.sendNotificationCtrl);
+
+  // ── Notification delivery monitoring ──────────────────────────
+  fastify.get('/notifications/delivery-stats', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('delivery.view')],
+    schema: {
+      summary: 'Get notification delivery statistics',
+      tags: ['Admin'],
+    },
+  }, ctrl.getDeliveryStatsCtrl);
+
+  fastify.get('/notifications/deliveries', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requirePermission('delivery.view')],
+    schema: {
+      summary: 'List notification deliveries for monitoring',
+      tags: ['Admin'],
+    },
+  }, ctrl.listDeliveriesCtrl);
 }
 
 module.exports = adminRoutes;

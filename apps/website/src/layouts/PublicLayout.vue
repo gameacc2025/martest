@@ -15,9 +15,8 @@ const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-// The website is a PUBLIC marketplace only — it has no dashboard, profile, or
-// notifications routes. Those live in separate apps (company / admin). We link
-// out to them via env-configured origins instead of internal router names.
+// CUSTOMER notifications live on the website. COMPANY and STAFF users are
+// redirected to their own panels through the configured PKCE handoff URLs.
 const companyAppUrl = import.meta.env.VITE_COMPANY_APP_URL || ''
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || ''
 
@@ -53,6 +52,11 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 //   COMPANY → Company App link
 const canAccessDashboard = computed(() => authStore.isStaff)
 const canAccessCompanyDashboard = computed(() => authStore.isCompany)
+const notificationHref = computed(() => {
+  if (canAccessDashboard.value) return panelStartUrl(adminAppUrl, '/notifications')
+  if (canAccessCompanyDashboard.value) return panelStartUrl(companyAppUrl, '/notifications')
+  return '/notifications'
+})
 
 
 const displayName = computed(() => {
@@ -168,7 +172,7 @@ function logout() {
             </div>
 
             <template v-if="user">
-              <a :href="panelStartUrl(companyAppUrl, '/notifications')" class="public-icon-link public-notifications-link">
+              <a :href="notificationHref" class="public-icon-link public-notifications-link">
                 <i class="pi pi-bell"></i>
                 <span v-if="notificationCount > 0" class="public-cart-badge">{{ notificationCount }}</span>
               </a>

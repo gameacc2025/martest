@@ -76,6 +76,7 @@ const routes = [
       { path: "/my-products", name: "my-products", component: () => import("../pages/user/MyProducts.vue"), meta: { title: "محصولات من" } },
       { path: "/change-password", name: "change-password", component: () => import("../pages/user/ChangePassword.vue"), meta: { title: "تغییر رمز عبور" } },
       { path: "/notifications", name: "notifications", component: () => import("../pages/user/Notifications.vue"), meta: { title: "اعلان‌ها" } },
+      { path: "/notification-preferences", name: "notification-preferences", component: () => import("../pages/user/NotificationPreferences.vue"), meta: { title: "تنظیمات اعلان‌ها" } },
       // Company product management (company users access via products permission)
       { path: "/products", name: "manage-products", component: () => import("../pages/company/products/ProductList.vue"), meta: { title: "مدیریت محصولات" } },
       { path: "/products/create", name: "manage-product-create", component: () => import("../pages/company/products/ProductForm.vue"), meta: { title: "ایجاد محصول جدید" } },

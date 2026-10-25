@@ -46,6 +46,28 @@ const env = {
   superAdminPhone: process.env.SUPER_ADMIN_PHONE || '09120000000',
   superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || 'Admin@123456',
   superAdminEmail: process.env.SUPER_ADMIN_EMAIL || 'admin@telecommarketplace.local',
+
+  // ── Notifications ──────────────────────────────────────────────
+  // Email provider configuration. When SMTP_HOST is not set, the
+  // delivery worker falls back to a console adapter that logs the
+  // message — useful for local development and tests.
+  smtpHost: process.env.SMTP_HOST || null,
+  smtpPort: parseInt(process.env.SMTP_PORT, 10) || 587,
+  smtpUser: process.env.SMTP_USER || null,
+  smtpPass: process.env.SMTP_PASS || null,
+  smtpFrom: process.env.SMTP_FROM || 'noreply@telecommarketplace.local',
+  // SMS provider configuration (Twilio). When not set, SMS is never queued
+  // by the delivery worker — the dispatch service already marks SMS as
+  // notImplemented.
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || null,
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || null,
+  twilioFromNumber: process.env.TWILIO_FROM_NUMBER || null,
+  // Max delivery attempts for EMAIL outbox rows (mirrored in dispatch service).
+  notificationMaxAttempts: parseInt(process.env.NOTIFICATION_MAX_ATTEMPTS, 10) || 3,
+  // How often the delivery worker polls for PENDING rows.
+  notificationPollIntervalMs: parseInt(process.env.NOTIFICATION_POLL_INTERVAL_MS, 10) || 5000,
+  // Base URL for the API (used in email links).
+  apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:3000/api/v1',
 };
 
 // Required variables — app will not start without these

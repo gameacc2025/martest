@@ -60,6 +60,7 @@ const EXPECTED_EVENT_KEYS = [
   'ORDER_PAYMENT_FAILED',
   'ORDER_ITEM_STATUS_CHANGED',
   'ORDER_UNANSWERED_REMINDER',
+  'ADMIN_ANNOUNCEMENT',
 ];
 
 test('catalog: every event promised by flow/06 §5 exists', () => {
@@ -111,6 +112,7 @@ test('catalog: templates produce { title, message, data } from context', () => {
     ORDER_PAYMENT_FAILED: { order: { id: 5 }, reason: 'card declined' },
     ORDER_ITEM_STATUS_CHANGED: { order: { id: 2 }, item: { id: 3, name: 'item' }, status: 'SHIPPED' },
     ORDER_UNANSWERED_REMINDER: { order: { id: 9 }, company: { id: 1 } },
+    ADMIN_ANNOUNCEMENT: { title: 'اطلاعیه آزمایشی', message: 'متن اطلاعیه' },
   };
 
   for (const event of listEvents()) {

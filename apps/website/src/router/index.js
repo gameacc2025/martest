@@ -31,6 +31,18 @@ const routes = [
     children: [
       { path: "", name: "home", component: Home, meta: { title: "صفحه اصلی" } },
       {
+        path: "notifications",
+        name: "notifications",
+        component: () => import("../pages/public/Notifications.vue"),
+        meta: { title: "اعلان‌های من", requiresAuth: true },
+      },
+      {
+        path: "notification-preferences",
+        name: "notification-preferences",
+        component: () => import("../pages/public/NotificationPreferences.vue"),
+        meta: { title: "تنظیمات اعلان‌ها", requiresAuth: true },
+      },
+      {
         path: "categories",
         name: "categories",
         component: Categories,

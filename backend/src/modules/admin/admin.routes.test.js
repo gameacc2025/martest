@@ -40,6 +40,12 @@ const trivialController = {
     hit.updateReviewEditThreshold = request.body;
     return reply.code(200).send({ productReviewEditThreshold: request.body.value });
   },
+  sendNotificationCtrl: async (request, reply) => {
+    hit.sendNotification = request.body;
+    return reply.code(202).send({ data: { recipients: 3 } });
+  },
+  getDeliveryStatsCtrl: async (request, reply) => reply.code(200).send({ data: {} }),
+  listDeliveriesCtrl: async (request, reply) => reply.code(200).send({ data: [], meta: { total: 0, totalPages: 1 } }),
 };
 injectMock('./admin.controller', trivialController);
 
@@ -64,6 +70,37 @@ function userHeader(permissions) {
 }
 
 test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
+
+test('POST /notifications/send: requires notifications.send and forwards validated payload', async () => {
+  const app = await buildApp();
+  const payload = { title: 'اطلاعیه', message: 'متن اطلاعیه', audience: 'CUSTOMER', channels: ['IN_APP', 'EMAIL'] };
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/admin/notifications/send',
+    headers: userHeader(['notifications.send']),
+    payload,
+  });
+  assert.equal(res.statusCode, 202);
+  assert.deepEqual(hit.sendNotification, payload);
+  await app.close();
+});
+
+test('POST /notifications/send: rejects invalid audience and missing permission', async () => {
+  const app = await buildApp();
+  const denied = await app.inject({
+    method: 'POST', url: '/api/v1/admin/notifications/send',
+    headers: userHeader(['users.read']),
+    payload: { title: 'اطلاعیه', message: 'متن', audience: 'CUSTOMER', channels: ['IN_APP'] },
+  });
+  assert.equal(denied.statusCode, 403);
+  const invalid = await app.inject({
+    method: 'POST', url: '/api/v1/admin/notifications/send',
+    headers: userHeader(['notifications.send']),
+    payload: { title: 'اطلاعیه', message: 'متن', audience: 'UNKNOWN', channels: ['IN_APP'] },
+  });
+  assert.equal(invalid.statusCode, 400);
+  await app.close();
+});
 
 test('GET /stats: requires users.read permission', async () => {
   const app = await buildApp();

@@ -47,7 +47,7 @@ async function buildApp() {
     }
     request.user = JSON.parse(raw);
   });
-  await app.register(notificationRoutes, { prefix: '/api/v1/notifications' });
+  await app.register(notificationRoutes, { prefix: '/api/v1/settings/notifications' });
   await app.ready();
   return app;
 }
@@ -58,7 +58,7 @@ test('GET /: requires authentication', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET',
-    url: '/api/v1/notifications',
+    url: '/api/v1/settings/notifications',
     headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
   });
   assert.equal(res.statusCode, 200);
@@ -68,7 +68,7 @@ test('GET /: requires authentication', async () => {
 
 test('GET /: without auth -> 401', async () => {
   const app = await buildApp();
-  const res = await app.inject({ method: 'GET', url: '/api/v1/notifications' });
+  const res = await app.inject({ method: 'GET', url: '/api/v1/settings/notifications' });
   assert.equal(res.statusCode, 401);
   await app.close();
 });
@@ -77,7 +77,7 @@ test('GET /unread-count: requires authentication', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET',
-    url: '/api/v1/notifications/unread-count',
+    url: '/api/v1/settings/notifications/unread-count',
     headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
   });
   assert.equal(res.statusCode, 200);
@@ -89,7 +89,7 @@ test('PATCH /:id/read: requires authentication', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'PATCH',
-    url: '/api/v1/notifications/1/read',
+    url: '/api/v1/settings/notifications/1/read',
     headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
   });
   assert.equal(res.statusCode, 200);
@@ -101,7 +101,7 @@ test('PATCH /read-all: requires authentication', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'PATCH',
-    url: '/api/v1/notifications/read-all',
+    url: '/api/v1/settings/notifications/read-all',
     headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
   });
   assert.equal(res.statusCode, 200);
@@ -113,7 +113,7 @@ test('DELETE /:id: requires authentication', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'DELETE',
-    url: '/api/v1/notifications/1',
+    url: '/api/v1/settings/notifications/1',
     headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
   });
   assert.equal(res.statusCode, 200);
@@ -123,7 +123,7 @@ test('DELETE /:id: requires authentication', async () => {
 
 test('DELETE /:id: without auth -> 401', async () => {
   const app = await buildApp();
-  const res = await app.inject({ method: 'DELETE', url: '/api/v1/notifications/1' });
+  const res = await app.inject({ method: 'DELETE', url: '/api/v1/settings/notifications/1' });
   assert.equal(res.statusCode, 401);
   await app.close();
 });

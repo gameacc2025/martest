@@ -3,15 +3,38 @@
  */
 
 const ctrl = require('./notification.controller');
+const prefCtrl = require('./notification.preference.controller');
+const schema = require('./notification.schemas');
 
 async function notificationRoutes(fastify) {
   fastify.addHook('onRequest', fastify.authenticate);
 
+  // ── User-facing notification CRUD ─────────────────────────────
   fastify.get('/', ctrl.list);
   fastify.get('/unread-count', ctrl.getUnreadCount);
   fastify.patch('/:id/read', ctrl.markAsRead);
   fastify.patch('/read-all', ctrl.markAllAsRead);
   fastify.delete('/:id', ctrl.remove);
+
+  // ── User notification preferences ─────────────────────────────
+  // GET    /preferences — effective (stored + defaults) matrix
+  // PATCH  /preferences — batch update user's (eventType, channel, enabled) rows
+  fastify.get('/preferences', {
+    schema: {
+      summary: 'Get effective notification preferences (stored overrides + event defaults)',
+      tags: ['Preferences'],
+    },
+  }, prefCtrl.getPreferencesCtrl);
+
+  fastify.patch('/preferences', {
+    schema: {
+      summary: 'Batch update notification preferences',
+      description: 'Array of { eventType, channel, enabled } — unknown keys/channels are rejected with 400.',
+      tags: ['Preferences'],
+      body: schema.preferenceUpdateBodySchema,
+      response: schema.preferenceResponseSchema,
+    },
+  }, prefCtrl.updatePreferencesCtrl);
 }
 
 module.exports = notificationRoutes;

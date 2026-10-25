@@ -116,11 +116,25 @@ export const endpoints = {
     notifications: '/settings/notifications',
     changePassword: '/settings/change-password'
   },
+  // Notifications (user-facing inbox and preferences)
+  notifications: {
+    list: '/settings/notifications',
+    unreadCount: '/settings/notifications/unread-count',
+    read: (id) => `/settings/notifications/${id}/read`,
+    readAll: '/settings/notifications/read-all',
+    remove: (id) => `/settings/notifications/${id}`,
+    preferences: '/settings/notifications/preferences',
+  },
   // Admin
   admin: {
     stats: '/admin/stats',
     settings: '/admin/settings',
     productReviewThreshold: '/admin/settings/product-review-threshold',
+    notifications: {
+      send: '/admin/notifications/send',
+      deliveryStats: '/admin/notifications/delivery-stats',
+      deliveries: '/admin/notifications/deliveries',
+    },
     roles: '/roles',
     getRole: (id) => `/roles/${id}`,
     assignableRoles: '/roles/assignable',

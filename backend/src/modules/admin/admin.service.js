@@ -3,6 +3,8 @@
 // =============================================================
 
 const prisma = require('../../config/db');
+const deliveryService = require('../notifications/notification.delivery.service');
+const { dispatchNotification } = require('../notifications/notification.dispatch.service');
 const { AppError } = require('../../utils/error');
 
 // System settings keys. Value is shared with the products module
@@ -119,4 +121,50 @@ async function getStats() {
   };
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold };
+/**
+ * Send an admin announcement to active users in a selected access profile.
+ * Delivery preferences are honored by the central dispatcher.
+ */
+async function sendNotification({ title, message, audience, channels }) {
+  const where = { status: 'ACTIVE' };
+  if (audience !== 'ALL_ACTIVE') {
+    where.accessProfile = { type: audience, isActive: true };
+  }
+  const users = await prisma.user.findMany({
+    where,
+    select: { id: true, email: true },
+    orderBy: { id: 'asc' },
+  });
+
+  const campaignId = require('node:crypto').randomUUID();
+  const result = await dispatchNotification(
+    'ADMIN_ANNOUNCEMENT',
+    users.map((user) => ({ userId: user.id, email: user.email })),
+    { title, message },
+    { channels, dedupeKey: (userId) => campaignId + ':' + userId },
+  );
+  return {
+    audience,
+    recipients: result.recipients,
+    inAppCreated: result.inApp.created,
+    emailQueued: result.email.queued,
+    emailSkipped: result.email.preferenceDisabled + result.email.noEmailAddress,
+    smsNotImplemented: result.sms.notImplemented,
+  };
+}
+
+/**
+ * Admin: Get delivery statistics for monitoring dashboard.
+ */
+async function getDeliveryStats(options = {}) {
+  return deliveryService.getDeliveryStats(options);
+}
+
+/**
+ * Admin: List deliveries for monitoring page.
+ */
+async function listDeliveries(options = {}) {
+  return deliveryService.listDeliveries(options);
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries };
