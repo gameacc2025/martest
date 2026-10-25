@@ -90,3 +90,18 @@ app. The API is under `/api/v1/admin/notifications/folders`.
 Copy/move membership actions and user-facing folder filtering are intentionally the
 next phase; do not imply they are already available. Apply the migration through the
 project's reviewed Prisma migration deployment workflow before using the folder API.
+
+
+## User folder actions (2026-10-25)
+
+The user inbox API now exposes `GET /settings/notifications/folders?app=WEBSITE|COMPANY|ADMIN`
+and `POST /settings/notifications/:id/folders` with `folderId`, `action` (`copy` or `move`), `app`,
+and optional `sourceFolderId`. The service verifies notification ownership, active destination folder,
+app scope, and source membership. Copy creates an additional membership; move creates/ensures the
+destination membership and removes the selected source membership in a transaction. The three inbox
+pages expose folder selection, save-to-SAVED, copy, and move actions. The canonical notification row
+and its read state are not duplicated by folder operations.
+
+Verification is pending CI for the latest commits. The database migration has not been applied to any
+runtime environment as part of this change; apply it through the project's approved development migration
+workflow before trying the folder endpoints against a live database.
