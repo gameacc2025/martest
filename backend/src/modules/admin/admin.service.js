@@ -167,4 +167,46 @@ async function listDeliveries(options = {}) {
   return deliveryService.listDeliveries(options);
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries };
+async function listNotificationFolders() {
+  return prisma.notificationFolder.findMany({
+    orderBy: [{ isSystem: 'desc' }, { sortOrder: 'asc' }, { id: 'asc' }],
+  });
+}
+
+function folderKeyFromName(name) {
+  const base = String(name).normalize('NFKD').toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48);
+  return base || 'folder';
+}
+
+async function createNotificationFolder({ name, scope, sortOrder = 10 }) {
+  const cleanName = String(name || '').trim();
+  if (cleanName.length < 2 || cleanName.length > 60) {
+    throw new AppError('نام پوشه باید بین ۲ تا ۶۰ نویسه باشد.', 400, true, 'INVALID_FOLDER_NAME');
+  }
+  const base = folderKeyFromName(cleanName);
+  let key = base;
+  let suffix = 2;
+  while (await prisma.notificationFolder.findUnique({ where: { key } })) key = `${base}-${suffix++}`;
+  return prisma.notificationFolder.create({
+    data: { key, name: cleanName, scope, sortOrder: Number(sortOrder) || 0, isSystem: false, isActive: true },
+  });
+}
+
+async function updateNotificationFolder(id, changes) {
+  const folder = await prisma.notificationFolder.findUnique({ where: { id } });
+  if (!folder) throw new AppError('پوشه پیدا نشد.', 404, true, 'FOLDER_NOT_FOUND');
+  if (folder.isSystem) throw new AppError('پوشه‌های سیستمی قابل تغییر نیستند.', 400, true, 'SYSTEM_FOLDER_IMMUTABLE');
+  const data = {};
+  if (changes.name !== undefined) {
+    const name = String(changes.name).trim();
+    if (name.length < 2 || name.length > 60) throw new AppError('نام پوشه باید بین ۲ تا ۶۰ نویسه باشد.', 400, true, 'INVALID_FOLDER_NAME');
+    data.name = name;
+  }
+  if (changes.scope !== undefined) data.scope = changes.scope;
+  if (changes.sortOrder !== undefined) data.sortOrder = changes.sortOrder;
+  if (changes.isActive !== undefined) data.isActive = changes.isActive;
+  return prisma.notificationFolder.update({ where: { id }, data });
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder };
