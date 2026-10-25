@@ -696,6 +696,45 @@ async function ensurePriceTierDoesNotOverlap(productId, tier, excludeTierId) {
 async function listProducts({ skip, take, filters = {}, caller, publicOnly = false }) {
   const where = { deletedAt: null };
 
+  const parseOptionalPrice = (value, field) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      throw { statusCode: 400, code: 'INVALID_PRICE_FILTER', message: `${field} must be a non-negative number.` };
+    }
+    return parsed;
+  };
+  const minPrice = parseOptionalPrice(filters.minPrice, 'minPrice');
+  const maxPrice = parseOptionalPrice(filters.maxPrice, 'maxPrice');
+  if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
+    throw { statusCode: 400, code: 'INVALID_PRICE_RANGE', message: 'minPrice must be less than or equal to maxPrice.' };
+  }
+
+  const featured = parseOptionalBoolean(filters.featured);
+  if (featured !== undefined) where.isFeatured = featured;
+
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    where.prices = {
+      some: {
+        price: {
+          ...(minPrice !== undefined ? { gte: minPrice } : {}),
+          ...(maxPrice !== undefined ? { lte: maxPrice } : {}),
+        },
+      },
+    };
+  }
+
+  const sortBy = filters.sortBy || 'createdAt';
+  const allowedSortFields = new Set(['createdAt', 'updatedAt', 'title']);
+  if (!allowedSortFields.has(sortBy)) {
+    throw { statusCode: 400, code: 'INVALID_SORT_FIELD', message: 'sortBy must be one of: createdAt, updatedAt, title.' };
+  }
+  const sortOrder = filters.sortOrder === undefined || filters.sortOrder === '' ? 'desc' : String(filters.sortOrder).toLowerCase();
+  if (!['asc', 'desc'].includes(sortOrder)) {
+    throw { statusCode: 400, code: 'INVALID_SORT_ORDER', message: 'sortOrder must be asc or desc.' };
+  }
+  const orderBy = { [sortBy]: sortOrder };
+
   // Public marketplace routes must remain public-catalog queries even when a
   // visitor has a COMPANY/STAFF session. Management pages use /my-products.
   //   1. Public marketplace           → PUBLISHED + PUBLIC across all companies
@@ -728,7 +767,7 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   }
 
   const [items, total] = await Promise.all([
-    prisma.product.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, include: productInclude }),
+    prisma.product.findMany({ where, skip, take, orderBy, include: productInclude }),
     prisma.product.count({ where }),
   ]);
   return { items, total };
