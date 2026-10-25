@@ -32,7 +32,15 @@ jobs:
         run: pnpm test
       - name: Install backend dependencies
         run: npm ci --prefix backend
+      - name: Generate Prisma client
+        working-directory: backend
+        run: npx prisma generate
       - name: Run backend tests
         run: pnpm --dir backend test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          JWT_ACCESS_SECRET: test-access-secret-for-ci-only
+          JWT_REFRESH_SECRET: test-refresh-secret-for-ci-only
       - name: Build all frontend apps
         run: pnpm build
