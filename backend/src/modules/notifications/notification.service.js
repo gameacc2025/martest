@@ -12,11 +12,12 @@ const prisma = require('../../config/db');
  * @returns {Object} { data, meta }
  */
 async function getNotifications(userId, options = {}) {
-  const { page = 1, limit = 20, unreadOnly = false, folderId = null } = options;
+  const { page = 1, limit = 20, unreadOnly = false, readOnly = false, folderId = null } = options;
   const skip = (page - 1) * limit;
 
   const where = { userId };
   if (unreadOnly) where.isRead = false;
+  else if (readOnly) where.isRead = true;
   if (folderId !== null && folderId !== undefined) where.folderMemberships = { some: { folderId: Number(folderId) } };
 
   const [data, total] = await Promise.all([
@@ -77,10 +78,30 @@ async function markAsRead(notificationId, userId) {
  * @param {number} userId
  */
 async function markAllAsRead(userId) {
-  await prisma.notification.updateMany({
+  return prisma.notification.updateMany({
     where: { userId, isRead: false },
     data: { isRead: true },
   });
+}
+
+async function setNotificationReadState(notificationId, userId, isRead) {
+  if (typeof isRead !== 'boolean') throw { statusCode: 400, code: 'INVALID_READ_STATE', message: 'وضعیت خواندن پیام نامعتبر است.' };
+  const notification = await prisma.notification.findFirst({ where: { id: notificationId, userId } });
+  if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
+  await prisma.notification.update({ where: { id: notificationId }, data: { isRead } });
+}
+
+function normalizeNotificationIds(ids) {
+  if (!Array.isArray(ids) || ids.length < 1 || ids.length > 100 || ids.some(id => !Number.isInteger(id) || id < 1)) {
+    throw { statusCode: 400, code: 'INVALID_NOTIFICATION_IDS', message: 'فهرست پیام‌های انتخاب‌شده نامعتبر است.' };
+  }
+  return [...new Set(ids)];
+}
+
+async function setNotificationsReadState(ids, userId, isRead) {
+  const notificationIds = normalizeNotificationIds(ids);
+  if (typeof isRead !== 'boolean') throw { statusCode: 400, code: 'INVALID_READ_STATE', message: 'وضعیت خواندن پیام نامعتبر است.' };
+  return prisma.notification.updateMany({ where: { userId, id: { in: notificationIds } }, data: { isRead } });
 }
 
 /**
@@ -108,6 +129,11 @@ async function deleteNotification(notificationId, userId) {
  * @param {string} title
  * @param {string} message
  */
+async function deleteNotifications(ids, userId) {
+  const notificationIds = normalizeNotificationIds(ids);
+  return prisma.notification.deleteMany({ where: { userId, id: { in: notificationIds } } });
+}
+
 async function createNotification(userId, title, message) {
   return prisma.notification.create({
     data: { userId, title, message },
@@ -182,7 +208,10 @@ module.exports = {
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  setNotificationReadState,
+  setNotificationsReadState,
   deleteNotification,
+  deleteNotifications,
   createNotification,
   getUserFolders,
   changeNotificationFolder,

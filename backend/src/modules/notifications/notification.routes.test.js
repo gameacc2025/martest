@@ -28,7 +28,7 @@ injectMock('../../config/db', {});
 
 const hit = {};
 const trivialController = {};
-for (const name of ['list', 'getUnreadCount', 'markAsRead', 'markAllAsRead', 'remove', 'listFolders', 'changeFolder']) {
+for (const name of ['list', 'getUnreadCount', 'markAsRead', 'markAllAsRead', 'setReadState', 'bulkSetReadState', 'bulkRemove', 'remove', 'listFolders', 'changeFolder']) {
   trivialController[name] = async (request, reply) => {
     hit[name] = true;
     return reply.code(200).send({ ok: true });
@@ -94,6 +94,33 @@ test('PATCH /:id/read: requires authentication', async () => {
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.markAsRead, true);
+  await app.close();
+});
+
+test('PATCH /:id/read-state accepts a boolean read state', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/settings/notifications/1/read-state',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }), 'content-type': 'application/json' },
+    payload: { isRead: false },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.setReadState, true);
+  await app.close();
+});
+
+test('POST /bulk-read-state and /bulk-delete validate requests', async () => {
+  const app = await buildApp();
+  const headers = { 'x-test-user': JSON.stringify({ id: 1 }), 'content-type': 'application/json' };
+  const read = await app.inject({ method: 'POST', url: '/api/v1/settings/notifications/bulk-read-state', headers, payload: { ids: [1, 2], isRead: true } });
+  assert.equal(read.statusCode, 200);
+  assert.equal(hit.bulkSetReadState, true);
+  const remove = await app.inject({ method: 'POST', url: '/api/v1/settings/notifications/bulk-delete', headers, payload: { ids: [1, 2] } });
+  assert.equal(remove.statusCode, 200);
+  assert.equal(hit.bulkRemove, true);
+  const invalid = await app.inject({ method: 'POST', url: '/api/v1/settings/notifications/bulk-delete', headers, payload: { ids: [] } });
+  assert.equal(invalid.statusCode, 400);
   await app.close();
 });
 

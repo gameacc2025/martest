@@ -9,12 +9,13 @@ const notificationService = require('./notification.service');
  * Get user's notifications
  */
 async function list(request, reply) {
-  const { page = 1, limit = 20, unreadOnly } = request.query;
+  const { page = 1, limit = 20, unreadOnly, readOnly } = request.query;
   const userId = request.user.id;
   const result = await notificationService.getNotifications(userId, {
     page: Number(page),
     limit: Number(limit),
     unreadOnly: unreadOnly === 'true',
+    readOnly: readOnly === 'true',
     ...(request.query.folderId ? { folderId: Number(request.query.folderId) } : {}),
   });
   return reply.send(result);
@@ -43,8 +44,23 @@ async function markAsRead(request, reply) {
  * Mark all notifications as read
  */
 async function markAllAsRead(request, reply) {
-  await notificationService.markAllAsRead(request.user.id);
+  const result = await notificationService.markAllAsRead(request.user.id);
+  return reply.send({ success: true, count: result?.count ?? 0 });
+}
+
+async function setReadState(request, reply) {
+  await notificationService.setNotificationReadState(Number(request.params.id), request.user.id, request.body.isRead);
   return reply.send({ success: true });
+}
+
+async function bulkSetReadState(request, reply) {
+  const result = await notificationService.setNotificationsReadState(request.body.ids, request.user.id, request.body.isRead);
+  return reply.send({ success: true, count: result.count });
+}
+
+async function bulkRemove(request, reply) {
+  const result = await notificationService.deleteNotifications(request.body.ids, request.user.id);
+  return reply.send({ success: true, count: result.count });
 }
 
 /**
@@ -80,5 +96,8 @@ module.exports = {
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  setReadState,
+  bulkSetReadState,
+  bulkRemove,
   remove,
 };

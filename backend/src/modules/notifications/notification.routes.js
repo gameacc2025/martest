@@ -12,10 +12,27 @@ async function notificationRoutes(fastify) {
   // ── User-facing notification CRUD ─────────────────────────────
   fastify.get('/', ctrl.list);
   fastify.get('/unread-count', ctrl.getUnreadCount);
+  fastify.post('/bulk-read-state', {
+    schema: { body: { type: 'object', required: ['ids', 'isRead'], additionalProperties: false, properties: {
+      ids: { type: 'array', minItems: 1, maxItems: 100, uniqueItems: true, items: { type: 'integer', minimum: 1 } },
+      isRead: { type: 'boolean' },
+    } } },
+  }, ctrl.bulkSetReadState);
+  fastify.post('/bulk-delete', {
+    schema: { body: { type: 'object', required: ['ids'], additionalProperties: false, properties: {
+      ids: { type: 'array', minItems: 1, maxItems: 100, uniqueItems: true, items: { type: 'integer', minimum: 1 } },
+    } } },
+  }, ctrl.bulkRemove);
   fastify.get('/folders', ctrl.listFolders);
   fastify.post('/:id/folders', {
     schema: { params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } }, body: { type: 'object', required: ['folderId', 'action', 'app'], additionalProperties: false, properties: { folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 }, app: { type: 'string', enum: ['WEBSITE', 'COMPANY', 'ADMIN'] } } } },
   }, ctrl.changeFolder);
+  fastify.patch('/:id/read-state', {
+    schema: {
+      params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      body: { type: 'object', required: ['isRead'], additionalProperties: false, properties: { isRead: { type: 'boolean' } } },
+    },
+  }, ctrl.setReadState);
   fastify.patch('/:id/read', ctrl.markAsRead);
   fastify.patch('/read-all', ctrl.markAllAsRead);
   fastify.delete('/:id', ctrl.remove);

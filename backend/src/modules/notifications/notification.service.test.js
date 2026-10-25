@@ -33,6 +33,7 @@ const calls = {
   update: [],
   updateMany: [],
   delete: [],
+  deleteMany: [],
   create: [],
 };
 let fx;
@@ -73,6 +74,10 @@ const mockPrisma = {
       calls.delete.push(args);
       return {};
     },
+    deleteMany: async (args) => {
+      calls.deleteMany.push(args);
+      return { count: 2 };
+    },
     create: async (args) => {
       calls.create.push(args);
       return fx.created;
@@ -87,7 +92,10 @@ const {
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  setNotificationReadState,
+  setNotificationsReadState,
   deleteNotification,
+  deleteNotifications,
   createNotification,
 } = require('./notification.service');
 
@@ -104,6 +112,13 @@ test('getNotifications: unreadOnly=true adds an isRead:false filter', async () =
   resetMocks();
   await getNotifications(7, { unreadOnly: true });
   assert.deepEqual(calls.findMany[0].where, { userId: 7, isRead: false });
+});
+
+test('getNotifications: readOnly=true filters to read notifications', async () => {
+  resetMocks();
+  await getNotifications(7, { readOnly: true });
+  assert.deepEqual(calls.findMany[0].where, { userId: 7, isRead: true });
+  assert.deepEqual(calls.count[0].where, { userId: 7, isRead: true });
 });
 
 test('getNotifications: defaults to page=1, limit=20', async () => {
@@ -195,6 +210,36 @@ test('markAllAsRead: only touches the given user\'s unread notifications', async
 
   assert.deepEqual(calls.updateMany[0].where, { userId: 7, isRead: false });
   assert.deepEqual(calls.updateMany[0].data, { isRead: true });
+});
+
+// ── explicit read-state and bulk operations ─────────────────────────────
+
+test('setNotificationReadState: updates only a notification owned by the user', async () => {
+  resetMocks();
+  fx.found = { id: 4, userId: 7 };
+  await setNotificationReadState(4, 7, false);
+  assert.deepEqual(calls.findFirst[0].where, { id: 4, userId: 7 });
+  assert.deepEqual(calls.update[0], { where: { id: 4 }, data: { isRead: false } });
+});
+
+test('setNotificationsReadState: scopes bulk updates by user and selected ids', async () => {
+  resetMocks();
+  const result = await setNotificationsReadState([4, 5], 7, true);
+  assert.deepEqual(calls.updateMany[0], { where: { userId: 7, id: { in: [4, 5] } }, data: { isRead: true } });
+  assert.equal(result.count, 0);
+});
+
+test('deleteNotifications: bulk delete is scoped by user and selected ids', async () => {
+  resetMocks();
+  const result = await deleteNotifications([4, 5], 7);
+  assert.deepEqual(calls.deleteMany[0], { where: { userId: 7, id: { in: [4, 5] } } });
+  assert.equal(result.count, 2);
+});
+
+test('bulk notification operations reject invalid ids and read state', async () => {
+  resetMocks();
+  await assert.rejects(() => deleteNotifications([], 7), error => error.code === 'INVALID_NOTIFICATION_IDS');
+  await assert.rejects(() => setNotificationsReadState([1], 7, 'true'), error => error.code === 'INVALID_READ_STATE');
 });
 
 // ── deleteNotification ───────────────────────────────────────
