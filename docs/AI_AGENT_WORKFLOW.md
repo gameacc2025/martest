@@ -1,5 +1,10 @@
 # AI Agent Workflow and Project Memory
 
+
+## Language of communication
+
+All agents must communicate with the user in **English**, no matter what language the user writes in. This applies to plans, questions, progress updates, explanations, recommendations, and final reports. Do not mirror the user's language. The language of product deliverables (for example, Persian UI copy or translation files) should follow the product requirements or explicit deliverable request; the agent's explanations to the user must still be in English.
+
 **Mandatory companion:** [`AGENTS.md`](../AGENTS.md). All agents must read it and [`.ai/PROTOCOL.md`](../.ai/PROTOCOL.md) before work.
 
 ## Why this exists
