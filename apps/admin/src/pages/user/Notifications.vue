@@ -84,6 +84,7 @@ function formatTime(date) {
     <div class="page-header">
       <h1>اعلان‌ها</h1>
       <div class="page-header-actions">
+        <router-link to="/notification-management" class="management-link"><i class="pi pi-send"></i> ارسال و مدیریت اعلان‌ها</router-link>
         <span v-if="unreadCount > 0" class="unread-badge">{{ unreadCount }} خوانده نشده</span>
         <Button v-if="unreadCount > 0" label="همه خوانده شد" icon="pi pi-check" @click="markAllAsRead" />
       </div>
@@ -143,6 +144,8 @@ function formatTime(date) {
   font-weight: 700;
   margin: 0;
 }
+
+.management-link { color: var(--primary-color); text-decoration: none; font-size: .9rem; }
 
 .page-header-actions {
   display: flex;
