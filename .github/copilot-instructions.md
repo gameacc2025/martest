@@ -1,5 +1,8 @@
 # GitHub Copilot Instructions
 
+
+**Language requirement:** Communicate with the user in English at all times, regardless of the language of their message. Plans, questions, progress updates, explanations, and final reports must be English. Only explicitly requested localized product/deliverable content may use another language; explanations to the user remain English.
+
 Before changing this repository, read and follow root `AGENTS.md`. Then read `.ai/PROTOCOL.md`, recent `.ai/WORKLOG.md` entries, `.ai/current-task.md`, `.ai/project-context.md`, and `.ai/decisions.md`. Read open questions when relevant and inspect the actual implementation.
 
 Mandatory expectations:
