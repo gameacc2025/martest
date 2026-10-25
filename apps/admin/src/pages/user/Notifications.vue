@@ -13,6 +13,7 @@ const loading = ref(false)
 const page = ref(1)
 const totalPages = ref(1)
 const total = ref(0)
+const folderCounts = ref({ all: 0, read: 0, unread: 0 })
 const selectedId = ref(null)
 const activeFolder = ref('all')
 const activeCategory = ref('all')
@@ -25,14 +26,14 @@ const targetFolderId = ref(null)
 const appScope = 'ADMIN'
 
 const folders = computed(() => [
-  { id: 'all', label: 'همه پیام‌ها', icon: 'pi-inbox', count: total.value },
+  { id: 'all', label: 'همه پیام‌ها', icon: 'pi-inbox', count: folderCounts.value.all },
   { id: 'unread', label: 'خوانده‌نشده', icon: 'pi-envelope', count: unreadCount.value },
-  { id: 'read', label: 'خوانده‌شده', icon: 'pi-check-circle', count: Math.max(0, total.value - unreadCount.value) },
+  { id: 'read', label: 'خوانده‌شده', icon: 'pi-check-circle', count: folderCounts.value.read },
   ...userFolders.value.map(folder => ({
     id: folder.id,
     label: folder.name,
     icon: folder.key === 'SAVED' ? 'pi-bookmark' : folder.key === 'INBOX' ? 'pi-inbox' : 'pi-folder',
-
+    count: folderCounts.value[folder.id] ?? 0,
   })),
 ])
 
@@ -156,11 +157,43 @@ async function fetchUnreadCount() {
   } catch (err) {
     console.error('Error fetching unread count:', err)
   }
+  await fetchFolderCounts()
+}
+
+async function fetchFolderCounts() {
+  try {
+    const countFor = async (folderId = null) => {
+      const params = new URLSearchParams({ page: '1', limit: '1' })
+      if (folderId !== null) params.set('folderId', String(folderId))
+      const result = await apiGetPaginated(`${endpoints.notifications.list}?${params.toString()}`)
+      const normalized = normalizeNotificationPage(result)
+      return Number(normalized.meta?.total ?? normalized.data.length)
+    }
+    const [allCount, ...folderResults] = await Promise.all([
+      countFor(),
+      ...userFolders.value.map(folder => countFor(folder.id)),
+    ])
+    const nextCounts = {
+      ...folderCounts.value,
+      all: allCount,
+      read: Math.max(0, allCount - unreadCount.value),
+    }
+    userFolders.value.forEach((folder, index) => {
+      nextCounts[folder.id] = folderResults[index]
+    })
+    folderCounts.value = nextCounts
+  } catch (err) {
+    console.error('Error fetching notification folder counts:', err)
+  }
 }
 
 function openNotification(item) {
   selectedId.value = item.id
-  if (!item.isRead) setNotificationReadState(item, true)
+}
+
+async function openNotificationAndMarkRead(item) {
+  openNotification(item)
+  if (!item.isRead) await setNotificationReadState(item, true)
 }
 
 async function setNotificationReadState(item, isRead) {
@@ -212,6 +245,14 @@ async function bulkSetReadState(isRead) {
   bulkBusy.value = true
   try {
     await apiPost(endpoints.notifications.bulkReadState, { ids, isRead })
+    const selectedIdSet = new Set(ids)
+    let unreadDelta = 0
+    for (const item of notifications.value) {
+      if (!selectedIdSet.has(item.id) || item.isRead === isRead) continue
+      unreadDelta += isRead ? -1 : 1
+      item.isRead = isRead
+    }
+    unreadCount.value = Math.max(0, unreadCount.value + unreadDelta)
     clearSelection()
     await fetchNotifications(); await fetchUnreadCount()
     toast.add({ severity: 'success', summary: 'انجام شد', detail: isRead ? 'پیام‌های انتخاب‌شده خوانده شدند.' : 'پیام‌های انتخاب‌شده خوانده‌نشده شدند.', life: 3000 })
@@ -266,6 +307,7 @@ async function applyFolderAction(item, action, folderId = targetFolderId.value) 
     })
     toast.add({ severity: 'success', summary: 'انجام شد', detail: action === 'copy' ? 'پیام در پوشه مقصد هم قرار گرفت.' : 'پیام به پوشه مقصد منتقل شد.', life: 2500 })
     await fetchNotifications()
+    await fetchUnreadCount()
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'تغییر پوشه پیام انجام نشد.', life: 3000 })
   }
@@ -361,7 +403,7 @@ function typeLabel(item) {
           :class="{ active: activeFolder === folder.id && activeCategory === 'all' }" @click="selectFolder(folder.id)">
           <i :class="['pi', folder.icon]" aria-hidden="true"></i>
           <span>{{ folder.label }}</span>
-          <b v-if="folder.count">{{ folder.count }}</b>
+          <b>{{ folder.count }}</b>
         </button>
 
         <div class="sidebar-divider"></div>
@@ -399,7 +441,7 @@ function typeLabel(item) {
         <div v-else class="message-items">
           <div v-for="item in visibleNotifications" :key="item.id" class="message-row"
             :class="{ selected: selectedId === item.id, unread: !item.isRead }" role="button" tabindex="0"
-            @click="openNotification(item)" @keydown.enter.prevent="openNotification(item)">
+            @click="openNotification(item)" @dblclick="openNotificationAndMarkRead(item)" @keydown.enter.prevent="openNotification(item)">
             <input type="checkbox" class="row-checkbox" :checked="selectedIds.has(item.id)" :aria-label="`انتخاب پیام ${item.title}`"
               @click.stop @change="toggleSelection(item.id, $event.target.checked)">
             <span class="row-status" :class="{ 'is-unread': !item.isRead }"><i :class="['pi', item.isRead ? 'pi-envelope-open' : 'pi-envelope']"></i></span>
