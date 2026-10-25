@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { apiGet, apiPatch, apiDelete } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiGetPaginated, apiPatch, apiDelete } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -74,7 +74,7 @@ onMounted(() => {
 async function fetchNotifications() {
   loading.value = true
   try {
-    const result = await apiGet(`${endpoints.settings.notifications}?page=${page.value}&limit=20`)
+    const result = await apiGetPaginated(`${endpoints.settings.notifications}?page=${page.value}&limit=20`)
     notifications.value = Array.isArray(result?.data) ? result.data : []
     total.value = Number(result?.meta?.total ?? notifications.value.length)
     totalPages.value = Math.max(1, Number(result?.meta?.totalPages || 1))
