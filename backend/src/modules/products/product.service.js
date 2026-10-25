@@ -1012,7 +1012,11 @@ async function updateProduct(id, data, caller) {
       await notifyStaffForAutoReReview(tx, product, policy.threshold);
     }
 
-    return saved;
+    // `saved` was included before price-tier reconciliation; re-read inside
+    // the transaction so the PATCH response reflects the final tier collection.
+    return priceTiersChanged
+      ? tx.product.findFirst({ where: { id: productId, deletedAt: null }, include: productInclude })
+      : saved;
   });
 
   return updated;
