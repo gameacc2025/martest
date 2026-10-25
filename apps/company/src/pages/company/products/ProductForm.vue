@@ -457,11 +457,15 @@ function buildProductPayload() {
 
   // Price tiers — omit empty maxQuantity/unit (schema forbids null on these).
   payload.priceTiers = priceTiers.value.map((t) => {
-    const tier = { minQuantity: t.minQuantity, price: t.price }
+    const tier = { minQuantity: Number(t.minQuantity), price: Number(t.price) }
+    if (isEditMode.value && t.id) tier.id = Number(t.id)
     if (t.maxQuantity !== null && t.maxQuantity !== undefined && t.maxQuantity !== '') {
-      tier.maxQuantity = t.maxQuantity
+      tier.maxQuantity = Number(t.maxQuantity)
+    } else if (isEditMode.value && t.id) {
+      tier.maxQuantity = null
     }
     if (t.unit && t.unit.trim()) tier.unit = t.unit.trim()
+    else if (isEditMode.value && t.id) tier.unit = null
     return tier
   })
 
