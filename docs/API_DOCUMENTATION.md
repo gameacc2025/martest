@@ -1204,11 +1204,14 @@
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/` | فهرست اعلان‌ها؛ پارامترهای صفحه‌بندی و `folderId` برای فیلتر سمت سرور |
+| GET | `/` | فهرست صفحه‌بندی‌شده؛ پارامترهای `folderId`، `unreadOnly=true` و `readOnly=true` برای فیلتر سمت سرور |
 | GET | `/unread-count` | تعداد اعلان‌های خوانده‌نشده |
 | GET | `/folders?app=WEBSITE\|COMPANY\|ADMIN` | فهرست پوشه‌های فعال قابل‌دسترسی در برنامه |
 | POST | `/:id/folders` | کپی یا انتقال اعلان با `folderId`، `action=copy\|move` و `app`؛ برای انتقال، `sourceFolderId` اختیاری است |
-| PATCH | `/:id/read` | علامت‌گذاری یک اعلان به‌عنوان خوانده‌شده |
+| PATCH | `/:id/read` | علامت‌گذاری یک اعلان به‌عنوان خوانده‌شده (سازگاری قدیمی) |
+| PATCH | `/:id/read-state` | تعیین وضعیت با بدنهٔ `{ isRead: boolean }` |
+| POST | `/bulk-read-state` | تغییر وضعیت خواندن چند اعلان با `{ ids: number[], isRead: boolean }` (حداکثر ۱۰۰ مورد) |
+| POST | `/bulk-delete` | حذف گروهی اعلان‌های متعلق به کاربر با `{ ids: number[] }` (حداکثر ۱۰۰ مورد) |
 | PATCH | `/read-all` | علامت‌گذاری همهٔ اعلان‌های کاربر به‌عنوان خوانده‌شده |
 | DELETE | `/:id` | حذف اعلان متعلق به کاربر |
 | GET | `/preferences` | دریافت تنظیمات مؤثر اعلان‌ها |

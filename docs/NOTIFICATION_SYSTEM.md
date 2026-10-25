@@ -109,3 +109,10 @@ Verification and environment status:
 - `prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script` returned an empty migration, and `prisma migrate status` reported `Database schema is up to date!`.
 - The user confirmed the folder UI is working. Live copy/move clicks were not independently exercised in this session and remain NOT VERIFIED.
 - The Prisma `package.json#prisma` deprecation warning is non-blocking and was not changed as part of this task.
+
+
+## Inbox interaction update — 2026-10-25
+
+The inbox now filters folders by membership in both the API query and the visible list. Read/unread filtering is server-side to preserve pagination. Website, Company, and Admin provide per-message read/unread and delete controls, page selection checkboxes, bulk read/unread, and bulk delete. The transfer controls are compact in the message toolbar. Bulk operations are authenticated, ownership-scoped, and limited to 100 IDs per request.
+
+Verification: GitHub Actions run [40201945241](https://github.com/gameacc2025/martest/actions/runs/40201945241) passed frontend/shared tests (18/18), backend tests (1156/1156), Prisma Client generation, and production builds for all three frontend apps. Live browser click-through remains for the user to verify after pulling `main`.

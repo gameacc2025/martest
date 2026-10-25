@@ -1,13 +1,15 @@
 # Current Task / Agent Handoff
 
-## Completed — NOTIFICATION-FOLDERS (Stages 2 and 3)
+## Completed — Notification inbox fixes and bulk actions
 
-- **Status:** DONE — implementation is on `main`; GitHub Actions CI passed on the folder-action test commits.
-- **Stage 2:** Prisma folder models and additive migration; fixed `INBOX` and `SAVED` system folders; existing-notification backfill; trigger assigning new notifications to Inbox; admin-only folder list/create/update API and Admin management UI.
-- **Stage 3:** App-scoped folder listing; server-side folder filtering; copy/move membership API; save-to-SAVED, copy, and move controls in Website, Company, and Admin inboxes.
-- **Security:** Admin folder management requires `system_settings.manage`; user actions require authentication and notification ownership, validate app scope and active destination, and validate source membership for moves. Copy preserves source membership. Move adds the destination and removes the source in a transaction. The canonical notification and its read state remain singular.
-- **Verification:** GitHub Actions run [40199219352](https://github.com/gameacc2025/martest/actions/runs/40199219352) passed: frontend/shared tests 18/18, backend tests 1149/1149, Prisma Client generation, and Website/Company/Admin production builds. The preceding admin-route test fix also passed run [40199100910](https://github.com/gameacc2025/martest/actions/runs/40199100910).
-- **Development database:** The user created a backup, applied `20261025130000_notification_folders`, verified the `INBOX` and `SAVED` folders and 26 Inbox memberships, then confirmed `prisma migrate diff` was empty and `prisma migrate status` reported the schema up to date.
-- **Not independently verified:** Live UI copy/move click-through across folders was not separately exercised in this session. The user confirmed the notification folder UI is working.
-- **Relevant commits:** `53dcf7e3fcf910461bd500ff284f0bd41c87466f` (admin route test mocks and coverage); `a7473f22637415f36ecd2ec90df272e4a9403c24` (folder service ownership/scope/copy/move tests).
-- **Next action:** Sync local `main` before continuing. If a live copy/move action fails, capture its request/response and inspect the relevant folder membership; otherwise select the next project priority.
+- **Status:** Implemented and committed to `main`; latest code CI run passed before documentation close-out.
+- **Affected apps:** Website, Company, Admin notification inbox pages.
+- **Folder filtering:** Company inbox previously fetched the base settings notifications endpoint without folderId; all three pages now use the canonical notifications endpoint, send folder/read filters to the server, and apply a membership guard in the visible list. Folder badges no longer show misleading counts derived only from the current page.
+- **Read state:** Added authenticated `PATCH /settings/notifications/:id/read-state` with `{ isRead: boolean }`; per-row and reading-pane controls toggle read/unread. Initial auto-selection does not silently mark a notification as read. Added `readOnly=true` server filtering for the read folder.
+- **Mark all read:** Always calls the server action instead of returning early based on a potentially stale unread counter; then refreshes list and counter.
+- **Bulk actions:** Checkboxes per row and select-current-page control; selected items can be marked read, marked unread, or bulk-deleted. New authenticated endpoints `POST /bulk-read-state` and `POST /bulk-delete`; both validate request bodies, cap batches at 100, and scope DB mutations to the authenticated user.
+- **UI cleanup:** Removed the large copy/move section from the message body. Saved, move-to-folder, read/unread, and delete controls are compact in the reading toolbar; row-level read/unread and delete icons are available.
+- **Security/tests:** Added ownership-scoped service operations and route/service tests. Frontend tests updated for the explicit read-state endpoint and initial selection behavior.
+- **Verification:** GitHub Actions run [40201945241](https://github.com/gameacc2025/martest/actions/runs/40201945241) passed: frontend/shared tests 18/18, backend tests 1156/1156, Prisma Client generation, and production builds for Website, Company, and Admin.
+- **Commits:** `5fa5c68` UI controls and folder filtering; `46bf7dc` read-state and bulk endpoints; `69dcf1a` endpoint test expectations; `f3eebbe` initial-selection test update; `39e660b` preserve controller response contracts.
+- **Next:** Pull `main` locally and verify live folder membership with one item saved and one not saved; test individual read/unread, mark all read, and bulk delete.

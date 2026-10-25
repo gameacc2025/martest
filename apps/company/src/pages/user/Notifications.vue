@@ -32,7 +32,7 @@ const folders = computed(() => [
     id: folder.id,
     label: folder.name,
     icon: folder.key === 'SAVED' ? 'pi-bookmark' : folder.key === 'INBOX' ? 'pi-inbox' : 'pi-folder',
-    count: notifications.value.filter(item => (item.folderMemberships || []).some(m => m.folderId === folder.id || m.folder?.id === folder.id)).length,
+
   })),
 ])
 

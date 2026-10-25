@@ -172,3 +172,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Directly committed to remote `main` through the GitHub repository API; verify the new HEAD after updating the ref.
 - **Risks / open questions:** The development database was baselined because its existing schema had no `_prisma_migrations` table; other environments require their own reviewed migration/baseline procedure. Do not re-run the folder SQL against the already-migrated development database.
 - **Next action:** User syncs local `main`; if live copy/move clicks fail, capture the network request/response for diagnosis. Otherwise await the next prioritized project task.
+
+
+## 2026-10-25 — NOTIFICATION-INBOX-FIXES — Folder filters, read-state, and bulk actions
+- **Status:** Code and automated tests passed on GitHub Actions run [40201945241](https://github.com/gameacc2025/martest/actions/runs/40201945241).
+- **User report:** Saved and Inbox folders displayed the same messages; transfer controls were visually poor; user requested delete icons, read/unread controls, working mark-all-read, and checkbox-based bulk delete.
+- **Changes:** Fixed Company app list endpoint usage; added explicit server-side folder/read filters and client-side membership guard; removed the large transfer panel in favor of compact reading-toolbar controls; added row-level delete and read/unread icons, checkbox selection, select-current-page, bulk read/unread, and bulk delete.
+- **Backend:** Added ownership-scoped read-state and bulk mutation services/controllers/routes; validation caps bulk requests at 100 IDs. Updated shared API endpoint definitions and service/route tests.
+- **Verification:** CI passed frontend/shared tests 18/18, backend tests 1156/1156, Prisma generation, and Website/Company/Admin production builds. The initial selection no longer silently marks a message read.
+- **Commits:** `5fa5c68f9eb235b4a5135ba155467ef33f477fde`; `46bf7dcbf7c9860f7b4c16064b0f478d179245ec`; `69dcf1a71ee64d3acc62c733815f2b75ef579170`; `f3eebbe340eb5d70f0d141e4fc6edcc5f7ca0b35`; `39e660bd5a280d4acea48b6a280d720d6d29891d`.
+- **Open verification:** Browser-level checks on the user's live environment have not been performed by the agent. User should validate the interactions after pulling the latest main.
+- **Next:** User syncs local main and smoke-tests inbox filtering, single read/unread, mark all read, and selected bulk delete.
