@@ -30,3 +30,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Additional alignment:** Prepended a mandatory policy notice to legacy `.ai/PROMPTS.md` so old phase prompts cannot silently override the new root agent policy. Commit: `f8fcf67`.
 - **Final branch check:** `main` and `feat/notifications-complete` are still listed by GitHub. The branch-deletion action is not exposed by the connected GitHub tool, so the request to leave only `main` is not fully completed yet.
 - **Latest content commit before this worklog update:** `f8fcf671bdfe9389453c605823b9c0bb238bec03`.
+
+
+## 2026-10-25 — AGENT-ENGLISH-COMMUNICATION — Enforce English user-facing responses
+- **Status:** DONE
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Make English the mandatory communication language for every agent, regardless of the language used by the user.
+- **Claimed scope:** Root agent policy, Claude/Copilot entrypoints, shared protocol, workflow guide, README, and accepted decisions.
+- **Changes:** Added the English-only user communication rule to `AGENTS.md`, `CLAUDE.md`, `.ai/PROTOCOL.md`, `.github/copilot-instructions.md`, `docs/AI_AGENT_WORKFLOW.md`, `README.md`, and `.ai/decisions.md`. Clarified that localized product deliverables may still use their required language while explanations to the user stay English.
+- **Verification:** Re-fetched and checked the updated files from GitHub after writing. No local tests/builds run; this is a documentation/policy-only change.
+- **Commit:** `1b7e7a0`, `aa50990`, `285f4f1`, `22654d3`, `9768805`, `489f2d6`, `6eecb8d` (one remote commit per file).
+- **Push:** Changes written directly to remote `main`.
+- **Risks / open questions:** Existing external agent sessions will only follow this policy after they load the updated repository instructions; this file change cannot retroactively change an already-running model's system-level instructions.
+- **Next action:** Ensure each agent tool/session loads `AGENTS.md` and its tool-specific instructions before work.
