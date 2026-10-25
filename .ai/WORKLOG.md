@@ -195,3 +195,20 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commits:** Implementation and test changes are being committed directly to `main` via the GitHub repository integration; exact commit IDs are available from the commit history.
 - **Verification:** Automated GitHub Actions validation pending. No local browser or local checkout was available in this session, so live UI interaction is NOT VERIFIED.
 - **Next:** Check CI, correct any failures, then sync local `main` and verify counts, double-click read, selected bulk read/unread, and bulk delete in the browser.
+
+
+## 2026-10-25 — PRODUCT-LIFECYCLE-AUDIT-2026-10-25 — Product module end-to-end audit
+
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Issue:** https://github.com/gameacc2025/martest/issues/2
+- **Goal:** Audit the product lifecycle end-to-end, complete safe verified fixes, and create/maintain follow-up tasks for unresolved changes.
+- **Claimed scope:** Backend product service/controller/routes/tests; Company/Admin product UI; Website listing/detail/store; images/documents, specifications and pricing; product roadmap and AI-agent instructions.
+- **Pre-work checks:** Confirmed repository `gameacc2025/martest`, default branch `main`, observed HEAD `6e19a2e6cb248273d4f0fd4115d722eda41ee504`; reviewed root agent rules, shared protocol, current-task handoff, project context, decisions, architecture roadmap, testing guide, and relevant product source/test files. Existing current-task handoff was preserved and this task was appended.
+- **Initial observations (not yet declared defects):** Product service defines status transitions and a configurable review-on-edit threshold (default 5); `myProducts` controller has an explicit SUPER_ADMIN/company-scope branch. Need to verify those behaviors against routes, service checks, UI actions, and tests. Product image/list/detail behavior remains a known area to verify from historical project context.
+- **Changes so far:** Opened GitHub issue #2 to track scope/acceptance criteria. Updated `.ai/current-task.md` to claim this task and record evidence/verification limits.
+- **Commit:** `ec09fe3e95db860b18757da83879ac0da391176b` — claim task in current-task handoff.
+- **Verification:** Remote source inspection only. Local `git status`, runtime tests, builds, and browser interaction are **NOT RUN** because no local checkout/runtime is available in this session. No product implementation change has been made yet.
+- **Push:** The current-task documentation commit was written directly to remote `main` using the GitHub repository integration; remote head verification still required.
+- **Risks / open questions:** Need to inspect the full route/service behavior and current CI before choosing code changes. Do not modify permission/business rules, Prisma schema, or migrations without approval when impact is consequential.
+- **Next:** Continue cross-layer audit; add confirmed findings to issue #2; then implement narrowly scoped, test-backed fixes or leave clearly prioritized follow-up tasks.
