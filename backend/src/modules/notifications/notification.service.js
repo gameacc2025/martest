@@ -155,7 +155,7 @@ async function changeNotificationFolder(userId, notificationId, folderId, action
     : Number(sourceFolderId);
   if (!sourceId) throw { statusCode: 500, code: 'INBOX_FOLDER_MISSING', message: 'پوشه دریافتی‌ها پیدا نشد.' };
   const sourceFolder = await prisma.notificationFolder.findUnique({ where: { id: sourceId }, select: { scope: true, isActive: true } });
-  if (!sourceFolder || !sourceFolder.isActive || !['ALL', app].includes(sourceFolder.scope)) throw { statusCode: 404, code: 'SOURCE_FOLDER_NOT_FOUND', message: 'پوشه مبدا در دسترس نیست.' };
+  if (!sourceFolder || !['ALL', app].includes(sourceFolder.scope)) throw { statusCode: 404, code: 'SOURCE_FOLDER_NOT_FOUND', message: 'پوشه مبدا در دسترس نیست.' };
   if (sourceId === folderId) return { success: true, action, notificationId, folderId };
 
   const sourceMembership = await prisma.notificationFolderMembership.findUnique({
