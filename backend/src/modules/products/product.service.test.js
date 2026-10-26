@@ -1600,6 +1600,15 @@ test('getProductHistory: STAFF moderator with products.read can read cross-compa
   assert.deepEqual(await service.getProductHistory(1, staffModerator), []);
 });
 
+test('getProductHistory: CUSTOMER cannot read audit data even with a companyId claim', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  await assert.rejects(
+    () => service.getProductHistory(1, { id: 8, accessType: 'CUSTOMER', companyId: 10, permissions: ['products.read'] }),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['productStatusHistory.findMany'] || []).length, 0);
+});
+
 test('getProductActivityLog: a missing product is 404', async () => {
   fx.product = null;
   await assert.rejects(
@@ -1633,4 +1642,13 @@ test('getProductActivityLog: another company receives 404 and no audit query', a
 test('getProductActivityLog: STAFF moderator with products.read can read cross-company activity', async () => {
   fx.product = draftProduct({ companyId: 10 });
   assert.deepEqual(await service.getProductActivityLog(1, staffModerator), []);
+});
+
+test('getProductActivityLog: CUSTOMER cannot read audit data even with a companyId claim', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  await assert.rejects(
+    () => service.getProductActivityLog(1, { id: 8, accessType: 'CUSTOMER', companyId: 10, permissions: ['products.read'] }),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['productActivityLog.findMany'] || []).length, 0);
 });
