@@ -54,6 +54,10 @@ async function toggleEnforcement() {
   successMessage.value = ''
   saving.value = true
   const next = !settings.value.subscriptionEnforcement
+  if (next && !window.confirm('با فعال‌کردن این گزینه، حساب‌های بدون اشتراک فعال نمی‌توانند استعلام ثبت کنند یا به استعلام پاسخ دهند. آیا طرح‌ها و اشتراک‌های لازم را آماده کرده‌اید؟')) {
+    saving.value = false
+    return
+  }
   try {
     const result = await apiPatch(endpoints.inquirySubscriptions.adminSettings, { subscriptionEnforcement: next })
     settings.value.subscriptionEnforcement = !!unwrap(result).subscriptionEnforcement
