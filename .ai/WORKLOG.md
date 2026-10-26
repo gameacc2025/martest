@@ -342,12 +342,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 ## 2026-10-26 — PRODUCT-AUTH-FEATURED-STAFF-2026-10-26-01 — Enforce featured and STAFF cross-company permissions
-- **Status:** IMPLEMENTED — CI verification pending.
+- **Status:** DONE — verified by GitHub Actions.
 - **Goal:** Apply the approved policy: changes to `isFeatured` require `products.feature` or SUPER_ADMIN; STAFF cross-company writes require the exact operation permission; COMPANY ownership remains mandatory.
-- **Changes:** Added service-level permission checks for STAFF product create/update/delete, price tiers, image/document operations, and lifecycle actions. STAFF product creation now requires `products.create` and an explicit target `companyId`. COMPANY callers retain company ownership enforcement. Added a separate featured-field guard and hid/omitted the featured toggle in Company/Admin forms without permission. Added seven backend regression tests and updated API/decision documentation.
-- **Files:** `backend/src/modules/products/product.service.js`, `backend/src/modules/products/product.service.test.js`, both Company/Admin `ProductForm.vue`, `docs/API_DOCUMENTATION.md`, `.ai/decisions.md`, `.ai/current-task.md`.
-- **Verification:** NOT RUN locally; this session edits remote GitHub files only. GitHub Actions must pass before marking complete.
-- **Commit:** Remote commits written directly to `main`; latest source/test/docs commits to be recorded after CI check.
-- **Push:** Written directly to remote `main` via GitHub Contents API.
-- **Risks / open questions:** Ensure existing Company/Admin users without `products.feature` do not send `isFeatured` on PATCH; forms now omit it. Staff role seeds may need review if specific users are expected to perform any of these actions.
-- **Next action:** Inspect CI for current main HEAD, fix any test/build failures, then close issues #5/#6 and master audit #2 only after successful verification.
+- **Changes:** Added service-level permission checks for STAFF product create/update/delete, price tiers, image/document operations, and lifecycle actions. STAFF product creation now requires `products.create` and an explicit target `companyId`. STAFF-only moderation and caller access type are checked at service level. COMPANY ownership is preserved. Added the featured-field guard and hid/omitted the featured toggle in Company/Admin forms without permission. Admin cross-company controls now reflect granular STAFF permissions; creating across companies requires `products.create` and `companies.read` in the UI. Added 12 backend regression tests and updated API/decision documentation.
+- **Files:** `backend/src/modules/products/product.service.js`, `backend/src/modules/products/product.service.test.js`, `backend/src/modules/products/product.routes.js`, `apps/company/src/pages/company/products/ProductForm.vue`, `apps/admin/src/pages/admin/products/ProductForm.vue`, `apps/admin/src/pages/admin/products/ProductList.vue`, `docs/API_DOCUMENTATION.md`, `.ai/decisions.md`, `.ai/current-task.md`.
+- **Verification:** GitHub Actions [run 40277836441](https://github.com/gameacc2025/martest/actions/runs/40277836441) passed. Frontend/shared: 19/19 test files; backend: 1196/1196 tests; Prisma Client generation passed; Website, Company, and Admin production builds passed. Local tests/builds were NOT RUN; remote CI is the verification source.
+- **Commit:** Changes written to remote `main` through GitHub Contents API; verified commit at time of CI: `4b0f9720f17bd60ef75473de7be9c72c2b8c1f6e`.
+- **Push:** Directly committed to remote `main`; no local push was performed.
+- **Risks / open questions:** None remaining for the approved scope. No schema or migration changes.
+- **Next action:** Keep product permission seeds aligned with assigned roles; closed issues #2, #5, and #6 after successful CI.
