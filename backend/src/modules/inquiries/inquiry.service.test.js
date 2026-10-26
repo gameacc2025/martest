@@ -152,6 +152,8 @@ const mockPrisma = {
       return {};
     },
   },
+  notificationPreference: { findUnique: async () => ({ enabled: true }) },
+  notificationDelivery: { create: async (args) => { record('notificationDelivery.create', args); return { id: 500, ...args.data }; } },
   inquiryMessage: {
     findMany: async (args) => { record('inquiryMessage.findMany', args); return nextMessages; },
     create: async (args) => { record('inquiryMessage.create', args); return { id: 101, ...args.data }; },
@@ -1554,27 +1556,25 @@ test('listInquiryMessages: limits company results to messages involving that com
 
 
 
-test('sendInquiryMessage: optional SMS consumes its own paid allowance', async () => {
+test('sendInquiryMessage: optional SMS consumes its own paid allowance and queues an outbox delivery', async () => {
   resetMocks();
   nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
   fx.response = { id: 90 };
-  const oldSid = process.env.TWILIO_ACCOUNT_SID;
-  const oldToken = process.env.TWILIO_AUTH_TOKEN;
-  const oldFrom = process.env.TWILIO_FROM_NUMBER;
-  const oldFetch = global.fetch;
-  process.env.TWILIO_ACCOUNT_SID = 'ACtest';
-  process.env.TWILIO_AUTH_TOKEN = 'test-token';
-  process.env.TWILIO_FROM_NUMBER = '+15005550006';
-  global.fetch = async () => ({ ok: true, status: 200 });
+  const oldUrl = process.env.INQUIRY_SMS_GATEWAY_URL;
+  const oldToken = process.env.INQUIRY_SMS_GATEWAY_TOKEN;
+  process.env.INQUIRY_SMS_GATEWAY_URL = 'https://sms.example.test/send';
+  process.env.INQUIRY_SMS_GATEWAY_TOKEN = 'test-token';
   try {
     const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
     assert.equal(result.recipientUserId, 10);
+    assert.equal(result.smsQueued, true);
     assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 1);
+    assert.equal(calls['notificationDelivery.create'].length, 1);
+    assert.equal(calls['notificationDelivery.create'][0].data.channel, 'SMS');
+    assert.equal(calls['notificationDelivery.create'][0].data.recipient, '+31612345678');
   } finally {
-    global.fetch = oldFetch;
-    if (oldSid === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = oldSid;
-    if (oldToken === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = oldToken;
-    if (oldFrom === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = oldFrom;
+    if (oldUrl === undefined) delete process.env.INQUIRY_SMS_GATEWAY_URL; else process.env.INQUIRY_SMS_GATEWAY_URL = oldUrl;
+    if (oldToken === undefined) delete process.env.INQUIRY_SMS_GATEWAY_TOKEN; else process.env.INQUIRY_SMS_GATEWAY_TOKEN = oldToken;
   }
 });
 
