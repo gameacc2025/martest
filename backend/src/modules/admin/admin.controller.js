@@ -57,6 +57,11 @@ async function createInquiryPlanCtrl(request, reply) {
   return reply.code(201).send(success(await adminService.createInquiryPlan(request.body)));
 }
 
+
+async function updateInquiryPlanCtrl(request, reply) {
+  return reply.send(success(await adminService.updateInquiryPlan(Number(request.params.id), request.body)));
+}
+
 async function listInquirySubscriptionsCtrl(request, reply) {
   return reply.send(success(await adminService.listInquirySubscriptions()));
 }
@@ -134,4 +139,4 @@ async function updateNotificationFolderCtrl(request, reply) {
   return reply.send({ data: folder });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, getInquiryMonetizationSettingsCtrl, updateInquiryMonetizationSettingsCtrl, listInquiryPlansCtrl, createInquiryPlanCtrl, listInquirySubscriptionsCtrl, grantInquirySubscriptionCtrl, activatePendingInquirySubscriptionCtrl, rejectPendingInquirySubscriptionCtrl, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl, listNotificationFoldersCtrl, createNotificationFolderCtrl, updateNotificationFolderCtrl };
+module.exports = { getStats, getSettings, updateReviewEditThreshold, getInquiryMonetizationSettingsCtrl, updateInquiryMonetizationSettingsCtrl, listInquiryPlansCtrl, createInquiryPlanCtrl, updateInquiryPlanCtrl, listInquirySubscriptionsCtrl, grantInquirySubscriptionCtrl, activatePendingInquirySubscriptionCtrl, rejectPendingInquirySubscriptionCtrl, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl, listNotificationFoldersCtrl, createNotificationFolderCtrl, updateNotificationFolderCtrl };
