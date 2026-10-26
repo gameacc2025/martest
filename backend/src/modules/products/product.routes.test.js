@@ -97,7 +97,7 @@ test('GET /my-products: requires authenticate', async () => {
   const res = await app.inject({
     method: 'GET',
     url: '/api/v1/products/my-products',
-    headers: userHeader('COMPANY', []),
+    headers: userHeader('COMPANY', ['products.read']),
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.myProducts, true);
@@ -109,6 +109,39 @@ test('GET /my-products: without auth -> 401', async () => {
   const res = await app.inject({ method: 'GET', url: '/api/v1/products/my-products' });
   assert.equal(res.statusCode, 401);
   await app.close();
+});
+
+test('GET /my-products: requires products.read', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET', url: '/api/v1/products/my-products',
+    headers: userHeader('STAFF', []),
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.myProducts, undefined);
+  await app.close();
+});
+
+test('GET /:id/manage, /:id/history and /:id/activity require STAFF/COMPANY plus products.read', async () => {
+  for (const path of ['1/manage', '1/history', '1/activity']) {
+    const app = await buildApp();
+    const denied = await app.inject({
+      method: 'GET', url: '/api/v1/products/' + path,
+      headers: userHeader('CUSTOMER', ['products.read']),
+    });
+    assert.equal(denied.statusCode, 403, path + ' rejects CUSTOMER');
+    const noPermission = await app.inject({
+      method: 'GET', url: '/api/v1/products/' + path,
+      headers: userHeader('STAFF', []),
+    });
+    assert.equal(noPermission.statusCode, 403, path + ' requires products.read');
+    const staffAllowed = await app.inject({
+      method: 'GET', url: '/api/v1/products/' + path,
+      headers: userHeader('STAFF', ['products.read']),
+    });
+    assert.equal(staffAllowed.statusCode, 200, path + ' allows authorized STAFF');
+    await app.close();
+  }
 });
 
 // ── POST / (create) — COMPANY|STAFF + products.create ────────
