@@ -215,6 +215,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import { useCartStore } from '../../stores/cart'
 import { useWishlistStore } from '../../stores/wishlist'
+import { useAuthStore } from '../../stores/auth'
+import { inquiriesApi } from '@telecom/api-client'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -224,6 +226,7 @@ const router = useRouter()
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
+const authStore = useAuthStore()
 
 const product = ref({})
 const loading = ref(false)
@@ -231,6 +234,35 @@ const loadError = ref('')
 const selectedImage = ref('')
 const imageFailed = ref(false)
 const wishlistVersion = ref(0)
+const inquiryDialogOpen = ref(false)
+const inquirySubmitting = ref(false)
+const inquiryQuantity = ref(1)
+const inquiryDescription = ref('')
+const inquiryError = ref('')
+const priceHistoryDialogOpen = ref(false)
+
+const canCreateInquiry = computed(() => authStore.isAuthenticated
+  && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
+const productTags = computed(() => {
+  const tags = Array.isArray(product.value.tags) ? product.value.tags : []
+  return tags.map(tag => String(typeof tag === 'object' ? (tag.name || tag.label || '') : tag).trim()).filter(Boolean)
+})
+const priceHistoryPoints = computed(() => {
+  const now = new Date()
+  const cutoff = new Date(now)
+  cutoff.setMonth(cutoff.getMonth() - 6)
+  const entries = prices.value.map((tier, index) => {
+    const date = new Date(tier.updatedAt || tier.validFrom || tier.createdAt)
+    return { key: tier.id ?? index, date, price: Number(tier.price) }
+  }).filter(point => Number.isFinite(point.price) && !Number.isNaN(point.date.getTime()) && point.date >= cutoff && point.date <= now)
+    .sort((a, b) => a.date - b.date)
+  const maxPrice = Math.max(...entries.map(point => point.price), 0)
+  return entries.map(point => ({
+    ...point,
+    label: point.date.toLocaleDateString('fa-IR', { month: 'short', year: 'numeric' }),
+    width: maxPrice > 0 ? Math.max(3, point.price / maxPrice * 100) : 0,
+  }))
+})
 
 const home = { icon: 'pi pi-home', to: '/' }
 const breadcrumbItems = computed(() => [
@@ -365,6 +397,35 @@ const addToWishlist = () => {
   if (!product.value.id) return
   wishlistStore.toggleWishlist(product.value)
   wishlistVersion.value += 1
+}
+
+const submitInquiry = async () => {
+  if (!canCreateInquiry.value || !product.value.id) return
+  const quantity = Number(inquiryQuantity.value)
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    inquiryError.value = 'تعداد باید عدد صحیح و حداقل ۱ باشد.'
+    return
+  }
+  inquirySubmitting.value = true
+  inquiryError.value = ''
+  try {
+    await inquiriesApi.create({
+      title: 'استعلام قیمت: ' + (product.value.title || 'محصول'),
+      description: inquiryDescription.value.trim() || undefined,
+      items: [{
+        productId: Number(product.value.id),
+        quantity,
+        description: inquiryDescription.value.trim() || undefined,
+      }],
+    })
+    inquiryDialogOpen.value = false
+    inquiryQuantity.value = 1
+    inquiryDescription.value = ''
+  } catch (err) {
+    inquiryError.value = err?.response?.data?.message || err?.message || 'ثبت استعلام انجام نشد. لطفاً دسترسی حساب را بررسی کنید.'
+  } finally {
+    inquirySubmitting.value = false
+  }
 }
 
 const viewCompanyProfile = () => {
