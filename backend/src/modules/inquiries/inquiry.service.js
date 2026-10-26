@@ -636,7 +636,7 @@ function buildInquiryOrderBy(query) {
  *
  * Query params: page, limit, search, status, scope, sortBy, sortOrder
  */
-async async function listInquiries(query, caller) {
+async function listInquiries(query, caller) {
   const { page, limit, skip, take } = getPaginationParams(query);
   const superAdmin = isSuperAdmin(caller);
   const callerCompanyId = Number(caller?.companyId) || null;
@@ -988,7 +988,7 @@ async function deleteInquiryItem(inquiryId, itemId, caller) {
   });
 }
 
-async async function submitResponse(inquiryId, data, caller) {
+async function submitResponse(inquiryId, data, caller) {
   const companyId = resolveCompanyId(data, caller);
   ensureCompanyId(companyId);
   if (caller?.accessType === 'STAFF' && !isSuperAdmin(caller)) {
