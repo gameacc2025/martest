@@ -17,3 +17,8 @@ ALTER TABLE "Inquiry"
     ("companyId" IS NOT NULL AND "buyerUserId" IS NULL)
     OR ("companyId" IS NULL AND "buyerUserId" IS NOT NULL)
   );
+
+-- Scheduled transitions are system actions; preserve them in the same history
+-- stream without inventing a human actor.
+ALTER TABLE "InquiryStatusHistory" ALTER COLUMN "changedByUserId" DROP NOT NULL;
+ALTER TABLE "InquiryStatusHistory" ADD COLUMN "source" TEXT NOT NULL DEFAULT 'USER';
