@@ -104,7 +104,7 @@ export const dashboardMenu = [
       // zero changes to this file.
       { title: 'محصولات شرکت', icon: 'pi pi-box', route: 'manage-products', permission: 'products.read' },
       { title: 'استعلام‌ها', icon: 'pi pi-inbox', route: 'company-inquiries', permission: 'inquiries.read' },
-      { title: 'اشتراک استعلام', icon: 'pi pi-wallet', route: 'company-inquiry-subscription', permission: 'inquiries.create' },
+      { title: 'اشتراک استعلام', icon: 'pi pi-wallet', route: 'company-inquiry-subscription', permission: ['inquiries.create', 'inquiries.respond'] },
       // Only COMPANY_MANAGER holds company_profile.update today.
       { title: 'پروفایل شرکت', icon: 'pi pi-building', route: 'company-settings', permission: 'company_profile.update' },
       // Only COMPANY_MANAGER holds users.read (COMPANY_USER has no users.*
