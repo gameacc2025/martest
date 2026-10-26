@@ -112,6 +112,7 @@ async function buildApp() {
   // ── 5. Routes ─────────────────────────────────────────────────
   await app.register(require('./modules/auth/auth.routes'), { prefix: '/api/v1/auth' });
   await app.register(require('./modules/users/user.routes'), { prefix: '/api/v1/users' });
+  await app.register(require('./modules/addresses/address.routes'), { prefix: '/api/v1/addresses' });
   await app.register(require('./modules/roles/role.routes'), { prefix: '/api/v1/roles' });
   await app.register(require('./modules/permissions/permission.routes'), { prefix: '/api/v1/permissions' });
   await app.register(require('./modules/admin/admin.routes'), { prefix: '/api/v1/admin' });
