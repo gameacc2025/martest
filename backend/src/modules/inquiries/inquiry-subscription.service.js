@@ -49,7 +49,7 @@ async function getUsage(subscriptionId, usageType, startsAt, client = prisma) {
   return result._sum.quantity || 0;
 }
 
-async function consumeUsage({ ownerType, ownerId, usageType, referenceType = null, referenceId = null, idempotencyKey = null, tx = prisma }) {
+async function consumeUsage({ ownerType, ownerId, usageType, referenceType = null, referenceId = null, idempotencyKey = null, forceEnforcement = false, tx = prisma }) {
   if (!Object.hasOwn(LIMIT_BY_USAGE, usageType)) {
     throw { statusCode: 400, code: 'INVALID_INQUIRY_USAGE_TYPE', message: 'نوع مصرف اشتراک معتبر نیست.' };
   }
