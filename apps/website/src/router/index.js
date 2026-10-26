@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { setAuthRouter } from "@telecom/auth";
+import { useAuthStore } from "../stores/auth";
 
 import PublicLayout from "../layouts/PublicLayout.vue";
 
@@ -168,7 +169,6 @@ setAuthRouter(router);
 
 // Navigation guards
 router.beforeEach(async (to, from, next) => {
-  const { useAuthStore } = await import("../stores/auth");
   const authStore = useAuthStore();
 
   // Set page title
