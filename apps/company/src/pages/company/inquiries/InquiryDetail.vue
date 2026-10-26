@@ -60,6 +60,11 @@ const PRIORITY_SEVERITY = { LOW: 'secondary', NORMAL: 'info', HIGH: 'warn', URGE
 
 const myCompanyId = computed(() => Number(auth.companyId) || null)
 const isInquiryBuyer = computed(() => Boolean(myCompanyId.value && Number(inquiry.value?.company?.id) === myCompanyId.value))
+const canRevealResponses = computed(() => isInquiryBuyer.value
+  && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.value?.visibilityMode)
+  && inquiry.value?.allowEarlyReveal
+  && inquiry.value?.responsesHidden
+  && !inquiry.value?.revealedAt)
 
 function canDecideResponse(response) {
   return isInquiryBuyer.value
@@ -198,6 +203,16 @@ async function saveResponse() {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در ثبت پاسخ', life: 3500 })
   } finally {
     savingResponse.value = false
+  }
+}
+
+async function revealResponses() {
+  try {
+    await inquiriesApi.revealResponses(route.params.id)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'پیشنهادها اکنون قابل بررسی هستند', life: 3000 })
+    await fetchInquiry()
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err?.response?.data?.message || err?.message || 'بازکردن پیشنهادها انجام نشد', life: 3500 })
   }
 }
 
@@ -397,6 +412,13 @@ function formatPrice(price) {
             <div v-else class="empty-section">
               <p>آیتمی ثبت نشده است</p>
             </div>
+          </div>
+
+          <!-- Sealed response privacy -->
+          <div class="detail-section" v-if="inquiry.responsesHidden">
+            <h2>پاسخ‌ها</h2>
+            <p class="description-text">پیشنهادها تا پایان مهلت پاسخ یا بازکردن مجاز پاکت‌ها محرمانه می‌مانند.</p>
+            <Button v-if="canRevealResponses" label="بازکردن پاکت پیشنهادها" icon="pi pi-lock-open" :loading="savingResponse" @click="revealResponses" />
           </div>
 
           <!-- Responses Section -->
