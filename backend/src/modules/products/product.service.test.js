@@ -1347,6 +1347,9 @@ test('updateProduct: replaces changed price tiers atomically and records the pri
   assert.equal(created[1].data.productId, 1);
   assert.equal(calls['productActivityLog.create'].some((call) => call.data.action === 'PRICE_TIER_UPDATE'), true);
   assert.equal(calls['productStatusHistory.create'].some((call) => call.data.comment === 'تغییر ردیف‌های قیمت محصول'), true);
+  assert.equal(calls['productPriceSnapshot.create'].length, 1);
+  assert.equal(calls['productPriceSnapshot.create'][0].data.action, 'UPDATE');
+  assert.equal(Number(calls['productPriceSnapshot.create'][0].data.price), 125);
 });
 
 test('updateProduct: price tier reconciliation still completes when the edit threshold is crossed', async () => {
@@ -1389,6 +1392,19 @@ test('updateProduct: updates an existing price tier by ID and preserves validity
   assert.equal(update.data.validTo, null);
   assert.equal((calls['productPriceTier.delete'] || []).length, 0);
   assert.equal((calls['productPriceTier.create'] || []).length, 0);
+});
+
+test('updateProduct: replacing the retail row at the same price does not create chart points', async () => {
+  resetMocks();
+  fx.product = editableProduct({ status: 'DRAFT' });
+  fx.priceTiers = [{
+    id: 7, productId: 1, minQuantity: 1, maxQuantity: null, price: '100', unit: 'IRR',
+    validFrom: new Date('2020-01-01T00:00:00.000Z'), validTo: null,
+  }];
+  await service.updateProduct(1, {
+    priceTiers: [{ minQuantity: 1, maxQuantity: null, price: 100, unit: 'IRR' }],
+  }, companyA);
+  assert.equal(calls['productPriceSnapshot.create']?.length || 0, 0);
 });
 
 test('updateProduct: full tier reconciliation records retail price changes for the chart', async () => {
