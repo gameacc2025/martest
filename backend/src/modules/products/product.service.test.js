@@ -304,6 +304,20 @@ test('listProducts: authorized STAFF management sees pending products across com
   assert.equal(capturedWhere.companyId, undefined);
 });
 
+test('listProducts: STAFF management requires products.read but public catalog remains available', async () => {
+  await assert.rejects(
+    () => service.listProducts({ skip: 0, take: 10, caller: { ...staffModerator, permissions: [] } }),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  let capturedWhere;
+  mockPrisma.product.findMany = async (args) => { capturedWhere = args.where; return []; };
+  await service.listProducts({
+    skip: 0, take: 10, caller: { ...staffModerator, permissions: [] }, publicOnly: true,
+  });
+  assert.equal(capturedWhere.status, 'PUBLISHED');
+  assert.equal(capturedWhere.visibility, 'PUBLIC');
+});
+
 test('listProducts: even STAFF sessions on the public route remain clamped to PUBLISHED + PUBLIC', async () => {
   let capturedWhere;
   mockPrisma.product.findMany = async (args) => { capturedWhere = args.where; return []; };
