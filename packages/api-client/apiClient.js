@@ -180,6 +180,7 @@ export const adminApi = {
   updateInquiryMonetizationSettings: (subscriptionEnforcement) => api.patch(endpoints.inquirySubscriptions.adminSettings, { subscriptionEnforcement }),
   listInquiryPlans: () => api.get(endpoints.inquirySubscriptions.adminPlans),
   createInquiryPlan: (data) => api.post(endpoints.inquirySubscriptions.adminPlans, data),
+  updateInquiryPlan: (id, data) => api.patch(endpoints.inquirySubscriptions.adminPlan(id), data),
   listInquirySubscriptions: () => api.get(endpoints.inquirySubscriptions.adminSubscriptions),
   activateInquirySubscription: (id, notes = '') => api.post(endpoints.inquirySubscriptions.activate(id), { paymentConfirmed: true, notes }),
   rejectInquirySubscription: (id, notes = '') => api.post(endpoints.inquirySubscriptions.reject(id), { notes }),
