@@ -1,11 +1,12 @@
 # Current Task / Agent Handoff
 
-## REPOSITORY-QUALITY-AUDIT-2026-10-26-01 — Full pre-development audit
+## PRODUCT-ACCESS-AUDIT-2026-10-26-01 — Product security, lifecycle, and retail price chart history
 
-- **Status:** IN_PROGRESS — initial source/document review and CI evidence collected; remediation and operational verification remain.
+- **Status:** IN_PROGRESS — service-level access and lifecycle logic reviewed; retail-only snapshot logic, full-history API behavior, focused regression tests, and API/database documentation updated. Continue until CI for the latest HEAD is green and the remaining source/test audit is complete.
 - **Canonical branch:** `main`.
-- **Audit report:** [docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md](../docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md).
-- **Verified CI:** Run [40309510309](https://github.com/gameacc2025/martest/actions/runs/40309510309) passed on HEAD `1dd1434d1c78b4a0fb0e51cd5695b6653f1d4e35`, including frontend/shared tests, backend tests, Prisma Client generation, and production builds for Website/Company/Admin.
-- **Initial findings:** Several docs are stale (Docker/Next.js paths and versions, API base paths/legacy roles, frontend tree, database model inventory, role/access matrix). CI build emits an Admin chunk >500 kB and ineffective dynamic-import warning.
-- **Unverified:** Local test rerun, PostgreSQL migration application, Docker/Compose build/startup, browser E2E and visual validation, company ownership/IDOR sign-off, live SMTP, and generated dependency graph.
-- **Next actions:** Reconcile docs with current source and registered routes; review auth/RBAC and company-owned resource paths; add/run isolated migration and Docker smoke checks; validate high-value browser flows; re-run CI and review changes. Do not begin unrelated feature development until P1 findings are resolved or explicitly documented as accepted risks.
+- **User authorization:** Full implementation of Task 1 (STAFF/COMPANY/CUSTOMER access control and tenant ownership) and Task 2 (product lifecycle/pricing/specifications/media/publication workflow), including tests and docs. No follow-up approval is required for in-scope fixes.
+- **Price-history requirement:** Persist only retail tier history (`minQuantity = 1`) in the existing `ProductPriceSnapshot` table. Snapshot writes must share the price mutation transaction. Wholesale changes and metadata-only edits must not create chart points. Return the complete stored public series in ascending timestamp order for currently PUBLISHED + PUBLIC products. Historical prices predating snapshot activation must not be fabricated.
+- **Current implementation commits:** `fcfdf919577affcd590b55ca423e1b3d2f5de6d1` (retail-only snapshot guard); `03da519bf207f6bc9fa376fb377b8a37b9981ce9` (complete retail series); `5f3fef964ae838be41ac63db2c160ae6808b400a` (retail history edge-case tests); `cff8b70da5670b5af3897de2622dd08e3270a9e1` (API docs); `64358664d517316a4ef303db24c80be0263bfb4c` (database docs). Further commits may follow.
+- **Initial verification:** CI runs `40311461581`, `40311689207`, `40311709695`, and `40311758998` passed on their respective commits. CI for later documentation/refactor commits is still to be checked.
+- **Remaining work:** Inspect complete product workflow and authorization paths (including direct service entrypoints, workflow transitions, image/document ownership, price reconciliation); add focused tests where gaps remain; verify latest CI; update worklog; report what is and is not verified. PostgreSQL migration application, Docker/Compose startup, browser E2E/visual checks, and live service connectivity must remain explicitly unverified unless actually run in an available environment.
+- **Do not expand scope:** Do not implement cart/checkout/payment/CRM in this task.
