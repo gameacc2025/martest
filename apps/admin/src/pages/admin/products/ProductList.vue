@@ -373,6 +373,45 @@ async function publishProduct(product) {
   }
 }
 
+async function hideProduct(product) {
+  try {
+    hidingId.value = product.id
+    await productsApi.hide(product.id, 'مخفی‌سازی توسط مدیر سیستم')
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: `محصول "${product.title}" از کاتالوگ عمومی مخفی شد`, life: 3000 })
+    await fetchProducts(pagination.value.page)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.response?.data?.error?.message || err.message || 'مخفی‌سازی محصول ناموفق بود', life: 4000 })
+  } finally {
+    hidingId.value = null
+  }
+}
+
+async function archiveProduct(product) {
+  try {
+    archivingId.value = product.id
+    await productsApi.archive(product.id, 'بایگانی توسط مدیر سیستم')
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: `محصول "${product.title}" بایگانی شد`, life: 3000 })
+    await fetchProducts(pagination.value.page)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.response?.data?.error?.message || err.message || 'بایگانی محصول ناموفق بود', life: 4000 })
+  } finally {
+    archivingId.value = null
+  }
+}
+
+async function restoreProductToDraft(product) {
+  try {
+    restoringId.value = product.id
+    await productsApi.restoreDraft(product.id, 'بازگردانی به پیش‌نویس توسط مدیر سیستم')
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: `محصول "${product.title}" به پیش‌نویس بازگردانده شد`, life: 3000 })
+    await fetchProducts(pagination.value.page)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.response?.data?.error?.message || err.message || 'بازگردانی محصول ناموفق بود', life: 4000 })
+  } finally {
+    restoringId.value = null
+  }
+}
+
 function openRejectDialog(product) {
   productToReject.value = product
   rejectReason.value = ''
