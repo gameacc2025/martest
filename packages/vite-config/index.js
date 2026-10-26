@@ -41,6 +41,44 @@ export function createAppConfig({ appDir, port, apiTarget = 'http://localhost:30
       dedupe: ['vue', 'primevue', '@primevue/themes'],
     },
 
+    build: {
+      // Vite 8 uses Rolldown's codeSplitting API. Keep large framework/UI
+      // dependencies out of each app's entry chunk and cap vendor group sizes.
+      // Browser smoke tests in Runtime Validation guard against ordering regressions.
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              {
+                name: 'primevue',
+                test: /node_modules[\\/]primevue[\\/]/,
+                priority: 30,
+                maxSize: 300 * 1024,
+              },
+              {
+                name: 'framework',
+                test: /node_modules[\\/](vue|vue-router|pinia)[\\/]/,
+                priority: 25,
+                maxSize: 300 * 1024,
+              },
+              {
+                name: 'primevue-theme-icons',
+                test: /node_modules[\\/](@primevue|primeicons)[\\/]/,
+                priority: 20,
+                maxSize: 300 * 1024,
+              },
+              {
+                name: 'vendor',
+                test: /node_modules[\\/]/,
+                priority: 10,
+                maxSize: 300 * 1024,
+              },
+            ],
+          },
+        },
+      },
+    },
+
     server: {
       host: '0.0.0.0',
       port,
