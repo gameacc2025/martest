@@ -77,8 +77,27 @@ const productInclude = {
   statusHistory: { orderBy: { createdAt: 'desc' }, take: 10, include: { changedBy: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } } } },
 };
 
-// Public catalog responses must not expose moderation history or staff identity.
-const publicProductInclude = {
+// Public catalog responses must not expose moderation history, creator IDs,
+// edit counters, deletion metadata, or staff identity. Select public fields
+// explicitly rather than using `include` (which returns every scalar column).
+const publicProductSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  shortDescription: true,
+  description: true,
+  sku: true,
+  brand: true,
+  model: true,
+  specifications: true,
+  status: true,
+  visibility: true,
+  isFeatured: true,
+  companyId: true,
+  categoryId: true,
+  subcategoryId: true,
+  createdAt: true,
+  updatedAt: true,
   company: productInclude.company,
   category: productInclude.category,
   subcategory: productInclude.subcategory,
@@ -786,7 +805,7 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   //   3. SUPER_ADMIN management      → every company's products, any status
   const isPublicCaller = publicOnly || !caller
     || (!isSuperAdmin(caller) && !isCompanyUser(caller) && !isStaffUser(caller));
-  const include = isPublicCaller ? publicProductInclude : productInclude;
+  const queryShape = isPublicCaller ? { select: publicProductSelect } : { include: productInclude };
 
   if (isPublicCaller) {
     where.status = 'PUBLISHED';
@@ -813,7 +832,7 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   }
 
   const [items, total] = await Promise.all([
-    prisma.product.findMany({ where, skip, take, orderBy, include }),
+    prisma.product.findMany({ where, skip, take, orderBy, ...queryShape }),
     prisma.product.count({ where }),
   ]);
   return { items, total };
@@ -823,7 +842,7 @@ async function getProductById(id, caller) {
   const isPublicCaller = !caller
     || (!isSuperAdmin(caller) && !isCompanyUser(caller) && !isStaffUser(caller));
   const include = isPublicCaller ? publicProductInclude : productInclude;
-  const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, include });
+  const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, ...queryShape });
   if (!product) return null;
   if (isCompanyUser(caller)) {
     if (!Array.isArray(caller.permissions) || !caller.permissions.includes('products.read')) {
