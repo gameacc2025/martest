@@ -1040,7 +1040,7 @@ async function submitResponse(inquiryId, data, caller) {
     validateResponseItemOwnership(data.items, ownedInquiryItemIds);
 
     await validateResponseSubmissionCapacity(companyId, tx);
-    await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'RESPONSE_SUBMIT', referenceType: 'Inquiry', referenceId: numericInquiryId, idempotencyKey: `rfq-response:${numericInquiryId}:${companyId}`, tx });
+    await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'RESPONSE_SUBMIT', referenceType: 'Inquiry', referenceId: numericInquiryId, tx });
 
     const response = await tx.inquiryResponse.create({
       data: {
