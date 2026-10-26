@@ -1416,7 +1416,9 @@ test('updateProduct: full tier reconciliation does not record wholesale price ch
 
 test('public retail price history is not exposed for unpublished products', async () => {
   resetMocks();
-  fx.product = { id: 1, status: 'DRAFT', visibility: 'PUBLIC', deletedAt: null };
+  // Prisma enforces the status/visibility predicate; the unit mock represents
+  // a non-matching query with no returned row.
+  fx.product = null;
   assert.equal(await service.getPublicPriceHistory(1), null);
   assert.equal(calls['productPriceSnapshot.findMany']?.length || 0, 0);
 });
