@@ -131,7 +131,7 @@ test('myProducts: a caller with the "*" wildcard permission is also treated as u
 
 test('myProducts: a regular company user is scoped to their own JWT companyId', async () => {
   const reply = makeReply();
-  const user = { roles: ['COMPANY_MANAGER'], permissions: ['products.read'], companyId: 7 };
+  const user = { roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 7 };
   await controller.myProducts(makeRequest({ user }), reply);
 
   assert.equal(calls.listProducts[0].filters.companyId, 7);
@@ -155,11 +155,12 @@ test('getOne: passes params.id and request.user (for visibility scoping) to the 
   assert.deepEqual(calls.getProductById, ['1', user]);
 });
 
-test('getActivity: forwards id and wraps the result', async () => {
+test('getActivity: forwards id and authenticated caller, then wraps the result', async () => {
   fx.activity = [{ id: 1, action: 'EDIT' }];
   const reply = makeReply();
-  await controller.getActivity(makeRequest({ params: { id: '1' } }), reply);
-  assert.deepEqual(calls.getProductActivityLog, ['1']);
+  const user = { roles: [], permissions: ['products.read'], accessType: 'STAFF' };
+  await controller.getActivity(makeRequest({ params: { id: '1' }, user }), reply);
+  assert.deepEqual(calls.getProductActivityLog, ['1', user]);
   assert.deepEqual(reply._body, { data: fx.activity });
 });
 
