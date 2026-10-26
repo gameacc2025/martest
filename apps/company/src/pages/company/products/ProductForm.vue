@@ -446,7 +446,6 @@ function buildProductPayload() {
   // Feature promotion is a separate privilege. Omitting this field preserves
   // the stored value for callers who cannot manage featured placement.
   if (canFeature.value) payload.isFeatured = !!form.value.isFeatured
-  }
 
   // Optional text fields — only include non-empty values.
   for (const key of ['shortDescription', 'description', 'sku', 'brand', 'model']) {
