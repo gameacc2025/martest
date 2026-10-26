@@ -109,19 +109,36 @@ const responseInclude = {
 
 
 function getInquirySmsGatewayConfig() {
-  const endpoint = String(process.env.INQUIRY_SMS_GATEWAY_URL || '').trim();
-  const token = String(process.env.INQUIRY_SMS_GATEWAY_TOKEN || '').trim();
-  if (!endpoint || !token) {
+  const accountSid = String(process.env.TWILIO_ACCOUNT_SID || '').trim();
+  const authToken = String(process.env.TWILIO_AUTH_TOKEN || '').trim();
+  const from = String(process.env.TWILIO_FROM_NUMBER || '').trim();
+  if (!accountSid || !authToken || !from) {
     throw { statusCode: 503, code: 'SMS_PROVIDER_NOT_CONFIGURED', message: 'درگاه پیامک روی سرور پیکربندی نشده است.' };
   }
-  let url;
-  try { url = new URL(endpoint); } catch {
-    throw { statusCode: 500, code: 'SMS_PROVIDER_CONFIGURATION_INVALID', message: 'نشانی درگاه پیامک معتبر نیست.' };
+  if (!accountSid.startsWith('AC') || from.length > 40) {
+    throw { statusCode: 500, code: 'SMS_PROVIDER_CONFIGURATION_INVALID', message: 'تنظیمات درگاه پیامک معتبر نیست.' };
   }
-  if (!['https:', ...(process.env.NODE_ENV === 'production' ? [] : ['http:'])].includes(url.protocol)) {
-    throw { statusCode: 500, code: 'SMS_PROVIDER_CONFIGURATION_INVALID', message: 'درگاه پیامک باید از HTTPS استفاده کند.' };
+  return { accountSid, authToken, from };
+}
+
+async function deliverInquirySms(to, message) {
+  const gateway = getInquirySmsGatewayConfig();
+  const auth = Buffer.from(`${gateway.accountSid}:${gateway.authToken}`).toString('base64');
+  const body = new URLSearchParams({ To: to, From: gateway.from, Body: message }).toString();
+  let response;
+  try {
+    response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${gateway.accountSid}/Messages.json`, {
+      method: 'POST',
+      headers: { authorization: `Basic ${auth}`, 'content-type': 'application/x-www-form-urlencoded' },
+      body,
+      signal: AbortSignal.timeout(8000),
+    });
+  } catch {
+    throw { statusCode: 502, code: 'SMS_PROVIDER_UNAVAILABLE', message: 'ارتباط با درگاه پیامک برقرار نشد.' };
   }
-  return { endpoint: url.toString(), token };
+  if (!response.ok) {
+    throw { statusCode: 502, code: 'SMS_PROVIDER_REJECTED', message: 'درگاه پیامک درخواست را نپذیرفت.' };
+  }
 }
 
 function isSuperAdmin(caller) {
