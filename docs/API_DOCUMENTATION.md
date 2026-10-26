@@ -1260,3 +1260,27 @@ Supported optional query parameters:
 Pagination uses the existing `page` and `limit` parameters. Invalid price bounds, sort fields, or sort directions return a validation error rather than silently changing the query.
 
 The current Product schema has no stock quantity or order/sales aggregate, so stock filtering and a genuine best-seller ranking are not available. The homepage therefore uses `isFeatured` for its featured section and labels the recent catalog slice as newest products instead of implying sales ranking.
+
+
+## Inquiry / RFQ completion contract (2026-10-26)
+
+All inquiry routes are authenticated under `/api/v1/inquiries`. Access is scoped server-side by buyer ownership, supplier product ownership, or STAFF permissions.
+
+- `POST /`: Company buyers create DRAFT inquiries; CUSTOMER users create immediately OPEN inquiries owned by their user ID. A client-supplied company ID is ignored for CUSTOMER callers.
+- `GET /?scope=sent|received|all`: returns a paginated list. CUSTOMER `sent`/ `all` scopes are restricted to that customer's own inquiries. Supplier `received` scope only lists published/due inquiries containing products owned by the supplier's company.
+- `GET /:id`: buyer, authorized STAFF, or a company owning a requested product can read; unrelated users receive 404.
+- `PATCH /:id/status`: follows the allowed status transition map. CUSTOMER callers may only cancel their own inquiry.
+- `POST /:id/reveal`: explicitly reveals a sealed inquiry early only when `allowEarlyReveal` is enabled; STAFF with update permission can supervise/reveal.
+- `GET /:id/responses`, `POST /:id/responses`, `PATCH /:id/responses/:responseId`, `POST /:id/responses/:responseId/withdraw`: supplier response/quote lifecycle, with supplier ownership enforced per response item.
+
+Visibility rules:
+- NORMAL: the buyer sees all responses; a supplier sees only its own response.
+- SEALED: the buyer cannot see quote details until the response deadline or closure, unless an authorized early reveal is performed. Suppliers see only their own response.
+- ANONYMOUS_SEALED: after reveal, supplier identities are redacted from buyer response data; supplier company IDs are not returned in quote items.
+- `confidential=true`: supplier-facing inquiry detail does not expose the requesting company's identity.
+- Drafts and future-scheduled inquiries are not discoverable in supplier lists/details.
+
+Lifecycle:
+- Company inquiries retain DRAFT → SUBMITTED → OPEN. A future `publishDate` is processed by the background lifecycle worker; `autoClose=true` transitions OPEN inquiries to EXPIRED when `responseDeadline` is reached.
+- Customer product-page inquiries open immediately.
+- Lifecycle transitions are recorded in `InquiryStatusHistory.source` as USER or SYSTEM; system actions do not invent a human actor.
