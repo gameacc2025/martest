@@ -107,6 +107,41 @@ const responseInclude = {
 };
 
 
+
+function getInquirySmsGatewayConfig() {
+  const endpoint = String(process.env.INQUIRY_SMS_GATEWAY_URL || '').trim();
+  const token = String(process.env.INQUIRY_SMS_GATEWAY_TOKEN || '').trim();
+  if (!endpoint || !token) {
+    throw { statusCode: 503, code: 'SMS_PROVIDER_NOT_CONFIGURED', message: 'درگاه پیامک روی سرور پیکربندی نشده است.' };
+  }
+  let url;
+  try { url = new URL(endpoint); } catch {
+    throw { statusCode: 500, code: 'SMS_PROVIDER_CONFIGURATION_INVALID', message: 'نشانی درگاه پیامک معتبر نیست.' };
+  }
+  if (!['https:', ...(process.env.NODE_ENV === 'production' ? [] : ['http:'])].includes(url.protocol)) {
+    throw { statusCode: 500, code: 'SMS_PROVIDER_CONFIGURATION_INVALID', message: 'درگاه پیامک باید از HTTPS استفاده کند.' };
+  }
+  return { endpoint: url.toString(), token };
+}
+
+async function deliverInquirySms(to, message) {
+  const gateway = getInquirySmsGatewayConfig();
+  let response;
+  try {
+    response = await fetch(gateway.endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${gateway.token}` },
+      body: JSON.stringify({ to, message }),
+      signal: AbortSignal.timeout(8000),
+    });
+  } catch {
+    throw { statusCode: 502, code: 'SMS_PROVIDER_UNAVAILABLE', message: 'ارتباط با درگاه پیامک برقرار نشد.' };
+  }
+  if (!response.ok) {
+    throw { statusCode: 502, code: 'SMS_PROVIDER_REJECTED', message: 'درگاه پیامک درخواست را نپذیرفت.' };
+  }
+}
+
 function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
 }
@@ -1165,15 +1200,28 @@ async function sendInquiryMessage(inquiryId, data, caller) {
       ownerType, ownerId, usageType: 'INTERNAL_MESSAGE',
       referenceType: 'Inquiry', referenceId: numericInquiryId, tx,
     });
-    return tx.inquiryMessage.create({
+    const createdMessage = await tx.inquiryMessage.create({
       data: { inquiryId: numericInquiryId, senderUserId, senderCompanyId, recipientUserId, recipientCompanyId, body: message },
       include: {
         senderUser: { select: { id: true, phone: true, email: true } },
         senderCompany: { select: { id: true, name: true } },
         recipientUser: { select: { id: true, phone: true, email: true } },
-        recipientCompany: { select: { id: true, name: true } },
+        recipientCompany: { select: { id: true, name: true, phone: true } },
       },
     });
+    if (data.notifyBySms === true) {
+      const recipient = recipientUserId
+        ? await tx.user.findUnique({ where: { id: recipientUserId }, select: { phone: true } })
+        : await tx.company.findUnique({ where: { id: recipientCompanyId }, select: { phone: true } });
+      const phone = String(recipient?.phone || '').trim();
+      if (!phone) throw { statusCode: 422, code: 'SMS_RECIPIENT_PHONE_MISSING', message: 'برای گیرنده شماره تلفن ثبت نشده است.' };
+      // SMS always requires an active paid allowance, even during the staged
+      // rollout where ordinary inquiry quotas are not yet enforced.
+      getInquirySmsGatewayConfig();
+      await consumeUsage({ ownerType, ownerId, usageType: 'SMS', referenceType: 'InquiryMessage', referenceId: createdMessage.id, tx });
+      await deliverInquirySms(phone, `پیام جدیدی درباره استعلام «${String(inquiry.title || '').slice(0, 100)}» دریافت کرده‌اید.`);
+    }
+    return createdMessage;
   });
 }
 
