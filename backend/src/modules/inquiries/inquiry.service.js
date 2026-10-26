@@ -412,12 +412,12 @@ async function notifyInquiryPublished(tx, inquiry) {
   if (companyIds.length) {
     await dispatchNotification('INQUIRY_PUBLISHED', { companyIds }, context, {
       tx,
-      dedupeKey: `inquiry-published-${inquiry.id}-companies`,
+      dedupeKey: (userId) => `inquiry-published-${inquiry.id}-companies-${userId}`,
     });
   }
   await dispatchNotification('INQUIRY_PUBLISHED', { permission: 'leads.read' }, context, {
     tx,
-    dedupeKey: `inquiry-published-${inquiry.id}-staff`,
+    dedupeKey: (userId) => `inquiry-published-${inquiry.id}-staff-${userId}`,
   });
 }
 
@@ -426,7 +426,10 @@ async function notifyInquiryOwner(tx, inquiry, eventKey, context, dedupeKey) {
     ? [Number(inquiry.buyerUserId)]
     : (inquiry.companyId ? { companyIds: [Number(inquiry.companyId)] } : []);
   if (!recipients.length) return;
-  await dispatchNotification(eventKey, recipients, context, { tx, dedupeKey });
+  await dispatchNotification(eventKey, recipients, context, {
+    tx,
+    dedupeKey: (userId) => `${typeof dedupeKey === 'function' ? dedupeKey(userId) : dedupeKey}-${userId}`,
+  });
 }
 
 function normalizeInquiryItems(items = []) {
@@ -893,7 +896,7 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
       for (const companyId of [...new Set(responseCompanies.map((row) => Number(row.companyId)))]) {
         await dispatchNotification('INQUIRY_STATUS_CHANGED', { companyIds: [companyId] }, context, {
           tx,
-          dedupeKey: `inquiry-status-${updated.id}-${nextStatus}-company-${companyId}`,
+          dedupeKey: (userId) => `inquiry-status-${updated.id}-${nextStatus}-company-${companyId}-${userId}`,
         });
       }
     }
@@ -1192,7 +1195,7 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
       await dispatchNotification('INQUIRY_RESPONSE_REJECTED', { companyIds: [response.companyId] }, {
         inquiry: { id: inquiry.id, title: inquiry.title },
         response: { id: response.id },
-      }, { tx, dedupeKey: `inquiry-response-rejected-${response.id}` });
+      }, { tx, dedupeKey: (userId) => `inquiry-response-rejected-${response.id}-${userId}` });
       // Decision endpoints return a minimal receipt only; never echo supplier identity
       // into buyer-facing responses for ANONYMOUS_SEALED inquiries.
       return { id: rejected.id, inquiryId: numericInquiryId, status: rejected.status };
@@ -1240,13 +1243,13 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
     await dispatchNotification('INQUIRY_RESPONSE_SELECTED', { companyIds: [response.companyId] }, {
       inquiry: { id: inquiry.id, title: inquiry.title },
       response: { id: response.id },
-    }, { tx, dedupeKey: `inquiry-response-selected-${response.id}` });
+    }, { tx, dedupeKey: (userId) => `inquiry-response-selected-${response.id}-${userId}` });
 
     for (const loser of losers) {
       await dispatchNotification('INQUIRY_RESPONSE_AUTO_REJECTED', { companyIds: [loser.companyId] }, {
         inquiry: { id: inquiry.id, title: inquiry.title },
         company: { id: loser.companyId },
-      }, { tx, dedupeKey: `inquiry-response-auto-rejected-${loser.id}` });
+      }, { tx, dedupeKey: (userId) => `inquiry-response-auto-rejected-${loser.id}-${userId}` });
     }
 
     await notifyInquiryOwner(tx, inquiry, 'INQUIRY_STATUS_CHANGED', {
