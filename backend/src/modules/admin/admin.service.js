@@ -266,6 +266,43 @@ async function listInquirySubscriptions() {
 
 // Explicit staff grant for support/compensation. This is NOT a payment callback;
 // online checkout must only activate a subscription after a verified gateway callback.
+
+async function activateInquirySubscription(subscriptionId, adminUserId, notes) {
+  const id = Number(subscriptionId);
+  if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه اشتراک معتبر نیست.', 400, true, 'INVALID_SUBSCRIPTION_ID');
+  return prisma.$transaction(async (tx) => {
+    const subscription = await tx.inquirySubscription.findUnique({
+      where: { id },
+      include: { plan: true },
+    });
+    if (!subscription) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'INQUIRY_SUBSCRIPTION_NOT_FOUND');
+    if (subscription.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست در انتظار پرداخت قابل فعال‌سازی است.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+    if (!subscription.plan.isActive) throw new AppError('طرح این اشتراک غیرفعال شده است.', 409, true, 'INQUIRY_PLAN_INACTIVE');
+    if ((subscription.companyId == null) === (subscription.userId == null)) {
+      throw new AppError('مالک اشتراک معتبر نیست.', 409, true, 'INVALID_SUBSCRIPTION_OWNER');
+    }
+    const ownerFilter = subscription.companyId != null ? { companyId: subscription.companyId } : { userId: subscription.userId };
+    const active = await tx.inquirySubscription.findFirst({
+      where: { ...ownerFilter, status: 'ACTIVE', startsAt: { lte: new Date() }, endsAt: { gt: new Date() } },
+      select: { id: true },
+    });
+    if (active) throw new AppError('این حساب اشتراک فعال دیگری دارد.', 409, true, 'ACTIVE_SUBSCRIPTION_EXISTS');
+    const startsAt = new Date();
+    const endsAt = new Date(startsAt.getTime() + subscription.plan.durationDays * 86400000);
+    return tx.inquirySubscription.update({
+      where: { id },
+      data: {
+        status: 'ACTIVE',
+        startsAt,
+        endsAt,
+        activatedBy: adminUserId,
+        notes: notes ? String(notes).slice(0, 1000) : 'پرداخت توسط مدیر بررسی و تأیید شد.',
+      },
+      include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true, email: true } } },
+    });
+  });
+}
+
 async function grantInquirySubscription(data, adminUserId) {
   const companyId = data.companyId == null ? null : Number(data.companyId);
   const userId = data.userId == null ? null : Number(data.userId);
