@@ -312,6 +312,7 @@ model Product {
   images           ProductImage[]
   documents        ProductDocument[]
   prices           ProductPriceTier[]
+  priceSnapshots   ProductPriceSnapshot[]
   statusHistory    ProductStatusHistory[]
   activityLog      ProductActivityLog[]
   inquiryItems     InquiryItem[]
@@ -414,6 +415,22 @@ model ProductPriceTier {
   @@index([minQuantity])
   @@index([validFrom])
   @@index([validTo])
+}
+
+model ProductPriceSnapshot {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  priceTierId Int?
+  minQuantity Int
+  maxQuantity Int?
+  price       Decimal  @db.Decimal(18, 2)
+  unit        String?
+  action      String
+  recordedAt  DateTime @default(now())
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, recordedAt])
+  @@index([priceTierId])
 }
 
 model Inquiry {
