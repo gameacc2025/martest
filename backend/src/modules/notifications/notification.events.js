@@ -117,6 +117,18 @@ const EVENT_CATALOG = {
     }),
   },
 
+  INQUIRY_MESSAGE_RECEIVED: {
+    key: 'INQUIRY_MESSAGE_RECEIVED',
+    label: 'پیام جدید در گفت‌وگوی استعلام',
+    recipients: 'The inquiry buyer or responding company participating in the conversation',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ inquiry }) => ({
+      title: 'پیام جدید در استعلام',
+      message: `پیام جدیدی درباره استعلام «${inquiry?.title || inquiry?.id || ''}» دریافت کرده‌اید.`,
+      data: { inquiryId: inquiry?.id },
+    }),
+  },
+
   INQUIRY_RESPONSE_RECEIVED: {
     key: 'INQUIRY_RESPONSE_RECEIVED',
     label: 'دریافت پاسخ استعلام',
