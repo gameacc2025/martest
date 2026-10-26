@@ -38,6 +38,12 @@ const routes = [
         meta: { title: "اعلان‌های من", requiresAuth: true },
       },
       {
+        path: "profile",
+        name: "profile",
+        component: () => import("../pages/public/UserProfile.vue"),
+        meta: { title: "پروفایل کاربر", requiresAuth: true },
+      },
+      {
         path: "profile/addresses",
         name: "profile-addresses",
         component: () => import("../pages/public/Addresses.vue"),
