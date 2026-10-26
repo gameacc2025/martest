@@ -459,3 +459,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **SMTP:** Real provider delivery is not verified because this environment has no SMTP credentials/recipient. SMS remains not implemented in current dispatch.
 - **Verification:** Latest CI and Runtime Validation are in progress/pending at handoff time. No pass claim until GitHub Actions reports success.
 - **Key files:** `docs/API_DOCUMENTATION.md`, `docs/DATABASE_DOCUMENTATION.md`, `docs/FRONTEND_DOCUMENTATION.md`, `docs/DOCKER_DEPLOYMENT.md`, `docs/role-access-matrix.md`, `docs/ARCHITECTURE_DECISIONS.md`, `docs/architecture/*`, `scripts/generate-architecture-graph.mjs`, `e2e/*`, `.github/workflows/runtime-validation.yml`, `TESTING.md`.
+
+
+## 2026-10-26 — CUSTOMER-ADDRESS-MANAGEMENT
+
+- **Branch:** `feature/customer-address-management`, based on `docs-runtime-e2e-hardening`.
+- **Feature:** Customer-owned addresses in Prisma, PostgreSQL migration, authenticated API CRUD, default-address transaction logic, and Persian responsive website page at `/profile/addresses`.
+- **Security:** Every address query is scoped to `request.user.id`; routes require authenticated CUSTOMER access type; a foreign user's address ID returns not-found.
+- **Data behavior:** First address becomes default, selecting a default clears the prior default for the same user, and deleting the default promotes a remaining address.
+- **Tests added:** `backend/src/modules/addresses/address.service.test.js` covers user isolation, first default, default switching, foreign IDs, and deletion fallback.
+- **Verification:** CI and real PostgreSQL migration checks are pending. Do not merge until they complete successfully.
