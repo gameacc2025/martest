@@ -1100,7 +1100,6 @@ async function updateProduct(id, data, caller) {
         const { id: tierId, ...tierData } = tier;
         if (tierId !== undefined) {
           const before = existingTiersById.get(tierId);
-          const changed = JSON.stringify(comparableTier(before)) !== JSON.stringify(comparableTier(tierData));
           // The chart tracks retail-price changes, not wholesale tiers or
           // metadata-only edits. Preserve the final retail point if this tier
           // stops being the retail tier; a tier entering retail starts a series.
