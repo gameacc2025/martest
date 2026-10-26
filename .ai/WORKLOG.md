@@ -351,3 +351,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Directly committed to remote `main`; no local push was performed.
 - **Risks / open questions:** None remaining for the approved scope. No schema or migration changes.
 - **Next action:** Keep product permission seeds aligned with assigned roles; closed issues #2, #5, and #6 after successful CI.
+
+## 2026-10-26 — PRODUCT-DETAILS-LAYOUT-2026-10-26-01 — Refine product details page to match reference
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Improve the public product details page layout based on the user-provided reference screenshot while preserving existing product data/API and commerce behavior.
+- **Claimed scope:** `apps/website/src/pages/public/ProductDetails.vue` and focused tests if an existing test harness is found; `.ai/current-task.md` handoff.
+- **Evidence:** Current page already has a right-side gallery, product details/specifications, and left sticky summary card on desktop, but the summary card is cart-centric, mobile puts the sidebar before the gallery, specs use two columns on wide screens, and the image frame is comparatively tall. The reference emphasizes the gallery first, a compact left action card, and readable full-width spec rows.
+- **Plan:** Adjust image frame proportions, desktop sidebar width/spacing, spec rows to one column, and mobile order so gallery appears first and the action/supplier cards follow before the long description/specifications. Do not invent an inquiry submission API or change cart behavior without an existing verified flow.
+- **Verification plan:** Inspect existing test scripts and GitHub Actions for current main; verify targeted tests and website production build in CI. Local checkout/browser visual validation is unavailable in this workflow.
+- **Commit:** Pending.
+- **Push:** Repository tool writes directly to remote `main`; only scoped files will be changed.
+- **Risks / open questions:** The reference screenshot's “ثبت استعلام” workflow does not match the current page's cart actions. Keep current action behavior unless an existing inquiry flow is verified.
+- **Next action:** Apply responsive layout refinements, inspect CI, and update this entry with observed results.
