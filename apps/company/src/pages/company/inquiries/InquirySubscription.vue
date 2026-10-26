@@ -59,11 +59,16 @@ async function requestPlan(plan) {
   }
   submitting.value = true
   try {
-    await apiPost(endpoints.inquirySubscriptions.request, {
+    const response = await apiPost(endpoints.inquirySubscriptions.request, {
       planId: plan.id,
       paymentReference: paymentReference.value.trim() || undefined,
     })
-    successMessage.value = 'درخواست ثبت شد. اشتراک پس از بررسی و تأیید پرداخت فعال می‌شود.'
+    const result = response?.data?.data ?? response?.data ?? response
+    if (result?.paymentUrl) {
+      window.location.assign(result.paymentUrl)
+      return
+    }
+    successMessage.value = 'درخواست ثبت شد. در صورت نبود درگاه آنلاین، اشتراک پس از بررسی و تأیید پرداخت توسط مدیر فعال می‌شود.'
     paymentReference.value = ''
     selectedPlanId.value = null
     await load()
@@ -128,7 +133,7 @@ async function requestPlan(plan) {
           </button>
         </article>
       </div>
-      <p class="footnote">توجه: درگاه پرداخت آنلاین هنوز به این پروژه متصل نشده است. شماره پیگیری به‌تنهایی تأیید پرداخت نیست و فعال‌سازی فقط پس از بررسی مدیر انجام می‌شود.</p>
+      <p class="footnote">اگر درگاه آنلاین پیکربندی شده باشد، پس از ثبت درخواست به صفحه پرداخت منتقل می‌شوید. در غیر این صورت درخواست برای بررسی دستی ثبت می‌شود؛ شماره پیگیری به‌تنهایی تأیید پرداخت نیست.</p>
     </section>
   </main>
 </template>
