@@ -117,3 +117,32 @@ test('quota summary reports usage and remaining quota for each usage type', asyn
   assert.deepEqual(result.quotas.RESPONSE_SUBMIT, { used: 2, limit: 3, remaining: 1 });
   assert.deepEqual(result.quotas.INTERNAL_MESSAGE, { used: 2, limit: 30, remaining: 28 });
 });
+
+test('SMS quota remains enforced when general inquiry quota rollout is disabled', async () => {
+  reset();
+  enforcement = false;
+  const result = await consumeUsage({
+    ownerType: 'company',
+    ownerId: 4,
+    usageType: 'SMS',
+    referenceType: 'InquiryMessage',
+    referenceId: 92,
+    forceEnforcement: true,
+    tx: mockPrisma,
+  });
+  assert.equal(result.enforced, true);
+  assert.equal(result.limit, 10);
+  assert.equal(result.remaining, 9);
+  assert.equal(calls.create[0].data.usageType, 'SMS');
+});
+
+test('paid SMS requires an active subscription even while inquiry enforcement is disabled', async () => {
+  reset();
+  enforcement = false;
+  activeSubscription = null;
+  await assert.rejects(
+    () => consumeUsage({ ownerType: 'user', ownerId: 8, usageType: 'SMS', forceEnforcement: true }),
+    (error) => error.code === 'INQUIRY_SUBSCRIPTION_REQUIRED' && error.statusCode === 403,
+  );
+  assert.equal(calls.create.length, 0);
+});
