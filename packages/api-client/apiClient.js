@@ -193,6 +193,7 @@ export const inquiriesApi = {
   listResponses: (id) => api.get(endpoints.inquiries.listResponses(id)),
   submitResponse: (id, data) => api.post(endpoints.inquiries.submitResponse(id), data),
   updateResponse: (id, responseId, data) => api.patch(endpoints.inquiries.updateResponse(id, responseId), data),
+  decideResponse: (id, responseId, data) => api.patch(endpoints.inquiries.decideResponse(id, responseId), data),
   withdrawResponse: (id, responseId, data = {}) => api.post(endpoints.inquiries.withdrawResponse(id, responseId), data),
   uploadResponseAttachment: (id, responseId, formData) => api.post(endpoints.inquiries.responseAttachments(id, responseId), formData),
   deleteResponseAttachment: (id, responseId, attachmentId) => api.delete(endpoints.inquiries.deleteResponseAttachment(id, responseId, attachmentId)),
