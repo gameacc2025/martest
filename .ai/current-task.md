@@ -11,6 +11,14 @@
 - **Next:** No remaining work for this approved authorization scope.
 
 
+## Active task — PRODUCT-DETAILS-LAYOUT-2026-10-26-01
+- **Status:** IN_PROGRESS.
+- **Goal:** Refine Website product detail page against user screenshot.
+- **Scope:** `apps/website/src/pages/public/ProductDetails.vue`; tests only if a matching test file/harness exists.
+- **Plan:** Improve gallery proportions, compact desktop sidebar, one-column technical spec rows, and mobile order (gallery first, action/supplier card second, long text after). Preserve API/data and existing cart actions; no unverified inquiry workflow added.
+- **Verification:** Inspect GitHub Actions after source edit. Local test/build/browser run NOT AVAILABLE in this remote-only session.
+- **Next:** Implement, verify via CI, and record commit/run.
+
 ## Completed — Notification inbox fixes and bulk actions
 
 - **Status:** Earlier inbox actions are implemented; follow-up for independent folder counters and double-click-to-read has been committed to `main`; CI pending.
