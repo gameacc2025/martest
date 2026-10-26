@@ -1,14 +1,12 @@
 # Current Task / Agent Handoff
 
-## PRODUCT-ACCESS-AUDIT-2026-10-26-01 — Product security, lifecycle, and retail price chart history
+## INQUIRY-COMPLETION-2026-10-26-01 — Complete Inquiry / RFQ workflow
 
-- **Status:** IMPLEMENTED; latest CI run is GREEN. Database deployment, Docker/Compose runtime, and browser E2E/visual checks remain unverified because this session only has remote repository/CI access.
-- **Canonical branch:** `main`.
-- **User authorization:** Full implementation of Task 1 (STAFF/COMPANY/CUSTOMER access control and tenant ownership) and Task 2 (product lifecycle/pricing/specifications/media/publication workflow), including tests and docs. No follow-up approval is required for in-scope fixes.
-- **Security/lifecycle review:** Product routes use central access-type and permission guards; service paths independently enforce company ownership and operation permissions; existing tests cover tenant isolation, status transitions, featured permission, product media/document ownership, and CUSTOMER misuse of company claims. Soft deletion was improved to atomically write activity and status audit records.
-- **Price-history requirement:** Persist only retail tier history (`minQuantity = 1`) in existing `ProductPriceSnapshot`. Snapshot writes share the price mutation transaction. Wholesale changes and metadata-only edits do not add chart points; replacing a retail row in a full edit produces a single net price-change point rather than duplicate DELETE/CREATE points. The public API returns the complete stored series in ascending timestamp order for currently PUBLISHED + PUBLIC products. The product detail page labels the chart as retail-only and prioritizes retail price in the headline display. Historical prices predating snapshot activation are not fabricated.
-- **Key implementation commits:** `fcfdf919577affcd590b55ca423e1b3d2f5de6d1`, `03da519bf207f6bc9fa376fb377b8a37b9981ce9`, `5f3fef964ae838be41ac63db2c160ae6808b400a`, `cff8b70da5670b5af3897de2622dd08e3270a9e1`, `64358664d517316a4ef303db24c80be0263bfb4c`, `d14728e8baf7872d5d21eccc41c2809e3e0ee3f0`, `9b56e765ed3ce209de0615ae64399a94545a5a75`, `35ca58c27c3215c8b45c82351cb1233a1fb542a5`, `1bc55a152264c0a8e2410f17c8561fb0e08b3883`, `e588f47068d8639ba3657fc2b62d4488e48349a2`.
-- **Verified CI:** [Run 40312425822](https://github.com/gameacc2025/martest/actions/runs/40312425822) passed on `e588f47068d8639ba3657fc2b62d4488e48349a2`, including frontend/shared tests, backend tests, Prisma Client generation, and production builds for all three frontend apps. An earlier test run exposed one incorrect unit-test mock for unpublished products; the mock was corrected, and the later full CI run passed.
-- **Docs:** `docs/API_DOCUMENTATION.md`, `docs/DATABASE_DOCUMENTATION.md`, and this handoff updated.
-- **Remaining verification:** Apply Prisma migrations to an isolated PostgreSQL database; verify Docker/Compose startup and health; run browser workflows for product creation/edit/review/publish, retail/wholesale pricing, inquiry ownership, media, and chart display. Do not claim these passed without executing them.
-- **Do not expand scope:** Do not implement cart/checkout/payment/CRM in this task.
+- **Status:** IN_PROGRESS
+- **Branch:** `feature/inquiry-completion`, based on `main`.
+- **User priority:** Finish Inquiry completely before returning to customer dashboard, addresses follow-ups, or B2C commerce.
+- **Scope:** Customer-created inquiries, inquiry ownership/model/API, normal/sealed/anonymous-sealed privacy, status/deadline/publish lifecycle, Company responses, STAFF oversight, notification events, Website inquiry history/details, tests, and docs.
+- **Confirmed current defects:** Website permits inquiry create for CUSTOMER_USER, but service insists on a companyId; Inquiry has no buyerUserId. Sealed modes are not enforced when getInquiry includes all responses. Inquiry lifecycle does not dispatch catalog events. Scheduled publish/deadline/autoclose behavior must be implemented or explicitly surfaced as unsupported.
+- **Plan:** Backward-compatible owner relation and SQL constraint/migration; service authorization and response redaction; notifications via notification.dispatch.service.js; customer inquiry UI; regression coverage; API/database/notification docs.
+- **Verification:** NOT RUN for this task yet.
+- **Deferred:** PR #11 is not merged and customer dashboard/B2C work is paused until this task is complete.
