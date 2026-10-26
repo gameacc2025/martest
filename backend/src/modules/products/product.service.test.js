@@ -1739,7 +1739,7 @@ test('STAFF product creation requires products.create and an explicit target com
 });
 
 test('STAFF with products.update may update another company product; STAFF without it is denied', async () => {
-  fx.product = draftProduct({ companyId: 10 });
+  fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1 });
   const unauthorizedStaff = { id: 5, accessType: 'STAFF', permissions: ['products.read'], companyId: 999 };
   await assert.rejects(
     () => service.updateProduct(1, { title: 'Changed' }, unauthorizedStaff),
@@ -1788,7 +1788,7 @@ test('createProduct requires products.feature to create a featured product', asy
 });
 
 test('updateProduct requires products.feature only when isFeatured changes', async () => {
-  fx.product = draftProduct({ companyId: 10, isFeatured: false });
+  fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1, isFeatured: false });
   await assert.rejects(
     () => service.updateProduct(1, { isFeatured: true }, companyA),
     (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
