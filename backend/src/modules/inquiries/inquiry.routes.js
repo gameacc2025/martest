@@ -274,6 +274,22 @@ async function inquiryRoutes(fastify) {
     },
   }, ctrl.submitResponse);
 
+  fastify.patch('/:id/responses/:responseId/decision', {
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('inquiries.create', 'inquiries.update', 'leads.update')],
+    schema: {
+      params: inquiryResponseParamsSchema,
+      body: {
+        type: 'object',
+        required: ['decision'],
+        additionalProperties: false,
+        properties: {
+          decision: { type: 'string', enum: ['SELECTED', 'REJECTED'] },
+          comment: { type: 'string', maxLength: 2000 },
+        },
+      },
+    },
+  }, ctrl.decideResponse);
+
   fastify.patch('/:id/responses/:responseId', {
     preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('inquiries.respond', 'leads.update')],
     schema: {
