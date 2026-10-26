@@ -60,6 +60,11 @@ async function consumeUsage({ ownerType, ownerId, usageType, referenceType = nul
     throw quotaError('INQUIRY_SUBSCRIPTION_REQUIRED', 'برای استفاده از این قابلیت، اشتراک فعال لازم است.', { ownerType, ownerId });
   }
 
+  // Serialize quota decisions for a subscription so simultaneous requests cannot
+  // both observe the same remaining slot and overspend the allowance.
+  if (typeof tx.$queryRawUnsafe === 'function') {
+    await tx.$queryRawUnsafe('SELECT id FROM "InquirySubscription" WHERE id = $1 FOR UPDATE', subscription.id);
+  }
   const limitField = LIMIT_BY_USAGE[usageType];
   const limit = subscription.plan[limitField];
   if (!Number.isInteger(limit) || limit < 0) {
