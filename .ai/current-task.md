@@ -1,13 +1,11 @@
 # Current Task / Agent Handoff
 
-## PROJECT-QUALITY-2026-10-26-01 — Five follow-ups
+## REPOSITORY-QUALITY-AUDIT-2026-10-26-01 — Full pre-development audit
 
-- **Status:** PARTIAL — implementation and automated CI verification passed; live/browser checks remain unverified.
+- **Status:** IN_PROGRESS — initial source/document review and CI evidence collected; remediation and operational verification remain.
 - **Canonical branch:** `main`.
-- **Task 1 — Documentation conflict:** DONE. Removed Git conflict markers from this file; historical task details remain in `.ai/WORKLOG.md`.
-- **Task 2 — Notifications:** Automated frontend/shared tests and all builds passed on current HEAD. Tests cover double-click-to-read and bulk read-state. Manual browser validation across Website, Company, and Admin is NOT RUN.
-- **Task 3 — Product price history:** Implemented `ProductPriceSnapshot`, migration `20261026110000_product_price_snapshots`, snapshots on product creation and price-tier create/update/delete/reconciliation, and public `GET /api/v1/products/:id/price-history` restricted to currently PUBLISHED + PUBLIC products. ProductDetails now loads persisted six-month snapshots. No historic values are fabricated or backfilled. Apply the migration before enabling the feature in a deployed environment.
-- **Task 4 — Product details/inquiry:** Existing permission-gated inquiry form, wishlist, product tags, responsive layout, and cart/supplier navigation are preserved. Automated tests/builds pass; desktop/mobile visual inspection is NOT RUN.
-- **Task 5 — Email/SMS:** SMTP provider and configuration are present. Live SMTP delivery is NOT VERIFIED because no configured mail environment was available. SMS delivery remains NOT IMPLEMENTED.
-- **Latest verification:** GitHub Actions [40309340136](https://github.com/gameacc2025/martest/actions/runs/40309340136) passed on `fa1df2054d1220f526e652f6fc6c8964644ebece`: frontend/shared tests, Prisma Client generation, backend tests, and Website/Company/Admin production builds.
-- **Next action:** In a configured deployment, apply the Prisma migration, manually test the three notification inboxes and product page at desktop/mobile widths, and send a controlled SMTP test email. Do not claim those operational checks passed until performed.
+- **Audit report:** [docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md](../docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md).
+- **Verified CI:** Run [40309510309](https://github.com/gameacc2025/martest/actions/runs/40309510309) passed on HEAD `1dd1434d1c78b4a0fb0e51cd5695b6653f1d4e35`, including frontend/shared tests, backend tests, Prisma Client generation, and production builds for Website/Company/Admin.
+- **Initial findings:** Several docs are stale (Docker/Next.js paths and versions, API base paths/legacy roles, frontend tree, database model inventory, role/access matrix). CI build emits an Admin chunk >500 kB and ineffective dynamic-import warning.
+- **Unverified:** Local test rerun, PostgreSQL migration application, Docker/Compose build/startup, browser E2E and visual validation, company ownership/IDOR sign-off, live SMTP, and generated dependency graph.
+- **Next actions:** Reconcile docs with current source and registered routes; review auth/RBAC and company-owned resource paths; add/run isolated migration and Docker smoke checks; validate high-value browser flows; re-run CI and review changes. Do not begin unrelated feature development until P1 findings are resolved or explicitly documented as accepted risks.
