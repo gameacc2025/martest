@@ -1,6 +1,22 @@
 const prisma = require('../../config/db');
 const { createPendingSubscription } = require('./inquiry-subscription.service');
 
+function lockSubscriptionOwner(tx, ownerType, ownerId) {
+  if (typeof tx.$queryRawUnsafe !== 'function') return Promise.resolve();
+  const id = Number(ownerId);
+  if (!Number.isInteger(id) || id < 1) return Promise.resolve();
+  if (ownerType === 'company') return tx.$queryRawUnsafe('SELECT id FROM "Company" WHERE id = $1 FOR UPDATE', id);
+  if (ownerType === 'user') return tx.$queryRawUnsafe('SELECT id FROM "User" WHERE id = $1 FOR UPDATE', id);
+  return Promise.resolve();
+}
+
+async function createPendingWithOwnerLock(args) {
+  return prisma.$transaction(async (tx) => {
+    await lockSubscriptionOwner(tx, args.ownerType, args.ownerId);
+    return createPendingSubscription(args, tx);
+  });
+}
+
 function zarinpalConfig() {
   const merchantId = String(process.env.ZARINPAL_MERCHANT_ID || '').trim();
   if (!merchantId) return null;
@@ -75,11 +91,12 @@ function amountInRial(plan) {
 async function startSubscriptionPayment({ ownerType, ownerId, planId, paymentReference = null }) {
   const config = zarinpalConfig();
   if (!config) {
-    const subscription = await createPendingSubscription({ ownerType, ownerId, planId, paymentReference });
+    const subscription = await createPendingWithOwnerLock({ ownerType, ownerId, planId, paymentReference });
     return { paymentMode: 'MANUAL_REVIEW', subscription, paymentUrl: null };
   }
 
   const prepared = await prisma.$transaction(async (tx) => {
+    await lockSubscriptionOwner(tx, ownerType, ownerId);
     const subscription = await createPendingSubscription({ ownerType, ownerId, planId, paymentReference: null }, tx);
     const amount = amountInRial(subscription.plan);
     const updated = await tx.inquirySubscription.update({
