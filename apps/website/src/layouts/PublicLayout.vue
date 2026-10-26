@@ -71,7 +71,6 @@ const userMenuItems = computed(() => {
   // their own portal through the existing PKCE session handoff.
   const items = authStore.isCustomer
     ? [
-        { label: 'پروفایل', icon: 'pi pi-user', command: () => router.push('/profile') },
         { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => router.push('/my-inquiries') },
       ]
     : [
