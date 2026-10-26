@@ -57,7 +57,7 @@
         <Column header="عملیات" style="width: 160px">
           <template #body="{ data }">
             <div class="actions-cell">
-              <Button v-if="['DRAFT', 'REJECTED'].includes(data.status)" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
+              <Button v-if="canSubmitForReview(data)" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
               <Button v-if="data.status === 'APPROVED'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت پس از تأیید STAFF'" @click="publishProduct(data)" />
               <Button v-if="canEdit(data)" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
               <!-- Approve/Reject are STAFF-only actions (products.approve / products.reject —
@@ -138,7 +138,7 @@ import { useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
-import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, canEdit, getUnreviewedEditCount } from '../../../config/product'
+import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, canEdit, canSubmitForReview, getUnreviewedEditCount } from '../../../config/product'
 import Select from 'primevue/select'
 
 const toast = useToast()
