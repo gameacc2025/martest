@@ -207,12 +207,15 @@ async function saveResponse() {
 }
 
 async function revealResponses() {
+  savingResponse.value = true
   try {
     await inquiriesApi.revealResponses(route.params.id)
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'پیشنهادها اکنون قابل بررسی هستند', life: 3000 })
     await fetchInquiry()
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err?.response?.data?.message || err?.message || 'بازکردن پیشنهادها انجام نشد', life: 3500 })
+  } finally {
+    savingResponse.value = false
   }
 }
 
