@@ -23,8 +23,9 @@ The current Playwright suite checks:
 - Website, Company and Admin SPA entrypoint returns HTTP 200 and mounts the Vue root.
 - Initial desktop render and mobile viewport change do not produce uncaught browser JavaScript errors.
 - Each panel's nginx proxy forwards an unauthenticated `GET /api/v1/auth/me` to the backend and receives the expected 401 rather than a proxy error.
+- A seeded STAFF account can log in through the Website UI, complete the PKCE handoff into Admin, and log out back to the centralized Website login page.
 
-These are browser/runtime smoke tests, not full business-flow acceptance tests. They do not yet prove successful login/logout, role-specific route denial, product create/approval/publication, inquiry response ownership, notification folder/count behavior, or visual parity across all pages. Those flows need seeded test fixtures and dedicated assertions before release sign-off.
+These are smoke and one end-to-end authentication-flow test, not full business-flow acceptance. Role-specific route denial, product create/approval/publication and retail history, inquiry response ownership, notification folder/count/read-state behavior, and visual parity across all pages still need dedicated assertions before release sign-off.
 
 ## Database migrations
 
