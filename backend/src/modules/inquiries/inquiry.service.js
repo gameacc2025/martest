@@ -1165,7 +1165,9 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
         inquiry: { id: inquiry.id, title: inquiry.title },
         response: { id: response.id },
       }, { tx, dedupeKey: `inquiry-response-rejected-${response.id}` });
-      return rejected;
+      // Decision endpoints return a minimal receipt only; never echo supplier identity
+      // into buyer-facing responses for ANONYMOUS_SEALED inquiries.
+      return { id: rejected.id, inquiryId: numericInquiryId, status: rejected.status };
     }
 
     const now = new Date();
@@ -1224,7 +1226,11 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
       status: 'CLOSED',
     }, `inquiry-status-${inquiry.id}-CLOSED-owner`);
 
-    return selectedResponse;
+    return {
+      id: selectedResponse.id,
+      inquiryId: numericInquiryId,
+      status: selectedResponse.status,
+    };
   });
 }
 
