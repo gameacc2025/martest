@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, feat/notifications-complete, docs-runtime-e2e-hardening, feature/customer-address-management]
+    branches: [main, feat/notifications-complete, docs-runtime-e2e-hardening, feature/customer-address-management, feature/customer-dashboard-foundation]
   pull_request:
-    branches: [main]
+    branches: [main, docs-runtime-e2e-hardening]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
