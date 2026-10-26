@@ -28,8 +28,9 @@ const router = useRouter()
 const toast = useToast()
 const auth = useAuthStore()
 
-// Only SUPER_ADMIN picks a company explicitly. Company representatives
-// have their product auto-assigned to their own company by the backend.
+// SUPER_ADMIN may select a target company. STAFF may do so on create only
+// when they have both products.create and companies.read; COMPANY users are
+// auto-assigned to their own company by the backend.
 const canChooseCompany = computed(() => auth.isSuperAdmin || (!isEditMode.value && auth.accessProfile?.type === 'STAFF' && auth.hasPermission('products.create') && auth.hasPermission('companies.read')))
 const canFeature = computed(() => auth.isSuperAdmin || auth.hasPermission('products.feature'))
 
