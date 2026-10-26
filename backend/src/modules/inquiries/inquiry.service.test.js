@@ -26,6 +26,7 @@ const calls = {
 let nextCount = 0;
 let nextFindMany = [];
 let nextFindUnique = null;
+let nextMessages = [];
 
 // Fixtures backing the transactional / relationship-heavy paths
 // (items, responses, attachments, product validation, stats).
@@ -141,6 +142,11 @@ const mockPrisma = {
       return {};
     },
   },
+  inquiryMessage: {
+    findMany: async (args) => { record('inquiryMessage.findMany', args); return nextMessages; },
+    create: async (args) => { record('inquiryMessage.create', args); return { id: 101, ...args.data }; },
+    updateMany: async (args) => { record('inquiryMessage.updateMany', args); return { count: 1 }; },
+  },
   inquiryResponseAttachment: {
     count: async () => fx.attachmentCount,
     findFirst: async () => fx.attachment,
@@ -224,6 +230,7 @@ function resetMocks() {
   nextCount = 0;
   nextFindMany = [];
   nextFindUnique = null;
+  nextMessages = [];
   fx.inquiryItem = null;
   fx.inquiryItemCount = 0;
   fx.ownedItemIds = [];
@@ -1492,3 +1499,44 @@ test('getInquiryStats: a caller without a company is rejected', async () => {
     (err) => err.code === 'COMPANY_REQUIRED',
   );
 });
+
+test('sendInquiryMessage: supplier can message the inquiry buyer only after responding', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const result = await inquiryService.sendInquiryMessage(1, { message: 'Need one clarification' }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+  assert.equal(result.senderCompanyId, 5);
+  assert.equal(result.recipientUserId, 10);
+  assert.equal(result.body, 'Need one clarification');
+  assert.equal(calls['inquiryMessage.create'][0].data.senderCompanyId, 5);
+});
+
+test('sendInquiryMessage: buyer messages a responding company and records the chosen recipient', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const result = await inquiryService.sendInquiryMessage(1, { message: 'Please confirm delivery', recipientCompanyId: 5 }, { id: 10, accessType: 'CUSTOMER', permissions: ['inquiries.create'] });
+  assert.equal(result.senderUserId, 10);
+  assert.equal(result.recipientCompanyId, 5);
+});
+
+test('sendInquiryMessage: blocks companies that have not responded', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = null;
+  await assert.rejects(
+    () => inquiryService.sendInquiryMessage(1, { message: 'Hello' }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] }),
+    (error) => error.code === 'INQUIRY_NOT_FOUND' && error.statusCode === 404,
+  );
+  assert.equal(calls['inquiryMessage.create'], undefined);
+});
+
+test('listInquiryMessages: limits company results to messages involving that company', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10 };
+  nextMessages = [{ id: 1, senderCompanyId: 5, recipientUserId: 10 }];
+  await inquiryService.listInquiryMessages(1, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.read'] });
+  assert.deepEqual(calls['inquiryMessage.findMany'][0].where.OR, [{ senderCompanyId: 5 }, { recipientCompanyId: 5 }]);
+  assert.equal(calls['inquiryMessage.updateMany'][0].where.recipientCompanyId, 5);
+});
+
