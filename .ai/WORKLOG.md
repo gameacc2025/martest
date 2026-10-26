@@ -283,3 +283,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Source/test review via GitHub API only; local test/build commands NOT RUN because there is no working local checkout/network access in this session. Run `40270601243` for HEAD `42468c4c8a5913da15a55152549c371752779f0b` was queued at last check. Recent CI run `40270506320` failed before backend tests due to three pre-existing Website/Company/Admin notification bulk-read tests expecting a `خوانده‌شده` button that is not found (155 passed, 3 failed).
 - **Risks / open questions:** The permission contract assumes product moderators are granted `products.read`; confirm via test/CI and existing permission seeds. Audit endpoints now intentionally expose actor identity details only to authorized readers.
 - **Next:** Check latest CI; if the notification test blocker persists, fix its root cause so backend tests/builds can execute. Then verify the product tests and continue the remaining lifecycle/specification/media audit.
+### Product authorization hardening follow-up — 2026-10-26
+
+- Restricted `isCompanyUser` to COMPANY access profiles (with legacy no-accessType compatibility), preventing CUSTOMER callers with an unexpected `companyId` claim from being classified as company managers.
+- Staff moderator test fixture now intentionally includes `companyId: 999` to prove STAFF remains cross-company; added service tests denying CUSTOMER access to product history/activity even if the caller has `products.read` and a companyId.
+- Commits: `8a963b4459288d7de714b4913579dbb61669435d`, `df0e7b52cf8e1e2643bbabac43cd999eee96bcf2`, handoff update `783cbe999d0acbe6d0431158d680b1004382e73d`.
+- CI: run `40270760225` for then-current HEAD `df0e7b52cf8e1e2643bbabac43cd999eee96bcf2` was queued at last check. Existing frontend notification bulk-read tests still block the backend test step in recent runs; product tests/builds remain NOT VERIFIED.
+- Next: Check latest CI and remove the notification test blocker if it persists, then verify the product service/route suites.
