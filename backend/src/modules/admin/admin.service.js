@@ -239,7 +239,7 @@ async function createInquiryPlan(data) {
   if (!/^[a-z0-9][a-z0-9_-]{1,49}$/.test(code) || !name || name.length > 100) {
     throw new AppError('کد یا نام طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
   }
-  if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650 || !Number.isFinite(price) || price < 0) {
+  if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650 || !Number.isFinite(price) || price < 1) {
     throw new AppError('مدت یا قیمت طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
   }
   const quotas = ['inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod'];
@@ -278,7 +278,7 @@ async function updateInquiryPlan(planId, data) {
   }
   if (data.price !== undefined) {
     const price = Number(data.price);
-    if (!Number.isFinite(price) || price < 0) throw new AppError('قیمت طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+    if (!Number.isFinite(price) || price < 1) throw new AppError('قیمت طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
     update.price = price;
   }
   if (data.currency !== undefined) {
