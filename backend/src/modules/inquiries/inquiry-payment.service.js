@@ -137,18 +137,18 @@ async function handleSubscriptionPaymentCallback(query = {}) {
     include: { plan: true },
   });
   if (!subscription) return { payment: 'failed', redirectUrl: makeResultUrl(config, 'failed') };
-  if (subscription.status === 'ACTIVE' && subscription.paymentVerifiedAt) {
-    return { payment: 'success', subscriptionId: subscription.id, refId: subscription.paymentRefId, redirectUrl: makeResultUrl(config, 'success', subscription.id, subscription.paymentRefId) };
-  }
-  if (subscription.status !== 'PENDING_PAYMENT') {
-    return { payment: 'failed', subscriptionId: subscription.id, redirectUrl: makeResultUrl(config, 'failed', subscription.id) };
-  }
   if (String(query.Status || '').toUpperCase() !== 'OK') {
     await prisma.inquirySubscription.updateMany({
       where: { id: subscription.id, status: 'PENDING_PAYMENT' },
       data: { status: 'CANCELLED', notes: 'پرداخت توسط کاربر لغو شد.' },
     });
     return { payment: 'cancelled', subscriptionId: subscription.id, redirectUrl: makeResultUrl(config, 'cancelled', subscription.id) };
+  }
+  if (subscription.status === 'ACTIVE' && subscription.paymentVerifiedAt) {
+    return { payment: 'success', subscriptionId: subscription.id, refId: subscription.paymentRefId, redirectUrl: makeResultUrl(config, 'success', subscription.id, subscription.paymentRefId) };
+  }
+  if (subscription.status !== 'PENDING_PAYMENT') {
+    return { payment: 'failed', subscriptionId: subscription.id, redirectUrl: makeResultUrl(config, 'failed', subscription.id) };
   }
 
   let verification;
