@@ -152,9 +152,9 @@ const toast = useToast()
 const router = useRouter()
 const auth = useAuthStore()
 
-// The company filter/selector is only meaningful (and permitted) for
-// SUPER_ADMIN. Company users manage their own products, so the /companies
-// list endpoint is not fetched for them (it would 403).
+// Company selection is available to SUPER_ADMIN and to STAFF who have both
+// products.create and companies.read. STAFF write actions are cross-company
+// only when the corresponding granular permission is present.
 const isStaffContext = computed(() => auth.accessProfile?.type === 'STAFF')
 const canChooseCompany = computed(() => auth.isSuperAdmin || (isStaffContext.value && auth.hasPermission('products.create') && auth.hasPermission('companies.read')))
 const canCreateProduct = computed(() => auth.isSuperAdmin || (isStaffContext.value && auth.hasPermission('products.create') && auth.hasPermission('companies.read')))
