@@ -185,6 +185,7 @@ export const inquiriesApi = {
   getById: (id) => api.get(endpoints.inquiries.getById(id)),
   create: (data) => api.post(endpoints.inquiries.create, data),
   changeStatus: (id, data) => api.patch(endpoints.inquiries.changeStatus(id), data),
+  revealResponses: (id) => api.post(endpoints.inquiries.revealResponses(id)),
   listItems: (id) => api.get(endpoints.inquiries.listItems(id)),
   addItem: (id, data) => api.post(endpoints.inquiries.addItem(id), data),
   updateItem: (id, itemId, data) => api.patch(endpoints.inquiries.updateItem(id, itemId), data),
