@@ -88,8 +88,12 @@ function isStaffUser(caller) {
 
 function isCompanyUser(caller) {
   // STAFF moderators are cross-company readers; a companyId claim must not
-  // silently turn them into tenant-scoped COMPANY users.
-  return caller?.accessType !== 'STAFF' && Boolean(caller?.companyId) && !isSuperAdmin(caller);
+  // silently turn them into tenant-scoped COMPANY users. CUSTOMER is never a
+  // management caller even if an unexpected companyId claim is present.
+  const accessType = caller?.accessType;
+  return (accessType === 'COMPANY' || accessType === undefined || accessType === null)
+    && Boolean(caller?.companyId)
+    && !isSuperAdmin(caller);
 }
 
 function assertCanReadProduct(product, caller) {
