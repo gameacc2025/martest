@@ -65,7 +65,7 @@ async function adminRoutes(fastify) {
       name: { type: 'string', minLength: 1, maxLength: 100 },
       description: { type: 'string', maxLength: 1000 },
       durationDays: { type: 'integer', minimum: 1, maximum: 3650 },
-      price: { type: 'number', minimum: 0 },
+      price: { type: 'number', minimum: 1 },
       currency: { type: 'string', minLength: 3, maxLength: 8 },
       inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
       responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
