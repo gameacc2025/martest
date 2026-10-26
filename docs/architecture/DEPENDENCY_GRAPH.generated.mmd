@@ -40,9 +40,9 @@ flowchart LR
   auth --> shared_core
   shared_ui --> api_client
   shared_ui --> auth
-  website -->|HTTP /api/v1| api
-  company -->|HTTP /api/v1| api
   admin -->|HTTP /api/v1| api
+  company -->|HTTP /api/v1| api
+  website -->|HTTP /api/v1| api
   api --> rbac["Auth / RBAC middleware"]
   api --> mod_admin["admin module"]
   api --> mod_auth["auth module"]
@@ -69,4 +69,3 @@ flowchart LR
   mod_settings --> db
   mod_specification_library --> db
   mod_users --> db
-  db --- migrations["backend/prisma/migrations/*"]
