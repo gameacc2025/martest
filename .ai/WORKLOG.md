@@ -421,3 +421,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Audit report committed directly to remote `main` through GitHub Contents API.
 - **Risks / open questions:** Do not treat green CI as release sign-off. Authorization changes and migration/deployment operations require targeted tests and an isolated configured environment. Need determine whether the requested architecture graph means a generated dependency graph or only documentation diagrams.
 - **Next action:** Reconcile stale documentation with source, audit RBAC/ownership and inquiry/notification/product price-history routes, then run/add operational smoke and browser tests before marking the audit complete.
+
+
+## 2026-10-26 — PRODUCT-ACCESS-AUDIT-2026-10-26-01 — Product security, lifecycle, retail price history
+
+- **Status:** IN_PROGRESS
+- **User authorization:** User explicitly authorized full implementation of Task 1 (access/RBAC and ownership audit) and Task 2 (product workflow audit), without follow-up questions.
+- **Scope:** Product service/route/controller access checks; COMPANY tenant isolation; STAFF operation permissions; product status transitions; pricing tier validation/reconciliation; specs and media; retail-only price history for charting.
+- **Changes made:** Updated `backend/src/modules/products/product.service.js` so only the retail price tier (`minQuantity = 1`) is snapshotted. Wholesale tier creation/updates do not add points; metadata-only retail edits do not add duplicate points; a tier entering retail starts a series; a retail tier leaving retail preserves its final value. Public price history now returns the complete stored series ordered by `recordedAt ASC` instead of truncating at six months. Snapshot writes remain inside the same Prisma transaction as price mutations.
+- **Tests added:** `backend/src/modules/products/product.service.test.js` covers wholesale exclusion, retail-to-wholesale final value, wholesale-to-retail series start, metadata-only no-op for chart, and complete public history query shape.
+- **Docs updated:** API history endpoint summary and `docs/API_DOCUMENTATION.md`; replaced stale ProductPrice section in `docs/DATABASE_DOCUMENTATION.md` with current `ProductPriceTier` / `ProductPriceSnapshot` models and retail chart semantics; replaced current-task handoff.
+- **Commits:** `fcfdf919577affcd590b55ca423e1b3d2f5de6d1`, `03da519bf207f6bc9fa376fb377b8a37b9981ce9`, `5f3fef964ae838be41ac63db2c160ae6808b400a`, `b2ac6ff37883f487c14c27484a9b7672254c66a1`, `cff8b70da5670b5af3897de2622dd08e3270a9e1`, `64358664d517316a4ef303db24c80be0263bfb4c`, `31a9ec433c1e3e949bedd8887c3742f7273e4301`, `8cfbbc08e3b738daf3a16320aaf7123a5c880d57`.
+- **CI evidence:** Runs `40311461581`, `40311689207`, `40311709695`, and `40311758998` completed successfully on the code/test/docs commits listed there. Later commits must be checked before this task is marked complete.
+- **Not yet verified:** PostgreSQL migration deployment against a real DB, Docker/Compose runtime, browser E2E/visual checks, live SMTP/other external services. Green CI alone is not production sign-off.
+- **Next:** Finish code-path/test audit; verify CI for latest main HEAD; close any findings and update this record with final commit and verification status.
