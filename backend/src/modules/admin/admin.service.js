@@ -209,4 +209,78 @@ async function updateNotificationFolder(id, changes) {
   return prisma.notificationFolder.update({ where: { id }, data });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder };
+
+const INQUIRY_ENFORCEMENT_KEY = 'inquiry.subscription_enforcement';
+
+async function getInquiryMonetizationSettings() {
+  const setting = await prisma.systemSetting.findUnique({ where: { key: INQUIRY_ENFORCEMENT_KEY }, select: { value: true } });
+  return { subscriptionEnforcement: setting?.value === 'true' };
+}
+
+async function updateInquiryMonetizationSettings(enabled, adminUserId) {
+  if (typeof enabled !== 'boolean') throw new AppError('وضعیت کنترل اشتراک باید درست یا نادرست باشد.', 400, true, 'INVALID_SUBSCRIPTION_SETTING');
+  await prisma.systemSetting.upsert({
+    where: { key: INQUIRY_ENFORCEMENT_KEY },
+    create: { key: INQUIRY_ENFORCEMENT_KEY, value: String(enabled), updatedByUserId: adminUserId },
+    update: { value: String(enabled), updatedByUserId: adminUserId },
+  });
+  return getInquiryMonetizationSettings();
+}
+
+async function listInquiryPlans() {
+  return prisma.inquiryPlan.findMany({ orderBy: [{ isActive: 'desc' }, { price: 'asc' }, { id: 'asc' }] });
+}
+
+async function createInquiryPlan(data) {
+  const code = String(data.code || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+  const name = String(data.name || '').trim();
+  const durationDays = Number(data.durationDays);
+  const price = Number(data.price);
+  if (!/^[a-z0-9][a-z0-9_-]{1,49}$/.test(code) || !name || name.length > 100) {
+    throw new AppError('کد یا نام طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+  }
+  if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650 || !Number.isFinite(price) || price < 0) {
+    throw new AppError('مدت یا قیمت طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+  }
+  const quotas = ['inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod'];
+  const normalized = {};
+  for (const key of quotas) {
+    const value = data[key] === undefined ? 0 : Number(data[key]);
+    if (!Number.isInteger(value) || value < 0 || value > 100000000) {
+      throw new AppError('سهمیه طرح باید عدد صحیح نامنفی باشد.', 400, true, 'INVALID_INQUIRY_PLAN_QUOTA');
+    }
+    normalized[key] = value;
+  }
+  return prisma.inquiryPlan.create({
+    data: { code, name, description: data.description || null, durationDays, price, currency: data.currency || 'IRR', ...normalized, isActive: data.isActive !== false },
+  });
+}
+
+async function listInquirySubscriptions() {
+  return prisma.inquirySubscription.findMany({
+    take: 100,
+    orderBy: { createdAt: 'desc' },
+    include: { plan: { select: { id: true, code: true, name: true, price: true, durationDays: true } }, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true, email: true } } },
+  });
+}
+
+// Explicit staff grant for support/compensation. This is NOT a payment callback;
+// online checkout must only activate a subscription after a verified gateway callback.
+async function grantInquirySubscription(data, adminUserId) {
+  const companyId = data.companyId == null ? null : Number(data.companyId);
+  const userId = data.userId == null ? null : Number(data.userId);
+  if ((companyId == null) === (userId == null) || (companyId != null && (!Number.isInteger(companyId) || companyId < 1)) || (userId != null && (!Number.isInteger(userId) || userId < 1))) {
+    throw new AppError('باید دقیقاً یکی از شناسه شرکت یا کاربر تعیین شود.', 400, true, 'INVALID_SUBSCRIPTION_OWNER');
+  }
+  const planId = Number(data.planId);
+  const plan = await prisma.inquiryPlan.findFirst({ where: { id: planId, isActive: true } });
+  if (!plan) throw new AppError('طرح اشتراک فعال پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
+  const startsAt = new Date();
+  const endsAt = new Date(startsAt.getTime() + plan.durationDays * 86400000);
+  return prisma.inquirySubscription.create({
+    data: { planId, companyId, userId, status: 'ACTIVE', startsAt, endsAt, activatedBy: adminUserId, notes: data.notes || 'Manual administrative grant' },
+    include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
+  });
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder, getInquiryMonetizationSettings, updateInquiryMonetizationSettings, listInquiryPlans, createInquiryPlan, listInquirySubscriptions, grantInquirySubscription };
