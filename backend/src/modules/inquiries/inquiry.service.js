@@ -121,26 +121,6 @@ function getInquirySmsGatewayConfig() {
   return { accountSid, authToken, from };
 }
 
-async function deliverInquirySms(to, message) {
-  const gateway = getInquirySmsGatewayConfig();
-  const auth = Buffer.from(`${gateway.accountSid}:${gateway.authToken}`).toString('base64');
-  const body = new URLSearchParams({ To: to, From: gateway.from, Body: message }).toString();
-  let response;
-  try {
-    response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${gateway.accountSid}/Messages.json`, {
-      method: 'POST',
-      headers: { authorization: `Basic ${auth}`, 'content-type': 'application/x-www-form-urlencoded' },
-      body,
-      signal: AbortSignal.timeout(8000),
-    });
-  } catch {
-    throw { statusCode: 502, code: 'SMS_PROVIDER_UNAVAILABLE', message: 'ارتباط با درگاه پیامک برقرار نشد.' };
-  }
-  if (!response.ok) {
-    throw { statusCode: 502, code: 'SMS_PROVIDER_REJECTED', message: 'درگاه پیامک درخواست را نپذیرفت.' };
-  }
-}
-
 function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
 }
