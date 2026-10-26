@@ -42,7 +42,7 @@ const {
   listEvents,
 } = require('./notification.events');
 
-// The 11 events of flow/06 §5 (company/product/inquiry/order), grouped.
+// Stable event catalog contract, including the completed inquiry decision lifecycle.
 const EXPECTED_EVENT_KEYS = [
   // account/registration (flow/01)
   'COMPANY_REGISTERED',
@@ -54,6 +54,9 @@ const EXPECTED_EVENT_KEYS = [
   // inquiry/RFQ (flow/03)
   'INQUIRY_PUBLISHED',
   'INQUIRY_RESPONSE_RECEIVED',
+  'INQUIRY_STATUS_CHANGED',
+  'INQUIRY_RESPONSE_SELECTED',
+  'INQUIRY_RESPONSE_REJECTED',
   'INQUIRY_RESPONSE_AUTO_REJECTED',
   // order/cart (flow/04) — reserved contract, no Order model yet
   'ORDER_PLACED',
@@ -107,6 +110,9 @@ test('catalog: templates produce { title, message, data } from context', () => {
     PRODUCT_RE_REVIEW: { product: { id: 3, title: 'Y' }, threshold: 5 },
     INQUIRY_PUBLISHED: { inquiry: { id: 1, title: 'استعلام' } },
     INQUIRY_RESPONSE_RECEIVED: { inquiry: { id: 2 }, response: { id: 3 } },
+    INQUIRY_STATUS_CHANGED: { inquiry: { id: 2 }, status: 'CLOSED' },
+    INQUIRY_RESPONSE_SELECTED: { inquiry: { id: 2 }, response: { id: 3 } },
+    INQUIRY_RESPONSE_REJECTED: { inquiry: { id: 2 }, response: { id: 3 } },
     INQUIRY_RESPONSE_AUTO_REJECTED: { inquiry: { id: 2 }, company: { id: 3 } },
     ORDER_PLACED: { order: { id: 4 } },
     ORDER_PAYMENT_FAILED: { order: { id: 5 }, reason: 'card declined' },
