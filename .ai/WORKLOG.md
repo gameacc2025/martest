@@ -435,3 +435,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **CI evidence:** Runs `40311461581`, `40311689207`, `40311709695`, and `40311758998` completed successfully on the code/test/docs commits listed there. Later commits must be checked before this task is marked complete.
 - **Not yet verified:** PostgreSQL migration deployment against a real DB, Docker/Compose runtime, browser E2E/visual checks, live SMTP/other external services. Green CI alone is not production sign-off.
 - **Next:** Finish code-path/test audit; verify CI for latest main HEAD; close any findings and update this record with final commit and verification status.
+
+
+### Follow-up — PRODUCT-ACCESS-AUDIT-2026-10-26-01 (2026-10-26)
+
+- **Additional lifecycle fix:** `deleteProduct` now performs soft deletion, status-history insertion (when status changes), and activity logging in one Prisma transaction.
+- **Retail history edge cases:** Full product-editor tier reconciliation now records one net retail price change when the editor replaces a retail row, and avoids creating chart points when the retail amount remains unchanged. Added regression coverage for both cases.
+- **Public product UI:** Product details prioritize the `minQuantity = 1` retail price for the headline price; the price-history dialog is labeled and explained as retail-only.
+- **Test correction:** CI initially found a test-double mismatch in the unpublished-history test (the Prisma mock did not enforce the query predicate). The mock now returns no product for the non-public lookup, matching Prisma query semantics.
+- **Green verification:** GitHub Actions run [40312425822](https://github.com/gameacc2025/martest/actions/runs/40312425822) passed on commit `e588f47068d8639ba3657fc2b62d4488e48349a2`; frontend/shared tests, backend tests, Prisma client generation, and all frontend production builds passed.
+- **Current handoff commit:** `927e165677d2ff11b7ebde2a9160ba673ace075f`.
+- **Still unverified:** Real PostgreSQL migration deployment, Docker/Compose startup, browser E2E/visual flows, and external service connectivity. These require an appropriate runtime environment; do not infer success from CI.
