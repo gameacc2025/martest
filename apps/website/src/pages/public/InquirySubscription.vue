@@ -1,8 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { apiGet, apiPost } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
 
+const route = useRoute()
 const plans = ref([])
 const subscriptions = ref([])
 const quota = ref(null)
@@ -31,7 +33,14 @@ function date(value) {
 }
 function unwrap(result) { return result?.data?.data ?? result?.data ?? result ?? {} }
 
-onMounted(load)
+onMounted(async () => {
+  await load()
+  const paymentStatus = String(route.query.payment || '')
+  if (paymentStatus === 'success') successMessage.value = 'پرداخت با موفقیت تأیید شد و اشتراک فعال شد.'
+  else if (paymentStatus === 'cancelled') errorMessage.value = 'پرداخت لغو شد؛ اشتراک فعال نشده است.'
+  else if (paymentStatus === 'failed') errorMessage.value = 'پرداخت تأیید نشد؛ اگر مبلغی کسر شده، با پشتیبانی تماس بگیرید.'
+  else if (paymentStatus === 'pending') errorMessage.value = 'تأیید درگاه موقتاً در دسترس نبود؛ درخواست در انتظار بررسی باقی مانده است.'
+})
 async function load() {
   loading.value = true
   errorMessage.value = ''
@@ -59,11 +68,16 @@ async function requestPlan(plan) {
   }
   submitting.value = true
   try {
-    await apiPost(endpoints.inquirySubscriptions.request, {
+    const response = await apiPost(endpoints.inquirySubscriptions.request, {
       planId: plan.id,
       paymentReference: paymentReference.value.trim() || undefined,
     })
-    successMessage.value = 'درخواست ثبت شد. اشتراک پس از بررسی و تأیید پرداخت فعال می‌شود.'
+    const result = unwrap(response)
+    if (result?.paymentUrl) {
+      window.location.assign(result.paymentUrl)
+      return
+    }
+    successMessage.value = 'درخواست ثبت شد. اگر درگاه آنلاین پیکربندی نشده باشد، اشتراک پس از بررسی و تأیید پرداخت توسط مدیر فعال می‌شود.'
     paymentReference.value = ''
     selectedPlanId.value = null
     await load()
@@ -91,7 +105,7 @@ async function requestPlan(plan) {
       <span class="status active-pill">فعال</span>
     </section>
     <section v-else-if="pendingSubscription" class="panel pending">
-      <div><span class="eyebrow">درخواست در انتظار</span><h2>{{ pendingSubscription.plan?.name }}</h2><p>شماره پیگیری: {{ pendingSubscription.paymentReference || 'ثبت نشده' }}</p><p>این درخواست تا بررسی و تأیید مدیر فعال نمی‌شود.</p></div>
+      <div><span class="eyebrow">درخواست در انتظار</span><h2>{{ pendingSubscription.plan?.name }}</h2><p>شماره پیگیری: {{ pendingSubscription.paymentReference || 'ثبت نشده' }}</p><p>{{ pendingSubscription.paymentProvider === 'ZARINPAL' ? 'پرداخت آنلاین ثبت شده و نتیجه پس از تأیید سمت سرور به‌روزرسانی می‌شود.' : 'این درخواست تا بررسی و تأیید مدیر فعال نمی‌شود.' }}</p></div>
       <span class="status pending-pill">در انتظار بررسی</span>
     </section>
 
@@ -128,7 +142,7 @@ async function requestPlan(plan) {
           </button>
         </article>
       </div>
-      <p class="footnote">توجه: درگاه پرداخت آنلاین هنوز به این پروژه متصل نشده است. شماره پیگیری به‌تنهایی تأیید پرداخت نیست و فعال‌سازی فقط پس از بررسی مدیر انجام می‌شود.</p>
+      <p class="footnote">در صورت پیکربندی درگاه آنلاین، پس از انتخاب طرح به صفحه پرداخت منتقل می‌شوید. در غیر این صورت درخواست برای بررسی دستی ثبت می‌شود؛ شماره پیگیری به‌تنهایی تأیید پرداخت نیست.</p>
     </section>
   </main>
 </template>
