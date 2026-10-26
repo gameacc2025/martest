@@ -115,6 +115,27 @@ async function activateSubscription(item) {
     saving.value = false
   }
 }
+
+async function rejectSubscription(item) {
+  const notes = window.prompt('دلیل رد درخواست اشتراک #' + item.id + ' را وارد کنید:')
+  if (notes === null) return
+  if (!notes.trim()) {
+    errorMessage.value = 'برای رد درخواست، ثبت دلیل الزامی است.'
+    return
+  }
+  errorMessage.value = ''
+  successMessage.value = ''
+  saving.value = true
+  try {
+    await apiPost(endpoints.inquirySubscriptions.reject(item.id), { notes: notes.trim() })
+    successMessage.value = 'درخواست اشتراک رد شد.'
+    await loadAll()
+  } catch (error) {
+    errorMessage.value = error?.message || 'رد درخواست انجام نشد.'
+  } finally {
+    saving.value = false
+  }
+}
 </script>
 
 <template>
@@ -164,7 +185,7 @@ async function activateSubscription(item) {
       <p class="muted">فعال‌سازی دستی فقط پس از بررسی واقعی پرداخت انجام شود. شماره پیگیری به‌تنهایی مدرک پرداخت نیست.</p>
       <div v-if="!pending.length" class="muted">درخواستی در انتظار بررسی نیست.</div>
       <div v-else class="table-wrap"><table><thead><tr><th>مالک</th><th>طرح</th><th>شماره پیگیری</th><th>ثبت درخواست</th><th>عملیات</th></tr></thead>
-        <tbody><tr v-for="item in pending" :key="item.id"><td>{{ ownerName(item) }}</td><td>{{ item.plan?.name || '—' }}</td><td>{{ item.paymentReference || 'ثبت نشده' }}</td><td>{{ date(item.createdAt) }}</td><td><button class="primary small" :disabled="saving" @click="activateSubscription(item)">تأیید پرداخت و فعال‌سازی</button></td></tr></tbody>
+        <tbody><tr v-for="item in pending" :key="item.id"><td>{{ ownerName(item) }}</td><td>{{ item.plan?.name || '—' }}</td><td>{{ item.paymentReference || 'ثبت نشده' }}</td><td>{{ date(item.createdAt) }}</td><td class="actions"><button class="primary small" :disabled="saving" @click="activateSubscription(item)">تأیید پرداخت و فعال‌سازی</button><button class="danger small" :disabled="saving" @click="rejectSubscription(item)">رد درخواست</button></td></tr></tbody>
       </table></div>
     </section>
 
@@ -179,5 +200,5 @@ async function activateSubscription(item) {
 </template>
 
 <style scoped>
-.subscription-admin{display:grid;gap:1rem;color:var(--text-color,#1f2937)}.heading{display:flex;justify-content:space-between;align-items:center;gap:1rem}h1{font-size:1.45rem;margin:0 0 .35rem}h2{font-size:1.05rem;margin:0 0 .85rem}p{line-height:1.8;color:var(--text-color-secondary,#64748b);margin:.25rem 0}.panel{padding:1.2rem;border:1px solid var(--surface-border,#e5e7eb);border-radius:12px;background:var(--surface-card,#fff)}.enforcement{display:flex;align-items:center;justify-content:space-between;gap:1rem}.plan-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.plan-form label{display:grid;gap:.4rem;font-size:.9rem}.plan-form .wide{grid-column:span 2}.plan-form .checkbox{display:flex;align-items:center;gap:.5rem}.plan-form input:not([type=checkbox]),.plan-form select{min-width:0;padding:.7rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-ground,#fff);color:inherit}.plan-form input[type=checkbox]{width:1rem;height:1rem}button{border:0;border-radius:7px;padding:.7rem 1rem;cursor:pointer;white-space:nowrap}.primary{background:#0f9e9a;color:#fff}.secondary{background:var(--surface-hover,#eef2f7);color:inherit}.danger{background:#b91c1c;color:#fff}.small{padding:.5rem .7rem;font-size:.85rem}button:disabled{opacity:.55;cursor:not-allowed}.notice{padding:.8rem 1rem;border-radius:8px}.error{background:#fee2e2;color:#991b1b}.success{background:#d1fae5;color:#065f46}.muted{color:var(--text-color-secondary,#64748b);padding:.5rem 0}.table-wrap{width:100%;overflow:auto}table{border-collapse:collapse;width:100%;min-width:650px;text-align:right}th,td{padding:.75rem;border-bottom:1px solid var(--surface-border,#e5e7eb);vertical-align:top}th{font-weight:600;font-size:.85rem}td small{display:block;color:var(--text-color-secondary,#64748b);font-size:.8rem;margin-top:.2rem}.pill{display:inline-block;border-radius:999px;padding:.3rem .65rem;font-size:.8rem;white-space:nowrap}.on{background:#d1fae5;color:#065f46}.off{background:#e5e7eb;color:#374151}.wait{background:#fef3c7;color:#92400e}@media(max-width:800px){.plan-form{grid-template-columns:repeat(2,minmax(0,1fr))}.enforcement,.heading{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.plan-form{grid-template-columns:1fr}.plan-form .wide{grid-column:auto}}
+.subscription-admin{display:grid;gap:1rem;color:var(--text-color,#1f2937)}.heading{display:flex;justify-content:space-between;align-items:center;gap:1rem}h1{font-size:1.45rem;margin:0 0 .35rem}h2{font-size:1.05rem;margin:0 0 .85rem}p{line-height:1.8;color:var(--text-color-secondary,#64748b);margin:.25rem 0}.panel{padding:1.2rem;border:1px solid var(--surface-border,#e5e7eb);border-radius:12px;background:var(--surface-card,#fff)}.enforcement{display:flex;align-items:center;justify-content:space-between;gap:1rem}.plan-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.plan-form label{display:grid;gap:.4rem;font-size:.9rem}.plan-form .wide{grid-column:span 2}.plan-form .checkbox{display:flex;align-items:center;gap:.5rem}.plan-form input:not([type=checkbox]),.plan-form select{min-width:0;padding:.7rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-ground,#fff);color:inherit}.plan-form input[type=checkbox]{width:1rem;height:1rem}button{border:0;border-radius:7px;padding:.7rem 1rem;cursor:pointer;white-space:nowrap}.primary{background:#0f9e9a;color:#fff}.danger{background:#b91c1c;color:#fff}.actions{display:flex;gap:.5rem;flex-wrap:wrap}.secondary{background:var(--surface-hover,#eef2f7);color:inherit}.danger{background:#b91c1c;color:#fff}.small{padding:.5rem .7rem;font-size:.85rem}button:disabled{opacity:.55;cursor:not-allowed}.notice{padding:.8rem 1rem;border-radius:8px}.error{background:#fee2e2;color:#991b1b}.success{background:#d1fae5;color:#065f46}.muted{color:var(--text-color-secondary,#64748b);padding:.5rem 0}.table-wrap{width:100%;overflow:auto}table{border-collapse:collapse;width:100%;min-width:650px;text-align:right}th,td{padding:.75rem;border-bottom:1px solid var(--surface-border,#e5e7eb);vertical-align:top}th{font-weight:600;font-size:.85rem}td small{display:block;color:var(--text-color-secondary,#64748b);font-size:.8rem;margin-top:.2rem}.pill{display:inline-block;border-radius:999px;padding:.3rem .65rem;font-size:.8rem;white-space:nowrap}.on{background:#d1fae5;color:#065f46}.off{background:#e5e7eb;color:#374151}.wait{background:#fef3c7;color:#92400e}@media(max-width:800px){.plan-form{grid-template-columns:repeat(2,minmax(0,1fr))}.enforcement,.heading{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.plan-form{grid-template-columns:1fr}.plan-form .wide{grid-column:auto}}
 </style>
