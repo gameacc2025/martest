@@ -256,6 +256,48 @@ async function createInquiryPlan(data) {
   });
 }
 
+
+async function updateInquiryPlan(planId, data) {
+  const id = Number(planId);
+  if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN_ID');
+  const existing = await prisma.inquiryPlan.findUnique({ where: { id } });
+  if (!existing) throw new AppError('طرح اشتراک پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
+  const update = {};
+  if (data.name !== undefined) {
+    const name = String(data.name).trim();
+    if (!name || name.length > 100) throw new AppError('نام طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+    update.name = name;
+  }
+  if (data.description !== undefined) update.description = data.description ? String(data.description).trim().slice(0, 1000) : null;
+  if (data.durationDays !== undefined) {
+    const days = Number(data.durationDays);
+    if (!Number.isInteger(days) || days < 1 || days > 3650) throw new AppError('مدت طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+    update.durationDays = days;
+  }
+  if (data.price !== undefined) {
+    const price = Number(data.price);
+    if (!Number.isFinite(price) || price < 0) throw new AppError('قیمت طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+    update.price = price;
+  }
+  if (data.currency !== undefined) {
+    const currency = String(data.currency).trim().toUpperCase();
+    if (!/^[A-Z]{3,8}$/.test(currency)) throw new AppError('واحد پول معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+    update.currency = currency;
+  }
+  for (const key of ['inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod']) {
+    if (data[key] === undefined) continue;
+    const value = Number(data[key]);
+    if (!Number.isInteger(value) || value < 0 || value > 100000000) throw new AppError('سهمیه طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN_QUOTA');
+    update[key] = value;
+  }
+  if (data.isActive !== undefined) {
+    if (typeof data.isActive !== 'boolean') throw new AppError('وضعیت طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+    update.isActive = data.isActive;
+  }
+  if (!Object.keys(update).length) throw new AppError('هیچ تغییری برای ذخیره ارسال نشده است.', 400, true, 'EMPTY_INQUIRY_PLAN_UPDATE');
+  return prisma.inquiryPlan.update({ where: { id }, data: update });
+}
+
 async function listInquirySubscriptions() {
   await prisma.inquirySubscription.updateMany({ where: { status: 'ACTIVE', endsAt: { lte: new Date() } }, data: { status: 'EXPIRED' } });
   return prisma.inquirySubscription.findMany({
@@ -339,4 +381,4 @@ async function rejectPendingInquirySubscription(subscriptionId, adminUserId, not
   });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder, getInquiryMonetizationSettings, updateInquiryMonetizationSettings, listInquiryPlans, createInquiryPlan, listInquirySubscriptions, grantInquirySubscription, activatePendingInquirySubscription, rejectPendingInquirySubscription };
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder, getInquiryMonetizationSettings, updateInquiryMonetizationSettings, listInquiryPlans, createInquiryPlan, updateInquiryPlan, listInquirySubscriptions, grantInquirySubscription, activatePendingInquirySubscription, rejectPendingInquirySubscription };
