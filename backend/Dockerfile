@@ -12,6 +12,8 @@ RUN apt-get update -y && apt-get install -y openssl
 # Stage 2: generate prisma client
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/*
 COPY package*.json ./
 RUN npm ci
 COPY . .
