@@ -32,7 +32,7 @@ const controllerMethods = [
   'quota', 'listPlans', 'mySubscriptions', 'requestSubscription', 'listMessages', 'sendMessage',
   'list', 'stats', 'getById', 'create', 'update', 'listItems',
   'changeStatus', 'revealResponses', 'addItem', 'updateItem', 'deleteItem',
-  'listResponses', 'submitResponse', 'updateResponse', 'decideResponse',
+  'listMessages', 'sendMessage', 'listResponses', 'submitResponse', 'updateResponse', 'decideResponse',
   'withdrawResponse', 'uploadResponseAttachment', 'deleteResponseAttachment',
 ];
 for (const name of controllerMethods) {
