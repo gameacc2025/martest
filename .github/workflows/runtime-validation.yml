@@ -94,8 +94,12 @@ jobs:
 
       - name: Collect service logs on failure
         if: failure()
-        run: docker compose logs --no-color postgres backend website company admin
+        shell: bash
+        run: |
+          if [ -f .env ]; then docker compose logs --no-color postgres backend website company admin; fi
 
       - name: Tear down disposable environment
         if: always()
-        run: docker compose down -v
+        shell: bash
+        run: |
+          if [ -f .env ]; then docker compose down -v; fi
