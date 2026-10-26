@@ -75,6 +75,14 @@ test('GET /: public, reaches list controller without auth', async () => {
   await app.close();
 });
 
+test('GET /:id/price-history: public, reaches price history controller without auth', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'GET', url: '/api/v1/products/1/price-history' });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.getPriceHistory, true);
+  await app.close();
+});
+
 test('GET /:id: public, reaches getOne controller without auth', async () => {
   const app = await buildApp();
   const res = await app.inject({ method: 'GET', url: '/api/v1/products/1' });
