@@ -1,6 +1,6 @@
 const inquiryService = require('./inquiry.service');
 const { getQuotaSummary, listActivePlans, getMySubscriptions } = require('./inquiry-subscription.service');
-const { startSubscriptionPayment, handleSubscriptionPaymentCallback } = require('./inquiry-payment.service');
+const { startSubscriptionPayment, handleSubscriptionPaymentCallback, retryPendingSubscriptionVerification } = require('./inquiry-payment.service');
 const { success } = require('../../utils/success');
 
 async function list(request, reply) {
@@ -68,6 +68,12 @@ async function requestSubscription(request, reply) {
   const owner = subscriptionOwner(request.user);
   const result = await startSubscriptionPayment({ ...owner, planId: request.body.planId, paymentReference: request.body.paymentReference });
   return reply.code(201).send(success({ ...result.subscription, paymentMode: result.paymentMode, paymentUrl: result.paymentUrl }));
+}
+
+async function retrySubscriptionPayment(request, reply) {
+  const owner = subscriptionOwner(request.user);
+  const result = await retryPendingSubscriptionVerification({ ...owner, subscriptionId: request.params.id });
+  return reply.send(success(result));
 }
 
 async function subscriptionPaymentCallback(request, reply) {
@@ -187,6 +193,7 @@ module.exports = {
   mySubscriptions,
   requestSubscription,
   subscriptionPaymentCallback,
+  retrySubscriptionPayment,
 
 
   listItems,
