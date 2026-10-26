@@ -92,7 +92,10 @@ jobs:
         run: npm install --prefix e2e --no-package-lock --no-audit --no-fund
 
       - name: Install Chromium
-        run: cd e2e && npx playwright install --with-deps chromium
+        timeout-minutes: 10
+        # GitHub's Ubuntu runner already provides the common browser libraries;
+        # install the pinned browser only to avoid a second apt dependency sweep.
+        run: cd e2e && npx playwright install chromium
 
       - name: Run browser smoke tests against all panels and API proxies
         run: npm --prefix e2e test
