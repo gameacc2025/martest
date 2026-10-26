@@ -1183,7 +1183,7 @@ test('updateProduct: replaces changed price tiers atomically and records the pri
   await service.updateProduct(1, {
     title: 'Updated',
     priceTiers: [
-      { minQuantity: 1, price: 125 },
+      { minQuantity: 1, maxQuantity: 9, price: 125 },
       { minQuantity: 10, price: 100, unit: 'box' },
     ],
   }, companyA);
