@@ -1,4 +1,5 @@
 const inquiryService = require('./inquiry.service');
+const { getQuotaSummary } = require('./inquiry-subscription.service');
 const { success } = require('../../utils/success');
 
 async function list(request, reply) {
@@ -23,6 +24,17 @@ async function update(request, reply) {
 }
 
 
+
+async function quota(request, reply) {
+  const caller = request.user || {};
+  const ownerType = caller.accessType === 'CUSTOMER' ? 'user' : 'company';
+  const ownerId = ownerType === 'user' ? caller.id : caller.companyId;
+  if (!ownerId || !Number.isInteger(Number(ownerId)) || Number(ownerId) < 1) {
+    return reply.send(success({ enforced: false, subscription: null, quotas: null }));
+  }
+  const data = await getQuotaSummary(ownerType, Number(ownerId));
+  return reply.send(success(data));
+}
 
 async function stats(request, reply) {
   const data = await inquiryService.getInquiryStats(request.user);
@@ -121,6 +133,7 @@ module.exports = {
   changeStatus,
   revealResponses,
   stats,
+  quota,
 
 
   listItems,
