@@ -67,3 +67,10 @@
 
 - **Latest verified code HEAD before this handoff-only update:** `3b541c3255532a8c14c24e7de0bc7d163e47265a`; [CI run 40271919142](https://github.com/gameacc2025/martest/actions/runs/40271919142) passed frontend/shared tests, backend 1179/1179, Prisma generation, and Website/Company/Admin builds. Admin create/edit/copy/delete controls are now also scoped to the caller's permission and matching company for non-SUPER_ADMIN users.
 - **Open authorization decisions:** #5 (`isFeatured` may be set through create/update without `products.feature`) and #6 (STAFF update/delete/price/media write scope; STAFF publish has been fixed) remain unimplemented where they would broaden/change permission boundaries; obtain explicit approval before proceeding.
+
+
+## Additional product audit fixes — 2026-10-26
+- `deletePriceTier` now applies the same post-approval review threshold as add/update, with transactional product counter/status changes, status history, activity log, and staff notification; a threshold-crossing regression test was added.
+- Stored XSS: replaced public ProductDetails `v-html` rendering of the company-editable description with escaped plain-text interpolation and `white-space: pre-line`; tracked in issue #7.
+- Verified: [CI run 40272171627](https://github.com/gameacc2025/martest/actions/runs/40272171627) passed frontend/shared tests, backend tests, Prisma generation, and Website/Company/Admin builds for commit `3a132bf65c6783f35231f4304d6ded82347b335f`.
+- Open approval-sensitive issues: #5 `isFeatured` permission enforcement and #6 broader STAFF update/delete/price/media write scope (STAFF publish subcase fixed). Do not broaden those permissions without explicit approval.
