@@ -243,6 +243,8 @@ async function createInquiryPlan(data) {
     throw new AppError('مدت یا قیمت طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
   }
   const quotas = ['inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod'];
+  const currency = String(data.currency || 'IRR').trim().toUpperCase();
+  if (!/^[A-Z]{3,8}$/.test(currency)) throw new AppError('واحد پول طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
   const normalized = {};
   for (const key of quotas) {
     const value = data[key] === undefined ? 0 : Number(data[key]);
@@ -252,7 +254,7 @@ async function createInquiryPlan(data) {
     normalized[key] = value;
   }
   return prisma.inquiryPlan.create({
-    data: { code, name, description: data.description || null, durationDays, price, currency: data.currency || 'IRR', ...normalized, isActive: data.isActive !== false },
+    data: { code, name, description: data.description || null, durationDays, price, currency, ...normalized, isActive: data.isActive !== false },
   });
 }
 
