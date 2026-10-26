@@ -107,4 +107,66 @@ async function getQuotaSummary(ownerType, ownerId, client = prisma, now = new Da
   };
 }
 
-module.exports = { LIMIT_BY_USAGE, enforcementEnabled, getActiveSubscription, getQuotaSummary, consumeUsage };
+
+async function listActivePlans(client = prisma) {
+  return client.inquiryPlan.findMany({
+    where: { isActive: true },
+    select: {
+      id: true, code: true, name: true, description: true, durationDays: true,
+      price: true, currency: true, inquiriesPerPeriod: true, responsesPerPeriod: true,
+      internalMessagesPerPeriod: true, smsPerPeriod: true,
+    },
+    orderBy: [{ price: 'asc' }, { id: 'asc' }],
+  });
+}
+
+async function createPendingSubscription({ ownerType, ownerId, planId, paymentReference = null }, client = prisma) {
+  if (!['company', 'user'].includes(ownerType) || !Number.isInteger(Number(ownerId)) || Number(ownerId) < 1) {
+    throw { statusCode: 400, code: 'SUBSCRIPTION_OWNER_REQUIRED', message: 'شناسه صاحب اشتراک معتبر نیست.' };
+  }
+  const normalizedPlanId = Number(planId);
+  if (!Number.isInteger(normalizedPlanId) || normalizedPlanId < 1) {
+    throw { statusCode: 400, code: 'INVALID_INQUIRY_PLAN', message: 'طرح اشتراک معتبر نیست.' };
+  }
+  const ownerFilter = ownerType === 'company' ? { companyId: Number(ownerId) } : { userId: Number(ownerId) };
+  const plan = await client.inquiryPlan.findFirst({ where: { id: normalizedPlanId, isActive: true } });
+  if (!plan) throw { statusCode: 404, code: 'INQUIRY_PLAN_NOT_FOUND', message: 'طرح اشتراک فعال پیدا نشد.' };
+
+  const active = await getActiveSubscription(ownerType, ownerId, client);
+  if (active) throw { statusCode: 409, code: 'ACTIVE_SUBSCRIPTION_EXISTS', message: 'در حال حاضر اشتراک فعال دارید.' };
+
+  const pending = await client.inquirySubscription.findFirst({
+    where: { ...ownerFilter, status: 'PENDING_PAYMENT', planId: normalizedPlanId },
+    select: { id: true },
+  });
+  if (pending) throw { statusCode: 409, code: 'PENDING_SUBSCRIPTION_EXISTS', message: 'برای این طرح درخواست پرداخت ثبت‌شده و در انتظار بررسی دارید.', details: { subscriptionId: pending.id } };
+
+  const reference = typeof paymentReference === 'string' ? paymentReference.trim() : '';
+  if (reference.length > 120) throw { statusCode: 400, code: 'INVALID_PAYMENT_REFERENCE', message: 'شماره پیگیری حداکثر باید ۱۲۰ نویسه باشد.' };
+
+  return client.inquirySubscription.create({
+    data: {
+      planId: normalizedPlanId,
+      ...ownerFilter,
+      status: 'PENDING_PAYMENT',
+      paymentReference: reference || null,
+      notes: 'در انتظار بررسی دستی پرداخت؛ شماره پیگیری به‌تنهایی تأیید پرداخت محسوب نمی‌شود.',
+    },
+    include: { plan: { select: { id: true, name: true, durationDays: true, price: true, currency: true } } },
+  });
+}
+
+async function getMySubscriptions(ownerType, ownerId, client = prisma) {
+  if (!['company', 'user'].includes(ownerType) || !Number.isInteger(Number(ownerId)) || Number(ownerId) < 1) {
+    throw { statusCode: 400, code: 'SUBSCRIPTION_OWNER_REQUIRED', message: 'شناسه صاحب اشتراک معتبر نیست.' };
+  }
+  const ownerFilter = ownerType === 'company' ? { companyId: Number(ownerId) } : { userId: Number(ownerId) };
+  return client.inquirySubscription.findMany({
+    where: ownerFilter,
+    take: 20,
+    orderBy: { createdAt: 'desc' },
+    include: { plan: { select: { id: true, code: true, name: true, durationDays: true, price: true, currency: true, inquiriesPerPeriod: true, responsesPerPeriod: true, internalMessagesPerPeriod: true, smsPerPeriod: true } } },
+  });
+}
+
+module.exports = { LIMIT_BY_USAGE, enforcementEnabled, getActiveSubscription, getQuotaSummary, consumeUsage, listActivePlans, createPendingSubscription, getMySubscriptions };
