@@ -403,3 +403,12 @@ test('SUPER_ADMIN bypasses all inquiry permission checks', async () => {
   assert.equal(hit.list, true);
   await app.close();
 });
+
+
+test('GET /subscription/payment/callback is public for provider redirects', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'GET', url: '/api/v1/inquiries/subscription/payment/callback?Authority=A-test&Status=OK' });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.subscriptionPaymentCallback, true);
+  await app.close();
+});
