@@ -77,6 +77,16 @@ const productInclude = {
   statusHistory: { orderBy: { createdAt: 'desc' }, take: 10, include: { changedBy: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } } } },
 };
 
+// Public catalog responses must not expose moderation history or staff identity.
+const publicProductInclude = {
+  company: productInclude.company,
+  category: productInclude.category,
+  subcategory: productInclude.subcategory,
+  prices: productInclude.prices,
+  images: productInclude.images,
+  documents: productInclude.documents,
+};
+
 
 function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
@@ -776,6 +786,7 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   //   3. SUPER_ADMIN management      → every company's products, any status
   const isPublicCaller = publicOnly || !caller
     || (!isSuperAdmin(caller) && !isCompanyUser(caller) && !isStaffUser(caller));
+  const include = isPublicCaller ? publicProductInclude : productInclude;
 
   if (isPublicCaller) {
     where.status = 'PUBLISHED';
@@ -802,14 +813,17 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   }
 
   const [items, total] = await Promise.all([
-    prisma.product.findMany({ where, skip, take, orderBy, include: productInclude }),
+    prisma.product.findMany({ where, skip, take, orderBy, include }),
     prisma.product.count({ where }),
   ]);
   return { items, total };
 }
 
 async function getProductById(id, caller) {
-  const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, include: productInclude });
+  const isPublicCaller = !caller
+    || (!isSuperAdmin(caller) && !isCompanyUser(caller) && !isStaffUser(caller));
+  const include = isPublicCaller ? publicProductInclude : productInclude;
+  const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, include });
   if (!product) return null;
   if (isCompanyUser(caller)) {
     if (!Array.isArray(caller.permissions) || !caller.permissions.includes('products.read')) {
