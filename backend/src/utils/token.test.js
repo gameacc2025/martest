@@ -49,6 +49,24 @@ async function buildFastifyWithJwt() {
   return app;
 }
 
+test('signRefreshToken is unique for repeated issuance within the same second', async () => {
+  const app = await buildFastifyWithJwt();
+  const first = signRefreshToken(app, 42);
+  const second = signRefreshToken(app, 42);
+
+  assert.notEqual(first, second);
+  const firstPayload = verifyRefreshToken(app, first);
+  const secondPayload = verifyRefreshToken(app, second);
+  assert.equal(firstPayload.sub, 42);
+  assert.equal(secondPayload.sub, 42);
+  assert.equal(firstPayload.type, 'refresh');
+  assert.equal(secondPayload.type, 'refresh');
+  assert.ok(firstPayload.jti);
+  assert.ok(secondPayload.jti);
+  assert.notEqual(firstPayload.jti, secondPayload.jti);
+  await app.close();
+});
+
 test('signAccessToken produces a verifiable JWT with the expected payload shape', async () => {
   const app = await buildFastifyWithJwt();
   const token = signAccessToken(app, {
