@@ -29,6 +29,8 @@ const errored = ref(false)
 const messages = ref([])
 const messageDraft = ref('')
 const recipientCompanyId = ref(null)
+const notifyBySms = ref(false)
+const smsAvailable = ref(false)
 const loadingMessages = ref(false)
 const sendingMessage = ref(false)
 
@@ -139,6 +141,14 @@ async function fetchInquiry() {
     const response = await inquiriesApi.getById(route.params.id)
     const body = response?.data ?? response
     inquiry.value = body?.data ?? body
+    try {
+      const quotaResult = await inquiriesApi.getQuota()
+      const quotaBody = quotaResult?.data ?? quotaResult
+      const quota = quotaBody?.data ?? quotaBody
+      smsAvailable.value = Boolean(quota?.capabilities?.smsConfigured && Number(quota?.quotas?.SMS?.remaining) > 0)
+    } catch {
+      smsAvailable.value = false
+    }
     await fetchMessages()
   } catch (err) {
     errored.value = true
@@ -184,8 +194,10 @@ async function sendInquiryMessage() {
     await inquiriesApi.sendMessage(route.params.id, {
       message,
       ...(isInquiryBuyer.value ? { recipientCompanyId: Number(recipientCompanyId.value) } : {}),
+      ...(notifyBySms.value ? { notifyBySms: true } : {}),
     })
     messageDraft.value = ''
+    notifyBySms.value = false
     toast.add({ severity: 'success', summary: 'پیام ارسال شد', detail: 'پیام با موفقیت ثبت شد.', life: 2500 })
     await fetchMessages()
   } catch (err) {
@@ -553,6 +565,7 @@ function formatPrice(price) {
                 </select>
               </label>
               <Textarea v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="پیام خود را بنویسید…" class="w-full" />
+              <label v-if="smsAvailable" class="message-sms-option"><input v-model="notifyBySms" type="checkbox" /> ارسال اعلان پیامکی به گیرنده (یک سهمیه پیامک مصرف می‌کند)</label>
               <div class="message-send-row"><small>{{ messageDraft.trim().length.toLocaleString('fa-IR') }} / ۵۰۰۰</small><Button type="submit" label="ارسال پیام" icon="pi pi-send" :loading="sendingMessage" :disabled="!messageDraft.trim() || messageDraft.trim().length > 5000" /></div>
             </form>
           </div>
