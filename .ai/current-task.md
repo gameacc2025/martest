@@ -81,3 +81,10 @@
 - Regression tests verify public list/detail use the allowlist and management detail retains status history. API docs updated.
 - CI run [40272542697](https://github.com/gameacc2025/martest/actions/runs/40272542697) passed frontend/shared tests, backend tests, Prisma generation, and all three production builds for commit `9c42d944e07baf8dde418e7ce301f0a663552826`.
 - Remaining open authorization issues: #5 `isFeatured` permission enforcement and #6 broader STAFF write scope (publish subcase fixed); do not broaden those permissions without explicit approval.
+
+
+## Final verified handoff — 2026-10-26
+- Latest handoff HEAD before this note `c1bfed792c2933a586d88838ae498e4073c4ed2f` passed [CI run 40272711539](https://github.com/gameacc2025/martest/actions/runs/40272711539): frontend/shared tests, backend tests, Prisma generation, and all Website/Company/Admin builds passed.
+- Closed completed issues #3, #4, #7, and #8. Master product audit #2 remains open pending decisions tracked in #5 and #6.
+- **Approval needed to finish the remaining permission audit:** #5: enforce `products.feature` for creating/changing `isFeatured` (Company and Admin forms currently send it, and the backend accepts it under create/update permissions); #6: decide whether STAFF with granular write permissions may update/delete/manage prices/media across companies or whether those routes should be COMPANY-only except SUPER_ADMIN. STAFF cross-company publish was fixed to match the existing `products.publish` route contract.
+- No schema/migration changes. All code changes above are committed directly to `main`; CI is green for the latest code/docs snapshot.
