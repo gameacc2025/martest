@@ -408,3 +408,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Price history:** The immutable snapshot model, migration, write hooks, public history endpoint, UI integration, route/service tests, and API documentation are committed to `main`. Apply migration `20261026110000_product_price_snapshots` before deployment. No historical backfill was made because the existing mutable price-tier timestamps do not provide a reliable complete historical record.
 - **Remaining operational checks:** Manual browser tests for Website/Company/Admin notification inboxes and desktop/mobile product details; controlled SMTP delivery test with valid deployment credentials. SMS remains unimplemented.
 - **Latest handoff:** `599bdf094d0c22c82051c61f96309beb999ec27c`.
+
+
+## 2026-10-26 — REPOSITORY-QUALITY-AUDIT-2026-10-26-01 — Full pre-development audit
+- **Status:** IN_PROGRESS — initial source/document review and CI evidence collected; remediation and operational verification remain.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Verify existing application sections, architecture/dependency documentation, tests, access boundaries, and deployment readiness before starting the remaining feature roadmap.
+- **Scope checked:** Root README and manifests, CI workflow and latest run logs, current task/project context, notification contract, role-access matrix, API/frontend/database/Docker docs, production and development Compose files, three frontend Dockerfiles, backend Dockerfile, Prisma schema, and product/notification route registration.
+- **Findings:** Added `docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md`. Key issues: Docker docs still describe Next.js/legacy frontend paths and Node 18; docs index says Next.js/PostgreSQL 16/Prisma 5; frontend docs refer to obsolete `frontend/src`; API docs describe legacy `/api` paths and role/user shapes; database model inventory is stale; role-access matrix needs reconciliation with access-profile-based app contexts. Successful Admin build emits a >500 kB chunk and ineffective dynamic-import warning.
+- **Verification:** CI run [40309510309](https://github.com/gameacc2025/martest/actions/runs/40309510309) passed frontend/shared tests, backend tests, Prisma Client generation, and all three frontend builds. Source tree scan identified 78 test/spec files and 8 Prisma SQL migrations. Docker/Compose runtime, real PostgreSQL migration application, browser E2E/visual checks, company ownership/IDOR security sign-off, live SMTP, and generated graph validation are NOT VERIFIED.
+- **Commit:** Audit report commit `b3e4d6d13aa2e331c2a25035f19fe22d1b73cb2f`; handoff/worklog updates follow separately.
+- **Push:** Audit report committed directly to remote `main` through GitHub Contents API.
+- **Risks / open questions:** Do not treat green CI as release sign-off. Authorization changes and migration/deployment operations require targeted tests and an isolated configured environment. Need determine whether the requested architecture graph means a generated dependency graph or only documentation diagrams.
+- **Next action:** Reconcile stale documentation with source, audit RBAC/ownership and inquiry/notification/product price-history routes, then run/add operational smoke and browser tests before marking the audit complete.
