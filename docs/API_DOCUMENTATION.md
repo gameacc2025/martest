@@ -1272,6 +1272,7 @@ All inquiry routes are authenticated under `/api/v1/inquiries`. Access is scoped
 - `PATCH /:id/status`: follows the allowed status transition map. CUSTOMER callers may only cancel their own inquiry.
 - `POST /:id/reveal`: explicitly reveals a sealed inquiry early only when `allowEarlyReveal` is enabled; STAFF with update permission can supervise/reveal.
 - `GET /:id/responses`, `POST /:id/responses`, `PATCH /:id/responses/:responseId`, `POST /:id/responses/:responseId/withdraw`: supplier response/quote lifecycle, with supplier ownership enforced per response item.
+- `PATCH /:id/responses/:responseId/decision` with `{ decision: "SELECTED" | "REJECTED", comment? }`: buyer-only quote decision. Selecting a quote atomically closes the inquiry, marks that response SELECTED, rejects other PENDING responses, writes status history, and notifies the winner and losing suppliers. A supplier cannot decide any quote.
 
 Visibility rules:
 - NORMAL: the buyer sees all responses; a supplier sees only its own response.
