@@ -317,7 +317,10 @@ function assertCanReadResponses(inquiry, caller) {
   const callerCompanyId = Number(caller?.companyId);
   const ownsRequestedProduct = Number.isInteger(callerCompanyId) && callerCompanyId > 0
     && (inquiry.items || []).some((item) => Number(item.product?.companyId) === callerCompanyId);
-  if (!ownsRequestedProduct) {
+  const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
+  const isPublished = publishedStatuses.includes(inquiry.status)
+    && (!inquiry.publishDate || new Date(inquiry.publishDate) <= new Date());
+  if (!ownsRequestedProduct || !isPublished) {
     throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   }
 }
@@ -449,7 +452,15 @@ function buildInquirySettings(data = {}, { partial = false } = {}) {
 
   const setDate = (key) => {
     if (data[key] !== undefined) {
-      settings[key] = data[key] ? new Date(data[key]) : null;
+      if (!data[key]) {
+        settings[key] = null;
+        return;
+      }
+      const date = new Date(data[key]);
+      if (Number.isNaN(date.getTime())) {
+        throw { statusCode: 400, code: 'INVALID_INQUIRY_DATE', message: `Invalid date value for ${key}.` };
+      }
+      settings[key] = date;
     } else if (!partial) {
       settings[key] = null;
     }
@@ -622,6 +633,8 @@ async async function listInquiries(query, caller) {
       throw { statusCode: 403, code: 'INVALID_INQUIRY_SCOPE', message: 'Received inquiries are only available to company users.' };
     }
     where.AND.push({ items: { some: { product: { companyId: callerCompanyId } } } });
+    where.AND.push({ status: { in: ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'] } });
+    where.AND.push({ OR: [{ publishDate: null }, { publishDate: { lte: new Date() } }] });
   } else if (scope === 'sent') {
     if (isCustomer) {
       where.AND.push({ buyerUserId: callerUserId });
@@ -746,7 +759,7 @@ async function createInquiry(data, caller) {
     if (isCustomerBuyer) {
       await notifyInquiryPublished(tx, inquiry);
     }
-    return inquiry;
+    return shapeInquiryForCaller(inquiry, caller);
   });
 }
 
@@ -776,11 +789,12 @@ async function updateInquiry(inquiryId, data, caller) {
       throw { statusCode: 400, code: 'NO_UPDATE_FIELDS', message: 'No updatable fields were provided.' };
     }
 
-    return tx.inquiry.update({
+    const updated = await tx.inquiry.update({
       where: { id: numericInquiryId },
       data: updateData,
       include: inquiryInclude,
     });
+    return shapeInquiryForCaller(updated, caller);
   });
 }
 
@@ -837,7 +851,7 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
       }
     }
 
-    return updated;
+    return shapeInquiryForCaller(updated, caller);
   });
 }
 
@@ -862,11 +876,12 @@ async function revealInquiryResponses(inquiryId, caller) {
       throw { statusCode: 403, code: 'EARLY_REVEAL_DISABLED', message: 'Responses cannot be revealed before the deadline unless early reveal is enabled.' };
     }
 
-    return tx.inquiry.update({
+    const updated = await tx.inquiry.update({
       where: { id: numericInquiryId },
       data: { revealedAt: new Date() },
       include: inquiryInclude,
     });
+    return shapeInquiryForCaller(updated, caller);
   });
 }
 
@@ -999,6 +1014,7 @@ async function listResponses(inquiryId, caller) {
       buyerUserId: true,
       visibilityMode: true,
       status: true,
+      publishDate: true,
       revealedAt: true,
       responseDeadline: true,
       allowEarlyReveal: true,
