@@ -68,12 +68,16 @@ jobs:
         run: |
           set -euo pipefail
           for attempt in $(seq 1 90); do
-            if curl -fsS http://127.0.0.1:3000/health >/dev/null \
-              && curl -fsS http://127.0.0.1:3001/health >/dev/null \
-              && curl -fsS http://127.0.0.1:3002/health >/dev/null \
-              && curl -fsS http://127.0.0.1:3003/health >/dev/null; then
+            if curl --connect-timeout 2 --max-time 5 -fsS http://127.0.0.1:3000/health >/dev/null \
+              && curl --connect-timeout 2 --max-time 5 -fsS http://127.0.0.1:3001/health >/dev/null \
+              && curl --connect-timeout 2 --max-time 5 -fsS http://127.0.0.1:3002/health >/dev/null \
+              && curl --connect-timeout 2 --max-time 5 -fsS http://127.0.0.1:3003/health >/dev/null; then
               echo "Backend and all three panels are healthy."
               exit 0
+            fi
+            if (( attempt % 6 == 0 )); then
+              echo "Waiting for service health (attempt ${attempt}/90)."
+              docker compose ps
             fi
             sleep 5
           done
