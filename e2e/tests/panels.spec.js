@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 const panels = [
-  { name: 'Website', url: process.env.WEBSITE_URL || 'http://127.0.0.1:3001/' },
-  { name: 'Company', url: process.env.COMPANY_URL || 'http://127.0.0.1:3002/' },
-  { name: 'Admin', url: process.env.ADMIN_URL || 'http://127.0.0.1:3003/' },
+  { name: 'Website', url: process.env.WEBSITE_URL || 'http://localhost:3001/' },
+  { name: 'Company', url: process.env.COMPANY_URL || 'http://localhost:3002/' },
+  { name: 'Admin', url: process.env.ADMIN_URL || 'http://localhost:3003/' },
 ];
 
 for (const panel of panels) {
