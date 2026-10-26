@@ -463,9 +463,10 @@ async function changeProductStatus(id, action, caller, comment) {
   const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
 
-  if (action === 'submitReview' || action === 'publish') {
-    // Company users may act only on their own products; STAFF moderation
-    // remains cross-company. The route additionally checks access type and permission.
+  if (action === 'submitReview' || (action === 'publish' && isCompanyUser(caller))) {
+    // Submitting a product is an owner hand-off, and COMPANY publication must
+    // target its own product. STAFF publication is a moderation action: the
+    // route's products.publish permission authorizes it across companies.
     assertCanManageProduct(product, caller);
   }
   if (action === 'publish' && isCompanyUser(caller) && product.status !== 'APPROVED') {
