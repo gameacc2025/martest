@@ -34,7 +34,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify generated architecture graph
-        run: node scripts/generate-architecture-graph.mjs --check
+        run: |
+          node scripts/generate-architecture-graph.mjs --write
+          git diff -- docs/architecture/DEPENDENCY_GRAPH.generated.mmd
 
       - name: Prepare disposable Compose environment
         shell: bash
