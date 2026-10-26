@@ -206,3 +206,14 @@ active feature work in flight as of this writing (see
 - Website notification inbox is `apps/website/src/pages/public/Notifications.vue`; website, company, and admin each have notification preference pages. Admin management/composition is `apps/admin/src/pages/admin/notifications/NotificationManagement.vue`.
 - See `docs/NOTIFICATION_SYSTEM.md` for route inventory, frontend entry points, SMTP requirements, and verification checklist.
 - CI/build success does not verify live SMTP credentials/connectivity; record external delivery as NOT VERIFIED until exercised in a configured environment.
+
+
+## 18. Product authorization contract — 2026-10-26
+
+- Public product catalog endpoints expose only `PUBLISHED` + `PUBLIC` products and omit internal moderation/audit fields.
+- COMPANY product writes remain tenant-scoped to the caller's own company; a supplied `companyId` cannot transfer ownership.
+- STAFF cross-company operations require the exact permission for that operation, checked in both the route and product service. This includes create (explicit target `companyId`), update/delete, price tiers, image/document actions, and lifecycle actions. STAFF is not treated as COMPANY even if a token carries a `companyId`.
+- `isFeatured` is separately privileged: only SUPER_ADMIN or `products.feature` may set it to true or change the existing value. Company/Admin forms hide the control and omit the field when the caller lacks permission.
+- STAFF-only workflow actions are guarded in the service as well as the route; CUSTOMER cannot use a stray `companyId` to create or publish products.
+- No database schema or migration changes were needed. The contract and regression tests are documented in `docs/API_DOCUMENTATION.md`, `.ai/decisions.md`, and `.ai/WORKLOG.md`.
+- Verification baseline: GitHub Actions run [40277836441](https://github.com/gameacc2025/martest/actions/runs/40277836441) passed frontend/shared 19/19 test files, backend 1196/1196 tests, Prisma Client generation, and all three frontend production builds.
