@@ -858,6 +858,7 @@ function formatPrice(price) {
 .message-bubble p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.55rem 0 0;color:var(--text-color,#1f2937);line-height:1.8}
 .message-composer{display:grid;gap:.65rem;margin-top:1rem}
 .message-recipient{display:grid;gap:.4rem;max-width:360px;font-size:.9rem}
+.message-sms-option{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text-color-secondary,#64748b)}.message-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,#0f9e9a)}
 .message-recipient select{padding:.65rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-card,#fff);color:inherit}
 .message-send-row small{color:var(--text-color-secondary,#64748b)}
 .responses-list {
