@@ -21,19 +21,23 @@ async function myProducts(request, reply) {
   // SUPER_ADMIN sees products from ALL companies. Only scope by companyId
   // for regular company users — injecting the JWT companyId for admin would
   // incorrectly restrict results to the admin's assigned company.
-  const isAdmin = request.user.roles?.includes('SUPER_ADMIN') || request.user.permissions?.includes('*');
-  const companyId = isAdmin ? undefined : request.user.companyId;
+  // Only COMPANY users are tenant-scoped. STAFF moderators can review
+  // products across companies, while public catalogue routes stay clamped.
+  const isCompany = request.user.accessType === 'COMPANY'
+    && !request.user.roles?.includes('SUPER_ADMIN')
+    && !request.user.permissions?.includes('*');
+  const companyId = isCompany ? request.user.companyId : undefined;
   const { items, total } = await svc.listProducts({ skip, take, filters: { search, companyId, status }, caller: request.user });
   return reply.send(buildPaginatedResponse(items, total, page, limit));
 }
 
 async function getHistory(request, reply) {
-  const history = await svc.getProductHistory(request.params.id);
+  const history = await svc.getProductHistory(request.params.id, request.user);
   return reply.send(success(history));
 }
 
 async function getActivity(request, reply) {
-  const activity = await svc.getProductActivityLog(request.params.id);
+  const activity = await svc.getProductActivityLog(request.params.id, request.user);
   return reply.send(success(activity));
 }
 
