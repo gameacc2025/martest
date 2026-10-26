@@ -217,3 +217,10 @@ active feature work in flight as of this writing (see
 - STAFF-only workflow actions are guarded in the service as well as the route; CUSTOMER cannot use a stray `companyId` to create or publish products.
 - No database schema or migration changes were needed. The contract and regression tests are documented in `docs/API_DOCUMENTATION.md`, `.ai/decisions.md`, and `.ai/WORKLOG.md`.
 - Verification baseline: GitHub Actions run [40277836441](https://github.com/gameacc2025/martest/actions/runs/40277836441) passed frontend/shared 19/19 test files, backend 1196/1196 tests, Prisma Client generation, and all three frontend production builds.
+
+
+## Inquiry completion status (2026-10-26)
+- Customer inquiry creation is supported with `Inquiry.buyerUserId`; existing company-owned inquiries continue using `companyId`.
+- Normal/sealed/anonymous-sealed visibility is enforced in service response shaping. Supplier users only receive their own response data; drafts and future-scheduled inquiries are hidden from suppliers.
+- `INQUIRY_PUBLISHED`, `INQUIRY_RESPONSE_RECEIVED`, and `INQUIRY_STATUS_CHANGED` are dispatched transactionally through the central notification dispatcher.
+- Background lifecycle worker processes scheduled publishing and automatic expiry, recording SYSTEM transitions in status history.

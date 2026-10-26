@@ -45,6 +45,11 @@ async function changeStatus(request, reply) {
   return reply.send(success(inquiry));
 }
 
+async function revealResponses(request, reply) {
+  const inquiry = await inquiryService.revealInquiryResponses(request.params.id, request.user);
+  return reply.send(success(inquiry));
+}
+
 async function addItem(request, reply) {
   const item = await inquiryService.addInquiryItem(request.params.id, request.body, request.user);
   return reply.code(201).send(success(item));
@@ -72,6 +77,17 @@ async function listResponses(request, reply) {
 
 async function updateResponse(request, reply) {
   const response = await inquiryService.updateResponse(request.params.id, request.params.responseId, request.body, request.user);
+  return reply.send(success(response));
+}
+
+async function decideResponse(request, reply) {
+  const response = await inquiryService.decideResponse(
+    request.params.id,
+    request.params.responseId,
+    request.body.decision,
+    request.user,
+    request.body.comment,
+  );
   return reply.send(success(response));
 }
 
@@ -103,6 +119,7 @@ module.exports = {
   create,
   update,
   changeStatus,
+  revealResponses,
   stats,
 
 
@@ -114,6 +131,7 @@ module.exports = {
   submitResponse,
   listResponses,
   updateResponse,
+  decideResponse,
   withdrawResponse,
   uploadResponseAttachment,
   deleteResponseAttachment,

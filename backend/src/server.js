@@ -8,6 +8,7 @@
 const buildApp = require('./app');
 const { port, nodeEnv } = require('./config/env');
 const { processPendingDeliveries } = require('./modules/notifications/notification.delivery.service');
+const { processInquiryLifecycle } = require('./modules/inquiries/inquiry.lifecycle.service');
 
 async function start() {
   const app = await buildApp();
@@ -42,6 +43,32 @@ async function start() {
     setInterval(runDeliveryWorker, pollInterval);
     app.log.info(`Delivery worker started — polling every ${pollInterval}ms`);
   }
+
+  // ── Inquiry lifecycle worker ────────────────────────────────
+  // Publishes SUBMITTED inquiries when publishDate is due and expires OPEN
+  // inquiries with autoClose enabled once their response deadline passes.
+  let inquiryWorkerRunning = false;
+  async function runInquiryLifecycleWorker() {
+    if (inquiryWorkerRunning) return;
+    inquiryWorkerRunning = true;
+    try {
+      const result = await processInquiryLifecycle({ limit: 100 });
+      if (result.published || result.expired) {
+        app.log.info(result, 'Inquiry lifecycle transitions processed');
+      }
+    } catch (err) {
+      app.log.error(err, 'Inquiry lifecycle worker error');
+    } finally {
+      inquiryWorkerRunning = false;
+    }
+  }
+
+  const inquiryPollInterval = parseInt(process.env.INQUIRY_LIFECYCLE_POLL_INTERVAL_MS, 10) || 15000;
+  if (nodeEnv !== 'test') {
+    setInterval(runInquiryLifecycleWorker, inquiryPollInterval);
+    app.log.info(`Inquiry lifecycle worker started — polling every ${inquiryPollInterval}ms`);
+  }
+  setImmediate(runInquiryLifecycleWorker);
 
   // Run once immediately on startup
   setImmediate(runDeliveryWorker);

@@ -8,6 +8,7 @@ const path = require('path');
 const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
+const { dispatchNotification } = require('../notifications/notification.dispatch.service');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const {
   validateInquiryCreationCapacity,
@@ -62,9 +63,18 @@ const inquiryInclude = {
     },
   },
   responses: {
+    orderBy: { createdAt: 'asc' },
     include: {
       company: { select: { id: true, name: true, type: true } },
-      items: true,
+      items: {
+        include: {
+          inquiryItem: {
+            include: {
+              product: { select: { id: true, title: true, slug: true, companyId: true } },
+            },
+          },
+        },
+      },
     },
   },
   statusHistory: {
@@ -100,12 +110,33 @@ function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
 }
 
+function hasAnyPermission(caller, ...permissions) {
+  return isSuperAdmin(caller) || permissions.some((permission) => caller?.permissions?.includes(permission));
+}
+
+function isStaffWithPermission(caller, ...permissions) {
+  return isSuperAdmin(caller) || (caller?.accessType === 'STAFF' && hasAnyPermission(caller, ...permissions));
+}
+
+function isInquiryBuyer(inquiry, caller) {
+  if (!inquiry || !caller) return false;
+  if (isSuperAdmin(caller)) return true;
+  if (inquiry.buyerUserId && Number(inquiry.buyerUserId) === Number(caller.id)) return true;
+  return Boolean(inquiry.companyId) && Number(inquiry.companyId) === Number(caller.companyId);
+}
+
 function resolveCompanyId(data, caller) {
-  return isSuperAdmin(caller) && data.companyId ? Number(data.companyId) : Number(caller?.companyId);
+  if (caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller)) return null;
+  if (isSuperAdmin(caller) && data?.companyId) return Number(data.companyId);
+  if (caller?.companyId) return Number(caller.companyId);
+  if (data?.companyId && caller?.accessType === 'STAFF' && hasAnyPermission(caller, 'leads.create', 'inquiries.create')) {
+    return Number(data.companyId);
+  }
+  return null;
 }
 
 function ensureCompanyId(companyId) {
-  if (!companyId) {
+  if (!Number.isInteger(Number(companyId)) || Number(companyId) < 1) {
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
   }
 }
@@ -119,10 +150,7 @@ function toPositiveInt(value, field) {
 }
 
 function assertCanManageInquiryItems(inquiry, caller) {
-  if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== Number(caller?.companyId)) {
-    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  }
+  assertCanManageInquiry(inquiry, caller);
   if (inquiry.status !== 'DRAFT') {
     throw { statusCode: 400, code: 'INQUIRY_ITEMS_LOCKED', message: 'RFQ items can only be changed while the RFQ is in draft status.' };
   }
@@ -130,16 +158,15 @@ function assertCanManageInquiryItems(inquiry, caller) {
 
 function assertCanReadInquiry(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== Number(caller?.companyId)) {
-    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  }
+  if (isInquiryBuyer(inquiry, caller) || isStaffWithPermission(caller, 'leads.read', 'inquiries.read')) return;
+  throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 }
 
 function assertCanManageInquiry(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== Number(caller?.companyId)) {
-    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  }
+  if (isInquiryBuyer(inquiry, caller)) return;
+  if (isStaffWithPermission(caller, 'leads.update', 'inquiries.update')) return;
+  throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 }
 
 function assertAuthenticatedUser(caller) {
@@ -293,18 +320,116 @@ async function removeStoredAttachment(url) {
 }
 
 function assertCanReadResponses(inquiry, caller) {
-
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (isSuperAdmin(caller)) return;
+  if (isInquiryBuyer(inquiry, caller) || isStaffWithPermission(caller, 'leads.read', 'inquiries.read')) return;
+  if (!caller?.companyId && caller?.accessType !== 'CUSTOMER') {
+    throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
+  }
 
   const callerCompanyId = Number(caller?.companyId);
-  if (!callerCompanyId) throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
-
-  const isBuyer = inquiry.companyId === callerCompanyId;
-  const ownsRequestedProduct = inquiry.items.some((item) => item.product?.companyId === callerCompanyId);
-  if (!isBuyer && !ownsRequestedProduct) {
+  const ownsRequestedProduct = Number.isInteger(callerCompanyId) && callerCompanyId > 0
+    && (inquiry.items || []).some((item) => Number(item.product?.companyId) === callerCompanyId);
+  const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
+  const isPublished = publishedStatuses.includes(inquiry.status)
+    && (!inquiry.publishDate || new Date(inquiry.publishDate) <= new Date());
+  if (!ownsRequestedProduct || !isPublished) {
     throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   }
+}
+
+function areResponsesRevealed(inquiry) {
+  if (!inquiry) return false;
+  if (inquiry.revealedAt) return true;
+  if (['CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'].includes(inquiry.status)) return true;
+  return Boolean(inquiry.responseDeadline) && new Date(inquiry.responseDeadline) <= new Date();
+}
+
+function shapeInquiryForCaller(inquiry, caller) {
+  const result = { ...inquiry };
+  delete result.buyerUserId;
+
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const isBuyer = isInquiryBuyer(inquiry, caller);
+  const callerCompanyId = Number(caller?.companyId) || null;
+
+  if (!isBuyer && !isStaff && inquiry.confidential) {
+    result.company = null;
+    delete result.companyId;
+  }
+
+  const responses = Array.isArray(inquiry.responses) ? inquiry.responses : [];
+  result.responseCount = inquiry._count?.responses ?? responses.length;
+  if (!isBuyer && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+    delete result.responseCount;
+  }
+
+  if (isBuyer && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+    result.responses = [];
+    result.responsesHidden = true;
+  } else {
+    let visibleResponses = responses;
+    if (!isBuyer && !isStaff) {
+      visibleResponses = responses.filter((response) => Number(response.companyId) === callerCompanyId);
+    }
+
+    if (isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED' && areResponsesRevealed(inquiry) && !isStaff) {
+      let ordinal = 0;
+      visibleResponses = visibleResponses.map((response) => {
+        ordinal += 1;
+        const anonymous = { ...response, company: { name: `پیشنهاددهنده ${ordinal}`, type: null } };
+        delete anonymous.companyId;
+        anonymous.items = (response.items || []).map((item) => {
+          const safeItem = { ...item };
+          if (safeItem.inquiryItem?.product) {
+            safeItem.inquiryItem = { ...safeItem.inquiryItem, product: { ...safeItem.inquiryItem.product } };
+            delete safeItem.inquiryItem.product.companyId;
+          }
+          return safeItem;
+        });
+        return anonymous;
+      });
+      result.items = (result.items || []).map((item) => ({
+        ...item,
+        product: item.product ? { ...item.product, company: null } : item.product,
+      }));
+    }
+
+    result.responses = visibleResponses;
+    result.responsesHidden = false;
+  }
+
+  return result;
+}
+
+async function notifyInquiryPublished(tx, inquiry) {
+  const rows = await tx.inquiryItem.findMany({
+    where: { inquiryId: inquiry.id },
+    select: { product: { select: { companyId: true } } },
+  });
+  const companyIds = [...new Set(rows.map((row) => Number(row.product?.companyId)).filter((id) => id > 0))];
+  const context = { inquiry: { id: inquiry.id, title: inquiry.title } };
+
+  if (companyIds.length) {
+    await dispatchNotification('INQUIRY_PUBLISHED', { companyIds }, context, {
+      tx,
+      dedupeKey: (userId) => `inquiry-published-${inquiry.id}-companies-${userId}`,
+    });
+  }
+  await dispatchNotification('INQUIRY_PUBLISHED', { permission: 'leads.read' }, context, {
+    tx,
+    dedupeKey: (userId) => `inquiry-published-${inquiry.id}-staff-${userId}`,
+  });
+}
+
+async function notifyInquiryOwner(tx, inquiry, eventKey, context, dedupeKey) {
+  const recipients = inquiry.buyerUserId
+    ? [Number(inquiry.buyerUserId)]
+    : (inquiry.companyId ? { companyIds: [Number(inquiry.companyId)] } : []);
+  if (!recipients.length) return;
+  await dispatchNotification(eventKey, recipients, context, {
+    tx,
+    dedupeKey: (userId) => `${typeof dedupeKey === 'function' ? dedupeKey(userId) : dedupeKey}-${userId}`,
+  });
 }
 
 function normalizeInquiryItems(items = []) {
@@ -331,6 +456,18 @@ function normalizeInquiryItems(items = []) {
  *
  * Date fields accept ISO strings, or `null` to clear (update only).
  */
+function assertInquiryDateWindow(publishDate, responseDeadline) {
+  if (!responseDeadline) return;
+  const publicationBoundary = publishDate ? new Date(publishDate) : new Date();
+  if (Number.isNaN(publicationBoundary.getTime()) || new Date(responseDeadline) <= publicationBoundary) {
+    throw {
+      statusCode: 400,
+      code: 'INVALID_INQUIRY_DATE_WINDOW',
+      message: 'The response deadline must be later than the publication date (or the current time when publishing immediately).',
+    };
+  }
+}
+
 function buildInquirySettings(data = {}, { partial = false } = {}) {
   const settings = {};
 
@@ -353,7 +490,15 @@ function buildInquirySettings(data = {}, { partial = false } = {}) {
 
   const setDate = (key) => {
     if (data[key] !== undefined) {
-      settings[key] = data[key] ? new Date(data[key]) : null;
+      if (!data[key]) {
+        settings[key] = null;
+        return;
+      }
+      const date = new Date(data[key]);
+      if (Number.isNaN(date.getTime())) {
+        throw { statusCode: 400, code: 'INVALID_INQUIRY_DATE', message: `Invalid date value for ${key}.` };
+      }
+      settings[key] = date;
     } else if (!partial) {
       settings[key] = null;
     }
@@ -375,6 +520,7 @@ function buildInquirySettings(data = {}, { partial = false } = {}) {
   setDate('publishDate');
   setDate('responseDeadline');
 
+  if (!partial) assertInquiryDateWindow(settings.publishDate, settings.responseDeadline);
   return settings;
 }
 
@@ -510,19 +656,35 @@ async function listInquiries(query, caller) {
   const { page, limit, skip, take } = getPaginationParams(query);
   const superAdmin = isSuperAdmin(caller);
   const callerCompanyId = Number(caller?.companyId) || null;
-  const scope = query.scope || (superAdmin ? 'all' : 'sent');
+  const callerUserId = Number(caller?.id) || null;
+  const isCustomer = caller?.accessType === 'CUSTOMER' && !superAdmin;
+  const isStaff = caller?.accessType === 'STAFF' || superAdmin;
+  const scope = query.scope || (isStaff ? 'all' : 'sent');
 
   const where = { AND: [] };
 
-  if (scope === 'sent') {
-    if (!superAdmin) ensureCompanyId(callerCompanyId);
-    if (callerCompanyId) where.AND.push({ companyId: callerCompanyId });
-  } else if (scope === 'received') {
-    ensureCompanyId(callerCompanyId);
+  if (isStaff && !superAdmin && !hasAnyPermission(caller, 'leads.read', 'inquiries.read')) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'You do not have permission to read inquiries.' };
+  }
+
+  if (scope === 'received') {
+    if (isCustomer || !callerCompanyId) {
+      throw { statusCode: 403, code: 'INVALID_INQUIRY_SCOPE', message: 'Received inquiries are only available to company users.' };
+    }
     where.AND.push({ items: { some: { product: { companyId: callerCompanyId } } } });
-  } else {
-    // 'all' — restricted to SUPER_ADMIN; non-admins fall back to their own company
-    if (!superAdmin) {
+    where.AND.push({ status: { in: ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'] } });
+    where.AND.push({ OR: [{ publishDate: null }, { publishDate: { lte: new Date() } }] });
+  } else if (scope === 'sent') {
+    if (isCustomer) {
+      where.AND.push({ buyerUserId: callerUserId });
+    } else if (!isStaff) {
+      ensureCompanyId(callerCompanyId);
+      where.AND.push({ companyId: callerCompanyId });
+    }
+  } else if (scope === 'all') {
+    if (isCustomer) {
+      where.AND.push({ buyerUserId: callerUserId });
+    } else if (!isStaff) {
       ensureCompanyId(callerCompanyId);
       where.AND.push({ companyId: callerCompanyId });
     }
@@ -558,13 +720,27 @@ async function listInquiries(query, caller) {
     }),
   ]);
 
-  return buildPaginatedResponse(inquiries, total, page, limit);
+  const safeInquiries = inquiries.map((inquiry) => {
+    const safe = { ...inquiry };
+    delete safe.buyerUserId;
+    if (!isInquiryBuyer(inquiry, caller) && !isStaff && inquiry.confidential) {
+      safe.company = null;
+      delete safe.companyId;
+    }
+    if (!isInquiryBuyer(inquiry, caller) && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+      safe._count = { ...(safe._count || {}) };
+      delete safe._count.responses;
+    }
+    return safe;
+  });
+
+  return buildPaginatedResponse(safeInquiries, total, page, limit);
 }
 
 /**
- * Get a single inquiry with full detail, enforcing read access.
- * Buyers (owning company), sellers (owning a requested product) and
- * SUPER_ADMIN may read; everyone else gets 404.
+ * Get a single inquiry with caller-specific visibility.
+ * Buyers, authorized STAFF, and eligible supplier companies may read it.
+ * Supplier companies cannot discover drafts or future-scheduled inquiries.
  */
 async function getInquiry(inquiryId, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
@@ -574,42 +750,60 @@ async function getInquiry(inquiryId, caller) {
   });
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 
-  if (!isSuperAdmin(caller)) {
-    const callerCompanyId = Number(caller?.companyId) || null;
-    const isBuyer = inquiry.companyId === callerCompanyId;
-    const ownsRequestedProduct = inquiry.items.some((item) => item.product?.company?.id === callerCompanyId);
-    if (!isBuyer && !ownsRequestedProduct) {
-      throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-    }
+  const isBuyer = isInquiryBuyer(inquiry, caller);
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const callerCompanyId = Number(caller?.companyId) || null;
+  const ownsRequestedProduct = Boolean(callerCompanyId)
+    && inquiry.items.some((item) => Number(item.product?.company?.id) === callerCompanyId);
+  const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
+  const isPublishedForSuppliers = publishedStatuses.includes(inquiry.status)
+    && (!inquiry.publishDate || new Date(inquiry.publishDate) <= new Date());
+
+  if (!isBuyer && !isStaff && !(ownsRequestedProduct && isPublishedForSuppliers)) {
+    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   }
 
-  return inquiry;
+  return shapeInquiryForCaller(inquiry, caller);
 }
 
 async function createInquiry(data, caller) {
+  const isCustomerBuyer = caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller);
+  const buyerUserId = isCustomerBuyer ? assertAuthenticatedUser(caller) : null;
+  const companyId = isCustomerBuyer ? null : resolveCompanyId(data, caller);
 
-  const companyId = resolveCompanyId(data, caller);
-  ensureCompanyId(companyId);
+  if (!isCustomerBuyer) ensureCompanyId(companyId);
 
   return prisma.$transaction(async (tx) => {
-    await validateInquiryCreationCapacity(companyId, tx);
+    if (companyId) await validateInquiryCreationCapacity(companyId, tx);
     await validateInquiryProducts(data.items, tx);
 
     if (data.status && data.status !== 'DRAFT') {
       throw { statusCode: 400, code: 'INVALID_INITIAL_STATUS', message: 'RFQs must be created as DRAFT and then moved through status workflow.' };
     }
 
-    return tx.inquiry.create({
+    const settings = buildInquirySettings(data, { partial: false });
+    // Website quick inquiries are actionable immediately. Company-authored RFQs
+    // retain the established DRAFT -> SUBMITTED -> OPEN workflow.
+    if (isCustomerBuyer) settings.publishDate = new Date();
+    assertInquiryDateWindow(settings.publishDate, settings.responseDeadline);
+
+    const inquiry = await tx.inquiry.create({
       data: {
         title: data.title,
         description: data.description,
         companyId,
-        status: 'DRAFT',
-        ...buildInquirySettings(data, { partial: false }),
+        buyerUserId,
+        status: isCustomerBuyer ? 'OPEN' : 'DRAFT',
+        ...settings,
         items: normalizeInquiryItems(data.items),
       },
       include: inquiryInclude,
     });
+
+    if (isCustomerBuyer) {
+      await notifyInquiryPublished(tx, inquiry);
+    }
+    return shapeInquiryForCaller(inquiry, caller);
   });
 }
 
@@ -632,6 +826,12 @@ async function updateInquiry(inquiryId, data, caller) {
     }
 
     const updateData = buildInquirySettings(data, { partial: true });
+    if (data.publishDate !== undefined || data.responseDeadline !== undefined) {
+      assertInquiryDateWindow(
+        updateData.publishDate !== undefined ? updateData.publishDate : inquiry.publishDate,
+        updateData.responseDeadline !== undefined ? updateData.responseDeadline : inquiry.responseDeadline,
+      );
+    }
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
 
@@ -639,11 +839,12 @@ async function updateInquiry(inquiryId, data, caller) {
       throw { statusCode: 400, code: 'NO_UPDATE_FIELDS', message: 'No updatable fields were provided.' };
     }
 
-    return tx.inquiry.update({
+    const updated = await tx.inquiry.update({
       where: { id: numericInquiryId },
       data: updateData,
       include: inquiryInclude,
     });
+    return shapeInquiryForCaller(updated, caller);
   });
 }
 
@@ -655,6 +856,15 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
   return prisma.$transaction(async (tx) => {
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiry(inquiry, caller);
+
+    if (caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller) && nextStatus !== 'CANCELLED') {
+      throw { statusCode: 403, code: 'CUSTOMER_STATUS_RESTRICTED', message: 'Customers may only cancel their own inquiry.' };
+    }
+
+    if (nextStatus === 'OPEN' && inquiry.publishDate && new Date(inquiry.publishDate) > new Date()) {
+      throw { statusCode: 400, code: 'PUBLISH_DATE_IN_FUTURE', message: 'This inquiry is scheduled for a future publish date.' };
+    }
+
     assertInquiryTransition(inquiry.status, nextStatus);
     await validateInquiryReadyForStatus(numericInquiryId, nextStatus, tx);
 
@@ -668,17 +878,69 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
       },
     });
 
-    return tx.inquiry.update({
+    const updated = await tx.inquiry.update({
       where: { id: numericInquiryId },
       data: buildStatusTransitionData(nextStatus),
       include: inquiryInclude,
     });
+
+    if (nextStatus === 'OPEN') {
+      await notifyInquiryPublished(tx, updated);
+    } else if (['CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'].includes(nextStatus)) {
+      const context = { inquiry: { id: updated.id, title: updated.title }, status: nextStatus };
+      await notifyInquiryOwner(tx, updated, 'INQUIRY_STATUS_CHANGED', context, `inquiry-status-${updated.id}-${nextStatus}-owner`);
+      const responseCompanies = await tx.inquiryResponse.findMany({
+        where: { inquiryId: updated.id, status: { not: 'WITHDRAWN' } },
+        select: { companyId: true },
+      });
+      for (const companyId of [...new Set(responseCompanies.map((row) => Number(row.companyId)))]) {
+        await dispatchNotification('INQUIRY_STATUS_CHANGED', { companyIds: [companyId] }, context, {
+          tx,
+          dedupeKey: (userId) => `inquiry-status-${updated.id}-${nextStatus}-company-${companyId}-${userId}`,
+        });
+      }
+    }
+
+    return shapeInquiryForCaller(updated, caller);
+  });
+}
+
+async function revealInquiryResponses(inquiryId, caller) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  return prisma.$transaction(async (tx) => {
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
+    if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+
+    const isStaff = isStaffWithPermission(caller, 'leads.update', 'inquiries.update');
+    if (!isInquiryBuyer(inquiry, caller) && !isStaff) {
+      throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+    }
+    if (!['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+      throw { statusCode: 400, code: 'INQUIRY_NOT_SEALED', message: 'Only sealed inquiries have a reveal step.' };
+    }
+    if (inquiry.revealedAt) return shapeInquiryForCaller(inquiry, caller);
+
+    const deadlinePassed = inquiry.responseDeadline && new Date(inquiry.responseDeadline) <= new Date();
+    const inquiryClosed = ['CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'].includes(inquiry.status);
+    if (!isStaff && !inquiry.allowEarlyReveal && !deadlinePassed && !inquiryClosed) {
+      throw { statusCode: 403, code: 'EARLY_REVEAL_DISABLED', message: 'Responses cannot be revealed before the deadline unless early reveal is enabled.' };
+    }
+
+    const updated = await tx.inquiry.update({
+      where: { id: numericInquiryId },
+      data: { revealedAt: new Date() },
+      include: inquiryInclude,
+    });
+    return shapeInquiryForCaller(updated, caller);
   });
 }
 
 async function listInquiryItems(inquiryId, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
-  const inquiry = await prisma.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, companyId: true } });
+  const inquiry = await prisma.inquiry.findUnique({
+    where: { id: numericInquiryId },
+    select: { id: true, companyId: true, buyerUserId: true },
+  });
   assertCanReadInquiry(inquiry, caller);
 
   return prisma.inquiryItem.findMany({
@@ -752,13 +1014,16 @@ async function deleteInquiryItem(inquiryId, itemId, caller) {
 async function submitResponse(inquiryId, data, caller) {
   const companyId = resolveCompanyId(data, caller);
   ensureCompanyId(companyId);
+  if (caller?.accessType === 'STAFF' && !isSuperAdmin(caller)) {
+    throw { statusCode: 403, code: 'STAFF_CANNOT_RESPOND', message: 'STAFF users supervise inquiries but do not submit supplier quotes.' };
+  }
 
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
 
   return prisma.$transaction(async (tx) => {
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertInquiryAcceptsResponseChanges(inquiry);
-    if (inquiry.companyId === companyId) {
+    if (inquiry.companyId && inquiry.companyId === companyId) {
       throw { statusCode: 400, code: 'SELF_RESPONSE_NOT_ALLOWED', message: 'شرکت ایجادکننده درخواست نمی‌تواند به درخواست خود پاسخ دهد.' };
     }
 
@@ -770,15 +1035,22 @@ async function submitResponse(inquiryId, data, caller) {
 
     await validateResponseSubmissionCapacity(companyId, tx);
 
-    return tx.inquiryResponse.create({
+    const response = await tx.inquiryResponse.create({
       data: {
         inquiryId: numericInquiryId,
         companyId,
-        status: data.status || 'PENDING',
+        status: 'PENDING',
         items: normalizeResponseItems(data.items),
       },
       include: responseInclude,
     });
+
+    await notifyInquiryOwner(tx, inquiry, 'INQUIRY_RESPONSE_RECEIVED', {
+      inquiry: { id: inquiry.id, title: inquiry.title },
+      response: { id: response.id },
+    }, `inquiry-response-${response.id}`);
+
+    return response;
   });
 }
 
@@ -789,22 +1061,55 @@ async function listResponses(inquiryId, caller) {
     select: {
       id: true,
       companyId: true,
+      buyerUserId: true,
+      visibilityMode: true,
+      status: true,
+      publishDate: true,
+      revealedAt: true,
+      responseDeadline: true,
+      allowEarlyReveal: true,
       items: { select: { product: { select: { companyId: true } } } },
     },
   });
   assertCanReadResponses(inquiry, caller);
 
-  const callerCompanyId = Number(caller?.companyId);
+  const isBuyer = isInquiryBuyer(inquiry, caller);
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  if (isBuyer && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+    return [];
+  }
+
+  const callerCompanyId = Number(caller?.companyId) || null;
   const where = { inquiryId: numericInquiryId };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== callerCompanyId) {
+  if (!isBuyer && !isStaff) {
     where.companyId = callerCompanyId;
   }
 
-  return prisma.inquiryResponse.findMany({
+  const responses = await prisma.inquiryResponse.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: 'asc' },
     include: responseInclude,
   });
+
+  if (isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED' && areResponsesRevealed(inquiry) && !isStaff) {
+    return responses.map((response, index) => {
+      const safe = { ...response, company: { name: `پیشنهاددهنده ${index + 1}`, type: null } };
+      delete safe.companyId;
+      safe.items = (response.items || []).map((item) => {
+        const safeItem = { ...item };
+        if (safeItem.inquiryItem?.product) {
+          safeItem.inquiryItem = {
+            ...safeItem.inquiryItem,
+            product: { ...safeItem.inquiryItem.product },
+          };
+          delete safeItem.inquiryItem.product.companyId;
+        }
+        return safeItem;
+      });
+      return safe;
+    });
+  }
+  return responses;
 }
 
 async function updateResponse(inquiryId, responseId, data, caller) {
@@ -851,6 +1156,115 @@ async function updateResponse(inquiryId, responseId, data, caller) {
  * and before the deadline. Withdrawn responses are kept for audit (status
  * = WITHDRAWN, withdrawnAt set) rather than deleted.
  */
+async function decideResponse(inquiryId, responseId, decision, caller, comment) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const numericResponseId = toPositiveInt(responseId, 'responseId');
+  if (!['SELECTED', 'REJECTED'].includes(decision)) {
+    throw { statusCode: 400, code: 'INVALID_RESPONSE_DECISION', message: 'Decision must be SELECTED or REJECTED.' };
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
+    if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+    assertCanManageInquiry(inquiry, caller);
+    if (!isInquiryBuyer(inquiry, caller)) {
+      throw { statusCode: 403, code: 'BUYER_DECISION_REQUIRED', message: 'Only the inquiry buyer may decide supplier responses.' };
+    }
+    if (inquiry.status !== 'OPEN') {
+      throw { statusCode: 400, code: 'INQUIRY_NOT_OPEN', message: 'Only responses to an open inquiry can be decided.' };
+    }
+    if (['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+      throw { statusCode: 403, code: 'RESPONSES_NOT_REVEALED', message: 'Reveal sealed responses before deciding on a supplier.' };
+    }
+
+    const response = await tx.inquiryResponse.findFirst({
+      where: { id: numericResponseId, inquiryId: numericInquiryId },
+      select: { id: true, companyId: true, status: true },
+    });
+    if (!response) throw { statusCode: 404, code: 'RESPONSE_NOT_FOUND', message: 'Response not found.' };
+    if (response.status !== 'PENDING') {
+      throw { statusCode: 400, code: 'RESPONSE_ALREADY_DECIDED', message: 'Only pending responses can be decided.' };
+    }
+
+    if (decision === 'REJECTED') {
+      const rejected = await tx.inquiryResponse.update({
+        where: { id: numericResponseId },
+        data: { status: 'REJECTED' },
+        include: responseInclude,
+      });
+      await dispatchNotification('INQUIRY_RESPONSE_REJECTED', { companyIds: [response.companyId] }, {
+        inquiry: { id: inquiry.id, title: inquiry.title },
+        response: { id: response.id },
+      }, { tx, dedupeKey: (userId) => `inquiry-response-rejected-${response.id}-${userId}` });
+      // Decision endpoints return a minimal receipt only; never echo supplier identity
+      // into buyer-facing responses for ANONYMOUS_SEALED inquiries.
+      return { id: rejected.id, inquiryId: numericInquiryId, status: rejected.status };
+    }
+
+    const now = new Date();
+    const closeResult = await tx.inquiry.updateMany({
+      where: { id: numericInquiryId, status: 'OPEN' },
+      data: { status: 'CLOSED', closedAt: now },
+    });
+    if (!closeResult.count) {
+      throw { statusCode: 409, code: 'INQUIRY_ALREADY_CLOSED', message: 'This inquiry has already been closed or decided.' };
+    }
+
+    const losers = await tx.inquiryResponse.findMany({
+      where: { inquiryId: numericInquiryId, status: 'PENDING', id: { not: numericResponseId } },
+      select: { id: true, companyId: true },
+    });
+    await tx.inquiryResponse.update({
+      where: { id: numericResponseId },
+      data: { status: 'SELECTED' },
+    });
+    if (losers.length) {
+      await tx.inquiryResponse.updateMany({
+        where: { inquiryId: numericInquiryId, status: 'PENDING', id: { not: numericResponseId } },
+        data: { status: 'REJECTED' },
+      });
+    }
+
+    await tx.inquiryStatusHistory.create({
+      data: {
+        inquiryId: numericInquiryId,
+        previousStatus: 'OPEN',
+        newStatus: 'CLOSED',
+        changedByUserId: assertAuthenticatedUser(caller),
+        source: 'USER',
+        comment: comment || 'Supplier response selected; other pending responses were rejected.',
+      },
+    });
+
+    const selectedResponse = await tx.inquiryResponse.findFirst({
+      where: { id: numericResponseId, inquiryId: numericInquiryId },
+      include: responseInclude,
+    });
+    await dispatchNotification('INQUIRY_RESPONSE_SELECTED', { companyIds: [response.companyId] }, {
+      inquiry: { id: inquiry.id, title: inquiry.title },
+      response: { id: response.id },
+    }, { tx, dedupeKey: (userId) => `inquiry-response-selected-${response.id}-${userId}` });
+
+    for (const loser of losers) {
+      await dispatchNotification('INQUIRY_RESPONSE_AUTO_REJECTED', { companyIds: [loser.companyId] }, {
+        inquiry: { id: inquiry.id, title: inquiry.title },
+        company: { id: loser.companyId },
+      }, { tx, dedupeKey: (userId) => `inquiry-response-auto-rejected-${loser.id}-${userId}` });
+    }
+
+    await notifyInquiryOwner(tx, inquiry, 'INQUIRY_STATUS_CHANGED', {
+      inquiry: { id: inquiry.id, title: inquiry.title },
+      status: 'CLOSED',
+    }, `inquiry-status-${inquiry.id}-CLOSED-owner`);
+
+    return {
+      id: selectedResponse.id,
+      inquiryId: numericInquiryId,
+      status: selectedResponse.status,
+    };
+  });
+}
+
 async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   const numericResponseId = toPositiveInt(responseId, 'responseId');
@@ -969,11 +1383,20 @@ async function deleteResponseAttachment(inquiryId, responseId, attachmentId, cal
 async function getInquiryStats(caller) {
   const superAdmin = isSuperAdmin(caller);
   const companyId = Number(caller?.companyId) || null;
-  if (!superAdmin) ensureCompanyId(companyId);
+  const customerUserId = Number(caller?.id) || null;
+  const isCustomer = caller?.accessType === 'CUSTOMER' && !superAdmin;
+  if (!superAdmin && !isCustomer) ensureCompanyId(companyId);
+  if (isCustomer && !customerUserId) {
+    throw { statusCode: 401, code: 'UNAUTHORIZED', message: 'Authenticated user is required.' };
+  }
 
-  const sentWhere = superAdmin ? {} : { companyId };
-  const receivedWhere = superAdmin ? {} : { items: { some: { product: { companyId } } } };
-  const responsesWhere = superAdmin ? {} : { companyId };
+  const sentWhere = superAdmin ? {} : isCustomer ? { buyerUserId: customerUserId } : { companyId };
+  const receivedWhere = superAdmin ? {} : isCustomer
+    ? { id: { in: [] } }
+    : { items: { some: { product: { companyId } } } };
+  const responsesWhere = superAdmin ? {} : isCustomer
+    ? { inquiry: { buyerUserId: customerUserId } }
+    : { companyId };
 
   const groupToMap = (grouped) =>
     grouped.reduce((acc, row) => {
@@ -1018,7 +1441,7 @@ async function getInquiryStats(caller) {
         status: true,
         createdAt: true,
         company: { select: { id: true, name: true } },
-        inquiry: { select: { id: true, title: true } },
+        inquiry: { select: { id: true, title: true, status: true, visibilityMode: true, revealedAt: true, responseDeadline: true } },
         _count: { select: { items: true } },
       },
     }),
@@ -1049,8 +1472,21 @@ async function getInquiryStats(caller) {
       selected,
       successRate,
     },
-    recentInquiries,
-    recentResponses,
+    recentInquiries: recentInquiries.map((inquiry) => {
+      const safe = { ...inquiry };
+      delete safe.buyerUserId;
+      return safe;
+    }),
+    recentResponses: isCustomer
+      ? recentResponses.filter((response) => {
+          const inquiry = response.inquiry || {};
+          if (['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) return false;
+          if (inquiry.visibilityMode === 'ANONYMOUS_SEALED') {
+            response.company = { name: 'پیشنهاددهنده' };
+          }
+          return true;
+        })
+      : recentResponses,
   };
 }
 
@@ -1060,6 +1496,7 @@ module.exports = {
   createInquiry,
   updateInquiry,
   changeInquiryStatus,
+  revealInquiryResponses,
   getInquiryStats,
 
 
@@ -1071,6 +1508,7 @@ module.exports = {
   submitResponse,
   listResponses,
   updateResponse,
+  decideResponse,
   withdrawResponse,
   uploadResponseAttachment,
   deleteResponseAttachment,

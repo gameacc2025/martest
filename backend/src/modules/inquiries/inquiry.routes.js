@@ -230,10 +230,17 @@ async function inquiryRoutes(fastify) {
   }, ctrl.listItems);
 
 
+  // Buyers may cancel their own inquiry; STAFF/COMPANY lifecycle changes
+  // still require the corresponding update permission and are owner-scoped in the service.
   fastify.patch('/:id/status', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.update', 'inquiries.update')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.create')],
     schema: { params: inquiryParamsSchema, body: statusBodySchema },
   }, ctrl.changeStatus);
+
+  fastify.post('/:id/reveal', {
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'leads.update', 'inquiries.update')],
+    schema: { params: inquiryParamsSchema },
+  }, ctrl.revealResponses);
 
   fastify.post('/:id/items', {
     preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.create')],
@@ -266,6 +273,22 @@ async function inquiryRoutes(fastify) {
       body: responseBodySchema,
     },
   }, ctrl.submitResponse);
+
+  fastify.patch('/:id/responses/:responseId/decision', {
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('inquiries.create', 'inquiries.update', 'leads.update')],
+    schema: {
+      params: inquiryResponseParamsSchema,
+      body: {
+        type: 'object',
+        required: ['decision'],
+        additionalProperties: false,
+        properties: {
+          decision: { type: 'string', enum: ['SELECTED', 'REJECTED'] },
+          comment: { type: 'string', maxLength: 2000 },
+        },
+      },
+    },
+  }, ctrl.decideResponse);
 
   fastify.patch('/:id/responses/:responseId', {
     preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('inquiries.respond', 'leads.update')],

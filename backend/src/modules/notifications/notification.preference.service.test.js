@@ -45,13 +45,14 @@ resetMocks();
 injectMock('../../config/db', mockPrisma);
 
 const { getPreferences, updatePreferences } = require('./notification.preference.service');
+const { listEventKeys } = require('./notification.events');
 
 // Test suite
 
 test('getPreferences: empty preferences -> event defaults', async () => {
   resetMocks();
   const result = await getPreferences(5);
-  assert.equal(result.data.length, 13); // 13 events in EVENT_CATALOG
+  assert.equal(result.data.length, listEventKeys().length); // Every event in EVENT_CATALOG has defaults
   assert.equal(result.smsAvailable, false);
 });
 
@@ -78,7 +79,7 @@ test('updatePreferences: create new rows', async () => {
   assert.equal(upsertCalls[0].create.userId, 5);
   assert.equal(upsertCalls[0].update.enabled, false);
   assert.ok(Array.isArray(result.data));
-  assert.equal(result.data.length, 13);
+  assert.equal(result.data.length, listEventKeys().length);
 });
 
 test('updatePreferences: updates existing rows', async () => {

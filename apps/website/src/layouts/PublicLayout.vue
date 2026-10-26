@@ -67,11 +67,16 @@ const displayName = computed(() => {
 
 // Dropdown menu items — visibility depends on the user's access level.
 const userMenuItems = computed(() => {
-  // Profile / inquiries / notifications live in the company dashboard app.
-  const items = [
-    { label: 'پروفایل', icon: 'pi pi-user', command: () => goToCompanyApp('/profile') },
-    { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => goToCompanyApp('/profile?tab=inquiries') },
-  ]
+  // Customer inquiries are managed in the Website. Company/STAFF users use
+  // their own portal through the existing PKCE session handoff.
+  const items = authStore.isCustomer
+    ? [
+        { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => router.push('/my-inquiries') },
+      ]
+    : [
+        { label: 'پروفایل', icon: 'pi pi-user', command: () => goToCompanyApp('/profile') },
+        { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => goToCompanyApp('/profile?tab=inquiries') },
+      ]
   if (canAccessDashboard.value) {
     items.push({
       label: 'پنل مدیریت',

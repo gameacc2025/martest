@@ -32,6 +32,7 @@ const responseItems = ref([])
 const editingResponseId = ref(null)
 const savingResponse = ref(false)
 const uploadingResponseId = ref(null)
+const decidingResponseId = ref(null)
 
 const statusLabels = {
   DRAFT: 'پیش‌نویس', SUBMITTED: 'ارسال شده', OPEN: 'باز',
@@ -58,6 +59,19 @@ const PRIORITY_LABELS = { LOW: 'کم', NORMAL: 'عادی', HIGH: 'زیاد', URG
 const PRIORITY_SEVERITY = { LOW: 'secondary', NORMAL: 'info', HIGH: 'warn', URGENT: 'danger' }
 
 const myCompanyId = computed(() => Number(auth.companyId) || null)
+const isInquiryBuyer = computed(() => Boolean(myCompanyId.value && Number(inquiry.value?.company?.id) === myCompanyId.value))
+const canRevealResponses = computed(() => isInquiryBuyer.value
+  && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.value?.visibilityMode)
+  && inquiry.value?.allowEarlyReveal
+  && inquiry.value?.responsesHidden
+  && !inquiry.value?.revealedAt)
+
+function canDecideResponse(response) {
+  return isInquiryBuyer.value
+    && inquiry.value?.status === 'OPEN'
+    && response?.status === 'PENDING'
+    && !inquiry.value?.responsesHidden
+}
 
 const deadlinePassed = computed(() => {
   const d = inquiry.value?.responseDeadline
@@ -189,6 +203,52 @@ async function saveResponse() {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در ثبت پاسخ', life: 3500 })
   } finally {
     savingResponse.value = false
+  }
+}
+
+async function revealResponses() {
+  savingResponse.value = true
+  try {
+    await inquiriesApi.revealResponses(route.params.id)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'پیشنهادها اکنون قابل بررسی هستند', life: 3000 })
+    await fetchInquiry()
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err?.response?.data?.message || err?.message || 'بازکردن پیشنهادها انجام نشد', life: 3500 })
+  } finally {
+    savingResponse.value = false
+  }
+}
+
+function confirmDecision(response, decision) {
+  const selecting = decision === 'SELECTED'
+  confirm.require({
+    message: selecting
+      ? 'با انتخاب این پیشنهاد، استعلام بسته و سایر پیشنهادهای در انتظار به‌صورت خودکار رد می‌شوند. ادامه می‌دهید؟'
+      : 'آیا از رد این پیشنهاد مطمئن هستید؟',
+    header: selecting ? 'انتخاب پیشنهاد برنده' : 'رد پیشنهاد',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: selecting ? 'انتخاب و بستن استعلام' : 'رد پیشنهاد',
+    rejectLabel: 'انصراف',
+    acceptClass: selecting ? undefined : 'p-button-danger',
+    accept: () => decideResponse(response, decision),
+  })
+}
+
+async function decideResponse(response, decision) {
+  decidingResponseId.value = response.id
+  try {
+    await inquiriesApi.decideResponse(route.params.id, response.id, { decision })
+    toast.add({
+      severity: 'success',
+      summary: 'موفقیت',
+      detail: decision === 'SELECTED' ? 'پیشنهاد انتخاب شد و استعلام بسته شد' : 'پیشنهاد رد شد',
+      life: 3500,
+    })
+    await fetchInquiry()
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err?.response?.data?.message || err?.message || 'تصمیم‌گیری روی پیشنهاد انجام نشد', life: 3500 })
+  } finally {
+    decidingResponseId.value = null
   }
 }
 
@@ -357,6 +417,13 @@ function formatPrice(price) {
             </div>
           </div>
 
+          <!-- Sealed response privacy -->
+          <div class="detail-section" v-if="inquiry.responsesHidden">
+            <h2>پاسخ‌ها</h2>
+            <p class="description-text">پیشنهادها تا پایان مهلت پاسخ یا بازکردن مجاز پاکت‌ها محرمانه می‌مانند.</p>
+            <Button v-if="canRevealResponses" label="بازکردن پاکت پیشنهادها" icon="pi pi-lock-open" :loading="savingResponse" @click="revealResponses" />
+          </div>
+
           <!-- Responses Section -->
           <div class="detail-section" v-if="inquiry.responses?.length">
             <h2>پاسخ‌ها <span class="count-badge">{{ inquiry.responses.length }}</span></h2>
@@ -372,6 +439,10 @@ function formatPrice(price) {
                     <Button v-if="canEditResponse(response)" label="ویرایش" icon="pi pi-pencil" size="small" text @click="openEditDialog(response)" />
                     <Button v-if="canEditResponse(response)" label="افزودن فایل" icon="pi pi-paperclip" size="small" text :loading="uploadingResponseId === response.id" @click="triggerUpload(response)" />
                     <Button v-if="canWithdrawResponse(response)" label="انصراف" icon="pi pi-times-circle" size="small" text severity="danger" @click="confirmWithdraw(response)" />
+                  </div>
+                  <div class="response-actions response-decision-actions" v-if="canDecideResponse(response)">
+                    <Button label="انتخاب پیشنهاد" icon="pi pi-check" size="small" severity="success" :loading="decidingResponseId === response.id" @click="confirmDecision(response, 'SELECTED')" />
+                    <Button label="رد پیشنهاد" icon="pi pi-times" size="small" severity="danger" outlined :loading="decidingResponseId === response.id" @click="confirmDecision(response, 'REJECTED')" />
                   </div>
                 </div>
                 <DataTable :value="response.items || []" responsiveLayout="scroll" size="small">

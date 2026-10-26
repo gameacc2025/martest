@@ -222,6 +222,7 @@
             </label>
             <p v-if="inquiryError" class="dialog-error" role="alert">{{ inquiryError }}</p>
             <p v-if="inquirySuccess" class="dialog-success" role="status">{{ inquirySuccess }}</p>
+            <Button v-if="inquirySuccess" label="مشاهده استعلام‌های من" icon="pi pi-list" text @click="router.push('/my-inquiries')" />
             <div class="dialog-actions">
               <Button :label="inquirySuccess ? 'بستن' : 'انصراف'" severity="secondary" outlined @click="inquiryDialogOpen = false" />
               <Button v-if="!inquirySuccess" label="ثبت استعلام" icon="pi pi-send" :loading="inquirySubmitting" @click="submitInquiry" />
@@ -506,7 +507,7 @@ const submitInquiry = async () => {
     inquiryQuantity.value = 1
     inquiryDescription.value = ''
   } catch (err) {
-    inquiryError.value = err?.response?.data?.message || err?.message || 'ثبت استعلام انجام نشد. لطفاً دسترسی حساب را بررسی کنید.'
+    inquiryError.value = err?.response?.data?.message || err?.response?.data?.error?.message || err?.serverMessage || err?.message || 'ثبت استعلام انجام نشد. لطفاً دوباره تلاش کنید.'
   } finally {
     inquirySubmitting.value = false
   }
