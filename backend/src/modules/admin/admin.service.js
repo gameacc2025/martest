@@ -257,6 +257,7 @@ async function createInquiryPlan(data) {
 }
 
 async function listInquirySubscriptions() {
+  await prisma.inquirySubscription.updateMany({ where: { status: 'ACTIVE', endsAt: { lte: new Date() } }, data: { status: 'EXPIRED' } });
   return prisma.inquirySubscription.findMany({
     take: 100,
     orderBy: { createdAt: 'desc' },
@@ -324,4 +325,18 @@ async function activatePendingInquirySubscription(subscriptionId, adminUserId, n
   });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder, getInquiryMonetizationSettings, updateInquiryMonetizationSettings, listInquiryPlans, createInquiryPlan, listInquirySubscriptions, grantInquirySubscription, activatePendingInquirySubscription };
+
+async function rejectPendingInquirySubscription(subscriptionId, adminUserId, notes) {
+  const id = Number(subscriptionId);
+  if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه اشتراک معتبر نیست.', 400, true, 'INVALID_SUBSCRIPTION_ID');
+  const pending = await prisma.inquirySubscription.findUnique({ where: { id }, select: { id: true, status: true, notes: true } });
+  if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
+  if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار بررسی قابل رد هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+  return prisma.inquirySubscription.update({
+    where: { id },
+    data: { status: 'CANCELLED', activatedBy: Number(adminUserId), notes: [pending.notes, 'درخواست پرداخت توسط مدیر رد شد.', notes].filter(Boolean).join(' | ').slice(0, 2000) },
+    include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
+  });
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder, getInquiryMonetizationSettings, updateInquiryMonetizationSettings, listInquiryPlans, createInquiryPlan, listInquirySubscriptions, grantInquirySubscription, activatePendingInquirySubscription, rejectPendingInquirySubscription };
