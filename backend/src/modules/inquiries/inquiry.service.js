@@ -313,6 +313,9 @@ async function removeStoredAttachment(url) {
 function assertCanReadResponses(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   if (isInquiryBuyer(inquiry, caller) || isStaffWithPermission(caller, 'leads.read', 'inquiries.read')) return;
+  if (!caller?.companyId && caller?.accessType !== 'CUSTOMER') {
+    throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
+  }
 
   const callerCompanyId = Number(caller?.companyId);
   const ownsRequestedProduct = Number.isInteger(callerCompanyId) && callerCompanyId > 0
@@ -353,7 +356,7 @@ function shapeInquiryForCaller(inquiry, caller) {
     result.responsesHidden = true;
   } else {
     let visibleResponses = responses;
-    if (!isBuyer && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+    if (!isBuyer && !isStaff) {
       visibleResponses = responses.filter((response) => Number(response.companyId) === callerCompanyId);
     }
 
