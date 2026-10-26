@@ -53,7 +53,7 @@
               <Button v-if="canPublishProduct && ['APPROVED', 'HIDDEN'].includes(data.status)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
               <Button v-if="canHideProduct && data.status === 'PUBLISHED'" icon="pi pi-eye-slash" severity="secondary" rounded text v-tooltip.top="'مخفی کردن از سایت'" :loading="hidingId === data.id" @click="hideProduct(data)" />
               <Button v-if="canArchiveProduct && ['DRAFT', 'REJECTED', 'APPROVED', 'PUBLISHED', 'HIDDEN'].includes(data.status)" icon="pi pi-folder" severity="secondary" rounded text v-tooltip.top="'بایگانی محصول'" :loading="archivingId === data.id" @click="archiveProduct(data)" />
-              <Button v-if="canRestoreProduct && ['PENDING_REVIEW', 'APPROVED', 'REJECTED', 'HIDDEN', 'ARCHIVED'].includes(data.status)" icon="pi pi-replay" severity="warn" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" :loading="restoringId === data.id" @click="restoreProductToDraft(data)" />
+              <Button v-if="canRestoreProduct && ['PENDING_REVIEW', 'APPROVED', 'REJECTED', 'HIDDEN', 'ARCHIVED'].includes(data.status)" icon="pi pi-replay" severity="warning" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" :loading="restoringId === data.id" @click="restoreProductToDraft(data)" />
               <Button v-if="canCreateProduct" icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
               <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
               <Button v-if="canDeleteProduct" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
@@ -305,23 +305,6 @@ async function saveProduct() {
     await fetchProducts()
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در ذخیره محصول', life: 3000 })
-  }
-}
-
-async function submitForReview(product) {
-  try {
-    await productsApi.submitReview(product.id)
-    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'محصول برای بررسی ارسال شد', life: 3000 })
-    await fetchProducts(pagination.value.page)
-  } catch (err) {
-    // The API returns the specific missing requirements in error.details
-    // (falls back to errors / message for older shapes).
-    const body = err.response?.data?.error || err.response?.data || {}
-    const reasons = body.details || body.errors
-    const detail = Array.isArray(reasons) && reasons.length
-      ? reasons.join('؛ ')
-      : body.message || err.message || 'محصول آماده ارسال برای بررسی نیست'
-    toast.add({ severity: 'error', summary: 'محصول آماده ارسال نیست', detail, life: 7000 })
   }
 }
 
