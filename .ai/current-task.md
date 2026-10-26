@@ -18,6 +18,15 @@
 - **Source commit:** `74598683d26929380418adf876fbb3da00ba9d53`.
 - **Open consideration:** Reference image includes a dedicated inquiry flow; current page has cart actions. No unverified inquiry workflow was invented.
 - **Next:** User syncs `main` and visually checks desktop/mobile.
+
+## Active task — PRODUCT-DETAILS-ACTIONS-PRICE-CHART-2026-10-26-01
+- **Status:** IN_PROGRESS.
+- **Goal:** Rework ProductDetails actions, category placement, sidebar tags, and six-month price view.
+- **Scope:** `apps/website/src/pages/public/ProductDetails.vue`, worklog/handoff.
+- **Plan:** Gate inquiry icon with auth + `inquiries.create`/`leads.create`; use existing inquiry API; move wishlist icon beside price; add price-history dialog using only actual retained price-tier timestamps; show primary category as badge inline with title; move any returned product tags to sidebar bottom.
+- **Verification:** GitHub Actions test/build. Browser visual test NOT AVAILABLE in remote-only session.
+- **Caveat:** No immutable price-history model exists; never synthesize missing prices.
+
 ## Completed — Notification inbox fixes and bulk actions
 
 - **Status:** Earlier inbox actions are implemented; follow-up for independent folder counters and double-click-to-read has been committed to `main`; CI pending.
