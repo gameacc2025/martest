@@ -1240,6 +1240,11 @@
 
 `GET /api/v1/products` is the public catalog endpoint. It always returns only products whose status is `PUBLISHED` and visibility is `PUBLIC`; query parameters cannot override that restriction, including when a signed-in STAFF or COMPANY user calls the public route.
 
+**Product management reads and audit endpoints:** `GET /api/v1/products/my-products`, `GET /api/v1/products/:id/manage`, `GET /api/v1/products/:id/history`, and `GET /api/v1/products/:id/activity` require a signed-in STAFF or COMPANY access profile and the `products.read` permission (SUPER_ADMIN bypasses the guards). COMPANY callers are restricted to their own company; a cross-company product ID returns 404. Authorized STAFF moderators can list and inspect products across companies and lifecycle states through management routes. Audit service functions independently enforce `products.read` and company ownership so they remain protected even when called outside the HTTP route.
+
+The public `GET /api/v1/products` and `GET /api/v1/products/:id` routes remain public-catalog reads and must not be used for moderation: they expose only `PUBLISHED` + `PUBLIC` products. The public list remains clamped to those values even when a signed-in session exists.
+
+
 Supported optional query parameters:
 
 | Parameter | Behavior |
