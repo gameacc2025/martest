@@ -998,6 +998,37 @@ test('deletePriceTier: crossing the review threshold updates status and notifies
   assert.equal(calls['notification.createMany'].length > 0, true);
 });
 
+test('price tier creation records an immutable price snapshot', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10 });
+  await service.addPriceTier(1, { minQuantity: 1, maxQuantity: 5, price: 100, unit: 'IRR' }, companyA);
+  const snapshot = calls['productPriceSnapshot.create'].at(-1).data;
+  assert.equal(snapshot.productId, 1);
+  assert.equal(snapshot.priceTierId, 99);
+  assert.equal(snapshot.price, 100);
+  assert.equal(snapshot.action, 'CREATE');
+});
+
+test('price tier update records a snapshot only for a changed tier', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1 });
+  fx.existingTier = { id: 5, minQuantity: 1, maxQuantity: null, price: 100, unit: 'IRR' };
+  await service.updatePriceTier(1, 5, { price: 150 }, companyA);
+  assert.equal(calls['productPriceSnapshot.create'].at(-1).data.action, 'UPDATE');
+  assert.equal(calls['productPriceSnapshot.create'].at(-1).data.price, 150);
+});
+
+test('price tier deletion records the deleted tier value', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, minQuantity: 1, maxQuantity: null, price: 100, unit: 'IRR' };
+  await service.deletePriceTier(1, 5, companyA);
+  const snapshot = calls['productPriceSnapshot.create'].at(-1).data;
+  assert.equal(snapshot.action, 'DELETE');
+  assert.equal(snapshot.priceTierId, 5);
+  assert.equal(snapshot.price, 100);
+});
+
 test('upsertPrice: delegates to addPriceTier', async () => {
   fx.product = draftProduct({ companyId: 10 });
   await service.upsertPrice(1, { minQuantity: 1, price: 100 }, companyA);
