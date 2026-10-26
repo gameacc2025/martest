@@ -190,6 +190,7 @@ onMounted(async () => {
           <h1>استعلام‌های من</h1>
           <p class="page-description">درخواست‌های قیمت، وضعیت بررسی و پیشنهادهای تأمین‌کنندگان را پیگیری کنید.</p>
         </div>
+        <Button label="اشتراک استعلام" icon="pi pi-wallet" severity="primary" outlined @click="router.push({ name: 'inquiry-subscription' })" />
         <Button v-if="isDetail" label="بازگشت به فهرست" icon="pi pi-arrow-right" severity="secondary" outlined @click="backToList" />
         <Button v-else label="به‌روزرسانی" icon="pi pi-refresh" severity="secondary" outlined :loading="loadingList" @click="refresh" />
       </header>
