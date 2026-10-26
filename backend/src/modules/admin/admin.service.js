@@ -373,7 +373,6 @@ async function activatePendingInquirySubscription(subscriptionId, adminUserId, n
     }
     pending = await tx.inquirySubscription.findUnique({ where: { id }, include: { plan: true } });
     if (!pending || pending.status !== 'PENDING_PAYMENT') throw new AppError('وضعیت درخواست تغییر کرده است؛ فهرست را تازه‌سازی کنید.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
-    if (!pending.plan.isActive) throw new AppError('طرح این اشتراک غیرفعال شده است.', 409, true, 'SUBSCRIPTION_PLAN_INACTIVE');
 
     const ownerFilter = pending.companyId ? { companyId: pending.companyId } : { userId: pending.userId };
     const active = await tx.inquirySubscription.findFirst({
