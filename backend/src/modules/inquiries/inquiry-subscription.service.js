@@ -92,7 +92,7 @@ async function consumeUsage({ ownerType, ownerId, usageType, referenceType = nul
 
 async function getQuotaSummary(ownerType, ownerId, client = prisma, now = new Date()) {
   const enforced = await enforcementEnabled(client);
-  const capabilities = { smsConfigured: Boolean(process.env.INQUIRY_SMS_GATEWAY_URL && process.env.INQUIRY_SMS_GATEWAY_TOKEN) };
+  const capabilities = { smsConfigured: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM_NUMBER) };
   // SMS is a separately metered paid service, so its allowance remains visible
   // and enforced even while inquiry/response quota enforcement is in rollout.
   if (!enforced && !capabilities.smsConfigured) return { enforced: false, subscription: null, quotas: null, capabilities };
