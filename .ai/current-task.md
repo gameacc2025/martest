@@ -1,14 +1,42 @@
 # Current Task / Agent Handoff
 
-## PRODUCT-ACCESS-AUDIT-2026-10-26-01 — Product security, lifecycle, and retail price chart history
+## REPO-HARDENING-TASKS-3-7 — Documentation, architecture, runtime, browser smoke, and release readiness
 
-- **Status:** IMPLEMENTED; latest CI run is GREEN. Database deployment, Docker/Compose runtime, and browser E2E/visual checks remain unverified because this session only has remote repository/CI access.
-- **Canonical branch:** `main`.
-- **User authorization:** Full implementation of Task 1 (STAFF/COMPANY/CUSTOMER access control and tenant ownership) and Task 2 (product lifecycle/pricing/specifications/media/publication workflow), including tests and docs. No follow-up approval is required for in-scope fixes.
-- **Security/lifecycle review:** Product routes use central access-type and permission guards; service paths independently enforce company ownership and operation permissions; existing tests cover tenant isolation, status transitions, featured permission, product media/document ownership, and CUSTOMER misuse of company claims. Soft deletion was improved to atomically write activity and status audit records.
-- **Price-history requirement:** Persist only retail tier history (`minQuantity = 1`) in existing `ProductPriceSnapshot`. Snapshot writes share the price mutation transaction. Wholesale changes and metadata-only edits do not add chart points; replacing a retail row in a full edit produces a single net price-change point rather than duplicate DELETE/CREATE points. The public API returns the complete stored series in ascending timestamp order for currently PUBLISHED + PUBLIC products. The product detail page labels the chart as retail-only and prioritizes retail price in the headline display. Historical prices predating snapshot activation are not fabricated.
-- **Key implementation commits:** `fcfdf919577affcd590b55ca423e1b3d2f5de6d1`, `03da519bf207f6bc9fa376fb377b8a37b9981ce9`, `5f3fef964ae838be41ac63db2c160ae6808b400a`, `cff8b70da5670b5af3897de2622dd08e3270a9e1`, `64358664d517316a4ef303db24c80be0263bfb4c`, `d14728e8baf7872d5d21eccc41c2809e3e0ee3f0`, `9b56e765ed3ce209de0615ae64399a94545a5a75`, `35ca58c27c3215c8b45c82351cb1233a1fb542a5`, `1bc55a152264c0a8e2410f17c8561fb0e08b3883`, `e588f47068d8639ba3657fc2b62d4488e48349a2`.
-- **Verified CI:** [Run 40312425822](https://github.com/gameacc2025/martest/actions/runs/40312425822) passed on `e588f47068d8639ba3657fc2b62d4488e48349a2`, including frontend/shared tests, backend tests, Prisma Client generation, and production builds for all three frontend apps. An earlier test run exposed one incorrect unit-test mock for unpublished products; the mock was corrected, and the later full CI run passed.
-- **Docs:** `docs/API_DOCUMENTATION.md`, `docs/DATABASE_DOCUMENTATION.md`, and this handoff updated.
-- **Remaining verification:** Apply Prisma migrations to an isolated PostgreSQL database; verify Docker/Compose startup and health; run browser workflows for product creation/edit/review/publish, retail/wholesale pricing, inquiry ownership, media, and chart display. Do not claim these passed without executing them.
-- **Do not expand scope:** Do not implement cart/checkout/payment/CRM in this task.
+- **Status:** IMPLEMENTED ON WORKING BRANCH; automated CI/runtime verification is running. Do not mark release-ready until the latest workflow runs finish green.
+- **Branch:** `docs-runtime-e2e-hardening`
+- **Base branch:** `main` at `98cdbb1390e6fff50099e14fd64b277db7876974`.
+- **User authorization:** User explicitly authorized completing Tasks 3–7 autonomously without further questions.
+
+### Task 3 — Documentation
+- Rewrote `docs/API_DOCUMENTATION.md` around actual `/api/v1` route registration and current route modules; removed legacy `/api`, old role names, and universal response-shape assumptions.
+- Rewrote `docs/DATABASE_DOCUMENTATION.md` from current Prisma models and migrations, including AccessProfile/RBAC, inquiry/notification models, ProductPriceTier and retail-only ProductPriceSnapshot semantics.
+- Rewrote `docs/FRONTEND_DOCUMENTATION.md` for `apps/website`, `apps/company`, `apps/admin` and `packages/*`.
+- Rewrote `docs/DOCKER_DEPLOYMENT.md` around current Compose services, Node 22, PostgreSQL 18.4 image, ports 3000–3003, nginx and required env files.
+- Corrected `docs/role-access-matrix.md` and `docs/ARCHITECTURE_DECISIONS.md` to reflect AccessProfile types and actual inquiry route behavior; refreshed `docs/README.md` and root `.env.example`.
+- Replaced old Testing guide with current unit/build/runtime/browser coverage and explicitly listed what's not verified.
+
+### Task 4 — Architecture graph
+- Added `scripts/generate-architecture-graph.mjs` and `docs/architecture/DEPENDENCY_GRAPH.generated.mmd`.
+- Added `docs/architecture/README.md` describing source-of-truth files and repeatable `--write` / `--check` workflow.
+- Runtime CI has confirmed the graph validation step passed on a recent commit.
+
+### Task 5 — Database and Compose runtime
+- Added `.github/workflows/runtime-validation.yml`: validates Compose config, builds and starts all services with a disposable PostgreSQL volume, waits for backend and all panel health endpoints, then checks `prisma migrate status`.
+- This is intended to verify migrations against a real PostgreSQL container, not just `prisma generate`. Final result is pending in GitHub Actions; do not claim pass until latest run concludes green.
+
+### Task 6 — Browser tests
+- Added isolated Playwright config and tests under `e2e/`.
+- Coverage currently is browser smoke, not full business acceptance: all three SPA entrypoints render at desktop/mobile viewport; no uncaught initial JS errors; each panel's nginx proxy forwards an unauthenticated protected API request and receives 401.
+- Successful login/logout, role-specific denial, product approval/publication, inquiry ownership/response, notification folder/count behavior, and full visual parity still require dedicated fixtures/assertions. Do not describe those flows as covered.
+
+### Task 7 — Optimization and delivery
+- Fixed the ineffective dynamic import warning in `apps/admin/src/router/index.js` by using the already shared auth store as a static import.
+- Admin bundle size warning still needs review after the latest build logs; do not silence it by merely increasing the warning threshold.
+- Real SMTP delivery is not verified: no provider credentials/recipient are available in this workflow. SMS remains unimplemented in the current dispatch service.
+- CI workflow now also runs on this branch. Latest CI/runtime workflow results are pending; see Actions for this branch.
+
+### Required final checks
+1. Confirm latest CI and Runtime Validation runs conclude successfully.
+2. Fix any migration, Compose, Playwright, unit-test, or build failure revealed by those runs.
+3. Re-fetch final branch HEAD and compare with `main`; create/merge a PR only after green checks.
+4. Update this file and `.ai/WORKLOG.md` with exact run IDs, final commit, and truthful verification boundaries.
