@@ -1196,11 +1196,20 @@ async function deleteResponseAttachment(inquiryId, responseId, attachmentId, cal
 async function getInquiryStats(caller) {
   const superAdmin = isSuperAdmin(caller);
   const companyId = Number(caller?.companyId) || null;
-  if (!superAdmin) ensureCompanyId(companyId);
+  const customerUserId = Number(caller?.id) || null;
+  const isCustomer = caller?.accessType === 'CUSTOMER' && !superAdmin;
+  if (!superAdmin && !isCustomer) ensureCompanyId(companyId);
+  if (isCustomer && !customerUserId) {
+    throw { statusCode: 401, code: 'UNAUTHORIZED', message: 'Authenticated user is required.' };
+  }
 
-  const sentWhere = superAdmin ? {} : { companyId };
-  const receivedWhere = superAdmin ? {} : { items: { some: { product: { companyId } } } };
-  const responsesWhere = superAdmin ? {} : { companyId };
+  const sentWhere = superAdmin ? {} : isCustomer ? { buyerUserId: customerUserId } : { companyId };
+  const receivedWhere = superAdmin ? {} : isCustomer
+    ? { id: { in: [] } }
+    : { items: { some: { product: { companyId } } } };
+  const responsesWhere = superAdmin ? {} : isCustomer
+    ? { inquiry: { buyerUserId: customerUserId } }
+    : { companyId };
 
   const groupToMap = (grouped) =>
     grouped.reduce((acc, row) => {
@@ -1245,7 +1254,7 @@ async function getInquiryStats(caller) {
         status: true,
         createdAt: true,
         company: { select: { id: true, name: true } },
-        inquiry: { select: { id: true, title: true } },
+        inquiry: { select: { id: true, title: true, status: true, visibilityMode: true, revealedAt: true, responseDeadline: true } },
         _count: { select: { items: true } },
       },
     }),
@@ -1276,8 +1285,21 @@ async function getInquiryStats(caller) {
       selected,
       successRate,
     },
-    recentInquiries,
-    recentResponses,
+    recentInquiries: recentInquiries.map((inquiry) => {
+      const safe = { ...inquiry };
+      delete safe.buyerUserId;
+      return safe;
+    }),
+    recentResponses: isCustomer
+      ? recentResponses.filter((response) => {
+          const inquiry = response.inquiry || {};
+          if (['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) return false;
+          if (inquiry.visibilityMode === 'ANONYMOUS_SEALED') {
+            response.company = { name: 'پیشنهاددهنده' };
+          }
+          return true;
+        })
+      : recentResponses,
   };
 }
 
