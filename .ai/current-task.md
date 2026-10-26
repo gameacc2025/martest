@@ -1,12 +1,14 @@
 # Current Task / Agent Handoff
 
-## Active task — PRODUCT-AUTH-FEATURED-STAFF-2026-10-26-01
-- **Status:** IMPLEMENTED; CI verification pending.
+## Completed task — PRODUCT-AUTH-FEATURED-STAFF-2026-10-26-01
+- **Status:** DONE; verified by GitHub Actions.
 - **Approved policy:** `isFeatured` may be set/changed only by SUPER_ADMIN or a caller with `products.feature`. STAFF cross-company writes require the exact operation permission; COMPANY ownership is never bypassed.
-- **Implementation:** Service-level STAFF permission guards cover create/update/delete, price tiers, image/document operations, and lifecycle actions. STAFF product creation requires explicit `companyId`. Company/Admin forms hide the featured control and omit the field without permission. API and architectural decision docs updated.
-- **Regression coverage:** Seven backend tests added for STAFF create/update/delete/media scope, featured creation/update, and STAFF-only moderation actions.
-- **Verification:** Remote source edits only; local tests/builds NOT RUN. Must inspect GitHub Actions for current main HEAD before closing issues.
-- **Next:** Verify CI, fix any failures, then close issues #5/#6 and master audit #2 if all checks pass.
+- **Implementation:** Service-level STAFF permission guards cover create/update/delete, price tiers, image/document operations, and lifecycle actions. STAFF-only moderation and caller access type are checked at service level. STAFF product creation requires explicit `companyId`. Company/Admin forms hide the featured control and omit the field without permission. Admin cross-company actions match the granular permission contract; cross-company creation UI requires both `products.create` and `companies.read`.
+- **Regression coverage:** 12 backend tests added for STAFF create/update/delete/price/media scope, featured creation/update with and without permission, SUPER_ADMIN bypass, and access-type/moderation enforcement.
+- **Verification:** [CI run 40277836441](https://github.com/gameacc2025/martest/actions/runs/40277836441) passed: frontend/shared 19/19 test files; backend 1196/1196; Prisma generation; Website, Company, Admin production builds. Local tests/builds NOT RUN.
+- **Commits:** Service `4b0f9720f17bd60ef75473de7be9c72c2b8c1f6e` was the verified code/docs head; subsequent issue-state and worklog/handoff changes are docs/metadata-only.
+- **Issues:** #5 and #6 resolved; master audit #2 closed after verification.
+- **Next:** No remaining work for this approved authorization scope.
 
 
 ## Completed — Notification inbox fixes and bulk actions
