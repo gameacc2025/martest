@@ -165,7 +165,7 @@ async function productRoutes(fastify) {
   // management listings must NOT use these routes — they use the authenticated
   // GET /my-products endpoint below so they can see every status.
   fastify.get('/', ctrl.list);
-  fastify.get('/:id/price-history', { schema: { params: idParamSchema, summary: 'Get six-month public product price history', tags: ['Products'] } }, ctrl.getPriceHistory);
+  fastify.get('/:id/price-history', { schema: { params: idParamSchema, summary: 'Get complete public retail price history for charting', tags: ['Products'] } }, ctrl.getPriceHistory);
   fastify.get('/:id', { schema: { params: idParamSchema } }, ctrl.getOne);
 
   // ── Authenticated routes ───────────────────────────────────
