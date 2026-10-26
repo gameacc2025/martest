@@ -465,6 +465,15 @@ test('changeProductStatus: STAFF can republish a previously approved HIDDEN prod
   assert.equal(updateArgs.data.status, 'PUBLISHED');
 });
 
+test('changeProductStatus: STAFF with products.publish can publish across companies', async () => {
+  const staffPublisher = { id: 5, roles: ['PRODUCT_MODERATOR'], accessType: 'STAFF', permissions: ['products.publish'] };
+  for (const status of ['APPROVED', 'HIDDEN']) {
+    fx.product = draftProduct({ companyId: 10, status });
+    await service.changeProductStatus(1, 'publish', staffPublisher);
+    assert.equal(calls['product.update'].at(-1).data.status, 'PUBLISHED');
+  }
+});
+
 test('changeProductStatus: reject requires a non-empty comment', async () => {
   fx.product = draftProduct({ status: 'PENDING_REVIEW' });
   await assert.rejects(
