@@ -154,6 +154,18 @@ export const endpoints = {
     get: (id) => `/uploads/${id}`,
     delete: (id) => `/uploads/${id}`
   },
+  // Inquiry subscription monetization
+  inquirySubscriptions: {
+    plans: '/inquiries/plans',
+    mine: '/inquiries/subscription/me',
+    request: '/inquiries/subscription',
+    quota: '/inquiries/quota',
+    adminSettings: '/admin/inquiry-monetization/settings',
+    adminPlans: '/admin/inquiry-plans',
+    adminSubscriptions: '/admin/inquiry-subscriptions',
+    activate: (id) => `/admin/inquiry-subscriptions/${id}/activate`,
+    grant: '/admin/inquiry-subscriptions/grant',
+  },
   // Inquiries (RFQ)
   inquiries: {
     create: '/inquiries',
