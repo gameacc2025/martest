@@ -155,10 +155,11 @@ const auth = useAuthStore()
 // The company filter/selector is only meaningful (and permitted) for
 // SUPER_ADMIN. Company users manage their own products, so the /companies
 // list endpoint is not fetched for them (it would 403).
-const canChooseCompany = computed(() => auth.isSuperAdmin)
-const canCreateProduct = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.create') && Boolean(auth.companyId)))
-const canEditProducts = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.update') && Boolean(auth.companyId)))
-const canDeleteProducts = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.delete') && Boolean(auth.companyId)))
+const isStaffContext = computed(() => auth.accessProfile?.type === 'STAFF')
+const canChooseCompany = computed(() => auth.isSuperAdmin || (isStaffContext.value && auth.hasPermission('products.create') && auth.hasPermission('companies.read')))
+const canCreateProduct = computed(() => auth.isSuperAdmin || (isStaffContext.value && auth.hasPermission('products.create') && auth.hasPermission('companies.read')))
+const canEditProducts = computed(() => auth.isSuperAdmin || (isStaffContext.value && auth.hasPermission('products.update')))
+const canDeleteProducts = computed(() => auth.isSuperAdmin || (isStaffContext.value && auth.hasPermission('products.delete')))
 const canApproveProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.approve'))
 const canRejectProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.reject'))
 const canPublishProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.publish'))
@@ -168,17 +169,17 @@ const canRestoreProduct = computed(() => auth.isSuperAdmin || auth.hasPermission
 
 function canEditProduct(product) {
   return auth.isSuperAdmin
-    || (canEditProducts.value && Number(auth.companyId) === Number(product.companyId))
+    || (canEditProducts.value && (isStaffContext.value || Number(auth.companyId) === Number(product.companyId)))
 }
 
 function canDeleteProduct(product) {
   return auth.isSuperAdmin
-    || (canDeleteProducts.value && Number(auth.companyId) === Number(product.companyId))
+    || (canDeleteProducts.value && (isStaffContext.value || Number(auth.companyId) === Number(product.companyId)))
 }
 
 function canDuplicateProduct(product) {
   return auth.isSuperAdmin
-    || (canCreateProduct.value && Number(auth.companyId) === Number(product.companyId))
+    || (canCreateProduct.value && (isStaffContext.value || Number(auth.companyId) === Number(product.companyId)))
 }
 
 
