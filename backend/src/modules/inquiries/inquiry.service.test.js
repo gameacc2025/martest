@@ -1534,6 +1534,7 @@ test('sendInquiryMessage: blocks companies that have not responded', async () =>
 test('listInquiryMessages: limits company results to messages involving that company', async () => {
   resetMocks();
   nextFindUnique = { id: 1, companyId: null, buyerUserId: 10 };
+  fx.response = { id: 90 };
   nextMessages = [{ id: 1, senderCompanyId: 5, recipientUserId: 10 }];
   await inquiryService.listInquiryMessages(1, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.read'] });
   assert.deepEqual(calls['inquiryMessage.findMany'][0].where.OR, [{ senderCompanyId: 5 }, { recipientCompanyId: 5 }]);
