@@ -314,3 +314,8 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Issues:** #4 tracks lifecycle UI work (implemented); #5 tracks `isFeatured` permission enforcement and remains open pending authorization approval; #6 tracks broader STAFF update/delete/price/media write scope (publish subcase fixed, other write paths remain open pending explicit decision).
 - **Verification:** GitHub Actions run `40271764110` for commit `670e1071712069ff4adbd66b5542799423a1e202` passed: frontend/shared tests passed; backend 1179/1179 passed; Prisma Client generation passed; Website/Company/Admin production builds passed.
 - **Next:** Check CI for the latest documentation/handoff commit; continue the remaining product audit. Do not implement issue #5 or broaden STAFF write access without explicit approval.
+
+### Final lifecycle UI verification — 2026-10-26
+- Admin create/edit/copy/delete controls are now scoped to the caller's permission and, for non-SUPER_ADMIN callers, the product's matching companyId. This avoids showing actions that the service would reject for a different tenant.
+- Latest code HEAD `3b541c3255532a8c14c24e7de0bc7d163e47265a` passed GitHub Actions run [40271919142](https://github.com/gameacc2025/martest/actions/runs/40271919142): frontend/shared tests passed, backend 1179/1179, Prisma Client generation passed, and Website/Company/Admin builds passed.
+- Issue #4 lifecycle UI work is implemented and verified. Remaining open approval-sensitive findings are #5 (`isFeatured` permission enforcement) and #6 (broader STAFF update/delete/price/media write authorization; STAFF publish subcase is already fixed).
