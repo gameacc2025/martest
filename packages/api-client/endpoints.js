@@ -161,6 +161,7 @@ export const endpoints = {
     stats: '/inquiries/stats',
     getById: (id) => `/inquiries/${id}`,
     changeStatus: (id) => `/inquiries/${id}/status`,
+    revealResponses: (id) => `/inquiries/${id}/reveal`,
     listItems: (id) => `/inquiries/${id}/items`,
     addItem: (id) => `/inquiries/${id}/items`,
     updateItem: (id, itemId) => `/inquiries/${id}/items/${itemId}`,
