@@ -12,7 +12,7 @@ const packages = listDirs('packages').map((dir) => ({ dir, pkg: readJson(path.jo
 const appSource = fs.readFileSync(path.join(root, 'backend/src/app.js'), 'utf8');
 const modulesDir = path.join(root, 'backend/src/modules');
 const modules = fs.readdirSync(modulesDir, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(modulesDir, entry.name, entry.name === 'specification-library' ? 'specification-library.routes.js' : entry.name.replace(/s$/, '') + '.routes.js')))
+  .filter((entry) => entry.isDirectory() && fs.readdirSync(path.join(modulesDir, entry.name)).some((file) => file.endsWith('.routes.js')))
   .map((entry) => entry.name)
   .filter((name) => appSource.includes(`./modules/${name}/`))
   .sort();
