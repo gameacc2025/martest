@@ -484,3 +484,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Rollout safety:** `inquiry.subscription_enforcement` defaults OFF. Configure plans and grant/approve subscriptions before enabling. SMS remains separately enforced.
 - **Verification:** CI backend/frontend/shared test-and-build passed on `f505e910ab7687a0f177556efc97b84a6d8515e1`; Prisma migration validation also passed on that commit. Live Twilio delivery and browser-level manual QA were not performed.
 - **Production follow-up:** Connect the business-selected payment gateway; verify real credentials in staging; perform end-to-end quota, SMS failure/retry, and permissions testing; agree initial plan prices and quota amounts.
+
+
+### RFQ-MONETIZATION-01 implementation update — 2026-10-26
+
+- **Branch / PR:** `feat/rfq-monetization`, draft PR #13: https://github.com/gameacc2025/martest/pull/13
+- **Implemented:** Period-based plan/subscription/usage ledger; backend quota checks for inquiry creation, supplier response, private inquiry messaging and paid SMS; buyer/supplier participant authorization; message read timestamps; SMS opt-in outbox delivery through Twilio; company plan/quota/request UI; admin plan create/update/enable/disable and subscription activation/rejection UI; race-safe manual payment review and subscription state changes; elapsed subscription expiry.
+- **SMS configuration:** `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`. SMS is queued only when the recipient opted in and the sender has remaining SMS quota. Live provider delivery has not been exercised.
+- **Payment limitation:** No payment gateway/provider or credentials are present in this repository. The current request flow is pending/manual verification; an admin activation is not a payment gateway callback. A real online checkout and signed/verified provider callback remain required before production monetization is complete.
+- **Rollout:** `inquiry.subscription_enforcement` defaults OFF for inquiry/response/internal-message quotas. SMS remains separately metered and requires an active subscription/allowance when requested.
+- **Verification:** GitHub CI passed at `f505e910` (backend tests and frontend builds); database migration validation passed at the same head. No live payment or Twilio acceptance test was performed.
+- **Follow-up:** Choose and configure the actual payment provider, implement payment intent/redirect and verified callback handling, then run staging acceptance tests before merging or enabling enforcement in production.
