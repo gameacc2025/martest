@@ -30,7 +30,7 @@ const hit = {};
 const trivialController = {};
 const controllerMethods = [
   'list', 'stats', 'getById', 'create', 'update', 'listItems',
-  'changeStatus', 'addItem', 'updateItem', 'deleteItem',
+  'changeStatus', 'revealResponses', 'addItem', 'updateItem', 'deleteItem',
   'listResponses', 'submitResponse', 'updateResponse',
   'withdrawResponse', 'uploadResponseAttachment', 'deleteResponseAttachment',
 ];
@@ -249,6 +249,31 @@ test('PATCH /:id/status: STAFF with leads.update -> 200', async () => {
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.changeStatus, true);
+  await app.close();
+});
+
+test('PATCH /:id/status: CUSTOMER with inquiries.create can request own cancellation', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/inquiries/42/status',
+    headers: userHeader('CUSTOMER', ['inquiries.create']),
+    payload: { status: 'CANCELLED' },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.changeStatus, true);
+  await app.close();
+});
+
+test('POST /:id/reveal: requires inquiry read/update permission', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/inquiries/42/reveal',
+    headers: userHeader('CUSTOMER', ['inquiries.read']),
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.revealResponses, true);
   await app.close();
 });
 
