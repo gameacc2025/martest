@@ -93,6 +93,29 @@ async function adminRoutes(fastify) {
     schema: { body: inquiryPlanSchema },
   }, ctrl.createInquiryPlanCtrl);
 
+
+  fastify.patch('/inquiry-plans/:id', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    schema: {
+      params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      body: {
+        type: 'object', minProperties: 1, additionalProperties: false,
+        properties: {
+          name: { type: 'string', minLength: 1, maxLength: 100 },
+          description: { type: 'string', maxLength: 1000 },
+          durationDays: { type: 'integer', minimum: 1, maximum: 3650 },
+          price: { type: 'number', minimum: 0 },
+          currency: { type: 'string', minLength: 3, maxLength: 8 },
+          inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          internalMessagesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          smsPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          isActive: { type: 'boolean' },
+        },
+      },
+    },
+  }, ctrl.updateInquiryPlanCtrl);
+
   fastify.get('/inquiry-subscriptions', {
     onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
   }, ctrl.listInquirySubscriptionsCtrl);
