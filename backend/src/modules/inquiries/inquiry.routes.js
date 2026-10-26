@@ -202,6 +202,20 @@ async function inquiryRoutes(fastify) {
     schema: { querystring: listQuerySchema },
   }, ctrl.list);
 
+  // Plans and self-service subscription requests.
+  fastify.get('/plans', {
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
+  }, ctrl.listPlans);
+
+  fastify.get('/subscription/me', {
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.read', 'inquiries.create')],
+  }, ctrl.mySubscriptions);
+
+  fastify.post('/subscription', {
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.create')],
+    schema: { body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, paymentReference: { type: 'string', maxLength: 120 } } } },
+  }, ctrl.requestSubscription);
+
   // Current subscription and remaining RFQ quota for the caller.
   fastify.get('/quota', {
     preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
