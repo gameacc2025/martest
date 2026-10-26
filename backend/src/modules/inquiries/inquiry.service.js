@@ -1105,9 +1105,9 @@ async function listInquiryMessages(inquiryId, caller) {
     orderBy: { createdAt: 'asc' },
     take: 500,
     include: {
-      senderUser: { select: { id: true, phone: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
+      senderUser: { select: { id: true, profile: { select: { firstName: true, lastName: true } } } },
       senderCompany: { select: { id: true, name: true } },
-      recipientUser: { select: { id: true, phone: true, email: true } },
+      recipientUser: { select: { id: true } },
       recipientCompany: { select: { id: true, name: true } },
     },
   });
@@ -1182,10 +1182,10 @@ async function sendInquiryMessage(inquiryId, data, caller) {
     const createdMessage = await tx.inquiryMessage.create({
       data: { inquiryId: numericInquiryId, senderUserId, senderCompanyId, recipientUserId, recipientCompanyId, body: message },
       include: {
-        senderUser: { select: { id: true, phone: true, email: true } },
+        senderUser: { select: { id: true, profile: { select: { firstName: true, lastName: true } } } },
         senderCompany: { select: { id: true, name: true } },
-        recipientUser: { select: { id: true, phone: true, email: true } },
-        recipientCompany: { select: { id: true, name: true, phone: true } },
+        recipientUser: { select: { id: true } },
+        recipientCompany: { select: { id: true, name: true } },
       },
     });
     let smsQueued = false;
