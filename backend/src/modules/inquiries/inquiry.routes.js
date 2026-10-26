@@ -203,6 +203,10 @@ async function inquiryRoutes(fastify) {
   }, ctrl.list);
 
   // Plans and self-service subscription requests.
+  fastify.get('/subscription/payment/callback', {
+    config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
+  }, ctrl.subscriptionPaymentCallback);
+
   fastify.get('/plans', {
     preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
   }, ctrl.listPlans);
