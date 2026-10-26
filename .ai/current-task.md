@@ -37,3 +37,14 @@
 - **Scope:** Require `products.read` plus STAFF/COMPANY access type for management list/detail and history/activity; enforce company ownership in service audit queries; let authorized STAFF moderators see all product lifecycle states only through management routes while keeping public catalog clamped to `PUBLISHED` + `PUBLIC`.
 - **Evidence:** `product.routes.js` currently has no RBAC preHandlers on `/my-products`, `/:id/manage`, `/:id/history`, or `/:id/activity`; `product.service.js` does not receive a caller for audit functions and classifies STAFF without `companyId` as a public caller in listing/detail logic.
 - **Verification:** Remote GitHub edits only at present; local test/build execution unavailable unless environment changes.
+
+
+## Product authorization follow-up — 2026-10-26
+- **Status:** Implemented in source; CI verification pending.
+- Management list/detail and product history/activity routes require STAFF or COMPANY access type and `products.read` (SUPER_ADMIN bypass remains supported).
+- Audit service methods now receive the caller and enforce `products.read` plus company ownership; cross-company COMPANY reads return 404 before querying audit rows.
+- Authorized STAFF moderators can list/load pending/private products across companies via management routes, even when a `companyId` claim is present. Public list/detail behavior remains restricted to PUBLISHED + PUBLIC.
+- Added route/service regression tests and documented the contract in `docs/API_DOCUMENTATION.md`.
+- Commits: `037daf105deecd1dfeb205ca987303b6a0837e1b`, `d32c748f38f071f96f5ddc66512d500170c3984d`, `139ae28219da533e5def0a03eb0c879f0dacb6d9`, `a9edc271385a213de60e11c628cbf5cf8cf67dee`, `32b1beb4d1ed7c8549d3fb5a4575f18f05346469`, `33c23dc022d7ccc181f960ec4a47dbee93f747ee`, `1fa059e1a6aba89f463c445ec927e03a9c39b044`, `5af33260e62a1cef08c6690592f938f92eadc79f`, `42468c4c8a5913da15a55152549c371752779f0b`.
+- Verification: GitHub Actions run `40270601243` was queued at last check. Local tests/builds are NOT RUN; this session has remote GitHub file access but no working local checkout.
+- Next: Inspect the latest workflow result; resolve the existing frontend notification test blocker if it still prevents backend tests, then verify product tests and continue the remaining product audit.
