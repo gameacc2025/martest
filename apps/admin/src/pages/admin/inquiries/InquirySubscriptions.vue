@@ -102,7 +102,7 @@ async function activateSubscription(item) {
   successMessage.value = ''
   saving.value = true
   try {
-    await apiPost(endpoints.inquirySubscriptions.activate(item.id), { notes: 'پرداخت توسط مدیر بررسی و تأیید شد.' })
+    await apiPost(endpoints.inquirySubscriptions.activate(item.id), { paymentConfirmed: true, notes: 'پرداخت توسط مدیر خارج از سامانه بررسی و تأیید شد.' })
     successMessage.value = 'اشتراک با موفقیت فعال شد.'
     await loadAll()
   } catch (error) {
