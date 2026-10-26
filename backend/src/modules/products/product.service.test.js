@@ -99,6 +99,10 @@ const mockPrisma = {
   category: { findUnique: async () => fx.category },
   subcategory: { findUnique: async () => fx.subcategory },
   company: { findFirst: async () => fx.company },
+  productPriceSnapshot: {
+    create: async (args) => { recordCall('productPriceSnapshot.create', args); return { id: 501, ...args.data }; },
+    findMany: async (args) => { recordCall('productPriceSnapshot.findMany', args); return []; },
+  },
   productPriceTier: {
     findMany: async (args) => { recordCall('productPriceTier.findMany', args); return fx.priceTiers; },
     create: async (args) => { recordCall('productPriceTier.create', args); return { id: 99, ...args.data }; },
