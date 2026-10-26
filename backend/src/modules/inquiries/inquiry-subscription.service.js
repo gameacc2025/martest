@@ -34,7 +34,6 @@ async function getActiveSubscription(ownerType, ownerId, client = prisma, now = 
       status: 'ACTIVE',
       startsAt: { lte: now },
       endsAt: { gt: now },
-      plan: { is: { isActive: true } },
     },
     include: { plan: true },
     orderBy: { endsAt: 'desc' },
