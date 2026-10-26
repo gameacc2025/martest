@@ -823,10 +823,12 @@ async function updateInquiry(inquiryId, data, caller) {
     }
 
     const updateData = buildInquirySettings(data, { partial: true });
-    assertInquiryDateWindow(
-      updateData.publishDate !== undefined ? updateData.publishDate : inquiry.publishDate,
-      updateData.responseDeadline !== undefined ? updateData.responseDeadline : inquiry.responseDeadline,
-    );
+    if (data.publishDate !== undefined || data.responseDeadline !== undefined) {
+      assertInquiryDateWindow(
+        updateData.publishDate !== undefined ? updateData.publishDate : inquiry.publishDate,
+        updateData.responseDeadline !== undefined ? updateData.responseDeadline : inquiry.responseDeadline,
+      );
+    }
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
 
