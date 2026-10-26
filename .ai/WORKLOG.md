@@ -319,3 +319,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin create/edit/copy/delete controls are now scoped to the caller's permission and, for non-SUPER_ADMIN callers, the product's matching companyId. This avoids showing actions that the service would reject for a different tenant.
 - Latest code HEAD `3b541c3255532a8c14c24e7de0bc7d163e47265a` passed GitHub Actions run [40271919142](https://github.com/gameacc2025/martest/actions/runs/40271919142): frontend/shared tests passed, backend 1179/1179, Prisma Client generation passed, and Website/Company/Admin builds passed.
 - Issue #4 lifecycle UI work is implemented and verified. Remaining open approval-sensitive findings are #5 (`isFeatured` permission enforcement) and #6 (broader STAFF update/delete/price/media write authorization; STAFF publish subcase is already fixed).
+
+
+### Price deletion review policy and stored-XSS fix — 2026-10-26
+- `deletePriceTier` now follows the same post-approval edit threshold as add/update: product status/counter update, status history, activity log, and staff notification happen in the same transaction. Added threshold-crossing regression coverage.
+- Found stored-XSS risk in public ProductDetails (`v-html` on company-editable description). Since the editor is a plain textarea, changed rendering to escaped text interpolation and preserved line breaks; ProductPreviewCard already used safe interpolation. Issue #7 records the finding and fix.
+- **CI passed:** Run `40272171627` for commit `3a132bf65c6783f35231f4304d6ded82347b335f` passed frontend/shared tests, backend tests, Prisma generation, and Website/Company/Admin builds.
+- **Remaining approval-sensitive issues:** #5 `isFeatured` permission enforcement and #6 broader STAFF write scope (publish subcase already fixed). These were recorded but not implemented beyond the explicitly authorized scope.
