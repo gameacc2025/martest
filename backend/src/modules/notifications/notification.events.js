@@ -146,10 +146,10 @@ const EVENT_CATALOG = {
     label: 'انتخاب پاسخ استعلام',
     recipients: 'The company whose quote was selected by the inquiry buyer',
     channels: { IN_APP: true, EMAIL: true, SMS: false },
-    template: ({ inquiry }) => ({
+    template: ({ inquiry, response }) => ({
       title: 'پیشنهاد شما انتخاب شد',
       message: `پیشنهاد شما برای استعلام «${inquiry?.title || inquiry?.id || ''}» انتخاب شد.`,
-      data: { inquiryId: inquiry?.id },
+      data: { inquiryId: inquiry?.id, responseId: response?.id },
     }),
   },
 
@@ -158,10 +158,10 @@ const EVENT_CATALOG = {
     label: 'رد پاسخ استعلام',
     recipients: 'The company whose quote was rejected by the inquiry buyer',
     channels: { IN_APP: true, EMAIL: true, SMS: false },
-    template: ({ inquiry }) => ({
+    template: ({ inquiry, response }) => ({
       title: 'پیشنهاد شما انتخاب نشد',
       message: `پیشنهاد شما برای استعلام «${inquiry?.title || inquiry?.id || ''}» انتخاب نشد.`,
-      data: { inquiryId: inquiry?.id },
+      data: { inquiryId: inquiry?.id, responseId: response?.id },
     }),
   },
 
