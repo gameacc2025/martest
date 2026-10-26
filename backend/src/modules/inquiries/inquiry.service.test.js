@@ -512,6 +512,21 @@ test('createInquiry: CUSTOMER creates an immediately open inquiry owned by the a
   assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_PUBLISHED'));
 });
 
+test('createInquiry: rejects a response deadline that is already past', async () => {
+  resetMocks();
+  fx.products = publishedProducts(41);
+  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  await assert.rejects(
+    () => inquiryService.createInquiry({
+      title: 'Expired price request',
+      responseDeadline: new Date(Date.now() - 60_000).toISOString(),
+      items: [{ productId: 41, quantity: 1 }],
+    }, customer),
+    (err) => err.code === 'INVALID_INQUIRY_DATE_WINDOW',
+  );
+  assert.equal((calls['inquiry.create'] || []).length, 0);
+});
+
 test('createInquiry: a caller without a company is rejected', async () => {
   resetMocks();
   await assert.rejects(
