@@ -207,7 +207,13 @@ async function sendInquiryMessage() {
         ? 'پیام ثبت شد و اعلان پیامکی در صف ارسال قرار گرفت.'
         : payload?.smsSkippedReason === 'recipient_sms_opted_out'
           ? 'پیام ثبت شد؛ گیرنده دریافت پیامک را فعال نکرده است.'
-          : 'پیام با موفقیت ثبت شد.',
+          : payload?.smsSkippedReason === 'sms_quota_exceeded'
+            ? 'پیام ثبت شد؛ سهمیه پیامک شما کافی نیست یا اشتراک پیامکی فعال ندارید.'
+            : payload?.smsSkippedReason === 'sms_provider_not_configured'
+              ? 'پیام ثبت شد؛ درگاه پیامک در حال حاضر آماده نیست.'
+              : payload?.smsSkippedReason === 'recipient_phone_missing' || payload?.smsSkippedReason === 'recipient_account_missing'
+                ? 'پیام ثبت شد؛ اطلاعات تماس گیرنده برای ارسال پیامک کامل نیست.'
+                : 'پیام با موفقیت ثبت شد.',
       life: 3000,
     })
     await fetchMessages()
