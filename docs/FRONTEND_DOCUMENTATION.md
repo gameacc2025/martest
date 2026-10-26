@@ -1,163 +1,91 @@
-# مستندات Frontend - Telecom Marketplace
+# مستندات فرانت‌اند — سه پنل Vue
 
-## مقدمه
-این مستندات ساختار و کامپوننتهای frontend پروژه Telecom Marketplace را شرح میدهد. این پروژه با **Vue 3** (Composition API) و **PrimeVue** برای UI و **Vite** برای build tool ساخته شده است.
+## ساختار جاری
 
----
+پروژه یک monorepo مبتنی بر pnpm است و سه اپلیکیشن مستقل Vue/Vite دارد:
 
-## جدول محتوا
-1. [معماری کلی](#معماری-کلی)
-2. [ساختار پوشهها](#ساختار-پوشهها)
-3. [صفحات اصلی](#صفحات-اصلی)
-4. [کامپوننتهای عمومی](#کامپوننتهای-عمومی)
-5. [State Management (Pinia)](#state-management)
-6. [مسیرها و ناوبری](#مسیرها-و-ناوبری)
-7. [اتصال به API](#اتصال-به-api)
-8. [احراز هویت](#احراز-هویت)
+| اپلیکیشن | مسیر | کاربرد | پورت توسعه/Compose |
+|---|---|---|---|
+| Website | `apps/website` | وب‌سایت عمومی، کاتالوگ محصول و تجربه CUSTOMER | 3001 |
+| Company | `apps/company` | پنل شرکت و مدیریت محصولات/استعلام‌های مجاز | 3002 |
+| Admin | `apps/admin` | پنل STAFF برای مدیریت و تأیید | 3003 |
 
----
+این پورت‌ها در Compose به host منتشر می‌شوند. در imageهای production، اپ‌ها با nginx روی پورت داخلی 80 سرو می‌شوند.
 
-## معماری کلی
+## فناوری‌ها
 
-### مشخصات فنی
-- **Framework**: Vue 3 (Composition API)
-- **UI Library**: PrimeVue
-- **Build Tool**: Vite
-- **State Management**: Pinia
-- **Styling**: PrimeVue Themes (Lara) + Custom SCSS
-- **HTTP Client**: Custom Fetch-based client
+- Vue 3 و Vue Router
+- Vite 8 در manifestهای اپلیکیشن
+- PrimeVue 4 و PrimeIcons در سه اپلیکیشن
+- Pinia در جاهایی که state مشترک/ماندگار لازم است
+- JavaScript (نه TypeScript)
+- pnpm workspace برای سه اپ و packageهای مشترک
 
----
+نسخه قطعی هر وابستگی در `package.json` و `pnpm-lock.yaml` است؛ این سند جایگزین lockfile نیست.
 
-## ساختار پوشهها
+## ساختار monorepo
 
-```
-frontend/src/
-├── api/                    # API client configuration
-│   └── index.js           # API endpoints + methods
-├── assets/                 # استایلها و آیکونها
-│   ├── main.scss          # استایلهای اصلی
-│   └── NewCSS/            # Layout styles
-├── components/             # کامپوننتهای shared
-│   ├── common/            # Badge, Button, Card, MegaMenu, etc.
-│   ├── products/          # ProductCard
-│   └── reviews/           # ReviewCard
-├── composables/            # Vue composables
-│   └── usePermissions.js  # Permission checking
-├── config/                 # تنظیمات
-│   └── navigation/        # Admin/User menu configs
-├── http/                   # HTTP client
-│   ├── apiClient.js       # API helper functions
-│   ├── core/              # HttpClient, HttpRequest, HttpResponse
-│   ├── errors/            # Error classes
-│   ├── middlewares/        # Auth, Parser middlewares
-│   └── presets/            # Browser/Node presets
-├── layouts/                # Layout components
-│   ├── PublicLayout.vue   # لایوت عمومی سایت
-│   └── AdminLayout.vue    # لایوت پنل ادمین
-├── pages/                  # صفحات
-│   ├── public/            # صفحات عمومی
-│   ├── admin/             # پنل ادمین
-│   └── user/              # صفحات کاربر
-├── router/                 # مسیرها
-│   └── index.js           # Vue Router config
-└── stores/                 # Pinia stores
-    ├── auth.js            # احراز هویت
-    ├── cart.js            # سبد خرید
-    └── admin/             # استورهای ادمین
+```text
+apps/
+  website/       # اپ عمومی
+  company/       # پنل شرکت
+  admin/         # پنل مدیریت
+packages/
+  api-client/    # قرارداد/کلاینت HTTP مشترک
+  auth/          # نشست و handoff احراز هویت
+  permissions/   # کمک‌ابزارهای مجوز
+  shared-core/   # منطق مشترک
+  shared-ui/     # اجزای رابط مشترک
+  vite-config/   # تنظیمات مشترک Vite
+backend/         # Fastify + Prisma API
+docker/nginx/    # reverse proxy برای API و uploads + SPA fallback
 ```
 
----
+هر اپ ساختار `src/`، router، صفحات، کامپوننت‌ها و تست‌های خود را دارد. برای مسیر دقیق فایل‌ها از درخت همان اپ استفاده کنید؛ مسیر قدیمی `frontend/src/` در ساختار فعلی وجود ندارد.
 
-## صفحات اصلی
+## Packageهای مشترک
 
-### صفحات عمومی (pages/public/)
-- `Home.vue` - صفحه اصلی با محصولات ویژه
-- `ProductListing.vue` - لیست محصولات با فیلتر
-- `ProductDetails.vue` - جزئیات محصول
-- `Categories.vue` - دسته‌بندی‌ها
-- `Login.vue` - ورود
-- `Register.vue` - ثبت نام
-- `ContactUs.vue` - تماس با ما
-- `AboutUs.vue` - درباره ما
+- `@telecom/api-client`: از این package برای درخواست‌های API استفاده کنید و کلاینت موازی جدید نسازید.
+- `@telecom/auth`: منطق مشترک احراز هویت و انتقال نشست.
+- `@telecom/permissions`: بررسی مجوزها در UI؛ جایگزین مجوزسنجی backend نیست.
+- `@telecom/shared-core` و `@telecom/shared-ui`: منطق و اجزای مشترک.
+- `@telecom/vite-config`: تنظیمات پایه Vite.
 
-### پنل ادمین (pages/admin/)
-- `Dashboard.vue` - داشبورد با آمار و محصولات در انتظار تأیید
-- `users/UserList.vue` - مدیریت کاربران
-- `roles/RoleList.vue` - مدیریت نقش‌ها
-- `permissions/PermissionList.vue` - مدیریت مجوزها
-- `products/ProductList.vue` - مدیریت محصولات
-- `products/ProductForm.vue` - ایجاد/ویرایش محصول
-- `categories/CategoryList.vue` - مدیریت دسته‌بندی‌ها
-- `orders/OrderList.vue` - مدیریت سفارشات
-- `companies/CompanyList.vue` - مدیریت شرکت‌ها
-- `inquiries/InquiryList.vue` - درخواست‌های استعلام
-- `inquiries/InquiryDetail.vue` - جزئیات درخواست
-- `inquiries/InquiryCreate.vue` - ایجاد درخواست
+## URLهای API و پراکسی
 
-### صفحات کاربر (pages/user/)
-- `MyProducts.vue` - محصولات من
-- `MyInquiries.vue` - درخواست‌های من
-- `UserProfile.vue` - پروفایل من
-- `ChangePassword.vue` - تغییر رمز عبور
-- `Notifications.vue` - اعلان‌ها
-- `company/CompanySettings.vue` - تنظیمات شرکت
-- `company/CompanyProducts.vue` - محصولات شرکت
+- Prefix بک‌اند: `/api/v1`
+- Compose: مرورگر به origin هر پنل متصل می‌شود؛ nginx مسیر `/api/` و `/uploads/` را به `http://backend:3000` پراکسی می‌کند.
+- در حالت توسعه، پیکربندی مشترک Vite از پورت مختص هر اپ و API target تعریف‌شده در `vite.config.js` استفاده می‌کند.
+- نام میزبان `backend` فقط داخل شبکه Docker معتبر است؛ آن را در URL سمت مرورگر hardcode نکنید.
+- در production، originهای مجاز باید در `backend/.env` با `ALLOWED_ORIGINS` هماهنگ باشند.
 
----
+## احراز هویت و مجوز
 
-## State Management (Pinia)
+دامنه دسترسی با `AccessProfile.type` مشخص می‌شود: STAFF، COMPANY یا CUSTOMER. نقش‌ها و permissionها دسترسی عملیاتی را کنترل می‌کنند. Router guardهای فرانت‌اند برای UX هستند؛ backend باید تمام مجوزها و مالکیت منابع را دوباره بررسی کند. به role name به‌تنهایی به‌عنوان مرز امنیتی اعتماد نکنید.
 
-### استورهای اصلی
-- `auth.js` - احراز هویت (login, logout, register, profile)
-- `cart.js` - سبد خرید
-- `stats.js` - آمار داشبورد
-- `admin.js` - عملیات ادمین
-- `admin/users.js` - مدیریت کاربران
-- `admin/roles.js` - مدیریت نقش‌ها
-- `admin/permissions.js` - مدیریت مجوزها
-- `companies.js` - مدیریت شرکت‌ها
-- `products.js` - مدیریت محصولات
-- `orders.js` - مدیریت سفارشات
+## دستورات توسعه
 
----
-
-## اتصال به API
-
-### API Client Helper Functions
-```javascript
-import { apiGet, apiGetPaginated, apiPost, apiPatch, apiDelete } from '@/http/apiClient'
-import { handleApiError } from '@/api/errorHandler'
-
-// GET request
-const data = await apiGet('/users')
-
-// Paginated GET
-const { data, meta } = await apiGetPaginated('/products', { params: { page: 1 } })
-
-// POST request
-const result = await apiPost('/users', userData)
-
-// Error handling
-try {
-  await apiPost('/users', data)
-} catch (err) {
-  const { status, message } = handleApiError(err)
-}
+```bash
+pnpm install --frozen-lockfile
+pnpm dev:website
+pnpm dev:company
+pnpm dev:admin
+pnpm dev:all
 ```
 
----
+## تست و build
 
-## احراز هویت
+```bash
+pnpm test
+pnpm test:shared-ui
+pnpm test:shared-core
+pnpm test:api-client
+pnpm test:auth
+pnpm build
+```
 
-### فلوی احراز هویت
-1. کاربر فرم ثبت‌نام را تکمیل می‌کند (تلفن اجباری، ایمیل اختیاری)
-2. کاربر عادی بلافاصله ACTIVE می‌شود؛ شرکت نیاز به تأیید ادمین دارد
-3. کاربر با شماره تلفن و رمز عبور وارد می‌شود → دریافت JWT token
-4. توکن در localStorage ذخیره می‌شود
-5. تمام درخواست‌های API با هدر Authorization ارسال می‌شوند
+برای تست‌های مخصوص اپ‌ها، script همان `apps/*/package.json` را بررسی کنید. موفقیت build به‌تنهایی معادل تست مرورگر یا صحت اتصال runtime نیست.
 
-### سیستم وضعیت کاربران
-- **PENDING**: در انتظار تأیید ادمین
-- **ACTIVE**: فعال و قابل استفاده
-- **REJECTED**: رد شده توسط ادمین
+## تست‌های مرورگر
+
+گردش‌های اصلی موردنیاز برای E2E: بارگذاری هر سه SPA، ورود/خروج، حفاظت مسیرها، مشاهده/ویرایش محصول بر اساس مجوز، استعلام و پاسخ، اعلان و شمارنده، و جزئیات محصول/تاریخچه قیمت. تست‌ها نباید به سرویس SMTP واقعی یا داده production وابسته باشند؛ برای هر تست از محیط و حساب آزمایشی ایزوله استفاده کنید.
