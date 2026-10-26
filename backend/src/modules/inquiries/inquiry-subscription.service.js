@@ -15,6 +15,7 @@ function quotaError(code, message, details) {
 }
 
 async function enforcementEnabled(client) {
+  if (typeof client?.systemSetting?.findUnique !== 'function') return false;
   const setting = await client.systemSetting.findUnique({
     where: { key: 'inquiry.subscription_enforcement' },
     select: { value: true },
