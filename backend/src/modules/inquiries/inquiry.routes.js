@@ -219,7 +219,7 @@ async function inquiryRoutes(fastify) {
 
   fastify.post('/subscription/:id/verify-payment', {
     preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.read', 'inquiries.create', 'inquiries.respond')],
-    schema: { params: { type: 'object', required: ['id'], properties: { id: { type: 'string', pattern: '^[1-9][0-9]*
+    schema: { params: { type: 'object', required: ['id'], properties: { id: { type: 'string', minLength: 1, maxLength: 10 } } } },
   }, ctrl.retrySubscriptionPayment);
 
   fastify.get('/subscription/me', {
