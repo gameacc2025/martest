@@ -27,6 +27,9 @@ let nextCount = 0;
 let nextFindMany = [];
 let nextFindUnique = null;
 let nextMessages = [];
+let smsUsageEvents = [];
+const activeSmsSubscription = { id: 77, planId: 2, startsAt: new Date('2026-10-01T00:00:00Z'), endsAt: new Date('2026-11-01T00:00:00Z'), status: 'ACTIVE', plan: { id: 2, name: 'SMS', isActive: true, inquiriesPerPeriod: 10, responsesPerPeriod: 10, internalMessagesPerPeriod: 10, smsPerPeriod: 2 } };
+let nextMessages = [];
 
 // Fixtures backing the transactional / relationship-heavy paths
 // (items, responses, attachments, product validation, stats).
@@ -60,6 +63,14 @@ function record(name, args) {
 }
 
 const mockPrisma = {
+  systemSetting: { findUnique: async () => ({ value: 'false' }) },
+  inquirySubscription: { findFirst: async () => activeSmsSubscription },
+  inquiryUsageEvent: {
+    aggregate: async ({ where }) => ({ _sum: { quantity: smsUsageEvents.filter(e => e.subscriptionId === where.subscriptionId && e.usageType === where.usageType).reduce((sum, e) => sum + e.quantity, 0) } }),
+    create: async ({ data }) => { smsUsageEvents.push(data); return { id: smsUsageEvents.length, ...data }; },
+  },
+  user: { findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }) },
+  company: { findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }) },
   inquiry: {
     count: async (args) => {
       calls.count.push(args);
@@ -231,6 +242,7 @@ function resetMocks() {
   nextFindMany = [];
   nextFindUnique = null;
   nextMessages = [];
+  smsUsageEvents = [];
   fx.inquiryItem = null;
   fx.inquiryItemCount = 0;
   fx.ownedItemIds = [];
@@ -1539,5 +1551,28 @@ test('listInquiryMessages: limits company results to messages involving that com
   await inquiryService.listInquiryMessages(1, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.read'] });
   assert.deepEqual(calls['inquiryMessage.findMany'][0].where.OR, [{ senderCompanyId: 5 }, { recipientCompanyId: 5 }]);
   assert.equal(calls['inquiryMessage.updateMany'][0].where.recipientCompanyId, 5);
+});
+
+
+
+test('sendInquiryMessage: optional SMS consumes its own paid allowance', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const oldUrl = process.env.INQUIRY_SMS_GATEWAY_URL;
+  const oldToken = process.env.INQUIRY_SMS_GATEWAY_TOKEN;
+  const oldFetch = global.fetch;
+  process.env.INQUIRY_SMS_GATEWAY_URL = 'https://sms.example.test/send';
+  process.env.INQUIRY_SMS_GATEWAY_TOKEN = 'test-token';
+  global.fetch = async () => ({ ok: true, status: 200 });
+  try {
+    const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+    assert.equal(result.recipientUserId, 10);
+    assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 1);
+  } finally {
+    global.fetch = oldFetch;
+    if (oldUrl === undefined) delete process.env.INQUIRY_SMS_GATEWAY_URL; else process.env.INQUIRY_SMS_GATEWAY_URL = oldUrl;
+    if (oldToken === undefined) delete process.env.INQUIRY_SMS_GATEWAY_TOKEN; else process.env.INQUIRY_SMS_GATEWAY_TOKEN = oldToken;
+  }
 });
 
