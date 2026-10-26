@@ -1003,6 +1003,9 @@ async function updateProduct(id, data, caller) {
       };
     });
 
+  const existingRetailTier = (existingPriceTiers || []).find((tier) => Number(tier.minQuantity) === 1);
+  const submittedRetailTier = (submittedPriceTiers || []).find((tier) => Number(tier.minQuantity) === 1);
+
   if (submittedPriceTiers) {
     const submittedIds = submittedPriceTiers.filter((tier) => tier.id !== undefined).map((tier) => tier.id);
     if (new Set(submittedIds).size !== submittedIds.length) {
@@ -1092,7 +1095,11 @@ async function updateProduct(id, data, caller) {
       const submittedIds = new Set(submittedPriceTiers.filter((tier) => tier.id !== undefined).map((tier) => tier.id));
       for (const existingTier of existingPriceTiers) {
         if (!submittedIds.has(Number(existingTier.id))) {
-          await recordPriceSnapshot(tx, productId, existingTier, 'DELETE');
+          // If the same save replaces the retail row with another retail row,
+          // record one net price change below instead of DELETE + CREATE points.
+          if (Number(existingTier.minQuantity) === 1 && !submittedRetailTier) {
+            await recordPriceSnapshot(tx, productId, existingTier, 'DELETE');
+          }
           await tx.productPriceTier.delete({ where: { id: Number(existingTier.id) } });
         }
       }
@@ -1106,18 +1113,32 @@ async function updateProduct(id, data, caller) {
           const wasRetail = Number(before.minQuantity) === 1;
           const isRetail = Number(tierData.minQuantity) === 1;
           const priceChanged = Number(before.price) !== Number(tierData.price);
-          if (wasRetail && !isRetail) {
+          if (wasRetail && !isRetail && !submittedRetailTier) {
             await recordPriceSnapshot(tx, productId, before, 'DELETE');
           }
           const record = await tx.productPriceTier.update({ where: { id: tierId }, data: tierData });
           if (!wasRetail && isRetail) {
-            await recordPriceSnapshot(tx, productId, record, 'CREATE');
+            if (existingRetailTier) {
+              if (Number(existingRetailTier.price) !== Number(record.price)) {
+                await recordPriceSnapshot(tx, productId, record, 'UPDATE');
+              }
+            } else {
+              await recordPriceSnapshot(tx, productId, record, 'CREATE');
+            }
           } else if (wasRetail && isRetail && priceChanged) {
             await recordPriceSnapshot(tx, productId, record, 'UPDATE');
           }
         } else {
           const record = await tx.productPriceTier.create({ data: { ...tierData, productId } });
-          await recordPriceSnapshot(tx, productId, record, 'CREATE');
+          if (Number(tierData.minQuantity) === 1) {
+            if (existingRetailTier) {
+              if (Number(existingRetailTier.price) !== Number(record.price)) {
+                await recordPriceSnapshot(tx, productId, record, 'UPDATE');
+              }
+            } else {
+              await recordPriceSnapshot(tx, productId, record, 'CREATE');
+            }
+          }
         }
       }
       await tx.productStatusHistory.create({
