@@ -136,7 +136,7 @@
                   :title="isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'" @click="addToWishlist" />
                 <Button icon="pi pi-chart-line" rounded outlined severity="secondary"
                   aria-label="نمودار قیمت شش ماه اخیر" title="نمودار قیمت شش ماه اخیر"
-                  @click="priceHistoryDialogOpen = true" />
+                  @click="openPriceHistory" />
               </div>
               <div v-if="prices.length > 1" class="price-tiers">
                 <div v-for="(tier, index) in sortedPrices" :key="tier.id || index" class="price-tier">
@@ -235,10 +235,12 @@
               <h2 id="price-history-title">نمودار قیمت شش ماه اخیر</h2>
               <Button icon="pi pi-times" text rounded severity="secondary" aria-label="بستن" @click="priceHistoryDialogOpen = false" />
             </div>
-            <p class="history-disclaimer">این نمودار فقط از سوابق واقعی سطح‌های قیمت موجود در اطلاعات محصول استفاده می‌کند؛ تاریخچه کامل تغییر قیمت در سامانه ذخیره نمی‌شود.</p>
-            <div v-if="priceHistoryPoints.length" class="price-history-list">
+            <p class="history-disclaimer">این نمودار تغییرات قیمت ثبت‌شده در سامانه طی شش ماه اخیر را نشان می‌دهد. سابقه‌ای پیش از فعال‌شدن ثبت قیمت‌ها به‌صورت خودکار ساخته نمی‌شود.</p>
+            <p v-if="priceHistoryLoading" class="history-empty">در حال دریافت تاریخچه قیمت...</p>
+            <p v-else-if="priceHistoryError" class="history-empty">{{ priceHistoryError }}</p>
+            <div v-else-if="priceHistoryPoints.length" class="price-history-list">
               <div v-for="point in priceHistoryPoints" :key="point.key" class="price-history-point">
-                <span class="history-date">{{ point.label }}</span>
+                <span class="history-date">{{ point.label }} · {{ point.minQuantity }}+ عدد</span>
                 <div class="history-bar-track"><span class="history-bar" :style="{ width: point.width + '%' }"></span></div>
                 <strong>{{ formatPrice(point.price) }}</strong>
               </div>
@@ -253,6 +255,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { apiGet } from '@telecom/shared-core/http/apiClient'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import { useCartStore } from '../../stores/cart'
@@ -283,6 +286,10 @@ const inquiryDescription = ref('')
 const inquiryError = ref('')
 const inquirySuccess = ref('')
 const priceHistoryDialogOpen = ref(false)
+const priceHistoryRecords = ref([])
+const priceHistoryLoading = ref(false)
+const priceHistoryError = ref('')
+const priceHistoryLoaded = ref(false)
 
 const canCreateInquiry = computed(() => authStore.isAuthenticated
   && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
@@ -296,9 +303,15 @@ const priceHistoryPoints = computed(() => {
   const now = new Date()
   const cutoff = new Date(now)
   cutoff.setMonth(cutoff.getMonth() - 6)
-  const entries = prices.value.map((tier, index) => {
-    const date = new Date(tier.updatedAt || tier.validFrom || tier.createdAt)
-    return { key: tier.id ?? index, date, price: Number(tier.price) }
+  const entries = priceHistoryRecords.value.map((record, index) => {
+    const date = new Date(record.recordedAt)
+    return {
+      key: record.id ?? index,
+      date,
+      price: Number(record.price),
+      minQuantity: record.minQuantity,
+      action: record.action,
+    }
   }).filter(point => Number.isFinite(point.price) && !Number.isNaN(point.date.getTime()) && point.date >= cutoff && point.date <= now)
     .sort((a, b) => a.date - b.date)
   const maxPrice = Math.max(...entries.map(point => point.price), 0)
@@ -308,6 +321,23 @@ const priceHistoryPoints = computed(() => {
     width: maxPrice > 0 ? Math.max(3, point.price / maxPrice * 100) : 0,
   }))
 })
+
+const openPriceHistory = async () => {
+  priceHistoryDialogOpen.value = true
+  if (priceHistoryLoaded.value || priceHistoryLoading.value) return
+  priceHistoryLoading.value = true
+  priceHistoryError.value = ''
+  try {
+    const response = await apiGet(`/products/${route.params.id}/price-history`)
+    const payload = response?.data?.data ?? response?.data ?? response
+    priceHistoryRecords.value = Array.isArray(payload) ? payload : []
+    priceHistoryLoaded.value = true
+  } catch (error) {
+    priceHistoryError.value = error?.serverMessage || 'دریافت تاریخچه قیمت با مشکل مواجه شد.'
+  } finally {
+    priceHistoryLoading.value = false
+  }
+}
 
 const home = { icon: 'pi pi-home', to: '/' }
 const breadcrumbItems = computed(() => [
