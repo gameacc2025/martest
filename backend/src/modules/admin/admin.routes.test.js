@@ -28,6 +28,12 @@ injectMock('../../config/db', {});
 
 const hit = {};
 const trivialController = {
+  getInquiryMonetizationSettingsCtrl: async (request, reply) => reply.code(200).send({ data: { subscriptionEnforcement: false } }),
+  updateInquiryMonetizationSettingsCtrl: async (request, reply) => reply.code(200).send({ data: { subscriptionEnforcement: request.body.subscriptionEnforcement } }),
+  listInquiryPlansCtrl: async (request, reply) => reply.code(200).send({ data: [] }),
+  createInquiryPlanCtrl: async (request, reply) => reply.code(201).send({ data: request.body }),
+  listInquirySubscriptionsCtrl: async (request, reply) => reply.code(200).send({ data: [] }),
+  grantInquirySubscriptionCtrl: async (request, reply) => reply.code(201).send({ data: request.body }),
   getStats: async (request, reply) => {
     hit.getStats = true;
     return reply.code(200).send({ ok: true });
