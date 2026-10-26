@@ -152,6 +152,7 @@ model User {
   productStatusChanges ProductStatusHistory[]
   productActivityLogs ProductActivityLog[]
   inquiryStatusChanges InquiryStatusHistory[]
+  buyerInquiries      Inquiry[]          @relation("InquiryBuyer")
 
   @@index([email])
   @@index([status])
@@ -437,7 +438,10 @@ model Inquiry {
   id               Int               @id @default(autoincrement())
   title            String
   description      String?
-  companyId        Int
+  // Exactly one buyer identity is set: companyId for B2B company buyers,
+  // buyerUserId for CUSTOMER buyers. Enforced by a PostgreSQL CHECK constraint.
+  companyId        Int?
+  buyerUserId      Int?
   status           InquiryStatus     @default(DRAFT)
 
   // ── Phase 2: professional inquiry model ────────────────────
@@ -461,12 +465,14 @@ model Inquiry {
   closedAt         DateTime?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  company          Company           @relation(fields: [companyId], references: [id])
+  company          Company?          @relation(fields: [companyId], references: [id])
+  buyerUser        User?              @relation("InquiryBuyer", fields: [buyerUserId], references: [id], onDelete: Cascade)
   items            InquiryItem[]
   responses        InquiryResponse[]
   statusHistory    InquiryStatusHistory[]
 
   @@index([companyId])
+  @@index([buyerUserId])
   @@index([status])
   @@index([priority])
   @@index([visibilityMode])
