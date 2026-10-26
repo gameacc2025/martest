@@ -82,8 +82,30 @@ function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
 }
 
+function isStaffUser(caller) {
+  return caller?.accessType === 'STAFF' && !isSuperAdmin(caller);
+}
+
 function isCompanyUser(caller) {
-  return Boolean(caller?.companyId) && !isSuperAdmin(caller);
+  // STAFF moderators are cross-company readers; a companyId claim must not
+  // silently turn them into tenant-scoped COMPANY users.
+  return caller?.accessType !== 'STAFF' && Boolean(caller?.companyId) && !isSuperAdmin(caller);
+}
+
+function assertCanReadProduct(product, caller) {
+  if (isSuperAdmin(caller)) return;
+  if (!caller || !Array.isArray(caller.permissions) || !caller.permissions.includes('products.read')) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'Permission products.read is required.' };
+  }
+  if (caller.accessType === 'COMPANY' || (caller.accessType === undefined && isCompanyUser(caller))) {
+    if (!caller.companyId || Number(product.companyId) !== Number(caller.companyId)) {
+      // Keep cross-tenant product IDs indistinguishable from missing products.
+      throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
+    }
+    return;
+  }
+  if (caller.accessType === 'STAFF') return;
+  throw { statusCode: 403, code: 'FORBIDDEN', message: 'Only STAFF and COMPANY users can read managed product data.' };
 }
 
 function toPositiveInt(value, field) {
@@ -740,7 +762,8 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   //   1. Public marketplace           → PUBLISHED + PUBLIC across all companies
   //   2. Company management          → own company's products, any status
   //   3. SUPER_ADMIN management      → every company's products, any status
-  const isPublicCaller = publicOnly || !caller || (!isSuperAdmin(caller) && !isCompanyUser(caller));
+  const isPublicCaller = publicOnly || !caller
+    || (!isSuperAdmin(caller) && !isCompanyUser(caller) && !isStaffUser(caller));
 
   if (isPublicCaller) {
     where.status = 'PUBLISHED';
@@ -777,6 +800,12 @@ async function getProductById(id, caller) {
   const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, include: productInclude });
   if (!product) return null;
   if (isCompanyUser(caller) && product.companyId !== Number(caller.companyId)) return null;
+  if (isStaffUser(caller)) {
+    if (!Array.isArray(caller.permissions) || !caller.permissions.includes('products.read')) {
+      throw { statusCode: 403, code: 'FORBIDDEN', message: 'Permission products.read is required.' };
+    }
+    return product;
+  }
   if (!caller || (!isSuperAdmin(caller) && !isCompanyUser(caller))) {
     if (product.status !== 'PUBLISHED' || product.visibility !== 'PUBLIC') return null;
   }
@@ -1272,10 +1301,11 @@ async function deleteDocument(productId, documentId, caller) {
 /**
  * Get product change history (status changes, price changes, etc.)
  */
-async function getProductHistory(productId) {
+async function getProductHistory(productId, caller) {
   const id = Number(productId);
-  const product = await prisma.product.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
+  const product = await prisma.product.findFirst({ where: { id, deletedAt: null }, select: { id: true, companyId: true } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
+  assertCanReadProduct(product, caller);
 
   const history = await prisma.productStatusHistory.findMany({
     where: { productId: id },
@@ -1292,10 +1322,11 @@ async function getProductHistory(productId) {
  * Get the immutable activity trail for a product (every field edit,
  * price/media change, and workflow transition).
  */
-async function getProductActivityLog(productId) {
+async function getProductActivityLog(productId, caller) {
   const id = Number(productId);
-  const product = await prisma.product.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
+  const product = await prisma.product.findFirst({ where: { id, deletedAt: null }, select: { id: true, companyId: true } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
+  assertCanReadProduct(product, caller);
 
   return prisma.productActivityLog.findMany({
     where: { productId: id },
