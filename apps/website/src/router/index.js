@@ -38,6 +38,12 @@ const routes = [
         meta: { title: "اعلان‌های من", requiresAuth: true },
       },
       {
+        path: "profile/addresses",
+        name: "profile-addresses",
+        component: () => import("../pages/public/Addresses.vue"),
+        meta: { title: "آدرس‌های من", requiresAuth: true },
+      },
+      {
         path: "notification-preferences",
         name: "notification-preferences",
         component: () => import("../pages/public/NotificationPreferences.vue"),
