@@ -601,23 +601,37 @@ function buildInquiryOrderBy(query) {
  *
  * Query params: page, limit, search, status, scope, sortBy, sortOrder
  */
-async function listInquiries(query, caller) {
+async async function listInquiries(query, caller) {
   const { page, limit, skip, take } = getPaginationParams(query);
   const superAdmin = isSuperAdmin(caller);
   const callerCompanyId = Number(caller?.companyId) || null;
-  const scope = query.scope || (superAdmin ? 'all' : 'sent');
+  const callerUserId = Number(caller?.id) || null;
+  const isCustomer = caller?.accessType === 'CUSTOMER' && !superAdmin;
+  const isStaff = caller?.accessType === 'STAFF' || superAdmin;
+  const scope = query.scope || (isStaff ? 'all' : 'sent');
 
   const where = { AND: [] };
 
-  if (scope === 'sent') {
-    if (!superAdmin) ensureCompanyId(callerCompanyId);
-    if (callerCompanyId) where.AND.push({ companyId: callerCompanyId });
-  } else if (scope === 'received') {
-    ensureCompanyId(callerCompanyId);
+  if (isStaff && !superAdmin && !hasAnyPermission(caller, 'leads.read', 'inquiries.read')) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'You do not have permission to read inquiries.' };
+  }
+
+  if (scope === 'received') {
+    if (isCustomer || !callerCompanyId) {
+      throw { statusCode: 403, code: 'INVALID_INQUIRY_SCOPE', message: 'Received inquiries are only available to company users.' };
+    }
     where.AND.push({ items: { some: { product: { companyId: callerCompanyId } } } });
-  } else {
-    // 'all' — restricted to SUPER_ADMIN; non-admins fall back to their own company
-    if (!superAdmin) {
+  } else if (scope === 'sent') {
+    if (isCustomer) {
+      where.AND.push({ buyerUserId: callerUserId });
+    } else if (!isStaff) {
+      ensureCompanyId(callerCompanyId);
+      where.AND.push({ companyId: callerCompanyId });
+    }
+  } else if (scope === 'all') {
+    if (isCustomer) {
+      where.AND.push({ buyerUserId: callerUserId });
+    } else if (!isStaff) {
       ensureCompanyId(callerCompanyId);
       where.AND.push({ companyId: callerCompanyId });
     }
@@ -653,13 +667,23 @@ async function listInquiries(query, caller) {
     }),
   ]);
 
-  return buildPaginatedResponse(inquiries, total, page, limit);
+  const safeInquiries = inquiries.map((inquiry) => {
+    const safe = { ...inquiry };
+    delete safe.buyerUserId;
+    if (!isInquiryBuyer(inquiry, caller) && !isStaff && inquiry.confidential) {
+      safe.company = null;
+      delete safe.companyId;
+    }
+    return safe;
+  });
+
+  return buildPaginatedResponse(safeInquiries, total, page, limit);
 }
 
 /**
- * Get a single inquiry with full detail, enforcing read access.
- * Buyers (owning company), sellers (owning a requested product) and
- * SUPER_ADMIN may read; everyone else gets 404.
+ * Get a single inquiry with caller-specific visibility.
+ * Buyers, authorized STAFF, and eligible supplier companies may read it.
+ * Supplier companies cannot discover drafts or future-scheduled inquiries.
  */
 async function getInquiry(inquiryId, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
@@ -669,42 +693,59 @@ async function getInquiry(inquiryId, caller) {
   });
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 
-  if (!isSuperAdmin(caller)) {
-    const callerCompanyId = Number(caller?.companyId) || null;
-    const isBuyer = inquiry.companyId === callerCompanyId;
-    const ownsRequestedProduct = inquiry.items.some((item) => item.product?.company?.id === callerCompanyId);
-    if (!isBuyer && !ownsRequestedProduct) {
-      throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-    }
+  const isBuyer = isInquiryBuyer(inquiry, caller);
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const callerCompanyId = Number(caller?.companyId) || null;
+  const ownsRequestedProduct = Boolean(callerCompanyId)
+    && inquiry.items.some((item) => Number(item.product?.company?.id) === callerCompanyId);
+  const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
+  const isPublishedForSuppliers = publishedStatuses.includes(inquiry.status)
+    && (!inquiry.publishDate || new Date(inquiry.publishDate) <= new Date());
+
+  if (!isBuyer && !isStaff && !(ownsRequestedProduct && isPublishedForSuppliers)) {
+    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   }
 
-  return inquiry;
+  return shapeInquiryForCaller(inquiry, caller);
 }
 
 async function createInquiry(data, caller) {
+  const isCustomerBuyer = caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller);
+  const buyerUserId = isCustomerBuyer ? assertAuthenticatedUser(caller) : null;
+  const companyId = isCustomerBuyer ? null : resolveCompanyId(data, caller);
 
-  const companyId = resolveCompanyId(data, caller);
-  ensureCompanyId(companyId);
+  if (!isCustomerBuyer) ensureCompanyId(companyId);
 
   return prisma.$transaction(async (tx) => {
-    await validateInquiryCreationCapacity(companyId, tx);
+    if (companyId) await validateInquiryCreationCapacity(companyId, tx);
     await validateInquiryProducts(data.items, tx);
 
     if (data.status && data.status !== 'DRAFT') {
       throw { statusCode: 400, code: 'INVALID_INITIAL_STATUS', message: 'RFQs must be created as DRAFT and then moved through status workflow.' };
     }
 
-    return tx.inquiry.create({
+    const settings = buildInquirySettings(data, { partial: false });
+    // Website quick inquiries are actionable immediately. Company-authored RFQs
+    // retain the established DRAFT -> SUBMITTED -> OPEN workflow.
+    if (isCustomerBuyer) settings.publishDate = settings.publishDate || new Date();
+
+    const inquiry = await tx.inquiry.create({
       data: {
         title: data.title,
         description: data.description,
         companyId,
-        status: 'DRAFT',
-        ...buildInquirySettings(data, { partial: false }),
+        buyerUserId,
+        status: isCustomerBuyer ? 'OPEN' : 'DRAFT',
+        ...settings,
         items: normalizeInquiryItems(data.items),
       },
       include: inquiryInclude,
     });
+
+    if (isCustomerBuyer) {
+      await notifyInquiryPublished(tx, inquiry);
+    }
+    return inquiry;
   });
 }
 
@@ -750,6 +791,15 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
   return prisma.$transaction(async (tx) => {
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiry(inquiry, caller);
+
+    if (caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller) && nextStatus !== 'CANCELLED') {
+      throw { statusCode: 403, code: 'CUSTOMER_STATUS_RESTRICTED', message: 'Customers may only cancel their own inquiry.' };
+    }
+
+    if (nextStatus === 'OPEN' && inquiry.publishDate && new Date(inquiry.publishDate) > new Date()) {
+      throw { statusCode: 400, code: 'PUBLISH_DATE_IN_FUTURE', message: 'This inquiry is scheduled for a future publish date.' };
+    }
+
     assertInquiryTransition(inquiry.status, nextStatus);
     await validateInquiryReadyForStatus(numericInquiryId, nextStatus, tx);
 
@@ -763,11 +813,30 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
       },
     });
 
-    return tx.inquiry.update({
+    const updated = await tx.inquiry.update({
       where: { id: numericInquiryId },
       data: buildStatusTransitionData(nextStatus),
       include: inquiryInclude,
     });
+
+    if (nextStatus === 'OPEN') {
+      await notifyInquiryPublished(tx, updated);
+    } else if (['CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'].includes(nextStatus)) {
+      const context = { inquiry: { id: updated.id, title: updated.title }, status: nextStatus };
+      await notifyInquiryOwner(tx, updated, 'INQUIRY_STATUS_CHANGED', context, `inquiry-status-${updated.id}-${nextStatus}-owner`);
+      const responseCompanies = await tx.inquiryResponse.findMany({
+        where: { inquiryId: updated.id, status: { not: 'WITHDRAWN' } },
+        select: { companyId: true },
+      });
+      for (const companyId of [...new Set(responseCompanies.map((row) => Number(row.companyId)))]) {
+        await dispatchNotification('INQUIRY_STATUS_CHANGED', { companyIds: [companyId] }, context, {
+          tx,
+          dedupeKey: `inquiry-status-${updated.id}-${nextStatus}-company-${companyId}`,
+        });
+      }
+    }
+
+    return updated;
   });
 }
 
