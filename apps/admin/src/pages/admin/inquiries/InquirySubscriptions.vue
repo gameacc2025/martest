@@ -100,6 +100,22 @@ async function createPlan() {
     saving.value = false
   }
 }
+
+async function togglePlan(plan) {
+  saving.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+  try {
+    await apiPatch(endpoints.inquirySubscriptions.adminPlan(plan.id), { isActive: !plan.isActive })
+    successMessage.value = plan.isActive ? 'طرح غیرفعال شد و خرید جدید آن بسته شد.' : 'طرح دوباره فعال شد.'
+    await loadAll()
+  } catch (error) {
+    errorMessage.value = error?.message || 'تغییر وضعیت طرح انجام نشد.'
+  } finally {
+    saving.value = false
+  }
+}
+
 async function activateSubscription(item) {
   if (!window.confirm('تأیید می‌کنید پرداخت این درخواست را خارج از سامانه بررسی کرده‌اید؟')) return
   errorMessage.value = ''
@@ -176,7 +192,7 @@ async function rejectSubscription(item) {
       <h2>طرح‌های تعریف‌شده ({{ plans.length.toLocaleString('fa-IR') }})</h2>
       <div v-if="!plans.length" class="muted">هنوز طرحی ثبت نشده است.</div>
       <div v-else class="table-wrap"><table><thead><tr><th>طرح</th><th>قیمت</th><th>مدت</th><th>سهمیه‌ها</th><th>وضعیت</th></tr></thead>
-        <tbody><tr v-for="plan in plans" :key="plan.id"><td><strong>{{ plan.name }}</strong><small>{{ plan.code }}</small></td><td>{{ money(plan.price, plan.currency) }}</td><td>{{ plan.durationDays }} روز</td><td><small v-for="(label, key) in usageLabels" :key="key">{{ label }}: {{ Number(plan[key] || 0).toLocaleString('fa-IR') }}<br/></small></td><td><span :class="plan.isActive ? 'pill on' : 'pill off'">{{ plan.isActive ? 'فعال' : 'غیرفعال' }}</span></td></tr></tbody>
+        <tbody><tr v-for="plan in plans" :key="plan.id"><td><strong>{{ plan.name }}</strong><small>{{ plan.code }}</small></td><td>{{ money(plan.price, plan.currency) }}</td><td>{{ plan.durationDays }} روز</td><td><small v-for="(label, key) in usageLabels" :key="key">{{ label }}: {{ Number(plan[key] || 0).toLocaleString('fa-IR') }}<br/></small></td><td><span :class="plan.isActive ? 'pill on' : 'pill off'">{{ plan.isActive ? 'فعال' : 'غیرفعال' }}</span><button class="secondary small" :disabled="saving" @click="togglePlan(plan)">{{ plan.isActive ? 'غیرفعال‌کردن' : 'فعال‌کردن' }}</button></td></tr></tbody>
       </table></div>
     </section>
 
