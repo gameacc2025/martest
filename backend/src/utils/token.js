@@ -62,7 +62,7 @@ function signAccessToken(fastify, payload) {
  */
 function signRefreshToken(fastify, userId) {
   return fastify.jwt.sign(
-    { sub: userId, type: 'refresh' },
+    { sub: userId, type: 'refresh', jti: crypto.randomUUID() },
     { key: jwtRefreshSecret, expiresIn: jwtRefreshExpiresIn }
   );
 }
