@@ -276,6 +276,28 @@ async function inquiryRoutes(fastify) {
     schema: { params: inquiryItemParamsSchema },
   }, ctrl.deleteItem);
 
+
+  // Private buyer/supplier conversation. A supplier can only message after
+  // submitting a response; each send consumes the sender's message quota.
+  fastify.get('/:id/messages', {
+    preHandler: [requireAccessType('STAFF', 'COMPANY', 'CUSTOMER'), requireAnyPermission('leads.read', 'inquiries.read')],
+    schema: { params: inquiryParamsSchema },
+  }, ctrl.listMessages);
+
+  fastify.post('/:id/messages', {
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.create', 'inquiries.respond')],
+    schema: {
+      params: inquiryParamsSchema,
+      body: {
+        type: 'object', required: ['message'], additionalProperties: false,
+        properties: {
+          message: { type: 'string', minLength: 1, maxLength: 5000 },
+          recipientCompanyId: { type: 'integer', minimum: 1 },
+        },
+      },
+    },
+  }, ctrl.sendMessage);
+
   fastify.get('/:id/responses', {
     preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('inquiries.read', 'inquiries.respond', 'leads.read')],
     schema: { params: inquiryParamsSchema },
