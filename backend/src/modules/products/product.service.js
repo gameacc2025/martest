@@ -1172,12 +1172,32 @@ async function updateProduct(id, data, caller) {
 }
 
 async function deleteProduct(id, caller) {
-  const productId = Number(id);
+  const productId = toPositiveInt(id, 'productId');
   const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
   assertCanManageProduct(product, caller, 'products.delete');
 
-  return prisma.product.update({ where: { id: productId }, data: { status: 'ARCHIVED', deletedAt: new Date() } });
+  // Soft deletion is a lifecycle event: keep the product recoverable and write
+  // its audit trail atomically with the archive/deletion marker.
+  return prisma.$transaction(async (tx) => {
+    const archived = await tx.product.update({
+      where: { id: productId },
+      data: { status: 'ARCHIVED', deletedAt: new Date() },
+    });
+    if (product.status !== 'ARCHIVED') {
+      await tx.productStatusHistory.create({
+        data: {
+          productId,
+          previousStatus: product.status,
+          newStatus: 'ARCHIVED',
+          changedByUserId: Number(caller.id),
+          comment: 'محصول به‌صورت نرم حذف شد',
+        },
+      });
+    }
+    await addActivityLog(tx, productId, Number(caller.id), 'DELETE', 'محصول به‌صورت نرم حذف شد');
+    return archived;
+  });
 }
 
 async function assertCanManageProductById(productId, caller, permission = 'products.update') {
