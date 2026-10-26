@@ -80,6 +80,17 @@ async function updateResponse(request, reply) {
   return reply.send(success(response));
 }
 
+async function decideResponse(request, reply) {
+  const response = await inquiryService.decideResponse(
+    request.params.id,
+    request.params.responseId,
+    request.body.decision,
+    request.user,
+    request.body.comment,
+  );
+  return reply.send(success(response));
+}
+
 async function withdrawResponse(request, reply) {
   const response = await inquiryService.withdrawResponse(request.params.id, request.params.responseId, request.user, request.body || {});
   return reply.send(success(response));
@@ -120,6 +131,7 @@ module.exports = {
   submitResponse,
   listResponses,
   updateResponse,
+  decideResponse,
   withdrawResponse,
   uploadResponseAttachment,
   deleteResponseAttachment,
