@@ -208,11 +208,11 @@ async function inquiryRoutes(fastify) {
   }, ctrl.listPlans);
 
   fastify.get('/subscription/me', {
-    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.read', 'inquiries.create')],
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.read', 'inquiries.create', 'inquiries.respond')],
   }, ctrl.mySubscriptions);
 
   fastify.post('/subscription', {
-    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.create')],
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.create', 'inquiries.respond')],
     schema: { body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, paymentReference: { type: 'string', maxLength: 120 } } } },
   }, ctrl.requestSubscription);
 
