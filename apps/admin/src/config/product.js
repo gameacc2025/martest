@@ -86,7 +86,7 @@ export function getStatusSeverity(status) {
  * @returns {boolean}
  */
 export function isPendingReview(product) {
-  return product?.status === 'PENDING_REVIEW'
+  return ALLOWED_TRANSITIONS.approve.from.includes(product?.status)
 }
 
 /**
@@ -95,7 +95,7 @@ export function isPendingReview(product) {
  * @returns {boolean}
  */
 export function canApprove(product) {
-  return product?.status === 'PENDING_REVIEW'
+  return ALLOWED_TRANSITIONS.reject.from.includes(product?.status)
 }
 
 /**
@@ -113,7 +113,7 @@ export function canReject(product) {
  * @returns {boolean}
  */
 export function canPublish(product) {
-  return product?.status === 'APPROVED' || product?.status === 'HIDDEN'
+  return ALLOWED_TRANSITIONS.publish.from.includes(product?.status)
 }
 
 /**
@@ -122,7 +122,20 @@ export function canPublish(product) {
  * @returns {boolean}
  */
 export function canHide(product) {
-  return product?.status === 'PUBLISHED'
+  return ALLOWED_TRANSITIONS.hide.from.includes(product?.status)
+}
+
+export function canArchive(product) {
+  return ALLOWED_TRANSITIONS.archive.from.includes(product?.status)
+}
+
+/**
+ * Check if a product can be restored to draft.
+ * @param {object} product
+ * @returns {boolean}
+ */
+export function canRestoreDraft(product) {
+  return ALLOWED_TRANSITIONS.restoreDraft.from.includes(product?.status)
 }
 
 /**
@@ -136,6 +149,8 @@ export function getAllowedActions(product) {
   if (canReject(product)) actions.push('reject')
   if (canPublish(product)) actions.push('publish')
   if (canHide(product)) actions.push('hide')
+  if (canArchive(product)) actions.push('archive')
+  if (canRestoreDraft(product)) actions.push('restoreDraft')
   actions.push('duplicate')
   return actions
 }
