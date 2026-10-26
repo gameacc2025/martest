@@ -477,7 +477,6 @@ model Inquiry {
   responses        InquiryResponse[]
   messages         InquiryMessage[]
   statusHistory    InquiryStatusHistory[]
-  messages         InquiryMessage[]
 
   @@index([companyId])
   @@index([buyerUserId])
