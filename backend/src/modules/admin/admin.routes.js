@@ -105,7 +105,7 @@ async function adminRoutes(fastify) {
     },
   }, ctrl.activatePendingInquirySubscriptionCtrl);
 
-  fastify.post('/inquiry-subscriptions/grant',
+  fastify.post('/inquiry-subscriptions/grant', {
     onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
     schema: { body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, companyId: { type: 'integer', minimum: 1 }, userId: { type: 'integer', minimum: 1 }, notes: { type: 'string', maxLength: 1000 } } } },
   }, ctrl.grantInquirySubscriptionCtrl);
