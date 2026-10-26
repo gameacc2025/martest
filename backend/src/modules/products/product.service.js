@@ -722,6 +722,13 @@ async function ensurePriceTierDoesNotOverlap(productId, tier, excludeTierId) {
 async function listProducts({ skip, take, filters = {}, caller, publicOnly = false }) {
   const where = { deletedAt: null };
 
+  // The public catalog intentionally has no permission requirement. Management
+  // callers must be authorized here as well as at the HTTP route.
+  if (!publicOnly && !isSuperAdmin(caller) && (isCompanyUser(caller) || isStaffUser(caller))
+    && (!Array.isArray(caller.permissions) || !caller.permissions.includes('products.read'))) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'Permission products.read is required.' };
+  }
+
   const parseOptionalPrice = (value, field) => {
     if (value === undefined || value === null || value === '') return undefined;
     const parsed = Number(value);
