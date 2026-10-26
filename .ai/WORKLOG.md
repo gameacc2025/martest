@@ -362,3 +362,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Committed directly to remote `main` through GitHub Contents API.
 - **Risks / open questions:** The reference image shows a dedicated “ثبت استعلام” workflow while current Website product details still uses cart actions. No inquiry API was invented or wired; this task preserves existing behavior until a verified inquiry flow is available.
 - **Next action:** User can sync latest `main` and review the page at desktop/mobile widths.
+
+## 2026-10-26 — PRODUCT-DETAILS-ACTIONS-PRICE-CHART-2026-10-26-01 — Product action icons, category badge, tags and six-month price view
+- **Status:** IN_PROGRESS
+- **Goal:** Apply the user's requested ProductDetails UX changes: permission-gated inquiry icon, icon-only wishlist and price-chart controls beside price, primary category badge beside title, and tags at bottom of sidebar.
+- **Evidence:** Current page has a labeled wishlist button in the heading and category/subcategory chips above the title. Website router has no inquiry-create route; shared API client does expose `inquiriesApi.create`, and backend POST /inquiries requires `inquiries.create` or `leads.create` plus a supported access type. Product schema has current price tiers with validFrom/validTo/createdAt/updatedAt but no immutable price-history table. Do not fabricate a historical series; show only available retained price-tier records within six months and state when historical data is unavailable.
+- **Scope:** `apps/website/src/pages/public/ProductDetails.vue`; update project handoff/worklog.
+- **Plan:** Gate inquiry icon by authentication + permission, submit a single-product RFQ using the existing API and quantity/details dialog, move wishlist to compact icon action beside price, add six-month price-history dialog based only on returned tier records, place only primary category badge inline with title, remove category breadcrumb chips, and render tags at the bottom of the sidebar if the public product response provides them.
+- **Verification:** GitHub Actions tests and all production builds. Browser visual validation is not available in this remote-only session.
+- **Commit:** Pending.
+- **Push:** Existing standing instruction permits direct commits to remote `main`.
+- **Risks:** Existing product API does not persist complete historical price snapshots; UI must not imply full historical completeness.
+- **Next action:** Implement and verify via CI.
