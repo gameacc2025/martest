@@ -164,6 +164,7 @@ const mockPrisma = {
 const serviceDir = path.join(__dirname);
 const dbPath = require.resolve(path.join(serviceDir, '../../config/db'));
 const companyRulePath = require.resolve(path.join(serviceDir, '../companies/company-rule.service'));
+const notificationDispatchPath = require.resolve(path.join(serviceDir, '../notifications/notification.dispatch.service'));
 
 const originalDbEntry = require.cache[dbPath];
 require.cache[dbPath] = new Module(dbPath);
@@ -171,6 +172,15 @@ require.cache[dbPath].exports = mockPrisma;
 require.cache[dbPath].loaded = true;
 
 const originalCompanyRuleEntry = require.cache[companyRulePath];
+const originalNotificationDispatchEntry = require.cache[notificationDispatchPath];
+require.cache[notificationDispatchPath] = new Module(notificationDispatchPath);
+require.cache[notificationDispatchPath].exports = {
+  dispatchNotification: async (...args) => {
+    record('dispatchNotification', args);
+    return { event: args[0], recipients: 0 };
+  },
+};
+require.cache[notificationDispatchPath].loaded = true;
 require.cache[companyRulePath] = new Module(companyRulePath);
 require.cache[companyRulePath].exports = {
   validateInquiryCreationCapacity: async () => {},
@@ -186,6 +196,8 @@ test.after(() => {
   else delete require.cache[dbPath];
   if (originalCompanyRuleEntry) require.cache[companyRulePath] = originalCompanyRuleEntry;
   else delete require.cache[companyRulePath];
+  if (originalNotificationDispatchEntry) require.cache[notificationDispatchPath] = originalNotificationDispatchEntry;
+  else delete require.cache[notificationDispatchPath];
 });
 
 // Now load the service (it will pick up the mocks above)
@@ -354,6 +366,7 @@ test('getInquiry allows a seller who owns a requested product', async () => {
   nextFindUnique = {
     id: 6,
     companyId: buyer.companyId,
+    status: 'OPEN',
     items: [{ product: { company: { id: seller.companyId } } }],
   };
   const inquiry = await inquiryService.getInquiry(6, seller);
@@ -372,6 +385,40 @@ test('getInquiry hides an inquiry from an unrelated company (404)', async () => 
     () => inquiryService.getInquiry(7, unrelated),
     (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
   );
+});
+
+test('getInquiry allows a customer to read only their own inquiry', async () => {
+  resetMocks();
+  nextFindUnique = { id: 90, companyId: null, buyerUserId: 77, status: 'OPEN', visibilityMode: 'NORMAL', responses: [], items: [] };
+  const inquiry = await inquiryService.getInquiry(90, { id: 77, accessType: 'CUSTOMER', permissions: ['inquiries.read'] });
+  assert.equal(inquiry.id, 90);
+  assert.equal(Object.hasOwn(inquiry, 'buyerUserId'), false);
+});
+
+test('getInquiry hides sealed quotes from the buyer before reveal', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 91, companyId: buyer.companyId, status: 'OPEN', visibilityMode: 'SEALED',
+    responseDeadline: new Date(Date.now() + 3600000), responses: [{ id: 1, companyId: seller.companyId }, { id: 2, companyId: 42 }],
+    items: [],
+  };
+  const inquiry = await inquiryService.getInquiry(91, buyer);
+  assert.equal(inquiry.responses.length, 0);
+  assert.equal(inquiry.responsesHidden, true);
+  assert.equal(inquiry.responseCount, 2);
+});
+
+test('getInquiry anonymizes company identities for a revealed anonymous sealed inquiry', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 92, companyId: buyer.companyId, status: 'CLOSED', visibilityMode: 'ANONYMOUS_SEALED',
+    responses: [{ id: 1, companyId: seller.companyId, company: { id: seller.companyId, name: 'Secret supplier' } }],
+    items: [{ id: 4, product: { title: 'Product', company: { id: seller.companyId, name: 'Secret supplier' } } }],
+  };
+  const inquiry = await inquiryService.getInquiry(92, buyer);
+  assert.equal(inquiry.responses[0].company.name, 'پیشنهاددهنده 1');
+  assert.equal(Object.hasOwn(inquiry.responses[0], 'companyId'), false);
+  assert.equal(inquiry.items[0].product.company, null);
 });
 
 test('getInquiry allows SUPER_ADMIN regardless of company', async () => {
@@ -432,6 +479,23 @@ test('createInquiry: SUPER_ADMIN creates a DRAFT under the supplied companyId wi
   assert.equal(args.data.responseDeadline, null);
   assert.equal(args.data.items.create.length, 1);
   assert.equal(args.data.items.create[0].quantity, 5);
+});
+
+test('createInquiry: CUSTOMER creates an immediately open inquiry owned by the authenticated user', async () => {
+  resetMocks();
+  fx.products = [{ id: 41, status: 'PUBLISHED', company: { status: 'ACTIVE' } }];
+  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  const inquiry = await inquiryService.createInquiry({
+    title: 'Customer price request',
+    items: [{ productId: 41, quantity: 2 }],
+  }, customer);
+  const create = calls['inquiry.create'][0];
+  assert.equal(create.data.companyId, null);
+  assert.equal(create.data.buyerUserId, 77);
+  assert.equal(create.data.status, 'OPEN');
+  assert.ok(create.data.publishDate instanceof Date);
+  assert.equal(inquiry.id, 7);
+  assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_PUBLISHED'));
 });
 
 test('createInquiry: a caller without a company is rejected', async () => {
