@@ -164,6 +164,7 @@ export const endpoints = {
     adminPlans: '/admin/inquiry-plans',
     adminSubscriptions: '/admin/inquiry-subscriptions',
     activate: (id) => `/admin/inquiry-subscriptions/${id}/activate`,
+    reject: (id) => `/admin/inquiry-subscriptions/${id}/reject`,
     grant: '/admin/inquiry-subscriptions/grant',
   },
   // Inquiries (RFQ)
