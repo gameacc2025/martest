@@ -1048,7 +1048,7 @@
 ### `GET /api/products/:id`
 **توضیح**: دریافت اطلاعات محصول از کاتالوگ عمومی
 
-**Access**: Public. Only `PUBLISHED` + `PUBLIC` products are returned; other products are not exposed through this endpoint. Public responses omit internal moderation `statusHistory` and staff identity details. For moderation/editing, use the authenticated `/:id/manage` route with `products.read`.
+**Access**: Public. Only `PUBLISHED` + `PUBLIC` products are returned; other products are not exposed through this endpoint. Public responses omit internal moderation `statusHistory`, staff identity details, creator IDs, post-approval edit counters, and deletion metadata. For moderation/editing, use the authenticated `/:id/manage` route with `products.read`.
 
 **Response**:
 ```json
