@@ -176,12 +176,23 @@ export const adminApi = {
   deletePermission: (id) => api.delete(endpoints.admin.getPermission(id)),
   getSystemSettings: () => api.get(endpoints.admin.settings),
   updateProductReviewThreshold: (value) => api.patch(endpoints.admin.productReviewThreshold, { value }),
+  getInquiryMonetizationSettings: () => api.get(endpoints.inquirySubscriptions.adminSettings),
+  updateInquiryMonetizationSettings: (subscriptionEnforcement) => api.patch(endpoints.inquirySubscriptions.adminSettings, { subscriptionEnforcement }),
+  listInquiryPlans: () => api.get(endpoints.inquirySubscriptions.adminPlans),
+  createInquiryPlan: (data) => api.post(endpoints.inquirySubscriptions.adminPlans, data),
+  listInquirySubscriptions: () => api.get(endpoints.inquirySubscriptions.adminSubscriptions),
+  activateInquirySubscription: (id, notes = '') => api.post(endpoints.inquirySubscriptions.activate(id), { paymentConfirmed: true, notes }),
+  grantInquirySubscription: (data) => api.post(endpoints.inquirySubscriptions.grant, data),
 }
 
 // Inquiries API
 export const inquiriesApi = {
   list: (params = {}) => api.get(endpoints.inquiries.list, { params }),
   getStats: () => api.get(endpoints.inquiries.stats),
+  listPlans: () => api.get(endpoints.inquirySubscriptions.plans),
+  getMySubscriptions: () => api.get(endpoints.inquirySubscriptions.mine),
+  requestSubscription: (data) => api.post(endpoints.inquirySubscriptions.request, data),
+  getQuota: () => api.get(endpoints.inquirySubscriptions.quota),
   getById: (id) => api.get(endpoints.inquiries.getById(id)),
   create: (data) => api.post(endpoints.inquiries.create, data),
   changeStatus: (id, data) => api.patch(endpoints.inquiries.changeStatus(id), data),
