@@ -297,3 +297,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Evidence:** Latest workflow logs show 3 failed / 155 passed frontend tests; each failure cannot find the `خوانده‌شده` bulk button after setting a row checkbox. Backend tests/builds are skipped by the workflow after this frontend failure.
 - **Scope:** Three `Notifications.vue` pages and their focused tests only; no notification API/schema changes.
 - **Verification:** CI must pass the notification tests before product backend tests can be considered verified. Remote GitHub source edits only; local test runner unavailable in this session.
+
+### Verification milestone — product authorization + CI blocker — 2026-10-26
+
+- **CI passed:** Run `40271177578` for commit `3eeb388ede16a3624b6ee2c6ca3baf555d9bc761` completed successfully. Frontend/shared: 17/17 test files passed (158 tests, 0 failed). Backend: 1179/1179 tests passed. Prisma Client generation passed. Website, Company, and Admin production builds passed.
+- **Product test corrections:** Updated controller tests to assert the COMPANY access type and to verify `getActivity` forwards the authenticated caller; corrected the changed-price-tier fixture to use non-overlapping quantity ranges.
+- **CI blocker correction:** The three notification tests now locate the rendered bulk action by its rendered label instead of matching the imported PrimeVue component object, and the toolbar selection state is exposed through a computed flag. The passing CI run confirms the three Website/Company/Admin notification tests no longer block the workflow.
+- **Documentation:** Corrected the legacy API docs that incorrectly listed public `GET /api/products` and `GET /api/products/:id` as requiring `products.read`; documented the public-vs-management split and access contract.
+- **Status caveat:** The successful run is for `3eeb388ede16a3624b6ee2c6ca3baf555d9bc761`. A later docs-only commit `4f4d2a2c9885adca22dcee1c95f774698e3fd4f1` is the newer HEAD at this log update and its own CI run `40271218831` was still in progress at last check.
+- **Next:** Verify the latest HEAD workflow finishes successfully; continue the remaining product lifecycle/media/specification audit.
