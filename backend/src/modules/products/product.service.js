@@ -799,7 +799,13 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
 async function getProductById(id, caller) {
   const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, include: productInclude });
   if (!product) return null;
-  if (isCompanyUser(caller) && product.companyId !== Number(caller.companyId)) return null;
+  if (isCompanyUser(caller)) {
+    if (!Array.isArray(caller.permissions) || !caller.permissions.includes('products.read')) {
+      throw { statusCode: 403, code: 'FORBIDDEN', message: 'Permission products.read is required.' };
+    }
+    if (product.companyId !== Number(caller.companyId)) return null;
+    return product;
+  }
   if (isStaffUser(caller)) {
     if (!Array.isArray(caller.permissions) || !caller.permissions.includes('products.read')) {
       throw { statusCode: 403, code: 'FORBIDDEN', message: 'Permission products.read is required.' };
