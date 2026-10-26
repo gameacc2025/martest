@@ -29,7 +29,7 @@ injectMock('../../config/db', {});
 const hit = {};
 const trivialController = {};
 const controllerMethods = [
-  'quota',
+  'quota', 'listPlans', 'mySubscriptions', 'requestSubscription',
   'list', 'stats', 'getById', 'create', 'update', 'listItems',
   'changeStatus', 'revealResponses', 'addItem', 'updateItem', 'deleteItem',
   'listResponses', 'submitResponse', 'updateResponse', 'decideResponse',
