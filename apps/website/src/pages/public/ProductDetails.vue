@@ -524,16 +524,18 @@ const goBack = () => router.push('/products')
   min-width: 0;
 }
 
-.category-list,
-.product-meta {
+ .product-meta {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.category-list {
-  margin-bottom: 0.8rem;
+.product-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
 .category-chip {
@@ -583,13 +585,27 @@ const goBack = () => router.push('/products')
   direction: ltr;
 }
 
-.wishlist-button {
-  flex-shrink: 0;
-  margin-top: 0.2rem;
-  white-space: nowrap;
+.price-icon-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 0.9rem;
 }
 
-.wishlist-button--active {
+.price-icon-actions :deep(.p-button) {
+  width: 2.55rem;
+  height: 2.55rem;
+  color: var(--pd-text);
+  border-color: var(--pd-border);
+}
+
+.price-icon-actions :deep(.p-button:hover) {
+  color: var(--pd-accent);
+  border-color: var(--pd-accent);
+  background: var(--pd-accent-soft);
+}
+
+.price-icon-actions .icon-action--active {
   color: #d9485f !important;
   border-color: #f1b8c1 !important;
   background: #fff7f8 !important;
@@ -963,6 +979,34 @@ const goBack = () => router.push('/products')
   color: var(--pd-accent);
 }
 
+.tags-card {
+  padding: 1rem 1.1rem;
+  background: var(--pd-surface);
+  border: 1px solid var(--pd-border);
+  border-radius: 1rem;
+}
+
+.tags-card h2 {
+  margin: 0 0 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.product-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.product-tag {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--pd-ground);
+  color: var(--pd-muted);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
 .company-card {
   padding: 1.1rem;
 }
@@ -1038,6 +1082,132 @@ const goBack = () => router.push('/products')
   color: var(--pd-muted);
   font-size: 0.78rem;
   line-height: 1.8;
+}
+
+.product-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(12, 28, 38, 0.52);
+}
+
+.product-dialog {
+  width: min(100%, 32rem);
+  max-height: min(90vh, 46rem);
+  overflow: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--pd-border);
+  border-radius: 1rem;
+  background: var(--pd-surface);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dialog-heading h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.dialog-product-name {
+  margin: 0.65rem 0 1.2rem;
+  color: var(--pd-muted);
+  line-height: 1.8;
+}
+
+.dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.dialog-field input,
+.dialog-field textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--pd-border);
+  border-radius: 0.65rem;
+  color: var(--pd-text);
+  background: var(--pd-surface);
+  font: inherit;
+  font-weight: 400;
+}
+
+.dialog-error {
+  margin: 0.8rem 0 0;
+  color: #b42335;
+  font-size: 0.85rem;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.history-disclaimer {
+  color: var(--pd-muted);
+  font-size: 0.84rem;
+  line-height: 1.8;
+}
+
+.price-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.price-history-point {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(2rem, 1fr) minmax(6rem, auto);
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.8rem;
+}
+
+.history-date {
+  color: var(--pd-muted);
+}
+
+.history-bar-track {
+  height: 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--pd-ground);
+}
+
+.history-bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--pd-accent);
+}
+
+.price-history-point strong {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.history-empty {
+  margin: 1rem 0 0;
+  padding: 1rem;
+  border-radius: 0.7rem;
+  background: var(--pd-ground);
+  color: var(--pd-muted);
+  line-height: 1.9;
 }
 
 .page-state {
@@ -1118,10 +1288,6 @@ const goBack = () => router.push('/products')
   .product-heading {
     flex-direction: column;
     gap: 0.9rem;
-  }
-
-  .wishlist-button {
-    align-self: flex-start;
   }
 
   .product-layout {
