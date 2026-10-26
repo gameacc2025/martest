@@ -164,7 +164,7 @@ async function rejectSubscription(item) {
     <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
 
     <section class="panel enforcement">
-      <div><h2>کنترل اجباری سهمیه</h2><p>در حالت فعال، ثبت استعلام و پاسخ شرکت به اشتراک فعال و سهمیهٔ باقی‌مانده نیاز دارد. قبل از فعال‌کردن، طرح و اشتراک معتبر بسازید.</p></div>
+      <div><h2>کنترل اجباری سهمیه</h2><p>در حالت فعال، ثبت استعلام، پاسخ شرکت و پیام‌های داخلی به اشتراک فعال و سهمیهٔ باقی‌مانده نیاز دارند. پیامک همیشه سهمیهٔ جداگانهٔ پولی دارد.</p></div>
       <button :class="settings.subscriptionEnforcement ? 'danger' : 'primary'" :disabled="saving" @click="toggleEnforcement">
         {{ settings.subscriptionEnforcement ? 'فعال است؛ غیرفعال کن' : 'غیرفعال است؛ فعال کن' }}
       </button>
@@ -201,7 +201,7 @@ async function rejectSubscription(item) {
       <p class="muted">فعال‌سازی دستی فقط پس از بررسی واقعی پرداخت انجام شود. شماره پیگیری به‌تنهایی مدرک پرداخت نیست.</p>
       <div v-if="!pending.length" class="muted">درخواستی در انتظار بررسی نیست.</div>
       <div v-else class="table-wrap"><table><thead><tr><th>مالک</th><th>طرح</th><th>شماره پیگیری</th><th>ثبت درخواست</th><th>عملیات</th></tr></thead>
-        <tbody><tr v-for="item in pending" :key="item.id"><td>{{ ownerName(item) }}</td><td>{{ item.plan?.name || '—' }}</td><td>{{ item.paymentReference || 'ثبت نشده' }}</td><td>{{ date(item.createdAt) }}</td><td class="actions"><button class="primary small" :disabled="saving" @click="activateSubscription(item)">تأیید پرداخت و فعال‌سازی</button><button class="danger small" :disabled="saving" @click="rejectSubscription(item)">رد درخواست</button></td></tr></tbody>
+        <tbody><tr v-for="item in pending" :key="item.id"><td>{{ ownerName(item) }}</td><td>{{ item.plan?.name || '—' }}</td><td>{{ item.paymentProvider === 'ZARINPAL' ? ('زرین‌پال · ' + (item.paymentAuthority || 'در انتظار شناسه')) : (item.paymentReference || 'ثبت نشده') }}</td><td>{{ date(item.createdAt) }}</td><td class="actions"><template v-if="item.paymentProvider === 'ZARINPAL'"><span class="muted">تأیید فقط از طریق callback درگاه</span></template><template v-else><button class="primary small" :disabled="saving" @click="activateSubscription(item)">تأیید پرداخت و فعال‌سازی</button><button class="danger small" :disabled="saving" @click="rejectSubscription(item)">رد درخواست</button></template></td></tr></tbody>
       </table></div>
     </section>
 
