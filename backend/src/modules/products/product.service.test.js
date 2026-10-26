@@ -171,7 +171,7 @@ test.beforeEach(() => resetMocks());
 const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'] };
 const companyA = { id: 2, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 10 };
 const companyB = { id: 3, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 20 };
-const staffModerator = { id: 5, roles: ['PRODUCT_MODERATOR'], accessType: 'STAFF', permissions: ['products.read'] };
+const staffModerator = { id: 5, roles: ['PRODUCT_MODERATOR'], accessType: 'STAFF', permissions: ['products.read'], companyId: 999 };
 const anonymous = null;
 
 function draftProduct(overrides = {}) {
