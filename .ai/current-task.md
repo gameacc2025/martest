@@ -19,13 +19,13 @@
 - **Open consideration:** Reference image includes a dedicated inquiry flow; current page has cart actions. No unverified inquiry workflow was invented.
 - **Next:** User syncs `main` and visually checks desktop/mobile.
 
-## Active task — PRODUCT-DETAILS-ACTIONS-PRICE-CHART-2026-10-26-01
-- **Status:** IN_PROGRESS.
-- **Goal:** Rework ProductDetails actions, category placement, sidebar tags, and six-month price view.
-- **Scope:** `apps/website/src/pages/public/ProductDetails.vue`, worklog/handoff.
-- **Plan:** Gate inquiry icon with auth + `inquiries.create`/`leads.create`; use existing inquiry API; move wishlist icon beside price; add price-history dialog using only actual retained price-tier timestamps; show primary category as badge inline with title; move any returned product tags to sidebar bottom.
-- **Verification:** GitHub Actions test/build. Browser visual test NOT AVAILABLE in remote-only session.
-- **Caveat:** No immutable price-history model exists; never synthesize missing prices.
+## Completed task — PRODUCT-DETAILS-ACTIONS-PRICE-CHART-2026-10-26-01
+- **Status:** DONE; CI passed.
+- **Changes:** Inquiry-price icon is visible only for authenticated users with `inquiries.create` or `leads.create`; it opens a single-product quantity/details form and submits through existing `inquiriesApi.create`. Wishlist and six-month price-history icons sit beside price. Primary category is shown as a badge next to the product title; category/subcategory chips above title removed. Product tags (if present in returned `tags` or `specifications.tags`) are at the bottom of sidebar.
+- **Price-history limitation:** Schema has no immutable price snapshots; current view only uses actual retained price-tier timestamps within six months and explicitly discloses that it is not a complete history. No prices are fabricated. A true trend requires snapshot persistence + endpoint + migration.
+- **Verification:** [CI 40290318566](https://github.com/gameacc2025/martest/actions/runs/40290318566) passed: frontend/shared 19/19 files, handoff 18/18, backend 1196/1196, Prisma generation, all three production builds. Local/browser visual validation NOT RUN.
+- **Commit:** `80f4c49cb10141065750fa7ae2e74c38d4a0fae1`.
+- **Next:** If desired, implement real immutable price history across six months.
 
 ## Completed — Notification inbox fixes and bulk actions
 
