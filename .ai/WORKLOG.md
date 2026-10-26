@@ -399,3 +399,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Latest observed workflow for current price-history work, [40309246682](https://github.com/gameacc2025/martest/actions/runs/40309246682), was IN_PROGRESS when this entry was written. Earlier intermediate runs failed because the route-test controller stub did not include the newly added handler; the stub and route test have since been updated. Do not mark the task DONE until the latest CI result is checked.
 - **Migration/rollout:** Deploy the new Prisma migration before relying on the endpoint in a live environment. Existing historic prices are not backfilled because the prior data does not contain a reliable immutable history.
 - **Next action:** Verify latest CI on the final source commit; fix any failing tests/builds, then update this entry and current-task with exact results.
+
+
+### Verification update — PROJECT-QUALITY-2026-10-26-01
+
+- **Status:** PARTIAL — implementation and CI verification passed; manual browser and live SMTP checks remain NOT VERIFIED.
+- **CI:** GitHub Actions [40309340136](https://github.com/gameacc2025/martest/actions/runs/40309340136) passed for commit `fa1df2054d1220f526e652f6fc6c8964644ebece`: frontend/shared tests, Prisma Client generation, backend tests, and Website/Company/Admin production builds.
+- **Price history:** The immutable snapshot model, migration, write hooks, public history endpoint, UI integration, route/service tests, and API documentation are committed to `main`. Apply migration `20261026110000_product_price_snapshots` before deployment. No historical backfill was made because the existing mutable price-tier timestamps do not provide a reliable complete historical record.
+- **Remaining operational checks:** Manual browser tests for Website/Company/Admin notification inboxes and desktop/mobile product details; controlled SMTP delivery test with valid deployment credentials. SMS remains unimplemented.
+- **Latest handoff:** `599bdf094d0c22c82051c61f96309beb999ec27c`.
