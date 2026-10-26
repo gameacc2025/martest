@@ -657,6 +657,11 @@ model InquirySubscription {
   endsAt      DateTime?
   activatedBy Int?
   paymentReference String? @unique
+  paymentProvider String?
+  paymentAuthority String? @unique
+  paymentRefId String?
+  paymentAmount Int?
+  paymentVerifiedAt DateTime?
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
