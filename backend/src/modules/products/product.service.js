@@ -909,7 +909,7 @@ async function getProductById(id, caller) {
 
 async function createProduct(data, caller) {
   if (!data.title?.trim()) throw { statusCode: 400, code: 'TITLE_REQUIRED', message: 'title is required.' };
-  if (!isSuperAdmin(caller) && !isStaffUser(caller) && !isCompanyUser(caller)) {
+  if (!isSuperAdmin(caller) && !isStaffUser(caller) && !isCompanyUser(caller) && caller?.accessType) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'Only STAFF and COMPANY users can create products.' };
   }
   assertStaffPermission(caller, 'products.create');
