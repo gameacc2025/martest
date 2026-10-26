@@ -53,7 +53,7 @@ async function consumeUsage({ ownerType, ownerId, usageType, referenceType = nul
   if (!Object.hasOwn(LIMIT_BY_USAGE, usageType)) {
     throw { statusCode: 400, code: 'INVALID_INQUIRY_USAGE_TYPE', message: 'نوع مصرف اشتراک معتبر نیست.' };
   }
-  if (!(await enforcementEnabled(tx))) return { enforced: false, remaining: null, limit: null, used: null };
+  if (!(await enforcementEnabled(tx)) && usageType !== 'SMS') return { enforced: false, remaining: null, limit: null, used: null };
 
   const subscription = await getActiveSubscription(ownerType, ownerId, tx);
   if (!subscription) {
@@ -91,9 +91,10 @@ async function consumeUsage({ ownerType, ownerId, usageType, referenceType = nul
 }
 
 async function getQuotaSummary(ownerType, ownerId, client = prisma, now = new Date()) {
-  if (!(await enforcementEnabled(client))) return { enforced: false, subscription: null, quotas: null };
+  const capabilities = { smsConfigured: Boolean(process.env.INQUIRY_SMS_GATEWAY_URL && process.env.INQUIRY_SMS_GATEWAY_TOKEN) };
+  if (!(await enforcementEnabled(client))) return { enforced: false, subscription: null, quotas: null, capabilities };
   const subscription = await getActiveSubscription(ownerType, ownerId, client, now);
-  if (!subscription) return { enforced: true, subscription: null, quotas: null };
+  if (!subscription) return { enforced: true, subscription: null, quotas: null, capabilities };
   const quotas = {};
   for (const [usageType, field] of Object.entries(LIMIT_BY_USAGE)) {
     const used = await getUsage(subscription.id, usageType, subscription.startsAt, client);
@@ -104,6 +105,7 @@ async function getQuotaSummary(ownerType, ownerId, client = prisma, now = new Da
     enforced: true,
     subscription: { id: subscription.id, planId: subscription.planId, planName: subscription.plan.name, startsAt: subscription.startsAt, endsAt: subscription.endsAt, status: subscription.status },
     quotas,
+    capabilities,
   };
 }
 
