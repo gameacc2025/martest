@@ -8,6 +8,7 @@ const path = require('path');
 const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
+const { dispatchNotification } = require('../notifications/notification.dispatch.service');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const {
   validateInquiryCreationCapacity,
@@ -100,12 +101,32 @@ function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
 }
 
+function hasAnyPermission(caller, ...permissions) {
+  return isSuperAdmin(caller) || permissions.some((permission) => caller?.permissions?.includes(permission));
+}
+
+function isStaffWithPermission(caller, ...permissions) {
+  return isSuperAdmin(caller) || (caller?.accessType === 'STAFF' && hasAnyPermission(caller, ...permissions));
+}
+
+function isInquiryBuyer(inquiry, caller) {
+  if (!inquiry || !caller) return false;
+  if (isSuperAdmin(caller)) return true;
+  if (inquiry.buyerUserId && Number(inquiry.buyerUserId) === Number(caller.id)) return true;
+  return Boolean(inquiry.companyId) && Number(inquiry.companyId) === Number(caller.companyId);
+}
+
 function resolveCompanyId(data, caller) {
-  return isSuperAdmin(caller) && data.companyId ? Number(data.companyId) : Number(caller?.companyId);
+  if (caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller)) return null;
+  if (caller?.companyId) return Number(caller.companyId);
+  if (data?.companyId && (isSuperAdmin(caller) || (caller?.accessType === 'STAFF' && hasAnyPermission(caller, 'leads.create', 'inquiries.create')))) {
+    return Number(data.companyId);
+  }
+  return null;
 }
 
 function ensureCompanyId(companyId) {
-  if (!companyId) {
+  if (!Number.isInteger(Number(companyId)) || Number(companyId) < 1) {
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
   }
 }
@@ -119,10 +140,7 @@ function toPositiveInt(value, field) {
 }
 
 function assertCanManageInquiryItems(inquiry, caller) {
-  if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== Number(caller?.companyId)) {
-    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  }
+  assertCanManageInquiry(inquiry, caller);
   if (inquiry.status !== 'DRAFT') {
     throw { statusCode: 400, code: 'INQUIRY_ITEMS_LOCKED', message: 'RFQ items can only be changed while the RFQ is in draft status.' };
   }
@@ -130,16 +148,15 @@ function assertCanManageInquiryItems(inquiry, caller) {
 
 function assertCanReadInquiry(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== Number(caller?.companyId)) {
-    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  }
+  if (isInquiryBuyer(inquiry, caller) || isStaffWithPermission(caller, 'leads.read', 'inquiries.read')) return;
+  throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 }
 
 function assertCanManageInquiry(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== Number(caller?.companyId)) {
-    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  }
+  if (isInquiryBuyer(inquiry, caller)) return;
+  if (isStaffWithPermission(caller, 'leads.update', 'inquiries.update')) return;
+  throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 }
 
 function assertAuthenticatedUser(caller) {
@@ -293,18 +310,96 @@ async function removeStoredAttachment(url) {
 }
 
 function assertCanReadResponses(inquiry, caller) {
-
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (isSuperAdmin(caller)) return;
+  if (isInquiryBuyer(inquiry, caller) || isStaffWithPermission(caller, 'leads.read', 'inquiries.read')) return;
 
   const callerCompanyId = Number(caller?.companyId);
-  if (!callerCompanyId) throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
-
-  const isBuyer = inquiry.companyId === callerCompanyId;
-  const ownsRequestedProduct = inquiry.items.some((item) => item.product?.companyId === callerCompanyId);
-  if (!isBuyer && !ownsRequestedProduct) {
+  const ownsRequestedProduct = Number.isInteger(callerCompanyId) && callerCompanyId > 0
+    && (inquiry.items || []).some((item) => Number(item.product?.companyId) === callerCompanyId);
+  if (!ownsRequestedProduct) {
     throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   }
+}
+
+function areResponsesRevealed(inquiry) {
+  if (!inquiry) return false;
+  if (inquiry.revealedAt) return true;
+  if (['CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'].includes(inquiry.status)) return true;
+  return Boolean(inquiry.responseDeadline) && new Date(inquiry.responseDeadline) <= new Date();
+}
+
+function shapeInquiryForCaller(inquiry, caller) {
+  const result = { ...inquiry };
+  delete result.buyerUserId;
+
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const isBuyer = isInquiryBuyer(inquiry, caller);
+  const callerCompanyId = Number(caller?.companyId) || null;
+
+  if (!isBuyer && !isStaff && inquiry.confidential) {
+    result.company = null;
+    delete result.companyId;
+  }
+
+  const responses = Array.isArray(inquiry.responses) ? inquiry.responses : [];
+  result.responseCount = inquiry._count?.responses ?? responses.length;
+
+  if (isBuyer && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+    result.responses = [];
+    result.responsesHidden = true;
+  } else {
+    let visibleResponses = responses;
+    if (!isBuyer && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+      visibleResponses = responses.filter((response) => Number(response.companyId) === callerCompanyId);
+    }
+
+    if (isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED' && areResponsesRevealed(inquiry) && !isStaff) {
+      let ordinal = 0;
+      visibleResponses = visibleResponses.map((response) => {
+        ordinal += 1;
+        const anonymous = { ...response, company: { name: `پیشنهاددهنده ${ordinal}`, type: null } };
+        delete anonymous.companyId;
+        return anonymous;
+      });
+      result.items = (result.items || []).map((item) => ({
+        ...item,
+        product: item.product ? { ...item.product, company: null } : item.product,
+      }));
+    }
+
+    result.responses = visibleResponses;
+    result.responsesHidden = false;
+  }
+
+  return result;
+}
+
+async function notifyInquiryPublished(tx, inquiry) {
+  const rows = await tx.inquiryItem.findMany({
+    where: { inquiryId: inquiry.id },
+    select: { product: { select: { companyId: true } } },
+  });
+  const companyIds = [...new Set(rows.map((row) => Number(row.product?.companyId)).filter((id) => id > 0))];
+  const context = { inquiry: { id: inquiry.id, title: inquiry.title } };
+
+  if (companyIds.length) {
+    await dispatchNotification('INQUIRY_PUBLISHED', { companyIds }, context, {
+      tx,
+      dedupeKey: `inquiry-published-${inquiry.id}-companies`,
+    });
+  }
+  await dispatchNotification('INQUIRY_PUBLISHED', { permission: 'leads.read' }, context, {
+    tx,
+    dedupeKey: `inquiry-published-${inquiry.id}-staff`,
+  });
+}
+
+async function notifyInquiryOwner(tx, inquiry, eventKey, context, dedupeKey) {
+  const recipients = inquiry.buyerUserId
+    ? [Number(inquiry.buyerUserId)]
+    : (inquiry.companyId ? { companyIds: [Number(inquiry.companyId)] } : []);
+  if (!recipients.length) return;
+  await dispatchNotification(eventKey, recipients, context, { tx, dedupeKey });
 }
 
 function normalizeInquiryItems(items = []) {
