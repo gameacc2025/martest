@@ -424,49 +424,59 @@ model Product {
 
 ---
 
-### 5. ProductPrice (قیمت محصول)
-**توضیح**: تاریخچه قیمت محصولات
+### 5. ProductPriceTier و ProductPriceSnapshot (قیمت فعلی و تاریخچه قیمت)
+
+**ProductPriceTier** ردیف‌های قیمت فعال محصول را نگه می‌دارد. هر ردیف یک بازهٔ تعدادی دارد؛ ردیفی که `minQuantity = 1` است، سطح خرده‌فروشی محسوب می‌شود. سایر ردیف‌ها قیمت عمده یا خرید تعدادی هستند.
 
 ```prisma
-model ProductPrice {
-  id                  Int       @id @default(autoincrement())
-  productId           Int
-  product             Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  price               Decimal   @db.Decimal(18, 2)
-  currency            String    @default("IRR")
-  unit                String?   // "unit", "meter", "kilogram", etc.
-  minOrderQty         Int?
-  quantityAvailable   Int?
-
-  // Price history: when a new price is set, validTo is set on the old row
-  validFrom           DateTime  @default(now())
-  validTo             DateTime? // null = currently active price
-
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+model ProductPriceTier {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  minQuantity Int
+  maxQuantity Int?
+  price       Decimal   @db.Decimal(18, 2)
+  unit        String?
+  validFrom   DateTime  @default(now())
+  validTo     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
+  @@index([minQuantity])
+  @@index([validFrom])
+  @@index([validTo])
 }
 ```
 
-**فیلدها**:
-- `id`: شناسه یکتا
-- `productId`: شناسه محصول
-- `price`: قیمت (با دقت 2 رقم اعشار)
-- `currency`: واحد پول (پیشفرض: IRR)
-- `unit`: واحد اندازهگیری
-- `minOrderQty`: حداقل مقدار سفارش
-- `quantityAvailable`: مقدار موجود
-- `validFrom`: تاریخ شروع اعتبار
-- `validTo`: تاریخ پایان اعتبار (null = فعال)
-- `createdAt/updatedAt`: زمان ایجاد و بهروزرسانی
+**ProductPriceSnapshot** یک جدول تاریخچهٔ افزایشی است که برای نمودار، مشاهدهٔ قیمت خرده‌فروشی در طول زمان را حفظ می‌کند. تغییرات قیمت عمده‌فروشی در این جدول ثبت نمی‌شوند.
 
-**استراتژی تاریخچه قیمت**:
-- هنگام تنظیم قیمت جدید، `validTo` روی رکورد قدیمی تنظیم میشود
-- فقط یک رکورد با `validTo = null` برای هر محصول فعال است
+```prisma
+model ProductPriceSnapshot {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  priceTierId Int?
+  minQuantity Int
+  maxQuantity Int?
+  price       Decimal  @db.Decimal(18, 2)
+  unit        String?
+  action      String
+  recordedAt  DateTime @default(now())
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
----
+  @@index([productId, recordedAt])
+  @@index([priceTierId])
+}
+```
+
+**قواعد تاریخچه قیمت خرده‌فروشی**:
+- فقط ردیف قیمت با `minQuantity = 1` وارد سری نمودار می‌شود.
+- ایجاد قیمت خرده‌فروشی یک snapshot با `action = CREATE` ثبت می‌کند.
+- تغییر واقعی مبلغ خرده‌فروشی یک snapshot با `action = UPDATE` ثبت می‌کند؛ ویرایش واحد یا بازهٔ تعداد بدون تغییر مبلغ، نقطهٔ تکراری در نمودار نمی‌سازد.
+- حذف ردیف خرده‌فروشی یا تبدیل آن به قیمت عمده، آخرین مقدار خرده‌فروشی را با `action = DELETE` حفظ می‌کند.
+- snapshot و تغییر قیمت در یک تراکنش دیتابیس ثبت می‌شوند. رکوردهای قبلی با ویرایش ردیف قیمت بازنویسی نمی‌شوند.
+- API عمومی `GET /api/v1/products/:id/price-history` همهٔ نقاط ذخیره‌شده را به ترتیب زمانی صعودی برمی‌گرداند و فقط برای محصولات منتشرشده و عمومی پاسخ می‌دهد.
+- تاریخچه از زمان فعال‌شدن این قابلیت به بعد جمع می‌شود؛ قیمت‌های تاریخی‌ای که پیش‌تر ذخیره نشده‌اند از روی `updatedAt` قابل بازسازی مطمئن نیستند.
 
 ### 6. ProductImage (تصاویر محصول)
 **توضیح**: تصاویر و مستندات محصولات
