@@ -2,9 +2,9 @@ name: Runtime Validation
 
 on:
   push:
-    branches: [main, docs-runtime-e2e-hardening, feature/customer-address-management]
+    branches: [main, docs-runtime-e2e-hardening, feature/customer-address-management, feature/customer-dashboard-foundation]
   pull_request:
-    branches: [main]
+    branches: [main, docs-runtime-e2e-hardening]
   workflow_dispatch:
 
 concurrency:
