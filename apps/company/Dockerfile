@@ -34,6 +34,11 @@ COPY packages/permissions/ ./packages/permissions/
 COPY packages/vite-config/ ./packages/vite-config/
 COPY apps/company/ ./apps/company/
 
+ARG VITE_WEBSITE_APP_URL
+ARG VITE_ADMIN_APP_URL
+ENV VITE_WEBSITE_APP_URL=${VITE_WEBSITE_APP_URL}
+ENV VITE_ADMIN_APP_URL=${VITE_ADMIN_APP_URL}
+
 # Build
 RUN pnpm --filter @telecom/company build
 
