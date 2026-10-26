@@ -1056,6 +1056,7 @@ test('listResponses: a seller owning a requested product may read the responses'
   nextFindUnique = {
     id: 1,
     companyId: buyer.companyId,
+    status: 'OPEN',
     items: [{ product: { companyId: seller.companyId } }],
   };
   await inquiryService.listResponses(1, seller);
