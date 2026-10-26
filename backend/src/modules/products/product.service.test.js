@@ -1384,6 +1384,43 @@ test('updateProduct: updates an existing price tier by ID and preserves validity
   assert.equal((calls['productPriceTier.create'] || []).length, 0);
 });
 
+test('updateProduct: full tier reconciliation records retail price changes for the chart', async () => {
+  resetMocks();
+  fx.product = editableProduct({ status: 'DRAFT' });
+  fx.priceTiers = [{
+    id: 7, productId: 1, minQuantity: 1, maxQuantity: 9, price: '100', unit: 'IRR',
+    validFrom: new Date('2020-01-01T00:00:00.000Z'), validTo: null,
+  }];
+  await service.updateProduct(1, {
+    priceTiers: [{ id: 7, minQuantity: 1, maxQuantity: 9, price: 125, unit: 'IRR' }],
+  }, companyA);
+  const snapshot = calls['productPriceSnapshot.create'].at(-1).data;
+  assert.equal(calls['productPriceSnapshot.create'].length, 1);
+  assert.equal(snapshot.action, 'UPDATE');
+  assert.equal(snapshot.minQuantity, 1);
+  assert.equal(Number(snapshot.price), 125);
+});
+
+test('updateProduct: full tier reconciliation does not record wholesale price changes', async () => {
+  resetMocks();
+  fx.product = editableProduct({ status: 'DRAFT' });
+  fx.priceTiers = [{
+    id: 7, productId: 1, minQuantity: 10, maxQuantity: 20, price: '80', unit: 'IRR',
+    validFrom: new Date('2020-01-01T00:00:00.000Z'), validTo: null,
+  }];
+  await service.updateProduct(1, {
+    priceTiers: [{ id: 7, minQuantity: 10, maxQuantity: 20, price: 75, unit: 'IRR' }],
+  }, companyA);
+  assert.equal(calls['productPriceSnapshot.create']?.length || 0, 0);
+});
+
+test('public retail price history is not exposed for unpublished products', async () => {
+  resetMocks();
+  fx.product = { id: 1, status: 'DRAFT', visibility: 'PUBLIC', deletedAt: null };
+  assert.equal(await service.getPublicPriceHistory(1), null);
+  assert.equal(calls['productPriceSnapshot.findMany']?.length || 0, 0);
+});
+
 test('updateProduct: does not recreate unchanged price tiers', async () => {
   fx.product = editableProduct({ status: 'DRAFT' });
   fx.priceTiers = [{
