@@ -189,12 +189,7 @@
               />
             </section>
 
-            <section v-if="productTags.length" class="tags-card" aria-label="برچسب‌های محصول">
-              <h2>برچسب‌ها</h2>
-              <div class="product-tags">
-                <span v-for="tag in productTags" :key="tag" class="product-tag">#{{ tag }}</span>
-              </div>
-            </section>
+
             <div class="help-card">
               <span class="help-icon"><i class="pi pi-comments"></i></span>
               <div>
@@ -202,6 +197,12 @@
                 <p>برای جزئیات قیمت یا مشخصات، با تأمین‌کننده محصول آشنا شوید.</p>
               </div>
             </div>
+            <section v-if="productTags.length" class="tags-card" aria-label="برچسب‌های محصول">
+              <h2>برچسب‌ها</h2>
+              <div class="product-tags">
+                <span v-for="tag in productTags" :key="tag" class="product-tag">#{{ tag }}</span>
+              </div>
+            </section>
           </aside>
         </div>
         <div v-if="inquiryDialogOpen" class="product-dialog-backdrop" @click.self="inquiryDialogOpen = false">
