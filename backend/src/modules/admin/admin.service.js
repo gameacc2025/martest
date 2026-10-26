@@ -341,13 +341,20 @@ async function activatePendingInquirySubscription(subscriptionId, adminUserId, n
   const id = Number(subscriptionId);
   if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه اشتراک معتبر نیست.', 400, true, 'INVALID_SUBSCRIPTION_ID');
   return prisma.$transaction(async (tx) => {
-    const pending = await tx.inquirySubscription.findUnique({
-      where: { id },
-      include: { plan: true },
-    });
+    let pending = await tx.inquirySubscription.findUnique({ where: { id }, include: { plan: true } });
     if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
     if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار پرداخت قابل فعال‌سازی هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+
+    // Lock the owner row to prevent two pending requests for the same owner
+    // from being activated concurrently after both observed "no active plan".
+    if (typeof tx.$queryRawUnsafe === 'function') {
+      if (pending.companyId) await tx.$queryRawUnsafe('SELECT id FROM "Company" WHERE id = $1 FOR UPDATE', pending.companyId);
+      else await tx.$queryRawUnsafe('SELECT id FROM "User" WHERE id = $1 FOR UPDATE', pending.userId);
+    }
+    pending = await tx.inquirySubscription.findUnique({ where: { id }, include: { plan: true } });
+    if (!pending || pending.status !== 'PENDING_PAYMENT') throw new AppError('وضعیت درخواست تغییر کرده است؛ فهرست را تازه‌سازی کنید.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
     if (!pending.plan.isActive) throw new AppError('طرح این اشتراک غیرفعال شده است.', 409, true, 'SUBSCRIPTION_PLAN_INACTIVE');
+
     const ownerFilter = pending.companyId ? { companyId: pending.companyId } : { userId: pending.userId };
     const active = await tx.inquirySubscription.findFirst({
       where: { ...ownerFilter, status: 'ACTIVE', startsAt: { lte: new Date() }, endsAt: { gt: new Date() } },
@@ -356,28 +363,37 @@ async function activatePendingInquirySubscription(subscriptionId, adminUserId, n
     if (active) throw new AppError('این حساب هم‌اکنون اشتراک فعال دارد.', 409, true, 'ACTIVE_SUBSCRIPTION_EXISTS');
     const startsAt = new Date();
     const endsAt = new Date(startsAt.getTime() + pending.plan.durationDays * 86400000);
-    return tx.inquirySubscription.update({
-      where: { id },
+    const changed = await tx.inquirySubscription.updateMany({
+      where: { id, status: 'PENDING_PAYMENT' },
       data: {
         status: 'ACTIVE', startsAt, endsAt, activatedBy: Number(adminUserId),
         notes: [pending.notes, 'پرداخت به‌صورت دستی توسط مدیر بررسی و تأیید شد.', notes].filter(Boolean).join(' | ').slice(0, 2000),
       },
+    });
+    if (changed.count !== 1) throw new AppError('وضعیت درخواست تغییر کرده است؛ فهرست را تازه‌سازی کنید.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+    return tx.inquirySubscription.findUnique({
+      where: { id },
       include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
     });
   });
 }
 
-
 async function rejectPendingInquirySubscription(subscriptionId, adminUserId, notes) {
   const id = Number(subscriptionId);
   if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه اشتراک معتبر نیست.', 400, true, 'INVALID_SUBSCRIPTION_ID');
-  const pending = await prisma.inquirySubscription.findUnique({ where: { id }, select: { id: true, status: true, notes: true } });
-  if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
-  if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار بررسی قابل رد هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
-  return prisma.inquirySubscription.update({
-    where: { id },
-    data: { status: 'CANCELLED', activatedBy: Number(adminUserId), notes: [pending.notes, 'درخواست پرداخت توسط مدیر رد شد.', notes].filter(Boolean).join(' | ').slice(0, 2000) },
-    include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
+  return prisma.$transaction(async (tx) => {
+    const pending = await tx.inquirySubscription.findUnique({ where: { id }, select: { id: true, status: true, notes: true } });
+    if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
+    if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار بررسی قابل رد هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+    const changed = await tx.inquirySubscription.updateMany({
+      where: { id, status: 'PENDING_PAYMENT' },
+      data: { status: 'CANCELLED', activatedBy: Number(adminUserId), notes: [pending.notes, 'درخواست پرداخت توسط مدیر رد شد.', notes].filter(Boolean).join(' | ').slice(0, 2000) },
+    });
+    if (changed.count !== 1) throw new AppError('وضعیت درخواست تغییر کرده است؛ فهرست را تازه‌سازی کنید.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+    return tx.inquirySubscription.findUnique({
+      where: { id },
+      include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
+    });
   });
 }
 
