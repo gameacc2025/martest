@@ -569,12 +569,19 @@ test('createProduct: rejects a missing title before touching the database', asyn
 
 // ── deleteProduct: soft delete + tenant isolation ─────────────
 
-test('deleteProduct: soft-deletes (sets deletedAt) rather than removing the row', async () => {
+test('deleteProduct: soft-deletes and atomically records lifecycle/activity audit', async () => {
   fx.product = draftProduct({ companyId: 10 });
   await service.deleteProduct(1, companyA);
   const updateArgs = calls['product.update'].at(-1);
   assert.ok(updateArgs.data.deletedAt instanceof Date);
   assert.equal(updateArgs.data.status, 'ARCHIVED');
+  const statusEvent = calls['productStatusHistory.create'].at(-1).data;
+  assert.equal(statusEvent.previousStatus, 'DRAFT');
+  assert.equal(statusEvent.newStatus, 'ARCHIVED');
+  assert.equal(statusEvent.changedByUserId, companyA.id);
+  const activity = calls['productActivityLog.create'].at(-1).data;
+  assert.equal(activity.action, 'DELETE');
+  assert.equal(activity.productId, 1);
 });
 
 test('deleteProduct: a company cannot delete another company\'s product', async () => {
