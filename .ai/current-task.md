@@ -1,5 +1,23 @@
 # Current Task / Agent Handoff
 
+## CUSTOMER-ADDRESS-MANAGEMENT — Customer Identity Phase
+
+- **Status:** Implemented on branch; CI and runtime checks must pass before release/merge.
+- **Branch:** `feature/customer-address-management`
+- **Base:** `docs-runtime-e2e-hardening`.
+- **Authorization:** User explicitly approved implementation after the schema/migration plan was described.
+- Added `Address` Prisma model and PostgreSQL migration `20261026130000_customer_addresses`.
+- Added owner-scoped address service/controller/routes, with CUSTOMER access-type enforcement, validation, default-address handling, and cascade deletion.
+- Registered `/api/v1/addresses` and centralized API client endpoints.
+- Added responsive Persian customer address page at `/profile/addresses`, linked from the existing profile menu.
+- Added service tests for ownership boundaries and default-address behavior.
+- Updated API and database documentation.
+- **Verification boundary:** Code has been committed to the feature branch via GitHub file commits; do not claim tests or Prisma migration deployment passed until CI/Runtime Validation confirms it. No PR merged.
+
+---
+
+# Current Task / Agent Handoff
+
 ## REPO-HARDENING-TASKS-3-7 — Documentation, architecture, runtime, browser smoke, and release readiness
 
 - **Status:** IMPLEMENTED ON WORKING BRANCH; automated CI/runtime verification is running. Do not mark release-ready until the latest workflow runs finish green.
