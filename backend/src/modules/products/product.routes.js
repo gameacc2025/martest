@@ -175,7 +175,8 @@ async function productRoutes(fastify) {
 
     // IMPORTANT: /my-products MUST be before /:id to avoid route conflict
     authenticated.get('/my-products', {
-      schema: { summary: 'List current user\'s products', tags: ['Products'] },
+      preHandler: [requireAccessType(...MANAGE_TYPES), requirePermission('products.read')],
+      schema: { summary: 'List products available to the current management user', tags: ['Products'] },
     }, ctrl.myProducts);
 
     // Authenticated single-product fetch for MANAGEMENT/edit. Unlike the public
@@ -184,16 +185,19 @@ async function productRoutes(fastify) {
     // own product in ANY status (DRAFT/PENDING_REVIEW/REJECTED/...) and
     // SUPER_ADMIN can load any product. Ownership is enforced in the service.
     authenticated.get('/:id/manage', {
+      preHandler: [requireAccessType(...MANAGE_TYPES), requirePermission('products.read')],
       schema: { params: idParamSchema, summary: 'Get a product for management/edit', tags: ['Products'] },
     }, ctrl.getOne);
 
     authenticated.get('/:id/history', {
+      preHandler: [requireAccessType(...MANAGE_TYPES), requirePermission('products.read')],
       schema: { params: idParamSchema, summary: 'Get product change history', tags: ['Products'] },
     }, ctrl.getHistory);
 
-    // Immutable audit trail of every content mutation + workflow transition.
-    // Ownership/404 is enforced in the service (same as /history).
+    // Immutable audit trail. RBAC is enforced here and tenant ownership again
+    // inside the service to protect direct/internal call paths.
     authenticated.get('/:id/activity', {
+      preHandler: [requireAccessType(...MANAGE_TYPES), requirePermission('products.read')],
       schema: { params: idParamSchema, summary: 'Get product activity log', tags: ['Products'] },
     }, ctrl.getActivity);
 
