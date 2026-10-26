@@ -1142,8 +1142,8 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
     if (inquiry.status !== 'OPEN') {
       throw { statusCode: 400, code: 'INQUIRY_NOT_OPEN', message: 'Only responses to an open inquiry can be decided.' };
     }
-    if (decision === 'SELECTED' && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
-      throw { statusCode: 403, code: 'RESPONSES_NOT_REVEALED', message: 'Reveal sealed responses before selecting a supplier.' };
+    if (['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+      throw { statusCode: 403, code: 'RESPONSES_NOT_REVEALED', message: 'Reveal sealed responses before deciding on a supplier.' };
     }
 
     const response = await tx.inquiryResponse.findFirst({
