@@ -45,6 +45,11 @@ async function changeStatus(request, reply) {
   return reply.send(success(inquiry));
 }
 
+async function revealResponses(request, reply) {
+  const inquiry = await inquiryService.revealInquiryResponses(request.params.id, request.user);
+  return reply.send(success(inquiry));
+}
+
 async function addItem(request, reply) {
   const item = await inquiryService.addInquiryItem(request.params.id, request.body, request.user);
   return reply.code(201).send(success(item));
@@ -103,6 +108,7 @@ module.exports = {
   create,
   update,
   changeStatus,
+  revealResponses,
   stats,
 
 
