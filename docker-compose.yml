@@ -123,6 +123,9 @@ services:
     build:
       context: .
       dockerfile: apps/admin/Dockerfile
+      args:
+        VITE_WEBSITE_APP_URL: ${VITE_WEBSITE_APP_URL:-http://localhost:3001}
+        VITE_COMPANY_APP_URL: ${VITE_COMPANY_APP_URL:-http://localhost:3002}
 
     container_name: telecom_admin
     restart: unless-stopped
