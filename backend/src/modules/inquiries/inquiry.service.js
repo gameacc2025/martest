@@ -453,6 +453,18 @@ function normalizeInquiryItems(items = []) {
  *
  * Date fields accept ISO strings, or `null` to clear (update only).
  */
+function assertInquiryDateWindow(publishDate, responseDeadline) {
+  if (!responseDeadline) return;
+  const publicationBoundary = publishDate ? new Date(publishDate) : new Date();
+  if (Number.isNaN(publicationBoundary.getTime()) || new Date(responseDeadline) <= publicationBoundary) {
+    throw {
+      statusCode: 400,
+      code: 'INVALID_INQUIRY_DATE_WINDOW',
+      message: 'The response deadline must be later than the publication date (or the current time when publishing immediately).',
+    };
+  }
+}
+
 function buildInquirySettings(data = {}, { partial = false } = {}) {
   const settings = {};
 
@@ -505,6 +517,7 @@ function buildInquirySettings(data = {}, { partial = false } = {}) {
   setDate('publishDate');
   setDate('responseDeadline');
 
+  if (!partial) assertInquiryDateWindow(settings.publishDate, settings.responseDeadline);
   return settings;
 }
 
@@ -769,6 +782,7 @@ async function createInquiry(data, caller) {
     // Website quick inquiries are actionable immediately. Company-authored RFQs
     // retain the established DRAFT -> SUBMITTED -> OPEN workflow.
     if (isCustomerBuyer) settings.publishDate = new Date();
+    assertInquiryDateWindow(settings.publishDate, settings.responseDeadline);
 
     const inquiry = await tx.inquiry.create({
       data: {
@@ -809,6 +823,10 @@ async function updateInquiry(inquiryId, data, caller) {
     }
 
     const updateData = buildInquirySettings(data, { partial: true });
+    assertInquiryDateWindow(
+      updateData.publishDate !== undefined ? updateData.publishDate : inquiry.publishDate,
+      updateData.responseDeadline !== undefined ? updateData.responseDeadline : inquiry.responseDeadline,
+    );
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
 
