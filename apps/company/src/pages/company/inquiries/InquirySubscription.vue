@@ -34,12 +34,12 @@ function date(value) {
 function unwrap(result) { return result?.data?.data ?? result?.data ?? result ?? {} }
 
 onMounted(async () => {
+  await load()
   const paymentStatus = String(route.query.payment || '')
   if (paymentStatus === 'success') successMessage.value = 'پرداخت با موفقیت تأیید شد و اشتراک فعال شد.'
   else if (paymentStatus === 'cancelled') errorMessage.value = 'پرداخت لغو شد؛ اشتراک فعال نشده است.'
   else if (paymentStatus === 'failed') errorMessage.value = 'پرداخت تأیید نشد؛ اگر مبلغی کسر شده، با پشتیبانی تماس بگیرید.'
   else if (paymentStatus === 'pending') errorMessage.value = 'تأیید درگاه موقتاً در دسترس نبود؛ درخواست در انتظار بررسی باقی مانده است.'
-  await load()
 })
 async function load() {
   loading.value = true
