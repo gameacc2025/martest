@@ -40,6 +40,31 @@ async function updateReviewEditThreshold(request, reply) {
  * POST /api/v1/admin/notifications/send
  * Send an announcement to an authorized audience.
  */
+async function getInquiryMonetizationSettingsCtrl(request, reply) {
+  return reply.send(success(await adminService.getInquiryMonetizationSettings()));
+}
+
+async function updateInquiryMonetizationSettingsCtrl(request, reply) {
+  const result = await adminService.updateInquiryMonetizationSettings(request.body.subscriptionEnforcement, Number(request.user.id));
+  return reply.send(success(result));
+}
+
+async function listInquiryPlansCtrl(request, reply) {
+  return reply.send(success(await adminService.listInquiryPlans()));
+}
+
+async function createInquiryPlanCtrl(request, reply) {
+  return reply.code(201).send(success(await adminService.createInquiryPlan(request.body)));
+}
+
+async function listInquirySubscriptionsCtrl(request, reply) {
+  return reply.send(success(await adminService.listInquirySubscriptions()));
+}
+
+async function grantInquirySubscriptionCtrl(request, reply) {
+  return reply.code(201).send(success(await adminService.grantInquirySubscription(request.body, Number(request.user.id))));
+}
+
 async function sendNotificationCtrl(request, reply) {
   const result = await adminService.sendNotification(request.body);
   return reply.code(202).send({ data: result });
@@ -94,4 +119,4 @@ async function updateNotificationFolderCtrl(request, reply) {
   return reply.send({ data: folder });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl, listNotificationFoldersCtrl, createNotificationFolderCtrl, updateNotificationFolderCtrl };
+module.exports = { getStats, getSettings, updateReviewEditThreshold, getInquiryMonetizationSettingsCtrl, updateInquiryMonetizationSettingsCtrl, listInquiryPlansCtrl, createInquiryPlanCtrl, listInquirySubscriptionsCtrl, grantInquirySubscriptionCtrl, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl, listNotificationFoldersCtrl, createNotificationFolderCtrl, updateNotificationFolderCtrl };
