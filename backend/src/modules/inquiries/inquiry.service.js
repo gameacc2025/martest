@@ -65,7 +65,15 @@ const inquiryInclude = {
   responses: {
     include: {
       company: { select: { id: true, name: true, type: true } },
-      items: true,
+      items: {
+        include: {
+          inquiryItem: {
+            include: {
+              product: { select: { id: true, title: true, slug: true, companyId: true } },
+            },
+          },
+        },
+      },
     },
   },
   statusHistory: {
@@ -366,6 +374,14 @@ function shapeInquiryForCaller(inquiry, caller) {
         ordinal += 1;
         const anonymous = { ...response, company: { name: `پیشنهاددهنده ${ordinal}`, type: null } };
         delete anonymous.companyId;
+        anonymous.items = (response.items || []).map((item) => {
+          const safeItem = { ...item };
+          if (safeItem.inquiryItem?.product) {
+            safeItem.inquiryItem = { ...safeItem.inquiryItem, product: { ...safeItem.inquiryItem.product } };
+            delete safeItem.inquiryItem.product.companyId;
+          }
+          return safeItem;
+        });
         return anonymous;
       });
       result.items = (result.items || []).map((item) => ({
@@ -1109,6 +1125,109 @@ async function updateResponse(inquiryId, responseId, data, caller) {
  * and before the deadline. Withdrawn responses are kept for audit (status
  * = WITHDRAWN, withdrawnAt set) rather than deleted.
  */
+async function decideResponse(inquiryId, responseId, decision, caller, comment) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const numericResponseId = toPositiveInt(responseId, 'responseId');
+  if (!['SELECTED', 'REJECTED'].includes(decision)) {
+    throw { statusCode: 400, code: 'INVALID_RESPONSE_DECISION', message: 'Decision must be SELECTED or REJECTED.' };
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
+    if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+    assertCanManageInquiry(inquiry, caller);
+    if (!isInquiryBuyer(inquiry, caller)) {
+      throw { statusCode: 403, code: 'BUYER_DECISION_REQUIRED', message: 'Only the inquiry buyer may decide supplier responses.' };
+    }
+    if (inquiry.status !== 'OPEN') {
+      throw { statusCode: 400, code: 'INQUIRY_NOT_OPEN', message: 'Only responses to an open inquiry can be decided.' };
+    }
+    if (decision === 'SELECTED' && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+      throw { statusCode: 403, code: 'RESPONSES_NOT_REVEALED', message: 'Reveal sealed responses before selecting a supplier.' };
+    }
+
+    const response = await tx.inquiryResponse.findFirst({
+      where: { id: numericResponseId, inquiryId: numericInquiryId },
+      select: { id: true, companyId: true, status: true },
+    });
+    if (!response) throw { statusCode: 404, code: 'RESPONSE_NOT_FOUND', message: 'Response not found.' };
+    if (response.status !== 'PENDING') {
+      throw { statusCode: 400, code: 'RESPONSE_ALREADY_DECIDED', message: 'Only pending responses can be decided.' };
+    }
+
+    if (decision === 'REJECTED') {
+      const rejected = await tx.inquiryResponse.update({
+        where: { id: numericResponseId },
+        data: { status: 'REJECTED' },
+        include: responseInclude,
+      });
+      await dispatchNotification('INQUIRY_RESPONSE_REJECTED', { companyIds: [response.companyId] }, {
+        inquiry: { id: inquiry.id, title: inquiry.title },
+        response: { id: response.id },
+      }, { tx, dedupeKey: `inquiry-response-rejected-${response.id}` });
+      return rejected;
+    }
+
+    const now = new Date();
+    const closeResult = await tx.inquiry.updateMany({
+      where: { id: numericInquiryId, status: 'OPEN' },
+      data: { status: 'CLOSED', closedAt: now },
+    });
+    if (!closeResult.count) {
+      throw { statusCode: 409, code: 'INQUIRY_ALREADY_CLOSED', message: 'This inquiry has already been closed or decided.' };
+    }
+
+    const losers = await tx.inquiryResponse.findMany({
+      where: { inquiryId: numericInquiryId, status: 'PENDING', id: { not: numericResponseId } },
+      select: { id: true, companyId: true },
+    });
+    await tx.inquiryResponse.update({
+      where: { id: numericResponseId },
+      data: { status: 'SELECTED' },
+    });
+    if (losers.length) {
+      await tx.inquiryResponse.updateMany({
+        where: { inquiryId: numericInquiryId, status: 'PENDING', id: { not: numericResponseId } },
+        data: { status: 'REJECTED' },
+      });
+    }
+
+    await tx.inquiryStatusHistory.create({
+      data: {
+        inquiryId: numericInquiryId,
+        previousStatus: 'OPEN',
+        newStatus: 'CLOSED',
+        changedByUserId: assertAuthenticatedUser(caller),
+        source: 'USER',
+        comment: comment || 'Supplier response selected; other pending responses were rejected.',
+      },
+    });
+
+    const selectedResponse = await tx.inquiryResponse.findFirst({
+      where: { id: numericResponseId, inquiryId: numericInquiryId },
+      include: responseInclude,
+    });
+    await dispatchNotification('INQUIRY_RESPONSE_SELECTED', { companyIds: [response.companyId] }, {
+      inquiry: { id: inquiry.id, title: inquiry.title },
+      response: { id: response.id },
+    }, { tx, dedupeKey: `inquiry-response-selected-${response.id}` });
+
+    for (const loser of losers) {
+      await dispatchNotification('INQUIRY_RESPONSE_AUTO_REJECTED', { companyIds: [loser.companyId] }, {
+        inquiry: { id: inquiry.id, title: inquiry.title },
+        company: { id: loser.companyId },
+      }, { tx, dedupeKey: `inquiry-response-auto-rejected-${loser.id}` });
+    }
+
+    await notifyInquiryOwner(tx, inquiry, 'INQUIRY_STATUS_CHANGED', {
+      inquiry: { id: inquiry.id, title: inquiry.title },
+      status: 'CLOSED',
+    }, `inquiry-status-${inquiry.id}-CLOSED-owner`);
+
+    return selectedResponse;
+  });
+}
+
 async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   const numericResponseId = toPositiveInt(responseId, 'responseId');
@@ -1352,6 +1471,7 @@ module.exports = {
   submitResponse,
   listResponses,
   updateResponse,
+  decideResponse,
   withdrawResponse,
   uploadResponseAttachment,
   deleteResponseAttachment,
