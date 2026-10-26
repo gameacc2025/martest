@@ -26,6 +26,11 @@ const auth = useAuthStore()
 const inquiry = ref(null)
 const loading = ref(true)
 const errored = ref(false)
+const messages = ref([])
+const messageDraft = ref('')
+const recipientCompanyId = ref(null)
+const loadingMessages = ref(false)
+const sendingMessage = ref(false)
 
 const showResponseDialog = ref(false)
 const responseItems = ref([])
@@ -60,6 +65,8 @@ const PRIORITY_SEVERITY = { LOW: 'secondary', NORMAL: 'info', HIGH: 'warn', URGE
 
 const myCompanyId = computed(() => Number(auth.companyId) || null)
 const isInquiryBuyer = computed(() => Boolean(myCompanyId.value && Number(inquiry.value?.company?.id) === myCompanyId.value))
+const canUseInquiryMessages = computed(() => isInquiryBuyer.value || Boolean(myResponse.value))
+const messageRecipients = computed(() => (inquiry.value?.responses || []).map(r => r.company).filter(Boolean))
 const canRevealResponses = computed(() => isInquiryBuyer.value
   && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.value?.visibilityMode)
   && inquiry.value?.allowEarlyReveal
@@ -132,11 +139,63 @@ async function fetchInquiry() {
     const response = await inquiriesApi.getById(route.params.id)
     const body = response?.data ?? response
     inquiry.value = body?.data ?? body
+    await fetchMessages()
   } catch (err) {
     errored.value = true
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت اطلاعات استعلام', life: 3000 })
   } finally {
     loading.value = false
+  }
+}
+
+function messageSenderName(message) {
+  if (message.senderCompany?.name) return message.senderCompany.name
+  const profile = message.senderUser?.profile
+  const name = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ')
+  return name || message.senderUser?.phone || 'کاربر'
+}
+
+async function fetchMessages() {
+  loadingMessages.value = true
+  try {
+    const result = await inquiriesApi.listMessages(route.params.id)
+    const body = result?.data ?? result
+    messages.value = Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : []
+  } catch (err) {
+    messages.value = []
+    // A user who can see the inquiry but is not a participant must not see the thread.
+    if (err?.response?.status !== 403 && err?.response?.status !== 404) {
+      toast.add({ severity: 'warn', summary: 'پیام‌های استعلام', detail: err?.message || 'دریافت پیام‌ها انجام نشد', life: 3000 })
+    }
+  } finally {
+    loadingMessages.value = false
+  }
+}
+
+async function sendInquiryMessage() {
+  const message = messageDraft.value.trim()
+  if (!message) return
+  if (isInquiryBuyer.value && !Number(recipientCompanyId.value)) {
+    toast.add({ severity: 'warn', summary: 'انتخاب گیرنده', detail: 'ابتدا شرکت پاسخ‌دهنده را انتخاب کنید.', life: 3000 })
+    return
+  }
+  sendingMessage.value = true
+  try {
+    await inquiriesApi.sendMessage(route.params.id, {
+      message,
+      ...(isInquiryBuyer.value ? { recipientCompanyId: Number(recipientCompanyId.value) } : {}),
+    })
+    messageDraft.value = ''
+    toast.add({ severity: 'success', summary: 'پیام ارسال شد', detail: 'پیام با موفقیت ثبت شد.', life: 2500 })
+    await fetchMessages()
+  } catch (err) {
+    const code = err?.response?.data?.code || err?.code
+    const detail = code === 'INQUIRY_QUOTA_EXCEEDED' || code === 'INQUIRY_SUBSCRIPTION_REQUIRED'
+      ? 'سهمیه پیام شما کافی نیست یا اشتراک فعال ندارید. بخش اشتراک استعلام را بررسی کنید.'
+      : err?.response?.data?.message || err?.message || 'ارسال پیام انجام نشد.'
+    toast.add({ severity: 'error', summary: 'ارسال پیام ناموفق بود', detail, life: 4000 })
+  } finally {
+    sendingMessage.value = false
   }
 }
 
@@ -470,6 +529,33 @@ function formatPrice(price) {
               </div>
             </div>
           </div>
+
+          <!-- Private inquiry conversation -->
+          <div class="detail-section message-section" v-if="canUseInquiryMessages">
+            <div class="message-heading">
+              <h2>گفت‌وگوی استعلام <span class="count-badge">{{ messages.length }}</span></h2>
+              <Button icon="pi pi-refresh" text rounded size="small" aria-label="به‌روزرسانی پیام‌ها" :loading="loadingMessages" @click="fetchMessages" />
+            </div>
+            <p class="description-text">پیام‌ها فقط بین خریدار استعلام و شرکت پاسخ‌دهندهٔ انتخاب‌شده نمایش داده می‌شوند. ارسال پیام از سهمیهٔ اشتراک مصرف می‌کند.</p>
+            <div v-if="loadingMessages && !messages.length" class="empty-section">در حال دریافت پیام‌ها…</div>
+            <div v-else-if="!messages.length" class="empty-section">هنوز پیامی در این گفت‌وگو ثبت نشده است.</div>
+            <div v-else class="message-list" aria-live="polite">
+              <article v-for="message in messages" :key="message.id" class="message-bubble" :class="{ 'message-mine': message.senderCompanyId === myCompanyId }">
+                <div class="message-meta"><strong>{{ messageSenderName(message) }}</strong><time>{{ formatDateTime(message.createdAt) }}</time></div>
+                <p>{{ message.body }}</p>
+              </article>
+            </div>
+            <form class="message-composer" @submit.prevent="sendInquiryMessage">
+              <label v-if="isInquiryBuyer" class="message-recipient">شرکت پاسخ‌دهنده
+                <select v-model="recipientCompanyId" required>
+                  <option :value="null" disabled>انتخاب شرکت</option>
+                  <option v-for="company in messageRecipients" :key="company.id" :value="company.id">{{ company.name }}</option>
+                </select>
+              </label>
+              <Textarea v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="پیام خود را بنویسید…" class="w-full" />
+              <div class="message-send-row"><small>{{ messageDraft.trim().length.toLocaleString('fa-IR') }} / ۵۰۰۰</small><Button type="submit" label="ارسال پیام" icon="pi pi-send" :loading="sendingMessage" :disabled="!messageDraft.trim() || messageDraft.trim().length > 5000" /></div>
+            </form>
+          </div>
         </div>
 
         <!-- Right Column: Sidebar -->
@@ -750,6 +836,17 @@ function formatPrice(price) {
 }
 
 /* ── Responses ──────────────────────────────────────── */
+.message-section{border-top:1px solid var(--surface-border,#e5e7eb);padding-top:1.25rem}
+.message-heading,.message-meta,.message-send-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.message-list{display:grid;gap:.75rem;max-height:420px;overflow:auto;margin:1rem 0}
+.message-bubble{border:1px solid var(--surface-border,#e5e7eb);border-radius:10px;padding:.8rem 1rem;background:var(--surface-card,#fff);max-width:92%}
+.message-bubble.message-mine{margin-inline-start:auto;background:var(--surface-ground,#f8fafc)}
+.message-meta{font-size:.8rem;color:var(--text-color-secondary,#64748b);flex-wrap:wrap}
+.message-bubble p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.55rem 0 0;color:var(--text-color,#1f2937);line-height:1.8}
+.message-composer{display:grid;gap:.65rem;margin-top:1rem}
+.message-recipient{display:grid;gap:.4rem;max-width:360px;font-size:.9rem}
+.message-recipient select{padding:.65rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-card,#fff);color:inherit}
+.message-send-row small{color:var(--text-color-secondary,#64748b)}
 .responses-list {
   display: flex;
   flex-direction: column;
