@@ -29,7 +29,6 @@ let nextFindUnique = null;
 let nextMessages = [];
 let smsUsageEvents = [];
 const activeSmsSubscription = { id: 77, planId: 2, startsAt: new Date('2026-10-01T00:00:00Z'), endsAt: new Date('2026-11-01T00:00:00Z'), status: 'ACTIVE', plan: { id: 2, name: 'SMS', isActive: true, inquiriesPerPeriod: 10, responsesPerPeriod: 10, internalMessagesPerPeriod: 10, smsPerPeriod: 2 } };
-let nextMessages = [];
 
 // Fixtures backing the transactional / relationship-heavy paths
 // (items, responses, attachments, product validation, stats).
