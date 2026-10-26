@@ -290,3 +290,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Commits: `8a963b4459288d7de714b4913579dbb61669435d`, `df0e7b52cf8e1e2643bbabac43cd999eee96bcf2`, handoff update `783cbe999d0acbe6d0431158d680b1004382e73d`.
 - CI: run `40270760225` for then-current HEAD `df0e7b52cf8e1e2643bbabac43cd999eee96bcf2` was queued at last check. Existing frontend notification bulk-read tests still block the backend test step in recent runs; product tests/builds remain NOT VERIFIED.
 - Next: Check latest CI and remove the notification test blocker if it persists, then verify the product service/route suites.
+
+## 2026-10-26 — CI-UNBLOCK-NOTIFICATIONS-2026-10-26-01 — Restore bulk notification selection test coverage
+- **Status:** IN_PROGRESS
+- **Goal:** Remove the existing Website/Company/Admin notification bulk-read UI test failure that stops CI before the product backend tests can run.
+- **Evidence:** Latest workflow logs show 3 failed / 155 passed frontend tests; each failure cannot find the `خوانده‌شده` bulk button after setting a row checkbox. Backend tests/builds are skipped by the workflow after this frontend failure.
+- **Scope:** Three `Notifications.vue` pages and their focused tests only; no notification API/schema changes.
+- **Verification:** CI must pass the notification tests before product backend tests can be considered verified. Remote GitHub source edits only; local test runner unavailable in this session.
