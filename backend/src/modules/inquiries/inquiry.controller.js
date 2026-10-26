@@ -115,6 +115,16 @@ async function submitResponse(request, reply) {
   return reply.code(201).send(success(response));
 }
 
+async function listMessages(request, reply) {
+  const messages = await inquiryService.listInquiryMessages(request.params.id, request.user);
+  return reply.send(success(messages));
+}
+
+async function sendMessage(request, reply) {
+  const message = await inquiryService.sendInquiryMessage(request.params.id, request.body, request.user);
+  return reply.code(201).send(success(message));
+}
+
 async function listResponses(request, reply) {
   const responses = await inquiryService.listResponses(request.params.id, request.user);
   return reply.send(success(responses));
@@ -179,6 +189,8 @@ module.exports = {
   deleteItem,
   submitResponse,
   listResponses,
+  listMessages,
+  sendMessage,
   updateResponse,
   decideResponse,
   withdrawResponse,
