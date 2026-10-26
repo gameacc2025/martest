@@ -169,8 +169,9 @@ test.beforeEach(() => resetMocks());
 
 // ── Callers used across tests ────────────────────────────────
 const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'] };
-const companyA = { id: 2, roles: ['COMPANY_MANAGER'], permissions: [], companyId: 10 };
-const companyB = { id: 3, roles: ['COMPANY_MANAGER'], permissions: [], companyId: 20 };
+const companyA = { id: 2, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 10 };
+const companyB = { id: 3, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 20 };
+const staffModerator = { id: 5, roles: ['PRODUCT_MODERATOR'], accessType: 'STAFF', permissions: ['products.read'] };
 const anonymous = null;
 
 function draftProduct(overrides = {}) {
@@ -279,6 +280,38 @@ test('getProductById: a company is hidden from another company\'s product (looks
 test('getProductById: SUPER_ADMIN sees any product regardless of status/visibility/owner', async () => {
   fx.product = draftProduct({ companyId: 10, status: 'DRAFT', visibility: 'PRIVATE' });
   assert.ok(await service.getProductById(1, superAdmin));
+});
+
+test('getProductById: STAFF with products.read can load pending/private products across companies', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'PENDING_REVIEW', visibility: 'PRIVATE' });
+  assert.ok(await service.getProductById(1, staffModerator));
+});
+
+test('getProductById: STAFF without products.read is forbidden from management detail', async () => {
+  fx.product = draftProduct({ status: 'PENDING_REVIEW', visibility: 'PRIVATE' });
+  await assert.rejects(
+    () => service.getProductById(1, { ...staffModerator, permissions: [] }),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('listProducts: authorized STAFF management sees pending products across companies', async () => {
+  let capturedWhere;
+  mockPrisma.product.findMany = async (args) => { capturedWhere = args.where; return []; };
+  await service.listProducts({ skip: 0, take: 10, filters: { status: 'PENDING_REVIEW' }, caller: staffModerator });
+  assert.equal(capturedWhere.status, 'PENDING_REVIEW');
+  assert.equal(capturedWhere.visibility, undefined);
+  assert.equal(capturedWhere.companyId, undefined);
+});
+
+test('listProducts: even STAFF sessions on the public route remain clamped to PUBLISHED + PUBLIC', async () => {
+  let capturedWhere;
+  mockPrisma.product.findMany = async (args) => { capturedWhere = args.where; return []; };
+  await service.listProducts({
+    skip: 0, take: 10, filters: { status: 'PENDING_REVIEW' }, caller: staffModerator, publicOnly: true,
+  });
+  assert.equal(capturedWhere.status, 'PUBLISHED');
+  assert.equal(capturedWhere.visibility, 'PUBLIC');
 });
 
 // ── listProducts scoping ──────────────────────────────────────
@@ -1540,9 +1573,31 @@ test('getProductHistory: a missing product is 404', async () => {
   );
 });
 
-test('getProductHistory: returns the status timeline', async () => {
+test('getProductHistory: requires products.read for a management caller', async () => {
   fx.product = draftProduct();
-  assert.deepEqual(await service.getProductHistory(1), []);
+  await assert.rejects(
+    () => service.getProductHistory(1, { ...companyA, permissions: [] }),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('getProductHistory: company can read its own status timeline', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  assert.deepEqual(await service.getProductHistory(1, companyA), []);
+});
+
+test('getProductHistory: another company receives 404 and no audit query', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  await assert.rejects(
+    () => service.getProductHistory(1, companyB),
+    (err) => err.statusCode === 404 && err.code === 'PRODUCT_NOT_FOUND'
+  );
+  assert.equal((calls['productStatusHistory.findMany'] || []).length, 0);
+});
+
+test('getProductHistory: STAFF moderator with products.read can read cross-company history', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  assert.deepEqual(await service.getProductHistory(1, staffModerator), []);
 });
 
 test('getProductActivityLog: a missing product is 404', async () => {
@@ -1553,7 +1608,29 @@ test('getProductActivityLog: a missing product is 404', async () => {
   );
 });
 
-test('getProductActivityLog: returns the activity rows', async () => {
+test('getProductActivityLog: requires products.read for a management caller', async () => {
   fx.product = draftProduct();
-  assert.deepEqual(await service.getProductActivityLog(1), []);
+  await assert.rejects(
+    () => service.getProductActivityLog(1, { ...companyA, permissions: [] }),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('getProductActivityLog: company can read its own activity rows', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  assert.deepEqual(await service.getProductActivityLog(1, companyA), []);
+});
+
+test('getProductActivityLog: another company receives 404 and no audit query', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  await assert.rejects(
+    () => service.getProductActivityLog(1, companyB),
+    (err) => err.statusCode === 404 && err.code === 'PRODUCT_NOT_FOUND'
+  );
+  assert.equal((calls['productActivityLog.findMany'] || []).length, 0);
+});
+
+test('getProductActivityLog: STAFF moderator with products.read can read cross-company activity', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  assert.deepEqual(await service.getProductActivityLog(1, staffModerator), []);
 });
