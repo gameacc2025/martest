@@ -174,7 +174,7 @@ async function processPendingSmsDeliveries({ limit = POLL_LIMIT } = {}) {
           status: isExhausted ? 'FAILED' : 'PENDING',
           attempts: newAttempts,
           lastError: error.message?.substring(0, 500) || String(error),
-          nextAttemptAt: isExhausted ? null : calculateBackoff(newAttempts),
+          nextAttemptAt: isExhausted ? new Date() : calculateBackoff(newAttempts),
           updatedAt: new Date(),
         },
       });
