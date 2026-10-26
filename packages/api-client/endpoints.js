@@ -169,6 +169,7 @@ export const endpoints = {
     listResponses: (id) => `/inquiries/${id}/responses`,
     submitResponse: (id) => `/inquiries/${id}/responses`,
     updateResponse: (id, responseId) => `/inquiries/${id}/responses/${responseId}`,
+    decideResponse: (id, responseId) => `/inquiries/${id}/responses/${responseId}/decision`,
     withdrawResponse: (id, responseId) => `/inquiries/${id}/responses/${responseId}/withdraw`,
     responseAttachments: (id, responseId) => `/inquiries/${id}/responses/${responseId}/attachments`,
     deleteResponseAttachment: (id, responseId, attachmentId) => `/inquiries/${id}/responses/${responseId}/attachments/${attachmentId}`,
