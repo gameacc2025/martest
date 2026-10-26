@@ -94,7 +94,7 @@
               <div v-if="product.shortDescription" class="short-description">
                 {{ product.shortDescription }}
               </div>
-              <div v-if="product.description" class="full-description" v-html="product.description"></div>
+              <div v-if="product.description" class="full-description">{{ product.description }}</div>
             </section>
 
             <section v-if="specRows.length" class="content-card specifications-card">
@@ -662,25 +662,7 @@ const goBack = () => router.push('/products')
   line-height: 2;
   font-size: 0.92rem;
   overflow-wrap: anywhere;
-}
-
-.full-description :deep(p) {
-  margin: 0 0 0.8rem;
-}
-
-.full-description :deep(p:last-child) {
-  margin-bottom: 0;
-}
-
-.full-description :deep(img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.65rem;
-}
-
-.full-description :deep(ul),
-.full-description :deep(ol) {
-  padding-inline-start: 1.5rem;
+  white-space: pre-line;
 }
 
 .specification-list {
