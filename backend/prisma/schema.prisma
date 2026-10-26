@@ -489,11 +489,12 @@ model InquiryStatusHistory {
   inquiryId      Int
   previousStatus InquiryStatus
   newStatus      InquiryStatus
-  changedByUserId Int
+  changedByUserId Int?
+  source         String        @default("USER")
   comment        String?
   createdAt      DateTime      @default(now())
   inquiry        Inquiry       @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
-  changedBy      User          @relation(fields: [changedByUserId], references: [id])
+  changedBy      User?         @relation(fields: [changedByUserId], references: [id])
 
   @@index([inquiryId])
   @@index([changedByUserId])
