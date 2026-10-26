@@ -1238,6 +1238,10 @@
 
 The public `GET /api/v1/products` and `GET /api/v1/products/:id` routes remain public-catalog reads and must not be used for moderation: they expose only `PUBLISHED` + `PUBLIC` products. The public list remains clamped to those values even when a signed-in session exists.
 
+**Product write authorization:** COMPANY users can mutate only products owned by their company; this ownership rule is enforced by the service, not just the route/UI. STAFF cross-company writes are allowed only when the caller has the exact operation permission enforced by the route and independently checked in the service: `products.create` (creation requires an explicit `companyId`), `products.update` (including price tiers), `products.delete`, `product_images.create/update/delete`, `product_documents.create/delete`, or the corresponding workflow permission (`products.submit_review`, `products.approve`, `products.reject`, `products.publish`, `products.hide`, `products.archive`, `products.review`). STAFF is not treated as a COMPANY tenant even if a token contains `companyId`; product creation must explicitly name the target company.
+
+**Featured placement:** `isFeatured` may be set to `true` during creation or changed on update only by SUPER_ADMIN or a caller with `products.feature`. Callers without that permission must omit the field on update so an existing featured value is preserved. Company and Admin forms hide the control and omit the field when the caller lacks permission. Backend checks remain authoritative.
+
 
 Supported optional query parameters:
 
