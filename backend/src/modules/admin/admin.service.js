@@ -312,11 +312,20 @@ async function grantInquirySubscription(data, adminUserId) {
   const planId = Number(data.planId);
   const plan = await prisma.inquiryPlan.findFirst({ where: { id: planId, isActive: true } });
   if (!plan) throw new AppError('طرح اشتراک فعال پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
-  const startsAt = new Date();
-  const endsAt = new Date(startsAt.getTime() + plan.durationDays * 86400000);
-  return prisma.inquirySubscription.create({
-    data: { planId, companyId, userId, status: 'ACTIVE', startsAt, endsAt, activatedBy: adminUserId, notes: data.notes || 'Manual administrative grant' },
-    include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
+  return prisma.$transaction(async (tx) => {
+    const ownerFilter = companyId != null ? { companyId } : { userId };
+    const now = new Date();
+    const active = await tx.inquirySubscription.findFirst({
+      where: { ...ownerFilter, status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gt: now } },
+      select: { id: true },
+    });
+    if (active) throw new AppError('این حساب در حال حاضر اشتراک فعال دارد.', 409, true, 'ACTIVE_SUBSCRIPTION_EXISTS');
+    const startsAt = new Date();
+    const endsAt = new Date(startsAt.getTime() + plan.durationDays * 86400000);
+    return tx.inquirySubscription.create({
+      data: { planId, companyId, userId, status: 'ACTIVE', startsAt, endsAt, activatedBy: adminUserId, notes: data.notes || 'Manual administrative grant' },
+      include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
+    });
   });
 }
 
