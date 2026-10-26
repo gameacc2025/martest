@@ -124,24 +124,6 @@ function getInquirySmsGatewayConfig() {
   return { endpoint: url.toString(), token };
 }
 
-async function deliverInquirySms(to, message) {
-  const gateway = getInquirySmsGatewayConfig();
-  let response;
-  try {
-    response = await fetch(gateway.endpoint, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${gateway.token}` },
-      body: JSON.stringify({ to, message }),
-      signal: AbortSignal.timeout(8000),
-    });
-  } catch {
-    throw { statusCode: 502, code: 'SMS_PROVIDER_UNAVAILABLE', message: 'ارتباط با درگاه پیامک برقرار نشد.' };
-  }
-  if (!response.ok) {
-    throw { statusCode: 502, code: 'SMS_PROVIDER_REJECTED', message: 'درگاه پیامک درخواست را نپذیرفت.' };
-  }
-}
-
 function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
 }
@@ -1209,19 +1191,48 @@ async function sendInquiryMessage(inquiryId, data, caller) {
         recipientCompany: { select: { id: true, name: true, phone: true } },
       },
     });
+    let smsQueued = false;
     if (data.notifyBySms === true) {
       const recipient = recipientUserId
-        ? await tx.user.findUnique({ where: { id: recipientUserId }, select: { phone: true } })
+        ? await tx.user.findUnique({ where: { id: recipientUserId }, select: { id: true, phone: true } })
         : await tx.company.findUnique({ where: { id: recipientCompanyId }, select: { phone: true } });
       const phone = String(recipient?.phone || '').trim();
       if (!phone) throw { statusCode: 422, code: 'SMS_RECIPIENT_PHONE_MISSING', message: 'برای گیرنده شماره تلفن ثبت نشده است.' };
-      // SMS always requires an active paid allowance, even during the staged
-      // rollout where ordinary inquiry quotas are not yet enforced.
+      // Validate provider configuration before committing an outbox row. The
+      // external SMS is delivered by the worker after this transaction commits.
       getInquirySmsGatewayConfig();
-      await consumeUsage({ ownerType, ownerId, usageType: 'SMS', referenceType: 'InquiryMessage', referenceId: createdMessage.id, tx });
-      await deliverInquirySms(phone, `پیام جدیدی درباره استعلام «${String(inquiry.title || '').slice(0, 100)}» دریافت کرده‌اید.`);
+      let deliveryUserId = recipientUserId;
+      if (!deliveryUserId) {
+        const companyMember = await tx.user.findFirst({
+          where: { status: 'ACTIVE', accessProfile: { companyId: recipientCompanyId } },
+          select: { id: true },
+        });
+        deliveryUserId = companyMember?.id;
+      }
+      if (!deliveryUserId) throw { statusCode: 422, code: 'SMS_RECIPIENT_ACCOUNT_MISSING', message: 'برای گیرنده شرکت، حساب کاربری فعالی جهت ثبت وضعیت پیامک پیدا نشد.' };
+      await consumeUsage({
+        ownerType, ownerId, usageType: 'SMS', referenceType: 'InquiryMessage',
+        referenceId: createdMessage.id, forceEnforcement: true, tx,
+      });
+      await tx.notificationDelivery.create({
+        data: {
+          userId: deliveryUserId,
+          eventType: 'INQUIRY_MESSAGE_RECEIVED',
+          channel: 'SMS',
+          status: 'PENDING',
+          recipient: phone,
+          subject: null,
+          body: `پیام جدیدی درباره استعلام «${String(inquiry.title || '').slice(0, 100)}» دریافت کرده‌اید. وارد سامانه شوید تا آن را بخوانید.`,
+          attempts: 0,
+          maxAttempts: 3,
+          nextAttemptAt: new Date(),
+          dedupeKey: `inquiry-message-${createdMessage.id}-sms`,
+          updatedAt: new Date(),
+        },
+      });
+      smsQueued = true;
     }
-    return createdMessage;
+    return { ...createdMessage, smsQueued };
   }, { maxWait: 5000, timeout: 12000 });
 }
 
