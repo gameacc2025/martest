@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { setAuthRouter } from "@telecom/auth";
+import { setAuthRouter, useAuthStore } from "@telecom/auth";
+import { useAuthStore as useAdminAuthStore } from "../stores/auth";
 
 import AdminLayout from "../layouts/AdminLayout.vue";
 
@@ -24,8 +25,7 @@ const websiteAppUrl = import.meta.env.VITE_WEBSITE_APP_URL || '/';
 
 function redirectToWebsite(page) {
   return async (to) => {
-    const { useAuthStore } = await import("../stores/auth");
-    const authStore = useAuthStore();
+    const authStore = useAdminAuthStore();
     if (authStore.isAuthenticated && authStore.isStaff) {
       const redirect = typeof to.query.redirect === "string" ? to.query.redirect : null;
       if (redirect && !/^https?:\/\//i.test(redirect)) return redirect;
