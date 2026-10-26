@@ -299,6 +299,11 @@ function resolveCompanyId(data, caller) {
     if (caller?.companyId) return toPositiveInt(caller.companyId, 'companyId');
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'companyId is required when creating a product.' };
   }
+  if (isStaffUser(caller)) {
+    assertStaffPermission(caller, 'products.create');
+    if (!data.companyId) throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'STAFF product creation requires an explicit companyId.' };
+    return toPositiveInt(data.companyId, 'companyId');
+  }
   if (!caller?.companyId) throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'Authenticated user must belong to a company.' };
   if (data.companyId && Number(data.companyId) !== Number(caller.companyId)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'Company users can only manage their own products.' };
@@ -306,15 +311,33 @@ function resolveCompanyId(data, caller) {
   return Number(caller.companyId);
 }
 
-function assertCanManageProduct(product, caller) {
+function assertStaffPermission(caller, permission) {
+  if (isSuperAdmin(caller) || caller?.accessType !== 'STAFF') return;
+  if (!Array.isArray(caller.permissions) || !caller.permissions.includes(permission)) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: `Permission ${permission} is required for this STAFF operation.` };
+  }
+}
+
+function assertCanSetFeatured(caller) {
   if (isSuperAdmin(caller)) return;
-  if (!product || product.companyId !== Number(caller?.companyId)) {
+  if (!Array.isArray(caller?.permissions) || !caller.permissions.includes('products.feature')) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'Permission products.feature is required to change featured status.' };
+  }
+}
+
+function assertCanManageProduct(product, caller, permission = 'products.update') {
+  if (isSuperAdmin(caller)) return;
+  if (isStaffUser(caller)) {
+    assertStaffPermission(caller, permission);
+    return;
+  }
+  if (!isCompanyUser(caller) || !product || Number(product.companyId) !== Number(caller?.companyId)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'Company users can only manage their own products.' };
   }
 }
 
-function assertCompanyCanEdit(product, caller) {
-  assertCanManageProduct(product, caller);
+function assertCompanyCanEdit(product, caller, permission = 'products.update') {
+  assertCanManageProduct(product, caller, permission);
   // Post-approval products (APPROVED / PUBLISHED / HIDDEN) ARE editable now —
   // the review-threshold policy in updateProduct decides whether that edit
   // sends the product back to PENDING_REVIEW. Only products mid-review or
@@ -488,6 +511,19 @@ async function validateProductReadyForReview(productId) {
 }
 
 async function changeProductStatus(id, action, caller, comment) {
+  const actionPermissions = {
+    submitReview: 'products.submit_review',
+    approve: 'products.approve',
+    reject: 'products.reject',
+    publish: 'products.publish',
+    hide: 'products.hide',
+    archive: 'products.archive',
+    restoreDraft: 'products.review',
+  };
+  const requiredPermission = actionPermissions[action];
+  if (!requiredPermission) throw { statusCode: 400, code: 'INVALID_STATUS_ACTION', message: 'Unknown product status action.' };
+  assertStaffPermission(caller, requiredPermission);
+
   const productId = Number(id);
   const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
@@ -496,7 +532,7 @@ async function changeProductStatus(id, action, caller, comment) {
     // Submitting a product is an owner hand-off, and COMPANY publication must
     // target its own product. STAFF publication is a moderation action: the
     // route's products.publish permission authorizes it across companies.
-    assertCanManageProduct(product, caller);
+    assertCanManageProduct(product, caller, requiredPermission);
   }
   if (action === 'publish' && isCompanyUser(caller) && product.status !== 'APPROVED') {
     // A company must never bypass staff review or re-publish a product that
@@ -865,6 +901,8 @@ async function getProductById(id, caller) {
 
 async function createProduct(data, caller) {
   if (!data.title?.trim()) throw { statusCode: 400, code: 'TITLE_REQUIRED', message: 'title is required.' };
+  assertStaffPermission(caller, 'products.create');
+  if (data.isFeatured === true) assertCanSetFeatured(caller);
 
   const companyId = resolveCompanyId(data, caller);
   const categoryId = toPositiveInt(data.categoryId, 'categoryId');
@@ -911,9 +949,11 @@ async function createProduct(data, caller) {
 
 async function updateProduct(id, data, caller) {
   const productId = Number(id);
+  assertStaffPermission(caller, 'products.update');
   const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
-  assertCompanyCanEdit(product, caller);
+  assertCompanyCanEdit(product, caller, 'products.update');
+  if (data.isFeatured !== undefined && data.isFeatured !== product.isFeatured) assertCanSetFeatured(caller);
 
   const updateData = { ...data };
   delete updateData.companyId;
@@ -1106,15 +1146,16 @@ async function deleteProduct(id, caller) {
   const productId = Number(id);
   const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
-  assertCanManageProduct(product, caller);
+  assertCanManageProduct(product, caller, 'products.delete');
 
   return prisma.product.update({ where: { id: productId }, data: { status: 'ARCHIVED', deletedAt: new Date() } });
 }
 
-async function assertCanManageProductById(productId, caller) {
+async function assertCanManageProductById(productId, caller, permission = 'products.update') {
+  assertStaffPermission(caller, permission);
   const product = await prisma.product.findFirst({ where: { id: Number(productId), deletedAt: null }, select: { id: true, companyId: true, status: true } });
   if (!product) throw { statusCode: 404, code: 'PRODUCT_NOT_FOUND', message: 'Product not found.' };
-  assertCompanyCanEdit(product, caller);
+  assertCompanyCanEdit(product, caller, permission);
   return product;
 }
 
@@ -1237,7 +1278,7 @@ async function upsertPrice(productId, data, caller) {
 }
 
 async function uploadImage(productId, file, caller) {
-  const product = await assertCanManageProductById(productId, caller);
+  const product = await assertCanManageProductById(productId, caller, 'product_images.create');
   assertUploadedFile(file);
   assertFileType(file, SUPPORTED_IMAGE_TYPES, ['.jpg', '.jpeg', '.png', '.webp', '.gif'], 'INVALID_IMAGE_TYPE');
 
@@ -1271,7 +1312,7 @@ async function uploadImage(productId, file, caller) {
 }
 
 async function deleteImage(productId, imageId, caller) {
-  const product = await assertCanManageProductById(productId, caller);
+  const product = await assertCanManageProductById(productId, caller, 'product_images.delete');
   const image = await prisma.productImage.findFirst({ where: { id: Number(imageId), productId: product.id } });
   if (!image) throw { statusCode: 404, code: 'IMAGE_NOT_FOUND', message: 'Product image not found.' };
 
@@ -1288,7 +1329,7 @@ async function deleteImage(productId, imageId, caller) {
 }
 
 async function setPrimaryImage(productId, imageId, caller) {
-  const product = await assertCanManageProductById(productId, caller);
+  const product = await assertCanManageProductById(productId, caller, 'product_images.update');
   const image = await prisma.productImage.findFirst({ where: { id: Number(imageId), productId: product.id } });
   if (!image) throw { statusCode: 404, code: 'IMAGE_NOT_FOUND', message: 'Product image not found.' };
 
@@ -1301,7 +1342,7 @@ async function setPrimaryImage(productId, imageId, caller) {
 }
 
 async function sortImages(productId, images, caller) {
-  const product = await assertCanManageProductById(productId, caller);
+  const product = await assertCanManageProductById(productId, caller, 'product_images.update');
   const imageIds = images.map((image) => Number(image.id));
   const uniqueImageIds = new Set(imageIds);
   if (uniqueImageIds.size !== imageIds.length) {
@@ -1325,7 +1366,7 @@ async function sortImages(productId, images, caller) {
 }
 
 async function uploadDocument(productId, file, caller) {
-  const product = await assertCanManageProductById(productId, caller);
+  const product = await assertCanManageProductById(productId, caller, 'product_documents.create');
   assertUploadedFile(file);
   assertFileType(file, SUPPORTED_DOCUMENT_TYPES, ['.pdf'], 'INVALID_DOCUMENT_TYPE');
 
@@ -1360,7 +1401,7 @@ async function uploadDocument(productId, file, caller) {
 }
 
 async function deleteDocument(productId, documentId, caller) {
-  const product = await assertCanManageProductById(productId, caller);
+  const product = await assertCanManageProductById(productId, caller, 'product_documents.delete');
   const document = await prisma.productDocument.findFirst({ where: { id: Number(documentId), productId: product.id } });
   if (!document) throw { statusCode: 404, code: 'DOCUMENT_NOT_FOUND', message: 'Product document not found.' };
 
