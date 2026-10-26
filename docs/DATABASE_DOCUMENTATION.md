@@ -854,3 +854,15 @@ npx prisma migrate status
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs)
 - [Prisma Schema Reference](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference)
+
+## Inquiry buyer ownership and lifecycle updates (2026-10-26)
+
+The `Inquiry` model supports exactly one owner:
+- `companyId`: existing company-owned B2B inquiry.
+- `buyerUserId`: authenticated CUSTOMER user who submits an inquiry from the Website.
+
+A PostgreSQL CHECK constraint enforces that exactly one of these owner columns is non-null. The migration preserves all existing company-owned rows and adds a buyer-user foreign key with cascade deletion. The optional company relation uses RESTRICT deletion so deleting a company cannot violate the ownership constraint.
+
+`InquiryStatusHistory.changedByUserId` is nullable for scheduled system transitions; `source` records USER or SYSTEM. The lifecycle worker records scheduled publication and automatic expiry in the same transaction as the state transition.
+
+`visibilityMode` is enforced in service responses, not just represented in the schema. Sealed responses remain hidden until eligible for reveal; anonymous-sealed responses redact competing supplier identities for the buyer.
