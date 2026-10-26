@@ -104,6 +104,7 @@ const selectedNotification = computed(() =>
 const allVisibleSelected = computed(() =>
   visibleNotifications.value.length > 0 && visibleNotifications.value.every(item => selectedIds.value.has(item.id))
 )
+const hasSelectedNotifications = computed(() => selectedIds.value.size > 0)
 
 const activeCategoryLabel = computed(() => {
   if (activeCategory.value === 'all') return 'همه دسته‌ها'
@@ -383,7 +384,7 @@ function typeLabel(item) {
       </label>
       <div class="toolbar-actions">
         <span class="result-count">{{ visibleNotifications.length }} پیام در این صفحه</span>
-        <div v-if="selectedIds.size" class="bulk-actions">
+        <div v-if="hasSelectedNotifications" class="bulk-actions">
           <span>{{ selectedIds.size }} انتخاب‌شده</span>
           <Button label="خوانده‌شده" icon="pi pi-envelope-open" severity="secondary" text size="small" :disabled="bulkBusy" @click="bulkSetReadState(true)" />
           <Button label="خوانده‌نشده" icon="pi pi-envelope" severity="secondary" text size="small" :disabled="bulkBusy" @click="bulkSetReadState(false)" />
@@ -425,7 +426,7 @@ function typeLabel(item) {
             <span>{{ activeFolder === 'unread' ? 'پیام‌های خوانده‌نشده' : activeFolder === 'read' ? 'پیام‌های خوانده‌شده' : 'جدیدترین پیام‌ها' }}</span>
           </div>
           <label class="select-visible">
-            <input type="checkbox" :checked="allVisibleSelected" :indeterminate="selectedIds.size > 0 && !allVisibleSelected" :disabled="!visibleNotifications.length" @change="toggleVisibleSelection($event.target.checked)">
+            <input type="checkbox" :checked="allVisibleSelected" :indeterminate="hasSelectedNotifications && !allVisibleSelected" :disabled="!visibleNotifications.length" @change="toggleVisibleSelection($event.target.checked)">
             <span>انتخاب صفحه</span>
           </label>
           <span class="list-count">{{ visibleNotifications.length }}</span>
