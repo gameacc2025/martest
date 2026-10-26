@@ -351,7 +351,10 @@ test('listProducts: public catalog excludes internal status history', async () =
   let capturedArgs;
   mockPrisma.product.findMany = async (args) => { capturedArgs = args; return []; };
   await service.listProducts({ skip: 0, take: 10, caller: anonymous, publicOnly: true });
-  assert.equal(capturedArgs.include.statusHistory, undefined);
+  assert.equal(capturedArgs.select.statusHistory, undefined);
+  assert.equal(capturedArgs.select.createdByUserId, undefined);
+  assert.equal(capturedArgs.select.editsSinceApproval, undefined);
+  assert.equal(capturedArgs.select.deletedAt, undefined);
 });
 
 // ── listProducts scoping ──────────────────────────────────────
