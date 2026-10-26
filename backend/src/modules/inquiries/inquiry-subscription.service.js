@@ -91,18 +91,22 @@ async function consumeUsage({ ownerType, ownerId, usageType, referenceType = nul
 }
 
 async function getQuotaSummary(ownerType, ownerId, client = prisma, now = new Date()) {
+  const enforced = await enforcementEnabled(client);
   const capabilities = { smsConfigured: Boolean(process.env.INQUIRY_SMS_GATEWAY_URL && process.env.INQUIRY_SMS_GATEWAY_TOKEN) };
-  if (!(await enforcementEnabled(client))) return { enforced: false, subscription: null, quotas: null, capabilities };
+  // SMS is a separately metered paid service, so its allowance remains visible
+  // and enforced even while inquiry/response quota enforcement is in rollout.
+  if (!enforced && !capabilities.smsConfigured) return { enforced: false, subscription: null, quotas: null, capabilities };
   const subscription = await getActiveSubscription(ownerType, ownerId, client, now);
-  if (!subscription) return { enforced: true, subscription: null, quotas: null, capabilities };
+  if (!subscription) return { enforced, subscription: null, quotas: null, capabilities };
   const quotas = {};
   for (const [usageType, field] of Object.entries(LIMIT_BY_USAGE)) {
+    if (!enforced && usageType !== 'SMS') continue;
     const used = await getUsage(subscription.id, usageType, subscription.startsAt, client);
     const limit = subscription.plan[field];
     quotas[usageType] = { used, limit, remaining: Math.max(0, limit - used) };
   }
   return {
-    enforced: true,
+    enforced,
     subscription: { id: subscription.id, planId: subscription.planId, planName: subscription.plan.name, startsAt: subscription.startsAt, endsAt: subscription.endsAt, status: subscription.status },
     quotas,
     capabilities,
