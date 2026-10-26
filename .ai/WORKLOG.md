@@ -469,3 +469,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Data behavior:** First address becomes default, selecting a default clears the prior default for the same user, and deleting the default promotes a remaining address.
 - **Tests added:** `backend/src/modules/addresses/address.service.test.js` covers user isolation, first default, default switching, foreign IDs, and deletion fallback.
 - **Verification:** CI and real PostgreSQL migration checks are pending. Do not merge until they complete successfully.
+
+
+## 2026-10-26 — CUSTOMER-DASHBOARD-FOUNDATION
+- **Status:** IN_PROGRESS — implementation committed; verification pending.
+- **Goal:** Complete the remaining practical customer-identity dashboard foundation after address management.
+- **Changes:** Corrected the profile page to map the actual `/auth/me` response domains (`user`, `profile`, `accessProfile`) instead of treating the response as a flat legacy user object. Profile edit now sends the personal fields supported by the profile API. Added a customer address count and a shortcut to address management using the authenticated customer's address endpoint.
+- **Files:** `apps/website/src/pages/public/UserProfile.vue`.
+- **Verification:** NOT RUN yet; CI/Build must run on PR. Order statistics/recent order endpoints remain dependent on an order backend module, which is not present in this repository; do not present those as fully implemented.
+- **Commit:** `38baee9a8a54c666d2c2f5acc397ad0edf2a2701`.
+- **Push:** committed directly to temporary feature branch through GitHub API.
+- **Next action:** Run CI and review the profile/auth contract; only then merge.
