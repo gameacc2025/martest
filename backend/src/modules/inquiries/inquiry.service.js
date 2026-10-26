@@ -840,9 +840,41 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
   });
 }
 
+async function revealInquiryResponses(inquiryId, caller) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  return prisma.$transaction(async (tx) => {
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
+    if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+
+    const isStaff = isStaffWithPermission(caller, 'leads.update', 'inquiries.update');
+    if (!isInquiryBuyer(inquiry, caller) && !isStaff) {
+      throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+    }
+    if (!['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+      throw { statusCode: 400, code: 'INQUIRY_NOT_SEALED', message: 'Only sealed inquiries have a reveal step.' };
+    }
+    if (inquiry.revealedAt) return inquiry;
+
+    const deadlinePassed = inquiry.responseDeadline && new Date(inquiry.responseDeadline) <= new Date();
+    const inquiryClosed = ['CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'].includes(inquiry.status);
+    if (!isStaff && !inquiry.allowEarlyReveal && !deadlinePassed && !inquiryClosed) {
+      throw { statusCode: 403, code: 'EARLY_REVEAL_DISABLED', message: 'Responses cannot be revealed before the deadline unless early reveal is enabled.' };
+    }
+
+    return tx.inquiry.update({
+      where: { id: numericInquiryId },
+      data: { revealedAt: new Date() },
+      include: inquiryInclude,
+    });
+  });
+}
+
 async function listInquiryItems(inquiryId, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
-  const inquiry = await prisma.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, companyId: true } });
+  const inquiry = await prisma.inquiry.findUnique({
+    where: { id: numericInquiryId },
+    select: { id: true, companyId: true, buyerUserId: true },
+  });
   assertCanReadInquiry(inquiry, caller);
 
   return prisma.inquiryItem.findMany({
@@ -913,16 +945,19 @@ async function deleteInquiryItem(inquiryId, itemId, caller) {
   });
 }
 
-async function submitResponse(inquiryId, data, caller) {
+async async function submitResponse(inquiryId, data, caller) {
   const companyId = resolveCompanyId(data, caller);
   ensureCompanyId(companyId);
+  if (caller?.accessType === 'STAFF' && !isSuperAdmin(caller)) {
+    throw { statusCode: 403, code: 'STAFF_CANNOT_RESPOND', message: 'STAFF users supervise inquiries but do not submit supplier quotes.' };
+  }
 
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
 
   return prisma.$transaction(async (tx) => {
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertInquiryAcceptsResponseChanges(inquiry);
-    if (inquiry.companyId === companyId) {
+    if (inquiry.companyId && inquiry.companyId === companyId) {
       throw { statusCode: 400, code: 'SELF_RESPONSE_NOT_ALLOWED', message: 'شرکت ایجادکننده درخواست نمی‌تواند به درخواست خود پاسخ دهد.' };
     }
 
@@ -934,15 +969,22 @@ async function submitResponse(inquiryId, data, caller) {
 
     await validateResponseSubmissionCapacity(companyId, tx);
 
-    return tx.inquiryResponse.create({
+    const response = await tx.inquiryResponse.create({
       data: {
         inquiryId: numericInquiryId,
         companyId,
-        status: data.status || 'PENDING',
+        status: 'PENDING',
         items: normalizeResponseItems(data.items),
       },
       include: responseInclude,
     });
+
+    await notifyInquiryOwner(tx, inquiry, 'INQUIRY_RESPONSE_RECEIVED', {
+      inquiry: { id: inquiry.id, title: inquiry.title },
+      response: { id: response.id },
+    }, `inquiry-response-${response.id}`);
+
+    return response;
   });
 }
 
@@ -953,22 +995,43 @@ async function listResponses(inquiryId, caller) {
     select: {
       id: true,
       companyId: true,
+      buyerUserId: true,
+      visibilityMode: true,
+      status: true,
+      revealedAt: true,
+      responseDeadline: true,
+      allowEarlyReveal: true,
       items: { select: { product: { select: { companyId: true } } } },
     },
   });
   assertCanReadResponses(inquiry, caller);
 
-  const callerCompanyId = Number(caller?.companyId);
+  const isBuyer = isInquiryBuyer(inquiry, caller);
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  if (isBuyer && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+    return [];
+  }
+
+  const callerCompanyId = Number(caller?.companyId) || null;
   const where = { inquiryId: numericInquiryId };
-  if (!isSuperAdmin(caller) && inquiry.companyId !== callerCompanyId) {
+  if (!isBuyer && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
     where.companyId = callerCompanyId;
   }
 
-  return prisma.inquiryResponse.findMany({
+  const responses = await prisma.inquiryResponse.findMany({
     where,
     orderBy: { createdAt: 'desc' },
     include: responseInclude,
   });
+
+  if (isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED' && areResponsesRevealed(inquiry) && !isStaff) {
+    return responses.map((response, index) => {
+      const safe = { ...response, company: { name: `پیشنهاددهنده ${index + 1}`, type: null } };
+      delete safe.companyId;
+      return safe;
+    });
+  }
+  return responses;
 }
 
 async function updateResponse(inquiryId, responseId, data, caller) {
@@ -1224,6 +1287,7 @@ module.exports = {
   createInquiry,
   updateInquiry,
   changeInquiryStatus,
+  revealInquiryResponses,
   getInquiryStats,
 
 
