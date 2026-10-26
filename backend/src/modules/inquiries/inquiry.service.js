@@ -9,6 +9,7 @@ const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
 const { dispatchNotification } = require('../notifications/notification.dispatch.service');
+const { consumeUsage } = require('./inquiry-subscription.service');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const {
   validateInquiryCreationCapacity,
@@ -774,7 +775,12 @@ async function createInquiry(data, caller) {
   if (!isCustomerBuyer) ensureCompanyId(companyId);
 
   return prisma.$transaction(async (tx) => {
-    if (companyId) await validateInquiryCreationCapacity(companyId, tx);
+    if (companyId) {
+      await validateInquiryCreationCapacity(companyId, tx);
+      await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'INQUIRY_CREATE', tx });
+    } else if (buyerUserId) {
+      await consumeUsage({ ownerType: 'user', ownerId: buyerUserId, usageType: 'INQUIRY_CREATE', tx });
+    }
     await validateInquiryProducts(data.items, tx);
 
     if (data.status && data.status !== 'DRAFT') {
@@ -1034,6 +1040,7 @@ async function submitResponse(inquiryId, data, caller) {
     validateResponseItemOwnership(data.items, ownedInquiryItemIds);
 
     await validateResponseSubmissionCapacity(companyId, tx);
+    await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'RESPONSE_SUBMIT', referenceType: 'Inquiry', referenceId: numericInquiryId, idempotencyKey: `rfq-response:${numericInquiryId}:${companyId}`, tx });
 
     const response = await tx.inquiryResponse.create({
       data: {
