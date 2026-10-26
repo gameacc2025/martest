@@ -1029,6 +1029,33 @@ test('price tier deletion records the deleted tier value', async () => {
   assert.equal(snapshot.price, 100);
 });
 
+test('wholesale price tiers never create retail chart snapshots', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10 });
+  await service.addPriceTier(1, { minQuantity: 10, maxQuantity: 20, price: 80, unit: 'IRR' }, companyA);
+  assert.equal(calls['productPriceSnapshot.create']?.length || 0, 0);
+});
+
+test('updating a wholesale tier does not create retail chart snapshots', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, minQuantity: 10, maxQuantity: 20, price: 80, unit: 'IRR' };
+  await service.updatePriceTier(1, 5, { price: 75 }, companyA);
+  assert.equal(calls['productPriceSnapshot.create']?.length || 0, 0);
+});
+
+test('changing the retail tier into a wholesale tier preserves the last retail value', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, minQuantity: 1, maxQuantity: 9, price: 100, unit: 'IRR' };
+  await service.updatePriceTier(1, 5, { minQuantity: 10, maxQuantity: 20, price: 80 }, companyA);
+  const snapshot = calls['productPriceSnapshot.create'].at(-1).data;
+  assert.equal(snapshot.action, 'DELETE');
+  assert.equal(snapshot.minQuantity, 1);
+  assert.equal(snapshot.price, 100);
+  assert.equal(calls['productPriceSnapshot.create'].length, 1);
+});
+
 test('upsertPrice: delegates to addPriceTier', async () => {
   fx.product = draftProduct({ companyId: 10 });
   await service.upsertPrice(1, { minQuantity: 1, price: 100 }, companyA);
