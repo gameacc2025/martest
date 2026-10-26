@@ -13,6 +13,7 @@ const selected = ref(null)
 const loadingList = ref(false)
 const loadingDetail = ref(false)
 const saving = ref(false)
+const decidingResponseId = ref(null)
 const error = ref('')
 const detailError = ref('')
 
@@ -123,6 +124,32 @@ async function cancelInquiry() {
     saving.value = false
   }
 }
+function canDecideResponse(response) {
+  return selected.value?.status === 'OPEN'
+    && response?.status === 'PENDING'
+    && !selected.value?.responsesHidden
+}
+
+async function decideResponse(response, decision) {
+  if (!selected.value || !canDecideResponse(response) || decidingResponseId.value) return
+  const selecting = decision === 'SELECTED'
+  const message = selecting
+    ? 'با انتخاب این پیشنهاد، استعلام بسته و سایر پیشنهادهای در انتظار رد می‌شوند. ادامه می‌دهید؟'
+    : 'آیا از رد این پیشنهاد مطمئن هستید؟'
+  if (!window.confirm(message)) return
+  decidingResponseId.value = response.id
+  detailError.value = ''
+  try {
+    await inquiriesApi.decideResponse(selected.value.id, response.id, { decision })
+    await refresh()
+  } catch (err) {
+    detailError.value = err?.response?.data?.message || err?.response?.data?.error?.message
+      || err?.serverMessage || err?.message || 'تصمیم‌گیری روی پیشنهاد ناموفق بود.'
+  } finally {
+    decidingResponseId.value = null
+  }
+}
+
 async function revealResponses() {
   if (!selected.value || saving.value) return
   saving.value = true
@@ -216,7 +243,11 @@ onMounted(async () => {
             <article v-for="response in selected.responses || []" :key="response.id" class="response-card">
               <div class="response-heading">
                 <strong>{{ responseLabel(response) }}</strong>
-                <Tag :value="({PENDING:'در انتظار بررسی',SELECTED:'انتخاب‌شده',REJECTED:'انتخاب‌نشده',EXPIRED:'منقضی‌شده',WITHDRAWN:'پس‌گرفته‌شده'})[response.status] || response.status" severity="info" />
+                <Tag :value="({PENDING:'در انتظار بررسی',SELECTED:'انتخاب‌شده',REJECTED:'انتخاب‌نشده',EXPIRED:'منقضی‌شده',WITHDRAWN:'پس‌گرفته‌شده'})[response.status] || response.status" :severity="({SELECTED:'success',REJECTED:'danger',WITHDRAWN:'secondary'})[response.status] || 'info'" />
+              </div>
+              <div v-if="canDecideResponse(response)" class="response-decision-actions">
+                <Button label="انتخاب پیشنهاد" icon="pi pi-check" size="small" severity="success" :loading="decidingResponseId === response.id" @click="decideResponse(response, 'SELECTED')" />
+                <Button label="رد پیشنهاد" icon="pi pi-times" size="small" severity="danger" outlined :loading="decidingResponseId === response.id" @click="decideResponse(response, 'REJECTED')" />
               </div>
               <div v-for="item in response.items || []" :key="item.id" class="response-item">
                 <span>{{ item.description || item.inquiryItem?.product?.title || 'پیشنهاد قیمت' }}</span>
@@ -296,6 +327,7 @@ onMounted(async () => {
 .item-main small{font-size:.8rem}
 .quantity{white-space:nowrap;font-size:.9rem}
 .response-card{display:block}
+.response-decision-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}
 .response-heading{margin-bottom:10px}
 .response-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;padding:10px 0;border-top:1px solid var(--surface-border,#e5e7eb)}
 .response-item small{grid-column:1/-1;color:var(--text-color-secondary,#667085)}
