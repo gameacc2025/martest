@@ -63,6 +63,7 @@ const inquiryInclude = {
     },
   },
   responses: {
+    orderBy: { createdAt: 'asc' },
     include: {
       company: { select: { id: true, name: true, type: true } },
       items: {
@@ -358,6 +359,9 @@ function shapeInquiryForCaller(inquiry, caller) {
 
   const responses = Array.isArray(inquiry.responses) ? inquiry.responses : [];
   result.responseCount = inquiry._count?.responses ?? responses.length;
+  if (!isBuyer && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+    delete result.responseCount;
+  }
 
   if (isBuyer && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
     result.responses = [];
@@ -706,6 +710,10 @@ async async function listInquiries(query, caller) {
     if (!isInquiryBuyer(inquiry, caller) && !isStaff && inquiry.confidential) {
       safe.company = null;
       delete safe.companyId;
+    }
+    if (!isInquiryBuyer(inquiry, caller) && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+      safe._count = { ...(safe._count || {}) };
+      delete safe._count.responses;
     }
     return safe;
   });
@@ -1056,7 +1064,7 @@ async function listResponses(inquiryId, caller) {
 
   const responses = await prisma.inquiryResponse.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: 'asc' },
     include: responseInclude,
   });
 
