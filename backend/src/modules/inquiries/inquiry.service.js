@@ -1055,8 +1055,6 @@ async function submitResponse(inquiryId, data, caller) {
     validateResponseItemOwnership(data.items, ownedInquiryItemIds);
 
     await validateResponseSubmissionCapacity(companyId, tx);
-    await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'RESPONSE_SUBMIT', referenceType: 'Inquiry', referenceId: numericInquiryId, tx });
-
     const response = await tx.inquiryResponse.create({
       data: {
         inquiryId: numericInquiryId,
@@ -1065,6 +1063,11 @@ async function submitResponse(inquiryId, data, caller) {
         items: normalizeResponseItems(data.items),
       },
       include: responseInclude,
+    });
+
+    await consumeUsage({
+      ownerType: 'company', ownerId: companyId, usageType: 'RESPONSE_SUBMIT',
+      referenceType: 'InquiryResponse', referenceId: response.id, tx,
     });
 
     await notifyInquiryOwner(tx, inquiry, 'INQUIRY_RESPONSE_RECEIVED', {
