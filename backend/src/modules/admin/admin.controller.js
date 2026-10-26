@@ -65,6 +65,12 @@ async function grantInquirySubscriptionCtrl(request, reply) {
   return reply.code(201).send(success(await adminService.grantInquirySubscription(request.body, Number(request.user.id))));
 }
 
+
+async function rejectPendingInquirySubscriptionCtrl(request, reply) {
+  const result = await adminService.rejectPendingInquirySubscription(Number(request.params.id), Number(request.user.id), request.body.notes);
+  return reply.send(success(result));
+}
+
 async function activatePendingInquirySubscriptionCtrl(request, reply) {
   if (request.body.paymentConfirmed !== true) {
     const { AppError } = require('../../utils/error');
@@ -128,4 +134,4 @@ async function updateNotificationFolderCtrl(request, reply) {
   return reply.send({ data: folder });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, getInquiryMonetizationSettingsCtrl, updateInquiryMonetizationSettingsCtrl, listInquiryPlansCtrl, createInquiryPlanCtrl, listInquirySubscriptionsCtrl, grantInquirySubscriptionCtrl, activatePendingInquirySubscriptionCtrl, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl, listNotificationFoldersCtrl, createNotificationFolderCtrl, updateNotificationFolderCtrl };
+module.exports = { getStats, getSettings, updateReviewEditThreshold, getInquiryMonetizationSettingsCtrl, updateInquiryMonetizationSettingsCtrl, listInquiryPlansCtrl, createInquiryPlanCtrl, listInquirySubscriptionsCtrl, grantInquirySubscriptionCtrl, activatePendingInquirySubscriptionCtrl, rejectPendingInquirySubscriptionCtrl, sendNotificationCtrl, getDeliveryStatsCtrl, listDeliveriesCtrl, listNotificationFoldersCtrl, createNotificationFolderCtrl, updateNotificationFolderCtrl };
