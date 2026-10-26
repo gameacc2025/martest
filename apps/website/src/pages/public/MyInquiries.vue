@@ -171,7 +171,13 @@ async function sendInquiryMessage() {
       ? 'پیام ارسال شد و اعلان پیامکی در صف ارسال قرار گرفت.'
       : payload?.smsSkippedReason === 'recipient_sms_opted_out'
         ? 'پیام ارسال شد؛ اعلان پیامکی ارسال نشد چون گیرنده دریافت پیامک را فعال نکرده است.'
-        : 'پیام با موفقیت ارسال شد.'
+        : payload?.smsSkippedReason === 'sms_quota_exceeded'
+          ? 'پیام ارسال شد؛ سهمیه پیامک شما کافی نیست یا اشتراک پیامکی فعال ندارید.'
+          : payload?.smsSkippedReason === 'sms_provider_not_configured'
+            ? 'پیام ارسال شد؛ درگاه پیامک در حال حاضر آماده نیست.'
+            : payload?.smsSkippedReason === 'recipient_phone_missing' || payload?.smsSkippedReason === 'recipient_account_missing'
+              ? 'پیام ارسال شد؛ اطلاعات تماس گیرنده برای ارسال پیامک کامل نیست.'
+              : 'پیام با موفقیت ارسال شد.'
     await Promise.all([loadMessages(), loadQuota()])
   } catch (err) {
     const code = err?.response?.data?.code || err?.code
