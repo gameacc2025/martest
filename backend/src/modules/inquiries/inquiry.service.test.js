@@ -78,7 +78,7 @@ const mockPrisma = {
     },
     update: async (args) => {
       record('inquiry.update', args);
-      return { id: args.where?.id, ...args.data };
+      return { ...(nextFindUnique || {}), id: args.where?.id, ...args.data };
     },
     groupBy: async () => drain(queues.inquiryGroupBy),
   },
