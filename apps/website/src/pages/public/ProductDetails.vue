@@ -135,7 +135,7 @@
                   :aria-label="isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'"
                   :title="isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'" @click="addToWishlist" />
                 <Button icon="pi pi-chart-line" rounded outlined severity="secondary"
-                  aria-label="نمودار قیمت شش ماه اخیر" title="نمودار قیمت شش ماه اخیر"
+                  aria-label="نمودار قیمت خرده‌فروشی شش ماه اخیر" title="نمودار قیمت خرده‌فروشی شش ماه اخیر"
                   @click="openPriceHistory" />
               </div>
               <div v-if="prices.length > 1" class="price-tiers">
@@ -232,20 +232,20 @@
         <div v-if="priceHistoryDialogOpen" class="product-dialog-backdrop" @click.self="priceHistoryDialogOpen = false">
           <section class="product-dialog price-history-dialog" role="dialog" aria-modal="true" aria-labelledby="price-history-title">
             <div class="dialog-heading">
-              <h2 id="price-history-title">نمودار قیمت شش ماه اخیر</h2>
+              <h2 id="price-history-title">نمودار قیمت خرده‌فروشی شش ماه اخیر</h2>
               <Button icon="pi pi-times" text rounded severity="secondary" aria-label="بستن" @click="priceHistoryDialogOpen = false" />
             </div>
-            <p class="history-disclaimer">این نمودار تغییرات قیمت ثبت‌شده در سامانه طی شش ماه اخیر را نشان می‌دهد. سابقه‌ای پیش از فعال‌شدن ثبت قیمت‌ها به‌صورت خودکار ساخته نمی‌شود.</p>
+            <p class="history-disclaimer">این نمودار فقط تغییرات قیمت خرده‌فروشی (قیمت برای حداقل تعداد ۱) را در شش ماه اخیر نشان می‌دهد. سابقه‌ای پیش از فعال‌شدن ثبت تاریخچه به‌صورت خودکار ساخته نمی‌شود.</p>
             <p v-if="priceHistoryLoading" class="history-empty">در حال دریافت تاریخچه قیمت...</p>
             <p v-else-if="priceHistoryError" class="history-empty">{{ priceHistoryError }}</p>
             <div v-else-if="priceHistoryPoints.length" class="price-history-list">
               <div v-for="point in priceHistoryPoints" :key="point.key" class="price-history-point">
-                <span class="history-date">{{ point.label }} · {{ point.minQuantity }}+ عدد</span>
+                <span class="history-date">{{ point.label }} · قیمت خرده‌فروشی</span>
                 <div class="history-bar-track"><span class="history-bar" :style="{ width: point.width + '%' }"></span></div>
                 <strong>{{ formatPrice(point.price) }}</strong>
               </div>
             </div>
-            <p v-else class="history-empty">برای شش ماه اخیر، سابقه زمانی قابل اتکایی برای رسم نمودار ثبت نشده است.</p>
+            <p v-else class="history-empty">برای شش ماه اخیر، سابقهٔ ثبت‌شده‌ای از قیمت خرده‌فروشی برای رسم نمودار وجود ندارد.</p>
           </section>
         </div>
       </template>
@@ -375,8 +375,16 @@ const prices = computed(() => {
   return list.filter((tier) => tier.price != null && tier.price !== '' && Number.isFinite(Number(tier.price)))
 })
 
-const sortedPrices = computed(() => [...prices.value].sort((a, b) => Number(a.price) - Number(b.price)))
-const minPrice = computed(() => sortedPrices.value.length ? Number(sortedPrices.value[0].price) : null)
+// Show the retail price first when present; bulk tiers must not make the
+// headline price look cheaper than the price for a single item.
+const sortedPrices = computed(() => [...prices.value].sort((a, b) => {
+  const quantityDelta = Number(a.minQuantity ?? a.minOrderQty ?? 1) - Number(b.minQuantity ?? b.minOrderQty ?? 1)
+  return quantityDelta || Number(a.price) - Number(b.price)
+}))
+const retailPrice = computed(() => prices.value.find(tier => Number(tier.minQuantity ?? tier.minOrderQty ?? 1) === 1))
+const minPrice = computed(() => retailPrice.value
+  ? Number(retailPrice.value.price)
+  : (sortedPrices.value.length ? Number(sortedPrices.value[0].price) : null))
 const minPriceText = computed(() => minPrice.value == null ? '' : formatPrice(minPrice.value))
 
 const specRows = computed(() => {
