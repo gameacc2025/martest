@@ -30,7 +30,7 @@ const auth = useAuthStore()
 
 // Only SUPER_ADMIN picks a company explicitly. Company representatives
 // have their product auto-assigned to their own company by the backend.
-const canChooseCompany = computed(() => auth.isSuperAdmin)
+const canChooseCompany = computed(() => auth.isSuperAdmin || (!isEditMode.value && auth.accessProfile?.type === 'STAFF' && auth.hasPermission('products.create') && auth.hasPermission('companies.read')))
 const canFeature = computed(() => auth.isSuperAdmin || auth.hasPermission('products.feature'))
 
 // Derive the backend origin from the API base URL (strip the /api/... suffix)
