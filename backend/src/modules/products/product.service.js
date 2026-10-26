@@ -1101,13 +1101,19 @@ async function updateProduct(id, data, caller) {
         if (tierId !== undefined) {
           const before = existingTiersById.get(tierId);
           const changed = JSON.stringify(comparableTier(before)) !== JSON.stringify(comparableTier(tierData));
-          // Price history is only for retail (minQuantity = 1). Preserve the
-          // last retail value if this tier stops being the retail tier.
-          if (Number(before.minQuantity) === 1 && Number(tierData.minQuantity) !== 1) {
+          // The chart tracks retail-price changes, not wholesale tiers or
+          // metadata-only edits. Preserve the final retail point if this tier
+          // stops being the retail tier; a tier entering retail starts a series.
+          const wasRetail = Number(before.minQuantity) === 1;
+          const isRetail = Number(tierData.minQuantity) === 1;
+          const priceChanged = Number(before.price) !== Number(tierData.price);
+          if (wasRetail && !isRetail) {
             await recordPriceSnapshot(tx, productId, before, 'DELETE');
           }
           const record = await tx.productPriceTier.update({ where: { id: tierId }, data: tierData });
-          if (changed && Number(tierData.minQuantity) === 1) {
+          if (!wasRetail && isRetail) {
+            await recordPriceSnapshot(tx, productId, record, 'CREATE');
+          } else if (wasRetail && isRetail && priceChanged) {
             await recordPriceSnapshot(tx, productId, record, 'UPDATE');
           }
         } else {
@@ -1208,10 +1214,11 @@ async function getPublicPriceHistory(productId) {
     select: { id: true },
   });
   if (!product) return null;
-  const since = new Date();
-  since.setMonth(since.getMonth() - 6);
+  // Return the complete recorded retail series. The table is the durable
+  // source for charts; limiting the default response to six months would hide
+  // older valid price changes even though they remain stored.
   return prisma.productPriceSnapshot.findMany({
-    where: { productId: id, minQuantity: 1, recordedAt: { gte: since } },
+    where: { productId: id, minQuantity: 1 },
     orderBy: { recordedAt: 'asc' },
     select: { id: true, priceTierId: true, minQuantity: true, maxQuantity: true, price: true, unit: true, action: true, recordedAt: true },
   });
@@ -1273,13 +1280,18 @@ async function updatePriceTier(productId, tierId, data, caller) {
   if (existing.unit !== tier.unit) changes.push(`واحد: ${existing.unit || '-'} → ${tier.unit || '-'}`);
 
   const updated = await prisma.$transaction(async (tx) => {
-    // If the tier ceases to be retail, preserve its final retail value before
-    // changing the tier. The snapshot and price update share this transaction.
-    if (Number(existing.minQuantity) === 1 && Number(tier.minQuantity) !== 1) {
+    // Retail chart points are created only for entering retail or an actual
+    // retail price change. Wholesale and metadata-only edits do not add points.
+    const wasRetail = Number(existing.minQuantity) === 1;
+    const isRetail = Number(tier.minQuantity) === 1;
+    const priceChanged = Number(existing.price) !== Number(tier.price);
+    if (wasRetail && !isRetail) {
       await recordPriceSnapshot(tx, product.id, existing, 'DELETE');
     }
     const record = await tx.productPriceTier.update({ where: { id: existing.id }, data: tier });
-    if (changes.length && Number(tier.minQuantity) === 1) {
+    if (!wasRetail && isRetail) {
+      await recordPriceSnapshot(tx, product.id, record, 'CREATE');
+    } else if (wasRetail && isRetail && priceChanged) {
       await recordPriceSnapshot(tx, product.id, record, 'UPDATE');
     }
 
