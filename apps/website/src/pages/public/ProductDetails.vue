@@ -204,6 +204,46 @@
             </div>
           </aside>
         </div>
+        <div v-if="inquiryDialogOpen" class="product-dialog-backdrop" @click.self="inquiryDialogOpen = false">
+          <section class="product-dialog" role="dialog" aria-modal="true" aria-labelledby="inquiry-dialog-title">
+            <div class="dialog-heading">
+              <h2 id="inquiry-dialog-title">استعلام قیمت محصول</h2>
+              <Button icon="pi pi-times" text rounded severity="secondary" aria-label="بستن" @click="inquiryDialogOpen = false" />
+            </div>
+            <p class="dialog-product-name">{{ product.title }}</p>
+            <label class="dialog-field">
+              <span>تعداد موردنیاز</span>
+              <input v-model.number="inquiryQuantity" type="number" min="1" step="1" />
+            </label>
+            <label class="dialog-field">
+              <span>توضیحات (اختیاری)</span>
+              <textarea v-model="inquiryDescription" rows="3" maxlength="2000" placeholder="شرایط تحویل یا توضیحات تکمیلی"></textarea>
+            </label>
+            <p v-if="inquiryError" class="dialog-error" role="alert">{{ inquiryError }}</p>
+            <div class="dialog-actions">
+              <Button label="انصراف" severity="secondary" outlined @click="inquiryDialogOpen = false" />
+              <Button label="ثبت استعلام" icon="pi pi-send" :loading="inquirySubmitting" @click="submitInquiry" />
+            </div>
+          </section>
+        </div>
+
+        <div v-if="priceHistoryDialogOpen" class="product-dialog-backdrop" @click.self="priceHistoryDialogOpen = false">
+          <section class="product-dialog price-history-dialog" role="dialog" aria-modal="true" aria-labelledby="price-history-title">
+            <div class="dialog-heading">
+              <h2 id="price-history-title">نمودار قیمت شش ماه اخیر</h2>
+              <Button icon="pi pi-times" text rounded severity="secondary" aria-label="بستن" @click="priceHistoryDialogOpen = false" />
+            </div>
+            <p class="history-disclaimer">این نمودار فقط از سوابق واقعی سطح‌های قیمت موجود در اطلاعات محصول استفاده می‌کند؛ تاریخچه کامل تغییر قیمت در سامانه ذخیره نمی‌شود.</p>
+            <div v-if="priceHistoryPoints.length" class="price-history-list">
+              <div v-for="point in priceHistoryPoints" :key="point.key" class="price-history-point">
+                <span class="history-date">{{ point.label }}</span>
+                <div class="history-bar-track"><span class="history-bar" :style="{ width: point.width + '%' }"></span></div>
+                <strong>{{ formatPrice(point.price) }}</strong>
+              </div>
+            </div>
+            <p v-else class="history-empty">برای شش ماه اخیر، سابقه زمانی قابل اتکایی برای رسم نمودار ثبت نشده است.</p>
+          </section>
+        </div>
       </template>
     </div>
   </main>
