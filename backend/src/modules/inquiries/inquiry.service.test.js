@@ -104,6 +104,7 @@ const mockPrisma = {
     },
   },
   inquiryResponse: {
+    findUnique: async () => null,
     count: async () => fx.responseCount,
     findMany: async (args) => {
       record('inquiryResponse.findMany', args);
