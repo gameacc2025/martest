@@ -446,3 +446,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Green verification:** GitHub Actions run [40312425822](https://github.com/gameacc2025/martest/actions/runs/40312425822) passed on commit `e588f47068d8639ba3657fc2b62d4488e48349a2`; frontend/shared tests, backend tests, Prisma client generation, and all frontend production builds passed.
 - **Current handoff commit:** `927e165677d2ff11b7ebde2a9160ba673ace075f`.
 - **Still unverified:** Real PostgreSQL migration deployment, Docker/Compose startup, browser E2E/visual flows, and external service connectivity. These require an appropriate runtime environment; do not infer success from CI.
+
+
+## 2026-10-26 — REPO-HARDENING-TASKS-3-7
+- **Status:** Implemented on `docs-runtime-e2e-hardening`; final CI/runtime result pending.
+- **Authorization:** User authorized autonomous completion of Tasks 3–7.
+- **Documentation:** Reconciled API, database, frontend, Docker, role-access, architecture decisions and documentation index against the current route registration, Prisma schema/migrations, three-app workspace, Compose config and central RBAC.
+- **Architecture:** Added a deterministic Mermaid graph generator and checked-in generated graph. Runtime CI's graph validation step passed on the branch.
+- **Runtime validation:** Added GitHub Actions workflow that builds all Compose services, starts an isolated PostgreSQL, checks all four health endpoints, and checks applied Prisma migrations.
+- **Browser smoke:** Added Playwright suite for Website/Company/Admin render, mobile viewport, uncaught page errors and protected API proxy behavior. This is smoke coverage, not full business E2E for successful auth, products, inquiries, or notifications.
+- **Performance:** Replaced the ineffective dynamic import of the Admin auth store with a static import. Bundle-size warning still needs final review against latest build logs.
+- **SMTP:** Real provider delivery is not verified because this environment has no SMTP credentials/recipient. SMS remains not implemented in current dispatch.
+- **Verification:** Latest CI and Runtime Validation are in progress/pending at handoff time. No pass claim until GitHub Actions reports success.
+- **Key files:** `docs/API_DOCUMENTATION.md`, `docs/DATABASE_DOCUMENTATION.md`, `docs/FRONTEND_DOCUMENTATION.md`, `docs/DOCKER_DEPLOYMENT.md`, `docs/role-access-matrix.md`, `docs/ARCHITECTURE_DECISIONS.md`, `docs/architecture/*`, `scripts/generate-architecture-graph.mjs`, `e2e/*`, `.github/workflows/runtime-validation.yml`, `TESTING.md`.
