@@ -1176,10 +1176,6 @@ async function sendInquiryMessage(inquiryId, data, caller) {
 
     const ownerType = senderUserId ? 'user' : 'company';
     const ownerId = senderUserId || senderCompanyId;
-    await consumeUsage({
-      ownerType, ownerId, usageType: 'INTERNAL_MESSAGE',
-      referenceType: 'Inquiry', referenceId: numericInquiryId, tx,
-    });
     const createdMessage = await tx.inquiryMessage.create({
       data: { inquiryId: numericInquiryId, senderUserId, senderCompanyId, recipientUserId, recipientCompanyId, body: message },
       include: {
@@ -1188,6 +1184,10 @@ async function sendInquiryMessage(inquiryId, data, caller) {
         recipientUser: { select: { id: true } },
         recipientCompany: { select: { id: true, name: true } },
       },
+    });
+    await consumeUsage({
+      ownerType, ownerId, usageType: 'INTERNAL_MESSAGE',
+      referenceType: 'InquiryMessage', referenceId: createdMessage.id, tx,
     });
     let smsQueued = false;
     let smsSkippedReason = null;
