@@ -86,7 +86,7 @@ export function getStatusSeverity(status) {
  * @returns {boolean}
  */
 export function isPendingReview(product) {
-  return ALLOWED_TRANSITIONS.approve.from.includes(product?.status)
+  return product?.status === 'PENDING_REVIEW'
 }
 
 /**
@@ -95,7 +95,7 @@ export function isPendingReview(product) {
  * @returns {boolean}
  */
 export function canApprove(product) {
-  return ALLOWED_TRANSITIONS.reject.from.includes(product?.status)
+  return ALLOWED_TRANSITIONS.approve.from.includes(product?.status)
 }
 
 /**
@@ -104,7 +104,7 @@ export function canApprove(product) {
  * @returns {boolean}
  */
 export function canReject(product) {
-  return product?.status === 'PENDING_REVIEW'
+  return ALLOWED_TRANSITIONS.reject.from.includes(product?.status)
 }
 
 /**
