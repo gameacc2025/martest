@@ -523,6 +523,9 @@ async function changeProductStatus(id, action, caller, comment) {
   const requiredPermission = actionPermissions[action];
   if (!requiredPermission) throw { statusCode: 400, code: 'INVALID_STATUS_ACTION', message: 'Unknown product status action.' };
   assertStaffPermission(caller, requiredPermission);
+  if (!isSuperAdmin(caller) && !isStaffUser(caller) && !['submitReview', 'publish'].includes(action)) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'This product workflow action is reserved for STAFF.' };
+  }
 
   const productId = Number(id);
   const product = await prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
