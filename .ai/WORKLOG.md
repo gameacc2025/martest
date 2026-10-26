@@ -326,3 +326,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Found stored-XSS risk in public ProductDetails (`v-html` on company-editable description). Since the editor is a plain textarea, changed rendering to escaped text interpolation and preserved line breaks; ProductPreviewCard already used safe interpolation. Issue #7 records the finding and fix.
 - **CI passed:** Run `40272171627` for commit `3a132bf65c6783f35231f4304d6ded82347b335f` passed frontend/shared tests, backend tests, Prisma generation, and Website/Company/Admin builds.
 - **Remaining approval-sensitive issues:** #5 `isFeatured` permission enforcement and #6 broader STAFF write scope (publish subcase already fixed). These were recorded but not implemented beyond the explicitly authorized scope.
+
+
+### Public product response allowlist — 2026-10-26
+- Public product list/detail now use `publicProductSelect` rather than `include`, returning only fields required by the public catalog and its public relations. Internal `statusHistory`, actor/creator IDs, `editsSinceApproval`, and `deletedAt` are omitted. Management reads continue using `productInclude` with status history for authorized callers.
+- Added regression tests for public list/detail select shapes and management detail retaining history. API docs document the public response privacy boundary.
+- CI run `40272542697` for commit `9c42d944e07baf8dde418e7ce301f0a663552826` passed frontend/shared tests, backend tests, Prisma generation, and Website/Company/Admin builds.
+- The later docs-only commits `575f1ba0d3ad5ae471d92c24ead003c9664b70a2` and `144a7c31b913593f340d19d135d5f6d373178708` clarify the public field allowlist; their CI runs are pending.
