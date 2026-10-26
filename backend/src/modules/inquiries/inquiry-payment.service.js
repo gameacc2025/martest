@@ -79,14 +79,18 @@ async function startSubscriptionPayment({ ownerType, ownerId, planId, paymentRef
     return { paymentMode: 'MANUAL_REVIEW', subscription, paymentUrl: null };
   }
 
-  const plan = await prisma.inquiryPlan.findFirst({ where: { id: Number(planId), isActive: true } });
-  if (!plan) throw { statusCode: 404, code: 'INQUIRY_PLAN_NOT_FOUND', message: 'طرح اشتراک فعال پیدا نشد.' };
-  const amount = amountInRial(plan);
-  const subscription = await createPendingSubscription({ ownerType, ownerId, planId, paymentReference: null });
-  await prisma.inquirySubscription.update({
-    where: { id: subscription.id },
-    data: { paymentProvider: 'ZARINPAL', paymentAmount: amount, notes: 'در انتظار پرداخت آنلاین از طریق زرین‌پال.' },
+  const prepared = await prisma.$transaction(async (tx) => {
+    const subscription = await createPendingSubscription({ ownerType, ownerId, planId, paymentReference: null }, tx);
+    const amount = amountInRial(subscription.plan);
+    const updated = await tx.inquirySubscription.update({
+      where: { id: subscription.id },
+      data: { paymentProvider: 'ZARINPAL', paymentAmount: amount, notes: 'در انتظار پرداخت آنلاین از طریق زرین‌پال.' },
+      include: { plan: { select: { id: true, name: true, durationDays: true, price: true, currency: true } } },
+    });
+    return { subscription: updated, amount };
   });
+  const subscription = prepared.subscription;
+  const amount = prepared.amount;
 
   try {
     const result = await callZarinpal(config, 'request', {
