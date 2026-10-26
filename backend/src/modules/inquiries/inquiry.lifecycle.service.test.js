@@ -25,6 +25,9 @@ const mockPrisma = {
   inquiryItem: {
     findMany: async () => [{ product: { companyId: 20 } }],
   },
+  inquiryStatusHistory: {
+    create: async ({ data }) => ({ ...data }),
+  },
   $transaction: async (callback) => callback(mockPrisma),
 };
 
