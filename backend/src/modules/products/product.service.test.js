@@ -268,11 +268,14 @@ test('getProductById: an anonymous visitor only sees PUBLISHED + PUBLIC products
 });
 
 test('getProductById: public detail excludes internal status history', async () => {
-  let capturedInclude;
+  let capturedSelect;
   fx.product = draftProduct({ status: 'PUBLISHED', visibility: 'PUBLIC' });
-  mockPrisma.product.findFirst = async (args) => { capturedInclude = args.include; return fx.product; };
+  mockPrisma.product.findFirst = async (args) => { capturedSelect = args.select; return fx.product; };
   await service.getProductById(1, anonymous);
-  assert.equal(capturedInclude.statusHistory, undefined);
+  assert.equal(capturedSelect.statusHistory, undefined);
+  assert.equal(capturedSelect.createdByUserId, undefined);
+  assert.equal(capturedSelect.editsSinceApproval, undefined);
+  assert.equal(capturedSelect.deletedAt, undefined);
 });
 
 test('getProductById: authorized management detail retains status history', async () => {
