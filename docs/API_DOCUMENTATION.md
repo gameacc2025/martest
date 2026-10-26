@@ -952,7 +952,7 @@
 ### `GET /api/products`
 **توضیح**: لیست محصولات کاتالوگ عمومی
 
-**Access**: Public. Only `PUBLISHED` products with `PUBLIC` visibility are returned; query parameters and signed-in session state cannot bypass this restriction. Public responses omit internal moderation `statusHistory` and staff identity details.
+**Access**: Public. Only `PUBLISHED` products with `PUBLIC` visibility are returned; query parameters and signed-in session state cannot bypass this restriction. Public responses omit internal moderation `statusHistory`, staff identity details, creator IDs, post-approval edit counters, and deletion metadata.
 
 **Query Parameters**:
 - `page`: شماره صفحه
