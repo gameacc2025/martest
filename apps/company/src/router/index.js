@@ -82,6 +82,7 @@ const routes = [
       { path: "/products/create", name: "manage-product-create", component: () => import("../pages/company/products/ProductForm.vue"), meta: { title: "ایجاد محصول جدید" } },
       { path: "/products/:id/edit", name: "manage-product-edit", component: () => import("../pages/company/products/ProductForm.vue"), meta: { title: "ویرایش محصول" } },
       // ── Inquiries ────────────────────────────────────────
+      { path: "/inquiry-subscription", name: "company-inquiry-subscription", component: () => import("../pages/company/inquiries/InquirySubscription.vue"), meta: { title: "اشتراک استعلام" } },
       { path: "/inquiries", name: "company-inquiries", component: () => import("../pages/company/inquiries/InquiryList.vue"), meta: { title: "استعلام‌ها" } },
       { path: "/inquiries/create", name: "company-inquiry-create", component: () => import("../pages/company/inquiries/InquiryCreate.vue"), meta: { title: "ایجاد استعلام" } },
       { path: "/inquiries/:id", name: "company-inquiry-detail", component: () => import("../pages/company/inquiries/InquiryDetail.vue"), meta: { title: "جزئیات استعلام" } },
