@@ -182,6 +182,7 @@ export const adminApi = {
   createInquiryPlan: (data) => api.post(endpoints.inquirySubscriptions.adminPlans, data),
   listInquirySubscriptions: () => api.get(endpoints.inquirySubscriptions.adminSubscriptions),
   activateInquirySubscription: (id, notes = '') => api.post(endpoints.inquirySubscriptions.activate(id), { paymentConfirmed: true, notes }),
+  rejectInquirySubscription: (id, notes = '') => api.post(endpoints.inquirySubscriptions.reject(id), { notes }),
   grantInquirySubscription: (data) => api.post(endpoints.inquirySubscriptions.grant, data),
 }
 
