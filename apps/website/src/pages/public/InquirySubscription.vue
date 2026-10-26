@@ -124,7 +124,7 @@ async function requestPlan(plan) {
       <span class="status active-pill">فعال</span>
     </section>
     <section v-else-if="pendingSubscription" class="panel pending">
-      <div><span class="eyebrow">درخواست در انتظار</span><h2>{{ pendingSubscription.plan?.name }}</h2><p>شماره پیگیری: {{ pendingSubscription.paymentProvider === 'ZARINPAL' ? (pendingSubscription.paymentRefId || pendingSubscription.paymentAuthority || 'پرداخت آنلاین') : (pendingSubscription.paymentReference || 'ثبت نشده') }}</p><p>{{ pendingSubscription.paymentProvider === 'ZARINPAL' ? 'پرداخت آنلاین ثبت شده؛ اگر تأیید موقتاً ناموفق بود، وضعیت را دوباره بررسی کنید.' : 'این درخواست تا بررسی و تأیید مدیر فعال نمی‌شود.' }}</p><button v-if="pendingSubscription.paymentProvider === 'ZARINPAL'" class="secondary" :disabled="submitting" @click="retryPayment">{{ submitting ? 'در حال بررسی…' : 'بررسی دوباره پرداخت' }}</button></div>
+      <div><span class="eyebrow">درخواست در انتظار</span><h2>{{ pendingSubscription.plan?.name }}</h2><p>شماره پیگیری: {{ pendingSubscription.paymentProvider === 'ZARINPAL' ? (pendingSubscription.paymentRefId || 'پرداخت آنلاین') : (pendingSubscription.paymentReference || 'ثبت نشده') }}</p><p>{{ pendingSubscription.paymentProvider === 'ZARINPAL' ? 'پرداخت آنلاین ثبت شده؛ اگر تأیید موقتاً ناموفق بود، وضعیت را دوباره بررسی کنید.' : 'این درخواست تا بررسی و تأیید مدیر فعال نمی‌شود.' }}</p><button v-if="pendingSubscription.paymentProvider === 'ZARINPAL'" class="secondary" :disabled="submitting" @click="retryPayment">{{ submitting ? 'در حال بررسی…' : 'بررسی دوباره پرداخت' }}</button></div>
       <span class="status pending-pill">در انتظار بررسی</span>
     </section>
 
