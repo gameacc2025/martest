@@ -233,4 +233,29 @@ async function handleSubscriptionPaymentCallback(query = {}) {
   return { payment: 'success', subscriptionId: activated.id, refId, redirectUrl: makeResultUrl(config, 'success', activated.id, refId) };
 }
 
-module.exports = { isZarinpalConfigured, startSubscriptionPayment, handleSubscriptionPaymentCallback };
+
+async function retryPendingSubscriptionVerification({ ownerType, ownerId, subscriptionId }) {
+  if (!['company', 'user'].includes(ownerType) || !Number.isInteger(Number(ownerId)) || Number(ownerId) < 1) {
+    throw { statusCode: 400, code: 'SUBSCRIPTION_OWNER_REQUIRED', message: 'شناسه صاحب اشتراک معتبر نیست.' };
+  }
+  const id = Number(subscriptionId);
+  if (!Number.isInteger(id) || id < 1) {
+    throw { statusCode: 400, code: 'INVALID_SUBSCRIPTION_ID', message: 'شناسه اشتراک معتبر نیست.' };
+  }
+  const ownerFilter = ownerType === 'company' ? { companyId: Number(ownerId) } : { userId: Number(ownerId) };
+  const subscription = await prisma.inquirySubscription.findFirst({
+    where: { id, ...ownerFilter, paymentProvider: 'ZARINPAL' },
+    select: { id: true, status: true, paymentAuthority: true, paymentRefId: true, paymentVerifiedAt: true },
+  });
+  if (!subscription) throw { statusCode: 404, code: 'SUBSCRIPTION_NOT_FOUND', message: 'درخواست پرداخت آنلاین پیدا نشد.' };
+  if (subscription.status === 'ACTIVE' && subscription.paymentVerifiedAt) {
+    return { payment: 'success', subscriptionId: subscription.id, refId: subscription.paymentRefId };
+  }
+  if (subscription.status !== 'PENDING_PAYMENT' || !subscription.paymentAuthority) {
+    throw { statusCode: 409, code: 'SUBSCRIPTION_NOT_PENDING', message: 'این درخواست پرداخت در وضعیت قابل بررسی مجدد نیست.' };
+  }
+  const result = await handleSubscriptionPaymentCallback({ Authority: subscription.paymentAuthority, Status: 'OK' });
+  return { payment: result.payment, subscriptionId: subscription.id, refId: result.refId || null };
+}
+
+module.exports = { isZarinpalConfigured, startSubscriptionPayment, handleSubscriptionPaymentCallback, retryPendingSubscriptionVerification };
