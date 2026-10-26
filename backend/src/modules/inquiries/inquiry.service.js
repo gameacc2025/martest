@@ -760,7 +760,7 @@ async function createInquiry(data, caller) {
     const settings = buildInquirySettings(data, { partial: false });
     // Website quick inquiries are actionable immediately. Company-authored RFQs
     // retain the established DRAFT -> SUBMITTED -> OPEN workflow.
-    if (isCustomerBuyer) settings.publishDate = settings.publishDate || new Date();
+    if (isCustomerBuyer) settings.publishDate = new Date();
 
     const inquiry = await tx.inquiry.create({
       data: {
