@@ -220,9 +220,10 @@
               <textarea v-model="inquiryDescription" rows="3" maxlength="2000" placeholder="شرایط تحویل یا توضیحات تکمیلی"></textarea>
             </label>
             <p v-if="inquiryError" class="dialog-error" role="alert">{{ inquiryError }}</p>
+            <p v-if="inquirySuccess" class="dialog-success" role="status">{{ inquirySuccess }}</p>
             <div class="dialog-actions">
-              <Button label="انصراف" severity="secondary" outlined @click="inquiryDialogOpen = false" />
-              <Button label="ثبت استعلام" icon="pi pi-send" :loading="inquirySubmitting" @click="submitInquiry" />
+              <Button :label="inquirySuccess ? 'بستن' : 'انصراف'" severity="secondary" outlined @click="inquiryDialogOpen = false" />
+              <Button v-if="!inquirySuccess" label="ثبت استعلام" icon="pi pi-send" :loading="inquirySubmitting" @click="submitInquiry" />
             </div>
           </section>
         </div>
@@ -279,13 +280,16 @@ const inquirySubmitting = ref(false)
 const inquiryQuantity = ref(1)
 const inquiryDescription = ref('')
 const inquiryError = ref('')
+const inquirySuccess = ref('')
 const priceHistoryDialogOpen = ref(false)
 
 const canCreateInquiry = computed(() => authStore.isAuthenticated
   && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
 const productTags = computed(() => {
-  const tags = Array.isArray(product.value.tags) ? product.value.tags : []
-  return tags.map(tag => String(typeof tag === 'object' ? (tag.name || tag.label || '') : tag).trim()).filter(Boolean)
+  const tags = Array.isArray(product.value.tags) ? product.value.tags
+    : Array.isArray(product.value.specifications?.tags) ? product.value.specifications.tags
+      : []
+  return [...new Set(tags.map(tag => String(typeof tag === 'object' ? (tag.name || tag.label || '') : tag).trim()).filter(Boolean))]
 })
 const priceHistoryPoints = computed(() => {
   const now = new Date()
@@ -448,6 +452,7 @@ const submitInquiry = async () => {
   }
   inquirySubmitting.value = true
   inquiryError.value = ''
+  inquirySuccess.value = ''
   try {
     await inquiriesApi.create({
       title: 'استعلام قیمت: ' + (product.value.title || 'محصول'),
@@ -458,7 +463,7 @@ const submitInquiry = async () => {
         description: inquiryDescription.value.trim() || undefined,
       }],
     })
-    inquiryDialogOpen.value = false
+    inquirySuccess.value = 'درخواست استعلام قیمت با موفقیت ثبت شد.'
     inquiryQuantity.value = 1
     inquiryDescription.value = ''
   } catch (err) {
@@ -547,11 +552,6 @@ const goBack = () => router.push('/products')
   color: color-mix(in srgb, var(--pd-accent) 75%, #064c50);
   font-size: 0.78rem;
   font-weight: 700;
-}
-
-.category-chip--muted {
-  background: var(--pd-ground);
-  color: var(--pd-muted);
 }
 
 .product-heading h1 {
@@ -1144,10 +1144,19 @@ const goBack = () => router.push('/products')
   font-weight: 400;
 }
 
-.dialog-error {
+.dialog-error,
+.dialog-success {
   margin: 0.8rem 0 0;
-  color: #b42335;
   font-size: 0.85rem;
+  line-height: 1.8;
+}
+
+.dialog-error {
+  color: #b42335;
+}
+
+.dialog-success {
+  color: #15803d;
 }
 
 .dialog-actions {
