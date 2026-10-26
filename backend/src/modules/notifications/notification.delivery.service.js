@@ -13,6 +13,7 @@
 
 const prisma = require('../../config/db');
 const emailProvider = require('./notification.email.provider');
+const smsProvider = require('./notification.sms.provider');
 const { notificationMaxAttempts } = require('../../config/env');
 
 // Default poll limit if not configured
@@ -117,6 +118,70 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
     }
   }
 
+  return results;
+}
+
+
+/**
+ * Process pending SMS deliveries through the configured Twilio adapter.
+ * SMS rows are only queued when a sender explicitly requests a text alert and
+ * the recipient has opted into SMS for INQUIRY_MESSAGE_RECEIVED.
+ */
+async function processPendingSmsDeliveries({ limit = POLL_LIMIT } = {}) {
+  if (!smsProvider.hasRealProvider()) {
+    return { processed: 0, sent: 0, failed: 0, skipped: limit, reason: 'no_sms_provider' };
+  }
+
+  const results = { processed: 0, sent: 0, failed: 0, errors: [] };
+  const deliveries = await prisma.notificationDelivery.findMany({
+    where: {
+      status: 'PENDING',
+      channel: 'SMS',
+      OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: new Date() } }],
+      attempts: { lt: notificationMaxAttempts },
+    },
+    orderBy: { nextAttemptAt: 'asc' },
+    take: limit,
+  });
+
+  for (const delivery of deliveries) {
+    results.processed += 1;
+    try {
+      if (!delivery.recipient) {
+        await markDeliverySkipped(delivery.id, 'No recipient phone number');
+        results.failed += 1;
+        continue;
+      }
+      const providerResult = await smsProvider.sendSms({ to: delivery.recipient, body: delivery.body || '' });
+      await prisma.notificationDelivery.update({
+        where: { id: delivery.id },
+        data: {
+          status: 'SENT',
+          provider: providerResult?.provider || 'twilio',
+          sentAt: new Date(),
+          attempts: delivery.attempts + 1,
+          lastError: null,
+          updatedAt: new Date(),
+        },
+      });
+      results.sent += 1;
+    } catch (error) {
+      const newAttempts = delivery.attempts + 1;
+      const isExhausted = newAttempts >= notificationMaxAttempts;
+      await prisma.notificationDelivery.update({
+        where: { id: delivery.id },
+        data: {
+          status: isExhausted ? 'FAILED' : 'PENDING',
+          attempts: newAttempts,
+          lastError: error.message?.substring(0, 500) || String(error),
+          nextAttemptAt: isExhausted ? null : calculateBackoff(newAttempts),
+          updatedAt: new Date(),
+        },
+      });
+      results.failed += 1;
+      if (isExhausted) results.errors.push({ id: delivery.id, error: error.message });
+    }
+  }
   return results;
 }
 
@@ -264,6 +329,7 @@ async function listDeliveries(options = {}) {
 
 module.exports = {
   processPendingDeliveries,
+  processPendingSmsDeliveries,
   calculateBackoff,
   getDeliveryStats,
   listDeliveries,
