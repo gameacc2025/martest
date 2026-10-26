@@ -12,6 +12,7 @@ function lockSubscriptionOwner(tx, ownerType, ownerId) {
 
 async function createPendingWithOwnerLock(args) {
   return prisma.$transaction(async (tx) => {
+    if (typeof tx.$queryRawUnsafe === 'function') await tx.$queryRawUnsafe('SELECT id FROM "InquiryPlan" WHERE id = $1 FOR UPDATE', Number(args.planId));
     await lockSubscriptionOwner(tx, args.ownerType, args.ownerId);
     return createPendingSubscription(args, tx);
   });
@@ -96,6 +97,7 @@ async function startSubscriptionPayment({ ownerType, ownerId, planId, paymentRef
   }
 
   const prepared = await prisma.$transaction(async (tx) => {
+    if (typeof tx.$queryRawUnsafe === 'function') await tx.$queryRawUnsafe('SELECT id FROM "InquiryPlan" WHERE id = $1 FOR UPDATE', Number(planId));
     await lockSubscriptionOwner(tx, ownerType, ownerId);
     const subscription = await createPendingSubscription({ ownerType, ownerId, planId, paymentReference: null }, tx);
     const amount = amountInRial(subscription.plan);
