@@ -868,7 +868,7 @@ async function revealInquiryResponses(inquiryId, caller) {
     if (!['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
       throw { statusCode: 400, code: 'INQUIRY_NOT_SEALED', message: 'Only sealed inquiries have a reveal step.' };
     }
-    if (inquiry.revealedAt) return inquiry;
+    if (inquiry.revealedAt) return shapeInquiryForCaller(inquiry, caller);
 
     const deadlinePassed = inquiry.responseDeadline && new Date(inquiry.responseDeadline) <= new Date();
     const inquiryClosed = ['CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'].includes(inquiry.status);
