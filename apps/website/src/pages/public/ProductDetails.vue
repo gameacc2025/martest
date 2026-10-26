@@ -29,25 +29,16 @@
       <template v-else>
         <div class="product-heading">
           <div class="heading-copy">
-            <div class="category-list">
+            <h1 class="product-title">
+              {{ product.title || 'بدون عنوان' }}
               <span v-if="categoryName" class="category-chip">{{ categoryName }}</span>
-              <span v-if="subcategoryName" class="category-chip category-chip--muted">{{ subcategoryName }}</span>
-            </div>
-            <h1>{{ product.title || 'بدون عنوان' }}</h1>
+            </h1>
             <div class="product-meta">
               <span v-if="product.brand"><i class="pi pi-tag"></i>{{ product.brand }}</span>
               <span v-if="product.model"><i class="pi pi-box"></i>مدل {{ product.model }}</span>
               <span v-if="product.sku" class="sku"><i class="pi pi-hashtag"></i>{{ product.sku }}</span>
             </div>
           </div>
-          <Button
-            icon="pi pi-heart"
-            :label="isInWishlist ? 'در علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'"
-            :class="['wishlist-button', { 'wishlist-button--active': isInWishlist }]"
-            severity="secondary"
-            outlined
-            @click="addToWishlist"
-          />
         </div>
 
         <div class="product-layout">
@@ -135,6 +126,18 @@
                 </div>
               </div>
 
+              <div class="price-icon-actions" aria-label="عملیات قیمت محصول">
+                <Button v-if="canCreateInquiry" icon="pi pi-file-edit" rounded outlined severity="secondary"
+                  aria-label="ثبت استعلام قیمت" title="ثبت استعلام قیمت" :disabled="inquirySubmitting"
+                  @click="inquiryDialogOpen = true" />
+                <Button :icon="isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'" rounded outlined
+                  :class="['icon-action', { 'icon-action--active': isInWishlist }]"
+                  :aria-label="isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'"
+                  :title="isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'" @click="addToWishlist" />
+                <Button icon="pi pi-chart-line" rounded outlined severity="secondary"
+                  aria-label="نمودار قیمت شش ماه اخیر" title="نمودار قیمت شش ماه اخیر"
+                  @click="priceHistoryDialogOpen = true" />
+              </div>
               <div v-if="prices.length > 1" class="price-tiers">
                 <div v-for="(tier, index) in sortedPrices" :key="tier.id || index" class="price-tier">
                   <span>{{ tier.label || tier.name || ('سطح قیمت ' + (index + 1)) }}</span>
@@ -186,6 +189,12 @@
               />
             </section>
 
+            <section v-if="productTags.length" class="tags-card" aria-label="برچسب‌های محصول">
+              <h2>برچسب‌ها</h2>
+              <div class="product-tags">
+                <span v-for="tag in productTags" :key="tag" class="product-tag">#{{ tag }}</span>
+              </div>
+            </section>
             <div class="help-card">
               <span class="help-icon"><i class="pi pi-comments"></i></span>
               <div>
