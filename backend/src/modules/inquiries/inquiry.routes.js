@@ -195,7 +195,13 @@ const listQuerySchema = {
 };
 
 async function inquiryRoutes(fastify) {
-  fastify.addHook('onRequest', fastify.authenticate);
+  // Zarinpal redirects the customer back without our JWT. Keep this one
+  // provider callback public; the handler verifies Authority with Zarinpal
+  // server-to-server before it can activate any subscription.
+  fastify.addHook('onRequest', async (request, reply) => {
+    if (request.routeOptions?.url === '/subscription/payment/callback') return;
+    return fastify.authenticate(request, reply);
+  });
 
   fastify.get('/', {
     preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read')],
