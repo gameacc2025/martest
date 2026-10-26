@@ -1824,3 +1824,37 @@ test('CUSTOMER with stray companyId and product permissions cannot create or pub
   );
   assert.equal((calls['product.update'] || []).length, 0);
 });
+
+
+test('STAFF with products.update and products.feature may change featured placement cross-company', async () => {
+  fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1, isFeatured: false });
+  const staffFeaturedEditor = { id: 5, accessType: 'STAFF', companyId: 999, permissions: ['products.update', 'products.feature'] };
+  await service.updateProduct(1, { isFeatured: true }, staffFeaturedEditor);
+  assert.equal(calls['product.update'].at(-1).data.isFeatured, true);
+});
+
+test('SUPER_ADMIN may set featured placement during create and update', async () => {
+  await service.createProduct({ title: 'Featured', categoryId: 1, subcategoryId: 1, companyId: 10, isFeatured: true }, superAdmin);
+  assert.equal(calls['product.create'].at(-1).data.isFeatured, true);
+
+  fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1, isFeatured: false });
+  await service.updateProduct(1, { isFeatured: true }, superAdmin);
+  assert.equal(calls['product.update'].at(-1).data.isFeatured, true);
+});
+
+test('STAFF without products.publish cannot publish across companies', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'APPROVED' });
+  const staffWithoutPublish = { id: 5, accessType: 'STAFF', companyId: 999, permissions: ['products.read'] };
+  await assert.rejects(
+    () => service.changeProductStatus(1, 'publish', staffWithoutPublish),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['product.update'] || []).length, 0);
+});
+
+test('STAFF with products.update may manage price tiers across companies', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const staffPriceEditor = { id: 5, accessType: 'STAFF', companyId: 999, permissions: ['products.update'] };
+  await service.addPriceTier(1, { minQuantity: 1, price: 500 }, staffPriceEditor);
+  assert.equal(calls['productPriceTier.create'].at(-1).data.productId, 1);
+});
