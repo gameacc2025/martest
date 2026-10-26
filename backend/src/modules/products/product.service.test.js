@@ -267,6 +267,22 @@ test('getProductById: an anonymous visitor only sees PUBLISHED + PUBLIC products
   assert.ok(await service.getProductById(1, anonymous));
 });
 
+test('getProductById: public detail excludes internal status history', async () => {
+  let capturedInclude;
+  fx.product = draftProduct({ status: 'PUBLISHED', visibility: 'PUBLIC' });
+  mockPrisma.product.findFirst = async (args) => { capturedInclude = args.include; return fx.product; };
+  await service.getProductById(1, anonymous);
+  assert.equal(capturedInclude.statusHistory, undefined);
+});
+
+test('getProductById: authorized management detail retains status history', async () => {
+  let capturedInclude;
+  fx.product = draftProduct({ companyId: 10, status: 'DRAFT' });
+  mockPrisma.product.findFirst = async (args) => { capturedInclude = args.include; return fx.product; };
+  await service.getProductById(1, companyA);
+  assert.ok(capturedInclude.statusHistory);
+});
+
 test('getProductById: a company sees its own product regardless of status', async () => {
   fx.product = draftProduct({ companyId: 10, status: 'DRAFT' });
   assert.ok(await service.getProductById(1, companyA));
@@ -326,6 +342,13 @@ test('listProducts: even STAFF sessions on the public route remain clamped to PU
   });
   assert.equal(capturedWhere.status, 'PUBLISHED');
   assert.equal(capturedWhere.visibility, 'PUBLIC');
+});
+
+test('listProducts: public catalog excludes internal status history', async () => {
+  let capturedArgs;
+  mockPrisma.product.findMany = async (args) => { capturedArgs = args; return []; };
+  await service.listProducts({ skip: 0, take: 10, caller: anonymous, publicOnly: true });
+  assert.equal(capturedArgs.include.statusHistory, undefined);
 });
 
 // ── listProducts scoping ──────────────────────────────────────
