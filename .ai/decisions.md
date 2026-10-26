@@ -105,3 +105,16 @@ Date: 2026-10-25
 Decision: Notification folders must remain simple for end users: Saved is a fixed system folder and users cannot create or manage folders. Admin owns folder configuration, with options for system-wide availability or availability scoped to Website, Company Portal, or Admin.
 Reason: The user explicitly requested centralized admin control and wants to avoid the complexity of user-created folders.
 Impact: Future folder work must include admin controls and app-scope authorization. Copy adds a notification-folder association without removing the source association; Move changes the association without deleting the canonical notification. Read state belongs to the canonical notification, not to each folder association. The schema/API design and implementation remain pending separate user approval; do not change them during the read-state fix.
+
+
+---
+
+Date: 2026-10-26
+Decision: Product featured placement is a separately privileged action. Only SUPER_ADMIN or a caller with `products.feature` may set `isFeatured=true` at creation or change an existing `isFeatured` value. Callers without this permission must omit the field on update so they cannot clear or overwrite an existing featured value.
+Reason: Featured placement affects public catalog promotion and must not be implicitly granted by generic create/update access.
+Impact: Backend service checks are authoritative; Company/Admin forms hide the toggle and omit the field when the caller lacks the permission. A create without the field defaults to non-featured.
+
+Date: 2026-10-26
+Decision: STAFF may perform cross-company product operations only when they have the exact granular permission for that operation; COMPANY ownership remains mandatory and cannot be bypassed with a supplied `companyId`.
+Reason: STAFF are marketplace moderators, not tenant-owned sellers. Cross-company access is necessary for explicitly authorized moderation/content operations, but broad access based on STAFF identity alone would violate least privilege.
+Impact: Product services enforce STAFF permissions for create/update/delete, price tiers, image/document operations, and lifecycle actions, not only at HTTP routes. STAFF creation requires an explicit target `companyId`. COMPANY callers remain restricted to their own company's products. Public catalog routes remain clamped to PUBLISHED + PUBLIC.
