@@ -16,6 +16,13 @@ const loadingDetail = ref(false)
 const saving = ref(false)
 const decidingResponseId = ref(null)
 const messages = ref([])
+const quotaSummary = ref(null)
+const notifyBySms = ref(false)
+const messageNotice = ref('')
+const smsAvailable = computed(() => Boolean(
+  quotaSummary.value?.capabilities?.smsConfigured
+  && Number(quotaSummary.value?.quotas?.SMS?.remaining) > 0,
+))
 const messageDraft = ref('')
 const recipientCompanyId = ref(null)
 const loadingMessages = ref(false)
@@ -103,7 +110,7 @@ async function loadDetail() {
   detailError.value = ''
   try {
     selected.value = unwrapInquiry(await inquiriesApi.getById(id))
-    await loadMessages()
+    await Promise.all([loadMessages(), loadQuota()])
   } catch (err) {
     selected.value = null
     detailError.value = err?.response?.data?.message || err?.response?.data?.error?.message
@@ -128,6 +135,16 @@ async function loadMessages() {
   }
 }
 
+async function loadQuota() {
+  try {
+    const result = await inquiriesApi.getQuota()
+    const body = result?.data ?? result
+    quotaSummary.value = body?.data ?? body
+  } catch {
+    quotaSummary.value = null
+  }
+}
+
 function messageSenderName(message) {
   if (message.senderCompany?.name) return message.senderCompany.name
   const profile = message.senderUser?.profile
@@ -139,13 +156,23 @@ async function sendInquiryMessage() {
   if (!selected.value?.id || !messageDraft.value.trim() || !Number(recipientCompanyId.value)) return
   sendingMessage.value = true
   detailError.value = ''
+  messageNotice.value = ''
   try {
-    await inquiriesApi.sendMessage(selected.value.id, {
+    const result = await inquiriesApi.sendMessage(selected.value.id, {
       message: messageDraft.value.trim(),
       recipientCompanyId: Number(recipientCompanyId.value),
+      ...(notifyBySms.value ? { notifyBySms: true } : {}),
     })
+    const body = result?.data ?? result
+    const payload = body?.data ?? body
+    notifyBySms.value = false
     messageDraft.value = ''
-    await loadMessages()
+    messageNotice.value = payload?.smsQueued
+      ? 'پیام ارسال شد و اعلان پیامکی در صف ارسال قرار گرفت.'
+      : payload?.smsSkippedReason === 'recipient_sms_opted_out'
+        ? 'پیام ارسال شد؛ اعلان پیامکی ارسال نشد چون گیرنده دریافت پیامک را فعال نکرده است.'
+        : 'پیام با موفقیت ارسال شد.'
+    await Promise.all([loadMessages(), loadQuota()])
   } catch (err) {
     const code = err?.response?.data?.code || err?.code
     detailError.value = code === 'INQUIRY_QUOTA_EXCEEDED' || code === 'INQUIRY_SUBSCRIPTION_REQUIRED'
@@ -332,7 +359,9 @@ onMounted(async () => {
                   </option>
                 </select>
               </label>
+              <label v-if="smsAvailable" class="conversation-sms-option"><input v-model="notifyBySms" type="checkbox" /> ارسال اعلان پیامکی به گیرنده (یک سهمیه پیامک مصرف می‌کند)</label>
               <Textarea v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="پیام خود را بنویسید…" class="w-full" />
+              <p v-if="messageNotice" class="message-notice" role="status">{{ messageNotice }}</p>
               <div class="conversation-actions"><small>{{ messageDraft.trim().length.toLocaleString('fa-IR') }} / ۵۰۰۰</small><Button type="submit" label="ارسال پیام" icon="pi pi-send" :loading="sendingMessage" :disabled="!messageDraft.trim() || !Number(recipientCompanyId) || messageDraft.trim().length > 5000" /></div>
             </form>
           </section>
@@ -409,6 +438,9 @@ onMounted(async () => {
 .conversation-form label{display:grid;gap:6px;max-width:420px}
 .conversation-form select{padding:10px;border:1px solid var(--surface-border,#cbd5e1);border-radius:8px;background:var(--surface-card,#fff);color:inherit}
 .conversation-actions small{color:var(--text-color-secondary,#667085)}
+.conversation-sms-option{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-color-secondary,#667085)}
+.conversation-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,#0f9e9a)}
+.message-notice{color:var(--text-color-secondary,#667085);font-size:.9rem;margin:0;line-height:1.7}
 .content-section h3{font-size:1.1rem;margin:0 0 14px}
 .item-row,.response-card{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:14px;border:1px solid var(--surface-border,#e5e7eb);border-radius:10px;margin-top:10px}
 .item-main{display:grid;gap:6px}
