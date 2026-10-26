@@ -69,6 +69,16 @@ async function processInquiryLifecycle({ now = new Date(), limit = 100 } = {}) {
         data: { status: 'OPEN', closedAt: null },
       });
       if (!result.count) return false;
+      await tx.inquiryStatusHistory.create({
+        data: {
+          inquiryId: id,
+          previousStatus: 'SUBMITTED',
+          newStatus: 'OPEN',
+          changedByUserId: null,
+          source: 'SYSTEM',
+          comment: 'Scheduled publish date reached.',
+        },
+      });
       const inquiry = await tx.inquiry.findUnique({
         where: { id },
         include: { items: { select: { product: { select: { companyId: true } } } } },
@@ -86,6 +96,16 @@ async function processInquiryLifecycle({ now = new Date(), limit = 100 } = {}) {
         data: { status: 'EXPIRED', closedAt: now },
       });
       if (!result.count) return false;
+      await tx.inquiryStatusHistory.create({
+        data: {
+          inquiryId: id,
+          previousStatus: 'OPEN',
+          newStatus: 'EXPIRED',
+          changedByUserId: null,
+          source: 'SYSTEM',
+          comment: 'Response deadline reached; automatic closure enabled.',
+        },
+      });
       const inquiry = await tx.inquiry.findUnique({
         where: { id },
         include: { responses: { select: { companyId: true, status: true } } },
