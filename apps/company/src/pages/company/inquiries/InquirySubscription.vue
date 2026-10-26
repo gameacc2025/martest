@@ -1,8 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { apiGet, apiPost } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
 
+const route = useRoute()
 const plans = ref([])
 const subscriptions = ref([])
 const quota = ref(null)
@@ -31,7 +33,14 @@ function date(value) {
 }
 function unwrap(result) { return result?.data?.data ?? result?.data ?? result ?? {} }
 
-onMounted(load)
+onMounted(async () => {
+  const paymentStatus = String(route.query.payment || '')
+  if (paymentStatus === 'success') successMessage.value = 'پرداخت با موفقیت تأیید شد و اشتراک فعال شد.'
+  else if (paymentStatus === 'cancelled') errorMessage.value = 'پرداخت لغو شد؛ اشتراک فعال نشده است.'
+  else if (paymentStatus === 'failed') errorMessage.value = 'پرداخت تأیید نشد؛ اگر مبلغی کسر شده، با پشتیبانی تماس بگیرید.'
+  else if (paymentStatus === 'pending') errorMessage.value = 'تأیید درگاه موقتاً در دسترس نبود؛ درخواست در انتظار بررسی باقی مانده است.'
+  await load()
+})
 async function load() {
   loading.value = true
   errorMessage.value = ''
