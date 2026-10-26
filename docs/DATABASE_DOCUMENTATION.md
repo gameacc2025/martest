@@ -14,7 +14,7 @@
 مدل‌های تعریف‌شده در schema فعلی:
 
 - **RBAC و نشست:** `Role`, `Permission`, `RolePermission`, `UserRole`, `AccessProfile`, `Profile`, `RefreshToken`, `HandoffCode`
-- **شرکت و کاربران:** `User`, `Company`
+- **شرکت و کاربران:** `User`, `Company`, `Address`
 - **کاتالوگ:** `Category`, `Subcategory`, `SpecificationTemplate`, `SpecificationField`, `SpecificationLibraryField`
 - **محصول و audit:** `Product`, `ProductStatusHistory`, `ProductActivityLog`, `ProductImage`, `ProductDocument`, `ProductPriceTier`, `ProductPriceSnapshot`
 - **استعلام B2B:** `Inquiry`, `InquiryStatusHistory`, `InquiryItem`, `InquiryResponse`, `InquiryResponseAttachment`, `InquiryResponseItem`, `CompanyInquiryLimit`, `CompanyLimit`
@@ -29,6 +29,13 @@ Enums نیز در schema تعریف شده‌اند؛ برای مقادیر دق
 - `Role.scope` از نوع `RoleScope` است و دامنه نقش را مستقل از نام نمایشی/ماشین‌خوان نگه می‌دارد.
 - `RolePermission` و `UserRole` روابط چندبه‌چند را نگه می‌دارند.
 - ساختار واقعی ستون‌ها، nullable بودن، کلیدهای خارجی، cascade و indexها فقط از schema/migration قابل تعیین است؛ مثال‌های قدیمی این سند مرجع schema نیستند.
+
+## آدرس‌های مشتری
+
+- `Address` با `User` رابطه یک‌به‌چند دارد و با حذف کاربر، آدرس‌های او cascade می‌شوند.
+- `userId` روی آدرس مالک را تعیین می‌کند؛ فهرست/خواندن/ویرایش/حذف باید همیشه با شناسه کاربر احراز هویت‌شده scope شوند.
+- `isDefault` آدرس منتخب کاربر را مشخص می‌کند. سرویس در یک تراکنش، پیش‌فرض قبلی را غیرفعال می‌کند؛ اولین آدرس به‌صورت خودکار پیش‌فرض می‌شود.
+- migration مربوط: `20261026130000_customer_addresses`.
 
 ## قیمت محصول و تاریخچه
 

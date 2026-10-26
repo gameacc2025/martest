@@ -37,6 +37,7 @@
 | Products | `/api/v1/products/*` | public read در محدوده انتشار/visibility؛ management با type + permission؛ مالکیت در service |
 | Inquiries | `/api/v1/inquiries/*` | type + permission + مالکیت استعلام/پاسخ |
 | Notifications | `/api/v1/settings/notifications/*` | authenticate و مالکیت داده کاربر |
+| Customer addresses | `/api/v1/addresses/*` | authenticate + CUSTOMER access type + scope بر اساس `request.user.id` در service |
 | Roles/Permissions | `/api/v1/roles/*`, `/api/v1/permissions/*` | مجوزهای مدیریت نقش/مجوز |
 
 ## فرایند تغییر نقش/مجوز
