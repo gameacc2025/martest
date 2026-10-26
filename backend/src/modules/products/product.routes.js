@@ -203,8 +203,9 @@ async function productRoutes(fastify) {
 
     // ── Core product CRUD ───────────────────────────────────
     // Two-layer RBAC: domain boundary (COMPANY|STAFF) + fine-grained
-    // permission. Resource ownership ("only your own company's products")
-    // stays enforced inside the service (assertCanManageProduct*).
+    // permission. COMPANY ownership stays enforced inside the service;
+    // STAFF may cross company boundaries only with the exact operation permission,
+    // which is also checked by the service for direct/internal call paths.
     authenticated.post('/', {
       preHandler: [requireAccessType(...MANAGE_TYPES), requirePermission('products.create')],
       schema: createProductSchema,
