@@ -952,7 +952,7 @@
 ### `GET /api/products`
 **توضیح**: لیست محصولات کاتالوگ عمومی
 
-**Access**: Public. Only `PUBLISHED` products with `PUBLIC` visibility are returned; query parameters and signed-in session state cannot bypass this restriction.
+**Access**: Public. Only `PUBLISHED` products with `PUBLIC` visibility are returned; query parameters and signed-in session state cannot bypass this restriction. Public responses omit internal moderation `statusHistory` and staff identity details.
 
 **Query Parameters**:
 - `page`: شماره صفحه
@@ -1048,7 +1048,7 @@
 ### `GET /api/products/:id`
 **توضیح**: دریافت اطلاعات محصول از کاتالوگ عمومی
 
-**Access**: Public. Only `PUBLISHED` + `PUBLIC` products are returned; other products are not exposed through this endpoint. For moderation/editing, use the authenticated `/:id/manage` route with `products.read`.
+**Access**: Public. Only `PUBLISHED` + `PUBLIC` products are returned; other products are not exposed through this endpoint. Public responses omit internal moderation `statusHistory` and staff identity details. For moderation/editing, use the authenticated `/:id/manage` route with `products.read`.
 
 **Response**:
 ```json
