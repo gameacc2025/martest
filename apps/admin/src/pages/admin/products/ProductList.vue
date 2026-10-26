@@ -47,16 +47,16 @@
           <template #body="{ data }">
             <div class="flex gap-2">
               <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'پیش‌نمایش'" @click="showPreview(data)" />
-              <Button v-if="canEditProduct && data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
+              <Button v-if="canEditProduct(data) && data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
               <Button v-if="canApproveProduct && canApprove(data)" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
               <Button v-if="canRejectProduct && canReject(data)" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
               <Button v-if="canPublishProduct && canPublish(data)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
               <Button v-if="canHideProduct && canHide(data)" icon="pi pi-eye-slash" severity="secondary" rounded text v-tooltip.top="'مخفی کردن از سایت'" :loading="hidingId === data.id" @click="hideProduct(data)" />
               <Button v-if="canArchiveProduct && canArchive(data)" icon="pi pi-folder" severity="secondary" rounded text v-tooltip.top="'بایگانی محصول'" :loading="archivingId === data.id" @click="archiveProduct(data)" />
               <Button v-if="canRestoreProduct && canRestoreDraft(data)" icon="pi pi-replay" severity="warning" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" :loading="restoringId === data.id" @click="restoreProductToDraft(data)" />
-              <Button v-if="canCreateProduct" icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
+              <Button v-if="canDuplicateProduct(data)" icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
               <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
-              <Button v-if="canDeleteProduct" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
+              <Button v-if="canDeleteProduct(data)" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
             </div>
           </template>
         </Column>
@@ -157,14 +157,29 @@ const auth = useAuthStore()
 // list endpoint is not fetched for them (it would 403).
 const canChooseCompany = computed(() => auth.isSuperAdmin)
 const canCreateProduct = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.create') && Boolean(auth.companyId)))
-const canEditProduct = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.update') && Boolean(auth.companyId)))
-const canDeleteProduct = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.delete') && Boolean(auth.companyId)))
+const canEditProducts = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.update') && Boolean(auth.companyId)))
+const canDeleteProducts = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.delete') && Boolean(auth.companyId)))
 const canApproveProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.approve'))
 const canRejectProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.reject'))
 const canPublishProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.publish'))
 const canHideProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.hide'))
 const canArchiveProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.archive'))
 const canRestoreProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.review'))
+
+function canEditProduct(product) {
+  return auth.isSuperAdmin
+    || (canEditProducts.value && Number(auth.companyId) === Number(product.companyId))
+}
+
+function canDeleteProduct(product) {
+  return auth.isSuperAdmin
+    || (canDeleteProducts.value && Number(auth.companyId) === Number(product.companyId))
+}
+
+function canDuplicateProduct(product) {
+  return auth.isSuperAdmin
+    || (canCreateProduct.value && Number(auth.companyId) === Number(product.companyId))
+}
 
 
 const products = ref([])
