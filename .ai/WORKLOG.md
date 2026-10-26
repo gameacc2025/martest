@@ -364,13 +364,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Next action:** User can sync latest `main` and review the page at desktop/mobile widths.
 
 ## 2026-10-26 — PRODUCT-DETAILS-ACTIONS-PRICE-CHART-2026-10-26-01 — Product action icons, category badge, tags and six-month price view
-- **Status:** IN_PROGRESS
+- **Status:** DONE — CI passed.
 - **Goal:** Apply the user's requested ProductDetails UX changes: permission-gated inquiry icon, icon-only wishlist and price-chart controls beside price, primary category badge beside title, and tags at bottom of sidebar.
 - **Evidence:** Current page has a labeled wishlist button in the heading and category/subcategory chips above the title. Website router has no inquiry-create route; shared API client does expose `inquiriesApi.create`, and backend POST /inquiries requires `inquiries.create` or `leads.create` plus a supported access type. Product schema has current price tiers with validFrom/validTo/createdAt/updatedAt but no immutable price-history table. Do not fabricate a historical series; show only available retained price-tier records within six months and state when historical data is unavailable.
 - **Scope:** `apps/website/src/pages/public/ProductDetails.vue`; update project handoff/worklog.
 - **Plan:** Gate inquiry icon by authentication + permission, submit a single-product RFQ using the existing API and quantity/details dialog, move wishlist to compact icon action beside price, add six-month price-history dialog based only on returned tier records, place only primary category badge inline with title, remove category breadcrumb chips, and render tags at the bottom of the sidebar if the public product response provides them.
 - **Verification:** GitHub Actions tests and all production builds. Browser visual validation is not available in this remote-only session.
-- **Commit:** Pending.
+- **Commit:** Source changes are on remote `main`; final UI commit `80f4c49cb10141065750fa7ae2e74c38d4a0fae1`.
 - **Push:** Existing standing instruction permits direct commits to remote `main`.
 - **Risks:** Existing product API does not persist complete historical price snapshots; UI must not imply full historical completeness.
-- **Next action:** Implement and verify via CI.
+- **Verification:** [GitHub Actions run 40290318566](https://github.com/gameacc2025/martest/actions/runs/40290318566) passed: frontend/shared 19/19 test files, handoff 18/18, backend 1196/1196, Prisma generation, and Website/Company/Admin builds. Local/browser visual test NOT RUN.
+- **Next action:** For a genuine six-month price-history chart, add persistent immutable price snapshots and expose a read endpoint; current UI intentionally does not fabricate missing historical data.
