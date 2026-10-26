@@ -293,6 +293,7 @@ async function inquiryRoutes(fastify) {
         properties: {
           message: { type: 'string', minLength: 1, maxLength: 5000 },
           recipientCompanyId: { type: 'integer', minimum: 1 },
+          notifyBySms: { type: 'boolean' },
         },
       },
     },
