@@ -3,8 +3,19 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const Module = require('node:module');
 
-const dbPath = require.resolve('../../config/db', { paths: [__dirname] });
-const originalDb = require.cache[dbPath];
+const serviceDir = __dirname;
+function injectMock(relativePath, exportsObj) {
+  const resolved = require.resolve(path.join(serviceDir, relativePath));
+  const original = require.cache[resolved];
+  require.cache[resolved] = new Module(resolved);
+  require.cache[resolved].exports = exportsObj;
+  require.cache[resolved].loaded = true;
+  test.after(() => {
+    if (original) require.cache[resolved] = original;
+    else delete require.cache[resolved];
+  });
+  return resolved;
+}
 const calls = { subscription: [], aggregate: [], create: [] };
 let enabled = true;
 let subscription = null;
@@ -17,13 +28,7 @@ const mockPrisma = {
     create: async (args) => { calls.create.push(args); return args.data; },
   },
 };
-require.cache[dbPath] = new Module(dbPath);
-require.cache[dbPath].exports = mockPrisma;
-require.cache[dbPath].loaded = true;
-test.after(() => {
-  if (originalDb) require.cache[dbPath] = originalDb;
-  else delete require.cache[dbPath];
-});
+injectMock('../../config/db', mockPrisma);
 
 const { consumeUsage, getQuotaSummary } = require('./inquiry-subscription.service');
 
