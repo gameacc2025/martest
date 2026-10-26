@@ -523,8 +523,13 @@ async function changeProductStatus(id, action, caller, comment) {
   const requiredPermission = actionPermissions[action];
   if (!requiredPermission) throw { statusCode: 400, code: 'INVALID_STATUS_ACTION', message: 'Unknown product status action.' };
   assertStaffPermission(caller, requiredPermission);
-  if (!isSuperAdmin(caller) && !isStaffUser(caller) && !['submitReview', 'publish'].includes(action)) {
-    throw { statusCode: 403, code: 'FORBIDDEN', message: 'This product workflow action is reserved for STAFF.' };
+  if (!isSuperAdmin(caller)) {
+    const companyWorkflowAction = ['submitReview', 'publish'].includes(action);
+    if (isStaffUser(caller)) {
+      // The granular permission above authorizes STAFF across company boundaries.
+    } else if (!companyWorkflowAction || !isCompanyUser(caller)) {
+      throw { statusCode: 403, code: 'FORBIDDEN', message: 'This product workflow action is not available to this access type.' };
+    }
   }
 
   const productId = Number(id);
@@ -904,6 +909,9 @@ async function getProductById(id, caller) {
 
 async function createProduct(data, caller) {
   if (!data.title?.trim()) throw { statusCode: 400, code: 'TITLE_REQUIRED', message: 'title is required.' };
+  if (!isSuperAdmin(caller) && !isStaffUser(caller) && !isCompanyUser(caller)) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'Only STAFF and COMPANY users can create products.' };
+  }
   assertStaffPermission(caller, 'products.create');
   if (data.isFeatured === true) assertCanSetFeatured(caller);
 
