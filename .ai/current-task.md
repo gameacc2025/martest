@@ -74,3 +74,10 @@
 - Stored XSS: replaced public ProductDetails `v-html` rendering of the company-editable description with escaped plain-text interpolation and `white-space: pre-line`; tracked in issue #7.
 - Verified: [CI run 40272171627](https://github.com/gameacc2025/martest/actions/runs/40272171627) passed frontend/shared tests, backend tests, Prisma generation, and Website/Company/Admin builds for commit `3a132bf65c6783f35231f4304d6ded82347b335f`.
 - Open approval-sensitive issues: #5 `isFeatured` permission enforcement and #6 broader STAFF update/delete/price/media write scope (STAFF publish subcase fixed). Do not broaden those permissions without explicit approval.
+
+
+## Public product response privacy fix — 2026-10-26
+- Added `publicProductSelect` and use it for public list/detail queries. It returns public product fields and relations but omits `statusHistory`, actor/creator IDs, post-approval edit counters, and deletion metadata. Management reads retain `productInclude` with history.
+- Regression tests verify public list/detail use the allowlist and management detail retains status history. API docs updated.
+- CI run [40272542697](https://github.com/gameacc2025/martest/actions/runs/40272542697) passed frontend/shared tests, backend tests, Prisma generation, and all three production builds for commit `9c42d944e07baf8dde418e7ce301f0a663552826`.
+- Remaining open authorization issues: #5 `isFeatured` permission enforcement and #6 broader STAFF write scope (publish subcase fixed); do not broaden those permissions without explicit approval.
