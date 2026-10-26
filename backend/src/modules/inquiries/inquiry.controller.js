@@ -1,5 +1,5 @@
 const inquiryService = require('./inquiry.service');
-const { getQuotaSummary } = require('./inquiry-subscription.service');
+const { getQuotaSummary, listActivePlans, createPendingSubscription, getMySubscriptions } = require('./inquiry-subscription.service');
 const { success } = require('../../utils/success');
 
 async function list(request, reply) {
@@ -34,6 +34,39 @@ async function quota(request, reply) {
   }
   const data = await getQuotaSummary(ownerType, Number(ownerId));
   return reply.send(success(data));
+}
+
+function subscriptionOwner(caller) {
+  if (caller?.accessType === 'COMPANY') {
+    const companyId = Number(caller.companyId);
+    if (!Number.isInteger(companyId) || companyId < 1) throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'حساب شرکت معتبر نیست.' };
+    return { ownerType: 'company', ownerId: companyId };
+  }
+  if (caller?.accessType === 'CUSTOMER') {
+    const userId = Number(caller.id);
+    if (!Number.isInteger(userId) || userId < 1) throw { statusCode: 403, code: 'USER_CONTEXT_REQUIRED', message: 'حساب کاربری معتبر نیست.' };
+    return { ownerType: 'user', ownerId: userId };
+  }
+  throw { statusCode: 403, code: 'SUBSCRIPTION_NOT_AVAILABLE_FOR_ROLE', message: 'خرید اشتراک برای این نوع حساب فعال نیست.' };
+}
+
+async function listPlans(request, reply) {
+  return reply.send(success(await listActivePlans()));
+}
+
+async function mySubscriptions(request, reply) {
+  const owner = subscriptionOwner(request.user);
+  const [subscriptions, quota] = await Promise.all([
+    getMySubscriptions(owner.ownerType, owner.ownerId),
+    getQuotaSummary(owner.ownerType, owner.ownerId),
+  ]);
+  return reply.send(success({ subscriptions, quota }));
+}
+
+async function requestSubscription(request, reply) {
+  const owner = subscriptionOwner(request.user);
+  const subscription = await createPendingSubscription({ ...owner, planId: request.body.planId, paymentReference: request.body.paymentReference });
+  return reply.code(201).send(success(subscription));
 }
 
 async function stats(request, reply) {
@@ -134,6 +167,9 @@ module.exports = {
   revealResponses,
   stats,
   quota,
+  listPlans,
+  mySubscriptions,
+  requestSubscription,
 
 
   listItems,
