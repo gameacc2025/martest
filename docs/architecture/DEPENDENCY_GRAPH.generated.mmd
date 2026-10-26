@@ -43,7 +43,7 @@ flowchart LR
   website -->|HTTP /api/v1| api
   company -->|HTTP /api/v1| api
   admin -->|HTTP /api/v1| api
-  api --> auth["Auth / RBAC middleware"]
+  api --> rbac["Auth / RBAC middleware"]
   api --> mod_admin["admin module"]
   api --> mod_auth["auth module"]
   api --> mod_categories["categories module"]
