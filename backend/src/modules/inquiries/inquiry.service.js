@@ -1150,7 +1150,7 @@ async function sendInquiryMessage(inquiryId, data, caller) {
   }
 
   return prisma.$transaction(async (tx) => {
-    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, companyId: true, buyerUserId: true, status: true } });
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, title: true, companyId: true, buyerUserId: true, status: true } });
     if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
     if (['CANCELLED', 'COMPLETED', 'EXPIRED'].includes(inquiry.status)) {
       throw { statusCode: 409, code: 'INQUIRY_MESSAGES_CLOSED', message: 'پس از بسته‌شدن نهایی استعلام امکان ارسال پیام وجود ندارد.' };
