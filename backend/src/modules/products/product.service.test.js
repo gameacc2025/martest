@@ -1808,3 +1808,19 @@ test('company cannot call STAFF-only moderation actions directly through the ser
   );
   assert.equal((calls['product.update'] || []).length, 0);
 });
+
+
+test('CUSTOMER with stray companyId and product permissions cannot create or publish products', async () => {
+  const customer = { id: 8, accessType: 'CUSTOMER', companyId: 10, permissions: ['products.create', 'products.publish'] };
+  await assert.rejects(
+    () => service.createProduct({ title: 'Invalid', categoryId: 1, subcategoryId: 1 }, customer),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+
+  fx.product = draftProduct({ companyId: 10, status: 'APPROVED' });
+  await assert.rejects(
+    () => service.changeProductStatus(1, 'publish', customer),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['product.update'] || []).length, 0);
+});
