@@ -470,3 +470,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** CI passed on feature commit `0e1b0d7b` — https://github.com/gameacc2025/martest/actions/runs/40353078512. Fresh PostgreSQL schema validation, Prisma generation, `migrate deploy`, and `migrate status` passed — https://github.com/gameacc2025/martest/actions/runs/40353071103. Backend tests and all frontend builds passed in CI. Browser-level manual visual verification and live SMTP delivery were not performed.
 - **Notification detail:** Email dedupe keys are per recipient to avoid silently dropping all but one recipient when a company has multiple active users.
 - **Deferred by user:** Customer dashboard foundation PR #11 remains DRAFT and unmerged: https://github.com/gameacc2025/martest/pull/11. Address follow-ups, order history, and B2C commerce remain paused until the user directs us to resume them.
+
+
+## 2026-10-26 — RFQ-MONETIZATION-01 — Inquiry permissions, subscription quotas, and paid messaging
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Audit and complete monetization and access controls for inquiry creation, company responses, internal inquiry messages, and SMS.
+- **Claimed scope:** Backend authorization/entitlement enforcement; subscription plans and periods; usage accounting for inquiry creation and responses; internal-message and SMS quotas/costs; admin configurability; relevant UI, tests, migrations, API docs, and durable agent notes.
+- **Initial findings:** `Inquiry` already supports CUSTOMER buyer users and company buyers. `company-rule.service.js` currently supports opt-in company limits for open RFQs and active/daily/monthly responses, but absence of a configured limit means unlimited. `InquiryResponse` is unique per inquiry/company. Schema has `CompanyLimit` and `CompanyInquiryLimit` but no subscription/plan/entitlement or usage-ledger models were found in the inspected schema section.
+- **Security requirement:** Feature permission and paid entitlement/quota are independent gates. Enforce on backend service operations, not only in UI. Never grant every company user access just because the company has a subscription.
+- **Verification plan:** Add targeted tests for denied users, inactive/expired subscription, quota exhaustion, period rollover, duplicate response idempotency, internal message quota, SMS balance/allowance, and admin override; run backend tests, Prisma validation/migration checks, and frontend builds if execution access is available.
+- **Commit:** Not yet committed
+- **Push:** Changes, if any, will be made only after review and verification; current inspection used read-only repository calls.
+- **Risks / open questions:** Existing payment provider and internal-message implementation must be traced before selecting billing hooks; do not invent SMS prices or payment status. Existing legacy limits must remain compatible during migration.
+- **Next action:** Trace inquiry response write paths, internal messaging, SMS dispatch/provider integration, subscription/payment modules, admin settings UI, and permission seeds before implementing the shared entitlement/usage layer.
