@@ -1061,6 +1061,122 @@ async function submitResponse(inquiryId, data, caller) {
   });
 }
 
+
+async function listInquiryMessages(inquiryId, caller) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const inquiry = await prisma.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, companyId: true, buyerUserId: true } });
+  if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const userId = caller?.accessType === 'CUSTOMER' ? assertAuthenticatedUser(caller) : null;
+  const companyId = caller?.accessType === 'COMPANY' ? Number(caller.companyId) : null;
+  const isBuyer = (userId && Number(inquiry.buyerUserId) === userId)
+    || (companyId && Number(inquiry.companyId) === companyId);
+
+  if (!isBuyer && !isStaff) {
+    if (!Number.isInteger(companyId) || companyId < 1) {
+      throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+    }
+    const response = await prisma.inquiryResponse.findFirst({ where: { inquiryId: numericInquiryId, companyId }, select: { id: true } });
+    if (!response) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+  }
+
+  const where = { inquiryId: numericInquiryId };
+  if (!isStaff) {
+    if (userId) where.OR = [{ senderUserId: userId }, { recipientUserId: userId }];
+    else if (companyId) where.OR = [{ senderCompanyId: companyId }, { recipientCompanyId: companyId }];
+  }
+  const messages = await prisma.inquiryMessage.findMany({
+    where,
+    orderBy: { createdAt: 'asc' },
+    take: 500,
+    include: {
+      senderUser: { select: { id: true, phone: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
+      senderCompany: { select: { id: true, name: true } },
+      recipientUser: { select: { id: true, phone: true, email: true } },
+      recipientCompany: { select: { id: true, name: true } },
+    },
+  });
+  if (!isStaff) {
+    if (userId) await prisma.inquiryMessage.updateMany({ where: { inquiryId: numericInquiryId, recipientUserId: userId, readAt: null }, data: { readAt: new Date() } });
+    else if (companyId) await prisma.inquiryMessage.updateMany({ where: { inquiryId: numericInquiryId, recipientCompanyId: companyId, readAt: null }, data: { readAt: new Date() } });
+  }
+  return messages;
+}
+
+async function sendInquiryMessage(inquiryId, data, caller) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const message = typeof data?.message === 'string' ? data.message.trim() : '';
+  if (!message || message.length > 5000) {
+    throw { statusCode: 400, code: 'INVALID_INQUIRY_MESSAGE', message: 'متن پیام باید بین ۱ تا ۵۰۰۰ نویسه باشد.' };
+  }
+  if (!['CUSTOMER', 'COMPANY'].includes(caller?.accessType) || isSuperAdmin(caller)) {
+    throw { statusCode: 403, code: 'INQUIRY_MESSAGE_ROLE_NOT_ALLOWED', message: 'این نوع حساب مجاز به ارسال پیام استعلام نیست.' };
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, companyId: true, buyerUserId: true, status: true } });
+    if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+    if (['CANCELLED', 'COMPLETED', 'EXPIRED'].includes(inquiry.status)) {
+      throw { statusCode: 409, code: 'INQUIRY_MESSAGES_CLOSED', message: 'پس از بسته‌شدن نهایی استعلام امکان ارسال پیام وجود ندارد.' };
+    }
+
+    const userId = caller.accessType === 'CUSTOMER' ? assertAuthenticatedUser(caller) : null;
+    const companyId = caller.accessType === 'COMPANY' ? Number(caller.companyId) : null;
+    if (caller.accessType === 'COMPANY' && (!Number.isInteger(companyId) || companyId < 1)) {
+      throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'حساب شرکت معتبر نیست.' };
+    }
+
+    const isBuyer = (userId && Number(inquiry.buyerUserId) === userId)
+      || (companyId && Number(inquiry.companyId) === companyId);
+    let recipientUserId = null;
+    let recipientCompanyId = null;
+    let senderUserId = null;
+    let senderCompanyId = null;
+
+    if (isBuyer) {
+      recipientCompanyId = Number(data.recipientCompanyId);
+      if (!Number.isInteger(recipientCompanyId) || recipientCompanyId < 1) {
+        throw { statusCode: 400, code: 'RECIPIENT_COMPANY_REQUIRED', message: 'برای ارسال پیام، شرکت پاسخ‌دهنده را انتخاب کنید.' };
+      }
+      const response = await tx.inquiryResponse.findFirst({
+        where: { inquiryId: numericInquiryId, companyId: recipientCompanyId },
+        select: { id: true },
+      });
+      if (!response) throw { statusCode: 404, code: 'INQUIRY_RECIPIENT_NOT_FOUND', message: 'این شرکت برای استعلام پاسخ ثبت نکرده است.' };
+      if (userId) senderUserId = userId;
+      else senderCompanyId = companyId;
+    } else {
+      if (!companyId) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+      const response = await tx.inquiryResponse.findFirst({
+        where: { inquiryId: numericInquiryId, companyId },
+        select: { id: true },
+      });
+      if (!response) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+      if (inquiry.buyerUserId) recipientUserId = inquiry.buyerUserId;
+      else if (inquiry.companyId) recipientCompanyId = inquiry.companyId;
+      else throw { statusCode: 409, code: 'INQUIRY_BUYER_MISSING', message: 'مالک استعلام مشخص نیست.' };
+      senderCompanyId = companyId;
+    }
+
+    const ownerType = senderUserId ? 'user' : 'company';
+    const ownerId = senderUserId || senderCompanyId;
+    await consumeUsage({
+      ownerType, ownerId, usageType: 'INTERNAL_MESSAGE',
+      referenceType: 'Inquiry', referenceId: numericInquiryId, tx,
+    });
+    return tx.inquiryMessage.create({
+      data: { inquiryId: numericInquiryId, senderUserId, senderCompanyId, recipientUserId, recipientCompanyId, body: message },
+      include: {
+        senderUser: { select: { id: true, phone: true, email: true } },
+        senderCompany: { select: { id: true, name: true } },
+        recipientUser: { select: { id: true, phone: true, email: true } },
+        recipientCompany: { select: { id: true, name: true } },
+      },
+    });
+  });
+}
+
 async function listResponses(inquiryId, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   const inquiry = await prisma.inquiry.findUnique({
@@ -1514,6 +1630,8 @@ module.exports = {
   deleteInquiryItem,
   submitResponse,
   listResponses,
+  listInquiryMessages,
+  sendInquiryMessage,
   updateResponse,
   decideResponse,
   withdrawResponse,
