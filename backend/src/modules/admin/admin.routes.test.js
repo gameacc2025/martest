@@ -35,6 +35,7 @@ const trivialController = {
   listInquirySubscriptionsCtrl: async (request, reply) => reply.code(200).send({ data: [] }),
   grantInquirySubscriptionCtrl: async (request, reply) => reply.code(201).send({ data: request.body }),
   activatePendingInquirySubscriptionCtrl: async (request, reply) => reply.code(200).send({ data: { id: Number(request.params.id), status: 'ACTIVE' } }),
+  rejectPendingInquirySubscriptionCtrl: async (request, reply) => reply.code(200).send({ data: { id: Number(request.params.id), status: 'CANCELLED' } }),
   activateInquirySubscriptionCtrl: async (request, reply) => reply.code(200).send({ data: { id: Number(request.params.id), status: 'ACTIVE' } }),
   getStats: async (request, reply) => {
     hit.getStats = true;
