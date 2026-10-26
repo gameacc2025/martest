@@ -333,3 +333,9 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added regression tests for public list/detail select shapes and management detail retaining history. API docs document the public response privacy boundary.
 - CI run `40272542697` for commit `9c42d944e07baf8dde418e7ce301f0a663552826` passed frontend/shared tests, backend tests, Prisma generation, and Website/Company/Admin builds.
 - The later docs-only commits `575f1ba0d3ad5ae471d92c24ead003c9664b70a2` and `144a7c31b913593f340d19d135d5f6d373178708` clarify the public field allowlist; their CI runs are pending.
+
+
+### Public response privacy verification and issue closure — 2026-10-26
+- Latest handoff HEAD `c1bfed792c2933a586d88838ae498e4073c4ed2f` passed GitHub Actions run [40272711539](https://github.com/gameacc2025/martest/actions/runs/40272711539): frontend/shared tests, backend tests, Prisma generation, and all three production builds passed.
+- Closed completed issues #3 (catalog query/featured behavior), #4 (lifecycle UI), #7 (stored XSS), and #8 (public product response privacy allowlist). Master audit issue #2 remains open while authorization decisions #5 (`isFeatured`) and #6 (broader STAFF write scope) remain unresolved.
+- Next required user decision: authorize the `products.feature` guard for create/update and decide whether STAFF with granular write permissions should operate cross-company for update/delete/price/media operations. The STAFF publish subcase is already implemented and tested. No schema changes were made.
