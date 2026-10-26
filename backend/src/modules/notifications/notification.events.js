@@ -120,12 +120,24 @@ const EVENT_CATALOG = {
   INQUIRY_RESPONSE_RECEIVED: {
     key: 'INQUIRY_RESPONSE_RECEIVED',
     label: 'دریافت پاسخ استعلام',
-    recipients: 'The requesting company (non-confidential responses)',
+    recipients: 'The requesting company or customer user',
     channels: { IN_APP: true, EMAIL: true, SMS: false },
     template: ({ inquiry, response }) => ({
       title: 'پاسخ جدید برای استعلام',
       message: `برای استعلام «${inquiry?.title || inquiry?.id || ''}» پاسخ جدیدی ثبت شد.`,
       data: { inquiryId: inquiry?.id, responseId: response?.id },
+    }),
+  },
+
+  INQUIRY_STATUS_CHANGED: {
+    key: 'INQUIRY_STATUS_CHANGED',
+    label: 'تغییر وضعیت استعلام',
+    recipients: 'The inquiry owner and companies that submitted a response',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ inquiry, status }) => ({
+      title: 'تغییر وضعیت استعلام',
+      message: `وضعیت استعلام «${inquiry?.title || inquiry?.id || ''}» به ${status || 'جدید'} تغییر کرد.`,
+      data: { inquiryId: inquiry?.id, status },
     }),
   },
 
