@@ -950,12 +950,9 @@
 ## APIهای Products
 
 ### `GET /api/products`
-**توضیح**: لیست تمام محصولات
+**توضیح**: لیست محصولات کاتالوگ عمومی
 
-**Headers**:
-- `Authorization: Bearer <access_token>`
-
-**Required Permission**: `products.read`
+**Access**: Public. Only `PUBLISHED` products with `PUBLIC` visibility are returned; query parameters and signed-in session state cannot bypass this restriction.
 
 **Query Parameters**:
 - `page`: شماره صفحه
@@ -1049,12 +1046,9 @@
 
 ---
 ### `GET /api/products/:id`
-**توضیح**: دریافت اطلاعات محصول
+**توضیح**: دریافت اطلاعات محصول از کاتالوگ عمومی
 
-**Headers**:
-- `Authorization: Bearer <access_token>`
-
-**Required Permission**: `products.read`
+**Access**: Public. Only `PUBLISHED` + `PUBLIC` products are returned; other products are not exposed through this endpoint. For moderation/editing, use the authenticated `/:id/manage` route with `products.read`.
 
 **Response**:
 ```json
