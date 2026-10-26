@@ -459,3 +459,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Branch:** feature/inquiry-completion, based on main.
 - **Deferred by user:** PR #11 customer-dashboard-foundation and other customer identity/B2C tasks remain unmerged/on hold until Inquiry is complete.
 - **Next action:** Implement schema migration and service ownership/privacy fixes first, then UI/notifications, tests, and docs.
+
+
+## 2026-10-26 — INQUIRY-COMPLETION-2026-10-26-01 — COMPLETED
+- **Status:** MERGED to main.
+- **Pull Request:** https://github.com/gameacc2025/martest/pull/12 (squash merged).
+- **Merge commit:** `1335ce5cd6e9b5b17a13537db4dda9b607556f3a`.
+- **Implemented:** CUSTOMER-owned Website inquiries with exclusive buyer ownership constraint; company-owned B2B RFQs preserved; supplier ownership and STAFF permission checks; drafts/future schedules hidden from suppliers; NORMAL/SEALED/ANONYMOUS_SEALED privacy; early reveal; buyer quote selection/manual rejection/automatic rejection of competing pending quotes; scheduled publishing and auto-expiry worker; USER/SYSTEM status history; transactional notifications for publication, quote receipt, status changes, selection/rejection; customer inquiry list/detail/cancel UI; company buyer decision/reveal UI; date-window validation; API/database/notification documentation.
+- **Database migration:** Added `20261026150000_customer_owned_inquiries`; fixed invalid PostgreSQL `//` comments in the pre-existing `20261024120000_notification_system` migration, which had blocked fresh-database migration runs.
+- **Verification:** CI passed on feature commit `0e1b0d7b` — https://github.com/gameacc2025/martest/actions/runs/40353078512. Fresh PostgreSQL schema validation, Prisma generation, `migrate deploy`, and `migrate status` passed — https://github.com/gameacc2025/martest/actions/runs/40353071103. Backend tests and all frontend builds passed in CI. Browser-level manual visual verification and live SMTP delivery were not performed.
+- **Notification detail:** Email dedupe keys are per recipient to avoid silently dropping all but one recipient when a company has multiple active users.
+- **Deferred by user:** Customer dashboard foundation PR #11 remains DRAFT and unmerged: https://github.com/gameacc2025/martest/pull/11. Address follow-ups, order history, and B2C commerce remain paused until the user directs us to resume them.
