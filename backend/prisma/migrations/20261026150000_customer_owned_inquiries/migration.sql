@@ -22,3 +22,8 @@ ALTER TABLE "Inquiry"
 -- stream without inventing a human actor.
 ALTER TABLE "InquiryStatusHistory" ALTER COLUMN "changedByUserId" DROP NOT NULL;
 ALTER TABLE "InquiryStatusHistory" ADD COLUMN "source" TEXT NOT NULL DEFAULT 'USER';
+ALTER TABLE "InquiryStatusHistory" DROP CONSTRAINT "InquiryStatusHistory_changedByUserId_fkey";
+ALTER TABLE "InquiryStatusHistory"
+  ADD CONSTRAINT "InquiryStatusHistory_changedByUserId_fkey"
+  FOREIGN KEY ("changedByUserId") REFERENCES "User"("id")
+  ON DELETE SET NULL ON UPDATE CASCADE;
