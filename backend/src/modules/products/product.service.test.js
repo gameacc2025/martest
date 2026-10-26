@@ -143,7 +143,7 @@ const mockPrisma = {
   },
   productStatusHistory: {
     create: async (args) => { recordCall('productStatusHistory.create', args); return {}; },
-    findMany: async () => [],
+    findMany: async (args) => { recordCall('productStatusHistory.findMany', args); return []; },
   },
   user: { findMany: async () => fx.superAdminUserIds.map((id) => ({ id })) },
   notification: { createMany: async (args) => { recordCall('notification.createMany', args); } },
@@ -153,7 +153,7 @@ const mockPrisma = {
   },
   productActivityLog: {
     create: async (args) => { recordCall('productActivityLog.create', args); return { id: 1 }; },
-    findMany: async () => [],
+    findMany: async (args) => { recordCall('productActivityLog.findMany', args); return []; },
   },
   $transaction: async (arg) => {
     if (typeof arg === 'function') return arg(mockPrisma);
