@@ -47,6 +47,12 @@ async function getOne(request, reply) {
   return reply.send(success(product));
 }
 
+async function getPriceHistory(request, reply) {
+  const history = await svc.getPublicPriceHistory(request.params.id);
+  if (history === null) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'محصول یافت نشد' } });
+  return reply.send(success(history));
+}
+
 async function create(request, reply) {
   const product = await svc.createProduct(request.body, request.user);
   return reply.code(201).send(success(product));
@@ -155,6 +161,7 @@ module.exports = {
   getHistory,
   getActivity,
   getOne,
+  getPriceHistory,
   create,
   update,
   remove,
