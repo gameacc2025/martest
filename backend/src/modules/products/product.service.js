@@ -1170,9 +1170,31 @@ async function deletePriceTier(productId, tierId, caller) {
   const existing = await prisma.productPriceTier.findFirst({ where: { id: Number(tierId), productId: product.id } });
   if (!existing) throw { statusCode: 404, code: 'PRICE_TIER_NOT_FOUND', message: 'Price tier not found.' };
 
+  // Removing a price tier is a content edit too, and must follow the same
+  // post-approval review threshold as adding/updating a tier.
+  const policy = await applyEditPolicy(product, caller);
+  const previousStatus = product.status;
+  const statusChanged = policy.nextStatus !== previousStatus;
+
   return prisma.$transaction(async (tx) => {
     const deleted = await tx.productPriceTier.delete({ where: { id: existing.id } });
+    if (policy.editsSinceApproval !== (product.editsSinceApproval ?? 0) || statusChanged) {
+      await tx.product.update({
+        where: { id: product.id },
+        data: { status: policy.nextStatus, editsSinceApproval: policy.editsSinceApproval },
+      });
+    }
+    await tx.productStatusHistory.create({
+      data: {
+        productId: product.id,
+        previousStatus,
+        newStatus: policy.nextStatus,
+        changedByUserId: Number(caller.id),
+        comment: `حذف ردیف قیمت: ${existing.minQuantity}+ → ${existing.price} ریال`,
+      },
+    });
     await addActivityLog(tx, product.id, Number(caller.id), 'PRICE_TIER_DELETE', `حذف ردیف قیمت ${existing.minQuantity}+ → ${existing.price}`);
+    if (policy.crossedThreshold) await notifyStaffForAutoReReview(tx, product, policy.threshold);
     return deleted;
   });
 }
