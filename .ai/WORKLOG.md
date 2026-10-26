@@ -446,3 +446,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Green verification:** GitHub Actions run [40312425822](https://github.com/gameacc2025/martest/actions/runs/40312425822) passed on commit `e588f47068d8639ba3657fc2b62d4488e48349a2`; frontend/shared tests, backend tests, Prisma client generation, and all frontend production builds passed.
 - **Current handoff commit:** `927e165677d2ff11b7ebde2a9160ba673ace075f`.
 - **Still unverified:** Real PostgreSQL migration deployment, Docker/Compose startup, browser E2E/visual flows, and external service connectivity. These require an appropriate runtime environment; do not infer success from CI.
+
+
+## 2026-10-26 — INQUIRY-COMPLETION-2026-10-26-01 — Complete inquiry/RFQ workflow
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Finish the B2B Inquiry feature end to end before resuming customer dashboard/address/B2C follow-ups.
+- **Scope:** Customer-created inquiries from Website, ownership-aware API/model, inquiry visibility (NORMAL/SEALED/ANONYMOUS_SEALED), status/deadline/publish lifecycle, Company response lifecycle, STAFF supervision, event-driven notifications, customer inquiry listing/detail, tests and docs.
+- **Evidence/root causes:** Website ProductDetails.vue exposes inquiry creation to CUSTOMER_USER, but createInquiry() requires a companyId; Inquiry.companyId is required and has no buyer-user relation. Sealed modes are stored but getInquiry() returns all responses without applying visibility rules. Inquiry service currently has no calls to notification.dispatch.service.js, despite catalog events for inquiry publication and response receipt. publishDate/autoClose/allowEarlyReveal require verification for actual lifecycle behavior.
+- **Implementation plan:** Add a backward-compatible buyerUserId ownership path with an XOR owner constraint/migration; preserve company-owned inquiry flows; enforce ownership and STAFF permission scope in services; redact sealed response data until allowed reveal and anonymize competing companies in ANONYMOUS_SEALED; connect published/status/response events to notification dispatch; add a Website My Inquiries workflow; add regression tests and update API/database/notification docs.
+- **Verification plan:** Inquiry service/routes tests, notification event/dispatch tests, Prisma generate/validate, full backend tests, frontend/shared tests, all three frontend builds, CI and Runtime Validation. Checks not yet run.
+- **Branch:** feature/inquiry-completion, based on main.
+- **Deferred by user:** PR #11 customer-dashboard-foundation and other customer identity/B2C tasks remain unmerged/on hold until Inquiry is complete.
+- **Next action:** Implement schema migration and service ownership/privacy fixes first, then UI/notifications, tests, and docs.
