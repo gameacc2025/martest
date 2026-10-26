@@ -263,6 +263,8 @@ test('listInquiries scope=received filters by owned product company', async () =
     (c) => c.items && c.items.some && c.items.some.product.companyId === seller.companyId,
   );
   assert.ok(hasProductFilter);
+  assert.ok(where.AND.some((condition) => condition.status?.in?.includes('OPEN')));
+  assert.ok(where.AND.some((condition) => condition.OR?.some((entry) => entry.publishDate?.lte)));
 });
 
 test('listInquiries scope=all as SUPER_ADMIN applies no company filter', async () => {
@@ -1042,6 +1044,7 @@ test('listResponses: a seller only sees its own responses', async () => {
   nextFindUnique = {
     id: 1,
     companyId: buyer.companyId,
+    status: 'OPEN',
     items: [{ product: { companyId: seller.companyId } }],
   };
   await inquiryService.listResponses(1, seller);
