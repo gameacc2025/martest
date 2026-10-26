@@ -339,3 +339,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Latest handoff HEAD `c1bfed792c2933a586d88838ae498e4073c4ed2f` passed GitHub Actions run [40272711539](https://github.com/gameacc2025/martest/actions/runs/40272711539): frontend/shared tests, backend tests, Prisma generation, and all three production builds passed.
 - Closed completed issues #3 (catalog query/featured behavior), #4 (lifecycle UI), #7 (stored XSS), and #8 (public product response privacy allowlist). Master audit issue #2 remains open while authorization decisions #5 (`isFeatured`) and #6 (broader STAFF write scope) remain unresolved.
 - Next required user decision: authorize the `products.feature` guard for create/update and decide whether STAFF with granular write permissions should operate cross-company for update/delete/price/media operations. The STAFF publish subcase is already implemented and tested. No schema changes were made.
+
+
+## 2026-10-26 — PRODUCT-AUTH-FEATURED-STAFF-2026-10-26-01 — Enforce featured and STAFF cross-company permissions
+- **Status:** IMPLEMENTED — CI verification pending.
+- **Goal:** Apply the approved policy: changes to `isFeatured` require `products.feature` or SUPER_ADMIN; STAFF cross-company writes require the exact operation permission; COMPANY ownership remains mandatory.
+- **Changes:** Added service-level permission checks for STAFF product create/update/delete, price tiers, image/document operations, and lifecycle actions. STAFF product creation now requires `products.create` and an explicit target `companyId`. COMPANY callers retain company ownership enforcement. Added a separate featured-field guard and hid/omitted the featured toggle in Company/Admin forms without permission. Added seven backend regression tests and updated API/decision documentation.
+- **Files:** `backend/src/modules/products/product.service.js`, `backend/src/modules/products/product.service.test.js`, both Company/Admin `ProductForm.vue`, `docs/API_DOCUMENTATION.md`, `.ai/decisions.md`, `.ai/current-task.md`.
+- **Verification:** NOT RUN locally; this session edits remote GitHub files only. GitHub Actions must pass before marking complete.
+- **Commit:** Remote commits written directly to `main`; latest source/test/docs commits to be recorded after CI check.
+- **Push:** Written directly to remote `main` via GitHub Contents API.
+- **Risks / open questions:** Ensure existing Company/Admin users without `products.feature` do not send `isFeatured` on PATCH; forms now omit it. Staff role seeds may need review if specific users are expected to perform any of these actions.
+- **Next action:** Inspect CI for current main HEAD, fix any test/build failures, then close issues #5/#6 and master audit #2 only after successful verification.
