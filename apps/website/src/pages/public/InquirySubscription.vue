@@ -59,6 +59,25 @@ async function load() {
     loading.value = false
   }
 }
+async function retryPayment() {
+  if (!pendingSubscription.value?.id || pendingSubscription.value.paymentProvider !== 'ZARINPAL') return
+  submitting.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+  try {
+    const response = await apiPost(endpoints.inquirySubscriptions.verifyPayment(pendingSubscription.value.id), {})
+    const result = unwrap(response)
+    await load()
+    if (result.payment === 'success') successMessage.value = 'پرداخت با موفقیت تأیید شد و اشتراک فعال است.'
+    else if (result.payment === 'pending') errorMessage.value = 'تأیید درگاه هنوز در دسترس نیست؛ چند لحظه دیگر دوباره تلاش کنید.'
+    else errorMessage.value = 'پرداخت تأیید نشد. اگر مبلغی کسر شده، با پشتیبانی تماس بگیرید.'
+  } catch (error) {
+    errorMessage.value = error?.message || 'بررسی دوباره پرداخت انجام نشد.'
+  } finally {
+    submitting.value = false
+  }
+}
+
 async function requestPlan(plan) {
   errorMessage.value = ''
   successMessage.value = ''
@@ -105,7 +124,7 @@ async function requestPlan(plan) {
       <span class="status active-pill">فعال</span>
     </section>
     <section v-else-if="pendingSubscription" class="panel pending">
-      <div><span class="eyebrow">درخواست در انتظار</span><h2>{{ pendingSubscription.plan?.name }}</h2><p>شماره پیگیری: {{ pendingSubscription.paymentReference || 'ثبت نشده' }}</p><p>{{ pendingSubscription.paymentProvider === 'ZARINPAL' ? 'پرداخت آنلاین ثبت شده و نتیجه پس از تأیید سمت سرور به‌روزرسانی می‌شود.' : 'این درخواست تا بررسی و تأیید مدیر فعال نمی‌شود.' }}</p></div>
+      <div><span class="eyebrow">درخواست در انتظار</span><h2>{{ pendingSubscription.plan?.name }}</h2><p>شماره پیگیری: {{ pendingSubscription.paymentProvider === 'ZARINPAL' ? (pendingSubscription.paymentRefId || pendingSubscription.paymentAuthority || 'پرداخت آنلاین') : (pendingSubscription.paymentReference || 'ثبت نشده') }}</p><p>{{ pendingSubscription.paymentProvider === 'ZARINPAL' ? 'پرداخت آنلاین ثبت شده؛ اگر تأیید موقتاً ناموفق بود، وضعیت را دوباره بررسی کنید.' : 'این درخواست تا بررسی و تأیید مدیر فعال نمی‌شود.' }}</p><button v-if="pendingSubscription.paymentProvider === 'ZARINPAL'" class="secondary" :disabled="submitting" @click="retryPayment">{{ submitting ? 'در حال بررسی…' : 'بررسی دوباره پرداخت' }}</button></div>
       <span class="status pending-pill">در انتظار بررسی</span>
     </section>
 
