@@ -1,6 +1,5 @@
-// Central notification dispatch — schema additions (flow/06-plan-notifications.md).
-// Applied by hand (no live DB in this environment); run `prisma migrate deploy`
-// (or `prisma migrate dev`) to apply. Additive only — no existing column changes.
+-- Central notification dispatch schema additions (flow/06-plan-notifications.md).
+-- Applied by Prisma migration tooling. Additive only; no existing columns are removed.
 
 -- Notification gains event typing + a structured payload.
 ALTER TABLE "Notification" ADD COLUMN "type" TEXT;
