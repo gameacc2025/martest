@@ -1,30 +1,15 @@
-// Configurable SMS gateway adapter used by the notification outbox worker.
-// The gateway receives { to, message } and must return a 2xx response on acceptance.
+// Twilio SMS adapter used by the notification outbox worker.
+const { twilioAccountSid, twilioAuthToken, twilioFromNumber, nodeEnv } = require('../../config/env');
+
 function hasRealProvider() {
-  return Boolean(String(process.env.INQUIRY_SMS_GATEWAY_URL || '').trim()
-    && String(process.env.INQUIRY_SMS_GATEWAY_TOKEN || '').trim());
+  return Boolean(twilioAccountSid && twilioAuthToken && twilioFromNumber && nodeEnv !== 'test');
 }
 
 async function sendSms({ to, body }) {
-  const endpoint = String(process.env.INQUIRY_SMS_GATEWAY_URL || '').trim();
-  const token = String(process.env.INQUIRY_SMS_GATEWAY_TOKEN || '').trim();
-  if (!endpoint || !token) {
+  if (!hasRealProvider()) {
     const error = new Error('درگاه پیامک روی سرور پیکربندی نشده است.');
     error.code = 'SMS_PROVIDER_NOT_CONFIGURED';
     error.statusCode = 503;
-    throw error;
-  }
-  let url;
-  try { url = new URL(endpoint); } catch {
-    const error = new Error('نشانی درگاه پیامک معتبر نیست.');
-    error.code = 'SMS_PROVIDER_CONFIGURATION_INVALID';
-    error.statusCode = 500;
-    throw error;
-  }
-  if (!['https:', ...(process.env.NODE_ENV === 'production' ? [] : ['http:'])].includes(url.protocol)) {
-    const error = new Error('درگاه پیامک باید از HTTPS استفاده کند.');
-    error.code = 'SMS_PROVIDER_CONFIGURATION_INVALID';
-    error.statusCode = 500;
     throw error;
   }
   const recipient = String(to || '').trim();
@@ -35,12 +20,17 @@ async function sendSms({ to, body }) {
     error.statusCode = 400;
     throw error;
   }
+  const account = encodeURIComponent(twilioAccountSid);
+  const form = new URLSearchParams({ To: recipient, From: twilioFromNumber, Body: message });
   let response;
   try {
-    response = await fetch(url.toString(), {
+    response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${account}/Messages.json`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-      body: JSON.stringify({ to: recipient, message }),
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${twilioAccountSid}:${twilioAuthToken}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: form.toString(),
       signal: AbortSignal.timeout(8000),
     });
   } catch {
@@ -49,13 +39,14 @@ async function sendSms({ to, body }) {
     error.statusCode = 502;
     throw error;
   }
+  const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error('درگاه پیامک درخواست را نپذیرفت.');
+    const error = new Error(payload.message || 'درگاه پیامک درخواست را نپذیرفت.');
     error.code = 'SMS_PROVIDER_REJECTED';
     error.statusCode = 502;
     throw error;
   }
-  return { provider: 'configured-gateway' };
+  return { provider: 'twilio', messageId: payload.sid || null, status: payload.status || null };
 }
 
 module.exports = { hasRealProvider, sendSms };
