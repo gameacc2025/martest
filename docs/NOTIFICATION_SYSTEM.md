@@ -54,6 +54,16 @@ Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, an
 
 The shared API client lives in `packages/api-client`; use it instead of adding page-specific HTTP clients. For paginated inbox lists, the Company page must call `apiGetPaginated()` from `packages/shared-core/http/apiClient.js`: `apiGet()` unwraps `{ data, meta }` to the inner `data` value and therefore discards pagination metadata. The Company inbox has a regression test for rendering rows from the paginated response (`apps/company/src/pages/user/Notifications.test.js`).
 
+## Inquiry/RFQ notification integration
+
+The Inquiry service dispatches catalog events through `notification.dispatch.service.js` inside the same Prisma transaction as the business change:
+
+- `INQUIRY_PUBLISHED`: when a customer submits a product inquiry immediately, when a company inquiry transitions to OPEN, or when a scheduled SUBMITTED inquiry becomes due. Recipients are companies that own the requested products and STAFF users with `leads.read`.
+- `INQUIRY_RESPONSE_RECEIVED`: delivered to the owning customer user or the requesting company when a supplier submits a quote.
+- `INQUIRY_STATUS_CHANGED`: delivered to the inquiry owner and companies that have active responses when an inquiry closes, expires, completes, or is cancelled.
+
+The dispatcher applies each recipient's channel preferences, persists in-app notifications and queues email deliveries transactionally, and deduplicates event dispatch. SMS remains unavailable. Scheduled publishing and auto-expiry are processed by the backend inquiry lifecycle worker; manual browser verification and live SMTP delivery still require a configured environment.
+
 ## Delivery and operational requirements
 
 - The notification event catalog and dispatch service determine which events can be emitted and how channels/preferences are applied.
