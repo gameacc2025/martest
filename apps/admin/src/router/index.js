@@ -117,7 +117,6 @@ setAuthRouter(router);
 //   4. App selection: send authenticated users who don't belong to THIS app
 //      to the app their accessProfile.type maps to.
 router.beforeEach(async (to, from, next) => {
-  const { useAuthStore } = await import("../stores/auth");
   const authStore = useAuthStore();
 
   // 1. Set page title
