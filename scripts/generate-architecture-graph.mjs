@@ -36,7 +36,7 @@ for (const { pkg } of [...apps, ...packages]) {
   }
 }
 for (const { pkg } of apps) lines.push(`  ${id(pkg.name)} -->|HTTP /api/v1| api`);
-lines.push('  api --> auth["Auth / RBAC middleware"]');
+lines.push('  api --> rbac["Auth / RBAC middleware"]');
 for (const moduleName of modules) lines.push(`  api --> mod_${id(moduleName)}["${moduleName} module"]`);
 lines.push('  auth --> db');
 for (const moduleName of modules) lines.push(`  mod_${id(moduleName)} --> db`);
