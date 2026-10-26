@@ -1222,7 +1222,7 @@ async function sendInquiryMessage(inquiryId, data, caller) {
       await deliverInquirySms(phone, `پیام جدیدی درباره استعلام «${String(inquiry.title || '').slice(0, 100)}» دریافت کرده‌اید.`);
     }
     return createdMessage;
-  });
+  }, { maxWait: 5000, timeout: 12000 });
 }
 
 async function listResponses(inquiryId, caller) {
