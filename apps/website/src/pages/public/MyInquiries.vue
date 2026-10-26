@@ -5,6 +5,7 @@ import { inquiriesApi } from '@telecom/api-client'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import ProgressSpinner from 'primevue/progressspinner'
+import Textarea from 'primevue/textarea'
 
 const route = useRoute()
 const router = useRouter()
@@ -14,6 +15,11 @@ const loadingList = ref(false)
 const loadingDetail = ref(false)
 const saving = ref(false)
 const decidingResponseId = ref(null)
+const messages = ref([])
+const messageDraft = ref('')
+const recipientCompanyId = ref(null)
+const loadingMessages = ref(false)
+const sendingMessage = ref(false)
 const error = ref('')
 const detailError = ref('')
 
@@ -97,12 +103,56 @@ async function loadDetail() {
   detailError.value = ''
   try {
     selected.value = unwrapInquiry(await inquiriesApi.getById(id))
+    await loadMessages()
   } catch (err) {
     selected.value = null
     detailError.value = err?.response?.data?.message || err?.response?.data?.error?.message
       || err?.serverMessage || err?.message || 'دریافت جزئیات استعلام ناموفق بود.'
   } finally {
     loadingDetail.value = false
+  }
+}
+
+async function loadMessages() {
+  if (!selected.value?.id) return
+  loadingMessages.value = true
+  try {
+    const result = await inquiriesApi.listMessages(selected.value.id)
+    const body = result?.data ?? result
+    const payload = body?.data ?? body
+    messages.value = Array.isArray(payload) ? payload : []
+  } catch {
+    messages.value = []
+  } finally {
+    loadingMessages.value = false
+  }
+}
+
+function messageSenderName(message) {
+  if (message.senderCompany?.name) return message.senderCompany.name
+  const profile = message.senderUser?.profile
+  const fullName = [profile?.firstName, profile?.lastName].filter(Boolean).join(' ')
+  return fullName || message.senderUser?.phone || 'کاربر'
+}
+
+async function sendInquiryMessage() {
+  if (!selected.value?.id || !messageDraft.value.trim() || !Number(recipientCompanyId.value)) return
+  sendingMessage.value = true
+  detailError.value = ''
+  try {
+    await inquiriesApi.sendMessage(selected.value.id, {
+      message: messageDraft.value.trim(),
+      recipientCompanyId: Number(recipientCompanyId.value),
+    })
+    messageDraft.value = ''
+    await loadMessages()
+  } catch (err) {
+    const code = err?.response?.data?.code || err?.code
+    detailError.value = code === 'INQUIRY_QUOTA_EXCEEDED' || code === 'INQUIRY_SUBSCRIPTION_REQUIRED'
+      ? 'سهمیه پیام شما تمام شده یا اشتراک فعال ندارید. از بخش «اشتراک استعلام» طرح مناسب را تهیه کنید.'
+      : err?.response?.data?.message || err?.response?.data?.error?.message || err?.message || 'ارسال پیام ناموفق بود.'
+  } finally {
+    sendingMessage.value = false
   }
 }
 
@@ -258,6 +308,35 @@ onMounted(async () => {
             </article>
           </section>
 
+
+          <section v-if="!selected.responsesHidden && selected.responses?.length" class="content-section conversation-section">
+            <div class="section-title-row">
+              <h3>گفت‌وگوی خصوصی با تأمین‌کننده</h3>
+              <Button icon="pi pi-refresh" text rounded aria-label="به‌روزرسانی پیام‌ها" :loading="loadingMessages" @click="loadMessages" />
+            </div>
+            <p class="conversation-note">ارسال هر پیام از سهمیهٔ پیام داخلی اشتراک شما مصرف می‌کند.</p>
+            <div v-if="loadingMessages && !messages.length" class="empty-inline">در حال دریافت پیام‌ها…</div>
+            <div v-else-if="!messages.length" class="empty-inline">هنوز پیامی ثبت نشده است.</div>
+            <div v-else class="conversation-list" aria-live="polite">
+              <article v-for="message in messages" :key="message.id" class="conversation-message">
+                <div class="conversation-meta"><strong>{{ messageSenderName(message) }}</strong><time>{{ formatDate(message.createdAt) }}</time></div>
+                <p>{{ message.body }}</p>
+              </article>
+            </div>
+            <form class="conversation-form" @submit.prevent="sendInquiryMessage">
+              <label>شرکت دریافت‌کننده
+                <select v-model="recipientCompanyId" required>
+                  <option :value="null" disabled>انتخاب شرکت پاسخ‌دهنده</option>
+                  <option v-for="response in selected.responses" :key="response.company?.id" :value="response.company?.id" :disabled="!response.company?.id">
+                    {{ response.company?.name || 'شرکت پاسخ‌دهنده' }}
+                  </option>
+                </select>
+              </label>
+              <Textarea v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="پیام خود را بنویسید…" class="w-full" />
+              <div class="conversation-actions"><small>{{ messageDraft.trim().length.toLocaleString('fa-IR') }} / ۵۰۰۰</small><Button type="submit" label="ارسال پیام" icon="pi pi-send" :loading="sendingMessage" :disabled="!messageDraft.trim() || !Number(recipientCompanyId) || messageDraft.trim().length > 5000" /></div>
+            </form>
+          </section>
+
           <p v-if="detailError" class="inline-error" role="alert">{{ detailError }}</p>
           <footer class="detail-actions">
             <Button v-if="canCancel" label="لغو استعلام" icon="pi pi-times" severity="danger" outlined :loading="saving" @click="cancelInquiry" />
@@ -321,6 +400,15 @@ onMounted(async () => {
 .metadata-grid span{font-size:.85rem;color:var(--text-color-secondary,#667085)}
 .metadata-grid strong{overflow-wrap:anywhere}
 .content-section{margin-top:26px}
+.conversation-note{color:var(--text-color-secondary,#667085);font-size:.9rem;line-height:1.8}
+.conversation-list{display:grid;gap:10px;max-height:360px;overflow:auto;margin:14px 0}
+.conversation-message{border:1px solid var(--surface-border,#e5e7eb);border-radius:10px;padding:12px;background:var(--surface-card,#fff)}
+.conversation-meta,.conversation-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.82rem;color:var(--text-color-secondary,#667085)}
+.conversation-message p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;margin:8px 0 0;color:var(--text-color,#1f2937)}
+.conversation-form{display:grid;gap:10px;margin-top:14px}
+.conversation-form label{display:grid;gap:6px;max-width:420px}
+.conversation-form select{padding:10px;border:1px solid var(--surface-border,#cbd5e1);border-radius:8px;background:var(--surface-card,#fff);color:inherit}
+.conversation-actions small{color:var(--text-color-secondary,#667085)}
 .content-section h3{font-size:1.1rem;margin:0 0 14px}
 .item-row,.response-card{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:14px;border:1px solid var(--surface-border,#e5e7eb);border-radius:10px;margin-top:10px}
 .item-main{display:grid;gap:6px}
