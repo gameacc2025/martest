@@ -1257,7 +1257,7 @@ async function updatePriceTier(productId, tierId, data, caller) {
   const statusChanged = policy.nextStatus !== previousStatus;
 
   const changes = [];
-  if (existing.price !== tier.price) changes.push(`قیمت: ${existing.price} → ${tier.price}`);
+  if (Number(existing.price) !== Number(tier.price)) changes.push(`قیمت: ${existing.price} → ${tier.price}`);
   if (existing.minQuantity !== tier.minQuantity) changes.push(`حداقل تعداد: ${existing.minQuantity} → ${tier.minQuantity}`);
   if (existing.maxQuantity !== tier.maxQuantity) changes.push(`حداکثر تعداد: ${existing.maxQuantity || '-'} → ${tier.maxQuantity || '-'}`);
   if (existing.unit !== tier.unit) changes.push(`واحد: ${existing.unit || '-'} → ${tier.unit || '-'}`);
