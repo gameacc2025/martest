@@ -383,7 +383,7 @@ async function rejectPendingInquirySubscription(subscriptionId, adminUserId, not
   const id = Number(subscriptionId);
   if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه اشتراک معتبر نیست.', 400, true, 'INVALID_SUBSCRIPTION_ID');
   return prisma.$transaction(async (tx) => {
-    const pending = await tx.inquirySubscription.findUnique({ where: { id }, select: { id: true, status: true, notes: true } });
+    const pending = await tx.inquirySubscription.findUnique({ where: { id }, select: { id: true, status: true, notes: true, paymentProvider: true } });
     if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
     if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار بررسی قابل رد هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
     if (pending.paymentProvider === 'ZARINPAL') throw new AppError('درخواست پرداخت آنلاین باید از طریق نتیجه تأییدشده درگاه تعیین تکلیف شود.', 409, true, 'PAYMENT_PROVIDER_VERIFICATION_REQUIRED');
