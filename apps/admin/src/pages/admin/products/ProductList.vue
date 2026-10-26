@@ -13,7 +13,7 @@
         </template>
 
         <template #end>
-          <Button label="محصول جدید" icon="pi pi-plus" @click="openCreateDialog" />
+          <Button v-if="canCreateProduct" label="محصول جدید" icon="pi pi-plus" @click="openCreateDialog" />
         </template>
       </Toolbar>
 
@@ -47,14 +47,16 @@
           <template #body="{ data }">
             <div class="flex gap-2">
               <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'پیش‌نمایش'" @click="showPreview(data)" />
-              <Button v-if="data.status === 'DRAFT'" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
-              <Button v-if="data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text @click="editProduct(data)" />
-              <Button v-if="data.status === 'PENDING_REVIEW'" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
-              <Button v-if="data.status === 'PENDING_REVIEW'" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
-              <Button v-if="['APPROVED', 'HIDDEN'].includes(data.status)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
-              <Button icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
+              <Button v-if="canEditProduct && data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
+              <Button v-if="canApproveProduct && data.status === 'PENDING_REVIEW'" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
+              <Button v-if="canRejectProduct && data.status === 'PENDING_REVIEW'" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
+              <Button v-if="canPublishProduct && ['APPROVED', 'HIDDEN'].includes(data.status)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
+              <Button v-if="canHideProduct && data.status === 'PUBLISHED'" icon="pi pi-eye-slash" severity="secondary" rounded text v-tooltip.top="'مخفی کردن از سایت'" :loading="hidingId === data.id" @click="hideProduct(data)" />
+              <Button v-if="canArchiveProduct && ['DRAFT', 'REJECTED', 'APPROVED', 'PUBLISHED', 'HIDDEN'].includes(data.status)" icon="pi pi-folder" severity="secondary" rounded text v-tooltip.top="'بایگانی محصول'" :loading="archivingId === data.id" @click="archiveProduct(data)" />
+              <Button v-if="canRestoreProduct && ['PENDING_REVIEW', 'APPROVED', 'REJECTED', 'HIDDEN', 'ARCHIVED'].includes(data.status)" icon="pi pi-replay" severity="warn" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" :loading="restoringId === data.id" @click="restoreProductToDraft(data)" />
+              <Button v-if="canCreateProduct" icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
               <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
-              <Button icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
+              <Button v-if="canDeleteProduct" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
             </div>
           </template>
         </Column>
@@ -154,6 +156,15 @@ const auth = useAuthStore()
 // SUPER_ADMIN. Company users manage their own products, so the /companies
 // list endpoint is not fetched for them (it would 403).
 const canChooseCompany = computed(() => auth.isSuperAdmin)
+const canCreateProduct = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.create') && Boolean(auth.companyId)))
+const canEditProduct = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.update') && Boolean(auth.companyId)))
+const canDeleteProduct = computed(() => auth.isSuperAdmin || (auth.hasPermission('products.delete') && Boolean(auth.companyId)))
+const canApproveProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.approve'))
+const canRejectProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.reject'))
+const canPublishProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.publish'))
+const canHideProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.hide'))
+const canArchiveProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.archive'))
+const canRestoreProduct = computed(() => auth.isSuperAdmin || auth.hasPermission('products.review'))
 
 
 const products = ref([])
@@ -174,6 +185,9 @@ const statusOptions = STATUS_OPTIONS
 // Approve / reject workflow (PENDING_REVIEW products)
 const approvingId = ref(null)
 const publishingId = ref(null)
+const hidingId = ref(null)
+const archivingId = ref(null)
+const restoringId = ref(null)
 const rejectingId = ref(null)
 const showRejectDialog = ref(false)
 const rejectReason = ref('')
