@@ -11,14 +11,13 @@
 - **Next:** No remaining work for this approved authorization scope.
 
 
-## Active task — PRODUCT-DETAILS-LAYOUT-2026-10-26-01
-- **Status:** IN_PROGRESS.
-- **Goal:** Refine Website product detail page against user screenshot.
-- **Scope:** `apps/website/src/pages/public/ProductDetails.vue`; tests only if a matching test file/harness exists.
-- **Plan:** Improve gallery proportions, compact desktop sidebar, one-column technical spec rows, and mobile order (gallery first, action/supplier card second, long text after). Preserve API/data and existing cart actions; no unverified inquiry workflow added.
-- **Verification:** Inspect GitHub Actions after source edit. Local test/build/browser run NOT AVAILABLE in this remote-only session.
-- **Next:** Implement, verify via CI, and record commit/run.
-
+## Completed task — PRODUCT-DETAILS-LAYOUT-2026-10-26-01
+- **Status:** DONE; verified by GitHub Actions run [40287801938](https://github.com/gameacc2025/martest/actions/runs/40287801938).
+- **Changes:** Product details page gallery has a landscape frame; desktop sidebar is narrower; technical specs use single-column rows; mobile order is gallery, action/supplier sidebar, description, specs. Existing API/cart/wishlist/supplier navigation preserved.
+- **Verification:** Frontend/shared 19/19 files, handoff 18/18, backend 1196/1196, Prisma generation, and Website/Company/Admin production builds passed. Local/browser visual testing NOT RUN.
+- **Source commit:** `74598683d26929380418adf876fbb3da00ba9d53`.
+- **Open consideration:** Reference image includes a dedicated inquiry flow; current page has cart actions. No unverified inquiry workflow was invented.
+- **Next:** User syncs `main` and visually checks desktop/mobile.
 ## Completed — Notification inbox fixes and bulk actions
 
 - **Status:** Earlier inbox actions are implemented; follow-up for independent folder counters and double-click-to-read has been committed to `main`; CI pending.
