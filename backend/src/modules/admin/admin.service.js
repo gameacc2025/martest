@@ -265,6 +265,16 @@ async function updateInquiryPlan(planId, data) {
   const existing = await prisma.inquiryPlan.findUnique({ where: { id } });
   if (!existing) throw new AppError('طرح اشتراک پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
   const update = {};
+  const entitlementFields = ['durationDays', 'price', 'currency', 'inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod'];
+  const changesEntitlements = entitlementFields.some((key) => data[key] !== undefined && data[key] !== existing[key]);
+  if (changesEntitlements) {
+    const linkedSubscriptions = await prisma.inquirySubscription.count({
+      where: { planId: id, status: { in: ['PENDING_PAYMENT', 'ACTIVE'] } },
+    });
+    if (linkedSubscriptions > 0) {
+      throw new AppError('این طرح درخواست پرداخت یا اشتراک فعال دارد؛ برای تغییر قیمت، مدت یا سهمیه یک طرح جدید بسازید تا شرایط خریدهای قبلی تغییر نکند.', 409, true, 'INQUIRY_PLAN_HAS_SUBSCRIPTIONS');
+    }
+  }
   if (data.name !== undefined) {
     const name = String(data.name).trim();
     if (!name || name.length > 100) throw new AppError('نام طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
