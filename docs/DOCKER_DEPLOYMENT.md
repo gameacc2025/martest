@@ -28,7 +28,8 @@
 2. `backend/.env.example` را به `backend/.env` کپی کنید.
 3. `JWT_ACCESS_SECRET` و `JWT_REFRESH_SECRET` را با secret تصادفی مستقل و طولانی جایگزین کنید.
 4. `ALLOWED_ORIGINS` را مطابق دامنه‌های واقعی سه پنل تنظیم کنید.
-5. برای ارسال email، تنظیمات SMTP معتبر لازم است. بدون SMTP واقعی، ارسال email خارجی تأییدشده محسوب نمی‌شود.
+5. `VITE_WEBSITE_APP_URL`، `VITE_COMPANY_APP_URL` و `VITE_ADMIN_APP_URL` آدرس‌های عمومی‌ای هستند که هنگام build داخل فایل‌های JS قرار می‌گیرند؛ در Compose برای localhost پیکربندی پیش‌فرض دارند. برای دامنه‌های production آن‌ها را در `.env` به origin واقعی پنل‌ها تغییر دهید و imageها را دوباره build کنید.
+6. برای ارسال email، تنظیمات SMTP معتبر لازم است. بدون SMTP واقعی، ارسال email خارجی تأییدشده محسوب نمی‌شود.
 6. هیچ فایل env حاوی secret را commit نکنید.
 
 > مقدارهای نمونه فقط برای توسعه‌اند. از رمز seed پیش‌فرض و secretهای نمونه در محیط عملیاتی استفاده نکنید.
