@@ -1034,7 +1034,7 @@ async function listResponses(inquiryId, caller) {
 
   const callerCompanyId = Number(caller?.companyId) || null;
   const where = { inquiryId: numericInquiryId };
-  if (!isBuyer && !isStaff && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode)) {
+  if (!isBuyer && !isStaff) {
     where.companyId = callerCompanyId;
   }
 
