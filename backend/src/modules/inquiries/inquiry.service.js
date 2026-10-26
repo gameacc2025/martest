@@ -789,12 +789,7 @@ async function createInquiry(data, caller) {
   if (!isCustomerBuyer) ensureCompanyId(companyId);
 
   return prisma.$transaction(async (tx) => {
-    if (companyId) {
-      await validateInquiryCreationCapacity(companyId, tx);
-      await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'INQUIRY_CREATE', tx });
-    } else if (buyerUserId) {
-      await consumeUsage({ ownerType: 'user', ownerId: buyerUserId, usageType: 'INQUIRY_CREATE', tx });
-    }
+    if (companyId) await validateInquiryCreationCapacity(companyId, tx);
     await validateInquiryProducts(data.items, tx);
 
     if (data.status && data.status !== 'DRAFT') {
@@ -819,6 +814,12 @@ async function createInquiry(data, caller) {
       },
       include: inquiryInclude,
     });
+
+    if (companyId) {
+      await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
+    } else if (buyerUserId) {
+      await consumeUsage({ ownerType: 'user', ownerId: buyerUserId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
+    }
 
     if (isCustomerBuyer) {
       await notifyInquiryPublished(tx, inquiry);
