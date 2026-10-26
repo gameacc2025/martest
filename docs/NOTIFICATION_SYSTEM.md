@@ -61,6 +61,9 @@ The Inquiry service dispatches catalog events through `notification.dispatch.ser
 - `INQUIRY_PUBLISHED`: when a customer submits a product inquiry immediately, when a company inquiry transitions to OPEN, or when a scheduled SUBMITTED inquiry becomes due. Recipients are companies that own the requested products and STAFF users with `leads.read`.
 - `INQUIRY_RESPONSE_RECEIVED`: delivered to the owning customer user or the requesting company when a supplier submits a quote.
 - `INQUIRY_STATUS_CHANGED`: delivered to the inquiry owner and companies that have active responses when an inquiry closes, expires, completes, or is cancelled.
+- `INQUIRY_RESPONSE_SELECTED`: delivered to the supplier whose quote was selected.
+- `INQUIRY_RESPONSE_REJECTED`: delivered when the buyer manually rejects one quote.
+- `INQUIRY_RESPONSE_AUTO_REJECTED`: delivered to pending suppliers whose quotes are rejected atomically after another quote is selected.
 
 The dispatcher applies each recipient's channel preferences, persists in-app notifications and queues email deliveries transactionally, and deduplicates event dispatch. SMS remains unavailable. Scheduled publishing and auto-expiry are processed by the backend inquiry lifecycle worker; manual browser verification and live SMTP delivery still require a configured environment.
 
