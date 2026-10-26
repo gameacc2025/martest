@@ -353,14 +353,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Next action:** Keep product permission seeds aligned with assigned roles; closed issues #2, #5, and #6 after successful CI.
 
 ## 2026-10-26 — PRODUCT-DETAILS-LAYOUT-2026-10-26-01 — Refine product details page to match reference
-- **Status:** IN_PROGRESS
+- **Status:** DONE — GitHub Actions passed.
 - **Agent:** ChatGPT via GitHub repository tools.
 - **Goal:** Improve the public product details page layout based on the user-provided reference screenshot while preserving existing product data/API and commerce behavior.
-- **Claimed scope:** `apps/website/src/pages/public/ProductDetails.vue` and focused tests if an existing test harness is found; `.ai/current-task.md` handoff.
-- **Evidence:** Current page already has a right-side gallery, product details/specifications, and left sticky summary card on desktop, but the summary card is cart-centric, mobile puts the sidebar before the gallery, specs use two columns on wide screens, and the image frame is comparatively tall. The reference emphasizes the gallery first, a compact left action card, and readable full-width spec rows.
-- **Plan:** Adjust image frame proportions, desktop sidebar width/spacing, spec rows to one column, and mobile order so gallery appears first and the action/supplier cards follow before the long description/specifications. Do not invent an inquiry submission API or change cart behavior without an existing verified flow.
-- **Verification plan:** Inspect existing test scripts and GitHub Actions for current main; verify targeted tests and website production build in CI. Local checkout/browser visual validation is unavailable in this workflow.
-- **Commit:** Pending.
-- **Push:** Repository tool writes directly to remote `main`; only scoped files will be changed.
-- **Risks / open questions:** The reference screenshot's “ثبت استعلام” workflow does not match the current page's cart actions. Keep current action behavior unless an existing inquiry flow is verified.
-- **Next action:** Apply responsive layout refinements, inspect CI, and update this entry with observed results.
+- **Changes:** `apps/website/src/pages/public/ProductDetails.vue`: gallery now uses a wider landscape frame with a lower minimum height; desktop sidebar is narrower; technical specifications render as full-width single-column rows; mobile order is gallery first, then the action/supplier sidebar, then description and specifications. Existing API, cart, wishlist, and supplier navigation behavior are unchanged.
+- **Verification:** [GitHub Actions run 40287801938](https://github.com/gameacc2025/martest/actions/runs/40287801938) passed. Frontend/shared tests: 19/19 files; handoff suite: 18/18; backend: 1196/1196; Prisma Client generation passed; Website, Company, and Admin production builds passed. Local/browser visual testing NOT RUN (remote-only editing session).
+- **Commit:** `74598683d26929380418adf876fbb3da00ba9d53` (source change; verified by CI).
+- **Push:** Committed directly to remote `main` through GitHub Contents API.
+- **Risks / open questions:** The reference image shows a dedicated “ثبت استعلام” workflow while current Website product details still uses cart actions. No inquiry API was invented or wired; this task preserves existing behavior until a verified inquiry flow is available.
+- **Next action:** User can sync latest `main` and review the page at desktop/mobile widths.
