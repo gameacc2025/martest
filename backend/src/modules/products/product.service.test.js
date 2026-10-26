@@ -1718,3 +1718,93 @@ test('getProductActivityLog: CUSTOMER cannot read audit data even with a company
   );
   assert.equal((calls['productActivityLog.findMany'] || []).length, 0);
 });
+
+// ── Explicit STAFF write scope and featured permission ───────────────
+
+test('STAFF product creation requires products.create and an explicit target company', async () => {
+  const staffWithoutCreate = { id: 5, accessType: 'STAFF', permissions: [], roles: ['PRODUCT_MODERATOR'] };
+  await assert.rejects(
+    () => service.createProduct({ title: 'New', categoryId: 1, subcategoryId: 1, companyId: 10 }, staffWithoutCreate),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+
+  const staffCreator = { id: 5, accessType: 'STAFF', permissions: ['products.create'], roles: ['PRODUCT_MODERATOR'] };
+  await assert.rejects(
+    () => service.createProduct({ title: 'New', categoryId: 1, subcategoryId: 1 }, staffCreator),
+    (err) => err.statusCode === 400 && err.code === 'COMPANY_REQUIRED'
+  );
+
+  await service.createProduct({ title: 'New', categoryId: 1, subcategoryId: 1, companyId: 20 }, staffCreator);
+  assert.equal(calls['product.create'].at(-1).data.companyId, 20);
+});
+
+test('STAFF with products.update may update another company product; STAFF without it is denied', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const unauthorizedStaff = { id: 5, accessType: 'STAFF', permissions: ['products.read'], companyId: 999 };
+  await assert.rejects(
+    () => service.updateProduct(1, { title: 'Changed' }, unauthorizedStaff),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['product.update'] || []).length, 0);
+
+  const authorizedStaff = { id: 5, accessType: 'STAFF', permissions: ['products.update'], companyId: 999 };
+  await service.updateProduct(1, { title: 'Changed' }, authorizedStaff);
+  assert.equal(calls['product.update'].at(-1).data.title, 'Changed');
+});
+
+test('STAFF with products.delete may delete another company product', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const staffDeleter = { id: 5, accessType: 'STAFF', permissions: ['products.delete'], companyId: 999 };
+  await service.deleteProduct(1, staffDeleter);
+  assert.equal(calls['product.update'].at(-1).data.status, 'ARCHIVED');
+  assert.ok(calls['product.update'].at(-1).data.deletedAt instanceof Date);
+});
+
+test('STAFF product price/media writes require the exact operation permission across companies', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const staffWithoutMedia = { id: 5, accessType: 'STAFF', permissions: ['products.update'], companyId: 999 };
+  await assert.rejects(
+    () => service.uploadImage(1, undefined, staffWithoutMedia),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+
+  const staffWithMedia = { id: 5, accessType: 'STAFF', permissions: ['product_images.create'], companyId: 999 };
+  await assert.rejects(
+    () => service.uploadImage(1, undefined, staffWithMedia),
+    (err) => err.statusCode === 400 && err.code === 'FILE_REQUIRED'
+  );
+});
+
+test('createProduct requires products.feature to create a featured product', async () => {
+  const staffCreator = { id: 5, accessType: 'STAFF', permissions: ['products.create'], roles: ['PRODUCT_MODERATOR'] };
+  await assert.rejects(
+    () => service.createProduct({ title: 'Featured', categoryId: 1, subcategoryId: 1, companyId: 10, isFeatured: true }, staffCreator),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+
+  const featuredCreator = { ...staffCreator, permissions: ['products.create', 'products.feature'] };
+  await service.createProduct({ title: 'Featured', categoryId: 1, subcategoryId: 1, companyId: 10, isFeatured: true }, featuredCreator);
+  assert.equal(calls['product.create'].at(-1).data.isFeatured, true);
+});
+
+test('updateProduct requires products.feature only when isFeatured changes', async () => {
+  fx.product = draftProduct({ companyId: 10, isFeatured: false });
+  await assert.rejects(
+    () => service.updateProduct(1, { isFeatured: true }, companyA),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['product.update'] || []).length, 0);
+
+  const featuredCompany = { ...companyA, permissions: ['products.read', 'products.feature'] };
+  await service.updateProduct(1, { isFeatured: true }, featuredCompany);
+  assert.equal(calls['product.update'].at(-1).data.isFeatured, true);
+});
+
+test('company cannot call STAFF-only moderation actions directly through the service', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'PENDING_REVIEW' });
+  await assert.rejects(
+    () => service.changeProductStatus(1, 'approve', companyA),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['product.update'] || []).length, 0);
+});
