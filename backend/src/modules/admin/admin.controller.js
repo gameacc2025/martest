@@ -65,6 +65,10 @@ async function grantInquirySubscriptionCtrl(request, reply) {
   return reply.code(201).send(success(await adminService.grantInquirySubscription(request.body, Number(request.user.id))));
 }
 
+async function activateInquirySubscriptionCtrl(request, reply) {
+  return reply.send(success(await adminService.activateInquirySubscription(request.params.id, Number(request.user.id), request.body?.notes)));
+}
+
 async function activatePendingInquirySubscriptionCtrl(request, reply) {
   if (request.body.paymentConfirmed !== true) {
     const { AppError } = require('../../utils/error');
