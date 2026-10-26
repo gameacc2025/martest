@@ -31,6 +31,7 @@ const auth = useAuthStore()
 // Only SUPER_ADMIN picks a company explicitly. Company representatives
 // have their product auto-assigned to their own company by the backend.
 const canChooseCompany = computed(() => auth.isSuperAdmin)
+const canFeature = computed(() => auth.isSuperAdmin || auth.hasPermission('products.feature'))
 
 // Derive the backend origin from the API base URL (strip the /api/... suffix)
 // so relative upload paths like "/uploads/..." resolve to the API server.
@@ -439,8 +440,12 @@ function buildProductPayload() {
     categoryId: form.value.categoryId,
     subcategoryId: form.value.subcategoryId,
     visibility: form.value.visibility,
-    isFeatured: !!form.value.isFeatured,
     specifications: buildSpecificationsPayload(),
+  }
+
+  // Feature promotion is a separate privilege. Omitting this field preserves
+  // the stored value for callers who cannot manage featured placement.
+  if (canFeature.value) payload.isFeatured = !!form.value.isFeatured
   }
 
   // Optional text fields — only include non-empty values.
@@ -751,7 +756,7 @@ async function removeExistingDocument(docId) {
             <label>قابلیت نمایش</label>
             <Select v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
           </div>
-          <div class="field">
+          <div v-if="canFeature" class="field">
             <label>محصول ویژه</label>
             <div class="flex align-items-center gap-2 mt-2">
               <InputSwitch v-model="form.isFeatured" />
