@@ -55,6 +55,12 @@ const routes = [
         meta: { title: "محصولات" },
       },
       {
+        path: "inquiry-subscription",
+        name: "inquiry-subscription",
+        component: () => import("../pages/public/InquirySubscription.vue"),
+        meta: { title: "اشتراک استعلام", requiresAuth: true },
+      },
+      {
         path: "my-inquiries/:id?",
         name: "my-inquiries",
         component: () => import("../pages/public/MyInquiries.vue"),
