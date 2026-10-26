@@ -48,12 +48,12 @@
             <div class="flex gap-2">
               <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'پیش‌نمایش'" @click="showPreview(data)" />
               <Button v-if="canEditProduct && data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
-              <Button v-if="canApproveProduct && data.status === 'PENDING_REVIEW'" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
-              <Button v-if="canRejectProduct && data.status === 'PENDING_REVIEW'" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
-              <Button v-if="canPublishProduct && ['APPROVED', 'HIDDEN'].includes(data.status)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
-              <Button v-if="canHideProduct && data.status === 'PUBLISHED'" icon="pi pi-eye-slash" severity="secondary" rounded text v-tooltip.top="'مخفی کردن از سایت'" :loading="hidingId === data.id" @click="hideProduct(data)" />
-              <Button v-if="canArchiveProduct && ['DRAFT', 'REJECTED', 'APPROVED', 'PUBLISHED', 'HIDDEN'].includes(data.status)" icon="pi pi-folder" severity="secondary" rounded text v-tooltip.top="'بایگانی محصول'" :loading="archivingId === data.id" @click="archiveProduct(data)" />
-              <Button v-if="canRestoreProduct && ['PENDING_REVIEW', 'APPROVED', 'REJECTED', 'HIDDEN', 'ARCHIVED'].includes(data.status)" icon="pi pi-replay" severity="warning" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" :loading="restoringId === data.id" @click="restoreProductToDraft(data)" />
+              <Button v-if="canApproveProduct && canApprove(data)" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
+              <Button v-if="canRejectProduct && canReject(data)" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
+              <Button v-if="canPublishProduct && canPublish(data)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
+              <Button v-if="canHideProduct && canHide(data)" icon="pi pi-eye-slash" severity="secondary" rounded text v-tooltip.top="'مخفی کردن از سایت'" :loading="hidingId === data.id" @click="hideProduct(data)" />
+              <Button v-if="canArchiveProduct && canArchive(data)" icon="pi pi-folder" severity="secondary" rounded text v-tooltip.top="'بایگانی محصول'" :loading="archivingId === data.id" @click="archiveProduct(data)" />
+              <Button v-if="canRestoreProduct && canRestoreDraft(data)" icon="pi pi-replay" severity="warning" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" :loading="restoringId === data.id" @click="restoreProductToDraft(data)" />
               <Button v-if="canCreateProduct" icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
               <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
               <Button v-if="canDeleteProduct" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
@@ -144,7 +144,7 @@ import { useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
-import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, getUnreviewedEditCount } from '../../../config/product'
+import { getStatusLabel, getStatusSeverity, STATUS_OPTIONS, getUnreviewedEditCount, canApprove, canReject, canPublish, canHide, canArchive, canRestoreDraft } from '../../../config/product'
 import ProductPreviewCard from '../../../components/ProductPreviewCard.vue'
 import Select from 'primevue/select'
 
