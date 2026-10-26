@@ -56,7 +56,7 @@ flowchart LR
   api --> mod_settings["settings module"]
   api --> mod_specification_library["specification-library module"]
   api --> mod_users["users module"]
-  auth --> db
+  rbac --> db
   mod_admin --> db
   mod_auth --> db
   mod_categories --> db
