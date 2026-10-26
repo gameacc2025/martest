@@ -31,7 +31,7 @@ const trivialController = {};
 const controllerMethods = [
   'list', 'stats', 'getById', 'create', 'update', 'listItems',
   'changeStatus', 'revealResponses', 'addItem', 'updateItem', 'deleteItem',
-  'listResponses', 'submitResponse', 'updateResponse',
+  'listResponses', 'submitResponse', 'updateResponse', 'decideResponse',
   'withdrawResponse', 'uploadResponseAttachment', 'deleteResponseAttachment',
 ];
 for (const name of controllerMethods) {
