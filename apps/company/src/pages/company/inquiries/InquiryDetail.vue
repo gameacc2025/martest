@@ -191,14 +191,25 @@ async function sendInquiryMessage() {
   }
   sendingMessage.value = true
   try {
-    await inquiriesApi.sendMessage(route.params.id, {
+    const result = await inquiriesApi.sendMessage(route.params.id, {
       message,
       ...(isInquiryBuyer.value ? { recipientCompanyId: Number(recipientCompanyId.value) } : {}),
       ...(notifyBySms.value ? { notifyBySms: true } : {}),
     })
+    const body = result?.data ?? result
+    const payload = body?.data ?? body
     messageDraft.value = ''
     notifyBySms.value = false
-    toast.add({ severity: 'success', summary: 'پیام ارسال شد', detail: 'پیام با موفقیت ثبت شد.', life: 2500 })
+    toast.add({
+      severity: payload?.smsSkippedReason ? 'warn' : 'success',
+      summary: 'پیام ارسال شد',
+      detail: payload?.smsQueued
+        ? 'پیام ثبت شد و اعلان پیامکی در صف ارسال قرار گرفت.'
+        : payload?.smsSkippedReason === 'recipient_sms_opted_out'
+          ? 'پیام ثبت شد؛ گیرنده دریافت پیامک را فعال نکرده است.'
+          : 'پیام با موفقیت ثبت شد.',
+      life: 3000,
+    })
     await fetchMessages()
   } catch (err) {
     const code = err?.response?.data?.code || err?.code
