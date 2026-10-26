@@ -951,6 +951,20 @@ test('deletePriceTier: deletes the tier and logs the removal', async () => {
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'PRICE_TIER_DELETE');
 });
 
+test('deletePriceTier: crossing the review threshold updates status and notifies staff', async () => {
+  fx.product = draftProduct({ companyId: 10, status: 'PUBLISHED', editsSinceApproval: 4 });
+  fx.existingTier = { id: 5, minQuantity: 1, price: 100 };
+  fx.superAdminUserIds = [10];
+
+  await service.deletePriceTier(1, 5, companyA);
+
+  const productUpdate = calls['product.update'].at(-1);
+  assert.equal(productUpdate.data.status, 'PENDING_REVIEW');
+  assert.equal(productUpdate.data.editsSinceApproval, 0);
+  assert.equal(calls['productStatusHistory.create'].at(-1).data.newStatus, 'PENDING_REVIEW');
+  assert.equal(calls['notification.createMany'].length > 0, true);
+});
+
 test('upsertPrice: delegates to addPriceTier', async () => {
   fx.product = draftProduct({ companyId: 10 });
   await service.upsertPrice(1, { minQuantity: 1, price: 100 }, companyA);
