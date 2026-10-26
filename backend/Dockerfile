@@ -22,9 +22,12 @@ FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# فقط فایل‌های لازم را کپی می‌کنیم
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# The runtime executes `prisma migrate deploy`, so include the generated client
+# and the Prisma CLI (a backend devDependency) from the builder stage. Copying
+# only production node_modules omits the CLI and makes startup depend on npx/network.
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/prisma ./prisma
 COPY package.json ./
