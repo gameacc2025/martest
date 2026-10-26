@@ -80,6 +80,7 @@ const routes = [
       // ── Orders ────────────────────────────────────────────
       { path: "/orders", name: "admin-orders", component: () => import("../pages/admin/orders/OrderList.vue"), meta: { title: "مدیریت سفارشات" } },
       // ── Inquiries ─────────────────────────────────────────
+      { path: "/inquiry-subscriptions", name: "admin-inquiry-subscriptions", component: () => import("../pages/admin/inquiries/InquirySubscriptions.vue"), meta: { title: "اشتراک‌های استعلام" } },
       { path: "/inquiries", name: "admin-inquiries", component: () => import("../pages/admin/inquiries/InquiryList.vue"), meta: { title: "مدیریت استعلام‌ها" } },
       { path: "/inquiries/create", name: "admin-inquiry-create", component: () => import("../pages/admin/inquiries/InquiryCreate.vue"), meta: { title: "ایجاد استعلام جدید" } },
       { path: "/inquiries/:id", name: "admin-inquiry-detail", component: () => import("../pages/admin/inquiries/InquiryDetail.vue"), meta: { title: "جزئیات استعلام" } },
