@@ -17,6 +17,8 @@ CREATE TABLE "Address" (
 
 CREATE INDEX "Address_userId_isDefault_idx" ON "Address"("userId", "isDefault");
 CREATE INDEX "Address_userId_createdAt_idx" ON "Address"("userId", "createdAt");
+-- PostgreSQL partial index guarantees at most one default address per customer.
+CREATE UNIQUE INDEX "Address_one_default_per_user_idx" ON "Address"("userId") WHERE "isDefault" = true;
 
 ALTER TABLE "Address"
   ADD CONSTRAINT "Address_userId_fkey"
