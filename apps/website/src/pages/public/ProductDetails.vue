@@ -487,7 +487,7 @@ const goBack = () => router.push('/products')
 
 .product-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 350px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   align-items: start;
   gap: 1.25rem;
 }
@@ -520,9 +520,9 @@ const goBack = () => router.push('/products')
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 360px;
-  max-height: 500px;
-  aspect-ratio: 1.25 / 1;
+  min-height: 320px;
+  max-height: 460px;
+  aspect-ratio: 1.6 / 1;
   overflow: hidden;
   border-radius: 0.75rem;
   background: linear-gradient(145deg, var(--pd-ground), color-mix(in srgb, var(--pd-accent) 5%, white));
@@ -667,7 +667,7 @@ const goBack = () => router.push('/products')
 
 .specification-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
   margin: 0;
   border: 1px solid var(--pd-border);
@@ -684,11 +684,7 @@ const goBack = () => router.push('/products')
   min-width: 0;
 }
 
-.specification-row:nth-child(odd) {
-  border-inline-end: 1px solid var(--pd-border);
-}
-
-.specification-row:nth-last-child(-n + 2) {
+.specification-row:last-child {
   border-bottom: 0;
 }
 
@@ -987,7 +983,7 @@ const goBack = () => router.push('/products')
 
 @media (max-width: 1000px) {
   .product-layout {
-    grid-template-columns: minmax(0, 1fr) 310px;
+    grid-template-columns: minmax(0, 1fr) 280px;
     gap: 1rem;
   }
 
@@ -996,15 +992,7 @@ const goBack = () => router.push('/products')
   }
 
   .specification-list {
-    grid-template-columns: 1fr;
-  }
-
-  .specification-row:nth-child(odd) {
-    border-inline-end: 0;
-  }
-
-  .specification-row:nth-last-child(2) {
-    border-bottom: 1px solid var(--pd-border);
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1030,18 +1018,31 @@ const goBack = () => router.push('/products')
     grid-template-columns: 1fr;
   }
 
-  .product-sidebar {
-    position: static;
-    grid-row: 1;
+  .product-main {
+    display: contents;
   }
 
-  .product-main {
-    grid-row: 2;
+  .gallery-card {
+    order: 1;
+  }
+
+  .product-sidebar {
+    position: static;
+    order: 2;
+  }
+
+  .description-card {
+    order: 3;
+  }
+
+  .specifications-card {
+    order: 4;
   }
 
   .main-image-frame {
-    min-height: 250px;
-    aspect-ratio: 1.15 / 1;
+    min-height: 230px;
+    max-height: 380px;
+    aspect-ratio: 1.35 / 1;
   }
 
   .main-image {
@@ -1073,7 +1074,7 @@ const goBack = () => router.push('/products')
   }
 
   .main-image-frame {
-    min-height: 220px;
+    min-height: 200px;
   }
 
   .thumbnail-button {
