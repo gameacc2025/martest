@@ -162,6 +162,7 @@ export const endpoints = {
     quota: '/inquiries/quota',
     adminSettings: '/admin/inquiry-monetization/settings',
     adminPlans: '/admin/inquiry-plans',
+    adminPlan: (id) => `/admin/inquiry-plans/${id}`,
     adminSubscriptions: '/admin/inquiry-subscriptions',
     activate: (id) => `/admin/inquiry-subscriptions/${id}/activate`,
     reject: (id) => `/admin/inquiry-subscriptions/${id}/reject`,
