@@ -344,6 +344,7 @@ async function activatePendingInquirySubscription(subscriptionId, adminUserId, n
     let pending = await tx.inquirySubscription.findUnique({ where: { id }, include: { plan: true } });
     if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
     if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار پرداخت قابل فعال‌سازی هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+    if (pending.paymentProvider === 'ZARINPAL') throw new AppError('اشتراک پرداخت آنلاین فقط پس از تأیید سمت سرور درگاه فعال می‌شود.', 409, true, 'PAYMENT_PROVIDER_VERIFICATION_REQUIRED');
 
     // Lock the owner row to prevent two pending requests for the same owner
     // from being activated concurrently after both observed "no active plan".
@@ -385,6 +386,7 @@ async function rejectPendingInquirySubscription(subscriptionId, adminUserId, not
     const pending = await tx.inquirySubscription.findUnique({ where: { id }, select: { id: true, status: true, notes: true } });
     if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
     if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار بررسی قابل رد هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+    if (pending.paymentProvider === 'ZARINPAL') throw new AppError('درخواست پرداخت آنلاین باید از طریق نتیجه تأییدشده درگاه تعیین تکلیف شود.', 409, true, 'PAYMENT_PROVIDER_VERIFICATION_REQUIRED');
     const changed = await tx.inquirySubscription.updateMany({
       where: { id, status: 'PENDING_PAYMENT' },
       data: { status: 'CANCELLED', activatedBy: Number(adminUserId), notes: [pending.notes, 'درخواست پرداخت توسط مدیر رد شد.', notes].filter(Boolean).join(' | ').slice(0, 2000) },
