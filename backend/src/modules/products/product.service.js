@@ -841,7 +841,7 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
 async function getProductById(id, caller) {
   const isPublicCaller = !caller
     || (!isSuperAdmin(caller) && !isCompanyUser(caller) && !isStaffUser(caller));
-  const include = isPublicCaller ? publicProductInclude : productInclude;
+  const queryShape = isPublicCaller ? { select: publicProductSelect } : { include: productInclude };
   const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, ...queryShape });
   if (!product) return null;
   if (isCompanyUser(caller)) {
