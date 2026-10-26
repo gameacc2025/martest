@@ -1199,48 +1199,72 @@ async function sendInquiryMessage(inquiryId, data, caller) {
         ? await tx.user.findUnique({ where: { id: recipientUserId }, select: { id: true, phone: true } })
         : await tx.company.findUnique({ where: { id: recipientCompanyId }, select: { phone: true } });
       const phone = String(recipient?.phone || '').trim();
-      if (!phone) throw { statusCode: 422, code: 'SMS_RECIPIENT_PHONE_MISSING', message: 'برای گیرنده شماره تلفن ثبت نشده است.' };
       let deliveryUserId = recipientUserId;
-      if (!deliveryUserId) {
+      if (!deliveryUserId && recipientCompanyId) {
         const companyMember = await tx.user.findFirst({
           where: { status: 'ACTIVE', accessProfile: { companyId: recipientCompanyId } },
           select: { id: true },
         });
         deliveryUserId = companyMember?.id;
       }
-      if (!deliveryUserId) throw { statusCode: 422, code: 'SMS_RECIPIENT_ACCOUNT_MISSING', message: 'برای گیرنده شرکت، حساب کاربری فعالی جهت ثبت وضعیت پیامک پیدا نشد.' };
-      const preference = await tx.notificationPreference.findUnique({
-        where: { userId_eventType_channel: { userId: deliveryUserId, eventType: 'INQUIRY_MESSAGE_RECEIVED', channel: 'SMS' } },
-        select: { enabled: true },
-      });
-      // Missing preference means the event default applies (SMS is opt-in only).
-      if (preference?.enabled !== true) {
-        smsSkippedReason = 'recipient_sms_opted_out';
+
+      if (!phone) {
+        smsSkippedReason = 'recipient_phone_missing';
+      } else if (!deliveryUserId) {
+        smsSkippedReason = 'recipient_account_missing';
       } else {
-        // Validate provider config before queuing; the actual SMS is sent by the
-        // outbox worker after this transaction commits.
-        getInquirySmsGatewayConfig();
-        await consumeUsage({
-          ownerType, ownerId, usageType: 'SMS', referenceType: 'InquiryMessage',
-          referenceId: createdMessage.id, forceEnforcement: true, tx,
+        const preference = await tx.notificationPreference.findUnique({
+          where: { userId_eventType_channel: { userId: deliveryUserId, eventType: 'INQUIRY_MESSAGE_RECEIVED', channel: 'SMS' } },
+          select: { enabled: true },
         });
-        await tx.notificationDelivery.create({
-          data: {
-            userId: deliveryUserId,
-            eventType: 'INQUIRY_MESSAGE_RECEIVED',
-            channel: 'SMS',
-            status: 'PENDING',
-            recipient: phone,
-            subject: null,
-            body: `پیام جدیدی درباره استعلام «${String(inquiry.title || '').slice(0, 100)}» دریافت کرده‌اید. وارد سامانه شوید تا آن را بخوانید.`,
-            attempts: 0,
-            maxAttempts: 3,
-            nextAttemptAt: new Date(),
-            dedupeKey: `inquiry-message-${createdMessage.id}-sms`,
-            updatedAt: new Date(),
-          },
-        });
-        smsQueued = true;
+        if (preference?.enabled !== true) {
+          smsSkippedReason = 'recipient_sms_opted_out';
+        } else {
+          try {
+            getInquirySmsGatewayConfig();
+          } catch (error) {
+            if (['SMS_PROVIDER_NOT_CONFIGURED', 'SMS_PROVIDER_CONFIGURATION_INVALID'].includes(error?.code)) {
+              smsSkippedReason = 'sms_provider_not_configured';
+            } else {
+              throw error;
+            }
+          }
+
+          if (!smsSkippedReason) {
+            try {
+              await consumeUsage({
+                ownerType, ownerId, usageType: 'SMS', referenceType: 'InquiryMessage',
+                referenceId: createdMessage.id, forceEnforcement: true, tx,
+              });
+            } catch (error) {
+              if (error?.code === 'INQUIRY_QUOTA_EXCEEDED' || error?.code === 'INQUIRY_SUBSCRIPTION_REQUIRED') {
+                smsSkippedReason = 'sms_quota_exceeded';
+              } else {
+                throw error;
+              }
+            }
+          }
+
+          if (!smsSkippedReason) {
+            await tx.notificationDelivery.create({
+              data: {
+                userId: deliveryUserId,
+                eventType: 'INQUIRY_MESSAGE_RECEIVED',
+                channel: 'SMS',
+                status: 'PENDING',
+                recipient: phone,
+                subject: null,
+                body: `پیام جدیدی درباره استعلام «${String(inquiry.title || '').slice(0, 100)}» دریافت کرده‌اید. وارد سامانه شوید تا آن را بخوانید.`,
+                attempts: 0,
+                maxAttempts: 3,
+                nextAttemptAt: new Date(),
+                dedupeKey: `inquiry-message-${createdMessage.id}-sms`,
+                updatedAt: new Date(),
+              },
+            });
+            smsQueued = true;
+          }
+        }
       }
     }
     return { ...createdMessage, smsQueued, smsSkippedReason };
