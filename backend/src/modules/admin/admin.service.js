@@ -283,4 +283,35 @@ async function grantInquirySubscription(data, adminUserId) {
   });
 }
 
-module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder, getInquiryMonetizationSettings, updateInquiryMonetizationSettings, listInquiryPlans, createInquiryPlan, listInquirySubscriptions, grantInquirySubscription };
+
+async function activatePendingInquirySubscription(subscriptionId, adminUserId, notes) {
+  const id = Number(subscriptionId);
+  if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه اشتراک معتبر نیست.', 400, true, 'INVALID_SUBSCRIPTION_ID');
+  return prisma.$transaction(async (tx) => {
+    const pending = await tx.inquirySubscription.findUnique({
+      where: { id },
+      include: { plan: true },
+    });
+    if (!pending) throw new AppError('درخواست اشتراک پیدا نشد.', 404, true, 'SUBSCRIPTION_NOT_FOUND');
+    if (pending.status !== 'PENDING_PAYMENT') throw new AppError('فقط درخواست‌های در انتظار پرداخت قابل فعال‌سازی هستند.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+    if (!pending.plan.isActive) throw new AppError('طرح این اشتراک غیرفعال شده است.', 409, true, 'SUBSCRIPTION_PLAN_INACTIVE');
+    const ownerFilter = pending.companyId ? { companyId: pending.companyId } : { userId: pending.userId };
+    const active = await tx.inquirySubscription.findFirst({
+      where: { ...ownerFilter, status: 'ACTIVE', startsAt: { lte: new Date() }, endsAt: { gt: new Date() } },
+      select: { id: true },
+    });
+    if (active) throw new AppError('این حساب هم‌اکنون اشتراک فعال دارد.', 409, true, 'ACTIVE_SUBSCRIPTION_EXISTS');
+    const startsAt = new Date();
+    const endsAt = new Date(startsAt.getTime() + pending.plan.durationDays * 86400000);
+    return tx.inquirySubscription.update({
+      where: { id },
+      data: {
+        status: 'ACTIVE', startsAt, endsAt, activatedBy: Number(adminUserId),
+        notes: [pending.notes, 'پرداخت به‌صورت دستی توسط مدیر بررسی و تأیید شد.', notes].filter(Boolean).join(' | ').slice(0, 2000),
+      },
+      include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
+    });
+  });
+}
+
+module.exports = { getStats, getSettings, updateReviewEditThreshold, sendNotification, getDeliveryStats, listDeliveries, listNotificationFolders, createNotificationFolder, updateNotificationFolder, getInquiryMonetizationSettings, updateInquiryMonetizationSettings, listInquiryPlans, createInquiryPlan, listInquirySubscriptions, grantInquirySubscription, activatePendingInquirySubscription };
