@@ -134,12 +134,12 @@
                       <span>{{ formatPrice(userStats.totalSpent || 0) }}</span>
                     </div>
                     <div class="flex justify-between">
-                      <span class="text-gray-500">تعداد نظرات:</span>
-                      <span>{{ userStats.reviewCount || 0 }}</span>
+                      <span class="text-gray-500">تعداد آدرس‌های ذخیره‌شده:</span>
+                      <span>{{ userStats.addressCount || 0 }}</span>
                     </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">امتیاز کلی:</span>
-                      <Rating :modelValue="userStats.averageRating || 0" :cancel="false" readonly />
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-500">مدیریت آدرس‌ها:</span>
+                      <Button label="مشاهده آدرس‌ها" icon="pi pi-map-marker" class="p-button-text p-button-sm" @click="goToAddresses" />
                     </div>
                   </div>
                 </div>
@@ -361,13 +361,15 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Rating from 'primevue/rating'
 import FileUpload from 'primevue/fileupload'
+import { apiGet } from '@telecom/shared-core/http/apiClient'
+import { endpoints } from '@telecom/api-client'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
 
 const user = ref({})
-const userStats = ref({})
+const userStats = ref({ orderCount: 0, totalSpent: 0, addressCount: 0 })
 const recentOrders = ref([])
 const notificationCount = ref('0')
 
@@ -399,19 +401,34 @@ const passwordForm = ref({
 
 onMounted(async () => {
   await loadUserProfile()
-  await loadUserStats()
-  await loadRecentOrders()
+  await Promise.all([loadUserStats(), loadRecentOrders()])
 })
 
 const loadUserProfile = async () => {
   try {
-    const data = await authStore.getProfile()
-    user.value = data
+    const context = await authStore.getProfile()
+    const identity = context?.user || {}
+    const profile = context?.profile || {}
+    const accessProfile = context?.accessProfile || {}
+    const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim()
+    user.value = {
+      ...identity,
+      ...profile,
+      fullName,
+      name: fullName || identity.phone || identity.email || 'کاربر',
+      email: identity.email || 'ثبت نشده',
+      phone: identity.phone || '',
+      phoneNumber: identity.phone || '',
+      avatarUrl: profile.avatar || null,
+      role: accessProfile.type || 'CUSTOMER',
+      userType: accessProfile.type || 'CUSTOMER',
+      createdAt: identity.createdAt,
+    }
     editForm.value = {
-      firstName: data.firstName || '',
-      lastName: data.lastName || '',
-      phone: data.phone || '',
-      avatar: data.avatar || null
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
+      phone: identity.phone || '',
+      avatar: profile.avatar || null
     }
   } catch (error) {
     console.error('Error loading user profile:', error)
@@ -420,8 +437,17 @@ const loadUserProfile = async () => {
 
 const loadUserStats = async () => {
   try {
-    const data = await orderStore.getUserStats()
-    userStats.value = data
+    const [data, addressResult] = await Promise.allSettled([
+      orderStore.getUserStats(),
+      apiGet(endpoints.addresses.list),
+    ])
+    if (data.status === 'fulfilled' && data.value && typeof data.value === 'object') {
+      userStats.value = { ...userStats.value, ...data.value }
+    }
+    if (addressResult.status === 'fulfilled') {
+      const addressList = Array.isArray(addressResult.value) ? addressResult.value : []
+      userStats.value.addressCount = addressList.length
+    }
   } catch (error) {
     console.error('Error loading user stats:', error)
   }
@@ -485,11 +511,8 @@ const saveProfile = async () => {
   try {
     // Only send fields that have changed
     const updateData = {
-      firstName: editForm.value.firstName,
-      lastName: editForm.value.lastName,
-      displayName: editForm.value.displayName,
-      phoneNumber: editForm.value.phoneNumber,
-      bio: editForm.value.bio
+      firstName: editForm.value.firstName.trim(),
+      lastName: editForm.value.lastName.trim()
     }
 
     // Remove undefined/null values
