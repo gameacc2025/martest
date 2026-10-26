@@ -118,8 +118,9 @@ function isInquiryBuyer(inquiry, caller) {
 
 function resolveCompanyId(data, caller) {
   if (caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller)) return null;
+  if (isSuperAdmin(caller) && data?.companyId) return Number(data.companyId);
   if (caller?.companyId) return Number(caller.companyId);
-  if (data?.companyId && (isSuperAdmin(caller) || (caller?.accessType === 'STAFF' && hasAnyPermission(caller, 'leads.create', 'inquiries.create')))) {
+  if (data?.companyId && caller?.accessType === 'STAFF' && hasAnyPermission(caller, 'leads.create', 'inquiries.create')) {
     return Number(data.companyId);
   }
   return null;
@@ -1028,6 +1029,17 @@ async function listResponses(inquiryId, caller) {
     return responses.map((response, index) => {
       const safe = { ...response, company: { name: `پیشنهاددهنده ${index + 1}`, type: null } };
       delete safe.companyId;
+      safe.items = (response.items || []).map((item) => {
+        const safeItem = { ...item };
+        if (safeItem.inquiryItem?.product) {
+          safeItem.inquiryItem = {
+            ...safeItem.inquiryItem,
+            product: { ...safeItem.inquiryItem.product },
+          };
+          delete safeItem.inquiryItem.product.companyId;
+        }
+        return safeItem;
+      });
       return safe;
     });
   }
