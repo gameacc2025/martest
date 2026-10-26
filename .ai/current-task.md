@@ -55,3 +55,12 @@
 - GitHub Actions run [40271177578](https://github.com/gameacc2025/martest/actions/runs/40271177578) passed for commit `3eeb388ede16a3624b6ee2c6ca3baf555d9bc761`: frontend/shared 17/17 test files (158 tests, 0 failed); backend 1179/1179; Prisma Client generation; Website/Company/Admin production builds.
 - The product route/service authorization tests are included in that passing backend suite. The three notification inbox test failures were fixed by locating the rendered bulk action by label; the computed selection flag remains in all three inbox pages.
 - The latest documentation-only commit `4f4d2a2c9885adca22dcee1c95f774698e3fd4f1` corrects the old public-endpoint permission statements; its own CI run `40271218831` was still in progress at last check.
+
+
+## Product lifecycle UI milestone — 2026-10-26
+- Company product list now allows resubmitting REJECTED products through `canSubmitForReview`.
+- Admin product list now exposes hide/archive/restore-to-draft actions only in backend-supported statuses and only when the caller has the matching permission. Create/edit/copy/delete controls are permission-aware; the invalid Admin submit-review button was removed.
+- Admin lifecycle action helpers now derive from `ALLOWED_TRANSITIONS`; new tests were added for Admin and Company lifecycle helper behavior.
+- STAFF with `products.publish` can publish APPROVED and HIDDEN products across companies, matching the existing route contract; COMPANY publish remains ownership-checked and APPROVED-only.
+- Issues: #4 implemented; #5 `isFeatured` permission enforcement remains open pending authorization approval; #6 broader STAFF update/delete/price/media write scope remains open (publish subcase fixed).
+- Verification: [CI run 40271764110](https://github.com/gameacc2025/martest/actions/runs/40271764110) passed frontend/shared tests, backend 1179/1179, Prisma generation, and Website/Company/Admin builds. This run is for commit `670e1071712069ff4adbd66b5542799423a1e202`; current handoff/documentation commits may have their own CI runs pending.
