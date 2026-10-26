@@ -1056,6 +1056,36 @@ test('changing the retail tier into a wholesale tier preserves the last retail v
   assert.equal(calls['productPriceSnapshot.create'].length, 1);
 });
 
+test('retail tier metadata edits do not add duplicate chart points when price is unchanged', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, minQuantity: 1, maxQuantity: 9, price: 100, unit: 'IRR' };
+  await service.updatePriceTier(1, 5, { maxQuantity: 8 }, companyA);
+  assert.equal(calls['productPriceSnapshot.create']?.length || 0, 0);
+});
+
+test('a wholesale tier promoted to retail starts a retail history series', async () => {
+  resetMocks();
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, minQuantity: 10, maxQuantity: 20, price: 80, unit: 'IRR' };
+  await service.updatePriceTier(1, 5, { minQuantity: 1, maxQuantity: 9, price: 100 }, companyA);
+  const snapshot = calls['productPriceSnapshot.create'].at(-1).data;
+  assert.equal(snapshot.action, 'CREATE');
+  assert.equal(snapshot.minQuantity, 1);
+  assert.equal(snapshot.price, 100);
+});
+
+test('public retail price history returns all stored points and filters to retail', async () => {
+  resetMocks();
+  fx.product = { id: 1, status: 'PUBLISHED', visibility: 'PUBLIC', deletedAt: null };
+  await service.getPublicPriceHistory(1);
+  const query = calls['productPriceSnapshot.findMany'].at(-1);
+  assert.equal(query.where.productId, 1);
+  assert.equal(query.where.minQuantity, 1);
+  assert.equal(query.where.recordedAt, undefined);
+  assert.deepEqual(query.orderBy, { recordedAt: 'asc' });
+});
+
 test('upsertPrice: delegates to addPriceTier', async () => {
   fx.product = draftProduct({ companyId: 10 });
   await service.upsertPrice(1, { minQuantity: 1, price: 100 }, companyA);
