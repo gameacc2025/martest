@@ -1170,6 +1170,37 @@ async function assertCanManageProductById(productId, caller, permission = 'produ
   return product;
 }
 
+async function recordPriceSnapshot(tx, productId, tier, action) {
+  return tx.productPriceSnapshot.create({
+    data: {
+      productId: Number(productId),
+      priceTierId: tier.id == null ? null : Number(tier.id),
+      minQuantity: Number(tier.minQuantity),
+      maxQuantity: tier.maxQuantity == null ? null : Number(tier.maxQuantity),
+      price: tier.price,
+      unit: tier.unit ?? null,
+      action,
+      recordedAt: new Date(),
+    },
+  });
+}
+
+async function getPublicPriceHistory(productId) {
+  const id = toPositiveInt(productId, 'productId');
+  const product = await prisma.product.findFirst({
+    where: { id, status: 'PUBLISHED', visibility: 'PUBLIC', deletedAt: null },
+    select: { id: true },
+  });
+  if (!product) return null;
+  const since = new Date();
+  since.setMonth(since.getMonth() - 6);
+  return prisma.productPriceSnapshot.findMany({
+    where: { productId: id, recordedAt: { gte: since } },
+    orderBy: { recordedAt: 'asc' },
+    select: { id: true, priceTierId: true, minQuantity: true, maxQuantity: true, price: true, unit: true, action: true, recordedAt: true },
+  });
+}
+
 async function addPriceTier(productId, data, caller) {
   const product = await assertCanManageProductById(productId, caller);
   const tier = normalizePriceTier(data);
@@ -1183,6 +1214,7 @@ async function addPriceTier(productId, data, caller) {
 
   const created = await prisma.$transaction(async (tx) => {
     const record = await tx.productPriceTier.create({ data: { ...tier, productId: product.id } });
+    await recordPriceSnapshot(tx, product.id, record, 'CREATE');
 
     if (policy.editsSinceApproval !== (product.editsSinceApproval ?? 0) || statusChanged) {
       await tx.product.update({ where: { id: product.id }, data: { status: policy.nextStatus, editsSinceApproval: policy.editsSinceApproval } });
@@ -1222,9 +1254,11 @@ async function updatePriceTier(productId, tierId, data, caller) {
   if (existing.price !== tier.price) changes.push(`قیمت: ${existing.price} → ${tier.price}`);
   if (existing.minQuantity !== tier.minQuantity) changes.push(`حداقل تعداد: ${existing.minQuantity} → ${tier.minQuantity}`);
   if (existing.maxQuantity !== tier.maxQuantity) changes.push(`حداکثر تعداد: ${existing.maxQuantity || '-'} → ${tier.maxQuantity || '-'}`);
+  if (existing.unit !== tier.unit) changes.push(`واحد: ${existing.unit || '-'} → ${tier.unit || '-'}`);
 
   const updated = await prisma.$transaction(async (tx) => {
     const record = await tx.productPriceTier.update({ where: { id: existing.id }, data: tier });
+    if (changes.length) await recordPriceSnapshot(tx, product.id, record, 'UPDATE');
 
     if (policy.editsSinceApproval !== (product.editsSinceApproval ?? 0) || statusChanged) {
       await tx.product.update({ where: { id: product.id }, data: { status: policy.nextStatus, editsSinceApproval: policy.editsSinceApproval } });
@@ -1262,6 +1296,7 @@ async function deletePriceTier(productId, tierId, caller) {
   const statusChanged = policy.nextStatus !== previousStatus;
 
   return prisma.$transaction(async (tx) => {
+    await recordPriceSnapshot(tx, product.id, existing, 'DELETE');
     const deleted = await tx.productPriceTier.delete({ where: { id: existing.id } });
     if (policy.editsSinceApproval !== (product.editsSinceApproval ?? 0) || statusChanged) {
       await tx.product.update({
@@ -1483,5 +1518,6 @@ module.exports = {
   changeProductStatus,
   getProductHistory,
   getProductActivityLog,
+  getPublicPriceHistory,
   getReviewEditThreshold,
 };
