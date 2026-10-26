@@ -1,12 +1,11 @@
 # Current Task / Agent Handoff
 
-## INQUIRY-COMPLETION-2026-10-26-01 — Complete Inquiry / RFQ workflow
+## Inquiry / RFQ workflow — COMPLETED
 
-- **Status:** IN_PROGRESS
-- **Branch:** `feature/inquiry-completion`, based on `main`.
-- **User priority:** Finish Inquiry completely before returning to customer dashboard, addresses follow-ups, or B2C commerce.
-- **Scope:** Customer-created inquiries, inquiry ownership/model/API, normal/sealed/anonymous-sealed privacy, status/deadline/publish lifecycle, Company responses, STAFF oversight, notification events, Website inquiry history/details, tests, and docs.
-- **Confirmed current defects:** Website permits inquiry create for CUSTOMER_USER, but service insists on a companyId; Inquiry has no buyerUserId. Sealed modes are not enforced when getInquiry includes all responses. Inquiry lifecycle does not dispatch catalog events. Scheduled publish/deadline/autoclose behavior must be implemented or explicitly surfaced as unsupported.
-- **Plan:** Backward-compatible owner relation and SQL constraint/migration; service authorization and response redaction; notifications via notification.dispatch.service.js; customer inquiry UI; regression coverage; API/database/notification docs.
-- **Verification:** NOT RUN for this task yet.
-- **Deferred:** PR #11 is not merged and customer dashboard/B2C work is paused until this task is complete.
+- **Status:** Merged to `main` on 2026-10-26.
+- **PR:** https://github.com/gameacc2025/martest/pull/12
+- **Merge commit:** `1335ce5cd6e9b5b17a13537db4dda9b607556f3a`.
+- **Verification:** CI passed (tests + all frontend builds) and fresh PostgreSQL migration validation passed (`prisma validate`, `prisma generate`, `prisma migrate deploy`, `prisma migrate status`).
+- **Important:** A pre-existing migration contained invalid `//` SQL comments; these were changed to PostgreSQL `--` comments so a fresh database can apply the complete migration chain.
+- **Deferred:** PR #11 customer dashboard foundation is now draft and remains unmerged. Address follow-ups, customer order history, cart/checkout and other B2C work are explicitly paused by the user until they ask to resume.
+- **Next action:** Do not start deferred customer identity/B2C work without a new user instruction. The Inquiry/RFQ feature is the current completed milestone.
