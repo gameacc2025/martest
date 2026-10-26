@@ -141,6 +141,30 @@ const EVENT_CATALOG = {
     }),
   },
 
+  INQUIRY_RESPONSE_SELECTED: {
+    key: 'INQUIRY_RESPONSE_SELECTED',
+    label: 'انتخاب پاسخ استعلام',
+    recipients: 'The company whose quote was selected by the inquiry buyer',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ inquiry }) => ({
+      title: 'پیشنهاد شما انتخاب شد',
+      message: `پیشنهاد شما برای استعلام «${inquiry?.title || inquiry?.id || ''}» انتخاب شد.`,
+      data: { inquiryId: inquiry?.id },
+    }),
+  },
+
+  INQUIRY_RESPONSE_REJECTED: {
+    key: 'INQUIRY_RESPONSE_REJECTED',
+    label: 'رد پاسخ استعلام',
+    recipients: 'The company whose quote was rejected by the inquiry buyer',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ inquiry }) => ({
+      title: 'پیشنهاد شما انتخاب نشد',
+      message: `پیشنهاد شما برای استعلام «${inquiry?.title || inquiry?.id || ''}» انتخاب نشد.`,
+      data: { inquiryId: inquiry?.id },
+    }),
+  },
+
   INQUIRY_RESPONSE_AUTO_REJECTED: {
     key: 'INQUIRY_RESPONSE_AUTO_REJECTED',
     label: 'رد خودکار پاسخ استعلام',
