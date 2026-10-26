@@ -159,6 +159,7 @@ export const endpoints = {
     plans: '/inquiries/plans',
     mine: '/inquiries/subscription/me',
     request: '/inquiries/subscription',
+    verifyPayment: (id) => `/inquiries/subscription/${id}/verify-payment`,
     quota: '/inquiries/quota',
     adminSettings: '/admin/inquiry-monetization/settings',
     adminPlans: '/admin/inquiry-plans',
