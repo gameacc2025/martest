@@ -265,6 +265,31 @@ test('PATCH /:id/status: CUSTOMER with inquiries.create can request own cancella
   await app.close();
 });
 
+test('PATCH /:id/responses/:responseId/decision: buyer permission reaches decision handler', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/inquiries/42/responses/9/decision',
+    headers: userHeader('CUSTOMER', ['inquiries.create']),
+    payload: { decision: 'SELECTED' },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.decideResponse, true);
+  await app.close();
+});
+
+test('PATCH /:id/responses/:responseId/decision: invalid decision is rejected by schema', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/inquiries/42/responses/9/decision',
+    headers: userHeader('CUSTOMER', ['inquiries.create']),
+    payload: { decision: 'MAYBE' },
+  });
+  assert.equal(res.statusCode, 400);
+  await app.close();
+});
+
 test('POST /:id/reveal: requires inquiry read/update permission', async () => {
   const app = await buildApp();
   const res = await app.inject({
