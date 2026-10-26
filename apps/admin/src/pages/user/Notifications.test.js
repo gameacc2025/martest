@@ -130,9 +130,8 @@ describe('Admin notification inbox', () => {
     await wrapper.findAll('.row-checkbox')[1].setValue(true)
     await flushPromises()
     expect(wrapper.find('.bulk-actions').exists()).toBe(true)
-    const markReadButton = wrapper.findAllComponents({ name: 'Button' })
-      .find(component => component.props('label') === 'خوانده‌شده')
-    expect(markReadButton).toBeTruthy()
+    const markReadButton = wrapper.findComponent('[label="خوانده‌شده"]')
+    expect(markReadButton.exists()).toBe(true)
     markReadButton.vm.$emit('click')
     await flushPromises()
 
