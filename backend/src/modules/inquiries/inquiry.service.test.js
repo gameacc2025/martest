@@ -80,6 +80,10 @@ const mockPrisma = {
       record('inquiry.update', args);
       return { ...(nextFindUnique || {}), id: args.where?.id, ...args.data };
     },
+    updateMany: async (args) => {
+      record('inquiry.updateMany', args);
+      return { count: 1 };
+    },
     groupBy: async () => drain(queues.inquiryGroupBy),
   },
   inquiryItem: {
@@ -112,7 +116,15 @@ const mockPrisma = {
     },
     update: async (args) => {
       record('inquiryResponse.update', args);
+      if (fx.response && fx.response.id === args.where?.id) {
+        fx.response = { ...fx.response, ...args.data };
+        return { ...fx.response };
+      }
       return { id: args.where?.id, ...args.data };
+    },
+    updateMany: async (args) => {
+      record('inquiryResponse.updateMany', args);
+      return { count: 1 };
     },
     groupBy: async () => drain(queues.responseGroupBy),
   },
@@ -1021,6 +1033,45 @@ test('submitResponse: a valid quote is stored with normalized items', async () =
 });
 
 // ── listResponses ────────────────────────────────────────────
+
+test('decideResponse: selecting a quote closes the inquiry and rejects other pending quotes', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 30, companyId: buyer.companyId, visibilityMode: 'NORMAL' });
+  fx.response = { id: 501, inquiryId: 30, companyId: seller.companyId, status: 'PENDING' };
+  fx.recentResponses = [{ id: 502, inquiryId: 30, companyId: 88, status: 'PENDING' }];
+  const selected = await inquiryService.decideResponse(30, 501, 'SELECTED', buyer, 'Best delivery');
+  assert.equal(selected.status, 'SELECTED');
+  assert.equal(calls['inquiry.updateMany'][0].data.status, 'CLOSED');
+  assert.equal(calls['inquiryResponse.updateMany'][0].data.status, 'REJECTED');
+  assert.ok(calls['inquiryStatusHistory.create'].some((call) => call.data.source === 'USER'));
+  assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'));
+  assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_AUTO_REJECTED'));
+});
+
+test('decideResponse: buyer cannot select a sealed quote before reveal', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 31,
+    companyId: buyer.companyId,
+    visibilityMode: 'SEALED',
+    responseDeadline: new Date(Date.now() + 60_000),
+  });
+  fx.response = { id: 503, inquiryId: 31, companyId: seller.companyId, status: 'PENDING' };
+  await assert.rejects(
+    () => inquiryService.decideResponse(31, 503, 'SELECTED', buyer),
+    (err) => err.code === 'RESPONSES_NOT_REVEALED',
+  );
+});
+
+test('decideResponse: supplier cannot decide another supplier response', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 32, companyId: buyer.companyId, visibilityMode: 'NORMAL' });
+  fx.response = { id: 504, inquiryId: 32, companyId: seller.companyId, status: 'PENDING' };
+  await assert.rejects(
+    () => inquiryService.decideResponse(32, 504, 'SELECTED', seller),
+    (err) => err.statusCode === 404 || err.code === 'BUYER_DECISION_REQUIRED',
+  );
+});
 
 test('listResponses: SUPER_ADMIN sees every response', async () => {
   resetMocks();
