@@ -13,12 +13,12 @@ async function notifyPublished(tx, inquiry) {
   if (companyIds.length) {
     await dispatchNotification('INQUIRY_PUBLISHED', { companyIds }, context, {
       tx,
-      dedupeKey: `inquiry-published-${inquiry.id}-companies`,
+      dedupeKey: (userId) => `inquiry-published-${inquiry.id}-companies-${userId}`,
     });
   }
   await dispatchNotification('INQUIRY_PUBLISHED', { permission: 'leads.read' }, context, {
     tx,
-    dedupeKey: `inquiry-published-${inquiry.id}-staff`,
+    dedupeKey: (userId) => `inquiry-published-${inquiry.id}-staff-${userId}`,
   });
 }
 
@@ -30,7 +30,7 @@ async function notifyStatusChanged(tx, inquiry, status) {
   if (ownerRecipients.length) {
     await dispatchNotification('INQUIRY_STATUS_CHANGED', ownerRecipients, context, {
       tx,
-      dedupeKey: `inquiry-status-${inquiry.id}-${status}-owner`,
+      dedupeKey: (userId) => `inquiry-status-${inquiry.id}-${status}-owner-${userId}`,
     });
   }
   const companyIds = [...new Set((inquiry.responses || [])
@@ -40,7 +40,7 @@ async function notifyStatusChanged(tx, inquiry, status) {
   for (const companyId of companyIds) {
     await dispatchNotification('INQUIRY_STATUS_CHANGED', { companyIds: [companyId] }, context, {
       tx,
-      dedupeKey: `inquiry-status-${inquiry.id}-${status}-company-${companyId}`,
+      dedupeKey: (userId) => `inquiry-status-${inquiry.id}-${status}-company-${companyId}-${userId}`,
     });
   }
 }
