@@ -176,7 +176,7 @@ async function rejectSubscription(item) {
         <label>کد یکتا<input v-model="form.code" required maxlength="50" placeholder="basic-monthly"/></label>
         <label>نام طرح<input v-model="form.name" required maxlength="100" placeholder="اشتراک پایه"/></label>
         <label>مدت اعتبار (روز)<input v-model.number="form.durationDays" required type="number" min="1" max="3650"/></label>
-        <label>قیمت<input v-model.number="form.price" required type="number" min="0" step="1"/></label>
+        <label>قیمت<input v-model.number="form.price" required type="number" min="1" step="1"/></label>
         <label>واحد پول<select v-model="form.currency"><option value="IRR">ریال</option><option value="TOMAN">تومان</option><option value="EUR">EUR</option><option value="USD">USD</option></select></label>
         <label>سهمیه ثبت استعلام<input v-model.number="form.inquiriesPerPeriod" required type="number" min="0"/></label>
         <label>سهمیه پاسخ شرکت<input v-model.number="form.responsesPerPeriod" required type="number" min="0"/></label>
