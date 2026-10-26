@@ -162,7 +162,16 @@ async function createPendingSubscription({ ownerType, ownerId, planId, paymentRe
   });
 }
 
+async function expireElapsedSubscriptions(client = prisma, now = new Date()) {
+  if (typeof client.inquirySubscription?.updateMany !== 'function') return;
+  await client.inquirySubscription.updateMany({
+    where: { status: 'ACTIVE', endsAt: { lte: now } },
+    data: { status: 'EXPIRED' },
+  });
+}
+
 async function getMySubscriptions(ownerType, ownerId, client = prisma) {
+  await expireElapsedSubscriptions(client);
   if (!['company', 'user'].includes(ownerType) || !Number.isInteger(Number(ownerId)) || Number(ownerId) < 1) {
     throw { statusCode: 400, code: 'SUBSCRIPTION_OWNER_REQUIRED', message: 'شناسه صاحب اشتراک معتبر نیست.' };
   }
@@ -175,4 +184,4 @@ async function getMySubscriptions(ownerType, ownerId, client = prisma) {
   });
 }
 
-module.exports = { LIMIT_BY_USAGE, enforcementEnabled, getActiveSubscription, getQuotaSummary, consumeUsage, listActivePlans, createPendingSubscription, getMySubscriptions };
+module.exports = { LIMIT_BY_USAGE, enforcementEnabled, getActiveSubscription, getQuotaSummary, consumeUsage, listActivePlans, createPendingSubscription, getMySubscriptions, expireElapsedSubscriptions };
