@@ -160,7 +160,6 @@ export const endpoints = {
     mine: '/inquiries/subscription/me',
     request: '/inquiries/subscription',
     quota: '/inquiries/quota',
-    messages: (id) => `/inquiries/${id}/messages`,
     adminSettings: '/admin/inquiry-monetization/settings',
     adminPlans: '/admin/inquiry-plans',
     adminSubscriptions: '/admin/inquiry-subscriptions',
