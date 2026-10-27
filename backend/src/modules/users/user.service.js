@@ -71,11 +71,18 @@ function callerCompanyId(caller) {
 
 function isGlobalStaffAdmin(caller) {
   // Roles never select the application context. Even a legacy/misassigned
-  // SUPER_ADMIN role in COMPANY context must not bypass tenant boundaries.
-  return caller?.accessType === 'STAFF' && caller?.roles?.includes(SUPER_ADMIN_ROLE);
+  // SUPER_ADMIN role in COMPANY/CUSTOMER context must not bypass tenant boundaries.
+  return caller?.accessType === 'STAFF' &&
+    (caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*'));
 }
 
-function denyCompanyUserManagement(caller, operation) {
+function requireStaffOrCompany(caller) {
+  if (!['STAFF', 'COMPANY'].includes(caller?.accessType)) {
+    throw { statusCode: 403, code: 'ACCESS_TYPE_FORBIDDEN', message: 'User management is available only in STAFF or COMPANY context.' };
+  }
+}
+
+function requireStaffContext(caller, operation) {
   if (caller?.accessType === 'COMPANY') {
     throw {
       statusCode: 403,
@@ -83,12 +90,16 @@ function denyCompanyUserManagement(caller, operation) {
       message: `Company users may only view and enable or disable their own company's users; they cannot ${operation}.`,
     };
   }
+  if (caller?.accessType !== 'STAFF') {
+    throw { statusCode: 403, code: 'STAFF_CONTEXT_REQUIRED', message: 'This user-management action requires STAFF context.' };
+  }
 }
 
 /**
  * List users with pagination, search and optional company scoping.
  */
 async function listUsers(query, caller) {
+  requireStaffOrCompany(caller);
   const { page, limit, skip, take } = getPaginationParams(query);
   const where = { AND: [] };
 
@@ -143,6 +154,7 @@ async function listUsers(query, caller) {
  * Get a single user with detailed roles & permissions.
  */
 async function getUser(userId, caller) {
+  requireStaffOrCompany(caller);
   const user = await prisma.user.findUnique({ where: { id: userId }, select: USER_SELECT });
   if (!user) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
@@ -169,12 +181,12 @@ async function getUser(userId, caller) {
  * by roles. Roles only control permissions within the selected app.
  */
 async function createUser(data, caller) {
-  denyCompanyUserManagement(caller, 'create users');
+  requireStaffContext(caller, 'create users');
 
   // STAFF user-management permissions are the only path for creating accounts.
   // The requested access context and target company are resolved from the
   // validated request body only after the caller has passed the domain guard.
-  const companyId = data.companyId ? parseInt(data.companyId, 10) : null;
+  let companyId = data.companyId ? parseInt(data.companyId, 10) : null;
   let accessType = data.type;
   if (!accessType) accessType = companyId ? 'COMPANY' : 'CUSTOMER';
 
@@ -247,7 +259,7 @@ async function createUser(data, caller) {
  * AccessProfile. The User row only owns email/phone/status.
  */
 async function updateUser(userId, data, caller) {
-  denyCompanyUserManagement(caller, 'edit user details');
+  requireStaffContext(caller, 'edit user details');
   const existing = await prisma.user.findUnique({ where: { id: userId }, select: USER_SELECT });
   if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
@@ -311,7 +323,7 @@ async function updateUser(userId, data, caller) {
  * application the user belongs to (that is accessProfile.type).
  */
 async function setUserAccess(userId, roleId, permissionIds, caller) {
-  denyCompanyUserManagement(caller, 'change roles or permissions');
+  requireStaffContext(caller, 'change roles or permissions');
   const existing = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, status: true, accessProfile: { select: { companyId: true } } },
@@ -361,7 +373,7 @@ async function setUserAccess(userId, roleId, permissionIds, caller) {
  * Delete a user. Cannot delete self or the last SUPER_ADMIN.
  */
 async function deleteUser(userId, caller) {
-  denyCompanyUserManagement(caller, 'delete users');
+  requireStaffContext(caller, 'delete users');
   if (userId === caller.id) {
     throw { statusCode: 400, code: 'CANNOT_DELETE_SELF', message: 'شما نمی‌توانید حساب خودتان را حذف کنید.' };
   }
@@ -396,6 +408,7 @@ async function deleteUser(userId, caller) {
  * Toggles AccessProfile.isActive without touching the auth identity.
  */
 async function setAccessActive(userId, isActive, caller) {
+  requireStaffOrCompany(caller);
   if (Number(userId) === Number(caller.id)) {
     throw { statusCode: 403, code: 'CANNOT_SELF_MODIFY', message: 'شما نمی‌توانید دسترسی خودتان را فعال یا غیرفعال کنید.' };
   }
@@ -424,6 +437,7 @@ async function setAccessActive(userId, isActive, caller) {
  * Move a company user to a different company (SUPER_ADMIN only).
  */
 async function moveUserToCompany(userId, companyId, caller) {
+  requireStaffContext(caller, 'move users between companies');
   if (!isGlobalStaffAdmin(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'تنها مدیر کل می‌تواند کاربر را بین شرکت‌ها جابجا کند.' };
   }
