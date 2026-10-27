@@ -56,7 +56,7 @@ function sha256b64url(value) {
  * Panel access rules: the target app must match the user's access type.
  * Wildcard permissions never override the app-context boundary.
  */
-function assertPanelAccess(app, accessProfile, roles) {
+function assertPanelAccess(app, accessProfile) {
   const required = APP_TO_ACCESS_TYPE[app];
   if (!required) {
     throw createError(400, 'INVALID_APP', 'Unknown app.');
@@ -94,7 +94,7 @@ async function createHandoffCode(userId, app, challenge) {
   if (!user || user.status !== 'ACTIVE') {
     throw createError(401, 'USER_DISABLED', 'حساب کاربری غیرفعال است.');
   }
-  assertPanelAccess(app, accessProfile, roles);
+  assertPanelAccess(app, accessProfile);
 
   const code = crypto.randomBytes(32).toString('base64url');
 
@@ -154,7 +154,7 @@ async function redeemHandoffCode(fastify, { app, code, verifier }) {
   if (!context.user || context.user.status !== 'ACTIVE') {
     throw createError(401, 'USER_DISABLED', 'حساب کاربری غیرفعال است.');
   }
-  assertPanelAccess(app, context.accessProfile, context.roles);
+  assertPanelAccess(app, context.accessProfile);
 
   // revokeExisting: false — the website tab keeps its own session; the
   // panel gets a second refresh token. Each rotates independently.
@@ -179,6 +179,7 @@ async function redeemHandoffCode(fastify, { app, code, verifier }) {
 }
 
 module.exports = {
+  assertPanelAccess,
   createHandoffCode,
   redeemHandoffCode,
 };
