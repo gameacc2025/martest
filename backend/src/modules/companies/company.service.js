@@ -13,6 +13,16 @@
 
 const prisma = require('../../config/db');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
+
+function isGlobalStaffAdmin(caller) {
+  return caller?.accessType === 'STAFF' &&
+    (caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*'));
+}
+
+function callerCompanyId(caller) {
+  return caller?.companyId ?? caller?.accessProfile?.companyId ?? null;
+}
+
 const { COMPANY_LIMIT_KEYS } = require('./company-rule.service');
 
 // Allowed sort fields (whitelist to prevent injection)
@@ -259,14 +269,20 @@ async function updateCompany(id, data, caller) {
   if (!company) throw { statusCode: 404, message: 'شرکت یافت نشد' };
   if (company.deletedAt) throw { statusCode: 404, message: 'شرکت حذف شده است' };
 
-  const isSuperAdmin = caller.roles.includes(SUPER_ADMIN_ROLE);
+  const isSuperAdmin = isGlobalStaffAdmin(caller);
 
-  // Non-super-admins can only update their own company
-  if (!isSuperAdmin && company.id !== caller.companyId) {
-    throw { statusCode: 403, message: 'شما فقط می‌توانید شرکت خود را ویرایش کنید.' };
+  // Company context remains tenant-scoped even if a legacy/misassigned role
+  // includes SUPER_ADMIN. Roles never change the caller's application context.
+  if (!isSuperAdmin && company.id !== Number(callerCompanyId(caller))) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط می‌توانید شرکت خود را ویرایش کنید.' };
   }
 
-  // Non-super-admins cannot change status, isVerified, or type
+  // Company quotas are administrative controls, not company-profile fields.
+  if (!isSuperAdmin && (limits !== undefined || inquiryLimit !== undefined)) {
+    throw { statusCode: 403, code: 'COMPANY_LIMITS_ADMIN_ONLY', message: 'Only STAFF administrators may change company limits.' };
+  }
+
+  // Non-global STAFF/COMPANY callers cannot change lifecycle or verification.
   if (!isSuperAdmin) {
     delete companyData.status;
     delete companyData.isVerified;
