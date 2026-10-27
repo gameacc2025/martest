@@ -63,7 +63,7 @@ test('COMPANY context cannot administer role definitions even with SUPER_ADMIN a
     method: 'POST',
     url: '/api/v1/roles',
     headers: userHeader(['*'], { accessType: 'COMPANY', roles: ['SUPER_ADMIN'] }),
-    payload: { name: 'COMPANY_ADMIN', scope: 'COMPANY' },
+    payload: { name: 'NEW_ROLE', label: 'New Role', scope: 'COMPANY' },
   });
   assert.equal(res.statusCode, 403);
   assert.equal(hit.createRole, undefined);

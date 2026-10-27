@@ -66,7 +66,7 @@ test('COMPANY context cannot read or change permission definitions with SUPER_AD
     method: 'PATCH',
     url: '/api/v1/permissions/1',
     headers: userHeader(['*'], { accessType: 'COMPANY', roles: ['SUPER_ADMIN'] }),
-    payload: { name: 'users.delete' },
+    payload: { label: 'Updated' },
   });
   assert.equal(res.statusCode, 403);
   assert.equal(hit.update, undefined);
