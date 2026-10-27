@@ -13,13 +13,13 @@
             <template #content>
               <div class="text-center">
                 <img
-                  :src="user.avatarUrl || '/placeholder-avatar.jpg'"
+                  :src="user.avatar || '/placeholder-avatar.jpg'"
                   alt="Avatar"
                   class="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                 />
-                <h2 class="text-lg font-bold">{{ user.fullName || user.displayName || user.name }}</h2>
+                <h2 class="text-lg font-bold">{{ user.fullName || user.email || 'کاربر' }}</h2>
                 <p class="text-gray-500">{{ user.email }}</p>
-                <p class="text-sm text-gray-400 mt-2">{{ user.role }}</p>
+                <p class="text-sm text-gray-400 mt-2">{{ user.userType }}</p>
 
                 <div class="mt-6 space-y-2">
                   <Button
@@ -87,11 +87,7 @@
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-500">شماره تلفن:</span>
-                      <span>{{ user.phoneNumber || 'ثبت نشده' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">درباره من:</span>
-                      <span>{{ user.bio || 'ثبت نشده' }}</span>
+                      <span>{{ user.phone || 'ثبت نشده' }}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-500">تاریخ عضویت:</span>
@@ -139,34 +135,6 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-2">نام نمایشی</label>
-            <InputText
-              v-model="editForm.displayName"
-              placeholder="نام نمایشی خود را وارد کنید"
-              class="w-full"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2">شماره تلفن</label>
-            <InputText
-              v-model="editForm.phoneNumber"
-              placeholder="شماره تلفن خود را وارد کنید"
-              class="w-full"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">درباره من</label>
-          <Textarea
-            v-model="editForm.bio"
-            placeholder="توضیحاتی درباره خود بنویسید"
-            class="w-full"
-            rows="3"
-          />
-        </div>
 
         <div>
           <label class="block text-sm font-medium mb-2">آواتار</label>
@@ -175,7 +143,7 @@
             name="avatar"
             accept="image/*"
             :maxFileSize="1000000"
-            @upload="onAvatarUpload"
+            @select="onAvatarUpload"
             class="w-full"
           />
         </div>
@@ -311,13 +279,21 @@ onMounted(async () => {
 
 const loadUserProfile = async () => {
   try {
-    const data = await authStore.getProfile()
-    user.value = data
+    const context = await authStore.getProfile()
+    const identity = context?.user || {}
+    const profile = context?.profile || {}
+    const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(' ')
+    user.value = {
+      ...identity,
+      ...profile,
+      fullName,
+      phone: identity.phone || '',
+      userType: context?.accessProfile?.type
+        || (context?.roles?.includes('CUSTOMER_USER') ? 'CUSTOMER' : 'کاربر'),
+    }
     editForm.value = {
-      firstName: data.firstName || '',
-      lastName: data.lastName || '',
-      phone: data.phone || '',
-      avatar: data.avatar || null
+      firstName: profile.firstName || '',
+      lastName: profile.lastName || '',
     }
   } catch (error) {
     console.error('Error loading user profile:', error)
@@ -340,22 +316,14 @@ const changePassword = () => {
 const saveProfile = async () => {
   saving.value = true
   try {
-    // Only send fields that have changed
-    const updateData = {
-      firstName: editForm.value.firstName,
-      lastName: editForm.value.lastName,
-      displayName: editForm.value.displayName,
-      phoneNumber: editForm.value.phoneNumber,
-      bio: editForm.value.bio
+    // The backend profile API accepts only firstName and lastName here.
+    const updateData = {}
+    if (editForm.value.firstName?.trim()) updateData.firstName = editForm.value.firstName.trim()
+    if (editForm.value.lastName?.trim()) updateData.lastName = editForm.value.lastName.trim()
+    if (Object.keys(updateData).length === 0) {
+      editProfileDialog.value = false
+      return
     }
-
-    // Remove undefined/null values
-    Object.keys(updateData).forEach(key => {
-      if (updateData[key] === null || updateData[key] === undefined || updateData[key] === '') {
-        delete updateData[key]
-      }
-    })
-
     await authStore.updateProfile(updateData)
     await loadUserProfile()
     editProfileDialog.value = false
@@ -369,7 +337,13 @@ const saveProfile = async () => {
 const saveNewPassword = async () => {
   saving.value = true
   try {
-    await authStore.changePassword(passwordForm.value)
+    if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+      throw new Error('تکرار رمز عبور جدید با رمز عبور یکسان نیست.')
+    }
+    await authStore.changePassword({
+      currentPassword: passwordForm.value.currentPassword,
+      newPassword: passwordForm.value.newPassword,
+    })
     passwordForm.value = {
       currentPassword: '',
       newPassword: '',
