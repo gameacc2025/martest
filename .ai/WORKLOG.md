@@ -511,3 +511,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** Not yet committed.
 - **Push:** Not yet pushed.
 - **Next action:** Confirm the STAFF/SUPER_ADMIN quote-submission behavior against tests and related authorization decisions; then implement only verified gaps.
+
+
+### MARKETPLACE-E2E-01 completion update — 2026-10-27
+- **Status:** DONE
+- **Confirmed defects:** STAFF-context SUPER_ADMIN could use supplier response service exceptions and a supplied companyId to submit/edit/withdraw quotes; the buyer decision helper also treated STAFF SUPER_ADMIN as the inquiry buyer. Quote decision writes were unconditional after stale reads, allowing concurrent SELECTED/REJECTED requests to overwrite a decision.
+- **Changes:** Added a supplier-context resolver that requires COMPANY access for supplier mutations and derives companyId from the authenticated access profile; explicitly blocks STAFF from quote submission and buyer decisions; uses conditional PENDING→REJECTED / PENDING→SELECTED updates and returns 409 when another request has already decided the response. Added regression tests for STAFF/SUPER_ADMIN impersonation, companyId spoofing, stale decisions, and response attachment deletion permission routing. Updated the API contract documentation.
+- **Verification:** CI passed on `6349019df12d0f7cbaba165182e7136c24f2c38a` (backend tests, frontend/shared tests, all frontend builds): https://github.com/gameacc2025/martest/actions/runs/40449870703. Fresh PostgreSQL migration validation passed: https://github.com/gameacc2025/martest/actions/runs/40449870804. No schema migration was needed. Browser/manual staging tests were NOT RUN.
+- **Commit:** Changes are on `main`; latest verified code commit: `6349019df12d0f7cbaba165182e7136c24f2c38a` (documentation-only commits followed the code and are also included in the verified run).
+- **Push:** Written directly to the canonical GitHub `main` branch through repository tools.
+- **Risks / open questions:** End-to-end browser verification was not performed. Real payment/Twilio testing remains separately dependent on staging credentials.
+- **Next action:** Continue the broader Phase 0 tenant-isolation/RBAC audit across product, company-user, and admin routes; reproduce any suspected cross-tenant access issue before changing behavior.
