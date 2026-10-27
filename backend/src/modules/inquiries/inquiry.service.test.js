@@ -964,7 +964,7 @@ test('submitResponse: STAFF cannot submit a supplier quote even with SUPER_ADMIN
     }, staffAdmin),
     (err) => err.statusCode === 403 && err.code === 'STAFF_CANNOT_RESPOND',
   );
-  assert.equal(calls['inquiryResponse.create'].length, 0);
+  assert.equal((calls['inquiryResponse.create'] || []).length, 0);
 });
 
 test('submitResponse: requires a company', async () => {
