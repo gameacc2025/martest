@@ -53,7 +53,7 @@ docker compose logs --tail=200 postgres
 docker compose logs --tail=200 backend
 ```
 
-Backend در Dockerfile فعلی دستورهای `prisma migrate deploy` و سپس `node prisma/seed.js` را قبل از شروع سرور اجرا می‌کند. بنابراین قبل از اجرای آن در محیط واقعی، مقصد دیتابیس، backup و برنامه بازگشت را بررسی کنید. اجرای seed جایگزین backup نیست.
+Backend در Dockerfile فعلی دستورهای `prisma migrate deploy` و سپس `node prisma/seed.js` را قبل از شروع سرور اجرا می‌کند. image runtime باید Prisma CLI و OpenSSL را از build stage دریافت کند؛ به اجرای دانلودی `npx prisma` در زمان شروع یا دسترسی اینترنتی کانتینر وابسته نباشید. قبل از اجرای آن در محیط واقعی، مقصد دیتابیس، backup و برنامه بازگشت را بررسی کنید. اجرای seed جایگزین backup نیست.
 
 ## URLهای پیش‌فرض میزبان
 
