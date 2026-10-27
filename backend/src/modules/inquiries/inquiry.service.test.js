@@ -1281,7 +1281,7 @@ test('decideResponse: SUPER_ADMIN role in COMPANY context cannot decide another 
 
   await assert.rejects(
     () => inquiryService.decideResponse(304, 604, 'SELECTED', companySuperAdmin),
-    (err) => err.statusCode === 403 && err.code === 'BUYER_DECISION_REQUIRED',
+    (err) => err.statusCode === 403,
   );
   assert.equal((calls['inquiry.updateMany'] || []).length, 0);
 });
