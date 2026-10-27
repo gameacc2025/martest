@@ -116,6 +116,7 @@
       class="p-fluid"
     >
       <form @submit.prevent="saveProfile" class="space-y-4">
+        <p v-if="formError" class="text-red-600 text-sm" role="alert">{{ formError }}</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium mb-2">نام</label>
@@ -175,6 +176,7 @@
       class="p-fluid"
     >
       <form @submit.prevent="saveNewPassword" class="space-y-4">
+        <p v-if="formError" class="text-red-600 text-sm" role="alert">{{ formError }}</p>
         <div>
           <label class="block text-sm font-medium mb-2">رمز عبور فعلی</label>
           <Password
@@ -250,6 +252,7 @@ const notificationCount = ref('0')
 const editProfileDialog = ref(false)
 const changePasswordDialog = ref(false)
 const saving = ref(false)
+const formError = ref('')
 
 const home = ref({
   icon: 'pi pi-home',
@@ -306,14 +309,17 @@ const formatDate = (date) => {
 }
 
 const editProfile = () => {
+  formError.value = ''
   editProfileDialog.value = true
 }
 
 const changePassword = () => {
+  formError.value = ''
   changePasswordDialog.value = true
 }
 
 const saveProfile = async () => {
+  formError.value = ''
   saving.value = true
   try {
     // The backend profile API accepts only firstName and lastName here.
@@ -328,13 +334,14 @@ const saveProfile = async () => {
     await loadUserProfile()
     editProfileDialog.value = false
   } catch (error) {
-    console.error('Error updating profile:', error)
+    formError.value = error?.serverMessage || error?.message || 'ذخیره پروفایل ناموفق بود.'
   } finally {
     saving.value = false
   }
 }
 
 const saveNewPassword = async () => {
+  formError.value = ''
   saving.value = true
   try {
     if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
@@ -351,7 +358,7 @@ const saveNewPassword = async () => {
     }
     changePasswordDialog.value = false
   } catch (error) {
-    console.error('Error changing password:', error)
+    formError.value = error?.serverMessage || error?.message || 'تغییر رمز عبور ناموفق بود.'
   } finally {
     saving.value = false
   }
