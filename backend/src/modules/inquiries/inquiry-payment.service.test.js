@@ -61,7 +61,11 @@ injectMock('./inquiry-subscription.service', {
   },
 });
 
-const { startSubscriptionPayment, handleSubscriptionPaymentCallback } = require('./inquiry-payment.service');
+const {
+  startSubscriptionPayment,
+  handleSubscriptionPaymentCallback,
+  retryPendingSubscriptionVerification,
+} = require('./inquiry-payment.service');
 
 const envKeys = ['ZARINPAL_MERCHANT_ID', 'ZARINPAL_SANDBOX', 'ZARINPAL_CALLBACK_URL', 'INQUIRY_SUBSCRIPTION_RESULT_URL'];
 const oldEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
@@ -121,6 +125,36 @@ test('callback activates a subscription only after server-side verification succ
   assert.equal(subscription.status, 'ACTIVE');
   assert.ok(subscription.paymentVerifiedAt instanceof Date);
   assert.equal(subscription.paymentRefId, '12345');
+});
+
+test('callback replay after activation is idempotent and skips provider verification', async () => {
+  process.env.ZARINPAL_MERCHANT_ID = 'merchant-test';
+  subscription = {
+    id: 7, planId: 2, companyId: 5, userId: null, status: 'ACTIVE',
+    paymentProvider: 'ZARINPAL', paymentAuthority: 'A-test', paymentAmount: 1000,
+    paymentVerifiedAt: new Date('2026-10-27T10:00:00.000Z'), paymentRefId: '12345',
+    startsAt: new Date('2026-10-27T10:00:00.000Z'), endsAt: new Date('2026-11-26T10:00:00.000Z'),
+    notes: 'verified', plan: { id: 2, name: 'Basic', durationDays: 30, price: 1000, currency: 'IRR', isActive: true },
+  };
+  global.fetch = async () => { throw new Error('verified callback replay must not call the provider'); };
+  const result = await handleSubscriptionPaymentCallback({ Authority: 'A-test', Status: 'OK' });
+  assert.equal(result.payment, 'success');
+  assert.equal(result.refId, '12345');
+  assert.equal(calls.filter(([name]) => name === 'updateMany').length, 0);
+});
+
+test('retrying an already verified subscription returns success without another provider call', async () => {
+  subscription = {
+    id: 7, planId: 2, companyId: 5, userId: null, status: 'ACTIVE',
+    paymentProvider: 'ZARINPAL', paymentAuthority: 'A-test', paymentAmount: 1000,
+    paymentVerifiedAt: new Date('2026-10-27T10:00:00.000Z'), paymentRefId: '12345',
+    startsAt: new Date('2026-10-27T10:00:00.000Z'), endsAt: new Date('2026-11-26T10:00:00.000Z'),
+    notes: 'verified', plan: { id: 2, name: 'Basic', durationDays: 30, price: 1000, currency: 'IRR', isActive: true },
+  };
+  global.fetch = async () => { throw new Error('verified retry must not call the provider'); };
+  const result = await retryPendingSubscriptionVerification({ ownerType: 'company', ownerId: 5, subscriptionId: 7 });
+  assert.equal(result.payment, 'success');
+  assert.equal(result.refId, '12345');
 });
 
 test('a server-verified payment can recover from a concurrent cancellation callback', async () => {
