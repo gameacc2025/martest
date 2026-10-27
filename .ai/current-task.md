@@ -1,19 +1,15 @@
 # Current Task / Agent Handoff
 
-## RFQ monetization and entitlement enforcement — READY FOR REVIEW
+## MARKETPLACE-E2E-01 — Supplier response and quotation lifecycle audit
 
-- **Task ID:** RFQ-MONETIZATION-01
-- **Started:** 2026-10-26
-- **Goal:** Complete the inquiry workflow as a permission-gated, subscription-based revenue feature.
-- **Requirements:** Separate permissions from subscription entitlement; gate inquiry creation and company response participation independently; configurable period-based quotas; track internal inquiry-message allowances and paid SMS usage; prevent bypass through direct API calls; expose clear quota/plan state to authorized UIs; update tests, docs, and project memory.
-- **Initial audit:** `backend/prisma/schema.prisma` contains inquiry buyer, response, `CompanyLimit` and `CompanyInquiryLimit` models. `backend/src/modules/companies/company-rule.service.js` checks open inquiry and active/daily/monthly response counts, but configured limits are optional and missing rows mean unlimited. No subscription model was found in the inspected schema section; payment, messaging, and SMS integrations still need tracing.
-- **Guardrails:** Preserve existing inquiry lifecycle/visibility semantics and backward compatibility. Do not treat COMPANY access as automatic inquiry access. Do not assume or invent provider prices. Backend is authoritative.
-- **Verification target:** targeted authorization/quota tests, full backend tests, Prisma validate/generate/migration validation, and all three frontend builds; record unrun checks honestly.
-- **Status:** Implementation ready for review on branch `feat/rfq-monetization`; not merged to main. CI and Prisma migration validation passed on the implementation commit.
-- **Implemented so far:** Added `InquiryPlan`, `InquirySubscription`, and `InquiryUsageEvent` models with ordered PostgreSQL migrations; period-based quota accounting and concurrency locking; backend entitlement checks for inquiry creation and supplier responses; private buyer/respondent inquiry messaging with access checks and a per-message quota; paid SMS allowance enforced independently of the general rollout switch; Twilio SMS outbox delivery with retries; recipient SMS opt-in checks; quota summary API; customer and company subscription pages; customer/company private-message UI; protected admin plan/settings/subscription management and manual payment confirmation; regression tests for quotas, SMS queueing, event catalog, and route registration.
-
-- **Payment integration:** Added optional Zarinpal v4 checkout and a public callback endpoint that activates subscriptions only after server-to-server verification. Configure `ZARINPAL_MERCHANT_ID`, `ZARINPAL_SANDBOX`, `ZARINPAL_CALLBACK_URL`, and `INQUIRY_SUBSCRIPTION_RESULT_URL`. If merchant ID is absent, requests use the manual-review flow. Online payment requests cannot be manually activated/rejected. Real credentials and staging acceptance tests are not available in CI.
-- **SMS configuration:** Configure `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER`. SMS is queued to the delivery outbox, retried by the worker, and only offered when the sender has SMS quota and the recipient has opted into `INQUIRY_MESSAGE_RECEIVED` SMS notifications. If SMS cannot be queued due to missing configuration, recipient details or quota, the internal message still sends and the UI explains why the SMS was skipped.
-- **Rollout safety:** General inquiry/response enforcement defaults OFF until an authorized administrator enables `inquiry.subscription_enforcement`. Paid SMS quota remains enforced separately. Configure plans/subscriptions and validate permissions before enabling in production.
-- **Verification:** CI (backend tests, frontend/shared tests, and all frontend builds) and Prisma migration validation passed on commit `117adb221b3da2ad4e29d547a62114243f68a9d6`. Browser-level manual QA, real Zarinpal payment, and live Twilio delivery were not performed.
-- **Remaining before production:** Configure Zarinpal merchant credentials and publicly reachable HTTPS callback/result URLs; run successful, cancelled, repeated-callback, retry and failed-verification flows in staging; run end-to-end Twilio delivery/retry tests; review initial plan prices/quotas with the business owner.
+- **Started:** 2026-10-27
+- **Goal:** Continue after the user-tested inquiry monetization feature by auditing the B2B end-to-end path: published product → inquiry → supplier response/quote → buyer decision → terminal status.
+- **Scope:** Backend authorization and ownership, STAFF/COMPANY/CUSTOMER separation, deadline and lifecycle rules, duplicate response prevention, quote item ownership, sealed/anonymous-sealed privacy, concurrent decisions, notifications, regression tests, and documentation.
+- **Baseline:** Inquiry monetization was merged to `main` in commit `bd90c07f56d3e8f973db52970f6f5f43ff3429d8`. Post-merge CI and PostgreSQL migration validation both passed:
+  - CI: https://github.com/gameacc2025/martest/actions/runs/40448233442
+  - Migration validation: https://github.com/gameacc2025/martest/actions/runs/40448233509
+- **Initial risk to verify:** `submitResponse` blocks ordinary STAFF but has a SUPER_ADMIN exception; `resolveCompanyId` can accept a supplied company ID for SUPER_ADMIN. Check whether a STAFF-context SUPER_ADMIN can submit a quote as a company, contrary to the project rule that STAFF supervises and does not act as a supplier.
+- **Guardrails:** Backend is authoritative. Do not conflate STAFF with COMPANY. Preserve current RFQ behavior and sealed-bid privacy. Reproduce → test → fix → regression test for each confirmed vulnerability. Do not enable B2C commerce or resume deferred customer dashboard/order-history work.
+- **Verification target:** Targeted inquiry service tests, full backend test suite, frontend/shared tests and all frontend builds, plus Prisma migration validation if schema changes are necessary. Record live/manual checks as NOT RUN unless actually performed.
+- **Status:** IN_PROGRESS
+- **Next action:** Inspect and test response/decision service paths, fix confirmed issues only, then update this handoff and WORKLOG with exact results.
