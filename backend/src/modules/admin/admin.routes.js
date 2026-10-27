@@ -12,7 +12,7 @@
 // =============================================================
 
 const ctrl = require('./admin.controller');
-const { requirePermission } = require('../../middlewares/rbac');
+const { requirePermission, requireExactAccessType } = require('../../middlewares/rbac');
 
 const thresholdBodySchema = {
   type: 'object',
@@ -24,7 +24,7 @@ const thresholdBodySchema = {
 async function adminRoutes(fastify) {
   fastify.get('/stats', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('users.read')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('users.read')],
     schema: {
       summary: 'Get admin dashboard statistics',
       tags: ['Admin'],
@@ -37,7 +37,7 @@ async function adminRoutes(fastify) {
   // (seeded into SUPER_ADMIN only today — see prisma/seed.js).
   fastify.get('/settings', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('system_settings.manage')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: {
       summary: 'Get system settings',
       tags: ['Admin'],
@@ -46,7 +46,7 @@ async function adminRoutes(fastify) {
 
   fastify.patch('/settings/product-review-threshold', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('system_settings.manage')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: {
       summary: 'Update product review edit threshold',
       tags: ['Admin'],
@@ -76,26 +76,26 @@ async function adminRoutes(fastify) {
   };
 
   fastify.get('/inquiry-monetization/settings', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
   }, ctrl.getInquiryMonetizationSettingsCtrl);
 
   fastify.patch('/inquiry-monetization/settings', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: { body: { type: 'object', required: ['subscriptionEnforcement'], additionalProperties: false, properties: { subscriptionEnforcement: { type: 'boolean' } } } },
   }, ctrl.updateInquiryMonetizationSettingsCtrl);
 
   fastify.get('/inquiry-plans', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
   }, ctrl.listInquiryPlansCtrl);
 
   fastify.post('/inquiry-plans', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: { body: inquiryPlanSchema },
   }, ctrl.createInquiryPlanCtrl);
 
 
   fastify.patch('/inquiry-plans/:id', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: {
       params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
       body: {
@@ -117,11 +117,11 @@ async function adminRoutes(fastify) {
   }, ctrl.updateInquiryPlanCtrl);
 
   fastify.get('/inquiry-subscriptions', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
   }, ctrl.listInquirySubscriptionsCtrl);
 
   fastify.post('/inquiry-subscriptions/:id/activate', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: {
       params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
       body: { type: 'object', required: ['paymentConfirmed'], additionalProperties: false, properties: { paymentConfirmed: { type: 'boolean', const: true }, notes: { type: 'string', maxLength: 1000 } } },
@@ -130,7 +130,7 @@ async function adminRoutes(fastify) {
 
 
   fastify.post('/inquiry-subscriptions/:id/reject', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: {
       params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
       body: { type: 'object', additionalProperties: false, properties: { notes: { type: 'string', maxLength: 1000 } } },
@@ -138,14 +138,14 @@ async function adminRoutes(fastify) {
   }, ctrl.rejectPendingInquirySubscriptionCtrl);
 
   fastify.post('/inquiry-subscriptions/grant', {
-    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    onRequest: [fastify.authenticate], preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: { body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, companyId: { type: 'integer', minimum: 1 }, userId: { type: 'integer', minimum: 1 }, notes: { type: 'string', maxLength: 1000 } } } },
   }, ctrl.grantInquirySubscriptionCtrl);
 
   // ── Admin-created announcements ───────────────────────────────
   fastify.post('/notifications/send', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('notifications.send')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('notifications.send')],
     schema: {
       summary: 'Send an announcement to active users',
       tags: ['Notifications'],
@@ -166,13 +166,13 @@ async function adminRoutes(fastify) {
   // ── Admin-managed notification folders ───────────────────────
   fastify.get('/notifications/folders', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('system_settings.manage')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: { summary: 'List notification folders', tags: ['Notifications'] },
   }, ctrl.listNotificationFoldersCtrl);
 
   fastify.post('/notifications/folders', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('system_settings.manage')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: {
       summary: 'Create a notification folder', tags: ['Notifications'],
       body: { type: 'object', required: ['name', 'scope'], additionalProperties: false,
@@ -187,7 +187,7 @@ async function adminRoutes(fastify) {
 
   fastify.patch('/notifications/folders/:id', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('system_settings.manage')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('system_settings.manage')],
     schema: {
       summary: 'Update a notification folder', tags: ['Notifications'],
       params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
@@ -205,7 +205,7 @@ async function adminRoutes(fastify) {
   // ── Notification delivery monitoring ──────────────────────────
   fastify.get('/notifications/delivery-stats', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('delivery.view')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('delivery.view')],
     schema: {
       summary: 'Get notification delivery statistics',
       tags: ['Admin'],
@@ -214,7 +214,7 @@ async function adminRoutes(fastify) {
 
   fastify.get('/notifications/deliveries', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('delivery.view')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('delivery.view')],
     schema: {
       summary: 'List notification deliveries for monitoring',
       tags: ['Admin'],
