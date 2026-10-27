@@ -206,8 +206,8 @@ const {
 } = require('./user.service');
 
 // Helper: build a caller (request.user shape after auth).
-function caller({ id = 1, roles = ['VIEWER'], companyId = null, accessType = 'STAFF' } = {}) {
-  return { id, roles, companyId, accessType };
+function caller({ id = 1, roles = ['VIEWER'], companyId = null, accessType = 'STAFF', permissions = [] } = {}) {
+  return { id, roles, companyId, accessType, permissions };
 }
 
 function dbUser(overrides = {}) {
@@ -232,6 +232,12 @@ test('listUsers: non-SUPER_ADMIN callers are forced into their own company, igno
 
   const where = calls.userFindMany[0].where;
   assert.deepEqual(where.AND[0], { accessProfile: { companyId: 10 } });
+});
+
+test('listUsers: COMPANY context remains tenant-scoped even with a SUPER_ADMIN role', async () => {
+  resetMocks();
+  await listUsers({ companyId: '999' }, caller({ roles: [SUPER_ADMIN_ROLE], accessType: 'COMPANY', companyId: 10 }));
+  assert.deepEqual(calls.userFindMany[0].where.AND[0], { accessProfile: { companyId: 10, type: 'COMPANY' } });
 });
 
 test('listUsers: SUPER_ADMIN can filter by any companyId', async () => {
@@ -321,6 +327,15 @@ test('getUser: allows a caller from the SAME company', async () => {
   assert.equal(result.id, 5);
 });
 
+test('getUser: COMPANY context cannot view another company even with a SUPER_ADMIN role', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { type: 'COMPANY', companyId: 999 } });
+  await assert.rejects(
+    () => getUser(5, caller({ roles: [SUPER_ADMIN_ROLE], accessType: 'COMPANY', companyId: 10 })),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+});
+
 test('getUser: SUPER_ADMIN can view a user in any company', async () => {
   resetMocks();
   fx.userById = dbUser({ accessProfile: { companyId: 999 } });
@@ -331,19 +346,17 @@ test('getUser: SUPER_ADMIN can view a user in any company', async () => {
 
 // ── createUser ───────────────────────────────────────────────
 
-test('createUser: a COMPANY-scoped caller is forced into their own company, ignoring body.companyId/type', async () => {
+test('createUser: COMPANY callers cannot create users even inside their own company', async () => {
   resetMocks();
-  fx.userByEmail = null;
-  fx.userById = dbUser({ id: 100, accessProfile: { companyId: 10 } }); // for the getUser() call at the end
 
-  await createUser(
-    { email: 'new@x.com', phone: '09120000000', password: 'p', companyId: '999', type: 'STAFF' },
-    caller({ accessType: 'COMPANY', companyId: 10 })
+  await assert.rejects(
+    () => createUser(
+      { email: 'new@x.com', phone: '09120000000', password: 'p', companyId: 10, type: 'COMPANY' },
+      caller({ accessType: 'COMPANY', companyId: 10, permissions: ['users.create'] })
+    ),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_USER_MANAGEMENT_RESTRICTED',
   );
-
-  const accessProfileData = calls.accessProfileCreate[0].data;
-  assert.equal(accessProfileData.type, 'COMPANY');
-  assert.equal(accessProfileData.companyId, 10);
+  assert.equal(calls.userCreate.length, 0);
 });
 
 test('createUser: rejects a missing phone (phone required)', async () => {
@@ -446,6 +459,16 @@ test('createUser: hashes the password before persisting', async () => {
 
 // ── updateUser ───────────────────────────────────────────────
 
+test('updateUser: COMPANY callers cannot edit user details even within their own company', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { type: 'COMPANY', companyId: 10 } });
+  await assert.rejects(
+    () => updateUser(5, { firstName: 'Changed' }, caller({ accessType: 'COMPANY', companyId: 10, permissions: ['users.update'] })),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_USER_MANAGEMENT_RESTRICTED',
+  );
+  assert.equal(calls.userUpdate.length, 0);
+});
+
 test('updateUser: a non-admin caller from a different company is rejected (403)', async () => {
   resetMocks();
   fx.userById = dbUser({ accessProfile: { companyId: 10 } });
@@ -520,19 +543,14 @@ test('setUserAccess: a non-admin caller cannot touch another company\'s user', a
   );
 });
 
-test('setUserAccess: a COMPANY-scoped caller cannot assign a GLOBAL-scope role (privilege escalation guard)', async () => {
+test('setUserAccess: COMPANY callers cannot change roles or permissions at all', async () => {
   resetMocks();
-  fx.userById = dbUser({ accessProfile: { companyId: 10 } });
-  fx.role = { id: 1, scope: 'GLOBAL' };
-
+  fx.userById = dbUser({ accessProfile: { type: 'COMPANY', companyId: 10 } });
   await assert.rejects(
-    () => setUserAccess(5, 1, [], caller({ accessType: 'COMPANY', companyId: 10 })),
-    (err) => {
-      assert.equal(err.statusCode, 403);
-      assert.equal(err.code, 'ROLE_OUT_OF_SCOPE');
-      return true;
-    }
+    () => setUserAccess(5, 1, [], caller({ accessType: 'COMPANY', companyId: 10, permissions: ['users.assign_roles'] })),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_USER_MANAGEMENT_RESTRICTED',
   );
+  assert.equal(calls.userRoleCreate.length, 0);
 });
 
 test('setUserAccess: an invalid roleId is rejected', async () => {
@@ -573,6 +591,16 @@ test('setUserAccess: clearing the role (roleId=null) removes assignment without 
 });
 
 // ── deleteUser ───────────────────────────────────────────────
+
+test('deleteUser: COMPANY callers cannot delete users in their own company', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { type: 'COMPANY', companyId: 10 }, roles: [] });
+  await assert.rejects(
+    () => deleteUser(5, caller({ id: 1, accessType: 'COMPANY', companyId: 10, permissions: ['users.delete'] })),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_USER_MANAGEMENT_RESTRICTED',
+  );
+  assert.equal(calls.userDelete.length, 0);
+});
 
 test('deleteUser: cannot delete your own account', async () => {
   resetMocks();
@@ -684,6 +712,23 @@ test('setAccessActive: a non-admin caller cannot toggle another company\'s user'
   );
 });
 
+test('setAccessActive: COMPANY SUPER_ADMIN cannot toggle another company user', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { id: 1, type: 'COMPANY', companyId: 20 } });
+  await assert.rejects(
+    () => setAccessActive(5, false, caller({ id: 1, roles: [SUPER_ADMIN_ROLE], accessType: 'COMPANY', companyId: 10 })),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  assert.equal(calls.accessProfileUpdate.length, 0);
+});
+
+test('setAccessActive: COMPANY can toggle a user in its own company', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { id: 1, type: 'COMPANY', companyId: 10 } });
+  await setAccessActive(5, false, caller({ id: 1, accessType: 'COMPANY', companyId: 10, permissions: ['users.deactivate'] }));
+  assert.equal(calls.accessProfileUpdate[0].data.isActive, false);
+});
+
 test('setAccessActive: SUPER_ADMIN can deactivate a user in any company', async () => {
   resetMocks();
   fx.userById = dbUser({ accessProfile: { id: 1, companyId: 10 } });
@@ -705,6 +750,15 @@ test('moveUserToCompany: rejects a non-SUPER_ADMIN caller', async () => {
       return true;
     }
   );
+});
+
+test('moveUserToCompany: COMPANY context cannot move users even with a SUPER_ADMIN role', async () => {
+  resetMocks();
+  await assert.rejects(
+    () => moveUserToCompany(5, 20, caller({ roles: [SUPER_ADMIN_ROLE], accessType: 'COMPANY', companyId: 10 })),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_USER_MANAGEMENT_RESTRICTED',
+  );
+  assert.equal(calls.accessProfileUpsert.length, 0);
 });
 
 test('moveUserToCompany: rejects a nonexistent target company', async () => {
