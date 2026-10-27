@@ -292,7 +292,17 @@ async function updateUser(userId, data, caller) {
     accessData.companyId = data.companyId ? parseInt(data.companyId, 10) : null;
   }
   if (isSuperAdmin && data.type !== undefined) accessData.type = data.type;
-  if (data.isAccessActive !== undefined) accessData.isActive = !!data.isAccessActive;
+  if (data.isAccessActive !== undefined && !!data.isAccessActive !== !!existing.accessProfile?.isActive) {
+    const requiredPermission = data.isAccessActive ? 'users.activate' : 'users.deactivate';
+    if (!isSuperAdmin && !caller.permissions?.includes(requiredPermission) && !caller.permissions?.includes('*')) {
+      throw {
+        statusCode: 403,
+        code: 'PERMISSION_REQUIRED',
+        message: `Changing panel access requires the ${requiredPermission} permission.`,
+      };
+    }
+    accessData.isActive = !!data.isAccessActive;
+  }
 
   await prisma.$transaction(async (tx) => {
     if (Object.keys(userData).length) {
