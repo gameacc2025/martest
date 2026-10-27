@@ -1,56 +1,57 @@
-# Role Access Matrix
+# ماتریس دسترسی برنامه‌ها و نقش‌ها
 
-> **When adding/changing roles, update ALL THREE enforcement points simultaneously.**
+> این سند باید با `backend/prisma/schema.prisma`، `backend/src/modules/auth/auth.service.js`، `backend/src/middlewares/rbac.js`، routeهای هر ماژول و seed فعلی تطبیق داده شود. کد بک‌اند مرجع اجرای مجوزهاست.
 
-## Admin App (`apps/admin`)
+## اصل معماری
 
-**Allowed roles:** SUPER_ADMIN, ADMIN, MODERATOR, SUPPORT, FINANCE, VIEWER
+**زمینه دسترسی برنامه از `AccessProfile.type` می‌آید، نه از نام نقش.**
 
-| Enforcement Point | File | Line |
-|-------------------|------|------|
-| Frontend router guard | `apps/admin/src/router/index.js` | ~line 94 |
-| Backend login validation | `backend/src/modules/auth/auth.service.js` | `login()` function, APP_ACCESS_ROLES check |
-| Seed definition | `backend/prisma/seed.js` | `ROLES` array |
+| زمینه | برنامه | مرز داده |
+|---|---|---|
+| `CUSTOMER` | Website | داده‌های مشتری و استعلام‌هایی که خودش مالک آن‌هاست |
+| `COMPANY` | Company Portal | شرکت مرتبط با access profile و منابع متعلق به همان شرکت |
+| `STAFF` | Admin | عملیات مدیریتی فقط با permissionهای لازم |
 
-**Excluded:** BUYER, COMPANY — these users cannot access the admin panel.
+نقش‌ها دارای `Role.scope` هستند (`STAFF`، `COMPANY` یا `CUSTOMER`). تخصیص نقش باید با زمینه کاربر و محدوده مجاز آن سازگار باشد. داشتن permission یا wildcard به‌تنهایی نباید کنترل مالکیت رکورد را حذف کند.
 
-## Company App (`apps/company`)
+## کنترل‌های اصلی
 
-**Allowed roles:** COMPANY
+| عملیات | کنترل مورد انتظار |
+|---|---|
+| ورود به Admin | زمینه STAFF و قواعد احراز هویت؛ بررسی مجوز برای هر عملیات مدیریتی |
+| عملیات شرکت | زمینه COMPANY و مالکیت شرکت، یا زمینه STAFF همراه با permission دقیق برای عملیات سراسری |
+| مدیریت کاربران شرکت | فقط مشاهده کاربران شرکت خود و فعال/غیرفعال‌سازی با permission دقیق؛ ایجاد/حذف/تغییر نقش یا انتقال شرکت برای COMPANY ممنوع |
+| مدیریت نقش‌ها و permissionها | فقط STAFF؛ تطبیق scope نقش با زمینه کاربر هدف |
+| محصولات | محصول عمومی فقط در وضعیت/visibility مجاز؛ نوشتن COMPANY محدود به شرکت خودش؛ STAFF برای عملیات بین‌شرکتی به permission مربوط نیاز دارد |
+| استعلام و پیشنهاد | CUSTOMER فقط استعلام‌های خودش؛ COMPANY فقط پاسخ‌های مجاز به‌عنوان تأمین‌کننده؛ STAFF نباید با جعل companyId به‌جای تأمین‌کننده یا خریدار عمل کند |
+| تاریخچه قیمت | فقط محصول منتشرشده و عمومی؛ تاریخچه از snapshotهای ذخیره‌شده می‌آید |
+| اعلان‌ها | اعلان‌ها، folder associationها و عملیات read/delete باید با مالکیت گیرنده و scope پوشه بررسی شوند |
 
-| Enforcement Point | File | Line |
-|-------------------|------|------|
-| Frontend router guard | `apps/company/src/router/index.js` | ~line 84 |
-| Backend login validation | `backend/src/modules/auth/auth.service.js` | `login()` function, APP_ACCESS_ROLES check |
-| Seed definition | `backend/prisma/seed.js` | `ROLES` array |
+## نقش SUPER_ADMIN و وضعیت سیاست
 
-**Excluded:** BUYER, ADMIN, MODERATOR, SUPPORT, FINANCE, VIEWER — only company users can access.
+در کد فعلی، بعضی مسیرهای legacy هنوز اجازه می‌دهند نقش `SUPER_ADMIN` از بررسی عمومی `requireAccessType` یا انتخاب app در login عبور کند. در عین حال، تعدادی از مسیرهای حساس اکنون از guard دقیق STAFF و کنترل مالکیت سرویس استفاده می‌کنند.
 
-## Website (`apps/website`)
+این تفاوت **هنوز تصمیم نهایی محصول نیست**. تا زمان تعیین سیاست نهایی:
+- به استثنای عمومی SUPER_ADMIN به‌عنوان سیاست مطلوب یا تضمین‌شده تکیه نکنید.
+- برای endpointهای حساس از guard زمینه دقیق و کنترل مالکیت سمت سرویس استفاده کنید.
+- قرارداد سراسری ورود، middleware و handoff را بدون تست رگرسیون و تعیین سیاست صریح تغییر ندهید.
 
-**No role restriction.** Public marketplace accessible to all.
+## فایل‌های مرجع
 
-- **Guest:** Can browse products, categories, company profiles
-- **Buyer (BUYER role):** Can browse + access profile page
-- **Any authenticated user:** Can browse + access profile
+- `backend/prisma/schema.prisma` — `AccessProfileType`، `RoleScope` و مدل‌های مالکیت
+- `backend/src/modules/auth/auth.service.js` — ورود و انتخاب برنامه
+- `backend/src/middlewares/rbac.js` — guardهای زمینه و permission
+- `backend/src/modules/users/user.routes.js` و `user.service.js` — مدیریت کاربران
+- `backend/src/modules/companies/company.routes.js` و سرویس مربوطه — مالکیت شرکت
+- `backend/src/modules/products/product.routes.js` و `product.service.js` — محصولات
+- `backend/src/modules/inquiries/inquiry.routes.js` و `inquiry.service.js` — استعلام و پاسخ
+- `backend/src/modules/notifications/notification.routes.js` — اعلان‌ها
 
-## Complete Role List (from seed.js)
+## تست پذیرش امنیتی
 
-| Role | Label | Admin App | Company App | Website |
-|------|-------|-----------|-------------|---------|
-| SUPER_ADMIN | Super Admin | ✅ (bypasses all) | ✅ (bypasses all) | ✅ |
-| ADMIN | مدیر سامانه | ✅ | ❌ | ✅ |
-| COMPANY | نماینده شرکت | ❌ | ✅ | ✅ |
-| MODERATOR | مسئول محتوا | ✅ | ❌ | ✅ |
-| SUPPORT | پشتیبانی | ✅ | ❌ | ✅ |
-| FINANCE | مالی | ✅ | ❌ | ✅ |
-| VIEWER | مشاهده‌گر | ✅ | ❌ | ✅ |
-| BUYER | خریدار | ❌ | ❌ | ✅ |
-
-## Key Rules
-
-1. **BUYER has NO `dashboard.read` permission** — removed from seed to prevent accidental admin/company access
-2. **SUPER_ADMIN bypasses all app-type checks** — can access any app for support/debugging
-3. **Backend validation (Step 0.6) is the ONLY real security boundary** — frontend guards (Steps 0.4/0.5) are UX only
-4. **`app` parameter in login is optional** — if omitted, no role check is performed (backward compatible)
-5. **Company users cannot create/delete/edit other users** — only platform admins can manage user lifecycle
+- درخواست بدون هویت باید 401 برگرداند.
+- کاربر COMPANY نباید با تغییر ID به داده یا عملیات شرکت دیگر دسترسی بگیرد.
+- CUSTOMER نباید عملیات تأمین‌کننده یا مدیریت STAFF انجام دهد.
+- STAFF بدون permission دقیق نباید عملیات بین‌شرکتی/مالی/مدیریتی را اجرا کند.
+- role با scope ناسازگار نباید به کاربر تخصیص یابد.
+- هر اصلاح مجوز باید تست منفی و مثبت متناسب با route و service داشته باشد.
