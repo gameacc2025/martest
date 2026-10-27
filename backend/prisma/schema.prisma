@@ -159,10 +159,30 @@ model User {
   inquirySubscriptions InquirySubscription[]
   sentInquiryMessages InquiryMessage[] @relation("InquiryMessageSenderUser")
   receivedInquiryMessages InquiryMessage[] @relation("InquiryMessageRecipientUser")
+  addresses                Address[]
 
   @@index([email])
   @@index([status])
   @@index([phone])
+}
+
+model Address {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  label          String   @default("خانه")
+  recipientName  String
+  recipientPhone String
+  province       String
+  city           String
+  addressLine    String
+  postalCode     String?
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isDefault])
+  @@index([userId, createdAt])
 }
 
 model RefreshToken {
