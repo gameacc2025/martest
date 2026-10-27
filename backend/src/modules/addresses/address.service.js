@@ -62,12 +62,37 @@ async function createAddress(userId, input) {
 
 async function updateAddress(userId, addressId, input) {
   const data = normalizeAddress(input);
+  const ownerId = Number(userId);
   return prisma.$transaction(async (tx) => {
-    const existing = await tx.address.findFirst({ where: { id: Number(addressId), userId: Number(userId) } });
+    const existing = await tx.address.findFirst({ where: { id: Number(addressId), userId: ownerId } });
     if (!existing) throw notFound();
 
     if (data.isDefault === true) {
-      await tx.address.updateMany({ where: { userId: Number(userId), isDefault: true }, data: { isDefault: false } });
+      await tx.address.updateMany({ where: { userId: ownerId, isDefault: true }, data: { isDefault: false } });
+    }
+
+    // A customer cannot accidentally end up with no default address by
+    // unchecking the only default. If alternatives exist, promote the newest
+    // one after clearing the current default (required by the partial unique index).
+    if (data.isDefault === false && existing.isDefault) {
+      const alternatives = await tx.address.findMany({
+        where: { userId: ownerId },
+        orderBy: [{ createdAt: 'desc' }],
+      });
+      const nextDefault = alternatives.find((address) => address.id !== existing.id);
+      if (nextDefault) {
+        const updated = await tx.address.update({
+          where: { id: existing.id },
+          data,
+          select: ADDRESS_SELECT,
+        });
+        await tx.address.update({
+          where: { id: nextDefault.id },
+          data: { isDefault: true },
+        });
+        return updated;
+      }
+      data.isDefault = true;
     }
 
     return tx.address.update({
