@@ -1221,7 +1221,34 @@ test('listResponses: an unrelated company gets 404', async () => {
   );
 });
 
+test('decideResponse: STAFF cannot decide a buyer quote even with SUPER_ADMIN role', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 303, companyId: buyer.companyId, visibilityMode: 'NORMAL' });
+  fx.response = { id: 603, inquiryId: 303, companyId: seller.companyId, status: 'PENDING' };
+  const staffAdmin = { ...superAdmin, accessType: 'STAFF' };
+
+  await assert.rejects(
+    () => inquiryService.decideResponse(303, 603, 'SELECTED', staffAdmin),
+    (err) => err.statusCode === 403 && err.code === 'BUYER_DECISION_REQUIRED',
+  );
+  assert.equal((calls['inquiry.updateMany'] || []).length, 0);
+});
+
 // ── updateResponse ───────────────────────────────────────────
+
+test('updateResponse: STAFF cannot impersonate a supplier through companyId', async () => {
+  resetMocks();
+  const staffAdmin = { ...superAdmin, accessType: 'STAFF' };
+
+  await assert.rejects(
+    () => inquiryService.updateResponse(1, 50, {
+      companyId: seller.companyId,
+      items: [{ inquiryItemId: 11, price: 10, availableQuantity: 2 }],
+    }, staffAdmin),
+    (err) => err.statusCode === 403 && err.code === 'STAFF_CANNOT_MANAGE_SUPPLIER_RESPONSE',
+  );
+  assert.equal((calls['inquiryResponse.update'] || []).length, 0);
+});
 
 test('updateResponse: rewrites the items of a pending response', async () => {
   resetMocks();
@@ -1295,6 +1322,17 @@ test('updateResponse: only PENDING responses can be edited', async () => {
 });
 
 // ── withdrawResponse ─────────────────────────────────────────
+
+test('withdrawResponse: STAFF cannot impersonate a supplier through companyId', async () => {
+  resetMocks();
+  const staffAdmin = { ...superAdmin, accessType: 'STAFF' };
+
+  await assert.rejects(
+    () => inquiryService.withdrawResponse(1, 50, staffAdmin, { companyId: seller.companyId }),
+    (err) => err.statusCode === 403 && err.code === 'STAFF_CANNOT_MANAGE_SUPPLIER_RESPONSE',
+  );
+  assert.equal((calls['inquiryResponse.update'] || []).length, 0);
+});
 
 test('withdrawResponse: marks a pending response as WITHDRAWN', async () => {
   resetMocks();
