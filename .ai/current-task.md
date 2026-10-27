@@ -28,10 +28,15 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 1. Create a validation PR from the current main snapshot with a documentation/worklog checkpoint so CI runs the latest backend tests, frontend Vitest tests, Prisma validation/migrations, and all frontend builds. Do not wait for the Playwright runtime/browser step; retain it as automated coverage.
 2. Fix any CI failures surfaced by that run, then merge the validation PR. Do not claim tests passed before observing the completed CI result.
-3. Close stale PR #9 and PR #11 after recording that their useful code has been ported selectively; neither old branch should be force-merged over current main. PR #14 is already merged.
-4. Review notification folder/read-state regression tests and confirm docs match the current implementation.
-5. Verify architecture graph with `pnpm architecture:check` in CI; fix the generated graph if stale.
-6. Keep SMTP status as NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Do not report third-party delivery as successful based only on unit tests.
+3. Review notification folder/read-state regression tests and confirm docs match the current implementation.
+4. Verify architecture graph with `pnpm architecture:check` in CI; fix the generated graph if stale.
+5. Keep SMTP status as NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Do not report third-party delivery as successful based only on unit tests.
+
+## Branch/PR handling
+
+- PR #14 is merged.
+- PR #9 and PR #11 are closed as stale/non-mergeable or redundant. Their useful code was ported to current main: customer addresses, profile contract fix, refresh-token uniqueness, architecture graph, Vite chunk splitting and Docker runtime hardening.
+- No stale branch was force-merged. The connected GitHub actions do not expose branch deletion; do not claim remote branches were deleted.
 
 ## Security and architecture contract
 
