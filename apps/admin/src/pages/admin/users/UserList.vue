@@ -328,8 +328,13 @@
         </div>
 
         <!-- Panel access toggle (edit only) -->
-        <div class="field-checkbox" v-if="isEditMode">
-          <Checkbox inputId="isAccessActive" v-model="currentUser.isAccessActive" :binary="true" />
+        <div class="field-checkbox" v-if="isEditMode && (canActivate || canDeactivate)">
+          <Checkbox
+            inputId="isAccessActive"
+            v-model="currentUser.isAccessActive"
+            :binary="true"
+            :disabled="currentUser.isAccessActive ? !canDeactivate : !canActivate"
+          />
           <label for="isAccessActive">دسترسی به پنل فعال باشد</label>
         </div>
 
@@ -379,6 +384,8 @@ const canUpdate = computed(() => can(P.USERS.UPDATE));
 const canDelete = computed(() => can(P.USERS.DELETE));
 const canAssignRoles = computed(() => can(P.USERS.ASSIGN_ROLES));
 const canResetPassword = computed(() => can(P.USERS.RESET_PASSWORD));
+const canActivate = computed(() => can(P.USERS.ACTIVATE));
+const canDeactivate = computed(() => can(P.USERS.DEACTIVATE));
 
 const users = ref([]);
 const loading = ref(false);
