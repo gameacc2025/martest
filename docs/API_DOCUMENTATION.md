@@ -73,7 +73,7 @@
 
 1. permission سمت backend باید برای هر عملیات بررسی شود.
 2. کنترل مالکیت resource باید در service هم برقرار باشد؛ `companyId` ارسالی از client به‌تنهایی قابل اعتماد نیست.
-3. نقش SUPER_ADMIN مجوز عبور از تمام مرزهای داده تلقی نمی‌شود. بعضی middlewareهای legacy هنوز bypass عمومی دارند و تحت بررسی جداگانه‌اند؛ مسیرهای حساس باید از guard دقیق زمینه استفاده کنند.
+3. نقش SUPER_ADMIN مجوز عبور از زمینه برنامه یا مرزهای داده نیست. ورود به Admin به `AccessProfile.type=STAFF` و ورود به Company به `AccessProfile.type=COMPANY` نیاز دارد؛ `requireAccessType` و PKCE handoff این زمینه را حتی با wildcard permission بررسی می‌کنند. مالکیت tenant نیز باید در service کنترل شود.
 4. حالت‌های SEALED و ANONYMOUS_SEALED نباید داده پاسخ رقبا را زودتر از زمان مجاز افشا کنند.
 5. endpointهای عمومی باید فیلدهای مجاز را برگردانند و فیلدهای داخلی moderation/audit را حذف کنند.
 6. تغییر schema یا مسیر باید با تست رگرسیون و مستندات متناظر همراه باشد.
