@@ -130,10 +130,6 @@
                 <Button v-if="canCreateInquiry" icon="pi pi-file-edit" rounded outlined severity="secondary"
                   aria-label="ثبت استعلام قیمت" title="ثبت استعلام قیمت" :disabled="inquirySubmitting"
                   @click="inquiryDialogOpen = true" />
-                <Button :icon="isInWishlist ? 'pi pi-heart-fill' : 'pi pi-heart'" rounded outlined
-                  :class="['icon-action', { 'icon-action--active': isInWishlist }]"
-                  :aria-label="isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'"
-                  :title="isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'" @click="addToWishlist" />
                 <Button icon="pi pi-chart-line" rounded outlined severity="secondary"
                   aria-label="نمودار قیمت خرده‌فروشی شش ماه اخیر" title="نمودار قیمت خرده‌فروشی شش ماه اخیر"
                   @click="openPriceHistory" />
@@ -143,23 +139,6 @@
                   <span>{{ tier.label || tier.name || ('سطح قیمت ' + (index + 1)) }}</span>
                   <strong>{{ formatPrice(tier.price) }}</strong>
                 </div>
-              </div>
-
-              <div class="purchase-actions">
-                <Button
-                  label="افزودن به سبد خرید"
-                  icon="pi pi-shopping-cart"
-                  class="primary-action"
-                  @click="addToCart"
-                />
-                <Button
-                  label="مشاهده سبد خرید"
-                  icon="pi pi-arrow-left"
-                  severity="secondary"
-                  outlined
-                  class="secondary-action"
-                  @click="router.push('/cart')"
-                />
               </div>
 
               <div class="purchase-assurance">
@@ -259,8 +238,6 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { apiGet } from '@telecom/shared-core/http/apiClient'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
-import { useCartStore } from '../../stores/cart'
-import { useWishlistStore } from '../../stores/wishlist'
 import { useAuthStore } from '../../stores/auth'
 import { inquiriesApi } from '@telecom/api-client'
 import Breadcrumb from 'primevue/breadcrumb'
@@ -270,8 +247,6 @@ import ProgressSpinner from 'primevue/progressspinner'
 const route = useRoute()
 const router = useRouter()
 const productsStore = useProductsStore()
-const cartStore = useCartStore()
-const wishlistStore = useWishlistStore()
 const authStore = useAuthStore()
 
 const product = ref({})
@@ -279,7 +254,6 @@ const loading = ref(false)
 const loadError = ref('')
 const selectedImage = ref('')
 const imageFailed = ref(false)
-const wishlistVersion = ref(0)
 const inquiryDialogOpen = ref(false)
 const inquirySubmitting = ref(false)
 const inquiryQuantity = ref(1)
@@ -405,11 +379,6 @@ const specRows = computed(() => {
   return rows
 })
 
-const isInWishlist = computed(() => {
-  wishlistVersion.value
-  return product.value.id != null && wishlistStore.isInWishlist(product.value.id)
-})
-
 const loadProduct = async () => {
   const productId = route.params.id
   if (productId == null || productId === '') {
@@ -465,22 +434,6 @@ function formatPrice(value) {
     currency: 'IRR',
     maximumFractionDigits: 0
   }).format(num)
-}
-
-const addToCart = () => {
-  if (!product.value.id) return
-  cartStore.addItem({
-    id: product.value.id,
-    title: product.value.title || 'بدون عنوان',
-    prices: [{ price: minPrice.value ?? 0, currency: 'IRR' }],
-    images: activeImage.value ? [activeImage.value] : []
-  }, 1)
-}
-
-const addToWishlist = () => {
-  if (!product.value.id) return
-  wishlistStore.toggleWishlist(product.value)
-  wishlistVersion.value += 1
 }
 
 const submitInquiry = async () => {
