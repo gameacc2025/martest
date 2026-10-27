@@ -183,8 +183,8 @@ const {
   getCompanyProducts,
 } = require('./company.service');
 
-const SUPER_ADMIN = { roles: ['SUPER_ADMIN'], companyId: null };
-const OWN_COMPANY_MANAGER = (companyId) => ({ roles: ['COMPANY_MANAGER'], companyId });
+const SUPER_ADMIN = { roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF', companyId: null };
+const OWN_COMPANY_MANAGER = (companyId) => ({ roles: ['COMPANY_MANAGER'], permissions: ['company_profile.update'], accessType: 'COMPANY', companyId };
 
 // ── listCompanies / buildWhereClause / buildOrderBy ──────────
 
@@ -426,6 +426,43 @@ test('updateCompany: 403s a non-SUPER_ADMIN caller editing a company that is not
     }
   );
   assert.equal(calls.companyUpdate.length, 0);
+});
+
+test('updateCompany: COMPANY context cannot edit another tenant even with SUPER_ADMIN role', async () => {
+  resetMocks();
+  fx.company = { id: 1, deletedAt: null };
+
+  await assert.rejects(
+    () => updateCompany(1, { name: 'X' }, { roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'COMPANY', companyId: 2 }),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  assert.equal(calls.companyUpdate.length, 0);
+});
+
+test('updateCompany: COMPANY context cannot change lifecycle fields even with SUPER_ADMIN role', async () => {
+  resetMocks();
+  fx.company = { id: 1, deletedAt: null };
+
+  await updateCompany(1, { name: 'X', status: 'SUSPENDED', isVerified: true, type: 'MANUFACTURER' }, {
+    roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'COMPANY', companyId: 1,
+  });
+
+  const data = calls.companyUpdate[0].data;
+  assert.equal(data.name, 'X');
+  assert.equal('status' in data, false);
+  assert.equal('isVerified' in data, false);
+  assert.equal('type' in data, false);
+});
+
+test('updateCompany: company users cannot change company limits', async () => {
+  resetMocks();
+  fx.company = { id: 1, deletedAt: null };
+
+  await assert.rejects(
+    () => updateCompany(1, { limits: { 'rfq.max_open': 10 } }, OWN_COMPANY_MANAGER(1)),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_LIMITS_ADMIN_ONLY',
+  );
+  assert.equal(calls.companyLimitUpsert.length, 0);
 });
 
 test('updateCompany: allows a non-SUPER_ADMIN caller to edit their own company', async () => {
