@@ -18,7 +18,7 @@
 // =============================================================
 
 const ctrl = require('./role.controller');
-const { requirePermission, requireAnyPermission } = require('../../middlewares/rbac');
+const { requirePermission, requireAnyPermission, requireExactAccessType } = require('../../middlewares/rbac');
 const { createRoleBody, updateRoleBody } = require('./role.schemas');
 
 const idParam = { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } };
@@ -26,7 +26,7 @@ const idParam = { type: 'object', required: ['id'], properties: { id: { type: 'i
 async function roleRoutes(fastify) {
   fastify.get('/', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('roles.read')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('roles.read')],
     schema: { summary: 'List all roles with their permissions', tags: ['Roles'] },
   }, ctrl.listRoles);
 
@@ -35,13 +35,13 @@ async function roleRoutes(fastify) {
   // domain. Must be registered before GET /:id.
   fastify.get('/assignable', {
     onRequest: [fastify.authenticate],
-    preHandler: [requireAnyPermission('users.create', 'users.assign_roles')],
+    preHandler: [requireExactAccessType('STAFF', 'COMPANY'), requireAnyPermission('users.create', 'users.assign_roles')],
     schema: { summary: 'List roles assignable by the caller (scoped to their own accessType)', tags: ['Roles'] },
   }, ctrl.listAssignableRoles);
 
   fastify.post('/', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('roles.create')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('roles.create')],
     schema: { summary: 'Create a new role', tags: ['Roles'], body: createRoleBody },
   }, ctrl.createRole);
 
@@ -53,13 +53,13 @@ async function roleRoutes(fastify) {
 
   fastify.patch('/:id', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('roles.update')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('roles.update')],
     schema: { summary: 'Update role', tags: ['Roles'], params: idParam, body: updateRoleBody },
   }, ctrl.updateRole);
 
   fastify.delete('/:id', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('roles.delete')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('roles.delete')],
     schema: { summary: 'Delete role (system roles cannot be deleted)', tags: ['Roles'], params: idParam },
   }, ctrl.deleteRole);
 }
