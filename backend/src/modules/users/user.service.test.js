@@ -751,6 +751,17 @@ test('setAccessActive: COMPANY can toggle a user in its own company', async () =
   assert.equal(calls.accessProfileUpdate[0].data.isActive, false);
 });
 
+test('setAccessActive: users.activate alone cannot deactivate a user', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { id: 1, type: 'COMPANY', companyId: 10 } });
+
+  await assert.rejects(
+    () => setAccessActive(5, false, caller({ id: 1, companyId: 10, permissions: ['users.activate'] })),
+    (err) => err.statusCode === 403 && err.code === 'PERMISSION_REQUIRED',
+  );
+  assert.equal(calls.accessProfileUpdate.length, 0);
+});
+
 test('setAccessActive: SUPER_ADMIN can deactivate a user in any company', async () => {
   resetMocks();
   fx.userById = dbUser({ accessProfile: { id: 1, companyId: 10 } });
