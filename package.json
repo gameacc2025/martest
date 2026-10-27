@@ -16,7 +16,9 @@
     "test:shared-ui": "pnpm --filter @telecom/shared-ui test",
     "test:shared-core": "pnpm --filter @telecom/shared-core test",
     "test:api-client": "pnpm --filter @telecom/api-client test",
-    "test:auth": "pnpm --filter @telecom/auth test"
+    "test:auth": "pnpm --filter @telecom/auth test",
+    "architecture:graph": "node scripts/generate-architecture-graph.mjs --write",
+    "architecture:check": "node scripts/generate-architecture-graph.mjs --check"
   },
   "devDependencies": {
     "@vue/test-utils": "2.5.1",
