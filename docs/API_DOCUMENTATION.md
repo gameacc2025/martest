@@ -1285,3 +1285,14 @@ Lifecycle:
 - Company inquiries retain DRAFT → SUBMITTED → OPEN. A future `publishDate` is processed by the background lifecycle worker; `autoClose=true` transitions OPEN inquiries to EXPIRED when `responseDeadline` is reached.
 - Customer product-page inquiries open immediately.
 - Lifecycle transitions are recorded in `InquiryStatusHistory.source` as USER or SYSTEM; system actions do not invent a human actor.
+
+
+## User management and tenant authorization contract (2026-10-27)
+
+- **STAFF context:** User creation, profile editing, deletion, role assignment, and company transfers are STAFF-only operations and still require the corresponding granular permissions.
+- **COMPANY context:** A company user may list/view only users whose access profile is COMPANY and whose company ID matches the authenticated profile. The only permitted mutation is toggling panel access for users in that same company, with `users.activate` required to enable and `users.deactivate` required to disable.
+- **Forbidden company-user actions:** Creating or deleting users, editing user profile details, assigning roles/permissions, and transferring users between companies return 403 even if the caller has a broad role or wildcard permission.
+- **Role scope:** Assigning a role requires `users.assign_roles`; the role's scope must match the target account's `AccessProfile.type`. Only a STAFF-context global administrator can assign `SUPER_ADMIN`.
+- **Company profile:** `GET /api/v1/companies/:id` accepts `company_profile.read` for the caller's own company. `PATCH /api/v1/companies/:id` allows own-company profile fields only; company limits, lifecycle status, verification and company type remain administrative controls.
+- **Strict STAFF-only surfaces:** Role definitions, permission definitions, category management and admin settings/statistics enforce exact STAFF context. Company-scoped product and inquiry access remains subject to service-level ownership checks.
+- **Policy note:** The legacy generic `requireAccessType` middleware and auth app-selection flow still have a tested SUPER_ADMIN cross-context bypass. The audited services/routes above enforce their own context boundaries; changing the global auth contract is tracked separately because it changes existing behavior.

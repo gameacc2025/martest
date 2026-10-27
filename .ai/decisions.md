@@ -118,3 +118,12 @@ Date: 2026-10-26
 Decision: STAFF may perform cross-company product operations only when they have the exact granular permission for that operation; COMPANY ownership remains mandatory and cannot be bypassed with a supplied `companyId`.
 Reason: STAFF are marketplace moderators, not tenant-owned sellers. Cross-company access is necessary for explicitly authorized moderation/content operations, but broad access based on STAFF identity alone would violate least privilege.
 Impact: Product services enforce STAFF permissions for create/update/delete, price tiers, image/document operations, and lifecycle actions, not only at HTTP routes. STAFF creation requires an explicit target `companyId`. COMPANY callers remain restricted to their own company's products. Public catalog routes remain clamped to PUBLISHED + PUBLIC.
+
+
+## 2026-10-27 — Company user management and tenant-context boundaries
+- COMPANY users may list/view only users belonging to their own COMPANY access profile and may enable/disable those users only through the exact `users.activate` or `users.deactivate` permission.
+- COMPANY users must not create/delete users, edit other users' profile data, assign roles/permissions, or move users between companies. These restrictions are enforced in backend services, not only by hiding UI controls.
+- Role assignment requires `users.assign_roles`, the role scope must match the target user's `AccessProfile.type`, and only a STAFF-context global administrator may assign the `SUPER_ADMIN` role.
+- Company profile updates are tenant-scoped. Company users cannot alter company limits, lifecycle status, verification, or company type. Product/inquiry/company/user service-level global overrides apply only in STAFF context.
+- Roles, permissions, categories, and admin management routes use strict STAFF-context guards so wildcard permissions or a legacy SUPER_ADMIN role in COMPANY context cannot cross those domain boundaries.
+- The generic `requireAccessType` / auth app-selection SUPER_ADMIN bypass remains a separately tracked policy question; do not silently change it without confirming the intended cross-app behavior.
