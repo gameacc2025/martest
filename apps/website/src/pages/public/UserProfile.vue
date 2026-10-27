@@ -58,12 +58,6 @@
                   @click="goToAddresses"
                 />
                 <Button
-                  label="تراکنش ها"
-                  icon="pi pi-credit-card"
-                  class="w-full p-button-text justify-start"
-                  @click="goToTransactions"
-                />
-                <Button
                   label="خروج"
                   icon="pi pi-sign-out"
                   class="w-full p-button-text p-button-danger justify-start"
@@ -407,10 +401,6 @@ const goToNotifications = () => {
 
 const goToAddresses = () => {
   router.push('/profile/addresses')
-}
-
-const goToTransactions = () => {
-  router.push('/profile/transactions')
 }
 
 const logout = async () => {
