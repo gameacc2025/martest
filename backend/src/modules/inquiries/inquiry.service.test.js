@@ -267,7 +267,8 @@ function resetMocks() {
   queues.responseGroupBy = [];
 }
 
-const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'], companyId: null };
+const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF', companyId: null };
+const companySuperAdmin = { id: 9, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'COMPANY', companyId: 20 };
 const buyer = { id: 2, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], companyId: 10 };
 const seller = { id: 3, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], companyId: 20 };
 const orphan = { id: 4, roles: ['USER'], permissions: ['inquiries.read'], companyId: null };
@@ -307,6 +308,13 @@ test('listInquiries scope=received filters by owned product company', async () =
   assert.ok(hasProductFilter);
   assert.ok(where.AND.some((condition) => condition.status?.in?.includes('OPEN')));
   assert.ok(where.AND.some((condition) => condition.OR?.some((entry) => entry.publishDate?.lte)));
+});
+
+test('listInquiries: SUPER_ADMIN role in COMPANY context remains scoped to its company', async () => {
+  resetMocks();
+  await inquiryService.listInquiries({ scope: 'all' }, companySuperAdmin);
+  const where = calls.findMany[0].where;
+  assert.ok(where.AND.some((condition) => condition.companyId === companySuperAdmin.companyId));
 });
 
 test('listInquiries scope=all as SUPER_ADMIN applies no company filter', async () => {
@@ -463,6 +471,15 @@ test('getInquiry anonymizes company identities for a revealed anonymous sealed i
   assert.equal(inquiry.responses[0].company.name, 'پیشنهاددهنده 1');
   assert.equal(Object.hasOwn(inquiry.responses[0], 'companyId'), false);
   assert.equal(inquiry.items[0].product.company, null);
+});
+
+test('getInquiry: SUPER_ADMIN role in COMPANY context cannot read unrelated inquiry', async () => {
+  resetMocks();
+  nextFindUnique = { id: 81, companyId: 555, items: [] };
+  await assert.rejects(
+    () => inquiryService.getInquiry(81, companySuperAdmin),
+    (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
+  );
 });
 
 test('getInquiry allows SUPER_ADMIN regardless of company', async () => {
@@ -1189,6 +1206,15 @@ test('decideResponse: supplier cannot decide another supplier response', async (
   );
 });
 
+test('listResponses: SUPER_ADMIN role in COMPANY context cannot read unrelated RFQ responses', async () => {
+  resetMocks();
+  nextFindUnique = { id: 88, companyId: buyer.companyId, items: [] };
+  await assert.rejects(
+    () => inquiryService.listResponses(88, companySuperAdmin),
+    (err) => err.statusCode === 404 || err.code === 'FORBIDDEN',
+  );
+});
+
 test('listResponses: SUPER_ADMIN sees every response', async () => {
   resetMocks();
   nextFindUnique = { id: 1, companyId: buyer.companyId, items: [] };
@@ -1246,6 +1272,18 @@ test('listResponses: an unrelated company gets 404', async () => {
     () => inquiryService.listResponses(1, { id: 9, roles: [], permissions: [], companyId: 777 }),
     (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
   );
+});
+
+test('decideResponse: SUPER_ADMIN role in COMPANY context cannot decide another buyer quote', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 304, companyId: buyer.companyId, visibilityMode: 'NORMAL' });
+  fx.response = { id: 604, inquiryId: 304, companyId: seller.companyId, status: 'PENDING' };
+
+  await assert.rejects(
+    () => inquiryService.decideResponse(304, 604, 'SELECTED', companySuperAdmin),
+    (err) => err.statusCode === 403 && err.code === 'BUYER_DECISION_REQUIRED',
+  );
+  assert.equal((calls['inquiry.updateMany'] || []).length, 0);
 });
 
 test('decideResponse: STAFF cannot decide a buyer quote even with SUPER_ADMIN role', async () => {
