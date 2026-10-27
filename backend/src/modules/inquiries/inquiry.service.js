@@ -1035,7 +1035,7 @@ async function deleteInquiryItem(inquiryId, itemId, caller) {
 async function submitResponse(inquiryId, data, caller) {
   const companyId = resolveCompanyId(data, caller);
   ensureCompanyId(companyId);
-  if (caller?.accessType === 'STAFF' && !isSuperAdmin(caller)) {
+  if (caller?.accessType === 'STAFF') {
     throw { statusCode: 403, code: 'STAFF_CANNOT_RESPOND', message: 'STAFF users supervise inquiries but do not submit supplier quotes.' };
   }
 
