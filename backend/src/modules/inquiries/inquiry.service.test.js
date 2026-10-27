@@ -138,7 +138,11 @@ const mockPrisma = {
     updateMany: async (args) => {
       record('inquiryResponse.updateMany', args);
       if (args.where?.id && args.where?.status === 'PENDING') {
-        return { count: fx.responseDecisionUpdateCount };
+        const count = fx.responseDecisionUpdateCount;
+        if (count && fx.response && fx.response.id === args.where.id) {
+          fx.response = { ...fx.response, ...args.data };
+        }
+        return { count };
       }
       return { count: 1 };
     },
