@@ -1271,8 +1271,8 @@ All inquiry routes are authenticated under `/api/v1/inquiries`. Access is scoped
 - `GET /:id`: buyer, authorized STAFF, or a company owning a requested product can read; unrelated users receive 404.
 - `PATCH /:id/status`: follows the allowed status transition map. CUSTOMER callers may only cancel their own inquiry.
 - `POST /:id/reveal`: explicitly reveals a sealed inquiry early only when `allowEarlyReveal` is enabled; STAFF with update permission can supervise/reveal.
-- `GET /:id/responses`, `POST /:id/responses`, `PATCH /:id/responses/:responseId`, `POST /:id/responses/:responseId/withdraw`: supplier response/quote lifecycle, with supplier ownership enforced per response item.
-- `PATCH /:id/responses/:responseId/decision` with `{ decision: "SELECTED" | "REJECTED", comment? }`: buyer-only quote decision. Selecting a quote atomically closes the inquiry, marks that response SELECTED, rejects other PENDING responses, writes status history, and notifies the winner and losing suppliers. A supplier cannot decide any quote.
+- `GET /:id/responses`, `POST /:id/responses`, `PATCH /:id/responses/:responseId`, `POST /:id/responses/:responseId/withdraw`: supplier response/quote lifecycle. Supplier mutations require COMPANY context; the company identity is taken from the authenticated access profile, not a caller-supplied `companyId`. STAFF (including SUPER_ADMIN in STAFF context) cannot submit, edit, or withdraw supplier quotes.
+- `PATCH /:id/responses/:responseId/decision` with `{ decision: "SELECTED" | "REJECTED", comment? }`: buyer-only quote decision. STAFF cannot decide quotes on behalf of buyers. Selection/rejection uses compare-and-set status updates so stale concurrent decisions cannot overwrite a previously decided response; conflicts return 409. Selecting a quote atomically closes the inquiry, marks that response SELECTED, rejects other PENDING responses, writes status history, and notifies the winner and losing suppliers.
 
 Visibility rules:
 - NORMAL: the buyer sees all responses; a supplier sees only its own response.
