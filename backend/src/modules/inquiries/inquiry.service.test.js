@@ -122,7 +122,7 @@ const mockPrisma = {
       record('inquiryResponse.findMany', args);
       return fx.recentResponses;
     },
-    findFirst: async () => fx.response,
+    findFirst: async (args) => { record('inquiryResponse.findFirst', args); return fx.response; },
     create: async (args) => {
       record('inquiryResponse.create', args);
       return { id: 5, ...args.data };
@@ -1076,6 +1076,33 @@ test('submitResponse: quoting an item the company does not own is rejected', asy
   );
 });
 
+test('submitResponse: companyId is derived from COMPANY context, not request body', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry();
+  fx.ownedItemIds = [11];
+  const companyCaller = { ...seller, accessType: 'COMPANY' };
+
+  await inquiryService.submitResponse(1, {
+    companyId: 999,
+    items: [{ inquiryItemId: 11, price: 1500, availableQuantity: 4 }],
+  }, companyCaller);
+
+  assert.equal(calls['inquiryResponse.create'].at(-1).data.companyId, seller.companyId);
+});
+
+test('submitResponse: CUSTOMER cannot submit a quote by supplying companyId', async () => {
+  resetMocks();
+  const customerAdmin = { ...superAdmin, accessType: 'CUSTOMER' };
+
+  await assert.rejects(
+    () => inquiryService.submitResponse(1, {
+      companyId: seller.companyId,
+      items: [{ inquiryItemId: 11, price: 1500, availableQuantity: 4 }],
+    }, customerAdmin),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_CONTEXT_REQUIRED',
+  );
+});
+
 test('submitResponse: a valid quote is stored with normalized items', async () => {
   resetMocks();
   nextFindUnique = openInquiry();
@@ -1263,6 +1290,21 @@ test('updateResponse: rewrites the items of a pending response', async () => {
   const args = calls['inquiryResponse.update'].at(-1);
   assert.equal(args.where.id, 50);
   assert.equal(args.data.items.create[0].price, 10);
+});
+
+test('updateResponse: companyId is derived from COMPANY context, not request body', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry();
+  fx.response = { id: 50, status: 'PENDING' };
+  fx.ownedItemIds = [11];
+  const companyCaller = { ...seller, accessType: 'COMPANY' };
+
+  await inquiryService.updateResponse(1, 50, {
+    companyId: 999,
+    items: [{ inquiryItemId: 11, price: 10, availableQuantity: 2 }],
+  }, companyCaller);
+
+  assert.equal(calls['inquiryResponse.findFirst'].at(-1).where.companyId, seller.companyId);
 });
 
 test('updateResponse: a missing RFQ is 404', async () => {
