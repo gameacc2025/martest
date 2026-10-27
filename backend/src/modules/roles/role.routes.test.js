@@ -49,13 +49,26 @@ async function buildApp() {
   return app;
 }
 
-function userHeader(permissions) {
-  return { 'x-test-user': JSON.stringify({ roles: [], permissions }) };
+function userHeader(permissions, { accessType = 'STAFF', roles = [] } = {}) {
+  return { 'x-test-user': JSON.stringify({ accessType, roles, permissions }) };
 }
 
 test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
 
 // ── GET / (list) — roles.read ───────────────────────────────
+
+test('COMPANY context cannot administer role definitions even with SUPER_ADMIN and wildcard permissions', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/roles',
+    headers: userHeader(['*'], { accessType: 'COMPANY', roles: ['SUPER_ADMIN'] }),
+    payload: { name: 'COMPANY_ADMIN', scope: 'COMPANY' },
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.createRole, undefined);
+  await app.close();
+});
 
 test('GET /: requires roles.read', async () => {
   const app = await buildApp();
