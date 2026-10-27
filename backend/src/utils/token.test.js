@@ -98,10 +98,19 @@ test('signRefreshToken produces a MINIMAL payload — no email/roles/permissions
   // be in there, so a leaked/decoded refresh token exposes as little
   // as possible.
   const extraKeys = Object.keys(decoded).filter(
-    (k) => !['sub', 'type', 'iat', 'exp'].includes(k)
+    (k) => !['sub', 'type', 'jti', 'iat', 'exp'].includes(k)
   );
   assert.deepEqual(extraKeys, []);
 
+  await app.close();
+});
+
+test('signRefreshToken creates unique tokens for repeated issuance in the same second', async () => {
+  const app = await buildFastifyWithJwt();
+  const first = signRefreshToken(app, 42);
+  const second = signRefreshToken(app, 42);
+  assert.notEqual(first, second);
+  assert.notEqual(verifyRefreshToken(app, first).jti, verifyRefreshToken(app, second).jti);
   await app.close();
 });
 
