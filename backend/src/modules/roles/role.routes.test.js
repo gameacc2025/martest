@@ -236,7 +236,7 @@ test('SUPER_ADMIN bypasses all role permission checks', async () => {
   const res = await app.inject({
     method: 'GET',
     url: '/api/v1/roles',
-    headers: { 'x-test-user': JSON.stringify({ roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
+    headers: { 'x-test-user': JSON.stringify({ accessType: 'STAFF', roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.listRoles, true);
