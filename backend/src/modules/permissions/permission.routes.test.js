@@ -52,13 +52,26 @@ async function buildApp() {
   return app;
 }
 
-function userHeader(permissions) {
-  return { 'x-test-user': JSON.stringify({ roles: [], permissions }) };
+function userHeader(permissions, { accessType = 'STAFF', roles = [] } = {}) {
+  return { 'x-test-user': JSON.stringify({ accessType, roles, permissions }) };
 }
 
 test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
 
 // ── GET / (list) — permissions.read ─────────────────────────
+
+test('COMPANY context cannot read or change permission definitions with SUPER_ADMIN wildcard permissions', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/permissions/1',
+    headers: userHeader(['*'], { accessType: 'COMPANY', roles: ['SUPER_ADMIN'] }),
+    payload: { name: 'users.delete' },
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.update, undefined);
+  await app.close();
+});
 
 test('GET /: requires permissions.read', async () => {
   const app = await buildApp();
