@@ -125,3 +125,13 @@ Strict `requireExactAccessType` already protects role/permission, category and a
 4. Verify monetization PR/merge status and test payment callback/replay/retry plus Twilio delivery in staging.
 5. Resume the deferred customer dashboard/address work after higher-priority validation; orders still need a real backend domain.
 6. Address Admin bundle warnings after capturing a baseline and tracing imports.
+
+
+## Progress update — 2026-10-27 (runtime and auth-context follow-up)
+
+- PR #14 was squash-merged into `main` as `92501f206ab16b163d8d4605e685cbe3396dd2aa`. It adds Docker/Compose runtime validation, Playwright smoke tests, and explicit Vite build-time origins for the Company/Admin panels.
+- Observed on the PR head: CI run `40555574784` passed; PostgreSQL migration validation `40555574786` passed. Runtime run `40555575064` passed Compose configuration, Docker build/start, health endpoints, and migration status. Its browser step was still running at the last observation; per the owner instruction, do not block subsequent work waiting for it and do not claim browser E2E passed.
+- The legacy SUPER_ADMIN cross-app bypass was removed from auth app selection, generic `requireAccessType`, and PKCE handoff. Tests were updated for login and RBAC, and a handoff unit test was added. These newest test edits have not yet been confirmed by a completed CI run.
+- `docs/role-access-matrix.md`, `docs/ARCHITECTURE_DECISIONS.md`, `.ai/decisions.md`, and `.ai/current-task.md` now state that `AccessProfile.type` is the strict app-context boundary and wildcard permissions do not override it.
+- PR #9 became non-mergeable after main advanced. Do not merge its old branch wholesale. Port useful address/token/architecture/performance changes selectively after comparing them with current main. PR #11 is based on that branch and must also be ported selectively.
+- Remaining audit work: validate the strict-context regression tests; reconcile customer address/profile behavior with actual APIs; review product price-history and inquiry quote/decision workflows; verify monetization callback idempotency/retry coverage; check notification inbox tests; and document SMTP (not live-verified) / SMS (not implemented) boundaries.
