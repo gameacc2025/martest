@@ -42,7 +42,7 @@ async function companyRoutes(fastify) {
 
   // ── Read routes ──────────────────────────────────────────
   fastify.get('/', { preHandler: [companyRouteAccess({ staffOnly: true }), requirePermission('companies.read')] }, ctrl.list);
-  fastify.get('/:id', { preHandler: [companyRouteAccess(), requirePermission('companies.read')] }, ctrl.getOne);
+  fastify.get('/:id', { preHandler: [companyRouteAccess(), requireAnyPermission('companies.read', 'company_profile.read')] }, ctrl.getOne);
   fastify.get('/:id/products', { preHandler: [companyRouteAccess(), requirePermission('companies.read')] }, ctrl.getProducts);
   fastify.get('/:id/settings', { preHandler: [companyRouteAccess({ staffOnly: true }), requireAnyPermission('companies.read', 'companies.manage_settings')] }, ctrl.getSettings);
   fastify.get('/:id/statistics', { preHandler: [companyRouteAccess(), requirePermission('companies.view_statistics')] }, ctrl.getStatistics);
