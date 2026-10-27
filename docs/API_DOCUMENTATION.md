@@ -16,7 +16,7 @@
 
 ## زمینه‌های دسترسی
 
-- `CUSTOMER`: تجربه Website و استعلام‌هایی که کاربر خودش مالک آن‌هاست.
+- `CUSTOMER`: تجربه Website و استعلام‌هایی که کاربر خودش مالک آن‌هاست. ثبت‌نام CUSTOMER در قرارداد فعلی AccessProfile نمی‌سازد؛ middleware فقط نقش `CUSTOMER_USER` را در نبود access type به‌عنوان زمینه پیش‌فرض Website می‌پذیرد، نه برای Admin یا Company.
 - `COMPANY`: پنل شرکت و عملیات محدود به شرکت مربوط به access profile.
 - `STAFF`: پنل مدیریت؛ عملیات مدیریتی همچنان به permission و محدوده هر عملیات نیاز دارد.
 
@@ -30,6 +30,7 @@
 |---|---|---|
 | احراز هویت و session | `/auth` | `backend/src/modules/auth/auth.routes.js` |
 | کاربران | `/users` | `backend/src/modules/users/user.routes.js` |
+| آدرس مشتری | `/addresses` | `backend/src/modules/addresses/address.routes.js` |
 | نقش‌ها | `/roles` | `backend/src/modules/roles/role.routes.js` |
 | مجوزها | `/permissions` | `backend/src/modules/permissions/permission.routes.js` |
 | مدیریت سامانه | `/admin` | `backend/src/modules/admin/admin.routes.js` |
@@ -50,6 +51,13 @@
 ### کاربران و دسترسی‌ها
 
 در `/api/v1/users` عملیات فهرست، ایجاد، مشاهده، ویرایش، حذف، تغییر وضعیت دسترسی و عملیات مربوط به شرکت ثبت شده‌اند. محدودیت مالکیت و زمینه دسترسی باید در route و service هر عملیات بررسی شود؛ پنهان‌کردن دکمه در frontend کافی نیست.
+
+### آدرس‌های مشتری
+
+- `GET /api/v1/addresses` فهرست آدرس‌های مشتری احراز هویت‌شده را می‌دهد.
+- `POST /api/v1/addresses` آدرس جدید می‌سازد؛ نخستین آدرس به‌صورت خودکار پیش‌فرض می‌شود.
+- `GET/PATCH/DELETE /api/v1/addresses/:id` فقط روی آدرس متعلق به همان کاربر کار می‌کند.
+- `PATCH /api/v1/addresses/:id/default` آدرس پیش‌فرض را تغییر می‌دهد. حذف یا ویرایش پیش‌فرض نباید کاربر را بدون یک آدرس پیش‌فرض باقی بگذارد، اگر آدرس دیگری وجود داشته باشد.
 
 ### محصولات و قیمت
 
