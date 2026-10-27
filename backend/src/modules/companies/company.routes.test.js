@@ -72,8 +72,8 @@ async function buildApp() {
   return app;
 }
 
-function userHeader(permissions) {
-  return { 'x-test-user': JSON.stringify({ roles: [], permissions }) };
+function userHeader(permissions, { accessType = 'STAFF', companyId = null, roles = [] } = {}) {
+  return { 'x-test-user': JSON.stringify({ accessType, companyId, roles, permissions }) };
 }
 
 test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
@@ -147,6 +147,65 @@ test('a SUPER_ADMIN (permissions: ["*"]) can hit every route regardless of the s
 });
 
 // ── every route requires authentication (onRequest hook) ──────
+
+test('COMPANY context with SUPER_ADMIN role can read only its own company', async () => {
+  const app = await buildApp();
+  const own = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/10',
+    headers: userHeader(['*'], { accessType: 'COMPANY', companyId: 10, roles: ['SUPER_ADMIN'] }),
+  });
+  assert.equal(own.statusCode, 200);
+  assert.equal(hit.getOne, true);
+
+  delete hit.getOne;
+  const other = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/11',
+    headers: userHeader(['*'], { accessType: 'COMPANY', companyId: 10, roles: ['SUPER_ADMIN'] }),
+  });
+  assert.equal(other.statusCode, 403);
+  assert.equal(hit.getOne, undefined);
+  await app.close();
+});
+
+test('COMPANY context cannot list companies or change company lifecycle with wildcard permissions', async () => {
+  const app = await buildApp();
+  const headers = userHeader(['*'], { accessType: 'COMPANY', companyId: 10, roles: ['SUPER_ADMIN'] });
+  const list = await app.inject({ method: 'GET', url: '/api/v1/companies', headers });
+  assert.equal(list.statusCode, 403);
+  assert.equal(hit.list, undefined);
+
+  const status = await app.inject({ method: 'PATCH', url: '/api/v1/companies/10/status', headers, payload: { status: 'SUSPENDED' } });
+  assert.equal(status.statusCode, 403);
+  assert.equal(hit.changeStatus, undefined);
+  await app.close();
+});
+
+test('CUSTOMER context cannot call company management endpoints with wildcard permissions', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/10',
+    headers: userHeader(['*'], { accessType: 'CUSTOMER', roles: ['SUPER_ADMIN'] }),
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.getOne, undefined);
+  await app.close();
+});
+
+test('COMPANY context may update its own profile through company_profile.update', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/companies/10',
+    headers: userHeader(['company_profile.update'], { accessType: 'COMPANY', companyId: 10 }),
+    payload: { name: 'Updated' },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.update, true);
+  await app.close();
+});
 
 test('every registered route runs fastify.authenticate first — none are left accidentally public', async () => {
   const app = await buildApp();
