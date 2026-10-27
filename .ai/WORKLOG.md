@@ -543,3 +543,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Each updated file was fetched from the repository before editing and the changes were committed through the GitHub repository connector. No local markdown lint, app tests, build, Docker run, PostgreSQL migration run, or browser tests were executed in this documentation-only step. The new commits have not yet been independently verified by a fresh CI result.
 - **Not completed:** The broader architecture roadmap and API/database examples still require detailed route/schema cross-checking. Runtime validation and browser E2E remain unverified. PR #9 (runtime/browser validation) and PR #11 (customer dashboard) remain listed as open by the repository search; do not assume either is merged.
 - **Next action:** Check current CI/runtime validation status for the latest main head and PR #9, then address remaining P1 runtime/browser verification. Keep the global SUPER_ADMIN cross-app policy unchanged until the product decision is explicit.
+
+
+## 2026-10-27 — RUNTIME-VALIDATION-01 — Inspect completed Docker and browser smoke run
+
+- **Status:** VALIDATION PASSED ON PR BRANCH; NOT YET VERIFIED ON MAIN.
+- **Workflow run:** `40339211695`; job `122194361685`; branch `docs-runtime-e2e-hardening`.
+- **Observed final result:** Job conclusion is `success`. Docker Compose configuration validation, build/start of PostgreSQL + backend + all three panels, service health checks, Prisma migration status, Chromium installation, and Playwright browser smoke tests all completed successfully. Failure-log collection was skipped because the run did not fail, and the disposable Compose environment was torn down successfully.
+- **Important scope limit:** This run validates the PR branch snapshot, not the latest main head. The branch and main have diverged substantially (compare reports 61 commits ahead and 77 behind). PR #9 includes changes beyond the runtime workflow, including customer-address code, Dockerfiles, migration/schema changes and frontend/router changes. Do not merge the entire PR solely because its runtime workflow passed; it needs a fresh base/rebase and conflict/behavior review.
+- **Current main CI:** No workflow run was returned for documentation commit `0aba93bd1a2922a7029b8e9010f87953a6d0671b` through the commit-run lookup. This is NOT evidence of a failure or a pass; latest-main CI remains NOT VERIFIED.
+- **Next action:** Port the runtime workflow and minimal browser smoke tests to a fresh branch based on current main, adapting tests to the current code. Trigger the workflow there and verify the final result before marking runtime/browser validation complete on main.
