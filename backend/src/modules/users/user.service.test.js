@@ -435,7 +435,7 @@ test('createUser: COMPANY type without a companyId is rejected', async () => {
   );
 });
 
-test('createUser: a COMPANY-scoped caller cannot assign a non-COMPANY-scope role (privilege escalation guard)', async () => {
+test('createUser: COMPANY callers cannot create users even with a privileged role', async () => {
   resetMocks();
   fx.userByEmail = null;
   fx.roles = [{ id: 1, name: 'SUPER_ADMIN', scope: 'GLOBAL' }];
@@ -448,7 +448,7 @@ test('createUser: a COMPANY-scoped caller cannot assign a non-COMPANY-scope role
       ),
     (err) => {
       assert.equal(err.statusCode, 403);
-      assert.equal(err.code, 'ROLE_OUT_OF_SCOPE');
+      assert.equal(err.code, 'COMPANY_USER_MANAGEMENT_RESTRICTED');
       return true;
     }
   );
