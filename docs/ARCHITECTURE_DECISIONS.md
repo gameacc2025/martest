@@ -34,6 +34,7 @@
 ### AD-6 — AccessProfile.type مرز قطعی پنل است
 - نقش `SUPER_ADMIN` نمی‌تواند با وجود wildcard permission از بررسی زمینه برنامه عبور کند.
 - ورود به Admin نیازمند `AccessProfile.type = STAFF` و ورود به Company نیازمند `AccessProfile.type = COMPANY` است.
+- ثبت‌نام CUSTOMER طبق قرارداد فعلی `AccessProfile` ندارد؛ فقط `CUSTOMER_USER` بدون AccessProfile می‌تواند از زمینه پیش‌فرض Website استفاده کند. این fallback هرگز دسترسی STAFF/COMPANY نمی‌دهد و برای SUPER_ADMIN معتبر نیست.
 - middleware عمومی `requireAccessType` و PKCE handoff باید این مرز را در هر مرحله enforce کنند.
 - عملیات سراسری با AccessProfile مناسب STAFF و permissionهای لازم انجام می‌شود؛ role membership به‌تنهایی زمینه کاربر را تغییر نمی‌دهد.
 - تست‌های auth، RBAC و handoff باید دسترسی مجاز، زمینه ناسازگار، AccessProfile غایب و access غیرفعال را پوشش دهند.
