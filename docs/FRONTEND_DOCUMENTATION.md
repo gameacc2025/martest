@@ -71,6 +71,7 @@ pnpm test
 - پروفایل مشتری: `apps/website/src/pages/public/UserProfile.vue`، مسیر `/profile`.
 - مدیریت آدرس‌ها: `apps/website/src/pages/public/Addresses.vue`، مسیر `/profile/addresses`.
 - درخواست‌ها از endpointهای مرکزی `packages/api-client/endpoints.js` استفاده می‌کنند؛ مالکیت آدرس در backend با هویت کاربر احراز هویت‌شده اعمال می‌شود.
+- Cart / Checkout / Orders / Wishlist فایل‌های قدیمی/آینده هستند و عمداً از router و کنترل‌های فعال محصول/پروفایل خارج شده‌اند؛ وجود فایل به معنی قابلیت فعال نیست.
 
 ## احراز هویت و مرز پنل‌ها
 
