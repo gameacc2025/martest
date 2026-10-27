@@ -54,15 +54,13 @@ function sha256b64url(value) {
 
 /**
  * Panel access rules: the target app must match the user's access type.
- * SUPER_ADMIN bypasses (support/debugging), mirroring the RBAC wildcard.
+ * Wildcard permissions never override the app-context boundary.
  */
 function assertPanelAccess(app, accessProfile, roles) {
   const required = APP_TO_ACCESS_TYPE[app];
   if (!required) {
     throw createError(400, 'INVALID_APP', 'Unknown app.');
   }
-  if (Array.isArray(roles) && roles.includes('SUPER_ADMIN')) return;
-
   if (!accessProfile || accessProfile.type !== required) {
     throw createError(403, 'APP_ACCESS_DENIED', 'این حساب کاربری به این پنل دسترسی ندارد.');
   }
