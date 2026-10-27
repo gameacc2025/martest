@@ -44,18 +44,6 @@
             <template #content>
               <div class="space-y-2">
                 <Button
-                  label="سفارشات من"
-                  icon="pi pi-shopping-bag"
-                  class="w-full p-button-text justify-start"
-                  @click="goToOrders"
-                />
-                <Button
-                  label="لیست علاقه مندی ها"
-                  icon="pi pi-heart"
-                  class="w-full p-button-text justify-start"
-                  @click="goToWishlist"
-                />
-                <Button
                   label="اعلان ها"
                   icon="pi pi-bell"
                   class="w-full p-button-text justify-start"
@@ -122,79 +110,10 @@
                   </div>
                 </div>
 
-                <div>
-                  <h3 class="font-semibold mb-4">آمار کاربر</h3>
-                  <div class="space-y-3">
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">تعداد سفارشات:</span>
-                      <span>{{ userStats.orderCount || 0 }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">مبلغ کل سفارشات:</span>
-                      <span>{{ formatPrice(userStats.totalSpent || 0) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">تعداد نظرات:</span>
-                      <span>{{ userStats.reviewCount || 0 }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">امتیاز کلی:</span>
-                      <Rating :modelValue="userStats.averageRating || 0" :cancel="false" readonly />
-                    </div>
-                  </div>
-                </div>
               </div>
             </template>
           </Card>
 
-          <!-- Recent Orders -->
-          <Card class="mt-4">
-            <template #title>آخرین سفارشات</template>
-            <template #content>
-              <div v-if="recentOrders.length === 0" class="text-center py-4 text-gray-500">
-                سفارشی یافت نشد
-              </div>
-              <div v-else class="space-y-4">
-                <div
-                  v-for="order in recentOrders"
-                  :key="order.id"
-                  class="order-item p-4 border rounded-lg"
-                >
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <h4 class="font-semibold">سفارش #{{ order.orderNumber }}</h4>
-                      <p class="text-sm text-gray-500">{{ formatDate(order.createdAt) }}</p>
-                      <p class="text-sm mt-1">
-                        <span :class="getOrderStatusClass(order.status)">
-                          {{ getOrderStatusText(order.status) }}
-                        </span>
-                      </p>
-                    </div>
-                    <div class="text-right">
-                      <p class="font-semibold">{{ formatPrice(order.total) }}</p>
-                      <p class="text-sm text-gray-500">{{ order.items ? order.items.length : 0 }} محصول</p>
-                    </div>
-                  </div>
-                  <div class="mt-2">
-                    <Button
-                      label="مشاهده جزئیات"
-                      icon="pi pi-eye"
-                      class="p-button-text p-button-sm"
-                      @click="viewOrder(order.id)"
-                    />
-                  </div>
-                </div>
-              </div>
-            </template>
-            <template #footer>
-              <Button
-                label="مشاهده همه سفارشات"
-                icon="pi pi-list"
-                class="p-button-outlined"
-                @click="goToOrders"
-              />
-            </template>
-          </Card>
         </div>
       </div>
     </div>
@@ -352,23 +271,18 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
-import { useOrderStore } from '../../stores/orders'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
-import Rating from 'primevue/rating'
 import FileUpload from 'primevue/fileupload'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const orderStore = useOrderStore()
 
 const user = ref({})
-const userStats = ref({})
-const recentOrders = ref([])
 const notificationCount = ref('0')
 
 const editProfileDialog = ref(false)
@@ -399,8 +313,6 @@ const passwordForm = ref({
 
 onMounted(async () => {
   await loadUserProfile()
-  await loadUserStats()
-  await loadRecentOrders()
 })
 
 const loadUserProfile = async () => {
@@ -418,58 +330,9 @@ const loadUserProfile = async () => {
   }
 }
 
-const loadUserStats = async () => {
-  try {
-    const data = await orderStore.getUserStats()
-    userStats.value = data
-  } catch (error) {
-    console.error('Error loading user stats:', error)
-  }
-}
-
-const loadRecentOrders = async () => {
-  try {
-    const data = await orderStore.getRecentOrders(5)
-    recentOrders.value = data
-  } catch (error) {
-    console.error('Error loading recent orders:', error)
-  }
-}
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('fa-IR', {
-    style: 'currency',
-    currency: 'IRR'
-  }).format(price)
-}
-
 const formatDate = (date) => {
   if (!date) return 'نامشخص'
   return new Date(date).toLocaleDateString('fa-IR')
-}
-
-const getOrderStatusText = (status) => {
-  const statusMap = {
-    pending: 'در انتظار پردازش',
-    processing: 'در حال پردازش',
-    shipped: 'ارسال شده',
-    delivered: 'تحویل داده شده',
-    cancelled: 'لغو شده',
-    refunded: 'مرجوع شده'
-  }
-  return statusMap[status] || status
-}
-
-const getOrderStatusClass = (status) => {
-  const statusClass = {
-    pending: 'text-yellow-600',
-    processing: 'text-blue-600',
-    shipped: 'text-purple-600',
-    delivered: 'text-green-600',
-    cancelled: 'text-red-600',
-    refunded: 'text-orange-600'
-  }
-  return statusClass[status] || 'text-gray-600'
 }
 
 const editProfile = () => {
@@ -538,14 +401,6 @@ const onAvatarUpload = async (event) => {
   }
 }
 
-const goToOrders = () => {
-  router.push({ name: 'orders' })
-}
-
-const goToWishlist = () => {
-  router.push({ name: 'wishlist' })
-}
-
 const goToNotifications = () => {
   router.push({ name: 'notifications' })
 }
@@ -556,10 +411,6 @@ const goToAddresses = () => {
 
 const goToTransactions = () => {
   router.push('/profile/transactions')
-}
-
-const viewOrder = (orderId) => {
-  router.push({ name: 'order-details', params: { id: orderId } })
 }
 
 const logout = async () => {
