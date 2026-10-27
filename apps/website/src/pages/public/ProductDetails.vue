@@ -239,6 +239,7 @@ import { apiGet } from '@telecom/shared-core/http/apiClient'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import { useAuthStore } from '../../stores/auth'
+import { buildPriceHistoryPoints } from '../../utils/priceHistory'
 import { inquiriesApi } from '@telecom/api-client'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
@@ -274,28 +275,7 @@ const productTags = computed(() => {
       : []
   return [...new Set(tags.map(tag => String(typeof tag === 'object' ? (tag.name || tag.label || '') : tag).trim()).filter(Boolean))]
 })
-const priceHistoryPoints = computed(() => {
-  const now = new Date()
-  const cutoff = new Date(now)
-  cutoff.setMonth(cutoff.getMonth() - 6)
-  const entries = priceHistoryRecords.value.map((record, index) => {
-    const date = new Date(record.recordedAt)
-    return {
-      key: record.id ?? index,
-      date,
-      price: Number(record.price),
-      minQuantity: record.minQuantity,
-      action: record.action,
-    }
-  }).filter(point => Number.isFinite(point.price) && !Number.isNaN(point.date.getTime()) && point.date >= cutoff && point.date <= now)
-    .sort((a, b) => a.date - b.date)
-  const maxPrice = Math.max(...entries.map(point => point.price), 0)
-  return entries.map(point => ({
-    ...point,
-    label: point.date.toLocaleDateString('fa-IR', { month: 'short', year: 'numeric' }),
-    width: maxPrice > 0 ? Math.max(3, point.price / maxPrice * 100) : 0,
-  }))
-})
+const priceHistoryPoints = computed(() => buildPriceHistoryPoints(priceHistoryRecords.value))
 
 const openPriceHistory = async () => {
   priceHistoryDialogOpen.value = true
