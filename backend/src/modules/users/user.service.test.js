@@ -482,6 +482,28 @@ test('updateUser: a non-admin caller from a different company is rejected (403)'
   );
 });
 
+test('updateUser: changing panel access requires the matching activate/deactivate permission', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { id: 1, type: 'COMPANY', companyId: 10, isActive: true } });
+
+  await assert.rejects(
+    () => updateUser(5, { isAccessActive: false }, caller({ roles: ['STAFF_EDITOR'], companyId: 10, permissions: ['users.update'] })),
+    (err) => err.statusCode === 403 && err.code === 'PERMISSION_REQUIRED',
+  );
+  assert.equal(calls.accessProfileUpsert.length, 0);
+});
+
+test('updateUser: panel access can be changed with the specific deactivate permission', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { id: 1, type: 'COMPANY', companyId: 10, isActive: true } });
+
+  await updateUser(5, { isAccessActive: false }, caller({
+    roles: ['STAFF_EDITOR'], companyId: 10, permissions: ['users.update', 'users.deactivate'],
+  }));
+
+  assert.equal(calls.accessProfileUpsert[0].update.isActive, false);
+});
+
 test('updateUser: only a SUPER_ADMIN may change companyId/type', async () => {
   resetMocks();
   fx.userById = dbUser({ accessProfile: { companyId: 10 } });
