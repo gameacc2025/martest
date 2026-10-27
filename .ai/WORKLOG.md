@@ -553,3 +553,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Important scope limit:** This run validates the PR branch snapshot, not the latest main head. The branch and main have diverged substantially (compare reports 61 commits ahead and 77 behind). PR #9 includes changes beyond the runtime workflow, including customer-address code, Dockerfiles, migration/schema changes and frontend/router changes. Do not merge the entire PR solely because its runtime workflow passed; it needs a fresh base/rebase and conflict/behavior review.
 - **Current main CI:** No workflow run was returned for documentation commit `0aba93bd1a2922a7029b8e9010f87953a6d0671b` through the commit-run lookup. This is NOT evidence of a failure or a pass; latest-main CI remains NOT VERIFIED.
 - **Next action:** Port the runtime workflow and minimal browser smoke tests to a fresh branch based on current main, adapting tests to the current code. Trigger the workflow there and verify the final result before marking runtime/browser validation complete on main.
+
+
+## 2026-10-27 — RUNTIME-VALIDATION-MAIN-01 — Port smoke validation onto current main
+
+- **Status:** IN PROGRESS — PR opened; workflow result not yet observable.
+- **Branch:** `runtime-validation-main`, based directly on current main (`99bfb3386704260c0bfbc3baee9bff9e747fad86`).
+- **PR:** #14 — https://github.com/gameacc2025/martest/pull/14
+- **Changes isolated to five new files:** `.github/workflows/runtime-validation.yml`, `e2e/package.json`, `e2e/playwright.config.js`, `e2e/tests/panels.spec.js`, `e2e/tests/auth-flow.spec.js`.
+- **Coverage intended:** disposable Docker Compose configuration/build/start, backend + all three frontend health endpoints, PostgreSQL migration status, Playwright Chromium installation, initial render at desktop/mobile viewport for each panel, API proxy reachability, and STAFF login → cross-app handoff → logout.
+- **Branch safety:** Compare against main reports exactly 5 commits ahead, 0 behind; no unrelated address/schema/product code is included. The PR is not merged.
+- **CI observation:** The commit status query currently returns no statuses and the workflow-run lookup returns no runs for the head SHA. Thus the new workflow's runtime/browser result is NOT VERIFIED yet. Do not merge until a completed green run is observable.
+- **Next action for this stage:** Verify the PR's CI result; if no workflow is triggered, diagnose workflow dispatch/Actions visibility and adjust the workflow trigger before considering this stage complete.
