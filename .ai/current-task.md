@@ -2,46 +2,48 @@
 
 Updated: 2026-10-27
 
-## Current status
+## User direction
 
-The user authorized fixing the remaining repository issues, merging safe branches into `main`, keeping automated tests in the repository without waiting for browser execution, and continuously updating documentation and AI handoff files.
+The owner authorized fixing the remaining issues, merging safe work into `main`, writing regression tests without waiting for live browser execution, proceeding through the remaining work, and keeping all relevant docs and AI handoff files updated.
 
-### Completed in this continuation
+## Completed on main in this continuation
 
-- PR #14 merged into `main` as commit `92501f206ab16b163d8d4605e685cbe3396dd2aa`.
-- Added Docker runtime validation and Playwright smoke tests for all three panels, protected API proxy reachability, responsive initial rendering, and STAFF login → Admin handoff → logout.
-- Configured `VITE_COMPANY_APP_URL` and `VITE_ADMIN_APP_URL` as build-time Vite arguments across the three Dockerfiles and Compose.
-- On the PR branch, CI run `40555574784` and fresh PostgreSQL migration run `40555574786` completed successfully. Runtime run `40555575064` passed Compose config, image build/start, service health endpoints, and migration status. The Playwright browser step was still in progress at last observation and is intentionally not a blocker per the user.
-- Removed the global `SUPER_ADMIN` app-context bypass from login, `requireAccessType`, and PKCE handoff. Added/updated unit tests for login and RBAC and added `backend/src/modules/auth/handoff.service.test.js`.
-- Updated `docs/role-access-matrix.md`, `docs/ARCHITECTURE_DECISIONS.md`, and `.ai/decisions.md` to record the strict AccessProfile context rule.
+- PR #14 was squash-merged into `main` as `92501f206ab16b163d8d4605e685cbe3396dd2aa`. It adds Docker runtime validation and Playwright smoke tests. The browser step was not awaited and must not be reported as passed.
+- Runtime validation on the PR head observed successful Compose config validation, Docker build/start, all service health endpoints, and Prisma migration status. CI run `40555574784` and migration run `40555574786` passed on that PR head.
+- Strict security context: removed the SUPER_ADMIN cross-app bypass from auth login, generic `requireAccessType`, and PKCE handoff. Customer registrations intentionally have no AccessProfile; only `CUSTOMER_USER` can use the default Website context, and that fallback does not permit Admin/Company or SUPER_ADMIN.
+- Added regression tests for auth login/RBAC/handoff and customer default Website context.
+- Ported the customer Address feature selectively: Prisma model and migration `20261027200000_customer_addresses`, API route/controller/service, ownership/default-address tests, shared API endpoints, Website page and routes, profile/menu links.
+- Fixed address default invariants: a customer cannot end up without a default when an address exists; ownership remains scoped by authenticated user.
+- Fixed the customer profile contract: `GET /auth/me` response is mapped from `user` + `profile` + `accessProfile`; profile update sends only backend-supported first/last name fields; password change excludes confirmation from API payload and validates it client-side; errors are visible.
+- Fixed auth-store profile normalization so `/settings/profile` response stores only the nested personal profile instead of the full user object. Added a store regression test.
+- Added `jti` to refresh JWTs and a uniqueness regression test to prevent identical refresh tokens issued in the same second.
+- Extracted the six-month price-history transformation into `apps/website/src/utils/priceHistory.js` and added Vitest coverage for date filtering, ordering, widths, and invalid records. Backend price snapshot/API/service tests already exist.
+- Added payment callback replay and verified-retry idempotency tests. Provider verification remains server-side; do not mark live payment as verified without credentials/staging.
+- Enforced frozen AD-4: Cart / Checkout / Orders / Wishlist remain dormant future B2C pages. Their routes and active product/profile controls were removed; files remain for future development.
+- Added Rolldown vendor chunk splitting and architecture graph generation/check scripts.
+- Fixed the backend Docker runtime image to include Prisma CLI and OpenSSL so startup migrations do not rely on an implicit `npx` download.
+- Updated API/database/frontend/Docker/architecture/security docs, `.ai/project-context.md`, `.ai/decisions.md`, this task file, worklog and quality audit.
 
-## Remaining work — continue without asking for routine approval
+## Immediate remaining work
 
-1. Verify/fix CI regressions from strict auth-context enforcement; keep tests aligned with the rule that `AccessProfile.type` is the app boundary.
-2. Port useful customer-address/dashboard changes selectively from PR #9 / PR #11 onto current `main`. Do not merge their old base wholesale: PR #9 became non-mergeable after new main commits, and PR #11 is based on `docs-runtime-e2e-hardening`, not `main`.
-3. Audit the existing product price-history snapshot/API/tests and the product → inquiry → supplier quote → buyer decision flow. Fix missing behavior and add backend/API/UI regression tests where implementation is incomplete.
-4. Review wishlist state and its documented disabled/future-B2C status. Do not reactivate cart/checkout/orders/wishlist UI against the frozen architecture decision without a clear existing implementation contract.
-5. Verify inquiry monetization subscription/payment callback replay/idempotency/retry paths from code and tests. Clearly document integrations that cannot be verified without staging credentials.
-6. Verify notification inbox regression tests and current CI coverage; preserve folder/read-state semantics already recorded in `.ai/decisions.md`.
-7. Update the relevant API, database, frontend, Docker, role-access, quality-audit and agent documents for every behavior/schema/test change. Append facts to `.ai/WORKLOG.md`; keep this file accurate.
-8. Capture the Admin bundle warning as a tracked performance item only after tracing current Vite/Rolldown output; avoid speculative chunking changes.
+1. Create a validation PR from the current main snapshot with a documentation/worklog checkpoint so CI runs the latest backend tests, frontend Vitest tests, Prisma validation/migrations, and all frontend builds. Do not wait for the Playwright runtime/browser step; retain it as automated coverage.
+2. Fix any CI failures surfaced by that run, then merge the validation PR. Do not claim tests passed before observing the completed CI result.
+3. Close stale PR #9 and PR #11 after recording that their useful code has been ported selectively; neither old branch should be force-merged over current main. PR #14 is already merged.
+4. Review notification folder/read-state regression tests and confirm docs match the current implementation.
+5. Verify architecture graph with `pnpm architecture:check` in CI; fix the generated graph if stale.
+6. Keep SMTP status as NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Do not report third-party delivery as successful based only on unit tests.
 
-## Branch/PR handling
+## Security and architecture contract
 
-- PR #14 is merged.
-- PR #9 remains open but is no longer mergeable against current main. It contains useful address, token, architecture-graph and code-splitting changes, but its diff must be ported selectively to avoid reverting current docs/Docker/security work.
-- PR #11 is based on PR #9's branch. Port its customer profile change only after checking API contract and missing order-domain dependencies; do not claim order history/statistics are implemented because no order backend module exists.
-- The connected GitHub actions currently available here do not expose branch deletion. Do not claim stale branches were deleted.
-
-## Security contract
-
-- `AccessProfile.type` selects the application context: STAFF → Admin, COMPANY → Company Portal, CUSTOMER → Website.
-- `SUPER_ADMIN` wildcard permission does not bypass app-context checks. Cross-app role membership is not a grant of access to another panel.
-- Keep resource ownership checks in services in addition to route guards.
-- SMTP delivery cannot be certified without live credentials and a test recipient. SMS is not implemented; keep it documented as such rather than reporting delivery success.
+- `AccessProfile.type` is the strict Admin/Company boundary: STAFF → Admin, COMPANY → Company Portal.
+- Customer registration intentionally has no AccessProfile; `CUSTOMER_USER` may access only the default Website/CUSTOMER context. This fallback cannot grant STAFF/COMPANY access and cannot be used by SUPER_ADMIN.
+- Role/permission wildcard does not override app context or resource ownership. Ownership remains enforced in backend services.
+- Product price history uses persisted snapshots; never fabricate history for periods with no data.
+- Inquiry permissions, subscription quotas, response decisions, and payment callbacks must be checked in backend services as well as UI.
+- B2C Cart / Checkout / Orders / Wishlist remain disabled per AD-4 until the owner explicitly changes the architecture decision.
 
 ## Verification discipline
 
-- Distinguish unit/CI pass, Prisma migration pass, Docker runtime pass, browser E2E pass, and live third-party integration checks.
-- Browser E2E tests remain committed, but do not wait for their live execution as a blocker for continuing work.
+- Distinguish backend unit tests, frontend Vitest tests, Prisma migration validation, Docker runtime checks, browser E2E, and live third-party integration tests.
+- Browser E2E tests remain committed; their live completion is not a blocker per owner instruction.
 - Never label a test as passed unless a completed run or local result is actually observed.
