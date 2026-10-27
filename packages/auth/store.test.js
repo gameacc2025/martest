@@ -35,7 +35,7 @@ vi.mock('@telecom/api-client', () => ({
   showSessionToast: vi.fn(),
 }))
 
-import { apiGet, apiPost } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiPost, apiPatch } from '@telecom/shared-core/http/apiClient'
 import { showSessionToast } from '@telecom/api-client'
 
 /**
@@ -496,6 +496,29 @@ describe('restoreSession (boot-time silent recovery)', () => {
       return {}
     })
     await expect(store2.restoreSession()).resolves.toBe(false)
+  })
+})
+
+describe('updateProfile', () => {
+  it('stores only the nested personal profile returned by the settings API', async () => {
+    const store = useAuthStore()
+    const personalProfile = { id: 5, firstName: 'نرگس', lastName: 'رضایی', avatar: null, metadata: null }
+    apiPatch.mockResolvedValueOnce({
+      id: 1,
+      email: 'buyer@example.com',
+      phone: '09120000000',
+      profile: personalProfile,
+      accessProfile: null,
+      roles: [{ role: { name: 'CUSTOMER_USER' } }],
+    })
+
+    const updated = await store.updateProfile({ firstName: 'نرگس' })
+
+    expect(apiPatch).toHaveBeenCalledWith('/settings/profile', { firstName: 'نرگس' })
+    expect(updated).toEqual(personalProfile)
+    expect(store.profile).toEqual(personalProfile)
+    expect(store.profile).not.toHaveProperty('email')
+    expect(store.accessProfile).toBeNull()
   })
 })
 
