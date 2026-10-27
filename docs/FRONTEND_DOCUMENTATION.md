@@ -66,6 +66,12 @@ pnpm test
 - خطاهای احراز هویت، پاسخ صفحه‌بندی‌شده و خطاهای API باید مطابق helperهای موجود پردازش شوند.
 - از افزودن مستقیم fetch/axios یا client موازی بدون بررسی الگوی فعلی خودداری کنید.
 
+## پروفایل مشتری و آدرس‌ها
+
+- پروفایل مشتری: `apps/website/src/pages/public/UserProfile.vue`، مسیر `/profile`.
+- مدیریت آدرس‌ها: `apps/website/src/pages/public/Addresses.vue`، مسیر `/profile/addresses`.
+- درخواست‌ها از endpointهای مرکزی `packages/api-client/endpoints.js` استفاده می‌کنند؛ مالکیت آدرس در backend با هویت کاربر احراز هویت‌شده اعمال می‌شود.
+
 ## احراز هویت و مرز پنل‌ها
 
 - زمینه برنامه از access profile می‌آید: `CUSTOMER`، `COMPANY` یا `STAFF`.
