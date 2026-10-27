@@ -10,13 +10,13 @@
 // =============================================================
 
 const ctrl = require('./permission.controller');
-const { requirePermission } = require('../../middlewares/rbac');
+const { requirePermission, requireExactAccessType } = require('../../middlewares/rbac');
 const { idParam, createPermissionBody, updatePermissionBody } = require('./permission.schemas');
 
 async function permissionRoutes(fastify) {
   fastify.get('/', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('permissions.read')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('permissions.read')],
     schema: {
       summary: 'List permissions',
       tags: ['Permissions'],
@@ -35,7 +35,7 @@ async function permissionRoutes(fastify) {
 
   fastify.get('/:id', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('permissions.read')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('permissions.read')],
     schema: {
       summary: 'Get permission by ID',
       tags: ['Permissions'],
@@ -45,7 +45,7 @@ async function permissionRoutes(fastify) {
 
   fastify.post('/', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('permissions.create')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('permissions.create')],
     schema: {
       summary: 'Create permission',
       tags: ['Permissions'],
@@ -55,7 +55,7 @@ async function permissionRoutes(fastify) {
 
   fastify.patch('/:id', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('permissions.update')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('permissions.update')],
     schema: {
       summary: 'Update permission',
       tags: ['Permissions'],
@@ -66,7 +66,7 @@ async function permissionRoutes(fastify) {
 
   fastify.delete('/:id', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('permissions.delete')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('permissions.delete')],
     schema: {
       summary: 'Delete permission',
       tags: ['Permissions'],
