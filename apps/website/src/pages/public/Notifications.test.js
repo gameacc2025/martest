@@ -93,6 +93,28 @@ describe('Website notification inbox', () => {
     expect(wrapper.findAll('.message-row')).toHaveLength(1)
     expect(wrapper.find('.message-row').text()).toContain('وضعیت محصول تغییر کرد')
   })
+  it('filters the unread folder without changing the independent folder counts', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+
+    const folderButtons = wrapper.findAll('.folder-link:not(.category-link)')
+    const countsBefore = folderButtons.map((button) => button.find('b').text())
+    expect(folderButtons.map((button) => button.text())).toEqual([
+      expect.stringContaining('همه پیام‌ها'),
+      expect.stringContaining('خوانده‌نشده'),
+      expect.stringContaining('خوانده‌شده'),
+    ])
+
+    await folderButtons[1].trigger('click')
+    await flushPromises()
+
+    expect(apiGetPaginated).toHaveBeenCalledWith('/settings/notifications?page=1&limit=20&unreadOnly=true')
+    const countsAfter = wrapper.findAll('.folder-link:not(.category-link)').map((button) => button.find('b').text())
+    expect(countsAfter).toEqual(countsBefore)
+  })
+
   it('does not mark a notification as read just because it is selected on initial load', async () => {
     wrapper = shallowMount(Notifications, {
       global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
