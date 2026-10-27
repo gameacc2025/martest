@@ -498,3 +498,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 - **Post-review hardening (2026-10-27):** Added a standalone outbox worker command, `npm run worker:notifications`, which polls both email and SMS deliveries. Run as a single replica until delivery claiming supports a database lease for safe multi-worker deployment. Added a regression test for a successful server-verified payment racing with a cancellation callback; verified payments can still activate without trusting callback query parameters. Administrative support grants now lock the owner row to avoid concurrent duplicate active grants.
 - **Latest verification:** Revalidation is running for the payment-race test and notification worker additions. Do not merge until the latest CI and migration validation checks finish successfully. Live payment/Twilio tests still require configured staging credentials.
+
+
+## 2026-10-27 — MARKETPLACE-E2E-01 — Supplier response and quotation lifecycle audit
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Continue after the user-tested inquiry monetization work by auditing and hardening the B2B path from published product to inquiry, supplier response/quote, buyer decision, and terminal state.
+- **Claimed scope:** Trace response/quote authorization and ownership; verify STAFF/COMPANY/CUSTOMER boundaries; check deadlines, sealed/anonymous-sealed privacy, duplicate responses, quote item ownership, decision races, and notification side effects; add regression tests for confirmed defects; update project handoff.
+- **Observed starting point:** Main contains inquiry creation/lifecycle, supplier responses, buyer decisions, sealed visibility, and subscription quotas. CI and fresh-PostgreSQL migration validation passed on merge commit `bd90c07f56d3e8f973db52970f6f5f43ff3429d8`.
+- **Initial risk to verify:** `submitResponse` blocks ordinary STAFF but exempts SUPER_ADMIN STAFF, while `resolveCompanyId` allows that caller to supply a company ID. This may violate the documented rule that STAFF does not act as a supplier; reproduce with tests before changing behavior.
+- **Plan:** Inspect route permissions, service helpers, existing unit tests, and caller identity contracts; add a failing regression test for any confirmed authorization bypass; make the smallest backend fix; run targeted backend tests and CI/build/migration validation; document actual results.
+- **Commit:** Not yet committed.
+- **Push:** Not yet pushed.
+- **Next action:** Confirm the STAFF/SUPER_ADMIN quote-submission behavior against tests and related authorization decisions; then implement only verified gaps.
