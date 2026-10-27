@@ -235,7 +235,7 @@ test('PATCH /settings/product-review-threshold: SUPER_ADMIN bypasses permission 
   const res = await app.inject({
     method: 'PATCH',
     url: '/api/v1/admin/settings/product-review-threshold',
-    headers: { 'x-test-user': JSON.stringify({ roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
+    headers: { 'x-test-user': JSON.stringify({ accessType: 'STAFF', roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
     payload: { value: 7 },
   });
   assert.equal(res.statusCode, 200);
