@@ -11,8 +11,9 @@
 
 ## P1 — REPOSITORY-QUALITY-AUDIT-2026-10-26-01: Runtime and browser verification
 
-- **Status:** IN_PROGRESS
-- **Latest documentation work:** Core README, frontend, Docker, API, database and role-access matrix documents were reconciled with the current monorepo/source on 2026-10-27. See the appended WORKLOG entry and commits `3e9bacb`, `e3e5e7f`, `d0518eb`, `bf43f91`, `eab7069`, `7587c49`.
-- **Not verified:** CI for the latest documentation commits, Docker image build/Compose startup, real PostgreSQL migration deployment, browser E2E/visual flows, live SMTP/Twilio delivery and payment provider acceptance.
-- **Known open work:** PR #9 is listed as open for documentation/runtime/browser validation; PR #11 is listed as open for customer dashboard alignment. Confirm current PR/CI state before doing overlapping work.
-- **Next action:** Inspect the latest CI and runtime-validation workflow result; complete the highest-priority runtime/browser gaps where a supported environment exists. Do not claim a runtime or provider check passed unless its actual result is observed.
+- **Status:** IN PROGRESS — PR-branch validation passed; current main still unverified.
+- **Documentation:** Core README, frontend, Docker, API, database, role-access matrix and quality-audit documents were reconciled on main. See WORKLOG entries dated 2026-10-27.
+- **Observed runtime result:** Workflow run `40339211695`, job `122194361685` on branch `docs-runtime-e2e-hardening` completed successfully, including Compose config, Docker build/start for PostgreSQL/backend/all three panels, health checks, Prisma migration status, Chromium installation and Playwright browser smoke tests.
+- **Scope limitation:** PR #9's branch is 61 commits ahead and 77 behind main and includes unrelated schema/migration/address/Docker/frontend changes. Do not merge the full PR just to obtain its workflow. Current main CI for latest documentation head has not been independently verified.
+- **Next action:** Create a minimal runtime/browser validation change based on current main, port/adapt only the workflow and smoke tests, then run it and inspect the final CI result. Do not claim main runtime validation passes until that run is green.
+- **Known open work:** PR #11 (customer dashboard/address work) must be rechecked after higher-priority runtime/security work. Global SUPER_ADMIN policy remains unresolved and must not be silently changed.
