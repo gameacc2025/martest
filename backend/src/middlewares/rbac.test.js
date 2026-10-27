@@ -32,6 +32,7 @@ test.after(() => {
 const {
   hasPermission,
   requireAccessType,
+  requireExactAccessType,
   requirePermission,
   requireAnyPermission,
   requireRole,
@@ -79,6 +80,24 @@ test('hasPermission mode=all requires every permission', () => {
 test('hasPermission mode=any requires at least one permission', () => {
   assert.equal(hasPermission(staff, ['users.delete', 'users.create'], 'any'), true);
   assert.equal(hasPermission(staff, ['users.delete', 'roles.delete'], 'any'), false);
+});
+
+// ── requireExactAccessType ────────────────────────────────────
+
+test('requireExactAccessType: rejects a COMPANY SUPER_ADMIN at a STAFF boundary', async () => {
+  const reply = makeReply();
+  await requireExactAccessType('STAFF')({
+    user: { accessType: 'COMPANY', roles: ['SUPER_ADMIN'], permissions: ['*'] },
+  }, reply);
+  assert.equal(reply.statusCode, 403);
+  assert.equal(reply.body.code, 'FORBIDDEN');
+});
+
+test('requireExactAccessType: allows a matching STAFF context', async () => {
+  const reply = makeReply();
+  const result = await requireExactAccessType('STAFF')({ user: staff }, reply);
+  assert.equal(result, undefined);
+  assert.equal(reply.statusCode, null);
 });
 
 // ── requireAccessType ────────────────────────────────────────
