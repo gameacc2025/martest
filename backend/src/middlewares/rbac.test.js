@@ -60,6 +60,7 @@ const superAdmin = { roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'ST
 const staff = { roles: ['STAFF_ROLE'], permissions: ['users.read', 'users.create'], accessType: 'STAFF', companyId: null };
 const company = { roles: ['COMPANY_ADMIN'], permissions: ['products.read'], accessType: 'COMPANY', companyId: 10 };
 const customer = { roles: ['CUSTOMER_USER'], permissions: [], accessType: 'CUSTOMER', companyId: null };
+const defaultWebsiteCustomer = { roles: ['CUSTOMER_USER'], permissions: [], accessType: null, companyId: null };
 
 // ── hasPermission ────────────────────────────────────────────
 
@@ -119,6 +120,22 @@ test('requireAccessType: allows a matching access type', async () => {
 test('requireAccessType: rejects a mismatched access type with 403', async () => {
   const reply = makeReply();
   await requireAccessType('STAFF')({ user: company }, reply);
+  assert.equal(reply.statusCode, 403);
+  assert.equal(reply.body.code, 'FORBIDDEN');
+});
+
+test('requireAccessType: allows default Website customers with no AccessProfile', async () => {
+  const reply = makeReply();
+  const result = await requireAccessType('CUSTOMER')({ user: defaultWebsiteCustomer }, reply);
+  assert.equal(result, undefined);
+  assert.equal(reply.statusCode, null);
+});
+
+test('requireAccessType: SUPER_ADMIN without an access profile cannot use the customer fallback', async () => {
+  const reply = makeReply();
+  await requireAccessType('CUSTOMER')({
+    user: { roles: ['SUPER_ADMIN', 'CUSTOMER_USER'], permissions: ['*'], accessType: null },
+  }, reply);
   assert.equal(reply.statusCode, 403);
   assert.equal(reply.body.code, 'FORBIDDEN');
 });
