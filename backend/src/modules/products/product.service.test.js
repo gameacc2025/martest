@@ -172,7 +172,8 @@ const service = require('./product.service');
 test.beforeEach(() => resetMocks());
 
 // ── Callers used across tests ────────────────────────────────
-const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'] };
+const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF' };
+const companySuperAdmin = { id: 2, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'COMPANY', companyId: 10 };
 const companyA = { id: 2, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 10 };
 const companyB = { id: 3, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 20 };
 const staffModerator = { id: 5, roles: ['PRODUCT_MODERATOR'], accessType: 'STAFF', permissions: ['products.read'], companyId: 999 };
@@ -219,6 +220,14 @@ test('tenant isolation: a company cannot manage another company\'s product (403)
   await assert.rejects(
     () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, companyB), // companyB.companyId = 20
     (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('tenant isolation: SUPER_ADMIN role in COMPANY context cannot manage another company product', async () => {
+  fx.product = draftProduct({ companyId: 20 });
+  await assert.rejects(
+    () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, companySuperAdmin),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
   );
 });
 
@@ -298,6 +307,11 @@ test('getProductById: a company sees its own product regardless of status', asyn
 test('getProductById: a company is hidden from another company\'s product (looks like 404, not 403)', async () => {
   fx.product = draftProduct({ companyId: 10, status: 'PUBLISHED', visibility: 'PUBLIC' });
   assert.equal(await service.getProductById(1, companyB), null);
+});
+
+test('getProductById: SUPER_ADMIN role in COMPANY context cannot see another company product', async () => {
+  fx.product = draftProduct({ companyId: 20, status: 'PUBLISHED', visibility: 'PUBLIC' });
+  assert.equal(await service.getProductById(1, companySuperAdmin), null);
 });
 
 test('getProductById: SUPER_ADMIN sees any product regardless of status/visibility/owner', async () => {
@@ -539,6 +553,13 @@ test('changeProductStatus: a company user cannot submitReview on another company
 });
 
 // ── createProduct: company scoping ────────────────────────────
+
+test('createProduct: SUPER_ADMIN role in COMPANY context cannot spoof companyId', async () => {
+  await assert.rejects(
+    () => service.createProduct({ title: 'New', categoryId: 1, subcategoryId: 1, companyId: 999 }, companySuperAdmin),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+});
 
 test('createProduct: SUPER_ADMIN must specify a companyId explicitly (no implicit own-company fallback unless caller has one)', async () => {
   await assert.rejects(
