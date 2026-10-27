@@ -23,7 +23,18 @@
 - مقدار امن `POSTGRES_PASSWORD` در فایل محیطی ریشه؛ Compose در صورت نبودن آن باید fail شود و نباید از رمز پیش‌فرض ناامن استفاده کند.
 - فایل `backend/.env` با تنظیمات محیطی لازم بک‌اند، از جمله secrets احراز هویت و providerهایی که قرار است فعال باشند.
 
-هرگز فایل‌های `.env`، رمزها، tokenها یا credentialهای واقعی را commit نکنید. مقادیر مورد نیاز را از فایل‌های `.env.example` و تنظیمات محیط خود بررسی کنید؛ این سند عمداً مقدار واقعی secret را درج نمی‌کند.
+هرگز فایل‌های `.env`، رمزها، tokenها یا credentialهای واقعی را commit نکنید. از `.env.example` برای متغیرهای ریشه و `backend/.env.example` برای تنظیمات بک‌اند استفاده کنید.
+
+## آدرس پنل‌ها در فرانت‌اند
+
+آدرس‌های پنل شرکت و مدیریت در زمان build با Vite داخل bundle مرورگر قرار می‌گیرند؛ تنظیم کردنشان فقط در environment کانتینر پس از build کافی نیست. فایل `.env` ریشه باید این متغیرها را داشته باشد:
+
+```dotenv
+VITE_COMPANY_APP_URL=http://localhost:3002
+VITE_ADMIN_APP_URL=http://localhost:3003
+```
+
+مقادیر بالا برای اجرای محلی با پورت‌های پیش‌فرض Compose هستند. در استقرار واقعی، آن‌ها را با originهای قابل دسترسی از مرورگر کاربر (ترجیحاً HTTPS) جایگزین کنید و imageها را دوباره build کنید. این آدرس‌ها نباید نام داخلی سرویس Docker مثل `company` یا `admin` باشند، چون مرورگر کاربر قادر به resolve کردن آن‌ها نیست.
 
 ## اعتبارسنجی پیش از اجرا
 
@@ -42,7 +53,7 @@ docker compose logs --tail=200 postgres
 docker compose logs --tail=200 backend
 ```
 
-Backend در Dockerfile فعلی دستورهای `prisma migrate deploy` و سپس `node prisma/seed.js` را قبل از شروع سرور اجرا می‌کند. بنابراین قبل از اجرای آن در محیط واقعی، مقصد دیتابیس، backup و برنامه بازگشت را بررسی کنید. اجرای seed فقط به‌دلیل idempotent بودن برخی عملیات، جایگزین backup نیست.
+Backend در Dockerfile فعلی دستورهای `prisma migrate deploy` و سپس `node prisma/seed.js` را قبل از شروع سرور اجرا می‌کند. بنابراین قبل از اجرای آن در محیط واقعی، مقصد دیتابیس، backup و برنامه بازگشت را بررسی کنید. اجرای seed جایگزین backup نیست.
 
 ## URLهای پیش‌فرض میزبان
 
@@ -68,7 +79,7 @@ docker compose exec postgres pg_isready
 2. مطمئن شوید migrationها در لاگ‌ها با موفقیت اجرا شده‌اند.
 3. خطاهای Prisma Client و متغیرهای محیطی را بررسی کنید؛ secretها را در گزارش عمومی کپی نکنید.
 
-اگر frontend به API دسترسی ندارد، تنظیمات proxy در Dockerfile/nginx هر برنامه را با API prefix `/api/v1` و شبکه Compose تطبیق دهید.
+اگر frontend به API دسترسی ندارد، تنظیمات proxy در nginx هر برنامه را با API prefix `/api/v1` و شبکه Compose تطبیق دهید.
 
 ## وضعیت اعتبارسنجی
 

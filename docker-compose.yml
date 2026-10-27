@@ -2,131 +2,93 @@
 # Docker Compose - Production
 # اجرا:
 # docker compose up -d --build
+# Set VITE_COMPANY_APP_URL and VITE_ADMIN_APP_URL in .env to the
+# public browser-reachable origins when deploying outside localhost.
 # =============================================================
 
 services:
-
-  # ────────────────────────────────────────────────────────────
-  # PostgreSQL
-  # ────────────────────────────────────────────────────────────
   postgres:
     image: postgres:18.4-bookworm
     container_name: telecom_db
     restart: unless-stopped
-
     environment:
-      # No insecure defaults: POSTGRES_PASSWORD is required (see .env /
-      # .env.example). Compose fails to start rather than silently
-      # falling back to a well-known password like the old "telecom_pass".
       POSTGRES_USER: ${POSTGRES_USER:-telecom}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
       POSTGRES_DB: ${POSTGRES_DB:-telecom_marketplace}
-
     volumes:
       - postgres_data:/var/lib/postgresql
-
-    # Deliberately NOT publishing 5432 to the host. Postgres only needs
-    # to be reachable by the "backend" service over the internal
-    # "telecom_net" bridge network. If you need direct DB access for
-    # local debugging, use `docker compose exec postgres psql ...` or a
-    # temporary `docker run --network telecom_net ...` instead of
-    # widening the container's attack surface permanently.
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-telecom} -d ${POSTGRES_DB:-telecom_marketplace}"]
       interval: 10s
       timeout: 5s
       retries: 5
-
     networks:
       - telecom_net
 
-  # ────────────────────────────────────────────────────────────
-  # Backend (Fastify)
-  # ────────────────────────────────────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-
     container_name: telecom_backend
-
     restart: unless-stopped
-
     env_file:
       - ./backend/.env
-
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-telecom}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@postgres:5432/${POSTGRES_DB:-telecom_marketplace}?schema=public
-
     ports:
       - "3000:3000"
-
     depends_on:
       postgres:
         condition: service_healthy
-
     networks:
       - telecom_net
 
-  # ────────────────────────────────────────────────────────────
-  # Website (Public marketplace)
-  # ────────────────────────────────────────────────────────────
   website:
     build:
       context: .
       dockerfile: apps/website/Dockerfile
-
+      args:
+        VITE_COMPANY_APP_URL: ${VITE_COMPANY_APP_URL:-http://localhost:3002}
+        VITE_ADMIN_APP_URL: ${VITE_ADMIN_APP_URL:-http://localhost:3003}
     container_name: telecom_website
     restart: unless-stopped
-
     ports:
       - "3001:80"
-
     depends_on:
       - backend
-
     networks:
       - telecom_net
 
-  # ────────────────────────────────────────────────────────────
-  # Company portal
-  # ────────────────────────────────────────────────────────────
   company:
     build:
       context: .
       dockerfile: apps/company/Dockerfile
-
+      args:
+        VITE_COMPANY_APP_URL: ${VITE_COMPANY_APP_URL:-http://localhost:3002}
+        VITE_ADMIN_APP_URL: ${VITE_ADMIN_APP_URL:-http://localhost:3003}
     container_name: telecom_company
     restart: unless-stopped
-
     ports:
       - "3002:80"
-
     depends_on:
       - backend
-
     networks:
       - telecom_net
 
-  # ────────────────────────────────────────────────────────────
-  # Admin portal
-  # ────────────────────────────────────────────────────────────
   admin:
     build:
       context: .
       dockerfile: apps/admin/Dockerfile
-
+      args:
+        VITE_COMPANY_APP_URL: ${VITE_COMPANY_APP_URL:-http://localhost:3002}
+        VITE_ADMIN_APP_URL: ${VITE_ADMIN_APP_URL:-http://localhost:3003}
     container_name: telecom_admin
     restart: unless-stopped
-
     ports:
       - "3003:80"
-
     depends_on:
       - backend
-
     networks:
       - telecom_net
 
