@@ -247,15 +247,11 @@ async function login(fastify, phone, password, app) {
   // Frontend guards are UX only; this is the real security boundary.
   // Access is decided by the AccessProfile.type, not by role names.
   if (app) {
-    const isSuperAdmin = roles.includes('SUPER_ADMIN');
-
-    if (!isSuperAdmin) {
-      if (app === 'admin' && accessType !== 'STAFF') {
-        throw createError(403, 'APP_ACCESS_DENIED', 'این حساب کاربری به پنل مدیریت دسترسی ندارد.');
-      }
-      if (app === 'company' && accessType !== 'COMPANY') {
-        throw createError(403, 'APP_ACCESS_DENIED', 'این حساب کاربری به پنل شرکت دسترسی ندارد.');
-      }
+    if (app === 'admin' && accessType !== 'STAFF') {
+      throw createError(403, 'APP_ACCESS_DENIED', 'این حساب کاربری به پنل مدیریت دسترسی ندارد.');
+    }
+    if (app === 'company' && accessType !== 'COMPANY') {
+      throw createError(403, 'APP_ACCESS_DENIED', 'این حساب کاربری به پنل شرکت دسترسی ندارد.');
     }
   }
 
