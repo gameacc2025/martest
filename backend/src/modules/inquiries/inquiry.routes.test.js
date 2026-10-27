@@ -376,6 +376,30 @@ test('POST /:id/responses: COMPANY with inquiries.respond -> 200', async () => {
   await app.close();
 });
 
+test('DELETE /:id/responses/:responseId/attachments/:attachmentId: requires supplier response permission', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'DELETE',
+    url: '/api/v1/inquiries/1/responses/2/attachments/3',
+    headers: userHeader('COMPANY', ['inquiries.read']),
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.deleteResponseAttachment, undefined);
+  await app.close();
+});
+
+test('DELETE /:id/responses/:responseId/attachments/:attachmentId: COMPANY with inquiries.respond -> 200', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'DELETE',
+    url: '/api/v1/inquiries/1/responses/2/attachments/3',
+    headers: userHeader('COMPANY', ['inquiries.respond']),
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.deleteResponseAttachment, true);
+  await app.close();
+});
+
 // ── GET /:id/responses — ALL_TYPES ───────────────────────────
 
 test('GET /:id/responses: CUSTOMER with inquiries.read -> 200', async () => {
