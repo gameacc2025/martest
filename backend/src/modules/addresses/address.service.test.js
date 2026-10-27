@@ -118,6 +118,20 @@ test('setting a default address never changes another user’s default', async (
   assert.equal(rows.find((row) => row.id === 3).isDefault, true);
 });
 
+test('unchecking the current default promotes another owned address', async () => {
+  await service.updateAddress(7, 1, { isDefault: false });
+  assert.equal(rows.find((row) => row.id === 1).isDefault, false);
+  assert.equal(rows.find((row) => row.id === 2).isDefault, true);
+  assert.equal(rows.find((row) => row.id === 3).isDefault, true);
+});
+
+test('the only address cannot be left without a default', async () => {
+  rows = rows.filter((row) => row.userId !== 7 || row.id === 1);
+  const result = await service.updateAddress(7, 1, { isDefault: false });
+  assert.equal(result.isDefault, true);
+  assert.equal(rows.filter((row) => row.userId === 7 && row.isDefault).length, 1);
+});
+
 test('address IDs belonging to another user are indistinguishable from missing IDs', async () => {
   await assert.rejects(() => service.getAddress(7, 3), (error) => {
     assert.equal(error.statusCode, 404);
