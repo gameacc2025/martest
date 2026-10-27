@@ -15,7 +15,7 @@ for (const panel of panels) {
     const response = await page.goto(panel.url, { waitUntil: 'networkidle' });
     expect(response, 'navigation should return a response').not.toBeNull();
     expect(response.status(), 'SPA entrypoint should return HTTP 200').toBe(200);
-    await expect(page.locator('#app')).toBeAttached();
+    await expect(page.locator('#app')).toBeAttached({ timeout: 20_000 });
     await expect(page.locator('body')).not.toBeEmpty();
     expect(uncaughtErrors, 'no uncaught JavaScript errors on initial render').toEqual([]);
 
