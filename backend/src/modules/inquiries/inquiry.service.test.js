@@ -942,6 +942,22 @@ test('deleteInquiryItem: a missing item is 404', async () => {
 
 // ── submitResponse ───────────────────────────────────────────
 
+test('submitResponse: STAFF cannot submit a supplier quote even with SUPER_ADMIN role or a supplied companyId', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry();
+  fx.ownedItemIds = [11];
+  const staffAdmin = { ...superAdmin, accessType: 'STAFF' };
+
+  await assert.rejects(
+    () => inquiryService.submitResponse(1, {
+      companyId: seller.companyId,
+      items: [{ inquiryItemId: 11, price: 1, availableQuantity: 1 }],
+    }, staffAdmin),
+    (err) => err.statusCode === 403 && err.code === 'STAFF_CANNOT_RESPOND',
+  );
+  assert.equal(calls['inquiryResponse.create'].length, 0);
+});
+
 test('submitResponse: requires a company', async () => {
   resetMocks();
   await assert.rejects(
