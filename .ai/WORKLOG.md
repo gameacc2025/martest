@@ -597,3 +597,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs updated:** `docs/API_DOCUMENTATION.md`, `docs/DATABASE_DOCUMENTATION.md`, `docs/FRONTEND_DOCUMENTATION.md`, `docs/DOCKER_DEPLOYMENT.md`, `docs/README.md`, `docs/role-access-matrix.md`, `docs/ARCHITECTURE_DECISIONS.md`, `docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md`, `docs/architecture/README.md`, `.ai/project-context.md`, `.ai/decisions.md`, and `.ai/current-task.md`.
 - **Current verification:** PR-head CI and migration runs cited in the previous entry were green. The newest direct-main commits (strict-context tests, address module/migration, profile/auth-store, price-history/payment/token tests, code splitting and Docker runtime changes) have not yet been observed passing a completed CI run. Browser E2E is intentionally not awaited. Next action: create a validation PR from the current main snapshot with a docs/worklog checkpoint, review CI and migration/build results, fix failures, and merge that PR. Do not claim the browser step passed.
 - **External integrations:** SMTP remains NOT VERIFIED without real credentials and a test recipient. SMS remains NOT IMPLEMENTED.
+
+
+## 2026-10-27 — VALIDATE-CURRENT-MAIN-FINAL-01
+
+- **Branch:** `validate-current-main-final-20261027`, created from current main snapshot `4f0793007c7f45d920ce6addc35afacdd24ce701`. Only documentation/worklog checkpoint changes are on this branch; all application code and regression tests match the latest main snapshot.
+- **Prior snapshot results:** CI run `40590958164` passed frontend/shared tests, backend tests and all frontend builds. Database migration run `40590958106` passed Prisma schema/client validation, fresh PostgreSQL migration application and migration status. These runs predate the newest notification folder-count tests.
+- **Runtime/browser instruction:** Previous runtime run `40590958191` failed. The owner explicitly said not to chase browser tests, so the browser job is not a blocker and no browser pass is claimed. Docker runtime checks and Playwright tests remain committed.
+- **Required now:** Run CI and migration validation against this newer snapshot; fix failures if any. Merge this PR only after completed CI and migration checks pass. No live SMTP/SMS/provider verification is implied.
