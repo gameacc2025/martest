@@ -234,6 +234,15 @@ test('listUsers: non-SUPER_ADMIN callers are forced into their own company, igno
   assert.deepEqual(where.AND[0], { accessProfile: { companyId: 10 } });
 });
 
+test('listUsers: CUSTOMER context cannot access user administration even with SUPER_ADMIN role', async () => {
+  resetMocks();
+  await assert.rejects(
+    () => listUsers({}, caller({ roles: [SUPER_ADMIN_ROLE], accessType: 'CUSTOMER', permissions: ['*'] })),
+    (err) => err.statusCode === 403 && err.code === 'ACCESS_TYPE_FORBIDDEN',
+  );
+  assert.equal(calls.userFindMany.length, 0);
+});
+
 test('listUsers: COMPANY context remains tenant-scoped even with a SUPER_ADMIN role', async () => {
   resetMocks();
   await listUsers({ companyId: '999' }, caller({ roles: [SUPER_ADMIN_ROLE], accessType: 'COMPANY', companyId: 10 }));
@@ -345,6 +354,18 @@ test('getUser: SUPER_ADMIN can view a user in any company', async () => {
 });
 
 // ── createUser ───────────────────────────────────────────────
+
+test('createUser: CUSTOMER context cannot create accounts even with SUPER_ADMIN role', async () => {
+  resetMocks();
+  await assert.rejects(
+    () => createUser(
+      { phone: '09120000000', password: 'secret', type: 'COMPANY', companyId: 10 },
+      caller({ roles: [SUPER_ADMIN_ROLE], accessType: 'CUSTOMER', permissions: ['*'] })
+    ),
+    (err) => err.statusCode === 403 && err.code === 'STAFF_CONTEXT_REQUIRED',
+  );
+  assert.equal(calls.userCreate.length, 0);
+});
 
 test('createUser: COMPANY callers cannot create users even inside their own company', async () => {
   resetMocks();
