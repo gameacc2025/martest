@@ -75,3 +75,53 @@ The repository has architecture diagrams embedded in prose documents, but this a
 ## Explicit limitation
 
 This report records verified repository and CI evidence plus findings from source/document review. It does **not** claim the entire application has been manually tested, deployed, security-certified, or visually validated.
+
+## Progress update — 2026-10-27
+
+### Documentation reconciliation
+
+The P1 stale-documentation finding has been addressed at the main-branch document level for the core guide set:
+
+- `docs/README.md` — current pnpm/Vue monorepo and docs index.
+- `docs/FRONTEND_DOCUMENTATION.md` — three Vue/Vite applications and shared packages.
+- `docs/DOCKER_DEPLOYMENT.md` — current production Compose topology, ports, PostgreSQL 18 image and Node 22 backend.
+- `docs/API_DOCUMENTATION.md` — current `/api/v1` module index and source-of-truth route references.
+- `docs/DATABASE_DOCUMENTATION.md` — current Prisma model inventory.
+- `docs/role-access-matrix.md` — access-profile boundaries and unresolved legacy SUPER_ADMIN bypass.
+
+Commits: `3e9bacbafd4905ddcce35622a66fc9d0abad8573`, `e3e5e7f49c501d0d899c882d6b896418ca51bbfe`, `d0518ebce8c313fa1b8ccaac963133bc313dff95`, `bf43f91d014cb7353933aea4874c7955370e94ec`, `eab7069c6c15a9521fcede18ddec5bcd2b8af3eb`, `7587c4953f7e04042fa1044c5926477c5214a89d`.
+
+These are source-aligned summary documents, not a claim that every endpoint request/response schema has been exhaustively documented. Markdown lint and a fresh CI result for these documentation commits are NOT VERIFIED.
+
+### Runtime/browser validation follow-up
+
+The runtime/browser workflow exists on the open `docs-runtime-e2e-hardening` PR branch (PR #9), not in the current main workflow. Its previous run `40339211695` was cancelled during the service-health wait. The cancelled job was re-run as job `122194361685`.
+
+As of this update, the re-run has successfully completed:
+- generated architecture graph verification;
+- disposable Compose configuration validation;
+- Docker build/start for PostgreSQL, backend and all three frontend panels;
+- all service health endpoint checks;
+- Prisma migration status against the disposable PostgreSQL database;
+- installation of the isolated browser-test dependency.
+
+Chromium installation is still in progress; Playwright browser smoke tests have not started yet. Do not mark runtime/browser validation as complete until the workflow's final conclusion and browser-test result are observed. This run is on the PR branch's older commit, not the latest main head.
+
+### Security-policy impact inventory
+
+The unresolved global SUPER_ADMIN cross-app bypass is present in:
+- login app selection in `backend/src/modules/auth/auth.service.js` (test: `login: SUPER_ADMIN bypasses the app-type guard entirely`);
+- generic `requireAccessType` in `backend/src/middlewares/rbac.js` (test explicitly expects the bypass);
+- session handoff target-app validation in `backend/src/modules/auth/handoff.service.js`;
+- several product and inquiry routes that still use generic `requireAccessType`.
+
+Strict `requireExactAccessType` already protects role/permission, category and admin-management surfaces; service-level ownership/context checks were added for the audited user, company, product and inquiry paths. A global change needs a deliberate policy decision and targeted regression tests; this audit has not changed that contract.
+
+### Remaining priority order
+
+1. Confirm the runtime/browser workflow result and port any validated runtime checks to main without overwriting newer documentation.
+2. Finish the auth-context policy review; keep the global bypass unchanged until policy is explicit.
+3. Complete browser E2E journeys for product → inquiry → supplier quote → buyer decision, notification folders/read state, and company isolation.
+4. Verify monetization PR/merge status and test payment callback/replay/retry plus Twilio delivery in staging.
+5. Resume the deferred customer dashboard/address work after higher-priority validation; orders still need a real backend domain.
+6. Address Admin bundle warnings after capturing a baseline and tracing imports.
