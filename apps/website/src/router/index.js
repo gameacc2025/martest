@@ -16,6 +16,8 @@ import Register from "../pages/public/Register.vue";
 import ForgotPassword from "../pages/public/ForgotPassword.vue";
 import Orders from "../pages/public/Orders.vue";
 import Wishlist from "../pages/public/Wishlist.vue";
+import UserProfile from "../pages/public/UserProfile.vue";
+import Addresses from "../pages/public/Addresses.vue";
 import CompanyProfile from "../pages/public/CompanyProfile.vue";
 import ContactUs from "../pages/public/ContactUs.vue";
 import AboutUs from "../pages/public/AboutUs.vue";
@@ -41,6 +43,18 @@ const routes = [
         name: "notification-preferences",
         component: () => import("../pages/public/NotificationPreferences.vue"),
         meta: { title: "تنظیمات اعلان‌ها", requiresAuth: true },
+      },
+      {
+        path: "profile",
+        name: "profile",
+        component: UserProfile,
+        meta: { title: "پروفایل کاربر", requiresAuth: true },
+      },
+      {
+        path: "profile/addresses",
+        name: "profile-addresses",
+        component: Addresses,
+        meta: { title: "آدرس‌های من", requiresAuth: true },
       },
       {
         path: "categories",
