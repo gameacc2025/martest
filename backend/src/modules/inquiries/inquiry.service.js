@@ -122,7 +122,10 @@ function getInquirySmsGatewayConfig() {
 }
 
 function isSuperAdmin(caller) {
-  return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
+  // Global override applies only to STAFF context; role membership must not
+  // switch a COMPANY/CUSTOMER account into the staff domain.
+  return caller?.accessType === 'STAFF' &&
+    (caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*'));
 }
 
 function hasAnyPermission(caller, ...permissions) {
