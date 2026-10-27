@@ -123,13 +123,12 @@ test('requireAccessType: rejects a mismatched access type with 403', async () =>
   assert.equal(reply.body.code, 'FORBIDDEN');
 });
 
-test('requireAccessType: SUPER_ADMIN bypasses the access-type check', async () => {
+test('requireAccessType: SUPER_ADMIN cannot bypass a mismatched access type', async () => {
   const reply = makeReply();
-  // superAdmin.accessType is 'STAFF' above, so use a COMPANY-only guard
-  // to prove the bypass is driven by the SUPER_ADMIN role, not accessType.
   const result = await requireAccessType('COMPANY')({ user: superAdmin }, reply);
   assert.equal(result, undefined);
-  assert.equal(reply.statusCode, null);
+  assert.equal(reply.statusCode, 403);
+  assert.equal(reply.body.code, 'FORBIDDEN');
 });
 
 // ── requirePermission (ALL) ──────────────────────────────────
