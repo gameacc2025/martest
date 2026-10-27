@@ -25,6 +25,7 @@ postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public
 | `UserRole` | نقش‌های اختصاص‌یافته به کاربر |
 | `RefreshToken` | نشست/refresh token ذخیره‌شده |
 | `HandoffCode` | کدهای handoff نشست بین برنامه‌ها |
+| `Address` | آدرس‌های تحویل/تماس متعلق به مشتری؛ با حذف کاربر حذف می‌شوند |
 
 نقش نباید جایگزین `AccessProfile.type` یا کنترل مالکیت resource شود. کاربر COMPANY باید به شرکت مربوط به access profile محدود بماند.
 
@@ -33,6 +34,7 @@ postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public
 | حوزه | مدل‌ها |
 |---|---|
 | شرکت و حساب | `Company`، `CompanyLimit`، `CompanyInquiryLimit` |
+| آدرس مشتری | `Address` با مالکیت `userId`، نشانی، گیرنده و `isDefault` |
 | دسته‌بندی و مشخصات | `Category`، `Subcategory`، `SpecificationTemplate`، `SpecificationField`، `SpecificationLibraryField` |
 | محصول | `Product`، `ProductStatusHistory`، `ProductActivityLog`، `ProductImage`، `ProductDocument` |
 | قیمت محصول | `ProductPriceTier`، `ProductPriceSnapshot` |
@@ -66,7 +68,7 @@ Enums تعریف‌شده در schema شامل این موارد هستند:
 
 ## Migration و استقرار
 
-Migrationها در `backend/prisma/migrations/` قرار دارند. در production، Dockerfile بک‌اند `prisma migrate deploy` را قبل از seed و شروع سرور اجرا می‌کند.
+Migrationها در `backend/prisma/migrations/` قرار دارند. migration `20261027200000_customer_addresses` جدول `Address`، foreign key مالکیت و index یکتای جزئی برای حداکثر یک آدرس پیش‌فرض برای هر کاربر را ایجاد می‌کند. چون Prisma schema یکتایی جزئی را مدل نمی‌کند، index جزئی فقط در SQL migration تعریف شده و نباید از migration حذف شود. در production، Dockerfile بک‌اند `prisma migrate deploy` را قبل از seed و شروع سرور اجرا می‌کند.
 
 قبل از migration محیط واقعی:
 1. مقصد دیتابیس و نسخه schema را بررسی کنید.
