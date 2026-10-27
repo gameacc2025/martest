@@ -150,6 +150,23 @@ function resolveCompanyId(data, caller) {
   return null;
 }
 
+function resolveSupplierCompanyId(data, caller) {
+  // Supplier responses belong to a real COMPANY context. STAFF privileges
+  // must never become a way to impersonate a supplier via body.companyId.
+  if (caller?.accessType === 'STAFF') {
+    throw { statusCode: 403, code: 'STAFF_CANNOT_MANAGE_SUPPLIER_RESPONSE', message: 'STAFF users supervise inquiries but cannot act as suppliers.' };
+  }
+  if (caller?.accessType === 'COMPANY') {
+    const companyId = Number(caller.companyId);
+    ensureCompanyId(companyId);
+    return companyId;
+  }
+  const companyId = resolveCompanyId(data, caller);
+  ensureCompanyId(companyId);
+  return companyId;
+}
+
+
 function ensureCompanyId(companyId) {
   if (!Number.isInteger(Number(companyId)) || Number(companyId) < 1) {
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
@@ -1033,11 +1050,10 @@ async function deleteInquiryItem(inquiryId, itemId, caller) {
 }
 
 async function submitResponse(inquiryId, data, caller) {
-  const companyId = resolveCompanyId(data, caller);
-  ensureCompanyId(companyId);
   if (caller?.accessType === 'STAFF') {
     throw { statusCode: 403, code: 'STAFF_CANNOT_RESPOND', message: 'STAFF users supervise inquiries but do not submit supplier quotes.' };
   }
+  const companyId = resolveSupplierCompanyId(data, caller);
 
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
 
@@ -1332,8 +1348,7 @@ async function listResponses(inquiryId, caller) {
 async function updateResponse(inquiryId, responseId, data, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   const numericResponseId = toPositiveInt(responseId, 'responseId');
-  const companyId = resolveCompanyId(data, caller);
-  ensureCompanyId(companyId);
+  const companyId = resolveSupplierCompanyId(data, caller);
 
   return prisma.$transaction(async (tx) => {
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
@@ -1384,7 +1399,7 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
     assertCanManageInquiry(inquiry, caller);
-    if (!isInquiryBuyer(inquiry, caller)) {
+    if (caller?.accessType === 'STAFF' || !isInquiryBuyer(inquiry, caller)) {
       throw { statusCode: 403, code: 'BUYER_DECISION_REQUIRED', message: 'Only the inquiry buyer may decide supplier responses.' };
     }
     if (inquiry.status !== 'OPEN') {
@@ -1494,8 +1509,7 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
 async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   const numericResponseId = toPositiveInt(responseId, 'responseId');
-  const companyId = resolveCompanyId(data, caller);
-  ensureCompanyId(companyId);
+  const companyId = resolveSupplierCompanyId(data, caller);
 
   return prisma.$transaction(async (tx) => {
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
@@ -1530,8 +1544,7 @@ async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
 async function resolveOwnedEditableResponse(inquiryId, responseId, caller, data = {}) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   const numericResponseId = toPositiveInt(responseId, 'responseId');
-  const companyId = resolveCompanyId(data, caller);
-  ensureCompanyId(companyId);
+  const companyId = resolveSupplierCompanyId(data, caller);
 
   const inquiry = await prisma.inquiry.findUnique({ where: { id: numericInquiryId } });
   assertResponseEditable(inquiry);
