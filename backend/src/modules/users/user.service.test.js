@@ -468,6 +468,35 @@ test('createUser: an invalid role id (not found in DB) is rejected', async () =>
   );
 });
 
+test('createUser: assigning roles requires users.assign_roles', async () => {
+  resetMocks();
+  fx.userByEmail = null;
+  fx.roles = [{ id: 1, name: 'STAFF_EDITOR', scope: 'STAFF' }];
+
+  await assert.rejects(
+    () => createUser(
+      { phone: '09120000000', password: 'secret', type: 'STAFF', roleIds: [1] },
+      caller({ roles: ['STAFF_EDITOR'], permissions: ['users.create'] })
+    ),
+    (err) => err.statusCode === 403 && err.code === 'PERMISSION_REQUIRED',
+  );
+  assert.equal(calls.userCreate.length, 0);
+});
+
+test('createUser: role scope must match the new user access context', async () => {
+  resetMocks();
+  fx.userByEmail = null;
+  fx.roles = [{ id: 1, name: 'STAFF_EDITOR', scope: 'STAFF' }];
+
+  await assert.rejects(
+    () => createUser(
+      { phone: '09120000000', password: 'secret', type: 'COMPANY', companyId: 10, roleIds: [1] },
+      caller({ roles: [SUPER_ADMIN_ROLE] })
+    ),
+    (err) => err.statusCode === 403 && err.code === 'ROLE_OUT_OF_SCOPE',
+  );
+});
+
 test('createUser: hashes the password before persisting', async () => {
   resetMocks();
   fx.userByEmail = null;
@@ -495,7 +524,7 @@ test('updateUser: a non-admin caller from a different company is rejected (403)'
   fx.userById = dbUser({ accessProfile: { companyId: 10 } });
 
   await assert.rejects(
-    () => updateUser(5, { email: 'new@x.com' }, caller({ roles: ['COMPANY_ADMIN'], companyId: 999 })),
+    () => updateUser(5, { email: 'new@x.com' }, caller({ roles: ['COMPANY_ADMIN'], companyId: 999, permissions: ['users.assign_roles'] })),
     (err) => {
       assert.equal(err.statusCode, 403);
       return true;
@@ -596,6 +625,29 @@ test('setUserAccess: COMPANY callers cannot change roles or permissions at all',
   assert.equal(calls.userRoleCreate.length, 0);
 });
 
+test('setUserAccess: a role must match the target user access context', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { type: 'COMPANY', companyId: 10 } });
+  fx.role = { id: 1, name: 'STAFF_EDITOR', scope: 'STAFF' };
+
+  await assert.rejects(
+    () => setUserAccess(5, 1, [], caller({ roles: [SUPER_ADMIN_ROLE] })),
+    (err) => err.statusCode === 403 && err.code === 'ROLE_OUT_OF_SCOPE',
+  );
+});
+
+test('setUserAccess: non-global STAFF cannot assign SUPER_ADMIN role', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { type: 'STAFF', companyId: null } });
+  fx.role = { id: 1, name: SUPER_ADMIN_ROLE, scope: 'STAFF' };
+
+  await assert.rejects(
+    () => setUserAccess(5, 1, [], caller({ roles: ['ADMIN'], permissions: ['users.assign_roles'] })),
+    (err) => err.statusCode === 403 && err.code === 'GLOBAL_ROLE_ASSIGNMENT_FORBIDDEN',
+  );
+  assert.equal(calls.userRoleCreate.length, 0);
+});
+
 test('setUserAccess: an invalid roleId is rejected', async () => {
   resetMocks();
   fx.userById = dbUser({ accessProfile: { companyId: 10 } });
@@ -612,8 +664,8 @@ test('setUserAccess: an invalid roleId is rejected', async () => {
 
 test('setUserAccess: assigning a role to a PENDING user activates them', async () => {
   resetMocks();
-  fx.userById = dbUser({ accessProfile: { companyId: 10 }, status: 'PENDING' });
-  fx.role = { id: 1, scope: 'COMPANY' };
+  fx.userById = dbUser({ accessProfile: { type: 'COMPANY', companyId: 10 }, status: 'PENDING' });
+  fx.role = { id: 1, scope: 'COMPANY', name: 'COMPANY_MANAGER' };
 
   await setUserAccess(5, 1, [], caller({ roles: [SUPER_ADMIN_ROLE] }));
 
