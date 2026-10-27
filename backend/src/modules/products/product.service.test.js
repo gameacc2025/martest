@@ -173,7 +173,7 @@ test.beforeEach(() => resetMocks());
 
 // ── Callers used across tests ────────────────────────────────
 const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF' };
-const companySuperAdmin = { id: 2, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'COMPANY', companyId: 10 };
+const companySuperAdmin = { id: 2, roles: ['SUPER_ADMIN'], permissions: ['*', 'products.read', 'products.update', 'products.create'], accessType: 'COMPANY', companyId: 10 };
 const companyA = { id: 2, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 10 };
 const companyB = { id: 3, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 20 };
 const staffModerator = { id: 5, roles: ['PRODUCT_MODERATOR'], accessType: 'STAFF', permissions: ['products.read'], companyId: 999 };
