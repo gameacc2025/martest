@@ -12,7 +12,7 @@
 | `COMPANY` | Company Portal | شرکت مرتبط با access profile و منابع متعلق به همان شرکت |
 | `STAFF` | Admin | عملیات مدیریتی فقط با permissionهای لازم |
 
-نقش‌ها دارای `Role.scope` هستند (`STAFF`، `COMPANY` یا `CUSTOMER`). تخصیص نقش باید با زمینه کاربر و محدوده مجاز آن سازگار باشد. داشتن permission یا wildcard به‌تنهایی نباید کنترل مالکیت رکورد را حذف کند.
+نقش‌ها دارای `Role.scope` هستند (`STAFF`، `COMPANY` یا `CUSTOMER`). تخصیص نقش باید با زمینه کاربر و محدوده مجاز آن سازگار باشد. ثبت‌نام CUSTOMER طبق قرارداد فعلی `AccessProfile` نمی‌سازد؛ در این حالت فقط `CUSTOMER_USER` می‌تواند به‌عنوان زمینه پیش‌فرض Website عمل کند. این استثنا فقط برای CUSTOMER است و هرگز زمینه STAFF/COMPANY یا نقش SUPER_ADMIN را دور نمی‌زند. داشتن permission یا wildcard به‌تنهایی نباید کنترل مالکیت رکورد را حذف کند.
 
 ## کنترل‌های اصلی
 
