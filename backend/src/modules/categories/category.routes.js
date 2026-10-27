@@ -1,5 +1,5 @@
 const ctrl = require('./category.controller');
-const { requireAccessType, requirePermission } = require('../../middlewares/rbac');
+const { requireExactAccessType, requirePermission } = require('../../middlewares/rbac');
 
 // Category management is a STAFF-only domain (no COMPANY/CUSTOMER role ever
 // holds categories.* permissions in seed.js), same boundary used by products.
@@ -27,7 +27,7 @@ async function categoryRoutes(fastify) {
     // don't conflict since this is a distinct literal path, but keep it here
     // for readability next to the other authenticated routes.
     authenticated.get('/manage', {
-      preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('categories.read')],
+      preHandler: [requireExactAccessType(...STAFF_ONLY), requirePermission('categories.read')],
       schema: { summary: 'List all categories (including inactive) for management', tags: ['Categories'] },
     }, ctrl.listForManagement);
 
@@ -36,13 +36,13 @@ async function categoryRoutes(fastify) {
     // an ADMIN user always got 403 here despite holding the permission.
     // Permission is now the actual gate; SUPER_ADMIN still passes via its
     // wildcard bypass in requirePermission.
-    authenticated.post('/', { preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('categories.create')] }, ctrl.create);
-    authenticated.patch('/:id', { preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('categories.update')] }, ctrl.update);
-    authenticated.delete('/:id', { preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('categories.delete')] }, ctrl.remove);
+    authenticated.post('/', { preHandler: [requireExactAccessType(...STAFF_ONLY), requirePermission('categories.create')] }, ctrl.create);
+    authenticated.patch('/:id', { preHandler: [requireExactAccessType(...STAFF_ONLY), requirePermission('categories.update')] }, ctrl.update);
+    authenticated.delete('/:id', { preHandler: [requireExactAccessType(...STAFF_ONLY), requirePermission('categories.delete')] }, ctrl.remove);
 
-    authenticated.post('/:id/subcategories', { preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('categories.create')] }, ctrl.createSubcategory);
-    authenticated.patch('/:id/subcategories/:subId', { preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('categories.update')] }, ctrl.updateSubcategory);
-    authenticated.delete('/:id/subcategories/:subId', { preHandler: [requireAccessType(...STAFF_ONLY), requirePermission('categories.delete')] }, ctrl.removeSubcategory);
+    authenticated.post('/:id/subcategories', { preHandler: [requireExactAccessType(...STAFF_ONLY), requirePermission('categories.create')] }, ctrl.createSubcategory);
+    authenticated.patch('/:id/subcategories/:subId', { preHandler: [requireExactAccessType(...STAFF_ONLY), requirePermission('categories.update')] }, ctrl.updateSubcategory);
+    authenticated.delete('/:id/subcategories/:subId', { preHandler: [requireExactAccessType(...STAFF_ONLY), requirePermission('categories.delete')] }, ctrl.removeSubcategory);
   });
 }
 
