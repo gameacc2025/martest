@@ -202,7 +202,7 @@ test('SUPER_ADMIN bypasses all permission checks', async () => {
   const res = await app.inject({
     method: 'GET',
     url: '/api/v1/permissions',
-    headers: { 'x-test-user': JSON.stringify({ roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
+    headers: { 'x-test-user': JSON.stringify({ accessType: 'STAFF', roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.list, true);
