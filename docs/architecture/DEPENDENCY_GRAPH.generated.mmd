@@ -1,0 +1,73 @@
+%% GENERATED FILE. Do not edit by hand.
+%% Run: node scripts/generate-architecture-graph.mjs --write
+flowchart LR
+  subgraph apps["Frontend applications"]
+    admin["@telecom/admin<br/>admin"]
+    company["@telecom/company<br/>company"]
+    website["@telecom/website<br/>website"]
+  end
+  subgraph shared["Shared workspace packages"]
+    api_client["api-client"]
+    auth["auth"]
+    permissions["permissions"]
+    shared_core["shared-core"]
+    shared_ui["shared-ui"]
+    vite_config["vite-config"]
+  end
+  subgraph backend["Backend"]
+    api["Fastify API<br/>/api/v1"]
+  end
+  db[("PostgreSQL<br/>Prisma schema + migrations")]
+  admin --> api_client
+  admin --> auth
+  admin --> permissions
+  admin --> shared_core
+  admin --> shared_ui
+  admin --> vite_config
+  company --> api_client
+  company --> auth
+  company --> permissions
+  company --> shared_core
+  company --> shared_ui
+  company --> vite_config
+  website --> api_client
+  website --> auth
+  website --> shared_core
+  website --> shared_ui
+  website --> vite_config
+  api_client --> shared_core
+  auth --> api_client
+  auth --> shared_core
+  shared_ui --> api_client
+  shared_ui --> auth
+  admin -->|HTTP /api/v1| api
+  company -->|HTTP /api/v1| api
+  website -->|HTTP /api/v1| api
+  api --> rbac["Auth / RBAC middleware"]
+  api --> mod_addresses["addresses module"]
+  api --> mod_admin["admin module"]
+  api --> mod_auth["auth module"]
+  api --> mod_categories["categories module"]
+  api --> mod_companies["companies module"]
+  api --> mod_inquiries["inquiries module"]
+  api --> mod_notifications["notifications module"]
+  api --> mod_permissions["permissions module"]
+  api --> mod_products["products module"]
+  api --> mod_roles["roles module"]
+  api --> mod_settings["settings module"]
+  api --> mod_specification_library["specification-library module"]
+  api --> mod_users["users module"]
+  rbac --> db
+  mod_addresses --> db
+  mod_admin --> db
+  mod_auth --> db
+  mod_categories --> db
+  mod_companies --> db
+  mod_inquiries --> db
+  mod_notifications --> db
+  mod_permissions --> db
+  mod_products --> db
+  mod_roles --> db
+  mod_settings --> db
+  mod_specification_library --> db
+  mod_users --> db
