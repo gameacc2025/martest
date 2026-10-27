@@ -439,6 +439,15 @@ async function setAccessActive(userId, isActive, caller) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
 
+  const requiredPermission = isActive ? 'users.activate' : 'users.deactivate';
+  if (!isSuperAdmin && !caller.permissions?.includes(requiredPermission) && !caller.permissions?.includes('*')) {
+    throw {
+      statusCode: 403,
+      code: 'PERMISSION_REQUIRED',
+      message: `Changing panel access requires the ${requiredPermission} permission.`,
+    };
+  }
+
   await prisma.accessProfile.update({ where: { userId }, data: { isActive: !!isActive } });
   return getUser(userId, caller);
 }
