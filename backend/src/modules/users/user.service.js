@@ -69,6 +69,22 @@ function callerCompanyId(caller) {
   return caller.companyId ?? caller.accessProfile?.companyId ?? null;
 }
 
+function isGlobalStaffAdmin(caller) {
+  // Roles never select the application context. Even a legacy/misassigned
+  // SUPER_ADMIN role in COMPANY context must not bypass tenant boundaries.
+  return caller?.accessType === 'STAFF' && caller?.roles?.includes(SUPER_ADMIN_ROLE);
+}
+
+function denyCompanyUserManagement(caller, operation) {
+  if (caller?.accessType === 'COMPANY') {
+    throw {
+      statusCode: 403,
+      code: 'COMPANY_USER_MANAGEMENT_RESTRICTED',
+      message: `Company users may only view and enable or disable their own company's users; they cannot ${operation}.`,
+    };
+  }
+}
+
 /**
  * List users with pagination, search and optional company scoping.
  */
@@ -76,7 +92,9 @@ async function listUsers(query, caller) {
   const { page, limit, skip, take } = getPaginationParams(query);
   const where = { AND: [] };
 
-  if (!caller.roles.includes(SUPER_ADMIN_ROLE)) {
+  if (caller.accessType === 'COMPANY') {
+    where.AND.push({ accessProfile: { companyId: callerCompanyId(caller), type: 'COMPANY' } });
+  } else if (!isGlobalStaffAdmin(caller)) {
     where.AND.push({ accessProfile: { companyId: callerCompanyId(caller) } });
   } else if (query.companyId) {
     where.AND.push({ accessProfile: { companyId: parseInt(query.companyId, 10) } });
@@ -128,10 +146,11 @@ async function getUser(userId, caller) {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: USER_SELECT });
   if (!user) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
-  if (
-    !caller.roles.includes(SUPER_ADMIN_ROLE) &&
-    user.accessProfile?.companyId !== callerCompanyId(caller)
-  ) {
+  if (caller.accessType === 'COMPANY') {
+    if (user.accessProfile?.type !== 'COMPANY' || user.accessProfile?.companyId !== callerCompanyId(caller)) {
+      throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
+    }
+  } else if (!isGlobalStaffAdmin(caller) && user.accessProfile?.companyId !== callerCompanyId(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
 
@@ -150,28 +169,14 @@ async function getUser(userId, caller) {
  * by roles. Roles only control permissions within the selected app.
  */
 async function createUser(data, caller) {
-  // A caller whose OWN accessType is COMPANY (e.g. COMPANY_MANAGER) must only
-  // ever be able to create COMPANY users inside their own company — never a
-  // STAFF or CUSTOMER account, and never in another company. This is
-  // independent of whatever `type`/`companyId` the client sends in the body.
-  const callerIsCompanyScoped = caller.accessType === 'COMPANY';
+  denyCompanyUserManagement(caller, 'create users');
 
-  let companyId;
-  let accessType;
-
-  if (callerIsCompanyScoped) {
-    companyId = callerCompanyId(caller);
-    accessType = 'COMPANY';
-  } else {
-    // Company scoping: non-super-admin STAFF can still target any company
-    // (that's their job), but only super-admin's choice of companyId is
-    // otherwise unrestricted too — both branches read straight from the body.
-    companyId = data.companyId ? parseInt(data.companyId, 10) : null;
-    // Determine access type. Default: COMPANY when a companyId is present,
-    // otherwise CUSTOMER. STAFF must be explicitly requested by an admin.
-    accessType = data.type;
-    if (!accessType) accessType = companyId ? 'COMPANY' : 'CUSTOMER';
-  }
+  // STAFF user-management permissions are the only path for creating accounts.
+  // The requested access context and target company are resolved from the
+  // validated request body only after the caller has passed the domain guard.
+  const companyId = data.companyId ? parseInt(data.companyId, 10) : null;
+  let accessType = data.type;
+  if (!accessType) accessType = companyId ? 'COMPANY' : 'CUSTOMER';
 
   if (accessType === 'COMPANY' && !companyId) {
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'برای کاربر شرکت، انتخاب شرکت الزامی است.' };
@@ -182,12 +187,6 @@ async function createUser(data, caller) {
   if (rIds.length) {
     const roles = await prisma.role.findMany({ where: { id: { in: rIds } }, select: { id: true, name: true, scope: true } });
     if (roles.length !== rIds.length) throw { statusCode: 400, code: 'INVALID_ROLE', message: 'نقش نامعتبر.' };
-    if (callerIsCompanyScoped) {
-      const invalid = roles.filter((r) => r.scope !== 'COMPANY');
-      if (invalid.length) {
-        throw { statusCode: 403, code: 'ROLE_OUT_OF_SCOPE', message: 'شما فقط مجاز به تخصیص نقش‌های شرکتی هستید.' };
-      }
-    }
   }
 
   if (!data.phone) {
@@ -248,10 +247,11 @@ async function createUser(data, caller) {
  * AccessProfile. The User row only owns email/phone/status.
  */
 async function updateUser(userId, data, caller) {
+  denyCompanyUserManagement(caller, 'edit user details');
   const existing = await prisma.user.findUnique({ where: { id: userId }, select: USER_SELECT });
   if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
-  const isSuperAdmin = caller.roles.includes(SUPER_ADMIN_ROLE);
+  const isSuperAdmin = isGlobalStaffAdmin(caller);
   if (!isSuperAdmin && existing.accessProfile?.companyId !== callerCompanyId(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
@@ -311,13 +311,14 @@ async function updateUser(userId, data, caller) {
  * application the user belongs to (that is accessProfile.type).
  */
 async function setUserAccess(userId, roleId, permissionIds, caller) {
+  denyCompanyUserManagement(caller, 'change roles or permissions');
   const existing = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, status: true, accessProfile: { select: { companyId: true } } },
   });
   if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
-  const isSuperAdmin = caller.roles.includes(SUPER_ADMIN_ROLE);
+  const isSuperAdmin = isGlobalStaffAdmin(caller);
   if (!isSuperAdmin && existing.accessProfile?.companyId !== callerCompanyId(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
@@ -360,6 +361,7 @@ async function setUserAccess(userId, roleId, permissionIds, caller) {
  * Delete a user. Cannot delete self or the last SUPER_ADMIN.
  */
 async function deleteUser(userId, caller) {
+  denyCompanyUserManagement(caller, 'delete users');
   if (userId === caller.id) {
     throw { statusCode: 400, code: 'CANNOT_DELETE_SELF', message: 'شما نمی‌توانید حساب خودتان را حذف کنید.' };
   }
@@ -374,7 +376,7 @@ async function deleteUser(userId, caller) {
   });
   if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
-  const isSuperAdmin = caller.roles.includes(SUPER_ADMIN_ROLE);
+  const isSuperAdmin = isGlobalStaffAdmin(caller);
   if (!isSuperAdmin && existing.accessProfile?.companyId !== callerCompanyId(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
@@ -400,13 +402,17 @@ async function setAccessActive(userId, isActive, caller) {
 
   const existing = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, accessProfile: { select: { id: true, companyId: true } } },
+    select: { id: true, accessProfile: { select: { id: true, type: true, companyId: true } } },
   });
   if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
   if (!existing.accessProfile) throw { statusCode: 400, code: 'NO_ACCESS_PROFILE', message: 'این کاربر پروفایل دسترسی ندارد.' };
 
-  const isSuperAdmin = caller.roles.includes(SUPER_ADMIN_ROLE);
-  if (!isSuperAdmin && existing.accessProfile.companyId !== callerCompanyId(caller)) {
+  const isSuperAdmin = isGlobalStaffAdmin(caller);
+  if (caller.accessType === 'COMPANY') {
+    if (existing.accessProfile.type !== 'COMPANY' || existing.accessProfile.companyId !== callerCompanyId(caller)) {
+      throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط می‌توانید دسترسی کاربران شرکت خود را تغییر دهید.' };
+    }
+  } else if (!isSuperAdmin && existing.accessProfile.companyId !== callerCompanyId(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
 
@@ -418,7 +424,7 @@ async function setAccessActive(userId, isActive, caller) {
  * Move a company user to a different company (SUPER_ADMIN only).
  */
 async function moveUserToCompany(userId, companyId, caller) {
-  if (!caller.roles.includes(SUPER_ADMIN_ROLE)) {
+  if (!isGlobalStaffAdmin(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'تنها مدیر کل می‌تواند کاربر را بین شرکت‌ها جابجا کند.' };
   }
 
