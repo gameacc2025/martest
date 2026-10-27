@@ -184,7 +184,7 @@ const {
 } = require('./company.service');
 
 const SUPER_ADMIN = { roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF', companyId: null };
-const OWN_COMPANY_MANAGER = (companyId) => ({ roles: ['COMPANY_MANAGER'], permissions: ['company_profile.update'], accessType: 'COMPANY', companyId };
+const OWN_COMPANY_MANAGER = (companyId) => ({ roles: ['COMPANY_MANAGER'], permissions: ['company_profile.update'], accessType: 'COMPANY', companyId });
 
 // ── listCompanies / buildWhereClause / buildOrderBy ──────────
 
