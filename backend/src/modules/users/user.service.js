@@ -10,16 +10,16 @@
 //                     (type: STAFF|COMPANY|CUSTOMER, companyId, isActive)
 //   - UserRole      = roles assigned directly to the user
 //
-// Permission model (enforced at route level):
-//   - users.read   → list + view
-//   - users.create → create
-//   - users.update → edit, activate/deactivate, change password, assign roles
-//   - users.delete → delete
+// Permission model:
+//   - users.read → list + view
+//   - users.create / users.update / users.delete → STAFF-context user management
+//   - users.assign_roles → role assignment (STAFF only)
+//   - users.activate / users.deactivate → exact-direction panel-access toggle
 //
 // Resource scoping:
-//   - SUPER_ADMIN sees/edits all users
-//   - Company admins see/edit only users in their own company
-//     (scoped through accessProfile.companyId)
+//   - Only a STAFF-context SUPER_ADMIN has global user-management scope
+//   - COMPANY users can view and activate/deactivate COMPANY users in their own tenant
+//   - CUSTOMER context cannot access user administration
 // =============================================================
 
 const prisma = require('../../config/db');
