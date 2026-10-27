@@ -1404,18 +1404,22 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
     }
 
     if (decision === 'REJECTED') {
-      const rejected = await tx.inquiryResponse.update({
-        where: { id: numericResponseId },
+      // Compare-and-set prevents a concurrent SELECTED decision from being
+      // overwritten by a stale rejection request.
+      const rejected = await tx.inquiryResponse.updateMany({
+        where: { id: numericResponseId, inquiryId: numericInquiryId, status: 'PENDING' },
         data: { status: 'REJECTED' },
-        include: responseInclude,
       });
+      if (!rejected.count) {
+        throw { statusCode: 409, code: 'RESPONSE_ALREADY_DECIDED', message: 'This response was decided by another request.' };
+      }
       await dispatchNotification('INQUIRY_RESPONSE_REJECTED', { companyIds: [response.companyId] }, {
         inquiry: { id: inquiry.id, title: inquiry.title },
         response: { id: response.id },
       }, { tx, dedupeKey: (userId) => `inquiry-response-rejected-${response.id}-${userId}` });
       // Decision endpoints return a minimal receipt only; never echo supplier identity
       // into buyer-facing responses for ANONYMOUS_SEALED inquiries.
-      return { id: rejected.id, inquiryId: numericInquiryId, status: rejected.status };
+      return { id: response.id, inquiryId: numericInquiryId, status: 'REJECTED' };
     }
 
     const now = new Date();
@@ -1431,10 +1435,15 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
       where: { inquiryId: numericInquiryId, status: 'PENDING', id: { not: numericResponseId } },
       select: { id: true, companyId: true },
     });
-    await tx.inquiryResponse.update({
-      where: { id: numericResponseId },
+    // Compare-and-set ensures a stale selection cannot overwrite a concurrent rejection.
+    // Throwing aborts the transaction, including the inquiry close above.
+    const selected = await tx.inquiryResponse.updateMany({
+      where: { id: numericResponseId, inquiryId: numericInquiryId, status: 'PENDING' },
       data: { status: 'SELECTED' },
     });
+    if (!selected.count) {
+      throw { statusCode: 409, code: 'RESPONSE_ALREADY_DECIDED', message: 'This response was decided by another request.' };
+    }
     if (losers.length) {
       await tx.inquiryResponse.updateMany({
         where: { inquiryId: numericInquiryId, status: 'PENDING', id: { not: numericResponseId } },
