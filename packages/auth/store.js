@@ -294,11 +294,13 @@ export function createAuthStore() {
       try {
         loading.value = true
         error.value = null
-        const updated = await apiPatch(endpoints.settings.profile, data)
-        // The profile endpoint updates the personal profile fields.
-        profile.value = updated
+        const response = await apiPatch(endpoints.settings.profile, data)
+        // The backend returns the user identity with a nested `profile`.
+        // Persist only the personal-profile domain in this store slot.
+        const updatedProfile = response?.profile ?? response?.data?.profile ?? response
+        profile.value = updatedProfile
         writeStored(STORAGE_KEYS.profile, profile.value)
-        return updated
+        return updatedProfile
       } catch (err) {
         error.value = handleApiError(err).message || 'خطا در بروزرسانی پروفایل'
         throw err
