@@ -21,14 +21,14 @@ filters (`pnpm --filter @telecom/<app> dev|build`).
 - **`apps/admin`** (`@telecom/admin`) — internal admin portal, user/role/permission mgmt, product approval, analytics (STAFF accessProfile).
 - All three: Vue 3.4, vue-router 4, Vite 8, `@vitejs/plugin-vue`, sass/sass-embedded.
 - Admin + Company also use: Pinia (state), PrimeVue 4 + `@primevue/themes` (UI kit), PrimeIcons.
-- App selection on login is driven ONLY by `accessProfile.type` (STAFF→admin, COMPANY→company, CUSTOMER→website) — roles never select the app, only permissions within it.
+- Admin/Company app access is strictly driven by `AccessProfile.type` (STAFF→admin, COMPANY→company). Customer registration intentionally has no AccessProfile; only `CUSTOMER_USER` may use the default Website context, and that fallback never grants panel access or bypasses SUPER_ADMIN app-context checks.
 
 ## 4. Backend (`backend/`)
 Fastify 4 + Prisma + PostgreSQL. Modular-monolith layout under
 `backend/src/modules/<name>/`: `*.controller.js` (HTTP), `*.service.js`
 (business logic + Prisma calls), `*.routes.js` (registration, preHandlers),
 `*.schemas.js` (JSON Schema, where not inlined in routes).
-Modules: admin, auth, categories, companies, inquiries, notifications,
+Modules: admin, auth, addresses, categories, companies, inquiries, notifications,
 permissions, products, roles, settings, specification-library, users.
 Entry: `src/server.js` → `src/app.js` (builds & returns the Fastify
 instance — this indirection is what makes `app.test.js` boot-smoke-testable
@@ -56,7 +56,8 @@ ForbiddenError 403, ConflictError 409) and `handlePrismaError`/
 
 ## 7. Database (Prisma / PostgreSQL)
 Single `backend/prisma/schema.prisma`, ~26 models. Key domains:
-- **Identity**: `User` → `Profile` (1:1, personal info: firstName/lastName/avatar) → `AccessProfile` (1:1, app-context: `type` STAFF|COMPANY, `companyId`, `isActive`) → `UserRole`→`Role`→`RolePermission`→`Permission`.
+- **Identity**: `User` → `Profile` (1:1, personal info: firstName/lastName/avatar) → optional `AccessProfile` (1:1, app-context: `type` STAFF|COMPANY, `companyId`, `isActive`; CUSTOMER defaults to Website without an AccessProfile) → `UserRole`→`Role`→`RolePermission`→`Permission`.
+- **Customer addresses**: `Address` records are owned by `userId`; all address APIs scope reads/writes to the authenticated user. A partial unique PostgreSQL index enforces at most one default address per user.
 - **Companies**: `Company`, `CompanyLimit` (key/value quota rows, e.g. `rfq.max_open`), `CompanyInquiryLimit` (legacy-shaped limit fields, being phased toward `CompanyLimit`).
 - **Catalog**: `Category`→`Subcategory`, `SpecificationTemplate`/`SpecificationField` (per-category spec forms), `SpecificationLibraryField` (reusable autocomplete field library), `Product` (+`ProductStatusHistory`, `ProductImage`, `ProductDocument`, `ProductPriceTier`).
 - **RFQ workflow**: `Inquiry` (+`InquiryStatusHistory`, `InquiryItem`) → `InquiryResponse` (+`InquiryResponseAttachment`, `InquiryResponseItem`).
