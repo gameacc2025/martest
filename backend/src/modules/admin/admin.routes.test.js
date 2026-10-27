@@ -87,8 +87,8 @@ async function buildApp() {
   return app;
 }
 
-function userHeader(permissions) {
-  return { 'x-test-user': JSON.stringify({ roles: [], permissions }) };
+function userHeader(permissions, { accessType = 'STAFF', roles = [] } = {}) {
+  return { 'x-test-user': JSON.stringify({ accessType, roles, permissions }) };
 }
 
 test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
@@ -160,10 +160,23 @@ test('GET /stats: SUPER_ADMIN bypasses permission check', async () => {
   const res = await app.inject({
     method: 'GET',
     url: '/api/v1/admin/stats',
-    headers: { 'x-test-user': JSON.stringify({ roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
+    headers: { 'x-test-user': JSON.stringify({ accessType: 'STAFF', roles: ['SUPER_ADMIN'], permissions: ['*'] }) },
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.getStats, true);
+  await app.close();
+});
+
+test('COMPANY context cannot access admin settings or statistics with SUPER_ADMIN wildcard permissions', async () => {
+  const app = await buildApp();
+  const headers = userHeader(['*'], { accessType: 'COMPANY', roles: ['SUPER_ADMIN'] });
+  const stats = await app.inject({ method: 'GET', url: '/api/v1/admin/stats', headers });
+  assert.equal(stats.statusCode, 403);
+  assert.equal(hit.getStats, undefined);
+
+  const settings = await app.inject({ method: 'GET', url: '/api/v1/admin/settings', headers });
+  assert.equal(settings.statusCode, 403);
+  assert.equal(hit.getSettings, undefined);
   await app.close();
 });
 
