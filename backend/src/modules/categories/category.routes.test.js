@@ -55,13 +55,26 @@ async function buildApp() {
   return app;
 }
 
-function userHeader(accessType, permissions) {
-  return { 'x-test-user': JSON.stringify({ roles: [], permissions, accessType }) };
+function userHeader(accessType, permissions, roles = []) {
+  return { 'x-test-user': JSON.stringify({ roles, permissions, accessType }) };
 }
 
 test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
 
 // ── Public routes (no auth required) ──────────────────────────
+
+test('COMPANY context cannot manage categories even with SUPER_ADMIN wildcard permissions', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/categories',
+    headers: userHeader('COMPANY', ['*'], ['SUPER_ADMIN']),
+    payload: { name: 'Sensitive category' },
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.create, undefined);
+  await app.close();
+});
 
 test('GET /: public, reaches the controller without auth', async () => {
   const app = await buildApp();
