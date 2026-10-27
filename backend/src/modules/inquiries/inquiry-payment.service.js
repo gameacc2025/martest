@@ -166,7 +166,7 @@ async function handleSubscriptionPaymentCallback(query = {}) {
   if (subscription.status === 'ACTIVE' && subscription.paymentVerifiedAt) {
     return { payment: 'success', subscriptionId: subscription.id, refId: subscription.paymentRefId, redirectUrl: makeResultUrl(config, 'success', subscription.id, subscription.paymentRefId) };
   }
-  if (subscription.status !== 'PENDING_PAYMENT') {
+  if (!['PENDING_PAYMENT', 'CANCELLED'].includes(subscription.status) || subscription.paymentVerifiedAt) {
     return { payment: 'failed', subscriptionId: subscription.id, redirectUrl: makeResultUrl(config, 'failed', subscription.id) };
   }
 
@@ -196,7 +196,7 @@ async function handleSubscriptionPaymentCallback(query = {}) {
     const current = await tx.inquirySubscription.findUnique({ where: { id: subscription.id }, include: { plan: true } });
     if (!current) return null;
     if (current.status === 'ACTIVE' && current.paymentVerifiedAt) return current;
-    if (current.status !== 'PENDING_PAYMENT') return null;
+    if (!['PENDING_PAYMENT', 'CANCELLED'].includes(current.status) || current.paymentVerifiedAt) return null;
     if (typeof tx.$queryRawUnsafe === 'function') {
       if (current.companyId) await tx.$queryRawUnsafe('SELECT id FROM "Company" WHERE id = $1 FOR UPDATE', current.companyId);
       else await tx.$queryRawUnsafe('SELECT id FROM "User" WHERE id = $1 FOR UPDATE', current.userId);
@@ -215,7 +215,7 @@ async function handleSubscriptionPaymentCallback(query = {}) {
     const startsAt = active?.endsAt && active.endsAt > now ? active.endsAt : now;
     const endsAt = new Date(startsAt.getTime() + current.plan.durationDays * 86400000);
     const updated = await tx.inquirySubscription.updateMany({
-      where: { id: current.id, status: 'PENDING_PAYMENT' },
+      where: { id: current.id, status: { in: ['PENDING_PAYMENT', 'CANCELLED'] }, paymentVerifiedAt: null },
       data: {
         status: 'ACTIVE',
         startsAt,
