@@ -148,6 +148,18 @@ test('a SUPER_ADMIN (permissions: ["*"]) can hit every route regardless of the s
 
 // ── every route requires authentication (onRequest hook) ──────
 
+test('COMPANY context can read its own company with company_profile.read', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/10',
+    headers: userHeader(['company_profile.read'], { accessType: 'COMPANY', companyId: 10 }),
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.getOne, true);
+  await app.close();
+});
+
 test('COMPANY context with SUPER_ADMIN role can read only its own company', async () => {
   const app = await buildApp();
   const own = await app.inject({
