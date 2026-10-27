@@ -26,8 +26,8 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 ## Immediate remaining work
 
-1. Create a validation PR from the current main snapshot with a documentation/worklog checkpoint so CI runs the latest backend tests, frontend Vitest tests, Prisma validation/migrations, and all frontend builds. Do not wait for the Playwright runtime/browser step; retain it as automated coverage.
-2. Fix any CI failures surfaced by that run, then merge the validation PR. Do not claim tests passed before observing the completed CI result.
+1. Validation PR #16 (`validate-current-main-final-20261027`) is open from the latest main snapshot and runs CI + Prisma migration validation. The previous snapshot passed both, but the latest notification tests still need their own completed CI result.
+2. Fix any CI failures surfaced by PR #16, then merge it. Do not wait for the Playwright runtime/browser step; the user explicitly instructed not to chase it, and no browser pass is claimed.
 3. Review notification folder/read-state regression tests and confirm docs match the current implementation.
 4. Verify architecture graph with `pnpm architecture:check` in CI; fix the generated graph if stale.
 5. Keep SMTP status as NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Do not report third-party delivery as successful based only on unit tests.
@@ -35,7 +35,8 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 ## Branch/PR handling
 
 - PR #14 is merged.
-- PR #9 and PR #11 are closed as stale/non-mergeable or redundant. Their useful code was ported to current main: customer addresses, profile contract fix, refresh-token uniqueness, architecture graph, Vite chunk splitting and Docker runtime hardening.
+- PR #9, PR #11, and superseded validation PR #15 are closed.
+- Final validation PR #16 is open from the latest main snapshot. Their useful code was ported to current main: customer addresses, profile contract fix, refresh-token uniqueness, architecture graph, Vite chunk splitting and Docker runtime hardening.
 - No stale branch was force-merged. The connected GitHub actions do not expose branch deletion; do not claim remote branches were deleted.
 
 ## Security and architecture contract
