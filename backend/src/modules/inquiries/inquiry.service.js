@@ -156,6 +156,9 @@ function resolveSupplierCompanyId(data, caller) {
   if (caller?.accessType === 'STAFF') {
     throw { statusCode: 403, code: 'STAFF_CANNOT_MANAGE_SUPPLIER_RESPONSE', message: 'STAFF users supervise inquiries but cannot act as suppliers.' };
   }
+  if (caller?.accessType && caller.accessType !== 'COMPANY') {
+    throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'Supplier responses require a COMPANY access context.' };
+  }
   if (caller?.accessType === 'COMPANY') {
     const companyId = Number(caller.companyId);
     ensureCompanyId(companyId);
