@@ -1161,7 +1161,7 @@ test('decideResponse: stale selection fails and does not notify suppliers', asyn
     () => inquiryService.decideResponse(302, 602, 'SELECTED', buyer),
     (err) => err.statusCode === 409 && err.code === 'RESPONSE_ALREADY_DECIDED',
   );
-  assert.equal(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'), false);
+  assert.equal((calls.dispatchNotification || []).some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'), false);
 });
 
 test('decideResponse: buyer cannot select a sealed quote before reveal', async () => {
