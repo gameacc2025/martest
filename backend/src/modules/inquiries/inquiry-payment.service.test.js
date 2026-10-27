@@ -34,7 +34,11 @@ const mockPrisma = {
     update: async ({ data }) => { subscription = { ...subscription, ...data }; calls.push(['update', data]); return subscription; },
     updateMany: async ({ data, where }) => {
       calls.push(['updateMany', { where, data }]);
-      if (!subscription || subscription.status !== where.status) return { count: 0 };
+      const statusMatches = !where.status
+        || (typeof where.status === 'string' ? subscription?.status === where.status : where.status.in?.includes(subscription?.status));
+      const verifiedMatches = where.paymentVerifiedAt === undefined
+        || (where.paymentVerifiedAt === null ? subscription?.paymentVerifiedAt == null : subscription?.paymentVerifiedAt === where.paymentVerifiedAt);
+      if (!subscription || !statusMatches || !verifiedMatches) return { count: 0 };
       subscription = { ...subscription, ...data };
       return { count: 1 };
     },
