@@ -154,6 +154,21 @@ export const endpoints = {
     get: (id) => `/uploads/${id}`,
     delete: (id) => `/uploads/${id}`
   },
+  // Inquiry subscription monetization
+  inquirySubscriptions: {
+    plans: '/inquiries/plans',
+    mine: '/inquiries/subscription/me',
+    request: '/inquiries/subscription',
+    verifyPayment: (id) => `/inquiries/subscription/${id}/verify-payment`,
+    quota: '/inquiries/quota',
+    adminSettings: '/admin/inquiry-monetization/settings',
+    adminPlans: '/admin/inquiry-plans',
+    adminPlan: (id) => `/admin/inquiry-plans/${id}`,
+    adminSubscriptions: '/admin/inquiry-subscriptions',
+    activate: (id) => `/admin/inquiry-subscriptions/${id}/activate`,
+    reject: (id) => `/admin/inquiry-subscriptions/${id}/reject`,
+    grant: '/admin/inquiry-subscriptions/grant',
+  },
   // Inquiries (RFQ)
   inquiries: {
     create: '/inquiries',
@@ -166,6 +181,8 @@ export const endpoints = {
     addItem: (id) => `/inquiries/${id}/items`,
     updateItem: (id, itemId) => `/inquiries/${id}/items/${itemId}`,
     deleteItem: (id, itemId) => `/inquiries/${id}/items/${itemId}`,
+    listMessages: (id) => `/inquiries/${id}/messages`,
+    sendMessage: (id) => `/inquiries/${id}/messages`,
     listResponses: (id) => `/inquiries/${id}/responses`,
     submitResponse: (id) => `/inquiries/${id}/responses`,
     updateResponse: (id, responseId) => `/inquiries/${id}/responses/${responseId}`,

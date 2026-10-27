@@ -1,4 +1,6 @@
 const inquiryService = require('./inquiry.service');
+const { getQuotaSummary, listActivePlans, getMySubscriptions } = require('./inquiry-subscription.service');
+const { startSubscriptionPayment, handleSubscriptionPaymentCallback, retryPendingSubscriptionVerification } = require('./inquiry-payment.service');
 const { success } = require('../../utils/success');
 
 async function list(request, reply) {
@@ -23,6 +25,61 @@ async function update(request, reply) {
 }
 
 
+
+async function quota(request, reply) {
+  const caller = request.user || {};
+  const ownerType = caller.accessType === 'CUSTOMER' ? 'user' : 'company';
+  const ownerId = ownerType === 'user' ? caller.id : caller.companyId;
+  if (!ownerId || !Number.isInteger(Number(ownerId)) || Number(ownerId) < 1) {
+    return reply.send(success({ enforced: false, subscription: null, quotas: null }));
+  }
+  const data = await getQuotaSummary(ownerType, Number(ownerId));
+  return reply.send(success(data));
+}
+
+function subscriptionOwner(caller) {
+  if (caller?.accessType === 'COMPANY') {
+    const companyId = Number(caller.companyId);
+    if (!Number.isInteger(companyId) || companyId < 1) throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'حساب شرکت معتبر نیست.' };
+    return { ownerType: 'company', ownerId: companyId };
+  }
+  if (caller?.accessType === 'CUSTOMER') {
+    const userId = Number(caller.id);
+    if (!Number.isInteger(userId) || userId < 1) throw { statusCode: 403, code: 'USER_CONTEXT_REQUIRED', message: 'حساب کاربری معتبر نیست.' };
+    return { ownerType: 'user', ownerId: userId };
+  }
+  throw { statusCode: 403, code: 'SUBSCRIPTION_NOT_AVAILABLE_FOR_ROLE', message: 'خرید اشتراک برای این نوع حساب فعال نیست.' };
+}
+
+async function listPlans(request, reply) {
+  return reply.send(success(await listActivePlans()));
+}
+
+async function mySubscriptions(request, reply) {
+  const owner = subscriptionOwner(request.user);
+  const [subscriptions, quota] = await Promise.all([
+    getMySubscriptions(owner.ownerType, owner.ownerId),
+    getQuotaSummary(owner.ownerType, owner.ownerId),
+  ]);
+  return reply.send(success({ subscriptions, quota }));
+}
+
+async function requestSubscription(request, reply) {
+  const owner = subscriptionOwner(request.user);
+  const result = await startSubscriptionPayment({ ...owner, planId: request.body.planId, paymentReference: request.body.paymentReference });
+  return reply.code(201).send(success({ ...result.subscription, paymentMode: result.paymentMode, paymentUrl: result.paymentUrl }));
+}
+
+async function retrySubscriptionPayment(request, reply) {
+  const owner = subscriptionOwner(request.user);
+  const result = await retryPendingSubscriptionVerification({ ...owner, subscriptionId: request.params.id });
+  return reply.send(success(result));
+}
+
+async function subscriptionPaymentCallback(request, reply) {
+  const result = await handleSubscriptionPaymentCallback(request.query);
+  return reply.redirect(result.redirectUrl);
+}
 
 async function stats(request, reply) {
   const data = await inquiryService.getInquiryStats(request.user);
@@ -68,6 +125,16 @@ async function deleteItem(request, reply) {
 async function submitResponse(request, reply) {
   const response = await inquiryService.submitResponse(request.params.id, request.body, request.user);
   return reply.code(201).send(success(response));
+}
+
+async function listMessages(request, reply) {
+  const messages = await inquiryService.listInquiryMessages(request.params.id, request.user);
+  return reply.send(success(messages));
+}
+
+async function sendMessage(request, reply) {
+  const message = await inquiryService.sendInquiryMessage(request.params.id, request.body, request.user);
+  return reply.code(201).send(success(message));
 }
 
 async function listResponses(request, reply) {
@@ -121,6 +188,12 @@ module.exports = {
   changeStatus,
   revealResponses,
   stats,
+  quota,
+  listPlans,
+  mySubscriptions,
+  requestSubscription,
+  subscriptionPaymentCallback,
+  retrySubscriptionPayment,
 
 
   listItems,
@@ -130,6 +203,8 @@ module.exports = {
   deleteItem,
   submitResponse,
   listResponses,
+  listMessages,
+  sendMessage,
   updateResponse,
   decideResponse,
   withdrawResponse,

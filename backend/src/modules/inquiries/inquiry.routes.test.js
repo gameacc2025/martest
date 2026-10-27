@@ -29,6 +29,7 @@ injectMock('../../config/db', {});
 const hit = {};
 const trivialController = {};
 const controllerMethods = [
+  'quota', 'listPlans', 'mySubscriptions', 'requestSubscription', 'subscriptionPaymentCallback', 'retrySubscriptionPayment', 'listMessages', 'sendMessage',
   'list', 'stats', 'getById', 'create', 'update', 'listItems',
   'changeStatus', 'revealResponses', 'addItem', 'updateItem', 'deleteItem',
   'listResponses', 'submitResponse', 'updateResponse', 'decideResponse',
@@ -400,5 +401,22 @@ test('SUPER_ADMIN bypasses all inquiry permission checks', async () => {
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.list, true);
+  await app.close();
+});
+
+
+test('GET /subscription/payment/callback is public for provider redirects', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'GET', url: '/api/v1/inquiries/subscription/payment/callback?Authority=A-test&Status=OK' });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.subscriptionPaymentCallback, true);
+  await app.close();
+});
+
+
+test('POST /subscription/:id/verify-payment requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'POST', url: '/api/v1/inquiries/subscription/7/verify-payment' });
+  assert.equal(res.statusCode, 401);
   await app.close();
 });

@@ -195,12 +195,46 @@ const listQuerySchema = {
 };
 
 async function inquiryRoutes(fastify) {
-  fastify.addHook('onRequest', fastify.authenticate);
+  // Zarinpal redirects the customer back without our JWT. Keep this one
+  // provider callback public; the handler verifies Authority with Zarinpal
+  // server-to-server before it can activate any subscription.
+  fastify.addHook('onRequest', async (request, reply) => {
+    if (String(request.routeOptions?.url || '').endsWith('/subscription/payment/callback')) return;
+    return fastify.authenticate(request, reply);
+  });
 
   fastify.get('/', {
     preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read')],
     schema: { querystring: listQuerySchema },
   }, ctrl.list);
+
+  // Plans and self-service subscription requests.
+  fastify.get('/subscription/payment/callback', {
+    config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
+  }, ctrl.subscriptionPaymentCallback);
+
+  fastify.get('/plans', {
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
+  }, ctrl.listPlans);
+
+  fastify.post('/subscription/:id/verify-payment', {
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.read', 'inquiries.create', 'inquiries.respond')],
+    schema: { params: { type: 'object', required: ['id'], properties: { id: { type: 'string', minLength: 1, maxLength: 10 } } } },
+  }, ctrl.retrySubscriptionPayment);
+
+  fastify.get('/subscription/me', {
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.read', 'inquiries.create', 'inquiries.respond')],
+  }, ctrl.mySubscriptions);
+
+  fastify.post('/subscription', {
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.create', 'inquiries.respond')],
+    schema: { body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, paymentReference: { type: 'string', maxLength: 120 } } } },
+  }, ctrl.requestSubscription);
+
+  // Current subscription and remaining RFQ quota for the caller.
+  fastify.get('/quota', {
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
+  }, ctrl.quota);
 
   // Dashboard statistics scoped to the caller's company (aggregated live).
   fastify.get('/stats', {
@@ -256,6 +290,29 @@ async function inquiryRoutes(fastify) {
     preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.delete', 'inquiries.create')],
     schema: { params: inquiryItemParamsSchema },
   }, ctrl.deleteItem);
+
+
+  // Private buyer/supplier conversation. A supplier can only message after
+  // submitting a response; each send consumes the sender's message quota.
+  fastify.get('/:id/messages', {
+    preHandler: [requireAccessType('STAFF', 'COMPANY', 'CUSTOMER'), requireAnyPermission('leads.read', 'inquiries.read')],
+    schema: { params: inquiryParamsSchema },
+  }, ctrl.listMessages);
+
+  fastify.post('/:id/messages', {
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.create', 'inquiries.respond')],
+    schema: {
+      params: inquiryParamsSchema,
+      body: {
+        type: 'object', required: ['message'], additionalProperties: false,
+        properties: {
+          message: { type: 'string', minLength: 1, maxLength: 5000 },
+          recipientCompanyId: { type: 'integer', minimum: 1 },
+          notifyBySms: { type: 'boolean' },
+        },
+      },
+    },
+  }, ctrl.sendMessage);
 
   fastify.get('/:id/responses', {
     preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('inquiries.read', 'inquiries.respond', 'leads.read')],

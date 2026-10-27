@@ -7,7 +7,7 @@
 
 const buildApp = require('./app');
 const { port, nodeEnv } = require('./config/env');
-const { processPendingDeliveries } = require('./modules/notifications/notification.delivery.service');
+const { processPendingDeliveries, processPendingSmsDeliveries } = require('./modules/notifications/notification.delivery.service');
 const { processInquiryLifecycle } = require('./modules/inquiries/inquiry.lifecycle.service');
 
 async function start() {
@@ -22,15 +22,17 @@ async function start() {
   }
 
   // ── Delivery worker ──────────────────────────────────────────
-  // Polls for PENDING EMAIL deliveries and processes them.
-  // Only runs when a real email provider is configured; otherwise
-  // deliveries remain PENDING until SMTP is configured.
+  // Polls pending EMAIL and SMS outbox deliveries. Each channel only sends
+  // when its real provider is configured; otherwise rows remain pending.
   let workerRunning = false;
   async function runDeliveryWorker() {
     if (workerRunning) return; // Prevent overlapping runs
     workerRunning = true;
     try {
-      await processPendingDeliveries({ limit: 100 });
+      await Promise.all([
+        processPendingDeliveries({ limit: 100 }),
+        processPendingSmsDeliveries({ limit: 100 }),
+      ]);
     } catch (err) {
       app.log.error(err, 'Delivery worker error');
     } finally {

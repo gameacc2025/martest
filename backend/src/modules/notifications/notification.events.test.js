@@ -54,6 +54,7 @@ const EXPECTED_EVENT_KEYS = [
   // inquiry/RFQ (flow/03)
   'INQUIRY_PUBLISHED',
   'INQUIRY_RESPONSE_RECEIVED',
+  'INQUIRY_MESSAGE_RECEIVED',
   'INQUIRY_STATUS_CHANGED',
   'INQUIRY_RESPONSE_SELECTED',
   'INQUIRY_RESPONSE_REJECTED',
@@ -110,6 +111,7 @@ test('catalog: templates produce { title, message, data } from context', () => {
     PRODUCT_RE_REVIEW: { product: { id: 3, title: 'Y' }, threshold: 5 },
     INQUIRY_PUBLISHED: { inquiry: { id: 1, title: 'استعلام' } },
     INQUIRY_RESPONSE_RECEIVED: { inquiry: { id: 2 }, response: { id: 3 } },
+    INQUIRY_MESSAGE_RECEIVED: { inquiry: { id: 2, title: 'استعلام' } },
     INQUIRY_STATUS_CHANGED: { inquiry: { id: 2 }, status: 'CLOSED' },
     INQUIRY_RESPONSE_SELECTED: { inquiry: { id: 2 }, response: { id: 3 } },
     INQUIRY_RESPONSE_REJECTED: { inquiry: { id: 2 }, response: { id: 3 } },

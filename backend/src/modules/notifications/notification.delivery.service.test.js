@@ -97,6 +97,9 @@ injectMock('../../config/env', {
 // Mock email provider
 const emailCalls = [];
 let emailShouldFail = false;
+const smsCalls = [];
+let smsProviderConfigured = false;
+let smsShouldFail = false;
 
 const mockEmailProvider = {
   sendEmail: async (opts) => { emailCalls.push(opts); if (emailShouldFail) throw new Error('SMTP connection refused'); return { messageId: 'test-msg-id', provider: 'smtp' }; },
@@ -105,11 +108,20 @@ const mockEmailProvider = {
 };
 
 function resetEmailMocks() { emailCalls.length = 0; emailShouldFail = false; }
+function resetSmsMocks() { smsCalls.length = 0; smsProviderConfigured = false; smsShouldFail = false; }
 function setEmailShouldFail(v) { emailShouldFail = v; }
 
 injectMock('./notification.email.provider', mockEmailProvider);
+injectMock('./notification.sms.provider', {
+  hasRealProvider: () => smsProviderConfigured,
+  sendSms: async (opts) => {
+    smsCalls.push(opts);
+    if (smsShouldFail) throw new Error('Twilio unavailable');
+    return { provider: 'twilio', messageSid: 'SM-test' };
+  },
+});
 
-const { processPendingDeliveries, calculateBackoff, getDeliveryStats, listDeliveries } = require('./notification.delivery.service');
+const { processPendingDeliveries, processPendingSmsDeliveries, calculateBackoff, getDeliveryStats, listDeliveries } = require('./notification.delivery.service');
 
 // Tests
 
@@ -224,3 +236,40 @@ test('listDeliveries: filters by status and channel', async () => {
   assert.equal(result.data.length, 1);
   assert.equal(result.data[0].id, 2);
 });
+
+test('processPendingSmsDeliveries: skips when Twilio is not configured', async () => {
+  resetMocks(); resetSmsMocks();
+  fx.deliveries = [{ id: 90, status: 'PENDING', channel: 'SMS', recipient: '+31612345678', body: 'Hello', attempts: 0, nextAttemptAt: null, userId: 1, eventType: 'INQUIRY_MESSAGE_RECEIVED' }];
+  const result = await processPendingSmsDeliveries({ limit: 100 });
+  assert.equal(result.processed, 0);
+  assert.equal(result.reason, 'no_sms_provider');
+  assert.equal(smsCalls.length, 0);
+});
+
+test('processPendingSmsDeliveries: sends queued SMS and marks delivery SENT', async () => {
+  resetMocks(); resetSmsMocks();
+  smsProviderConfigured = true;
+  fx.deliveries = [{ id: 91, status: 'PENDING', channel: 'SMS', recipient: '+31612345678', body: 'Hello', attempts: 0, nextAttemptAt: null, userId: 1, eventType: 'INQUIRY_MESSAGE_RECEIVED' }];
+  const result = await processPendingSmsDeliveries({ limit: 100 });
+  assert.equal(result.processed, 1);
+  assert.equal(result.sent, 1);
+  assert.deepEqual(smsCalls[0], { to: '+31612345678', body: 'Hello' });
+  const update = fx.updates.find(u => u.where.id === 91);
+  assert.equal(update.data.status, 'SENT');
+  assert.equal(update.data.provider, 'twilio');
+});
+
+test('processPendingSmsDeliveries: retries provider failures and records attempts', async () => {
+  resetMocks(); resetSmsMocks();
+  smsProviderConfigured = true;
+  smsShouldFail = true;
+  fx.deliveries = [{ id: 92, status: 'PENDING', channel: 'SMS', recipient: '+31612345678', body: 'Hello', attempts: 0, nextAttemptAt: null, userId: 1, eventType: 'INQUIRY_MESSAGE_RECEIVED' }];
+  const result = await processPendingSmsDeliveries({ limit: 100 });
+  assert.equal(result.processed, 1);
+  assert.equal(result.failed, 1);
+  const update = fx.updates.find(u => u.where.id === 92);
+  assert.equal(update.data.status, 'PENDING');
+  assert.equal(update.data.attempts, 1);
+  assert.match(update.data.lastError, /Twilio unavailable/);
+});
+

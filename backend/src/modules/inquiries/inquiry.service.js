@@ -9,6 +9,7 @@ const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
 const { dispatchNotification } = require('../notifications/notification.dispatch.service');
+const { consumeUsage } = require('./inquiry-subscription.service');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const {
   validateInquiryCreationCapacity,
@@ -105,6 +106,20 @@ const responseInclude = {
   },
 };
 
+
+
+function getInquirySmsGatewayConfig() {
+  const accountSid = String(process.env.TWILIO_ACCOUNT_SID || '').trim();
+  const authToken = String(process.env.TWILIO_AUTH_TOKEN || '').trim();
+  const from = String(process.env.TWILIO_FROM_NUMBER || '').trim();
+  if (!accountSid || !authToken || !from) {
+    throw { statusCode: 503, code: 'SMS_PROVIDER_NOT_CONFIGURED', message: 'درگاه پیامک روی سرور پیکربندی نشده است.' };
+  }
+  if (!accountSid.startsWith('AC') || from.length > 40) {
+    throw { statusCode: 500, code: 'SMS_PROVIDER_CONFIGURATION_INVALID', message: 'تنظیمات درگاه پیامک معتبر نیست.' };
+  }
+  return { accountSid, authToken, from };
+}
 
 function isSuperAdmin(caller) {
   return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
@@ -800,6 +815,12 @@ async function createInquiry(data, caller) {
       include: inquiryInclude,
     });
 
+    if (companyId) {
+      await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
+    } else if (buyerUserId) {
+      await consumeUsage({ ownerType: 'user', ownerId: buyerUserId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
+    }
+
     if (isCustomerBuyer) {
       await notifyInquiryPublished(tx, inquiry);
     }
@@ -1034,7 +1055,6 @@ async function submitResponse(inquiryId, data, caller) {
     validateResponseItemOwnership(data.items, ownedInquiryItemIds);
 
     await validateResponseSubmissionCapacity(companyId, tx);
-
     const response = await tx.inquiryResponse.create({
       data: {
         inquiryId: numericInquiryId,
@@ -1045,6 +1065,11 @@ async function submitResponse(inquiryId, data, caller) {
       include: responseInclude,
     });
 
+    await consumeUsage({
+      ownerType: 'company', ownerId: companyId, usageType: 'RESPONSE_SUBMIT',
+      referenceType: 'InquiryResponse', referenceId: response.id, tx,
+    });
+
     await notifyInquiryOwner(tx, inquiry, 'INQUIRY_RESPONSE_RECEIVED', {
       inquiry: { id: inquiry.id, title: inquiry.title },
       response: { id: response.id },
@@ -1052,6 +1077,198 @@ async function submitResponse(inquiryId, data, caller) {
 
     return response;
   });
+}
+
+
+async function listInquiryMessages(inquiryId, caller) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const inquiry = await prisma.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, companyId: true, buyerUserId: true } });
+  if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const userId = caller?.accessType === 'CUSTOMER' ? assertAuthenticatedUser(caller) : null;
+  const companyId = caller?.accessType === 'COMPANY' ? Number(caller.companyId) : null;
+  const isBuyer = (userId && Number(inquiry.buyerUserId) === userId)
+    || (companyId && Number(inquiry.companyId) === companyId);
+
+  if (!isBuyer && !isStaff) {
+    if (!Number.isInteger(companyId) || companyId < 1) {
+      throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+    }
+    const response = await prisma.inquiryResponse.findFirst({ where: { inquiryId: numericInquiryId, companyId }, select: { id: true } });
+    if (!response) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+  }
+
+  const where = { inquiryId: numericInquiryId };
+  if (!isStaff) {
+    if (userId) where.OR = [{ senderUserId: userId }, { recipientUserId: userId }];
+    else if (companyId) where.OR = [{ senderCompanyId: companyId }, { recipientCompanyId: companyId }];
+  }
+  const messages = await prisma.inquiryMessage.findMany({
+    where,
+    orderBy: { createdAt: 'asc' },
+    take: 500,
+    include: {
+      senderUser: { select: { id: true, profile: { select: { firstName: true, lastName: true } } } },
+      senderCompany: { select: { id: true, name: true } },
+      recipientUser: { select: { id: true } },
+      recipientCompany: { select: { id: true, name: true } },
+    },
+  });
+  if (!isStaff) {
+    if (userId) await prisma.inquiryMessage.updateMany({ where: { inquiryId: numericInquiryId, recipientUserId: userId, readAt: null }, data: { readAt: new Date() } });
+    else if (companyId) await prisma.inquiryMessage.updateMany({ where: { inquiryId: numericInquiryId, recipientCompanyId: companyId, readAt: null }, data: { readAt: new Date() } });
+  }
+  return messages;
+}
+
+async function sendInquiryMessage(inquiryId, data, caller) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const message = typeof data?.message === 'string' ? data.message.trim() : '';
+  if (!message || message.length > 5000) {
+    throw { statusCode: 400, code: 'INVALID_INQUIRY_MESSAGE', message: 'متن پیام باید بین ۱ تا ۵۰۰۰ نویسه باشد.' };
+  }
+  if (!['CUSTOMER', 'COMPANY'].includes(caller?.accessType) || isSuperAdmin(caller)) {
+    throw { statusCode: 403, code: 'INQUIRY_MESSAGE_ROLE_NOT_ALLOWED', message: 'این نوع حساب مجاز به ارسال پیام استعلام نیست.' };
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, title: true, companyId: true, buyerUserId: true, status: true } });
+    if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+    if (['CANCELLED', 'COMPLETED', 'EXPIRED'].includes(inquiry.status)) {
+      throw { statusCode: 409, code: 'INQUIRY_MESSAGES_CLOSED', message: 'پس از بسته‌شدن نهایی استعلام امکان ارسال پیام وجود ندارد.' };
+    }
+
+    const userId = caller.accessType === 'CUSTOMER' ? assertAuthenticatedUser(caller) : null;
+    const companyId = caller.accessType === 'COMPANY' ? Number(caller.companyId) : null;
+    if (caller.accessType === 'COMPANY' && (!Number.isInteger(companyId) || companyId < 1)) {
+      throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'حساب شرکت معتبر نیست.' };
+    }
+
+    const isBuyer = (userId && Number(inquiry.buyerUserId) === userId)
+      || (companyId && Number(inquiry.companyId) === companyId);
+    let recipientUserId = null;
+    let recipientCompanyId = null;
+    let senderUserId = null;
+    let senderCompanyId = null;
+
+    if (isBuyer) {
+      recipientCompanyId = Number(data.recipientCompanyId);
+      if (!Number.isInteger(recipientCompanyId) || recipientCompanyId < 1) {
+        throw { statusCode: 400, code: 'RECIPIENT_COMPANY_REQUIRED', message: 'برای ارسال پیام، شرکت پاسخ‌دهنده را انتخاب کنید.' };
+      }
+      const response = await tx.inquiryResponse.findFirst({
+        where: { inquiryId: numericInquiryId, companyId: recipientCompanyId },
+        select: { id: true },
+      });
+      if (!response) throw { statusCode: 404, code: 'INQUIRY_RECIPIENT_NOT_FOUND', message: 'این شرکت برای استعلام پاسخ ثبت نکرده است.' };
+      if (userId) senderUserId = userId;
+      else senderCompanyId = companyId;
+    } else {
+      if (!companyId) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+      const response = await tx.inquiryResponse.findFirst({
+        where: { inquiryId: numericInquiryId, companyId },
+        select: { id: true },
+      });
+      if (!response) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+      if (inquiry.buyerUserId) recipientUserId = inquiry.buyerUserId;
+      else if (inquiry.companyId) recipientCompanyId = inquiry.companyId;
+      else throw { statusCode: 409, code: 'INQUIRY_BUYER_MISSING', message: 'مالک استعلام مشخص نیست.' };
+      senderCompanyId = companyId;
+    }
+
+    const ownerType = senderUserId ? 'user' : 'company';
+    const ownerId = senderUserId || senderCompanyId;
+    const createdMessage = await tx.inquiryMessage.create({
+      data: { inquiryId: numericInquiryId, senderUserId, senderCompanyId, recipientUserId, recipientCompanyId, body: message },
+      include: {
+        senderUser: { select: { id: true, profile: { select: { firstName: true, lastName: true } } } },
+        senderCompany: { select: { id: true, name: true } },
+        recipientUser: { select: { id: true } },
+        recipientCompany: { select: { id: true, name: true } },
+      },
+    });
+    await consumeUsage({
+      ownerType, ownerId, usageType: 'INTERNAL_MESSAGE',
+      referenceType: 'InquiryMessage', referenceId: createdMessage.id, tx,
+    });
+    let smsQueued = false;
+    let smsSkippedReason = null;
+    if (data.notifyBySms === true) {
+      const recipient = recipientUserId
+        ? await tx.user.findUnique({ where: { id: recipientUserId }, select: { id: true, phone: true } })
+        : await tx.company.findUnique({ where: { id: recipientCompanyId }, select: { phone: true } });
+      const phone = String(recipient?.phone || '').trim();
+      let deliveryUserId = recipientUserId;
+      if (!deliveryUserId && recipientCompanyId) {
+        const companyMember = await tx.user.findFirst({
+          where: { status: 'ACTIVE', accessProfile: { companyId: recipientCompanyId } },
+          select: { id: true },
+        });
+        deliveryUserId = companyMember?.id;
+      }
+
+      if (!phone) {
+        smsSkippedReason = 'recipient_phone_missing';
+      } else if (!deliveryUserId) {
+        smsSkippedReason = 'recipient_account_missing';
+      } else {
+        const preference = await tx.notificationPreference.findUnique({
+          where: { userId_eventType_channel: { userId: deliveryUserId, eventType: 'INQUIRY_MESSAGE_RECEIVED', channel: 'SMS' } },
+          select: { enabled: true },
+        });
+        if (preference?.enabled !== true) {
+          smsSkippedReason = 'recipient_sms_opted_out';
+        } else {
+          try {
+            getInquirySmsGatewayConfig();
+          } catch (error) {
+            if (['SMS_PROVIDER_NOT_CONFIGURED', 'SMS_PROVIDER_CONFIGURATION_INVALID'].includes(error?.code)) {
+              smsSkippedReason = 'sms_provider_not_configured';
+            } else {
+              throw error;
+            }
+          }
+
+          if (!smsSkippedReason) {
+            try {
+              await consumeUsage({
+                ownerType, ownerId, usageType: 'SMS', referenceType: 'InquiryMessage',
+                referenceId: createdMessage.id, forceEnforcement: true, tx,
+              });
+            } catch (error) {
+              if (error?.code === 'INQUIRY_QUOTA_EXCEEDED' || error?.code === 'INQUIRY_SUBSCRIPTION_REQUIRED') {
+                smsSkippedReason = 'sms_quota_exceeded';
+              } else {
+                throw error;
+              }
+            }
+          }
+
+          if (!smsSkippedReason) {
+            await tx.notificationDelivery.create({
+              data: {
+                userId: deliveryUserId,
+                eventType: 'INQUIRY_MESSAGE_RECEIVED',
+                channel: 'SMS',
+                status: 'PENDING',
+                recipient: phone,
+                subject: null,
+                body: `پیام جدیدی درباره استعلام «${String(inquiry.title || '').slice(0, 100)}» دریافت کرده‌اید. وارد سامانه شوید تا آن را بخوانید.`,
+                attempts: 0,
+                maxAttempts: 3,
+                nextAttemptAt: new Date(),
+                dedupeKey: `inquiry-message-${createdMessage.id}-sms`,
+                updatedAt: new Date(),
+              },
+            });
+            smsQueued = true;
+          }
+        }
+      }
+    }
+    return { ...createdMessage, smsQueued, smsSkippedReason };
+  }, { maxWait: 5000, timeout: 12000 });
 }
 
 async function listResponses(inquiryId, caller) {
@@ -1507,6 +1724,8 @@ module.exports = {
   deleteInquiryItem,
   submitResponse,
   listResponses,
+  listInquiryMessages,
+  sendInquiryMessage,
   updateResponse,
   decideResponse,
   withdrawResponse,

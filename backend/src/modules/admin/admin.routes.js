@@ -54,6 +54,94 @@ async function adminRoutes(fastify) {
     },
   }, ctrl.updateReviewEditThreshold);
 
+
+  // ── RFQ subscription monetization ───────────────────────────
+  const inquiryPlanSchema = {
+    type: 'object',
+    required: ['code', 'name', 'durationDays', 'price'],
+    additionalProperties: false,
+    properties: {
+      code: { type: 'string', minLength: 2, maxLength: 50 },
+      name: { type: 'string', minLength: 1, maxLength: 100 },
+      description: { type: 'string', maxLength: 1000 },
+      durationDays: { type: 'integer', minimum: 1, maximum: 3650 },
+      price: { type: 'number', minimum: 1 },
+      currency: { type: 'string', minLength: 3, maxLength: 8 },
+      inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      internalMessagesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      smsPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      isActive: { type: 'boolean' },
+    },
+  };
+
+  fastify.get('/inquiry-monetization/settings', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+  }, ctrl.getInquiryMonetizationSettingsCtrl);
+
+  fastify.patch('/inquiry-monetization/settings', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    schema: { body: { type: 'object', required: ['subscriptionEnforcement'], additionalProperties: false, properties: { subscriptionEnforcement: { type: 'boolean' } } } },
+  }, ctrl.updateInquiryMonetizationSettingsCtrl);
+
+  fastify.get('/inquiry-plans', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+  }, ctrl.listInquiryPlansCtrl);
+
+  fastify.post('/inquiry-plans', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    schema: { body: inquiryPlanSchema },
+  }, ctrl.createInquiryPlanCtrl);
+
+
+  fastify.patch('/inquiry-plans/:id', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    schema: {
+      params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      body: {
+        type: 'object', minProperties: 1, additionalProperties: false,
+        properties: {
+          name: { type: 'string', minLength: 1, maxLength: 100 },
+          description: { type: 'string', maxLength: 1000 },
+          durationDays: { type: 'integer', minimum: 1, maximum: 3650 },
+          price: { type: 'number', minimum: 0 },
+          currency: { type: 'string', minLength: 3, maxLength: 8 },
+          inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          internalMessagesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          smsPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+          isActive: { type: 'boolean' },
+        },
+      },
+    },
+  }, ctrl.updateInquiryPlanCtrl);
+
+  fastify.get('/inquiry-subscriptions', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+  }, ctrl.listInquirySubscriptionsCtrl);
+
+  fastify.post('/inquiry-subscriptions/:id/activate', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    schema: {
+      params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      body: { type: 'object', required: ['paymentConfirmed'], additionalProperties: false, properties: { paymentConfirmed: { type: 'boolean', const: true }, notes: { type: 'string', maxLength: 1000 } } },
+    },
+  }, ctrl.activatePendingInquirySubscriptionCtrl);
+
+
+  fastify.post('/inquiry-subscriptions/:id/reject', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    schema: {
+      params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } },
+      body: { type: 'object', additionalProperties: false, properties: { notes: { type: 'string', maxLength: 1000 } } },
+    },
+  }, ctrl.rejectPendingInquirySubscriptionCtrl);
+
+  fastify.post('/inquiry-subscriptions/grant', {
+    onRequest: [fastify.authenticate], preHandler: [requirePermission('system_settings.manage')],
+    schema: { body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, companyId: { type: 'integer', minimum: 1 }, userId: { type: 'integer', minimum: 1 }, notes: { type: 'string', maxLength: 1000 } } } },
+  }, ctrl.grantInquirySubscriptionCtrl);
+
   // ── Admin-created announcements ───────────────────────────────
   fastify.post('/notifications/send', {
     onRequest: [fastify.authenticate],

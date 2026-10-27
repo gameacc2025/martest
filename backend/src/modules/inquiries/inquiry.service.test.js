@@ -26,6 +26,9 @@ const calls = {
 let nextCount = 0;
 let nextFindMany = [];
 let nextFindUnique = null;
+let nextMessages = [];
+let smsUsageEvents = [];
+const activeSmsSubscription = { id: 77, planId: 2, startsAt: new Date('2026-10-01T00:00:00Z'), endsAt: new Date('2026-11-01T00:00:00Z'), status: 'ACTIVE', plan: { id: 2, name: 'SMS', isActive: true, inquiriesPerPeriod: 10, responsesPerPeriod: 10, internalMessagesPerPeriod: 10, smsPerPeriod: 2 } };
 
 // Fixtures backing the transactional / relationship-heavy paths
 // (items, responses, attachments, product validation, stats).
@@ -59,6 +62,14 @@ function record(name, args) {
 }
 
 const mockPrisma = {
+  systemSetting: { findUnique: async () => ({ value: 'false' }) },
+  inquirySubscription: { findFirst: async () => activeSmsSubscription },
+  inquiryUsageEvent: {
+    aggregate: async ({ where }) => ({ _sum: { quantity: smsUsageEvents.filter(e => e.subscriptionId === where.subscriptionId && e.usageType === where.usageType).reduce((sum, e) => sum + e.quantity, 0) } }),
+    create: async ({ data }) => { smsUsageEvents.push(data); return { id: smsUsageEvents.length, ...data }; },
+  },
+  user: { findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }) },
+  company: { findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }) },
   inquiry: {
     count: async (args) => {
       calls.count.push(args);
@@ -104,6 +115,7 @@ const mockPrisma = {
     },
   },
   inquiryResponse: {
+    findUnique: async () => null,
     count: async () => fx.responseCount,
     findMany: async (args) => {
       record('inquiryResponse.findMany', args);
@@ -139,6 +151,13 @@ const mockPrisma = {
       record('inquiryStatusHistory.create', args);
       return {};
     },
+  },
+  notificationPreference: { findUnique: async () => ({ enabled: true }) },
+  notificationDelivery: { create: async (args) => { record('notificationDelivery.create', args); return { id: 500, ...args.data }; } },
+  inquiryMessage: {
+    findMany: async (args) => { record('inquiryMessage.findMany', args); return nextMessages; },
+    create: async (args) => { record('inquiryMessage.create', args); return { id: 101, ...args.data }; },
+    updateMany: async (args) => { record('inquiryMessage.updateMany', args); return { count: 1 }; },
   },
   inquiryResponseAttachment: {
     count: async () => fx.attachmentCount,
@@ -223,6 +242,8 @@ function resetMocks() {
   nextCount = 0;
   nextFindMany = [];
   nextFindUnique = null;
+  nextMessages = [];
+  smsUsageEvents = [];
   fx.inquiryItem = null;
   fx.inquiryItemCount = 0;
   fx.ownedItemIds = [];
@@ -1491,3 +1512,72 @@ test('getInquiryStats: a caller without a company is rejected', async () => {
     (err) => err.code === 'COMPANY_REQUIRED',
   );
 });
+
+test('sendInquiryMessage: supplier can message the inquiry buyer only after responding', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const result = await inquiryService.sendInquiryMessage(1, { message: 'Need one clarification' }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+  assert.equal(result.senderCompanyId, 5);
+  assert.equal(result.recipientUserId, 10);
+  assert.equal(result.body, 'Need one clarification');
+  assert.equal(calls['inquiryMessage.create'][0].data.senderCompanyId, 5);
+});
+
+test('sendInquiryMessage: buyer messages a responding company and records the chosen recipient', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const result = await inquiryService.sendInquiryMessage(1, { message: 'Please confirm delivery', recipientCompanyId: 5 }, { id: 10, accessType: 'CUSTOMER', permissions: ['inquiries.create'] });
+  assert.equal(result.senderUserId, 10);
+  assert.equal(result.recipientCompanyId, 5);
+});
+
+test('sendInquiryMessage: blocks companies that have not responded', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = null;
+  await assert.rejects(
+    () => inquiryService.sendInquiryMessage(1, { message: 'Hello' }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] }),
+    (error) => error.code === 'INQUIRY_NOT_FOUND' && error.statusCode === 404,
+  );
+  assert.equal(calls['inquiryMessage.create'], undefined);
+});
+
+test('listInquiryMessages: limits company results to messages involving that company', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10 };
+  fx.response = { id: 90 };
+  nextMessages = [{ id: 1, senderCompanyId: 5, recipientUserId: 10 }];
+  await inquiryService.listInquiryMessages(1, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.read'] });
+  assert.deepEqual(calls['inquiryMessage.findMany'][0].where.OR, [{ senderCompanyId: 5 }, { recipientCompanyId: 5 }]);
+  assert.equal(calls['inquiryMessage.updateMany'][0].where.recipientCompanyId, 5);
+});
+
+
+
+test('sendInquiryMessage: optional SMS consumes its own paid allowance and queues an outbox delivery', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const oldSid = process.env.TWILIO_ACCOUNT_SID;
+  const oldToken = process.env.TWILIO_AUTH_TOKEN;
+  const oldFrom = process.env.TWILIO_FROM_NUMBER;
+  process.env.TWILIO_ACCOUNT_SID = 'ACtest';
+  process.env.TWILIO_AUTH_TOKEN = 'test-token';
+  process.env.TWILIO_FROM_NUMBER = '+15005550006';
+  try {
+    const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+    assert.equal(result.recipientUserId, 10);
+    assert.equal(result.smsQueued, true);
+    assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 1);
+    assert.equal(calls['notificationDelivery.create'].length, 1);
+    assert.equal(calls['notificationDelivery.create'][0].data.channel, 'SMS');
+    assert.equal(calls['notificationDelivery.create'][0].data.recipient, '+31612345678');
+  } finally {
+    if (oldSid === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = oldSid;
+    if (oldToken === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = oldToken;
+    if (oldFrom === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = oldFrom;
+  }
+});
+
