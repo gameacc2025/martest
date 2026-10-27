@@ -58,6 +58,7 @@ ForbiddenError 403, ConflictError 409) and `handlePrismaError`/
 Single `backend/prisma/schema.prisma`, ~26 models. Key domains:
 - **Identity**: `User` → `Profile` (1:1, personal info: firstName/lastName/avatar) → optional `AccessProfile` (1:1, app-context: `type` STAFF|COMPANY, `companyId`, `isActive`; CUSTOMER defaults to Website without an AccessProfile) → `UserRole`→`Role`→`RolePermission`→`Permission`.
 - **Customer addresses**: `Address` records are owned by `userId`; all address APIs scope reads/writes to the authenticated user. A partial unique PostgreSQL index enforces at most one default address per user.
+- **Future B2C commerce**: Cart, Checkout, Orders, and Wishlist remain dormant by frozen AD-4. Their page/store files may remain for future work but must not be routed or exposed through active product/profile controls until the architecture decision changes.
 - **Companies**: `Company`, `CompanyLimit` (key/value quota rows, e.g. `rfq.max_open`), `CompanyInquiryLimit` (legacy-shaped limit fields, being phased toward `CompanyLimit`).
 - **Catalog**: `Category`→`Subcategory`, `SpecificationTemplate`/`SpecificationField` (per-category spec forms), `SpecificationLibraryField` (reusable autocomplete field library), `Product` (+`ProductStatusHistory`, `ProductImage`, `ProductDocument`, `ProductPriceTier`).
 - **RFQ workflow**: `Inquiry` (+`InquiryStatusHistory`, `InquiryItem`) → `InquiryResponse` (+`InquiryResponseAttachment`, `InquiryResponseItem`).
