@@ -108,6 +108,26 @@ function requireAccessType(...allowedTypes) {
 }
 
 /**
+ * Strict access-context guard for domain boundaries that must not be
+ * bypassed by SUPER_ADMIN role membership. Use for staff-only management
+ * surfaces (roles/permissions) and other routes where AccessProfile.type
+ * is the security boundary, not just a frontend routing hint.
+ */
+function requireExactAccessType(...allowedTypes) {
+  return async function checkExactAccessType(request, reply) {
+    const user = request.user;
+    if (!user) return unauthorized(reply);
+    const accessType = user.accessType ?? null;
+    if (!allowedTypes.includes(accessType)) {
+      return forbidden(
+        reply,
+        `Access denied. This endpoint requires access type: ${allowedTypes.join(' or ')}.`
+      );
+    }
+  };
+}
+
+/**
  * Fastify preHandler factory — require ALL the given permissions.
  * @param {...string} permissions
  */
@@ -181,6 +201,7 @@ function requireOwnCompany(getTargetCompanyId) {
 module.exports = {
   hasPermission,
   requireAccessType,
+  requireExactAccessType,
   requirePermission,
   requireAnyPermission,
   requireRole,
