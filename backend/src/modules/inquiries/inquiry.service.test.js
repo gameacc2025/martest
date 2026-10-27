@@ -37,6 +37,7 @@ const fx = {
   inquiryItemCount: 0,      // inquiryItem.count
   ownedItemIds: [],         // inquiryItem.findMany → items owned by the responder
   response: null,           // inquiryResponse.findFirst
+  responseDecisionUpdateCount: 1, // compare-and-set response decision result
   attachment: null,         // inquiryResponseAttachment.findFirst
   attachmentCount: 0,
   attachmentCreateError: null,
@@ -136,6 +137,9 @@ const mockPrisma = {
     },
     updateMany: async (args) => {
       record('inquiryResponse.updateMany', args);
+      if (args.where?.id && args.where?.status === 'PENDING') {
+        return { count: fx.responseDecisionUpdateCount };
+      }
       return { count: 1 };
     },
     groupBy: async () => drain(queues.responseGroupBy),
@@ -248,6 +252,7 @@ function resetMocks() {
   fx.inquiryItemCount = 0;
   fx.ownedItemIds = [];
   fx.response = null;
+  fx.responseDecisionUpdateCount = 1;
   fx.attachment = null;
   fx.attachmentCount = 0;
   fx.attachmentCreateError = null;
@@ -1094,10 +1099,38 @@ test('decideResponse: selecting a quote closes the inquiry and rejects other pen
   const selected = await inquiryService.decideResponse(30, 501, 'SELECTED', buyer, 'Best delivery');
   assert.equal(selected.status, 'SELECTED');
   assert.equal(calls['inquiry.updateMany'][0].data.status, 'CLOSED');
-  assert.equal(calls['inquiryResponse.updateMany'][0].data.status, 'REJECTED');
+  assert.ok(calls['inquiryResponse.updateMany'].some((call) => call.data.status === 'REJECTED'));
+  assert.ok(calls['inquiryResponse.updateMany'].some((call) => call.data.status === 'SELECTED'));
+
   assert.ok(calls['inquiryStatusHistory.create'].some((call) => call.data.source === 'USER'));
   assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'));
   assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_AUTO_REJECTED'));
+});
+
+test('decideResponse: stale rejection fails when the response is no longer pending', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 301, companyId: buyer.companyId, visibilityMode: 'NORMAL' });
+  fx.response = { id: 601, inquiryId: 301, companyId: seller.companyId, status: 'PENDING' };
+  fx.responseDecisionUpdateCount = 0;
+
+  await assert.rejects(
+    () => inquiryService.decideResponse(301, 601, 'REJECTED', buyer),
+    (err) => err.statusCode === 409 && err.code === 'RESPONSE_ALREADY_DECIDED',
+  );
+  assert.equal(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_REJECTED'), false);
+});
+
+test('decideResponse: stale selection fails and does not notify suppliers', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 302, companyId: buyer.companyId, visibilityMode: 'NORMAL' });
+  fx.response = { id: 602, inquiryId: 302, companyId: seller.companyId, status: 'PENDING' };
+  fx.responseDecisionUpdateCount = 0;
+
+  await assert.rejects(
+    () => inquiryService.decideResponse(302, 602, 'SELECTED', buyer),
+    (err) => err.statusCode === 409 && err.code === 'RESPONSE_ALREADY_DECIDED',
+  );
+  assert.equal(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'), false);
 });
 
 test('decideResponse: buyer cannot select a sealed quote before reveal', async () => {
