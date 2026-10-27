@@ -9,13 +9,9 @@ import Categories from "../pages/public/Categories.vue";
 import ProductListing from "../pages/public/ProductListing.vue";
 import ProductDetails from "../pages/public/ProductDetails.vue";
 import SearchResults from "../pages/public/SearchResults.vue";
-import ShoppingCart from "../pages/public/ShoppingCart.vue";
-import Checkout from "../pages/public/Checkout.vue";
 import Login from "../pages/public/Login.vue";
 import Register from "../pages/public/Register.vue";
 import ForgotPassword from "../pages/public/ForgotPassword.vue";
-import Orders from "../pages/public/Orders.vue";
-import Wishlist from "../pages/public/Wishlist.vue";
 import UserProfile from "../pages/public/UserProfile.vue";
 import Addresses from "../pages/public/Addresses.vue";
 import CompanyProfile from "../pages/public/CompanyProfile.vue";
@@ -93,34 +89,10 @@ const routes = [
         meta: { title: "نتایج جستجو" },
       },
       {
-        path: "cart",
-        name: "cart",
-        component: ShoppingCart,
-        meta: { title: "سبد خرید", requiresAuth: true },
-      },
-      {
-        path: "checkout",
-        name: "checkout",
-        component: Checkout,
-        meta: { title: "تسویه حساب", requiresAuth: true },
-      },
-      {
         path: "forgot-password",
         name: "forgot-password",
         component: ForgotPassword,
         meta: { title: "فراموشی رمز عبور", guestOnly: true },
-      },
-      {
-        path: "orders",
-        name: "orders",
-        component: Orders,
-        meta: { title: "سفارشات", requiresAuth: true },
-      },
-      {
-        path: "wishlist",
-        name: "wishlist",
-        component: Wishlist,
-        meta: { title: "لیست علاقه مندی ها", requiresAuth: true },
       },
       {
         path: "company/:id",
