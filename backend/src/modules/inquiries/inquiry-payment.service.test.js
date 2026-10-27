@@ -123,6 +123,20 @@ test('callback activates a subscription only after server-side verification succ
   assert.equal(subscription.paymentRefId, '12345');
 });
 
+test('a server-verified payment can recover from a concurrent cancellation callback', async () => {
+  process.env.ZARINPAL_MERCHANT_ID = 'merchant-test';
+  subscription = {
+    id: 7, planId: 2, companyId: 5, userId: null, status: 'CANCELLED',
+    paymentProvider: 'ZARINPAL', paymentAuthority: 'A-test', paymentAmount: 1000,
+    paymentVerifiedAt: null, paymentRefId: null, startsAt: null, endsAt: null,
+    notes: 'cancel callback raced with verification', plan: { id: 2, name: 'Basic', durationDays: 30, price: 1000, currency: 'IRR', isActive: true },
+  };
+  const result = await handleSubscriptionPaymentCallback({ Authority: 'A-test', Status: 'OK' });
+  assert.equal(result.payment, 'success');
+  assert.equal(subscription.status, 'ACTIVE');
+  assert.equal(subscription.paymentRefId, '12345');
+});
+
 test('callback never activates a payment that the provider did not verify', async () => {
   process.env.ZARINPAL_MERCHANT_ID = 'merchant-test';
   subscription = {
