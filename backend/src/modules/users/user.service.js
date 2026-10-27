@@ -197,8 +197,18 @@ async function createUser(data, caller) {
 
   const rIds = (data.roleIds || []).map(Number);
   if (rIds.length) {
+    if (!isGlobalStaffAdmin(caller) && !caller.permissions?.includes('users.assign_roles') && !caller.permissions?.includes('*')) {
+      throw { statusCode: 403, code: 'PERMISSION_REQUIRED', message: 'Assigning roles requires the users.assign_roles permission.' };
+    }
     const roles = await prisma.role.findMany({ where: { id: { in: rIds } }, select: { id: true, name: true, scope: true } });
     if (roles.length !== rIds.length) throw { statusCode: 400, code: 'INVALID_ROLE', message: 'نقش نامعتبر.' };
+    const outOfScope = roles.filter((role) => role.scope !== accessType);
+    if (outOfScope.length) {
+      throw { statusCode: 403, code: 'ROLE_OUT_OF_SCOPE', message: 'Assigned roles must match the new user access context.' };
+    }
+    if (!isGlobalStaffAdmin(caller) && roles.some((role) => role.name === SUPER_ADMIN_ROLE)) {
+      throw { statusCode: 403, code: 'GLOBAL_ROLE_ASSIGNMENT_FORBIDDEN', message: 'Only a STAFF-context SUPER_ADMIN may assign the SUPER_ADMIN role.' };
+    }
   }
 
   if (!data.phone) {
@@ -334,13 +344,16 @@ async function updateUser(userId, data, caller) {
  */
 async function setUserAccess(userId, roleId, permissionIds, caller) {
   requireStaffContext(caller, 'change roles or permissions');
+  const isSuperAdmin = isGlobalStaffAdmin(caller);
+  if (!isSuperAdmin && !caller.permissions?.includes('users.assign_roles') && !caller.permissions?.includes('*')) {
+    throw { statusCode: 403, code: 'PERMISSION_REQUIRED', message: 'Changing roles requires the users.assign_roles permission.' };
+  }
   const existing = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, status: true, accessProfile: { select: { companyId: true } } },
+    select: { id: true, status: true, accessProfile: { select: { type: true, companyId: true } } },
   });
   if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
-  const isSuperAdmin = isGlobalStaffAdmin(caller);
   if (!isSuperAdmin && existing.accessProfile?.companyId !== callerCompanyId(caller)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
@@ -354,8 +367,11 @@ async function setUserAccess(userId, roleId, permissionIds, caller) {
     // COMPANY-domain role — this closes the same privilege-escalation path
     // fixed in createUser() (was previously unchecked here entirely: any
     // existing role id, including SUPER_ADMIN's, would be accepted).
-    if (caller.accessType === 'COMPANY' && role.scope !== 'COMPANY') {
-      throw { statusCode: 403, code: 'ROLE_OUT_OF_SCOPE', message: 'شما فقط مجاز به تخصیص نقش‌های شرکتی هستید.' };
+    if (role.scope !== existing.accessProfile?.type) {
+      throw { statusCode: 403, code: 'ROLE_OUT_OF_SCOPE', message: 'Assigned role scope must match the target user access context.' };
+    }
+    if (!isSuperAdmin && role.name === SUPER_ADMIN_ROLE) {
+      throw { statusCode: 403, code: 'GLOBAL_ROLE_ASSIGNMENT_FORBIDDEN', message: 'Only a STAFF-context SUPER_ADMIN may assign the SUPER_ADMIN role.' };
     }
   }
 
