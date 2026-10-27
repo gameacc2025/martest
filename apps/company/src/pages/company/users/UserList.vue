@@ -69,15 +69,14 @@ function emptyCreateForm() {
 
 const companyId = computed(() => auth.companyId)
 
-// users.create is granted to COMPANY_MANAGER only — COMPANY_USER has no
-// users.* permission at all (see backend/prisma/seed.js ROLE_PERMISSIONS).
-// Kept permission-based (not role-hardcoded) so a future custom company
-// role can be granted just this one capability independently.
-const canCreate = computed(() => auth.hasPermission('users.create'))
+// COMPANY users may only view their own company's users and toggle panel
+// access. Creation, deletion, and role assignment remain STAFF-only operations.
+const isCompanyContext = computed(() => auth.accessProfile?.type === 'COMPANY')
+const canCreate = computed(() => !isCompanyContext.value && auth.hasPermission('users.create'))
 const canActivate = computed(() => auth.hasPermission('users.activate'))
 const canDeactivate = computed(() => auth.hasPermission('users.deactivate'))
-const canDelete = computed(() => auth.hasPermission('users.delete'))
-const canAssignRole = computed(() => auth.hasPermission('users.assign_roles'))
+const canDelete = computed(() => !isCompanyContext.value && auth.hasPermission('users.delete'))
+const canAssignRole = computed(() => !isCompanyContext.value && auth.hasPermission('users.assign_roles'))
 
 function isSelf(row) {
   return row?.id === auth.user?.id
