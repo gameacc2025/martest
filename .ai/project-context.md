@@ -111,39 +111,22 @@ responses) — "no configured limit row" means unlimited (opt-in quotas, not
 default-deny).
 
 ## 10. Testing
-**Backend**: `node --test` (Node's built-in runner, no Jest/Mocha), test
-files co-located as `*.test.js` next to the source file. As of the last
-full pass: full coverage on `companies`, `specification-library` modules,
-all controllers, pure utils (`pagination`/`success`/`error`/
-`openapi-route-docs`), both plugins (`auth.plugin`, `error-handler.plugin`),
-plus integration tests (`company.routes.test.js`, `auth.routes.test.js`,
-`app.test.js` boot smoke test, `schemas.structural.test.js`). The two
-former gaps are now closed: `inquiry.service.js` and `product.service.js`
-are both at 100% lines / >92% branches / >96% functions (their test files
-were completed in a dedicated pass — `inquiry.service.test.js` 107 tests,
-`product.service.test.js` 117 tests; repo total 1062). Run: `cd backend &&
-npm test` (fast, no coverage) or `npm run
-test:ci` (with 95%/90%/90% line/branch/function coverage gate — see
-`package.json`). No CI workflow exists yet (`.ai` previously referenced
-`.github/workflows/backend-tests.yml`, but there is no `.github/` directory
-in the repo — add one if/when CI is wanted). Every test mocks `config/db`,
-so no live DB is needed.
-**Frontend**: effectively no test coverage. Only
-`packages/auth/sessionHandoff.test.js` exists across all of `apps/*` and
-`packages/*`. This is the single biggest testing gap in the repo.
+**Backend**: Node's built-in `node:test` runner with co-located `*.test.js` files. Run `npm test --prefix backend` or `pnpm --dir backend test`. Coverage includes auth/RBAC, products and price snapshots, inquiry lifecycle/quotas/responses, notification inbox/delivery, address ownership/default invariants, payment callback/retry idempotency, refresh-token uniqueness, and handoff context checks. Tests mock Prisma/provider boundaries unless specifically running the disposable runtime workflow.
+**Frontend**: Vitest projects are configured for shared packages and all three apps. Website coverage includes auth-store profile response normalization and the pure six-month price-history transformation; company/admin and shared packages have their own regression tests. Root command: `pnpm test`.
+**Browser E2E**: Playwright smoke tests are committed in `e2e/` and run through `.github/workflows/runtime-validation.yml`; the owner explicitly instructed not to block further work waiting for live browser execution. Never claim E2E passed unless the workflow result is observed.
 
 ## 11. Docker / development
-`docker-compose.yml` (prod-ish) and `docker-compose.dev.yml` (dev), both
-define: `postgres`, `backend`, `admin`, `company`, `website` services on a
-shared `telecom_net` network, with `postgres_data`/`postgres_data_dev`
-volumes. Root `.env.example` documents `JWT_SECRET`/`JWT_EXPIRES_IN` (NOTE:
-`backend/.env.example`, not the root one, is authoritative for the backend's
-actual required vars — confirm which `.env.example` is current before
-trusting either blindly). Backend fails fast at boot if required env vars
-are missing (`backend/src/config/env.js`).
+`docker-compose.yml` (production) and `docker-compose.dev.yml` (development)
+define PostgreSQL, backend and the three frontend panels. Root `.env.example`
+holds the PostgreSQL password and browser-facing Vite panel origins;
+`backend/.env.example` is the source for backend secrets/provider settings.
+The backend runtime image includes Prisma CLI and OpenSSL because startup runs
+`prisma migrate deploy` before seed and Fastify startup. Do not depend on an
+implicit `npx` network download in production.
 
 ## 12. Important business rules
-- Application routing is `accessProfile.type`-driven, never role-driven (repeated in 3 places in code — auth store, backend JWT payload shape, and comments in `company.service.js` — treat this as load-bearing, not incidental).
+- Admin/Company app access is strictly driven by `AccessProfile.type`; SUPER_ADMIN wildcard permissions never bypass the context boundary. Customer registration intentionally has no AccessProfile; only `CUSTOMER_USER` can use the default Website context, never Admin/Company.
+- Cart / Checkout / Orders / Wishlist are dormant future B2C pages under frozen AD-4; do not route or expose their controls.
 - Company activation (`PENDING`→`ACTIVE` via `company.service.js changeStatus`) is transactional: activates all PENDING users under that company AND seeds default `CompanyLimit`/`CompanyInquiryLimit` rows via upsert-with-empty-update (never overwrites an admin's already-customized limits).
 - RFQ/response quotas are opt-in: a company with no `CompanyLimit` row for a given key is unlimited for that key, not blocked.
 - Soft-delete pattern on `Company` (`deletedAt`) — deleted companies are 404, not 400, even for SUPER_ADMIN; delete also forces `status: INACTIVE`.
@@ -157,19 +140,19 @@ are missing (`backend/src/config/env.js`).
 - Backend module boundary: controller → service → Prisma. Don't call Prisma directly from a controller.
 
 ## 14. Current development state
-Backend test coverage was just brought from ~0 (on several modules) to
-comprehensive (1062 tests passing) — see §10. Previous engineer had left the
-backend under-tested; that gap is now closed for controllers/utils/
-plugins/companies/specification-library/inquiries/products. Frontend has
-essentially no automated tests — likely the next major gap to address. No
-active feature work in flight as of this writing (see
-`.ai/current-task.md`).
+Backend and frontend regression coverage now spans the main auth, product,
+inquiry, notification, profile, price-history and address contracts. Newest
+test additions have been committed to main; their completed CI result must be
+checked through the validation PR before claiming they pass. Browser E2E is
+kept as automated coverage but is not a blocker per owner instruction. Current
+work status is tracked in `.ai/current-task.md` and `.ai/WORKLOG.md`.
 
 ## 15. Known issues / technical debt
 - Two parallel HTTP client implementations (`packages/api-client` vs `packages/shared-core/http`), both actively imported by `packages/auth/store.js` for different exports — needs an intentional decision (consolidate or document why both exist), not a reflexive cleanup.
 - `project-structure.txt` at repo root is a 2MB generated file dump — never read it; if it needs regenerating, regenerate, don't cat it into context.
-- Frontend has ~zero test coverage (see §10).
-- Root `.env.example` (`JWT_SECRET`) looks stale/inconsistent with `backend/.env.example` (`JWT_ACCESS_SECRET`/`JWT_REFRESH_SECRET`) — verify which is current before relying on either for a fresh setup.
+- `packages/api-client` and `packages/shared-core/http` remain two HTTP helper layers; keep their ownership/return-shape contracts documented and covered by tests rather than merging reflexively.
+- SMTP delivery cannot be considered verified without real credentials and a test recipient. SMS is not implemented.
+- Architecture graph is generated from package manifests and route registration; use `pnpm architecture:graph` to regenerate and `pnpm architecture:check` to detect drift.
 - `BACKEND_AUDIT_REPORT.md` at repo root documents a completed `User`→`Profile`+`AccessProfile` migration; worth a skim if touching identity/auth models, but don't treat it as current-state documentation — it's a point-in-time audit.
 
 ## 16. Important recent changes
