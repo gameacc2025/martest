@@ -34,6 +34,15 @@ export const endpoints = {
     resetPassword: (id) => `/auth/users/${id}/password`
   },
 
+  // Customer addresses (always scoped to the authenticated customer's identity)
+  addresses: {
+    list: '/addresses',
+    get: (id) => `/addresses/${id}`,
+    create: '/addresses',
+    update: (id) => `/addresses/${id}`,
+    setDefault: (id) => `/addresses/${id}/default`,
+    delete: (id) => `/addresses/${id}`,
+  },
   // Companies
   companies: {
     list: '/companies',
