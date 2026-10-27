@@ -47,7 +47,7 @@ async function roleRoutes(fastify) {
 
   fastify.get('/:id', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('roles.read')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('roles.read')],
     schema: { summary: 'Get role by ID', tags: ['Roles'], params: idParam },
   }, ctrl.getRole);
 
