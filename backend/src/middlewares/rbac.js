@@ -80,12 +80,15 @@ function hasPermission(user, required, mode = 'all') {
  * Fastify preHandler factory — require the user's AccessProfile.type to be
  * one of the allowed types.
  *
- * Role membership never overrides the authenticated AccessProfile.type.
+ * Role membership never overrides STAFF/COMPANY AccessProfile boundaries.
+ * Customer accounts intentionally have no AccessProfile; the explicit
+ * CUSTOMER_USER role is the legacy/default Website context only. It never
+ * grants STAFF or COMPANY access and SUPER_ADMIN cannot use this fallback.
  *
  * App rules:
  *   Admin panel  → requireAccessType('STAFF')
  *   Company panel → requireAccessType('COMPANY')
- *   Website      → requireAccessType('CUSTOMER')  (or no guard for public)
+ *   Website authenticated customer actions → requireAccessType('CUSTOMER')
  *
  * @param {...string} allowedTypes - 'STAFF' | 'COMPANY' | 'CUSTOMER'
  */
@@ -95,12 +98,25 @@ function requireAccessType(...allowedTypes) {
     if (!user) return unauthorized(reply);
 
     const accessType = user.accessType ?? null;
-    if (!allowedTypes.includes(accessType)) {
-      return forbidden(
-        reply,
-        `Access denied. This endpoint requires access type: ${allowedTypes.join(' or ')}.`
-      );
+    if (allowedTypes.includes(accessType)) return;
+
+    // Customer registrations intentionally have no AccessProfile: the
+    // CUSTOMER_USER role is the explicit default Website context only.
+    // Do not let this fallback grant panel access or apply to SUPER_ADMIN.
+    const roles = Array.isArray(user.roles) ? user.roles : [];
+    if (
+      accessType === null &&
+      allowedTypes.includes('CUSTOMER') &&
+      roles.includes('CUSTOMER_USER') &&
+      !roles.includes(SUPER_ADMIN_ROLE)
+    ) {
+      return;
     }
+
+    return forbidden(
+      reply,
+      `Access denied. This endpoint requires access type: ${allowedTypes.join(' or ')}.`
+    );
   };
 }
 
