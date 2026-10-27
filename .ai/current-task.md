@@ -1,15 +1,13 @@
 # Current Task / Agent Handoff
 
-## MARKETPLACE-E2E-01 — Supplier response and quotation lifecycle audit
+## TENANT-ISOLATION-01 — Phase 0 RBAC and tenant-isolation audit
 
 - **Started:** 2026-10-27
-- **Goal:** Continue after the user-tested inquiry monetization feature by auditing the B2B end-to-end path: published product → inquiry → supplier response/quote → buyer decision → terminal status.
-- **Scope:** Backend authorization and ownership, STAFF/COMPANY/CUSTOMER separation, deadline and lifecycle rules, duplicate response prevention, quote item ownership, sealed/anonymous-sealed privacy, concurrent decisions, notifications, regression tests, and documentation.
-- **Baseline:** Inquiry monetization was merged to `main` in commit `bd90c07f56d3e8f973db52970f6f5f43ff3429d8`. Post-merge CI and PostgreSQL migration validation both passed:
-  - CI: https://github.com/gameacc2025/martest/actions/runs/40448233442
-  - Migration validation: https://github.com/gameacc2025/martest/actions/runs/40448233509
-- **Initial risk to verify:** `submitResponse` blocks ordinary STAFF but has a SUPER_ADMIN exception; `resolveCompanyId` can accept a supplied company ID for SUPER_ADMIN. Check whether a STAFF-context SUPER_ADMIN can submit a quote as a company, contrary to the project rule that STAFF supervises and does not act as a supplier.
-- **Guardrails:** Backend is authoritative. Do not conflate STAFF with COMPANY. Preserve current RFQ behavior and sealed-bid privacy. Reproduce → test → fix → regression test for each confirmed vulnerability. Do not enable B2C commerce or resume deferred customer dashboard/order-history work.
-- **Verification target:** Targeted inquiry service tests, full backend test suite, frontend/shared tests and all frontend builds, plus Prisma migration validation if schema changes are necessary. Record live/manual checks as NOT RUN unless actually performed.
+- **Goal:** Continue the project security stabilization by auditing tenant boundaries and authorization outside the completed inquiry/quote path.
+- **Scope:** Product ownership and visibility, company-user management boundaries, STAFF/COMPANY/CUSTOMER access separation, route permission guards, backend ownership checks, and regression tests for confirmed vulnerabilities.
+- **Baseline:** `MARKETPLACE-E2E-01` is complete. CI and fresh-PostgreSQL migration validation passed after the supplier quote authorization and concurrent decision fixes. See the latest completion entry in `.ai/WORKLOG.md`.
+- **Guardrails:** Read `AGENTS.md`, `.ai/PROTOCOL.md`, project context, decisions, and roadmap before edits. Backend is the authorization boundary. COMPANY users may only manage their own company data; STAFF is not a seller. Do not allow Company users to create/delete other company users, change roles/permissions, or transfer users. Do not resume deferred B2C cart/checkout/orders or the customer dashboard task.
+- **Method:** Map route → controller → service → ownership predicate → permission middleware → tests. Reproduce → regression test → fix only confirmed defects. Preserve current behavior and UI unless a verified issue requires change.
+- **Verification target:** Targeted backend authorization tests, full backend tests, frontend/shared tests and builds, and fresh-PostgreSQL migration validation if applicable.
 - **Status:** IN_PROGRESS
-- **Next action:** Inspect and test response/decision service paths, fix confirmed issues only, then update this handoff and WORKLOG with exact results.
+- **Next action:** Inspect product and company-user mutation routes/services and their existing tests; prioritize caller-supplied companyId, cross-company IDs, and missing route permission guards.
