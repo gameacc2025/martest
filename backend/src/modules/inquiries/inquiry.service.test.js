@@ -1107,7 +1107,7 @@ test('decideResponse: selecting a quote closes the inquiry and rejects other pen
   assert.ok(calls['inquiryResponse.updateMany'].some((call) => call.data.status === 'SELECTED'));
 
   assert.ok(calls['inquiryStatusHistory.create'].some((call) => call.data.source === 'USER'));
-  assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'));
+  assert.ok((calls.dispatchNotification || []).some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'));
   assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_AUTO_REJECTED'));
 });
 
@@ -1121,7 +1121,7 @@ test('decideResponse: stale rejection fails when the response is no longer pendi
     () => inquiryService.decideResponse(301, 601, 'REJECTED', buyer),
     (err) => err.statusCode === 409 && err.code === 'RESPONSE_ALREADY_DECIDED',
   );
-  assert.equal(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_REJECTED'), false);
+  assert.equal((calls.dispatchNotification || []).some(([event]) => event === 'INQUIRY_RESPONSE_REJECTED'), false);
 });
 
 test('decideResponse: stale selection fails and does not notify suppliers', async () => {
