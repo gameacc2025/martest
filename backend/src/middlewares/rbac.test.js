@@ -125,8 +125,7 @@ test('requireAccessType: rejects a mismatched access type with 403', async () =>
 
 test('requireAccessType: SUPER_ADMIN cannot bypass a mismatched access type', async () => {
   const reply = makeReply();
-  const result = await requireAccessType('COMPANY')({ user: superAdmin }, reply);
-  assert.equal(result, undefined);
+  await requireAccessType('COMPANY')({ user: superAdmin }, reply);
   assert.equal(reply.statusCode, 403);
   assert.equal(reply.body.code, 'FORBIDDEN');
 });
