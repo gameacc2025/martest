@@ -303,14 +303,16 @@ test('login: app="company" rejects a non-COMPANY access type with APP_ACCESS_DEN
   );
 });
 
-test('login: SUPER_ADMIN bypasses the app-type guard entirely', async () => {
+test('login: SUPER_ADMIN without COMPANY context is denied the company app', async () => {
   baseResetAll();
   fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
   fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
-  fx.accessProfile = null;
+  fx.accessProfile = { id: 1, type: 'STAFF', companyId: null, isActive: true };
   nextAccess = { roles: ['SUPER_ADMIN'], permissions: ['*'] };
-  const result = await authService.login(fakeFastify, '09120000000', 'pw', 'company');
-  assert.equal(result.accessToken, 'access-token-for-1');
+  await assert.rejects(
+    () => authService.login(fakeFastify, '09120000000', 'pw', 'company'),
+    (err) => err.statusCode === 403 && err.code === 'APP_ACCESS_DENIED',
+  );
 });
 
 test('login: succeeds and returns token pair + expiresIn for a valid ACTIVE user', async () => {
