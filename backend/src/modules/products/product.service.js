@@ -108,7 +108,11 @@ const publicProductSelect = {
 
 
 function isSuperAdmin(caller) {
-  return caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*');
+  // SUPER_ADMIN is a global override only in STAFF application context.
+  // A role or wildcard permission must never switch a COMPANY/CUSTOMER token
+  // into the staff domain or bypass tenant ownership.
+  return caller?.accessType === 'STAFF' &&
+    (caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*'));
 }
 
 function isStaffUser(caller) {
