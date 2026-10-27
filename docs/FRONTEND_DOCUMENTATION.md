@@ -1,163 +1,86 @@
-# مستندات Frontend - Telecom Marketplace
+# مستندات Frontend — Telecom Marketplace
 
-## مقدمه
-این مستندات ساختار و کامپوننتهای frontend پروژه Telecom Marketplace را شرح میدهد. این پروژه با **Vue 3** (Composition API) و **PrimeVue** برای UI و **Vite** برای build tool ساخته شده است.
+## معماری
 
----
+Frontend پروژه سه برنامه مستقل Vue 3/Vite دارد. این پروژه Next.js نیست و مسیر قدیمی `frontend/src/` مرجع ساختار فعلی نیست.
 
-## جدول محتوا
-1. [معماری کلی](#معماری-کلی)
-2. [ساختار پوشهها](#ساختار-پوشهها)
-3. [صفحات اصلی](#صفحات-اصلی)
-4. [کامپوننتهای عمومی](#کامپوننتهای-عمومی)
-5. [State Management (Pinia)](#state-management)
-6. [مسیرها و ناوبری](#مسیرها-و-ناوبری)
-7. [اتصال به API](#اتصال-به-api)
-8. [احراز هویت](#احراز-هویت)
+| برنامه | مسیر | زمینه دسترسی |
+|---|---|---|
+| وب‌سایت بازارگاه | `apps/website` | CUSTOMER و تجربه عمومی |
+| پنل شرکت | `apps/company` | COMPANY |
+| پنل مدیریت | `apps/admin` | STAFF |
 
----
+فناوری‌های مشترک شامل Vue 3، Vite، Vue Router و PrimeVue است. Pinia در برنامه‌ها و بخش‌هایی که نیاز دارند استفاده می‌شود. بسته‌های مشترک در `packages/` قرار دارند.
 
-## معماری کلی
+## ساختار سطح بالا
 
-### مشخصات فنی
-- **Framework**: Vue 3 (Composition API)
-- **UI Library**: PrimeVue
-- **Build Tool**: Vite
-- **State Management**: Pinia
-- **Styling**: PrimeVue Themes (Lara) + Custom SCSS
-- **HTTP Client**: Custom Fetch-based client
-
----
-
-## ساختار پوشهها
-
-```
-frontend/src/
-├── api/                    # API client configuration
-│   └── index.js           # API endpoints + methods
-├── assets/                 # استایلها و آیکونها
-│   ├── main.scss          # استایلهای اصلی
-│   └── NewCSS/            # Layout styles
-├── components/             # کامپوننتهای shared
-│   ├── common/            # Badge, Button, Card, MegaMenu, etc.
-│   ├── products/          # ProductCard
-│   └── reviews/           # ReviewCard
-├── composables/            # Vue composables
-│   └── usePermissions.js  # Permission checking
-├── config/                 # تنظیمات
-│   └── navigation/        # Admin/User menu configs
-├── http/                   # HTTP client
-│   ├── apiClient.js       # API helper functions
-│   ├── core/              # HttpClient, HttpRequest, HttpResponse
-│   ├── errors/            # Error classes
-│   ├── middlewares/        # Auth, Parser middlewares
-│   └── presets/            # Browser/Node presets
-├── layouts/                # Layout components
-│   ├── PublicLayout.vue   # لایوت عمومی سایت
-│   └── AdminLayout.vue    # لایوت پنل ادمین
-├── pages/                  # صفحات
-│   ├── public/            # صفحات عمومی
-│   ├── admin/             # پنل ادمین
-│   └── user/              # صفحات کاربر
-├── router/                 # مسیرها
-│   └── index.js           # Vue Router config
-└── stores/                 # Pinia stores
-    ├── auth.js            # احراز هویت
-    ├── cart.js            # سبد خرید
-    └── admin/             # استورهای ادمین
+```text
+apps/
+  website/
+    src/
+      pages/
+      layouts/
+      router/
+      stores/
+  company/
+    src/
+      pages/
+      layouts/
+      router/
+      stores/
+  admin/
+    src/
+      pages/
+      layouts/
+      router/
+      stores/
+packages/
+  api-client/
+  auth/
+  permissions/
+  shared-core/
+  shared-ui/
+  vite-config/
 ```
 
----
+این نمودار سطح بالا است؛ نام و محل دقیق هر صفحه را در برنامه مربوطه بررسی کنید. از ساختن مسیر یا store جدید بر اساس ساختار قدیمی مستندات خودداری کنید.
 
-## صفحات اصلی
+## دستورات
 
-### صفحات عمومی (pages/public/)
-- `Home.vue` - صفحه اصلی با محصولات ویژه
-- `ProductListing.vue` - لیست محصولات با فیلتر
-- `ProductDetails.vue` - جزئیات محصول
-- `Categories.vue` - دسته‌بندی‌ها
-- `Login.vue` - ورود
-- `Register.vue` - ثبت نام
-- `ContactUs.vue` - تماس با ما
-- `AboutUs.vue` - درباره ما
+از ریشه monorepo:
 
-### پنل ادمین (pages/admin/)
-- `Dashboard.vue` - داشبورد با آمار و محصولات در انتظار تأیید
-- `users/UserList.vue` - مدیریت کاربران
-- `roles/RoleList.vue` - مدیریت نقش‌ها
-- `permissions/PermissionList.vue` - مدیریت مجوزها
-- `products/ProductList.vue` - مدیریت محصولات
-- `products/ProductForm.vue` - ایجاد/ویرایش محصول
-- `categories/CategoryList.vue` - مدیریت دسته‌بندی‌ها
-- `orders/OrderList.vue` - مدیریت سفارشات
-- `companies/CompanyList.vue` - مدیریت شرکت‌ها
-- `inquiries/InquiryList.vue` - درخواست‌های استعلام
-- `inquiries/InquiryDetail.vue` - جزئیات درخواست
-- `inquiries/InquiryCreate.vue` - ایجاد درخواست
-
-### صفحات کاربر (pages/user/)
-- `MyProducts.vue` - محصولات من
-- `MyInquiries.vue` - درخواست‌های من
-- `UserProfile.vue` - پروفایل من
-- `ChangePassword.vue` - تغییر رمز عبور
-- `Notifications.vue` - اعلان‌ها
-- `company/CompanySettings.vue` - تنظیمات شرکت
-- `company/CompanyProducts.vue` - محصولات شرکت
-
----
-
-## State Management (Pinia)
-
-### استورهای اصلی
-- `auth.js` - احراز هویت (login, logout, register, profile)
-- `cart.js` - سبد خرید
-- `stats.js` - آمار داشبورد
-- `admin.js` - عملیات ادمین
-- `admin/users.js` - مدیریت کاربران
-- `admin/roles.js` - مدیریت نقش‌ها
-- `admin/permissions.js` - مدیریت مجوزها
-- `companies.js` - مدیریت شرکت‌ها
-- `products.js` - مدیریت محصولات
-- `orders.js` - مدیریت سفارشات
-
----
-
-## اتصال به API
-
-### API Client Helper Functions
-```javascript
-import { apiGet, apiGetPaginated, apiPost, apiPatch, apiDelete } from '@/http/apiClient'
-import { handleApiError } from '@/api/errorHandler'
-
-// GET request
-const data = await apiGet('/users')
-
-// Paginated GET
-const { data, meta } = await apiGetPaginated('/products', { params: { page: 1 } })
-
-// POST request
-const result = await apiPost('/users', userData)
-
-// Error handling
-try {
-  await apiPost('/users', data)
-} catch (err) {
-  const { status, message } = handleApiError(err)
-}
+```bash
+pnpm dev:website
+pnpm dev:company
+pnpm dev:admin
+pnpm build
+pnpm test
 ```
 
----
+هر برنامه نیز دارای manifest مستقل است. پیش از افزودن script یا انتخاب دستور تست، `package.json` همان برنامه و پیکربندی Vitest را بررسی کنید.
 
-## احراز هویت
+## ارتباط با API
 
-### فلوی احراز هویت
-1. کاربر فرم ثبت‌نام را تکمیل می‌کند (تلفن اجباری، ایمیل اختیاری)
-2. کاربر عادی بلافاصله ACTIVE می‌شود؛ شرکت نیاز به تأیید ادمین دارد
-3. کاربر با شماره تلفن و رمز عبور وارد می‌شود → دریافت JWT token
-4. توکن در localStorage ذخیره می‌شود
-5. تمام درخواست‌های API با هدر Authorization ارسال می‌شوند
+- قرارداد پایه API در بک‌اند با prefix `/api/v1` ثبت می‌شود.
+- برای درخواست‌ها از `@telecom/api-client` و الگوی موجود در همان برنامه استفاده کنید؛ در صورت نیاز به response صفحه‌بندی‌شده، قرارداد helper را بررسی کنید و فرض نکنید `apiGet` و `apiGetPaginated` خروجی یکسان دارند.
+- خطاهای احراز هویت، پاسخ صفحه‌بندی‌شده و خطاهای API باید مطابق helperهای موجود پردازش شوند.
+- از افزودن مستقیم fetch/axios یا client موازی بدون بررسی الگوی فعلی خودداری کنید.
 
-### سیستم وضعیت کاربران
-- **PENDING**: در انتظار تأیید ادمین
-- **ACTIVE**: فعال و قابل استفاده
-- **REJECTED**: رد شده توسط ادمین
+## احراز هویت و مرز پنل‌ها
+
+- زمینه برنامه از access profile می‌آید: `CUSTOMER`، `COMPANY` یا `STAFF`.
+- role/permission برای تعیین عملیات مجاز استفاده می‌شود و جایگزین بررسی زمینه دسترسی یا مالکیت رکورد نیست.
+- router guard برای تجربه کاربری است؛ بک‌اند باید مجوز و مالکیت را دوباره بررسی کند.
+- نقش `SUPER_ADMIN` در middleware عمومی هنوز یک رفتار legacy برای عبور از برخی بررسی‌های نوع برنامه دارد؛ این موضوع در بررسی امنیتی جداگانه ثبت شده و نباید مستندات آن را به‌عنوان سیاست نهایی تأییدشده معرفی کنند.
+
+## تست و build
+
+CI باید تست‌های frontend/shared و build تولیدی هر سه برنامه را اجرا کند. سبز بودن build تضمین‌کننده ظاهر صحیح در مرورگر، رفتار responsive یا صحت session واقعی نیست؛ جریان‌های کلیدی باید با تست مرورگر یا QA محیطی نیز بررسی شوند.
+
+## راهنمای تغییر
+
+1. ابتدا route، page، store و API helper موجود را در همان برنامه پیدا کنید.
+2. تغییرات UI را با تست رگرسیون مناسب پوشش دهید.
+3. برای عملیات حساس، مجوز و مالکیت سمت بک‌اند را نیز بررسی کنید.
+4. تست‌های مربوطه و سپس `pnpm test` و `pnpm build` را اجرا کنید.
+5. اگر قرارداد مشترک تغییر کرده، مستندات API و سایر برنامه‌های مصرف‌کننده را نیز به‌روز کنید.
