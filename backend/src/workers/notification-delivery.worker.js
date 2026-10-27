@@ -3,7 +3,7 @@
 const deliveryService = require('../modules/notifications/notification.delivery.service');
 const prisma = require('../config/db');
 
-const intervalMs = Math.max(1000, Number(process.env.NOTIFICATION_WORKER_INTERVAL_MS) || 5000);
+const intervalMs = Math.max(1000, Number(process.env.NOTIFICATION_WORKER_INTERVAL_MS || process.env.NOTIFICATION_POLL_INTERVAL_MS) || 5000);
 const batchSize = Math.min(500, Math.max(1, Number(process.env.NOTIFICATION_WORKER_BATCH_SIZE) || 100));
 let stopping = false;
 
