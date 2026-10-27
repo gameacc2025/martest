@@ -29,7 +29,6 @@
 const crypto = require('crypto');
 
 const prisma = require('../../config/db');
-const { loadUserAccess } = require('../../utils/rbac');
 const { jwtAccessExpiresIn } = require('../../config/env');
 const {
   buildUserContext,
@@ -79,7 +78,7 @@ function assertPanelAccess(app, accessProfile) {
  * @returns {Promise<{code: string, expiresIn: number}>}
  */
 async function createHandoffCode(userId, app, challenge) {
-  const [user, accessProfile, { roles }] = await Promise.all([
+  const [user, accessProfile] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { status: true },
@@ -88,7 +87,6 @@ async function createHandoffCode(userId, app, challenge) {
       where: { userId },
       select: { type: true, isActive: true },
     }),
-    loadUserAccess(userId),
   ]);
 
   if (!user || user.status !== 'ACTIVE') {
