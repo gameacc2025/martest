@@ -14,6 +14,7 @@
 | [role-access-matrix.md](role-access-matrix.md) | مرزهای CUSTOMER / COMPANY / STAFF و کنترل‌های دسترسی |
 | [REPOSITORY_QUALITY_AUDIT_2026-10-26.md](REPOSITORY_QUALITY_AUDIT_2026-10-26.md) | یافته‌های کیفیت، محدودیت‌های اعتبارسنجی و کارهای باقی‌مانده |
 | [AI_AGENT_WORKFLOW.md](AI_AGENT_WORKFLOW.md) | گردش‌کار عامل‌های توسعه |
+| [architecture/README.md](architecture/README.md) | گراف وابستگی تولیدشده و دستورهای بازسازی/بررسی آن |
 
 ## ساختار فعلی مخزن
 
@@ -67,7 +68,8 @@ docker compose logs --tail=200 backend
 
 ## اصول مهم معماری
 
-- `AccessProfile.type` زمینه دسترسی برنامه را مشخص می‌کند: `CUSTOMER`، `COMPANY` یا `STAFF`. نقش‌ها به‌تنهایی نباید جایگزین بررسی زمینه و مالکیت شوند.
+- `AccessProfile.type` مرز قطعی Admin/Company است؛ ثبت‌نام CUSTOMER طبق قرارداد فعلی بدون AccessProfile انجام می‌شود و فقط `CUSTOMER_USER` می‌تواند از زمینه پیش‌فرض Website استفاده کند. نقش SUPER_ADMIN نمی‌تواند زمینه پنل را دور بزند.
+- Cart / Checkout / Orders / Wishlist در معماری فعلی فاز آینده B2C و غیرفعال‌اند؛ فایل‌های موجودشان مسیر یا کنترل فعال ندارند.
 - کنترل دسترسی و مالکیت داده باید در بک‌اند enforce شود؛ مخفی‌کردن کنترل در UI به‌تنهایی امنیت ایجاد نمی‌کند.
 - وضعیت سبز CI به‌تنهایی اثبات‌کننده ارسال واقعی ایمیل/SMS، پرداخت واقعی، اجرای production یا تست بصری مرورگر نیست.
 - تاریخچه قیمت باید از snapshotهای ذخیره‌شده خوانده شود؛ داده تاریخی موجودنبوده را نباید ساختگی نمایش داد.
