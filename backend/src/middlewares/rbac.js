@@ -6,7 +6,7 @@
 //   1. Access-type guard (domain boundary)
 //      requireAccessType(...types)
 //        - Checks request.user.accessType (from JWT / AccessProfile)
-//        - SUPER_ADMIN bypasses all access-type checks
+//        - AccessProfile.type is always enforced, including for SUPER_ADMIN
 //        - App rules:
 //            admin panel  → STAFF only
 //            company panel → COMPANY only
@@ -80,7 +80,7 @@ function hasPermission(user, required, mode = 'all') {
  * Fastify preHandler factory — require the user's AccessProfile.type to be
  * one of the allowed types.
  *
- * SUPER_ADMIN bypasses this check regardless of their access type.
+ * Role membership never overrides the authenticated AccessProfile.type.
  *
  * App rules:
  *   Admin panel  → requireAccessType('STAFF')
@@ -93,9 +93,6 @@ function requireAccessType(...allowedTypes) {
   return async function checkAccessType(request, reply) {
     const user = request.user;
     if (!user) return unauthorized(reply);
-
-    // SUPER_ADMIN bypasses access-type restrictions
-    if (Array.isArray(user.roles) && user.roles.includes(SUPER_ADMIN_ROLE)) return;
 
     const accessType = user.accessType ?? null;
     if (!allowedTypes.includes(accessType)) {
