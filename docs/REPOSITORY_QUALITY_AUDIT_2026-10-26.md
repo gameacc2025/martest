@@ -105,33 +105,28 @@ As of this update, the re-run has successfully completed:
 - Prisma migration status against the disposable PostgreSQL database;
 - installation of the isolated browser-test dependency.
 
-Chromium installation is still in progress; Playwright browser smoke tests have not started yet. Do not mark runtime/browser validation as complete until the workflow's final conclusion and browser-test result are observed. This run is on the PR branch's older commit, not the latest main head.
+Historical snapshot at the time this audit was first written: Chromium installation was in progress and browser tests had not started. PR #14 was later merged to main. The owner explicitly instructed that browser execution must not block further work; Playwright tests remain committed, but their live completion is not claimed.
 
 ### Security-policy impact inventory
 
-The unresolved global SUPER_ADMIN cross-app bypass is present in:
-- login app selection in `backend/src/modules/auth/auth.service.js` (test: `login: SUPER_ADMIN bypasses the app-type guard entirely`);
-- generic `requireAccessType` in `backend/src/middlewares/rbac.js` (test explicitly expects the bypass);
-- session handoff target-app validation in `backend/src/modules/auth/handoff.service.js`;
-- several product and inquiry routes that still use generic `requireAccessType`.
-
-Strict `requireExactAccessType` already protects role/permission, category and admin-management surfaces; service-level ownership/context checks were added for the audited user, company, product and inquiry paths. A global change needs a deliberate policy decision and targeted regression tests; this audit has not changed that contract.
+Security finding (remediated on 2026-10-27): the SUPER_ADMIN cross-app bypass was removed from login app selection, generic `requireAccessType`, and PKCE handoff. Regression tests now cover a mismatched STAFF/COMPANY context and the CUSTOMER default-Website exception. `AccessProfile.type` remains the strict Admin/Company boundary; `CUSTOMER_USER` without AccessProfile may access Website-only CUSTOMER endpoints and cannot use that fallback for Admin/Company or SUPER_ADMIN.
 
 ### Remaining priority order
 
-1. Confirm the runtime/browser workflow result and port any validated runtime checks to main without overwriting newer documentation.
-2. Finish the auth-context policy review; keep the global bypass unchanged until policy is explicit.
-3. Complete browser E2E journeys for product → inquiry → supplier quote → buyer decision, notification folders/read state, and company isolation.
-4. Verify monetization PR/merge status and test payment callback/replay/retry plus Twilio delivery in staging.
-5. Resume the deferred customer dashboard/address work after higher-priority validation; orders still need a real backend domain.
-6. Address Admin bundle warnings after capturing a baseline and tracing imports.
+Updated priority order after the 2026-10-27 follow-up:
+1. Run the current backend/frontend CI against the latest main snapshot; fix failures without waiting for the live browser job.
+2. Keep customer address/profile APIs, route ownership, and profile response normalization covered by unit tests.
+3. Keep price-history transformation, inquiry response decisions, and payment callback/retry idempotency covered by regression tests.
+4. Treat Cart / Checkout / Orders / Wishlist as dormant future B2C pages; do not expose active routes or controls until the architecture decision changes.
+5. Verify notification inbox/read-state regressions and document SMTP as not live-verified and SMS as not implemented.
+6. Track Vite vendor chunking and architecture graph generation; verify builds through CI.
 
 
 ## Progress update — 2026-10-27 (runtime and auth-context follow-up)
 
 - PR #14 was squash-merged into `main` as `92501f206ab16b163d8d4605e685cbe3396dd2aa`. It adds Docker/Compose runtime validation, Playwright smoke tests, and explicit Vite build-time origins for the Company/Admin panels.
 - Observed on the PR head: CI run `40555574784` passed; PostgreSQL migration validation `40555574786` passed. Runtime run `40555575064` passed Compose configuration, Docker build/start, health endpoints, and migration status. Its browser step was still running at the last observation; per the owner instruction, do not block subsequent work waiting for it and do not claim browser E2E passed.
-- The legacy SUPER_ADMIN cross-app bypass was removed from auth app selection, generic `requireAccessType`, and PKCE handoff. Tests were updated for login and RBAC, and a handoff unit test was added. These newest test edits have not yet been confirmed by a completed CI run.
+- The legacy SUPER_ADMIN cross-app bypass was removed from auth app selection, generic `requireAccessType`, and PKCE handoff. Tests were updated for login and RBAC, and a handoff unit test was added. The CUSTOMER-without-AccessProfile default Website behavior is explicitly tested so strict panel isolation does not break existing customer registrations.
 - `docs/role-access-matrix.md`, `docs/ARCHITECTURE_DECISIONS.md`, `.ai/decisions.md`, and `.ai/current-task.md` now state that `AccessProfile.type` is the strict app-context boundary and wildcard permissions do not override it.
-- PR #9 became non-mergeable after main advanced. Do not merge its old branch wholesale. Port useful address/token/architecture/performance changes selectively after comparing them with current main. PR #11 is based on that branch and must also be ported selectively.
-- Remaining audit work: validate the strict-context regression tests; reconcile customer address/profile behavior with actual APIs; review product price-history and inquiry quote/decision workflows; verify monetization callback idempotency/retry coverage; check notification inbox tests; and document SMTP (not live-verified) / SMS (not implemented) boundaries.
+- PR #9 is non-mergeable after main advanced. Its useful address/token/architecture/code-splitting changes have now been ported selectively, along with the customer profile/API contract fix. PR #11's profile change is redundant against current main; close both stale PRs rather than force-merging an old base.
+- Additional 2026-10-27 changes: added the customer Address model/migration/API/UI and ownership/default-address tests; normalized auth-store profile updates to store only the nested personal profile; added refresh-token `jti` uniqueness and regression tests; added price-history transformation tests; added payment callback/retry idempotency tests; disabled active Cart/Checkout/Orders/Wishlist routes and controls per AD-4; added Vite vendor chunk splitting, deterministic Prisma CLI availability in the runtime image, and generated architecture graph tooling. Latest test edits still need a completed CI result; live SMTP remains unverified and SMS is not implemented.
