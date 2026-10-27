@@ -340,6 +340,10 @@ async function grantInquirySubscription(data, adminUserId) {
   if (!plan) throw new AppError('طرح اشتراک فعال پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
   return prisma.$transaction(async (tx) => {
     const ownerFilter = companyId != null ? { companyId } : { userId };
+    if (typeof tx.$queryRawUnsafe === 'function') {
+      if (companyId != null) await tx.$queryRawUnsafe('SELECT id FROM "Company" WHERE id = $1 FOR UPDATE', companyId);
+      else await tx.$queryRawUnsafe('SELECT id FROM "User" WHERE id = $1 FOR UPDATE', userId);
+    }
     const now = new Date();
     const active = await tx.inquirySubscription.findFirst({
       where: { ...ownerFilter, status: 'ACTIVE', startsAt: { lte: now }, endsAt: { gt: now } },
