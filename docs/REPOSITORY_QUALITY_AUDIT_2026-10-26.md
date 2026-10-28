@@ -1,80 +1,87 @@
 # Repository Quality Audit — 2026-10-26
 
-## Status
+## Current status (refreshed 2026-10-28)
 
-**IN PROGRESS — source review and CI evidence collected; this is not a release sign-off.**
+**Core source/doc fixes are merged and the CI + migration checks are green for the latest code changes. This is still not a release sign-off** because live deployment, external provider, SMTP and browser E2E verification are not claimed.
 
 Repository: `gameacc2025/martest`  
 Branch: `main`  
-Audited HEAD at start: `1dd1434d1c78b4a0fb0e51cd5695b6653f1d4e35`
+Audit baseline at start: `1dd1434d1c78b4a0fb0e51cd5695b6653f1d4e35`
 
 ## Evidence checked
 
-- GitHub Actions CI run [40309510309](https://github.com/gameacc2025/martest/actions/runs/40309510309) completed successfully on the audited HEAD.
-- CI steps completed: pnpm frozen-lockfile install, frontend/shared tests, backend dependency install, Prisma client generation, backend tests, and production builds for Website, Company, and Admin.
-- Repository tree contains 1,230 paths, 78 files matching test/spec filename patterns, 8 Prisma SQL migrations, and 10 files under `docs/`.
-- Reviewed root README, workspace/package manifests, CI workflow, current task handoff, project context, notification contract, role-access matrix, API/Frontend/Database/Docker docs, Docker Compose manifests, frontend Dockerfiles, backend Dockerfile, Prisma schema, and key product/notification route registration.
-- No local checkout or live deployment/browser/SMTP/database environment was available in this review. Those checks are NOT VERIFIED.
+- CI runs `40634032996`, `40634407695`, `40634806585`, and `40635157043` passed architecture graph validation, frontend/shared tests, backend tests, Prisma client generation and all three production builds.
+- Fresh PostgreSQL migration validation runs `40634032923`, `40634407696`, `40634806668`, and `40635157013` passed.
+- Latest build output no longer shows `INEFFECTIVE_DYNAMIC_IMPORT`; the largest displayed JS chunk after code splitting was approximately 195 kB, not the prior approximately 730 kB entry chunk.
+- Runtime workflow evidence includes successful Compose validation, Docker build/start, service health checks and migration status; browser E2E was intentionally not awaited per owner instruction and is not claimed passed.
+- Relevant documentation and AI handoff files have been updated alongside the fixes. The generated architecture graph is checked in CI.
+- Live Zarinpal, SMTP delivery, SMS delivery, production deployment, and browser journey validation are not claimed verified.
 
-## Findings
+## Current findings and disposition
 
-### P1 — Documentation materially diverges from current implementation
+### Resolved — documentation/source drift
 
-1. `docs/DOCKER_DEPLOYMENT.md` still describes a Next.js frontend, `frontend/Dockerfile`, Node 18 images and old port/layout assumptions. Actual deployment uses three Vue/Vite apps under `apps/website`, `apps/company`, and `apps/admin`, served by nginx; current production Compose maps them to host ports 3001, 3002 and 3003, with backend on 3000. The actual backend Dockerfile uses Node 22 and runs `prisma migrate deploy`, seed, then the server.
-2. `docs/README.md` still describes Next.js, PostgreSQL 16, Prisma 5, Tailwind and a single frontend, which conflicts with current manifests and root README (Vue 3, Vite, PrimeVue, Prisma 6, PostgreSQL 18 image, three frontends).
-3. `docs/FRONTEND_DOCUMENTATION.md` contains the obsolete `frontend/src/` layout and references pages/stores not matching the current monorepo paths.
-4. `docs/API_DOCUMENTATION.md` documents base URLs ending in `/api`, legacy `/api/auth` paths, old role names such as `COMPANY_ADMIN`, and a flattened user response shape. Current code registers the API under `/api/v1` and uses distinct `user`, `profile`, and `accessProfile` contexts. This document must be reconciled against registered routes and schemas, not patched by blanket path replacement.
-5. `docs/DATABASE_DOCUMENTATION.md` has an old model overview that omits current models such as `AccessProfile`, `ProductPriceSnapshot`, inquiry response entities, and notification entities. It must be compared with `backend/prisma/schema.prisma` and migrations.
+The core README, API, database, frontend, Docker deployment, role-access matrix and notification docs were reconciled against the current Vue/Vite + Fastify/Prisma implementation. Endpoint-by-endpoint exhaustive schema documentation is still a separate completeness task; do not describe the docs as a fully formal API specification.
 
-### P1 — Access matrix needs reconciliation
+### Resolved — application context and notification scope
 
-`docs/role-access-matrix.md` says SUPER_ADMIN bypasses app-type checks and lists roles as the primary app boundary. The current project context says app selection is driven by `accessProfile.type` (STAFF / COMPANY / CUSTOMER), while roles grant permissions within that context. Reconcile this document against the current auth service, frontend router guards, central RBAC middleware, and seed data. Do not change authorization behavior without a separate security plan and tests.
+The `AccessProfile.type` app boundary is enforced in login, RBAC and handoff. Notification folder scope is derived from the authenticated token context; client-provided app scope is not trusted. Regression tests cover these boundaries. A full manual audit of every company-owned endpoint is not claimed complete.
 
-### P1 — Production bundle warnings
+### Resolved — production bundle import warning
 
-The latest successful CI build emits a warning that the Admin entry bundle is larger than 500 kB after minification (the observed main JS chunk is approximately 730 kB), plus an ineffective dynamic import warning for `src/stores/auth.js`. These do not fail CI but should be tracked as performance improvements. Avoid changing code-splitting until route/store import dependencies are inspected and a baseline is captured.
+Website, Company and Admin routers now import their auth stores statically while route pages remain lazy-loaded. CI build logs no longer emit `INEFFECTIVE_DYNAMIC_IMPORT`; split JavaScript chunks are below the prior oversized entry bundle.
 
-### P1 — Migration and external integration checks remain operationally unverified
+### Resolved — inquiry response consistency
 
-The latest CI generates the Prisma client but does not start PostgreSQL or apply all migrations against a real database. The newly added `ProductPriceSnapshot` migration must be applied in a configured environment before using the feature in deployment. SMTP delivery is not verified without valid SMTP configuration; SMS remains not implemented per current handoff.
+Parent inquiry row locking serializes response submission/edit/withdrawal, buyer decisions and manual status transitions. Duplicate supplier submissions return HTTP 409 `RESPONSE_ALREADY_EXISTS` rather than surfacing a generic Prisma unique-constraint failure. Regression tests are in place.
 
-### P2 — Deployment and runtime validation gap
+### Resolved — subscription monetization consistency
 
-CI builds all three frontends and runs automated tests, but the reviewed workflow does not build or start Docker images/Compose services, exercise real HTTP journeys against PostgreSQL, or run browser end-to-end tests. These checks should be added or run in a configured environment before release.
+- A pending subscription request is checked by owner, independent of selected plan.
+- Payment callbacks re-read state after acquiring the owner lock, returning an already verified ACTIVE subscription without duplicate activation/extension.
+- Quota consumption revalidates the active subscription after the subscription-row lock and fails closed when the paid period has expired.
 
-### P2 — Architecture/dependency graph is not yet validated as a generated artifact
+### Remaining — operational and dependency verification
 
-The repository has architecture diagrams embedded in prose documents, but this audit has not found a clearly canonical generated dependency graph with a reproducible generation/validation command. Confirm whether a graph artifact is expected; if so, establish one source of truth and verify it against workspace dependencies and runtime imports rather than maintaining a manually stale picture.
+- Node emits transitive `url.parse()` and `punycode` deprecation notices in CI. Current logs do not provide the call-site stack, so no dependency was upgraded blindly. This is non-blocking debt; trace the dependency path before changing lockfiles.
+- Live Zarinpal payment remains NOT VERIFIED without staging credentials.
+- SMTP remains NOT VERIFIED without credentials and a controlled test recipient.
+- SMS remains NOT IMPLEMENTED.
+- Browser E2E is intentionally not awaited per owner instruction; no browser pass is claimed.
+- Production deployment and exhaustive company-owned endpoint IDOR review are not release-signed-off.
 
 ## Verification matrix
 
-| Area | Status | Evidence / next action |
+| Area | Current status | Evidence / limitation |
 |---|---|---|
-| Frontend/shared automated tests | PASS in CI | Current workflow completed successfully; obtain exact suite counts from CI output if needed |
-| Backend automated tests | PASS in CI | Current workflow completed successfully |
-| Website/Company/Admin production builds | PASS with warnings | Admin bundle-size and ineffective dynamic-import warnings need triage |
-| Prisma client generation | PASS in CI | Does not prove migrations apply to a live database |
-| Full migration application against PostgreSQL | NOT VERIFIED | Run in disposable PostgreSQL test environment |
-| Docker image build and Compose startup | NOT VERIFIED | Build all four images and smoke-test health/readiness and proxy paths |
-| Browser workflows across all three apps | NOT VERIFIED | Exercise auth, products, inquiry, notification folders/read state, RBAC and mobile layout |
-| Company data isolation / IDOR | NOT SIGNED OFF | Trace and test each company-owned read/write service and route |
-| SMTP delivery | NOT VERIFIED | Send a controlled test in a configured environment |
-| SMS delivery | NOT IMPLEMENTED | Keep out of release acceptance unless separately scoped |
-| API, database, frontend and deployment docs | FAIL — stale content found | Reconcile each against implementation and CI/deployment configuration |
-| Dependency/architecture graph | NOT VERIFIED | Determine canonical graph source and regenerate/compare |
+| Frontend/shared tests | PASS | CI run `40635157043` |
+| Backend tests | PASS | CI run `40635157043` |
+| Website/Company/Admin production builds | PASS | CI run `40635157043`; no ineffective auth dynamic-import warning |
+| Prisma client generation | PASS | CI run `40635157043` |
+| Fresh PostgreSQL migration application | PASS | Migration run `40635157013` |
+| Architecture graph generation/check | PASS | CI architecture check in `40635157043` |
+| Docker Compose build/start + service health | PARTIAL PASS | Successful steps observed; full runtime workflow not used as a release gate |
+| Browser workflows across all apps | NOT VERIFIED | Intentionally not awaited per owner instruction |
+| Targeted auth/notification/inquiry RBAC tests | PASS | Regression tests in CI |
+| Exhaustive company-owned endpoint IDOR review | NOT SIGNED OFF | Continue source-level audit before release sign-off |
+| API/database/frontend/deployment docs | CORE DOCS ALIGNED | Exhaustive endpoint-schema completeness is not claimed |
+| Live Zarinpal payment | NOT VERIFIED | Requires staging credentials |
+| SMTP delivery | NOT VERIFIED | Requires credentials and controlled recipient |
+| SMS delivery | NOT IMPLEMENTED | Separate scope required |
+| Transitive Node deprecation warnings | DEFERRED, NON-BLOCKING | Need a traced call site before a safe package change |
 
-## Recommended order before feature development
+## Next actions
 
-1. Reconcile documentation with current code (API, database, frontend, Docker, role-access matrix).
-2. Run focused security review of access-profile boundaries, company ownership/IDOR, notification ownership/folder operations, inquiry access and product price-history visibility.
-3. Add or run Docker/Compose and database migration smoke tests in an isolated environment.
-4. Add browser end-to-end coverage for the three apps and high-value journeys.
-5. Resolve or consciously defer Admin bundle warnings.
-6. Re-run CI, inspect the full diff, and only then mark the audit complete and begin the next feature phase.
+1. Continue source-level audit of company-owned read/write routes for owner scoping and IDOR, adding tests for any uncovered boundary.
+2. Trace the `url.parse()` / `punycode` warning call sites before considering dependency updates; do not upgrade blindly.
+3. Verify live payment and SMTP only when staging credentials and controlled test accounts are available. SMS is out of scope unless separately implemented.
+4. Keep `.ai/current-task.md`, `.ai/WORKLOG.md`, project context, API docs and this audit updated at every material change.
+5. Browser E2E is not a blocker per owner instruction and must not be reported as passed.
 
 ## Explicit limitation
 
-This report records verified repository and CI evidence plus findings from source/document review. It does **not** claim the entire application has been manually tested, deployed, security-certified, or visually validated.
+This report records observed CI results and source-level changes. It does **not** claim that the whole application has been manually tested, deployed, security-certified, or visually validated.
+
 
 ## Progress update — 2026-10-27
 
