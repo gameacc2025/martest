@@ -65,3 +65,14 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Docs:** API documentation, quality audit, worklog, project context and decision notes are updated for this invariant.
 - **Validation:** Do not mark the stage complete until CI and fresh PostgreSQL migration validation finish. Browser E2E is intentionally non-blocking and must not be chased or claimed passed.
 - **Branch policy:** Never merge legacy branches wholesale when they are heavily diverged. Port useful work to a fresh branch from current main, validate code/tests, then merge that PR; close/leave stale branch references as appropriate.
+
+
+## Closure — inquiry response concurrency hardening (2026-10-28)
+
+- **Status:** COMPLETE — PR #20 squash-merged into `main` as `afe468c62d674ec675e4d7e9264e4850403fdb21`.
+- **CI:** Run [40633476868](https://github.com/gameacc2025/martest/actions/runs/40633476868) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Fresh PostgreSQL migration validation [40633476941](https://github.com/gameacc2025/martest/actions/runs/40633476941) passed. This PR introduces no schema changes.
+- **Fix:** Response submission, editing, withdrawal, buyer decision and manual status transitions lock the parent Inquiry row before reading its state inside the transaction.
+- **Regression tests:** Successful response submission and buyer selection assert that the parent-row `FOR UPDATE` lock is issued.
+- **Browser E2E:** Intentionally not awaited per owner instruction. No browser pass is claimed.
+- **Next active stage:** Review Admin production bundle warning and confirm chunk splitting is effective; then continue source-level audit of quota usage/idempotency and payment callback edge cases. Keep tests and docs/AI files current and merge safe fixes after CI + migration validation.
