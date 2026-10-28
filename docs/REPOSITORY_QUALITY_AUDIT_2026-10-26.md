@@ -288,3 +288,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Database:** [40635157013](https://github.com/gameacc2025/martest/actions/runs/40635157013) passed fresh PostgreSQL migration validation.
 - **Behavior:** Quota consumption revalidates the current active subscription after row lock and fails closed when no paid period remains. A replacement active subscription is re-locked and rechecked.
 - **Browser E2E:** Not awaited or claimed passed.
+
+
+## Targeted tenant-boundary source review (2026-10-28)
+
+- Reviewed route/service boundaries for company profile and company products, product CRUD/history/media, customer addresses, inquiry ownership/responses/messages, and notification folders.
+- **Observed controls:** Company routes compare COMPANY context to the requested company ID; product routes enforce STAFF/COMPANY context and service-level product ownership; address operations scope every query to the authenticated user ID; inquiry services check buyer/supplier ownership and response visibility; notification operations scope messages by user and derive folder app scope from the verified token.
+- **Regression coverage already present:** Product service tests cover company spoofing and cross-company access; company service tests cover tenant-scoped updates; address tests cover foreign IDs/user scoping; inquiry tests cover supplier ownership and cross-context roles; notification tests cover forged app scope and cross-scope folders.
+- **Result:** No additional confirmed cross-tenant data path was found in these targeted areas during this pass. This is not an exhaustive route-by-route security sign-off; keep that limitation in the verification matrix.
+- **Code comment corrected:** `product.routes.js` no longer claims SUPER_ADMIN bypasses `requireAccessType`; the comment now states that the app-context boundary remains strict.
