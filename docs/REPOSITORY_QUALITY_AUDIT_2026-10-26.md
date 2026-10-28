@@ -183,3 +183,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Finding:** The self-service UI blocks a new subscription request while any pending request exists, but the backend only checked pending requests for the same plan. A direct API caller could create pending requests for different plans.
 - **Fix under validation:** Backend pending-subscription lookup is now owner-scoped and independent of plan ID. Regression tests cover the different-plan duplicate and first valid request. The payment flow already locks the owner row before creation.
 - **Status:** Pending CI and migration validation; do not close until green and merged.
+
+
+## Follow-up closure — pending inquiry subscription invariant (2026-10-28)
+
+- **Status:** FIXED and merged in PR #19 at \`695b61861b39f840eefa24660541d4d61143943d\`.
+- **CI:** [40631325212](https://github.com/gameacc2025/martest/actions/runs/40631325212) passed; migration validation [40631325206](https://github.com/gameacc2025/martest/actions/runs/40631325206) passed.
+- **Verified change:** Backend checks pending subscription requests by owner regardless of plan, matching the self-service UI rule. The payment flow locks the owner row before creating the pending request.
+- **Regression coverage:** A pending request for another plan blocks a duplicate; an owner with no pending/active subscription can create the first request.
+- **External provider verification:** These tests do not verify a live payment with Zarinpal. Live provider payment remains NOT VERIFIED without configured staging credentials.
