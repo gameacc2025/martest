@@ -245,3 +245,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Database:** [40634407696](https://github.com/gameacc2025/martest/actions/runs/40634407696) passed fresh PostgreSQL migration validation.
 - **Behavior:** Duplicate supplier response returns HTTP 409 `RESPONSE_ALREADY_EXISTS` and the existing response ID/status; no second response or notification is created.
 - **Browser E2E:** Not awaited or claimed passed.
+
+
+## Follow-up finding — concurrent verified payment callbacks (2026-10-28)
+
+- **Severity:** P1 monetization correctness/idempotency.
+- **Finding:** The callback transaction read subscription state before locking the owner row. If another callback activated the subscription while this request waited for the lock, the stale in-memory state could lead to a failed response even though the payment had already been activated.
+- **Fix prepared:** After locking the owner row, re-read the subscription and return the existing verified ACTIVE record when another callback has already committed. Keep provider verification, owner serialization and compare-and-set activation.
+- **Regression coverage prepared:** Simulate a concurrent activation while the callback waits for the owner lock; assert the second callback returns success without updating/extending the subscription.
+- **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change.

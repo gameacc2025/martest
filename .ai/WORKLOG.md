@@ -761,3 +761,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs:** Updated API documentation, repository quality audit, current-task and project context.
 - **Browser E2E:** Intentionally not awaited and not claimed passed.
 - **Next:** Audit quota transaction semantics and payment callback idempotency; add tests and merge safe fixes after CI + migration validation.
+
+
+## 2026-10-28 — PAYMENT-CALLBACK-CONCURRENCY-01
+
+- **Status:** IN PROGRESS — callback state recheck and regression test prepared on `fix/payment-callback-concurrency-20261028`.
+- **Finding:** A callback read `PENDING_PAYMENT` before taking the owner-row lock. A second callback could wait while the first committed activation, then use the stale read and return failure even though the payment was already successful.
+- **Fix:** Re-read the subscription after acquiring the owner lock and return the already verified ACTIVE record when present. Existing server-side provider verification and compare-and-set activation remain.
+- **Regression coverage:** Test simulates another callback activating the subscription while this request waits for the owner lock and asserts success without duplicate activation/extension.
+- **Docs:** Updated API documentation, quality audit, current-task, project context and decisions.
+- **Validation:** CI and fresh PostgreSQL migration validation pending. Browser E2E is not a blocker.

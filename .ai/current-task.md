@@ -119,3 +119,13 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Fix/test:** Duplicate company/inquiry response submissions now return HTTP 409 `RESPONSE_ALREADY_EXISTS` with existing response ID/status; regression test confirms no second response or notification is created.
 - **Browser E2E:** Not awaited or claimed passed.
 - **Next active stage:** Continue review of subscription quota transaction semantics and payment callback idempotency. Keep docs and AI handoff updated after findings/fixes.
+
+
+## Current stage — payment callback concurrency/idempotency (2026-10-28)
+
+- **Branch:** `fix/payment-callback-concurrency-20261028`.
+- **Finding:** Callback transaction checked the subscription status before acquiring the owner lock. A second callback could wait while the first activated the subscription, then continue with stale PENDING state and return a false failure.
+- **Fix:** After the owner-row lock, re-read the subscription; if it is already ACTIVE with `paymentVerifiedAt`, return the existing verified subscription and do not update/extend it. Keep server-to-server provider verification and the conditional activation update.
+- **Regression test:** Simulates a concurrent activation during owner-lock acquisition and verifies the waiting callback returns success without a second update.
+- **Docs:** Updated API documentation, quality audit, current-task, worklog, project context and decisions.
+- **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change. Browser E2E is non-blocking.
