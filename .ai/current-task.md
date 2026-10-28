@@ -150,3 +150,13 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Regression test:** Simulates expiry while waiting for the lock and asserts a 403 `INQUIRY_SUBSCRIPTION_REQUIRED` response and zero usage-event writes.
 - **Docs:** Updated API documentation, quality audit, current-task, worklog and project context.
 - **Validation:** CI and fresh PostgreSQL migration validation pending. No schema change; browser E2E is non-blocking.
+
+
+## Closure — quota active-period revalidation (2026-10-28)
+
+- **Status:** COMPLETE — PR #24 merged into `main` as `c96850af53866c9e8c84b46d436e38fd8b06be3b`.
+- **CI:** Run [40635157043](https://github.com/gameacc2025/martest/actions/runs/40635157043) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Fresh PostgreSQL migration validation [40635157013](https://github.com/gameacc2025/martest/actions/runs/40635157013) passed; no schema change was introduced.
+- **Fix/test:** Quota consumption revalidates the active subscription after the row lock, follows a replacement active subscription at the period boundary, and fails closed without writing usage if no active subscription remains.
+- **Browser E2E:** Not awaited or claimed passed.
+- **Next active stage:** Trace the remaining transitive `url.parse()` / `punycode` deprecation warnings to their source packages; update dependencies only if the fix is safe and covered by tests. Continue checking the quality audit for remaining actionable items.
