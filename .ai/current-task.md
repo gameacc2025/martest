@@ -26,18 +26,19 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 ## Immediate remaining work
 
-1. Validation PR #16 (`validate-current-main-final-20261027`) is open from the latest main snapshot and runs CI + Prisma migration validation. The previous snapshot passed both, but the latest notification tests still need their own completed CI result.
-2. Fix any CI failures surfaced by PR #16, then merge it. Do not wait for the Playwright runtime/browser step; the user explicitly instructed not to chase it, and no browser pass is claimed.
-3. Review notification folder/read-state regression tests and confirm docs match the current implementation.
-4. Verify architecture graph with `pnpm architecture:check` in CI; fix the generated graph if stale.
-5. Keep SMTP status as NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Do not report third-party delivery as successful based only on unit tests.
+1. PR #16 was merged into main as `90a8f36be5c4281c999515206b099b894d2da75d`.
+2. CI run `40629289205` passed: generated architecture graph check, frontend/shared tests, backend tests, Prisma client generation, and all three production builds.
+3. Database migration validation run `40629289194` passed against a fresh PostgreSQL database.
+4. Fixed a false-negative notification folder-count regression test in Website, Company and Admin by adding a stable `data-folder-id` selector to actual folder buttons. The architecture graph was regenerated and its check now passes.
+5. Browser E2E remains committed but explicitly non-blocking per owner instruction. Do not wait for it and do not claim it passed.
+6. Continue the remaining quality-audit items: review notification folder/read-state API and ownership contracts; compare docs with route/schema implementation; inspect inquiry permissions, quotas, response decisions and payment idempotency coverage; track bundle warnings; keep SMTP NOT VERIFIED without live credentials and a test recipient. SMS remains NOT IMPLEMENTED.
 
 ## Branch/PR handling
 
-- PR #14 is merged.
-- PR #9, PR #11, and superseded validation PR #15 are closed.
-- Final validation PR #16 is open from the latest main snapshot. Their useful code was ported to current main: customer addresses, profile contract fix, refresh-token uniqueness, architecture graph, Vite chunk splitting and Docker runtime hardening.
-- No stale branch was force-merged. The connected GitHub actions do not expose branch deletion; do not claim remote branches were deleted.
+- PR #14 merged as `92501f206ab16b163d8d4605e685cbe3396dd2aa`.
+- PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`.
+- PR #9, PR #11 and superseded validation PR #15 are closed.
+- Remaining remote branches include legacy/feature branches. Do not blindly merge divergent branches without comparing them with main and checking for unique work. The GitHub connector does not expose a branch-delete action; do not claim remote branches were deleted.
 
 ## Security and architecture contract
 
