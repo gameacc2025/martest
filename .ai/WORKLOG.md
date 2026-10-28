@@ -670,3 +670,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Changes:** The shared endpoint helper now exposes the canonical \`/settings/notifications/folders\` path without a client-selected app query. Website, Company and Admin no longer send app scope in folder list or move/copy requests. The route schema no longer requires a client-supplied app; the controller derives scope from verified token context.
 - **Docs:** Updated \`docs/NOTIFICATION_SYSTEM.md\`, quality audit, worklog and handoff.
 - **Next:** Inquiry monetization review identified a likely backend consistency gap to verify: pending subscription duplication is checked per owner + plan, while the UI blocks any pending request. Add a regression test and enforce one pending request per owner if confirmed.
+
+
+## 2026-10-28 — INQUIRY-PENDING-SUBSCRIPTION-01
+
+- **Status:** IN PROGRESS — backend invariant fix and regression tests on \`fix/inquiry-pending-subscription-unique-20261028\`.
+- **Finding:** \`createPendingSubscription\` queried pending subscriptions by owner *and planId*. The self-service UI blocks any new request when any pending subscription exists, so direct API calls could bypass that UI rule by selecting a different plan. The owner lock serializes concurrent requests, but the backend predicate was still too narrow.
+- **Fix:** Check pending status by owner only, independent of plan ID. The existing transaction/owner lock in the payment service preserves the serial decision path.
+- **Tests:** Added regression coverage that a pending request for a different plan blocks creation, plus a positive case for an owner with no pending/active subscription.
+- **Docs:** Added subscription ownership, pending-request and payment-verification invariants to \`docs/API_DOCUMENTATION.md\`; refreshed current-task handoff.
+- **Verification:** CI and fresh PostgreSQL migration validation pending. Do not claim success before observing completed results.
