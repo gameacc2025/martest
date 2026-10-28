@@ -703,3 +703,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs updated:** `docs/API_DOCUMENTATION.md`, `docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md`, `.ai/current-task.md`, `.ai/project-context.md`, and `.ai/decisions.md`.
 - **Validation:** CI and fresh PostgreSQL migration validation are pending. Browser E2E is not a blocker per owner instruction and is not claimed passed.
 - **Next:** Observe CI + migration status, fix non-browser failures, merge if green, then continue source-level review of quota idempotency and payment callback consistency. Do not blindly merge heavily diverged feature branches.
+
+
+## 2026-10-28 — INQUIRY-RESPONSE-CONCURRENCY-01 — COMPLETE
+
+- **Status:** DONE — PR #20 squash-merged into `main` at `afe468c62d674ec675e4d7e9264e4850403fdb21`.
+- **CI:** Run `40633476868` passed architecture graph consistency, frontend/shared tests, backend tests, Prisma client generation and Website/Company/Admin production builds.
+- **Database:** Fresh PostgreSQL migration validation run `40633476941` passed; no schema changes were included in this fix.
+- **Fix:** Parent `Inquiry` rows are locked inside transactions before current state is read for supplier response submission/edit/withdraw, buyer decision, and manual status transition. This prevents a stale submission transaction from adding a pending response after a buyer closes an RFQ.
+- **Regression coverage:** Unit tests verify the `FOR UPDATE` lock is requested on successful supplier submission and buyer selection.
+- **Docs:** API documentation, repository quality audit, project context, decision notes, current-task handoff and worklog were updated.
+- **Browser E2E:** Intentionally not awaited per owner instruction. No browser pass is claimed.
+- **Next:** Review the remaining Admin bundle-size warning and continue quota/payment edge-case audit. Do not merge heavily diverged legacy branches wholesale.
