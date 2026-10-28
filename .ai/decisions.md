@@ -131,3 +131,6 @@ Impact: Product services enforce STAFF permissions for create/update/delete, pri
 
 
 - Decision (2026-10-28): Inquiry response mutations and buyer decisions must serialize by locking the parent `Inquiry` row inside their transaction before reading its current status. Keep compare-and-set status updates and all authorization/ownership checks; do not rely on a prior unlocked read to coordinate quote submission with inquiry closure.
+
+
+- Decision (2026-10-28): Payment callbacks must re-read subscription state after acquiring the owner lock. A callback that observes a previously verified ACTIVE subscription must return success without changing its period; keep provider verification and conditional activation as defense in depth.
