@@ -1,9 +1,9 @@
 const ctrl = require('./product.controller');
-// Sprint 0 (RBAC): use the CENTRAL, two-layer RBAC middleware instead of the
-// ad-hoc guards that previously lived in this file.
-//   - requireAccessType(...types) → domain boundary (STAFF | COMPANY | CUSTOMER)
-//   - requirePermission(...perms)  → fine-grained action permission
-// SUPER_ADMIN bypasses both layers (handled inside the middleware).
+// Use the CENTRAL, two-layer RBAC middleware instead of ad-hoc guards.
+//   - requireAccessType(...types) → strict app-context boundary (STAFF | COMPANY | CUSTOMER)
+//   - requirePermission(...perms)  → fine-grained permission within that context
+// SUPER_ADMIN grants a permission override only in STAFF context; it never
+// bypasses requireAccessType or turns a COMPANY/CUSTOMER session into STAFF.
 const { requireAccessType, requirePermission } = require('../../middlewares/rbac');
 
 // Product management is a COMPANY + STAFF concern. CUSTOMER is buyer-only

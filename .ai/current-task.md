@@ -168,3 +168,12 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - CI run `40635157043` and fresh PostgreSQL migration validation `40635157013` passed.
 - Do not chase browser E2E per owner instruction. Do not claim live payment/SMTP verification; SMS is not implemented.
 - Remaining source work: exhaustive company-owned route/service IDOR review. Non-blocking warning debt: transitive `url.parse()` and `punycode` deprecations; current logs lack a call-site stack, so don't upgrade packages blindly.
+
+
+## Targeted tenant-boundary review (2026-10-28)
+
+- **Branch:** `docs/rbac-context-comment-20261028`.
+- Reviewed route/service ownership controls for company profile/products, product CRUD/history/media, customer addresses, inquiry responses/messages, and notification folders.
+- No additional confirmed cross-tenant path was found in the reviewed surfaces. Existing regression tests cover product/company/address/inquiry/notification ownership boundaries.
+- Corrected the stale comment in `backend/src/modules/products/product.routes.js`: SUPER_ADMIN does not bypass strict `requireAccessType` app-context enforcement.
+- **Limit:** This was a targeted source review, not an exhaustive route-by-route security certification. Keep that distinction in the quality audit.
