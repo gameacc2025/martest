@@ -177,3 +177,14 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - No additional confirmed cross-tenant path was found in the reviewed surfaces. Existing regression tests cover product/company/address/inquiry/notification ownership boundaries.
 - Corrected the stale comment in `backend/src/modules/products/product.routes.js`: SUPER_ADMIN does not bypass strict `requireAccessType` app-context enforcement.
 - **Limit:** This was a targeted source review, not an exhaustive route-by-route security certification. Keep that distinction in the quality audit.
+
+
+## Closure — targeted tenant-boundary review (2026-10-28)
+
+- **Status:** COMPLETE for the targeted source surfaces; PR #25 merged to `main` as `6fc10282a29a836ca84987eb4cec93fecce54774`.
+- **Reviewed:** Company profile/products, product CRUD/history/media, customer addresses, inquiry buyer/supplier responses/messages, and notification folder/message scoping.
+- **Result:** No additional confirmed cross-tenant path was found in the reviewed surfaces. Existing tests cover the key owner/context boundaries.
+- **Comment fix:** Product route comments now accurately state that SUPER_ADMIN does not bypass `requireAccessType`.
+- **CI:** Run [40635937015](https://github.com/gameacc2025/martest/actions/runs/40635937015) passed. Migration validation [40635936924](https://github.com/gameacc2025/martest/actions/runs/40635936924) passed.
+- **Limits:** This is not an exhaustive route-by-route security sign-off. Transitive `url.parse()`/`punycode` deprecations remain non-blocking until a call-site trace is available. Browser E2E remains intentionally non-blocking; live Zarinpal/SMTP are not verified and SMS is not implemented.
+- **Next:** Only operational/external verification and optional dependency-warning tracing remain; no further confirmed high-severity source issue is currently open from this targeted pass.
