@@ -749,3 +749,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Added a service test proving duplicate pending response is rejected before creating another response or dispatching another notification.
 - **Docs:** Updated API documentation, quality audit, current-task and project context.
 - **Validation:** CI and fresh PostgreSQL migration validation pending. No migration/schema change. Browser E2E remains non-blocking.
+
+
+## 2026-10-28 — INQUIRY-DUPLICATE-RESPONSE-01 — COMPLETE
+
+- **Status:** DONE — PR #22 squash-merged into `main` at `17a2015edeecbc00c1cbf540540ea48b8c97f394`.
+- **CI:** Run `40634407695` passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Migration validation run `40634407696` passed against a fresh PostgreSQL database.
+- **Fix:** The inquiry service checks for an existing response after locking the inquiry and validating supplier ownership, then returns HTTP 409 / `RESPONSE_ALREADY_EXISTS` instead of exposing a generic Prisma unique-constraint failure.
+- **Regression coverage:** Duplicate pending response is rejected before a second response or notification is created. The database unique constraint remains the final defense.
+- **Docs:** Updated API documentation, repository quality audit, current-task and project context.
+- **Browser E2E:** Intentionally not awaited and not claimed passed.
+- **Next:** Audit quota transaction semantics and payment callback idempotency; add tests and merge safe fixes after CI + migration validation.
