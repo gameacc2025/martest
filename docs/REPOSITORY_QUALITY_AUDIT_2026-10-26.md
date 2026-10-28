@@ -297,3 +297,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Regression coverage already present:** Product service tests cover company spoofing and cross-company access; company service tests cover tenant-scoped updates; address tests cover foreign IDs/user scoping; inquiry tests cover supplier ownership and cross-context roles; notification tests cover forged app scope and cross-scope folders.
 - **Result:** No additional confirmed cross-tenant data path was found in these targeted areas during this pass. This is not an exhaustive route-by-route security sign-off; keep that limitation in the verification matrix.
 - **Code comment corrected:** `product.routes.js` no longer claims SUPER_ADMIN bypasses `requireAccessType`; the comment now states that the app-context boundary remains strict.
+
+
+## Closure — targeted tenant-boundary review (2026-10-28)
+
+- **Status:** Targeted review completed; PR #25 merged at `6fc10282a29a836ca84987eb4cec93fecce54774`.
+- **CI:** [40635937015](https://github.com/gameacc2025/martest/actions/runs/40635937015) passed; fresh PostgreSQL migration validation [40635936924](https://github.com/gameacc2025/martest/actions/runs/40635936924) passed.
+- **Reviewed:** Company, product, address, inquiry, and notification route/service ownership controls.
+- **Result:** No additional confirmed cross-tenant path was found in the reviewed surfaces; existing regression tests cover the principal owner/context boundaries. This is not an exhaustive route-by-route security certification.
+- **Comment accuracy:** Product routes now correctly state that SUPER_ADMIN does not bypass the strict app-context boundary.
