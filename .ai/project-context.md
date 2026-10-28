@@ -209,3 +209,8 @@ work status is tracked in `.ai/current-task.md` and `.ai/WORKLOG.md`.
 - Normal/sealed/anonymous-sealed visibility is enforced in service response shaping. Supplier users only receive their own response data; drafts and future-scheduled inquiries are hidden from suppliers.
 - `INQUIRY_PUBLISHED`, `INQUIRY_RESPONSE_RECEIVED`, and `INQUIRY_STATUS_CHANGED` are dispatched transactionally through the central notification dispatcher.
 - Background lifecycle worker processes scheduled publishing and automatic expiry, recording SYSTEM transitions in status history.
+
+
+## Inquiry response concurrency invariant (2026-10-28)
+
+Response writes and buyer decisions are serialized on the parent `Inquiry` row within the same PostgreSQL transaction. Before reading current inquiry state, response submit/edit/withdraw/decision operations and manual status transitions acquire `SELECT id FROM "Inquiry" WHERE id = $1 FOR UPDATE`. This prevents a stale transaction from committing a pending supplier response after buyer selection closes the inquiry. Keep authorization, ownership, deadline checks, response compare-and-set, and transactional notification dispatch in place; the lock is an additional consistency guarantee, not a replacement.

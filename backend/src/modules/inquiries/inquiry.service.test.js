@@ -190,6 +190,10 @@ const mockPrisma = {
       return fx.products;
     },
   },
+  $queryRawUnsafe: async (query, ...params) => {
+    record('$queryRawUnsafe', { query, params });
+    return [];
+  },
   $transaction: async (arg) => {
     if (typeof arg === 'function') return arg(mockPrisma);
     return Promise.all(arg);
@@ -1130,6 +1134,7 @@ test('submitResponse: a valid quote is stored with normalized items', async () =
   }, seller);
 
   const args = calls['inquiryResponse.create'].at(-1);
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "Inquiry"') && query.includes('FOR UPDATE') && params[0] === 1), 'locks the parent inquiry before submitting a response');
   assert.equal(args.data.companyId, seller.companyId);
   assert.equal(args.data.status, 'PENDING');
   assert.equal(args.data.items.create[0].price, 1500);
@@ -1145,6 +1150,7 @@ test('decideResponse: selecting a quote closes the inquiry and rejects other pen
   fx.response = { id: 501, inquiryId: 30, companyId: seller.companyId, status: 'PENDING' };
   fx.recentResponses = [{ id: 502, inquiryId: 30, companyId: 88, status: 'PENDING' }];
   const selected = await inquiryService.decideResponse(30, 501, 'SELECTED', buyer, 'Best delivery');
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "Inquiry"') && query.includes('FOR UPDATE') && params[0] === 30), 'locks the parent inquiry before selecting a response');
   assert.equal(selected.status, 'SELECTED');
   assert.equal(calls['inquiry.updateMany'][0].data.status, 'CLOSED');
   assert.ok(calls['inquiryResponse.updateMany'].some((call) => call.data.status === 'REJECTED'));

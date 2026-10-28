@@ -692,3 +692,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Regression tests:** Added a negative test for an existing pending request tied to another plan and a positive test for the first valid request.
 - **Docs:** Added subscription owner, pending-request and server-side payment verification invariants to \`docs/API_DOCUMENTATION.md\`; updated the quality audit and handoff.
 - **Next:** Continue review of inquiry response decisions, ownership/RBAC, quota enforcement and payment callback paths. Do not claim live payment verification without staging credentials.
+
+
+## 2026-10-28 — INQUIRY-RESPONSE-CONCURRENCY-01
+
+- **Status:** IN PROGRESS — implementation and regression assertions prepared on `fix/inquiry-response-concurrency-20261028`.
+- **Finding:** Under PostgreSQL READ COMMITTED, a supplier response submission and buyer response selection could concurrently read an inquiry as OPEN. A transaction that read OPEN before selection committed could insert a pending quote after the buyer closed the inquiry and rejected existing pending responses.
+- **Fix:** Added a shared transactional lock on the parent `Inquiry` row before reading state for response submission, response editing/withdrawal, buyer selection/rejection, and manual status transitions. Existing ownership, permission, deadline, response-state compare-and-set and transactional notification checks remain in place.
+- **Regression tests:** Mock Prisma records raw SQL calls; successful response submission and buyer selection assert a parent-row `FOR UPDATE` lock.
+- **Docs updated:** `docs/API_DOCUMENTATION.md`, `docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md`, `.ai/current-task.md`, `.ai/project-context.md`, and `.ai/decisions.md`.
+- **Validation:** CI and fresh PostgreSQL migration validation are pending. Browser E2E is not a blocker per owner instruction and is not claimed passed.
+- **Next:** Observe CI + migration status, fix non-browser failures, merge if green, then continue source-level review of quota idempotency and payment callback consistency. Do not blindly merge heavily diverged feature branches.

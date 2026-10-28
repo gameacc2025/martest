@@ -54,3 +54,14 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - Distinguish backend unit tests, frontend Vitest tests, Prisma migration validation, Docker runtime checks, browser E2E, and live third-party integration tests.
 - Browser E2E tests remain committed; their live completion is not a blocker per owner instruction.
 - Never label a test as passed unless a completed run or local result is actually observed.
+
+
+## Current stage — inquiry response concurrency hardening (2026-10-28)
+
+- **Branch:** `fix/inquiry-response-concurrency-20261028`.
+- **Finding:** Supplier response submission could race buyer selection/closure: both transactions could read OPEN, then a new pending response might commit after the buyer closed the RFQ.
+- **Code:** Added a shared parent-row lock helper using `SELECT id FROM "Inquiry" WHERE id = $1 FOR UPDATE` inside transactions. Applied it before reading status in response submit/edit/withdraw/decision paths and manual inquiry status transitions.
+- **Tests:** Inquiry service test mock records raw queries; regression assertions require the parent inquiry lock for successful response submission and buyer selection.
+- **Docs:** API documentation, quality audit, worklog, project context and decision notes are updated for this invariant.
+- **Validation:** Do not mark the stage complete until CI and fresh PostgreSQL migration validation finish. Browser E2E is intentionally non-blocking and must not be chased or claimed passed.
+- **Branch policy:** Never merge legacy branches wholesale when they are heavily diverged. Port useful work to a fresh branch from current main, validate code/tests, then merge that PR; close/leave stale branch references as appropriate.
