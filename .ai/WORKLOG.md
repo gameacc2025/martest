@@ -835,3 +835,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Result:** No additional confirmed cross-tenant data path found in the targeted surfaces. Existing regression tests cover the main ownership boundaries.
 - **Code comment:** Corrected the stale claim that SUPER_ADMIN bypasses `requireAccessType`; app context remains strict.
 - **Limitations:** Not an exhaustive route-by-route security sign-off. Transitive Node deprecation notices remain non-blocking until traced; browser E2E is not claimed passed; live Zarinpal/SMTP are not verified; SMS is not implemented.
+
+
+## 2026-10-28 — CI-DEPRECATION-TRACE-01 — COMPLETE
+
+- **Diagnostic PR:** #26 was intentionally closed without merging its temporary `NODE_OPTIONS=--trace-deprecation` setting.
+- **Trace result:** `DEP0169 url.parse()` originates from `pnpm/action-setup@v4` bundled `pnpm.cjs` during self-install. `DEP0040 punycode` originates from `actions/setup-node@v4` bundled setup/cache code.
+- **Impact:** These are GitHub Actions toolchain warnings, not application/workspace runtime dependency warnings. No package/lockfile update was justified.
+- **Next:** Only consider updating action versions as a separate CI maintenance change, with ordinary CI/migration validation.
