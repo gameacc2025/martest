@@ -210,3 +210,11 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Database:** [40633476941](https://github.com/gameacc2025/martest/actions/runs/40633476941) passed fresh PostgreSQL migration validation. No schema changes were introduced.
 - **Regression coverage:** Service tests assert parent-row locking for successful response submission and buyer selection.
 - **Browser E2E:** Not awaited or claimed passed, per owner instruction.
+
+
+## Follow-up — Admin production bundle warning (2026-10-28)
+
+- **Evidence:** CI build `40633476868` completed successfully. The generated Admin chunks shown in its build output are below the previous approximately 730 kB entry chunk; the largest displayed JavaScript chunk is approximately 196 kB (uncompressed), consistent with the configured 300 KiB vendor split target.
+- **Remaining warning found:** Rolldown reported `INEFFECTIVE_DYNAMIC_IMPORT` for `src/stores/auth.js` because the Admin router dynamically imported the store while layouts, pages and `main.js` also statically imported it.
+- **Fix prepared:** The Admin router now imports `useAuthStore` statically and calls it in the guard/redirect callbacks. This matches the module's actual usage and avoids pretending the store can be split into a separate chunk. Page components remain lazy-loaded.
+- **Validation:** CI production builds must be rerun on the PR head. Browser E2E is not required for this cleanup and is not claimed passed.
