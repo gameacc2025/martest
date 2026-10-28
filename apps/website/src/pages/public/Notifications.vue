@@ -392,7 +392,7 @@ function typeLabel(item) {
     <div class="mail-layout">
       <aside class="mail-sidebar" aria-label="پوشه‌ها و دسته‌بندی پیام‌ها">
         <p class="sidebar-heading">پوشه‌ها</p>
-        <button v-for="folder in folders" :key="folder.id" type="button" class="folder-link"
+        <button v-for="folder in folders" :key="folder.id" type="button" class="folder-link" :data-folder-id="folder.id"
           :class="{ active: activeFolder === folder.id && activeCategory === 'all' }" @click="selectFolder(folder.id)">
           <i :class="['pi', folder.icon]" aria-hidden="true"></i>
           <span>{{ folder.label }}</span>
