@@ -638,3 +638,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Added controller regression tests for forged app scope, missing app context, cross-app folder IDs and valid scope mapping. Added service regression tests for inactive source folders and cross-scope destinations.
 - **Docs:** Updated \`docs/NOTIFICATION_SYSTEM.md\` with current folder/bulk endpoints and the server-derived app-scope contract; updated \`.ai/current-task.md\`.
 - **Verification:** Await CI and fresh PostgreSQL migration validation on this branch. Do not claim tests passed before the completed workflow result. Browser E2E is intentionally non-blocking.
+
+
+## 2026-10-28 — NOTIFICATION-APP-SCOPE-01 — COMPLETE
+
+- **Status:** DONE — PR #17 merged into \`main\`.
+- **Merge commit:** \`6c936fbf89b62febdf8122ac854fb53d93049ed4\`.
+- **CI:** Run \`40630173240\` passed architecture graph check, frontend/shared tests, backend tests, Prisma client generation and all three production builds.
+- **Database:** Migration validation run \`40630173261\` passed against a fresh PostgreSQL database.
+- **Security fix:** Notification folder scope is derived from verified token context (\`STAFF\` → \`ADMIN\`, \`COMPANY\` → \`COMPANY\`, \`CUSTOMER\` → \`WEBSITE\`). The controller ignores client-provided \`app\`, rejects unknown contexts, and checks requested folder IDs against allowed folders before listing. The service rejects inactive source folders and cross-scope destinations.
+- **Regression tests:** Added coverage for forged query/body app values, missing context, cross-app folder IDs, valid context mapping, inactive source folders and cross-scope destinations.
+- **Docs:** Updated \`docs/NOTIFICATION_SYSTEM.md\`, \`docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md\`, and this handoff/worklog.
+- **Browser E2E:** Intentionally non-blocking per owner instruction. No browser pass is claimed.
+- **Next:** Continue inquiry permission/quota/response-decision/payment review and source-aligned docs. SMTP remains not live-verified; SMS is not implemented.
