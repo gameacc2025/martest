@@ -151,3 +151,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Fix under validation:** Derive scope server-side from the verified access token (\`STAFF\` → \`ADMIN\`, \`COMPANY\` → \`COMPANY\`, \`CUSTOMER\` → \`WEBSITE\`); ignore client-supplied scope; fail closed for unknown context; verify a requested folder is available in that scope before listing its notifications; reject moves from inactive source folders.
 - **Regression tests added:** Controller tests cover forged \`app\` values, missing context, cross-app folder IDs and scope mapping. Service tests cover inactive source folders and cross-scope destinations.
 - **Status:** Pending CI and migration validation. Do not close the finding until the tests pass and the fix is merged.
+
+
+## Follow-up finding closure — notification folder app-scope authorization (2026-10-28)
+
+- **Status:** FIXED and merged in PR #17 at \`6c936fbf89b62febdf8122ac854fb53d93049ed4\`.
+- **CI:** [40630173240](https://github.com/gameacc2025/martest/actions/runs/40630173240) passed; fresh PostgreSQL migration validation [40630173261](https://github.com/gameacc2025/martest/actions/runs/40630173261) passed.
+- **Verified changes:** scope now comes from authenticated \`accessType\`, client-supplied scope is ignored, cross-app folder IDs are rejected, unknown contexts fail closed, and inactive source folders cannot be moved from.
+- **Regression coverage:** controller tests cover forged scope values, missing context, folder-ID scope validation and mapping; service tests cover inactive source folders and cross-scope destinations.
+- **Browser E2E:** not required for this closure and not claimed passed.
