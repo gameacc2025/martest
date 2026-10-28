@@ -82,7 +82,9 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 - **Branch:** `perf/admin-auth-import-warning-20261028`.
 - **Evidence from CI run 40633476868:** production builds passed; current split chunks shown in logs are below the previous ~730 kB Admin entry chunk, with the largest displayed JS chunk ~196 kB. Do not report a specific performance improvement beyond these observed artifact sizes.
-- **Finding:** `INEFFECTIVE_DYNAMIC_IMPORT` was emitted because `apps/admin/src/router/index.js` dynamically imported `src/stores/auth.js` even though the store was statically imported by app layouts/pages and main.
-- **Fix:** Import `useAuthStore` statically in the router and call it inside the route callbacks. Route page components remain lazy-loaded.
+- **Finding:** CI showed `INEFFECTIVE_DYNAMIC_IMPORT` in Website, Company and Admin because each router dynamically imported `src/stores/auth.js` even though the store was statically imported by layouts/pages and main.
+- **Fix:** All three routers now import `useAuthStore` statically and call it inside route callbacks. Route page components remain lazy-loaded.
 - **Docs:** Updated frontend documentation, quality audit and AI handoff/context/worklog.
 - **Validation:** Wait for CI build/tests. Browser E2E is not a blocker per owner instruction.
+
+- **Scope adjustment:** The first CI after the Admin-only fix showed the identical warning in Website and Company; this branch now removes all three ineffective dynamic imports. Re-run CI to confirm the warning is gone.
