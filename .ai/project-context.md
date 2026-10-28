@@ -234,3 +234,8 @@ After a provider verifies payment, callbacks for the same owner serialize on the
 ## Quota consumption invariant (2026-10-28)
 
 Usage consumption must validate the active subscription after acquiring its row lock, not rely solely on a pre-lock lookup. Re-query the owner's active subscription and time window after the lock; if it changed, lock and re-check the new active row. If no active subscription remains, reject before aggregation or inserting an `InquiryUsageEvent`.
+
+
+## RBAC comment accuracy (2026-10-28)
+
+`requireAccessType` is a strict application-context boundary. SUPER_ADMIN/wildcard permission override applies only in STAFF context and must not bypass app-type checks for COMPANY or CUSTOMER. Keep route comments and docs aligned with this invariant.
