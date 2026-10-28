@@ -17,13 +17,18 @@ Routes are registered under `/api/v1/settings/notifications` (confirm the prefix
 |---|---|---|
 | GET | `/` | List the authenticated user's notifications |
 | GET | `/unread-count` | Get unread count |
+| GET | `/folders?app=...` | List folders for the app context derived from the authenticated access token; the query parameter is ignored |
+| POST | `/:id/folders` | Copy or move an owned notification to a folder allowed in the authenticated app context |
+| PATCH | `/:id/read-state` | Set an owned notification's `isRead` state to true or false |
+| POST | `/bulk-read-state` | Set read state for up to 100 selected notifications owned by the caller |
+| POST | `/bulk-delete` | Delete up to 100 selected notifications owned by the caller |
 | PATCH | `/:id/read` | Mark one notification as read |
 | PATCH | `/read-all` | Mark all notifications as read |
 | DELETE | `/:id` | Delete one of the authenticated user's notifications |
 | GET | `/preferences` | Read effective preferences, including defaults |
 | PATCH | `/preferences` | Batch update preferences by event type and channel |
 
-All routes require authentication. Ownership must be scoped to the authenticated user in service/controller logic; do not trust a user ID supplied by the client.
+All routes require authentication. Ownership must be scoped to the authenticated user in service/controller logic; do not trust a user ID supplied by the client. Folder app scope is derived server-side from the verified access token (`STAFF` → `ADMIN`, `COMPANY` → `COMPANY`, `CUSTOMER` → `WEBSITE`); clients cannot select another app's folder by submitting a query/body `app` value. Unknown app context fails closed.
 
 ## Admin API
 
