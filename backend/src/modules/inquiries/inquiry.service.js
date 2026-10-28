@@ -215,6 +215,15 @@ function assertAuthenticatedUser(caller) {
   return userId;
 }
 
+// Serialize response writes and buyer decisions on the parent RFQ row. Without
+// this lock, a quote submission can read OPEN, race with buyer selection, and
+// commit a new PENDING response after the buyer has closed the RFQ.
+async function lockInquiryForUpdate(tx, inquiryId) {
+  if (typeof tx?.$queryRawUnsafe === 'function') {
+    await tx.$queryRawUnsafe('SELECT id FROM "Inquiry" WHERE id = $1 FOR UPDATE', inquiryId);
+  }
+}
+
 function assertValidInquiryStatus(status) {
   if (!INQUIRY_STATUSES.includes(status)) {
     throw { statusCode: 400, code: 'INVALID_INQUIRY_STATUS', message: `Invalid RFQ status: ${status}.` };
@@ -898,6 +907,7 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
   const changedByUserId = assertAuthenticatedUser(caller);
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiry(inquiry, caller);
 
@@ -1064,6 +1074,7 @@ async function submitResponse(inquiryId, data, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertInquiryAcceptsResponseChanges(inquiry);
     if (inquiry.companyId && inquiry.companyId === companyId) {
@@ -1357,6 +1368,7 @@ async function updateResponse(inquiryId, responseId, data, caller) {
   const companyId = resolveSupplierCompanyId(data, caller);
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertResponseEditable(inquiry);
 
@@ -1402,6 +1414,7 @@ async function decideResponse(inquiryId, responseId, decision, caller, comment) 
   }
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
     assertCanManageInquiry(inquiry, caller);
@@ -1518,6 +1531,7 @@ async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
   const companyId = resolveSupplierCompanyId(data, caller);
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertResponseWithdrawable(inquiry);
 
