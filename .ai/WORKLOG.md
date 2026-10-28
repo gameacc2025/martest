@@ -605,3 +605,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Prior snapshot results:** CI run `40590958164` passed frontend/shared tests, backend tests and all frontend builds. Database migration run `40590958106` passed Prisma schema/client validation, fresh PostgreSQL migration application and migration status. These runs predate the newest notification folder-count tests.
 - **Runtime/browser instruction:** Previous runtime run `40590958191` failed. The owner explicitly said not to chase browser tests, so the browser job is not a blocker and no browser pass is claimed. Docker runtime checks and Playwright tests remain committed.
 - **Required now:** Run CI and migration validation against this newer snapshot; fix failures if any. Merge this PR only after completed CI and migration checks pass. No live SMTP/SMS/provider verification is implied.
+
+
+## 2026-10-28 — VALIDATE-CURRENT-MAIN-FINAL-01 follow-up
+
+- **Status:** IN PROGRESS — current-main validation PR #16; browser E2E intentionally non-blocking.
+- **CI evidence:** First CI run on PR #16 failed before running app tests because \`pnpm architecture:check\` found \`docs/architecture/DEPENDENCY_GRAPH.generated.mmd\` stale. The generator's check path now prints its expected graph when stale, and the generated graph was rewritten from the generator output; the subsequent run passed the architecture graph check.
+- **Regression failure found:** The next CI run reached frontend tests and exposed the same failing folder-count test in Website, Company and Admin. The test selected every \`.folder-link:not(.category-link)\`, which accidentally included the “all categories” button that has no count element. Added \`data-folder-id\` to server-managed folder buttons and changed the tests to select \`button[data-folder-id]\`, so the assertions measure only actual folders.
+- **Changed files on validation branch:** \`scripts/generate-architecture-graph.mjs\`, \`docs/architecture/DEPENDENCY_GRAPH.generated.mmd\`, the three notification page components and their Vitest files.
+- **Docs:** Added a source-aligned notification folder/read-state/bulk-action contract to \`docs/NOTIFICATION_SYSTEM.md\`; refreshed this handoff.
+- **Verification:** Architecture graph check passed in CI after regeneration. The full CI run after the folder selector fix and database migration validation are still pending/need final status review. Browser workflow is not a blocker and must not be represented as passed.
+- **Next action:** Verify latest CI and migration jobs, fix any non-browser failures, then merge PR #16. Continue the remaining quality-audit items after merge and keep this file plus \`.ai/current-task.md\` updated at each milestone.
