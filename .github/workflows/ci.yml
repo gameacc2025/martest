@@ -13,6 +13,10 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Temporary diagnostic: print call-site stacks for Node deprecation warnings
+    # so transitive dependencies can be updated deliberately rather than blindly.
+    env:
+      NODE_OPTIONS: --trace-deprecation
     steps:
       - name: Checkout
         uses: actions/checkout@v4
