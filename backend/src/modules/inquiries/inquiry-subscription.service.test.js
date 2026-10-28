@@ -8,14 +8,27 @@ const originalDb = require.cache[dbPath];
 const calls = { subscription: [], aggregate: [], create: [] };
 let enforcement = true;
 let activeSubscription;
+let pendingSubscription;
+let activePlan;
 let used = 0;
 
 const mockPrisma = {
   systemSetting: {
     findUnique: async () => ({ value: enforcement ? 'true' : 'false' }),
   },
+  inquiryPlan: {
+    findFirst: async (args) => { calls.plan = args; return activePlan; },
+  },
   inquirySubscription: {
-    findFirst: async (args) => { calls.subscription.push(args); return activeSubscription; },
+    findFirst: async (args) => {
+      calls.subscription.push(args);
+      if (args.where?.status === 'PENDING_PAYMENT') return pendingSubscription;
+      return activeSubscription;
+    },
+    create: async (args) => {
+      calls.createdSubscription = args;
+      return { id: 44, ...args.data, plan: activePlan };
+    },
   },
   inquiryUsageEvent: {
     aggregate: async (args) => { calls.aggregate.push(args); return { _sum: { quantity: used } }; },
@@ -31,14 +44,19 @@ test.after(() => {
   else delete require.cache[dbPath];
 });
 
-const { consumeUsage, getQuotaSummary } = require('./inquiry-subscription.service');
+const { consumeUsage, getQuotaSummary, createPendingSubscription } = require('./inquiry-subscription.service');
 
 function reset() {
   calls.subscription.length = 0;
   calls.aggregate.length = 0;
   calls.create.length = 0;
+  calls.subscription.length = 0;
+  calls.plan = null;
+  calls.createdSubscription = null;
   enforcement = true;
   used = 0;
+  pendingSubscription = null;
+  activePlan = { id: 3, code: 'basic', name: 'Basic', durationDays: 30, price: 100, currency: 'IRR', isActive: true };
   activeSubscription = {
     id: 12,
     planId: 3,
@@ -145,4 +163,38 @@ test('paid SMS requires an active subscription even while inquiry enforcement is
     (error) => error.code === 'INQUIRY_SUBSCRIPTION_REQUIRED' && error.statusCode === 403,
   );
   assert.equal(calls.create.length, 0);
+});
+
+
+test('createPendingSubscription blocks another pending request even when it targets a different plan', async () => {
+  reset();
+  activeSubscription = null;
+  pendingSubscription = { id: 99, planId: 1, status: 'PENDING_PAYMENT' };
+
+  await assert.rejects(
+    () => createPendingSubscription({ ownerType: 'company', ownerId: 4, planId: 3 }),
+    (error) => error.code === 'PENDING_SUBSCRIPTION_EXISTS' && error.details.subscriptionId === 99,
+  );
+
+  assert.deepEqual(calls.subscription[1].where, { companyId: 4, status: 'PENDING_PAYMENT' });
+  assert.equal(calls.createdSubscription, null);
+});
+
+test('createPendingSubscription allows one pending request when the owner has none', async () => {
+  reset();
+  activeSubscription = null;
+
+  const result = await createPendingSubscription({
+    ownerType: 'company',
+    ownerId: 4,
+    planId: 3,
+    paymentReference: 'receipt-123',
+  });
+
+  assert.equal(result.status, 'PENDING_PAYMENT');
+  assert.equal(result.planId, 3);
+  assert.equal(result.companyId, 4);
+  assert.equal(result.paymentReference, 'receipt-123');
+  assert.deepEqual(calls.subscription[1].where, { companyId: 4, status: 'PENDING_PAYMENT' });
+  assert.equal(calls.createdSubscription.data.status, 'PENDING_PAYMENT');
 });
