@@ -160,3 +160,11 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Fix/test:** Quota consumption revalidates the active subscription after the row lock, follows a replacement active subscription at the period boundary, and fails closed without writing usage if no active subscription remains.
 - **Browser E2E:** Not awaited or claimed passed.
 - **Next active stage:** Trace the remaining transitive `url.parse()` / `punycode` deprecation warnings to their source packages; update dependencies only if the fix is safe and covered by tests. Continue checking the quality audit for remaining actionable items.
+
+
+## Audit refresh — remaining work (2026-10-28)
+
+- Core docs, auth context, notification folder scope, frontend import warnings, inquiry response concurrency/duplicate submissions, payment callback concurrency, and quota expiry revalidation are fixed and merged.
+- CI run `40635157043` and fresh PostgreSQL migration validation `40635157013` passed.
+- Do not chase browser E2E per owner instruction. Do not claim live payment/SMTP verification; SMS is not implemented.
+- Remaining source work: exhaustive company-owned route/service IDOR review. Non-blocking warning debt: transitive `url.parse()` and `punycode` deprecations; current logs lack a call-site stack, so don't upgrade packages blindly.
