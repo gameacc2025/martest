@@ -5,8 +5,9 @@ const Module = require('node:module');
 
 const dbPath = require.resolve(path.join(__dirname, '../../config/db'));
 const originalDb = require.cache[dbPath];
-const calls = { subscription: [], aggregate: [], create: [] };
+const calls = { subscription: [], aggregate: [], create: [], locks: [] };
 let enforcement = true;
+let expireOnQuotaLock = false;
 let activeSubscription;
 let pendingSubscription;
 let activePlan;
@@ -34,6 +35,14 @@ const mockPrisma = {
     aggregate: async (args) => { calls.aggregate.push(args); return { _sum: { quantity: used } }; },
     create: async (args) => { calls.create.push(args); return { id: calls.create.length, ...args.data }; },
   },
+  $queryRawUnsafe: async (query, ...params) => {
+    calls.locks.push({ query, params });
+    if (expireOnQuotaLock) {
+      expireOnQuotaLock = false;
+      activeSubscription = null;
+    }
+    return [];
+  },
 };
 require.cache[dbPath] = new Module(dbPath);
 require.cache[dbPath].exports = mockPrisma;
@@ -50,7 +59,9 @@ function reset() {
   calls.subscription.length = 0;
   calls.aggregate.length = 0;
   calls.create.length = 0;
+  calls.locks.length = 0;
   calls.subscription.length = 0;
+  expireOnQuotaLock = false;
   calls.plan = null;
   calls.createdSubscription = null;
   enforcement = true;
@@ -91,6 +102,19 @@ test('enforced quota rejects an owner without an active subscription', async () 
     () => consumeUsage({ ownerType: 'user', ownerId: 8, usageType: 'INQUIRY_CREATE' }),
     (error) => error.code === 'INQUIRY_SUBSCRIPTION_REQUIRED' && error.statusCode === 403,
   );
+  assert.equal(calls.create.length, 0);
+});
+
+test('quota is rejected when the active subscription expires while waiting for its row lock', async () => {
+  reset();
+  expireOnQuotaLock = true;
+
+  await assert.rejects(
+    () => consumeUsage({ ownerType: 'company', ownerId: 4, usageType: 'RESPONSE_SUBMIT', tx: mockPrisma }),
+    (error) => error.code === 'INQUIRY_SUBSCRIPTION_REQUIRED' && error.statusCode === 403,
+  );
+
+  assert.equal(calls.locks.length, 1);
   assert.equal(calls.create.length, 0);
 });
 

@@ -783,3 +783,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs:** Updated API docs, quality audit, current-task, worklog, project context and decisions.
 - **External provider:** Live Zarinpal payment remains NOT VERIFIED without staging credentials. Browser E2E is not claimed passed.
 - **Next:** Review quota consumption when a subscription expires while a transaction waits for its row lock; add regression coverage and merge a safe fix.
+
+
+## 2026-10-28 — QUOTA-ACTIVE-PERIOD-01
+
+- **Status:** IN PROGRESS — service fix and regression test prepared on `fix/inquiry-quota-expiry-lock-20261028`.
+- **Finding:** `consumeUsage` queried the active subscription before locking it. If the transaction waited until the subscription period expired, the stale pre-lock object could authorize usage after expiration.
+- **Fix:** After locking the candidate row, re-query the owner's currently active subscription and verify its period again. If the active row changed at the boundary, lock and re-check the new row; if none remains, reject before counting or recording usage.
+- **Regression test:** Simulates an active subscription disappearing while the lock is acquired and asserts no usage event is created.
+- **Docs:** Updated API documentation, quality audit, current-task and project context.
+- **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change.

@@ -54,16 +54,37 @@ async function consumeUsage({ ownerType, ownerId, usageType, referenceType = nul
   }
   if (!(await enforcementEnabled(tx)) && usageType !== 'SMS') return { enforced: false, remaining: null, limit: null, used: null };
 
-  const subscription = await getActiveSubscription(ownerType, ownerId, tx);
+  let subscription = await getActiveSubscription(ownerType, ownerId, tx);
   if (!subscription) {
     throw quotaError('INQUIRY_SUBSCRIPTION_REQUIRED', 'برای استفاده از این قابلیت، اشتراک فعال لازم است.', { ownerType, ownerId });
   }
 
-  // Serialize quota decisions for a subscription so simultaneous requests cannot
-  // both observe the same remaining slot and overspend the allowance.
-  if (typeof tx.$queryRawUnsafe === 'function') {
-    await tx.$queryRawUnsafe('SELECT id FROM "InquirySubscription" WHERE id = $1 FOR UPDATE', subscription.id);
+  // Serialize quota decisions and re-check the active period AFTER acquiring
+  // the row lock. A subscription can expire while this transaction waits;
+  // using the pre-lock result would otherwise allow one last post-expiry use.
+  // If the active subscription changed at the boundary, lock and re-check the
+  // newly active row as well before consuming quota.
+  let locked = false;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const lockedSubscriptionId = subscription.id;
+    if (typeof tx.$queryRawUnsafe === 'function') {
+      await tx.$queryRawUnsafe('SELECT id FROM "InquirySubscription" WHERE id = $1 FOR UPDATE', lockedSubscriptionId);
+    }
+    const currentSubscription = await getActiveSubscription(ownerType, ownerId, tx);
+    if (!currentSubscription) {
+      throw quotaError('INQUIRY_SUBSCRIPTION_REQUIRED', 'برای استفاده از این قابلیت، اشتراک فعال لازم است.', { ownerType, ownerId });
+    }
+    if (currentSubscription.id === lockedSubscriptionId) {
+      subscription = currentSubscription;
+      locked = true;
+      break;
+    }
+    subscription = currentSubscription;
   }
+  if (!locked) {
+    throw { statusCode: 409, code: 'SUBSCRIPTION_STATE_CHANGED', message: 'وضعیت اشتراک تغییر کرده است؛ دوباره تلاش کنید.' };
+  }
+
   const limitField = LIMIT_BY_USAGE[usageType];
   const limit = subscription.plan[limitField];
   if (!Number.isInteger(limit) || limit < 0) {

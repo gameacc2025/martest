@@ -229,3 +229,8 @@ A company may have only one `InquiryResponse` per inquiry, enforced by the datab
 ## Payment callback concurrency invariant (2026-10-28)
 
 After a provider verifies payment, callbacks for the same owner serialize on the owner row. Re-read the subscription after acquiring that lock. If another callback already committed `ACTIVE` with `paymentVerifiedAt`, return the existing verified result without extending or reactivating it. Continue to require server-to-server provider verification and conditional status/verification updates.
+
+
+## Quota consumption invariant (2026-10-28)
+
+Usage consumption must validate the active subscription after acquiring its row lock, not rely solely on a pre-lock lookup. Re-query the owner's active subscription and time window after the lock; if it changed, lock and re-check the new active row. If no active subscription remains, reject before aggregation or inserting an `InquiryUsageEvent`.
