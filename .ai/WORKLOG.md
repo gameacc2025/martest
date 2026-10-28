@@ -616,3 +616,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs:** Added a source-aligned notification folder/read-state/bulk-action contract to \`docs/NOTIFICATION_SYSTEM.md\`; refreshed this handoff.
 - **Verification:** Architecture graph check passed in CI after regeneration. The full CI run after the folder selector fix and database migration validation are still pending/need final status review. Browser workflow is not a blocker and must not be represented as passed.
 - **Next action:** Verify latest CI and migration jobs, fix any non-browser failures, then merge PR #16. Continue the remaining quality-audit items after merge and keep this file plus \`.ai/current-task.md\` updated at each milestone.
+
+
+## 2026-10-28 — VALIDATE-CURRENT-MAIN-FINAL-01 — COMPLETE
+
+- **Status:** DONE — validation PR #16 merged to \`main\`.
+- **Merge commit:** \`90a8f36be5c4281c999515206b099b894d2da75d\`.
+- **CI:** Run \`40629289205\` passed. Verified architecture graph consistency, frontend/shared Vitest tests, backend tests, Prisma client generation, and production builds for Website, Company and Admin.
+- **Database:** Migration validation run \`40629289194\` passed schema/client validation, applying all migrations to a fresh PostgreSQL instance, and checking migration state.
+- **Failures fixed:** (1) generated Mermaid graph was out of sync with generator output; regenerated the file and added expected-graph diagnostics to the checker; (2) a folder-count test in all three frontends incorrectly selected the “all categories” button, which has no count element. Added \`data-folder-id\` to folder buttons and restricted test selection to those buttons.
+- **Documentation:** Added notification folder/read-state/bulk action details to \`docs/NOTIFICATION_SYSTEM.md\`; updated this worklog and \`.ai/current-task.md\`.
+- **Browser E2E:** Intentionally not treated as a blocker per owner instruction. No browser pass is claimed.
+- **Next:** Continue reviewing notification API ownership/scope, inquiry access/quotas/response decisions, payment callback idempotency, documentation/source alignment, and the outstanding bundle-size warning. SMTP is not live-verified; SMS is not implemented.
