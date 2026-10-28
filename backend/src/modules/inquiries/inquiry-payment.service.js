@@ -193,14 +193,21 @@ async function handleSubscriptionPaymentCallback(query = {}) {
 
   const refId = String(verification?.data?.ref_id || '').trim() || null;
   const activated = await prisma.$transaction(async (tx) => {
-    const current = await tx.inquirySubscription.findUnique({ where: { id: subscription.id }, include: { plan: true } });
+    let current = await tx.inquirySubscription.findUnique({ where: { id: subscription.id }, include: { plan: true } });
     if (!current) return null;
-    if (current.status === 'ACTIVE' && current.paymentVerifiedAt) return current;
-    if (!['PENDING_PAYMENT', 'CANCELLED'].includes(current.status) || current.paymentVerifiedAt) return null;
+
+    // Concurrent callbacks for the same owner serialize on the owner row.
+    // Re-read this subscription AFTER acquiring the lock: a previous callback
+    // may have verified and activated it while this request waited.
     if (typeof tx.$queryRawUnsafe === 'function') {
       if (current.companyId) await tx.$queryRawUnsafe('SELECT id FROM "Company" WHERE id = $1 FOR UPDATE', current.companyId);
       else await tx.$queryRawUnsafe('SELECT id FROM "User" WHERE id = $1 FOR UPDATE', current.userId);
     }
+    current = await tx.inquirySubscription.findUnique({ where: { id: subscription.id }, include: { plan: true } });
+    if (!current) return null;
+    if (current.status === 'ACTIVE' && current.paymentVerifiedAt) return current;
+    if (!['PENDING_PAYMENT', 'CANCELLED'].includes(current.status) || current.paymentVerifiedAt) return null;
+
     const now = new Date();
     const active = await tx.inquirySubscription.findFirst({
       where: {
