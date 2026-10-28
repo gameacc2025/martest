@@ -272,3 +272,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Fix prepared:** After locking the selected subscription, re-query the owner's active subscription and validate its current time window. If the active subscription changed at the boundary, lock and re-check the new row. If no active period remains, reject before aggregating or recording usage.
 - **Regression coverage prepared:** Simulate the subscription becoming inactive during lock acquisition and assert quota consumption fails without creating a usage event.
 - **Validation:** CI + fresh PostgreSQL migration validation pending; no schema change.
+
+
+## Closure — quota consumption at subscription expiry (2026-10-28)
+
+- **Status:** FIXED and merged in PR #24 at `c96850af53866c9e8c84b46d436e38fd8b06be3b`.
+- **CI:** [40635157043](https://github.com/gameacc2025/martest/actions/runs/40635157043) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** [40635157013](https://github.com/gameacc2025/martest/actions/runs/40635157013) passed fresh PostgreSQL migration validation.
+- **Behavior:** Quota consumption revalidates the current active subscription after row lock and fails closed when no paid period remains. A replacement active subscription is re-locked and rechecked.
+- **Browser E2E:** Not awaited or claimed passed.
