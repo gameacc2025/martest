@@ -4,7 +4,7 @@
 
 **Core code-level findings from the current audit are fixed and merged into `main`.** This is not a release sign-off: live deployment and external integrations are not verified, browser E2E is intentionally not awaited per owner instruction, and an exhaustive route-by-route IDOR certification has not been completed.
 
-Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`. Subsequent direct commits only refreshed the quality audit and AI handoff.
+Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`. Follow-up direct commits refreshed the quality audit and AI handoff; CI push trigger was subsequently narrowed to canonical main.
 
 ## Recently completed and merged
 
@@ -44,3 +44,11 @@ Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`.
 - Browser E2E is intentionally non-blocking per owner instruction; never claim it passed without observed results.
 - Keep `.ai/current-task.md` concise and current; append history to `.ai/WORKLOG.md`; update relevant API/frontend/database/Docker/notification docs and the quality audit with each material change.
 - Distinguish unit tests, CI builds, migration validation, Docker runtime checks, browser E2E, and live provider tests.
+
+## 2026-10-28 branch/CI follow-up
+
+- **CI cleanup:** Removed the stale `feat/notifications-complete` push trigger; CI push validation now runs only on canonical `main`, while pull requests targeting `main` remain covered.
+- **Branch inventory:** GitHub currently exposes multiple historical/feature branches, including inquiry/payment/notification fixes, customer dashboard/address work, runtime validation, and RFQ monetization. Several compare as heavily diverged from `main` (some over 100 commits behind) despite overlapping changes already present in main.
+- **Merge safety:** No blanket merge or force update was performed. Do not merge old snapshots solely to make branch names disappear; compare and port any genuinely unique, still-needed changes into `main` with tests. Branch deletion remains separate and was not performed.
+- **Verification:** CI workflow file changed on main in commit `a518d061ded03ab82db3b62368489b1f9efdc6f5`. Automated workflow execution is pending; no browser tests were run or awaited.
+- **Next task:** Continue the company/product/inquiry authorization and lifecycle audit from current `main`, then address any confirmed gaps with regression tests and docs. Keep external payment/SMTP and deployment checks marked NOT VERIFIED without credentials/environment.
