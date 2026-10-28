@@ -129,3 +129,14 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Regression test:** Simulates a concurrent activation during owner-lock acquisition and verifies the waiting callback returns success without a second update.
 - **Docs:** Updated API documentation, quality audit, current-task, worklog, project context and decisions.
 - **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change. Browser E2E is non-blocking.
+
+
+## Closure — payment callback concurrency/idempotency (2026-10-28)
+
+- **Status:** COMPLETE — PR #23 merged into `main` as `075db4b3a99d75f0dc043f3fec3417f8bf158ca9`.
+- **CI:** Run [40634806585](https://github.com/gameacc2025/martest/actions/runs/40634806585) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Fresh PostgreSQL migration validation [40634806668](https://github.com/gameacc2025/martest/actions/runs/40634806668) passed; no schema change was introduced.
+- **Fix/test:** Callback state is re-read after owner-row lock; a callback that waited for another successful activation returns the already verified subscription without a second activation/extension. Regression test covers the race.
+- **External payment:** Live Zarinpal behavior is still NOT VERIFIED without staging credentials; CI mocks do not prove provider integration.
+- **Browser E2E:** Not awaited or claimed passed.
+- **Next active stage:** Harden subscription quota consumption around the active-period boundary, then continue any remaining source-audit findings. Keep all docs and AI handoff current.
