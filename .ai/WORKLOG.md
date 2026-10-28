@@ -805,3 +805,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs:** Updated API docs, quality audit, current-task, worklog and project context.
 - **Browser E2E:** Not awaited and not claimed passed.
 - **Next:** Trace transitive Node deprecation warnings and review any remaining actionable audit items.
+
+
+## 2026-10-28 — AUDIT-STATUS-REFRESH-01
+
+- **Status:** Core findings fixed; source-level audit continues.
+- **CI:** Run `40635157043` passed architecture check, frontend/shared tests, backend tests, Prisma generation and all production builds.
+- **Database:** Run `40635157013` passed fresh PostgreSQL migration application and status verification.
+- **Resolved:** Core documentation drift, strict app context, notification folder app scope, ineffective auth-store dynamic imports in all three routers, inquiry response race/duplicate error handling, payment callback concurrency, and quota expiry revalidation.
+- **Not claimed:** Browser E2E pass, live Zarinpal, SMTP delivery, production deployment or exhaustive company-endpoint IDOR sign-off. SMS remains not implemented.
+- **Remaining:** Continue company-owned route/service owner-scope review. Node `url.parse()`/`punycode` deprecations remain non-blocking pending a traced call site; do not upgrade dependencies blindly.
