@@ -168,3 +168,10 @@ Updated priority order after the 2026-10-27 follow-up:
 - Removed the obsolete client-selected app parameter from the shared endpoint helper and all three inboxes.
 - Removed the app field from the folder action request schema and made folderId/action the only required body fields. The controller continues to derive authorization scope exclusively from the verified token.
 - Updated notification API docs and route test fixture to match the canonical contract.
+
+
+## Follow-up closure — canonical notification folder API contract (2026-10-28)
+
+- **Status:** FIXED and merged in PR #18 at \`fd6515426d7cc5d6ed1c7d02589c46e940e35fde\`.
+- **CI:** [40630881073](https://github.com/gameacc2025/martest/actions/runs/40630881073) passed; migration validation [40630881119](https://github.com/gameacc2025/martest/actions/runs/40630881119) passed.
+- **Verified changes:** Frontend apps no longer send client-selected app scope for folder listing/move/copy; the shared endpoint helper and backend route schema match that contract. Authorization remains derived from the verified access token.
