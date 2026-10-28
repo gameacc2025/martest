@@ -109,3 +109,13 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Regression test:** A duplicate pending response is rejected before a new response/notification is created.
 - **Docs:** Updated API documentation, quality audit, project context, current-task and worklog.
 - **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change is introduced. Browser E2E is not a blocker.
+
+
+## Closure — duplicate supplier response handling (2026-10-28)
+
+- **Status:** COMPLETE — PR #22 merged into `main` as `17a2015edeecbc00c1cbf540540ea48b8c97f394`.
+- **CI:** Run [40634407695](https://github.com/gameacc2025/martest/actions/runs/40634407695) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Fresh PostgreSQL migration validation [40634407696](https://github.com/gameacc2025/martest/actions/runs/40634407696) passed; no schema change was introduced.
+- **Fix/test:** Duplicate company/inquiry response submissions now return HTTP 409 `RESPONSE_ALREADY_EXISTS` with existing response ID/status; regression test confirms no second response or notification is created.
+- **Browser E2E:** Not awaited or claimed passed.
+- **Next active stage:** Continue review of subscription quota transaction semantics and payment callback idempotency. Keep docs and AI handoff updated after findings/fixes.
