@@ -88,3 +88,14 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Validation:** Wait for CI build/tests. Browser E2E is not a blocker per owner instruction.
 
 - **Scope adjustment:** The first CI after the Admin-only fix showed the identical warning in Website and Company; this branch now removes all three ineffective dynamic imports. Re-run CI to confirm the warning is gone.
+
+
+## Closure — frontend auth-store import warning (2026-10-28)
+
+- **Status:** COMPLETE — PR #21 merged to `main` as `a6c24627b640b6154cfe6277332673b021299371`.
+- **CI:** Run [40634032996](https://github.com/gameacc2025/martest/actions/runs/40634032996) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Fresh PostgreSQL migration validation [40634032923](https://github.com/gameacc2025/martest/actions/runs/40634032923) passed.
+- **Fix verified:** Build logs no longer contain `INEFFECTIVE_DYNAMIC_IMPORT` for auth stores in Website, Company or Admin. Route-level page lazy loading remains.
+- **Other warnings:** Node dependency deprecations (`url.parse()`, `punycode`) remain from transitive dependencies; they are distinct from the resolved bundling warning.
+- **Browser E2E:** Not awaited or claimed passed.
+- **Next active stage:** Continue inquiry response duplicate-submission handling and quota/payment edge-case audit. Update relevant docs/AI files and add regression tests for each fix.
