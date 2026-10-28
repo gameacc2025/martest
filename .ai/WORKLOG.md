@@ -727,3 +727,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Validation:** CI still needs to run on this branch. Browser E2E is not a blocker and is not claimed passed.
 
 - **Scope adjustment:** Expanded the fix to Website and Company after CI exposed the same warning there. CI needs one more run to confirm all three warnings are gone.
+
+
+## 2026-10-28 — FRONTEND-AUTH-IMPORT-WARNING-01 — COMPLETE
+
+- **Status:** DONE — PR #21 squash-merged into `main` at `a6c24627b640b6154cfe6277332673b021299371`.
+- **CI:** Run `40634032996` passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Migration validation run `40634032923` passed against a fresh PostgreSQL database.
+- **Fix:** Website, Company and Admin routers now statically import their auth stores. This removed the ineffective dynamic-import warning without disabling route-level lazy loading.
+- **Verification:** Build logs for the merged PR head contain no `INEFFECTIVE_DYNAMIC_IMPORT` warning. The previous ~730 kB Admin entry bundle is now split into chunks; the largest displayed JS chunk is about 195 kB.
+- **Remaining dependency notices:** Node's `url.parse()` and `punycode` deprecations remain in transitive dependencies; no package update was included because the source dependency path should be traced before changing lockfiles.
+- **Browser E2E:** Intentionally not awaited and not claimed passed.
+- **Next:** Continue inquiry duplicate-response handling and subscription quota/payment callback review.
