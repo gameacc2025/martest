@@ -192,3 +192,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Verified change:** Backend checks pending subscription requests by owner regardless of plan, matching the self-service UI rule. The payment flow locks the owner row before creating the pending request.
 - **Regression coverage:** A pending request for another plan blocks a duplicate; an owner with no pending/active subscription can create the first request.
 - **External provider verification:** These tests do not verify a live payment with Zarinpal. Live provider payment remains NOT VERIFIED without configured staging credentials.
+
+
+## Follow-up finding — inquiry response concurrency (2026-10-28)
+
+- **Severity:** P1 consistency / race-condition hardening.
+- **Finding:** A supplier submission and buyer selection could both read an inquiry as OPEN under separate READ COMMITTED transactions. A submission that had already read OPEN could otherwise commit a new PENDING response after the buyer closed the inquiry and rejected existing pending responses.
+- **Fix prepared:** Response submission, response edit/withdrawal, buyer response decision, and manual inquiry status transitions now lock the parent Inquiry row inside their transaction before reading current status.
+- **Regression coverage prepared:** Service tests assert that response submission and buyer selection issue the parent-row `FOR UPDATE` lock.
+- **Validation:** CI and fresh PostgreSQL migration validation must be observed on the PR head before merge. Browser E2E remains non-blocking per owner instruction and is not claimed passed.
