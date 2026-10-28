@@ -99,3 +99,13 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Other warnings:** Node dependency deprecations (`url.parse()`, `punycode`) remain from transitive dependencies; they are distinct from the resolved bundling warning.
 - **Browser E2E:** Not awaited or claimed passed.
 - **Next active stage:** Continue inquiry response duplicate-submission handling and quota/payment edge-case audit. Update relevant docs/AI files and add regression tests for each fix.
+
+
+## Current stage — duplicate supplier response handling (2026-10-28)
+
+- **Branch:** `fix/inquiry-duplicate-response-20261028`.
+- **Finding:** Database uniqueness already prevents two responses for the same company/inquiry, but duplicate submissions could surface as an unhandled Prisma error instead of a clear domain conflict.
+- **Fix:** After locking the parent inquiry and validating supplier/product ownership, the service checks for an existing response and returns HTTP 409 / `RESPONSE_ALREADY_EXISTS`, including existing response ID/status. Database uniqueness remains as the final guard.
+- **Regression test:** A duplicate pending response is rejected before a new response/notification is created.
+- **Docs:** Updated API documentation, quality audit, project context, current-task and worklog.
+- **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change is introduced. Browser E2E is not a blocker.

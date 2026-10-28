@@ -1087,6 +1087,23 @@ async function submitResponse(inquiryId, data, caller) {
     }
     validateResponseItemOwnership(data.items, ownedInquiryItemIds);
 
+    // The database has a unique (inquiryId, companyId) constraint, but
+    // proactively return a domain conflict instead of leaking a Prisma P2002
+    // as a generic 500. The parent Inquiry row is already locked above, so
+    // concurrent submissions from the same company are serialized here.
+    const existingResponse = await tx.inquiryResponse.findFirst({
+      where: { inquiryId: numericInquiryId, companyId },
+      select: { id: true, status: true },
+    });
+    if (existingResponse) {
+      throw {
+        statusCode: 409,
+        code: 'RESPONSE_ALREADY_EXISTS',
+        message: 'شرکت شما قبلاً برای این استعلام پاسخ ثبت کرده است.',
+        details: { responseId: existingResponse.id, status: existingResponse.status },
+      };
+    }
+
     await validateResponseSubmissionCapacity(companyId, tx);
     const response = await tx.inquiryResponse.create({
       data: {

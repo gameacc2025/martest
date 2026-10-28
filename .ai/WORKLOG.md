@@ -739,3 +739,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Remaining dependency notices:** Node's `url.parse()` and `punycode` deprecations remain in transitive dependencies; no package update was included because the source dependency path should be traced before changing lockfiles.
 - **Browser E2E:** Intentionally not awaited and not claimed passed.
 - **Next:** Continue inquiry duplicate-response handling and subscription quota/payment callback review.
+
+
+## 2026-10-28 — INQUIRY-DUPLICATE-RESPONSE-01
+
+- **Status:** IN PROGRESS — backend fix and regression test prepared on `fix/inquiry-duplicate-response-20261028`.
+- **Finding:** The schema's unique `(inquiryId, companyId)` constraint prevented duplicate response rows, but duplicate submission could still produce a generic Prisma error and a 500 response.
+- **Fix:** After locking the parent inquiry and validating the caller's product ownership, the service checks for an existing response and returns 409 / `RESPONSE_ALREADY_EXISTS` with its ID and status. The unique database constraint remains the final invariant.
+- **Tests:** Added a service test proving duplicate pending response is rejected before creating another response or dispatching another notification.
+- **Docs:** Updated API documentation, quality audit, current-task and project context.
+- **Validation:** CI and fresh PostgreSQL migration validation pending. No migration/schema change. Browser E2E remains non-blocking.

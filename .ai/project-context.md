@@ -219,3 +219,8 @@ Response writes and buyer decisions are serialized on the parent `Inquiry` row w
 ## Frontend bundling note (2026-10-28)
 
 The shared Vite config uses Rolldown code-splitting groups for framework and PrimeVue dependencies. Keep dashboard page components lazy-loaded. The Website, Company and Admin auth stores are imported statically by their routers because other modules also import them statically; a dynamic import of the same module is ineffective and should not be added as a chunk-splitting workaround.
+
+
+## Duplicate inquiry response contract (2026-10-28)
+
+A company may have only one `InquiryResponse` per inquiry, enforced by the database unique constraint on `(inquiryId, companyId)`. The service must check for an existing response while holding the parent inquiry row lock and return a stable HTTP 409 `RESPONSE_ALREADY_EXISTS` domain error before attempting another insert. Preserve the database constraint as defense in depth and do not dispatch duplicate response notifications.

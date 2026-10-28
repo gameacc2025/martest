@@ -1142,6 +1142,26 @@ test('submitResponse: a valid quote is stored with normalized items', async () =
   assert.equal(args.data.items.create[0].currency, 'IRR');
 });
 
+test('submitResponse: duplicate response returns a domain conflict instead of a database error', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 41 });
+  fx.ownedItemIds = [11];
+  fx.response = { id: 901, inquiryId: 41, companyId: seller.companyId, status: 'PENDING' };
+
+  await assert.rejects(
+    () => inquiryService.submitResponse(41, {
+      items: [{ inquiryItemId: 11, price: 1500, availableQuantity: 4 }],
+    }, seller),
+    (error) => error.statusCode === 409
+      && error.code === 'RESPONSE_ALREADY_EXISTS'
+      && error.details.responseId === 901
+      && error.details.status === 'PENDING',
+  );
+
+  assert.equal((calls['inquiryResponse.create'] || []).length, 0);
+  assert.equal((calls.dispatchNotification || []).some(([event]) => event === 'INQUIRY_RESPONSE_RECEIVED'), false);
+});
+
 // ── listResponses ────────────────────────────────────────────
 
 test('decideResponse: selecting a quote closes the inquiry and rejects other pending quotes', async () => {
