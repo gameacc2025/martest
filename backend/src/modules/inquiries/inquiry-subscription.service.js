@@ -140,8 +140,12 @@ async function createPendingSubscription({ ownerType, ownerId, planId, paymentRe
   const active = await getActiveSubscription(ownerType, ownerId, client);
   if (active) throw { statusCode: 409, code: 'ACTIVE_SUBSCRIPTION_EXISTS', message: 'در حال حاضر اشتراک فعال دارید.' };
 
+  // The owner may have only one pending payment request at a time, regardless
+  // of plan. The UI follows this rule; enforce it here as well because clients
+  // can call this endpoint directly. Callers that need concurrency safety lock
+  // the owner row before invoking this service.
   const pending = await client.inquirySubscription.findFirst({
-    where: { ...ownerFilter, status: 'PENDING_PAYMENT', planId: normalizedPlanId },
+    where: { ...ownerFilter, status: 'PENDING_PAYMENT' },
     select: { id: true },
   });
   if (pending) throw { statusCode: 409, code: 'PENDING_SUBSCRIPTION_EXISTS', message: 'برای این طرح درخواست پرداخت ثبت‌شده و در انتظار بررسی دارید.', details: { subscriptionId: pending.id } };
