@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { setAuthRouter } from "@telecom/auth";
 
 import AdminLayout from "../layouts/AdminLayout.vue";
+import { useAuthStore } from "../stores/auth";
 
 // Auth / gate
 import Landing from "../pages/Landing.vue";
@@ -24,7 +25,6 @@ const websiteAppUrl = import.meta.env.VITE_WEBSITE_APP_URL || '/';
 
 function redirectToWebsite(page) {
   return async (to) => {
-    const { useAuthStore } = await import("../stores/auth");
     const authStore = useAuthStore();
     if (authStore.isAuthenticated && authStore.isStaff) {
       const redirect = typeof to.query.redirect === "string" ? to.query.redirect : null;
@@ -118,7 +118,6 @@ setAuthRouter(router);
 //   4. App selection: send authenticated users who don't belong to THIS app
 //      to the app their accessProfile.type maps to.
 router.beforeEach(async (to, from, next) => {
-  const { useAuthStore } = await import("../stores/auth");
   const authStore = useAuthStore();
 
   // 1. Set page title

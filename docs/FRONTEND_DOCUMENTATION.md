@@ -91,3 +91,8 @@ CI باید تست‌های frontend/shared و build تولیدی هر سه بر
 3. برای عملیات حساس، مجوز و مالکیت سمت بک‌اند را نیز بررسی کنید.
 4. تست‌های مربوطه و سپس `pnpm test` و `pnpm build` را اجرا کنید.
 5. اگر قرارداد مشترک تغییر کرده، مستندات API و سایر برنامه‌های مصرف‌کننده را نیز به‌روز کنید.
+
+
+## Production bundling and route loading
+
+The three Vue/Vite applications lazy-load dashboard pages through Vue Router and use the shared Vite configuration in `packages/vite-config/index.js` to split framework and PrimeVue dependencies into bounded vendor chunks. The Admin router imports its auth store statically because that module is also used by layouts/pages; a dynamic import of the same module does not create a separate chunk and produces an ineffective-import warning. Keep the route table's page-level lazy imports intact and validate bundle output with the standard CI production builds.

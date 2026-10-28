@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { setAuthRouter } from "@telecom/auth";
 
 import CompanyLayout from "../layouts/CompanyLayout.vue";
+import { useAuthStore } from "../stores/auth";
 
 // Auth / gate
 import Landing from "../pages/Landing.vue";
@@ -33,7 +34,6 @@ function redirectToWebsite(page) {
     // to the website again would bounce them in an endless redirect loop
     // instead of ever reaching the app. So: check auth first, and only
     // bounce out if there really is no valid session for this app.
-    const { useAuthStore } = await import("../stores/auth");
     const authStore = useAuthStore();
     if (authStore.isAuthenticated && authStore.isCompany) {
       const redirect = typeof to.query.redirect === "string" ? to.query.redirect : null;
@@ -119,7 +119,6 @@ setAuthRouter(router);
 //   4. App selection: send authenticated users who don't belong to THIS app
 //      to the app their accessProfile.type maps to.
 router.beforeEach(async (to, from, next) => {
-  const { useAuthStore } = await import("../stores/auth");
   const authStore = useAuthStore();
 
   // 1. Set page title
