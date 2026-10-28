@@ -76,3 +76,13 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **Regression tests:** Successful response submission and buyer selection assert that the parent-row `FOR UPDATE` lock is issued.
 - **Browser E2E:** Intentionally not awaited per owner instruction. No browser pass is claimed.
 - **Next active stage:** Review Admin production bundle warning and confirm chunk splitting is effective; then continue source-level audit of quota usage/idempotency and payment callback edge cases. Keep tests and docs/AI files current and merge safe fixes after CI + migration validation.
+
+
+## Current stage — Admin bundle warning cleanup (2026-10-28)
+
+- **Branch:** `perf/admin-auth-import-warning-20261028`.
+- **Evidence from CI run 40633476868:** production builds passed; current split chunks shown in logs are below the previous ~730 kB Admin entry chunk, with the largest displayed JS chunk ~196 kB. Do not report a specific performance improvement beyond these observed artifact sizes.
+- **Finding:** `INEFFECTIVE_DYNAMIC_IMPORT` was emitted because `apps/admin/src/router/index.js` dynamically imported `src/stores/auth.js` even though the store was statically imported by app layouts/pages and main.
+- **Fix:** Import `useAuthStore` statically in the router and call it inside the route callbacks. Route page components remain lazy-loaded.
+- **Docs:** Updated frontend documentation, quality audit and AI handoff/context/worklog.
+- **Validation:** Wait for CI build/tests. Browser E2E is not a blocker per owner instruction.
