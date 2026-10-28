@@ -43,7 +43,7 @@ Parent inquiry row locking serializes response submission/edit/withdrawal, buyer
 
 ### Remaining — operational and dependency verification
 
-- Node emits transitive `url.parse()` and `punycode` deprecation notices in CI. Current logs do not provide the call-site stack, so no dependency was upgraded blindly. This is non-blocking debt; trace the dependency path before changing lockfiles.
+- CI deprecation traces attribute `url.parse()` to the bundled pnpm self-installer in `pnpm/action-setup@v4` and `punycode` to bundled `actions/setup-node@v4` setup/cache code. These are GitHub Actions toolchain notices, not workspace runtime dependencies. No project dependency upgrade is justified; consider action-version updates separately and validate them.
 - Live Zarinpal payment remains NOT VERIFIED without staging credentials.
 - SMTP remains NOT VERIFIED without credentials and a controlled test recipient.
 - SMS remains NOT IMPLEMENTED.
@@ -68,7 +68,7 @@ Parent inquiry row locking serializes response submission/edit/withdrawal, buyer
 | Live Zarinpal payment | NOT VERIFIED | Requires staging credentials |
 | SMTP delivery | NOT VERIFIED | Requires credentials and controlled recipient |
 | SMS delivery | NOT IMPLEMENTED | Separate scope required |
-| Transitive Node deprecation warnings | DEFERRED, NON-BLOCKING | Need a traced call site before a safe package change |
+| Node deprecation warnings in CI | IDENTIFIED, NON-BLOCKING | Call sites are bundled code in `pnpm/action-setup@v4` and `actions/setup-node@v4`; no app dependency change required |
 
 ## Next actions
 
@@ -306,3 +306,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Reviewed:** Company, product, address, inquiry, and notification route/service ownership controls.
 - **Result:** No additional confirmed cross-tenant path was found in the reviewed surfaces; existing regression tests cover the principal owner/context boundaries. This is not an exhaustive route-by-route security certification.
 - **Comment accuracy:** Product routes now correctly state that SUPER_ADMIN does not bypass the strict app-context boundary.
+
+
+## Closure — CI deprecation warning attribution (2026-10-28)
+
+- A temporary `NODE_OPTIONS=--trace-deprecation` diagnostic run in closed PR #26 identified both warnings:
+  - `DEP0169 url.parse()` comes from `pnpm/action-setup@v4`'s bundled `pnpm.cjs` during action self-install.
+  - `DEP0040 punycode` comes from `actions/setup-node@v4`'s bundled setup/cache implementation.
+- PR #26 was closed without merging the diagnostic environment change. No application dependency was upgraded because the warnings originate in the GitHub Actions toolchain.
+- If action versions are updated later, do so as a separate CI maintenance change with the standard workflow/migration checks.
