@@ -843,3 +843,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Trace result:** `DEP0169 url.parse()` originates from `pnpm/action-setup@v4` bundled `pnpm.cjs` during self-install. `DEP0040 punycode` originates from `actions/setup-node@v4` bundled setup/cache code.
 - **Impact:** These are GitHub Actions toolchain warnings, not application/workspace runtime dependency warnings. No package/lockfile update was justified.
 - **Next:** Only consider updating action versions as a separate CI maintenance change, with ordinary CI/migration validation.
+
+
+## 2026-10-28 — BRANCH-CONSOLIDATION-CI-01
+
+- **Status:** CI trigger cleanup committed; full branch consolidation remains a selective audit, not a blanket merge.
+- **Finding:** The push workflow still targeted `feat/notifications-complete` even though the canonical workflow is `main`. The repository currently has many stale branches that diverge substantially from current main; their diffs overlap with already-merged work and cannot safely be merged as snapshots.
+- **Change:** `.github/workflows/ci.yml` now triggers on pushes to `main` only; pull-request validation targeting `main` remains unchanged.
+- **AI handoff:** Updated `.ai/current-task.md` with branch inventory, merge-safety decision, verification state, and next audit focus.
+- **Commits:** CI `a518d061ded03ab82db3b62368489b1f9efdc6f5`; handoff `789047952636b5ccc761bf252596b75f07ce6082`.
+- **Tests:** NOT RUN in this tool session. GitHub Actions status after these direct commits has not yet been checked. No browser E2E was run or awaited.
+- **Branch policy:** No force-push, blind merge, or branch deletion. Port only unique, relevant changes after review and regression tests; branch deletion is not implied by merge authorization.
+- **Remaining:** Continue company/product/inquiry lifecycle and authorization audit; validate CI on main; retain explicit NOT VERIFIED labels for live payment, SMTP, deployment, and browser E2E.
