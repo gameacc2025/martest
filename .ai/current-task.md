@@ -26,12 +26,11 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 ## Immediate remaining work
 
-1. PR #16 was merged into main as `90a8f36be5c4281c999515206b099b894d2da75d`.
-2. CI run `40629289205` passed: generated architecture graph check, frontend/shared tests, backend tests, Prisma client generation, and all three production builds.
-3. Database migration validation run `40629289194` passed against a fresh PostgreSQL database.
-4. Fixed a false-negative notification folder-count regression test in Website, Company and Admin by adding a stable `data-folder-id` selector to actual folder buttons. The architecture graph was regenerated and its check now passes.
-5. Browser E2E remains committed but explicitly non-blocking per owner instruction. Do not wait for it and do not claim it passed.
-6. Continue the remaining quality-audit items: review notification folder/read-state API and ownership contracts; compare docs with route/schema implementation; inspect inquiry permissions, quotas, response decisions and payment idempotency coverage; track bundle warnings; keep SMTP NOT VERIFIED without live credentials and a test recipient. SMS remains NOT IMPLEMENTED.
+1. Validation PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`. CI `40629289205` and PostgreSQL migration validation `40629289194` passed.
+2. Current follow-up branch `fix/notification-app-scope-20261028` closes a notification authorization gap: clients could submit `app=ADMIN` to folder endpoints regardless of their authenticated app context. The controller now derives scope from verified `request.user.accessType` (`STAFF` → `ADMIN`, `COMPANY` → `COMPANY`, `CUSTOMER` → `WEBSITE`), validates folder IDs against that scope, and fails closed when context is unknown.
+3. Added controller regression tests for forged app scopes, cross-app folder IDs, and scope mapping; added service tests for inactive source folders and cross-scope destinations. Notification docs now list the folder/bulk endpoints and the app-scope contract.
+4. Run CI and migration validation for this security follow-up; fix failures and merge after green CI/database checks. Browser E2E remains non-blocking per owner instruction and is not claimed passed.
+5. Continue quality-audit items after this fix: inquiry permission/quota/response decision coverage, docs/source alignment, and bundle-size warning review. SMTP is NOT VERIFIED without live credentials and a test recipient; SMS is NOT IMPLEMENTED.
 
 ## Branch/PR handling
 
