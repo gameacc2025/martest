@@ -28,6 +28,8 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
+      - name: Verify generated architecture graph
+        run: pnpm architecture:check
       - name: Run frontend/shared tests
         run: pnpm test
       - name: Install backend dependencies

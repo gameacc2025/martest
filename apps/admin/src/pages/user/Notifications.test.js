@@ -99,7 +99,7 @@ describe('Admin notification inbox', () => {
     })
     await flushPromises()
 
-    const folderButtons = wrapper.findAll('.folder-link:not(.category-link)')
+    const folderButtons = wrapper.findAll('button[data-folder-id]')
     const countsBefore = folderButtons.map((button) => button.find('b').text())
     expect(folderButtons.map((button) => button.text())).toEqual([
       expect.stringContaining('همه پیام‌ها'),
@@ -111,7 +111,7 @@ describe('Admin notification inbox', () => {
     await flushPromises()
 
     expect(apiGetPaginated.mock.calls.some(([url]) => url.includes('unreadOnly=true'))).toBe(true)
-    const countsAfter = wrapper.findAll('.folder-link:not(.category-link)').map((button) => button.find('b').text())
+    const countsAfter = wrapper.findAll('button[data-folder-id]').map((button) => button.find('b').text())
     expect(countsAfter).toEqual(countsBefore)
   })
 

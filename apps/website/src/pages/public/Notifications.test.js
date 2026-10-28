@@ -99,7 +99,7 @@ describe('Website notification inbox', () => {
     })
     await flushPromises()
 
-    const folderButtons = wrapper.findAll('.folder-link:not(.category-link)')
+    const folderButtons = wrapper.findAll('button[data-folder-id]')
     const countsBefore = folderButtons.map((button) => button.find('b').text())
     expect(folderButtons.map((button) => button.text())).toEqual([
       expect.stringContaining('همه پیام‌ها'),
@@ -111,7 +111,7 @@ describe('Website notification inbox', () => {
     await flushPromises()
 
     expect(apiGetPaginated).toHaveBeenCalledWith('/settings/notifications?page=1&limit=20&unreadOnly=true')
-    const countsAfter = wrapper.findAll('.folder-link:not(.category-link)').map((button) => button.find('b').text())
+    const countsAfter = wrapper.findAll('button[data-folder-id]').map((button) => button.find('b').text())
     expect(countsAfter).toEqual(countsBefore)
   })
 

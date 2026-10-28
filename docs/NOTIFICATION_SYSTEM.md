@@ -140,3 +140,19 @@ The three inbox pages now fetch independent totals for all notifications and eac
 A single click now only selects a message and opens its reading pane. A double-click marks that message as read. Bulk read/unread now updates visible row state immediately after the server confirms the operation, then refreshes the list and counts.
 
 Verification for this follow-up: frontend tests were updated to assert single-click selection does not mark a message read and double-click does. GitHub Actions validation is pending; live browser interactions remain NOT VERIFIED until tested after syncing the local checkout.
+
+
+## Folder membership, counts, and read-state UI (2026-10-28)
+
+The Website, Company, and Admin inboxes use server-managed folders scoped by app (\`WEBSITE\`, \`COMPANY\`, \`ADMIN\`). The folder list comes from the notification folders endpoint; each folder's message list is requested with its own \`folderId\`. The inbox, read, and unread views use the existing list API with \`readOnly\`/\`unreadOnly\` filters. Folder totals are fetched separately using a one-row paginated request so changing the active folder does not repurpose the count displayed for other folders.
+
+The inbox also supports selecting messages, bulk read/unread updates, bulk deletion, saving a notification into the SAVED folder, and moving/copying a notification to another eligible folder. The backend must enforce notification ownership by authenticated user and app-scope eligibility for both source and destination folders; client-supplied IDs are not authorization.
+
+Interaction contract:
+- A single click selects a message for reading but does not change its read state.
+- A double click opens the message and marks it as read.
+- The read/unread actions and bulk actions call the backend and refresh counts after success.
+- Category and text search filters apply to the currently fetched page (20 items by default), not the entire notification history. Global search/category pagination requires a server-side query contract.
+- UI regression tests cover paginated rendering, legacy notifications with null types, stable folder counts when switching folders, double-click read behavior, bulk read state, and failed read requests. Backend unit and route tests cover ownership scoping, bulk ID validation, and the notification API wiring.
+
+Do not claim a browser E2E run passed unless a completed Playwright job explicitly reports success. Unit tests and the CI browser job are separate evidence.

@@ -52,6 +52,9 @@ else if (mode === '--write') {
 } else if (mode === '--check') {
   if (!fs.existsSync(graphPath) || fs.readFileSync(graphPath, 'utf8') !== output) {
     console.error('Architecture graph is stale. Run: node scripts/generate-architecture-graph.mjs --write');
+    console.error('--- BEGIN GENERATED GRAPH ---');
+    process.stderr.write(output);
+    console.error('--- END GENERATED GRAPH ---');
     process.exitCode = 1;
   } else process.stdout.write('Architecture graph is current.\n');
 } else {
