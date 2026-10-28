@@ -1,190 +1,46 @@
-# Current Task / Agent Handoff
+# Current Task Handoff — 2026-10-28
 
-Updated: 2026-10-28
+## Current state
 
-## User direction
+**Core code-level findings from the current audit are fixed and merged into `main`.** This is not a release sign-off: live deployment and external integrations are not verified, browser E2E is intentionally not awaited per owner instruction, and an exhaustive route-by-route IDOR certification has not been completed.
 
-The owner authorized fixing the remaining issues, merging safe work into `main`, writing regression tests without waiting for live browser execution, proceeding through the remaining work, and keeping all relevant docs and AI handoff files updated.
+Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`. Subsequent direct commits only refreshed the quality audit and AI handoff.
 
-## Completed on main in this continuation
+## Recently completed and merged
 
-- PR #14 was squash-merged into `main` as `92501f206ab16b163d8d4605e685cbe3396dd2aa`. It adds Docker runtime validation and Playwright smoke tests. The browser step was not awaited and must not be reported as passed.
-- Runtime validation on the PR head observed successful Compose config validation, Docker build/start, all service health endpoints, and Prisma migration status. CI run `40555574784` and migration run `40555574786` passed on that PR head.
-- Strict security context: removed the SUPER_ADMIN cross-app bypass from auth login, generic `requireAccessType`, and PKCE handoff. Customer registrations intentionally have no AccessProfile; only `CUSTOMER_USER` can use the default Website context, and that fallback does not permit Admin/Company or SUPER_ADMIN.
-- Added regression tests for auth login/RBAC/handoff and customer default Website context.
-- Ported the customer Address feature selectively: Prisma model and migration `20261027200000_customer_addresses`, API route/controller/service, ownership/default-address tests, shared API endpoints, Website page and routes, profile/menu links.
-- Fixed address default invariants: a customer cannot end up without a default when an address exists; ownership remains scoped by authenticated user.
-- Fixed the customer profile contract: `GET /auth/me` response is mapped from `user` + `profile` + `accessProfile`; profile update sends only backend-supported first/last name fields; password change excludes confirmation from API payload and validates it client-side; errors are visible.
-- Fixed auth-store profile normalization so `/settings/profile` response stores only the nested personal profile instead of the full user object. Added a store regression test.
-- Added `jti` to refresh JWTs and a uniqueness regression test to prevent identical refresh tokens issued in the same second.
-- Extracted the six-month price-history transformation into `apps/website/src/utils/priceHistory.js` and added Vitest coverage for date filtering, ordering, widths, and invalid records. Backend price snapshot/API/service tests already exist.
-- Added payment callback replay and verified-retry idempotency tests. Provider verification remains server-side; do not mark live payment as verified without credentials/staging.
-- Enforced frozen AD-4: Cart / Checkout / Orders / Wishlist remain dormant future B2C pages. Their routes and active product/profile controls were removed; files remain for future development.
-- Added Rolldown vendor chunk splitting and architecture graph generation/check scripts.
-- Fixed the backend Docker runtime image to include Prisma CLI and OpenSSL so startup migrations do not rely on an implicit `npx` download.
-- Updated API/database/frontend/Docker/architecture/security docs, `.ai/project-context.md`, `.ai/decisions.md`, this task file, worklog and quality audit.
+- **PR #20 — Inquiry response concurrency:** parent `Inquiry` row lock serializes response submission/edit/withdraw, buyer decisions and manual status changes.
+- **PR #21 — Frontend bundle warning:** Website, Company and Admin routers statically import auth stores; route-level page lazy loading remains. CI logs no longer show `INEFFECTIVE_DYNAMIC_IMPORT`; largest displayed JS chunk is about 195 kB instead of the prior oversized Admin entry chunk.
+- **PR #22 — Duplicate supplier response:** duplicate company/inquiry submissions return HTTP 409 `RESPONSE_ALREADY_EXISTS` with existing response ID/status; no second response or notification is created.
+- **PR #23 — Payment callback concurrency:** callback re-reads subscription state after owner-row lock and returns an already verified ACTIVE subscription without reactivation/extension.
+- **PR #24 — Quota period boundary:** quota consumption revalidates the active subscription after row lock and rejects if the paid period expired while waiting.
+- **PR #25 — RBAC comment accuracy:** corrected the stale claim that SUPER_ADMIN bypasses `requireAccessType`; application context remains strict.
+- Earlier merged work includes strict app-context checks, notification folder scope, pending-subscription uniqueness, customer addresses/profile, price-history tests, Docker build-time panel origins, architecture graph validation, and core documentation reconciliation.
 
-## Immediate remaining work
+## CI / database evidence
 
-1. PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`; CI `40629289205` and PostgreSQL migration validation `40629289194` passed.
-2. PR #17 merged as `6c936fbf89b62febdf8122ac854fb53d93049ed4`; CI `40630173240` and migration validation `40630173261` passed. Notification folder scope is derived from verified `request.user.accessType`, and cross-app folders/unknown contexts are rejected.
-3. PR #18 merged as `fd6515426d7cc5d6ed1c7d02589c46e940e35fde`; CI `40630881073` and migration validation `40630881119` passed. Frontends and endpoint helper no longer send client-selected app scope; the backend schema no longer requires it.
-4. PR #19 merged as `695b61861b39f840eefa24660541d4d61143943d`; CI `40631325212` and migration validation `40631325206` passed. Backend now enforces one pending subscription per owner regardless of plan; tests cover duplicate-different-plan and first valid request.
-5. Continue source review of inquiry response decisions, access/ownership checks, quota transaction semantics and payment callback idempotency; then resolve source/doc conflicts and review the Admin bundle warning. Browser E2E is non-blocking per owner instruction and is not claimed passed.
-6. SMTP is NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED.
+- CI run `40635937015`: PASS — architecture graph check, frontend/shared tests, backend tests, Prisma generation, and all three production builds.
+- Fresh PostgreSQL migration run `40635936924`: PASS.
+- Recent feature PRs #20–#25 also had successful CI and migration checks:
+  - #20: CI `40633476868`, migration `40633476941`
+  - #21: CI `40634032996`, migration `40634032923`
+  - #22: CI `40634407695`, migration `40634407696`
+  - #23: CI `40634806585`, migration `40634806668`
+  - #24: CI `40635157043`, migration `40635157013`
+  - #25: CI `40635937015`, migration `40635936924`
+- Browser E2E was not awaited and is not claimed passed. Runtime workflow checks observed successful Compose validation, image build/start, health endpoints and migration status, but this is not a full release acceptance run.
 
-## Branch/PR handling
+## Remaining limitations / follow-up
 
-- PR #14 merged as `92501f206ab16b163d8d4605e685cbe3396dd2aa`.
-- PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`.
-- PR #9, PR #11 and superseded validation PR #15 are closed.
-- Remaining remote branches include legacy/feature branches. Do not blindly merge divergent branches without comparing them with main and checking for unique work. The GitHub connector does not expose a branch-delete action; do not claim remote branches were deleted.
+1. **Dependency deprecations:** CI still emits transitive Node `url.parse()` and `punycode` deprecation notices. The current logs do not include call-site stacks; do not upgrade dependencies blindly. If pursued, trace with `NODE_OPTIONS=--trace-deprecation`, identify the responsible package, then make a minimal tested upgrade.
+2. **Tenant review:** Targeted review of company, product, address, inquiry and notification ownership found no additional confirmed cross-tenant path. This is not an exhaustive route-by-route IDOR certification.
+3. **External services:** Live Zarinpal payment is NOT VERIFIED without staging credentials. SMTP is NOT VERIFIED without credentials and a controlled recipient. SMS is NOT IMPLEMENTED.
+4. **Deployment:** No claim of production deployment, live operational readiness, or visual/browser verification.
+5. **Legacy branches:** Do not force-merge old, heavily diverged branches. PR #9/#11 were closed after useful changes were ported selectively; stale branch references are not a reason to reintroduce old snapshots.
 
-## Security and architecture contract
+## Working rules
 
-- `AccessProfile.type` is the strict Admin/Company boundary: STAFF → Admin, COMPANY → Company Portal.
-- Customer registration intentionally has no AccessProfile; `CUSTOMER_USER` may access only the default Website/CUSTOMER context. This fallback cannot grant STAFF/COMPANY access and cannot be used by SUPER_ADMIN.
-- Role/permission wildcard does not override app context or resource ownership. Ownership remains enforced in backend services.
-- Product price history uses persisted snapshots; never fabricate history for periods with no data.
-- Inquiry permissions, subscription quotas, response decisions, and payment callbacks must be checked in backend services as well as UI.
-- B2C Cart / Checkout / Orders / Wishlist remain disabled per AD-4 until the owner explicitly changes the architecture decision.
-
-## Verification discipline
-
-- Distinguish backend unit tests, frontend Vitest tests, Prisma migration validation, Docker runtime checks, browser E2E, and live third-party integration tests.
-- Browser E2E tests remain committed; their live completion is not a blocker per owner instruction.
-- Never label a test as passed unless a completed run or local result is actually observed.
-
-
-## Current stage — inquiry response concurrency hardening (2026-10-28)
-
-- **Branch:** `fix/inquiry-response-concurrency-20261028`.
-- **Finding:** Supplier response submission could race buyer selection/closure: both transactions could read OPEN, then a new pending response might commit after the buyer closed the RFQ.
-- **Code:** Added a shared parent-row lock helper using `SELECT id FROM "Inquiry" WHERE id = $1 FOR UPDATE` inside transactions. Applied it before reading status in response submit/edit/withdraw/decision paths and manual inquiry status transitions.
-- **Tests:** Inquiry service test mock records raw queries; regression assertions require the parent inquiry lock for successful response submission and buyer selection.
-- **Docs:** API documentation, quality audit, worklog, project context and decision notes are updated for this invariant.
-- **Validation:** Do not mark the stage complete until CI and fresh PostgreSQL migration validation finish. Browser E2E is intentionally non-blocking and must not be chased or claimed passed.
-- **Branch policy:** Never merge legacy branches wholesale when they are heavily diverged. Port useful work to a fresh branch from current main, validate code/tests, then merge that PR; close/leave stale branch references as appropriate.
-
-
-## Closure — inquiry response concurrency hardening (2026-10-28)
-
-- **Status:** COMPLETE — PR #20 squash-merged into `main` as `afe468c62d674ec675e4d7e9264e4850403fdb21`.
-- **CI:** Run [40633476868](https://github.com/gameacc2025/martest/actions/runs/40633476868) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
-- **Database:** Fresh PostgreSQL migration validation [40633476941](https://github.com/gameacc2025/martest/actions/runs/40633476941) passed. This PR introduces no schema changes.
-- **Fix:** Response submission, editing, withdrawal, buyer decision and manual status transitions lock the parent Inquiry row before reading its state inside the transaction.
-- **Regression tests:** Successful response submission and buyer selection assert that the parent-row `FOR UPDATE` lock is issued.
-- **Browser E2E:** Intentionally not awaited per owner instruction. No browser pass is claimed.
-- **Next active stage:** Review Admin production bundle warning and confirm chunk splitting is effective; then continue source-level audit of quota usage/idempotency and payment callback edge cases. Keep tests and docs/AI files current and merge safe fixes after CI + migration validation.
-
-
-## Current stage — Admin bundle warning cleanup (2026-10-28)
-
-- **Branch:** `perf/admin-auth-import-warning-20261028`.
-- **Evidence from CI run 40633476868:** production builds passed; current split chunks shown in logs are below the previous ~730 kB Admin entry chunk, with the largest displayed JS chunk ~196 kB. Do not report a specific performance improvement beyond these observed artifact sizes.
-- **Finding:** CI showed `INEFFECTIVE_DYNAMIC_IMPORT` in Website, Company and Admin because each router dynamically imported `src/stores/auth.js` even though the store was statically imported by layouts/pages and main.
-- **Fix:** All three routers now import `useAuthStore` statically and call it inside route callbacks. Route page components remain lazy-loaded.
-- **Docs:** Updated frontend documentation, quality audit and AI handoff/context/worklog.
-- **Validation:** Wait for CI build/tests. Browser E2E is not a blocker per owner instruction.
-
-- **Scope adjustment:** The first CI after the Admin-only fix showed the identical warning in Website and Company; this branch now removes all three ineffective dynamic imports. Re-run CI to confirm the warning is gone.
-
-
-## Closure — frontend auth-store import warning (2026-10-28)
-
-- **Status:** COMPLETE — PR #21 merged to `main` as `a6c24627b640b6154cfe6277332673b021299371`.
-- **CI:** Run [40634032996](https://github.com/gameacc2025/martest/actions/runs/40634032996) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
-- **Database:** Fresh PostgreSQL migration validation [40634032923](https://github.com/gameacc2025/martest/actions/runs/40634032923) passed.
-- **Fix verified:** Build logs no longer contain `INEFFECTIVE_DYNAMIC_IMPORT` for auth stores in Website, Company or Admin. Route-level page lazy loading remains.
-- **Other warnings:** Node dependency deprecations (`url.parse()`, `punycode`) remain from transitive dependencies; they are distinct from the resolved bundling warning.
-- **Browser E2E:** Not awaited or claimed passed.
-- **Next active stage:** Continue inquiry response duplicate-submission handling and quota/payment edge-case audit. Update relevant docs/AI files and add regression tests for each fix.
-
-
-## Current stage — duplicate supplier response handling (2026-10-28)
-
-- **Branch:** `fix/inquiry-duplicate-response-20261028`.
-- **Finding:** Database uniqueness already prevents two responses for the same company/inquiry, but duplicate submissions could surface as an unhandled Prisma error instead of a clear domain conflict.
-- **Fix:** After locking the parent inquiry and validating supplier/product ownership, the service checks for an existing response and returns HTTP 409 / `RESPONSE_ALREADY_EXISTS`, including existing response ID/status. Database uniqueness remains as the final guard.
-- **Regression test:** A duplicate pending response is rejected before a new response/notification is created.
-- **Docs:** Updated API documentation, quality audit, project context, current-task and worklog.
-- **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change is introduced. Browser E2E is not a blocker.
-
-
-## Closure — duplicate supplier response handling (2026-10-28)
-
-- **Status:** COMPLETE — PR #22 merged into `main` as `17a2015edeecbc00c1cbf540540ea48b8c97f394`.
-- **CI:** Run [40634407695](https://github.com/gameacc2025/martest/actions/runs/40634407695) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
-- **Database:** Fresh PostgreSQL migration validation [40634407696](https://github.com/gameacc2025/martest/actions/runs/40634407696) passed; no schema change was introduced.
-- **Fix/test:** Duplicate company/inquiry response submissions now return HTTP 409 `RESPONSE_ALREADY_EXISTS` with existing response ID/status; regression test confirms no second response or notification is created.
-- **Browser E2E:** Not awaited or claimed passed.
-- **Next active stage:** Continue review of subscription quota transaction semantics and payment callback idempotency. Keep docs and AI handoff updated after findings/fixes.
-
-
-## Current stage — payment callback concurrency/idempotency (2026-10-28)
-
-- **Branch:** `fix/payment-callback-concurrency-20261028`.
-- **Finding:** Callback transaction checked the subscription status before acquiring the owner lock. A second callback could wait while the first activated the subscription, then continue with stale PENDING state and return a false failure.
-- **Fix:** After the owner-row lock, re-read the subscription; if it is already ACTIVE with `paymentVerifiedAt`, return the existing verified subscription and do not update/extend it. Keep server-to-server provider verification and the conditional activation update.
-- **Regression test:** Simulates a concurrent activation during owner-lock acquisition and verifies the waiting callback returns success without a second update.
-- **Docs:** Updated API documentation, quality audit, current-task, worklog, project context and decisions.
-- **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change. Browser E2E is non-blocking.
-
-
-## Closure — payment callback concurrency/idempotency (2026-10-28)
-
-- **Status:** COMPLETE — PR #23 merged into `main` as `075db4b3a99d75f0dc043f3fec3417f8bf158ca9`.
-- **CI:** Run [40634806585](https://github.com/gameacc2025/martest/actions/runs/40634806585) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
-- **Database:** Fresh PostgreSQL migration validation [40634806668](https://github.com/gameacc2025/martest/actions/runs/40634806668) passed; no schema change was introduced.
-- **Fix/test:** Callback state is re-read after owner-row lock; a callback that waited for another successful activation returns the already verified subscription without a second activation/extension. Regression test covers the race.
-- **External payment:** Live Zarinpal behavior is still NOT VERIFIED without staging credentials; CI mocks do not prove provider integration.
-- **Browser E2E:** Not awaited or claimed passed.
-- **Next active stage:** Harden subscription quota consumption around the active-period boundary, then continue any remaining source-audit findings. Keep all docs and AI handoff current.
-
-
-## Current stage — quota active-period revalidation (2026-10-28)
-
-- **Branch:** `fix/inquiry-quota-expiry-lock-20261028`.
-- **Finding:** `consumeUsage` selected an active subscription before taking its row lock and did not re-check after waiting. A transaction could use a stale active subscription if its paid period expired during the wait.
-- **Fix:** Lock the candidate subscription, re-query the active subscription after lock acquisition, and lock/re-check a newly active row if the subscription changed at the period boundary. Fail closed when no active subscription remains; do not aggregate or create a usage event in that case.
-- **Regression test:** Simulates expiry while waiting for the lock and asserts a 403 `INQUIRY_SUBSCRIPTION_REQUIRED` response and zero usage-event writes.
-- **Docs:** Updated API documentation, quality audit, current-task, worklog and project context.
-- **Validation:** CI and fresh PostgreSQL migration validation pending. No schema change; browser E2E is non-blocking.
-
-
-## Closure — quota active-period revalidation (2026-10-28)
-
-- **Status:** COMPLETE — PR #24 merged into `main` as `c96850af53866c9e8c84b46d436e38fd8b06be3b`.
-- **CI:** Run [40635157043](https://github.com/gameacc2025/martest/actions/runs/40635157043) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
-- **Database:** Fresh PostgreSQL migration validation [40635157013](https://github.com/gameacc2025/martest/actions/runs/40635157013) passed; no schema change was introduced.
-- **Fix/test:** Quota consumption revalidates the active subscription after the row lock, follows a replacement active subscription at the period boundary, and fails closed without writing usage if no active subscription remains.
-- **Browser E2E:** Not awaited or claimed passed.
-- **Next active stage:** Trace the remaining transitive `url.parse()` / `punycode` deprecation warnings to their source packages; update dependencies only if the fix is safe and covered by tests. Continue checking the quality audit for remaining actionable items.
-
-
-## Audit refresh — remaining work (2026-10-28)
-
-- Core docs, auth context, notification folder scope, frontend import warnings, inquiry response concurrency/duplicate submissions, payment callback concurrency, and quota expiry revalidation are fixed and merged.
-- CI run `40635157043` and fresh PostgreSQL migration validation `40635157013` passed.
-- Do not chase browser E2E per owner instruction. Do not claim live payment/SMTP verification; SMS is not implemented.
-- Remaining source work: exhaustive company-owned route/service IDOR review. Non-blocking warning debt: transitive `url.parse()` and `punycode` deprecations; current logs lack a call-site stack, so don't upgrade packages blindly.
-
-
-## Targeted tenant-boundary review (2026-10-28)
-
-- **Branch:** `docs/rbac-context-comment-20261028`.
-- Reviewed route/service ownership controls for company profile/products, product CRUD/history/media, customer addresses, inquiry responses/messages, and notification folders.
-- No additional confirmed cross-tenant path was found in the reviewed surfaces. Existing regression tests cover product/company/address/inquiry/notification ownership boundaries.
-- Corrected the stale comment in `backend/src/modules/products/product.routes.js`: SUPER_ADMIN does not bypass strict `requireAccessType` app-context enforcement.
-- **Limit:** This was a targeted source review, not an exhaustive route-by-route security certification. Keep that distinction in the quality audit.
-
-
-## Closure — targeted tenant-boundary review (2026-10-28)
-
-- **Status:** COMPLETE for the targeted source surfaces; PR #25 merged to `main` as `6fc10282a29a836ca84987eb4cec93fecce54774`.
-- **Reviewed:** Company profile/products, product CRUD/history/media, customer addresses, inquiry buyer/supplier responses/messages, and notification folder/message scoping.
-- **Result:** No additional confirmed cross-tenant path was found in the reviewed surfaces. Existing tests cover the key owner/context boundaries.
-- **Comment fix:** Product route comments now accurately state that SUPER_ADMIN does not bypass `requireAccessType`.
-- **CI:** Run [40635937015](https://github.com/gameacc2025/martest/actions/runs/40635937015) passed. Migration validation [40635936924](https://github.com/gameacc2025/martest/actions/runs/40635936924) passed.
-- **Limits:** This is not an exhaustive route-by-route security sign-off. Transitive `url.parse()`/`punycode` deprecations remain non-blocking until a call-site trace is available. Browser E2E remains intentionally non-blocking; live Zarinpal/SMTP are not verified and SMS is not implemented.
-- **Next:** Only operational/external verification and optional dependency-warning tracing remain; no further confirmed high-severity source issue is currently open from this targeted pass.
+- Work on one focused stage/PR at a time.
+- Write regression tests for code fixes; wait for ordinary CI and migration validation before merging.
+- Browser E2E is intentionally non-blocking per owner instruction; never claim it passed without observed results.
+- Keep `.ai/current-task.md` concise and current; append history to `.ai/WORKLOG.md`; update relevant API/frontend/database/Docker/notification docs and the quality audit with each material change.
+- Distinguish unit tests, CI builds, migration validation, Docker runtime checks, browser E2E, and live provider tests.
