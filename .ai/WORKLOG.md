@@ -824,3 +824,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Result:** No additional confirmed cross-tenant data path was found in these surfaces during this pass. Existing regression tests cover the main ownership boundaries.
 - **Fix:** Updated the product route comment to accurately state that SUPER_ADMIN does not bypass the app-context boundary.
 - **Limit:** Not an exhaustive route-by-route security sign-off.
+
+
+## 2026-10-28 — TENANT-BOUNDARY-TARGETED-REVIEW-01 — COMPLETE
+
+- **Status:** Targeted review completed; PR #25 merged into `main` at `6fc10282a29a836ca84987eb4cec93fecce54774`.
+- **CI:** Run `40635937015` passed architecture graph, frontend/shared tests, backend tests, Prisma generation and all production builds.
+- **Database:** Migration validation run `40635936924` passed.
+- **Reviewed:** Company routes/services, product management/media/history, user-scoped addresses, inquiry response/message ownership, notification folder/message scoping.
+- **Result:** No additional confirmed cross-tenant data path found in the targeted surfaces. Existing regression tests cover the main ownership boundaries.
+- **Code comment:** Corrected the stale claim that SUPER_ADMIN bypasses `requireAccessType`; app context remains strict.
+- **Limitations:** Not an exhaustive route-by-route security sign-off. Transitive Node deprecation notices remain non-blocking until traced; browser E2E is not claimed passed; live Zarinpal/SMTP are not verified; SMS is not implemented.
