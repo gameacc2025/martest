@@ -175,3 +175,11 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Status:** FIXED and merged in PR #18 at \`fd6515426d7cc5d6ed1c7d02589c46e940e35fde\`.
 - **CI:** [40630881073](https://github.com/gameacc2025/martest/actions/runs/40630881073) passed; migration validation [40630881119](https://github.com/gameacc2025/martest/actions/runs/40630881119) passed.
 - **Verified changes:** Frontend apps no longer send client-selected app scope for folder listing/move/copy; the shared endpoint helper and backend route schema match that contract. Authorization remains derived from the verified access token.
+
+
+## Follow-up finding — pending inquiry subscription invariant (2026-10-28)
+
+- **Severity:** P1 business-rule consistency for monetization.
+- **Finding:** The self-service UI blocks a new subscription request while any pending request exists, but the backend only checked pending requests for the same plan. A direct API caller could create pending requests for different plans.
+- **Fix under validation:** Backend pending-subscription lookup is now owner-scoped and independent of plan ID. Regression tests cover the different-plan duplicate and first valid request. The payment flow already locks the owner row before creation.
+- **Status:** Pending CI and migration validation; do not close until green and merged.
