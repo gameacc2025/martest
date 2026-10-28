@@ -771,3 +771,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Regression coverage:** Test simulates another callback activating the subscription while this request waits for the owner lock and asserts success without duplicate activation/extension.
 - **Docs:** Updated API documentation, quality audit, current-task, project context and decisions.
 - **Validation:** CI and fresh PostgreSQL migration validation pending. Browser E2E is not a blocker.
+
+
+## 2026-10-28 — PAYMENT-CALLBACK-CONCURRENCY-01 — COMPLETE
+
+- **Status:** DONE — PR #23 squash-merged into `main` at `075db4b3a99d75f0dc043f3fec3417f8bf158ca9`.
+- **CI:** Run `40634806585` passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Migration validation run `40634806668` passed against a fresh PostgreSQL database.
+- **Fix:** Subscription state is re-read after the owner-row lock. If another callback has already committed a verified ACTIVE subscription while this callback waited, the waiting callback returns success without activating or extending the subscription again.
+- **Regression test:** Simulates a concurrent activation during lock acquisition and verifies success/no second update.
+- **Docs:** Updated API docs, quality audit, current-task, worklog, project context and decisions.
+- **External provider:** Live Zarinpal payment remains NOT VERIFIED without staging credentials. Browser E2E is not claimed passed.
+- **Next:** Review quota consumption when a subscription expires while a transaction waits for its row lock; add regression coverage and merge a safe fix.
