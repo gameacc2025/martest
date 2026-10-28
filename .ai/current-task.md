@@ -31,7 +31,7 @@ Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`.
 
 ## Remaining limitations / follow-up
 
-1. **Dependency deprecations:** CI still emits transitive Node `url.parse()` and `punycode` deprecation notices. The current logs do not include call-site stacks; do not upgrade dependencies blindly. If pursued, trace with `NODE_OPTIONS=--trace-deprecation`, identify the responsible package, then make a minimal tested upgrade.
+1. **CI action deprecations:** A temporary trace in closed PR #26 identified `url.parse()` in `pnpm/action-setup@v4`'s bundled pnpm self-installer and `punycode` in `actions/setup-node@v4` setup/cache bundles. These are GitHub Actions toolchain notices, not workspace dependencies. No app package upgrade is needed; action-version updates can be considered separately.
 2. **Tenant review:** Targeted review of company, product, address, inquiry and notification ownership found no additional confirmed cross-tenant path. This is not an exhaustive route-by-route IDOR certification.
 3. **External services:** Live Zarinpal payment is NOT VERIFIED without staging credentials. SMTP is NOT VERIFIED without credentials and a controlled recipient. SMS is NOT IMPLEMENTED.
 4. **Deployment:** No claim of production deployment, live operational readiness, or visual/browser verification.
