@@ -130,3 +130,15 @@ Updated priority order after the 2026-10-27 follow-up:
 - `docs/role-access-matrix.md`, `docs/ARCHITECTURE_DECISIONS.md`, `.ai/decisions.md`, and `.ai/current-task.md` now state that `AccessProfile.type` is the strict app-context boundary and wildcard permissions do not override it.
 - PR #9 is non-mergeable after main advanced. Its useful address/token/architecture/code-splitting changes have now been ported selectively, along with the customer profile/API contract fix. PR #11's profile change is redundant against current main; close both stale PRs rather than force-merging an old base.
 - Additional 2026-10-27 changes: added the customer Address model/migration/API/UI and ownership/default-address tests; normalized auth-store profile updates to store only the nested personal profile; added refresh-token `jti` uniqueness and regression tests; added price-history transformation tests; added payment callback/retry idempotency tests; disabled active Cart/Checkout/Orders/Wishlist routes and controls per AD-4; added Vite vendor chunk splitting, deterministic Prisma CLI availability in the runtime image, and generated architecture graph tooling. Latest test edits still need a completed CI result; live SMTP remains unverified and SMS is not implemented.
+
+
+## Progress update — 2026-10-28 — validation checkpoint merged
+
+- Validation PR #16 was merged into \`main\` at \`90a8f36be5c4281c999515206b099b894d2da75d\`.
+- CI run [40629289205](https://github.com/gameacc2025/martest/actions/runs/40629289205) passed architecture graph consistency, frontend/shared tests, backend tests, Prisma client generation and all three frontend production builds.
+- Fresh PostgreSQL migration validation run [40629289194](https://github.com/gameacc2025/martest/actions/runs/40629289194) passed schema/client validation, applying migrations to an empty database and checking migration state.
+- The first validation run found the generated Mermaid graph was stale. The graph was regenerated and the graph check subsequently passed.
+- Frontend tests found one false-negative test in the notification inbox folder-count suite across Website, Company and Admin. The tests had included the “all categories” button, which has no count element. Added \`data-folder-id\` to actual folder buttons and updated tests to query those explicit controls; the next complete CI run passed.
+- Notification implementation notes now cover folder membership, counts, read-state behavior, bulk actions, and the page-scoped search/category limitation.
+- Browser E2E is explicitly non-blocking per owner instruction. This update does not claim the browser tests passed.
+- **Remaining audit work:** source-level review of notification folder/read-state authorization and app scope; inquiry permission/quota/response-decision coverage; ensure API/database/frontend/Docker/notification docs remain aligned with current source; review and track Admin bundle warnings; keep external SMTP NOT VERIFIED without credentials and a test recipient, and SMS NOT IMPLEMENTED.
