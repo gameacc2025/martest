@@ -20,6 +20,7 @@ let subscription;
 let plan;
 let requestResponse;
 let verifyResponse;
+let activateOnOwnerLock = false;
 const calls = [];
 const mockPrisma = {
   inquiryPlan: { findFirst: async () => plan },
@@ -43,7 +44,21 @@ const mockPrisma = {
       return { count: 1 };
     },
   },
-  $queryRawUnsafe: async () => [],
+  $queryRawUnsafe: async () => {
+    if (activateOnOwnerLock && subscription) {
+      activateOnOwnerLock = false;
+      subscription = {
+        ...subscription,
+        status: 'ACTIVE',
+        paymentVerifiedAt: new Date('2026-10-28T04:00:00.000Z'),
+        paymentRefId: '12345',
+        startsAt: new Date('2026-10-28T04:00:00.000Z'),
+        endsAt: new Date('2026-11-27T04:00:00.000Z'),
+        notes: 'activated by concurrent callback',
+      };
+    }
+    return [];
+  },
   $transaction: async (fn) => fn(mockPrisma),
 };
 injectMock('../../config/db', mockPrisma);
@@ -72,6 +87,7 @@ const oldEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
 const oldFetch = global.fetch;
 test.beforeEach(() => {
   calls.length = 0;
+  activateOnOwnerLock = false;
   plan = { id: 2, name: 'Basic', durationDays: 30, price: 1000, currency: 'IRR', isActive: true };
   subscription = null;
   requestResponse = { data: { code: 100, authority: 'A-test' }, errors: [] };
@@ -141,6 +157,28 @@ test('callback replay after activation is idempotent and skips provider verifica
   assert.equal(result.payment, 'success');
   assert.equal(result.refId, '12345');
   assert.equal(calls.filter(([name]) => name === 'updateMany').length, 0);
+});
+
+test('concurrent successful callback returns the already activated subscription after owner lock', async () => {
+  process.env.ZARINPAL_MERCHANT_ID = 'merchant-test';
+  subscription = {
+    id: 7, planId: 2, companyId: 5, userId: null, status: 'PENDING_PAYMENT',
+    paymentProvider: 'ZARINPAL', paymentAuthority: 'A-test', paymentAmount: 1000,
+    paymentVerifiedAt: null, paymentRefId: null, startsAt: null, endsAt: null,
+    notes: 'pending', plan: { id: 2, name: 'Basic', durationDays: 30, price: 1000, currency: 'IRR', isActive: true },
+  };
+  // Simulate another callback committing activation while this callback waits
+  // for the owner-row lock, after its initial read but before the locked re-read.
+  activateOnOwnerLock = true;
+
+  const result = await handleSubscriptionPaymentCallback({ Authority: 'A-test', Status: 'OK' });
+
+  assert.equal(result.payment, 'success');
+  assert.equal(result.refId, '12345');
+  assert.equal(subscription.status, 'ACTIVE');
+  assert.equal(subscription.startsAt.toISOString(), '2026-10-28T04:00:00.000Z');
+  assert.equal(subscription.endsAt.toISOString(), '2026-11-27T04:00:00.000Z');
+  assert.equal(calls.filter(([name]) => name === 'updateMany').length, 0, 'does not try to activate or extend the already active subscription');
 });
 
 test('retrying an already verified subscription returns success without another provider call', async () => {
