@@ -254,3 +254,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Fix prepared:** After locking the owner row, re-read the subscription and return the existing verified ACTIVE record when another callback has already committed. Keep provider verification, owner serialization and compare-and-set activation.
 - **Regression coverage prepared:** Simulate a concurrent activation while the callback waits for the owner lock; assert the second callback returns success without updating/extending the subscription.
 - **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change.
+
+
+## Closure — concurrent verified payment callbacks (2026-10-28)
+
+- **Status:** FIXED and merged in PR #23 at `075db4b3a99d75f0dc043f3fec3417f8bf158ca9`.
+- **CI:** [40634806585](https://github.com/gameacc2025/martest/actions/runs/40634806585) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** [40634806668](https://github.com/gameacc2025/martest/actions/runs/40634806668) passed fresh PostgreSQL migration validation.
+- **Behavior:** Callback state is re-read after owner lock; a callback that observes a prior verified activation returns success without a second activation/extension.
+- **Limitations:** This is regression coverage with mocked provider responses, not live Zarinpal verification. Browser E2E is not claimed passed.
