@@ -214,3 +214,8 @@ work status is tracked in `.ai/current-task.md` and `.ai/WORKLOG.md`.
 ## Inquiry response concurrency invariant (2026-10-28)
 
 Response writes and buyer decisions are serialized on the parent `Inquiry` row within the same PostgreSQL transaction. Before reading current inquiry state, response submit/edit/withdraw/decision operations and manual status transitions acquire `SELECT id FROM "Inquiry" WHERE id = $1 FOR UPDATE`. This prevents a stale transaction from committing a pending supplier response after buyer selection closes the inquiry. Keep authorization, ownership, deadline checks, response compare-and-set, and transactional notification dispatch in place; the lock is an additional consistency guarantee, not a replacement.
+
+
+## Frontend bundling note (2026-10-28)
+
+The shared Vite config uses Rolldown code-splitting groups for framework and PrimeVue dependencies. Keep dashboard page components lazy-loaded. The Admin auth store is imported statically by the router because other modules also import it statically; a dynamic import of the same module is ineffective and should not be added as a chunk-splitting workaround.
