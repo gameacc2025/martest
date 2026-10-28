@@ -715,3 +715,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs:** API documentation, repository quality audit, project context, decision notes, current-task handoff and worklog were updated.
 - **Browser E2E:** Intentionally not awaited per owner instruction. No browser pass is claimed.
 - **Next:** Review the remaining Admin bundle-size warning and continue quota/payment edge-case audit. Do not merge heavily diverged legacy branches wholesale.
+
+
+## 2026-10-28 — ADMIN-BUNDLE-WARNING-01
+
+- **Status:** IN PROGRESS — Admin router import cleanup prepared on `perf/admin-auth-import-warning-20261028`.
+- **Evidence:** CI run `40633476868` passed production builds and emitted split Admin chunks below the prior approximately 730 kB entry chunk; the largest displayed JavaScript chunk was approximately 196 kB.
+- **Finding:** Rolldown warned that `src/stores/auth.js` was dynamically imported by the router but statically imported elsewhere, making the dynamic import ineffective.
+- **Fix:** The Admin router now imports `useAuthStore` statically. Route-level lazy imports remain unchanged.
+- **Docs:** Updated `docs/FRONTEND_DOCUMENTATION.md`, repository quality audit, current-task and project context.
+- **Validation:** CI still needs to run on this branch. Browser E2E is not a blocker and is not claimed passed.
