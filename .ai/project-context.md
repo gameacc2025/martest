@@ -218,4 +218,4 @@ Response writes and buyer decisions are serialized on the parent `Inquiry` row w
 
 ## Frontend bundling note (2026-10-28)
 
-The shared Vite config uses Rolldown code-splitting groups for framework and PrimeVue dependencies. Keep dashboard page components lazy-loaded. The Admin auth store is imported statically by the router because other modules also import it statically; a dynamic import of the same module is ineffective and should not be added as a chunk-splitting workaround.
+The shared Vite config uses Rolldown code-splitting groups for framework and PrimeVue dependencies. Keep dashboard page components lazy-loaded. The Website, Company and Admin auth stores are imported statically by their routers because other modules also import them statically; a dynamic import of the same module is ineffective and should not be added as a chunk-splitting workaround.
