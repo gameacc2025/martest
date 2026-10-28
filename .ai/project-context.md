@@ -224,3 +224,8 @@ The shared Vite config uses Rolldown code-splitting groups for framework and Pri
 ## Duplicate inquiry response contract (2026-10-28)
 
 A company may have only one `InquiryResponse` per inquiry, enforced by the database unique constraint on `(inquiryId, companyId)`. The service must check for an existing response while holding the parent inquiry row lock and return a stable HTTP 409 `RESPONSE_ALREADY_EXISTS` domain error before attempting another insert. Preserve the database constraint as defense in depth and do not dispatch duplicate response notifications.
+
+
+## Payment callback concurrency invariant (2026-10-28)
+
+After a provider verifies payment, callbacks for the same owner serialize on the owner row. Re-read the subscription after acquiring that lock. If another callback already committed `ACTIVE` with `paymentVerifiedAt`, return the existing verified result without extending or reactivating it. Continue to require server-to-server provider verification and conditional status/verification updates.
