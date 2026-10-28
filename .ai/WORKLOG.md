@@ -815,3 +815,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Resolved:** Core documentation drift, strict app context, notification folder app scope, ineffective auth-store dynamic imports in all three routers, inquiry response race/duplicate error handling, payment callback concurrency, and quota expiry revalidation.
 - **Not claimed:** Browser E2E pass, live Zarinpal, SMTP delivery, production deployment or exhaustive company-endpoint IDOR sign-off. SMS remains not implemented.
 - **Remaining:** Continue company-owned route/service owner-scope review. Node `url.parse()`/`punycode` deprecations remain non-blocking pending a traced call site; do not upgrade dependencies blindly.
+
+
+## 2026-10-28 — TENANT-BOUNDARY-TARGETED-REVIEW-01
+
+- **Status:** IN PROGRESS — targeted source review and stale RBAC comment fix on `docs/rbac-context-comment-20261028`.
+- **Reviewed:** Company route/service ownership, product management and media/history ownership, user-scoped address CRUD, inquiry buyer/supplier response/message access, and notification folder/message scoping.
+- **Result:** No additional confirmed cross-tenant data path was found in these surfaces during this pass. Existing regression tests cover the main ownership boundaries.
+- **Fix:** Updated the product route comment to accurately state that SUPER_ADMIN does not bypass the app-context boundary.
+- **Limit:** Not an exhaustive route-by-route security sign-off.
