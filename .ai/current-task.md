@@ -26,11 +26,11 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 ## Immediate remaining work
 
-1. Validation PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`. CI `40629289205` and PostgreSQL migration validation `40629289194` passed.
-2. Current follow-up branch `fix/notification-app-scope-20261028` closes a notification authorization gap: clients could submit `app=ADMIN` to folder endpoints regardless of their authenticated app context. The controller now derives scope from verified `request.user.accessType` (`STAFF` → `ADMIN`, `COMPANY` → `COMPANY`, `CUSTOMER` → `WEBSITE`), validates folder IDs against that scope, and fails closed when context is unknown.
-3. Added controller regression tests for forged app scopes, cross-app folder IDs, and scope mapping; added service tests for inactive source folders and cross-scope destinations. Notification docs now list the folder/bulk endpoints and the app-scope contract.
-4. Run CI and migration validation for this security follow-up; fix failures and merge after green CI/database checks. Browser E2E remains non-blocking per owner instruction and is not claimed passed.
-5. Continue quality-audit items after this fix: inquiry permission/quota/response decision coverage, docs/source alignment, and bundle-size warning review. SMTP is NOT VERIFIED without live credentials and a test recipient; SMS is NOT IMPLEMENTED.
+1. PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`. CI `40629289205` and PostgreSQL migration validation `40629289194` passed.
+2. PR #17 merged as `6c936fbf89b62febdf8122ac854fb53d93049ed4`. CI `40630173240` and PostgreSQL migration validation `40630173261` passed.
+3. Notification folder app scope is now derived server-side from verified `request.user.accessType` (`STAFF` → `ADMIN`, `COMPANY` → `COMPANY`, `CUSTOMER` → `WEBSITE`). Client-supplied app values are ignored, folder IDs are checked against allowed app scope, unknown contexts fail closed, and inactive source folders cannot be used for move operations.
+4. Continue remaining quality-audit work: inspect inquiry permission/quota/response-decision and payment callback paths; review notification read/folder behavior and API contracts; keep API/database/frontend/Docker/notification docs aligned; review the Admin bundle warning. Browser E2E is non-blocking per owner instruction and must not be claimed passed.
+5. SMTP is NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Never claim provider delivery based only on unit tests.
 
 ## Branch/PR handling
 
