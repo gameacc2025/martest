@@ -23,8 +23,6 @@ const selectedIds = ref(new Set())
 const bulkBusy = ref(false)
 const userFolders = ref([])
 const targetFolderId = ref(null)
-const appScope = 'COMPANY'
-
 const folders = computed(() => [
   { id: 'all', label: 'همه پیام‌ها', icon: 'pi-inbox', count: folderCounts.value.all },
   { id: 'unread', label: 'خوانده‌نشده', icon: 'pi-envelope', count: unreadCount.value },
@@ -121,7 +119,7 @@ onMounted(async () => {
 
 async function fetchUserFolders() {
   try {
-    const result = await apiGet(endpoints.notifications.folders(appScope))
+    const result = await apiGet(endpoints.notifications.folders())
     userFolders.value = Array.isArray(result) ? result : []
     const saved = userFolders.value.find(folder => folder.key === 'SAVED')
     targetFolderId.value = saved?.id ?? userFolders.value.find(folder => !folder.isSystem)?.id ?? null
@@ -303,7 +301,7 @@ async function applyFolderAction(item, action, folderId = targetFolderId.value) 
   }
   try {
     await apiPost(endpoints.notifications.changeFolder(item.id), {
-      folderId: Number(folderId), action, app: appScope,
+      folderId: Number(folderId), action,
       ...(action === 'move' && sourceFolderId ? { sourceFolderId } : {}),
     })
     toast.add({ severity: 'success', summary: 'انجام شد', detail: action === 'copy' ? 'پیام در پوشه مقصد هم قرار گرفت.' : 'پیام به پوشه مقصد منتقل شد.', life: 2500 })

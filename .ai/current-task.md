@@ -26,11 +26,10 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 ## Immediate remaining work
 
-1. PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`. CI `40629289205` and PostgreSQL migration validation `40629289194` passed.
-2. PR #17 merged as `6c936fbf89b62febdf8122ac854fb53d93049ed4`. CI `40630173240` and PostgreSQL migration validation `40630173261` passed.
-3. Notification folder app scope is now derived server-side from verified `request.user.accessType` (`STAFF` → `ADMIN`, `COMPANY` → `COMPANY`, `CUSTOMER` → `WEBSITE`). Client-supplied app values are ignored, folder IDs are checked against allowed app scope, unknown contexts fail closed, and inactive source folders cannot be used for move operations.
-4. Continue remaining quality-audit work: inspect inquiry permission/quota/response-decision and payment callback paths; review notification read/folder behavior and API contracts; keep API/database/frontend/Docker/notification docs aligned; review the Admin bundle warning. Browser E2E is non-blocking per owner instruction and must not be claimed passed.
-5. SMTP is NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Never claim provider delivery based only on unit tests.
+1. PR #16 and PR #17 are merged; CI and fresh PostgreSQL migration validation passed for both.
+2. Follow-up branch `fix/notification-folder-contract-20261028` removes the obsolete client-selected app scope from the notification folder API contract. The shared endpoint helper no longer appends `?app=...`, all three inboxes call the folders endpoint without an app argument and omit `app` from move/copy bodies, and the backend route schema no longer requires a client-supplied `app`.
+3. Validate this cleanup with CI and migration checks, then merge. Browser E2E remains non-blocking per owner instruction and is not claimed passed.
+4. Continue inquiry permission/quota/response-decision/payment review, docs/source alignment and Admin bundle warning review. SMTP is NOT VERIFIED without live credentials and a test recipient; SMS is NOT IMPLEMENTED.
 
 ## Branch/PR handling
 

@@ -173,7 +173,7 @@ test('POST /:id/folders: requires authentication and valid action', async () => 
     method: 'POST',
     url: '/api/v1/settings/notifications/1/folders',
     headers: { 'x-test-user': JSON.stringify({ id: 1 }), 'content-type': 'application/json' },
-    payload: { folderId: 2, action: 'copy', app: 'WEBSITE' },
+    payload: { folderId: 2, action: 'copy' },
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.changeFolder, true);

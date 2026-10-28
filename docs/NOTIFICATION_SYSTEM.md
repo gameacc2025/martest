@@ -17,7 +17,7 @@ Routes are registered under `/api/v1/settings/notifications` (confirm the prefix
 |---|---|---|
 | GET | `/` | List the authenticated user's notifications |
 | GET | `/unread-count` | Get unread count |
-| GET | `/folders?app=...` | List folders for the app context derived from the authenticated access token; the query parameter is ignored |
+| GET | `/folders` | List folders for the app context derived from the authenticated access token |
 | POST | `/:id/folders` | Copy or move an owned notification to a folder allowed in the authenticated app context |
 | PATCH | `/:id/read-state` | Set an owned notification's `isRead` state to true or false |
 | POST | `/bulk-read-state` | Set read state for up to 100 selected notifications owned by the caller |

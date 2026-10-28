@@ -160,3 +160,11 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Verified changes:** scope now comes from authenticated \`accessType\`, client-supplied scope is ignored, cross-app folder IDs are rejected, unknown contexts fail closed, and inactive source folders cannot be moved from.
 - **Regression coverage:** controller tests cover forged scope values, missing context, folder-ID scope validation and mapping; service tests cover inactive source folders and cross-scope destinations.
 - **Browser E2E:** not required for this closure and not claimed passed.
+
+
+## Follow-up — canonical notification folder API contract (2026-10-28)
+
+- **Status:** Pending CI and merge.
+- Removed the obsolete client-selected app parameter from the shared endpoint helper and all three inboxes.
+- Removed the app field from the folder action request schema and made folderId/action the only required body fields. The controller continues to derive authorization scope exclusively from the verified token.
+- Updated notification API docs and route test fixture to match the canonical contract.

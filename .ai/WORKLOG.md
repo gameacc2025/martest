@@ -651,3 +651,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs:** Updated \`docs/NOTIFICATION_SYSTEM.md\`, \`docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md\`, and this handoff/worklog.
 - **Browser E2E:** Intentionally non-blocking per owner instruction. No browser pass is claimed.
 - **Next:** Continue inquiry permission/quota/response-decision/payment review and source-aligned docs. SMTP remains not live-verified; SMS is not implemented.
+
+
+## 2026-10-28 — NOTIFICATION-FOLDER-CONTRACT-01
+
+- **Status:** IN PROGRESS — client API cleanup on \`fix/notification-folder-contract-20261028\`.
+- **Reason:** After server-side scope enforcement was merged, the shared endpoint helper and all three frontends still sent a redundant app value. The route schema also required \`app\` even though the controller correctly ignored it.
+- **Changes:** \`endpoints.notifications.folders\` is now a constant path without a query parameter; Website/Company/Admin call it without an app argument and omit \`app\` from move/copy bodies; the backend folder action schema no longer requires or accepts a client-supplied app field; the route regression test uses the canonical body; notification API docs were aligned.
+- **Verification:** CI and migration validation pending. Browser E2E is not a blocker and is not claimed passed.
