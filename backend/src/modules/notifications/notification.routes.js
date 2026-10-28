@@ -25,7 +25,7 @@ async function notificationRoutes(fastify) {
   }, ctrl.bulkRemove);
   fastify.get('/folders', ctrl.listFolders);
   fastify.post('/:id/folders', {
-    schema: { params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } }, body: { type: 'object', required: ['folderId', 'action', 'app'], additionalProperties: false, properties: { folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 }, app: { type: 'string', enum: ['WEBSITE', 'COMPANY', 'ADMIN'] } } } },
+    schema: { params: { type: 'object', required: ['id'], properties: { id: { type: 'integer', minimum: 1 } } }, body: { type: 'object', required: ['folderId', 'action'], additionalProperties: false, properties: { folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 } } } },
   }, ctrl.changeFolder);
   fastify.patch('/:id/read-state', {
     schema: {
