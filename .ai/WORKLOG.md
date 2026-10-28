@@ -793,3 +793,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Regression test:** Simulates an active subscription disappearing while the lock is acquired and asserts no usage event is created.
 - **Docs:** Updated API documentation, quality audit, current-task and project context.
 - **Validation:** CI and fresh PostgreSQL migration validation pending; no schema change.
+
+
+## 2026-10-28 — QUOTA-ACTIVE-PERIOD-01 — COMPLETE
+
+- **Status:** DONE — PR #24 squash-merged into `main` at `c96850af53866c9e8c84b46d436e38fd8b06be3b`.
+- **CI:** Run `40635157043` passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** Migration validation run `40635157013` passed against a fresh PostgreSQL database.
+- **Fix:** Quota consumption re-checks the active subscription after locking its row. If the period expired while waiting, it rejects before usage aggregation/insertion. If the active row changed at the boundary, it locks and re-checks the new row.
+- **Regression coverage:** Simulates an active subscription becoming unavailable during lock acquisition and asserts no usage event is written.
+- **Docs:** Updated API docs, quality audit, current-task, worklog and project context.
+- **Browser E2E:** Not awaited and not claimed passed.
+- **Next:** Trace transitive Node deprecation warnings and review any remaining actionable audit items.
