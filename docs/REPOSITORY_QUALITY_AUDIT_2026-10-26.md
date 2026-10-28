@@ -201,3 +201,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Fix prepared:** Response submission, response edit/withdrawal, buyer response decision, and manual inquiry status transitions now lock the parent Inquiry row inside their transaction before reading current status.
 - **Regression coverage prepared:** Service tests assert that response submission and buyer selection issue the parent-row `FOR UPDATE` lock.
 - **Validation:** CI and fresh PostgreSQL migration validation must be observed on the PR head before merge. Browser E2E remains non-blocking per owner instruction and is not claimed passed.
+
+
+## Closure — inquiry response concurrency (2026-10-28)
+
+- **Status:** FIXED and merged in PR #20 at `afe468c62d674ec675e4d7e9264e4850403fdb21`.
+- **CI:** [40633476868](https://github.com/gameacc2025/martest/actions/runs/40633476868) passed graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** [40633476941](https://github.com/gameacc2025/martest/actions/runs/40633476941) passed fresh PostgreSQL migration validation. No schema changes were introduced.
+- **Regression coverage:** Service tests assert parent-row locking for successful response submission and buyer selection.
+- **Browser E2E:** Not awaited or claimed passed, per owner instruction.
