@@ -140,3 +140,13 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 - **External payment:** Live Zarinpal behavior is still NOT VERIFIED without staging credentials; CI mocks do not prove provider integration.
 - **Browser E2E:** Not awaited or claimed passed.
 - **Next active stage:** Harden subscription quota consumption around the active-period boundary, then continue any remaining source-audit findings. Keep all docs and AI handoff current.
+
+
+## Current stage — quota active-period revalidation (2026-10-28)
+
+- **Branch:** `fix/inquiry-quota-expiry-lock-20261028`.
+- **Finding:** `consumeUsage` selected an active subscription before taking its row lock and did not re-check after waiting. A transaction could use a stale active subscription if its paid period expired during the wait.
+- **Fix:** Lock the candidate subscription, re-query the active subscription after lock acquisition, and lock/re-check a newly active row if the subscription changed at the period boundary. Fail closed when no active subscription remains; do not aggregate or create a usage event in that case.
+- **Regression test:** Simulates expiry while waiting for the lock and asserts a 403 `INQUIRY_SUBSCRIPTION_REQUIRED` response and zero usage-event writes.
+- **Docs:** Updated API documentation, quality audit, current-task, worklog and project context.
+- **Validation:** CI and fresh PostgreSQL migration validation pending. No schema change; browser E2E is non-blocking.
