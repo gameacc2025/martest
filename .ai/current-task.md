@@ -26,10 +26,12 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 ## Immediate remaining work
 
-1. PR #16 and PR #17 are merged; CI and fresh PostgreSQL migration validation passed for both.
-2. Follow-up branch `fix/notification-folder-contract-20261028` removes the obsolete client-selected app scope from the notification folder API contract. The shared endpoint helper no longer appends `?app=...`, all three inboxes call the folders endpoint without an app argument and omit `app` from move/copy bodies, and the backend route schema no longer requires a client-supplied `app`.
-3. Validate this cleanup with CI and migration checks, then merge. Browser E2E remains non-blocking per owner instruction and is not claimed passed.
-4. Continue inquiry permission/quota/response-decision/payment review, docs/source alignment and Admin bundle warning review. SMTP is NOT VERIFIED without live credentials and a test recipient; SMS is NOT IMPLEMENTED.
+1. PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`; CI `40629289205` and PostgreSQL migration validation `40629289194` passed.
+2. PR #17 merged as `6c936fbf89b62febdf8122ac854fb53d93049ed4`; CI `40630173240` and migration validation `40630173261` passed. Notification folder scope is derived from verified `request.user.accessType`, and cross-app folders/unknown contexts are rejected.
+3. PR #18 merged as `fd6515426d7cc5d6ed1c7d02589c46e940e35fde`; CI `40630881073` and migration validation `40630881119` passed. Frontends and endpoint helper no longer send client-selected app scope; the backend schema no longer requires it.
+4. Next inquiry monetization review: backend currently checks for an existing pending subscription using both owner and plan ID, although the UI and business flow treat any pending subscription as a blocker. Verify and add regression coverage so an owner cannot create concurrent pending requests for different plans.
+5. Continue review of inquiry permission/quota/response decisions, payment callback idempotency, source-aligned docs and the Admin bundle warning. Browser E2E is non-blocking per owner instruction and is not claimed passed.
+6. SMTP is NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED. Never claim provider delivery based only on unit tests.
 
 ## Branch/PR handling
 
