@@ -26,11 +26,12 @@ The owner authorized fixing the remaining issues, merging safe work into `main`,
 
 ## Immediate remaining work
 
-1. Notification security and API contract fixes are merged in PRs #17 and #18; CI and migration validation passed for both.
-2. Current branch `fix/inquiry-pending-subscription-unique-20261028` fixes a backend consistency gap: one owner could create pending subscription requests for different plans, even though the UI blocks any new request while one is pending. The service now checks for any pending request by owner, and regression tests cover both blocked duplicate requests and a valid first request.
-3. Added API documentation for owner-derived subscriptions, one-pending-request invariant, and server-verified payment activation. Validate via CI and fresh PostgreSQL migrations before merging.
-4. Continue review of inquiry permission/quota/response-decision/payment paths and source-aligned docs. Browser E2E is non-blocking per owner instruction and is not claimed passed.
-5. SMTP is NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED.
+1. PR #16 merged as `90a8f36be5c4281c999515206b099b894d2da75d`; CI `40629289205` and PostgreSQL migration validation `40629289194` passed.
+2. PR #17 merged as `6c936fbf89b62febdf8122ac854fb53d93049ed4`; CI `40630173240` and migration validation `40630173261` passed. Notification folder scope is derived from verified `request.user.accessType`, and cross-app folders/unknown contexts are rejected.
+3. PR #18 merged as `fd6515426d7cc5d6ed1c7d02589c46e940e35fde`; CI `40630881073` and migration validation `40630881119` passed. Frontends and endpoint helper no longer send client-selected app scope; the backend schema no longer requires it.
+4. PR #19 merged as `695b61861b39f840eefa24660541d4d61143943d`; CI `40631325212` and migration validation `40631325206` passed. Backend now enforces one pending subscription per owner regardless of plan; tests cover duplicate-different-plan and first valid request.
+5. Continue source review of inquiry response decisions, access/ownership checks, quota transaction semantics and payment callback idempotency; then resolve source/doc conflicts and review the Admin bundle warning. Browser E2E is non-blocking per owner instruction and is not claimed passed.
+6. SMTP is NOT VERIFIED without live credentials and a test recipient. SMS is NOT IMPLEMENTED.
 
 ## Branch/PR handling
 
