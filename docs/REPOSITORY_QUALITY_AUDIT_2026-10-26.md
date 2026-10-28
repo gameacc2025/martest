@@ -263,3 +263,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Database:** [40634806668](https://github.com/gameacc2025/martest/actions/runs/40634806668) passed fresh PostgreSQL migration validation.
 - **Behavior:** Callback state is re-read after owner lock; a callback that observes a prior verified activation returns success without a second activation/extension.
 - **Limitations:** This is regression coverage with mocked provider responses, not live Zarinpal verification. Browser E2E is not claimed passed.
+
+
+## Follow-up finding — quota consumption at subscription expiry (2026-10-28)
+
+- **Severity:** P1 monetization consistency.
+- **Finding:** Quota consumption selected an active subscription before taking its row lock and used that stale result after waiting. If the subscription expired while waiting, one usage could be accepted after the paid period ended.
+- **Fix prepared:** After locking the selected subscription, re-query the owner's active subscription and validate its current time window. If the active subscription changed at the boundary, lock and re-check the new row. If no active period remains, reject before aggregating or recording usage.
+- **Regression coverage prepared:** Simulate the subscription becoming inactive during lock acquisition and assert quota consumption fails without creating a usage event.
+- **Validation:** CI + fresh PostgreSQL migration validation pending; no schema change.
