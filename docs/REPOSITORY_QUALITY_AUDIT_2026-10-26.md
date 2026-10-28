@@ -218,3 +218,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Remaining warning found:** CI on the first fix branch confirmed the same `INEFFECTIVE_DYNAMIC_IMPORT` warning in Website and Company as well as Admin: each router dynamically imported `src/stores/auth.js` while layouts/pages and `main.js` also statically imported it.
 - **Fix prepared:** All three routers now import `useAuthStore` statically and call it inside route callbacks. This matches each module's actual usage and avoids pretending the store can be split into a separate chunk. Page components remain lazy-loaded.
 - **Validation:** CI production builds must be rerun on the PR head. Browser E2E is not required for this cleanup and is not claimed passed.
+
+
+## Closure — frontend auth-store dynamic import warning (2026-10-28)
+
+- **Status:** FIXED and merged in PR #21 at `a6c24627b640b6154cfe6277332673b021299371`.
+- **CI:** [40634032996](https://github.com/gameacc2025/martest/actions/runs/40634032996) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** [40634032923](https://github.com/gameacc2025/martest/actions/runs/40634032923) passed fresh PostgreSQL migration validation.
+- **Evidence:** Build logs no longer report `INEFFECTIVE_DYNAMIC_IMPORT` in Website, Company or Admin. Route-level lazy loading remains, and the largest displayed JavaScript chunk is approximately 195 kB.
+- **Remaining:** Transitive Node dependency deprecation notices for `url.parse()` and `punycode` are still present; trace the dependency chain before upgrading packages. Browser E2E is not claimed passed.
