@@ -680,3 +680,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Added regression coverage that a pending request for a different plan blocks creation, plus a positive case for an owner with no pending/active subscription.
 - **Docs:** Added subscription ownership, pending-request and payment-verification invariants to \`docs/API_DOCUMENTATION.md\`; refreshed current-task handoff.
 - **Verification:** CI and fresh PostgreSQL migration validation pending. Do not claim success before observing completed results.
+
+
+## 2026-10-28 — INQUIRY-PENDING-SUBSCRIPTION-01 — COMPLETE
+
+- **Status:** DONE — PR #19 merged into \`main\`.
+- **Merge commit:** \`695b61861b39f840eefa24660541d4d61143943d\`.
+- **CI:** Run \`40631325212\` passed architecture graph validation, frontend/shared tests, backend tests, Prisma client generation and all three frontend production builds.
+- **Database:** Migration validation run \`40631325206\` passed against a fresh PostgreSQL database.
+- **Business-rule fix:** \`createPendingSubscription\` now checks for any \`PENDING_PAYMENT\` subscription belonging to the owner, independent of plan ID. The payment service's owner-row lock serializes concurrent creation attempts before this check.
+- **Regression tests:** Added a negative test for an existing pending request tied to another plan and a positive test for the first valid request.
+- **Docs:** Added subscription owner, pending-request and server-side payment verification invariants to \`docs/API_DOCUMENTATION.md\`; updated the quality audit and handoff.
+- **Next:** Continue review of inquiry response decisions, ownership/RBAC, quota enforcement and payment callback paths. Do not claim live payment verification without staging credentials.
