@@ -236,3 +236,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Fix prepared:** With the parent inquiry row already locked, the service checks for an existing response and returns HTTP 409 / `RESPONSE_ALREADY_EXISTS` with the existing response ID and status. The database unique constraint remains the final invariant.
 - **Regression coverage prepared:** Duplicate pending response is rejected before creation and does not dispatch another response notification.
 - **Validation:** CI and migration validation pending; browser E2E is non-blocking.
+
+
+## Closure — duplicate supplier response handling (2026-10-28)
+
+- **Status:** FIXED and merged in PR #22 at `17a2015edeecbc00c1cbf540540ea48b8c97f394`.
+- **CI:** [40634407695](https://github.com/gameacc2025/martest/actions/runs/40634407695) passed architecture graph, frontend/shared tests, backend tests, Prisma generation and all three production builds.
+- **Database:** [40634407696](https://github.com/gameacc2025/martest/actions/runs/40634407696) passed fresh PostgreSQL migration validation.
+- **Behavior:** Duplicate supplier response returns HTTP 409 `RESPONSE_ALREADY_EXISTS` and the existing response ID/status; no second response or notification is created.
+- **Browser E2E:** Not awaited or claimed passed.
