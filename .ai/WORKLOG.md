@@ -659,3 +659,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Reason:** After server-side scope enforcement was merged, the shared endpoint helper and all three frontends still sent a redundant app value. The route schema also required \`app\` even though the controller correctly ignored it.
 - **Changes:** \`endpoints.notifications.folders\` is now a constant path without a query parameter; Website/Company/Admin call it without an app argument and omit \`app\` from move/copy bodies; the backend folder action schema no longer requires or accepts a client-supplied app field; the route regression test uses the canonical body; notification API docs were aligned.
 - **Verification:** CI and migration validation pending. Browser E2E is not a blocker and is not claimed passed.
+
+
+## 2026-10-28 — NOTIFICATION-FOLDER-CONTRACT-01 — COMPLETE
+
+- **Status:** DONE — PR #18 merged into \`main\`.
+- **Merge commit:** \`fd6515426d7cc5d6ed1c7d02589c46e940e35fde\`.
+- **CI:** Run \`40630881073\` passed architecture graph check, frontend/shared tests, backend tests, Prisma client generation and all three production builds.
+- **Database:** Migration validation run \`40630881119\` passed against a fresh PostgreSQL database.
+- **Changes:** The shared endpoint helper now exposes the canonical \`/settings/notifications/folders\` path without a client-selected app query. Website, Company and Admin no longer send app scope in folder list or move/copy requests. The route schema no longer requires a client-supplied app; the controller derives scope from verified token context.
+- **Docs:** Updated \`docs/NOTIFICATION_SYSTEM.md\`, quality audit, worklog and handoff.
+- **Next:** Inquiry monetization review identified a likely backend consistency gap to verify: pending subscription duplication is checked per owner + plan, while the UI blocks any pending request. Add a regression test and enforce one pending request per owner if confirmed.
