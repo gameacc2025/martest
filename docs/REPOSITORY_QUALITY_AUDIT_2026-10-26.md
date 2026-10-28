@@ -227,3 +227,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - **Database:** [40634032923](https://github.com/gameacc2025/martest/actions/runs/40634032923) passed fresh PostgreSQL migration validation.
 - **Evidence:** Build logs no longer report `INEFFECTIVE_DYNAMIC_IMPORT` in Website, Company or Admin. Route-level lazy loading remains, and the largest displayed JavaScript chunk is approximately 195 kB.
 - **Remaining:** Transitive Node dependency deprecation notices for `url.parse()` and `punycode` are still present; trace the dependency chain before upgrading packages. Browser E2E is not claimed passed.
+
+
+## Follow-up finding — duplicate supplier response handling (2026-10-28)
+
+- **Severity:** P2 business/API consistency.
+- **Finding:** Prisma's unique constraint on `(inquiryId, companyId)` protects data integrity, but a duplicate submit could surface as a generic database error rather than a useful API conflict.
+- **Fix prepared:** With the parent inquiry row already locked, the service checks for an existing response and returns HTTP 409 / `RESPONSE_ALREADY_EXISTS` with the existing response ID and status. The database unique constraint remains the final invariant.
+- **Regression coverage prepared:** Duplicate pending response is rejected before creation and does not dispatch another response notification.
+- **Validation:** CI and migration validation pending; browser E2E is non-blocking.
