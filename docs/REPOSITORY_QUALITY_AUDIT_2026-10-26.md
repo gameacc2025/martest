@@ -142,3 +142,12 @@ Updated priority order after the 2026-10-27 follow-up:
 - Notification implementation notes now cover folder membership, counts, read-state behavior, bulk actions, and the page-scoped search/category limitation.
 - Browser E2E is explicitly non-blocking per owner instruction. This update does not claim the browser tests passed.
 - **Remaining audit work:** source-level review of notification folder/read-state authorization and app scope; inquiry permission/quota/response-decision coverage; ensure API/database/frontend/Docker/notification docs remain aligned with current source; review and track Admin bundle warnings; keep external SMTP NOT VERIFIED without credentials and a test recipient, and SMS NOT IMPLEMENTED.
+
+
+## Follow-up finding — notification folder app-scope authorization (2026-10-28)
+
+- **Severity:** P1 authorization-boundary hardening.
+- **Finding:** The folder list and copy/move endpoints accepted an app scope from client query/body values, and folder-list filtering accepted a numeric folder ID without checking whether that folder belonged to the caller's authenticated app context.
+- **Fix under validation:** Derive scope server-side from the verified access token (\`STAFF\` → \`ADMIN\`, \`COMPANY\` → \`COMPANY\`, \`CUSTOMER\` → \`WEBSITE\`); ignore client-supplied scope; fail closed for unknown context; verify a requested folder is available in that scope before listing its notifications; reject moves from inactive source folders.
+- **Regression tests added:** Controller tests cover forged \`app\` values, missing context, cross-app folder IDs and scope mapping. Service tests cover inactive source folders and cross-scope destinations.
+- **Status:** Pending CI and migration validation. Do not close the finding until the tests pass and the fix is merged.

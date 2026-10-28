@@ -41,6 +41,8 @@ const mockNotificationService = {
   markAsRead: async (...args) => { calls.markAsRead = args; },
   markAllAsRead: async (...args) => { calls.markAllAsRead = args; },
   deleteNotification: async (...args) => { calls.deleteNotification = args; },
+  getUserFolders: async (...args) => { calls.getUserFolders = args; return fx.folders || []; },
+  changeNotificationFolder: async (...args) => { calls.changeNotificationFolder = args; return { success: true }; },
 };
 
 injectMock('./notification.service', mockNotificationService);
@@ -126,5 +128,59 @@ test('remove: coerces params.id to a number and scopes deletion to the caller', 
   const reply = makeReply();
   await controller.remove(makeRequest({ params: { id: '3' }, user: { id: 9 } }), reply);
   assert.deepEqual(calls.deleteNotification, [3, 9]);
+  assert.deepEqual(reply._body, { success: true });
+});
+
+
+test('listFolders: derives the app scope from verified accessType, ignoring query.app', async () => {
+  fx.folders = [{ id: 4, key: 'INBOX', scope: 'ALL' }];
+  const reply = makeReply();
+  await controller.listFolders(makeRequest({
+    query: { app: 'COMPANY' },
+    user: { id: 7, accessType: 'STAFF' },
+  }), reply);
+  assert.deepEqual(calls.getUserFolders, ['ADMIN']);
+  assert.deepEqual(reply._body, { data: fx.folders });
+});
+
+test('listFolders: fails closed when the token has no recognized app context', async () => {
+  await assert.rejects(
+    () => controller.listFolders(makeRequest({ query: { app: 'ADMIN' }, user: { id: 7 } }), makeReply()),
+    (error) => error.code === 'NOTIFICATION_APP_CONTEXT_REQUIRED' && error.statusCode === 403,
+  );
+  assert.equal(calls.getUserFolders, undefined);
+});
+
+test('list: rejects a folder ID outside the authenticated app scope before querying notifications', async () => {
+  fx.folders = [{ id: 21, key: 'INBOX', scope: 'COMPANY' }];
+  await assert.rejects(
+    () => controller.list(makeRequest({
+      query: { folderId: '22' },
+      user: { id: 7, accessType: 'COMPANY' },
+    }), makeReply()),
+    (error) => error.code === 'FOLDER_NOT_FOUND' && error.statusCode === 404,
+  );
+  assert.deepEqual(calls.getUserFolders, ['COMPANY']);
+  assert.equal(calls.getNotifications, undefined);
+});
+
+test('list: validates folder scope and filters by the accessible folder ID', async () => {
+  fx.folders = [{ id: 12, key: 'SAVED', scope: 'WEBSITE' }];
+  await controller.list(makeRequest({
+    query: { folderId: '12' },
+    user: { id: 7, accessType: 'CUSTOMER' },
+  }), makeReply());
+  assert.deepEqual(calls.getUserFolders, ['WEBSITE']);
+  assert.deepEqual(calls.getNotifications, [7, { page: 1, limit: 20, unreadOnly: false, folderId: 12 }]);
+});
+
+test('changeFolder: derives the app scope from accessType and ignores body.app', async () => {
+  const reply = makeReply();
+  await controller.changeFolder(makeRequest({
+    params: { id: '9' },
+    body: { folderId: 2, action: 'move', app: 'ADMIN', sourceFolderId: 1 },
+    user: { id: 7, accessType: 'COMPANY' },
+  }), reply);
+  assert.deepEqual(calls.changeNotificationFolder, [7, 9, 2, 'move', 'COMPANY', 1]);
   assert.deepEqual(reply._body, { success: true });
 });

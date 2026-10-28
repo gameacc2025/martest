@@ -4,6 +4,16 @@
 
 const notificationService = require('./notification.service');
 
+function resolveNotificationAppScope(request) {
+  const accessType = String(request.user?.accessType || '').toUpperCase();
+  const scopeByAccessType = { STAFF: 'ADMIN', COMPANY: 'COMPANY', CUSTOMER: 'WEBSITE' };
+  const scope = scopeByAccessType[accessType];
+  if (!scope) {
+    throw { statusCode: 403, code: 'NOTIFICATION_APP_CONTEXT_REQUIRED', message: 'دامنه دسترسی برای اعلان‌ها مشخص نیست.' };
+  }
+  return scope;
+}
+
 /**
  * GET /api/v1/notifications
  * Get user's notifications
@@ -11,13 +21,24 @@ const notificationService = require('./notification.service');
 async function list(request, reply) {
   const { page = 1, limit = 20, unreadOnly, readOnly } = request.query;
   const userId = request.user.id;
-  const result = await notificationService.getNotifications(userId, {
+  const options = {
     page: Number(page),
     limit: Number(limit),
     unreadOnly: unreadOnly === 'true',
     ...(readOnly === 'true' ? { readOnly: true } : {}),
-    ...(request.query.folderId ? { folderId: Number(request.query.folderId) } : {}),
-  });
+  };
+
+  if (request.query.folderId) {
+    const appScope = resolveNotificationAppScope(request);
+    const folderId = Number(request.query.folderId);
+    const folders = await notificationService.getUserFolders(appScope);
+    if (!folders.some((folder) => Number(folder.id) === folderId)) {
+      throw { statusCode: 404, code: 'FOLDER_NOT_FOUND', message: 'پوشه در این پنل در دسترس نیست.' };
+    }
+    options.folderId = folderId;
+  }
+
+  const result = await notificationService.getNotifications(userId, options);
   return reply.send(result);
 }
 
@@ -73,7 +94,9 @@ async function remove(request, reply) {
 }
 
 async function listFolders(request, reply) {
-  const data = await notificationService.getUserFolders(String(request.query.app || '').toUpperCase());
+  // App scope is derived from the verified access token, never from a client query.
+  const appScope = resolveNotificationAppScope(request);
+  const data = await notificationService.getUserFolders(appScope);
   return reply.send({ data });
 }
 
@@ -83,7 +106,8 @@ async function changeFolder(request, reply) {
     Number(request.params.id),
     Number(request.body.folderId),
     request.body.action,
-    request.body.app,
+    // Ignore request.body.app; scope comes from the verified access token.
+    resolveNotificationAppScope(request),
     request.body.sourceFolderId === undefined ? null : Number(request.body.sourceFolderId),
   );
   return reply.send(result);

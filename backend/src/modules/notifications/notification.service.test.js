@@ -35,6 +35,11 @@ const calls = {
   delete: [],
   deleteMany: [],
   create: [],
+  folderFindUnique: [],
+  membershipFindUnique: [],
+  membershipUpsert: [],
+  membershipDelete: [],
+  transactions: [],
 };
 let fx;
 function resetMocks() {
@@ -44,6 +49,8 @@ function resetMocks() {
     total: 0,
     found: null, // what findFirst returns
     created: { id: 1 },
+    folders: {},
+    memberships: {},
   };
 }
 resetMocks();
@@ -83,6 +90,28 @@ const mockPrisma = {
       return fx.created;
     },
   },
+  notificationFolder: {
+    findMany: async () => [],
+    findUnique: async ({ where }) => {
+      calls.folderFindUnique.push(where);
+      if (where.id !== undefined) return fx.folders[where.id] || null;
+      return fx.foldersByKey?.[where.key] || null;
+    },
+  },
+  notificationFolderMembership: {
+    findUnique: async ({ where }) => {
+      calls.membershipFindUnique.push(where);
+      const folderId = where.notificationId_folderId.folderId;
+      return fx.memberships[folderId] || null;
+    },
+    upsert: async (args) => { calls.membershipUpsert.push(args); return {}; },
+    delete: async (args) => { calls.membershipDelete.push(args); return {}; },
+  },
+  $transaction: async (operations) => {
+    calls.transactions.push(operations);
+    if (Array.isArray(operations)) return Promise.all(operations);
+    return operations(mockPrisma);
+  },
 };
 
 injectMock('../../config/db', mockPrisma);
@@ -97,6 +126,7 @@ const {
   deleteNotification,
   deleteNotifications,
   createNotification,
+  changeNotificationFolder,
 } = require('./notification.service');
 
 // ── getNotifications ─────────────────────────────────────────
@@ -274,4 +304,32 @@ test('createNotification: persists userId/title/message', async () => {
 
   assert.deepEqual(calls.create[0].data, { userId: 7, title: 't', message: 'm' });
   assert.deepEqual(result, fx.created);
+});
+
+test('changeNotificationFolder: refuses moving from an inactive source folder', async () => {
+  resetMocks();
+  fx.found = { id: 50 };
+  fx.folders[2] = { id: 2, isActive: true, scope: 'COMPANY' };
+  fx.folders[1] = { id: 1, isActive: false, scope: 'COMPANY' };
+  fx.memberships[1] = { notificationId: 50, folderId: 1 };
+
+  await assert.rejects(
+    () => changeNotificationFolder(7, 50, 2, 'move', 'COMPANY', 1),
+    (error) => error.code === 'SOURCE_FOLDER_NOT_FOUND' && error.statusCode === 404,
+  );
+  assert.deepEqual(calls.findFirst[0].where, { id: 50, userId: 7 });
+  assert.deepEqual(calls.folderFindUnique, [{ id: 2 }, { id: 1 }]);
+  assert.equal(calls.transactions.length, 0);
+});
+
+test('changeNotificationFolder: refuses a destination folder from another app scope', async () => {
+  resetMocks();
+  fx.found = { id: 50 };
+  fx.folders[9] = { id: 9, isActive: true, scope: 'ADMIN' };
+
+  await assert.rejects(
+    () => changeNotificationFolder(7, 50, 9, 'copy', 'COMPANY'),
+    (error) => error.code === 'FOLDER_NOT_FOUND' && error.statusCode === 404,
+  );
+  assert.equal(calls.membershipUpsert.length, 0);
 });

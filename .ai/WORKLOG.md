@@ -628,3 +628,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Documentation:** Added notification folder/read-state/bulk action details to \`docs/NOTIFICATION_SYSTEM.md\`; updated this worklog and \`.ai/current-task.md\`.
 - **Browser E2E:** Intentionally not treated as a blocker per owner instruction. No browser pass is claimed.
 - **Next:** Continue reviewing notification API ownership/scope, inquiry access/quotas/response decisions, payment callback idempotency, documentation/source alignment, and the outstanding bundle-size warning. SMTP is not live-verified; SMS is not implemented.
+
+
+## 2026-10-28 — NOTIFICATION-APP-SCOPE-01
+
+- **Status:** IN PROGRESS — security fix and regression tests prepared on \`fix/notification-app-scope-20261028\`.
+- **Finding:** Notification folder APIs accepted a client-supplied app scope (\`query.app\` for folder listing and \`body.app\` for move/copy). An authenticated user could request another panel's folder scope. Listing a folder ID also did not first verify that the folder was visible in the caller's app context.
+- **Fix:** Derive folder scope from verified \`request.user.accessType\`: \`STAFF\` → \`ADMIN\`, \`COMPANY\` → \`COMPANY\`, \`CUSTOMER\` → \`WEBSITE\`. Ignore client app values, reject unknown contexts, and validate folder IDs against the server-derived scope before querying messages. Reject moves from inactive source folders.
+- **Tests:** Added controller regression tests for forged app scope, missing app context, cross-app folder IDs and valid scope mapping. Added service regression tests for inactive source folders and cross-scope destinations.
+- **Docs:** Updated \`docs/NOTIFICATION_SYSTEM.md\` with current folder/bulk endpoints and the server-derived app-scope contract; updated \`.ai/current-task.md\`.
+- **Verification:** Await CI and fresh PostgreSQL migration validation on this branch. Do not claim tests passed before the completed workflow result. Browser E2E is intentionally non-blocking.
