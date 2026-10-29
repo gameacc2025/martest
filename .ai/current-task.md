@@ -4,7 +4,7 @@
 
 **Core code-level findings from the current audit are fixed and merged into `main`.** This is not a release sign-off: live deployment and external integrations are not verified, browser E2E is intentionally not awaited per owner instruction, and an exhaustive route-by-route IDOR certification has not been completed.
 
-Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`. Follow-up direct commits refreshed the quality audit and AI handoff; CI push trigger was subsequently narrowed to canonical main.
+Latest source merge: PR #27, squash commit `7accdd8b2db4a1db046175c19507d76d223bce95` (2026-10-29). CI and database migration validation passed on the merged `main` commit.
 
 ## Recently completed and merged
 
@@ -56,6 +56,16 @@ Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`.
 
 ## 2026-10-29 supplier-context hardening
 
-- Opened PR #27 to make supplier response creation, editing, withdrawal, and attachment management require COMPANY context plus `inquiries.respond`.
-- Regression tests cover STAFF with `leads.update` being denied supplier response submission/edit/withdrawal/attachment deletion.
-- CI and database migration workflows are queued for PR #27. Browser E2E is intentionally not run. Do not mark this task complete until required CI/migration checks pass and the PR is merged.
+- **PR #27 merged:** `7accdd8b2db4a1db046175c19507d76d223bce95`.
+- Supplier response creation, editing, withdrawal, upload, and attachment deletion require COMPANY context plus `inquiries.respond`; STAFF with `leads.update` is denied.
+- Regression tests cover STAFF supplier-response submission/edit/withdraw/attachment deletion.
+- CI run `40826610626` (database migrations) passed on merged `main`; PR CI run `40825349236` passed. Browser E2E was not run or awaited.
+- **Branch cleanup remains:** 18 other non-main refs were audited. Only merge changes that are not already present; old snapshots must not be merged wholesale. The current GitHub connector exposes branch listing but not branch-ref deletion, so remote deletion still needs a supported GitHub deletion action.
+
+
+## 2026-10-29 — selective branch audit
+
+- Refreshed the remote branch inventory after merging PR #27. The supplier-context branch is merged, but GitHub still lists the branch ref.
+- Compared all 18 other non-main branch heads against `main`. Several focused fixes are already present in current `main` (duplicate-response handling, quota expiry lock, notification app scope, payment callback idempotency, RBAC comment accuracy, inquiry response locking, pending-subscription uniqueness). Do not replay these stale snapshots.
+- Large legacy branches (`docs-runtime-e2e-hardening`, `feature/customer-address-management`, `feature/customer-dashboard-foundation`, `feature/inquiry-completion`, `feat/rfq-monetization`, `runtime-validation-main`) diverge by dozens to hundreds of commits; changes must be verified file-by-file and not merged as a whole. Browser E2E additions are not to be pursued per owner instruction.
+- The connected GitHub action set currently supports reading branches but has no branch-ref deletion action. No ref was force-updated or deleted through an unsupported workaround.
