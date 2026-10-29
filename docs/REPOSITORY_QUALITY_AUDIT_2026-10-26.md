@@ -46,7 +46,7 @@ Parent inquiry row locking serializes response submission/edit/withdrawal, buyer
 - CI deprecation traces attribute `url.parse()` to the bundled pnpm self-installer in `pnpm/action-setup@v4` and `punycode` to bundled `actions/setup-node@v4` setup/cache code. These are GitHub Actions toolchain notices, not workspace runtime dependencies. No project dependency upgrade is justified; consider action-version updates separately and validate them.
 - Live Zarinpal payment remains NOT VERIFIED without staging credentials.
 - SMTP remains NOT VERIFIED without credentials and a controlled test recipient.
-- SMS remains NOT IMPLEMENTED.
+- SMS is PARTIALLY IMPLEMENTED: Twilio adapter, worker processing, quota enforcement and unit tests exist; the dispatcher explicitly does not queue SMS rows, so end-to-end event-driven SMS remains incomplete. Live Twilio delivery is NOT VERIFIED.
 - Browser E2E is intentionally not awaited per owner instruction; no browser pass is claimed.
 - Production deployment and exhaustive company-owned endpoint IDOR review are not release-signed-off.
 
@@ -67,14 +67,14 @@ Parent inquiry row locking serializes response submission/edit/withdrawal, buyer
 | API/database/frontend/deployment docs | CORE DOCS ALIGNED | Exhaustive endpoint-schema completeness is not claimed |
 | Live Zarinpal payment | NOT VERIFIED | Requires staging credentials |
 | SMTP delivery | NOT VERIFIED | Requires credentials and controlled recipient |
-| SMS delivery | NOT IMPLEMENTED | Separate scope required |
+| SMS delivery | PARTIAL / NOT VERIFIED | Twilio adapter, worker processing and paid quota/tests exist; dispatcher never queues SMS rows; live provider not verified |
 | Node deprecation warnings in CI | IDENTIFIED, NON-BLOCKING | Call sites are bundled code in `pnpm/action-setup@v4` and `actions/setup-node@v4`; no app dependency change required |
 
 ## Next actions
 
 1. Continue source-level audit of company-owned read/write routes for owner scoping and IDOR, adding tests for any uncovered boundary.
 2. Trace the `url.parse()` / `punycode` warning call sites before considering dependency updates; do not upgrade blindly.
-3. Verify live payment and SMTP only when staging credentials and controlled test accounts are available. SMS is out of scope unless separately implemented.
+3. Verify live payment and SMTP only when staging credentials and controlled test accounts are available. SMS delivery is only partially wired: complete event dispatch/queue integration, opt-in/quota enforcement at queue time, recipient validation, idempotency/retry coverage and controlled Twilio verification.
 4. Keep `.ai/current-task.md`, `.ai/WORKLOG.md`, project context, API docs and this audit updated at every material change.
 5. Browser E2E is not a blocker per owner instruction and must not be reported as passed.
 
@@ -339,7 +339,7 @@ PR #28 is merged as `23576cb1a22f80fea2d245cf10e5915794d4a15c`. The accepted sco
 ### Remaining work
 1. Continue route-by-route company-owned resource authorization/tenant/IDOR review. Existing targeted review did not constitute exhaustive certification.
 2. Port the UI redesign one current page at a time, beginning with the Website homepage; preserve API/data contracts and add tests for behavior.
-3. Run controlled live Zarinpal and SMTP verification only when credentials/environment are supplied. SMS delivery is not implemented.
+3. Run controlled live Zarinpal and SMTP verification only when credentials/environment are supplied. SMS is partially implemented (Twilio adapter/worker/quota/tests); dispatch does not queue SMS rows and live delivery is not verified.
 4. Expand API documentation from module-level source-aligned guidance to exhaustive endpoint/schema/permission coverage.
 5. Consider GitHub Actions toolchain updates separately if deprecation warnings remain; do not change application dependencies for warnings attributed to bundled action code.
 
@@ -348,3 +348,15 @@ Graphify MCP could not be reviewed or refreshed: the tool reported no available 
 
 ### Release-sign-off boundary
 No production deployment, live payment, live SMTP, SMS delivery, exhaustive tenant-security certification, or passing browser smoke is claimed. The CI and migration results above are not a substitute for those operational checks.
+
+
+## Correction — SMS implementation status (2026-10-29 source review)
+
+Earlier entries saying SMS is wholly unimplemented are too broad and are superseded by this correction. The source currently contains:
+- `backend/src/modules/notifications/notification.sms.provider.js`: Twilio REST adapter with configuration/payload validation and timeout/error mapping.
+- `backend/src/modules/notifications/notification.delivery.service.js`: `processPendingSmsDeliveries` with SENT/FAILED/retry tracking.
+- `backend/src/workers/notification-delivery.worker.js`: invokes email and SMS delivery processors.
+- `backend/src/modules/inquiries/inquiry-subscription.service.js`: separately metered SMS quota, plus unit tests.
+- Provider, delivery worker, and quota tests.
+
+**Confirmed gap:** `backend/src/modules/notifications/notification.dispatch.service.js` explicitly marks SMS as not implemented and does not create SMS delivery rows. Therefore end-to-end event-driven SMS is not wired despite the downstream adapter/worker existing. The next SMS task is to integrate dispatch/queue creation with explicit recipient opt-in, phone-number resolution/validation, paid-quota consumption, deduplication, and regression tests. Live Twilio delivery remains NOT VERIFIED without credentials and a controlled recipient.
