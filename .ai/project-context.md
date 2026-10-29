@@ -315,3 +315,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Categories page uses shared design tokens and responsive grid/cards; explicit empty state and accessible loading/error states are added.
 - Preserve `productsStore.getCategories()`, category data fields/IDs, and `router.push({ name: 'products', query: { category: categoryId } })`.
 - Component tests cover live rendering, route/query behavior, loading, empty and error states. CI/build/migration verification pending.
+
+
+## UI redesign handoff after Step 4 merge — 2026-10-29
+
+- Categories PR #32 merged at `50745aa1c83bfb01fe6a7db5cb87c8f33af7b178`.
+- Feature CI [40842352640](https://github.com/gameacc2025/martest/actions/runs/40842352640), migration [40842352602](https://github.com/gameacc2025/martest/actions/runs/40842352602), post-merge CI [40842534524](https://github.com/gameacc2025/martest/actions/runs/40842534524), and post-merge migration [40842534511](https://github.com/gameacc2025/martest/actions/runs/40842534511) passed.
+- Categories preserves `productsStore.getCategories()` and the category-ID query contract to the products route. Empty/loading/error states and route navigation are covered by component tests.
+- Next UI page: `apps/website/src/pages/public/SearchResults.vue`; preserve query parsing, API parameters, result rendering and product-detail navigation.

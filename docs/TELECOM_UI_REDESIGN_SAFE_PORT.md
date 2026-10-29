@@ -120,3 +120,12 @@ Branch: `feat/website-homepage-redesign-step-1`
 - Preserved category store call/data contract and existing products route query.
 - Added component regression tests for loading/render, category navigation, empty and error states.
 - **Verification pending:** do not merge until CI tests/builds and migration validation are inspected.
+
+
+## Step 4 completion — Website Categories (2026-10-29)
+
+- PR [#32](https://github.com/gameacc2025/martest/pull/32) merged as `50745aa1c83bfb01fe6a7db5cb87c8f33af7b178`.
+- Feature CI [40842352640](https://github.com/gameacc2025/martest/actions/runs/40842352640), migration [40842352602](https://github.com/gameacc2025/martest/actions/runs/40842352602), post-merge CI [40842534524](https://github.com/gameacc2025/martest/actions/runs/40842534524), and post-merge migration [40842534511](https://github.com/gameacc2025/martest/actions/runs/40842534511) passed.
+- The page uses shared design tokens, a responsive category grid and accessible loading/error/empty states. Existing category store and products route/query are preserved.
+- The first test run exposed missing slot rendering in shallow-mount stubs; explicit component stubs fixed the test setup and the corrected tests passed.
+- **Next page:** `apps/website/src/pages/public/SearchResults.vue`.

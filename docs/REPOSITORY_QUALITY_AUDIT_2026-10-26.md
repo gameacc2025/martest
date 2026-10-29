@@ -406,3 +406,8 @@ Product Details PR #31 merged at `daf47ff282a2e81162ff0e8e5047337b1973b26e`. Fea
 ## UI redesign step 4 — Categories (pending verification, 2026-10-29)
 
 The Categories page is being ported on `feat/website-categories-redesign-step-4`. Changes preserve the live category store and products route/query contract while adding responsive shared styling, accessible state semantics and an explicit empty state. Component tests cover category render/navigation/loading/empty/error. CI/build/migration validation is pending.
+
+
+## UI redesign step 4 verified and merged — 2026-10-29
+
+Categories PR #32 merged at `50745aa1c83bfb01fe6a7db5cb87c8f33af7b178`. Feature CI [40842352640](https://github.com/gameacc2025/martest/actions/runs/40842352640), feature migration [40842352602](https://github.com/gameacc2025/martest/actions/runs/40842352602), post-merge CI [40842534524](https://github.com/gameacc2025/martest/actions/runs/40842534524), and post-merge migration [40842534511](https://github.com/gameacc2025/martest/actions/runs/40842534511) all passed. Tests cover live category rendering, route/query navigation, loading, empty and error states. Next page is Search Results.

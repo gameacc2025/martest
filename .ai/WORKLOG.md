@@ -1029,3 +1029,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Behavior preserved:** `productsStore.getCategories()`, category fields/IDs, and route push to `name: 'products'` with `query.category`.
 - **Tests:** Live category rendering, route/query contract, pending loading state, empty result and error state.
 - **Verification:** CI, production builds and migration validation pending. No local test/build execution claimed.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-4 — MERGED
+
+- **Status:** MERGED; PR [#32](https://github.com/gameacc2025/martest/pull/32), merge commit `50745aa1c83bfb01fe6a7db5cb87c8f33af7b178`.
+- **Changes:** Categories page uses shared page/container/header/surface tokens, responsive grid/cards, focus treatment, accessible loading/error states and explicit empty state.
+- **Behavior preserved:** `productsStore.getCategories()`, category fields/IDs and navigation to `{ name: 'products', query: { category: categoryId } }`.
+- **Tests:** component tests cover category rendering, route/query, loading, empty and error states.
+- **Test correction:** The first CI run failed because shallow-mounted Card stubs did not render named slots; explicit Card/Button/Badge/Breadcrumb/Spinner stubs were added and tests passed in the corrected run.
+- **Verification:** Feature CI [40842352640](https://github.com/gameacc2025/martest/actions/runs/40842352640) and migration [40842352602](https://github.com/gameacc2025/martest/actions/runs/40842352602) passed. Post-merge CI [40842534524](https://github.com/gameacc2025/martest/actions/runs/40842534524) and migration [40842534511](https://github.com/gameacc2025/martest/actions/runs/40842534511) passed.
+- **Next:** Search Results page as Step 5.
