@@ -41,7 +41,7 @@ This handoff supersedes earlier entries in this file that say PR #28 is open, th
 ### P1 — Verify external operations when safe credentials exist
 - Live Zarinpal payment: **NOT VERIFIED**; requires staging credentials and controlled test transactions.
 - SMTP delivery: **NOT VERIFIED**; requires valid credentials and a controlled recipient.
-- SMS: **NOT IMPLEMENTED**; decide whether to scope and implement a provider, delivery policy, cost controls, retries, and tests.
+- SMS: **PARTIALLY IMPLEMENTED**. Twilio adapter, delivery-worker processing, quota enforcement, and unit tests exist. However, `notification.dispatch.service.js` explicitly never queues SMS rows, so end-to-end event-driven SMS is not wired. Finish dispatch/queue integration with recipient opt-in, paid-quota consumption, phone validation, deduplication/retry tests, and controlled provider verification. Live Twilio delivery remains NOT VERIFIED.
 - Production deployment/readiness: **NOT SIGNED OFF**; no deployment claim is supported by the current audit.
 
 ### P2 — Documentation completeness and maintenance
