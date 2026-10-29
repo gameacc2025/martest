@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-const source = readFileSync(fileURLToPath(new URL('./Home.vue', import.meta.url)), 'utf8')
+const source = readFileSync(resolve(process.cwd(), 'apps/website/src/pages/public/Home.vue'), 'utf8')
 
 describe('Website homepage redesign contracts', () => {
   it('keeps the production API and category store as the source of page data', () => {
