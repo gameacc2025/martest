@@ -307,3 +307,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Product Details keeps the route-ID watcher, product store API, gallery, price tiers, company profile, price-history API, and inquiry permission gate; component tests cover these boundaries.
 - Next UI page is `apps/website/src/pages/public/Categories.vue`; preserve category data, IDs, navigation query and loading/error/empty states.
 - Runtime/browser smoke is separate and not claimed green; browser-test debugging is not the next task.
+
+
+## Active UI redesign — Step 4 Categories (2026-10-29)
+
+- Branch: `feat/website-categories-redesign-step-4`.
+- Categories page uses shared design tokens and responsive grid/cards; explicit empty state and accessible loading/error states are added.
+- Preserve `productsStore.getCategories()`, category data fields/IDs, and `router.push({ name: 'products', query: { category: categoryId } })`.
+- Component tests cover live rendering, route/query behavior, loading, empty and error states. CI/build/migration verification pending.
