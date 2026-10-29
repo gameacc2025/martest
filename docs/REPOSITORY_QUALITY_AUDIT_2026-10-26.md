@@ -421,3 +421,12 @@ Website Search Results redesign is on feature branch `feat/website-search-result
 ## Search Results redesign merge update — 2026-10-29
 
 PR #33 was merged to `main` at `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`. Feature CI [40880947037](https://github.com/gameacc2025/martest/actions/runs/40880947037) and database migration validation [40880947043](https://github.com/gameacc2025/martest/actions/runs/40880947043) passed. Post-merge CI [40881262815](https://github.com/gameacc2025/martest/actions/runs/40881262815) and migration validation [40881262830](https://github.com/gameacc2025/martest/actions/runs/40881262830) were queued at the time of this update. Runtime/browser smoke is tracked separately and is not the next debugging task per owner instruction.
+
+
+## Final verification — Search Results Step 5 (2026-10-29)
+
+- PR #33 merged as `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`.
+- Feature CI [40880947037](https://github.com/gameacc2025/martest/actions/runs/40880947037) and feature migration validation [40880947043](https://github.com/gameacc2025/martest/actions/runs/40880947043) passed.
+- Post-merge CI [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521) passed, and post-merge migration validation [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) passed.
+- Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at browser smoke after Compose validation, image build/start, service health, and migration-state checks passed. Per owner instruction, browser-smoke debugging is not the next task.
+- This is not a release sign-off; live external services, exhaustive tenant/IDOR review, and production readiness remain separate tasks.

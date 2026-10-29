@@ -1061,3 +1061,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Post-merge checks:** CI [40881262815](https://github.com/gameacc2025/martest/actions/runs/40881262815) and migration validation [40881262830](https://github.com/gameacc2025/martest/actions/runs/40881262830) were queued when this entry was written. Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) was also queued. Inspect these before starting the next page.
 - **Browser-smoke constraint:** Feature runtime workflow was still running at the last check. Per owner instruction, do not debug browser smoke as the next task; report its actual outcome when available.
 - **Next page:** Only after post-merge CI/migration are inspected, proceed to the next Website page in the approved sequence.
+
+
+### Post-merge verification result — Search Results Step 5 (2026-10-29)
+
+- **Post-merge CI:** [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521) PASS on `main`, including frontend/shared tests, backend tests, Prisma generation, architecture graph check, and all three frontend builds.
+- **Post-merge database migration validation:** [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) PASS.
+- **Runtime validation:** [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) FAIL at browser smoke. Compose validation, build/start of PostgreSQL/backend/three panels, health endpoints, and migration-state checks passed before browser smoke failed. Per owner instruction, no browser-smoke debugging is started as the next task.
+- **Disposition:** Step 5 is complete and merged. The next Website page may begin; keep the browser smoke failure visible as an operational caveat.

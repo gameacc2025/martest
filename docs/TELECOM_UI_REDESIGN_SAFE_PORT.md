@@ -147,4 +147,9 @@ Branch: `feat/website-homepage-redesign-step-1`
 - Feature CI [40880947037](https://github.com/gameacc2025/martest/actions/runs/40880947037) passed frontend/shared tests, backend tests, Prisma generation, architecture graph check, and all three frontend production builds.
 - Feature database migration validation [40880947043](https://github.com/gameacc2025/martest/actions/runs/40880947043) passed.
 - Search query/store API contract, route query synchronization, filters, sort/pagination, cart/wishlist handlers and product-details navigation were preserved. Regression tests cover query/API behavior, result rendering/normalization, empty/error/retry states, route query updates and product navigation.
-- Post-merge CI [40881262815](https://github.com/gameacc2025/martest/actions/runs/40881262815) and migration validation [40881262830](https://github.com/gameacc2025/martest/actions/runs/40881262830) were pending at the time of this update. Do not begin the next page until those checks are inspected.
+- Post-merge CI [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521) and migration validation [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) passed. Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at browser smoke after Compose/build/start, service health, and migration checks passed. Per owner instruction, browser smoke is not the next debugging task.
+
+
+### Step 5 verification correction — 2026-10-29
+
+The final post-merge checks supersede any earlier “pending” status above: CI run [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521) and migration validation [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) both passed on main. Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at the browser-smoke step after infrastructure and migration checks passed. Do not report the runtime workflow as green.

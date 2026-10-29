@@ -6,7 +6,7 @@
 **Canonical branch:** `main`  
 **Canonical branch:** `main`  
 **Latest merged feature:** Search Results PR #33, squash commit `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`.  
-**Status:** Feature-branch CI and migration validation passed; PR merged. Post-merge CI and migration checks are pending at the time of this update.
+**Status:** PR #33 merged. Feature and post-merge CI/migration validation passed. Runtime validation failed at browser smoke after infrastructure health and migration checks passed; per owner instruction, browser smoke is not the next debugging task.
 
 ## Completed UI steps
 
@@ -19,8 +19,8 @@
 ## Step 5 post-merge verification plan
 
 1. Inspect post-merge CI [40881262815](https://github.com/gameacc2025/martest/actions/runs/40881262815) and migration validation [40881262830](https://github.com/gameacc2025/martest/actions/runs/40881262830).
-2. Record runtime workflow [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) separately; do not pursue browser-smoke debugging as the next task.
-3. Do not start the next page until post-merge CI and migration checks are inspected.
+2. Runtime workflow [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at browser smoke; Compose validation, build/start, service health and migration-state checks passed before it. Per owner instruction, do not pursue browser-smoke debugging as the next task.
+3. Post-merge CI [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521) and migration validation [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) passed. Step 5 is complete; the next page can now be selected.
 
 ## Remaining cross-project backlog
 
