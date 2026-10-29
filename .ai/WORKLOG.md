@@ -915,3 +915,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Pushed via GitHub API to the requested feature branch. `main` unchanged.
 - **Risks / open questions:** This is not the full 32-file patch. Large page replacements must be reconciled individually with current APIs and current routes before any wider merge. Keep PR draft/unmerged while the page-by-page port continues.
 - **Next action:** Review current Website homepage implementation and tests; port only template/style changes while preserving API calls, loading/error states, route behavior and authorization assumptions.
+
+
+### Merge and cleanup handoff — UI-REDESIGN-SAFE-01 (2026-10-29)
+- **Status:** MERGED (partial safe slice); full page-by-page patch port remains incomplete.
+- **PR:** [#28](https://github.com/gameacc2025/martest/pull/28), squash-merged.
+- **Merge commit:** `23576cb1a22f80fea2d245cf10e5915794d4a15c`.
+- **Verification:** CI passed (frontend/shared tests, backend tests, architecture graph, three frontend builds); database migration validation passed. Runtime validation was still in progress at last check.
+- **Branch deletion:** `feat/telecom-ui-redesign-safe` remains present because the connected GitHub toolset does not provide a delete-branch operation. Repository owner can delete it via GitHub UI or `git push origin --delete feat/telecom-ui-redesign-safe`.
+- **Next:** Continue porting the page-level visual changes separately; do not describe the entire 32-file patch as merged.
