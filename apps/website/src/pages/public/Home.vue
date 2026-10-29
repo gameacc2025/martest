@@ -803,7 +803,7 @@ onBeforeUnmount(() => {
   grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
   gap: var(--ds-space-4);
 }
- .product-card {
+.product-card {
   background: var(--ds-color-surface);
   border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg);
   overflow: hidden; cursor: pointer;
