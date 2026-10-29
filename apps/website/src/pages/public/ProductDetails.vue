@@ -1,22 +1,22 @@
 <template>
-  <main class="product-page" dir="rtl">
-    <div class="product-shell">
+  <main class="product-page ds-page" dir="rtl" :aria-busy="loading">
+    <div class="product-shell ds-container">
       <Breadcrumb :home="home" :model="breadcrumbItems" class="product-breadcrumb" />
 
-      <section v-if="loading" class="page-state" aria-live="polite">
+      <section v-if="loading" class="page-state" role="status" aria-live="polite">
         <ProgressSpinner />
         <h1>در حال دریافت اطلاعات محصول</h1>
         <p>چند لحظه صبر کنید...</p>
       </section>
 
-      <section v-else-if="notFound" class="page-state">
+      <section v-else-if="notFound" class="page-state" role="status">
         <span class="state-icon"><i class="pi pi-box"></i></span>
         <h1>محصول پیدا نشد</h1>
         <p>این محصول در دسترس نیست یا ممکن است حذف شده باشد.</p>
         <Button label="بازگشت به محصولات" icon="pi pi-arrow-left" @click="goBack" />
       </section>
 
-      <section v-else-if="loadError" class="page-state">
+      <section v-else-if="loadError" class="page-state" role="alert">
         <span class="state-icon state-icon--error"><i class="pi pi-exclamation-triangle"></i></span>
         <h1>دریافت محصول با مشکل مواجه شد</h1>
         <p>{{ loadError }}</p>
@@ -67,6 +67,7 @@
                   class="thumbnail-button"
                   :class="{ 'thumbnail-button--active': image.url === activeImage }"
                   :aria-label="'نمایش تصویر ' + (index + 1)"
+                  :aria-pressed="image.url === activeImage"
                   @click="selectImage(image.url)"
                 >
                   <img :src="image.url" :alt="'تصویر ' + (index + 1)" />
@@ -216,8 +217,8 @@
               <Button icon="pi pi-times" text rounded severity="secondary" aria-label="بستن" @click="priceHistoryDialogOpen = false" />
             </div>
             <p class="history-disclaimer">این نمودار فقط تغییرات قیمت خرده‌فروشی (قیمت برای حداقل تعداد ۱) را در شش ماه اخیر نشان می‌دهد. سابقه‌ای پیش از فعال‌شدن ثبت تاریخچه به‌صورت خودکار ساخته نمی‌شود.</p>
-            <p v-if="priceHistoryLoading" class="history-empty">در حال دریافت تاریخچه قیمت...</p>
-            <p v-else-if="priceHistoryError" class="history-empty">{{ priceHistoryError }}</p>
+            <p v-if="priceHistoryLoading" class="history-empty" role="status">در حال دریافت تاریخچه قیمت...</p>
+            <p v-else-if="priceHistoryError" class="history-empty" role="alert">{{ priceHistoryError }}</p>
             <div v-else-if="priceHistoryPoints.length" class="price-history-list">
               <div v-for="point in priceHistoryPoints" :key="point.key" class="price-history-point">
                 <span class="history-date">{{ point.label }} · قیمت خرده‌فروشی</span>
@@ -457,16 +458,16 @@ const goBack = () => router.push('/products')
 
 <style scoped>
 .product-page {
-  --pd-accent: var(--primary-color, #01bec2);
-  --pd-accent-soft: color-mix(in srgb, var(--pd-accent) 10%, white);
-  --pd-text: var(--text-color, #172b3a);
-  --pd-muted: var(--text-color-secondary, #718096);
-  --pd-border: var(--surface-border, #e7edf0);
-  --pd-surface: var(--surface-card, #fff);
-  --pd-ground: var(--surface-ground, #f6f9fa);
+  --pd-accent: var(--ds-color-primary, var(--primary-color, #01bec2));
+  --pd-accent-soft: var(--ds-color-primary-soft, color-mix(in srgb, var(--pd-accent) 10%, white));
+  --pd-text: var(--ds-color-text, var(--text-color, #172b3a));
+  --pd-muted: var(--ds-color-text-muted, var(--text-color-secondary, #718096));
+  --pd-border: var(--ds-color-border, var(--surface-border, #e7edf0));
+  --pd-surface: var(--ds-color-surface, var(--surface-card, #fff));
+  --pd-ground: var(--ds-color-background, var(--surface-ground, #f6f9fa));
   direction: rtl;
   min-height: 60vh;
-  padding: 1.5rem 0 4rem;
+  padding: var(--ds-space-6) 0 var(--ds-space-16);
   color: var(--pd-text);
 }
 
@@ -607,7 +608,7 @@ const goBack = () => router.push('/products')
   background: var(--pd-surface);
   border: 1px solid var(--pd-border);
   border-radius: 1rem;
-  box-shadow: 0 4px 18px rgba(20, 48, 60, 0.035);
+  box-shadow: var(--ds-shadow-sm);
 }
 
 .gallery-card {
