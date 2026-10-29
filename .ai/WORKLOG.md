@@ -881,3 +881,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Confirmed core inquiry duplicate-response, quota expiry, notification app-scope, payment callback, RBAC context and inquiry locking fixes are present in current `main`; stale branch variants must not be replayed.
 - Large divergent customer-address/dashboard, inquiry-completion, RFQ and runtime-validation branches remain subject to selective file-level review. Browser E2E work is excluded per owner instruction.
 - Branch-ref deletion is not available through the connected GitHub action set; do not simulate deletion by moving refs. A supported GitHub delete-ref action is needed to complete remote branch cleanup.
+
+
+## 2026-10-29 — BRANCH-AUDIT-03: final selective review
+
+- Re-listed the 19 non-main remote refs and compared each branch head with current `main`.
+- Confirmed no further merge is warranted. The customer address and inquiry/RFQ work are represented by merged PRs #10, #12 and #13; notification/security/concurrency fixes are represented by merged PRs #17–#25; supplier response authorization is merged as PR #27. The customer profile PR #11 was closed as redundant after a direct port; PR #9 was closed after useful changes were selectively ported. PR #26 was diagnostic-only and was correctly not merged.
+- The old feature branches diverge substantially and contain historical snapshots; merging them wholesale risks reverting newer implementation. Validation branches are checkpoints, not product changes. Current `main` already contains the runtime validation workflow.
+- No additional branch content was merged because no unmerged unique implementation was identified. Owner can now delete the listed remote refs, retaining only `main`. Browser E2E was not run or awaited.
