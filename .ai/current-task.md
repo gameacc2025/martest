@@ -20,7 +20,7 @@
 
 ## Current status
 
-**Implementation prepared on the focused branch; verification pending.** Do not merge or mark complete until CI test/build results are inspected. No local test/build execution is claimed.
+**CI tests and all three frontend production builds PASS** on commit `0d33036dfe8480e0b63279ad42b4bf39787e844e` ([run 40839667461](https://github.com/gameacc2025/martest/actions/runs/40839667461)). The new homepage source-contract suite passed as part of frontend/shared tests. Database migration validation and runtime validation are separate workflows and were still pending at the last check. No local test/build execution is claimed; verification is from GitHub Actions.
 
 ## Remaining backlog after this step
 
