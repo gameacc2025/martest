@@ -948,3 +948,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Confirmed missing integration: `backend/src/modules/notifications/notification.dispatch.service.js` explicitly never queues SMS rows and returns `sms.notImplemented`. Admin announcements are IN_APP/EMAIL only.
 - Remaining task: wire supported event dispatch to SMS queue with recipient opt-in, phone validation, paid quota consumption, dedupe/retry tests, then controlled live Twilio verification. Live delivery remains NOT VERIFIED.
 - Updated `.ai/current-task.md`, `.ai/project-context.md`, quality audit, notification system documentation, and project roadmap to reflect the partial implementation accurately.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-1 — Website homepage
+
+- **Status:** Implementation committed to focused branch; verification pending.
+- **Branch:** `feat/website-homepage-redesign-step-1`, based on `main` at `d91b3961e3c775def84d0efe634a4fa82271b9f4`.
+- **Scope:** `apps/website/src/pages/public/Home.vue`; Website test script/config; source-contract regression test; UI porting guide and AI handoff.
+- **Changes:** Applied shared design-system tokens to homepage surfaces, spacing, hero, section typography; improved mobile hero layout; added keyboard activation/focus treatment for category/product tiles.
+- **Behavior preserved by source review:** real `productsApi.list` and `productsStore.getCategories` calls, search/filter behavior, product/category routes, and loading/error/empty states. No API, backend, authentication or authorization logic changed.
+- **Tests:** Added source-contract regression tests for the real API/store calls, route contracts, state branches, keyboard support, and absence of mock-data/auth-bypass switches. These are source-level guards, not component interaction tests.
+- **Verification:** No local runner available through GitHub connector. CI and Website build are pending; do not claim pass until Actions reports success.
+- **Next step after verification:** Port Product Listing page with the same API-first constraints.
