@@ -401,3 +401,8 @@ Product Details is being ported on `feat/website-product-details-redesign-step-3
 ## UI redesign step 3 verified and merged — 2026-10-29
 
 Product Details PR #31 merged at `daf47ff282a2e81162ff0e8e5047337b1973b26e`. Feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392), feature migration validation [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249), post-merge CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985), and post-merge migration validation [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967) all passed. Product Details tests cover route ID load/change, not-found/error, gallery selection, and inquiry permission visibility. Next UI slice is Categories. Runtime/browser smoke is not claimed green.
+
+
+## UI redesign step 4 — Categories (pending verification, 2026-10-29)
+
+The Categories page is being ported on `feat/website-categories-redesign-step-4`. Changes preserve the live category store and products route/query contract while adding responsive shared styling, accessible state semantics and an explicit empty state. Component tests cover category render/navigation/loading/empty/error. CI/build/migration validation is pending.

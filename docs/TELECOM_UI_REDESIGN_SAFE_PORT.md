@@ -111,3 +111,12 @@ Branch: `feat/website-homepage-redesign-step-1`
 - Product Details now consumes shared design tokens for page/surface/text/border/shadow/spacing. Accessible state roles and thumbnail `aria-pressed` were added.
 - Existing product route ID, image selection, price tier logic, company route, price-history API and permission-gated inquiry behavior were preserved.
 - **Next page:** `apps/website/src/pages/public/Categories.vue`.
+
+
+## Step 4 — Categories (in progress, 2026-10-29)
+
+- Branch: `feat/website-categories-redesign-step-4`.
+- Added shared design-system page/header/container/surface styling, responsive category grid, accessible loading/error states and explicit empty state.
+- Preserved category store call/data contract and existing products route query.
+- Added component regression tests for loading/render, category navigation, empty and error states.
+- **Verification pending:** do not merge until CI tests/builds and migration validation are inspected.

@@ -1019,3 +1019,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Behavior preserved:** route-ID loading/watcher, product gallery, retail/bulk price logic, company profile navigation, price-history API, and inquiry submission with existing authentication/permission gate.
 - **Verification:** Feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392) passed all frontend/shared tests (including new Product Details component tests), backend tests, Prisma generation, architecture graph and all three builds. Migration validation [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249) passed. Post-merge main CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985) and migration validation [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967) also passed.
 - **Next:** Categories page as Step 4 on a focused branch. Runtime/browser smoke remains separate and is not claimed passed.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-4 — Categories
+
+- **Status:** Implementation and component regression tests committed on focused branch; verification pending.
+- **Branch:** `feat/website-categories-redesign-step-4`.
+- **Changes:** Shared page/container/header/surface tokens, responsive category grid/cards, focus treatment, accessible loading/error states and explicit empty state.
+- **Behavior preserved:** `productsStore.getCategories()`, category fields/IDs, and route push to `name: 'products'` with `query.category`.
+- **Tests:** Live category rendering, route/query contract, pending loading state, empty result and error state.
+- **Verification:** CI, production builds and migration validation pending. No local test/build execution claimed.
