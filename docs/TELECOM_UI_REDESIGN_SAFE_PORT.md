@@ -153,3 +153,14 @@ Branch: `feat/website-homepage-redesign-step-1`
 ### Step 5 verification correction — 2026-10-29
 
 The final post-merge checks supersede any earlier “pending” status above: CI run [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521) and migration validation [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) both passed on main. Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at the browser-smoke step after infrastructure and migration checks passed. Do not report the runtime workflow as green.
+
+
+## Step 6 — Website About Us (2026-10-29)
+
+- **Branch:** `feat/website-about-us-redesign-step-6`.
+- **Files:** `apps/website/src/pages/public/AboutUs.vue` and new `apps/website/src/pages/public/AboutUs.test.js`.
+- **Changes:** Uses shared design-system tokens, responsive mission/value/how-it-works sections, and an API-backed published-products section with accessible loading/error/empty states.
+- **Content integrity:** Removed unverified hardcoded statistics, fictional team-member details, and partner claims rather than replacing them with another mock dataset.
+- **Behavior preserved:** Existing `productsApi.list({ page: 1, limit: 6, status: 'PUBLISHED' })` request and product-details route.
+- **Tests:** Cover API contract/product rendering, absence of demo content, empty/error/retry behavior and product navigation.
+- **Status:** Feature CI and migration validation pending; do not merge until they pass.

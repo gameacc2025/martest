@@ -1069,3 +1069,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Post-merge database migration validation:** [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) PASS.
 - **Runtime validation:** [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) FAIL at browser smoke. Compose validation, build/start of PostgreSQL/backend/three panels, health endpoints, and migration-state checks passed before browser smoke failed. Per owner instruction, no browser-smoke debugging is started as the next task.
 - **Disposition:** Step 5 is complete and merged. The next Website page may begin; keep the browser smoke failure visible as an operational caveat.
+
+
+## 2026-10-29 — WEBSITE-ABOUT-US-REDESIGN-STEP-6
+
+- **Status:** Implementation and regression tests pushed to `feat/website-about-us-redesign-step-6`; CI and migration verification pending.
+- **Page:** `apps/website/src/pages/public/AboutUs.vue`.
+- **Changes:** Applied shared design-system tokens and responsive layouts; reorganized mission, values, how-it-works and published-products sections; added accessible loading/error/empty states and retry behavior.
+- **Content integrity:** Removed hardcoded unverified usage/order/product/company counts, named team profiles, and partner claims. Retained only non-numeric platform purpose/process copy and real API-backed published products.
+- **Behavior preserved:** `productsApi.list({ page: 1, limit: 6, status: 'PUBLISHED' })`, product price formatting, and `product-details` route navigation.
+- **Tests:** Added `apps/website/src/pages/public/AboutUs.test.js` for request contract, API-backed product rendering, absence of demo metrics/team/partner claims, empty/error/retry states, and product navigation.
+- **Source review follow-ups:** `Companies.vue` is not registered in the current router and references missing CompanyCard/store APIs; `CompanyProfile.vue` calls missing website store methods. These are documented for a dedicated behavior/API-contract task and are not silently changed in this visual slice.
+- **Verification:** No local dependency-equipped checkout was used; await feature CI and migration validation. No local test run is claimed.
+- **Constraints:** No mock data, auth bypass, or fabricated metrics added.
