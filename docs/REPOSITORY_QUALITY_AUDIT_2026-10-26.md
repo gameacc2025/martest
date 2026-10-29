@@ -365,3 +365,11 @@ Earlier entries saying SMS is wholly unimplemented are too broad and are superse
 ## UI redesign step 1 — current branch status (2026-10-29)
 
 The first page-level port is prepared on `feat/website-homepage-redesign-step-1`. It refines the Website homepage using existing design-system tokens, preserves API and route behavior, and adds keyboard activation for category/product tiles. Source-contract regression tests were added. CI and production build results remain pending; this step is not yet marked complete or merged. No browser E2E debugging is included in this task.
+
+
+## Verification update — homepage redesign PR #29 (2026-10-29)
+
+- CI run [40839667461](https://github.com/gameacc2025/martest/actions/runs/40839667461) passed on branch commit `0d33036dfe8480e0b63279ad42b4bf39787e844e`: architecture graph validation, frontend/shared tests, backend tests, Prisma generation, and all three frontend builds.
+- The first test attempt exposed an invalid `fileURLToPath(import.meta.url)` assumption under Vitest's transform. The test now resolves the source using the current working directory and checks both repository-root and app-root paths; the corrected test passed in CI.
+- Database migration validation was still running at the time of this update. Runtime validation is a separate workflow and is not being debugged as part of this task.
+- The page-level redesign remains on PR #29 and is not merged.
