@@ -33,13 +33,21 @@ The shared foundation described here has been merged in PR #28. The remaining pa
 
 ## Verification record
 
-- GitHub Actions CI run [40832326705](https://github.com/gameacc2025/martest/actions/runs/40832326705): **PASS** — architecture graph check, frontend/shared tests (including the new MegaMenu tests), backend tests, Prisma client generation, and builds for all three frontend apps.
-- Database migration validation run [40832326749](https://github.com/gameacc2025/martest/actions/runs/40832326749): **PASS**.
-- Runtime validation run [40832326683](https://github.com/gameacc2025/martest/actions/runs/40832326683): still running when recorded; not claimed passed. Browser smoke-test outcome is not verified here.
-- No local build/test command was run in this session; verification above is from the actual GitHub Actions runs.
+- Latest main CI run [40833114382](https://github.com/gameacc2025/martest/actions/runs/40833114382): **PASS** — architecture graph check, frontend/shared tests (including MegaMenu regression tests), backend tests, Prisma client generation, and builds for all three frontend apps.
+- Latest database migration validation [40833114529](https://github.com/gameacc2025/martest/actions/runs/40833114529): **PASS**.
+- Latest runtime validation [40833114464](https://github.com/gameacc2025/martest/actions/runs/40833114464): **FAIL** at the browser-smoke step. Compose configuration, image build/start, service health endpoints and migration-state checks passed before browser smoke. Per owner instruction, browser tests are not the next debugging task; this workflow must not be described as green.
+- No local build/test command was run during this review; the evidence above is from GitHub Actions.
+- Graphify MCP review/update is blocked because no workspace is available/selected for this agent. This is distinct from the repository-generated architecture graph, whose CI check passed.
 
 ## Merge record
 
 - PR [#28](https://github.com/gameacc2025/martest/pull/28) was squash-merged to `main` as `23576cb1a22f80fea2d245cf10e5915794d4a15c`.
 - The safe shared UI foundation is merged; the broader page-by-page redesign remains incomplete.
 - Branch cleanup is pending manual deletion because the available GitHub connector actions do not include branch deletion.
+
+
+## Current follow-up status — 2026-10-29
+
+- Only `main` appeared in the latest remote branch inventory.
+- The next port should begin with the current Website homepage and be delivered as a separate focused change. The patch is not complete until the intended page-level visual changes have been reconciled with current API-backed code.
+- Treat the latest runtime browser-smoke failure as recorded evidence, not as a passing check. Do not pursue browser-test debugging as the next task under the current owner instruction.
