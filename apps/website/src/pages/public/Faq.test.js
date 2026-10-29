@@ -60,8 +60,11 @@ describe('Website FAQ', () => {
     expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('true')
   })
 
-  it('does not promise unsupported checkout, installment, return, or order-tracking flows', () => {
+  it('does not promise unsupported checkout, installment, return, or order-tracking flows', async () => {
     wrapper = mountFaq()
+    for (const question of wrapper.findAll('.faq-question')) {
+      await question.trigger('click')
+    }
     const text = wrapper.text()
 
     expect(text).not.toContain('خرید اقساطی')
