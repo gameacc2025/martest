@@ -40,7 +40,7 @@ Admin routes are registered under the admin API prefix (verify the registration 
 | GET | `/notifications/delivery-stats` | `delivery.view` | Read delivery statistics |
 | GET | `/notifications/deliveries` | `delivery.view` | List delivery attempts/results |
 
-Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, and `STAFF`. Supported send channels are `IN_APP` and `EMAIL`; SMS is not enabled by this contract. Request schema limits and accepted values are defined in `backend/src/modules/admin/admin.routes.js` and must remain the source of truth.
+Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, and `STAFF`. Admin announcement send channels are `IN_APP` and `EMAIL`; SMS is not enabled for announcements. Separately, the repository has a Twilio SMS adapter, delivery-worker path, paid SMS quota enforcement, and unit tests, but the central event dispatcher explicitly does not queue SMS delivery rows, so event-driven SMS is not end-to-end wired. Request schema limits and accepted announcement values are defined in `backend/src/modules/admin/admin.routes.js` and remain the source of truth.
 
 ## Frontend entry points
 
@@ -72,7 +72,7 @@ The Inquiry service dispatches catalog events through `notification.dispatch.ser
 - `INQUIRY_RESPONSE_REJECTED`: delivered when the buyer manually rejects one quote.
 - `INQUIRY_RESPONSE_AUTO_REJECTED`: delivered to pending suppliers whose quotes are rejected atomically after another quote is selected.
 
-The dispatcher applies each recipient's channel preferences, persists in-app notifications and queues email deliveries transactionally, and deduplicates event dispatch. SMS remains unavailable. Scheduled publishing and auto-expiry are processed by the backend inquiry lifecycle worker; manual browser verification and live SMTP delivery still require a configured environment.
+The dispatcher applies each recipient's channel preferences, persists in-app notifications and queues email deliveries transactionally, and deduplicates event dispatch. SMS preferences and downstream provider/worker/quota pieces exist, but the dispatcher currently reports SMS as `notImplemented` and does not queue SMS rows. Complete that integration before describing event-driven SMS as available. Scheduled publishing and auto-expiry are processed by the backend inquiry lifecycle worker; live SMTP/Twilio delivery still requires a configured environment and controlled verification.
 
 ## Delivery and operational requirements
 
@@ -161,3 +161,11 @@ Interaction contract:
 - UI regression tests cover paginated rendering, legacy notifications with null types, stable folder counts when switching folders, double-click read behavior, bulk read state, and failed read requests. Backend unit and route tests cover ownership scoping, bulk ID validation, and the notification API wiring.
 
 Do not claim a browser E2E run passed unless a completed Playwright job explicitly reports success. Unit tests and the CI browser job are separate evidence.
+
+
+## SMS implementation boundary — source rechecked 2026-10-29
+
+- Present: Twilio adapter (`notification.sms.provider.js`), SMS outbox processing/retry in `notification.delivery.service.js`, worker invocation in `notification-delivery.worker.js`, paid SMS quota accounting, and unit tests.
+- Missing integration: `notification.dispatch.service.js` intentionally never queues SMS rows and returns `sms.notImplemented`. The channel therefore is not end-to-end available for notification events.
+- Follow-up: queue SMS only for explicit user opt-in and supported events; resolve and validate recipient phone; consume the paid quota safely before queueing; add dedupe and failure/retry regression tests; verify with configured Twilio credentials and a controlled recipient.
+- Status: **PARTIAL / live provider NOT VERIFIED**. Admin announcements remain IN_APP/EMAIL only.
