@@ -1556,3 +1556,49 @@ Agents must inspect Git state before edits, preserve user changes, diagnose befo
 # 31. Notification System Documentation
 
 The current notification route inventory, user preferences, admin announcement endpoints, frontend entry points, and SMTP verification requirements are documented in `docs/NOTIFICATION_SYSTEM.md`. When notification implementation changes, update that document and the relevant API docs in the same task. Live SMTP delivery must be marked NOT VERIFIED unless tested with configured credentials and a real delivery path.
+
+
+---
+
+# 44. وضعیت واقعی پروژه و برنامه کار بعدی — 2026-10-29
+
+این بخش وضعیت اجرایی فعلی را مشخص می‌کند و برای وضعیت تکمیل قابلیت‌ها از حدس یا صرفاً از roadmap قدیمی استفاده نمی‌کند. در صورت اختلاف با فازهای برنامه‌ریزی‌شده قدیمی، وضعیت مشاهده‌شده در سورس، تست‌ها و گزارش کیفیت ملاک است.
+
+## وضعیت تأییدشده
+
+- شاخه مرجع `main` است. آخرین جست‌وجوی شاخه‌های ریموت فقط `main` را برگرداند؛ این مشاهده، وضعیت شاخه‌های محلی کاربر را مشخص نمی‌کند.
+- PR #28 فقط زیربنای مشترک بازطراحی UI را ادغام کرده است: design tokenها، primitiveهای اختیاری صفحه، ظاهر MegaMenu، تست رگرسیون و راهنمای انتقال امن. بازطراحی کامل فایل‌های patch انجام نشده است.
+- CI اجراشده روی commit بررسی‌شده موفق بوده است: تست‌های frontend/shared، backend، تولید Prisma Client، بررسی گراف معماری و build هر سه پنل.
+- اعتبارسنجی migration دیتابیس موفق بوده است.
+- Runtime validation در مرحله browser smoke شکست خورده؛ مراحل Compose، ساخت/اجرای سرویس‌ها، health check و بررسی migration پیش از آن موفق بوده‌اند. طبق دستور مالک پروژه، این مورد در حال حاضر کار بعدی برای عیب‌یابی نیست و نباید موفق گزارش شود.
+- Graphify MCP به دلیل نبود workspace قابل انتخاب بررسی یا به‌روزرسانی نشد. این محدودیت از architecture graph تولیدشده داخل repository جداست؛ بررسی آن در CI موفق بوده است.
+
+## کارهای باقی‌مانده به ترتیب اولویت
+
+### اولویت ۱ — انتقال امن بازطراحی UI
+1. صفحه اصلی Website را از روی `main` فعلی بررسی کن.
+2. فقط تغییرات template/style سازگار را انتقال بده؛ API، مجوزها، routeها، داده واقعی، loading/error/empty states و mutationها باید حفظ شوند.
+3. برای رفتارهای تغییرکرده تست رگرسیون بنویس و تست‌های هدفمند و build همان پنل را اجرا کن.
+4. سپس صفحه بعدی را شروع کن؛ patch قدیمی را یک‌جا اعمال نکن و mock data یا auth bypass وارد محصول نکن.
+
+### اولویت ۱ — تکمیل بازبینی امنیت و مالکیت داده
+- بررسی route به route برای endpointهای شرکت و خطر IDOR/tenant leakage ادامه یابد.
+- بررسی هدفمند قبلی به معنی تأیید امنیت کامل نیست. هر شکاف تأییدشده باید با تست رگرسیون بسته شود.
+
+### اولویت ۱ — سرویس‌های بیرونی و آمادگی عملیاتی
+- پرداخت زرين‌پال: **تأیید زنده نشده**؛ به staging و اعتبارنامه معتبر نیاز دارد.
+- ارسال SMTP: **تأیید زنده نشده**؛ به اعتبارنامه و گیرنده آزمایشی کنترل‌شده نیاز دارد.
+- SMS: **پیاده‌سازی نشده**؛ قبل از توسعه، provider، سیاست هزینه، retry، گزارش وضعیت و تست‌ها باید در scope تعریف شود.
+- استقرار production و آمادگی عملیاتی: **تأیید نهایی نشده**.
+
+### اولویت ۲ — تکمیل مستندات و نگهداری
+- مستندات API در سطح ماژول و منبع فعلی همگام شده‌اند؛ پوشش کامل همه endpointها، schemaها و مجوزها هنوز ادعا نمی‌شود.
+- هشدارهای deprecation مربوط به ابزارهای GitHub Actions را جداگانه بررسی کن؛ dependencyهای برنامه را صرفاً به خاطر هشدارهای کد bundled اکشن‌ها ارتقا نده.
+- فایل‌های `.ai/current-task.md`، `.ai/WORKLOG.md`، `.ai/project-context.md`، این roadmap و گزارش کیفیت را در هر تغییر مهم به‌روز نگه دار.
+
+## محدودیت‌های غیرقابل مذاکره
+
+- مرز AccessProfile/app context با نقش SUPER_ADMIN یا wildcard دور زده نمی‌شود.
+- invariants مربوط به قفل‌گذاری پاسخ استعلام، جلوگیری از پاسخ تکراری، idempotency پرداخت و انقضای سهمیه باید حفظ شوند.
+- سبد خرید، checkout، سفارش و wishlist طبق تصمیم معماری فعلی قابلیت‌های آینده/غیرفعال هستند و نباید ناخواسته فعال شوند.
+- تست مرورگر در این مرحله کار بعدی نیست؛ نتیجه شکست‌خورده باید صادقانه ثبت شود، نه اینکه موفق اعلام شود.
