@@ -273,3 +273,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Website homepage source-contract tests are source-level guards, not component interaction tests. The initial path-resolution failure was fixed; the corrected tests passed.
 - Next page is `apps/website/src/pages/public/ProductListing.vue`. Inspect existing API/store/query/pagination/filter contracts before styling; do not apply the legacy patch wholesale.
 - Keep each page port isolated, tested and documented. No browser smoke debugging as the next task.
+
+
+## Active UI redesign — Step 2 Product Listing (2026-10-29)
+
+- Branch: `feat/website-product-listing-redesign-step-2`, based on main after merged homepage PR #29.
+- `ProductListing.vue` is being restyled with the shared design system; API/store data flow, query category initialization/watch, filters, pagination and product-details route must remain intact.
+- Product cards now support keyboard activation/focus. Loading/error/empty regions expose appropriate live/accessibility semantics.
+- New component tests cover category query params, keyboard navigation, error/empty states and query watcher behavior. CI/build verification is pending.

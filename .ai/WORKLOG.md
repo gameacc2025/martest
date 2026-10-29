@@ -979,3 +979,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Behavior:** Real `productsApi.list` and `productsStore.getCategories` calls, route contracts, filters and loading/error/empty states remain intact. No backend/API/auth changes or mock data were introduced.
 - **Runtime boundary:** Runtime/browser smoke is separate and not claimed green. Per owner instruction, browser-smoke debugging is not the next task.
 - **Next:** Inspect post-merge main CI/migration results, then begin Product Listing page as Step 2 on a focused branch.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-2 — Product Listing
+
+- **Status:** Implementation and tests committed on focused branch; verification pending.
+- **Branch:** `feat/website-product-listing-redesign-step-2`, based on main after homepage PR #29 and its documentation handoff.
+- **Source reviewed:** `apps/website/src/pages/public/ProductListing.vue`, products store, Website router and existing Website test patterns.
+- **Changes:** Added page heading using shared design tokens, refined filter card/product grid/price badge/pagination styling, associated search/category labels with inputs, gave min/max price inputs accessible labels, added live/loading/error/empty semantics, and keyboard activation/focus for product tiles.
+- **Behavior preserved:** `productsStore.getCategories()`, `productsStore.getProducts(params)`, initial category query, query watcher, filters/pagination, and `product-details` route.
+- **Tests added:** component-level tests for initial query/API params, keyboard navigation, error/empty states and reactive route-query category changes.
+- **Verification:** CI/build/migration results pending. No local test/build run is claimed.

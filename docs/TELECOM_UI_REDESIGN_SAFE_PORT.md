@@ -74,3 +74,12 @@ Branch: `feat/website-homepage-redesign-step-1`
 - The homepage keeps its existing API/store data flow, routes, filter semantics and loading/error/empty states. Keyboard activation and focus visibility were added to category/product tiles.
 - Post-merge workflows on `main` are separate and must be inspected before the next page starts. Runtime/browser smoke is not claimed green and is not the next debugging task.
 - **Next page:** `apps/website/src/pages/public/ProductListing.vue`, one focused branch/PR at a time.
+
+
+## Step 2 — Product Listing (in progress, 2026-10-29)
+
+- Branch: `feat/website-product-listing-redesign-step-2`.
+- Updated page header, filter card, product grid, price badge, pagination surface, accessible filter labels and product-tile keyboard interaction.
+- Preserved store/API calls, category query initialization and watcher, filter/pagination parameters, and the existing product-details route.
+- Added component tests for API params, route query updates, keyboard navigation, error and empty states.
+- **Verification pending:** do not mark this step complete or merge until CI tests and all frontend builds pass; inspect database migration validation separately.
