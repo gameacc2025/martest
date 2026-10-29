@@ -990,3 +990,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Behavior preserved:** `productsStore.getCategories()`, `productsStore.getProducts(params)`, initial category query, query watcher, filters/pagination, and `product-details` route.
 - **Tests added:** component-level tests for initial query/API params, keyboard navigation, error/empty states and reactive route-query category changes.
 - **Verification:** CI/build/migration results pending. No local test/build run is claimed.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-2 — MERGED
+
+- **Status:** MERGED; PR [#30](https://github.com/gameacc2025/martest/pull/30), merge commit `91c64bb1a43553ecb1214b4a50c1bb0efa5f7ac2`.
+- **Changes:** Shared design-system page heading/surface/grid/pagination styling; associated filter labels and accessible min/max price labels; loading/error/empty live-state semantics; keyboard product-tile activation/focus.
+- **Behavior preserved:** `productsStore.getCategories()`, `productsStore.getProducts(params)`, category query initialization/watch, filter and pagination semantics, and `product-details` route.
+- **Verification:** Feature-branch CI [40840764762](https://github.com/gameacc2025/martest/actions/runs/40840764762) passed architecture graph validation, frontend/shared tests including Product Listing component tests, backend tests, Prisma generation and all three frontend builds. Migration validation [40840764653](https://github.com/gameacc2025/martest/actions/runs/40840764653) passed.
+- **Post-merge:** Main CI/migration/runtime workflows were queued on merge commit and must be checked before Step 3 starts.
+- **Next:** Product Details page, one focused branch/PR at a time; preserve inquiry/cart/data behavior.

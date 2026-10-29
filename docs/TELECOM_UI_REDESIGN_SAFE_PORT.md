@@ -83,3 +83,13 @@ Branch: `feat/website-homepage-redesign-step-1`
 - Preserved store/API calls, category query initialization and watcher, filter/pagination parameters, and the existing product-details route.
 - Added component tests for API params, route query updates, keyboard navigation, error and empty states.
 - **Verification pending:** do not mark this step complete or merge until CI tests and all frontend builds pass; inspect database migration validation separately.
+
+
+## Step 2 completion — Website Product Listing (2026-10-29)
+
+- PR [#30](https://github.com/gameacc2025/martest/pull/30) merged as `91c64bb1a43553ecb1214b4a50c1bb0efa5f7ac2`.
+- Feature-branch CI [40840764762](https://github.com/gameacc2025/martest/actions/runs/40840764762) passed architecture graph, frontend/shared tests including Product Listing component tests, backend tests, Prisma generation and all three frontend builds.
+- Feature-branch migration validation [40840764653](https://github.com/gameacc2025/martest/actions/runs/40840764653) passed.
+- Product Listing preserves the existing store/API contract, category query initialization/watch, filters, pagination and product-details route. Keyboard activation/focus and accessible state semantics were added.
+- Post-merge main workflows are separate and must be inspected before Step 3 starts.
+- **Next page:** `apps/website/src/pages/public/ProductDetails.vue`.

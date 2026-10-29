@@ -281,3 +281,12 @@ Usage consumption must validate the active subscription after acquiring its row 
 - `ProductListing.vue` is being restyled with the shared design system; API/store data flow, query category initialization/watch, filters, pagination and product-details route must remain intact.
 - Product cards now support keyboard activation/focus. Loading/error/empty regions expose appropriate live/accessibility semantics.
 - New component tests cover category query params, keyboard navigation, error/empty states and query watcher behavior. CI/build verification is pending.
+
+
+## UI redesign handoff after Step 2 merge — 2026-10-29
+
+- Product Listing PR #30 merged at `91c64bb1a43553ecb1214b4a50c1bb0efa5f7ac2`.
+- Feature-branch CI [40840764762](https://github.com/gameacc2025/martest/actions/runs/40840764762) and migration validation [40840764653](https://github.com/gameacc2025/martest/actions/runs/40840764653) passed. The new component tests cover initial category query params, keyboard navigation, error/empty states and reactive category query updates.
+- Product Listing keeps existing store/API calls, route-query semantics, filters, pagination and product-details route.
+- Next page is `apps/website/src/pages/public/ProductDetails.vue`; preserve API/store data flow, route ID, inquiry/cart behavior, permissions and loading/not-found/error states.
+- Inspect post-merge main CI/migration checks before starting the next page. Browser smoke debugging remains out of scope per owner instruction.
