@@ -1,24 +1,32 @@
 <template>
-  <div class="products-page">
+  <main class="products-page ds-page" aria-labelledby="products-page-title">
 
     <!-- Breadcrumb as page title -->
-    <div class="breadcrumb-wrap">
-      <Breadcrumb :home="home" :model="items" />
-    </div>
+    <header class="listing-page-header">
+      <div class="listing-heading-copy">
+        <span class="ds-eyebrow">بازارگاه تجهیزات مخابراتی</span>
+        <h1 id="products-page-title" class="ds-h1">محصولات</h1>
+        <p class="ds-lead">محصولات را با جستجو، دسته‌بندی و محدوده قیمت پیدا کنید.</p>
+      </div>
+      <div class="breadcrumb-wrap">
+        <Breadcrumb :home="home" :model="items" />
+      </div>
+    </header>
 
     <!-- Two Column Layout: Filters (right) + Products (left) -->
     <div class="products-grid-layout">
 
       <!-- Right: Filters Sidebar -->
-      <aside class="filters-sidebar">
-        <Card class="filters-card">
+      <aside class="filters-sidebar" aria-label="فیلتر محصولات">
+        <Card class="filters-card ds-card">
           <template #content>
             <div class="filters-inner">
               <!-- Search -->
               <div class="filter-group">
-                <label>جستجو</label>
+                <label for="product-search">جستجو</label>
                 <div class="p-inputgroup">
                   <InputText
+                    id="product-search"
                     v-model="searchQuery"
                     placeholder="نام محصول..."
                     @keyup.enter="applyFilters"
@@ -30,8 +38,9 @@
 
               <!-- Category -->
               <div class="filter-group">
-                <label>دسته‌بندی</label>
+                <label for="product-category">دسته‌بندی</label>
                 <Select
+                  inputId="product-category"
                   v-model="selectedCategory"
                   :options="categoryOptions"
                   optionLabel="name"
@@ -47,6 +56,8 @@
                 <label>محدوده قیمت</label>
                 <div class="price-range">
                   <InputNumber
+                    inputId="minimum-price"
+                    aria-label="حداقل قیمت"
                     v-model="minPrice"
                     placeholder="از"
                     class="w-full"
@@ -54,6 +65,8 @@
                   />
                   <span class="price-separator">تا</span>
                   <InputNumber
+                    inputId="maximum-price"
+                    aria-label="حداکثر قیمت"
                     v-model="maxPrice"
                     placeholder="تا"
                     class="w-full"
@@ -73,23 +86,23 @@
       </aside>
 
       <!-- Left: Products -->
-      <div class="products-main">
+      <section class="products-main" aria-label="فهرست محصولات" aria-live="polite" :aria-busy="loading">
 
         <!-- Loading -->
-        <div v-if="loading" class="state-box">
+        <div v-if="loading" class="state-box" role="status">
           <ProgressSpinner />
           <p>در حال دریافت محصولات...</p>
         </div>
 
         <!-- Error -->
-        <div v-else-if="error" class="state-box error">
+        <div v-else-if="error" class="state-box error" role="alert">
           <i class="pi pi-exclamation-circle"></i>
           <h3>خطا</h3>
           <p>{{ error }}</p>
         </div>
 
         <!-- Empty -->
-        <div v-else-if="products.length === 0" class="state-box">
+        <div v-else-if="products.length === 0" class="state-box" role="status">
           <i class="pi pi-search"></i>
           <h3>هیچ محصولی یافت نشد</h3>
           <p>با فیلترهای فعلی هیچ محصولی یافت نشد</p>
@@ -106,7 +119,11 @@
               v-for="product in products"
               :key="product.id"
               class="product-card"
+              role="link"
+              tabindex="0"
               @click="goToProduct(product)"
+              @keydown.enter.prevent="goToProduct(product)"
+              @keydown.space.prevent="goToProduct(product)"
             >
               <div class="product-image">
                 <img
@@ -139,9 +156,9 @@
             />
           </div>
         </template>
-      </div>
+      </section>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -293,6 +310,9 @@ watch(() => route.query.category, (newVal) => {
 .products-page {
   direction: rtl;
   width: 100%;
+  background:
+    radial-gradient(ellipse at 8% 0%, color-mix(in srgb, var(--ds-color-primary) 6%, transparent), transparent 32rem),
+    var(--ds-color-background);
   max-width: var(--ds-container-max-wide);
   margin-inline: auto;
   padding-inline: var(--ds-container-pad);
@@ -318,8 +338,19 @@ watch(() => route.query.category, (newVal) => {
   }
 }
 
-/* Breadcrumb */
-.breadcrumb-wrap { margin-bottom: var(--ds-space-4); }
+/* Page header */
+.listing-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-4);
+  margin-bottom: var(--ds-space-6);
+}
+.listing-heading-copy { min-width: 0; }
+.listing-heading-copy .ds-h1 { margin: 0; }
+.listing-heading-copy .ds-lead { max-width: 42rem; }
+.breadcrumb-wrap { margin-top: var(--ds-space-2); }
 
 /* Two Column Layout */
 .products-grid-layout {
@@ -335,8 +366,11 @@ watch(() => route.query.category, (newVal) => {
   top: 5rem;
   align-self: start;
 }
-.filters-card { border-radius: var(--ds-radius-lg); }
-.filters-card :deep(.p-card-content) { padding: var(--ds-space-4); }
+.filters-card {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-sm);
+}
+.filters-card :deep(.p-card-content) { padding: var(--ds-space-5); }
 .filters-inner {
   display: flex;
   flex-direction: column;
@@ -373,16 +407,21 @@ watch(() => route.query.category, (newVal) => {
   min-height: 400px;
 }
 .products-count {
-  font-size: 0.85rem;
-  color: var(--text-color-secondary);
-  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 2.5rem;
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  color: var(--ds-color-text-muted);
+  margin-bottom: var(--ds-space-3);
 }
 
 /* Products Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  gap: var(--ds-space-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: var(--ds-space-5);
 }
 
 .product-card {
@@ -393,10 +432,15 @@ watch(() => route.query.category, (newVal) => {
   cursor: pointer;
   transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
 }
-.product-card:hover {
-  box-shadow: var(--ds-shadow-lg);
-  transform: translateY(-2px);
+.product-card:hover,
+.product-card:focus-visible {
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-3px);
   border-color: var(--ds-color-primary);
+}
+.product-card:focus-visible {
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 3px;
 }
 
 .product-image {
@@ -424,10 +468,10 @@ watch(() => route.query.category, (newVal) => {
 }
 .product-price-badge {
   position: absolute;
-  bottom: 0.5rem;
-  inset-inline-end: 0.5rem;
-  background: var(--primary-color);
-  color: #fff;
+  bottom: 0.75rem;
+  inset-inline-end: 0.75rem;
+  background: var(--ds-color-brand-dark);
+  color: var(--ds-color-on-brand);
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.2rem 0.5rem;
@@ -481,10 +525,12 @@ watch(() => route.query.category, (newVal) => {
 
 /* Pagination */
 .pagination-wrap {
-  margin-top: 1.5rem;
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: 0.75rem;
+  margin-top: var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
 }
 
 /* Responsive */
