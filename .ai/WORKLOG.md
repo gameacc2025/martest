@@ -1105,3 +1105,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Added `apps/website/src/pages/public/CompanyProfile.test.js` for query contract, route ID updates, empty/error/retry states, product navigation and pagination.
 - **Base:** `e7d9a50d6fe86097d1286507d5249c026467b483`.
 - **Constraints:** No backend endpoint, authorization change, mock data, or public private-company fields added. Await feature CI and migration validation; no local tests claimed.
+
+
+## 2026-10-29 — WEBSITE-COMPANY-PROFILE-CONTRACT-STEP-7-COMPLETE
+
+- **Status:** PR #35 merged to `main` as `59c9dc201e6bd896a7a1ca5e599d9b4f31426659`.
+- **Feature CI:** [40883463184](https://github.com/gameacc2025/martest/actions/runs/40883463184) PASS.
+- **Feature migration validation:** [40883463227](https://github.com/gameacc2025/martest/actions/runs/40883463227) PASS.
+- **Post-merge CI:** [40883640234](https://github.com/gameacc2025/martest/actions/runs/40883640234) PASS.
+- **Post-merge migration validation:** [40883640581](https://github.com/gameacc2025/martest/actions/runs/40883640581) PASS.
+- **Runtime validation:** [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) was still in progress at last check; no result claimed.
+- **Contract:** Company Profile now uses public catalog `getProducts({ page, limit, companyId })`, which is explicitly filtered to PUBLISHED + PUBLIC by the backend. Unsupported review/follow UI was removed; no backend authorization was weakened.
+- **Next:** Audit Companies directory because it is unrouted, references a missing component and missing store methods, while backend `GET /companies` is STAFF-only.

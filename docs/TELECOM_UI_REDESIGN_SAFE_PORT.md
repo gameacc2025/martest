@@ -184,3 +184,12 @@ The final post-merge checks supersede any earlier “pending” status above: CI
 - **Removed:** Unsupported review and follow actions. No backend endpoint or authorization rule was invented or weakened.
 - **Tests:** Cover API params, route ID changes, empty/error/retry, product navigation and pagination.
 - **Status:** Feature CI and migration validation pending; do not merge until they pass.
+
+
+## Step 7 completion — Company Profile public-catalog contract (2026-10-29)
+
+- PR [#35](https://github.com/gameacc2025/martest/pull/35) merged as `59c9dc201e6bd896a7a1ca5e599d9b4f31426659`.
+- Feature CI [40883463184](https://github.com/gameacc2025/martest/actions/runs/40883463184), feature migration [40883463227](https://github.com/gameacc2025/martest/actions/runs/40883463227), post-merge CI [40883640234](https://github.com/gameacc2025/martest/actions/runs/40883640234), and post-merge migration [40883640581](https://github.com/gameacc2025/martest/actions/runs/40883640581) passed.
+- The public Company Profile uses the public catalog endpoint filtered by company ID, which enforces PUBLISHED + PUBLIC. Reviews/follows were removed because no supporting routes/store/schema were found.
+- Runtime validation [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) was still running at last check; no result is claimed.
+- **Next:** Resolve the Companies directory routing/API contract before redesigning it.

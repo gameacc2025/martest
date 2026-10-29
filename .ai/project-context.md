@@ -339,3 +339,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - The public `GET /products` catalog explicitly supports `companyId` filtering and clamps anonymous/public results to `PUBLISHED + PUBLIC`; its public product select includes company id/name/type only.
 - Branch `fix/website-company-profile-api-contract-step-7` adapts the routed public Company Profile page to that supported public catalog contract, removing unsupported review/follow features instead of inventing endpoints. Regression tests and CI/migration validation are pending.
 - This avoids exposing private company data or bypassing company route authorization.
+
+
+## Company directory contract finding — 2026-10-29
+
+- `apps/website/src/pages/public/Companies.vue` is not registered in the Website router. It imports a `CompanyCard.vue` path absent from the current Git tree and calls `getFeaturedCompanies/followCompany/unfollowCompany`, which are not exported from the current website company store.
+- Backend `GET /companies` is explicitly restricted to STAFF context with `companies.read`; it must not be made public by merely changing frontend routing.
+- Step 7 PR #35 merged as `59c9dc201e6bd896a7a1ca5e599d9b4f31426659`. Company Profile now uses the existing public catalog query filtered by companyId; only PUBLISHED + PUBLIC products and public company id/name/type are rendered. Feature and post-merge CI/migration checks passed.
+- Next decision: either keep the directory unrouted if no public directory is intended, or design a separate public-safe endpoint with allowlisted fields and tests before exposing it.

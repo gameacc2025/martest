@@ -455,3 +455,11 @@ The About Us page is being ported safely on `feat/website-about-us-redesign-step
 ## Company Profile contract repair — Step 7 in progress (2026-10-29)
 
 The routed Company Profile page was calling website store methods that do not exist. The backend company read/products routes are authenticated and context/permission gated; no review/follow endpoints or schema models were found. The public product list endpoint explicitly supports companyId filtering and enforces `PUBLISHED + PUBLIC`, with a public-safe company id/name/type selection. Branch `fix/website-company-profile-api-contract-step-7` uses this supported public catalog contract, removes unsupported reviews/follows, adds accessible states and regression tests. Feature CI and migration validation are pending. No backend authorization change or new endpoint is included.
+
+
+## Company Profile Step 7 final checks and Companies directory follow-up — 2026-10-29
+
+- PR #35 merged at `59c9dc201e6bd896a7a1ca5e599d9b4f31426659`.
+- Feature CI [40883463184](https://github.com/gameacc2025/martest/actions/runs/40883463184), migration [40883463227](https://github.com/gameacc2025/martest/actions/runs/40883463227), post-merge CI [40883640234](https://github.com/gameacc2025/martest/actions/runs/40883640234), and post-merge migration [40883640581](https://github.com/gameacc2025/martest/actions/runs/40883640581) all passed.
+- Runtime validation [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) was still running at last check.
+- `Companies.vue` is not routed, imports a missing component, and references missing store methods; backend `GET /companies` is STAFF-only. Do not expose it publicly without a separately designed public-safe API and tests.
