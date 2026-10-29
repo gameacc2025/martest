@@ -293,4 +293,89 @@ function goToSubcategory(categorySlug, subcategorySlug) {
     grid-template-columns: 1fr;
   }
 }
+
+/* Production-safe visual refresh: preserve existing menu data and routing contract. */
+.mega-menu-wrapper {
+  position: relative;
+}
+
+.mega-trigger {
+  min-height: var(--ds-touch-target, 44px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--ds-color-border, var(--surface-border));
+  border-radius: var(--ds-radius-md, 10px);
+  background: var(--ds-color-surface, var(--surface-card));
+  color: var(--ds-color-text, var(--text-color));
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.mega-trigger:hover {
+  border-color: var(--ds-color-primary-text, var(--primary-color));
+  background: var(--ds-color-primary-soft, var(--surface-hover));
+}
+
+.mega-trigger:focus-visible {
+  outline: 3px solid var(--ds-color-focus, var(--primary-color));
+  outline-offset: 2px;
+}
+
+.mega-dropdown {
+  border: 1px solid var(--ds-color-border, var(--surface-border));
+  border-radius: 16px;
+  background: var(--ds-color-surface, var(--surface-card));
+  box-shadow: var(--ds-shadow-lg, 0 12px 32px rgba(0, 58, 84, 0.16));
+  overflow: hidden;
+}
+
+.mega-content {
+  grid-template-columns: minmax(220px, 0.85fr) minmax(0, 1.5fr);
+}
+
+.mega-categories {
+  background: var(--ds-color-surface-alt, var(--surface-ground));
+}
+
+.mega-cat-item {
+  min-height: var(--ds-touch-target, 44px);
+  border-radius: 8px;
+  margin: 0.25rem 0.375rem;
+}
+
+.mega-cat-item:hover,
+.mega-cat-item.is-active {
+  background: var(--ds-color-primary-soft, var(--surface-hover));
+  color: var(--ds-color-primary-text, var(--primary-color));
+}
+
+.mega-subcat-header h3,
+.mega-view-all:hover,
+.mega-subcat-item:hover {
+  color: var(--ds-color-primary-text, var(--primary-color));
+}
+
+.mega-subcat-item {
+  min-height: var(--ds-touch-target, 44px);
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+}
+
+@media (max-width: 767px) {
+  .mega-dropdown {
+    border-radius: 0 0 16px 16px;
+    box-shadow: var(--ds-shadow-lg, 0 12px 32px rgba(0, 58, 84, 0.16));
+  }
+
+  .mega-cat-item {
+    margin-inline: 0;
+  }
+}
+
 </style>

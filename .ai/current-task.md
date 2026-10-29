@@ -1,3 +1,27 @@
+# Current Task — 2026-10-29
+
+## Active work: UI-REDESIGN-SAFE-01
+
+**Status: PARTIAL / safe first slice implemented; PR open for review.** The uploaded 32-file patch has not been applied wholesale because it replaces API-backed flows with mock data and bypasses the Website authentication guard. A safe shared design foundation and menu visual refresh are on branch `feat/telecom-ui-redesign-safe` and [PR #28](https://github.com/gameacc2025/martest/pull/28).
+
+### Implemented on the branch
+- Added semantic design-token aliases and opt-in page primitives under `packages/shared-ui/assets/design-system/`.
+- Refreshed the shared category mega-menu CSS while retaining its existing prop shape and `products` route contract.
+- Added `MegaMenu.test.js` regression coverage for opening, category navigation, and outside-click dismissal.
+- Added `docs/TELECOM_UI_REDESIGN_SAFE_PORT.md` with exclusions and a page-by-page porting plan.
+- No `mockData.js` / `USE_MOCK` file, no API/auth/permission/router-guard changes, and no production page data replaced with fixtures.
+
+### Verification
+- CI run [40832326705](https://github.com/gameacc2025/martest/actions/runs/40832326705): PASS — architecture graph, frontend/shared tests, backend tests, Prisma generation, all three frontend builds.
+- Database migration validation [40832326749](https://github.com/gameacc2025/martest/actions/runs/40832326749): PASS.
+- Runtime validation [40832326683](https://github.com/gameacc2025/martest/actions/runs/40832326683): in progress at last check; no pass claimed.
+- Local tests/build were NOT RUN because the session did not have a local checkout with installed dependencies.
+
+### Next step
+Continue porting one page at a time against current API-backed code (start with the homepage) only after reviewing its current implementation, data contract, loading/error states, and existing tests. Keep PR #28 unmerged until the broader page-by-page work is reviewed.
+
+---
+
 # Current Task Handoff — 2026-10-28
 
 ## Current state
@@ -78,3 +102,16 @@ Latest source merge: PR #27, squash commit `7accdd8b2db4a1db046175c19507d76d223b
 - Current non-main branch refs reviewed: `chore/trace-node-deprecations-20261028`, `docs/rbac-context-comment-20261028`, `docs-runtime-e2e-hardening`, `feat/rfq-monetization`, `feature/customer-address-management`, `feature/customer-dashboard-foundation`, `feature/inquiry-completion`, `fix/inquiry-duplicate-response-20261028`, `fix/inquiry-pending-subscription-unique-20261028`, `fix/inquiry-quota-expiry-lock-20261028`, `fix/inquiry-response-concurrency-20261028`, `fix/inquiry-supplier-context-20261029`, `fix/notification-app-scope-20261028`, `fix/notification-folder-contract-20261028`, `fix/payment-callback-concurrency-20261028`, `perf/admin-auth-import-warning-20261028`, `runtime-validation-main`, `validate-current-main-20261027`, and `validate-current-main-final-20261027`.
 - Decision: do not merge any stale branch wholesale or replay fixes already in `main`; no remaining unique code change was identified that justifies another merge. Runtime/browser workflow is already present on `main`; no browser tests were run or awaited.
 - Branch deletion is intentionally left to the repository owner using the explicit `git push origin --delete ...` command provided in the handoff, because the connected GitHub action set has no branch-delete operation.
+
+
+## 2026-10-29 — UI-REDESIGN-SAFE-01
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Safely adapt `telecom-ui-redesign.patch` for the live website without replacing API-backed flows with demo data or weakening route guards.
+- **Claimed scope:** Shared design tokens and reusable page primitives; the shared category mega-menu visual treatment; focused component regression tests; redesign compatibility documentation; task handoff and worklog. All changes isolated to `feat/telecom-ui-redesign-safe`.
+- **Changes:** Task claim only at this point. The uploaded patch contains `USE_MOCK = true`, numerous `mockData.js` page dependencies, local-only cart/wishlist/order/notification data, and a router guard bypass. Those are excluded from the production adaptation.
+- **Verification:** To be run after implementation. No test/build result claimed yet.
+- **Commit:** Task claim commit pending.
+- **Push:** Authorized for the requested separate branch; no merge to `main` planned.
+- **Risks / open questions:** The full 32-file patch is based on an older UI implementation and several hunks conflict with current `main`. Page-by-page markup redesign must be ported against current API contracts in later focused steps; this initial safe slice must not be represented as the whole patch being ported.
+- **Next action:** Add token-backed, non-invasive visual primitives and restyle the existing menu without changing route/API/auth behavior; add tests and docs.
