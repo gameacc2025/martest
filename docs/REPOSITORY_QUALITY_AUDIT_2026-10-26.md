@@ -430,3 +430,14 @@ PR #33 was merged to `main` at `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`. Featu
 - Post-merge CI [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521) passed, and post-merge migration validation [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) passed.
 - Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at browser smoke after Compose validation, image build/start, service health, and migration-state checks passed. Per owner instruction, browser-smoke debugging is not the next task.
 - This is not a release sign-off; live external services, exhaustive tenant/IDOR review, and production readiness remain separate tasks.
+
+
+## Source-review follow-up — company pages (2026-10-29)
+
+- `apps/website/src/pages/public/Companies.vue` is not registered in `apps/website/src/router/index.js` as currently observed. It imports `../../components/companies/CompanyCard.vue`, which was not found in the complete current Git tree, and calls `getFeaturedCompanies`, `followCompany`, and `unfollowCompany` methods that are not exported from `apps/website/src/stores/companies.js`. This appears to be an orphaned/incomplete page and should not be redesigned without resolving routing and API/store contracts.
+- Routed `apps/website/src/pages/public/CompanyProfile.vue` calls `productsStore.getProductsByCompany` and company-store methods `getCompanyReviews`, `isFollowing`, `followCompany`, and `unfollowCompany`; these were not found in the current website store exports. Add a dedicated behavior/API-contract repair with tests before redesigning that page.
+- These are source-review findings, not claims that the affected pages were exercised at runtime.
+
+## About Us redesign Step 6 — implementation in progress (2026-10-29)
+
+The About Us page is being ported safely on `feat/website-about-us-redesign-step-6`. The change removes unverified static usage/order/product/company statistics, invented team-member details and partner claims, while preserving the existing published-products API request and product-details route. Regression tests were added; feature CI/migration validation are pending. No local test run is claimed.
