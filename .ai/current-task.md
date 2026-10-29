@@ -1,117 +1,62 @@
 # Current Task — 2026-10-29
 
-## Active work: UI-REDESIGN-SAFE-01
+## Current repository state
 
-**Status: PARTIAL / safe first slice implemented; PR open for review.** The uploaded 32-file patch has not been applied wholesale because it replaces API-backed flows with mock data and bypasses the Website authentication guard. A safe shared design foundation and menu visual refresh are on branch `feat/telecom-ui-redesign-safe` and [PR #28](https://github.com/gameacc2025/martest/pull/28).
+**Canonical repository:** `gameacc2025/martest`  
+**Canonical branch:** `main`  
+**Reviewed main HEAD before this documentation refresh:** `384459502d0913350e4920e5aeeb2aef5360e553`  
+**Remote branch inventory:** the GitHub branch search returned only `main`. This is the latest observed inventory, not a claim about local branches on the owner's computer.
 
-### Implemented on the branch
-- Added semantic design-token aliases and opt-in page primitives under `packages/shared-ui/assets/design-system/`.
-- Refreshed the shared category mega-menu CSS while retaining its existing prop shape and `products` route contract.
-- Added `MegaMenu.test.js` regression coverage for opening, category navigation, and outside-click dismissal.
-- Added `docs/TELECOM_UI_REDESIGN_SAFE_PORT.md` with exclusions and a page-by-page porting plan.
-- No `mockData.js` / `USE_MOCK` file, no API/auth/permission/router-guard changes, and no production page data replaced with fixtures.
+This handoff supersedes earlier entries in this file that say PR #28 is open, the safe redesign work is unmerged, or multiple remote branches still exist.
 
-### Verification
-- CI run [40832326705](https://github.com/gameacc2025/martest/actions/runs/40832326705): PASS — architecture graph, frontend/shared tests, backend tests, Prisma generation, all three frontend builds.
-- Database migration validation [40832326749](https://github.com/gameacc2025/martest/actions/runs/40832326749): PASS.
-- Runtime validation [40832326683](https://github.com/gameacc2025/martest/actions/runs/40832326683): in progress at last check; no pass claimed.
-- Local tests/build were NOT RUN because the session did not have a local checkout with installed dependencies.
+## Latest verification observed
 
-### Next step
-Continue porting one page at a time against current API-backed code (start with the homepage) only after reviewing its current implementation, data contract, loading/error states, and existing tests. Keep PR #28 unmerged until the broader page-by-page work is reviewed.
+- CI run [40833114382](https://github.com/gameacc2025/martest/actions/runs/40833114382): **PASS** on main HEAD `384459502d0913350e4920e5aeeb2aef5360e553` — architecture check, frontend/shared tests, backend tests, Prisma generation, and Website/Company/Admin production builds.
+- Database migration validation [40833114529](https://github.com/gameacc2025/martest/actions/runs/40833114529): **PASS** on the same commit.
+- Runtime validation [40833114464](https://github.com/gameacc2025/martest/actions/runs/40833114464): **FAIL** at the Playwright browser-smoke step. Compose validation, image build/start, service health checks, and migration-state verification passed before that step. Per owner instruction, do not spend the next task chasing browser tests; do not describe the runtime workflow as fully green.
+- No local checkout or dependency-equipped environment was used for this audit. CI evidence is remote evidence, not a claim that local commands ran.
+- Graphify MCP could not be inspected or updated: `list_workspaces` returned no available workspaces and Graphify tools rejected calls because no workspace is selected. This is separate from the repository's generated architecture graph, which passed the CI check.
 
----
+## Completed and merged work that should not be reopened without new evidence
 
-# Current Task Handoff — 2026-10-28
+- PRs #20–#25: inquiry response concurrency, frontend auth-store import/build warning, duplicate supplier response handling, payment callback idempotency, quota period-boundary handling, and RBAC comment correction.
+- PR #27: supplier response actions enforce COMPANY context plus `inquiries.respond`; STAFF permission alone cannot submit/edit/withdraw supplier responses or manage their attachments.
+- PR #28: [safe shared UI redesign foundation](https://github.com/gameacc2025/martest/pull/28), squash commit `23576cb1a22f80fea2d245cf10e5915794d4a15c`. It added design-token aliases, opt-in page primitives, shared MegaMenu styling, tests, and documentation. The original patch was **not** applied wholesale.
+- Existing merged work covers notification folder/app scoping, canonical folder API contract, customer addresses/profile, product lifecycle/access/privacy controls, RFQ subscription/quota invariants, architecture graph validation, and core documentation reconciliation.
+- Current branch search lists only `main`; do not claim local branches have been removed.
 
-## Current state
+## Remaining tasks — prioritized backlog
 
-**Core code-level findings from the current audit are fixed and merged into `main`.** This is not a release sign-off: live deployment and external integrations are not verified, browser E2E is intentionally not awaited per owner instruction, and an exhaustive route-by-route IDOR certification has not been completed.
+### P1 — Complete the production-safe UI redesign
+- Port the redesign from the current `main` implementation page by page, starting with the Website homepage.
+- Preserve existing API contracts, auth/permission gates, route parameters, real data, loading/empty/error states, and mutation behavior.
+- Do not introduce `USE_MOCK`, demo fixtures in production flows, auth bypasses, or local-only cart/wishlist/order behavior.
+- Add focused regression tests for every changed interaction; run targeted unit tests and the relevant production build before moving to the next page.
+- Update `docs/TELECOM_UI_REDESIGN_SAFE_PORT.md` after each meaningful page batch.
 
-Latest source merge: PR #27, squash commit `7accdd8b2db4a1db046175c19507d76d223bce95` (2026-10-29). CI and database migration validation passed on the merged `main` commit.
+### P1 — Finish the security review boundary
+- Continue the source-level, route-by-route review of company-owned reads/writes and tenant/IDOR boundaries. Existing targeted review is useful evidence, **not** exhaustive security sign-off.
+- For every confirmed gap, add a regression test and update the access matrix/API docs. Do not infer security from frontend gating alone.
 
-## Recently completed and merged
+### P1 — Verify external operations when safe credentials exist
+- Live Zarinpal payment: **NOT VERIFIED**; requires staging credentials and controlled test transactions.
+- SMTP delivery: **NOT VERIFIED**; requires valid credentials and a controlled recipient.
+- SMS: **NOT IMPLEMENTED**; decide whether to scope and implement a provider, delivery policy, cost controls, retries, and tests.
+- Production deployment/readiness: **NOT SIGNED OFF**; no deployment claim is supported by the current audit.
 
-- **PR #20 — Inquiry response concurrency:** parent `Inquiry` row lock serializes response submission/edit/withdraw, buyer decisions and manual status changes.
-- **PR #21 — Frontend bundle warning:** Website, Company and Admin routers statically import auth stores; route-level page lazy loading remains. CI logs no longer show `INEFFECTIVE_DYNAMIC_IMPORT`; largest displayed JS chunk is about 195 kB instead of the prior oversized Admin entry chunk.
-- **PR #22 — Duplicate supplier response:** duplicate company/inquiry submissions return HTTP 409 `RESPONSE_ALREADY_EXISTS` with existing response ID/status; no second response or notification is created.
-- **PR #23 — Payment callback concurrency:** callback re-reads subscription state after owner-row lock and returns an already verified ACTIVE subscription without reactivation/extension.
-- **PR #24 — Quota period boundary:** quota consumption revalidates the active subscription after row lock and rejects if the paid period expired while waiting.
-- **PR #25 — RBAC comment accuracy:** corrected the stale claim that SUPER_ADMIN bypasses `requireAccessType`; application context remains strict.
-- Earlier merged work includes strict app-context checks, notification folder scope, pending-subscription uniqueness, customer addresses/profile, price-history tests, Docker build-time panel origins, architecture graph validation, and core documentation reconciliation.
+### P2 — Documentation completeness and maintenance
+- API docs are source-aligned at the module/contract level, but exhaustive endpoint-by-endpoint schema/permission documentation is not complete.
+- Keep `.ai/current-task.md` concise and authoritative; append task history to `.ai/WORKLOG.md`; maintain `.ai/project-context.md`, the architecture roadmap, API/role/notification docs, and the quality audit with material changes.
+- Review GitHub Actions action-version/deprecation notices separately; the observed `url.parse`/`punycode` traces were attributed to bundled GitHub Actions tooling, not application dependencies. Do not upgrade blindly.
 
-## CI / database evidence
+## Non-negotiable constraints
 
-- CI run `40635937015`: PASS — architecture graph check, frontend/shared tests, backend tests, Prisma generation, and all three production builds.
-- Fresh PostgreSQL migration run `40635936924`: PASS.
-- Recent feature PRs #20–#25 also had successful CI and migration checks:
-  - #20: CI `40633476868`, migration `40633476941`
-  - #21: CI `40634032996`, migration `40634032923`
-  - #22: CI `40634407695`, migration `40634407696`
-  - #23: CI `40634806585`, migration `40634806668`
-  - #24: CI `40635157043`, migration `40635157013`
-  - #25: CI `40635937015`, migration `40635936924`
-- Browser E2E was not awaited and is not claimed passed. Runtime workflow checks observed successful Compose validation, image build/start, health endpoints and migration status, but this is not a full release acceptance run.
+- Backend authorization and ownership checks are authoritative. `AccessProfile.type` app context cannot be bypassed by SUPER_ADMIN or wildcard permissions.
+- Inquiry and subscription row-lock/idempotency invariants must remain intact.
+- Do not merge stale, heavily diverged branches wholesale.
+- Browser E2E is not the next task per owner instruction. Report the observed failure honestly, but do not claim it passed or spend the next task debugging it.
+- Separate unit/CI tests, builds, database migration validation, runtime infrastructure checks, browser smoke, live provider checks, and production deployment in all reports.
 
-## Remaining limitations / follow-up
+## Next action
 
-1. **CI action deprecations:** A temporary trace in closed PR #26 identified `url.parse()` in `pnpm/action-setup@v4`'s bundled pnpm self-installer and `punycode` in `actions/setup-node@v4` setup/cache bundles. These are GitHub Actions toolchain notices, not workspace dependencies. No app package upgrade is needed; action-version updates can be considered separately.
-2. **Tenant review:** Targeted review of company, product, address, inquiry and notification ownership found no additional confirmed cross-tenant path. This is not an exhaustive route-by-route IDOR certification.
-3. **External services:** Live Zarinpal payment is NOT VERIFIED without staging credentials. SMTP is NOT VERIFIED without credentials and a controlled recipient. SMS is NOT IMPLEMENTED.
-4. **Deployment:** No claim of production deployment, live operational readiness, or visual/browser verification.
-5. **Legacy branches:** Do not force-merge old, heavily diverged branches. PR #9/#11 were closed after useful changes were ported selectively; stale branch references are not a reason to reintroduce old snapshots.
-
-## Working rules
-
-- Work on one focused stage/PR at a time.
-- Write regression tests for code fixes; wait for ordinary CI and migration validation before merging.
-- Browser E2E is intentionally non-blocking per owner instruction; never claim it passed without observed results.
-- Keep `.ai/current-task.md` concise and current; append history to `.ai/WORKLOG.md`; update relevant API/frontend/database/Docker/notification docs and the quality audit with each material change.
-- Distinguish unit tests, CI builds, migration validation, Docker runtime checks, browser E2E, and live provider tests.
-
-## 2026-10-28 branch/CI follow-up
-
-- **CI cleanup:** Removed the stale `feat/notifications-complete` push trigger; CI push validation now runs only on canonical `main`, while pull requests targeting `main` remain covered.
-- **Branch inventory:** GitHub currently exposes multiple historical/feature branches, including inquiry/payment/notification fixes, customer dashboard/address work, runtime validation, and RFQ monetization. Several compare as heavily diverged from `main` (some over 100 commits behind) despite overlapping changes already present in main.
-- **Merge safety:** No blanket merge or force update was performed. Do not merge old snapshots solely to make branch names disappear; compare and port any genuinely unique, still-needed changes into `main` with tests. Branch deletion remains separate and was not performed.
-- **Verification:** CI workflow file changed on main in commit `a518d061ded03ab82db3b62368489b1f9efdc6f5`. Automated workflow execution is pending; no browser tests were run or awaited.
-- **Next task:** Continue the company/product/inquiry authorization and lifecycle audit from current `main`, then address any confirmed gaps with regression tests and docs. Keep external payment/SMTP and deployment checks marked NOT VERIFIED without credentials/environment.
-
-
-## 2026-10-29 supplier-context hardening
-
-- **PR #27 merged:** `7accdd8b2db4a1db046175c19507d76d223bce95`.
-- Supplier response creation, editing, withdrawal, upload, and attachment deletion require COMPANY context plus `inquiries.respond`; STAFF with `leads.update` is denied.
-- Regression tests cover STAFF supplier-response submission/edit/withdraw/attachment deletion.
-- CI run `40826610626` (database migrations) passed on merged `main`; PR CI run `40825349236` passed. Browser E2E was not run or awaited.
-- **Branch cleanup remains:** 18 other non-main refs were audited. Only merge changes that are not already present; old snapshots must not be merged wholesale. The current GitHub connector exposes branch listing but not branch-ref deletion, so remote deletion still needs a supported GitHub deletion action.
-
-
-## 2026-10-29 — selective branch audit
-
-- Refreshed the remote branch inventory after merging PR #27. The supplier-context branch is merged, but GitHub still lists the branch ref.
-- Compared all 18 other non-main branch heads against `main`. Several focused fixes are already present in current `main` (duplicate-response handling, quota expiry lock, notification app scope, payment callback idempotency, RBAC comment accuracy, inquiry response locking, pending-subscription uniqueness). Do not replay these stale snapshots.
-- Large legacy branches (`docs-runtime-e2e-hardening`, `feature/customer-address-management`, `feature/customer-dashboard-foundation`, `feature/inquiry-completion`, `feat/rfq-monetization`, `runtime-validation-main`) diverge by dozens to hundreds of commits; changes must be verified file-by-file and not merged as a whole. Browser E2E additions are not to be pursued per owner instruction.
-- The connected GitHub action set currently supports reading branches but has no branch-ref deletion action. No ref was force-updated or deleted through an unsupported workaround.
-
-
-## 2026-10-29 — final selective branch review before cleanup
-
-- Re-fetched the remote branch inventory and compared all 19 non-main refs with current `main`. No additional merge is warranted: the substantive changes represented by the old inquiry, RFQ/subscription/payment, customer-address, customer-profile, notification, RBAC and concurrency branches are already present in `main` through merged PRs or the selective port recorded when PR #9/#11 were closed.
-- Merged PRs confirmed by GitHub search include #10 (customer address management), #12 (inquiry/RFQ workflow), #13 (RFQ monetization), #17–#25 as applicable, and #27 (supplier response access context). PR #11 was closed as redundant after its profile fix was ported directly to `main`; PR #9 was closed after selective porting. PR #26's deprecation trace was diagnostic-only and correctly left unmerged.
-- Current non-main branch refs reviewed: `chore/trace-node-deprecations-20261028`, `docs/rbac-context-comment-20261028`, `docs-runtime-e2e-hardening`, `feat/rfq-monetization`, `feature/customer-address-management`, `feature/customer-dashboard-foundation`, `feature/inquiry-completion`, `fix/inquiry-duplicate-response-20261028`, `fix/inquiry-pending-subscription-unique-20261028`, `fix/inquiry-quota-expiry-lock-20261028`, `fix/inquiry-response-concurrency-20261028`, `fix/inquiry-supplier-context-20261029`, `fix/notification-app-scope-20261028`, `fix/notification-folder-contract-20261028`, `fix/payment-callback-concurrency-20261028`, `perf/admin-auth-import-warning-20261028`, `runtime-validation-main`, `validate-current-main-20261027`, and `validate-current-main-final-20261027`.
-- Decision: do not merge any stale branch wholesale or replay fixes already in `main`; no remaining unique code change was identified that justifies another merge. Runtime/browser workflow is already present on `main`; no browser tests were run or awaited.
-- Branch deletion is intentionally left to the repository owner using the explicit `git push origin --delete ...` command provided in the handoff, because the connected GitHub action set has no branch-delete operation.
-
-
-## 2026-10-29 — UI-REDESIGN-SAFE-01
-- **Status:** MERGED — safe shared UI foundation only; full 32-file patch is not ported.
-- **Agent:** ChatGPT via GitHub repository tools
-- **Goal:** Safely adapt `telecom-ui-redesign.patch` without replacing API-backed flows with demo data or weakening route guards.
-- **Changes merged:** Shared semantic design-token aliases and opt-in page primitives; refreshed shared category mega-menu CSS; two regression tests; compatibility and verification documentation.
-- **Pull request:** [PR #28](https://github.com/gameacc2025/martest/pull/28), merged by squash.
-- **Merge commit:** `23576cb1a22f80fea2d245cf10e5915794d4a15c`.
-- **Verification:** CI passed (frontend/shared tests, backend tests, architecture graph and all three frontend builds); database migration validation passed. Runtime validation was still in progress at last check and is not claimed passed.
-- **Security / compatibility:** No `USE_MOCK` or `mockData.js`; router guards, APIs, authentication, permissions and page data flows were not replaced.
-- **Remaining work:** The visual redesign of individual pages is not complete. Port page-by-page against current API contracts and preserve loading/error states, route behavior and authorization.
-- **Branch cleanup:** The branch `feat/telecom-ui-redesign-safe` still exists. The connected GitHub action set does not expose branch deletion; the repository owner must delete it from GitHub or with `git push origin --delete feat/telecom-ui-redesign-safe`.
+Start the first page-level redesign slice on a new focused branch from current `main`: inspect Website homepage implementation, API/data contract, loading/error states, and tests; port template/style only; add regression tests; run CI-equivalent targeted tests and Website build; update docs and AI memory; then review before proceeding.
