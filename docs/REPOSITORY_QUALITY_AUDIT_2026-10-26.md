@@ -450,3 +450,8 @@ The About Us page is being ported safely on `feat/website-about-us-redesign-step
 - Runtime validation [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017) was still running at last check.
 - Company Profile source contract gap: page calls five website store methods not found in store exports (`getProductsByCompany`, `getCompanyReviews`, `isFollowing`, `followCompany`, `unfollowCompany`). Inspect backend endpoints/services before adding methods; do not invent endpoints.
 - Companies directory source contract gap: `Companies.vue` is not routed, imports a missing component path and calls store methods not exported. Resolve route/product intent separately.
+
+
+## Company Profile contract repair — Step 7 in progress (2026-10-29)
+
+The routed Company Profile page was calling website store methods that do not exist. The backend company read/products routes are authenticated and context/permission gated; no review/follow endpoints or schema models were found. The public product list endpoint explicitly supports companyId filtering and enforces `PUBLISHED + PUBLIC`, with a public-safe company id/name/type selection. Branch `fix/website-company-profile-api-contract-step-7` uses this supported public catalog contract, removes unsupported reviews/follows, adds accessible states and regression tests. Feature CI and migration validation are pending. No backend authorization change or new endpoint is included.

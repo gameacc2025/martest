@@ -1094,3 +1094,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Runtime validation:** [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017) was still in progress at the last check. No result is claimed and browser smoke is not the next debugging task.
 - **Content integrity:** Removed unverified static metrics, named team profiles and partner claims; retained API-backed published products and route navigation.
 - **Next task:** Step 7 Company Profile contract audit/repair, because the routed page calls store methods not exported by current website stores. Do not redesign the page until its API contract is established.
+
+
+## 2026-10-29 — WEBSITE-COMPANY-PROFILE-CONTRACT-STEP-7
+
+- **Status:** Implementation and tests pushed to `fix/website-company-profile-api-contract-step-7`; CI/migration verification pending.
+- **Source finding:** Routed `CompanyProfile.vue` called missing website-store methods for company products, reviews and follows. Backend company routes require authentication and context/permission checks; no company review/follower endpoints or schema models were found in the current source. Do not add invented endpoints.
+- **Supported contract:** Public product listing uses `GET /products`, `publicOnly: true`, and supports `companyId` filtering. It enforces `PUBLISHED + PUBLIC` and returns public product fields including company id/name/type.
+- **Change:** Reworked Company Profile to call `productsStore.getProducts({ page, limit, companyId })`, derive the public company header from returned products, normalize product-card data, preserve product-details navigation/cart/wishlist handlers, and add accessible loading/error/empty/retry states plus route-ID watching/pagination. Unsupported review/follow UI was removed rather than faked.
+- **Tests:** Added `apps/website/src/pages/public/CompanyProfile.test.js` for query contract, route ID updates, empty/error/retry states, product navigation and pagination.
+- **Base:** `e7d9a50d6fe86097d1286507d5249c026467b483`.
+- **Constraints:** No backend endpoint, authorization change, mock data, or public private-company fields added. Await feature CI and migration validation; no local tests claimed.
