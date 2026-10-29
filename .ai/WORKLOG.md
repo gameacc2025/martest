@@ -903,3 +903,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Working on the requested separate remote branch; `main` remains untouched.
 - **Risks / open questions:** The patch's page-level visual changes require per-page porting against current API contracts; the safe shared UI slice is not the complete 32-file redesign.
 - **Next action:** Implement shared styling and menu regression tests, then run the shared-ui test suite and website build if the available environment permits.
+
+
+### Completion update — UI-REDESIGN-SAFE-01 (2026-10-29)
+- **Status:** PARTIAL — safe shared UI foundation implemented; broader page-by-page redesign remains.
+- **Branch / PR:** `feat/telecom-ui-redesign-safe`, [PR #28](https://github.com/gameacc2025/martest/pull/28), draft and unmerged.
+- **Changes:** Added shared design token aliases and opt-in page primitives; refreshed the existing MegaMenu styles without changing its data or routing contract; added two MegaMenu regression tests; documented the security and compatibility exclusions in `docs/TELECOM_UI_REDESIGN_SAFE_PORT.md`.
+- **Security review:** No `USE_MOCK` or `mockData.js` added; no router/auth/API/permission changes; no mock product/order/cart/wishlist/notification data wired into production pages. `apps/website/src/router/index.js` remains unchanged.
+- **Verification:** CI run `40832326705` PASS (architecture graph, frontend/shared tests, backend tests, Prisma generation, all three frontend builds). Database migration validation `40832326749` PASS. Runtime validation `40832326683` was still in progress at the last check and is NOT claimed passed. Local tests/build NOT RUN; no local dependency-equipped checkout was available.
+- **Commits:** Changes are on the PR branch; current PR head to be rechecked at handoff.
+- **Push:** Pushed via GitHub API to the requested feature branch. `main` unchanged.
+- **Risks / open questions:** This is not the full 32-file patch. Large page replacements must be reconciled individually with current APIs and current routes before any wider merge. Keep PR draft/unmerged while the page-by-page port continues.
+- **Next action:** Review current Website homepage implementation and tests; port only template/style changes while preserving API calls, loading/error states, route behavior and authorization assumptions.
