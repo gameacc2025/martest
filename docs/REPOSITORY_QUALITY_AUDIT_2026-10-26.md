@@ -416,3 +416,8 @@ Categories PR #32 merged at `50745aa1c83bfb01fe6a7db5cb87c8f33af7b178`. Feature 
 ## UI redesign progress update — Step 5 (2026-10-29)
 
 Website Search Results redesign is on feature branch `feat/website-search-results-redesign-step-5`. It applies shared design primitives and adds accessible loading/error/empty states while preserving the existing search store/API contract and routes. Regression tests were added. Feature CI and database migration validation are pending; this is not yet considered complete or merged. No local test execution is claimed.
+
+
+## Search Results redesign merge update — 2026-10-29
+
+PR #33 was merged to `main` at `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`. Feature CI [40880947037](https://github.com/gameacc2025/martest/actions/runs/40880947037) and database migration validation [40880947043](https://github.com/gameacc2025/martest/actions/runs/40880947043) passed. Post-merge CI [40881262815](https://github.com/gameacc2025/martest/actions/runs/40881262815) and migration validation [40881262830](https://github.com/gameacc2025/martest/actions/runs/40881262830) were queued at the time of this update. Runtime/browser smoke is tracked separately and is not the next debugging task per owner instruction.
