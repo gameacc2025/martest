@@ -99,8 +99,7 @@ each app boots with `store.js restoreSession()` (silent `/auth/refresh`,
 Backend: `backend/src/utils/rbac.js` (pure helpers incl. `SUPER_ADMIN_ROLE`
 constant + wildcard bypass) + `backend/src/middlewares/rbac.js`
 (`requirePermission` / `requireAnyPermission` Fastify preHandlers, used per-route
-in every `*.routes.js`). SUPER_ADMIN (or a `'*'` in `permissions[]`) bypasses
-every permission check. Frontend: `@telecom/permissions` (string constants,
+in every `*.routes.js`). SUPER_ADMIN (or a `'*'` in `permissions[]`) may bypass permission checks only after app-context checks; it never bypasses `requireAccessType`. Frontend: `@telecom/permissions` (string constants,
 single source of truth) + `usePermissions().can()/canAny()` composable
 (reads `auth.permissions` from the Pinia store) — same SUPER_ADMIN bypass
 mirrored client-side for UI gating (server is still the enforcement
