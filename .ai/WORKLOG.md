@@ -889,3 +889,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Confirmed no further merge is warranted. The customer address and inquiry/RFQ work are represented by merged PRs #10, #12 and #13; notification/security/concurrency fixes are represented by merged PRs #17–#25; supplier response authorization is merged as PR #27. The customer profile PR #11 was closed as redundant after a direct port; PR #9 was closed after useful changes were selectively ported. PR #26 was diagnostic-only and was correctly not merged.
 - The old feature branches diverge substantially and contain historical snapshots; merging them wholesale risks reverting newer implementation. Validation branches are checkpoints, not product changes. Current `main` already contains the runtime validation workflow.
 - No additional branch content was merged because no unmerged unique implementation was identified. Owner can now delete the listed remote refs, retaining only `main`. Browser E2E was not run or awaited.
+
+
+## 2026-10-29 — UI-REDESIGN-SAFE-01 — Safe production adaptation of telecom UI redesign
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Port the visual direction of `telecom-ui-redesign.patch` without replacing production API-backed behavior, authentication, or permissions.
+- **Claimed scope:** Shared design tokens/primitives, existing category mega-menu styling, focused regression tests, redesign compatibility docs, and task handoff on `feat/telecom-ui-redesign-safe`.
+- **Evidence:** The uploaded patch introduces `USE_MOCK = true`, mock product/company/order/inquiry/user/notification datasets, local-only cart/wishlist behavior, and bypasses the `requiresAuth` route guard when mocks are enabled. It also conflicts with several files on current `main`.
+- **Changes:** Claim recorded. Mock-backed page rewrites and auth-guard changes are explicitly excluded from the production branch.
+- **Verification:** NOT RUN yet.
+- **Commit:** Claim/handoff commit recorded on branch; implementation pending.
+- **Push:** Working on the requested separate remote branch; `main` remains untouched.
+- **Risks / open questions:** The patch's page-level visual changes require per-page porting against current API contracts; the safe shared UI slice is not the complete 32-file redesign.
+- **Next action:** Implement shared styling and menu regression tests, then run the shared-ui test suite and website build if the available environment permits.
