@@ -504,7 +504,7 @@ onBeforeUnmount(() => {
   padding-inline: var(--ds-container-pad);
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-7);
+  gap: var(--ds-space-8);
 }
 
 @media (min-width: 768px) {
