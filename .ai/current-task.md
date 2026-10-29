@@ -4,9 +4,9 @@
 
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main`  
-**Feature branch:** `feat/website-search-results-redesign-step-5`  
-**Base commit:** `985b8da264c21254c1c29edc2610c37d42952c76`  
-**Status:** Implementation and regression tests pushed to feature branch; CI verification and review pending. Do not merge until relevant checks pass.
+**Canonical branch:** `main`  
+**Latest merged feature:** Search Results PR #33, squash commit `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`.  
+**Status:** Feature-branch CI and migration validation passed; PR merged. Post-merge CI and migration checks are pending at the time of this update.
 
 ## Completed UI steps
 
@@ -14,15 +14,13 @@
 - **Step 2 Product Listing:** PR #30 merged; feature CI/migration and post-merge checks passed.
 - **Step 3 Product Details:** PR #31 merged; feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392), migration [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249), post-merge CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985), and post-merge migration [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967) passed.
 - **Step 4 Categories:** PR #32 merged as `50745aa1c83bfb01fe6a7db5cb87c8f33af7b178`. Feature CI [40842352640](https://github.com/gameacc2025/martest/actions/runs/40842352640), migration [40842352602](https://github.com/gameacc2025/martest/actions/runs/40842352602), post-merge CI [40842534524](https://github.com/gameacc2025/martest/actions/runs/40842534524), and post-merge migration [40842534511](https://github.com/gameacc2025/martest/actions/runs/40842534511) passed.
-- **Step 5 Search Results:** updated `SearchResults.vue` with shared design tokens/primitives, responsive results/filter layout, accessible loading/error/empty states, labels and retry action. Existing search store/API contract, query watcher, category/price/sort/page parameters, cart/wishlist handlers, and product-detail route are preserved. Added `SearchResults.test.js` for query/API behavior, result normalization/render, empty/error/retry, route query updates, and product navigation. Verification is pending CI.
+- **Step 5 Search Results:** PR [#33](https://github.com/gameacc2025/martest/pull/33) merged as `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`. Feature CI [40880947037](https://github.com/gameacc2025/martest/actions/runs/40880947037) and migration validation [40880947043](https://github.com/gameacc2025/martest/actions/runs/40880947043) passed. The page uses shared design tokens/primitives, responsive results/filter layout, accessible loading/error/empty states, labels and retry action. Search store/API contract, query watcher, category/price/sort/page parameters, cart/wishlist handlers and product-details route remain. Regression tests cover query/API behavior, result normalization/render, empty/error/retry, route query updates and product navigation. Post-merge CI and migration validation are pending.
 
-## Step 5 verification plan
+## Step 5 post-merge verification plan
 
-1. Inspect PR CI result for frontend/shared tests, backend tests, Prisma generation and Website/Company/Admin builds.
-2. Inspect database migration validation separately.
-3. Per owner instruction, do not pursue browser-smoke debugging as the next task.
-4. If a test fails, fix the implementation/test setup on this branch and re-check CI before merging.
-5. After merge, inspect post-merge CI and migration validation before starting another page.
+1. Inspect post-merge CI [40881262815](https://github.com/gameacc2025/martest/actions/runs/40881262815) and migration validation [40881262830](https://github.com/gameacc2025/martest/actions/runs/40881262830).
+2. Record runtime workflow [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) separately; do not pursue browser-smoke debugging as the next task.
+3. Do not start the next page until post-merge CI and migration checks are inspected.
 
 ## Remaining cross-project backlog
 
