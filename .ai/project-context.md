@@ -290,3 +290,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Product Listing keeps existing store/API calls, route-query semantics, filters, pagination and product-details route.
 - Next page is `apps/website/src/pages/public/ProductDetails.vue`; preserve API/store data flow, route ID, inquiry/cart behavior, permissions and loading/not-found/error states.
 - Inspect post-merge main CI/migration checks before starting the next page. Browser smoke debugging remains out of scope per owner instruction.
+
+
+## Active UI redesign — Step 3 Product Details (2026-10-29)
+
+- Branch: `feat/website-product-details-redesign-step-3`.
+- Product Details is being aligned to shared design-system tokens for surfaces, text, border, shadow and spacing. Accessible state semantics and selected-gallery-thumbnail `aria-pressed` are being added.
+- Preserve `getProductById(route.params.id)`, route ID watcher, product gallery, price tier logic, company-profile route, price-history API, inquiry creation, and the existing authentication plus permission gate for inquiries.
+- Component tests cover route-ID load/change, product render, not-found/error, thumbnail selection and inquiry permission gating. CI/build/migration verification pending.

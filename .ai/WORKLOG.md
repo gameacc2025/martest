@@ -1000,3 +1000,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Feature-branch CI [40840764762](https://github.com/gameacc2025/martest/actions/runs/40840764762) passed architecture graph validation, frontend/shared tests including Product Listing component tests, backend tests, Prisma generation and all three frontend builds. Migration validation [40840764653](https://github.com/gameacc2025/martest/actions/runs/40840764653) passed.
 - **Post-merge:** Main CI/migration/runtime workflows were queued on merge commit and must be checked before Step 3 starts.
 - **Next:** Product Details page, one focused branch/PR at a time; preserve inquiry/cart/data behavior.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-3 — Product Details
+
+- **Status:** Implementation and component regression tests committed on focused branch; verification pending.
+- **Branch:** `feat/website-product-details-redesign-step-3`, based on main after merged Product Listing PR #30.
+- **Changes:** Apply shared design tokens to Product Details page surfaces/spacing; add accessible loading/not-found/error and price-history state semantics; expose active thumbnail selection with `aria-pressed`.
+- **Behavior preserved:** route ID loading/watcher, product store API, image selection, retail/bulk price selection, company profile route, price-history API, inquiry submission and permission gating.
+- **Tests added:** product loading/route ID, not-found/error states, route changes, image switching and permission-gated inquiry action.
+- **Verification:** CI, production builds and migration validation pending. No local test/build run claimed.
