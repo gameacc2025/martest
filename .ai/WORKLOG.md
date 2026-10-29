@@ -948,3 +948,23 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Confirmed missing integration: `backend/src/modules/notifications/notification.dispatch.service.js` explicitly never queues SMS rows and returns `sms.notImplemented`. Admin announcements are IN_APP/EMAIL only.
 - Remaining task: wire supported event dispatch to SMS queue with recipient opt-in, phone validation, paid quota consumption, dedupe/retry tests, then controlled live Twilio verification. Live delivery remains NOT VERIFIED.
 - Updated `.ai/current-task.md`, `.ai/project-context.md`, quality audit, notification system documentation, and project roadmap to reflect the partial implementation accurately.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-1 — Website homepage
+
+- **Status:** Implementation committed to focused branch; verification pending.
+- **Branch:** `feat/website-homepage-redesign-step-1`, based on `main` at `d91b3961e3c775def84d0efe634a4fa82271b9f4`.
+- **Scope:** `apps/website/src/pages/public/Home.vue`; Website test script/config; source-contract regression test; UI porting guide and AI handoff.
+- **Changes:** Applied shared design-system tokens to homepage surfaces, spacing, hero, section typography; improved mobile hero layout; added keyboard activation/focus treatment for category/product tiles.
+- **Behavior preserved by source review:** real `productsApi.list` and `productsStore.getCategories` calls, search/filter behavior, product/category routes, and loading/error/empty states. No API, backend, authentication or authorization logic changed.
+- **Tests:** Added source-contract regression tests for the real API/store calls, route contracts, state branches, keyboard support, and absence of mock-data/auth-bypass switches. These are source-level guards, not component interaction tests.
+- **Verification:** No local runner available through GitHub connector. CI and Website build are pending; do not claim pass until Actions reports success.
+- **Next step after verification:** Port Product Listing page with the same API-first constraints.
+
+
+### Verification update — UI-REDESIGN-STEP-1 (2026-10-29)
+
+- CI run [40839667461](https://github.com/gameacc2025/martest/actions/runs/40839667461) **PASS** on commit `0d33036dfe8480e0b63279ad42b4bf39787e844e`: architecture graph validation, frontend/shared tests (including the new homepage source-contract tests), backend tests, Prisma generation, and all three frontend production builds.
+- An earlier CI attempt failed because Vitest transforms `import.meta.url` in this workspace, making the test's `fileURLToPath` assumption invalid. The test path was corrected to resolve the source from either repository-root or app-root working directories. The corrected suite passed in the latest CI run.
+- Database migration validation was still running at the time of this update. Runtime validation remains a separate workflow; browser smoke debugging is not part of this step.
+- The test is intentionally a source-contract regression guard; it is not represented as a component-level interaction test.

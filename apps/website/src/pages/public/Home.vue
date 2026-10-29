@@ -204,8 +204,8 @@ onBeforeUnmount(() => {
 
 
 <template>
-  <div class="home-page">
-    <div class="home-container">
+  <div class="home-page ds-page" dir="rtl">
+    <div class="home-container ds-container ds-stack">
 
       <!-- Hero Slideshow -->
       <section
@@ -349,10 +349,10 @@ onBeforeUnmount(() => {
         <div class="home-main">
 
           <!-- Categories Slider -->
-          <section class="section-block">
+          <section class="section-block ds-card" aria-labelledby="categories-heading">
             <div class="section-head">
               <router-link :to="{ name: 'categories' }" class="panel-link">مشاهده همه</router-link>
-              <h2 class="section-title"><i class="pi pi-folder"></i> دسته‌بندی محصولات</h2>
+              <h2 id="categories-heading" class="section-title ds-h2"><i class="pi pi-folder"></i> دسته‌بندی محصولات</h2>
             </div>
             <div v-if="categoriesLoading" class="state-box">
               <i class="pi pi-spin pi-spinner"></i>
@@ -373,7 +373,7 @@ onBeforeUnmount(() => {
             >
               <template #item="{ data: category }">
                 <div class="cat-slide">
-                  <Card class="category-card" @click="viewCategoryProducts(category.id)">
+                  <Card class="category-card" role="button" tabindex="0" @click="viewCategoryProducts(category.id)" @keydown.enter.prevent="viewCategoryProducts(category.id)" @keydown.space.prevent="viewCategoryProducts(category.id)">
                     <template #content>
                       <div class="cat-thumb">
                         <img
@@ -399,12 +399,12 @@ onBeforeUnmount(() => {
           </section>
 
           <!-- Featured Products -->
-          <section class="section-block">
+          <section class="section-block ds-card" aria-labelledby="featured-heading">
             <div class="section-head">
               <button class="nav-btn" @click="fetchProducts" :disabled="loading" aria-label="بارگذاری مجدد">
                 <i class="pi" :class="loading ? 'pi-spin pi-spinner' : 'pi-refresh'"></i>
               </button>
-              <h2 class="section-title"><i class="pi pi-star-fill"></i> محصولات ویژه</h2>
+              <h2 id="featured-heading" class="section-title ds-h2"><i class="pi pi-star-fill"></i> محصولات ویژه</h2>
             </div>
 
             <div v-if="loading" class="products-grid">
@@ -420,7 +420,7 @@ onBeforeUnmount(() => {
               <Button label="حذف فیلترها" icon="pi pi-times" severity="secondary" text @click="resetFilters" />
             </div>
             <div v-else class="products-grid">
-              <div v-for="product in featuredProducts" :key="product.id" class="product-card" @click="goToProduct(product)">
+              <div v-for="product in featuredProducts" :key="product.id" class="product-card" role="link" tabindex="0" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
                 <div class="product-image">
                   <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
@@ -437,17 +437,17 @@ onBeforeUnmount(() => {
           </section>
 
           <!-- Recent Products -->
-          <section class="section-block">
+          <section class="section-block ds-card" aria-labelledby="recent-heading">
             <div class="section-head">
               <router-link v-if="recentProducts.length > 0" :to="{ name: 'products' }" class="panel-link">مشاهده همه</router-link>
-              <h2 class="section-title"><i class="pi pi-clock"></i> جدیدترین محصولات</h2>
+              <h2 id="recent-heading" class="section-title ds-h2"><i class="pi pi-clock"></i> جدیدترین محصولات</h2>
             </div>
             <div v-if="recentProducts.length === 0 && !loading" class="state-box">
               <i class="pi pi-box"></i>
               <p>در حال حاضر محصولی موجود نیست</p>
             </div>
             <div v-else class="products-grid">
-              <div v-for="product in recentProducts" :key="product.id" class="product-card" @click="goToProduct(product)">
+              <div v-for="product in recentProducts" :key="product.id" class="product-card" role="link" tabindex="0" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
                 <div class="product-image">
                   <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
@@ -492,8 +492,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .home-page {
-  background: var(--surface-ground);
-  padding: 1rem 0 2rem;
+  background:
+    radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--ds-color-primary) 7%, transparent), transparent 34rem),
+    var(--ds-color-background);
+  padding: 1.5rem 0 3rem;
 }
 .home-container {
   width: 100%;
@@ -502,7 +504,7 @@ onBeforeUnmount(() => {
   padding-inline: var(--ds-container-pad);
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-6);
+  gap: var(--ds-space-8);
 }
 
 @media (min-width: 768px) {
@@ -530,10 +532,11 @@ onBeforeUnmount(() => {
   grid-template-columns: 1.15fr 0.85fr;
   align-items: center;
   gap: var(--ds-space-8);
-  background: linear-gradient(135deg, var(--p-primary-50) 0%, var(--hero-center, var(--surface-card)) 55%, var(--p-primary-100) 100%);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--ds-radius-xl);
-  padding: var(--ds-space-8);
+  background: linear-gradient(125deg, color-mix(in srgb, var(--ds-color-primary) 11%, var(--ds-color-surface)) 0%, var(--hero-center, var(--ds-color-surface)) 55%, color-mix(in srgb, var(--ds-color-accent) 10%, var(--ds-color-surface)) 100%);
+  border: 1px solid var(--ds-color-border);
+  border-radius: calc(var(--ds-radius-xl) + 0.25rem);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  box-shadow: var(--ds-shadow-sm);
   overflow: hidden;
 }
 
@@ -615,7 +618,7 @@ onBeforeUnmount(() => {
   color: var(--primary-color); font-weight: 700; font-size: 0.95rem;
 }
 .hero-title {
-  color: var(--p-primary-900); font-size: 2.25rem; font-weight: 800;
+  color: var(--ds-color-text); font-size: clamp(1.8rem, 3.2vw, 2.7rem); font-weight: 850;
   line-height: 1.3; margin: 0;
 }
 
@@ -629,14 +632,14 @@ onBeforeUnmount(() => {
 .hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .hero-visual {
   position: relative; height: 260px; border-radius: 0.75rem;
-  background: linear-gradient(135deg, var(--p-primary-100), var(--p-primary-300));
+  background: linear-gradient(145deg, var(--ds-color-brand-dark), var(--ds-color-primary));
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .hero-glow {
   position: absolute; inset: -30%;
   background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 60%);
 }
-.hero-icon { font-size: 6rem; color: var(--primary-color); opacity: 0.85; z-index: 1; }
+.hero-icon { font-size: clamp(4rem, 7vw, 6.5rem); color: var(--ds-color-on-brand); opacity: 0.95; z-index: 1; filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.16)); }
 
 /* Hero Slideshow */
 .hero-slideshow { position: relative; }
@@ -738,15 +741,18 @@ onBeforeUnmount(() => {
 
 /* Section Block */
 .section-block {
-  background: var(--surface-card); border: 1px solid var(--surface-border);
-  border-radius: 1rem; padding: 1.25rem;
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  box-shadow: var(--ds-shadow-xs);
 }
 .section-head {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
 }
 .section-title {
-  display: flex; align-items: center; gap: 0.5rem;
-  margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text-color);
+  display: flex; align-items: center; gap: 0.625rem;
+  margin: 0; font-size: clamp(1.1rem, 1.7vw, 1.35rem); font-weight: 800; color: var(--ds-color-text);
 }
 .section-title i { color: var(--primary-color); }
 .panel-link {
@@ -759,7 +765,7 @@ onBeforeUnmount(() => {
 .cat-slide { padding: 0.25rem; height: 100%; }
 .category-card {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
   height: 100%;
 }
 .category-card:hover {
@@ -798,15 +804,22 @@ onBeforeUnmount(() => {
   gap: var(--ds-space-4);
 }
 .product-card {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border); border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg);
   overflow: hidden; cursor: pointer;
   transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
 }
-.product-card:hover {
+.product-card:hover,
+.product-card:focus-visible {
   box-shadow: var(--ds-shadow-md);
   transform: translateY(-2px);
-  border-color: var(--primary-color);
+  border-color: var(--ds-color-primary);
+  outline: none;
+}
+.product-card:focus-visible,
+.category-card:focus-visible {
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 3px;
 }
 .product-image {
   position: relative; aspect-ratio: 4 / 3; background: var(--surface-ground);
@@ -906,5 +919,9 @@ onBeforeUnmount(() => {
   .hero-actions { flex-direction: column; }
   .btn { justify-content: center; }
   .products-grid, .stats-bar, .features-bar { grid-template-columns: 1fr; }
+  .home-container { gap: var(--ds-space-4); }
+  .hero { padding: 1.25rem; }
+  .hero-search { grid-template-columns: auto minmax(0, 1fr); border-radius: var(--ds-radius-xl); }
+  .hero-search-btn { grid-column: 1 / -1; width: 100%; }
 }
 </style>

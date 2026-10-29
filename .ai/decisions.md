@@ -147,3 +147,9 @@ Date: 2026-10-29
 Decision: Keep the strict application-context boundary independent of role permission overrides.
 Reason: SUPER_ADMIN/wildcard permissions must not let STAFF context act as COMPANY/CUSTOMER or bypass `requireAccessType`.
 Impact: Supplier response create/edit/withdraw/attachment actions require COMPANY context and `inquiries.respond`; backend route guards remain authoritative.
+
+
+Date: 2026-10-29
+Decision: Deliver the legacy UI redesign as small page-level ports against current main, starting with Website homepage.
+Reason: The source patch is stale and contains mock-data/auth-guard hazards. Small changes reduce regression risk and make API, route, and state preservation reviewable.
+Impact: Homepage styling and keyboard accessibility are changed without replacing API/store logic. Each page must have regression coverage and a passing targeted test/build before the next page starts.
