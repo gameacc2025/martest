@@ -1,0 +1,235 @@
+/* ============================================================
+   Telecom Marketplace — production-safe page primitives
+   ============================================================
+   These classes are opt-in layout primitives. They do not fetch data,
+   change routes, or replace existing API-backed page logic.
+*/
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.ds-container {
+  width: 100%;
+  max-width: var(--ds-container-max);
+  margin-inline: auto;
+  padding-inline: var(--ds-container-pad, 1rem);
+}
+
+.ds-page {
+  min-height: 60vh;
+  padding-block: var(--ds-space-6) var(--ds-space-16);
+  background: var(--ds-color-background);
+}
+
+.ds-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+}
+
+.ds-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-3);
+}
+
+.ds-row--between {
+  justify-content: space-between;
+}
+
+.ds-grid {
+  --ds-min: 260px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--ds-min)), 1fr));
+  gap: var(--ds-space-5);
+}
+
+.ds-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--ds-space-6);
+}
+
+.ds-split__main {
+  flex: 999 1 560px;
+  min-width: 0;
+}
+
+.ds-split__side {
+  flex: 1 1 320px;
+  min-width: min(100%, 300px);
+}
+
+.ds-section {
+  padding-block: var(--ds-space-8);
+}
+
+.ds-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-6);
+}
+
+.ds-eyebrow {
+  display: block;
+  margin-bottom: var(--ds-space-1);
+  color: var(--ds-color-primary-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.ds-h1,
+.ds-h2,
+.ds-card-title {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-weight: 800;
+  line-height: var(--ds-line-height-tight);
+}
+
+.ds-h1 { font-size: var(--ds-font-size-2xl); }
+.ds-h2 { font-size: var(--ds-font-size-xl); }
+
+.ds-lead {
+  margin: var(--ds-space-2) 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-md);
+  line-height: var(--ds-line-height-relaxed);
+}
+
+.ds-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  min-height: var(--ds-touch-target);
+  color: var(--ds-color-primary-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ds-link:hover { text-decoration: underline; }
+
+.ds-card {
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.ds-card--pad { padding: var(--ds-space-6); }
+
+.ds-card--hover {
+  cursor: pointer;
+  transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
+}
+
+.ds-card--hover:hover {
+  border-color: var(--p-primary-300);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+}
+
+.ds-card-title {
+  margin-bottom: var(--ds-space-4);
+  font-size: var(--ds-font-size-lg);
+}
+
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  min-height: var(--ds-touch-target);
+  padding-inline: var(--ds-space-5);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md);
+  font-family: inherit;
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--ds-transition-fast), border-color var(--ds-transition-fast), color var(--ds-transition-fast);
+}
+
+.ds-btn--lg {
+  min-height: 52px;
+  padding-inline: var(--ds-space-8);
+  border-radius: var(--ds-radius-lg);
+  font-size: var(--ds-font-size-md);
+}
+
+.ds-btn--primary {
+  background: var(--ds-color-accent);
+  color: var(--ds-color-on-accent);
+}
+
+.ds-btn--primary:hover { background: var(--ds-color-primary-hover); }
+
+.ds-btn--dark {
+  background: var(--ds-color-brand-dark);
+  color: var(--ds-color-on-brand);
+}
+
+.ds-btn--dark:hover { background: var(--ds-color-brand-deep); }
+
+.ds-btn--outline {
+  background: var(--ds-color-surface);
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+}
+
+.ds-btn--outline:hover {
+  background: var(--ds-color-surface-hover);
+  border-color: var(--ds-color-primary-text);
+}
+
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding-inline: var(--ds-space-3);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.ds-badge--success { background: var(--ds-status-success-bg); color: var(--ds-status-success-fg); }
+.ds-badge--warning { background: var(--ds-status-warning-bg); color: var(--ds-status-warning-fg); }
+.ds-badge--danger { background: var(--ds-status-danger-bg); color: var(--ds-status-danger-fg); }
+.ds-badge--info { background: var(--ds-status-info-bg); color: var(--ds-status-info-fg); }
+.ds-badge--muted { background: var(--ds-status-muted-bg); color: var(--ds-status-muted-fg); }
+
+@media (min-width: 768px) {
+  .ds-container { padding-inline: var(--ds-container-pad-lg, 2rem); }
+}
+
+@media (min-width: 1920px) {
+  .ds-container { padding-inline: var(--ds-container-pad-xl, 3rem); }
+}
+
+@media (max-width: 640px) {
+  .ds-page { padding-block: var(--ds-space-4) var(--ds-space-8); }
+  .ds-card--pad { padding: var(--ds-space-4); }
+  .ds-h1 { font-size: var(--ds-font-size-xl); }
+}
