@@ -1,8 +1,14 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-const source = readFileSync(resolve(process.cwd(), 'apps/website/src/pages/public/Home.vue'), 'utf8')
+const homePath = [
+  resolve(process.cwd(), 'apps/website/src/pages/public/Home.vue'),
+  resolve(process.cwd(), 'src/pages/public/Home.vue'),
+].find(existsSync)
+
+if (!homePath) throw new Error('Could not locate the Website homepage source file')
+const source = readFileSync(homePath, 'utf8')
 
 describe('Website homepage redesign contracts', () => {
   it('keeps the production API and category store as the source of page data', () => {
