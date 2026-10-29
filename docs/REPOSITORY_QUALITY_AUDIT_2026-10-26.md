@@ -1,8 +1,8 @@
 # Repository Quality Audit — 2026-10-26
 
-## Current status (refreshed 2026-10-28)
+## Current status (history refreshed 2026-10-29; see final current-state addendum)
 
-**Core source/doc fixes are merged and the CI + migration checks are green for the latest code changes. This is still not a release sign-off** because live deployment, external provider, SMTP and browser E2E verification are not claimed.
+**Core source fixes are merged.** The latest verified source commit before the documentation-only refresh passed CI and database migration validation; the subsequent documentation commits have fresh CI/migration/runtime workflows running. The latest completed runtime workflow failed at browser smoke. This is still not a release sign-off: live deployment, external provider checks, SMTP delivery, SMS, exhaustive tenant review, and browser smoke are not signed off.
 
 Repository: `gameacc2025/martest`  
 Branch: `main`  
