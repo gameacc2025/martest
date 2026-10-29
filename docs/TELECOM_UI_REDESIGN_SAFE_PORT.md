@@ -93,3 +93,12 @@ Branch: `feat/website-homepage-redesign-step-1`
 - Product Listing preserves the existing store/API contract, category query initialization/watch, filters, pagination and product-details route. Keyboard activation/focus and accessible state semantics were added.
 - Post-merge main workflows are separate and must be inspected before Step 3 starts.
 - **Next page:** `apps/website/src/pages/public/ProductDetails.vue`.
+
+
+## Step 3 — Product Details (in progress, 2026-10-29)
+
+- Branch: `feat/website-product-details-redesign-step-3`.
+- Shared design tokens are being applied to the page shell and existing product surfaces; loading/not-found/error and price-history states expose accessible roles; selected gallery thumbnail exposes `aria-pressed`.
+- Existing product store/API, route ID watcher, image/price logic, company profile navigation, price-history API, inquiry submission and permission gate are preserved.
+- Component regression tests cover route IDs, render, not-found/error, thumbnail selection and permission-gated inquiry.
+- **Verification pending:** do not mark complete or merge until CI tests/builds and migration validation are inspected.

@@ -391,3 +391,8 @@ The Product Listing page is being ported on `feat/website-product-listing-redesi
 ## UI redesign step 2 merged — 2026-10-29
 
 Product Listing PR #30 merged at `91c64bb1a43553ecb1214b4a50c1bb0efa5f7ac2`. Feature-branch CI [40840764762](https://github.com/gameacc2025/martest/actions/runs/40840764762) and migration validation [40840764653](https://github.com/gameacc2025/martest/actions/runs/40840764653) passed. Added component tests for initial category/API params, reactive route-query updates, keyboard navigation, and error/empty states. Post-merge main workflows are queued and should be checked before proceeding to Product Details. Runtime/browser smoke is not claimed green.
+
+
+## UI redesign step 3 — Product Details (pending verification, 2026-10-29)
+
+Product Details is being ported on `feat/website-product-details-redesign-step-3`. Styling and accessibility updates preserve product-store calls, route ID handling, image selection, retail/bulk price logic, company navigation, price history and the inquiry permission gate. Component tests cover load/change of route ID, render, not-found/error, thumbnail selection and inquiry authorization visibility. CI/build/migration validation is pending.
