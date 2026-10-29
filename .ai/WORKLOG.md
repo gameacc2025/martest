@@ -1117,3 +1117,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Runtime validation:** [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) was still in progress at last check; no result claimed.
 - **Contract:** Company Profile now uses public catalog `getProducts({ page, limit, companyId })`, which is explicitly filtered to PUBLISHED + PUBLIC by the backend. Unsupported review/follow UI was removed; no backend authorization was weakened.
 - **Next:** Audit Companies directory because it is unrouted, references a missing component and missing store methods, while backend `GET /companies` is STAFF-only.
+
+
+## 2026-10-29 — WEBSITE-FAQ-REDESIGN-STEP-9
+
+- **Status:** Implementation and regression tests pushed to `feat/website-faq-redesign-step-9`; CI/migration verification pending.
+- **Page:** `apps/website/src/pages/public/Faq.vue`.
+- **Changes:** Shared design-system hero/surfaces, responsive FAQ accordion, accessible `aria-expanded` / `aria-controls` / region semantics, contact-support links.
+- **Content accuracy:** Replaced outdated claims about product returns, installment payments, order tracking, and seller contact with current B2B marketplace, inquiry permission/subscription, company approval and product-publication guidance.
+- **Tests:** Added `Faq.test.js` for rendering, toggle semantics, independent expanded items, unsupported-feature claim prevention, and contact route.
+- **Step 8 disposition:** Keep Companies directory unrouted/dormant because backend `GET /companies` is STAFF-only and the current page references missing UI/store contracts. No public API was invented.
+- **Runtime evidence correction:** Search Results [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762), About Us [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017), and Company Profile [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) runtime workflows failed at browser smoke after infrastructure/health/migration stages. Per owner instruction, do not debug browser smoke as the next task.
+- **Verification:** No local test run claimed; await feature CI and migration validation.

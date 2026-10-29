@@ -347,3 +347,10 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Backend `GET /companies` is explicitly restricted to STAFF context with `companies.read`; it must not be made public by merely changing frontend routing.
 - Step 7 PR #35 merged as `59c9dc201e6bd896a7a1ca5e599d9b4f31426659`. Company Profile now uses the existing public catalog query filtered by companyId; only PUBLISHED + PUBLIC products and public company id/name/type are rendered. Feature and post-merge CI/migration checks passed.
 - Next decision: either keep the directory unrouted if no public directory is intended, or design a separate public-safe endpoint with allowlisted fields and tests before exposing it.
+
+
+## FAQ and Companies directory status — 2026-10-29
+
+- The Companies directory is intentionally kept unrouted/dormant: backend `GET /companies` requires STAFF context and `companies.read`; no public-safe directory endpoint is currently defined. Do not expose it through a frontend-only route.
+- FAQ redesign branch `feat/website-faq-redesign-step-9` updates help content to the actual B2B inquiry permission/subscription flow and product publication process. It removes unsupported promises about installment purchases, returns, order tracking and direct seller contact.
+- Runtime validation failures on Search Results (`40881262762`), About Us (`40882371017`) and Company Profile (`40883463183`) all occurred at the browser-smoke step. Per owner instruction, browser smoke is not the next debugging task.

@@ -463,3 +463,10 @@ The routed Company Profile page was calling website store methods that do not ex
 - Feature CI [40883463184](https://github.com/gameacc2025/martest/actions/runs/40883463184), migration [40883463227](https://github.com/gameacc2025/martest/actions/runs/40883463227), post-merge CI [40883640234](https://github.com/gameacc2025/martest/actions/runs/40883640234), and post-merge migration [40883640581](https://github.com/gameacc2025/martest/actions/runs/40883640581) all passed.
 - Runtime validation [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) was still running at last check.
 - `Companies.vue` is not routed, imports a missing component, and references missing store methods; backend `GET /companies` is STAFF-only. Do not expose it publicly without a separately designed public-safe API and tests.
+
+
+## FAQ Step 9 and Companies directory disposition — 2026-10-29
+
+- Step 8 decision: keep `apps/website/src/pages/public/Companies.vue` unrouted/dormant because backend `GET /companies` is STAFF-only; no public-safe company directory endpoint exists. The dormant page also references missing UI/store APIs.
+- FAQ Step 9 is in progress on `feat/website-faq-redesign-step-9`. It updates copy to current B2B inquiry permissions/subscription and product publication behavior, removing unverified checkout/returns/installment/order-tracking claims. Regression tests added; CI/migration pending.
+- Runtime validation failures at browser smoke were confirmed for Search Results [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762), About Us [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017), and Company Profile [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183). Infrastructure/health/migration stages passed before browser smoke; per owner instruction, do not debug that step as the next task.
