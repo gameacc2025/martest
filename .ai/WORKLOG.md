@@ -855,3 +855,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** NOT RUN in this tool session. GitHub Actions status after these direct commits has not yet been checked. No browser E2E was run or awaited.
 - **Branch policy:** No force-push, blind merge, or branch deletion. Port only unique, relevant changes after review and regression tests; branch deletion is not implied by merge authorization.
 - **Remaining:** Continue company/product/inquiry lifecycle and authorization audit; validate CI on main; retain explicit NOT VERIFIED labels for live payment, SMTP, deployment, and browser E2E.
+
+
+## 2026-10-29 — INQUIRY-SUPPLIER-CONTEXT-01
+
+- **Status:** PR #27 open; CI and migration validation pending.
+- **Finding:** Supplier response routes allowed STAFF context when the caller held `leads.update`, although the service rejects staff from acting as suppliers. This mismatch exposed an unnecessarily broad route boundary and inconsistent authorization behavior.
+- **Change:** Response create/edit/withdraw/attachment routes now require `COMPANY` access context and `inquiries.respond` specifically.
+- **Regression coverage:** Added tests that STAFF with `leads.update` cannot submit, edit, withdraw, or delete supplier response attachments.
+- **Docs:** Updated `.ai/current-task.md`; API documentation update still pending.
+- **Validation:** No browser E2E. Do not merge until automated checks pass.
