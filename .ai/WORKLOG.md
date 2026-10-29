@@ -939,3 +939,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Remaining tasks:** (1) port Website homepage redesign safely with tests/build; (2) continue exhaustive company-owned route/tenant/IDOR review; (3) controlled live Zarinpal/SMTP verification when credentials are available; (4) decide whether to scope and implement SMS; (5) expand API documentation to endpoint/schema/permission level; (6) maintain action toolchain separately if deprecation warnings warrant it.
 - **Release limitations:** No production deployment, live payment, live SMTP, SMS delivery, exhaustive tenant-security certification, or passing browser smoke is claimed.
 - **Files updated in this review:** `.ai/current-task.md`, `.ai/project-context.md`, `.ai/decisions.md`, this worklog, `docs/REPOSITORY_QUALITY_AUDIT_2026-10-26.md`, `docs/TELECOM_UI_REDESIGN_SAFE_PORT.md`, and `Telecom_Marketplace_Project_Architecture_and_Roadmap.md`.
+
+
+### Correction to SMS status — source-level review (2026-10-29)
+
+- Earlier summary wording that SMS was wholly unimplemented was too broad.
+- Present in source: Twilio provider adapter, SMS delivery processor/retry tracking, worker invocation, paid SMS quota enforcement, and unit tests.
+- Confirmed missing integration: `backend/src/modules/notifications/notification.dispatch.service.js` explicitly never queues SMS rows and returns `sms.notImplemented`. Admin announcements are IN_APP/EMAIL only.
+- Remaining task: wire supported event dispatch to SMS queue with recipient opt-in, phone validation, paid quota consumption, dedupe/retry tests, then controlled live Twilio verification. Live delivery remains NOT VERIFIED.
+- Updated `.ai/current-task.md`, `.ai/project-context.md`, quality audit, notification system documentation, and project roadmap to reflect the partial implementation accurately.
