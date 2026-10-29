@@ -1,28 +1,37 @@
 <template>
-  <div class="categories-page">
-    <div class="cat-container">
-      <div class="cat-head">
-        <h1>دسته بندی محصولات</h1>
+  <main class="categories-page ds-page" aria-labelledby="categories-title">
+    <div class="cat-container ds-container">
+      <header class="cat-head">
+        <div class="cat-heading-copy">
+          <span class="ds-eyebrow">بازارگاه تجهیزات مخابراتی</span>
+          <h1 id="categories-title" class="ds-h1">دسته‌بندی محصولات</h1>
+          <p class="ds-lead">برای پیدا کردن تجهیزات موردنیاز، دسته‌بندی مناسب را انتخاب کنید.</p>
+        </div>
         <Breadcrumb :home="home" :model="items" class="cat-breadcrumb" />
-      </div>
+      </header>
 
-      <div v-if="loading" class="cat-state">
+      <div v-if="loading" class="cat-state" role="status" aria-live="polite">
         <ProgressSpinner />
         <p class="cat-state-text">در حال دریافت دسته بندی ها...</p>
       </div>
 
-      <div v-else-if="error" class="cat-state">
+      <div v-else-if="error" class="cat-state" role="alert">
         <i class="pi pi-exclamation-circle cat-error-icon"></i>
         <h3 class="cat-error-title">خطا</h3>
         <p class="cat-error-text">{{ error }}</p>
       </div>
 
-      <div v-else>
-        <div class="cat-grid">
+      <div v-else-if="categories.length === 0" class="cat-state" role="status">
+        <i class="pi pi-folder-open cat-empty-icon"></i>
+        <h2>دسته‌بندی‌ای موجود نیست</h2>
+        <p>در حال حاضر دسته‌بندی فعالی برای نمایش وجود ندارد.</p>
+      </div>
+
+      <div v-else class="cat-grid" aria-label="دسته‌بندی محصولات">
           <Card
             v-for="category in categories"
             :key="category.id"
-            class="category-card"
+            class="category-card ds-card"
           >
             <template #content>
               <div class="cat-thumb">
@@ -49,10 +58,9 @@
               </div>
             </template>
           </Card>
-        </div>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -110,6 +118,9 @@ const viewCategoryProducts = (categoryId) => {
 <style scoped>
 .categories-page {
   direction: rtl;
+  background:
+    radial-gradient(ellipse at 8% 0%, color-mix(in srgb, var(--ds-color-primary) 6%, transparent), transparent 32rem),
+    var(--ds-color-background);
 }
 
 .cat-container {
@@ -127,23 +138,39 @@ const viewCategoryProducts = (categoryId) => {
 }
 
 .cat-head {
-  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-4);
+  margin-bottom: var(--ds-space-6);
 }
 
-.cat-head h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
+.cat-heading-copy { min-width: 0; }
+.cat-heading-copy .ds-h1 { margin: 0; }
+.cat-heading-copy .ds-lead { max-width: 42rem; }
 
 .cat-breadcrumb {
-  margin-top: 0.5rem;
+  margin-top: var(--ds-space-2);
 }
 
 .cat-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-3);
+  min-height: 16rem;
+  padding: var(--ds-space-8) var(--ds-space-4);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
   text-align: center;
-  padding: 2rem 0;
 }
+.cat-state h2 { margin: 0; color: var(--ds-color-text); }
+.cat-state p { margin: 0; }
+.cat-empty-icon { font-size: 2.5rem; }
 
 .cat-state-text {
   margin-top: 1rem;
@@ -168,8 +195,8 @@ const viewCategoryProducts = (categoryId) => {
 
 .cat-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--ds-space-5);
 }
 
 @media (min-width: 768px) {
@@ -185,19 +212,23 @@ const viewCategoryProducts = (categoryId) => {
 }
 
 .category-card {
-  transition: all 0.2s ease;
+  height: 100%;
+  border-radius: var(--ds-radius-xl);
+  overflow: hidden;
+  transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
 }
 
 .category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--ds-shadow-lg);
+  transform: translateY(-3px);
+  border-color: var(--ds-color-primary);
+  box-shadow: var(--ds-shadow-md);
 }
 
 .cat-thumb {
   aspect-ratio: 16 / 9;
-  background: var(--surface-ground);
-  border-radius: var(--content-border-radius);
-  margin-bottom: 1rem;
+  background: var(--ds-color-background);
+  border-radius: var(--ds-radius-lg);
+  margin-bottom: var(--ds-space-4);
   overflow: hidden;
 }
 
@@ -221,20 +252,32 @@ const viewCategoryProducts = (categoryId) => {
 }
 
 .cat-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-tight);
+  margin: 0 0 var(--ds-space-2) 0;
+  color: var(--ds-color-text);
+  overflow-wrap: anywhere;
 }
 
 .cat-desc {
-  color: var(--text-color-secondary);
-  font-size: 0.875rem;
-  margin: 0 0 1rem 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: var(--ds-line-height-relaxed);
+  margin: 0 0 var(--ds-space-4) 0;
 }
 
 .cat-footer-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+}
+.category-card :deep(.p-card-content) { height: 100%; }
+.category-card :deep(.p-button) { min-height: var(--ds-touch-target); }
+.category-card:focus-within {
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 3px;
 }
 </style>
