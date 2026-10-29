@@ -12,6 +12,9 @@ const { requireAccessType, requireAnyPermission } = require('../../middlewares/r
 //                  (CUSTOMER has no *.update / inquiries.respond permission).
 const ALL_TYPES = ['STAFF', 'COMPANY', 'CUSTOMER'];
 const MANAGE_TYPES = ['STAFF', 'COMPANY'];
+// Supplier quote lifecycle is company-only. Staff can administer inquiry
+// records, but must never impersonate a supplier when submitting or editing quotes.
+const SUPPLIER_TYPES = ['COMPANY'];
 
 const INQUIRY_PRIORITIES = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
 
@@ -320,7 +323,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.listResponses);
 
   fastify.post('/:id/responses', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('inquiries.respond', 'leads.update')],
+    preHandler: [requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')],
     schema: {
       params: {
         type: 'object',
@@ -348,7 +351,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.decideResponse);
 
   fastify.patch('/:id/responses/:responseId', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('inquiries.respond', 'leads.update')],
+    preHandler: [requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')],
     schema: {
       params: inquiryResponseParamsSchema,
       body: responseBodySchema,
@@ -357,7 +360,7 @@ async function inquiryRoutes(fastify) {
 
   // Withdraw a response (soft — status becomes WITHDRAWN).
   fastify.post('/:id/responses/:responseId/withdraw', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('inquiries.respond', 'leads.update')],
+    preHandler: [requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')],
     schema: {
       params: inquiryResponseParamsSchema,
       body: withdrawResponseBodySchema,
@@ -366,7 +369,7 @@ async function inquiryRoutes(fastify) {
 
   // Upload a file attachment to a response (multipart/form-data).
   fastify.post('/:id/responses/:responseId/attachments', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('inquiries.respond', 'leads.update')],
+    preHandler: [requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')],
     schema: {
       params: inquiryResponseParamsSchema,
       consumes: ['multipart/form-data'],
@@ -375,7 +378,7 @@ async function inquiryRoutes(fastify) {
 
   // Delete a response attachment.
   fastify.delete('/:id/responses/:responseId/attachments/:attachmentId', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('inquiries.respond', 'leads.update')],
+    preHandler: [requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')],
     schema: { params: inquiryResponseAttachmentParamsSchema },
   }, ctrl.deleteResponseAttachment);
 
