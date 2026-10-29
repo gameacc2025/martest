@@ -322,3 +322,29 @@ Updated priority order after the 2026-10-27 follow-up:
 All 19 non-main remote refs were compared against current `main`. No further merge was justified: merged PRs and selective ports already cover customer address management, customer profile, customer-owned inquiries, RFQ monetization, notification scope/folder contracts, subscription quota/payment concurrency, inquiry response concurrency, RBAC context, admin bundle import cleanup, and supplier response authorization. PR #26 only diagnosed Node deprecation warnings in GitHub Actions tooling and remains intentionally unmerged. The legacy feature branches are heavily divergent historical snapshots; merging them wholesale would risk regressions. The runtime validation workflow is already on `main`. No browser E2E was run or awaited, per owner instruction.
 
 The remaining action is remote ref cleanup by the repository owner. Retain `main`; delete the 19 reviewed non-main refs after fetching the latest remote state.
+
+
+## Current-state refresh — 2026-10-29 (after PR #28 merge)
+
+### Source baseline and CI evidence
+- Latest reviewed main commit before this documentation refresh: `384459502d0913350e4920e5aeeb2aef5360e553`.
+- CI [40833114382](https://github.com/gameacc2025/martest/actions/runs/40833114382): PASS for architecture graph check, frontend/shared tests, backend tests, Prisma generation, and all three production builds.
+- Fresh PostgreSQL migration validation [40833114529](https://github.com/gameacc2025/martest/actions/runs/40833114529): PASS.
+- Runtime validation [40833114464](https://github.com/gameacc2025/martest/actions/runs/40833114464): FAIL at the browser-smoke step. Compose validation, image build/start, service health endpoints, and migration-state check passed first. The browser smoke failure is recorded honestly; per owner instruction it is not the next debugging task.
+- The remote branch inventory returned only `main` in the latest query. This says nothing about unpushed local branches.
+
+### UI redesign disposition
+PR #28 is merged as `23576cb1a22f80fea2d245cf10e5915794d4a15c`. The accepted scope is limited to shared tokens/primitives, MegaMenu styling, regression tests and the safe-port guide. The legacy 32-file patch remains only partially adapted; page-level redesign is still open. Its mock-data switch, fake fixtures and auth bypass remain explicitly rejected.
+
+### Remaining work
+1. Continue route-by-route company-owned resource authorization/tenant/IDOR review. Existing targeted review did not constitute exhaustive certification.
+2. Port the UI redesign one current page at a time, beginning with the Website homepage; preserve API/data contracts and add tests for behavior.
+3. Run controlled live Zarinpal and SMTP verification only when credentials/environment are supplied. SMS delivery is not implemented.
+4. Expand API documentation from module-level source-aligned guidance to exhaustive endpoint/schema/permission coverage.
+5. Consider GitHub Actions toolchain updates separately if deprecation warnings remain; do not change application dependencies for warnings attributed to bundled action code.
+
+### Graphify status
+Graphify MCP could not be reviewed or refreshed: the tool reported no available workspace and calls failed because no workspace was selected. This is a tooling/access blocker, not a finding that the repository's generated architecture graph is stale. The generated architecture graph CI check passed in run 40833114382. Re-run Graphify analysis only after a workspace is made available and selected.
+
+### Release-sign-off boundary
+No production deployment, live payment, live SMTP, SMS delivery, exhaustive tenant-security certification, or passing browser smoke is claimed. The CI and migration results above are not a substitute for those operational checks.
