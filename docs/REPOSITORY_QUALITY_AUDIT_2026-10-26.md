@@ -373,3 +373,11 @@ The first page-level port is prepared on `feat/website-homepage-redesign-step-1`
 - The first test attempt exposed an invalid `fileURLToPath(import.meta.url)` assumption under Vitest's transform. The test now resolves the source using the current working directory and checks both repository-root and app-root paths; the corrected test passed in CI.
 - Database migration validation was still running at the time of this update. Runtime validation is a separate workflow and is not being debugged as part of this task.
 - The page-level redesign remains on PR #29 and is not merged.
+
+
+## Post-merge UI redesign status — 2026-10-29
+
+- PR #29 merged as `520d590b51b7d4be49772dd44cc3f5dc96f45351`; the Website homepage is the first page-level safe port after the shared foundation in PR #28.
+- Feature-branch CI [40839895731](https://github.com/gameacc2025/martest/actions/runs/40839895731) and migration validation [40839895740](https://github.com/gameacc2025/martest/actions/runs/40839895740) passed on the final feature-branch commit before merge.
+- Post-merge CI, migration, and runtime workflows have been triggered on the merge commit and must be checked independently. Runtime/browser smoke is not claimed passed; per owner instruction, do not prioritize browser-test debugging.
+- Next UI slice: Product Listing page. Preserve API/query/pagination/filter semantics, loading/error/empty states, and add focused regression tests before moving to another page.

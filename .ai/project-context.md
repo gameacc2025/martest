@@ -264,3 +264,12 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Keyboard activation/focus styles are being added to category and product tiles.
 - Source-contract tests were added; they guard API/route/state assumptions but do not replace component-level interaction tests. CI run [40839667461](https://github.com/gameacc2025/martest/actions/runs/40839667461) passed frontend/shared tests, backend tests, Prisma generation, architecture graph validation, and all three frontend builds on commit `0d33036dfe8480e0b63279ad42b4bf39787e844e`. Database migration validation was still running at the time of this update.
 - Do not proceed to Product Listing until this step's CI test/build results are inspected.
+
+
+## UI redesign handoff after Step 1 merge — 2026-10-29
+
+- PR #29 is merged at `520d590b51b7d4be49772dd44cc3f5dc96f45351`. Homepage styling now uses shared design-system primitives/tokens; category and product tiles support keyboard activation and visible focus.
+- Branch CI [40839895731](https://github.com/gameacc2025/martest/actions/runs/40839895731) and migration validation [40839895740](https://github.com/gameacc2025/martest/actions/runs/40839895740) both passed on the final feature-branch commit before merge. Post-merge main workflows must still be inspected separately.
+- Website homepage source-contract tests are source-level guards, not component interaction tests. The initial path-resolution failure was fixed; the corrected tests passed.
+- Next page is `apps/website/src/pages/public/ProductListing.vue`. Inspect existing API/store/query/pagination/filter contracts before styling; do not apply the legacy patch wholesale.
+- Keep each page port isolated, tested and documented. No browser smoke debugging as the next task.

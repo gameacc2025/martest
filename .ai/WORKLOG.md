@@ -968,3 +968,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - An earlier CI attempt failed because Vitest transforms `import.meta.url` in this workspace, making the test's `fileURLToPath` assumption invalid. The test path was corrected to resolve the source from either repository-root or app-root working directories. The corrected suite passed in the latest CI run.
 - Database migration validation was still running at the time of this update. Runtime validation remains a separate workflow; browser smoke debugging is not part of this step.
 - The test is intentionally a source-contract regression guard; it is not represented as a component-level interaction test.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-1 — MERGED
+
+- **Status:** MERGED; PR [#29](https://github.com/gameacc2025/martest/pull/29), merge commit `520d590b51b7d4be49772dd44cc3f5dc96f45351`.
+- **Scope:** Website homepage visual refinement, keyboard activation/focus for category/product tiles, Website source-contract regression tests, and updated AI/docs.
+- **Verification:** CI [40839895731](https://github.com/gameacc2025/martest/actions/runs/40839895731) passed architecture graph validation, frontend/shared tests, backend tests, Prisma generation and all three frontend production builds on the final branch commit before merge. Migration validation [40839895740](https://github.com/gameacc2025/martest/actions/runs/40839895740) passed on that commit.
+- **Test correction:** The initial source test failed because Vitest transforms `import.meta.url`; the test was corrected to find the source from either repository-root or app-root working directories, and the corrected suite passed.
+- **Behavior:** Real `productsApi.list` and `productsStore.getCategories` calls, route contracts, filters and loading/error/empty states remain intact. No backend/API/auth changes or mock data were introduced.
+- **Runtime boundary:** Runtime/browser smoke is separate and not claimed green. Per owner instruction, browser-smoke debugging is not the next task.
+- **Next:** Inspect post-merge main CI/migration results, then begin Product Listing page as Step 2 on a focused branch.

@@ -2,7 +2,7 @@
 
 ## Scope and status
 
-The merged implementation is a **production-safe first slice** of `telecom-ui-redesign.patch`, not a claim that all 32 changed files have been ported. The uploaded patch is based on an older page implementation and contains demo-only data paths. The following visual foundation is adapted here:
+The merged implementation is a **production-safe partial port** of `telecom-ui-redesign.patch`, not a claim that all 32 changed files have been ported. The shared foundation is PR #28; the first page-level slice (Website homepage) is PR #29. The uploaded patch is based on an older page implementation and contains demo-only data paths. The following visual foundation is adapted here:
 
 - shared semantic design tokens for brand surfaces, focus, status labels and touch targets;
 - opt-in page layout primitives in `packages/shared-ui/assets/design-system/pages.scss`;
@@ -63,3 +63,14 @@ Branch: `feat/website-homepage-redesign-step-1`
 - Added Website Vitest script and focused source-contract tests for API/route/state/accessibility invariants.
 - No backend, API contract, authentication guard, authorization policy, or mock-data behavior changed.
 - **Status:** CI test and production-build verification **PASS** on commit `0d33036dfe8480e0b63279ad42b4bf39787e844e` (run [40839667461](https://github.com/gameacc2025/martest/actions/runs/40839667461)). The source-contract test file passed with the full frontend/shared suite; backend tests and all three frontend production builds also passed. Database migration validation is still running at the time of this update. Runtime validation remains separate; browser smoke is not being debugged in this step. Source-contract tests are not a substitute for component interaction tests.
+
+
+## Step 1 completion — Website homepage (2026-10-29)
+
+- PR [#29](https://github.com/gameacc2025/martest/pull/29) merged as `520d590b51b7d4be49772dd44cc3f5dc96f45351`.
+- Feature-branch CI [40839895731](https://github.com/gameacc2025/martest/actions/runs/40839895731) passed: architecture graph, frontend/shared tests including homepage source-contract tests, backend tests, Prisma generation, and Website/Company/Admin production builds.
+- Feature-branch migration validation [40839895740](https://github.com/gameacc2025/martest/actions/runs/40839895740) passed.
+- The source-contract test initially failed due to Vitest's transformed `import.meta.url`; the test now searches both root-relative and app-relative paths and passed in the final CI run.
+- The homepage keeps its existing API/store data flow, routes, filter semantics and loading/error/empty states. Keyboard activation and focus visibility were added to category/product tiles.
+- Post-merge workflows on `main` are separate and must be inspected before the next page starts. Runtime/browser smoke is not claimed green and is not the next debugging task.
+- **Next page:** `apps/website/src/pages/public/ProductListing.vue`, one focused branch/PR at a time.
