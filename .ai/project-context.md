@@ -262,5 +262,5 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Current focused branch: `feat/website-homepage-redesign-step-1`, based on `main` commit `d91b3961e3c775def84d0efe634a4fa82271b9f4`.
 - Website homepage is being visually refined using the already merged shared design system. Existing API calls (`productsApi.list`, `productsStore.getCategories`), route contracts, and loading/error/empty states must remain unchanged.
 - Keyboard activation/focus styles are being added to category and product tiles.
-- Source-contract tests were added; they guard API/route/state assumptions but do not replace component-level interaction tests. CI and Website build results are pending.
+- Source-contract tests were added; they guard API/route/state assumptions but do not replace component-level interaction tests. CI run [40839667461](https://github.com/gameacc2025/martest/actions/runs/40839667461) passed frontend/shared tests, backend tests, Prisma generation, architecture graph validation, and all three frontend builds on commit `0d33036dfe8480e0b63279ad42b4bf39787e844e`. Database migration validation was still running at the time of this update.
 - Do not proceed to Product Listing until this step's CI test/build results are inspected.
