@@ -30,3 +30,10 @@ Port one page at a time from the current `main` implementation. For each page:
 4. run targeted tests and the Website production build before proceeding.
 
 Do not merge this branch until CI and review confirm that the selected visual changes do not alter production flows.
+
+## Verification record
+
+- GitHub Actions CI run [40832326705](https://github.com/gameacc2025/martest/actions/runs/40832326705): **PASS** — architecture graph check, frontend/shared tests (including the new MegaMenu tests), backend tests, Prisma client generation, and builds for all three frontend apps.
+- Database migration validation run [40832326749](https://github.com/gameacc2025/martest/actions/runs/40832326749): **PASS**.
+- Runtime validation run [40832326683](https://github.com/gameacc2025/martest/actions/runs/40832326683): still running when recorded; not claimed passed. Browser smoke-test outcome is not verified here.
+- No local build/test command was run in this session; verification above is from the actual GitHub Actions runs.
