@@ -444,3 +444,12 @@ test('POST /subscription/:id/verify-payment requires authentication', async () =
   assert.equal(res.statusCode, 401);
   await app.close();
 });
+
+
+test('STAFF with leads.update cannot submit a supplier response', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'POST', url: '/api/v1/inquiries/1/responses', headers: userHeader('STAFF', ['leads.update']), payload: { items: [{ inquiryItemId: 1, price: 1000, deliveryTime: '3 days', description: 'desc', availableQuantity: 50 }] } });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.submitResponse, undefined);
+  await app.close();
+});
