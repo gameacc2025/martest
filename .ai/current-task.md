@@ -52,3 +52,10 @@ Latest known source merge: PR #25 at `6fc10282a29a836ca84987eb4cec93fecce54774`.
 - **Merge safety:** No blanket merge or force update was performed. Do not merge old snapshots solely to make branch names disappear; compare and port any genuinely unique, still-needed changes into `main` with tests. Branch deletion remains separate and was not performed.
 - **Verification:** CI workflow file changed on main in commit `a518d061ded03ab82db3b62368489b1f9efdc6f5`. Automated workflow execution is pending; no browser tests were run or awaited.
 - **Next task:** Continue the company/product/inquiry authorization and lifecycle audit from current `main`, then address any confirmed gaps with regression tests and docs. Keep external payment/SMTP and deployment checks marked NOT VERIFIED without credentials/environment.
+
+
+## 2026-10-29 supplier-context hardening
+
+- Opened PR #27 to make supplier response creation, editing, withdrawal, and attachment management require COMPANY context plus `inquiries.respond`.
+- Regression tests cover STAFF with `leads.update` being denied supplier response submission/edit/withdrawal/attachment deletion.
+- CI and database migration workflows are queued for PR #27. Browser E2E is intentionally not run. Do not mark this task complete until required CI/migration checks pass and the PR is merged.
