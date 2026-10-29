@@ -134,3 +134,16 @@ Impact: Product services enforce STAFF permissions for create/update/delete, pri
 
 
 - Decision (2026-10-28): Payment callbacks must re-read subscription state after acquiring the owner lock. A callback that observes a previously verified ACTIVE subscription must return success without changing its period; keep provider verification and conditional activation as defense in depth.
+
+
+---
+
+Date: 2026-10-29
+Decision: Port the telecom UI redesign incrementally against the current production implementation rather than applying the legacy patch wholesale.
+Reason: The patch contains mock/demo data paths and an authentication-guard bypass, and several page replacements target older source. Wholesale application risks removing API contracts, authorization and recently merged fixes.
+Impact: Only the shared design foundation and MegaMenu slice from PR #28 is accepted. Each later page change must preserve real API data, routes, permissions, loading/error states and mutations, with regression tests and targeted builds.
+
+Date: 2026-10-29
+Decision: Keep the strict application-context boundary independent of role permission overrides.
+Reason: SUPER_ADMIN/wildcard permissions must not let STAFF context act as COMPANY/CUSTOMER or bypass `requireAccessType`.
+Impact: Supplier response create/edit/withdraw/attachment actions require COMPANY context and `inquiries.respond`; backend route guards remain authoritative.
