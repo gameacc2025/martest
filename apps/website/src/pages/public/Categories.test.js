@@ -23,7 +23,7 @@ const mountCategories = () => shallowMount(Categories, {
       Button: {
         props: ['label'],
         emits: ['click'],
-        template: '<button type="button" @click="$emit(\'click\')">{{ label }}</button>',
+        template: '<button type="button" @click="$emit(&quot;click&quot;)">{{ label }}</button>',
       },
       Badge: { props: ['value'], template: '<span>{{ value }}</span>' },
       Breadcrumb: { template: '<nav class="breadcrumb-stub" />' },
