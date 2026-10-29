@@ -396,3 +396,8 @@ Product Listing PR #30 merged at `91c64bb1a43553ecb1214b4a50c1bb0efa5f7ac2`. Fea
 ## UI redesign step 3 — Product Details (pending verification, 2026-10-29)
 
 Product Details is being ported on `feat/website-product-details-redesign-step-3`. Styling and accessibility updates preserve product-store calls, route ID handling, image selection, retail/bulk price logic, company navigation, price history and the inquiry permission gate. Component tests cover load/change of route ID, render, not-found/error, thumbnail selection and inquiry authorization visibility. CI/build/migration validation is pending.
+
+
+## UI redesign step 3 verified and merged — 2026-10-29
+
+Product Details PR #31 merged at `daf47ff282a2e81162ff0e8e5047337b1973b26e`. Feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392), feature migration validation [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249), post-merge CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985), and post-merge migration validation [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967) all passed. Product Details tests cover route ID load/change, not-found/error, gallery selection, and inquiry permission visibility. Next UI slice is Categories. Runtime/browser smoke is not claimed green.

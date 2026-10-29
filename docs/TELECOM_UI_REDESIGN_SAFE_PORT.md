@@ -102,3 +102,12 @@ Branch: `feat/website-homepage-redesign-step-1`
 - Existing product store/API, route ID watcher, image/price logic, company profile navigation, price-history API, inquiry submission and permission gate are preserved.
 - Component regression tests cover route IDs, render, not-found/error, thumbnail selection and permission-gated inquiry.
 - **Verification pending:** do not mark complete or merge until CI tests/builds and migration validation are inspected.
+
+
+## Step 3 completion — Website Product Details (2026-10-29)
+
+- PR [#31](https://github.com/gameacc2025/martest/pull/31) merged as `daf47ff282a2e81162ff0e8e5047337b1973b26e`.
+- Feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392) and migration [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249) passed. Post-merge CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985) and migration [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967) passed.
+- Product Details now consumes shared design tokens for page/surface/text/border/shadow/spacing. Accessible state roles and thumbnail `aria-pressed` were added.
+- Existing product route ID, image selection, price tier logic, company route, price-history API and permission-gated inquiry behavior were preserved.
+- **Next page:** `apps/website/src/pages/public/Categories.vue`.

@@ -298,3 +298,12 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Product Details is being aligned to shared design-system tokens for surfaces, text, border, shadow and spacing. Accessible state semantics and selected-gallery-thumbnail `aria-pressed` are being added.
 - Preserve `getProductById(route.params.id)`, route ID watcher, product gallery, price tier logic, company-profile route, price-history API, inquiry creation, and the existing authentication plus permission gate for inquiries.
 - Component tests cover route-ID load/change, product render, not-found/error, thumbnail selection and inquiry permission gating. CI/build/migration verification pending.
+
+
+## UI redesign handoff after Step 3 merge — 2026-10-29
+
+- Product Details PR #31 merged at `daf47ff282a2e81162ff0e8e5047337b1973b26e`.
+- Feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392), feature migration [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249), post-merge CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985), and post-merge migration [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967) all passed.
+- Product Details keeps the route-ID watcher, product store API, gallery, price tiers, company profile, price-history API, and inquiry permission gate; component tests cover these boundaries.
+- Next UI page is `apps/website/src/pages/public/Categories.vue`; preserve category data, IDs, navigation query and loading/error/empty states.
+- Runtime/browser smoke is separate and not claimed green; browser-test debugging is not the next task.

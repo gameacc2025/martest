@@ -1,35 +1,48 @@
 # Current Task — 2026-10-29
 
-## Active task: Step 3 — Website Product Details redesign
+## Active handoff: Step 4 — Website Categories page redesign
 
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main`  
-**Working branch:** `feat/website-product-details-redesign-step-3`  
-**Base:** `main` at `bccbe4c30c44fe11d071731ea5f19e0af13b3eca`
+**Latest merged feature:** Product Details PR #31, merge commit `daf47ff282a2e81162ff0e8e5047337b1973b26e`  
+**Next focused branch:** `feat/website-categories-redesign-step-4`.
 
 ## Completed UI steps
 
 ### Step 1 — Homepage
 - PR [#29](https://github.com/gameacc2025/martest/pull/29) merged as `520d590b51b7d4be49772dd44cc3f5dc96f45351`.
-- Feature CI [40839895731](https://github.com/gameacc2025/martest/actions/runs/40839895731) and migration [40839895740](https://github.com/gameacc2025/martest/actions/runs/40839895740) passed.
-- Post-merge CI and migration validation passed.
+- Feature CI [40839895731](https://github.com/gameacc2025/martest/actions/runs/40839895731) and migration [40839895740](https://github.com/gameacc2025/martest/actions/runs/40839895740) passed; post-merge CI/migration also passed.
 
 ### Step 2 — Product Listing
 - PR [#30](https://github.com/gameacc2025/martest/pull/30) merged as `91c64bb1a43553ecb1214b4a50c1bb0efa5f7ac2`.
-- Feature CI [40840764762](https://github.com/gameacc2025/martest/actions/runs/40840764762) and migration [40840764653](https://github.com/gameacc2025/martest/actions/runs/40840764653) passed.
-- Post-merge CI [40840922441](https://github.com/gameacc2025/martest/actions/runs/40840922441) and migration validation [40840922446](https://github.com/gameacc2025/martest/actions/runs/40840922446) passed.
+- Feature CI [40840764762](https://github.com/gameacc2025/martest/actions/runs/40840764762) and migration [40840764653](https://github.com/gameacc2025/martest/actions/runs/40840764653) passed; post-merge CI [40840922441](https://github.com/gameacc2025/martest/actions/runs/40840922441) and migration [40840922446](https://github.com/gameacc2025/martest/actions/runs/40840922446) passed.
 
-## Step 3 scope — Product Details
+### Step 3 — Product Details
+- PR [#31](https://github.com/gameacc2025/martest/pull/31) merged as `daf47ff282a2e81162ff0e8e5047337b1973b26e`.
+- Feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392): **PASS** — architecture graph, frontend/shared tests including Product Details component tests, backend tests, Prisma generation, and all three frontend builds.
+- Feature migration validation [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249): **PASS**.
+- Post-merge CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985): **PASS**.
+- Post-merge migration validation [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967): **PASS**.
+- Runtime/browser smoke is separate and not claimed green; do not debug it as the next task per owner instruction.
 
-- File: `apps/website/src/pages/public/ProductDetails.vue`.
-- Current changes: use shared page/container and design tokens for color/surface/border/shadow/spacing; mark loading/not-found/error and price-history states for assistive technology; expose selected thumbnail state via `aria-pressed`.
-- Preserved: `productsStore.getProductById(route.params.id)`, product route-id watcher, image selection, pricing/sorting, company profile navigation, price-history API, inquiry submission, and permission gate `isAuthenticated && hasAnyPermission(['inquiries.create', 'leads.create'])`.
-- Tests added: `apps/website/src/pages/public/ProductDetails.test.js` covers route-ID loading, product details/image, not-found/error states, route ID changes, thumbnail selection, and permission-gated inquiry action.
-- **Status:** implementation/tests on focused branch; CI/build/migration verification pending. Do not merge until tests, builds, and migration checks are inspected.
+## Step 4 scope — Categories
+
+1. Inspect `apps/website/src/pages/public/Categories.vue`, its product store/API, category data shape, navigation/query contracts, and loading/error/empty states.
+2. Apply shared design-system styling and accessibility changes only.
+3. Preserve `productsStore.getCategories()`, category IDs, `products` route query semantics, and all current states.
+4. Add component regression tests for live category loading, empty/error states, and category navigation.
+5. Run frontend/shared tests, backend tests, all three production builds and separate migration validation.
+6. Update this file, worklog, project context, safe-port guide and quality audit with actual evidence.
+7. Do not start another page until checks are inspected.
+
+## Remaining cross-project backlog
+
+- Exhaustive company-owned route/tenant/IDOR review.
+- Complete SMS event-dispatch integration; Twilio adapter/worker/quota exist, but dispatcher does not enqueue SMS rows. Live delivery unverified.
+- Controlled live Zarinpal and SMTP verification.
+- Complete endpoint/schema/permission API documentation.
+- Graphify MCP refresh remains blocked until a workspace is available and selected.
 
 ## Constraints
 
-- No mock data or auth bypass. Preserve product API/store, route ID, price history, inquiry and company navigation behavior.
-- Do not weaken the inquiry permission gate or backend authorization.
-- Browser-smoke debugging is not the next task per owner instruction.
-- Remaining cross-project work: exhaustive company-owned route/tenant/IDOR review; finish SMS event-dispatch integration; controlled live Zarinpal/SMTP verification; complete endpoint/schema/permission API docs; Graphify MCP refresh when a workspace is available.
+No mock data, auth bypass, or local-only replacement for API behavior. Preserve app-context/RBAC and tenant ownership. Browser-smoke debugging is not the next task. Do not claim any check is green without workflow evidence.

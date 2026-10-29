@@ -1010,3 +1010,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Behavior preserved:** route ID loading/watcher, product store API, image selection, retail/bulk price selection, company profile route, price-history API, inquiry submission and permission gating.
 - **Tests added:** product loading/route ID, not-found/error states, route changes, image switching and permission-gated inquiry action.
 - **Verification:** CI, production builds and migration validation pending. No local test/build run claimed.
+
+
+## 2026-10-29 — UI-REDESIGN-STEP-3 — MERGED
+
+- **Status:** MERGED; PR [#31](https://github.com/gameacc2025/martest/pull/31), merge commit `daf47ff282a2e81162ff0e8e5047337b1973b26e`.
+- **Changes:** Product Details now uses shared design-system tokens for page surface, container, color, border, shadow and spacing. Loading/not-found/error/price-history states expose accessibility roles; selected image thumbnail exposes `aria-pressed`.
+- **Behavior preserved:** route-ID loading/watcher, product gallery, retail/bulk price logic, company profile navigation, price-history API, and inquiry submission with existing authentication/permission gate.
+- **Verification:** Feature CI [40841432392](https://github.com/gameacc2025/martest/actions/runs/40841432392) passed all frontend/shared tests (including new Product Details component tests), backend tests, Prisma generation, architecture graph and all three builds. Migration validation [40841432249](https://github.com/gameacc2025/martest/actions/runs/40841432249) passed. Post-merge main CI [40841579985](https://github.com/gameacc2025/martest/actions/runs/40841579985) and migration validation [40841579967](https://github.com/gameacc2025/martest/actions/runs/40841579967) also passed.
+- **Next:** Categories page as Step 4 on a focused branch. Runtime/browser smoke remains separate and is not claimed passed.
