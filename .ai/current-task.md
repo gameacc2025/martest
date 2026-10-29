@@ -1,3 +1,27 @@
+# Current Task — 2026-10-29
+
+## Active work: UI-REDESIGN-SAFE-01
+
+**Status: PARTIAL / safe first slice implemented; PR open for review.** The uploaded 32-file patch has not been applied wholesale because it replaces API-backed flows with mock data and bypasses the Website authentication guard. A safe shared design foundation and menu visual refresh are on branch `feat/telecom-ui-redesign-safe` and [PR #28](https://github.com/gameacc2025/martest/pull/28).
+
+### Implemented on the branch
+- Added semantic design-token aliases and opt-in page primitives under `packages/shared-ui/assets/design-system/`.
+- Refreshed the shared category mega-menu CSS while retaining its existing prop shape and `products` route contract.
+- Added `MegaMenu.test.js` regression coverage for opening, category navigation, and outside-click dismissal.
+- Added `docs/TELECOM_UI_REDESIGN_SAFE_PORT.md` with exclusions and a page-by-page porting plan.
+- No `mockData.js` / `USE_MOCK` file, no API/auth/permission/router-guard changes, and no production page data replaced with fixtures.
+
+### Verification
+- CI run [40832326705](https://github.com/gameacc2025/martest/actions/runs/40832326705): PASS — architecture graph, frontend/shared tests, backend tests, Prisma generation, all three frontend builds.
+- Database migration validation [40832326749](https://github.com/gameacc2025/martest/actions/runs/40832326749): PASS.
+- Runtime validation [40832326683](https://github.com/gameacc2025/martest/actions/runs/40832326683): in progress at last check; no pass claimed.
+- Local tests/build were NOT RUN because the session did not have a local checkout with installed dependencies.
+
+### Next step
+Continue porting one page at a time against current API-backed code (start with the homepage) only after reviewing its current implementation, data contract, loading/error states, and existing tests. Keep PR #28 unmerged until the broader page-by-page work is reviewed.
+
+---
+
 # Current Task Handoff — 2026-10-28
 
 ## Current state
