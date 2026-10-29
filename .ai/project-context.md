@@ -1,6 +1,6 @@
 # martest — Project Context
 
-_Last full rebuild: 2026-08-08 (initial). Update incrementally via /context-update; only /context-reset does a full rescan._
+_Baseline architecture notes originated 2026-08-08; current-state corrections last reconciled 2026-10-29. Read the final “Current state and audit corrections” section below before relying on older details.
 
 ## 1. Project identity
 Telecom B2B marketplace ("telecom-marketplace"). Companies (manufacturers/
@@ -239,3 +239,20 @@ Usage consumption must validate the active subscription after acquiring its row 
 ## RBAC comment accuracy (2026-10-28)
 
 `requireAccessType` is a strict application-context boundary. SUPER_ADMIN/wildcard permission override applies only in STAFF context and must not bypass app-type checks for COMPANY or CUSTOMER. Keep route comments and docs aligned with this invariant.
+
+
+## Current state and audit corrections — 2026-10-29 (authoritative over older notes)
+
+- Canonical source is `main`; the latest reviewed source commit before this documentation refresh was `384459502d0913350e4920e5aeeb2aef5360e553`. GitHub branch search returned only `main` at the time of review.
+- PR #28 is merged. Its production-safe shared UI slice includes semantic design-token aliases, opt-in page primitives, MegaMenu visual updates, regression tests and a porting guide. The uploaded 32-file redesign patch is **not fully ported**.
+- Never import the original patch's `USE_MOCK` / `mockData.js` patterns into production pages. Preserve backend APIs, auth guards, RBAC, actual server data, route behavior, loading/error states and real mutations.
+- Strict context invariant: SUPER_ADMIN or wildcard permissions do not bypass the STAFF/COMPANY/CUSTOMER application-context boundary. In particular, supplier response create/edit/withdraw/attachment operations require COMPANY context and `inquiries.respond`.
+- Inquiry concurrency invariants: parent inquiry row locking serializes response submit/edit/withdraw, buyer decisions and manual status changes; duplicate company/inquiry submissions return 409 `RESPONSE_ALREADY_EXISTS`.
+- Payment/quota invariants: payment callbacks re-read subscription state after the owner lock and must not reactivate/extend an already verified ACTIVE subscription; quota consumption revalidates the current active period after locking and fails closed after expiry.
+- Notifications derive app/folder scope from authenticated context, not client-supplied app scope. Preserve stable counters, folder membership, bulk/single read state and the double-click-to-read interaction.
+- Latest remote CI on the reviewed main commit: CI run `40833114382` passed, migration validation `40833114529` passed. Runtime validation `40833114464` failed at browser smoke after Compose, build/start, service health and migration checks succeeded. Per owner instruction, browser tests are not the next debugging task and must not be reported as passed.
+- Live Zarinpal and SMTP remain NOT VERIFIED without staging credentials/controlled delivery; SMS remains NOT IMPLEMENTED; production deployment and exhaustive route-by-route tenant/IDOR review are not signed off.
+- API documentation is reconciled to current implementation at a high level, but exhaustive endpoint/schema/permission documentation is still follow-up work.
+- The Graphify MCP workspace could not be queried or updated because no workspace is available/selected for this agent. This does not mean the repository architecture graph is missing: its generated check passed in CI. Re-enable/select a Graphify workspace before claiming a Graphify refresh.
+- The frontend contains two API-client implementations (`packages/api-client` and `packages/shared-core/http`). Treat consolidation as a separate architectural decision; do not merge them reflexively.
+- B2C Cart/Checkout/Orders/Wishlist remain dormant under the existing frozen architecture decision; do not expose them as active features without revisiting that decision.
