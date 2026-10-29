@@ -129,3 +129,13 @@ Branch: `feat/website-homepage-redesign-step-1`
 - The page uses shared design tokens, a responsive category grid and accessible loading/error/empty states. Existing category store and products route/query are preserved.
 - The first test run exposed missing slot rendering in shallow-mount stubs; explicit component stubs fixed the test setup and the corrected tests passed.
 - **Next page:** `apps/website/src/pages/public/SearchResults.vue`.
+
+
+## Step 5 — Website Search Results (2026-10-29)
+
+- **Branch:** `feat/website-search-results-redesign-step-5`.
+- **Files:** `apps/website/src/pages/public/SearchResults.vue` and new `apps/website/src/pages/public/SearchResults.test.js`.
+- **Changes:** Adopted shared `ds-*` tokens/primitives for the page shell, headings and surfaces; improved responsive filter/results layout; added accessible search/controls, loading/error/empty states and retry action.
+- **Behavior preserved:** Existing `productsStore.searchProducts(query, params)` contract, query route watcher/URL synchronization, category and price filter parameters, sorting/pagination, cart/wishlist handlers and product-details navigation.
+- **Tests:** Added regression coverage for query-to-API behavior, result rendering/normalization, empty/error/retry states, route query changes and product navigation.
+- **Status:** Awaiting feature CI and database migration validation. Do not merge or mark complete until checks are inspected.

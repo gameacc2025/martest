@@ -1040,3 +1040,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Test correction:** The first CI run failed because shallow-mounted Card stubs did not render named slots; explicit Card/Button/Badge/Breadcrumb/Spinner stubs were added and tests passed in the corrected run.
 - **Verification:** Feature CI [40842352640](https://github.com/gameacc2025/martest/actions/runs/40842352640) and migration [40842352602](https://github.com/gameacc2025/martest/actions/runs/40842352602) passed. Post-merge CI [40842534524](https://github.com/gameacc2025/martest/actions/runs/40842534524) and migration [40842534511](https://github.com/gameacc2025/martest/actions/runs/40842534511) passed.
 - **Next:** Search Results page as Step 5.
+
+
+## 2026-10-29 — WEBSITE-SEARCH-RESULTS-REDESIGN-STEP-5
+
+- **Status:** Implementation and regression tests pushed to `feat/website-search-results-redesign-step-5`; CI and migration verification pending.
+- **Scope:** Redesigned `apps/website/src/pages/public/SearchResults.vue` using the existing shared design-system tokens/primitives; added accessible search labels, results count announcements, loading/error/empty states, retry action, responsive filter/result layout, and accessible sorting controls.
+- **Behavior preserved:** `productsStore.searchProducts(searchQuery, params)`, query route synchronization/watcher, category/price/sort/pagination parameters, product normalization, cart/wishlist handlers, and `product-details` route.
+- **Tests added:** `apps/website/src/pages/public/SearchResults.test.js` covers route query/API parameters, live result normalization/render, new query submit and URL sync, empty/error/retry states, query changes, and product navigation.
+- **Base:** `985b8da264c21254c1c29edc2610c37d42952c76`.
+- **Important:** No local dependency-equipped checkout was available; do not claim local tests ran. Await feature CI, migration validation, and post-merge checks before marking complete.
+- **Owner constraints:** Do not introduce mocks into production runtime, bypass auth, change API contracts, or debug browser smoke as the next task.
