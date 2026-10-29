@@ -865,3 +865,19 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Regression coverage:** Added tests that STAFF with `leads.update` cannot submit, edit, withdraw, or delete supplier response attachments.
 - **Docs:** Updated `.ai/current-task.md`; API documentation update still pending.
 - **Validation:** No browser E2E. Do not merge until automated checks pass.
+
+
+## 2026-10-29 — INQUIRY-SUPPLIER-CONTEXT-01 — MERGED
+
+- **PR:** [#27](https://github.com/gameacc2025/martest/pull/27), squash merge `7accdd8b2db4a1db046175c19507d76d223bce95`.
+- **Finding/fix:** Supplier response lifecycle routes now require `COMPANY` access context and `inquiries.respond`; administrative `leads.update` does not permit STAFF to impersonate a supplier.
+- **Regression tests:** STAFF cannot submit, edit, withdraw, or delete response attachments through supplier routes.
+- **Validation:** CI run `40825349236` passed; database migration validation run `40826610626` passed on merged `main`. No browser E2E was run or awaited.
+- **Docs:** Added `docs/SUPPLIER_RESPONSE_AUTHORIZATION.md` and updated `docs/API_DOCUMENTATION.md`.
+
+## 2026-10-29 — BRANCH-AUDIT-02
+
+- Audited 18 remaining non-main branch heads against `main`; no blanket merge or force update performed.
+- Confirmed core inquiry duplicate-response, quota expiry, notification app-scope, payment callback, RBAC context and inquiry locking fixes are present in current `main`; stale branch variants must not be replayed.
+- Large divergent customer-address/dashboard, inquiry-completion, RFQ and runtime-validation branches remain subject to selective file-level review. Browser E2E work is excluded per owner instruction.
+- Branch-ref deletion is not available through the connected GitHub action set; do not simulate deletion by moving refs. A supported GitHub delete-ref action is needed to complete remote branch cleanup.
