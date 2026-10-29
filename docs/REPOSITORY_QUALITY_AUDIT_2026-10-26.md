@@ -381,3 +381,8 @@ The first page-level port is prepared on `feat/website-homepage-redesign-step-1`
 - Feature-branch CI [40839895731](https://github.com/gameacc2025/martest/actions/runs/40839895731) and migration validation [40839895740](https://github.com/gameacc2025/martest/actions/runs/40839895740) passed on the final feature-branch commit before merge.
 - Post-merge CI, migration, and runtime workflows have been triggered on the merge commit and must be checked independently. Runtime/browser smoke is not claimed passed; per owner instruction, do not prioritize browser-test debugging.
 - Next UI slice: Product Listing page. Preserve API/query/pagination/filter semantics, loading/error/empty states, and add focused regression tests before moving to another page.
+
+
+## UI redesign step 2 — Product Listing (pending verification, 2026-10-29)
+
+The Product Listing page is being ported on `feat/website-product-listing-redesign-step-2`. Styling and accessibility changes preserve the existing products store calls, category query handling, filters, pagination and product-detail route. Component regression tests cover initial query parameters, route-query updates, keyboard activation, and error/empty states. CI/build/migration validation is pending; this step is not merged or signed off.
