@@ -360,3 +360,8 @@ Earlier entries saying SMS is wholly unimplemented are too broad and are superse
 - Provider, delivery worker, and quota tests.
 
 **Confirmed gap:** `backend/src/modules/notifications/notification.dispatch.service.js` explicitly marks SMS as not implemented and does not create SMS delivery rows. Therefore end-to-end event-driven SMS is not wired despite the downstream adapter/worker existing. The next SMS task is to integrate dispatch/queue creation with explicit recipient opt-in, phone-number resolution/validation, paid-quota consumption, deduplication, and regression tests. Live Twilio delivery remains NOT VERIFIED without credentials and a controlled recipient.
+
+
+## UI redesign step 1 — current branch status (2026-10-29)
+
+The first page-level port is prepared on `feat/website-homepage-redesign-step-1`. It refines the Website homepage using existing design-system tokens, preserves API and route behavior, and adds keyboard activation for category/product tiles. Source-contract regression tests were added. CI and production build results remain pending; this step is not yet marked complete or merged. No browser E2E debugging is included in this task.
