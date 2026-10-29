@@ -453,3 +453,20 @@ test('STAFF with leads.update cannot submit a supplier response', async () => {
   assert.equal(hit.submitResponse, undefined);
   await app.close();
 });
+
+
+test('STAFF cannot edit or withdraw supplier responses with administrative permissions', async () => {
+  const app = await buildApp();
+  const headers = userHeader('STAFF', ['leads.update']);
+  const payload = { items: [{ inquiryItemId: 1, price: 1000, deliveryTime: '3 days', description: 'desc', availableQuantity: 50 }] };
+  const edit = await app.inject({ method: 'PATCH', url: '/api/v1/inquiries/1/responses/2', headers, payload });
+  assert.equal(edit.statusCode, 403);
+  assert.equal(hit.updateResponse, undefined);
+  const withdraw = await app.inject({ method: 'POST', url: '/api/v1/inquiries/1/responses/2/withdraw', headers, payload: {} });
+  assert.equal(withdraw.statusCode, 403);
+  assert.equal(hit.withdrawResponse, undefined);
+  const removeAttachment = await app.inject({ method: 'DELETE', url: '/api/v1/inquiries/1/responses/2/attachments/3', headers });
+  assert.equal(removeAttachment.statusCode, 403);
+  assert.equal(hit.deleteResponseAttachment, undefined);
+  await app.close();
+});
