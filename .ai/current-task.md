@@ -105,13 +105,13 @@ Latest source merge: PR #27, squash commit `7accdd8b2db4a1db046175c19507d76d223b
 
 
 ## 2026-10-29 — UI-REDESIGN-SAFE-01
-- **Status:** IN_PROGRESS
+- **Status:** MERGED — safe shared UI foundation only; full 32-file patch is not ported.
 - **Agent:** ChatGPT via GitHub repository tools
-- **Goal:** Safely adapt `telecom-ui-redesign.patch` for the live website without replacing API-backed flows with demo data or weakening route guards.
-- **Claimed scope:** Shared design tokens and reusable page primitives; the shared category mega-menu visual treatment; focused component regression tests; redesign compatibility documentation; task handoff and worklog. All changes isolated to `feat/telecom-ui-redesign-safe`.
-- **Changes:** Task claim only at this point. The uploaded patch contains `USE_MOCK = true`, numerous `mockData.js` page dependencies, local-only cart/wishlist/order/notification data, and a router guard bypass. Those are excluded from the production adaptation.
-- **Verification:** To be run after implementation. No test/build result claimed yet.
-- **Commit:** Task claim commit pending.
-- **Push:** Authorized for the requested separate branch; no merge to `main` planned.
-- **Risks / open questions:** The full 32-file patch is based on an older UI implementation and several hunks conflict with current `main`. Page-by-page markup redesign must be ported against current API contracts in later focused steps; this initial safe slice must not be represented as the whole patch being ported.
-- **Next action:** Add token-backed, non-invasive visual primitives and restyle the existing menu without changing route/API/auth behavior; add tests and docs.
+- **Goal:** Safely adapt `telecom-ui-redesign.patch` without replacing API-backed flows with demo data or weakening route guards.
+- **Changes merged:** Shared semantic design-token aliases and opt-in page primitives; refreshed shared category mega-menu CSS; two regression tests; compatibility and verification documentation.
+- **Pull request:** [PR #28](https://github.com/gameacc2025/martest/pull/28), merged by squash.
+- **Merge commit:** `23576cb1a22f80fea2d245cf10e5915794d4a15c`.
+- **Verification:** CI passed (frontend/shared tests, backend tests, architecture graph and all three frontend builds); database migration validation passed. Runtime validation was still in progress at last check and is not claimed passed.
+- **Security / compatibility:** No `USE_MOCK` or `mockData.js`; router guards, APIs, authentication, permissions and page data flows were not replaced.
+- **Remaining work:** The visual redesign of individual pages is not complete. Port page-by-page against current API contracts and preserve loading/error states, route behavior and authorization.
+- **Branch cleanup:** The branch `feat/telecom-ui-redesign-safe` still exists. The connected GitHub action set does not expose branch deletion; the repository owner must delete it from GitHub or with `git push origin --delete feat/telecom-ui-redesign-safe`.
