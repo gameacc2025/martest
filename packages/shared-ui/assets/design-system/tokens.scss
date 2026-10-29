@@ -167,6 +167,30 @@
   --ds-z-overlay: 1000;
   --ds-z-modal: 1100;
   --ds-z-toast: 1200;
+
+  /* Production-safe redesign aliases: no data or domain behavior implied. */
+  --ds-color-brand-deep: var(--p-primary-950, #003a54);
+  --ds-color-brand-dark: var(--p-primary-900, #004d6f);
+  --ds-color-on-brand: #ffffff;
+  --ds-color-on-brand-muted: var(--p-primary-200, #b9dbe6);
+  --ds-color-accent: var(--p-primary-color);
+  --ds-color-on-accent: var(--p-primary-contrast-color);
+  --ds-color-primary-text: var(--p-primary-800, #0a6a78);
+  --ds-color-primary-soft: var(--p-primary-50, #e8fafb);
+  --ds-color-focus: var(--p-primary-color);
+  --ds-container-max: 1280px;
+  --ds-touch-target: 44px;
+
+  --ds-status-success-bg: #e7f7ee;
+  --ds-status-success-fg: #14693a;
+  --ds-status-warning-bg: #fff1d6;
+  --ds-status-warning-fg: #8a4b00;
+  --ds-status-danger-bg: #fde8e8;
+  --ds-status-danger-fg: #9b1c1c;
+  --ds-status-info-bg: #def5fb;
+  --ds-status-info-fg: #0a6a78;
+  --ds-status-muted-bg: #eceff1;
+  --ds-status-muted-fg: #37474f;
 }
 
 /* ------------------------------------------------------------
@@ -182,4 +206,16 @@
   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
   --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
   --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.65);
+  --ds-color-primary-text: var(--p-primary-300, #55dbdf);
+  --ds-color-primary-soft: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
+  --ds-status-success-bg: rgba(34, 197, 94, 0.16);
+  --ds-status-success-fg: #86efac;
+  --ds-status-warning-bg: rgba(245, 158, 11, 0.16);
+  --ds-status-warning-fg: #fcd34d;
+  --ds-status-danger-bg: rgba(239, 68, 68, 0.16);
+  --ds-status-danger-fg: #fca5a5;
+  --ds-status-info-bg: rgba(1, 190, 194, 0.16);
+  --ds-status-info-fg: #7ddfe2;
+  --ds-status-muted-bg: rgba(148, 163, 184, 0.16);
+  --ds-status-muted-fg: #cbd5e1;
 }
