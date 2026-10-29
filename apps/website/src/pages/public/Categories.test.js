@@ -16,6 +16,22 @@ vi.mock('../../stores/products', () => ({
 
 import Categories from './Categories.vue'
 
+const mountCategories = () => shallowMount(Categories, {
+  global: {
+    stubs: {
+      Card: { template: '<article class="card-stub"><slot name="content" /></article>' },
+      Button: {
+        props: ['label'],
+        emits: ['click'],
+        template: '<button type="button" @click="$emit(\'click\')">{{ label }}</button>',
+      },
+      Badge: { props: ['value'], template: '<span>{{ value }}</span>' },
+      Breadcrumb: { template: '<nav class="breadcrumb-stub" />' },
+      ProgressSpinner: { template: '<span class="spinner-stub" />' },
+    },
+  },
+})
+
 const categoryFixture = () => ({
   id: 7,
   slug: 'fiber-optic',
@@ -40,7 +56,7 @@ describe('Website Categories', () => {
   })
 
   it('loads live categories and renders category details', async () => {
-    wrapper = shallowMount(Categories)
+    wrapper = mountCategories()
     await flushPromises()
 
     expect(getCategories).toHaveBeenCalledOnce()
@@ -52,10 +68,10 @@ describe('Website Categories', () => {
   })
 
   it('navigates with the existing products route and category query', async () => {
-    wrapper = shallowMount(Categories)
+    wrapper = mountCategories()
     await flushPromises()
 
-    wrapper.findComponent('[label="مشاهده محصولات"]').vm.$emit('click')
+    wrapper.find('button').trigger('click')
 
     expect(routerPush).toHaveBeenCalledWith({
       name: 'products',
@@ -68,7 +84,7 @@ describe('Website Categories', () => {
     getCategories.mockReturnValueOnce(new Promise(resolve => {
       resolveCategories = resolve
     }))
-    wrapper = shallowMount(Categories)
+    wrapper = mountCategories()
     await flushPromises()
 
     expect(wrapper.find('[role="status"]').text()).toContain('در حال دریافت دسته بندی ها')
@@ -80,7 +96,7 @@ describe('Website Categories', () => {
 
   it('shows an explicit empty state when the API returns no categories', async () => {
     getCategories.mockResolvedValueOnce([])
-    wrapper = shallowMount(Categories)
+    wrapper = mountCategories()
     await flushPromises()
 
     expect(wrapper.find('[role="status"]').text()).toContain('دسته‌بندی‌ای موجود نیست')
@@ -89,7 +105,7 @@ describe('Website Categories', () => {
 
   it('announces a category-loading error accessibly', async () => {
     getCategories.mockRejectedValueOnce(new Error('offline'))
-    wrapper = shallowMount(Categories)
+    wrapper = mountCategories()
     await flushPromises()
 
     expect(wrapper.find('[role="alert"]').text()).toContain('خطا در دریافت دسته بندی ها')
