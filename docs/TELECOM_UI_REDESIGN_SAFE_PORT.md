@@ -51,3 +51,15 @@ The shared foundation described here has been merged in PR #28. The remaining pa
 - Only `main` appeared in the latest remote branch inventory.
 - The next port should begin with the current Website homepage and be delivered as a separate focused change. The patch is not complete until the intended page-level visual changes have been reconciled with current API-backed code.
 - Treat the latest runtime browser-smoke failure as recorded evidence, not as a passing check. Do not pursue browser-test debugging as the next task under the current owner instruction.
+
+
+## Step 1 — Website homepage redesign
+
+Branch: `feat/website-homepage-redesign-step-1`
+
+- Updated `apps/website/src/pages/public/Home.vue` to use the merged shared design-system primitives and tokens for page surface, container, sections, hero contrast, typography and responsive spacing.
+- Added keyboard activation and focus visibility for category/product tiles.
+- Preserved the current `productsApi.list` and `productsStore.getCategories` data flow, existing named routes, filters, loading/error/empty states, and cart store wiring.
+- Added Website Vitest script and focused source-contract tests for API/route/state/accessibility invariants.
+- No backend, API contract, authentication guard, authorization policy, or mock-data behavior changed.
+- **Status:** implementation prepared; CI test and production-build verification pending. Source-contract tests are not a substitute for component interaction tests.
