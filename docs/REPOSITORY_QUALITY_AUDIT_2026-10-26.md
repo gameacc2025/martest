@@ -315,3 +315,10 @@ Updated priority order after the 2026-10-27 follow-up:
   - `DEP0040 punycode` comes from `actions/setup-node@v4`'s bundled setup/cache implementation.
 - PR #26 was closed without merging the diagnostic environment change. No application dependency was upgraded because the warnings originate in the GitHub Actions toolchain.
 - If action versions are updated later, do so as a separate CI maintenance change with the standard workflow/migration checks.
+
+
+## Final branch disposition — 2026-10-29
+
+All 19 non-main remote refs were compared against current `main`. No further merge was justified: merged PRs and selective ports already cover customer address management, customer profile, customer-owned inquiries, RFQ monetization, notification scope/folder contracts, subscription quota/payment concurrency, inquiry response concurrency, RBAC context, admin bundle import cleanup, and supplier response authorization. PR #26 only diagnosed Node deprecation warnings in GitHub Actions tooling and remains intentionally unmerged. The legacy feature branches are heavily divergent historical snapshots; merging them wholesale would risk regressions. The runtime validation workflow is already on `main`. No browser E2E was run or awaited, per owner instruction.
+
+The remaining action is remote ref cleanup by the repository owner. Retain `main`; delete the 19 reviewed non-main refs after fetching the latest remote state.
