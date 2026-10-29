@@ -173,3 +173,14 @@ The final post-merge checks supersede any earlier “pending” status above: CI
 - Static unverified metrics, fictional team profiles and partner claims were removed. Published products remain API-backed with accessible loading/error/empty/retry states.
 - Runtime validation [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017) was still running at last check; no result is claimed. Per owner instruction, browser smoke is not the next debugging task.
 - **Next safe step:** reconcile Company Profile store/API contracts before redesigning its visuals.
+
+
+## Step 7 — Company Profile public-catalog contract (2026-10-29)
+
+- **Branch:** `fix/website-company-profile-api-contract-step-7`.
+- **Files:** `apps/website/src/pages/public/CompanyProfile.vue` and new `CompanyProfile.test.js`.
+- **Contract correction:** Existing company GET/products routes require authentication and context/permission checks; company reviews/follows are not supported by current routes/store/schema. The page now uses the existing public `GET /products?companyId=...` catalog contract, which returns only `PUBLISHED + PUBLIC` products and exposes only public company id/name/type in product results.
+- **Changes:** Shared design tokens, responsive layout, route ID watcher, product normalization, pagination, accessible loading/error/empty/retry states, product details navigation and existing cart/wishlist events.
+- **Removed:** Unsupported review and follow actions. No backend endpoint or authorization rule was invented or weakened.
+- **Tests:** Cover API params, route ID changes, empty/error/retry, product navigation and pagination.
+- **Status:** Feature CI and migration validation pending; do not merge until they pass.

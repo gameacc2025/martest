@@ -331,3 +331,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - `apps/website/src/pages/public/Companies.vue` is not registered in the current website router and references a missing CompanyCard component path plus store methods not exported by the current website company store. Treat it as an orphaned/incomplete feature until route/API intent is confirmed.
 - About Us PR #34 merged at `503bbe8af65e1b787a64a7d53aa50ff9bba3bf7f`. It uses the existing published-products API and removes unverified hardcoded statistics/team/partner claims.
 - About Us feature and post-merge CI/migration validation passed: feature CI `40882370960`, migration `40882371076`, post-merge CI `40882547737`, post-merge migration `40882547667`. Runtime validation `40882371017` was still running at last check.
+
+
+## Company Profile contract resolution in progress — 2026-10-29
+
+- Backend `GET /companies/:id` and `GET /companies/:id/products` are authenticated and context/permission gated; they are not public company-profile endpoints.
+- The public `GET /products` catalog explicitly supports `companyId` filtering and clamps anonymous/public results to `PUBLISHED + PUBLIC`; its public product select includes company id/name/type only.
+- Branch `fix/website-company-profile-api-contract-step-7` adapts the routed public Company Profile page to that supported public catalog contract, removing unsupported review/follow features instead of inventing endpoints. Regression tests and CI/migration validation are pending.
+- This avoids exposing private company data or bypassing company route authorization.
