@@ -441,3 +441,12 @@ PR #33 was merged to `main` at `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`. Featu
 ## About Us redesign Step 6 — implementation in progress (2026-10-29)
 
 The About Us page is being ported safely on `feat/website-about-us-redesign-step-6`. The change removes unverified static usage/order/product/company statistics, invented team-member details and partner claims, while preserving the existing published-products API request and product-details route. Regression tests were added; feature CI/migration validation are pending. No local test run is claimed.
+
+
+## About Us final verification and Company Profile next step — 2026-10-29
+
+- PR #34 merged at `503bbe8af65e1b787a64a7d53aa50ff9bba3bf7f`.
+- Feature CI [40882370960](https://github.com/gameacc2025/martest/actions/runs/40882370960), migration validation [40882371076](https://github.com/gameacc2025/martest/actions/runs/40882371076), post-merge CI [40882547737](https://github.com/gameacc2025/martest/actions/runs/40882547737), and post-merge migration validation [40882547667](https://github.com/gameacc2025/martest/actions/runs/40882547667) all passed.
+- Runtime validation [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017) was still running at last check.
+- Company Profile source contract gap: page calls five website store methods not found in store exports (`getProductsByCompany`, `getCompanyReviews`, `isFollowing`, `followCompany`, `unfollowCompany`). Inspect backend endpoints/services before adding methods; do not invent endpoints.
+- Companies directory source contract gap: `Companies.vue` is not routed, imports a missing component path and calls store methods not exported. Resolve route/product intent separately.

@@ -323,3 +323,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Feature CI [40842352640](https://github.com/gameacc2025/martest/actions/runs/40842352640), migration [40842352602](https://github.com/gameacc2025/martest/actions/runs/40842352602), post-merge CI [40842534524](https://github.com/gameacc2025/martest/actions/runs/40842534524), and post-merge migration [40842534511](https://github.com/gameacc2025/martest/actions/runs/40842534511) passed.
 - Categories preserves `productsStore.getCategories()` and the category-ID query contract to the products route. Empty/loading/error states and route navigation are covered by component tests.
 - Next UI page: `apps/website/src/pages/public/SearchResults.vue`; preserve query parsing, API parameters, result rendering and product-detail navigation.
+
+
+## Current page-contract findings — 2026-10-29
+
+- The routed Website `CompanyProfile.vue` references `productsStore.getProductsByCompany` and `companyStore.getCompanyReviews/isFollowing/followCompany/unfollowCompany`, which were not found among current store exports. Verify backend route/service support and define the actual contract before redesigning this page; do not create mock implementations or assume endpoints.
+- `apps/website/src/pages/public/Companies.vue` is not registered in the current website router and references a missing CompanyCard component path plus store methods not exported by the current website company store. Treat it as an orphaned/incomplete feature until route/API intent is confirmed.
+- About Us PR #34 merged at `503bbe8af65e1b787a64a7d53aa50ff9bba3bf7f`. It uses the existing published-products API and removes unverified hardcoded statistics/team/partner claims.
+- About Us feature and post-merge CI/migration validation passed: feature CI `40882370960`, migration `40882371076`, post-merge CI `40882547737`, post-merge migration `40882547667`. Runtime validation `40882371017` was still running at last check.

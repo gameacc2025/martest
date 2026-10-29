@@ -164,3 +164,12 @@ The final post-merge checks supersede any earlier “pending” status above: CI
 - **Behavior preserved:** Existing `productsApi.list({ page: 1, limit: 6, status: 'PUBLISHED' })` request and product-details route.
 - **Tests:** Cover API contract/product rendering, absence of demo content, empty/error/retry behavior and product navigation.
 - **Status:** Feature CI and migration validation pending; do not merge until they pass.
+
+
+## Step 6 completion — Website About Us (2026-10-29)
+
+- PR [#34](https://github.com/gameacc2025/martest/pull/34) merged as `503bbe8af65e1b787a64a7d53aa50ff9bba3bf7f`.
+- Feature CI [40882370960](https://github.com/gameacc2025/martest/actions/runs/40882370960), feature migration validation [40882371076](https://github.com/gameacc2025/martest/actions/runs/40882371076), post-merge CI [40882547737](https://github.com/gameacc2025/martest/actions/runs/40882547737), and post-merge migration validation [40882547667](https://github.com/gameacc2025/martest/actions/runs/40882547667) passed.
+- Static unverified metrics, fictional team profiles and partner claims were removed. Published products remain API-backed with accessible loading/error/empty/retry states.
+- Runtime validation [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017) was still running at last check; no result is claimed. Per owner instruction, browser smoke is not the next debugging task.
+- **Next safe step:** reconcile Company Profile store/API contracts before redesigning its visuals.

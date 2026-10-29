@@ -1,12 +1,11 @@
 # Current Task — 2026-10-29
 
-## Active handoff: Step 6 — Website About Us redesign
+## Active handoff: Step 7 — Company Profile API/store contract repair
 
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main`  
-**Feature branch:** `feat/website-about-us-redesign-step-6`  
-**Base commit:** `72eb48ea97adbcc265462a1c8281cc03fa6896e9`  
-**Status:** About Us redesign and regression tests are on the feature branch; CI/migration verification pending. Do not merge until feature checks pass.
+**Latest merged feature:** About Us PR #34, squash commit `503bbe8af65e1b787a64a7d53aa50ff9bba3bf7f`.  
+**Status:** Step 6 is merged; feature and post-merge CI/migration checks passed. The next task is to reconcile the routed Company Profile page with the actual website stores/backend contracts before applying a visual redesign.
 
 ## Completed UI steps
 
@@ -14,26 +13,29 @@
 - **Step 2 Product Listing:** PR #30 merged; feature CI/migration and post-merge checks passed.
 - **Step 3 Product Details:** PR #31 merged; feature CI and migration checks, plus post-merge checks, passed.
 - **Step 4 Categories:** PR #32 merged; feature and post-merge CI/migration checks passed.
-- **Step 5 Search Results:** PR [#33](https://github.com/gameacc2025/martest/pull/33) merged as `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`. Feature CI [40880947037](https://github.com/gameacc2025/martest/actions/runs/40880947037), migration [40880947043](https://github.com/gameacc2025/martest/actions/runs/40880947043), post-merge CI [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521), and post-merge migration [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) passed. Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at browser smoke after infrastructure health/migration checks passed; per owner instruction, do not debug browser smoke as the next task.
-- **Step 6 About Us:** Reworked the static page with shared design tokens, responsive mission/value/how-it-works sections, and API-backed published products. Removed unverified hardcoded user/company/product/order statistics, invented team profiles, and partner claims. Preserved the existing `productsApi.list({ page: 1, limit: 6, status: 'PUBLISHED' })` request and `product-details` navigation. Added loading/error/empty states and `AboutUs.test.js` covering API request/render, no demo metrics, error/retry, empty state and navigation. CI/migration verification pending.
+- **Step 5 Search Results:** PR [#33](https://github.com/gameacc2025/martest/pull/33) merged as `1c58e2c2b01bbfdfe2e4b938e91b9199945ecc25`. Feature CI [40880947037](https://github.com/gameacc2025/martest/actions/runs/40880947037), migration [40880947043](https://github.com/gameacc2025/martest/actions/runs/40880947043), post-merge CI [40881378521](https://github.com/gameacc2025/martest/actions/runs/40881378521), and post-merge migration [40881378435](https://github.com/gameacc2025/martest/actions/runs/40881378435) passed. Runtime validation [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762) failed at browser smoke after infrastructure/migration checks passed; per owner instruction, do not debug browser smoke as the next task.
+- **Step 6 About Us:** PR [#34](https://github.com/gameacc2025/martest/pull/34) merged as `503bbe8af65e1b787a64a7d53aa50ff9bba3bf7f`. Feature CI [40882370960](https://github.com/gameacc2025/martest/actions/runs/40882370960), migration [40882371076](https://github.com/gameacc2025/martest/actions/runs/40882371076), post-merge CI [40882547737](https://github.com/gameacc2025/martest/actions/runs/40882547737), and post-merge migration [40882547667](https://github.com/gameacc2025/martest/actions/runs/40882547667) passed. About Us uses shared design primitives, real published products, accessible loading/error/empty/retry states; unverified static metrics, fictional team profiles and partner claims were removed. Runtime validation [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017) was still in progress at last check; do not claim a result or debug browser smoke as the next task.
 
-## Step 6 verification plan
+## Step 7 — Company Profile contract audit and repair
 
-1. Inspect PR CI: frontend/shared tests, backend tests, Prisma generation, architecture graph check and all three frontend builds.
-2. Inspect migration validation separately.
-3. Record runtime validation independently; do not pursue browser-smoke debugging as the next task.
-4. Merge only after feature CI and migration validation pass; then inspect post-merge CI and migration validation before starting another page.
+Before visual redesign, inspect the existing route, store exports, API client endpoints and backend routes/services/tests. Source review found these calls in routed `apps/website/src/pages/public/CompanyProfile.vue` that do not exist in current store exports:
+- `productsStore.getProductsByCompany`
+- `companyStore.getCompanyReviews`
+- `companyStore.isFollowing`
+- `companyStore.followCompany`
+- `companyStore.unfollowCompany`
 
-## Confirmed follow-up findings from source review
+Determine whether backend/API support exists under different names. Implement only a source-supported contract; do not invent endpoints or mock data. Add tests for company/product/review loading, follow behavior only if the backend contract exists, route ID handling, and error/empty states. Then apply the page-level design-system styling without changing authorization or route behavior. Run CI/build and migration validation; inspect post-merge checks before proceeding.
 
-- Website `Companies.vue` is not registered in the current website router. It imports a `CompanyCard.vue` path that is absent from the current tree and calls company-store methods not exported by `apps/website/src/stores/companies.js`. Do not redesign it blindly; decide whether it should be routed and reconcile its API/store contract first.
-- Routed `CompanyProfile.vue` calls `getProductsByCompany`, `getCompanyReviews`, `isFollowing`, `followCompany`, and `unfollowCompany`; these methods are absent from the current website products/company stores. Repair and test the actual contract before its visual redesign.
-- Graphify MCP refresh remains blocked until a workspace is available and selected.
+## Other confirmed follow-up findings
+
+- Website `Companies.vue` is not registered in the current website router. It imports a `CompanyCard.vue` path absent from the current Git tree and calls `getFeaturedCompanies`, `followCompany`, and `unfollowCompany` methods not exported by `apps/website/src/stores/companies.js`. Treat as a separate directory routing/API contract decision, not a blind UI port.
+- Graphify MCP refresh remains blocked until a workspace is available and selected. The repository-generated architecture graph CI check is separate and has passed on prior verified commits.
 
 ## Remaining cross-project backlog
 
-1. Finish safe UI redesign page-by-page, with tests and builds before each next page.
-2. Repair company directory/profile routing and store/API contract mismatches identified above.
+1. Repair Company Profile API/store behavior, then safely redesign the page.
+2. Decide whether to expose/repair the Companies directory and reconcile its API/store/component contract.
 3. Exhaustive company-owned route/tenant/IDOR review.
 4. Complete SMS event-dispatch integration; Twilio adapter/worker/quota exist, but dispatcher does not enqueue SMS rows. Live delivery unverified.
 5. Controlled live Zarinpal and SMTP verification.
@@ -42,8 +44,8 @@
 
 ## Constraints
 
-- No mock data or auth bypass; preserve real APIs and route behavior.
-- Do not add fake platform metrics, fake company/person identities, or unverified partner claims to production-facing copy.
+- No mock data or authentication bypass; preserve real API contracts and route behavior.
+- Do not add fabricated metrics, people, or partner claims to production-facing content.
 - Preserve app-context/RBAC, tenant ownership, and inquiry permission/subscription constraints.
 - Browser-smoke debugging is not the next task.
 - Do not claim checks green without workflow evidence.

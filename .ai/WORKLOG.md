@@ -1082,3 +1082,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Source review follow-ups:** `Companies.vue` is not registered in the current router and references missing CompanyCard/store APIs; `CompanyProfile.vue` calls missing website store methods. These are documented for a dedicated behavior/API-contract task and are not silently changed in this visual slice.
 - **Verification:** No local dependency-equipped checkout was used; await feature CI and migration validation. No local test run is claimed.
 - **Constraints:** No mock data, auth bypass, or fabricated metrics added.
+
+
+## 2026-10-29 — WEBSITE-ABOUT-US-REDESIGN-STEP-6-COMPLETE
+
+- **Status:** PR #34 merged to `main` as `503bbe8af65e1b787a64a7d53aa50ff9bba3bf7f`.
+- **Feature CI:** [40882370960](https://github.com/gameacc2025/martest/actions/runs/40882370960) PASS, including frontend/shared tests, backend tests, Prisma generation, architecture graph check, and all three frontend builds.
+- **Feature migration validation:** [40882371076](https://github.com/gameacc2025/martest/actions/runs/40882371076) PASS.
+- **Post-merge CI:** [40882547737](https://github.com/gameacc2025/martest/actions/runs/40882547737) PASS.
+- **Post-merge migration validation:** [40882547667](https://github.com/gameacc2025/martest/actions/runs/40882547667) PASS.
+- **Runtime validation:** [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017) was still in progress at the last check. No result is claimed and browser smoke is not the next debugging task.
+- **Content integrity:** Removed unverified static metrics, named team profiles and partner claims; retained API-backed published products and route navigation.
+- **Next task:** Step 7 Company Profile contract audit/repair, because the routed page calls store methods not exported by current website stores. Do not redesign the page until its API contract is established.
