@@ -2,7 +2,7 @@
 
 ## Scope and status
 
-This branch is a **production-safe first slice** of `telecom-ui-redesign.patch`, not a claim that all 32 changed files have been ported. The uploaded patch is based on an older page implementation and contains demo-only data paths. The following visual foundation is adapted here:
+The merged implementation is a **production-safe first slice** of `telecom-ui-redesign.patch`, not a claim that all 32 changed files have been ported. The uploaded patch is based on an older page implementation and contains demo-only data paths. The following visual foundation is adapted here:
 
 - shared semantic design tokens for brand surfaces, focus, status labels and touch targets;
 - opt-in page layout primitives in `packages/shared-ui/assets/design-system/pages.scss`;
