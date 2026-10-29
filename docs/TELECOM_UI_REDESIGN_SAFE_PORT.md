@@ -193,3 +193,17 @@ The final post-merge checks supersede any earlier “pending” status above: CI
 - The public Company Profile uses the public catalog endpoint filtered by company ID, which enforces PUBLISHED + PUBLIC. Reviews/follows were removed because no supporting routes/store/schema were found.
 - Runtime validation [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) was still running at last check; no result is claimed.
 - **Next:** Resolve the Companies directory routing/API contract before redesigning it.
+
+
+## Step 8 disposition — Companies directory (2026-10-29)
+
+The Website Companies directory remains unrouted/dormant. The current backend `GET /companies` requires STAFF context and `companies.read`; the dormant page also imports a missing component and calls unexported store methods. No public endpoint or field allowlist was invented. Revisit only as a separately scoped backend/API design if a public company directory is explicitly approved.
+
+## Step 9 — Website FAQ (2026-10-29)
+
+- **Branch:** `feat/website-faq-redesign-step-9`.
+- **Files:** `apps/website/src/pages/public/Faq.vue` and new `Faq.test.js`.
+- **Changes:** Shared design-system styling, responsive accordion, accessible expanded/controlled region semantics and contact links.
+- **Content integrity:** Removed unsupported claims about returns, installment purchases, order tracking and direct seller contact. FAQ now reflects B2B catalog discovery, inquiry permissions/subscription, company approval and product publication.
+- **Tests:** Cover render, independent accordion toggles, accessibility attributes, unsupported claim prevention and contact route.
+- **Status:** Feature CI and migration validation pending; do not merge until they pass.
