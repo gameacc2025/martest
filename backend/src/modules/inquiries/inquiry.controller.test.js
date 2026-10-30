@@ -58,7 +58,20 @@ const mockInquiryService = {
   deleteResponseAttachment: async (...args) => { calls.deleteResponseAttachment = args; },
 };
 
+const mockSubscriptionService = {
+  getQuotaSummary: async (...args) => { calls.getQuotaSummary = args; return { enforced: true }; },
+  getMySubscriptions: async (...args) => { calls.getMySubscriptions = args; return []; },
+  listActivePlans: async () => [],
+};
+const mockPaymentService = {
+  startSubscriptionPayment: async (...args) => { calls.startSubscriptionPayment = args; return { subscription: { id: 9 }, paymentMode: 'MANUAL_REVIEW', paymentUrl: null }; },
+  retryPendingSubscriptionVerification: async (...args) => { calls.retryPendingSubscriptionVerification = args; return { payment: 'pending' }; },
+  handleSubscriptionPaymentCallback: async () => ({ redirectUrl: 'https://example.test/result' }),
+};
+
 injectMock('./inquiry.service', mockInquiryService);
+injectMock('./inquiry-subscription.service', mockSubscriptionService);
+injectMock('./inquiry-payment.service', mockPaymentService);
 const controller = require('./inquiry.controller');
 
 test.beforeEach(() => resetMocks());
@@ -242,4 +255,56 @@ test('deleteResponseAttachment: forwards inquiryId, responseId, attachmentId, us
   await controller.deleteResponseAttachment(makeRequest({ params: { id: '1', responseId: '9', attachmentId: '3' }, user }), reply);
   assert.deepEqual(calls.deleteResponseAttachment, ['1', '9', '3', user]);
   assert.equal(reply._statusCode, 204);
+});
+
+
+// ── subscription owner resolution ─────────────────────────────
+
+const accessProfileLessCustomer = {
+  id: 41,
+  accessType: null,
+  companyId: null,
+  roles: ['CUSTOMER_USER'],
+  permissions: ['inquiries.read', 'inquiries.create'],
+};
+
+test('mySubscriptions: CUSTOMER_USER without AccessProfile is scoped to its user id', async () => {
+  const reply = makeReply();
+  await controller.mySubscriptions(makeRequest({ user: accessProfileLessCustomer }), reply);
+  assert.deepEqual(calls.getMySubscriptions, ['user', 41]);
+  assert.deepEqual(calls.getQuotaSummary, ['user', 41]);
+});
+
+test('requestSubscription: CUSTOMER_USER without AccessProfile creates a user-owned subscription', async () => {
+  const reply = makeReply();
+  await controller.requestSubscription(makeRequest({ user: accessProfileLessCustomer, body: { planId: 3 } }), reply);
+  assert.deepEqual(calls.startSubscriptionPayment, [{ ownerType: 'user', ownerId: 41, planId: 3, paymentReference: undefined }]);
+  assert.equal(reply._statusCode, 201);
+});
+
+test('retrySubscriptionPayment: CUSTOMER_USER without AccessProfile verifies only its own subscription', async () => {
+  const reply = makeReply();
+  await controller.retrySubscriptionPayment(makeRequest({ user: accessProfileLessCustomer, params: { id: '9' } }), reply);
+  assert.deepEqual(calls.retryPendingSubscriptionVerification, [{ ownerType: 'user', ownerId: 41, subscriptionId: '9' }]);
+});
+
+test('quota: CUSTOMER_USER without AccessProfile reads user-owned quota', async () => {
+  const reply = makeReply();
+  await controller.quota(makeRequest({ user: accessProfileLessCustomer }), reply);
+  assert.deepEqual(calls.getQuotaSummary, ['user', 41]);
+});
+
+test('subscription owner resolution never trusts STAFF companyId', async () => {
+  const staff = { id: 7, accessType: 'STAFF', companyId: 22, roles: ['STAFF_USER'], permissions: ['inquiries.read'] };
+  await assert.rejects(
+    () => controller.mySubscriptions(makeRequest({ user: staff }), makeReply()),
+    (error) => error.code === 'SUBSCRIPTION_NOT_AVAILABLE_FOR_ROLE',
+  );
+  assert.equal(calls.getMySubscriptions, undefined);
+});
+
+test('quota remains company-owned for COMPANY access context', async () => {
+  const company = { id: 8, accessType: 'COMPANY', companyId: 55, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'] };
+  await controller.quota(makeRequest({ user: company }), makeReply());
+  assert.deepEqual(calls.getQuotaSummary, ['company', 55]);
 });
