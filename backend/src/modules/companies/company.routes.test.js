@@ -227,3 +227,94 @@ test('every registered route runs fastify.authenticate first — none are left a
   }
   await app.close();
 });
+
+
+// ── company tenant boundary coverage for remaining company-scoped routes ──
+
+test('COMPANY context can read only its own company product listing', async () => {
+  const app = await buildApp();
+  const own = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/10/products',
+    headers: userHeader(['companies.read'], { accessType: 'COMPANY', companyId: 10 }),
+  });
+  assert.equal(own.statusCode, 200);
+  assert.equal(hit.getProducts, true);
+
+  delete hit.getProducts;
+  const other = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/11/products',
+    headers: userHeader(['companies.read'], { accessType: 'COMPANY', companyId: 10 }),
+  });
+  assert.equal(other.statusCode, 403);
+  assert.equal(hit.getProducts, undefined);
+  await app.close();
+});
+
+test('COMPANY context can read only its own company statistics', async () => {
+  const app = await buildApp();
+  const own = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/10/statistics',
+    headers: userHeader(['companies.view_statistics'], { accessType: 'COMPANY', companyId: 10 }),
+  });
+  assert.equal(own.statusCode, 200);
+  assert.equal(hit.getStatistics, true);
+
+  delete hit.getStatistics;
+  const other = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/11/statistics',
+    headers: userHeader(['companies.view_statistics'], { accessType: 'COMPANY', companyId: 10 }),
+  });
+  assert.equal(other.statusCode, 403);
+  assert.equal(hit.getStatistics, undefined);
+  await app.close();
+});
+
+test('COMPANY context can update only its own company logo', async () => {
+  const app = await buildApp();
+  const own = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/companies/10/logo',
+    headers: userHeader(['company_profile.update'], { accessType: 'COMPANY', companyId: 10 }),
+    payload: { logo: 'logo.png' },
+  });
+  assert.equal(own.statusCode, 200);
+  assert.equal(hit.updateLogo, true);
+
+  delete hit.updateLogo;
+  const other = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/companies/11/logo',
+    headers: userHeader(['company_profile.update'], { accessType: 'COMPANY', companyId: 10 }),
+    payload: { logo: 'logo.png' },
+  });
+  assert.equal(other.statusCode, 403);
+  assert.equal(hit.updateLogo, undefined);
+  await app.close();
+});
+
+test('COMPANY context cannot read or update company settings, even with wildcard permissions', async () => {
+  const app = await buildApp();
+  const headers = userHeader(['*'], { accessType: 'COMPANY', companyId: 10, roles: ['SUPER_ADMIN'] });
+
+  const read = await app.inject({
+    method: 'GET',
+    url: '/api/v1/companies/10/settings',
+    headers,
+  });
+  assert.equal(read.statusCode, 403);
+  assert.equal(hit.getSettings, undefined);
+
+  const update = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/companies/10/settings',
+    headers,
+    payload: { limits: { 'rfq.max_open': 99 } },
+  });
+  assert.equal(update.statusCode, 403);
+  assert.equal(hit.updateSettings, undefined);
+  await app.close();
+});
