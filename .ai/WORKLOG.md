@@ -1195,3 +1195,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Coverage added:** A route integration regression test verifies COMPANY and CUSTOMER contexts carrying a stray SUPER_ADMIN role and wildcard permissions cannot invoke STAFF-only approve/reject/hide/archive/restore actions.
 - **Not a full sign-off:** Inquiry, address, notification and remaining nested resource routes still require review.
 - **Verification:** CI/backend tests and migration validation pending.
+
+
+## 2026-10-30 — SECURITY-AUDIT-STEP-11B-PRODUCTS-MERGED
+
+- **PR #39:** merged at `de25c403506208bdfc01c1516d56fa929e85a8ad`.
+- Feature CI [41098778272] and migration [41098778245] passed.
+- Post-merge CI [41098969268] and migration [41098969119] passed.
+- Runtime [41098968989] remains separate; no browser-smoke pass is claimed.
+- No confirmed product cross-tenant bypass found. Product list/detail and nested price tier/image/document lookups were reviewed; public projection remains PUBLISHED + PUBLIC.
+- Added regression coverage ensuring COMPANY/CUSTOMER wildcard contexts cannot invoke STAFF-only moderation actions.
+- Next: inquiry route family — buyer/supplier ownership, strict context, subscription/payment ownership, sealed visibility, messaging and attachments.
