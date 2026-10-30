@@ -1947,3 +1947,15 @@ test('getInquiry: CUSTOMER_USER with a stray companyId cannot read a supplier-vi
     (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
   );
 });
+
+
+test('listInquiries: STAFF with a stray companyId cannot use the company-only received scope', async () => {
+  resetMocks();
+  const staff = { id: 90, accessType: 'STAFF', companyId: seller.companyId, roles: ['STAFF_USER'], permissions: ['inquiries.read'] };
+
+  await assert.rejects(
+    () => inquiryService.listInquiries({ scope: 'received' }, staff),
+    (err) => err.statusCode === 403 && err.code === 'INVALID_INQUIRY_SCOPE',
+  );
+  assert.equal(calls.findMany, undefined);
+});
