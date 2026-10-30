@@ -1217,3 +1217,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fix in progress: add `isCustomerContext` matching the central CUSTOMER fallback, scope buyer identity by CUSTOMER_USER id or COMPANY context only, require explicit COMPANY context for supplier responses, and only let STAFF create for an explicitly supplied companyId with the required permission.
 - Added regression tests for customer default context across listing/create/messages/stats, STAFF stray-companyId read/status denial, and STAFF/CUSTOMER wildcard denial on supplier lifecycle/attachment routes. CI pending.
 - Corrected the stale inquiry route comment: SUPER_ADMIN wildcard bypasses permission checks only, never the AccessProfile context guard.
+
+
+### Inquiry audit refinement — customer response visibility
+
+- A second use of `caller.companyId` was found in `assertCanReadResponses`: after buyer check, it could treat a CUSTOMER_USER default Website context with a stray companyId as a supplier company owning a requested product.
+- Fixed the fallback so a CUSTOMER context that is not the buyer receives 404; only an explicit COMPANY context may use companyId for supplier visibility.
+- Added regression coverage that a CUSTOMER_USER with a stray companyId cannot list supplier responses for another buyer's inquiry.
+- Also corrected the central RBAC header comment: wildcard bypasses permission checks only, never `requireAccessType`.
