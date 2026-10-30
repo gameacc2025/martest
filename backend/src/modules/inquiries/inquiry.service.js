@@ -1695,19 +1695,28 @@ async function deleteResponseAttachment(inquiryId, responseId, attachmentId, cal
  */
 async function getInquiryStats(caller) {
   const superAdmin = isSuperAdmin(caller);
-  const companyId = Number(caller?.companyId) || null;
+  const isStaff = caller?.accessType === 'STAFF';
+  const isAuthorizedStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const companyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const customerUserId = Number(caller?.id) || null;
   const isCustomer = isCustomerContext(caller) && !superAdmin;
-  if (!superAdmin && !isCustomer) ensureCompanyId(companyId);
+
+  if (isStaff && !isAuthorizedStaff) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'You do not have permission to read inquiry statistics.' };
+  }
+  if (!superAdmin && !isCustomer && !isStaff) ensureCompanyId(companyId);
   if (isCustomer && !customerUserId) {
     throw { statusCode: 401, code: 'UNAUTHORIZED', message: 'Authenticated user is required.' };
   }
 
-  const sentWhere = superAdmin ? {} : isCustomer ? { buyerUserId: customerUserId } : { companyId };
-  const receivedWhere = superAdmin ? {} : isCustomer
+  // STAFF dashboard aggregates are platform-wide, matching the STAFF inquiry
+  // list scope. Never scope STAFF statistics through a stray companyId.
+  const platformScope = superAdmin || isStaff;
+  const sentWhere = platformScope ? {} : isCustomer ? { buyerUserId: customerUserId } : { companyId };
+  const receivedWhere = platformScope ? {} : isCustomer
     ? { id: { in: [] } }
     : { items: { some: { product: { companyId } } } };
-  const responsesWhere = superAdmin ? {} : isCustomer
+  const responsesWhere = platformScope ? {} : isCustomer
     ? { inquiry: { buyerUserId: customerUserId } }
     : { companyId };
 
