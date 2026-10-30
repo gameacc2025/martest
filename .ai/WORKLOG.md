@@ -1206,3 +1206,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - No confirmed product cross-tenant bypass found. Product list/detail and nested price tier/image/document lookups were reviewed; public projection remains PUBLISHED + PUBLIC.
 - Added regression coverage ensuring COMPANY/CUSTOMER wildcard contexts cannot invoke STAFF-only moderation actions.
 - Next: inquiry route family — buyer/supplier ownership, strict context, subscription/payment ownership, sealed visibility, messaging and attachments.
+
+
+## 2026-10-30 — SECURITY-AUDIT-STEP-11C-INQUIRIES: confirmed context mismatch
+
+- Auth source confirms CUSTOMER registrations have no AccessProfile; `issueTokens` emits `accessType: null`, `companyId: null`, and role `CUSTOMER_USER`.
+- Central `requireAccessType('CUSTOMER')` explicitly accepts this role-based Website fallback.
+- Inquiry service previously recognized customers only when `accessType === 'CUSTOMER'` in listing, creation, status restrictions, messages, and statistics. Therefore the actual AccessProfile-less CUSTOMER_USER token did not follow the customer path even though route RBAC admitted it.
+- `isInquiryBuyer` also compared `caller.companyId` without requiring COMPANY context. A STAFF token carrying a stray companyId could be treated as the buyer in service-level ownership checks. In particular, STAFF with `inquiries.create` can reach the status/items routes' permission preHandler, so service ownership must not accept that stray companyId.
+- Fix in progress: add `isCustomerContext` matching the central CUSTOMER fallback, scope buyer identity by CUSTOMER_USER id or COMPANY context only, require explicit COMPANY context for supplier responses, and only let STAFF create for an explicitly supplied companyId with the required permission.
+- Added regression tests for customer default context across listing/create/messages/stats, STAFF stray-companyId read/status denial, and STAFF/CUSTOMER wildcard denial on supplier lifecycle/attachment routes. CI pending.
+- Corrected the stale inquiry route comment: SUPER_ADMIN wildcard bypasses permission checks only, never the AccessProfile context guard.
