@@ -486,3 +486,10 @@ The routed Company Profile page was calling website store methods that do not ex
 Reviewed the company route/controller/service family and existing tests. No confirmed cross-tenant authorization bypass was identified in this slice. COMPANY users are constrained by the route guard to their own company ID; settings/lifecycle management remains STAFF-only; company service update checks preserve the STAFF-only global admin override and prevent COMPANY-context changes to lifecycle fields and quotas.
 
 Added route integration regression tests for own-vs-other tenant access to company product listings, statistics and logo updates, plus wildcard COMPANY denial for settings read/update. This is not an exhaustive security sign-off: product, inquiry, address, notification and nested-resource routes remain outstanding. CI is pending.
+
+
+## Company API audit — merged and verified (2026-10-30)
+
+PR #38 merged at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`. Feature CI [41098052152], feature migration [41098052018], post-merge CI [41098224830], and post-merge migration [41098224693] passed. No confirmed company-route cross-tenant bypass was found. Added integration regression coverage for own-vs-other tenant access to company product listings, statistics and logo update, and wildcard COMPANY denial for staff-only settings. Runtime [41098225137] is tracked separately; browser smoke is not claimed as passed.
+
+Next audit slice: product routes/service, especially nested price tiers, images, documents, status history and activity logs.
