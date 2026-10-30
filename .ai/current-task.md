@@ -6,7 +6,7 @@
 **Canonical branch:** `main`  
 **Main after Step 10:** `0da4960d026aa6be532777c5dd66afacca3430de`  
 **Feature branch:** `audit/company-tenant-access-step-11`  
-**Status:** Company module audit slice merged in PR #38 at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`; feature and post-merge CI/migration passed. Product module is the next route family under review.
+**Status:** Company module audit slice merged in PR #38 at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`; feature and post-merge CI/migration passed. **Current audit slice:** Product routes/service reviewed. Existing ownership and nested-resource checks are present; added regression coverage for COMPANY/CUSTOMER wildcard attempts against STAFF-only moderation. CI pending. Inquiry routes are next.
 
 ## Completed UI redesign steps
 
