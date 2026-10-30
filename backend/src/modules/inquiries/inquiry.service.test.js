@@ -273,8 +273,8 @@ function resetMocks() {
 
 const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF', companyId: null };
 const companySuperAdmin = { id: 9, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'COMPANY', companyId: 20 };
-const buyer = { id: 2, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], companyId: 10 };
-const seller = { id: 3, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], companyId: 20 };
+const buyer = { id: 2, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], accessType: 'COMPANY', companyId: 10 };
+const seller = { id: 3, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], accessType: 'COMPANY', companyId: 20 };
 const orphan = { id: 4, roles: ['USER'], permissions: ['inquiries.read'], companyId: null };
 
 // ── listInquiries ────────────────────────────────────────────
@@ -992,7 +992,7 @@ test('submitResponse: requires a company', async () => {
   resetMocks();
   await assert.rejects(
     () => inquiryService.submitResponse(1, { items: [] }, orphan),
-    (err) => err.code === 'COMPANY_REQUIRED',
+    (err) => err.code === 'COMPANY_CONTEXT_REQUIRED',
   );
 });
 
@@ -1778,3 +1778,99 @@ test('sendInquiryMessage: optional SMS consumes its own paid allowance and queue
   }
 });
 
+
+
+// ── AccessProfile-less CUSTOMER_USER and strict STAFF context regression coverage ──
+
+
+test('listInquiries: CUSTOMER_USER without an AccessProfile sees only inquiries owned by its user id', async () => {
+  resetMocks();
+  const customer = { id: 77, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
+  await inquiryService.listInquiries({ scope: 'sent' }, customer);
+
+  const where = calls.findMany[0].where;
+  assert.ok(where.AND.some((clause) => clause.buyerUserId === 77));
+  assert.equal(where.AND.some((clause) => clause.companyId !== undefined), false);
+});
+
+test('createInquiry: CUSTOMER_USER without an AccessProfile creates a user-owned OPEN inquiry', async () => {
+  resetMocks();
+  fx.products = [{ id: 41, status: 'PUBLISHED', company: { status: 'ACTIVE' } }];
+  const customer = { id: 77, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+
+  await inquiryService.createInquiry({
+    title: 'Customer price request',
+    items: [{ productId: 41, quantity: 2 }],
+  }, customer);
+
+  const create = calls['inquiry.create'][0];
+  assert.equal(create.data.companyId, null);
+  assert.equal(create.data.buyerUserId, 77);
+  assert.equal(create.data.status, 'OPEN');
+});
+
+test('createInquiry: STAFF with a stray companyId must explicitly select the target company', async () => {
+  resetMocks();
+  fx.products = publishedProducts(1);
+  const staff = { id: 90, accessType: 'STAFF', companyId: 10, roles: ['STAFF_USER'], permissions: ['inquiries.create'] };
+
+  await assert.rejects(
+    () => inquiryService.createInquiry({ title: 'RFQ', items: [{ productId: 1, quantity: 1 }] }, staff),
+    (err) => err.code === 'COMPANY_REQUIRED',
+  );
+  assert.equal(calls['inquiry.create'], undefined);
+});
+
+test('changeInquiryStatus: STAFF with a stray buyer companyId and inquiries.create cannot manage that company inquiry', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry({ companyId: 10 });
+  const staff = { id: 90, accessType: 'STAFF', companyId: 10, roles: ['STAFF_USER'], permissions: ['inquiries.create'] };
+
+  await assert.rejects(
+    () => inquiryService.changeInquiryStatus(1, 'SUBMITTED', staff),
+    (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
+  );
+  assert.equal(calls['inquiry.update'], undefined);
+  assert.equal(calls['inquiryStatusHistory.create'], undefined);
+});
+
+test('sendInquiryMessage: CUSTOMER_USER without an AccessProfile can message a responding company', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const customer = { id: 10, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+
+  const result = await inquiryService.sendInquiryMessage(
+    1,
+    { message: 'Please confirm delivery', recipientCompanyId: 5 },
+    customer,
+  );
+
+  assert.equal(result.senderUserId, 10);
+  assert.equal(result.recipientCompanyId, 5);
+});
+
+test('listInquiryMessages: CUSTOMER_USER without an AccessProfile is scoped to its own user messages', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, companyId: null, buyerUserId: 10 };
+  nextMessages = [{ id: 1, senderUserId: 10, recipientCompanyId: 5 }];
+  const customer = { id: 10, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
+
+  await inquiryService.listInquiryMessages(1, customer);
+
+  assert.deepEqual(calls['inquiryMessage.findMany'][0].where.OR, [{ senderUserId: 10 }, { recipientUserId: 10 }]);
+  assert.equal(calls['inquiryMessage.updateMany'][0].where.recipientUserId, 10);
+});
+
+test('getInquiryStats: CUSTOMER_USER without an AccessProfile is scoped to its own inquiries', async () => {
+  resetMocks();
+  queues.inquiryGroupBy = [[], []];
+  queues.responseGroupBy = [[]];
+  const customer = { id: 77, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
+
+  await inquiryService.getInquiryStats(customer);
+
+  assert.deepEqual(calls.groupBy[0].where, { buyerUserId: 77 });
+  assert.deepEqual(calls.groupBy[1].where, { id: { in: [] } });
+  assert.deepEqual(calls['inquiryResponse.groupBy'][0].where, { inquiry: { buyerUserId: 77 } });
+});
