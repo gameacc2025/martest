@@ -225,3 +225,12 @@ The current page hardcodes phone/email/address/social URLs/map details and simul
 ## Step 10 implementation update — PR #37 (2026-10-30)
 
 The Terms & Privacy page visual/accessibility slice is now implemented on `feat/website-terms-redesign-step-10` and proposed in [PR #37](https://github.com/gameacc2025/martest/pull/37). It preserves the existing legal paragraphs, adds RTL/semantic structure and shared-token responsive styling, and adds a component regression test. CI [41096735410], migration [41096735469] and runtime [41096735415] were queued at the time of this update; wait for CI and migration before merge. Runtime browser smoke is tracked separately.
+
+
+## Step 10 completion — Terms & Privacy (2026-10-30)
+
+PR #37 merged at `0da4960d026aa6be532777c5dd66afacca3430de`. Feature CI [41096817092] and migration [41096817046] passed; post-merge CI [41097249357] and migration [41097249463] passed. Post-merge runtime [41097249425] was still running at handoff. The page now uses RTL semantic structure, shared design tokens, responsive cards and a breadcrumb; all existing legal paragraphs were preserved. Regression tests cover content, section structure and unsupported-claim prevention.
+
+## UI redesign disposition after Step 10
+
+The targeted page-by-page UI work is complete for homepage, product listing/details, categories, search results, About Us, Company Profile, FAQ and Terms & Privacy. The Companies directory remains intentionally dormant for security reasons. Contact Us is deferred because it currently displays unverified hardcoded contact details and simulates a successful send without a verified backend endpoint. Do not present it as functional until its backend contract and business contact data are verified.
