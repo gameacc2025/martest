@@ -1959,3 +1959,30 @@ test('listInquiries: STAFF with a stray companyId cannot use the company-only re
   );
   assert.equal(calls.findMany, undefined);
 });
+
+
+test('getInquiryStats: STAFF with inquiry read permission gets platform aggregates, never a stray company scope', async () => {
+  resetMocks();
+  queues.inquiryGroupBy = [[], []];
+  queues.responseGroupBy = [[]];
+  const staff = { id: 90, accessType: 'STAFF', companyId: seller.companyId, roles: ['STAFF_USER'], permissions: ['inquiries.read'] };
+
+  await inquiryService.getInquiryStats(staff);
+
+  assert.deepEqual(calls.groupBy[0].where, {});
+  assert.deepEqual(calls.groupBy[1].where, {});
+  assert.deepEqual(calls['inquiryResponse.groupBy'][0].where, {});
+  assert.deepEqual(calls.findMany[0].where, {});
+});
+
+test('getInquiryStats: STAFF without inquiry read permission is denied', async () => {
+  resetMocks();
+  const staff = { id: 90, accessType: 'STAFF', companyId: seller.companyId, roles: ['STAFF_USER'], permissions: [] };
+
+  await assert.rejects(
+    () => inquiryService.getInquiryStats(staff),
+    (error) => error.statusCode === 403 && error.code === 'FORBIDDEN',
+  );
+  assert.equal(calls.groupBy, undefined);
+  assert.equal(calls.findMany.length, 0);
+});
