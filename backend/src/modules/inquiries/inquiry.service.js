@@ -750,7 +750,9 @@ async function listInquiries(query, caller) {
   }
 
   if (scope === 'received') {
-    if (isCustomer || !callerCompanyId) {
+    // Received inquiries are a supplier/company view. Never infer COMPANY
+    // context from a stray companyId on STAFF or CUSTOMER tokens.
+    if (caller?.accessType !== 'COMPANY' || !callerCompanyId) {
       throw { statusCode: 403, code: 'INVALID_INQUIRY_SCOPE', message: 'Received inquiries are only available to company users.' };
     }
     where.AND.push({ items: { some: { product: { companyId: callerCompanyId } } } });
