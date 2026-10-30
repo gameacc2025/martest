@@ -143,7 +143,7 @@
   color: var(--ds-color-text);
   font-size: var(--ds-font-size-lg);
   font-weight: var(--ds-font-weight-bold);
-  line-height: var(--ds-line-height-heading);
+  line-height: var(--ds-line-height-tight);
 }
 .terms-section p {
   margin: 0;
