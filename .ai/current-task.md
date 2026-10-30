@@ -6,7 +6,7 @@
 **Canonical branch:** `main`  
 **Main after Step 10:** `0da4960d026aa6be532777c5dd66afacca3430de`  
 **Feature branch:** `audit/company-tenant-access-step-11`  
-**Status:** Company module audit slice merged in PR #38 at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`; feature and post-merge CI/migration passed. **Current audit slice:** Product routes/service reviewed. Existing ownership and nested-resource checks are present; added regression coverage for COMPANY/CUSTOMER wildcard attempts against STAFF-only moderation. CI pending. Inquiry routes are next.
+**Status:** Company module audit slice merged in PR #38 at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`; feature and post-merge CI/migration passed. **Current audit slice:** Product routes/service reviewed. Existing ownership and nested-resource checks are present; added regression coverage for COMPANY/CUSTOMER wildcard attempts against STAFF-only moderation. CI pending. **Current audit slice:** Product route/service review completed with no confirmed cross-tenant bypass. Regression test for COMPANY/CUSTOMER wildcard attempts against STAFF-only moderation merged in PR #39; feature and post-merge CI/migration passed. Inquiry route family is next.
 
 ## Completed UI redesign steps
 
@@ -53,3 +53,12 @@ PR #38 merged at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`. Feature CI [4109805
 ## Step 11B — Products module (next)
 
 Review product route/controller/service ownership enforcement and nested image/document/price-tier operations. Existing tests already cover many ownership, lifecycle and attachment boundaries; verify gaps against actual route wiring before adding or changing behavior. No vulnerability is asserted at this point.
+
+
+## Step 11B completion — Products module
+
+PR #39 merged at `de25c403506208bdfc01c1516d56fa929e85a8ad`. Feature CI [41098778272] and migration [41098778245] passed; post-merge CI [41098969268] and migration [41098969119] passed. Runtime [41098968989] remains separate; browser smoke is not the next debugging task. No confirmed product cross-tenant bypass was found. Added explicit wildcard-context regression tests for STAFF-only product moderation.
+
+## Step 11C — Inquiry route family (next)
+
+Review route context/permission boundaries, buyer/supplier ownership, sealed/anonymous response visibility, subscription ownership/payment callbacks, messaging and nested response attachments. Correct stale comments that imply SUPER_ADMIN bypasses the AccessProfile context layer. Add focused tests for confirmed gaps only.
