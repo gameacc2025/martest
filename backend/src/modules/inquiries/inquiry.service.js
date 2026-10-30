@@ -397,11 +397,18 @@ async function removeStoredAttachment(url) {
 function assertCanReadResponses(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   if (isInquiryBuyer(inquiry, caller) || isStaffWithPermission(caller, 'leads.read', 'inquiries.read')) return;
-  if (!caller?.companyId && !isCustomerContext(caller)) {
+
+  // A CUSTOMER (including the AccessProfile-less CUSTOMER_USER fallback) can
+  // read responses only as the buyer. A stray companyId must not make that
+  // account look like a supplier that owns one of the requested products.
+  if (isCustomerContext(caller)) {
+    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+  }
+  if (caller?.accessType !== 'COMPANY' || !caller.companyId) {
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
   }
 
-  const callerCompanyId = Number(caller?.companyId);
+  const callerCompanyId = Number(caller.companyId);
   const ownsRequestedProduct = Number.isInteger(callerCompanyId) && callerCompanyId > 0
     && (inquiry.items || []).some((item) => Number(item.product?.companyId) === callerCompanyId);
   const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
