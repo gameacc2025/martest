@@ -1624,3 +1624,10 @@ The current notification route inventory, user preferences, admin announcement e
 PR #38 با commit `d4d64af9c120d7200e363bdcb7092dfd0554f47b` ادغام شد. CI و migration در شاخه و پس از merge موفق شدند. در routeهای شرکت شکاف قطعی cross-tenant پیدا نشد؛ تست‌های رگرسیون برای دسترسی به محصولات، آمار، لوگو و منع دسترسی COMPANY به تنظیمات staff-only اضافه شد.
 
 مرحله بعدی ممیزی: route/service محصولات، با تمرکز بر مالکیت و دسترسی به price tierها، تصاویر، اسناد، تاریخچه وضعیت و activity log.
+
+
+## ممیزی امنیتی — مرحله 11B تکمیل شد (2026-10-30)
+
+PR #39 با commit `de25c403506208bdfc01c1516d56fa929e85a8ad` ادغام شد. CI و migration در شاخه و پس از merge موفق شدند. شکاف قطعی cross-tenant در ماژول محصول پیدا نشد. تست رگرسیون اضافه شد تا COMPANY و CUSTOMER حتی با نقش SUPER_ADMIN و wildcard نتوانند عملیات moderation مختص STAFF را اجرا کنند.
+
+مرحله بعدی ممیزی: استعلام‌ها؛ مرز app context، مالکیت خریدار/تأمین‌کننده، subscription و payment، حالت‌های sealed/anonymous، پیام‌ها و پیوست‌های پاسخ.
