@@ -470,3 +470,12 @@ The routed Company Profile page was calling website store methods that do not ex
 - Step 8 decision: keep `apps/website/src/pages/public/Companies.vue` unrouted/dormant because backend `GET /companies` is STAFF-only; no public-safe company directory endpoint exists. The dormant page also references missing UI/store APIs.
 - FAQ Step 9 is in progress on `feat/website-faq-redesign-step-9`. It updates copy to current B2B inquiry permissions/subscription and product publication behavior, removing unverified checkout/returns/installment/order-tracking claims. Regression tests added; CI/migration pending.
 - Runtime validation failures at browser smoke were confirmed for Search Results [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762), About Us [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017), and Company Profile [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183). Infrastructure/health/migration stages passed before browser smoke; per owner instruction, do not debug that step as the next task.
+
+
+## 2026-10-30 follow-up — UI Step 10 and next security audit
+
+- PR #37 (Terms & Privacy visual/accessibility redesign) merged at `0da4960d026aa6be532777c5dd66afacca3430de`.
+- Feature CI [41096817092] and migration [41096817046] passed; post-merge CI [41097249357] and migration [41097249463] passed.
+- Post-merge runtime [41097249425] was still running at the time of this note; no runtime/browser-smoke pass is claimed.
+- The targeted safe page redesign scope now covers Homepage, Product Listing, Product Details, Categories, Search Results, About Us, Company Profile, FAQ and Terms & Privacy. Companies remains intentionally dormant; Contact Us remains blocked by fake submission behavior and unverified contact details.
+- Next active task: exhaustive route-by-route review of company-owned API operations for AccessProfile context, tenant scoping, ownership and nested-resource authorization. Add tests for confirmed gaps; no full security sign-off yet.
