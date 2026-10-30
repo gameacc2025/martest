@@ -354,3 +354,12 @@ Usage consumption must validate the active subscription after acquiring its row 
 - The Companies directory is intentionally kept unrouted/dormant: backend `GET /companies` requires STAFF context and `companies.read`; no public-safe directory endpoint is currently defined. Do not expose it through a frontend-only route.
 - FAQ redesign branch `feat/website-faq-redesign-step-9` updates help content to the actual B2B inquiry permission/subscription flow and product publication process. It removes unsupported promises about installment purchases, returns, order tracking and direct seller contact.
 - Runtime validation failures on Search Results (`40881262762`), About Us (`40882371017`) and Company Profile (`40883463183`) all occurred at the browser-smoke step. Per owner instruction, browser smoke is not the next debugging task.
+
+
+## Inquiry AccessProfile boundary correction — 2026-10-30
+
+- Customer registration intentionally creates no AccessProfile. Its JWT therefore carries `accessType: null`, `companyId: null`, and role `CUSTOMER_USER`; central `requireAccessType('CUSTOMER')` recognizes only this exact fallback.
+- Inquiry service must use the same customer-context rule for buyer ownership, sent-inquiry listing, customer inquiry creation, status cancellation, messages, statistics and response visibility.
+- Company ownership is valid only when `accessType === 'COMPANY'`. A stray `companyId` on STAFF/CUSTOMER context is never buyer or supplier identity.
+- STAFF-created inquiries on behalf of a company require an explicit target `data.companyId` and create permission; STAFF's own stray `companyId` must not be used implicitly.
+- SUPER_ADMIN/wildcard bypasses fine-grained permission checks only; it never bypasses the AccessProfile app-context boundary.
