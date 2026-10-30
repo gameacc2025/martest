@@ -1225,3 +1225,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed the fallback so a CUSTOMER context that is not the buyer receives 404; only an explicit COMPANY context may use companyId for supplier visibility.
 - Added regression coverage that a CUSTOMER_USER with a stray companyId cannot list supplier responses for another buyer's inquiry.
 - Also corrected the central RBAC header comment: wildcard bypasses permission checks only, never `requireAccessType`.
+
+
+### Inquiry audit — received-scope tenant boundary and CI correction (2026-10-30)
+
+- The first CI attempt for PR #40 exposed a real service-layer gap: listInquiries({scope:'received'}) allowed STAFF with a stray companyId because the guard only checked that companyId was truthy. This contradicted the COMPANY-only supplier view.
+- Fixed the guard to require caller.accessType === 'COMPANY' as well as a valid companyId. This prevents STAFF/CUSTOMER tokens from entering supplier received scope based on stale/misassigned company identifiers.
+- Corrected an unrelated-company response test fixture to carry explicit COMPANY context, so the test exercises the intended supplier-not-owner 404 path instead of the invalid-context path.
+- The stats test expected Prisma groupBy query arguments but the mock never recorded them. Updated inquiry and response groupBy mocks to record args, making the assertions meaningful.
+- Earlier backend CI failures: (1) unrelated-company fixture expected wrong error for context-less caller; (2) stats assertion read missing mock call records; (3) STAFF received-scope was not rejected. Latest commits contain corrections; re-run CI before merge.
