@@ -4,8 +4,9 @@
 
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main`  
-**Current main before this handoff:** `89c490b6273188e10b66a685794c9edbe9bfed01`  
-**Status:** Step 9 FAQ is merged and verified for CI/migrations. Step 10 Terms page is next; inspect content and preserve its legal meaning. No implementation changes have been made for Step 10 yet.
+**Feature branch:** `feat/website-terms-redesign-step-10`  
+**Base commit:** `89c490b6273188e10b66a685794c9edbe9bfed01` plus current-task handoff docs  
+**Status:** Step 10 Terms page redesign, regression tests, and documentation updates are committed on the feature branch. CI/migration validation has not yet been triggered or verified.
 
 ## Completed UI steps
 
