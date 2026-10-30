@@ -470,3 +470,35 @@ test('STAFF cannot edit or withdraw supplier responses with administrative permi
   assert.equal(hit.deleteResponseAttachment, undefined);
   await app.close();
 });
+
+
+test('STAFF and CUSTOMER wildcard contexts cannot perform supplier response lifecycle or attachment actions', async () => {
+  const app = await buildApp();
+  const supplierActions = [
+    { method: 'POST', url: '/api/v1/inquiries/1/responses', controller: 'submitResponse', payload: { items: [{ inquiryItemId: 1, price: 1000, deliveryTime: '3 days', description: 'desc', availableQuantity: 5 }] } },
+    { method: 'PATCH', url: '/api/v1/inquiries/1/responses/2', controller: 'updateResponse', payload: { items: [{ inquiryItemId: 1, price: 1000, deliveryTime: '3 days', description: 'desc', availableQuantity: 5 }] } },
+    { method: 'POST', url: '/api/v1/inquiries/1/responses/2/withdraw', controller: 'withdrawResponse', payload: {} },
+    { method: 'POST', url: '/api/v1/inquiries/1/responses/2/attachments', controller: 'uploadResponseAttachment', payload: {} },
+    { method: 'DELETE', url: '/api/v1/inquiries/1/responses/2/attachments/3', controller: 'deleteResponseAttachment' },
+  ];
+  const forbiddenContexts = [
+    { name: 'STAFF', user: { accessType: 'STAFF', roles: ['SUPER_ADMIN'], permissions: ['*'], companyId: 10 } },
+    { name: 'CUSTOMER', user: { accessType: 'CUSTOMER', roles: ['SUPER_ADMIN'], permissions: ['*'], companyId: 10 } },
+  ];
+
+  for (const context of forbiddenContexts) {
+    const headers = { 'x-test-user': JSON.stringify(context.user) };
+    for (const action of supplierActions) {
+      const res = await app.inject({
+        method: action.method,
+        url: action.url,
+        headers,
+        ...(action.payload !== undefined ? { payload: action.payload } : {}),
+      });
+      assert.equal(res.statusCode, 403, `${context.name} must not perform ${action.method} ${action.url}`);
+      assert.equal(hit[action.controller], undefined, `${context.name} must not reach ${action.controller} controller`);
+    }
+  }
+
+  await app.close();
+});
