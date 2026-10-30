@@ -1151,3 +1151,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added `apps/website/src/pages/public/Terms.test.js` for semantic structure, RTL, content-preservation and unsupported-claim checks.
 - PR checks on head `cc6200f893a496f413679f7cae88bdbbc7365fbc`: CI [41096735410], migration [41096735469], and runtime [41096735415] were queued when recorded. No result claimed yet.
 - This entry supersedes the earlier Step 10 “no implementation changes yet” handoff line.
+
+
+## 2026-10-30 — UI-REDESIGN-STEP-10-COMPLETE
+
+- **PR:** #37 merged at `0da4960d026aa6be532777c5dd66afacca3430de`.
+- **Feature CI:** [41096817092](https://github.com/gameacc2025/martest/actions/runs/41096817092) PASS.
+- **Feature migration:** [41096817046](https://github.com/gameacc2025/martest/actions/runs/41096817046) PASS.
+- **Post-merge CI:** [41097249357](https://github.com/gameacc2025/martest/actions/runs/41097249357) PASS.
+- **Post-merge migration:** [41097249463](https://github.com/gameacc2025/martest/actions/runs/41097249463) PASS.
+- **Post-merge runtime:** [41097249425](https://github.com/gameacc2025/martest/actions/runs/41097249425) was still running at handoff; browser smoke is not pursued as the next task.
+- **Scope:** Terms & Privacy page received RTL/semantic/responsive shared-design-system layout; original legal wording preserved; focused tests added. No API/auth/backend changes.
+- **Next:** Step 11 company-owned API route/tenant-isolation audit. Inspect source route-by-route and add tests for confirmed gaps; no full security sign-off until complete.
+- **Contact Us:** still deferred; hardcoded contact information and simulated success, no verified public submission endpoint.
