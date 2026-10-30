@@ -1,50 +1,45 @@
 # Current Task — 2026-10-30
 
-## Active handoff: Step 10 — Website Terms & Privacy page redesign
+## Active handoff: Step 11 — Company-owned API authorization and tenant-isolation audit
 
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main`  
-**Feature branch:** `feat/website-terms-redesign-step-10`  
-**Base commit:** `89c490b6273188e10b66a685794c9edbe9bfed01` plus current-task handoff docs  
-**Status:** Step 10 Terms page redesign, regression tests, and documentation updates are committed on the feature branch. CI/migration validation has not yet been triggered or verified.
+**Main after Step 10:** `0da4960d026aa6be532777c5dd66afacca3430de`  
+**Status:** Step 10 Terms & Privacy redesign is merged. Step 11 begins with a source-level, route-by-route audit of company-owned API resources. No new security finding is claimed until reproduced and tested.
 
-## Completed UI steps
+## Completed UI redesign steps
 
-- **Step 1 Homepage:** PR #29 merged; CI/migration and post-merge checks passed.
-- **Step 2 Product Listing:** PR #30 merged; CI/migration and post-merge checks passed.
-- **Step 3 Product Details:** PR #31 merged; CI/migration and post-merge checks passed.
-- **Step 4 Categories:** PR #32 merged; CI/migration checks passed.
-- **Step 5 Search Results:** PR #33 merged; CI/migration passed; runtime browser smoke failed.
-- **Step 6 About Us:** PR #34 merged; CI/migration passed; runtime browser smoke failed.
-- **Step 7 Company Profile:** PR #35 merged; CI/migration passed; runtime browser smoke failed on feature run.
-- **Step 8 Companies directory:** intentionally remains unrouted/dormant. Backend GET /companies is STAFF-only and current page references missing dependencies. Do not make it public without a public-safe endpoint and explicit field allowlist.
-- **Step 9 FAQ:** PR #36 merged at `89c490b6273188e10b66a685794c9edbe9bfed01`. Feature CI [40884581248](https://github.com/gameacc2025/martest/actions/runs/40884581248) passed; migration [40884581108](https://github.com/gameacc2025/martest/actions/runs/40884581108) passed; post-merge CI [40884769582](https://github.com/gameacc2025/martest/actions/runs/40884769582) passed; post-merge migration [40884769425](https://github.com/gameacc2025/martest/actions/runs/40884769425) passed. Runtime [40884581818](https://github.com/gameacc2025/martest/actions/runs/40884581818) and post-merge [40884769750](https://github.com/gameacc2025/martest/actions/runs/40884769750) failed at browser smoke; do not claim runtime green.
+- Steps 1–7: Homepage, Product Listing, Product Details, Categories, Search Results, About Us, and Company Profile changes are merged in PRs #29–#35. Their CI/migration results are recorded in the UI redesign guide; browser-smoke failures are recorded separately.
+- Step 8: Companies directory remains intentionally unrouted/dormant because `GET /companies` is STAFF-only and the existing page references missing dependencies. No public exposure without a public-safe endpoint and field allowlist.
+- Step 9: FAQ PR #36 merged. Feature and post-merge CI/migration passed; feature and post-merge runtime browser-smoke failed.
+- **Step 10:** Terms & Privacy PR #37 merged at `0da4960d026aa6be532777c5dd66afacca3430de`. Feature CI [41096817092](https://github.com/gameacc2025/martest/actions/runs/41096817092) passed; feature migration [41096817046](https://github.com/gameacc2025/martest/actions/runs/41096817046) passed; post-merge CI [41097249357](https://github.com/gameacc2025/martest/actions/runs/41097249357) passed; post-merge migration [41097249463](https://github.com/gameacc2025/martest/actions/runs/41097249463) passed. Post-merge runtime [41097249425](https://github.com/gameacc2025/martest/actions/runs/41097249425) was still running at handoff; browser smoke is not the next debugging task.
 
-## Step 10 — Terms & Privacy (next)
+## Step 11 — Security audit scope
 
-- Redesign `apps/website/src/pages/public/Terms.vue` using shared design-system tokens and responsive, readable legal-document layout.
-- Preserve existing legal wording and meaning; this is a visual/accessibility pass, not legal drafting. Do not add claims about data retention, sharing, security certifications, processors, cookies, or legal compliance without authoritative source material.
-- Add a focused component test covering headings/sections, content preservation, RTL semantics and responsive design hooks.
-- Do not change routes, auth, API behavior, or other pages in this step.
+- Review company-owned API routes, their preHandlers, AccessProfile context requirements, tenant scoping, resource ownership checks, nested attachments, and read/write operations.
+- Start with `companies`, `products`, `inquiries`, `addresses`, and `notifications`; inspect every relevant route and service query rather than relying on frontend gating.
+- For each suspected gap, prove the path and add a focused regression test before changing behavior.
+- Do not claim full security sign-off until the complete route inventory is covered.
+- Preserve strict app-context boundaries: STAFF/SUPER_ADMIN must not gain COMPANY context by wildcard permission; COMPANY operations must be scoped to the authenticated company.
 
-## Deferred / blocked UI item — Contact Us
+## Deferred UI / integration item — Contact Us
 
-The current `ContactUs.vue` displays hardcoded phone, email, postal address, social URLs and a map embed, and its submit handler simulates success with a one-second timeout instead of calling a verified contact API. Search found no matching public contact submission endpoint. Do not merely restyle and preserve a misleading successful-send claim. Defer the page until the real contact submission contract and verified business contact details are established; record this as a functional integration task.
+`ContactUs.vue` contains hardcoded phone/email/address/social/map details and a submit handler that simulates success with a timeout. No public contact submission API was found in source searches or route inventory. Do not invent an endpoint or claim a message was sent. Define a real contact-message workflow and authoritative business contact details before implementing it.
 
-## Remaining cross-project backlog
+## Remaining backlog after Step 11
 
-1. Complete remaining safe page-by-page UI work, one page per branch/PR.
-2. Exhaustive company-owned route/tenant/IDOR review.
-3. Complete SMS event-dispatch integration. Twilio adapter, worker, paid quota and tests exist; dispatcher does not enqueue SMS rows. Live delivery unverified.
-4. Controlled live Zarinpal and SMTP verification.
-5. Complete endpoint/schema/permission API documentation.
-6. Refresh Graphify when a workspace is available.
+1. Complete the exhaustive company-owned route/tenant/IDOR audit.
+2. Complete SMS event-dispatch integration: Twilio adapter, worker, paid quota and tests exist; dispatcher does not enqueue SMS rows. Live delivery unverified.
+3. Verify live Zarinpal and SMTP using controlled staging credentials.
+4. Complete endpoint/schema/permission API documentation.
+5. Refresh Graphify when a workspace is available.
+6. Resolve Contact Us functional integration from an approved API and verified contact data.
 
 ## Constraints
 
 - No mock data, auth bypass, invented endpoints, or fake success states.
 - Do not expose STAFF-only company directory data publicly.
 - Preserve app-context/RBAC, tenant ownership, inquiry permission/subscription, payment idempotency and quota invariants.
-- Browser-smoke debugging is not the next task; report its failure honestly.
-- Keep tests/build/migration/runtime/browser/provider verification as separate statuses.
-- Update this file, `.ai/WORKLOG.md`, project context, roadmap and relevant feature docs at each meaningful stage.
+- Browser-smoke debugging is not the next task; report its result honestly.
+- Separate unit/CI tests, builds, migrations, runtime infrastructure, browser smoke and live-provider verification.
+- Keep `.ai/current-task.md`, `.ai/WORKLOG.md`, project context, roadmap and relevant docs current.
