@@ -1164,3 +1164,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Scope:** Terms & Privacy page received RTL/semantic/responsive shared-design-system layout; original legal wording preserved; focused tests added. No API/auth/backend changes.
 - **Next:** Step 11 company-owned API route/tenant-isolation audit. Inspect source route-by-route and add tests for confirmed gaps; no full security sign-off until complete.
 - **Contact Us:** still deferred; hardcoded contact information and simulated success, no verified public submission endpoint.
+
+
+## 2026-10-30 — SECURITY-AUDIT-STEP-11A-COMPANIES
+
+- **Branch:** `audit/company-tenant-access-step-11`.
+- **Scope reviewed:** `company.routes.js`, `company.controller.js`, `company.service.js`, company route/controller/service tests, RBAC middleware, and company rule service.
+- **Findings:** No confirmed cross-tenant authorization bypass in the reviewed company route family. The route-level context guard limits COMPANY users to the company ID in their authenticated context; staff-only routes reject COMPANY context; service update logic preserves the STAFF global-admin boundary and blocks company-context lifecycle/limit changes.
+- **Coverage added:** Integration tests verify own-vs-other tenant behavior for company product listing, statistics and logo update, and verify COMPANY context cannot read/update settings even with wildcard permissions.
+- **Not a full sign-off:** This is one module slice only. Product, inquiry, address, notification and nested-resource route families remain to be reviewed.
+- **Verification:** Await GitHub Actions CI/backend tests and migration validation before merging this test-only security slice.
