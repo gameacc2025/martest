@@ -220,3 +220,8 @@ Redesign `apps/website/src/pages/public/Terms.vue` as a visual/accessibility-onl
 ## Contact Us — deferred pending functional contract
 
 The current page hardcodes phone/email/address/social URLs/map details and simulates successful submission with a timeout. No verified public contact submission endpoint was found in the source search. Defer redesign until the actual backend contract and authoritative contact details are available; do not present simulated success as real delivery.
+
+
+## Step 10 implementation update — PR #37 (2026-10-30)
+
+The Terms & Privacy page visual/accessibility slice is now implemented on `feat/website-terms-redesign-step-10` and proposed in [PR #37](https://github.com/gameacc2025/martest/pull/37). It preserves the existing legal paragraphs, adds RTL/semantic structure and shared-token responsive styling, and adds a component regression test. CI [41096735410], migration [41096735469] and runtime [41096735415] were queued at the time of this update; wait for CI and migration before merge. Runtime browser smoke is tracked separately.

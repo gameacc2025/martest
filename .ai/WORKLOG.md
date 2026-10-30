@@ -1141,3 +1141,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Contact Us deferral:** current page has hardcoded business contact details/map and fake successful submission implemented with a timeout. No public contact submission endpoint was found by source search. Do not redesign it as if sending were real; first define and verify backend contract and real business contact data.
 - **No implementation changes for Step 10 yet.**
 - **Graphify:** still unavailable because no workspace is selected; do not claim its memory/index was refreshed.
+
+
+## 2026-10-30 — STEP-10 TERMS PAGE IMPLEMENTATION (PR #37)
+
+- **Branch:** `feat/website-terms-redesign-step-10`; **PR:** https://github.com/gameacc2025/martest/pull/37 (draft).
+- Replaced the Terms page's legacy layout with responsive RTL shared-design-system sections and breadcrumb.
+- Preserved all existing legal paragraphs; only added a short descriptive page introduction. No new legal, privacy, security or compliance claims were added.
+- Added `apps/website/src/pages/public/Terms.test.js` for semantic structure, RTL, content-preservation and unsupported-claim checks.
+- PR checks on head `cc6200f893a496f413679f7cae88bdbbc7365fbc`: CI [41096735410], migration [41096735469], and runtime [41096735415] were queued when recorded. No result claimed yet.
+- This entry supersedes the earlier Step 10 “no implementation changes yet” handoff line.
