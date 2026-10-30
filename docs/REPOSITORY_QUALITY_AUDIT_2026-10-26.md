@@ -500,3 +500,10 @@ Next audit slice: product routes/service, especially nested price tiers, images,
 Reviewed product routes, controller, service ownership guards, public data projection and nested price-tier/image/document/history/activity operations. No confirmed cross-tenant bypass was identified in this slice. Existing service queries bind nested resources to the parent product; company product listings are scoped to the authenticated company; public reads remain clamped to PUBLISHED + PUBLIC and use an explicit public projection.
 
 Added route integration coverage proving COMPANY and CUSTOMER contexts with a stray SUPER_ADMIN role plus wildcard permissions cannot invoke STAFF-only moderation routes (approve/reject/hide/archive/restore). CI and migration validation pending. This is not full security sign-off; inquiry, address and notification route families remain.
+
+
+## Product API audit — merged and verified (2026-10-30)
+
+PR #39 merged at `de25c403506208bdfc01c1516d56fa929e85a8ad`. Feature CI [41098778272], feature migration [41098778245], post-merge CI [41098969268], and post-merge migration [41098969119] passed. No confirmed cross-tenant product bypass was found. Added regression coverage proving COMPANY and CUSTOMER contexts with wildcard permissions cannot invoke STAFF-only moderation actions. Runtime [41098968989] is tracked separately.
+
+Next audit slice: inquiry routes and service — buyer/supplier ownership, app context, subscription/payment ownership, sealed response visibility, messages, and nested response attachments.
