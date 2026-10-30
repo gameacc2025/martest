@@ -1895,3 +1895,28 @@ test('getInquiryStats: CUSTOMER_USER without an AccessProfile is scoped to its o
   assert.deepEqual(calls.groupBy[1].where, { id: { in: [] } });
   assert.deepEqual(calls['inquiryResponse.groupBy'][0].where, { inquiry: { buyerUserId: 77 } });
 });
+
+
+test('listResponses: AccessProfile-less CUSTOMER_USER cannot use a stray companyId to read supplier responses', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 1,
+    companyId: buyer.companyId,
+    buyerUserId: 999,
+    status: 'OPEN',
+    items: [{ product: { companyId: seller.companyId } }],
+  };
+  const customer = {
+    id: 77,
+    accessType: null,
+    companyId: seller.companyId,
+    roles: ['CUSTOMER_USER'],
+    permissions: ['inquiries.read'],
+  };
+
+  await assert.rejects(
+    () => inquiryService.listResponses(1, customer),
+    (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
+  );
+  assert.equal(calls['inquiryResponse.findMany'], undefined);
+});
