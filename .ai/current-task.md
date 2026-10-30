@@ -74,3 +74,12 @@ Review route context/permission boundaries, buyer/supplier ownership, sealed/ano
 - Fixed stats test instrumentation so Prisma groupBy arguments are captured and the new customer stats assertions test real query scoping.
 - Previous CI attempt exposed three failing backend tests: the unrelated-company fixture lacked COMPANY context; groupBy mocks did not record args; STAFF received-scope was accepted. These are addressed in the latest branch commits. New CI must confirm.
 - No merge until latest backend tests/CI and migration validation pass. Runtime browser smoke is tracked separately and not the next debugging task.
+
+
+## Step 11C additional findings — subscription/quota and statistics
+
+- Confirmed controller mismatch: route RBAC admits AccessProfile-less CUSTOMER_USER as default CUSTOMER context, but controller subscriptionOwner() and quota() recognized only accessType === 'CUSTOMER'. Customer users therefore could not read their own quota/subscription or purchase/verify a user-owned plan. Controller now resolves the same explicit CUSTOMER_USER fallback and scopes these operations to caller.id.
+- Quota endpoint now accepts only COMPANY or CUSTOMER app context; STAFF with a stray companyId cannot inspect a company's quota.
+- Confirmed stats scope mismatch: getInquiryStats previously read caller.companyId without requiring COMPANY context. STAFF could be scoped through a stray companyId; STAFF without companyId failed despite the route admitting STAFF. It now permits authorized STAFF (leads.read/inquiries.read) to receive platform-wide aggregates, matching the STAFF inquiry-list behavior, and never scopes STAFF by companyId. Unauthorized STAFF is rejected.
+- Added controller tests for CUSTOMER_USER subscription listing, purchase, payment retry and quota; COMPANY quota; and STAFF stray-companyId denial. Added service tests for STAFF stats authorization and platform scope.
+- PR #40 remains unmerged pending the latest CI/backend tests and migration validation.
