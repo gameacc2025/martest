@@ -189,6 +189,9 @@ function resolveCompanyId(data, caller) {
 function resolveSupplierCompanyId(data, caller) {
   // Supplier responses require an explicit COMPANY application context.
   // STAFF/CUSTOMER/legacy context must never impersonate a supplier via body.companyId.
+  if (caller?.accessType === 'STAFF') {
+    throw { statusCode: 403, code: 'STAFF_CANNOT_MANAGE_SUPPLIER_RESPONSE', message: 'STAFF users supervise inquiries but cannot act as suppliers.' };
+  }
   if (caller?.accessType !== 'COMPANY') {
     throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'Supplier responses require a COMPANY access context.' };
   }
