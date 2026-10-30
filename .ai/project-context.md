@@ -370,3 +370,10 @@ Usage consumption must validate the active subscription after acquiring its row 
 - scope=received is a supplier/company view and must require AccessProfile.type === COMPANY plus a valid authenticated companyId.
 - A STAFF caller with a stale or stray companyId must not be treated as a supplier, even when it has inquiry read permission or SUPER_ADMIN/wildcard permission.
 - The inquiry service now enforces this context rule independently of route-level permission checks.
+
+
+## Inquiry subscription and statistics ownership — 2026-10-30
+
+- AccessProfile-less CUSTOMER_USER tokens have `accessType: null` and are recognized as default Website context by central RBAC. Controller subscription/quota owner resolution must mirror that fallback and use authenticated `caller.id` as ownerType=user.
+- Quota endpoint is limited to COMPANY/CUSTOMER contexts; STAFF cannot inspect company quota through a stray companyId.
+- Inquiry statistics derive company ownership only from COMPANY context. Authorized STAFF with inquiry-read permission receives platform-wide aggregates; STAFF companyId is never used as tenant identity.
