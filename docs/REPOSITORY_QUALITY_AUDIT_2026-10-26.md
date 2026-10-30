@@ -479,3 +479,10 @@ The routed Company Profile page was calling website store methods that do not ex
 - Post-merge runtime [41097249425] was still running at the time of this note; no runtime/browser-smoke pass is claimed.
 - The targeted safe page redesign scope now covers Homepage, Product Listing, Product Details, Categories, Search Results, About Us, Company Profile, FAQ and Terms & Privacy. Companies remains intentionally dormant; Contact Us remains blocked by fake submission behavior and unverified contact details.
 - Next active task: exhaustive route-by-route review of company-owned API operations for AccessProfile context, tenant scoping, ownership and nested-resource authorization. Add tests for confirmed gaps; no full security sign-off yet.
+
+
+## Company API tenant audit slice — 2026-10-30
+
+Reviewed the company route/controller/service family and existing tests. No confirmed cross-tenant authorization bypass was identified in this slice. COMPANY users are constrained by the route guard to their own company ID; settings/lifecycle management remains STAFF-only; company service update checks preserve the STAFF-only global admin override and prevent COMPANY-context changes to lifecycle fields and quotas.
+
+Added route integration regression tests for own-vs-other tenant access to company product listings, statistics and logo updates, plus wildcard COMPANY denial for settings read/update. This is not an exhaustive security sign-off: product, inquiry, address, notification and nested-resource routes remain outstanding. CI is pending.

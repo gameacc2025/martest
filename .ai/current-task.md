@@ -5,7 +5,8 @@
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main`  
 **Main after Step 10:** `0da4960d026aa6be532777c5dd66afacca3430de`  
-**Status:** Step 10 Terms & Privacy redesign is merged. Step 11 begins with a source-level, route-by-route audit of company-owned API resources. No new security finding is claimed until reproduced and tested.
+**Feature branch:** `audit/company-tenant-access-step-11`  
+**Status:** Company module route/service review completed with no confirmed authorization bypass. Added integration regression tests for company-owned products/statistics/logo and staff-only settings. CI pending. Product module review is next within this audit.
 
 ## Completed UI redesign steps
 
