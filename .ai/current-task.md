@@ -62,3 +62,15 @@ PR #39 merged at `de25c403506208bdfc01c1516d56fa929e85a8ad`. Feature CI [4109877
 ## Step 11C — Inquiry route family (next)
 
 Review route context/permission boundaries, buyer/supplier ownership, sealed/anonymous response visibility, subscription ownership/payment callbacks, messaging and nested response attachments. **Confirmed finding:** customer accounts have no AccessProfile and receive `accessType: null` with `CUSTOMER_USER`, but inquiry services only recognized `accessType: 'CUSTOMER'`; additionally, `isInquiryBuyer` trusted any caller's companyId, including STAFF. Fix these service-level context mismatches and cover them with regression tests. Correct the stale SUPER_ADMIN comment.
+
+
+## Step 11C audit update — inquiry ownership and received scope
+
+- The open PR is #40: https://github.com/gameacc2025/martest/pull/40
+- Fixed the confirmed buyer-context and AccessProfile-less CUSTOMER_USER mismatches described above.
+- Additional confirmed issue: listInquiries({ scope: 'received' }) accepted STAFF callers if they carried a stray companyId, because the service checked only for a companyId and did not require accessType === 'COMPANY'. This could expose supplier-side received inquiry listings to STAFF outside the intended company context.
+- Fixed the service guard to require explicit COMPANY context and a valid companyId for received scope.
+- Updated the unrelated-company response-visibility fixture to use an actual COMPANY context.
+- Fixed stats test instrumentation so Prisma groupBy arguments are captured and the new customer stats assertions test real query scoping.
+- Previous CI attempt exposed three failing backend tests: the unrelated-company fixture lacked COMPANY context; groupBy mocks did not record args; STAFF received-scope was accepted. These are addressed in the latest branch commits. New CI must confirm.
+- No merge until latest backend tests/CI and migration validation pass. Runtime browser smoke is tracked separately and not the next debugging task.
