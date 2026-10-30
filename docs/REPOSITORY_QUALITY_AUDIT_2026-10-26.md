@@ -517,3 +517,10 @@ Two source-backed issues were found:
 2. **STAFF companyId confused with buyer ownership.** `isInquiryBuyer` treated any caller with a matching `companyId` as the company buyer, regardless of AccessProfile. STAFF with a stray companyId could therefore pass service-level buyer ownership checks when an endpoint's permission preHandler admitted `inquiries.create`.
 
 Fix and regression tests are in progress on `audit/inquiry-app-context-step-11c`. The change introduces a CUSTOMER context helper matching the central RBAC fallback, scopes company ownership to COMPANY context, prevents STAFF's stray companyId from being implicitly used for inquiry creation, and requires explicit COMPANY context for supplier response operations. No full inquiry-security sign-off is claimed until all related tests pass and remaining subscription/payment/sealed-visibility/message/attachment checks finish.
+
+
+### Inquiry audit refinement — CUSTOMER supplier-visibility boundary
+
+A further service-level edge case was confirmed in `assertCanReadResponses`: a CUSTOMER_USER account without an AccessProfile could carry a stray companyId and be treated as a supplier when it was not the buyer. The service now denies that path; only explicit COMPANY context can use companyId for supplier response visibility. A regression test proves that a customer with a stray companyId cannot list supplier responses for an unrelated buyer inquiry.
+
+The central RBAC header comment was also corrected to say SUPER_ADMIN wildcard bypasses permission checks only, never AccessProfile context.
