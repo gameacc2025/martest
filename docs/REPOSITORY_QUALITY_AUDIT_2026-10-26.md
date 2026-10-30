@@ -493,3 +493,10 @@ Added route integration regression tests for own-vs-other tenant access to compa
 PR #38 merged at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`. Feature CI [41098052152], feature migration [41098052018], post-merge CI [41098224830], and post-merge migration [41098224693] passed. No confirmed company-route cross-tenant bypass was found. Added integration regression coverage for own-vs-other tenant access to company product listings, statistics and logo update, and wildcard COMPANY denial for staff-only settings. Runtime [41098225137] is tracked separately; browser smoke is not claimed as passed.
 
 Next audit slice: product routes/service, especially nested price tiers, images, documents, status history and activity logs.
+
+
+## Product API tenant audit slice — 2026-10-30
+
+Reviewed product routes, controller, service ownership guards, public data projection and nested price-tier/image/document/history/activity operations. No confirmed cross-tenant bypass was identified in this slice. Existing service queries bind nested resources to the parent product; company product listings are scoped to the authenticated company; public reads remain clamped to PUBLISHED + PUBLIC and use an explicit public projection.
+
+Added route integration coverage proving COMPANY and CUSTOMER contexts with a stray SUPER_ADMIN role plus wildcard permissions cannot invoke STAFF-only moderation routes (approve/reject/hide/archive/restore). CI and migration validation pending. This is not full security sign-off; inquiry, address and notification route families remain.

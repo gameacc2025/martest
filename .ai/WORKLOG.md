@@ -1185,3 +1185,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - No confirmed cross-tenant authorization bypass found in company routes/services.
 - Added route tests for own-vs-other company products/statistics/logo and wildcard COMPANY denial on staff-only settings.
 - Next: product route/service and nested attachment authorization audit.
+
+
+## 2026-10-30 — SECURITY-AUDIT-STEP-11B-PRODUCTS
+
+- **Branch:** `audit/product-tenant-access-step-11b`.
+- **Scope reviewed:** product route table, controller, service ownership helpers, product route/service tests, public projection and nested resource methods (price tiers, images, documents, status history, activity logs).
+- **Findings:** No confirmed cross-tenant bypass identified in this product slice. Company management queries are scoped to caller company; nested image/document/price-tier lookups are constrained by parent product ID; public catalog projection clamps visibility and excludes internal moderation fields; status transitions are separated by AccessProfile context.
+- **Coverage added:** A route integration regression test verifies COMPANY and CUSTOMER contexts carrying a stray SUPER_ADMIN role and wildcard permissions cannot invoke STAFF-only approve/reject/hide/archive/restore actions.
+- **Not a full sign-off:** Inquiry, address, notification and remaining nested resource routes still require review.
+- **Verification:** CI/backend tests and migration validation pending.
