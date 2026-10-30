@@ -237,7 +237,7 @@ async function inquiryRoutes(fastify) {
 
   // Current subscription and remaining RFQ quota for the caller.
   fastify.get('/quota', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
   }, ctrl.quota);
 
   // Dashboard statistics scoped to the caller's company (aggregated live).
