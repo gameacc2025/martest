@@ -553,3 +553,36 @@ test('COMPANY and CUSTOMER contexts cannot invoke STAFF-only product moderation 
 
   await app.close();
 });
+
+
+test('COMPANY and CUSTOMER contexts cannot invoke STAFF-only product moderation with wildcard permissions', async () => {
+  const app = await buildApp();
+  const staffOnlyActions = ['approve', 'reject', 'hide', 'archive', 'restore-draft'];
+  const contexts = [
+    {
+      name: 'COMPANY',
+      user: { accessType: 'COMPANY', companyId: 10, roles: ['SUPER_ADMIN'], permissions: ['*'] },
+    },
+    {
+      name: 'CUSTOMER',
+      user: { accessType: 'CUSTOMER', companyId: 10, roles: ['SUPER_ADMIN'], permissions: ['*'] },
+    },
+  ];
+
+  for (const context of contexts) {
+    const headers = { 'x-test-user': JSON.stringify(context.user) };
+    for (const action of staffOnlyActions) {
+      const res = await app.inject({
+        method: 'POST',
+        url: `/api/v1/products/1/${action}`,
+        headers,
+        payload: {},
+      });
+      assert.equal(res.statusCode, 403, `${context.name} must not perform ${action}`);
+      const controllerName = action === 'restore-draft' ? 'restoreDraft' : action;
+      assert.equal(hit[controllerName], undefined, `${context.name} must not reach ${controllerName} controller`);
+    }
+  }
+
+  await app.close();
+});
