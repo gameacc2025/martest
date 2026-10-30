@@ -502,3 +502,28 @@ test('STAFF and CUSTOMER wildcard contexts cannot perform supplier response life
 
   await app.close();
 });
+
+
+test('GET /quota: STAFF cannot access company quota through a stray companyId', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/inquiries/quota',
+    headers: { 'x-test-user': JSON.stringify({ accessType: 'STAFF', companyId: 22, roles: ['STAFF_USER'], permissions: ['inquiries.read'] }) },
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.quota, undefined);
+  await app.close();
+});
+
+test('GET /quota: AccessProfile-less CUSTOMER_USER is accepted as Website context', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/inquiries/quota',
+    headers: { 'x-test-user': JSON.stringify({ accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.quota, true);
+  await app.close();
+});
