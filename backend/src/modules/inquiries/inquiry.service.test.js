@@ -96,7 +96,7 @@ const mockPrisma = {
       record('inquiry.updateMany', args);
       return { count: 1 };
     },
-    groupBy: async () => drain(queues.inquiryGroupBy),
+    groupBy: async (args) => { record('groupBy', args); return drain(queues.inquiryGroupBy); },
   },
   inquiryItem: {
     count: async () => fx.inquiryItemCount,
@@ -146,7 +146,7 @@ const mockPrisma = {
       }
       return { count: 1 };
     },
-    groupBy: async () => drain(queues.responseGroupBy),
+    groupBy: async (args) => { record('inquiryResponse.groupBy', args); return drain(queues.responseGroupBy); },
   },
   inquiryResponseItem: {
     deleteMany: async (args) => {
@@ -1316,7 +1316,7 @@ test('listResponses: an unrelated company gets 404', async () => {
   resetMocks();
   nextFindUnique = { id: 1, companyId: buyer.companyId, items: [] };
   await assert.rejects(
-    () => inquiryService.listResponses(1, { id: 9, roles: [], permissions: [], companyId: 777 }),
+    () => inquiryService.listResponses(1, { id: 9, accessType: 'COMPANY', roles: [], permissions: [], companyId: 777 }),
     (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
   );
 });
