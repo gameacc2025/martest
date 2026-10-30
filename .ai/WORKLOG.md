@@ -1174,3 +1174,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Coverage added:** Integration tests verify own-vs-other tenant behavior for company product listing, statistics and logo update, and verify COMPANY context cannot read/update settings even with wildcard permissions.
 - **Not a full sign-off:** This is one module slice only. Product, inquiry, address, notification and nested-resource route families remain to be reviewed.
 - **Verification:** Await GitHub Actions CI/backend tests and migration validation before merging this test-only security slice.
+
+
+## 2026-10-30 — SECURITY-AUDIT-STEP-11A-COMPANIES-MERGED
+
+- **PR #38:** merged at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`.
+- Feature CI [41098052152] and migration [41098052018] passed.
+- Post-merge CI [41098224830] and migration [41098224693] passed.
+- Runtime [41098225137] remains separate; do not claim browser smoke passed or pursue it as the next debugging task.
+- No confirmed cross-tenant authorization bypass found in company routes/services.
+- Added route tests for own-vs-other company products/statistics/logo and wildcard COMPANY denial on staff-only settings.
+- Next: product route/service and nested attachment authorization audit.
