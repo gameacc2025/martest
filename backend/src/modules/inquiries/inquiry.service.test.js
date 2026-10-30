@@ -1920,3 +1920,30 @@ test('listResponses: AccessProfile-less CUSTOMER_USER cannot use a stray company
   );
   assert.equal(calls['inquiryResponse.findMany'], undefined);
 });
+
+
+test('getInquiry: CUSTOMER_USER with a stray companyId cannot read a supplier-visible inquiry', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 83,
+    companyId: buyer.companyId,
+    buyerUserId: 999,
+    status: 'OPEN',
+    visibilityMode: 'NORMAL',
+    publishDate: null,
+    responses: [],
+    items: [{ product: { company: { id: seller.companyId } } }],
+  };
+  const customer = {
+    id: 77,
+    accessType: null,
+    companyId: seller.companyId,
+    roles: ['CUSTOMER_USER'],
+    permissions: ['inquiries.read'],
+  };
+
+  await assert.rejects(
+    () => inquiryService.getInquiry(83, customer),
+    (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
+  );
+});
