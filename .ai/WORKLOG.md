@@ -1129,3 +1129,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Step 8 disposition:** Keep Companies directory unrouted/dormant because backend `GET /companies` is STAFF-only and the current page references missing UI/store contracts. No public API was invented.
 - **Runtime evidence correction:** Search Results [40881262762](https://github.com/gameacc2025/martest/actions/runs/40881262762), About Us [40882371017](https://github.com/gameacc2025/martest/actions/runs/40882371017), and Company Profile [40883463183](https://github.com/gameacc2025/martest/actions/runs/40883463183) runtime workflows failed at browser smoke after infrastructure/health/migration stages. Per owner instruction, do not debug browser smoke as the next task.
 - **Verification:** No local test run claimed; await feature CI and migration validation.
+
+
+## 2026-10-30 — UI-REDESIGN-STEP-9-VERIFICATION-AND-STEP-10-HANDOFF
+
+- **Step 9:** FAQ redesign PR #36 is merged at `89c490b6273188e10b66a685794c9edbe9bfed01`.
+- **Feature verification:** CI [40884581248](https://github.com/gameacc2025/martest/actions/runs/40884581248) PASS; database migration [40884581108](https://github.com/gameacc2025/martest/actions/runs/40884581108) PASS.
+- **Post-merge verification:** CI [40884769582](https://github.com/gameacc2025/martest/actions/runs/40884769582) PASS; database migration [40884769425](https://github.com/gameacc2025/martest/actions/runs/40884769425) PASS.
+- **Runtime:** feature [40884581818](https://github.com/gameacc2025/martest/actions/runs/40884581818) and post-merge [40884769750](https://github.com/gameacc2025/martest/actions/runs/40884769750) failed at browser smoke. No runtime pass is claimed; per owner instruction, browser smoke is not pursued as the next task.
+- **Current next UI slice:** Step 10 Terms & Privacy visual/accessibility redesign. Preserve legal text and meaning; do not create new legal claims.
+- **Contact Us deferral:** current page has hardcoded business contact details/map and fake successful submission implemented with a timeout. No public contact submission endpoint was found by source search. Do not redesign it as if sending were real; first define and verify backend contract and real business contact data.
+- **No implementation changes for Step 10 yet.**
+- **Graphify:** still unavailable because no workspace is selected; do not claim its memory/index was refreshed.
