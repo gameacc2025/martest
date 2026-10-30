@@ -737,7 +737,7 @@ function buildInquiryOrderBy(query) {
 async function listInquiries(query, caller) {
   const { page, limit, skip, take } = getPaginationParams(query);
   const superAdmin = isSuperAdmin(caller);
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const callerUserId = Number(caller?.id) || null;
   const isCustomer = isCustomerContext(caller) && !superAdmin;
   const isStaff = caller?.accessType === 'STAFF' || superAdmin;
@@ -834,7 +834,7 @@ async function getInquiry(inquiryId, caller) {
 
   const isBuyer = isInquiryBuyer(inquiry, caller);
   const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const ownsRequestedProduct = Boolean(callerCompanyId)
     && inquiry.items.some((item) => Number(item.product?.company?.id) === callerCompanyId);
   const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
@@ -1381,7 +1381,7 @@ async function listResponses(inquiryId, caller) {
     return [];
   }
 
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const where = { inquiryId: numericInquiryId };
   if (!isBuyer && !isStaff) {
     where.companyId = callerCompanyId;
