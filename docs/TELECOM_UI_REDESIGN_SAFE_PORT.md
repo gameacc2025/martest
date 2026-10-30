@@ -207,3 +207,16 @@ The Website Companies directory remains unrouted/dormant. The current backend `G
 - **Content integrity:** Removed unsupported claims about returns, installment purchases, order tracking and direct seller contact. FAQ now reflects B2B catalog discovery, inquiry permissions/subscription, company approval and product publication.
 - **Tests:** Cover render, independent accordion toggles, accessibility attributes, unsupported claim prevention and contact route.
 - **Status:** Feature CI and migration validation pending; do not merge until they pass.
+
+
+## Step 9 completion — Website FAQ (2026-10-30 verification)
+
+PR #36 merged as `89c490b6273188e10b66a685794c9edbe9bfed01`. Feature CI [40884581248](https://github.com/gameacc2025/martest/actions/runs/40884581248), feature migration [40884581108](https://github.com/gameacc2025/martest/actions/runs/40884581108), post-merge CI [40884769582](https://github.com/gameacc2025/martest/actions/runs/40884769582), and post-merge migration [40884769425](https://github.com/gameacc2025/martest/actions/runs/40884769425) passed. Feature and post-merge runtime validation failed at browser smoke; this is not a green runtime check.
+
+## Step 10 — Terms & Privacy (next)
+
+Redesign `apps/website/src/pages/public/Terms.vue` as a visual/accessibility-only slice. Preserve the existing legal wording and meaning. Do not add legal, privacy, security, cookie, data-retention, processor, or compliance claims without authoritative source material. Add focused component tests; leave routing and behavior unchanged.
+
+## Contact Us — deferred pending functional contract
+
+The current page hardcodes phone/email/address/social URLs/map details and simulates successful submission with a timeout. No verified public contact submission endpoint was found in the source search. Defer redesign until the actual backend contract and authoritative contact details are available; do not present simulated success as real delivery.
