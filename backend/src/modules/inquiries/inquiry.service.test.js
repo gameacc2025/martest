@@ -523,6 +523,27 @@ function largeStream(megabytes) {
 
 const attachmentDir = path.join(process.cwd(), 'uploads', 'inquiries', 'responses');
 
+
+test('getInquiry: STAFF with a stray companyId cannot read that company inquiry as its buyer', async () => {
+  resetMocks();
+  nextFindUnique = { id: 81, companyId: 10, buyerUserId: null, items: [] };
+  const staff = { id: 90, accessType: 'STAFF', companyId: 10, roles: ['STAFF_USER'], permissions: ['inquiries.create'] };
+
+  await assert.rejects(
+    () => inquiryService.getInquiry(81, staff),
+    (err) => err.statusCode === 404 && err.code === 'INQUIRY_NOT_FOUND',
+  );
+});
+
+test('getInquiry: CUSTOMER_USER without an AccessProfile can read only its own user-owned inquiry', async () => {
+  resetMocks();
+  nextFindUnique = { id: 82, companyId: null, buyerUserId: 77, status: 'OPEN', visibilityMode: 'NORMAL', responses: [], items: [] };
+  const customer = { id: 77, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
+
+  const result = await inquiryService.getInquiry(82, customer);
+  assert.equal(result.id, 82);
+});
+
 // ── createInquiry ────────────────────────────────────────────
 
 test('createInquiry: SUPER_ADMIN creates a DRAFT under the supplied companyId with default settings', async () => {
@@ -1451,11 +1472,11 @@ test('withdrawResponse: marks a pending response as WITHDRAWN', async () => {
   assert.ok(args.data.withdrawnAt instanceof Date);
 });
 
-test('withdrawResponse: requires a company', async () => {
+test('withdrawResponse: requires an explicit COMPANY application context', async () => {
   resetMocks();
   await assert.rejects(
     () => inquiryService.withdrawResponse(1, 50, orphan),
-    (err) => err.code === 'COMPANY_REQUIRED',
+    (err) => err.code === 'COMPANY_CONTEXT_REQUIRED',
   );
 });
 
