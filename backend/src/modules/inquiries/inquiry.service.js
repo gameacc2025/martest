@@ -432,7 +432,7 @@ function shapeInquiryForCaller(inquiry, caller) {
 
   const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
   const isBuyer = isInquiryBuyer(inquiry, caller);
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
 
   if (!isBuyer && !isStaff && inquiry.confidential) {
     result.company = null;
