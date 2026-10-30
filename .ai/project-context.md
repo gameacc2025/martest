@@ -363,3 +363,10 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Company ownership is valid only when `accessType === 'COMPANY'`. A stray `companyId` on STAFF/CUSTOMER context is never buyer or supplier identity.
 - STAFF-created inquiries on behalf of a company require an explicit target `data.companyId` and create permission; STAFF's own stray `companyId` must not be used implicitly.
 - SUPER_ADMIN/wildcard bypasses fine-grained permission checks only; it never bypasses the AccessProfile app-context boundary.
+
+
+## Inquiry received-scope boundary — 2026-10-30
+
+- scope=received is a supplier/company view and must require AccessProfile.type === COMPANY plus a valid authenticated companyId.
+- A STAFF caller with a stale or stray companyId must not be treated as a supplier, even when it has inquiry read permission or SUPER_ADMIN/wildcard permission.
+- The inquiry service now enforces this context rule independently of route-level permission checks.
