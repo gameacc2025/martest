@@ -6,7 +6,7 @@
 **Canonical branch:** `main`  
 **Main after Step 10:** `0da4960d026aa6be532777c5dd66afacca3430de`  
 **Feature branch:** `audit/company-tenant-access-step-11`  
-**Status:** Company module route/service review completed with no confirmed authorization bypass. Added integration regression tests for company-owned products/statistics/logo and staff-only settings. CI pending. Product module review is next within this audit.
+**Status:** Company module audit slice merged in PR #38 at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`; feature and post-merge CI/migration passed. Product module is the next route family under review.
 
 ## Completed UI redesign steps
 
@@ -44,3 +44,12 @@
 - Browser-smoke debugging is not the next task; report its result honestly.
 - Separate unit/CI tests, builds, migrations, runtime infrastructure, browser smoke and live-provider verification.
 - Keep `.ai/current-task.md`, `.ai/WORKLOG.md`, project context, roadmap and relevant docs current.
+
+
+## Step 11A completion — Companies module
+
+PR #38 merged at `d4d64af9c120d7200e363bdcb7092dfd0554f47b`. Feature CI [41098052152] and migration [41098052018] passed; post-merge CI [41098224830] and migration [41098224693] passed. Runtime [41098225137] remains separate; browser smoke is not pursued next. No confirmed company-route cross-tenant bypass was found. Added tests cover own-vs-other tenant access to company products/statistics/logo and wildcard COMPANY denial for settings.
+
+## Step 11B — Products module (next)
+
+Review product route/controller/service ownership enforcement and nested image/document/price-tier operations. Existing tests already cover many ownership, lifecycle and attachment boundaries; verify gaps against actual route wiring before adding or changing behavior. No vulnerability is asserted at this point.
