@@ -524,3 +524,10 @@ Fix and regression tests are in progress on `audit/inquiry-app-context-step-11c`
 A further service-level edge case was confirmed in `assertCanReadResponses`: a CUSTOMER_USER account without an AccessProfile could carry a stray companyId and be treated as a supplier when it was not the buyer. The service now denies that path; only explicit COMPANY context can use companyId for supplier response visibility. A regression test proves that a customer with a stray companyId cannot list supplier responses for an unrelated buyer inquiry.
 
 The central RBAC header comment was also corrected to say SUPER_ADMIN wildcard bypasses permission checks only, never AccessProfile context.
+
+
+### Inquiry received-scope finding — 2026-10-30
+
+A source review and CI regression test confirmed that the received inquiry list scope only checked whether caller.companyId existed. A STAFF caller carrying a stale/misassigned companyId could therefore enter the supplier-side list. The service now requires explicit COMPANY app context and a valid companyId before building the product-ownership query. This is a confirmed security boundary correction; PR #40 remains unmerged pending fresh CI/backend test and migration validation.
+
+The initial CI attempt also identified two test-harness issues (the unrelated-company fixture omitted COMPANY context, and stats groupBy mocks did not record query arguments); both test issues were corrected without weakening the security assertions.
