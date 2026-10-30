@@ -1234,3 +1234,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Corrected an unrelated-company response test fixture to carry explicit COMPANY context, so the test exercises the intended supplier-not-owner 404 path instead of the invalid-context path.
 - The stats test expected Prisma groupBy query arguments but the mock never recorded them. Updated inquiry and response groupBy mocks to record args, making the assertions meaningful.
 - Earlier backend CI failures: (1) unrelated-company fixture expected wrong error for context-less caller; (2) stats assertion read missing mock call records; (3) STAFF received-scope was not rejected. Latest commits contain corrections; re-run CI before merge.
+
+
+### Inquiry audit — subscription owner and statistics context alignment (2026-10-30)
+
+- Found a second AccessProfile-less CUSTOMER_USER mismatch in `inquiry.controller.js`: RBAC allowed the default Website context, but subscriptionOwner() and quota() recognized only explicit `accessType === 'CUSTOMER'`. This blocked customers from their own subscription/quota flows. Added matching CUSTOMER_USER fallback; all user-owned operations are scoped by authenticated caller.id.
+- Restricted the quota route to COMPANY/CUSTOMER contexts so STAFF cannot read company quota by carrying a stray companyId.
+- Found stats context mismatch: getInquiryStats read caller.companyId regardless of AccessProfile. It now derives companyId only in COMPANY context, requires inquiry-read permission for STAFF, and uses platform-wide aggregates for authorized STAFF (consistent with staff inquiry listing) rather than a stray company filter.
+- Added controller tests for customer subscription/list/retry/quota ownership, company quota, and STAFF denial; added stats tests for authorized platform scope and unauthorized STAFF rejection.
+- PR #40 remains open pending latest CI and migration checks.
