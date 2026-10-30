@@ -531,3 +531,11 @@ The central RBAC header comment was also corrected to say SUPER_ADMIN wildcard b
 A source review and CI regression test confirmed that the received inquiry list scope only checked whether caller.companyId existed. A STAFF caller carrying a stale/misassigned companyId could therefore enter the supplier-side list. The service now requires explicit COMPANY app context and a valid companyId before building the product-ownership query. This is a confirmed security boundary correction; PR #40 remains unmerged pending fresh CI/backend test and migration validation.
 
 The initial CI attempt also identified two test-harness issues (the unrelated-company fixture omitted COMPANY context, and stats groupBy mocks did not record query arguments); both test issues were corrected without weakening the security assertions.
+
+
+### Inquiry subscription and statistics context findings — 2026-10-30
+
+- `inquiry.controller.js` previously resolved customer subscription/quota ownership only from explicit `accessType === 'CUSTOMER'`, despite central RBAC admitting the AccessProfile-less `CUSTOMER_USER` fallback. This prevented customers from reading their own subscription/quota or purchasing/verifying user-owned subscriptions. Controller now mirrors the exact default Website context and scopes by authenticated user ID.
+- Quota route now admits only COMPANY/CUSTOMER contexts; STAFF cannot obtain a company's quota through a stray companyId.
+- `getInquiryStats` previously derived company scope from any caller.companyId. It now derives tenant identity only from COMPANY context; authorized STAFF with inquiry-read permission receives platform aggregates, consistent with staff inquiry-list behavior, and unauthorized STAFF is rejected.
+- Regression tests cover the customer subscription lifecycle argument wiring, quota context, STAFF quota isolation, and STAFF stats permission/platform scope. PR #40 remains unmerged pending CI/migration validation.
