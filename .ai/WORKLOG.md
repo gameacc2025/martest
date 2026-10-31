@@ -1494,3 +1494,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Refresh tokens are cookie-only and omitted from all JSON response schemas; handoff create returns one-time code with 60-second expiry. Customer registration has no AccessProfile; company registration creates inactive COMPANY access pending approval.
 - Added structural tests and updated API documentation. Route inventory remains 149/149 documented.
 - Next: step 16G for product mutation/media and notification preference/folder response contracts.
+
+
+## 2026-10-31 — OPENAPI-ADMIN-MONITORING-INQUIRY-STATS-STEP-16D
+
+- Started branch `docs/openapi-admin-monitoring-inquiry-stats-step-16d` from main.
+- Added admin subscription list schema from `admin.service.listInquirySubscriptions`: up to 100 rows, plan select (id/code/name/price/durationDays), company select (id/name), user select (id/phone/email), plus subscription scalar fields. Expired ACTIVE rows are normalized before the list query.
+- Added delivery stats schema from `notification.delivery.service.getDeliveryStats`: total, zero-filled status and channel buckets, up to 10 failed-delivery projections. Added complete delivery list row schema from `NotificationDelivery` Prisma model and pagination metadata.
+- Added inquiry dashboard stats schema from `inquiry.service.getInquiryStats`: sent/received/response aggregates, 0–100 successRate, and at most five recent inquiries/responses. Recent inquiry output excludes buyerUserId; sealed buyer response redaction is documented.
+- Added structural response tests. CI pending.
+- Runtime failure on PR #49 examined: all browser failures were SPA origin unavailable (`chrome-error://chromewebdata/`, app root never attached) and staff handoff could not reach admin panel. Backend unit/build CI and DB migration validation passed. Track as runtime compose/startup failure, not as application test success.
