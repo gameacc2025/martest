@@ -659,3 +659,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Notification preferences return direct `{data,smsAvailable:false}`; folder list includes isSystem/sortOrder.
 - Company restore/status/verify/logo responses return company scalar fields in a success envelope. Company soft delete is 204/no body.
 - Product workflow status actions return the managed product include projection; product soft delete is 204/no body.
+
+
+## Global API error response contracts — step 16I (2026-10-31)
+
+- Central Fastify error handler emits `{error:{code,message,details?}}` for validation/app/Prisma errors. Production 500 messages are generic; development 500 may additionally include debug and stack.
+- Prisma P2002 maps to 409; oversized multipart/request payload errors map to 413 through statusCode handling; Fastify rate limiting returns 429 with `{statusCode,error,message}` rather than the normal error envelope.
+- OpenAPI default responses now document 409, 413, and 429 globally; ErrorResponse includes optional dev-only debug/stack fields. RateLimitResponse is a separate schema.
