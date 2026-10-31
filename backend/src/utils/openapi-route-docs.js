@@ -921,6 +921,16 @@ const inquirySubscriptionResponseSchema = {
     } },
   },
 };
+const inquirySubscriptionCreateResponseSchema = {
+  ...inquirySubscriptionResponseSchema,
+  properties: {
+    ...inquirySubscriptionResponseSchema.properties,
+    plan: { type: 'object', required: ['id', 'name', 'durationDays', 'price', 'currency'], properties: {
+      id: { type: 'integer' }, name: { type: 'string' }, durationDays: { type: 'integer' },
+      price: { type: 'string' }, currency: { type: 'string' },
+    } },
+  },
+};
 const subscriptionPaymentResultSchema = {
   type: 'object', required: ['payment', 'subscriptionId', 'refId'],
   properties: {
@@ -940,7 +950,7 @@ Object.assign(docs, {
     responses: { 201: { description: 'Inquiry subscription request created; payment mode and next action returned.', type: 'object', required: ['data'], properties: { data: {
       type: 'object', required: ['paymentMode', 'subscription', 'paymentUrl'], properties: {
         paymentMode: { type: 'string', enum: ['MANUAL_REVIEW', 'ONLINE'] },
-        subscription: inquirySubscriptionResponseSchema,
+        subscription: inquirySubscriptionCreateResponseSchema,
         paymentUrl: { type: ['string', 'null'], format: 'uri' },
       },
     } } } },
