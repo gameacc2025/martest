@@ -408,3 +408,9 @@ Step 11E is the remaining backend route inventory: auth, users, admin, settings,
 
 
 - Auth controller password-reset contract: pass `request.user` (verified token context) as the third argument to `authService.changeUserPassword`; controller tests must assert this caller forwarding.
+
+
+## STAFF user creation result — 2026-10-31
+
+- A STAFF caller with `users.create` and any required role-assignment permission may create a COMPANY user for a target company. Returning the just-created record must not be blocked by the caller's later read-scope filter.
+- The service uses a private post-create context lookup tied to the created ID; this does not broaden normal `getUser` access or list scoping.
