@@ -80,8 +80,8 @@ test('source-backed response contracts describe address, notification and inquir
   assert.ok(address.properties.isDefault);
 
   const notifications = docs['GET /api/v1/settings/notifications'].responses[200].properties;
-  assert.ok(notifications.properties.meta.properties.totalPages);
-  assert.ok(notifications.properties.data.items.properties.folderMemberships);
+  assert.ok(notifications.meta.properties.totalPages);
+  assert.ok(notifications.data.items.properties.folderMemberships);
 
   const unread = docs['GET /api/v1/settings/notifications/unread-count'].responses[200].properties;
   assert.ok(unread.count);
