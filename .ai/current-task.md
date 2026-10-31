@@ -311,3 +311,5 @@ PR #49 merged by squash into `main` at `d79b1908d899fc8569495e8925a00a3a0650080d
 - Added inquiry stats response schema based on service aggregation: sent/received/responses maps and totals, new/closed/awaiting/selected/successRate, recent five inquiries/responses. Anonymous sealed recent response company ID remains optional.
 - Added structural tests for these response fields. Static route coverage remains 149/149. CI pending.
 - Remaining 16D review: product management list/detail stable projections and inquiry list pagination/redaction; add only where source projections are sufficiently stable.
+
+- Also documented `GET /inquiries` pagination and privacy behavior: buyerUserId is never emitted, confidential company identity may be removed, and sealed response counts may be omitted. Added regression assertion that buyerUserId is absent from the schema.
