@@ -1835,6 +1835,39 @@ test('sendInquiryMessage: exhausted SMS quota keeps the message but does not que
   }
 });
 
+test('sendInquiryMessage: missing recipient phone skips SMS before quota is consumed', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  smsRecipientUser = { id: 10, phone: ' ' };
+  const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+  assert.equal(result.smsQueued, false);
+  assert.equal(result.smsSkippedReason, 'recipient_phone_missing');
+  assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 0);
+  assert.equal(calls['notificationDelivery.create'], undefined);
+});
+
+test('sendInquiryMessage: unconfigured Twilio skips SMS without consuming paid allowance', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const old = [process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_FROM_NUMBER];
+  delete process.env.TWILIO_ACCOUNT_SID;
+  delete process.env.TWILIO_AUTH_TOKEN;
+  delete process.env.TWILIO_FROM_NUMBER;
+  try {
+    const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+    assert.equal(result.smsQueued, false);
+    assert.equal(result.smsSkippedReason, 'sms_provider_not_configured');
+    assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 0);
+    assert.equal(calls['notificationDelivery.create'], undefined);
+  } finally {
+    if (old[0] === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = old[0];
+    if (old[1] === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = old[1];
+    if (old[2] === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = old[2];
+  }
+});
+
 test('sendInquiryMessage: recipient SMS opt-out prevents quota consumption and delivery creation', async () => {
   resetMocks();
   nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
