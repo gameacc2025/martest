@@ -90,7 +90,7 @@ test('swagger plugin: OpenAPI spec includes common component schemas', async () 
   assert.ok(schemas, 'spec should have components.schemas');
   const expectedSchemas = [
     'ErrorResponse', 'MessageResponse', 'PaginatedMeta',
-    'PaginatedResponse', 'SuccessResponse', 'AuthTokens',
+    'PaginatedResponse', 'SuccessResponse', 'AuthTokens', 'RateLimitResponse',
     'User', 'Profile', 'AccessProfile',
   ];
   for (const name of expectedSchemas) {
@@ -139,7 +139,16 @@ test('swagger plugin: transform function merges route docs and adds default erro
   assert.equal(op.summary, 'Health check');
   assert.ok(op.tags.includes('Admin'));
   // transform adds default error responses (401, 404, 500) for authenticated routes
+  assert.ok(op.responses[409], 'operation should document Prisma/application conflicts');
+  assert.ok(op.responses[413], 'operation should document oversized upload/payload errors');
+  assert.ok(op.responses[429], 'operation should document rate limiting');
   assert.ok(op.responses[500], 'operation should have a 500 response');
+  assert.equal(op.responses[409].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
+  assert.equal(op.responses[413].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
+  assert.equal(op.responses[429].content['application/json'].schema.$ref, '#/components/schemas/RateLimitResponse');
+  const errorProperties = spec.components.schemas.ErrorResponse.properties.error.properties;
+  assert.ok(errorProperties.debug, 'development error detail is documented as optional');
+  assert.ok(errorProperties.stack, 'development stack trace is documented as optional');
   await app.close();
 });
 
