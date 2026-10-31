@@ -1533,3 +1533,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Corrected a malformed compact nested actor schema and fixed a test assertion for nullable company inquiryLimit. Final CI passed backend 1,390/1,390, frontend/shared 18/18 and all frontend builds. Prisma migration validation passed. Runtime compose/browser validation remained in progress at merge and is not claimed as passed.
 - Static route coverage remains 149/149 unique routes, zero missing/duplicate keys.
 - Next: step 16F remaining generic response coverage for users/RBAC/categories/settings/company stats/product auxiliary endpoints.
+
+
+## 2026-10-31 — OPENAPI-COMPANY-PRODUCT-CATEGORY-AUX-STEP-16F
+
+- Started branch `docs/openapi-company-product-category-aux-step-16f` from main.
+- Added company settings (inquiryLimit + limits), company statistics (counts + 5 recent products/orders), and company product pagination schemas based on service/controller projections.
+- Added category public/manage list, category detail, subcategory list/detail, category product pagination, and category/subcategory create/update response schemas. Subcategory detail includes optional specification template and ordered fields.
+- Added specification library search/all response schemas; search response is capped at 50 and contains only id/title/slug/type/defaultUnit/description.
+- Added product price-tier/image/document and product workflow transition response schemas. Corrected delete endpoints to HTTP 204/no response body for categories, subcategories, price tiers, product images and documents.
+- Added structural response contract tests. Static coverage is 149/149 routes, zero missing/duplicate keys and no duplicate top-level schema declarations. CI pending.

@@ -433,3 +433,13 @@ PR #54 merged by squash into `main` at `8ab9acf25c1380e51fc840fa7d69ea42377971b4
 - Audit remaining generic resource/paginated response placeholders for users, roles/permissions, categories/subcategories, settings, company settings/statistics/products and product price-tier/image/document operations.
 - Prefer stable service projections and explicit security omissions; avoid broad schema guesses for dynamic or unstable DTOs.
 - Add focused structural tests and update API/.ai docs, then CI/migration validation and merge.
+
+
+## OpenAPI response contracts — step 16F (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-company-product-category-aux-step-16f`.
+- Added company settings GET/PATCH, company statistics and company product pagination schemas from exact service return shapes.
+- Added category public/manage list, detail, subcategory list/detail, category product pagination, and category/subcategory CRUD schemas. Subcategory detail includes category and optional specification template/fields.
+- Added specification-library search/all schemas based on the explicit selected fields and 50-result search cap.
+- Added product price-tier, image, document and workflow-transition response schemas; corrected all auxiliary delete endpoints to HTTP 204 with no body.
+- Reused step16E DTO schemas where the service projection is identical. Static route coverage remains 149/149 with zero missing/duplicate keys or duplicate top-level declarations. Structural tests added. CI pending.
