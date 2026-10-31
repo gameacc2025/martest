@@ -1425,3 +1425,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Inquiry message schema follows Prisma include projections for sender/recipient user/company, body, createdAt/readAt; list max is 500; send adds SMS queue outcome fields.
 - Inquiry response schema follows responseInclude; companyId and nested product companyId are optional for ANONYMOUS_SEALED redaction. Decision returns only id/inquiryId/status. Attachment URLs are relative upload paths.
 - Added response contract tests. CI pending.
+
+
+## 2026-10-31 — OPENAPI-PRODUCT-INQUIRY-RESPONSES-STEP-16C-MERGE
+
+- PR #49 merged by squash at `d79b1908d899fc8569495e8925a00a3a0650080d`.
+- CI [41224051397] passed: backend 1,385/1,385, frontend/shared 18/18, frontend builds passed. Migration [41224051449] passed. Runtime remains separate.
+- Added concrete product price snapshot, status history and activity log response schemas. Public price history reflects all recorded retail snapshots in chronological order.
+- Added inquiry message, supplier response/item, attachment and decision receipt schemas. Anonymous sealed views can omit supplier/company identifiers; decision endpoint returns only `{id,inquiryId,status}`. Attachment URL is a relative upload path.
+- Added response contract tests. Next step 16D: admin inquiry subscription/delivery rows, inquiry stats/list and product management projections where stable source contracts exist.
