@@ -594,3 +594,19 @@ PR #59 merged by squash into `main` at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e
 - Audit common error envelopes and per-route error status codes for auth, permission/ownership failures, validation, missing resources, quota/plan restrictions and payment callbacks.
 - Ensure 204 routes have no body, 201 creation routes and direct pagination envelopes are accurate, and public/sealed inquiry projections remain redacted.
 - Add focused structural tests and API/.ai documentation; validate CI/migrations and merge.
+
+
+## OpenAPI response contracts — step 16H merged (2026-10-31)
+
+PR #61 squash-merged into `main` at `fc6caac4aa742c0f2c12e7778faffc6eafcf1389`. CI [41239961588](https://github.com/gameacc2025/martest/actions/runs/41239961588) passed: backend 1,397/1,397; frontend/shared 18/18; all three frontend builds passed. Prisma migration validation [41239961564](https://github.com/gameacc2025/martest/actions/runs/41239961564) passed. Runtime compose validation [41239961558](https://github.com/gameacc2025/martest/actions/runs/41239961558) was separate from required test/build and migration gates.
+
+- Auth response contracts preserve cookie-only refresh tokens and omit password hashes. Customer registration has no AccessProfile; company registration is pending with inactive company AccessProfile.
+- Notification preferences are direct `{data,smsAvailable}` (SMS unavailable); notification list `{data,meta}`; unread count `{count}`; bulk operations `{success,count}`; folder membership `{success,action,notificationId,folderId}`. Folder scope is derived from the authenticated token.
+- Company restore/status/verify/logo return company records. Company and product soft delete return 204 with no body. Product lifecycle transitions return managed product projection with status history.
+- Regression tests cover auth secret omission, direct notification envelopes and lifecycle response statuses.
+
+## Next active work — step 16I error/status contract audit
+
+- Audit common error handler envelopes and route-specific status codes for authentication, authorization/tenant ownership, validation, missing resources, quota/subscription restrictions and payment callbacks.
+- Align OpenAPI response schemas for 400/401/403/404/409/422/429/500 as actually emitted; avoid claiming one uniform error shape if handlers differ.
+- Verify 204 no-body and 201 creation responses across the route inventory; add focused tests, API/.ai docs, CI/migration validation and merge.
