@@ -364,11 +364,24 @@ test('PATCH /users/:id/password: requires users.reset_password permission on top
   const withPerm = await app.inject({
     method: 'PATCH',
     url: '/api/v1/auth/users/1/password',
-    headers: { 'x-test-user': JSON.stringify({ roles: [], permissions: ['users.reset_password'] }) },
+    headers: { 'x-test-user': JSON.stringify({ id: 1, accessType: 'STAFF', roles: ['ADMIN'], permissions: ['users.reset_password'] }) },
     payload: { newPassword: 'newpassword123' },
   });
   assert.equal(withPerm.statusCode, 200);
   assert.equal(hit.adminChangeUserPassword, true);
+  await app.close();
+});
+
+test('PATCH /users/:id/password: COMPANY wildcard cannot cross into the STAFF-only admin action', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/auth/users/2/password',
+    headers: { 'x-test-user': JSON.stringify({ id: 2, accessType: 'COMPANY', companyId: 10, roles: ['SUPER_ADMIN'], permissions: ['*', 'users.reset_password'] }) },
+    payload: { newPassword: 'newpassword123' },
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.adminChangeUserPassword, undefined);
   await app.close();
 });
 
