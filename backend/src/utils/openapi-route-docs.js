@@ -1011,7 +1011,7 @@ const inquiryMessageResponseSchema = {
 const inquiryResponseAttachmentResponseSchema = {
   type: 'object', required: ['id', 'responseId', 'url', 'filename', 'mimetype', 'size', 'createdAt'],
   properties: {
-    id: { type: 'integer' }, responseId: { type: 'integer' }, url: { type: 'string', format: 'uri' },
+    id: { type: 'integer' }, responseId: { type: 'integer' }, url: { type: 'string', minLength: 1 },
     filename: { type: 'string' }, mimetype: { type: ['string', 'null'] }, size: { type: ['integer', 'null'] },
     createdAt: { type: 'string', format: 'date-time' },
   },
