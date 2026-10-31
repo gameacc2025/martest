@@ -125,6 +125,24 @@ test('OpenAPI JSON contains every inventory route with effective security and gl
   }
 });
 
+test('generated OpenAPI exposes the actual admin notification delivery filters', async () => {
+  const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
+  const expected = ['status', 'channel', 'eventType', 'userId', 'page', 'limit'];
+
+  for (const routePath of ['/admin/notifications/deliveries', '/admin/notifications/delivery-stats']) {
+    const operation = spec.paths[routePath]?.get;
+    assert.ok(operation, 'missing generated operation for ' + routePath);
+    const queryNames = new Set((operation.parameters || [])
+      .filter((parameter) => parameter.in === 'query')
+      .map((parameter) => parameter.name));
+    for (const name of expected) {
+      assert.ok(queryNames.has(name), routePath + ' must expose query parameter ' + name);
+    }
+    assert.equal(queryNames.has('from'), false);
+    assert.equal(queryNames.has('to'), false);
+  }
+});
+
 // ── /health — public, no auth ───────────────────────────────────
 
 
