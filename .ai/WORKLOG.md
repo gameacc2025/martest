@@ -1553,3 +1553,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Final CI passed backend 1,391/1,391, frontend/shared 18/18 and all frontend builds. Prisma migration validation passed. Runtime compose/browser validation was still in progress at merge; not claimed as passed.
 - Static route coverage remains 149/149 unique routes, zero missing/duplicate keys.
 - Next: step 16G user/RBAC/settings/admin responses.
+
+
+## 2026-10-31 — OPENAPI-USER-RBAC-SETTINGS-ADMIN-STEP-16G
+
+- Started branch `docs/openapi-user-rbac-settings-admin-step-16g` from main.
+- Added user list/detail/create/update/access/access-active/company-move/delete response schemas. List roles/permissions are name arrays; detailed responses are full safe Role/Permission scalar records. No passwordHash or refresh-token fields are exposed.
+- Added role list dual response form (unpaginated envelope or paginated), assignable role compact picker DTO, role CRUD; permission list triple response form (plain, paginated, grouped) and permission CRUD.
+- Added settings profile response (identity/profile/access profile/compact role join), password change message, avatar URL and delete message responses.
+- Added admin dashboard stats, system setting threshold, inquiry monetization setting, inquiry plan CRUD, and manual subscription grant/activate/reject responses. Subscription action owner relations are compact; plan is full scalar projection.
+- Added structural response tests. CI pending.
