@@ -499,3 +499,24 @@ PR #56 merged by squash into `main` at `bebc3192440c9f3b66080a78384d627fdabb4e24
 - Added company restore/status/verify/logo response schemas. Corrected company and product DELETE contracts to HTTP 204 with no response body, matching controllers.
 - Added full managed-product response schema for all seven status workflow transitions, including latest ten status history rows.
 - Added structural tests for all response variants and secret omissions. CI/migration validation pending.
+
+
+## OpenAPI response contracts — step 16H merged (2026-10-31)
+
+PR #57 merged by squash into `main` at `415b6858a9f34235f6cf726a558d76afb5b92af4`.
+
+- CI [41236279545](https://github.com/gameacc2025/martest/actions/runs/41236279545) passed: backend 1,393/1,393; frontend/shared 18/18; all frontend builds passed.
+- Prisma migration validation [41236279647](https://github.com/gameacc2025/martest/actions/runs/41236279647) passed.
+- Runtime compose/browser validation [41236279570] was queued and is not claimed as passed; browser smoke is not a critical-path requirement unless a concrete runtime defect blocks correctness.
+- Added source-backed customer/company registration, PKCE handoff, logout, notification preference/folder, company lifecycle/logo, and product status workflow response schemas.
+- Customer registration documents ACTIVE user + personal profile + null AccessProfile + CUSTOMER_USER role. Company registration documents PENDING company/manager + inactive COMPANY AccessProfile and no auto-assigned role. Refresh token remains cookie-only.
+- Notification preference responses are direct `{data,smsAvailable:false}`; folder listing includes `isSystem` and `sortOrder`.
+- Company and product soft-delete routes now document HTTP 204 with no response body, matching their controllers.
+- Product workflow actions document the managed product projection including related resources and latest ten status-history rows.
+- Static route coverage: 149 inventory routes / 149 unique literal route keys; zero missing and zero duplicate.
+
+## Next active work — step 16I error and response metadata audit
+
+- Audit error response shapes/statuses and route-level response status metadata against controller/service behavior, especially validation, authorization, not-found, conflict and 204 cases.
+- Inspect remaining OpenAPI placeholders after accounting for later response overrides; do not assume the initial generic registry entry is the effective response.
+- Add structural tests for final effective route responses and metadata, update API/.ai docs, run CI/migration validation, and merge.
