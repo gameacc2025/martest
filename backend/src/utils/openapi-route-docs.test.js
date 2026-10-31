@@ -696,10 +696,12 @@ test('shared error response docs match central, auth/RBAC and native rate-limit 
   assert.equal(internal.oneOf[0].$ref, '#/components/schemas/ErrorResponse');
   assert.equal(internal.oneOf[1].properties.error.const, true);
 
-  // Payment provider 502/503 throws are normalized to generic 500 by the
-  // central handler today; they must not be advertised as public statuses.
-  assert.equal(docs['POST /api/v1/inquiries/subscription'].responses[502], undefined);
+  // Only the inquiry payment routes with controller-level allow-list handling
+  // expose sanitized provider statuses; other routes retain generic 500.
+  assert.equal(docs['POST /api/v1/inquiries/subscription'].responses[502].$ref, '#/components/schemas/ErrorResponse');
   assert.equal(docs['POST /api/v1/inquiries/subscription'].responses[503], undefined);
+  assert.equal(docs['GET /api/v1/inquiries/subscription/me'].responses[502], undefined);
+  assert.equal(docs['GET /api/v1/inquiries/subscription/me'].responses[503], undefined);
 });
 
 
