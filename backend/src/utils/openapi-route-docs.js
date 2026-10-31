@@ -404,7 +404,7 @@ Object.assign(docs, {
   'DELETE /api/v1/addresses/:id': {
     summary: 'Delete an owned customer address',
     description: 'Deletes an address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER.',
-    tags: ['Addresses'], params: idParam(), responses: messageResponse('Customer address deleted successfully.'),
+    tags: ['Addresses'], params: idParam(), responses: { 204: { description: 'Customer address deleted successfully; no response body.' } },
   },
   'GET /api/v1/roles/assignable': {
     summary: 'List roles assignable by the current user',
@@ -439,7 +439,7 @@ Object.assign(docs, {
   'DELETE /api/v1/categories/:id/subcategories/:subId': {
     summary: 'Delete a subcategory',
     description: 'Deletes a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.delete.',
-    tags: ['Categories'], permission: 'categories.delete', params: twoIdParams('id', 'subId'), responses: messageResponse('Subcategory deleted successfully.'),
+    tags: ['Categories'], permission: 'categories.delete', params: twoIdParams('id', 'subId'), responses: { 204: { description: 'Subcategory deleted successfully; no response body.' } },
   },
   'GET /api/v1/products/:id/price-history': {
     summary: 'Get public retail price history',
@@ -552,7 +552,7 @@ Object.assign(docs, {
       title: { type: 'string', minLength: 1, maxLength: 120 }, message: { type: 'string', minLength: 1, maxLength: 5000 },
       audience: { type: 'string', enum: ['ALL_ACTIVE', 'CUSTOMER', 'COMPANY', 'STAFF'] },
       channels: { type: 'array', minItems: 1, uniqueItems: true, items: { type: 'string', enum: ['IN_APP', 'EMAIL'] } },
-    } }, responses: createdResponse('Announcement queued successfully.'),
+    } }, responses: { 202: { description: 'Announcement accepted and queued for delivery.', type: 'object', additionalProperties: true } },
   },
   'GET /api/v1/admin/notifications/folders': {
     summary: 'List administratively managed notification folders',
@@ -671,7 +671,7 @@ Object.assign(docs, {
     description: 'Deletes an attachment owned by the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Attachment and response ownership are enforced by the service.',
     tags: ['Inquiries'], permission: 'inquiries.respond',
     params: { type: 'object', required: ['id', 'responseId', 'attachmentId'], properties: { id: { type: 'integer' }, responseId: { type: 'integer' }, attachmentId: { type: 'integer' } } },
-    responses: messageResponse('Inquiry response attachment deleted successfully.'),
+    responses: { 204: { description: 'Inquiry response attachment deleted successfully; no response body.' } },
   },
   'GET /api/v1/settings/notifications': {
     summary: 'List the current user notifications',
