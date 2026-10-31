@@ -116,3 +116,12 @@ PR #41 merged by squash into `main` at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53
 ## Step 11E — Remaining backend route inventory (active)
 
 Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categories`, `roles`, `permissions`, and `specification-library`. Verify route preHandlers against service-level ownership and app-context checks; do not assume role/permission wildcard grants cross-panel access. Record each module's coverage and add regression tests only for proven gaps. After Step 11E, complete the remaining SMS message/event integration review and API documentation backlog.
+
+
+## Step 11E audit update — Auth and user-management surfaces (2026-10-31)
+
+- Reviewed auth routes/controller/service, user routes/controller/service, admin, settings, categories, roles, permissions and specification-library route registrations and their service query patterns.
+- Confirmed security gap: `PATCH /auth/users/:id/password` was described as an admin-only action but enforced only `users.reset_password`. Since role-permission assignment is configurable and wildcard permissions bypass fine-grained checks, a COMPANY-context user holding that permission (or SUPER_ADMIN role in COMPANY context) could reach a service that changed any target user's password by ID; the service itself accepted no caller context.
+- Fixed both boundaries: route now requires exact STAFF AccessProfile context plus `users.reset_password`; controller passes the verified caller to the service; service independently requires STAFF context and the explicit permission (or STAFF wildcard) before reading or changing the target account.
+- Added route regression coverage proving COMPANY + SUPER_ADMIN + wildcard cannot invoke the reset controller. Added service tests for COMPANY context denial and missing permission, while preserving authorized STAFF reset behavior.
+- Branch: `audit/backend-route-inventory-step-11e`. CI/migration checks pending. Further route families remain under review; no full security sign-off yet.
