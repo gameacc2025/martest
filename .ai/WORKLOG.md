@@ -1465,3 +1465,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Category public/staff lists and details model nested subcategory summaries; subcategory detail models category and specification-template fields. Public category product listing models the published/public product projection and pagination.
 - DELETE company/category/subcategory endpoints now explicitly document 204/no body. Added structural contract tests.
 - Static route inventory check: 149/149 docs entries, no missing routes or duplicate keys. New schema block delimiters balanced. CI pending.
+
+
+## 2026-10-31 — OPENAPI-COMPANY-CATEGORY-RESPONSES-STEP-16E-MERGE
+
+- PR #51 merged at `095e742d1fbd8b4af954299ff31febd81e0ff732`.
+- CI [41227529099] passed: backend 1,387/1,387; frontend/shared 18/18; frontend builds passed. Migration validation [41227529153] passed.
+- Added source-backed company CRUD/detail/list, limits, settings, statistics and company products schemas; company detail user summaries are capped at 10 and company statistics recent products/orders at 5.
+- Added public/staff category, subcategory and specification-template response schemas plus paginated public category product response.
+- Corrected company/category/subcategory deletes to 204 with no body. Structural tests added. API docs and AI docs updated. Route inventory remains 149/149 documented.
+- Next: step 16F for users, roles, permissions, addresses, settings/profile and auth/session response projections.
