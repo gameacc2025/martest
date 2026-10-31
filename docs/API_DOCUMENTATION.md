@@ -299,3 +299,10 @@ User and role/permission response variants, current-user settings profile/passwo
 - Company restore/status/verification/logo operations return a success envelope around the company scalar record. Company DELETE is 204 with no body.
 - Product submit-review/approve/reject/publish/hide/archive/restore-draft return the updated managed product projection with related company/category/prices/images/documents and latest ten status-history rows. Product DELETE is 204 with no body.
 - Structural tests assert response envelopes, critical fields, secret omissions and no-body delete statuses. CI/migration validation pending.
+
+
+## Step 16H merge — auth, notifications and lifecycle (2026-10-31)
+
+PR #57 merged at `415b6858a9f34235f6cf726a558d76afb5b92af4`. CI passed with 1,393 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed. Runtime compose/browser validation was queued at merge and is not reported as passing.
+
+Customer registration, company registration, PKCE handoff create/redeem and logout response DTOs now match the auth controllers/services. Refresh tokens are documented as httpOnly-cookie-only. Notification preferences document the direct `{data,smsAvailable:false}` response; folder list includes `isSystem` and `sortOrder`. Company restore/status/verification/logo and product status workflow responses are source-backed. Company and product soft deletes correctly document 204 with no body. Structural response contract tests cover these cases.
