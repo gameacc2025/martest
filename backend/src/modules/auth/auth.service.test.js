@@ -477,11 +477,29 @@ test('changePassword: succeeds and revokes all refresh tokens', async () => {
 
 // ── changeUserPassword (admin action) ───────────────────────
 
+test('changeUserPassword: rejects COMPANY/SUPER_ADMIN context even with wildcard permission', async () => {
+  baseResetAll();
+  await assert.rejects(
+    () => authService.changeUserPassword(2, 'brandnewpassword', { accessType: 'COMPANY', permissions: ['*', 'users.reset_password'] }),
+    (err) => err.statusCode === 403 && err.code === 'STAFF_CONTEXT_REQUIRED',
+  );
+  assert.equal(calls.userFindUnique.length, 0);
+});
+
+test('changeUserPassword: rejects STAFF without the explicit reset permission', async () => {
+  baseResetAll();
+  await assert.rejects(
+    () => authService.changeUserPassword(2, 'brandnewpassword', { accessType: 'STAFF', permissions: ['users.read'] }),
+    (err) => err.statusCode === 403 && err.code === 'PERMISSION_REQUIRED',
+  );
+  assert.equal(calls.userFindUnique.length, 0);
+});
+
 test('changeUserPassword: throws NOT_FOUND for an unknown target user', async () => {
   baseResetAll();
   fx.userById = null;
   await assert.rejects(
-    () => authService.changeUserPassword(999, 'newpassword'),
+    () => authService.changeUserPassword(999, 'newpassword', { accessType: 'STAFF', permissions: ['users.reset_password'] }),
     (err) => err.statusCode === 404 && err.code === 'NOT_FOUND',
   );
 });
@@ -490,7 +508,7 @@ test('changeUserPassword: rejects a weak new password', async () => {
   baseResetAll();
   fx.userById = { id: 2 };
   await assert.rejects(
-    () => authService.changeUserPassword(2, 'short'),
+    () => authService.changeUserPassword(2, 'short', { accessType: 'STAFF', permissions: ['users.reset_password'] }),
     (err) => err.statusCode === 400 && err.code === 'WEAK_PASSWORD',
   );
 });
@@ -498,7 +516,7 @@ test('changeUserPassword: rejects a weak new password', async () => {
 test('changeUserPassword: succeeds without requiring the current password', async () => {
   baseResetAll();
   fx.userById = { id: 2 };
-  await authService.changeUserPassword(2, 'brandnewpassword');
+  await authService.changeUserPassword(2, 'brandnewpassword', { accessType: 'STAFF', permissions: ['users.reset_password'] });
   assert.equal(calls.userUpdate.length, 1);
   assert.equal(calls.refreshTokenDeleteMany[0].where.userId, 2);
 });
