@@ -482,3 +482,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - `openapi-route-docs.js` now has dedicated metadata for all 149 routes in `docs/API_ROUTE_INVENTORY.md`; tests enforce both directions of route-doc/inventory consistency and explicit no-auth metadata for every public route.
 - Public category/product/specification-library endpoints are documented as unauthenticated; protected routes require Bearer by default, while refresh/logout use refreshCookie and PKCE redeem remains non-Bearer.
 - Detailed request schemas are included where route sources define them. Generic response descriptions remain where concrete response shapes are not source-defined. Next is step 16B: source-backed concrete response schema coverage.
+
+
+## OpenAPI response contracts — 2026-10-31
+
+- Step 16B is deriving concrete response schemas from actual controller envelopes, service projections and Prisma selects. Address responses use `success(data)` and `ADDRESS_SELECT`; notification endpoints have direct `{data,meta}`, `{count}`, `{success}` and `{success,count}` shapes; folder change returns `{success,action,notificationId,folderId}`.
+- Inquiry subscription quota is `{enforced,subscription,quotas,capabilities}`; active plan and subscription projections are documented from `inquiry-subscription.service.js`; payment retry can return `success`, `failed`, `pending` or `cancelled`.
+- Admin notification delivery stats contain `total`, `byStatus`, `byChannel`, `recentFailures`; delivery list is paginated. Do not treat raw delivery rows as a finalized public DTO until the API exposes a stable projection.
