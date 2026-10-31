@@ -253,3 +253,12 @@ PR #47 merged by squash into `main` at `d3d6012107651af9368c0683ae3126dfc03e5a3f
 - Prioritize inquiry subscription/quota/messages/responses, notification CRUD/folders/delivery monitoring, address CRUD, products and admin plan endpoints.
 - Add contract tests that compare documented status codes and key response shapes with controller behavior. Do not invent fields or overclaim schema completeness.
 - Keep the previously merged security audits (company/product/inquiry/notification/address/admin route families) as completed slices; revisit only on new evidence.
+
+
+## OpenAPI response contracts — step 16B (in progress, 2026-10-31)
+
+- New branch: `docs/openapi-response-contracts-step-16b` (based on main after PR #47).
+- Added concrete response schemas from controller envelopes, Prisma selects and service projections for address CRUD, notification list/read/bulk/folder actions, admin notification folders/delivery stats/delivery pagination, inquiry plans/quota, caller-owned subscriptions and payment verification.
+- Address responses reflect the explicit `ADDRESS_SELECT` fields and `{data}` wrapper; address delete is 204. Notifications document the actual direct response shapes (`{data,meta}`, `{count}`, `{success}`, `{success,count}`, folder change result). Admin delivery stats reflect actual totals/maps/recentFailures. Inquiry quota reflects enforced/subscription/quotas/capabilities; subscription payment results include cancelled.
+- Added structural response-contract tests for these exact payload keys. Static registry check still shows 149 unique docs keys for 149 routes, zero missing, zero duplicate literal keys.
+- Remaining step 16B work: concrete product history/public price-history response schemas, inquiry message/response shapes, and full notification delivery row schema only if source DTO is stable. Then CI/migration validation and PR.
