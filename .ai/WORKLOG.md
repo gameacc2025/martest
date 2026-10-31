@@ -1243,3 +1243,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Found stats context mismatch: getInquiryStats read caller.companyId regardless of AccessProfile. It now derives companyId only in COMPANY context, requires inquiry-read permission for STAFF, and uses platform-wide aggregates for authorized STAFF (consistent with staff inquiry listing) rather than a stray company filter.
 - Added controller tests for customer subscription/list/retry/quota ownership, company quota, and STAFF denial; added stats tests for authorized platform scope and unauthorized STAFF rejection.
 - PR #40 remains open pending latest CI and migration checks.
+
+
+## 2026-10-31 — INQUIRY-APP-CONTEXT-CI-CORRECTION
+
+- **PR:** #40, branch `audit/inquiry-app-context-step-11c`.
+- **CI diagnosis:** The first run executed 1,355 backend tests; 1,354 passed. The sole failure was in the newly added STAFF `scope=received` test. The service correctly rejected the request before querying; the test then incorrectly asserted `calls.findMany === undefined`, while the shared mock harness initializes that tracker to `[]`.
+- **Correction:** Changed the assertion to `calls.findMany.length === 0`; no production behavior changed in this correction.
+- **Commit:** `189516deb109ca045f577459d385b5492c1d16e7`.
+- **Migration:** Previous PR-head migration validation passed; fresh validation on the corrected head is pending. Runtime infrastructure, health endpoints and migrations passed; browser smoke failed separately and is not pursued as the next task.
+- **Disposition:** Keep PR #40 unmerged until fresh CI and migration checks pass.
