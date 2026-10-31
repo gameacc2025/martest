@@ -94,7 +94,11 @@ test('OpenAPI JSON contains every inventory route with effective security and gl
 
   for (const { method, fullPath } of routes) {
     const routePath = fullPath.replace(/^\/api\/v1/, '').replace(/:([A-Za-z0-9_]+)/g, '{$1}') || '/';
-    const operation = spec.paths[routePath]?.[method.toLowerCase()];
+    const fullOpenApiPath = fullPath.replace(/:([A-Za-z0-9_]+)/g, '{$1}');
+    const apiPrefixedPath = '/api/v1' + routePath;
+    const operation = spec.paths[routePath]?.[method.toLowerCase()]
+      || spec.paths[fullOpenApiPath]?.[method.toLowerCase()]
+      || spec.paths[apiPrefixedPath]?.[method.toLowerCase()];
     const key = method + ' ' + fullPath;
     const doc = routeDocs[key];
 
