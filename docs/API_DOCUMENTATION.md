@@ -177,3 +177,12 @@ pnpm --dir backend test
 PR #48 merged at `462aad8a518fea47025d116ccb8fc7e095b708b4`. CI passed 1,384 backend tests and 18 frontend/shared tests; frontend builds and migration validation passed.
 
 The OpenAPI registry now contains source-backed response schemas for address CRUD, notification pagination/read/bulk/folder actions, admin notification folders and delivery statistics, inquiry active plans, quota, caller-owned subscriptions and payment verification. Contracts follow controller response envelopes, Prisma selects and service projections. The subscription creation response documents the narrower included plan fields returned by the payment service, distinct from the plan projection in subscription listing.
+
+
+## Product and inquiry response contracts — step 16C (2026-10-31)
+
+- Product price history documents the complete chronological public retail snapshot series (id, tier reference, quantity bounds, Decimal price, unit, action, recordedAt). It is not artificially limited to six months; the service returns all stored retail snapshots.
+- Product status history and activity log document their actor/profile projections and their distinct status-transition vs immutable-activity fields.
+- Inquiry messages document sender/recipient identity projections, read timestamps, the 500-message list cap, and optional SMS queue/skip outcome on send.
+- Inquiry response list/create/update/withdraw schemas document response status, company projection, response items, requested product projection and attachment metadata. Anonymous sealed buyer responses may omit companyId and product companyId; the schema does not require either.
+- Buyer decision endpoints return a minimal receipt `{ id, inquiryId, status }`, not a full supplier response. Attachment upload returns stored relative URL metadata; delete remains 204 without a body.
