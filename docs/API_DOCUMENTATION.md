@@ -42,6 +42,12 @@
 | استعلام، پاسخ و اشتراک | `/inquiries` | `backend/src/modules/inquiries/inquiry.routes.js` |
 | اعلان‌ها و ترجیحات | `/settings/notifications` | `backend/src/modules/notifications/notification.routes.js` |
 
+## فهرست کامل endpointها
+
+فهرست تمام routeهای ثبت‌شده Fastify شامل متد HTTP، مسیر کامل زیر `/api/v1` و خلاصه guardهای دسترسی در [API_ROUTE_INVENTORY.md](./API_ROUTE_INVENTORY.md) قرار دارد. این فهرست از فایل‌های route ماژول‌ها استخراج شده و تست `backend/src/utils/api-route-inventory.test.js` بررسی می‌کند که هر route ثبت‌شده در مستندات حضور داشته باشد.
+
+این inventory جایگزین schema اجرایی نیست: جزئیات body/query/params، response schema و validation همچنان در route/schemaهای منبع نگهداری می‌شوند.
+
 ## عملیات مهم موجود
 
 ### احراز هویت

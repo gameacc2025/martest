@@ -450,3 +450,10 @@ Next priority is subscription payment provider/callback/idempotency review.
 PR #44 merged at `142df69c90dd6f725fc4913a8cd2f1572883e1dc`; CI passed 1,375/1,375 backend tests and migration validation passed. Rial conversion now rejects values outside positive PostgreSQL INTEGER / Prisma Int range before contacting Zarinpal. Server-side callback verification, stored amount, Authority and owner scope remain authoritative. Live provider verification is not complete.
 
 Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/OpenAPI schemas, then update endpoint/auth/permission/schema documentation from source truth.
+
+
+## API route documentation contract — 2026-10-31
+
+- `docs/API_ROUTE_INVENTORY.md` is the complete method/path/guard index for Fastify route registrations under `/api/v1`.
+- `docs/API_DOCUMENTATION.md` links the inventory and summarizes domain contracts.
+- `backend/src/utils/api-route-inventory.test.js` checks all literal route declarations against the inventory. Request/response schemas and validation remain authoritative in route/schema source files; never invent them in docs.

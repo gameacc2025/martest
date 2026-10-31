@@ -202,3 +202,12 @@ Zarinpal request/verify, callback replay protection, owner lock and amount freez
 ## Next active work — API documentation completeness
 
 Compare `docs/API_DOCUMENTATION.md`, Swagger/OpenAPI route schemas and actual registered routes module-by-module. Identify missing or stale paths, request/response schemas, auth/app-context requirements, permissions, pagination and error codes. Update docs from source truth and add tests for OpenAPI route metadata where gaps exist. Do not invent response schemas or claim every endpoint is documented until inventory is complete.
+
+
+## API documentation inventory — active (2026-10-31)
+
+- Compared module route registrations with `docs/API_DOCUMENTATION.md`; the guide described module prefixes and selected operations but lacked a complete endpoint-by-endpoint index.
+- Added `docs/API_ROUTE_INVENTORY.md` with all registered Fastify methods/full paths across 13 modules, including inherited auth/context notes and route-level permission guards where declared.
+- Linked the inventory from `docs/API_DOCUMENTATION.md`.
+- Added `backend/src/utils/api-route-inventory.test.js` so CI fails if a registered route is absent from the inventory. Detailed body/query/params and response schemas remain in route/schema source; the inventory does not invent schemas.
+- CI/migration verification pending. Next documentation pass: compare Swagger/OpenAPI operation metadata and actual request/response schemas; fill only source-supported gaps.
