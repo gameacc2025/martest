@@ -2846,7 +2846,7 @@ const step16jGuardErrorResponse = {
     { $ref: '#/components/schemas/ErrorResponse' },
     {
       type: 'object',
-      required: ['error', 'code', 'message'],
+      required: ['error', 'message'],
       properties: {
         error: { type: 'boolean', const: true },
         code: { type: 'string' },
@@ -2871,6 +2871,7 @@ for (const routeDoc of Object.values(docs)) {
     401: step16jGuardErrorResponse,
     403: step16jGuardErrorResponse,
     429: step16jRateLimitErrorResponse,
+    500: step16jGuardErrorResponse,
   };
 }
 
