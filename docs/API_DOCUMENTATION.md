@@ -152,3 +152,11 @@ pnpm --dir backend test
 - 9 ورودی قدیمی که به مسیرهای ثبت‌نشده `orders` و `settings/preferences` اشاره می‌کردند حذف شدند. مسیر واقعی ترجیحات اعلان‌ها `/settings/notifications/preferences` است.
 - مسیرهای بدون metadata اختصاصی اکنون به‌صورت پیش‌فرض bearerAuth می‌گیرند؛ مسیرهای عمومی در allow-list مشخص شده‌اند و refresh/logout از refresh-cookie scheme استفاده می‌کنند. Handoff redeem و callback پرداخت به‌عنوان مسیرهای بدون Bearer مستند شده‌اند.
 - تست‌ها اکنون هم stale route-doc entries را رد می‌کنند و هم security schemeهای cookie/public/default را بررسی می‌کنند.
+
+
+## OpenAPI route metadata coverage — 2026-10-31
+
+- Dedicated OpenAPI prose metadata now covers all 149 registered module routes in `docs/API_ROUTE_INVENTORY.md`; no inventory route is missing a registry entry and no registry key points to an unregistered route.
+- The 60 newly documented routes cover user access/company actions, customer addresses, assignable roles, category/subcategory browsing and management, product management/history/price history, specification library, inquiry subscription/admin workflows, private inquiry messaging/response decisions/attachments, and user/admin notification operations.
+- Request schemas were copied only where route registration defines them. Routes without a source JSON schema are documented with their actual path/context/permission contract without fabricating a request schema. Response shapes remain generic where the handler does not expose a reusable response schema; this is route-description coverage, not a claim that every response is fully modeled.
+- Added a reverse-coverage regression test: every route in the 149-row inventory must have an OpenAPI metadata entry. Existing tests also reject stale docs, duplicate keys, malformed entries and missing responses.

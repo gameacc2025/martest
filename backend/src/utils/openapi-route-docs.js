@@ -280,17 +280,17 @@ Object.assign(docs, {
 });
 
 Object.assign(docs, {
-  'GET /api/v1/categories': { summary: 'List categories', description: 'Lists categories. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Categories'], responses: resourceResponse('Categories returned successfully.') },
-  'GET /api/v1/categories/:id': { summary: 'Get category by ID', description: 'Returns a category by numeric ID. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Categories'], params: idParam(), responses: resourceResponse('Category returned successfully.') },
-  'GET /api/v1/categories/:id/products': { summary: 'Get category products', description: 'Returns products in a category. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Categories'], params: idParam(), responses: resourceResponse('Category products returned successfully.') },
+  'GET /api/v1/categories': { summary: 'List public categories', description: 'Lists active categories for anonymous and authenticated marketplace visitors. Authentication required: none.', tags: ['Categories'], authRequired: false, responses: resourceResponse('Active public categories returned successfully.') },
+  'GET /api/v1/categories/:id': { summary: 'Get an active public category', description: 'Returns an active category for public marketplace browsing. Inactive categories are not exposed. Authentication required: none.', tags: ['Categories'], authRequired: false, params: idParam(), responses: resourceResponse('Active public category returned successfully.') },
+  'GET /api/v1/categories/:id/products': { summary: 'List public products in a category', description: 'Returns public catalogue products for the requested category. Authentication required: none. Product visibility and publication filters are applied by the service.', tags: ['Categories'], authRequired: false, params: idParam(), responses: resourceResponse('Public category products returned successfully.') },
   'POST /api/v1/categories': { summary: 'Create category', description: 'Creates a category. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN role.', tags: ['Categories'], permission: 'SUPER_ADMIN role', responses: createdResponse('Category created successfully.') },
   'PATCH /api/v1/categories/:id': { summary: 'Update category', description: 'Updates a category. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN role.', tags: ['Categories'], permission: 'SUPER_ADMIN role', params: idParam(), responses: resourceResponse('Category updated successfully.') },
   'DELETE /api/v1/categories/:id': { summary: 'Delete category', description: 'Deletes a category. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN role.', tags: ['Categories'], permission: 'SUPER_ADMIN role', params: idParam(), responses: messageResponse('Category deleted successfully.') },
 });
 
 Object.assign(docs, {
-  'GET /api/v1/products': { summary: 'List products', description: 'Lists products. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Products'], querystring: paginationQuery, responses: paginatedResponse('Products returned successfully.') },
-  'GET /api/v1/products/:id': { summary: 'Get product by ID', description: 'Returns a product by numeric ID. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Products'], params: idParam(), responses: resourceResponse('Product returned successfully.') },
+  'GET /api/v1/products': { summary: 'List public marketplace products', description: 'Lists products available in the public catalogue. Authentication required: none. The public service projection is limited to published and public products.', tags: ['Products'], authRequired: false, querystring: paginationQuery, responses: paginatedResponse('Public products returned successfully.') },
+  'GET /api/v1/products/:id': { summary: 'Get a public marketplace product', description: 'Returns a product from the public catalogue. Authentication required: none. Only products eligible for public publication and visibility are exposed; management users use the separate /manage route.', tags: ['Products'], authRequired: false, params: idParam(), responses: resourceResponse('Public product returned successfully.') },
   'POST /api/v1/products': { summary: 'Create product', description: 'Creates a product. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN or company user.', tags: ['Products'], permission: 'SUPER_ADMIN role OR company user account', responses: createdResponse('Product created successfully.') },
   'PATCH /api/v1/products/:id': { summary: 'Update product', description: 'Updates product details. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN or company user.', tags: ['Products'], permission: 'SUPER_ADMIN role OR company user account', params: idParam(), responses: resourceResponse('Product updated successfully.') },
   'DELETE /api/v1/products/:id': { summary: 'Delete product', description: 'Deletes a product. Authentication required: Bearer JWT. Permission required: SUPER_ADMIN or company user.', tags: ['Products'], permission: 'SUPER_ADMIN role OR company user account', params: idParam(), responses: messageResponse('Product deleted successfully.') },
@@ -347,6 +347,392 @@ Object.assign(docs, {
   'GET /api/v1/inquiries/:id/responses': { summary: 'List inquiry responses', description: 'Returns responses submitted for an inquiry. Authentication required: Bearer JWT. Permission required: inquiries.read, inquiries.respond, or leads.read.', tags: ['Inquiries'], permission: 'inquiries.read OR inquiries.respond OR leads.read', params: idParam(), responses: resourceResponse('Inquiry responses returned successfully.') },
   'POST /api/v1/inquiries/:id/responses': { summary: 'Submit inquiry response', description: 'Submits a response to an inquiry. Authentication required: Bearer JWT. Permission required: inquiries.respond or leads.update.', tags: ['Inquiries'], permission: 'inquiries.respond OR leads.update', params: idParam(), responses: createdResponse('Inquiry response submitted successfully.') },
   'PATCH /api/v1/inquiries/:id/responses/:responseId': { summary: 'Update inquiry response', description: 'Updates a submitted inquiry response. Authentication required: Bearer JWT. Permission required: inquiries.respond or leads.update.', tags: ['Inquiries'], permission: 'inquiries.respond OR leads.update', params: twoIdParams('id', 'responseId'), responses: resourceResponse('Inquiry response updated successfully.') },
+});
+
+
+// Additional source-backed route metadata — coverage pass 16A.
+Object.assign(docs, {
+  'PATCH /api/v1/users/:id/access-active': {
+    summary: 'Activate or deactivate a user access profile',
+    description: 'Changes whether the target user may access the assigned application panel. Authentication required: Bearer JWT. Permission required: users.activate or users.deactivate. Target ownership and permitted access-profile scope are enforced by the user service.',
+    tags: ['Users'], permission: 'users.activate OR users.deactivate', params: idParam(),
+    body: { type: 'object', required: ['isActive'], additionalProperties: false, properties: { isActive: { type: 'boolean' } } },
+    responses: resourceResponse('User access profile state updated successfully.'),
+  },
+  'PATCH /api/v1/users/:id/company': {
+    summary: 'Move a user to another company',
+    description: 'Changes the company assignment of a user. Authentication required: Bearer JWT. Permission required: users.update. The service restricts this privileged cross-company operation to the authorized administrative context.',
+    tags: ['Users'], permission: 'users.update', params: idParam(),
+    body: { type: 'object', required: ['companyId'], additionalProperties: false, properties: { companyId: { type: 'integer', minimum: 1 } } },
+    responses: resourceResponse('User company assignment updated successfully.'),
+  },
+  'GET /api/v1/addresses': {
+    summary: 'List the current customer addresses',
+    description: 'Returns addresses owned by the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. Results are scoped to the current user.',
+    tags: ['Addresses'], responses: resourceResponse('Customer addresses returned successfully.'),
+  },
+  'POST /api/v1/addresses': {
+    summary: 'Create a customer address',
+    description: 'Creates an address for the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. Required fields: recipientName, recipientPhone, province, city and addressLine; optional fields include label, postalCode and isDefault.',
+    tags: ['Addresses'], body: { type: 'object', required: ['recipientName', 'recipientPhone', 'province', 'city', 'addressLine'], additionalProperties: false, properties: {
+      label: { type: 'string', minLength: 1, maxLength: 50 }, recipientName: { type: 'string', minLength: 1, maxLength: 120 },
+      recipientPhone: { type: 'string', minLength: 5, maxLength: 30 }, province: { type: 'string', minLength: 1, maxLength: 100 },
+      city: { type: 'string', minLength: 1, maxLength: 100 }, addressLine: { type: 'string', minLength: 5, maxLength: 1000 },
+      postalCode: { type: ['string', 'null'], maxLength: 30 }, isDefault: { type: 'boolean' },
+    } }, responses: createdResponse('Customer address created successfully.'),
+  },
+  'GET /api/v1/addresses/:id': {
+    summary: 'Get an owned customer address',
+    description: 'Returns one address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. An address outside the caller’s ownership is not exposed.',
+    tags: ['Addresses'], params: idParam(), responses: resourceResponse('Customer address returned successfully.'),
+  },
+  'PATCH /api/v1/addresses/:id': {
+    summary: 'Update an owned customer address',
+    description: 'Updates one address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. At least one allowed address field must be supplied.',
+    tags: ['Addresses'], params: idParam(), body: { type: 'object', minProperties: 1, additionalProperties: false, properties: {
+      label: { type: 'string', minLength: 1, maxLength: 50 }, recipientName: { type: 'string', minLength: 1, maxLength: 120 },
+      recipientPhone: { type: 'string', minLength: 5, maxLength: 30 }, province: { type: 'string', minLength: 1, maxLength: 100 },
+      city: { type: 'string', minLength: 1, maxLength: 100 }, addressLine: { type: 'string', minLength: 5, maxLength: 1000 },
+      postalCode: { type: ['string', 'null'], maxLength: 30 }, isDefault: { type: 'boolean' },
+    } }, responses: resourceResponse('Customer address updated successfully.'),
+  },
+  'PATCH /api/v1/addresses/:id/default': {
+    summary: 'Set an owned address as the customer default',
+    description: 'Marks an address owned by the authenticated customer as the default address. Authentication required: Bearer JWT. Access context required: CUSTOMER.',
+    tags: ['Addresses'], params: idParam(), responses: resourceResponse('Default customer address updated successfully.'),
+  },
+  'DELETE /api/v1/addresses/:id': {
+    summary: 'Delete an owned customer address',
+    description: 'Deletes an address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER.',
+    tags: ['Addresses'], params: idParam(), responses: { 204: { description: 'Customer address deleted successfully; no response body.' } },
+  },
+  'GET /api/v1/roles/assignable': {
+    summary: 'List roles assignable by the current user',
+    description: 'Returns roles that the caller may assign within the caller’s own access-type domain. Authentication required: Bearer JWT. Access context required: STAFF or COMPANY. Permission required: users.create or users.assign_roles.',
+    tags: ['Roles'], permission: 'users.create OR users.assign_roles', responses: resourceResponse('Assignable roles returned successfully.'),
+  },
+  'GET /api/v1/categories/:id/subcategories': {
+    summary: 'List active subcategories for a category',
+    description: 'Returns active subcategories of the requested active category for public marketplace browsing. Authentication required: none.',
+    tags: ['Categories'], authRequired: false, params: idParam(), responses: resourceResponse('Active subcategories returned successfully.'),
+  },
+  'GET /api/v1/categories/:id/subcategories/:subId': {
+    summary: 'Get an active category subcategory',
+    description: 'Returns one active subcategory under an active parent category for public marketplace browsing. Authentication required: none.',
+    tags: ['Categories'], authRequired: false, params: twoIdParams('id', 'subId'), responses: resourceResponse('Active subcategory returned successfully.'),
+  },
+  'GET /api/v1/categories/manage': {
+    summary: 'List categories for staff management',
+    description: 'Returns categories for administrative management, including inactive entries. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.read.',
+    tags: ['Categories'], permission: 'categories.read', responses: resourceResponse('Categories returned for management.'),
+  },
+  'POST /api/v1/categories/:id/subcategories': {
+    summary: 'Create a subcategory',
+    description: 'Creates a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.create. Request validation is defined by the route handler and category service.',
+    tags: ['Categories'], permission: 'categories.create', params: idParam(), responses: createdResponse('Subcategory created successfully.'),
+  },
+  'PATCH /api/v1/categories/:id/subcategories/:subId': {
+    summary: 'Update a subcategory',
+    description: 'Updates a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.update.',
+    tags: ['Categories'], permission: 'categories.update', params: twoIdParams('id', 'subId'), responses: resourceResponse('Subcategory updated successfully.'),
+  },
+  'DELETE /api/v1/categories/:id/subcategories/:subId': {
+    summary: 'Delete a subcategory',
+    description: 'Deletes a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.delete.',
+    tags: ['Categories'], permission: 'categories.delete', params: twoIdParams('id', 'subId'), responses: { 204: { description: 'Subcategory deleted successfully; no response body.' } },
+  },
+  'GET /api/v1/products/:id/price-history': {
+    summary: 'Get public retail price history',
+    description: 'Returns the public retail price history for a product, intended for the six-month price chart. Authentication required: none. Only the public product projection is exposed.',
+    tags: ['Products'], authRequired: false, params: idParam(), responses: resourceResponse('Public retail price history returned successfully.'),
+  },
+  'GET /api/v1/products/my-products': {
+    summary: 'List products available to the current management user',
+    description: 'Lists products visible to the authenticated company or staff management context. Authentication required: Bearer JWT. Access context required: COMPANY or STAFF. Permission required: products.read; company ownership is enforced by the service.',
+    tags: ['Products'], permission: 'products.read', responses: paginatedResponse('Managed products returned successfully.'),
+  },
+  'GET /api/v1/products/:id/manage': {
+    summary: 'Get a product for management',
+    description: 'Returns a product in any workflow status for authorized management/editing. Authentication required: Bearer JWT. Access context required: COMPANY or STAFF. Permission required: products.read; company ownership is enforced by the service.',
+    tags: ['Products'], permission: 'products.read', params: idParam(), responses: resourceResponse('Managed product returned successfully.'),
+  },
+  'GET /api/v1/products/:id/history': {
+    summary: 'Get product status and change history',
+    description: 'Returns the product change history for an authorized management user. Authentication required: Bearer JWT. Access context required: COMPANY or STAFF. Permission required: products.read; tenant ownership is enforced by the service.',
+    tags: ['Products'], permission: 'products.read', params: idParam(), responses: resourceResponse('Product history returned successfully.'),
+  },
+  'GET /api/v1/specification-library': {
+    summary: 'Search the public specification library',
+    description: 'Searches reusable product specification definitions for product form and catalogue use. Authentication required: none.',
+    tags: ['Specification Library'], authRequired: false, responses: resourceResponse('Specification library search results returned successfully.'),
+  },
+  'GET /api/v1/specification-library/all': {
+    summary: 'List all public specification definitions',
+    description: 'Returns the complete reusable specification definition list. Authentication required: none.',
+    tags: ['Specification Library'], authRequired: false, responses: resourceResponse('Specification definitions returned successfully.'),
+  },
+});
+
+
+// Source-backed metadata for monetization, inquiry conversation and notification operations.
+Object.assign(docs, {
+  'GET /api/v1/admin/inquiry-monetization/settings': {
+    summary: 'Get inquiry monetization settings',
+    description: 'Returns platform-level inquiry subscription enforcement settings. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Inquiry monetization settings returned successfully.'),
+  },
+  'PATCH /api/v1/admin/inquiry-monetization/settings': {
+    summary: 'Update inquiry monetization settings',
+    description: 'Updates whether inquiry subscription enforcement is enabled. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['subscriptionEnforcement'], additionalProperties: false, properties: { subscriptionEnforcement: { type: 'boolean' } } },
+    responses: resourceResponse('Inquiry monetization settings updated successfully.'),
+  },
+  'GET /api/v1/admin/inquiry-plans': {
+    summary: 'List inquiry subscription plans for administration',
+    description: 'Lists inquiry plans for staff administration. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Inquiry plans returned successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-plans': {
+    summary: 'Create an inquiry subscription plan',
+    description: 'Creates a subscription plan with duration, price and per-period inquiry, response, internal-message and SMS allowances. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['code', 'name', 'durationDays', 'price'], additionalProperties: false, properties: {
+      code: { type: 'string', minLength: 2, maxLength: 50 }, name: { type: 'string', minLength: 1, maxLength: 100 },
+      description: { type: 'string', maxLength: 1000 }, durationDays: { type: 'integer', minimum: 1, maximum: 3650 },
+      price: { type: 'number', minimum: 1 }, currency: { type: 'string', minLength: 3, maxLength: 8 },
+      inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      internalMessagesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, smsPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      isActive: { type: 'boolean' },
+    } }, responses: createdResponse('Inquiry subscription plan created successfully.'),
+  },
+  'PATCH /api/v1/admin/inquiry-plans/:id': {
+    summary: 'Update an inquiry subscription plan',
+    description: 'Updates configurable plan details and usage allowances. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', minProperties: 1, additionalProperties: false, properties: {
+      name: { type: 'string', minLength: 1, maxLength: 100 }, description: { type: 'string', maxLength: 1000 },
+      durationDays: { type: 'integer', minimum: 1, maximum: 3650 }, price: { type: 'number', minimum: 0 },
+      currency: { type: 'string', minLength: 3, maxLength: 8 }, inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, internalMessagesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      smsPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, isActive: { type: 'boolean' },
+    } }, responses: resourceResponse('Inquiry subscription plan updated successfully.'),
+  },
+  'GET /api/v1/admin/inquiry-subscriptions': {
+    summary: 'List inquiry subscriptions for administration',
+    description: 'Lists inquiry subscriptions for staff review and management. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Inquiry subscriptions returned successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-subscriptions/:id/activate': {
+    summary: 'Activate a pending inquiry subscription',
+    description: 'Confirms a pending subscription payment and activates the subscription. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage. paymentConfirmed must be true.',
+    tags: ['Admin'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', required: ['paymentConfirmed'], additionalProperties: false, properties: { paymentConfirmed: { type: 'boolean', const: true }, notes: { type: 'string', maxLength: 1000 } } },
+    responses: resourceResponse('Inquiry subscription activated successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-subscriptions/:id/reject': {
+    summary: 'Reject a pending inquiry subscription',
+    description: 'Rejects a pending subscription request and may record staff notes. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', additionalProperties: false, properties: { notes: { type: 'string', maxLength: 1000 } } },
+    responses: resourceResponse('Inquiry subscription rejected successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-subscriptions/grant': {
+    summary: 'Grant an inquiry subscription manually',
+    description: 'Grants a selected plan to a company or user as an administrative action. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage. Supply planId and the intended companyId or userId.',
+    tags: ['Admin'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, companyId: { type: 'integer', minimum: 1 }, userId: { type: 'integer', minimum: 1 }, notes: { type: 'string', maxLength: 1000 } } },
+    responses: createdResponse('Inquiry subscription granted successfully.'),
+  },
+  'POST /api/v1/admin/notifications/send': {
+    summary: 'Send an administrative announcement',
+    description: 'Sends an announcement to active users in the selected audience through the selected in-app and/or email channels. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: notifications.send.',
+    tags: ['Notifications'], permission: 'notifications.send',
+    body: { type: 'object', required: ['title', 'message', 'audience', 'channels'], additionalProperties: false, properties: {
+      title: { type: 'string', minLength: 1, maxLength: 120 }, message: { type: 'string', minLength: 1, maxLength: 5000 },
+      audience: { type: 'string', enum: ['ALL_ACTIVE', 'CUSTOMER', 'COMPANY', 'STAFF'] },
+      channels: { type: 'array', minItems: 1, uniqueItems: true, items: { type: 'string', enum: ['IN_APP', 'EMAIL'] } },
+    } }, responses: { 202: { description: 'Announcement accepted and queued for delivery.', type: 'object', additionalProperties: true } },
+  },
+  'GET /api/v1/admin/notifications/folders': {
+    summary: 'List administratively managed notification folders',
+    description: 'Lists notification folder definitions and their audience scopes. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Notifications'], permission: 'system_settings.manage', responses: resourceResponse('Notification folders returned successfully.'),
+  },
+  'POST /api/v1/admin/notifications/folders': {
+    summary: 'Create a notification folder',
+    description: 'Creates a system-managed notification folder for the selected audience scope. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Notifications'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['name', 'scope'], additionalProperties: false, properties: {
+      name: { type: 'string', minLength: 2, maxLength: 60 }, scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+      sortOrder: { type: 'integer', minimum: 0, maximum: 10000 },
+    } }, responses: createdResponse('Notification folder created successfully.'),
+  },
+  'PATCH /api/v1/admin/notifications/folders/:id': {
+    summary: 'Update a notification folder',
+    description: 'Updates a system-managed notification folder, including its name, audience scope, ordering or active state. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Notifications'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', minProperties: 1, additionalProperties: false, properties: {
+      name: { type: 'string', minLength: 2, maxLength: 60 }, scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+      sortOrder: { type: 'integer', minimum: 0, maximum: 10000 }, isActive: { type: 'boolean' },
+    } }, responses: resourceResponse('Notification folder updated successfully.'),
+  },
+  'GET /api/v1/admin/notifications/delivery-stats': {
+    summary: 'Get notification delivery statistics',
+    description: 'Returns aggregate notification delivery statistics for staff monitoring. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: delivery.view.',
+    tags: ['Admin'], permission: 'delivery.view', responses: resourceResponse('Notification delivery statistics returned successfully.'),
+  },
+  'GET /api/v1/admin/notifications/deliveries': {
+    summary: 'List notification delivery records',
+    description: 'Lists delivery records for operational monitoring. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: delivery.view.',
+    tags: ['Admin'], permission: 'delivery.view', responses: paginatedResponse('Notification delivery records returned successfully.'),
+  },
+  'GET /api/v1/inquiries/plans': {
+    summary: 'List inquiry subscription plans',
+    description: 'Lists available inquiry subscription plans for eligible buyer and supplier application contexts. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read or inquiries.create.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read OR inquiries.create', responses: resourceResponse('Available inquiry plans returned successfully.'),
+  },
+  'POST /api/v1/inquiries/subscription/:id/verify-payment': {
+    summary: 'Retry verification of an inquiry subscription payment',
+    description: 'Retries server-side verification for the caller-owned inquiry subscription payment. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.read, inquiries.create or inquiries.respond. The provider reference is resolved from the stored subscription; caller ownership is enforced.',
+    tags: ['Inquiries'], permission: 'inquiries.read OR inquiries.create OR inquiries.respond',
+    params: { type: 'object', required: ['id'], properties: { id: { type: 'string', minLength: 1, maxLength: 10 } } },
+    responses: resourceResponse('Inquiry subscription payment verification result returned.'),
+  },
+  'GET /api/v1/inquiries/subscription/me': {
+    summary: 'List the current user or company inquiry subscriptions',
+    description: 'Returns subscriptions owned by the authenticated customer user or company. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.read, inquiries.create or inquiries.respond.',
+    tags: ['Inquiries'], permission: 'inquiries.read OR inquiries.create OR inquiries.respond', responses: resourceResponse('Caller-owned inquiry subscriptions returned successfully.'),
+  },
+  'POST /api/v1/inquiries/subscription': {
+    summary: 'Request an inquiry subscription',
+    description: 'Requests a plan for the authenticated company or customer user. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.create or inquiries.respond. Optional paymentReference is used for manual payment review when applicable.',
+    tags: ['Inquiries'], permission: 'inquiries.create OR inquiries.respond',
+    body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, paymentReference: { type: 'string', maxLength: 120 } } },
+    responses: createdResponse('Inquiry subscription request created successfully.'),
+  },
+  'GET /api/v1/inquiries/quota': {
+    summary: 'Get the current inquiry subscription quota',
+    description: 'Returns the remaining inquiry, response, internal-message and SMS allowances for the authenticated owner. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read or inquiries.create.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read OR inquiries.create', responses: resourceResponse('Current inquiry quota returned successfully.'),
+  },
+  'GET /api/v1/inquiries/stats': {
+    summary: 'Get inquiry statistics for the current access context',
+    description: 'Returns inquiry aggregates scoped to the authenticated buyer, supplier company or authorized staff platform context. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read or inquiries.read.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', responses: resourceResponse('Inquiry statistics returned successfully.'),
+  },
+  'PATCH /api/v1/inquiries/:id': {
+    summary: 'Update an inquiry',
+    description: 'Updates an inquiry within the caller’s authorized management context. Authentication required: Bearer JWT. Access context required: STAFF or COMPANY. Permission required: leads.update or inquiries.update. Buyer/supplier ownership and lifecycle rules are enforced by the service.',
+    tags: ['Inquiries'], permission: 'leads.update OR inquiries.update', params: idParam(),
+    responses: resourceResponse('Inquiry updated successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/reveal': {
+    summary: 'Reveal sealed inquiry responses',
+    description: 'Requests early reveal of sealed supplier responses when the inquiry policy allows it. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read, leads.update or inquiries.update. Buyer ownership and reveal policy are enforced by the service.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read OR leads.update OR inquiries.update', params: idParam(),
+    responses: resourceResponse('Inquiry response reveal result returned successfully.'),
+  },
+  'GET /api/v1/inquiries/:id/messages': {
+    summary: 'List private inquiry messages',
+    description: 'Returns the private buyer/supplier conversation for an inquiry. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read or inquiries.read. Conversation membership and inquiry visibility are enforced by the service.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', params: idParam(), responses: resourceResponse('Inquiry messages returned successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/messages': {
+    summary: 'Send a private inquiry message',
+    description: 'Sends a message in an authorized inquiry conversation and may request an SMS alert when recipient preference and sender quota allow it. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.create or inquiries.respond. Each send is subject to subscription message quota.',
+    tags: ['Inquiries'], permission: 'inquiries.create OR inquiries.respond', params: idParam(),
+    body: { type: 'object', required: ['message'], additionalProperties: false, properties: {
+      message: { type: 'string', minLength: 1, maxLength: 5000 }, recipientCompanyId: { type: 'integer', minimum: 1 }, notifyBySms: { type: 'boolean' },
+    } }, responses: createdResponse('Inquiry message sent successfully.'),
+  },
+  'PATCH /api/v1/inquiries/:id/responses/:responseId/decision': {
+    summary: 'Accept or reject an inquiry response',
+    description: 'Records the buyer’s decision on a supplier response. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: inquiries.create, inquiries.update or leads.update. Buyer ownership and response decision rules are enforced by the service.',
+    tags: ['Inquiries'], permission: 'inquiries.create OR inquiries.update OR leads.update', params: twoIdParams('id', 'responseId'),
+    body: { type: 'object', required: ['decision'], additionalProperties: false, properties: { decision: { type: 'string', enum: ['SELECTED', 'REJECTED'] }, comment: { type: 'string', maxLength: 2000 } } },
+    responses: resourceResponse('Inquiry response decision saved successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/responses/:responseId/withdraw': {
+    summary: 'Withdraw a supplier response',
+    description: 'Withdraws the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Response ownership is enforced by the service.',
+    tags: ['Inquiries'], permission: 'inquiries.respond', params: twoIdParams('id', 'responseId'),
+    body: { type: 'object', additionalProperties: false, properties: { companyId: { type: 'integer' } } },
+    responses: resourceResponse('Inquiry response withdrawn successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/responses/:responseId/attachments': {
+    summary: 'Upload an attachment to a supplier response',
+    description: 'Uploads a file attachment to the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Request content type: multipart/form-data.',
+    tags: ['Inquiries'], permission: 'inquiries.respond', params: twoIdParams('id', 'responseId'),
+    responses: createdResponse('Inquiry response attachment uploaded successfully.'),
+  },
+  'DELETE /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId': {
+    summary: 'Delete an attachment from a supplier response',
+    description: 'Deletes an attachment owned by the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Attachment and response ownership are enforced by the service.',
+    tags: ['Inquiries'], permission: 'inquiries.respond',
+    params: { type: 'object', required: ['id', 'responseId', 'attachmentId'], properties: { id: { type: 'integer' }, responseId: { type: 'integer' }, attachmentId: { type: 'integer' } } },
+    responses: { 204: { description: 'Inquiry response attachment deleted successfully; no response body.' } },
+  },
+  'GET /api/v1/settings/notifications': {
+    summary: 'List the current user notifications',
+    description: 'Lists notifications belonging to the authenticated user, including the selected inbox/folder scope and pagination where supported. Authentication required: Bearer JWT. Results are user-scoped.',
+    tags: ['Notifications'], responses: paginatedResponse('User notifications returned successfully.'),
+  },
+  'GET /api/v1/settings/notifications/unread-count': {
+    summary: 'Get the current user unread notification count',
+    description: 'Returns unread notification counts for the authenticated user’s notification folders. Authentication required: Bearer JWT. Results are user-scoped.',
+    tags: ['Notifications'], responses: resourceResponse('Unread notification counts returned successfully.'),
+  },
+  'POST /api/v1/settings/notifications/bulk-read-state': {
+    summary: 'Set read state for multiple notifications',
+    description: 'Marks up to 100 selected notifications as read or unread for the authenticated user. Authentication required: Bearer JWT. Every notification ID is scoped to the caller.',
+    tags: ['Notifications'],
+    body: { type: 'object', required: ['ids', 'isRead'], additionalProperties: false, properties: {
+      ids: { type: 'array', minItems: 1, maxItems: 100, uniqueItems: true, items: { type: 'integer', minimum: 1 } }, isRead: { type: 'boolean' },
+    } }, responses: resourceResponse('Notification read states updated successfully.'),
+  },
+  'POST /api/v1/settings/notifications/bulk-delete': {
+    summary: 'Delete multiple notifications',
+    description: 'Deletes up to 100 selected notifications belonging to the authenticated user. Authentication required: Bearer JWT. Every notification ID is scoped to the caller.',
+    tags: ['Notifications'],
+    body: { type: 'object', required: ['ids'], additionalProperties: false, properties: { ids: { type: 'array', minItems: 1, maxItems: 100, uniqueItems: true, items: { type: 'integer', minimum: 1 } } } },
+    responses: messageResponse('Selected notifications deleted successfully.'),
+  },
+  'GET /api/v1/settings/notifications/folders': {
+    summary: 'List notification folders available to the current user',
+    description: 'Returns system-defined folders available in the authenticated user’s application context. Authentication required: Bearer JWT. Folder visibility is scoped to the user’s context.',
+    tags: ['Notifications'], responses: resourceResponse('Available notification folders returned successfully.'),
+  },
+  'POST /api/v1/settings/notifications/:id/folders': {
+    summary: 'Copy or move a notification to a folder',
+    description: 'Copies or moves an owned notification into a permitted folder. Authentication required: Bearer JWT. Notification ownership and folder scope are enforced by the service.',
+    tags: ['Notifications'], params: idParam(),
+    body: { type: 'object', required: ['folderId', 'action'], additionalProperties: false, properties: {
+      folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 },
+    } }, responses: resourceResponse('Notification folder assignment updated successfully.'),
+  },
+  'PATCH /api/v1/settings/notifications/:id/read-state': {
+    summary: 'Set a notification read state',
+    description: 'Marks an owned notification as read or unread. Authentication required: Bearer JWT. Notification ownership is enforced by the service.',
+    tags: ['Notifications'], params: idParam(),
+    body: { type: 'object', required: ['isRead'], additionalProperties: false, properties: { isRead: { type: 'boolean' } } },
+    responses: resourceResponse('Notification read state updated successfully.'),
+  },
+  'PATCH /api/v1/settings/notifications/:id/read': {
+    summary: 'Mark a notification as read',
+    description: 'Marks an owned notification as read. Authentication required: Bearer JWT. Notification ownership is enforced by the service.',
+    tags: ['Notifications'], params: idParam(), responses: resourceResponse('Notification marked as read successfully.'),
+  },
+  'PATCH /api/v1/settings/notifications/read-all': {
+    summary: 'Mark all current user notifications as read',
+    description: 'Marks all notifications belonging to the authenticated user as read. Authentication required: Bearer JWT. Updates are scoped to the caller.',
+    tags: ['Notifications'], responses: resourceResponse('All user notifications marked as read.'),
+  },
+  'DELETE /api/v1/settings/notifications/:id': {
+    summary: 'Delete an owned notification',
+    description: 'Deletes a notification belonging to the authenticated user. Authentication required: Bearer JWT. Notification ownership is enforced by the service.',
+    tags: ['Notifications'], params: idParam(), responses: messageResponse('Notification deleted successfully.'),
+  },
 });
 
 module.exports = docs;

@@ -248,9 +248,10 @@ async function swaggerPlugin(fastify) {
         if (!Array.isArray(transformed.security) || transformed.security.length === 0) {
           transformed.security = isPublic ? [] : [{ bearerAuth: [] }];
         }
-        transformed['x-authentication-required'] = transformed['x-authentication-required'] ?? !isPublic;
-        transformed['x-permission-required'] = transformed['x-permission-required']
-          || (isPublic ? 'None' : 'Authenticated user; see route-level AccessProfile and permission guards');
+        transformed['x-authentication-required'] = !isPublic;
+        transformed['x-permission-required'] = isPublic
+          ? 'None'
+          : 'Authenticated user; see route-level AccessProfile and permission guards';
       }
 
       transformed.response = {

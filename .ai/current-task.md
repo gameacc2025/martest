@@ -227,3 +227,12 @@ Compare `docs/API_DOCUMENTATION.md`, Swagger/OpenAPI route schemas and actual re
 PR #46 merged by squash into `main` at `ea6e787c9b2c6dbe819fb344c22aa7adea33016d`. Before merge, CI found one Swagger regression: Fastify supplied an empty `security: []` array for undocumented routes, and the fallback treated it as intentional. Fixed the fallback so empty/missing security metadata defaults to Bearer for non-allow-listed routes while preserving explicit non-empty schemes and the public allow-list. Migration validation passed on the pre-correction PR head; the one-line correction changes no schema. The corrected exact head was merged at owner request; no workflow run was exposed for the corrected head/merge commit at merge time, so post-merge CI remains to be confirmed.
 
 Next: complete source-backed OpenAPI prose/query/params/response metadata for the remaining 60 of 149 registered routes, without inventing response shapes. Add focused tests for auth/context/permission and route-doc coverage. Then resume pending tenant-isolation audits for company, notification/address and product route families.
+
+
+## OpenAPI metadata coverage — step 16A (2026-10-31)
+
+- Added source-backed OpenAPI prose metadata for the remaining 60 routes: user access/company actions, addresses, assignable roles, categories/subcategories, product management/history/retail price history, specification library, inquiry subscription/admin/conversation/response attachment workflows, and notification operations.
+- Route inventory and registry now both contain 149 unique method/path keys; static comparison found zero missing and zero stale keys.
+- Request body/path schemas were included only where route source defines them. Routes without a registered request schema are not assigned invented schemas. Generic response descriptions remain where handlers do not provide explicit response schemas.
+- Added reverse-coverage test requiring every route in `API_ROUTE_INVENTORY.md` to have a dedicated OpenAPI metadata entry (currently 149 routes).
+- Branch `docs/openapi-metadata-coverage-step-16`; tests/CI pending. Next after merge: audit tenant boundaries for company, notification/address and product route families; complete response schemas only from controller/service contracts.

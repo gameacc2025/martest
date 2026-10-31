@@ -169,17 +169,17 @@ test('swagger plugin: transform sets empty security array when authRequired is f
 test('swagger plugin: undocumented protected routes default to bearer while allow-listed public routes do not', async () => {
   const app = Fastify();
   await app.register(swaggerPlugin);
-  app.get('/api/v1/addresses', { schema: { summary: 'List addresses', tags: ['Addresses'] } }, async () => []);
-  app.get('/api/v1/categories', { schema: { summary: 'Public categories', tags: ['Categories'] } }, async () => []);
+  app.get('/api/v1/undocumented-protected-probe', { schema: { summary: 'Undocumented protected probe', tags: ['Admin'] } }, async () => []);
+  app.get('/api/v1/health', { schema: { summary: 'Public health probe', tags: ['Admin'] } }, async () => []);
   await app.ready();
 
   const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
-  assert.deepEqual(spec.paths['/addresses'].get.security, [{ bearerAuth: [] }]);
-  assert.equal(spec.paths['/addresses'].get['x-authentication-required'], true);
-  assert.match(spec.paths['/addresses'].get['x-permission-required'], /route-level AccessProfile/);
-  assert.deepEqual(spec.paths['/categories'].get.security, []);
-  assert.equal(spec.paths['/categories'].get['x-authentication-required'], false);
-  assert.equal(spec.paths['/categories'].get['x-permission-required'], 'None');
+  assert.deepEqual(spec.paths['/undocumented-protected-probe'].get.security, [{ bearerAuth: [] }]);
+  assert.equal(spec.paths['/undocumented-protected-probe'].get['x-authentication-required'], true);
+  assert.match(spec.paths['/undocumented-protected-probe'].get['x-permission-required'], /route-level AccessProfile/);
+  assert.deepEqual(spec.paths['/health'].get.security, []);
+  assert.equal(spec.paths['/health'].get['x-authentication-required'], false);
+  assert.equal(spec.paths['/health'].get['x-permission-required'], 'None');
   await app.close();
 });
 

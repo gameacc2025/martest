@@ -1374,3 +1374,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added refreshCookie scheme for refresh/logout; PKCE redeem is documented without Bearer. Undocumented protected routes default to Bearer unless explicitly allow-listed public.
 - CI on initial PR head exposed one Swagger test failure caused by empty `security: []` being treated as intentional. Corrected fallback to apply Bearer for empty/missing security on non-public routes while preserving non-empty schemes. Migration validation passed on initial PR head; exact corrected head/merge commit had no visible workflow run at merge time, so post-merge CI must be checked.
 - Dedicated OpenAPI prose coverage: 89/149; remaining 60 routes are the next documentation pass. Do not fabricate request/response schemas; derive from route/schema source.
+
+
+## 2026-10-31 — OPENAPI-METADATA-COVERAGE-STEP-16A
+
+- Completed the route-doc registry coverage pass for all 149 registered API routes. Before this pass, 60 route entries were missing.
+- Added metadata for user access/company operations; customer address CRUD; assignable roles; category/subcategory browse/manage; product retail price history and management views; specification library; inquiry plans/subscriptions/quota/stats/messages/response decisions/withdrawals/attachments; admin subscription/notification settings and delivery monitoring; user notification list/bulk/folder/read-state operations.
+- Added source-defined request schemas for route bodies and params where present in route registrations. Did not invent schemas for routes without one. Generic response descriptions are retained where there is no source response schema.
+- Added a reverse-coverage test enforcing every inventory route has a docs entry. Static comparison: 149 unique docs keys, 149 inventory rows, zero missing, zero stale, no duplicate keys.
+- Branch: `docs/openapi-metadata-coverage-step-16`. CI pending.
