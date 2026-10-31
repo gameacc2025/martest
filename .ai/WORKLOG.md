@@ -1339,3 +1339,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 - First payment-audit CI run failed only in the newly added owner-scope test because its mock `findFirst` returned a subscription from a different company instead of honoring the query filter. Corrected the mock to model Prisma's id/companyId/userId filtering; production code unchanged. Rerun CI.
+
+
+## 2026-10-31 — ZARINPAL-PAYMENT-AMOUNT-BOUNDARY-MERGE
+
+- PR #44 merged by squash at `142df69c90dd6f725fc4913a8cd2f1572883e1dc`.
+- CI [41218821629](https://github.com/gameacc2025/martest/actions/runs/41218821629) passed 1,375/1,375 backend tests; migration [41218821572](https://github.com/gameacc2025/martest/actions/runs/41218821572) passed. Runtime [41218821631](https://github.com/gameacc2025/martest/actions/runs/41218821631) remained separate.
+- Added pre-provider validation for the maximum stored Rial amount (PostgreSQL INTEGER / Prisma Int). Added tests for overflow rejection, server-frozen request/verify amounts and retry owner scoping.
+- Live Zarinpal verification remains unverified.
+- Next: reconcile API_DOCUMENTATION.md with actual routes and Swagger schemas.
