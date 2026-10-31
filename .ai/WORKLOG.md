@@ -1524,3 +1524,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added inquiry list/detail/create/update/status and item list/create/update schemas from `inquiryInclude` and `shapeInquiryForCaller`; no buyerUserId, confidential company identity may be hidden, sealed response counts may be omitted, anonymous sealed supplier IDs stay optional, and status history includes its actor projection.
 - Added admin notification folder list/create/update and announcement accepted receipt schemas. Create endpoints explicitly use `{data}` 201 envelopes; admin announcement uses `{data}` 202.
 - Added structural contract tests. Static route coverage: 149 inventory routes / 149 unique OpenAPI keys, zero missing/duplicate keys; no duplicate schema declarations. CI pending.
+
+
+## 2026-10-31 — OPENAPI-CORE-RESOURCE-RESPONSE-AUDIT-STEP-16E-MERGE
+
+- PR #54 merged by squash at `8ab9acf25c1380e51fc840fa7d69ea42377971b4`.
+- Added management product list/detail/create/update schemas from productInclude; Company list/detail/create/update schemas from service include projections; inquiry list/detail/create/update/status and item list/create/update schemas preserving caller redactions; admin notification folder CRUD and announcement receipt schemas.
+- Corrected a malformed compact nested actor schema and fixed a test assertion for nullable company inquiryLimit. Final CI passed backend 1,390/1,390, frontend/shared 18/18 and all frontend builds. Prisma migration validation passed. Runtime compose/browser validation remained in progress at merge and is not claimed as passed.
+- Static route coverage remains 149/149 unique routes, zero missing/duplicate keys.
+- Next: step 16F remaining generic response coverage for users/RBAC/categories/settings/company stats/product auxiliary endpoints.
