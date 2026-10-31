@@ -1319,3 +1319,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Tightened recipient lookup: user recipients must be ACTIVE; company recipients must resolve to an ACTIVE user with AccessProfile type COMPANY, matching companyId and isActive=true. This prevents selecting STAFF with a shared Main-company ID or a deactivated company account as the preference owner.
 - Added tests for SMS quota exhaustion, opt-out, missing phone, missing provider, and active COMPANY recipient scoping. Existing worker/provider tests already cover send success, provider failure and retries.
 - SMS usage is consumed at enqueue time in the same transaction as the message and outbox row; retries do not re-consume allowance. Live Twilio is not verified without credentials.
+
+
+## 2026-10-31 — SMS-RECIPIENT-CONTEXT-AND-QUOTA-MERGE
+
+- PR #43 merged by squash at `c08b4d319c44541d7a238cba94f0d1b91556ee42`.
+- CI [41218300030](https://github.com/gameacc2025/martest/actions/runs/41218300030) passed 1,373/1,373 backend tests; migration [41218299932](https://github.com/gameacc2025/martest/actions/runs/41218299932) passed. Runtime [41218299887](https://github.com/gameacc2025/martest/actions/runs/41218299887) was still running separately.
+- Tightened SMS recipient selection to active user and company AccessProfile boundaries. Tests now cover quota exhaustion, opt-out, missing phone/provider and company-recipient context.
+- Clarified generic event-dispatch SMS remains unimplemented; explicit inquiry-message SMS is queued after recipient opt-in and sender paid quota check. Live Twilio is not verified.
+- Next: audit subscription payment provider, callback authenticity, idempotency and replay protection; Zarinpal live verification remains unverified.
