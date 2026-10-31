@@ -488,3 +488,14 @@ PR #56 merged by squash into `main` at `bebc3192440c9f3b66080a78384d627fdabb4e24
 - Audit remaining generic response placeholders for auth register/login/refresh/me/handoff, notification preferences/folders/read/delete actions, company logo/status/restore, and remaining product status/soft-delete responses.
 - Reconcile all controller status codes and error response contracts, including 204/no-body and direct `{data}` responses.
 - Add structural tests and API/.ai docs; CI/migration validation and merge. Keep browser smoke out of the critical path unless a concrete runtime defect blocks correctness.
+
+
+## OpenAPI response contracts — step 16H (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-auth-notifications-lifecycle-step-16h`.
+- Added source-backed customer registration and company registration responses. Customer registration has a null AccessProfile and CUSTOMER_USER role; company registration creates a PENDING company/manager with inactive COMPANY AccessProfile and no auto-assigned role.
+- Added PKCE handoff create/redeem response schemas. The code is 60-second/one-use; redeem body contains access token and safe context while refresh token remains httpOnly-cookie-only.
+- Added direct `{data,smsAvailable}` preference response schemas (not nested success envelope), including explicit `smsAvailable:false`; corrected user-folder fields to include `isSystem` and `sortOrder` returned by service.
+- Added company restore/status/verify/logo response schemas. Corrected company and product DELETE contracts to HTTP 204 with no response body, matching controllers.
+- Added full managed-product response schema for all seven status workflow transitions, including latest ten status history rows.
+- Added structural tests for all response variants and secret omissions. CI/migration validation pending.

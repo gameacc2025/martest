@@ -640,3 +640,12 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Admin stats includes eight counts, five recent users and twenty pending products. System setting only exposes productReviewEditThreshold; inquiry monetization only exposes subscriptionEnforcement. Inquiry plan CRUD and manual subscription action DTOs are documented.
 - CI: backend 1,392/1,392; frontend/shared 18/18; builds and Prisma migration validation passed. Runtime validation pending at merge.
 - Next: auth/notification/system response audit.
+
+
+## Auth, notifications and lifecycle response contracts — step 16H (2026-10-31)
+
+- Customer registration returns message/user/profile/null accessProfile/roles in success data; company registration returns message/company/pending user/inactive COMPANY access profile. No role is automatically assigned to the company manager. Neither exposes passwordHash.
+- PKCE handoff create returns `{code,expiresIn:60}`; redeem returns access token plus safe auth context. Refresh token is set only in httpOnly cookie, never in response JSON.
+- Notification preference GET/PATCH return direct `{data,smsAvailable:false}`. User folder listing returns `{data:[{id,key,name,scope,isSystem,sortOrder}]}`; notification list remains direct `{data,meta}`.
+- Company restore/status/verify/logo responses wrap raw company scalars in `success(data)`. Company soft delete returns 204 with no body.
+- Product submit-review/approve/reject/publish/hide/archive/restore-draft responses wrap productInclude (company/category/prices/images/documents/latest 10 status-history rows). Product soft delete returns 204 with no body.

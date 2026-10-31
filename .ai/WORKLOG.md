@@ -1574,3 +1574,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - CI passed backend 1,392/1,392, frontend/shared 18/18 and all frontend builds. Prisma migration validation passed. Runtime compose/browser validation was still pending and is not claimed as passed.
 - Static route coverage remains 149/149 unique routes, zero missing/duplicate keys.
 - Next: step 16H auth/notification/system response audit.
+
+
+## 2026-10-31 — OPENAPI-AUTH-NOTIFICATIONS-LIFECYCLE-STEP-16H
+
+- Branch `docs/openapi-auth-notifications-lifecycle-step-16h` adds response schemas for customer/company registration, PKCE handoff create/redeem, logout/logout-all, notification preference matrix, user-visible notification folders, company lifecycle/logo operations, and product workflow transitions.
+- Registration contracts reflect auth service output: customer is ACTIVE with `CUSTOMER_USER`, no AccessProfile, and personal Profile; company and manager start PENDING, AccessProfile COMPANY is inactive, and no role is assigned. Both omit passwordHash; refresh tokens never appear in body.
+- Handoff create returns a 43-char base64url code and expiresIn=60. Redeem returns tokens plus safe context; refresh token is cookie-only.
+- Notification preferences return `{data,smsAvailable:false}` directly. Folder list includes `isSystem` and `sortOrder` from `getUserFolders`.
+- Corrected company DELETE and product DELETE from generic 200/message response to 204/no body. Company restore/status/verify/logo return `success(company)`; product status workflow actions return `success(productInclude)`.
+- Added structural tests. CI/migration validation pending.

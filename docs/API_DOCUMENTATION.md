@@ -289,3 +289,13 @@ Company settings/statistics/products, category/subcategory CRUD and public brows
 PR #56 merged at `bebc3192440c9f3b66080a78384d627fdabb4e24`. CI passed with 1,392 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime compose/browser validation was pending at merge time and is not reported as passing.
 
 User and role/permission response variants, current-user settings profile/password/avatar responses, admin stats/system settings/inquiry monetization, inquiry plan CRUD and manual subscription action responses now have source-backed schemas. Password hashes and refresh tokens are explicitly excluded.
+
+
+## Step 16H — auth, notification and lifecycle response contracts (2026-10-31)
+
+- Customer registration returns `data.message`, safe user identity, personal profile, `accessProfile: null` and `roles: [CUSTOMER_USER]`. Company registration returns pending company/manager plus inactive COMPANY access profile; roles are not assigned during public registration. Password hashes are never returned.
+- PKCE handoff creation returns a 60-second one-time code. Redeem returns access token and safe user/access context; refresh token is only set as an httpOnly cookie. Logout and logout-all return `data.message`.
+- Notification preference GET/PATCH return direct `{data,smsAvailable}` (not the standard nested success envelope); SMS availability is currently false. Folder listing includes `isSystem` and `sortOrder`.
+- Company restore/status/verification/logo operations return a success envelope around the company scalar record. Company DELETE is 204 with no body.
+- Product submit-review/approve/reject/publish/hide/archive/restore-draft return the updated managed product projection with related company/category/prices/images/documents and latest ten status-history rows. Product DELETE is 204 with no body.
+- Structural tests assert response envelopes, critical fields, secret omissions and no-body delete statuses. CI/migration validation pending.

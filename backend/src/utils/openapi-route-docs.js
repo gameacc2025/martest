@@ -2668,4 +2668,142 @@ Object.assign(docs, {
   ['POST /api/v1/admin/inquiry-subscriptions/:id/reject']: { ...docs['POST /api/v1/admin/inquiry-subscriptions/:id/reject'], responses: successEnvelope(step16gAdminSubscriptionActionSchema, 'Rejected pending offline-payment subscription; status is CANCELLED.') },
 });
 
+
+// Step 16H — source-backed auth, notification preferences, company lifecycle,
+// and product workflow response contracts.
+const step16hRegistrationResponseSchema = {
+  type: 'object',
+  required: ['message', 'user', 'profile', 'accessProfile', 'roles'],
+  properties: {
+    message: { type: 'string' },
+    user: safeAuthUserResponseSchema,
+    profile: { anyOf: [profileResponseSchema, { type: 'null' }] },
+    accessProfile: { anyOf: [accessProfileResponseSchema, { type: 'null' }] },
+    roles: { type: 'array', items: { type: 'string' } },
+  },
+};
+const step16hCompanyRegistrationResponseSchema = {
+  type: 'object',
+  required: ['message', 'company', 'user', 'accessProfile'],
+  properties: {
+    message: { type: 'string' },
+    company: companyResponseSchema,
+    user: safeAuthUserResponseSchema,
+    accessProfile: accessProfileResponseSchema,
+  },
+};
+const step16hHandoffCreateResponseSchema = {
+  type: 'object', required: ['code', 'expiresIn'],
+  properties: {
+    code: { type: 'string', minLength: 43, maxLength: 43 },
+    expiresIn: { type: 'integer', enum: [60] },
+  },
+};
+const step16hHandoffRedeemResponseSchema = {
+  type: 'object',
+  required: ['tokens', 'user', 'profile', 'accessProfile', 'roles', 'permissions'],
+  properties: {
+    tokens: authTokensResponseSchema.properties.tokens,
+    ...authContextResponseSchema.properties,
+  },
+};
+const step16hNotificationPreferenceRowSchema = {
+  type: 'object',
+  required: ['eventType', 'label', 'channels', 'defaults'],
+  properties: {
+    eventType: { type: 'string' }, label: { type: 'string' },
+    channels: { type: 'object', required: ['IN_APP', 'EMAIL', 'SMS'], properties: {
+      IN_APP: { type: 'boolean' }, EMAIL: { type: 'boolean' }, SMS: { type: 'boolean' },
+    }, additionalProperties: false },
+    defaults: { type: 'object', required: ['IN_APP', 'EMAIL', 'SMS'], properties: {
+      IN_APP: { type: 'boolean' }, EMAIL: { type: 'boolean' }, SMS: { type: 'boolean' },
+    }, additionalProperties: false },
+  },
+};
+const step16hNotificationPreferencesResponseSchema = {
+  type: 'object', required: ['data', 'smsAvailable'],
+  properties: {
+    data: { type: 'array', items: step16hNotificationPreferenceRowSchema },
+    smsAvailable: { type: 'boolean', const: false },
+  },
+};
+const step16hUserNotificationFolderSchema = {
+  type: 'object', required: ['id', 'key', 'name', 'scope', 'isSystem', 'sortOrder'],
+  properties: {
+    id: { type: 'integer' }, key: { type: 'string' }, name: { type: 'string' },
+    scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+    isSystem: { type: 'boolean' }, sortOrder: { type: 'integer' },
+  },
+};
+
+Object.assign(docs, {
+  ['POST /api/v1/auth/register']: {
+    ...docs['POST /api/v1/auth/register'],
+    responses: { 201: { description: 'Created active customer identity and personal profile. Customer registration has no AccessProfile; role defaults to CUSTOMER_USER. No token or password hash is returned.', type: 'object', required: ['data'], properties: { data: step16hRegistrationResponseSchema } } },
+  },
+  ['POST /api/v1/auth/register-company']: {
+    ...docs['POST /api/v1/auth/register-company'],
+    responses: { 201: { description: 'Created pending company and pending manager. Company panel AccessProfile is inactive and no role is automatically assigned. No password hash or refresh token is returned.', type: 'object', required: ['data'], properties: { data: step16hCompanyRegistrationResponseSchema } } },
+  },
+  ['POST /api/v1/auth/handoff']: {
+    ...docs['POST /api/v1/auth/handoff'],
+    responses: { 201: { description: 'One-time PKCE handoff code valid for 60 seconds.', type: 'object', required: ['data'], properties: { data: step16hHandoffCreateResponseSchema } } },
+  },
+  ['POST /api/v1/auth/handoff/redeem']: {
+    ...docs['POST /api/v1/auth/handoff/redeem'],
+    responses: { 200: { description: 'New panel session with access token and safe user context. Refresh token is only set as an httpOnly cookie and is never in the body.', type: 'object', required: ['data'], properties: { data: step16hHandoffRedeemResponseSchema } } },
+  },
+  ['POST /api/v1/auth/logout']: {
+    ...docs['POST /api/v1/auth/logout'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Revoked current refresh-token session and cleared its cookie.'),
+  },
+  ['POST /api/v1/auth/logout-all']: {
+    ...docs['POST /api/v1/auth/logout-all'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Revoked every refresh-token session for the current user and cleared the current cookie.'),
+  },
+  ['GET /api/v1/settings/notifications/preferences']: {
+    ...docs['GET /api/v1/settings/notifications/preferences'],
+    responses: { 200: { description: 'Effective stored/default preference matrix and SMS availability. This endpoint returns data and smsAvailable directly, not a nested success envelope.', ...step16hNotificationPreferencesResponseSchema } },
+  },
+  ['PATCH /api/v1/settings/notifications/preferences']: {
+    ...docs['PATCH /api/v1/settings/notifications/preferences'],
+    responses: { 200: { description: 'Updated effective preference matrix and SMS availability. SMS preference remains visible but delivery is currently unavailable.', ...step16hNotificationPreferencesResponseSchema } },
+  },
+  ['GET /api/v1/settings/notifications/folders']: {
+    ...docs['GET /api/v1/settings/notifications/folders'],
+    responses: { 200: { description: 'Active folders visible in the token-derived app context; includes system flag and sort order.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: step16hUserNotificationFolderSchema } } } },
+  },
+  ['DELETE /api/v1/companies/:id']: {
+    ...docs['DELETE /api/v1/companies/:id'],
+    responses: { 204: { description: 'Company soft-deleted. No response body.' } },
+  },
+  ['PATCH /api/v1/companies/:id/restore']: {
+    ...docs['PATCH /api/v1/companies/:id/restore'],
+    responses: successEnvelope(companyResponseSchema, 'Restored company with scalar company fields.'),
+  },
+  ['PATCH /api/v1/companies/:id/status']: {
+    ...docs['PATCH /api/v1/companies/:id/status'],
+    responses: successEnvelope(companyResponseSchema, 'Updated company lifecycle status. Activating a pending company also activates its pending users and company access profiles.'),
+  },
+  ['PATCH /api/v1/companies/:id/verify']: {
+    ...docs['PATCH /api/v1/companies/:id/verify'],
+    responses: successEnvelope(companyResponseSchema, 'Updated company verification flag.'),
+  },
+  ['PATCH /api/v1/companies/:id/logo']: {
+    ...docs['PATCH /api/v1/companies/:id/logo'],
+    responses: successEnvelope(companyResponseSchema, 'Updated company logo path or URL.'),
+  },
+  ['DELETE /api/v1/products/:id']: {
+    ...docs['DELETE /api/v1/products/:id'],
+    responses: { 204: { description: 'Product soft-deleted (archived with deletedAt set). No response body.' } },
+  },
+  ...Object.fromEntries(['submit-review', 'approve', 'reject', 'publish', 'hide', 'archive', 'restore-draft'].map((action) => {
+    const route = 'POST /api/v1/products/:id/' + action;
+    return [route, {
+      ...docs[route],
+      responses: successEnvelope(step16eManagedProductSchema, 'Product returned after the ' + action + ' workflow transition, including company/category/price/image/document projections and the latest ten status-history rows.'),
+    }];
+  })),
+});
+
 module.exports = docs;
