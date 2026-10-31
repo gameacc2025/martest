@@ -3,6 +3,25 @@ const swagger = require('@fastify/swagger');
 const swaggerUi = require('@fastify/swagger-ui');
 const routeDocs = require('../utils/openapi-route-docs');
 
+const PUBLIC_ROUTE_KEYS = new Set([
+  'GET /health',
+  'POST /api/v1/auth/login',
+  'POST /api/v1/auth/register',
+  'POST /api/v1/auth/register-company',
+  'POST /api/v1/auth/handoff/redeem',
+  'GET /api/v1/categories',
+  'GET /api/v1/categories/:id',
+  'GET /api/v1/categories/:id/products',
+  'GET /api/v1/categories/:id/subcategories',
+  'GET /api/v1/categories/:id/subcategories/:subId',
+  'GET /api/v1/products',
+  'GET /api/v1/products/:id',
+  'GET /api/v1/products/:id/price-history',
+  'GET /api/v1/specification-library',
+  'GET /api/v1/specification-library/all',
+  'GET /api/v1/inquiries/subscription/payment/callback',
+]);
+
 const TAGS = [
   { name: 'Authentication', description: 'Login, refresh tokens, logout, and current-user identity endpoints.' },
   { name: 'Users', description: 'User profile, access assignment, and user lifecycle management.' },
@@ -214,6 +233,17 @@ async function swaggerPlugin(fastify) {
 
         transformed['x-authentication-required'] = doc.authRequired !== false;
         transformed['x-permission-required'] = doc.authRequired === false ? 'None' : (doc.permission || 'Authenticated user');
+      }
+
+      // Protected routes default to bearerAuth even when a route has no
+      // dedicated prose entry yet. Explicit public routes are allow-listed;
+      // cookie/PKCE routes can override this through doc.security above.
+      if (!doc) {
+        const routeKey = `${String(route.method).toUpperCase()} ${normalizePath(url)}`;
+        const publicRouteKey = routeKey.startsWith('GET /api/v1') || routeKey.startsWith('POST /api/v1')
+          ? routeKey
+          : routeKey;
+        transformed.security = transformed.security || (PUBLIC_ROUTE_KEYS.has(publicRouteKey) ? [] : [{ bearerAuth: [] }]);
       }
 
       transformed.response = {
