@@ -338,3 +338,13 @@ The real Fastify `/docs/json` output is now checked against all 149 route invent
 ## Step 16K — admin notification delivery query filters (2026-10-31)
 
 Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/notifications/deliveries` document the query fields actually consumed by the controller: `status`, `channel`, `eventType`, `userId`, `page`, and `limit`. Status/channel values are enumerated; page/limit are positive integers with defaults 1/20. `from` and `to` are intentionally excluded because the controller does not pass them to the delivery service. No maximum limit is documented because the service does not enforce one.
+
+
+## احراز هویت، اعلان‌ها و چرخه عمر منابع — مرحله ۱۶H (2026-10-31)
+
+- ثبت‌نام مشتری با `201` و envelope استاندارد `data` برمی‌گردد؛ مشتری `AccessProfile` ندارد و نقش پیش‌فرض `CUSTOMER_USER` است. ثبت‌نام شرکت نیز `201` است؛ شرکت و کاربر مدیر در وضعیت انتظار ساخته می‌شوند و `AccessProfile` شرکت غیرفعال است. هیچ‌یک از پاسخ‌ها hash رمز عبور یا refresh token را افشا نمی‌کنند.
+- ورود، تمدید نشست، `GET /auth/me` و handoff/redeem دارای schema پاسخ مجزا هستند. access token فقط در بدنه JSON است؛ refresh token فقط در کوکی `httpOnly` قرار می‌گیرد. کد handoff یک‌بارمصرف و ۶۰ ثانیه‌ای است.
+- تنظیمات اعلان‌ها عمداً envelope متفاوتی دارد: `{ data, smsAvailable }` مستقیم، نه `{ data: ... }` تو در تو. کانال‌های `IN_APP`، `EMAIL` و `SMS` همراه مقدار مؤثر و پیش‌فرض مستند شده‌اند؛ `smsAvailable` فعلاً `false` است.
+- فهرست اعلان‌ها مستقیم `{ data, meta }` برمی‌گرداند؛ شمارنده خوانده‌نشده مستقیم `{ count }` است؛ عملیات گروهی `{ success, count }` و تغییر پوشه `{ success, action, notificationId, folderId }` برمی‌گرداند. پوشه‌های کاربر بر اساس دامنه توکن فیلتر می‌شوند و شامل `isSystem` و `sortOrder` هستند.
+- تغییر وضعیت، بازیابی و تغییر لوگوی شرکت، رکورد شرکت را در `data` برمی‌گردانند. حذف شرکت و حذف نرم محصول هر دو `204` بدون بدنه‌اند. عملیات گردش وضعیت محصول `200` و محصول مدیریت‌شده با تاریخچه وضعیت را برمی‌گردانند.
+- تست‌های قرارداد پاسخ، نبود refresh token/hash رمز در خروجی، envelopeهای مستقیم اعلان‌ها، و کدهای `204` بدون بدنه را پوشش می‌دهند.
