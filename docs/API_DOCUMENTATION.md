@@ -282,3 +282,10 @@ Company settings/statistics/products, category/subcategory CRUD and public brows
 - Current-user settings profile returns user identity, profile, access profile/company and compact role assignments. Password change, avatar upload and avatar delete return their actual message/avatarUrl envelopes.
 - Admin stats returns eight aggregate counts, up to five recent users and up to twenty pending products with compact company/category/creator projections. Admin settings expose only `productReviewEditThreshold`; inquiry monetization settings expose only `subscriptionEnforcement`.
 - Admin inquiry plan CRUD follows the full InquiryPlan scalar model. Manual subscription grant/activate/reject responses include the full plan and only compact company/user owner projections. Online gateway payment cannot be manually activated.
+
+
+## Step 16G merge — user/RBAC/settings/admin responses (2026-10-31)
+
+PR #56 merged at `bebc3192440c9f3b66080a78384d627fdabb4e24`. CI passed with 1,392 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime compose/browser validation was pending at merge time and is not reported as passing.
+
+User and role/permission response variants, current-user settings profile/password/avatar responses, admin stats/system settings/inquiry monetization, inquiry plan CRUD and manual subscription action responses now have source-backed schemas. Password hashes and refresh tokens are explicitly excluded.
