@@ -349,4 +349,127 @@ Object.assign(docs, {
   'PATCH /api/v1/inquiries/:id/responses/:responseId': { summary: 'Update inquiry response', description: 'Updates a submitted inquiry response. Authentication required: Bearer JWT. Permission required: inquiries.respond or leads.update.', tags: ['Inquiries'], permission: 'inquiries.respond OR leads.update', params: twoIdParams('id', 'responseId'), responses: resourceResponse('Inquiry response updated successfully.') },
 });
 
+
+// Additional source-backed route metadata — coverage pass 16A.
+Object.assign(docs, {
+  'PATCH /api/v1/users/:id/access-active': {
+    summary: 'Activate or deactivate a user access profile',
+    description: 'Changes whether the target user may access the assigned application panel. Authentication required: Bearer JWT. Permission required: users.activate or users.deactivate. Target ownership and permitted access-profile scope are enforced by the user service.',
+    tags: ['Users'], permission: 'users.activate OR users.deactivate', params: idParam(),
+    body: { type: 'object', required: ['isActive'], additionalProperties: false, properties: { isActive: { type: 'boolean' } } },
+    responses: resourceResponse('User access profile state updated successfully.'),
+  },
+  'PATCH /api/v1/users/:id/company': {
+    summary: 'Move a user to another company',
+    description: 'Changes the company assignment of a user. Authentication required: Bearer JWT. Permission required: users.update. The service restricts this privileged cross-company operation to the authorized administrative context.',
+    tags: ['Users'], permission: 'users.update', params: idParam(),
+    responses: resourceResponse('User company assignment updated successfully.'),
+  },
+  'GET /api/v1/addresses': {
+    summary: 'List the current customer addresses',
+    description: 'Returns addresses owned by the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. Results are scoped to the current user.',
+    tags: ['Addresses'], responses: resourceResponse('Customer addresses returned successfully.'),
+  },
+  'POST /api/v1/addresses': {
+    summary: 'Create a customer address',
+    description: 'Creates an address for the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. Required fields: recipientName, recipientPhone, province, city and addressLine; optional fields include label, postalCode and isDefault.',
+    tags: ['Addresses'], body: { type: 'object', required: ['recipientName', 'recipientPhone', 'province', 'city', 'addressLine'], additionalProperties: false, properties: {
+      label: { type: 'string', minLength: 1, maxLength: 50 }, recipientName: { type: 'string', minLength: 1, maxLength: 120 },
+      recipientPhone: { type: 'string', minLength: 5, maxLength: 30 }, province: { type: 'string', minLength: 1, maxLength: 100 },
+      city: { type: 'string', minLength: 1, maxLength: 100 }, addressLine: { type: 'string', minLength: 5, maxLength: 1000 },
+      postalCode: { type: ['string', 'null'], maxLength: 30 }, isDefault: { type: 'boolean' },
+    } }, responses: createdResponse('Customer address created successfully.'),
+  },
+  'GET /api/v1/addresses/:id': {
+    summary: 'Get an owned customer address',
+    description: 'Returns one address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. An address outside the caller’s ownership is not exposed.',
+    tags: ['Addresses'], params: idParam(), responses: resourceResponse('Customer address returned successfully.'),
+  },
+  'PATCH /api/v1/addresses/:id': {
+    summary: 'Update an owned customer address',
+    description: 'Updates one address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER. At least one allowed address field must be supplied.',
+    tags: ['Addresses'], params: idParam(), body: { type: 'object', minProperties: 1, additionalProperties: false, properties: {
+      label: { type: 'string', minLength: 1, maxLength: 50 }, recipientName: { type: 'string', minLength: 1, maxLength: 120 },
+      recipientPhone: { type: 'string', minLength: 5, maxLength: 30 }, province: { type: 'string', minLength: 1, maxLength: 100 },
+      city: { type: 'string', minLength: 1, maxLength: 100 }, addressLine: { type: 'string', minLength: 5, maxLength: 1000 },
+      postalCode: { type: ['string', 'null'], maxLength: 30 }, isDefault: { type: 'boolean' },
+    } }, responses: resourceResponse('Customer address updated successfully.'),
+  },
+  'PATCH /api/v1/addresses/:id/default': {
+    summary: 'Set an owned address as the customer default',
+    description: 'Marks an address owned by the authenticated customer as the default address. Authentication required: Bearer JWT. Access context required: CUSTOMER.',
+    tags: ['Addresses'], params: idParam(), responses: resourceResponse('Default customer address updated successfully.'),
+  },
+  'DELETE /api/v1/addresses/:id': {
+    summary: 'Delete an owned customer address',
+    description: 'Deletes an address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER.',
+    tags: ['Addresses'], params: idParam(), responses: messageResponse('Customer address deleted successfully.'),
+  },
+  'GET /api/v1/roles/assignable': {
+    summary: 'List roles assignable by the current user',
+    description: 'Returns roles that the caller may assign within the caller’s own access-type domain. Authentication required: Bearer JWT. Access context required: STAFF or COMPANY. Permission required: users.create or users.assign_roles.',
+    tags: ['Roles'], permission: 'users.create OR users.assign_roles', responses: resourceResponse('Assignable roles returned successfully.'),
+  },
+  'GET /api/v1/categories/:id/subcategories': {
+    summary: 'List active subcategories for a category',
+    description: 'Returns active subcategories of the requested active category for public marketplace browsing. Authentication required: none.',
+    tags: ['Categories'], authRequired: false, params: idParam(), responses: resourceResponse('Active subcategories returned successfully.'),
+  },
+  'GET /api/v1/categories/:id/subcategories/:subId': {
+    summary: 'Get an active category subcategory',
+    description: 'Returns one active subcategory under an active parent category for public marketplace browsing. Authentication required: none.',
+    tags: ['Categories'], authRequired: false, params: twoIdParams('id', 'subId'), responses: resourceResponse('Active subcategory returned successfully.'),
+  },
+  'GET /api/v1/categories/manage': {
+    summary: 'List categories for staff management',
+    description: 'Returns categories for administrative management, including inactive entries. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.read.',
+    tags: ['Categories'], permission: 'categories.read', responses: resourceResponse('Categories returned for management.'),
+  },
+  'POST /api/v1/categories/:id/subcategories': {
+    summary: 'Create a subcategory',
+    description: 'Creates a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.create. Request validation is defined by the route handler and category service.',
+    tags: ['Categories'], permission: 'categories.create', params: idParam(), responses: createdResponse('Subcategory created successfully.'),
+  },
+  'PATCH /api/v1/categories/:id/subcategories/:subId': {
+    summary: 'Update a subcategory',
+    description: 'Updates a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.update.',
+    tags: ['Categories'], permission: 'categories.update', params: twoIdParams('id', 'subId'), responses: resourceResponse('Subcategory updated successfully.'),
+  },
+  'DELETE /api/v1/categories/:id/subcategories/:subId': {
+    summary: 'Delete a subcategory',
+    description: 'Deletes a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.delete.',
+    tags: ['Categories'], permission: 'categories.delete', params: twoIdParams('id', 'subId'), responses: messageResponse('Subcategory deleted successfully.'),
+  },
+  'GET /api/v1/products/:id/price-history': {
+    summary: 'Get public retail price history',
+    description: 'Returns the public retail price history for a product, intended for the six-month price chart. Authentication required: none. Only the public product projection is exposed.',
+    tags: ['Products'], authRequired: false, params: idParam(), responses: resourceResponse('Public retail price history returned successfully.'),
+  },
+  'GET /api/v1/products/my-products': {
+    summary: 'List products available to the current management user',
+    description: 'Lists products visible to the authenticated company or staff management context. Authentication required: Bearer JWT. Access context required: COMPANY or STAFF. Permission required: products.read; company ownership is enforced by the service.',
+    tags: ['Products'], permission: 'products.read', responses: paginatedResponse('Managed products returned successfully.'),
+  },
+  'GET /api/v1/products/:id/manage': {
+    summary: 'Get a product for management',
+    description: 'Returns a product in any workflow status for authorized management/editing. Authentication required: Bearer JWT. Access context required: COMPANY or STAFF. Permission required: products.read; company ownership is enforced by the service.',
+    tags: ['Products'], permission: 'products.read', params: idParam(), responses: resourceResponse('Managed product returned successfully.'),
+  },
+  'GET /api/v1/products/:id/history': {
+    summary: 'Get product status and change history',
+    description: 'Returns the product change history for an authorized management user. Authentication required: Bearer JWT. Access context required: COMPANY or STAFF. Permission required: products.read; tenant ownership is enforced by the service.',
+    tags: ['Products'], permission: 'products.read', params: idParam(), responses: resourceResponse('Product history returned successfully.'),
+  },
+  'GET /api/v1/specification-library': {
+    summary: 'Search the public specification library',
+    description: 'Searches reusable product specification definitions for product form and catalogue use. Authentication required: none.',
+    tags: ['Specification Library'], authRequired: false, responses: resourceResponse('Specification library search results returned successfully.'),
+  },
+  'GET /api/v1/specification-library/all': {
+    summary: 'List all public specification definitions',
+    description: 'Returns the complete reusable specification definition list. Authentication required: none.',
+    tags: ['Specification Library'], authRequired: false, responses: resourceResponse('Specification definitions returned successfully.'),
+  },
+});
+
 module.exports = docs;
