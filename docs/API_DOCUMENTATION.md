@@ -143,3 +143,12 @@ pnpm --dir backend test
 ### مجوزهای چرخه پاسخ تأمین‌کننده
 
 عملیات ایجاد پاسخ (`POST /api/v1/inquiries/:id/responses`)، ویرایش (`PATCH /api/v1/inquiries/:id/responses/:responseId`)، انصراف (`POST .../withdraw`)، بارگذاری پیوست (`POST .../attachments`) و حذف پیوست (`DELETE .../attachments/:attachmentId`) فقط در زمینه `COMPANY` و با مجوز `inquiries.respond` مجازند. مجوز مدیریتی `leads.update` یا wildcard نقش SUPER_ADMIN در زمینه STAFF به‌تنهایی اجازه ارسال پیشنهاد از طرف تأمین‌کننده را نمی‌دهد. این مرز پیش از اجرای controller اعمال می‌شود و کنترل مالکیت/شرکت در service نیز باید حفظ شود. تست‌های رگرسیون در `backend/src/modules/inquiries/inquiry.routes.test.js` این رد دسترسی را بررسی می‌کنند.
+
+
+## Swagger/OpenAPI وضعیت پوشش — 2026-10-31
+
+- تمام 149 route ماژولی در [API_ROUTE_INVENTORY.md](./API_ROUTE_INVENTORY.md) فهرست شده‌اند.
+- در `openapi-route-docs.js` برای 89 از 149 مسیر توضیحات اختصاصی وجود دارد؛ 60 مسیر هنوز از summary/tagهای route source یا توضیحات عمومی استفاده می‌کنند و باید در مرحله بعد تکمیل شوند.
+- 9 ورودی قدیمی که به مسیرهای ثبت‌نشده `orders` و `settings/preferences` اشاره می‌کردند حذف شدند. مسیر واقعی ترجیحات اعلان‌ها `/settings/notifications/preferences` است.
+- مسیرهای بدون metadata اختصاصی اکنون به‌صورت پیش‌فرض bearerAuth می‌گیرند؛ مسیرهای عمومی در allow-list مشخص شده‌اند و refresh/logout از refresh-cookie scheme استفاده می‌کنند. Handoff redeem و callback پرداخت به‌عنوان مسیرهای بدون Bearer مستند شده‌اند.
+- تست‌ها اکنون هم stale route-doc entries را رد می‌کنند و هم security schemeهای cookie/public/default را بررسی می‌کنند.

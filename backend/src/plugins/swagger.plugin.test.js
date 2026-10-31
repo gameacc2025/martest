@@ -67,9 +67,9 @@ test('swagger plugin: OpenAPI spec includes all expected tags', async () => {
   const spec = res.json();
 
   const expectedTags = [
-    'Authentication', 'Users', 'Roles', 'Permissions',
-    'Companies', 'Categories', 'Products', 'Inquiries',
-    'Notifications', 'Orders', 'Settings', 'Admin',
+    'Authentication', 'Users', 'Addresses', 'Roles', 'Permissions',
+    'Companies', 'Categories', 'Specification Library', 'Products', 'Inquiries',
+    'Notifications', 'Settings', 'Admin',
   ];
   const tagNames = spec.tags.map((t) => t.name);
   for (const tag of expectedTags) {
@@ -163,6 +163,42 @@ test('swagger plugin: transform sets empty security array when authRequired is f
   assert.ok(publicPath, 'spec should have /public path');
   // The transform may or may not override security, but the path should exist
   assert.ok(publicPath.get, 'path should have a GET operation');
+  await app.close();
+});
+
+test('swagger plugin: undocumented protected routes default to bearer while allow-listed public routes do not', async () => {
+  const app = Fastify();
+  await app.register(swaggerPlugin);
+  app.get('/api/v1/addresses', { schema: { summary: 'List addresses', tags: ['Addresses'] } }, async () => []);
+  app.get('/api/v1/categories', { schema: { summary: 'Public categories', tags: ['Categories'] } }, async () => []);
+  await app.ready();
+
+  const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
+  assert.deepEqual(spec.paths['/addresses'].get.security, [{ bearerAuth: [] }]);
+  assert.equal(spec.paths['/addresses'].get['x-authentication-required'], true);
+  assert.match(spec.paths['/addresses'].get['x-permission-required'], /route-level AccessProfile/);
+  assert.deepEqual(spec.paths['/categories'].get.security, []);
+  assert.equal(spec.paths['/categories'].get['x-authentication-required'], false);
+  assert.equal(spec.paths['/categories'].get['x-permission-required'], 'None');
+  await app.close();
+});
+
+test('swagger plugin: refresh uses cookieAuth and PKCE redeem is documented as non-bearer', async () => {
+  const app = Fastify();
+  await app.register(swaggerPlugin);
+  app.post('/api/v1/auth/refresh', {
+    schema: { summary: 'Refresh access token', tags: ['Authentication'] },
+  }, async () => ({ ok: true }));
+  app.post('/api/v1/auth/handoff/redeem', {
+    schema: { summary: 'Redeem handoff', tags: ['Authentication'] },
+  }, async () => ({ ok: true }));
+  await app.ready();
+
+  const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
+  assert.deepEqual(spec.paths['/auth/refresh'].post.security, [{ refreshCookie: [] }]);
+  assert.deepEqual(spec.paths['/auth/handoff/redeem'].post.security, []);
+  assert.equal(spec.components.securitySchemes.refreshCookie.in, 'cookie');
+  assert.equal(spec.components.securitySchemes.refreshCookie.name, 'refreshToken');
   await app.close();
 });
 

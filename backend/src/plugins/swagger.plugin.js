@@ -3,17 +3,37 @@ const swagger = require('@fastify/swagger');
 const swaggerUi = require('@fastify/swagger-ui');
 const routeDocs = require('../utils/openapi-route-docs');
 
+const PUBLIC_ROUTE_KEYS = new Set([
+  'GET /api/v1/health',
+  'POST /api/v1/auth/login',
+  'POST /api/v1/auth/register',
+  'POST /api/v1/auth/register-company',
+  'POST /api/v1/auth/handoff/redeem',
+  'GET /api/v1/categories',
+  'GET /api/v1/categories/:id',
+  'GET /api/v1/categories/:id/products',
+  'GET /api/v1/categories/:id/subcategories',
+  'GET /api/v1/categories/:id/subcategories/:subId',
+  'GET /api/v1/products',
+  'GET /api/v1/products/:id',
+  'GET /api/v1/products/:id/price-history',
+  'GET /api/v1/specification-library',
+  'GET /api/v1/specification-library/all',
+  'GET /api/v1/inquiries/subscription/payment/callback',
+]);
+
 const TAGS = [
   { name: 'Authentication', description: 'Login, refresh tokens, logout, and current-user identity endpoints.' },
   { name: 'Users', description: 'User profile, access assignment, and user lifecycle management.' },
+  { name: 'Addresses', description: 'Customer-owned delivery and contact addresses.' },
   { name: 'Roles', description: 'Role lifecycle management and role permission assignment.' },
   { name: 'Permissions', description: 'Permission catalogue management and filtering.' },
   { name: 'Companies', description: 'Company profiles, status, settings, products, and statistics.' },
   { name: 'Categories', description: 'Product category browsing and administration.' },
+  { name: 'Specification Library', description: 'Reusable product specification fields and templates.' },
   { name: 'Products', description: 'Product catalogue, lifecycle, pricing, images, and documents.' },
   { name: 'Inquiries', description: 'Inquiry requests, inquiry items, supplier responses, and statuses.' },
   { name: 'Notifications', description: 'Notification delivery, read state, and user notification preferences.' },
-  { name: 'Orders', description: 'Order history, order statistics, and administrative order management.' },
   { name: 'Settings', description: 'Authenticated user profile, avatar, password, and preferences settings.' },
   { name: 'Admin', description: 'Administrative dashboard and operational statistics.' },
 ];
@@ -182,6 +202,12 @@ async function swaggerPlugin(fastify) {
             bearerFormat: 'JWT',
             description: 'Enter a JWT access token. Swagger UI will send it as `Authorization: Bearer <token>`.',
           },
+          refreshCookie: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'refreshToken',
+            description: 'HttpOnly refresh token cookie set by the login endpoint. Browser requests must include the trusted origin.',
+          },
         },
         schemas: commonSchemas,
       },
@@ -194,7 +220,7 @@ async function swaggerPlugin(fastify) {
         transformed.summary = doc.summary;
         transformed.description = doc.description;
         transformed.tags = doc.tags;
-        transformed.security = doc.authRequired === false ? [] : [{ bearerAuth: [] }];
+        transformed.security = Array.isArray(doc.security) ? doc.security : (doc.authRequired === false ? [] : [{ bearerAuth: [] }]);
         transformed.params = transformed.params || doc.params;
         transformed.querystring = transformed.querystring || doc.querystring;
         transformed.body = transformed.body || doc.body;
@@ -209,6 +235,22 @@ async function swaggerPlugin(fastify) {
 
         transformed['x-authentication-required'] = doc.authRequired !== false;
         transformed['x-permission-required'] = doc.authRequired === false ? 'None' : (doc.permission || 'Authenticated user');
+      }
+
+      // Protected routes default to bearerAuth even when a route has no
+      // dedicated prose entry yet. Explicit public routes are allow-listed;
+      // cookie/PKCE routes can override this through doc.security above.
+      if (!doc) {
+        const normalizedUrl = normalizePath(url);
+        const fullPath = normalizedUrl.startsWith('/api/v1') ? normalizedUrl : `/api/v1${normalizedUrl}`;
+        const routeKey = `${String(route.method).toUpperCase()} ${fullPath}`;
+        const isPublic = PUBLIC_ROUTE_KEYS.has(routeKey);
+        if (!Array.isArray(transformed.security) || transformed.security.length === 0) {
+          transformed.security = isPublic ? [] : [{ bearerAuth: [] }];
+        }
+        transformed['x-authentication-required'] = transformed['x-authentication-required'] ?? !isPublic;
+        transformed['x-permission-required'] = transformed['x-permission-required']
+          || (isPublic ? 'None' : 'Authenticated user; see route-level AccessProfile and permission guards');
       }
 
       transformed.response = {

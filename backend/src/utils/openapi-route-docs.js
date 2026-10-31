@@ -46,6 +46,36 @@ const multipartFileBody = (fieldName = 'file') => ({
 });
 
 const docs = {
+  'POST /api/v1/auth/register': {
+    summary: 'Register customer account',
+    description: 'Creates a Website customer account using phone, password and personal name fields. Authentication required: none. Permission required: none. Rate limited.',
+    tags: ['Authentication'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: createdResponse('Customer account created successfully.'),
+  },
+  'POST /api/v1/auth/register-company': {
+    summary: 'Register company and manager',
+    description: 'Submits a company registration with its initial manager for staff approval. Authentication required: none. Permission required: none. Rate limited.',
+    tags: ['Authentication'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: createdResponse('Company registration submitted successfully.'),
+  },
+  'POST /api/v1/auth/handoff': {
+    summary: 'Create cross-app handoff code',
+    description: 'Creates a short-lived, one-time PKCE handoff code for an authenticated panel session. Authentication required: Bearer JWT. Permission required: authenticated user.',
+    tags: ['Authentication'],
+    responses: resourceResponse('Handoff code created successfully.'),
+  },
+  'POST /api/v1/auth/handoff/redeem': {
+    summary: 'Redeem cross-app handoff code',
+    description: 'Redeems a one-time PKCE handoff code and verifier to establish the target panel session. Requires a trusted browser origin; no bearer token is used on this endpoint.',
+    tags: ['Authentication'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: resourceResponse('Handoff session established successfully.'),
+  },
   'POST /api/v1/auth/login': {
     summary: 'Login',
     description: 'Authenticates a user with phone and password. Returns an access token and sets the refresh token cookie when login succeeds. Authentication required: none. Permission required: none.',
@@ -58,14 +88,16 @@ const docs = {
     summary: 'Refresh access token',
     description: 'Issues a new access token using the refresh token cookie. Authentication required: refresh token cookie. Permission required: authenticated session.',
     tags: ['Authentication'],
-    permission: 'Authenticated refresh token',
+    permission: 'Authenticated refresh token cookie + trusted origin',
+    security: [{ refreshCookie: [] }],
     responses: { 200: { description: 'New access token issued.', $ref: '#/components/schemas/AuthTokens' } },
   },
   'POST /api/v1/auth/logout': {
     summary: 'Logout current device',
     description: 'Revokes the current refresh token and clears the refresh cookie. Authentication required: refresh token cookie. Permission required: authenticated session.',
     tags: ['Authentication'],
-    permission: 'Authenticated refresh token',
+    permission: 'Authenticated refresh token cookie + trusted origin',
+    security: [{ refreshCookie: [] }],
     responses: messageResponse('Logged out from the current device.'),
   },
   'POST /api/v1/auth/logout-all': {
@@ -221,21 +253,14 @@ Object.assign(docs, {
   'GET /api/v1/admin/settings': { summary: 'Get system settings', description: 'Returns admin-managed system settings (e.g. the product review-edit threshold). Authentication required: Bearer JWT. Permission required: system_settings.manage.', tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('System settings returned successfully.') },
   'PATCH /api/v1/admin/settings/product-review-threshold': { summary: 'Update product review threshold', description: 'Updates the number of post-approval product edits that trigger re-review. Authentication required: Bearer JWT. Permission required: system_settings.manage.', tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Review threshold updated successfully.') },
 
+  'GET /api/v1/settings/notifications/preferences': { summary: 'Get notification preferences', description: 'Returns the authenticated user notification channel preferences. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Notifications'], responses: resourceResponse('Notification preferences returned successfully.') },
+  'PATCH /api/v1/settings/notifications/preferences': { summary: 'Update notification preferences', description: 'Updates the authenticated user notification channel preferences. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Notifications'], responses: resourceResponse('Notification preferences updated successfully.') },
   'GET /api/v1/settings/profile': { summary: 'Get current profile', description: 'Returns the authenticated user profile settings. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: resourceResponse('Profile returned successfully.') },
   'PATCH /api/v1/settings/profile': { summary: 'Update current profile', description: 'Updates the authenticated user profile settings. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: resourceResponse('Profile updated successfully.') },
   'POST /api/v1/settings/profile/avatar': { summary: 'Upload avatar', description: 'Uploads an avatar image for the authenticated user. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], consumes: ['multipart/form-data'], body: multipartFileBody('avatar'), responses: resourceResponse('Avatar uploaded successfully.') },
   'DELETE /api/v1/settings/profile/avatar': { summary: 'Delete avatar', description: 'Deletes the authenticated user avatar. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: messageResponse('Avatar deleted successfully.') },
   'PATCH /api/v1/settings/change-password': { summary: 'Change password', description: 'Changes the authenticated user password. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: messageResponse('Password changed successfully.') },
-  'GET /api/v1/settings/preferences': { summary: 'Get preferences', description: 'Returns the authenticated user preferences. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: resourceResponse('Preferences returned successfully.') },
-  'PATCH /api/v1/settings/preferences': { summary: 'Update preferences', description: 'Updates the authenticated user preferences. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Settings'], responses: resourceResponse('Preferences updated successfully.') },
 
-  'GET /api/v1/orders/me': { summary: 'Get my recent orders', description: 'Returns recent orders for the authenticated user. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Orders'], responses: resourceResponse('Recent orders returned successfully.') },
-  'GET /api/v1/orders/me/stats': { summary: 'Get my order statistics', description: 'Returns order statistics for the authenticated user. Authentication required: Bearer JWT. Permission required: authenticated user.', tags: ['Orders'], responses: resourceResponse('Order statistics returned successfully.') },
-  'GET /api/v1/orders': { summary: 'List orders', description: 'Lists orders for administrative management. Authentication required: Bearer JWT. Permission required: orders.read.', tags: ['Orders'], permission: 'orders.read', querystring: paginationQuery, responses: paginatedResponse('Orders returned successfully.') },
-  'POST /api/v1/orders': { summary: 'Create order', description: 'Creates a new order. Authentication required: Bearer JWT. Permission required: orders.create.', tags: ['Orders'], permission: 'orders.create', responses: createdResponse('Order created successfully.') },
-  'GET /api/v1/orders/:id': { summary: 'Get order by ID', description: 'Returns an order by numeric ID. Authentication required: Bearer JWT. Permission required: orders.read.', tags: ['Orders'], permission: 'orders.read', params: idParam(), responses: resourceResponse('Order returned successfully.') },
-  'PUT /api/v1/orders/:id': { summary: 'Update order', description: 'Updates an order by numeric ID. Authentication required: Bearer JWT. Permission required: orders.update.', tags: ['Orders'], permission: 'orders.update', params: idParam(), responses: resourceResponse('Order updated successfully.') },
-  'DELETE /api/v1/orders/:id': { summary: 'Delete order', description: 'Deletes an order by numeric ID. Authentication required: Bearer JWT. Permission required: orders.delete.', tags: ['Orders'], permission: 'orders.delete', params: idParam(), responses: messageResponse('Order deleted successfully.') },
 });
 
 Object.assign(docs, {
@@ -302,6 +327,14 @@ const inquiryListQuery = {
 };
 
 Object.assign(docs, {
+  'GET /api/v1/inquiries/subscription/payment/callback': {
+    summary: 'Verify Zarinpal subscription callback',
+    description: 'Public payment-provider callback. The stored Authority and server-side Zarinpal verification determine activation; query parameters alone are never trusted.',
+    tags: ['Inquiries'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: { 302: { description: 'Redirects to the configured subscription result URL.' } },
+  },
   'GET /api/v1/inquiries': { summary: 'List inquiries', description: 'Lists inquiries with server-side pagination, search, status filtering, scope-based visibility (sent/received/all) and sorting. Company-based access is enforced: buyers see their own inquiries, sellers see inquiries requesting their products, and SUPER_ADMIN can see all. Authentication required: Bearer JWT. Permission required: leads.read or inquiries.read.', tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', querystring: inquiryListQuery, responses: paginatedResponse('Inquiries returned successfully.') },
   'GET /api/v1/inquiries/:id': { summary: 'Get inquiry by ID', description: 'Returns a single inquiry with items, responses and recent status history. Read access is restricted to the owning (buyer) company, companies owning a requested product (seller), and SUPER_ADMIN; anyone else receives 404. Authentication required: Bearer JWT. Permission required: leads.read or inquiries.read.', tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', params: idParam(), responses: resourceResponse('Inquiry returned successfully.') },
   'POST /api/v1/inquiries': { summary: 'Create inquiry', description: 'Creates a new inquiry with items. Authentication required: Bearer JWT. Permission required: leads.create or inquiries.create.', tags: ['Inquiries'], permission: 'leads.create OR inquiries.create', responses: createdResponse('Inquiry created successfully.') },

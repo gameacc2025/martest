@@ -211,3 +211,12 @@ Compare `docs/API_DOCUMENTATION.md`, Swagger/OpenAPI route schemas and actual re
 - Linked the inventory from `docs/API_DOCUMENTATION.md`.
 - Added `backend/src/utils/api-route-inventory.test.js` so CI fails if a registered route is absent from the inventory. Detailed body/query/params and response schemas remain in route/schema source; the inventory does not invent schemas.
 - CI/migration verification pending. Next documentation pass: compare Swagger/OpenAPI operation metadata and actual request/response schemas; fill only source-supported gaps.
+
+
+## OpenAPI metadata and security alignment — active (2026-10-31)
+
+- Route inventory confirms 149 module routes. OpenAPI registry had 91 keys initially: 82 matched registered routes, 9 were stale (7 nonexistent orders endpoints and 2 nonexistent /settings/preferences paths).
+- Removed all 9 stale keys and the unused Orders tag; added docs for the real /settings/notifications/preferences paths, customer/company registration, PKCE handoff, and Zarinpal callback. Current dedicated prose metadata coverage is 89/149; 60 routes remain for a later description/schema pass.
+- Corrected cookie-auth docs: refresh/logout use a dedicated refreshCookie scheme; PKCE redeem is trusted-origin + one-time code, not Bearer.
+- Swagger now defaults undocumented protected routes to bearerAuth and uses an explicit public route allow-list. Added Addresses and Specification Library tags.
+- Added tests that reject OpenAPI keys absent from route inventory, assert cookie/public security schemes, and verify bearer default for undocumented protected routes. CI/migration checks pending.
