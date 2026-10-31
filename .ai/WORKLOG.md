@@ -1632,3 +1632,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Test revealed root route path `/users/` includes trailing slash in generated Swagger; route test now checks normalized, full and trailing-slash path candidates.
 - All 13 204 route response docs now use `type: 'null'`, the `@fastify/swagger` empty-body schema form; generated OpenAPI integration test confirms no content body.
 - Next: step 16K safe remote branch reconciliation and docs consistency. GitHub connector has no branch deletion action; no deletion claimed.
+
+
+## 2026-10-31 — OPENAPI-DELIVERY-QUERY-FILTERS-STEP-16K
+
+- Remote branch audit: 31 non-main branches exist. All but two match merged PR heads. `feat/website-homepage-redesign` is fully behind main (ahead 0). `docs/openapi-admin-inquiry-delivery-responses-step-16d` contains mostly superseded response work but one missing admin delivery querystring definition.
+- Added `step16kNotificationDeliveryQuerySchema` to both GET admin notification delivery endpoints, reflecting fields actually read by `admin.controller.js` and `notification.delivery.service.js`: status, channel, eventType, userId, page, limit. Did not include from/to (ignored by controller), or invent a maximum limit (service does not enforce one).
+- Added static contract tests and real generated OpenAPI query parameter tests. CI pending.
+- Branch deletion is not available through the current GitHub connector actions; exact PowerShell deletion commands will be provided after the audit.
