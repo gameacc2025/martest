@@ -73,6 +73,30 @@ test('every OpenAPI route-doc key corresponds to a registered route in the API i
   }
 });
 
+test('source-backed response contracts describe address, notification and inquiry quota payloads', () => {
+  const address = docs['GET /api/v1/addresses'].responses[200].properties.data.items;
+  assert.ok(address.properties.userId);
+  assert.ok(address.properties.recipientName);
+  assert.ok(address.properties.isDefault);
+
+  const notifications = docs['GET /api/v1/settings/notifications'].responses[200].properties;
+  assert.ok(notifications.properties.meta.properties.totalPages);
+  assert.ok(notifications.properties.data.items.properties.folderMemberships);
+
+  const unread = docs['GET /api/v1/settings/notifications/unread-count'].responses[200].properties;
+  assert.ok(unread.count);
+
+  const bulk = docs['POST /api/v1/settings/notifications/bulk-delete'].responses[200].properties;
+  assert.ok(bulk.success);
+  assert.ok(bulk.count);
+
+  const quota = docs['GET /api/v1/inquiries/quota'].responses[200].properties.data.properties;
+  assert.ok(quota.enforced);
+  assert.ok(quota.subscription);
+  assert.ok(quota.quotas);
+  assert.ok(quota.capabilities);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
