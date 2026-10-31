@@ -1336,3 +1336,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Audited payment amount freezing, callback verification, Authority mapping, refId, owner lock, replay/concurrent callback handling and owner scoping.
 - Fixed amount conversion boundary: Toman-to-Rial multiplication must remain within PostgreSQL INTEGER / Prisma Int max 2,147,483,647. Overflow is now rejected before provider request and database write.
 - Added regression test that checks no provider call occurs for an overflowing Toman plan. Live Zarinpal remains unverified.
+
+
+- First payment-audit CI run failed only in the newly added owner-scope test because its mock `findFirst` returned a subscription from a different company instead of honoring the query filter. Corrected the mock to model Prisma's id/companyId/userId filtering; production code unchanged. Rerun CI.
