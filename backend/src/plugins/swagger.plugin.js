@@ -25,10 +25,12 @@ const PUBLIC_ROUTE_KEYS = new Set([
 const TAGS = [
   { name: 'Authentication', description: 'Login, refresh tokens, logout, and current-user identity endpoints.' },
   { name: 'Users', description: 'User profile, access assignment, and user lifecycle management.' },
+  { name: 'Addresses', description: 'Customer-owned delivery and contact addresses.' },
   { name: 'Roles', description: 'Role lifecycle management and role permission assignment.' },
   { name: 'Permissions', description: 'Permission catalogue management and filtering.' },
   { name: 'Companies', description: 'Company profiles, status, settings, products, and statistics.' },
   { name: 'Categories', description: 'Product category browsing and administration.' },
+  { name: 'Specification Library', description: 'Reusable product specification fields and templates.' },
   { name: 'Products', description: 'Product catalogue, lifecycle, pricing, images, and documents.' },
   { name: 'Inquiries', description: 'Inquiry requests, inquiry items, supplier responses, and statuses.' },
   { name: 'Notifications', description: 'Notification delivery, read state, and user notification preferences.' },
