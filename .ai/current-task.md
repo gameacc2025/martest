@@ -125,3 +125,10 @@ Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categori
 - Fixed both boundaries: route now requires exact STAFF AccessProfile context plus `users.reset_password`; controller passes the verified caller to the service; service independently requires STAFF context and the explicit permission (or STAFF wildcard) before reading or changing the target account.
 - Added route regression coverage proving COMPANY + SUPER_ADMIN + wildcard cannot invoke the reset controller. Added service tests for COMPANY context denial and missing permission, while preserving authorized STAFF reset behavior.
 - Branch: `audit/backend-route-inventory-step-11e`. CI/migration checks pending. Further route families remain under review; no full security sign-off yet.
+
+
+## Step 11E additional finding — Public category detail visibility
+
+- Confirmed public category `GET /:id` and `GET /:id/subcategories/:subId` looked up taxonomy by ID without requiring ACTIVE status. The public list filtered inactive records, but direct detail URLs could still expose inactive category/subcategory metadata; the controller's source comment promised active-only behavior more broadly than the implementation provided.
+- Updated public detail lookups to require `status: ACTIVE`; inactive or unknown IDs now follow the existing not-found path. Public subcategory listing also verifies the parent category is active before returning active children.
+- Added service and controller regression tests for active-only detail lookups.
