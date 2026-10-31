@@ -694,3 +694,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/notifications/deliveries` accept status (PENDING/SENT/FAILED/SKIPPED), channel (IN_APP/EMAIL/SMS), eventType substring, userId, page and limit. Controller defaults page=1/limit=20; delivery service does not clamp maximum limit.
 - Do not document `from`/`to`: the actual admin controller does not pass them to delivery service, even though a stale notification schema helper declares them.
 - OpenAPI route docs now declare these query filters; static and generated-spec tests cover the exact accepted fields.
+
+
+## Auth, notification and resource lifecycle API response rules — 2026-10-31
+
+- Auth refresh token is cookie-only (`httpOnly`); never include refreshToken/passwordHash in JSON contracts. Customer registration has no AccessProfile; company registration creates pending company/user with inactive company AccessProfile.
+- Notification preference response is direct `{data,smsAvailable}`; notification list `{data,meta}`; unread count `{count}`; bulk operations `{success,count}`; folder membership `{success,action,notificationId,folderId}`. SMS is currently unavailable; app scope is derived from authenticated token.
+- Company restore/status/verify/logo return a company object. Company soft-delete and product soft-delete are HTTP 204 without response body. Product workflow actions return the managed product projection and status history.
