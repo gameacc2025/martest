@@ -1291,3 +1291,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 - CI first run: 1,313 tests executed, 1,312 passed; the only failure was a stale controller-test expectation after the caller context was added to the service call. Updated the test to provide a verified STAFF caller and assert the third argument. No production behavior changed in this correction. Re-run CI on the latest head.
+
+
+- Category controller regression caught one missed call site: `listSubcategories` still fetched its parent without `activeOnly: true`. Corrected the parent lookup to enforce active status before listing active children; re-run CI on the latest head.
