@@ -472,4 +472,266 @@ Object.assign(docs, {
   },
 });
 
+
+// Source-backed metadata for monetization, inquiry conversation and notification operations.
+Object.assign(docs, {
+  'GET /api/v1/admin/inquiry-monetization/settings': {
+    summary: 'Get inquiry monetization settings',
+    description: 'Returns platform-level inquiry subscription enforcement settings. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Inquiry monetization settings returned successfully.'),
+  },
+  'PATCH /api/v1/admin/inquiry-monetization/settings': {
+    summary: 'Update inquiry monetization settings',
+    description: 'Updates whether inquiry subscription enforcement is enabled. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['subscriptionEnforcement'], additionalProperties: false, properties: { subscriptionEnforcement: { type: 'boolean' } } },
+    responses: resourceResponse('Inquiry monetization settings updated successfully.'),
+  },
+  'GET /api/v1/admin/inquiry-plans': {
+    summary: 'List inquiry subscription plans for administration',
+    description: 'Lists inquiry plans for staff administration. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Inquiry plans returned successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-plans': {
+    summary: 'Create an inquiry subscription plan',
+    description: 'Creates a subscription plan with duration, price and per-period inquiry, response, internal-message and SMS allowances. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['code', 'name', 'durationDays', 'price'], additionalProperties: false, properties: {
+      code: { type: 'string', minLength: 2, maxLength: 50 }, name: { type: 'string', minLength: 1, maxLength: 100 },
+      description: { type: 'string', maxLength: 1000 }, durationDays: { type: 'integer', minimum: 1, maximum: 3650 },
+      price: { type: 'number', minimum: 1 }, currency: { type: 'string', minLength: 3, maxLength: 8 },
+      inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      internalMessagesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, smsPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      isActive: { type: 'boolean' },
+    } }, responses: createdResponse('Inquiry subscription plan created successfully.'),
+  },
+  'PATCH /api/v1/admin/inquiry-plans/:id': {
+    summary: 'Update an inquiry subscription plan',
+    description: 'Updates configurable plan details and usage allowances. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', minProperties: 1, additionalProperties: false, properties: {
+      name: { type: 'string', minLength: 1, maxLength: 100 }, description: { type: 'string', maxLength: 1000 },
+      durationDays: { type: 'integer', minimum: 1, maximum: 3650 }, price: { type: 'number', minimum: 0 },
+      currency: { type: 'string', minLength: 3, maxLength: 8 }, inquiriesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      responsesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, internalMessagesPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 },
+      smsPerPeriod: { type: 'integer', minimum: 0, maximum: 100000000 }, isActive: { type: 'boolean' },
+    } }, responses: resourceResponse('Inquiry subscription plan updated successfully.'),
+  },
+  'GET /api/v1/admin/inquiry-subscriptions': {
+    summary: 'List inquiry subscriptions for administration',
+    description: 'Lists inquiry subscriptions for staff review and management. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', responses: resourceResponse('Inquiry subscriptions returned successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-subscriptions/:id/activate': {
+    summary: 'Activate a pending inquiry subscription',
+    description: 'Confirms a pending subscription payment and activates the subscription. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage. paymentConfirmed must be true.',
+    tags: ['Admin'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', required: ['paymentConfirmed'], additionalProperties: false, properties: { paymentConfirmed: { type: 'boolean', const: true }, notes: { type: 'string', maxLength: 1000 } } },
+    responses: resourceResponse('Inquiry subscription activated successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-subscriptions/:id/reject': {
+    summary: 'Reject a pending inquiry subscription',
+    description: 'Rejects a pending subscription request and may record staff notes. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Admin'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', additionalProperties: false, properties: { notes: { type: 'string', maxLength: 1000 } } },
+    responses: resourceResponse('Inquiry subscription rejected successfully.'),
+  },
+  'POST /api/v1/admin/inquiry-subscriptions/grant': {
+    summary: 'Grant an inquiry subscription manually',
+    description: 'Grants a selected plan to a company or user as an administrative action. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage. Supply planId and the intended companyId or userId.',
+    tags: ['Admin'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, companyId: { type: 'integer', minimum: 1 }, userId: { type: 'integer', minimum: 1 }, notes: { type: 'string', maxLength: 1000 } } },
+    responses: createdResponse('Inquiry subscription granted successfully.'),
+  },
+  'POST /api/v1/admin/notifications/send': {
+    summary: 'Send an administrative announcement',
+    description: 'Sends an announcement to active users in the selected audience through the selected in-app and/or email channels. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: notifications.send.',
+    tags: ['Notifications'], permission: 'notifications.send',
+    body: { type: 'object', required: ['title', 'message', 'audience', 'channels'], additionalProperties: false, properties: {
+      title: { type: 'string', minLength: 1, maxLength: 120 }, message: { type: 'string', minLength: 1, maxLength: 5000 },
+      audience: { type: 'string', enum: ['ALL_ACTIVE', 'CUSTOMER', 'COMPANY', 'STAFF'] },
+      channels: { type: 'array', minItems: 1, uniqueItems: true, items: { type: 'string', enum: ['IN_APP', 'EMAIL'] } },
+    } }, responses: createdResponse('Announcement queued successfully.'),
+  },
+  'GET /api/v1/admin/notifications/folders': {
+    summary: 'List administratively managed notification folders',
+    description: 'Lists notification folder definitions and their audience scopes. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Notifications'], permission: 'system_settings.manage', responses: resourceResponse('Notification folders returned successfully.'),
+  },
+  'POST /api/v1/admin/notifications/folders': {
+    summary: 'Create a notification folder',
+    description: 'Creates a system-managed notification folder for the selected audience scope. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Notifications'], permission: 'system_settings.manage',
+    body: { type: 'object', required: ['name', 'scope'], additionalProperties: false, properties: {
+      name: { type: 'string', minLength: 2, maxLength: 60 }, scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+      sortOrder: { type: 'integer', minimum: 0, maximum: 10000 },
+    } }, responses: createdResponse('Notification folder created successfully.'),
+  },
+  'PATCH /api/v1/admin/notifications/folders/:id': {
+    summary: 'Update a notification folder',
+    description: 'Updates a system-managed notification folder, including its name, audience scope, ordering or active state. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: system_settings.manage.',
+    tags: ['Notifications'], permission: 'system_settings.manage', params: idParam(),
+    body: { type: 'object', minProperties: 1, additionalProperties: false, properties: {
+      name: { type: 'string', minLength: 2, maxLength: 60 }, scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+      sortOrder: { type: 'integer', minimum: 0, maximum: 10000 }, isActive: { type: 'boolean' },
+    } }, responses: resourceResponse('Notification folder updated successfully.'),
+  },
+  'GET /api/v1/admin/notifications/delivery-stats': {
+    summary: 'Get notification delivery statistics',
+    description: 'Returns aggregate notification delivery statistics for staff monitoring. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: delivery.view.',
+    tags: ['Admin'], permission: 'delivery.view', responses: resourceResponse('Notification delivery statistics returned successfully.'),
+  },
+  'GET /api/v1/admin/notifications/deliveries': {
+    summary: 'List notification delivery records',
+    description: 'Lists delivery records for operational monitoring. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: delivery.view.',
+    tags: ['Admin'], permission: 'delivery.view', responses: paginatedResponse('Notification delivery records returned successfully.'),
+  },
+  'GET /api/v1/inquiries/plans': {
+    summary: 'List inquiry subscription plans',
+    description: 'Lists available inquiry subscription plans for eligible buyer and supplier application contexts. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read or inquiries.create.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read OR inquiries.create', responses: resourceResponse('Available inquiry plans returned successfully.'),
+  },
+  'POST /api/v1/inquiries/subscription/:id/verify-payment': {
+    summary: 'Retry verification of an inquiry subscription payment',
+    description: 'Retries server-side verification for the caller-owned inquiry subscription payment. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.read, inquiries.create or inquiries.respond. The provider reference is resolved from the stored subscription; caller ownership is enforced.',
+    tags: ['Inquiries'], permission: 'inquiries.read OR inquiries.create OR inquiries.respond',
+    params: { type: 'object', required: ['id'], properties: { id: { type: 'string', minLength: 1, maxLength: 10 } } },
+    responses: resourceResponse('Inquiry subscription payment verification result returned.'),
+  },
+  'GET /api/v1/inquiries/subscription/me': {
+    summary: 'List the current user or company inquiry subscriptions',
+    description: 'Returns subscriptions owned by the authenticated customer user or company. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.read, inquiries.create or inquiries.respond.',
+    tags: ['Inquiries'], permission: 'inquiries.read OR inquiries.create OR inquiries.respond', responses: resourceResponse('Caller-owned inquiry subscriptions returned successfully.'),
+  },
+  'POST /api/v1/inquiries/subscription': {
+    summary: 'Request an inquiry subscription',
+    description: 'Requests a plan for the authenticated company or customer user. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.create or inquiries.respond. Optional paymentReference is used for manual payment review when applicable.',
+    tags: ['Inquiries'], permission: 'inquiries.create OR inquiries.respond',
+    body: { type: 'object', required: ['planId'], additionalProperties: false, properties: { planId: { type: 'integer', minimum: 1 }, paymentReference: { type: 'string', maxLength: 120 } } },
+    responses: createdResponse('Inquiry subscription request created successfully.'),
+  },
+  'GET /api/v1/inquiries/quota': {
+    summary: 'Get the current inquiry subscription quota',
+    description: 'Returns the remaining inquiry, response, internal-message and SMS allowances for the authenticated owner. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read or inquiries.create.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read OR inquiries.create', responses: resourceResponse('Current inquiry quota returned successfully.'),
+  },
+  'GET /api/v1/inquiries/stats': {
+    summary: 'Get inquiry statistics for the current access context',
+    description: 'Returns inquiry aggregates scoped to the authenticated buyer, supplier company or authorized staff platform context. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read or inquiries.read.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', responses: resourceResponse('Inquiry statistics returned successfully.'),
+  },
+  'PATCH /api/v1/inquiries/:id': {
+    summary: 'Update an inquiry',
+    description: 'Updates an inquiry within the caller’s authorized management context. Authentication required: Bearer JWT. Access context required: STAFF or COMPANY. Permission required: leads.update or inquiries.update. Buyer/supplier ownership and lifecycle rules are enforced by the service.',
+    tags: ['Inquiries'], permission: 'leads.update OR inquiries.update', params: idParam(),
+    responses: resourceResponse('Inquiry updated successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/reveal': {
+    summary: 'Reveal sealed inquiry responses',
+    description: 'Requests early reveal of sealed supplier responses when the inquiry policy allows it. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read, leads.update or inquiries.update. Buyer ownership and reveal policy are enforced by the service.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read OR leads.update OR inquiries.update', params: idParam(),
+    responses: resourceResponse('Inquiry response reveal result returned successfully.'),
+  },
+  'GET /api/v1/inquiries/:id/messages': {
+    summary: 'List private inquiry messages',
+    description: 'Returns the private buyer/supplier conversation for an inquiry. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read or inquiries.read. Conversation membership and inquiry visibility are enforced by the service.',
+    tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', params: idParam(), responses: resourceResponse('Inquiry messages returned successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/messages': {
+    summary: 'Send a private inquiry message',
+    description: 'Sends a message in an authorized inquiry conversation and may request an SMS alert when recipient preference and sender quota allow it. Authentication required: Bearer JWT. Access context required: COMPANY or CUSTOMER. Permission required: inquiries.create or inquiries.respond. Each send is subject to subscription message quota.',
+    tags: ['Inquiries'], permission: 'inquiries.create OR inquiries.respond', params: idParam(),
+    body: { type: 'object', required: ['message'], additionalProperties: false, properties: {
+      message: { type: 'string', minLength: 1, maxLength: 5000 }, recipientCompanyId: { type: 'integer', minimum: 1 }, notifyBySms: { type: 'boolean' },
+    } }, responses: createdResponse('Inquiry message sent successfully.'),
+  },
+  'PATCH /api/v1/inquiries/:id/responses/:responseId/decision': {
+    summary: 'Accept or reject an inquiry response',
+    description: 'Records the buyer’s decision on a supplier response. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: inquiries.create, inquiries.update or leads.update. Buyer ownership and response decision rules are enforced by the service.',
+    tags: ['Inquiries'], permission: 'inquiries.create OR inquiries.update OR leads.update', params: twoIdParams('id', 'responseId'),
+    body: { type: 'object', required: ['decision'], additionalProperties: false, properties: { decision: { type: 'string', enum: ['SELECTED', 'REJECTED'] }, comment: { type: 'string', maxLength: 2000 } } },
+    responses: resourceResponse('Inquiry response decision saved successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/responses/:responseId/withdraw': {
+    summary: 'Withdraw a supplier response',
+    description: 'Withdraws the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Response ownership is enforced by the service.',
+    tags: ['Inquiries'], permission: 'inquiries.respond', params: twoIdParams('id', 'responseId'),
+    body: { type: 'object', additionalProperties: false, properties: { companyId: { type: 'integer' } } },
+    responses: resourceResponse('Inquiry response withdrawn successfully.'),
+  },
+  'POST /api/v1/inquiries/:id/responses/:responseId/attachments': {
+    summary: 'Upload an attachment to a supplier response',
+    description: 'Uploads a file attachment to the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Request content type: multipart/form-data.',
+    tags: ['Inquiries'], permission: 'inquiries.respond', params: twoIdParams('id', 'responseId'),
+    responses: createdResponse('Inquiry response attachment uploaded successfully.'),
+  },
+  'DELETE /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId': {
+    summary: 'Delete an attachment from a supplier response',
+    description: 'Deletes an attachment owned by the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Attachment and response ownership are enforced by the service.',
+    tags: ['Inquiries'], permission: 'inquiries.respond',
+    params: { type: 'object', required: ['id', 'responseId', 'attachmentId'], properties: { id: { type: 'integer' }, responseId: { type: 'integer' }, attachmentId: { type: 'integer' } } },
+    responses: messageResponse('Inquiry response attachment deleted successfully.'),
+  },
+  'GET /api/v1/settings/notifications': {
+    summary: 'List the current user notifications',
+    description: 'Lists notifications belonging to the authenticated user, including the selected inbox/folder scope and pagination where supported. Authentication required: Bearer JWT. Results are user-scoped.',
+    tags: ['Notifications'], responses: paginatedResponse('User notifications returned successfully.'),
+  },
+  'GET /api/v1/settings/notifications/unread-count': {
+    summary: 'Get the current user unread notification count',
+    description: 'Returns unread notification counts for the authenticated user’s notification folders. Authentication required: Bearer JWT. Results are user-scoped.',
+    tags: ['Notifications'], responses: resourceResponse('Unread notification counts returned successfully.'),
+  },
+  'POST /api/v1/settings/notifications/bulk-read-state': {
+    summary: 'Set read state for multiple notifications',
+    description: 'Marks up to 100 selected notifications as read or unread for the authenticated user. Authentication required: Bearer JWT. Every notification ID is scoped to the caller.',
+    tags: ['Notifications'],
+    body: { type: 'object', required: ['ids', 'isRead'], additionalProperties: false, properties: {
+      ids: { type: 'array', minItems: 1, maxItems: 100, uniqueItems: true, items: { type: 'integer', minimum: 1 } }, isRead: { type: 'boolean' },
+    } }, responses: resourceResponse('Notification read states updated successfully.'),
+  },
+  'POST /api/v1/settings/notifications/bulk-delete': {
+    summary: 'Delete multiple notifications',
+    description: 'Deletes up to 100 selected notifications belonging to the authenticated user. Authentication required: Bearer JWT. Every notification ID is scoped to the caller.',
+    tags: ['Notifications'],
+    body: { type: 'object', required: ['ids'], additionalProperties: false, properties: { ids: { type: 'array', minItems: 1, maxItems: 100, uniqueItems: true, items: { type: 'integer', minimum: 1 } } } },
+    responses: messageResponse('Selected notifications deleted successfully.'),
+  },
+  'GET /api/v1/settings/notifications/folders': {
+    summary: 'List notification folders available to the current user',
+    description: 'Returns system-defined folders available in the authenticated user’s application context. Authentication required: Bearer JWT. Folder visibility is scoped to the user’s context.',
+    tags: ['Notifications'], responses: resourceResponse('Available notification folders returned successfully.'),
+  },
+  'POST /api/v1/settings/notifications/:id/folders': {
+    summary: 'Copy or move a notification to a folder',
+    description: 'Copies or moves an owned notification into a permitted folder. Authentication required: Bearer JWT. Notification ownership and folder scope are enforced by the service.',
+    tags: ['Notifications'], params: idParam(),
+    body: { type: 'object', required: ['folderId', 'action'], additionalProperties: false, properties: {
+      folderId: { type: 'integer', minimum: 1 }, action: { type: 'string', enum: ['copy', 'move'] }, sourceFolderId: { type: 'integer', minimum: 1 },
+    } }, responses: resourceResponse('Notification folder assignment updated successfully.'),
+  },
+  'PATCH /api/v1/settings/notifications/:id/read-state': {
+    summary: 'Set a notification read state',
+    description: 'Marks an owned notification as read or unread. Authentication required: Bearer JWT. Notification ownership is enforced by the service.',
+    tags: ['Notifications'], params: idParam(),
+    body: { type: 'object', required: ['isRead'], additionalProperties: false, properties: { isRead: { type: 'boolean' } } },
+    responses: resourceResponse('Notification read state updated successfully.'),
+  },
+  'PATCH /api/v1/settings/notifications/:id/read': {
+    summary: 'Mark a notification as read',
+    description: 'Marks an owned notification as read. Authentication required: Bearer JWT. Notification ownership is enforced by the service.',
+    tags: ['Notifications'], params: idParam(), responses: resourceResponse('Notification marked as read successfully.'),
+  },
+  'PATCH /api/v1/settings/notifications/read-all': {
+    summary: 'Mark all current user notifications as read',
+    description: 'Marks all notifications belonging to the authenticated user as read. Authentication required: Bearer JWT. Updates are scoped to the caller.',
+    tags: ['Notifications'], responses: resourceResponse('All user notifications marked as read.'),
+  },
+  'DELETE /api/v1/settings/notifications/:id': {
+    summary: 'Delete an owned notification',
+    description: 'Deletes a notification belonging to the authenticated user. Authentication required: Bearer JWT. Notification ownership is enforced by the service.',
+    tags: ['Notifications'], params: idParam(), responses: messageResponse('Notification deleted successfully.'),
+  },
+});
+
 module.exports = docs;
