@@ -28,7 +28,7 @@ async function listForManagement(request, reply) {
 }
 
 async function getOne(request, reply) {
-  const item = await svc.getCategoryById(request.params.id);
+  const item = await svc.getCategoryById(request.params.id, { activeOnly: true });
   if (!item) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'دسته‌بندی یافت نشد' } });
   return reply.send(success(item));
 }
@@ -45,7 +45,7 @@ async function listSubcategories(request, reply) {
 }
 
 async function getSubcategory(request, reply) {
-  const item = await svc.getSubcategoryById(request.params.subId);
+  const item = await svc.getSubcategoryById(request.params.subId, { activeOnly: true });
   if (!item) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'زیردسته یافت نشد' } });
   return reply.send(success(item));
 }
