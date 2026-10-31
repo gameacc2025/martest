@@ -35,6 +35,18 @@ test('every key looks like "METHOD /api/v1/..." with a real HTTP method', () => 
   }
 });
 
+test('every OpenAPI route-doc key corresponds to a registered route in the API inventory', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const inventory = fs.readFileSync(path.join(__dirname, '../../../docs/API_ROUTE_INVENTORY.md'), 'utf8');
+
+  for (const key of Object.keys(docs)) {
+    const [method, routePath] = key.split(' ');
+    const inventoryRow = `| ${method} | \`${routePath}\` |`;
+    assert.ok(inventory.includes(inventoryRow), `OpenAPI docs reference an unregistered route: ${key}`);
+  }
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
