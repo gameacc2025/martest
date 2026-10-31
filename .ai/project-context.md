@@ -474,3 +474,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - `refresh` and `logout` use the `refreshCookie` scheme; PKCE redeem is trusted-origin + one-time code/verifier and is not Bearer-authenticated.
 - Undocumented protected operations default to Bearer unless explicitly included in the public route allow-list. Empty `security: []` metadata must not accidentally make a protected route public.
 - 89/149 routes have dedicated prose entries; remaining 60 are pending source-backed metadata completion.
+
+
+## OpenAPI metadata coverage — 2026-10-31
+
+- PR #46 security alignment merged at `ea6e787c9b2c6dbe819fb344c22aa7adea33016d`; PR #47 full route metadata coverage merged at `d3d6012107651af9368c0683ae3126dfc03e5a3f`.
+- `openapi-route-docs.js` now has dedicated metadata for all 149 routes in `docs/API_ROUTE_INVENTORY.md`; tests enforce both directions of route-doc/inventory consistency and explicit no-auth metadata for every public route.
+- Public category/product/specification-library endpoints are documented as unauthenticated; protected routes require Bearer by default, while refresh/logout use refreshCookie and PKCE redeem remains non-Bearer.
+- Detailed request schemas are included where route sources define them. Generic response descriptions remain where concrete response shapes are not source-defined. Next is step 16B: source-backed concrete response schema coverage.
