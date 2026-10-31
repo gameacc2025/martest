@@ -72,6 +72,7 @@ test('repeated failed logins from the same IP get rate-limited (429)', async () 
   const payload = { phone: '09120000000', password: 'wrong-password' };
 
   const statuses = [];
+  const responses = [];
   for (let i = 0; i < 12; i++) {
     const res = await app.inject({
       method: 'POST',
@@ -80,6 +81,7 @@ test('repeated failed logins from the same IP get rate-limited (429)', async () 
       remoteAddress,
     });
     statuses.push(res.statusCode);
+    responses.push(res);
   }
 
   // First 10 attempts are the normal 401 (bad credentials); the login
@@ -87,6 +89,10 @@ test('repeated failed logins from the same IP get rate-limited (429)', async () 
   // should be rejected with 429 before ever reaching the handler.
   assert.ok(statuses.slice(0, 10).every((s) => s === 401), `expected first 10 to be 401, got: ${statuses}`);
   assert.equal(statuses[10], 429, `expected 11th attempt to be rate-limited, got: ${statuses}`);
+  const limitedBody = responses[10].json();
+  assert.equal(limitedBody.statusCode, 429);
+  assert.equal(limitedBody.error, 'Too Many Requests');
+  assert.match(limitedBody.message, /Rate limit exceeded/);
 });
 
 test('a different IP is NOT affected by another IP\'s rate limit', async () => {
