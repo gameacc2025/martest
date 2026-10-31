@@ -405,3 +405,6 @@ Step 11E is the remaining backend route inventory: auth, users, admin, settings,
 
 - Public category and subcategory detail endpoints must return active taxonomy only, matching the public category list. An inactive parent category must not expose its child list.
 - Category service supports explicit `activeOnly` lookup options; public controller handlers pass `activeOnly: true`. Staff management list remains able to inspect inactive categories.
+
+
+- Auth controller password-reset contract: pass `request.user` (verified token context) as the third argument to `authService.changeUserPassword`; controller tests must assert this caller forwarding.
