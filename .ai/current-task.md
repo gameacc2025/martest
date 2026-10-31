@@ -571,3 +571,11 @@ PR #59 merged by squash into `main` at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e
 - Reconcile all existing remote branches against `main` before merging/deleting anything; merge only branches with valid, non-duplicate feature commits and no conflicting history.
 - Verify route inventory, API docs and `.ai` current-task/worklog/project context all point to merged main state.
 - GitHub connector currently exposes branch creation/update but no branch-delete operation; do not claim remote branch deletion. Provide exact PowerShell commands for stale branch deletion after the safe merge audit.
+
+
+## OpenAPI delivery query filters — step 16K (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-delivery-query-filters-step-16k`.
+- Safe branch audit found 31 remote branches; all but two map to already-merged PR heads. `feat/website-homepage-redesign` has zero commits ahead of main and is safe to delete. `docs/openapi-admin-inquiry-delivery-responses-step-16d` is a scratch branch whose response schema work is already superseded by merged 16D/16E work, but its admin delivery querystring schema is not present in main.
+- Added source-backed delivery query filters to both admin delivery stats and delivery list docs. Exact controller inputs: status, channel, eventType, userId, page, limit. Excluded from/to because controller/service do not consume them. No max limit is claimed because service does not clamp it.
+- Added static schema tests and generated `/docs/json` integration assertions for query parameter presence/absence. CI pending.

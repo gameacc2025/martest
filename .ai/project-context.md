@@ -687,3 +687,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - PR #59 merged at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e`. CI passed backend 1,394/1,394 and frontend/shared 18/18; all builds and Prisma migration validation passed.
 - Real Fastify `/docs/json` is tested against all 149 API inventory routes, including route method/path, effective bearer/cookie/public security, global error statuses and empty-body 204 responses.
 - Root routes mounted at `'/'` appear in Swagger with trailing slash (e.g. `/users/`). `@fastify/swagger` requires `type: 'null'` to model empty 204 bodies; all 13 204 route entries use this form.
+
+
+## Admin notification delivery query filters — step 16K (2026-10-31)
+
+- GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/notifications/deliveries` accept status (PENDING/SENT/FAILED/SKIPPED), channel (IN_APP/EMAIL/SMS), eventType substring, userId, page and limit. Controller defaults page=1/limit=20; delivery service does not clamp maximum limit.
+- Do not document `from`/`to`: the actual admin controller does not pass them to delivery service, even though a stale notification schema helper declares them.
+- OpenAPI route docs now declare these query filters; static and generated-spec tests cover the exact accepted fields.
