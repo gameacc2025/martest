@@ -507,6 +507,25 @@ test('createUser: hashes the password before persisting', async () => {
   assert.equal(calls.userCreate[0].data.passwordHash, 'hashed(plaintext)');
 });
 
+test('createUser: STAFF admin can create a user for another company and receive the created record', async () => {
+  resetMocks();
+  fx.userByPhone = null;
+  fx.userByEmail = null;
+  fx.userById = dbUser({ id: 100, accessProfile: { id: 9, type: 'COMPANY', companyId: 20, isActive: true } });
+  fx.roles = [{ id: 2, name: 'COMPANY_USER', scope: 'COMPANY' }];
+  accessFx = { roles: ['COMPANY_USER'], permissions: ['products.read'] };
+
+  const result = await createUser(
+    { phone: '09120000000', password: 'plaintext', type: 'COMPANY', companyId: 20, roleIds: [2] },
+    caller({ roles: ['ADMIN'], companyId: 1, accessType: 'STAFF', permissions: ['users.create', 'users.assign_roles'] }),
+  );
+
+  assert.equal(result.id, 100);
+  assert.equal(result.accessProfile.companyId, 20);
+  assert.equal(calls.accessProfileCreate[0].data.companyId, 20);
+  resetAccessFx();
+});
+
 // ── updateUser ───────────────────────────────────────────────
 
 test('updateUser: COMPANY callers cannot edit user details even within their own company', async () => {

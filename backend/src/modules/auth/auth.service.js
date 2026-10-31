@@ -404,7 +404,15 @@ async function changePassword(userId, currentPassword, newPassword) {
 /**
  * Admin resets another user's password.
  */
-async function changeUserPassword(targetUserId, newPassword) {
+async function changeUserPassword(targetUserId, newPassword, caller) {
+  if (caller?.accessType !== 'STAFF') {
+    throw createError(403, 'STAFF_CONTEXT_REQUIRED', 'بازنشانی رمز عبور سایر کاربران فقط در پنل مدیریت مجاز است.');
+  }
+  const permissions = Array.isArray(caller.permissions) ? caller.permissions : [];
+  if (!permissions.includes('users.reset_password') && !permissions.includes('*')) {
+    throw createError(403, 'PERMISSION_REQUIRED', 'مجوز بازنشانی رمز عبور را ندارید.');
+  }
+
   const user = await prisma.user.findUnique({ where: { id: targetUserId } });
 
   if (!user) {

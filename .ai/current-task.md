@@ -116,3 +116,32 @@ PR #41 merged by squash into `main` at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53
 ## Step 11E — Remaining backend route inventory (active)
 
 Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categories`, `roles`, `permissions`, and `specification-library`. Verify route preHandlers against service-level ownership and app-context checks; do not assume role/permission wildcard grants cross-panel access. Record each module's coverage and add regression tests only for proven gaps. After Step 11E, complete the remaining SMS message/event integration review and API documentation backlog.
+
+
+## Step 11E audit update — Auth and user-management surfaces (2026-10-31)
+
+- Reviewed auth routes/controller/service, user routes/controller/service, admin, settings, categories, roles, permissions and specification-library route registrations and their service query patterns.
+- Confirmed security gap: `PATCH /auth/users/:id/password` was described as an admin-only action but enforced only `users.reset_password`. Since role-permission assignment is configurable and wildcard permissions bypass fine-grained checks, a COMPANY-context user holding that permission (or SUPER_ADMIN role in COMPANY context) could reach a service that changed any target user's password by ID; the service itself accepted no caller context.
+- Fixed both boundaries: route now requires exact STAFF AccessProfile context plus `users.reset_password`; controller passes the verified caller to the service; service independently requires STAFF context and the explicit permission (or STAFF wildcard) before reading or changing the target account.
+- Added route regression coverage proving COMPANY + SUPER_ADMIN + wildcard cannot invoke the reset controller. Added service tests for COMPANY context denial and missing permission, while preserving authorized STAFF reset behavior.
+- Branch: `audit/backend-route-inventory-step-11e`. CI/migration checks pending. Further route families remain under review; no full security sign-off yet.
+
+
+## Step 11E additional finding — Public category detail visibility
+
+- Confirmed public category `GET /:id` and `GET /:id/subcategories/:subId` looked up taxonomy by ID without requiring ACTIVE status. The public list filtered inactive records, but direct detail URLs could still expose inactive category/subcategory metadata; the controller's source comment promised active-only behavior more broadly than the implementation provided.
+- Updated public detail lookups to require `status: ACTIVE`; inactive or unknown IDs now follow the existing not-found path. Public subcategory listing also verifies the parent category is active before returning active children.
+- Added service and controller regression tests for active-only detail lookups.
+
+
+- CI feedback: the first backend test run exposed one test-only mismatch in `auth.controller.test.js`: after the controller began forwarding the verified caller, the test still expected only two service arguments. Updated the fixture to include a STAFF caller and assert all three arguments. No production behavior changed in this correction; rerun CI on the new head.
+
+
+- CI feedback on the category visibility change: the first controller patch updated `getOne` but did not pass `activeOnly: true` from `listSubcategories` when checking its parent. Updated that call; the failing test correctly caught the incomplete route wiring. Re-run CI on the latest head.
+
+
+## Step 11E additional finding — STAFF creation of users for other companies
+
+- Confirmed functional bug in `createUser`: after a STAFF admin successfully created a COMPANY user for company X, it called `getUser`, whose non-global STAFF read scope was limited to the caller's Main-company `companyId`. For any other company, the create transaction committed but the API then returned 403, making a successful create appear to fail.
+- Added an internal post-create read path that returns only the user just created by the authorized operation, without widening subsequent `getUser` read access. Added regression coverage for a non-SUPER_ADMIN STAFF `ADMIN` with `users.create` + `users.assign_roles` creating a COMPANY user in a different tenant and receiving the created record.
+- Corrected the stale auth route comment to document STAFF context + `users.reset_password`.

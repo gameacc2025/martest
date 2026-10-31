@@ -28,9 +28,9 @@ async function listCategories({ activeOnly } = {}) {
   });
 }
 
-async function getCategoryById(id) {
-  return prisma.category.findUnique({
-    where: { id: Number(id) },
+async function getCategoryById(id, { activeOnly = false } = {}) {
+  return prisma.category.findFirst({
+    where: { id: Number(id), ...(activeOnly ? { status: 'ACTIVE' } : {}) },
     include: {
       subcategories: {
         orderBy: { sortOrder: 'asc' },
@@ -54,9 +54,9 @@ async function listSubcategoriesByCategory(categoryId, { activeOnly } = {}) {
   });
 }
 
-async function getSubcategoryById(id) {
-  return prisma.subcategory.findUnique({
-    where: { id: Number(id) },
+async function getSubcategoryById(id, { activeOnly = false } = {}) {
+  return prisma.subcategory.findFirst({
+    where: { id: Number(id), ...(activeOnly ? { status: 'ACTIVE' } : {}) },
     include: {
       category: true,
       specificationTemplate: { include: { fields: { orderBy: { sortOrder: 'asc' } } } },

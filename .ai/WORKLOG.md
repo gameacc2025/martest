@@ -1272,3 +1272,32 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Address ownership queries remain scoped to authenticated userId; no cross-user IDOR confirmed. Address route tests cover CUSTOMER_USER default Website context and explicit denial of COMPANY/STAFF/SUPER_ADMIN wildcard context.
 - Fixed notification folder app-scope resolution for AccessProfile-less CUSTOMER_USER while preserving strict ADMIN/COMPANY boundaries; added folder listing/filtering and SUPER_ADMIN regression tests.
 - Next: Step 11E audit of auth/users/admin/settings/categories/roles/permissions/specification-library.
+
+
+## 2026-10-31 — STEP-11E-AUTH-PASSWORD-RESET
+
+- Audited auth/users/admin/settings/categories/roles/permissions/specification-library route wiring and selected service boundaries.
+- Confirmed the admin password-reset endpoint had only a fine-grained permission guard. It did not enforce STAFF app context, and `changeUserPassword` accepted no caller context, allowing any caller whose role was granted `users.reset_password` (including a COMPANY-context SUPER_ADMIN/wildcard) to reset arbitrary user IDs.
+- Fixed route to require `requireExactAccessType('STAFF')` and `users.reset_password`; passed verified caller into service; service independently enforces STAFF context and explicit permission/wildcard.
+- Added route and service regressions for COMPANY/SUPER_ADMIN wildcard denial and STAFF missing-permission denial. Authorized STAFF reset behavior remains covered.
+- Branch: `audit/backend-route-inventory-step-11e`; verification pending.
+
+
+### Step 11E — Public taxonomy visibility
+
+- Found public category detail and subcategory detail handlers fetched by ID without checking `status === ACTIVE`, despite the public category list filtering inactive rows.
+- Added active-only predicates to public category/subcategory detail lookups and verified the parent category is active before listing children.
+- Added service/controller regression coverage. Changes are included in PR #42.
+
+
+- CI first run: 1,313 tests executed, 1,312 passed; the only failure was a stale controller-test expectation after the caller context was added to the service call. Updated the test to provide a verified STAFF caller and assert the third argument. No production behavior changed in this correction. Re-run CI on the latest head.
+
+
+- Category controller regression caught one missed call site: `listSubcategories` still fetched its parent without `activeOnly: true`. Corrected the parent lookup to enforce active status before listing active children; re-run CI on the latest head.
+
+
+### Step 11E — STAFF-created company user response
+
+- Confirmed `createUser` committed a COMPANY user for another tenant and then called `getUser`; non-global STAFF read scoping rejected that newly-created user with 403 because the caller's Main-company ID differed.
+- Replaced that post-create read with a private `getCreatedUserContext` path that can only be invoked using the ID returned by the successful create transaction. Normal `getUser` tenant scoping is unchanged.
+- Added regression coverage for STAFF ADMIN creating a user in another company and receiving the result.

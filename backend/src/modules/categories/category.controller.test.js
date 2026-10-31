@@ -99,6 +99,7 @@ test('getOne: wraps a found category in success()', async () => {
   fx.category = { id: 1 };
   const reply = makeReply();
   await controller.getOne(makeRequest({ params: { id: '1' } }), reply);
+  assert.deepEqual(calls.getCategoryById, ['1', { activeOnly: true }]);
   assert.deepEqual(reply._body, { data: fx.category });
 });
 
@@ -117,6 +118,7 @@ test('listSubcategories: lists activeOnly=true subcategories once the parent is 
   fx.subcategories = [{ id: 10 }];
   const reply = makeReply();
   await controller.listSubcategories(makeRequest({ params: { id: '1' } }), reply);
+  assert.deepEqual(calls.getCategoryById, ['1', { activeOnly: true }]);
   assert.deepEqual(calls.listSubcategoriesByCategory, ['1', { activeOnly: true }]);
   assert.deepEqual(reply._body, { data: fx.subcategories });
 });
@@ -127,7 +129,7 @@ test('getSubcategory: uses params.subId (not params.id) and 404s a Persian messa
   fx.subcategory = null;
   const reply = makeReply();
   await controller.getSubcategory(makeRequest({ params: { id: '1', subId: '99' } }), reply);
-  assert.deepEqual(calls.getSubcategoryById, ['99']);
+  assert.deepEqual(calls.getSubcategoryById, ['99', { activeOnly: true }]);
   assert.equal(reply._statusCode, 404);
   assert.deepEqual(reply._body, { error: { code: 'NOT_FOUND', message: 'زیردسته یافت نشد' } });
 });

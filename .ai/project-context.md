@@ -392,3 +392,25 @@ Usage consumption must validate the active subscription after acquiring its row 
 PR #41 merged into main at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53`. Address records are scoped by authenticated userId; route tests protect CUSTOMER_USER Website fallback from COMPANY/STAFF/SUPER_ADMIN context crossover. Notification folder scope resolver now mirrors central RBAC's AccessProfile-less CUSTOMER_USER fallback to WEBSITE only and rejects SUPER_ADMIN fallback. CI and migration checks passed; Runtime validation remains separate.
 
 Step 11E is the remaining backend route inventory: auth, users, admin, settings, categories, roles, permissions, and specification-library.
+
+
+## Admin password reset app-context boundary — 2026-10-31
+
+- `PATCH /api/v1/auth/users/:id/password` is an administrative operation and must require exact `AccessProfile.type === STAFF` in addition to `users.reset_password`.
+- A COMPANY-context user must never gain the admin password-reset capability from a misassigned permission or SUPER_ADMIN/wildcard role. The service must independently verify caller context and permission; route-only enforcement is insufficient.
+- Auth service now receives the verified caller for `changeUserPassword` and rejects non-STAFF or unauthorized callers before querying the target account.
+
+
+## Public taxonomy visibility — 2026-10-31
+
+- Public category and subcategory detail endpoints must return active taxonomy only, matching the public category list. An inactive parent category must not expose its child list.
+- Category service supports explicit `activeOnly` lookup options; public controller handlers pass `activeOnly: true`. Staff management list remains able to inspect inactive categories.
+
+
+- Auth controller password-reset contract: pass `request.user` (verified token context) as the third argument to `authService.changeUserPassword`; controller tests must assert this caller forwarding.
+
+
+## STAFF user creation result — 2026-10-31
+
+- A STAFF caller with `users.create` and any required role-assignment permission may create a COMPANY user for a target company. Returning the just-created record must not be blocked by the caller's later read-scope filter.
+- The service uses a private post-create context lookup tied to the created ID; this does not broaden normal `getUser` access or list scoping.

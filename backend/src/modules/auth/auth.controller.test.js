@@ -209,13 +209,14 @@ test('adminChangeUserPassword: 400s for a non-numeric / zero id', async () => {
   assert.equal(reply._statusCode, 400);
 });
 
-test('adminChangeUserPassword: coerces the id to a number and forwards to the service', async () => {
+test('adminChangeUserPassword: coerces the id to a number and forwards the verified caller to the service', async () => {
   const reply = makeReply();
+  const user = { id: 1, accessType: 'STAFF', permissions: ['users.reset_password'] };
   await controller.adminChangeUserPassword(
-    makeRequest({ params: { id: '17' }, body: { newPassword: 'x'.repeat(10) } }),
+    makeRequest({ params: { id: '17' }, body: { newPassword: 'x'.repeat(10) }, user }),
     reply
   );
-  assert.deepEqual(calls.changeUserPassword, [17, 'x'.repeat(10)]);
+  assert.deepEqual(calls.changeUserPassword, [17, 'x'.repeat(10), user]);
   assert.equal(reply._statusCode, 200);
 });
 

@@ -227,7 +227,8 @@ async function adminChangeUserPassword(request, reply) {
 
   await authService.changeUserPassword(
     targetId,
-    newPassword
+    newPassword,
+    request.user,
   );
 
 

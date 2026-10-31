@@ -170,6 +170,18 @@ async function getUser(userId, caller) {
   return { ...user, roles: access.roles, permissions: access.permissions };
 }
 
+// Return a newly-created user to the STAFF actor who just created it. This
+// internal path intentionally skips getUser's subsequent read-scope check:
+// the creation transaction itself is the authorization boundary, and a
+// non-global STAFF caller may create a user for a company other than the
+// platform's Main company.
+async function getCreatedUserContext(userId) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: USER_SELECT });
+  if (!user) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر ایجادشده پیدا نشد.' };
+  const access = await loadUserAccessDetailed(userId);
+  return { ...user, roles: access.roles, permissions: access.permissions };
+}
+
 /**
  * Create a new user (STAFF or COMPANY employee) with:
  *   - User            (auth identity)
@@ -260,7 +272,7 @@ async function createUser(data, caller) {
     return user;
   });
 
-  return getUser(created.id, caller);
+  return getCreatedUserContext(created.id);
 }
 
 /**

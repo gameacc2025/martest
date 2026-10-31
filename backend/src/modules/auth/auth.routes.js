@@ -10,14 +10,14 @@
 //   POST   /api/v1/auth/handoff/redeem          → redeem handoff code for a session (origin guard)
 //   GET    /api/v1/auth/me                      → current user profile + access (any role)
 //   PATCH  /api/v1/auth/users/:id/password      → admin reset another user's password
-//                                               (requires permission: users.update)
+//                                               (requires STAFF context + users.reset_password)
 //
 // NOTE: user creation/update/delete lives in the `users` module
 //       (POST /api/users, etc.) which enforces the users.create permission.
 // =============================================================
 
 const ctrl = require('./auth.controller');
-const { requirePermission } = require('../../middlewares/rbac');
+const { requirePermission, requireExactAccessType } = require('../../middlewares/rbac');
 const { requireTrustedOrigin } = require('../../middlewares/originGuard');
 const {
   loginBody,
@@ -174,7 +174,7 @@ async function authRoutes(fastify) {
   // ── Admin: reset another user's password ────────────────────
   fastify.patch('/users/:id/password', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('users.reset_password')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('users.reset_password')],
     schema: {
       summary: 'Admin resets another user password',
       tags: ['Auth'],
