@@ -2806,4 +2806,29 @@ Object.assign(docs, {
   })),
 });
 
+
+// Step 16K — query filters actually consumed by admin delivery controllers.
+const step16kNotificationDeliveryQuerySchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    status: { type: 'string', enum: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'] },
+    channel: { type: 'string', enum: ['IN_APP', 'EMAIL', 'SMS'] },
+    eventType: { type: 'string' },
+    userId: { type: 'integer', minimum: 1 },
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, default: 20 },
+  },
+};
+Object.assign(docs, {
+  ['GET /api/v1/admin/notifications/delivery-stats']: {
+    ...docs['GET /api/v1/admin/notifications/delivery-stats'],
+    querystring: step16kNotificationDeliveryQuerySchema,
+  },
+  ['GET /api/v1/admin/notifications/deliveries']: {
+    ...docs['GET /api/v1/admin/notifications/deliveries'],
+    querystring: step16kNotificationDeliveryQuerySchema,
+  },
+});
+
 module.exports = docs;
