@@ -39,7 +39,7 @@ test('every registered API route has a dedicated OpenAPI route-doc entry', () =>
   const fs = require('node:fs');
   const path = require('node:path');
   const inventory = fs.readFileSync(path.join(__dirname, '../../../docs/API_ROUTE_INVENTORY.md'), 'utf8');
-  const registeredKeys = [...inventory.matchAll(/^\\| ([A-Z]+) \\| `(\\/api\\/v1[^\`]+)` \\|/gm)]
+  const registeredKeys = [...inventory.matchAll(/^\| ([A-Z]+) \| `(\/api\/v1[^`]+)` \|/gm)]
     .map((match) => `${match[1]} ${match[2]}`);
   const documentedKeys = new Set(Object.keys(docs));
   const missing = registeredKeys.filter((key) => !documentedKeys.has(key));
