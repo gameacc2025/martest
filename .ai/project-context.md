@@ -505,3 +505,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Inquiry message list returns up to 500 messages with sender/recipient projections; send adds `smsQueued` and `smsSkippedReason`.
 - Inquiry response projections include company, response items with inquiry item/product projections, and attachment metadata. For ANONYMOUS_SEALED buyer views, supplier companyId and nested product companyId are removed; response schema keeps them optional. Buyer response decision returns only `{id,inquiryId,status}`.
 - Response attachment `url` is a relative `/uploads/inquiries/responses/...` path.
+
+
+## Product/inquiry response contracts — merged 2026-10-31
+
+- PR #49 merged at `d79b1908d899fc8569495e8925a00a3a0650080d`; CI backend 1,385/1,385 and frontend/shared 18/18; migration passed.
+- Product price snapshots, status history and activity log have concrete schemas. Inquiry messages, responses/items, attachments and decision receipts are documented from actual service projections.
+- ANONYMOUS_SEALED buyer responses redact companyId and nested product companyId; schemas do not require them. Buyer decision responses are minimal `{id,inquiryId,status}` receipts. Attachment URLs are relative upload paths.
+- Remaining response-contract work: admin subscription/delivery records, inquiry stats/list and product management projections, only where a stable source DTO/projection exists.
