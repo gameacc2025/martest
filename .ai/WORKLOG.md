@@ -1272,3 +1272,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Address ownership queries remain scoped to authenticated userId; no cross-user IDOR confirmed. Address route tests cover CUSTOMER_USER default Website context and explicit denial of COMPANY/STAFF/SUPER_ADMIN wildcard context.
 - Fixed notification folder app-scope resolution for AccessProfile-less CUSTOMER_USER while preserving strict ADMIN/COMPANY boundaries; added folder listing/filtering and SUPER_ADMIN regression tests.
 - Next: Step 11E audit of auth/users/admin/settings/categories/roles/permissions/specification-library.
+
+
+## 2026-10-31 — STEP-11E-AUTH-PASSWORD-RESET
+
+- Audited auth/users/admin/settings/categories/roles/permissions/specification-library route wiring and selected service boundaries.
+- Confirmed the admin password-reset endpoint had only a fine-grained permission guard. It did not enforce STAFF app context, and `changeUserPassword` accepted no caller context, allowing any caller whose role was granted `users.reset_password` (including a COMPANY-context SUPER_ADMIN/wildcard) to reset arbitrary user IDs.
+- Fixed route to require `requireExactAccessType('STAFF')` and `users.reset_password`; passed verified caller into service; service independently enforces STAFF context and explicit permission/wildcard.
+- Added route and service regressions for COMPANY/SUPER_ADMIN wildcard denial and STAFF missing-permission denial. Authorized STAFF reset behavior remains covered.
+- Branch: `audit/backend-route-inventory-step-11e`; verification pending.
