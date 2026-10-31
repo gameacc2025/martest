@@ -1605,3 +1605,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - ErrorResponse now documents optional development-only `debug` and `stack` fields; these are absent in production. Existing error details remain array/object compatible.
 - Swagger plugin tests assert all new default statuses and schema references. Security integration test now verifies the actual rate-limit 429 payload fields (statusCode/error/message).
 - CI/migration validation pending.
+
+
+## 2026-10-31 — OPENAPI-ERROR-RESPONSE-AUDIT-STEP-16I-MERGE
+
+- PR #58 merged by squash at `4ee4dbca6486588af34eda4ed9a22a809a7cb73d`.
+- CI [41236781704] passed: backend 1,393/1,393; frontend/shared 18/18; all frontend builds passed. Prisma migration validation [41236781614] passed.
+- OpenAPI defaults now include 409, 413 and 429. 409/413/429 all use ErrorResponse. ErrorResponse has optional development-only debug/stack fields; production omits them.
+- Verified Fastify rate-limit errors flow through `error-handler.plugin.js`, which wraps status 429 as `{error:{code:'APP_ERROR',message}}`. Security integration test asserts this exact normalized envelope. An initial incorrect raw rate-limit DTO was removed before merge.
+- Swagger tests assert new default status schemas. Next: step 16J route registry/runtime route and security coverage audit.
