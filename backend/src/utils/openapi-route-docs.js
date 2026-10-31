@@ -1695,19 +1695,75 @@ Object.assign(docs, {
   },
   ['GET /api/v1/admin/stats']: {
     ...docs['GET /api/v1/admin/stats'],
-    responses: { 200: { description: 'Admin dashboard totals, up to five recent users and up to twenty pending products with compact creator/company/category projections.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['counts', 'recentUsers', 'pendingProducts'], properties: {
-      counts: { type: 'object', required: ['users', 'activeUsers', 'companies', 'products', 'pendingProducts', 'orders', 'roles', 'permissions'], properties: {
-        users: { type: 'integer' }, activeUsers: { type: 'integer' }, companies: { type: 'integer' }, products: { type: 'integer' }, pendingProducts: { type: 'integer' }, orders: { type: 'integer' }, roles: { type: 'integer' }, permissions: { type: 'integer' },
-      } },
-      recentUsers: { type: 'array', maxItems: 5, items: { type: 'object', required: ['id', 'email', 'status', 'createdAt', 'profile'], properties: { id: { type: 'integer' }, email: { type: ['string', 'null'] }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' }, profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } }, { type: 'null' }] } } } },
-      pendingProducts: { type: 'array', maxItems: 20, items: { type: 'object', required: ['id', 'title', 'status', 'company', 'category', 'subcategory', 'createdBy'], properties: {
-        id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' },
-        company: { type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } } },
-        category: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
-        subcategory: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
-        createdBy: { type: 'object', properties: { id: { type: 'integer' }, email: { type: ['string', 'null'] }, profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } } }, { type: 'null' }] } } },
-      }, additionalProperties: true } },
-    } } } },
+    responses: {
+      200: {
+        description: 'Admin dashboard totals, up to five recent users and up to twenty pending products with compact creator/company/category projections.',
+        type: 'object',
+        required: ['data'],
+        properties: {
+          data: {
+            type: 'object',
+            required: ['counts', 'recentUsers', 'pendingProducts'],
+            properties: {
+              counts: {
+                type: 'object',
+                required: ['users', 'activeUsers', 'companies', 'products', 'pendingProducts', 'orders', 'roles', 'permissions'],
+                properties: {
+                  users: { type: 'integer' }, activeUsers: { type: 'integer' }, companies: { type: 'integer' },
+                  products: { type: 'integer' }, pendingProducts: { type: 'integer' }, orders: { type: 'integer' },
+                  roles: { type: 'integer' }, permissions: { type: 'integer' },
+                },
+              },
+              recentUsers: {
+                type: 'array',
+                maxItems: 5,
+                items: {
+                  type: 'object',
+                  required: ['id', 'email', 'status', 'createdAt', 'profile'],
+                  properties: {
+                    id: { type: 'integer' }, email: { type: ['string', 'null'] },
+                    status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' },
+                    profile: {
+                      anyOf: [
+                        { type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } } },
+                        { type: 'null' },
+                      ],
+                    },
+                  },
+                },
+              },
+              pendingProducts: {
+                type: 'array',
+                maxItems: 20,
+                items: {
+                  type: 'object',
+                  required: ['id', 'title', 'status', 'company', 'category', 'subcategory', 'createdBy'],
+                  properties: {
+                    id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' },
+                    company: { type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } } },
+                    category: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
+                    subcategory: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
+                    createdBy: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer' }, email: { type: ['string', 'null'] },
+                        profile: {
+                          anyOf: [
+                            { type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } } },
+                            { type: 'null' },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  additionalProperties: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   ['GET /api/v1/admin/settings']: {
     ...docs['GET /api/v1/admin/settings'],
