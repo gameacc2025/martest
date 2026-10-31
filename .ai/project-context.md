@@ -377,3 +377,11 @@ Usage consumption must validate the active subscription after acquiring its row 
 - AccessProfile-less CUSTOMER_USER tokens have `accessType: null` and are recognized as default Website context by central RBAC. Controller subscription/quota owner resolution must mirror that fallback and use authenticated `caller.id` as ownerType=user.
 - Quota endpoint is limited to COMPANY/CUSTOMER contexts; STAFF cannot inspect company quota through a stray companyId.
 - Inquiry statistics derive company ownership only from COMPANY context. Authorized STAFF with inquiry-read permission receives platform-wide aggregates; STAFF companyId is never used as tenant identity.
+
+
+## Notification app-context alignment — 2026-10-31
+
+- Notification folder scopes are ADMIN/COMPANY/WEBSITE and must be derived from the authenticated token, never request query/body values.
+- Customer registrations have no AccessProfile and are represented by `accessType: null` plus the `CUSTOMER_USER` role. Notification folder scope resolution must mirror `requireAccessType('CUSTOMER')`: this exact fallback grants WEBSITE only and must not apply to SUPER_ADMIN.
+- Address endpoints are CUSTOMER-only and all address records are owned by authenticated `userId`; COMPANY and STAFF contexts (including wildcard permission) must not gain customer address access.
+- Step 11C inquiry audit merged in PR #40 at `9bac9916de148741fb379ffcdd5aaf44157f4db2`. Step 11D addresses/notifications audit is active on `audit/notification-address-tenant-step-11d`.
