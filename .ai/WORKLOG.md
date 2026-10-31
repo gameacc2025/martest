@@ -1446,3 +1446,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Product management list/detail schemas cover core product fields and included company/category/subcategory/price/image/document relations.
 - Added structural tests. CI/migration validation pending.
 - Separate runtime workflow for merged PR #49 failed on company/admin browser smoke rendering and STAFF auth handoff. Backend 1,385 tests, frontend/shared 18 tests, builds and migration validation passed; browser smoke testing remains secondary per project owner direction.
+
+
+## 2026-10-31 — OPENAPI-ADMIN-INQUIRY-STATS-AND-MANAGEMENT-RESPONSES-STEP-16D-MERGE
+
+- PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b90ef2a1`.
+- CI [41227149553] passed: backend 1,386/1,386; frontend/shared 18/18; all frontend builds passed. Migration validation [41227149568] passed.
+- Added admin subscription list/lifecycle, notification delivery stats/list, inquiry stats/list, and product management list/detail response schemas.
+- Documented admin subscription owner/plan projections and 100-row cap; delivery stats status/channel maps and 10 recent failures; inquiry dashboard scoping and 5-row recent lists; inquiry-list confidentiality/sealed redactions; managed product relation groups.
+- Added structural response tests and updated API documentation. Static route inventory remains 149/149 documented with zero missing/duplicate route keys.
+- Next: step 16E audit remaining route envelopes and replace generic responses with concrete source-backed schemas where stable DTOs exist.
