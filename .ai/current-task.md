@@ -328,3 +328,12 @@ PR #50 merged by squash into `main` at `96a972cb6c663952cb09d6c7a3d9c3d8b90ef2a1
 - Audit response envelopes/status codes for the remaining documented API routes, especially admin dashboard/settings, company/user/role/permission/category management, product mutations/media uploads and notification preference/folder actions.
 - Replace generic response descriptions with concrete source-backed DTO schemas where the controllers/services provide stable projections; preserve 204/202/302 outcomes and multipart upload metadata.
 - Add structural tests for each added schema; keep error response contract aligned with the global error handler. Then CI/migration validation and merge.
+
+
+## OpenAPI response contracts — step 16E (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-company-category-responses-step-16e`.
+- Added company list/detail/create/update/status/restore/verification/logo, settings, statistics and company product-list response schemas. Company detail includes up to ten flattened user summaries; list includes counts and limit projections. Statistics cap recent lists at five.
+- Added public and staff category list/detail, subcategory list/detail, and public category product-list response schemas. Subcategory detail includes category and specification-template/field projections.
+- Corrected company/category/subcategory DELETE contracts to HTTP 204 without JSON response body. Category/company product list responses use actual `{data,meta}` pagination.
+- Added structural tests; static route inventory remains 149/149 covered, no duplicate keys, and new schema block delimiter check passed. CI pending.
