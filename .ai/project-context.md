@@ -513,3 +513,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Product price snapshots, status history and activity log have concrete schemas. Inquiry messages, responses/items, attachments and decision receipts are documented from actual service projections.
 - ANONYMOUS_SEALED buyer responses redact companyId and nested product companyId; schemas do not require them. Buyer decision responses are minimal `{id,inquiryId,status}` receipts. Attachment URLs are relative upload paths.
 - Remaining response-contract work: admin subscription/delivery records, inquiry stats/list and product management projections, only where a stable source DTO/projection exists.
+
+
+## Admin delivery and inquiry statistics OpenAPI contracts — 2026-10-31
+
+- Admin inquiry subscription list returns at most 100 subscription rows with selected plan, company and user projections.
+- NotificationDelivery rows are documented from the Prisma model; `notificationId` is a nullable scalar without a declared Prisma relation/FK. Delivery list/stats share status/channel/eventType/userId/page/limit filters.
+- Inquiry statistics are scoped by caller context: sent/received/response totals and status maps, recent five inquiries/responses and successRate. Anonymous sealed customer projections may omit company.id.
