@@ -1668,3 +1668,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Central Prisma mappings: P2002→409, P2025→404, P2003/P2014→400. Validation→400. Generic 5xx→500 INTERNAL_ERROR; debug/stack only in development.
 - Inquiry payment service throws internal 502/503, but central handler currently normalizes all thrown 5xx to generic 500. Public response is therefore 500 and does not expose provider details.
 - OpenAPI `ErrorResponse` and 429 description do not currently match all runtime envelopes. Step 16J is responsible for the shared oneOf schema, accurate rate-limit docs, and safe payment status decision/tests. No runtime behavior changed in this audit slice.
+
+
+## 2026-10-31 — OPENAPI-ERROR-STATUS-AUDIT-STEP-16I-MERGE
+
+- PR #62 squash-merged at `3d3c2de398566e9f064744dcd3698f43dbd54d6c`.
+- CI [41240689243] passed: backend 1,397/1,397, frontend/shared 18/18 and frontend builds. Prisma migration validation [41240689183] passed. Runtime [41240689335] is a separate validation workflow.
+- Documented actual central nested, direct auth/RBAC and native Fastify rate-limit error envelopes; Prisma/validation mappings; generic production 500 redaction; payment service 502/503 normalization to generic 500.
+- Confirmed remaining OpenAPI mismatch: shared ErrorResponse only describes nested central envelope; 429 description incorrectly says the central handler wraps the response. No runtime behavior changed in the audit PR.
+- Next: step 16J correct shared error schema and rate-limit documentation; evaluate safe payment gateway status preservation with tests.
