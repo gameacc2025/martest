@@ -443,3 +443,21 @@ PR #54 merged by squash into `main` at `8ab9acf25c1380e51fc840fa7d69ea42377971b4
 - Added specification-library search/all schemas based on the explicit selected fields and 50-result search cap.
 - Added product price-tier, image, document and workflow-transition response schemas; corrected all auxiliary delete endpoints to HTTP 204 with no body.
 - Reused step16E DTO schemas where the service projection is identical. Static route coverage remains 149/149 with zero missing/duplicate keys or duplicate top-level declarations. Structural tests added. CI pending.
+
+
+## OpenAPI response contracts — step 16F merged (2026-10-31)
+
+PR #55 merged by squash into `main` at `306a82047e3226bf93660598dfcc1b29dcf0e1c5`.
+
+- Company settings, statistics and paginated company-product responses now have concrete schemas.
+- Category public/manage/detail/subcategory/product and CRUD responses are source-backed. Subcategory detail includes category and optional specification template/fields.
+- Specification library search/all schemas follow explicit selected fields; search is capped at 50.
+- Product price-tier/image/document and workflow transition responses are documented; category/subcategory/tier/image/document delete routes correctly return 204 with no body.
+- CI passed: backend 1,391/1,391; frontend/shared 18/18; frontend builds passed. Prisma migration validation passed. Runtime compose/browser validation was still in progress at merge time and is not counted as passed.
+
+## Next active work — step 16G user/RBAC/settings/admin response coverage
+
+- Add source-backed response schemas for users/access profiles, roles, permissions and assignable roles.
+- Add settings/profile/preferences/avatar/password response contracts, company logo/settings operations and remaining admin stats/settings/plan/subscription operations.
+- Verify exact no-content status codes, direct `{data}` versus `success(data)` envelopes and secret-field omissions.
+- Add structural tests, update API/.ai docs, CI/migration validation and merge.
