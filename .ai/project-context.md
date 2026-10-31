@@ -553,3 +553,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Role APIs expose scope, role-permission join projections and assigned-user counts; assignable roles are limited to `id/name/label/scope` and caller's access type. Permission APIs support plain array, grouped `{all,grouped}` and paginated `{data,meta}` modes.
 - Auth login/refresh/me/registration/handoff responses exclude refresh tokens from JSON. Refresh token is httpOnly-cookie-only; handoff code is single-use and valid 60 seconds. Customer registration has no AccessProfile; company registration creates inactive COMPANY access pending staff approval.
 - Profile settings return safe identity/profile/access/company and role-link data. Admin dashboard exposes aggregate counts, five recent users and twenty pending products; admin settings expose product review threshold.
+
+
+## User, RBAC and auth OpenAPI response coverage — 2026-10-31
+
+- PR #52 merged at `a58d45f85025ec054d12d46ad9f6f4ba1c08389d`; CI passed 1,388 backend tests and 18 frontend/shared tests; builds and migration validation passed.
+- User APIs expose safe identity/profile/access/role/permission projections; no password hashes. Role/permission APIs document role scope, permission links, assignable-role filtering and array/grouped/paginated permission-list modes.
+- Auth schemas cover login, refresh, me, customer/company registration and PKCE handoff. Refresh token remains in httpOnly cookie only; handoff code expires in 60 seconds.
+- Profile settings, avatar/password operations and admin dashboard/review-threshold settings are documented. Route inventory remains 149/149 covered.
