@@ -529,3 +529,21 @@ PR #57 merged by squash into `main` at `415b6858a9f34235f6cf726a558d76afb5b92af4
 - Added global 409/413/429 responses. The 429 response uses ErrorResponse because the central Fastify error handler normalizes the rate-limit Error into `{error:{code:'APP_ERROR',message}}`. Expanded ErrorResponse with optional development-only debug/stack fields; production responses still omit them.
 - Added Swagger contract tests for 409/413/429 and debug/stack schema fields. Strengthened security rate-limit integration test to assert actual 429 body shape.
 - CI/migration validation pending.
+
+
+## OpenAPI error/status response audit — step 16I merged (2026-10-31)
+
+PR #58 merged by squash into `main` at `4ee4dbca6486588af34eda4ed9a22a809a7cb73d`.
+
+- CI [41236781704](https://github.com/gameacc2025/martest/actions/runs/41236781704) passed: backend 1,393/1,393; frontend/shared 18/18; all frontend builds passed.
+- Prisma migration validation [41236781614](https://github.com/gameacc2025/martest/actions/runs/41236781614) passed.
+- Central error handler normalizes rate-limit exceptions (HTTP 429) to `{error:{code:'APP_ERROR',message}}`; the initial assumption of a raw `{statusCode,error,message}` body was disproved by the security integration test and corrected.
+- OpenAPI global error responses now include 409 conflict, 413 oversized request/file, and 429 rate limit. All use ErrorResponse; 429 does not expose Fastify's internal Error object.
+- ErrorResponse documents optional development-only debug/stack fields; production still omits them.
+- Swagger tests and security integration tests cover status and body shapes.
+
+## Next active work — step 16J final route response audit
+
+- Audit route inventory against registered Fastify routes and effective OpenAPI operations (including paths with aliases/prefixes).
+- Identify remaining undocumented response bodies/statuses or stale metadata, with focus on 204 endpoints, public routes, cookie/PKCE auth and any routes falling back to undocumented security.
+- Add static/structural tests, update API/.ai docs, run CI/migration validation and merge.
