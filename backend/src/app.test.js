@@ -143,6 +143,43 @@ test('generated OpenAPI exposes the actual admin notification delivery filters',
   }
 });
 
+test('generated OpenAPI preserves public product privacy and management query filters', async () => {
+  const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
+  const productList = spec.paths['/products/']?.get || spec.paths['/products']?.get;
+  const managedList = spec.paths['/products/my-products']?.get;
+  const singleProduct = spec.paths['/products/{id}']?.get;
+
+  assert.ok(productList);
+  assert.ok(managedList);
+  assert.ok(singleProduct);
+
+  const publicQueryNames = new Set((productList.parameters || [])
+    .filter((parameter) => parameter.in === 'query')
+    .map((parameter) => parameter.name));
+  for (const name of ['search', 'companyId', 'categoryId', 'minPrice', 'maxPrice', 'featured', 'sortBy', 'sortOrder', 'page', 'limit']) {
+    assert.ok(publicQueryNames.has(name), 'public product query must expose ' + name);
+  }
+
+  const managedQueryNames = new Set((managedList.parameters || [])
+    .filter((parameter) => parameter.in === 'query')
+    .map((parameter) => parameter.name));
+  for (const name of ['search', 'status', 'page', 'limit']) {
+    assert.ok(managedQueryNames.has(name), 'management product query must expose ' + name);
+  }
+
+  const publicSchema = productList.responses['200'].content['application/json'].schema;
+  const publicProduct = publicSchema.properties.data.items.properties;
+  assert.ok(publicProduct.company);
+  assert.equal(publicProduct.createdByUserId, undefined);
+  assert.equal(publicProduct.deletedAt, undefined);
+  assert.equal(publicProduct.statusHistory, undefined);
+
+  const singleSchema = singleProduct.responses['200'].content['application/json'].schema.properties.data;
+  assert.equal(singleSchema.oneOf.length, 2);
+  assert.equal(singleSchema.oneOf[0].properties.createdByUserId, undefined);
+  assert.ok(singleSchema.oneOf[1].properties.createdByUserId);
+});
+
 // ── /health — public, no auth ───────────────────────────────────
 
 
