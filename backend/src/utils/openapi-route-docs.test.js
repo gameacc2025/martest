@@ -577,6 +577,25 @@ test('auth, notification preferences, company lifecycle and product workflow res
   assert.equal(docs['DELETE /api/v1/products/:id'].responses[200], undefined);
 });
 
+test('admin notification delivery query filters match controller inputs', () => {
+  for (const route of [
+    'GET /api/v1/admin/notifications/delivery-stats',
+    'GET /api/v1/admin/notifications/deliveries',
+  ]) {
+    const query = docs[route].querystring;
+    assert.ok(query);
+    assert.equal(query.additionalProperties, false);
+    assert.deepEqual(query.properties.status.enum, ['PENDING', 'SENT', 'FAILED', 'SKIPPED']);
+    assert.deepEqual(query.properties.channel.enum, ['IN_APP', 'EMAIL', 'SMS']);
+    assert.ok(query.properties.eventType);
+    assert.equal(query.properties.userId.minimum, 1);
+    assert.equal(query.properties.page.default, 1);
+    assert.equal(query.properties.limit.default, 20);
+    assert.equal(query.properties.from, undefined);
+    assert.equal(query.properties.to, undefined);
+  }
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually
