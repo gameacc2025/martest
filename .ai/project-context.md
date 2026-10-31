@@ -521,3 +521,12 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Notification delivery stats expose `total`, normalized `byStatus`/`byChannel` and at most 10 recent failures. Delivery list returns persisted scalar NotificationDelivery fields and pagination metadata.
 - Inquiry dashboard stats are caller-scoped for COMPANY/CUSTOMER and platform-wide for STAFF, with sent/received/response aggregates, success rate and at most five recent records. Inquiry listing uses `{data,meta}` and applies confidentiality/sealed-view redactions to company and response counts.
 - Product management listing/detail schemas cover core product data and relation groups (company/category/subcategory/prices/images/documents).
+
+
+## OpenAPI response schema coverage — step 16D (2026-10-31)
+
+- PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b90ef2a1`; CI passed 1,386 backend tests and 18 frontend/shared tests; builds and migration validation passed.
+- Admin inquiry subscription list/lifecycle actions document actual plan and owner projections; list capped at 100.
+- Notification delivery statistics document normalized status/channel maps and 10 recent failures; delivery rows document scalar persisted fields and pagination.
+- Inquiry stats/list schemas document caller scoping, recent record caps and sealed/confidential redactions. Product management list/detail schemas document core product and relation groups.
+- Route inventory remains 149/149 covered with no duplicate keys. Next pass audits remaining API response envelopes and concrete DTO schemas.
