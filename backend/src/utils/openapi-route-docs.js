@@ -1001,7 +1001,24 @@ const inquiryMessageResponseSchema = {
     senderUserId: { type: ['integer', 'null'] }, senderCompanyId: { type: ['integer', 'null'] },
     recipientUserId: { type: ['integer', 'null'] }, recipientCompanyId: { type: ['integer', 'null'] },
     body: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' }, readAt: { type: ['string', 'null'], format: 'date-time' },
-    senderUser: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } }, additionalProperties: true }, { type: 'null' }] }, additionalProperties: true }, { type: 'null' }] },
+    senderUser: {
+      anyOf: [
+        {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            profile: {
+              anyOf: [
+                { type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } }, additionalProperties: true },
+                { type: 'null' },
+              ],
+            },
+          },
+          additionalProperties: true,
+        },
+        { type: 'null' },
+      ],
+    },
     senderCompany: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
     recipientUser: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' } } }, { type: 'null' }] },
     recipientCompany: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
