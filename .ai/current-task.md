@@ -286,3 +286,18 @@ PR #48 merged by squash into `main` at `462aad8a518fea47025d116ccb8fc7e095b708b4
 - Public price history reflects all recorded retail snapshots in ascending recordedAt order (not a six-month truncation); Decimal prices are serialized as strings. Product status history and activity log preserve their distinct actor projections.
 - Inquiry messages document the 500-item cap and sender/recipient projections; send response includes smsQueued/smsSkippedReason. Inquiry response schemas allow companyId and nested product companyId to be omitted for ANONYMOUS_SEALED buyer views. Buyer decision response is the minimal `{id,inquiryId,status}` receipt. Attachment URLs are relative `/uploads/...` paths, not absolute URIs.
 - Tests added for product history/price history/activity and inquiry message/response/decision/attachment response keys. CI pending.
+
+
+## OpenAPI product/inquiry response contracts — step 16C merged (2026-10-31)
+
+PR #49 merged by squash into `main` at `d79b1908d899fc8569495e8925a00a3a0650080d`. CI [41224051397](https://github.com/gameacc2025/martest/actions/runs/41224051397) passed: backend 1,385/1,385 and frontend/shared 18/18; frontend builds passed. Migration validation [41224051449](https://github.com/gameacc2025/martest/actions/runs/41224051449) passed. Runtime remains separate/pending and is not a merge blocker per owner instruction.
+
+- Product price snapshots, product status history and activity log now have source-backed response schemas.
+- Inquiry messages, supplier responses/items, attachment metadata and minimal buyer decision receipts now have source-backed schemas. Anonymous sealed response redaction is reflected by optional company identifiers.
+- Attachment URL documents the relative `/uploads/inquiries/responses/...` path. Message list documents the 500-item cap and send response includes SMS outcome fields.
+
+## Next active work — step 16D response schema completion
+
+- Model admin inquiry subscription list and notification delivery row response projections from service/Prisma selects.
+- Model inquiry stats/list and product management list/detail responses where stable projections exist.
+- Re-check all response status codes and error response shapes; avoid turning raw internal model fields into a public contract without a stable DTO.
