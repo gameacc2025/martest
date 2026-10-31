@@ -186,3 +186,10 @@ The OpenAPI registry now contains source-backed response schemas for address CRU
 - Inquiry messages document sender/recipient identity projections, read timestamps, the 500-message list cap, and optional SMS queue/skip outcome on send.
 - Inquiry response list/create/update/withdraw schemas document response status, company projection, response items, requested product projection and attachment metadata. Anonymous sealed buyer responses may omit companyId and product companyId; the schema does not require either.
 - Buyer decision endpoints return a minimal receipt `{ id, inquiryId, status }`, not a full supplier response. Attachment upload returns stored relative URL metadata; delete remains 204 without a body.
+
+
+## Product and inquiry response schema pass 16C — merged (2026-10-31)
+
+PR #49 merged at `d79b1908d899fc8569495e8925a00a3a0650080d`. CI passed 1,385 backend tests and 18 frontend/shared tests; builds and migration validation passed.
+
+Product price snapshot/history/activity and inquiry messages/responses/items/attachments/decision receipts now have concrete response schemas derived from Prisma projections and services. Anonymous sealed buyer response projections omit supplier company IDs and nested product company IDs. Decision returns a minimal receipt; attachment URLs are relative upload paths.
