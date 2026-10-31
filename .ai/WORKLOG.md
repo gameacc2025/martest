@@ -1442,3 +1442,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added NotificationDelivery row schema from Prisma model, including nullable notificationId scalar, event/channel/status, recipient/subject/body/provider, attempts, retry/error/sent/dedupe fields and timestamps. Added shared delivery filter query schema (status/channel/eventType/userId/page/limit).
 - Added inquiry stats schema from `getInquiryStats`: sent/received/response aggregates and maps, recent five inquiry/response projections, and successRate. Company id is not required for anonymous sealed customer recent responses.
 - Added structural tests. CI pending.
+
+- Added paginated `GET /inquiries` response schema with company confidentiality and sealed response-count redaction; schema intentionally excludes buyerUserId. Added structural test.
