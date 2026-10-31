@@ -607,3 +607,14 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Specification-library endpoints expose only id/title/slug/type/defaultUnit/description; search is capped at 50 active rows.
 - Product price-tier/image/document and workflow routes now document actual result DTOs. Delete routes for categories, subcategories, tiers, images and documents return 204 with no body.
 - Step 16F CI pending; route coverage remains 149/149.
+
+
+## Company/category/product auxiliary response coverage — step 16F merged (2026-10-31)
+
+- PR #55 merged at `306a82047e3226bf93660598dfcc1b29dcf0e1c5`.
+- Company settings return inquiryLimit and ordered CompanyLimit rows; company statistics return six counts and five recent products/inquiries; company product lists include product scalars and compact category/subcategory/company projections.
+- Category public/manage/detail and subcategory list/detail responses now include their actual subcategory/template relations. Category product pagination is documented.
+- Specification library exposes only id/title/slug/type/defaultUnit/description; search cap 50.
+- Product price-tier/image/document/workflow responses are documented; deletes return 204 without body.
+- CI: backend 1,391/1,391; frontend/shared 18/18; frontend builds and Prisma migration validation passed. Runtime validation was not confirmed at merge.
+- Next: user/RBAC/settings/admin response contracts.
