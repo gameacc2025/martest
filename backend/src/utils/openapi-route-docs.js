@@ -821,58 +821,58 @@ const notificationBulkSuccess = {
 };
 
 Object.assign(docs, {
-  'GET /api/v1/addresses': { ...docs['GET /api/v1/addresses'], responses: addressEnvelope(true) },
-  'GET /api/v1/addresses/:id': { ...docs['GET /api/v1/addresses/:id'], responses: addressEnvelope(false) },
-  'POST /api/v1/addresses': { ...docs['POST /api/v1/addresses'], responses: { 201: { ...addressEnvelope(false)[200], description: 'Customer address created successfully.' } } },
-  'PATCH /api/v1/addresses/:id': { ...docs['PATCH /api/v1/addresses/:id'], responses: addressEnvelope(false) },
-  'PATCH /api/v1/addresses/:id/default': { ...docs['PATCH /api/v1/addresses/:id/default'], responses: addressEnvelope(false) },
+  ['GET /api/v1/addresses']: { ...docs['GET /api/v1/addresses'], responses: addressEnvelope(true) },
+  ['GET /api/v1/addresses/:id']: { ...docs['GET /api/v1/addresses/:id'], responses: addressEnvelope(false) },
+  ['POST /api/v1/addresses']: { ...docs['POST /api/v1/addresses'], responses: { 201: { ...addressEnvelope(false)[200], description: 'Customer address created successfully.' } } },
+  ['PATCH /api/v1/addresses/:id']: { ...docs['PATCH /api/v1/addresses/:id'], responses: addressEnvelope(false) },
+  ['PATCH /api/v1/addresses/:id/default']: { ...docs['PATCH /api/v1/addresses/:id/default'], responses: addressEnvelope(false) },
 
-  'GET /api/v1/settings/notifications': {
+  ['GET /api/v1/settings/notifications']: {
     ...docs['GET /api/v1/settings/notifications'],
     responses: { 200: { description: 'Notifications and pagination metadata returned successfully.', type: 'object', required: ['data', 'meta'], properties: {
       data: { type: 'array', items: notificationItemResponseSchema }, meta: paginationMetaResponseSchema,
     } } },
   },
-  'GET /api/v1/settings/notifications/unread-count': {
+  ['GET /api/v1/settings/notifications/unread-count']: {
     ...docs['GET /api/v1/settings/notifications/unread-count'],
     responses: { 200: { description: 'Unread notification count returned successfully.', type: 'object', required: ['count'], properties: { count: { type: 'integer' } } } },
   },
-  'POST /api/v1/settings/notifications/bulk-read-state': {
+  ['POST /api/v1/settings/notifications/bulk-read-state']: {
     ...docs['POST /api/v1/settings/notifications/bulk-read-state'],
     responses: { 200: { description: 'Bulk notification read state updated.', ...notificationBulkSuccess } },
   },
-  'POST /api/v1/settings/notifications/bulk-delete': {
+  ['POST /api/v1/settings/notifications/bulk-delete']: {
     ...docs['POST /api/v1/settings/notifications/bulk-delete'],
     responses: { 200: { description: 'Bulk notification deletion completed.', ...notificationBulkSuccess } },
   },
-  'GET /api/v1/settings/notifications/folders': {
+  ['GET /api/v1/settings/notifications/folders']: {
     ...docs['GET /api/v1/settings/notifications/folders'],
     responses: { 200: { description: 'Folders available to the current app context returned successfully.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: notificationFolderUserSchema } } } },
   },
-  'POST /api/v1/settings/notifications/:id/folders': {
+  ['POST /api/v1/settings/notifications/:id/folders']: {
     ...docs['POST /api/v1/settings/notifications/:id/folders'],
     responses: { 200: { description: 'Notification folder membership changed successfully.', type: 'object', required: ['success', 'action', 'notificationId', 'folderId'], properties: {
       success: { type: 'boolean' }, action: { type: 'string', enum: ['copy', 'move'] }, notificationId: { type: 'integer' }, folderId: { type: 'integer' },
     } } },
   },
-  'PATCH /api/v1/settings/notifications/:id/read-state': { ...docs['PATCH /api/v1/settings/notifications/:id/read-state'], responses: { 200: { description: 'Notification read state updated.', ...notificationSimpleSuccess } } },
-  'PATCH /api/v1/settings/notifications/:id/read': { ...docs['PATCH /api/v1/settings/notifications/:id/read'], responses: { 200: { description: 'Notification marked as read.', ...notificationSimpleSuccess } } },
-  'PATCH /api/v1/settings/notifications/read-all': { ...docs['PATCH /api/v1/settings/notifications/read-all'], responses: { 200: { description: 'All current user notifications marked as read.', ...notificationSimpleSuccess } } },
-  'DELETE /api/v1/settings/notifications/:id': { ...docs['DELETE /api/v1/settings/notifications/:id'], responses: { 200: { description: 'Notification deleted successfully.', ...notificationSimpleSuccess } } },
+  ['PATCH /api/v1/settings/notifications/:id/read-state']: { ...docs['PATCH /api/v1/settings/notifications/:id/read-state'], responses: { 200: { description: 'Notification read state updated.', ...notificationSimpleSuccess } } },
+  ['PATCH /api/v1/settings/notifications/:id/read']: { ...docs['PATCH /api/v1/settings/notifications/:id/read'], responses: { 200: { description: 'Notification marked as read.', ...notificationSimpleSuccess } } },
+  ['PATCH /api/v1/settings/notifications/read-all']: { ...docs['PATCH /api/v1/settings/notifications/read-all'], responses: { 200: { description: 'All current user notifications marked as read.', ...notificationSimpleSuccess } } },
+  ['DELETE /api/v1/settings/notifications/:id']: { ...docs['DELETE /api/v1/settings/notifications/:id'], responses: { 200: { description: 'Notification deleted successfully.', ...notificationSimpleSuccess } } },
 
-  'GET /api/v1/admin/notifications/folders': {
+  ['GET /api/v1/admin/notifications/folders']: {
     ...docs['GET /api/v1/admin/notifications/folders'],
     responses: { 200: { description: 'All notification folders returned successfully.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: notificationFolderAdminSchema } } } },
   },
-  'POST /api/v1/admin/notifications/folders': {
+  ['POST /api/v1/admin/notifications/folders']: {
     ...docs['POST /api/v1/admin/notifications/folders'],
     responses: { 201: { description: 'Notification folder created successfully.', type: 'object', required: ['data'], properties: { data: notificationFolderAdminSchema } } },
   },
-  'PATCH /api/v1/admin/notifications/folders/:id': {
+  ['PATCH /api/v1/admin/notifications/folders/:id']: {
     ...docs['PATCH /api/v1/admin/notifications/folders/:id'],
     responses: { 200: { description: 'Notification folder updated successfully.', type: 'object', required: ['data'], properties: { data: notificationFolderAdminSchema } } },
   },
-  'GET /api/v1/admin/notifications/delivery-stats': {
+  ['GET /api/v1/admin/notifications/delivery-stats']: {
     ...docs['GET /api/v1/admin/notifications/delivery-stats'],
     responses: { 200: { description: 'Notification delivery monitoring aggregates returned successfully.', type: 'object', required: ['data'], properties: { data: {
       type: 'object', required: ['total', 'byStatus', 'byChannel', 'recentFailures'], properties: {
@@ -887,18 +887,18 @@ Object.assign(docs, {
       },
     } } } },
   },
-  'GET /api/v1/admin/notifications/deliveries': {
+  ['GET /api/v1/admin/notifications/deliveries']: {
     ...docs['GET /api/v1/admin/notifications/deliveries'],
     responses: { 200: { description: 'Notification delivery rows and pagination metadata returned successfully.', type: 'object', required: ['data', 'meta'], properties: {
       data: { type: 'array', items: { type: 'object', additionalProperties: true } }, meta: paginationMetaResponseSchema,
     } } },
   },
 
-  'GET /api/v1/inquiries/plans': successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Active inquiry subscription plans returned successfully.'),
-  'GET /api/v1/inquiries/quota': successEnvelope(inquiryQuotaResponseSchema, 'Current inquiry subscription quota returned successfully.'),
-  'GET /api/v1/admin/inquiry-monetization/settings': successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings returned successfully.'),
-  'PATCH /api/v1/admin/inquiry-monetization/settings': successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings updated successfully.'),
-  'GET /api/v1/admin/inquiry-plans': successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Inquiry plans returned successfully.'),
+  ['GET /api/v1/inquiries/plans']: successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Active inquiry subscription plans returned successfully.'),
+  ['GET /api/v1/inquiries/quota']: successEnvelope(inquiryQuotaResponseSchema, 'Current inquiry subscription quota returned successfully.'),
+  ['GET /api/v1/admin/inquiry-monetization/settings']: successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings returned successfully.'),
+  ['PATCH /api/v1/admin/inquiry-monetization/settings']: successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings updated successfully.'),
+  ['GET /api/v1/admin/inquiry-plans']: successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Inquiry plans returned successfully.'),
 });
 
 module.exports = docs;
