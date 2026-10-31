@@ -1628,7 +1628,7 @@ Object.assign(docs, {
       profile: { anyOf: [profileResponseSchema, { type: 'null' }] },
       accessProfile: { anyOf: [accessProfileResponseSchema, { type: 'null' }] },
       roles: { type: 'array', items: { type: 'string' } }, permissions: { type: 'array', items: { type: 'string' } },
-    } } } },
+    } } } } },
   },
   ['POST /api/v1/auth/refresh']: {
     ...docs['POST /api/v1/auth/refresh'],
@@ -1655,23 +1655,23 @@ Object.assign(docs, {
     responses: { 201: { description: 'Registered customer account. No AccessProfile is created for CUSTOMER users; roles contains the CUSTOMER_USER role name.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['message', 'user', 'profile', 'accessProfile', 'roles'], properties: {
       message: { type: 'string' }, user: safeAuthUserResponseSchema, profile: profileResponseSchema,
       accessProfile: { type: 'null' }, roles: { type: 'array', items: { type: 'string' } },
-    } } } },
+    } } } } },
   },
   ['POST /api/v1/auth/register-company']: {
     ...docs['POST /api/v1/auth/register-company'],
     responses: { 201: { description: 'Pending company and manager registration. Company manager access profile is inactive until staff approval; no role is granted in this response.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['message', 'company', 'user', 'accessProfile'], properties: {
       message: { type: 'string' }, company: companyResponseSchema, user: safeAuthUserResponseSchema, accessProfile: accessProfileResponseSchema,
-    } } } },
+    } } } } },
   },
   ['POST /api/v1/auth/handoff']: {
     ...docs['POST /api/v1/auth/handoff'],
-    responses: { 201: { description: 'One-time PKCE-bound handoff code valid for 60 seconds. No access or refresh token is returned.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['code', 'expiresIn'], properties: { code: { type: 'string' }, expiresIn: { type: 'integer', enum: [60] } } } } },
+    responses: { 201: { description: 'One-time PKCE-bound handoff code valid for 60 seconds. No access or refresh token is returned.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['code', 'expiresIn'], properties: { code: { type: 'string' }, expiresIn: { type: 'integer', enum: [60] } } } } } },
   },
   ['POST /api/v1/auth/handoff/redeem']: {
     ...docs['POST /api/v1/auth/handoff/redeem'],
     responses: { 200: { description: 'Fresh access token and authenticated context; refresh token is set only in the httpOnly cookie.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['user', 'profile', 'accessProfile', 'roles', 'permissions', 'tokens'], properties: {
       ...authContextResponseSchema.properties, tokens: authTokensResponseSchema.properties.tokens,
-    } } } },
+    } } } } },
   },
   ['GET /api/v1/settings/profile']: {
     ...docs['GET /api/v1/settings/profile'],
