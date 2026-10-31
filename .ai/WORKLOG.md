@@ -1444,3 +1444,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added structural tests. CI pending.
 
 - Added paginated `GET /inquiries` response schema with company confidentiality and sealed response-count redaction; schema intentionally excludes buyerUserId. Added structural test.
+
+- Added public and management product projection schemas from `publicProductSelect` and `productInclude`; public responses omit creator/moderation/deletion/history fields, while management responses include full management fields and latest ten status transitions. Added query schemas for catalogue and management lists and tests to prevent accidental exposure in public projection.
