@@ -232,3 +232,10 @@ Step 16D merge verification: PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b
 - `GET /admin/notifications/deliveries` returns `{data, meta}`; delivery rows follow the complete `NotificationDelivery` Prisma model, including retry, provider, recipient snapshot and idempotency fields. `nextAttemptAt` is non-null.
 - `GET /inquiries/stats` returns sent/received/response aggregates, a selected-vs-decided success rate, and at most five recent inquiries and five recent responses. It is scoped to buyer, supplier company or authorized STAFF context; buyer-facing sealed/anonymous-sealed response visibility/redaction follows the service rules.
 - Runtime validation on PR #49 failed in the browser-smoke stage because the admin/company SPA origins returned `chrome-error://chromewebdata/` / `#app` never attached; API/CI unit and build checks passed. This is tracked separately as a compose/runtime startup issue, not misreported as a passing browser check.
+
+
+## Step 16D merge — admin monitoring and inquiry dashboard contracts (2026-10-31)
+
+PR #53 merged at `da0478df49eb256fdb5f40c179818a02a6f706fa`. CI passed with 1,389 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime compose/browser validation was still running at merge time and is not reported as passing.
+
+Admin inquiry subscription list, notification delivery statistics/list, and inquiry dashboard statistics now have concrete response schemas grounded in their service projections. Subscription list cap is 100; delivery statistics include zero-filled status/channel buckets and ten recent failures; inquiry dashboard returns five recent inquiry/response records and preserves buyer-specific sealed/anonymous-sealed redaction.
