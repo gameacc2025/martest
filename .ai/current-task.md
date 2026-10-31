@@ -145,3 +145,17 @@ Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categori
 - Confirmed functional bug in `createUser`: after a STAFF admin successfully created a COMPANY user for company X, it called `getUser`, whose non-global STAFF read scope was limited to the caller's Main-company `companyId`. For any other company, the create transaction committed but the API then returned 403, making a successful create appear to fail.
 - Added an internal post-create read path that returns only the user just created by the authorized operation, without widening subsequent `getUser` read access. Added regression coverage for a non-SUPER_ADMIN STAFF `ADMIN` with `users.create` + `users.assign_roles` creating a COMPANY user in a different tenant and receiving the created record.
 - Corrected the stale auth route comment to document STAFF context + `users.reset_password`.
+
+
+## Step 11E completion — Remaining backend route inventory (2026-10-31)
+
+PR #42 merged by squash into `main` at `c92aeff2866353826ec423534b4bc4178e7a57c1`. Corrected-head CI [41217897665](https://github.com/gameacc2025/martest/actions/runs/41217897665) passed with 1,368/1,368 backend tests; migration validation [41217897689](https://github.com/gameacc2025/martest/actions/runs/41217897689) passed. Runtime validation [41217897681](https://github.com/gameacc2025/martest/actions/runs/41217897681) remained separate at merge time.
+
+Confirmed and fixed: STAFF-only admin password reset now enforces exact STAFF context at route and service; public category/subcategory detail lookups hide inactive taxonomy; STAFF user creation for another company now returns the record it created without widening normal read scope. Auth/users/admin/settings/categories/roles/permissions/specification-library routes and selected service boundaries have been reviewed. This is not a blanket security certification for every endpoint.
+
+## Next active work — SMS delivery integration review
+
+- Reconcile notification dispatcher docs with the existing explicit inquiry-message SMS queue path.
+- Verify paid SMS quota is consumed atomically and idempotently with the message/outbox write, phone resolution and recipient opt-in are correct, and failures do not send without quota.
+- Add/adjust regression tests for quota, dedupe, preference, missing phone/provider and transaction rollback.
+- Live Twilio delivery remains unverified without configured credentials and a controlled recipient.
