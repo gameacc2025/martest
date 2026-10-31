@@ -344,8 +344,8 @@ test('admin inquiry subscription, delivery monitoring and inquiry dashboard resp
   assert.ok(subscription.paymentAuthority);
   assert.ok(subscription.paymentVerifiedAt);
   assert.ok(subscription.plan.properties.durationDays);
-  assert.ok(subscription.company.properties.name);
-  assert.ok(subscription.user.properties.phone);
+  assert.ok(subscription.company.anyOf[0].properties.name);
+  assert.ok(subscription.user.anyOf[0].properties.phone);
   assert.equal(subscription.plan.properties.inquiriesPerPeriod, undefined);
 
   const deliveryStats = docs['GET /api/v1/admin/notifications/delivery-stats'].responses[200].properties.data.properties;
