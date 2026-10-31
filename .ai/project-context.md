@@ -497,3 +497,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Address responses reflect `ADDRESS_SELECT` and `{data}` envelopes. Notification list returns `{data,meta}` with folder memberships; count/read/bulk/folder actions match their controller/service payloads. Admin delivery stats expose total, byStatus, byChannel and recentFailures.
 - Inquiry plan/quota/subscription response contracts derive from `inquiry-subscription.service.js` and `inquiry-payment.service.js`; POST subscription plan projection is intentionally narrower than the subscription-list projection. Payment retry includes cancelled status.
 - Next schema slice: product price/history/activity and inquiry messages/responses/attachments.
+
+
+## Product and inquiry OpenAPI response contracts — 2026-10-31
+
+- Product price history returns all public retail ProductPriceSnapshot rows in ascending recordedAt order; price Decimal is represented as a JSON string. Product status history includes changedBy user/profile; ProductActivityLog includes actor user/profile.
+- Inquiry message list returns up to 500 messages with sender/recipient projections; send adds `smsQueued` and `smsSkippedReason`.
+- Inquiry response projections include company, response items with inquiry item/product projections, and attachment metadata. For ANONYMOUS_SEALED buyer views, supplier companyId and nested product companyId are removed; response schema keeps them optional. Buyer response decision returns only `{id,inquiryId,status}`.
+- Response attachment `url` is a relative `/uploads/inquiries/responses/...` path.
