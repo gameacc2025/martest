@@ -649,3 +649,13 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Notification preference GET/PATCH return direct `{data,smsAvailable:false}`. User folder listing returns `{data:[{id,key,name,scope,isSystem,sortOrder}]}`; notification list remains direct `{data,meta}`.
 - Company restore/status/verify/logo responses wrap raw company scalars in `success(data)`. Company soft delete returns 204 with no body.
 - Product submit-review/approve/reject/publish/hide/archive/restore-draft responses wrap productInclude (company/category/prices/images/documents/latest 10 status-history rows). Product soft delete returns 204 with no body.
+
+
+## Auth, notification and lifecycle response contracts — step 16H merged (2026-10-31)
+
+- PR #57 merged at `415b6858a9f34235f6cf726a558d76afb5b92af4`. CI passed backend 1,393/1,393 and frontend/shared 18/18; all frontend builds and Prisma migration validation passed. Runtime validation was queued at merge and is not claimed as passed.
+- Customer registration returns message/user/profile/null AccessProfile/CUSTOMER_USER role; company registration returns pending company and manager plus inactive COMPANY AccessProfile, with no automatic role assignment. Password hashes are omitted.
+- PKCE handoff create returns a 60-second code; redeem returns access token and safe auth context. Refresh token is cookie-only.
+- Notification preferences return direct `{data,smsAvailable:false}`; folder list includes isSystem/sortOrder.
+- Company restore/status/verify/logo responses return company scalar fields in a success envelope. Company soft delete is 204/no body.
+- Product workflow status actions return the managed product include projection; product soft delete is 204/no body.
