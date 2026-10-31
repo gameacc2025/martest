@@ -2695,7 +2695,7 @@ const step16hCompanyRegistrationResponseSchema = {
 const step16hHandoffCreateResponseSchema = {
   type: 'object', required: ['code', 'expiresIn'],
   properties: {
-    code: { type: 'string', pattern: '^[A-Za-z0-9_-]{43} },
+    code: { type: 'string', minLength: 43, maxLength: 43 },
     expiresIn: { type: 'integer', enum: [60] },
   },
 };
