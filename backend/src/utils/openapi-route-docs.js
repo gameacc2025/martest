@@ -404,7 +404,7 @@ Object.assign(docs, {
   'DELETE /api/v1/addresses/:id': {
     summary: 'Delete an owned customer address',
     description: 'Deletes an address belonging to the authenticated customer. Authentication required: Bearer JWT. Access context required: CUSTOMER.',
-    tags: ['Addresses'], params: idParam(), responses: { 204: { description: 'Customer address deleted successfully; no response body.' } },
+    tags: ['Addresses'], params: idParam(), responses: { 204: { type: 'null', description: 'Customer address deleted successfully; no response body.' } },
   },
   'GET /api/v1/roles/assignable': {
     summary: 'List roles assignable by the current user',
@@ -439,7 +439,7 @@ Object.assign(docs, {
   'DELETE /api/v1/categories/:id/subcategories/:subId': {
     summary: 'Delete a subcategory',
     description: 'Deletes a subcategory under the specified category. Authentication required: Bearer JWT. Access context required: STAFF. Permission required: categories.delete.',
-    tags: ['Categories'], permission: 'categories.delete', params: twoIdParams('id', 'subId'), responses: { 204: { description: 'Subcategory deleted successfully; no response body.' } },
+    tags: ['Categories'], permission: 'categories.delete', params: twoIdParams('id', 'subId'), responses: { 204: { type: 'null', description: 'Subcategory deleted successfully; no response body.' } },
   },
   'GET /api/v1/products/:id/price-history': {
     summary: 'Get public retail price history',
@@ -671,7 +671,7 @@ Object.assign(docs, {
     description: 'Deletes an attachment owned by the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Attachment and response ownership are enforced by the service.',
     tags: ['Inquiries'], permission: 'inquiries.respond',
     params: { type: 'object', required: ['id', 'responseId', 'attachmentId'], properties: { id: { type: 'integer' }, responseId: { type: 'integer' }, attachmentId: { type: 'integer' } } },
-    responses: { 204: { description: 'Inquiry response attachment deleted successfully; no response body.' } },
+    responses: { 204: { type: 'null', description: 'Inquiry response attachment deleted successfully; no response body.' } },
   },
   'GET /api/v1/settings/notifications': {
     summary: 'List the current user notifications',
@@ -1347,7 +1347,7 @@ Object.assign(docs, {
   },
   ['DELETE /api/v1/companies/:id']: {
     ...docs['DELETE /api/v1/companies/:id'],
-    responses: { 204: { description: 'Company soft-deleted successfully; no response body.' } },
+    responses: { 204: { type: 'null', description: 'Company soft-deleted successfully; no response body.' } },
   },
   ['PATCH /api/v1/companies/:id/restore']: {
     ...docs['PATCH /api/v1/companies/:id/restore'],
@@ -1415,7 +1415,7 @@ Object.assign(docs, {
   },
   ['DELETE /api/v1/categories/:id']: {
     ...docs['DELETE /api/v1/categories/:id'],
-    responses: { 204: { description: 'Category deleted successfully; no response body.' } },
+    responses: { 204: { type: 'null', description: 'Category deleted successfully; no response body.' } },
   },
   ['POST /api/v1/categories/:id/subcategories']: {
     ...docs['POST /api/v1/categories/:id/subcategories'],
@@ -1427,7 +1427,7 @@ Object.assign(docs, {
   },
   ['DELETE /api/v1/categories/:id/subcategories/:subId']: {
     ...docs['DELETE /api/v1/categories/:id/subcategories/:subId'],
-    responses: { 204: { description: 'Subcategory deleted successfully; no response body.' } },
+    responses: { 204: { type: 'null', description: 'Subcategory deleted successfully; no response body.' } },
   },
 });
 
@@ -2383,8 +2383,8 @@ Object.assign(docs, {
     ...docs['PATCH /api/v1/categories/:id/subcategories/:subId'],
     responses: successEnvelope(step16fSubcategoryBaseSchema, 'Updated subcategory record.'),
   },
-  ['DELETE /api/v1/categories/:id']: { ...docs['DELETE /api/v1/categories/:id'], responses: { 204: { description: 'Category deleted; no response body.' } } },
-  ['DELETE /api/v1/categories/:id/subcategories/:subId']: { ...docs['DELETE /api/v1/categories/:id/subcategories/:subId'], responses: { 204: { description: 'Subcategory deleted; no response body.' } } },
+  ['DELETE /api/v1/categories/:id']: { ...docs['DELETE /api/v1/categories/:id'], responses: { 204: { type: 'null', description: 'Category deleted; no response body.' } } },
+  ['DELETE /api/v1/categories/:id/subcategories/:subId']: { ...docs['DELETE /api/v1/categories/:id/subcategories/:subId'], responses: { 204: { type: 'null', description: 'Subcategory deleted; no response body.' } } },
   ['GET /api/v1/specification-library']: {
     ...docs['GET /api/v1/specification-library'],
     responses: { 200: { description: 'Matching active specification library fields; empty query returns an empty array and limit is capped at 50.', type: 'object', required: ['data'], properties: { data: { type: 'array', maxItems: 50, items: step16fSpecificationFieldSchema } } } },
@@ -2401,7 +2401,7 @@ Object.assign(docs, {
     ...docs['PATCH /api/v1/products/:id/price-tiers/:tierId'],
     responses: successEnvelope(step16eProductPriceTierSchema, 'Updated product price tier; a retail snapshot is recorded only when retail pricing actually changes.'),
   },
-  ['DELETE /api/v1/products/:id/price-tiers/:tierId']: { ...docs['DELETE /api/v1/products/:id/price-tiers/:tierId'], responses: { 204: { description: 'Price tier deleted; no response body.' } } },
+  ['DELETE /api/v1/products/:id/price-tiers/:tierId']: { ...docs['DELETE /api/v1/products/:id/price-tiers/:tierId'], responses: { 204: { type: 'null', description: 'Price tier deleted; no response body.' } } },
   ['POST /api/v1/products/:id/images']: {
     ...docs['POST /api/v1/products/:id/images'],
     responses: { 201: { description: 'Uploaded product image metadata.', type: 'object', required: ['data'], properties: { data: step16eProductImageSchema } } },
@@ -2414,12 +2414,12 @@ Object.assign(docs, {
     ...docs['PATCH /api/v1/products/:id/images/sort'],
     responses: successEnvelope({ type: 'array', items: step16eProductImageSchema }, 'All product images ordered by sortOrder and creation time after the sort update.'),
   },
-  ['DELETE /api/v1/products/:id/images/:imageId']: { ...docs['DELETE /api/v1/products/:id/images/:imageId'], responses: { 204: { description: 'Product image deleted; no response body.' } } },
+  ['DELETE /api/v1/products/:id/images/:imageId']: { ...docs['DELETE /api/v1/products/:id/images/:imageId'], responses: { 204: { type: 'null', description: 'Product image deleted; no response body.' } } },
   ['POST /api/v1/products/:id/documents']: {
     ...docs['POST /api/v1/products/:id/documents'],
     responses: { 201: { description: 'Uploaded product document metadata.', type: 'object', required: ['data'], properties: { data: step16eProductDocumentSchema } } },
   },
-  ['DELETE /api/v1/products/:id/documents/:documentId']: { ...docs['DELETE /api/v1/products/:id/documents/:documentId'], responses: { 204: { description: 'Product document deleted; no response body.' } } },
+  ['DELETE /api/v1/products/:id/documents/:documentId']: { ...docs['DELETE /api/v1/products/:id/documents/:documentId'], responses: { 204: { type: 'null', description: 'Product document deleted; no response body.' } } },
   ['POST /api/v1/products/:id/submit-review']: { ...docs['POST /api/v1/products/:id/submit-review'], responses: successEnvelope(step16eManagedProductSchema, 'Product transitioned into review and returned with management relations.') },
   ['POST /api/v1/products/:id/approve']: { ...docs['POST /api/v1/products/:id/approve'], responses: successEnvelope(step16eManagedProductSchema, 'Approved product returned with management relations.') },
   ['POST /api/v1/products/:id/reject']: { ...docs['POST /api/v1/products/:id/reject'], responses: successEnvelope(step16eManagedProductSchema, 'Rejected product returned with management relations.') },
@@ -2775,7 +2775,7 @@ Object.assign(docs, {
   },
   ['DELETE /api/v1/companies/:id']: {
     ...docs['DELETE /api/v1/companies/:id'],
-    responses: { 204: { description: 'Company soft-deleted. No response body.' } },
+    responses: { 204: { type: 'null', description: 'Company soft-deleted. No response body.' } },
   },
   ['PATCH /api/v1/companies/:id/restore']: {
     ...docs['PATCH /api/v1/companies/:id/restore'],
@@ -2795,7 +2795,7 @@ Object.assign(docs, {
   },
   ['DELETE /api/v1/products/:id']: {
     ...docs['DELETE /api/v1/products/:id'],
-    responses: { 204: { description: 'Product soft-deleted (archived with deletedAt set). No response body.' } },
+    responses: { 204: { type: 'null', description: 'Product soft-deleted (archived with deletedAt set). No response body.' } },
   },
   ...Object.fromEntries(['submit-review', 'approve', 'reject', 'publish', 'hide', 'archive', 'restore-draft'].map((action) => {
     const route = 'POST /api/v1/products/:id/' + action;
