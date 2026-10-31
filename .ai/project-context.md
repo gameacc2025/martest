@@ -629,3 +629,14 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Admin stats includes eight counts, five recent users and twenty pending products with compact related company/category/creator projections. System setting response only exposes productReviewEditThreshold; inquiry monetization setting only exposes subscriptionEnforcement.
 - Admin inquiry plan CRUD follows full plan scalar model. Manual subscription actions include full plan and compact company/user projections.
 - Step 16G CI pending.
+
+
+## User/RBAC/settings/admin response contracts — step 16G merged (2026-10-31)
+
+- PR #56 merged at `bebc3192440c9f3b66080a78384d627fdabb4e24`.
+- User list uses role/permission name arrays; detail and mutations use safe Role/Permission scalar records. `passwordHash` and refresh-token fields are never exposed.
+- Role list is plain or paginated; assignable role picker is filtered by caller scope. Permission list is plain, paginated or grouped. Role response contains compact permission joins and user count.
+- Current-user settings profile contains identity/profile/access context and compact role join; password change/avatar operations return message/avatarUrl envelopes.
+- Admin stats includes eight counts, five recent users and twenty pending products. System setting only exposes productReviewEditThreshold; inquiry monetization only exposes subscriptionEnforcement. Inquiry plan CRUD and manual subscription action DTOs are documented.
+- CI: backend 1,392/1,392; frontend/shared 18/18; builds and Prisma migration validation passed. Runtime validation pending at merge.
+- Next: auth/notification/system response audit.
