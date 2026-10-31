@@ -2238,7 +2238,7 @@ const step16fCategoryWithSubcategoriesSchema = {
 const step16fSpecificationFieldSchema = {
   type: 'object', required: ['id', 'title', 'slug', 'type', 'defaultUnit', 'description'],
   properties: {
-    id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' }, type: { type: 'string' },
+    id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' }, type: { type: 'string', enum: ['TEXT', 'NUMBER', 'BOOLEAN', 'SELECT', 'MULTI_SELECT', 'DATE'] },
     defaultUnit: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
   },
 };
