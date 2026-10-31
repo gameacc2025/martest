@@ -1288,3 +1288,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Found public category detail and subcategory detail handlers fetched by ID without checking `status === ACTIVE`, despite the public category list filtering inactive rows.
 - Added active-only predicates to public category/subcategory detail lookups and verified the parent category is active before listing children.
 - Added service/controller regression coverage. Changes are included in PR #42.
+
+
+- CI first run: 1,313 tests executed, 1,312 passed; the only failure was a stale controller-test expectation after the caller context was added to the service call. Updated the test to provide a verified STAFF caller and assert the third argument. No production behavior changed in this correction. Re-run CI on the latest head.
