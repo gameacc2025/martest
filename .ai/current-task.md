@@ -262,3 +262,18 @@ PR #47 merged by squash into `main` at `d3d6012107651af9368c0683ae3126dfc03e5a3f
 - Address responses reflect the explicit `ADDRESS_SELECT` fields and `{data}` wrapper; address delete is 204. Notifications document the actual direct response shapes (`{data,meta}`, `{count}`, `{success}`, `{success,count}`, folder change result). Admin delivery stats reflect actual totals/maps/recentFailures. Inquiry quota reflects enforced/subscription/quotas/capabilities; subscription payment results include cancelled.
 - Added structural response-contract tests for these exact payload keys. Static registry check still shows 149 unique docs keys for 149 routes, zero missing, zero duplicate literal keys.
 - Remaining step 16B work: concrete product history/public price-history response schemas, inquiry message/response shapes, and full notification delivery row schema only if source DTO is stable. Then CI/migration validation and PR.
+
+
+## OpenAPI response contracts — step 16B merged (2026-10-31)
+
+PR #48 merged by squash into `main` at `462aad8a518fea47025d116ccb8fc7e095b708b4`. CI [41223427283](https://github.com/gameacc2025/martest/actions/runs/41223427283) passed: backend 1,384/1,384; frontend/shared 18/18; all frontend builds passed. Migration validation [41223427321](https://github.com/gameacc2025/martest/actions/runs/41223427321) passed. Runtime [41223427298] remains separate from unit/build and is not a merge blocker per owner instruction.
+
+- Concrete response contracts added for addresses, user notifications, notification folders/read/bulk actions, admin notification folders/delivery stats/delivery pagination, inquiry plans/quota/subscriptions/payment verification.
+- Schemas follow actual `success(data)` envelopes, direct `{data,meta}` notification pagination, Prisma selects and controller status codes. Subscription creation uses the narrower plan projection actually returned by the payment service; subscription list uses the wider plan projection. Payment retry includes `cancelled` as a supported service outcome.
+- Added structural tests for address, notification, admin delivery and inquiry subscription response fields.
+
+## Next active work — step 16C
+
+- Add source-backed response schemas for product public price history, product management history/activity, inquiry message lists/sends, inquiry response lists/decisions/withdrawals and attachment upload.
+- Reuse existing service projection shapes; do not expose private buyer/company/payment fields in public projections.
+- Add tests for each documented response envelope and statuses; then CI/migration validation and merge.
