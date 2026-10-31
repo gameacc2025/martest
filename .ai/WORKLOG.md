@@ -1720,3 +1720,9 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added an integration test against generated `/docs/json` for inquiry subscription create/retry/callback and product soft-delete routes.
 - Assertions verify central/direct 401/403/500 schemas, native Fastify 429 schema, sanitized payment 502/503 only on relevant routes, and 204 no-content behavior.
 - Existing Swagger integration coverage continues to verify cookie-auth refresh and non-bearer handoff redeem; route registry tests cover notification preferences and all documented routes. CI pending.
+
+
+### Step 16M — Swagger transform correction
+
+- Generated `/docs/json` integration test exposed that transform's default 401/403/500 responses overwrote route-specific schemas. Updated transform to prefer route-doc responses and fall back to shared defaults.
+- Corrected default 429 description to native Fastify rate-limit behavior. CI rerun pending.
