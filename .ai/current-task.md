@@ -277,3 +277,12 @@ PR #48 merged by squash into `main` at `462aad8a518fea47025d116ccb8fc7e095b708b4
 - Add source-backed response schemas for product public price history, product management history/activity, inquiry message lists/sends, inquiry response lists/decisions/withdrawals and attachment upload.
 - Reuse existing service projection shapes; do not expose private buyer/company/payment fields in public projections.
 - Add tests for each documented response envelope and statuses; then CI/migration validation and merge.
+
+
+## OpenAPI response contracts — step 16C (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-product-inquiry-responses-step-16c`.
+- Added source-backed product price snapshot, product status history, product activity log, inquiry message, inquiry response/item, response attachment and buyer-decision receipt schemas.
+- Public price history reflects all recorded retail snapshots in ascending recordedAt order (not a six-month truncation); Decimal prices are serialized as strings. Product status history and activity log preserve their distinct actor projections.
+- Inquiry messages document the 500-item cap and sender/recipient projections; send response includes smsQueued/smsSkippedReason. Inquiry response schemas allow companyId and nested product companyId to be omitted for ANONYMOUS_SEALED buyer views. Buyer decision response is the minimal `{id,inquiryId,status}` receipt. Attachment URLs are relative `/uploads/...` paths, not absolute URIs.
+- Tests added for product history/price history/activity and inquiry message/response/decision/attachment response keys. CI pending.
