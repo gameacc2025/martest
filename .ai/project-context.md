@@ -701,3 +701,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Auth refresh token is cookie-only (`httpOnly`); never include refreshToken/passwordHash in JSON contracts. Customer registration has no AccessProfile; company registration creates pending company/user with inactive company AccessProfile.
 - Notification preference response is direct `{data,smsAvailable}`; notification list `{data,meta}`; unread count `{count}`; bulk operations `{success,count}`; folder membership `{success,action,notificationId,folderId}`. SMS is currently unavailable; app scope is derived from authenticated token.
 - Company restore/status/verify/logo return a company object. Company soft-delete and product soft-delete are HTTP 204 without response body. Product workflow actions return the managed product projection and status history.
+
+
+## API error contract findings — 2026-10-31
+
+- Central error handler envelope: `{error:{code,message,details?}}`; production 500 is generic `INTERNAL_ERROR`, with debug/stack only in development.
+- Auth and RBAC guards often respond directly with `{error:true,code,message}`; some refresh errors are nested. Fastify rate-limit default response is `{statusCode,error,message}`.
+- Prisma mapping: P2002→409, P2025→404, P2003/P2014→400; schema validation→400. Thrown payment provider 502/503 errors are currently normalized to generic 500 by the central handler.
+- OpenAPI ErrorResponse currently models only the nested central envelope; step 16J must align it to actual variants without weakening production error redaction.
