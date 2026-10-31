@@ -363,3 +363,20 @@ PR #51 merged by squash into `main` at `095e742d1fbd8b4af954299ff31febd81e0ff732
 - Added login/refresh/me/register/register-company/handoff schemas, explicitly keeping refresh token out of JSON (httpOnly cookie only) and documenting 60-second one-time handoff code.
 - Added profile settings, avatar upload/delete, password change, admin stats and review-threshold settings schemas. Profile settings role relation shape is modeled separately from detailed user access; no nonexistent `permissions` field is required.
 - Added structural tests for response shapes and secret exclusion. New schema block delimiters balanced; route inventory remains 149/149 covered, no missing/duplicate route keys. CI pending.
+
+
+## OpenAPI response contracts — step 16F merged (2026-10-31)
+
+PR #52 merged by squash into `main` at `a58d45f85025ec054d12d46ad9f6f4ba1c08389d`. CI [41228711838](https://github.com/gameacc2025/martest/actions/runs/41228711838) passed: backend 1,388/1,388; frontend/shared 18/18; frontend builds passed. Migration validation [41228711826](https://github.com/gameacc2025/martest/actions/runs/41228711826) passed.
+
+- User list/detail/create/update/access/company-move schemas now reflect safe identity, profile/access profile, roles and permissions; password hashes are excluded.
+- Role CRUD/assignable and permission CRUD/list variants are documented.
+- Auth login/refresh/me/register/register-company/handoff flows document cookie-only refresh tokens and the one-time 60-second handoff code.
+- Profile settings/avatar/password and admin stats/review threshold are documented.
+- Structural tests pass; route inventory remains 149/149 covered.
+
+## Next active work — step 16G
+
+- Audit remaining product mutation/media and notification preference/folder routes for exact success envelopes and HTTP statuses.
+- Model price-tier create/update/delete, product image/document upload/delete/sort/primary, public product detail, notification preferences, user folder membership/read-state/bulk operations, admin notification folder CRUD and send campaign 202 envelopes.
+- Preserve 204/202 outcomes and relative upload URLs; do not leak delivery internals or private product/company fields into public responses. Add tests, CI/migration validation and merge.
