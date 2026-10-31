@@ -513,7 +513,7 @@ test('user, RBAC, personal settings and remaining admin response contracts prese
   assert.ok(docs['PATCH /api/v1/admin/inquiry-plans/:id'].responses[200].properties.data.properties.inquiriesPerPeriod);
   assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/grant'].responses[201].properties.data.properties.plan.properties.durationDays);
   assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/:id/activate'].responses[200].properties.data.properties.paymentProvider);
-  assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/:id/reject'].responses[200].properties.data.properties.user.properties.phone);
+  assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/:id/reject'].responses[200].properties.data.properties.user.anyOf[0].properties.phone);
 });
 
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
