@@ -203,6 +203,51 @@ test('every route with a `params` schema requires exactly the {id} / {id,subId} 
   }
 });
 
+test('admin inquiry subscriptions, notification deliveries, inquiry dashboard and managed product responses are modeled', () => {
+  const subscriptionList = docs['GET /api/v1/admin/inquiry-subscriptions'].responses[200].properties.data;
+  const subscriptions = subscriptionList.items;
+  assert.ok(subscriptions.properties.plan.properties.durationDays);
+  assert.ok(subscriptions.properties.company);
+  assert.ok(subscriptions.properties.user);
+  assert.equal(subscriptionList.maxItems, 100);
+
+  const granted = docs['POST /api/v1/admin/inquiry-subscriptions/grant'].responses[201].properties.data.properties;
+  assert.ok(granted.status);
+  assert.ok(granted.plan);
+
+  const stats = docs['GET /api/v1/admin/notifications/delivery-stats'].responses[200].properties.data.properties;
+  assert.ok(stats.total);
+  assert.ok(stats.byStatus.properties.FAILED);
+  assert.ok(stats.byChannel.properties.EMAIL);
+  assert.equal(stats.recentFailures.maxItems, 10);
+  assert.ok(stats.recentFailures.items.properties.lastError);
+
+  const deliveries = docs['GET /api/v1/admin/notifications/deliveries'].responses[200].properties;
+  assert.ok(deliveries.data.items.properties.recipient);
+  assert.ok(deliveries.data.items.properties.attempts);
+  assert.ok(deliveries.meta.properties.totalPages);
+
+  const inquiryStats = docs['GET /api/v1/inquiries/stats'].responses[200].properties.data.properties;
+  assert.ok(inquiryStats.sent.properties.byStatus);
+  assert.ok(inquiryStats.received.properties.new);
+  assert.ok(inquiryStats.responses.properties.successRate);
+  assert.equal(inquiryStats.recentInquiries.maxItems, 5);
+
+  const inquiryList = docs['GET /api/v1/inquiries'].responses[200].properties;
+  assert.ok(inquiryList.data.items.properties.company);
+  assert.ok(inquiryList.data.items.properties._count.properties.items);
+  assert.ok(inquiryList.meta.properties.total);
+
+  const products = docs['GET /api/v1/products/my-products'].responses[200].properties;
+  assert.ok(products.data.items.properties.status);
+  assert.ok(products.data.items.properties.company);
+  assert.ok(products.meta.properties.totalPages);
+
+  const productDetail = docs['GET /api/v1/products/:id/manage'].responses[200].properties.data.properties;
+  assert.ok(productDetail.images);
+  assert.ok(productDetail.documents);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually

@@ -1434,3 +1434,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added concrete product price snapshot, status history and activity log response schemas. Public price history reflects all recorded retail snapshots in chronological order.
 - Added inquiry message, supplier response/item, attachment and decision receipt schemas. Anonymous sealed views can omit supplier/company identifiers; decision endpoint returns only `{id,inquiryId,status}`. Attachment URL is a relative upload path.
 - Added response contract tests. Next step 16D: admin inquiry subscription/delivery rows, inquiry stats/list and product management projections where stable source contracts exist.
+
+
+## 2026-10-31 — OPENAPI-ADMIN-INQUIRY-STATS-AND-MANAGEMENT-RESPONSES-STEP-16D
+
+- Added source-backed response contracts for admin subscription list and lifecycle actions, notification delivery statistics and delivery rows, inquiry statistics/list, and product management list/detail.
+- Admin subscription list is capped at 100 and includes plan `{id,code,name,price,durationDays}`, company `{id,name}`, and user `{id,phone,email}` projections. Grant/activate/reject return subscription rows with full plan and compact owner projections.
+- Delivery stats return total, normalized status/channel maps, and up to 10 recent failures. Delivery list returns full scalar NotificationDelivery rows plus pagination meta.
+- Inquiry stats return sent/received/response counts, status maps, response success rate, and up to five recent inquiry/response records. STAFF is platform-wide; COMPANY/CUSTOMER are caller-scoped.
+- Inquiry list returns `{data,meta}` with company and `_count`; company can be null and `_count.responses` may be omitted for confidential/sealed supplier views.
+- Product management list/detail schemas cover core product fields and included company/category/subcategory/price/image/document relations.
+- Added structural tests. CI/migration validation pending.
+- Separate runtime workflow for merged PR #49 failed on company/admin browser smoke rendering and STAFF auth handoff. Backend 1,385 tests, frontend/shared 18 tests, builds and migration validation passed; browser smoke testing remains secondary per project owner direction.

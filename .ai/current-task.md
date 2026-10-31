@@ -301,3 +301,13 @@ PR #49 merged by squash into `main` at `d79b1908d899fc8569495e8925a00a3a0650080d
 - Model admin inquiry subscription list and notification delivery row response projections from service/Prisma selects.
 - Model inquiry stats/list and product management list/detail responses where stable projections exist.
 - Re-check all response status codes and error response shapes; avoid turning raw internal model fields into a public contract without a stable DTO.
+
+
+## OpenAPI response contracts — step 16D (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-admin-inquiry-stats-and-management-responses-step-16d`.
+- Added schemas for admin inquiry subscription list/grant/activate/reject, notification delivery aggregate stats and raw delivery rows, inquiry stats/list, and product management list/detail.
+- Contracts follow actual controller envelopes and service projections: subscription list capped at 100; delivery stats recent failures capped at 10; inquiry stats recent arrays capped at 5; inquiry/product/delivery lists use shared `{data,meta}` pagination.
+- Inquiry list keeps company nullable and response count optional because confidential/sealed supplier views redact them. Inquiry stats distinguish caller-scoped CUSTOMER/COMPANY data from platform-wide STAFF data.
+- Tests assert important fields, list caps and redaction-compatible shapes. CI pending.
+- Separate runtime validation on merged PR #49 failed in browser smoke tests: company/admin panel smoke pages did not mount, and STAFF auth handoff redirected to `/login` then Chrome error page. Backend/frontend unit tests, builds and migration validation passed. Per project direction, do not make browser smoke testing the focus; investigate only if it points to an actual app/API regression.

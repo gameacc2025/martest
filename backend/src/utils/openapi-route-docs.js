@@ -1112,4 +1112,136 @@ Object.assign(docs, {
   },
 });
 
+
+// Admin subscription/delivery, inquiry dashboard and product management list contracts.
+const inquiryPlanAdminResponseSchema = {
+  type: 'object', required: ['id', 'code', 'name', 'durationDays', 'price', 'currency', 'inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod', 'isActive'],
+  properties: {
+    id: { type: 'integer' }, code: { type: 'string' }, name: { type: 'string' }, description: { type: ['string', 'null'] },
+    durationDays: { type: 'integer' }, price: { type: 'string' }, currency: { type: 'string' },
+    inquiriesPerPeriod: { type: 'integer' }, responsesPerPeriod: { type: 'integer' },
+    internalMessagesPerPeriod: { type: 'integer' }, smsPerPeriod: { type: 'integer' }, isActive: { type: 'boolean' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const inquirySubscriptionAdminResponseSchema = {
+  type: 'object', required: ['id', 'planId', 'status', 'createdAt', 'updatedAt', 'plan'],
+  properties: {
+    id: { type: 'integer' }, planId: { type: 'integer' }, companyId: { type: ['integer', 'null'] }, userId: { type: ['integer', 'null'] },
+    status: { type: 'string', enum: ['PENDING_PAYMENT', 'ACTIVE', 'EXPIRED', 'CANCELLED', 'SUSPENDED'] },
+    startsAt: { type: ['string', 'null'], format: 'date-time' }, endsAt: { type: ['string', 'null'], format: 'date-time' },
+    activatedBy: { type: ['integer', 'null'] }, paymentReference: { type: ['string', 'null'] },
+    paymentProvider: { type: ['string', 'null'] }, paymentAmount: { type: ['integer', 'null'] },
+    paymentVerifiedAt: { type: ['string', 'null'], format: 'date-time' }, notes: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    plan: inquiryPlanAdminResponseSchema,
+    company: { anyOf: [{ type: 'object', required: ['id', 'name'], properties: { id: { type: 'integer' }, name: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
+    user: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, phone: { type: ['string', 'null'] }, email: { type: ['string', 'null'] } }, additionalProperties: true }, { type: 'null' }] },
+  },
+};
+const notificationDeliveryResponseSchema = {
+  type: 'object', required: ['id', 'userId', 'eventType', 'channel', 'status', 'attempts', 'maxAttempts', 'nextAttemptAt', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, userId: { type: 'integer' }, notificationId: { type: ['integer', 'null'] },
+    eventType: { type: 'string' }, channel: { type: 'string', enum: ['IN_APP', 'EMAIL', 'SMS'] },
+    status: { type: 'string', enum: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'] },
+    recipient: { type: ['string', 'null'] }, subject: { type: ['string', 'null'] }, body: { type: ['string', 'null'] },
+    provider: { type: ['string', 'null'] }, attempts: { type: 'integer' }, maxAttempts: { type: 'integer' },
+    nextAttemptAt: { type: 'string', format: 'date-time' }, lastError: { type: ['string', 'null'] },
+    sentAt: { type: ['string', 'null'], format: 'date-time' }, dedupeKey: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const inquirySummaryRowResponseSchema = {
+  type: 'object', required: ['id', 'title', 'status', 'createdAt', '_count'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' },
+    createdAt: { type: 'string', format: 'date-time' },
+    _count: { type: 'object', required: ['items', 'responses'], properties: { items: { type: 'integer' }, responses: { type: 'integer' } } },
+  }, additionalProperties: true,
+};
+const inquiryStatsResponseSchema = {
+  type: 'object', required: ['sent', 'received', 'responses', 'recentInquiries', 'recentResponses'],
+  properties: {
+    sent: { type: 'object', required: ['total', 'byStatus'], properties: { total: { type: 'integer' }, byStatus: { type: 'object', additionalProperties: { type: 'integer' } } } },
+    received: { type: 'object', required: ['total', 'byStatus', 'new', 'closed'], properties: { total: { type: 'integer' }, byStatus: { type: 'object', additionalProperties: { type: 'integer' } }, new: { type: 'integer' }, closed: { type: 'integer' } } },
+    responses: { type: 'object', required: ['total', 'byStatus', 'awaiting', 'selected', 'successRate'], properties: { total: { type: 'integer' }, byStatus: { type: 'object', additionalProperties: { type: 'integer' } }, awaiting: { type: 'integer' }, selected: { type: 'integer' }, successRate: { type: 'integer', minimum: 0, maximum: 100 } } },
+    recentInquiries: { type: 'array', maxItems: 5, items: inquirySummaryRowResponseSchema },
+    recentResponses: { type: 'array', maxItems: 5, items: { type: 'object', required: ['id', 'status', 'createdAt', 'inquiry', '_count'], properties: { id: { type: 'integer' }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' }, company: { type: ['object', 'null'], additionalProperties: true }, inquiry: { type: 'object', additionalProperties: true }, _count: { type: 'object', properties: { items: { type: 'integer' } } } }, additionalProperties: true } },
+  },
+};
+const inquiryListItemResponseSchema = {
+  ...inquirySummaryRowResponseSchema,
+  required: ['id', 'title', 'status', 'createdAt', 'company', '_count'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' },
+    createdAt: { type: 'string', format: 'date-time' },
+    company: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] } }, additionalProperties: true }, { type: 'null' }] },
+    _count: { type: 'object', required: ['items'], properties: { items: { type: 'integer' }, responses: { type: 'integer' } } },
+  }, additionalProperties: true,
+};
+const managedProductResponseSchema = {
+  type: 'object', required: ['id', 'title', 'slug', 'status', 'visibility', 'companyId', 'categoryId', 'subcategoryId', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
+    shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
+    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
+    specifications: { type: ['object', 'array', 'null'] },
+    status: { type: 'string' }, visibility: { type: 'string' }, isFeatured: { type: 'boolean' },
+    companyId: { type: 'integer' }, categoryId: { type: 'integer' }, subcategoryId: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    company: { type: 'object', additionalProperties: true }, category: { type: 'object', additionalProperties: true },
+    subcategory: { type: 'object', additionalProperties: true }, prices: { type: 'array', items: { type: 'object', additionalProperties: true } },
+    images: { type: 'array', items: { type: 'object', additionalProperties: true } }, documents: { type: 'array', items: { type: 'object', additionalProperties: true } },
+  }, additionalProperties: true,
+};
+
+Object.assign(docs, {
+  ['GET /api/v1/admin/inquiry-subscriptions']: {
+    ...docs['GET /api/v1/admin/inquiry-subscriptions'],
+    responses: { 200: { description: 'Up to 100 newest subscriptions, with the admin list plan, company and user projections.', type: 'object', required: ['data'], properties: { data: { type: 'array', maxItems: 100, items: inquirySubscriptionAdminResponseSchema } } } },
+  },
+  ['POST /api/v1/admin/inquiry-subscriptions/grant']: {
+    ...docs['POST /api/v1/admin/inquiry-subscriptions/grant'],
+    responses: { 201: { description: 'Manually granted active subscription with full plan and compact owner projections.', type: 'object', required: ['data'], properties: { data: inquirySubscriptionAdminResponseSchema } } },
+  },
+  ['POST /api/v1/admin/inquiry-subscriptions/:id/activate']: {
+    ...docs['POST /api/v1/admin/inquiry-subscriptions/:id/activate'],
+    responses: { 200: { description: 'Activated subscription after explicit staff confirmation for an offline payment.', type: 'object', required: ['data'], properties: { data: inquirySubscriptionAdminResponseSchema } } },
+  },
+  ['POST /api/v1/admin/inquiry-subscriptions/:id/reject']: {
+    ...docs['POST /api/v1/admin/inquiry-subscriptions/:id/reject'],
+    responses: { 200: { description: 'Cancelled pending subscription with plan and compact owner projections.', type: 'object', required: ['data'], properties: { data: inquirySubscriptionAdminResponseSchema } } },
+  },
+  ['GET /api/v1/admin/notifications/delivery-stats']: {
+    ...docs['GET /api/v1/admin/notifications/delivery-stats'],
+    responses: { 200: { description: 'Aggregate counts by status and channel, plus at most ten recent failures.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['total', 'byStatus', 'byChannel', 'recentFailures'], properties: {
+      total: { type: 'integer' },
+      byStatus: { type: 'object', required: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'], properties: { PENDING: { type: 'integer' }, SENT: { type: 'integer' }, FAILED: { type: 'integer' }, SKIPPED: { type: 'integer' } } },
+      byChannel: { type: 'object', required: ['IN_APP', 'EMAIL', 'SMS'], properties: { IN_APP: { type: 'integer' }, EMAIL: { type: 'integer' }, SMS: { type: 'integer' } } },
+      recentFailures: { type: 'array', maxItems: 10, items: { type: 'object', required: ['id', 'eventType', 'channel', 'status', 'attempts', 'maxAttempts', 'createdAt'], properties: { id: { type: 'integer' }, eventType: { type: 'string' }, channel: { type: 'string', enum: ['IN_APP', 'EMAIL', 'SMS'] }, status: { type: 'string', enum: ['FAILED'] }, recipient: { type: ['string', 'null'] }, lastError: { type: ['string', 'null'] }, attempts: { type: 'integer' }, maxAttempts: { type: 'integer' }, nextAttemptAt: { type: 'string', format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' } } } },
+    } } } } },
+  },
+  ['GET /api/v1/admin/notifications/deliveries']: {
+    ...docs['GET /api/v1/admin/notifications/deliveries'],
+    responses: { 200: { description: 'Newest delivery rows with pagination metadata; rows are returned as persisted scalar NotificationDelivery fields.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: notificationDeliveryResponseSchema }, meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } } } } },
+  },
+  ['GET /api/v1/inquiries/stats']: {
+    ...docs['GET /api/v1/inquiries/stats'],
+    responses: { 200: { description: 'Caller-scoped sent/received/response aggregates and up to five recent inquiries/responses. CUSTOMER and COMPANY scopes differ; STAFF statistics are platform-wide.', type: 'object', required: ['data'], properties: { data: inquiryStatsResponseSchema } } },
+  },
+  ['GET /api/v1/inquiries']: {
+    ...docs['GET /api/v1/inquiries'],
+    responses: { 200: { description: 'Caller-scoped inquiry rows and pagination metadata. Confidential company identity and sealed response counts are redacted for supplier views when required.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: inquiryListItemResponseSchema }, meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } } } } },
+  },
+  ['GET /api/v1/products/my-products']: {
+    ...docs['GET /api/v1/products/my-products'],
+    responses: { 200: { description: 'Management product rows with pagination metadata; company users see only their own company and staff management contexts may span companies.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: managedProductResponseSchema }, meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } } } } },
+  },
+  ['GET /api/v1/products/:id/manage']: {
+    ...docs['GET /api/v1/products/:id/manage'],
+    responses: { 200: { description: 'Full management product projection, including relations used by authorized product editors.', type: 'object', required: ['data'], properties: { data: managedProductResponseSchema } } },
+  },
+});
+
 module.exports = docs;
