@@ -461,3 +461,13 @@ PR #55 merged by squash into `main` at `306a82047e3226bf93660598dfcc1b29dcf0e1c5
 - Add settings/profile/preferences/avatar/password response contracts, company logo/settings operations and remaining admin stats/settings/plan/subscription operations.
 - Verify exact no-content status codes, direct `{data}` versus `success(data)` envelopes and secret-field omissions.
 - Add structural tests, update API/.ai docs, CI/migration validation and merge.
+
+
+## OpenAPI response contracts — step 16G (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-user-rbac-settings-admin-step-16g`.
+- Added user list/detail/create/update/access/activation/company-move/delete contracts. List uses role/permission name arrays; detail responses use full safe role/permission scalar records. `passwordHash` and refresh tokens are omitted.
+- Added role list (plain or paginated), assignable roles, role CRUD and permission list (plain/paginated/grouped), permission CRUD schemas based on ROLE_SELECT/PERMISSION_SELECT.
+- Added current-user settings profile, password change, avatar upload/delete envelopes.
+- Added admin stats (8 counts, 5 recent users, 20 pending products), system settings, inquiry monetization switch, plan CRUD and manual subscription action schemas. Plan actions use full InquiryPlan and compact company/user owner projections.
+- Structural tests added. CI/migration validation pending.

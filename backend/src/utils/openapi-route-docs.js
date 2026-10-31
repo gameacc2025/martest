@@ -2429,4 +2429,243 @@ Object.assign(docs, {
   ['POST /api/v1/products/:id/restore-draft']: { ...docs['POST /api/v1/products/:id/restore-draft'], responses: successEnvelope(step16eManagedProductSchema, 'Restored draft product returned with management relations.') },
 });
 
+
+// User, RBAC, personal settings and remaining admin response contracts (16G).
+const step16gProfileSchema = {
+  type: 'object', required: ['id', 'firstName', 'lastName', 'avatar', 'metadata'],
+  properties: {
+    id: { type: 'integer' }, firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] },
+    avatar: { type: ['string', 'null'] }, metadata: {},
+  },
+};
+const step16gAccessProfileSchema = {
+  type: 'object', required: ['id', 'type', 'companyId', 'isActive', 'company'],
+  properties: {
+    id: { type: 'integer' }, type: { type: 'string', enum: ['STAFF', 'COMPANY'] },
+    companyId: { type: ['integer', 'null'] }, isActive: { type: 'boolean' },
+    company: { anyOf: [{ type: 'object', required: ['id', 'name', 'type', 'status'], properties: {
+      id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] }, status: { type: 'string' },
+    } }, { type: 'null' }] },
+  },
+};
+const step16gRoleScalarSchema = {
+  type: 'object', required: ['id', 'name', 'label', 'description', 'isSystem', 'scope', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' },
+    description: { type: ['string', 'null'] }, isSystem: { type: 'boolean' },
+    scope: { type: 'string', enum: ['STAFF', 'COMPANY', 'CUSTOMER'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16gPermissionScalarSchema = {
+  type: 'object', required: ['id', 'name', 'label', 'description', 'group', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' },
+    description: { type: ['string', 'null'] }, group: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16gUserBaseSchema = {
+  type: 'object', required: ['id', 'email', 'phone', 'status', 'createdAt', 'updatedAt', 'profile', 'accessProfile'],
+  properties: {
+    id: { type: 'integer' }, email: { type: ['string', 'null'] }, phone: { type: 'string' },
+    status: { type: 'string', enum: ['PENDING', 'ACTIVE', 'REJECTED'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    profile: { anyOf: [step16gProfileSchema, { type: 'null' }] },
+    accessProfile: { anyOf: [step16gAccessProfileSchema, { type: 'null' }] },
+  },
+};
+const step16gUserListItemSchema = {
+  ...step16gUserBaseSchema,
+  required: [...step16gUserBaseSchema.required, 'roles', 'permissions'],
+  properties: {
+    ...step16gUserBaseSchema.properties,
+    roles: { type: 'array', items: { type: 'string' } },
+    permissions: { type: 'array', items: { type: 'string' } },
+  },
+};
+const step16gUserDetailSchema = {
+  ...step16gUserBaseSchema,
+  required: [...step16gUserBaseSchema.required, 'roles', 'permissions'],
+  properties: {
+    ...step16gUserBaseSchema.properties,
+    roles: { type: 'array', items: step16gRoleScalarSchema },
+    permissions: { type: 'array', items: step16gPermissionScalarSchema },
+  },
+};
+const step16gRoleResponseSchema = {
+  ...step16gRoleScalarSchema,
+  required: [...step16gRoleScalarSchema.required, 'permissions', '_count'],
+  properties: {
+    ...step16gRoleScalarSchema.properties,
+    permissions: { type: 'array', items: { type: 'object', required: ['permission'], properties: {
+      permission: { type: 'object', required: ['id', 'name', 'label', 'group'], properties: {
+        id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' }, group: { type: ['string', 'null'] },
+      } },
+    } } },
+    _count: { type: 'object', required: ['users'], properties: { users: { type: 'integer' } } },
+  },
+};
+const step16gAssignableRoleSchema = {
+  type: 'object', required: ['id', 'name', 'label', 'scope'],
+  properties: { id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' }, scope: { type: 'string', enum: ['STAFF', 'COMPANY', 'CUSTOMER'] } },
+};
+const step16gPermissionResponseSchema = {
+  type: 'object', required: ['id', 'name', 'label', 'description', 'group', 'createdAt'],
+  properties: {
+    id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' },
+    description: { type: ['string', 'null'] }, group: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16gSettingsProfileSchema = {
+  ...step16gUserBaseSchema,
+  required: [...step16gUserBaseSchema.required, 'roles'],
+  properties: {
+    ...step16gUserBaseSchema.properties,
+    roles: { type: 'array', items: { type: 'object', required: ['role'], properties: {
+      role: { type: 'object', required: ['id', 'name', 'label'], properties: {
+        id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' },
+      } },
+    } } },
+  },
+};
+const step16gInquiryPlanSchema = {
+  type: 'object',
+  required: ['id', 'code', 'name', 'description', 'durationDays', 'price', 'currency', 'inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod', 'isActive', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, code: { type: 'string' }, name: { type: 'string' },
+    description: { type: ['string', 'null'] }, durationDays: { type: 'integer' }, price: { type: 'string' },
+    currency: { type: 'string' }, inquiriesPerPeriod: { type: 'integer' }, responsesPerPeriod: { type: 'integer' },
+    internalMessagesPerPeriod: { type: 'integer' }, smsPerPeriod: { type: 'integer' }, isActive: { type: 'boolean' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16gAdminSubscriptionActionSchema = {
+  type: 'object',
+  required: ['id', 'planId', 'companyId', 'userId', 'status', 'startsAt', 'endsAt', 'activatedBy', 'paymentReference', 'paymentProvider', 'paymentAuthority', 'paymentRefId', 'paymentAmount', 'paymentVerifiedAt', 'notes', 'createdAt', 'updatedAt', 'plan', 'company', 'user'],
+  properties: {
+    id: { type: 'integer' }, planId: { type: 'integer' }, companyId: { type: ['integer', 'null'] }, userId: { type: ['integer', 'null'] },
+    status: { type: 'string', enum: ['PENDING_PAYMENT', 'ACTIVE', 'EXPIRED', 'CANCELLED', 'SUSPENDED'] },
+    startsAt: { type: ['string', 'null'], format: 'date-time' }, endsAt: { type: ['string', 'null'], format: 'date-time' },
+    activatedBy: { type: ['integer', 'null'] }, paymentReference: { type: ['string', 'null'] },
+    paymentProvider: { type: ['string', 'null'] }, paymentAuthority: { type: ['string', 'null'] },
+    paymentRefId: { type: ['string', 'null'] }, paymentAmount: { type: ['integer', 'null'] },
+    paymentVerifiedAt: { type: ['string', 'null'], format: 'date-time' }, notes: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    plan: step16gInquiryPlanSchema,
+    company: { anyOf: [{ type: 'object', required: ['id', 'name'], properties: { id: { type: 'integer' }, name: { type: 'string' } } }, { type: 'null' }] },
+    user: { anyOf: [{ type: 'object', required: ['id', 'phone'], properties: { id: { type: 'integer' }, phone: { type: 'string' } } }, { type: 'null' }] },
+  },
+};
+const step16gAdminPendingProductSchema = {
+  type: 'object',
+  required: ['id', 'title', 'slug', 'shortDescription', 'description', 'sku', 'brand', 'model', 'specifications', 'status', 'visibility', 'isFeatured', 'editsSinceApproval', 'companyId', 'categoryId', 'subcategoryId', 'createdByUserId', 'createdAt', 'updatedAt', 'deletedAt', 'company', 'category', 'subcategory', 'createdBy'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
+    shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
+    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] }, specifications: {},
+    status: { type: 'string', enum: ['PENDING_REVIEW'] }, visibility: { type: 'string', enum: ['PUBLIC', 'PRIVATE', 'COMPANY_ONLY'] },
+    isFeatured: { type: 'boolean' }, editsSinceApproval: { type: 'integer' },
+    companyId: { type: 'integer' }, categoryId: { type: 'integer' }, subcategoryId: { type: 'integer' }, createdByUserId: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' }, deletedAt: { type: ['string', 'null'], format: 'date-time' },
+    company: { type: 'object', required: ['id', 'name'], properties: { id: { type: 'integer' }, name: { type: 'string' } } },
+    category: { type: 'object', required: ['id', 'nameFa'], properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
+    subcategory: { type: 'object', required: ['id', 'nameFa'], properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
+    createdBy: { type: 'object', required: ['id', 'email', 'profile'], properties: {
+      id: { type: 'integer' }, email: { type: ['string', 'null'] },
+      profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } } }, { type: 'null' }] },
+    } },
+  },
+};
+const step16gAdminStatsSchema = {
+  type: 'object', required: ['counts', 'recentUsers', 'pendingProducts'],
+  properties: {
+    counts: { type: 'object', required: ['users', 'activeUsers', 'companies', 'products', 'pendingProducts', 'orders', 'roles', 'permissions'], properties: {
+      users: { type: 'integer' }, activeUsers: { type: 'integer' }, companies: { type: 'integer' }, products: { type: 'integer' },
+      pendingProducts: { type: 'integer' }, orders: { type: 'integer' }, roles: { type: 'integer' }, permissions: { type: 'integer' },
+    } },
+    recentUsers: { type: 'array', maxItems: 5, items: { type: 'object', required: ['id', 'email', 'status', 'createdAt', 'profile'], properties: {
+      id: { type: 'integer' }, email: { type: ['string', 'null'] }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' },
+      profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } } }, { type: 'null' }] },
+    } } },
+    pendingProducts: { type: 'array', maxItems: 20, items: step16gAdminPendingProductSchema },
+  },
+};
+const step16gSettingsSchema = {
+  type: 'object', required: ['productReviewEditThreshold'],
+  properties: { productReviewEditThreshold: { type: 'integer', minimum: 1 } },
+};
+const step16gMonetizationSettingsSchema = {
+  type: 'object', required: ['subscriptionEnforcement'],
+  properties: { subscriptionEnforcement: { type: 'boolean' } },
+};
+const step16gGroupedPermissionResponseSchema = {
+  type: 'object', required: ['all', 'grouped'],
+  properties: {
+    all: { type: 'array', items: step16gPermissionResponseSchema },
+    grouped: { type: 'object', additionalProperties: { type: 'array', items: step16gPermissionResponseSchema } },
+  },
+};
+const step16gPaginatedSchema = (items) => ({
+  type: 'object', required: ['data', 'meta'],
+  properties: {
+    data: { type: 'array', items },
+    meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: {
+      page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' },
+    } },
+  },
+});
+
+Object.assign(docs, {
+  ['GET /api/v1/users']: { ...docs['GET /api/v1/users'], responses: { 200: step16gPaginatedSchema(step16gUserListItemSchema) } },
+  ['GET /api/v1/users/:id']: { ...docs['GET /api/v1/users/:id'], responses: successEnvelope(step16gUserDetailSchema, 'Scoped user identity, profile and access context with detailed role/permission records; passwordHash and refresh tokens are never returned.') },
+  ['POST /api/v1/users']: { ...docs['POST /api/v1/users'], responses: { 201: { description: 'Created user with detailed role/permission records and access context.', type: 'object', required: ['data'], properties: { data: step16gUserDetailSchema } } } },
+  ['PATCH /api/v1/users/:id']: { ...docs['PATCH /api/v1/users/:id'], responses: successEnvelope(step16gUserDetailSchema, 'Updated user details and safe access context; secrets are omitted.') },
+  ['PATCH /api/v1/users/:id/access']: { ...docs['PATCH /api/v1/users/:id/access'], responses: successEnvelope(step16gUserDetailSchema, 'Updated role assignment and detailed permission projection.') },
+  ['PATCH /api/v1/users/:id/access-active']: { ...docs['PATCH /api/v1/users/:id/access-active'], responses: successEnvelope(step16gUserDetailSchema, 'Updated AccessProfile.isActive and returned the scoped user projection.') },
+  ['PATCH /api/v1/users/:id/company']: { ...docs['PATCH /api/v1/users/:id/company'], responses: successEnvelope(step16gUserDetailSchema, 'Moved company user and returned the scoped user projection.') },
+  ['DELETE /api/v1/users/:id']: { ...docs['DELETE /api/v1/users/:id'], responses: successEnvelope({ type: 'object', required: ['message'], properties: { message: { type: 'string' } } }, 'User deletion confirmation.') },
+  ['GET /api/v1/roles']: {
+    ...docs['GET /api/v1/roles'],
+    responses: { 200: { oneOf: [
+      { type: 'object', required: ['data'], properties: { data: { type: 'array', items: step16gRoleResponseSchema } } },
+      step16gPaginatedSchema(step16gRoleResponseSchema),
+    ] } },
+  },
+  ['GET /api/v1/roles/assignable']: { ...docs['GET /api/v1/roles/assignable'], responses: successEnvelope({ type: 'array', items: step16gAssignableRoleSchema }, 'Roles whose scope matches the caller access context; only the compact role picker fields are returned.') },
+  ['GET /api/v1/roles/:id']: { ...docs['GET /api/v1/roles/:id'], responses: successEnvelope(step16gRoleResponseSchema, 'Role with compact permission relation projections and assigned-user count.') },
+  ['POST /api/v1/roles']: { ...docs['POST /api/v1/roles'], responses: { 201: { description: 'Created role with selected permission relations and assigned-user count.', type: 'object', required: ['data'], properties: { data: step16gRoleResponseSchema } } } },
+  ['PATCH /api/v1/roles/:id']: { ...docs['PATCH /api/v1/roles/:id'], responses: successEnvelope(step16gRoleResponseSchema, 'Updated role with selected permission relations and assigned-user count.') },
+  ['DELETE /api/v1/roles/:id']: { ...docs['DELETE /api/v1/roles/:id'], responses: successEnvelope({ type: 'object', required: ['message'], properties: { message: { type: 'string' } } }, 'Role deletion confirmation; system roles cannot be deleted.') },
+  ['GET /api/v1/permissions']: {
+    ...docs['GET /api/v1/permissions'],
+    responses: { 200: { anyOf: [
+      { type: 'object', required: ['data'], properties: { data: { type: 'array', items: step16gPermissionResponseSchema } } },
+      step16gPaginatedSchema(step16gPermissionResponseSchema),
+      { type: 'object', required: ['data'], properties: { data: step16gGroupedPermissionResponseSchema } },
+    ] } },
+  },
+  ['GET /api/v1/permissions/:id']: { ...docs['GET /api/v1/permissions/:id'], responses: successEnvelope(step16gPermissionResponseSchema, 'Permission record selected by PERMISSION_SELECT.') },
+  ['POST /api/v1/permissions']: { ...docs['POST /api/v1/permissions'], responses: { 201: { description: 'Created permission record selected by PERMISSION_SELECT.', type: 'object', required: ['data'], properties: { data: step16gPermissionResponseSchema } } } },
+  ['PATCH /api/v1/permissions/:id']: { ...docs['PATCH /api/v1/permissions/:id'], responses: successEnvelope(step16gPermissionResponseSchema, 'Updated permission record selected by PERMISSION_SELECT.') },
+  ['DELETE /api/v1/permissions/:id']: { ...docs['DELETE /api/v1/permissions/:id'], responses: successEnvelope({ type: 'object', required: ['message'], properties: { message: { type: 'string' } } }, 'Permission deletion confirmation; assigned permissions cannot be deleted.') },
+  ['GET /api/v1/settings/profile']: { ...docs['GET /api/v1/settings/profile'], responses: successEnvelope(step16gSettingsProfileSchema, 'Current user identity, personal profile, access context and compact role assignments; passwordHash is never selected.') },
+  ['PATCH /api/v1/settings/profile']: { ...docs['PATCH /api/v1/settings/profile'], responses: successEnvelope(step16gSettingsProfileSchema, 'Updated current-user profile and unchanged safe access/role projections.') },
+  ['PATCH /api/v1/settings/change-password']: { ...docs['PATCH /api/v1/settings/change-password'], responses: successEnvelope({ type: 'object', required: ['message'], properties: { message: { type: 'string' } } }, 'Password changed and existing refresh tokens revoked.') },
+  ['POST /api/v1/settings/profile/avatar']: { ...docs['POST /api/v1/settings/profile/avatar'], responses: successEnvelope({ type: 'object', required: ['avatarUrl'], properties: { avatarUrl: { type: 'string' } } }, 'Avatar upload result; avatarUrl is a stored relative path.') },
+  ['DELETE /api/v1/settings/profile/avatar']: { ...docs['DELETE /api/v1/settings/profile/avatar'], responses: successEnvelope({ type: 'object', required: ['message'], properties: { message: { type: 'string' } } }, 'Avatar deletion confirmation.') },
+  ['GET /api/v1/admin/stats']: { ...docs['GET /api/v1/admin/stats'], responses: successEnvelope(step16gAdminStatsSchema, 'Platform-wide entity counts, up to five recent users and up to twenty pending products with safe company/category/creator projections.') },
+  ['GET /api/v1/admin/settings']: { ...docs['GET /api/v1/admin/settings'], responses: successEnvelope(step16gSettingsSchema, 'Current system product review edit threshold.') },
+  ['PATCH /api/v1/admin/settings/product-review-threshold']: { ...docs['PATCH /api/v1/admin/settings/product-review-threshold'], responses: successEnvelope(step16gSettingsSchema, 'Updated product review edit threshold.') },
+  ['GET /api/v1/admin/inquiry-monetization/settings']: { ...docs['GET /api/v1/admin/inquiry-monetization/settings'], responses: successEnvelope(step16gMonetizationSettingsSchema, 'Current inquiry subscription enforcement switch.') },
+  ['PATCH /api/v1/admin/inquiry-monetization/settings']: { ...docs['PATCH /api/v1/admin/inquiry-monetization/settings'], responses: successEnvelope(step16gMonetizationSettingsSchema, 'Updated inquiry subscription enforcement switch.') },
+  ['GET /api/v1/admin/inquiry-plans']: { ...docs['GET /api/v1/admin/inquiry-plans'], responses: successEnvelope({ type: 'array', items: step16gInquiryPlanSchema }, 'All inquiry plans ordered active-first, then price and ID.') },
+  ['POST /api/v1/admin/inquiry-plans']: { ...docs['POST /api/v1/admin/inquiry-plans'], responses: { 201: { description: 'Created inquiry subscription plan.', type: 'object', required: ['data'], properties: { data: step16gInquiryPlanSchema } } } },
+  ['PATCH /api/v1/admin/inquiry-plans/:id']: { ...docs['PATCH /api/v1/admin/inquiry-plans/:id'], responses: successEnvelope(step16gInquiryPlanSchema, 'Updated inquiry plan. Entitlement-affecting fields are immutable while pending or active subscriptions are linked.') },
+  ['POST /api/v1/admin/inquiry-subscriptions/grant']: { ...docs['POST /api/v1/admin/inquiry-subscriptions/grant'], responses: { 201: { description: 'Manually granted active subscription with full plan and compact owner projection.', type: 'object', required: ['data'], properties: { data: step16gAdminSubscriptionActionSchema } } } },
+  ['POST /api/v1/admin/inquiry-subscriptions/:id/activate']: { ...docs['POST /api/v1/admin/inquiry-subscriptions/:id/activate'], responses: successEnvelope(step16gAdminSubscriptionActionSchema, 'Manually activated offline-payment subscription with full plan and compact owner projection; online gateway payments cannot be manually activated.') },
+  ['POST /api/v1/admin/inquiry-subscriptions/:id/reject']: { ...docs['POST /api/v1/admin/inquiry-subscriptions/:id/reject'], responses: successEnvelope(step16gAdminSubscriptionActionSchema, 'Rejected pending offline-payment subscription; status is CANCELLED.') },
+});
+
 module.exports = docs;
