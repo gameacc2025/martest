@@ -392,3 +392,10 @@ Usage consumption must validate the active subscription after acquiring its row 
 PR #41 merged into main at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53`. Address records are scoped by authenticated userId; route tests protect CUSTOMER_USER Website fallback from COMPANY/STAFF/SUPER_ADMIN context crossover. Notification folder scope resolver now mirrors central RBAC's AccessProfile-less CUSTOMER_USER fallback to WEBSITE only and rejects SUPER_ADMIN fallback. CI and migration checks passed; Runtime validation remains separate.
 
 Step 11E is the remaining backend route inventory: auth, users, admin, settings, categories, roles, permissions, and specification-library.
+
+
+## Admin password reset app-context boundary — 2026-10-31
+
+- `PATCH /api/v1/auth/users/:id/password` is an administrative operation and must require exact `AccessProfile.type === STAFF` in addition to `users.reset_password`.
+- A COMPANY-context user must never gain the admin password-reset capability from a misassigned permission or SUPER_ADMIN/wildcard role. The service must independently verify caller context and permission; route-only enforcement is insufficient.
+- Auth service now receives the verified caller for `changeUserPassword` and rejects non-STAFF or unauthorized callers before querying the target account.
