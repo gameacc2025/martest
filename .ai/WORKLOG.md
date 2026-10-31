@@ -1543,3 +1543,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added specification library search/all response schemas; search response is capped at 50 and contains only id/title/slug/type/defaultUnit/description.
 - Added product price-tier/image/document and product workflow transition response schemas. Corrected delete endpoints to HTTP 204/no response body for categories, subcategories, price tiers, product images and documents.
 - Added structural response contract tests. Static coverage is 149/149 routes, zero missing/duplicate keys and no duplicate top-level schema declarations. CI pending.
+
+
+## 2026-10-31 — OPENAPI-COMPANY-PRODUCT-CATEGORY-AUX-STEP-16F-MERGE
+
+- PR #55 merged by squash at `306a82047e3226bf93660598dfcc1b29dcf0e1c5`.
+- Added company settings, company statistics and paginated company-product response schemas; category public/manage/detail/subcategory/category-product/CRUD schemas; specification library search/all DTOs; product price-tier/image/document and workflow response DTOs.
+- Fixed delete response documentation to 204/no body for categories, subcategories, product price tiers, images and documents.
+- Final CI passed backend 1,391/1,391, frontend/shared 18/18 and all frontend builds. Prisma migration validation passed. Runtime compose/browser validation was still in progress at merge; not claimed as passed.
+- Static route coverage remains 149/149 unique routes, zero missing/duplicate keys.
+- Next: step 16G user/RBAC/settings/admin responses.
