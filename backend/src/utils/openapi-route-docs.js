@@ -2198,4 +2198,227 @@ Object.assign(docs, {
   },
 });
 
+
+// Company dashboards, product auxiliary resources, category taxonomy and
+// specification-library contracts (step 16F).
+const step16fCategoryBaseSchema = {
+  type: 'object', required: ['id', 'slug', 'nameFa', 'nameEn', 'image', 'status', 'showInMenu', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, slug: { type: 'string' }, nameFa: { type: 'string' }, nameEn: { type: 'string' },
+    image: { type: ['string', 'null'] }, status: { type: 'string', enum: ['ACTIVE', 'INACTIVE'] },
+    showInMenu: { type: 'boolean' }, sortOrder: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16fSubcategoryBaseSchema = {
+  type: 'object', required: ['id', 'categoryId', 'slug', 'nameFa', 'nameEn', 'status', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, categoryId: { type: 'integer' }, slug: { type: 'string' },
+    nameFa: { type: 'string' }, nameEn: { type: 'string' }, status: { type: 'string', enum: ['ACTIVE', 'INACTIVE'] },
+    sortOrder: { type: 'integer' }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16fCategoryWithSelectedSubcategoriesSchema = {
+  ...step16fCategoryBaseSchema,
+  properties: {
+    ...step16fCategoryBaseSchema.properties,
+    subcategories: { type: 'array', items: {
+      type: 'object', required: ['id', 'slug', 'nameFa', 'nameEn', 'status', 'sortOrder'],
+      properties: {
+        id: { type: 'integer' }, slug: { type: 'string' }, nameFa: { type: 'string' }, nameEn: { type: 'string' },
+        status: { type: 'string', enum: ['ACTIVE', 'INACTIVE'] }, sortOrder: { type: 'integer' },
+      },
+    } },
+  },
+};
+const step16fCategoryWithSubcategoriesSchema = {
+  ...step16fCategoryBaseSchema,
+  properties: { ...step16fCategoryBaseSchema.properties, subcategories: { type: 'array', items: step16fSubcategoryBaseSchema } },
+};
+const step16fSpecificationFieldSchema = {
+  type: 'object', required: ['id', 'title', 'slug', 'type', 'defaultUnit', 'description'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' }, type: { type: 'string' },
+    defaultUnit: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
+  },
+};
+const step16fSpecificationDefinitionFieldSchema = {
+  type: 'object', required: ['id', 'templateId', 'name', 'key', 'type', 'isRequired', 'unit', 'options', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, templateId: { type: 'integer' }, name: { type: 'string' }, key: { type: 'string' },
+    type: { type: 'string' }, isRequired: { type: 'boolean' }, unit: { type: ['string', 'null'] },
+    options: {}, sortOrder: { type: 'integer' }, createdAt: { type: 'string', format: 'date-time' },
+    updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16fSpecificationTemplateSchema = {
+  type: 'object', required: ['id', 'subcategoryId', 'name', 'description', 'isActive', 'createdAt', 'updatedAt', 'fields'],
+  properties: {
+    id: { type: 'integer' }, subcategoryId: { type: 'integer' }, name: { type: 'string' },
+    description: { type: ['string', 'null'] }, isActive: { type: 'boolean' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    fields: { type: 'array', items: step16fSpecificationDefinitionFieldSchema },
+  },
+};
+const step16fSubcategoryDetailSchema = {
+  ...step16fSubcategoryBaseSchema,
+  properties: {
+    ...step16fSubcategoryBaseSchema.properties,
+    category: step16fCategoryBaseSchema,
+    specificationTemplate: { anyOf: [step16fSpecificationTemplateSchema, { type: 'null' }] },
+  },
+};
+const step16fCompanyProductSchema = {
+  type: 'object',
+  required: ['id', 'title', 'slug', 'shortDescription', 'description', 'sku', 'brand', 'model', 'specifications', 'status', 'visibility', 'isFeatured', 'editsSinceApproval', 'companyId', 'categoryId', 'subcategoryId', 'createdByUserId', 'createdAt', 'updatedAt', 'deletedAt', 'category', 'subcategory', 'company'],
+  properties: {
+    ...step16eManagedProductSchema.properties,
+    category: { type: 'object', required: ['id', 'nameFa', 'nameEn'], properties: { id: { type: 'integer' }, nameFa: { type: 'string' }, nameEn: { type: 'string' } } },
+    subcategory: { type: 'object', required: ['id', 'nameFa', 'nameEn'], properties: { id: { type: 'integer' }, nameFa: { type: 'string' }, nameEn: { type: 'string' } } },
+    company: { type: 'object', required: ['id', 'name'], properties: { id: { type: 'integer' }, name: { type: 'string' } } },
+  },
+};
+const step16fCompanySettingsSchema = {
+  type: 'object', required: ['inquiryLimit', 'limits'],
+  properties: {
+    inquiryLimit: { anyOf: [step16eCompanyInquiryLimitSchema, { type: 'null' }] },
+    limits: { type: 'array', items: step16eCompanyLimitSchema },
+  },
+};
+const step16fCompanyStatisticsSchema = {
+  type: 'object', required: ['counts', 'recentProducts', 'recentOrders'],
+  properties: {
+    counts: { type: 'object', required: ['products', 'publishedProducts', 'orders', 'pendingOrders', 'users', 'activeUsers'], properties: {
+      products: { type: 'integer' }, publishedProducts: { type: 'integer' }, orders: { type: 'integer' },
+      pendingOrders: { type: 'integer' }, users: { type: 'integer' }, activeUsers: { type: 'integer' },
+    } },
+    recentProducts: { type: 'array', maxItems: 5, items: { type: 'object', required: ['id', 'title', 'status', 'createdAt'], properties: {
+      id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' },
+    } } },
+    recentOrders: { type: 'array', maxItems: 5, items: { type: 'object', required: ['id', 'title', 'status', 'createdAt'], properties: {
+      id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' },
+    } } },
+  },
+};
+const step16fCategoryProductSchema = {
+  type: 'object',
+  required: ['id', 'title', 'slug', 'shortDescription', 'description', 'sku', 'brand', 'model', 'specifications', 'status', 'visibility', 'isFeatured', 'editsSinceApproval', 'companyId', 'categoryId', 'subcategoryId', 'createdByUserId', 'createdAt', 'updatedAt', 'deletedAt', 'category', 'subcategory', 'company'],
+  properties: {
+    ...step16fCompanyProductSchema.properties,
+  },
+};
+
+Object.assign(docs, {
+  ['GET /api/v1/companies/:id/settings']: {
+    ...docs['GET /api/v1/companies/:id/settings'],
+    responses: successEnvelope(step16fCompanySettingsSchema, 'Company inquiry limit and ordered usage-limit records.'),
+  },
+  ['PATCH /api/v1/companies/:id/settings']: {
+    ...docs['PATCH /api/v1/companies/:id/settings'],
+    responses: successEnvelope(step16fCompanySettingsSchema, 'Updated company inquiry and usage limits.'),
+  },
+  ['GET /api/v1/companies/:id/statistics']: {
+    ...docs['GET /api/v1/companies/:id/statistics'],
+    responses: successEnvelope(step16fCompanyStatisticsSchema, 'Company product/order/user counts and up to five recent products and inquiries.'),
+  },
+  ['GET /api/v1/companies/:id/products']: {
+    ...docs['GET /api/v1/companies/:id/products'],
+    responses: {
+      200: { description: 'Paginated company products with compact category, subcategory and company projections.', type: 'object', required: ['data', 'meta'], properties: {
+        data: { type: 'array', items: step16fCompanyProductSchema },
+        meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } },
+      } },
+    },
+  },
+  ['GET /api/v1/categories']: {
+    ...docs['GET /api/v1/categories'],
+    responses: successEnvelope({ type: 'array', items: step16fCategoryWithSelectedSubcategoriesSchema }, 'Active categories with their active subcategories, ordered by sort order.'),
+  },
+  ['GET /api/v1/categories/manage']: {
+    ...docs['GET /api/v1/categories/manage'],
+    responses: successEnvelope({ type: 'array', items: step16fCategoryWithSelectedSubcategoriesSchema }, 'All categories, including inactive entries and their subcategories, for staff management.'),
+  },
+  ['GET /api/v1/categories/:id']: {
+    ...docs['GET /api/v1/categories/:id'],
+    responses: successEnvelope(step16fCategoryWithSubcategoriesSchema, 'Active category with full subcategory records.'),
+  },
+  ['GET /api/v1/categories/:id/subcategories']: {
+    ...docs['GET /api/v1/categories/:id/subcategories'],
+    responses: successEnvelope({ type: 'array', items: step16fSubcategoryBaseSchema }, 'Active subcategories belonging to the active parent category.'),
+  },
+  ['GET /api/v1/categories/:id/subcategories/:subId']: {
+    ...docs['GET /api/v1/categories/:id/subcategories/:subId'],
+    responses: successEnvelope(step16fSubcategoryDetailSchema, 'Active subcategory with its full parent category and optional specification template/fields.'),
+  },
+  ['GET /api/v1/categories/:id/products']: {
+    ...docs['GET /api/v1/categories/:id/products'],
+    responses: {
+      200: { description: 'Paginated published/public products in the category with compact category, subcategory and company relations.', type: 'object', required: ['data', 'meta'], properties: {
+        data: { type: 'array', items: step16fCategoryProductSchema },
+        meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } },
+      } },
+    },
+  },
+  ['POST /api/v1/categories']: {
+    ...docs['POST /api/v1/categories'],
+    responses: { 201: { description: 'Created category record.', type: 'object', required: ['data'], properties: { data: step16fCategoryBaseSchema } } },
+  },
+  ['PATCH /api/v1/categories/:id']: {
+    ...docs['PATCH /api/v1/categories/:id'],
+    responses: successEnvelope(step16fCategoryBaseSchema, 'Updated category record.'),
+  },
+  ['POST /api/v1/categories/:id/subcategories']: {
+    ...docs['POST /api/v1/categories/:id/subcategories'],
+    responses: { 201: { description: 'Created subcategory record.', type: 'object', required: ['data'], properties: { data: step16fSubcategoryBaseSchema } } },
+  },
+  ['PATCH /api/v1/categories/:id/subcategories/:subId']: {
+    ...docs['PATCH /api/v1/categories/:id/subcategories/:subId'],
+    responses: successEnvelope(step16fSubcategoryBaseSchema, 'Updated subcategory record.'),
+  },
+  ['DELETE /api/v1/categories/:id']: { ...docs['DELETE /api/v1/categories/:id'], responses: { 204: { description: 'Category deleted; no response body.' } } },
+  ['DELETE /api/v1/categories/:id/subcategories/:subId']: { ...docs['DELETE /api/v1/categories/:id/subcategories/:subId'], responses: { 204: { description: 'Subcategory deleted; no response body.' } } },
+  ['GET /api/v1/specification-library']: {
+    ...docs['GET /api/v1/specification-library'],
+    responses: { 200: { description: 'Matching active specification library fields; empty query returns an empty array and limit is capped at 50.', type: 'object', required: ['data'], properties: { data: { type: 'array', maxItems: 50, items: step16fSpecificationFieldSchema } } } },
+  },
+  ['GET /api/v1/specification-library/all']: {
+    ...docs['GET /api/v1/specification-library/all'],
+    responses: { 200: { description: 'All active specification library fields ordered by title.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: step16fSpecificationFieldSchema } } } },
+  },
+  ['POST /api/v1/products/:id/price-tiers']: {
+    ...docs['POST /api/v1/products/:id/price-tiers'],
+    responses: { 201: { description: 'Created product price tier; retail tier creation also records a price snapshot.', type: 'object', required: ['data'], properties: { data: step16eProductPriceTierSchema } } },
+  },
+  ['PATCH /api/v1/products/:id/price-tiers/:tierId']: {
+    ...docs['PATCH /api/v1/products/:id/price-tiers/:tierId'],
+    responses: successEnvelope(step16eProductPriceTierSchema, 'Updated product price tier; a retail snapshot is recorded only when retail pricing actually changes.'),
+  },
+  ['DELETE /api/v1/products/:id/price-tiers/:tierId']: { ...docs['DELETE /api/v1/products/:id/price-tiers/:tierId'], responses: { 204: { description: 'Price tier deleted; no response body.' } } },
+  ['POST /api/v1/products/:id/images']: {
+    ...docs['POST /api/v1/products/:id/images'],
+    responses: { 201: { description: 'Uploaded product image metadata.', type: 'object', required: ['data'], properties: { data: step16eProductImageSchema } } },
+  },
+  ['PATCH /api/v1/products/:id/images/:imageId/primary']: {
+    ...docs['PATCH /api/v1/products/:id/images/:imageId/primary'],
+    responses: successEnvelope(step16eProductImageSchema, 'Updated product image marked as the primary image.'),
+  },
+  ['PATCH /api/v1/products/:id/images/sort']: {
+    ...docs['PATCH /api/v1/products/:id/images/sort'],
+    responses: successEnvelope({ type: 'array', items: step16eProductImageSchema }, 'All product images ordered by sortOrder and creation time after the sort update.'),
+  },
+  ['DELETE /api/v1/products/:id/images/:imageId']: { ...docs['DELETE /api/v1/products/:id/images/:imageId'], responses: { 204: { description: 'Product image deleted; no response body.' } } },
+  ['POST /api/v1/products/:id/documents']: {
+    ...docs['POST /api/v1/products/:id/documents'],
+    responses: { 201: { description: 'Uploaded product document metadata.', type: 'object', required: ['data'], properties: { data: step16eProductDocumentSchema } } },
+  },
+  ['DELETE /api/v1/products/:id/documents/:documentId']: { ...docs['DELETE /api/v1/products/:id/documents/:documentId'], responses: { 204: { description: 'Product document deleted; no response body.' } } },
+  ['POST /api/v1/products/:id/submit-review']: { ...docs['POST /api/v1/products/:id/submit-review'], responses: successEnvelope(step16eManagedProductSchema, 'Product transitioned into review and returned with management relations.') },
+  ['POST /api/v1/products/:id/approve']: { ...docs['POST /api/v1/products/:id/approve'], responses: successEnvelope(step16eManagedProductSchema, 'Approved product returned with management relations.') },
+  ['POST /api/v1/products/:id/reject']: { ...docs['POST /api/v1/products/:id/reject'], responses: successEnvelope(step16eManagedProductSchema, 'Rejected product returned with management relations.') },
+  ['POST /api/v1/products/:id/publish']: { ...docs['POST /api/v1/products/:id/publish'], responses: successEnvelope(step16eManagedProductSchema, 'Published product returned with management relations.') },
+  ['POST /api/v1/products/:id/hide']: { ...docs['POST /api/v1/products/:id/hide'], responses: successEnvelope(step16eManagedProductSchema, 'Hidden product returned with management relations.') },
+  ['POST /api/v1/products/:id/archive']: { ...docs['POST /api/v1/products/:id/archive'], responses: successEnvelope(step16eManagedProductSchema, 'Archived product returned with management relations.') },
+  ['POST /api/v1/products/:id/restore-draft']: { ...docs['POST /api/v1/products/:id/restore-draft'], responses: successEnvelope(step16eManagedProductSchema, 'Restored draft product returned with management relations.') },
+});
+
 module.exports = docs;
