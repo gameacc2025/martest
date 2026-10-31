@@ -83,3 +83,12 @@ Review route context/permission boundaries, buyer/supplier ownership, sealed/ano
 - Confirmed stats scope mismatch: getInquiryStats previously read caller.companyId without requiring COMPANY context. STAFF could be scoped through a stray companyId; STAFF without companyId failed despite the route admitting STAFF. It now permits authorized STAFF (leads.read/inquiries.read) to receive platform-wide aggregates, matching the STAFF inquiry-list behavior, and never scopes STAFF by companyId. Unauthorized STAFF is rejected.
 - Added controller tests for CUSTOMER_USER subscription listing, purchase, payment retry and quota; COMPANY quota; and STAFF stray-companyId denial. Added service tests for STAFF stats authorization and platform scope.
 - PR #40 remains unmerged pending the latest CI/backend tests and migration validation.
+
+
+## Step 11C CI correction — 2026-10-31
+
+- The first PR #40 CI run had 1 backend test failure out of 1,355: the STAFF `scope=received` regression correctly rejected the request, but the test incorrectly expected the mock call tracker to be `undefined`; the harness initializes it as an empty array.
+- Corrected the assertion to require `calls.findMany.length === 0`, preserving the security expectation that no database listing occurs after rejecting STAFF received scope.
+- Correction commit: `189516deb109ca045f577459d385b5492c1d16e7`.
+- Fresh CI and migration verification for this exact head are pending. Previous migration validation passed, but it must be rerun for the corrected PR head. Runtime workflow infrastructure/health/migrations passed; browser smoke failed and remains outside the next debugging task.
+- Do not merge PR #40 until fresh backend CI and migration validation pass.
