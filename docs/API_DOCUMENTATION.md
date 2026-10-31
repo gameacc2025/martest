@@ -256,3 +256,12 @@ Admin inquiry subscription list, notification delivery statistics/list, and inqu
 PR #54 merged at `8ab9acf25c1380e51fc840fa7d69ea42377971b4`. CI passed with 1,390 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed. Runtime compose/browser validation was still running at merge time and is not reported as passed.
 
 Product management, company CRUD/list/detail, caller-shaped inquiry and inquiry item operations, notification folder management and admin announcement acceptance now have source-backed response contracts. Buyer identity and sealed/anonymous-sealed inquiry privacy rules remain explicit in the schemas.
+
+
+## Company/category/product auxiliary responses — step 16F (2026-10-31)
+
+- Company settings GET/PATCH return `{data: {inquiryLimit, limits}}`; company statistics return counts plus at most five recent products and five recent inquiries; company products return paginated Product rows with compact category/subcategory/company projections.
+- Category public/manage lists include their respective active/all subcategory sets. Category detail includes full subcategory rows; subcategory detail includes its full category and optional specification template with ordered fields. Category products are paginated published/public Product rows with compact relations.
+- Category/subcategory create/update responses now use their actual `{data}` envelopes; delete operations return HTTP 204 with no body.
+- Specification-library search returns selected field metadata only (id/title/slug/type/defaultUnit/description), capped at 50; `/all` returns the same selected shape for all active fields.
+- Product price-tier create/update, image upload/primary/sort, document upload and workflow transitions now describe their actual response DTOs. Product tier/image/document delete endpoints return HTTP 204 without a body. Retail price snapshot behavior is noted for tier mutations.
