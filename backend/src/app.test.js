@@ -102,7 +102,7 @@ test('OpenAPI JSON contains every inventory route with effective security and gl
     const key = method + ' ' + fullPath;
     const doc = routeDocs[key];
 
-    assert.ok(operation, 'missing generated OpenAPI operation for ' + key);
+    assert.ok(operation, 'missing generated OpenAPI operation for ' + key + '; candidate paths: ' + Object.keys(spec.paths).filter((value) => value.includes('users')).join(', '));
     assert.ok(doc, 'missing route documentation for ' + key);
     assert.equal(typeof operation['x-authentication-required'], 'boolean', key + ' must declare auth metadata');
     assert.ok(Array.isArray(operation.security), key + ' must have an explicit security requirement');
