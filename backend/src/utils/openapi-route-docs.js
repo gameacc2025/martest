@@ -1220,7 +1220,7 @@ Object.assign(docs, {
       byStatus: { type: 'object', required: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'], properties: { PENDING: { type: 'integer' }, SENT: { type: 'integer' }, FAILED: { type: 'integer' }, SKIPPED: { type: 'integer' } } },
       byChannel: { type: 'object', required: ['IN_APP', 'EMAIL', 'SMS'], properties: { IN_APP: { type: 'integer' }, EMAIL: { type: 'integer' }, SMS: { type: 'integer' } } },
       recentFailures: { type: 'array', maxItems: 10, items: { type: 'object', required: ['id', 'eventType', 'channel', 'status', 'attempts', 'maxAttempts', 'createdAt'], properties: { id: { type: 'integer' }, eventType: { type: 'string' }, channel: { type: 'string', enum: ['IN_APP', 'EMAIL', 'SMS'] }, status: { type: 'string', enum: ['FAILED'] }, recipient: { type: ['string', 'null'] }, lastError: { type: ['string', 'null'] }, attempts: { type: 'integer' }, maxAttempts: { type: 'integer' }, nextAttemptAt: { type: 'string', format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' } } } },
-    } } } },
+    } } } } },
   },
   ['GET /api/v1/admin/notifications/deliveries']: {
     ...docs['GET /api/v1/admin/notifications/deliveries'],
