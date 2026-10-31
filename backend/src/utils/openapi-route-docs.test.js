@@ -461,7 +461,7 @@ test('company dashboard, product auxiliary, category and specification-library r
   assert.ok(image.thumbnailUrl);
   assert.ok(docs['PATCH /api/v1/products/:id/images/:imageId/primary'].responses[200].properties.data.properties.isPrimary);
   assert.equal(docs['PATCH /api/v1/products/:id/images/sort'].responses[200].properties.data.type, 'array');
-  assert.ok(docs['POST /api/v1/products/:id/documents'].responses[201].properties.data.properties.mimetype === undefined);
+  assert.ok(docs['POST /api/v1/products/:id/documents'].responses[201].properties.data.properties.url);
   assert.equal(docs['DELETE /api/v1/products/:id/documents/:documentId'].responses[204].properties, undefined);
   assert.ok(docs['POST /api/v1/products/:id/approve'].responses[200].properties.data.properties.status);
 });
