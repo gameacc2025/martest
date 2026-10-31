@@ -338,3 +338,10 @@ The real Fastify `/docs/json` output is now checked against all 149 route invent
 ## Step 16K — admin notification delivery query filters (2026-10-31)
 
 Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/notifications/deliveries` document the query fields actually consumed by the controller: `status`, `channel`, `eventType`, `userId`, `page`, and `limit`. Status/channel values are enumerated; page/limit are positive integers with defaults 1/20. `from` and `to` are intentionally excluded because the controller does not pass them to the delivery service. No maximum limit is documented because the service does not enforce one.
+
+
+## Step 16L — public and management product response projections (2026-10-31)
+
+The public catalogue uses the explicit `publicProductSelect` projection. GET `/api/v1/products` returns only public product fields and related company/category/subcategory/prices/images/documents. It does not expose creator user IDs, internal edit counters, deletion timestamps or moderation history. GET `/api/v1/products/:id` documents a `oneOf`: public projection for anonymous/customer callers, or management projection for authorized COMPANY/STAFF callers. GET `/api/v1/products/my-products` returns the management projection with creator, edit counter, deletion metadata and up to ten status-history rows.
+
+Public list query filters: search, companyId, categoryId, minPrice, maxPrice, featured, sortBy, sortOrder, page, limit. Management list query filters: search, status, page, limit.
