@@ -244,7 +244,11 @@ async function swaggerPlugin(fastify) {
         const normalizedUrl = normalizePath(url);
         const fullPath = normalizedUrl.startsWith('/api/v1') ? normalizedUrl : `/api/v1${normalizedUrl}`;
         const routeKey = `${String(route.method).toUpperCase()} ${fullPath}`;
-        transformed.security = transformed.security || (PUBLIC_ROUTE_KEYS.has(routeKey) ? [] : [{ bearerAuth: [] }]);
+        const isPublic = PUBLIC_ROUTE_KEYS.has(routeKey);
+        transformed.security = transformed.security || (isPublic ? [] : [{ bearerAuth: [] }]);
+        transformed['x-authentication-required'] = transformed['x-authentication-required'] ?? !isPublic;
+        transformed['x-permission-required'] = transformed['x-permission-required']
+          || (isPublic ? 'None' : 'Authenticated user; see route-level AccessProfile and permission guards');
       }
 
       transformed.response = {
