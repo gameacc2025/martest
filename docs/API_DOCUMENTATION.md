@@ -388,3 +388,8 @@ Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/not
 - تست integration روی خروجی واقعی `/docs/json` اضافه شده است؛ صرفاً به object ثابت route-doc اعتماد نمی‌کند.
 - مسیرهای خرید اشتراک، بررسی مجدد پرداخت، callback و حذف نرم محصول ثبت می‌شوند و خروجی OpenAPI بررسی می‌شود: 401/403 و 500 با union خطا، 429 native rate-limit، 502/503 فقط در مسیرهای پرداخت مربوط، و 204 بدون content.
 - تست موجود Swagger برای refresh نیز امنیت cookie-based را بررسی می‌کند؛ تست‌های ساختاری route-doc همچنان envelopeهای اعلان و مسیرهای دیگر را پوشش می‌دهند.
+
+
+### نکته پیاده‌سازی Swagger
+
+برای مؤثرشدن schemaهای خطای هر route، transform مربوط به Swagger اکنون پاسخ‌های `401`، `403`، `404` و `500` تعریف‌شده در route-doc را بر پیش‌فرض عمومی مقدم می‌داند. پیش از این، transform در بعضی وضعیت‌ها schema اختصاصی مسیر را دوباره با پیش‌فرض جایگزین می‌کرد و خروجی نهایی `/docs/json` با registry تست‌شده یکسان نبود.
