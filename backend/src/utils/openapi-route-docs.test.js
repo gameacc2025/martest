@@ -702,3 +702,19 @@ test('shared error response docs match central, auth/RBAC and native rate-limit 
   assert.equal(docs['POST /api/v1/inquiries/subscription'].responses[503], undefined);
 });
 
+
+test('payment provider 502/503 statuses are documented only on explicitly handled inquiry payment routes', () => {
+  const request = docs['POST /api/v1/inquiries/subscription'].responses[502];
+  assert.equal(request.$ref, '#/components/schemas/ErrorResponse');
+  assert.match(request.description, /Sanitized payment-provider failure/);
+
+  const retry = docs['POST /api/v1/inquiries/subscription/:id/verify-payment'].responses[503];
+  assert.equal(retry.$ref, '#/components/schemas/ErrorResponse');
+
+  const callback = docs['GET /api/v1/inquiries/subscription/payment/callback'].responses[503];
+  assert.equal(callback.$ref, '#/components/schemas/ErrorResponse');
+
+  assert.equal(docs['GET /api/v1/inquiries/subscription/me'].responses[502], undefined);
+  assert.equal(docs['GET /api/v1/inquiries/subscription/me'].responses[503], undefined);
+});
+
