@@ -561,3 +561,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - User APIs expose safe identity/profile/access/role/permission projections; no password hashes. Role/permission APIs document role scope, permission links, assignable-role filtering and array/grouped/paginated permission-list modes.
 - Auth schemas cover login, refresh, me, customer/company registration and PKCE handoff. Refresh token remains in httpOnly cookie only; handoff code expires in 60 seconds.
 - Profile settings, avatar/password operations and admin dashboard/review-threshold settings are documented. Route inventory remains 149/149 covered.
+
+
+## Admin monitoring and inquiry dashboard response contracts — 2026-10-31
+
+- Admin inquiry subscription list includes subscription scalar fields and exact nested projections: plan id/code/name/price/durationDays; company id/name; user id/phone/email. List is capped at 100 newest rows and first marks elapsed ACTIVE rows EXPIRED.
+- Notification delivery stats return total, zero-filled status/channel counts, and up to ten recent failed-delivery projections. Delivery list returns full `NotificationDelivery` rows with pagination metadata; `nextAttemptAt` is non-null per Prisma.
+- Inquiry dashboard stats are access-context scoped and return sent/received/responses aggregates, successRate (selected / selected+rejected), and five recent inquiry/response records. Recent inquiry rows omit buyerUserId. Sealed and anonymous-sealed buyer views filter/redact recent responses.
+- PR #49 browser runtime validation failure was due to SPA origins failing to serve (`chrome-error://chromewebdata/`, missing #app) while backend CI/build and migration validation passed; keep this as a separate runtime startup investigation.

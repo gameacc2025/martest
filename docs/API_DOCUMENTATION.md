@@ -223,3 +223,12 @@ Step 16D merge verification: PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b
 - Permission list documents its three actual modes: unpaginated array, `{all,grouped}` grouping, and paginated `{data,meta}`. Permission CRUD documents scalar permission fields.
 - Login, refresh, current-user context, customer registration, company registration and PKCE handoff responses are modeled. Refresh tokens are never in JSON; they are carried only by the httpOnly cookie. Handoff create returns a one-time code with 60-second TTL; redeem returns a new access token and context.
 - Profile settings document user identity, personal profile, access profile/company and role links; avatar upload returns `avatarUrl`; password/avatar operations return message receipts. Admin dashboard/settings include counts, five recent users, twenty pending products and review threshold.
+
+
+## Admin monitoring and inquiry dashboard responses — step 16D (2026-10-31)
+
+- `GET /admin/inquiry-subscriptions` returns `{data: [...]}` with at most 100 newest rows. Each row includes subscription scalar fields, a deliberately narrow plan projection (`id`, `code`, `name`, `price`, `durationDays`), company (`id`, `name`) and user (`id`, `phone`, `email`) projections. Expired ACTIVE subscriptions are marked EXPIRED before listing.
+- `GET /admin/notifications/delivery-stats` returns `{data: {total, byStatus, byChannel, recentFailures}}`; status/channel buckets are complete zero-filled maps, and recent failures are capped at 10 with their operational error/retry fields.
+- `GET /admin/notifications/deliveries` returns `{data, meta}`; delivery rows follow the complete `NotificationDelivery` Prisma model, including retry, provider, recipient snapshot and idempotency fields. `nextAttemptAt` is non-null.
+- `GET /inquiries/stats` returns sent/received/response aggregates, a selected-vs-decided success rate, and at most five recent inquiries and five recent responses. It is scoped to buyer, supplier company or authorized STAFF context; buyer-facing sealed/anonymous-sealed response visibility/redaction follows the service rules.
+- Runtime validation on PR #49 failed in the browser-smoke stage because the admin/company SPA origins returned `chrome-error://chromewebdata/` / `#app` never attached; API/CI unit and build checks passed. This is tracked separately as a compose/runtime startup issue, not misreported as a passing browser check.
