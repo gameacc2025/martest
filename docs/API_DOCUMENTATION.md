@@ -381,3 +381,10 @@ Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/not
 - خطاهای موقت هنگام verify در callback همچنان به نتیجه `pending` و redirect به صفحه نتیجه منتهی می‌شوند؛ callback از query string به‌تنهایی اشتراک را فعال نمی‌کند.
 - پاسخ مستقیم خطا فقط `code` و `message` ثابت/پاک‌سازی‌شده را می‌فرستد؛ بدنه پاسخ درگاه، merchant ID، authority، stack و جزئیات config هرگز forward نمی‌شوند.
 - کدهای ناشناخته یا status/code نامنطبق دوباره throw می‌شوند تا handler مرکزی آن‌ها را به 500 عمومی تبدیل کند. خطای پیکربندی نامعتبر نیز 500 عمومی باقی می‌ماند.
+
+
+## اعتبارسنجی قرارداد تولیدشده Swagger — مرحله ۱۶M (2026-10-31)
+
+- تست integration روی خروجی واقعی `/docs/json` اضافه شده است؛ صرفاً به object ثابت route-doc اعتماد نمی‌کند.
+- مسیرهای خرید اشتراک، بررسی مجدد پرداخت، callback و حذف نرم محصول ثبت می‌شوند و خروجی OpenAPI بررسی می‌شود: 401/403 و 500 با union خطا، 429 native rate-limit، 502/503 فقط در مسیرهای پرداخت مربوط، و 204 بدون content.
+- تست موجود Swagger برای refresh نیز امنیت cookie-based را بررسی می‌کند؛ تست‌های ساختاری route-doc همچنان envelopeهای اعلان و مسیرهای دیگر را پوشش می‌دهند.
