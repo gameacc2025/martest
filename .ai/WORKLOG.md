@@ -1294,3 +1294,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 - Category controller regression caught one missed call site: `listSubcategories` still fetched its parent without `activeOnly: true`. Corrected the parent lookup to enforce active status before listing active children; re-run CI on the latest head.
+
+
+### Step 11E — STAFF-created company user response
+
+- Confirmed `createUser` committed a COMPANY user for another tenant and then called `getUser`; non-global STAFF read scoping rejected that newly-created user with 403 because the caller's Main-company ID differed.
+- Replaced that post-create read with a private `getCreatedUserContext` path that can only be invoked using the ID returned by the successful create transaction. Normal `getUser` tenant scoping is unchanged.
+- Added regression coverage for STAFF ADMIN creating a user in another company and receiving the result.
