@@ -390,3 +390,19 @@ PR #52 merged by squash into `main` at `a58d45f85025ec054d12d46ad9f6f4ba1c08389d
 - Added `GET /inquiries/stats` dashboard contract: sent/received/responses buckets, computed success rate, recent inquiries/responses capped at five, no buyerUserId field in recent inquiry output, and sealed/anonymous buyer response visibility behavior.
 - Added structural response contract tests. CI and migration validation pending.
 - PR #49 CI and migration passed (backend 1,385/1,385, frontend/shared 18/18, builds and migration validation). Runtime validation failed only in browser smoke: SPA origins returned chrome-error and `#app` did not attach. User preference is to prioritize tests over browser testing; track runtime compose/startup separately and do not claim it passed.
+
+
+## OpenAPI response contracts — step 16D merged (2026-10-31)
+
+PR #53 merged by squash into `main` at `da0478df49eb256fdb5f40c179818a02a6f706fa`.
+
+- Admin inquiry subscription list now documents its 100-row cap and exact subscription/plan/company/user projections.
+- Notification delivery stats now document zero-filled status/channel maps and up to ten recent failures; delivery list documents the complete NotificationDelivery row and pagination metadata. `nextAttemptAt` is required.
+- Inquiry stats now document scoped sent/received/response aggregates, successRate and up to five recent inquiries/responses with sealed/anonymous-sealed buyer visibility rules.
+- CI passed: backend 1,389/1,389 and frontend/shared 18/18; all frontend builds passed. Migration validation passed. Runtime compose/browser run was still executing at merge time and is not treated as a passed check.
+
+## Next active work — step 16E response coverage audit
+
+- Audit the remaining route registry for generic response placeholders, especially product create/update/list/manage, inquiry create/update/status/item operations, company list/detail, and notification admin folder/send operations.
+- Add only response schemas grounded in controller/service/Prisma projections; preserve sensitive-field omissions and caller-specific redactions.
+- Extend structural tests and docs, then CI/migration validation and merge. Avoid browser-smoke work unless a concrete runtime issue blocks functional verification.
