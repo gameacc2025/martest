@@ -333,3 +333,8 @@ An app-level integration test now compares the generated `/docs/json` document f
 PR #59 merged at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e`. CI passed 1,394 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed.
 
 The real Fastify `/docs/json` output is now checked against all 149 route inventory entries, effective auth/security metadata, global error statuses and empty-body 204 responses. Fastify root routes may render with a trailing slash (for example `/users/`). All 13 204 responses use `type: 'null'`, the supported `@fastify/swagger` empty-body response form.
+
+
+## Step 16K — admin notification delivery query filters (2026-10-31)
+
+Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/notifications/deliveries` document the query fields actually consumed by the controller: `status`, `channel`, `eventType`, `userId`, `page`, and `limit`. Status/channel values are enumerated; page/limit are positive integers with defaults 1/20. `from` and `to` are intentionally excluded because the controller does not pass them to the delivery service. No maximum limit is documented because the service does not enforce one.
