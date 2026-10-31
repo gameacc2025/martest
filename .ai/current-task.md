@@ -642,3 +642,12 @@ PR #62 squash-merged into `main` at `3d3c2de398566e9f064744dcd3698f43dbd54d6c`. 
 - Align shared OpenAPI ErrorResponse with central, direct guard and Fastify rate-limit variants; correct 429 description.
 - Evaluate a narrowly allow-listed 502/503 payment response path only if it can preserve sanitized messages and keep all other 5xx generic.
 - Add Swagger/error-handler tests for each variant and production redaction; update API/.ai docs, CI/migration validation and merge.
+
+
+## OpenAPI error envelope correction — step 16J (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-error-envelope-schemas-step-16j`.
+- Route-doc responses now override Swagger defaults for 401/403 with `oneOf`: central nested `ErrorResponse` plus direct auth/RBAC `{error:true,message,code?}`. 500 also accepts both shapes because `authenticateRefresh` has a direct catch-all 500 body.
+- 429 now documents native Fastify `{statusCode:429,error:'Too Many Requests',message}` rather than claiming central wrapping.
+- 502/503 are intentionally not advertised: inquiry payment service throws those internal status codes, but central handler currently normalizes all thrown 5xx to generic 500. No unsafe behavior change was made.
+- Added structural tests for 401/403/429/500 variants and payment status normalization; route inventory remains 149/149 with no duplicate keys. CI pending.
