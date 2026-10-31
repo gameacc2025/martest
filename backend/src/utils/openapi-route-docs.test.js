@@ -676,3 +676,29 @@ test('auth sessions, notification preferences and lifecycle response envelopes m
   }
 });
 
+
+test('shared error response docs match central, auth/RBAC and native rate-limit envelopes', () => {
+  const authFailure = docs['POST /api/v1/auth/refresh'].responses[401];
+  assert.equal(authFailure.oneOf[0].$ref, '#/components/schemas/ErrorResponse');
+  assert.equal(authFailure.oneOf[1].properties.error.const, true);
+  assert.deepEqual(authFailure.oneOf[1].required, ['error', 'message']);
+
+  const forbidden = docs['GET /api/v1/users'].responses[403];
+  assert.equal(forbidden.oneOf[0].$ref, '#/components/schemas/ErrorResponse');
+  assert.equal(forbidden.oneOf[1].properties.error.const, true);
+
+  const rateLimit = docs['POST /api/v1/auth/login'].responses[429];
+  assert.equal(rateLimit.properties.statusCode.const, 429);
+  assert.equal(rateLimit.properties.error.const, 'Too Many Requests');
+  assert.ok(rateLimit.properties.message);
+
+  const internal = docs['POST /api/v1/auth/refresh'].responses[500];
+  assert.equal(internal.oneOf[0].$ref, '#/components/schemas/ErrorResponse');
+  assert.equal(internal.oneOf[1].properties.error.const, true);
+
+  // Payment provider 502/503 throws are normalized to generic 500 by the
+  // central handler today; they must not be advertised as public statuses.
+  assert.equal(docs['POST /api/v1/inquiries/subscription'].responses[502], undefined);
+  assert.equal(docs['POST /api/v1/inquiries/subscription'].responses[503], undefined);
+});
+
