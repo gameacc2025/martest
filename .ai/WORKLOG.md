@@ -1365,3 +1365,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added refreshCookie OpenAPI security scheme and made refresh/logout use it; PKCE redeem is explicitly non-Bearer.
 - Swagger now defaults undocumented routes to bearerAuth unless in explicit public route allow-list; added Addresses and Specification Library tags.
 - Added tests for stale OpenAPI keys, refresh-cookie security, PKCE redeem, and protected/public fallback. Current prose metadata coverage 89/149; 60 route descriptions remain for a later pass.
+
+
+## 2026-10-31 — OPENAPI-STALE-ROUTE-DOCS-STEP-15-MERGE
+
+- PR #46 merged by squash into `main` at `ea6e787c9b2c6dbe819fb344c22aa7adea33016d`.
+- Removed 9 stale route-doc entries (7 nonexistent orders routes and 2 obsolete settings/preferences paths); documented actual notification preferences, registration, PKCE and payment callback endpoints.
+- Added refreshCookie scheme for refresh/logout; PKCE redeem is documented without Bearer. Undocumented protected routes default to Bearer unless explicitly allow-listed public.
+- CI on initial PR head exposed one Swagger test failure caused by empty `security: []` being treated as intentional. Corrected fallback to apply Bearer for empty/missing security on non-public routes while preserving non-empty schemes. Migration validation passed on initial PR head; exact corrected head/merge commit had no visible workflow run at merge time, so post-merge CI must be checked.
+- Dedicated OpenAPI prose coverage: 89/149; remaining 60 routes are the next documentation pass. Do not fabricate request/response schemas; derive from route/schema source.
