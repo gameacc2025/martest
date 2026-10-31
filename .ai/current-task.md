@@ -168,3 +168,14 @@ Confirmed and fixed: STAFF-only admin password reset now enforces exact STAFF co
 - Fixed recipient selection to require `status: ACTIVE` and `AccessProfile(type=COMPANY, companyId=recipientCompanyId, isActive=true)`; direct user recipients must also be ACTIVE. Added regression tests for company context, quota exhaustion, opt-out, missing phone and missing Twilio configuration.
 - SMS is charged to the sender's user/company subscription at queue time; quota is consumed once per outbox row in the same Prisma transaction as the message and delivery row. Provider retries do not consume quota again.
 - Live Twilio delivery remains NOT VERIFIED without deployment credentials and a controlled recipient. CI/migration checks pending.
+
+
+## SMS recipient-context and quota review completed — 2026-10-31
+
+PR #43 merged by squash into `main` at `c08b4d319c44541d7a238cba94f0d1b91556ee42`. CI [41218300030](https://github.com/gameacc2025/martest/actions/runs/41218300030) passed with 1,373/1,373 backend tests; migration validation [41218299932](https://github.com/gameacc2025/martest/actions/runs/41218299932) passed. Runtime [41218299887](https://github.com/gameacc2025/martest/actions/runs/41218299887) remained separate at merge time.
+
+Company SMS recipient selection now requires an ACTIVE COMPANY AccessProfile belonging to the recipient company with active panel access; direct user recipients must be ACTIVE. Tests cover quota exhaustion, opt-out, missing phone, missing provider and company recipient scoping. SMS quota is charged to the sender at enqueue time in the same transaction as the message/outbox row; retries do not charge again. Generic event-dispatch SMS remains intentionally unimplemented; only explicit inquiry-message SMS is supported. Live Twilio delivery is NOT VERIFIED.
+
+## Next priority — subscription payment provider review
+
+Inspect current subscription payment request/verification flow, provider callbacks, idempotency and admin manual activation. Establish whether Zarinpal integration is implemented or still manual-only. Add tests for callback authenticity, amount/currency/reference matching, replay protection and state transitions before attempting live staging verification. Do not mark payments live-verified without credentials and controlled test transaction.
