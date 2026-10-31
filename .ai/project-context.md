@@ -414,3 +414,10 @@ Step 11E is the remaining backend route inventory: auth, users, admin, settings,
 
 - A STAFF caller with `users.create` and any required role-assignment permission may create a COMPANY user for a target company. Returning the just-created record must not be blocked by the caller's later read-scope filter.
 - The service uses a private post-create context lookup tied to the created ID; this does not broaden normal `getUser` access or list scoping.
+
+
+## Step 11E merged — auth and remaining backend route families (2026-10-31)
+
+PR #42 merged into main at `c92aeff2866353826ec423534b4bc4178e7a57c1`. CI passed 1,368/1,368 tests and migration validation passed. The auth password-reset route/service enforce STAFF context and permission; public category/subcategory detail lookups require ACTIVE; STAFF-created COMPANY users return their created record without widening later user read access.
+
+Next work is the SMS delivery integration audit: reconcile dispatcher and inquiry-message queue paths, confirm paid quota/opt-in/dedupe/transaction guarantees, and keep live Twilio verification separate from unit tests.
