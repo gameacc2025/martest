@@ -457,3 +457,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - `docs/API_ROUTE_INVENTORY.md` is the complete method/path/guard index for Fastify route registrations under `/api/v1`.
 - `docs/API_DOCUMENTATION.md` links the inventory and summarizes domain contracts.
 - `backend/src/utils/api-route-inventory.test.js` checks all literal route declarations against the inventory. Request/response schemas and validation remain authoritative in route/schema source files; never invent them in docs.
+
+
+## OpenAPI security contract — 2026-10-31
+
+- Swagger routes without a dedicated prose entry default to Bearer JWT security; public routes must be explicitly allow-listed.
+- Refresh/logout use the `refreshCookie` cookie scheme and trusted-origin guard. PKCE handoff redeem uses trusted origin + one-time code/verifier, not Bearer auth.
+- `openapi-route-docs.js` keys must correspond to registered routes; `openapi-route-docs.test.js` checks against `docs/API_ROUTE_INVENTORY.md`.
+- At the 2026-10-31 audit point, 89/149 registered module routes had dedicated prose entries; remaining routes still rely on route source metadata/generic response descriptions.
