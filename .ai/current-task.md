@@ -555,3 +555,19 @@ PR #58 merged by squash into `main` at `4ee4dbca6486588af34eda4ed9a22a809a7cb73d
 - Added an app-level integration test that boots the actual Fastify app (existing Prisma/env mocks), fetches `/docs/json`, and compares every route in `API_ROUTE_INVENTORY.md` against the generated OpenAPI path+method.
 - The test also checks effective bearer/cookie/public security metadata against route docs, verifies global 400/401/403/404/409/413/429/500 responses, and ensures any 204 operation has no response body.
 - This closes the gap between static route-doc key coverage and actual Swagger transform output. CI pending.
+
+
+## OpenAPI runtime route coverage audit — step 16J merged (2026-10-31)
+
+PR #59 merged by squash into `main` at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e`.
+
+- CI [41237449214](https://github.com/gameacc2025/martest/actions/runs/41237449214) passed: backend 1,394/1,394; frontend/shared 18/18; all frontend builds passed.
+- Prisma migration validation [41237449259](https://github.com/gameacc2025/martest/actions/runs/41237449259) passed.
+- Added real-app `/docs/json` integration coverage: all 149 API inventory routes are present with method/path, security metadata matches route docs, global error statuses 400/401/403/404/409/413/429/500 are present, and 204 responses are bodyless.
+- The integration test exposed two actual documentation details: root Fastify routes appear with trailing slash in Swagger (`/users/`), and `@fastify/swagger` requires `type: 'null'` for empty-body responses. All 13 204 entries now declare explicit null bodies and generated OpenAPI verifies them as bodyless.
+
+## Next active work — step 16K repository branch and documentation consistency audit
+
+- Reconcile all existing remote branches against `main` before merging/deleting anything; merge only branches with valid, non-duplicate feature commits and no conflicting history.
+- Verify route inventory, API docs and `.ai` current-task/worklog/project context all point to merged main state.
+- GitHub connector currently exposes branch creation/update but no branch-delete operation; do not claim remote branch deletion. Provide exact PowerShell commands for stale branch deletion after the safe merge audit.
