@@ -1584,3 +1584,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Notification preferences return `{data,smsAvailable:false}` directly. Folder list includes `isSystem` and `sortOrder` from `getUserFolders`.
 - Corrected company DELETE and product DELETE from generic 200/message response to 204/no body. Company restore/status/verify/logo return `success(company)`; product status workflow actions return `success(productInclude)`.
 - Added structural tests. CI/migration validation pending.
+
+
+## 2026-10-31 — OPENAPI-AUTH-NOTIFICATIONS-LIFECYCLE-STEP-16H-MERGE
+
+- PR #57 merged by squash at `415b6858a9f34235f6cf726a558d76afb5b92af4`.
+- CI [41236279545] passed: backend 1,393/1,393; frontend/shared 18/18; all three frontend builds passed. Prisma migration validation [41236279647] passed. Runtime validation [41236279570] was queued and is not claimed as passed.
+- Added response contracts for customer/company registration, PKCE handoff create/redeem, logout/logout-all, notification preferences/folders, company restore/status/verify/logo, and product workflow status actions.
+- Registration schemas follow actual service projections and state: customer is ACTIVE with CUSTOMER_USER and null AccessProfile; company and manager are PENDING with inactive COMPANY AccessProfile and no automatic role assignment. Secret hashes and refresh tokens are omitted.
+- Handoff code expiry is 60 seconds; redeem response carries access token and safe auth context, refresh token stays in httpOnly cookie.
+- Notification preference endpoints return direct `{data,smsAvailable:false}`. Folder list documents isSystem/sortOrder.
+- Corrected company and product soft-delete response status to 204/no body. Added structural response tests.
+- Static inventory remains 149/149 route keys with no missing or duplicate literal entries.
+- Next: step 16I error/status metadata audit, taking final overrides into account.
