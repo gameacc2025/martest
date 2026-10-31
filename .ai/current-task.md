@@ -471,3 +471,20 @@ PR #55 merged by squash into `main` at `306a82047e3226bf93660598dfcc1b29dcf0e1c5
 - Added current-user settings profile, password change, avatar upload/delete envelopes.
 - Added admin stats (8 counts, 5 recent users, 20 pending products), system settings, inquiry monetization switch, plan CRUD and manual subscription action schemas. Plan actions use full InquiryPlan and compact company/user owner projections.
 - Structural tests added. CI/migration validation pending.
+
+
+## OpenAPI response contracts — step 16G merged (2026-10-31)
+
+PR #56 merged by squash into `main` at `bebc3192440c9f3b66080a78384d627fdabb4e24`.
+
+- User list/detail/create/update/access/access-active/company-move/delete contracts distinguish role/permission name arrays from detailed scalar records; passwordHash and refresh tokens are excluded.
+- Role plain/paginated and assignable responses; permission plain/paginated/grouped variants and CRUD responses are documented.
+- Current-user settings profile, password change and avatar responses are documented.
+- Admin stats, system settings, inquiry monetization, plan CRUD and manual subscription grant/activate/reject responses are documented.
+- CI passed: backend 1,392/1,392; frontend/shared 18/18; frontend builds passed. Prisma migration validation passed. Runtime compose/browser validation was still pending and is not counted as passed.
+
+## Next active work — step 16H remaining auth/notification/system response audit
+
+- Audit remaining generic response placeholders for auth register/login/refresh/me/handoff, notification preferences/folders/read/delete actions, company logo/status/restore, and remaining product status/soft-delete responses.
+- Reconcile all controller status codes and error response contracts, including 204/no-body and direct `{data}` responses.
+- Add structural tests and API/.ai docs; CI/migration validation and merge. Keep browser smoke out of the critical path unless a concrete runtime defect blocks correctness.
