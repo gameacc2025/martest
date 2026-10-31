@@ -1063,7 +1063,7 @@ Object.assign(docs, {
   },
   ['GET /api/v1/inquiries/:id/messages']: {
     ...docs['GET /api/v1/inquiries/:id/messages'],
-    responses: { 200: { description: 'Inquiry messages visible to the caller, ordered oldest first; recipient messages may be marked read.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: inquiryMessageResponseSchema } } } },
+    responses: { 200: { description: 'Inquiry messages visible to the caller, ordered oldest first; recipient messages may be marked read.', type: 'object', required: ['data'], properties: { data: { type: 'array', maxItems: 500, items: inquiryMessageResponseSchema } } } },
   },
   ['POST /api/v1/inquiries/:id/messages']: {
     ...docs['POST /api/v1/inquiries/:id/messages'],
