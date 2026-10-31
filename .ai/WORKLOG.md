@@ -1659,3 +1659,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Completed auth session/registration/PKCE handoff, notification preference/folder/read/bulk, company lifecycle and product workflow response contract docs/tests.
 - Added regression test for refresh-token/password-hash omission, direct notification preference/list/count/bulk envelopes, and 204 no-body delete semantics.
 - Next: step 16I error/status contract audit across auth, RBAC/tenant ownership, validation, not-found, quota/subscription and payment callback paths.
+
+
+## 2026-10-31 — OPENAPI-ERROR-STATUS-AUDIT-STEP-16I
+
+- Audited central error handler, auth plugin, RBAC middleware, origin guard, rate-limit configuration, auth schemas, payment service and Swagger defaults.
+- Found three runtime envelopes: nested central `{error:{code,message,details?}}`; direct auth/RBAC `{error:true,code,message}` (with one nested refresh account-disabled branch); default Fastify rate limit `{statusCode,error,message}`.
+- Central Prisma mappings: P2002→409, P2025→404, P2003/P2014→400. Validation→400. Generic 5xx→500 INTERNAL_ERROR; debug/stack only in development.
+- Inquiry payment service throws internal 502/503, but central handler currently normalizes all thrown 5xx to generic 500. Public response is therefore 500 and does not expose provider details.
+- OpenAPI `ErrorResponse` and 429 description do not currently match all runtime envelopes. Step 16J is responsible for the shared oneOf schema, accurate rate-limit docs, and safe payment status decision/tests. No runtime behavior changed in this audit slice.
