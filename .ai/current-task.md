@@ -301,3 +301,13 @@ PR #49 merged by squash into `main` at `d79b1908d899fc8569495e8925a00a3a0650080d
 - Model admin inquiry subscription list and notification delivery row response projections from service/Prisma selects.
 - Model inquiry stats/list and product management list/detail responses where stable projections exist.
 - Re-check all response status codes and error response shapes; avoid turning raw internal model fields into a public contract without a stable DTO.
+
+
+## OpenAPI response contracts — step 16D (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-admin-inquiry-delivery-responses-step-16d`.
+- Added admin inquiry subscription list response schema (latest 100 records, scalar subscription fields and selected plan/company/user projections).
+- Added full NotificationDelivery row schema based on Prisma model, including notificationId scalar (nullable/no relation), frozen message fields, provider, attempts, retry/error and timestamps; added query schema shared by delivery list/stats.
+- Added inquiry stats response schema based on service aggregation: sent/received/responses maps and totals, new/closed/awaiting/selected/successRate, recent five inquiries/responses. Anonymous sealed recent response company ID remains optional.
+- Added structural tests for these response fields. Static route coverage remains 149/149. CI pending.
+- Remaining 16D review: product management list/detail stable projections and inquiry list pagination/redaction; add only where source projections are sufficiently stable.
