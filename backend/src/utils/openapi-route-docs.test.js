@@ -132,6 +132,45 @@ test('admin notification response contracts match delivery and folder controller
   assert.ok(docs['DELETE /api/v1/addresses/:id'].responses[204]);
 });
 
+test('product history and inquiry conversation response contracts match service projections', () => {
+  const priceHistory = docs['GET /api/v1/products/:id/price-history'].responses[200].properties.data.items.properties;
+  assert.ok(priceHistory.price);
+  assert.ok(priceHistory.recordedAt);
+  assert.ok(priceHistory.minQuantity);
+
+  const productHistory = docs['GET /api/v1/products/:id/history'].responses[200].properties.data.items.properties;
+  assert.ok(productHistory.previousStatus);
+  assert.ok(productHistory.changedBy.properties.profile);
+
+  const activity = docs['GET /api/v1/products/:id/activity'].responses[200].properties.data.items.properties;
+  assert.ok(activity.action);
+  assert.ok(activity.actor.properties.email);
+
+  const messages = docs['GET /api/v1/inquiries/:id/messages'].responses[200].properties.data.items.properties;
+  assert.ok(messages.body);
+  assert.ok(messages.senderUser);
+  assert.ok(messages.recipientCompany);
+
+  const sentMessage = docs['POST /api/v1/inquiries/:id/messages'].responses[201].properties.data.properties;
+  assert.ok(sentMessage.smsQueued);
+  assert.ok(sentMessage.smsSkippedReason);
+
+  const responses = docs['GET /api/v1/inquiries/:id/responses'].responses[200].properties.data.items.properties;
+  assert.ok(responses.company);
+  assert.ok(responses.items.items.properties.inquiryItem);
+  assert.ok(responses.attachments.items.properties.filename);
+
+  const decision = docs['PATCH /api/v1/inquiries/:id/responses/:responseId/decision'].responses[200].properties.data.properties;
+  assert.ok(decision.id);
+  assert.ok(decision.inquiryId);
+  assert.ok(decision.status);
+  assert.equal(decision.companyId, undefined);
+
+  const attachment = docs['POST /api/v1/inquiries/:id/responses/:responseId/attachments'].responses[201].properties.data.properties;
+  assert.ok(attachment.url);
+  assert.ok(attachment.filename);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
