@@ -181,6 +181,12 @@ async function swaggerPlugin(fastify) {
             bearerFormat: 'JWT',
             description: 'Enter a JWT access token. Swagger UI will send it as `Authorization: Bearer <token>`.',
           },
+          refreshCookie: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'refreshToken',
+            description: 'HttpOnly refresh token cookie set by the login endpoint. Browser requests must include the trusted origin.',
+          },
         },
         schemas: commonSchemas,
       },
@@ -193,7 +199,7 @@ async function swaggerPlugin(fastify) {
         transformed.summary = doc.summary;
         transformed.description = doc.description;
         transformed.tags = doc.tags;
-        transformed.security = doc.authRequired === false ? [] : [{ bearerAuth: [] }];
+        transformed.security = Array.isArray(doc.security) ? doc.security : (doc.authRequired === false ? [] : [{ bearerAuth: [] }]);
         transformed.params = transformed.params || doc.params;
         transformed.querystring = transformed.querystring || doc.querystring;
         transformed.body = transformed.body || doc.body;
