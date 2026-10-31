@@ -1283,22 +1283,32 @@ async function sendInquiryMessage(inquiryId, data, caller) {
     let smsSkippedReason = null;
     if (data.notifyBySms === true) {
       const recipient = recipientUserId
-        ? await tx.user.findUnique({ where: { id: recipientUserId }, select: { id: true, phone: true } })
+        ? await tx.user.findFirst({
+          where: { id: recipientUserId, status: 'ACTIVE' },
+          select: { id: true, phone: true },
+        })
         : await tx.company.findUnique({ where: { id: recipientCompanyId }, select: { phone: true } });
       const phone = String(recipient?.phone || '').trim();
-      let deliveryUserId = recipientUserId;
-      if (!deliveryUserId && recipientCompanyId) {
+      let deliveryUserId = recipientUserId ? recipient?.id : null;
+      if (!recipientUserId && recipientCompanyId) {
+        // A company contact number may only be paired with an active COMPANY
+        // account's SMS preference. STAFF accounts can share the platform's
+        // Main-company id, and deactivated panel users must not authorize SMS.
         const companyMember = await tx.user.findFirst({
-          where: { status: 'ACTIVE', accessProfile: { companyId: recipientCompanyId } },
+          where: {
+            status: 'ACTIVE',
+            accessProfile: { companyId: recipientCompanyId, type: 'COMPANY', isActive: true },
+          },
+          orderBy: { id: 'asc' },
           select: { id: true },
         });
-        deliveryUserId = companyMember?.id;
+        deliveryUserId = companyMember?.id ?? null;
       }
 
-      if (!phone) {
-        smsSkippedReason = 'recipient_phone_missing';
-      } else if (!deliveryUserId) {
+      if (!recipient || !deliveryUserId) {
         smsSkippedReason = 'recipient_account_missing';
+      } else if (!phone) {
+        smsSkippedReason = 'recipient_phone_missing';
       } else {
         const preference = await tx.notificationPreference.findUnique({
           where: { userId_eventType_channel: { userId: deliveryUserId, eventType: 'INQUIRY_MESSAGE_RECEIVED', channel: 'SMS' } },
