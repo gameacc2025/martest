@@ -664,5 +664,5 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 ## Global API error response contracts — step 16I (2026-10-31)
 
 - Central Fastify error handler emits `{error:{code,message,details?}}` for validation/app/Prisma errors. Production 500 messages are generic; development 500 may additionally include debug and stack.
-- Prisma P2002 maps to 409; oversized multipart/request payload errors map to 413 through statusCode handling; Fastify rate limiting returns 429 with `{statusCode,error,message}` rather than the normal error envelope.
-- OpenAPI default responses now document 409, 413, and 429 globally; ErrorResponse includes optional dev-only debug/stack fields. RateLimitResponse is a separate schema.
+- Prisma P2002 maps to 409; oversized multipart/request payload errors map to 413 through statusCode handling; Fastify rate-limit errors are caught by the central handler and return 429 with the standard `{error:{code:'APP_ERROR',message}}` envelope.
+- OpenAPI default responses now document 409, 413, and 429 globally; all three use ErrorResponse. ErrorResponse includes optional dev-only debug/stack fields.
