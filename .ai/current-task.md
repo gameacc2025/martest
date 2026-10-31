@@ -694,3 +694,11 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 - Add an integration test against `/docs/json` for actual registered auth, notification, inquiry payment and lifecycle routes (not only the static route-doc registry).
 - Assert generated OpenAPI preserves route-level 401/403 oneOf, native 429, 500 variants, payment 502/503 only on relevant routes, and 204 no-content semantics.
 - Ensure security schemes and route path normalization are correct; CI/migration validation and merge. Then continue remaining Inquiry flow test/feature gaps from project roadmap.
+
+
+## Generated OpenAPI integration verification — step 16M (in progress, 2026-10-31)
+
+- Branch: `test/openapi-generated-spec-step-16M`.
+- Added a Swagger `/docs/json` integration test that registers inquiry subscription creation, retry verification, public payment callback and product soft-delete routes, then asserts generated 401/403/429/500 variants, route-specific 502/503 and 204 no-content.
+- Existing Swagger integration test separately asserts refresh uses cookieAuth and handoff redeem is non-bearer; static route tests cover notification preferences and all 149 route docs.
+- CI pending.
