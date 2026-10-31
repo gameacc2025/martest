@@ -489,3 +489,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Step 16B is deriving concrete response schemas from actual controller envelopes, service projections and Prisma selects. Address responses use `success(data)` and `ADDRESS_SELECT`; notification endpoints have direct `{data,meta}`, `{count}`, `{success}` and `{success,count}` shapes; folder change returns `{success,action,notificationId,folderId}`.
 - Inquiry subscription quota is `{enforced,subscription,quotas,capabilities}`; active plan and subscription projections are documented from `inquiry-subscription.service.js`; payment retry can return `success`, `failed`, `pending` or `cancelled`.
 - Admin notification delivery stats contain `total`, `byStatus`, `byChannel`, `recentFailures`; delivery list is paginated. Do not treat raw delivery rows as a finalized public DTO until the API exposes a stable projection.
+
+
+## OpenAPI response contract coverage — 2026-10-31
+
+- PR #48 merged at `462aad8a518fea47025d116ccb8fc7e095b708b4`; CI passed backend 1,384/1,384 and frontend/shared 18/18; migration passed.
+- Address responses reflect `ADDRESS_SELECT` and `{data}` envelopes. Notification list returns `{data,meta}` with folder memberships; count/read/bulk/folder actions match their controller/service payloads. Admin delivery stats expose total, byStatus, byChannel and recentFailures.
+- Inquiry plan/quota/subscription response contracts derive from `inquiry-subscription.service.js` and `inquiry-payment.service.js`; POST subscription plan projection is intentionally narrower than the subscription-list projection. Payment retry includes cancelled status.
+- Next schema slice: product price/history/activity and inquiry messages/responses/attachments.
