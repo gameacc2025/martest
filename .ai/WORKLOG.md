@@ -1405,3 +1405,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added inquiry contracts for active plans, quota summary, caller-owned subscription list and server-side payment verification results, including `cancelled` payment status.
 - Added structural tests that assert key fields in address, notification, inquiry subscription and admin delivery response payloads.
 - Static coverage remains 149/149; zero missing routes and no duplicate literal route keys. CI pending.
+
+
+## 2026-10-31 — OPENAPI-RESPONSE-CONTRACTS-STEP-16B-MERGE
+
+- PR #48 merged by squash at `462aad8a518fea47025d116ccb8fc7e095b708b4`.
+- CI [41223427283] passed: backend 1,384/1,384, frontend/shared 18/18, frontend builds successful. Migration [41223427321] passed. Runtime validation [41223427298] remained separate.
+- Added concrete response contracts for customer addresses, notifications and folders, admin notification delivery stats/list, inquiry plans, quota, caller subscriptions and payment verification.
+- Verified source projections: `ADDRESS_SELECT`, notification Prisma includes, notification service pagination, delivery service aggregates, inquiry plan selection, quota summary, subscription include projections and payment retry outcomes.
+- Split inquiry subscription plan projections between `GET /subscription/me` and `POST /subscription`, matching the actual narrower create/payment response. Added `cancelled` payment result.
+- Added response contract tests for these shapes. Next: step 16C for product history/price history and inquiry messages/responses/attachments.
