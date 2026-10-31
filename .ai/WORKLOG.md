@@ -1614,3 +1614,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - OpenAPI defaults now include 409, 413 and 429. 409/413/429 all use ErrorResponse. ErrorResponse has optional development-only debug/stack fields; production omits them.
 - Verified Fastify rate-limit errors flow through `error-handler.plugin.js`, which wraps status 429 as `{error:{code:'APP_ERROR',message}}`. Security integration test asserts this exact normalized envelope. An initial incorrect raw rate-limit DTO was removed before merge.
 - Swagger tests assert new default status schemas. Next: step 16J route registry/runtime route and security coverage audit.
+
+
+## 2026-10-31 — OPENAPI-RUNTIME-ROUTE-COVERAGE-STEP-16J
+
+- Added an app-level test using the real Fastify app/plugin/route registration chain and existing test mocks.
+- It parses all 149 inventory entries, maps `:params` to OpenAPI `{params}`, and asserts every method/path exists in `/docs/json`.
+- It verifies effective security metadata against each route's doc (bearer, cookie, or explicit public), confirms global error statuses 400/401/403/404/409/413/429/500, and checks that any 204 response is bodyless.
+- CI pending.
