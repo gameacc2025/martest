@@ -1622,3 +1622,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - It parses all 149 inventory entries, maps `:params` to OpenAPI `{params}`, and asserts every method/path exists in `/docs/json`.
 - It verifies effective security metadata against each route's doc (bearer, cookie, or explicit public), confirms global error statuses 400/401/403/404/409/413/429/500, and checks that any 204 response is bodyless.
 - CI pending.
+
+
+## 2026-10-31 — OPENAPI-RUNTIME-ROUTE-COVERAGE-STEP-16J-MERGE
+
+- PR #59 merged by squash at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e`.
+- CI [41237449214] passed: backend 1,394/1,394; frontend/shared 18/18; all frontend builds passed. Prisma migration validation [41237449259] passed.
+- New app-level test builds actual Fastify app and checks `/docs/json` against all 149 inventory method/path rows, effective bearer/cookie/public security, global error statuses and bodyless 204 responses.
+- Test revealed root route path `/users/` includes trailing slash in generated Swagger; route test now checks normalized, full and trailing-slash path candidates.
+- All 13 204 route response docs now use `type: 'null'`, the `@fastify/swagger` empty-body schema form; generated OpenAPI integration test confirms no content body.
+- Next: step 16K safe remote branch reconciliation and docs consistency. GitHub connector has no branch deletion action; no deletion claimed.
