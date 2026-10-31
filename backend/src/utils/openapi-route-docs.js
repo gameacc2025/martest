@@ -1775,4 +1775,138 @@ Object.assign(docs, {
   },
 });
 
+
+// Admin monitoring and inquiry dashboard response contracts, aligned with
+// the explicit Prisma selects/includes in their service implementations.
+const adminInquirySubscriptionPlanResponseSchema = {
+  type: 'object', required: ['id', 'code', 'name', 'price', 'durationDays'],
+  properties: {
+    id: { type: 'integer' }, code: { type: 'string' }, name: { type: 'string' },
+    price: { type: 'string' }, durationDays: { type: 'integer' },
+  },
+};
+const adminInquirySubscriptionResponseSchema = {
+  type: 'object',
+  required: ['id', 'planId', 'companyId', 'userId', 'status', 'startsAt', 'endsAt', 'activatedBy', 'paymentReference', 'paymentProvider', 'paymentAuthority', 'paymentRefId', 'paymentAmount', 'paymentVerifiedAt', 'notes', 'createdAt', 'updatedAt', 'plan', 'company', 'user'],
+  properties: {
+    id: { type: 'integer' }, planId: { type: 'integer' },
+    companyId: { type: ['integer', 'null'] }, userId: { type: ['integer', 'null'] },
+    status: { type: 'string', enum: ['PENDING_PAYMENT', 'ACTIVE', 'EXPIRED', 'CANCELLED', 'SUSPENDED'] },
+    startsAt: { type: ['string', 'null'], format: 'date-time' }, endsAt: { type: ['string', 'null'], format: 'date-time' },
+    activatedBy: { type: ['integer', 'null'] }, paymentReference: { type: ['string', 'null'] },
+    paymentProvider: { type: ['string', 'null'] }, paymentAuthority: { type: ['string', 'null'] },
+    paymentRefId: { type: ['string', 'null'] }, paymentAmount: { type: ['integer', 'null'] },
+    paymentVerifiedAt: { type: ['string', 'null'], format: 'date-time' }, notes: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    plan: adminInquirySubscriptionPlanResponseSchema,
+    company: { anyOf: [{ type: 'object', required: ['id', 'name'], properties: { id: { type: 'integer' }, name: { type: 'string' } } }, { type: 'null' }] },
+    user: { anyOf: [{ type: 'object', required: ['id', 'phone', 'email'], properties: { id: { type: 'integer' }, phone: { type: ['string', 'null'] }, email: { type: ['string', 'null'] } } }, { type: 'null' }] },
+  },
+};
+const notificationDeliveryResponseSchema = {
+  type: 'object',
+  required: ['id', 'userId', 'notificationId', 'eventType', 'channel', 'status', 'recipient', 'subject', 'body', 'provider', 'attempts', 'maxAttempts', 'nextAttemptAt', 'lastError', 'sentAt', 'dedupeKey', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, userId: { type: 'integer' }, notificationId: { type: ['integer', 'null'] },
+    eventType: { type: 'string' }, channel: { type: 'string', enum: ['IN_APP', 'EMAIL', 'SMS'] },
+    status: { type: 'string', enum: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'] },
+    recipient: { type: ['string', 'null'] }, subject: { type: ['string', 'null'] }, body: { type: ['string', 'null'] },
+    provider: { type: ['string', 'null'] }, attempts: { type: 'integer' }, maxAttempts: { type: 'integer' },
+    nextAttemptAt: { type: ['string', 'null'], format: 'date-time' }, lastError: { type: ['string', 'null'] },
+    sentAt: { type: ['string', 'null'], format: 'date-time' }, dedupeKey: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const notificationDeliveryFailureResponseSchema = {
+  type: 'object', required: ['id', 'eventType', 'channel', 'status', 'recipient', 'lastError', 'attempts', 'maxAttempts', 'nextAttemptAt', 'createdAt'],
+  properties: {
+    id: { type: 'integer' }, eventType: { type: 'string' }, channel: { type: 'string', enum: ['IN_APP', 'EMAIL', 'SMS'] },
+    status: { type: 'string', enum: ['FAILED'] }, recipient: { type: ['string', 'null'] }, lastError: { type: ['string', 'null'] },
+    attempts: { type: 'integer' }, maxAttempts: { type: 'integer' },
+    nextAttemptAt: { type: ['string', 'null'], format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' },
+  },
+};
+const notificationDeliveryStatsResponseSchema = {
+  type: 'object', required: ['total', 'byStatus', 'byChannel', 'recentFailures'],
+  properties: {
+    total: { type: 'integer', minimum: 0 },
+    byStatus: { type: 'object', required: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'], properties: {
+      PENDING: { type: 'integer', minimum: 0 }, SENT: { type: 'integer', minimum: 0 },
+      FAILED: { type: 'integer', minimum: 0 }, SKIPPED: { type: 'integer', minimum: 0 },
+    } },
+    byChannel: { type: 'object', required: ['IN_APP', 'EMAIL', 'SMS'], properties: {
+      IN_APP: { type: 'integer', minimum: 0 }, EMAIL: { type: 'integer', minimum: 0 }, SMS: { type: 'integer', minimum: 0 },
+    } },
+    recentFailures: { type: 'array', maxItems: 10, items: notificationDeliveryFailureResponseSchema },
+  },
+};
+const inquiryDashboardRecentInquiryResponseSchema = {
+  type: 'object', required: ['id', 'title', 'status', 'createdAt', '_count'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' },
+    createdAt: { type: 'string', format: 'date-time' },
+    _count: { type: 'object', required: ['items', 'responses'], properties: { items: { type: 'integer' }, responses: { type: 'integer' } } },
+  },
+};
+const inquiryDashboardRecentResponseSchema = {
+  type: 'object', required: ['id', 'status', 'createdAt', 'company', 'inquiry', '_count'],
+  properties: {
+    id: { type: 'integer' }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' },
+    company: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
+    inquiry: { type: 'object', required: ['id', 'title', 'status', 'visibilityMode', 'revealedAt', 'responseDeadline'], properties: {
+      id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' }, visibilityMode: { type: 'string' },
+      revealedAt: { type: ['string', 'null'], format: 'date-time' }, responseDeadline: { type: ['string', 'null'], format: 'date-time' },
+    } },
+    _count: { type: 'object', required: ['items'], properties: { items: { type: 'integer' } } },
+  },
+};
+const inquiryStatsResponseSchema = {
+  type: 'object', required: ['sent', 'received', 'responses', 'recentInquiries', 'recentResponses'],
+  properties: {
+    sent: { type: 'object', required: ['total', 'byStatus'], properties: {
+      total: { type: 'integer' }, byStatus: { type: 'object', additionalProperties: { type: 'integer' } },
+    } },
+    received: { type: 'object', required: ['total', 'byStatus', 'new', 'closed'], properties: {
+      total: { type: 'integer' }, byStatus: { type: 'object', additionalProperties: { type: 'integer' } },
+      new: { type: 'integer' }, closed: { type: 'integer' },
+    } },
+    responses: { type: 'object', required: ['total', 'byStatus', 'awaiting', 'selected', 'successRate'], properties: {
+      total: { type: 'integer' }, byStatus: { type: 'object', additionalProperties: { type: 'integer' } },
+      awaiting: { type: 'integer' }, selected: { type: 'integer' }, successRate: { type: 'integer', minimum: 0, maximum: 100 },
+    } },
+    recentInquiries: { type: 'array', maxItems: 5, items: inquiryDashboardRecentInquiryResponseSchema },
+    recentResponses: { type: 'array', maxItems: 5, items: inquiryDashboardRecentResponseSchema },
+  },
+};
+
+Object.assign(docs, {
+  ['GET /api/v1/admin/inquiry-subscriptions']: {
+    ...docs['GET /api/v1/admin/inquiry-subscriptions'],
+    responses: successEnvelope({ type: 'array', items: adminInquirySubscriptionResponseSchema }, 'Up to 100 newest subscriptions; expired active rows are transitioned to EXPIRED before the query.'),
+  },
+  ['GET /api/v1/admin/notifications/delivery-stats']: {
+    ...docs['GET /api/v1/admin/notifications/delivery-stats'],
+    responses: successEnvelope(notificationDeliveryStatsResponseSchema, 'Filtered aggregate counts and up to ten recent failed deliveries.'),
+  },
+  ['GET /api/v1/admin/notifications/deliveries']: {
+    ...docs['GET /api/v1/admin/notifications/deliveries'],
+    responses: {
+      200: {
+        description: 'Newest delivery records and pagination metadata.',
+        type: 'object', required: ['data', 'meta'],
+        properties: {
+          data: { type: 'array', items: notificationDeliveryResponseSchema },
+          meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: {
+            page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' },
+          } },
+        },
+      },
+    },
+  },
+  ['GET /api/v1/inquiries/stats']: {
+    ...docs['GET /api/v1/inquiries/stats'],
+    responses: successEnvelope(inquiryStatsResponseSchema, 'Buyer-, supplier- or authorized staff-scoped inquiry dashboard aggregates and up to five recent records per section. Sealed and anonymous-sealed buyer response visibility follows the service redaction rules.'),
+  },
+});
+
 module.exports = docs;
