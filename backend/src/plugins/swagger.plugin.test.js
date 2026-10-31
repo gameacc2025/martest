@@ -90,7 +90,7 @@ test('swagger plugin: OpenAPI spec includes common component schemas', async () 
   assert.ok(schemas, 'spec should have components.schemas');
   const expectedSchemas = [
     'ErrorResponse', 'MessageResponse', 'PaginatedMeta',
-    'PaginatedResponse', 'SuccessResponse', 'AuthTokens', 'RateLimitResponse',
+    'PaginatedResponse', 'SuccessResponse', 'AuthTokens',
     'User', 'Profile', 'AccessProfile',
   ];
   for (const name of expectedSchemas) {
@@ -145,7 +145,7 @@ test('swagger plugin: transform function merges route docs and adds default erro
   assert.ok(op.responses[500], 'operation should have a 500 response');
   assert.equal(op.responses[409].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
   assert.equal(op.responses[413].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
-  assert.equal(op.responses[429].content['application/json'].schema.$ref, '#/components/schemas/RateLimitResponse');
+  assert.equal(op.responses[429].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
   const errorProperties = spec.components.schemas.ErrorResponse.properties.error.properties;
   assert.ok(errorProperties.debug, 'development error detail is documented as optional');
   assert.ok(errorProperties.stack, 'development stack trace is documented as optional');
