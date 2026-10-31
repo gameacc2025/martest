@@ -4,7 +4,7 @@ const swaggerUi = require('@fastify/swagger-ui');
 const routeDocs = require('../utils/openapi-route-docs');
 
 const PUBLIC_ROUTE_KEYS = new Set([
-  'GET /health',
+  'GET /api/v1/health',
   'POST /api/v1/auth/login',
   'POST /api/v1/auth/register',
   'POST /api/v1/auth/register-company',
@@ -239,11 +239,10 @@ async function swaggerPlugin(fastify) {
       // dedicated prose entry yet. Explicit public routes are allow-listed;
       // cookie/PKCE routes can override this through doc.security above.
       if (!doc) {
-        const routeKey = `${String(route.method).toUpperCase()} ${normalizePath(url)}`;
-        const publicRouteKey = routeKey.startsWith('GET /api/v1') || routeKey.startsWith('POST /api/v1')
-          ? routeKey
-          : routeKey;
-        transformed.security = transformed.security || (PUBLIC_ROUTE_KEYS.has(publicRouteKey) ? [] : [{ bearerAuth: [] }]);
+        const normalizedUrl = normalizePath(url);
+        const fullPath = normalizedUrl.startsWith('/api/v1') ? normalizedUrl : `/api/v1${normalizedUrl}`;
+        const routeKey = `${String(route.method).toUpperCase()} ${fullPath}`;
+        transformed.security = transformed.security || (PUBLIC_ROUTE_KEYS.has(routeKey) ? [] : [{ bearerAuth: [] }]);
       }
 
       transformed.response = {
