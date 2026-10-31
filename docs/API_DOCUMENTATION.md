@@ -372,3 +372,12 @@ Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/not
 - پاسخ `429` قالب native محدودکننده Fastify را مستند می‌کند: `{ statusCode: 429, error: 'Too Many Requests', message }`؛ این پاسخ توسط error handler مرکزی wrap نمی‌شود.
 - سرویس پرداخت مقادیر داخلی 502/503 می‌اندازد، اما handler مرکزی فعلی آن‌ها را به 500 عمومی تبدیل می‌کند؛ بنابراین 502/503 به‌عنوان پاسخ عمومی مستند نشده‌اند تا زمانی که تغییر امن رفتار و تست آن انجام شود.
 - برای هر ۱۴۹ مسیر مستند، overrideهای پاسخ خطا اضافه شده‌اند؛ تعداد کلیدهای مسیر ۱۴۹، بدون مسیر گمشده یا کلید تکراری باقی مانده است.
+
+
+## خطاهای درگاه پرداخت اشتراک استعلام — مرحله ۱۶L (2026-10-31)
+
+- درخواست خرید اشتراک (`POST /inquiries/subscription`) برای خطاهای upstream allow-list شده با `502` و envelope تو‌در‌توی `{ error: { code, message } }` پاسخ می‌دهد: `PAYMENT_PROVIDER_UNAVAILABLE`، `PAYMENT_PROVIDER_HTTP_ERROR`، `PAYMENT_PROVIDER_INVALID_RESPONSE` و `PAYMENT_REQUEST_REJECTED`.
+- بررسی مجدد پرداخت (`POST /inquiries/subscription/:id/verify-payment`) و callback عمومی در صورت پیکربندی‌نبودن درگاه `503 PAYMENT_PROVIDER_NOT_CONFIGURED` می‌دهند.
+- خطاهای موقت هنگام verify در callback همچنان به نتیجه `pending` و redirect به صفحه نتیجه منتهی می‌شوند؛ callback از query string به‌تنهایی اشتراک را فعال نمی‌کند.
+- پاسخ مستقیم خطا فقط `code` و `message` ثابت/پاک‌سازی‌شده را می‌فرستد؛ بدنه پاسخ درگاه، merchant ID، authority، stack و جزئیات config هرگز forward نمی‌شوند.
+- کدهای ناشناخته یا status/code نامنطبق دوباره throw می‌شوند تا handler مرکزی آن‌ها را به 500 عمومی تبدیل کند. خطای پیکربندی نامعتبر نیز 500 عمومی باقی می‌ماند.
