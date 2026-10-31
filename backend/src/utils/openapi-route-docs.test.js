@@ -516,6 +516,66 @@ test('user, RBAC, personal settings and remaining admin response contracts prese
   assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/:id/reject'].responses[200].properties.data.properties.user.anyOf[0].properties.phone);
 });
 
+test('auth, notification preferences, company lifecycle and product workflow response contracts match controller behavior', () => {
+  const customerRegistration = docs['POST /api/v1/auth/register'].responses[201].properties.data.properties;
+  assert.ok(customerRegistration.user.properties.phone);
+  assert.ok(customerRegistration.profile.anyOf);
+  assert.ok(customerRegistration.accessProfile.anyOf);
+  assert.ok(customerRegistration.roles.items);
+  assert.equal(customerRegistration.passwordHash, undefined);
+
+  const companyRegistration = docs['POST /api/v1/auth/register-company'].responses[201].properties.data.properties;
+  assert.ok(companyRegistration.company.properties.nationalId);
+  assert.ok(companyRegistration.user.properties.status);
+  assert.ok(companyRegistration.accessProfile.properties.isActive);
+  assert.equal(companyRegistration.refreshToken, undefined);
+
+  const handoffCreate = docs['POST /api/v1/auth/handoff'].responses[201].properties.data.properties;
+  assert.equal(handoffCreate.expiresIn.enum[0], 60);
+  assert.ok(handoffCreate.code.pattern);
+  const handoffRedeem = docs['POST /api/v1/auth/handoff/redeem'].responses[200].properties.data.properties;
+  assert.ok(handoffRedeem.tokens.properties.accessToken);
+  assert.ok(handoffRedeem.user);
+  assert.ok(handoffRedeem.roles);
+  assert.equal(handoffRedeem.refreshToken, undefined);
+
+  for (const route of ['POST /api/v1/auth/logout', 'POST /api/v1/auth/logout-all']) {
+    const receipt = docs[route].responses[200].properties.data.properties;
+    assert.ok(receipt.message);
+  }
+
+  for (const route of ['GET /api/v1/settings/notifications/preferences', 'PATCH /api/v1/settings/notifications/preferences']) {
+    const preferences = docs[route].responses[200].properties;
+    assert.ok(preferences.data.items.properties.channels.properties.SMS);
+    assert.equal(preferences.smsAvailable.const, false);
+  }
+  const folders = docs['GET /api/v1/settings/notifications/folders'].responses[200].properties.data.items.properties;
+  assert.ok(folders.isSystem);
+  assert.ok(folders.sortOrder);
+
+  for (const route of [
+    'PATCH /api/v1/companies/:id/restore',
+    'PATCH /api/v1/companies/:id/status',
+    'PATCH /api/v1/companies/:id/verify',
+    'PATCH /api/v1/companies/:id/logo',
+  ]) {
+    const company = docs[route].responses[200].properties.data.properties;
+    assert.ok(company.id);
+    assert.ok(company.status);
+    assert.ok(company.isVerified);
+  }
+  assert.equal(docs['DELETE /api/v1/companies/:id'].responses[204].content, undefined);
+  assert.equal(docs['DELETE /api/v1/companies/:id'].responses[200], undefined);
+
+  for (const action of ['submit-review', 'approve', 'reject', 'publish', 'hide', 'archive', 'restore-draft']) {
+    const product = docs['POST /api/v1/products/:id/' + action].responses[200].properties.data.properties;
+    assert.ok(product.status);
+    assert.ok(product.statusHistory.items.properties.changedBy);
+  }
+  assert.equal(docs['DELETE /api/v1/products/:id'].responses[204].content, undefined);
+  assert.equal(docs['DELETE /api/v1/products/:id'].responses[200], undefined);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually
