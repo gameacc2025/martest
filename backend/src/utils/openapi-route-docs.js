@@ -1812,7 +1812,7 @@ const notificationDeliveryResponseSchema = {
     status: { type: 'string', enum: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'] },
     recipient: { type: ['string', 'null'] }, subject: { type: ['string', 'null'] }, body: { type: ['string', 'null'] },
     provider: { type: ['string', 'null'] }, attempts: { type: 'integer' }, maxAttempts: { type: 'integer' },
-    nextAttemptAt: { type: ['string', 'null'], format: 'date-time' }, lastError: { type: ['string', 'null'] },
+    nextAttemptAt: { type: 'string', format: 'date-time' }, lastError: { type: ['string', 'null'] },
     sentAt: { type: ['string', 'null'], format: 'date-time' }, dedupeKey: { type: ['string', 'null'] },
     createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
   },
@@ -1823,7 +1823,7 @@ const notificationDeliveryFailureResponseSchema = {
     id: { type: 'integer' }, eventType: { type: 'string' }, channel: { type: 'string', enum: ['IN_APP', 'EMAIL', 'SMS'] },
     status: { type: 'string', enum: ['FAILED'] }, recipient: { type: ['string', 'null'] }, lastError: { type: ['string', 'null'] },
     attempts: { type: 'integer' }, maxAttempts: { type: 'integer' },
-    nextAttemptAt: { type: ['string', 'null'], format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' },
+    nextAttemptAt: { type: 'string', format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' },
   },
 };
 const notificationDeliveryStatsResponseSchema = {
