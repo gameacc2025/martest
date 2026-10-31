@@ -30,6 +30,9 @@ const mockPrisma = {
     findFirst: async (args) => {
       calls.push(['findFirst', args]);
       if (args.where?.paymentAuthority) return subscription?.paymentAuthority === args.where.paymentAuthority ? subscription : null;
+      if (args.where?.id && subscription?.id !== args.where.id) return null;
+      if (args.where?.companyId != null && subscription?.companyId !== args.where.companyId) return null;
+      if (args.where?.userId != null && subscription?.userId !== args.where.userId) return null;
       if (args.where?.status === 'ACTIVE') return null;
       return subscription;
     },
