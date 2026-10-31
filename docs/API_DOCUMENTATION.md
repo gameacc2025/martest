@@ -312,5 +312,5 @@ Customer registration, company registration, PKCE handoff create/redeem and logo
 
 - Global error responses document 409 conflicts (including Prisma duplicate keys), 413 oversized request/file uploads, and 429 rate limits.
 - Standard application errors use `{error:{code,message,details?}}`; development-only 500 diagnostics may include `debug` and `stack`, while production never returns those fields.
-- Rate limiting has its own response DTO `{statusCode:429,error,message}` and is not conflated with the standard application error envelope.
+- Rate limiting is normalized by the central error handler to the standard `{error:{code:'APP_ERROR',message}}` envelope with HTTP 429; it does not expose Fastify's internal rate-limit Error object.
 - Swagger and security tests cover the response status/schema contracts. CI/migration validation pending.
