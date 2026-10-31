@@ -1563,3 +1563,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added settings profile response (identity/profile/access profile/compact role join), password change message, avatar URL and delete message responses.
 - Added admin dashboard stats, system setting threshold, inquiry monetization setting, inquiry plan CRUD, and manual subscription grant/activate/reject responses. Subscription action owner relations are compact; plan is full scalar projection.
 - Added structural response tests. CI pending.
+
+
+## 2026-10-31 — OPENAPI-USER-RBAC-SETTINGS-ADMIN-STEP-16G-MERGE
+
+- PR #56 merged by squash at `bebc3192440c9f3b66080a78384d627fdabb4e24`.
+- Added user list/detail/create/update/access/access-active/company-move/delete schemas; list role/permission names are strings, detailed responses use safe scalar records. No passwordHash/refreshTokens.
+- Added role plain/paginated/assignable response variants and permission plain/paginated/grouped variants plus CRUD. Added current-user profile/password/avatar response schemas.
+- Added admin stats (8 counts, 5 recent users, 20 pending products), system settings, inquiry monetization switch, plan CRUD and manual subscription action response schemas.
+- CI passed backend 1,392/1,392, frontend/shared 18/18 and all frontend builds. Prisma migration validation passed. Runtime compose/browser validation was still pending and is not claimed as passed.
+- Static route coverage remains 149/149 unique routes, zero missing/duplicate keys.
+- Next: step 16H auth/notification/system response audit.
