@@ -579,3 +579,12 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - `GET /inquiries/stats`: access-context scoped sent/received/response aggregates, selected/(selected+rejected) success rate and up to five recent inquiry/response records; recent inquiry excludes buyerUserId and buyer sealed-response redaction is retained.
 - Verification: backend 1,389/1,389, frontend/shared 18/18, frontend builds and Prisma migration validation passed. Runtime compose/browser validation was not confirmed at merge time.
 - Next audit: replace remaining generic OpenAPI response placeholders only where source projections are stable.
+
+
+## Core resource OpenAPI response coverage — step 16E (2026-10-31)
+
+- Product management responses follow `productInclude`: full management scalars (including createdByUserId/editsSinceApproval), company/category/subcategory compact projections, price tiers, images, documents and at most ten status-history rows. Public product select intentionally excludes management-only metadata.
+- Company list/detail/create/update include Company scalar fields, `_count`, inquiryLimit and CompanyLimit rows as applicable. Detail maps up to ten AccessProfiles to a safe users[] projection; it does not expose password hashes or access token material.
+- Inquiry list/detail/create/update/status use distinct caller-facing shapes: buyerUserId is omitted; confidential buyer company may be hidden; list sealed response counts can be absent; detail may hide responses until reveal and anonymize supplier/company IDs in anonymous sealed mode. Inquiry item endpoints include compact product/company projections.
+- Admin notification folder operations expose full folder metadata; announcement acceptance returns recipient and channel summary counts under `{data}` with HTTP 202.
+- Step 16E CI pending; static route key coverage remains 149/149.
