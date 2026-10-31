@@ -170,3 +170,10 @@ pnpm --dir backend test
 - Delivery statistics document the exact totals/status/channel aggregates and recent failure projection. Delivery listing documents `{ data, meta }` while keeping row internals extensible until a stable public DTO is defined.
 - Inquiry plan, quota, subscription, and payment retry responses document the service's selected fields and nullable ownership/payment states. Payment result includes success, failed, pending and cancelled outcomes.
 - Generic response schemas remain only where the service/controller does not yet expose a stable projection or where raw model output is intentionally extensible.
+
+
+## Response schema pass 16B — merged (2026-10-31)
+
+PR #48 merged at `462aad8a518fea47025d116ccb8fc7e095b708b4`. CI passed 1,384 backend tests and 18 frontend/shared tests; frontend builds and migration validation passed.
+
+The OpenAPI registry now contains source-backed response schemas for address CRUD, notification pagination/read/bulk/folder actions, admin notification folders and delivery statistics, inquiry active plans, quota, caller-owned subscriptions and payment verification. Contracts follow controller response envelopes, Prisma selects and service projections. The subscription creation response documents the narrower included plan fields returned by the payment service, distinct from the plan projection in subscription listing.
