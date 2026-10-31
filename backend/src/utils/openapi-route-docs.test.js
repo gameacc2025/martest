@@ -115,6 +115,21 @@ test('inquiry subscription response contracts include owner, plan, quota and pay
   assert.ok(verification.refId);
 });
 
+test('admin notification response contracts match delivery and folder controller envelopes', () => {
+  const stats = docs['GET /api/v1/admin/notifications/delivery-stats'].responses[200].properties.data.properties;
+  assert.ok(stats.total);
+  assert.ok(stats.byStatus.properties.FAILED);
+  assert.ok(stats.byChannel.properties.SMS);
+  assert.ok(stats.recentFailures.items.properties.lastError);
+
+  const deliveries = docs['GET /api/v1/admin/notifications/deliveries'].responses[200].properties;
+  assert.ok(deliveries.data.items);
+  assert.ok(deliveries.meta.properties.totalPages);
+
+  assert.ok(docs['POST /api/v1/admin/notifications/send'].responses[202]);
+  assert.ok(docs['DELETE /api/v1/addresses/:id'].responses[204]);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
