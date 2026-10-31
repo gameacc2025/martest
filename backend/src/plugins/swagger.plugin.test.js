@@ -175,7 +175,11 @@ test('swagger plugin: undocumented protected routes default to bearer while allo
 
   const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
   assert.deepEqual(spec.paths['/addresses'].get.security, [{ bearerAuth: [] }]);
+  assert.equal(spec.paths['/addresses'].get['x-authentication-required'], true);
+  assert.match(spec.paths['/addresses'].get['x-permission-required'], /route-level AccessProfile/);
   assert.deepEqual(spec.paths['/categories'].get.security, []);
+  assert.equal(spec.paths['/categories'].get['x-authentication-required'], false);
+  assert.equal(spec.paths['/categories'].get['x-permission-required'], 'None');
   await app.close();
 });
 
