@@ -2093,7 +2093,7 @@ Object.assign(docs, {
   },
   ['POST /api/v1/products']: {
     ...docs['POST /api/v1/products'],
-    responses: createdResponse('Product created with its price tiers and management relations.', step16eManagedProductSchema),
+    responses: { 201: { description: 'Product created with its price tiers and management relations.', type: 'object', required: ['data'], properties: { data: step16eManagedProductSchema } } },
   },
   ['PATCH /api/v1/products/:id']: {
     ...docs['PATCH /api/v1/products/:id'],
@@ -2114,7 +2114,7 @@ Object.assign(docs, {
   },
   ['POST /api/v1/companies']: {
     ...docs['POST /api/v1/companies'],
-    responses: createdResponse('Created company with inquiry and usage limit relations.', step16eCompanyCoreSchema),
+    responses: { 201: { description: 'Created company with inquiry and usage limit relations.', type: 'object', required: ['data'], properties: { data: step16eCompanyCoreSchema } } },
   },
   ['PATCH /api/v1/companies/:id']: {
     ...docs['PATCH /api/v1/companies/:id'],
@@ -2135,7 +2135,7 @@ Object.assign(docs, {
   },
   ['POST /api/v1/inquiries']: {
     ...docs['POST /api/v1/inquiries'],
-    responses: createdResponse('Created inquiry shaped for the buyer context; company buyers start in DRAFT while customer quick inquiries start in OPEN.', step16eInquiryDetailSchema),
+    responses: { 201: { description: 'Created inquiry shaped for the buyer context; company buyers start in DRAFT while customer quick inquiries start in OPEN.', type: 'object', required: ['data'], properties: { data: step16eInquiryDetailSchema } } },
   },
   ['PATCH /api/v1/inquiries/:id']: {
     ...docs['PATCH /api/v1/inquiries/:id'],
@@ -2151,7 +2151,7 @@ Object.assign(docs, {
   },
   ['POST /api/v1/inquiries/:id/items']: {
     ...docs['POST /api/v1/inquiries/:id/items'],
-    responses: createdResponse('Created inquiry item with its compact product/company projection.', step16eInquiryItemSchema),
+    responses: { 201: { description: 'Created inquiry item with its compact product/company projection.', type: 'object', required: ['data'], properties: { data: step16eInquiryItemSchema } } },
   },
   ['PATCH /api/v1/inquiries/:id/items/:itemId']: {
     ...docs['PATCH /api/v1/inquiries/:id/items/:itemId'],
@@ -2163,7 +2163,7 @@ Object.assign(docs, {
   },
   ['POST /api/v1/admin/notifications/folders']: {
     ...docs['POST /api/v1/admin/notifications/folders'],
-    responses: createdResponse('Created administratively managed notification folder.', step16eNotificationFolderSchema),
+    responses: { 201: { description: 'Created administratively managed notification folder.', type: 'object', required: ['data'], properties: { data: step16eNotificationFolderSchema } } },
   },
   ['PATCH /api/v1/admin/notifications/folders/:id']: {
     ...docs['PATCH /api/v1/admin/notifications/folders/:id'],
