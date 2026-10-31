@@ -709,3 +709,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Auth and RBAC guards often respond directly with `{error:true,code,message}`; some refresh errors are nested. Fastify rate-limit default response is `{statusCode,error,message}`.
 - Prisma mapping: P2002→409, P2025→404, P2003/P2014→400; schema validation→400. Thrown payment provider 502/503 errors are currently normalized to generic 500 by the central handler.
 - OpenAPI ErrorResponse currently models only the nested central envelope; step 16J must align it to actual variants without weakening production error redaction.
+
+
+## OpenAPI error response variants — 2026-10-31
+
+- Route docs model 401/403 as `oneOf` central nested ErrorResponse and direct auth/RBAC `{error:true,message,code?}`.
+- 500 models central nested errors and direct auth-refresh catch-all `{error:true,message}`. 429 models native Fastify `{statusCode:429,error:'Too Many Requests',message}`.
+- Payment-provider service 502/503 exceptions currently become generic 500 through central handler; do not advertise 502/503 until a safe handler change is made and tested.

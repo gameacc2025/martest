@@ -2831,4 +2831,49 @@ Object.assign(docs, {
   },
 });
 
+/**
+ * Step 16J — actual runtime error envelopes.
+ *
+ * The central error handler uses the nested ErrorResponse component, while
+ * auth/RBAC guards can reply with { error: true, code, message } directly.
+ * Fastify's default rate limiter emits its own { statusCode, error, message }
+ * envelope. Attach the real unions to route docs so the Swagger transform's
+ * shared defaults are overridden without changing runtime error handling.
+ */
+const step16jGuardErrorResponse = {
+  description: 'Central error-handler response or direct auth/RBAC guard response.',
+  oneOf: [
+    { $ref: '#/components/schemas/ErrorResponse' },
+    {
+      type: 'object',
+      required: ['error', 'message'],
+      properties: {
+        error: { type: 'boolean', const: true },
+        code: { type: 'string' },
+        message: { type: 'string' },
+      },
+    },
+  ],
+};
+const step16jRateLimitErrorResponse = {
+  description: 'Native Fastify rate-limit response; it is not wrapped by the central error handler.',
+  type: 'object',
+  required: ['statusCode', 'error', 'message'],
+  properties: {
+    statusCode: { type: 'integer', const: 429 },
+    error: { type: 'string', const: 'Too Many Requests' },
+    message: { type: 'string' },
+  },
+};
+for (const routeDoc of Object.values(docs)) {
+  routeDoc.responses = {
+    ...(routeDoc.responses || {}),
+    401: step16jGuardErrorResponse,
+    403: step16jGuardErrorResponse,
+    429: step16jRateLimitErrorResponse,
+    500: step16jGuardErrorResponse,
+  };
+}
+
+
 module.exports = docs;

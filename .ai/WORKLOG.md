@@ -1677,3 +1677,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Documented actual central nested, direct auth/RBAC and native Fastify rate-limit error envelopes; Prisma/validation mappings; generic production 500 redaction; payment service 502/503 normalization to generic 500.
 - Confirmed remaining OpenAPI mismatch: shared ErrorResponse only describes nested central envelope; 429 description incorrectly says the central handler wraps the response. No runtime behavior changed in the audit PR.
 - Next: step 16J correct shared error schema and rate-limit documentation; evaluate safe payment gateway status preservation with tests.
+
+
+## 2026-10-31 — OPENAPI-ERROR-ENVELOPE-SCHEMAS-STEP-16J
+
+- Added route-level error response schema overrides for all documented API routes.
+- 401/403 use `oneOf` for the central nested ErrorResponse and direct auth/RBAC guard shape. 500 includes the direct auth-refresh catch-all shape as well as the nested central handler response.
+- 429 documents native Fastify rate-limit `{statusCode,error,message}`; removed the incorrect claim that the central handler wraps it.
+- Payment-service 502/503 throws are normalized by central error handler to generic 500, so these are not advertised as public statuses. No runtime behavior change.
+- Added tests and verified 149 inventory routes / 149 unique doc keys, zero missing, zero duplicates. CI pending.
