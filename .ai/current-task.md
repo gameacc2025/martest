@@ -702,3 +702,9 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 - Added a Swagger `/docs/json` integration test that registers inquiry subscription creation, retry verification, public payment callback and product soft-delete routes, then asserts generated 401/403/429/500 variants, route-specific 502/503 and 204 no-content.
 - Existing Swagger integration test separately asserts refresh uses cookieAuth and handoff redeem is non-bearer; static route tests cover notification preferences and all 149 route docs.
 - CI pending.
+
+
+### Step 16M additional finding
+
+- Generated spec test initially exposed that Swagger transform unconditionally overwrote route-doc 401/403/500 response schemas with shared defaults. Updated `swagger.plugin.js` to prefer route-specific error schemas while retaining defaults when no route override exists; corrected the default 429 description to native Fastify behavior.
+- Generated spec integration assertions now exercise the actual transformed output, not only static route docs. CI rerun pending.
