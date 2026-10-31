@@ -52,7 +52,7 @@ test('every explicitly public route is documented without authentication', () =>
   const fs = require('node:fs');
   const path = require('node:path');
   const inventory = fs.readFileSync(path.join(__dirname, '../../../docs/API_ROUTE_INVENTORY.md'), 'utf8');
-  const publicKeys = [...inventory.matchAll(/^\\| ([A-Z]+) \\| `(\\/api\\/v1[^\`]+)` \\| `Public` \|$/gm)]
+  const publicKeys = [...inventory.matchAll(/^\| ([A-Z]+) \| `(\/api\/v1[^`]+)` \| `Public` \|$/gm)]
     .map((match) => `${match[1]} ${match[2]}`);
 
   for (const key of publicKeys) {
