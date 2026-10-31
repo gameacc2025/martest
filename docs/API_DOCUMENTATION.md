@@ -249,3 +249,10 @@ Admin inquiry subscription list, notification delivery statistics/list, and inqu
 - Inquiry item list/create/update describe the compact requested-product/company projection.
 - Admin notification folder list/create/update describe the full folder model. Announcement 202 response describes resolved recipients and per-channel in-app/email/SMS summary counts.
 - Create endpoints use their actual `{data}` envelope and 201 status; announcement dispatch uses `{data}` with 202.
+
+
+## Step 16E merge — core product, company, inquiry and notification responses (2026-10-31)
+
+PR #54 merged at `8ab9acf25c1380e51fc840fa7d69ea42377971b4`. CI passed with 1,390 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed. Runtime compose/browser validation was still running at merge time and is not reported as passed.
+
+Product management, company CRUD/list/detail, caller-shaped inquiry and inquiry item operations, notification folder management and admin announcement acceptance now have source-backed response contracts. Buyer identity and sealed/anonymous-sealed inquiry privacy rules remain explicit in the schemas.
