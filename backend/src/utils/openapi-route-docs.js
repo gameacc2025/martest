@@ -2010,7 +2010,30 @@ const step16eInquiryStatusHistorySchema = {
     id: { type: 'integer' }, inquiryId: { type: 'integer' }, previousStatus: { type: 'string' }, newStatus: { type: 'string' },
     changedByUserId: { type: ['integer', 'null'] }, source: { type: 'string' }, comment: { type: ['string', 'null'] },
     createdAt: { type: 'string', format: 'date-time' },
-    changedBy: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, email: { type: ['string', 'null'] }, profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } }, { type: 'null' }] } } }, { type: 'null' }] },
+    changedBy: {
+      anyOf: [
+        {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            email: { type: ['string', 'null'] },
+            profile: {
+              anyOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    firstName: { type: ['string', 'null'] },
+                    lastName: { type: ['string', 'null'] },
+                  },
+                },
+                { type: 'null' },
+              ],
+            },
+          },
+        },
+        { type: 'null' },
+      ],
+    },
   },
 };
 const step16eInquiryItemSchema = {
