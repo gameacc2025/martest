@@ -1310,3 +1310,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed STAFF-only password reset app-context gap; active-only public category/subcategory detail lookup; and post-create response failure for STAFF-created users in another company.
 - Route families reviewed: auth, users, admin, settings, categories, roles, permissions and specification-library. Further exhaustive service review remains; no blanket security certification claimed.
 - Next: verify SMS message delivery/outbox integration, quota, opt-in and dedupe.
+
+
+## 2026-10-31 — SMS-RECIPIENT-CONTEXT-AND-QUOTA
+
+- Reviewed explicit inquiry-message SMS path, subscription usage accounting, Twilio adapter, delivery worker, server worker startup and notification docs.
+- Clarified that generic event dispatcher SMS remains intentionally unimplemented; only explicit inquiry-message text alerts queue SMS rows.
+- Tightened recipient lookup: user recipients must be ACTIVE; company recipients must resolve to an ACTIVE user with AccessProfile type COMPANY, matching companyId and isActive=true. This prevents selecting STAFF with a shared Main-company ID or a deactivated company account as the preference owner.
+- Added tests for SMS quota exhaustion, opt-out, missing phone, missing provider, and active COMPANY recipient scoping. Existing worker/provider tests already cover send success, provider failure and retries.
+- SMS usage is consumed at enqueue time in the same transaction as the message and outbox row; retries do not re-consume allowance. Live Twilio is not verified without credentials.
