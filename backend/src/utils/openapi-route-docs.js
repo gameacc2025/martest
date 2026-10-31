@@ -2640,7 +2640,7 @@ Object.assign(docs, {
   ['DELETE /api/v1/roles/:id']: { ...docs['DELETE /api/v1/roles/:id'], responses: successEnvelope({ type: 'object', required: ['message'], properties: { message: { type: 'string' } } }, 'Role deletion confirmation; system roles cannot be deleted.') },
   ['GET /api/v1/permissions']: {
     ...docs['GET /api/v1/permissions'],
-    responses: { 200: { oneOf: [
+    responses: { 200: { anyOf: [
       { type: 'object', required: ['data'], properties: { data: { type: 'array', items: step16gPermissionResponseSchema } } },
       step16gPaginatedSchema(step16gPermissionResponseSchema),
       { type: 'object', required: ['data'], properties: { data: step16gGroupedPermissionResponseSchema } },
