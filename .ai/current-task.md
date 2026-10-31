@@ -138,3 +138,10 @@ Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categori
 
 
 - CI feedback on the category visibility change: the first controller patch updated `getOne` but did not pass `activeOnly: true` from `listSubcategories` when checking its parent. Updated that call; the failing test correctly caught the incomplete route wiring. Re-run CI on the latest head.
+
+
+## Step 11E additional finding — STAFF creation of users for other companies
+
+- Confirmed functional bug in `createUser`: after a STAFF admin successfully created a COMPANY user for company X, it called `getUser`, whose non-global STAFF read scope was limited to the caller's Main-company `companyId`. For any other company, the create transaction committed but the API then returned 403, making a successful create appear to fail.
+- Added an internal post-create read path that returns only the user just created by the authorized operation, without widening subsequent `getUser` read access. Added regression coverage for a non-SUPER_ADMIN STAFF `ADMIN` with `users.create` + `users.assign_roles` creating a COMPANY user in a different tenant and receiving the created record.
+- Corrected the stale auth route comment to document STAFF context + `users.reset_password`.
