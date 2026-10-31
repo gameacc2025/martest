@@ -1640,3 +1640,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added `step16kNotificationDeliveryQuerySchema` to both GET admin notification delivery endpoints, reflecting fields actually read by `admin.controller.js` and `notification.delivery.service.js`: status, channel, eventType, userId, page, limit. Did not include from/to (ignored by controller), or invent a maximum limit (service does not enforce one).
 - Added static contract tests and real generated OpenAPI query parameter tests. CI pending.
 - Branch deletion is not available through the current GitHub connector actions; exact PowerShell deletion commands will be provided after the audit.
+
+
+## 2026-10-31 — OPENAPI-DELIVERY-QUERY-FILTERS-STEP-16K-MERGE
+
+- PR #60 merged at `2cd7a5d9d00b783cc209a371cd41511a23c82d88`.
+- CI [41237935630] passed backend 1,396/1,396 and frontend/shared 18/18; all frontend builds and Prisma migration validation [41237935658] passed.
+- Added exact query schemas for admin delivery stats/list: status, channel, eventType, userId, page, limit. from/to excluded because controller ignores them; no maximum limit claimed.
+
+## 2026-10-31 — OPENAPI-PUBLIC-PRODUCT-PROJECTIONS-STEP-16L
+
+- Auditing stale branch `docs/openapi-admin-inquiry-delivery-responses-step-16d` revealed current main still had generic response placeholders for public GET `/products` and GET `/products/:id`.
+- Added `step16lPublicProductSchema`, derived from `step16eManagedProductSchema` with `editsSinceApproval`, `createdByUserId`, `deletedAt`, and `statusHistory` removed. Public list uses this DTO; single product uses oneOf public vs management DTO depending on caller context. Management listing query schema documents search/status/page/limit; public list query documents its supported filters.
+- Added static and generated OpenAPI tests for privacy separation and query fields. CI pending.
