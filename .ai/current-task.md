@@ -579,3 +579,21 @@ PR #59 merged by squash into `main` at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e
 - Safe branch audit found 31 remote branches; all but two map to already-merged PR heads. `feat/website-homepage-redesign` has zero commits ahead of main and is safe to delete. `docs/openapi-admin-inquiry-delivery-responses-step-16d` is a scratch branch whose response schema work is already superseded by merged 16D/16E work, but its admin delivery querystring schema is not present in main.
 - Added source-backed delivery query filters to both admin delivery stats and delivery list docs. Exact controller inputs: status, channel, eventType, userId, page, limit. Excluded from/to because controller/service do not consume them. No max limit is claimed because service does not clamp it.
 - Added static schema tests and generated `/docs/json` integration assertions for query parameter presence/absence. CI pending.
+
+
+## OpenAPI admin delivery query filters — step 16K merged (2026-10-31)
+
+PR #60 merged by squash into `main` at `2cd7a5d9d00b783cc209a371cd41511a23c82d88`.
+
+- CI [41237935630](https://github.com/gameacc2025/martest/actions/runs/41237935630) passed: backend 1,396/1,396; frontend/shared 18/18; all frontend builds passed.
+- Prisma migration validation [41237935658](https://github.com/gameacc2025/martest/actions/runs/41237935658) passed.
+- Admin delivery stats/list now document status/channel/eventType/userId/page/limit. `from`/`to` intentionally excluded because controller ignores them; no max limit claimed because service does not clamp it.
+- Branch audit found a stale 16D scratch branch with response schemas already superseded by merged steps, plus one missing query filter definition; this was recovered in PR #60.
+
+## OpenAPI public product projection audit — step 16L (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-public-product-projections-step-16l`.
+- Further comparison of the old 16D scratch branch exposed one additional contract omission in current main: public `GET /products` and `GET /products/:id` still used generic response placeholders even though the service uses a restricted `publicProductSelect`.
+- Added a public product DTO by deriving from the managed product schema while removing editsSinceApproval, createdByUserId, deletedAt and statusHistory. Single-product GET documents `oneOf` public vs authorized management projection. Public list and management list query filters are documented separately.
+- Added static tests plus generated `/docs/json` tests proving public responses omit creator/deletion/moderation fields and management responses retain them.
+- CI/migration validation pending.
