@@ -1434,3 +1434,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added concrete product price snapshot, status history and activity log response schemas. Public price history reflects all recorded retail snapshots in chronological order.
 - Added inquiry message, supplier response/item, attachment and decision receipt schemas. Anonymous sealed views can omit supplier/company identifiers; decision endpoint returns only `{id,inquiryId,status}`. Attachment URL is a relative upload path.
 - Added response contract tests. Next step 16D: admin inquiry subscription/delivery rows, inquiry stats/list and product management projections where stable source contracts exist.
+
+
+## 2026-10-31 — OPENAPI-ADMIN-INQUIRY-DELIVERY-RESPONSES-STEP-16D
+
+- Added admin inquiry subscription list response schema from `admin.service.listInquirySubscriptions`: latest 100 subscription rows, plan id/code/name/price/duration, company id/name, user id/phone/email.
+- Added NotificationDelivery row schema from Prisma model, including nullable notificationId scalar, event/channel/status, recipient/subject/body/provider, attempts, retry/error/sent/dedupe fields and timestamps. Added shared delivery filter query schema (status/channel/eventType/userId/page/limit).
+- Added inquiry stats schema from `getInquiryStats`: sent/received/response aggregates and maps, recent five inquiry/response projections, and successRate. Company id is not required for anonymous sealed customer recent responses.
+- Added structural tests. CI pending.
