@@ -13,7 +13,6 @@ const TAGS = [
   { name: 'Products', description: 'Product catalogue, lifecycle, pricing, images, and documents.' },
   { name: 'Inquiries', description: 'Inquiry requests, inquiry items, supplier responses, and statuses.' },
   { name: 'Notifications', description: 'Notification delivery, read state, and user notification preferences.' },
-  { name: 'Orders', description: 'Order history, order statistics, and administrative order management.' },
   { name: 'Settings', description: 'Authenticated user profile, avatar, password, and preferences settings.' },
   { name: 'Admin', description: 'Administrative dashboard and operational statistics.' },
 ];
