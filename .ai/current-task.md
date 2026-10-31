@@ -416,3 +416,20 @@ PR #53 merged by squash into `main` at `da0478df49eb256fdb5f40c179818a02a6f706fa
 - Inquiry list/detail/create/update/status and item list/create/update now document caller-shaped responses, compact product/company relations, status history, and list count. `buyerUserId` is omitted; confidentiality and sealed/anonymous-sealed response hiding/redaction are reflected in optional/nullable fields.
 - Admin notification folder CRUD and 202 announcement receipt now have concrete response schemas.
 - Corrected created-response contracts to wrap data under `{data}` (not a bare object). Structural tests added. Static route audit: 149/149 inventory routes, zero missing/duplicate keys and zero duplicate top-level schema declarations. CI pending.
+
+
+## OpenAPI response contracts — step 16E merged (2026-10-31)
+
+PR #54 merged by squash into `main` at `8ab9acf25c1380e51fc840fa7d69ea42377971b4`.
+
+- Product management list/detail/create/update contracts follow `productInclude`, including price tiers, images, documents and up to ten status-history rows. Public product schemas remain distinct.
+- Company list/detail/create/update contracts include Company scalars, inquiry/usage limits, counts and up to ten flattened user summaries.
+- Inquiry list/detail/create/update/status and item list/create/update contracts preserve buyerUserId omission, confidential company hiding, sealed response count omission, anonymous-sealed supplier redaction and caller-specific response visibility.
+- Admin notification folder CRUD and announcement 202 receipt now have concrete schemas. Create operations use `{data}` with 201.
+- CI passed: backend 1,390/1,390; frontend/shared 18/18; frontend builds passed. Prisma migration validation passed. Runtime compose/browser validation was still running at merge time and is not counted as passed.
+
+## Next active work — step 16F remaining response coverage
+
+- Audit remaining generic resource/paginated response placeholders for users, roles/permissions, categories/subcategories, settings, company settings/statistics/products and product price-tier/image/document operations.
+- Prefer stable service projections and explicit security omissions; avoid broad schema guesses for dynamic or unstable DTOs.
+- Add focused structural tests and update API/.ai docs, then CI/migration validation and merge.
