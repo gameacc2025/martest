@@ -513,3 +513,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Product price snapshots, status history and activity log have concrete schemas. Inquiry messages, responses/items, attachments and decision receipts are documented from actual service projections.
 - ANONYMOUS_SEALED buyer responses redact companyId and nested product companyId; schemas do not require them. Buyer decision responses are minimal `{id,inquiryId,status}` receipts. Attachment URLs are relative upload paths.
 - Remaining response-contract work: admin subscription/delivery records, inquiry stats/list and product management projections, only where a stable source DTO/projection exists.
+
+
+## Admin, inquiry dashboard and product management response contracts — 2026-10-31
+
+- Admin subscription list is limited to the newest 100 rows and includes selected plan, company and user projections; manual grant/activate/reject responses include subscription + plan + compact owner projections.
+- Notification delivery stats expose `total`, normalized `byStatus`/`byChannel` and at most 10 recent failures. Delivery list returns persisted scalar NotificationDelivery fields and pagination metadata.
+- Inquiry dashboard stats are caller-scoped for COMPANY/CUSTOMER and platform-wide for STAFF, with sent/received/response aggregates, success rate and at most five recent records. Inquiry listing uses `{data,meta}` and applies confidentiality/sealed-view redactions to company and response counts.
+- Product management listing/detail schemas cover core product data and relation groups (company/category/subcategory/prices/images/documents).
