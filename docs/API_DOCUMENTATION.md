@@ -193,3 +193,12 @@ The OpenAPI registry now contains source-backed response schemas for address CRU
 PR #49 merged at `d79b1908d899fc8569495e8925a00a3a0650080d`. CI passed 1,385 backend tests and 18 frontend/shared tests; builds and migration validation passed.
 
 Product price snapshot/history/activity and inquiry messages/responses/items/attachments/decision receipts now have concrete response schemas derived from Prisma projections and services. Anonymous sealed buyer response projections omit supplier company IDs and nested product company IDs. Decision returns a minimal receipt; attachment URLs are relative upload paths.
+
+
+## Admin, inquiry dashboard and product management response contracts — step 16D (2026-10-31)
+
+- Admin inquiry subscription list documents its 100 newest rows and selected plan/company/user projections. Manual grant, offline activation and rejection return the corresponding subscription with its plan and compact owner projection.
+- Notification delivery statistics document total counts, normalized status/channel maps and up to ten recent failure rows. Delivery listing documents persisted scalar `NotificationDelivery` fields and `{data,meta}` pagination.
+- Inquiry statistics document caller-scoped sent/received/response aggregates, calculated response success rate and up to five recent inquiries/responses. STAFF aggregates are platform-wide; CUSTOMER/COMPANY results are scoped by the service.
+- Inquiry listing documents pagination and company/count projections, including nullable company identity and optional response counts where confidential/sealed views redact them.
+- Product management list/detail documents the management product projection and its relations; list pagination uses the shared `{data,meta}` envelope.
