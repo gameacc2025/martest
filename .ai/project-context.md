@@ -694,3 +694,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/notifications/deliveries` accept status (PENDING/SENT/FAILED/SKIPPED), channel (IN_APP/EMAIL/SMS), eventType substring, userId, page and limit. Controller defaults page=1/limit=20; delivery service does not clamp maximum limit.
 - Do not document `from`/`to`: the actual admin controller does not pass them to delivery service, even though a stale notification schema helper declares them.
 - OpenAPI route docs now declare these query filters; static and generated-spec tests cover the exact accepted fields.
+
+
+## Public vs management product response projections — step 16L (2026-10-31)
+
+- `product.service.js` uses `publicProductSelect` for public catalogue listing and for anonymous/customer single-product reads. It selects product scalar fields plus company/category/subcategory/prices/images/documents, and deliberately excludes `editsSinceApproval`, `createdByUserId`, `deletedAt`, and `statusHistory`.
+- Authorized COMPANY/STAFF single-product reads use `productInclude` and return the management projection with the latest ten status-history rows. `/my-products` always uses the management projection.
+- OpenAPI GET `/products` now returns public DTO only; GET `/products/:id` documents oneOf public vs management; GET `/products/my-products` documents management DTO and query filters. Static and generated Swagger tests protect the privacy boundary.
