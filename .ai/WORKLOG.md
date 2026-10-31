@@ -1415,3 +1415,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Verified source projections: `ADDRESS_SELECT`, notification Prisma includes, notification service pagination, delivery service aggregates, inquiry plan selection, quota summary, subscription include projections and payment retry outcomes.
 - Split inquiry subscription plan projections between `GET /subscription/me` and `POST /subscription`, matching the actual narrower create/payment response. Added `cancelled` payment result.
 - Added response contract tests for these shapes. Next: step 16C for product history/price history and inquiry messages/responses/attachments.
+
+
+## 2026-10-31 — OPENAPI-PRODUCT-INQUIRY-RESPONSES-STEP-16C
+
+- Added source-backed response schemas for public product retail price history, management product status history, immutable activity logs, inquiry messages, supplier responses, response items, attachments and buyer decision receipts.
+- Product price history schema follows ProductPriceSnapshot selection: id, priceTierId, min/max quantity, Decimal price, unit, action, recordedAt. The service returns the complete stored retail history in ascending time order.
+- Product history/activity schemas follow `changedBy`/`actor` projections (id, email, profile first/last name).
+- Inquiry message schema follows Prisma include projections for sender/recipient user/company, body, createdAt/readAt; list max is 500; send adds SMS queue outcome fields.
+- Inquiry response schema follows responseInclude; companyId and nested product companyId are optional for ANONYMOUS_SEALED redaction. Decision returns only id/inquiryId/status. Attachment URLs are relative upload paths.
+- Added response contract tests. CI pending.
