@@ -306,3 +306,11 @@ User and role/permission response variants, current-user settings profile/passwo
 PR #57 merged at `415b6858a9f34235f6cf726a558d76afb5b92af4`. CI passed with 1,393 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed. Runtime compose/browser validation was queued at merge and is not reported as passing.
 
 Customer registration, company registration, PKCE handoff create/redeem and logout response DTOs now match the auth controllers/services. Refresh tokens are documented as httpOnly-cookie-only. Notification preferences document the direct `{data,smsAvailable:false}` response; folder list includes `isSystem` and `sortOrder`. Company restore/status/verification/logo and product status workflow responses are source-backed. Company and product soft deletes correctly document 204 with no body. Structural response contract tests cover these cases.
+
+
+## Step 16I — global error and status response contracts (2026-10-31)
+
+- Global error responses document 409 conflicts (including Prisma duplicate keys), 413 oversized request/file uploads, and 429 rate limits.
+- Standard application errors use `{error:{code,message,details?}}`; development-only 500 diagnostics may include `debug` and `stack`, while production never returns those fields.
+- Rate limiting is normalized by the central error handler to the standard `{error:{code:'APP_ERROR',message}}` envelope with HTTP 429; it does not expose Fastify's internal rate-limit Error object.
+- Swagger and security tests cover the response status/schema contracts. CI/migration validation pending.

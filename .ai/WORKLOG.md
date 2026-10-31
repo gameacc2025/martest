@@ -1597,3 +1597,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Corrected company and product soft-delete response status to 204/no body. Added structural response tests.
 - Static inventory remains 149/149 route keys with no missing or duplicate literal entries.
 - Next: step 16I error/status metadata audit, taking final overrides into account.
+
+
+## 2026-10-31 — OPENAPI-ERROR-RESPONSE-AUDIT-STEP-16I
+
+- Added global OpenAPI 409 Conflict response for Prisma duplicate/conflict outcomes, 413 for request/file-size limits normalized by the error handler, and 429 using the standard ErrorResponse envelope. Fastify rate-limit errors flow through the central handler and become `{error:{code:'APP_ERROR',message}}`.
+- ErrorResponse now documents optional development-only `debug` and `stack` fields; these are absent in production. Existing error details remain array/object compatible.
+- Swagger plugin tests assert all new default statuses and schema references. Security integration test now verifies the actual rate-limit 429 payload fields (statusCode/error/message).
+- CI/migration validation pending.

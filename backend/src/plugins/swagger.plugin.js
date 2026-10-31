@@ -49,6 +49,8 @@ const commonSchemas = {
         properties: {
           code: { type: 'string', example: 'VALIDATION_ERROR' },
           message: { type: 'string', example: 'The request payload is invalid.' },
+          debug: { type: 'string', description: 'Development-only internal error detail; never returned in production.' },
+          stack: { type: 'string', description: 'Development-only stack trace; never returned in production.' },
           details: {
             oneOf: [
               {
@@ -152,6 +154,9 @@ const defaultErrorResponses = {
   401: { description: 'Authentication is required or the token is invalid.', $ref: '#/components/schemas/ErrorResponse' },
   403: { description: 'The authenticated user does not have the required permission or role.', $ref: '#/components/schemas/ErrorResponse' },
   404: { description: 'The requested resource was not found.', $ref: '#/components/schemas/ErrorResponse' },
+  409: { description: 'The request conflicts with an existing or related record.', $ref: '#/components/schemas/ErrorResponse' },
+  413: { description: 'The uploaded file or request payload exceeds the configured size limit.', $ref: '#/components/schemas/ErrorResponse' },
+  429: { description: 'The caller exceeded a per-route or global rate limit. The central error handler wraps it in ErrorResponse.', $ref: '#/components/schemas/ErrorResponse' },
   500: { description: 'Unexpected server error.', $ref: '#/components/schemas/ErrorResponse' },
 };
 
