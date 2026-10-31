@@ -1139,7 +1139,7 @@ const inquirySubscriptionAdminResponseSchema = {
     user: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, phone: { type: ['string', 'null'] }, email: { type: ['string', 'null'] } }, additionalProperties: true }, { type: 'null' }] },
   },
 };
-const notificationDeliveryResponseSchema = {
+const step16dNotificationDeliveryResponseSchema = {
   type: 'object', required: ['id', 'userId', 'eventType', 'channel', 'status', 'attempts', 'maxAttempts', 'nextAttemptAt', 'createdAt', 'updatedAt'],
   properties: {
     id: { type: 'integer' }, userId: { type: 'integer' }, notificationId: { type: ['integer', 'null'] },
@@ -1160,7 +1160,7 @@ const inquirySummaryRowResponseSchema = {
     _count: { type: 'object', required: ['items', 'responses'], properties: { items: { type: 'integer' }, responses: { type: 'integer' } } },
   }, additionalProperties: true,
 };
-const inquiryStatsResponseSchema = {
+const step16dInquiryStatsResponseSchema = {
   type: 'object', required: ['sent', 'received', 'responses', 'recentInquiries', 'recentResponses'],
   properties: {
     sent: { type: 'object', required: ['total', 'byStatus'], properties: { total: { type: 'integer' }, byStatus: { type: 'object', additionalProperties: { type: 'integer' } } } },
@@ -1224,11 +1224,11 @@ Object.assign(docs, {
   },
   ['GET /api/v1/admin/notifications/deliveries']: {
     ...docs['GET /api/v1/admin/notifications/deliveries'],
-    responses: { 200: { description: 'Newest delivery rows with pagination metadata; rows are returned as persisted scalar NotificationDelivery fields.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: notificationDeliveryResponseSchema }, meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } } } } },
+    responses: { 200: { description: 'Newest delivery rows with pagination metadata; rows are returned as persisted scalar NotificationDelivery fields.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: step16dNotificationDeliveryResponseSchema }, meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } } } } },
   },
   ['GET /api/v1/inquiries/stats']: {
     ...docs['GET /api/v1/inquiries/stats'],
-    responses: { 200: { description: 'Caller-scoped sent/received/response aggregates and up to five recent inquiries/responses. CUSTOMER and COMPANY scopes differ; STAFF statistics are platform-wide.', type: 'object', required: ['data'], properties: { data: inquiryStatsResponseSchema } } },
+    responses: { 200: { description: 'Caller-scoped sent/received/response aggregates and up to five recent inquiries/responses. CUSTOMER and COMPANY scopes differ; STAFF statistics are platform-wide.', type: 'object', required: ['data'], properties: { data: step16dInquiryStatsResponseSchema } } },
   },
   ['GET /api/v1/inquiries']: {
     ...docs['GET /api/v1/inquiries'],
@@ -1803,7 +1803,7 @@ const adminInquirySubscriptionResponseSchema = {
     user: { anyOf: [{ type: 'object', required: ['id', 'phone', 'email'], properties: { id: { type: 'integer' }, phone: { type: ['string', 'null'] }, email: { type: ['string', 'null'] } } }, { type: 'null' }] },
   },
 };
-const notificationDeliveryResponseSchema = {
+const step16dNotificationDeliveryResponseSchema = {
   type: 'object',
   required: ['id', 'userId', 'notificationId', 'eventType', 'channel', 'status', 'recipient', 'subject', 'body', 'provider', 'attempts', 'maxAttempts', 'nextAttemptAt', 'lastError', 'sentAt', 'dedupeKey', 'createdAt', 'updatedAt'],
   properties: {
@@ -1860,7 +1860,7 @@ const inquiryDashboardRecentResponseSchema = {
     _count: { type: 'object', required: ['items'], properties: { items: { type: 'integer' } } },
   },
 };
-const inquiryStatsResponseSchema = {
+const step16dInquiryStatsResponseSchema = {
   type: 'object', required: ['sent', 'received', 'responses', 'recentInquiries', 'recentResponses'],
   properties: {
     sent: { type: 'object', required: ['total', 'byStatus'], properties: {
@@ -1895,7 +1895,7 @@ Object.assign(docs, {
         description: 'Newest delivery records and pagination metadata.',
         type: 'object', required: ['data', 'meta'],
         properties: {
-          data: { type: 'array', items: notificationDeliveryResponseSchema },
+          data: { type: 'array', items: step16dNotificationDeliveryResponseSchema },
           meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: {
             page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' },
           } },
@@ -1905,7 +1905,7 @@ Object.assign(docs, {
   },
   ['GET /api/v1/inquiries/stats']: {
     ...docs['GET /api/v1/inquiries/stats'],
-    responses: successEnvelope(inquiryStatsResponseSchema, 'Buyer-, supplier- or authorized staff-scoped inquiry dashboard aggregates and up to five recent records per section. Sealed and anonymous-sealed buyer response visibility follows the service redaction rules.'),
+    responses: successEnvelope(step16dInquiryStatsResponseSchema, 'Buyer-, supplier- or authorized staff-scoped inquiry dashboard aggregates and up to five recent records per section. Sealed and anonymous-sealed buyer response visibility follows the service redaction rules.'),
   },
 });
 
