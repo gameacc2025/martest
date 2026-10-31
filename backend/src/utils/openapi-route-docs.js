@@ -1882,7 +1882,7 @@ const step16dAdminInquiryStatsResponseSchema = {
 Object.assign(docs, {
   ['GET /api/v1/admin/inquiry-subscriptions']: {
     ...docs['GET /api/v1/admin/inquiry-subscriptions'],
-    responses: successEnvelope({ type: 'array', items: adminInquirySubscriptionResponseSchema }, 'Up to 100 newest subscriptions; expired active rows are transitioned to EXPIRED before the query.'),
+    responses: successEnvelope({ type: 'array', maxItems: 100, items: adminInquirySubscriptionResponseSchema }, 'Up to 100 newest subscriptions; expired active rows are transitioned to EXPIRED before the query.'),
   },
   ['GET /api/v1/admin/notifications/delivery-stats']: {
     ...docs['GET /api/v1/admin/notifications/delivery-stats'],
