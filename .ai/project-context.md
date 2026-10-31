@@ -465,3 +465,12 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Refresh/logout use the `refreshCookie` cookie scheme and trusted-origin guard. PKCE handoff redeem uses trusted origin + one-time code/verifier, not Bearer auth.
 - `openapi-route-docs.js` keys must correspond to registered routes; `openapi-route-docs.test.js` checks against `docs/API_ROUTE_INVENTORY.md`.
 - At the 2026-10-31 audit point, 89/149 registered module routes had dedicated prose entries; remaining routes still rely on route source metadata/generic response descriptions.
+
+
+## OpenAPI route security alignment — 2026-10-31
+
+- PR #46 merged to main at `ea6e787c9b2c6dbe819fb344c22aa7adea33016d`.
+- OpenAPI docs remove stale `/orders` and `/settings/preferences` entries; actual notification preferences paths are `/settings/notifications/preferences`.
+- `refresh` and `logout` use the `refreshCookie` scheme; PKCE redeem is trusted-origin + one-time code/verifier and is not Bearer-authenticated.
+- Undocumented protected operations default to Bearer unless explicitly included in the public route allow-list. Empty `security: []` metadata must not accidentally make a protected route public.
+- 89/149 routes have dedicated prose entries; remaining 60 are pending source-backed metadata completion.
