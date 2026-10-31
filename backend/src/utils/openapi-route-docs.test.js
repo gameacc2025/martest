@@ -248,6 +248,46 @@ test('admin inquiry subscriptions, notification deliveries, inquiry dashboard an
   assert.ok(productDetail.documents);
 });
 
+test('company and category response contracts match controller/service projections', () => {
+  const companyList = docs['GET /api/v1/companies'].responses[200].properties;
+  assert.ok(companyList.data.items.properties._count);
+  assert.ok(companyList.data.items.properties.inquiryLimit);
+  assert.ok(companyList.meta.properties.totalPages);
+
+  const company = docs['GET /api/v1/companies/:id'].responses[200].properties.data.properties;
+  assert.ok(company.nationalId);
+  assert.ok(company.users.items.properties.firstName);
+  assert.equal(company.users.maxItems, 10);
+
+  const companySettings = docs['GET /api/v1/companies/:id/settings'].responses[200].properties.data.properties;
+  assert.ok(companySettings.inquiryLimit);
+  assert.ok(companySettings.limits.items.properties.key);
+
+  const companyStats = docs['GET /api/v1/companies/:id/statistics'].responses[200].properties.data.properties;
+  assert.ok(companyStats.counts.properties.activeUsers);
+  assert.equal(companyStats.recentProducts.maxItems, 5);
+  assert.equal(companyStats.recentOrders.maxItems, 5);
+
+  const companyProducts = docs['GET /api/v1/companies/:id/products'].responses[200].properties;
+  assert.ok(companyProducts.data.items.properties.category);
+  assert.ok(companyProducts.data.items.properties.subcategory);
+  assert.ok(companyProducts.meta.properties.total);
+
+  const categoryList = docs['GET /api/v1/categories'].responses[200].properties.data;
+  assert.ok(categoryList.items.properties.subcategories);
+  const subcategories = docs['GET /api/v1/categories/:id/subcategories'].responses[200].properties.data.items.properties;
+  assert.ok(subcategories.nameFa);
+  const subcategoryDetail = docs['GET /api/v1/categories/:id/subcategories/:subId'].responses[200].properties.data.properties;
+  assert.ok(subcategoryDetail.specificationTemplate);
+  const categoryProducts = docs['GET /api/v1/categories/:id/products'].responses[200].properties;
+  assert.ok(categoryProducts.data.items.properties.company);
+  assert.ok(categoryProducts.meta.properties.totalPages);
+
+  assert.equal(docs['DELETE /api/v1/companies/:id'].responses[204].content, undefined);
+  assert.equal(docs['DELETE /api/v1/categories/:id'].responses[204].content, undefined);
+  assert.equal(docs['DELETE /api/v1/categories/:id/subcategories/:subId'].responses[204].content, undefined);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually

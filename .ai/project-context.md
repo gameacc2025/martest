@@ -530,3 +530,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Notification delivery statistics document normalized status/channel maps and 10 recent failures; delivery rows document scalar persisted fields and pagination.
 - Inquiry stats/list schemas document caller scoping, recent record caps and sealed/confidential redactions. Product management list/detail schemas document core product and relation groups.
 - Route inventory remains 149/149 covered with no duplicate keys. Next pass audits remaining API response envelopes and concrete DTO schemas.
+
+
+## Company and category API response contracts — 2026-10-31
+
+- Company APIs expose company scalar fields, counts, inquiry limits, custom limits and (detail only) up to ten flattened user summaries. Settings expose inquiryLimit + limits; statistics expose counts and five recent products/orders; company products use paginated product rows with compact company/category/subcategory projections.
+- Category APIs expose category records with nested subcategory summaries; subcategory detail includes category and specification template/fields. Public category product lists only published/public products and are paginated.
+- Company, category and subcategory DELETE endpoints return 204 without a body.
