@@ -314,3 +314,10 @@ Customer registration, company registration, PKCE handoff create/redeem and logo
 - Standard application errors use `{error:{code,message,details?}}`; development-only 500 diagnostics may include `debug` and `stack`, while production never returns those fields.
 - Rate limiting is normalized by the central error handler to the standard `{error:{code:'APP_ERROR',message}}` envelope with HTTP 429; it does not expose Fastify's internal rate-limit Error object.
 - Swagger and security tests cover the response status/schema contracts. CI/migration validation pending.
+
+
+## Step 16I merge — global error/status responses (2026-10-31)
+
+PR #58 merged at `4ee4dbca6486588af34eda4ed9a22a809a7cb73d`. CI passed 1,393 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed.
+
+OpenAPI global responses now include 409 conflicts, 413 oversized request/file uploads and 429 rate limits. All use the standard ErrorResponse schema. Rate-limit exceptions pass through the central handler and return HTTP 429 with `error.code=APP_ERROR` and the rate-limit message. Optional debug/stack fields are documented for development-only 500 responses and are never returned in production.
