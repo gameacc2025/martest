@@ -627,3 +627,18 @@ PR #61 squash-merged into `main` at `fc6caac4aa742c0f2c12e7778faffc6eafcf1389`. 
 - Add exact 502/503 only if the central handler safely preserves an allow-list of sanitized payment-provider errors; all other 5xx must remain generic 500.
 - Extend Swagger/error-handler tests for every envelope and ensure production responses never leak provider/internal debug data.
 - Update API/.ai docs, run CI/migration validation, merge.
+
+
+## OpenAPI error/status audit — step 16I findings merged (2026-10-31)
+
+PR #62 squash-merged into `main` at `3d3c2de398566e9f064744dcd3698f43dbd54d6c`. CI [41240689243](https://github.com/gameacc2025/martest/actions/runs/41240689243) passed: backend 1,397/1,397, frontend/shared 18/18 and frontend builds. Prisma migration validation [41240689183](https://github.com/gameacc2025/martest/actions/runs/41240689183) passed. Runtime validation [41240689335](https://github.com/gameacc2025/martest/actions/runs/41240689335) is separate.
+
+- Documented three actual error envelopes: central nested `{error:{code,message,details?}}`, direct auth/RBAC `{error:true,code,message}`, and default Fastify rate-limit `{statusCode,error,message}`.
+- Documented Prisma/validation mappings and production 500 redaction. Payment service 502/503 throws currently normalize to generic 500 in the central handler.
+- Identified the OpenAPI shared `ErrorResponse` mismatch and incorrect 429 description; no runtime behavior changed in this audit-only PR.
+
+## Next active work — step 16J common error schema correction
+
+- Align shared OpenAPI ErrorResponse with central, direct guard and Fastify rate-limit variants; correct 429 description.
+- Evaluate a narrowly allow-listed 502/503 payment response path only if it can preserve sanitized messages and keep all other 5xx generic.
+- Add Swagger/error-handler tests for each variant and production redaction; update API/.ai docs, CI/migration validation and merge.
