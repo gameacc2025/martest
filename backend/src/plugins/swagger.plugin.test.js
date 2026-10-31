@@ -166,6 +166,25 @@ test('swagger plugin: transform sets empty security array when authRequired is f
   await app.close();
 });
 
+test('swagger plugin: refresh uses cookieAuth and PKCE redeem is documented as non-bearer', async () => {
+  const app = Fastify();
+  await app.register(swaggerPlugin);
+  app.post('/api/v1/auth/refresh', {
+    schema: { summary: 'Refresh access token', tags: ['Authentication'] },
+  }, async () => ({ ok: true }));
+  app.post('/api/v1/auth/handoff/redeem', {
+    schema: { summary: 'Redeem handoff', tags: ['Authentication'] },
+  }, async () => ({ ok: true }));
+  await app.ready();
+
+  const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
+  assert.deepEqual(spec.paths['/auth/refresh'].post.security, [{ refreshCookie: [] }]);
+  assert.deepEqual(spec.paths['/auth/handoff/redeem'].post.security, []);
+  assert.equal(spec.components.securitySchemes.refreshCookie.in, 'cookie');
+  assert.equal(spec.components.securitySchemes.refreshCookie.name, 'refreshToken');
+  await app.close();
+});
+
 test('swagger plugin: OpenAPI spec has /api/v1 server', async () => {
   const app = Fastify();
   await app.register(swaggerPlugin);
