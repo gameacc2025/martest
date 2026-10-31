@@ -389,7 +389,7 @@ test('core product, company, inquiry and notification resource responses match s
   assert.ok(updatedProduct.company);
 
   const companies = docs['GET /api/v1/companies'].responses[200].properties;
-  assert.ok(companies.data.items.properties.inquiryLimit.properties.maxOpenInquiries);
+  assert.ok(companies.data.items.properties.inquiryLimit.anyOf[0].properties.maxOpenInquiries);
   assert.ok(companies.data.items.properties.limits.items.properties.key);
   assert.ok(companies.data.items.properties._count.properties.accessProfiles);
   const company = docs['GET /api/v1/companies/:id'].responses[200].properties.data.properties;
