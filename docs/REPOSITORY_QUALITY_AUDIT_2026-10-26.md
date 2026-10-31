@@ -546,3 +546,12 @@ The initial CI attempt also identified two test-harness issues (the unrelated-co
 PR #41 merged at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53`. CI and migration validation passed. Address ownership is consistently user-scoped; no cross-user IDOR was confirmed. Notification folder context resolution was corrected for AccessProfile-less CUSTOMER_USER accounts, with explicit SUPER_ADMIN exclusion and regression coverage.
 
 Step 11E remains: route-level and service-level authorization review for auth, users, admin, settings, categories, roles, permissions, and specification-library. Full security sign-off is not yet claimed.
+
+
+## Step 11E — Remaining backend route families
+
+PR #42 merged at `c92aeff2866353826ec423534b4bc4178e7a57c1`. CI passed 1,368/1,368 tests; migration validation passed. Fixes: exact STAFF context + permission for administrative password reset at route and service layers; ACTIVE-only public category/subcategory detail lookups; and a private post-create response path so STAFF can receive the company user they just created without widening normal user read scope.
+
+Reviewed auth/users/admin/settings/categories/roles/permissions/specification-library route wiring and selected service boundaries. Further exhaustive service-level audit is still required; do not call the full API security-certified.
+
+Next backlog: verify SMS outbox dispatch, paid quota, recipient phone/opt-in, idempotency and failure/rollback behavior; live Twilio remains unverified.
