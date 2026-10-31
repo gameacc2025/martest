@@ -236,3 +236,20 @@ Next: complete source-backed OpenAPI prose/query/params/response metadata for th
 - Request body/path schemas were included only where route source defines them. Routes without a registered request schema are not assigned invented schemas. Generic response descriptions remain where handlers do not provide explicit response schemas.
 - Added reverse-coverage test requiring every route in `API_ROUTE_INVENTORY.md` to have a dedicated OpenAPI metadata entry (currently 149 routes).
 - Branch `docs/openapi-metadata-coverage-step-16`; tests/CI pending. Next after merge: audit tenant boundaries for company, notification/address and product route families; complete response schemas only from controller/service contracts.
+
+
+## OpenAPI metadata coverage — step 16A merged (2026-10-31)
+
+PR #47 merged by squash into `main` at `d3d6012107651af9368c0683ae3126dfc03e5a3f`. CI run [41222767276](https://github.com/gameacc2025/martest/actions/runs/41222767276) passed: backend 1,381/1,381 tests; frontend/shared tests and all three frontend builds passed. Migration validation [41222767300](https://github.com/gameacc2025/martest/actions/runs/41222767300) passed. Runtime [41222767219](https://github.com/gameacc2025/martest/actions/runs/41222767219) remains separate/pending; browser smoke is not a merge blocker per owner instruction.
+
+- All 149/149 registered module routes now have dedicated OpenAPI metadata. Reverse inventory comparison: zero missing, zero stale, no duplicate keys.
+- Public route documentation explicitly marks all 13 public routes `authRequired: false`; a regression test enforces it.
+- Protected undocumented route fallback now sets Bearer and route auth extensions correctly; the fallback test uses a truly undocumented route so it tests the intended branch.
+- Source-backed request schemas and response status codes were aligned where the route/controller defines them. Generic response descriptions remain for handlers without reusable response schemas.
+
+## Next active work — step 16B response contract accuracy
+
+- Derive concrete response JSON schemas from controllers, services and existing response schema exports for endpoints currently using generic `resourceResponse`/`paginatedResponse` descriptions.
+- Prioritize inquiry subscription/quota/messages/responses, notification CRUD/folders/delivery monitoring, address CRUD, products and admin plan endpoints.
+- Add contract tests that compare documented status codes and key response shapes with controller behavior. Do not invent fields or overclaim schema completeness.
+- Keep the previously merged security audits (company/product/inquiry/notification/address/admin route families) as completed slices; revisit only on new evidence.
