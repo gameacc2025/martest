@@ -385,3 +385,10 @@ Usage consumption must validate the active subscription after acquiring its row 
 - Customer registrations have no AccessProfile and are represented by `accessType: null` plus the `CUSTOMER_USER` role. Notification folder scope resolution must mirror `requireAccessType('CUSTOMER')`: this exact fallback grants WEBSITE only and must not apply to SUPER_ADMIN.
 - Address endpoints are CUSTOMER-only and all address records are owned by authenticated `userId`; COMPANY and STAFF contexts (including wildcard permission) must not gain customer address access.
 - Step 11C inquiry audit merged in PR #40 at `9bac9916de148741fb379ffcdd5aaf44157f4db2`. Step 11D addresses/notifications audit is active on `audit/notification-address-tenant-step-11d`.
+
+
+## Step 11D merged — addresses and notifications (2026-10-31)
+
+PR #41 merged into main at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53`. Address records are scoped by authenticated userId; route tests protect CUSTOMER_USER Website fallback from COMPANY/STAFF/SUPER_ADMIN context crossover. Notification folder scope resolver now mirrors central RBAC's AccessProfile-less CUSTOMER_USER fallback to WEBSITE only and rejects SUPER_ADMIN fallback. CI and migration checks passed; Runtime validation remains separate.
+
+Step 11E is the remaining backend route inventory: auth, users, admin, settings, categories, roles, permissions, and specification-library.
