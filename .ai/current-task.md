@@ -669,3 +669,12 @@ PR #63 squash-merged into `main` at `97ea2bb9adaa140fb8b41925269446264fd088a7`. 
 - Decide whether sanitized provider-unavailable/rejected errors should surface as 502/503 or remain generic 500; if changing, use a narrow allow-list and never expose provider response bodies, merchant configuration, authority secrets or stack traces.
 - Add controller/service/error-handler tests for provider unavailable, malformed response, rejected request, missing configuration and generic unexpected errors.
 - Update route-level OpenAPI statuses and API/.ai docs only after runtime behavior is verified; CI/migration validation and merge.
+
+
+## Payment provider error handling — step 16L (in progress, 2026-10-31)
+
+- Branch: `audit/payment-provider-error-contract-step-16L`.
+- Inquiry controller now catches only a strict allow-list of provider errors and returns sanitized nested `{error:{code,message}}` with correct HTTP status: provider unavailable/HTTP/invalid response/request rejected → 502; provider not configured → 503.
+- Applied handling to subscription request, retry verification and public callback. Callback verification outages are already converted by the service to a `pending` redirect and remain so.
+- Unrecognized codes, mismatched status codes, and invalid provider configuration continue to throw to the central handler (generic 500); no provider response body, merchant ID, authority, stack or config values are exposed.
+- OpenAPI now documents 502 only on subscription request and 503 on retry verification and callback. Added controller and route-doc tests. CI pending.
