@@ -107,6 +107,8 @@ test('inquiry subscription response contracts include owner, plan, quota and pay
   const purchase = docs['POST /api/v1/inquiries/subscription'].responses[201].properties.data.properties;
   assert.ok(purchase.paymentMode);
   assert.ok(purchase.subscription);
+  assert.ok(purchase.subscription.properties.plan.properties.name);
+  assert.equal(purchase.subscription.properties.plan.properties.code, undefined);
   assert.ok(purchase.paymentUrl);
 
   const verification = docs['POST /api/v1/inquiries/subscription/:id/verify-payment'].responses[200].properties.data.properties;
