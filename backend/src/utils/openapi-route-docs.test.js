@@ -171,6 +171,29 @@ test('product history and inquiry conversation response contracts match service 
   assert.ok(attachment.filename);
 });
 
+test('admin subscription, delivery and inquiry stats response contracts match service projections', () => {
+  const subscriptions = docs['GET /api/v1/admin/inquiry-subscriptions'].responses[200].properties.data.items.properties;
+  assert.ok(subscriptions.plan.properties.code);
+  assert.ok(subscriptions.company.properties.id);
+  assert.ok(subscriptions.user.properties.email);
+  assert.ok(subscriptions.paymentProvider);
+
+  const deliveries = docs['GET /api/v1/admin/notifications/deliveries'].responses[200].properties.data.items.properties;
+  assert.ok(deliveries.notificationId);
+  assert.ok(deliveries.channel);
+  assert.ok(deliveries.nextAttemptAt);
+  assert.ok(deliveries.lastError);
+  assert.ok(docs['GET /api/v1/admin/notifications/deliveries'].querystring.properties.limit);
+
+  const stats = docs['GET /api/v1/inquiries/stats'].responses[200].properties.data.properties;
+  assert.ok(stats.sent.properties.byStatus);
+  assert.ok(stats.received.properties.new);
+  assert.ok(stats.responses.properties.successRate);
+  assert.ok(stats.recentInquiries.items.properties._count);
+  assert.ok(stats.recentResponses.items.properties.inquiry);
+  assert.equal(stats.recentResponses.items.properties.company.required.includes('id'), false);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
