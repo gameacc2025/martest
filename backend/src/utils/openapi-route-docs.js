@@ -735,4 +735,170 @@ Object.assign(docs, {
   },
 });
 
+
+// Concrete response contracts derived from controller envelopes, service projections and Prisma selects.
+const addressItemResponseSchema = {
+  type: 'object',
+  required: ['id', 'userId', 'label', 'recipientName', 'recipientPhone', 'province', 'city', 'addressLine', 'postalCode', 'isDefault', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, userId: { type: 'integer' }, label: { type: 'string' },
+    recipientName: { type: 'string' }, recipientPhone: { type: 'string' }, province: { type: 'string' },
+    city: { type: 'string' }, addressLine: { type: 'string' }, postalCode: { type: ['string', 'null'] },
+    isDefault: { type: 'boolean' }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const addressEnvelope = (array = false) => ({
+  200: { description: array ? 'Customer addresses returned successfully.' : 'Customer address returned successfully.', type: 'object', required: ['data'], properties: {
+    data: array ? { type: 'array', items: addressItemResponseSchema } : addressItemResponseSchema,
+  } },
+});
+const notificationFolderUserSchema = {
+  type: 'object', required: ['id', 'key', 'name', 'scope'],
+  properties: { id: { type: 'integer' }, key: { type: 'string' }, name: { type: 'string' }, scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] } },
+};
+const notificationFolderAdminSchema = {
+  type: 'object', required: ['id', 'key', 'name', 'scope', 'isSystem', 'isActive', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, key: { type: 'string' }, name: { type: 'string' },
+    scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+    isSystem: { type: 'boolean' }, isActive: { type: 'boolean' }, sortOrder: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const notificationItemResponseSchema = {
+  type: 'object',
+  required: ['id', 'userId', 'type', 'data', 'title', 'message', 'isRead', 'createdAt', 'folderMemberships'],
+  properties: {
+    id: { type: 'integer' }, userId: { type: 'integer' }, type: { type: ['string', 'null'] },
+    data: { anyOf: [{ type: 'object', additionalProperties: true }, { type: 'null' }] },
+    title: { type: 'string' }, message: { type: 'string' }, isRead: { type: 'boolean' },
+    createdAt: { type: 'string', format: 'date-time' },
+    folderMemberships: { type: 'array', items: { type: 'object', required: ['id', 'notificationId', 'folderId', 'createdAt', 'folder'], properties: {
+      id: { type: 'integer' }, notificationId: { type: 'integer' }, folderId: { type: 'integer' },
+      createdAt: { type: 'string', format: 'date-time' },
+      folder: { type: 'object', required: ['id', 'key', 'name', 'scope'], properties: {
+        id: { type: 'integer' }, key: { type: 'string' }, name: { type: 'string' }, scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+      } },
+    } } },
+  },
+};
+const paginationMetaResponseSchema = {
+  type: 'object', required: ['page', 'limit', 'total', 'totalPages'],
+  properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } },
+};
+const inquiryPlanResponseSchema = {
+  type: 'object', required: ['id', 'code', 'name', 'description', 'durationDays', 'price', 'currency', 'inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod'],
+  properties: {
+    id: { type: 'integer' }, code: { type: 'string' }, name: { type: 'string' }, description: { type: ['string', 'null'] },
+    durationDays: { type: 'integer' }, price: { type: 'string' }, currency: { type: 'string' },
+    inquiriesPerPeriod: { type: 'integer' }, responsesPerPeriod: { type: 'integer' },
+    internalMessagesPerPeriod: { type: 'integer' }, smsPerPeriod: { type: 'integer' },
+    isActive: { type: 'boolean' }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const inquiryQuotaResponseSchema = {
+  type: 'object', required: ['enforced', 'subscription', 'quotas', 'capabilities'],
+  properties: {
+    enforced: { type: 'boolean' },
+    subscription: { anyOf: [{ type: 'object', required: ['id', 'planId', 'planName', 'startsAt', 'endsAt', 'status'], properties: {
+      id: { type: 'integer' }, planId: { type: 'integer' }, planName: { type: 'string' },
+      startsAt: { type: 'string', format: 'date-time' }, endsAt: { type: 'string', format: 'date-time' }, status: { type: 'string' },
+    } }, { type: 'null' }] },
+    quotas: { anyOf: [{ type: 'object', additionalProperties: { type: 'object', required: ['used', 'limit', 'remaining'], properties: {
+      used: { type: 'integer' }, limit: { type: 'integer' }, remaining: { type: 'integer' },
+    } } }, { type: 'null' }] },
+    capabilities: { type: 'object', required: ['smsConfigured'], properties: { smsConfigured: { type: 'boolean' } } },
+  },
+};
+const successEnvelope = (payload, description) => ({
+  200: { description, type: 'object', required: ['data'], properties: { data: payload } },
+});
+const notificationSimpleSuccess = {
+  type: 'object', required: ['success'], properties: { success: { type: 'boolean' } },
+};
+const notificationBulkSuccess = {
+  type: 'object', required: ['success', 'count'], properties: { success: { type: 'boolean' }, count: { type: 'integer' } },
+};
+
+Object.assign(docs, {
+  'GET /api/v1/addresses': { ...docs['GET /api/v1/addresses'], responses: addressEnvelope(true) },
+  'GET /api/v1/addresses/:id': { ...docs['GET /api/v1/addresses/:id'], responses: addressEnvelope(false) },
+  'POST /api/v1/addresses': { ...docs['POST /api/v1/addresses'], responses: { 201: { ...addressEnvelope(false)[200], description: 'Customer address created successfully.' } } },
+  'PATCH /api/v1/addresses/:id': { ...docs['PATCH /api/v1/addresses/:id'], responses: addressEnvelope(false) },
+  'PATCH /api/v1/addresses/:id/default': { ...docs['PATCH /api/v1/addresses/:id/default'], responses: addressEnvelope(false) },
+
+  'GET /api/v1/settings/notifications': {
+    ...docs['GET /api/v1/settings/notifications'],
+    responses: { 200: { description: 'Notifications and pagination metadata returned successfully.', type: 'object', required: ['data', 'meta'], properties: {
+      data: { type: 'array', items: notificationItemResponseSchema }, meta: paginationMetaResponseSchema,
+    } } },
+  },
+  'GET /api/v1/settings/notifications/unread-count': {
+    ...docs['GET /api/v1/settings/notifications/unread-count'],
+    responses: { 200: { description: 'Unread notification count returned successfully.', type: 'object', required: ['count'], properties: { count: { type: 'integer' } } } },
+  },
+  'POST /api/v1/settings/notifications/bulk-read-state': {
+    ...docs['POST /api/v1/settings/notifications/bulk-read-state'],
+    responses: { 200: { description: 'Bulk notification read state updated.', ...notificationBulkSuccess } },
+  },
+  'POST /api/v1/settings/notifications/bulk-delete': {
+    ...docs['POST /api/v1/settings/notifications/bulk-delete'],
+    responses: { 200: { description: 'Bulk notification deletion completed.', ...notificationBulkSuccess } },
+  },
+  'GET /api/v1/settings/notifications/folders': {
+    ...docs['GET /api/v1/settings/notifications/folders'],
+    responses: { 200: { description: 'Folders available to the current app context returned successfully.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: notificationFolderUserSchema } } } },
+  },
+  'POST /api/v1/settings/notifications/:id/folders': {
+    ...docs['POST /api/v1/settings/notifications/:id/folders'],
+    responses: { 200: { description: 'Notification folder membership changed successfully.', type: 'object', required: ['success', 'action', 'notificationId', 'folderId'], properties: {
+      success: { type: 'boolean' }, action: { type: 'string', enum: ['copy', 'move'] }, notificationId: { type: 'integer' }, folderId: { type: 'integer' },
+    } } },
+  },
+  'PATCH /api/v1/settings/notifications/:id/read-state': { ...docs['PATCH /api/v1/settings/notifications/:id/read-state'], responses: { 200: { description: 'Notification read state updated.', ...notificationSimpleSuccess } } },
+  'PATCH /api/v1/settings/notifications/:id/read': { ...docs['PATCH /api/v1/settings/notifications/:id/read'], responses: { 200: { description: 'Notification marked as read.', ...notificationSimpleSuccess } } },
+  'PATCH /api/v1/settings/notifications/read-all': { ...docs['PATCH /api/v1/settings/notifications/read-all'], responses: { 200: { description: 'All current user notifications marked as read.', ...notificationSimpleSuccess } } },
+  'DELETE /api/v1/settings/notifications/:id': { ...docs['DELETE /api/v1/settings/notifications/:id'], responses: { 200: { description: 'Notification deleted successfully.', ...notificationSimpleSuccess } } },
+
+  'GET /api/v1/admin/notifications/folders': {
+    ...docs['GET /api/v1/admin/notifications/folders'],
+    responses: { 200: { description: 'All notification folders returned successfully.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: notificationFolderAdminSchema } } } },
+  },
+  'POST /api/v1/admin/notifications/folders': {
+    ...docs['POST /api/v1/admin/notifications/folders'],
+    responses: { 201: { description: 'Notification folder created successfully.', type: 'object', required: ['data'], properties: { data: notificationFolderAdminSchema } } },
+  },
+  'PATCH /api/v1/admin/notifications/folders/:id': {
+    ...docs['PATCH /api/v1/admin/notifications/folders/:id'],
+    responses: { 200: { description: 'Notification folder updated successfully.', type: 'object', required: ['data'], properties: { data: notificationFolderAdminSchema } } },
+  },
+  'GET /api/v1/admin/notifications/delivery-stats': {
+    ...docs['GET /api/v1/admin/notifications/delivery-stats'],
+    responses: { 200: { description: 'Notification delivery monitoring aggregates returned successfully.', type: 'object', required: ['data'], properties: { data: {
+      type: 'object', required: ['total', 'byStatus', 'byChannel', 'recentFailures'], properties: {
+        total: { type: 'integer' },
+        byStatus: { type: 'object', required: ['PENDING', 'SENT', 'FAILED', 'SKIPPED'], properties: { PENDING: { type: 'integer' }, SENT: { type: 'integer' }, FAILED: { type: 'integer' }, SKIPPED: { type: 'integer' } } },
+        byChannel: { type: 'object', required: ['IN_APP', 'EMAIL', 'SMS'], properties: { IN_APP: { type: 'integer' }, EMAIL: { type: 'integer' }, SMS: { type: 'integer' } } },
+        recentFailures: { type: 'array', items: { type: 'object', required: ['id', 'eventType', 'channel', 'status', 'attempts', 'maxAttempts', 'createdAt'], properties: {
+          id: { type: 'integer' }, eventType: { type: 'string' }, channel: { type: 'string' }, status: { type: 'string' },
+          recipient: { type: ['string', 'null'] }, lastError: { type: ['string', 'null'] }, attempts: { type: 'integer' },
+          maxAttempts: { type: 'integer' }, nextAttemptAt: { type: 'string', format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' },
+        } } },
+      },
+    } } } },
+  },
+  'GET /api/v1/admin/notifications/deliveries': {
+    ...docs['GET /api/v1/admin/notifications/deliveries'],
+    responses: { 200: { description: 'Notification delivery rows and pagination metadata returned successfully.', type: 'object', required: ['data', 'meta'], properties: {
+      data: { type: 'array', items: { type: 'object', additionalProperties: true } }, meta: paginationMetaResponseSchema,
+    } } },
+  },
+
+  'GET /api/v1/inquiries/plans': successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Active inquiry subscription plans returned successfully.'),
+  'GET /api/v1/inquiries/quota': successEnvelope(inquiryQuotaResponseSchema, 'Current inquiry subscription quota returned successfully.'),
+  'GET /api/v1/admin/inquiry-monetization/settings': successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings returned successfully.'),
+  'PATCH /api/v1/admin/inquiry-monetization/settings': successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings updated successfully.'),
+  'GET /api/v1/admin/inquiry-plans': successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Inquiry plans returned successfully.'),
+});
+
 module.exports = docs;
