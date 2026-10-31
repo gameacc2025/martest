@@ -716,3 +716,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Route docs model 401/403 as `oneOf` central nested ErrorResponse and direct auth/RBAC `{error:true,message,code?}`.
 - 500 models central nested errors and direct auth-refresh catch-all `{error:true,message}`. 429 models native Fastify `{statusCode:429,error:'Too Many Requests',message}`.
 - Payment-provider service 502/503 exceptions currently become generic 500 through central handler; do not advertise 502/503 until a safe handler change is made and tested.
+
+
+## Payment provider error response policy — 2026-10-31
+
+- Inquiry subscription request allow-lists provider-unavailable, provider HTTP error, invalid provider response and request rejection as sanitized 502 `{error:{code,message}}`.
+- Missing payment provider config returns sanitized 503 on retry verification and callback. Callback verify outages continue to redirect with `payment=pending`.
+- Unknown/mismatched errors and invalid provider configuration remain generic 500 through central handler. Never expose raw provider response, merchant ID, authority, config or stack.
