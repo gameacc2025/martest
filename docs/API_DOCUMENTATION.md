@@ -205,3 +205,12 @@ Product price snapshot/history/activity and inquiry messages/responses/items/att
 
 
 Step 16D merge verification: PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b90ef2a1`. CI passed 1,386 backend tests and 18 frontend/shared tests; all frontend builds and database migration validation passed. Static route inventory coverage remains 149/149 with no missing or duplicate route keys.
+
+
+## Company and category response contracts — step 16E (2026-10-31)
+
+- Company list/detail/create/update/status/restore/verification/logo responses document company scalar fields, inquiry limits, key/value limits and relation counts. Company detail includes up to ten flattened user summaries; it does not expose password or auth-secret fields.
+- Company settings responses document `inquiryLimit` and ordered `limits`. Company statistics document aggregate counts and up to five recent products/inquiries. Company product listing documents pagination and compact category/subcategory/company projections.
+- Public category list/detail and management category list document category fields and nested subcategory summaries. Subcategory detail documents category and specification-template/field projections.
+- Category product listing documents only published/public products and the actual paginated `{data,meta}` response.
+- Company/category/subcategory DELETE endpoints document HTTP 204 with no response body (rather than a fictitious JSON message envelope).
