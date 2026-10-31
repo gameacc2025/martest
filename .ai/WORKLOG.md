@@ -1504,3 +1504,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added inquiry dashboard stats schema from `inquiry.service.getInquiryStats`: sent/received/response aggregates, 0–100 successRate, and at most five recent inquiries/responses. Recent inquiry output excludes buyerUserId; sealed buyer response redaction is documented.
 - Added structural response tests. CI pending.
 - Runtime failure on PR #49 examined: all browser failures were SPA origin unavailable (`chrome-error://chromewebdata/`, app root never attached) and staff handoff could not reach admin panel. Backend unit/build CI and DB migration validation passed. Track as runtime compose/startup failure, not as application test success.
+
+
+## 2026-10-31 — OPENAPI-ADMIN-MONITORING-INQUIRY-STATS-STEP-16D-MERGE
+
+- PR #53 merged by squash at `da0478df49eb256fdb5f40c179818a02a6f706fa`.
+- Added admin inquiry subscription list response schema (100 rows; exact plan/company/user projections), notification delivery stats and complete paginated delivery rows, and scoped inquiry dashboard stats/recent records.
+- Added structural tests and updated API documentation and `.ai` context files.
+- Initial CI caught a duplicate schema constant and then two structural-test mismatches (missing documented list cap and assertion through nullable relation `anyOf`). Renamed the step-specific schema constants, documented `maxItems:100`, and corrected test paths.
+- Final CI passed: backend 1,389/1,389, frontend/shared 18/18, frontend builds passed. Prisma migration validation passed. Runtime compose/browser validation was still in progress at merge time; not claimed as passed.
+- Next: step 16E audit remaining generic response placeholders and add stable source-backed response schemas.
