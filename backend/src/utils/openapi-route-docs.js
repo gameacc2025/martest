@@ -1244,4 +1244,191 @@ Object.assign(docs, {
   },
 });
 
+
+// Company and category response contracts derived from service includes/selects.
+const companyLimitResponseSchema = {
+  type: 'object', required: ['id', 'companyId', 'key', 'value'],
+  properties: { id: { type: 'integer' }, companyId: { type: 'integer' }, key: { type: 'string' }, value: { type: 'integer' }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' } },
+};
+const companyInquiryLimitResponseSchema = {
+  type: 'object', required: ['id', 'companyId', 'maxOpenInquiries', 'maxActiveResponses'],
+  properties: { id: { type: 'integer' }, companyId: { type: 'integer' }, maxOpenInquiries: { type: 'integer' }, maxActiveResponses: { type: 'integer' }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' } },
+};
+const companyUserSummaryResponseSchema = {
+  type: 'object', required: ['id', 'type', 'isActive', 'status', 'createdAt'],
+  properties: {
+    id: { type: 'integer' }, email: { type: ['string', 'null'] }, status: { type: 'string' },
+    createdAt: { type: 'string', format: 'date-time' }, type: { type: 'string' }, isActive: { type: 'boolean' },
+    firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] }, avatar: { type: ['string', 'null'] },
+  },
+};
+const companyResponseSchema = {
+  type: 'object', required: ['id', 'name', 'type', 'status', 'isVerified', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, name: { type: 'string' }, nameEn: { type: ['string', 'null'] },
+    nationalId: { type: ['string', 'null'] }, registrationNumber: { type: ['string', 'null'] },
+    type: { type: ['string', 'null'], enum: ['MANUFACTURER', 'IMPORTER', 'TELECOM_OPERATOR', null] },
+    description: { type: ['string', 'null'] }, logo: { type: ['string', 'null'] }, email: { type: ['string', 'null'] },
+    phone: { type: ['string', 'null'] }, address: { type: ['string', 'null'] }, website: { type: ['string', 'null'] },
+    status: { type: 'string', enum: ['PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED'] }, isVerified: { type: 'boolean' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' }, deletedAt: { type: ['string', 'null'], format: 'date-time' },
+    _count: { type: 'object', properties: { products: { type: 'integer' }, accessProfiles: { type: 'integer' }, inquiries: { type: 'integer' } } },
+    inquiryLimit: { anyOf: [companyInquiryLimitResponseSchema, { type: 'null' }] },
+    limits: { type: 'array', items: companyLimitResponseSchema },
+    users: { type: 'array', maxItems: 10, items: companyUserSummaryResponseSchema },
+  }, additionalProperties: true,
+};
+const companySettingsResponseSchema = {
+  type: 'object', required: ['inquiryLimit', 'limits'],
+  properties: { inquiryLimit: { anyOf: [companyInquiryLimitResponseSchema, { type: 'null' }] }, limits: { type: 'array', items: companyLimitResponseSchema } },
+};
+const companyStatisticsResponseSchema = {
+  type: 'object', required: ['counts', 'recentProducts', 'recentOrders'],
+  properties: {
+    counts: { type: 'object', required: ['products', 'publishedProducts', 'orders', 'pendingOrders', 'users', 'activeUsers'], properties: {
+      products: { type: 'integer' }, publishedProducts: { type: 'integer' }, orders: { type: 'integer' }, pendingOrders: { type: 'integer' }, users: { type: 'integer' }, activeUsers: { type: 'integer' },
+    } },
+    recentProducts: { type: 'array', maxItems: 5, items: { type: 'object', required: ['id', 'title', 'status', 'createdAt'], properties: { id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' } } } },
+    recentOrders: { type: 'array', maxItems: 5, items: { type: 'object', required: ['id', 'title', 'status', 'createdAt'], properties: { id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' } } } },
+  },
+};
+const categorySubcategorySummaryResponseSchema = {
+  type: 'object', required: ['id', 'slug', 'nameFa', 'nameEn', 'status', 'sortOrder'],
+  properties: { id: { type: 'integer' }, categoryId: { type: 'integer' }, slug: { type: 'string' }, nameFa: { type: 'string' }, nameEn: { type: 'string' }, status: { type: 'string', enum: ['ACTIVE', 'INACTIVE'] }, sortOrder: { type: 'integer' } },
+};
+const categoryResponseSchema = {
+  type: 'object', required: ['id', 'slug', 'nameFa', 'nameEn', 'status', 'showInMenu', 'sortOrder'],
+  properties: {
+    id: { type: 'integer' }, slug: { type: 'string' }, nameFa: { type: 'string' }, nameEn: { type: 'string' },
+    image: { type: ['string', 'null'] }, status: { type: 'string', enum: ['ACTIVE', 'INACTIVE'] },
+    showInMenu: { type: 'boolean' }, sortOrder: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    subcategories: { type: 'array', items: categorySubcategorySummaryResponseSchema },
+  }, additionalProperties: true,
+};
+const categorySubcategoryDetailResponseSchema = {
+  ...categorySubcategorySummaryResponseSchema,
+  properties: {
+    ...categorySubcategorySummaryResponseSchema.properties,
+    category: { type: 'object', additionalProperties: true },
+    specificationTemplate: { anyOf: [{ type: 'object', properties: {
+      id: { type: 'integer' }, subcategoryId: { type: 'integer' }, name: { type: 'string' }, description: { type: ['string', 'null'] }, isActive: { type: 'boolean' },
+      fields: { type: 'array', items: { type: 'object', properties: { id: { type: 'integer' }, templateId: { type: 'integer' }, name: { type: 'string' }, key: { type: 'string' }, type: { type: 'string' }, isRequired: { type: 'boolean' }, unit: { type: ['string', 'null'] }, options: {}, sortOrder: { type: 'integer' } }, additionalProperties: true } },
+    }, additionalProperties: true }, { type: 'null' }] },
+  },
+  additionalProperties: true,
+};
+const companyProductResponseSchema = {
+  ...managedProductResponseSchema,
+  properties: {
+    ...managedProductResponseSchema.properties,
+    category: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' }, nameEn: { type: 'string' } }, additionalProperties: true },
+    subcategory: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' }, nameEn: { type: 'string' } }, additionalProperties: true },
+    company: { type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } }, additionalProperties: true },
+  },
+};
+
+Object.assign(docs, {
+  ['GET /api/v1/companies']: {
+    ...docs['GET /api/v1/companies'],
+    responses: { 200: { description: 'Company rows with product/access-profile/inquiry counts and company inquiry limits, paginated.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: companyResponseSchema }, meta: paginationMetaResponseSchema } } },
+  },
+  ['GET /api/v1/companies/:id']: {
+    ...docs['GET /api/v1/companies/:id'],
+    responses: { 200: { description: 'Company details, counts, inquiry limits, ordered custom limits and up to ten flattened user summaries.', type: 'object', required: ['data'], properties: { data: companyResponseSchema } } },
+  },
+  ['POST /api/v1/companies']: {
+    ...docs['POST /api/v1/companies'],
+    responses: { 201: { description: 'Created company record.', type: 'object', required: ['data'], properties: { data: companyResponseSchema } } },
+  },
+  ['PATCH /api/v1/companies/:id']: {
+    ...docs['PATCH /api/v1/companies/:id'],
+    responses: { 200: { description: 'Updated company record.', type: 'object', required: ['data'], properties: { data: companyResponseSchema } } },
+  },
+  ['DELETE /api/v1/companies/:id']: {
+    ...docs['DELETE /api/v1/companies/:id'],
+    responses: { 204: { description: 'Company soft-deleted successfully; no response body.' } },
+  },
+  ['PATCH /api/v1/companies/:id/restore']: {
+    ...docs['PATCH /api/v1/companies/:id/restore'],
+    responses: { 200: { description: 'Restored company record.', type: 'object', required: ['data'], properties: { data: companyResponseSchema } } },
+  },
+  ['PATCH /api/v1/companies/:id/status']: {
+    ...docs['PATCH /api/v1/companies/:id/status'],
+    responses: { 200: { description: 'Company record with updated status.', type: 'object', required: ['data'], properties: { data: companyResponseSchema } } },
+  },
+  ['PATCH /api/v1/companies/:id/verify']: {
+    ...docs['PATCH /api/v1/companies/:id/verify'],
+    responses: { 200: { description: 'Company record with updated verification flag.', type: 'object', required: ['data'], properties: { data: companyResponseSchema } } },
+  },
+  ['PATCH /api/v1/companies/:id/logo']: {
+    ...docs['PATCH /api/v1/companies/:id/logo'],
+    responses: { 200: { description: 'Company record with updated logo path.', type: 'object', required: ['data'], properties: { data: companyResponseSchema } } },
+  },
+  ['GET /api/v1/companies/:id/settings']: {
+    ...docs['GET /api/v1/companies/:id/settings'],
+    responses: { 200: { description: 'Company inquiry limit and ordered key/value limits.', type: 'object', required: ['data'], properties: { data: companySettingsResponseSchema } } },
+  },
+  ['PATCH /api/v1/companies/:id/settings']: {
+    ...docs['PATCH /api/v1/companies/:id/settings'],
+    responses: { 200: { description: 'Updated company inquiry limit and ordered key/value limits.', type: 'object', required: ['data'], properties: { data: companySettingsResponseSchema } } },
+  },
+  ['GET /api/v1/companies/:id/statistics']: {
+    ...docs['GET /api/v1/companies/:id/statistics'],
+    responses: { 200: { description: 'Company dashboard counts and up to five recent products and inquiries.', type: 'object', required: ['data'], properties: { data: companyStatisticsResponseSchema } } },
+  },
+  ['GET /api/v1/companies/:id/products']: {
+    ...docs['GET /api/v1/companies/:id/products'],
+    responses: { 200: { description: 'Company products with compact category/subcategory/company projections and pagination metadata.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: companyProductResponseSchema }, meta: paginationMetaResponseSchema } } },
+  },
+  ['GET /api/v1/categories']: {
+    ...docs['GET /api/v1/categories'],
+    responses: successEnvelope({ type: 'array', items: categoryResponseSchema }, 'Active categories with active subcategory summaries returned successfully.'),
+  },
+  ['GET /api/v1/categories/manage']: {
+    ...docs['GET /api/v1/categories/manage'],
+    responses: successEnvelope({ type: 'array', items: categoryResponseSchema }, 'All categories, including inactive categories and subcategories, returned for staff management.'),
+  },
+  ['GET /api/v1/categories/:id']: {
+    ...docs['GET /api/v1/categories/:id'],
+    responses: successEnvelope(categoryResponseSchema, 'Active category with its subcategories returned successfully.'),
+  },
+  ['GET /api/v1/categories/:id/subcategories']: {
+    ...docs['GET /api/v1/categories/:id/subcategories'],
+    responses: successEnvelope({ type: 'array', items: categorySubcategorySummaryResponseSchema }, 'Active subcategories for the selected active category returned successfully.'),
+  },
+  ['GET /api/v1/categories/:id/subcategories/:subId']: {
+    ...docs['GET /api/v1/categories/:id/subcategories/:subId'],
+    responses: successEnvelope(categorySubcategoryDetailResponseSchema, 'Active subcategory with category and specification-template fields returned successfully.'),
+  },
+  ['GET /api/v1/categories/:id/products']: {
+    ...docs['GET /api/v1/categories/:id/products'],
+    responses: { 200: { description: 'Publicly published and public products in the category with pagination metadata.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: companyProductResponseSchema }, meta: paginationMetaResponseSchema } } },
+  },
+  ['POST /api/v1/categories']: {
+    ...docs['POST /api/v1/categories'],
+    responses: { 201: { description: 'Created category record.', type: 'object', required: ['data'], properties: { data: categoryResponseSchema } } },
+  },
+  ['PATCH /api/v1/categories/:id']: {
+    ...docs['PATCH /api/v1/categories/:id'],
+    responses: { 200: { description: 'Updated category record.', type: 'object', required: ['data'], properties: { data: categoryResponseSchema } } },
+  },
+  ['DELETE /api/v1/categories/:id']: {
+    ...docs['DELETE /api/v1/categories/:id'],
+    responses: { 204: { description: 'Category deleted successfully; no response body.' } },
+  },
+  ['POST /api/v1/categories/:id/subcategories']: {
+    ...docs['POST /api/v1/categories/:id/subcategories'],
+    responses: { 201: { description: 'Created subcategory record.', type: 'object', required: ['data'], properties: { data: categorySubcategoryDetailResponseSchema } } },
+  },
+  ['PATCH /api/v1/categories/:id/subcategories/:subId']: {
+    ...docs['PATCH /api/v1/categories/:id/subcategories/:subId'],
+    responses: { 200: { description: 'Updated subcategory record.', type: 'object', required: ['data'], properties: { data: categorySubcategoryDetailResponseSchema } } },
+  },
+  ['DELETE /api/v1/categories/:id/subcategories/:subId']: {
+    ...docs['DELETE /api/v1/categories/:id/subcategories/:subId'],
+    responses: { 204: { description: 'Subcategory deleted successfully; no response body.' } },
+  },
+});
+
 module.exports = docs;
