@@ -326,3 +326,10 @@ OpenAPI global responses now include 409 conflicts, 413 oversized request/file u
 ## Step 16J — generated OpenAPI route coverage audit (2026-10-31)
 
 An app-level integration test now compares the generated `/docs/json` document from the real Fastify plugin/route registration chain against all 149 route inventory entries. It checks method/path coverage, parameter path normalization, effective bearer/cookie/public security metadata, global error response status coverage, and bodyless 204 operations.
+
+
+## Step 16J merge — generated OpenAPI route verification (2026-10-31)
+
+PR #59 merged at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e`. CI passed 1,394 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed.
+
+The real Fastify `/docs/json` output is now checked against all 149 route inventory entries, effective auth/security metadata, global error statuses and empty-body 204 responses. Fastify root routes may render with a trailing slash (for example `/users/`). All 13 204 responses use `type: 'null'`, the supported `@fastify/swagger` empty-body response form.
