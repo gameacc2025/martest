@@ -1348,3 +1348,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added pre-provider validation for the maximum stored Rial amount (PostgreSQL INTEGER / Prisma Int). Added tests for overflow rejection, server-frozen request/verify amounts and retry owner scoping.
 - Live Zarinpal verification remains unverified.
 - Next: reconcile API_DOCUMENTATION.md with actual routes and Swagger schemas.
+
+
+## 2026-10-31 — API-ROUTE-INVENTORY-STEP-14
+
+- Added a complete route index for 13 backend modules: 149 module routes plus the health probe. Inventory lists HTTP method, full `/api/v1` path and route/module guard summary.
+- Added a link from `docs/API_DOCUMENTATION.md`.
+- Added backend test `api-route-inventory.test.js` to assert every literal Fastify route declaration is present in the inventory, preventing silent documentation drift.
+- Route JSON schemas remain in executable route/schema files; no unsupported response schema was fabricated. Swagger/OpenAPI metadata review remains the next pass.
