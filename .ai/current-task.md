@@ -579,3 +579,18 @@ PR #59 merged by squash into `main` at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e
 - Safe branch audit found 31 remote branches; all but two map to already-merged PR heads. `feat/website-homepage-redesign` has zero commits ahead of main and is safe to delete. `docs/openapi-admin-inquiry-delivery-responses-step-16d` is a scratch branch whose response schema work is already superseded by merged 16D/16E work, but its admin delivery querystring schema is not present in main.
 - Added source-backed delivery query filters to both admin delivery stats and delivery list docs. Exact controller inputs: status, channel, eventType, userId, page, limit. Excluded from/to because controller/service do not consume them. No max limit is claimed because service does not clamp it.
 - Added static schema tests and generated `/docs/json` integration assertions for query parameter presence/absence. CI pending.
+
+
+## OpenAPI response contracts — step 16H complete (2026-10-31)
+
+- Branch: `docs/openapi-auth-notification-company-responses-step-16h`.
+- Auth responses cover customer/company registration, login, refresh, current-user context, logout and one-time PKCE handoff/redeem. Refresh token remains cookie-only; response schemas do not expose refreshToken or passwordHash. Customer registration has no AccessProfile; company manager registration is pending with inactive AccessProfile and no implicit role.
+- Notification preferences use direct `{data,smsAvailable}` (not a success envelope); current SMS availability is false. User notification list is direct `{data,meta}`, unread count `{count}`, bulk actions `{success,count}`, folder membership `{success,action,notificationId,folderId}`. User folders include scope/system/sort fields and are selected from token-derived app scope.
+- Company restore/status/verify/logo return company data. Company soft-delete and product soft-delete return HTTP 204 with no body. Product workflow transitions return managed product projection with status history.
+- Added a second regression test to assert auth secret omissions, notification direct envelopes and lifecycle response status/body contracts. API guide updated. CI/migration validation pending.
+
+## Next active work — step 16I response/error contract audit
+
+- Audit common error envelopes and per-route error status codes for auth, permission/ownership failures, validation, missing resources, quota/plan restrictions and payment callbacks.
+- Ensure 204 routes have no body, 201 creation routes and direct pagination envelopes are accurate, and public/sealed inquiry projections remain redacted.
+- Add focused structural tests and API/.ai documentation; validate CI/migrations and merge.
