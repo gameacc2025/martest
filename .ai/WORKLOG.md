@@ -1475,3 +1475,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added public/staff category, subcategory and specification-template response schemas plus paginated public category product response.
 - Corrected company/category/subcategory deletes to 204 with no body. Structural tests added. API docs and AI docs updated. Route inventory remains 149/149 documented.
 - Next: step 16F for users, roles, permissions, addresses, settings/profile and auth/session response projections.
+
+
+## 2026-10-31 — OPENAPI-USERS-AUTH-RBAC-RESPONSES-STEP-16F
+
+- Added safe user response schemas based on `USER_SELECT` and `loadUserAccess`/`loadUserAccessDetailed`; list uses role/permission name strings, detail/mutations use detailed role/permission objects. No password hashes are exposed.
+- Added role schemas from `ROLE_SELECT` (scope, permission join records, `_count.users`) and compact assignable-role projection. Added permission scalar schema and all three list modes: array, grouped `{all,grouped}`, and paginated `{data,meta}`.
+- Added auth response schemas for login, refresh, logout, logout-all, me, customer/company registration, admin password reset and PKCE handoff create/redeem. Refresh token remains cookie-only; handoff code TTL is 60 seconds.
+- Added profile settings projection from `PROFILE_SELECT`, avatar URL, message receipts, admin stats (5 recent users, 20 pending products) and product review threshold setting.
+- Added structural tests for the DTO shapes and token/hash exclusion. New block delimiter balance passed; route inventory remains 149/149. CI pending.
