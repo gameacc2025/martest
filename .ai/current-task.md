@@ -678,3 +678,19 @@ PR #63 squash-merged into `main` at `97ea2bb9adaa140fb8b41925269446264fd088a7`. 
 - Applied handling to subscription request, retry verification and public callback. Callback verification outages are already converted by the service to a `pending` redirect and remain so.
 - Unrecognized codes, mismatched status codes, and invalid provider configuration continue to throw to the central handler (generic 500); no provider response body, merchant ID, authority, stack or config values are exposed.
 - OpenAPI now documents 502 only on subscription request and 503 on retry verification and callback. Added controller and route-doc tests. CI pending.
+
+
+## Payment provider error handling — step 16L merged (2026-10-31)
+
+PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. CI [41241532496](https://github.com/gameacc2025/martest/actions/runs/41241532496) passed: backend 1,404/1,404; frontend/shared 18/18; frontend builds passed. Prisma migration validation [41241532777](https://github.com/gameacc2025/martest/actions/runs/41241532777) passed. Runtime [41241532900](https://github.com/gameacc2025/martest/actions/runs/41241532900) remains a separate workflow.
+
+- Inquiry controller maps only allow-listed payment errors to sanitized responses: request/provider HTTP/invalid response/rejection → 502; provider not configured → 503.
+- Applied to subscription creation, retry verification and callback. Transient callback verification failure still redirects with `payment=pending` and never activates without server-side verification.
+- Unrecognized/mismatched errors and invalid provider configuration continue to central generic 500. Only code/message are returned; provider body, merchant ID, authority, stack and config are not forwarded.
+- OpenAPI exposes 502 only for subscription creation and 503 for retry verification/callback. Tests cover safe payloads and unknown error propagation.
+
+## Next active work — step 16M generated OpenAPI integration verification
+
+- Add an integration test against `/docs/json` for actual registered auth, notification, inquiry payment and lifecycle routes (not only the static route-doc registry).
+- Assert generated OpenAPI preserves route-level 401/403 oneOf, native 429, 500 variants, payment 502/503 only on relevant routes, and 204 no-content semantics.
+- Ensure security schemes and route path normalization are correct; CI/migration validation and merge. Then continue remaining Inquiry flow test/feature gaps from project roadmap.
