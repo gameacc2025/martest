@@ -191,3 +191,14 @@ Inspect current subscription payment request/verification flow, provider callbac
 
 
 - CI found one test-fixture mismatch in the new owner-isolation test: the mocked `inquirySubscription.findFirst` ignored the requested companyId, unlike Prisma. Updated the mock to honor id/companyId/userId filters. No production code change in this correction; rerun CI on the latest head.
+
+
+## Subscription payment amount audit completed — 2026-10-31
+
+PR #44 merged by squash into `main` at `142df69c90dd6f725fc4913a8cd2f1572883e1dc`. Corrected-head CI [41218821629](https://github.com/gameacc2025/martest/actions/runs/41218821629) passed with 1,375/1,375 backend tests; migration validation [41218821572](https://github.com/gameacc2025/martest/actions/runs/41218821572) passed. Runtime [41218821631](https://github.com/gameacc2025/martest/actions/runs/41218821631) remained separate at merge time.
+
+Zarinpal request/verify, callback replay protection, owner lock and amount freezing were reviewed. Converted Rial amount is now constrained to positive PostgreSQL INTEGER / Prisma Int range before provider request. Live Zarinpal remains NOT VERIFIED without controlled staging credentials/transaction.
+
+## Next active work — API documentation completeness
+
+Compare `docs/API_DOCUMENTATION.md`, Swagger/OpenAPI route schemas and actual registered routes module-by-module. Identify missing or stale paths, request/response schemas, auth/app-context requirements, permissions, pagination and error codes. Update docs from source truth and add tests for OpenAPI route metadata where gaps exist. Do not invent response schemas or claim every endpoint is documented until inventory is complete.
