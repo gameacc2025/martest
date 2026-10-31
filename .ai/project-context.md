@@ -520,3 +520,5 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Admin inquiry subscription list returns at most 100 subscription rows with selected plan, company and user projections.
 - NotificationDelivery rows are documented from the Prisma model; `notificationId` is a nullable scalar without a declared Prisma relation/FK. Delivery list/stats share status/channel/eventType/userId/page/limit filters.
 - Inquiry statistics are scoped by caller context: sent/received/response totals and status maps, recent five inquiries/responses and successRate. Anonymous sealed customer projections may omit company.id.
+
+- Inquiry list OpenAPI response is paginated, never exposes buyerUserId, and allows company/companyId plus sealed response count to be omitted according to confidential/sealed caller context.
