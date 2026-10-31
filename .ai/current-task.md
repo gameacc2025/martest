@@ -311,3 +311,20 @@ PR #49 merged by squash into `main` at `d79b1908d899fc8569495e8925a00a3a0650080d
 - Inquiry list keeps company nullable and response count optional because confidential/sealed supplier views redact them. Inquiry stats distinguish caller-scoped CUSTOMER/COMPANY data from platform-wide STAFF data.
 - Tests assert important fields, list caps and redaction-compatible shapes. CI pending.
 - Separate runtime validation on merged PR #49 failed in browser smoke tests: company/admin panel smoke pages did not mount, and STAFF auth handoff redirected to `/login` then Chrome error page. Backend/frontend unit tests, builds and migration validation passed. Per project direction, do not make browser smoke testing the focus; investigate only if it points to an actual app/API regression.
+
+
+## OpenAPI response contracts — step 16D merged (2026-10-31)
+
+PR #50 merged by squash into `main` at `96a972cb6c663952cb09d6c7a3d9c3d8b90ef2a1`. CI [41227149553](https://github.com/gameacc2025/martest/actions/runs/41227149553) passed: backend 1,386/1,386; frontend/shared 18/18; all frontend builds passed. Migration validation [41227149568](https://github.com/gameacc2025/martest/actions/runs/41227149568) passed. Runtime validation remains separate from unit/build and is not a merge blocker per owner instruction.
+
+- Admin inquiry subscription list and grant/activate/reject responses now reflect actual plan/company/user projections; list cap is 100.
+- Notification delivery stats expose normalized status/channel counts and at most 10 recent failures; delivery rows include persisted scalar fields and pagination.
+- Inquiry stats/list document caller-specific scoping and confidentiality/sealed-view redactions. Stats recent arrays cap at 5.
+- Product management list/detail document the management projection and relation groups.
+- Tests assert key response fields and limits. Route inventory remains 149/149 covered, with no duplicate keys.
+
+## Next active work — step 16E
+
+- Audit response envelopes/status codes for the remaining documented API routes, especially admin dashboard/settings, company/user/role/permission/category management, product mutations/media uploads and notification preference/folder actions.
+- Replace generic response descriptions with concrete source-backed DTO schemas where the controllers/services provide stable projections; preserve 204/202/302 outcomes and multipart upload metadata.
+- Add structural tests for each added schema; keep error response contract aligned with the global error handler. Then CI/migration validation and merge.
