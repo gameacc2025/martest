@@ -545,3 +545,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Company response schemas cover scalar company fields, counts, inquiry/custom limits, up to ten flattened user summaries, settings, dashboard statistics and paginated company products.
 - Category/subcategory schemas cover public/staff lists, category detail, subcategory detail with specification template/fields and paginated published/public category products.
 - Company/category/subcategory DELETE responses are 204 without bodies. Route inventory remains 149/149 covered.
+
+
+## Users, RBAC and authentication API response contracts — 2026-10-31
+
+- User APIs expose safe identity fields (`id/email/phone/status/timestamps`), nullable profile/access profile, and roles/permissions. List responses carry role/permission name arrays; detail and mutation responses carry detailed records. Password hashes are never selected.
+- Role APIs expose scope, role-permission join projections and assigned-user counts; assignable roles are limited to `id/name/label/scope` and caller's access type. Permission APIs support plain array, grouped `{all,grouped}` and paginated `{data,meta}` modes.
+- Auth login/refresh/me/registration/handoff responses exclude refresh tokens from JSON. Refresh token is httpOnly-cookie-only; handoff code is single-use and valid 60 seconds. Customer registration has no AccessProfile; company registration creates inactive COMPANY access pending staff approval.
+- Profile settings return safe identity/profile/access/company and role-link data. Admin dashboard exposes aggregate counts, five recent users and twenty pending products; admin settings expose product review threshold.
