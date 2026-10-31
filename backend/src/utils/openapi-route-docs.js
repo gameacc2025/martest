@@ -1632,7 +1632,7 @@ Object.assign(docs, {
   },
   ['POST /api/v1/auth/refresh']: {
     ...docs['POST /api/v1/auth/refresh'],
-    responses: successEnvelope(authTokensResponseSchema.properties, 'Rotated access token; rotated refresh token is set only in the httpOnly cookie.'),
+    responses: successEnvelope(authTokensResponseSchema, 'Rotated access token; rotated refresh token is set only in the httpOnly cookie.'),
   },
   ['POST /api/v1/auth/logout']: {
     ...docs['POST /api/v1/auth/logout'],
