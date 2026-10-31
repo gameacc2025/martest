@@ -680,3 +680,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 
 - `backend/src/app.test.js` now boots the real Fastify app with the existing Prisma/env mocks and validates generated `/docs/json` against all 149 route inventory rows.
 - The test converts Fastify `:param` paths to OpenAPI `{param}` paths, checks every method/path operation exists, verifies bearer/cookie/public security against route metadata, checks global error response statuses, and ensures 204 responses have no content body.
+
+
+## Generated OpenAPI route verification — step 16J merged (2026-10-31)
+
+- PR #59 merged at `28b9d1035689b099f18cbd711c56bd4b8bae7e3e`. CI passed backend 1,394/1,394 and frontend/shared 18/18; all builds and Prisma migration validation passed.
+- Real Fastify `/docs/json` is tested against all 149 API inventory routes, including route method/path, effective bearer/cookie/public security, global error statuses and empty-body 204 responses.
+- Root routes mounted at `'/'` appear in Swagger with trailing slash (e.g. `/users/`). `@fastify/swagger` requires `type: 'null'` to model empty 204 bodies; all 13 204 route entries use this form.
