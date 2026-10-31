@@ -1230,4 +1230,112 @@ Object.assign(docs, {
   },
 });
 
+
+// Product catalogue and management projections are deliberately separate: public responses
+// exclude creator/moderation/history fields; authenticated management responses include them.
+const productCompanyResponseSchema = {
+  type: 'object', required: ['id', 'name', 'type'], properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: 'string' } },
+};
+const productCategoryResponseSchema = {
+  type: 'object', required: ['id', 'nameFa', 'slug'], properties: {
+    id: { type: 'integer' }, nameFa: { type: 'string' }, nameEn: { type: ['string', 'null'] }, slug: { type: 'string' },
+  },
+};
+const productPriceTierResponseSchema = {
+  type: 'object', required: ['id', 'productId', 'minQuantity', 'maxQuantity', 'price', 'unit', 'validFrom', 'validTo', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, minQuantity: { type: 'integer' }, maxQuantity: { type: ['integer', 'null'] },
+    price: { type: 'string' }, unit: { type: ['string', 'null'] },
+    validFrom: { type: 'string', format: 'date-time' }, validTo: { type: ['string', 'null'], format: 'date-time' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const productImageResponseSchema = {
+  type: 'object', required: ['id', 'productId', 'url', 'thumbnailUrl', 'altText', 'isPrimary', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, url: { type: 'string' }, thumbnailUrl: { type: ['string', 'null'] },
+    altText: { type: ['string', 'null'] }, isPrimary: { type: 'boolean' }, sortOrder: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const productDocumentResponseSchema = {
+  type: 'object', required: ['id', 'productId', 'type', 'title', 'url', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, type: { type: 'string' }, title: { type: ['string', 'null'] },
+    url: { type: 'string' }, sortOrder: { type: 'integer' }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const productStatusHistoryItemResponseSchema = {
+  type: 'object', required: ['id', 'productId', 'previousStatus', 'newStatus', 'changedByUserId', 'comment', 'createdAt', 'changedBy'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, previousStatus: { type: 'string' }, newStatus: { type: 'string' },
+    changedByUserId: { type: 'integer' }, comment: { type: ['string', 'null'] }, createdAt: { type: 'string', format: 'date-time' },
+    changedBy: productActorResponseSchema,
+  },
+};
+const productPublicResponseSchema = {
+  type: 'object',
+  required: ['id', 'title', 'slug', 'shortDescription', 'description', 'sku', 'brand', 'model', 'specifications', 'status', 'visibility', 'isFeatured', 'companyId', 'categoryId', 'subcategoryId', 'createdAt', 'updatedAt', 'company', 'category', 'subcategory', 'prices', 'images', 'documents'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
+    shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
+    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
+    specifications: { anyOf: [{ type: 'object', additionalProperties: true }, { type: 'array' }, { type: 'string' }, { type: 'number' }, { type: 'boolean' }, { type: 'null' }] },
+    status: { type: 'string' }, visibility: { type: 'string' }, isFeatured: { type: 'boolean' },
+    companyId: { type: 'integer' }, categoryId: { type: 'integer' }, subcategoryId: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    company: productCompanyResponseSchema, category: productCategoryResponseSchema, subcategory: productCategoryResponseSchema,
+    prices: { type: 'array', items: productPriceTierResponseSchema }, images: { type: 'array', items: productImageResponseSchema },
+    documents: { type: 'array', items: productDocumentResponseSchema },
+  },
+};
+const productManagementResponseSchema = {
+  ...productPublicResponseSchema,
+  required: [...productPublicResponseSchema.required, 'editsSinceApproval', 'createdByUserId', 'deletedAt', 'statusHistory'],
+  properties: {
+    ...productPublicResponseSchema.properties,
+    editsSinceApproval: { type: 'integer' }, createdByUserId: { type: 'integer' },
+    deletedAt: { type: ['string', 'null'], format: 'date-time' },
+    statusHistory: { type: 'array', maxItems: 10, items: productStatusHistoryItemResponseSchema },
+  },
+};
+const publicProductQuerySchema = {
+  type: 'object', properties: {
+    search: { type: 'string' }, companyId: { type: 'integer', minimum: 1 }, categoryId: { type: 'integer', minimum: 1 },
+    minPrice: { type: 'number', minimum: 0 }, maxPrice: { type: 'number', minimum: 0 }, featured: { type: 'boolean' },
+    sortBy: { type: 'string', enum: ['createdAt', 'updatedAt', 'title'] }, sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+    page: { type: 'integer', minimum: 1, default: 1 }, limit: { type: 'integer', minimum: 1, default: 20 },
+  },
+};
+const managedProductQuerySchema = {
+  type: 'object', properties: {
+    search: { type: 'string' }, status: { type: 'string' },
+    page: { type: 'integer', minimum: 1, default: 1 }, limit: { type: 'integer', minimum: 1, default: 20 },
+  },
+};
+Object.assign(docs, {
+  ['GET /api/v1/products']: {
+    ...docs['GET /api/v1/products'], querystring: publicProductQuerySchema,
+    responses: { 200: { description: 'Paginated public product projection. Creator, moderation and internal history fields are excluded.', type: 'object', required: ['data', 'meta'], properties: {
+      data: { type: 'array', items: productPublicResponseSchema }, meta: paginationMetaResponseSchema,
+    } } },
+  },
+  ['GET /api/v1/products/:id']: {
+    ...docs['GET /api/v1/products/:id'],
+    responses: { 200: { description: 'Public callers receive the restricted catalogue projection; authorized COMPANY/STAFF management callers receive the management projection.', type: 'object', required: ['data'], properties: {
+      data: { oneOf: [productPublicResponseSchema, productManagementResponseSchema] },
+    } } },
+  },
+  ['GET /api/v1/products/my-products']: {
+    ...docs['GET /api/v1/products/my-products'], querystring: managedProductQuerySchema,
+    responses: { 200: { description: 'Paginated management product projection scoped to the authenticated company or authorized staff context.', type: 'object', required: ['data', 'meta'], properties: {
+      data: { type: 'array', items: productManagementResponseSchema }, meta: paginationMetaResponseSchema,
+    } } },
+  },
+  ['GET /api/v1/products/:id/manage']: {
+    ...docs['GET /api/v1/products/:id/manage'],
+    responses: { 200: { description: 'Full management product projection including the latest ten status transitions and actor profiles.', type: 'object', required: ['data'], properties: { data: productManagementResponseSchema } } },
+  },
+});
+
 module.exports = docs;
