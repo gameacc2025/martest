@@ -1281,3 +1281,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed route to require `requireExactAccessType('STAFF')` and `users.reset_password`; passed verified caller into service; service independently enforces STAFF context and explicit permission/wildcard.
 - Added route and service regressions for COMPANY/SUPER_ADMIN wildcard denial and STAFF missing-permission denial. Authorized STAFF reset behavior remains covered.
 - Branch: `audit/backend-route-inventory-step-11e`; verification pending.
+
+
+### Step 11E — Public taxonomy visibility
+
+- Found public category detail and subcategory detail handlers fetched by ID without checking `status === ACTIVE`, despite the public category list filtering inactive rows.
+- Added active-only predicates to public category/subcategory detail lookups and verified the parent category is active before listing children.
+- Added service/controller regression coverage. Changes are included in PR #42.
