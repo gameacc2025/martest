@@ -38,7 +38,7 @@ async function getOne(request, reply) {
  * List subcategories for a given category (used to populate the product form).
  */
 async function listSubcategories(request, reply) {
-  const category = await svc.getCategoryById(request.params.id);
+  const category = await svc.getCategoryById(request.params.id, { activeOnly: true });
   if (!category) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'دسته‌بندی یافت نشد' } });
   const items = await svc.listSubcategoriesByCategory(request.params.id, { activeOnly: true });
   return reply.send(success(items));
