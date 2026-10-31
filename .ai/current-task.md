@@ -380,3 +380,13 @@ PR #52 merged by squash into `main` at `a58d45f85025ec054d12d46ad9f6f4ba1c08389d
 - Audit remaining product mutation/media and notification preference/folder routes for exact success envelopes and HTTP statuses.
 - Model price-tier create/update/delete, product image/document upload/delete/sort/primary, public product detail, notification preferences, user folder membership/read-state/bulk operations, admin notification folder CRUD and send campaign 202 envelopes.
 - Preserve 204/202 outcomes and relative upload URLs; do not leak delivery internals or private product/company fields into public responses. Add tests, CI/migration validation and merge.
+
+
+## OpenAPI response contracts — step 16D (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-admin-monitoring-inquiry-stats-step-16d`.
+- Added source-backed `GET /admin/inquiry-subscriptions` contract with exact list include projections (plan select, company select, user select), 100-row cap and expiry normalization note.
+- Added `GET /admin/notifications/delivery-stats` contract with complete zero-filled status/channel maps and up to ten failure rows; added complete `NotificationDelivery` row schema for paginated delivery list. `nextAttemptAt` is required because Prisma schema defines it non-null.
+- Added `GET /inquiries/stats` dashboard contract: sent/received/responses buckets, computed success rate, recent inquiries/responses capped at five, no buyerUserId field in recent inquiry output, and sealed/anonymous buyer response visibility behavior.
+- Added structural response contract tests. CI and migration validation pending.
+- PR #49 CI and migration passed (backend 1,385/1,385, frontend/shared 18/18, builds and migration validation). Runtime validation failed only in browser smoke: SPA origins returned chrome-error and `#app` did not attach. User preference is to prioritize tests over browser testing; track runtime compose/startup separately and do not claim it passed.
