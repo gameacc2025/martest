@@ -200,3 +200,6 @@ Product price snapshot/history/activity and inquiry messages/responses/items/att
 - Admin inquiry subscription listing documents the latest 100 rows with the actual scalar subscription fields and selected plan/company/user projections.
 - Notification delivery listing documents the complete `NotificationDelivery` row (including optional notificationId, frozen message snapshot, provider/attempt state and timestamps) plus pagination metadata. Delivery list/stats document their shared status/channel/eventType/userId/page/limit query filters.
 - Inquiry statistics document caller-scoped sent/received/response aggregates, by-status maps, new/closed/awaiting/selected/successRate values, and the five-item recent inquiry/response projections. Anonymous sealed customer recent responses do not require a company ID.
+
+
+- Inquiry list response is now explicitly paginated and documents its caller-context redaction: buyerUserId is never returned, confidential company identity may be removed, and sealed response counts may be omitted.
