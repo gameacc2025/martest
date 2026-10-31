@@ -1957,7 +1957,7 @@ test('listInquiries: STAFF with a stray companyId cannot use the company-only re
     () => inquiryService.listInquiries({ scope: 'received' }, staff),
     (err) => err.statusCode === 403 && err.code === 'INVALID_INQUIRY_SCOPE',
   );
-  assert.equal(calls.findMany, undefined);
+  assert.equal(calls.findMany.length, 0);
 });
 
 
