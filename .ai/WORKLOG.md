@@ -1703,3 +1703,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Wrapped subscription creation, retry verification and public callback. Provider verification outages in callback remain a pending result redirect, preserving the server-side verification rule.
 - Error body contains only allow-listed code and safe message; provider payload, merchant ID, payment authority, stack and configuration are never copied. Unknown/mismatched 5xx continue to central generic 500.
 - OpenAPI 502/503 responses added only to relevant inquiry payment routes; structural tests cover response codes. Controller tests cover sanitized body and unknown-error propagation. CI pending.
+
+
+## 2026-10-31 — PAYMENT-PROVIDER-ERROR-CONTRACT-STEP-16L-MERGE
+
+- PR #64 squash-merged at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`.
+- CI [41241532496] passed: backend 1,404/1,404; frontend/shared 18/18; frontend builds passed. Prisma migration validation [41241532777] passed. Runtime [41241532900] is separate.
+- Inquiry controller now returns allow-listed sanitized 502 for upstream request failures and 503 for missing provider configuration on retry/callback. Transient verification failures in callback still redirect pending.
+- Unknown/mismatched errors and invalid provider config remain generic 500. Provider payload, merchant ID, authority, stack and config are never forwarded.
+- Added controller and OpenAPI contract tests; documented route-specific 502/503 responses.
+- Next: step 16M integration-test the generated `/docs/json` contract for actual registered routes, then continue remaining Inquiry flow tests/features.
