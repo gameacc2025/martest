@@ -179,3 +179,12 @@ Company SMS recipient selection now requires an ACTIVE COMPANY AccessProfile bel
 ## Next priority — subscription payment provider review
 
 Inspect current subscription payment request/verification flow, provider callbacks, idempotency and admin manual activation. Establish whether Zarinpal integration is implemented or still manual-only. Add tests for callback authenticity, amount/currency/reference matching, replay protection and state transitions before attempting live staging verification. Do not mark payments live-verified without credentials and controlled test transaction.
+
+
+## Subscription payment audit — active (2026-10-31)
+
+- Confirmed Zarinpal v4 online request/verify integration exists; when merchant credentials are absent, the service falls back to manual payment-reference review. Live provider verification remains separate.
+- Reviewed server-side amount freezing, Authority lookup, callback Status handling, provider verification, refId persistence, owner locking, concurrent callback idempotency, and user/company ownership checks.
+- Found a storage boundary bug: Toman prices are multiplied by 10 for Rial, but `paymentAmount` is a PostgreSQL INTEGER / Prisma Int. The old validation accepted any safe JS integer, so a high Toman plan could exceed 2,147,483,647 after the external flow was prepared and fail at DB write.
+- Added a strict signed 32-bit positive integer bound before contacting Zarinpal; added a regression test proving overflow is rejected before any provider request or paymentAmount update.
+- Branch `fix/zarinpal-payment-amount-boundary`; CI/migration verification pending. Do not claim live payment verification without credentials and a controlled staging transaction.
