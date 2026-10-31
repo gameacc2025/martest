@@ -188,3 +188,6 @@ Inspect current subscription payment request/verification flow, provider callbac
 - Found a storage boundary bug: Toman prices are multiplied by 10 for Rial, but `paymentAmount` is a PostgreSQL INTEGER / Prisma Int. The old validation accepted any safe JS integer, so a high Toman plan could exceed 2,147,483,647 after the external flow was prepared and fail at DB write.
 - Added a strict signed 32-bit positive integer bound before contacting Zarinpal; added a regression test proving overflow is rejected before any provider request or paymentAmount update.
 - Branch `fix/zarinpal-payment-amount-boundary`; CI/migration verification pending. Do not claim live payment verification without credentials and a controlled staging transaction.
+
+
+- CI found one test-fixture mismatch in the new owner-isolation test: the mocked `inquirySubscription.findFirst` ignored the requested companyId, unlike Prisma. Updated the mock to honor id/companyId/userId filters. No production code change in this correction; rerun CI on the latest head.
