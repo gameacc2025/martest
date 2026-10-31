@@ -313,3 +313,5 @@ PR #49 merged by squash into `main` at `d79b1908d899fc8569495e8925a00a3a0650080d
 - Remaining 16D review: product management list/detail stable projections and inquiry list pagination/redaction; add only where source projections are sufficiently stable.
 
 - Also documented `GET /inquiries` pagination and privacy behavior: buyerUserId is never emitted, confidential company identity may be removed, and sealed response counts may be omitted. Added regression assertion that buyerUserId is absent from the schema.
+
+- Added product catalogue response schemas: public list projection excludes createdByUserId, editsSinceApproval, deletedAt and statusHistory; management list/detail includes them, plus company/category/subcategory, price tiers, images, documents and latest 10 status history rows. `GET /products/:id` documents the public/management `oneOf` projection based on optional caller context. Added regression tests for this separation.
