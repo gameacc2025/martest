@@ -17,7 +17,7 @@
 // =============================================================
 
 const ctrl = require('./auth.controller');
-const { requirePermission } = require('../../middlewares/rbac');
+const { requirePermission, requireExactAccessType } = require('../../middlewares/rbac');
 const { requireTrustedOrigin } = require('../../middlewares/originGuard');
 const {
   loginBody,
@@ -174,7 +174,7 @@ async function authRoutes(fastify) {
   // ── Admin: reset another user's password ────────────────────
   fastify.patch('/users/:id/password', {
     onRequest: [fastify.authenticate],
-    preHandler: [requirePermission('users.reset_password')],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('users.reset_password')],
     schema: {
       summary: 'Admin resets another user password',
       tags: ['Auth'],
