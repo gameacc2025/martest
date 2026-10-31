@@ -159,3 +159,12 @@ Confirmed and fixed: STAFF-only admin password reset now enforces exact STAFF co
 - Verify paid SMS quota is consumed atomically and idempotently with the message/outbox write, phone resolution and recipient opt-in are correct, and failures do not send without quota.
 - Add/adjust regression tests for quota, dedupe, preference, missing phone/provider and transaction rollback.
 - Live Twilio delivery remains unverified without configured credentials and a controlled recipient.
+
+
+## SMS delivery review — active (2026-10-31)
+
+- Clarified architecture: the central notification event dispatcher intentionally does not queue generic event-driven SMS. A separate explicit `sendInquiryMessage(..., notifyBySms: true)` path queues `INQUIRY_MESSAGE_RECEIVED` SMS only when the recipient opted in, Twilio config exists, and the sender has SMS quota. The delivery worker sends the outbox row.
+- Found recipient-context weakness for company-owned inquiries: the code selected the first ACTIVE user with a matching companyId but did not require AccessProfile type COMPANY or active panel access. STAFF tied to the Main company or deactivated company accounts could be selected as the SMS preference owner.
+- Fixed recipient selection to require `status: ACTIVE` and `AccessProfile(type=COMPANY, companyId=recipientCompanyId, isActive=true)`; direct user recipients must also be ACTIVE. Added regression tests for company context, quota exhaustion, opt-out, missing phone and missing Twilio configuration.
+- SMS is charged to the sender's user/company subscription at queue time; quota is consumed once per outbox row in the same Prisma transaction as the message and delivery row. Provider retries do not consume quota again.
+- Live Twilio delivery remains NOT VERIFIED without deployment credentials and a controlled recipient. CI/migration checks pending.

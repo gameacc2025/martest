@@ -28,6 +28,9 @@ let nextFindMany = [];
 let nextFindUnique = null;
 let nextMessages = [];
 let smsUsageEvents = [];
+let smsRecipientUser = { id: 10, phone: '+31612345678' };
+let smsCompanyMember = { id: 31 };
+let smsPreferenceEnabled = true;
 const activeSmsSubscription = { id: 77, planId: 2, startsAt: new Date('2026-10-01T00:00:00Z'), endsAt: new Date('2026-11-01T00:00:00Z'), status: 'ACTIVE', plan: { id: 2, name: 'SMS', isActive: true, inquiriesPerPeriod: 10, responsesPerPeriod: 10, internalMessagesPerPeriod: 10, smsPerPeriod: 2 } };
 
 // Fixtures backing the transactional / relationship-heavy paths
@@ -69,7 +72,10 @@ const mockPrisma = {
     aggregate: async ({ where }) => ({ _sum: { quantity: smsUsageEvents.filter(e => e.subscriptionId === where.subscriptionId && e.usageType === where.usageType).reduce((sum, e) => sum + e.quantity, 0) } }),
     create: async ({ data }) => { smsUsageEvents.push(data); return { id: smsUsageEvents.length, ...data }; },
   },
-  user: { findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }) },
+  user: {
+    findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }),
+    findFirst: async (args) => { record('user.findFirst', args); return args.where?.accessProfile ? smsCompanyMember : smsRecipientUser; },
+  },
   company: { findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }) },
   inquiry: {
     count: async (args) => {
@@ -160,7 +166,7 @@ const mockPrisma = {
       return {};
     },
   },
-  notificationPreference: { findUnique: async () => ({ enabled: true }) },
+  notificationPreference: { findUnique: async () => ({ enabled: smsPreferenceEnabled }) },
   notificationDelivery: { create: async (args) => { record('notificationDelivery.create', args); return { id: 500, ...args.data }; } },
   inquiryMessage: {
     findMany: async (args) => { record('inquiryMessage.findMany', args); return nextMessages; },
@@ -256,6 +262,9 @@ function resetMocks() {
   nextFindUnique = null;
   nextMessages = [];
   smsUsageEvents = [];
+  smsRecipientUser = { id: 10, phone: '+31612345678' };
+  smsCompanyMember = { id: 31 };
+  smsPreferenceEnabled = true;
   fx.inquiryItem = null;
   fx.inquiryItemCount = 0;
   fx.ownedItemIds = [];
@@ -1796,6 +1805,112 @@ test('sendInquiryMessage: optional SMS consumes its own paid allowance and queue
     if (oldSid === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = oldSid;
     if (oldToken === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = oldToken;
     if (oldFrom === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = oldFrom;
+  }
+});
+
+test('sendInquiryMessage: exhausted SMS quota keeps the message but does not queue or consume another SMS', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  smsUsageEvents = [
+    { subscriptionId: 77, usageType: 'SMS', quantity: 1 },
+    { subscriptionId: 77, usageType: 'SMS', quantity: 1 },
+  ];
+  const old = [process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_FROM_NUMBER];
+  process.env.TWILIO_ACCOUNT_SID = 'ACtest';
+  process.env.TWILIO_AUTH_TOKEN = 'test-token';
+  process.env.TWILIO_FROM_NUMBER = '+15005550006';
+  try {
+    const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+    assert.equal(result.id, 101);
+    assert.equal(result.smsQueued, false);
+    assert.equal(result.smsSkippedReason, 'sms_quota_exceeded');
+    assert.equal(calls['inquiryMessage.create'].length, 1);
+    assert.equal(calls['notificationDelivery.create'], undefined);
+    assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 2);
+  } finally {
+    if (old[0] === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = old[0];
+    if (old[1] === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = old[1];
+    if (old[2] === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = old[2];
+  }
+});
+
+test('sendInquiryMessage: missing recipient phone skips SMS before quota is consumed', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  smsRecipientUser = { id: 10, phone: ' ' };
+  const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+  assert.equal(result.smsQueued, false);
+  assert.equal(result.smsSkippedReason, 'recipient_phone_missing');
+  assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 0);
+  assert.equal(calls['notificationDelivery.create'], undefined);
+});
+
+test('sendInquiryMessage: unconfigured Twilio skips SMS without consuming paid allowance', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const old = [process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_FROM_NUMBER];
+  delete process.env.TWILIO_ACCOUNT_SID;
+  delete process.env.TWILIO_AUTH_TOKEN;
+  delete process.env.TWILIO_FROM_NUMBER;
+  try {
+    const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+    assert.equal(result.smsQueued, false);
+    assert.equal(result.smsSkippedReason, 'sms_provider_not_configured');
+    assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 0);
+    assert.equal(calls['notificationDelivery.create'], undefined);
+  } finally {
+    if (old[0] === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = old[0];
+    if (old[1] === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = old[1];
+    if (old[2] === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = old[2];
+  }
+});
+
+test('sendInquiryMessage: recipient SMS opt-out prevents quota consumption and delivery creation', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  smsPreferenceEnabled = false;
+  const old = [process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_FROM_NUMBER];
+  process.env.TWILIO_ACCOUNT_SID = 'ACtest';
+  process.env.TWILIO_AUTH_TOKEN = 'test-token';
+  process.env.TWILIO_FROM_NUMBER = '+15005550006';
+  try {
+    const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] });
+    assert.equal(result.smsQueued, false);
+    assert.equal(result.smsSkippedReason, 'recipient_sms_opted_out');
+    assert.equal(smsUsageEvents.filter(e => e.usageType === 'SMS').length, 0);
+    assert.equal(calls['notificationDelivery.create'], undefined);
+  } finally {
+    if (old[0] === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = old[0];
+    if (old[1] === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = old[1];
+    if (old[2] === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = old[2];
+  }
+});
+
+test('sendInquiryMessage: company SMS preference belongs to an active COMPANY panel user, never STAFF or deactivated accounts', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Sample RFQ', companyId: 77, buyerUserId: null, status: 'OPEN' };
+  fx.response = { id: 90 };
+  const old = [process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN, process.env.TWILIO_FROM_NUMBER];
+  process.env.TWILIO_ACCOUNT_SID = 'ACtest';
+  process.env.TWILIO_AUTH_TOKEN = 'test-token';
+  process.env.TWILIO_FROM_NUMBER = '+15005550006';
+  try {
+    const result = await inquiryService.sendInquiryMessage(1, { message: 'Please call me', notifyBySms: true }, { id: 20, accessType: 'COMPANY', companyId: 20, permissions: ['inquiries.respond'] });
+    assert.equal(result.recipientCompanyId, 77);
+    assert.equal(result.smsQueued, true);
+    assert.deepEqual(calls['user.findFirst'][0].where, {
+      status: 'ACTIVE',
+      accessProfile: { companyId: 77, type: 'COMPANY', isActive: true },
+    });
+    assert.equal(calls['notificationDelivery.create'][0].data.userId, 31);
+  } finally {
+    if (old[0] === undefined) delete process.env.TWILIO_ACCOUNT_SID; else process.env.TWILIO_ACCOUNT_SID = old[0];
+    if (old[1] === undefined) delete process.env.TWILIO_AUTH_TOKEN; else process.env.TWILIO_AUTH_TOKEN = old[1];
+    if (old[2] === undefined) delete process.env.TWILIO_FROM_NUMBER; else process.env.TWILIO_FROM_NUMBER = old[2];
   }
 });
 

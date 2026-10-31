@@ -8,7 +8,9 @@
 // For EMAIL: picks up PENDING rows, sends via the email provider adapter,
 // updates status to SENT on success or FAILED on error.
 //
-// For SMS: implementation is reserved for future Twilio integration.
+// For SMS: processes rows queued by the explicit inquiry-message notifyBySms
+// flow, after sender quota and recipient opt-in checks. The central event
+// dispatcher intentionally does not emit general event-driven SMS rows.
 // =============================================================
 
 const prisma = require('../../config/db');

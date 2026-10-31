@@ -421,3 +421,11 @@ Step 11E is the remaining backend route inventory: auth, users, admin, settings,
 PR #42 merged into main at `c92aeff2866353826ec423534b4bc4178e7a57c1`. CI passed 1,368/1,368 tests and migration validation passed. The auth password-reset route/service enforce STAFF context and permission; public category/subcategory detail lookups require ACTIVE; STAFF-created COMPANY users return their created record without widening later user read access.
 
 Next work is the SMS delivery integration audit: reconcile dispatcher and inquiry-message queue paths, confirm paid quota/opt-in/dedupe/transaction guarantees, and keep live Twilio verification separate from unit tests.
+
+
+## Inquiry-message SMS contract — 2026-10-31
+
+- Generic `notification.dispatch.service` does not emit SMS rows for general notification events. Explicit inquiry-message SMS is queued only when `notifyBySms === true`, recipient preference for `INQUIRY_MESSAGE_RECEIVED/SMS` is enabled, Twilio config is valid, and the sender has paid SMS quota.
+- Sender quota owner is the authenticated sender's user or company subscription. The SMS usage event and NotificationDelivery outbox row are created in the same transaction as the inquiry message; quota is consumed at enqueue time, not again on retries.
+- Direct user recipients must be ACTIVE. Company SMS preference must be associated with an ACTIVE user whose AccessProfile is type COMPANY, belongs to the recipient company, and has active panel access. Do not select STAFF users merely because they share the Main-company ID.
+- The notification worker sends pending SMS through the Twilio adapter. Live provider delivery is not verified until tested with deployment credentials and a controlled recipient.
