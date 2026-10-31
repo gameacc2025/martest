@@ -22,6 +22,7 @@ let requestResponse;
 let verifyResponse;
 let activateOnOwnerLock = false;
 const calls = [];
+let providerRequests = 0;
 const mockPrisma = {
   inquiryPlan: { findFirst: async () => plan },
   inquirySubscription: {
@@ -87,6 +88,7 @@ const oldEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
 const oldFetch = global.fetch;
 test.beforeEach(() => {
   calls.length = 0;
+  providerRequests = 0;
   activateOnOwnerLock = false;
   plan = { id: 2, name: 'Basic', durationDays: 30, price: 1000, currency: 'IRR', isActive: true };
   subscription = null;
@@ -97,6 +99,7 @@ test.beforeEach(() => {
   process.env.ZARINPAL_CALLBACK_URL = 'http://localhost:3000/api/v1/inquiries/subscription/payment/callback';
   process.env.INQUIRY_SUBSCRIPTION_RESULT_URL = 'http://localhost:3001/inquiry-subscription';
   global.fetch = async (url, options) => {
+    providerRequests += 1;
     const body = JSON.parse(options.body);
     if (String(url).includes('/request.json')) return { ok: true, json: async () => requestResponse };
     if (String(url).includes('/verify.json')) return { ok: true, json: async () => verifyResponse };
@@ -125,6 +128,18 @@ test('startSubscriptionPayment creates Zarinpal checkout and freezes the payable
   assert.equal(result.subscription.paymentAuthority, 'A-test');
   assert.equal(subscription.paymentAmount, 1000);
   assert.equal(subscription.paymentProvider, 'ZARINPAL');
+});
+
+test('startSubscriptionPayment rejects Toman amounts that overflow the persisted Prisma Int before calling Zarinpal', async () => {
+  process.env.ZARINPAL_MERCHANT_ID = 'merchant-test';
+  plan = { ...plan, price: 214748365, currency: 'TOMAN' };
+
+  await assert.rejects(
+    () => startSubscriptionPayment({ ownerType: 'company', ownerId: 5, planId: 2 }),
+    (error) => error.code === 'INVALID_PAYMENT_AMOUNT' && error.statusCode === 400,
+  );
+  assert.equal(providerRequests, 0);
+  assert.equal(calls.some(([name]) => name === 'update'), false);
 });
 
 test('callback activates a subscription only after server-side verification succeeds', async () => {
