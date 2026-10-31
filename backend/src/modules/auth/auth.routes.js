@@ -10,7 +10,7 @@
 //   POST   /api/v1/auth/handoff/redeem          → redeem handoff code for a session (origin guard)
 //   GET    /api/v1/auth/me                      → current user profile + access (any role)
 //   PATCH  /api/v1/auth/users/:id/password      → admin reset another user's password
-//                                               (requires permission: users.update)
+//                                               (requires STAFF context + users.reset_password)
 //
 // NOTE: user creation/update/delete lives in the `users` module
 //       (POST /api/users, etc.) which enforces the users.create permission.
