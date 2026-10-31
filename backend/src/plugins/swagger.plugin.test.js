@@ -166,6 +166,19 @@ test('swagger plugin: transform sets empty security array when authRequired is f
   await app.close();
 });
 
+test('swagger plugin: undocumented protected routes default to bearer while allow-listed public routes do not', async () => {
+  const app = Fastify();
+  await app.register(swaggerPlugin);
+  app.get('/api/v1/addresses', { schema: { summary: 'List addresses', tags: ['Addresses'] } }, async () => []);
+  app.get('/api/v1/categories', { schema: { summary: 'Public categories', tags: ['Categories'] } }, async () => []);
+  await app.ready();
+
+  const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
+  assert.deepEqual(spec.paths['/addresses'].get.security, [{ bearerAuth: [] }]);
+  assert.deepEqual(spec.paths['/categories'].get.security, []);
+  await app.close();
+});
+
 test('swagger plugin: refresh uses cookieAuth and PKCE redeem is documented as non-bearer', async () => {
   const app = Fastify();
   await app.register(swaggerPlugin);
