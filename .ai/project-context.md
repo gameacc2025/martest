@@ -598,3 +598,12 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Inquiry list/detail/create/update/status and item endpoints document caller-shaped data; buyerUserId is omitted, confidential company identity can be hidden, sealed counts may be absent and anonymous sealed supplier identities are redacted.
 - Admin notification folder CRUD and announcement receipt contracts added. CI: backend 1,390/1,390; frontend/shared 18/18; builds and Prisma migration validation passed. Runtime validation not confirmed at merge.
 - Next: audit remaining generic response placeholders for users/RBAC/categories/settings/company stats/product auxiliary endpoints.
+
+
+## Company/category/product auxiliary OpenAPI contracts — step 16F (2026-10-31)
+
+- Company settings return inquiryLimit and ordered CompanyLimit records. Company statistics return six aggregate counts and five recent products/five recent inquiries. Company product lists include full product scalar data plus compact category/subcategory/company projections.
+- Category public/manage list includes selected subcategory fields; category detail includes full subcategories. Subcategory detail includes category and optional specification template with fields. Category product list returns paginated published/public product records with compact relations.
+- Specification-library endpoints expose only id/title/slug/type/defaultUnit/description; search is capped at 50 active rows.
+- Product price-tier/image/document and workflow routes now document actual result DTOs. Delete routes for categories, subcategories, tiers, images and documents return 204 with no body.
+- Step 16F CI pending; route coverage remains 149/149.
