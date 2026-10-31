@@ -443,3 +443,10 @@ Next priority is subscription payment provider/callback/idempotency review.
 - `InquirySubscription.paymentAmount` is PostgreSQL INTEGER / Prisma Int. Zarinpal receives Rial, so Toman plan prices are multiplied by 10.
 - Validate the converted Rial amount as a positive integer no greater than 2,147,483,647 before creating a provider request. Reject overflow before any external payment request to avoid orphaned external authorities or failed persistence.
 - Payment activation must continue to rely on server-side Zarinpal verification, never callback query parameters alone. Live credentials/staging transaction remain unverified.
+
+
+## Zarinpal payment amount validation merged — 2026-10-31
+
+PR #44 merged at `142df69c90dd6f725fc4913a8cd2f1572883e1dc`; CI passed 1,375/1,375 backend tests and migration validation passed. Rial conversion now rejects values outside positive PostgreSQL INTEGER / Prisma Int range before contacting Zarinpal. Server-side callback verification, stored amount, Authority and owner scope remain authoritative. Live provider verification is not complete.
+
+Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/OpenAPI schemas, then update endpoint/auth/permission/schema documentation from source truth.
