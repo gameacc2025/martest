@@ -348,3 +348,18 @@ Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/not
 - فهرست اعلان‌ها مستقیم `{ data, meta }` برمی‌گرداند؛ شمارنده خوانده‌نشده مستقیم `{ count }` است؛ عملیات گروهی `{ success, count }` و تغییر پوشه `{ success, action, notificationId, folderId }` برمی‌گرداند. پوشه‌های کاربر بر اساس دامنه توکن فیلتر می‌شوند و شامل `isSystem` و `sortOrder` هستند.
 - تغییر وضعیت، بازیابی و تغییر لوگوی شرکت، رکورد شرکت را در `data` برمی‌گردانند. حذف شرکت و حذف نرم محصول هر دو `204` بدون بدنه‌اند. عملیات گردش وضعیت محصول `200` و محصول مدیریت‌شده با تاریخچه وضعیت را برمی‌گردانند.
 - تست‌های قرارداد پاسخ، نبود refresh token/hash رمز در خروجی، envelopeهای مستقیم اعلان‌ها، و کدهای `204` بدون بدنه را پوشش می‌دهند.
+
+
+## قرارداد خطاها و وضعیت HTTP — یافته‌های ممیزی مرحله ۱۶I (2026-10-31)
+
+سورس فعلی چند قالب خطای واقعی دارد؛ کلاینت نباید فرض کند همه پاسخ‌های خطا یک شکل‌اند:
+
+1. **خطای مرکزی Fastify**: `{ error: { code, message, details? } }` برای خطاهای validation، خطاهای Prisma و خطاهای برنامه با status کمتر از 500. پاسخ 500 عمومی نیز همین envelope را با `INTERNAL_ERROR` می‌دهد. در development ممکن است `debug` و `stack` اضافه شوند؛ این دو در production حذف می‌شوند.
+2. **خطای مستقیم احراز هویت و RBAC**: `{ error: true, code, message }` برای بسیاری از خطاهای access token، refresh cookie و permission/access-type guardها. برخی مسیرهای refresh برای کاربر غیرفعال به‌جای آن از envelope مرکزی تو‌در‌تو استفاده می‌کنند.
+3. **Rate limit**: `@fastify/rate-limit` بدون `errorResponseBuilder` سفارشی در app ثبت شده است؛ پاسخ پیش‌فرض آن قالب Fastify یعنی `{ statusCode, error, message }` است و نباید به‌عنوان envelope مرکزی مستند شود.
+
+نگاشت خطاهای Prisma در handler مرکزی: `P2002 → 409 DUPLICATE_ENTRY`، `P2025 → 404 NOT_FOUND`، `P2003 → 400 FOREIGN_KEY_VIOLATION` و `P2014 → 400 RELATION_VIOLATION`. خطاهای validation نیز `400 VALIDATION_ERROR` و جزئیات فیلدها را برمی‌گردانند.
+
+**نکته پرداخت:** سرویس پرداخت ممکن است خطاهای داخلی با statusCode برابر 502 یا 503 ایجاد کند، اما handler مرکزی فعلی همه خطاهای 5xx را به `500 INTERNAL_ERROR` عمومی تبدیل می‌کند. بنابراین کلاینت در وضعیت فعلی نباید انتظار status 502/503 یا کد داخلی provider را داشته باشد. این رفتار عمداً جزئیات داخلی را پنهان می‌کند؛ اصلاح امن و تست‌شده آن در مرحله بعد بررسی می‌شود.
+
+**مغایرت مستندات OpenAPI:** component فعلی `ErrorResponse` فقط envelope مرکزی تو‌در‌تو را مدل می‌کند، درحالی‌که guardهای auth/RBAC و rate limit قالب‌های مستقیم دارند. توضیح 429 در Swagger نیز ادعا می‌کند handler مرکزی آن را wrap می‌کند؛ این ادعا با پیکربندی فعلی rate-limit سازگار نیست. این مغایرت در مرحله ۱۶J با schema اتحادی و تست قرارداد اصلاح خواهد شد.

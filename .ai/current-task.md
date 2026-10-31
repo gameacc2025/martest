@@ -610,3 +610,20 @@ PR #61 squash-merged into `main` at `fc6caac4aa742c0f2c12e7778faffc6eafcf1389`. 
 - Audit common error handler envelopes and route-specific status codes for authentication, authorization/tenant ownership, validation, missing resources, quota/subscription restrictions and payment callbacks.
 - Align OpenAPI response schemas for 400/401/403/404/409/422/429/500 as actually emitted; avoid claiming one uniform error shape if handlers differ.
 - Verify 204 no-body and 201 creation responses across the route inventory; add focused tests, API/.ai docs, CI/migration validation and merge.
+
+
+## OpenAPI error/status audit — step 16I findings (2026-10-31)
+
+- Inspected `error-handler.plugin.js`, `auth.plugin.js`, `rbac.js`, `originGuard.js`, `app.js`, `swagger.plugin.js`, `auth.schemas.js`, inquiry payment/subscription services and existing error-handler/auth/Swagger tests.
+- Actual error shapes are not uniform: central handler uses `{error:{code,message,details?}}`; auth and RBAC guards often send `{error:true,code,message}` directly (one refresh branch sends nested error); rate limiting uses the default Fastify response `{statusCode,error,message}` because no custom `errorResponseBuilder` is configured.
+- Central handler maps Prisma P2002→409, P2025→404, P2003/P2014→400; validation→400. Generic production 500 is `{error:{code:'INTERNAL_ERROR',message}}`; debug/stack are development-only.
+- Payment service emits internal 502/503 `statusCode` values, but central handler deliberately normalizes all thrown 5xx errors to generic 500. Public clients currently receive 500/INTERNAL_ERROR, not the provider code/status.
+- Identified an OpenAPI mismatch: `ErrorResponse` component models only the nested envelope, and Swagger's 429 description incorrectly claims central wrapping. No code/schema change has been merged in this audit slice; follow-up step 16J will safely model the union and decide whether sanitized payment gateway statuses should be preserved, with tests proving no internal leakage.
+- Route inventory and 204/201 checks remain covered by the existing 149-route OpenAPI registry tests.
+
+## Next active work — step 16J common error schema/status correction
+
+- Update shared OpenAPI ErrorResponse to a oneOf union for central, direct auth/RBAC and Fastify rate-limit envelopes; correct 429 description.
+- Add exact 502/503 only if the central handler safely preserves an allow-list of sanitized payment-provider errors; all other 5xx must remain generic 500.
+- Extend Swagger/error-handler tests for every envelope and ensure production responses never leak provider/internal debug data.
+- Update API/.ai docs, run CI/migration validation, merge.
