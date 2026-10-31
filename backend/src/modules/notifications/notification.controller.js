@@ -6,8 +6,16 @@ const notificationService = require('./notification.service');
 
 function resolveNotificationAppScope(request) {
   const accessType = String(request.user?.accessType || '').toUpperCase();
+  const roles = Array.isArray(request.user?.roles) ? request.user.roles : [];
+  // Match the central RBAC default Website context for AccessProfile-less
+  // customer registrations. This fallback must never grant a panel scope
+  // or apply to SUPER_ADMIN.
+  const isDefaultCustomer = !accessType
+    && roles.includes('CUSTOMER_USER')
+    && !roles.includes('SUPER_ADMIN');
+  const effectiveAccessType = isDefaultCustomer ? 'CUSTOMER' : accessType;
   const scopeByAccessType = { STAFF: 'ADMIN', COMPANY: 'COMPANY', CUSTOMER: 'WEBSITE' };
-  const scope = scopeByAccessType[accessType];
+  const scope = scopeByAccessType[effectiveAccessType];
   if (!scope) {
     throw { statusCode: 403, code: 'NOTIFICATION_APP_CONTEXT_REQUIRED', message: 'دامنه دسترسی برای اعلان‌ها مشخص نیست.' };
   }

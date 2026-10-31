@@ -92,3 +92,18 @@ Review route context/permission boundaries, buyer/supplier ownership, sealed/ano
 - Correction commit: `189516deb109ca045f577459d385b5492c1d16e7`.
 - Fresh CI and migration verification for this exact head are pending. Previous migration validation passed, but it must be rerun for the corrected PR head. Runtime workflow infrastructure/health/migrations passed; browser smoke failed and remains outside the next debugging task.
 - Do not merge PR #40 until fresh backend CI and migration validation pass.
+
+
+## Step 11C completion — Inquiry module (2026-10-31)
+
+PR #40 was merged into `main` by squash at `9bac9916de148741fb379ffcdd5aaf44157f4db2`. Corrected-head CI run [41216629069](https://github.com/gameacc2025/martest/actions/runs/41216629069) passed; database migration validation [41216628936](https://github.com/gameacc2025/martest/actions/runs/41216628936) passed. Runtime validation [41216628926](https://github.com/gameacc2025/martest/actions/runs/41216628926) remained queued at merge time and is tracked separately. The PR was moved from draft to ready before merge. All previous "do not merge / pending" notes above refer to pre-merge state and are superseded by this completion record.
+
+## Step 11D — Addresses and notifications audit (active)
+
+- Reviewed address routes, controller, service and ownership tests. Every address read/update/delete query is scoped by authenticated `userId`; foreign address IDs return the same not-found response. Default-address mutations are also tenant-scoped. No cross-user IDOR was confirmed.
+- Reviewed notification routes/controller/service and dispatcher. Notification CRUD is scoped by authenticated user ID; folder scope is derived from the verified token rather than client-supplied `app`; folder membership changes verify notification ownership, destination/source scope and source membership.
+- Confirmed one app-context integration defect: notification folder listing/filtering recognized only explicit `accessType === 'CUSTOMER'`, while central RBAC intentionally permits AccessProfile-less `CUSTOMER_USER` accounts as Website customers. Such users were denied folder operations despite being authenticated Website customers.
+- Fixed notification scope resolution to mirror central RBAC exactly: only `accessType === null` + `CUSTOMER_USER` gets WEBSITE; SUPER_ADMIN is excluded. Added controller regression tests for fallback, strict SUPER_ADMIN denial, and Website folder filtering.
+- Added address route tests proving CUSTOMER_USER Website access works, COMPANY and STAFF/SUPER_ADMIN cannot cross into customer address routes, and wildcard permission does not override app-context boundaries.
+- Branch: `audit/notification-address-tenant-step-11d`. CI/migration verification is pending. Do not merge until required CI and migration checks pass.
+- Remaining Step 11 scope includes any route families outside companies/products/inquiries/addresses/notifications; do not claim exhaustive sign-off until inventory is complete.

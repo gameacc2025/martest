@@ -151,6 +151,35 @@ test('listFolders: fails closed when the token has no recognized app context', a
   assert.equal(calls.getUserFolders, undefined);
 });
 
+test('listFolders: AccessProfile-less CUSTOMER_USER receives Website folders only', async () => {
+  fx.folders = [{ id: 5, key: 'INBOX', scope: 'ALL' }];
+  await controller.listFolders(makeRequest({
+    query: { app: 'ADMIN' },
+    user: { id: 8, accessType: null, roles: ['CUSTOMER_USER'] },
+  }), makeReply());
+  assert.deepEqual(calls.getUserFolders, ['WEBSITE']);
+});
+
+test('listFolders: CUSTOMER_USER fallback never applies to SUPER_ADMIN', async () => {
+  await assert.rejects(
+    () => controller.listFolders(makeRequest({
+      user: { id: 8, accessType: null, roles: ['CUSTOMER_USER', 'SUPER_ADMIN'] },
+    }), makeReply()),
+    (error) => error.code === 'NOTIFICATION_APP_CONTEXT_REQUIRED' && error.statusCode === 403,
+  );
+  assert.equal(calls.getUserFolders, undefined);
+});
+
+test('list: AccessProfile-less CUSTOMER_USER can filter only Website-scoped folders', async () => {
+  fx.folders = [{ id: 6, key: 'SAVED', scope: 'WEBSITE' }];
+  await controller.list(makeRequest({
+    query: { folderId: '6' },
+    user: { id: 8, accessType: null, roles: ['CUSTOMER_USER'] },
+  }), makeReply());
+  assert.deepEqual(calls.getUserFolders, ['WEBSITE']);
+  assert.deepEqual(calls.getNotifications, [8, { page: 1, limit: 20, unreadOnly: false, folderId: 6 }]);
+});
+
 test('list: rejects a folder ID outside the authenticated app scope before querying notifications', async () => {
   fx.folders = [{ id: 21, key: 'INBOX', scope: 'COMPANY' }];
   await assert.rejects(
