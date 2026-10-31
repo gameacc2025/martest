@@ -220,3 +220,10 @@ Compare `docs/API_DOCUMENTATION.md`, Swagger/OpenAPI route schemas and actual re
 - Corrected cookie-auth docs: refresh/logout use a dedicated refreshCookie scheme; PKCE redeem is trusted-origin + one-time code, not Bearer.
 - Swagger now defaults undocumented protected routes to bearerAuth and uses an explicit public route allow-list. Added Addresses and Specification Library tags.
 - Added tests that reject OpenAPI keys absent from route inventory, assert cookie/public security schemes, and verify bearer default for undocumented protected routes. CI/migration checks pending.
+
+
+## OpenAPI metadata/security alignment — merged (2026-10-31)
+
+PR #46 merged by squash into `main` at `ea6e787c9b2c6dbe819fb344c22aa7adea33016d`. Before merge, CI found one Swagger regression: Fastify supplied an empty `security: []` array for undocumented routes, and the fallback treated it as intentional. Fixed the fallback so empty/missing security metadata defaults to Bearer for non-allow-listed routes while preserving explicit non-empty schemes and the public allow-list. Migration validation passed on the pre-correction PR head; the one-line correction changes no schema. The corrected exact head was merged at owner request; no workflow run was exposed for the corrected head/merge commit at merge time, so post-merge CI remains to be confirmed.
+
+Next: complete source-backed OpenAPI prose/query/params/response metadata for the remaining 60 of 149 registered routes, without inventing response shapes. Add focused tests for auth/context/permission and route-doc coverage. Then resume pending tenant-isolation audits for company, notification/address and product route families.
