@@ -1263,3 +1263,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Step 11D notification review found AccessProfile-less CUSTOMER_USER accounts could not access notification folders because controller scope resolution did not mirror central RBAC's default Website fallback. Fixed with strict CUSTOMER_USER-only fallback and explicit SUPER_ADMIN exclusion. Added controller tests for folders and folder-filtered listing.
 - Current branch: `audit/notification-address-tenant-step-11d`; awaiting CI/migration checks before PR merge.
 - Full security sign-off is not claimed; remaining route inventory and SMS event dispatch integration are still open.
+
+
+## 2026-10-31 — STEP-11D-MERGE
+
+- PR #41 merged by squash at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53`.
+- CI [41216966030](https://github.com/gameacc2025/martest/actions/runs/41216966030) and migration validation [41216965916](https://github.com/gameacc2025/martest/actions/runs/41216965916) passed. Runtime [41216965989](https://github.com/gameacc2025/martest/actions/runs/41216965989) was still running at merge time.
+- Address ownership queries remain scoped to authenticated userId; no cross-user IDOR confirmed. Address route tests cover CUSTOMER_USER default Website context and explicit denial of COMPANY/STAFF/SUPER_ADMIN wildcard context.
+- Fixed notification folder app-scope resolution for AccessProfile-less CUSTOMER_USER while preserving strict ADMIN/COMPANY boundaries; added folder listing/filtering and SUPER_ADMIN regression tests.
+- Next: Step 11E audit of auth/users/admin/settings/categories/roles/permissions/specification-library.
