@@ -399,3 +399,9 @@ Step 11E is the remaining backend route inventory: auth, users, admin, settings,
 - `PATCH /api/v1/auth/users/:id/password` is an administrative operation and must require exact `AccessProfile.type === STAFF` in addition to `users.reset_password`.
 - A COMPANY-context user must never gain the admin password-reset capability from a misassigned permission or SUPER_ADMIN/wildcard role. The service must independently verify caller context and permission; route-only enforcement is insufficient.
 - Auth service now receives the verified caller for `changeUserPassword` and rejects non-STAFF or unauthorized callers before querying the target account.
+
+
+## Public taxonomy visibility — 2026-10-31
+
+- Public category and subcategory detail endpoints must return active taxonomy only, matching the public category list. An inactive parent category must not expose its child list.
+- Category service supports explicit `activeOnly` lookup options; public controller handlers pass `activeOnly: true`. Staff management list remains able to inspect inactive categories.
