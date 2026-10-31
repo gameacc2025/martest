@@ -618,3 +618,14 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Product price-tier/image/document/workflow responses are documented; deletes return 204 without body.
 - CI: backend 1,391/1,391; frontend/shared 18/18; frontend builds and Prisma migration validation passed. Runtime validation was not confirmed at merge.
 - Next: user/RBAC/settings/admin response contracts.
+
+
+## User/RBAC/settings/admin OpenAPI response coverage — step 16G (2026-10-31)
+
+- User list returns role/permission name arrays; detailed user CRUD/access responses return full safe Role/Permission scalar records. USER_SELECT omits passwordHash and refresh-token relations.
+- Role list may be unpaginated or paginated; assignable roles are caller-scope filtered and expose id/name/label/scope. Role response includes compact permission joins and `_count.users`.
+- Permission list may be plain, paginated or grouped; permission DTO follows PERMISSION_SELECT.
+- Settings profile includes identity/profile/access profile and compact role relation. Password change returns message, avatar upload returns avatarUrl, avatar delete returns message.
+- Admin stats includes eight counts, five recent users and twenty pending products with compact related company/category/creator projections. System setting response only exposes productReviewEditThreshold; inquiry monetization setting only exposes subscriptionEnforcement.
+- Admin inquiry plan CRUD follows full plan scalar model. Manual subscription actions include full plan and compact company/user projections.
+- Step 16G CI pending.
