@@ -370,6 +370,59 @@ test('admin inquiry subscription, delivery monitoring and inquiry dashboard resp
   assert.equal(stats.recentInquiries.items.properties.buyerUserId, undefined);
 });
 
+test('core product, company, inquiry and notification resource responses match service projections', () => {
+  const managedProducts = docs['GET /api/v1/products/my-products'].responses[200].properties;
+  assert.ok(managedProducts.data.items.properties.prices.items.properties.price);
+  assert.ok(managedProducts.data.items.properties.images.items.properties.thumbnailUrl);
+  assert.ok(managedProducts.data.items.properties.documents.items.properties.type);
+  assert.equal(managedProducts.data.items.properties.statusHistory.maxItems, 10);
+  assert.ok(managedProducts.meta.properties.totalPages);
+
+  const managedProduct = docs['GET /api/v1/products/:id/manage'].responses[200].properties.data.properties;
+  assert.ok(managedProduct.editsSinceApproval);
+  assert.ok(managedProduct.createdByUserId);
+  assert.ok(managedProduct.statusHistory);
+  const createdProduct = docs['POST /api/v1/products'].responses[201].properties.data.properties;
+  assert.ok(createdProduct.prices);
+  assert.ok(createdProduct.documents);
+  const updatedProduct = docs['PATCH /api/v1/products/:id'].responses[200].properties.data.properties;
+  assert.ok(updatedProduct.company);
+
+  const companies = docs['GET /api/v1/companies'].responses[200].properties;
+  assert.ok(companies.data.items.properties.inquiryLimit.properties.maxOpenInquiries);
+  assert.ok(companies.data.items.properties.limits.items.properties.key);
+  assert.ok(companies.data.items.properties._count.properties.accessProfiles);
+  const company = docs['GET /api/v1/companies/:id'].responses[200].properties.data.properties;
+  assert.equal(company.users.maxItems, 10);
+  assert.ok(company.users.items.properties.firstName);
+  assert.ok(company.inquiryLimit);
+  assert.ok(docs['POST /api/v1/companies'].responses[201].properties.data.properties.limits);
+
+  const inquiryList = docs['GET /api/v1/inquiries'].responses[200].properties;
+  assert.ok(inquiryList.data.items.properties.visibilityMode);
+  assert.ok(inquiryList.data.items.properties._count.properties.items);
+  assert.equal(inquiryList.data.items.properties.buyerUserId, undefined);
+  const inquiryDetail = docs['GET /api/v1/inquiries/:id'].responses[200].properties.data.properties;
+  assert.ok(inquiryDetail.items.items.properties.product);
+  assert.ok(inquiryDetail.responsesHidden);
+  assert.ok(inquiryDetail.statusHistory.items.properties.changedBy);
+  assert.equal(inquiryDetail.buyerUserId, undefined);
+  assert.ok(docs['POST /api/v1/inquiries'].responses[201].properties.data.properties.responses);
+  assert.ok(docs['PATCH /api/v1/inquiries/:id/status'].responses[200].properties.data.properties.responses);
+  const inquiryItems = docs['GET /api/v1/inquiries/:id/items'].responses[200].properties.data;
+  assert.equal(inquiryItems.type, 'array');
+  assert.ok(inquiryItems.items.properties.product.properties.company);
+
+  const folders = docs['GET /api/v1/admin/notifications/folders'].responses[200].properties.data;
+  assert.ok(folders.items.properties.isSystem);
+  assert.ok(docs['POST /api/v1/admin/notifications/folders'].responses[201].properties.data.properties.key);
+  assert.ok(docs['PATCH /api/v1/admin/notifications/folders/:id'].responses[200].properties.data.properties.isActive);
+  const announcement = docs['POST /api/v1/admin/notifications/send'].responses[202].properties.data.properties;
+  assert.ok(announcement.recipients);
+  assert.ok(announcement.emailQueued);
+  assert.ok(announcement.smsNotImplemented);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually
