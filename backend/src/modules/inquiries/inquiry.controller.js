@@ -2,6 +2,7 @@ const inquiryService = require('./inquiry.service');
 const { getQuotaSummary, listActivePlans, getMySubscriptions } = require('./inquiry-subscription.service');
 const { startSubscriptionPayment, handleSubscriptionPaymentCallback, retryPendingSubscriptionVerification } = require('./inquiry-payment.service');
 const { success } = require('../../utils/success');
+const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
 
 async function list(request, reply) {
   // listInquiries returns { data, meta } from buildPaginatedResponse — already correct
@@ -26,12 +27,28 @@ async function update(request, reply) {
 
 
 
+function isCustomerContext(caller) {
+  if (!caller) return false;
+  if (caller.accessType === 'CUSTOMER') return true;
+  const roles = Array.isArray(caller.roles) ? caller.roles : [];
+  return caller.accessType == null
+    && roles.includes('CUSTOMER_USER')
+    && !roles.includes(SUPER_ADMIN_ROLE);
+}
+
 async function quota(request, reply) {
   const caller = request.user || {};
-  const ownerType = caller.accessType === 'CUSTOMER' ? 'user' : 'company';
+  const ownerType = isCustomerContext(caller)
+    ? 'user'
+    : caller.accessType === 'COMPANY'
+      ? 'company'
+      : null;
+  if (!ownerType) {
+    throw { statusCode: 403, code: 'SUBSCRIPTION_NOT_AVAILABLE_FOR_ROLE', message: 'سهمیه استعلام برای این نوع حساب فعال نیست.' };
+  }
   const ownerId = ownerType === 'user' ? caller.id : caller.companyId;
   if (!ownerId || !Number.isInteger(Number(ownerId)) || Number(ownerId) < 1) {
-    return reply.send(success({ enforced: false, subscription: null, quotas: null }));
+    throw { statusCode: 403, code: ownerType === 'user' ? 'USER_CONTEXT_REQUIRED' : 'COMPANY_CONTEXT_REQUIRED', message: 'زمینه مالک اشتراک معتبر نیست.' };
   }
   const data = await getQuotaSummary(ownerType, Number(ownerId));
   return reply.send(success(data));
@@ -43,7 +60,7 @@ function subscriptionOwner(caller) {
     if (!Number.isInteger(companyId) || companyId < 1) throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'حساب شرکت معتبر نیست.' };
     return { ownerType: 'company', ownerId: companyId };
   }
-  if (caller?.accessType === 'CUSTOMER') {
+  if (isCustomerContext(caller)) {
     const userId = Number(caller.id);
     if (!Number.isInteger(userId) || userId < 1) throw { statusCode: 403, code: 'USER_CONTEXT_REQUIRED', message: 'حساب کاربری معتبر نیست.' };
     return { ownerType: 'user', ownerId: userId };

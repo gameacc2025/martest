@@ -507,3 +507,35 @@ Added route integration coverage proving COMPANY and CUSTOMER contexts with a st
 PR #39 merged at `de25c403506208bdfc01c1516d56fa929e85a8ad`. Feature CI [41098778272], feature migration [41098778245], post-merge CI [41098969268], and post-merge migration [41098969119] passed. No confirmed cross-tenant product bypass was found. Added regression coverage proving COMPANY and CUSTOMER contexts with wildcard permissions cannot invoke STAFF-only moderation actions. Runtime [41098968989] is tracked separately.
 
 Next audit slice: inquiry routes and service — buyer/supplier ownership, app context, subscription/payment ownership, sealed response visibility, messages, and nested response attachments.
+
+
+## Inquiry API audit — confirmed app-context issues (2026-10-30, fix in progress)
+
+Two source-backed issues were found:
+
+1. **AccessProfile-less CUSTOMER_USER mismatch.** Auth registration creates CUSTOMER_USER without an AccessProfile, and access tokens carry `accessType: null`. The central `requireAccessType('CUSTOMER')` intentionally recognizes CUSTOMER_USER as Website context, but inquiry service logic checked only `accessType === 'CUSTOMER'`. This caused customer listing/create/message/statistics paths to diverge from the actual token shape.
+2. **STAFF companyId confused with buyer ownership.** `isInquiryBuyer` treated any caller with a matching `companyId` as the company buyer, regardless of AccessProfile. STAFF with a stray companyId could therefore pass service-level buyer ownership checks when an endpoint's permission preHandler admitted `inquiries.create`.
+
+Fix and regression tests are in progress on `audit/inquiry-app-context-step-11c`. The change introduces a CUSTOMER context helper matching the central RBAC fallback, scopes company ownership to COMPANY context, prevents STAFF's stray companyId from being implicitly used for inquiry creation, and requires explicit COMPANY context for supplier response operations. No full inquiry-security sign-off is claimed until all related tests pass and remaining subscription/payment/sealed-visibility/message/attachment checks finish.
+
+
+### Inquiry audit refinement — CUSTOMER supplier-visibility boundary
+
+A further service-level edge case was confirmed in `assertCanReadResponses`: a CUSTOMER_USER account without an AccessProfile could carry a stray companyId and be treated as a supplier when it was not the buyer. The service now denies that path; only explicit COMPANY context can use companyId for supplier response visibility. A regression test proves that a customer with a stray companyId cannot list supplier responses for an unrelated buyer inquiry.
+
+The central RBAC header comment was also corrected to say SUPER_ADMIN wildcard bypasses permission checks only, never AccessProfile context.
+
+
+### Inquiry received-scope finding — 2026-10-30
+
+A source review and CI regression test confirmed that the received inquiry list scope only checked whether caller.companyId existed. A STAFF caller carrying a stale/misassigned companyId could therefore enter the supplier-side list. The service now requires explicit COMPANY app context and a valid companyId before building the product-ownership query. This is a confirmed security boundary correction; PR #40 remains unmerged pending fresh CI/backend test and migration validation.
+
+The initial CI attempt also identified two test-harness issues (the unrelated-company fixture omitted COMPANY context, and stats groupBy mocks did not record query arguments); both test issues were corrected without weakening the security assertions.
+
+
+### Inquiry subscription and statistics context findings — 2026-10-30
+
+- `inquiry.controller.js` previously resolved customer subscription/quota ownership only from explicit `accessType === 'CUSTOMER'`, despite central RBAC admitting the AccessProfile-less `CUSTOMER_USER` fallback. This prevented customers from reading their own subscription/quota or purchasing/verifying user-owned subscriptions. Controller now mirrors the exact default Website context and scopes by authenticated user ID.
+- Quota route now admits only COMPANY/CUSTOMER contexts; STAFF cannot obtain a company's quota through a stray companyId.
+- `getInquiryStats` previously derived company scope from any caller.companyId. It now derives tenant identity only from COMPANY context; authorized STAFF with inquiry-read permission receives platform aggregates, consistent with staff inquiry-list behavior, and unauthorized STAFF is rejected.
+- Regression tests cover the customer subscription lifecycle argument wiring, quota context, STAFF quota isolation, and STAFF stats permission/platform scope. PR #40 remains unmerged pending CI/migration validation.

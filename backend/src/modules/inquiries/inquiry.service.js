@@ -128,6 +128,19 @@ function isSuperAdmin(caller) {
     (caller?.roles?.includes(SUPER_ADMIN_ROLE) || caller?.permissions?.includes('*'));
 }
 
+function isCustomerContext(caller) {
+  if (!caller || isSuperAdmin(caller)) return false;
+  if (caller.accessType === 'CUSTOMER') return true;
+
+  // Customer registrations intentionally have no AccessProfile. Match the
+  // central requireAccessType('CUSTOMER') fallback exactly: only CUSTOMER_USER
+  // may establish the default Website context when accessType is null.
+  const roles = Array.isArray(caller.roles) ? caller.roles : [];
+  return caller.accessType == null
+    && roles.includes('CUSTOMER_USER')
+    && !roles.includes(SUPER_ADMIN_ROLE);
+}
+
 function hasAnyPermission(caller, ...permissions) {
   return isSuperAdmin(caller) || permissions.some((permission) => caller?.permissions?.includes(permission));
 }
@@ -139,35 +152,50 @@ function isStaffWithPermission(caller, ...permissions) {
 function isInquiryBuyer(inquiry, caller) {
   if (!inquiry || !caller) return false;
   if (isSuperAdmin(caller)) return true;
-  if (inquiry.buyerUserId && Number(inquiry.buyerUserId) === Number(caller.id)) return true;
-  return Boolean(inquiry.companyId) && Number(inquiry.companyId) === Number(caller.companyId);
+
+  if (isCustomerContext(caller)) {
+    return Boolean(inquiry.buyerUserId)
+      && Number(inquiry.buyerUserId) === Number(caller.id);
+  }
+
+  // Company ownership is meaningful only in COMPANY app context. A STAFF
+  // token carrying a stale/misassigned companyId must never become the buyer.
+  if (caller.accessType === 'COMPANY') {
+    return Boolean(inquiry.companyId)
+      && Number(inquiry.companyId) === Number(caller.companyId);
+  }
+
+  return false;
 }
 
 function resolveCompanyId(data, caller) {
-  if (caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller)) return null;
+  if (isCustomerContext(caller)) return null;
   if (isSuperAdmin(caller) && data?.companyId) return Number(data.companyId);
-  if (caller?.companyId) return Number(caller.companyId);
-  if (data?.companyId && caller?.accessType === 'STAFF' && hasAnyPermission(caller, 'leads.create', 'inquiries.create')) {
+
+  if (caller?.accessType === 'COMPANY') {
+    return caller.companyId ? Number(caller.companyId) : null;
+  }
+
+  // STAFF may create on behalf of an explicitly selected company only when
+  // the staff permission is present. A stray STAFF companyId is never used.
+  if (caller?.accessType === 'STAFF' && data?.companyId
+    && hasAnyPermission(caller, 'leads.create', 'inquiries.create')) {
     return Number(data.companyId);
   }
+
   return null;
 }
 
 function resolveSupplierCompanyId(data, caller) {
-  // Supplier responses belong to a real COMPANY context. STAFF privileges
-  // must never become a way to impersonate a supplier via body.companyId.
+  // Supplier responses require an explicit COMPANY application context.
+  // STAFF/CUSTOMER/legacy context must never impersonate a supplier via body.companyId.
   if (caller?.accessType === 'STAFF') {
     throw { statusCode: 403, code: 'STAFF_CANNOT_MANAGE_SUPPLIER_RESPONSE', message: 'STAFF users supervise inquiries but cannot act as suppliers.' };
   }
-  if (caller?.accessType && caller.accessType !== 'COMPANY') {
+  if (caller?.accessType !== 'COMPANY') {
     throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'Supplier responses require a COMPANY access context.' };
   }
-  if (caller?.accessType === 'COMPANY') {
-    const companyId = Number(caller.companyId);
-    ensureCompanyId(companyId);
-    return companyId;
-  }
-  const companyId = resolveCompanyId(data, caller);
+  const companyId = Number(caller.companyId);
   ensureCompanyId(companyId);
   return companyId;
 }
@@ -369,11 +397,18 @@ async function removeStoredAttachment(url) {
 function assertCanReadResponses(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
   if (isInquiryBuyer(inquiry, caller) || isStaffWithPermission(caller, 'leads.read', 'inquiries.read')) return;
-  if (!caller?.companyId && caller?.accessType !== 'CUSTOMER') {
+
+  // A CUSTOMER (including the AccessProfile-less CUSTOMER_USER fallback) can
+  // read responses only as the buyer. A stray companyId must not make that
+  // account look like a supplier that owns one of the requested products.
+  if (isCustomerContext(caller)) {
+    throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
+  }
+  if (caller?.accessType !== 'COMPANY' || !caller.companyId) {
     throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'شناسه شرکت الزامی است.' };
   }
 
-  const callerCompanyId = Number(caller?.companyId);
+  const callerCompanyId = Number(caller.companyId);
   const ownsRequestedProduct = Number.isInteger(callerCompanyId) && callerCompanyId > 0
     && (inquiry.items || []).some((item) => Number(item.product?.companyId) === callerCompanyId);
   const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
@@ -397,7 +432,7 @@ function shapeInquiryForCaller(inquiry, caller) {
 
   const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
   const isBuyer = isInquiryBuyer(inquiry, caller);
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
 
   if (!isBuyer && !isStaff && inquiry.confidential) {
     result.company = null;
@@ -702,9 +737,9 @@ function buildInquiryOrderBy(query) {
 async function listInquiries(query, caller) {
   const { page, limit, skip, take } = getPaginationParams(query);
   const superAdmin = isSuperAdmin(caller);
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const callerUserId = Number(caller?.id) || null;
-  const isCustomer = caller?.accessType === 'CUSTOMER' && !superAdmin;
+  const isCustomer = isCustomerContext(caller) && !superAdmin;
   const isStaff = caller?.accessType === 'STAFF' || superAdmin;
   const scope = query.scope || (isStaff ? 'all' : 'sent');
 
@@ -715,7 +750,9 @@ async function listInquiries(query, caller) {
   }
 
   if (scope === 'received') {
-    if (isCustomer || !callerCompanyId) {
+    // Received inquiries are a supplier/company view. Never infer COMPANY
+    // context from a stray companyId on STAFF or CUSTOMER tokens.
+    if (caller?.accessType !== 'COMPANY' || !callerCompanyId) {
       throw { statusCode: 403, code: 'INVALID_INQUIRY_SCOPE', message: 'Received inquiries are only available to company users.' };
     }
     where.AND.push({ items: { some: { product: { companyId: callerCompanyId } } } });
@@ -799,7 +836,7 @@ async function getInquiry(inquiryId, caller) {
 
   const isBuyer = isInquiryBuyer(inquiry, caller);
   const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const ownsRequestedProduct = Boolean(callerCompanyId)
     && inquiry.items.some((item) => Number(item.product?.company?.id) === callerCompanyId);
   const publishedStatuses = ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'];
@@ -814,7 +851,7 @@ async function getInquiry(inquiryId, caller) {
 }
 
 async function createInquiry(data, caller) {
-  const isCustomerBuyer = caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller);
+  const isCustomerBuyer = isCustomerContext(caller);
   const buyerUserId = isCustomerBuyer ? assertAuthenticatedUser(caller) : null;
   const companyId = isCustomerBuyer ? null : resolveCompanyId(data, caller);
 
@@ -911,7 +948,7 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiry(inquiry, caller);
 
-    if (caller?.accessType === 'CUSTOMER' && !isSuperAdmin(caller) && nextStatus !== 'CANCELLED') {
+    if (isCustomerContext(caller) && nextStatus !== 'CANCELLED') {
       throw { statusCode: 403, code: 'CUSTOMER_STATUS_RESTRICTED', message: 'Customers may only cancel their own inquiry.' };
     }
 
@@ -1136,7 +1173,7 @@ async function listInquiryMessages(inquiryId, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
 
   const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
-  const userId = caller?.accessType === 'CUSTOMER' ? assertAuthenticatedUser(caller) : null;
+  const userId = isCustomerContext(caller) ? assertAuthenticatedUser(caller) : null;
   const companyId = caller?.accessType === 'COMPANY' ? Number(caller.companyId) : null;
   const isBuyer = (userId && Number(inquiry.buyerUserId) === userId)
     || (companyId && Number(inquiry.companyId) === companyId);
@@ -1178,7 +1215,7 @@ async function sendInquiryMessage(inquiryId, data, caller) {
   if (!message || message.length > 5000) {
     throw { statusCode: 400, code: 'INVALID_INQUIRY_MESSAGE', message: 'متن پیام باید بین ۱ تا ۵۰۰۰ نویسه باشد.' };
   }
-  if (!['CUSTOMER', 'COMPANY'].includes(caller?.accessType) || isSuperAdmin(caller)) {
+  if ((!isCustomerContext(caller) && caller?.accessType !== 'COMPANY') || isSuperAdmin(caller)) {
     throw { statusCode: 403, code: 'INQUIRY_MESSAGE_ROLE_NOT_ALLOWED', message: 'این نوع حساب مجاز به ارسال پیام استعلام نیست.' };
   }
 
@@ -1189,7 +1226,7 @@ async function sendInquiryMessage(inquiryId, data, caller) {
       throw { statusCode: 409, code: 'INQUIRY_MESSAGES_CLOSED', message: 'پس از بسته‌شدن نهایی استعلام امکان ارسال پیام وجود ندارد.' };
     }
 
-    const userId = caller.accessType === 'CUSTOMER' ? assertAuthenticatedUser(caller) : null;
+    const userId = isCustomerContext(caller) ? assertAuthenticatedUser(caller) : null;
     const companyId = caller.accessType === 'COMPANY' ? Number(caller.companyId) : null;
     if (caller.accessType === 'COMPANY' && (!Number.isInteger(companyId) || companyId < 1)) {
       throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'حساب شرکت معتبر نیست.' };
@@ -1346,7 +1383,7 @@ async function listResponses(inquiryId, caller) {
     return [];
   }
 
-  const callerCompanyId = Number(caller?.companyId) || null;
+  const callerCompanyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const where = { inquiryId: numericInquiryId };
   if (!isBuyer && !isStaff) {
     where.companyId = callerCompanyId;
@@ -1658,19 +1695,28 @@ async function deleteResponseAttachment(inquiryId, responseId, attachmentId, cal
  */
 async function getInquiryStats(caller) {
   const superAdmin = isSuperAdmin(caller);
-  const companyId = Number(caller?.companyId) || null;
+  const isStaff = caller?.accessType === 'STAFF';
+  const isAuthorizedStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  const companyId = caller?.accessType === 'COMPANY' ? (Number(caller.companyId) || null) : null;
   const customerUserId = Number(caller?.id) || null;
-  const isCustomer = caller?.accessType === 'CUSTOMER' && !superAdmin;
-  if (!superAdmin && !isCustomer) ensureCompanyId(companyId);
+  const isCustomer = isCustomerContext(caller) && !superAdmin;
+
+  if (isStaff && !isAuthorizedStaff) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'You do not have permission to read inquiry statistics.' };
+  }
+  if (!superAdmin && !isCustomer && !isStaff) ensureCompanyId(companyId);
   if (isCustomer && !customerUserId) {
     throw { statusCode: 401, code: 'UNAUTHORIZED', message: 'Authenticated user is required.' };
   }
 
-  const sentWhere = superAdmin ? {} : isCustomer ? { buyerUserId: customerUserId } : { companyId };
-  const receivedWhere = superAdmin ? {} : isCustomer
+  // STAFF dashboard aggregates are platform-wide, matching the STAFF inquiry
+  // list scope. Never scope STAFF statistics through a stray companyId.
+  const platformScope = superAdmin || isStaff;
+  const sentWhere = platformScope ? {} : isCustomer ? { buyerUserId: customerUserId } : { companyId };
+  const receivedWhere = platformScope ? {} : isCustomer
     ? { id: { in: [] } }
     : { items: { some: { product: { companyId } } } };
-  const responsesWhere = superAdmin ? {} : isCustomer
+  const responsesWhere = platformScope ? {} : isCustomer
     ? { inquiry: { buyerUserId: customerUserId } }
     : { companyId };
 

@@ -1206,3 +1206,50 @@ This file is the shared, version-controlled memory for agents working on the rep
 - No confirmed product cross-tenant bypass found. Product list/detail and nested price tier/image/document lookups were reviewed; public projection remains PUBLISHED + PUBLIC.
 - Added regression coverage ensuring COMPANY/CUSTOMER wildcard contexts cannot invoke STAFF-only moderation actions.
 - Next: inquiry route family — buyer/supplier ownership, strict context, subscription/payment ownership, sealed visibility, messaging and attachments.
+
+
+## 2026-10-30 — SECURITY-AUDIT-STEP-11C-INQUIRIES: confirmed context mismatch
+
+- Auth source confirms CUSTOMER registrations have no AccessProfile; `issueTokens` emits `accessType: null`, `companyId: null`, and role `CUSTOMER_USER`.
+- Central `requireAccessType('CUSTOMER')` explicitly accepts this role-based Website fallback.
+- Inquiry service previously recognized customers only when `accessType === 'CUSTOMER'` in listing, creation, status restrictions, messages, and statistics. Therefore the actual AccessProfile-less CUSTOMER_USER token did not follow the customer path even though route RBAC admitted it.
+- `isInquiryBuyer` also compared `caller.companyId` without requiring COMPANY context. A STAFF token carrying a stray companyId could be treated as the buyer in service-level ownership checks. In particular, STAFF with `inquiries.create` can reach the status/items routes' permission preHandler, so service ownership must not accept that stray companyId.
+- Fix in progress: add `isCustomerContext` matching the central CUSTOMER fallback, scope buyer identity by CUSTOMER_USER id or COMPANY context only, require explicit COMPANY context for supplier responses, and only let STAFF create for an explicitly supplied companyId with the required permission.
+- Added regression tests for customer default context across listing/create/messages/stats, STAFF stray-companyId read/status denial, and STAFF/CUSTOMER wildcard denial on supplier lifecycle/attachment routes. CI pending.
+- Corrected the stale inquiry route comment: SUPER_ADMIN wildcard bypasses permission checks only, never the AccessProfile context guard.
+
+
+### Inquiry audit refinement — customer response visibility
+
+- A second use of `caller.companyId` was found in `assertCanReadResponses`: after buyer check, it could treat a CUSTOMER_USER default Website context with a stray companyId as a supplier company owning a requested product.
+- Fixed the fallback so a CUSTOMER context that is not the buyer receives 404; only an explicit COMPANY context may use companyId for supplier visibility.
+- Added regression coverage that a CUSTOMER_USER with a stray companyId cannot list supplier responses for another buyer's inquiry.
+- Also corrected the central RBAC header comment: wildcard bypasses permission checks only, never `requireAccessType`.
+
+
+### Inquiry audit — received-scope tenant boundary and CI correction (2026-10-30)
+
+- The first CI attempt for PR #40 exposed a real service-layer gap: listInquiries({scope:'received'}) allowed STAFF with a stray companyId because the guard only checked that companyId was truthy. This contradicted the COMPANY-only supplier view.
+- Fixed the guard to require caller.accessType === 'COMPANY' as well as a valid companyId. This prevents STAFF/CUSTOMER tokens from entering supplier received scope based on stale/misassigned company identifiers.
+- Corrected an unrelated-company response test fixture to carry explicit COMPANY context, so the test exercises the intended supplier-not-owner 404 path instead of the invalid-context path.
+- The stats test expected Prisma groupBy query arguments but the mock never recorded them. Updated inquiry and response groupBy mocks to record args, making the assertions meaningful.
+- Earlier backend CI failures: (1) unrelated-company fixture expected wrong error for context-less caller; (2) stats assertion read missing mock call records; (3) STAFF received-scope was not rejected. Latest commits contain corrections; re-run CI before merge.
+
+
+### Inquiry audit — subscription owner and statistics context alignment (2026-10-30)
+
+- Found a second AccessProfile-less CUSTOMER_USER mismatch in `inquiry.controller.js`: RBAC allowed the default Website context, but subscriptionOwner() and quota() recognized only explicit `accessType === 'CUSTOMER'`. This blocked customers from their own subscription/quota flows. Added matching CUSTOMER_USER fallback; all user-owned operations are scoped by authenticated caller.id.
+- Restricted the quota route to COMPANY/CUSTOMER contexts so STAFF cannot read company quota by carrying a stray companyId.
+- Found stats context mismatch: getInquiryStats read caller.companyId regardless of AccessProfile. It now derives companyId only in COMPANY context, requires inquiry-read permission for STAFF, and uses platform-wide aggregates for authorized STAFF (consistent with staff inquiry listing) rather than a stray company filter.
+- Added controller tests for customer subscription/list/retry/quota ownership, company quota, and STAFF denial; added stats tests for authorized platform scope and unauthorized STAFF rejection.
+- PR #40 remains open pending latest CI and migration checks.
+
+
+## 2026-10-31 — INQUIRY-APP-CONTEXT-CI-CORRECTION
+
+- **PR:** #40, branch `audit/inquiry-app-context-step-11c`.
+- **CI diagnosis:** The first run executed 1,355 backend tests; 1,354 passed. The sole failure was in the newly added STAFF `scope=received` test. The service correctly rejected the request before querying; the test then incorrectly asserted `calls.findMany === undefined`, while the shared mock harness initializes that tracker to `[]`.
+- **Correction:** Changed the assertion to `calls.findMany.length === 0`; no production behavior changed in this correction.
+- **Commit:** `189516deb109ca045f577459d385b5492c1d16e7`.
+- **Migration:** Previous PR-head migration validation passed; fresh validation on the corrected head is pending. Runtime infrastructure, health endpoints and migrations passed; browser smoke failed separately and is not pursued as the next task.
+- **Disposition:** Keep PR #40 unmerged until fresh CI and migration checks pass.

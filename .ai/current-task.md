@@ -61,4 +61,34 @@ PR #39 merged at `de25c403506208bdfc01c1516d56fa929e85a8ad`. Feature CI [4109877
 
 ## Step 11C — Inquiry route family (next)
 
-Review route context/permission boundaries, buyer/supplier ownership, sealed/anonymous response visibility, subscription ownership/payment callbacks, messaging and nested response attachments. Correct stale comments that imply SUPER_ADMIN bypasses the AccessProfile context layer. Add focused tests for confirmed gaps only.
+Review route context/permission boundaries, buyer/supplier ownership, sealed/anonymous response visibility, subscription ownership/payment callbacks, messaging and nested response attachments. **Confirmed finding:** customer accounts have no AccessProfile and receive `accessType: null` with `CUSTOMER_USER`, but inquiry services only recognized `accessType: 'CUSTOMER'`; additionally, `isInquiryBuyer` trusted any caller's companyId, including STAFF. Fix these service-level context mismatches and cover them with regression tests. Correct the stale SUPER_ADMIN comment.
+
+
+## Step 11C audit update — inquiry ownership and received scope
+
+- The open PR is #40: https://github.com/gameacc2025/martest/pull/40
+- Fixed the confirmed buyer-context and AccessProfile-less CUSTOMER_USER mismatches described above.
+- Additional confirmed issue: listInquiries({ scope: 'received' }) accepted STAFF callers if they carried a stray companyId, because the service checked only for a companyId and did not require accessType === 'COMPANY'. This could expose supplier-side received inquiry listings to STAFF outside the intended company context.
+- Fixed the service guard to require explicit COMPANY context and a valid companyId for received scope.
+- Updated the unrelated-company response-visibility fixture to use an actual COMPANY context.
+- Fixed stats test instrumentation so Prisma groupBy arguments are captured and the new customer stats assertions test real query scoping.
+- Previous CI attempt exposed three failing backend tests: the unrelated-company fixture lacked COMPANY context; groupBy mocks did not record args; STAFF received-scope was accepted. These are addressed in the latest branch commits. New CI must confirm.
+- No merge until latest backend tests/CI and migration validation pass. Runtime browser smoke is tracked separately and not the next debugging task.
+
+
+## Step 11C additional findings — subscription/quota and statistics
+
+- Confirmed controller mismatch: route RBAC admits AccessProfile-less CUSTOMER_USER as default CUSTOMER context, but controller subscriptionOwner() and quota() recognized only accessType === 'CUSTOMER'. Customer users therefore could not read their own quota/subscription or purchase/verify a user-owned plan. Controller now resolves the same explicit CUSTOMER_USER fallback and scopes these operations to caller.id.
+- Quota endpoint now accepts only COMPANY or CUSTOMER app context; STAFF with a stray companyId cannot inspect a company's quota.
+- Confirmed stats scope mismatch: getInquiryStats previously read caller.companyId without requiring COMPANY context. STAFF could be scoped through a stray companyId; STAFF without companyId failed despite the route admitting STAFF. It now permits authorized STAFF (leads.read/inquiries.read) to receive platform-wide aggregates, matching the STAFF inquiry-list behavior, and never scopes STAFF by companyId. Unauthorized STAFF is rejected.
+- Added controller tests for CUSTOMER_USER subscription listing, purchase, payment retry and quota; COMPANY quota; and STAFF stray-companyId denial. Added service tests for STAFF stats authorization and platform scope.
+- PR #40 remains unmerged pending the latest CI/backend tests and migration validation.
+
+
+## Step 11C CI correction — 2026-10-31
+
+- The first PR #40 CI run had 1 backend test failure out of 1,355: the STAFF `scope=received` regression correctly rejected the request, but the test incorrectly expected the mock call tracker to be `undefined`; the harness initializes it as an empty array.
+- Corrected the assertion to require `calls.findMany.length === 0`, preserving the security expectation that no database listing occurs after rejecting STAFF received scope.
+- Correction commit: `189516deb109ca045f577459d385b5492c1d16e7`.
+- Fresh CI and migration verification for this exact head are pending. Previous migration validation passed, but it must be rerun for the corrected PR head. Runtime workflow infrastructure/health/migrations passed; browser smoke failed and remains outside the next debugging task.
+- Do not merge PR #40 until fresh backend CI and migration validation pass.

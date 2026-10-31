@@ -2,7 +2,8 @@ const ctrl = require('./inquiry.controller');
 // Priority 1 (RBAC): every protected route must have BOTH authorization layers
 //   1. requireAccessType(...) → domain boundary (STAFF | COMPANY | CUSTOMER)
 //   2. requireAnyPermission(...) → fine-grained action permission
-// SUPER_ADMIN bypasses both layers (handled inside the central middleware).
+// SUPER_ADMIN's wildcard bypasses the permission layer only; requireAccessType
+// always enforces the AccessProfile app-context boundary, including for SUPER_ADMIN.
 const { requireAccessType, requireAnyPermission } = require('../../middlewares/rbac');
 
 // Access-type sets, derived from the seed ROLE_PERMISSIONS: the union of the
@@ -236,7 +237,7 @@ async function inquiryRoutes(fastify) {
 
   // Current subscription and remaining RFQ quota for the caller.
   fastify.get('/quota', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.create')],
   }, ctrl.quota);
 
   // Dashboard statistics scoped to the caller's company (aggregated live).
