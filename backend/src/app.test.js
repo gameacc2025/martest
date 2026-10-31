@@ -26,6 +26,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
+const fs = require('node:fs');
+const routeDocs = require('./utils/openapi-route-docs');
 const Module = require('node:module');
 
 function injectMock(relativePath, exportsObj) {
@@ -77,7 +79,54 @@ test('buildApp(): the full real plugin + route registration chain resolves witho
   assert.ok(app);
 });
 
+// ── The generated OpenAPI document must match the real registered routes ──
+
+test('OpenAPI JSON contains every inventory route with effective security and global error responses', async () => {
+  const specResponse = await app.inject({ method: 'GET', url: '/docs/json' });
+  assert.equal(specResponse.statusCode, 200);
+  const spec = specResponse.json();
+  const inventoryPath = path.join(__dirname, '../../docs/API_ROUTE_INVENTORY.md');
+  const inventory = fs.readFileSync(inventoryPath, 'utf8');
+  const routes = [...inventory.matchAll(/^\| ([A-Z]+) \| `(\/api\/v1[^\`]+)` \|/gm)]
+    .map((match) => ({ method: match[1], fullPath: match[2] }));
+
+  assert.equal(routes.length, 149, 'update the expected route count when the route inventory changes');
+
+  for (const { method, fullPath } of routes) {
+    const routePath = fullPath.replace(/^\/api\/v1/, '').replace(/:([A-Za-z0-9_]+)/g, '{$1}') || '/';
+    const fullOpenApiPath = fullPath.replace(/:([A-Za-z0-9_]+)/g, '{$1}');
+    const apiPrefixedPath = '/api/v1' + routePath;
+    const operation = spec.paths[routePath]?.[method.toLowerCase()]
+      || spec.paths[routePath + '/']?.[method.toLowerCase()]
+      || spec.paths[fullOpenApiPath]?.[method.toLowerCase()]
+      || spec.paths[fullOpenApiPath + '/']?.[method.toLowerCase()]
+      || spec.paths[apiPrefixedPath]?.[method.toLowerCase()]
+      || spec.paths[apiPrefixedPath + '/']?.[method.toLowerCase()];
+    const key = method + ' ' + fullPath;
+    const doc = routeDocs[key];
+
+    assert.ok(operation, 'missing generated OpenAPI operation for ' + key + '; candidate paths: ' + Object.keys(spec.paths).filter((value) => value.includes('users')).join(', '));
+    assert.ok(doc, 'missing route documentation for ' + key);
+    assert.equal(typeof operation['x-authentication-required'], 'boolean', key + ' must declare auth metadata');
+    assert.ok(Array.isArray(operation.security), key + ' must have an explicit security requirement');
+
+    const expectedSecurity = Array.isArray(doc.security)
+      ? doc.security
+      : (doc.authRequired === false ? [] : [{ bearerAuth: [] }]);
+    assert.deepEqual(operation.security, expectedSecurity, key + ' security must match its route metadata');
+
+    for (const status of ['400', '401', '403', '404', '409', '413', '429', '500']) {
+      assert.ok(operation.responses[status], key + ' must document default error status ' + status);
+    }
+
+    if (operation.responses['204']) {
+      assert.equal(operation.responses['204'].content, undefined, key + ' 204 response must not define a body');
+    }
+  }
+});
+
 // ── /health — public, no auth ───────────────────────────────────
+
 
 test('GET /health: public, returns status ok', async () => {
   const res = await app.inject({ method: 'GET', url: '/health' });

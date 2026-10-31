@@ -321,3 +321,8 @@ Customer registration, company registration, PKCE handoff create/redeem and logo
 PR #58 merged at `4ee4dbca6486588af34eda4ed9a22a809a7cb73d`. CI passed 1,393 backend tests and 18 frontend/shared tests; all frontend builds and Prisma migration validation passed.
 
 OpenAPI global responses now include 409 conflicts, 413 oversized request/file uploads and 429 rate limits. All use the standard ErrorResponse schema. Rate-limit exceptions pass through the central handler and return HTTP 429 with `error.code=APP_ERROR` and the rate-limit message. Optional debug/stack fields are documented for development-only 500 responses and are never returned in production.
+
+
+## Step 16J — generated OpenAPI route coverage audit (2026-10-31)
+
+An app-level integration test now compares the generated `/docs/json` document from the real Fastify plugin/route registration chain against all 149 route inventory entries. It checks method/path coverage, parameter path normalization, effective bearer/cookie/public security metadata, global error response status coverage, and bodyless 204 operations.

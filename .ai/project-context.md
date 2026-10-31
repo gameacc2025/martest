@@ -674,3 +674,9 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - OpenAPI default responses include 409 Conflict, 413 oversized payload/upload and 429 rate limiting. All use the standard ErrorResponse envelope.
 - Fastify rate-limit exceptions are caught by the central error handler and normalized to HTTP 429 with `{error:{code:'APP_ERROR',message}}`; do not document the raw plugin Error object.
 - ErrorResponse includes optional debug/stack fields only for development-mode 500 errors; production responses omit them.
+
+
+## Generated OpenAPI runtime route coverage — step 16J (2026-10-31)
+
+- `backend/src/app.test.js` now boots the real Fastify app with the existing Prisma/env mocks and validates generated `/docs/json` against all 149 route inventory rows.
+- The test converts Fastify `:param` paths to OpenAPI `{param}` paths, checks every method/path operation exists, verifies bearer/cookie/public security against route metadata, checks global error response statuses, and ensures 204 responses have no content body.
