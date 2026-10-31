@@ -1522,6 +1522,7 @@ const permissionListResponseSchema = {
 };
 const userProfileSettingsResponseSchema = {
   ...userResponseSchema,
+  required: ['id', 'email', 'phone', 'status', 'createdAt', 'updatedAt', 'profile', 'accessProfile', 'roles'],
   properties: {
     ...safeAuthUserResponseSchema.properties,
     profile: { anyOf: [profileResponseSchema, { type: 'null' }] },
