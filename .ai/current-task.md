@@ -337,3 +337,19 @@ PR #50 merged by squash into `main` at `96a972cb6c663952cb09d6c7a3d9c3d8b90ef2a1
 - Added public and staff category list/detail, subcategory list/detail, and public category product-list response schemas. Subcategory detail includes category and specification-template/field projections.
 - Corrected company/category/subcategory DELETE contracts to HTTP 204 without JSON response body. Category/company product list responses use actual `{data,meta}` pagination.
 - Added structural tests; static route inventory remains 149/149 covered, no duplicate keys, and new schema block delimiter check passed. CI pending.
+
+
+## OpenAPI response contracts — step 16E merged (2026-10-31)
+
+PR #51 merged by squash into `main` at `095e742d1fbd8b4af954299ff31febd81e0ff732`. CI [41227529099](https://github.com/gameacc2025/martest/actions/runs/41227529099) passed: backend 1,387/1,387; frontend/shared 18/18; frontend builds passed. Migration validation [41227529153](https://github.com/gameacc2025/martest/actions/runs/41227529153) passed. Runtime remains a separate check and is not a merge blocker per owner instruction.
+
+- Company APIs now document company scalar fields, counts, inquiry limits, custom limits, flattened up-to-10 user summaries, settings, statistics and paginated product relations.
+- Category APIs now document public/staff category list/detail, subcategory summaries/details, specification-template fields and paginated public category products.
+- Company/category/subcategory DELETE endpoints correctly document 204/no body.
+- Added structural tests; inventory remains 149/149 routes documented, no duplicate keys.
+
+## Next active work — step 16F
+
+- Audit user, role, permission, address, settings/profile and auth/session responses against controllers/services and Prisma selects.
+- Replace generic response descriptions with concrete source-backed schemas for user list/detail/create/update/access state, assignable roles, role/permission CRUD, profile/password/avatar, addresses and auth registration/session/handoff flows.
+- Keep private fields (password hashes, tokens, provider secrets) excluded; preserve 204 and message-only outcomes. Add tests, CI/migration validation and merge.
