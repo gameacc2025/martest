@@ -202,3 +202,6 @@ Product price snapshot/history/activity and inquiry messages/responses/items/att
 - Inquiry statistics document caller-scoped sent/received/response aggregates, calculated response success rate and up to five recent inquiries/responses. STAFF aggregates are platform-wide; CUSTOMER/COMPANY results are scoped by the service.
 - Inquiry listing documents pagination and company/count projections, including nullable company identity and optional response counts where confidential/sealed views redact them.
 - Product management list/detail documents the management product projection and its relations; list pagination uses the shared `{data,meta}` envelope.
+
+
+Step 16D merge verification: PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b90ef2a1`. CI passed 1,386 backend tests and 18 frontend/shared tests; all frontend builds and database migration validation passed. Static route inventory coverage remains 149/149 with no missing or duplicate route keys.
