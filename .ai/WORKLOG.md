@@ -1328,3 +1328,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Tightened SMS recipient selection to active user and company AccessProfile boundaries. Tests now cover quota exhaustion, opt-out, missing phone/provider and company-recipient context.
 - Clarified generic event-dispatch SMS remains unimplemented; explicit inquiry-message SMS is queued after recipient opt-in and sender paid quota check. Live Twilio is not verified.
 - Next: audit subscription payment provider, callback authenticity, idempotency and replay protection; Zarinpal live verification remains unverified.
+
+
+## 2026-10-31 — ZARINPAL-PAYMENT-AMOUNT-BOUNDARY
+
+- Confirmed Zarinpal v4 request/verify implementation is present; manual review is only the fallback when merchant configuration is absent.
+- Audited payment amount freezing, callback verification, Authority mapping, refId, owner lock, replay/concurrent callback handling and owner scoping.
+- Fixed amount conversion boundary: Toman-to-Rial multiplication must remain within PostgreSQL INTEGER / Prisma Int max 2,147,483,647. Overflow is now rejected before provider request and database write.
+- Added regression test that checks no provider call occurs for an overflowing Toman plan. Live Zarinpal remains unverified.
