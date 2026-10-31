@@ -107,3 +107,12 @@ PR #40 was merged into `main` by squash at `9bac9916de148741fb379ffcdd5aaf44157f
 - Added address route tests proving CUSTOMER_USER Website access works, COMPANY and STAFF/SUPER_ADMIN cannot cross into customer address routes, and wildcard permission does not override app-context boundaries.
 - Branch: `audit/notification-address-tenant-step-11d`. CI/migration verification is pending. Do not merge until required CI and migration checks pass.
 - Remaining Step 11 scope includes any route families outside companies/products/inquiries/addresses/notifications; do not claim exhaustive sign-off until inventory is complete.
+
+
+## Step 11D completion — Addresses and notifications (2026-10-31)
+
+PR #41 merged by squash into `main` at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53`. CI [41216966030](https://github.com/gameacc2025/martest/actions/runs/41216966030) and database migration validation [41216965916](https://github.com/gameacc2025/martest/actions/runs/41216965916) passed. Runtime validation [41216965989](https://github.com/gameacc2025/martest/actions/runs/41216965989) was still running separately. Address ownership review found no cross-user IDOR; notification CUSTOMER_USER Website-context mismatch was fixed with regression tests. Previous Step 11D pending notes above are superseded.
+
+## Step 11E — Remaining backend route inventory (active)
+
+Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categories`, `roles`, `permissions`, and `specification-library`. Verify route preHandlers against service-level ownership and app-context checks; do not assume role/permission wildcard grants cross-panel access. Record each module's coverage and add regression tests only for proven gaps. After Step 11E, complete the remaining SMS message/event integration review and API documentation backlog.
