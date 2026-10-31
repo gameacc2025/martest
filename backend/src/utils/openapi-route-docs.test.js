@@ -205,6 +205,25 @@ test('inquiry list response preserves pagination and omits private buyer identif
   assert.equal(inquiry.buyerUserId, undefined);
 });
 
+test('public and management product response projections stay separated', () => {
+  const publicProduct = docs['GET /api/v1/products'].responses[200].properties.data.items.properties;
+  assert.ok(publicProduct.company);
+  assert.ok(publicProduct.prices);
+  assert.equal(publicProduct.createdByUserId, undefined);
+  assert.equal(publicProduct.deletedAt, undefined);
+  assert.equal(publicProduct.statusHistory, undefined);
+
+  const managedProduct = docs['GET /api/v1/products/my-products'].responses[200].properties.data.items.properties;
+  assert.ok(managedProduct.createdByUserId);
+  assert.ok(managedProduct.editsSinceApproval);
+  assert.ok(managedProduct.deletedAt);
+  assert.ok(managedProduct.statusHistory.items.properties.changedBy);
+
+  const singleProduct = docs['GET /api/v1/products/:id'].responses[200].properties.data;
+  assert.equal(singleProduct.oneOf.length, 2);
+  assert.ok(docs['GET /api/v1/products/my-products'].querystring.properties.status);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
