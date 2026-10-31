@@ -537,3 +537,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Company APIs expose company scalar fields, counts, inquiry limits, custom limits and (detail only) up to ten flattened user summaries. Settings expose inquiryLimit + limits; statistics expose counts and five recent products/orders; company products use paginated product rows with compact company/category/subcategory projections.
 - Category APIs expose category records with nested subcategory summaries; subcategory detail includes category and specification template/fields. Public category product lists only published/public products and are paginated.
 - Company, category and subcategory DELETE endpoints return 204 without a body.
+
+
+## Company and category OpenAPI response coverage — 2026-10-31
+
+- PR #51 merged at `095e742d1fbd8b4af954299ff31febd81e0ff732`; CI passed 1,387 backend tests and 18 frontend/shared tests; builds and migration validation passed.
+- Company response schemas cover scalar company fields, counts, inquiry/custom limits, up to ten flattened user summaries, settings, dashboard statistics and paginated company products.
+- Category/subcategory schemas cover public/staff lists, category detail, subcategory detail with specification template/fields and paginated published/public category products.
+- Company/category/subcategory DELETE responses are 204 without bodies. Route inventory remains 149/149 covered.
