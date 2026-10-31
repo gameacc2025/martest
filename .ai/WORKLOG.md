@@ -1650,3 +1650,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Company lifecycle mutations return the company projection. Company and product soft delete use 204/no body. Product status transitions return managed product projection with status history.
 - Added regression test for auth secrets, notification envelope distinctions, and lifecycle status/body contracts. CI/migration pending.
 - Next: step 16I common error envelope and status-code audit (auth, RBAC/ownership, validation, quota, payment).
+
+
+## 2026-10-31 — OPENAPI-AUTH-NOTIFICATION-COMPANY-RESPONSES-STEP-16H-MERGE
+
+- PR #61 squash-merged at `fc6caac4aa742c0f2c12e7778faffc6eafcf1389`.
+- CI [41239961588] passed: backend 1,397/1,397; frontend/shared 18/18; all three frontend builds passed. Prisma migration validation [41239961564] passed. Runtime compose validation [41239961558] remained a separate workflow.
+- Completed auth session/registration/PKCE handoff, notification preference/folder/read/bulk, company lifecycle and product workflow response contract docs/tests.
+- Added regression test for refresh-token/password-hash omission, direct notification preference/list/count/bulk envelopes, and 204 no-body delete semantics.
+- Next: step 16I error/status contract audit across auth, RBAC/tenant ownership, validation, not-found, quota/subscription and payment callback paths.
