@@ -1640,3 +1640,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added `step16kNotificationDeliveryQuerySchema` to both GET admin notification delivery endpoints, reflecting fields actually read by `admin.controller.js` and `notification.delivery.service.js`: status, channel, eventType, userId, page, limit. Did not include from/to (ignored by controller), or invent a maximum limit (service does not enforce one).
 - Added static contract tests and real generated OpenAPI query parameter tests. CI pending.
 - Branch deletion is not available through the current GitHub connector actions; exact PowerShell deletion commands will be provided after the audit.
+
+
+## 2026-10-31 — OPENAPI-AUTH-NOTIFICATION-COMPANY-RESPONSES-STEP-16H
+
+- Completed response audit for auth registration/login/refresh/me/logout/handoff, user notification preferences/folders/read/delete/bulk operations, company restore/status/verification/logo, and product workflow/delete.
+- Auth schemas preserve cookie-only refresh tokens and omit password hashes. Customer registration has no AccessProfile; company registration starts pending with inactive company AccessProfile.
+- Notification preference routes return direct `{data,smsAvailable}` with SMS unavailable; notification list returns direct `{data,meta}`; unread count `{count}`; bulk actions `{success,count}`; folder changes `{success,action,notificationId,folderId}`. Token-derived scope is the source of folder visibility.
+- Company lifecycle mutations return the company projection. Company and product soft delete use 204/no body. Product status transitions return managed product projection with status history.
+- Added regression test for auth secrets, notification envelope distinctions, and lifecycle status/body contracts. CI/migration pending.
+- Next: step 16I common error envelope and status-code audit (auth, RBAC/ownership, validation, quota, payment).

@@ -617,3 +617,62 @@ test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign
   }
   assert.deepEqual(duplicates, []);
 });
+
+test('auth sessions, notification preferences and lifecycle response envelopes match controller behavior', () => {
+  const login = docs['POST /api/v1/auth/login'].responses[200].properties.data.properties;
+  assert.ok(login.tokens.properties.accessToken);
+  assert.ok(login.tokens.properties.expiresIn);
+  assert.equal(login.tokens.properties.refreshToken, undefined);
+
+  const refresh = docs['POST /api/v1/auth/refresh'].responses[200].properties.data.properties;
+  assert.ok(refresh.tokens.properties.accessToken);
+  assert.equal(refresh.tokens.properties.refreshToken, undefined);
+
+  const me = docs['GET /api/v1/auth/me'].responses[200].properties.data.properties;
+  assert.ok(me.user);
+  assert.ok(me.roles);
+  assert.ok(me.permissions);
+  assert.equal(me.tokens, undefined);
+  assert.equal(me.passwordHash, undefined);
+
+  for (const route of ['GET /api/v1/settings/notifications/preferences', 'PATCH /api/v1/settings/notifications/preferences']) {
+    const response = docs[route].responses[200];
+    assert.deepEqual(response.required, ['data', 'smsAvailable']);
+    assert.equal(response.properties.smsAvailable.const, false);
+    assert.ok(response.properties.data.items.properties.channels.properties.IN_APP);
+    assert.ok(response.properties.data.items.properties.channels.properties.EMAIL);
+    assert.ok(response.properties.data.items.properties.channels.properties.SMS);
+    assert.equal(response.properties.success, undefined);
+  }
+
+  const list = docs['GET /api/v1/settings/notifications'].responses[200];
+  assert.deepEqual(list.required, ['data', 'meta']);
+  assert.ok(list.properties.meta.properties.totalPages);
+  const unread = docs['GET /api/v1/settings/notifications/unread-count'].responses[200];
+  assert.deepEqual(unread.required, ['count']);
+  const bulk = docs['POST /api/v1/settings/notifications/bulk-read-state'].responses[200];
+  assert.ok(bulk.properties.count);
+  assert.equal(bulk.properties.data, undefined);
+  const move = docs['POST /api/v1/settings/notifications/:id/folders'].responses[200];
+  assert.deepEqual(move.required, ['success', 'action', 'notificationId', 'folderId']);
+  assert.deepEqual(move.properties.action.enum, ['copy', 'move']);
+
+  for (const route of [
+    'PATCH /api/v1/companies/:id/restore',
+    'PATCH /api/v1/companies/:id/status',
+    'PATCH /api/v1/companies/:id/verify',
+    'PATCH /api/v1/companies/:id/logo',
+  ]) {
+    const company = docs[route].responses[200].properties.data.properties;
+    assert.ok(company.id);
+    assert.ok(company.status);
+    assert.ok(company.logo);
+    assert.ok(company.isVerified);
+  }
+  for (const route of ['DELETE /api/v1/companies/:id', 'DELETE /api/v1/products/:id']) {
+    assert.ok(docs[route].responses[204]);
+    assert.equal(docs[route].responses[204].properties, undefined);
+    assert.equal(docs[route].responses[200], undefined);
+  }
+});
+
