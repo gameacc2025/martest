@@ -924,7 +924,7 @@ const inquirySubscriptionResponseSchema = {
 const subscriptionPaymentResultSchema = {
   type: 'object', required: ['payment', 'subscriptionId', 'refId'],
   properties: {
-    payment: { type: 'string', enum: ['success', 'failed', 'pending'] },
+    payment: { type: 'string', enum: ['success', 'failed', 'pending', 'cancelled'] },
     subscriptionId: { type: 'integer' }, refId: { type: ['string', 'null'] },
   },
 };
