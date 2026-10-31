@@ -466,6 +466,56 @@ test('company dashboard, product auxiliary, category and specification-library r
   assert.ok(docs['POST /api/v1/products/:id/approve'].responses[200].properties.data.properties.status);
 });
 
+test('user, RBAC, personal settings and remaining admin response contracts preserve safe projections', () => {
+  const userList = docs['GET /api/v1/users'].responses[200].properties;
+  assert.ok(userList.data.items.properties.roles.items.type === 'string');
+  assert.ok(userList.data.items.properties.permissions.items.type === 'string');
+  assert.ok(userList.data.items.properties.accessProfile.anyOf[0].properties.company);
+  assert.equal(userList.data.items.properties.passwordHash, undefined);
+
+  const userDetail = docs['GET /api/v1/users/:id'].responses[200].properties.data.properties;
+  assert.ok(userDetail.roles.items.properties.scope);
+  assert.ok(userDetail.permissions.items.properties.updatedAt);
+  assert.equal(userDetail.passwordHash, undefined);
+  assert.equal(userDetail.refreshTokens, undefined);
+  assert.ok(docs['POST /api/v1/users'].responses[201].properties.data.properties.accessProfile);
+  assert.ok(docs['PATCH /api/v1/users/:id/access'].responses[200].properties.data.properties.permissions);
+
+  const roles = docs['GET /api/v1/roles'].responses[200].oneOf;
+  assert.equal(roles.length, 2);
+  assert.ok(roles[0].properties.data.items.properties.permissions.items.properties.permission);
+  assert.ok(docs['GET /api/v1/roles/assignable'].responses[200].properties.data.items.properties.scope);
+  assert.ok(docs['POST /api/v1/roles'].responses[201].properties.data.properties._count.properties.users);
+  assert.ok(docs['DELETE /api/v1/roles/:id'].responses[200].properties.data.properties.message);
+
+  const permissions = docs['GET /api/v1/permissions'].responses[200].oneOf;
+  assert.equal(permissions.length, 3);
+  assert.ok(docs['GET /api/v1/permissions/:id'].responses[200].properties.data.properties.group);
+  assert.ok(docs['POST /api/v1/permissions'].responses[201].properties.data.properties.createdAt);
+  assert.ok(docs['DELETE /api/v1/permissions/:id'].responses[200].properties.data.properties.message);
+
+  const profile = docs['GET /api/v1/settings/profile'].responses[200].properties.data.properties;
+  assert.ok(profile.roles.items.properties.role.properties.label);
+  assert.equal(profile.passwordHash, undefined);
+  assert.ok(docs['PATCH /api/v1/settings/change-password'].responses[200].properties.data.properties.message);
+  assert.ok(docs['POST /api/v1/settings/profile/avatar'].responses[200].properties.data.properties.avatarUrl);
+  assert.ok(docs['DELETE /api/v1/settings/profile/avatar'].responses[200].properties.data.properties.message);
+
+  const adminStats = docs['GET /api/v1/admin/stats'].responses[200].properties.data.properties;
+  assert.ok(adminStats.counts.properties.permissions);
+  assert.equal(adminStats.recentUsers.maxItems, 5);
+  assert.equal(adminStats.pendingProducts.maxItems, 20);
+  assert.ok(adminStats.pendingProducts.items.properties.createdBy.properties.profile);
+  assert.ok(docs['GET /api/v1/admin/settings'].responses[200].properties.data.properties.productReviewEditThreshold);
+  assert.ok(docs['PATCH /api/v1/admin/inquiry-monetization/settings'].responses[200].properties.data.properties.subscriptionEnforcement);
+  assert.ok(docs['GET /api/v1/admin/inquiry-plans'].responses[200].properties.data.items.properties.smsPerPeriod);
+  assert.ok(docs['POST /api/v1/admin/inquiry-plans'].responses[201].properties.data.properties.currency);
+  assert.ok(docs['PATCH /api/v1/admin/inquiry-plans/:id'].responses[200].properties.data.properties.inquiriesPerPeriod);
+  assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/grant'].responses[201].properties.data.properties.plan.properties.durationDays);
+  assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/:id/activate'].responses[200].properties.data.properties.paymentProvider);
+  assert.ok(docs['POST /api/v1/admin/inquiry-subscriptions/:id/reject'].responses[200].properties.data.properties.user.properties.phone);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually
