@@ -1301,3 +1301,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Confirmed `createUser` committed a COMPANY user for another tenant and then called `getUser`; non-global STAFF read scoping rejected that newly-created user with 403 because the caller's Main-company ID differed.
 - Replaced that post-create read with a private `getCreatedUserContext` path that can only be invoked using the ID returned by the successful create transaction. Normal `getUser` tenant scoping is unchanged.
 - Added regression coverage for STAFF ADMIN creating a user in another company and receiving the result.
+
+
+## 2026-10-31 — STEP-11E-MERGE
+
+- PR #42 merged by squash at `c92aeff2866353826ec423534b4bc4178e7a57c1`.
+- CI [41217897665](https://github.com/gameacc2025/martest/actions/runs/41217897665) passed: 1,368/1,368 backend tests. Migration validation [41217897689](https://github.com/gameacc2025/martest/actions/runs/41217897689) passed. Runtime [41217897681](https://github.com/gameacc2025/martest/actions/runs/41217897681) was still running separately.
+- Fixed STAFF-only password reset app-context gap; active-only public category/subcategory detail lookup; and post-create response failure for STAFF-created users in another company.
+- Route families reviewed: auth, users, admin, settings, categories, roles, permissions and specification-library. Further exhaustive service review remains; no blanket security certification claimed.
+- Next: verify SMS message delivery/outbox integration, quota, opt-in and dedupe.
