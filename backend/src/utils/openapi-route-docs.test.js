@@ -48,6 +48,19 @@ test('every registered API route has a dedicated OpenAPI route-doc entry', () =>
   assert.deepEqual(missing, [], 'every registered route must have dedicated OpenAPI metadata');
 });
 
+test('every explicitly public route is documented without authentication', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const inventory = fs.readFileSync(path.join(__dirname, '../../../docs/API_ROUTE_INVENTORY.md'), 'utf8');
+  const publicKeys = [...inventory.matchAll(/^\\| ([A-Z]+) \\| `(\\/api\\/v1[^\`]+)` \\| `Public` \|$/gm)]
+    .map((match) => `${match[1]} ${match[2]}`);
+
+  for (const key of publicKeys) {
+    assert.ok(docs[key], `public route is missing OpenAPI metadata: ${key}`);
+    assert.equal(docs[key].authRequired, false, `${key} must explicitly declare authRequired: false`);
+  }
+});
+
 test('every OpenAPI route-doc key corresponds to a registered route in the API inventory', () => {
   const fs = require('node:fs');
   const path = require('node:path');
