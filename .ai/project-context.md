@@ -429,3 +429,10 @@ Next work is the SMS delivery integration audit: reconcile dispatcher and inquir
 - Sender quota owner is the authenticated sender's user or company subscription. The SMS usage event and NotificationDelivery outbox row are created in the same transaction as the inquiry message; quota is consumed at enqueue time, not again on retries.
 - Direct user recipients must be ACTIVE. Company SMS preference must be associated with an ACTIVE user whose AccessProfile is type COMPANY, belongs to the recipient company, and has active panel access. Do not select STAFF users merely because they share the Main-company ID.
 - The notification worker sends pending SMS through the Twilio adapter. Live provider delivery is not verified until tested with deployment credentials and a controlled recipient.
+
+
+## SMS delivery recipient scope merged — 2026-10-31
+
+PR #43 merged at `c08b4d319c44541d7a238cba94f0d1b91556ee42`; CI passed 1,373/1,373 backend tests and migration validation passed. Explicit inquiry-message SMS recipient lookup now requires an ACTIVE user; company recipients require ACTIVE COMPANY AccessProfile with matching companyId and active panel access. Sender quota is consumed once at enqueue in the same transaction as the inquiry message and SMS outbox row. Generic event dispatcher SMS remains intentionally unimplemented. Live Twilio is not verified.
+
+Next priority is subscription payment provider/callback/idempotency review.
