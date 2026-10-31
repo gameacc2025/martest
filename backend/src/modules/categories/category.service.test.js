@@ -29,11 +29,13 @@ function injectMock(relativePath, exportsObj) {
 const calls = {
   categoryFindMany: [],
   categoryFindUnique: [],
+  categoryFindFirst: [],
   categoryCreate: [],
   categoryUpdate: [],
   categoryDelete: [],
   subcategoryFindMany: [],
   subcategoryFindUnique: [],
+  subcategoryFindFirst: [],
   subcategoryCreate: [],
   subcategoryUpdate: [],
   subcategoryDelete: [],
@@ -66,6 +68,10 @@ const mockPrisma = {
       calls.categoryFindUnique.push(args);
       return fx.category;
     },
+    findFirst: async (args) => {
+      calls.categoryFindFirst.push(args);
+      return fx.category;
+    },
     create: async (args) => {
       calls.categoryCreate.push(args);
       return fx.created;
@@ -86,6 +92,10 @@ const mockPrisma = {
     },
     findUnique: async (args) => {
       calls.subcategoryFindUnique.push(args);
+      return fx.subcategory;
+    },
+    findFirst: async (args) => {
+      calls.subcategoryFindFirst.push(args);
       return fx.subcategory;
     },
     create: async (args) => {
@@ -162,7 +172,13 @@ test('listCategories: orders by sortOrder asc at both levels', async () => {
 test('getCategoryById: coerces a string id to a number', async () => {
   resetMocks();
   await getCategoryById('42');
-  assert.equal(calls.categoryFindUnique[0].where.id, 42);
+  assert.equal(calls.categoryFindFirst[0].where.id, 42);
+});
+
+test('getCategoryById: activeOnly hides inactive categories from public details', async () => {
+  resetMocks();
+  await getCategoryById('42', { activeOnly: true });
+  assert.deepEqual(calls.categoryFindFirst[0].where, { id: 42, status: 'ACTIVE' });
 });
 
 // ── listSubcategoriesByCategory ──────────────────────────────
@@ -185,13 +201,19 @@ test('getSubcategoryById: includes the parent category and ordered specification
   resetMocks();
   await getSubcategoryById('3');
 
-  const args = calls.subcategoryFindUnique[0];
+  const args = calls.subcategoryFindFirst[0];
   assert.equal(args.where.id, 3);
   assert.ok(args.include.category);
   assert.deepEqual(
     args.include.specificationTemplate.include.fields.orderBy,
     { sortOrder: 'asc' }
   );
+});
+
+test('getSubcategoryById: activeOnly hides inactive subcategories from public details', async () => {
+  resetMocks();
+  await getSubcategoryById('3', { activeOnly: true });
+  assert.deepEqual(calls.subcategoryFindFirst[0].where, { id: 3, status: 'ACTIVE' });
 });
 
 // ── createCategory / updateCategory / deleteCategory ─────────
