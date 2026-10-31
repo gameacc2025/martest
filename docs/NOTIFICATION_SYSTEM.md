@@ -170,3 +170,7 @@ Do not claim a browser E2E run passed unless a completed Playwright job explicit
 - Follow-up: queue SMS only for explicit user opt-in and supported events; resolve and validate recipient phone; consume the paid quota safely before queueing; add dedupe and failure/retry regression tests; verify with configured Twilio credentials and a controlled recipient.
 - Status: **PARTIAL / live provider NOT VERIFIED**. Admin announcements remain IN_APP/EMAIL only.
 null
+
+## SMS implementation status update — 2026-10-31
+
+The 2026-10-29 note above remains accurate only for generic event-driven SMS from `notification.dispatch.service.js`. A separate explicit inquiry-message SMS path is now implemented: `sendInquiryMessage` queues `INQUIRY_MESSAGE_RECEIVED` only when the sender explicitly requests it, the recipient has opted in, Twilio configuration is valid, and paid sender quota is available. Recipient accounts must be active; company recipients use an active COMPANY AccessProfile in the target company. Quota and outbox insertion are transactional. The worker sends and retries the queued SMS. Generic event-dispatch SMS and SMS for admin announcements remain unsupported; live Twilio delivery remains NOT VERIFIED.
