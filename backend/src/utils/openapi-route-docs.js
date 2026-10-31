@@ -894,11 +894,11 @@ Object.assign(docs, {
     } } },
   },
 
-  ['GET /api/v1/inquiries/plans']: successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Active inquiry subscription plans returned successfully.'),
-  ['GET /api/v1/inquiries/quota']: successEnvelope(inquiryQuotaResponseSchema, 'Current inquiry subscription quota returned successfully.'),
-  ['GET /api/v1/admin/inquiry-monetization/settings']: successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings returned successfully.'),
-  ['PATCH /api/v1/admin/inquiry-monetization/settings']: successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings updated successfully.'),
-  ['GET /api/v1/admin/inquiry-plans']: successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Inquiry plans returned successfully.'),
+  ['GET /api/v1/inquiries/plans']: { ...docs['GET /api/v1/inquiries/plans'], responses: successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Active inquiry subscription plans returned successfully.') },
+  ['GET /api/v1/inquiries/quota']: { ...docs['GET /api/v1/inquiries/quota'], responses: successEnvelope(inquiryQuotaResponseSchema, 'Current inquiry subscription quota returned successfully.') },
+  ['GET /api/v1/admin/inquiry-monetization/settings']: { ...docs['GET /api/v1/admin/inquiry-monetization/settings'], responses: successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings returned successfully.') },
+  ['PATCH /api/v1/admin/inquiry-monetization/settings']: { ...docs['PATCH /api/v1/admin/inquiry-monetization/settings'], responses: successEnvelope({ type: 'object', required: ['subscriptionEnforcement'], properties: { subscriptionEnforcement: { type: 'boolean' } } }, 'Inquiry subscription enforcement settings updated successfully.') },
+  ['GET /api/v1/admin/inquiry-plans']: { ...docs['GET /api/v1/admin/inquiry-plans'], responses: successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Inquiry plans returned successfully.') },
 });
 
 
