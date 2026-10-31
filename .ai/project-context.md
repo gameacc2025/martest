@@ -588,3 +588,13 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Inquiry list/detail/create/update/status use distinct caller-facing shapes: buyerUserId is omitted; confidential buyer company may be hidden; list sealed response counts can be absent; detail may hide responses until reveal and anonymize supplier/company IDs in anonymous sealed mode. Inquiry item endpoints include compact product/company projections.
 - Admin notification folder operations expose full folder metadata; announcement acceptance returns recipient and channel summary counts under `{data}` with HTTP 202.
 - Step 16E CI pending; static route key coverage remains 149/149.
+
+
+## Core resource response coverage — step 16E merged (2026-10-31)
+
+- PR #54 merged at `8ab9acf25c1380e51fc840fa7d69ea42377971b4`.
+- Product management list/detail/create/update contracts reflect `productInclude`: management scalars, company/category/subcategory, price tiers, images, documents, last ten status history. Public catalog response remains separately selected and omits management-only metadata.
+- Company list/detail/create/update contracts reflect company service includes, inquiryLimit, limits, counts and up to ten flattened user summaries.
+- Inquiry list/detail/create/update/status and item endpoints document caller-shaped data; buyerUserId is omitted, confidential company identity can be hidden, sealed counts may be absent and anonymous sealed supplier identities are redacted.
+- Admin notification folder CRUD and announcement receipt contracts added. CI: backend 1,390/1,390; frontend/shared 18/18; builds and Prisma migration validation passed. Runtime validation not confirmed at merge.
+- Next: audit remaining generic response placeholders for users/RBAC/categories/settings/company stats/product auxiliary endpoints.
