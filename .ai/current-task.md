@@ -651,3 +651,21 @@ PR #62 squash-merged into `main` at `3d3c2de398566e9f064744dcd3698f43dbd54d6c`. 
 - 429 now documents native Fastify `{statusCode:429,error:'Too Many Requests',message}` rather than claiming central wrapping.
 - 502/503 are intentionally not advertised: inquiry payment service throws those internal status codes, but central handler currently normalizes all thrown 5xx to generic 500. No unsafe behavior change was made.
 - Added structural tests for 401/403/429/500 variants and payment status normalization; route inventory remains 149/149 with no duplicate keys. CI pending.
+
+
+## OpenAPI error envelope correction — step 16J merged (2026-10-31)
+
+PR #63 squash-merged into `main` at `97ea2bb9adaa140fb8b41925269446264fd088a7`. CI [41240966618](https://github.com/gameacc2025/martest/actions/runs/41240966618) passed: backend 1,398/1,398; frontend/shared 18/18; all frontend builds passed. Prisma migration validation [41240966682](https://github.com/gameacc2025/martest/actions/runs/41240966682) passed. Runtime [41240966686](https://github.com/gameacc2025/martest/actions/runs/41240966686) is a separate workflow.
+
+- Route-level OpenAPI 401/403 now model the nested central error and direct auth/RBAC guard error via `oneOf`.
+- 500 models both the central nested error and the direct auth-refresh catch-all response.
+- 429 documents native Fastify `{statusCode,error,message}`; the incorrect claim of central wrapping is removed.
+- Payment service 502/503 exceptions remain normalized to generic 500 by the central handler and are not advertised as public statuses. This preserves current production redaction; safe payment status behavior remains a follow-up decision.
+- Structural tests pass and all 149 route inventory entries remain documented with no duplicates.
+
+## Next active work — step 16L payment error contract and provider failure handling
+
+- Trace request/retry/callback payment paths and their controller response/redirect behavior.
+- Decide whether sanitized provider-unavailable/rejected errors should surface as 502/503 or remain generic 500; if changing, use a narrow allow-list and never expose provider response bodies, merchant configuration, authority secrets or stack traces.
+- Add controller/service/error-handler tests for provider unavailable, malformed response, rejected request, missing configuration and generic unexpected errors.
+- Update route-level OpenAPI statuses and API/.ai docs only after runtime behavior is verified; CI/migration validation and merge.
