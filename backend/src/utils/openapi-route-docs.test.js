@@ -194,6 +194,17 @@ test('admin subscription, delivery and inquiry stats response contracts match se
   assert.equal(stats.recentResponses.items.properties.company.required.includes('id'), false);
 });
 
+test('inquiry list response preserves pagination and omits private buyer identifiers', () => {
+  const response = docs['GET /api/v1/inquiries'].responses[200].properties;
+  const inquiry = response.data.items.properties;
+  assert.ok(response.meta.properties.totalPages);
+  assert.ok(inquiry.companyId);
+  assert.ok(inquiry.company);
+  assert.ok(inquiry._count.properties.items);
+  assert.ok(inquiry._count.properties.responses);
+  assert.equal(inquiry.buyerUserId, undefined);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
