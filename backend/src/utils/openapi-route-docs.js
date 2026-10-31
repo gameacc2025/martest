@@ -961,4 +961,138 @@ Object.assign(docs, {
   },
 });
 
+
+// Product history and inquiry conversation/response contracts from service projections.
+const productActorResponseSchema = {
+  type: 'object', required: ['id', 'email', 'profile'], properties: {
+    id: { type: 'integer' }, email: { type: ['string', 'null'] },
+    profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } }, additionalProperties: true }, { type: 'null' }] },
+  },
+};
+const productPriceSnapshotResponseSchema = {
+  type: 'object', required: ['id', 'priceTierId', 'minQuantity', 'maxQuantity', 'price', 'unit', 'action', 'recordedAt'],
+  properties: {
+    id: { type: 'integer' }, priceTierId: { type: ['integer', 'null'] }, minQuantity: { type: 'integer' },
+    maxQuantity: { type: ['integer', 'null'] }, price: { type: 'string' }, unit: { type: ['string', 'null'] },
+    action: { type: 'string' }, recordedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const productStatusHistoryResponseSchema = {
+  type: 'object', required: ['id', 'productId', 'previousStatus', 'newStatus', 'changedByUserId', 'comment', 'createdAt', 'changedBy'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, previousStatus: { type: 'string' }, newStatus: { type: 'string' },
+    changedByUserId: { type: 'integer' }, comment: { type: ['string', 'null'] }, createdAt: { type: 'string', format: 'date-time' },
+    changedBy: productActorResponseSchema,
+  },
+};
+const productActivityLogResponseSchema = {
+  type: 'object', required: ['id', 'productId', 'actorUserId', 'action', 'detail', 'comment', 'createdAt', 'actor'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, actorUserId: { type: 'integer' }, action: { type: 'string' },
+    detail: { type: ['string', 'null'] }, comment: { type: ['string', 'null'] }, createdAt: { type: 'string', format: 'date-time' },
+    actor: productActorResponseSchema,
+  },
+};
+const inquiryMessageResponseSchema = {
+  type: 'object',
+  required: ['id', 'inquiryId', 'senderUserId', 'senderCompanyId', 'recipientUserId', 'recipientCompanyId', 'body', 'createdAt', 'readAt'],
+  properties: {
+    id: { type: 'integer' }, inquiryId: { type: 'integer' },
+    senderUserId: { type: ['integer', 'null'] }, senderCompanyId: { type: ['integer', 'null'] },
+    recipientUserId: { type: ['integer', 'null'] }, recipientCompanyId: { type: ['integer', 'null'] },
+    body: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' }, readAt: { type: ['string', 'null'], format: 'date-time' },
+    senderUser: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, profile: { anyOf: [{ type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } }, additionalProperties: true }, { type: 'null' }] }, additionalProperties: true }, { type: 'null' }] },
+    senderCompany: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
+    recipientUser: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' } }, { type: 'null' }] },
+    recipientCompany: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
+    smsQueued: { type: 'boolean' }, smsSkippedReason: { type: ['string', 'null'] },
+  },
+};
+const inquiryResponseAttachmentResponseSchema = {
+  type: 'object', required: ['id', 'responseId', 'url', 'filename', 'mimetype', 'size', 'createdAt'],
+  properties: {
+    id: { type: 'integer' }, responseId: { type: 'integer' }, url: { type: 'string', format: 'uri' },
+    filename: { type: 'string' }, mimetype: { type: ['string', 'null'] }, size: { type: ['integer', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+};
+const inquiryResponseItemResponseSchema = {
+  type: 'object', required: ['id', 'responseId', 'inquiryItemId', 'price', 'currency', 'availableQuantity', 'deliveryTime', 'description', 'inquiryItem'],
+  properties: {
+    id: { type: 'integer' }, responseId: { type: 'integer' }, inquiryItemId: { type: 'integer' },
+    price: { type: 'string' }, currency: { type: 'string' }, availableQuantity: { type: 'integer' },
+    deliveryTime: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
+    inquiryItem: { type: 'object', properties: {
+      id: { type: 'integer' }, inquiryId: { type: 'integer' }, productId: { type: 'integer' },
+      description: { type: ['string', 'null'] }, quantity: { type: 'integer' }, attachment: { type: ['string', 'null'] },
+      createdAt: { type: 'string', format: 'date-time' },
+      product: { type: 'object', properties: { id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' }, companyId: { type: 'integer' } }, additionalProperties: true },
+    }, additionalProperties: true },
+  },
+};
+const inquiryResponseResponseSchema = {
+  type: 'object', required: ['id', 'inquiryId', 'status', 'withdrawnAt', 'createdAt', 'updatedAt', 'company', 'attachments', 'items'],
+  properties: {
+    id: { type: 'integer' }, inquiryId: { type: 'integer' }, companyId: { type: 'integer' },
+    status: { type: 'string', enum: ['PENDING', 'SELECTED', 'REJECTED', 'WITHDRAWN'] },
+    withdrawnAt: { type: ['string', 'null'], format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' },
+    updatedAt: { type: 'string', format: 'date-time' },
+    company: { type: 'object', required: ['name', 'type'], properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] } }, additionalProperties: true },
+    attachments: { type: 'array', items: inquiryResponseAttachmentResponseSchema },
+    items: { type: 'array', items: inquiryResponseItemResponseSchema },
+    inquiry: { type: 'object', additionalProperties: true },
+  },
+};
+const inquiryDecisionReceiptResponseSchema = {
+  type: 'object', required: ['id', 'inquiryId', 'status'],
+  properties: { id: { type: 'integer' }, inquiryId: { type: 'integer' }, status: { type: 'string', enum: ['SELECTED', 'REJECTED'] } },
+};
+
+Object.assign(docs, {
+  ['GET /api/v1/products/:id/price-history']: {
+    ...docs['GET /api/v1/products/:id/price-history'],
+    responses: { 200: { description: 'Complete public retail price snapshot series in chronological order.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: productPriceSnapshotResponseSchema } } } },
+  },
+  ['GET /api/v1/products/:id/history']: {
+    ...docs['GET /api/v1/products/:id/history'],
+    responses: { 200: { description: 'Product status history with the actor projection returned by the service.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: productStatusHistoryResponseSchema } } } },
+  },
+  ['GET /api/v1/products/:id/activity']: {
+    ...docs['GET /api/v1/products/:id/activity'],
+    responses: { 200: { description: 'Immutable product activity log with actor projection.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: productActivityLogResponseSchema } } } },
+  },
+  ['GET /api/v1/inquiries/:id/messages']: {
+    ...docs['GET /api/v1/inquiries/:id/messages'],
+    responses: { 200: { description: 'Inquiry messages visible to the caller, ordered oldest first; recipient messages may be marked read.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: inquiryMessageResponseSchema } } } },
+  },
+  ['POST /api/v1/inquiries/:id/messages']: {
+    ...docs['POST /api/v1/inquiries/:id/messages'],
+    responses: { 201: { description: 'Created inquiry message and optional SMS delivery outcome.', type: 'object', required: ['data'], properties: { data: inquiryMessageResponseSchema } } },
+  },
+  ['GET /api/v1/inquiries/:id/responses']: {
+    ...docs['GET /api/v1/inquiries/:id/responses'],
+    responses: { 200: { description: 'Supplier responses visible under inquiry visibility rules. Sealed buyer views may return an empty array until reveal; anonymous sealed views redact supplier identifiers.', type: 'object', required: ['data'], properties: { data: { type: 'array', items: inquiryResponseResponseSchema } } } },
+  },
+  ['POST /api/v1/inquiries/:id/responses']: {
+    ...docs['POST /api/v1/inquiries/:id/responses'],
+    responses: { 201: { description: 'Created supplier response with its response items and attachments.', type: 'object', required: ['data'], properties: { data: inquiryResponseResponseSchema } } },
+  },
+  ['PATCH /api/v1/inquiries/:id/responses/:responseId']: {
+    ...docs['PATCH /api/v1/inquiries/:id/responses/:responseId'],
+    responses: { 200: { description: 'Updated supplier response and response items. The service also includes the inquiry record for the supplier editor.', type: 'object', required: ['data'], properties: { data: inquiryResponseResponseSchema } } },
+  },
+  ['PATCH /api/v1/inquiries/:id/responses/:responseId/decision']: {
+    ...docs['PATCH /api/v1/inquiries/:id/responses/:responseId/decision'],
+    responses: { 200: { description: 'Minimal buyer decision receipt; supplier identity is not echoed.', type: 'object', required: ['data'], properties: { data: inquiryDecisionReceiptResponseSchema } } },
+  },
+  ['POST /api/v1/inquiries/:id/responses/:responseId/withdraw']: {
+    ...docs['POST /api/v1/inquiries/:id/responses/:responseId/withdraw'],
+    responses: { 200: { description: 'Withdrawn supplier response with response items and attachments.', type: 'object', required: ['data'], properties: { data: inquiryResponseResponseSchema } } },
+  },
+  ['POST /api/v1/inquiries/:id/responses/:responseId/attachments']: {
+    ...docs['POST /api/v1/inquiries/:id/responses/:responseId/attachments'],
+    responses: { 201: { description: 'Created response attachment metadata.', type: 'object', required: ['data'], properties: { data: inquiryResponseAttachmentResponseSchema } } },
+  },
+});
+
 module.exports = docs;
