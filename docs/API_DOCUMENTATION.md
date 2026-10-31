@@ -272,3 +272,13 @@ Product management, company CRUD/list/detail, caller-shaped inquiry and inquiry 
 PR #55 merged at `306a82047e3226bf93660598dfcc1b29dcf0e1c5`. CI passed with 1,391 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime compose/browser validation was still running at merge time and is not reported as passed.
 
 Company settings/statistics/products, category/subcategory CRUD and public browsing, specification-library search/all, and product price-tier/image/document/workflow response contracts are now documented. Delete operations for these auxiliary resources return 204 with no body.
+
+
+## User/RBAC/settings/admin response contracts — step 16G (2026-10-31)
+
+- User list returns `{data,meta}` with safe identity/profile/access fields and role/permission name arrays. User detail/create/update/access changes return detailed role and permission records. `passwordHash` and refresh-token data are never selected or documented.
+- Role list supports either a plain `{data:[...]}` envelope or paginated `{data,meta}`. Role records follow `ROLE_SELECT`, including compact permission joins and `_count.users`; assignable roles are restricted to the caller scope and return only id/name/label/scope.
+- Permission list supports plain, paginated and grouped forms. Permission records follow `PERMISSION_SELECT`; deletion returns a message envelope.
+- Current-user settings profile returns user identity, profile, access profile/company and compact role assignments. Password change, avatar upload and avatar delete return their actual message/avatarUrl envelopes.
+- Admin stats returns eight aggregate counts, up to five recent users and up to twenty pending products with compact company/category/creator projections. Admin settings expose only `productReviewEditThreshold`; inquiry monetization settings expose only `subscriptionEnforcement`.
+- Admin inquiry plan CRUD follows the full InquiryPlan scalar model. Manual subscription grant/activate/reject responses include the full plan and only compact company/user owner projections. Online gateway payment cannot be manually activated.
