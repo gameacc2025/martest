@@ -436,3 +436,10 @@ Next work is the SMS delivery integration audit: reconcile dispatcher and inquir
 PR #43 merged at `c08b4d319c44541d7a238cba94f0d1b91556ee42`; CI passed 1,373/1,373 backend tests and migration validation passed. Explicit inquiry-message SMS recipient lookup now requires an ACTIVE user; company recipients require ACTIVE COMPANY AccessProfile with matching companyId and active panel access. Sender quota is consumed once at enqueue in the same transaction as the inquiry message and SMS outbox row. Generic event dispatcher SMS remains intentionally unimplemented. Live Twilio is not verified.
 
 Next priority is subscription payment provider/callback/idempotency review.
+
+
+## Zarinpal amount storage invariant — 2026-10-31
+
+- `InquirySubscription.paymentAmount` is PostgreSQL INTEGER / Prisma Int. Zarinpal receives Rial, so Toman plan prices are multiplied by 10.
+- Validate the converted Rial amount as a positive integer no greater than 2,147,483,647 before creating a provider request. Reject overflow before any external payment request to avoid orphaned external authorities or failed persistence.
+- Payment activation must continue to rely on server-side Zarinpal verification, never callback query parameters alone. Live credentials/staging transaction remain unverified.
