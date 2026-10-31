@@ -46,6 +46,36 @@ const multipartFileBody = (fieldName = 'file') => ({
 });
 
 const docs = {
+  'POST /api/v1/auth/register': {
+    summary: 'Register customer account',
+    description: 'Creates a Website customer account using phone, password and personal name fields. Authentication required: none. Permission required: none. Rate limited.',
+    tags: ['Authentication'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: createdResponse('Customer account created successfully.'),
+  },
+  'POST /api/v1/auth/register-company': {
+    summary: 'Register company and manager',
+    description: 'Submits a company registration with its initial manager for staff approval. Authentication required: none. Permission required: none. Rate limited.',
+    tags: ['Authentication'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: createdResponse('Company registration submitted successfully.'),
+  },
+  'POST /api/v1/auth/handoff': {
+    summary: 'Create cross-app handoff code',
+    description: 'Creates a short-lived, one-time PKCE handoff code for an authenticated panel session. Authentication required: Bearer JWT. Permission required: authenticated user.',
+    tags: ['Authentication'],
+    responses: resourceResponse('Handoff code created successfully.'),
+  },
+  'POST /api/v1/auth/handoff/redeem': {
+    summary: 'Redeem cross-app handoff code',
+    description: 'Redeems a one-time PKCE handoff code and verifier to establish the target panel session. Requires a trusted browser origin; no bearer token is used on this endpoint.',
+    tags: ['Authentication'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: resourceResponse('Handoff session established successfully.'),
+  },
   'POST /api/v1/auth/login': {
     summary: 'Login',
     description: 'Authenticates a user with phone and password. Returns an access token and sets the refresh token cookie when login succeeds. Authentication required: none. Permission required: none.',
@@ -58,14 +88,16 @@ const docs = {
     summary: 'Refresh access token',
     description: 'Issues a new access token using the refresh token cookie. Authentication required: refresh token cookie. Permission required: authenticated session.',
     tags: ['Authentication'],
-    permission: 'Authenticated refresh token',
+    permission: 'Authenticated refresh token cookie + trusted origin',
+    security: [{ refreshCookie: [] }],
     responses: { 200: { description: 'New access token issued.', $ref: '#/components/schemas/AuthTokens' } },
   },
   'POST /api/v1/auth/logout': {
     summary: 'Logout current device',
     description: 'Revokes the current refresh token and clears the refresh cookie. Authentication required: refresh token cookie. Permission required: authenticated session.',
     tags: ['Authentication'],
-    permission: 'Authenticated refresh token',
+    permission: 'Authenticated refresh token cookie + trusted origin',
+    security: [{ refreshCookie: [] }],
     responses: messageResponse('Logged out from the current device.'),
   },
   'POST /api/v1/auth/logout-all': {
@@ -295,6 +327,14 @@ const inquiryListQuery = {
 };
 
 Object.assign(docs, {
+  'GET /api/v1/inquiries/subscription/payment/callback': {
+    summary: 'Verify Zarinpal subscription callback',
+    description: 'Public payment-provider callback. The stored Authority and server-side Zarinpal verification determine activation; query parameters alone are never trusted.',
+    tags: ['Inquiries'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: { 302: { description: 'Redirects to the configured subscription result URL.' } },
+  },
   'GET /api/v1/inquiries': { summary: 'List inquiries', description: 'Lists inquiries with server-side pagination, search, status filtering, scope-based visibility (sent/received/all) and sorting. Company-based access is enforced: buyers see their own inquiries, sellers see inquiries requesting their products, and SUPER_ADMIN can see all. Authentication required: Bearer JWT. Permission required: leads.read or inquiries.read.', tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', querystring: inquiryListQuery, responses: paginatedResponse('Inquiries returned successfully.') },
   'GET /api/v1/inquiries/:id': { summary: 'Get inquiry by ID', description: 'Returns a single inquiry with items, responses and recent status history. Read access is restricted to the owning (buyer) company, companies owning a requested product (seller), and SUPER_ADMIN; anyone else receives 404. Authentication required: Bearer JWT. Permission required: leads.read or inquiries.read.', tags: ['Inquiries'], permission: 'leads.read OR inquiries.read', params: idParam(), responses: resourceResponse('Inquiry returned successfully.') },
   'POST /api/v1/inquiries': { summary: 'Create inquiry', description: 'Creates a new inquiry with items. Authentication required: Bearer JWT. Permission required: leads.create or inquiries.create.', tags: ['Inquiries'], permission: 'leads.create OR inquiries.create', responses: createdResponse('Inquiry created successfully.') },
