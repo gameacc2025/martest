@@ -204,11 +204,12 @@ test('every route with a `params` schema requires exactly the {id} / {id,subId} 
 });
 
 test('admin inquiry subscriptions, notification deliveries, inquiry dashboard and managed product responses are modeled', () => {
-  const subscriptions = docs['GET /api/v1/admin/inquiry-subscriptions'].responses[200].properties.data.items;
+  const subscriptionList = docs['GET /api/v1/admin/inquiry-subscriptions'].responses[200].properties.data;
+  const subscriptions = subscriptionList.items;
   assert.ok(subscriptions.properties.plan.properties.durationDays);
   assert.ok(subscriptions.properties.company);
   assert.ok(subscriptions.properties.user);
-  assert.equal(subscriptions.maxItems, 100);
+  assert.equal(subscriptionList.maxItems, 100);
 
   const granted = docs['POST /api/v1/admin/inquiry-subscriptions/grant'].responses[201].properties.data.properties;
   assert.ok(granted.status);
