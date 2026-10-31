@@ -901,4 +901,54 @@ Object.assign(docs, {
   ['GET /api/v1/admin/inquiry-plans']: successEnvelope({ type: 'array', items: inquiryPlanResponseSchema }, 'Inquiry plans returned successfully.'),
 });
 
+
+// Inquiry subscription response shapes are based on inquiry-subscription/payment service projections.
+const inquirySubscriptionResponseSchema = {
+  type: 'object',
+  required: ['id', 'planId', 'companyId', 'userId', 'status', 'startsAt', 'endsAt', 'activatedBy', 'paymentReference', 'paymentProvider', 'paymentAuthority', 'paymentRefId', 'paymentAmount', 'paymentVerifiedAt', 'notes', 'createdAt', 'updatedAt', 'plan'],
+  properties: {
+    id: { type: 'integer' }, planId: { type: 'integer' }, companyId: { type: ['integer', 'null'] }, userId: { type: ['integer', 'null'] },
+    status: { type: 'string', enum: ['PENDING_PAYMENT', 'ACTIVE', 'EXPIRED', 'CANCELLED', 'SUSPENDED'] },
+    startsAt: { type: ['string', 'null'], format: 'date-time' }, endsAt: { type: ['string', 'null'], format: 'date-time' },
+    activatedBy: { type: ['integer', 'null'] }, paymentReference: { type: ['string', 'null'] }, paymentProvider: { type: ['string', 'null'] },
+    paymentAuthority: { type: ['string', 'null'] }, paymentRefId: { type: ['string', 'null'] }, paymentAmount: { type: ['integer', 'null'] },
+    paymentVerifiedAt: { type: ['string', 'null'], format: 'date-time' }, notes: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    plan: { type: 'object', required: ['id', 'code', 'name', 'durationDays', 'price', 'currency', 'inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod'], properties: {
+      id: { type: 'integer' }, code: { type: 'string' }, name: { type: 'string' }, durationDays: { type: 'integer' },
+      price: { type: 'string' }, currency: { type: 'string' }, inquiriesPerPeriod: { type: 'integer' },
+      responsesPerPeriod: { type: 'integer' }, internalMessagesPerPeriod: { type: 'integer' }, smsPerPeriod: { type: 'integer' },
+    } },
+  },
+};
+const subscriptionPaymentResultSchema = {
+  type: 'object', required: ['payment', 'subscriptionId', 'refId'],
+  properties: {
+    payment: { type: 'string', enum: ['success', 'failed', 'pending'] },
+    subscriptionId: { type: 'integer' }, refId: { type: ['string', 'null'] },
+  },
+};
+Object.assign(docs, {
+  ['GET /api/v1/inquiries/subscription/me']: {
+    ...docs['GET /api/v1/inquiries/subscription/me'],
+    responses: successEnvelope({ type: 'object', required: ['subscriptions', 'quota'], properties: {
+      subscriptions: { type: 'array', items: inquirySubscriptionResponseSchema }, quota: inquiryQuotaResponseSchema,
+    } }, 'Caller-owned inquiry subscriptions and current quota returned successfully.'),
+  },
+  ['POST /api/v1/inquiries/subscription']: {
+    ...docs['POST /api/v1/inquiries/subscription'],
+    responses: { 201: { description: 'Inquiry subscription request created; payment mode and next action returned.', type: 'object', required: ['data'], properties: { data: {
+      type: 'object', required: ['paymentMode', 'subscription', 'paymentUrl'], properties: {
+        paymentMode: { type: 'string', enum: ['MANUAL_REVIEW', 'ONLINE'] },
+        subscription: inquirySubscriptionResponseSchema,
+        paymentUrl: { type: ['string', 'null'], format: 'uri' },
+      },
+    } } } },
+  },
+  ['POST /api/v1/inquiries/subscription/:id/verify-payment']: {
+    ...docs['POST /api/v1/inquiries/subscription/:id/verify-payment'],
+    responses: { 200: { description: 'Server-side inquiry subscription payment verification result.', type: 'object', required: ['data'], properties: { data: subscriptionPaymentResultSchema } } },
+  },
+});
+
 module.exports = docs;
