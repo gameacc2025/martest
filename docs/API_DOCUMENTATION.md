@@ -265,3 +265,10 @@ Product management, company CRUD/list/detail, caller-shaped inquiry and inquiry 
 - Category/subcategory create/update responses now use their actual `{data}` envelopes; delete operations return HTTP 204 with no body.
 - Specification-library search returns selected field metadata only (id/title/slug/type/defaultUnit/description), capped at 50; `/all` returns the same selected shape for all active fields.
 - Product price-tier create/update, image upload/primary/sort, document upload and workflow transitions now describe their actual response DTOs. Product tier/image/document delete endpoints return HTTP 204 without a body. Retail price snapshot behavior is noted for tier mutations.
+
+
+## Step 16F merge — company/category/product auxiliary responses (2026-10-31)
+
+PR #55 merged at `306a82047e3226bf93660598dfcc1b29dcf0e1c5`. CI passed with 1,391 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime compose/browser validation was still running at merge time and is not reported as passed.
+
+Company settings/statistics/products, category/subcategory CRUD and public browsing, specification-library search/all, and product price-tier/image/document/workflow response contracts are now documented. Delete operations for these auxiliary resources return 204 with no body.
