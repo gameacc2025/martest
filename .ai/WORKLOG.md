@@ -1484,3 +1484,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added auth response schemas for login, refresh, logout, logout-all, me, customer/company registration, admin password reset and PKCE handoff create/redeem. Refresh token remains cookie-only; handoff code TTL is 60 seconds.
 - Added profile settings projection from `PROFILE_SELECT`, avatar URL, message receipts, admin stats (5 recent users, 20 pending products) and product review threshold setting.
 - Added structural tests for the DTO shapes and token/hash exclusion. New block delimiter balance passed; route inventory remains 149/149. CI pending.
+
+
+## 2026-10-31 — OPENAPI-USERS-AUTH-RBAC-RESPONSES-STEP-16F-MERGE
+
+- PR #52 merged at `a58d45f85025ec054d12d46ad9f6f4ba1c08389d`.
+- CI [41228711838] passed: backend 1,388/1,388; frontend/shared 18/18; frontend builds passed. Migration validation [41228711826] passed.
+- Added safe user CRUD/access schemas (no password hashes), role/permission schemas and their actual list modes, authentication and PKCE handoff schemas, profile settings/avatar/password schemas, and admin dashboard/settings schemas.
+- Refresh tokens are cookie-only and omitted from all JSON response schemas; handoff create returns one-time code with 60-second expiry. Customer registration has no AccessProfile; company registration creates inactive COMPANY access pending approval.
+- Added structural tests and updated API documentation. Route inventory remains 149/149 documented.
+- Next: step 16G for product mutation/media and notification preference/folder response contracts.
