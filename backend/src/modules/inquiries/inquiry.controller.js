@@ -4,6 +4,29 @@ const { startSubscriptionPayment, handleSubscriptionPaymentCallback, retryPendin
 const { success } = require('../../utils/success');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
 
+const SAFE_PAYMENT_PROVIDER_ERRORS = Object.freeze({
+  PAYMENT_PROVIDER_UNAVAILABLE: 502,
+  PAYMENT_PROVIDER_HTTP_ERROR: 502,
+  PAYMENT_PROVIDER_INVALID_RESPONSE: 502,
+  PAYMENT_REQUEST_REJECTED: 502,
+  PAYMENT_PROVIDER_NOT_CONFIGURED: 503,
+});
+
+function sendSafePaymentProviderError(error, reply) {
+  const expectedStatus = SAFE_PAYMENT_PROVIDER_ERRORS[error?.code];
+  if (!expectedStatus || Number(error.statusCode) !== expectedStatus) throw error;
+
+  // Only expose the service's allow-listed code and sanitized message.
+  // Never forward provider response bodies, credentials, authority values,
+  // stack traces, or arbitrary error properties.
+  return reply.code(expectedStatus).send({
+    error: {
+      code: error.code,
+      message: error.message,
+    },
+  });
+}
+
 async function list(request, reply) {
   // listInquiries returns { data, meta } from buildPaginatedResponse — already correct
   const result = await inquiryService.listInquiries(request.query, request.user);
@@ -83,19 +106,31 @@ async function mySubscriptions(request, reply) {
 
 async function requestSubscription(request, reply) {
   const owner = subscriptionOwner(request.user);
-  const result = await startSubscriptionPayment({ ...owner, planId: request.body.planId, paymentReference: request.body.paymentReference });
-  return reply.code(201).send(success({ ...result.subscription, paymentMode: result.paymentMode, paymentUrl: result.paymentUrl }));
+  try {
+    const result = await startSubscriptionPayment({ ...owner, planId: request.body.planId, paymentReference: request.body.paymentReference });
+    return reply.code(201).send(success({ ...result.subscription, paymentMode: result.paymentMode, paymentUrl: result.paymentUrl }));
+  } catch (error) {
+    return sendSafePaymentProviderError(error, reply);
+  }
 }
 
 async function retrySubscriptionPayment(request, reply) {
   const owner = subscriptionOwner(request.user);
-  const result = await retryPendingSubscriptionVerification({ ...owner, subscriptionId: request.params.id });
-  return reply.send(success(result));
+  try {
+    const result = await retryPendingSubscriptionVerification({ ...owner, subscriptionId: request.params.id });
+    return reply.send(success(result));
+  } catch (error) {
+    return sendSafePaymentProviderError(error, reply);
+  }
 }
 
 async function subscriptionPaymentCallback(request, reply) {
-  const result = await handleSubscriptionPaymentCallback(request.query);
-  return reply.redirect(result.redirectUrl);
+  try {
+    const result = await handleSubscriptionPaymentCallback(request.query);
+    return reply.redirect(result.redirectUrl);
+  } catch (error) {
+    return sendSafePaymentProviderError(error, reply);
+  }
 }
 
 async function stats(request, reply) {
