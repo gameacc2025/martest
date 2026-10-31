@@ -1456,3 +1456,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Documented admin subscription owner/plan projections and 100-row cap; delivery stats status/channel maps and 10 recent failures; inquiry dashboard scoping and 5-row recent lists; inquiry-list confidentiality/sealed redactions; managed product relation groups.
 - Added structural response tests and updated API documentation. Static route inventory remains 149/149 documented with zero missing/duplicate route keys.
 - Next: step 16E audit remaining route envelopes and replace generic responses with concrete source-backed schemas where stable DTOs exist.
+
+
+## 2026-10-31 — OPENAPI-COMPANY-CATEGORY-RESPONSES-STEP-16E
+
+- Added source-backed Company and Category response schemas from company/category controllers, service Prisma includes and Prisma models.
+- Company list/detail and mutation responses model scalar company fields, counts, inquiry limits, custom key/value limits, and detail's flattened up-to-10 user summaries. Company settings, statistics (five recent products/orders) and company product pagination are modeled.
+- Category public/staff lists and details model nested subcategory summaries; subcategory detail models category and specification-template fields. Public category product listing models the published/public product projection and pagination.
+- DELETE company/category/subcategory endpoints now explicitly document 204/no body. Added structural contract tests.
+- Static route inventory check: 149/149 docs entries, no missing routes or duplicate keys. New schema block delimiters balanced. CI pending.
