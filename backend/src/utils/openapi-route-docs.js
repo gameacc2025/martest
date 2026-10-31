@@ -363,6 +363,7 @@ Object.assign(docs, {
     summary: 'Move a user to another company',
     description: 'Changes the company assignment of a user. Authentication required: Bearer JWT. Permission required: users.update. The service restricts this privileged cross-company operation to the authorized administrative context.',
     tags: ['Users'], permission: 'users.update', params: idParam(),
+    body: { type: 'object', required: ['companyId'], additionalProperties: false, properties: { companyId: { type: 'integer', minimum: 1 } } },
     responses: resourceResponse('User company assignment updated successfully.'),
   },
   'GET /api/v1/addresses': {
