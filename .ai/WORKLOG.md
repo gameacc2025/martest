@@ -1356,3 +1356,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added a link from `docs/API_DOCUMENTATION.md`.
 - Added backend test `api-route-inventory.test.js` to assert every literal Fastify route declaration is present in the inventory, preventing silent documentation drift.
 - Route JSON schemas remain in executable route/schema files; no unsupported response schema was fabricated. Swagger/OpenAPI metadata review remains the next pass.
+
+
+## 2026-10-31 — OPENAPI-STALE-ROUTE-DOCS-STEP-15
+
+- Compared OpenAPI registry against 149 Fastify routes. Initial registry had 82 matching keys and 9 stale keys for nonexistent `orders` and `settings/preferences` endpoints.
+- Removed stale route docs and unused Orders tag; documented actual notification preference endpoints and auth registration/PKCE/payment callback routes.
+- Added refreshCookie OpenAPI security scheme and made refresh/logout use it; PKCE redeem is explicitly non-Bearer.
+- Swagger now defaults undocumented routes to bearerAuth unless in explicit public route allow-list; added Addresses and Specification Library tags.
+- Added tests for stale OpenAPI keys, refresh-cookie security, PKCE redeem, and protected/public fallback. Current prose metadata coverage 89/149; 60 route descriptions remain for a later pass.
