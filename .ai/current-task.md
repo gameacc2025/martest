@@ -547,3 +547,11 @@ PR #58 merged by squash into `main` at `4ee4dbca6486588af34eda4ed9a22a809a7cb73d
 - Audit route inventory against registered Fastify routes and effective OpenAPI operations (including paths with aliases/prefixes).
 - Identify remaining undocumented response bodies/statuses or stale metadata, with focus on 204 endpoints, public routes, cookie/PKCE auth and any routes falling back to undocumented security.
 - Add static/structural tests, update API/.ai docs, run CI/migration validation and merge.
+
+
+## OpenAPI runtime route coverage audit — step 16J (in progress, 2026-10-31)
+
+- Branch: `test/openapi-runtime-route-coverage-step-16j`.
+- Added an app-level integration test that boots the actual Fastify app (existing Prisma/env mocks), fetches `/docs/json`, and compares every route in `API_ROUTE_INVENTORY.md` against the generated OpenAPI path+method.
+- The test also checks effective bearer/cookie/public security metadata against route docs, verifies global 400/401/403/404/409/413/429/500 responses, and ensures any 204 operation has no response body.
+- This closes the gap between static route-doc key coverage and actual Swagger transform output. CI pending.
