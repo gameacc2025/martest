@@ -135,3 +135,6 @@ Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categori
 
 
 - CI feedback: the first backend test run exposed one test-only mismatch in `auth.controller.test.js`: after the controller began forwarding the verified caller, the test still expected only two service arguments. Updated the fixture to include a STAFF caller and assert all three arguments. No production behavior changed in this correction; rerun CI on the new head.
+
+
+- CI feedback on the category visibility change: the first controller patch updated `getOne` but did not pass `activeOnly: true` from `listSubcategories` when checking its parent. Updated that call; the failing test correctly caught the incomplete route wiring. Re-run CI on the latest head.
