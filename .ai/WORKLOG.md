@@ -1713,3 +1713,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Unknown/mismatched errors and invalid provider config remain generic 500. Provider payload, merchant ID, authority, stack and config are never forwarded.
 - Added controller and OpenAPI contract tests; documented route-specific 502/503 responses.
 - Next: step 16M integration-test the generated `/docs/json` contract for actual registered routes, then continue remaining Inquiry flow tests/features.
+
+
+## 2026-10-31 — GENERATED-OPENAPI-INTEGRATION-STEP-16M
+
+- Added an integration test against generated `/docs/json` for inquiry subscription create/retry/callback and product soft-delete routes.
+- Assertions verify central/direct 401/403/500 schemas, native Fastify 429 schema, sanitized payment 502/503 only on relevant routes, and 204 no-content behavior.
+- Existing Swagger integration coverage continues to verify cookie-auth refresh and non-bearer handoff redeem; route registry tests cover notification preferences and all documented routes. CI pending.
