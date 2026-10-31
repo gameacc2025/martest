@@ -885,7 +885,7 @@ Object.assign(docs, {
           maxAttempts: { type: 'integer' }, nextAttemptAt: { type: 'string', format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' },
         } } },
       },
-    } } } } },
+    } } } },
   },
   ['GET /api/v1/admin/notifications/deliveries']: {
     ...docs['GET /api/v1/admin/notifications/deliveries'],
