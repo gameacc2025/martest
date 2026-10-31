@@ -488,7 +488,7 @@ test('user, RBAC, personal settings and remaining admin response contracts prese
   assert.ok(docs['POST /api/v1/roles'].responses[201].properties.data.properties._count.properties.users);
   assert.ok(docs['DELETE /api/v1/roles/:id'].responses[200].properties.data.properties.message);
 
-  const permissions = docs['GET /api/v1/permissions'].responses[200].oneOf;
+  const permissions = docs['GET /api/v1/permissions'].responses[200].anyOf;
   assert.equal(permissions.length, 3);
   assert.ok(docs['GET /api/v1/permissions/:id'].responses[200].properties.data.properties.group);
   assert.ok(docs['POST /api/v1/permissions'].responses[201].properties.data.properties.createdAt);
