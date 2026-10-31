@@ -132,3 +132,6 @@ Continue route-by-route audit of `auth`, `users`, `admin`, `settings`, `categori
 - Confirmed public category `GET /:id` and `GET /:id/subcategories/:subId` looked up taxonomy by ID without requiring ACTIVE status. The public list filtered inactive records, but direct detail URLs could still expose inactive category/subcategory metadata; the controller's source comment promised active-only behavior more broadly than the implementation provided.
 - Updated public detail lookups to require `status: ACTIVE`; inactive or unknown IDs now follow the existing not-found path. Public subcategory listing also verifies the parent category is active before returning active children.
 - Added service and controller regression tests for active-only detail lookups.
+
+
+- CI feedback: the first backend test run exposed one test-only mismatch in `auth.controller.test.js`: after the controller began forwarding the verified caller, the test still expected only two service arguments. Updated the fixture to include a STAFF caller and assert all three arguments. No production behavior changed in this correction; rerun CI on the new head.
