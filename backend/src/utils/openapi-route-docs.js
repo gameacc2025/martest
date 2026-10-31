@@ -1203,4 +1203,31 @@ Object.assign(docs, {
   },
 });
 
+
+const inquiryListItemResponseSchema = {
+  type: 'object',
+  required: ['id', 'title', 'description', 'status', 'priority', 'visibilityMode', 'confidential', 'publishDate', 'responseDeadline', 'autoClose', 'allowEarlyReveal', 'revealedAt', 'allowEditResponse', 'allowWithdrawResponse', 'closedAt', 'createdAt', 'updatedAt', 'company', '_count'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, description: { type: ['string', 'null'] },
+    companyId: { type: 'integer' }, status: { type: 'string' }, priority: { type: 'string' },
+    visibilityMode: { type: 'string', enum: ['NORMAL', 'SEALED', 'ANONYMOUS_SEALED'] },
+    confidential: { type: 'boolean' }, publishDate: { type: ['string', 'null'], format: 'date-time' },
+    responseDeadline: { type: ['string', 'null'], format: 'date-time' }, autoClose: { type: 'boolean' },
+    allowEarlyReveal: { type: 'boolean' }, revealedAt: { type: ['string', 'null'], format: 'date-time' },
+    allowEditResponse: { type: 'boolean' }, allowWithdrawResponse: { type: 'boolean' },
+    closedAt: { type: ['string', 'null'], format: 'date-time' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    company: { anyOf: [{ type: 'object', required: ['id', 'name', 'type'], properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: 'string' } } }, { type: 'null' }] },
+    _count: { type: 'object', required: ['items'], properties: { items: { type: 'integer' }, responses: { type: 'integer' } } },
+  },
+};
+Object.assign(docs, {
+  ['GET /api/v1/inquiries']: {
+    ...docs['GET /api/v1/inquiries'],
+    responses: { 200: { description: 'Paginated inquiry list. Buyer user IDs are never returned; confidential company identity and sealed response counts may be omitted according to caller context.', type: 'object', required: ['data', 'meta'], properties: {
+      data: { type: 'array', items: inquiryListItemResponseSchema }, meta: paginationMetaResponseSchema,
+    } } },
+  },
+});
+
 module.exports = docs;
