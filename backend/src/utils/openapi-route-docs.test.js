@@ -35,6 +35,19 @@ test('every key looks like "METHOD /api/v1/..." with a real HTTP method', () => 
   }
 });
 
+test('every registered API route has a dedicated OpenAPI route-doc entry', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const inventory = fs.readFileSync(path.join(__dirname, '../../../docs/API_ROUTE_INVENTORY.md'), 'utf8');
+  const registeredKeys = [...inventory.matchAll(/^\\| ([A-Z]+) \\| `(\\/api\\/v1[^\`]+)` \\|/gm)]
+    .map((match) => `${match[1]} ${match[2]}`);
+  const documentedKeys = new Set(Object.keys(docs));
+  const missing = registeredKeys.filter((key) => !documentedKeys.has(key));
+
+  assert.equal(registeredKeys.length, 149, 'update the expected route count when the inventory changes');
+  assert.deepEqual(missing, [], 'every registered route must have dedicated OpenAPI metadata');
+});
+
 test('every OpenAPI route-doc key corresponds to a registered route in the API inventory', () => {
   const fs = require('node:fs');
   const path = require('node:path');
