@@ -406,3 +406,13 @@ PR #53 merged by squash into `main` at `da0478df49eb256fdb5f40c179818a02a6f706fa
 - Audit the remaining route registry for generic response placeholders, especially product create/update/list/manage, inquiry create/update/status/item operations, company list/detail, and notification admin folder/send operations.
 - Add only response schemas grounded in controller/service/Prisma projections; preserve sensitive-field omissions and caller-specific redactions.
 - Extend structural tests and docs, then CI/migration validation and merge. Avoid browser-smoke work unless a concrete runtime issue blocks functional verification.
+
+
+## OpenAPI response contracts — step 16E (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-core-resource-response-audit-step-16e`.
+- Product management list/detail/create/update now use source-backed `productInclude` schemas (company/category/subcategory, price tiers, images, documents, max ten status-history records). Management-only fields stay out of public catalog response schemas.
+- Company list/detail/create/update now document Company scalar fields, counts, inquiry limits, usage limits and flattened max-ten recent user projections.
+- Inquiry list/detail/create/update/status and item list/create/update now document caller-shaped responses, compact product/company relations, status history, and list count. `buyerUserId` is omitted; confidentiality and sealed/anonymous-sealed response hiding/redaction are reflected in optional/nullable fields.
+- Admin notification folder CRUD and 202 announcement receipt now have concrete response schemas.
+- Corrected created-response contracts to wrap data under `{data}` (not a bare object). Structural tests added. Static route audit: 149/149 inventory routes, zero missing/duplicate keys and zero duplicate top-level schema declarations. CI pending.

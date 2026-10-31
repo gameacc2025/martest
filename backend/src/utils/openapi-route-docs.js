@@ -1909,4 +1909,293 @@ Object.assign(docs, {
   },
 });
 
+
+// Core resource response contracts — step 16E. These describe management
+// projections only where the service has a stable include/select contract.
+const step16eProductPriceTierSchema = {
+  type: 'object', required: ['id', 'productId', 'minQuantity', 'maxQuantity', 'price', 'unit', 'validFrom', 'validTo', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, minQuantity: { type: 'integer' },
+    maxQuantity: { type: ['integer', 'null'] }, price: { type: 'string' }, unit: { type: ['string', 'null'] },
+    validFrom: { type: 'string', format: 'date-time' }, validTo: { type: ['string', 'null'], format: 'date-time' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16eProductImageSchema = {
+  type: 'object', required: ['id', 'productId', 'url', 'thumbnailUrl', 'altText', 'isPrimary', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' }, url: { type: 'string' },
+    thumbnailUrl: { type: ['string', 'null'] }, altText: { type: ['string', 'null'] },
+    isPrimary: { type: 'boolean' }, sortOrder: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16eProductDocumentSchema = {
+  type: 'object', required: ['id', 'productId', 'type', 'title', 'url', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, productId: { type: 'integer' },
+    type: { type: 'string', enum: ['DATASHEET', 'CATALOG', 'MANUAL', 'CERTIFICATE'] },
+    title: { type: ['string', 'null'] }, url: { type: 'string' }, sortOrder: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16eProductCategorySchema = {
+  type: 'object', required: ['id', 'nameFa', 'nameEn', 'slug'],
+  properties: { id: { type: 'integer' }, nameFa: { type: 'string' }, nameEn: { type: 'string' }, slug: { type: 'string' } },
+};
+const step16eManagedProductSchema = {
+  type: 'object',
+  required: ['id', 'title', 'slug', 'shortDescription', 'description', 'sku', 'brand', 'model', 'specifications', 'status', 'visibility', 'isFeatured', 'editsSinceApproval', 'companyId', 'categoryId', 'subcategoryId', 'createdByUserId', 'createdAt', 'updatedAt', 'deletedAt', 'company', 'category', 'subcategory', 'prices', 'images', 'documents', 'statusHistory'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
+    shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
+    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
+    specifications: {}, status: { type: 'string', enum: ['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'PUBLISHED', 'HIDDEN', 'ARCHIVED'] },
+    visibility: { type: 'string', enum: ['PUBLIC', 'PRIVATE', 'COMPANY_ONLY'] }, isFeatured: { type: 'boolean' },
+    editsSinceApproval: { type: 'integer' }, companyId: { type: 'integer' }, categoryId: { type: 'integer' },
+    subcategoryId: { type: 'integer' }, createdByUserId: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+    deletedAt: { type: ['string', 'null'], format: 'date-time' },
+    company: { type: 'object', required: ['id', 'name', 'type'], properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] } } },
+    category: step16eProductCategorySchema,
+    subcategory: step16eProductCategorySchema,
+    prices: { type: 'array', items: step16eProductPriceTierSchema },
+    images: { type: 'array', items: step16eProductImageSchema },
+    documents: { type: 'array', items: step16eProductDocumentSchema },
+    statusHistory: { type: 'array', maxItems: 10, items: productStatusHistoryResponseSchema },
+  },
+};
+const step16eCompanyInquiryLimitSchema = {
+  type: 'object', required: ['id', 'companyId', 'maxOpenInquiries', 'maxActiveResponses', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, companyId: { type: 'integer' }, maxOpenInquiries: { type: 'integer' },
+    maxActiveResponses: { type: 'integer' }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16eCompanyLimitSchema = {
+  type: 'object', required: ['id', 'companyId', 'key', 'value', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, companyId: { type: 'integer' }, key: { type: 'string' }, value: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16eCompanyCoreSchema = {
+  type: 'object',
+  required: ['id', 'name', 'nameEn', 'nationalId', 'registrationNumber', 'type', 'description', 'logo', 'email', 'phone', 'address', 'website', 'status', 'isVerified', 'createdAt', 'updatedAt', 'deletedAt', 'inquiryLimit', 'limits'],
+  properties: {
+    id: { type: 'integer' }, name: { type: 'string' }, nameEn: { type: ['string', 'null'] },
+    nationalId: { type: ['string', 'null'] }, registrationNumber: { type: ['string', 'null'] },
+    type: { type: ['string', 'null'], enum: ['MANUFACTURER', 'IMPORTER', 'TELECOM_OPERATOR', null] },
+    description: { type: ['string', 'null'] }, logo: { type: ['string', 'null'] },
+    email: { type: ['string', 'null'] }, phone: { type: ['string', 'null'] }, address: { type: ['string', 'null'] },
+    website: { type: ['string', 'null'] }, status: { type: 'string', enum: ['PENDING', 'ACTIVE', 'INACTIVE', 'SUSPENDED'] },
+    isVerified: { type: 'boolean' }, createdAt: { type: 'string', format: 'date-time' },
+    updatedAt: { type: 'string', format: 'date-time' }, deletedAt: { type: ['string', 'null'], format: 'date-time' },
+    inquiryLimit: { anyOf: [step16eCompanyInquiryLimitSchema, { type: 'null' }] },
+    limits: { type: 'array', items: step16eCompanyLimitSchema },
+    _count: { type: 'object', properties: { products: { type: 'integer' }, accessProfiles: { type: 'integer' }, inquiries: { type: 'integer' } } },
+    users: { type: 'array', maxItems: 10, items: {
+      type: 'object', required: ['id', 'email', 'status', 'createdAt', 'type', 'isActive', 'firstName', 'lastName', 'avatar'],
+      properties: {
+        id: { type: 'integer' }, email: { type: ['string', 'null'] }, status: { type: 'string' },
+        createdAt: { type: 'string', format: 'date-time' }, type: { type: 'string', enum: ['STAFF', 'COMPANY'] },
+        isActive: { type: 'boolean' }, firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] }, avatar: { type: ['string', 'null'] },
+      },
+    } },
+  },
+};
+const step16eInquiryStatusHistorySchema = {
+  type: 'object', required: ['id', 'inquiryId', 'previousStatus', 'newStatus', 'changedByUserId', 'source', 'comment', 'createdAt', 'changedBy'],
+  properties: {
+    id: { type: 'integer' }, inquiryId: { type: 'integer' }, previousStatus: { type: 'string' }, newStatus: { type: 'string' },
+    changedByUserId: { type: ['integer', 'null'] }, source: { type: 'string' }, comment: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' },
+    changedBy: {
+      anyOf: [
+        {
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            email: { type: ['string', 'null'] },
+            profile: {
+              anyOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    firstName: { type: ['string', 'null'] },
+                    lastName: { type: ['string', 'null'] },
+                  },
+                },
+                { type: 'null' },
+              ],
+            },
+          },
+        },
+        { type: 'null' },
+      ],
+    },
+  },
+};
+const step16eInquiryItemSchema = {
+  type: 'object', required: ['id', 'inquiryId', 'productId', 'description', 'quantity', 'attachment', 'createdAt', 'product'],
+  properties: {
+    id: { type: 'integer' }, inquiryId: { type: 'integer' }, productId: { type: 'integer' },
+    description: { type: ['string', 'null'] }, quantity: { type: 'integer' }, attachment: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' },
+    product: { type: 'object', required: ['id', 'title', 'slug', 'status', 'company'], properties: {
+      id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
+      status: { type: 'string' }, company: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' }, status: { type: 'string' } } }, { type: 'null' }] },
+    } },
+  },
+};
+const step16eInquiryListItemSchema = {
+  type: 'object',
+  required: ['id', 'title', 'description', 'status', 'priority', 'visibilityMode', 'confidential', 'publishDate', 'responseDeadline', 'autoClose', 'allowEarlyReveal', 'revealedAt', 'allowEditResponse', 'allowWithdrawResponse', 'closedAt', 'createdAt', 'updatedAt', 'company', '_count'],
+  properties: {
+    id: { type: 'integer' }, title: { type: 'string' }, description: { type: ['string', 'null'] },
+    companyId: { type: 'integer' }, status: { type: 'string', enum: ['DRAFT', 'SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED', 'CANCELLED'] },
+    priority: { type: 'string', enum: ['LOW', 'NORMAL', 'HIGH', 'URGENT'] },
+    visibilityMode: { type: 'string', enum: ['NORMAL', 'SEALED', 'ANONYMOUS_SEALED'] },
+    confidential: { type: 'boolean' }, publishDate: { type: ['string', 'null'], format: 'date-time' },
+    responseDeadline: { type: ['string', 'null'], format: 'date-time' }, autoClose: { type: 'boolean' },
+    allowEarlyReveal: { type: 'boolean' }, revealedAt: { type: ['string', 'null'], format: 'date-time' },
+    allowEditResponse: { type: 'boolean' }, allowWithdrawResponse: { type: 'boolean' },
+    closedAt: { type: ['string', 'null'], format: 'date-time' }, createdAt: { type: 'string', format: 'date-time' },
+    updatedAt: { type: 'string', format: 'date-time' },
+    company: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] } } }, { type: 'null' }] },
+    _count: { type: 'object', required: ['items'], properties: { items: { type: 'integer' }, responses: { type: 'integer' } } },
+  },
+};
+const step16eInquiryDetailSchema = {
+  type: 'object',
+  required: ['id', 'title', 'description', 'status', 'priority', 'visibilityMode', 'confidential', 'publishDate', 'responseDeadline', 'autoClose', 'allowEarlyReveal', 'revealedAt', 'allowEditResponse', 'allowWithdrawResponse', 'closedAt', 'createdAt', 'updatedAt', 'company', 'items', 'responses', 'statusHistory'],
+  properties: {
+    ...step16eInquiryListItemSchema.properties,
+    companyId: { type: 'integer' },
+    company: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] } } }, { type: 'null' }] },
+    items: { type: 'array', items: step16eInquiryItemSchema },
+    responses: { type: 'array', items: inquiryResponseResponseSchema },
+    statusHistory: { type: 'array', maxItems: 10, items: step16eInquiryStatusHistorySchema },
+    responseCount: { type: 'integer', minimum: 0 },
+    responsesHidden: { type: 'boolean' },
+    _count: { type: 'object', properties: { items: { type: 'integer' }, responses: { type: 'integer' } } },
+  },
+};
+const step16eNotificationFolderSchema = {
+  type: 'object', required: ['id', 'key', 'name', 'scope', 'isSystem', 'isActive', 'sortOrder', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, key: { type: 'string' }, name: { type: 'string' },
+    scope: { type: 'string', enum: ['ALL', 'WEBSITE', 'COMPANY', 'ADMIN'] },
+    isSystem: { type: 'boolean' }, isActive: { type: 'boolean' }, sortOrder: { type: 'integer' },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const step16eAdminAnnouncementReceiptSchema = {
+  type: 'object', required: ['audience', 'recipients', 'inAppCreated', 'emailQueued', 'emailSkipped', 'smsNotImplemented'],
+  properties: {
+    audience: { type: 'string', enum: ['ALL_ACTIVE', 'CUSTOMER', 'COMPANY', 'STAFF'] },
+    recipients: { type: 'integer', minimum: 0 }, inAppCreated: { type: 'integer', minimum: 0 },
+    emailQueued: { type: 'integer', minimum: 0 }, emailSkipped: { type: 'integer', minimum: 0 },
+    smsNotImplemented: { type: 'integer', minimum: 0 },
+  },
+};
+
+Object.assign(docs, {
+  ['GET /api/v1/products/my-products']: {
+    ...docs['GET /api/v1/products/my-products'],
+    responses: {
+      200: { description: 'Paginated products visible to the current management context, including up to ten status-history rows per product.', type: 'object', required: ['data', 'meta'], properties: {
+        data: { type: 'array', items: step16eManagedProductSchema },
+        meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } },
+      } },
+    },
+  },
+  ['GET /api/v1/products/:id/manage']: {
+    ...docs['GET /api/v1/products/:id/manage'],
+    responses: successEnvelope(step16eManagedProductSchema, 'Management product with price tiers, images, documents and up to ten status-history rows.'),
+  },
+  ['POST /api/v1/products']: {
+    ...docs['POST /api/v1/products'],
+    responses: { 201: { description: 'Product created with its price tiers and management relations.', type: 'object', required: ['data'], properties: { data: step16eManagedProductSchema } } },
+  },
+  ['PATCH /api/v1/products/:id']: {
+    ...docs['PATCH /api/v1/products/:id'],
+    responses: successEnvelope(step16eManagedProductSchema, 'Updated management product with its included relations.'),
+  },
+  ['GET /api/v1/companies']: {
+    ...docs['GET /api/v1/companies'],
+    responses: {
+      200: { description: 'Paginated company rows with product/user/inquiry counts and company inquiry/usage limits.', type: 'object', required: ['data', 'meta'], properties: {
+        data: { type: 'array', items: step16eCompanyCoreSchema },
+        meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } },
+      } },
+    },
+  },
+  ['GET /api/v1/companies/:id']: {
+    ...docs['GET /api/v1/companies/:id'],
+    responses: successEnvelope(step16eCompanyCoreSchema, 'Company detail with up to ten recent company users, counts and usage limits.'),
+  },
+  ['POST /api/v1/companies']: {
+    ...docs['POST /api/v1/companies'],
+    responses: { 201: { description: 'Created company with inquiry and usage limit relations.', type: 'object', required: ['data'], properties: { data: step16eCompanyCoreSchema } } },
+  },
+  ['PATCH /api/v1/companies/:id']: {
+    ...docs['PATCH /api/v1/companies/:id'],
+    responses: successEnvelope(step16eCompanyCoreSchema, 'Updated company with inquiry and usage limit relations.'),
+  },
+  ['GET /api/v1/inquiries']: {
+    ...docs['GET /api/v1/inquiries'],
+    responses: {
+      200: { description: 'Paginated inquiry rows; buyerUserId is never exposed, confidential company identity and sealed response counts may be omitted according to caller scope.', type: 'object', required: ['data', 'meta'], properties: {
+        data: { type: 'array', items: step16eInquiryListItemSchema },
+        meta: { type: 'object', required: ['page', 'limit', 'total', 'totalPages'], properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } },
+      } },
+    },
+  },
+  ['GET /api/v1/inquiries/:id']: {
+    ...docs['GET /api/v1/inquiries/:id'],
+    responses: successEnvelope(step16eInquiryDetailSchema, 'Caller-shaped inquiry detail; buyerUserId is omitted and sealed/anonymous-sealed response visibility and identity redaction are applied.'),
+  },
+  ['POST /api/v1/inquiries']: {
+    ...docs['POST /api/v1/inquiries'],
+    responses: { 201: { description: 'Created inquiry shaped for the buyer context; company buyers start in DRAFT while customer quick inquiries start in OPEN.', type: 'object', required: ['data'], properties: { data: step16eInquiryDetailSchema } } },
+  },
+  ['PATCH /api/v1/inquiries/:id']: {
+    ...docs['PATCH /api/v1/inquiries/:id'],
+    responses: successEnvelope(step16eInquiryDetailSchema, 'Updated inquiry shaped for the caller; buyerUserId is omitted.'),
+  },
+  ['PATCH /api/v1/inquiries/:id/status']: {
+    ...docs['PATCH /api/v1/inquiries/:id/status'],
+    responses: successEnvelope(step16eInquiryDetailSchema, 'Status-transition result shaped for the caller; response visibility follows inquiry privacy mode.'),
+  },
+  ['GET /api/v1/inquiries/:id/items']: {
+    ...docs['GET /api/v1/inquiries/:id/items'],
+    responses: successEnvelope({ type: 'array', items: step16eInquiryItemSchema }, 'Inquiry items ordered by creation time, with compact product/company details.'),
+  },
+  ['POST /api/v1/inquiries/:id/items']: {
+    ...docs['POST /api/v1/inquiries/:id/items'],
+    responses: { 201: { description: 'Created inquiry item with its compact product/company projection.', type: 'object', required: ['data'], properties: { data: step16eInquiryItemSchema } } },
+  },
+  ['PATCH /api/v1/inquiries/:id/items/:itemId']: {
+    ...docs['PATCH /api/v1/inquiries/:id/items/:itemId'],
+    responses: successEnvelope(step16eInquiryItemSchema, 'Updated inquiry item with its compact product/company projection.'),
+  },
+  ['GET /api/v1/admin/notifications/folders']: {
+    ...docs['GET /api/v1/admin/notifications/folders'],
+    responses: successEnvelope({ type: 'array', items: step16eNotificationFolderSchema }, 'All notification folder definitions ordered by system flag, sort order and ID.'),
+  },
+  ['POST /api/v1/admin/notifications/folders']: {
+    ...docs['POST /api/v1/admin/notifications/folders'],
+    responses: { 201: { description: 'Created administratively managed notification folder.', type: 'object', required: ['data'], properties: { data: step16eNotificationFolderSchema } } },
+  },
+  ['PATCH /api/v1/admin/notifications/folders/:id']: {
+    ...docs['PATCH /api/v1/admin/notifications/folders/:id'],
+    responses: successEnvelope(step16eNotificationFolderSchema, 'Updated administratively managed notification folder.'),
+  },
+  ['POST /api/v1/admin/notifications/send']: {
+    ...docs['POST /api/v1/admin/notifications/send'],
+    responses: { 202: { description: 'Announcement accepted; response reports resolved recipient count and per-channel creation/queue/skip totals.', type: 'object', required: ['data'], properties: { data: step16eAdminAnnouncementReceiptSchema } } },
+  },
+});
+
 module.exports = docs;

@@ -239,3 +239,13 @@ Step 16D merge verification: PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b
 PR #53 merged at `da0478df49eb256fdb5f40c179818a02a6f706fa`. CI passed with 1,389 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime compose/browser validation was still running at merge time and is not reported as passing.
 
 Admin inquiry subscription list, notification delivery statistics/list, and inquiry dashboard statistics now have concrete response schemas grounded in their service projections. Subscription list cap is 100; delivery statistics include zero-filled status/channel buckets and ten recent failures; inquiry dashboard returns five recent inquiry/response records and preserves buyer-specific sealed/anonymous-sealed redaction.
+
+
+## Core resource response contracts — step 16E (2026-10-31)
+
+- Product management list/detail/create/update now describe the actual management `productInclude`: product scalars, compact company/category/subcategory projections, ordered price tiers/images/documents and up to ten status-history rows. Public catalog responses remain separate and do not inherit management-only creator/edit/moderation fields.
+- Company list/detail/create/update now describe Company scalars, inquiry limit, usage limits and counts; detail flattens at most ten recent AccessProfile users into a safe user projection (id/email/status/timestamps/context/active/profile names/avatar).
+- Inquiry list omits `buyerUserId`, keeps `_count.responses` optional because sealed views may redact it, and allows company identity to be null/omitted under confidentiality. Inquiry detail/create/update/status describe included items/products, supplier responses, status history, responseCount and responsesHidden while preserving sealed/anonymous-sealed filtering and identity redaction.
+- Inquiry item list/create/update describe the compact requested-product/company projection.
+- Admin notification folder list/create/update describe the full folder model. Announcement 202 response describes resolved recipients and per-channel in-app/email/SMS summary counts.
+- Create endpoints use their actual `{data}` envelope and 201 status; announcement dispatch uses `{data}` with 202.

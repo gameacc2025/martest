@@ -1514,3 +1514,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Initial CI caught a duplicate schema constant and then two structural-test mismatches (missing documented list cap and assertion through nullable relation `anyOf`). Renamed the step-specific schema constants, documented `maxItems:100`, and corrected test paths.
 - Final CI passed: backend 1,389/1,389, frontend/shared 18/18, frontend builds passed. Prisma migration validation passed. Runtime compose/browser validation was still in progress at merge time; not claimed as passed.
 - Next: step 16E audit remaining generic response placeholders and add stable source-backed response schemas.
+
+
+## 2026-10-31 — OPENAPI-CORE-RESOURCE-RESPONSE-AUDIT-STEP-16E
+
+- Started from main on `docs/openapi-core-resource-response-audit-step-16e`.
+- Added source-backed management product schemas for list/detail/create/update from `productInclude`; model covers scalar management fields, compact company/category/subcategory projections, price tiers, images, documents and the last ten status-history rows. Public catalog response fields remain separate.
+- Added company list/detail/create/update schemas from company service includes; company detail flattens up to ten AccessProfile users and excludes raw auth credentials.
+- Added inquiry list/detail/create/update/status and item list/create/update schemas from `inquiryInclude` and `shapeInquiryForCaller`; no buyerUserId, confidential company identity may be hidden, sealed response counts may be omitted, anonymous sealed supplier IDs stay optional, and status history includes its actor projection.
+- Added admin notification folder list/create/update and announcement accepted receipt schemas. Create endpoints explicitly use `{data}` 201 envelopes; admin announcement uses `{data}` 202.
+- Added structural contract tests. Static route coverage: 149 inventory routes / 149 unique OpenAPI keys, zero missing/duplicate keys; no duplicate schema declarations. CI pending.
