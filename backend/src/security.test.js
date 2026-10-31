@@ -90,9 +90,9 @@ test('repeated failed logins from the same IP get rate-limited (429)', async () 
   assert.ok(statuses.slice(0, 10).every((s) => s === 401), `expected first 10 to be 401, got: ${statuses}`);
   assert.equal(statuses[10], 429, `expected 11th attempt to be rate-limited, got: ${statuses}`);
   const limitedBody = responses[10].json();
-  assert.equal(limitedBody.statusCode, 429);
-  assert.equal(limitedBody.error, 'Too Many Requests');
-  assert.match(limitedBody.message, /Rate limit exceeded/);
+  assert.equal(limitedBody.error.code, 'APP_ERROR');
+  assert.match(limitedBody.error.message, /Rate limit exceeded/);
+  assert.equal(limitedBody.statusCode, undefined);
 });
 
 test('a different IP is NOT affected by another IP\'s rate limit', async () => {
