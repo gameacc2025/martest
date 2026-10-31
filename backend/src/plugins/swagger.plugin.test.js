@@ -67,9 +67,9 @@ test('swagger plugin: OpenAPI spec includes all expected tags', async () => {
   const spec = res.json();
 
   const expectedTags = [
-    'Authentication', 'Users', 'Roles', 'Permissions',
-    'Companies', 'Categories', 'Products', 'Inquiries',
-    'Notifications', 'Orders', 'Settings', 'Admin',
+    'Authentication', 'Users', 'Addresses', 'Roles', 'Permissions',
+    'Companies', 'Categories', 'Specification Library', 'Products', 'Inquiries',
+    'Notifications', 'Settings', 'Admin',
   ];
   const tagNames = spec.tags.map((t) => t.name);
   for (const tag of expectedTags) {
