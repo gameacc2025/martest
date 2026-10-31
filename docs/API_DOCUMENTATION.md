@@ -203,3 +203,6 @@ Product price snapshot/history/activity and inquiry messages/responses/items/att
 
 
 - Inquiry list response is now explicitly paginated and documents its caller-context redaction: buyerUserId is never returned, confidential company identity may be removed, and sealed response counts may be omitted.
+
+
+- Product catalogue responses now distinguish the restricted public projection from authenticated management projections. Public list responses exclude creator IDs, moderation counters, deletion metadata and status history; management list/detail include them and the latest ten status transitions. The single-product route documents both projections via `oneOf` because optional authentication changes the projection.
