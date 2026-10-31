@@ -84,15 +84,6 @@ const commonSchemas = {
       },
     },
   },
-  RateLimitResponse: {
-    type: 'object',
-    required: ['statusCode', 'error', 'message'],
-    properties: {
-      statusCode: { type: 'integer', enum: [429] },
-      error: { type: 'string', example: 'Too Many Requests' },
-      message: { type: 'string', example: 'Rate limit exceeded, retry in 5 minutes' },
-    },
-  },
   PaginatedMeta: {
     type: 'object',
     properties: {
@@ -165,7 +156,7 @@ const defaultErrorResponses = {
   404: { description: 'The requested resource was not found.', $ref: '#/components/schemas/ErrorResponse' },
   409: { description: 'The request conflicts with an existing or related record.', $ref: '#/components/schemas/ErrorResponse' },
   413: { description: 'The uploaded file or request payload exceeds the configured size limit.', $ref: '#/components/schemas/ErrorResponse' },
-  429: { description: 'The caller exceeded a per-route or global rate limit.', $ref: '#/components/schemas/RateLimitResponse' },
+  429: { description: 'The caller exceeded a per-route or global rate limit. The central error handler wraps it in ErrorResponse.', $ref: '#/components/schemas/ErrorResponse' },
   500: { description: 'Unexpected server error.', $ref: '#/components/schemas/ErrorResponse' },
 };
 
