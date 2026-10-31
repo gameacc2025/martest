@@ -520,3 +520,12 @@ PR #57 merged by squash into `main` at `415b6858a9f34235f6cf726a558d76afb5b92af4
 - Audit error response shapes/statuses and route-level response status metadata against controller/service behavior, especially validation, authorization, not-found, conflict and 204 cases.
 - Inspect remaining OpenAPI placeholders after accounting for later response overrides; do not assume the initial generic registry entry is the effective response.
 - Add structural tests for final effective route responses and metadata, update API/.ai docs, run CI/migration validation, and merge.
+
+
+## OpenAPI error/status response audit — step 16I (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-error-response-audit-step-16i`.
+- Audited `error-handler.plugin.js` and `swagger.plugin.js` default response behavior. Prisma P2002 maps to 409; multipart file-size errors are Fastify 413 and are normalized by the app error handler; auth/global rate limiting emits a 429 rate-limit payload.
+- Added reusable RateLimitResponse schema and global 409/413/429 responses. Expanded ErrorResponse with optional development-only debug/stack fields; production responses still omit them.
+- Added Swagger contract tests for 409/413/429 and debug/stack schema fields. Strengthened security rate-limit integration test to assert actual 429 body shape.
+- CI/migration validation pending.
