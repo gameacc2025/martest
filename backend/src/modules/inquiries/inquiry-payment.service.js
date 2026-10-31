@@ -80,13 +80,20 @@ function amountInRial(plan) {
   if (!Number.isSafeInteger(price) || price < 1) {
     throw { statusCode: 400, code: 'INVALID_PAYMENT_AMOUNT', message: 'مبلغ طرح باید عدد صحیح مثبت باشد.' };
   }
-  if (plan.currency === 'IRR') return price;
-  if (plan.currency === 'TOMAN') {
-    const rial = price * 10;
-    if (!Number.isSafeInteger(rial)) throw { statusCode: 400, code: 'INVALID_PAYMENT_AMOUNT', message: 'مبلغ طرح خارج از محدوده مجاز است.' };
-    return rial;
+
+  let rial;
+  if (plan.currency === 'IRR') rial = price;
+  else if (plan.currency === 'TOMAN') rial = price * 10;
+  else throw { statusCode: 400, code: 'UNSUPPORTED_PAYMENT_CURRENCY', message: 'درگاه زرین‌پال فقط برای طرح‌های ریالی یا تومانی فعال است.' };
+
+  // InquirySubscription.paymentAmount is a Prisma Int / PostgreSQL INTEGER.
+  // Reject values that would overflow that column before opening a provider
+  // request; otherwise a valid external payment request could be orphaned by
+  // a failed database write.
+  if (!Number.isSafeInteger(rial) || rial < 1 || rial > 2_147_483_647) {
+    throw { statusCode: 400, code: 'INVALID_PAYMENT_AMOUNT', message: 'مبلغ طرح خارج از محدوده قابل ذخیره و پرداخت است.' };
   }
-  throw { statusCode: 400, code: 'UNSUPPORTED_PAYMENT_CURRENCY', message: 'درگاه زرین‌پال فقط برای طرح‌های ریالی یا تومانی فعال است.' };
+  return rial;
 }
 
 async function startSubscriptionPayment({ ownerType, ownerId, planId, paymentReference = null }) {
