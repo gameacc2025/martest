@@ -539,3 +539,10 @@ The initial CI attempt also identified two test-harness issues (the unrelated-co
 - Quota route now admits only COMPANY/CUSTOMER contexts; STAFF cannot obtain a company's quota through a stray companyId.
 - `getInquiryStats` previously derived company scope from any caller.companyId. It now derives tenant identity only from COMPANY context; authorized STAFF with inquiry-read permission receives platform aggregates, consistent with staff inquiry-list behavior, and unauthorized STAFF is rejected.
 - Regression tests cover the customer subscription lifecycle argument wiring, quota context, STAFF quota isolation, and STAFF stats permission/platform scope. PR #40 remains unmerged pending CI/migration validation.
+
+
+## Step 11D — Addresses and notifications
+
+PR #41 merged at `9268be23da6c1f0bc0108d3480bdaf0c3f840e53`. CI and migration validation passed. Address ownership is consistently user-scoped; no cross-user IDOR was confirmed. Notification folder context resolution was corrected for AccessProfile-less CUSTOMER_USER accounts, with explicit SUPER_ADMIN exclusion and regression coverage.
+
+Step 11E remains: route-level and service-level authorization review for auth, users, admin, settings, categories, roles, permissions, and specification-library. Full security sign-off is not yet claimed.
