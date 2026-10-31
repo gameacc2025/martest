@@ -22,6 +22,7 @@ let requestResponse;
 let verifyResponse;
 let activateOnOwnerLock = false;
 const calls = [];
+const providerCalls = [];
 let providerRequests = 0;
 const mockPrisma = {
   inquiryPlan: { findFirst: async () => plan },
@@ -88,6 +89,7 @@ const oldEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
 const oldFetch = global.fetch;
 test.beforeEach(() => {
   calls.length = 0;
+  providerCalls.length = 0;
   providerRequests = 0;
   activateOnOwnerLock = false;
   plan = { id: 2, name: 'Basic', durationDays: 30, price: 1000, currency: 'IRR', isActive: true };
@@ -101,6 +103,7 @@ test.beforeEach(() => {
   global.fetch = async (url, options) => {
     providerRequests += 1;
     const body = JSON.parse(options.body);
+    providerCalls.push({ url: String(url), body });
     if (String(url).includes('/request.json')) return { ok: true, json: async () => requestResponse };
     if (String(url).includes('/verify.json')) return { ok: true, json: async () => verifyResponse };
     throw new Error('Unexpected payment endpoint');
@@ -128,6 +131,12 @@ test('startSubscriptionPayment creates Zarinpal checkout and freezes the payable
   assert.equal(result.subscription.paymentAuthority, 'A-test');
   assert.equal(subscription.paymentAmount, 1000);
   assert.equal(subscription.paymentProvider, 'ZARINPAL');
+  assert.deepEqual(providerCalls[0].body, {
+    merchant_id: 'merchant-test',
+    amount: 1000,
+    callback_url: 'http://localhost:3000/api/v1/inquiries/subscription/payment/callback',
+    description: 'اشتراک استعلام: Basic',
+  });
 });
 
 test('startSubscriptionPayment rejects Toman amounts that overflow the persisted Prisma Int before calling Zarinpal', async () => {
@@ -156,6 +165,8 @@ test('callback activates a subscription only after server-side verification succ
   assert.equal(subscription.status, 'ACTIVE');
   assert.ok(subscription.paymentVerifiedAt instanceof Date);
   assert.equal(subscription.paymentRefId, '12345');
+  assert.equal(providerCalls[0].body.amount, 1000);
+  assert.equal(providerCalls[0].body.authority, 'A-test');
 });
 
 test('callback replay after activation is idempotent and skips provider verification', async () => {
@@ -194,6 +205,19 @@ test('concurrent successful callback returns the already activated subscription 
   assert.equal(subscription.startsAt.toISOString(), '2026-10-28T04:00:00.000Z');
   assert.equal(subscription.endsAt.toISOString(), '2026-11-27T04:00:00.000Z');
   assert.equal(calls.filter(([name]) => name === 'updateMany').length, 0, 'does not try to activate or extend the already active subscription');
+});
+
+test('retryPendingSubscriptionVerification cannot inspect another owner subscription', async () => {
+  subscription = {
+    id: 7, planId: 2, companyId: 99, userId: null, status: 'PENDING_PAYMENT',
+    paymentProvider: 'ZARINPAL', paymentAuthority: 'A-test', paymentAmount: 1000,
+    paymentVerifiedAt: null, paymentRefId: null,
+  };
+  await assert.rejects(
+    () => retryPendingSubscriptionVerification({ ownerType: 'company', ownerId: 5, subscriptionId: 7 }),
+    (error) => error.code === 'SUBSCRIPTION_NOT_FOUND' && error.statusCode === 404,
+  );
+  assert.equal(providerRequests, 0);
 });
 
 test('retrying an already verified subscription returns success without another provider call', async () => {
