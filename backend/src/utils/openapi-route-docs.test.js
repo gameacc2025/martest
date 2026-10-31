@@ -97,6 +97,24 @@ test('source-backed response contracts describe address, notification and inquir
   assert.ok(quota.capabilities);
 });
 
+test('inquiry subscription response contracts include owner, plan, quota and payment fields', () => {
+  const mine = docs['GET /api/v1/inquiries/subscription/me'].responses[200].properties.data.properties;
+  assert.ok(mine.subscriptions.items.properties.companyId);
+  assert.ok(mine.subscriptions.items.properties.userId);
+  assert.ok(mine.subscriptions.items.properties.plan.properties.responsesPerPeriod);
+  assert.ok(mine.quota.properties.quotas);
+
+  const purchase = docs['POST /api/v1/inquiries/subscription'].responses[201].properties.data.properties;
+  assert.ok(purchase.paymentMode);
+  assert.ok(purchase.subscription);
+  assert.ok(purchase.paymentUrl);
+
+  const verification = docs['POST /api/v1/inquiries/subscription/:id/verify-payment'].responses[200].properties.data.properties;
+  assert.ok(verification.payment);
+  assert.ok(verification.subscriptionId);
+  assert.ok(verification.refId);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
