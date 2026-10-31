@@ -569,3 +569,13 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Notification delivery stats return total, zero-filled status/channel counts, and up to ten recent failed-delivery projections. Delivery list returns full `NotificationDelivery` rows with pagination metadata; `nextAttemptAt` is non-null per Prisma.
 - Inquiry dashboard stats are access-context scoped and return sent/received/responses aggregates, successRate (selected / selected+rejected), and five recent inquiry/response records. Recent inquiry rows omit buyerUserId. Sealed and anonymous-sealed buyer views filter/redact recent responses.
 - PR #49 browser runtime validation failure was due to SPA origins failing to serve (`chrome-error://chromewebdata/`, missing #app) while backend CI/build and migration validation passed; keep this as a separate runtime startup investigation.
+
+
+## OpenAPI response coverage — admin monitoring step 16D (2026-10-31)
+
+- PR #53 merged at `da0478df49eb256fdb5f40c179818a02a6f706fa`.
+- `GET /admin/inquiry-subscriptions`: up to 100 newest subscription rows, subscription scalars and exact narrow plan/company/user projections.
+- `GET /admin/notifications/delivery-stats`: total, zero-filled status/channel maps and up to ten recent failures. `GET /admin/notifications/deliveries`: full NotificationDelivery scalar row and pagination metadata; nextAttemptAt is required/non-null.
+- `GET /inquiries/stats`: access-context scoped sent/received/response aggregates, selected/(selected+rejected) success rate and up to five recent inquiry/response records; recent inquiry excludes buyerUserId and buyer sealed-response redaction is retained.
+- Verification: backend 1,389/1,389, frontend/shared 18/18, frontend builds and Prisma migration validation passed. Runtime compose/browser validation was not confirmed at merge time.
+- Next audit: replace remaining generic OpenAPI response placeholders only where source projections are stable.
