@@ -1383,3 +1383,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added source-defined request schemas for route bodies and params where present in route registrations. Did not invent schemas for routes without one. Generic response descriptions are retained where there is no source response schema.
 - Added a reverse-coverage test enforcing every inventory route has a docs entry. Static comparison: 149 unique docs keys, 149 inventory rows, zero missing, zero stale, no duplicate keys.
 - Branch: `docs/openapi-metadata-coverage-step-16`. CI pending.
+
+
+## 2026-10-31 — OPENAPI-METADATA-COVERAGE-STEP-16A-MERGE
+
+- PR #47 merged by squash at `d3d6012107651af9368c0683ae3126dfc03e5a3f`.
+- CI [41222767276](https://github.com/gameacc2025/martest/actions/runs/41222767276) passed: backend 1,381/1,381 tests; frontend/shared tests and builds passed. Migration [41222767300](https://github.com/gameacc2025/martest/actions/runs/41222767300) passed. Runtime [41222767219](https://github.com/gameacc2025/martest/actions/runs/41222767219) remained separate/pending at merge.
+- All 149 registered module routes now have dedicated OpenAPI entries; static comparison found zero missing/stale keys and no duplicate keys.
+- Added a regression test for reverse route coverage and another ensuring all 13 inventory-public routes explicitly set `authRequired: false`.
+- Fixed public catalogue route descriptions that previously incorrectly claimed Bearer authentication. Fixed undocumented-route Swagger fallback for empty security arrays and corrected test fixtures so fallback tests truly exercise undocumented routes.
+- Aligned source-backed body/params metadata and controller response status codes, including 202 announcement queueing and 204 no-content deletes. Generic response objects remain where source contracts are not explicit.
+- Next: step 16B — derive concrete response schemas from controller/service return shapes and existing schemas, prioritize inquiry/notification/address/product/admin workflows, and add contract regression tests without fabricating fields.
