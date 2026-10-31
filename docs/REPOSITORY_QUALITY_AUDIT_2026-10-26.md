@@ -555,3 +555,12 @@ PR #42 merged at `c92aeff2866353826ec423534b4bc4178e7a57c1`. CI passed 1,368/1,3
 Reviewed auth/users/admin/settings/categories/roles/permissions/specification-library route wiring and selected service boundaries. Further exhaustive service-level audit is still required; do not call the full API security-certified.
 
 Next backlog: verify SMS outbox dispatch, paid quota, recipient phone/opt-in, idempotency and failure/rollback behavior; live Twilio remains unverified.
+
+
+## Audit continuation — inquiry and OpenAPI route contracts (2026-10-31)
+
+- Inquiry context/tenant audit PR #40 merged at `9bac9916de148741fb379ffcdd5aaf44157f4db2`; CI and migration validation passed. Corrected AccessProfile-less CUSTOMER_USER ownership, STAFF stray-companyId paths, supplier response context, subscription/quota owner scoping and STAFF statistics permissions.
+- OpenAPI security alignment PR #46 merged at `ea6e787c9b2c6dbe819fb344c22aa7adea33016d`; PR #47 completed metadata for all 149 registered routes and merged at `d3d6012107651af9368c0683ae3126dfc03e5a3f`.
+- PR #47 CI [41222767276] passed with 1,381/1,381 backend tests and successful frontend/shared tests/builds; migration validation [41222767300] passed. Runtime browser validation remains separate and is not treated as a unit-test failure.
+- The 149-route inventory and OpenAPI registry now match in both directions. Public endpoints explicitly document no authentication; refresh/logout document cookie auth; PKCE redeem documents trusted-origin + one-time code/verifier.
+- Remaining documentation work is response-shape precision: derive schemas from concrete controller/service contracts, especially inquiry, notifications, addresses, product and admin plan operations. No blanket security certification is claimed beyond the reviewed route families.
