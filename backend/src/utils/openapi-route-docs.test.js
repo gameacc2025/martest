@@ -288,6 +288,55 @@ test('company and category response contracts match controller/service projectio
   assert.equal(docs['DELETE /api/v1/categories/:id/subcategories/:subId'].responses[204].content, undefined);
 });
 
+test('user, RBAC, auth, settings and admin dashboard response contracts exclude secrets', () => {
+  const userList = docs['GET /api/v1/users'].responses[200].properties;
+  assert.ok(userList.data.items.properties.accessProfile);
+  assert.ok(userList.data.items.properties.roles);
+  assert.equal(userList.data.items.properties.passwordHash, undefined);
+
+  const userDetail = docs['GET /api/v1/users/:id'].responses[200].properties.data.properties;
+  assert.ok(userDetail.permissions);
+  assert.ok(userDetail.profile);
+  assert.equal(userDetail.passwordHash, undefined);
+
+  const role = docs['GET /api/v1/roles/:id'].responses[200].properties.data.properties;
+  assert.ok(role.scope);
+  assert.ok(role.permissions.items.properties.permission);
+  const assignable = docs['GET /api/v1/roles/assignable'].responses[200].properties.data.items.properties;
+  assert.ok(assignable.scope);
+
+  const permissionList = docs['GET /api/v1/permissions'].responses[200];
+  assert.ok(permissionList.anyOf);
+  const permission = docs['GET /api/v1/permissions/:id'].responses[200].properties.data.properties;
+  assert.ok(permission.group);
+
+  const login = docs['POST /api/v1/auth/login'].responses[200].properties.data.properties;
+  assert.ok(login.tokens.properties.accessToken);
+  assert.equal(login.tokens.properties.refreshToken, undefined);
+  const refresh = docs['POST /api/v1/auth/refresh'].responses[200].properties.data.properties;
+  assert.ok(refresh.tokens.properties.accessToken);
+  assert.equal(refresh.tokens.properties.refreshToken, undefined);
+
+  const handoff = docs['POST /api/v1/auth/handoff'].responses[201].properties.data.properties;
+  assert.ok(handoff.code);
+  assert.equal(handoff.expiresIn.enum[0], 60);
+  const redeem = docs['POST /api/v1/auth/handoff/redeem'].responses[200].properties.data.properties;
+  assert.ok(redeem.tokens.properties.accessToken);
+  assert.ok(redeem.accessProfile);
+
+  const profile = docs['GET /api/v1/settings/profile'].responses[200].properties.data.properties;
+  assert.ok(profile.profile);
+  assert.ok(profile.accessProfile);
+  assert.ok(profile.roles);
+  assert.equal(profile.permissions, undefined);
+  assert.equal(profile.passwordHash, undefined);
+
+  const adminStats = docs['GET /api/v1/admin/stats'].responses[200].properties.data.properties;
+  assert.ok(adminStats.counts.properties.permissions);
+  assert.equal(adminStats.recentUsers.maxItems, 5);
+  assert.equal(adminStats.pendingProducts.maxItems, 20);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually

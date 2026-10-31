@@ -214,3 +214,12 @@ Step 16D merge verification: PR #50 merged at `96a972cb6c663952cb09d6c7a3d9c3d8b
 - Public category list/detail and management category list document category fields and nested subcategory summaries. Subcategory detail documents category and specification-template/field projections.
 - Category product listing documents only published/public products and the actual paginated `{data,meta}` response.
 - Company/category/subcategory DELETE endpoints document HTTP 204 with no response body (rather than a fictitious JSON message envelope).
+
+
+## Users, RBAC, authentication and profile response contracts — step 16F (2026-10-31)
+
+- User list/detail/create/update/access-state/company-move responses document safe identity fields, profile and access-profile context, plus role/permission arrays. Password hashes are excluded. List roles/permissions are names; detailed user reads and mutations return detailed role/permission records.
+- Role CRUD documents role scope, permission-link projections and assigned-user counts. Assignable roles are intentionally compact (`id/name/label/scope`) and filtered by caller access type.
+- Permission list documents its three actual modes: unpaginated array, `{all,grouped}` grouping, and paginated `{data,meta}`. Permission CRUD documents scalar permission fields.
+- Login, refresh, current-user context, customer registration, company registration and PKCE handoff responses are modeled. Refresh tokens are never in JSON; they are carried only by the httpOnly cookie. Handoff create returns a one-time code with 60-second TTL; redeem returns a new access token and context.
+- Profile settings document user identity, personal profile, access profile/company and role links; avatar upload returns `avatarUrl`; password/avatar operations return message receipts. Admin dashboard/settings include counts, five recent users, twenty pending products and review threshold.

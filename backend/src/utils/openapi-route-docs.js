@@ -1431,4 +1431,348 @@ Object.assign(docs, {
   },
 });
 
+
+// User, RBAC, authentication and personal-settings response contracts.
+const safeAuthUserResponseSchema = {
+  type: 'object', required: ['id', 'email', 'phone', 'status', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, email: { type: ['string', 'null'] }, phone: { type: 'string' },
+    status: { type: 'string', enum: ['PENDING', 'ACTIVE', 'REJECTED'] },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const profileResponseSchema = {
+  type: 'object', required: ['id', 'firstName', 'lastName', 'avatar'],
+  properties: {
+    id: { type: 'integer' }, firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] },
+    avatar: { type: ['string', 'null'] }, metadata: {},
+  }, additionalProperties: true,
+};
+const accessProfileResponseSchema = {
+  type: 'object', required: ['id', 'type', 'companyId', 'isActive'],
+  properties: {
+    id: { type: 'integer' }, type: { type: 'string', enum: ['STAFF', 'COMPANY'] },
+    companyId: { type: ['integer', 'null'] }, isActive: { type: 'boolean' },
+    company: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] }, status: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
+  }, additionalProperties: true,
+};
+const permissionResponseSchema = {
+  type: 'object', required: ['id', 'name', 'label', 'description', 'group', 'createdAt'],
+  properties: {
+    id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' },
+    description: { type: ['string', 'null'] }, group: { type: ['string', 'null'] },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+};
+const rolePermissionLinkResponseSchema = {
+  type: 'object', required: ['permission'],
+  properties: { permission: { type: 'object', required: ['id', 'name', 'label', 'group'], properties: { id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' }, group: { type: ['string', 'null'] } } } },
+};
+const roleResponseSchema = {
+  type: 'object', required: ['id', 'name', 'label', 'description', 'isSystem', 'scope', 'permissions', 'createdAt', 'updatedAt'],
+  properties: {
+    id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' },
+    description: { type: ['string', 'null'] }, isSystem: { type: 'boolean' },
+    scope: { type: 'string', enum: ['STAFF', 'COMPANY', 'CUSTOMER'] },
+    permissions: { type: 'array', items: rolePermissionLinkResponseSchema },
+    _count: { type: 'object', properties: { users: { type: 'integer' } } },
+    createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' },
+  },
+};
+const assignableRoleResponseSchema = {
+  type: 'object', required: ['id', 'name', 'label', 'scope'],
+  properties: { id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' }, scope: { type: 'string', enum: ['STAFF', 'COMPANY', 'CUSTOMER'] } },
+};
+const userResponseSchema = {
+  type: 'object', required: ['id', 'email', 'phone', 'status', 'createdAt', 'updatedAt', 'profile', 'accessProfile', 'roles', 'permissions'],
+  properties: {
+    ...safeAuthUserResponseSchema.properties,
+    profile: { anyOf: [profileResponseSchema, { type: 'null' }] },
+    accessProfile: { anyOf: [accessProfileResponseSchema, { type: 'null' }] },
+    roles: { type: 'array', items: { anyOf: [{ type: 'string' }, { type: 'object', additionalProperties: true }] } },
+    permissions: { type: 'array', items: { anyOf: [{ type: 'string' }, { type: 'object', additionalProperties: true }] } },
+  }, additionalProperties: true,
+};
+const authContextResponseSchema = {
+  type: 'object', required: ['user', 'profile', 'accessProfile', 'roles', 'permissions'],
+  properties: {
+    user: safeAuthUserResponseSchema,
+    profile: { anyOf: [profileResponseSchema, { type: 'null' }] },
+    accessProfile: { anyOf: [accessProfileResponseSchema, { type: 'null' }] },
+    roles: { type: 'array', items: { type: 'string' } },
+    permissions: { type: 'array', items: { type: 'string' } },
+  },
+};
+const authTokensResponseSchema = {
+  type: 'object', required: ['tokens'], properties: {
+    tokens: { type: 'object', required: ['accessToken', 'expiresIn'], properties: { accessToken: { type: 'string' }, expiresIn: { type: 'integer' } } },
+  },
+};
+const messageReceiptResponseSchema = {
+  type: 'object', required: ['message'], properties: { message: { type: 'string' } },
+};
+const permissionListResponseSchema = {
+  anyOf: [
+    { type: 'array', items: permissionResponseSchema },
+    { type: 'object', required: ['all', 'grouped'], properties: {
+      all: { type: 'array', items: permissionResponseSchema },
+      grouped: { type: 'object', additionalProperties: { type: 'array', items: permissionResponseSchema } },
+    } },
+  ],
+};
+const userProfileSettingsResponseSchema = {
+  ...userResponseSchema,
+  required: ['id', 'email', 'phone', 'status', 'createdAt', 'updatedAt', 'profile', 'accessProfile', 'roles'],
+  properties: {
+    ...safeAuthUserResponseSchema.properties,
+    profile: { anyOf: [profileResponseSchema, { type: 'null' }] },
+    accessProfile: { anyOf: [{ ...accessProfileResponseSchema, properties: {
+      ...accessProfileResponseSchema.properties,
+      company: { anyOf: [{ type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] }, status: { type: 'string' } }, additionalProperties: true }, { type: 'null' }] },
+    } }, { type: 'null' }] },
+    roles: { type: 'array', items: { type: 'object', required: ['role'], properties: { role: { type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' }, label: { type: 'string' } }, additionalProperties: true } } } },
+  },
+};
+
+Object.assign(docs, {
+  ['GET /api/v1/users']: {
+    ...docs['GET /api/v1/users'],
+    responses: { 200: { description: 'Paginated users with safe identity/profile/access projections and role/permission name arrays. Password hashes are never selected.', type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: userResponseSchema }, meta: paginationMetaResponseSchema } } },
+  },
+  ['GET /api/v1/users/:id']: {
+    ...docs['GET /api/v1/users/:id'],
+    responses: successEnvelope(userResponseSchema, 'User details with safe identity/profile/access data and detailed role/permission records.'),
+  },
+  ['POST /api/v1/users']: {
+    ...docs['POST /api/v1/users'],
+    responses: { 201: { description: 'Created user with safe identity/profile/access data and detailed role/permission records.', type: 'object', required: ['data'], properties: { data: userResponseSchema } } },
+  },
+  ['PATCH /api/v1/users/:id']: {
+    ...docs['PATCH /api/v1/users/:id'],
+    responses: successEnvelope(userResponseSchema, 'Updated user with safe identity/profile/access data and detailed role/permission records.'),
+  },
+  ['PATCH /api/v1/users/:id/access']: {
+    ...docs['PATCH /api/v1/users/:id/access'],
+    responses: successEnvelope(userResponseSchema, 'Updated role assignment and resulting detailed user access context. Direct permission IDs are not persisted.'),
+  },
+  ['PATCH /api/v1/users/:id/access-active']: {
+    ...docs['PATCH /api/v1/users/:id/access-active'],
+    responses: successEnvelope(userResponseSchema, 'Updated access-profile active state and resulting detailed user access context.'),
+  },
+  ['PATCH /api/v1/users/:id/company']: {
+    ...docs['PATCH /api/v1/users/:id/company'],
+    responses: successEnvelope(userResponseSchema, 'Moved user to the selected company and returned the resulting detailed access context.'),
+  },
+  ['DELETE /api/v1/users/:id']: {
+    ...docs['DELETE /api/v1/users/:id'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'User deletion receipt.'),
+  },
+  ['GET /api/v1/roles']: {
+    ...docs['GET /api/v1/roles'],
+    responses: {
+      200: { description: 'Role list: a success-wrapped array when unpaginated, or data/meta when page/limit is supplied.', anyOf: [
+        { type: 'object', required: ['data'], properties: { data: { type: 'array', items: roleResponseSchema } } },
+        { type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: roleResponseSchema }, meta: paginationMetaResponseSchema } },
+      ] },
+    },
+  },
+  ['GET /api/v1/roles/assignable']: {
+    ...docs['GET /api/v1/roles/assignable'],
+    responses: successEnvelope({ type: 'array', items: assignableRoleResponseSchema }, 'Roles scoped to the caller access type, limited to id/name/label/scope.'),
+  },
+  ['GET /api/v1/roles/:id']: {
+    ...docs['GET /api/v1/roles/:id'],
+    responses: successEnvelope(roleResponseSchema, 'Role details with permission links and assigned-user count.'),
+  },
+  ['POST /api/v1/roles']: {
+    ...docs['POST /api/v1/roles'],
+    responses: { 201: { description: 'Created role with permission links and assigned-user count.', type: 'object', required: ['data'], properties: { data: roleResponseSchema } } },
+  },
+  ['PATCH /api/v1/roles/:id']: {
+    ...docs['PATCH /api/v1/roles/:id'],
+    responses: successEnvelope(roleResponseSchema, 'Updated role with permission links and assigned-user count.'),
+  },
+  ['DELETE /api/v1/roles/:id']: {
+    ...docs['DELETE /api/v1/roles/:id'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Role deletion receipt.'),
+  },
+  ['GET /api/v1/permissions']: {
+    ...docs['GET /api/v1/permissions'],
+    responses: {
+      200: { description: 'Permission list: success-wrapped array, success-wrapped all/grouped object, or paginated data/meta depending on query options.', anyOf: [
+        { type: 'object', required: ['data'], properties: { data: permissionListResponseSchema } },
+        { type: 'object', required: ['data', 'meta'], properties: { data: { type: 'array', items: permissionResponseSchema }, meta: paginationMetaResponseSchema } },
+      ] },
+    },
+  },
+  ['GET /api/v1/permissions/:id']: {
+    ...docs['GET /api/v1/permissions/:id'],
+    responses: successEnvelope(permissionResponseSchema, 'Permission record returned successfully.'),
+  },
+  ['POST /api/v1/permissions']: {
+    ...docs['POST /api/v1/permissions'],
+    responses: { 201: { description: 'Created permission record.', type: 'object', required: ['data'], properties: { data: permissionResponseSchema } } },
+  },
+  ['PATCH /api/v1/permissions/:id']: {
+    ...docs['PATCH /api/v1/permissions/:id'],
+    responses: successEnvelope(permissionResponseSchema, 'Updated permission record.'),
+  },
+  ['DELETE /api/v1/permissions/:id']: {
+    ...docs['DELETE /api/v1/permissions/:id'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Permission deletion receipt.'),
+  },
+  ['POST /api/v1/auth/login']: {
+    ...docs['POST /api/v1/auth/login'],
+    responses: { 200: { description: 'Authenticated user context and access token. Refresh token is set only in the httpOnly cookie and is never returned in the JSON body.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['tokens', 'user', 'profile', 'accessProfile', 'roles', 'permissions'], properties: {
+      tokens: authTokensResponseSchema.properties.tokens, user: safeAuthUserResponseSchema,
+      profile: { anyOf: [profileResponseSchema, { type: 'null' }] },
+      accessProfile: { anyOf: [accessProfileResponseSchema, { type: 'null' }] },
+      roles: { type: 'array', items: { type: 'string' } }, permissions: { type: 'array', items: { type: 'string' } },
+    } } } } },
+  },
+  ['POST /api/v1/auth/refresh']: {
+    ...docs['POST /api/v1/auth/refresh'],
+    responses: successEnvelope(authTokensResponseSchema, 'Rotated access token; rotated refresh token is set only in the httpOnly cookie.'),
+  },
+  ['POST /api/v1/auth/logout']: {
+    ...docs['POST /api/v1/auth/logout'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Current refresh session revoked and cookie cleared.'),
+  },
+  ['POST /api/v1/auth/logout-all']: {
+    ...docs['POST /api/v1/auth/logout-all'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'All refresh sessions revoked and current cookie cleared.'),
+  },
+  ['GET /api/v1/auth/me']: {
+    ...docs['GET /api/v1/auth/me'],
+    responses: successEnvelope(authContextResponseSchema, 'Current authenticated user context without password or refresh-token secrets.'),
+  },
+  ['PATCH /api/v1/auth/users/:id/password']: {
+    ...docs['PATCH /api/v1/auth/users/:id/password'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Administrative password-reset receipt.'),
+  },
+  ['POST /api/v1/auth/register']: {
+    ...docs['POST /api/v1/auth/register'],
+    responses: { 201: { description: 'Registered customer account. No AccessProfile is created for CUSTOMER users; roles contains the CUSTOMER_USER role name.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['message', 'user', 'profile', 'accessProfile', 'roles'], properties: {
+      message: { type: 'string' }, user: safeAuthUserResponseSchema, profile: profileResponseSchema,
+      accessProfile: { type: 'null' }, roles: { type: 'array', items: { type: 'string' } },
+    } } } } },
+  },
+  ['POST /api/v1/auth/register-company']: {
+    ...docs['POST /api/v1/auth/register-company'],
+    responses: { 201: { description: 'Pending company and manager registration. Company manager access profile is inactive until staff approval; no role is granted in this response.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['message', 'company', 'user', 'accessProfile'], properties: {
+      message: { type: 'string' }, company: companyResponseSchema, user: safeAuthUserResponseSchema, accessProfile: accessProfileResponseSchema,
+    } } } } },
+  },
+  ['POST /api/v1/auth/handoff']: {
+    ...docs['POST /api/v1/auth/handoff'],
+    responses: { 201: { description: 'One-time PKCE-bound handoff code valid for 60 seconds. No access or refresh token is returned.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['code', 'expiresIn'], properties: { code: { type: 'string' }, expiresIn: { type: 'integer', enum: [60] } } } } } },
+  },
+  ['POST /api/v1/auth/handoff/redeem']: {
+    ...docs['POST /api/v1/auth/handoff/redeem'],
+    responses: { 200: { description: 'Fresh access token and authenticated context; refresh token is set only in the httpOnly cookie.', type: 'object', required: ['data'], properties: { data: { type: 'object', required: ['user', 'profile', 'accessProfile', 'roles', 'permissions', 'tokens'], properties: {
+      ...authContextResponseSchema.properties, tokens: authTokensResponseSchema.properties.tokens,
+    } } } } },
+  },
+  ['GET /api/v1/settings/profile']: {
+    ...docs['GET /api/v1/settings/profile'],
+    responses: successEnvelope(userProfileSettingsResponseSchema, 'Current user identity, personal profile, access profile, company summary and role links.'),
+  },
+  ['PATCH /api/v1/settings/profile']: {
+    ...docs['PATCH /api/v1/settings/profile'],
+    responses: successEnvelope(userProfileSettingsResponseSchema, 'Updated current user profile and unchanged safe identity/access projections.'),
+  },
+  ['POST /api/v1/settings/profile/avatar']: {
+    ...docs['POST /api/v1/settings/profile/avatar'],
+    responses: successEnvelope({ type: 'object', required: ['avatarUrl'], properties: { avatarUrl: { type: 'string' } } }, 'Uploaded avatar path returned successfully.'),
+  },
+  ['DELETE /api/v1/settings/profile/avatar']: {
+    ...docs['DELETE /api/v1/settings/profile/avatar'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Avatar deletion receipt.'),
+  },
+  ['PATCH /api/v1/settings/change-password']: {
+    ...docs['PATCH /api/v1/settings/change-password'],
+    responses: successEnvelope(messageReceiptResponseSchema, 'Password changed and existing refresh sessions revoked.'),
+  },
+  ['GET /api/v1/admin/stats']: {
+    ...docs['GET /api/v1/admin/stats'],
+    responses: {
+      200: {
+        description: 'Admin dashboard totals, up to five recent users and up to twenty pending products with compact creator/company/category projections.',
+        type: 'object',
+        required: ['data'],
+        properties: {
+          data: {
+            type: 'object',
+            required: ['counts', 'recentUsers', 'pendingProducts'],
+            properties: {
+              counts: {
+                type: 'object',
+                required: ['users', 'activeUsers', 'companies', 'products', 'pendingProducts', 'orders', 'roles', 'permissions'],
+                properties: {
+                  users: { type: 'integer' }, activeUsers: { type: 'integer' }, companies: { type: 'integer' },
+                  products: { type: 'integer' }, pendingProducts: { type: 'integer' }, orders: { type: 'integer' },
+                  roles: { type: 'integer' }, permissions: { type: 'integer' },
+                },
+              },
+              recentUsers: {
+                type: 'array',
+                maxItems: 5,
+                items: {
+                  type: 'object',
+                  required: ['id', 'email', 'status', 'createdAt', 'profile'],
+                  properties: {
+                    id: { type: 'integer' }, email: { type: ['string', 'null'] },
+                    status: { type: 'string' }, createdAt: { type: 'string', format: 'date-time' },
+                    profile: {
+                      anyOf: [
+                        { type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } } },
+                        { type: 'null' },
+                      ],
+                    },
+                  },
+                },
+              },
+              pendingProducts: {
+                type: 'array',
+                maxItems: 20,
+                items: {
+                  type: 'object',
+                  required: ['id', 'title', 'status', 'company', 'category', 'subcategory', 'createdBy'],
+                  properties: {
+                    id: { type: 'integer' }, title: { type: 'string' }, status: { type: 'string' },
+                    company: { type: 'object', properties: { id: { type: 'integer' }, name: { type: 'string' } } },
+                    category: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
+                    subcategory: { type: 'object', properties: { id: { type: 'integer' }, nameFa: { type: 'string' } } },
+                    createdBy: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer' }, email: { type: ['string', 'null'] },
+                        profile: {
+                          anyOf: [
+                            { type: 'object', properties: { firstName: { type: ['string', 'null'] }, lastName: { type: ['string', 'null'] } } },
+                            { type: 'null' },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  additionalProperties: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  ['GET /api/v1/admin/settings']: {
+    ...docs['GET /api/v1/admin/settings'],
+    responses: successEnvelope({ type: 'object', required: ['productReviewEditThreshold'], properties: { productReviewEditThreshold: { type: 'integer', minimum: 1 } } }, 'Admin-managed product review threshold setting.'),
+  },
+  ['PATCH /api/v1/admin/settings/product-review-threshold']: {
+    ...docs['PATCH /api/v1/admin/settings/product-review-threshold'],
+    responses: successEnvelope({ type: 'object', required: ['productReviewEditThreshold'], properties: { productReviewEditThreshold: { type: 'integer', minimum: 1 } } }, 'Updated admin-managed product review threshold setting.'),
+  },
+});
+
 module.exports = docs;

@@ -353,3 +353,13 @@ PR #51 merged by squash into `main` at `095e742d1fbd8b4af954299ff31febd81e0ff732
 - Audit user, role, permission, address, settings/profile and auth/session responses against controllers/services and Prisma selects.
 - Replace generic response descriptions with concrete source-backed schemas for user list/detail/create/update/access state, assignable roles, role/permission CRUD, profile/password/avatar, addresses and auth registration/session/handoff flows.
 - Keep private fields (password hashes, tokens, provider secrets) excluded; preserve 204 and message-only outcomes. Add tests, CI/migration validation and merge.
+
+
+## OpenAPI response contracts — step 16F (in progress, 2026-10-31)
+
+- Branch: `docs/openapi-users-auth-rbac-responses-step-16f`.
+- Added user list/detail/create/update/access state/company move schemas; user list exposes role/permission name arrays while detailed reads/mutations expose role/permission records. `passwordHash` is excluded.
+- Added role CRUD and caller-scoped assignable-role schemas; permission CRUD and list-mode variants (plain array, grouped `{all,grouped}`, paginated `{data,meta}`).
+- Added login/refresh/me/register/register-company/handoff schemas, explicitly keeping refresh token out of JSON (httpOnly cookie only) and documenting 60-second one-time handoff code.
+- Added profile settings, avatar upload/delete, password change, admin stats and review-threshold settings schemas. Profile settings role relation shape is modeled separately from detailed user access; no nonexistent `permissions` field is required.
+- Added structural tests for response shapes and secret exclusion. New schema block delimiters balanced; route inventory remains 149/149 covered, no missing/duplicate route keys. CI pending.
