@@ -1686,3 +1686,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - 429 documents native Fastify rate-limit `{statusCode,error,message}`; removed the incorrect claim that the central handler wraps it.
 - Payment-service 502/503 throws are normalized by central error handler to generic 500, so these are not advertised as public statuses. No runtime behavior change.
 - Added tests and verified 149 inventory routes / 149 unique doc keys, zero missing, zero duplicates. CI pending.
+
+
+## 2026-10-31 — OPENAPI-ERROR-ENVELOPE-SCHEMAS-STEP-16J-MERGE
+
+- PR #63 squash-merged at `97ea2bb9adaa140fb8b41925269446264fd088a7`.
+- CI [41240966618] passed: backend 1,398/1,398; frontend/shared 18/18; all frontend builds passed. Prisma migration validation [41240966682] passed. Runtime [41240966686] is separate.
+- Route-level OpenAPI error schemas now model central nested and direct auth/RBAC envelopes for 401/403; 500 includes direct auth-refresh catch-all; 429 uses native Fastify rate-limit envelope.
+- Payment provider internal 502/503 throws are still normalized to generic 500 by central handler and are not advertised publicly. Step 16L will trace payment request/retry/callback paths and decide whether to preserve sanitized 502/503 safely.
+- Route inventory remains 149/149, no missing or duplicate docs keys. Added tests pass.
