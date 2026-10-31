@@ -1253,3 +1253,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** `189516deb109ca045f577459d385b5492c1d16e7`.
 - **Migration:** Previous PR-head migration validation passed; fresh validation on the corrected head is pending. Runtime infrastructure, health endpoints and migrations passed; browser smoke failed separately and is not pursued as the next task.
 - **Disposition:** Keep PR #40 unmerged until fresh CI and migration checks pass.
+
+
+## 2026-10-31 — STEP-11C-MERGE / STEP-11D-NOTIFICATIONS-ADDRESSES
+
+- PR #40 merged by squash into `main`: `9bac9916de148741fb379ffcdd5aaf44157f4db2`.
+- Corrected-head CI [41216629069](https://github.com/gameacc2025/martest/actions/runs/41216629069) passed; database migration validation [41216628936](https://github.com/gameacc2025/martest/actions/runs/41216628936) passed. Runtime validation [41216628926](https://github.com/gameacc2025/martest/actions/runs/41216628926) was queued and remains separately tracked.
+- Step 11D address review found all address operations consistently scoped by authenticated user ID; no cross-user IDOR confirmed. Added route-level tests for CUSTOMER_USER default Website access and denial of COMPANY, STAFF/SUPER_ADMIN and wildcard attempts.
+- Step 11D notification review found AccessProfile-less CUSTOMER_USER accounts could not access notification folders because controller scope resolution did not mirror central RBAC's default Website fallback. Fixed with strict CUSTOMER_USER-only fallback and explicit SUPER_ADMIN exclusion. Added controller tests for folders and folder-filtered listing.
+- Current branch: `audit/notification-address-tenant-step-11d`; awaiting CI/migration checks before PR merge.
+- Full security sign-off is not claimed; remaining route inventory and SMS event dispatch integration are still open.
