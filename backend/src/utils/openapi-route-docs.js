@@ -2876,4 +2876,38 @@ for (const routeDoc of Object.values(docs)) {
 }
 
 
+/**
+ * Step 16L — sanitized payment gateway failures explicitly handled by the
+ * inquiry controller. Only these routes expose 502/503; other 5xx remain
+ * generic 500 responses through the central error handler.
+ */
+const step16lPaymentProviderErrorResponse = {
+  description: 'Sanitized payment-provider failure. Provider response bodies and credentials are never returned.',
+  $ref: '#/components/schemas/ErrorResponse',
+};
+Object.assign(docs, {
+  ['POST /api/v1/inquiries/subscription']: {
+    ...docs['POST /api/v1/inquiries/subscription'],
+    responses: {
+      ...docs['POST /api/v1/inquiries/subscription'].responses,
+      502: step16lPaymentProviderErrorResponse,
+    },
+  },
+  ['POST /api/v1/inquiries/subscription/:id/verify-payment']: {
+    ...docs['POST /api/v1/inquiries/subscription/:id/verify-payment'],
+    responses: {
+      ...docs['POST /api/v1/inquiries/subscription/:id/verify-payment'].responses,
+      503: step16lPaymentProviderErrorResponse,
+    },
+  },
+  ['GET /api/v1/inquiries/subscription/payment/callback']: {
+    ...docs['GET /api/v1/inquiries/subscription/payment/callback'],
+    responses: {
+      ...docs['GET /api/v1/inquiries/subscription/payment/callback'].responses,
+      503: step16lPaymentProviderErrorResponse,
+    },
+  },
+});
+
+
 module.exports = docs;

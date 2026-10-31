@@ -64,9 +64,20 @@ const mockSubscriptionService = {
   listActivePlans: async () => [],
 };
 const mockPaymentService = {
-  startSubscriptionPayment: async (...args) => { calls.startSubscriptionPayment = args; return { subscription: { id: 9 }, paymentMode: 'MANUAL_REVIEW', paymentUrl: null }; },
-  retryPendingSubscriptionVerification: async (...args) => { calls.retryPendingSubscriptionVerification = args; return { payment: 'pending' }; },
-  handleSubscriptionPaymentCallback: async () => ({ redirectUrl: 'https://example.test/result' }),
+  startSubscriptionPayment: async (...args) => {
+    calls.startSubscriptionPayment = args;
+    if (fx.startSubscriptionError) throw fx.startSubscriptionError;
+    return { subscription: { id: 9 }, paymentMode: 'MANUAL_REVIEW', paymentUrl: null };
+  },
+  retryPendingSubscriptionVerification: async (...args) => {
+    calls.retryPendingSubscriptionVerification = args;
+    if (fx.retryPaymentError) throw fx.retryPaymentError;
+    return { payment: 'pending' };
+  },
+  handleSubscriptionPaymentCallback: async () => {
+    if (fx.callbackPaymentError) throw fx.callbackPaymentError;
+    return { redirectUrl: 'https://example.test/result' };
+  },
 };
 
 injectMock('./inquiry.service', mockInquiryService);
@@ -308,3 +319,86 @@ test('quota remains company-owned for COMPANY access context', async () => {
   await controller.quota(makeRequest({ user: company }), makeReply());
   assert.deepEqual(calls.getQuotaSummary, ['company', 55]);
 });
+
+
+test('requestSubscription returns allow-listed provider failures as sanitized 502 responses', async () => {
+  fx.startSubscriptionError = {
+    statusCode: 502,
+    code: 'PAYMENT_PROVIDER_UNAVAILABLE',
+    message: 'Payment provider is unavailable.',
+    responseBody: { merchant_id: 'must-not-leak', authority: 'secret-authority' },
+  };
+  const reply = makeReply();
+  await controller.requestSubscription(makeRequest({ user: accessProfileLessCustomer, body: { planId: 3 } }), reply);
+  assert.equal(reply._statusCode, 502);
+  assert.deepEqual(reply._body, {
+    error: { code: 'PAYMENT_PROVIDER_UNAVAILABLE', message: 'Payment provider is unavailable.' },
+  });
+  assert.equal(JSON.stringify(reply._body).includes('secret-authority'), false);
+  assert.equal(JSON.stringify(reply._body).includes('merchant_id'), false);
+});
+
+test('requestSubscription returns rejected provider request as sanitized 502', async () => {
+  fx.startSubscriptionError = {
+    statusCode: 502,
+    code: 'PAYMENT_REQUEST_REJECTED',
+    message: 'Payment provider rejected the request.',
+  };
+  const reply = makeReply();
+  await controller.requestSubscription(makeRequest({ user: accessProfileLessCustomer, body: { planId: 3 } }), reply);
+  assert.equal(reply._statusCode, 502);
+  assert.equal(reply._body.error.code, 'PAYMENT_REQUEST_REJECTED');
+});
+
+test('retrySubscriptionPayment returns missing provider configuration as sanitized 503', async () => {
+  fx.retryPaymentError = {
+    statusCode: 503,
+    code: 'PAYMENT_PROVIDER_NOT_CONFIGURED',
+    message: 'Online payment provider is not configured.',
+    config: { merchantId: 'must-not-leak' },
+  };
+  const reply = makeReply();
+  await controller.retrySubscriptionPayment(makeRequest({ user: accessProfileLessCustomer, params: { id: '9' } }), reply);
+  assert.equal(reply._statusCode, 503);
+  assert.deepEqual(reply._body, {
+    error: { code: 'PAYMENT_PROVIDER_NOT_CONFIGURED', message: 'Online payment provider is not configured.' },
+  });
+  assert.equal(JSON.stringify(reply._body).includes('merchantId'), false);
+});
+
+test('payment callback returns missing provider configuration as sanitized 503', async () => {
+  fx.callbackPaymentError = {
+    statusCode: 503,
+    code: 'PAYMENT_PROVIDER_NOT_CONFIGURED',
+    message: 'Online payment provider is not configured.',
+  };
+  const reply = makeReply();
+  await controller.subscriptionPaymentCallback(makeRequest({ query: { Authority: 'A-test', Status: 'OK' } }), reply);
+  assert.equal(reply._statusCode, 503);
+  assert.deepEqual(reply._body, {
+    error: { code: 'PAYMENT_PROVIDER_NOT_CONFIGURED', message: 'Online payment provider is not configured.' },
+  });
+});
+
+test('payment controller does not expose unrecognized or mismatched 5xx errors', async () => {
+  fx.startSubscriptionError = {
+    statusCode: 502,
+    code: 'INTERNAL_DATABASE_FAILURE',
+    message: 'Sensitive database detail.',
+  };
+  await assert.rejects(
+    () => controller.requestSubscription(makeRequest({ user: accessProfileLessCustomer, body: { planId: 3 } }), makeReply()),
+    (error) => error.code === 'INTERNAL_DATABASE_FAILURE',
+  );
+
+  fx.startSubscriptionError = {
+    statusCode: 503,
+    code: 'PAYMENT_PROVIDER_UNAVAILABLE',
+    message: 'Mismatched status.',
+  };
+  await assert.rejects(
+    () => controller.requestSubscription(makeRequest({ user: accessProfileLessCustomer, body: { planId: 3 } }), makeReply()),
+    (error) => error.code === 'PAYMENT_PROVIDER_UNAVAILABLE',
+  );
+});
+

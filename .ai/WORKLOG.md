@@ -1695,3 +1695,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Route-level OpenAPI error schemas now model central nested and direct auth/RBAC envelopes for 401/403; 500 includes direct auth-refresh catch-all; 429 uses native Fastify rate-limit envelope.
 - Payment provider internal 502/503 throws are still normalized to generic 500 by central handler and are not advertised publicly. Step 16L will trace payment request/retry/callback paths and decide whether to preserve sanitized 502/503 safely.
 - Route inventory remains 149/149, no missing or duplicate docs keys. Added tests pass.
+
+
+## 2026-10-31 — PAYMENT-PROVIDER-ERROR-CONTRACT-STEP-16L
+
+- Added strict controller-level allow-list for sanitized payment gateway errors. Request/HTTP/invalid-response/rejected-request errors return 502; missing provider config returns 503.
+- Wrapped subscription creation, retry verification and public callback. Provider verification outages in callback remain a pending result redirect, preserving the server-side verification rule.
+- Error body contains only allow-listed code and safe message; provider payload, merchant ID, payment authority, stack and configuration are never copied. Unknown/mismatched 5xx continue to central generic 500.
+- OpenAPI 502/503 responses added only to relevant inquiry payment routes; structural tests cover response codes. Controller tests cover sanitized body and unknown-error propagation. CI pending.
