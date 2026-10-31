@@ -337,6 +337,39 @@ test('user, RBAC, auth, settings and admin dashboard response contracts exclude 
   assert.equal(adminStats.pendingProducts.maxItems, 20);
 });
 
+test('admin inquiry subscription, delivery monitoring and inquiry dashboard response contracts match service projections', () => {
+  const subscriptions = docs['GET /api/v1/admin/inquiry-subscriptions'].responses[200].properties.data;
+  assert.equal(subscriptions.type, 'array');
+  const subscription = subscriptions.items.properties;
+  assert.ok(subscription.paymentAuthority);
+  assert.ok(subscription.paymentVerifiedAt);
+  assert.ok(subscription.plan.properties.durationDays);
+  assert.ok(subscription.company.properties.name);
+  assert.ok(subscription.user.properties.phone);
+  assert.equal(subscription.plan.properties.inquiriesPerPeriod, undefined);
+
+  const deliveryStats = docs['GET /api/v1/admin/notifications/delivery-stats'].responses[200].properties.data.properties;
+  assert.ok(deliveryStats.total);
+  assert.ok(deliveryStats.byStatus.properties.SKIPPED);
+  assert.ok(deliveryStats.byChannel.properties.SMS);
+  assert.equal(deliveryStats.recentFailures.maxItems, 10);
+  assert.ok(deliveryStats.recentFailures.items.properties.lastError);
+
+  const deliveryList = docs['GET /api/v1/admin/notifications/deliveries'].responses[200].properties;
+  assert.ok(deliveryList.data.items.properties.dedupeKey);
+  assert.ok(deliveryList.data.items.properties.nextAttemptAt);
+  assert.ok(deliveryList.data.items.properties.lastError);
+  assert.ok(deliveryList.meta.properties.totalPages);
+
+  const stats = docs['GET /api/v1/inquiries/stats'].responses[200].properties.data.properties;
+  assert.ok(stats.sent.properties.byStatus);
+  assert.ok(stats.received.properties.new);
+  assert.ok(stats.responses.properties.successRate);
+  assert.equal(stats.recentInquiries.maxItems, 5);
+  assert.equal(stats.recentResponses.maxItems, 5);
+  assert.equal(stats.recentInquiries.items.properties.buyerUserId, undefined);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually
