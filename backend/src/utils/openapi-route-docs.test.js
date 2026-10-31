@@ -73,6 +73,65 @@ test('every OpenAPI route-doc key corresponds to a registered route in the API i
   }
 });
 
+test('source-backed response contracts describe address, notification and inquiry quota payloads', () => {
+  const address = docs['GET /api/v1/addresses'].responses[200].properties.data.items;
+  assert.ok(address.properties.userId);
+  assert.ok(address.properties.recipientName);
+  assert.ok(address.properties.isDefault);
+
+  const notifications = docs['GET /api/v1/settings/notifications'].responses[200].properties;
+  assert.ok(notifications.meta.properties.totalPages);
+  assert.ok(notifications.data.items.properties.folderMemberships);
+
+  const unread = docs['GET /api/v1/settings/notifications/unread-count'].responses[200].properties;
+  assert.ok(unread.count);
+
+  const bulk = docs['POST /api/v1/settings/notifications/bulk-delete'].responses[200].properties;
+  assert.ok(bulk.success);
+  assert.ok(bulk.count);
+
+  const quota = docs['GET /api/v1/inquiries/quota'].responses[200].properties.data.properties;
+  assert.ok(quota.enforced);
+  assert.ok(quota.subscription);
+  assert.ok(quota.quotas);
+  assert.ok(quota.capabilities);
+});
+
+test('inquiry subscription response contracts include owner, plan, quota and payment fields', () => {
+  const mine = docs['GET /api/v1/inquiries/subscription/me'].responses[200].properties.data.properties;
+  assert.ok(mine.subscriptions.items.properties.companyId);
+  assert.ok(mine.subscriptions.items.properties.userId);
+  assert.ok(mine.subscriptions.items.properties.plan.properties.responsesPerPeriod);
+  assert.ok(mine.quota.properties.quotas);
+
+  const purchase = docs['POST /api/v1/inquiries/subscription'].responses[201].properties.data.properties;
+  assert.ok(purchase.paymentMode);
+  assert.ok(purchase.subscription);
+  assert.ok(purchase.subscription.properties.plan.properties.name);
+  assert.equal(purchase.subscription.properties.plan.properties.code, undefined);
+  assert.ok(purchase.paymentUrl);
+
+  const verification = docs['POST /api/v1/inquiries/subscription/:id/verify-payment'].responses[200].properties.data.properties;
+  assert.ok(verification.payment);
+  assert.ok(verification.subscriptionId);
+  assert.ok(verification.refId);
+});
+
+test('admin notification response contracts match delivery and folder controller envelopes', () => {
+  const stats = docs['GET /api/v1/admin/notifications/delivery-stats'].responses[200].properties.data.properties;
+  assert.ok(stats.total);
+  assert.ok(stats.byStatus.properties.FAILED);
+  assert.ok(stats.byChannel.properties.SMS);
+  assert.ok(stats.recentFailures.items.properties.lastError);
+
+  const deliveries = docs['GET /api/v1/admin/notifications/deliveries'].responses[200].properties;
+  assert.ok(deliveries.data.items);
+  assert.ok(deliveries.meta.properties.totalPages);
+
+  assert.ok(docs['POST /api/v1/admin/notifications/send'].responses[202]);
+  assert.ok(docs['DELETE /api/v1/addresses/:id'].responses[204]);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);

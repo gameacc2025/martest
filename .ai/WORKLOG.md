@@ -1394,3 +1394,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed public catalogue route descriptions that previously incorrectly claimed Bearer authentication. Fixed undocumented-route Swagger fallback for empty security arrays and corrected test fixtures so fallback tests truly exercise undocumented routes.
 - Aligned source-backed body/params metadata and controller response status codes, including 202 announcement queueing and 204 no-content deletes. Generic response objects remain where source contracts are not explicit.
 - Next: step 16B — derive concrete response schemas from controller/service return shapes and existing schemas, prioritize inquiry/notification/address/product/admin workflows, and add contract regression tests without fabricating fields.
+
+
+## 2026-10-31 — OPENAPI-RESPONSE-CONTRACTS-STEP-16B
+
+- Started `docs/openapi-response-contracts-step-16b` after PR #47 merged.
+- Added concrete response schemas for address endpoints from `ADDRESS_SELECT` and the `success(data)` envelope; address deletion remains 204.
+- Added notification contracts from `notification.controller.js` / `notification.service.js`: paginated list with nested folder memberships, unread count, read/delete success flags, bulk counts, user folder projections and copy/move result.
+- Added admin notification contracts for full folder projections, delivery statistics (total, byStatus, byChannel, recentFailures) and paginated delivery records.
+- Added inquiry contracts for active plans, quota summary, caller-owned subscription list and server-side payment verification results, including `cancelled` payment status.
+- Added structural tests that assert key fields in address, notification, inquiry subscription and admin delivery response payloads.
+- Static coverage remains 149/149; zero missing routes and no duplicate literal route keys. CI pending.

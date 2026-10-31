@@ -160,3 +160,13 @@ pnpm --dir backend test
 - The 60 newly documented routes cover user access/company actions, customer addresses, assignable roles, category/subcategory browsing and management, product management/history/price history, specification library, inquiry subscription/admin workflows, private inquiry messaging/response decisions/attachments, and user/admin notification operations.
 - Request schemas were copied only where route registration defines them. Routes without a source JSON schema are documented with their actual path/context/permission contract without fabricating a request schema. Response shapes remain generic where the handler does not expose a reusable response schema; this is route-description coverage, not a claim that every response is fully modeled.
 - Added a reverse-coverage regression test: every route in the 149-row inventory must have an OpenAPI metadata entry. Existing tests also reject stale docs, duplicate keys, malformed entries and missing responses.
+
+
+## Source-backed response contract pass — step 16B (2026-10-31)
+
+- Added concrete OpenAPI response schemas derived from controller envelopes, Prisma selects and service return projections for customer address CRUD, notification list/read/bulk/folder operations, admin notification folders and delivery monitoring, inquiry plans/quota, and inquiry subscription/payment verification.
+- Address responses now document the selected `Address` projection and the `{ data }` success envelope; address deletion remains 204 with no body.
+- Notification list documents `{ data, meta }`, including nested folder memberships; unread count documents `{ count }`; read/delete and bulk actions document their exact `{ success }` / `{ success, count }` payloads; folder changes document the returned action and IDs.
+- Delivery statistics document the exact totals/status/channel aggregates and recent failure projection. Delivery listing documents `{ data, meta }` while keeping row internals extensible until a stable public DTO is defined.
+- Inquiry plan, quota, subscription, and payment retry responses document the service's selected fields and nullable ownership/payment states. Payment result includes success, failed, pending and cancelled outcomes.
+- Generic response schemas remain only where the service/controller does not yet expose a stable projection or where raw model output is intentionally extensible.
