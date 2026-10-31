@@ -532,7 +532,8 @@ test('auth, notification preferences, company lifecycle and product workflow res
 
   const handoffCreate = docs['POST /api/v1/auth/handoff'].responses[201].properties.data.properties;
   assert.equal(handoffCreate.expiresIn.enum[0], 60);
-  assert.ok(handoffCreate.code.pattern);
+  assert.equal(handoffCreate.code.minLength, 43);
+  assert.equal(handoffCreate.code.maxLength, 43);
   const handoffRedeem = docs['POST /api/v1/auth/handoff/redeem'].responses[200].properties.data.properties;
   assert.ok(handoffRedeem.tokens.properties.accessToken);
   assert.ok(handoffRedeem.user);
