@@ -1565,20 +1565,33 @@ test('uploadResponseAttachment: stores the file and writes the row', async () =>
 
   assert.equal(attachment.responseId, 50);
   assert.ok(attachment.url.startsWith('/uploads/inquiries/responses/'));
+  const lockIndex = operationTimeline.indexOf('$queryRawUnsafe');
+  const countIndex = operationTimeline.indexOf('inquiryResponseAttachment.count');
+  const createIndex = operationTimeline.indexOf('inquiryResponseAttachment.create');
+  assert.ok(lockIndex >= 0 && lockIndex < countIndex && countIndex < createIndex, 'parent inquiry is locked before the attachment cap is checked and row inserted');
+  assert.ok(calls.$transaction.some(({ kind }) => kind === 'interactive'));
   const storedPath = path.join(process.cwd(), attachment.url.replace(/^\//, ''));
   assert.ok(fs.existsSync(storedPath));
   fs.rmSync(storedPath, { force: true });
 });
 
-test('uploadResponseAttachment: enforces the per-response attachment cap', async () => {
+test('uploadResponseAttachment: enforces the per-response attachment cap under the inquiry lock and cleans the prewritten file', async () => {
   resetMocks();
   nextFindUnique = openInquiry();
   fx.response = { id: 50, status: 'PENDING' };
   fx.attachmentCount = 10;
+  fs.mkdirSync(attachmentDir, { recursive: true });
+  const before = fs.readdirSync(attachmentDir).sort();
+
   await assert.rejects(
     () => inquiryService.uploadResponseAttachment(1, 50, makeFile(), seller),
     (err) => err.code === 'ATTACHMENT_LIMIT_REACHED',
   );
+
+  const lockIndex = operationTimeline.indexOf('$queryRawUnsafe');
+  const countIndex = operationTimeline.indexOf('inquiryResponseAttachment.count');
+  assert.ok(lockIndex >= 0 && lockIndex < countIndex, 'cap check must run after acquiring the parent inquiry lock');
+  assert.deepEqual(fs.readdirSync(attachmentDir).sort(), before, 'rejected upload must remove the file written before the transaction');
 });
 
 test('uploadResponseAttachment: rejects a missing file', async () => {
