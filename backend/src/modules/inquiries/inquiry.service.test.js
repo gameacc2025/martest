@@ -1712,7 +1712,8 @@ test('uploadResponseAttachment: stores the file and writes the row', async () =>
   const createIndex = operationTimeline.indexOf('inquiryResponseAttachment.create');
   assert.ok(lockIndex >= 0 && lockIndex < countIndex && countIndex < createIndex, 'parent inquiry is locked before the attachment cap is checked and row inserted');
   assert.ok(calls.$transaction.some(({ kind }) => kind === 'interactive'));
-  const storedPath = path.join(process.cwd(), attachment.url.replace(/^\//, ''));
+  const storageKey = calls['inquiryResponseAttachment.create'][0].data.url;
+  const storedPath = path.join(attachmentDir, storageKey.split('/').pop());
   assert.ok(fs.existsSync(storedPath));
   fs.rmSync(storedPath, { force: true });
 });
