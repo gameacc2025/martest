@@ -914,6 +914,7 @@ async function updateInquiry(inquiryId, data, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiry(inquiry, caller);
 
@@ -1005,6 +1006,7 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
 async function revealInquiryResponses(inquiryId, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 
@@ -1051,6 +1053,7 @@ async function addInquiryItem(inquiryId, data, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiryItems(inquiry, caller);
     await validateInquiryProduct(data, tx);
@@ -1070,6 +1073,7 @@ async function updateInquiryItem(inquiryId, itemId, data, caller) {
   const numericItemId = toPositiveInt(itemId, 'itemId');
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiryItems(inquiry, caller);
 
@@ -1093,6 +1097,7 @@ async function deleteInquiryItem(inquiryId, itemId, caller) {
   const numericItemId = toPositiveInt(itemId, 'itemId');
 
   return prisma.$transaction(async (tx) => {
+    await lockInquiryForUpdate(tx, numericInquiryId);
     const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId } });
     assertCanManageInquiryItems(inquiry, caller);
 

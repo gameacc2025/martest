@@ -808,3 +808,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - PR #78 merged at `7d46b65a1f186fa63a91691240776cc336c23cc3`; CI passed 1,425 backend tests, 18 root Node tests, 33 frontend test files and all builds; Prisma migration validation passed.
 - Inquiry list service validates `scope` against sent/received/all. Company received aggregates apply published statuses SUBMITTED/OPEN/CLOSED/EXPIRED/COMPLETED and publishDate null or due.
 - SEALED/ANONYMOUS_SEALED buyer message reads return empty before reveal; message creation by either party is blocked before reveal. ANONYMOUS_SEALED buyer message views anonymize supplier company names and remove supplier IDs; direct buyer-to-company messaging by raw companyId is unavailable in anonymous mode.
+
+
+## Inquiry item and lifecycle mutation invariants — 2026-11-01
+
+- Inquiry item writes are buyer-owned or authorized STAFF-update operations and are allowed only while the parent inquiry is DRAFT. Update/delete must query an item using both its ID and the parent inquiry ID; never trust an item ID alone.
+- Item add/update/delete now acquire `SELECT id FROM "Inquiry" WHERE id = $1 FOR UPDATE` before reading parent state. This serializes item count and DRAFT checks against concurrent item writes, status transitions and response submission, preventing a two-delete race from removing the last items or mutation after submission.
+- General inquiry update and response reveal use the same parent lock. Status transitions and response submission/decision already lock this row.
+- CUSTOMER users may only cancel their own inquiry; STAFF reveal moderation requires update permission, not read-only permission.
