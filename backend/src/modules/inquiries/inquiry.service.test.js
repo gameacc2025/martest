@@ -2506,3 +2506,110 @@ test('sendInquiryMessage: anonymous sealed buyer cannot probe supplier IDs or st
   assert.equal(calls['inquiryResponse.findFirst'], undefined);
   assert.equal(calls['inquiryMessage.create'], undefined);
 });
+
+
+// ── Step 16Z: inquiry item/lifecycle authorization and concurrency ──
+
+test('item mutations serialize on the parent inquiry row before reading DRAFT state', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  fx.products = publishedProducts(4);
+  await inquiryService.addInquiryItem(1, { productId: 4, quantity: 1 }, buyer);
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "Inquiry"') && query.includes('FOR UPDATE') && params[0] === 1));
+
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  fx.inquiryItem = { id: 22, inquiryId: 1, quantity: 1 };
+  await inquiryService.updateInquiryItem(1, 22, { quantity: 2 }, buyer);
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "Inquiry"') && query.includes('FOR UPDATE') && params[0] === 1));
+
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  fx.inquiryItemCount = 2;
+  fx.inquiryItem = { id: 22, inquiryId: 1 };
+  await inquiryService.deleteInquiryItem(1, 22, buyer);
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "Inquiry"') && query.includes('FOR UPDATE') && params[0] === 1));
+});
+
+test('updateInquiryItem: an item id from another inquiry is not accepted', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  fx.inquiryItem = null;
+  await assert.rejects(
+    () => inquiryService.updateInquiryItem(1, 22, { quantity: 2 }, buyer),
+    (error) => error.statusCode === 404 && error.code === 'INQUIRY_ITEM_NOT_FOUND',
+  );
+  assert.deepEqual(calls['inquiryItem.findFirst'][0].where, { id: 22, inquiryId: 1 });
+  assert.equal(calls['inquiryItem.update'], undefined);
+});
+
+test('deleteInquiryItem: an item id from another inquiry is not accepted', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  fx.inquiryItemCount = 2;
+  fx.inquiryItem = null;
+  await assert.rejects(
+    () => inquiryService.deleteInquiryItem(1, 22, buyer),
+    (error) => error.statusCode === 404 && error.code === 'INQUIRY_ITEM_NOT_FOUND',
+  );
+  assert.deepEqual(calls['inquiryItem.findFirst'][0].where, { id: 22, inquiryId: 1 });
+  assert.equal(calls['inquiryItem.delete'], undefined);
+});
+
+test('STAFF with read-only inquiry permission cannot mutate DRAFT items', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  const staff = { id: 90, accessType: 'STAFF', roles: ['STAFF_USER'], permissions: ['leads.read'] };
+  await assert.rejects(
+    () => inquiryService.addInquiryItem(1, { productId: 4, quantity: 1 }, staff),
+    (error) => error.statusCode === 404 && error.code === 'INQUIRY_NOT_FOUND',
+  );
+  assert.equal(calls['inquiryItem.create'], undefined);
+});
+
+test('updateInquiry and reveal serialize on the same parent inquiry lock used by status transitions', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  await inquiryService.updateInquiry(1, { title: 'Revised title' }, buyer);
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FOR UPDATE') && params[0] === 1));
+
+  resetMocks();
+  nextFindUnique = openInquiry({ visibilityMode: 'SEALED', allowEarlyReveal: true, revealedAt: null });
+  await inquiryService.revealInquiryResponses(1, buyer);
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FOR UPDATE') && params[0] === 1));
+});
+
+test('changeInquiryStatus: CUSTOMER can cancel their own inquiry but cannot advance or close it', async () => {
+  resetMocks();
+  const customer = { id: 77, accessType: 'CUSTOMER', roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  nextFindUnique = openInquiry({ companyId: null, buyerUserId: 77 });
+  await assert.rejects(
+    () => inquiryService.changeInquiryStatus(1, 'CLOSED', customer),
+    (error) => error.statusCode === 403 && error.code === 'CUSTOMER_STATUS_RESTRICTED',
+  );
+  assert.equal(calls['inquiry.update'], undefined);
+
+  resetMocks();
+  nextFindUnique = openInquiry({ companyId: null, buyerUserId: 77 });
+  const cancelled = await inquiryService.changeInquiryStatus(1, 'CANCELLED', customer);
+  assert.equal(cancelled.status, 'CANCELLED');
+  assert.equal(calls['inquiry.update'][0].data.status, 'CANCELLED');
+});
+
+test('revealInquiryResponses: STAFF read permission is insufficient; update permission may moderate', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ visibilityMode: 'SEALED', allowEarlyReveal: false, revealedAt: null });
+  const readOnlyStaff = { id: 90, accessType: 'STAFF', roles: ['STAFF_USER'], permissions: ['leads.read'] };
+  await assert.rejects(
+    () => inquiryService.revealInquiryResponses(1, readOnlyStaff),
+    (error) => error.statusCode === 404 && error.code === 'INQUIRY_NOT_FOUND',
+  );
+  assert.equal(calls['inquiry.update'], undefined);
+
+  resetMocks();
+  nextFindUnique = openInquiry({ visibilityMode: 'SEALED', allowEarlyReveal: false, revealedAt: null });
+  const moderator = { id: 91, accessType: 'STAFF', roles: ['STAFF_USER'], permissions: ['leads.update'] };
+  const revealed = await inquiryService.revealInquiryResponses(1, moderator);
+  assert.ok(revealed.revealedAt);
+  assert.ok(calls['inquiry.update'][0].data.revealedAt instanceof Date);
+});
