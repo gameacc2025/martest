@@ -20,7 +20,7 @@ const mockPrisma = {
     },
     findUnique: async ({ where }) => where.id === 1
       ? { id: 1, title: 'Scheduled', companyId: 10, buyerUserId: null, items: [{ product: { companyId: 20 } }] }
-      : { id: 2, title: 'Expired', companyId: null, buyerUserId: 77, responses: [{ companyId: 20, status: 'PENDING' }] },
+      : { id: 2, title: 'Expired', companyId: 10, buyerUserId: null, responses: [{ companyId: 20, status: 'PENDING' }, { companyId: 30, status: 'WITHDRAWN' }] },
   },
   inquiryItem: {
     findMany: async () => [{ product: { companyId: 20 } }],
@@ -64,5 +64,16 @@ test('processInquiryLifecycle publishes due inquiries and expires auto-close inq
   assert.equal(updateCalls[0].where.status, 'SUBMITTED');
   assert.equal(updateCalls[1].where.status, 'OPEN');
   assert.ok(dispatchCalls.some(([event]) => event === 'INQUIRY_PUBLISHED'));
-  assert.ok(dispatchCalls.some(([event]) => event === 'INQUIRY_STATUS_CHANGED'));
+  const statusNotifications = dispatchCalls.filter(([event]) => event === 'INQUIRY_STATUS_CHANGED');
+  assert.deepEqual(statusNotifications.map(([, recipients]) => recipients), [
+    { companyIds: [10] },
+    { companyIds: [20] },
+  ]);
+  for (const [, , context, options] of statusNotifications) {
+    assert.deepEqual(context, { inquiry: { id: 2, title: 'Expired' }, status: 'EXPIRED' });
+    assert.equal(options.tx, mockPrisma);
+    assert.equal(typeof options.dedupeKey, 'function');
+  }
+  assert.equal(statusNotifications[0][3].dedupeKey(77), 'inquiry-status-2-EXPIRED-owner-77');
+  assert.equal(statusNotifications[1][3].dedupeKey(88), 'inquiry-status-2-EXPIRED-company-20-88');
 });
