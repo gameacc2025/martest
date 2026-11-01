@@ -1812,7 +1812,7 @@ test('deleteResponseAttachment: deletes the row and the stored file', async () =
   resetMocks();
   nextFindUnique = openInquiry();
   fx.response = { id: 50, status: 'PENDING' };
-  fx.attachment = { id: 77, url: '/uploads/inquiries/responses/gone.pdf' };
+  fx.attachment = { id: 77, url: 'private://inquiries/responses/gone.pdf' };
 
   fs.mkdirSync(attachmentDir, { recursive: true });
   const storedPath = path.join(attachmentDir, 'gone.pdf');
