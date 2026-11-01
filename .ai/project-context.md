@@ -834,3 +834,5 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Anonymous-sealed attachment metadata uses generic filenames; downloaded file content itself is not rewritten, so uploaded documents should not contain supplier-identifying content when strict anonymity is required.
 
 - Production Compose persists private response files using named volume `inquiry_private_uploads:/app/private-uploads`; development persists via the backend source bind mount. Keep `backend/private-uploads/` out of Git.
+
+- Supplier `PATCH /inquiries/:id/responses/:responseId` must not include the raw parent Inquiry record; buyer identifiers are private. Attachment extensions must derive from allowlisted MIME type, not client-supplied filename extensions.
