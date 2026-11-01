@@ -518,3 +518,8 @@ PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`. CI passed 1,432 bac
 
 - `GET /api/v1/inquiries/:id` includes attachment metadata for only the responses visible to the caller. Each attachment `url` is the authenticated `/api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download` endpoint; internal filesystem keys are never returned. SEALED pre-reveal and ANONYMOUS_SEALED redaction rules apply to detail responses as well as the dedicated response list.
 - Supplier response update returns only the response projection, not the raw inquiry record or buyer identity fields.
+
+
+### Verification — step 17 merged (2026-11-01)
+
+PR #80 merged at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`. CI passed 1,446 backend tests, 18 root Node tests, 33 frontend test files and all frontend builds; Prisma migration validation passed. Runtime/compose validation was separate and not used as a merge gate.
