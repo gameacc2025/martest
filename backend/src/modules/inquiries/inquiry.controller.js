@@ -234,6 +234,8 @@ async function downloadResponseAttachment(request, reply) {
     .header('Content-Disposition', "attachment; filename*=UTF-8''" + encodeURIComponent(attachment.filename))
     .header('Content-Length', attachment.size)
     .header('X-Content-Type-Options', 'nosniff')
+    .header('Cache-Control', 'private, no-store, max-age=0')
+    .header('Pragma', 'no-cache')
     .send(fs.createReadStream(attachment.path));
 }
 
