@@ -2150,7 +2150,7 @@ test('sendInquiryMessage: enforced owner quota records one INTERNAL_MESSAGE usag
 
   await inquiryService.sendInquiryMessage(
     1,
-    { message: 'Please confirm delivery' },
+    { message: 'Please confirm delivery', recipientCompanyId: 20 },
     { id: 12, accessType: 'COMPANY', companyId: 10, permissions: ['inquiries.create'] },
   );
 
