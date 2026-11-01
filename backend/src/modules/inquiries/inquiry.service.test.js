@@ -872,10 +872,11 @@ test('changeInquiryStatus: closing notifies the owner and each distinct respondi
   await inquiryService.changeInquiryStatus(44, 'CLOSED', buyer);
 
   const notifications = calls.dispatchNotification.filter(([event]) => event === 'INQUIRY_STATUS_CHANGED');
-  assert.equal(notifications.length, 3);
-  assert.deepEqual(notifications[0][1], { companyIds: [10] });
-  assert.deepEqual(notifications[1][1], { companyIds: [20] });
-  assert.deepEqual(notifications[2][1], { companyIds: [30] });
+  assert.deepEqual(notifications.map(([, recipients]) => recipients), [
+    { companyIds: [10] },
+    { companyIds: [20] },
+    { companyIds: [30] },
+  ]);
   for (const [, , context, options] of notifications) {
     assert.deepEqual(context, { inquiry: { id: 44, title: 'RFQ status notice' }, status: 'CLOSED' });
     assert.equal(options.tx, mockPrisma);
