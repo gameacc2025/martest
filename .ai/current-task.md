@@ -766,3 +766,16 @@ PR #66 squash-merged into `main` at `1c9e960a7144ff86369a4aa5ce88ca7514eb7de8`. 
 - Fix race in per-response 10-attachment cap: current check/count and insert were not serialized, so simultaneous uploads could exceed the cap.
 - Pre-validate ownership before reading/storing the upload, write file outside the DB lock, then lock parent Inquiry row, re-check response editability/ownership, count and insert inside one transaction. Clean up the stored file if the locked check or DB insert fails.
 - Add tests proving lock-before-count ordering, concurrent-safe cap decision path and file cleanup. CI/migration validation and merge.
+
+
+## Inquiry response attachment concurrency — step 16O merged (2026-11-01)
+
+PR #67 squash-merged into `main` at `8ec294c6ca41c64ddfbdf5acabd17e0b4debea12`. CI [41270660122] passed; Prisma migration validation [41270660084] passed. Runtime validation [41270660090] was separate/in progress at merge and is not claimed as passed.
+
+- Per-response attachment cap race fixed. Upload now validates before consuming multipart data, writes the file before DB locking, then locks parent Inquiry, re-checks ownership/editability, counts and inserts inside one transaction.
+- If the locked re-check, cap or insert fails, the prewritten file is removed. Tests assert lock-before-count/create ordering and cleanup at the cap.
+
+## Next active work — step 16P inquiry message and lifecycle transaction audit
+
+- Audit message send/read state, supplier response decisions, withdraw/update and inquiry status changes for race windows, duplicate side effects, missing idempotency, and transactional notification consistency.
+- Prioritize any verified issue with business impact; preserve current role/ownership/visibility rules. Add focused regression tests and update docs before CI/migration validation and merge.
