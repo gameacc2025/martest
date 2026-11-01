@@ -1794,3 +1794,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - `listInquiryMessages` fetched up to 500 messages but then updated all unread recipient messages in the inquiry. This could mark rows beyond the returned result or a message arriving after the SELECT as read before the user received it.
 - Changed read marking to update only unread recipient message IDs included in the fetched result, with inquiry, recipient and readAt-null predicates. The returned objects now reflect the new readAt timestamp.
 - Updated COMPANY and AccessProfile-less CUSTOMER service tests for ID-scoped updates and returned read state. CI pending.
+
+
+## 2026-11-01 — INQUIRY-MESSAGE-READ-RACE-STEP-16P-MERGE
+
+- PR #68 squash-merged at `9ebbfbd96fa5e5df836abc6c8f930d4f252bace0`.
+- CI [41270839852] and migration validation [41270839763] passed. Runtime [41270839712] was a separate workflow/in progress at merge.
+- Fixed list-read behavior to mark only unread recipient IDs in the returned result as read, not every unread message in the thread. Returned message objects now reflect readAt written by the request.
+- Tests cover company and AccessProfile-less customer recipient scoping, ID-only updates and returned timestamps.
+- Next: audit inquiry message notification/event behavior, delivery preferences and unread badge integration.
