@@ -666,6 +666,13 @@ Object.assign(docs, {
     tags: ['Inquiries'], permission: 'inquiries.respond', params: twoIdParams('id', 'responseId'),
     responses: createdResponse('Inquiry response attachment uploaded successfully.'),
   },
+  'GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download': {
+    summary: 'Download an inquiry response attachment',
+    description: 'Streams a response attachment only after checking inquiry visibility, buyer ownership or supplier response ownership. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read or inquiries.respond. SEALED buyers cannot download before reveal.',
+    tags: ['Inquiries'], permission: 'leads.read or inquiries.read or inquiries.respond',
+    params: { type: 'object', required: ['id', 'responseId', 'attachmentId'], properties: { id: { type: 'integer' }, responseId: { type: 'integer' }, attachmentId: { type: 'integer' } } },
+    responses: { 200: { description: 'Private attachment stream; Content-Disposition is attachment and X-Content-Type-Options is nosniff.', type: 'string', format: 'binary' } },
+  },
   'DELETE /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId': {
     summary: 'Delete an attachment from a supplier response',
     description: 'Deletes an attachment owned by the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Attachment and response ownership are enforced by the service.',
