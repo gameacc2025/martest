@@ -1894,3 +1894,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Audited company/admin create forms and backend `assertInquiryDateWindow`. Company form omitted publishDate < responseDeadline validation that admin form and backend already enforce; malformed restored date values also slipped past `NaN` comparisons.
 - Added `apps/company/src/utils/inquiryDateWindow.js`, wired it into company InquiryCreate settings validation, and added unit tests for future deadline, strict publish/deadline ordering, malformed dates and valid schedules.
 - No API/backend behavior changed; server validation remains authoritative. CI pending.
+
+
+## 2026-11-01 — INQUIRY-LIFECYCLE-UI-DATE-WINDOW-STEP-16V-MERGE
+
+- PR #75 merged by squash at `d2570f1abcda54cc369f7ca553fd58da333ba904`.
+- CI [41284497080] passed: 31 frontend test files / 225 tests, backend 1,418/1,418, builds passed. Prisma migration [41284497088] passed. Runtime [41284497056] was separate and still running at merge.
+- Company inquiry create UI now mirrors backend date-window validation and handles malformed restored draft values. No backend behavior changed.
+- Next: remove or clarify admin target-company selector that is not part of the API/data model; preserve automatic product-owner notification audience.
