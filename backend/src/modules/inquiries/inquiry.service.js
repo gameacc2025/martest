@@ -1614,10 +1614,10 @@ async function listResponses(inquiryId, caller) {
         }
         return safeItem;
       });
-      return safe;
+      return presentResponseAttachments(safe, numericInquiryId, { anonymous: true });
     });
   }
-  return responses;
+  return responses.map((response) => presentResponseAttachments(response, numericInquiryId));
 }
 
 async function updateResponse(inquiryId, responseId, data, caller) {
@@ -1646,7 +1646,7 @@ async function updateResponse(inquiryId, responseId, data, caller) {
 
     await tx.inquiryResponseItem.deleteMany({ where: { responseId: numericResponseId } });
 
-    return tx.inquiryResponse.update({
+    const updatedResponse = await tx.inquiryResponse.update({
       where: { id: numericResponseId },
       data: {
         items: normalizeResponseItems(data.items),
@@ -1656,6 +1656,7 @@ async function updateResponse(inquiryId, responseId, data, caller) {
         ...responseInclude,
       },
     });
+    return presentResponseAttachments(updatedResponse, numericInquiryId);
   });
 }
 
@@ -1835,7 +1836,7 @@ async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
       { tx, dedupeKey: (userId) => `inquiry-response-withdrawn-${response.id}-${userId}` },
     );
 
-    return withdrawnResponse;
+    return presentResponseAttachments(withdrawnResponse, numericInquiryId);
   });
 }
 
@@ -1879,7 +1880,7 @@ async function uploadResponseAttachment(inquiryId, responseId, file, caller) {
   const stored = await saveResponseAttachment(file);
 
   try {
-    return await prisma.$transaction(async (tx) => {
+    const attachment = await prisma.$transaction(async (tx) => {
       // Serialize concurrent uploads for the same inquiry before checking the
       // per-response cap. Re-check editability after acquiring the lock so a
       // response/inquiry closed during the file write cannot accept an upload.
@@ -1908,6 +1909,7 @@ async function uploadResponseAttachment(inquiryId, responseId, file, caller) {
         },
       });
     }, { maxWait: 5000, timeout: 12000 });
+    return { ...attachment, url: responseAttachmentDownloadUrl(numericInquiryId, numericResponseId, attachment.id) };
   } catch (error) {
     // The file is written before the database transaction to avoid holding a
     // row lock during disk I/O. Clean it up if the cap/re-check/insert fails.
@@ -2089,6 +2091,7 @@ module.exports = {
   decideResponse,
   withdrawResponse,
   uploadResponseAttachment,
+  getResponseAttachment,
   deleteResponseAttachment,
 };
 
