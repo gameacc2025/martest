@@ -1240,6 +1240,26 @@ test('submitResponse: duplicate response returns a domain conflict instead of a 
   assert.equal((calls.dispatchNotification || []).some(([event]) => event === 'INQUIRY_RESPONSE_RECEIVED'), false);
 });
 
+test('submitResponse: a withdrawn response still blocks a second submission', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 42 });
+  fx.ownedItemIds = [11];
+  fx.response = { id: 902, inquiryId: 42, companyId: seller.companyId, status: 'WITHDRAWN' };
+
+  await assert.rejects(
+    () => inquiryService.submitResponse(42, {
+      items: [{ inquiryItemId: 11, price: 1700, availableQuantity: 2 }],
+    }, seller),
+    (error) => error.statusCode === 409
+      && error.code === 'RESPONSE_ALREADY_EXISTS'
+      && error.details.responseId === 902
+      && error.details.status === 'WITHDRAWN',
+  );
+
+  assert.equal((calls['inquiryResponse.create'] || []).length, 0);
+  assert.equal((calls.dispatchNotification || []).some(([event]) => event === 'INQUIRY_RESPONSE_RECEIVED'), false);
+});
+
 // ── listResponses ────────────────────────────────────────────
 
 test('decideResponse: selecting a quote notifies winner, each losing supplier, and company buyer in one transaction', async () => {
