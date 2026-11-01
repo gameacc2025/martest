@@ -823,3 +823,12 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`; CI passed 1,432 backend tests, 18 root Node tests, 33 frontend test files and all frontend builds; Prisma migration validation passed.
 - Item add/update/delete, inquiry update and sealed response reveal acquire the parent Inquiry row lock. This serializes DRAFT-only checks and minimum item count with concurrent item operations, status transitions and response writes.
 - Item update/delete require both inquiryId and itemId. STAFF read-only does not authorize mutation or reveal; CUSTOMER status changes remain cancel-only.
+
+
+## Inquiry response attachment storage and access — 2026-11-01
+
+- Response attachments are private supplier quote files; never store them under the globally served `uploads` static root. New files use `private-uploads/inquiries/responses` and DB storage keys `private://inquiries/responses/<filename>`.
+- Legacy DB URLs `/uploads/inquiries/responses/<filename>` may be resolved by the authenticated download service only. App router explicitly returns 404 for direct GET/HEAD under `/uploads/inquiries/responses/*`.
+- Download endpoint is `GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download`. It verifies inquiry read visibility, supplier response ownership, response/attachment linkage, and sealed reveal state. Stream as attachment with safe content type and `X-Content-Type-Options: nosniff`.
+- API responses expose the authenticated download endpoint, never the physical/internal storage key. Company/Admin UIs must download via the authenticated API client as a blob rather than an anchor to static uploads.
+- Anonymous-sealed attachment metadata uses generic filenames; downloaded file content itself is not rewritten, so uploaded documents should not contain supplier-identifying content when strict anonymity is required.
