@@ -1035,7 +1035,7 @@ const inquiryMessageResponseSchema = {
 const inquiryResponseAttachmentResponseSchema = {
   type: 'object', required: ['id', 'responseId', 'url', 'filename', 'mimetype', 'size', 'createdAt'],
   properties: {
-    id: { type: 'integer' }, responseId: { type: 'integer' }, url: { type: 'string', minLength: 1 },
+    id: { type: 'integer' }, responseId: { type: 'integer' }, url: { type: 'string', minLength: 1, description: 'Authenticated inquiry attachment download endpoint; stored file keys are never returned.' },
     filename: { type: 'string' }, mimetype: { type: ['string', 'null'] }, size: { type: ['integer', 'null'] },
     createdAt: { type: 'string', format: 'date-time' },
   },
