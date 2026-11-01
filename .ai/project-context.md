@@ -792,3 +792,9 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Supplier withdrawal of a pending response emits `INQUIRY_RESPONSE_WITHDRAWN` to the inquiry owner, transactionally with the status change. IN_APP/EMAIL default on, SMS off.
 - Wording is generic ("one of the companies") and payload includes only inquiryId/responseId, preserving SEALED and ANONYMOUS_SEALED supplier confidentiality.
 - Recipient resolution targets active Website buyer user or active COMPANY access-profile members; STAFF accounts sharing company IDs are excluded. Dedupe includes response and recipient IDs.
+
+
+## Notification company recipient resolution — 2026-11-01
+
+- Notification dispatcher descriptors `{companyIds}` and `{roles, companyId}` must resolve only `status=ACTIVE` users with `AccessProfile.type=COMPANY` and `AccessProfile.isActive=true`. Filtering only by companyId can include STAFF accounts associated with the platform Main-company ID.
+- Inquiry terminal status changes notify the inquiry owner and each unique company with a non-withdrawn response; event payload contains inquiry title/id and status, not sealed supplier identity.
