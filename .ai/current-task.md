@@ -985,3 +985,21 @@ PR #76 squash-merged into `main` at `71063c219c2d641c7eee8a85e7b89a66dc03d7cb`.
 - Found company detail allowed `canCreateResponse` again when an existing response was WITHDRAWN, but backend `submitResponse` intentionally returns `409 RESPONSE_ALREADY_EXISTS` for any existing row, including WITHDRAWN. Aligned UI to disallow resubmission and added a clear notice after withdrawal.
 - Added pure unit tests for COMPANY-only admin supplier actions and company response eligibility; added backend regression test for withdrawn duplicate response conflict.
 - Branch: `fix/inquiry-response-action-rbac-step-16x`. CI pending.
+
+
+## Inquiry response action UI/RBAC audit — step 16X merged (2026-11-01)
+
+PR #77 squash-merged into `main` at `91500d3461fcd132804780c8d28e4c7e63e1bcbd`.
+
+- CI [41285255545] passed: 33 frontend test files, 18 root Node tests, 1,419 backend tests; all frontend builds passed.
+- Prisma migration validation [41285255562] passed.
+- Runtime validation [41285255563] was separate and still running at merge; not counted as passed.
+- Admin InquiryDetail supplier create/edit/withdraw controls now require COMPANY access context, matching backend supplier-only routes. STAFF/SUPER_ADMIN in STAFF context remain moderators.
+- Company UI no longer offers resubmission after WITHDRAWN because backend enforces one response row per (inquiry, company) and returns 409 for any existing response. UI explains the rule.
+- Sealed reveal behavior was verified: server auto-reveals after deadline/terminal status; early reveal button only appears while still hidden and allowEarlyReveal is enabled.
+
+## Next active work — step 16Y inquiry list/detail data isolation audit
+
+- Trace `listInquiries`, `getInquiry`, `listResponses`, message endpoints and dashboard stats for STAFF, COMPANY and CUSTOMER access types. Verify sent/received/all scopes, supplier eligibility by requested product ownership, anonymous/sealed redaction and no cross-company/cross-user leakage.
+- Add adversarial tests for unauthorized company/customer IDs, no product ownership, unrelated companies, STAFF scope, and response/message visibility. Fix any data-scope leaks; do not broaden route permissions.
+- Update docs/.ai, CI and merge.
