@@ -1963,3 +1963,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Confirmed `updateInquiryItem` and `deleteInquiryItem` query item by both `{id, inquiryId}`, item writes are DRAFT-only, buyer ownership is required for COMPANY/CUSTOMER, and STAFF requires update permission. CUSTOMER status transitions are cancel-only. STAFF reveal requires leads.update/inquiries.update; read-only STAFF is denied.
 - Found concurrent item mutations were not serialized against status changes: two deletes could both see itemCount > 1 and leave no items, or an item could be changed after a concurrent DRAFT→SUBMITTED transition. Added parent Inquiry row lock to add/update/delete item, updateInquiry and revealInquiryResponses; status and response operations already use the same lock.
 - Added regression tests for row-lock usage, item IDs from another inquiry, STAFF read/update boundaries, CUSTOMER cancel-only and reveal moderation permission. CI pending.
+
+
+## 2026-11-01 — INQUIRY-ITEM-LIFECYCLE-AUTHORIZATION-STEP-16Z-MERGE
+
+- PR #79 squash-merged into `main` at `37b06e17e98b156da29e8afe28492bbec3aa1992`.
+- CI [41324596670] passed: 33 frontend test files, 18 root Node tests, backend 1,432/1,432 and all frontend builds. Prisma migration validation [41324596563] passed. Runtime [41324596827] remained separate and was not a merge gate.
+- Parent Inquiry row locking now serializes item add/update/delete, inquiry updates and response reveal against status transitions and response operations. This protects DRAFT-only edits and the minimum-one-item invariant under concurrent writes.
+- Verified cross-inquiry item IDs are queried by both parent and item ID; STAFF read-only is insufficient for mutations/reveal; CUSTOMER can only cancel own inquiry.
+- Next: audit response attachment file ownership, validation, static serving and cleanup behavior.
