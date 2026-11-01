@@ -763,3 +763,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 
 - `listInquiryMessages` marks read only the unread recipient message IDs included in the fetched response (up to the 500-row cap), scoped by inquiry and recipient. New messages arriving after the query and messages outside the response are not marked read.
 - Returned messages reflect the readAt timestamp written by the same request. Staff moderation reads do not mutate recipient read state.
+
+
+## Inquiry message notification contract — 2026-11-01
+
+- `INQUIRY_MESSAGE_RECEIVED` exists in the notification event catalog; defaults are IN_APP and EMAIL enabled, SMS disabled/opt-in. New inquiry messages must dispatch this event in the same transaction as message persistence and internal-message usage consumption.
+- Recipient resolution is explicit: active Website buyer user, or active users with `AccessProfile.type=COMPANY` and `isActive=true` for the recipient company. Do not resolve only by companyId because STAFF accounts can share the platform Main-company ID.
+- Dedupe key must include both message ID and recipient user ID because notification delivery uniqueness is `(eventType, dedupeKey, channel)` and company conversations can notify multiple members.
+- Paid SMS is a separate opt-in, quota-enforced custom delivery path; central notification dispatch does not implement SMS.
