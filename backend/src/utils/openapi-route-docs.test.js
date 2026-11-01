@@ -171,6 +171,11 @@ test('product history and inquiry conversation response contracts match service 
   assert.ok(attachment.filename);
 });
 
+test('supplier response update contract excludes the raw inquiry record', () => {
+  const response = docs['PATCH /api/v1/inquiries/:id/responses/:responseId'].responses[200].properties.data.properties;
+  assert.equal(response.inquiry, undefined);
+});
+
 test('response attachment download is an authenticated binary response', () => {
   const download = docs['GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download'];
   assert.ok(download);
