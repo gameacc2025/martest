@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { inquiriesApi, API_BASE_URL } from '@telecom/api-client'
+import { canSubmitInquiryResponse } from '../../../utils/inquiryResponseActions.js'
 import { useAuthStore } from '../../../stores/auth'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
@@ -103,12 +104,12 @@ const myResponse = computed(() => {
   return inquiry.value.responses.find((r) => r.company?.id === myCompanyId.value) || null
 })
 
-const canCreateResponse = computed(() => {
-  if (!isOpen.value || deadlinePassed.value) return false
-  if (inquiry.value?.company?.id === myCompanyId.value) return false
-  const existing = myResponse.value
-  return !existing || existing.status === 'WITHDRAWN'
-})
+const canCreateResponse = computed(() => canSubmitInquiryResponse({
+  isOpen: isOpen.value,
+  deadlinePassed: deadlinePassed.value,
+  isBuyer: isInquiryBuyer.value,
+  existingResponse: myResponse.value,
+}))
 
 function canEditResponse(response) {
   return isOpen.value && !deadlinePassed.value && inquiry.value?.allowEditResponse && response?.status === 'PENDING'
@@ -512,6 +513,10 @@ function formatPrice(price) {
             <Button v-if="canRevealResponses" label="بازکردن پاکت پیشنهادها" icon="pi pi-lock-open" :loading="savingResponse" @click="revealResponses" />
           </div>
 
+          <div v-if="myResponse?.status === 'WITHDRAWN'" class="withdrawn-response-notice" role="status">
+            پاسخ شما قبلاً پس گرفته شده است. برای این استعلام امکان ثبت پاسخ مجدد وجود ندارد.
+          </div>
+
           <!-- Responses Section -->
           <div class="detail-section" v-if="inquiry.responses?.length">
             <h2>پاسخ‌ها <span class="count-badge">{{ inquiry.responses.length }}</span></h2>
@@ -878,6 +883,16 @@ function formatPrice(price) {
 .message-sms-option{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text-color-secondary,#64748b)}.message-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,#0f9e9a)}
 .message-recipient select{padding:.65rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-card,#fff);color:inherit}
 .message-send-row small{color:var(--text-color-secondary,#64748b)}
+.withdrawn-response-notice {
+  margin: 0 0 1rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--p-orange-200);
+  border-radius: var(--p-border-radius-md);
+  background: var(--p-orange-50);
+  color: var(--p-orange-900);
+  line-height: 1.8;
+}
+
 .responses-list {
   display: flex;
   flex-direction: column;
