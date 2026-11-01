@@ -31,6 +31,7 @@ let smsUsageEvents = [];
 let smsRecipientUser = { id: 10, phone: '+31612345678' };
 let smsCompanyMember = { id: 31 };
 let smsPreferenceEnabled = true;
+let subscriptionEnforcementEnabled = false;
 const activeSmsSubscription = { id: 77, planId: 2, startsAt: new Date('2026-10-01T00:00:00Z'), endsAt: new Date('2026-11-01T00:00:00Z'), status: 'ACTIVE', plan: { id: 2, name: 'SMS', isActive: true, inquiriesPerPeriod: 10, responsesPerPeriod: 10, internalMessagesPerPeriod: 10, smsPerPeriod: 2 } };
 
 // Fixtures backing the transactional / relationship-heavy paths
@@ -66,7 +67,7 @@ function record(name, args) {
 }
 
 const mockPrisma = {
-  systemSetting: { findUnique: async () => ({ value: 'false' }) },
+  systemSetting: { findUnique: async () => ({ value: subscriptionEnforcementEnabled ? 'true' : 'false' }) },
   inquirySubscription: { findFirst: async () => activeSmsSubscription },
   inquiryUsageEvent: {
     aggregate: async ({ where }) => ({ _sum: { quantity: smsUsageEvents.filter(e => e.subscriptionId === where.subscriptionId && e.usageType === where.usageType).reduce((sum, e) => sum + e.quantity, 0) } }),
@@ -262,6 +263,7 @@ function resetMocks() {
   nextFindUnique = null;
   nextMessages = [];
   smsUsageEvents = [];
+  subscriptionEnforcementEnabled = false;
   smsRecipientUser = { id: 10, phone: '+31612345678' };
   smsCompanyMember = { id: 31 };
   smsPreferenceEnabled = true;
