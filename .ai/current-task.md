@@ -932,3 +932,19 @@ PR #74 squash-merged into `main` at `f9a62bd23dd413b128dfbe3751e5edfd8687bedd`.
 - Added a pure date-window validator for the company app and integrated it into the settings step. It validates malformed restored draft values, deadline strictly after now, and deadline strictly after scheduled publication. Date inputs remain browser-local `datetime-local` values and payload serialization remains ISO.
 - Added Vitest coverage for empty/immediate dates, future deadline, exact/past deadline, publish/deadline ordering, malformed persisted values and valid scheduled publication.
 - Branch: `fix/company-inquiry-date-window-validation-step-16v`. CI/migration validation pending.
+
+
+## Inquiry lifecycle UI/API consistency audit — step 16V merged (2026-11-01)
+
+PR #75 squash-merged into `main` at `d2570f1abcda54cc369f7ca553fd58da333ba904`.
+
+- CI [41284497080] passed: frontend 31 test files / 225 tests passed; backend 1,418/1,418; frontend builds passed after correcting the new utility's relative import.
+- Prisma migration validation [41284497088] passed.
+- Runtime validation [41284497056] was separate and still running at merge; it is not counted as passed.
+- Company InquiryCreate now rejects malformed draft dates, response deadlines at/before now, and response deadlines at/before scheduled publishDate before final submit. Server-side date-window validation remains authoritative.
+
+## Next active work — step 16W admin inquiry target-company no-op audit
+
+- Admin InquiryCreate currently presents an optional “target companies” multi-select and persists it in local draft state, but the submit payload omits `targetCompanyIds`; the API/schema/Prisma model have no corresponding field or targeting relation.
+- Confirm whether this is a dead UI control. Do not invent a targeting model or change notification distribution semantics. Prefer removing the misleading selector and replacing it with clear copy that publication notifications are sent to companies owning the selected products, unless the repository contains an existing supported targeting contract.
+- Add regression coverage for the actual product-owner publication audience and keep admin UI/API documentation honest. CI/build and merge.
