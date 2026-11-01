@@ -1003,3 +1003,13 @@ PR #77 squash-merged into `main` at `91500d3461fcd132804780c8d28e4c7e63e1bcbd`.
 - Trace `listInquiries`, `getInquiry`, `listResponses`, message endpoints and dashboard stats for STAFF, COMPANY and CUSTOMER access types. Verify sent/received/all scopes, supplier eligibility by requested product ownership, anonymous/sealed redaction and no cross-company/cross-user leakage.
 - Add adversarial tests for unauthorized company/customer IDs, no product ownership, unrelated companies, STAFF scope, and response/message visibility. Fix any data-scope leaks; do not broaden route permissions.
 - Update docs/.ai, CI and merge.
+
+
+## Inquiry list/detail data isolation audit — step 16Y (in progress, 2026-11-01)
+
+- Branch: `audit/inquiry-list-detail-data-isolation-step-16y`.
+- Added defensive `scope` validation in `listInquiries`; only `sent`, `received`, and `all` are accepted. The route query schema already had this enum, but the service now rejects invalid values before any database query as defense in depth.
+- Corrected company `received` dashboard aggregates to match the published supplier list: only SUBMITTED/OPEN/CLOSED/EXPIRED/COMPLETED inquiries whose publishDate is null or due are counted. Draft and future-scheduled inquiries no longer leak through aggregate counts.
+- Found a sealed-conversation side channel: buyers and suppliers could start messages before response reveal, and message listing could reveal supplier company identities in ANONYMOUS_SEALED. Buyer message reads now return no messages before sealed reveal; sending on SEALED/ANONYMOUS_SEALED is rejected until reveal. ANONYMOUS_SEALED buyer message views mask supplier names and remove supplier company IDs while preserving buyer-owned company references and read-state updates.
+- Buyer cannot start a direct supplier thread in ANONYMOUS_SEALED even after reveal because the current endpoint requires recipientCompanyId and would defeat anonymity; this is rejected before probing whether a guessed company has responded.
+- Added adversarial tests for invalid scopes, stats publication filters, sealed message invisibility, anonymous message identity redaction/read receipts, and send-message restrictions. CI pending.

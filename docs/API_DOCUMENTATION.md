@@ -477,3 +477,12 @@ PR #76 merged at `71063c219c2d641c7eee8a85e7b89a66dc03d7cb`. CI passed 225 front
 ### Verification — step 16X merged (2026-11-01)
 
 PR #77 merged at `91500d3461fcd132804780c8d28e4c7e63e1bcbd`. CI passed 33 frontend test files, 18 root Node tests and 1,419 backend tests; all frontend builds and Prisma migration validation passed. Runtime validation was separate and still running at merge.
+
+
+## Inquiry data isolation and sealed messaging — 2026-11-01
+
+- `GET /api/v1/inquiries` accepts only `scope=sent|received|all`; invalid scopes return `400 INVALID_INQUIRY_SCOPE`. COMPANY and CUSTOMER callers remain owner-scoped even when requesting `all`; `received` is COMPANY-only.
+- A supplier's received inquiry list and dashboard aggregates use the same publication boundary: only SUBMITTED/OPEN/CLOSED/EXPIRED/COMPLETED inquiries with no publishDate or a publishDate at/before now. Draft and future-scheduled inquiries are not exposed or counted.
+- For SEALED and ANONYMOUS_SEALED inquiries, buyer message history remains empty until responses are revealed, and neither party may start a message conversation before reveal (`409 INQUIRY_RESPONSES_HIDDEN`).
+- For revealed ANONYMOUS_SEALED inquiries, buyer message history replaces supplier company names with generic proposer labels and removes supplier company IDs. Buyer-owned company identity remains visible to its own users. Recipient read receipts continue to update only the returned messages.
+- Buyer-initiated company-targeted messaging is not available for ANONYMOUS_SEALED (`409 ANONYMOUS_INQUIRY_CONTACT_UNAVAILABLE`), including after reveal, because the current endpoint accepts a raw recipientCompanyId and would defeat anonymity. An anonymous conversation feature needs a response/thread token rather than a company ID.

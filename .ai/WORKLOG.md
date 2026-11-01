@@ -1935,3 +1935,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - CI [41285255545] passed: 33 frontend test files, 18 root Node tests, backend 1,419/1,419 and all builds. Migration validation [41285255562] passed. Runtime [41285255563] was separate/in progress at merge.
 - Admin supplier response actions are now COMPANY-context only. Company UI no longer advertises resubmission after withdrawal; backend duplicate response rule is covered by a regression test.
 - Next: adversarial data-isolation audit for inquiry list/detail, response and message visibility across STAFF/COMPANY/CUSTOMER.
+
+
+## 2026-11-01 — INQUIRY-DATA-ISOLATION-AUDIT-STEP-16Y
+
+- Began adversarial trace across inquiry list/detail, response list, internal messages and dashboard stats for STAFF/COMPANY/CUSTOMER contexts.
+- Hardened `listInquiries` to reject invalid scopes before querying; route schema already enumerates sent/received/all, but service-level validation prevents unscoped fallback if called outside Fastify or schema validation is bypassed.
+- Fixed company received dashboard aggregates to apply the same publication constraints as received list/detail: allowed published statuses and null/due publishDate. Prevents aggregate count leakage for drafts/future RFQs.
+- Sealed messaging confidentiality fix: buyer reads no messages before sealed reveal; both parties cannot create messages before reveal; anonymous-sealed buyer message reads replace supplier names with stable generic proposer labels and remove supplier IDs. Buyer-owned company references remain visible to the buyer. Read receipts still update only rows returned to the caller.
+- Anonymous-sealed buyers cannot initiate direct company-targeted threads because current API requires recipientCompanyId and would expose/probe supplier identity; request rejected before checking response existence.
+- Added regression tests for invalid scope injection, received stats filters, pre-reveal message access, anonymous identity redaction, and message-send policy. CI pending.
