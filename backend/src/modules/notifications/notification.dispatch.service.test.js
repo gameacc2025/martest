@@ -309,12 +309,12 @@ test('resolveRecipients: dedupes a flat id list and drops invalid entries', asyn
   assert.deepEqual(resolved.map((r) => r.userId), [1, 2, 3]);
 });
 
-test('resolveRecipients: { companyIds } resolves ACTIVE members of those companies', async () => {
+test('resolveRecipients: { companyIds } resolves only active COMPANY access-profile members', async () => {
   fx.users = [{ id: 4, email: 'a@b.c' }, { id: 5, email: null }];
   const resolved = await resolveRecipients(mockPrisma, { companyIds: [2, 3] });
 
   const where = calls('user.findMany').at(-1).where;
-  assert.deepEqual(where.accessProfile, { companyId: { in: [2, 3] } });
+  assert.deepEqual(where.accessProfile, { companyId: { in: [2, 3] }, type: 'COMPANY', isActive: true });
   assert.equal(where.status, 'ACTIVE');
   assert.deepEqual(resolved, [
     { userId: 4, email: 'a@b.c' },
@@ -341,7 +341,7 @@ test('resolveRecipients: { roles, companyId } scopes role lookup to one company'
 
   const args = calls('user.findMany').at(-1);
   assert.deepEqual(args.where.roles, { some: { role: { name: { in: ['COMPANY_MANAGER'] } } } });
-  assert.deepEqual(args.where.accessProfile, { companyId: 10 });
+  assert.deepEqual(args.where.accessProfile, { companyId: 10, type: 'COMPANY', isActive: true });
   assert.equal(resolved[0].userId, 8);
 });
 
