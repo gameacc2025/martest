@@ -1202,11 +1202,37 @@ async function listInquiryMessages(inquiryId, caller) {
       recipientCompany: { select: { id: true, name: true } },
     },
   });
-  if (!isStaff) {
-    if (userId) await prisma.inquiryMessage.updateMany({ where: { inquiryId: numericInquiryId, recipientUserId: userId, readAt: null }, data: { readAt: new Date() } });
-    else if (companyId) await prisma.inquiryMessage.updateMany({ where: { inquiryId: numericInquiryId, recipientCompanyId: companyId, readAt: null }, data: { readAt: new Date() } });
-  }
-  return messages;
+  if (isStaff || (!userId && !companyId)) return messages;
+
+  // Mark only recipient messages included in this response as read. Updating
+  // every unread message in the thread here can silently mark messages beyond
+  // the 500-row result (or messages arriving after the SELECT) as read before
+  // the caller has ever received them.
+  const recipientWhere = userId ? { recipientUserId: userId } : { recipientCompanyId: companyId };
+  const unreadIds = messages
+    .filter((message) => !message.readAt && (
+      (userId && Number(message.recipientUserId) === userId)
+      || (companyId && Number(message.recipientCompanyId) === companyId)
+    ))
+    .map((message) => message.id);
+
+  if (!unreadIds.length) return messages;
+
+  const readAt = new Date();
+  await prisma.inquiryMessage.updateMany({
+    where: {
+      inquiryId: numericInquiryId,
+      id: { in: unreadIds },
+      ...recipientWhere,
+      readAt: null,
+    },
+    data: { readAt },
+  });
+
+  const unreadIdSet = new Set(unreadIds);
+  return messages.map((message) => (
+    unreadIdSet.has(message.id) ? { ...message, readAt } : message
+  ));
 }
 
 async function sendInquiryMessage(inquiryId, data, caller) {
