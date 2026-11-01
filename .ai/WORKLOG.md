@@ -1726,3 +1726,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 - Generated `/docs/json` integration test exposed that transform's default 401/403/500 responses overwrote route-specific schemas. Updated transform to prefer route-doc responses and fall back to shared defaults.
 - Corrected default 429 description to native Fastify rate-limit behavior. CI rerun pending.
+
+
+## 2026-11-01 — OPENAPI-GENERATED-SPEC-STEP-16M-FIX
+
+- CI [41242121449] initially failed one generated Swagger `/docs/json` integration test. The failure showed route-level auth error union had been replaced by a generic default schema.
+- Root cause: `mergeResponseDocs(schemaResponses, docResponses)` returned `{...docResponses,...schemaResponses}`, allowing framework-generated response definitions to override the audited route-doc registry.
+- Fixed merge precedence to `{...schemaResponses,...docResponses}` with comments: concrete route schemas are fallback; explicit audited route-doc responses take precedence.
+- Existing generated spec integration assertions now exercise 401/403 union, native 429, 500 union, payment-specific 502/503 and 204 without content. Migration validation on previous commit passed; rerun CI pending.
