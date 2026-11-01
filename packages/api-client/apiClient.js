@@ -211,5 +211,6 @@ export const inquiriesApi = {
   decideResponse: (id, responseId, data) => api.patch(endpoints.inquiries.decideResponse(id, responseId), data),
   withdrawResponse: (id, responseId, data = {}) => api.post(endpoints.inquiries.withdrawResponse(id, responseId), data),
   uploadResponseAttachment: (id, responseId, formData) => api.post(endpoints.inquiries.responseAttachments(id, responseId), formData),
+  downloadResponseAttachment: (id, responseId, attachmentId) => api.get(endpoints.inquiries.downloadResponseAttachment(id, responseId, attachmentId), { responseType: 'blob' }),
   deleteResponseAttachment: (id, responseId, attachmentId) => api.delete(endpoints.inquiries.deleteResponseAttachment(id, responseId, attachmentId)),
 }
