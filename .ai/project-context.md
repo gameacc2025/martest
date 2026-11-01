@@ -785,3 +785,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Successful supplier withdrawal of a pending response emits `INQUIRY_RESPONSE_WITHDRAWN` to the inquiry owner. Event channels default to IN_APP + EMAIL, SMS off.
 - Template intentionally says a company withdrew its response without naming the supplier, so the event is safe for sealed and anonymous-sealed inquiries. Payload includes inquiryId/responseId only.
 - Recipients are active Website buyer user or active COMPANY access-profile members; STAFF accounts sharing a company ID are excluded. Dispatch is transactional and deduped per response/recipient.
+
+
+## Inquiry response withdrawal notification — 2026-11-01
+
+- Supplier withdrawal of a pending response emits `INQUIRY_RESPONSE_WITHDRAWN` to the inquiry owner, transactionally with the status change. IN_APP/EMAIL default on, SMS off.
+- Wording is generic ("one of the companies") and payload includes only inquiryId/responseId, preserving SEALED and ANONYMOUS_SEALED supplier confidentiality.
+- Recipient resolution targets active Website buyer user or active COMPANY access-profile members; STAFF accounts sharing company IDs are excluded. Dedupe includes response and recipient IDs.
