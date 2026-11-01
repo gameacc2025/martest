@@ -715,3 +715,10 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 - CI run [41242121449](https://github.com/gameacc2025/martest/actions/runs/41242121449) exposed a real generated-spec defect: `mergeResponseDocs` merged route-doc responses first and schema-generated responses second, so generated defaults silently overwrote audited 401/403/429/500 route contracts.
 - Corrected precedence: actual registered route schemas remain as fallback, while explicit route-doc response contracts now win. This preserves the audited guard unions, native Fastify 429, payment-only 502/503 and 204 no-content contracts.
 - The integration test at `/docs/json` already reproduced the bug and now verifies the corrected output. Migration validation passed on prior head [41242121332]; CI rerun pending.
+
+
+## Step 16M — OpenAPI 3.0 compatibility correction (2026-11-01)
+
+- First rerun still failed at generated `/docs/json` assertion because OpenAPI 3.0.3 does not support JSON Schema `const`; Swagger serialization dropped the `const` keywords, so the expected discriminator values were absent in the generated spec.
+- Replaced `const` with single-value `enum` for direct auth/RBAC error and native Fastify 429 fields; updated static and generated-spec tests to assert enum arrays. Kept the response merge precedence correction so route docs override generated defaults.
+- CI and migration validation rerun pending.
