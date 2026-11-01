@@ -801,3 +801,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - SEALED and ANONYMOUS_SEALED conversations remain unavailable to buyers before response reveal; neither party may start a message thread before reveal.
 - ANONYMOUS_SEALED buyer message reads mask supplier names with generic proposer labels and remove supplier company IDs. The buyer's own company identity may remain visible to that buyer. Read receipts still update only returned recipient messages.
 - Current buyer-to-supplier message API requires recipientCompanyId; do not permit direct company-targeted messaging in ANONYMOUS_SEALED, as that leaks/probes supplier identity. A future anonymous messaging feature should address a response/thread token rather than raw company ID.
+
+
+## Inquiry data isolation audit — step 16Y merged (2026-11-01)
+
+- PR #78 merged at `7d46b65a1f186fa63a91691240776cc336c23cc3`; CI passed 1,425 backend tests, 18 root Node tests, 33 frontend test files and all builds; Prisma migration validation passed.
+- Inquiry list service validates `scope` against sent/received/all. Company received aggregates apply published statuses SUBMITTED/OPEN/CLOSED/EXPIRED/COMPLETED and publishDate null or due.
+- SEALED/ANONYMOUS_SEALED buyer message reads return empty before reveal; message creation by either party is blocked before reveal. ANONYMOUS_SEALED buyer message views anonymize supplier company names and remove supplier IDs; direct buyer-to-company messaging by raw companyId is unavailable in anonymous mode.
