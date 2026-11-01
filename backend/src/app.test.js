@@ -210,6 +210,20 @@ test('GET /uploads/*: the static file plugin is mounted (a missing file 404s, bu
   assert.equal(res.statusCode, 404);
 });
 
+test('GET /uploads/inquiries/responses/*: legacy response attachment paths are not publicly served', async () => {
+  const directory = path.join(process.cwd(), 'uploads', 'inquiries', 'responses');
+  fs.mkdirSync(directory, { recursive: true });
+  const filename = 'private-attachment-static-guard-test.pdf';
+  const filePath = path.join(directory, filename);
+  fs.writeFileSync(filePath, '%PDF-test');
+  try {
+    const res = await app.inject({ method: 'GET', url: '/uploads/inquiries/responses/' + filename });
+    assert.equal(res.statusCode, 404);
+  } finally {
+    fs.rmSync(filePath, { force: true });
+  }
+});
+
 // ── Security headers (helmet) are actually applied ───────────────
 
 test('helmet is registered: responses carry basic security headers', async () => {
