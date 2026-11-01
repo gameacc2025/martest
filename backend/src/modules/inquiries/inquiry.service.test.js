@@ -1492,6 +1492,7 @@ test('updateResponse: rewrites the items of a pending response', async () => {
   const args = calls['inquiryResponse.update'].at(-1);
   assert.equal(args.where.id, 50);
   assert.equal(args.data.items.create[0].price, 10);
+  assert.equal(args.include.inquiry, undefined, 'supplier response updates must not return the raw buyer inquiry record');
 });
 
 test('updateResponse: companyId is derived from COMPANY context, not request body', async () => {
