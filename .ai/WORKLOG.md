@@ -1747,3 +1747,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 - CI on the OpenAPI 3.0 enum change showed the static route-doc test had been fixed, but the generated-spec test still used strict equality on enum arrays. Changed generated Swagger assertions for 401/403/429/500 to `assert.deepEqual`. This is test-only; CI rerun pending.
+
+
+## 2026-11-01 — GENERATED-OPENAPI-INTEGRATION-STEP-16M-MERGE
+
+- PR #65 squash-merged at `5cdb8e81acdf679bf60e36c2c36dec118e118156`.
+- CI [41270193698] passed; DB migration validation [41270193682] passed. Runtime validation [41270193677] was separate/in progress at merge and is not marked passed.
+- Added integration test of actual generated `/docs/json` for payment create/retry/callback, subscription read, product soft-delete; asserts route-specific 401/403 error unions, native Fastify 429, 500 variants, payment-only 502/503 and 204 no-content.
+- Fixed `mergeResponseDocs` so explicit route-doc response definitions take precedence over generated route schema defaults. Converted fixed error values from unsupported OpenAPI 3.0.3 `const` to single-value `enum`. Updated tests and docs.
+- Next: step 16N audit remaining Inquiry flow implementation/test gaps, prioritizing access-type/permission boundaries, ownership, sealed/anonymous visibility, subscription quota and attachment safety.
