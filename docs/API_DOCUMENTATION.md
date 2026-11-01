@@ -503,3 +503,11 @@ PR #78 merged at `7d46b65a1f186fa63a91691240776cc336c23cc3`. CI passed 1,425 bac
 ### Verification — step 16Z merged (2026-11-01)
 
 PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`. CI passed 1,432 backend tests, 18 root Node tests, 33 frontend test files and all frontend builds; Prisma migration validation passed. Runtime/compose validation was separate and not used as a merge gate.
+
+
+## Private inquiry response attachments — 2026-11-01
+
+- Supplier response attachments are private files and are no longer stored under the public `/uploads` static root. New files are stored under the backend's private `private-uploads/inquiries/responses` directory.
+- `GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download` streams an attachment after checking inquiry visibility, buyer ownership or exact supplier response ownership, and sealed-response reveal state. STAFF requires inquiry read permission. Responses use `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`.
+- Direct `GET`/`HEAD /uploads/inquiries/responses/*` requests return 404. Existing legacy attachment records are resolved only inside the authenticated download service; new response API payloads return the authenticated download endpoint rather than a filesystem URL/storage key.
+- Company/Admin panels fetch the file through the authenticated API client as a Blob; direct unauthenticated anchor downloads are no longer used. Anonymous-sealed buyer metadata uses generic filenames. The file's internal document content is not rewritten, so suppliers must avoid embedding identifying information in attachments when strict anonymity is required.
