@@ -731,3 +731,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Generated `/docs/json` is integration-tested for actual auth/RBAC error unions, native rate-limit 429, payment provider 502/503 scope and 204 no-content semantics.
 - Swagger route-doc response definitions take precedence over generated defaults; handler schemas are fallback for undocumented statuses. OpenAPI 3.0.3 fixed-value constraints use single-value enums, not `const`.
 - Inquiry feature rules remain: buyer and supplier participation are permission- and access-context-gated; STAFF is a moderator, not an automatic supplier; sealed and anonymous-sealed visibility must not reveal supplier identities prematurely; quota/subscription limits apply to both buyer inquiries and supplier responses.
+
+
+## Inquiry monetization integration coverage — 2026-11-01
+
+- `inquiry.service.js` integrates `consumeUsage` for company/user inquiry creation (`INQUIRY_CREATE`), supplier quote submission (`RESPONSE_SUBMIT`) and buyer/supplier internal messages (`INTERNAL_MESSAGE`). SMS is separately metered (`SMS`) and remains enforced even while general enforcement is rollout-disabled.
+- Service tests now toggle `SystemSetting.inquiry.subscription_enforcement` and verify the three core usage event types and references, including user-owned Website inquiries and subscription row locking. The subscription service has dedicated tests for expiry, concurrency, limits and quota summaries.
+- Business boundary: CUSTOMER users own their own Website inquiries/subscriptions; COMPANY users are company-owned; STAFF is a moderator and must not become a supplier through stray companyId. `inquiries.create` and `inquiries.respond` permissions and access context remain distinct.

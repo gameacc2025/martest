@@ -31,6 +31,7 @@ let smsUsageEvents = [];
 let smsRecipientUser = { id: 10, phone: '+31612345678' };
 let smsCompanyMember = { id: 31 };
 let smsPreferenceEnabled = true;
+let subscriptionEnforcementEnabled = false;
 const activeSmsSubscription = { id: 77, planId: 2, startsAt: new Date('2026-10-01T00:00:00Z'), endsAt: new Date('2026-11-01T00:00:00Z'), status: 'ACTIVE', plan: { id: 2, name: 'SMS', isActive: true, inquiriesPerPeriod: 10, responsesPerPeriod: 10, internalMessagesPerPeriod: 10, smsPerPeriod: 2 } };
 
 // Fixtures backing the transactional / relationship-heavy paths
@@ -66,8 +67,8 @@ function record(name, args) {
 }
 
 const mockPrisma = {
-  systemSetting: { findUnique: async () => ({ value: 'false' }) },
-  inquirySubscription: { findFirst: async () => activeSmsSubscription },
+  systemSetting: { findUnique: async () => ({ value: subscriptionEnforcementEnabled ? 'true' : 'false' }) },
+  inquirySubscription: { findFirst: async (args) => { record('inquirySubscription.findFirst', args); return activeSmsSubscription; } },
   inquiryUsageEvent: {
     aggregate: async ({ where }) => ({ _sum: { quantity: smsUsageEvents.filter(e => e.subscriptionId === where.subscriptionId && e.usageType === where.usageType).reduce((sum, e) => sum + e.quantity, 0) } }),
     create: async ({ data }) => { smsUsageEvents.push(data); return { id: smsUsageEvents.length, ...data }; },
@@ -262,6 +263,7 @@ function resetMocks() {
   nextFindUnique = null;
   nextMessages = [];
   smsUsageEvents = [];
+  subscriptionEnforcementEnabled = false;
   smsRecipientUser = { id: 10, phone: '+31612345678' };
   smsCompanyMember = { id: 31 };
   smsPreferenceEnabled = true;
@@ -2100,4 +2102,79 @@ test('getInquiryStats: STAFF without inquiry read permission is denied', async (
   );
   assert.equal(calls.groupBy, undefined);
   assert.equal(calls.findMany.length, 0);
+});
+
+
+// ── Subscription usage integration: inquiry creation, supplier response and messages ──
+
+test('createInquiry: enforced company quota records one INQUIRY_CREATE usage event in the same transaction', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  fx.products = publishedProducts(1);
+
+  await inquiryService.createInquiry({
+    title: 'Quota-backed company RFQ',
+    items: [{ productId: 1, quantity: 2 }],
+  }, { id: 12, accessType: 'COMPANY', companyId: 10, permissions: ['inquiries.create'] });
+
+  assert.equal(smsUsageEvents.length, 1);
+  assert.deepEqual(
+    { subscriptionId: smsUsageEvents[0].subscriptionId, usageType: smsUsageEvents[0].usageType, referenceType: smsUsageEvents[0].referenceType, referenceId: smsUsageEvents[0].referenceId },
+    { subscriptionId: 77, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: '7' },
+  );
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "InquirySubscription"') && query.includes('FOR UPDATE') && params[0] === 77));
+});
+
+test('submitResponse: enforced supplier quota records one RESPONSE_SUBMIT usage event', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  nextFindUnique = openInquiry({ id: 41, companyId: buyer.companyId });
+  fx.ownedItemIds = [11];
+
+  await inquiryService.submitResponse(41, {
+    items: [{ inquiryItemId: 11, price: 1500, availableQuantity: 4 }],
+  }, seller);
+
+  assert.equal(smsUsageEvents.length, 1);
+  assert.deepEqual(
+    { subscriptionId: smsUsageEvents[0].subscriptionId, usageType: smsUsageEvents[0].usageType, referenceType: smsUsageEvents[0].referenceType, referenceId: smsUsageEvents[0].referenceId },
+    { subscriptionId: 77, usageType: 'RESPONSE_SUBMIT', referenceType: 'InquiryResponse', referenceId: '5' },
+  );
+});
+
+test('sendInquiryMessage: enforced owner quota records one INTERNAL_MESSAGE usage event', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  nextFindUnique = { id: 1, companyId: 10, buyerUserId: null, status: 'OPEN' };
+  fx.response = { id: 90 };
+
+  await inquiryService.sendInquiryMessage(
+    1,
+    { message: 'Please confirm delivery', recipientCompanyId: 20 },
+    { id: 12, accessType: 'COMPANY', companyId: 10, permissions: ['inquiries.create'] },
+  );
+
+  assert.equal(smsUsageEvents.length, 1);
+  assert.deepEqual(
+    { subscriptionId: smsUsageEvents[0].subscriptionId, usageType: smsUsageEvents[0].usageType, referenceType: smsUsageEvents[0].referenceType, referenceId: smsUsageEvents[0].referenceId },
+    { subscriptionId: 77, usageType: 'INTERNAL_MESSAGE', referenceType: 'InquiryMessage', referenceId: '101' },
+  );
+});
+
+
+test('createInquiry: enforced Website quota is charged to the authenticated customer user', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  fx.products = [{ id: 41, status: 'PUBLISHED', company: { status: 'ACTIVE' } }];
+  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+
+  await inquiryService.createInquiry({
+    title: 'Quota-backed customer RFQ',
+    items: [{ productId: 41, quantity: 1 }],
+  }, customer);
+
+  assert.ok(calls['inquirySubscription.findFirst'].some(({ where }) => where.userId === 77 && where.companyId === undefined));
+  assert.equal(smsUsageEvents.length, 1);
+  assert.equal(smsUsageEvents[0].usageType, 'INQUIRY_CREATE');
+  assert.equal(smsUsageEvents[0].referenceId, '7');
 });

@@ -744,3 +744,11 @@ PR #65 squash-merged into `main` at `5cdb8e81acdf679bf60e36c2c36dec118e118156`.
 - Audit end-to-end inquiry creation, item mutation, visibility/reveal rules, supplier eligibility, response submit/update/withdraw/decision, messages, attachments, subscription/quota enforcement and notification/SMS effects against service/controller code and existing tests.
 - Prioritize concrete authorization, ownership, sealed/anonymous disclosure and quota bypass gaps. Keep STAFF moderation distinct from supplier participation; require COMPANY/CUSTOMER context and explicit `inquiries.create` / `inquiries.respond` permissions where appropriate.
 - Add missing unit/integration tests and fix only verified defects; do not change intended business policy without evidence. Update `.ai` and API docs; run CI/migration validation and merge each completed slice.
+
+
+## Inquiry flow audit — step 16N (in progress, 2026-11-01)
+
+- Audited inquiry routes, service/controller, subscription service and existing tests. Existing suite already covers access context/permission boundaries, STAFF-vs-supplier separation, owner scoping, sealed/anonymous reveal, duplicate responses, stale decisions, attachment type/size/cap and file cleanup, message recipient restrictions, SMS preference/provider/quota handling, and payment callback verification.
+- Found a test coverage gap: `inquiry.service.test.js` mocked company capacity checks but left `SystemSetting.inquiry.subscription_enforcement` hardcoded false. Thus core create/response/message services did not verify that their real `consumeUsage` integration records the right usage type/reference when enforcement is enabled.
+- Added dynamic enforcement flag to test Prisma fixture and integration-style service tests for company inquiry creation (`INQUIRY_CREATE`), Website customer inquiry creation (user-owned `INQUIRY_CREATE`), supplier response submission (`RESPONSE_SUBMIT`) and internal message sending (`INTERNAL_MESSAGE`). Tests assert subscription row locking and usage-event references.
+- No production behavior changed in this slice. CI/migration validation pending.
