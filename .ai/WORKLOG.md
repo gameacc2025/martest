@@ -1927,3 +1927,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed company response CTA mismatch: a WITHDRAWN response still occupies the unique (inquiryId, companyId) row and backend returns 409 on resubmit. UI no longer offers a second submission and explains why.
 - Added unit tests for the two frontend permission/eligibility helpers and backend test for withdrawn duplicate response.
 - CI pending.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-ACTION-RBAC-STEP-16X-MERGE
+
+- PR #77 merged by squash at `91500d3461fcd132804780c8d28e4c7e63e1bcbd`.
+- CI [41285255545] passed: 33 frontend test files, 18 root Node tests, backend 1,419/1,419 and all builds. Migration validation [41285255562] passed. Runtime [41285255563] was separate/in progress at merge.
+- Admin supplier response actions are now COMPANY-context only. Company UI no longer advertises resubmission after withdrawal; backend duplicate response rule is covered by a regression test.
+- Next: adversarial data-isolation audit for inquiry list/detail, response and message visibility across STAFF/COMPANY/CUSTOMER.
