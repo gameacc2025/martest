@@ -439,3 +439,8 @@ PR #73 merged at `43869fb0252e0c96a59a372cc3dfd27d0acbff5b`. CI passed 1,418 bac
 - The lifecycle poller publishes SUBMITTED inquiries when `publishDate <= now`. It expires OPEN inquiries only when `autoClose=true` and `responseDeadline <= now`; equality is considered due.
 - Each transition uses a conditional compare-and-set update in a transaction, writes SYSTEM status history, and queues notification persistence/email outbox rows in the same transaction. Concurrent/repeated polls that no longer match the source status do not emit duplicate transition notifications.
 - Expiry notifies the inquiry owner and each distinct non-withdrawn responding company. Company owner descriptors are resolved only to active COMPANY access profiles; withdrawn suppliers are excluded. SMS is not introduced by the lifecycle poller.
+
+
+### Verification — step 16U merged (2026-11-01)
+
+PR #74 merged at `f9a62bd23dd413b128dfbe3751e5edfd8687bedd`. CI passed 1,418 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime validation was separate and remained running at merge.
