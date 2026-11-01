@@ -3,7 +3,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi, productsApi } from '@telecom/api-client'
-import { getInquiryDateWindowError, INQUIRY_DATE_WINDOW_ERRORS } from '../../utils/inquiryDateWindow.js'
+import { getInquiryDateWindowError, INQUIRY_DATE_WINDOW_ERRORS } from '../../../utils/inquiryDateWindow.js'
 
 import Stepper from 'primevue/stepper'
 import StepList from 'primevue/steplist'
