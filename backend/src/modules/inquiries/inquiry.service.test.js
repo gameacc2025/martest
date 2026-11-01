@@ -22,6 +22,7 @@ const calls = {
   findMany: [],
   findUnique: [],
 };
+const operationTimeline = [];
 
 let nextCount = 0;
 let nextFindMany = [];
@@ -62,6 +63,7 @@ function drain(queue) {
 }
 
 function record(name, args) {
+  operationTimeline.push(name);
   calls[name] = calls[name] || [];
   calls[name].push(args);
 }
@@ -175,7 +177,7 @@ const mockPrisma = {
     updateMany: async (args) => { record('inquiryMessage.updateMany', args); return { count: 1 }; },
   },
   inquiryResponseAttachment: {
-    count: async () => fx.attachmentCount,
+    count: async (args) => { record('inquiryResponseAttachment.count', args); return fx.attachmentCount; },
     findFirst: async () => fx.attachment,
     create: async (args) => {
       if (fx.attachmentCreateError) {
@@ -202,6 +204,7 @@ const mockPrisma = {
     return [];
   },
   $transaction: async (arg) => {
+    record('$transaction', { kind: typeof arg === 'function' ? 'interactive' : 'batch' });
     if (typeof arg === 'function') return arg(mockPrisma);
     return Promise.all(arg);
   },
@@ -254,6 +257,7 @@ test.after(() => {
 const inquiryService = require('./inquiry.service');
 
 function resetMocks() {
+  operationTimeline.length = 0;
   Object.keys(calls).forEach((key) => { delete calls[key]; });
   calls.count = [];
   calls.findMany = [];
