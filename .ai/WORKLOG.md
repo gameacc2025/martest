@@ -1879,3 +1879,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Lifecycle service audit confirmed scheduled publishing/expiry use compare-and-set updates within transactions; due boundaries are inclusive (`lte`). Status history and notification writes are transactional.
 - Found `notifyStatusChanged` repeated the company owner bug fixed in step 16S: checking `.length` on `{companyIds}` skips company owners on automatic expiry. Fixed recipient presence detection for arrays and company descriptors.
 - Added company-owned expiry regression, active responding company + withdrawn exclusion, tx/dedupe assertions, inclusive deadline query assertions, and duplicate poll idempotency test. CI pending.
+
+
+## 2026-11-01 — INQUIRY-LIFECYCLE-OWNER-NOTIFICATION-STEP-16U-MERGE
+
+- PR #74 merged by squash at `f9a62bd23dd413b128dfbe3751e5edfd8687bedd`.
+- CI [41284107485] passed: backend 1,418/1,418; frontend/shared 18/18; builds passed. Migration validation [41284107504] passed. Runtime [41284107444] remained separate/in progress at merge.
+- Fixed lifecycle owner-recipient guard so company-owned inquiries receive EXPIRED status notices. Added tests for company owner, active responders, withdrawn exclusion, deadline boundary and repeated-poll idempotency.
+- Next: audit frontend/API consistency for inquiry lifecycle settings, dates and closed/expired states.
