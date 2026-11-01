@@ -842,3 +842,12 @@ PR #70 squash-merged into `main` at `f2c957a2de1e8e8f5f0cdbc9fd552b912cd59ef7`. 
 
 - Audit `changeInquiryStatus` and related transitions to ensure buyer, responding suppliers and STAFF receive only policy-appropriate events. Check CUSTOMER cancellation, COMPANY/STAFF close/complete/expire transitions, notification dedupe and transaction boundaries.
 - Reuse existing event catalog where semantically correct; add a new event only when a distinct lifecycle event is required. Preserve sealed/anonymous supplier identity privacy. Add regression tests and update docs, CI/migration validation and merge.
+
+
+## Inquiry status notification audit — step 16S (2026-11-01)
+
+- Audited the existing `changeInquiryStatus` dispatch for OPEN publication and terminal transitions (CLOSED, EXPIRED, COMPLETED, CANCELLED). Existing status event dispatch already targets the inquiry owner and distinct companies with non-withdrawn responses, uses transaction-scoped persistence and per-user dedupe keys; the event payload contains only inquiry id/title and status, so it does not disclose supplier identity for SEALED/ANONYMOUS_SEALED.
+- Found a cross-context recipient bug in the shared notification dispatcher: `{ companyIds }` resolved every ACTIVE user with a matching companyId but did not require `AccessProfile.type=COMPANY` or `AccessProfile.isActive=true`. STAFF accounts sharing the Main-company id could therefore receive company notifications.
+- Fixed company recipient resolution to require ACTIVE user status plus COMPANY access profile, matching company ID and active access profile. This applies consistently to all company-targeted notifications, not only inquiry status changes.
+- Added dispatcher regression coverage for the exact company recipient filter and inquiry status service tests for company owner + distinct responding companies, per-recipient dedupe, transaction binding, and Website buyer cancellation recipient.
+- Branch: `fix/inquiry-status-notification-recipients-step-16s`. CI/migration validation pending.
