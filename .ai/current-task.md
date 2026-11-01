@@ -807,3 +807,17 @@ PR #68 squash-merged into `main` at `9ebbfbd96fa5e5df836abc6c8f930d4f252bace0`. 
 - Added transactional `dispatchNotification('INQUIRY_MESSAGE_RECEIVED', ...)` after message creation and internal-message quota consumption. Recipients are resolved to the active Website buyer user or active users with `accessProfile.type=COMPANY` and `isActive=true` for the recipient company. This deliberately excludes STAFF accounts that may share the Main-company ID.
 - Notification context carries inquiry id/title; dedupe keys are per recipient (`inquiry-message-{messageId}-{userId}`) so one company member's email does not suppress another's.
 - Existing optional paid SMS path remains separate, opt-in, quota-enforced and Twilio-outbox-backed. Tests added for user/company recipient resolution, STAFF exclusion and per-recipient dedupe. CI pending.
+
+
+## Inquiry message notification dispatch — step 16Q merged (2026-11-01)
+
+PR #69 squash-merged into `main` at `ef55a970e03bc746128c234272a63aa5a6a6c246`. CI [41271042201] passed and Prisma migration validation [41271042195] passed. Runtime [41271042218] was separate/in progress at merge and is not claimed as passed.
+
+- New inquiry conversation messages now dispatch the existing `INQUIRY_MESSAGE_RECEIVED` event inside the same transaction as message persistence and `INTERNAL_MESSAGE` usage consumption.
+- Recipient resolution is restricted to the active Website buyer user or active COMPANY access-profile members (`type=COMPANY`, `isActive=true`); STAFF sharing Main-company IDs are excluded.
+- Per-recipient dedupe keys prevent one company member's email from suppressing another's. Default IN_APP/EMAIL preferences apply; optional paid SMS remains separate and unchanged.
+
+## Next active work — step 16R inquiry response lifecycle notifications
+
+- Audit whether supplier response withdrawal and other buyer/supplier-visible lifecycle changes have appropriate notification events and recipients. Compare current event catalog and documented workflow before adding any new event.
+- If policy supports it, add a dedicated withdrawal event, dispatch transactionally to the inquiry owner, preserve anonymous/sealed privacy, add tests for COMPANY buyer and Website user buyer, update notification docs/preferences, CI/migration validation and merge.
