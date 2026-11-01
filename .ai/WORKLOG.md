@@ -1764,3 +1764,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Concrete gap: inquiry.service.test.js hardcoded subscription enforcement off and mocked company capacity checks, so it did not prove the core service paths call `consumeUsage` with correct owner/usage/reference when monetization enforcement is enabled.
 - Updated the test fixture to toggle enforcement and capture subscription lookups. Added tests proving company and Website-user inquiry creation consume `INQUIRY_CREATE`, supplier quote submission consumes `RESPONSE_SUBMIT`, and buyer internal messaging consumes `INTERNAL_MESSAGE`, with correct reference IDs and subscription row locking.
 - No production runtime code changed. CI and migration validation pending.
+
+
+## 2026-11-01 — INQUIRY-FLOW-COVERAGE-STEP-16N-MERGE
+
+- PR #66 squash-merged at `1c9e960a7144ff86369a4aa5ce88ca7514eb7de8`.
+- CI [41270495169] and migration validation [41270495193] passed. Runtime [41270495206] was separate/in progress at merge.
+- Added enabled-enforcement service coverage for company and Website user inquiry creation, supplier response submission and internal message sending. Verifies `INQUIRY_CREATE`, `RESPONSE_SUBMIT`, `INTERNAL_MESSAGE`, reference IDs and subscription row locking.
+- No production runtime code changed.
+
+## 2026-11-01 — INQUIRY-ATTACHMENT-CONCURRENCY-STEP-16O
+
+- Identified a race in `uploadResponseAttachment`: ownership/editability was checked, attachment count was read and row inserted without serializing concurrent uploads. Multiple uploads near the limit could exceed the documented cap of 10.
+- Changed upload path to pre-validate before consuming multipart data, write file before acquiring DB lock, then lock the parent Inquiry row and re-check response ownership/editability, count and insert in one transaction. Any cap/re-check/insert failure removes the prewritten file.
+- Updated service tests to trace operation order and assert the lock precedes cap check/create, plus cleanup when the cap is reached. CI pending.
