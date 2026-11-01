@@ -847,3 +847,8 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Response attachments are private under `private-uploads/inquiries/responses`, persisted in production via `inquiry_private_uploads`. Public static legacy path is blocked; legacy files can be served only through authenticated endpoint `GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download`.
 - Access checks buyer/supplier/STAFF inquiry visibility, exact response and attachment ownership, and sealed reveal state. Company/Admin use authenticated blob downloads. Response detail returns secure download URLs; anonymous-sealed buyer metadata uses generic names.
 - Supplier response update must not include the raw parent Inquiry object/buyer identifiers. MIME-derived extensions and sanitized display names are used.
+
+
+## Notification recipient scope
+
+- Both `{ companyIds }` and `{ roles, companyId }` company-scoped descriptors must select only users with `status=ACTIVE` and `AccessProfile.type=COMPANY`, matching company ID, and `AccessProfile.isActive=true`. Never allow STAFF users sharing the platform Main-company ID or inactive company profiles to receive company-private notifications.

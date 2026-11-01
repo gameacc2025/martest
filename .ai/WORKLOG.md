@@ -1999,3 +1999,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Private response attachment storage, authenticated download route, legacy static URL guard, private production Docker volume, authenticated blob downloads in both panels, safe MIME-derived filenames and response payload redaction are merged.
 - `GET /inquiries/:id` now includes visible response attachments with secure download endpoints and caller-specific anonymous filename redaction. Supplier response update no longer returns raw inquiry/buyer data.
 - Next: review/merge notification recipient scoping PR #71, then audit inquiry usage/quota and payment verification idempotency.
+
+
+## 2026-11-01 — NOTIFICATION-RECIPIENT-SCOPE-STEP-18
+
+- Reviewed PR #71 against the latest `main`. The companyIds recipient filter, inquiry status owner/responder dispatch, and company-owner recipient guard were already present on `main` through later merged inquiry lifecycle work; applying the stale PR wholesale would conflict and duplicate those changes.
+- Found the remaining gap in `{ roles, companyId }`: role-targeted company notifications constrained companyId but did not require `AccessProfile.type=COMPANY` and `isActive=true`, allowing STAFF or inactive access profiles sharing that company ID to match.
+- Tightened the roles+companyId descriptor to active COMPANY access profiles and updated the resolver regression test. The branch PR is superseded by current main plus this focused correction; no stale branch snapshot was merged.

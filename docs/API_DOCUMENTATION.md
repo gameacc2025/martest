@@ -523,3 +523,8 @@ PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`. CI passed 1,432 bac
 ### Verification — step 17 merged (2026-11-01)
 
 PR #80 merged at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`. CI passed 1,446 backend tests, 18 root Node tests, 33 frontend test files and all frontend builds; Prisma migration validation passed. Runtime/compose validation was separate and not used as a merge gate.
+
+
+### Company-scoped notification recipients
+
+Both `{ companyIds }` and `{ roles, companyId }` descriptors are restricted to ACTIVE users with an active COMPANY access profile (`type=COMPANY`, `isActive=true`) for the matching company. STAFF accounts sharing the platform Main-company ID are excluded.

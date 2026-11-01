@@ -58,8 +58,8 @@ const DEFAULT_MAX_ATTEMPTS = 3;
 async function resolveRecipients(client, recipients) {
   if (recipients === null || recipients === undefined) return [];
 
-  // Descriptor: members of the given companies (ACTIVE only, matching the
-  // pre-existing getCompanyUserIds helper in product.service.js).
+  // Company-scoped descriptors must resolve only active COMPANY-panel members.
+  // STAFF accounts can share the platform Main-company ID.
   if (!Array.isArray(recipients) && Array.isArray(recipients.companyIds)) {
     const users = await client.user.findMany({
       where: {
@@ -100,7 +100,9 @@ async function resolveRecipients(client, recipients) {
       where: {
         status: 'ACTIVE',
         roles: { some: { role: { name: { in: recipients.roles.map(String) } } } },
-        ...(recipients.companyId !== undefined ? { accessProfile: { companyId: Number(recipients.companyId) } } : {}),
+        ...(recipients.companyId !== undefined ? {
+          accessProfile: { companyId: Number(recipients.companyId), type: 'COMPANY', isActive: true },
+        } : {}),
       },
       select: { id: true, email: true },
     });

@@ -345,7 +345,7 @@ test('resolveRecipients: { roles, companyId } scopes role lookup to one company'
 
   const args = calls('user.findMany').at(-1);
   assert.deepEqual(args.where.roles, { some: { role: { name: { in: ['COMPANY_MANAGER'] } } } });
-  assert.deepEqual(args.where.accessProfile, { companyId: 10 });
+  assert.deepEqual(args.where.accessProfile, { companyId: 10, type: 'COMPANY', isActive: true });
   assert.equal(resolved[0].userId, 8);
 });
 

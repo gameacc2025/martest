@@ -1095,8 +1095,13 @@ PR #80 squash-merged into `main` at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`.
 - Company/Admin panels download as authenticated Blob requests. Inquiry detail response projections now include secure attachment URLs and anonymous-sealed generic filenames. Supplier response update no longer returns the raw parent inquiry/buyer identifiers.
 - File extension/display name derive from allowlisted MIME type; legacy names are normalized.
 
-## Next active work — step 18 notification recipient scope and inquiry event delivery
+## Completed — step 18 notification recipient scope (2026-11-01)
 
-- Review open PR #71 `fix(notifications): restrict company events to active COMPANY profiles` against current main; verify recipient resolution for COMPANY vs STAFF profiles, active access profiles, duplicate company IDs and inquiry status transition notifications.
-- Run CI/migration checks and merge if correct; repair any conflicts or regressions first.
-- Then audit remaining inquiry monetization/usage accounting and payment verification idempotency: company/user quotas, create/respond consumption, cancellation/refund/retry paths, webhook/callback replay, and subscription expiry/activation race conditions.
+- Reviewed PR #71 against current main. The inquiry status notification owner/responder coverage, companyIds filtering and company-owner recipient guard were already present on main through subsequent merged lifecycle work.
+- Closed the remaining company-scoped role descriptor gap: `{ roles, companyId }` now requires active COMPANY access profiles, matching `{ companyIds }`. Added/updated resolver regression coverage.
+- Updated API and AI project documentation. PR #71 is superseded by the focused main-branch correction rather than merged as a stale conflicting snapshot.
+
+## Next active work — step 19 inquiry monetization and payment integrity
+
+- Audit inquiry usage/quota accounting for company and user plans: create/respond consumption, limits, cancellation/refund/retry paths, and transactional consistency.
+- Audit payment verification idempotency: webhook/callback replay, amount/currency/provider reference validation, and subscription expiry/activation races. Add regression tests and update docs before merging.
