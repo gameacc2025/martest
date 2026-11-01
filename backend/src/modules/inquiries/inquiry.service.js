@@ -1651,10 +1651,7 @@ async function updateResponse(inquiryId, responseId, data, caller) {
       data: {
         items: normalizeResponseItems(data.items),
       },
-      include: {
-        inquiry: true,
-        ...responseInclude,
-      },
+      include: responseInclude,
     });
     return presentResponseAttachments(updatedResponse, numericInquiryId);
   });
