@@ -1082,3 +1082,21 @@ PR #79 squash-merged into `main` at `37b06e17e98b156da29e8afe28492bbec3aa1992`.
 
 - Inquiry detail (`GET /inquiries/:id`) now includes response attachment metadata and transforms every stored key into the authenticated download endpoint; sealed visibility and anonymous filename redaction are applied by the same caller-specific response shaper. This is required by both Company/Admin detail views, which render attachments from `inquiry.responses`.
 - Removed the raw parent `inquiry:true` include from supplier response updates; the buyer identifiers are no longer returned. Attachment extensions are derived from allowlisted MIME types and legacy download filenames are normalized.
+
+
+## Inquiry response attachment security — step 17 merged (2026-11-01)
+
+PR #80 squash-merged into `main` at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`.
+
+- CI [41326320059] passed: backend 1,446/1,446; 18 root Node tests; 33 frontend test files; all frontend builds passed.
+- Prisma migration validation [41326320181] passed. Runtime/compose validation [41326320124] is separate and not counted as a merge gate.
+- New response attachments are stored under private `private-uploads/inquiries/responses`, persisted in production with named Compose volume `inquiry_private_uploads`. Legacy `/uploads/inquiries/responses/*` URLs are blocked by the public static route and resolved only through authenticated download service.
+- Added permission/ownership-checked binary download route. Buyer, supplier, STAFF visibility, sealed reveal state, exact response/attachment linkage and safe storage path are checked. Files stream with attachment disposition, nosniff and private/no-store cache headers.
+- Company/Admin panels download as authenticated Blob requests. Inquiry detail response projections now include secure attachment URLs and anonymous-sealed generic filenames. Supplier response update no longer returns the raw parent inquiry/buyer identifiers.
+- File extension/display name derive from allowlisted MIME type; legacy names are normalized.
+
+## Next active work — step 18 notification recipient scope and inquiry event delivery
+
+- Review open PR #71 `fix(notifications): restrict company events to active COMPANY profiles` against current main; verify recipient resolution for COMPANY vs STAFF profiles, active access profiles, duplicate company IDs and inquiry status transition notifications.
+- Run CI/migration checks and merge if correct; repair any conflicts or regressions first.
+- Then audit remaining inquiry monetization/usage accounting and payment verification idempotency: company/user quotas, create/respond consumption, cancellation/refund/retry paths, webhook/callback replay, and subscription expiry/activation race conditions.
