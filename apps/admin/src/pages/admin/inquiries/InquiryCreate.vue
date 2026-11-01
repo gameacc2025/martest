@@ -2,7 +2,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { inquiriesApi, productsApi, companiesApi } from '@telecom/api-client'
+import { inquiriesApi, productsApi } from '@telecom/api-client'
 
 import Stepper from 'primevue/stepper'
 import StepList from 'primevue/steplist'
@@ -14,12 +14,10 @@ import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
-import MultiSelect from 'primevue/multiselect'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import ToggleSwitch from 'primevue/toggleswitch'
 import Message from 'primevue/message'
-import Tag from 'primevue/tag'
 
 const router = useRouter()
 const toast = useToast()
@@ -28,10 +26,9 @@ const toast = useToast()
 const STEPS = {
   BASIC: '1',
   PRODUCTS: '2',
-  COMPANIES: '3',
-  SETTINGS: '4',
-  REVIEW: '5',
-  SUBMIT: '6',
+  SETTINGS: '3',
+  REVIEW: '4',
+  SUBMIT: '5',
 }
 const activeStep = ref(STEPS.BASIC)
 
@@ -44,9 +41,7 @@ const form = reactive({
   description: '',
   // Step 2 — products / items
   items: [],
-  // Step 3 — target companies (UI selection; kept in draft)
-  targetCompanyIds: [],
-  // Step 4 — settings
+  // Step 3 — settings
   priority: 'NORMAL',
   visibilityMode: 'NORMAL',
   responseDeadline: null,
@@ -60,9 +55,7 @@ const form = reactive({
 
 // ── Reference data ───────────────────────────────────────────
 const products = ref([])
-const companies = ref([])
 const loadingProducts = ref(false)
-const loadingCompanies = ref(false)
 const submitting = ref(false)
 
 const newItem = reactive({ productId: null, quantity: 1, description: '' })
@@ -83,7 +76,6 @@ const visibilityOptions = [
 onMounted(() => {
   restoreDraft()
   fetchProducts()
-  fetchCompanies()
 })
 
 async function fetchProducts() {
@@ -101,26 +93,9 @@ async function fetchProducts() {
   }
 }
 
-async function fetchCompanies() {
-  loadingCompanies.value = true
-  try {
-    const response = await companiesApi.list({ limit: 100, status: 'ACTIVE' })
-    const body = response?.data ?? response
-    companies.value = Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : []
-  } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت شرکت‌ها', life: 3000 })
-  } finally {
-    loadingCompanies.value = false
-  }
-}
-
 // ── Helpers ──────────────────────────────────────────────────
 function getProductName(id) {
   return products.value.find((p) => p.id === id)?.title || '-'
-}
-
-function getCompanyName(id) {
-  return companies.value.find((c) => c.id === id)?.name || '-'
 }
 
 const priorityLabel = computed(() => priorityOptions.find((o) => o.value === form.priority)?.label || '-')
@@ -177,11 +152,6 @@ function validateStep(step) {
     return true
   }
 
-  if (step === STEPS.COMPANIES) {
-    // Target companies are optional; no hard requirement.
-    return true
-  }
-
   if (step === STEPS.SETTINGS) {
     if (form.responseDeadline && new Date(form.responseDeadline) <= new Date()) {
       toast.add({ severity: 'warn', summary: 'خطا', detail: 'مهلت پاسخ باید در آینده باشد', life: 3000 })
@@ -233,7 +203,12 @@ function restoreDraft() {
     const parsed = JSON.parse(raw)
     if (parsed?.form) {
       Object.assign(form, parsed.form)
-      if (parsed.activeStep) activeStep.value = parsed.activeStep
+      // Older drafts used step 3 for target-company selection and step 4 for settings.
+      // Target-company IDs were never part of the API contract, so discard that
+      // no-op field while preserving all other draft data and the nearest valid step.
+      delete form.targetCompanyIds
+      const legacyStepMap = { '1': STEPS.BASIC, '2': STEPS.PRODUCTS, '3': STEPS.SETTINGS, '4': STEPS.SETTINGS, '5': STEPS.REVIEW, '6': STEPS.SUBMIT }
+      if (parsed.activeStep) activeStep.value = legacyStepMap[String(parsed.activeStep)] || STEPS.BASIC
       toast.add({ severity: 'info', summary: 'پیش‌نویس', detail: 'پیش‌نویس قبلی بازیابی شد', life: 2500 })
     }
   } catch {
@@ -302,7 +277,6 @@ async function submitInquiry() {
       <StepList>
         <Step :value="STEPS.BASIC">اطلاعات</Step>
         <Step :value="STEPS.PRODUCTS">محصولات</Step>
-        <Step :value="STEPS.COMPANIES">شرکت‌ها</Step>
         <Step :value="STEPS.SETTINGS">تنظیمات</Step>
         <Step :value="STEPS.REVIEW">بررسی</Step>
         <Step :value="STEPS.SUBMIT">ثبت</Step>
@@ -362,6 +336,9 @@ async function submitInquiry() {
             <Message v-if="form.items.length === 0" severity="info" :closable="false" class="mt-2">
               هنوز قلمی اضافه نشده است. حداقل یک قلم کالا لازم است.
             </Message>
+            <Message severity="info" :closable="false" class="mt-2">
+              پس از انتشار استعلام، اعلان برای شرکت‌هایی ارسال می‌شود که مالک محصولات انتخاب‌شده هستند؛ انتخاب دستی شرکت هدف در این جریان پشتیبانی نمی‌شود.
+            </Message>
 
             <DataTable v-else :value="form.items" responsiveLayout="scroll" class="mt-3">
               <Column header="محصول">
@@ -382,33 +359,7 @@ async function submitInquiry() {
           </div>
         </StepPanel>
 
-        <!-- ── Step 3: Target Companies ───────────────────── -->
-        <StepPanel :value="STEPS.COMPANIES" v-slot="{ activateCallback }">
-          <div class="step-body">
-            <h2 class="step-title">شرکت‌های هدف</h2>
-            <p class="step-hint">شرکت‌هایی که می‌خواهید این استعلام برایشان ارسال شود را انتخاب کنید (اختیاری).</p>
-            <div class="field">
-              <label>شرکت‌ها</label>
-              <MultiSelect
-                v-model="form.targetCompanyIds"
-                :options="companies"
-                optionLabel="name"
-                optionValue="id"
-                :loading="loadingCompanies"
-                filter
-                display="chip"
-                placeholder="انتخاب شرکت‌ها"
-                class="w-full"
-              />
-            </div>
-          </div>
-          <div class="step-nav">
-            <Button label="قبلی" icon="pi pi-arrow-right" severity="secondary" @click="goBack(STEPS.COMPANIES, activateCallback)" />
-            <Button label="بعدی" icon="pi pi-arrow-left" iconPos="right" @click="goNext(STEPS.COMPANIES, activateCallback)" />
-          </div>
-        </StepPanel>
-
-        <!-- ── Step 4: Settings ───────────────────────────── -->
+        <!-- ── Step 3: Settings ───────────────────────────── -->
         <StepPanel :value="STEPS.SETTINGS" v-slot="{ activateCallback }">
           <div class="step-body">
             <h2 class="step-title">تنظیمات استعلام</h2>
@@ -494,7 +445,7 @@ async function submitInquiry() {
           </div>
         </StepPanel>
 
-        <!-- ── Step 5: Review ─────────────────────────────── -->
+        <!-- ── Step 4: Review ─────────────────────────────── -->
         <StepPanel :value="STEPS.REVIEW" v-slot="{ activateCallback }">
           <div class="step-body">
             <h2 class="step-title">بررسی نهایی</h2>
@@ -517,14 +468,6 @@ async function submitInquiry() {
             </div>
 
             <div class="review-block">
-              <h3>شرکت‌های هدف</h3>
-              <div v-if="form.targetCompanyIds.length === 0" class="review-row"><span>—</span></div>
-              <div v-else class="chips">
-                <Tag v-for="id in form.targetCompanyIds" :key="id" :value="getCompanyName(id)" />
-              </div>
-            </div>
-
-            <div class="review-block">
               <h3>تنظیمات</h3>
               <div class="review-row"><span>حالت نمایش</span><strong>{{ visibilityLabel }}</strong></div>
               <div class="review-row"><span>اولویت</span><strong>{{ priorityLabel }}</strong></div>
@@ -542,7 +485,7 @@ async function submitInquiry() {
           </div>
         </StepPanel>
 
-        <!-- ── Step 6: Submit ─────────────────────────────── -->
+        <!-- ── Step 5: Submit ─────────────────────────────── -->
         <StepPanel :value="STEPS.SUBMIT" v-slot="{ activateCallback }">
           <div class="step-body submit-body">
             <i class="pi pi-check-circle submit-icon"></i>
