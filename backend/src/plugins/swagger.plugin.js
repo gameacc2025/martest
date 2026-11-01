@@ -179,9 +179,13 @@ function getDoc(method, url) {
 }
 
 function mergeResponseDocs(schemaResponses = {}, docResponses = {}) {
+  // Route documentation is the audited public contract. Keep actual handler
+  // response schemas when no route-doc override exists, but never let a
+  // generated/default schema silently replace a more specific documented
+  // error envelope or status (for example auth/RBAC unions and 204).
   return {
-    ...docResponses,
     ...schemaResponses,
+    ...docResponses,
   };
 }
 
