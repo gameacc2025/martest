@@ -905,3 +905,21 @@ PR #73 squash-merged into `main` at `43869fb0252e0c96a59a372cc3dfd27d0acbff5b`.
 - Found another duplicate company-owner guard defect: lifecycle `notifyStatusChanged` used `ownerRecipients.length`, silently skipping company-owned inquiry expiry notices because `{companyIds}` is an object. Fixed it with array-vs-descriptor aware emptiness handling, consistent with the main inquiry service fix in step 16S.
 - Added tests for company-owned expiry owner notification, active responding-company notification, exclusion of withdrawn supplier responses, tx/dedupe propagation, exact deadline predicates, and repeated polling (second pass produces zero transitions and no additional notifications).
 - Branch: `fix/inquiry-lifecycle-owner-notification-step-16u`. CI/migration validation pending.
+
+
+## Inquiry deadline/expiry automation audit — step 16U merged (2026-11-01)
+
+PR #74 squash-merged into `main` at `f9a62bd23dd413b128dfbe3751e5edfd8687bedd`.
+
+- CI [41284107485] passed: backend 1,418/1,418; frontend/shared 18/18; frontend builds passed.
+- Prisma migration validation [41284107504] passed.
+- Runtime validation [41284107444] was separate and still running at merge; it is not counted as passed.
+- Fixed lifecycle `notifyStatusChanged` company-owner guard: `{companyIds}` is an object, not an array, so `.length` silently skipped company-owned inquiry expiry notices. Company owner now receives EXPIRED status notification.
+- Verified expiry notifies only active responding companies; withdrawn suppliers are excluded. Deadline equality is due (`lte`). Conditional updates and per-inquiry transactions keep status history and notifications atomic; repeated polls do not duplicate transitions or notifications.
+
+## Next active work — step 16V inquiry lifecycle UI/API consistency audit
+
+- Trace create/edit/status/deadline settings from company and admin inquiry forms through API request schemas, controller and service normalization.
+- Verify publishDate, responseDeadline, autoClose, allowEarlyReveal, allowEditResponse and allowWithdrawResponse are represented consistently; inspect timezone conversion, defaults, clearing dates, and frontend handling of EXPIRED/closed states.
+- Check that UI does not offer invalid lifecycle actions after deadlines or closed states, but keep server-side authorization/transition checks authoritative.
+- Add tests for request serialization/date validation and UI state logic where gaps are confirmed; update docs/.ai, CI and merge. Do not perform browser smoke as a substitute for tests.
