@@ -443,7 +443,7 @@ function responseAttachmentDownloadUrl(inquiryId, responseId, attachmentId) {
 function presentResponseAttachments(response, inquiryId, { anonymous = false } = {}) {
   if (!response) return response;
   const attachments = (response.attachments || []).map((attachment, index) => {
-    const extension = path.extname(attachment.filename || '').toLowerCase();
+    const extension = ATTACHMENT_MIME_EXTENSIONS[attachment.mimetype] || '.bin';
     return {
       ...attachment,
       filename: anonymous ? ('پیوست ' + (index + 1) + extension) : attachment.filename,
@@ -488,12 +488,12 @@ async function getResponseAttachment(inquiryId, responseId, attachmentId, caller
     throw { statusCode: 404, code: 'ATTACHMENT_FILE_NOT_FOUND', message: 'Attachment file not found.' };
   }
   if (!stat.isFile()) throw { statusCode: 404, code: 'ATTACHMENT_FILE_NOT_FOUND', message: 'Attachment file not found.' };
-  const extension = path.extname(attachment.filename || '').toLowerCase();
+  const extension = ATTACHMENT_MIME_EXTENSIONS[attachment.mimetype] || '.bin';
   return {
     id: attachment.id, path: filePath,
     filename: isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED'
       ? ('attachment-' + attachment.id + extension)
-      : path.basename(attachment.filename || ('attachment-' + attachment.id + extension)),
+      : sanitizeAttachmentDisplayName(attachment.filename || ('attachment-' + attachment.id), attachment.mimetype),
     mimetype: SUPPORTED_ATTACHMENT_TYPES.has(attachment.mimetype) ? attachment.mimetype : 'application/octet-stream',
     size: stat.size,
   };
