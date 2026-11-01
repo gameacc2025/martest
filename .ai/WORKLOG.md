@@ -1847,3 +1847,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Branch `fix/inquiry-status-notification-recipients-step-16s`; CI/migration validation pending.
 
 - CI exposed a second defect in the same flow: `notifyInquiryOwner` treated the company recipient descriptor `{companyIds:[...]}` as empty because it checked `.length` on an object. Fixed the empty-recipient guard for both arrays and descriptor objects. Regression test now verifies the company inquiry owner is notified as well as each distinct responding company.
+
+
+## 2026-11-01 — INQUIRY-STATUS-NOTIFICATION-STEP-16S-MERGE
+
+- PR #72 merged by squash at `903f24cdfe7746349fec0a32039acaf567d9118c`.
+- CI [41283669357] passed: backend 1,417/1,417; frontend/shared 18/18; builds passed. Migration validation [41283669375] passed. Runtime [41283669383] was still running separately at merge and is not claimed as passed.
+- Fixed `{companyIds}` recipient resolution to require ACTIVE user + active COMPANY AccessProfile; excludes STAFF and inactive access profiles.
+- Fixed `notifyInquiryOwner` object descriptor guard; company inquiry owners were silently skipped because `{companyIds}` has no `.length`.
+- Tests cover company owner + distinct responding companies, transactional dedupe propagation and Website buyer cancellation. Anonymous-safe event context remains inquiry ID/title + status.
+- Next: audit selected/rejected/auto-rejected supplier response notifications.
