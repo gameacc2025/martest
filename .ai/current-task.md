@@ -849,3 +849,6 @@ PR #70 squash-merged into `main` at `f2c957a2de1e8e8f5f0cdbc9fd552b912cd59ef7`. 
 - Verified terminal status transitions (`CLOSED`, `EXPIRED`, `COMPLETED`, `CANCELLED`) notify the inquiry owner and each unique company with a non-withdrawn response; OPEN publication uses `INQUIRY_PUBLISHED`. Added service test for owner + deduplicated responders.
 - Found a shared recipient-resolution defect: `dispatchNotification({companyIds})` selected all ACTIVE users with matching companyId, without checking `AccessProfile.type` or `isActive`. STAFF users sharing the platform Main-company ID could receive company-private product/inquiry notifications. Tightened companyIds and roles+companyId resolution to active COMPANY profiles only; updated resolver tests.
 - CI/migration validation pending.
+
+
+- CI on the first step 16S head caught an existing production defect in `notifyInquiryOwner`: it used `recipients.length` to detect an empty recipient list, but company recipients are a `{ companyIds }` descriptor object with no `length`. Therefore company-owned inquiry owners never received status-change notifications. Fixed the guard to handle both ID arrays and company descriptors; the closing-transition regression test now verifies the company owner notification plus unique responders.
