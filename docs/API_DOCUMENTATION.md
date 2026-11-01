@@ -486,3 +486,8 @@ PR #77 merged at `91500d3461fcd132804780c8d28e4c7e63e1bcbd`. CI passed 33 fronte
 - For SEALED and ANONYMOUS_SEALED inquiries, buyer message history remains empty until responses are revealed, and neither party may start a message conversation before reveal (`409 INQUIRY_RESPONSES_HIDDEN`).
 - For revealed ANONYMOUS_SEALED inquiries, buyer message history replaces supplier company names with generic proposer labels and removes supplier company IDs. Buyer-owned company identity remains visible to its own users. Recipient read receipts continue to update only the returned messages.
 - Buyer-initiated company-targeted messaging is not available for ANONYMOUS_SEALED (`409 ANONYMOUS_INQUIRY_CONTACT_UNAVAILABLE`), including after reveal, because the current endpoint accepts a raw recipientCompanyId and would defeat anonymity. An anonymous conversation feature needs a response/thread token rather than a company ID.
+
+
+### Verification — step 16Y merged (2026-11-01)
+
+PR #78 merged at `7d46b65a1f186fa63a91691240776cc336c23cc3`. CI passed 1,425 backend tests, 18 root Node tests, 33 frontend test files and all frontend builds; Prisma migration validation passed. Runtime/compose validation was separate and not used as a merge gate.
