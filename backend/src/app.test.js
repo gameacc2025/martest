@@ -90,7 +90,7 @@ test('OpenAPI JSON contains every inventory route with effective security and gl
   const routes = [...inventory.matchAll(/^\| ([A-Z]+) \| `(\/api\/v1[^\`]+)` \|/gm)]
     .map((match) => ({ method: match[1], fullPath: match[2] }));
 
-  assert.equal(routes.length, 149, 'update the expected route count when the route inventory changes');
+  assert.equal(routes.length, 150, 'update the expected route count when the route inventory changes');
 
   for (const { method, fullPath } of routes) {
     const routePath = fullPath.replace(/^\/api\/v1/, '').replace(/:([A-Za-z0-9_]+)/g, '{$1}') || '/';
