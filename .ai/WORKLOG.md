@@ -1778,3 +1778,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Identified a race in `uploadResponseAttachment`: ownership/editability was checked, attachment count was read and row inserted without serializing concurrent uploads. Multiple uploads near the limit could exceed the documented cap of 10.
 - Changed upload path to pre-validate before consuming multipart data, write file before acquiring DB lock, then lock the parent Inquiry row and re-check response ownership/editability, count and insert in one transaction. Any cap/re-check/insert failure removes the prewritten file.
 - Updated service tests to trace operation order and assert the lock precedes cap check/create, plus cleanup when the cap is reached. CI pending.
+
+
+## 2026-11-01 — INQUIRY-ATTACHMENT-CONCURRENCY-STEP-16O-MERGE
+
+- PR #67 squash-merged at `8ec294c6ca41c64ddfbdf5acabd17e0b4debea12`.
+- CI [41270660122] and migration validation [41270660084] passed. Runtime [41270660090] remained a separate workflow/in progress at merge.
+- Fixed race in attachment cap check: uploads now pre-validate, write file outside lock, lock parent Inquiry, re-check response ownership/editability, count and insert in a transaction. On any locked validation/cap/DB failure, remove prewritten file.
+- Tests assert lock-before-count/create ordering and file cleanup after cap rejection. Existing attachment type, size, ownership, status and insert-failure cleanup tests retained.
+- Next: step 16P audit message/read and response/inquiry lifecycle transaction races and duplicate notification effects.
