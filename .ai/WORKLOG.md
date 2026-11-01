@@ -1844,3 +1844,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Audited `changeInquiryStatus`: terminal status changes notify the owner and unique responding companies; OPEN dispatches `INQUIRY_PUBLISHED`. Added test for owner plus unique responder recipients and per-company dedupe keys.
 - Found `notification.dispatch.service.resolveRecipients({companyIds})` only filtered `user.status=ACTIVE` and `accessProfile.companyId`; it could include STAFF accounts sharing Main-company ID. Tightened both companyIds and roles+companyId descriptors to require `accessProfile.type='COMPANY'` and `isActive=true` in addition to active user status.
 - Updated resolver tests and code comments. CI pending.
+
+
+- First CI run exposed another existing defect: `notifyInquiryOwner` checked `recipients.length`; for company owners, recipients is `{ companyIds: [...] }`, so the helper returned early and never dispatched owner notifications. Fixed the guard to recognize non-empty companyIds descriptors as recipients. The lifecycle test verifies owner plus unique responder dispatch.
