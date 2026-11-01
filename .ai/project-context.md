@@ -839,3 +839,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 
 - GET inquiry detail is the response source for Company/Admin InquiryDetail views; `inquiryInclude.responses` must include attachment metadata, and `shapeInquiryForCaller` must replace DB storage keys with authenticated download URLs for every visible response. Preserve sealed visibility and anonymous filename redaction.
 - Supplier response update payloads must not include the full parent inquiry record or buyer identifiers.
+
+
+## Inquiry response attachment security — step 17 merged (2026-11-01)
+
+- PR #80 merged at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`; CI passed 1,446 backend tests, 18 root Node tests, 33 frontend test files and all builds; Prisma migration validation passed.
+- Response attachments are private under `private-uploads/inquiries/responses`, persisted in production via `inquiry_private_uploads`. Public static legacy path is blocked; legacy files can be served only through authenticated endpoint `GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download`.
+- Access checks buyer/supplier/STAFF inquiry visibility, exact response and attachment ownership, and sealed reveal state. Company/Admin use authenticated blob downloads. Response detail returns secure download URLs; anonymous-sealed buyer metadata uses generic names.
+- Supplier response update must not include the raw parent Inquiry object/buyer identifiers. MIME-derived extensions and sanitized display names are used.
