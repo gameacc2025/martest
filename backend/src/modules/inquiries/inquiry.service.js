@@ -89,6 +89,7 @@ const inquiryInclude = {
           },
         },
       },
+      attachments: { orderBy: { createdAt: 'asc' } },
     },
   },
   statusHistory: {
@@ -580,7 +581,11 @@ function shapeInquiryForCaller(inquiry, caller) {
       }));
     }
 
-    result.responses = visibleResponses;
+    const anonymousAttachments = isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED'
+      && areResponsesRevealed(inquiry) && !isStaff;
+    result.responses = visibleResponses.map((response) => (
+      presentResponseAttachments(response, inquiry.id, { anonymous: anonymousAttachments })
+    ));
     result.responsesHidden = false;
   }
 
