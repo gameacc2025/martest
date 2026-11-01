@@ -1910,3 +1910,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin UI now explains that publication notices go to companies owning selected products. Existing local drafts are migrated in-place: unsupported targetCompanyIds discarded and old step numbers mapped to the five-step wizard.
 - Lifecycle tests now assert exact product-owner + authorized STAFF publication recipients and per-user dedupe.
 - CI pending.
+
+
+## 2026-11-01 — ADMIN-INQUIRY-TARGET-COMPANY-NOOP-STEP-16W-MERGE
+
+- PR #76 merged by squash at `71063c219c2d641c7eee8a85e7b89a66dc03d7cb`.
+- CI [41284849375] passed: 31 frontend test files / 225 tests, 18 root Node tests, backend 1,418/1,418 and all builds. Migration validation [41284849374] passed. Runtime [41284757025] was separate and not used as a merge gate.
+- Removed unsupported admin targetCompanyIds selection and replaced it with the actual product-owner publication audience explanation. Old drafts map to the five-step wizard and discard the non-API field.
+- Next: audit sealed response reveal UI against backend deadline/closed/early-reveal rules.
