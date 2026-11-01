@@ -455,3 +455,9 @@ PR #74 merged at `f9a62bd23dd413b128dfbe3751e5edfd8687bedd`. CI passed 1,418 bac
 ### Verification — step 16V merged (2026-11-01)
 
 PR #75 merged at `d2570f1abcda54cc369f7ca553fd58da333ba904`. CI passed 225 frontend tests across 31 files and 1,418 backend tests; frontend builds and Prisma migration validation passed. Runtime validation was separate and remained running at merge.
+
+
+## Inquiry publication audience — 2026-11-01
+
+- There is no `targetCompanyIds` request field or inquiry target-company relation in the API contract. Admin-created inquiries are published through the normal lifecycle; `INQUIRY_PUBLISHED` targets active COMPANY users associated with companies that own the requested products, plus authorized STAFF users with the inquiry-read permission.
+- The admin creation UI no longer presents an unsupported target-company selector. This avoids implying that a client-only field can restrict or expand the publication audience.
