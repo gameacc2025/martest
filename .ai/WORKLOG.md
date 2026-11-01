@@ -1864,3 +1864,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Audited `decideResponse` notification lifecycle. Successful direct rejection dispatches `INQUIRY_RESPONSE_REJECTED`; successful selection dispatches winner notice, per-loser auto-rejection notices, and buyer owner status notice. All dispatches are inside the response decision transaction.
 - Confirmed stale CAS failures occur before notification dispatch; response-specific dedupe keys are per recipient. The anonymous-safe buyer receipt remains `{id,inquiryId,status}` and selected event context does not include supplier company identity.
 - Expanded service tests for exact recipient groups, multiple losers, transactional tx and dedupe keys, successful direct rejection, and ANONYMOUS_SEALED context. CI pending.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-DECISION-NOTIFICATIONS-STEP-16T-MERGE
+
+- PR #73 squash-merged at `43869fb0252e0c96a59a372cc3dfd27d0acbff5b`.
+- CI [41283879276] passed: backend 1,418/1,418; frontend/shared 18/18; frontend builds passed. Migration validation [41283879237] passed. Runtime [41283879261] was still running separately at merge.
+- Tests now assert successful REJECTED supplier notification, SELECTED supplier notification, per-loser AUTO_REJECTED notifications, inquiry owner CLOSED notification, tx binding and dedupe keys. Anonymous-safe selected context remains free of supplier company identity.
+- Next: audit inquiry response-deadline expiry automation, idempotency and notifications.
