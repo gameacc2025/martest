@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi, productsApi } from '@telecom/api-client'
+import { getInquiryDateWindowError, INQUIRY_DATE_WINDOW_ERRORS } from '../../../utils/inquiryDateWindow.js'
 
 import Stepper from 'primevue/stepper'
 import StepList from 'primevue/steplist'
@@ -118,8 +119,18 @@ function validateStep(step) {
     return true
   }
   if (step === STEPS.SETTINGS) {
-    if (form.responseDeadline && new Date(form.responseDeadline) <= new Date()) {
-      toast.add({ severity: 'warn', summary: 'خطا', detail: 'مهلت پاسخ باید در آینده باشد', life: 3000 })
+    const dateError = getInquiryDateWindowError({
+      publishDate: form.publishDate,
+      responseDeadline: form.responseDeadline,
+    })
+    const messages = {
+      [INQUIRY_DATE_WINDOW_ERRORS.INVALID_PUBLISH_DATE]: 'تاریخ انتشار معتبر نیست؛ تاریخ را دوباره انتخاب کنید',
+      [INQUIRY_DATE_WINDOW_ERRORS.INVALID_RESPONSE_DEADLINE]: 'مهلت پاسخ معتبر نیست؛ تاریخ را دوباره انتخاب کنید',
+      [INQUIRY_DATE_WINDOW_ERRORS.DEADLINE_NOT_FUTURE]: 'مهلت پاسخ باید در آینده باشد',
+      [INQUIRY_DATE_WINDOW_ERRORS.DEADLINE_NOT_AFTER_PUBLISH]: 'مهلت پاسخ باید بعد از تاریخ انتشار باشد',
+    }
+    if (dateError) {
+      toast.add({ severity: 'warn', summary: 'خطا', detail: messages[dateError] || 'بازه زمانی استعلام معتبر نیست', life: 3000 })
       return false
     }
     return true

@@ -923,3 +923,12 @@ PR #74 squash-merged into `main` at `f9a62bd23dd413b128dfbe3751e5edfd8687bedd`.
 - Verify publishDate, responseDeadline, autoClose, allowEarlyReveal, allowEditResponse and allowWithdrawResponse are represented consistently; inspect timezone conversion, defaults, clearing dates, and frontend handling of EXPIRED/closed states.
 - Check that UI does not offer invalid lifecycle actions after deadlines or closed states, but keep server-side authorization/transition checks authoritative.
 - Add tests for request serialization/date validation and UI state logic where gaps are confirmed; update docs/.ai, CI and merge. Do not perform browser smoke as a substitute for tests.
+
+
+## Inquiry lifecycle UI/API consistency audit — step 16V (2026-11-01)
+
+- Compared company/admin inquiry creation forms with backend `assertInquiryDateWindow`. Admin form already checked both future deadline and publishDate-before-deadline; company form checked only that responseDeadline was after the current time.
+- Confirmed backend rejects `responseDeadline <= publishDate`, so the company form could allow the user to progress through review and only fail on submit with an API validation error.
+- Added a pure date-window validator for the company app and integrated it into the settings step. It validates malformed restored draft values, deadline strictly after now, and deadline strictly after scheduled publication. Date inputs remain browser-local `datetime-local` values and payload serialization remains ISO.
+- Added Vitest coverage for empty/immediate dates, future deadline, exact/past deadline, publish/deadline ordering, malformed persisted values and valid scheduled publication.
+- Branch: `fix/company-inquiry-date-window-validation-step-16v`. CI/migration validation pending.
