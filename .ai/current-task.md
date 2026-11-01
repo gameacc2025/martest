@@ -880,3 +880,20 @@ PR #72 squash-merged into `main` at `903f24cdfe7746349fec0a32039acaf567d9118c`.
 - All dispatches use the same transaction client. Dedupe keys are per response and recipient. Winner event carries inquiry + response IDs only; auto-rejection event is scoped to the losing company's own active COMPANY members. No supplier identity is added to the buyer-facing decision receipt.
 - Added tests for successful REJECTED notification, exact selected/auto-rejected/owner recipient groups, multiple losing suppliers, transaction binding, per-response/per-user dedupe, and ANONYMOUS_SEALED decision context. Existing stale compare-and-set tests continue to assert no notification is sent on conflict.
 - Branch: `test/inquiry-response-decision-notifications-step-16t`. CI/migration validation pending.
+
+
+## Supplier response decision notification audit — step 16T merged (2026-11-01)
+
+PR #73 squash-merged into `main` at `43869fb0252e0c96a59a372cc3dfd27d0acbff5b`.
+
+- CI [41283879276] passed: backend 1,418/1,418; frontend/shared 18/18; frontend builds passed.
+- Prisma migration validation [41283879237] passed.
+- Runtime validation [41283879261] was separate and still running at merge; it is not counted as passed.
+- Added exact notification regression coverage for direct rejection, selected supplier, each auto-rejected supplier, company inquiry owner, transactional persistence and per-response/per-recipient dedupe. Stale compare-and-set paths still emit no notifications.
+- ANONYMOUS_SEALED buyer decision response remains minimal; selected event context carries only inquiry and response IDs, not supplier company identity.
+
+## Next active work — step 16U inquiry deadline/expiry automation audit
+
+- Trace responseDeadline handling, status transition scheduler/worker and reminder/expiry notification behavior. Check whether OPEN inquiries transition to EXPIRED at deadline, whether closedAt/history are recorded, and whether `INQUIRY_STATUS_CHANGED` is emitted exactly once to owner and active responding companies.
+- Verify scheduler idempotency, timezone/date boundaries, locking/CAS, and behavior for manual close/cancel/complete races. Do not add an arbitrary reminder policy or paid SMS.
+- Add tests for expiry boundary, duplicate worker runs and notification recipient/dedupe behavior; update docs/.ai, CI/migration validation and merge.
