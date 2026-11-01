@@ -112,7 +112,7 @@ const mockPrisma = {
   inquiryItem: {
     count: async () => fx.inquiryItemCount,
     findMany: async () => fx.ownedItemIds.map((id) => ({ id })),
-    findFirst: async () => fx.inquiryItem,
+    findFirst: async (args) => { record('inquiryItem.findFirst', args); return fx.inquiryItem; },
     create: async (args) => {
       record('inquiryItem.create', args);
       return { id: 1, ...args.data };
