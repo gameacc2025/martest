@@ -314,7 +314,11 @@ test('resolveRecipients: { companyIds } resolves ACTIVE members of those compani
   const resolved = await resolveRecipients(mockPrisma, { companyIds: [2, 3] });
 
   const where = calls('user.findMany').at(-1).where;
-  assert.deepEqual(where.accessProfile, { companyId: { in: [2, 3] } });
+  assert.deepEqual(where.accessProfile, {
+    companyId: { in: [2, 3] },
+    type: 'COMPANY',
+    isActive: true,
+  });
   assert.equal(where.status, 'ACTIVE');
   assert.deepEqual(resolved, [
     { userId: 4, email: 'a@b.c' },
@@ -407,4 +411,17 @@ test('dispatchNotification: fully-duplicated dispatch reports duplicates, queues
 
   assert.equal(summary.email.queued, 0);
   assert.equal(summary.email.duplicates, 1);
+});
+
+test('resolveRecipients: companyIds never includes STAFF or inactive company access profiles', async () => {
+  await resolveRecipients(mockPrisma, { companyIds: [10] });
+  const args = calls('user.findMany').at(-1);
+  assert.deepEqual(args.where, {
+    accessProfile: {
+      companyId: { in: [10] },
+      type: 'COMPANY',
+      isActive: true,
+    },
+    status: 'ACTIVE',
+  });
 });
