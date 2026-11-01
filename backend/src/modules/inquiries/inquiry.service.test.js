@@ -1793,6 +1793,49 @@ test('sendInquiryMessage: blocks companies that have not responded', async () =>
   assert.equal(calls['inquiryMessage.create'], undefined);
 });
 
+test('sendInquiryMessage: dispatches in-app/email notification to an active Website buyer user', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Buyer RFQ', companyId: null, buyerUserId: 10, status: 'OPEN' };
+  fx.response = { id: 90 };
+  fx.notificationRecipients = [{ id: 10 }];
+
+  await inquiryService.sendInquiryMessage(
+    1,
+    { message: 'Please confirm delivery' },
+    { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.respond'] },
+  );
+
+  assert.deepEqual(calls['user.findMany'][0].where, { id: 10, status: 'ACTIVE' });
+  const notification = calls.dispatchNotification.find(([event]) => event === 'INQUIRY_MESSAGE_RECEIVED');
+  assert.ok(notification);
+  assert.deepEqual(notification[1], [10]);
+  assert.deepEqual(notification[2], { inquiry: { id: 1, title: 'Buyer RFQ' } });
+  assert.equal(notification[3].tx, mockPrisma);
+  assert.equal(notification[3].dedupeKey, 'inquiry-message-101');
+});
+
+test('sendInquiryMessage: dispatches to active COMPANY members only, never STAFF sharing the company id', async () => {
+  resetMocks();
+  nextFindUnique = { id: 1, title: 'Company RFQ', companyId: 10, buyerUserId: null, status: 'OPEN' };
+  fx.response = { id: 90 };
+  fx.notificationRecipients = [{ id: 31 }, { id: 32 }];
+
+  await inquiryService.sendInquiryMessage(
+    1,
+    { message: 'Please confirm delivery', recipientCompanyId: 20 },
+    { id: 12, accessType: 'COMPANY', companyId: 10, permissions: ['inquiries.create'] },
+  );
+
+  assert.deepEqual(calls['user.findMany'][0].where, {
+    status: 'ACTIVE',
+    accessProfile: { companyId: 20, type: 'COMPANY', isActive: true },
+  });
+  const notification = calls.dispatchNotification.find(([event]) => event === 'INQUIRY_MESSAGE_RECEIVED');
+  assert.ok(notification);
+  assert.deepEqual(notification[1], [31, 32]);
+  assert.equal(notification[3].dedupeKey, 'inquiry-message-101');
+});
+
 test('listInquiryMessages: limits company results to messages involving that company', async () => {
   resetMocks();
   nextFindUnique = { id: 1, companyId: null, buyerUserId: 10 };
