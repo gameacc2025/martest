@@ -1064,3 +1064,13 @@ PR #79 squash-merged into `main` at `37b06e17e98b156da29e8afe28492bbec3aa1992`.
 ## Other open repository work
 
 - Notification recipient scoping PR remains open separately: `fix(notifications): restrict company events to active COMPANY profiles`. Review and merge independently after verifying its tests/checks.
+
+
+## Inquiry response attachment security — step 17 (in progress, 2026-11-01)
+
+- Branch: `audit/inquiry-response-attachment-security-step-17`.
+- Confirmed response attachments were stored under `uploads/inquiries/responses`, which is mounted as public static content. This bypassed all inquiry ownership, sealed visibility and company permission checks.
+- New uploads now go to `private-uploads/inquiries/responses` and database storage keys use the internal `private://inquiries/responses/...` scheme. Existing legacy `/uploads/inquiries/responses/...` rows remain supported only through the authenticated download service; the direct static URL route is explicitly blocked.
+- Added `GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download`. Service checks buyer/supplier/staff inquiry visibility, exact response ownership for suppliers, sealed reveal state, attachment-to-response association, safe storage key resolution and file existence. Responses expose the authenticated endpoint URL rather than the storage key. Anonymous-sealed buyer filenames are generic.
+- Company/admin UIs now fetch attachments as authenticated blobs through `@telecom/api-client`; no unauthenticated browser link is used.
+- Added backend service tests for supplier ownership, wrong response company, sealed pre-reveal denial, anonymous filename redaction, traversal keys and legacy cleanup; route tests and app static-route regression test added. CI pending.
