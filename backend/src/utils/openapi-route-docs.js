@@ -1064,7 +1064,6 @@ const inquiryResponseResponseSchema = {
     company: { type: 'object', required: ['name', 'type'], properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] } }, additionalProperties: true },
     attachments: { type: 'array', items: inquiryResponseAttachmentResponseSchema },
     items: { type: 'array', items: inquiryResponseItemResponseSchema },
-    inquiry: { type: 'object', additionalProperties: true },
   },
 };
 const inquiryDecisionReceiptResponseSchema = {
@@ -1103,7 +1102,7 @@ Object.assign(docs, {
   },
   ['PATCH /api/v1/inquiries/:id/responses/:responseId']: {
     ...docs['PATCH /api/v1/inquiries/:id/responses/:responseId'],
-    responses: { 200: { description: 'Updated supplier response and response items. The service also includes the inquiry record for the supplier editor.', type: 'object', required: ['data'], properties: { data: inquiryResponseResponseSchema } } },
+    responses: { 200: { description: 'Updated supplier response and response items. Returns only the supplier response projection; the buyer inquiry record and buyer identity fields are not included.', type: 'object', required: ['data'], properties: { data: inquiryResponseResponseSchema } } },
   },
   ['PATCH /api/v1/inquiries/:id/responses/:responseId/decision']: {
     ...docs['PATCH /api/v1/inquiries/:id/responses/:responseId/decision'],
