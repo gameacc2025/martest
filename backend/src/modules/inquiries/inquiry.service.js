@@ -1323,7 +1323,7 @@ async function sendInquiryMessage(inquiryId, data, caller) {
       'INQUIRY_MESSAGE_RECEIVED',
       notificationRecipients.map((recipient) => recipient.id),
       { inquiry: { id: inquiry.id, title: inquiry.title } },
-      { tx, dedupeKey: `inquiry-message-${createdMessage.id}` },
+      { tx, dedupeKey: (userId) => `inquiry-message-${createdMessage.id}-${userId}` },
     );
 
     let smsQueued = false;
