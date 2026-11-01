@@ -1845,3 +1845,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed `notification.dispatch.service.resolveRecipients({ companyIds })`: recipients now require `user.status=ACTIVE` and `accessProfile.companyId IN (...)`, `accessProfile.type=COMPANY`, `accessProfile.isActive=true`. Previously STAFF users sharing Main-company IDs and inactive company access profiles could be included.
 - Added dispatcher tests for the exact company-only recipient filter. Added inquiry service tests for company owner + deduplicated responding companies, tx/dedupe propagation and Website user-owned cancellation.
 - Branch `fix/inquiry-status-notification-recipients-step-16s`; CI/migration validation pending.
+
+- CI exposed a second defect in the same flow: `notifyInquiryOwner` treated the company recipient descriptor `{companyIds:[...]}` as empty because it checked `.length` on an object. Fixed the empty-recipient guard for both arrays and descriptor objects. Regression test now verifies the company inquiry owner is notified as well as each distinct responding company.
