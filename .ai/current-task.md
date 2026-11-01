@@ -853,3 +853,22 @@ PR #70 squash-merged into `main` at `f2c957a2de1e8e8f5f0cdbc9fd552b912cd59ef7`. 
 - Branch: `fix/inquiry-status-notification-recipients-step-16s`. CI/migration validation pending.
 
 - Additional regression found while running CI: `notifyInquiryOwner` used `recipients.length` to detect empty recipients. The company descriptor is an object (`{ companyIds: [...] }`) and has no `length`, so owner notifications for company-owned inquiries were silently skipped. Fixed the guard to distinguish ID arrays from company descriptor objects. The status transition test now asserts the owner company notification alongside distinct supplier companies.
+
+
+## Inquiry status notification recipient audit — step 16S merged (2026-11-01)
+
+PR #72 squash-merged into `main` at `903f24cdfe7746349fec0a32039acaf567d9118c`.
+
+- CI [41283669357] passed: backend 1,417/1,417; frontend/shared 18/18; frontend builds passed.
+- Prisma migration validation [41283669375] passed.
+- Runtime validation [41283669383] was separate and still running at merge; it is not counted as passed. Earlier runtime attempts from the pre-fix commits are not relevant to the merged SHA.
+- Fixed company notification recipient resolution to require ACTIVE user and active `AccessProfile` with `type=COMPANY` and matching company ID. STAFF sharing Main-company IDs and inactive company access profiles are excluded.
+- Fixed `notifyInquiryOwner` empty-recipient guard: company descriptors are objects and were incorrectly treated as empty by `.length`; company-owned inquiry owners now receive status notifications.
+- Verified terminal status events target the inquiry owner and distinct non-withdrawn responding companies transactionally, with per-recipient dedupe. Website buyer cancellation targets the buyer user ID. Event payload remains anonymous-safe (inquiry ID/title + status only).
+
+## Next active work — step 16T inquiry response selection/rejection notification audit
+
+- Audit `decideResponse` and auto-rejection flow against `INQUIRY_RESPONSE_SELECTED`, `INQUIRY_RESPONSE_REJECTED`, and `INQUIRY_RESPONSE_AUTO_REJECTED` events.
+- Verify selected supplier receives selection notice; rejected suppliers receive rejection notices; losing pending responses are auto-rejected and notified; only actual affected companies are targeted.
+- Preserve SEALED/ANONYMOUS_SEALED identity rules and buyer privacy. Ensure notifications are transactional with response decisions and inquiry status changes, deduped per response/recipient, and no duplicate or misleading event on idempotent retries.
+- Add regression tests, update docs/.ai, CI/migration validation and merge.
