@@ -751,3 +751,9 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 
 - Per-response attachment cap is 10. Concurrent uploads serialize on the parent Inquiry row; under the lock, service re-checks response ownership/editability, counts current attachment rows and inserts metadata in one DB transaction.
 - File I/O happens before acquiring the lock. If the transaction rejects due to status/ownership/cap or DB insert failure, the prewritten file is cleaned up. Regression tests verify ordering and cleanup.
+
+
+## Inquiry message read state — 2026-11-01
+
+- Message reads are scoped to the caller's recipient identity (company or Website user). A list request marks only unread recipient messages included in that response as read; it must not mark messages beyond the returned 500-row result or messages arriving after the query as read.
+- Returned message records reflect the readAt timestamp written by the request so the client does not receive stale unread state for messages it just opened.
