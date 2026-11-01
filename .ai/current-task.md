@@ -842,3 +842,10 @@ PR #70 squash-merged into `main` at `f2c957a2de1e8e8f5f0cdbc9fd552b912cd59ef7`. 
 
 - Audit `changeInquiryStatus` and related transitions to ensure buyer, responding suppliers and STAFF receive only policy-appropriate events. Check CUSTOMER cancellation, COMPANY/STAFF close/complete/expire transitions, notification dedupe and transaction boundaries.
 - Reuse existing event catalog where semantically correct; add a new event only when a distinct lifecycle event is required. Preserve sealed/anonymous supplier identity privacy. Add regression tests and update docs, CI/migration validation and merge.
+
+
+## Inquiry status notification audit — step 16S (in progress, 2026-11-01)
+
+- Verified terminal status transitions (`CLOSED`, `EXPIRED`, `COMPLETED`, `CANCELLED`) notify the inquiry owner and each unique company with a non-withdrawn response; OPEN publication uses `INQUIRY_PUBLISHED`. Added service test for owner + deduplicated responders.
+- Found a shared recipient-resolution defect: `dispatchNotification({companyIds})` selected all ACTIVE users with matching companyId, without checking `AccessProfile.type` or `isActive`. STAFF users sharing the platform Main-company ID could receive company-private product/inquiry notifications. Tightened companyIds and roles+companyId resolution to active COMPANY profiles only; updated resolver tests.
+- CI/migration validation pending.
