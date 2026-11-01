@@ -829,3 +829,16 @@ PR #69 squash-merged into `main` at `ef55a970e03bc746128c234272a63aa5a6a6c246`. 
 - Added `INQUIRY_RESPONSE_WITHDRAWN` with IN_APP + EMAIL defaults and an anonymous-safe template that names the inquiry/response IDs but never the supplier identity (safe for SEALED and ANONYMOUS_SEALED).
 - On successful withdrawal, dispatches transactionally to the active Website buyer user or active COMPANY access-profile members only; STAFF sharing the Main-company ID are excluded. Per-recipient dedupe keys are used.
 - Added service tests for company and Website buyer notification recipients and event template tests for anonymous safety. CI pending.
+
+
+## Inquiry response withdrawal notification — step 16R merged (2026-11-01)
+
+PR #70 squash-merged into `main` at `f2c957a2de1e8e8f5f0cdbc9fd552b912cd59ef7`. CI [41271249036] passed and Prisma migration validation [41271248977] passed. Runtime [41271249049] was separate/in progress at merge and is not claimed as passed.
+
+- Added `INQUIRY_RESPONSE_WITHDRAWN` with IN_APP + EMAIL defaults and anonymous-safe wording; supplier identity is never included.
+- Successful withdrawal dispatches transactionally to active Website buyer user or active COMPANY access-profile members only; STAFF sharing Main-company ID are excluded. Dedupe is per response/recipient.
+
+## Next active work — step 16S inquiry status transition notifications
+
+- Audit `changeInquiryStatus` and related transitions to ensure buyer, responding suppliers and STAFF receive only policy-appropriate events. Check CUSTOMER cancellation, COMPANY/STAFF close/complete/expire transitions, notification dedupe and transaction boundaries.
+- Reuse existing event catalog where semantically correct; add a new event only when a distinct lifecycle event is required. Preserve sealed/anonymous supplier identity privacy. Add regression tests and update docs, CI/migration validation and merge.
