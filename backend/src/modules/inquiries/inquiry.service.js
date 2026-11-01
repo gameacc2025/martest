@@ -1625,15 +1625,15 @@ async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
  * Resolve a response the caller is allowed to attach files to, enforcing
  * ownership and the RFQ's edit rules. Returns the response id + companyId.
  */
-async function resolveOwnedEditableResponse(inquiryId, responseId, caller, data = {}) {
+async function resolveOwnedEditableResponse(inquiryId, responseId, caller, data = {}, client = prisma) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
   const numericResponseId = toPositiveInt(responseId, 'responseId');
   const companyId = resolveSupplierCompanyId(data, caller);
 
-  const inquiry = await prisma.inquiry.findUnique({ where: { id: numericInquiryId } });
+  const inquiry = await client.inquiry.findUnique({ where: { id: numericInquiryId } });
   assertResponseEditable(inquiry);
 
-  const response = await prisma.inquiryResponse.findFirst({
+  const response = await client.inquiryResponse.findFirst({
     where: { id: numericResponseId, inquiryId: numericInquiryId, companyId },
     select: { id: true, status: true },
   });
@@ -1653,26 +1653,46 @@ async function resolveOwnedEditableResponse(inquiryId, responseId, caller, data 
  * `file` is the @fastify/multipart file object.
  */
 async function uploadResponseAttachment(inquiryId, responseId, file, caller) {
-  const { responseId: numericResponseId } = await resolveOwnedEditableResponse(inquiryId, responseId, caller);
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const numericResponseId = toPositiveInt(responseId, 'responseId');
 
-  const existingCount = await prisma.inquiryResponseAttachment.count({ where: { responseId: numericResponseId } });
-  if (existingCount >= MAX_RESPONSE_ATTACHMENTS) {
-    throw { statusCode: 400, code: 'ATTACHMENT_LIMIT_REACHED', message: `A response may have at most ${MAX_RESPONSE_ATTACHMENTS} attachments.` };
-  }
-
+  // Fail unauthorized/locked responses before consuming the multipart stream.
+  await resolveOwnedEditableResponse(numericInquiryId, numericResponseId, caller);
   const stored = await saveResponseAttachment(file);
 
   try {
-    return await prisma.inquiryResponseAttachment.create({
-      data: {
-        responseId: numericResponseId,
-        url: stored.url,
-        filename: stored.filename,
-        mimetype: stored.mimetype,
-        size: stored.size,
-      },
-    });
+    return await prisma.$transaction(async (tx) => {
+      // Serialize concurrent uploads for the same inquiry before checking the
+      // per-response cap. Re-check editability after acquiring the lock so a
+      // response/inquiry closed during the file write cannot accept an upload.
+      await lockInquiryForUpdate(tx, numericInquiryId);
+      const owned = await resolveOwnedEditableResponse(
+        numericInquiryId,
+        numericResponseId,
+        caller,
+        {},
+        tx,
+      );
+      const existingCount = await tx.inquiryResponseAttachment.count({
+        where: { responseId: owned.responseId },
+      });
+      if (existingCount >= MAX_RESPONSE_ATTACHMENTS) {
+        throw { statusCode: 400, code: 'ATTACHMENT_LIMIT_REACHED', message: `A response may have at most ${MAX_RESPONSE_ATTACHMENTS} attachments.` };
+      }
+
+      return tx.inquiryResponseAttachment.create({
+        data: {
+          responseId: owned.responseId,
+          url: stored.url,
+          filename: stored.filename,
+          mimetype: stored.mimetype,
+          size: stored.size,
+        },
+      });
+    }, { maxWait: 5000, timeout: 12000 });
   } catch (error) {
+    // The file is written before the database transaction to avoid holding a
+    // row lock during disk I/O. Clean it up if the cap/re-check/insert fails.
     await removeStoredAttachment(stored.url);
     throw error;
   }
