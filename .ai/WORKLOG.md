@@ -1945,3 +1945,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Sealed messaging confidentiality fix: buyer reads no messages before sealed reveal; both parties cannot create messages before reveal; anonymous-sealed buyer message reads replace supplier names with stable generic proposer labels and remove supplier IDs. Buyer-owned company references remain visible to the buyer. Read receipts still update only rows returned to the caller.
 - Anonymous-sealed buyers cannot initiate direct company-targeted threads because current API requires recipientCompanyId and would expose/probe supplier identity; request rejected before checking response existence.
 - Added regression tests for invalid scope injection, received stats filters, pre-reveal message access, anonymous identity redaction, and message-send policy. CI pending.
+
+
+## 2026-11-01 — INQUIRY-DATA-ISOLATION-AUDIT-STEP-16Y-MERGE
+
+- PR #78 squash-merged into `main` at `7d46b65a1f186fa63a91691240776cc336c23cc3`.
+- CI [41324224781] passed: 33 frontend test files, 18 root Node tests, backend 1,425/1,425 and all frontend builds. Prisma migration validation [41324224904] passed. Runtime/compose [41324224805] was separate and not a merge gate.
+- Added defensive list scope validation; company received stats now apply the same published status/date filter as supplier inquiry list.
+- Closed sealed conversation privacy gaps: no buyer messages or new conversations before reveal; anonymous sealed buyer message history removes supplier IDs and replaces names with proposer labels; anonymous buyer-to-supplier direct messaging by raw company ID is rejected.
+- Added adversarial tests for invalid scopes, aggregate publication filters, sealed conversation visibility, anonymous redaction and read receipts.
+- Next: step 16Z audit item-level and inquiry lifecycle mutation authorization across STAFF/COMPANY/CUSTOMER, including cross-inquiry item IDs and CUSTOMER cancel-only constraints.
