@@ -415,3 +415,8 @@ PR #65 merged at `5cdb8e81acdf679bf60e36c2c36dec118e118156`. CI and Prisma migra
 - Website-owned inquiries notify the buyer user ID directly. Notification persistence and email outbox queueing remain subject to each recipient's event preferences; SMS remains off by default and is not enabled by this change.
 
 - Company-owned inquiry owners are included in `INQUIRY_STATUS_CHANGED` delivery. The recipient descriptor is resolved as active COMPANY access-profile members only; Website-owned inquiries target the buyer user ID directly.
+
+
+### Verification — step 16S merged (2026-11-01)
+
+PR #72 merged at `903f24cdfe7746349fec0a32039acaf567d9118c`. CI passed 1,417 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime validation was a separate workflow and was still running at merge.
