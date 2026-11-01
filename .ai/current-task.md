@@ -959,3 +959,20 @@ PR #75 squash-merged into `main` at `d2570f1abcda54cc369f7ca553fd58da333ba904`.
 - Branch: `fix/admin-inquiry-target-company-noop-step-16w`. CI pending.
 
 - First CI build caught a Vue template adjacency issue: the new explanatory Message had been inserted between the product-empty `v-if` and table `v-else`. Moved the Message after the DataTable so the conditional pair remains adjacent; rerunning CI for the corrected head.
+
+
+## Admin inquiry target-company no-op audit — step 16W merged (2026-11-01)
+
+PR #76 squash-merged into `main` at `71063c219c2d641c7eee8a85e7b89a66dc03d7cb`.
+
+- CI [41284849375] passed: 31 frontend test files, 225 frontend tests, 18 root Node tests and 1,418 backend tests; all frontend builds passed.
+- Prisma migration validation [41284849374] passed.
+- Runtime validation [41284757025] was separate and not used as a merge gate; it was not counted as passed.
+- Removed the admin target-company selector because `targetCompanyIds` had no API or database support and was never sent. The wizard now explains the real product-owner publication audience. Existing local drafts are preserved with old-step remapping and removal of the unsupported field.
+- Lifecycle tests assert publication targets product-owning companies and authorized STAFF recipients, with transactional dedupe.
+
+## Next active work — step 16X sealed response reveal UI parity
+
+- Compare company and Website reveal-button visibility with backend `revealInquiryResponses` rules. Server permits buyer reveal when early reveal is enabled, or after the deadline, or after the inquiry is closed; verify whether `responsesHidden` already captures all automatic reveal conditions.
+- Ensure the UI exposes the reveal action whenever the server would permit it and hides it when already revealed or not a sealed inquiry. Preserve buyer ownership checks and STAFF moderation policy.
+- Add pure/composable UI logic tests plus service boundary tests if a real mismatch is found; update docs/.ai, CI and merge.
