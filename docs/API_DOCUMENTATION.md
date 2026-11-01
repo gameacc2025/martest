@@ -427,3 +427,8 @@ PR #72 merged at `903f24cdfe7746349fec0a32039acaf567d9118c`. CI passed 1,417 bac
 - Buyer rejection sends `INQUIRY_RESPONSE_REJECTED` to active COMPANY members of the rejected supplier.
 - Buyer selection sends `INQUIRY_RESPONSE_SELECTED` to the selected supplier and `INQUIRY_RESPONSE_AUTO_REJECTED` to each other pending supplier whose response is rejected by the selection. The inquiry owner also receives `INQUIRY_STATUS_CHANGED` with status `CLOSED`.
 - All notification and email-outbox writes occur in the same transaction as the decision. Dedupe is per response/recipient. Failed compare-and-set decisions do not emit notifications. The buyer-facing decision receipt remains limited to response ID, inquiry ID and status.
+
+
+### Verification — step 16T merged (2026-11-01)
+
+PR #73 merged at `43869fb0252e0c96a59a372cc3dfd27d0acbff5b`. CI passed 1,418 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime validation was a separate workflow and remained running at merge.
