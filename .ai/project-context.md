@@ -723,3 +723,11 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Inquiry subscription request allow-lists provider-unavailable, provider HTTP error, invalid provider response and request rejection as sanitized 502 `{error:{code,message}}`.
 - Missing payment provider config returns sanitized 503 on retry verification and callback. Callback verify outages continue to redirect with `payment=pending`.
 - Unknown/mismatched errors and invalid provider configuration remain generic 500 through central handler. Never expose raw provider response, merchant ID, authority, config or stack.
+
+
+## Generated OpenAPI integration guarantees — 2026-11-01
+
+- PR #65 merged at `5cdb8e81acdf679bf60e36c2c36dec118e118156`; CI and migration validation passed. Runtime validation was separate and still running at merge.
+- Generated `/docs/json` is integration-tested for actual auth/RBAC error unions, native rate-limit 429, payment provider 502/503 scope and 204 no-content semantics.
+- Swagger route-doc response definitions take precedence over generated defaults; handler schemas are fallback for undocumented statuses. OpenAPI 3.0.3 fixed-value constraints use single-value enums, not `const`.
+- Inquiry feature rules remain: buyer and supplier participation are permission- and access-context-gated; STAFF is a moderator, not an automatic supplier; sealed and anonymous-sealed visibility must not reveal supplier identities prematurely; quota/subscription limits apply to both buyer inquiries and supplier responses.
