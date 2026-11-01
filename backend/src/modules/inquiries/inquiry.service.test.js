@@ -49,6 +49,7 @@ const fx = {
   products: [],             // product.findMany inside validateInquiryProducts
   responseCount: 0,
   recentResponses: [],
+  notificationRecipients: [],
 };
 
 // groupBy returns one row-set per call; stats() calls each groupBy twice
@@ -76,6 +77,7 @@ const mockPrisma = {
     create: async ({ data }) => { smsUsageEvents.push(data); return { id: smsUsageEvents.length, ...data }; },
   },
   user: {
+    findMany: async (args) => { record('user.findMany', args); return fx.notificationRecipients; },
     findUnique: async ({ where }) => ({ id: where.id, phone: '+31612345678' }),
     findFirst: async (args) => { record('user.findFirst', args); return args.where?.accessProfile ? smsCompanyMember : smsRecipientUser; },
   },
@@ -282,6 +284,7 @@ function resetMocks() {
   fx.products = [];
   fx.responseCount = 0;
   fx.recentResponses = [];
+  fx.notificationRecipients = [];
   queues.inquiryGroupBy = [];
   queues.responseGroupBy = [];
 }
