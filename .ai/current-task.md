@@ -851,3 +851,5 @@ PR #70 squash-merged into `main` at `f2c957a2de1e8e8f5f0cdbc9fd552b912cd59ef7`. 
 - Fixed company recipient resolution to require ACTIVE user status plus COMPANY access profile, matching company ID and active access profile. This applies consistently to all company-targeted notifications, not only inquiry status changes.
 - Added dispatcher regression coverage for the exact company recipient filter and inquiry status service tests for company owner + distinct responding companies, per-recipient dedupe, transaction binding, and Website buyer cancellation recipient.
 - Branch: `fix/inquiry-status-notification-recipients-step-16s`. CI/migration validation pending.
+
+- Additional regression found while running CI: `notifyInquiryOwner` used `recipients.length` to detect empty recipients. The company descriptor is an object (`{ companyIds: [...] }`) and has no `length`, so owner notifications for company-owned inquiries were silently skipped. Fixed the guard to distinguish ID arrays from company descriptor objects. The status transition test now asserts the owner company notification alongside distinct supplier companies.
