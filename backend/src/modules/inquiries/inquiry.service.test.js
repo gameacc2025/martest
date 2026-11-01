@@ -68,7 +68,7 @@ function record(name, args) {
 
 const mockPrisma = {
   systemSetting: { findUnique: async () => ({ value: subscriptionEnforcementEnabled ? 'true' : 'false' }) },
-  inquirySubscription: { findFirst: async () => activeSmsSubscription },
+  inquirySubscription: { findFirst: async (args) => { record('inquirySubscription.findFirst', args); return activeSmsSubscription; } },
   inquiryUsageEvent: {
     aggregate: async ({ where }) => ({ _sum: { quantity: smsUsageEvents.filter(e => e.subscriptionId === where.subscriptionId && e.usageType === where.usageType).reduce((sum, e) => sum + e.quantity, 0) } }),
     create: async ({ data }) => { smsUsageEvents.push(data); return { id: smsUsageEvents.length, ...data }; },
@@ -2159,4 +2159,22 @@ test('sendInquiryMessage: enforced owner quota records one INTERNAL_MESSAGE usag
     { subscriptionId: smsUsageEvents[0].subscriptionId, usageType: smsUsageEvents[0].usageType, referenceType: smsUsageEvents[0].referenceType, referenceId: smsUsageEvents[0].referenceId },
     { subscriptionId: 77, usageType: 'INTERNAL_MESSAGE', referenceType: 'InquiryMessage', referenceId: '101' },
   );
+});
+
+
+test('createInquiry: enforced Website quota is charged to the authenticated customer user', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  fx.products = [{ id: 41, status: 'PUBLISHED', company: { status: 'ACTIVE' } }];
+  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+
+  await inquiryService.createInquiry({
+    title: 'Quota-backed customer RFQ',
+    items: [{ productId: 41, quantity: 1 }],
+  }, customer);
+
+  assert.ok(calls['inquirySubscription.findFirst'].some(({ where }) => where.userId === 77 && where.companyId === undefined));
+  assert.equal(smsUsageEvents.length, 1);
+  assert.equal(smsUsageEvents[0].usageType, 'INQUIRY_CREATE');
+  assert.equal(smsUsageEvents[0].referenceId, '7');
 });
