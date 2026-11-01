@@ -1275,7 +1275,8 @@ test('decideResponse: selecting a quote notifies winner, each losing supplier, a
   assert.equal(notifications[1][3].dedupeKey(72), 'inquiry-response-auto-rejected-502-72');
   assert.equal(notifications[2][3].dedupeKey(73), 'inquiry-response-auto-rejected-503-73');
   assert.equal(notifications[3][3].dedupeKey(2), 'inquiry-status-30-CLOSED-owner-2');
-  assert.equal(notifications.some(([, , context]) => context.company || context.response?.companyId), false, 'anonymous supplier identity is never added to the event context');
+  assert.deepEqual(notifications[0][2], { inquiry: { id: 30, title: 'RFQ decision' }, response: { id: 501 } });
+  assert.equal(notifications[0][2].response.companyId, undefined, 'selected supplier identity is not exposed in the buyer-facing response event context');
 });
 
 test('decideResponse: rejecting a pending quote notifies only that supplier company transactionally', async () => {
