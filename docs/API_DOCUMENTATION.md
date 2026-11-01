@@ -498,3 +498,8 @@ PR #78 merged at `7d46b65a1f186fa63a91691240776cc336c23cc3`. CI passed 1,425 bac
 - Item add/update/delete is restricted to the inquiry buyer or authorized STAFF with update permission, and only while the inquiry is DRAFT. Item update/delete is scoped by both `inquiryId` and `itemId`; a mismatched item ID returns `INQUIRY_ITEM_NOT_FOUND`.
 - CUSTOMER users may change their own inquiry status only to `CANCELLED`. STAFF may moderate lifecycle state with update permission; read-only permission does not authorize early response reveal.
 - Item writes, inquiry updates and response reveal serialize on the parent Inquiry row, matching the existing status/response write lock. This prevents item-count invariants and DRAFT-only checks from racing with status transitions or concurrent item mutations.
+
+
+### Verification — step 16Z merged (2026-11-01)
+
+PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`. CI passed 1,432 backend tests, 18 root Node tests, 33 frontend test files and all frontend builds; Prisma migration validation passed. Runtime/compose validation was separate and not used as a merge gate.
