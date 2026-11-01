@@ -1857,3 +1857,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed `notifyInquiryOwner` object descriptor guard; company inquiry owners were silently skipped because `{companyIds}` has no `.length`.
 - Tests cover company owner + distinct responding companies, transactional dedupe propagation and Website buyer cancellation. Anonymous-safe event context remains inquiry ID/title + status.
 - Next: audit selected/rejected/auto-rejected supplier response notifications.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-DECISION-NOTIFICATIONS-STEP-16T
+
+- Audited `decideResponse` notification lifecycle. Successful direct rejection dispatches `INQUIRY_RESPONSE_REJECTED`; successful selection dispatches winner notice, per-loser auto-rejection notices, and buyer owner status notice. All dispatches are inside the response decision transaction.
+- Confirmed stale CAS failures occur before notification dispatch; response-specific dedupe keys are per recipient. The anonymous-safe buyer receipt remains `{id,inquiryId,status}` and selected event context does not include supplier company identity.
+- Expanded service tests for exact recipient groups, multiple losers, transactional tx and dedupe keys, successful direct rejection, and ANONYMOUS_SEALED context. CI pending.

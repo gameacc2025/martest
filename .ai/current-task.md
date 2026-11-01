@@ -872,3 +872,11 @@ PR #72 squash-merged into `main` at `903f24cdfe7746349fec0a32039acaf567d9118c`.
 - Verify selected supplier receives selection notice; rejected suppliers receive rejection notices; losing pending responses are auto-rejected and notified; only actual affected companies are targeted.
 - Preserve SEALED/ANONYMOUS_SEALED identity rules and buyer privacy. Ensure notifications are transactional with response decisions and inquiry status changes, deduped per response/recipient, and no duplicate or misleading event on idempotent retries.
 - Add regression tests, update docs/.ai, CI/migration validation and merge.
+
+
+## Inquiry response selection/rejection notification audit — step 16T (2026-11-01)
+
+- Audited `decideResponse`: a direct REJECTED decision dispatches `INQUIRY_RESPONSE_REJECTED` only after compare-and-set succeeds; SELECTED closes the inquiry, marks the winner SELECTED, rejects remaining PENDING responses, then dispatches `INQUIRY_RESPONSE_SELECTED`, one `INQUIRY_RESPONSE_AUTO_REJECTED` per losing response, and `INQUIRY_STATUS_CHANGED` to the inquiry owner.
+- All dispatches use the same transaction client. Dedupe keys are per response and recipient. Winner event carries inquiry + response IDs only; auto-rejection event is scoped to the losing company's own active COMPANY members. No supplier identity is added to the buyer-facing decision receipt.
+- Added tests for successful REJECTED notification, exact selected/auto-rejected/owner recipient groups, multiple losing suppliers, transaction binding, per-response/per-user dedupe, and ANONYMOUS_SEALED decision context. Existing stale compare-and-set tests continue to assert no notification is sent on conflict.
+- Branch: `test/inquiry-response-decision-notifications-step-16t`. CI/migration validation pending.

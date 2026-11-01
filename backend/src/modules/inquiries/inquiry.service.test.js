@@ -1242,21 +1242,60 @@ test('submitResponse: duplicate response returns a domain conflict instead of a 
 
 // ── listResponses ────────────────────────────────────────────
 
-test('decideResponse: selecting a quote closes the inquiry and rejects other pending quotes', async () => {
+test('decideResponse: selecting a quote notifies winner, each losing supplier, and company buyer in one transaction', async () => {
   resetMocks();
-  nextFindUnique = openInquiry({ id: 30, companyId: buyer.companyId, visibilityMode: 'NORMAL' });
+  nextFindUnique = openInquiry({ id: 30, companyId: buyer.companyId, title: 'RFQ decision', visibilityMode: 'ANONYMOUS_SEALED', revealedAt: new Date() });
   fx.response = { id: 501, inquiryId: 30, companyId: seller.companyId, status: 'PENDING' };
-  fx.recentResponses = [{ id: 502, inquiryId: 30, companyId: 88, status: 'PENDING' }];
+  fx.recentResponses = [
+    { id: 502, inquiryId: 30, companyId: 88, status: 'PENDING' },
+    { id: 503, inquiryId: 30, companyId: 99, status: 'PENDING' },
+  ];
   const selected = await inquiryService.decideResponse(30, 501, 'SELECTED', buyer, 'Best delivery');
   assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "Inquiry"') && query.includes('FOR UPDATE') && params[0] === 30), 'locks the parent inquiry before selecting a response');
   assert.equal(selected.status, 'SELECTED');
   assert.equal(calls['inquiry.updateMany'][0].data.status, 'CLOSED');
   assert.ok(calls['inquiryResponse.updateMany'].some((call) => call.data.status === 'REJECTED'));
   assert.ok(calls['inquiryResponse.updateMany'].some((call) => call.data.status === 'SELECTED'));
-
   assert.ok(calls['inquiryStatusHistory.create'].some((call) => call.data.source === 'USER'));
-  assert.ok((calls.dispatchNotification || []).some(([event]) => event === 'INQUIRY_RESPONSE_SELECTED'));
-  assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_RESPONSE_AUTO_REJECTED'));
+
+  const notifications = calls.dispatchNotification;
+  assert.deepEqual(notifications.map(([event, recipients]) => [event, recipients]), [
+    ['INQUIRY_RESPONSE_SELECTED', { companyIds: [seller.companyId] }],
+    ['INQUIRY_RESPONSE_AUTO_REJECTED', { companyIds: [88] }],
+    ['INQUIRY_RESPONSE_AUTO_REJECTED', { companyIds: [99] }],
+    ['INQUIRY_STATUS_CHANGED', { companyIds: [buyer.companyId] }],
+  ]);
+  for (const [, , context, options] of notifications) {
+    assert.equal(context.inquiry.id, 30);
+    assert.equal(context.inquiry.title, 'RFQ decision');
+    assert.equal(options.tx, mockPrisma);
+    assert.equal(typeof options.dedupeKey, 'function');
+  }
+  assert.equal(notifications[0][3].dedupeKey(71), 'inquiry-response-selected-501-71');
+  assert.equal(notifications[1][3].dedupeKey(72), 'inquiry-response-auto-rejected-502-72');
+  assert.equal(notifications[2][3].dedupeKey(73), 'inquiry-response-auto-rejected-503-73');
+  assert.equal(notifications[3][3].dedupeKey(2), 'inquiry-status-30-CLOSED-owner-2');
+  assert.deepEqual(notifications[0][2], { inquiry: { id: 30, title: 'RFQ decision' }, response: { id: 501 } });
+  assert.equal(notifications[0][2].response.companyId, undefined, 'selected supplier identity is not exposed in the buyer-facing response event context');
+});
+
+test('decideResponse: rejecting a pending quote notifies only that supplier company transactionally', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 31, companyId: buyer.companyId, title: 'RFQ rejection' });
+  fx.response = { id: 601, inquiryId: 31, companyId: seller.companyId, status: 'PENDING' };
+
+  const rejected = await inquiryService.decideResponse(31, 601, 'REJECTED', buyer, 'Price not suitable');
+
+  assert.deepEqual(rejected, { id: 601, inquiryId: 31, status: 'REJECTED' });
+  assert.equal(calls['inquiryResponse.updateMany'].length, 1);
+  assert.deepEqual(calls.dispatchNotification.map(([event, recipients]) => [event, recipients]), [
+    ['INQUIRY_RESPONSE_REJECTED', { companyIds: [seller.companyId] }],
+  ]);
+  const [event, , context, options] = calls.dispatchNotification[0];
+  assert.equal(event, 'INQUIRY_RESPONSE_REJECTED');
+  assert.deepEqual(context, { inquiry: { id: 31, title: 'RFQ rejection' }, response: { id: 601 } });
+  assert.equal(options.tx, mockPrisma);
+  assert.equal(options.dedupeKey(73), 'inquiry-response-rejected-601-73');
 });
 
 test('decideResponse: stale rejection fails when the response is no longer pending', async () => {
