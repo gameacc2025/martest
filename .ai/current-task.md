@@ -752,3 +752,17 @@ PR #65 squash-merged into `main` at `5cdb8e81acdf679bf60e36c2c36dec118e118156`.
 - Found a test coverage gap: `inquiry.service.test.js` mocked company capacity checks but left `SystemSetting.inquiry.subscription_enforcement` hardcoded false. Thus core create/response/message services did not verify that their real `consumeUsage` integration records the right usage type/reference when enforcement is enabled.
 - Added dynamic enforcement flag to test Prisma fixture and integration-style service tests for company inquiry creation (`INQUIRY_CREATE`), Website customer inquiry creation (user-owned `INQUIRY_CREATE`), supplier response submission (`RESPONSE_SUBMIT`) and internal message sending (`INTERNAL_MESSAGE`). Tests assert subscription row locking and usage-event references.
 - No production behavior changed in this slice. CI/migration validation pending.
+
+
+## Inquiry usage integration coverage — step 16N merged (2026-11-01)
+
+PR #66 squash-merged into `main` at `1c9e960a7144ff86369a4aa5ce88ca7514eb7de8`. CI [41270495169] passed and Prisma migration validation [41270495193] passed. Runtime validation [41270495206] was separate/in progress and is not marked passed.
+
+- Service tests now enable monetization enforcement and verify company/user inquiry creation (`INQUIRY_CREATE`), supplier response (`RESPONSE_SUBMIT`) and internal message (`INTERNAL_MESSAGE`) usage events, references and subscription locking.
+- No production behavior changed in step 16N.
+
+## Next active work — step 16O response attachment concurrency
+
+- Fix race in per-response 10-attachment cap: current check/count and insert were not serialized, so simultaneous uploads could exceed the cap.
+- Pre-validate ownership before reading/storing the upload, write file outside the DB lock, then lock parent Inquiry row, re-check response editability/ownership, count and insert inside one transaction. Clean up the stored file if the locked check or DB insert fails.
+- Add tests proving lock-before-count ordering, concurrent-safe cap decision path and file cleanup. CI/migration validation and merge.

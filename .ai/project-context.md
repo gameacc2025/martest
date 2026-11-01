@@ -738,3 +738,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - `inquiry.service.js` integrates `consumeUsage` for company/user inquiry creation (`INQUIRY_CREATE`), supplier quote submission (`RESPONSE_SUBMIT`) and buyer/supplier internal messages (`INTERNAL_MESSAGE`). SMS is separately metered (`SMS`) and remains enforced even while general enforcement is rollout-disabled.
 - Service tests now toggle `SystemSetting.inquiry.subscription_enforcement` and verify the three core usage event types and references, including user-owned Website inquiries and subscription row locking. The subscription service has dedicated tests for expiry, concurrency, limits and quota summaries.
 - Business boundary: CUSTOMER users own their own Website inquiries/subscriptions; COMPANY users are company-owned; STAFF is a moderator and must not become a supplier through stray companyId. `inquiries.create` and `inquiries.respond` permissions and access context remain distinct.
+
+
+## Inquiry response attachment safety — 2026-11-01
+
+- Each supplier response is limited to 10 attachments; files are type/size validated, and failed DB inserts clean up the stored file.
+- Uploads now serialize the cap check and DB insert by locking the parent Inquiry row inside a transaction, then re-check response ownership/editability after the lock. The file is written before acquiring the row lock to avoid holding DB locks during disk I/O; if the locked cap/re-check/insert fails, the prewritten file is removed.
+- Upload ownership and editability are checked once before consuming the multipart stream and rechecked under the lock to close status-change races.
