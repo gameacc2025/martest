@@ -1744,3 +1744,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 - Follow-up CI confirmed generated `/docs/json` assertions now pass after replacing unsupported `const` with OAS 3.0 enums. One static test then failed because an enum array was compared using strict scalar equality; changed all five enum-array assertions to `deepEqual`. CI rerun pending.
+
+
+- CI on the OpenAPI 3.0 enum change showed the static route-doc test had been fixed, but the generated-spec test still used strict equality on enum arrays. Changed generated Swagger assertions for 401/403/429/500 to `assert.deepEqual`. This is test-only; CI rerun pending.
