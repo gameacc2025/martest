@@ -1013,3 +1013,25 @@ PR #77 squash-merged into `main` at `91500d3461fcd132804780c8d28e4c7e63e1bcbd`.
 - Found a sealed-conversation side channel: buyers and suppliers could start messages before response reveal, and message listing could reveal supplier company identities in ANONYMOUS_SEALED. Buyer message reads now return no messages before sealed reveal; sending on SEALED/ANONYMOUS_SEALED is rejected until reveal. ANONYMOUS_SEALED buyer message views mask supplier names and remove supplier company IDs while preserving buyer-owned company references and read-state updates.
 - Buyer cannot start a direct supplier thread in ANONYMOUS_SEALED even after reveal because the current endpoint requires recipientCompanyId and would defeat anonymity; this is rejected before probing whether a guessed company has responded.
 - Added adversarial tests for invalid scopes, stats publication filters, sealed message invisibility, anonymous message identity redaction/read receipts, and send-message restrictions. CI pending.
+
+
+## Inquiry list/detail data isolation audit — step 16Y merged (2026-11-01)
+
+PR #78 squash-merged into `main` at `7d46b65a1f186fa63a91691240776cc336c23cc3`.
+
+- CI [41324224781] passed: 33 frontend test files, 18 root Node tests, 1,425 backend tests; all frontend builds passed.
+- Prisma migration validation [41324224904] passed. Runtime/compose validation [41324224805] was separate and is not counted as a merge gate.
+- Service rejects invalid inquiry list scopes before database access; company received dashboard aggregates now match published status/date visibility.
+- SEALED/ANONYMOUS_SEALED buyer message history is hidden until reveal; neither side can start a conversation before reveal. ANONYMOUS_SEALED buyer message history masks supplier identity and IDs; direct company-ID buyer messaging is denied for anonymous inquiries.
+- Added adversarial tests and updated API/.ai docs.
+
+## Next active work — step 16Z inquiry item and lifecycle mutation authorization audit
+
+- Trace `listInquiryItems`, add/update/delete inquiry items, `updateInquiry`, `changeInquiryStatus`, `revealInquiryResponses`, and related controller/route schemas for STAFF, COMPANY, CUSTOMER.
+- Verify buyer ownership, company-context enforcement, STAFF permission boundaries, CUSTOMER cancel-only behavior, DRAFT-only item mutations, cross-inquiry item IDs, product ownership/availability and response visibility after status changes.
+- Add adversarial tests for wrong company/customer, STAFF with read vs update permissions, item IDs belonging to another inquiry, and lifecycle edge cases. Fix only demonstrated mismatches; preserve current permission boundaries.
+- Update docs/.ai, CI and migration validation, then merge.
+
+## Other open repository work
+
+- PR for notification event recipient scoping remains open separately: `fix(notifications): restrict company events to active COMPANY profiles`. Do not merge it as part of inquiry authorization work without reviewing its own checks.
