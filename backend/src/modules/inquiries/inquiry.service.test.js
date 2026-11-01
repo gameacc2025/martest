@@ -1795,10 +1795,11 @@ test('listInquiryMessages: limits company results to messages involving that com
   nextFindUnique = { id: 1, companyId: null, buyerUserId: 10 };
   fx.response = { id: 90 };
   nextMessages = [{ id: 1, senderCompanyId: 2, recipientCompanyId: 5, readAt: null }];
-  await inquiryService.listInquiryMessages(1, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.read'] });
+  const messages = await inquiryService.listInquiryMessages(1, { id: 20, accessType: 'COMPANY', companyId: 5, permissions: ['inquiries.read'] });
   assert.deepEqual(calls['inquiryMessage.findMany'][0].where.OR, [{ senderCompanyId: 5 }, { recipientCompanyId: 5 }]);
   assert.equal(calls['inquiryMessage.updateMany'][0].where.recipientCompanyId, 5);
   assert.deepEqual(calls['inquiryMessage.updateMany'][0].where.id, { in: [1] });
+  assert.ok(messages[0].readAt instanceof Date, 'returned recipient message reflects the read state written by this request');
   assert.ok(nextMessages[0].readAt === null, 'mock source row remains unchanged');
 });
 
@@ -2013,11 +2014,12 @@ test('listInquiryMessages: CUSTOMER_USER without an AccessProfile is scoped to i
   nextMessages = [{ id: 1, senderUserId: 9, recipientUserId: 10, readAt: null }];
   const customer = { id: 10, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
 
-  await inquiryService.listInquiryMessages(1, customer);
+  const messages = await inquiryService.listInquiryMessages(1, customer);
 
   assert.deepEqual(calls['inquiryMessage.findMany'][0].where.OR, [{ senderUserId: 10 }, { recipientUserId: 10 }]);
   assert.equal(calls['inquiryMessage.updateMany'][0].where.recipientUserId, 10);
   assert.deepEqual(calls['inquiryMessage.updateMany'][0].where.id, { in: [1] });
+  assert.ok(messages[0].readAt instanceof Date);
 });
 
 test('getInquiryStats: CUSTOMER_USER without an AccessProfile is scoped to its own inquiries', async () => {
