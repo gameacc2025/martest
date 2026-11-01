@@ -177,6 +177,19 @@ const EVENT_CATALOG = {
     }),
   },
 
+  INQUIRY_RESPONSE_WITHDRAWN: {
+    key: 'INQUIRY_RESPONSE_WITHDRAWN',
+    label: 'انصراف از پاسخ استعلام',
+    recipients: 'The inquiry owner whose supplier response was withdrawn',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    // Do not include supplier identity: withdrawal may occur on sealed RFQs.
+    template: ({ inquiry, response }) => ({
+      title: 'انصراف از پاسخ استعلام',
+      message: `یکی از شرکت‌ها از پاسخ خود برای استعلام «${inquiry?.title || inquiry?.id || ''}» انصراف داد.`,
+      data: { inquiryId: inquiry?.id, responseId: response?.id },
+    }),
+  },
+
   INQUIRY_RESPONSE_AUTO_REJECTED: {
     key: 'INQUIRY_RESPONSE_AUTO_REJECTED',
     label: 'رد خودکار پاسخ استعلام',
