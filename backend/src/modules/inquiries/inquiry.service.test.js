@@ -2385,3 +2385,124 @@ test('createInquiry: enforced Website quota is charged to the authenticated cust
   assert.equal(smsUsageEvents[0].usageType, 'INQUIRY_CREATE');
   assert.equal(smsUsageEvents[0].referenceId, '7');
 });
+
+
+// ── Step 16Y: adversarial inquiry data-isolation regressions ──
+
+test('listInquiries rejects an unknown scope instead of returning an unscoped list', async () => {
+  resetMocks();
+  for (const caller of [
+    buyer,
+    { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] },
+    { id: 78, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] },
+  ]) {
+    await assert.rejects(
+      () => inquiryService.listInquiries({ scope: 'everything' }, caller),
+      (error) => error.statusCode === 400 && error.code === 'INVALID_INQUIRY_SCOPE',
+    );
+  }
+  assert.equal(calls.count.length, 0);
+  assert.equal(calls.findMany.length, 0);
+});
+
+test('getInquiryStats: company received aggregates exclude drafts and future-published inquiries', async () => {
+  resetMocks();
+  queues.inquiryGroupBy = [[], []];
+  queues.responseGroupBy = [[]];
+
+  await inquiryService.getInquiryStats(buyer);
+
+  const receivedWhere = calls.groupBy[1].where;
+  assert.ok(receivedWhere.AND.some((clause) => clause.items?.some?.product?.companyId === buyer.companyId));
+  assert.deepEqual(receivedWhere.AND.find((clause) => clause.status)?.status.in, [
+    'SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED',
+  ]);
+  const publication = receivedWhere.AND.find((clause) => Array.isArray(clause.OR));
+  assert.deepEqual(publication.OR[0], { publishDate: null });
+  assert.ok(publication.OR[1].publishDate.lte instanceof Date);
+  assert.deepEqual(calls.count[1].where, receivedWhere);
+});
+
+test('listInquiryMessages: buyer cannot read sealed conversations before response reveal', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'SEALED', status: 'OPEN', revealedAt: null,
+    responseDeadline: new Date(Date.now() + 60_000),
+  };
+  const messages = await inquiryService.listInquiryMessages(1, buyer);
+  assert.deepEqual(messages, []);
+  assert.equal(calls['inquiryMessage.findMany'], undefined);
+  assert.equal(calls['inquiryMessage.updateMany'], undefined);
+});
+
+test('listInquiryMessages: anonymous sealed buyer view redacts supplier identities and still marks received messages read', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'ANONYMOUS_SEALED', status: 'CLOSED',
+    revealedAt: new Date(), responseDeadline: new Date(Date.now() - 60_000),
+  };
+  nextMessages = [
+    {
+      id: 1, senderCompanyId: seller.companyId, recipientCompanyId: buyer.companyId,
+      senderCompany: { id: seller.companyId, name: 'Secret supplier' },
+      recipientCompany: { id: buyer.companyId, name: 'Buyer company' }, readAt: null,
+    },
+    {
+      id: 2, senderCompanyId: buyer.companyId, recipientCompanyId: seller.companyId,
+      senderCompany: { id: buyer.companyId, name: 'Buyer company' },
+      recipientCompany: { id: seller.companyId, name: 'Secret supplier' }, readAt: new Date(),
+    },
+  ];
+
+  const messages = await inquiryService.listInquiryMessages(1, buyer);
+
+  assert.equal(messages[0].senderCompany.name, 'پیشنهاددهنده 1');
+  assert.equal(messages[0].senderCompany.id, undefined);
+  assert.equal(messages[0].senderCompanyId, undefined);
+  assert.equal(messages[0].recipientCompanyId, buyer.companyId);
+  assert.ok(messages[0].readAt instanceof Date);
+  assert.equal(messages[1].senderCompany.name, 'Buyer company');
+  assert.equal(messages[1].senderCompanyId, buyer.companyId);
+  assert.equal(messages[1].recipientCompany.name, 'پیشنهاددهنده 1');
+  assert.equal(messages[1].recipientCompany.id, undefined);
+  assert.equal(messages[1].recipientCompanyId, undefined);
+  assert.deepEqual(calls['inquiryMessage.updateMany'][0].where.id, { in: [1] });
+});
+
+test('sendInquiryMessage: sealed inquiry parties cannot start a conversation before reveal', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 1, title: 'Sealed RFQ', companyId: buyer.companyId, buyerUserId: null,
+    status: 'OPEN', visibilityMode: 'SEALED', revealedAt: null,
+    responseDeadline: new Date(Date.now() + 60_000),
+  };
+
+  await assert.rejects(
+    () => inquiryService.sendInquiryMessage(1, { message: 'Hello', recipientCompanyId: seller.companyId }, buyer),
+    (error) => error.statusCode === 409 && error.code === 'INQUIRY_RESPONSES_HIDDEN',
+  );
+  await assert.rejects(
+    () => inquiryService.sendInquiryMessage(1, { message: 'Need clarification' }, seller),
+    (error) => error.statusCode === 409 && error.code === 'INQUIRY_RESPONSES_HIDDEN',
+  );
+  assert.equal(calls['inquiryResponse.findFirst'], undefined);
+  assert.equal(calls['inquiryMessage.create'], undefined);
+});
+
+test('sendInquiryMessage: anonymous sealed buyer cannot probe supplier IDs or start a direct identity-revealing thread', async () => {
+  resetMocks();
+  nextFindUnique = {
+    id: 1, title: 'Anonymous RFQ', companyId: buyer.companyId, buyerUserId: null,
+    status: 'CLOSED', visibilityMode: 'ANONYMOUS_SEALED',
+    revealedAt: new Date(), responseDeadline: new Date(Date.now() - 60_000),
+  };
+
+  await assert.rejects(
+    () => inquiryService.sendInquiryMessage(1, { message: 'Hello', recipientCompanyId: seller.companyId }, buyer),
+    (error) => error.statusCode === 409 && error.code === 'ANONYMOUS_INQUIRY_CONTACT_UNAVAILABLE',
+  );
+  assert.equal(calls['inquiryResponse.findFirst'], undefined);
+  assert.equal(calls['inquiryMessage.create'], undefined);
+});
