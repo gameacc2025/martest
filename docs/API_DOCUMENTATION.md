@@ -406,3 +406,9 @@ OpenAPI is emitted as version 3.0.3, so fixed-value response discriminators use 
 ## Generated OpenAPI integration verification — step 16M merged (2026-11-01)
 
 PR #65 merged at `5cdb8e81acdf679bf60e36c2c36dec118e118156`. CI and Prisma migration validation passed. The actual `/docs/json` output is integration-tested for authentication/RBAC error unions, Fastify-native 429, sanitized payment 502/503 on only the relevant endpoints, and 204 responses without content. Explicit route-doc response definitions take precedence over generated defaults. Fixed-value schema constraints use OpenAPI 3.0-compatible single-value enums.
+
+
+## Inquiry status and notification recipient boundaries — 2026-11-01
+
+- Terminal inquiry transitions notify the owner and unique companies with non-withdrawn responses; publication uses `INQUIRY_PUBLISHED`.
+- Notification dispatcher company descriptors resolve only active COMPANY access profiles (`type=COMPANY`, `isActive=true`) and active users. STAFF accounts sharing the platform Main-company ID are excluded from company-private notifications.
