@@ -1079,3 +1079,6 @@ PR #79 squash-merged into `main` at `37b06e17e98b156da29e8afe28492bbec3aa1992`.
 
 - Additional response-payload audit found `updateResponse` included `inquiry: true`, returning the raw parent inquiry (including buyer identifiers) to suppliers. Removed that include and asserted the response-update payload omits the inquiry record.
 - Attachment storage/display extensions are now derived from the allowlisted MIME type rather than trusting the client filename extension; display names strip control characters and path components.
+
+- Inquiry detail (`GET /inquiries/:id`) now includes response attachment metadata and transforms every stored key into the authenticated download endpoint; sealed visibility and anonymous filename redaction are applied by the same caller-specific response shaper. This is required by both Company/Admin detail views, which render attachments from `inquiry.responses`.
+- Removed the raw parent `inquiry:true` include from supplier response updates; the buyer identifiers are no longer returned. Attachment extensions are derived from allowlisted MIME types and legacy download filenames are normalized.
