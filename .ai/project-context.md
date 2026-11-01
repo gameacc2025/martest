@@ -771,3 +771,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Recipient resolution is explicit: active Website buyer user, or active users with `AccessProfile.type=COMPANY` and `isActive=true` for the recipient company. Do not resolve only by companyId because STAFF accounts can share the platform Main-company ID.
 - Dedupe key must include both message ID and recipient user ID because notification delivery uniqueness is `(eventType, dedupeKey, channel)` and company conversations can notify multiple members.
 - Paid SMS is a separate opt-in, quota-enforced custom delivery path; central notification dispatch does not implement SMS.
+
+
+## Inquiry message notifications — 2026-11-01
+
+- New internal inquiry messages dispatch `INQUIRY_MESSAGE_RECEIVED` within the message transaction, after `INTERNAL_MESSAGE` usage consumption. Event defaults are IN_APP + EMAIL enabled and SMS disabled/opt-in.
+- Recipients: active Website buyer user, or active COMPANY access-profile members for the recipient company. Do not use companyId-only recipient resolution because STAFF users may share the platform Main-company ID.
+- Dedupe key includes message ID and recipient user ID. Paid SMS remains a separate custom outbox/quota path.
