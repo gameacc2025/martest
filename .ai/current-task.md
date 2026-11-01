@@ -728,3 +728,19 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 
 
 - A subsequent CI run passed the static error-contract tests but the generated-spec test had the same test-only issue: enum arrays were still checked with `assert.equal`. Converted generated-spec enum assertions to `assert.deepEqual` as well. No runtime/API behavior changed. CI rerun pending.
+
+
+## Generated OpenAPI integration verification — step 16M merged (2026-11-01)
+
+PR #65 squash-merged into `main` at `5cdb8e81acdf679bf60e36c2c36dec118e118156`.
+
+- CI [41270193698] passed. Database migration validation [41270193682] passed. Runtime validation [41270193677] was a separate workflow and was still running at merge time; it is not claimed as passed.
+- Generated `/docs/json` integration test now verifies actual transformed auth/RBAC 401/403 unions, native Fastify 429, 500 union, route-specific payment 502/503, and 204 no-content behavior.
+- Fixed Swagger response merge precedence so explicit audited route docs override generated/default response schemas while registered route schemas remain fallback.
+- Fixed OpenAPI 3.0.3 fixed-value constraints by using single-value `enum` instead of unsupported `const`. Structural and generated-spec tests pass.
+
+## Next active work — step 16N inquiry flow completion audit
+
+- Audit end-to-end inquiry creation, item mutation, visibility/reveal rules, supplier eligibility, response submit/update/withdraw/decision, messages, attachments, subscription/quota enforcement and notification/SMS effects against service/controller code and existing tests.
+- Prioritize concrete authorization, ownership, sealed/anonymous disclosure and quota bypass gaps. Keep STAFF moderation distinct from supplier participation; require COMPANY/CUSTOMER context and explicit `inquiries.create` / `inquiries.respond` permissions where appropriate.
+- Add missing unit/integration tests and fix only verified defects; do not change intended business policy without evidence. Update `.ai` and API docs; run CI/migration validation and merge each completed slice.
