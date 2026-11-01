@@ -957,3 +957,5 @@ PR #75 squash-merged into `main` at `d2570f1abcda54cc369f7ca553fd58da333ba904`.
 - Preserved existing saved drafts: restore logic discards the unsupported targetCompanyIds field and maps the old six-step wizard indices to the new five-step flow so users do not lose other draft data or land on the wrong step.
 - Strengthened lifecycle worker test to assert exact publication audience (product-owning companies + authorized STAFF permission recipients), transactional dispatch and dedupe keys.
 - Branch: `fix/admin-inquiry-target-company-noop-step-16w`. CI pending.
+
+- First CI build caught a Vue template adjacency issue: the new explanatory Message had been inserted between the product-empty `v-if` and table `v-else`. Moved the Message after the DataTable so the conditional pair remains adjacent; rerunning CI for the corrected head.
