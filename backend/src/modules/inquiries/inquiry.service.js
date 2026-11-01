@@ -1305,6 +1305,27 @@ async function sendInquiryMessage(inquiryId, data, caller) {
       ownerType, ownerId, usageType: 'INTERNAL_MESSAGE',
       referenceType: 'InquiryMessage', referenceId: createdMessage.id, tx,
     });
+
+    // Notify only the actual recipient: a Website buyer user, or active users
+    // whose access context is COMPANY for the responding/buyer company. Do not
+    // resolve by companyId alone because STAFF accounts may share the platform
+    // Main-company id and must never receive supplier conversation messages.
+    const notificationRecipients = await tx.user.findMany({
+      where: recipientUserId
+        ? { id: recipientUserId, status: 'ACTIVE' }
+        : {
+          status: 'ACTIVE',
+          accessProfile: { companyId: recipientCompanyId, type: 'COMPANY', isActive: true },
+        },
+      select: { id: true },
+    });
+    await dispatchNotification(
+      'INQUIRY_MESSAGE_RECEIVED',
+      notificationRecipients.map((recipient) => recipient.id),
+      { inquiry: { id: inquiry.id, title: inquiry.title } },
+      { tx, dedupeKey: `inquiry-message-${createdMessage.id}` },
+    );
+
     let smsQueued = false;
     let smsSkippedReason = null;
     if (data.notifyBySms === true) {
