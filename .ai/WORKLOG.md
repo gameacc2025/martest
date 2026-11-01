@@ -1828,3 +1828,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added `INQUIRY_RESPONSE_WITHDRAWN` with IN_APP/EMAIL defaults and generic supplier wording so SEALED/ANONYMOUS_SEALED supplier identity is never disclosed.
 - Dispatches within the same transaction as the response update, to active Website buyer user or active COMPANY access-profile members only. Excludes STAFF sharing Main-company ID; dedupe key includes response ID and recipient user ID.
 - Added company/user owner service tests and event template anonymous-safety test. CI pending.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-WITHDRAW-NOTIFICATION-STEP-16R-MERGE
+
+- PR #70 squash-merged at `f2c957a2de1e8e8f5f0cdbc9fd552b912cd59ef7`.
+- CI [41271249036] and migration validation [41271248977] passed. Runtime [41271249049] remained a separate workflow/in progress at merge.
+- Added `INQUIRY_RESPONSE_WITHDRAWN`, default IN_APP + EMAIL, anonymous-safe wording and inquiry/response deep-link data only.
+- Withdrawal dispatch is in the same transaction as status update and targets active Website buyer or active COMPANY access-profile members; excludes STAFF sharing Main-company ID; per-recipient dedupe.
+- Next: audit status transition notification coverage for buyer cancellation and other inquiry lifecycle actions.
