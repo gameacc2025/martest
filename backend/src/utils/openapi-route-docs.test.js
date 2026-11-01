@@ -171,6 +171,14 @@ test('product history and inquiry conversation response contracts match service 
   assert.ok(attachment.filename);
 });
 
+test('response attachment download is an authenticated binary response', () => {
+  const download = docs['GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download'];
+  assert.ok(download);
+  assert.equal(download.responses[200].type, 'string');
+  assert.equal(download.responses[200].format, 'binary');
+  assert.deepEqual(download.params.required, ['id', 'responseId', 'attachmentId']);
+});
+
 test('every entry has a non-empty summary, description, and tags array', () => {
   for (const [key, entry] of Object.entries(docs)) {
     assert.equal(typeof entry.summary, 'string', `${key}: summary must be a string`);
