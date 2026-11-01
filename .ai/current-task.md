@@ -976,3 +976,12 @@ PR #76 squash-merged into `main` at `71063c219c2d641c7eee8a85e7b89a66dc03d7cb`.
 - Compare company and Website reveal-button visibility with backend `revealInquiryResponses` rules. Server permits buyer reveal when early reveal is enabled, or after the deadline, or after the inquiry is closed; verify whether `responsesHidden` already captures all automatic reveal conditions.
 - Ensure the UI exposes the reveal action whenever the server would permit it and hides it when already revealed or not a sealed inquiry. Preserve buyer ownership checks and STAFF moderation policy.
 - Add pure/composable UI logic tests plus service boundary tests if a real mismatch is found; update docs/.ai, CI and merge.
+
+
+## Inquiry response action UI/RBAC audit — step 16X (2026-11-01)
+
+- Sealed response reveal UI was checked against `areResponsesRevealed` and `revealInquiryResponses`: response lists automatically unhide after deadline or terminal inquiry status; explicit reveal button is correctly reserved for early reveal while responses are still hidden. No change required.
+- Found admin InquiryDetail exposed supplier create/edit/withdraw controls to STAFF/SUPER_ADMIN even though backend routes require `AccessProfile.type=COMPANY`; these actions would fail with 403. Added an explicit COMPANY access-context guard for every supplier response action in admin detail.
+- Found company detail allowed `canCreateResponse` again when an existing response was WITHDRAWN, but backend `submitResponse` intentionally returns `409 RESPONSE_ALREADY_EXISTS` for any existing row, including WITHDRAWN. Aligned UI to disallow resubmission and added a clear notice after withdrawal.
+- Added pure unit tests for COMPANY-only admin supplier actions and company response eligibility; added backend regression test for withdrawn duplicate response conflict.
+- Branch: `fix/inquiry-response-action-rbac-step-16x`. CI pending.
