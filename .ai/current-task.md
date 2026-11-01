@@ -779,3 +779,10 @@ PR #67 squash-merged into `main` at `8ec294c6ca41c64ddfbdf5acabd17e0b4debea12`. 
 
 - Audit message send/read state, supplier response decisions, withdraw/update and inquiry status changes for race windows, duplicate side effects, missing idempotency, and transactional notification consistency.
 - Prioritize any verified issue with business impact; preserve current role/ownership/visibility rules. Add focused regression tests and update docs before CI/migration validation and merge.
+
+
+## Inquiry message read-state race — step 16P (in progress, 2026-11-01)
+
+- Found a concrete read-state bug in `listInquiryMessages`: after fetching at most 500 rows, it updated every unread message for that recipient in the inquiry. Messages beyond the returned page or arriving after the SELECT could be marked read without ever being returned to the caller.
+- Fixed by collecting unread recipient message IDs from the fetched result and updating only those IDs, still scoped by inquiry/recipient/readAt-null. Returned message objects now include the readAt timestamp written by this request.
+- Updated COMPANY and AccessProfile-less CUSTOMER tests to verify recipient-only updates, exact ID scoping and returned readAt values. CI pending.

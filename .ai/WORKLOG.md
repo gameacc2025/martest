@@ -1787,3 +1787,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed race in attachment cap check: uploads now pre-validate, write file outside lock, lock parent Inquiry, re-check response ownership/editability, count and insert in a transaction. On any locked validation/cap/DB failure, remove prewritten file.
 - Tests assert lock-before-count/create ordering and file cleanup after cap rejection. Existing attachment type, size, ownership, status and insert-failure cleanup tests retained.
 - Next: step 16P audit message/read and response/inquiry lifecycle transaction races and duplicate notification effects.
+
+
+## 2026-11-01 — INQUIRY-MESSAGE-READ-RACE-STEP-16P
+
+- `listInquiryMessages` fetched up to 500 messages but then updated all unread recipient messages in the inquiry. This could mark rows beyond the returned result or a message arriving after the SELECT as read before the user received it.
+- Changed read marking to update only unread recipient message IDs included in the fetched result, with inquiry, recipient and readAt-null predicates. The returned objects now reflect the new readAt timestamp.
+- Updated COMPANY and AccessProfile-less CUSTOMER service tests for ID-scoped updates and returned read state. CI pending.
