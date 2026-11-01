@@ -1,3 +1,4 @@
+const fs = require('fs');
 const inquiryService = require('./inquiry.service');
 const { getQuotaSummary, listActivePlans, getMySubscriptions } = require('./inquiry-subscription.service');
 const { startSubscriptionPayment, handleSubscriptionPaymentCallback, retryPendingSubscriptionVerification } = require('./inquiry-payment.service');
@@ -221,6 +222,21 @@ async function uploadResponseAttachment(request, reply) {
   return reply.code(201).send(success(attachment));
 }
 
+async function downloadResponseAttachment(request, reply) {
+  const attachment = await inquiryService.getResponseAttachment(
+    request.params.id,
+    request.params.responseId,
+    request.params.attachmentId,
+    request.user,
+  );
+  return reply
+    .type(attachment.mimetype)
+    .header('Content-Disposition', "attachment; filename*=UTF-8''" + encodeURIComponent(attachment.filename))
+    .header('Content-Length', attachment.size)
+    .header('X-Content-Type-Options', 'nosniff')
+    .send(fs.createReadStream(attachment.path));
+}
+
 async function deleteResponseAttachment(request, reply) {
   await inquiryService.deleteResponseAttachment(
     request.params.id,
@@ -261,6 +277,7 @@ module.exports = {
   decideResponse,
   withdrawResponse,
   uploadResponseAttachment,
+  downloadResponseAttachment,
   deleteResponseAttachment,
 };
 
