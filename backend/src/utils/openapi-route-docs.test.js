@@ -680,21 +680,21 @@ test('auth sessions, notification preferences and lifecycle response envelopes m
 test('shared error response docs match central, auth/RBAC and native rate-limit envelopes', () => {
   const authFailure = docs['POST /api/v1/auth/refresh'].responses[401];
   assert.equal(authFailure.oneOf[0].$ref, '#/components/schemas/ErrorResponse');
-  assert.equal(authFailure.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(authFailure.oneOf[1].properties.error.enum, [true]);
   assert.deepEqual(authFailure.oneOf[1].required, ['error', 'message']);
 
   const forbidden = docs['GET /api/v1/users'].responses[403];
   assert.equal(forbidden.oneOf[0].$ref, '#/components/schemas/ErrorResponse');
-  assert.equal(forbidden.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(forbidden.oneOf[1].properties.error.enum, [true]);
 
   const rateLimit = docs['POST /api/v1/auth/login'].responses[429];
-  assert.equal(rateLimit.properties.statusCode.enum, [429]);
-  assert.equal(rateLimit.properties.error.enum, ['Too Many Requests']);
+  assert.deepEqual(rateLimit.properties.statusCode.enum, [429]);
+  assert.deepEqual(rateLimit.properties.error.enum, ['Too Many Requests']);
   assert.ok(rateLimit.properties.message);
 
   const internal = docs['POST /api/v1/auth/refresh'].responses[500];
   assert.equal(internal.oneOf[0].$ref, '#/components/schemas/ErrorResponse');
-  assert.equal(internal.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(internal.oneOf[1].properties.error.enum, [true]);
 
   // Only the inquiry payment routes with controller-level allow-list handling
   // expose sanitized provider statuses; other routes retain generic 500.
