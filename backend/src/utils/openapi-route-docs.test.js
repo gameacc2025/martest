@@ -44,7 +44,7 @@ test('every registered API route has a dedicated OpenAPI route-doc entry', () =>
   const documentedKeys = new Set(Object.keys(docs));
   const missing = registeredKeys.filter((key) => !documentedKeys.has(key));
 
-  assert.equal(registeredKeys.length, 149, 'update the expected route count when the inventory changes');
+  assert.equal(registeredKeys.length, 150, 'update the expected route count when the inventory changes');
   assert.deepEqual(missing, [], 'every registered route must have dedicated OpenAPI metadata');
 });
 
