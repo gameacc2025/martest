@@ -1837,3 +1837,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added `INQUIRY_RESPONSE_WITHDRAWN`, default IN_APP + EMAIL, anonymous-safe wording and inquiry/response deep-link data only.
 - Withdrawal dispatch is in the same transaction as status update and targets active Website buyer or active COMPANY access-profile members; excludes STAFF sharing Main-company ID; per-recipient dedupe.
 - Next: audit status transition notification coverage for buyer cancellation and other inquiry lifecycle actions.
+
+
+## 2026-11-01 — INQUIRY-STATUS-NOTIFICATION-STEP-16S
+
+- Audited `changeInquiryStatus`: terminal status changes notify the owner and unique responding companies; OPEN dispatches `INQUIRY_PUBLISHED`. Added test for owner plus unique responder recipients and per-company dedupe keys.
+- Found `notification.dispatch.service.resolveRecipients({companyIds})` only filtered `user.status=ACTIVE` and `accessProfile.companyId`; it could include STAFF accounts sharing Main-company ID. Tightened both companyIds and roles+companyId descriptors to require `accessProfile.type='COMPANY'` and `isActive=true` in addition to active user status.
+- Updated resolver tests and code comments. CI pending.
