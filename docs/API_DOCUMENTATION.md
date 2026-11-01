@@ -515,3 +515,6 @@ PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`. CI passed 1,432 bac
 - Private response files are persisted outside the public static tree. Production Compose mounts `inquiry_private_uploads` at `/app/private-uploads`; development uses the backend bind mount. The private directory is ignored by Git.
 
 - Supplier response updates return only the response projection; the parent inquiry record and buyer identity fields are not part of the response payload. Attachment display names and physical extensions are sanitized and derived from the allowlisted MIME type.
+
+- `GET /api/v1/inquiries/:id` includes attachment metadata for only the responses visible to the caller. Each attachment `url` is the authenticated `/api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download` endpoint; internal filesystem keys are never returned. SEALED pre-reveal and ANONYMOUS_SEALED redaction rules apply to detail responses as well as the dedicated response list.
+- Supplier response update returns only the response projection, not the raw inquiry record or buyer identity fields.
