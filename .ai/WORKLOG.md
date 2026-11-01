@@ -1741,3 +1741,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 - After response merge precedence correction, CI showed the generated spec still did not expose expected `const` fields. Root cause: OpenAPI 3.0.3 does not support JSON Schema `const`; the Swagger serializer drops those keywords.
 - Converted step 16J error schema discriminators from `const` to single-value `enum` (`error: [true]`, `statusCode: [429]`, `error: ['Too Many Requests']`). Updated route-doc static tests and generated `/docs/json` integration assertions.
 - Route-doc precedence fix retained: explicit audited route responses override generated defaults; registered handler schemas remain fallback. CI/migration validation pending.
+
+
+- Follow-up CI confirmed generated `/docs/json` assertions now pass after replacing unsupported `const` with OAS 3.0 enums. One static test then failed because an enum array was compared using strict scalar equality; changed all five enum-array assertions to `deepEqual`. CI rerun pending.
