@@ -5,6 +5,7 @@ import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { inquiriesApi, API_BASE_URL } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
+import { canUseSupplierResponseActions as isSupplierAccessContext } from './inquiryResponsePermissions.js'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
 import Card from 'primevue/card'
@@ -55,6 +56,7 @@ const responseStatusSeverity = {
 // Current user's company id — sourced from the accessProfile (the single
 // source of company context now that `user` is identity-only).
 const myCompanyId = computed(() => Number(auth.companyId) || null)
+const canManageSupplierResponses = computed(() => isSupplierAccessContext(auth.accessType))
 
 const isSuperAdmin = computed(() => auth.isSuperAdmin)
 
@@ -76,14 +78,14 @@ const myResponse = computed(() => {
 // Can this company create a new response? Open, before deadline, no existing
 // active response, and not the buyer themselves.
 const canCreateResponse = computed(() => {
-  if (!isOpen.value || deadlinePassed.value) return false
+  if (!canManageSupplierResponses.value || !isOpen.value || deadlinePassed.value) return false
   if (inquiry.value?.company?.id === myCompanyId.value) return false
-  const existing = myResponse.value
-  return !existing || existing.status === 'WITHDRAWN'
+  return !myResponse.value
 })
 
 function canEditResponse(response) {
   return (
+    canManageSupplierResponses.value &&
     isOpen.value &&
     !deadlinePassed.value &&
     inquiry.value?.allowEditResponse &&
@@ -93,6 +95,7 @@ function canEditResponse(response) {
 
 function canWithdrawResponse(response) {
   return (
+    canManageSupplierResponses.value &&
     isOpen.value &&
     !deadlinePassed.value &&
     inquiry.value?.allowWithdrawResponse &&
@@ -101,7 +104,7 @@ function canWithdrawResponse(response) {
 }
 
 function isMyResponse(response) {
-  return myCompanyId.value && response.company?.id === myCompanyId.value
+  return canManageSupplierResponses.value && myCompanyId.value && response.company?.id === myCompanyId.value
 }
 
 onMounted(() => {
@@ -364,7 +367,7 @@ function formatPrice(price) {
                 />
                 <Tag v-if="isMyResponse(response)" value="پاسخ شما" severity="contrast" />
               </div>
-              <div class="response-actions" v-if="isMyResponse(response) || isSuperAdmin">
+              <div class="response-actions" v-if="isMyResponse(response)">
                 <Button
                   v-if="canEditResponse(response)"
                   label="ویرایش" icon="pi pi-pencil" size="small" text

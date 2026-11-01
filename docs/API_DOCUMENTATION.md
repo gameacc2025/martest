@@ -466,3 +466,9 @@ PR #75 merged at `d2570f1abcda54cc369f7ca553fd58da333ba904`. CI passed 225 front
 ### Verification — step 16W merged (2026-11-01)
 
 PR #76 merged at `71063c219c2d641c7eee8a85e7b89a66dc03d7cb`. CI passed 225 frontend tests across 31 files, 18 root Node tests and 1,418 backend tests; all frontend builds and Prisma migration validation passed. Runtime validation was separate and not used as a merge gate.
+
+
+## Supplier response ownership and withdrawal semantics — 2026-11-01
+
+- Supplier response create/edit/withdraw/upload actions are COMPANY-context operations. STAFF (including SUPER_ADMIN in STAFF context) may supervise inquiry records but cannot submit or mutate supplier quotes.
+- A company may have one response row per inquiry. Withdrawing changes that row to `WITHDRAWN`; it does not free the unique `(inquiryId, companyId)` slot. A second submission is rejected with `409 RESPONSE_ALREADY_EXISTS`, including when the prior row is withdrawn. The company UI now reflects this and does not offer a misleading resubmit action.

@@ -1918,3 +1918,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - CI [41284849375] passed: 31 frontend test files / 225 tests, 18 root Node tests, backend 1,418/1,418 and all builds. Migration validation [41284849374] passed. Runtime [41284757025] was separate and not used as a merge gate.
 - Removed unsupported admin targetCompanyIds selection and replaced it with the actual product-owner publication audience explanation. Old drafts map to the five-step wizard and discard the non-API field.
 - Next: audit sealed response reveal UI against backend deadline/closed/early-reveal rules.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-ACTION-RBAC-STEP-16X
+
+- Verified sealed reveal parity: automatic reveal after deadline/terminal status is represented by `responsesHidden=false`; early reveal action is correctly shown only when allowEarlyReveal is enabled and responses remain hidden.
+- Fixed admin InquiryDetail supplier action visibility: create/edit/withdraw actions now require COMPANY access context, matching `SUPPLIER_TYPES` route guards. STAFF and SUPER_ADMIN can supervise but cannot act as suppliers.
+- Fixed company response CTA mismatch: a WITHDRAWN response still occupies the unique (inquiryId, companyId) row and backend returns 409 on resubmit. UI no longer offers a second submission and explains why.
+- Added unit tests for the two frontend permission/eligibility helpers and backend test for withdrawn duplicate response.
+- CI pending.
