@@ -231,6 +231,7 @@ All routes inherit bearer authentication except the public Zarinpal callback; pr
 | PATCH | `/api/v1/inquiries/:id/responses/:responseId` | `requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')` |
 | POST | `/api/v1/inquiries/:id/responses/:responseId/withdraw` | `requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')` |
 | POST | `/api/v1/inquiries/:id/responses/:responseId/attachments` | `requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')` |
+| GET | `/api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download` | `requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.respond'); service checks buyer/supplier response visibility` |
 | DELETE | `/api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId` | `requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')` |
 
 ### notifications — `/api/v1/settings/notifications`
