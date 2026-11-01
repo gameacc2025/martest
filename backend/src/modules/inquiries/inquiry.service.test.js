@@ -1697,6 +1697,23 @@ test('withdrawResponse: a non-pending response is rejected', async () => {
 
 // ── Response attachments (real file I/O into backend/uploads) ─
 
+test('uploadResponseAttachment: stored extension follows the allowlisted MIME type, not the client filename', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry();
+  fx.response = { id: 50, status: 'PENDING' };
+
+  const attachment = await inquiryService.uploadResponseAttachment(
+    1, 50, makeFile({ filename: '../../Secret-Quote.html', mimetype: 'application/pdf' }), seller,
+  );
+
+  assert.equal(attachment.filename, 'Secret-Quote.pdf');
+  const storageKey = calls['inquiryResponseAttachment.create'][0].data.url;
+  assert.match(storageKey, /^private:\/\/inquiries\/responses\/[a-zA-Z0-9_-]+\.pdf$/);
+  const storedPath = path.join(attachmentDir, storageKey.split('/').pop());
+  assert.ok(fs.existsSync(storedPath));
+  fs.rmSync(storedPath, { force: true });
+});
+
 test('uploadResponseAttachment: stores the file and writes the row', async () => {
   resetMocks();
   nextFindUnique = openInquiry();
