@@ -226,3 +226,51 @@ test('swagger plugin: OpenAPI spec has /api/v1 server', async () => {
   );
   await app.close();
 });
+
+
+test('swagger plugin: generated payment and lifecycle routes preserve audited error/status contracts', async () => {
+  const app = Fastify();
+  await app.register(swaggerPlugin);
+
+  app.post('/api/v1/inquiries/subscription', {
+    schema: { summary: 'Request inquiry subscription', tags: ['Inquiries'] },
+  }, async () => ({ data: {} }));
+  app.post('/api/v1/inquiries/subscription/:id/verify-payment', {
+    schema: { summary: 'Retry inquiry payment verification', tags: ['Inquiries'] },
+  }, async () => ({ data: {} }));
+  app.get('/api/v1/inquiries/subscription/payment/callback', {
+    schema: { summary: 'Payment callback', tags: ['Inquiries'] },
+  }, async () => ({ ok: true }));
+  app.get('/api/v1/inquiries/subscription/me', {
+    schema: { summary: 'Current inquiry subscription', tags: ['Inquiries'] },
+  }, async () => ({ data: {} }));
+  app.delete('/api/v1/products/:id', {
+    schema: { summary: 'Delete managed product', tags: ['Products'] },
+  }, async (_request, reply) => reply.code(204).send());
+
+  await app.ready();
+  const spec = (await app.inject({ method: 'GET', url: '/docs/json' })).json();
+
+  const create = spec.paths['/inquiries/subscription'].post;
+  assert.equal(create.responses['502'].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
+  assert.deepEqual(create.responses['401'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(create.responses['403'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(create.responses['429'].content['application/json'].schema.properties.statusCode.enum, [429]);
+  assert.deepEqual(create.responses['500'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
+
+  const retry = spec.paths['/inquiries/subscription/{id}/verify-payment'].post;
+  assert.equal(retry.responses['503'].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
+
+  const callback = spec.paths['/inquiries/subscription/payment/callback'].get;
+  assert.equal(callback.responses['503'].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
+
+  const mine = spec.paths['/inquiries/subscription/me'].get;
+  assert.equal(mine.responses['502'], undefined);
+  assert.equal(mine.responses['503'], undefined);
+
+  const removeProduct = spec.paths['/products/{id}'].delete;
+  assert.ok(removeProduct.responses['204']);
+  assert.equal(removeProduct.responses['204'].content, undefined);
+  await app.close();
+});
+

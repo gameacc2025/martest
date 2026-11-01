@@ -694,3 +694,37 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 - Add an integration test against `/docs/json` for actual registered auth, notification, inquiry payment and lifecycle routes (not only the static route-doc registry).
 - Assert generated OpenAPI preserves route-level 401/403 oneOf, native 429, 500 variants, payment 502/503 only on relevant routes, and 204 no-content semantics.
 - Ensure security schemes and route path normalization are correct; CI/migration validation and merge. Then continue remaining Inquiry flow test/feature gaps from project roadmap.
+
+
+## Generated OpenAPI integration verification — step 16M (in progress, 2026-10-31)
+
+- Branch: `test/openapi-generated-spec-step-16M`.
+- Added a Swagger `/docs/json` integration test that registers inquiry subscription creation, retry verification, public payment callback and product soft-delete routes, then asserts generated 401/403/429/500 variants, route-specific 502/503 and 204 no-content.
+- Existing Swagger integration test separately asserts refresh uses cookieAuth and handoff redeem is non-bearer; static route tests cover notification preferences and all 149 route docs.
+- CI pending.
+
+
+### Step 16M additional finding
+
+- Generated spec test initially exposed that Swagger transform unconditionally overwrote route-doc 401/403/500 response schemas with shared defaults. Updated `swagger.plugin.js` to prefer route-specific error schemas while retaining defaults when no route override exists; corrected the default 429 description to native Fastify behavior.
+- Generated spec integration assertions now exercise the actual transformed output, not only static route docs. CI rerun pending.
+
+
+## Step 16M — generated OpenAPI response precedence fix (2026-11-01)
+
+- CI run [41242121449](https://github.com/gameacc2025/martest/actions/runs/41242121449) exposed a real generated-spec defect: `mergeResponseDocs` merged route-doc responses first and schema-generated responses second, so generated defaults silently overwrote audited 401/403/429/500 route contracts.
+- Corrected precedence: actual registered route schemas remain as fallback, while explicit route-doc response contracts now win. This preserves the audited guard unions, native Fastify 429, payment-only 502/503 and 204 no-content contracts.
+- The integration test at `/docs/json` already reproduced the bug and now verifies the corrected output. Migration validation passed on prior head [41242121332]; CI rerun pending.
+
+
+## Step 16M — OpenAPI 3.0 compatibility correction (2026-11-01)
+
+- First rerun still failed at generated `/docs/json` assertion because OpenAPI 3.0.3 does not support JSON Schema `const`; Swagger serialization dropped the `const` keywords, so the expected discriminator values were absent in the generated spec.
+- Replaced `const` with single-value `enum` for direct auth/RBAC error and native Fastify 429 fields; updated static and generated-spec tests to assert enum arrays. Kept the response merge precedence correction so route docs override generated defaults.
+- CI and migration validation rerun pending.
+
+
+- Follow-up CI caught a test-only assertion mistake: enum arrays were compared with strict scalar equality. Updated those assertions to structural `deepEqual`; generated Swagger integration checks now pass on the preceding attempt, and only the static assertion failed. CI rerun pending.
+
+
+- A subsequent CI run passed the static error-contract tests but the generated-spec test had the same test-only issue: enum arrays were still checked with `assert.equal`. Converted generated-spec enum assertions to `assert.deepEqual` as well. No runtime/API behavior changed. CI rerun pending.

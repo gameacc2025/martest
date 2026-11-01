@@ -2848,7 +2848,7 @@ const step16jGuardErrorResponse = {
       type: 'object',
       required: ['error', 'message'],
       properties: {
-        error: { type: 'boolean', const: true },
+        error: { type: 'boolean', enum: [true] },
         code: { type: 'string' },
         message: { type: 'string' },
       },
@@ -2860,8 +2860,8 @@ const step16jRateLimitErrorResponse = {
   type: 'object',
   required: ['statusCode', 'error', 'message'],
   properties: {
-    statusCode: { type: 'integer', const: 429 },
-    error: { type: 'string', const: 'Too Many Requests' },
+    statusCode: { type: 'integer', enum: [429] },
+    error: { type: 'string', enum: ['Too Many Requests'] },
     message: { type: 'string' },
   },
 };

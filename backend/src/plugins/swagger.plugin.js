@@ -156,7 +156,7 @@ const defaultErrorResponses = {
   404: { description: 'The requested resource was not found.', $ref: '#/components/schemas/ErrorResponse' },
   409: { description: 'The request conflicts with an existing or related record.', $ref: '#/components/schemas/ErrorResponse' },
   413: { description: 'The uploaded file or request payload exceeds the configured size limit.', $ref: '#/components/schemas/ErrorResponse' },
-  429: { description: 'The caller exceeded a per-route or global rate limit. The central error handler wraps it in ErrorResponse.', $ref: '#/components/schemas/ErrorResponse' },
+  429: { description: 'The caller exceeded a per-route or global rate limit. Fastify emits its native `{ statusCode, error, message }` envelope.', $ref: '#/components/schemas/ErrorResponse' },
   500: { description: 'Unexpected server error.', $ref: '#/components/schemas/ErrorResponse' },
 };
 
@@ -179,9 +179,13 @@ function getDoc(method, url) {
 }
 
 function mergeResponseDocs(schemaResponses = {}, docResponses = {}) {
+  // Route documentation is the audited public contract. Keep actual handler
+  // response schemas when no route-doc override exists, but never let a
+  // generated/default schema silently replace a more specific documented
+  // error envelope or status (for example auth/RBAC unions and 204).
   return {
-    ...docResponses,
     ...schemaResponses,
+    ...docResponses,
   };
 }
 
@@ -232,10 +236,10 @@ async function swaggerPlugin(fastify) {
         transformed.consumes = transformed.consumes || doc.consumes;
         transformed.response = mergeResponseDocs(transformed.response, {
           ...(doc.responses || {}),
-          ...(doc.authRequired === false ? {} : { 401: defaultErrorResponses[401] }),
-          ...(doc.permission ? { 403: defaultErrorResponses[403] } : {}),
-          ...(doc.includeNotFound === false ? {} : { 404: defaultErrorResponses[404] }),
-          500: defaultErrorResponses[500],
+          ...(doc.authRequired === false ? {} : { 401: doc.responses?.[401] || defaultErrorResponses[401] }),
+          ...(doc.permission ? { 403: doc.responses?.[403] || defaultErrorResponses[403] } : {}),
+          ...(doc.includeNotFound === false ? {} : { 404: doc.responses?.[404] || defaultErrorResponses[404] }),
+          500: doc.responses?.[500] || defaultErrorResponses[500],
         });
 
         transformed['x-authentication-required'] = doc.authRequired !== false;

@@ -381,3 +381,23 @@ Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/not
 - خطاهای موقت هنگام verify در callback همچنان به نتیجه `pending` و redirect به صفحه نتیجه منتهی می‌شوند؛ callback از query string به‌تنهایی اشتراک را فعال نمی‌کند.
 - پاسخ مستقیم خطا فقط `code` و `message` ثابت/پاک‌سازی‌شده را می‌فرستد؛ بدنه پاسخ درگاه، merchant ID، authority، stack و جزئیات config هرگز forward نمی‌شوند.
 - کدهای ناشناخته یا status/code نامنطبق دوباره throw می‌شوند تا handler مرکزی آن‌ها را به 500 عمومی تبدیل کند. خطای پیکربندی نامعتبر نیز 500 عمومی باقی می‌ماند.
+
+
+## اعتبارسنجی قرارداد تولیدشده Swagger — مرحله ۱۶M (2026-10-31)
+
+- تست integration روی خروجی واقعی `/docs/json` اضافه شده است؛ صرفاً به object ثابت route-doc اعتماد نمی‌کند.
+- مسیرهای خرید اشتراک، بررسی مجدد پرداخت، callback و حذف نرم محصول ثبت می‌شوند و خروجی OpenAPI بررسی می‌شود: 401/403 و 500 با union خطا، 429 native rate-limit، 502/503 فقط در مسیرهای پرداخت مربوط، و 204 بدون content.
+- تست موجود Swagger برای refresh نیز امنیت cookie-based را بررسی می‌کند؛ تست‌های ساختاری route-doc همچنان envelopeهای اعلان و مسیرهای دیگر را پوشش می‌دهند.
+
+
+### نکته پیاده‌سازی Swagger
+
+برای مؤثرشدن schemaهای خطای هر route، transform مربوط به Swagger اکنون پاسخ‌های `401`، `403`، `404` و `500` تعریف‌شده در route-doc را بر پیش‌فرض عمومی مقدم می‌داند. پیش از این، transform در بعضی وضعیت‌ها schema اختصاصی مسیر را دوباره با پیش‌فرض جایگزین می‌کرد و خروجی نهایی `/docs/json` با registry تست‌شده یکسان نبود.
+
+
+### Generated OpenAPI response precedence — 2026-11-01
+
+The Swagger `/docs/json` integration tests verify the final generated contract. When a route has an audited response definition in the route documentation registry, that explicit public contract takes precedence over framework-generated/default response schemas. The registered handler schema remains the fallback for response statuses not explicitly documented. This prevents generic generated errors from replacing route-specific auth/RBAC error unions, native Fastify 429 responses, payment-provider 502/503 contracts, and 204 no-content semantics.
+
+
+OpenAPI is emitted as version 3.0.3, so fixed-value response discriminators use single-value `enum` constraints rather than JSON Schema `const` (which is not part of OpenAPI 3.0 and may be dropped by tooling). The generated `/docs/json` integration tests assert the serialized enum representation.
