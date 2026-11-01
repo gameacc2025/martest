@@ -745,6 +745,9 @@ async function listInquiries(query, caller) {
   const isCustomer = isCustomerContext(caller) && !superAdmin;
   const isStaff = caller?.accessType === 'STAFF' || superAdmin;
   const scope = query.scope || (isStaff ? 'all' : 'sent');
+  if (!['sent', 'received', 'all'].includes(scope)) {
+    throw { statusCode: 400, code: 'INVALID_INQUIRY_SCOPE', message: 'Invalid inquiry list scope.' };
+  }
 
   const where = { AND: [] };
 
@@ -1172,7 +1175,13 @@ async function submitResponse(inquiryId, data, caller) {
 
 async function listInquiryMessages(inquiryId, caller) {
   const numericInquiryId = toPositiveInt(inquiryId, 'id');
-  const inquiry = await prisma.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, companyId: true, buyerUserId: true } });
+  const inquiry = await prisma.inquiry.findUnique({
+    where: { id: numericInquiryId },
+    select: {
+      id: true, companyId: true, buyerUserId: true, visibilityMode: true,
+      status: true, revealedAt: true, responseDeadline: true,
+    },
+  });
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
 
   const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
@@ -1180,6 +1189,10 @@ async function listInquiryMessages(inquiryId, caller) {
   const companyId = caller?.accessType === 'COMPANY' ? Number(caller.companyId) : null;
   const isBuyer = (userId && Number(inquiry.buyerUserId) === userId)
     || (companyId && Number(inquiry.companyId) === companyId);
+
+  if (isBuyer && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+    return [];
+  }
 
   if (!isBuyer && !isStaff) {
     if (!Number.isInteger(companyId) || companyId < 1) {
@@ -1206,6 +1219,9 @@ async function listInquiryMessages(inquiryId, caller) {
     },
   });
   if (isStaff || (!userId && !companyId)) return messages;
+  if (isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED') {
+    return redactAnonymousInquiryMessages(messages, inquiry);
+  }
 
   // Mark only recipient messages included in this response as read. Updating
   // every unread message in the thread here can silently mark messages beyond
@@ -1233,9 +1249,38 @@ async function listInquiryMessages(inquiryId, caller) {
   });
 
   const unreadIdSet = new Set(unreadIds);
-  return messages.map((message) => (
+  const readMessages = messages.map((message) => (
     unreadIdSet.has(message.id) ? { ...message, readAt } : message
   ));
+  if (isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED') {
+    return redactAnonymousInquiryMessages(readMessages, inquiry);
+  }
+  return readMessages;
+}
+
+function redactAnonymousInquiryMessages(messages, inquiry) {
+  const buyerCompanyId = Number(inquiry.companyId) || null;
+  const labels = new Map();
+  const labelFor = (companyId) => {
+    const id = Number(companyId);
+    if (!Number.isInteger(id) || id < 1 || id === buyerCompanyId) return null;
+    if (!labels.has(id)) labels.set(id, `پیشنهاددهنده ${labels.size + 1}`);
+    return labels.get(id);
+  };
+
+  return messages.map((message) => {
+    const safe = { ...message };
+    for (const field of ['senderCompanyId', 'recipientCompanyId']) {
+      const label = labelFor(safe[field]);
+      if (label) delete safe[field];
+    }
+    for (const field of ['senderCompany', 'recipientCompany']) {
+      const company = safe[field];
+      const label = labelFor(company?.id);
+      if (label) safe[field] = { name: label, type: null };
+    }
+    return safe;
+  });
 }
 
 async function sendInquiryMessage(inquiryId, data, caller) {
@@ -1249,7 +1294,7 @@ async function sendInquiryMessage(inquiryId, data, caller) {
   }
 
   return prisma.$transaction(async (tx) => {
-    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, title: true, companyId: true, buyerUserId: true, status: true } });
+    const inquiry = await tx.inquiry.findUnique({ where: { id: numericInquiryId }, select: { id: true, title: true, companyId: true, buyerUserId: true, status: true, visibilityMode: true, revealedAt: true, responseDeadline: true } });
     if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
     if (['CANCELLED', 'COMPLETED', 'EXPIRED'].includes(inquiry.status)) {
       throw { statusCode: 409, code: 'INQUIRY_MESSAGES_CLOSED', message: 'پس از بسته‌شدن نهایی استعلام امکان ارسال پیام وجود ندارد.' };
@@ -1269,6 +1314,12 @@ async function sendInquiryMessage(inquiryId, data, caller) {
     let senderCompanyId = null;
 
     if (isBuyer) {
+      if (['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+        throw { statusCode: 409, code: 'INQUIRY_RESPONSES_HIDDEN', message: 'ارسال پیام تا زمان آشکارشدن پاسخ‌های استعلام مهروموم‌شده امکان‌پذیر نیست.' };
+      }
+      if (inquiry.visibilityMode === 'ANONYMOUS_SEALED') {
+        throw { statusCode: 409, code: 'ANONYMOUS_INQUIRY_CONTACT_UNAVAILABLE', message: 'در استعلام ناشناس امکان تماس مستقیم با شرکت پیشنهاددهنده وجود ندارد.' };
+      }
       recipientCompanyId = Number(data.recipientCompanyId);
       if (!Number.isInteger(recipientCompanyId) || recipientCompanyId < 1) {
         throw { statusCode: 400, code: 'RECIPIENT_COMPANY_REQUIRED', message: 'برای ارسال پیام، شرکت پاسخ‌دهنده را انتخاب کنید.' };
@@ -1282,6 +1333,9 @@ async function sendInquiryMessage(inquiryId, data, caller) {
       else senderCompanyId = companyId;
     } else {
       if (!companyId) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'استعلام پیدا نشد.' };
+      if (['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+        throw { statusCode: 409, code: 'INQUIRY_RESPONSES_HIDDEN', message: 'ارسال پیام تا زمان آشکارشدن پاسخ‌های استعلام مهروموم‌شده امکان‌پذیر نیست.' };
+      }
       const response = await tx.inquiryResponse.findFirst({
         where: { inquiryId: numericInquiryId, companyId },
         select: { id: true },
@@ -1819,7 +1873,13 @@ async function getInquiryStats(caller) {
   const sentWhere = platformScope ? {} : isCustomer ? { buyerUserId: customerUserId } : { companyId };
   const receivedWhere = platformScope ? {} : isCustomer
     ? { id: { in: [] } }
-    : { items: { some: { product: { companyId } } } };
+    : {
+      AND: [
+        { items: { some: { product: { companyId } } } },
+        { status: { in: ['SUBMITTED', 'OPEN', 'CLOSED', 'EXPIRED', 'COMPLETED'] } },
+        { OR: [{ publishDate: null }, { publishDate: { lte: new Date() } }] },
+      ],
+    };
   const responsesWhere = platformScope ? {} : isCustomer
     ? { inquiry: { buyerUserId: customerUserId } }
     : { companyId };
