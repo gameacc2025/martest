@@ -1811,7 +1811,7 @@ test('sendInquiryMessage: dispatches in-app/email notification to an active Webs
   assert.deepEqual(notification[1], [10]);
   assert.deepEqual(notification[2], { inquiry: { id: 1, title: 'Buyer RFQ' } });
   assert.equal(notification[3].tx, mockPrisma);
-  assert.equal(notification[3].dedupeKey, 'inquiry-message-101');
+  assert.equal(notification[3].dedupeKey(10), 'inquiry-message-101-10');
 });
 
 test('sendInquiryMessage: dispatches to active COMPANY members only, never STAFF sharing the company id', async () => {
@@ -1833,7 +1833,8 @@ test('sendInquiryMessage: dispatches to active COMPANY members only, never STAFF
   const notification = calls.dispatchNotification.find(([event]) => event === 'INQUIRY_MESSAGE_RECEIVED');
   assert.ok(notification);
   assert.deepEqual(notification[1], [31, 32]);
-  assert.equal(notification[3].dedupeKey, 'inquiry-message-101');
+  assert.equal(notification[3].dedupeKey(31), 'inquiry-message-101-31');
+  assert.equal(notification[3].dedupeKey(32), 'inquiry-message-101-32');
 });
 
 test('listInquiryMessages: limits company results to messages involving that company', async () => {
