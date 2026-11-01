@@ -58,6 +58,7 @@ const EXPECTED_EVENT_KEYS = [
   'INQUIRY_STATUS_CHANGED',
   'INQUIRY_RESPONSE_SELECTED',
   'INQUIRY_RESPONSE_REJECTED',
+  'INQUIRY_RESPONSE_WITHDRAWN',
   'INQUIRY_RESPONSE_AUTO_REJECTED',
   // order/cart (flow/04) — reserved contract, no Order model yet
   'ORDER_PLACED',
@@ -158,6 +159,23 @@ test('catalog: ORDER_* events exist as a reserved contract (no Order model yet)'
   for (const key of ['ORDER_PLACED', 'ORDER_PAYMENT_FAILED', 'ORDER_ITEM_STATUS_CHANGED', 'ORDER_UNANSWERED_REMINDER']) {
     assert.ok(EVENT_CATALOG[key], `${key} must stay in the catalog as the reserved contract`);
   }
+});
+
+
+test('INQUIRY_RESPONSE_WITHDRAWN template is anonymous-safe and deep-links to the inquiry/response', () => {
+  const event = getEvent('INQUIRY_RESPONSE_WITHDRAWN');
+  assert.ok(event);
+  assert.deepEqual(event.channels, { IN_APP: true, EMAIL: true, SMS: false });
+  const content = event.template({
+    inquiry: { id: 7, title: 'RFQ confidential' },
+    response: { id: 9 },
+    company: { id: 123, name: 'Supplier secret' },
+  });
+  assert.equal(content.title, 'انصراف از پاسخ استعلام');
+  assert.match(content.message, /یکی از شرکت‌ها/);
+  assert.match(content.message, /RFQ confidential/);
+  assert.equal(content.message.includes('Supplier secret'), false);
+  assert.deepEqual(content.data, { inquiryId: 7, responseId: 9 });
 });
 
 test('catalog: lookups behave (getEvent/isKnownEvent)', () => {

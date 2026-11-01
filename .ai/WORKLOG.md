@@ -1820,3 +1820,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed missing `INQUIRY_MESSAGE_RECEIVED` dispatch. New messages now create in-app notifications and queue email according to the event defaults and per-user preferences, transactionally with message + quota usage.
 - Recipients are active Website buyer users or active COMPANY members only; STAFF accounts sharing a company ID are excluded. Dedupe key is per message and recipient. Paid optional SMS path remains separate.
 - Next: audit supplier response withdrawal and buyer/supplier lifecycle notification policy.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-WITHDRAW-NOTIFICATION-STEP-16R
+
+- Found that `withdrawResponse` changed response status to WITHDRAWN but did not notify the buyer. Existing event catalog had no withdrawal-specific event.
+- Added `INQUIRY_RESPONSE_WITHDRAWN` with IN_APP/EMAIL defaults and generic supplier wording so SEALED/ANONYMOUS_SEALED supplier identity is never disclosed.
+- Dispatches within the same transaction as the response update, to active Website buyer user or active COMPANY access-profile members only. Excludes STAFF sharing Main-company ID; dedupe key includes response ID and recipient user ID.
+- Added company/user owner service tests and event template anonymous-safety test. CI pending.

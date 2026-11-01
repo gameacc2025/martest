@@ -821,3 +821,11 @@ PR #69 squash-merged into `main` at `ef55a970e03bc746128c234272a63aa5a6a6c246`. 
 
 - Audit whether supplier response withdrawal and other buyer/supplier-visible lifecycle changes have appropriate notification events and recipients. Compare current event catalog and documented workflow before adding any new event.
 - If policy supports it, add a dedicated withdrawal event, dispatch transactionally to the inquiry owner, preserve anonymous/sealed privacy, add tests for COMPANY buyer and Website user buyer, update notification docs/preferences, CI/migration validation and merge.
+
+
+## Inquiry response withdrawal notifications — step 16R (in progress, 2026-11-01)
+
+- Audit found supplier `withdrawResponse` changed a pending response to WITHDRAWN but did not notify the inquiry owner. The event catalog had no dedicated withdrawal event.
+- Added `INQUIRY_RESPONSE_WITHDRAWN` with IN_APP + EMAIL defaults and an anonymous-safe template that names the inquiry/response IDs but never the supplier identity (safe for SEALED and ANONYMOUS_SEALED).
+- On successful withdrawal, dispatches transactionally to the active Website buyer user or active COMPANY access-profile members only; STAFF sharing the Main-company ID are excluded. Per-recipient dedupe keys are used.
+- Added service tests for company and Website buyer notification recipients and event template tests for anonymous safety. CI pending.

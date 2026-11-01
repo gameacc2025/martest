@@ -778,3 +778,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - New internal inquiry messages dispatch `INQUIRY_MESSAGE_RECEIVED` within the message transaction, after `INTERNAL_MESSAGE` usage consumption. Event defaults are IN_APP + EMAIL enabled and SMS disabled/opt-in.
 - Recipients: active Website buyer user, or active COMPANY access-profile members for the recipient company. Do not use companyId-only recipient resolution because STAFF users may share the platform Main-company ID.
 - Dedupe key includes message ID and recipient user ID. Paid SMS remains a separate custom outbox/quota path.
+
+
+## Supplier response withdrawal notification — 2026-11-01
+
+- Successful supplier withdrawal of a pending response emits `INQUIRY_RESPONSE_WITHDRAWN` to the inquiry owner. Event channels default to IN_APP + EMAIL, SMS off.
+- Template intentionally says a company withdrew its response without naming the supplier, so the event is safe for sealed and anonymous-sealed inquiries. Payload includes inquiryId/responseId only.
+- Recipients are active Website buyer user or active COMPANY access-profile members; STAFF accounts sharing a company ID are excluded. Dispatch is transactional and deduped per response/recipient.
