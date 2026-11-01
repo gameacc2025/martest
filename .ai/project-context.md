@@ -745,3 +745,9 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Each supplier response is limited to 10 attachments; files are type/size validated, and failed DB inserts clean up the stored file.
 - Uploads now serialize the cap check and DB insert by locking the parent Inquiry row inside a transaction, then re-check response ownership/editability after the lock. The file is written before acquiring the row lock to avoid holding DB locks during disk I/O; if the locked cap/re-check/insert fails, the prewritten file is removed.
 - Upload ownership and editability are checked once before consuming the multipart stream and rechecked under the lock to close status-change races.
+
+
+## Inquiry attachment concurrency invariant — 2026-11-01
+
+- Per-response attachment cap is 10. Concurrent uploads serialize on the parent Inquiry row; under the lock, service re-checks response ownership/editability, counts current attachment rows and inserts metadata in one DB transaction.
+- File I/O happens before acquiring the lock. If the transaction rejects due to status/ownership/cap or DB insert failure, the prewritten file is cleaned up. Regression tests verify ordering and cleanup.
