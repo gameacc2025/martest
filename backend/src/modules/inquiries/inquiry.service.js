@@ -23,6 +23,16 @@ const PRIVATE_RESPONSE_STORAGE_PREFIX = 'private://inquiries/responses/';
 const LEGACY_RESPONSE_PUBLIC_PREFIX = '/uploads/inquiries/responses/';
 const MAX_RESPONSE_ATTACHMENT_BYTES = 20 * 1024 * 1024; // 20 MB
 const MAX_RESPONSE_ATTACHMENTS = 10;
+const ATTACHMENT_MIME_EXTENSIONS = Object.freeze({
+  'application/pdf': '.pdf',
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'application/msword': '.doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+  'application/vnd.ms-excel': '.xls',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+});
 const SUPPORTED_ATTACHMENT_TYPES = new Set([
   'application/pdf',
   'image/jpeg',
@@ -351,10 +361,20 @@ function assertResponseWithdrawable(inquiry) {
   }
 }
 
-function sanitizeAttachmentFilename(filename) {
-  const ext = path.extname(filename || '').toLowerCase();
-  const basename = path.basename(filename || 'file', ext).replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 60) || 'file';
-  return `${Date.now()}-${crypto.randomBytes(8).toString('hex')}-${basename}${ext}`;
+function sanitizeAttachmentFilename(filename, mimetype) {
+  const ext = ATTACHMENT_MIME_EXTENSIONS[mimetype] || '.bin';
+  const basename = path.basename(filename || 'file', path.extname(filename || ''))
+    .replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 60) || 'file';
+  return Date.now() + '-' + crypto.randomBytes(8).toString('hex') + '-' + basename + ext;
+}
+
+function sanitizeAttachmentDisplayName(filename, mimetype) {
+  const ext = ATTACHMENT_MIME_EXTENSIONS[mimetype] || '.bin';
+  const basename = path.basename(filename || 'file', path.extname(filename || ''))
+    .replace(/[\r\n\u0000-\u001f\u007f]/g, '')
+    .replace(/[^\p{L}\p{N} _.-]/gu, '-')
+    .slice(0, 80) || 'file';
+  return basename + ext;
 }
 
 async function saveResponseAttachment(file) {
@@ -364,7 +384,7 @@ async function saveResponseAttachment(file) {
   }
 
   await fs.promises.mkdir(RESPONSE_UPLOAD_ROOT, { recursive: true });
-  const filename = sanitizeAttachmentFilename(file.filename);
+  const filename = sanitizeAttachmentFilename(file.filename, file.mimetype);
   const destination = path.join(RESPONSE_UPLOAD_ROOT, filename);
   let bytesWritten = 0;
 
@@ -384,7 +404,7 @@ async function saveResponseAttachment(file) {
 
   return {
     url: `${PRIVATE_RESPONSE_STORAGE_PREFIX}${filename}`,
-    filename: file.filename || filename,
+    filename: sanitizeAttachmentDisplayName(file.filename, file.mimetype),
     mimetype: file.mimetype || null,
     size: bytesWritten,
   };
