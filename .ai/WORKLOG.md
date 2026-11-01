@@ -1756,3 +1756,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added integration test of actual generated `/docs/json` for payment create/retry/callback, subscription read, product soft-delete; asserts route-specific 401/403 error unions, native Fastify 429, 500 variants, payment-only 502/503 and 204 no-content.
 - Fixed `mergeResponseDocs` so explicit route-doc response definitions take precedence over generated route schema defaults. Converted fixed error values from unsupported OpenAPI 3.0.3 `const` to single-value `enum`. Updated tests and docs.
 - Next: step 16N audit remaining Inquiry flow implementation/test gaps, prioritizing access-type/permission boundaries, ownership, sealed/anonymous visibility, subscription quota and attachment safety.
+
+
+## 2026-11-01 — INQUIRY-FLOW-COVERAGE-STEP-16N
+
+- Audited inquiry route guards, controller forwarding, inquiry service and subscription/payment services against existing unit tests. Existing coverage is broad across buyer/supplier ownership, access type and permission separation, STAFF moderation boundary, sealed/anonymous disclosure, response state concurrency, message participation, SMS preferences/provider/quota and attachment safety/cleanup.
+- Concrete gap: inquiry.service.test.js hardcoded subscription enforcement off and mocked company capacity checks, so it did not prove the core service paths call `consumeUsage` with correct owner/usage/reference when monetization enforcement is enabled.
+- Updated the test fixture to toggle enforcement and capture subscription lookups. Added tests proving company and Website-user inquiry creation consume `INQUIRY_CREATE`, supplier quote submission consumes `RESPONSE_SUBMIT`, and buyer internal messaging consumes `INTERNAL_MESSAGE`, with correct reference IDs and subscription row locking.
+- No production runtime code changed. CI and migration validation pending.
