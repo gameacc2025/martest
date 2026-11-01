@@ -757,3 +757,9 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 
 - Message reads are scoped to the caller's recipient identity (company or Website user). A list request marks only unread recipient messages included in that response as read; it must not mark messages beyond the returned 500-row result or messages arriving after the query as read.
 - Returned message records reflect the readAt timestamp written by the request so the client does not receive stale unread state for messages it just opened.
+
+
+## Inquiry message read-state regression fix — 2026-11-01
+
+- `listInquiryMessages` marks read only the unread recipient message IDs included in the fetched response (up to the 500-row cap), scoped by inquiry and recipient. New messages arriving after the query and messages outside the response are not marked read.
+- Returned messages reflect the readAt timestamp written by the same request. Staff moderation reads do not mutate recipient read state.
