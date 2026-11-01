@@ -832,3 +832,5 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Download endpoint is `GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download`. It verifies inquiry read visibility, supplier response ownership, response/attachment linkage, and sealed reveal state. Stream as attachment with safe content type and `X-Content-Type-Options: nosniff`.
 - API responses expose the authenticated download endpoint, never the physical/internal storage key. Company/Admin UIs must download via the authenticated API client as a blob rather than an anchor to static uploads.
 - Anonymous-sealed attachment metadata uses generic filenames; downloaded file content itself is not rewritten, so uploaded documents should not contain supplier-identifying content when strict anonymity is required.
+
+- Production Compose persists private response files using named volume `inquiry_private_uploads:/app/private-uploads`; development persists via the backend source bind mount. Keep `backend/private-uploads/` out of Git.
