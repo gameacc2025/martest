@@ -816,3 +816,10 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Item add/update/delete now acquire `SELECT id FROM "Inquiry" WHERE id = $1 FOR UPDATE` before reading parent state. This serializes item count and DRAFT checks against concurrent item writes, status transitions and response submission, preventing a two-delete race from removing the last items or mutation after submission.
 - General inquiry update and response reveal use the same parent lock. Status transitions and response submission/decision already lock this row.
 - CUSTOMER users may only cancel their own inquiry; STAFF reveal moderation requires update permission, not read-only permission.
+
+
+## Inquiry item/lifecycle concurrency — step 16Z merged (2026-11-01)
+
+- PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`; CI passed 1,432 backend tests, 18 root Node tests, 33 frontend test files and all frontend builds; Prisma migration validation passed.
+- Item add/update/delete, inquiry update and sealed response reveal acquire the parent Inquiry row lock. This serializes DRAFT-only checks and minimum item count with concurrent item operations, status transitions and response writes.
+- Item update/delete require both inquiryId and itemId. STAFF read-only does not authorize mutation or reveal; CUSTOMER status changes remain cancel-only.
