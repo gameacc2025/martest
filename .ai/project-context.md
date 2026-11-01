@@ -836,3 +836,6 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Production Compose persists private response files using named volume `inquiry_private_uploads:/app/private-uploads`; development persists via the backend source bind mount. Keep `backend/private-uploads/` out of Git.
 
 - Supplier `PATCH /inquiries/:id/responses/:responseId` must not include the raw parent Inquiry record; buyer identifiers are private. Attachment extensions must derive from allowlisted MIME type, not client-supplied filename extensions.
+
+- GET inquiry detail is the response source for Company/Admin InquiryDetail views; `inquiryInclude.responses` must include attachment metadata, and `shapeInquiryForCaller` must replace DB storage keys with authenticated download URLs for every visible response. Preserve sealed visibility and anonymous filename redaction.
+- Supplier response update payloads must not include the full parent inquiry record or buyer identifiers.
