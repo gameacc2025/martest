@@ -948,3 +948,12 @@ PR #75 squash-merged into `main` at `d2570f1abcda54cc369f7ca553fd58da333ba904`.
 - Admin InquiryCreate currently presents an optional “target companies” multi-select and persists it in local draft state, but the submit payload omits `targetCompanyIds`; the API/schema/Prisma model have no corresponding field or targeting relation.
 - Confirm whether this is a dead UI control. Do not invent a targeting model or change notification distribution semantics. Prefer removing the misleading selector and replacing it with clear copy that publication notifications are sent to companies owning the selected products, unless the repository contains an existing supported targeting contract.
 - Add regression coverage for the actual product-owner publication audience and keep admin UI/API documentation honest. CI/build and merge.
+
+
+## Admin inquiry target-company selector audit — step 16W (2026-11-01)
+
+- Confirmed admin InquiryCreate exposed an optional target-company MultiSelect and review section, but `targetCompanyIds` was only stored in local draft state and omitted from the API payload. No route schema, service logic, Prisma field/relation or notification target contract supports this selection. The control was a silent no-op.
+- Removed the unsupported target-company step and company-list API fetch from the admin wizard. Replaced it with an explicit note that publication notifications go to companies owning the selected products (and authorized staff per event policy).
+- Preserved existing saved drafts: restore logic discards the unsupported targetCompanyIds field and maps the old six-step wizard indices to the new five-step flow so users do not lose other draft data or land on the wrong step.
+- Strengthened lifecycle worker test to assert exact publication audience (product-owning companies + authorized STAFF permission recipients), transactional dispatch and dedupe keys.
+- Branch: `fix/admin-inquiry-target-company-noop-step-16w`. CI pending.
