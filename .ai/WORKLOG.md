@@ -1984,3 +1984,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added service, route, OpenAPI and real-app static-route regression tests. CI pending.
 
 - Production Compose now mounts named volume `inquiry_private_uploads` at `/app/private-uploads`; development's existing `./backend:/app` bind mount persists the same private directory. `.gitignore` excludes `backend/private-uploads/`.
+
+- Removed the raw `inquiry: true` include from supplier `updateResponse`; supplier update responses now return only the response projection and no parent inquiry/buyer identity fields. Added a service regression test and OpenAPI assertion.
+- Derived physical/display attachment extensions from the allowed MIME type and sanitized display names, preventing client-controlled `.html`/macro extension spoofing and header control characters.
