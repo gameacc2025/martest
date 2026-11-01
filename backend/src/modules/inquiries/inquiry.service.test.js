@@ -2793,7 +2793,7 @@ test('getInquiry: anonymous sealed buyer sees generic attachment filename and no
     responses: [{
       id: 50, companyId: seller.companyId, company: { id: seller.companyId, name: 'Secret Supplier' },
       items: [], attachments: [{
-        id: 77, filename: 'Secret-Supplier-Quote.pdf', url: 'private://inquiries/responses/private-quote.pdf',
+        id: 77, filename: 'Secret-Supplier-Quote.pdf', mimetype: 'application/pdf', url: 'private://inquiries/responses/private-quote.pdf',
       }],
     }],
   });
