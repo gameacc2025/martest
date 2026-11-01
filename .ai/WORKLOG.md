@@ -1811,3 +1811,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added transactional dispatch after message creation and `INTERNAL_MESSAGE` usage consumption. Recipient resolution uses active user for Website-owned buyer or active COMPANY access profiles for company recipients; avoids companyId-only resolution that could include STAFF on Main-company ID.
 - Uses per-recipient dedupe key to avoid the dispatcher's `(eventType,dedupeKey,channel)` unique key suppressing notifications for other company members.
 - Kept custom SMS path separate and unchanged. Added tests for user/company recipients, active COMPANY filtering, STAFF exclusion and per-user dedupe. CI pending.
+
+
+## 2026-11-01 — INQUIRY-MESSAGE-NOTIFICATION-STEP-16Q-MERGE
+
+- PR #69 squash-merged at `ef55a970e03bc746128c234272a63aa5a6a6c246`.
+- CI [41271042201] and migration validation [41271042195] passed. Runtime [41271042218] was separate/in progress at merge.
+- Fixed missing `INQUIRY_MESSAGE_RECEIVED` dispatch. New messages now create in-app notifications and queue email according to the event defaults and per-user preferences, transactionally with message + quota usage.
+- Recipients are active Website buyer users or active COMPANY members only; STAFF accounts sharing a company ID are excluded. Dedupe key is per message and recipient. Paid optional SMS path remains separate.
+- Next: audit supplier response withdrawal and buyer/supplier lifecycle notification policy.
