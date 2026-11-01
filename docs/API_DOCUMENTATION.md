@@ -393,3 +393,8 @@ Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/not
 ### نکته پیاده‌سازی Swagger
 
 برای مؤثرشدن schemaهای خطای هر route، transform مربوط به Swagger اکنون پاسخ‌های `401`، `403`، `404` و `500` تعریف‌شده در route-doc را بر پیش‌فرض عمومی مقدم می‌داند. پیش از این، transform در بعضی وضعیت‌ها schema اختصاصی مسیر را دوباره با پیش‌فرض جایگزین می‌کرد و خروجی نهایی `/docs/json` با registry تست‌شده یکسان نبود.
+
+
+### Generated OpenAPI response precedence — 2026-11-01
+
+The Swagger `/docs/json` integration tests verify the final generated contract. When a route has an audited response definition in the route documentation registry, that explicit public contract takes precedence over framework-generated/default response schemas. The registered handler schema remains the fallback for response statuses not explicitly documented. This prevents generic generated errors from replacing route-specific auth/RBAC error unions, native Fastify 429 responses, payment-provider 502/503 contracts, and 204 no-content semantics.
