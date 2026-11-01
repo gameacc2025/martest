@@ -1990,3 +1990,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 - Extended `inquiryInclude.responses` with attachment metadata and routed those URLs through `presentResponseAttachments` inside `shapeInquiryForCaller`. This ensures GET inquiry detail (the data source used by both panels) exposes secure download URLs and applies anonymous-sealed filename redaction.
 - Removed `inquiry:true` from updateResponse include to prevent the supplier update endpoint returning raw buyer inquiry identifiers. Attachment extensions now follow allowed MIME types; legacy filenames are normalized before download.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-ATTACHMENT-SECURITY-STEP-17-MERGE
+
+- PR #80 squash-merged into `main` at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`.
+- CI [41326320059] passed: 1,446 backend tests, 18 root Node tests, 33 frontend test files and all builds. Prisma migration validation [41326320181] passed. Runtime [41326320124] was separate/not a merge gate.
+- Private response attachment storage, authenticated download route, legacy static URL guard, private production Docker volume, authenticated blob downloads in both panels, safe MIME-derived filenames and response payload redaction are merged.
+- `GET /inquiries/:id` now includes visible response attachments with secure download endpoints and caller-specific anonymous filename redaction. Supplier response update no longer returns raw inquiry/buyer data.
+- Next: review/merge notification recipient scoping PR #71, then audit inquiry usage/quota and payment verification idempotency.
