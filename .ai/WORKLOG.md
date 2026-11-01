@@ -1982,3 +1982,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - All response API projections that include attachments now present the authenticated download route, not the storage key. Anonymous-sealed buyer projections and download filenames use generic labels.
 - Added authenticated blob download API client method and replaced direct hrefs in Company/Admin InquiryDetail with authenticated downloads.
 - Added service, route, OpenAPI and real-app static-route regression tests. CI pending.
+
+- Production Compose now mounts named volume `inquiry_private_uploads` at `/app/private-uploads`; development's existing `./backend:/app` bind mount persists the same private directory. `.gitignore` excludes `backend/private-uploads/`.
