@@ -2103,3 +2103,60 @@ test('getInquiryStats: STAFF without inquiry read permission is denied', async (
   assert.equal(calls.groupBy, undefined);
   assert.equal(calls.findMany.length, 0);
 });
+
+
+// ── Subscription usage integration: inquiry creation, supplier response and messages ──
+
+test('createInquiry: enforced company quota records one INQUIRY_CREATE usage event in the same transaction', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  fx.products = publishedProducts(1);
+
+  await inquiryService.createInquiry({
+    title: 'Quota-backed company RFQ',
+    items: [{ productId: 1, quantity: 2 }],
+  }, { id: 12, accessType: 'COMPANY', companyId: 10, permissions: ['inquiries.create'] });
+
+  assert.equal(smsUsageEvents.length, 1);
+  assert.deepEqual(
+    { subscriptionId: smsUsageEvents[0].subscriptionId, usageType: smsUsageEvents[0].usageType, referenceType: smsUsageEvents[0].referenceType, referenceId: smsUsageEvents[0].referenceId },
+    { subscriptionId: 77, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: '7' },
+  );
+  assert.ok(calls.$queryRawUnsafe.some(({ query, params }) => query.includes('FROM "InquirySubscription"') && query.includes('FOR UPDATE') && params[0] === 77));
+});
+
+test('submitResponse: enforced supplier quota records one RESPONSE_SUBMIT usage event', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  nextFindUnique = openInquiry({ id: 41, companyId: buyer.companyId });
+  fx.ownedItemIds = [11];
+
+  await inquiryService.submitResponse(41, {
+    items: [{ inquiryItemId: 11, price: 1500, availableQuantity: 4 }],
+  }, seller);
+
+  assert.equal(smsUsageEvents.length, 1);
+  assert.deepEqual(
+    { subscriptionId: smsUsageEvents[0].subscriptionId, usageType: smsUsageEvents[0].usageType, referenceType: smsUsageEvents[0].referenceType, referenceId: smsUsageEvents[0].referenceId },
+    { subscriptionId: 77, usageType: 'RESPONSE_SUBMIT', referenceType: 'InquiryResponse', referenceId: '5' },
+  );
+});
+
+test('sendInquiryMessage: enforced owner quota records one INTERNAL_MESSAGE usage event', async () => {
+  resetMocks();
+  subscriptionEnforcementEnabled = true;
+  nextFindUnique = { id: 1, companyId: 10, buyerUserId: null, status: 'OPEN' };
+  fx.response = { id: 90 };
+
+  await inquiryService.sendInquiryMessage(
+    1,
+    { message: 'Please confirm delivery' },
+    { id: 12, accessType: 'COMPANY', companyId: 10, permissions: ['inquiries.create'] },
+  );
+
+  assert.equal(smsUsageEvents.length, 1);
+  assert.deepEqual(
+    { subscriptionId: smsUsageEvents[0].subscriptionId, usageType: smsUsageEvents[0].usageType, referenceType: smsUsageEvents[0].referenceType, referenceId: smsUsageEvents[0].referenceId },
+    { subscriptionId: 77, usageType: 'INTERNAL_MESSAGE', referenceType: 'InquiryMessage', referenceId: '101' },
+  );
+});
