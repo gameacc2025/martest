@@ -2763,3 +2763,44 @@ test('deleteResponseAttachment: removes legacy public-path files during migratio
 
   assert.equal(fs.existsSync(legacyPath), false);
 });
+
+
+test('getInquiry: response attachments use authenticated download endpoints instead of storage keys', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'NORMAL', items: [],
+    responses: [{
+      id: 50, companyId: seller.companyId, company: { id: seller.companyId, name: 'Supplier' },
+      items: [], attachments: [{
+        id: 77, filename: 'Quote.pdf', url: 'private://inquiries/responses/private-quote.pdf',
+      }],
+    }],
+  });
+
+  const inquiry = await inquiryService.getInquiry(1, buyer);
+  assert.equal(inquiry.responses[0].attachments[0].url, '/api/v1/inquiries/1/responses/50/attachments/77/download');
+  assert.equal(inquiry.responses[0].attachments[0].url.includes('private://'), false);
+});
+
+test('getInquiry: anonymous sealed buyer sees generic attachment filename and no supplier identifiers', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'ANONYMOUS_SEALED', status: 'CLOSED',
+    revealedAt: new Date(), responseDeadline: new Date(Date.now() - 60_000),
+    items: [],
+    responses: [{
+      id: 50, companyId: seller.companyId, company: { id: seller.companyId, name: 'Secret Supplier' },
+      items: [], attachments: [{
+        id: 77, filename: 'Secret-Supplier-Quote.pdf', url: 'private://inquiries/responses/private-quote.pdf',
+      }],
+    }],
+  });
+
+  const inquiry = await inquiryService.getInquiry(1, buyer);
+  assert.equal(inquiry.responses[0].company.name, 'پیشنهاددهنده 1');
+  assert.equal(inquiry.responses[0].companyId, undefined);
+  assert.equal(inquiry.responses[0].attachments[0].filename, 'پیوست 1.pdf');
+  assert.equal(inquiry.responses[0].attachments[0].url, '/api/v1/inquiries/1/responses/50/attachments/77/download');
+});
