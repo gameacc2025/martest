@@ -406,3 +406,12 @@ OpenAPI is emitted as version 3.0.3, so fixed-value response discriminators use 
 ## Generated OpenAPI integration verification — step 16M merged (2026-11-01)
 
 PR #65 merged at `5cdb8e81acdf679bf60e36c2c36dec118e118156`. CI and Prisma migration validation passed. The actual `/docs/json` output is integration-tested for authentication/RBAC error unions, Fastify-native 429, sanitized payment 502/503 on only the relevant endpoints, and 204 responses without content. Explicit route-doc response definitions take precedence over generated defaults. Fixed-value schema constraints use OpenAPI 3.0-compatible single-value enums.
+
+
+## Inquiry lifecycle notification recipient policy — 2026-11-01
+
+- `INQUIRY_STATUS_CHANGED` is dispatched transactionally for terminal status transitions to the inquiry owner and distinct companies with non-withdrawn responses. The event context contains only inquiry ID/title and status; it never exposes supplier identity, including for SEALED and ANONYMOUS_SEALED inquiries.
+- Company-targeted notification descriptors resolve only ACTIVE users whose access profile belongs to the target company, has `type=COMPANY`, and is active. STAFF accounts sharing the Main-company ID and inactive company profiles are excluded.
+- Website-owned inquiries notify the buyer user ID directly. Notification persistence and email outbox queueing remain subject to each recipient's event preferences; SMS remains off by default and is not enabled by this change.
+
+- Company-owned inquiry owners are included in `INQUIRY_STATUS_CHANGED` delivery. The recipient descriptor is resolved as active COMPANY access-profile members only; Website-owned inquiries target the buyer user ID directly.

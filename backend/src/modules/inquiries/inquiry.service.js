@@ -507,7 +507,10 @@ async function notifyInquiryOwner(tx, inquiry, eventKey, context, dedupeKey) {
   const recipients = inquiry.buyerUserId
     ? [Number(inquiry.buyerUserId)]
     : (inquiry.companyId ? { companyIds: [Number(inquiry.companyId)] } : []);
-  if (!recipients.length) return;
+  const hasRecipients = Array.isArray(recipients)
+    ? recipients.length > 0
+    : Boolean(recipients?.companyIds?.length);
+  if (!hasRecipients) return;
   await dispatchNotification(eventKey, recipients, context, {
     tx,
     dedupeKey: (userId) => `${typeof dedupeKey === 'function' ? dedupeKey(userId) : dedupeKey}-${userId}`,

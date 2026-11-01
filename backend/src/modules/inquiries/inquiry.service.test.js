@@ -860,6 +860,45 @@ test('changeInquiryStatus: a closing transition stamps closedAt', async () => {
   assert.ok(update.data.closedAt instanceof Date);
 });
 
+test('changeInquiryStatus: closing notifies the owner and each distinct responding company transactionally', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 44, companyId: 10, title: 'RFQ status notice' });
+  fx.recentResponses = [
+    { companyId: 20, status: 'PENDING' },
+    { companyId: 20, status: 'SELECTED' },
+    { companyId: 30, status: 'REJECTED' },
+  ];
+
+  await inquiryService.changeInquiryStatus(44, 'CLOSED', buyer);
+
+  const notifications = calls.dispatchNotification.filter(([event]) => event === 'INQUIRY_STATUS_CHANGED');
+  assert.deepEqual(notifications.map(([, recipients]) => recipients), [
+    { companyIds: [10] },
+    { companyIds: [20] },
+    { companyIds: [30] },
+  ]);
+  for (const [, , context, options] of notifications) {
+    assert.deepEqual(context, { inquiry: { id: 44, title: 'RFQ status notice' }, status: 'CLOSED' });
+    assert.equal(options.tx, mockPrisma);
+    assert.equal(typeof options.dedupeKey, 'function');
+  }
+  assert.equal(notifications[1][3].dedupeKey(71), 'inquiry-status-44-CLOSED-company-20-71');
+});
+
+test('changeInquiryStatus: Website buyer cancellation notifies the user owner without a company recipient', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 45, companyId: null, buyerUserId: 77 });
+  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
+
+  await inquiryService.changeInquiryStatus(45, 'CANCELLED', customer);
+
+  const notifications = calls.dispatchNotification.filter(([event]) => event === 'INQUIRY_STATUS_CHANGED');
+  assert.equal(notifications.length, 1);
+  assert.deepEqual(notifications[0][1], [77]);
+  assert.deepEqual(notifications[0][2], { inquiry: { id: 45, title: undefined }, status: 'CANCELLED' });
+  assert.equal(notifications[0][3].tx, mockPrisma);
+});
+
 // ── listInquiryItems / addInquiryItem ────────────────────────
 
 test('listInquiryItems: returns the items of an RFQ the caller may read', async () => {
