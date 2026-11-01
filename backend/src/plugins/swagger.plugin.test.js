@@ -253,10 +253,10 @@ test('swagger plugin: generated payment and lifecycle routes preserve audited er
 
   const create = spec.paths['/inquiries/subscription'].post;
   assert.equal(create.responses['502'].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
-  assert.equal(create.responses['401'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
-  assert.equal(create.responses['403'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
-  assert.equal(create.responses['429'].content['application/json'].schema.properties.statusCode.enum, [429]);
-  assert.equal(create.responses['500'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(create.responses['401'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(create.responses['403'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
+  assert.deepEqual(create.responses['429'].content['application/json'].schema.properties.statusCode.enum, [429]);
+  assert.deepEqual(create.responses['500'].content['application/json'].schema.oneOf[1].properties.error.enum, [true]);
 
   const retry = spec.paths['/inquiries/subscription/{id}/verify-payment'].post;
   assert.equal(retry.responses['503'].content['application/json'].schema.$ref, '#/components/schemas/ErrorResponse');
