@@ -666,6 +666,13 @@ Object.assign(docs, {
     tags: ['Inquiries'], permission: 'inquiries.respond', params: twoIdParams('id', 'responseId'),
     responses: createdResponse('Inquiry response attachment uploaded successfully.'),
   },
+  'GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download': {
+    summary: 'Download an inquiry response attachment',
+    description: 'Streams a response attachment only after checking inquiry visibility, buyer ownership or supplier response ownership. Authentication required: Bearer JWT. Access context required: STAFF, COMPANY or CUSTOMER. Permission required: leads.read, inquiries.read or inquiries.respond. SEALED buyers cannot download before reveal.',
+    tags: ['Inquiries'], permission: 'leads.read or inquiries.read or inquiries.respond',
+    params: { type: 'object', required: ['id', 'responseId', 'attachmentId'], properties: { id: { type: 'integer' }, responseId: { type: 'integer' }, attachmentId: { type: 'integer' } } },
+    responses: { 200: { description: 'Private attachment stream; Content-Disposition is attachment and X-Content-Type-Options is nosniff.', type: 'string', format: 'binary' } },
+  },
   'DELETE /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId': {
     summary: 'Delete an attachment from a supplier response',
     description: 'Deletes an attachment owned by the authenticated supplier company’s response. Authentication required: Bearer JWT. Access context required: COMPANY. Permission required: inquiries.respond. Attachment and response ownership are enforced by the service.',
@@ -1028,7 +1035,7 @@ const inquiryMessageResponseSchema = {
 const inquiryResponseAttachmentResponseSchema = {
   type: 'object', required: ['id', 'responseId', 'url', 'filename', 'mimetype', 'size', 'createdAt'],
   properties: {
-    id: { type: 'integer' }, responseId: { type: 'integer' }, url: { type: 'string', minLength: 1 },
+    id: { type: 'integer' }, responseId: { type: 'integer' }, url: { type: 'string', minLength: 1, description: 'Authenticated inquiry attachment download endpoint; stored file keys are never returned.' },
     filename: { type: 'string' }, mimetype: { type: ['string', 'null'] }, size: { type: ['integer', 'null'] },
     createdAt: { type: 'string', format: 'date-time' },
   },
@@ -1057,7 +1064,6 @@ const inquiryResponseResponseSchema = {
     company: { type: 'object', required: ['name', 'type'], properties: { id: { type: 'integer' }, name: { type: 'string' }, type: { type: ['string', 'null'] } }, additionalProperties: true },
     attachments: { type: 'array', items: inquiryResponseAttachmentResponseSchema },
     items: { type: 'array', items: inquiryResponseItemResponseSchema },
-    inquiry: { type: 'object', additionalProperties: true },
   },
 };
 const inquiryDecisionReceiptResponseSchema = {
@@ -1096,7 +1102,7 @@ Object.assign(docs, {
   },
   ['PATCH /api/v1/inquiries/:id/responses/:responseId']: {
     ...docs['PATCH /api/v1/inquiries/:id/responses/:responseId'],
-    responses: { 200: { description: 'Updated supplier response and response items. The service also includes the inquiry record for the supplier editor.', type: 'object', required: ['data'], properties: { data: inquiryResponseResponseSchema } } },
+    responses: { 200: { description: 'Updated supplier response and response items. Returns only the supplier response projection; the buyer inquiry record and buyer identity fields are not included.', type: 'object', required: ['data'], properties: { data: inquiryResponseResponseSchema } } },
   },
   ['PATCH /api/v1/inquiries/:id/responses/:responseId/decision']: {
     ...docs['PATCH /api/v1/inquiries/:id/responses/:responseId/decision'],

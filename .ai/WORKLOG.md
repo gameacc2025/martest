@@ -1972,3 +1972,21 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Parent Inquiry row locking now serializes item add/update/delete, inquiry updates and response reveal against status transitions and response operations. This protects DRAFT-only edits and the minimum-one-item invariant under concurrent writes.
 - Verified cross-inquiry item IDs are queried by both parent and item ID; STAFF read-only is insufficient for mutations/reveal; CUSTOMER can only cancel own inquiry.
 - Next: audit response attachment file ownership, validation, static serving and cleanup behavior.
+
+
+## 2026-11-01 — INQUIRY-RESPONSE-ATTACHMENT-SECURITY-STEP-17
+
+- Security finding: response attachments were physically stored below the globally public `uploads` static root and served directly without auth. This exposed supplier quote files to anyone who knew/guessed a URL, bypassing inquiry visibility.
+- Moved new attachment writes to `private-uploads/inquiries/responses` with opaque internal `private://inquiries/responses/<safe-filename>` DB keys. Legacy public-path rows are still supported only by the authenticated download service so existing files can remain available while direct public static access is blocked.
+- Added GET download endpoint with inquiry/response/attachment linkage, buyer/supplier/STAFF read rules, supplier company scoping, sealed pre-reveal denial, safe path resolution and Content-Disposition attachment + nosniff headers.
+- All response API projections that include attachments now present the authenticated download route, not the storage key. Anonymous-sealed buyer projections and download filenames use generic labels.
+- Added authenticated blob download API client method and replaced direct hrefs in Company/Admin InquiryDetail with authenticated downloads.
+- Added service, route, OpenAPI and real-app static-route regression tests. CI pending.
+
+- Production Compose now mounts named volume `inquiry_private_uploads` at `/app/private-uploads`; development's existing `./backend:/app` bind mount persists the same private directory. `.gitignore` excludes `backend/private-uploads/`.
+
+- Removed the raw `inquiry: true` include from supplier `updateResponse`; supplier update responses now return only the response projection and no parent inquiry/buyer identity fields. Added a service regression test and OpenAPI assertion.
+- Derived physical/display attachment extensions from the allowed MIME type and sanitized display names, preventing client-controlled `.html`/macro extension spoofing and header control characters.
+
+- Extended `inquiryInclude.responses` with attachment metadata and routed those URLs through `presentResponseAttachments` inside `shapeInquiryForCaller`. This ensures GET inquiry detail (the data source used by both panels) exposes secure download URLs and applies anonymous-sealed filename redaction.
+- Removed `inquiry:true` from updateResponse include to prevent the supplier update endpoint returning raw buyer inquiry identifiers. Attachment extensions now follow allowed MIME types; legacy filenames are normalized before download.

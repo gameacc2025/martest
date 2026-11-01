@@ -90,7 +90,7 @@ test('OpenAPI JSON contains every inventory route with effective security and gl
   const routes = [...inventory.matchAll(/^\| ([A-Z]+) \| `(\/api\/v1[^\`]+)` \|/gm)]
     .map((match) => ({ method: match[1], fullPath: match[2] }));
 
-  assert.equal(routes.length, 149, 'update the expected route count when the route inventory changes');
+  assert.equal(routes.length, 150, 'update the expected route count when the route inventory changes');
 
   for (const { method, fullPath } of routes) {
     const routePath = fullPath.replace(/^\/api\/v1/, '').replace(/:([A-Za-z0-9_]+)/g, '{$1}') || '/';
@@ -208,6 +208,20 @@ test('GET /api/v1/this-route-does-not-exist: a genuinely unmatched route is a 40
 test('GET /uploads/*: the static file plugin is mounted (a missing file 404s, but the route itself exists)', async () => {
   const res = await app.inject({ method: 'GET', url: '/uploads/does-not-exist.png' });
   assert.equal(res.statusCode, 404);
+});
+
+test('GET /uploads/inquiries/responses/*: legacy response attachment paths are not publicly served', async () => {
+  const directory = path.join(process.cwd(), 'uploads', 'inquiries', 'responses');
+  fs.mkdirSync(directory, { recursive: true });
+  const filename = 'private-attachment-static-guard-test.pdf';
+  const filePath = path.join(directory, filename);
+  fs.writeFileSync(filePath, '%PDF-test');
+  try {
+    const res = await app.inject({ method: 'GET', url: '/uploads/inquiries/responses/' + filename });
+    assert.equal(res.statusCode, 404);
+  } finally {
+    fs.rmSync(filePath, { force: true });
+  }
 });
 
 // ── Security headers (helmet) are actually applied ───────────────

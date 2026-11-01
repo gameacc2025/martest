@@ -17,9 +17,22 @@ const {
 } = require('../companies/company-rule.service');
 
 // ── Response attachment upload configuration ─────────────────
-const RESPONSE_UPLOAD_ROOT = path.join(process.cwd(), 'uploads', 'inquiries', 'responses');
+const RESPONSE_UPLOAD_ROOT = path.join(process.cwd(), 'private-uploads', 'inquiries', 'responses');
+const LEGACY_RESPONSE_UPLOAD_ROOT = path.join(process.cwd(), 'uploads', 'inquiries', 'responses');
+const PRIVATE_RESPONSE_STORAGE_PREFIX = 'private://inquiries/responses/';
+const LEGACY_RESPONSE_PUBLIC_PREFIX = '/uploads/inquiries/responses/';
 const MAX_RESPONSE_ATTACHMENT_BYTES = 20 * 1024 * 1024; // 20 MB
 const MAX_RESPONSE_ATTACHMENTS = 10;
+const ATTACHMENT_MIME_EXTENSIONS = Object.freeze({
+  'application/pdf': '.pdf',
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'application/msword': '.doc',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+  'application/vnd.ms-excel': '.xls',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+});
 const SUPPORTED_ATTACHMENT_TYPES = new Set([
   'application/pdf',
   'image/jpeg',
@@ -76,6 +89,7 @@ const inquiryInclude = {
           },
         },
       },
+      attachments: { orderBy: { createdAt: 'asc' } },
     },
   },
   statusHistory: {
@@ -348,10 +362,20 @@ function assertResponseWithdrawable(inquiry) {
   }
 }
 
-function sanitizeAttachmentFilename(filename) {
-  const ext = path.extname(filename || '').toLowerCase();
-  const basename = path.basename(filename || 'file', ext).replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 60) || 'file';
-  return `${Date.now()}-${crypto.randomBytes(8).toString('hex')}-${basename}${ext}`;
+function sanitizeAttachmentFilename(filename, mimetype) {
+  const ext = ATTACHMENT_MIME_EXTENSIONS[mimetype] || '.bin';
+  const basename = path.basename(filename || 'file', path.extname(filename || ''))
+    .replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 60) || 'file';
+  return Date.now() + '-' + crypto.randomBytes(8).toString('hex') + '-' + basename + ext;
+}
+
+function sanitizeAttachmentDisplayName(filename, mimetype) {
+  const ext = ATTACHMENT_MIME_EXTENSIONS[mimetype] || '.bin';
+  const basename = path.basename(filename || 'file', path.extname(filename || ''))
+    .replace(/[\r\n\u0000-\u001f\u007f]/g, '')
+    .replace(/[^\p{L}\p{N} _.-]/gu, '-')
+    .slice(0, 80) || 'file';
+  return basename + ext;
 }
 
 async function saveResponseAttachment(file) {
@@ -361,7 +385,7 @@ async function saveResponseAttachment(file) {
   }
 
   await fs.promises.mkdir(RESPONSE_UPLOAD_ROOT, { recursive: true });
-  const filename = sanitizeAttachmentFilename(file.filename);
+  const filename = sanitizeAttachmentFilename(file.filename, file.mimetype);
   const destination = path.join(RESPONSE_UPLOAD_ROOT, filename);
   let bytesWritten = 0;
 
@@ -380,18 +404,99 @@ async function saveResponseAttachment(file) {
   }
 
   return {
-    url: `/uploads/inquiries/responses/${filename}`,
-    filename: file.filename || filename,
+    url: `${PRIVATE_RESPONSE_STORAGE_PREFIX}${filename}`,
+    filename: sanitizeAttachmentDisplayName(file.filename, file.mimetype),
     mimetype: file.mimetype || null,
     size: bytesWritten,
   };
 }
 
+function resolveStoredAttachmentPath(url) {
+  if (typeof url !== 'string') return null;
+  let root;
+  let filename;
+  if (url.startsWith(PRIVATE_RESPONSE_STORAGE_PREFIX)) {
+    root = RESPONSE_UPLOAD_ROOT;
+    filename = url.slice(PRIVATE_RESPONSE_STORAGE_PREFIX.length);
+  } else if (url.startsWith(LEGACY_RESPONSE_PUBLIC_PREFIX)) {
+    // Legacy rows remain readable through the authenticated download route.
+    root = LEGACY_RESPONSE_UPLOAD_ROOT;
+    filename = url.slice(LEGACY_RESPONSE_PUBLIC_PREFIX.length);
+  } else return null;
+  if (!filename || filename !== path.basename(filename) || !/^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]{1,8}$/.test(filename)) return null;
+  const rootPath = path.resolve(root);
+  const filePath = path.resolve(rootPath, filename);
+  if (!filePath.startsWith(rootPath + path.sep)) return null;
+  return filePath;
+}
+
 async function removeStoredAttachment(url) {
-  if (!url || !url.startsWith('/uploads/inquiries/responses/')) return;
-  const relativePath = url.replace(/^\/uploads\/inquiries\/responses\//, '');
-  const filePath = path.join(RESPONSE_UPLOAD_ROOT, relativePath);
+  const filePath = resolveStoredAttachmentPath(url);
+  if (!filePath) return;
   await fs.promises.rm(filePath, { force: true }).catch(() => {});
+}
+
+function responseAttachmentDownloadUrl(inquiryId, responseId, attachmentId) {
+  return '/api/v1/inquiries/' + inquiryId + '/responses/' + responseId + '/attachments/' + attachmentId + '/download';
+}
+
+function presentResponseAttachments(response, inquiryId, { anonymous = false } = {}) {
+  if (!response) return response;
+  const attachments = (response.attachments || []).map((attachment, index) => {
+    const extension = ATTACHMENT_MIME_EXTENSIONS[attachment.mimetype] || '.bin';
+    return {
+      ...attachment,
+      filename: anonymous ? ('پیوست ' + (index + 1) + extension) : attachment.filename,
+      url: responseAttachmentDownloadUrl(inquiryId, response.id, attachment.id),
+    };
+  });
+  return { ...response, attachments };
+}
+
+async function getResponseAttachment(inquiryId, responseId, attachmentId, caller) {
+  const numericInquiryId = toPositiveInt(inquiryId, 'id');
+  const numericResponseId = toPositiveInt(responseId, 'responseId');
+  const numericAttachmentId = toPositiveInt(attachmentId, 'attachmentId');
+  const inquiry = await prisma.inquiry.findUnique({
+    where: { id: numericInquiryId },
+    select: {
+      id: true, companyId: true, buyerUserId: true, visibilityMode: true,
+      status: true, publishDate: true, revealedAt: true, responseDeadline: true,
+      items: { select: { product: { select: { companyId: true } } } },
+    },
+  });
+  assertCanReadResponses(inquiry, caller);
+  const isBuyer = isInquiryBuyer(inquiry, caller);
+  const isStaff = isStaffWithPermission(caller, 'leads.read', 'inquiries.read');
+  if (isBuyer && ['SEALED', 'ANONYMOUS_SEALED'].includes(inquiry.visibilityMode) && !areResponsesRevealed(inquiry)) {
+    throw { statusCode: 404, code: 'ATTACHMENT_NOT_FOUND', message: 'Attachment not found.' };
+  }
+  const companyId = caller?.accessType === 'COMPANY' ? Number(caller.companyId) : null;
+  const responseWhere = { id: numericResponseId, inquiryId: numericInquiryId };
+  if (!isBuyer && !isStaff) responseWhere.companyId = companyId;
+  const response = await prisma.inquiryResponse.findFirst({ where: responseWhere, select: { id: true, companyId: true } });
+  if (!response) throw { statusCode: 404, code: 'ATTACHMENT_NOT_FOUND', message: 'Attachment not found.' };
+  const attachment = await prisma.inquiryResponseAttachment.findFirst({
+    where: { id: numericAttachmentId, responseId: numericResponseId },
+    select: { id: true, url: true, filename: true, mimetype: true, size: true },
+  });
+  if (!attachment) throw { statusCode: 404, code: 'ATTACHMENT_NOT_FOUND', message: 'Attachment not found.' };
+  const filePath = resolveStoredAttachmentPath(attachment.url);
+  if (!filePath) throw { statusCode: 404, code: 'ATTACHMENT_FILE_NOT_FOUND', message: 'Attachment file not found.' };
+  let stat;
+  try { stat = await fs.promises.stat(filePath); } catch {
+    throw { statusCode: 404, code: 'ATTACHMENT_FILE_NOT_FOUND', message: 'Attachment file not found.' };
+  }
+  if (!stat.isFile()) throw { statusCode: 404, code: 'ATTACHMENT_FILE_NOT_FOUND', message: 'Attachment file not found.' };
+  const extension = ATTACHMENT_MIME_EXTENSIONS[attachment.mimetype] || '.bin';
+  return {
+    id: attachment.id, path: filePath,
+    filename: isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED'
+      ? ('attachment-' + attachment.id + extension)
+      : sanitizeAttachmentDisplayName(attachment.filename || ('attachment-' + attachment.id), attachment.mimetype),
+    mimetype: SUPPORTED_ATTACHMENT_TYPES.has(attachment.mimetype) ? attachment.mimetype : 'application/octet-stream',
+    size: stat.size,
+  };
 }
 
 function assertCanReadResponses(inquiry, caller) {
@@ -476,7 +581,11 @@ function shapeInquiryForCaller(inquiry, caller) {
       }));
     }
 
-    result.responses = visibleResponses;
+    const anonymousAttachments = isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED'
+      && areResponsesRevealed(inquiry) && !isStaff;
+    result.responses = visibleResponses.map((response) => (
+      presentResponseAttachments(response, inquiry.id, { anonymous: anonymousAttachments })
+    ));
     result.responsesHidden = false;
   }
 
@@ -1530,10 +1639,10 @@ async function listResponses(inquiryId, caller) {
         }
         return safeItem;
       });
-      return safe;
+      return presentResponseAttachments(safe, numericInquiryId, { anonymous: true });
     });
   }
-  return responses;
+  return responses.map((response) => presentResponseAttachments(response, numericInquiryId));
 }
 
 async function updateResponse(inquiryId, responseId, data, caller) {
@@ -1562,16 +1671,14 @@ async function updateResponse(inquiryId, responseId, data, caller) {
 
     await tx.inquiryResponseItem.deleteMany({ where: { responseId: numericResponseId } });
 
-    return tx.inquiryResponse.update({
+    const updatedResponse = await tx.inquiryResponse.update({
       where: { id: numericResponseId },
       data: {
         items: normalizeResponseItems(data.items),
       },
-      include: {
-        inquiry: true,
-        ...responseInclude,
-      },
+      include: responseInclude,
     });
+    return presentResponseAttachments(updatedResponse, numericInquiryId);
   });
 }
 
@@ -1751,7 +1858,7 @@ async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
       { tx, dedupeKey: (userId) => `inquiry-response-withdrawn-${response.id}-${userId}` },
     );
 
-    return withdrawnResponse;
+    return presentResponseAttachments(withdrawnResponse, numericInquiryId);
   });
 }
 
@@ -1795,7 +1902,7 @@ async function uploadResponseAttachment(inquiryId, responseId, file, caller) {
   const stored = await saveResponseAttachment(file);
 
   try {
-    return await prisma.$transaction(async (tx) => {
+    const attachment = await prisma.$transaction(async (tx) => {
       // Serialize concurrent uploads for the same inquiry before checking the
       // per-response cap. Re-check editability after acquiring the lock so a
       // response/inquiry closed during the file write cannot accept an upload.
@@ -1824,6 +1931,7 @@ async function uploadResponseAttachment(inquiryId, responseId, file, caller) {
         },
       });
     }, { maxWait: 5000, timeout: 12000 });
+    return { ...attachment, url: responseAttachmentDownloadUrl(numericInquiryId, numericResponseId, attachment.id) };
   } catch (error) {
     // The file is written before the database transaction to avoid holding a
     // row lock during disk I/O. Clean it up if the cap/re-check/insert fails.
@@ -2005,6 +2113,7 @@ module.exports = {
   decideResponse,
   withdrawResponse,
   uploadResponseAttachment,
+  getResponseAttachment,
   deleteResponseAttachment,
 };
 

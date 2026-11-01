@@ -248,6 +248,24 @@ async function uploadAttachment(response, file) {
   }
 }
 
+async function downloadAttachment(response, attachment) {
+  try {
+    const result = await inquiriesApi.downloadResponseAttachment(route.params.id, response.id, attachment.id)
+    const blob = result.data
+    if (!(blob instanceof Blob)) throw new Error('فایل دریافتی معتبر نیست.')
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = attachment.filename || 'attachment'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در دریافت فایل', life: 3500 })
+  }
+}
+
 async function deleteAttachment(response, attachment) {
   try {
     await inquiriesApi.deleteResponseAttachment(route.params.id, response.id, attachment.id)
@@ -258,17 +276,6 @@ async function deleteAttachment(response, attachment) {
   }
 }
 
-function attachmentUrl(url) {
-  if (!url) return '#'
-  if (/^https?:\/\//.test(url)) return url
-  // API_BASE_URL usually ends with /api/v1; uploads are served from the origin root.
-  try {
-    const origin = new URL(API_BASE_URL, window.location.origin).origin
-    return `${origin}${url}`
-  } catch {
-    return url
-  }
-}
 
 function formatPrice(price) {
   return new Intl.NumberFormat('fa-IR', { style: 'currency', currency: 'IRR' }).format(price)
@@ -408,7 +415,7 @@ function formatPrice(price) {
               </span>
               <div class="attachment-list">
                 <div v-for="att in response.attachments" :key="att.id" class="attachment-chip">
-                  <a :href="attachmentUrl(att.url)" target="_blank" rel="noopener">
+                  <a href="#" @click.prevent="downloadAttachment(response, att)">
                     <i class="pi pi-file"></i> {{ att.filename }}
                   </a>
                   <Button

@@ -180,7 +180,7 @@ const mockPrisma = {
   },
   inquiryResponseAttachment: {
     count: async (args) => { record('inquiryResponseAttachment.count', args); return fx.attachmentCount; },
-    findFirst: async () => fx.attachment,
+    findFirst: async (args) => { record('inquiryResponseAttachment.findFirst', args); return fx.attachment; },
     create: async (args) => {
       if (fx.attachmentCreateError) {
         const error = fx.attachmentCreateError;
@@ -539,7 +539,8 @@ function largeStream(megabytes) {
   })());
 }
 
-const attachmentDir = path.join(process.cwd(), 'uploads', 'inquiries', 'responses');
+const attachmentDir = path.join(process.cwd(), 'private-uploads', 'inquiries', 'responses');
+const legacyAttachmentDir = path.join(process.cwd(), 'uploads', 'inquiries', 'responses');
 
 
 test('getInquiry: STAFF with a stray companyId cannot read that company inquiry as its buyer', async () => {
@@ -1491,6 +1492,7 @@ test('updateResponse: rewrites the items of a pending response', async () => {
   const args = calls['inquiryResponse.update'].at(-1);
   assert.equal(args.where.id, 50);
   assert.equal(args.data.items.create[0].price, 10);
+  assert.equal(args.include.inquiry, undefined, 'supplier response updates must not return the raw buyer inquiry record');
 });
 
 test('updateResponse: companyId is derived from COMPANY context, not request body', async () => {
@@ -1695,6 +1697,23 @@ test('withdrawResponse: a non-pending response is rejected', async () => {
 
 // ── Response attachments (real file I/O into backend/uploads) ─
 
+test('uploadResponseAttachment: stored extension follows the allowlisted MIME type, not the client filename', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry();
+  fx.response = { id: 50, status: 'PENDING' };
+
+  const attachment = await inquiryService.uploadResponseAttachment(
+    1, 50, makeFile({ filename: '../../Secret-Quote.html', mimetype: 'application/pdf' }), seller,
+  );
+
+  assert.equal(attachment.filename, 'Secret-Quote.pdf');
+  const storageKey = calls['inquiryResponseAttachment.create'][0].data.url;
+  assert.match(storageKey, /^private:\/\/inquiries\/responses\/[a-zA-Z0-9_-]+\.pdf$/);
+  const storedPath = path.join(attachmentDir, storageKey.split('/').pop());
+  assert.ok(fs.existsSync(storedPath));
+  fs.rmSync(storedPath, { force: true });
+});
+
 test('uploadResponseAttachment: stores the file and writes the row', async () => {
   resetMocks();
   nextFindUnique = openInquiry();
@@ -1705,13 +1724,14 @@ test('uploadResponseAttachment: stores the file and writes the row', async () =>
   );
 
   assert.equal(attachment.responseId, 50);
-  assert.ok(attachment.url.startsWith('/uploads/inquiries/responses/'));
+  assert.ok(attachment.url.startsWith('/api/v1/inquiries/1/responses/50/attachments/'));
   const lockIndex = operationTimeline.indexOf('$queryRawUnsafe');
   const countIndex = operationTimeline.indexOf('inquiryResponseAttachment.count');
   const createIndex = operationTimeline.indexOf('inquiryResponseAttachment.create');
   assert.ok(lockIndex >= 0 && lockIndex < countIndex && countIndex < createIndex, 'parent inquiry is locked before the attachment cap is checked and row inserted');
   assert.ok(calls.$transaction.some(({ kind }) => kind === 'interactive'));
-  const storedPath = path.join(process.cwd(), attachment.url.replace(/^\//, ''));
+  const storageKey = calls['inquiryResponseAttachment.create'][0].data.url;
+  const storedPath = path.join(attachmentDir, storageKey.split('/').pop());
   assert.ok(fs.existsSync(storedPath));
   fs.rmSync(storedPath, { force: true });
 });
@@ -1810,7 +1830,7 @@ test('deleteResponseAttachment: deletes the row and the stored file', async () =
   resetMocks();
   nextFindUnique = openInquiry();
   fx.response = { id: 50, status: 'PENDING' };
-  fx.attachment = { id: 77, url: '/uploads/inquiries/responses/gone.pdf' };
+  fx.attachment = { id: 77, url: 'private://inquiries/responses/gone.pdf' };
 
   fs.mkdirSync(attachmentDir, { recursive: true });
   const storedPath = path.join(attachmentDir, 'gone.pdf');
@@ -2612,4 +2632,175 @@ test('revealInquiryResponses: STAFF read permission is insufficient; update perm
   const revealed = await inquiryService.revealInquiryResponses(1, moderator);
   assert.ok(revealed.revealedAt);
   assert.ok(calls['inquiry.update'][0].data.revealedAt instanceof Date);
+});
+
+
+// ── Step 17: private response attachment access ──────────────
+
+test('getResponseAttachment: supplier can download only its own response file through a private storage key', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    publishDate: null, visibilityMode: 'NORMAL',
+    items: [{ product: { companyId: seller.companyId } }],
+  });
+  fx.response = { id: 50, companyId: seller.companyId };
+  fx.attachment = {
+    id: 77, responseId: 50, url: 'private://inquiries/responses/private-quote.pdf',
+    filename: 'Quote.pdf', mimetype: 'application/pdf', size: 4,
+  };
+  fs.mkdirSync(attachmentDir, { recursive: true });
+  const storedPath = path.join(attachmentDir, 'private-quote.pdf');
+  fs.writeFileSync(storedPath, '%PDF');
+
+  try {
+    const file = await inquiryService.getResponseAttachment(1, 50, 77, seller);
+    assert.equal(file.path, storedPath);
+    assert.equal(file.filename, 'Quote.pdf');
+    assert.equal(file.mimetype, 'application/pdf');
+    assert.deepEqual(calls['inquiryResponse.findFirst'][0].where, {
+      id: 50, inquiryId: 1, companyId: seller.companyId,
+    });
+    assert.deepEqual(calls['inquiryResponseAttachment.findFirst'][0].where, {
+      id: 77, responseId: 50,
+    });
+  } finally {
+    fs.rmSync(storedPath, { force: true });
+  }
+});
+
+test('getResponseAttachment: supplier cannot download another company response attachment', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    publishDate: null, visibilityMode: 'NORMAL',
+    items: [{ product: { companyId: seller.companyId } }],
+  });
+  fx.response = null;
+
+  await assert.rejects(
+    () => inquiryService.getResponseAttachment(1, 50, 77, seller),
+    (error) => error.statusCode === 404 && error.code === 'ATTACHMENT_NOT_FOUND',
+  );
+  assert.deepEqual(calls['inquiryResponse.findFirst'][0].where, {
+    id: 50, inquiryId: 1, companyId: seller.companyId,
+  });
+  assert.equal(calls['inquiryResponseAttachment.findFirst'], undefined);
+});
+
+test('getResponseAttachment: buyer cannot download sealed response files before reveal', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'SEALED', revealedAt: null,
+    responseDeadline: new Date(Date.now() + 60_000),
+    items: [{ product: { companyId: seller.companyId } }],
+  });
+
+  await assert.rejects(
+    () => inquiryService.getResponseAttachment(1, 50, 77, buyer),
+    (error) => error.statusCode === 404 && error.code === 'ATTACHMENT_NOT_FOUND',
+  );
+  assert.equal(calls['inquiryResponse.findFirst'], undefined);
+  assert.equal(calls['inquiryResponseAttachment.findFirst'], undefined);
+});
+
+test('getResponseAttachment: anonymous sealed buyer receives a non-identifying download filename after reveal', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'ANONYMOUS_SEALED', revealedAt: new Date(),
+    responseDeadline: new Date(Date.now() - 60_000),
+    items: [{ product: { companyId: seller.companyId } }],
+  });
+  fx.response = { id: 50, companyId: seller.companyId };
+  fx.attachment = {
+    id: 77, responseId: 50, url: 'private://inquiries/responses/private-quote.pdf',
+    filename: 'Secret-Supplier-Quote.pdf', mimetype: 'application/pdf', size: 4,
+  };
+  fs.mkdirSync(attachmentDir, { recursive: true });
+  const storedPath = path.join(attachmentDir, 'private-quote.pdf');
+  fs.writeFileSync(storedPath, '%PDF');
+
+  try {
+    const file = await inquiryService.getResponseAttachment(1, 50, 77, buyer);
+    assert.equal(file.filename, 'attachment-77.pdf');
+    assert.equal(file.path, storedPath);
+  } finally {
+    fs.rmSync(storedPath, { force: true });
+  }
+});
+
+test('getResponseAttachment: rejects a storage key that escapes both allowed roots', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    publishDate: null, visibilityMode: 'NORMAL',
+    items: [{ product: { companyId: seller.companyId } }],
+  });
+  fx.response = { id: 50, companyId: seller.companyId };
+  fx.attachment = {
+    id: 77, responseId: 50, url: 'private://inquiries/responses/../../secrets.txt',
+    filename: 'secret.txt', mimetype: 'text/plain', size: 1,
+  };
+
+  await assert.rejects(
+    () => inquiryService.getResponseAttachment(1, 50, 77, seller),
+    (error) => error.statusCode === 404 && error.code === 'ATTACHMENT_FILE_NOT_FOUND',
+  );
+});
+
+test('deleteResponseAttachment: removes legacy public-path files during migration cleanup', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry();
+  fx.response = { id: 50, status: 'PENDING' };
+  fx.attachment = { id: 79, url: '/uploads/inquiries/responses/legacy.pdf' };
+  fs.mkdirSync(legacyAttachmentDir, { recursive: true });
+  const legacyPath = path.join(legacyAttachmentDir, 'legacy.pdf');
+  fs.writeFileSync(legacyPath, '%PDF');
+
+  await inquiryService.deleteResponseAttachment(1, 50, 79, seller);
+
+  assert.equal(fs.existsSync(legacyPath), false);
+});
+
+
+test('getInquiry: response attachments use authenticated download endpoints instead of storage keys', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'NORMAL', items: [],
+    responses: [{
+      id: 50, companyId: seller.companyId, company: { id: seller.companyId, name: 'Supplier' },
+      items: [], attachments: [{
+        id: 77, filename: 'Quote.pdf', url: 'private://inquiries/responses/private-quote.pdf',
+      }],
+    }],
+  });
+
+  const inquiry = await inquiryService.getInquiry(1, buyer);
+  assert.equal(inquiry.responses[0].attachments[0].url, '/api/v1/inquiries/1/responses/50/attachments/77/download');
+  assert.equal(inquiry.responses[0].attachments[0].url.includes('private://'), false);
+});
+
+test('getInquiry: anonymous sealed buyer sees generic attachment filename and no supplier identifiers', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({
+    id: 1, companyId: buyer.companyId, buyerUserId: null,
+    visibilityMode: 'ANONYMOUS_SEALED', status: 'CLOSED',
+    revealedAt: new Date(), responseDeadline: new Date(Date.now() - 60_000),
+    items: [],
+    responses: [{
+      id: 50, companyId: seller.companyId, company: { id: seller.companyId, name: 'Secret Supplier' },
+      items: [], attachments: [{
+        id: 77, filename: 'Secret-Supplier-Quote.pdf', mimetype: 'application/pdf', url: 'private://inquiries/responses/private-quote.pdf',
+      }],
+    }],
+  });
+
+  const inquiry = await inquiryService.getInquiry(1, buyer);
+  assert.equal(inquiry.responses[0].company.name, 'پیشنهاددهنده 1');
+  assert.equal(inquiry.responses[0].companyId, undefined);
+  assert.equal(inquiry.responses[0].attachments[0].filename, 'پیوست 1.pdf');
+  assert.equal(inquiry.responses[0].attachments[0].url, '/api/v1/inquiries/1/responses/50/attachments/77/download');
 });

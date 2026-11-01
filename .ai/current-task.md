@@ -1064,3 +1064,21 @@ PR #79 squash-merged into `main` at `37b06e17e98b156da29e8afe28492bbec3aa1992`.
 ## Other open repository work
 
 - Notification recipient scoping PR remains open separately: `fix(notifications): restrict company events to active COMPANY profiles`. Review and merge independently after verifying its tests/checks.
+
+
+## Inquiry response attachment security — step 17 (in progress, 2026-11-01)
+
+- Branch: `audit/inquiry-response-attachment-security-step-17`.
+- Confirmed response attachments were stored under `uploads/inquiries/responses`, which is mounted as public static content. This bypassed all inquiry ownership, sealed visibility and company permission checks.
+- New uploads now go to `private-uploads/inquiries/responses` and database storage keys use the internal `private://inquiries/responses/...` scheme. Existing legacy `/uploads/inquiries/responses/...` rows remain supported only through the authenticated download service; the direct static URL route is explicitly blocked.
+- Added `GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download`. Service checks buyer/supplier/staff inquiry visibility, exact response ownership for suppliers, sealed reveal state, attachment-to-response association, safe storage key resolution and file existence. Responses expose the authenticated endpoint URL rather than the storage key. Anonymous-sealed buyer filenames are generic.
+- Company/admin UIs now fetch attachments as authenticated blobs through `@telecom/api-client`; no unauthenticated browser link is used.
+- Added backend service tests for supplier ownership, wrong response company, sealed pre-reveal denial, anonymous filename redaction, traversal keys and legacy cleanup; route tests and app static-route regression test added. CI pending.
+
+- Added a named `inquiry_private_uploads` volume to production Compose so private attachment files survive backend container replacement; development persists the directory through the existing backend bind mount. Added the directory to `.gitignore`.
+
+- Additional response-payload audit found `updateResponse` included `inquiry: true`, returning the raw parent inquiry (including buyer identifiers) to suppliers. Removed that include and asserted the response-update payload omits the inquiry record.
+- Attachment storage/display extensions are now derived from the allowlisted MIME type rather than trusting the client filename extension; display names strip control characters and path components.
+
+- Inquiry detail (`GET /inquiries/:id`) now includes response attachment metadata and transforms every stored key into the authenticated download endpoint; sealed visibility and anonymous filename redaction are applied by the same caller-specific response shaper. This is required by both Company/Admin detail views, which render attachments from `inquiry.responses`.
+- Removed the raw parent `inquiry:true` include from supplier response updates; the buyer identifiers are no longer returned. Attachment extensions are derived from allowlisted MIME types and legacy download filenames are normalized.

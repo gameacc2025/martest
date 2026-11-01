@@ -44,7 +44,7 @@ test('every registered API route has a dedicated OpenAPI route-doc entry', () =>
   const documentedKeys = new Set(Object.keys(docs));
   const missing = registeredKeys.filter((key) => !documentedKeys.has(key));
 
-  assert.equal(registeredKeys.length, 149, 'update the expected route count when the inventory changes');
+  assert.equal(registeredKeys.length, 150, 'update the expected route count when the inventory changes');
   assert.deepEqual(missing, [], 'every registered route must have dedicated OpenAPI metadata');
 });
 
@@ -169,6 +169,19 @@ test('product history and inquiry conversation response contracts match service 
   const attachment = docs['POST /api/v1/inquiries/:id/responses/:responseId/attachments'].responses[201].properties.data.properties;
   assert.ok(attachment.url);
   assert.ok(attachment.filename);
+});
+
+test('supplier response update contract excludes the raw inquiry record', () => {
+  const response = docs['PATCH /api/v1/inquiries/:id/responses/:responseId'].responses[200].properties.data.properties;
+  assert.equal(response.inquiry, undefined);
+});
+
+test('response attachment download is an authenticated binary response', () => {
+  const download = docs['GET /api/v1/inquiries/:id/responses/:responseId/attachments/:attachmentId/download'];
+  assert.ok(download);
+  assert.equal(download.responses[200].type, 'string');
+  assert.equal(download.responses[200].format, 'binary');
+  assert.deepEqual(download.params.required, ['id', 'responseId', 'attachmentId']);
 });
 
 test('every entry has a non-empty summary, description, and tags array', () => {

@@ -95,6 +95,16 @@ async function buildApp() {
   const fs = require('fs');
   const uploadsRoot = path.join(process.cwd(), 'uploads');
   fs.mkdirSync(uploadsRoot, { recursive: true });
+
+  // Response attachments may contain private supplier quotations. Keep
+  // legacy public URLs closed as well; authorized downloads go through the
+  // inquiry attachment route, which verifies buyer/supplier visibility.
+  app.route({
+    method: ['GET', 'HEAD'],
+    url: '/uploads/inquiries/responses/*',
+    handler: async (_request, reply) => reply.code(404).send({ error: true, code: 'NOT_FOUND', message: 'Not found.' }),
+  });
+
   await app.register(require('@fastify/static'), {
     root: uploadsRoot,
     prefix: '/uploads/',

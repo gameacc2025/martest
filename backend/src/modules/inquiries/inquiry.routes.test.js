@@ -33,7 +33,7 @@ const controllerMethods = [
   'list', 'stats', 'getById', 'create', 'update', 'listItems',
   'changeStatus', 'revealResponses', 'addItem', 'updateItem', 'deleteItem',
   'listResponses', 'submitResponse', 'updateResponse', 'decideResponse',
-  'withdrawResponse', 'uploadResponseAttachment', 'deleteResponseAttachment',
+  'withdrawResponse', 'uploadResponseAttachment', 'downloadResponseAttachment', 'deleteResponseAttachment',
 ];
 for (const name of controllerMethods) {
   trivialController[name] = async (request, reply) => {
@@ -64,6 +64,31 @@ function userHeader(accessType, permissions) {
 }
 
 test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
+
+
+test('GET /:id/responses/:responseId/attachments/:attachmentId/download: COMPANY with inquiries.read -> 200', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/inquiries/1/responses/50/attachments/77/download',
+    headers: userHeader('COMPANY', ['inquiries.read']),
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.downloadResponseAttachment, true);
+  await app.close();
+});
+
+test('GET attachment download without permission -> 403', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/inquiries/1/responses/50/attachments/77/download',
+    headers: userHeader('COMPANY', []),
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.downloadResponseAttachment, undefined);
+  await app.close();
+});
 
 // ── Auth: all routes require authentication ────────────────────
 
