@@ -1872,3 +1872,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - CI [41283879276] passed: backend 1,418/1,418; frontend/shared 18/18; frontend builds passed. Migration validation [41283879237] passed. Runtime [41283879261] was still running separately at merge.
 - Tests now assert successful REJECTED supplier notification, SELECTED supplier notification, per-loser AUTO_REJECTED notifications, inquiry owner CLOSED notification, tx binding and dedupe keys. Anonymous-safe selected context remains free of supplier company identity.
 - Next: audit inquiry response-deadline expiry automation, idempotency and notifications.
+
+
+## 2026-11-01 — INQUIRY-LIFECYCLE-OWNER-NOTIFICATION-STEP-16U
+
+- Lifecycle service audit confirmed scheduled publishing/expiry use compare-and-set updates within transactions; due boundaries are inclusive (`lte`). Status history and notification writes are transactional.
+- Found `notifyStatusChanged` repeated the company owner bug fixed in step 16S: checking `.length` on `{companyIds}` skips company owners on automatic expiry. Fixed recipient presence detection for arrays and company descriptors.
+- Added company-owned expiry regression, active responding company + withdrawn exclusion, tx/dedupe assertions, inclusive deadline query assertions, and duplicate poll idempotency test. CI pending.
