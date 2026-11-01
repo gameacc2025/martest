@@ -1734,3 +1734,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Root cause: `mergeResponseDocs(schemaResponses, docResponses)` returned `{...docResponses,...schemaResponses}`, allowing framework-generated response definitions to override the audited route-doc registry.
 - Fixed merge precedence to `{...schemaResponses,...docResponses}` with comments: concrete route schemas are fallback; explicit audited route-doc responses take precedence.
 - Existing generated spec integration assertions now exercise 401/403 union, native 429, 500 union, payment-specific 502/503 and 204 without content. Migration validation on previous commit passed; rerun CI pending.
+
+
+## 2026-11-01 — OPENAPI-GENERATED-SPEC-STEP-16M-OAS30-FIX
+
+- After response merge precedence correction, CI showed the generated spec still did not expose expected `const` fields. Root cause: OpenAPI 3.0.3 does not support JSON Schema `const`; the Swagger serializer drops those keywords.
+- Converted step 16J error schema discriminators from `const` to single-value `enum` (`error: [true]`, `statusCode: [429]`, `error: ['Too Many Requests']`). Updated route-doc static tests and generated `/docs/json` integration assertions.
+- Route-doc precedence fix retained: explicit audited route responses override generated defaults; registered handler schemas remain fallback. CI/migration validation pending.
