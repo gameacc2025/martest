@@ -63,7 +63,11 @@ async function resolveRecipients(client, recipients) {
   if (!Array.isArray(recipients) && Array.isArray(recipients.companyIds)) {
     const users = await client.user.findMany({
       where: {
-        accessProfile: { companyId: { in: recipients.companyIds.map(Number) } },
+        accessProfile: {
+          companyId: { in: recipients.companyIds.map(Number) },
+          type: 'COMPANY',
+          isActive: true,
+        },
         status: 'ACTIVE',
       },
       select: { id: true, email: true },
@@ -96,7 +100,7 @@ async function resolveRecipients(client, recipients) {
       where: {
         status: 'ACTIVE',
         roles: { some: { role: { name: { in: recipients.roles.map(String) } } } },
-        ...(recipients.companyId !== undefined ? { accessProfile: { companyId: Number(recipients.companyId) } } : {}),
+        ...(recipients.companyId !== undefined ? { accessProfile: { companyId: Number(recipients.companyId), type: 'COMPANY', isActive: true } } : {}),
       },
       select: { id: true, email: true },
     });
