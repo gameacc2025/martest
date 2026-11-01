@@ -58,8 +58,9 @@ const DEFAULT_MAX_ATTEMPTS = 3;
 async function resolveRecipients(client, recipients) {
   if (recipients === null || recipients === undefined) return [];
 
-  // Descriptor: members of the given companies (ACTIVE only, matching the
-  // pre-existing getCompanyUserIds helper in product.service.js).
+  // Descriptor: active COMPANY-panel members of the given companies. The
+  // access-profile type/isActive predicates deliberately exclude STAFF users
+  // who may share the platform Main-company ID.
   if (!Array.isArray(recipients) && Array.isArray(recipients.companyIds)) {
     const users = await client.user.findMany({
       where: {
