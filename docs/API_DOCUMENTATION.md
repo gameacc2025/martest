@@ -513,3 +513,5 @@ PR #79 merged at `37b06e17e98b156da29e8afe28492bbec3aa1992`. CI passed 1,432 bac
 - Company/Admin panels fetch the file through the authenticated API client as a Blob; direct unauthenticated anchor downloads are no longer used. Anonymous-sealed buyer metadata uses generic filenames. The file's internal document content is not rewritten, so suppliers must avoid embedding identifying information in attachments when strict anonymity is required.
 
 - Private response files are persisted outside the public static tree. Production Compose mounts `inquiry_private_uploads` at `/app/private-uploads`; development uses the backend bind mount. The private directory is ignored by Git.
+
+- Supplier response updates return only the response projection; the parent inquiry record and buyer identity fields are not part of the response payload. Attachment display names and physical extensions are sanitized and derived from the allowlisted MIME type.
