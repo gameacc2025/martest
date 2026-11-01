@@ -1043,3 +1043,24 @@ PR #78 squash-merged into `main` at `7d46b65a1f186fa63a91691240776cc336c23cc3`.
 - Confirmed item ownership lookup is scoped by both item ID and parent inquiry ID; cross-inquiry item IDs return `INQUIRY_ITEM_NOT_FOUND`. Item writes require buyer ownership or authorized STAFF update access and are DRAFT-only. CUSTOMER status changes are restricted to CANCELLED. STAFF reveal requires update permission; read-only STAFF cannot reveal early.
 - Found a race: item add/update/delete read DRAFT without locking the parent Inquiry row, while status transition/response submission already serialize on that row. Two concurrent item deletes could both observe more than one item and remove the final two; item mutation could also race a DRAFT→SUBMITTED transition. Added parent-row `FOR UPDATE` locking to item add/update/delete, general inquiry update and response reveal so all lifecycle/item mutations serialize against status and response operations.
 - Added tests for lock use, cross-inquiry item IDs, STAFF read-vs-update, CUSTOMER cancel-only, and reveal permission boundaries. CI pending.
+
+
+## Inquiry item and lifecycle mutation authorization — step 16Z merged (2026-11-01)
+
+PR #79 squash-merged into `main` at `37b06e17e98b156da29e8afe28492bbec3aa1992`.
+
+- CI [41324596670] passed: 33 frontend test files, 18 root Node tests, 1,432 backend tests; all frontend builds passed.
+- Prisma migration validation [41324596563] passed. Runtime/compose validation [41324596827] is separate and not used as a merge gate.
+- Item add/update/delete, inquiry update and response reveal now lock the parent Inquiry row before reading mutable state. This serializes DRAFT-only item changes and item-count invariants against concurrent item operations, status transitions and response operations.
+- Confirmed item update/delete are scoped by both inquiryId and itemId; STAFF read-only cannot mutate/reveal; CUSTOMER can only cancel own inquiry. Added adversarial tests.
+
+## Next active work — step 17 inquiry response attachment security and storage audit
+
+- Trace response attachment upload/delete, file validation, storage paths, cleanup, MIME/size limits, public/static file serving, and ownership checks across COMPANY/STAFF/CUSTOMER.
+- Verify that an attachment ID or path cannot be used across response/inquiry/company boundaries, anonymous/sealed visibility does not bypass response access, and uploaded files cannot escape the intended upload root or be served with unsafe content types.
+- Add tests for wrong response/inquiry/company, unauthorized roles, malformed/missing/oversized files, cleanup after DB failure, and safe storage URLs. Fix demonstrated issues only.
+- Update docs/.ai, CI and migration validation; merge.
+
+## Other open repository work
+
+- Notification recipient scoping PR remains open separately: `fix(notifications): restrict company events to active COMPANY profiles`. Review and merge independently after verifying its tests/checks.
