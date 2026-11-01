@@ -722,3 +722,6 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 - First rerun still failed at generated `/docs/json` assertion because OpenAPI 3.0.3 does not support JSON Schema `const`; Swagger serialization dropped the `const` keywords, so the expected discriminator values were absent in the generated spec.
 - Replaced `const` with single-value `enum` for direct auth/RBAC error and native Fastify 429 fields; updated static and generated-spec tests to assert enum arrays. Kept the response merge precedence correction so route docs override generated defaults.
 - CI and migration validation rerun pending.
+
+
+- Follow-up CI caught a test-only assertion mistake: enum arrays were compared with strict scalar equality. Updated those assertions to structural `deepEqual`; generated Swagger integration checks now pass on the preceding attempt, and only the static assertion failed. CI rerun pending.
