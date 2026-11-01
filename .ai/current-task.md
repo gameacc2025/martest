@@ -1035,3 +1035,11 @@ PR #78 squash-merged into `main` at `7d46b65a1f186fa63a91691240776cc336c23cc3`.
 ## Other open repository work
 
 - PR for notification event recipient scoping remains open separately: `fix(notifications): restrict company events to active COMPANY profiles`. Do not merge it as part of inquiry authorization work without reviewing its own checks.
+
+
+## Inquiry item and lifecycle mutation authorization — step 16Z (in progress, 2026-11-01)
+
+- Branch: `audit/inquiry-item-lifecycle-authorization-step-16z`.
+- Confirmed item ownership lookup is scoped by both item ID and parent inquiry ID; cross-inquiry item IDs return `INQUIRY_ITEM_NOT_FOUND`. Item writes require buyer ownership or authorized STAFF update access and are DRAFT-only. CUSTOMER status changes are restricted to CANCELLED. STAFF reveal requires update permission; read-only STAFF cannot reveal early.
+- Found a race: item add/update/delete read DRAFT without locking the parent Inquiry row, while status transition/response submission already serialize on that row. Two concurrent item deletes could both observe more than one item and remove the final two; item mutation could also race a DRAFT→SUBMITTED transition. Added parent-row `FOR UPDATE` locking to item add/update/delete, general inquiry update and response reveal so all lifecycle/item mutations serialize against status and response operations.
+- Added tests for lock use, cross-inquiry item IDs, STAFF read-vs-update, CUSTOMER cancel-only, and reveal permission boundaries. CI pending.
