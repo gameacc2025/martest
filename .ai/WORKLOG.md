@@ -1887,3 +1887,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - CI [41284107485] passed: backend 1,418/1,418; frontend/shared 18/18; builds passed. Migration validation [41284107504] passed. Runtime [41284107444] remained separate/in progress at merge.
 - Fixed lifecycle owner-recipient guard so company-owned inquiries receive EXPIRED status notices. Added tests for company owner, active responders, withdrawn exclusion, deadline boundary and repeated-poll idempotency.
 - Next: audit frontend/API consistency for inquiry lifecycle settings, dates and closed/expired states.
+
+
+## 2026-11-01 — INQUIRY-LIFECYCLE-UI-DATE-WINDOW-STEP-16V
+
+- Audited company/admin create forms and backend `assertInquiryDateWindow`. Company form omitted publishDate < responseDeadline validation that admin form and backend already enforce; malformed restored date values also slipped past `NaN` comparisons.
+- Added `apps/company/src/utils/inquiryDateWindow.js`, wired it into company InquiryCreate settings validation, and added unit tests for future deadline, strict publish/deadline ordering, malformed dates and valid schedules.
+- No API/backend behavior changed; server validation remains authoritative. CI pending.
