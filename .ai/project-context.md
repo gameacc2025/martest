@@ -792,3 +792,12 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 - Supplier withdrawal of a pending response emits `INQUIRY_RESPONSE_WITHDRAWN` to the inquiry owner, transactionally with the status change. IN_APP/EMAIL default on, SMS off.
 - Wording is generic ("one of the companies") and payload includes only inquiryId/responseId, preserving SEALED and ANONYMOUS_SEALED supplier confidentiality.
 - Recipient resolution targets active Website buyer user or active COMPANY access-profile members; STAFF accounts sharing company IDs are excluded. Dedupe includes response and recipient IDs.
+
+
+## Inquiry data isolation and sealed conversations — 2026-11-01
+
+- Inquiry list scope is restricted to `sent`, `received`, and `all`; service validates the enum even though the Fastify query schema also validates it.
+- Supplier received lists and received dashboard aggregates must share the same publication filter: statuses SUBMITTED/OPEN/CLOSED/EXPIRED/COMPLETED and publishDate null or not in the future. Draft/future inquiries must not be counted as received.
+- SEALED and ANONYMOUS_SEALED conversations remain unavailable to buyers before response reveal; neither party may start a message thread before reveal.
+- ANONYMOUS_SEALED buyer message reads mask supplier names with generic proposer labels and remove supplier company IDs. The buyer's own company identity may remain visible to that buyer. Read receipts still update only returned recipient messages.
+- Current buyer-to-supplier message API requires recipientCompanyId; do not permit direct company-targeted messaging in ANONYMOUS_SEALED, as that leaks/probes supplier identity. A future anonymous messaging feature should address a response/thread token rather than raw company ID.
