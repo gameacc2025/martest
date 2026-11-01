@@ -725,3 +725,6 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 
 
 - Follow-up CI caught a test-only assertion mistake: enum arrays were compared with strict scalar equality. Updated those assertions to structural `deepEqual`; generated Swagger integration checks now pass on the preceding attempt, and only the static assertion failed. CI rerun pending.
+
+
+- A subsequent CI run passed the static error-contract tests but the generated-spec test had the same test-only issue: enum arrays were still checked with `assert.equal`. Converted generated-spec enum assertions to `assert.deepEqual` as well. No runtime/API behavior changed. CI rerun pending.
