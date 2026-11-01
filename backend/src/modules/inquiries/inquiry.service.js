@@ -1660,11 +1660,35 @@ async function withdrawResponse(inquiryId, responseId, caller, data = {}) {
       throw { statusCode: 400, code: 'RESPONSE_LOCKED', message: 'Only pending responses can be withdrawn.' };
     }
 
-    return tx.inquiryResponse.update({
+    const withdrawnResponse = await tx.inquiryResponse.update({
       where: { id: numericResponseId },
       data: { status: 'WITHDRAWN', withdrawnAt: new Date() },
       include: responseInclude,
     });
+
+    const inquiryOwnerRecipients = inquiry.buyerUserId
+      ? await tx.user.findMany({
+        where: { id: inquiry.buyerUserId, status: 'ACTIVE' },
+        select: { id: true },
+      })
+      : await tx.user.findMany({
+        where: {
+          status: 'ACTIVE',
+          accessProfile: { companyId: inquiry.companyId, type: 'COMPANY', isActive: true },
+        },
+        select: { id: true },
+      });
+    await dispatchNotification(
+      'INQUIRY_RESPONSE_WITHDRAWN',
+      inquiryOwnerRecipients.map((recipient) => recipient.id),
+      {
+        inquiry: { id: inquiry.id, title: inquiry.title },
+        response: { id: response.id },
+      },
+      { tx, dedupeKey: (userId) => `inquiry-response-withdrawn-${response.id}-${userId}` },
+    );
+
+    return withdrawnResponse;
   });
 }
 
