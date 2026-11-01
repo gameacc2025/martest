@@ -1490,6 +1490,46 @@ test('withdrawResponse: marks a pending response as WITHDRAWN', async () => {
   assert.ok(args.data.withdrawnAt instanceof Date);
 });
 
+test('withdrawResponse: notifies active COMPANY buyer members without exposing supplier identity', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 1, companyId: 10, buyerUserId: null, title: 'Sealed RFQ', visibilityMode: 'ANONYMOUS_SEALED', allowWithdrawResponse: true });
+  fx.response = { id: 50, status: 'PENDING' };
+  fx.notificationRecipients = [{ id: 101 }, { id: 102 }];
+
+  await inquiryService.withdrawResponse(1, 50, seller);
+
+  assert.deepEqual(calls['user.findMany'][0].where, {
+    status: 'ACTIVE',
+    accessProfile: { companyId: 10, type: 'COMPANY', isActive: true },
+  });
+  const notification = calls.dispatchNotification.find(([event]) => event === 'INQUIRY_RESPONSE_WITHDRAWN');
+  assert.ok(notification);
+  assert.deepEqual(notification[1], [101, 102]);
+  assert.deepEqual(notification[2], {
+    inquiry: { id: 1, title: 'Sealed RFQ' },
+    response: { id: 50 },
+  });
+  assert.equal(notification[2].company, undefined);
+  assert.equal(notification[3].tx, mockPrisma);
+  assert.equal(notification[3].dedupeKey(101), 'inquiry-response-withdrawn-50-101');
+  assert.equal(notification[3].dedupeKey(102), 'inquiry-response-withdrawn-50-102');
+});
+
+test('withdrawResponse: notifies the active Website buyer user', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 1, companyId: null, buyerUserId: 77, allowWithdrawResponse: true });
+  fx.response = { id: 51, status: 'PENDING' };
+  fx.notificationRecipients = [{ id: 77 }];
+
+  await inquiryService.withdrawResponse(1, 51, seller);
+
+  assert.deepEqual(calls['user.findMany'][0].where, { id: 77, status: 'ACTIVE' });
+  const notification = calls.dispatchNotification.find(([event]) => event === 'INQUIRY_RESPONSE_WITHDRAWN');
+  assert.ok(notification);
+  assert.deepEqual(notification[1], [77]);
+  assert.equal(notification[3].dedupeKey(77), 'inquiry-response-withdrawn-51-77');
+});
+
 test('withdrawResponse: requires an explicit COMPANY application context', async () => {
   resetMocks();
   await assert.rejects(
