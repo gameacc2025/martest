@@ -1803,3 +1803,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed list-read behavior to mark only unread recipient IDs in the returned result as read, not every unread message in the thread. Returned message objects now reflect readAt written by the request.
 - Tests cover company and AccessProfile-less customer recipient scoping, ID-only updates and returned timestamps.
 - Next: audit inquiry message notification/event behavior, delivery preferences and unread badge integration.
+
+
+## 2026-11-01 — INQUIRY-MESSAGE-NOTIFICATION-STEP-16Q
+
+- Event catalog already defined `INQUIRY_MESSAGE_RECEIVED` with IN_APP + EMAIL defaults enabled and SMS disabled/opt-in, but `sendInquiryMessage` never called the dispatcher. Messages were persisted and optional paid SMS queued, but no in-app notification or email outbox was generated.
+- Added transactional dispatch after message creation and `INTERNAL_MESSAGE` usage consumption. Recipient resolution uses active user for Website-owned buyer or active COMPANY access profiles for company recipients; avoids companyId-only resolution that could include STAFF on Main-company ID.
+- Uses per-recipient dedupe key to avoid the dispatcher's `(eventType,dedupeKey,channel)` unique key suppressing notifications for other company members.
+- Kept custom SMS path separate and unchanged. Added tests for user/company recipients, active COMPANY filtering, STAFF exclusion and per-user dedupe. CI pending.

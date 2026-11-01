@@ -799,3 +799,11 @@ PR #68 squash-merged into `main` at `9ebbfbd96fa5e5df836abc6c8f930d4f252bace0`. 
 
 - Trace whether newly created inquiry messages generate the intended in-app notification/unread badge behavior, email/SMS delivery policy and event templates; compare service writes, notification event registry, frontend consumption and tests.
 - Verify sender/recipient identity for company-owned and user-owned inquiries, sealed/anonymous redaction, and dedupe/transaction boundaries. Add only policy-backed behavior; do not silently introduce paid SMS or change notification preferences.
+
+
+## Inquiry message notification delivery — step 16Q (in progress, 2026-11-01)
+
+- Confirmed `INQUIRY_MESSAGE_RECEIVED` already exists in `notification.events.js` with IN_APP + EMAIL enabled by default and SMS opt-in. `sendInquiryMessage` previously wrote the message and optional paid SMS outbox row but never dispatched this event, so no in-app notification/email was created.
+- Added transactional `dispatchNotification('INQUIRY_MESSAGE_RECEIVED', ...)` after message creation and internal-message quota consumption. Recipients are resolved to the active Website buyer user or active users with `accessProfile.type=COMPANY` and `isActive=true` for the recipient company. This deliberately excludes STAFF accounts that may share the Main-company ID.
+- Notification context carries inquiry id/title; dedupe keys are per recipient (`inquiry-message-{messageId}-{userId}`) so one company member's email does not suppress another's.
+- Existing optional paid SMS path remains separate, opt-in, quota-enforced and Twilio-outbox-backed. Tests added for user/company recipient resolution, STAFF exclusion and per-recipient dedupe. CI pending.
