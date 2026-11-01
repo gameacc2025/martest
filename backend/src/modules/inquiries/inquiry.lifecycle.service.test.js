@@ -72,7 +72,18 @@ test('processInquiryLifecycle publishes due inquiries and expires auto-close inq
   assert.equal(updateCalls[1].where.status, 'OPEN');
   assert.equal(updateCalls[1].where.autoClose, true);
   assert.deepEqual(updateCalls[1].where.responseDeadline, { lte: now });
-  assert.ok(dispatchCalls.some(([event]) => event === 'INQUIRY_PUBLISHED'));
+  const publicationNotifications = dispatchCalls.filter(([event]) => event === 'INQUIRY_PUBLISHED');
+  assert.deepEqual(publicationNotifications.map(([, recipients]) => recipients), [
+    { companyIds: [20] },
+    { permission: 'leads.read' },
+  ], 'scheduled publication targets companies owning requested products plus authorized staff');
+  for (const [, , context, options] of publicationNotifications) {
+    assert.deepEqual(context, { inquiry: { id: 1, title: 'Scheduled' } });
+    assert.equal(options.tx, mockPrisma);
+    assert.equal(typeof options.dedupeKey, 'function');
+  }
+  assert.equal(publicationNotifications[0][3].dedupeKey(71), 'inquiry-published-1-companies-71');
+  assert.equal(publicationNotifications[1][3].dedupeKey(72), 'inquiry-published-1-staff-72');
   const statusNotifications = dispatchCalls.filter(([event]) => event === 'INQUIRY_STATUS_CHANGED');
   assert.deepEqual(statusNotifications.map(([, recipients]) => recipients), [
     { companyIds: [10] },

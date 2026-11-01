@@ -1902,3 +1902,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - CI [41284497080] passed: 31 frontend test files / 225 tests, backend 1,418/1,418, builds passed. Prisma migration [41284497088] passed. Runtime [41284497056] was separate and still running at merge.
 - Company inquiry create UI now mirrors backend date-window validation and handles malformed restored draft values. No backend behavior changed.
 - Next: remove or clarify admin target-company selector that is not part of the API/data model; preserve automatic product-owner notification audience.
+
+
+## 2026-11-01 — ADMIN-INQUIRY-TARGET-COMPANY-NOOP-STEP-16W
+
+- Confirmed targetCompanyIds was a UI-only field: not in submit payload, route schema, service or Prisma model. Removed the misleading target-company selection step and API call rather than inventing targeting semantics.
+- Admin UI now explains that publication notices go to companies owning selected products. Existing local drafts are migrated in-place: unsupported targetCompanyIds discarded and old step numbers mapped to the five-step wizard.
+- Lifecycle tests now assert exact product-owner + authorized STAFF publication recipients and per-user dedupe.
+- CI pending.
