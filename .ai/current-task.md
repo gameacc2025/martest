@@ -708,3 +708,10 @@ PR #64 squash-merged into `main` at `3d7fa5276d211897d69fa5f567c09f3b4a5443f7`. 
 
 - Generated spec test initially exposed that Swagger transform unconditionally overwrote route-doc 401/403/500 response schemas with shared defaults. Updated `swagger.plugin.js` to prefer route-specific error schemas while retaining defaults when no route override exists; corrected the default 429 description to native Fastify behavior.
 - Generated spec integration assertions now exercise the actual transformed output, not only static route docs. CI rerun pending.
+
+
+## Step 16M — generated OpenAPI response precedence fix (2026-11-01)
+
+- CI run [41242121449](https://github.com/gameacc2025/martest/actions/runs/41242121449) exposed a real generated-spec defect: `mergeResponseDocs` merged route-doc responses first and schema-generated responses second, so generated defaults silently overwrote audited 401/403/429/500 route contracts.
+- Corrected precedence: actual registered route schemas remain as fallback, while explicit route-doc response contracts now win. This preserves the audited guard unions, native Fastify 429, payment-only 502/503 and 204 no-content contracts.
+- The integration test at `/docs/json` already reproduced the bug and now verifies the corrected output. Migration validation passed on prior head [41242121332]; CI rerun pending.
