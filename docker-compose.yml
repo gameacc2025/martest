@@ -38,6 +38,8 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-telecom}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@postgres:5432/${POSTGRES_DB:-telecom_marketplace}?schema=public
     ports:
       - "3000:3000"
+    volumes:
+      - inquiry_private_uploads:/app/private-uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,3 +100,4 @@ networks:
 
 volumes:
   postgres_data:
+  inquiry_private_uploads:
