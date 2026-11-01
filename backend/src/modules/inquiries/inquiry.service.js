@@ -1219,9 +1219,6 @@ async function listInquiryMessages(inquiryId, caller) {
     },
   });
   if (isStaff || (!userId && !companyId)) return messages;
-  if (isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED') {
-    return redactAnonymousInquiryMessages(messages, inquiry);
-  }
 
   // Mark only recipient messages included in this response as read. Updating
   // every unread message in the thread here can silently mark messages beyond
@@ -1235,7 +1232,11 @@ async function listInquiryMessages(inquiryId, caller) {
     ))
     .map((message) => message.id);
 
-  if (!unreadIds.length) return messages;
+  if (!unreadIds.length) {
+    return isBuyer && inquiry.visibilityMode === 'ANONYMOUS_SEALED'
+      ? redactAnonymousInquiryMessages(messages, inquiry)
+      : messages;
+  }
 
   const readAt = new Date();
   await prisma.inquiryMessage.updateMany({
