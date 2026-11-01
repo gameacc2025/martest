@@ -1105,3 +1105,10 @@ PR #80 squash-merged into `main` at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`.
 
 - Audit inquiry usage/quota accounting for company and user plans: create/respond consumption, limits, cancellation/refund/retry paths, and transactional consistency.
 - Audit payment verification idempotency: webhook/callback replay, amount/currency/provider reference validation, and subscription expiry/activation races. Add regression tests and update docs before merging.
+
+
+## Completed — step 16L public product projection recovery (2026-11-01)
+
+- Integrated the missing public-vs-management OpenAPI response projections from `docs/openapi-public-product-projections-step-16l` without replacing the newer main-branch file versions.
+- Added public product privacy schema, distinct public/management query contracts, detail `oneOf` projection, schema regression tests and generated `/docs/json` integration test.
+- Added inquiry-list pagination/privacy schema coverage recovered from the adjacent abandoned OpenAPI response branch.

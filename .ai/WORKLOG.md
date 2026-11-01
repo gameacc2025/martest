@@ -2006,3 +2006,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Reviewed PR #71 against the latest `main`. The companyIds recipient filter, inquiry status owner/responder dispatch, and company-owner recipient guard were already present on `main` through later merged inquiry lifecycle work; applying the stale PR wholesale would conflict and duplicate those changes.
 - Found the remaining gap in `{ roles, companyId }`: role-targeted company notifications constrained companyId but did not require `AccessProfile.type=COMPANY` and `isActive=true`, allowing STAFF or inactive access profiles sharing that company ID to match.
 - Tightened the roles+companyId descriptor to active COMPANY access profiles and updated the resolver regression test. The branch PR is superseded by current main plus this focused correction; no stale branch snapshot was merged.
+
+
+## 2026-11-01 — PUBLIC-PRODUCT-PROJECTION-STEP-16L
+
+- Recovered an unmerged OpenAPI branch that had not been included in later merges. The current main had generic public product response schemas and did not include the Step 16L public-vs-management projection metadata.
+- Added the restricted public product schema (removing creator ID, edit counter, deletedAt and statusHistory), public catalogue query filters, management query filters, and a two-projection detail response for authorized COMPANY/STAFF callers.
+- Added schema tests for public product privacy, management projection completeness and inquiry list pagination/privacy; added generated `/docs/json` integration coverage for public/management product routes and query parameters.
+- Updated API and AI project documentation. CI/migration validation pending.

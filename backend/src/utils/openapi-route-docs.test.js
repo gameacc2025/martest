@@ -609,6 +609,52 @@ test('admin notification delivery query filters match controller inputs', () => 
   }
 });
 
+
+
+test('inquiry list response preserves pagination and omits private buyer identifiers', () => {
+  const response = docs['GET /api/v1/inquiries'].responses[200].properties;
+  const inquiry = response.data.items.properties;
+  assert.ok(response.meta.properties.totalPages);
+  assert.ok(inquiry.companyId);
+  assert.ok(inquiry.company);
+  assert.ok(inquiry._count.properties.items);
+  assert.ok(inquiry._count.properties.responses);
+  assert.equal(inquiry.buyerUserId, undefined);
+});
+
+test('public and management product response projections stay separated', () => {
+  const publicList = docs['GET /api/v1/products'].responses[200].properties.data.items.properties;
+  assert.ok(publicList.company);
+  assert.ok(publicList.prices);
+  assert.ok(publicList.images);
+  assert.ok(publicList.documents);
+  assert.equal(publicList.createdByUserId, undefined);
+  assert.equal(publicList.editsSinceApproval, undefined);
+  assert.equal(publicList.deletedAt, undefined);
+  assert.equal(publicList.statusHistory, undefined);
+
+  const managedList = docs['GET /api/v1/products/my-products'].responses[200].properties.data.items.properties;
+  assert.ok(managedList.createdByUserId);
+  assert.ok(managedList.editsSinceApproval);
+  assert.ok(managedList.deletedAt);
+  assert.ok(managedList.statusHistory.items.properties.changedBy);
+
+  const singleProduct = docs['GET /api/v1/products/:id'].responses[200].properties.data;
+  assert.equal(singleProduct.oneOf.length, 2);
+  assert.equal(singleProduct.oneOf[0].properties.createdByUserId, undefined);
+  assert.ok(singleProduct.oneOf[1].properties.createdByUserId);
+
+  const publicQuery = docs['GET /api/v1/products'].querystring.properties;
+  for (const field of ['search', 'companyId', 'categoryId', 'minPrice', 'maxPrice', 'featured', 'sortBy', 'sortOrder', 'page', 'limit']) {
+    assert.ok(publicQuery[field], 'public product query must document ' + field);
+  }
+  const managementQuery = docs['GET /api/v1/products/my-products'].querystring.properties;
+  assert.ok(managementQuery.search);
+  assert.ok(managementQuery.status);
+  assert.ok(managementQuery.page);
+  assert.ok(managementQuery.limit);
+});
+
 test('no duplicate "METHOD /path" keys silently shadow each other (Object.assign into the same object would do this)', () => {
   // Re-require the raw source and count literal key occurrences as a
   // best-effort static check, since a JS object literal can't actually

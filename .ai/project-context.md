@@ -852,3 +852,9 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 ## Notification recipient scope
 
 - Both `{ companyIds }` and `{ roles, companyId }` company-scoped descriptors must select only users with `status=ACTIVE` and `AccessProfile.type=COMPANY`, matching company ID, and `AccessProfile.isActive=true`. Never allow STAFF users sharing the platform Main-company ID or inactive company profiles to receive company-private notifications.
+
+
+## Product response privacy
+
+- Public product catalogue/detail response schemas must not expose `createdByUserId`, `editsSinceApproval`, `deletedAt`, or `statusHistory`. Public detail may be returned to anonymous/customer callers; authorized COMPANY/STAFF detail may use the management projection. `/products/my-products` is a management projection with company ownership enforced by the service.
+- Keep public catalogue query filters separate from management product filters; generated `/docs/json` integration tests verify the effective OpenAPI contract.

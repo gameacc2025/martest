@@ -2916,4 +2916,81 @@ Object.assign(docs, {
 });
 
 
+
+
+// Step 16L — keep the anonymous catalogue projection narrower than the
+// authenticated COMPANY/STAFF management projection.
+const step16lPrivateProductFields = ['editsSinceApproval', 'createdByUserId', 'deletedAt', 'statusHistory'];
+const step16lPublicProductProperties = { ...step16eManagedProductSchema.properties };
+for (const field of step16lPrivateProductFields) delete step16lPublicProductProperties[field];
+const step16lPublicProductSchema = {
+  ...step16eManagedProductSchema,
+  required: step16eManagedProductSchema.required.filter((field) => !step16lPrivateProductFields.includes(field)),
+  properties: step16lPublicProductProperties,
+};
+const step16lPublicProductQuerySchema = {
+  type: 'object',
+  properties: {
+    search: { type: 'string' },
+    companyId: { type: 'integer', minimum: 1 },
+    categoryId: { type: 'integer', minimum: 1 },
+    minPrice: { type: 'number', minimum: 0 },
+    maxPrice: { type: 'number', minimum: 0 },
+    featured: { type: 'boolean' },
+    sortBy: { type: 'string', enum: ['createdAt', 'updatedAt', 'title'] },
+    sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, default: 20 },
+  },
+};
+const step16lManagedProductQuerySchema = {
+  type: 'object',
+  properties: {
+    search: { type: 'string' },
+    status: { type: 'string' },
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, default: 20 },
+  },
+};
+Object.assign(docs, {
+  ['GET /api/v1/products']: {
+    ...docs['GET /api/v1/products'],
+    querystring: step16lPublicProductQuerySchema,
+    responses: {
+      200: {
+        description: 'Paginated public catalogue projection. Creator, moderation history, edit counters and deletion metadata are excluded.',
+        type: 'object', required: ['data', 'meta'],
+        properties: {
+          data: { type: 'array', items: step16lPublicProductSchema },
+          meta: paginationMetaResponseSchema,
+        },
+      },
+    },
+  },
+  ['GET /api/v1/products/:id']: {
+    ...docs['GET /api/v1/products/:id'],
+    responses: {
+      200: {
+        description: 'Anonymous/customer callers receive the restricted public projection; authorized COMPANY/STAFF management callers receive the management projection.',
+        type: 'object', required: ['data'],
+        properties: { data: { oneOf: [step16lPublicProductSchema, step16eManagedProductSchema] } },
+      },
+    },
+  },
+  ['GET /api/v1/products/my-products']: {
+    ...docs['GET /api/v1/products/my-products'],
+    querystring: step16lManagedProductQuerySchema,
+    responses: {
+      200: {
+        description: 'Paginated management product projection, scoped to the authenticated company or authorized staff context.',
+        type: 'object', required: ['data', 'meta'],
+        properties: {
+          data: { type: 'array', items: step16eManagedProductSchema },
+          meta: paginationMetaResponseSchema,
+        },
+      },
+    },
+  },
+});
+
 module.exports = docs;

@@ -528,3 +528,9 @@ PR #80 merged at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`. CI passed 1,446 bac
 ### Company-scoped notification recipients
 
 Both `{ companyIds }` and `{ roles, companyId }` descriptors are restricted to ACTIVE users with an active COMPANY access profile (`type=COMPANY`, `isActive=true`) for the matching company. STAFF accounts sharing the platform Main-company ID are excluded.
+
+
+## Public and management product response projections — step 16L
+
+- Public `GET /products` and public/customer `GET /products/:id` use a restricted product schema that excludes creator IDs, edit counters, deletion metadata and moderation status history. Authorized COMPANY/STAFF callers of the detail endpoint may receive the management projection; `/products/my-products` remains explicitly management-only.
+- Documented distinct public and management query filters, and added schema-level plus generated `/docs/json` integration tests for field privacy, detail projection alternatives and query parameter coverage.
