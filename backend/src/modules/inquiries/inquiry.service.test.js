@@ -851,6 +851,27 @@ test('changeInquiryStatus: DRAFT → SUBMITTED writes history and clears closedA
   assert.equal(update.data.closedAt, null);
 });
 
+test('changeInquiryStatus: closing notifies the inquiry owner and each unique responding company', async () => {
+  resetMocks();
+  nextFindUnique = openInquiry({ id: 1, title: 'Closing RFQ' });
+  fx.recentResponses = [
+    { companyId: 20, status: 'PENDING' },
+    { companyId: 20, status: 'REJECTED' },
+    { companyId: 30, status: 'SELECTED' },
+  ];
+
+  await inquiryService.changeInquiryStatus(1, 'CLOSED', buyer);
+
+  const notifications = calls.dispatchNotification.filter(([event]) => event === 'INQUIRY_STATUS_CHANGED');
+  assert.equal(notifications.length, 3);
+  assert.deepEqual(notifications[0][1], { companyIds: [10] });
+  assert.deepEqual(notifications[1][1], { companyIds: [20] });
+  assert.deepEqual(notifications[2][1], { companyIds: [30] });
+  assert.deepEqual(notifications[0][2], { inquiry: { id: 1, title: 'Closing RFQ' }, status: 'CLOSED' });
+  assert.equal(notifications[1][3].dedupeKey(201), 'inquiry-status-1-CLOSED-company-20-201');
+  assert.equal(notifications[2][3].dedupeKey(301), 'inquiry-status-1-CLOSED-company-30-301');
+});
+
 test('changeInquiryStatus: a closing transition stamps closedAt', async () => {
   resetMocks();
   nextFindUnique = openInquiry();
