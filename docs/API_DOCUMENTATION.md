@@ -444,3 +444,9 @@ PR #73 merged at `43869fb0252e0c96a59a372cc3dfd27d0acbff5b`. CI passed 1,418 bac
 ### Verification — step 16U merged (2026-11-01)
 
 PR #74 merged at `f9a62bd23dd413b128dfbe3751e5edfd8687bedd`. CI passed 1,418 backend tests and 18 frontend/shared tests; frontend builds and Prisma migration validation passed. Runtime validation was separate and remained running at merge.
+
+
+## Inquiry date window validation — 2026-11-01
+
+- Inquiry creation and updates require a valid response deadline to be strictly later than the publication boundary (scheduled `publishDate`, or current time for immediate publication). A response deadline at or before the boundary is rejected with `INVALID_INQUIRY_DATE_WINDOW`.
+- Company creation UI now mirrors the server rule before submit, including malformed dates restored from local drafts. Datetime-local input values are serialized as ISO timestamps; server-side validation remains authoritative.
