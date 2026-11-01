@@ -398,3 +398,6 @@ Both GET `/api/v1/admin/notifications/delivery-stats` and GET `/api/v1/admin/not
 ### Generated OpenAPI response precedence — 2026-11-01
 
 The Swagger `/docs/json` integration tests verify the final generated contract. When a route has an audited response definition in the route documentation registry, that explicit public contract takes precedence over framework-generated/default response schemas. The registered handler schema remains the fallback for response statuses not explicitly documented. This prevents generic generated errors from replacing route-specific auth/RBAC error unions, native Fastify 429 responses, payment-provider 502/503 contracts, and 204 no-content semantics.
+
+
+OpenAPI is emitted as version 3.0.3, so fixed-value response discriminators use single-value `enum` constraints rather than JSON Schema `const` (which is not part of OpenAPI 3.0 and may be dropped by tooling). The generated `/docs/json` integration tests assert the serialized enum representation.
