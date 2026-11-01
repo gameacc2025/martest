@@ -1955,3 +1955,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Closed sealed conversation privacy gaps: no buyer messages or new conversations before reveal; anonymous sealed buyer message history removes supplier IDs and replaces names with proposer labels; anonymous buyer-to-supplier direct messaging by raw company ID is rejected.
 - Added adversarial tests for invalid scopes, aggregate publication filters, sealed conversation visibility, anonymous redaction and read receipts.
 - Next: step 16Z audit item-level and inquiry lifecycle mutation authorization across STAFF/COMPANY/CUSTOMER, including cross-inquiry item IDs and CUSTOMER cancel-only constraints.
+
+
+## 2026-11-01 — INQUIRY-ITEM-LIFECYCLE-AUTHORIZATION-STEP-16Z
+
+- Audited item read/add/update/delete and inquiry update/status/reveal service authorization.
+- Confirmed `updateInquiryItem` and `deleteInquiryItem` query item by both `{id, inquiryId}`, item writes are DRAFT-only, buyer ownership is required for COMPANY/CUSTOMER, and STAFF requires update permission. CUSTOMER status transitions are cancel-only. STAFF reveal requires leads.update/inquiries.update; read-only STAFF is denied.
+- Found concurrent item mutations were not serialized against status changes: two deletes could both see itemCount > 1 and leave no items, or an item could be changed after a concurrent DRAFT→SUBMITTED transition. Added parent Inquiry row lock to add/update/delete item, updateInquiry and revealInquiryResponses; status and response operations already use the same lock.
+- Added regression tests for row-lock usage, item IDs from another inquiry, STAFF read/update boundaries, CUSTOMER cancel-only and reveal moderation permission. CI pending.
