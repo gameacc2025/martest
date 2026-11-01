@@ -786,3 +786,16 @@ PR #67 squash-merged into `main` at `8ec294c6ca41c64ddfbdf5acabd17e0b4debea12`. 
 - Found a concrete read-state bug in `listInquiryMessages`: after fetching at most 500 rows, it updated every unread message for that recipient in the inquiry. Messages beyond the returned page or arriving after the SELECT could be marked read without ever being returned to the caller.
 - Fixed by collecting unread recipient message IDs from the fetched result and updating only those IDs, still scoped by inquiry/recipient/readAt-null. Returned message objects now include the readAt timestamp written by this request.
 - Updated COMPANY and AccessProfile-less CUSTOMER tests to verify recipient-only updates, exact ID scoping and returned readAt values. CI pending.
+
+
+## Inquiry message read-state race — step 16P merged (2026-11-01)
+
+PR #68 squash-merged into `main` at `9ebbfbd96fa5e5df836abc6c8f930d4f252bace0`. CI [41270839852] passed and Prisma migration validation [41270839763] passed. Runtime [41270839712] was separate/in progress at merge and is not claimed as passed.
+
+- Message list now marks only unread recipient message IDs included in the returned result as read; it no longer marks all unread messages in the thread, including unseen messages beyond the 500-row result or messages arriving after the SELECT.
+- Returned message records include the readAt timestamp written by the request. COMPANY and AccessProfile-less CUSTOMER tests verify recipient + ID scoping and returned read state.
+
+## Next active work — step 16Q inquiry messaging notification and delivery audit
+
+- Trace whether newly created inquiry messages generate the intended in-app notification/unread badge behavior, email/SMS delivery policy and event templates; compare service writes, notification event registry, frontend consumption and tests.
+- Verify sender/recipient identity for company-owned and user-owned inquiries, sealed/anonymous redaction, and dedupe/transaction boundaries. Add only policy-backed behavior; do not silently introduce paid SMS or change notification preferences.
