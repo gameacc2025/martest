@@ -27,7 +27,10 @@ async function notifyStatusChanged(tx, inquiry, status) {
   const ownerRecipients = inquiry.buyerUserId
     ? [Number(inquiry.buyerUserId)]
     : (inquiry.companyId ? { companyIds: [Number(inquiry.companyId)] } : []);
-  if (ownerRecipients.length) {
+  const hasOwnerRecipients = Array.isArray(ownerRecipients)
+    ? ownerRecipients.length > 0
+    : Boolean(ownerRecipients?.companyIds?.length);
+  if (hasOwnerRecipients) {
     await dispatchNotification('INQUIRY_STATUS_CHANGED', ownerRecipients, context, {
       tx,
       dedupeKey: (userId) => `inquiry-status-${inquiry.id}-${status}-owner-${userId}`,

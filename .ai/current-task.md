@@ -897,3 +897,11 @@ PR #73 squash-merged into `main` at `43869fb0252e0c96a59a372cc3dfd27d0acbff5b`.
 - Trace responseDeadline handling, status transition scheduler/worker and reminder/expiry notification behavior. Check whether OPEN inquiries transition to EXPIRED at deadline, whether closedAt/history are recorded, and whether `INQUIRY_STATUS_CHANGED` is emitted exactly once to owner and active responding companies.
 - Verify scheduler idempotency, timezone/date boundaries, locking/CAS, and behavior for manual close/cancel/complete races. Do not add an arbitrary reminder policy or paid SMS.
 - Add tests for expiry boundary, duplicate worker runs and notification recipient/dedupe behavior; update docs/.ai, CI/migration validation and merge.
+
+
+## Inquiry deadline/expiry automation audit — step 16U (2026-11-01)
+
+- Audited `inquiry.lifecycle.service.js`: scheduled publish and automatic expiry use conditional `updateMany` compare-and-set predicates (`status`, `publishDate <= now`, or `status=OPEN`, `autoClose=true`, `responseDeadline <= now`) inside per-inquiry transactions. History rows and notification outbox writes are part of the same transaction. Exact deadline equality is due (`lte`).
+- Found another duplicate company-owner guard defect: lifecycle `notifyStatusChanged` used `ownerRecipients.length`, silently skipping company-owned inquiry expiry notices because `{companyIds}` is an object. Fixed it with array-vs-descriptor aware emptiness handling, consistent with the main inquiry service fix in step 16S.
+- Added tests for company-owned expiry owner notification, active responding-company notification, exclusion of withdrawn supplier responses, tx/dedupe propagation, exact deadline predicates, and repeated polling (second pass produces zero transitions and no additional notifications).
+- Branch: `fix/inquiry-lifecycle-owner-notification-step-16u`. CI/migration validation pending.
