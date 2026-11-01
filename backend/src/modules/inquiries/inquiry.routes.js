@@ -377,6 +377,12 @@ async function inquiryRoutes(fastify) {
     },
   }, ctrl.uploadResponseAttachment);
 
+  // Download a response attachment only after inquiry/response visibility checks.
+  fastify.get('/:id/responses/:responseId/attachments/:attachmentId/download', {
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.read', 'inquiries.read', 'inquiries.respond')],
+    schema: { params: inquiryResponseAttachmentParamsSchema },
+  }, ctrl.downloadResponseAttachment);
+
   // Delete a response attachment.
   fastify.delete('/:id/responses/:responseId/attachments/:attachmentId', {
     preHandler: [requireAccessType(...SUPPLIER_TYPES), requireAnyPermission('inquiries.respond')],
