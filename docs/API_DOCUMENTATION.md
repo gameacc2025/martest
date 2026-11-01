@@ -401,3 +401,8 @@ The Swagger `/docs/json` integration tests verify the final generated contract. 
 
 
 OpenAPI is emitted as version 3.0.3, so fixed-value response discriminators use single-value `enum` constraints rather than JSON Schema `const` (which is not part of OpenAPI 3.0 and may be dropped by tooling). The generated `/docs/json` integration tests assert the serialized enum representation.
+
+
+## Generated OpenAPI integration verification — step 16M merged (2026-11-01)
+
+PR #65 merged at `5cdb8e81acdf679bf60e36c2c36dec118e118156`. CI and Prisma migration validation passed. The actual `/docs/json` output is integration-tested for authentication/RBAC error unions, Fastify-native 429, sanitized payment 502/503 on only the relevant endpoints, and 204 responses without content. Explicit route-doc response definitions take precedence over generated defaults. Fixed-value schema constraints use OpenAPI 3.0-compatible single-value enums.
