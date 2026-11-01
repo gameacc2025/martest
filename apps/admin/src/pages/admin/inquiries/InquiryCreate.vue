@@ -336,9 +336,6 @@ async function submitInquiry() {
             <Message v-if="form.items.length === 0" severity="info" :closable="false" class="mt-2">
               هنوز قلمی اضافه نشده است. حداقل یک قلم کالا لازم است.
             </Message>
-            <Message severity="info" :closable="false" class="mt-2">
-              پس از انتشار استعلام، اعلان برای شرکت‌هایی ارسال می‌شود که مالک محصولات انتخاب‌شده هستند؛ انتخاب دستی شرکت هدف در این جریان پشتیبانی نمی‌شود.
-            </Message>
 
             <DataTable v-else :value="form.items" responsiveLayout="scroll" class="mt-3">
               <Column header="محصول">
@@ -352,6 +349,9 @@ async function submitInquiry() {
                 </template>
               </Column>
             </DataTable>
+            <Message severity="info" :closable="false" class="mt-2">
+              پس از انتشار استعلام، اعلان برای شرکت‌هایی ارسال می‌شود که مالک محصولات انتخاب‌شده هستند؛ انتخاب دستی شرکت هدف در این جریان پشتیبانی نمی‌شود.
+            </Message>
           </div>
           <div class="step-nav">
             <Button label="قبلی" icon="pi pi-arrow-right" severity="secondary" @click="goBack(STEPS.PRODUCTS, activateCallback)" />
