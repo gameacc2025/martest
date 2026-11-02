@@ -1,11 +1,11 @@
 <template>
-  <div class="category-list-page">
+  <div class="category-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <div class="card">
+    <div class="card ds-panel">
       <div class="card-head">
         <h1 class="card-head-title"><i class="pi pi-sitemap"></i> مدیریت دسته‌بندی‌ها</h1>
       </div>
-      <Toolbar>
+      <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
@@ -214,5 +214,37 @@ onMounted(() => {
 <style scoped>
 .category-list-page {
   direction: rtl;
+}
+
+/* Shared Paces-style list hierarchy; query, pagination and permissions unchanged. */
+.category-list-page { gap: var(--ds-space-5); }
+.category-list-page .card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.category-list-page :deep(.p-toolbar) {
+  background: var(--ds-color-surface);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.category-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  white-space: nowrap;
+}
+.category-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
+  border-color: var(--ds-color-border);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+@media (max-width: 640px) {
+  .category-list-page { gap: var(--ds-space-3); }
+  .category-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
 </style>
