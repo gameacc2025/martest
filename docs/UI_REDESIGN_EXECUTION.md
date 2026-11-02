@@ -32,37 +32,49 @@ The public Website remains a marketplace experience; Admin and Company remain se
 - `437291e` — Admin product list
 - `f3c1723` — Company product list
 
-## Remaining UI inventory
+## Page migration coverage
 
-### Admin
-- Categories, companies, users, roles, permissions, system settings
-- Product form and remaining product states/details
-- Inquiry create/list/detail/subscriptions
-- Notification management, notification folders, user notifications/preferences
-- Orders (only if the current backend still supports this route; do not revive removed APIs)
-- Profile, password, authentication and error states
+The repository inventory contains 69 Vue page files across the three applications. Every active route/page family has either been migrated in this execution or audited as already using the shared Design System.
 
-### Company
-- Inquiry create/list/detail/subscription
-- Product create/edit/list and product-specific dialogs
-- Company users, reports, company profile/settings
-- Notifications, profile, password, authentication and error states
+### Admin / STAFF
+- Dashboard and workspace shell
+- Users, companies, categories, roles, permissions and system settings
+- Product list and editor
+- Inquiry list, detail, create and subscription management
+- Notification inbox, notification preferences, notification sending/management and folder settings
+- Profile, change password, password recovery and root loading gate
+- Legacy OrderList visual treatment retained without restoring the removed Orders backend/menu capability
 
-### Website
-- Home, category listing, product listing/details, search results
+### Company / COMPANY
+- Dashboard and workspace shell
+- Product list/editor, personal product list, company product view and company settings
+- Inquiry list, detail, create and subscription
+- Company users and reports
+- Notifications, notification preferences, profile, change password, password recovery and root loading gate
+- Not-found state continues to use the shared feedback system
+
+### Website / CUSTOMER
+- Public shell, home, category listing, product listing/details, search results
 - Company directory and company profile
-- Login, registration, forgot password, profile, addresses
-- Wishlist, cart, checkout, orders and order details
-- Customer inquiries and inquiry subscription
-- Notifications/preferences, FAQ, About, Contact, Terms, Not Found
+- Login, registration, forgot password, customer profile and addresses
+- Customer inquiry list/detail and subscription
+- Notification inbox/preferences
+- About, Contact, FAQ, Terms and Not Found
+- Legacy commerce views (cart, checkout, orders, order details, wishlist) and legacy Products view received token-based styling, but routes must remain governed by the current router/API reality
 
 ### Shared UI
-- Dashboard shell/sidebar/header/footer/breadcrumb
-- Product cards and product preview
-- Tables, pagination, badges, cards, dialogs, buttons, inputs
-- Form sections/fields/actions
-- Loading, empty, permission-denied, server-error, and not-found states
-- Mega menu and all responsive/dark/RTL states
+- Dashboard shell, sidebar, header, footer and breadcrumb
+- Cards, KPI cards, product cards, panels, quick actions, pipeline, welcome banner and system status
+- Buttons, badges, inputs, dialogs, page headers, tables, pagination and PrimeVue global surfaces
+- Form sections, fields, grids, alerts and action bars
+- Loading, skeleton, empty, permission-denied, server-error and not-found states
+- Mega menu, review card, auth handoff and shared feedback components
+
+### Remaining work (not page styling)
+- Complete local responsive/dark/RTL visual review against actual running apps.
+- Run all relevant unit/component tests and app builds locally or via CI after the latest commits.
+- Review the latest Runtime Validation workflow result. The test-and-build and database-migration checks passed at the earlier checkpoint; newer commits need their own green run.
+- Obtain the Paces source ZIP or accessible URLs if exact page-by-page inspection of the complete 280+ page catalog is required. The live preview index was not fully retrievable, so unobserved pages are not represented as inspected.
 
 ## Required process for each remaining page
 
