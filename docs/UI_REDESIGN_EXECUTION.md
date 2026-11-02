@@ -153,3 +153,12 @@ Recent commits: Company product views c3d2339/9946e62; Admin order/settings ca4b
 The repository currently contains 69 Vue page files across Admin, Company and Website. The active page families have been migrated or were already using the shared design system before this redesign. The remaining page files are transitional gates/shared-state wrappers and legacy pages; do not invent new backend functionality for them. The execution tracker remains open until component audit, full local tests/builds and CI are green.
 
 Recent shared component commits: DashboardPanel 20fd890, KpiCard 92a7116, QuickActions e5d6db0, InquiryPipeline af954b5, WelcomeBanner 21f3dd9, SystemStatus 030f46b, Dialog 6d9e8a4, PageHeader 61c1800, ReviewCard 925f02e, FormAlert 700a1d2, FormActions 3157c88, Input 8bd9dc7, DashboardSidebar test c64264a. Website token cleanup: ad447c3, 47b21aa, f0905f2.
+
+
+## Planned navigation coverage update
+
+The shared disabled roadmap section now also includes Calendar/Tasks, Documents/Assets, Organization Communications/Campaigns, Knowledge Center/Content, and Audit/Compliance. All future entries remain non-interactive, have no named route, and are role-scoped. The config test now checks the complete planned domain set.
+
+## CI checkpoint
+
+At commit 6a7cb3efc58b60a04f6de1e57df833263d0a75da, GitHub CI test-and-build completed successfully and Database Migration Validation completed successfully. Runtime Validation (compose-and-browser) was still in progress at the last check. Later menu-only commits require their own CI completion before final sign-off. No local browser test was performed.
