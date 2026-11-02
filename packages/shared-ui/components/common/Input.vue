@@ -80,4 +80,7 @@ const value = computed({
   margin-top: var(--ds-space-1);
   font-size: var(--ds-font-size-xs);
 }
+.ds-field-label { font-weight: var(--ds-font-weight-semibold); }
+.ds-field-input :deep(.p-inputtext) { min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
+.ds-field-input :deep(.p-inputtext:focus) { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent); }
 </style>
