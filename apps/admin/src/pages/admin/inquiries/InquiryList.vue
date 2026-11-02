@@ -162,8 +162,8 @@ function createInquiry() {
     <p>درخواست‌های ثبت‌شده، روند رسیدگی و پاسخ تأمین‌کنندگان را از یک نمای واحد مدیریت کنید.</p>
   </div>
 </section>
-        <div class="card ds-panel">
-      <Toolbar class="list-toolbar ds-toolbar">
+        <div class="card ds-panel inquiry-management-surface">
+      <Toolbar class="list-toolbar ds-toolbar inquiry-management-toolbar">
         <template #start>
           <div class="toolbar-filters">
             <span class="p-input-icon-right search-wrap">
@@ -484,4 +484,61 @@ function createInquiry() {
   .inquiry-list-page :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
 
+
+/* Admin review queue: compact filters and readable state/action table. */
+.inquiry-management-surface {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-management-toolbar {
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.inquiry-management-toolbar :deep(.p-toolbar-start),
+.inquiry-management-toolbar :deep(.p-toolbar-end) { gap: .65rem; flex-wrap: wrap; }
+.inquiry-management-toolbar :deep(.p-inputtext),
+.inquiry-management-toolbar :deep(.p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.inquiry-management-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
+.inquiry-management-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.inquiry-management-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  vertical-align: middle;
+}
+.inquiry-management-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
+.inquiry-management-table :deep(.p-paginator) {
+  justify-content: flex-start;
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.inquiry-management-table :deep(.p-paginator-page),
+.inquiry-management-table :deep(.p-paginator-next),
+.inquiry-management-table :deep(.p-paginator-prev) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+}
+.inquiry-management-table :deep(.p-datatable-empty-message > td) { padding: 0; }
+@media (max-width: 640px) {
+  .inquiry-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
+  .inquiry-management-toolbar :deep(.p-toolbar-start),
+  .inquiry-management-toolbar :deep(.p-toolbar-end),
+  .inquiry-management-toolbar .toolbar-filters { width: 100%; }
+  .inquiry-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
+}
 </style>
