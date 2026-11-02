@@ -4,7 +4,7 @@
       <WorkspacePageHeading
         eyebrow="حساب کاربری"
         title="پروفایل من"
-        description="اطلاعات حساب، سفارش‌ها و فعالیت‌های خود را مدیریت کنید."
+        description="مشخصات هویتی، اطلاعات تماس و دسترسی‌های حساب کاربری خود را مدیریت کنید."
         icon="pi pi-user"
         heading-id="public-profile-title"
       >
@@ -241,8 +241,6 @@ const items = ref([
 const editForm = ref({
   firstName: '',
   lastName: '',
-  phone: '',
-  avatar: null
 })
 
 const passwordForm = ref({
