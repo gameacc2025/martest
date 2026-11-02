@@ -2388,3 +2388,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Shared DataTable now exposes `resetPage()`; test added for this contract.
 - Commits: `d5312ab`, `173907e`, `e07b1fc`, `334f1d4`, `e2d958d`, `3a256fb`.
 - CI/build verification pending.
+
+
+## UI redesign — Admin directory/category list batch 9 (2026-11-02)
+
+- Admin Categories, Companies and Users lists migrated to the shared responsive DataTable.
+- Preserved existing store/API calls, permission-gated actions, company verification/status operations, user role/access management and category CRUD.
+- User list retains server sorting; shared DataTable accepts initial sort field/order and emits lazy sort/page requests.
+- Search/filter changes reset local paginator; company phone fallback and company tenant display remain.
+- Commits: `a0f30fe`, `f993736`, `06586b3`, `70a640e`, `09452c4`, `4f155e6`.
+- CI/build verification pending.
