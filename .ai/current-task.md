@@ -1544,3 +1544,6 @@ Continue the full UI route inventory after CI verification. No new branch: main 
 Public UserProfile is now a responsive account workspace with API-backed identity details, initials fallback for missing avatar, human-readable access type, no fabricated unread count, accessible profile/password dialogs and retryable profile-load errors. Existing auth/API/navigation behavior is preserved. Tests added for identity, fallback, editor and retry state.
 
 Continue remaining Website account/inquiry/detail pages and audit all route pages. Latest commit requires CI verification; main only, no new branches.
+## Latest public account UI — address book (2026-11-02)
+
+Address cards and empty state now use PrimeIcons; edit/delete/default actions and all fields have 44px targets and focus styles. Existing API behavior unchanged. Address-book tests added for list, default address, form and empty state. Continue through remaining public pages and Admin/Company form/detail pages; latest head requires CI verification.
