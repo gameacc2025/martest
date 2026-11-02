@@ -154,7 +154,8 @@ function createInquiry() {
 
 <template>
   <div class="inquiry-list-page ds-stack">
-    <div class="card ds-panel">
+<header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت استعلام‌ها</h1><p class="ds-page-heading__description">درخواست‌ها، وضعیت رسیدگی و پاسخ‌های تأمین‌کنندگان را پیگیری کنید.</p></div></header>
+        <div class="card ds-panel">
       <Toolbar class="list-toolbar ds-toolbar">
         <template #start>
           <div class="toolbar-filters">
@@ -369,6 +370,7 @@ function createInquiry() {
 
 /* Shared inbox/list visual language; filtering and server pagination unchanged. */
 .inquiry-list-page { gap: var(--ds-space-5); }
+.inquiry-list-page .ds-page-heading { margin-bottom: 0; }
 .inquiry-list-page .card {
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
