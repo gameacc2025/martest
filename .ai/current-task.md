@@ -1492,3 +1492,30 @@ Next: continue Admin roles/permissions/orders and Company inquiry detail/create/
 Admin Roles, Permissions and Orders list pages now use the shared responsive table. Existing store/API calls, role permission chips/scope badges, system-role safeguards, CRUD and order status actions are preserved. Server pagination is wired to shared requests and table state resets after filter/search/mutations.
 
 Continue with Admin inquiry details/forms and Company inquiry/product forms and remaining Website public pages; then verify all page families, shell and theme modes. Only main; no new branches.
+
+
+## Active UI-only task — 2026-11-02 (latest checkpoint)
+
+Repository rules for this task:
+- Work directly on main; do not create branches.
+- At each checkpoint inspect branch inventory and open PRs. Current remote inventory: only main; no open PRs.
+- Apply the repository's .opencode/skills/ui-ux-pro-max/SKILL.md and persisted design-system/MASTER.md plus page overrides. Preserve the Telecom palette, Vazirmatn, PrimeIcons, RTL/LTR technical identifiers, light/dark tokens and 44px controls.
+- No backend/API/schema changes, mock data, invented endpoints, fake prices, fake analytics or altered permission/tenant behavior.
+
+Latest completed UI work:
+- Admin and Company dashboard structural workspace changes.
+- Responsive shared DataTable/card rows and management-list migrations.
+- Admin/Company product and inquiry management, directories, roles/permissions/orders, notification management/preferences, company settings/reports and inquiry detail/create surfaces have received design-system passes.
+- PublicLayout: accessible skip/main/mobile navigation and a two-tier desktop header with FAQ/contact utility links.
+- Website ProductListing: richer API-backed product card hierarchy with optional brand/model/SKU, verified supplier cue only when API says true, and explicit no-price inquiry state.
+- Tests extended for the public shell and catalogue card states.
+
+Latest known commit: b18cdb7f0fcff8bb8dd5088b443209dac21179ca.
+Latest CI test/build at 8a381241 passed; workflows for b18cdb7 were pending at checkpoint. Latest runtime at 0618911 failed in browser smoke only; CI test/build and database migration validation passed for that SHA. Do not overstate verification.
+
+Next work:
+1. Continue auditing all remaining routed pages in Admin, Company and Website (auth, profile, orders/cart/checkout, notifications, reports, settings, category and product detail forms).
+2. Inspect and structurally redesign pages/components that still use legacy layouts, not just append CSS.
+3. Add focused tests for visible hierarchy and interactions.
+4. Check CI/migration/runtime workflow separately on the latest commit; fix test/build regressions, but don't prioritize browser smoke unless it reveals a genuine application issue.
+5. Keep .ai/WORKLOG.md, this file, docs/UI_REDESIGN_EXECUTION.md and design-system page overrides current.
