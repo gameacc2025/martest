@@ -1351,3 +1351,13 @@ Continue auditing remaining public/auth/account pages and shared components. Ove
 - Admin/Company dashboard shells now include accessible skip-to-main-content navigation.
 - Auth, account profile, password, product editor, inquiry authoring, reporting, category, company profile, FAQ, legal and search pages have been reviewed; several were already in the new design system.
 - Overall redesign is still in progress. Continue verifying every route against actual implementation and complete CI on the newest main commit before sign-off.
+
+
+## Latest UI checkpoint — 2026-11-02
+
+Additional shared shell work:
+- Dashboard topbar now identifies its host workspace through a prop: Admin = «مدیریت بازارگاه», Company = «فضای کاری شرکت».
+- Added focused component tests in `packages/shared-ui/components/dashboard/DashboardHeader.test.js`.
+- No API, auth, permission, route or data behavior changed.
+
+Continue the full UI redesign across the shared shell, Admin/Company management pages, inquiry workflows, product details/forms and Website catalog/account flows. Do not mark the redesign complete until the page inventory is audited, tests/builds pass, and the remaining page families are migrated.
