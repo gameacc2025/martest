@@ -2077,3 +2077,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added consistent page title/description hierarchy above table toolbars across Admin categories, companies, users, roles, permissions, products and inquiries; Company products, inquiries and company users; and legacy Admin order view.
 - Existing list filters, API calls, server pagination, actions and permission gates were preserved.
 - The execution tracker now reflects all 69 page files audited and separates completed page migration from remaining verification and inaccessible Paces preview pages.
+
+
+## CI checkpoint — 2026-11-02 / commit b5220ea
+
+- CI test-and-build passed, including component/unit tests and production builds for Website, Company and Admin.
+- Database Migration Validation passed.
+- Runtime Validation failed in the Playwright smoke suite: compose config, service health and migrations passed; the SPA panel tests timed out waiting for #app across Website/Company/Admin, and the STAFF auth-flow scenario failed. No root cause was established. Per project direction, browser automation was not pursued as the primary UI verification path.
