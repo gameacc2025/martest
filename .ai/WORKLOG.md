@@ -2090,3 +2090,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 - The unparameterized Bootstrap index at themes.coderthemes.com/paces/bootstrap/index.html is accessible and exposes the full navigation tree.
 - The ?rtl URL and most individual child-page URLs still return cache miss in the retrieval environment. The index menu has been catalogued in docs/PACES_RTL_UI_REFERENCE_AUDIT.md; individual child-page content is not claimed as inspected unless a searchable page was actually returned.
+
+
+## UI redesign — structural dashboard batch 6 (2026-11-02)
+
+- Admin dashboard now has a true branded welcome/command banner and a reorganized three-column operational workspace (quick actions, platform analytics, service health), responsive down to a single column.
+- Company dashboard now has a company-identity welcome banner and a two-column inquiry-pipeline/quick-action workspace; duplicate quick-action panel removed.
+- Existing API state, route names, permission checks, product approval actions, company scoping and loading/error behavior were preserved.
+- Commits: `171ca0ad` Admin dashboard; `82f68977` Company dashboard.
+- No local tests/builds were run in the connected GitHub editing session. Do not claim verification or full redesign completion.
