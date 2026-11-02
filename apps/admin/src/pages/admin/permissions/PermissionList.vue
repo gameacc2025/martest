@@ -5,8 +5,8 @@
   <span class="access-management-icon"><i class="pi pi-key"></i></span>
   <div><span>سیاست‌های دسترسی</span><h1 id="access-management-title">مدیریت مجوزها</h1><p>فهرست مجوزهای سامانه و کاربرد آن‌ها را مدیریت کنید.</p></div>
 </header>
-    <div class="card ds-panel">
-      <Toolbar class="ds-toolbar">
+    <div class="card ds-panel management-data-surface">
+      <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
@@ -18,7 +18,7 @@
         </template>
       </Toolbar>
 
-      <DataTable :value="permissions" :loading="loading" :paginator="true" :rows="pagination.limit"
+      <DataTable class="management-data-table" :value="permissions" :loading="loading" :paginator="true" :rows="pagination.limit"
         :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
         @page="onPageChange" responsiveLayout="scroll">
         <Column field="id" header="شناسه" sortable></Column>
@@ -290,4 +290,70 @@ async function deletePermission() {
   .permission-list-page :deep(.p-toolbar-start), .permission-list-page :deep(.p-toolbar-end) { width: 100%; }
 }
 
+
+/* Access/catalogue administration surfaces. */
+.management-data-surface {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.management-data-toolbar {
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.management-data-toolbar :deep(.p-toolbar-start),
+.management-data-toolbar :deep(.p-toolbar-end) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+.management-data-toolbar :deep(.p-inputtext),
+.management-data-toolbar :deep(.p-select) {
+  min-height: 2.65rem;
+  border-radius: var(--ds-radius-md);
+}
+.management-data-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
+.management-data-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.management-data-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  vertical-align: middle;
+}
+.management-data-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
+.management-data-table :deep(.p-paginator) {
+  justify-content: flex-start;
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.management-data-table :deep(.p-paginator-page),
+.management-data-table :deep(.p-paginator-next),
+.management-data-table :deep(.p-paginator-prev) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+}
+@media (max-width: 700px) {
+  .management-data-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
+  .management-data-toolbar :deep(.p-toolbar-start),
+  .management-data-toolbar :deep(.p-toolbar-end) { width: 100%; }
+  .management-data-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .management-data-toolbar :deep(.p-inputtext),
+  .management-data-toolbar :deep(.p-select) { width: 100%; }
+  .management-data-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
+}
 </style>
