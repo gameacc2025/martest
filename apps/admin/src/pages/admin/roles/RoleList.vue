@@ -16,44 +16,40 @@
         </template>
       </Toolbar>
 
-      <DataTable class="management-data-table" :value="roles" :loading="loading" :paginator="true" :rows="pagination.limit"
-        :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll">
-        <Column field="id" header="شناسه" sortable></Column>
-        <Column field="label" header="عنوان" sortable></Column>
-        <Column field="name" header="نام نقش" sortable></Column>
-        <Column header="دامنه">
-          <template #body="slotProps">
-            <Tag :value="scopeLabels[slotProps.data.scope] || slotProps.data.scope" :severity="scopeSeverity[slotProps.data.scope]" />
-          </template>
-        </Column>
-        <Column field="description" header="توضیحات"></Column>
-        <Column header="مجوزها">
-          <template #body="slotProps">
-            <div v-if="slotProps.data.permissions && slotProps.data.permissions.length" class="flex flex-wrap gap-2">
-              <Tag v-for="perm in slotProps.data.permissions" :key="perm.permission.id">
-                {{ perm.permission.label || perm.permission.name }}
-              </Tag>
-            </div>
-            <div v-else>
-              <Tag severity="warning">بدون مجوز</Tag>
-            </div>
-          </template>
-        </Column>
-        <Column header="تعداد کاربران">
-          <template #body="slotProps">
-            <Tag>{{ slotProps.data._count?.users || 0 }}</Tag>
-          </template>
-        </Column>
-        <Column header="عملیات">
-          <template #body="slotProps">
-            <div class="flex gap-2">
-              <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش نقش" @click="editRole(slotProps.data)" v-tooltip.top="slotProps.data.isSystem ? 'ویرایش عنوان، توضیحات و مجوزها؛ دامنه ثابت می‌ماند' : 'ویرایش نقش'" />
-              <Button icon="pi pi-trash" severity="danger" rounded text aria-label="حذف نقش" @click="confirmDelete(slotProps.data)" :disabled="slotProps.data.isSystem" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <SharedDataTable
+        ref="tableRef"
+        class="management-data-table"
+        title="فهرست نقش‌ها"
+        :columns="tableColumns"
+        :rows="roles"
+        :loading="loading"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[5, 10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        @request="onTableRequest"
+      >
+        <template #scope="{ row }">
+          <Tag :value="scopeLabels[row.scope] || row.scope" :severity="scopeSeverity[row.scope] || 'secondary'" />
+        </template>
+        <template #permissions="{ row }">
+          <div v-if="row.permissions?.length" class="role-permission-tags">
+            <Tag v-for="perm in row.permissions" :key="perm.permission.id">
+              {{ perm.permission.label || perm.permission.name }}
+            </Tag>
+          </div>
+          <Tag v-else severity="warning">بدون مجوز</Tag>
+        </template>
+        <template #userCount="{ row }">
+          <Tag>{{ row._count?.users || 0 }}</Tag>
+        </template>
+        <template #actions="{ row }">
+          <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش نقش" @click="editRole(row)" v-tooltip.top="row.isSystem ? 'ویرایش عنوان، توضیحات و مجوزها؛ دامنه ثابت می‌ماند' : 'ویرایش نقش'" />
+          <Button icon="pi pi-trash" severity="danger" rounded text aria-label="حذف نقش" @click="confirmDelete(row)" :disabled="row.isSystem" />
+        </template>
+      </SharedDataTable>
     </div>
 
     <!-- Create/Edit Role Dialog -->
@@ -162,6 +158,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoleStore } from '@/stores/admin/roles'
 import { usePermissionStore } from '@/stores/admin/permissions'
@@ -173,6 +170,7 @@ const roleStore = useRoleStore()
 const permissionStore = usePermissionStore()
 
 const roles = ref([])
+const tableRef = ref(null)
 const loading = ref(false)
 const pagination = ref({
   page: 1,
@@ -182,6 +180,15 @@ const pagination = ref({
 })
 
 const searchQuery = ref('')
+const tableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
+  { field: 'label', header: 'عنوان', sortable: true },
+  { field: 'name', header: 'نام نقش', sortable: true },
+  { field: 'scope', header: 'دامنه', slot: 'scope' },
+  { field: 'description', header: 'توضیحات' },
+  { field: 'permissions', header: 'مجوزها', slot: 'permissions' },
+  { field: '_count.users', header: 'تعداد کاربران', slot: 'userCount' },
+]
 const showDialog = ref(false)
 const isEditMode = ref(false)
 const currentRole = ref({})
@@ -248,14 +255,16 @@ function debounceSearch() {
 }
 
 function applyFilters() {
+  tableRef.value?.resetPage()
   loadRoles(1)
 }
 
-async function loadRoles(page = 1) {
+async function loadRoles(page = 1, limit = pagination.value.limit) {
   try {
     loading.value = true
     const response = await roleStore.getRoles({
       page,
+      limit,
       search: searchQuery.value
     })
     roles.value = response.roles || []
@@ -285,8 +294,9 @@ async function loadPermissions() {
   }
 }
 
-function onPageChange(event) {
-  loadRoles(event.page + 1)
+function onTableRequest({ page, rows }) {
+  pagination.value.limit = rows
+  loadRoles(page, rows)
 }
 
 function openCreateDialog() {
@@ -632,4 +642,5 @@ async function deleteRole() {
 .permission-item label { cursor: pointer; line-height: 1.7; }
 .role-list-page .management-data-toolbar :deep(.p-inputtext) { min-height: 2.75rem; }
 
+.role-permission-tags { display: flex; flex-wrap: wrap; gap: .35rem; max-width: 32rem; }
 </style>
