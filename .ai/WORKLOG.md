@@ -2417,3 +2417,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Server pagination wired through shared lazy request events; filter/search and post-mutation page reset behavior retained.
 - Commits: `d12afeb`, `54c49e4`, `9d3c3c6`, `b0a262f`, `975c917`.
 - CI/build verification pending.
+
+
+## Public storefront and catalogue refinement — 2026-11-02
+
+- PublicLayout now uses a compact utility strip above the primary navigation with real FAQ and contact routes; mobile keeps the existing compact navigation.
+- Website ProductListing cards now show API-backed supplier identity, optional brand/model/SKU, verification only when returned true, price when available, and an explicit supplier-pricing state when no price tier exists.
+- Cards remain a single keyboard-accessible navigation surface; no nested controls, mock prices or invented API behavior.
+- Tests added/extended: ProductListing identity/trust/price fallback; PublicLayout utility links.
+- Commits: edb183b catalogue card, 8a38124 tests, 7512ed1 public utility bar, 70141fc utility test, b18cdb7 semantic token correction.
+- ui-ux-pro-max skill was read and applied; Vue stack guidance, UX guidelines and persisted design-system MASTER/catalogue override are the design references.
+- Latest full test/build workflow is pending for b18cdb7; no local test/build run is claimed. Only main exists and no open PRs were found.
