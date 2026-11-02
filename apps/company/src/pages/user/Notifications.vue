@@ -437,25 +437,29 @@ function typeLabel(item) {
           <span>{{ searchQuery ? 'عبارت دیگری را جستجو کنید.' : 'در این پوشه اعلانی وجود ندارد.' }}</span>
         </div>
         <div v-else class="message-items">
-          <div v-for="item in visibleNotifications" :key="item.id" class="message-row"
-            :class="{ selected: selectedId === item.id, unread: !item.isRead }" role="button" tabindex="0"
-            @click="openNotification(item)" @dblclick="openNotificationAndMarkRead(item)" @keydown.enter.prevent="openNotification(item)">
-            <input type="checkbox" class="row-checkbox" :checked="selectedIds.has(item.id)" :aria-label="`انتخاب پیام ${item.title}`"
-              @click.stop @change="toggleSelection(item.id, $event.target.checked)">
-            <span class="row-status" :class="{ 'is-unread': !item.isRead }"><i :class="['pi', item.isRead ? 'pi-envelope-open' : 'pi-envelope']"></i></span>
-            <span class="row-content">
-              <span class="row-topline"><strong>{{ item.title }}</strong><time>{{ formatTime(item.createdAt) }}</time></span>
-              <span class="row-category">{{ typeLabel(item) }}</span>
-              <span class="row-preview">{{ item.message }}</span>
-            </span>
-            <span v-if="!item.isRead" class="unread-dot" aria-label="خوانده‌نشده"></span>
-            <span class="row-actions" @click.stop>
+          <article v-for="item in visibleNotifications" :key="item.id" class="message-row"
+            :class="{ selected: selectedId === item.id, unread: !item.isRead }">
+            <label class="row-select" :aria-label="`انتخاب پیام ${item.title}`">
+              <input type="checkbox" class="row-checkbox" :checked="selectedIds.has(item.id)"
+                @change="toggleSelection(item.id, $event.target.checked)">
+            </label>
+            <button type="button" class="message-row-open" :aria-pressed="selectedId === item.id"
+              @click="openNotification(item)" @dblclick="openNotificationAndMarkRead(item)">
+              <span class="row-status" :class="{ 'is-unread': !item.isRead }"><i :class="['pi', item.isRead ? 'pi-envelope-open' : 'pi-envelope']"></i></span>
+              <span class="row-content">
+                <span class="row-topline"><strong>{{ item.title }}</strong><time>{{ formatTime(item.createdAt) }}</time></span>
+                <span class="row-category">{{ typeLabel(item) }}</span>
+                <span class="row-preview">{{ item.message }}</span>
+              </span>
+              <span v-if="!item.isRead" class="unread-dot" aria-label="خوانده‌نشده"></span>
+            </button>
+            <span class="row-actions">
               <Button :icon="item.isRead ? 'pi pi-envelope' : 'pi pi-envelope-open'" severity="secondary" text rounded size="small"
                 :aria-label="item.isRead ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان خوانده‌شده'"
                 :loading="busyIds.has(item.id)" @click="setNotificationReadState(item, !item.isRead)" />
               <Button icon="pi pi-trash" severity="danger" text rounded size="small" aria-label="حذف پیام" :loading="busyIds.has(item.id)" @click="deleteNotification(item)" />
             </span>
-          </div>
+          </article>
         </div>
 
         <footer v-if="totalPages > 1" class="pagination">
@@ -614,6 +618,52 @@ function typeLabel(item) {
 @media (max-width: 640px) {
   .mail-header { padding: var(--ds-space-4); align-items: stretch; }
   .mail-header .header-actions { width: 100%; flex-wrap: wrap; }
+}
+
+
+/* Semantic inbox row controls: selection, open action and row tools are separate controls. */
+.mail-page .message-row { align-items: center; gap: .35rem; }
+.mail-page .row-select {
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+.mail-page .row-checkbox { width: 1rem; height: 1rem; margin: 0; }
+.mail-page .message-row-open {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+.mail-page .message-row-open:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+  border-radius: var(--ds-radius-sm);
+}
+.mail-page .folder-link { min-height: 2.75rem; }
+.mail-page .category-link { min-height: 2.75rem; }
+.mail-page .row-actions :deep(.p-button),
+.mail-page .reading-actions :deep(.p-button),
+.mail-page .bulk-actions :deep(.p-button) {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+@media (max-width: 760px) {
+  .mail-page .message-row { flex-wrap: wrap; }
+  .mail-page .message-row-open { flex-basis: calc(100% - 3.2rem); }
+  .mail-page .row-actions { margin-inline-start: 3rem; }
 }
 
 </style>
