@@ -1464,3 +1464,10 @@ The next structural layer after the dashboard batch is now implemented:
 - `mobileCardLayout=false` opts out where a dense table must retain classic scroll behavior.
 - Focused tests added; execution pending CI.
 - Continue with the shared app shell/header/sidebar and remaining page families. Do not call the UI redesign complete.
+
+
+## UI redesign checkpoint — product management lists (2026-11-02)
+
+Admin and Company product management pages now consume the shared responsive DataTable instead of separate PrimeVue table templates. Existing permissions, tenant scoping, API source, action handlers, dialogs, search and status filters remain. Server pagination is wired to shared table events and filter changes reset pagination.
+
+Next: continue page-family migrations (companies/users/categories/inquiries and public catalog/detail), then shared forms/dialogs, shell/header refinements, tests and full CI verification. Only `main` is to be used; do not create branches.
