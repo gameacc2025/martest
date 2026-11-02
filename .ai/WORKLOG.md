@@ -2237,3 +2237,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - API, inquiry lifecycle, privacy/decision authorization, tenant scope and settings semantics unchanged.
 - Commits: `5e1d159`, `f6bc9b8`, `26b6f8f`.
 - CI previously found a test-only stub assertion failure in Table.test.js; corrected in `07abcc2`. Awaiting CI on the corrected latest tree.
+
+
+## UI redesign — notifications and company catalogue (2026-11-02)
+
+- Admin notification composer/delivery status and notification folder administration now use responsive design-system cards, forms, status states and tokenized colors.
+- Admin and Company notification preferences now share a responsive channel matrix with consistent event rows and save footer.
+- Company-wide product list now uses a dedicated data surface and consistent DataTable/paginator styles.
+- Notification channel/audience semantics, system folder restrictions, preferences APIs, and company product scope/actions unchanged.
+- Commits: `7875672`, `8985db7`, `387e7e9`, `43e9fcb`, `e239d42`, `dc92478`.
+- CI + migration validation were green at `dfc47e5`; newer commits pending latest CI.
