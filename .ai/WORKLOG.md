@@ -2265,3 +2265,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Audited auth, profile, product editor, inquiry creation, reports, category, company profile, FAQ, terms, search and product detail pages; retained existing design-system work where already adequate.
 - No route, API, authorization, inquiry privacy, tenant or payment behavior changed.
 - Commits: `63724e4`, `abdefd7`, `bdf55c3`, `fca4b8d`, `f61e2e5`, `d31d278`, `bda68aa`, `1ed455e`.
+
+
+## UI redesign — shared shell batch 7 (2026-11-02)
+
+- Added host-provided workspace identity to the shared dashboard topbar; Admin and Company shells now identify their current workspace without duplicating header components.
+- Added focused DashboardHeader tests for configured and empty workspace labels.
+- Preserved existing sidebar filtering, access profile routing, search, theme, notification, user menu and logout behavior.
+- Commits: `9fe9d5f`, `39cfd56`, `399c989`, `8e5b9bf`.
+- Tests have been authored but not executed in this editing session.
