@@ -930,8 +930,7 @@ onBeforeUnmount(() => {
 .state-box.error i { color: var(--ds-color-danger); }
 .state-box p { margin: 0; }
 
-/* Stats */
-/* Features */
+/* Verified marketplace capabilities */
 .features-bar {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
   background: var(--surface-card); border: 1px solid var(--surface-border);
@@ -1001,7 +1000,7 @@ onBeforeUnmount(() => {
   background: var(--ds-color-surface);
   max-width: 40rem;
 }
-.hero-search-input { min-height: 2.7rem; }
+ .hero-search-input { min-height: 2.75rem; }
 .hero-search-btn { min-height: 2.65rem; }
 .hero-visual {
   min-height: 17rem;
@@ -1028,6 +1027,16 @@ onBeforeUnmount(() => {
 .filters-inner :deep(.p-inputtext),
 .filters-inner :deep(.p-select),
 .filters-inner :deep(.p-inputnumber-input) { border-radius: var(--ds-radius-md); }
+.filters-inner :deep(.p-inputtext),
+.filters-inner :deep(.p-select),
+.filters-inner :deep(.p-inputnumber-input) { min-height: 2.75rem; }
+.filter-actions :deep(.p-button) { min-height: 2.75rem; }
+.hero-actions .btn { min-height: 2.75rem; }
+.category-card { min-height: 10rem; cursor: pointer; }
+.category-card:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 3px;
+}
 .category-card {
   overflow: hidden;
   border: 1px solid var(--ds-color-border);
@@ -1058,9 +1067,7 @@ onBeforeUnmount(() => {
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
-.stat-icon,
 .feature-icon { background: var(--ds-color-primary-soft); }
-.stat-icon i,
 .feature-icon i { color: var(--ds-color-primary); }
 @media (max-width: 900px) {
   .hero { min-height: 0; }
@@ -1072,7 +1079,6 @@ onBeforeUnmount(() => {
   .hero-actions { flex-direction: row; }
   .hero-actions .btn { flex: 1 1 0; padding-inline: .75rem; font-size: .82rem; }
   .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
-  .stats-bar,
   .features-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .feature-item { justify-content: flex-start; padding: .5rem; }
   .feature-text h3 { font-size: .78rem; }
@@ -1084,4 +1090,19 @@ onBeforeUnmount(() => {
   .hero-actions { flex-direction: column; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .slide-fade-enter-active,
+  .slide-fade-leave-active,
+  .hero-dot::before,
+  .product-card,
+  .category-card,
+  .nav-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+  .product-card:hover,
+  .product-card:focus-visible,
+  .category-card:hover,
+  .category-card:focus-visible { transform: none !important; }
+}
 </style>
