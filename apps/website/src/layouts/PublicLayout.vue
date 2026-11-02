@@ -157,8 +157,12 @@ function logout() {
         <div class="public-header-row">
           <!-- Right side: Logo + Navigation -->
           <div class="public-header-right">
-            <router-link :to="{ name: 'home' }" class="public-logo">
-              <i class="pi pi-wifi"></i>
+            <router-link :to="{ name: 'home' }" class="public-logo" aria-label="صفحه اصلی بازارگاه مخابرات">
+              <span class="public-logo-mark"><i class="pi pi-wifi"></i></span>
+              <span class="public-logo-name">
+                <strong>Telecom</strong>
+                <small>Marketplace</small>
+              </span>
             </router-link>
 
             <nav class="public-nav-desktop">
@@ -808,4 +812,109 @@ function logout() {
   .public-header-row { height: 3.75rem; }
   .public-nav-link-active::after { display: none; }
 }
+
+/* Public marketplace header: clear brand lockup and deliberate action grouping. */
+.public-header-row { min-height: 4.5rem; }
+.public-header-right { gap: clamp(.85rem, 1.8vw, 1.75rem); }
+.public-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .65rem;
+  width: auto;
+  height: auto;
+  padding: .25rem 0;
+  border-radius: 0;
+  background: transparent;
+  text-decoration: none;
+}
+.public-logo-mark {
+  display: grid;
+  place-items: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 22%, transparent);
+  border-radius: .9rem;
+  background: color-mix(in srgb, var(--ds-color-primary) 11%, var(--ds-color-surface));
+  color: var(--ds-color-primary);
+}
+.public-logo-mark i { font-size: 1.35rem; }
+.public-logo-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .05rem;
+  line-height: 1.1;
+}
+.public-logo-name strong {
+  color: var(--ds-color-brand-deep);
+  font-size: 1.05rem;
+  font-weight: 850;
+  letter-spacing: -.025em;
+}
+.public-logo-name small {
+  color: var(--ds-color-text-muted);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.public-header-actions { gap: .6rem; }
+.public-search-desktop { width: clamp(12rem, 19vw, 19rem); }
+.public-search-desktop :deep(.p-iconfield) { width: 100%; }
+.public-search-input { min-height: 2.7rem; border-color: var(--ds-color-border); }
+.public-icon-link {
+  width: 2.65rem;
+  height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+}
+.public-icon-link:hover {
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-primary);
+}
+.public-user-trigger {
+  min-height: 2.65rem;
+  border-radius: var(--ds-radius-pill);
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.public-user-trigger:hover { border-color: color-mix(in srgb, var(--ds-color-primary) 35%, var(--ds-color-border)); }
+.public-mobile-nav {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 99;
+  background: var(--ds-color-surface);
+}
+.public-mobile-nav-list { gap: .35rem; }
+.public-mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-height: 2.8rem;
+  border-radius: var(--ds-radius-md);
+}
+.public-mobile-nav-link i { width: 1.2rem; color: var(--ds-color-primary); }
+.public-main { min-width: 0; }
+.public-footer { background: var(--ds-navy); }
+.public-footer-inner { padding-top: clamp(2.5rem, 5vw, 4rem); }
+.public-footer-grid { align-items: start; }
+.public-footer-bottom { margin-top: 3rem; }
+@media (max-width: 767px) {
+  .public-header-row { min-height: 4rem; height: 4rem; }
+  .public-logo-mark { width: 2.45rem; height: 2.45rem; }
+  .public-logo-name strong { font-size: .98rem; }
+  .public-logo-name small { font-size: .57rem; }
+  .public-user-trigger { padding: .25rem; border: 0; background: transparent; }
+  .public-user-caret { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-shell *, .public-shell *::before, .public-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
 </style>
