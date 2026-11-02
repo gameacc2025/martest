@@ -2184,3 +2184,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Contact Us now has a real title/context header and tokenized contact/social icon surfaces.
 - Existing APIs, filter/search/order actions and contact submission preserved.
 - Commits: f1d2e99, 8cd0cac, e349467, 41bcdf8. No local test/build/browser execution.
+
+
+## 2026-11-02 — UI redesign batch 16
+
+- Admin Roles/Permissions lists now have security-context headers and consistent responsive table surfaces.
+- Admin System Settings rebuilt semantically, removing the inline-style layout in favor of a responsive token-driven setting card and labeled numeric threshold control; load/save/error/retry behavior preserved.
+- Company Settings header and tabs refined with live company status and verification indicators.
+- Admin/Company personal profile pages and Company Change Password received consistent account/security page headers and form surfaces.
+- Commits: a51eea5, 5715c4a, c2da3c9, d3391a1, 7bf11c2, 70f7445, 5e0a572. No local test/build/browser execution.
