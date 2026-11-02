@@ -728,3 +728,13 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Extended PublicLayout tests for the utility tier and existing primary header.
 - CI test-and-build passed at 8a381241 before the subsequent PublicLayout utility-tier commits. Latest main is b18cdb7; its CI, migration and runtime workflows are pending. The last completed runtime workflow at 0618911 failed only in the browser smoke step; compose, service health, migration application and test/build CI were separate successful checks. Do not treat browser smoke as a substitute for component tests or production builds.
 - No local test/build execution is claimed in this connected GitHub editing session.
+
+
+## Notification inbox accessibility and control hierarchy — batch 13 (2026-11-02)
+
+- Admin and Company inbox message rows now use semantic article containers, separate selection labels/checkboxes, and native message-open buttons. This removes the previous interactive wrapper with role=button that contained nested checkboxes and action buttons.
+- Message-open buttons expose selected state through aria-pressed and support native keyboard activation; the existing single-click-select / double-click-mark-read contract remains unchanged.
+- Folder/category navigation and row/reading/bulk action controls have 44px minimum targets. Responsive row controls wrap without forcing page-level horizontal overflow.
+- Added Admin and Company inbox tests for semantic button behavior, selected state and unchanged double-click read semantics.
+- Existing API endpoints, folder IDs, unread counts, selection behavior, move/copy, bulk actions and user scope are unchanged.
+- CI for the latest batch is pending; no local test/build execution is claimed.
