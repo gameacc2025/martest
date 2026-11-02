@@ -2227,3 +2227,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added unit coverage for shared `Table.vue` row/loading passthrough, empty-state copy and column configuration.
 - Commits: `9927176`, `b52f642`, `8b54d91`, `d065562`, `b6ce439`, `95ac38b`.
 - CI was green on earlier commits `7767afe` and `b52f642`; latest run must finish before sign-off. Runtime Validation remains a separate flaky/failing Playwright smoke workflow and is not claimed green.
+
+
+## UI redesign — inquiry details and company settings (2026-11-02)
+
+- Admin inquiry details now use a two-column metadata/items layout with full-width responses and history.
+- Company inquiry details now align with the shared dashboard content container; responsive sidebar, deadline, response and data-table presentation refined.
+- Company settings no longer nest a narrow padded container inside the dashboard shell; tabs, profile/contact metadata, forms and toggles have consistent responsive panels.
+- API, inquiry lifecycle, privacy/decision authorization, tenant scope and settings semantics unchanged.
+- Commits: `5e1d159`, `f6bc9b8`, `26b6f8f`.
+- CI previously found a test-only stub assertion failure in Table.test.js; corrected in `07abcc2`. Awaiting CI on the corrected latest tree.
