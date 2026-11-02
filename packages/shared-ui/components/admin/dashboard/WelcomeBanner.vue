@@ -113,4 +113,10 @@ const today = computed(() =>
     font-size: var(--ds-font-size-xl);
   }
 }
+
+.welcome-banner { border-radius: var(--ds-radius-xl); }
+@media (max-width: 640px) {
+  .welcome-banner { align-items: flex-start; flex-direction: column; padding: var(--ds-space-5); }
+}
+
 </style>
