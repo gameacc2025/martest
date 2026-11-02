@@ -16,3 +16,8 @@ Applies to create/edit product, inquiry, company, user, role and settings forms.
 - Show access-profile type as a human-readable label, not a raw enum. Use API-backed name, email, phone and creation date with explicit empty-value labels.
 - Keep profile edit and password-change dialogs associated with visible labels and 44px controls. Preserve the existing profile/password/avatar API contracts.
 - Do not render a fabricated unread count. If the profile page does not load notification totals, show a plain notification navigation action.
+## Public address book
+- Address cards distinguish the default address with a clear status label and keep edit/delete/default actions visually separate.
+- Use PrimeIcons for map markers; avoid decorative text glyphs as interface icons.
+- Form fields remain label-wrapped or explicitly associated, with clear required states and 44px input/action targets.
+- Keep the address form responsive, preserve the existing create/update/default/delete API contracts, and show an intentional empty state when no addresses are returned.
