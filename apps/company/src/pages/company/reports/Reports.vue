@@ -175,12 +175,6 @@ function exportInquiriesCSV() {
             <p>{{ productsError }}</p>
             <Button label="تلاش دوباره" icon="pi pi-refresh" @click="fetchProducts" />
           </div>
-          <div v-else-if="inquiriesError" class="reports-error-state" role="alert">
-            <i class="pi pi-exclamation-triangle"></i>
-            <h3>دریافت گزارش استعلام‌ها ناموفق بود</h3>
-            <p>{{ inquiriesError }}</p>
-            <Button label="تلاش دوباره" icon="pi pi-refresh" @click="fetchInquiryStats" />
-          </div>
           <template v-else>
             <div class="kpi-grid">
               <KpiCard label="کل محصولات" :value="productKpis.total" icon="pi pi-box" tone="info" />
@@ -198,8 +192,14 @@ function exportInquiriesCSV() {
 
         <!-- Inquiries Tab -->
         <TabPanel value="inquiries">
-          <div v-if="inquiriesLoading" class="text-center py-8">
+          <div v-if="inquiriesLoading" class="text-center py-8" role="status">
             <ProgressSpinner />
+          </div>
+          <div v-else-if="inquiriesError" class="reports-error-state" role="alert">
+            <i class="pi pi-exclamation-triangle"></i>
+            <h3>دریافت گزارش استعلام‌ها ناموفق بود</h3>
+            <p>{{ inquiriesError }}</p>
+            <Button label="تلاش دوباره" icon="pi pi-refresh" @click="fetchInquiryStats" />
           </div>
           <template v-else>
             <div class="kpi-grid">
