@@ -1184,3 +1184,8 @@ The shared DataTable component now has a clearer record-count toolbar, token-dri
 ## UI implementation — latest batch 8 (2026-11-02)
 
 Completed structural/visual work on Admin and Company product editors, Admin inquiry-subscription management, and Company reports. These are focused page-level changes only; continue with the remaining Admin/Company/Website pages and shared components. Preserve API and permissions. Latest code commits: `e14505e`, `d288067`, `18a67c5`, `90cf711`; CI pending.
+
+
+## UI implementation — batch 9 (2026-11-02)
+
+Completed UI refinements for Admin notification management, Company product views and subscription page, and Website customer profile. These changes preserve the existing data and workflows. Commits: `5761ae7`, `eceda9f`, `e895213`, `f99c289`, `77b0f74`. Continue the remaining page inventory and wait for CI before sign-off.
