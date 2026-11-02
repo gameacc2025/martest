@@ -839,19 +839,15 @@ function formatDate(value) {
   min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
-.company-management-table :deep(.p-paginator-page.p-highlight).company-management-table :deep(.p-button.p-button-text) {
-  width: 2.75rem;
-  min-width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem;
-}
 .company-management-table :deep(.p-paginator-page.p-highlight) {
   background: var(--ds-color-primary-soft);
   color: var(--ds-color-primary-text);
 }
 .company-management-table :deep(.p-button.p-button-text) {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
 }
 @media (max-width: 760px) {
   .company-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
