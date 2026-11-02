@@ -29,4 +29,11 @@ const year = computed(() => new Date().getFullYear())
   color: var(--text-color-secondary);
   font-size: 0.8rem;
 }
+
+.dash-footer {
+  border-top-color: var(--ds-color-border);
+  color: var(--ds-color-text-muted);
+  padding-block: var(--ds-space-5);
+}
+
 </style>
