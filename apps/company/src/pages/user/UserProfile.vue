@@ -436,4 +436,24 @@ function logout() {
     grid-template-columns: 1fr;
   }
 }
+
+.profile-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.profile-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.profile-page .page-header h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
+.profile-page .account-grid { grid-template-columns: minmax(240px, .8fr) minmax(0, 1.8fr); }
+.profile-page :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.profile-page :deep(.p-tabpanels) { background: transparent; }
+@media (max-width: 900px) { .profile-page .account-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .profile-page .page-header { padding: var(--ds-space-4); } }
+
 </style>
