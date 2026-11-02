@@ -1116,3 +1116,15 @@ PR #80 squash-merged into `main` at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`.
 
 ## Product vision clarification — 2026-11-02
 The UI reference redesign must account for the full long-term enterprise platform vision, not only currently active marketplace features. Include future CRM, HR, finance/accounting, procurement, inventory/logistics, support, projects/workflows, documents/assets, BI, integrations, security and compliance in the information architecture and design-system planning. Their purpose and phased rollout are documented in `docs/FUTURE_MODULES_BLUEPRINT.md`. Keep planned modules visibly distinguished from active features; do not invent routes, APIs, or working controls for modules that are not implemented.
+
+
+## Active task — Full Paces RTL UI redesign (2026-11-02)
+
+The active user request is to continue until the complete UI of all three apps is redesigned. Track page-by-page progress in `docs/UI_REDESIGN_EXECUTION.md`.
+
+- Reference: Paces RTL Bootstrap preview; borrow page hierarchy, density, reusable layouts, toolbars, tables, details and responsive patterns—not its palette or framework dependencies.
+- Preserve the Telecom teal/navy brand, Vazirmatn, RTL, PrimeVue 4, Vue architecture, API contracts, auth/session handoff, router names, role/permission filtering, tenant isolation and business rules.
+- Current completed batch includes shared design primitives, cross-app PrimeVue surfaces, dashboard shells/dashboards, product lists, inquiry list/detail/create in Admin and Company, management lists, Company reports, Admin notification tools, Website company directory and commerce pages.
+- Remaining: all other listed Admin/Company/Website pages, shared components and responsive/dark states. Do not claim full completion until inventory is closed.
+- Do not add fake future CRM/HR/finance menu routes or controls. Planned modules belong in the documented information architecture only until their backend and permissions exist.
+- Tests/builds have not been run from this connected GitHub editing session. Run the relevant app tests/builds in the local workspace and record actual results.
