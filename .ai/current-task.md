@@ -1133,3 +1133,8 @@ The active user request is to continue until the complete UI of all three apps i
 ### UI redesign — batch 2 progress (2026-11-02)
 
 Completed this batch: Admin/Company product editors, inquiry subscriptions, Company settings, Admin/Company profile, all three notification inboxes and preference pages, Website login/register/recovery/profile/addresses/My Inquiries, Admin/Company password recovery/change-password, and shared Card/Button/Badge/DataTable/FormSection/ProductCard components. The tracker docs/UI_REDESIGN_EXECUTION.md is authoritative for completed and remaining pages. Continue through every remaining page and component; no completion claim until inventory and local verification are closed.
+
+
+### UI redesign — batch 3 progress (2026-11-02)
+
+Completed this batch: Company personal/company product views, Admin system settings and legacy order list styling, Website contact/inquiry-subscription/legacy catalogue, shared auth handoff/footer/breadcrumb/feedback states, and accessible Admin/Company loading gates. Added role-scoped disabled future-module labels to the sidebar (no routes or actions) and a Vitest test for the menu contract. Continue auditing every remaining component and page; local tests/builds remain outstanding.
