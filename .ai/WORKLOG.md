@@ -2330,3 +2330,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Breadcrumbs and My Inquiries action buttons remain in the named actions slot.
 - No account, order, wishlist, inquiry or route behavior changed.
 - Commits: `95e8111`, `de3d47f`, `7991a04`, `ecfc860`, `959035d`. CI pending.
+
+
+## UI redesign — public marketplace batch 15 (2026-11-02)
+
+- Shared workspace heading adopted in Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us.
+- Breadcrumbs and actions preserved via named slot; no data/filter/cart/checkout/address/contact API behavior changed.
+- Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.
