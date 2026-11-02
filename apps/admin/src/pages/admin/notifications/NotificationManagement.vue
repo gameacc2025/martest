@@ -70,8 +70,8 @@ function statusLabel(status) {
 
 <template>
   <section class="notification-management" dir="rtl">
-    <header class="page-header">
-      <div><p class="eyebrow">ارتباط با کاربران</p><h1>مدیریت و ارسال اعلان‌ها</h1><p class="muted">ارسال اطلاعیه به کاربران فعال و پیگیری صف ایمیل.</p></div>
+    <header class="page-header ds-page-heading">
+      <div class="notification-heading-copy"><p class="eyebrow"><i class="pi pi-megaphone"></i> ارتباط با کاربران</p><h1>مدیریت و ارسال اعلان‌ها</h1><p class="muted">اطلاعیه‌های هدفمند را منتشر و وضعیت تحویل کانال‌های ارسال را پیگیری کنید.</p></div>
       <router-link to="/notifications" class="back-link"><i class="pi pi-inbox"></i> صندوق اعلان‌های ادمین</router-link>
     </header>
 
@@ -161,5 +161,20 @@ function statusLabel(status) {
 @media (max-width: 640px) {
   .notification-management .page-header { padding: var(--ds-space-4); }
 }
+
+
+.notification-management .page-header { align-items: center; }
+.notification-management .notification-heading-copy { min-width: 0; }
+.notification-management .eyebrow { display: inline-flex; align-items: center; gap: .4rem; font-weight: var(--ds-font-weight-bold); }
+.notification-management .page-header h1 { font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
+.notification-management .management-grid { grid-template-columns: minmax(0, 1.35fr) minmax(280px, .85fr); gap: var(--ds-space-5); }
+.notification-management .panel h2 { display: flex; align-items: center; gap: .5rem; padding-bottom: .8rem; border-bottom: 1px solid var(--ds-color-border); }
+.notification-management .stat-grid div { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface-alt); }
+.notification-management .stat-grid strong { color: var(--ds-color-text); font-variant-numeric: tabular-nums; }
+.notification-management .table-wrap { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg); }
+.notification-management table { border-collapse: separate; border-spacing: 0; }
+.notification-management thead th { background: var(--ds-color-surface-alt); color: var(--ds-color-text-muted); font-weight: var(--ds-font-weight-bold); }
+.notification-management tbody tr:hover { background: var(--ds-color-surface-hover); }
+@media (max-width: 640px) { .notification-management .page-header { align-items: stretch; } }
 
 </style>
