@@ -758,4 +758,54 @@ function logout() {
     display: none;
   }
 }
+
+/* Public marketplace shell — shared brand system, Paces-level polish. */
+.public-header {
+  background: color-mix(in srgb, var(--ds-color-surface) 94%, transparent);
+  border-bottom-color: var(--ds-color-border);
+  box-shadow: var(--ds-shadow-xs);
+  backdrop-filter: blur(14px);
+}
+.public-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  justify-content: center;
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--ds-color-primary) 10%, transparent);
+}
+.public-nav-link {
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  text-decoration: none;
+  transition: color var(--ds-transition-fast);
+}
+.public-nav-link:hover,
+.public-nav-link-active { color: var(--ds-color-primary); }
+.public-nav-link-active::after {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.75rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ds-color-primary);
+  content: "";
+}
+.public-search-input {
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.public-icon-link,
+.public-user-trigger {
+  border-radius: var(--ds-radius-lg);
+}
+.public-mobile-nav {
+  border-bottom: 1px solid var(--ds-color-border);
+  box-shadow: var(--ds-shadow-sm);
+}
+@media (max-width: 767px) {
+  .public-header-row { height: 3.75rem; }
+  .public-nav-link-active::after { display: none; }
+}
 </style>
