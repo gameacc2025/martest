@@ -1,10 +1,10 @@
 <template>
-  <div class="companies-page">
-    <div class="comp-container">
-      <div class="comp-head">
-        <h1>شرکت ها</h1>
+  <main class="companies-page ds-page">
+    <div class="comp-container ds-container ds-stack">
+      <header class="comp-head ds-page-heading">
+        <h1 class="ds-h1">شرکت‌ها</h1>
         <Breadcrumb :home="home" :model="items" class="comp-breadcrumb" />
-      </div>
+      </header>
 
       <!-- Search and Filters -->
       <div class="comp-section">
@@ -135,7 +135,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -490,4 +490,15 @@ const toggleFollow = async (companyId) => {
   color: var(--text-color-secondary);
   margin: 0.25rem 0 0 0;
 }
+
+.comp-head { align-items: flex-end; }
+.comp-head h1 { font-size: var(--ds-font-size-2xl); }
+.comp-section :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.comp-section :deep(.p-card-body) { padding: var(--ds-space-5); }
+.comp-section :deep(.p-inputtext),
+.comp-section :deep(.p-select) { min-height: var(--ds-touch-target); }
 </style>
