@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -166,10 +167,13 @@ function logout() {
 
 <template>
   <div class="profile-page">
-    <header class="page-header profile-heading">
-      <span class="profile-heading-icon"><i class="pi pi-user"></i></span>
-      <div><span class="profile-heading-eyebrow">حساب کاربری</span><h1>پروفایل من</h1><p>اطلاعات حساب، تنظیمات شخصی و گزینه‌های امنیتی را مدیریت کنید.</p></div>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="حساب کاربری"
+      title="پروفایل من"
+      description="اطلاعات حساب، تنظیمات شخصی و گزینه‌های امنیتی را مدیریت کنید."
+      icon="pi pi-user"
+      heading-id="company-profile-title"
+    />
 
     <div v-if="loading" class="text-center py-8">
       <ProgressSpinner />
