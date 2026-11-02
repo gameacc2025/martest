@@ -666,3 +666,13 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Added focused tests for the default and opt-out behavior.
 - Commits: `4c60743` shared responsive table implementation; `775d757` component test coverage.
 - Tests/builds have not yet been run in this connected editing session. CI result must be checked before marking the batch verified.
+
+
+## Product management lists — batch 8 (2026-11-02)
+
+- Admin and Company product-management pages now use the shared `DataTable` component instead of two separate raw PrimeVue table implementations.
+- Both pages retain their existing role/permission-gated row actions, review/publish/archive/delete flows, preview/rejection dialogs, authenticated `myProducts` data source and tenant scoping.
+- The existing search and status controls remain in the page toolbar. Server pagination is now passed through the shared table request event, including the selected page size; filter/search changes reset the table's local paginator to page one.
+- Company title cells retain brand/model metadata through the shared table's named slot; status badges and all action controls retain their prior behavior.
+- Commits: `d5312ab` Admin list migration, `173907e` Company list migration, `e07b1fc` paginator reset API, `334f1d4` reset test, `e2d958d` / `3a256fb` filter-reset wiring.
+- CI and app builds are pending; no local execution is claimed.
