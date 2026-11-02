@@ -2116,3 +2116,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Company reports now have an analytics-oriented header and improved report tabs/export presentation.
 - API calls, product form state, role checks, subscription policy and CSV export logic were preserved.
 - Commits: `e14505e`, `d288067`, `18a67c5`, `90cf711`. Await CI.
+
+
+## UI redesign — batch 9 (2026-11-02)
+
+- Admin notification composer/delivery view refined.
+- Company personal and company product pages now have clearer catalogue page hierarchy.
+- Company subscription page now has clearer active/pending plan, quota and plan-selection presentation.
+- Website customer profile received a responsive account workspace header/layout.
+- Existing data, routes, payment flow and permissions preserved. Commits: `5761ae7`, `eceda9f`, `e895213`, `f99c289`, `77b0f74`. CI pending.
