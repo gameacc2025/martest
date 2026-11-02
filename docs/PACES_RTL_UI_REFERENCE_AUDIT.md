@@ -109,3 +109,16 @@ https://themes.coderthemes.com/paces/bootstrap/index.html?rtl
 - Paces DataTables Basic: https://themes.coderthemes.com/paces/tailwind/tables-datatables-basic.html
 - Paces DataTables JavaScript: https://themes.coderthemes.com/paces/tailwind/tables-datatables-javascript.html
 - Paces eCommerce Dashboard: https://themes.coderthemes.com/paces/tailwind/index.html?neo=&rtl=
+
+
+## تکمیل نقشه صفحات بر اساس کاتالوگ رسمی Paces
+
+کاتالوگ رسمی محصول Paces فهرست اپلیکیشن‌های آماده را شامل Ecommerce، Chat، Projects، Tasks، Invoice، CRM، Users، Finance، HRM، Email، Support Center، File Manager، Calendar، Companies، Todo، Clients، Issue Tracker، API Keys و موارد دیگر معرفی می‌کند. همچنین صفحه فروش رسمی از 28+ اپلیکیشن/صفحه کاربردی و 280+ صفحه آماده در مجموعه قالب سخن می‌گوید.
+
+این فهرست، نقشه دامنه‌های قابل الگوبرداری است و **به معنی واکشی و بازکردن تک‌تک 280+ صفحه نیست**. صفحه اصلی پیش‌نمایش RTL و تعدادی URL داخلی هنگام واکشی مستقیم با خطای cache miss برمی‌گردند؛ بنابراین فقط صفحات دارای محتوای قابل مشاهده در بخش «صفحات و الگوهای تأییدشده» به‌عنوان مشاهده مستقیم ثبت شده‌اند. برای بررسی تک‌تک صفحات و جزئیات دقیق، فایل ZIP/سورس خریداری‌شده قالب یا URLهای قابل دسترس لازم است.
+
+منابع کاتالوگ:
+- https://themeforest.net/item/paces-multipurpose-tailwind-css-admin-dashboard-template/61254418
+- https://coderthemes.com/product/paces-multipurpose-tailwind-css-4-and-bootstrap-5-admin-dashboard-template
+
+دامنه‌های کاتالوگ که در IA پروژه باید لحاظ شوند: تجارت الکترونیک، گفتگو و ایمیل، پروژه و وظیفه، صورتحساب و مالی، CRM و مشتریان، HRM، پشتیبانی و دانش، مدیریت فایل و سند، تقویم، شرکت‌ها، گزارش/BI، کلیدهای API و یکپارچه‌سازی. این دامنه‌ها در پروژه فقط وقتی فعال می‌شوند که backend و permission واقعی پیاده شده باشد.
