@@ -11,105 +11,65 @@
         <template #actions><Breadcrumb :home="home" :model="items" class="profile-breadcrumb" /></template>
       </WorkspacePageHeading>
 
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Sidebar -->
-        <div class="lg:col-span-1">
-          <Card>
-            <template #content>
-              <div class="text-center">
-                <img
-                  :src="user.avatar || '/placeholder-avatar.jpg'"
-                  alt="Avatar"
-                  class="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h2 class="text-lg font-bold">{{ user.fullName || user.email || 'کاربر' }}</h2>
-                <p class="text-gray-500">{{ user.email }}</p>
-                <p class="text-sm text-gray-400 mt-2">{{ user.userType }}</p>
+      <div v-if="profileError" class="profile-error" role="alert">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <span>{{ profileError }}</span>
+        <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined :loading="profileLoading" @click="loadUserProfile" />
+      </div>
 
-                <div class="mt-6 space-y-2">
-                  <Button
-                    label="ویرایش پروفایل"
-                    icon="pi pi-pencil"
-                    class="w-full p-button-outlined"
-                    @click="editProfile"
-                  />
-                  <Button
-                    label="تغییر رمز عبور"
-                    icon="pi pi-key"
-                    class="w-full p-button-outlined"
-                    @click="changePassword"
-                  />
-                </div>
+      <div v-if="profileLoading && !user.fullName" class="profile-loading" role="status">
+        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i><span>در حال دریافت اطلاعات حساب…</span>
+      </div>
+
+      <div v-else class="profile-layout">
+        <aside class="profile-sidebar" aria-label="اطلاعات و منوی حساب کاربری">
+          <Card class="profile-identity-card">
+            <template #content>
+              <div class="profile-identity">
+                <img v-if="user.avatar" :src="user.avatar" :alt="'تصویر پروفایل ' + (user.fullName || 'کاربر')" class="profile-avatar" />
+                <span v-else class="profile-avatar-fallback" aria-hidden="true">{{ userInitial }}</span>
+                <h2>{{ user.fullName || user.email || 'کاربر' }}</h2>
+                <p class="profile-email">{{ user.email || 'ایمیلی ثبت نشده است' }}</p>
+                <span class="profile-type"><i class="pi pi-user" aria-hidden="true"></i>{{ userTypeLabel }}</span>
+              </div>
+              <div class="profile-primary-actions">
+                <Button label="ویرایش پروفایل" icon="pi pi-pencil" outlined class="profile-action" @click="editProfile" />
+                <Button label="تغییر رمز عبور" icon="pi pi-key" outlined severity="secondary" class="profile-action" @click="changePassword" />
               </div>
             </template>
           </Card>
 
-          <Card class="mt-4">
-            <template #title>منوی کاربری</template>
+          <Card class="profile-menu-card">
+            <template #title>دسترسی‌های حساب</template>
             <template #content>
-              <div class="space-y-2">
-                <Button
-                  label="اعلان ها"
-                  icon="pi pi-bell"
-                  class="w-full p-button-text justify-start"
-                  @click="goToNotifications"
-                  :badge="notificationCount"
-                  badgeClass="p-badge-danger"
-                />
-                <Button
-                  label="آدرس ها"
-                  icon="pi pi-map-marker"
-                  class="w-full p-button-text justify-start"
-                  @click="goToAddresses"
-                />
-                <Button
-                  label="خروج"
-                  icon="pi pi-sign-out"
-                  class="w-full p-button-text p-button-danger justify-start"
-                  @click="logout"
-                />
-              </div>
+              <nav class="profile-menu" aria-label="منوی حساب کاربری">
+                <Button label="اعلان‌ها" icon="pi pi-bell" text class="profile-menu-action" @click="goToNotifications" />
+                <Button label="آدرس‌های من" icon="pi pi-map-marker" text class="profile-menu-action" @click="goToAddresses" />
+                <Button label="خروج از حساب" icon="pi pi-sign-out" text severity="danger" class="profile-menu-action profile-menu-action--danger" @click="logout" />
+              </nav>
             </template>
           </Card>
-        </div>
+        </aside>
 
-        <!-- Main Content -->
-        <div class="lg:col-span-3">
-          <Card>
-            <template #title>اطلاعات پروفایل</template>
-            <template #content>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 class="font-semibold mb-4">اطلاعات شخصی</h3>
-                  <div class="space-y-3">
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">نام و نام خانوادگی:</span>
-                      <span>{{ user.fullName || user.displayName || user.name }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">ایمیل:</span>
-                      <span>{{ user.email }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">شماره تلفن:</span>
-                      <span>{{ user.phone || 'ثبت نشده' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">تاریخ عضویت:</span>
-                      <span>{{ formatDate(user.createdAt) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-gray-500">نوع کاربر:</span>
-                      <span>{{ user.userType || 'کاربر عادی' }}</span>
-                    </div>
-                  </div>
-                </div>
-
+        <section class="profile-main" aria-labelledby="profile-details-title">
+          <Card class="profile-details-card">
+            <template #title>
+              <div class="profile-card-heading">
+                <span class="profile-card-icon"><i class="pi pi-id-card" aria-hidden="true"></i></span>
+                <div><h2 id="profile-details-title">اطلاعات حساب</h2><p>مشخصات ثبت‌شده برای حساب کاربری شما</p></div>
               </div>
             </template>
+            <template #content>
+              <dl class="profile-details-grid">
+                <div class="profile-detail-row"><dt>نام و نام خانوادگی</dt><dd>{{ user.fullName || user.displayName || user.name || 'ثبت نشده' }}</dd></div>
+                <div class="profile-detail-row"><dt>ایمیل</dt><dd>{{ user.email || 'ثبت نشده' }}</dd></div>
+                <div class="profile-detail-row"><dt>شماره تلفن</dt><dd>{{ user.phone || 'ثبت نشده' }}</dd></div>
+                <div class="profile-detail-row"><dt>تاریخ عضویت</dt><dd>{{ formatDate(user.createdAt) }}</dd></div>
+                <div class="profile-detail-row"><dt>نوع حساب</dt><dd><span class="profile-type-inline">{{ userTypeLabel }}</span></dd></div>
+              </dl>
+            </template>
           </Card>
-
-        </div>
+        </section>
       </div>
     </div>
 
@@ -124,16 +84,18 @@
         <p v-if="formError" class="text-red-600 text-sm" role="alert">{{ formError }}</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium mb-2">نام</label>
+            <label for="profile-first-name" class="profile-field-label">نام</label>
             <InputText
+              id="profile-first-name"
               v-model="editForm.firstName"
               placeholder="نام خود را وارد کنید"
               class="w-full"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium mb-2">نام خانوادگی</label>
+            <label for="profile-last-name" class="profile-field-label">نام خانوادگی</label>
             <InputText
+              id="profile-last-name"
               v-model="editForm.lastName"
               placeholder="نام خانوادگی خود را وارد کنید"
               class="w-full"
@@ -143,11 +105,12 @@
 
 
         <div>
-          <label class="block text-sm font-medium mb-2">آواتار</label>
+          <label class="profile-field-label">تصویر پروفایل</label>
           <FileUpload
             mode="basic"
             name="avatar"
             accept="image/*"
+            chooseLabel="انتخاب تصویر"
             :maxFileSize="1000000"
             @select="onAvatarUpload"
             class="w-full"
@@ -183,8 +146,9 @@
       <form @submit.prevent="saveNewPassword" class="space-y-4">
         <p v-if="formError" class="text-red-600 text-sm" role="alert">{{ formError }}</p>
         <div>
-          <label class="block text-sm font-medium mb-2">رمز عبور فعلی</label>
+          <label for="profile-current-password" class="profile-field-label">رمز عبور فعلی</label>
           <Password
+            inputId="profile-current-password"
             v-model="passwordForm.currentPassword"
             placeholder="رمز عبور فعلی را وارد کنید"
             class="w-full"
@@ -194,8 +158,9 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">رمز عبور جدید</label>
+          <label for="profile-new-password" class="profile-field-label">رمز عبور جدید</label>
           <Password
+            inputId="profile-new-password"
             v-model="passwordForm.newPassword"
             placeholder="رمز عبور جدید را وارد کنید"
             class="w-full"
@@ -205,8 +170,9 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">تکرار رمز عبور جدید</label>
+          <label for="profile-confirm-password" class="profile-field-label">تکرار رمز عبور جدید</label>
           <Password
+            inputId="profile-confirm-password"
             v-model="passwordForm.confirmPassword"
             placeholder="رمز عبور جدید را مجدداً وارد کنید"
             class="w-full"
@@ -238,7 +204,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import Breadcrumb from 'primevue/breadcrumb'
@@ -253,7 +219,10 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 const user = ref({})
-const notificationCount = ref('0')
+const profileLoading = ref(false)
+const profileError = ref('')
+const userInitial = computed(() => (user.value.fullName || user.value.email || 'ک').trim().slice(0, 1).toLocaleUpperCase('fa-IR'))
+const userTypeLabel = computed(() => ({ STAFF: 'کارمند بازارگاه', COMPANY: 'کاربر شرکت', CUSTOMER: 'کاربر عادی' }[user.value.userType] || 'کاربر'))
 
 const editProfileDialog = ref(false)
 const changePasswordDialog = ref(false)
@@ -287,6 +256,8 @@ onMounted(async () => {
 })
 
 const loadUserProfile = async () => {
+  profileLoading.value = true
+  profileError.value = ''
   try {
     const context = await authStore.getProfile()
     const identity = context?.user || {}
@@ -305,7 +276,9 @@ const loadUserProfile = async () => {
       lastName: profile.lastName || '',
     }
   } catch (error) {
-    console.error('Error loading user profile:', error)
+    profileError.value = error?.serverMessage || error?.message || 'دریافت اطلاعات پروفایل ناموفق بود.'
+  } finally {
+    profileLoading.value = false
   }
 }
 
@@ -377,7 +350,7 @@ const onAvatarUpload = async (event) => {
       await authStore.uploadAvatar(file)
       await loadUserProfile()
     } catch (error) {
-      console.error('Error uploading avatar:', error)
+      formError.value = error?.serverMessage || error?.message || 'بارگذاری تصویر پروفایل ناموفق بود.'
     }
   }
 }
@@ -397,80 +370,126 @@ const logout = async () => {
 </script>
 
 <style scoped>
-.user-profile-page {
-  direction: rtl;
+.user-profile-page { direction: rtl; color: var(--ds-color-text); }
+.user-profile-page > .ds-container { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, .78fr) minmax(0, 2.22fr);
+  align-items: start;
+  gap: var(--ds-space-5);
 }
-
-.order-item {
-  transition: all 0.2s ease;
-}
-
-.order-item:hover {
-  background-color: #f8f9fa;
-}
-
-.user-profile-page { color: var(--ds-color-text); }
-.user-profile-page .mb-6 {
-  padding-bottom: var(--ds-space-4);
-  border-bottom: 1px solid var(--ds-color-border);
-}
-.user-profile-page .mb-6 h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
+.profile-sidebar,
+.profile-main { display: flex; flex-direction: column; gap: var(--ds-space-4); min-width: 0; }
 .user-profile-page :deep(.p-card) {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.user-profile-page .order-item:hover { background: var(--ds-color-surface-hover); }
-
-.profile-page-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--ds-space-4);
-  margin-bottom: var(--ds-space-6);
-  padding: var(--ds-space-5) var(--ds-space-6);
+  overflow: hidden;
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
-.profile-page-eyebrow {
+.user-profile-page :deep(.p-card-body) { padding: clamp(1rem, 2vw, 1.5rem); }
+.user-profile-page :deep(.p-card-title) { margin-bottom: var(--ds-space-4); color: var(--ds-color-text); }
+.profile-identity { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.profile-avatar,
+.profile-avatar-fallback {
+  display: grid;
+  place-items: center;
+  width: 6.25rem;
+  height: 6.25rem;
+  margin-bottom: 1rem;
+  border: 4px solid var(--ds-color-surface-alt);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: var(--ds-shadow-sm);
+}
+.profile-avatar-fallback {
+  background: var(--ds-hero-gradient);
+  color: var(--ds-on-navy);
+  font-size: 2rem;
+  font-weight: var(--ds-font-weight-bold);
+}
+.profile-identity h2 { margin: 0; color: var(--ds-color-text); font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); overflow-wrap: anywhere; }
+.profile-email { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); overflow-wrap: anywhere; }
+.profile-type,
+.profile-type-inline {
   display: inline-flex;
   align-items: center;
-  gap: .45rem;
+  gap: .35rem;
+  padding: .35rem .65rem;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-primary-soft);
   color: var(--ds-color-primary);
   font-size: var(--ds-font-size-xs);
   font-weight: var(--ds-font-weight-bold);
 }
-.profile-page-heading h1 {
-  margin: .35rem 0;
-  color: var(--ds-color-text);
-  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
-}
-.profile-page-heading p { margin: 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
-.user-profile-page .grid {
+.profile-type { margin-top: .8rem; }
+.profile-primary-actions { display: grid; gap: .6rem; margin-top: 1.25rem; }
+.profile-action { width: 100%; min-height: 2.75rem; justify-content: center; }
+.profile-menu { display: grid; gap: .35rem; }
+.profile-menu-action { width: 100%; min-height: 2.75rem; justify-content: flex-start; }
+.profile-menu-action--danger { color: var(--ds-color-danger); }
+.profile-card-heading { display: flex; align-items: center; gap: .8rem; }
+.profile-card-icon {
   display: grid;
-  grid-template-columns: minmax(230px, .8fr) minmax(0, 2.2fr);
-  align-items: start;
-  gap: var(--ds-space-5);
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  flex: 0 0 auto;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.1rem;
 }
-.user-profile-page :deep(.p-card) { overflow: hidden; }
-.user-profile-page :deep(.p-card-body) { padding: clamp(1rem, 2vw, 1.5rem); }
-.user-profile-page img.rounded-full {
-  width: 6rem;
-  height: 6rem;
-  object-fit: cover;
-  border: 4px solid var(--ds-color-surface-alt);
-  box-shadow: var(--ds-shadow-sm);
+.profile-card-heading h2 { margin: 0; font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
+.profile-card-heading p { margin: .2rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-normal); }
+.profile-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 0; }
+.profile-detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
 }
-.user-profile-page .order-item { border-radius: var(--ds-radius-md); transition: background-color var(--ds-transition-fast); }
-.user-profile-page .order-item:hover { background: var(--ds-color-surface-hover); }
-.user-profile-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+.profile-detail-row dt { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-semibold); }
+.profile-detail-row dd { margin: 0; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); overflow-wrap: anywhere; }
+.profile-loading,
+.profile-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  min-height: 7rem;
+  padding: 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
+}
+.profile-loading i { color: var(--ds-color-primary); }
+.profile-error { flex-wrap: wrap; border-color: color-mix(in srgb, var(--ds-color-danger) 28%, transparent); background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.user-profile-page :deep(.p-dialog) { width: min(100% - 2rem, 38rem); }
+.user-profile-page :deep(.p-dialog-content) { padding-top: var(--ds-space-4); }
+.user-profile-page .profile-field-label { display: block; margin-bottom: .45rem; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); }
+.user-profile-page :deep(.p-inputtext),
+.user-profile-page :deep(.p-password-input) { width: 100%; min-height: 2.75rem; }
+.user-profile-page :deep(.p-fileupload-choose),
+.user-profile-page :deep(.p-button) { min-height: 2.75rem; border-radius: var(--ds-radius-md); }
+.user-profile-page :deep(.p-button:focus-visible),
+.user-profile-page :deep(.p-inputtext:focus-visible),
+.user-profile-page :deep(.p-password-input:focus-visible) {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
 @media (max-width: 900px) {
-  .user-profile-page .grid { grid-template-columns: minmax(0, 1fr); }
+  .profile-layout { grid-template-columns: minmax(0, 1fr); }
+  .profile-sidebar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
 @media (max-width: 640px) {
-  .profile-page-heading { align-items: flex-start; flex-direction: column; padding: var(--ds-space-4); }
-  .profile-breadcrumb { max-width: 100%; overflow: hidden; }
+  .profile-sidebar,
+  .profile-details-grid { grid-template-columns: minmax(0, 1fr); }
+  .profile-card-heading { align-items: flex-start; }
 }
 </style>
