@@ -2428,3 +2428,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Commits: edb183b catalogue card, 8a38124 tests, 7512ed1 public utility bar, 70141fc utility test, b18cdb7 semantic token correction.
 - ui-ux-pro-max skill was read and applied; Vue stack guidance, UX guidelines and persisted design-system MASTER/catalogue override are the design references.
 - Latest full test/build workflow is pending for b18cdb7; no local test/build run is claimed. Only main exists and no open PRs were found.
+
+
+## Notification inbox accessibility — 2026-11-02
+
+- Admin + Company notification inbox message rows are now semantic articles with independent selection labels/checkboxes, native open buttons and separate row action controls.
+- Removed nested interactive elements from the previous interactive wrapper; message buttons expose aria-pressed and rely on native Enter/Space activation.
+- Preserved the user's requested single-click-select / double-click-mark-read behavior, folder system, API calls, selection and bulk operations.
+- Standardized folder/category and row/reading/bulk action targets to 44px and added responsive wrapping.
+- Added tests in both Admin and Company inbox suites for semantic controls and selected state.
+- Commits: f4fa453 Admin inbox; ca8d218 Company inbox; 5fb074d Admin tests; 1cc79aa Company tests.
+- CI verification pending on the newest main head; no local tests/builds claimed.
