@@ -1,10 +1,15 @@
 <template>
   <div class="wishlist-page">
     <div class="ds-container ds-page">
-      <header class="commerce-page-heading">
-        <div class="commerce-heading-copy"><span class="ds-eyebrow"><i class="pi pi-heart"></i> مجموعه منتخب شما</span><h1 class="ds-page-heading__title">لیست علاقه‌مندی‌ها</h1><p>محصولاتی را که برای بررسی دوباره ذخیره کرده‌اید، اینجا پیدا می‌کنید.</p></div>
-        <Breadcrumb :home="home" :model="items" />
-      </header>
+      <WorkspacePageHeading
+        eyebrow="مجموعه منتخب شما"
+        title="لیست علاقه‌مندی‌ها"
+        description="محصولاتی را که برای بررسی دوباره ذخیره کرده‌اید، اینجا پیدا می‌کنید."
+        icon="pi pi-heart"
+        heading-id="wishlist-page-title"
+      >
+        <template #actions><Breadcrumb :home="home" :model="items" /></template>
+      </WorkspacePageHeading>
 
       <div v-if="wishlistItems.length === 0" class="wishlist-empty-state">
         <i class="pi pi-heart text-6xl text-gray-300 mb-4"></i>
@@ -107,6 +112,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWishlistStore } from '../../stores/wishlist'
