@@ -510,3 +510,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Existing linear step navigation, step validation, draft save/restore, inquiry options, product selection, API calls and submit behavior remain unchanged.
 - Commits: `ec4c1f2` Company wizard; `914ba4f` Admin wizard.
 - CI validation pending.
+
+
+## Shared form guidance component — batch 10 (2026-11-02)
+
+- Extracted the Admin/Company product-editor required-field indicator into `packages/shared-ui/components/common/RequiredFieldsProgress.vue`.
+- Both product editors now consume the same shared component; duplicated progress markup and styles were removed.
+- Added component tests for partial completion and the empty-checklist edge case.
+- Existing form check definitions remain role-aware and continue to mirror current validation requirements. No submit/API behavior changed.
+- Commits: `a5f6fa2` shared component; `5ad87a1` Company adoption; `49d779d` Admin adoption; `6332362` tests.
+- CI pending.
