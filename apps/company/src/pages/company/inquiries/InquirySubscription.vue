@@ -110,9 +110,13 @@ async function requestPlan(plan) {
 
 <template>
   <main class="subscription-page" dir="rtl">
-    <header class="heading">
-      <div><h1>اشتراک استعلام</h1><p>سهمیه استعلام، پاسخ شرکت‌ها، پیام داخلی و پیامک بر اساس طرح اشتراک محاسبه می‌شود.</p></div>
-      <button class="secondary" :disabled="loading" @click="load">به‌روزرسانی</button>
+    <header class="heading ds-page-heading">
+      <div class="subscription-heading-copy">
+        <span class="eyebrow"><i class="pi pi-wallet"></i> اشتراک و سهمیه خدمات</span>
+        <h1>اشتراک استعلام شرکت</h1>
+        <p>طرح فعال، میزان مصرف و درخواست خرید را مدیریت کنید؛ سهمیه‌ها بر اساس دوره اشتراک محاسبه می‌شوند.</p>
+      </div>
+      <button class="secondary refresh-action" :disabled="loading" @click="load"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
     </header>
 
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
@@ -215,4 +219,31 @@ button{border:0;border-radius:7px;padding:.75rem 1rem;cursor:pointer}.primary{ba
   .subscription-page .heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); }
 }
 
+.subscription-page .heading { align-items: center; }
+.subscription-heading-copy { min-width: 0; }
+.subscription-page .eyebrow { display: inline-flex; align-items: center; gap: .45rem; color: var(--ds-color-primary); font-weight: var(--ds-font-weight-bold); }
+.subscription-page .heading h1 { margin: .35rem 0; font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
+.subscription-page .heading p { margin: 0; }
+.subscription-page .refresh-action { display: inline-flex; align-items: center; gap: .5rem; }
+.subscription-page .active { border-inline-start: 4px solid var(--ds-color-success); }
+.subscription-page .pending { border-inline-start: 4px solid var(--ds-color-warning); }
+.subscription-page .active-pill { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-page .pending-pill { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
+.subscription-page .quota { border-color: var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface); }
+.subscription-page .quota strong { color: var(--ds-color-text); font-variant-numeric: tabular-nums; }
+.subscription-page .meter { background: var(--ds-color-surface-alt); }
+.subscription-page .meter span { background: var(--ds-color-primary); }
+.subscription-page .plan-card { border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-xs); transition: border-color var(--ds-transition), box-shadow var(--ds-transition), transform var(--ds-transition); }
+.subscription-page .plan-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
+.subscription-page .plan-card.chosen { border-color: var(--ds-color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-color-primary) 16%, transparent); }
+.subscription-page .price { color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); }
+.subscription-page input { width: 100%; box-sizing: border-box; }
+.subscription-page .primary { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.subscription-page .secondary { border: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); color: var(--ds-color-text); }
+.subscription-page .error { background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.subscription-page .success { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+@media (max-width: 640px) {
+  .subscription-page .heading { align-items: stretch; }
+  .subscription-page .quota-grid { grid-template-columns: 1fr; }
+}
 </style>
