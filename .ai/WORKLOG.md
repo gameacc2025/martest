@@ -2209,3 +2209,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Existing data sources, API calls, pagination, permission checks and product/company workflow handlers were preserved.
 - Commits: `0256af2`, `1092b84`, `c21d18d`, `7010dc6`.
 - CI run `41449786538` for `7010dc6` was still in progress when this note was added. No local tests/builds or browser tests are claimed.
+
+
+## UI redesign — catalogue and inquiry workspaces (2026-11-02)
+
+- Company product catalogue aligned with the Admin catalogue treatment; removed duplicate outer padding and refined responsive filters/table/paginator.
+- Company inquiry workspace now has a dedicated management surface, clearer scope tabs and table/paginator hierarchy.
+- Admin inquiry review queue now has matching toolbar/table/loading/pagination styling.
+- Preserved existing API behavior, tenant scoping, product state transitions, STAFF-only moderation, inquiry scope tabs and server-side pagination/sorting.
+- Commits: `4e5cd98`, `55ec8ed`, `17e43c0`, `9036416`, `7c2f7af`.
