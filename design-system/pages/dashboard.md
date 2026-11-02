@@ -20,3 +20,11 @@ Applies to Admin and Company dashboard pages. Master rules remain authoritative.
 - Secondary actions remain links/buttons with real routes.
 - Skeleton, empty, partial-data and API-error states remain distinct.
 - Respect reduced motion and ensure chart/table labels remain readable in dark mode.
+
+## Shared dashboard navigation and shell
+- Admin and Company use one shared sidebar/header shell; keep the menu permission-filtered by the host app and do not duplicate or hard-code route definitions in shared UI.
+- Desktop sidebar supports expanded/collapsed states; mobile drawer state is passed explicitly to the shared header.
+- Desktop and mobile toggles expose dynamic labels, aria-expanded and aria-controls pointing to the actual navigation container.
+- An open mobile sidebar is exposed as a modal navigation dialog. Escape and overlay dismissal behavior remains owned by the host layout.
+- Header icon, notification, account and search controls meet 44px minimum targets with visible focus states.
+- Preserve the Telecom brand mark, workspace label, company identity, theme switch, notification count, profile menu and search route guard.
