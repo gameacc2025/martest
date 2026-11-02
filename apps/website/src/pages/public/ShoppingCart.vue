@@ -1,10 +1,10 @@
 <template>
   <div class="shopping-cart-page">
     <div class="ds-container ds-page">
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold">سبد خرید</h1>
+      <header class="mb-6 ds-page-heading">
+        <h1 class="text-2xl font-bold ds-page-heading__title">سبد خرید</h1>
         <Breadcrumb :home="home" :model="items" class="mt-2" />
-      </div>
+      </header>
 
       <div v-if="cartItems.length === 0" class="text-center py-12">
         <i class="pi pi-shopping-cart text-6xl text-gray-300 mb-4"></i>
@@ -326,4 +326,26 @@ const applyDiscountCode = async () => {
 .cart-item:hover {
   background-color: #f8f9fa;
 }
+
+.shopping-cart-page { color: var(--ds-color-text); }
+.shopping-cart-page .ds-page-heading {
+  align-items: flex-end;
+  padding-bottom: var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-color-border);
+}
+.shopping-cart-page .ds-page-heading__title {
+  color: var(--ds-color-text);
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+  font-weight: var(--ds-font-weight-bold);
+}
+.shopping-cart-page :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.shopping-cart-page :deep(.p-card .p-card-title) {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-bold);
+}
+.shopping-cart-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
 </style>
