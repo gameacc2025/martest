@@ -163,6 +163,7 @@ function createInquiry() {
               <InputText
                 v-model="searchQuery"
                 placeholder="جستجو در عنوان/توضیحات..."
+                aria-label="جستجو در استعلام‌ها"
                 @input="debounceSearch"
               />
             </span>
@@ -174,6 +175,7 @@ function createInquiry() {
               placeholder="فیلتر وضعیت"
               class="status-filter"
               showClear
+              aria-label="فیلتر وضعیت استعلام"
               @change="applyStatusFilter"
             />
           </div>
@@ -183,7 +185,14 @@ function createInquiry() {
         </template>
       </Toolbar>
 
-      <Tabs v-model:value="scopeFilter" @update:value="onScopeChange">
+      <div v-if="errored" class="state-block inquiry-error-state" role="alert">
+        <i class="pi pi-exclamation-triangle state-icon"></i>
+        <h3>دریافت استعلام‌ها ناموفق بود</h3>
+        <p>اتصال به سرور با مشکل روبه‌رو شد. دوباره تلاش کنید.</p>
+        <Button label="تلاش مجدد" icon="pi pi-refresh" @click="fetchInquiries(1)" />
+      </div>
+
+      <Tabs v-else v-model:value="scopeFilter" @update:value="onScopeChange">
         <TabList>
           <Tab v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}
@@ -264,7 +273,7 @@ function createInquiry() {
               <Column header="عملیات" style="width: 5rem">
                 <template #body="{ data }">
                   <Button icon="pi pi-eye" severity="info" rounded text
-                    v-tooltip.top="'مشاهده'" @click="viewInquiry(data)" />
+                    v-tooltip.top="'مشاهده'" aria-label="مشاهده استعلام" @click="viewInquiry(data)" />
                 </template>
               </Column>
 
@@ -702,9 +711,20 @@ function createInquiry() {
 .inquiry-management-table :deep(.p-paginator-page),
 .inquiry-management-table :deep(.p-paginator-next),
 .inquiry-management-table :deep(.p-paginator-prev) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
+}
+.inquiry-management-table :deep(.p-button.p-button-text) {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+}
+.inquiry-error-state {
+  min-height: 16rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
 }
 @media (max-width: 640px) {
   .inquiry-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
