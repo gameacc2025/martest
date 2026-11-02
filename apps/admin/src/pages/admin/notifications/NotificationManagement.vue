@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted } from 'vue'
 import { apiGet, apiPost } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
@@ -70,10 +71,17 @@ function statusLabel(status) {
 
 <template>
   <section class="notification-management" dir="rtl">
-    <header class="page-header ds-page-heading">
-      <div class="notification-heading-copy"><p class="eyebrow"><i class="pi pi-megaphone"></i> ارتباط با کاربران</p><h1>مدیریت و ارسال اعلان‌ها</h1><p class="muted">اطلاعیه‌های هدفمند را منتشر و وضعیت تحویل کانال‌های ارسال را پیگیری کنید.</p></div>
-      <router-link to="/notifications" class="back-link"><i class="pi pi-inbox"></i> صندوق اعلان‌های ادمین</router-link>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="ارتباط با کاربران"
+      title="مدیریت و ارسال اعلان‌ها"
+      description="اطلاعیه‌های هدفمند را منتشر و وضعیت تحویل کانال‌های ارسال را پیگیری کنید."
+      icon="pi pi-megaphone"
+      heading-id="notification-management-title"
+    >
+      <template #actions>
+        <router-link to="/notifications" class="back-link"><i class="pi pi-inbox"></i> صندوق اعلان‌های ادمین</router-link>
+      </template>
+    </WorkspacePageHeading>
 
     <div class="management-grid">
       <form class="panel compose-panel" @submit.prevent="sendNotification">
