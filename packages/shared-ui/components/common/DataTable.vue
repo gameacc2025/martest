@@ -60,6 +60,8 @@ const props = defineProps({
   // ── Server-side mode ──────────────────────────────────────
   // When true, sorting/paging/search are delegated to the parent via `request`.
   lazy: { type: Boolean, default: false },
+  initialSortField: { type: String, default: null },
+  initialSortOrder: { type: Number, default: null },
   totalRecords: { type: Number, default: null },
 
   // ── Pagination ────────────────────────────────────────────
@@ -88,8 +90,8 @@ const emit = defineEmits(['request', 'update:selection', 'search'])
 // ── Internal state ──────────────────────────────────────────
 const search = ref('')
 const selection = ref([])
-const sortField = ref(null)
-const sortOrder = ref(null) // 1 asc, -1 desc
+const sortField = ref(props.initialSortField)
+const sortOrder = ref(props.initialSortOrder) // 1 asc, -1 desc
 const page = ref(1)
 const rows = ref(props.rowsPerPage)
 const columnFilters = ref({})
