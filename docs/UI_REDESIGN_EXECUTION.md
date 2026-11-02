@@ -340,3 +340,21 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Admin Notification Folders now has a folder-structure header, responsive creation form and list rows, consistent system-folder vs admin-folder surfaces, and token-based success/error/action styling. User folder creation remains unavailable; system INBOX/SAVED folders remain protected by the existing logic.
 - Commits: `7232a6e`, `fecd896`.
 - No local tests/builds/browser execution; verification remains outstanding.
+
+
+## Management screens and shared table batch — 2026-11-02
+
+### Completed
+- `packages/shared-ui/components/common/Table.vue`: replaced the minimal table presentation with a consistent data surface, clear header hierarchy, row hover/focus treatment, paginator styling, loading overlay and a designed empty state. The existing columns/rows/slots and PrimeVue attribute passthrough contract remain unchanged.
+- `apps/admin/src/pages/admin/products/ProductList.vue`: established a branded management intro, refined toolbar/filter controls, data-table hierarchy, pagination, row actions and explicit loading/error/empty state presentation. Existing API calls, pagination, product workflow actions and permission predicates were not changed.
+- `apps/admin/src/pages/admin/companies/CompanyList.vue`: refined the directory surface, search/filter toolbar, data table, pagination and responsive toolbar behavior. Company approval/verification/status operations and permissions were not changed.
+
+### Commits
+- `0256af2` — shared Table component
+- `1092b84` — Admin ProductList
+- `c21d18d` — Admin CompanyList visual system
+- `7010dc6` — apply the company table class hook missed in the prior edit
+
+### Verification
+- CI started for `7010dc6` (run `41449786538`); test/build outcome is pending at the time of this update.
+- No local browser testing was performed. Do not mark this batch as fully verified until CI completes.
