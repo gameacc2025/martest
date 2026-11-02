@@ -50,7 +50,10 @@ async function savePreferences() {
 <template>
   <section class="ds-container ds-page preferences-page" dir="rtl">
     <header class="page-heading">
-      <div><p class="eyebrow">حساب کاربری</p><h1>تنظیمات اعلان‌ها</h1><p class="muted">انتخاب کنید هر رویداد از چه راهی به شما اطلاع داده شود.</p></div>
+      <div class="preferences-heading-identity">
+        <span class="preferences-heading-icon"><i class="pi pi-bell"></i></span>
+        <div><p class="eyebrow">حساب کاربری</p><h1>تنظیمات اعلان‌ها</h1><p class="muted">انتخاب کنید هر رویداد از چه راهی به شما اطلاع داده شود.</p></div>
+      </div>
       <router-link class="button button-secondary" to="/notifications">بازگشت به اعلان‌ها</router-link>
     </header>
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
@@ -98,5 +101,29 @@ async function savePreferences() {
 }
 .preferences-page thead th { background: var(--ds-color-surface-alt); color: var(--ds-color-text-muted); }
 @media (max-width: 640px) { .preferences-page .page-heading { padding: var(--ds-space-4); } }
+
+
+.preferences-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.preferences-page .page-heading { margin-bottom: 0; }
+.preferences-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.preferences-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  flex: 0 0 auto;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.25rem;
+}
+.preferences-page .page-heading h1 { margin: .2rem 0; }
+.preferences-page .page-heading .eyebrow { font-weight: var(--ds-font-weight-bold); }
+.preferences-page .actions { border-top: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); }
+.preferences-page .table-wrap { overflow-x: auto; }
+.preferences-page table { min-width: 38rem; }
+.preferences-page tbody tr:hover { background: var(--ds-color-surface-hover); }
+.preferences-page input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--ds-color-primary); }
+@media (max-width: 640px) { .preferences-heading-identity { align-items: flex-start; } }
 
 </style>
