@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
@@ -292,14 +293,13 @@ async function saveCreate() {
 
 <template>
   <div class="user-list-page ds-stack">
-<header class="management-page-intro" aria-labelledby="management-page-title">
-      <span class="management-page-icon"><i class="pi pi-users"></i></span>
-      <div class="management-page-copy">
-        <span>مدیریت اعضای سازمان</span>
-        <h1 id="management-page-title">کاربران شرکت</h1>
-        <p>اعضای شرکت و وضعیت حساب‌های آن‌ها را مدیریت کنید.</p>
-      </div>
-    </header>
+<WorkspacePageHeading
+      eyebrow="مدیریت اعضای سازمان"
+      title="کاربران شرکت"
+      description="اعضای شرکت و وضعیت حساب‌های آن‌ها را مدیریت کنید."
+      icon="pi pi-users"
+      heading-id="management-page-title"
+    />
         <div class="card ds-panel identity-management-surface">
       <Toolbar class="ds-toolbar identity-management-toolbar">
         <template #start>
