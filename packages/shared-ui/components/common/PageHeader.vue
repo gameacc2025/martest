@@ -48,4 +48,10 @@ defineProps({
     padding: 0.5rem 1rem;
   }
 }
+
+.page-header-pro {
+  border-radius: var(--ds-radius-xl);
+  padding: var(--ds-space-3) var(--ds-space-5);
+}
+
 </style>
