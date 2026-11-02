@@ -141,7 +141,7 @@ export const dashboardMenu = [
       { title: 'اسناد و دارایی‌ها', icon: 'pi pi-folder-open', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'ارتباطات سازمانی و کمپین‌ها', icon: 'pi pi-comments', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'مرکز دانش و محتوا', icon: 'pi pi-book', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
-      { title: 'ممیزی و انطباق', icon: 'pi pi-verified', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'ممیزی و انطباق', icon: 'pi pi-check-circle', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
     ],
   },
   {
