@@ -2,7 +2,10 @@
   <main class="companies-page ds-page">
     <div class="comp-container ds-container ds-stack">
       <header class="comp-head ds-page-heading">
-        <h1 class="ds-h1">شرکت‌ها</h1>
+        <div class="comp-heading-identity">
+          <span class="comp-heading-icon"><i class="pi pi-building"></i></span>
+          <div><span class="ds-eyebrow">شبکه تأمین بازارگاه</span><h1 class="ds-h1">شرکت‌ها</h1><p>تولیدکنندگان و تأمین‌کنندگان عضو بازارگاه را جستجو و بررسی کنید.</p></div>
+        </div>
         <Breadcrumb :home="home" :model="items" class="comp-breadcrumb" />
       </header>
 
@@ -501,4 +504,20 @@ const toggleFollow = async (companyId) => {
 .comp-section :deep(.p-card-body) { padding: var(--ds-space-5); }
 .comp-section :deep(.p-inputtext),
 .comp-section :deep(.p-select) { min-height: var(--ds-touch-target); }
+
+.comp-head { align-items: center; padding: 1.25rem 1.5rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
+.comp-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.comp-heading-icon { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; flex: 0 0 auto; border-radius: 1rem; background: var(--ds-color-primary-soft); color: var(--ds-color-primary); font-size: 1.3rem; }
+.comp-heading-identity .ds-eyebrow { display: inline-block; margin-bottom: .2rem; font-weight: var(--ds-font-weight-bold); }
+.comp-heading-identity h1 { margin: 0; color: var(--ds-color-text); }
+.comp-heading-identity p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.comp-breadcrumb { margin: 0; }
+.comp-section :deep(.p-card) { border-radius: var(--ds-radius-xl); border-color: var(--ds-color-border); box-shadow: var(--ds-shadow-xs); }
+.comp-filter-grid :deep(.p-inputtext), .comp-filter-grid :deep(.p-select) { min-height: 2.7rem; border-radius: var(--ds-radius-md); }
+.comp-verify-filters { padding-top: .9rem; border-top: 1px solid var(--ds-color-border); }
+.comp-card-grid { gap: 1rem; }
+.category-card { border-color: var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface); }
+.category-card:hover { border-color: var(--ds-color-primary); box-shadow: var(--ds-shadow-md); }
+@media (max-width: 640px) { .comp-head { align-items: flex-start; flex-direction: column; padding: 1rem; } .comp-heading-identity { align-items: flex-start; } }
+
 </style>
