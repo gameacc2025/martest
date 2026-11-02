@@ -237,4 +237,16 @@ const goToLogin = () => {
   flex-direction: column;
   gap: 0.5rem;
 }
+
+.forgot-password-page { min-height: 70vh; background: var(--ds-color-background); }
+.forgot-password-page :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-lg);
+}
+.forgot-password-page .fp-title i { color: var(--ds-color-primary); }
+.forgot-password-page .fp-title h1 { color: var(--ds-color-text); }
+.forgot-password-page .fp-desc { color: var(--ds-color-text-muted); line-height: var(--ds-line-height-relaxed); }
+.forgot-password-page :deep(.p-inputtext) { border-radius: var(--ds-radius-md); }
+
 </style>
