@@ -1539,3 +1539,8 @@ Continue the full UI route inventory after CI verification. No new branch: main 
 - Focused tests added for the subscription page and homepage card states.
 - CI test/build passed at f2ee67b before the homepage card commits. Re-run CI on the newest main head; migration/runtime checks are separate and still pending.
 - Continue through remaining route inventory, especially public account and detail pages, then re-audit Admin/Company forms, detail pages and shared shells. No new branches.
+## Latest Website account UI — 2026-11-02
+
+Public UserProfile is now a responsive account workspace with API-backed identity details, initials fallback for missing avatar, human-readable access type, no fabricated unread count, accessible profile/password dialogs and retryable profile-load errors. Existing auth/API/navigation behavior is preserved. Tests added for identity, fallback, editor and retry state.
+
+Continue remaining Website account/inquiry/detail pages and audit all route pages. Latest commit requires CI verification; main only, no new branches.
