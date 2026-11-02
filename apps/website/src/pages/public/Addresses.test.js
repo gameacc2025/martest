@@ -98,8 +98,9 @@ describe('Website address book workspace', () => {
     await wrapper.findAll('button').find(button => button.text().includes('افزودن آدرس جدید')).trigger('click')
 
     expect(wrapper.find('.address-form').exists()).toBe(true)
-    expect(wrapper.find('.address-form label[for=""]').exists()).toBe(false)
-    expect(wrapper.find('.address-form input[required]').exists()).toBe(true)
+    const recipientLabel = wrapper.findAll('.address-form label').find(label => label.text().includes('نام تحویل‌گیرنده'))
+    expect(recipientLabel).toBeTruthy()
+    expect(recipientLabel.find('input[required]').exists()).toBe(true)
     expect(wrapper.find('.default-choice').text()).toContain('آدرس پیش‌فرض')
   })
 
