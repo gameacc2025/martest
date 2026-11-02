@@ -1,10 +1,15 @@
 <template>
   <div class="checkout-page">
     <div class="ds-container ds-page">
-      <header class="commerce-page-heading">
-        <div class="commerce-heading-copy"><span class="ds-eyebrow"><i class="pi pi-wallet"></i> تکمیل سفارش</span><h1 class="ds-page-heading__title">تسویه حساب</h1><p>اطلاعات سفارش و روش پرداخت را در مراحل بعدی بررسی کنید.</p></div>
-        <Breadcrumb :home="home" :model="items" />
-      </header>
+      <WorkspacePageHeading
+        eyebrow="تکمیل سفارش"
+        title="تسویه حساب"
+        description="اطلاعات سفارش و روش پرداخت را در مراحل بعدی بررسی کنید."
+        icon="pi pi-wallet"
+        heading-id="checkout-title"
+      >
+        <template #actions><Breadcrumb :home="home" :model="items" /></template>
+      </WorkspacePageHeading>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Checkout Steps -->
@@ -368,6 +373,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../../stores/cart'
