@@ -1,8 +1,8 @@
 <template>
-  <div class="role-list-page">
+  <div class="role-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <div class="card">
-      <Toolbar>
+    <div class="card ds-panel">
+      <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
@@ -404,5 +404,37 @@ async function deleteRole() {
 <style scoped>
 .role-list-page {
   direction: rtl;
+}
+
+/* Shared Paces-style list hierarchy; query, pagination and permissions unchanged. */
+.role-list-page { gap: var(--ds-space-5); }
+.role-list-page .card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.role-list-page :deep(.p-toolbar) {
+  background: var(--ds-color-surface);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.role-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  white-space: nowrap;
+}
+.role-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
+  border-color: var(--ds-color-border);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+@media (max-width: 640px) {
+  .role-list-page { gap: var(--ds-space-3); }
+  .role-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
 </style>
