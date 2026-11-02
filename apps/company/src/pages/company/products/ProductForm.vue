@@ -22,6 +22,7 @@ import InputSwitch from 'primevue/inputswitch'
 import FileUpload from 'primevue/fileupload'
 import Tag from 'primevue/tag'
 import ProgressSpinner from 'primevue/progressspinner'
+import RequiredFieldsProgress from '@telecom/shared-ui/components/common/RequiredFieldsProgress.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -46,8 +47,6 @@ const requiredFormChecks = computed(() => {
   }
   return checks
 })
-const completedRequiredCount = computed(() => requiredFormChecks.value.filter((item) => item.complete).length)
-const formCompletion = computed(() => Math.round((completedRequiredCount.value / requiredFormChecks.value.length) * 100))
 
 // Derive the backend origin from the API base URL (strip the /api/... suffix)
 // so relative upload paths like "/uploads/..." resolve to the API server.
@@ -707,36 +706,7 @@ async function removeExistingDocument(docId) {
       </div>
     </header>
 
-    <section class="product-form-progress" aria-label="تکمیل اطلاعات ضروری">
-      <div class="product-form-progress-heading">
-        <div>
-          <span class="product-form-progress-eyebrow">آمادگی ثبت محصول</span>
-          <strong>اطلاعات ضروری</strong>
-        </div>
-        <span class="product-form-progress-value" aria-live="polite">{{ completedRequiredCount }} از {{ requiredFormChecks.length }}</span>
-      </div>
-      <div
-        class="product-form-progress-track"
-        role="progressbar"
-        :aria-valuenow="formCompletion"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        :aria-label="`تکمیل ${formCompletion} درصد از اطلاعات ضروری`"
-      >
-        <span :style="{ width: formCompletion + '%' }"></span>
-      </div>
-      <div class="product-form-progress-checks">
-        <span
-          v-for="item in requiredFormChecks"
-          :key="item.key"
-          class="product-form-progress-check"
-          :class="{ 'is-complete': item.complete }"
-        >
-          <i :class="item.complete ? 'pi pi-check-circle' : 'pi pi-circle'"></i>
-          {{ item.label }}
-        </span>
-      </div>
-    </section>
+    <RequiredFieldsProgress :checks="requiredFormChecks" eyebrow="آمادگی ثبت محصول" title="اطلاعات ضروری" />
 
     <div v-if="pageLoading" class="text-center py-8">
       <ProgressSpinner />
@@ -1245,74 +1215,6 @@ async function removeExistingDocument(docId) {
 }
 
 .product-form-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
-.product-form-progress {
-  display: grid;
-  gap: .85rem;
-  padding: 1.1rem 1.35rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.product-form-progress-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.product-form-progress-heading > div { display: grid; gap: .15rem; }
-.product-form-progress-eyebrow {
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
-.product-form-progress-heading strong {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-sm);
-}
-.product-form-progress-value {
-  color: var(--ds-color-primary-text);
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-bold);
-  white-space: nowrap;
-}
-.product-form-progress-track {
-  height: .45rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--ds-color-surface-alt);
-}
-.product-form-progress-track > span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--ds-color-primary);
-  transition: width var(--ds-transition);
-}
-.product-form-progress-checks {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .55rem;
-}
-.product-form-progress-check {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .35rem .65rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-pill);
-  color: var(--ds-color-text-muted);
-  background: var(--ds-color-surface-alt);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-medium);
-}
-.product-form-progress-check.is-complete {
-  border-color: color-mix(in srgb, var(--ds-color-success) 30%, var(--ds-color-border));
-  color: var(--ds-status-success-fg);
-  background: var(--ds-status-success-bg);
-}
-.product-form-progress-check i { font-size: .8rem; }
 .product-form-page .page-header {
   padding: var(--ds-space-5) var(--ds-space-6);
   background: var(--ds-color-surface);
@@ -1410,9 +1312,6 @@ async function removeExistingDocument(docId) {
   background: var(--ds-color-surface-alt);
 }
 @media (max-width: 640px) {
-  .product-form-progress { padding: 1rem; }
-  .product-form-progress-checks { gap: .4rem; }
-  .product-form-progress-check { flex: 1 1 calc(50% - .4rem); justify-content: center; }
   .product-editor-heading { align-items: stretch; flex-direction: column; }
   .product-editor-title-row { align-items: flex-start; }
   .product-editor-heading .page-header-actions { display: grid; grid-template-columns: 1fr 1fr; }
