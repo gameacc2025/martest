@@ -2348,3 +2348,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Preserved all auth, PKCE, API, route and permission logic.
 - Commits: `7655d32`, `ca9591d`, `f531a4b`, `4b53d8f`, `3bb6ab5`.
 - Tests/builds have not yet been run in the remote-only editing environment; verification remains pending.
+
+
+## UI implementation — design system and inquiry inbox batch 8 (2026-11-02)
+
+- Applied `ui-ux-pro-max` skill guidance (B2B SaaS, marketplace, data-dense dashboard, Minimalism/Flat/Soft UI, Vue Composition API, accessibility) while retaining Telecom teal/navy and Vazirmatn.
+- Added `design-system/MASTER.md` and page overrides for dashboard, catalogue, inquiries and forms.
+- Standardized shared DataTable, WorkspacePageHeading, Admin/Company product list and inquiry list interactive controls to 44px targets.
+- Company inquiry list now distinguishes API failure from empty results and offers retry; added accessible search/filter/view labels and component retry tests.
+- CI passed at `2c5b360` for frontend/shared tests, backend tests and all frontend builds; later inquiry changes await the next CI completion.
+- All work remains directly on `main`; no other branches were created.
