@@ -1396,3 +1396,10 @@ Continue migrating the remaining list/detail/form surfaces; do not mark the full
 Shared heading adoption now covers Admin Categories, Users, Roles, Permissions, Orders, Products, Companies, Inquiries and Company Products/Inquiries (10 management list screens). All existing data and permission behavior remains unchanged. Latest adoption commits: `3a3611a`, `f2e5bd2`, `e8ecb49`, `10e2c67`, `5a3fd61`, `e693b5d`.
 
 Continue to Notifications, detail pages, account/profile pages and public website; this is not completion of the full redesign.
+
+
+## Cross-module UI checkpoint — 2026-11-02
+
+The shared workspace heading now also covers Admin Notification Management/Folders, System Settings, Inquiry Subscription Management and Company User Management/Reports. Action slots retain the original refresh, inbox and CSV export actions. Total shared-heading coverage is 16 Admin/Company operational screens. Commits: `c5f2126`, `7df3c0c`, `fc7963e`, `dcabf38`, `5eca4cd`, `1bd79b4`.
+
+Continue to detail pages, account pages, notification inboxes, and public catalog/checkout. Full UI redesign is still in progress.
