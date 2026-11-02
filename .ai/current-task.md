@@ -1179,3 +1179,8 @@ Preserve API contracts, auth, role/permission filtering, tenant isolation, route
 ## Latest shared UI batch — 2026-11-02
 
 The shared DataTable component now has a clearer record-count toolbar, token-driven header/body/hover/selection/paginator surfaces, improved mobile toolbar behavior, and unmount cleanup for the search debounce. Added focused tests for client-side, filtered and lazy server counts. Commits: `c0be61b`, `3f3ab5f`. Await CI; continue full app UI migration.
+
+
+## UI implementation — latest batch 8 (2026-11-02)
+
+Completed structural/visual work on Admin and Company product editors, Admin inquiry-subscription management, and Company reports. These are focused page-level changes only; continue with the remaining Admin/Company/Website pages and shared components. Preserve API and permissions. Latest code commits: `e14505e`, `d288067`, `18a67c5`, `90cf711`; CI pending.
