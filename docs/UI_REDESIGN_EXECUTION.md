@@ -481,3 +481,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 
 ### Verification
 - CI status for the newest commit is pending; previous green run `dfc47e5` remains the latest confirmed test/build checkpoint until the new run completes.
+
+
+## Dashboard shell and identity — batch 7 (2026-11-02)
+
+- Shared `DashboardHeader` now accepts a host-supplied `workspaceLabel` and renders a compact, accessible workspace identity beside the navigation controls.
+- Admin passes `مدیریت بازارگاه`; Company passes `فضای کاری شرکت`. The shared shell remains one component and the value is presentation-only.
+- The workspace identity adapts on narrow screens and uses existing semantic design tokens; no app membership, permission, route, notification, auth or API behavior changed.
+- Added `DashboardHeader.test.js` for both configured and omitted workspace labels.
+- Commits: `9fe9d5f` shared header; `39cfd56` Admin shell; `399c989` Company shell; `8e5b9bf` tests.
+- Test/build execution is still pending; no local verification is claimed.
