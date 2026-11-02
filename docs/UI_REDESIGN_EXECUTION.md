@@ -530,3 +530,14 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Added component tests for content, custom heading ID, optional fields and actions slot.
 - Commits: `1a0e4fc` component; `15f1e40`, `3c2b4d5`, `541944a`, `cb083f0` page adoption; `a34b8e1` tests.
 - CI pending.
+
+
+## Management list rollout — batch 12 (2026-11-02)
+
+Extended the shared `WorkspacePageHeading.vue` pattern to:
+- Admin: Categories, Users, Roles, Permissions and Orders.
+- Company: Product management.
+
+Together with batch 11, the shared heading now covers Admin Products/Companies/Inquiries and Company Products/Inquiries as well. Page copy and the legacy-order/API availability disclaimer were preserved exactly. Search, filters, permissions, routes, table columns, dialogs and data loading were not changed.
+
+Commits: `3a3611a`, `f2e5bd2`, `e8ecb49`, `10e2c67`, `5a3fd61`, `e693b5d`. CI pending.
