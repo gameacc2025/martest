@@ -8,10 +8,10 @@ const PrimeTableStub = {
     value: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
   },
-  template: '<div class="prime-table-stub" :data-loading="String(loading)"><slot name="empty" /></div>',
+  template: '<div class="prime-table-stub" :data-loading="String(loading)"><slot /><slot name="empty" /></div>',
 }
 
-function mountTable(props = {}) {
+const ColumnStub = {\n  name: 'Column',\n  props: ['field', 'header', 'sortable'],\n  template: '<div class="column-stub" :data-field="field" :data-header="header" :data-sortable="String(sortable)" />',\n}\n\nfunction mountTable(props = {}) {
   return mount(Table, {
     props: {
       columns: [{ key: 'name', label: 'نام' }],
@@ -21,7 +21,7 @@ function mountTable(props = {}) {
     global: {
       stubs: {
         DataTable: PrimeTableStub,
-        Column: true,
+        Column: ColumnStub,
       },
     },
   })
@@ -53,6 +53,6 @@ describe('shared Table', () => {
       ],
     })
 
-    expect(wrapper.findAllComponents({ name: 'Column' })).toHaveLength(2)
+    expect(wrapper.findAll('.column-stub')).toHaveLength(2)\n    expect(wrapper.findAll('.column-stub')[0].attributes('data-field')).toBe('name')\n    expect(wrapper.findAll('.column-stub')[1].attributes('data-header')).toBe('وضعیت')
   })
 })
