@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { categoriesApi } from '@telecom/api-client'
@@ -14,6 +14,10 @@ import MegaMenu from '@telecom/shared-ui/components/common/MegaMenu.vue'
 const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
+
+// Keep the responsive navigation in sync with route changes (including
+// browser back/forward) so it never remains open over a new page.
+watch(() => route.fullPath, () => { mobileMenuOpen.value = false })
 
 // CUSTOMER notifications live on the website. COMPANY and STAFF users are
 // redirected to their own panels through the configured PKCE handoff URLs.
@@ -140,6 +144,7 @@ function search() {
   if (searchQuery.value.trim()) {
     router.push({ name: 'search', query: { q: searchQuery.value } })
     searchQuery.value = ''
+    mobileMenuOpen.value = false
   }
 }
 
@@ -151,6 +156,7 @@ function logout() {
 
 <template>
   <div class="public-shell">
+    <a class="public-skip-link" href="#public-main">رفتن به محتوای اصلی</a>
     <!-- Header -->
     <header class="public-header">
       <div class="public-container">
@@ -210,11 +216,13 @@ function logout() {
 
             <!-- Mobile menu toggle -->
             <PvButton
-              icon="pi pi-bars"
+              :icon="mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'"
               text
               rounded
               class="public-mobile-toggle"
-              aria-label="باز کردن منوی موبایل"
+              :aria-label="mobileMenuOpen ? 'بستن منوی موبایل' : 'باز کردن منوی موبایل'"
+              :aria-expanded="mobileMenuOpen"
+              aria-controls="public-mobile-navigation"
               @click="mobileMenuOpen = !mobileMenuOpen"
             />
           </div>
@@ -231,8 +239,8 @@ function logout() {
     </header>
 
     <!-- Mobile Navigation -->
-    <div v-if="mobileMenuOpen" class="public-mobile-nav">
-      <nav class="public-container">
+    <div v-if="mobileMenuOpen" id="public-mobile-navigation" class="public-mobile-nav">
+      <nav class="public-container" aria-label="منوی اصلی موبایل">
         <ul class="public-mobile-nav-list">
           <li>
             <router-link :to="{ name: 'categories' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
@@ -270,7 +278,7 @@ function logout() {
     </div>
 
     <!-- Main content -->
-    <main class="public-main">
+    <main id="public-main" class="public-main" tabindex="-1">
       <router-view></router-view>
     </main>
 
@@ -338,6 +346,30 @@ function logout() {
   display: flex;
   flex-direction: column;
 }
+
+.public-skip-link {
+  position: fixed;
+  z-index: 2000;
+  inset-block-start: .5rem;
+  inset-inline-start: .5rem;
+  transform: translateY(-160%);
+  padding: .7rem 1rem;
+  border: 1px solid var(--ds-color-primary);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+  text-decoration: none;
+  box-shadow: var(--ds-shadow-md);
+  transition: transform var(--ds-transition-fast);
+}
+.public-skip-link:focus {
+  transform: translateY(0);
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+.public-main:focus { outline: none; }
 
 .public-container {
   width: 100%;
@@ -898,6 +930,28 @@ function logout() {
 }
 .public-mobile-nav-link i { width: 1.2rem; color: var(--ds-color-primary); }
 .public-main { min-width: 0; }
+.public-mobile-toggle {
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  color: var(--ds-color-text);
+}
+.public-mobile-toggle:focus-visible,
+.public-user-trigger:focus-visible,
+.public-icon-link:focus-visible,
+.public-nav-link:focus-visible,
+.public-mobile-nav-link:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 3px;
+}
+.public-mobile-nav {
+  max-height: min(70vh, 34rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--ds-color-border);
+}
+.public-mobile-nav-link { min-height: 2.9rem; }
 .public-footer { background: var(--ds-navy); }
 .public-footer-inner { padding-top: clamp(2.5rem, 5vw, 4rem); }
 .public-footer-grid { align-items: start; }
@@ -914,6 +968,7 @@ function logout() {
   .public-shell *, .public-shell *::before, .public-shell *::after {
     scroll-behavior: auto !important;
     transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
   }
 }
 
