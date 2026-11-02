@@ -2398,3 +2398,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Search/filter changes reset local paginator; company phone fallback and company tenant display remain.
 - Commits: `a0f30fe`, `f993736`, `06586b3`, `70a640e`, `09452c4`, `4f155e6`.
 - CI/build verification pending.
+
+
+## UI redesign — inquiry list batch 10 (2026-11-02)
+
+- Admin + Company inquiry lists migrated to shared responsive DataTable; real inquiries API and lazy pagination/sort/filter preserved.
+- Company scope tabs (all/sent/received), deadline status, priority, counts and create permission remain; Admin status-change dialog and routes remain.
+- Search/status/scope changes reset local table page.
+- Fixed a CI-detected orphaned `v-else-if` in Company inquiry list; fixed missing `mobileCardLayout` prop declaration after CI exposed it.
+- Commits: `d4d102d`, `a497b8a`, `cca3d37`, `2860f1b`, `d9c42c9`.
+- Latest full CI rerun pending.
