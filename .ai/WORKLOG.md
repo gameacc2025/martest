@@ -2461,3 +2461,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Existing create/update/delete/default API and form fields preserved.
 - Added Addresses tests for real API rows, default state, form open/label and empty state.
 - Commits: fa6db5f address UI; 316e0a4 tests; 5038b04 label assertions. CI pending on newest head.
+## Shared Admin/Company shell accessibility — 2026-11-02
+
+- Shared DashboardHeader now receives mobileOpen and provides dynamic labels, aria-expanded and aria-controls for desktop/mobile menu toggles.
+- Admin/Company layouts expose the shared sidebar wrapper with stable dashboard-navigation ID.
+- DashboardSidebar exposes role=dialog and aria-modal while mobile drawer is open.
+- Header actions/search targets meet 44px and have visible focus styles; reduced motion is respected.
+- Tests added to DashboardHeader and DashboardSidebar suites.
+- Commits: 5205452 header; a4c6364 AdminLayout; 48e6562 CompanyLayout; 1823a5f header tests; 50188bb sidebar semantics; 21c24a1 sidebar tests. CI pending.
