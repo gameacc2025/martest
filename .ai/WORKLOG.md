@@ -2125,3 +2125,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Company subscription page now has clearer active/pending plan, quota and plan-selection presentation.
 - Website customer profile received a responsive account workspace header/layout.
 - Existing data, routes, payment flow and permissions preserved. Commits: `5761ae7`, `eceda9f`, `e895213`, `f99c289`, `77b0f74`. CI pending.
+
+
+## 2026-11-02 — UI redesign batch 10
+
+- Shared dashboard PageHeader now presents section context, current route title and breadcrumb in a responsive shell component.
+- Shared DataTable visual system rebuilt with token-based toolbar, filter, table, row action, empty/loading and paginator styling; no API behavior was changed.
+- Public website header received a Telecom Marketplace wordmark and refined desktop/mobile actions.
+- Public product catalog received a structured filter panel, results header, category badge and revised product-card grid.
+- Admin/Company product management lists and inquiry lists received consistent role-specific workspace headings and responsive table/toolbar surfaces.
+- Customer My Inquiries received a distinct workspace identity and responsive action grouping.
+- Added PageHeader unit tests for route metadata and fallback text.
+- Commits: `48ce7a6`, `012f0ea`, `ca1cec4`, `e37de59`, `038a467`, `f763480`, `f9a2f47`, `0f64a5c`, `b933ca0`, `efac6fc`.
+- GitHub combined status for current main head is empty (no checks reported); no local tests/builds were executed. Continue implementation; do not claim full UI completion or verification.
