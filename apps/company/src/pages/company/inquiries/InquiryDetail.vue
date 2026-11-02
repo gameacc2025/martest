@@ -693,9 +693,9 @@ function formatPrice(price) {
 <style scoped>
 .inquiry-detail-page {
   direction: rtl;
-  padding: 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: none;
+  margin: 0;
 }
 
 /* ── Page Header ────────────────────────────────────── */
@@ -1280,5 +1280,89 @@ function formatPrice(price) {
   .inquiry-detail-page { padding: var(--ds-space-3); }
   .inquiry-detail-page .page-header { padding: var(--ds-space-4); }
   .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Company response workspace: align to the dashboard content grid, not a nested container. */
+.inquiry-detail-page { display: flex; flex-direction: column; gap: clamp(1rem, 2vw, 1.5rem); }
+.inquiry-detail-page .detail-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.inquiry-detail-page .detail-main,
+.inquiry-detail-page .detail-sidebar { min-width: 0; gap: var(--ds-space-5); }
+.inquiry-detail-page .detail-section,
+.inquiry-detail-page .sidebar-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-detail-page .detail-section { padding: clamp(1rem, 2vw, 1.5rem); }
+.inquiry-detail-page .detail-section h2,
+.inquiry-detail-page .sidebar-card h3 {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+}
+.inquiry-detail-page .item-card,
+.inquiry-detail-page .response-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+.inquiry-detail-page .item-card { padding: 1rem; }
+.inquiry-detail-page .response-card { padding: 1.1rem; }
+.inquiry-detail-page .item-description,
+.inquiry-detail-page .description-text { color: var(--ds-color-text-muted); line-height: 1.8; }
+.inquiry-detail-page .deadline-banner {
+  margin: 0;
+  padding: .9rem 1.1rem;
+  border-radius: var(--ds-radius-lg);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.inquiry-detail-page .page-header {
+  padding: 1.2rem 1.4rem;
+  margin: 0;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-detail-page .page-title-group h1 {
+  color: var(--ds-color-text);
+  font-size: clamp(1.2rem, 2vw, var(--ds-font-size-xl));
+}
+.inquiry-detail-page .page-meta { gap: .55rem; }
+.inquiry-detail-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+.inquiry-detail-page :deep(.p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.inquiry-detail-page :deep(.p-datatable-tbody > tr > td) {
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+}
+.inquiry-detail-page .detail-skeleton {
+  gap: var(--ds-space-5);
+  max-width: none;
+}
+.inquiry-detail-page .skeleton-card {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+}
+@media (max-width: 1024px) {
+  .inquiry-detail-page .detail-grid { grid-template-columns: minmax(0, 1fr); }
+  .inquiry-detail-page .detail-sidebar { order: 0; }
+}
+@media (max-width: 767px) {
+  .inquiry-detail-page { padding: 0; }
+  .inquiry-detail-page .page-header { padding: 1rem; }
+  .inquiry-detail-page .page-header-left { flex-direction: row; }
+  .inquiry-detail-page .page-header-actions,
+  .inquiry-detail-page .page-header-actions :deep(.p-button) { width: 100%; }
 }
 </style>
