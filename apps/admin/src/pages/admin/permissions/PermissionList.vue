@@ -35,7 +35,7 @@
     </div>
 
     <!-- Create/Edit Permission Dialog -->
-    <Dialog v-model:visible="showDialog" :header="dialogHeader" :modal="true" class="p-fluid">
+    <Dialog v-model:visible="showDialog" :header="dialogHeader" :modal="true" class="p-fluid" :style="{ width: '600px', maxWidth: '96vw' }" :breakpoints="{ '960px': '92vw', '640px': '96vw' }">
       <div class="field">
         <label for="name">نام مجوز (انگلیسی)</label>
         <InputText id="name" v-model="currentPermission.name" :disabled="isEditMode" placeholder="مثال: users.create" />
@@ -279,7 +279,7 @@ async function deletePermission() {
 .permission-list-page .card { border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
 .permission-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
 .permission-list-page :deep(.p-toolbar-start), .permission-list-page :deep(.p-toolbar-end) { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
-.permission-list-page :deep(.p-toolbar .p-inputtext) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.permission-list-page :deep(.p-toolbar .p-inputtext) { min-height: 2.75rem; border-radius: var(--ds-radius-md); }
 .permission-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
 .permission-list-page :deep(.p-datatable-thead > tr > th) { white-space: nowrap; }
 @media (max-width: 640px) {
@@ -312,7 +312,7 @@ async function deletePermission() {
 }
 .management-data-toolbar :deep(.p-inputtext),
 .management-data-toolbar :deep(.p-select) {
-  min-height: 2.65rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
 .management-data-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
@@ -350,6 +350,13 @@ async function deletePermission() {
   min-width: 2.75rem;
   height: 2.75rem;
   min-height: 2.75rem;
+}
+.management-data-toolbar :deep(.p-toolbar-end .p-button) { min-height: 2.75rem; }
+.management-data-toolbar :deep(.p-inputtext:focus-visible),
+.management-data-toolbar :deep(.p-select:focus-visible),
+.management-data-toolbar :deep(.p-button:focus-visible) {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
 }
 @media (max-width: 700px) {
   .management-data-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
