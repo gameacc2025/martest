@@ -71,8 +71,9 @@
             <div v-if="userType === 'customer'">
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>نام</label>
+                  <label for="register-first-name">نام</label>
                   <InputText
+                    id="register-first-name"
                     v-model="form.firstName"
                     placeholder="نام خود را وارد کنید"
                     class="auth-input"
@@ -81,8 +82,9 @@
                   <small v-if="errors.firstName" class="p-error block">{{ errors.firstName }}</small>
                 </div>
                 <div class="field">
-                  <label>نام خانوادگی</label>
+                  <label for="register-last-name">نام خانوادگی</label>
                   <InputText
+                    id="register-last-name"
                     v-model="form.lastName"
                     placeholder="نام خانوادگی خود را وارد کنید"
                     class="auth-input"
@@ -94,8 +96,9 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>ایمیل <span class="reg-optional">(اختیاری)</span></label>
+                  <label for="register-email">ایمیل <span class="reg-optional">(اختیاری)</span></label>
                   <InputText
+                    id="register-email"
                     v-model="form.email"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
@@ -105,8 +108,9 @@
                   <small v-if="errors.email" class="p-error block">{{ errors.email }}</small>
                 </div>
                 <div class="field">
-                  <label>شماره تلفن <span class="reg-required">*</span></label>
+                  <label for="register-phone">شماره تلفن <span class="reg-required">*</span></label>
                   <InputText
+                    id="register-phone"
                     v-model="form.phone"
                     placeholder="شماره تلفن خود را وارد کنید"
                     class="auth-input"
@@ -117,8 +121,9 @@
               </div>
 
               <div class="field">
-                <label>رمز عبور</label>
+                <label for="register-password">رمز عبور</label>
                 <Password
+                  inputId="register-password"
                   v-model="form.password"
                   placeholder="رمز عبور خود را وارد کنید"
                   class="auth-input"
@@ -130,8 +135,9 @@
               </div>
 
               <div class="field">
-                <label>تکرار رمز عبور</label>
+                <label for="register-confirm-password">تکرار رمز عبور</label>
                 <Password
+                  inputId="register-confirm-password"
                   v-model="form.confirmPassword"
                   placeholder="رمز عبور را مجدداً وارد کنید"
                   class="auth-input"
@@ -146,8 +152,9 @@
             <!-- Company Information -->
             <div v-if="userType === 'company'">
               <div class="field">
-                <label>نام شرکت</label>
+                <label for="register-company-name">نام شرکت</label>
                 <InputText
+                  id="register-company-name"
                   v-model="form.companyName"
                   placeholder="نام شرکت خود را وارد کنید"
                   class="auth-input"
@@ -158,16 +165,18 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>نام انگلیسی شرکت</label>
+                  <label for="register-company-name-en">نام انگلیسی شرکت</label>
                   <InputText
+                    id="register-company-name-en"
                     v-model="form.companyNameEn"
                     placeholder="نام انگلیسی شرکت"
                     class="auth-input"
                   />
                 </div>
                 <div class="field">
-                  <label>شناسه ملی شرکت</label>
+                  <label for="register-national-id">شناسه ملی شرکت</label>
                   <InputText
+                    id="register-national-id"
                     v-model="form.nationalId"
                     placeholder="شناسه ملی شرکت"
                     class="auth-input"
@@ -179,8 +188,9 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>شماره ثبت شرکت</label>
+                  <label for="register-registration-number">شماره ثبت شرکت</label>
                   <InputText
+                    id="register-registration-number"
                     v-model="form.registrationNumber"
                     placeholder="شماره ثبت شرکت"
                     class="auth-input"
@@ -189,8 +199,9 @@
                   <small v-if="errors.registrationNumber" class="p-error block">{{ errors.registrationNumber }}</small>
                 </div>
                 <div class="field">
-                  <label>ایمیل شرکت</label>
+                  <label for="register-company-email">ایمیل شرکت</label>
                   <InputText
+                    id="register-company-email"
                     v-model="form.email"
                     placeholder="آدرس ایمیل شرکت"
                     type="email"
@@ -203,8 +214,9 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>شماره تلفن شرکت</label>
+                  <label for="register-company-phone">شماره تلفن شرکت</label>
                   <InputText
+                    id="register-company-phone"
                     v-model="form.phone"
                     placeholder="شماره تلفن شرکت"
                     class="auth-input"
@@ -213,8 +225,9 @@
                   <small v-if="errors.phone" class="p-error block">{{ errors.phone }}</small>
                 </div>
                 <div class="field">
-                  <label>وب‌سایت شرکت</label>
+                  <label for="register-company-website">وب‌سایت شرکت</label>
                   <InputText
+                    id="register-company-website"
                     v-model="form.website"
                     placeholder="https://example.com"
                     class="auth-input"
@@ -223,8 +236,9 @@
               </div>
 
               <div class="field">
-                <label>آدرس شرکت</label>
+                <label for="register-company-address">آدرس شرکت</label>
                 <Textarea
+                  id="register-company-address"
                   v-model="form.address"
                   placeholder="آدرس کامل شرکت"
                   class="auth-input"
@@ -242,8 +256,9 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>نام مدیر</label>
+                  <label for="register-manager-first-name">نام مدیر</label>
                   <InputText
+                    id="register-manager-first-name"
                     v-model="form.managerFirstName"
                     placeholder="نام مدیر شرکت"
                     class="auth-input"
@@ -252,8 +267,9 @@
                   <small v-if="errors.managerFirstName" class="p-error block">{{ errors.managerFirstName }}</small>
                 </div>
                 <div class="field">
-                  <label>نام خانوادگی مدیر</label>
+                  <label for="register-manager-last-name">نام خانوادگی مدیر</label>
                   <InputText
+                    id="register-manager-last-name"
                     v-model="form.managerLastName"
                     placeholder="نام خانوادگی مدیر"
                     class="auth-input"
@@ -265,8 +281,9 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>ایمیل مدیر <span class="reg-optional">(اختیاری)</span></label>
+                  <label for="register-manager-email">ایمیل مدیر <span class="reg-optional">(اختیاری)</span></label>
                   <InputText
+                    id="register-manager-email"
                     v-model="form.managerEmail"
                     placeholder="ایمیل مدیر شرکت"
                     type="email"
@@ -276,8 +293,9 @@
                   <small v-if="errors.managerEmail" class="p-error block">{{ errors.managerEmail }}</small>
                 </div>
                 <div class="field">
-                  <label>شماره همراه مدیر <span class="reg-required">*</span></label>
+                  <label for="register-manager-phone">شماره همراه مدیر <span class="reg-required">*</span></label>
                   <InputText
+                    id="register-manager-phone"
                     v-model="form.managerPhone"
                     placeholder="شماره همراه مدیر"
                     class="auth-input"
@@ -289,8 +307,9 @@
 
               <div class="reg-grid-2">
                 <div class="field">
-                  <label>رمز عبور مدیر</label>
+                  <label for="register-company-password">رمز عبور مدیر</label>
                   <Password
+                    inputId="register-company-password"
                     v-model="form.password"
                     placeholder="رمز عبور را وارد کنید"
                     class="auth-input"
@@ -301,8 +320,9 @@
                   <small v-if="errors.password" class="p-error block">{{ errors.password }}</small>
                 </div>
                 <div class="field">
-                  <label>تکرار رمز عبور</label>
+                  <label for="register-company-confirm-password">تکرار رمز عبور</label>
                   <Password
+                    inputId="register-company-confirm-password"
                     v-model="form.confirmPassword"
                     placeholder="رمز عبور را مجدداً وارد کنید"
                     class="auth-input"
@@ -328,7 +348,7 @@
                 <a href="/terms" class="auth-link">سیاست حریم خصوصی</a> موافقم
               </label>
             </div>
-            <small v-if="errors.acceptTerms" class="p-error block">{{ errors.acceptTerms }}</small>
+            <small v-if="errors.acceptTerms" class="p-error block" role="alert">{{ errors.acceptTerms }}</small>
 
             <Button
               type="submit"
@@ -840,6 +860,15 @@ const isValidEmail = (email) => {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
 }
 .auth-submit { min-height: 2.9rem; border-radius: var(--ds-radius-md); }
+.auth-page .auth-back { min-height: 2.75rem; }
+.auth-page :deep(.p-button:focus-visible),
+.auth-page :deep(.p-inputtext:focus-visible),
+.auth-page :deep(.p-password-input:focus-visible),
+.auth-page :deep(.p-checkbox:focus-visible),
+.auth-page a:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
 .auth-success { border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent); background: var(--ds-color-success-soft); color: var(--ds-color-success); }
 .reg-type-row { gap: .75rem; }
 .user-type-selector {
