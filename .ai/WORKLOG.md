@@ -2289,3 +2289,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Both Admin and Company inquiry creation screens now provide a live step context/progress indicator and selected item count.
 - Uses existing step state and inquiry item array only; no workflow, validation, draft, permission or API changes.
 - Commits: `ec4c1f2`, `914ba4f`. CI pending.
+
+
+## UI redesign — shared form guidance batch 10 (2026-11-02)
+
+- Extracted the duplicated product required-field progress UI into shared-ui component `RequiredFieldsProgress.vue`.
+- Admin and Company editors now use the same component and keep their own existing access-aware required check arrays.
+- Added tests for percentage/count rendering and empty-list safety.
+- Commits: `a5f6fa2`, `5ad87a1`, `49d779d`, `6332362`. CI pending.
