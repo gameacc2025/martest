@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { computed, onMounted, ref } from 'vue'
 import { apiGet, apiPost, apiPatch } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
@@ -156,14 +157,17 @@ async function rejectSubscription(item) {
 
 <template>
   <main class="subscription-admin" dir="rtl">
-    <header class="heading ds-page-heading">
-      <div class="heading-copy">
-        <span class="eyebrow"><i class="pi pi-wallet"></i> درآمد و دسترسی</span>
-        <h1>مدیریت اشتراک‌های استعلام</h1>
-        <p>طرح‌ها، سهمیه‌های مصرف و درخواست‌های خرید را از یک فضای کاری یکپارچه مدیریت کنید.</p>
-      </div>
-      <button class="secondary refresh-action" :disabled="loading" @click="loadAll"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="درآمد و دسترسی"
+      title="مدیریت اشتراک‌های استعلام"
+      description="طرح‌ها، سهمیه‌های مصرف و درخواست‌های خرید را از یک فضای کاری یکپارچه مدیریت کنید."
+      icon="pi pi-wallet"
+      heading-id="inquiry-subscriptions-title"
+    >
+      <template #actions>
+        <button class="secondary refresh-action" :disabled="loading" @click="loadAll"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
+      </template>
+    </WorkspacePageHeading>
 
     <section class="subscription-overview" aria-label="خلاصه اشتراک‌ها">
       <article class="overview-card">
