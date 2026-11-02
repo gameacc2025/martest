@@ -50,17 +50,17 @@ const carouselResponsiveOptions = [
 ]
 
 const features = [
-  { icon: 'pi pi-shield', title: 'محصولات باکیفیت', text: 'تضمین کیفیت و اصالت' },
-  { icon: 'pi pi-verified', title: 'تأمین از بهترین‌ها', text: 'همکاری با برندهای معتبر' },
-  { icon: 'pi pi-headphones', title: 'پشتیبانی تخصصی', text: 'مشاوره و راهنمایی حرفه‌ای' },
-  { icon: 'pi pi-truck', title: 'ارسال سریع', text: 'تحویل به موقع و مطمئن' }
+  { icon: 'pi pi-box', title: 'کاتالوگ تخصصی', text: 'تجهیزات مخابراتی و شبکه در یک فضای یکپارچه' },
+  { icon: 'pi pi-search', title: 'جستجو و فیلتر', text: 'یافتن محصولات بر اساس دسته‌بندی و محدوده قیمت' },
+  { icon: 'pi pi-file-edit', title: 'استعلام قیمت', text: 'ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان' },
+  { icon: 'pi pi-sliders-h', title: 'مشخصات فنی', text: 'بررسی جزئیات و ویژگی‌های ثبت‌شده محصولات' }
 ]
 
-const stats = [
-  { icon: 'pi pi-users', value: '+250', label: 'تأمین کننده معتبر' },
-  { icon: 'pi pi-box', value: '+1,500', label: 'محصول متنوع' },
-  { icon: 'pi pi-user', value: '+5,000', label: 'مشتری راضی' },
-  { icon: 'pi pi-trophy', value: '+10 سال', label: 'سابقه درخشان' }
+const features = [
+  { icon: 'pi pi-box', title: 'کاتالوگ تخصصی', text: 'تجهیزات مخابراتی و شبکه در یک فضای یکپارچه' },
+  { icon: 'pi pi-search', title: 'جستجو و فیلتر', text: 'یافتن محصولات بر اساس دسته‌بندی و محدوده قیمت' },
+  { icon: 'pi pi-file-edit', title: 'استعلام قیمت', text: 'ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان' },
+  { icon: 'pi pi-sliders-h', title: 'مشخصات فنی', text: 'بررسی جزئیات و ویژگی‌های ثبت‌شده محصولات' }
 ]
 
 // ── Hero slideshow (banner carousel) ─────────────────────
@@ -91,6 +91,9 @@ const slides = [
   }
 ]
 const currentSlide = ref(0)
+const slideshowPaused = ref(false)
+const slideshowHovered = ref(false)
+const slideshowFocused = ref(false)
 let slideTimer = null
 
 function goToSlide(i) {
@@ -99,8 +102,9 @@ function goToSlide(i) {
 function nextSlide() {
   currentSlide.value = (currentSlide.value + 1) % slides.length
 }
-function startSlideshow() {
+function startSlideshow(force = false) {
   stopSlideshow()
+  if (slideshowPaused.value || slideshowHovered.value || (slideshowFocused.value && !force)) return
   slideTimer = setInterval(nextSlide, 5000)
 }
 function stopSlideshow() {
@@ -108,6 +112,29 @@ function stopSlideshow() {
     clearInterval(slideTimer)
     slideTimer = null
   }
+}
+function onSlideshowEnter() {
+  slideshowHovered.value = true
+  stopSlideshow()
+}
+function onSlideshowLeave() {
+  slideshowHovered.value = false
+  startSlideshow()
+}
+function onSlideshowFocusIn() {
+  slideshowFocused.value = true
+  stopSlideshow()
+}
+function onSlideshowFocusOut(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    slideshowFocused.value = false
+    startSlideshow()
+  }
+}
+function toggleSlideshow() {
+  slideshowPaused.value = !slideshowPaused.value
+  if (slideshowPaused.value) stopSlideshow()
+  else startSlideshow(true)
 }
 
 
@@ -194,6 +221,9 @@ async function fetchCategories() {
 onMounted(() => {
   fetchProducts()
   fetchCategories()
+  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    slideshowPaused.value = true
+  }
   startSlideshow()
 })
 
@@ -210,8 +240,10 @@ onBeforeUnmount(() => {
       <!-- Hero Slideshow -->
       <section
         class="hero-slideshow"
-        @mouseenter="stopSlideshow"
-        @mouseleave="startSlideshow"
+        @mouseenter="onSlideshowEnter"
+        @mouseleave="onSlideshowLeave"
+        @focusin="onSlideshowFocusIn"
+        @focusout="onSlideshowFocusOut"
       >
         <div class="hero">
           <div class="hero-content">
@@ -235,7 +267,7 @@ onBeforeUnmount(() => {
                 v-model="searchQuery"
                 type="search"
                 class="hero-search-input"
-                placeholder="نام محصول، برند یا دستهبندی را جستجو کنید…"
+                placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…"
                 aria-label="جستجوی محصولات"
               />
               <button type="submit" class="hero-search-btn">جستجو</button>
@@ -260,7 +292,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Slideshow dots -->
-        <div class="hero-dots">
+        <div class="hero-dots" aria-label="انتخاب اسلاید معرفی">
           <button
             v-for="(slide, i) in slides"
             :key="i"
@@ -269,6 +301,15 @@ onBeforeUnmount(() => {
             @click="goToSlide(i)"
             :aria-label="`اسلاید ${i + 1}`"
           ></button>
+          <button
+            type="button"
+            class="hero-play-toggle"
+            :aria-pressed="slideshowPaused"
+            :aria-label="slideshowPaused ? 'پخش خودکار اسلایدها' : 'توقف پخش خودکار اسلایدها'"
+            @click="toggleSlideshow"
+          >
+            <i :class="slideshowPaused ? 'pi pi-play' : 'pi pi-pause'" aria-hidden="true"></i>
+          </button>
         </div>
       </section>
 
@@ -286,22 +327,24 @@ onBeforeUnmount(() => {
               <div class="filters-inner">
                 <!-- Search -->
                 <div class="filter-group">
-                  <label>جستجو</label>
+                  <label for="home-product-search">جستجو</label>
                   <div class="p-inputgroup">
                     <InputText
+                      id="home-product-search"
                       v-model="searchQuery"
                       placeholder="نام محصول..."
                       @keyup.enter="applyFilters"
                       class="w-full"
                     />
-                    <Button icon="pi pi-search" @click="applyFilters" />
+                    <Button icon="pi pi-search" aria-label="اجرای جستجوی محصولات" @click="applyFilters" />
                   </div>
                 </div>
 
                 <!-- Category -->
                 <div class="filter-group">
-                  <label>دسته‌بندی</label>
+                  <label for="home-category-filter">دسته‌بندی</label>
                   <Select
+                    inputId="home-category-filter"
                     v-model="selectedCategory"
                     :options="categoryOptions"
                     optionLabel="name"
@@ -317,6 +360,8 @@ onBeforeUnmount(() => {
                   <label>محدوده قیمت (تومان)</label>
                   <div class="price-range">
                     <InputNumber
+                      inputId="home-minimum-price"
+                      aria-label="حداقل قیمت"
                       v-model="minPrice"
                       placeholder="حداقل"
                       class="price-input"
@@ -325,6 +370,8 @@ onBeforeUnmount(() => {
                     />
                     <span class="price-separator">—</span>
                     <InputNumber
+                      inputId="home-maximum-price"
+                      aria-label="حداکثر قیمت"
                       v-model="maxPrice"
                       placeholder="حداکثر"
                       class="price-input"
@@ -373,7 +420,7 @@ onBeforeUnmount(() => {
             >
               <template #item="{ data: category }">
                 <div class="cat-slide">
-                  <Card class="category-card" role="button" tabindex="0" @click="viewCategoryProducts(category.id)" @keydown.enter.prevent="viewCategoryProducts(category.id)" @keydown.space.prevent="viewCategoryProducts(category.id)">
+                  <Card class="category-card" role="button" tabindex="0" :aria-label="'مشاهده محصولات دسته ' + (category.nameFa || category.nameEn || category.slug)" @click="viewCategoryProducts(category.id)" @keydown.enter.prevent="viewCategoryProducts(category.id)" @keydown.space.prevent="viewCategoryProducts(category.id)">
                     <template #content>
                       <div class="cat-thumb">
                         <img
@@ -420,7 +467,7 @@ onBeforeUnmount(() => {
               <Button label="حذف فیلترها" icon="pi pi-times" severity="secondary" text @click="resetFilters" />
             </div>
             <div v-else class="products-grid">
-              <div v-for="product in featuredProducts" :key="product.id" class="product-card" role="link" tabindex="0" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
+              <div v-for="product in featuredProducts" :key="product.id" class="product-card" role="link" tabindex="0" :aria-label="`مشاهده جزئیات ${product.title}`" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
                 <div class="product-image">
                   <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
@@ -464,19 +511,8 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- Stats -->
-      <section class="stats-bar">
-        <div v-for="(stat, i) in stats" :key="i" class="stat-item">
-          <div class="stat-icon"><i :class="stat.icon"></i></div>
-          <div class="stat-text">
-            <span class="stat-value">{{ stat.value }}</span>
-            <span class="stat-label">{{ stat.label }}</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Features -->
-      <section class="features-bar">
+      <!-- Verified marketplace capabilities; no hard-coded business metrics. -->
+      <section class="features-bar" aria-label="امکانات بازارگاه">
         <div v-for="(feature, i) in features" :key="i" class="feature-item">
           <div class="feature-icon"><i :class="feature.icon"></i></div>
           <div class="feature-text">
@@ -598,7 +634,8 @@ onBeforeUnmount(() => {
   color: var(--text-color-secondary);
 }
 
-.hero-search-btn {
+ .hero-search-btn {
+  min-height: 2.75rem;
   border: none;
   cursor: pointer;
   background: var(--primary-color);
@@ -647,9 +684,49 @@ onBeforeUnmount(() => {
   display: flex; justify-content: center; gap: 0.5rem; margin-top: var(--ds-space-4);
 }
 .hero-dot {
-  width: 0.5rem; height: 0.5rem; border-radius: 50%;
-  background: var(--surface-border); cursor: pointer; transition: all 0.25s;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
   padding: 0;
+}
+.hero-dot::before {
+  content: "";
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--ds-color-border-strong);
+  transition: width var(--ds-transition-fast), background var(--ds-transition-fast);
+}
+.hero-dot.active::before {
+  width: 1.5rem;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-primary);
+}
+.hero-play-toggle {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: 50%;
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  cursor: pointer;
+}
+.hero-play-toggle:hover { border-color: var(--ds-color-primary); color: var(--ds-color-primary); }
+.hero-play-toggle:focus-visible,
+.hero-dot:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
 }
 .hero-dot:focus-visible {
   outline: 2px solid var(--primary-color);
@@ -842,8 +919,8 @@ onBeforeUnmount(() => {
 .product-price { font-weight: 800; color: var(--ds-color-primary); font-size: 1rem; }
 
 /* Nav buttons */
-.nav-btn {
-  width: 1.75rem; height: 1.75rem; border-radius: 0.4rem;
+ .nav-btn {
+  width: 2.75rem; min-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; border-radius: 0.75rem;
   border: 1px solid var(--surface-border); background: var(--surface-card);
   color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
@@ -861,26 +938,6 @@ onBeforeUnmount(() => {
 .state-box p { margin: 0; }
 
 /* Stats */
-.stats-bar {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
-  background: var(--surface-card); border: 1px solid var(--surface-border);
-  border-radius: 1rem; padding: 1rem 1.25rem;
-}
-.stat-item {
-  display: flex; align-items: center; gap: 0.75rem; justify-content: center;
-  border-inline-start: 1px solid var(--surface-border); padding: 0 0.5rem;
-}
-.stat-item:last-child { border-inline-start: none; }
-.stat-icon {
-  width: 2.5rem; height: 2.5rem; border-radius: 50%;
-  background: var(--p-primary-50); display: flex; align-items: center;
-  justify-content: center; flex-shrink: 0;
-}
-.stat-icon i { font-size: 1.1rem; color: var(--primary-color); }
-.stat-text { display: flex; flex-direction: column; }
-.stat-value { font-size: 1.2rem; font-weight: 800; color: var(--text-color); line-height: 1.2; }
-.stat-label { font-size: 0.75rem; color: var(--text-color-secondary); }
-
 /* Features */
 .features-bar {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
@@ -911,14 +968,14 @@ onBeforeUnmount(() => {
   .filters-sidebar { position: static; }
   .hero { grid-template-columns: 1fr; padding: 2rem; }
   .hero-visual { order: 2; height: 200px; }
-  .stats-bar, .features-bar { grid-template-columns: repeat(2, 1fr); }
-  .stat-item, .feature-item { border-inline-start: none; }
+  .features-bar { grid-template-columns: repeat(2, 1fr); }
+  .feature-item { border-inline-start: none; }
 }
 @media (max-width: 560px) {
   .hero-title { font-size: 1.75rem; }
   .hero-actions { flex-direction: column; }
   .btn { justify-content: center; }
-  .products-grid, .stats-bar, .features-bar { grid-template-columns: 1fr; }
+  .products-grid, .features-bar { grid-template-columns: 1fr; }
   .home-container { gap: var(--ds-space-4); }
   .hero { padding: 1.25rem; }
   .hero-search { grid-template-columns: auto minmax(0, 1fr); border-radius: var(--ds-radius-xl); }
