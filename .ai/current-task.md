@@ -1375,3 +1375,10 @@ Next: continue structural UI migration across product detail, inquiry detail/cre
 Admin and Company inquiry creation wizards now include an accessible current-step progress indicator and live item count above the existing five-step stepper. The original validation and submission flow is unchanged. Commits: `ec4c1f2`, `914ba4f`.
 
 Continue with inquiry detail/response/message surfaces and product detail/catalog families.
+
+
+## Shared form UI checkpoint — 2026-11-02
+
+The product-editor completion indicator is now a reusable shared-ui component, adopted by Admin and Company forms, with focused tests. The editors retain their existing role-aware required-field definitions. Commits: `a5f6fa2`, `5ad87a1`, `49d779d`, `6332362`.
+
+Continue the full UI rollout; next focus inquiry detail/response messaging, product details and remaining list/form families.
