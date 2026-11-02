@@ -399,4 +399,18 @@ const formatPrice = (price) => {
     animation: none;
   }
 }
+
+.product-card :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+  transition: transform var(--ds-transition), box-shadow var(--ds-transition), border-color var(--ds-transition);
+}
+.product-card:not(.product-card--skeleton):hover :deep(.p-card) {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--ds-color-primary) 40%, var(--ds-color-border));
+  box-shadow: var(--ds-shadow-md);
+}
+
 </style>
