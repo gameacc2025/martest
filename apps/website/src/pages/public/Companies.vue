@@ -1,13 +1,15 @@
 <template>
   <main class="companies-page ds-page">
     <div class="comp-container ds-container ds-stack">
-      <header class="comp-head ds-page-heading">
-        <div class="comp-heading-identity">
-          <span class="comp-heading-icon"><i class="pi pi-building"></i></span>
-          <div><span class="ds-eyebrow">شبکه تأمین بازارگاه</span><h1 class="ds-h1">شرکت‌ها</h1><p>تولیدکنندگان و تأمین‌کنندگان عضو بازارگاه را جستجو و بررسی کنید.</p></div>
-        </div>
-        <Breadcrumb :home="home" :model="items" class="comp-breadcrumb" />
-      </header>
+      <WorkspacePageHeading
+        eyebrow="شبکه تأمین بازارگاه"
+        title="شرکت‌ها"
+        description="تولیدکنندگان و تأمین‌کنندگان عضو بازارگاه را جستجو و بررسی کنید."
+        icon="pi pi-building"
+        heading-id="companies-page-title"
+      >
+        <template #actions><Breadcrumb :home="home" :model="items" class="comp-breadcrumb" /></template>
+      </WorkspacePageHeading>
 
       <!-- Search and Filters -->
       <div class="comp-section">
@@ -142,6 +144,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCompanyStore } from '../../stores/companies'
