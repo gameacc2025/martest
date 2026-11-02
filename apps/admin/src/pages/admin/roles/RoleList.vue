@@ -1,10 +1,7 @@
 <template>
   <div class="role-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <header class="access-management-intro" aria-labelledby="access-management-title">
-  <span class="access-management-icon"><i class="pi pi-shield"></i></span>
-  <div><span>کنترل دسترسی</span><h1 id="access-management-title">مدیریت نقش‌ها</h1><p>نقش‌ها و دسترسی‌های مبتنی بر مجوز را مدیریت کنید.</p></div>
-</header>
+    <WorkspacePageHeading eyebrow="کنترل دسترسی" title="مدیریت نقش‌ها" description="نقش‌ها و دسترسی‌های مبتنی بر مجوز را مدیریت کنید." icon="pi pi-shield" heading-id="access-management-title" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
@@ -156,6 +153,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoleStore } from '@/stores/admin/roles'
 import { usePermissionStore } from '@/stores/admin/permissions'
