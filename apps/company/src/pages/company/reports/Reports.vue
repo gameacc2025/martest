@@ -22,6 +22,7 @@ const activeTab = ref('products')
 // ── Products data ────────────────────────────────────────────
 const products = ref([])
 const productsLoading = ref(true)
+const productsError = ref('')
 
 const productKpis = computed(() => {
   const all = products.value
@@ -46,6 +47,7 @@ const productStatusChart = computed(() => [
 // ── Inquiries data ───────────────────────────────────────────
 const inquiryStats = ref(null)
 const inquiriesLoading = ref(true)
+const inquiriesError = ref('')
 
 const inquiryKpis = computed(() => {
   const s = inquiryStats.value
@@ -73,11 +75,13 @@ onMounted(() => {
 
 async function fetchProducts() {
   productsLoading.value = true
+  productsError.value = ''
   try {
     const res = await productsApi.myProducts({ limit: 500 })
     const body = res?.data ?? res
     products.value = Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : []
   } catch (err) {
+    productsError.value = err?.response?.data?.message || err?.message || 'خطا در دریافت محصولات'
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت محصولات', life: 3000 })
   } finally {
     productsLoading.value = false
@@ -86,11 +90,13 @@ async function fetchProducts() {
 
 async function fetchInquiryStats() {
   inquiriesLoading.value = true
+  inquiriesError.value = ''
   try {
     const res = await inquiriesApi.getStats()
     const body = res?.data ?? res
     inquiryStats.value = body?.data ?? body
   } catch (err) {
+    inquiriesError.value = err?.response?.data?.message || err?.message || 'خطا در دریافت آمار استعلام‌ها'
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت آمار استعلام‌ها', life: 3000 })
   } finally {
     inquiriesLoading.value = false
@@ -160,8 +166,20 @@ function exportInquiriesCSV() {
       <TabPanels>
         <!-- Products Tab -->
         <TabPanel value="products">
-          <div v-if="productsLoading" class="text-center py-8">
+          <div v-if="productsLoading" class="text-center py-8" role="status">
             <ProgressSpinner />
+          </div>
+          <div v-else-if="productsError" class="reports-error-state" role="alert">
+            <i class="pi pi-exclamation-triangle"></i>
+            <h3>دریافت گزارش محصولات ناموفق بود</h3>
+            <p>{{ productsError }}</p>
+            <Button label="تلاش دوباره" icon="pi pi-refresh" @click="fetchProducts" />
+          </div>
+          <div v-else-if="inquiriesError" class="reports-error-state" role="alert">
+            <i class="pi pi-exclamation-triangle"></i>
+            <h3>دریافت گزارش استعلام‌ها ناموفق بود</h3>
+            <p>{{ inquiriesError }}</p>
+            <Button label="تلاش دوباره" icon="pi pi-refresh" @click="fetchInquiryStats" />
           </div>
           <template v-else>
             <div class="kpi-grid">
@@ -305,6 +323,27 @@ function exportInquiriesCSV() {
   color: var(--ds-color-primary);
 }
 .reports-page :deep(.p-tabpanels) { padding-top: var(--ds-space-5); }
+.reports-error-state {
+  display: flex;
+  min-height: 16rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  padding: var(--ds-space-6);
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
+  text-align: center;
+}
+.reports-error-state > i { color: var(--ds-color-danger); font-size: 2rem; }
+.reports-error-state h3 { margin: 0; color: var(--ds-color-text); }
+.reports-error-state p { margin: 0; max-width: 32rem; }
+.reports-error-state :deep(.p-button),
+.reports-page .page-header-actions :deep(.p-button) { min-height: 2.75rem; }
+.reports-page :deep(.p-tab) { min-height: 2.75rem; }
+
 @media (max-width: 640px) {
   .reports-page .reports-heading { align-items: stretch; }
   .reports-page .page-header-actions { width: 100%; }
