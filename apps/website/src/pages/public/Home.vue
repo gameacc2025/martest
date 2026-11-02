@@ -466,11 +466,29 @@ onBeforeUnmount(() => {
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
                 </div>
                 <div class="product-info">
-                  <h3 class="product-title">{{ product.title }}</h3>
-                  <p class="product-vendor">{{ product.company?.name || product.vendor || 'تأمین‌کننده' }}</p>
-                  <span class="product-price" v-if="product.prices && product.prices[0]">
-                    {{ formatPrice(product.prices[0].price, product.prices[0].currency) }}
-                  </span>
+                  <div class="product-identity">
+                    <h3 class="product-title">{{ product.title }}</h3>
+                    <span v-if="product.company?.isVerified" class="product-verified" title="شرکت تأیید شده">
+                      <i class="pi pi-verified" aria-hidden="true"></i>
+                    </span>
+                  </div>
+                  <p class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor || 'تأمین‌کننده' }}</p>
+                  <div v-if="product.brand || product.model || product.sku" class="product-meta">
+                    <span v-if="product.brand">{{ product.brand }}</span>
+                    <span v-if="product.model">{{ product.model }}</span>
+                    <span v-if="product.sku" class="product-sku">{{ product.sku }}</span>
+                  </div>
+                  <div class="home-product-footer">
+                    <span v-if="product.prices?.length" class="product-price">
+                      <small>شروع قیمت از</small>
+                      <strong>{{ formatPrice(product.prices[0].price, product.prices[0].currency) }}</strong>
+                    </span>
+                    <span v-else class="product-price product-price--inquiry">
+                      <small>قیمت</small>
+                      <strong>استعلام از تأمین‌کننده</strong>
+                    </span>
+                    <span class="product-card-cta">جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -494,9 +512,29 @@ onBeforeUnmount(() => {
                   <span class="tile-badge">جدید</span>
                 </div>
                 <div class="product-info">
-                  <h3 class="product-title">{{ product.title }}</h3>
-                  <p class="product-vendor">{{ product.company?.name || product.vendor || 'تأمین‌کننده' }}</p>
-                  <span class="product-price">{{ formatPrice(product.prices?.[0]?.price, product.prices?.[0]?.currency) }}</span>
+                  <div class="product-identity">
+                    <h3 class="product-title">{{ product.title }}</h3>
+                    <span v-if="product.company?.isVerified" class="product-verified" title="شرکت تأیید شده">
+                      <i class="pi pi-verified" aria-hidden="true"></i>
+                    </span>
+                  </div>
+                  <p class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor || 'تأمین‌کننده' }}</p>
+                  <div v-if="product.brand || product.model || product.sku" class="product-meta">
+                    <span v-if="product.brand">{{ product.brand }}</span>
+                    <span v-if="product.model">{{ product.model }}</span>
+                    <span v-if="product.sku" class="product-sku">{{ product.sku }}</span>
+                  </div>
+                  <div class="home-product-footer">
+                    <span v-if="product.prices?.length" class="product-price">
+                      <small>شروع قیمت از</small>
+                      <strong>{{ formatPrice(product.prices[0].price, product.prices[0].currency) }}</strong>
+                    </span>
+                    <span v-else class="product-price product-price--inquiry">
+                      <small>قیمت</small>
+                      <strong>استعلام از تأمین‌کننده</strong>
+                    </span>
+                    <span class="product-card-cta">جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1105,4 +1143,51 @@ onBeforeUnmount(() => {
   .category-card:hover,
   .category-card:focus-visible { transform: none !important; }
 }
+
+/* Homepage product cards follow the same supplier/pricing hierarchy as catalogue results. */
+.home-page .product-info { display: flex; min-height: 12rem; flex-direction: column; gap: .35rem; }
+.home-page .product-identity { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
+.home-page .product-title { flex: 1; min-width: 0; margin: 0; }
+.home-page .product-verified {
+  display: grid;
+  place-items: center;
+  flex: 0 0 1.6rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--ds-color-success-soft);
+  color: var(--ds-color-success);
+  font-size: .8rem;
+}
+.home-page .product-vendor { margin: .25rem 0; }
+.home-page .product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem .55rem;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+}
+.home-page .product-sku { direction: ltr; unicode-bidi: isolate; }
+.home-page .home-product-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-top: auto;
+  padding-top: .7rem;
+  border-top: 1px solid var(--ds-color-border);
+}
+.home-page .product-price { display: flex; min-width: 0; flex-direction: column; gap: .1rem; font-size: .9rem; }
+.home-page .product-price small { color: var(--ds-color-text-muted); font-size: .65rem; font-weight: var(--ds-font-weight-normal); }
+.home-page .product-price strong { color: var(--ds-color-primary); font-size: .85rem; line-height: 1.5; }
+.home-page .product-price--inquiry strong { font-size: .75rem; }
+.home-page .product-card-cta { display: inline-flex; align-items: center; gap: .3rem; flex: 0 0 auto; min-height: 2.75rem; color: var(--ds-color-primary); font-size: .75rem; font-weight: var(--ds-font-weight-bold); }
+.home-page .product-card-cta i { transition: transform var(--ds-transition-fast); }
+.home-page .product-card:hover .product-card-cta i { transform: translateX(-3px); }
+@media (max-width: 560px) {
+  .home-page .product-info { min-height: 12.5rem; padding: .7rem; }
+  .home-page .home-product-footer { align-items: flex-start; flex-direction: column; }
+  .home-page .product-card-cta { min-height: 2.5rem; }
+}
+
 </style>
