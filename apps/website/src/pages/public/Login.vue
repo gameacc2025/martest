@@ -34,14 +34,15 @@
 
           <form @submit.prevent="handleSubmit" class="auth-form">
             <!-- Registration success message -->
-            <div v-if="route.query.registered" class="auth-success">
+            <div v-if="route.query.registered" class="auth-success" role="status">
               <i class="pi pi-check-circle"></i>
               <span>ثبت نام با موفقیت انجام شد. حساب کاربری شما پس از تأیید مدیر سیستم فعال خواهد شد.</span>
             </div>
 
             <div class="field">
-              <label>شماره تلفن</label>
+              <label for="login-phone">شماره تلفن</label>
               <InputText
+                id="login-phone"
                 v-model="form.phone"
                 placeholder="شماره تلفن خود را وارد کنید"
                 class="auth-input"
@@ -50,8 +51,9 @@
             </div>
 
             <div class="field">
-              <label>رمز عبور</label>
+              <label for="login-password">رمز عبور</label>
               <Password
+                inputId="login-password"
                 v-model="form.password"
                 placeholder="رمز عبور خود را وارد کنید"
                 class="auth-input"
@@ -62,7 +64,7 @@
               />
             </div>
 
-            <div v-if="error" class="auth-error">
+            <div v-if="error" class="auth-error" role="alert">
               {{ error }}
             </div>
 
@@ -570,6 +572,14 @@ async function handleSubmit() {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
 }
 .auth-submit { min-height: 2.9rem; border-radius: var(--ds-radius-md); }
+.auth-page .auth-back { min-height: 2.75rem; }
+.auth-page :deep(.p-button:focus-visible),
+.auth-page :deep(.p-inputtext:focus-visible),
+.auth-page :deep(.p-password-input:focus-visible),
+.auth-page a:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
 .auth-success { border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent); background: var(--ds-color-success-soft); color: var(--ds-color-success); }
 .reg-type-row { gap: .75rem; }
 .user-type-selector {
