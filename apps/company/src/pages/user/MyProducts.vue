@@ -65,10 +65,10 @@ function formatPrice(price) {
 
 <template>
   <div class="my-products-page">
-    <div class="page-header">
-      <h1>محصولات من</h1>
+    <header class="page-header ds-page-heading">
+      <div class="products-heading-copy"><span class="products-eyebrow"><i class="pi pi-box"></i> کاتالوگ من</span><h1>محصولات من</h1><p>محصولاتی را که مدیریت آن‌ها به حساب شما واگذار شده جستجو و پیگیری کنید.</p></div>
       <Button label="محصول جدید" icon="pi pi-plus" @click="router.push({ name: 'manage-product-create' })" />
-    </div>
+    </header>
 
     <div class="card">
       <Toolbar>
@@ -168,5 +168,11 @@ function formatPrice(price) {
   font-weight: var(--ds-font-weight-bold);
 }
 @media (max-width: 640px) { .page-header { padding: var(--ds-space-4); } }
+
+
+.products-heading-copy { min-width: 0; }
+.products-eyebrow { display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .4rem; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.my-products-page .page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
+@media (max-width: 640px) { .my-products-page .page-header { align-items: stretch; } }
 
 </style>
