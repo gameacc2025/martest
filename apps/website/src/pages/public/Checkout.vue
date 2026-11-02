@@ -1,9 +1,9 @@
 <template>
   <div class="checkout-page">
     <div class="ds-container ds-page">
-      <header class="mb-6 ds-page-heading">
-        <h1 class="text-2xl font-bold ds-page-heading__title">تسویه حساب</h1>
-        <Breadcrumb :home="home" :model="items" class="mt-2" />
+      <header class="commerce-page-heading">
+        <div class="commerce-heading-copy"><span class="ds-eyebrow"><i class="pi pi-wallet"></i> تکمیل سفارش</span><h1 class="ds-page-heading__title">تسویه حساب</h1><p>اطلاعات سفارش و روش پرداخت را در مراحل بعدی بررسی کنید.</p></div>
+        <Breadcrumb :home="home" :model="items" />
       </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -612,4 +612,31 @@ const goToCart = () => {
   font-weight: var(--ds-font-weight-bold);
 }
 .checkout-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+.commerce-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: var(--ds-space-6);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 7%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.commerce-heading-copy { min-width: 0; }
+.commerce-heading-copy .ds-eyebrow { display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .25rem; font-weight: var(--ds-font-weight-bold); }
+.commerce-heading-copy h1 { margin: 0; color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); font-weight: var(--ds-font-weight-bold); }
+.commerce-heading-copy p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
+.commerce-page-heading :deep(.p-breadcrumb) { padding: 0; background: transparent; border: 0; }
+.checkout-page { color: var(--ds-color-text); }
+.checkout-page :deep(.p-card) { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
+.checkout-page :deep(.p-card-title) { color: var(--ds-color-text); font-weight: var(--ds-font-weight-bold); }
+.checkout-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+.checkout-page .payment-method { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface); padding: 1rem; }
+.checkout-page .payment-method:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
+.checkout-page :deep(.p-steps) { background: var(--ds-color-surface-alt); border-radius: var(--ds-radius-lg); padding: .75rem; }
+
+
 </style>
