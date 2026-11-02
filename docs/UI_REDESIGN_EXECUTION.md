@@ -77,3 +77,36 @@ The public Website remains a marketplace experience; Admin and Company remain se
 ## Verification status
 
 The commits above are source edits made through the connected GitHub repository interface. A local pnpm test/build has **not** been run in this execution environment. Do not mark the redesign complete until all inventory sections are migrated and the user/local CI confirms the required tests and builds.
+
+
+## Additional pages completed
+
+| Area | Work |
+|---|---|
+| Admin inquiries | Refined inquiry inbox, detail, and multi-step create page surfaces. |
+| Company inquiries | Applied the same inbox/detail/create visual hierarchy; response and subscription logic untouched. |
+| Admin catalogue | Refined category, company, user, role, and permission management tables. |
+| Company users | Refined company-user management table. |
+| Company reports | Updated report heading, KPI grid, and tab surfaces. |
+| Admin notifications | Refined notification management and fixed-folder settings pages. |
+| Website company directory | Aligned company directory heading, filters, and card surfaces. |
+| Website commerce | Refined cart, checkout, orders, order details, and wishlist page headings and cards. |
+| Shared PrimeVue layer | Unified card, toolbar, table, paginator, dialog, form-control, tag, tab, and message surfaces across all three apps. |
+
+Recent commits include:
+- `1a795de` — cross-app PrimeVue surface layer
+- `488317f`, `6d5a582`, `eb952db` — Admin inquiry pages
+- `7aa435c`, `f047477`, `975c90a` — Company inquiry pages
+- `d9f3a79`, `f2d34f0`, `3e801cf`, `7d402ab`, `e7d9057` — Admin management lists
+- `c12b9b7` — Company user list
+- `030a717` — Company reports
+- `785c420`, `47e25b0` — Admin notification tools
+- `d3966fb` — Website company directory
+- `48942c0`, `197a079`, `06a246b`, `0fd78f4`, `7e66b77` — Website commerce pages
+
+## Next migration batch
+
+- Admin product form, inquiry subscription management, profile/preferences, and remaining notification pages.
+- Company product form, company settings, profile/preferences, and notification pages.
+- Website authentication, registration, customer profile/address pages, customer inquiry pages, and static content pages.
+- Shared product card, dialog, form, empty/loading/error components and remaining dashboard widgets.
