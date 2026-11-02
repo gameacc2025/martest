@@ -242,3 +242,35 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Website customer profile: replaced the plain heading with an account-context header and responsive profile workspace; retained existing profile actions and account data.
 - Commits: `5761ae7` Admin notification management; `eceda9f` Company personal products; `e895213` Company product directory; `f99c289` Company subscription; `77b0f74` Website customer profile.
 - CI for the latest source changes is pending; no local tests/builds claimed.
+
+
+## UI redesign — shared shell, catalog and inquiry batch 10 (2026-11-02)
+
+### Shared authenticated UI
+- Rebuilt the shared dashboard page-context header to show route section, route title and breadcrumb as a single responsive component.
+- Reworked the shared DataTable surface: toolbar hierarchy, search/column controls, filters, table head/body/selected states, row actions, empty/loading states and paginator now use the Telecom design tokens and have a mobile-specific layout.
+- Added a focused PageHeader component test for route metadata and fallback rendering.
+
+### Public marketplace
+- Rebuilt the public header's brand lockup into an icon + Telecom Marketplace wordmark and refined search, notification, profile and mobile navigation surfaces.
+- Reorganized the public product catalog's heading, filter card, result count, product category marker, image treatment, supplier line and responsive product grid.
+- Refined the customer inquiry center's page identity, action grouping, inquiry rows, metadata, sealed-response notice and conversation surfaces.
+
+### Product and inquiry operations
+- Rebuilt Admin and Company product-list page headers and management surfaces with role-specific context; existing API-backed list, filters, pagination, action handlers and permission checks remain unchanged.
+- Rebuilt Admin and Company inquiry-list page headers and toolbar/table surfaces; existing inquiry filters, tabs, pagination, response state and API calls remain unchanged.
+
+### Commits
+- `48ce7a6` — shared dashboard page context header
+- `012f0ea` — shared DataTable visual system
+- `ca1cec4` — public marketplace header identity
+- `e37de59` — public product catalog
+- `038a467`, `f763480` — Admin/Company product management lists
+- `f9a2f47`, `0f64a5c` — Admin/Company inquiry workspaces
+- `b933ca0` — customer inquiry center
+- `efac6fc` — PageHeader component tests
+
+### Verification status
+- GitHub Actions CI is configured for pushes to `main`, but the latest commit currently reports no status checks; do not infer a pass.
+- The connected GitHub editing session cannot run local pnpm tests or production builds. The new PageHeader test and existing shared UI tests are committed but not yet executed.
+- This batch is not signed off as verified. Continue page-family implementation and await/obtain CI evidence before release.
