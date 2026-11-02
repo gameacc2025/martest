@@ -7,7 +7,7 @@
         <template #start>
           <span class="p-input-icon-right search-wrap">
             <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
+            <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در کاربران" @input="debounceSearch" />
           </span>
           <Select
             v-model="statusFilter"
@@ -15,6 +15,7 @@
             optionLabel="label"
             optionValue="value"
             placeholder="وضعیت"
+            aria-label="فیلتر وضعیت کاربر"
             class="status-filter"
             showClear
             @change="applyFilters"
@@ -25,6 +26,7 @@
             optionLabel="label"
             optionValue="value"
             placeholder="نوع کاربر"
+            aria-label="فیلتر نوع کاربر"
             class="status-filter"
             showClear
             @change="applyFilters"
@@ -114,9 +116,9 @@
         <Column header="عملیات" style="width: 9rem">
           <template #body="{ data }">
             <div class="flex gap-2">
-              <Button icon="pi pi-eye" severity="secondary" rounded text @click="openInfo(data)" v-tooltip.top="'مشاهده'" />
-              <Button v-if="canUpdate" icon="pi pi-pencil" severity="info" rounded text @click="openEdit(data)" v-tooltip.top="'ویرایش'" />
-              <Button v-if="canDelete" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" v-tooltip.top="'حذف'" />
+              <Button icon="pi pi-eye" severity="secondary" rounded text aria-label="مشاهده کاربر" @click="openInfo(data)" v-tooltip.top="'مشاهده'" />
+              <Button v-if="canUpdate" icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش کاربر" @click="openEdit(data)" v-tooltip.top="'ویرایش'" />
+              <Button v-if="canDelete" icon="pi pi-trash" severity="danger" rounded text aria-label="حذف کاربر" @click="confirmDelete(data)" v-tooltip.top="'حذف'" />
             </div>
           </template>
         </Column>
@@ -989,11 +991,11 @@ async function deleteUser() {
 .identity-management-table :deep(.p-paginator-page),
 .identity-management-table :deep(.p-paginator-next),
 .identity-management-table :deep(.p-paginator-prev) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
-.identity-management-table :deep(.p-button.p-button-text) { width: 2.2rem; height: 2.2rem; }
+.identity-management-table :deep(.p-button.p-button-text) { width: 2.75rem; min-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; }
 @media (max-width: 700px) {
   .identity-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
   .identity-management-toolbar :deep(.p-toolbar-start),
