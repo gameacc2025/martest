@@ -1442,3 +1442,15 @@ Newly completed:
 - Company inquiry inbox now shows a real retryable error state rather than a false empty state; accessible control names and tests added.
 
 Latest verification checkpoint: CI passed at `2c5b360` before the newest inquiry-list changes. Wait for CI on the latest commit before calling the new batch verified. Continue through remaining public product, inquiry detail, form, admin/company list and account pages. Do not stop at shell/dashboard completion.
+
+
+## UI redesign checkpoint — 2026-11-02 (batch 9)
+
+Completed:
+- Admin/Company product forms now use associated labels for static, dynamic technical-specification and price-tier inputs; image/custom-spec actions have accessible names and responsive 44px controls.
+- Admin/Company user directories and Admin company directory have accessible filters/actions and 44px action/pagination targets.
+- Website product catalogue has accessible search/pagination controls and visible keyboard focus for product cards and filters.
+
+Still active:
+- Continue with inquiry detail/create pages, remaining form families, orders/categories/roles/settings, public home/category/search/profile/account pages and shared component consistency.
+- Latest batch needs CI confirmation. Do not mark complete until all routed page families are audited and CI passes.
