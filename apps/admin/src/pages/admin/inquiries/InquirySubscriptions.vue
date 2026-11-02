@@ -156,10 +156,29 @@ async function rejectSubscription(item) {
 
 <template>
   <main class="subscription-admin" dir="rtl">
-    <header class="heading">
-      <div><h1>مدیریت اشتراک‌های استعلام</h1><p>طرح‌ها، سهمیه‌ها و درخواست‌های خرید را مدیریت کنید.</p></div>
-      <button class="secondary" :disabled="loading" @click="loadAll">به‌روزرسانی</button>
+    <header class="heading ds-page-heading">
+      <div class="heading-copy">
+        <span class="eyebrow"><i class="pi pi-wallet"></i> درآمد و دسترسی</span>
+        <h1>مدیریت اشتراک‌های استعلام</h1>
+        <p>طرح‌ها، سهمیه‌های مصرف و درخواست‌های خرید را از یک فضای کاری یکپارچه مدیریت کنید.</p>
+      </div>
+      <button class="secondary refresh-action" :disabled="loading" @click="loadAll"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
     </header>
+
+    <section class="subscription-overview" aria-label="خلاصه اشتراک‌ها">
+      <article class="overview-card">
+        <span class="overview-icon"><i class="pi pi-tags"></i></span>
+        <div><span class="overview-label">طرح‌های تعریف‌شده</span><strong>{{ plans.length.toLocaleString('fa-IR') }}</strong></div>
+      </article>
+      <article class="overview-card">
+        <span class="overview-icon overview-icon--warning"><i class="pi pi-clock"></i></span>
+        <div><span class="overview-label">درخواست‌های در انتظار</span><strong>{{ pending.length.toLocaleString('fa-IR') }}</strong></div>
+      </article>
+      <article class="overview-card" :class="{ 'overview-card--enabled': settings.subscriptionEnforcement }">
+        <span class="overview-icon overview-icon--success"><i class="pi pi-shield"></i></span>
+        <div><span class="overview-label">کنترل سهمیه</span><strong>{{ settings.subscriptionEnforcement ? 'فعال' : 'غیرفعال' }}</strong></div>
+      </article>
+    </section>
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
     <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
 
@@ -251,4 +270,93 @@ async function rejectSubscription(item) {
   .subscription-page .heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); }
 }
 
+/* Subscription operations workspace: metrics, policy and review queues. */
+.subscription-admin .heading {
+  align-items: center;
+  min-height: 7rem;
+}
+.subscription-admin .heading-copy { min-width: 0; }
+.subscription-admin .heading .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.subscription-admin .heading h1 {
+  margin: .35rem 0;
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+}
+.subscription-admin .heading p { margin: 0; }
+.subscription-admin .refresh-action { display: inline-flex; align-items: center; gap: .5rem; }
+.subscription-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ds-space-4);
+}
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+  min-width: 0;
+  padding: var(--ds-space-5);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.overview-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 3rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-info-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.2rem;
+}
+.overview-icon--warning { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
+.overview-icon--success { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.overview-label { display: block; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.overview-card strong { display: block; margin-top: .25rem; color: var(--ds-color-text); font-size: var(--ds-font-size-xl); }
+.subscription-admin .enforcement {
+  border-inline-start: 4px solid var(--ds-color-primary);
+  align-items: center;
+}
+.subscription-admin .plan-form { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.subscription-admin .panel h2 { display: flex; align-items: center; gap: .5rem; }
+.subscription-admin .table-wrap { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg); }
+.subscription-admin table { border-collapse: separate; border-spacing: 0; }
+.subscription-admin th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.subscription-admin td { color: var(--ds-color-text); }
+.subscription-admin tbody tr:hover { background: var(--ds-color-surface-hover); }
+.subscription-admin .primary { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.subscription-admin .danger { background: var(--ds-color-danger); color: var(--ds-color-danger-contrast); }
+.subscription-admin .secondary { border: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); color: var(--ds-color-text); }
+.subscription-admin .error { background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.subscription-admin .success { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-admin .on { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-admin .off { background: var(--ds-color-surface-alt); color: var(--ds-color-text-muted); }
+.subscription-admin .wait { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
+.subscription-admin .pill { font-weight: var(--ds-font-weight-semibold); }
+@media (max-width: 900px) {
+  .subscription-admin .plan-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .subscription-overview { grid-template-columns: 1fr; }
+  .subscription-admin .heading { align-items: flex-start; }
+  .subscription-admin .plan-form { grid-template-columns: 1fr; }
+  .subscription-admin .plan-form .wide { grid-column: auto; }
+  .subscription-admin .enforcement { align-items: stretch; }
+}
 </style>
