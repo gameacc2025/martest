@@ -296,6 +296,7 @@ async function saveProduct() {
       toast.add({ severity: 'success', summary: 'موفقیت', detail: 'محصول با موفقیت ایجاد شد', life: 3000 })
     }
     showDialog.value = false
+    resetTablePage()
     editingId.value = null
     form.value = { title: '', description: '', companyId: null, categoryId: null, status: 'DRAFT' }
     await fetchProducts()
@@ -358,6 +359,7 @@ async function deleteProduct() {
     await productsApi.delete(productToDelete.value.id)
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'محصول با موفقیت حذف شد', life: 3000 })
     showDeleteDialog.value = false
+    resetTablePage()
     await fetchProducts()
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در حذف محصول', life: 3000 })
