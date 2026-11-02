@@ -867,3 +867,8 @@ The long-term product vision is broader than the currently implemented marketpla
 ## UI redesign direction (2026-11-02)
 
 The current full UI redesign uses the Paces RTL admin template as a visual/layout reference only. Preserve the product's own teal primary and deep-navy brand surfaces, Vazirmatn, RTL, light/dark support, Vue 3 and PrimeVue 4. The public Website remains a customer marketplace; Admin and Company remain distinct authenticated workspaces. Shared UI primitives should unify page headings, action groups, KPI cards, panels, filters/toolbars, tables, detail headers, forms, tabs, status badges and loading/empty/error states. Do not import Paces Bootstrap/jQuery plugins or demo data. Never alter API contracts, permission rules, role/access-profile semantics, tenant boundaries, or business workflows for visual-only work. Future CRM/HR/finance/operations modules remain planned and must not appear as working routes until implemented. See `docs/PACES_RTL_UI_REFERENCE_AUDIT.md` and `docs/UI_REDESIGN_EXECUTION.md`.
+
+
+### Planned modules in dashboard navigation
+
+The shared Admin/Company sidebar may show planned roadmap items as disabled, non-interactive labels (CRM, finance, HR, procurement, inventory/logistics, support, projects/operations, BI, integrations/security). These entries must have no route, no click action, and no implication that the module is live. They are role-scoped for relevant Staff/Company users. Actual navigation only appears when backend, permission, tenant, audit, test and UI implementation is ready.
