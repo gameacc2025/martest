@@ -1417,3 +1417,16 @@ Continue the remaining Website catalog, checkout/cart, detail pages, account scr
 Shared workspace heading now covers Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us. Breadcrumbs and page actions are preserved. Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`.
 
 Continue remaining Website pages, product details and inquiry details; complete UI audit before sign-off.
+
+
+## UI redesign checkpoint — 2026-11-02 (continued)
+
+Repository policy: work directly on `main`; no branch creation. Latest branch inventory showed only `main` and no open pull requests.
+
+Completed since the previous checkpoint:
+- Admin and Company dashboards received structural workspace redesigns (welcome hero + reorganized operational sections).
+- Public website shell gained accessible skip navigation, focusable main content, explicit mobile menu state and automatic close on route changes/search.
+- Shared dashboard header/sidebar controls were refined for accessible labels, focus semantics and 44px targets.
+- Added public-shell navigation tests and extended dashboard-header accessibility tests.
+
+Next: continue the Paces-inspired migration through page families (list/table, detail, forms, public product and inquiry flows) with real API-backed data. Preserve existing auth, tenant boundaries, permissions, route names and API contracts. Do not report complete until every routed page family is reviewed and all app tests/builds pass. Tests for the latest commits remain unexecuted in this remote-only session.
