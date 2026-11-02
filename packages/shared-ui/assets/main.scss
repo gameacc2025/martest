@@ -820,3 +820,151 @@
         }
     }
 }
+
+
+/* ============================================================
+   Cross-application enterprise UI layer
+   Applied to Admin, Company and Website through the shared entry.
+   Semantic tokens preserve the Telecom brand and dark-mode mapping.
+   ============================================================ */
+
+:where(.p-card, .p-panel, .p-datatable, .p-dialog, .p-popover, .p-menu) {
+  border-color: var(--ds-color-border);
+}
+
+.p-card,
+.p-panel {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.p-card .p-card-title,
+.p-panel .p-panel-title {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.p-toolbar {
+  gap: var(--ds-space-3);
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+}
+
+.p-inputtext,
+.p-textarea,
+.p-select,
+.p-multiselect,
+.p-inputnumber,
+.p-password,
+.p-datepicker,
+.p-autocomplete {
+  border-radius: var(--ds-radius-md);
+}
+
+.p-inputtext,
+.p-textarea {
+  color: var(--ds-color-text);
+}
+
+.p-inputtext:focus,
+.p-textarea:focus {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+
+.p-button {
+  border-radius: var(--ds-radius-md);
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link) {
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ds-navy) 10%, transparent);
+}
+
+.p-datatable {
+  color: var(--ds-color-text);
+  border-radius: var(--ds-radius-lg);
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  transition: background-color var(--ds-transition-fast);
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--ds-color-surface-hover);
+}
+
+.p-paginator {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
+}
+
+.p-dialog {
+  border-radius: var(--ds-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-xl);
+}
+
+.p-dialog .p-dialog-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border-bottom: 1px solid var(--ds-color-border);
+}
+
+.p-dialog .p-dialog-content {
+  padding: var(--ds-space-6);
+}
+
+.p-dialog .p-dialog-footer {
+  padding: var(--ds-space-4) var(--ds-space-6);
+  border-top: 1px solid var(--ds-color-border);
+}
+
+.p-tag,
+.p-badge {
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+.p-message {
+  border-radius: var(--ds-radius-lg);
+}
+
+.p-tabs,
+.p-tablist {
+  border-color: var(--ds-color-border);
+}
+
+.p-tab {
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+@media (max-width: 640px) {
+  .p-dialog {
+    width: calc(100vw - 1.5rem) !important;
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .p-dialog .p-dialog-header,
+  .p-dialog .p-dialog-content,
+  .p-dialog .p-dialog-footer {
+    padding-inline: var(--ds-space-4);
+  }
+
+  .p-toolbar {
+    align-items: stretch;
+  }
+}
