@@ -99,4 +99,25 @@ async function changePassword() {
   border-radius: var(--content-border-radius);
   max-width: 400px;
 }
+
+.change-password-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.change-password-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.change-password-page .page-header h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
+.change-password-page .form-section {
+  max-width: 520px;
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.change-password-page .field { gap: var(--ds-space-2); }
+.change-password-page label { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
+.change-password-page :deep(.p-inputtext) { border-radius: var(--ds-radius-md); }
+@media (max-width: 640px) { .change-password-page .page-header { padding: var(--ds-space-4); } }
+
 </style>
