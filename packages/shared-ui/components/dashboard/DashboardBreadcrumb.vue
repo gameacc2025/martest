@@ -128,4 +128,10 @@ const crumbs = computed(() => {
 [dir='ltr'] .dash-breadcrumb-sep {
   transform: rotate(180deg);
 }
+
+.dash-breadcrumb-link { color: var(--ds-color-text-muted); }
+.dash-breadcrumb-link:hover { color: var(--ds-color-primary); }
+.dash-breadcrumb-current { color: var(--ds-color-text); }
+.dash-breadcrumb-sep { color: var(--ds-color-text-muted); }
+
 </style>
