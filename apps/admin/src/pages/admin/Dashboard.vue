@@ -1,9 +1,9 @@
 <template>
   <div class="admin-dashboard">
     <!-- Page header (simple, uniform with other dashboard pages) -->
-    <div class="page-header">
-      <h1>داشبورد</h1>
-      <div class="page-header-actions">
+    <div class="page-header ds-page-heading">
+      <h1 class="ds-page-heading__title">داشبورد</h1>
+      <div class="page-header-actions ds-page-heading__actions">
         <router-link :to="{ name: 'admin-product-create' }">
           <Button label="محصول جدید" icon="pi pi-plus" />
         </router-link>
@@ -617,4 +617,26 @@ onMounted(() => {
   }
 }
 
+
+/* Paces-inspired dashboard rhythm with API-backed widgets unchanged. */
+.admin-dashboard .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.admin-dashboard .page-header h1 {
+  color: var(--ds-color-text);
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+}
+.admin-dashboard-kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.admin-dashboard-grid--2-1 { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
+.admin-dashboard-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+@media (max-width: 900px) {
+  .admin-dashboard-grid--2-1 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .admin-dashboard .page-header { padding: var(--ds-space-4); }
+}
 </style>
