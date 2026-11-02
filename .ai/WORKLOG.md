@@ -9,7 +9,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Claimed scope:** Root agent entrypoints, shared protocol, durable worklog, current-task handoff, contributor docs, README, architecture/decision notes, branch cleanup.
 - **Changes:** Added and verified the agent entrypoints/protocol, project memory files, and updated docs. Canonical remote is `gameacc2025/martest`; `main` HEAD at task start was `ef0bda86f455ac0ea76ad0ebbcb8f4b76acde335`. Notification system work was merged through PR #1. CI on main was previously verified green in GitHub Actions run 40167701297; this does not verify live SMTP credentials/connectivity.
 - **Verification:** NOT RUN for this documentation task yet.
-- **Commit:** Pending
+- **Commits:** `db8b9f0` (future-module blueprint), `4bae804` (architecture roadmap), `89a3771` (project context), `764004e` (current-task handoff), `066a5d9` (worklog completion record).
 - **Push:** Working directly on remote `main` through GitHub repository tools; each file write creates a commit.
 - **Risks / open questions:** GitHub connector exposes branch listing but may not support branch deletion. Do not claim the feature branch was deleted unless verified.
 - **Next action:** Finish agent files and docs, update this entry with commit hashes and actual verification status, inspect whether branch deletion is supported.
@@ -2017,7 +2017,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 ## 2026-11-02 — PRODUCT-PLATFORM-VISION — Expand roadmap to a modular enterprise platform
-- **Status:** DOCUMENTATION PLANNED
+- **Status:** DONE (documentation committed on main)
 - **Goal:** Extend the product vision beyond the current telecom marketplace to include future CRM, finance/accounting, HR, procurement, inventory, logistics, customer support, project/operations, document/asset management, BI, security, and integration modules.
 - **Decision:** Distinguish planned modules from implemented capabilities. Future menu groups may be documented and designed now, but no fake routes, APIs, or operational controls may be exposed. Each module requires real authorization, tenant boundaries, APIs, tests, auditability, and release readiness before activation.
 - **Deliverable:** A dedicated future-module blueprint, cross-referenced from the architecture roadmap and AI project context.
