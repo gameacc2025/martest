@@ -1,13 +1,12 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
 import Button from 'primevue/button'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
@@ -28,12 +27,24 @@ const auth = useAuthStore()
 const canCreate = computed(() => auth.hasPermission('inquiries.create'))
 
 const inquiries = ref([])
+const tableRef = ref(null)
 const loading = ref(false)
 const errored = ref(false)
 
 const pagination = ref({ page: 1, limit: 10, total: 0 })
 const sortField = ref('createdAt')
 const sortOrder = ref(-1)
+const tableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
+  { field: 'title', header: 'عنوان', sortable: true, slot: 'inquiryTitle' },
+  { field: 'company.name', header: 'شرکت', slot: 'company' },
+  { field: 'priority', header: 'اولویت', slot: 'priority' },
+  { field: 'status', header: 'وضعیت', sortable: true, slot: 'status' },
+  { field: '_count.items', header: 'اقلام', slot: 'itemsCount' },
+  { field: '_count.responses', header: 'پاسخ‌ها', slot: 'responsesCount' },
+  { field: 'responseDeadline', header: 'ددلاین', sortable: true, slot: 'deadline' },
+  { field: 'createdAt', header: 'تاریخ ایجاد', sortable: true, slot: 'createdDate' },
+]
 const searchQuery = ref('')
 const statusFilter = ref(null)
 const scopeFilter = ref('all')
@@ -92,13 +103,13 @@ function isDeadlinePassed(inquiry) {
 
 onMounted(() => fetchInquiries())
 
-async function fetchInquiries(page = pagination.value.page) {
+async function fetchInquiries(page = pagination.value.page, limit = pagination.value.limit) {
   loading.value = true
   errored.value = false
   try {
     const res = await inquiriesApi.list({
       page,
-      limit: pagination.value.limit,
+      limit,
       search: searchQuery.value || undefined,
       status: statusFilter.value || undefined,
       scope: scopeFilter.value !== 'all' ? scopeFilter.value : undefined,
@@ -122,20 +133,29 @@ async function fetchInquiries(page = pagination.value.page) {
 }
 
 let searchTimer
+function resetTablePage() {
+  tableRef.value?.resetPage()
+}
 function debounceSearch() {
   clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => fetchInquiries(1), 450)
+  searchTimer = setTimeout(() => {
+    resetTablePage()
+    fetchInquiries(1)
+  }, 450)
 }
-function applyStatusFilter() { fetchInquiries(1) }
-function onScopeChange() { fetchInquiries(1) }
-function onPage(event) {
-  pagination.value.limit = event.rows
-  fetchInquiries(event.page + 1)
-}
-function onSort(event) {
-  sortField.value = event.sortField || 'createdAt'
-  sortOrder.value = event.sortOrder || -1
+function applyStatusFilter() {
+  resetTablePage()
   fetchInquiries(1)
+}
+function onScopeChange() {
+  resetTablePage()
+  fetchInquiries(1)
+}
+function onTableRequest({ page, rows, sortField: requestedSortField, sortOrder: requestedSortOrder }) {
+  pagination.value.limit = rows
+  if (requestedSortField) sortField.value = requestedSortField
+  if (requestedSortOrder) sortOrder.value = requestedSortOrder === 'asc' ? 1 : -1
+  fetchInquiries(page, rows)
 }
 
 function viewInquiry(inquiry) {
@@ -200,94 +220,58 @@ function createInquiry() {
         </TabList>
         <TabPanels>
           <TabPanel v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
-            <DataTable
+            <SharedDataTable
+              ref="tableRef"
               class="inquiry-management-table"
-              v-if="inquiries.length > 0 || loading"
-              :value="inquiries"
+              title="استعلام‌های شرکت"
+              :columns="tableColumns"
+              :rows="inquiries"
               :loading="loading"
-              lazy
-              paginator
-              :rows="pagination.limit"
-              :first="(pagination.page - 1) * pagination.limit"
-              :totalRecords="pagination.total"
-              :rowsPerPageOptions="[5, 10, 20, 50]"
-              :sortField="sortField"
-              :sortOrder="sortOrder"
-              @page="onPage"
-              @sort="onSort"
-              responsiveLayout="scroll"
-              dataKey="id"
-              :rowHover="true"
+              :lazy="true"
+              :total-records="pagination.total"
+              :rows-per-page="pagination.limit"
+              :rows-per-page-options="[5, 10, 20, 50]"
+              :searchable="false"
+              :column-toggle="false"
+              :initial-sort-field="sortField"
+              :initial-sort-order="sortOrder"
+              :empty-message="searchQuery || statusFilter ? 'با فیلترهای فعلی استعلامی پیدا نشد.' : 'هنوز استعلامی ایجاد نشده است.'"
+              @request="onTableRequest"
             >
-              <Column field="id" header="شناسه" sortable style="width: 5rem"></Column>
-              <Column field="title" header="عنوان" sortable>
-                <template #body="{ data }">
-                  <div class="inquiry-title-cell">
-                    <span class="inquiry-title" :class="{ 'actionable': isActionable(data) }">
-                      {{ data.title }}
-                    </span>
-                    <span v-if="data.description" class="inquiry-desc">
-                      {{ data.description.substring(0, 60) }}{{ data.description.length > 60 ? '...' : '' }}
-                    </span>
-                  </div>
-                </template>
-              </Column>
-              <Column header="شرکت">
-                <template #body="{ data }">{{ data.company?.name || '—' }}</template>
-              </Column>
-              <Column header="اولویت" style="width: 80px">
-                <template #body="{ data }">
-                  <Tag v-if="data.priority && data.priority !== 'NORMAL'" :severity="PRIORITY_SEVERITY[data.priority] || 'secondary'" :value="PRIORITY_LABELS[data.priority] || data.priority" />
-                  <span v-else class="muted">عادی</span>
-                </template>
-              </Column>
-              <Column field="status" header="وضعیت" sortable style="width: 120px">
-                <template #body="{ data }">
-                  <Tag :value="statusLabel(data.status)" :severity="statusSeverity[data.status]" />
-                </template>
-              </Column>
-              <Column header="اقلام" style="width: 5rem">
-                <template #body="{ data }">
-                  <span class="count-badge">{{ data._count?.items ?? data.items?.length ?? 0 }}</span>
-                </template>
-              </Column>
-              <Column header="پاسخ‌ها" style="width: 5rem">
-                <template #body="{ data }">
-                  <span class="count-badge">{{ data._count?.responses ?? data.responses?.length ?? 0 }}</span>
-                </template>
-              </Column>
-              <Column field="responseDeadline" header="ددلاین" sortable style="width: 100px">
-                <template #body="{ data }">
-                  <span v-if="data.responseDeadline" :class="{
-                    'deadline-urgent': isDeadlineApproaching(data),
-                    'deadline-passed': isDeadlinePassed(data)
-                  }">
-                    {{ formatDate(data.responseDeadline) }}
+              <template #inquiryTitle="{ row }">
+                <div class="inquiry-title-cell">
+                  <span class="inquiry-title" :class="{ actionable: isActionable(row) }">{{ row.title }}</span>
+                  <span v-if="row.description" class="inquiry-desc">
+                    {{ row.description.substring(0, 60) }}{{ row.description.length > 60 ? '...' : '' }}
                   </span>
-                  <span v-else class="muted">—</span>
-                </template>
-              </Column>
-              <Column field="createdAt" header="تاریخ ایجاد" sortable style="width: 100px">
-                <template #body="{ data }">{{ formatDate(data.createdAt) }}</template>
-              </Column>
-              <Column header="عملیات" style="width: 5rem">
-                <template #body="{ data }">
-                  <Button icon="pi pi-eye" severity="info" rounded text
-                    v-tooltip.top="'مشاهده'" aria-label="مشاهده استعلام" @click="viewInquiry(data)" />
-                </template>
-              </Column>
-
-              <template #empty>
-                <div v-if="!loading" class="state-block">
-                  <i class="pi pi-inbox state-icon"></i>
-                  <h3 v-if="searchQuery || statusFilter">نتیجه‌ای یافت نشد</h3>
-                  <h3 v-else>استعلامی ثبت نشده</h3>
-                  <p v-if="searchQuery || statusFilter">فیلترها را تغییر دهید یا جستجو را پاک کنید.</p>
-                  <p v-else>هنوز استعلامی ایجاد نشده است.</p>
-                  <Button v-if="canCreate && !searchQuery && !statusFilter" label="ایجاد استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
                 </div>
               </template>
-            </DataTable>
+              <template #company="{ row }">{{ row.company?.name || '—' }}</template>
+              <template #priority="{ row }">
+                <Tag v-if="row.priority && row.priority !== 'NORMAL'" :severity="PRIORITY_SEVERITY[row.priority] || 'secondary'" :value="PRIORITY_LABELS[row.priority] || row.priority" />
+                <span v-else class="muted">عادی</span>
+              </template>
+              <template #status="{ row }">
+                <Tag :value="statusLabel(row.status)" :severity="statusSeverity[row.status] || 'secondary'" />
+              </template>
+              <template #itemsCount="{ row }">
+                <span class="count-badge">{{ row._count?.items ?? row.items?.length ?? 0 }}</span>
+              </template>
+              <template #responsesCount="{ row }">
+                <span class="count-badge">{{ row._count?.responses ?? row.responses?.length ?? 0 }}</span>
+              </template>
+              <template #deadline="{ row }">
+                <span v-if="row.responseDeadline" :class="{
+                  'deadline-urgent': isDeadlineApproaching(row),
+                  'deadline-passed': isDeadlinePassed(row)
+                }">{{ formatDate(row.responseDeadline) }}</span>
+                <span v-else class="muted">—</span>
+              </template>
+              <template #createdDate="{ row }">{{ formatDate(row.createdAt) }}</template>
+              <template #actions="{ row }">
+                <Button icon="pi pi-eye" severity="info" rounded text v-tooltip.top="'مشاهده'" aria-label="مشاهده استعلام" @click="viewInquiry(row)" />
+              </template>
+            </SharedDataTable>
 
             <div v-else-if="!loading" class="state-block">
               <i class="pi pi-inbox state-icon"></i>
