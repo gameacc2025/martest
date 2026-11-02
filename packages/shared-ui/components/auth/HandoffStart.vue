@@ -81,4 +81,26 @@ onMounted(async () => {
   color: var(--text-color-secondary, #64748b);
   font-size: 1rem;
 }
+
+.handoff-page {
+  background:
+    radial-gradient(ellipse at 50% 20%, color-mix(in srgb, var(--ds-color-primary) 8%, transparent), transparent 28rem),
+    var(--ds-color-background);
+  color: var(--ds-color-text);
+}
+.handoff-icon {
+  color: var(--ds-color-primary);
+  filter: drop-shadow(0 4px 12px color-mix(in srgb, var(--ds-color-primary) 22%, transparent));
+}
+.handoff-text { color: var(--ds-color-text-muted); }
+.handoff-button {
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-primary);
+  box-shadow: var(--ds-shadow-sm);
+}
+.handoff-button:focus-visible {
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 3px;
+}
+
 </style>
