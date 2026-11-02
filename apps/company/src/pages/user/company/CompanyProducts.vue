@@ -129,4 +129,42 @@ function formatPrice(price) {
   font-weight: 700;
   margin: 0;
 }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.page-header h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); margin: 0; }
+.my-products-page,
+.company-products-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.my-products-page .card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.my-products-page :deep(.p-toolbar) {
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.company-products-page :deep(.p-datatable),
+.my-products-page :deep(.p-datatable) { border-radius: var(--ds-radius-xl); }
+.company-products-page :deep(.p-datatable-thead > tr > th),
+.my-products-page :deep(.p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+@media (max-width: 640px) { .page-header { padding: var(--ds-space-4); } }
+
 </style>
