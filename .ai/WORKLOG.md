@@ -2218,3 +2218,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin inquiry review queue now has matching toolbar/table/loading/pagination styling.
 - Preserved existing API behavior, tenant scoping, product state transitions, STAFF-only moderation, inquiry scope tabs and server-side pagination/sorting.
 - Commits: `4e5cd98`, `55ec8ed`, `17e43c0`, `9036416`, `7c2f7af`.
+
+
+## UI redesign — identity/access/catalogue batch (2026-11-02)
+
+- Refined Admin and Company user directories with common responsive data surfaces and table styles; existing permission rules, self-protection and tenant scope preserved.
+- Refined Admin RoleList, PermissionList and CategoryList tables/toolbars.
+- Added unit coverage for shared `Table.vue` row/loading passthrough, empty-state copy and column configuration.
+- Commits: `9927176`, `b52f642`, `8b54d91`, `d065562`, `b6ce439`, `95ac38b`.
+- CI was green on earlier commits `7767afe` and `b52f642`; latest run must finish before sign-off. Runtime Validation remains a separate flaky/failing Playwright smoke workflow and is not claimed green.
