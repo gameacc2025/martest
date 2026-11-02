@@ -520,3 +520,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Existing form check definitions remain role-aware and continue to mirror current validation requirements. No submit/API behavior changed.
 - Commits: `a5f6fa2` shared component; `5ad87a1` Company adoption; `49d779d` Admin adoption; `6332362` tests.
 - CI pending.
+
+
+## Shared management page headings — batch 11 (2026-11-02)
+
+- Added `WorkspacePageHeading.vue` as a shared RTL-aware heading surface with optional eyebrow, description, icon and actions slot.
+- Adopted it in Admin product list, company list and inquiry list, plus Company inquiry list.
+- The migration standardizes page hierarchy and spacing while preserving each page's text, existing toolbar actions, search/filter state, data tables, routes and API behavior.
+- Added component tests for content, custom heading ID, optional fields and actions slot.
+- Commits: `1a0e4fc` component; `15f1e40`, `3c2b4d5`, `541944a`, `cb083f0` page adoption; `a34b8e1` tests.
+- CI pending.
