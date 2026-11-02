@@ -162,9 +162,10 @@ function logout() {
 
 <template>
   <div class="profile-page">
-    <div class="page-header">
-      <h1>پروفایل من</h1>
-    </div>
+    <header class="page-header profile-heading">
+      <span class="profile-heading-icon"><i class="pi pi-user"></i></span>
+      <div><span class="profile-heading-eyebrow">حساب کاربری</span><h1>پروفایل من</h1><p>اطلاعات حساب، تنظیمات شخصی و گزینه‌های امنیتی را مدیریت کنید.</p></div>
+    </header>
 
     <div v-if="loading" class="text-center py-8">
       <ProgressSpinner />
@@ -451,5 +452,44 @@ function logout() {
 .profile-page :deep(.p-tabpanels) { background: transparent; }
 @media (max-width: 900px) { .profile-page .account-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .profile-page .page-header { padding: var(--ds-space-4); } }
+
+
+.profile-page .page-header { margin-bottom: 0; }
+.profile-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.profile-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.profile-heading > div { min-width: 0; }
+.profile-heading-eyebrow { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.profile-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
+.profile-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.profile-page :deep(.p-tablist) { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0; background: var(--ds-color-surface); }
+.profile-page :deep(.p-tabpanels) { border: 1px solid var(--ds-color-border); border-top: 0; border-radius: 0 0 var(--ds-radius-xl) var(--ds-radius-xl); background: var(--ds-color-surface); }
+.profile-page .detail-row,
+.profile-page .security-row { border-color: var(--ds-color-border); }
+.profile-page .field label { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
+.profile-page :deep(.p-inputtext),
+.profile-page :deep(.p-textarea) { border-color: var(--ds-color-border); border-radius: var(--ds-radius-md); }
+@media (max-width: 640px) {
+  .profile-heading { align-items: flex-start; padding: 1rem; }
+  .profile-heading-icon { width: 2.75rem; height: 2.75rem; }
+}
 
 </style>
