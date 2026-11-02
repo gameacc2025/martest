@@ -15,28 +15,38 @@
         </template>
       </Toolbar>
 
-      <DataTable class="management-data-table" :value="categories" :loading="loading" :paginator="true" :rows="pagination.limit"
-        :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll">
-        <Column field="id" header="شناسه" sortable></Column>
-        <Column field="nameFa" header="نام فارسی" sortable></Column>
-        <Column field="nameEn" header="نام انگلیسی"></Column>
-        <Column header="تصویر">
-          <template #body="{ data }">
-            <img v-if="data.image" :src="data.image" :alt="data.nameFa" style="width: 56px; height: 40px; object-fit: cover; border-radius: 6px;" />
-            <span v-else>-</span>
-          </template>
-        </Column>
-        <Column field="slug" header="اسلاگ"></Column>
-        <Column header="عملیات">
-          <template #body="{ data }">
-            <div class="flex gap-2">
-              <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش دسته‌بندی" @click="editCategory(data)" />
-              <Button icon="pi pi-trash" severity="danger" rounded text aria-label="حذف دسته‌بندی" @click="confirmDelete(data)" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <SharedDataTable
+        ref="tableRef"
+        class="management-data-table"
+        title="فهرست دسته‌بندی‌ها"
+        :columns="tableColumns"
+        :rows="categories"
+        :loading="loading"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        @request="onTableRequest"
+      >
+        <template #categoryImage="{ row }">
+          <img
+            v-if="row.image"
+            :src="row.image"
+            :alt="row.nameFa"
+            class="category-table-image"
+            loading="lazy"
+          />
+          <span v-else class="category-table-image-placeholder" aria-label="بدون تصویر">
+            <i class="pi pi-image" aria-hidden="true"></i>
+          </span>
+        </template>
+        <template #actions="{ row }">
+          <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش دسته‌بندی" v-tooltip.top="'ویرایش'" @click="editCategory(row)" />
+          <Button icon="pi pi-trash" severity="danger" rounded text aria-label="حذف دسته‌بندی" v-tooltip.top="'حذف'" @click="confirmDelete(row)" />
+        </template>
+      </SharedDataTable>
     </div>
 
     <!-- Create/Edit Category Dialog -->
@@ -78,6 +88,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { categoriesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
@@ -85,6 +96,7 @@ import { useToast } from 'primevue/usetoast'
 const toast = useToast()
 
 const categories = ref([])
+const tableRef = ref(null)
 const loading = ref(false)
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)
@@ -98,6 +110,14 @@ const pagination = ref({
   total: 0,
   totalPages: 1,
 })
+
+const tableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 6rem' },
+  { field: 'nameFa', header: 'نام فارسی', sortable: true },
+  { field: 'nameEn', header: 'نام انگلیسی' },
+  { field: 'image', header: 'تصویر', slot: 'categoryImage' },
+  { field: 'slug', header: 'اسلاگ' },
+]
 
 const form = ref({
   nameFa: '',
@@ -113,17 +133,22 @@ const dialogHeader = computed(() => {
   return editingId.value ? 'ویرایش دسته‌بندی' : 'ایجاد دسته‌بندی جدید'
 })
 
+function resetTablePage() {
+  tableRef.value?.resetPage()
+}
+
 function debounceSearch() {
   clearTimeout(debounceSearch.timer)
   debounceSearch.timer = setTimeout(() => {
+    resetTablePage()
     fetchCategories(1)
   }, 500)
 }
 
-async function fetchCategories(page = 1) {
+async function fetchCategories(page = 1, limit = pagination.value.limit) {
   loading.value = true
   try {
-    const res = await categoriesApi.listForManagement({ page, search: searchQuery.value })
+    const res = await categoriesApi.listForManagement({ page, limit, search: searchQuery.value })
     const body = res.data
     const items = body?.data?.data || body?.data || body?.items || body || []
     categories.value = Array.isArray(items) ? items : []
@@ -143,8 +168,9 @@ async function fetchCategories(page = 1) {
   }
 }
 
-function onPageChange(event) {
-  fetchCategories(event.page + 1)
+function onTableRequest({ page, rows }) {
+  pagination.value.limit = rows
+  fetchCategories(page, rows)
 }
 
 function openCreateDialog() {
@@ -392,4 +418,18 @@ onMounted(() => {
   .management-data-toolbar :deep(.p-select) { width: 100%; }
   .management-data-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
+
+.category-table-image,
+.category-table-image-placeholder {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 2.75rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-primary);
+  object-fit: cover;
+}
+.category-table-image-placeholder i { font-size: 1.1rem; }
 </style>
