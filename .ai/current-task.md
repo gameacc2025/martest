@@ -1343,3 +1343,11 @@ Completed in the latest pass:
 - These changes preserve existing APIs, route names, user/tenant scope, sealed inquiry privacy, and payment verification behavior.
 
 Continue auditing remaining public/auth/account pages and shared components. Overall redesign remains in progress; do not declare completion until the full page/component inventory and final CI verification are complete.
+
+
+## Latest account/shell checkpoint — 2026-11-02
+
+- Public address book, inquiry center, company directory, contact page and subscription page have received responsive design-system treatments.
+- Admin/Company dashboard shells now include accessible skip-to-main-content navigation.
+- Auth, account profile, password, product editor, inquiry authoring, reporting, category, company profile, FAQ, legal and search pages have been reviewed; several were already in the new design system.
+- Overall redesign is still in progress. Continue verifying every route against actual implementation and complete CI on the newest main commit before sign-off.
