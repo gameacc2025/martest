@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -147,14 +148,13 @@ function createInquiry() {
 
 <template>
   <div class="inquiry-list-page ds-stack">
-<section class="inquiry-workspace-intro" aria-labelledby="inquiry-workspace-title">
-  <span class="inquiry-workspace-icon"><i class="pi pi-comments"></i></span>
-  <div class="inquiry-workspace-copy">
-    <span class="inquiry-workspace-eyebrow">فرصت‌های فروش و تأمین</span>
-    <h1 id="inquiry-workspace-title">استعلام‌های شرکت</h1>
-    <p>درخواست‌های مرتبط با محصولات شرکت را بررسی کنید و وضعیت پاسخ‌گویی را دنبال کنید.</p>
-  </div>
-</section>
+<WorkspacePageHeading
+      eyebrow="فرصت‌های فروش و تأمین"
+      title="استعلام‌های شرکت"
+      description="درخواست‌های مرتبط با محصولات شرکت را بررسی کنید و وضعیت پاسخ‌گویی را دنبال کنید."
+      icon="pi pi-comments"
+      heading-id="inquiry-workspace-title"
+    />
         <div class="card ds-panel inquiry-management-surface">
       <Toolbar class="list-toolbar ds-toolbar inquiry-management-toolbar">
         <template #start>
