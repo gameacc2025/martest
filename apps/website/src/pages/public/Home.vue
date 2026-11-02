@@ -62,23 +62,23 @@ const slides = [
     icon: 'pi pi-server',
     badge: 'کیفیت بالا، اعتماد پایدار',
     title: 'بازارگاه تجهیزات مخابراتی',
-    desc: 'طیف وسیعی از تجهیزات مخابراتی و شبکه با بهترین کیفیت از تولیدکنندگان و تأمین‌کنندگان معتبر.',
+    desc: 'کاتالوگ تخصصی تجهیزات مخابراتی و شبکه؛ محصولات و مشخصات ثبت‌شده را یکجا بررسی کنید.',
     primary: { label: 'مشاهده محصولات', to: { name: 'products' } },
     outline: { label: 'دسته‌بندی محصولات', to: { name: 'categories' } }
   },
   {
     icon: 'pi pi-wifi',
-    badge: 'جدیدترین تجهیزات شبکه',
+    badge: 'جستجوی دقیق محصولات',
     title: 'تجهیزات فیبر نوری و شبکه',
-    desc: 'سوییچ، روتر، مودم و کابل‌های فیبر نوری از برندهای معتبر جهانی با گارانتی اصالت.',
+    desc: 'محصولات حوزه فیبر نوری و شبکه را بر اساس دسته‌بندی، برند و مشخصات فنی جستجو کنید.',
     primary: { label: 'مشاهده محصولات', to: { name: 'products' } },
     outline: { label: 'دسته‌بندی محصولات', to: { name: 'categories' } }
   },
   {
     icon: 'pi pi-verified',
-    badge: 'تأمین از بهترین برندها',
+    badge: 'مسیر استعلام و تأمین',
     title: 'همکاری با تأمین‌کنندگان معتبر',
-    desc: 'بیش از ۲۵۰ تأمین‌کننده معتبر و بیش از ۱۵۰۰ محصول متنوع در یک بازارگاه.',
+    desc: 'درخواست قیمت ثبت کنید و پیشنهادهای تأمین‌کنندگان را در مسیر استعلام دنبال کنید.',
     primary: { label: 'مشاهده محصولات', to: { name: 'products' } },
     outline: { label: 'دسته‌بندی محصولات', to: { name: 'categories' } }
   }
@@ -311,7 +311,7 @@ onBeforeUnmount(() => {
       <div class="home-layout">
 
         <!-- Right: Filters Sidebar -->
-        <aside class="filters-sidebar">
+        <aside class="filters-sidebar" aria-label="فیلتر محصولات">
           <Card class="filters-card">
             <template #title>
               <span class="filters-title"><i class="pi pi-filter"></i> فیلتر محصولات</span>
@@ -487,7 +487,7 @@ onBeforeUnmount(() => {
               <p>در حال حاضر محصولی موجود نیست</p>
             </div>
             <div v-else class="products-grid">
-              <div v-for="product in recentProducts" :key="product.id" class="product-card" role="link" tabindex="0" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
+              <div v-for="product in recentProducts" :key="product.id" class="product-card" role="link" tabindex="0" :aria-label="`مشاهده جزئیات ${product.title}`" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
                 <div class="product-image">
                   <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
@@ -674,7 +674,12 @@ onBeforeUnmount(() => {
 /* Hero Slideshow */
 .hero-slideshow { position: relative; }
 .hero-dots {
-  display: flex; justify-content: center; gap: 0.5rem; margin-top: var(--ds-space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: var(--ds-space-4);
 }
 .hero-dot {
   display: grid;
@@ -694,7 +699,7 @@ onBeforeUnmount(() => {
   width: .5rem;
   height: .5rem;
   border-radius: 50%;
-  background: var(--ds-color-border-strong);
+  background: var(--ds-color-border, var(--surface-border));
   transition: width var(--ds-transition-fast), background var(--ds-transition-fast);
 }
 .hero-dot.active::before {
@@ -721,11 +726,6 @@ onBeforeUnmount(() => {
   outline: 2px solid var(--ds-color-focus);
   outline-offset: 2px;
 }
-.hero-dot:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
-.hero-dot.active { background: var(--primary-color); width: 1.5rem; border-radius: 1rem; }
 
 /* Slide transition */
 .slide-fade-enter-active { transition: all 0.5s ease; }
@@ -1052,8 +1052,7 @@ onBeforeUnmount(() => {
 .product-info { padding: .9rem; }
 .product-title { color: var(--ds-color-text); line-height: 1.65; }
 .product-vendor { display: flex; align-items: center; gap: .35rem; }
-.stats-bar,
-.features-bar {
+ .features-bar {
   border-color: var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
   background: var(--ds-color-surface);
@@ -1075,9 +1074,7 @@ onBeforeUnmount(() => {
   .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
   .stats-bar,
   .features-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .stat-item,
   .feature-item { justify-content: flex-start; padding: .5rem; }
-  .stat-value { font-size: 1rem; }
   .feature-text h3 { font-size: .78rem; }
   .feature-text p { font-size: .68rem; }
   .hero-visual { min-height: 10rem; }
