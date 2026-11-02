@@ -209,6 +209,7 @@ async function saveCategory() {
     showDialog.value = false
     editingId.value = null
     form.value = { nameFa: '', nameEn: '', slug: '', image: '', status: 'ACTIVE', showInMenu: true, sortOrder: 0 }
+    resetTablePage()
     await fetchCategories()
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در ذخیره دسته‌بندی', life: 3000 })
@@ -225,6 +226,7 @@ async function deleteCategory() {
     await categoriesApi.delete(categoryToDelete.value.id)
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'دسته‌بندی با موفقیت حذف شد', life: 3000 })
     showDeleteDialog.value = false
+    resetTablePage()
     await fetchCategories()
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در حذف دسته‌بندی', life: 3000 })
