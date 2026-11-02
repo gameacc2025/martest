@@ -45,7 +45,7 @@ describe('Website Product Listing', () => {
   })
 
   it('preserves the initial category query and API/store parameter contract', async () => {
-    wrapper = shallowMount(ProductListing)
+    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
     await flushPromises()
 
     expect(getCategories).toHaveBeenCalledOnce()
@@ -60,7 +60,7 @@ describe('Website Product Listing', () => {
   })
 
   it('navigates to the existing product-details route on keyboard activation', async () => {
-    wrapper = shallowMount(ProductListing)
+    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
     await flushPromises()
 
     await wrapper.find('.product-card').trigger('keydown.enter')
@@ -73,7 +73,7 @@ describe('Website Product Listing', () => {
 
   it('announces product loading errors accessibly', async () => {
     getProducts.mockRejectedValueOnce(new Error('offline'))
-    wrapper = shallowMount(ProductListing)
+    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
     await flushPromises()
 
     expect(wrapper.find('[role="alert"]').exists()).toBe(true)
@@ -85,14 +85,14 @@ describe('Website Product Listing', () => {
       data: [],
       meta: { page: 1, limit: 12, total: 0, totalPages: 0 },
     })
-    wrapper = shallowMount(ProductListing)
+    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
     await flushPromises()
 
     expect(wrapper.find('[role="status"]').text()).toContain('هیچ محصولی یافت نشد')
   })
 
   it('keeps route-query category changes connected to product loading', async () => {
-    wrapper = shallowMount(ProductListing)
+    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
     await flushPromises()
     getProducts.mockClear()
 
