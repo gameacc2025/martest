@@ -70,6 +70,7 @@ const props = defineProps({
   rowsPerPageOptions: { type: Array, default: () => [10, 20, 50, 100] },
 
   // ── Feature toggles ───────────────────────────────────────
+  mobileCardLayout: { type: Boolean, default: true },
   searchable: { type: Boolean, default: true },
   searchPlaceholder: { type: String, default: 'جستجو...' },
   columnToggle: { type: Boolean, default: true },
