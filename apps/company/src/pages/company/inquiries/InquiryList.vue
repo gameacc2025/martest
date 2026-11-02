@@ -192,6 +192,7 @@ function createInquiry() {
         <TabPanels>
           <TabPanel v-for="opt in scopeOptions" :key="opt.value" :value="opt.value">
             <DataTable
+              class="inquiry-management-table"
               v-if="inquiries.length > 0 || loading"
               :value="inquiries"
               :loading="loading"
