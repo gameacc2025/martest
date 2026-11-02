@@ -1,14 +1,27 @@
 <template>
   <div class="company-dashboard">
-    <!-- Page header -->
-    <div class="page-header ds-page-heading">
-      <h1 class="ds-page-heading__title">داشبورد شرکت</h1>
-      <div class="page-header-actions ds-page-heading__actions">
+    <!-- Company workspace welcome. Identity comes from the authenticated company profile. -->
+    <section class="company-dashboard-hero" aria-labelledby="company-dashboard-title">
+      <div class="company-dashboard-hero-copy">
+        <span class="company-dashboard-eyebrow"><i class="pi pi-building"></i> فضای کاری شرکت</span>
+        <h1 id="company-dashboard-title">{{ companyName ? `خوش آمدید، ${companyName}` : 'داشبورد شرکت' }}</h1>
+        <p>وضعیت محصولات، فرصت‌های استعلام و فعالیت‌های اخیر شرکت را از اینجا مدیریت کنید.</p>
+        <div class="company-dashboard-hero-status">
+          <span class="company-dashboard-status-dot" :class="{ 'is-active': company?.status === 'ACTIVE' }"></span>
+          {{ companyStatusLabel }}
+          <span v-if="company?.isVerified" class="company-dashboard-verified"><i class="pi pi-verified"></i> شرکت تأیید شده</span>
+        </div>
+      </div>
+      <div class="company-dashboard-hero-actions">
         <router-link :to="{ name: 'manage-product-create' }">
           <Button label="افزودن محصول" icon="pi pi-plus" />
         </router-link>
+        <router-link :to="{ name: 'company-inquiries' }" class="company-dashboard-secondary-action">
+          <i class="pi pi-inbox"></i><span>مشاهده استعلام‌ها</span>
+        </router-link>
       </div>
-    </div>
+      <span class="company-dashboard-hero-mark" aria-hidden="true"><i class="pi pi-chart-line"></i></span>
+    </section>
 
     <!-- Stats error (non-blocking) -->
     <DashboardPanel v-if="statsError" title="آمار داشبورد" icon="pi pi-exclamation-triangle">
@@ -75,10 +88,17 @@
       />
     </div>
 
-    <!-- 3. Inquiry pipeline — operational flow -->
-    <DashboardPanel title="جریان استعلام‌ها" icon="pi pi-sitemap">
-      <InquiryPipeline :stages="pipelineStages" :loading="statsLoading" />
-    </DashboardPanel>
+    <!-- Primary operations: inquiry pipeline and frequently used actions. -->
+    <section class="company-dashboard-operations" aria-label="عملیات اصلی شرکت">
+      <DashboardPanel title="جریان استعلام‌ها" icon="pi pi-sitemap" class="company-dashboard-pipeline">
+        <template #actions><router-link :to="{ name: 'company-inquiries' }" class="cd-link">مشاهده همه</router-link></template>
+        <InquiryPipeline :stages="pipelineStages" :loading="statsLoading" />
+      </DashboardPanel>
+      <DashboardPanel title="دسترسی سریع" icon="pi pi-bolt" class="company-dashboard-quick">
+        <template #actions><span class="cd-hint">میان‌برهای پرکاربرد</span></template>
+        <QuickActions :actions="quickActions" />
+      </DashboardPanel>
+    </section>
 
     <!-- 4. Activity: deadlines + recent activities -->
     <div class="cd-grid cd-grid--1-1">
@@ -153,10 +173,6 @@
       <EntityList :items="recentProducts" :loading="productsLoading" empty-message="هنوز محصولی ثبت نشده است." />
     </DashboardPanel>
 
-    <!-- 7. Quick actions -->
-    <DashboardPanel title="دسترسی سریع" icon="pi pi-bolt">
-      <QuickActions :actions="quickActions" />
-    </DashboardPanel>
   </div>
 </template>
 
@@ -702,5 +718,125 @@ onMounted(() => {
 }
 @media (max-width: 640px) {
   .company-dashboard .page-header { padding: var(--ds-space-4); }
+}
+/* Paces-inspired company command center — no changes to API-backed state. */
+.company-dashboard-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-6);
+  min-height: 184px;
+  overflow: hidden;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid color-mix(in srgb, var(--ds-navy) 12%, transparent);
+  border-radius: var(--ds-radius-xl);
+  color: var(--ds-on-navy);
+  background: var(--ds-hero-gradient);
+  box-shadow: var(--ds-shadow-md);
+}
+.company-dashboard-hero-copy,
+.company-dashboard-hero-actions { position: relative; z-index: 1; }
+.company-dashboard-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .6rem;
+  color: var(--ds-brand);
+  font-size: var(--ds-font-size-sm);
+  font-weight: 700;
+}
+.company-dashboard-hero h1 {
+  margin: 0;
+  color: inherit;
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  font-weight: 800;
+}
+.company-dashboard-hero p {
+  max-width: 44rem;
+  margin: .6rem 0 0;
+  color: var(--ds-on-navy-muted);
+  line-height: 1.8;
+}
+.company-dashboard-hero-status {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-top: .9rem;
+  color: var(--ds-on-navy-muted);
+  font-size: var(--ds-font-size-xs);
+}
+.company-dashboard-status-dot {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--ds-color-warning);
+}
+.company-dashboard-status-dot.is-active { background: #39d98a; }
+.company-dashboard-verified { display: inline-flex; align-items: center; gap: .3rem; margin-inline-start: .5rem; color: var(--ds-brand); }
+.company-dashboard-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.company-dashboard-secondary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 2.75rem;
+  padding: .65rem 1rem;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-on-navy);
+  text-decoration: none;
+  font-weight: 700;
+  background: rgba(255,255,255,.08);
+}
+.company-dashboard-secondary-action:hover { background: rgba(255,255,255,.15); }
+.company-dashboard-hero-mark {
+  position: absolute;
+  z-index: 0;
+  inset-inline-end: 42%;
+  top: -4.5rem;
+  display: grid;
+  place-items: center;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 50%;
+  color: rgba(255,255,255,.08);
+  font-size: 9rem;
+  transform: rotate(-12deg);
+}
+.company-dashboard-hero-mark::before {
+  content: "";
+  position: absolute;
+  inset: 1.4rem;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: inherit;
+}
+.company-dashboard-operations {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr);
+  gap: var(--ds-space-5);
+  align-items: stretch;
+}
+.company-dashboard-operations > * { min-width: 0; }
+.cd-hint { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.company-dashboard .cd-kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.company-dashboard .cd-grid--1-1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.company-dashboard .cd-grid--2-1 { grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); }
+@media (max-width: 1100px) {
+  .company-dashboard-operations,
+  .company-dashboard .cd-grid--2-1 { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .company-dashboard .cd-grid--1-1 { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .company-dashboard-hero { align-items: flex-start; flex-direction: column; min-height: 0; }
+  .company-dashboard-hero-mark { inset-inline-end: -4rem; top: -5rem; }
+  .company-dashboard-hero-actions { width: 100%; }
+  .company-dashboard-hero-actions > * { flex: 1 1 auto; }
+  .company-dashboard-secondary-action { width: 100%; }
 }
 </style>
