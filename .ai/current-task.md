@@ -1361,3 +1361,10 @@ Additional shared shell work:
 - No API, auth, permission, route or data behavior changed.
 
 Continue the full UI redesign across the shared shell, Admin/Company management pages, inquiry workflows, product details/forms and Website catalog/account flows. Do not mark the redesign complete until the page inventory is audited, tests/builds pass, and the remaining page families are migrated.
+
+
+## Product editor checkpoint — 2026-11-02
+
+Admin and Company product forms now show a live, accessible completion indicator for required fields. The indicator mirrors existing validation requirements without changing validation or submit behavior. Commits: `62ad6a7`, `d626f49`.
+
+Next: continue structural UI migration across product detail, inquiry detail/create/response flows, list families, account pages and the public website. Verify all new batches through CI before sign-off.
