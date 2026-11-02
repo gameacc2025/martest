@@ -274,3 +274,12 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - GitHub Actions CI is configured for pushes to `main`, but the latest commit currently reports no status checks; do not infer a pass.
 - The connected GitHub editing session cannot run local pnpm tests or production builds. The new PageHeader test and existing shared UI tests are committed but not yet executed.
 - This batch is not signed off as verified. Continue page-family implementation and await/obtain CI evidence before release.
+
+
+## UI redesign — inquiry authoring and homepage batch 11 (2026-11-02)
+
+- Admin and Company multi-step inquiry creation now have clearer contextual headers, a guided progress rail, improved active-step contrast, consistent field surfaces, review blocks and responsive action layout.
+- Customer inquiry center and inquiry lists were already updated in batch 10; this batch completes the inquiry-create visual family without changing step validation, draft persistence, inquiry payloads, role restrictions or submission APIs.
+- Public homepage refined: branded hero hierarchy, search CTA, product image containment, category/product card surfaces, responsive two-column mobile product grid and compact stats/features.
+- Commits: `ec8f735` Admin inquiry create; `14361df` Company inquiry create; `5da81bd` Website homepage.
+- No local tests/builds or browser checks were run. Current main CI status must be checked before sign-off.
