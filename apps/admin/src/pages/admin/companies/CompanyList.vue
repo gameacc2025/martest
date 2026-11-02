@@ -58,147 +58,55 @@
         {{ errorMessage }}
       </Message>
 
-      <DataTable
+      <SharedDataTable
+        ref="tableRef"
         class="company-management-table"
-        :value="companies"
+        title="فهرست شرکت‌ها"
+        :columns="tableColumns"
+        :rows="companies"
         :loading="loading"
-        :paginator="true"
         :lazy="true"
-        :first="first"
-        :rows="pagination.limit"
-        :totalRecords="pagination.total"
-        :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange"
-        responsiveLayout="scroll"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[5, 10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        @request="onTableRequest"
       >
-        <template #loading>
-          <div class="text-center py-8">
-            <i class="pi pi-spin pi-spinner text-primary-600"></i>
-            <span class="mr-2">در حال دریافت شرکت‌ها...</span>
-          </div>
+        <template #companyLogo="{ row }">
+          <Avatar
+            v-if="getCompanyLogo(row)"
+            :image="getCompanyLogo(row)"
+            shape="circle"
+            size="large"
+          />
+          <Avatar v-else icon="pi pi-building" shape="circle" size="large" />
         </template>
-
-        <template #empty>
-          <div class="text-center text-muted" style="padding: 2rem 0">
-            <i class="pi pi-building text-4xl mb-4 block"></i>
-            <div class="font-semibold mb-2">هیچ شرکتی یافت نشد</div>
-            <div>با معیارهای فعلی هیچ شرکتی برای نمایش وجود ندارد.</div>
-          </div>
+        <template #companyName="{ row }">
+          <strong class="company-table-name">{{ row.name || row.companyName || '—' }}</strong>
         </template>
-
-        <Column header="لوگو">
-          <template #body="{ data }">
-            <Avatar
-              v-if="getCompanyLogo(data)"
-              :image="getCompanyLogo(data)"
-              shape="circle"
-              size="large"
-            />
-            <Avatar v-else icon="pi pi-building" shape="circle" size="large" />
-          </template>
-        </Column>
-        <Column field="name" header="نام شرکت" sortable>
-          <template #body="{ data }">
-            {{ data.name || data.companyName || '-' }}
-          </template>
-        </Column>
-        <Column field="type" header="نوع">
-          <template #body="{ data }">
-            <Tag :severity="getTypeSeverity(data.type)">
-              {{ getTypeLabel(data.type) }}
-            </Tag>
-          </template>
-        </Column>
-        <Column field="email" header="ایمیل">
-          <template #body="{ data }">
-            {{ data.email || '-' }}
-          </template>
-        </Column>
-        <Column field="phone" header="تلفن">
-          <template #body="{ data }">
-            {{ data.phone || data.phoneNumber || '-' }}
-          </template>
-        </Column>
-        <Column field="status" header="وضعیت">
-          <template #body="{ data }">
-            <Tag :severity="getStatusSeverity(data.status)">
-              {{ getStatusLabel(data.status) }}
-            </Tag>
-          </template>
-        </Column>
-        <Column field="isVerified" header="تایید">
-          <template #body="{ data }">
-            <Tag :severity="data.isVerified ? 'success' : 'warning'">
-              {{ data.isVerified ? 'تایید شده' : 'در انتظار تایید' }}
-            </Tag>
-          </template>
-        </Column>
-        <Column field="createdAt" header="تاریخ ایجاد" sortable>
-          <template #body="{ data }">
-            {{ formatDate(data.createdAt) }}
-          </template>
-        </Column>
-        <Column header="عملیات" :exportable="false" style="min-width: 12rem">
-          <template #body="{ data }">
-            <div class="flex align-items-center gap-2">
-              <Button
-                v-if="canEditCompany"
-                icon="pi pi-pencil"
-                severity="info"
-                text
-                rounded
-                v-tooltip.top="'ویرایش شرکت'"
-                aria-label="ویرایش شرکت"
-                @click="openEditDialog(data)"
-              />
-              <Button
-                v-if="data.status === 'PENDING' && canManageCompanyStatus"
-                icon="pi pi-check"
-                severity="success"
-                text
-                rounded
-                v-tooltip.top="'تأیید و فعال‌سازی شرکت'"
-                aria-label="تأیید و فعال‌سازی شرکت"
-                :loading="processingCompanyId === data.id"
-                @click="approveCompany(data)"
-              />
-              <Button
-                v-if="!data.isVerified && canVerifyCompany"
-                icon="pi pi-shield"
-                severity="success"
-                text
-                rounded
-                v-tooltip.top="'تأیید مدارک شرکت'"
-                aria-label="تأیید مدارک شرکت"
-                :loading="processingCompanyId === data.id"
-                @click="setCompanyVerification(data, true)"
-              />
-              <Button
-                v-if="data.isVerified && canVerifyCompany"
-                icon="pi pi-shield"
-                severity="secondary"
-                text
-                rounded
-                v-tooltip.top="'لغو تأیید مدارک'"
-                aria-label="لغو تأیید مدارک شرکت"
-                :loading="processingCompanyId === data.id"
-                @click="setCompanyVerification(data, false)"
-              />
-              <Button
-                v-if="data.status === 'ACTIVE' && canManageCompanyStatus"
-                icon="pi pi-ban"
-                severity="danger"
-                text
-                rounded
-                v-tooltip.top="'غیرفعال‌سازی شرکت'"
-                aria-label="غیرفعال‌سازی شرکت"
-                :loading="processingCompanyId === data.id"
-                @click="changeCompanyStatus(data, 'INACTIVE')"
-              />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+        <template #companyType="{ row }">
+          <Tag :severity="getTypeSeverity(row.type)">{{ getTypeLabel(row.type) }}</Tag>
+        </template>
+        <template #companyStatus="{ row }">
+          <Tag :severity="getStatusSeverity(row.status)">{{ getStatusLabel(row.status) }}</Tag>
+        </template>
+        <template #verification="{ row }">
+          <Tag :severity="row.isVerified ? 'success' : 'warning'">
+            {{ row.isVerified ? 'تأیید شده' : 'در انتظار تأیید' }}
+          </Tag>
+        </template>
+        <template #createdDate="{ row }">
+          {{ formatDate(row.createdAt) }}
+        </template>
+        <template #actions="{ row }">
+          <Button v-if="canEditCompany" icon="pi pi-pencil" severity="info" text rounded v-tooltip.top="'ویرایش شرکت'" aria-label="ویرایش شرکت" @click="openEditDialog(row)" />
+          <Button v-if="row.status === 'PENDING' && canManageCompanyStatus" icon="pi pi-check" severity="success" text rounded v-tooltip.top="'تأیید و فعال‌سازی شرکت'" aria-label="تأیید و فعال‌سازی شرکت" :loading="processingCompanyId === row.id" @click="approveCompany(row)" />
+          <Button v-if="!row.isVerified && canVerifyCompany" icon="pi pi-shield" severity="success" text rounded v-tooltip.top="'تأیید مدارک شرکت'" aria-label="تأیید مدارک شرکت" :loading="processingCompanyId === row.id" @click="setCompanyVerification(row, true)" />
+          <Button v-if="row.isVerified && canVerifyCompany" icon="pi pi-shield" severity="secondary" text rounded v-tooltip.top="'لغو تأیید مدارک'" aria-label="لغو تأیید مدارک شرکت" :loading="processingCompanyId === row.id" @click="setCompanyVerification(row, false)" />
+          <Button v-if="row.status === 'ACTIVE' && canManageCompanyStatus" icon="pi pi-ban" severity="danger" text rounded v-tooltip.top="'غیرفعال‌سازی شرکت'" aria-label="غیرفعال‌سازی شرکت" :loading="processingCompanyId === row.id" @click="changeCompanyStatus(row, 'INACTIVE')" />
+        </template>
+      </SharedDataTable>
 
       <Dialog
         v-model:visible="editDialogVisible"
@@ -332,6 +240,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useCompanyStore } from '@/stores/companies'
@@ -342,6 +251,7 @@ const companyStore = useCompanyStore()
 const auth = useAuthStore()
 
 const companies = ref([])
+const tableRef = ref(null)
 const loading = ref(false)
 const creating = ref(false)
 const errorMessage = ref('')
@@ -380,7 +290,17 @@ const typeOptions = ref([
 
 const companyTypeOptions = computed(() => typeOptions.value.filter((item) => item.value))
 
-const first = computed(() => (pagination.value.page - 1) * pagination.value.limit)
+const tableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
+  { field: 'logo', header: 'لوگو', slot: 'companyLogo' },
+  { field: 'name', header: 'نام شرکت', sortable: true, slot: 'companyName' },
+  { field: 'type', header: 'نوع', slot: 'companyType' },
+  { field: 'email', header: 'ایمیل' },
+  { field: 'phone', header: 'تلفن' },
+  { field: 'status', header: 'وضعیت', slot: 'companyStatus' },
+  { field: 'isVerified', header: 'تأیید', slot: 'verification' },
+  { field: 'createdAt', header: 'تاریخ ایجاد', sortable: true, slot: 'createdDate' },
+]
 const canCreateCompany = computed(() => auth.hasPermission('companies.create'))
 const canEditCompany = computed(() =>
   auth.hasPermission('companies.update') || auth.hasPermission('company_profile.update')
@@ -402,6 +322,7 @@ function debounceSearch() {
 }
 
 function applyFilters() {
+  tableRef.value?.resetPage()
   loadCompanies(1)
 }
 
@@ -452,8 +373,8 @@ function normalizeCompanyResponse(response, page, limit) {
   }
 }
 
-function onPageChange(event) {
-  loadCompanies(event.page + 1, event.rows)
+function onTableRequest({ page, rows }) {
+  loadCompanies(page, rows)
 }
 
 function getEmptyCreateForm() {
@@ -858,4 +779,5 @@ function formatDate(value) {
   .company-management-toolbar :deep(.p-select) { width: 100%; }
   .company-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
+.company-table-name { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
 </style>
