@@ -520,4 +520,84 @@ const toggleFollow = async (companyId) => {
 .category-card:hover { border-color: var(--ds-color-primary); box-shadow: var(--ds-shadow-md); }
 @media (max-width: 640px) { .comp-head { align-items: flex-start; flex-direction: column; padding: 1rem; } .comp-heading-identity { align-items: flex-start; } }
 
+
+/* Public supplier directory — search, filters, company cards and category discovery. */
+.companies-page { background: var(--ds-color-background); color: var(--ds-color-text); }
+.comp-container { width: 100%; max-width: var(--ds-container-max-wide); }
+.comp-head {
+  align-items: center;
+  gap: 1.25rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 7%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.comp-heading-identity { min-width: 0; }
+.comp-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+}
+.comp-heading-identity h1 { color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
+.comp-heading-identity p { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
+.comp-section :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.comp-section :deep(.p-card-body) { padding: clamp(1rem, 2vw, 1.5rem); }
+.comp-section :deep(.p-inputtext),
+.comp-section :deep(.p-select) {
+  min-height: 2.7rem;
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+}
+.comp-verify-filters { gap: .6rem; border-color: var(--ds-color-border); }
+.comp-list-head { align-items: center; }
+.comp-h2 { color: var(--ds-color-text); font-size: var(--ds-font-size-xl); }
+.comp-sort :deep(.p-select) { border-radius: var(--ds-radius-md); }
+.comp-card-grid { gap: clamp(.85rem, 1.5vw, 1.25rem); }
+.comp-category-grid { gap: .85rem; }
+.category-card {
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  transition: border-color var(--ds-transition-fast), background var(--ds-transition-fast), transform var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+}
+.category-card i { color: var(--ds-color-primary); }
+.category-card:hover,
+.category-card:focus-visible {
+  border-color: var(--ds-color-primary);
+  background: var(--ds-color-surface-hover);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+  outline: none;
+}
+.comp-state {
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+}
+.comp-empty-title { color: var(--ds-color-text); }
+.comp-empty-text { color: var(--ds-color-text-muted); line-height: 1.8; }
+.comp-paginator { margin-top: var(--ds-space-5); }
+@media (max-width: 640px) {
+  .comp-head { align-items: flex-start; flex-direction: column; }
+  .comp-heading-identity { align-items: flex-start; }
+  .comp-verify-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .comp-verify-filters :deep(.p-button) { justify-content: center; padding-inline: .45rem; }
+  .comp-list-head { align-items: stretch; flex-direction: column; }
+}
 </style>
