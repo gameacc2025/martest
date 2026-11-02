@@ -757,3 +757,13 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - CI test/build passed at commit f2ee67b (includes the Company subscription component tests). The subsequent homepage commits are newer and require a fresh CI run.
 - Database migration/runtime workflows were still in progress at the last check; no migration or runtime sign-off is claimed for the latest main head.
 - No local tests/builds were run in this connected GitHub editing session.
+## Public account profile — batch 15 (2026-11-02)
+
+- Rebuilt the Website profile into a two-column account workspace: identity summary and navigation on one side, semantic account details on the other; responsive to a single-column mobile layout.
+- Avatar uses the API image when present and an initials fallback when absent, removing the broken placeholder-avatar URL.
+- Access profile types are displayed as Persian labels; email/phone/name/date values come from the existing profile response with explicit empty states.
+- Removed the hard-coded unread notification badge value (0); navigation remains available without displaying an invented count.
+- Replaced the misleading orders/activity heading description with a description matching the actual profile actions and content.
+- Profile/password dialogs now use associated labels/IDs, visible focus treatment and 44px controls. Existing profile update, password change, avatar upload, navigation and logout handlers remain unchanged.
+- Added UserProfile component tests for API-backed identity, avatar fallback, dialog opening and retryable load failure.
+- Latest main needs CI confirmation; no local tests/builds are claimed.
