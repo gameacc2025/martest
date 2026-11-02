@@ -1,10 +1,10 @@
 <template>
   <div class="contact-page">
 
-    <!-- Breadcrumb as page title -->
-    <div class="breadcrumb-wrap">
+    <header class="contact-page-heading">
+      <div><span class="ds-eyebrow"><i class="pi pi-headphones"></i> ارتباط با بازارگاه</span><h1>تماس با ما</h1><p>برای دریافت راهنمایی، پیگیری درخواست یا ارسال پیام با تیم ما در ارتباط باشید.</p></div>
       <Breadcrumb :home="home" :model="items" />
-    </div>
+    </header>
 
     <!-- Two Column Layout -->
     <div class="contact-grid">
@@ -432,5 +432,30 @@ const resetForm = () => {
 @media (max-width: 900px) {
   .contact-page .contact-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+
+.contact-page { color: var(--ds-color-text); }
+.contact-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: var(--ds-space-5);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.contact-page-heading .ds-eyebrow { display: inline-flex; align-items: center; gap: .45rem; font-weight: var(--ds-font-weight-bold); }
+.contact-page-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: var(--ds-font-weight-bold); }
+.contact-page-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
+.contact-page-heading :deep(.p-breadcrumb) { padding: 0; border: 0; background: transparent; }
+.contact-page :deep(.info-icon), .contact-page :deep(.social-link) { background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
+.contact-page :deep(.info-icon i) { color: var(--ds-color-primary); }
+.contact-page :deep(.social-link:hover) { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.contact-page :deep(.card-title-row i) { color: var(--ds-color-primary); }
+@media (max-width: 640px) { .contact-page-heading { align-items: flex-start; flex-direction: column; padding: 1rem; } }
 
 </style>
