@@ -177,4 +177,162 @@ function statusLabel(status) {
 .notification-management tbody tr:hover { background: var(--ds-color-surface-hover); }
 @media (max-width: 640px) { .notification-management .page-header { align-items: stretch; } }
 
+
+/* Notification composer and delivery dashboard — design-system tokens. */
+.notification-management { gap: var(--ds-space-5); }
+.notification-management .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.notification-management .notification-heading-copy { min-width: 0; }
+.notification-management .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin: 0;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.notification-management .page-header h1 {
+  margin: .25rem 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, var(--ds-font-size-2xl));
+}
+.notification-management .muted {
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.8;
+}
+.notification-management .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem .9rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  text-decoration: none;
+}
+.notification-management .back-link:hover { background: var(--ds-color-surface-hover); }
+.notification-management .management-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, .8fr);
+  gap: var(--ds-space-5);
+  align-items: start;
+}
+.notification-management .panel {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.notification-management .panel h2 {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding-bottom: .9rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+}
+.notification-management .panel h2 i { color: var(--ds-color-primary); }
+.notification-management .compose-panel { gap: .7rem; }
+.notification-management .compose-panel label,
+.notification-management .channel-fieldset legend {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.notification-management .field {
+  min-height: 2.75rem;
+  padding: .75rem .85rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text);
+  line-height: 1.8;
+  transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+}
+.notification-management textarea.field { min-height: 9rem; resize: vertical; }
+.notification-management .field:focus {
+  border-color: var(--ds-color-primary);
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+.notification-management .channel-fieldset {
+  display: grid;
+  gap: .8rem;
+  padding: 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.notification-management .channel-fieldset .check {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  color: var(--ds-color-text);
+}
+.notification-management .channel-fieldset input { width: 1rem; height: 1rem; accent-color: var(--ds-color-primary); }
+.notification-management .primary-button,
+.notification-management .secondary-button {
+  min-height: 2.7rem;
+  padding: .7rem 1.1rem;
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+  transition: transform var(--ds-transition-fast), background var(--ds-transition-fast);
+}
+.notification-management .primary-button {
+  background: var(--ds-color-primary);
+  color: var(--ds-color-primary-contrast);
+}
+.notification-management .primary-button:hover:not(:disabled) { background: var(--ds-color-primary-hover); transform: translateY(-1px); }
+.notification-management .secondary-button {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text);
+}
+.notification-management .notice {
+  padding: .8rem 1rem;
+  border: 1px solid;
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.8;
+}
+.notification-management .notice.error {
+  border-color: color-mix(in srgb, var(--ds-color-danger) 30%, transparent);
+  background: var(--ds-color-danger-soft);
+  color: var(--ds-color-danger);
+}
+.notification-management .notice.success {
+  border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent);
+  background: var(--ds-color-success-soft);
+  color: var(--ds-color-success);
+}
+.notification-management .stat-grid { gap: .75rem; }
+.notification-management .stat-grid div {
+  min-height: 6rem;
+  padding: 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.notification-management .stat-grid span { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.notification-management .stat-grid strong { color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, 1.8rem); font-weight: 800; }
+.notification-management .operational-note { border-color: var(--ds-color-border); color: var(--ds-color-text-muted); }
+@media (max-width: 900px) { .notification-management .management-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .notification-management .page-header { align-items: stretch; padding: var(--ds-space-4); }
+  .notification-management .back-link { justify-content: center; }
+  .notification-management .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 </style>
