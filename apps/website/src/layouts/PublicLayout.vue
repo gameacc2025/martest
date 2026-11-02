@@ -159,6 +159,18 @@ function logout() {
     <a class="public-skip-link" href="#public-main">رفتن به محتوای اصلی</a>
     <!-- Header -->
     <header class="public-header">
+      <div class="public-utility-bar">
+        <div class="public-container public-utility-inner">
+          <span class="public-utility-message">
+            <i class="pi pi-building" aria-hidden="true"></i>
+            بازارگاه تخصصی تجهیزات مخابراتی و خرید سازمانی
+          </span>
+          <nav class="public-utility-links" aria-label="دسترسی‌های راهنما">
+            <router-link :to="{ name: 'faq' }">راهنمای کاربران</router-link>
+            <router-link :to="{ name: 'contact' }">ارتباط با ما</router-link>
+          </nav>
+        </div>
+      </div>
       <div class="public-container">
         <div class="public-header-row">
           <!-- Right side: Logo + Navigation -->
@@ -795,6 +807,44 @@ function logout() {
   }
 }
 
+/* Two-tier storefront header: compact utility strip + primary navigation. */
+.public-utility-bar {
+  min-height: 2.25rem;
+  border-bottom: 1px solid color-mix(in srgb, #ffffff 12%, transparent);
+  background: var(--ds-navy);
+  color: var(--ds-on-navy-muted);
+}
+.public-utility-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.25rem;
+}
+.public-utility-message,
+.public-utility-links {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  font-size: .72rem;
+  line-height: 1.5;
+}
+.public-utility-message i { color: var(--ds-brand); }
+.public-utility-links { gap: 1.1rem; }
+.public-utility-links a {
+  color: var(--ds-on-navy);
+  text-decoration: none;
+  transition: color var(--ds-transition-fast);
+}
+.public-utility-links a:hover { color: var(--ds-brand); }
+.public-utility-links a:focus-visible {
+  outline: 2px solid var(--ds-brand);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+@media (max-width: 767px) {
+  .public-utility-bar { display: none; }
+}
 /* Public marketplace shell — shared brand system, Paces-level polish. */
 .public-header {
   background: color-mix(in srgb, var(--ds-color-surface) 94%, transparent);
