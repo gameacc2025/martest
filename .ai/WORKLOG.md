@@ -2448,3 +2448,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added homepage source-contract tests for supplier verification and no-price state.
 - Commits: 462ebf8 subscription workspace; 63b9589 subscription tests; f2ee67b token correction; a82fa86 homepage cards; 2f15bd2 homepage tests.
 - CI test/build passed on f2ee67b; newest homepage commits are awaiting CI. Migration/runtime verification for latest main is not yet complete.
+## Public account profile workspace — 2026-11-02
+
+- Website profile is now a responsive identity/details workspace with avatar initials fallback, Persian access-profile label, semantic detail rows, accessible edit/password dialogs and 44px controls.
+- Removed the nonexistent placeholder-avatar URL and hard-coded zero notification badge; profile menu still links to notifications and addresses.
+- Updated page description to reflect actual profile capabilities; no API, route or auth behavior changed.
+- Added UserProfile tests for identity rendering, fallback avatar, editor dialog and retryable API failure.
+- Commits: fdbff06 profile redesign; ab1ac85 tests; 064f18e copy/unused-state cleanup. CI pending on newest head.
