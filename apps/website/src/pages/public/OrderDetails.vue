@@ -1,9 +1,9 @@
 <template>
   <div class="order-details-page">
     <div class="ds-container ds-page">
-      <header class="mb-6 ds-page-heading">
-        <h1 class="text-2xl font-bold ds-page-heading__title">جزئیات سفارش</h1>
-        <Breadcrumb :home="home" :model="items" class="mt-2" />
+      <header class="orders-page-heading">
+        <div><span class="ds-eyebrow"><i class="pi pi-file-check"></i> پیگیری سفارش</span><h1 class="ds-page-heading__title">جزئیات سفارش</h1><p>اقلام، وضعیت پردازش و اطلاعات سفارش خود را بررسی کنید.</p></div>
+        <Breadcrumb :home="home" :model="items" />
       </header>
 
       <div v-if="loading" class="text-center py-8">
@@ -289,4 +289,28 @@ const goToOrders = () => {
   font-weight: var(--ds-font-weight-bold);
 }
 .order-details-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+
+.order-details-page { color: var(--ds-color-text); }
+.orders-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: var(--ds-space-6);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 7%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.orders-page-heading .ds-eyebrow { display: inline-flex; align-items: center; gap: .45rem; font-weight: var(--ds-font-weight-bold); }
+.orders-page-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: var(--ds-font-weight-bold); }
+.orders-page-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.orders-page-heading :deep(.p-breadcrumb) { padding: 0; border: 0; background: transparent; }
+.order-details-page :deep(.p-card) { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
+.order-details-page :deep(.p-card-title) { color: var(--ds-color-text); font-weight: var(--ds-font-weight-bold); }
+.order-details-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+@media (max-width: 640px) { .orders-page-heading { align-items: flex-start; flex-direction: column; padding: 1rem; } }
+
 </style>
