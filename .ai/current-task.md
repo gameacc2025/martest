@@ -1389,3 +1389,10 @@ Continue the full UI rollout; next focus inquiry detail/response messaging, prod
 Admin Product/Company/Inquiry lists and Company Inquiry list now use shared `WorkspacePageHeading.vue`. A dedicated test suite covers the component's content, optional slots and accessibility heading ID. Existing page behavior is unchanged. Commits: `1a0e4fc`, `15f1e40`, `3c2b4d5`, `541944a`, `cb083f0`, `a34b8e1`.
 
 Continue migrating the remaining list/detail/form surfaces; do not mark the full redesign complete.
+
+
+## Management list coverage — 2026-11-02
+
+Shared heading adoption now covers Admin Categories, Users, Roles, Permissions, Orders, Products, Companies, Inquiries and Company Products/Inquiries (10 management list screens). All existing data and permission behavior remains unchanged. Latest adoption commits: `3a3611a`, `f2e5bd2`, `e8ecb49`, `10e2c67`, `5a3fd61`, `e693b5d`.
+
+Continue to Notifications, detail pages, account/profile pages and public website; this is not completion of the full redesign.
