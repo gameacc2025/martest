@@ -1,10 +1,7 @@
 <template>
   <div class="permission-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <header class="access-management-intro" aria-labelledby="access-management-title">
-  <span class="access-management-icon"><i class="pi pi-key"></i></span>
-  <div><span>سیاست‌های دسترسی</span><h1 id="access-management-title">مدیریت مجوزها</h1><p>فهرست مجوزهای سامانه و کاربرد آن‌ها را مدیریت کنید.</p></div>
-</header>
+    <WorkspacePageHeading eyebrow="سیاست‌های دسترسی" title="مدیریت مجوزها" description="فهرست مجوزهای سامانه و کاربرد آن‌ها را مدیریت کنید." icon="pi pi-key" heading-id="access-management-title" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
@@ -73,6 +70,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { usePermissionStore } from '@/stores/admin/permissions'
 import { useToast } from 'primevue/usetoast'
