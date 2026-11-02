@@ -1430,3 +1430,15 @@ Completed since the previous checkpoint:
 - Added public-shell navigation tests and extended dashboard-header accessibility tests.
 
 Next: continue the Paces-inspired migration through page families (list/table, detail, forms, public product and inquiry flows) with real API-backed data. Preserve existing auth, tenant boundaries, permissions, route names and API contracts. Do not report complete until every routed page family is reviewed and all app tests/builds pass. Tests for the latest commits remain unexecuted in this remote-only session.
+
+
+## Active UI redesign — 2026-11-02 (batch 8)
+
+The project-specific design system is now persisted in `design-system/MASTER.md` plus dashboard/catalogue/inquiry/form overrides, derived from the repository's `ui-ux-pro-max` skill and existing brand tokens.
+
+Newly completed:
+- Shared table actions, pagination and page-heading actions standardized to 44px.
+- Admin/Company product-list actions standardized to 44px.
+- Company inquiry inbox now shows a real retryable error state rather than a false empty state; accessible control names and tests added.
+
+Latest verification checkpoint: CI passed at `2c5b360` before the newest inquiry-list changes. Wait for CI on the latest commit before calling the new batch verified. Continue through remaining public product, inquiry detail, form, admin/company list and account pages. Do not stop at shell/dashboard completion.
