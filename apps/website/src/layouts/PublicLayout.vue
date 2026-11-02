@@ -810,7 +810,7 @@ function logout() {
 /* Two-tier storefront header: compact utility strip + primary navigation. */
 .public-utility-bar {
   min-height: 2.25rem;
-  border-bottom: 1px solid color-mix(in srgb, #ffffff 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ds-on-navy) 12%, transparent);
   background: var(--ds-navy);
   color: var(--ds-on-navy-muted);
 }
