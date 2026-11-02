@@ -103,4 +103,18 @@ defineProps({
 .state-display--success { --state-accent: var(--ds-color-success); --state-soft: var(--ds-color-success-soft); }
 .state-display--warning { --state-accent: var(--ds-color-warning); --state-soft: var(--ds-color-warning-soft); }
 .state-display--danger  { --state-accent: var(--ds-color-danger);  --state-soft: var(--ds-color-danger-soft); }
+
+.state-display {
+  max-width: 560px;
+  margin-inline: auto;
+  border-radius: var(--ds-radius-xl);
+}
+.state-display-title { color: var(--ds-color-text); }
+.state-display-desc {
+  max-width: 52ch;
+  color: var(--ds-color-text-muted);
+  line-height: var(--ds-line-height-relaxed);
+}
+.state-display-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--ds-space-2); }
+
 </style>
