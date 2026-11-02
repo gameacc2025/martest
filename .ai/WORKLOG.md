@@ -2337,3 +2337,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Shared workspace heading adopted in Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us.
 - Breadcrumbs and actions preserved via named slot; no data/filter/cart/checkout/address/contact API behavior changed.
 - Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.
+
+
+## UI implementation — shared shell batch 7 (2026-11-02)
+
+- Confirmed the remote repository currently contains only `main`; there are no open PRs to merge. No new branch created.
+- Public website shell: keyboard skip link, focusable main landmark, accessible mobile-menu state, automatic close on route/search navigation, bounded mobile-menu scrolling and reduced-motion support.
+- Shared dashboard header/sidebar: descriptive control labels, 44px interactive targets, named sidebar navigation landmark.
+- Added PublicLayout tests for skip-link/main target and mobile navigation state/route-close behavior; extended DashboardHeader tests for accessible control labels.
+- Preserved all auth, PKCE, API, route and permission logic.
+- Commits: `7655d32`, `ca9591d`, `f531a4b`, `4b53d8f`, `3bb6ab5`.
+- Tests/builds have not yet been run in the remote-only editing environment; verification remains pending.
