@@ -1478,3 +1478,10 @@ Next: continue page-family migrations (companies/users/categories/inquiries and 
 Admin Companies, Users and Categories now use the shared responsive DataTable. API/store usage, permission gates, CRUD and verification actions, sort state and pagination remain connected to their existing sources. User sort is supported by the shared table's initial-sort inputs and lazy request event.
 
 Continue with inquiries, roles/permissions, orders, product forms/details, company-side users/reports/inquiries, and public website page families. Do not create branches; only `main`.
+
+
+## UI redesign checkpoint — inquiry lists (2026-11-02)
+
+Admin and Company inquiry lists are now on the shared responsive DataTable. Server search/filter/sort/pagination and existing inquiry API actions are preserved. Company sent/received/all tabs and deadline urgency remain. A build issue caused by an orphaned conditional branch was found in CI and fixed; rerun is pending.
+
+Next: continue Admin roles/permissions/orders and Company inquiry detail/create/product forms/reports, then Website catalog/product detail/checkout/account flows. Only `main`; no branch creation.
