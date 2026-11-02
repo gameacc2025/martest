@@ -307,7 +307,7 @@ function formatPrice(price) {
     </div>
 
     <!-- Error state -->
-    <div v-else-if="errored" class="state-block">
+    <div v-else-if="errored" class="state-block" role="alert">
       <i class="pi pi-exclamation-triangle state-icon" style="color: var(--p-red-500)"></i>
       <h3>خطا در دریافت اطلاعات</h3>
       <p>دریافت جزئیات استعلام با مشکل مواجه شد.</p>
@@ -428,6 +428,7 @@ function formatPrice(price) {
                   <Button
                     v-if="isMyResponse(response) && canEditResponse(response)"
                     icon="pi pi-times" text rounded size="small" severity="danger"
+                    aria-label="حذف فایل پیوست"
                     @click="deleteAttachment(response, att)"
                   />
                 </div>
@@ -471,26 +472,27 @@ function formatPrice(price) {
       v-model:visible="showResponseDialog"
       :header="editingResponseId ? 'ویرایش پاسخ' : 'ارسال پاسخ'"
       :modal="true"
-      :style="{ width: '700px' }"
+      :style="{ width: '700px', maxWidth: '96vw' }"
+      :breakpoints="{ '960px': '92vw', '640px': '96vw' }"
     >
       <div v-for="(item, index) in responseItems" :key="index" class="response-item-form">
         <h4 class="mb-2">{{ item.productTitle }}</h4>
         <div class="grid grid-cols-2 gap-4">
           <div class="field">
-            <label>قیمت (ریال)</label>
-            <InputNumber v-model="item.price" :min="0" class="w-full" />
+            <label :for="'response-price-' + index">قیمت (ریال)</label>
+            <InputNumber :inputId="'response-price-' + index" v-model="item.price" :min="0" class="w-full" />
           </div>
           <div class="field">
-            <label>تعداد موجود</label>
-            <InputNumber v-model="item.availableQuantity" :min="0" class="w-full" />
+            <label :for="'response-quantity-' + index">تعداد موجود</label>
+            <InputNumber :inputId="'response-quantity-' + index" v-model="item.availableQuantity" :min="0" class="w-full" />
           </div>
           <div class="field">
-            <label>زمان تحویل</label>
-            <InputText v-model="item.deliveryTime" placeholder="مثلاً ۳ روز کاری" class="w-full" />
+            <label :for="'response-delivery-' + index">زمان تحویل</label>
+            <InputText :id="'response-delivery-' + index" v-model="item.deliveryTime" placeholder="مثلاً ۳ روز کاری" class="w-full" />
           </div>
           <div class="field">
-            <label>توضیحات</label>
-            <InputText v-model="item.description" placeholder="توضیحات پاسخ" class="w-full" />
+            <label :for="'response-description-' + index">توضیحات</label>
+            <InputText :id="'response-description-' + index" v-model="item.description" placeholder="توضیحات پاسخ" class="w-full" />
           </div>
         </div>
       </div>
@@ -833,6 +835,24 @@ function formatPrice(price) {
 }
 .inquiry-detail-page .response-header { padding-bottom: .75rem; border-bottom: 1px solid var(--ds-color-border); }
 .inquiry-detail-page .info-grid { gap: 1.1rem; }
+.inquiry-detail-page .page-header-actions :deep(.p-button),
+.inquiry-detail-page .response-actions :deep(.p-button),
+.inquiry-detail-page .state-block :deep(.p-button) {
+  min-height: 2.75rem;
+}
+.inquiry-detail-page .inquiry-detail-title-row > :deep(.p-button) {
+  min-width: 2.75rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  height: 2.75rem;
+}
+.inquiry-detail-page :deep(.p-button):focus-visible,
+.inquiry-detail-page a:focus-visible,
+.inquiry-detail-page input:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+
 .inquiry-detail-page .info-label { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
 .inquiry-detail-page .info-value { color: var(--ds-color-text); line-height: 1.7; }
 .inquiry-detail-page .state-block {
