@@ -24,6 +24,8 @@ import DashboardBreadcrumb from './DashboardBreadcrumb.vue'
 const props = defineProps({
   // Whether the desktop sidebar is collapsed (affects the toggle icon).
   collapsed: { type: Boolean, default: false },
+  // Whether the mobile navigation drawer is currently open.
+  mobileOpen: { type: Boolean, default: false },
   // Optional live notification count for the bell badge.
   notificationCount: { type: Number, default: 0 },
   // User object from auth store.
@@ -109,7 +111,9 @@ function logout() {
       <button
         type="button"
         class="dash-header-icon-btn dash-header-desktop-only"
-        aria-label="جمع کردن منو"
+        :aria-label="collapsed ? 'باز کردن منو' : 'جمع کردن منو'"
+        :aria-expanded="!collapsed"
+        aria-controls="dashboard-navigation"
         @click="emit('toggle-sidebar')"
       >
         <i class="pi" :class="collapsed ? 'pi-angle-double-right' : 'pi-bars'"></i>
@@ -118,7 +122,9 @@ function logout() {
       <button
         type="button"
         class="dash-header-icon-btn dash-header-mobile-only"
-        aria-label="باز کردن منو"
+        :aria-label="mobileOpen ? 'بستن منو' : 'باز کردن منو'"
+        :aria-expanded="mobileOpen"
+        aria-controls="dashboard-navigation"
         @click="emit('toggle-mobile')"
       >
         <i class="pi pi-bars"></i>
@@ -608,6 +614,33 @@ function logout() {
 .dash-header-search-input:focus {
   border-color: var(--ds-color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+
+
+/* Shared shell controls meet touch-target and keyboard-focus standards. */
+.dash-header-icon-btn {
+  min-width: var(--ds-touch-target);
+  min-height: var(--ds-touch-target);
+}
+.dash-header-bell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ds-touch-target);
+  min-height: var(--ds-touch-target);
+}
+.dash-header-user { min-height: var(--ds-touch-target); }
+.dash-header-search-input { min-height: var(--ds-touch-target); }
+.dash-header-icon-btn:focus-visible,
+.dash-header-bell:focus-visible,
+.dash-header-user:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-header *,
+  .dash-header *::before,
+  .dash-header *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
 
 </style>
