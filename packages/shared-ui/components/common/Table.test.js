@@ -11,7 +11,13 @@ const PrimeTableStub = {
   template: '<div class="prime-table-stub" :data-loading="String(loading)"><slot /><slot name="empty" /></div>',
 }
 
-const ColumnStub = {\n  name: 'Column',\n  props: ['field', 'header', 'sortable'],\n  template: '<div class="column-stub" :data-field="field" :data-header="header" :data-sortable="String(sortable)" />',\n}\n\nfunction mountTable(props = {}) {
+const ColumnStub = {
+  name: 'Column',
+  props: ['field', 'header', 'sortable'],
+  template: '<div class="column-stub" :data-field="field" :data-header="header" :data-sortable="String(sortable)" />',
+}
+
+function mountTable(props = {}) {
   return mount(Table, {
     props: {
       columns: [{ key: 'name', label: 'نام' }],
@@ -53,6 +59,8 @@ describe('shared Table', () => {
       ],
     })
 
-    expect(wrapper.findAll('.column-stub')).toHaveLength(2)\n    expect(wrapper.findAll('.column-stub')[0].attributes('data-field')).toBe('name')\n    expect(wrapper.findAll('.column-stub')[1].attributes('data-header')).toBe('وضعیت')
+    expect(wrapper.findAll('.column-stub')).toHaveLength(2)
+    expect(wrapper.findAll('.column-stub')[0].attributes('data-field')).toBe('name')
+    expect(wrapper.findAll('.column-stub')[1].attributes('data-header')).toBe('وضعیت')
   })
 })
