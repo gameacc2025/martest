@@ -303,3 +303,12 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Admin, Company and Website notification-preference screens now share a settings identity, responsive table and save-action layout; the SMS availability state remains informational and is not made interactive.
 - Commits: 156d029 Login; d76e548 initial Register visual pass; 884de96 accessible account-type selector; e77f07a, 5cf6289, c44bb78 notification preferences.
 - No local test/build execution or browser testing was performed.
+
+
+## UI redesign — public company and commerce pages batch 14 (2026-11-02)
+
+- Public Companies directory now has a network/supplier context header, improved search/filter surface, verification filter strip and category cards.
+- Shopping Cart, Checkout and Wishlist now use a consistent contextual commerce header with breadcrumbs and explanatory copy; empty states and PrimeVue cards have responsive, token-based surfaces.
+- Checkout payment-method selection and cart/wishlist item behavior were not changed. These screens remain presentation work over their existing route/state; no new payment/cart backend behavior is claimed.
+- Commits: cc4842e Companies; 91f35bd Shopping Cart; a4c41fd Checkout; 32e88c0 Wishlist.
+- No local test/build/browser execution; verification remains outstanding.
