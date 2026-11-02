@@ -1,11 +1,11 @@
 <template>
   <div class="order-list-page">
     <!-- Card with Toolbar -->
-    <div class="card">
+    <div class="card ds-panel">
       <div class="card-head">
         <h1 class="card-head-title"><i class="pi pi-shopping-cart"></i> مدیریت سفارشات</h1>
       </div>
-      <Toolbar>
+      <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
@@ -192,4 +192,24 @@ onMounted(() => {
 .status-filter {
   width: 150px;
 }
+
+.order-list-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.order-list-page .card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.order-list-page :deep(.p-toolbar) {
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.order-list-page :deep(.p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+
 </style>
