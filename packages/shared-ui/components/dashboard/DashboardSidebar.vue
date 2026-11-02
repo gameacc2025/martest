@@ -100,6 +100,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 <template>
   <aside
     class="dash-sidebar"
+    aria-label="ناوبری پنل"
     :class="{
       'dash-sidebar--collapsed': collapsed,
       'dash-sidebar--mobile-open': mobileOpen,
@@ -546,8 +547,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   white-space: nowrap;
 }
 .dash-sidebar-collapse-btn {
-  width: 2.1rem;
-  height: 2.1rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: 1px solid var(--ds-sidebar-border);
   border-radius: var(--ds-radius-md);
 }
