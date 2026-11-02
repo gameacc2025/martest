@@ -675,16 +675,22 @@ async function removeExistingDocument(docId) {
 
 <template>
   <div class="product-form-page">
-    <div class="page-header">
-      <div>
-        <Button icon="pi pi-arrow-right" text @click="router.push({ name: 'admin-products' })" />
-        <h1>{{ isEditMode ? 'ویرایش محصول' : 'ایجاد محصول جدید' }}</h1>
+    <header class="page-header product-editor-heading">
+      <div class="product-editor-heading-copy">
+        <div class="product-editor-eyebrow"><i class="pi pi-box"></i> مدیریت کاتالوگ</div>
+        <div class="product-editor-title-row">
+          <Button icon="pi pi-arrow-right" text rounded aria-label="بازگشت به فهرست محصولات" @click="router.push({ name: 'admin-products' })" />
+          <div>
+            <h1>{{ isEditMode ? 'ویرایش محصول' : 'ایجاد محصول جدید' }}</h1>
+            <p>{{ isEditMode ? 'اطلاعات و مشخصات ثبت‌شده محصول را بازبینی و اصلاح کنید.' : 'اطلاعات پایه، دسته‌بندی و مشخصات فنی محصول را ثبت کنید.' }}</p>
+          </div>
+        </div>
       </div>
       <div class="page-header-actions">
         <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="router.push({ name: 'admin-products' })" />
-        <Button label="ذخیره" icon="pi pi-check" :loading="saving" @click="saveProduct" />
+        <Button label="ذخیره محصول" icon="pi pi-check" :loading="saving" @click="saveProduct" />
       </div>
-    </div>
+    </header>
 
     <div v-if="pageLoading" class="text-center py-8">
       <ProgressSpinner />
@@ -1221,4 +1227,80 @@ async function removeExistingDocument(docId) {
   .product-form-page .page-header-actions { flex-wrap: wrap; }
 }
 
+/* Product editor hierarchy: guided sections with a clear save action. */
+.product-editor-heading { align-items: center; }
+.product-editor-heading-copy { min-width: 0; }
+.product-editor-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-bottom: .6rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-editor-title-row { display: flex; align-items: center; gap: .5rem; }
+.product-editor-title-row h1 {
+  display: block;
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, var(--ds-font-size-2xl));
+}
+.product-editor-title-row p {
+  margin: .35rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.7;
+}
+.product-form-page .form-section {
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+.product-form-page .form-section h2 {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding-bottom: .85rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  font-size: var(--ds-font-size-lg);
+}
+.product-form-page .field { min-width: 0; margin-bottom: var(--ds-space-4); }
+.product-form-page .field:last-child { margin-bottom: 0; }
+.product-form-page :deep(.p-inputtext),
+.product-form-page :deep(.p-textarea),
+.product-form-page :deep(.p-select),
+.product-form-page :deep(.p-inputnumber),
+.product-form-page :deep(.p-multiselect),
+.product-form-page :deep(.p-datepicker) { width: 100%; }
+.product-form-page :deep(.p-inputtext),
+.product-form-page :deep(.p-textarea),
+.product-form-page :deep(.p-select),
+.product-form-page :deep(.p-inputnumber-input),
+.product-form-page :deep(.p-multiselect),
+.product-form-page :deep(.p-datepicker-input) {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+}
+.product-form-page :deep(.p-inputtext:focus),
+.product-form-page :deep(.p-textarea:focus) {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+.product-form-page .price-tier-row,
+.product-form-page .document-item {
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  border-radius: var(--ds-radius-lg);
+}
+.product-form-page .empty-section {
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+@media (max-width: 640px) {
+  .product-editor-heading { align-items: stretch; flex-direction: column; }
+  .product-editor-title-row { align-items: flex-start; }
+  .product-editor-title-row p { max-width: 100%; }
+  .product-editor-heading .page-header-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
 </style>
