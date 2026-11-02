@@ -65,4 +65,6 @@ defineProps({
     width: 100%;
   }
 }
+.form-actions--sticky { box-shadow: 0 -8px 20px color-mix(in srgb, var(--ds-color-text) 5%, transparent); }
+.form-actions :deep(.p-button) { min-height: var(--ds-touch-target); }
 </style>
