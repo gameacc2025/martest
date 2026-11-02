@@ -2256,3 +2256,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Public InquirySubscription aligned with the Company subscription UI, with the same payment/quota behavior.
 - No API, route, authorization, tenant scope, sealed inquiry privacy or payment semantics changed.
 - Commits: `abdefd7`, `bdf55c3`, `fca4b8d`, `f61e2e5`, `d31d278`, `63724e4`.
+
+
+## UI redesign — account and accessibility pass (2026-11-02)
+
+- Added skip-to-main-content keyboard navigation in Admin and Company layouts.
+- Refined public address book, customer inquiry center, company directory, contact page and public inquiry subscription.
+- Audited auth, profile, product editor, inquiry creation, reports, category, company profile, FAQ, terms, search and product detail pages; retained existing design-system work where already adequate.
+- No route, API, authorization, inquiry privacy, tenant or payment behavior changed.
+- Commits: `63724e4`, `abdefd7`, `bdf55c3`, `fca4b8d`, `f61e2e5`, `d31d278`, `bda68aa`, `1ed455e`.
