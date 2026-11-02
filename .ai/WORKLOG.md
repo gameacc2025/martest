@@ -2053,3 +2053,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added role-scoped, non-interactive planned module labels to the shared dashboard sidebar for CRM, finance, HR, procurement, inventory/logistics, support, projects/operations, BI, and integrations/security. They deliberately have no route/action. Added a Vitest regression test for this navigation contract.
 - Future module items are planning labels only; active menu items still require real routes and permissions.
 - Local tests/builds are still not executed from this connected repository editing environment.
+
+
+## 2026-11-02 — PACES-RTL-UI-REDESIGN — execution batch 4
+
+- Audited the 69 Vue page files in Admin, Company and Website. All active page families are either migrated in the previous batches or already built on the shared design system; remaining unmodified pages are mostly existing DS-native public content/product pages and thin loading/not-found wrappers.
+- Refined dashboard panels, KPI cards, quick actions, inquiry pipeline, welcome banner and system status; refined shared Dialog, PageHeader, ReviewCard, FormAlert, FormActions and Input.
+- Replaced legacy Website commerce hover colors with DS tokens so no foreign accent palette remains in those views.
+- Added DashboardSidebar rendering test verifying planned module labels are spans with aria-disabled=true and never anchors/buttons.
+- Full local pnpm test/build verification remains outstanding.
