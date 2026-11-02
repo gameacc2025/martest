@@ -402,4 +402,18 @@ const logout = async () => {
 .order-item:hover {
   background-color: #f8f9fa;
 }
+
+.user-profile-page { color: var(--ds-color-text); }
+.user-profile-page .mb-6 {
+  padding-bottom: var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-color-border);
+}
+.user-profile-page .mb-6 h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
+.user-profile-page :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.user-profile-page .order-item:hover { background: var(--ds-color-surface-hover); }
+
 </style>
