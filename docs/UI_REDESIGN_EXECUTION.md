@@ -189,3 +189,26 @@ Commits: Admin category/company/user/role/permission headers c350236, f7110ca, 1
 - Database Migration Validation: **passed**.
 - Runtime Validation: **failed** in the existing Playwright smoke suite. Compose configuration, service startup/health, and database migrations all passed; the panel smoke tests then timed out waiting for #app in Website/Company/Admin, and the STAFF auth-flow test also failed. This is recorded as an unresolved runtime-check failure; no root cause has been established and it is not being treated as a visual redesign acceptance test.
 - No local browser testing was performed. The successful build proves the current Vue/SCSS source compiles; it does not prove runtime rendering or visual correctness.
+
+
+## Structural redesign — batch 6 (2026-11-02)
+
+This batch replaces the previous dashboard-only heading treatment with an actual workspace composition change in both authenticated dashboards.
+
+### Admin dashboard
+- Replaced the plain page title row with a full-width welcome/command banner using the Telecom navy/teal brand tokens, explanatory context, and primary product-create plus inquiry-management actions.
+- Reorganized the operational area into a three-column workspace: quick actions, platform metrics visualization, and service health. At tablet/mobile widths it collapses to two columns and then a single column.
+- Kept all existing API-backed KPI values, stats/error/loading states, approval queue, entity lists, product approve/reject handlers, route names and permissions unchanged.
+
+### Company dashboard
+- Replaced the plain title row with a company-context welcome banner using the authenticated company identity/status and verified state already present in the auth store.
+- Combined the inquiry pipeline and quick actions into a two-column operational workspace; removed the duplicated standalone quick-actions panel.
+- Preserved existing company-scoped stats, products, inquiry deadlines, activity feed, score/rank fallback behavior, actions, routes and API calls.
+
+### Commits
+- `171ca0a` — structurally redesign Admin dashboard workspace
+- `82f6897` — redesign Company dashboard workspace
+
+### Verification
+- Source changes committed directly to `main` through the connected GitHub repository.
+- Local test/build execution is not available in this connected editing step; these commits are not marked as locally verified. Continue with component coverage and CI checks before sign-off.
