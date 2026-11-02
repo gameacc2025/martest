@@ -632,3 +632,27 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - GitHub Actions CI passed at commit `2c5b360` before the subsequent inquiry-inbox changes. Its `test-and-build` job passed frontend/shared tests, backend tests and builds for all frontend apps.
 - Latest inquiry changes have new tests but require the latest CI run to complete before they can be marked verified.
 - Runtime Validation and Database Migration Validation were cancelled by newer pushes during this rapid commit sequence; they are not considered passed.
+
+
+## Product editor and directory refinement — batch 9 (2026-11-02)
+
+### Product editors (Admin + Company)
+- Connected visible labels to static product fields, classification selects, dynamic technical-spec controls and price-tier fields using stable input IDs.
+- Added accessible names to custom-spec value/removal controls and product-image management actions.
+- Increased save/section/delete actions to usable touch sizes, changed image action overlays to a two-column control grid, and improved narrow-screen field/price-tier stacking.
+- Added visible focus treatment for keyboard users.
+- Existing product payloads, field names, validation, uploads, pricing semantics, permission-gated fields and API operations remain unchanged.
+
+### Identity and company directories
+- Admin and Company user directories now expose descriptive names for search, filters and icon-only row actions.
+- Admin company directory search/status/type filters now have accessible names.
+- Increased directory table action and paginator targets to 44px.
+- Preserved role assignment/deactivation restrictions, self-protection, company approval/verification permissions and server-side pagination.
+
+### Public catalogue
+- Search icon action and paginator have accessible labels.
+- Added visible focus outlines to keyboard-focused product cards and filters; filter/action and paginator targets are sized for touch.
+- Product visibility, route navigation, filter query and API behavior are unchanged.
+
+### Verification
+- These changes are committed directly to `main`. Await the latest GitHub Actions CI run for frontend/shared tests and builds; no local build is available in this connected editing session.
