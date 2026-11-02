@@ -858,3 +858,7 @@ Next work: compare API_DOCUMENTATION.md against registered routes and Swagger/Op
 
 - Public product catalogue/detail response schemas must not expose `createdByUserId`, `editsSinceApproval`, `deletedAt`, or `statusHistory`. Public detail may be returned to anonymous/customer callers; authorized COMPANY/STAFF detail may use the management projection. `/products/my-products` is a management projection with company ownership enforced by the service.
 - Keep public catalogue query filters separate from management product filters; generated `/docs/json` integration tests verify the effective OpenAPI contract.
+
+
+## Future enterprise platform scope (2026-11-02)
+The long-term product vision is broader than the currently implemented marketplace. Planned domains include CRM and customer lifecycle, finance/accounting, HR, procurement, inventory, logistics, support/ticketing, projects/workflows, document and asset management, BI/reporting, security/compliance, and integrations. Their purpose, menu taxonomy, architecture rules, phased roadmap, and activation checklist are documented in `docs/FUTURE_MODULES_BLUEPRINT.md`. Treat these as planned—not implemented. Never create fake operational routes/APIs or imply readiness solely because a menu item is documented. Activate a module only after its real backend, permissions/tenant isolation, tests, audit requirements, UI, and documentation are complete.
