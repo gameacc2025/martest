@@ -127,3 +127,15 @@ Recent commits include:
 Additional commits: product editors 745988d, 1d95149; subscription/settings c90da4c, c4d81f0, bc53c6f; profile/inbox/preferences b8caf91, e6ce2a5, 401a8a7, e597172, 50264a0, 68ce9be, 9f3c909, 692fa9b; auth/security 017ed2f, f24ddc4, b344ca6, c19d7ee, 5dfdca7, 1b9578f, ff339e3; customer account 8677b63, a1f37fa, 99c1308; shared components f02b82c, 16c10d1, a2b1ebd, d8000f2, 89bb83d, fd88bfb.
 
 A markup review caught two commerce page header closing tags after the initial heading conversion; both were corrected in c70fce1 and a0a734a. Build/test verification remains pending.
+
+
+## Additional migration batch 3
+
+- Company personal products and company products pages aligned to the shared table and page-heading system.
+- Admin system settings and the legacy Admin order list received consistent workspace/table surfaces. The order route remains unchanged; its backend availability must be validated separately before exposing it in navigation.
+- Website contact, inquiry-subscription, and legacy products catalogue pages received the shared visual hierarchy.
+- Admin/Company root loading gates now use accessible status semantics and brand tokens.
+- Shared auth handoff, dashboard footer/breadcrumb, and feedback-state components were refined.
+- Added disabled, explicitly labelled planned-module entries to the shared Admin/Company sidebar for CRM, finance, HR, procurement, inventory/logistics, support, projects/operations, BI, and integrations/security. These entries have no route or click action and are permission/role scoped. Added a regression test for the roadmap menu contract.
+
+Recent commits: Company product views c3d2339/9946e62; Admin order/settings ca4b483/4f5ce4a; Company dashboard donut fde356c; Website contact/subscription/legacy catalogue 1b7bf37/c0f4d52/84bf494; shared auth/shell/feedback 4962549/eff3cf6/bb1bfb9/7f698b6/78a307d; planned menu 39f42e0/fe74038/025c5bd; app loading gates f67b924/63f9333.
