@@ -1229,3 +1229,15 @@ Completed:
 Commits: `ef00252`, `6cf7465`, `d9cd191`, `e77f07a`, `5cf6289`, `c44bb78`, `1a91159`, `5e40f45`, `b9f25de`, `3df74f0`.
 
 Continue the rest of the page inventory and shared component audit. No local tests/builds have been executed; verify with CI before sign-off.
+
+
+## UI redesign — batch 13 checkpoint (2026-11-02)
+
+Completed:
+- Website login/register visual refresh.
+- Registration customer/company selector now supports keyboard selection with accessible radio semantics, preserving the original values and submission flow.
+- Admin/Company/Website notification preference page consistency and responsive layout.
+
+Commits: 156d029, d76e548, 884de96, e77f07a, 5cf6289, c44bb78.
+
+Continue through remaining public pages, admin/company forms/details and shared shell/components. Tests/builds are still outstanding; do not claim completion.
