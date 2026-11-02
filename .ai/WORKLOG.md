@@ -2062,3 +2062,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Replaced legacy Website commerce hover colors with DS tokens so no foreign accent palette remains in those views.
 - Added DashboardSidebar rendering test verifying planned module labels are spans with aria-disabled=true and never anchors/buttons.
 - Full local pnpm test/build verification remains outstanding.
+
+
+## 2026-11-02 — PACES CATALOG / ROADMAP NAVIGATION UPDATE
+
+- Added the remaining planned enterprise menu domains: Calendar/Tasks, Documents/Assets, Organization Communications/Campaigns, Knowledge Center/Content, and Audit/Compliance. All are disabled text-only entries without routes/actions and restricted by role.
+- Expanded the menu config test to cover the full planned domain taxonomy.
+- Expanded the Paces reference audit using the official product catalog. The preview index remains unavailable to direct retrieval (cache miss); the audit distinguishes pages directly inspected from categories listed in the catalog.
+- CI checkpoint at 6a7cb3e: test-and-build success; database migration validation success; runtime compose/browser validation still running. Newer menu commits need fresh CI confirmation.
