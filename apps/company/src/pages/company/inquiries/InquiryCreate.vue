@@ -25,6 +25,15 @@ const toast = useToast()
 
 const STEPS = { BASIC: '1', PRODUCTS: '2', SETTINGS: '3', REVIEW: '4', SUBMIT: '5' }
 const activeStep = ref(STEPS.BASIC)
+const stepLabels = {
+  [STEPS.BASIC]: 'اطلاعات پایه',
+  [STEPS.PRODUCTS]: 'انتخاب اقلام',
+  [STEPS.SETTINGS]: 'تنظیمات استعلام',
+  [STEPS.REVIEW]: 'بررسی نهایی',
+  [STEPS.SUBMIT]: 'ثبت درخواست',
+}
+const activeStepLabel = computed(() => stepLabels[activeStep.value] || stepLabels[STEPS.BASIC])
+const stepProgress = computed(() => (Number(activeStep.value) / Object.keys(STEPS).length) * 100)
 const DRAFT_KEY = 'company-inquiry-create-draft'
 
 const form = reactive({
@@ -229,6 +238,29 @@ async function submitInquiry() {
         <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="router.push({ name: 'company-inquiries' })" />
       </div>
     </header>
+
+    <section class="inquiry-progress-card" aria-label="پیشرفت ایجاد استعلام">
+      <div class="inquiry-progress-copy">
+        <div>
+          <span>مرحله {{ activeStep }} از {{ Object.keys(STEPS).length }}</span>
+          <strong>{{ activeStepLabel }}</strong>
+        </div>
+        <span class="inquiry-progress-item-count">
+          <i class="pi pi-box"></i>
+          {{ form.items.length.toLocaleString('fa-IR') }} قلم انتخاب شده
+        </span>
+      </div>
+      <div
+        class="inquiry-progress-track"
+        role="progressbar"
+        :aria-valuenow="stepProgress"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        :aria-label="`پیشرفت ${Math.round(stepProgress)} درصد`"
+      >
+        <span :style="{ width: stepProgress + '%' }"></span>
+      </div>
+    </section>
 
     <Stepper v-model:value="activeStep" class="inquiry-stepper" linear>
       <StepList>
@@ -485,6 +517,53 @@ async function submitInquiry() {
 }
 
 /* Guided inquiry authoring: explicit context and readable multi-step progress. */
+.inquiry-progress-card {
+  display: grid;
+  gap: .8rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-progress-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.inquiry-progress-copy > div { display: grid; gap: .15rem; }
+.inquiry-progress-copy > div > span {
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.inquiry-progress-copy strong {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+}
+.inquiry-progress-item-count {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  white-space: nowrap;
+}
+.inquiry-progress-item-count i { color: var(--ds-color-primary); }
+.inquiry-progress-track {
+  height: .4rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ds-color-surface-alt);
+}
+.inquiry-progress-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ds-color-primary);
+  transition: width var(--ds-transition);
+}
 .inquiry-create-page .page-header {
   align-items: center;
   gap: 1.25rem;
@@ -561,6 +640,8 @@ async function submitInquiry() {
 .inquiry-create-page .review-block { background: var(--ds-color-surface); }
 .inquiry-create-page .review-row { border-color: var(--ds-color-border); }
 @media (max-width: 640px) {
+  .inquiry-progress-card { padding: .9rem 1rem; }
+  .inquiry-progress-copy { align-items: flex-start; flex-direction: column; gap: .45rem; }
   .inquiry-create-page .page-header { align-items: stretch; }
   .inquiry-create-page .page-header-title { align-items: flex-start; }
   .inquiry-create-page .page-header-actions { display: grid; grid-template-columns: 1fr 1fr; }
