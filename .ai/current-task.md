@@ -1112,3 +1112,7 @@ PR #80 squash-merged into `main` at `cdbbf4c49e54a537a3a5a15a1119702e6d74fb5f`.
 - Integrated the missing public-vs-management OpenAPI response projections from `docs/openapi-public-product-projections-step-16l` without replacing the newer main-branch file versions.
 - Added public product privacy schema, distinct public/management query contracts, detail `oneOf` projection, schema regression tests and generated `/docs/json` integration test.
 - Added inquiry-list pagination/privacy schema coverage recovered from the adjacent abandoned OpenAPI response branch.
+
+
+## Product vision clarification — 2026-11-02
+The UI reference redesign must account for the full long-term enterprise platform vision, not only currently active marketplace features. Include future CRM, HR, finance/accounting, procurement, inventory/logistics, support, projects/workflows, documents/assets, BI, integrations, security and compliance in the information architecture and design-system planning. Their purpose and phased rollout are documented in `docs/FUTURE_MODULES_BLUEPRINT.md`. Keep planned modules visibly distinguished from active features; do not invent routes, APIs, or working controls for modules that are not implemented.
