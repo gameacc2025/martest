@@ -1,6 +1,7 @@
 <template>
   <div class="user-list-page ds-stack">
     <!-- Card with Toolbar -->
+    <header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت کاربران</h1><p class="ds-page-heading__description">حساب‌های کاربری و وضعیت دسترسی آن‌ها را مدیریت کنید.</p></div></header>
     <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
@@ -836,6 +837,7 @@ async function deleteUser() {
 
 /* Shared Paces-style list hierarchy; query, pagination and permissions unchanged. */
 .user-list-page { gap: var(--ds-space-5); }
+.user-list-page .ds-page-heading { margin-bottom: 0; }
 .user-list-page .card {
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
