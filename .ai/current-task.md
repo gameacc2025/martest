@@ -1204,3 +1204,14 @@ Completed:
 Relevant commits: `48ce7a6`, `012f0ea`, `ca1cec4`, `e37de59`, `038a467`, `f763480`, `f9a2f47`, `0f64a5c`, `b933ca0`, `efac6fc`.
 
 Still active: complete remaining page families (product forms/details, inquiry details/create/subscription, notification inbox/preferences, user/company/category/role/permission/settings pages, reports/orders, public home/auth/company/category/cart/checkout and error states), shared component audit, and test/build verification. Current main has no reported CI status checks; no local test/build execution is claimed.
+
+
+## UI redesign — batch 11 checkpoint (2026-11-02)
+
+Completed the next page family:
+- Admin and Company inquiry creation: contextual heading, accessible back action, stepper visual hierarchy, mobile progress behavior and token-driven form controls.
+- Website homepage: hero/search refinement, product/category card hierarchy, image fit and responsive product/stat grids.
+
+Commits: `ec8f735`, `14361df`, `5da81bd`.
+
+Continue with inquiry details/subscriptions, notifications/preferences, user/company/category/role/permission/settings pages, orders, public auth/cart/checkout/company/category pages, and shared components. No local tests/builds have been run; do not claim verified or complete.
