@@ -607,3 +607,28 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - `f531a4b` shared dashboard header controls
 - `4b53d8f` shared dashboard sidebar navigation
 - `3bb6ab5` dashboard header tests
+
+
+## Design system and inquiry inbox — batch 8 (2026-11-02)
+
+### ui-ux-pro-max skill application
+- Read the repository skill and its Vue stack guidance; used the skill's product/style/color/typography/UX datasets to derive the B2B SaaS + marketplace direction.
+- Selected a restrained Minimalism/Flat/Soft-UI hybrid with data-dense operational dashboards, trust cues on public surfaces, and blur only as optional sticky-shell enhancement.
+- Preserved the existing brand palette (`#01bec2`, `#003a54`), Vazirmatn, PrimeIcons and semantic `--ds-*` tokens instead of replacing them with generic sample palettes.
+- Persisted the resulting master rules and page overrides under `design-system/`.
+
+### Shared component sizing
+- Standardized shared table row-action and paginator targets to 44px.
+- Set WorkspacePageHeading action controls to a 44px minimum.
+- Updated Admin and Company product-list icon actions/pagination to the same target size.
+
+### Inquiry inbox
+- Company inquiry inbox now has an explicit recoverable error panel with a retry action instead of falling through to a misleading empty state when the list API fails.
+- Added accessible names to Company inquiry search, status filter and row-view action.
+- Standardized Admin and Company inquiry table action/pagination targets to 44px.
+- Added Company InquiryList component tests for error presentation and successful retry using the existing list API contract.
+
+### Verification
+- GitHub Actions CI passed at commit `2c5b360` before the subsequent inquiry-inbox changes. Its `test-and-build` job passed frontend/shared tests, backend tests and builds for all frontend apps.
+- Latest inquiry changes have new tests but require the latest CI run to complete before they can be marked verified.
+- Runtime Validation and Database Migration Validation were cancelled by newer pushes during this rapid commit sequence; they are not considered passed.
