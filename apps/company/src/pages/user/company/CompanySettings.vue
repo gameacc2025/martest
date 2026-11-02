@@ -743,4 +743,26 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
     justify-content: center;
   }
 }
+
+.settings-page { padding: var(--ds-space-5); }
+.settings-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.settings-page .page-header h1 { color: var(--ds-color-text); }
+.settings-page .settings-card,
+.settings-page .settings-section,
+.settings-page .skeleton-card {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.settings-page :deep(.p-inputtext),
+.settings-page :deep(.p-select),
+.settings-page :deep(.p-textarea) { border-radius: var(--ds-radius-md); }
+@media (max-width: 640px) { .settings-page { padding: var(--ds-space-3); } }
+
 </style>
