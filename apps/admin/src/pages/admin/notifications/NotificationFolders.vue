@@ -126,4 +126,36 @@ button:disabled{opacity:.55;cursor:wait}.primary{background:#01bec2;color:#062f3
 .message{padding:.7rem 1rem;border-radius:6px}.error{color:#b91c1c;background:#fee2e2}.success{color:#166534;background:#dcfce7}
 @media(max-width:900px){.create-form{grid-template-columns:1fr 1fr}.folder-row{flex-wrap:wrap}.folder-info{flex-basis:70%}}
 @media(max-width:560px){.create-form{grid-template-columns:1fr}.page-heading{align-items:flex-start;flex-direction:column}}
+
+.folder-page { gap: var(--ds-space-5); }
+.folder-page .page-heading {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.folder-page .panel {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  background: var(--ds-color-surface);
+}
+.folder-page input,
+.folder-page select {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+}
+.folder-page input:focus,
+.folder-page select:focus {
+  outline: 0;
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+@media (max-width: 640px) {
+  .folder-page .page-heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); }
+}
+
 </style>
