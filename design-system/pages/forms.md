@@ -10,3 +10,9 @@ Applies to create/edit product, inquiry, company, user, role and settings forms.
 - Preserve existing field names, validation rules, payload shape and API calls.
 - Put primary save/submit and secondary cancel/back actions in a consistent footer.
 - During submission, show progress and prevent duplicate submits; after failure, retain entered values.
+
+## Public account profile
+- Present account identity as a dedicated summary card with a real avatar or an initials fallback; never reference a missing placeholder image.
+- Show access-profile type as a human-readable label, not a raw enum. Use API-backed name, email, phone and creation date with explicit empty-value labels.
+- Keep profile edit and password-change dialogs associated with visible labels and 44px controls. Preserve the existing profile/password/avatar API contracts.
+- Do not render a fabricated unread count. If the profile page does not load notification totals, show a plain notification navigation action.
