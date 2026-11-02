@@ -1,10 +1,14 @@
 <template>
   <div class="user-profile-page">
     <div class="ds-container ds-page">
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold">پروفایل کاربر</h1>
-        <Breadcrumb :home="home" :model="items" class="mt-2" />
-      </div>
+      <header class="profile-page-heading">
+        <div>
+          <span class="profile-page-eyebrow"><i class="pi pi-user"></i> حساب کاربری</span>
+          <h1>پروفایل من</h1>
+          <p>اطلاعات حساب، سفارش‌ها و فعالیت‌های خود را مدیریت کنید.</p>
+        </div>
+        <Breadcrumb :home="home" :model="items" class="profile-breadcrumb" />
+      </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Sidebar -->
@@ -416,4 +420,55 @@ const logout = async () => {
 }
 .user-profile-page .order-item:hover { background: var(--ds-color-surface-hover); }
 
+.profile-page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  margin-bottom: var(--ds-space-6);
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.profile-page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.profile-page-heading h1 {
+  margin: .35rem 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+}
+.profile-page-heading p { margin: 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
+.user-profile-page .grid {
+  display: grid;
+  grid-template-columns: minmax(230px, .8fr) minmax(0, 2.2fr);
+  align-items: start;
+  gap: var(--ds-space-5);
+}
+.user-profile-page :deep(.p-card) { overflow: hidden; }
+.user-profile-page :deep(.p-card-body) { padding: clamp(1rem, 2vw, 1.5rem); }
+.user-profile-page img.rounded-full {
+  width: 6rem;
+  height: 6rem;
+  object-fit: cover;
+  border: 4px solid var(--ds-color-surface-alt);
+  box-shadow: var(--ds-shadow-sm);
+}
+.user-profile-page .order-item { border-radius: var(--ds-radius-md); transition: background-color var(--ds-transition-fast); }
+.user-profile-page .order-item:hover { background: var(--ds-color-surface-hover); }
+.user-profile-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+@media (max-width: 900px) {
+  .user-profile-page .grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .profile-page-heading { align-items: flex-start; flex-direction: column; padding: var(--ds-space-4); }
+  .profile-breadcrumb { max-width: 100%; overflow: hidden; }
+}
 </style>
