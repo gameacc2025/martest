@@ -285,7 +285,7 @@ function formatPrice(price) {
 <template>
   <div class="inquiry-detail-page">
     <ConfirmDialog />
-    <div class="page-header">
+    <div class="page-header ds-detail-heading">
       <div>
         <Button icon="pi pi-arrow-right" text @click="router.push({ name: 'admin-inquiries' })" />
         <h1>جزئیات درخواست استعلام</h1>
@@ -657,5 +657,38 @@ function formatPrice(price) {
     grid-template-columns: 1fr;
   }
 }
-</style>
 
+/* Inquiry record: clear identity, status, actions and readable information cards. */
+.inquiry-detail-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.inquiry-detail-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-detail-page .page-header h1 {
+  color: var(--ds-color-text);
+  font-size: clamp(1.2rem, 2vw, var(--ds-font-size-xl));
+}
+.inquiry-detail-page :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-detail-page :deep(.p-card-title) {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+}
+.inquiry-detail-page .response-card {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+@media (max-width: 640px) {
+  .inquiry-detail-page { padding: var(--ds-space-3); }
+  .inquiry-detail-page .page-header { padding: var(--ds-space-4); }
+  .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
