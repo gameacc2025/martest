@@ -1,8 +1,8 @@
 <template>
   <div class="checkout-page">
     <div class="ds-container ds-page">
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold">تسویه حساب</h1>
+      <header class="mb-6 ds-page-heading">
+        <h1 class="text-2xl font-bold ds-page-heading__title">تسویه حساب</h1>
         <Breadcrumb :home="home" :model="items" class="mt-2" />
       </div>
 
@@ -590,4 +590,26 @@ const goToCart = () => {
 :deep(.p-steps .p-steps-item) {
   direction: rtl;
 }
+
+.checkout-page { color: var(--ds-color-text); }
+.checkout-page .ds-page-heading {
+  align-items: flex-end;
+  padding-bottom: var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-color-border);
+}
+.checkout-page .ds-page-heading__title {
+  color: var(--ds-color-text);
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+  font-weight: var(--ds-font-weight-bold);
+}
+.checkout-page :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.checkout-page :deep(.p-card .p-card-title) {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-bold);
+}
+.checkout-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
 </style>
