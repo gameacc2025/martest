@@ -446,7 +446,7 @@ function formatPrice(price) {
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errored" class="state-block">
+    <div v-else-if="errored" class="state-block" role="alert">
       <i class="pi pi-exclamation-triangle state-icon error"></i>
       <h3>خطا در دریافت اطلاعات</h3>
       <p>دریافت جزئیات استعلام با مشکل مواجه شد.</p>
@@ -461,7 +461,7 @@ function formatPrice(price) {
       <!-- Page Header -->
       <div class="page-header ds-detail-heading">
         <div class="page-header-left">
-          <Button icon="pi pi-arrow-right" text @click="router.push({ name: 'company-inquiries' })" />
+          <Button icon="pi pi-arrow-right" text aria-label="بازگشت به فهرست استعلام‌ها" @click="router.push({ name: 'company-inquiries' })" />
           <div class="page-title-group">
             <h1>{{ inquiry.title }}</h1>
             <div class="page-meta">
@@ -480,7 +480,7 @@ function formatPrice(price) {
       </div>
 
       <!-- Deadline Banner -->
-      <div v-if="inquiry.responseDeadline" class="deadline-banner" :class="{ 'deadline-urgent': deadlineApproaching, 'deadline-passed': deadlinePassed }">
+      <div v-if="inquiry.responseDeadline" class="deadline-banner" role="status" :class="{ 'deadline-urgent': deadlineApproaching, 'deadline-passed': deadlinePassed }">
         <i class="pi" :class="deadlinePassed ? 'pi-times-circle' : 'pi-clock'"></i>
         <span v-if="deadlinePassed">مهلت پاسخ گذشته است</span>
         <span v-else-if="deadlineApproaching">مهلت پاسخ نزدیک است — {{ formatDateTime(inquiry.responseDeadline) }}</span>
@@ -564,7 +564,7 @@ function formatPrice(price) {
                       <a href="#" @click.prevent="downloadAttachment(response, att)">
                         <i class="pi pi-file"></i> {{ att.filename }}
                       </a>
-                      <Button v-if="isMyResponse(response) && canEditResponse(response)" icon="pi pi-times" text rounded size="small" severity="danger" @click="deleteAttachment(response, att)" />
+                      <Button v-if="isMyResponse(response) && canEditResponse(response)" icon="pi pi-times" text rounded size="small" severity="danger" aria-label="حذف فایل پیوست" @click="deleteAttachment(response, att)" />
                     </div>
                   </div>
                 </div>
@@ -594,7 +594,8 @@ function formatPrice(price) {
                   <option v-for="company in messageRecipients" :key="company.id" :value="company.id">{{ company.name }}</option>
                 </select>
               </label>
-              <Textarea v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="پیام خود را بنویسید…" class="w-full" />
+              <label for="inquiry-message-draft" class="message-composer-label">پیام جدید</label>
+              <Textarea id="inquiry-message-draft" v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="متن پیام را وارد کنید…" class="w-full" />
               <label v-if="smsAvailable" class="message-sms-option"><input v-model="notifyBySms" type="checkbox" /> ارسال اعلان پیامکی به گیرنده (یک سهمیه پیامک مصرف می‌کند)</label>
               <div class="message-send-row"><small>{{ messageDraft.trim().length.toLocaleString('fa-IR') }} / ۵۰۰۰</small><Button type="submit" label="ارسال پیام" icon="pi pi-send" :loading="sendingMessage" :disabled="!messageDraft.trim() || messageDraft.trim().length > 5000" /></div>
             </form>
@@ -887,6 +888,38 @@ function formatPrice(price) {
 .message-meta{font-size:.8rem;color:var(--text-color-secondary,#64748b);flex-wrap:wrap}
 .message-bubble p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.55rem 0 0;color:var(--text-color,#1f2937);line-height:1.8}
 .message-composer{display:grid;gap:.65rem;margin-top:1rem}
+.message-composer-label {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.message-list { overscroll-behavior: contain; }
+.inquiry-detail-page .page-header-actions :deep(.p-button),
+.inquiry-detail-page .response-actions :deep(.p-button),
+.inquiry-detail-page .message-heading :deep(.p-button),
+.inquiry-detail-page .attachment-chip :deep(.p-button),
+.inquiry-detail-page .state-actions :deep(.p-button) {
+  min-height: 2.75rem;
+}
+.inquiry-detail-page .attachment-chip :deep(.p-button) {
+  min-width: 2.75rem;
+  width: 2.75rem;
+}
+.inquiry-detail-page .page-header-left > :deep(.p-button) {
+  min-width: 2.75rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  height: 2.75rem;
+}
+.inquiry-detail-page :deep(.p-button):focus-visible,
+.inquiry-detail-page a:focus-visible,
+.inquiry-detail-page select:focus-visible,
+.inquiry-detail-page textarea:focus-visible,
+.inquiry-detail-page input:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+
 .message-recipient{display:grid;gap:.4rem;max-width:360px;font-size:.9rem}
 .message-sms-option{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text-color-secondary,#64748b)}.message-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,#0f9e9a)}
 .message-recipient select{padding:.65rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-card,#fff);color:inherit}
