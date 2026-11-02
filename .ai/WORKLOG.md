@@ -2439,3 +2439,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added tests in both Admin and Company inbox suites for semantic controls and selected state.
 - Commits: f4fa453 Admin inbox; ca8d218 Company inbox; 5fb074d Admin tests; 1cc79aa Company tests.
 - CI verification pending on the newest main head; no local tests/builds claimed.
+
+## Company subscription + Website homepage — 2026-11-02
+
+- Company InquirySubscription now uses shared WorkspacePageHeading, semantic accessible quota progressbars, responsive plan/usage cards, design-system tokens and 44px actions. Payment/API and subscription logic unchanged.
+- Added InquirySubscription component tests for API-backed plans, quota accessibility and two-step plan selection/request.
+- Website homepage featured/recent product cards now show supplier, verified cue only when API-confirmed, optional brand/model/SKU, actual price when present and supplier inquiry fallback otherwise.
+- Added homepage source-contract tests for supplier verification and no-price state.
+- Commits: 462ebf8 subscription workspace; 63b9589 subscription tests; f2ee67b token correction; a82fa86 homepage cards; 2f15bd2 homepage tests.
+- CI test/build passed on f2ee67b; newest homepage commits are awaiting CI. Migration/runtime verification for latest main is not yet complete.
