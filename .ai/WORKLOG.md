@@ -2313,3 +2313,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Combined with previous adoption, shared page-heading pattern now covers 10 Admin/Company management list pages.
 - Existing copy, old-order availability warning, table behavior, API, permission checks, routes and dialogs preserved.
 - Commits: `3a3611a`, `f2e5bd2`, `e8ecb49`, `10e2c67`, `5a3fd61`, `e693b5d`. CI pending.
+
+
+## UI redesign — cross-module headings batch 13 (2026-11-02)
+
+- Shared workspace heading now adopted in Admin Notification Management/Folders, System Settings, Inquiry Subscription Management, plus Company User Management and Reports.
+- Existing action slots preserve refresh, inbox navigation and tab-dependent CSV export actions.
+- Total adoption: 16 Admin/Company operational screens across list, report, settings, subscription and notification management.
+- No API or business logic changed.
+- Commits: `c5f2126`, `7df3c0c`, `fc7963e`, `dcabf38`, `5eca4cd`, `1bd79b4`. CI pending.
