@@ -192,7 +192,7 @@ async function deleteAddress(address) {
       <article v-for="address in addresses" :key="address.id" class="address-card">
         <div class="address-top">
           <div class="address-title">
-            <span class="address-pin" aria-hidden="true">⌖</span>
+            <span class="address-pin" aria-hidden="true"><i class="pi pi-map-marker"></i></span>
             <h2>{{ address.label || 'آدرس من' }}</h2>
             <span v-if="address.isDefault" class="default-badge">آدرس پیش‌فرض</span>
           </div>
@@ -208,7 +208,7 @@ async function deleteAddress(address) {
       </article>
     </section>
     <section v-else class="empty-state">
-      <div class="empty-icon" aria-hidden="true">⌖</div>
+      <div class="empty-icon" aria-hidden="true"><i class="pi pi-map-marker"></i></div>
       <h2>هنوز آدرسی ثبت نکرده‌اید</h2>
       <p>برای دسترسی سریع‌تر، آدرس خانه یا محل کارتان را اضافه کنید.</p>
       <button class="button button-primary" type="button" @click="openCreate">ثبت اولین آدرس</button>
@@ -316,4 +316,32 @@ async function deleteAddress(address) {
   .addresses-page .heading-actions { display: grid; grid-template-columns: 1fr; }
   .addresses-page .address-actions { width: auto; }
 }
+
+/* Address-book interaction polish: consistent tap targets and semantic iconography. */
+.addresses-page .button { min-height: var(--ds-touch-target); }
+.addresses-page .text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ds-touch-target);
+  min-height: var(--ds-touch-target);
+  padding: .55rem .8rem;
+  border-radius: var(--ds-radius-md);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.addresses-page .text-button:hover { background: var(--ds-color-surface-hover); }
+.addresses-page .address-pin { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; border-radius: var(--ds-radius-lg); background: var(--ds-color-primary-soft); font-size: 1.1rem; }
+.addresses-page .empty-icon { display: grid; place-items: center; width: 4rem; height: 4rem; margin-inline: auto; border-radius: 50%; background: var(--ds-color-primary-soft); font-size: 1.6rem; }
+.addresses-page .address-form input:not([type="checkbox"]),
+.addresses-page .address-form textarea { min-height: var(--ds-touch-target); }
+.addresses-page .default-choice { min-height: var(--ds-touch-target); }
+.addresses-page .default-choice input { width: 1.15rem; height: 1.15rem; flex: 0 0 auto; }
+.addresses-page .button:focus-visible,
+.addresses-page .text-button:focus-visible,
+.addresses-page .address-form input:focus-visible,
+.addresses-page .address-form textarea:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+
 </style>
