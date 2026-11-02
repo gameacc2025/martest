@@ -38,91 +38,59 @@
         </template>
       </Toolbar>
 
-      <DataTable
+      <SharedDataTable
+        ref="tableRef"
         class="identity-management-table"
-        :value="users"
+        title="فهرست کاربران"
+        :columns="tableColumns"
+        :rows="users"
         :loading="loading"
-        lazy
-        paginator
-        :rows="pagination.limit"
-        :first="(pagination.page - 1) * pagination.limit"
-        :totalRecords="pagination.total"
-        :rowsPerPageOptions="[5, 10, 20, 50]"
-        :sortField="sortField"
-        :sortOrder="sortOrder"
-        @page="onPage"
-        @sort="onSort"
-        responsiveLayout="scroll"
-        dataKey="id"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[5, 10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        :initial-sort-field="sortField"
+        :initial-sort-order="sortOrder"
+        @request="onTableRequest"
       >
-        <Column header="آواتار" style="width: 4rem">
-          <template #body="{ data }">
-            <Avatar
-              v-if="data.profile?.avatar"
-              :image="data.profile.avatar"
-              shape="circle"
-            />
-            <Avatar
-              v-else
-              :label="avatarLabel(data)"
-              shape="circle"
-            />
-          </template>
-        </Column>
-        <Column field="email" header="ایمیل" sortable></Column>
-        <Column header="نام کامل">
-          <template #body="{ data }">
-            {{ fullName(data) || '—' }}
-          </template>
-        </Column>
-        <Column header="تلفن">
-          <template #body="{ data }">
-            {{ data.phone || '—' }}
-          </template>
-        </Column>
-        <Column header="نوع">
-          <template #body="{ data }">
-            <Tag severity="contrast">{{ typeLabel(data.accessProfile?.type) }}</Tag>
-          </template>
-        </Column>
-        <Column header="شرکت">
-          <template #body="{ data }">
-            <span v-if="data.accessProfile?.company?.name" class="company-cell">
-              <i class="pi pi-building"></i> {{ data.accessProfile.company.name }}
-            </span>
-            <span v-else class="text-muted">—</span>
-          </template>
-        </Column>
-        <Column header="نقش‌ها">
-          <template #body="{ data }">
-            <div v-if="data.roles && data.roles.length" class="flex flex-wrap gap-2">
-              <Tag v-for="role in data.roles" :key="role.id || role">
-                {{ role.label || role.name || role }}
-              </Tag>
-            </div>
-            <Tag v-else severity="warn">بدون نقش</Tag>
-          </template>
-        </Column>
-        <Column field="status" header="وضعیت" sortable>
-          <template #body="{ data }">
-            <Tag :severity="statusSeverity(data.status)">{{ statusLabel(data.status) }}</Tag>
-          </template>
-        </Column>
-        <Column field="createdAt" header="تاریخ عضویت" sortable>
-          <template #body="{ data }">
-            {{ formatDate(data.createdAt) }}
-          </template>
-        </Column>
-        <Column header="عملیات" style="width: 9rem">
-          <template #body="{ data }">
-            <div class="flex gap-2">
-              <Button icon="pi pi-eye" severity="secondary" rounded text aria-label="مشاهده کاربر" @click="openInfo(data)" v-tooltip.top="'مشاهده'" />
-              <Button v-if="canUpdate" icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش کاربر" @click="openEdit(data)" v-tooltip.top="'ویرایش'" />
-              <Button v-if="canDelete" icon="pi pi-trash" severity="danger" rounded text aria-label="حذف کاربر" @click="confirmDelete(data)" v-tooltip.top="'حذف'" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+        <template #avatar="{ row }">
+          <Avatar v-if="row.profile?.avatar" :image="row.profile.avatar" shape="circle" />
+          <Avatar v-else :label="avatarLabel(row)" shape="circle" />
+        </template>
+        <template #fullName="{ row }">
+          <strong class="user-table-name">{{ fullName(row) || '—' }}</strong>
+        </template>
+        <template #accessType="{ row }">
+          <Tag severity="contrast">{{ typeLabel(row.accessProfile?.type) }}</Tag>
+        </template>
+        <template #company="{ row }">
+          <span v-if="row.accessProfile?.company?.name" class="company-cell">
+            <i class="pi pi-building" aria-hidden="true"></i> {{ row.accessProfile.company.name }}
+          </span>
+          <span v-else class="text-muted">—</span>
+        </template>
+        <template #roles="{ row }">
+          <div v-if="row.roles && row.roles.length" class="user-table-roles">
+            <Tag v-for="role in row.roles" :key="role.id || role">
+              {{ role.label || role.name || role }}
+            </Tag>
+          </div>
+          <Tag v-else severity="warn">بدون نقش</Tag>
+        </template>
+        <template #status="{ row }">
+          <Tag :severity="statusSeverity(row.status)">{{ statusLabel(row.status) }}</Tag>
+        </template>
+        <template #createdDate="{ row }">
+          {{ formatDate(row.createdAt) }}
+        </template>
+        <template #actions="{ row }">
+          <Button icon="pi pi-eye" severity="secondary" rounded text aria-label="مشاهده کاربر" v-tooltip.top="'مشاهده'" @click="openInfo(row)" />
+          <Button v-if="canUpdate" icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش کاربر" v-tooltip.top="'ویرایش'" @click="openEdit(row)" />
+          <Button v-if="canDelete" icon="pi pi-trash" severity="danger" rounded text aria-label="حذف کاربر" v-tooltip.top="'حذف'" @click="confirmDelete(row)" />
+        </template>
+      </SharedDataTable>
     </div>
 
     <!-- Info Dialog (read-only) -->
@@ -371,6 +339,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/stores/admin/users";
 import { useRoleStore } from "@/stores/admin/roles";
@@ -393,6 +362,7 @@ const canActivate = computed(() => can(P.USERS.ACTIVATE));
 const canDeactivate = computed(() => can(P.USERS.DEACTIVATE));
 
 const users = ref([]);
+const tableRef = ref(null);
 const loading = ref(false);
 const pagination = ref({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
@@ -401,6 +371,18 @@ const statusFilter = ref(null);
 const typeFilter = ref(null);
 const sortField = ref("id");
 const sortOrder = ref(-1); // -1 desc, 1 asc
+const tableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
+  { field: 'profile.avatar', header: 'آواتار', slot: 'avatar' },
+  { field: 'email', header: 'ایمیل', sortable: true },
+  { field: 'profile.firstName', header: 'نام کامل', slot: 'fullName' },
+  { field: 'phone', header: 'تلفن' },
+  { field: 'accessProfile.type', header: 'نوع', slot: 'accessType' },
+  { field: 'accessProfile.company.name', header: 'شرکت', slot: 'company' },
+  { field: 'roles', header: 'نقش‌ها', slot: 'roles' },
+  { field: 'status', header: 'وضعیت', sortable: true, slot: 'status' },
+  { field: 'createdAt', header: 'تاریخ عضویت', sortable: true, slot: 'createdDate' },
+];
 
 const statusOptions = ref([
   { label: "فعال", value: "ACTIVE" },
@@ -471,15 +453,16 @@ function debounceSearch() {
   debounceSearch.timer = setTimeout(() => applyFilters(), 500);
 }
 function applyFilters() {
+  tableRef.value?.resetPage();
   loadUsers(1);
 }
 
-async function loadUsers(page = pagination.value.page) {
+async function loadUsers(page = pagination.value.page, limit = pagination.value.limit) {
   try {
     loading.value = true;
     const response = await userStore.getUsers({
       page,
-      limit: pagination.value.limit,
+      limit,
       search: searchQuery.value,
       status: statusFilter.value,
       type: typeFilter.value,
@@ -520,14 +503,11 @@ async function loadCompanies() {
   }
 }
 
-function onPage(event) {
-  pagination.value.limit = event.rows;
-  loadUsers(event.page + 1);
-}
-function onSort(event) {
-  sortField.value = event.sortField || "id";
-  sortOrder.value = event.sortOrder || -1;
-  loadUsers(1);
+function onTableRequest({ page, rows, sortField: requestedSortField, sortOrder: requestedSortOrder }) {
+  pagination.value.limit = rows;
+  if (requestedSortField) sortField.value = requestedSortField;
+  if (requestedSortOrder) sortOrder.value = requestedSortOrder === "asc" ? 1 : -1;
+  loadUsers(page, rows);
 }
 
 // When the type is switched away from COMPANY, drop the company link.
@@ -1006,4 +986,6 @@ async function deleteUser() {
   .identity-management-toolbar :deep(.p-select) { width: 100%; margin: 0; }
   .identity-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
+.user-table-name { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
+.user-table-roles { display: flex; flex-wrap: wrap; gap: .35rem; }
 </style>
