@@ -70,7 +70,7 @@ onUnmounted(() => {
   >
     <a class="dash-layout-skip" href="#main-content">رفتن به محتوای اصلی</a>
     <!-- Sidebar: fixed on desktop, drawer on mobile -->
-    <div class="dash-layout-sidebar" :class="{ 'dash-layout-sidebar--open': mobileOpen }">
+    <div id="dashboard-navigation" class="dash-layout-sidebar" :class="{ 'dash-layout-sidebar--open': mobileOpen }">
       <DashboardSidebar
         :collapsed="sidebarCollapsed"
         :mobile-open="mobileOpen"
@@ -92,6 +92,7 @@ onUnmounted(() => {
     <div class="dash-layout-main">
       <DashboardHeader
         :collapsed="sidebarCollapsed"
+        :mobile-open="mobileOpen"
         workspace-label="مدیریت بازارگاه"
         :user="authStore.user"
         :is-super-admin="authStore.isSuperAdmin"
