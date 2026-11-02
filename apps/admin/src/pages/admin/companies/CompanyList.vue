@@ -1,6 +1,7 @@
 <template>
   <div class="company-list-page ds-stack">
     <!-- Card with Toolbar -->
+    <header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت شرکت‌ها</h1><p class="ds-page-heading__description">اطلاعات، وضعیت و تأیید شرکت‌های عضو بازارگاه را مدیریت کنید.</p></div></header>
     <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
@@ -665,6 +666,7 @@ function formatDate(value) {
 
 /* Shared Paces-style list hierarchy; query, pagination and permissions unchanged. */
 .company-list-page { gap: var(--ds-space-5); }
+.company-list-page .ds-page-heading { margin-bottom: 0; }
 .company-list-page .card {
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
