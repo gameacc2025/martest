@@ -1471,3 +1471,10 @@ The next structural layer after the dashboard batch is now implemented:
 Admin and Company product management pages now consume the shared responsive DataTable instead of separate PrimeVue table templates. Existing permissions, tenant scoping, API source, action handlers, dialogs, search and status filters remain. Server pagination is wired to shared table events and filter changes reset pagination.
 
 Next: continue page-family migrations (companies/users/categories/inquiries and public catalog/detail), then shared forms/dialogs, shell/header refinements, tests and full CI verification. Only `main` is to be used; do not create branches.
+
+
+## UI redesign checkpoint — admin list families (2026-11-02)
+
+Admin Companies, Users and Categories now use the shared responsive DataTable. API/store usage, permission gates, CRUD and verification actions, sort state and pagination remain connected to their existing sources. User sort is supported by the shared table's initial-sort inputs and lazy request event.
+
+Continue with inquiries, roles/permissions, orders, product forms/details, company-side users/reports/inquiries, and public website page families. Do not create branches; only `main`.
