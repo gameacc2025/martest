@@ -708,3 +708,23 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Search/filter and server pagination continue through the existing stores/API. Mutations reset the local paginator.
 - Commits: `d12afeb` Roles, `54c49e4` Permissions, `9d3c3c6` Orders, `b0a262f` / `975c917` mutation paginator resets.
 - CI/build verification for this batch is pending.
+
+
+## Public storefront and catalogue refinement — batch 12 (2026-11-02)
+
+### Public shell
+- Added a second, compact utility navigation tier above the existing public navigation: a marketplace context statement and real FAQ/contact links.
+- Utility tier is hidden at mobile breakpoints so the existing mobile navigation remains the primary navigation.
+- Existing search, category mega-menu, account menu, notifications, auth handoff, route behavior and footer remain intact.
+
+### Public product catalogue
+- Product cards now expose the product identity hierarchy more clearly: title, supplier, optional brand/model/SKU, API-confirmed verified-supplier cue, optional description, and a consistent price/details footer.
+- If the API has no published price tier, the card explicitly asks the buyer to request pricing from the supplier; no placeholder or fabricated price is shown.
+- Cards remain one keyboard-accessible navigation surface to the existing product-details route; no nested controls were introduced.
+- Technical SKU is isolated LTR inside the RTL interface.
+
+### Tests and verification
+- Extended ProductListing tests for brand/model/SKU, API-confirmed verification, price-present and price-absent states.
+- Extended PublicLayout tests for the utility tier and existing primary header.
+- CI test-and-build passed at 8a381241 before the subsequent PublicLayout utility-tier commits. Latest main is b18cdb7; its CI, migration and runtime workflows are pending. The last completed runtime workflow at 0618911 failed only in the browser smoke step; compose, service health, migration application and test/build CI were separate successful checks. Do not treat browser smoke as a substitute for component tests or production builds.
+- No local test/build execution is claimed in this connected GitHub editing session.
