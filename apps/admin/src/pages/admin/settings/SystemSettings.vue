@@ -1,5 +1,5 @@
 <template>
-  <div class="system-settings-page" :style="{ padding: '1.5rem', direction: 'rtl' }">
+  <div class="system-settings-page" dir="rtl">
     <div class="page-header" :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }">
       <h1 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--text-color)">تنظیمات سیستم</h1>
     </div>
@@ -91,3 +91,27 @@ async function saveThreshold() {
 
 onMounted(loadSettings)
 </script>
+<style scoped>
+
+.system-settings-page { display: flex; flex-direction: column; gap: var(--ds-space-5); padding: var(--ds-space-5) !important; }
+.system-settings-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.system-settings-page .page-header h1 { color: var(--ds-color-text) !important; font-size: var(--ds-font-size-2xl) !important; }
+.system-settings-page .card {
+  max-width: 760px !important;
+  border-color: var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-xl) !important;
+  box-shadow: var(--ds-shadow-xs);
+}
+.system-settings-page .setting-row { padding: var(--ds-space-6) !important; }
+.system-settings-page .setting-head { align-items: flex-start !important; }
+.system-settings-page .setting-head h3 { color: var(--ds-color-text) !important; font-weight: var(--ds-font-weight-bold); }
+.system-settings-page .setting-head p { color: var(--ds-color-text-muted) !important; }
+@media (max-width: 640px) { .system-settings-page { padding: var(--ds-space-3) !important; } }
+
+</style>
