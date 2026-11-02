@@ -326,12 +326,12 @@ async function submitInquiry() {
           <div class="step-body">
             <h2 class="step-title">اطلاعات پایه</h2>
             <div class="field">
-              <label>عنوان درخواست <span class="required">*</span></label>
-              <InputText v-model="form.title" class="w-full" placeholder="مثلاً: استعلام قیمت روتر صنعتی" />
+              <label for="inquiry-title">عنوان درخواست <span class="required">*</span></label>
+              <InputText id="inquiry-title" v-model="form.title" class="w-full" placeholder="مثلاً: استعلام قیمت روتر صنعتی" />
             </div>
             <div class="field">
-              <label>توضیحات</label>
-              <Textarea v-model="form.description" rows="4" class="w-full" placeholder="توضیحات تکمیلی درخواست..." />
+              <label for="inquiry-description">توضیحات</label>
+              <Textarea id="inquiry-description" v-model="form.description" rows="4" class="w-full" placeholder="توضیحات تکمیلی درخواست..." />
             </div>
           </div>
           <div class="step-nav">
@@ -346,8 +346,9 @@ async function submitInquiry() {
             <h2 class="step-title">اقلام کالا</h2>
             <div class="add-item-row">
               <div class="field grow">
-                <label>محصول</label>
+                <label for="inquiry-product">محصول</label>
                 <Select
+                  inputId="inquiry-product"
                   v-model="newItem.productId"
                   :options="products"
                   optionLabel="title"
@@ -359,12 +360,12 @@ async function submitInquiry() {
                 />
               </div>
               <div class="field qty">
-                <label>تعداد</label>
-                <InputNumber v-model="newItem.quantity" :min="1" class="w-full" />
+                <label for="inquiry-quantity">تعداد</label>
+                <InputNumber inputId="inquiry-quantity" v-model="newItem.quantity" :min="1" class="w-full" />
               </div>
               <div class="field grow">
-                <label>توضیحات</label>
-                <InputText v-model="newItem.description" placeholder="اختیاری" class="w-full" />
+                <label for="inquiry-item-description">توضیحات</label>
+                <InputText id="inquiry-item-description" v-model="newItem.description" placeholder="اختیاری" class="w-full" />
               </div>
               <div class="field add-btn">
                 <Button label="افزودن" icon="pi pi-plus" @click="addItem" />
@@ -383,7 +384,7 @@ async function submitInquiry() {
               <Column field="description" header="توضیحات" />
               <Column header="عملیات" style="width: 6rem">
                 <template #body="{ index }">
-                  <Button icon="pi pi-trash" severity="danger" rounded text @click="removeItem(index)" />
+                  <Button icon="pi pi-trash" severity="danger" rounded text :aria-label="'حذف قلم ' + (index + 1)" @click="removeItem(index)" />
                 </template>
               </Column>
             </DataTable>
@@ -404,8 +405,9 @@ async function submitInquiry() {
 
             <div class="settings-grid">
               <div class="field">
-                <label>حالت نمایش (Visibility)</label>
+                <label for="inquiry-visibility">حالت نمایش (Visibility)</label>
                 <Select
+                  inputId="inquiry-visibility"
                   v-model="form.visibilityMode"
                   :options="visibilityOptions"
                   optionLabel="label"
@@ -418,8 +420,9 @@ async function submitInquiry() {
               </div>
 
               <div class="field">
-                <label>اولویت (Priority)</label>
+                <label for="inquiry-priority">اولویت (Priority)</label>
                 <Select
+                  inputId="inquiry-priority"
                   v-model="form.priority"
                   :options="priorityOptions"
                   optionLabel="label"
@@ -429,13 +432,13 @@ async function submitInquiry() {
               </div>
 
               <div class="field">
-                <label>مهلت پاسخ (Deadline)</label>
-                <InputText v-model="form.responseDeadline" type="datetime-local" class="w-full" />
+                <label for="inquiry-deadline">مهلت پاسخ (Deadline)</label>
+                <InputText id="inquiry-deadline" v-model="form.responseDeadline" type="datetime-local" class="w-full" />
               </div>
 
               <div class="field">
-                <label>تاریخ انتشار (Publish Date)</label>
-                <InputText v-model="form.publishDate" type="datetime-local" class="w-full" />
+                <label for="inquiry-publish-date">تاریخ انتشار (Publish Date)</label>
+                <InputText id="inquiry-publish-date" v-model="form.publishDate" type="datetime-local" class="w-full" />
               </div>
             </div>
 
@@ -445,35 +448,35 @@ async function submitInquiry() {
                   <span class="switch-label">محرمانه (Confidential)</span>
                   <small class="switch-hint">استعلام به‌صورت محرمانه علامت‌گذاری می‌شود.</small>
                 </div>
-                <ToggleSwitch v-model="form.confidential" />
+                <ToggleSwitch v-model="form.confidential" aria-label="محرمانه بودن استعلام" />
               </div>
               <div class="switch-row">
                 <div>
                   <span class="switch-label">بستن خودکار (Auto Close)</span>
                   <small class="switch-hint">استعلام پس از پایان مهلت به‌صورت خودکار بسته شود.</small>
                 </div>
-                <ToggleSwitch v-model="form.autoClose" />
+                <ToggleSwitch v-model="form.autoClose" aria-label="بستن خودکار استعلام" />
               </div>
               <div class="switch-row">
                 <div>
                   <span class="switch-label">اجازه ویرایش پاسخ</span>
                   <small class="switch-hint">پاسخ‌دهندگان بتوانند پاسخ خود را ویرایش کنند.</small>
                 </div>
-                <ToggleSwitch v-model="form.allowEditResponse" />
+                <ToggleSwitch v-model="form.allowEditResponse" aria-label="اجازه ویرایش پاسخ" />
               </div>
               <div class="switch-row">
                 <div>
                   <span class="switch-label">اجازه پس‌گرفتن پاسخ</span>
                   <small class="switch-hint">پاسخ‌دهندگان بتوانند پاسخ خود را پس بگیرند.</small>
                 </div>
-                <ToggleSwitch v-model="form.allowWithdrawResponse" />
+                <ToggleSwitch v-model="form.allowWithdrawResponse" aria-label="اجازه پس‌گرفتن پاسخ" />
               </div>
               <div v-if="form.visibilityMode !== 'NORMAL'" class="switch-row">
                 <div>
                   <span class="switch-label">اجازه افشای زودهنگام</span>
                   <small class="switch-hint">امکان افشای پاسخ‌های دربسته پیش از پایان مهلت.</small>
                 </div>
-                <ToggleSwitch v-model="form.allowEarlyReveal" />
+                <ToggleSwitch v-model="form.allowEarlyReveal" aria-label="اجازه افشای زودهنگام پاسخ‌ها" />
               </div>
             </div>
           </div>
@@ -871,8 +874,10 @@ async function submitInquiry() {
 }
 .inquiry-create-page :deep(.p-step) { min-width: 0; }
 .inquiry-create-page :deep(.p-step-number) {
-  width: 2.1rem;
-  height: 2.1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-color: var(--ds-color-border);
   background: var(--ds-color-surface);
   color: var(--ds-color-text-muted);
@@ -913,6 +918,28 @@ async function submitInquiry() {
 }
 .inquiry-create-page .review-block { background: var(--ds-color-surface); }
 .inquiry-create-page .review-row { border-color: var(--ds-color-border); }
+.inquiry-create-page .page-header-actions :deep(.p-button),
+.inquiry-create-page .step-nav :deep(.p-button),
+.inquiry-create-page .add-item-row :deep(.p-button) {
+  min-height: 2.75rem;
+}
+.inquiry-create-page :deep(.p-inputtext:focus-visible),
+.inquiry-create-page :deep(.p-textarea:focus-visible),
+.inquiry-create-page :deep(.p-select:focus-visible),
+.inquiry-create-page :deep(.p-inputnumber-input:focus-visible),
+.inquiry-create-page :deep(.p-button:focus-visible),
+.inquiry-create-page :deep(.p-toggleswitch):focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .inquiry-create-page .add-item-row { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .inquiry-create-page .add-item-row .field { width: 100%; min-width: 0; }
+  .inquiry-create-page .step-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+  .inquiry-create-page .step-nav :deep(.p-button) { width: 100%; justify-content: center; }
+  .inquiry-create-page .page-header-actions { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media (max-width: 640px) {
   .inquiry-progress-card { padding: .9rem 1rem; }
   .inquiry-progress-copy { align-items: flex-start; flex-direction: column; gap: .45rem; }
