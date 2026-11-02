@@ -718,35 +718,35 @@ async function removeExistingDocument(docId) {
         <h2>اطلاعات پایه</h2>
 
         <div class="field">
-          <label>عنوان محصول <span class="required">*</span></label>
-          <InputText v-model="form.title" :class="{ 'p-invalid': errors.title }" class="w-full" />
+          <label for="product-title">عنوان محصول <span class="required">*</span></label>
+          <InputText id="product-title" v-model="form.title" :class="{ 'p-invalid': errors.title }" class="w-full" />
           <small v-if="errors.title" class="p-error">{{ errors.title }}</small>
         </div>
 
         <div class="field">
-          <label>توضیح کوتاه</label>
-          <Textarea v-model="form.shortDescription" rows="2" class="w-full" />
+          <label for="product-short-description">توضیح کوتاه</label>
+          <Textarea id="product-short-description" v-model="form.shortDescription" rows="2" class="w-full" />
         </div>
 
         <div class="field">
-          <label>توضیحات کامل</label>
-          <Textarea v-model="form.description" rows="5" class="w-full" />
+          <label for="product-description">توضیحات کامل</label>
+          <Textarea id="product-description" v-model="form.description" rows="5" class="w-full" />
         </div>
 
         <div class="field-grid">
           <div class="field">
-            <label>شناسه SKU</label>
-            <InputText v-model="form.sku" class="w-full" />
+            <label for="product-sku">شناسه SKU</label>
+            <InputText id="product-sku" v-model="form.sku" class="w-full" />
           </div>
           <div class="field">
-            <label>برند</label>
-            <InputText v-model="form.brand" class="w-full" />
+            <label for="product-brand">برند</label>
+            <InputText id="product-brand" v-model="form.brand" class="w-full" />
           </div>
         </div>
 
         <div class="field">
-          <label>مدل</label>
-          <InputText v-model="form.model" class="w-full" />
+          <label for="product-model">مدل</label>
+          <InputText id="product-model" v-model="form.model" class="w-full" />
         </div>
       </div>
 
@@ -755,28 +755,28 @@ async function removeExistingDocument(docId) {
         <h2>دسته‌بندی و شرکت</h2>
 
         <div v-if="canChooseCompany" class="field">
-          <label>شرکت <span class="required">*</span></label>
-          <Select v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب شرکت" class="w-full" :class="{ 'p-invalid': errors.companyId }" />
+          <label for="product-company">شرکت <span class="required">*</span></label>
+          <Select inputId="product-company" v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب شرکت" class="w-full" :class="{ 'p-invalid': errors.companyId }" />
           <small v-if="errors.companyId" class="p-error">{{ errors.companyId }}</small>
         </div>
 
 
         <div class="field">
-          <label>دسته‌بندی <span class="required">*</span></label>
-          <Select v-model="form.categoryId" :options="categories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب دسته‌بندی" class="w-full" :class="{ 'p-invalid': errors.categoryId }" />
+          <label for="product-category">دسته‌بندی <span class="required">*</span></label>
+          <Select inputId="product-category" v-model="form.categoryId" :options="categories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب دسته‌بندی" class="w-full" :class="{ 'p-invalid': errors.categoryId }" />
           <small v-if="errors.categoryId" class="p-error">{{ errors.categoryId }}</small>
         </div>
 
         <div class="field">
-          <label>زیردسته <span class="required">*</span></label>
-          <Select v-model="form.subcategoryId" :options="subcategories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب زیردسته" class="w-full" :disabled="!form.categoryId" :class="{ 'p-invalid': errors.subcategoryId }" />
+          <label for="product-subcategory">زیردسته <span class="required">*</span></label>
+          <Select inputId="product-subcategory" v-model="form.subcategoryId" :options="subcategories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب زیردسته" class="w-full" :disabled="!form.categoryId" :class="{ 'p-invalid': errors.subcategoryId }" />
           <small v-if="errors.subcategoryId" class="p-error">{{ errors.subcategoryId }}</small>
         </div>
 
         <div class="field-grid">
           <div class="field">
-            <label>قابلیت نمایش</label>
-            <Select v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
+            <label for="product-visibility">قابلیت نمایش</label>
+            <Select inputId="product-visibility" v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
           </div>
           <div v-if="canFeature" class="field">
             <label>محصول ویژه</label>
@@ -792,8 +792,8 @@ async function removeExistingDocument(docId) {
       <div v-if="isEditMode" class="form-section full-width">
         <h2>علت ویرایش</h2>
         <div class="field">
-          <label>توضیح تغییرات <span class="required">*</span></label>
-          <Textarea v-model="changeReason" placeholder="دلیل ویرایش محصول را وارد کنید (مثلاً تغییر قیمت، اصلاح اطلاعات و...)" rows="2" class="w-full" />
+          <label for="product-change-reason">توضیح تغییرات <span class="required">*</span></label>
+          <Textarea id="product-change-reason" v-model="changeReason" placeholder="دلیل ویرایش محصول را وارد کنید (مثلاً تغییر قیمت، اصلاح اطلاعات و...)" rows="2" class="w-full" />
           <small class="text-muted">این توضیحات در لاگ تغییرات محصول ذخیره می‌شوند.</small>
         </div>
       </div>
@@ -814,7 +814,7 @@ async function removeExistingDocument(docId) {
           <!-- Standard fields from the subcategory template -->
           <div v-else-if="templateFields.length > 0" class="spec-grid">
             <div v-for="field in templateFields" :key="field.key" class="field">
-              <label>
+              <label :for="'product-spec-' + field.key">
                 {{ field.name }}
                 <span v-if="field.unit" class="spec-unit">({{ field.unit }})</span>
                 <span v-if="field.isRequired" class="required">*</span>
@@ -822,21 +822,24 @@ async function removeExistingDocument(docId) {
 
               <InputText
                 v-if="field.type === 'TEXT'"
+                :id="'product-spec-' + field.key"
                 v-model="specValues[field.key]"
                 class="w-full"
               />
               <InputNumber
                 v-else-if="field.type === 'NUMBER'"
+                :inputId="'product-spec-' + field.key"
                 v-model="specValues[field.key]"
                 class="w-full"
                 :useGrouping="false"
               />
               <div v-else-if="field.type === 'BOOLEAN'" class="flex align-items-center gap-2 mt-2">
-                <InputSwitch v-model="specValues[field.key]" />
+                <InputSwitch v-model="specValues[field.key]" :aria-label="field.name" />
                 <span>{{ specValues[field.key] ? 'بله' : 'خیر' }}</span>
               </div>
               <Select
                 v-else-if="field.type === 'SELECT'"
+                :inputId="'product-spec-' + field.key"
                 v-model="specValues[field.key]"
                 :options="specFieldOptions(field)"
                 optionLabel="label"
@@ -847,6 +850,7 @@ async function removeExistingDocument(docId) {
               />
               <MultiSelect
                 v-else-if="field.type === 'MULTI_SELECT'"
+                :inputId="'product-spec-' + field.key"
                 v-model="specValues[field.key]"
                 :options="specFieldOptions(field)"
                 optionLabel="label"
@@ -857,12 +861,13 @@ async function removeExistingDocument(docId) {
               />
               <Calendar
                 v-else-if="field.type === 'DATE'"
+                :inputId="'product-spec-' + field.key"
                 v-model="specValues[field.key]"
                 dateFormat="yy-mm-dd"
                 showIcon
                 class="w-full"
               />
-              <InputText v-else v-model="specValues[field.key]" class="w-full" />
+              <InputText v-else :id="'product-spec-' + field.key" v-model="specValues[field.key]" class="w-full" />
             </div>
           </div>
 
@@ -894,8 +899,8 @@ async function removeExistingDocument(docId) {
                 @update:fieldId="spec.fieldId = $event"
                 @invalid="onSpecInvalid"
               />
-              <InputText v-model="spec.value" placeholder="مقدار (مثلاً 100000 ساعت)" class="custom-spec-value" />
-              <Button icon="pi pi-trash" severity="danger" text @click="removeCustomSpec(index)" />
+              <InputText v-model="spec.value" :aria-label="'مقدار ویژگی سفارشی ' + (index + 1)" placeholder="مقدار (مثلاً 100000 ساعت)" class="custom-spec-value" />
+              <Button icon="pi pi-trash" severity="danger" text :aria-label="'حذف ویژگی ' + (index + 1)" @click="removeCustomSpec(index)" />
             </div>
 
           </div>
@@ -934,7 +939,7 @@ async function removeExistingDocument(docId) {
                 <InputText v-model="tier.unit" placeholder="مثلاً عدد" class="w-full" />
               </div>
             </div>
-            <Button icon="pi pi-trash" severity="danger" text @click="removePriceTier(index)" />
+            <Button icon="pi pi-trash" severity="danger" text :aria-label="'حذف ردیف قیمت ' + (index + 1)" @click="removePriceTier(index)" />
           </div>
         </div>
       </div>
@@ -948,10 +953,10 @@ async function removeExistingDocument(docId) {
             <img :src="resolveMediaUrl(img.url)" :alt="img.altText" />
 
             <div class="image-actions">
-              <Button v-if="!img.isPrimary" icon="pi pi-star" severity="success" rounded text v-tooltip.top="'انتخاب به‌عنوان تصویر اصلی'" @click="setPrimaryImage(img.id)" />
-              <Button icon="pi pi-arrow-up" severity="secondary" rounded text :disabled="index === 0" v-tooltip.top="'انتقال به بالا'" @click="moveExistingImage(img.id, -1)" />
-              <Button icon="pi pi-arrow-down" severity="secondary" rounded text :disabled="index === productImages.length - 1" v-tooltip.top="'انتقال به پایین'" @click="moveExistingImage(img.id, 1)" />
-              <Button icon="pi pi-times" severity="danger" rounded class="image-remove" @click="removeExistingImage(img.id)" />
+              <Button v-if="!img.isPrimary" icon="pi pi-star" severity="success" rounded text v-tooltip.top="'انتخاب به‌عنوان تصویر اصلی'" aria-label="انتخاب تصویر اصلی" @click="setPrimaryImage(img.id) />
+              <Button icon="pi pi-arrow-up" severity="secondary" rounded text :disabled="index === 0" v-tooltip.top="'انتقال به بالا'" aria-label="انتقال تصویر به بالا" @click="moveExistingImage(img.id, -1) />
+              <Button icon="pi pi-arrow-down" severity="secondary" rounded text :disabled="index === productImages.length - 1" v-tooltip.top="'انتقال به پایین'" aria-label="انتقال تصویر به پایین" @click="moveExistingImage(img.id, 1) />
+              <Button icon="pi pi-times" severity="danger" rounded class="image-remove" aria-label="حذف تصویر" @click="removeExistingImage(img.id)" />
             </div>
             <Tag v-if="img.isPrimary" value="اصلی" severity="success" class="image-badge" />
           </div>
@@ -961,7 +966,7 @@ async function removeExistingDocument(docId) {
           <div v-for="(file, index) in newImages" :key="index" class="image-item">
             <img :src="previewImageUrl(file)" :alt="file.name" />
 
-            <Button icon="pi pi-times" severity="danger" rounded class="image-remove" @click="removeNewImage(index)" />
+            <Button icon="pi pi-times" severity="danger" rounded class="image-remove" :aria-label="'حذف تصویر جدید ' + (index + 1)" @click="removeNewImage(index)" />
             <Tag value="جدید" severity="info" class="image-badge" />
           </div>
         </div>
@@ -1300,6 +1305,53 @@ async function removeExistingDocument(docId) {
   border-color: var(--ds-color-border);
   border-radius: var(--ds-radius-md);
 }
+/* Form interaction/accessibility pass: labels, focus and usable touch targets. */
+.product-form-page .page-header-actions :deep(.p-button),
+.product-form-page .section-header :deep(.p-button),
+.product-form-page .custom-spec-row :deep(.p-button),
+.product-form-page .price-tier-row > :deep(.p-button) {
+  min-height: 2.75rem;
+}
+.product-form-page .custom-spec-row > :deep(.p-button),
+.product-form-page .price-tier-row > :deep(.p-button) {
+  min-width: 2.75rem;
+  width: 2.75rem;
+}
+.product-form-page .image-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 2.75rem);
+  gap: .25rem;
+}
+.product-form-page .image-actions :deep(.p-button),
+.product-form-page .image-remove {
+  min-width: 2.75rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  height: 2.75rem;
+}
+.product-form-page :deep(.p-inputtext:focus-visible),
+.product-form-page :deep(.p-textarea:focus-visible),
+.product-form-page :deep(.p-select:focus-visible),
+.product-form-page :deep(.p-inputnumber-input:focus-visible),
+.product-form-page :deep(.p-multiselect:focus-visible),
+.product-form-page :deep(.p-datepicker-input:focus-visible),
+.product-form-page :deep(.p-button:focus-visible) {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 520px) {
+  .product-form-page .field-grid,
+  .product-form-page .field-grid-4,
+  .product-form-page .spec-grid { grid-template-columns: minmax(0, 1fr); }
+  .product-form-page .custom-spec-row { align-items: stretch; flex-wrap: wrap; }
+  .product-form-page .custom-spec-title,
+  .product-form-page .custom-spec-value { flex: 1 1 100%; }
+  .product-form-page .price-tier-row { align-items: stretch; flex-direction: column; }
+  .product-form-page .price-tier-row > :deep(.p-button) { align-self: flex-end; }
+  .product-form-page .page-header-actions { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; }
+  .product-form-page .page-header-actions :deep(.p-button) { width: 100%; }
+}
+
 .product-form-page .price-tier-row,
 .product-form-page .document-item {
   border: 1px solid var(--ds-color-border);
