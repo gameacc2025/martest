@@ -1323,3 +1323,13 @@ Recently completed:
 - The shared Table unit test assertion was fixed after CI revealed that the test stub did not render Column children; see `07abcc2`.
 
 Continue the full redesign. Remaining significant page families include notifications/preferences and management/detail forms across roles, plus the public marketplace homepage/catalogue and shared shell. Do not claim completion until the full route inventory is reconciled and CI passes on the latest commit.
+
+
+## UI redesign checkpoint — 2026-11-02
+
+Additional completed areas:
+- Admin notification management and notification folder settings.
+- Admin and Company notification preference matrices.
+- Company-wide product catalogue page.
+
+Remaining route inventory to audit: auth/forgot-password screens, company subscription and product alias routes, order legacy route, not-found states, public Website pages and the shared dashboard shell. The full redesign remains active/incomplete.
