@@ -2193,3 +2193,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Company Settings header and tabs refined with live company status and verification indicators.
 - Admin/Company personal profile pages and Company Change Password received consistent account/security page headers and form surfaces.
 - Commits: a51eea5, 5715c4a, c2da3c9, d3391a1, 7bf11c2, 70f7445, 5e0a572. No local test/build/browser execution.
+
+
+## 2026-11-02 — UI redesign batch 17
+
+- Admin legacy Orders list receives a sales-context header and responsive toolbar/table surface; no missing order API capability is implied.
+- Admin Notification Folders receives a contextual heading, responsive creation form/list rows and design-token-based states. System folders remain protected and users still cannot create folders.
+- Commits: 7232a6e, fecd896. No local test/build/browser execution.
