@@ -1,10 +1,15 @@
 <template>
   <div class="shopping-cart-page">
     <div class="ds-container ds-page">
-      <header class="commerce-page-heading">
-        <div class="commerce-heading-copy"><span class="ds-eyebrow"><i class="pi pi-shopping-cart"></i> خرید محصولات</span><h1 class="ds-page-heading__title">سبد خرید</h1><p>اقلام انتخاب‌شده و تعداد موردنیاز را پیش از ادامه بررسی کنید.</p></div>
-        <Breadcrumb :home="home" :model="items" />
-      </header>
+      <WorkspacePageHeading
+        eyebrow="خرید محصولات"
+        title="سبد خرید"
+        description="اقلام انتخاب‌شده و تعداد موردنیاز را پیش از ادامه بررسی کنید."
+        icon="pi pi-shopping-cart"
+        heading-id="shopping-cart-title"
+      >
+        <template #actions><Breadcrumb :home="home" :model="items" /></template>
+      </WorkspacePageHeading>
 
       <div v-if="cartItems.length === 0" class="cart-empty-state">
         <i class="pi pi-shopping-cart text-6xl text-gray-300 mb-4"></i>
@@ -184,6 +189,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../../stores/cart'
