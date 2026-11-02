@@ -99,4 +99,8 @@ defineProps({
   padding: var(--ds-space-4) var(--ds-space-5);
   flex: 1;
 }
+
+.dash-panel { border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-xs); }
+.dash-panel-title h2 { font-weight: var(--ds-font-weight-bold); }
+
 </style>
