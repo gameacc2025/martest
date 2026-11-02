@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { inquiriesApi } from '@telecom/api-client'
@@ -267,21 +268,19 @@ onMounted(async () => {
 <template>
   <main class="my-inquiries-page" dir="rtl">
     <div class="inquiries-container">
-      <header class="page-heading">
-        <div class="heading-identity">
-          <span class="heading-icon"><i class="pi pi-inbox"></i></span>
-          <div>
-            <p class="eyebrow">فضای کاربری و پیگیری درخواست‌ها</p>
-            <h1>استعلام‌های من</h1>
-            <p class="page-description">درخواست‌های قیمت، وضعیت بررسی و پیشنهادهای تأمین‌کنندگان را پیگیری کنید.</p>
-          </div>
-        </div>
-        <div class="page-heading-actions">
+      <WorkspacePageHeading
+        eyebrow="فضای کاربری و پیگیری درخواست‌ها"
+        title="استعلام‌های من"
+        description="درخواست‌های قیمت، وضعیت بررسی و پیشنهادهای تأمین‌کنندگان را پیگیری کنید."
+        icon="pi pi-inbox"
+        heading-id="my-inquiries-page-title"
+      >
+        <template #actions>
           <Button label="اشتراک استعلام" icon="pi pi-wallet" severity="primary" outlined @click="router.push({ name: 'inquiry-subscription' })" />
           <Button v-if="isDetail" label="بازگشت به فهرست" icon="pi pi-arrow-right" severity="secondary" outlined @click="backToList" />
           <Button v-else label="به‌روزرسانی" icon="pi pi-refresh" severity="secondary" outlined :loading="loadingList" @click="refresh" />
-        </div>
-      </header>
+        </template>
+      </WorkspacePageHeading>
 
       <section v-if="isDetail" class="detail-panel">
         <div v-if="loadingDetail" class="loading-state"><ProgressSpinner /><span>در حال دریافت جزئیات...</span></div>
