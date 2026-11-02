@@ -35,7 +35,7 @@
                     @keyup.enter="applyFilters"
                     class="w-full"
                   />
-                  <Button icon="pi pi-search" @click="applyFilters" />
+                  <Button icon="pi pi-search" aria-label="اجرای جستجو" @click="applyFilters" />
                 </div>
               </div>
 
@@ -160,6 +160,7 @@
           <!-- Pagination -->
           <div v-if="totalPages > 1" class="pagination-wrap">
             <Paginator
+              aria-label="صفحه‌بندی محصولات"
               :rows="filters.limit"
               :totalRecords="totalItems"
               :rowsPerPageOptions="[12, 24, 48]"
@@ -641,6 +642,14 @@ watch(() => route.query.category, (newVal) => {
   min-height: 2.7rem;
   border-radius: var(--ds-radius-md);
 }
+.filter-actions :deep(.p-button) { min-height: 2.75rem; }
+.filter-group :deep(.p-inputtext:focus-visible),
+.filter-group :deep(.p-inputnumber-input:focus-visible),
+.filter-group :deep(.p-select:focus-visible),
+.filter-actions :deep(.p-button:focus-visible) {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
 .filter-actions { gap: .6rem; }
 .products-results-heading {
   display: flex;
@@ -683,6 +692,10 @@ watch(() => route.query.category, (newVal) => {
 .product-card:focus-visible {
   transform: translateY(-4px);
   box-shadow: var(--ds-shadow-lg);
+}
+.product-card:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 3px;
 }
 .product-image {
   aspect-ratio: 5 / 4;
@@ -734,6 +747,12 @@ watch(() => route.query.category, (newVal) => {
   background: var(--ds-color-surface);
 }
 .pagination-wrap { margin-top: 1.5rem; }
+.pagination-wrap :deep(.p-paginator-page),
+.pagination-wrap :deep(.p-paginator-next),
+.pagination-wrap :deep(.p-paginator-prev) {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
 @media (max-width: 900px) {
   .filters-sidebar { position: static; }
 }
