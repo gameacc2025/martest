@@ -324,7 +324,7 @@ const applyDiscountCode = async () => {
 }
 
 .cart-item:hover {
-  background-color: #f8f9fa;
+  background-color: var(--ds-color-surface-hover);
 }
 
 .shopping-cart-page { color: var(--ds-color-text); }
