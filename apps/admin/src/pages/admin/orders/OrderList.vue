@@ -1,10 +1,8 @@
 <template>
   <div class="order-list-page">
     <!-- Card with Toolbar -->
-    <div class="card ds-panel">
-      <div class="card-head">
-        <h1 class="card-head-title"><i class="pi pi-shopping-cart"></i> مدیریت سفارشات</h1>
-      </div>
+<header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت سفارش‌ها</h1><p class="ds-page-heading__description">فهرست سفارش‌های قدیمی؛ دسترسی و داده‌های این بخش تابع وضعیت API موجود است.</p></div></header>
+        <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
@@ -212,4 +210,6 @@ onMounted(() => {
   font-weight: var(--ds-font-weight-bold);
 }
 
+.order-list-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.order-list-page .ds-page-heading { margin-bottom: 0; }
 </style>
