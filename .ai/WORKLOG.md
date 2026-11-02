@@ -2247,3 +2247,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Notification channel/audience semantics, system folder restrictions, preferences APIs, and company product scope/actions unchanged.
 - Commits: `7875672`, `8985db7`, `387e7e9`, `43e9fcb`, `e239d42`, `dc92478`.
 - CI + migration validation were green at `dfc47e5`; newer commits pending latest CI.
+
+
+## UI redesign — public marketplace and shared shell (2026-11-02)
+
+- Shared dashboard sidebar now has a brand descriptor lockup, improved keyboard focus, section spacing and active/submenu states.
+- Public Companies, ContactUs, Addresses and MyInquiries screens received responsive/tokenized workspace treatments.
+- Public InquirySubscription aligned with the Company subscription UI, with the same payment/quota behavior.
+- No API, route, authorization, tenant scope, sealed inquiry privacy or payment semantics changed.
+- Commits: `abdefd7`, `bdf55c3`, `fca4b8d`, `f61e2e5`, `d31d278`, `63724e4`.
