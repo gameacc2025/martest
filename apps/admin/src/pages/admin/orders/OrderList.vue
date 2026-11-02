@@ -7,7 +7,7 @@
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
+            <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در سفارش‌ها" @input="debounceSearch" />
           </span>
           <Select
             v-model="statusFilter"
@@ -15,6 +15,7 @@
             optionLabel="label"
             optionValue="value"
             placeholder="وضعیت"
+            aria-label="فیلتر وضعیت سفارش"
             class="status-filter"
             @change="applyFilters"
           />
@@ -48,8 +49,8 @@
         <Column header="عملیات">
           <template #body="{ data }">
             <div class="flex gap-2">
-              <Button icon="pi pi-eye" severity="info" rounded text @click="viewOrder(data)" />
-              <Button icon="pi pi-pencil" severity="warn" rounded text @click="editStatus(data)" />
+              <Button icon="pi pi-eye" severity="info" rounded text aria-label="مشاهده سفارش" @click="viewOrder(data)" />
+              <Button icon="pi pi-pencil" severity="warn" rounded text aria-label="تغییر وضعیت سفارش" @click="editStatus(data)" />
             </div>
           </template>
         </Column>
@@ -245,6 +246,18 @@ onMounted(() => {
 .order-list-page :deep(.p-toolbar .p-inputtext), .order-list-page :deep(.p-toolbar .p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
 .order-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
 .order-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
+.order-list-page :deep(.p-toolbar .p-button),
+.order-list-page :deep(.p-button.p-button-text) { min-height: 2.75rem; }
+.order-list-page :deep(.p-button.p-button-text) {
+  width: 2.75rem;
+  min-width: 2.75rem;
+}
+.order-list-page :deep(.p-paginator-page),
+.order-list-page :deep(.p-paginator-next),
+.order-list-page :deep(.p-paginator-prev) {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
 @media (max-width: 640px) { .order-management-intro { align-items: flex-start; padding: 1rem; } .order-management-icon { width: 2.75rem; height: 2.75rem; } }
 
 </style>
