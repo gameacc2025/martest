@@ -573,4 +573,99 @@ onMounted(async () => {
   .page-heading-actions { display: grid; grid-template-columns: 1fr; }
 }
 
+
+/* Customer inquiry center: full-width operational layout with tokenized states. */
+.my-inquiries-page {
+  min-height: 65vh;
+  padding: var(--ds-space-8) var(--ds-container-pad) 4rem;
+  background: var(--ds-color-background);
+  color: var(--ds-color-text);
+}
+.inquiries-container {
+  width: 100%;
+  max-width: var(--ds-container-max-wide);
+  margin-inline: auto;
+}
+.my-inquiries-page .page-heading {
+  align-items: center;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.my-inquiries-page .page-heading h1 { color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
+.my-inquiries-page .page-description,
+.my-inquiries-page .muted,
+.my-inquiries-page .row-main small { color: var(--ds-color-text-muted); }
+.my-inquiries-page .list-panel,
+.my-inquiries-page .detail-panel {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.my-inquiries-page .inquiry-row {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  transition: border-color var(--ds-transition-fast), background var(--ds-transition-fast), transform var(--ds-transition-fast);
+}
+.my-inquiries-page .inquiry-row:hover {
+  border-color: color-mix(in srgb, var(--ds-color-primary) 42%, var(--ds-color-border));
+  background: color-mix(in srgb, var(--ds-color-primary) 4%, var(--ds-color-surface));
+  transform: translateY(-1px);
+}
+.my-inquiries-page .row-icon { background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
+.my-inquiries-page .detail-heading { border-color: var(--ds-color-border); }
+.my-inquiries-page .detail-heading h2,
+.my-inquiries-page .content-section h3 { color: var(--ds-color-text); }
+.my-inquiries-page .metadata-grid > div {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.my-inquiries-page .metadata-grid span { color: var(--ds-color-text-muted); }
+.my-inquiries-page .metadata-grid strong { color: var(--ds-color-text); }
+.my-inquiries-page .item-row,
+.my-inquiries-page .response-card,
+.my-inquiries-page .conversation-message {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+.my-inquiries-page .sealed-notice {
+  border-color: color-mix(in srgb, var(--ds-color-info) 25%, transparent);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-info-soft);
+  color: var(--ds-color-text);
+}
+.my-inquiries-page .empty-inline { border-color: var(--ds-color-border); color: var(--ds-color-text-muted); }
+.my-inquiries-page .empty-state,
+.my-inquiries-page .loading-state,
+.my-inquiries-page .state-message {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
+}
+.my-inquiries-page .empty-state > i { color: var(--ds-color-primary); }
+.my-inquiries-page .error-message,
+.my-inquiries-page .inline-error { color: var(--ds-color-danger); }
+.my-inquiries-page input,
+.my-inquiries-page select,
+.my-inquiries-page textarea {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text);
+}
+.my-inquiries-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+@media (max-width: 768px) {
+  .my-inquiries-page { padding: var(--ds-space-5) var(--ds-space-3) 3rem; }
+  .my-inquiries-page .page-heading { align-items: stretch; }
+  .heading-identity { align-items: flex-start; }
+  .page-heading-actions { width: 100%; }
+}
 </style>
