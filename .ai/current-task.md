@@ -1128,3 +1128,8 @@ The active user request is to continue until the complete UI of all three apps i
 - Remaining: all other listed Admin/Company/Website pages, shared components and responsive/dark states. Do not claim full completion until inventory is closed.
 - Do not add fake future CRM/HR/finance menu routes or controls. Planned modules belong in the documented information architecture only until their backend and permissions exist.
 - Tests/builds have not been run from this connected GitHub editing session. Run the relevant app tests/builds in the local workspace and record actual results.
+
+
+### UI redesign — batch 2 progress (2026-11-02)
+
+Completed this batch: Admin/Company product editors, inquiry subscriptions, Company settings, Admin/Company profile, all three notification inboxes and preference pages, Website login/register/recovery/profile/addresses/My Inquiries, Admin/Company password recovery/change-password, and shared Card/Button/Badge/DataTable/FormSection/ProductCard components. The tracker docs/UI_REDESIGN_EXECUTION.md is authoritative for completed and remaining pages. Continue through every remaining page and component; no completion claim until inventory and local verification are closed.
