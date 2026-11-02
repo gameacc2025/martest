@@ -1143,3 +1143,8 @@ Completed this batch: Company personal/company product views, Admin system setti
 ### UI redesign — batch 4 progress (2026-11-02)
 
 Audited all 69 Vue page files. Active page families are migrated or were already DS-native; remaining unmodified pages are existing public DS-native pages and thin state wrappers. Shared dashboard components, dialogs, headers, review cards, form alerts/actions and inputs are now aligned. Legacy commerce hover colors were replaced with design tokens. Added a sidebar rendering test for non-interactive future modules. Continue the shared-component audit and verify all test/build workflows before declaring completion.
+
+
+### Roadmap menu completion
+
+Added disabled, role-scoped labels for calendar/tasks, documents/assets, organizational communications/campaigns, knowledge center/content, and audit/compliance to complement CRM, finance, HR, procurement, inventory/logistics, support, projects, BI, and integrations/security. Updated the menu regression test and Paces audit to distinguish directly inspected pages from catalog-listed applications. The Paces live preview index still returns cache miss; do not claim all 280+ pages were individually opened.
