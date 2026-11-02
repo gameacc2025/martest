@@ -128,4 +128,7 @@ const overall = computed(() => {
 .system-status-label--warning { color: var(--ds-color-warning); }
 .system-status-label--danger  { color: var(--ds-color-danger); }
 .system-status-label--gray    { color: var(--ds-color-text-muted); }
+
+.system-status-overall { border-radius: var(--ds-radius-lg); }
+
 </style>
