@@ -115,4 +115,15 @@ defineProps({
   padding: var(--ds-space-4) var(--ds-space-6);
   border-top: 1px solid var(--ds-color-border);
 }
+
+.ds-card {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  transition: box-shadow var(--ds-transition), border-color var(--ds-transition), transform var(--ds-transition);
+}
+.ds-card-header { gap: var(--ds-space-4); }
+.ds-card-title { letter-spacing: -0.01em; }
+.ds-card--elev-md { box-shadow: var(--ds-shadow-md); }
+.ds-card--elev-lg { box-shadow: var(--ds-shadow-lg); }
+
 </style>
