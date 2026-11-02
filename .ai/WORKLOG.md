@@ -2138,3 +2138,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added PageHeader unit tests for route metadata and fallback text.
 - Commits: `48ce7a6`, `012f0ea`, `ca1cec4`, `e37de59`, `038a467`, `f763480`, `f9a2f47`, `0f64a5c`, `b933ca0`, `efac6fc`.
 - GitHub combined status for current main head is empty (no checks reported); no local tests/builds were executed. Continue implementation; do not claim full UI completion or verification.
+
+
+## 2026-11-02 — UI redesign batch 11
+
+- Admin/Company inquiry-create flows now use contextual authoring headers, improved PrimeVue stepper progress states, responsive step navigation and consistent form/review surfaces.
+- Website homepage received a refined brand hero/search CTA, improved category/product card treatment, product image containment, and a two-column mobile product grid (single column only on very narrow screens).
+- Preserved all inquiry step state, validation, save-draft and submit behavior; preserved homepage API data and navigation.
+- Commits: `ec8f735`, `14361df`, `5da81bd`.
+- Verification remains outstanding; no local test/build/browser execution claimed.
