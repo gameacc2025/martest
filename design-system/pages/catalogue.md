@@ -23,3 +23,8 @@ Applies to public product discovery and Admin/Company product lists.
 - When no published price tier is returned, state that price must be requested from the supplier. Never show a zero, placeholder or fabricated price.
 - Technical identifiers such as SKU use LTR isolation within the Persian RTL layout.
 - On small screens, keep cards compact but readable and stack the price/details footer rather than shrinking controls.
+
+## Homepage product card consistency
+- Featured and recent product cards use the same identity hierarchy as the public catalogue: title, supplier, optional API-provided verification, optional brand/model/SKU and an explicit price state.
+- When a published price tier is absent, show the supplier inquiry state instead of a dash or numeric placeholder.
+- Keep the whole card as one keyboard-accessible product-details navigation surface. The visual details affordance is not a nested link/button.
