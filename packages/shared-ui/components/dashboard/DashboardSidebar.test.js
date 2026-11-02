@@ -42,3 +42,19 @@ describe('DashboardSidebar planned roadmap entries', () => {
     expect(wrapper.find('button.dash-sidebar-link--planned').exists()).toBe(false)
   })
 })
+
+describe('DashboardSidebar mobile drawer semantics', () => {
+  it('exposes the open mobile navigation as a modal dialog', () => {
+    const wrapper = mount(DashboardSidebar, {
+      props: { mobileOpen: true, menuItems: [] },
+      global: {
+        stubs: { BrandMark: true, Badge: true, RouterLink: true },
+        directives: { tooltip: () => {} },
+      },
+    })
+
+    expect(wrapper.find('aside').attributes('role')).toBe('dialog')
+    expect(wrapper.find('aside').attributes('aria-modal')).toBe('true')
+    expect(wrapper.find('aside').attributes('aria-label')).toBe('منوی ناوبری پنل')
+  })
+})
