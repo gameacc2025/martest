@@ -1,40 +1,56 @@
 <template>
-  <div class="system-settings-page" dir="rtl">
-    <div class="page-header" :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }">
-      <h1 style="font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--text-color)">تنظیمات سیستم</h1>
-    </div>
-
-    <div class="card" style="background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 12px; max-width: 42rem;">
-      <div class="setting-row" :style="{ padding: '1.5rem', borderBottom: '1px solid var(--surface-border)' }">
-        <div class="setting-head" :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }">
-          <div>
-            <h3 style="margin: 0 0 0.35rem; font-size: 1.05rem; color: var(--text-color)">سقف ویرایش‌های پس از تأیید محصول</h3>
-            <p style="margin: 0; color: var(--text-color-secondary); font-size: 0.88rem; line-height: 1.9; max-width: 30rem">
-              هر بار که یک شرکت محتوای محصولِ تأییدشده را ویرایش کند، شمارنده «ویرایش بدون بازبینی» یک واحد افزایش می‌یابد.
-              وقتی به این سقف برسد، محصول به‌صورت خودکار برای بازبینی مجدد به وضعیت «در انتظار بررسی» برمی‌گردد و مدیران مطلع می‌شوند.
-            </p>
-          </div>
-          <div class="threshold-control" :style="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
-            <InputNumber v-model="threshold" :min="1" :max="1000" :showButtons="true" buttonLayout="horizontal"
-              decrementButtonIcon="pi pi-minus" incrementButtonIcon="pi pi-plus" style="width: 9rem"
-              :disabled="saving || loading || !!error" />
-            <Button label="ذخیره" icon="pi pi-check" :loading="saving" :disabled="loading || !!error" @click="saveThreshold" />
-          </div>
-        </div>
-
-        <div v-if="loading" class="loading" style="margin-top: 0.75rem; color: var(--text-color-secondary); font-size: 0.88rem;">
-          <i class="pi pi-spin pi-spinner" /> در حال بارگذاری تنظیمات...
-        </div>
-        <div v-if="error" style="margin-top: 0.75rem; color: var(--p-red-600); font-size: 0.88rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-          <i class="pi pi-exclamation-circle" /> {{ error }}
-          <Button label="تلاش مجدد" icon="pi pi-refresh" text size="small" severity="secondary" @click="loadSettings" />
-        </div>
-        <p v-else-if="!configured" style="margin: 0.75rem 0 0; color: var(--text-color-secondary); font-size: 0.8rem;">
-          این تنظیم هنوز در سیستم ثبت نشده است؛ مقدار پیش‌فرض (۵) نمایش داده می‌شود.
-        </p>
+  <main class="system-settings-page" dir="rtl">
+    <header class="system-settings-heading">
+      <span class="system-settings-icon"><i class="pi pi-cog"></i></span>
+      <div>
+        <span class="ds-eyebrow">پیکربندی و سیاست‌های سامانه</span>
+        <h1>تنظیمات سیستم</h1>
+        <p>مقادیر عملیاتی و قواعد عمومی بازارگاه را مدیریت کنید.</p>
       </div>
-    </div>
-  </div>
+    </header>
+
+    <section class="system-setting-card" aria-labelledby="product-edit-threshold-title">
+      <div class="system-setting-heading">
+        <span class="system-setting-symbol"><i class="pi pi-shield"></i></span>
+        <div class="system-setting-copy">
+          <h2 id="product-edit-threshold-title">سقف ویرایش‌های پس از تأیید محصول</h2>
+          <p>
+            هر بار که یک شرکت محتوای محصولِ تأییدشده را ویرایش کند، شمارنده «ویرایش بدون بازبینی» یک واحد افزایش می‌یابد.
+            وقتی به این سقف برسد، محصول به‌صورت خودکار برای بازبینی مجدد به وضعیت «در انتظار بررسی» برمی‌گردد و مدیران مطلع می‌شوند.
+          </p>
+        </div>
+      </div>
+
+      <div class="threshold-control">
+        <label for="product-edit-threshold">حداکثر دفعات ویرایش</label>
+        <div class="threshold-control-row">
+          <InputNumber
+            inputId="product-edit-threshold"
+            v-model="threshold"
+            :min="1"
+            :max="1000"
+            :showButtons="true"
+            buttonLayout="horizontal"
+            decrementButtonIcon="pi pi-minus"
+            incrementButtonIcon="pi pi-plus"
+            :disabled="saving || loading || !!error"
+          />
+          <Button label="ذخیره تنظیمات" icon="pi pi-check" :loading="saving" :disabled="loading || !!error" @click="saveThreshold" />
+        </div>
+      </div>
+
+      <div v-if="loading" class="system-setting-state" role="status">
+        <i class="pi pi-spin pi-spinner"></i> در حال بارگذاری تنظیمات...
+      </div>
+      <div v-if="error" class="system-setting-error" role="alert">
+        <i class="pi pi-exclamation-circle"></i><span>{{ error }}</span>
+        <Button label="تلاش مجدد" icon="pi pi-refresh" text size="small" severity="secondary" @click="loadSettings" />
+      </div>
+      <p v-else-if="!configured" class="system-setting-note">
+        این تنظیم هنوز در سیستم ثبت نشده است؛ مقدار پیش‌فرض (۵) نمایش داده می‌شود.
+      </p>
+    </section>
+  </main>
 </template>
 
 <script setup>
@@ -92,26 +108,72 @@ async function saveThreshold() {
 onMounted(loadSettings)
 </script>
 <style scoped>
-
-.system-settings-page { display: flex; flex-direction: column; gap: var(--ds-space-5); padding: var(--ds-space-5) !important; }
-.system-settings-page .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
+.system-settings-page { display: flex; flex-direction: column; gap: var(--ds-space-5); direction: rtl; }
+.system-settings-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
   box-shadow: var(--ds-shadow-xs);
 }
-.system-settings-page .page-header h1 { color: var(--ds-color-text) !important; font-size: var(--ds-font-size-2xl) !important; }
-.system-settings-page .card {
-  max-width: 760px !important;
-  border-color: var(--ds-color-border) !important;
-  border-radius: var(--ds-radius-xl) !important;
+.system-settings-icon,
+.system-setting-symbol {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.system-settings-heading > div { min-width: 0; }
+.system-settings-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
+.system-settings-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.system-setting-card {
+  max-width: 56rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
-.system-settings-page .setting-row { padding: var(--ds-space-6) !important; }
-.system-settings-page .setting-head { align-items: flex-start !important; }
-.system-settings-page .setting-head h3 { color: var(--ds-color-text) !important; font-weight: var(--ds-font-weight-bold); }
-.system-settings-page .setting-head p { color: var(--ds-color-text-muted) !important; }
-@media (max-width: 640px) { .system-settings-page { padding: var(--ds-space-3) !important; } }
-
+.system-setting-heading { display: flex; align-items: flex-start; gap: 1rem; }
+.system-setting-symbol { background: var(--ds-color-info-soft); }
+.system-setting-copy { min-width: 0; }
+.system-setting-copy h2 { margin: 0 0 .5rem; color: var(--ds-color-text); font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
+.system-setting-copy p { max-width: 58rem; margin: 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.9; }
+.threshold-control {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--ds-color-border);
+}
+.threshold-control > label { display: block; margin-bottom: .4rem; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); }
+.threshold-control-row { display: flex; align-items: center; gap: .75rem; }
+.threshold-control :deep(.p-inputnumber) { width: 10rem; }
+.threshold-control :deep(.p-inputnumber-input) { width: 100%; border-radius: var(--ds-radius-md); }
+.threshold-control :deep(.p-button) { min-height: 2.7rem; border-radius: var(--ds-radius-md); }
+.system-setting-state,
+.system-setting-note,
+.system-setting-error { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; font-size: var(--ds-font-size-sm); line-height: 1.8; }
+.system-setting-state,
+.system-setting-note { color: var(--ds-color-text-muted); }
+.system-setting-error { flex-wrap: wrap; color: var(--ds-color-danger); }
+@media (max-width: 640px) {
+  .system-settings-heading { align-items: flex-start; padding: 1rem; }
+  .system-settings-icon, .system-setting-symbol { width: 2.75rem; height: 2.75rem; }
+  .system-setting-heading { flex-direction: column; }
+  .threshold-control { align-items: stretch; }
+  .threshold-control-row { align-items: stretch; flex-direction: column; }
+  .threshold-control :deep(.p-inputnumber), .threshold-control-row :deep(.p-button) { width: 100%; }
+}
 </style>
