@@ -1410,3 +1410,10 @@ Continue to detail pages, account pages, notification inboxes, and public catalo
 Shared workspace headings now cover Company Profile and Website Profile, Orders, Wishlist and My Inquiries. Existing breadcrumbs and page actions are preserved. Commits: `95e8111`, `de3d47f`, `7991a04`, `ecfc860`, `959035d`.
 
 Continue the remaining Website catalog, checkout/cart, detail pages, account screens, notification inboxes and all remaining panel modules.
+
+
+## Public marketplace checkpoint — 2026-11-02
+
+Shared workspace heading now covers Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us. Breadcrumbs and page actions are preserved. Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`.
+
+Continue remaining Website pages, product details and inquiry details; complete UI audit before sign-off.
