@@ -1138,3 +1138,8 @@ Completed this batch: Admin/Company product editors, inquiry subscriptions, Comp
 ### UI redesign — batch 3 progress (2026-11-02)
 
 Completed this batch: Company personal/company product views, Admin system settings and legacy order list styling, Website contact/inquiry-subscription/legacy catalogue, shared auth handoff/footer/breadcrumb/feedback states, and accessible Admin/Company loading gates. Added role-scoped disabled future-module labels to the sidebar (no routes or actions) and a Vitest test for the menu contract. Continue auditing every remaining component and page; local tests/builds remain outstanding.
+
+
+### UI redesign — batch 4 progress (2026-11-02)
+
+Audited all 69 Vue page files. Active page families are migrated or were already DS-native; remaining unmodified pages are existing public DS-native pages and thin state wrappers. Shared dashboard components, dialogs, headers, review cards, form alerts/actions and inputs are now aligned. Legacy commerce hover colors were replaced with design tokens. Added a sidebar rendering test for non-interactive future modules. Continue the shared-component audit and verify all test/build workflows before declaring completion.
