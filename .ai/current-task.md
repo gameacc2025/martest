@@ -1454,3 +1454,13 @@ Completed:
 Still active:
 - Continue with inquiry detail/create pages, remaining form families, orders/categories/roles/settings, public home/category/search/profile/account pages and shared component consistency.
 - Latest batch needs CI confirmation. Do not mark complete until all routed page families are audited and CI passes.
+
+
+## UI redesign checkpoint — shared tables (2026-11-02)
+
+The next structural layer after the dashboard batch is now implemented:
+- Shared DataTable uses labeled row cards under 768px instead of requiring horizontal scrolling.
+- Existing slots, server/client filtering, pagination, selection, actions, and loading/empty states are preserved.
+- `mobileCardLayout=false` opts out where a dense table must retain classic scroll behavior.
+- Focused tests added; execution pending CI.
+- Continue with the shared app shell/header/sidebar and remaining page families. Do not call the UI redesign complete.
