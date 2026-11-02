@@ -738,3 +738,22 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Added Admin and Company inbox tests for semantic button behavior, selected state and unchanged double-click read semantics.
 - Existing API endpoints, folder IDs, unread counts, selection behavior, move/copy, bulk actions and user scope are unchanged.
 - CI for the latest batch is pending; no local test/build execution is claimed.
+
+## Company subscription and homepage catalogue — batch 14 (2026-11-02)
+
+### Company inquiry subscription
+- Replaced the bespoke title row with the shared WorkspacePageHeading.
+- Rebuilt the page styling around design-system surfaces/tokens: subscription state panels, quota cards, plan cards, notices, responsive grids and 44px actions.
+- Quota meters now expose accessible progressbar names, min/max/current values and value text.
+- Plan selection now exposes aria-pressed on the existing selection/request action. Existing payment routing, plan API calls, quota semantics, pending/current subscription rules and manual-payment caution text are unchanged.
+- Added component tests for real plan loading, quota accessibility and explicit plan selection before request submission.
+
+### Website homepage
+- Featured and recent product cards now show supplier identity, API-confirmed verification, optional brand/model/SKU, price when available, and a clear supplier-inquiry state when no price tier exists.
+- Technical SKU is isolated LTR in the RTL card. Cards remain single navigation surfaces to the existing details route.
+- Added homepage source-contract coverage for verification, no-price fallback and details affordance.
+
+### Verification
+- CI test/build passed at commit f2ee67b (includes the Company subscription component tests). The subsequent homepage commits are newer and require a fresh CI run.
+- Database migration/runtime workflows were still in progress at the last check; no migration or runtime sign-off is claimed for the latest main head.
+- No local tests/builds were run in this connected GitHub editing session.
