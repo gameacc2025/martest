@@ -2358,3 +2358,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Company inquiry list now distinguishes API failure from empty results and offers retry; added accessible search/filter/view labels and component retry tests.
 - CI passed at `2c5b360` for frontend/shared tests, backend tests and all frontend builds; later inquiry changes await the next CI completion.
 - All work remains directly on `main`; no other branches were created.
+
+
+## UI implementation — product editor and directories batch 9 (2026-11-02)
+
+- Product editors (Admin/Company): associated labels and inputs across static fields, dynamic specs and price tiers; added accessible names to icon actions; 44px action targets; responsive field/price grids and focus-visible treatment.
+- Admin/Company user directories: named search/filter controls and icon actions, 44px row-action and pagination targets.
+- Admin company directory: accessible filter labels and 44px action/pagination targets.
+- Website product catalogue: accessible search/pagination names, visible keyboard focus on cards/filters, 44px filter actions/pagination.
+- No API, route, permission, payload, pricing or tenant logic changed.
+- Latest changes are awaiting CI. Direct-to-main only; no branch created.
