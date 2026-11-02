@@ -57,6 +57,7 @@
       </Message>
 
       <DataTable
+        class="company-management-table"
         :value="companies"
         :loading="loading"
         :paginator="true"
