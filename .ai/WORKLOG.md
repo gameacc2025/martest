@@ -2408,3 +2408,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Fixed a CI-detected orphaned `v-else-if` in Company inquiry list; fixed missing `mobileCardLayout` prop declaration after CI exposed it.
 - Commits: `d4d102d`, `a497b8a`, `cca3d37`, `2860f1b`, `d9c42c9`.
 - Latest full CI rerun pending.
+
+
+## UI redesign — access control and order lists batch 11 (2026-11-02)
+
+- Roles, Permissions and Orders admin lists migrated to shared responsive DataTable.
+- Existing API/store calls, role scope, permission tags, system-role delete restriction, CRUD actions and order status actions retained.
+- Server pagination wired through shared lazy request events; filter/search and post-mutation page reset behavior retained.
+- Commits: `d12afeb`, `54c49e4`, `9d3c3c6`, `b0a262f`, `975c917`.
+- CI/build verification pending.
