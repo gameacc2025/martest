@@ -1,8 +1,8 @@
 <template>
-  <div class="product-list-page">
+  <div class="product-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <div class="card">
-      <Toolbar>
+    <div class="card ds-panel">
+      <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
@@ -513,5 +513,44 @@ onMounted(() => {
 .table-state p {
   margin: 0;
   font-size: 0.95rem;
+}
+
+/* Consistent catalogue management surface and dense-table hierarchy. */
+.product-list-page { gap: var(--ds-space-5); }
+.product-list-page .card {
+  border-radius: var(--ds-radius-xl);
+  border-color: var(--ds-color-border);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-list-page :deep(.p-toolbar) {
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
+  background: var(--ds-color-surface);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  gap: var(--ds-space-3);
+}
+.product-list-page :deep(.p-datatable) { border: 0; }
+.product-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  white-space: nowrap;
+}
+.product-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.product-list-page :deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background: var(--ds-color-surface-hover);
+}
+@media (max-width: 640px) {
+  .product-list-page :deep(.p-toolbar) { align-items: stretch; }
+  .product-list-page :deep(.p-toolbar-start),
+  .product-list-page :deep(.p-toolbar-end) { flex-wrap: wrap; }
 }
 </style>
