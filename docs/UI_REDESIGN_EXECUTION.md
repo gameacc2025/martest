@@ -767,3 +767,10 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Profile/password dialogs now use associated labels/IDs, visible focus treatment and 44px controls. Existing profile update, password change, avatar upload, navigation and logout handlers remain unchanged.
 - Added UserProfile component tests for API-backed identity, avatar fallback, dialog opening and retryable load failure.
 - Latest main needs CI confirmation; no local tests/builds are claimed.
+## Public address book — batch 16 (2026-11-02)
+
+- Replaced decorative map-marker glyphs with PrimeIcons in address cards and the empty state.
+- Increased primary, secondary, edit/delete, make-default and form control targets to the shared 44px target; added visible focus outlines.
+- Preserved the existing address CRUD/default API handlers and all fields; no address model or endpoint changes.
+- Added address-book tests for API-backed address rendering, default-address state, form opening/labels and the empty state.
+- CI for the latest address commits is pending; no local test/build execution is claimed.
