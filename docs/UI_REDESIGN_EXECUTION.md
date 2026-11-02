@@ -697,3 +697,14 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Scope/status/search changes reset the table paginator; the shared table continues to emit lazy requests to the existing API.
 - Commits: `d4d102d` Admin inquiry list; `a497b8a` Company inquiry list; `cca3d37` scoped paginator reset; `2860f1b` orphan empty-state fix.
 - A CI failure was traced to an orphaned `v-else-if` in the Company inquiry template and fixed in `2860f1b`. Shared table mobile prop was separately fixed in `d9c42c9`; final CI rerun is pending.
+
+
+## Access-control and order lists — batch 11 (2026-11-02)
+
+- Admin Roles, Permissions and Orders lists now use the shared responsive DataTable with labeled mobile cards.
+- Role rows retain scope badges, assigned permission chips, user counts, system-role delete restrictions and existing edit/delete handlers.
+- Permission rows retain name/label/group/description and existing CRUD handlers.
+- Order rows retain the existing API/store source, status labels, amount/date display and current view/status dialog actions.
+- Search/filter and server pagination continue through the existing stores/API. Mutations reset the local paginator.
+- Commits: `d12afeb` Roles, `54c49e4` Permissions, `9d3c3c6` Orders, `b0a262f` / `975c917` mutation paginator resets.
+- CI/build verification for this batch is pending.
