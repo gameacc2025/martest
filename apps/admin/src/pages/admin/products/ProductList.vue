@@ -1,14 +1,13 @@
 <template>
   <div class="product-list-page ds-stack">
     <!-- Card with Toolbar -->
-<section class="product-management-intro" aria-labelledby="product-management-title">
-  <div class="product-management-intro-icon"><i class="pi pi-box"></i></div>
-  <div class="product-management-intro-copy">
-    <span>کنترل کاتالوگ</span>
-    <h1 id="product-management-title">مدیریت محصولات</h1>
-    <p>کاتالوگ محصولات بازارگاه را بررسی، ارزیابی و مدیریت کنید.</p>
-  </div>
-</section>
+<WorkspacePageHeading
+      eyebrow="کنترل کاتالوگ"
+      title="مدیریت محصولات"
+      description="کاتالوگ محصولات بازارگاه را بررسی، ارزیابی و مدیریت کنید."
+      icon="pi pi-box"
+      heading-id="product-management-title"
+    />
         <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
       <Toolbar class="ds-toolbar product-management-toolbar">
         <template #start>
@@ -147,6 +146,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
