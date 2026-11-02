@@ -10,7 +10,7 @@
   </div>
 </section>
         <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
-      <Toolbar class="ds-toolbar">
+      <Toolbar class="ds-toolbar product-management-toolbar">
         <template #start>
           <span class="search-input">
             <InputText v-model="searchQuery" placeholder="جستجوی محصول..." @input="debounceSearch" />
@@ -23,7 +23,7 @@
         </template>
       </Toolbar>
 
-      <DataTable :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
+      <DataTable class="product-management-table" :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
         :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
         @page="onPageChange" responsiveLayout="scroll" :rowHover="true"
         v-if="products.length > 0 || loading">
@@ -372,7 +372,8 @@ onMounted(() => {
 <style scoped>
 .product-list-page {
   direction: rtl;
-  padding: 1.5rem;
+  padding: 0;
+  gap: clamp(1rem, 2vw, 1.5rem);
 }
 
 .page-header {
@@ -667,4 +668,119 @@ onMounted(() => {
   .product-list-page :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
 
+
+/* Company catalogue: match the admin management surface while retaining tenant-scoped actions. */
+.product-management-intro {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 7.5rem;
+  padding: clamp(1.15rem, 2.4vw, 1.6rem);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, var(--ds-color-border));
+  border-radius: var(--ds-radius-xl);
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--ds-color-primary) 13%, transparent), transparent 42%),
+    var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-management-intro-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 3.25rem;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 24%, transparent);
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.35rem;
+}
+.product-management-intro-copy { min-width: 0; }
+.product-management-intro-copy > span {
+  color: var(--ds-color-primary-text);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-management-intro-copy h1 {
+  margin: .2rem 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-management-intro-copy p {
+  margin: 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.8;
+}
+.product-management-surface {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-management-toolbar {
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.product-management-toolbar :deep(.p-toolbar-start),
+.product-management-toolbar :deep(.p-toolbar-end) { gap: .65rem; flex-wrap: wrap; }
+.product-management-toolbar :deep(.p-inputtext),
+.product-management-toolbar :deep(.p-select) {
+  min-height: 2.65rem;
+  border-radius: var(--ds-radius-md);
+}
+.product-management-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
+.product-management-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.product-management-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  vertical-align: middle;
+}
+.product-management-table :deep(.p-datatable-tbody > tr) { transition: background-color var(--ds-transition-fast); }
+.product-management-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
+.product-management-table :deep(.p-paginator) {
+  justify-content: flex-start;
+  gap: .3rem;
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.product-management-table :deep(.p-paginator-page),
+.product-management-table :deep(.p-paginator-next),
+.product-management-table :deep(.p-paginator-prev) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+}
+.product-management-table :deep(.p-paginator-page.p-highlight) {
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+}
+.product-management-table :deep(.p-button.p-button-text) { width: 2.2rem; height: 2.2rem; }
+@media (max-width: 700px) {
+  .product-management-intro { align-items: flex-start; }
+  .product-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
+  .product-management-toolbar :deep(.p-toolbar-start),
+  .product-management-toolbar :deep(.p-toolbar-end) { width: 100%; }
+  .product-management-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .product-management-toolbar :deep(.p-inputtext),
+  .product-management-toolbar :deep(.p-select) { width: 100%; margin: 0; }
+  .product-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
+}
 </style>
