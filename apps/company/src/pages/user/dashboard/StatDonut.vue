@@ -116,4 +116,11 @@ const arcs = computed(() => {
 .legend-value {
   margin-inline-start: auto;
 }
+
+.donut-wrap { gap: var(--ds-space-5); }
+.donut-track { stroke: var(--ds-color-surface-alt); }
+.donut-total { fill: var(--ds-color-text); font-variant-numeric: tabular-nums; }
+.donut-legend { gap: var(--ds-space-3); }
+.donut-legend li { color: var(--ds-color-text-muted); }
+
 </style>
