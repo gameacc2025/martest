@@ -14,3 +14,11 @@ Applies to Admin and Company inquiry list, create and detail pages.
 - Do not synthesize counts, deadlines, responses, supplier offers or subscription balances.
 - Preserve server-side pagination, sorting, filters and scope parameters.
 - Use clear loading, empty, error and access-denied states.
+
+
+## Notification inbox interaction refinement (2026-11-02)
+- Keep the three-pane folder/list/reading layout and the fixed system-managed folders; do not introduce user-created folders or alter folder APIs.
+- Message selection and message opening are separate controls: use a labeled checkbox for selection and a native button for opening/reading. Never put nested buttons or checkboxes inside an element with role=button.
+- Native message-open buttons expose aria-pressed for the selected item and work with Enter/Space without custom keyboard emulation.
+- Preserve the established interaction contract: single click selects only; double-click opens and marks unread messages as read.
+- Keep row action controls, folder links, bulk actions and reading-pane actions at least 44px; retain clear focus-visible states and responsive wrapping.
