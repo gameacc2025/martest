@@ -1,9 +1,9 @@
 <template>
   <div class="company-dashboard">
     <!-- Page header -->
-    <div class="page-header">
-      <h1>داشبورد شرکت</h1>
-      <div class="page-header-actions">
+    <div class="page-header ds-page-heading">
+      <h1 class="ds-page-heading__title">داشبورد شرکت</h1>
+      <div class="page-header-actions ds-page-heading__actions">
         <router-link :to="{ name: 'manage-product-create' }">
           <Button label="افزودن محصول" icon="pi pi-plus" />
         </router-link>
@@ -679,5 +679,28 @@ onMounted(() => {
   .cd-kpis { grid-template-columns: 1fr; }
   .cd-alert { flex-wrap: wrap; }
   .cd-alert-action { width: 100%; justify-content: center; margin-top: var(--ds-space-1); }
+}
+
+/* Paces-inspired dashboard rhythm with company-scoped data unchanged. */
+.company-dashboard .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.company-dashboard .page-header h1 {
+  color: var(--ds-color-text);
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+}
+.cd-kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.cd-grid--1-1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cd-grid--2-1 { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
+@media (max-width: 900px) {
+  .cd-grid--1-1,
+  .cd-grid--2-1 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .company-dashboard .page-header { padding: var(--ds-space-4); }
 }
 </style>
