@@ -140,9 +140,14 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
 
     <template v-else>
       <!-- Page Header with Trust Signals -->
-      <div class="page-header">
-        <div class="page-header-left">
-          <h1>تنظیمات شرکت</h1>
+      <header class="page-header settings-heading">
+        <div class="settings-heading-identity">
+          <span class="settings-heading-icon"><i class="pi pi-building"></i></span>
+          <div>
+            <span class="settings-heading-eyebrow">پروفایل و کنترل‌های سازمانی</span>
+            <h1>تنظیمات شرکت</h1>
+            <p>اطلاعات عمومی، راه‌های تماس، اعلان‌ها و امنیت حساب شرکت را مدیریت کنید.</p>
+          </div>
         </div>
         <div class="trust-badges">
           <div class="trust-badge" :class="'badge-' + (statusSeverity[companyMeta.status] || 'secondary')">
@@ -154,7 +159,7 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
             <span>{{ companyMeta.isVerified ? 'تأیید شده' : 'در انتظار تأیید' }}</span>
           </div>
         </div>
-      </div>
+      </header>
 
       <!-- Tabs -->
       <Tabs v-model:value="activeTab">
@@ -764,5 +769,49 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
 .settings-page :deep(.p-select),
 .settings-page :deep(.p-textarea) { border-radius: var(--ds-radius-md); }
 @media (max-width: 640px) { .settings-page { padding: var(--ds-space-3); } }
+
+
+.settings-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.settings-page .page-header { margin-bottom: 0; }
+.settings-heading {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.settings-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.settings-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.settings-heading-identity > div { min-width: 0; }
+.settings-heading-eyebrow { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.settings-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
+.settings-heading-identity p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
+.settings-page :deep(.p-tablist) { border-color: var(--ds-color-border); border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0; background: var(--ds-color-surface); }
+.settings-page :deep(.p-tabpanels) { border-color: var(--ds-color-border); border-radius: 0 0 var(--ds-radius-xl) var(--ds-radius-xl); background: var(--ds-color-surface); }
+.settings-page .meta-section,
+.settings-page .form-section,
+.settings-page .switch-row,
+.settings-page .session-item { border-color: var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface-alt); }
+.settings-page .form-section { background: var(--ds-color-surface); }
+.settings-page :deep(.p-inputtext),
+.settings-page :deep(.p-textarea),
+.settings-page :deep(.p-select) { border-color: var(--ds-color-border); border-radius: var(--ds-radius-md); }
+.settings-page .tab-actions { border-color: var(--ds-color-border); }
+@media (max-width: 640px) {
+  .settings-heading { align-items: flex-start; flex-direction: column; padding: 1rem; }
+  .settings-heading-identity { align-items: flex-start; }
+  .settings-page .tab-content { padding: 1rem; }
+  .settings-page .trust-badges { width: 100%; }
+}
 
 </style>
