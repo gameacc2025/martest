@@ -497,7 +497,7 @@ onMounted(async () => {
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
-.my-inquiries-page input,
+.my-inquiries-page input:not([type="checkbox"]):not([type="radio"]),
 .my-inquiries-page select,
 .my-inquiries-page textarea { border-color: var(--ds-color-border); border-radius: var(--ds-radius-md); }
 @media (max-width: 640px) {
@@ -653,7 +653,7 @@ onMounted(async () => {
 .my-inquiries-page .empty-state > i { color: var(--ds-color-primary); }
 .my-inquiries-page .error-message,
 .my-inquiries-page .inline-error { color: var(--ds-color-danger); }
-.my-inquiries-page input,
+.my-inquiries-page input:not([type="checkbox"]):not([type="radio"]),
 .my-inquiries-page select,
 .my-inquiries-page textarea {
   border-color: var(--ds-color-border);
@@ -662,12 +662,12 @@ onMounted(async () => {
   color: var(--ds-color-text);
 }
 .my-inquiries-page :deep(.p-button) { min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
-.my-inquiries-page input,
+.my-inquiries-page input:not([type="checkbox"]):not([type="radio"]),
 .my-inquiries-page select,
 .my-inquiries-page textarea { min-height: 2.75rem; }
 .my-inquiries-page :deep(.p-button):focus-visible,
 .my-inquiries-page a:focus-visible,
-.my-inquiries-page input:focus-visible,
+.my-inquiries-page input:not([type="checkbox"]):not([type="radio"]):focus-visible,
 .my-inquiries-page select:focus-visible,
 .my-inquiries-page textarea:focus-visible {
   outline: 2px solid var(--ds-color-focus);
