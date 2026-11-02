@@ -1,7 +1,10 @@
 <template>
   <div class="order-list-page">
     <!-- Card with Toolbar -->
-<header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت سفارش‌ها</h1><p class="ds-page-heading__description">فهرست سفارش‌های قدیمی؛ دسترسی و داده‌های این بخش تابع وضعیت API موجود است.</p></div></header>
+<header class="order-management-intro">
+  <span class="order-management-icon"><i class="pi pi-receipt"></i></span>
+  <div><span>مدیریت فروش</span><h1>مدیریت سفارش‌ها</h1><p>فهرست سفارش‌های قدیمی؛ دسترسی و داده‌های این بخش تابع وضعیت API موجود است.</p></div>
+</header>
         <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
@@ -212,4 +215,38 @@ onMounted(() => {
 
 .order-list-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
 .order-list-page .ds-page-heading { margin-bottom: 0; }
+
+.order-list-page { gap: var(--ds-space-5); }
+.order-management-intro {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.order-management-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.order-management-intro > div { min-width: 0; }
+.order-management-intro > div > span { color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.order-management-intro h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
+.order-management-intro p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
+.order-list-page .card { background: var(--ds-color-surface); }
+.order-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
+.order-list-page :deep(.p-toolbar .p-inputtext), .order-list-page :deep(.p-toolbar .p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.order-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+.order-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
+@media (max-width: 640px) { .order-management-intro { align-items: flex-start; padding: 1rem; } .order-management-icon { width: 2.75rem; height: 2.75rem; } }
+
 </style>
