@@ -1368,3 +1368,10 @@ Continue the full UI redesign across the shared shell, Admin/Company management 
 Admin and Company product forms now show a live, accessible completion indicator for required fields. The indicator mirrors existing validation requirements without changing validation or submit behavior. Commits: `62ad6a7`, `d626f49`.
 
 Next: continue structural UI migration across product detail, inquiry detail/create/response flows, list families, account pages and the public website. Verify all new batches through CI before sign-off.
+
+
+## Inquiry wizard checkpoint — 2026-11-02
+
+Admin and Company inquiry creation wizards now include an accessible current-step progress indicator and live item count above the existing five-step stepper. The original validation and submission flow is unchanged. Commits: `ec4c1f2`, `914ba4f`.
+
+Continue with inquiry detail/response/message surfaces and product detail/catalog families.
