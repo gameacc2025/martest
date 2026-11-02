@@ -774,3 +774,11 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Preserved the existing address CRUD/default API handlers and all fields; no address model or endpoint changes.
 - Added address-book tests for API-backed address rendering, default-address state, form opening/labels and the empty state.
 - CI for the latest address commits is pending; no local test/build execution is claimed.
+## Shared Admin/Company dashboard shell — batch 17 (2026-11-02)
+
+- DashboardHeader now receives the live mobile drawer state from both AdminLayout and CompanyLayout. Desktop/mobile navigation toggles expose dynamic accessible labels, aria-expanded and aria-controls.
+- The sidebar wrapper has a stable navigation ID; the open mobile sidebar exposes dialog/aria-modal semantics and a contextual label.
+- Shared header icon, notification, account and search controls now meet the 44px target and show keyboard focus outlines; reduced-motion preferences are respected.
+- Added shared component tests for desktop/mobile toggle states and mobile modal navigation semantics.
+- No routes, menu definitions, permission filtering, auth, theme or API behavior changed.
+- CI on the latest shell commits is pending; no local test/build execution is claimed.
