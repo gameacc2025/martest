@@ -31,7 +31,10 @@ describe('Website Product Listing', () => {
       data: [{
         id: 42,
         title: 'مودم فیبر نوری',
-        company: { name: 'تأمین‌کننده آزمایشی' },
+        brand: 'FiberPro',
+        model: 'XG-1200',
+        sku: 'FP-XG1200',
+        company: { name: 'تأمین‌کننده آزمایشی', isVerified: true },
         prices: [{ price: 1200000 }],
         images: [{ isPrimary: true, url: '/product-42.png' }],
       }],
@@ -69,6 +72,30 @@ describe('Website Product Listing', () => {
       name: 'product-details',
       params: { id: 42 },
     })
+  })
+
+  it('renders product identity, supplier trust and a clear details action from API data', async () => {
+    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    await flushPromises()
+
+    expect(wrapper.find('.product-meta').text()).toContain('FiberPro')
+    expect(wrapper.find('.product-meta').text()).toContain('XG-1200')
+    expect(wrapper.find('.product-meta').text()).toContain('FP-XG1200')
+    expect(wrapper.find('.product-verified').text()).toContain('تأمین‌کننده تأییدشده')
+    expect(wrapper.find('.product-card-footer').text()).toContain('جزئیات محصول')
+    expect(wrapper.find('.product-card-price').text()).toContain('شروع قیمت از')
+  })
+
+  it('clearly presents inquiry pricing when the API has no published price tier', async () => {
+    getProducts.mockResolvedValueOnce({
+      data: [{ id: 43, title: 'آنتن مخابراتی', company: { name: 'تأمین‌کننده' }, prices: [] }],
+      meta: { page: 1, limit: 12, total: 1, totalPages: 1 },
+    })
+    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    await flushPromises()
+
+    expect(wrapper.find('.product-card-price').text()).toContain('استعلام از تأمین‌کننده')
+    expect(wrapper.find('.product-verified').exists()).toBe(false)
   })
 
   it('announces product loading errors accessibly', async () => {
