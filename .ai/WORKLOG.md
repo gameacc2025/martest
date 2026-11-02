@@ -2305,3 +2305,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added tests for all content props, optional description/eyebrow, custom heading ID and action slot.
 - Existing list data, search, filters, routes, permission-gated actions and API flows were not changed.
 - Commits: `1a0e4fc`, `15f1e40`, `3c2b4d5`, `541944a`, `cb083f0`, `a34b8e1`. CI pending.
+
+
+## UI redesign — management heading rollout batch 12 (2026-11-02)
+
+- Extended shared `WorkspacePageHeading` to Admin Categories, Users, Roles, Permissions, Orders and Company Products.
+- Combined with previous adoption, shared page-heading pattern now covers 10 Admin/Company management list pages.
+- Existing copy, old-order availability warning, table behavior, API, permission checks, routes and dialogs preserved.
+- Commits: `3a3611a`, `f2e5bd2`, `e8ecb49`, `10e2c67`, `5a3fd61`, `e693b5d`. CI pending.
