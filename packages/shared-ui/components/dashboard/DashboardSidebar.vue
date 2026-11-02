@@ -109,7 +109,10 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
     <div class="dash-sidebar-brand">
       <div class="dash-sidebar-brand-main">
         <BrandMark class="dash-sidebar-brand-icon" :size="32" />
-        <span class="dash-sidebar-brand-text">Telecom Market</span>
+        <span class="dash-sidebar-brand-copy">
+          <span class="dash-sidebar-brand-text">Telecom Market</span>
+          <span class="dash-sidebar-brand-tagline">تجهیزات مخابراتی و شبکه</span>
+        </span>
       </div>
       <button
         type="button"
@@ -517,5 +520,65 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   .dash-sidebar-desktop-only {
     display: none;
   }
+}
+
+/* Brand lockup: product identity and context, not just a standalone wordmark. */
+.dash-sidebar-brand { min-height: var(--dash-header-height, 4rem); }
+.dash-sidebar-brand-main { gap: .7rem; }
+.dash-sidebar-brand-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .12rem;
+  min-width: 0;
+}
+.dash-sidebar-brand-text {
+  color: var(--ds-sidebar-fg-strong);
+  font-size: .98rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.dash-sidebar-brand-tagline {
+  color: var(--ds-sidebar-muted);
+  font-size: .65rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.dash-sidebar-collapse-btn {
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--ds-sidebar-border);
+  border-radius: var(--ds-radius-md);
+}
+.dash-sidebar-collapse-btn:focus-visible,
+.dash-sidebar-link:focus-visible {
+  outline: 2px solid var(--ds-sidebar-accent);
+  outline-offset: 2px;
+}
+.dash-sidebar-section {
+  margin-top: 1.25rem;
+  margin-bottom: .55rem;
+  padding-inline: .25rem;
+  letter-spacing: .045em;
+}
+.dash-sidebar-link {
+  min-height: 2.75rem;
+  border-radius: var(--ds-radius-md);
+}
+.dash-sidebar-link--active {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ds-sidebar-accent) 22%, transparent);
+}
+.dash-sidebar-sublist {
+  margin-inline: .35rem;
+  padding-inline-start: 1.1rem;
+  border-inline-start: 1px solid var(--ds-sidebar-border);
+}
+.dash-sidebar-sublink { min-height: 2.5rem; }
+@media (min-width: 992px) {
+  .dash-sidebar--collapsed .dash-sidebar-brand-copy { display: none; }
+}
+@media (max-width: 991px) {
+  .dash-sidebar-brand-tagline { font-size: .62rem; }
 }
 </style>
