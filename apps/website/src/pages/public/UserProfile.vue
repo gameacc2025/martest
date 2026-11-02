@@ -1,14 +1,15 @@
 <template>
   <div class="user-profile-page">
     <div class="ds-container ds-page">
-      <header class="profile-page-heading">
-        <div>
-          <span class="profile-page-eyebrow"><i class="pi pi-user"></i> حساب کاربری</span>
-          <h1>پروفایل من</h1>
-          <p>اطلاعات حساب، سفارش‌ها و فعالیت‌های خود را مدیریت کنید.</p>
-        </div>
-        <Breadcrumb :home="home" :model="items" class="profile-breadcrumb" />
-      </header>
+      <WorkspacePageHeading
+        eyebrow="حساب کاربری"
+        title="پروفایل من"
+        description="اطلاعات حساب، سفارش‌ها و فعالیت‌های خود را مدیریت کنید."
+        icon="pi pi-user"
+        heading-id="public-profile-title"
+      >
+        <template #actions><Breadcrumb :home="home" :model="items" class="profile-breadcrumb" /></template>
+      </WorkspacePageHeading>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Sidebar -->
@@ -236,6 +237,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
