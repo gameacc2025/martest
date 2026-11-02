@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi, productsApi } from '@telecom/api-client'
@@ -138,17 +139,18 @@ function exportInquiriesCSV() {
 
 <template>
   <div class="reports-page">
-    <header class="page-header reports-heading">
-      <div class="reports-heading-copy">
-        <span class="reports-eyebrow"><i class="pi pi-chart-pie"></i> بینش عملکرد شرکت</span>
-        <h1>گزارش‌ها و تحلیل‌ها</h1>
-        <p>نمای کلی وضعیت کاتالوگ محصولات و جریان استعلام‌های شرکت بر پایه داده‌های سامانه.</p>
-      </div>
-      <div class="page-header-actions">
+    <WorkspacePageHeading
+      eyebrow="بینش عملکرد شرکت"
+      title="گزارش‌ها و تحلیل‌ها"
+      description="نمای کلی وضعیت کاتالوگ محصولات و جریان استعلام‌های شرکت بر پایه داده‌های سامانه."
+      icon="pi pi-chart-pie"
+      heading-id="company-reports-title"
+    >
+      <template #actions>
         <Button v-if="activeTab === 'products'" label="دریافت گزارش محصولات" icon="pi pi-download" severity="secondary" outlined @click="exportProductsCSV" />
         <Button v-if="activeTab === 'inquiries'" label="دریافت گزارش استعلام‌ها" icon="pi pi-download" severity="secondary" outlined @click="exportInquiriesCSV" />
-      </div>
-    </header>
+      </template>
+    </WorkspacePageHeading>
 
     <Tabs v-model:value="activeTab">
       <TabList>
