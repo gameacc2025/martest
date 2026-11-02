@@ -533,4 +533,40 @@ function logout() {
     padding: 0 0.75rem;
   }
 }
+
+/* Enterprise topbar refinement — preserve brand and all existing actions. */
+.dash-header {
+  background: color-mix(in srgb, var(--surface-card) 94%, transparent);
+  border-bottom-color: var(--ds-color-border);
+  box-shadow: var(--ds-shadow-xs);
+  backdrop-filter: blur(14px);
+}
+
+.dash-header-icon-btn {
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md, 10px);
+}
+
+.dash-header-icon-btn:hover {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-primary);
+}
+
+.dash-header-user {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg, 14px);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.dash-header-search-input {
+  border-radius: var(--ds-radius-lg, 14px);
+  background: var(--ds-color-surface-alt);
+}
+
+.dash-header-search-input:focus {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+
 </style>
