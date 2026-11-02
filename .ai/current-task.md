@@ -1259,3 +1259,12 @@ Completed Website Products catalog, Orders, Order Details and Contact Us page re
 Commits: `f1d2e99`, `8cd0cac`, `e349467`, `41bcdf8`.
 
 Remaining focus: Admin/Company role and permission/settings forms, other management details, order pages and final shared-shell/page audit. Verification still outstanding.
+
+
+## UI redesign — batch 16 checkpoint (2026-11-02)
+
+Completed Admin Roles/Permissions lists, System Settings, Company Settings, Admin/Company personal profiles and Company Change Password UI refinements. Existing permissions, settings values, API operations and save flows were preserved.
+
+Commits: a51eea5, 5715c4a, c2da3c9, d3391a1, 7bf11c2, 70f7445, 5e0a572.
+
+Continue remaining page inventory and shared shell audit. No local tests/builds run yet.
