@@ -1485,3 +1485,10 @@ Continue with inquiries, roles/permissions, orders, product forms/details, compa
 Admin and Company inquiry lists are now on the shared responsive DataTable. Server search/filter/sort/pagination and existing inquiry API actions are preserved. Company sent/received/all tabs and deadline urgency remain. A build issue caused by an orphaned conditional branch was found in CI and fixed; rerun is pending.
 
 Next: continue Admin roles/permissions/orders and Company inquiry detail/create/product forms/reports, then Website catalog/product detail/checkout/account flows. Only `main`; no branch creation.
+
+
+## UI redesign checkpoint — Admin access/order lists (2026-11-02)
+
+Admin Roles, Permissions and Orders list pages now use the shared responsive table. Existing store/API calls, role permission chips/scope badges, system-role safeguards, CRUD and order status actions are preserved. Server pagination is wired to shared requests and table state resets after filter/search/mutations.
+
+Continue with Admin inquiry details/forms and Company inquiry/product forms and remaining Website public pages; then verify all page families, shell and theme modes. Only main; no new branches.
