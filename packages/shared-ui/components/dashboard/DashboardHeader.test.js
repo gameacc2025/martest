@@ -32,6 +32,29 @@ describe('DashboardHeader workspace context', () => {
     expect(wrapper.find('.dash-header-workspace').attributes('aria-label')).toBe('فضای کاری فعلی')
   })
 
+
+  it('provides descriptive labels for notification, theme and account controls', () => {
+    const wrapper = mount(DashboardHeader, {
+      props: {
+        notificationCount: 3,
+        user: { displayName: 'مدیر سامانه' },
+      },
+      global: {
+        stubs: {
+          Menu: true,
+          Badge: true,
+          Popover: true,
+          DashboardBreadcrumb: true,
+          RouterLink: { template: '<a><slot /></a>' },
+        },
+      },
+    })
+
+    expect(wrapper.find('.dash-header-bell').attributes('aria-label')).toContain('3')
+    expect(wrapper.find('button[aria-label="حالت تیره"]').exists()).toBe(true)
+    expect(wrapper.find('button[aria-haspopup="menu"]').attributes('aria-label')).toContain('مدیر سامانه')
+  })
+
   it('does not render an empty workspace identity when no label is supplied', () => {
     const wrapper = mount(DashboardHeader, {
       global: {
