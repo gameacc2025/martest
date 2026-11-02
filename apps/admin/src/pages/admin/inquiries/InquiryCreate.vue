@@ -262,7 +262,7 @@ async function submitInquiry() {
 
 <template>
   <div class="inquiry-create-page">
-    <div class="page-header">
+    <div class="page-header ds-page-heading">
       <div class="page-header-title">
         <Button icon="pi pi-arrow-right" text rounded @click="router.push({ name: 'admin-inquiries' })" />
         <h1>ایجاد درخواست استعلام</h1>
@@ -710,5 +710,45 @@ async function submitInquiry() {
   .settings-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Multi-step inquiry form: consistent panel, fields and action hierarchy. */
+.inquiry-create-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.inquiry-create-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-create-page .page-header-title h1 {
+  color: var(--ds-color-text);
+  font-size: clamp(1.2rem, 2vw, var(--ds-font-size-xl));
+}
+.inquiry-create-page .inquiry-stepper {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  padding: clamp(1rem, 2vw, 1.75rem);
+}
+.inquiry-create-page .step-body {
+  padding: var(--ds-space-6) var(--ds-space-3);
+}
+.inquiry-create-page .step-title {
+  padding-bottom: var(--ds-space-3);
+  border-bottom: 1px solid var(--ds-color-border);
+  font-size: var(--ds-font-size-lg);
+}
+.inquiry-create-page .field label {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+}
+.inquiry-create-page .step-nav {
+  padding-top: var(--ds-space-4);
+  border-top: 1px solid var(--ds-color-border);
+}
+@media (max-width: 640px) {
+  .inquiry-create-page .page-header { padding: var(--ds-space-4); }
+  .inquiry-create-page .page-header-actions { width: 100%; flex-wrap: wrap; }
 }
 </style>
