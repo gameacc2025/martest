@@ -294,3 +294,12 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Admin users/companies/categories and Company users lists: rebuilt the page intro with role-specific icon/context and aligned toolbar/table surfaces; existing search, filters, server pagination, dialogs and permissions preserved.
 - Commits: `ef00252`, `6cf7465`, `d9cd191`, `e77f07a`, `5cf6289`, `c44bb78`, `1a91159`, `5e40f45`, `b9f25de`, `3df74f0`.
 - Verification is still pending; no local tests/builds or browser tests were run.
+
+
+## UI redesign — authentication and account settings batch 13 (2026-11-02)
+
+- Customer login and registration received a more focused form surface, refined brand/visual panel, responsive spacing and token-based inputs/focus states.
+- Registration account-type choice is now one keyboard-operable radio group (Enter/Space and arrow-key selection) with a single accessible radio semantic; the existing customer/company values and submit payload remain unchanged.
+- Admin, Company and Website notification-preference screens now share a settings identity, responsive table and save-action layout; the SMS availability state remains informational and is not made interactive.
+- Commits: 156d029 Login; d76e548 initial Register visual pass; 884de96 accessible account-type selector; e77f07a, 5cf6289, c44bb78 notification preferences.
+- No local test/build execution or browser testing was performed.
