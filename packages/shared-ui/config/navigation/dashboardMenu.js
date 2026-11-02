@@ -136,6 +136,12 @@ export const dashboardMenu = [
       { title: 'پروژه‌ها و عملیات', icon: 'pi pi-sitemap', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'هوش تجاری و تحلیل (BI)', icon: 'pi pi-chart-line', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'یکپارچه‌سازی و امنیت', icon: 'pi pi-shield', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
+
+      { title: 'تقویم و وظایف', icon: 'pi pi-calendar', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'اسناد و دارایی‌ها', icon: 'pi pi-folder-open', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'ارتباطات سازمانی و کمپین‌ها', icon: 'pi pi-comments', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'مرکز دانش و محتوا', icon: 'pi pi-book', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'ممیزی و انطباق', icon: 'pi pi-verified', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
     ],
   },
   {
