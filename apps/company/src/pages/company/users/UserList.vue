@@ -306,7 +306,7 @@ async function saveCreate() {
           <div class="toolbar-filters">
             <span class="p-input-icon-right search-wrap">
               <i class="pi pi-search" />
-              <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
+              <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در کاربران شرکت" @input="debounceSearch" />
             </span>
             <Select
               v-model="statusFilter"
@@ -314,6 +314,7 @@ async function saveCreate() {
               optionLabel="label"
               optionValue="value"
               placeholder="وضعیت"
+              aria-label="فیلتر وضعیت کاربر"
               class="status-filter"
               showClear
               @change="loadUsers(1)"
@@ -389,8 +390,8 @@ async function saveCreate() {
         <Column header="عملیات" style="width: 10rem">
           <template #body="{ data }">
             <div class="flex gap-2">
-              <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'مشاهده'" @click="openInfo(data)" />
-              <Button v-if="canAssignRole && !isSelf(data)" icon="pi pi-key" severity="info" rounded text v-tooltip.top="'تغییر نقش'" @click="openEdit(data)" />
+              <Button icon="pi pi-eye" severity="secondary" rounded text aria-label="مشاهده کاربر" v-tooltip.top="'مشاهده'" @click="openInfo(data)" />
+              <Button v-if="canAssignRole && !isSelf(data)" icon="pi pi-key" severity="info" rounded text aria-label="تغییر نقش کاربر" v-tooltip.top="'تغییر نقش'" @click="openEdit(data)" />
               <!-- A user can never activate/deactivate their own access —
                    hidden entirely for the row matching the logged-in user,
                    not just disabled (see backend setAccessActive guard too). -->
@@ -402,6 +403,7 @@ async function saveCreate() {
                   rounded
                   text
                   v-tooltip.top="'غیرفعال کردن دسترسی'"
+                  aria-label="غیرفعال کردن دسترسی کاربر"
                   @click="confirmToggleActive(data)"
                 />
                 <Button
@@ -411,10 +413,11 @@ async function saveCreate() {
                   rounded
                   text
                   v-tooltip.top="'فعال کردن دسترسی'"
+                  aria-label="فعال کردن دسترسی کاربر"
                   @click="confirmToggleActive(data)"
                 />
               </template>
-              <Button v-if="canDelete && !isSelf(data)" icon="pi pi-trash" severity="danger" rounded text v-tooltip.top="'حذف'" @click="confirmDelete(data)" />
+              <Button v-if="canDelete && !isSelf(data)" icon="pi pi-trash" severity="danger" rounded text aria-label="حذف کاربر" v-tooltip.top="'حذف'" @click="confirmDelete(data)" />
             </div>
           </template>
         </Column>
@@ -882,11 +885,11 @@ async function saveCreate() {
 .identity-management-table :deep(.p-paginator-page),
 .identity-management-table :deep(.p-paginator-next),
 .identity-management-table :deep(.p-paginator-prev) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
-.identity-management-table :deep(.p-button.p-button-text) { width: 2.2rem; height: 2.2rem; }
+.identity-management-table :deep(.p-button.p-button-text) { width: 2.75rem; min-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; }
 @media (max-width: 700px) {
   .identity-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
   .identity-management-toolbar :deep(.p-toolbar-start),
