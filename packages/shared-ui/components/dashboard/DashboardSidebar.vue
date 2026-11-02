@@ -100,7 +100,9 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 <template>
   <aside
     class="dash-sidebar"
-    aria-label="ناوبری پنل"
+    :role="mobileOpen ? 'dialog' : null"
+    :aria-modal="mobileOpen ? 'true' : null"
+    :aria-label="mobileOpen ? 'منوی ناوبری پنل' : 'ناوبری پنل'"
     :class="{
       'dash-sidebar--collapsed': collapsed,
       'dash-sidebar--mobile-open': mobileOpen,
