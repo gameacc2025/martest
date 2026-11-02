@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { endpoints } from '@telecom/api-client'
@@ -135,17 +136,18 @@ async function deleteAddress(address) {
 
 <template>
   <main class="ds-container ds-page addresses-page" dir="rtl">
-    <header class="page-heading">
-      <div>
-        <p class="eyebrow">حساب کاربری</p>
-        <h1>آدرس‌های من</h1>
-        <p class="muted">نشانی‌های خود را ذخیره و آدرس پیش‌فرض را برای استفاده‌های بعدی مشخص کنید.</p>
-      </div>
-      <div class="heading-actions">
+    <WorkspacePageHeading
+      eyebrow="حساب کاربری"
+      title="آدرس‌های من"
+      description="نشانی‌های خود را ذخیره و آدرس پیش‌فرض را برای استفاده‌های بعدی مشخص کنید."
+      icon="pi pi-map-marker"
+      heading-id="addresses-page-title"
+    >
+      <template #actions>
         <button class="button button-secondary" type="button" @click="router.push('/profile')">بازگشت به پروفایل</button>
         <button class="button button-primary" type="button" @click="openCreate">افزودن آدرس جدید</button>
-      </div>
-    </header>
+      </template>
+    </WorkspacePageHeading>
 
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
     <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
