@@ -110,3 +110,20 @@ Recent commits include:
 - Company product form, company settings, profile/preferences, and notification pages.
 - Website authentication, registration, customer profile/address pages, customer inquiry pages, and static content pages.
 - Shared product card, dialog, form, empty/loading/error components and remaining dashboard widgets.
+
+
+## Additional migration batch 2
+
+- Admin and Company product editors: form headers, section surfaces, field hierarchy.
+- Admin and Company inquiry subscription pages: subscription/usage panels and form controls.
+- Company settings: profile/settings cards and form controls.
+- Admin and Company profile pages: responsive account summary and tab surfaces.
+- Admin, Company and Website notification inboxes: inbox heading, toolbar, surfaces and mobile actions.
+- Admin, Company and Website notification preferences: preference table and settings-card hierarchy.
+- Website auth: login, registration and password-recovery surfaces; Admin/Company password-recovery and password-change pages.
+- Website customer profile, address management, and inquiry workspace.
+- Shared components: Card, Button, Badge, DataTable, FormSection and ProductCard.
+
+Additional commits: product editors 745988d, 1d95149; subscription/settings c90da4c, c4d81f0, bc53c6f; profile/inbox/preferences b8caf91, e6ce2a5, 401a8a7, e597172, 50264a0, 68ce9be, 9f3c909, 692fa9b; auth/security 017ed2f, f24ddc4, b344ca6, c19d7ee, 5dfdca7, 1b9578f, ff339e3; customer account 8677b63, a1f37fa, 99c1308; shared components f02b82c, 16c10d1, a2b1ebd, d8000f2, 89bb83d, fd88bfb.
+
+A markup review caught two commerce page header closing tags after the initial heading conversion; both were corrected in c70fce1 and a0a734a. Build/test verification remains pending.
