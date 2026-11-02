@@ -19,7 +19,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="landing-gate">
+  <div class="landing-gate" role="status" aria-live="polite" aria-busy="true">
     <i class="pi pi-spin pi-spinner"></i>
     <span>در حال بارگذاری...</span>
   </div>
@@ -38,4 +38,13 @@ onMounted(async () => {
 .landing-gate i {
   font-size: 2rem;
 }
+
+.landing-gate {
+  background:
+    radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--ds-color-primary) 8%, transparent), transparent 24rem),
+    var(--ds-color-background);
+  color: var(--ds-color-text-muted);
+}
+.landing-gate i { color: var(--ds-color-primary); }
+.landing-gate span { font-size: var(--ds-font-size-sm); }
 </style>
