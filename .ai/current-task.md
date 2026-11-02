@@ -1148,3 +1148,8 @@ Audited all 69 Vue page files. Active page families are migrated or were already
 ### Roadmap menu completion
 
 Added disabled, role-scoped labels for calendar/tasks, documents/assets, organizational communications/campaigns, knowledge center/content, and audit/compliance to complement CRM, finance, HR, procurement, inventory/logistics, support, projects, BI, and integrations/security. Updated the menu regression test and Paces audit to distinguish directly inspected pages from catalog-listed applications. The Paces live preview index still returns cache miss; do not claim all 280+ pages were individually opened.
+
+
+### UI redesign — batch 5 progress
+
+Added consistent Paces-style page headers above the management lists in Admin and Company. The page-level title/description now sits above the existing toolbar and data table; API calls, filters, pagination, actions and permission checks are unchanged. Continue with final source audit and CI verification.
