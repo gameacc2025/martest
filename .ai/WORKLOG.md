@@ -2368,3 +2368,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Website product catalogue: accessible search/pagination names, visible keyboard focus on cards/filters, 44px filter actions/pagination.
 - No API, route, permission, payload, pricing or tenant logic changed.
 - Latest changes are awaiting CI. Direct-to-main only; no branch created.
+
+
+## UI redesign — responsive shared table batch 7 (2026-11-02)
+
+- Shared `DataTable.vue`: responsive card-style rows on screens below 768px; field labels are surfaced per cell; toolbar and filters stack cleanly; row actions and bulk selection remain accessible.
+- Added `mobileCardLayout` opt-out for exceptional dense data tables without changing existing callers.
+- Added tests in `DataTable.test.js` for default card mode and opt-out.
+- Commits: `4c607432` implementation, `775d757c` tests.
+- Not yet locally executed; verify via CI before sign-off.
