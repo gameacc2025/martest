@@ -1,7 +1,10 @@
 <template>
   <div class="role-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت نقش‌ها</h1><p class="ds-page-heading__description">نقش‌ها و دسترسی‌های مبتنی بر مجوز را مدیریت کنید.</p></div></header>
+    <header class="access-management-intro" aria-labelledby="access-management-title">
+  <span class="access-management-icon"><i class="pi pi-shield"></i></span>
+  <div><span>کنترل دسترسی</span><h1 id="access-management-title">مدیریت نقش‌ها</h1><p>نقش‌ها و دسترسی‌های مبتنی بر مجوز را مدیریت کنید.</p></div>
+</header>
     <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
@@ -439,4 +442,54 @@ async function deleteRole() {
   .role-list-page { gap: var(--ds-space-3); }
   .role-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
+
+.role-list-page { gap: clamp(1rem, 2vw, 1.5rem); }
+.access-management-intro {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.access-management-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.access-management-intro > div { min-width: 0; }
+.access-management-intro > div > span {
+  display: block;
+  margin-bottom: .2rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.access-management-intro h1 {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-weight: 800;
+}
+.access-management-intro p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.role-list-page .card { border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
+.role-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
+.role-list-page :deep(.p-toolbar-start), .role-list-page :deep(.p-toolbar-end) { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.role-list-page :deep(.p-toolbar .p-inputtext) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.role-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+.role-list-page :deep(.p-datatable-thead > tr > th) { white-space: nowrap; }
+@media (max-width: 640px) {
+  .access-management-intro { align-items: flex-start; padding: 1rem; }
+  .access-management-icon { width: 2.75rem; height: 2.75rem; }
+  .role-list-page :deep(.p-toolbar-start), .role-list-page :deep(.p-toolbar-end) { width: 100%; }
+}
+
 </style>
