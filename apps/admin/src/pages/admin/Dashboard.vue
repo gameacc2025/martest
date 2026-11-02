@@ -1,14 +1,22 @@
 <template>
   <div class="admin-dashboard">
-    <!-- Page header (simple, uniform with other dashboard pages) -->
-    <div class="page-header ds-page-heading">
-      <h1 class="ds-page-heading__title">داشبورد</h1>
-      <div class="page-header-actions ds-page-heading__actions">
+    <!-- Workspace welcome: clear hierarchy and one primary action. -->
+    <section class="admin-dashboard-hero" aria-labelledby="admin-dashboard-title">
+      <div class="admin-dashboard-hero-copy">
+        <span class="admin-dashboard-eyebrow"><i class="pi pi-sparkles"></i> مرکز فرماندهی بازارگاه</span>
+        <h1 id="admin-dashboard-title">داشبورد مدیریت</h1>
+        <p>نمایی یکپارچه از کاربران، شرکت‌ها، محصولات و جریان استعلام‌های پلتفرم.</p>
+      </div>
+      <div class="admin-dashboard-hero-actions">
         <router-link :to="{ name: 'admin-product-create' }">
-          <Button label="محصول جدید" icon="pi pi-plus" />
+          <Button label="ایجاد محصول" icon="pi pi-plus" />
+        </router-link>
+        <router-link :to="{ name: 'admin-inquiries' }" class="admin-dashboard-secondary-action">
+          <i class="pi pi-inbox"></i><span>مدیریت استعلام‌ها</span>
         </router-link>
       </div>
-    </div>
+      <span class="admin-dashboard-hero-mark" aria-hidden="true"><i class="pi pi-chart-line"></i></span>
+    </section>
 
     <!-- KPI cards -->
 
@@ -52,24 +60,23 @@
       {{ statsError }}
     </Message>
 
-    <!-- Quick actions -->
-    <DashboardPanel title="عملیات سریع" icon="pi pi-bolt" class="admin-dashboard-quick">
-      <QuickActions :actions="quickActions" />
-    </DashboardPanel>
+    <!-- Operational workspace: actions, platform overview and service health. -->
+    <section class="admin-dashboard-workspace" aria-label="نمای عملیاتی">
+      <DashboardPanel title="دسترسی سریع" icon="pi pi-bolt" class="admin-dashboard-quick">
+        <template #actions><span class="admin-dashboard-hint">میان‌برهای مدیریت</span></template>
+        <QuickActions :actions="quickActions" />
+      </DashboardPanel>
 
-    <!-- Main grid: analytics + system status -->
-    <div class="admin-dashboard-grid admin-dashboard-grid--2-1">
-      <DashboardPanel title="تحلیل پلتفرم" icon="pi pi-chart-bar">
-        <template #actions>
-          <span class="admin-dashboard-hint">نمای کلی موجودیت‌ها</span>
-        </template>
+      <DashboardPanel title="نمای کلی پلتفرم" icon="pi pi-chart-bar" class="admin-dashboard-analytics">
+        <template #actions><span class="admin-dashboard-hint">بر اساس داده‌های دریافتی</span></template>
         <AnalyticsChart :series="analyticsSeries" :loading="loadingStats" tone="primary" />
       </DashboardPanel>
 
-      <DashboardPanel title="وضعیت سیستم" icon="pi pi-server">
+      <DashboardPanel title="سلامت سرویس‌ها" icon="pi pi-server" class="admin-dashboard-health">
+        <template #actions><span class="admin-dashboard-hint">وضعیت اتصال</span></template>
         <SystemStatus :services="systemServices" />
       </DashboardPanel>
-    </div>
+    </section>
 
     <!-- Latest lists -->
     <div class="admin-dashboard-grid admin-dashboard-grid--3">
@@ -494,25 +501,97 @@ onMounted(() => {
   gap: var(--ds-space-6);
 }
 
-/* Simple page header — uniform with other dashboard pages (Products, etc.). */
-.page-header {
+/* Paces-style welcome band, using the platform's own teal/navy identity. */
+.admin-dashboard-hero {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: var(--ds-space-6);
+  min-height: 176px;
+  overflow: hidden;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid color-mix(in srgb, var(--ds-navy) 12%, transparent);
+  border-radius: var(--ds-radius-xl);
+  color: var(--ds-on-navy);
+  background: var(--ds-hero-gradient);
+  box-shadow: var(--ds-shadow-md);
 }
-
-.page-header h1 {
-  font-size: 1.5rem;
+.admin-dashboard-hero-copy,
+.admin-dashboard-hero-actions { position: relative; z-index: 1; }
+.admin-dashboard-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .65rem;
+  color: var(--ds-brand);
+  font-size: var(--ds-font-size-sm);
   font-weight: 700;
+}
+.admin-dashboard-hero h1 {
   margin: 0;
+  color: inherit;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 800;
 }
-
-.page-header-actions {
+.admin-dashboard-hero p {
+  max-width: 42rem;
+  margin: .65rem 0 0;
+  color: var(--ds-on-navy-muted);
+  line-height: 1.8;
+}
+.admin-dashboard-hero-actions {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
 }
+.admin-dashboard-secondary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 2.75rem;
+  padding: .65rem 1rem;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-on-navy);
+  text-decoration: none;
+  font-weight: 700;
+  background: rgba(255,255,255,.08);
+}
+.admin-dashboard-secondary-action:hover { background: rgba(255,255,255,.15); }
+.admin-dashboard-hero-mark {
+  position: absolute;
+  z-index: 0;
+  inset-inline-end: 42%;
+  top: -4.5rem;
+  display: grid;
+  place-items: center;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 50%;
+  color: rgba(255,255,255,.08);
+  font-size: 9rem;
+  transform: rotate(-12deg);
+}
+.admin-dashboard-hero-mark::before {
+  content: "";
+  position: absolute;
+  inset: 1.4rem;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: inherit;
+}
+.admin-dashboard-workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 1.1fr) minmax(320px, 1.25fr) minmax(240px, .8fr);
+  align-items: stretch;
+  gap: var(--ds-space-5);
+}
+.admin-dashboard-workspace > * { min-width: 0; }
+
 
 
 .admin-dashboard-kpis {
@@ -523,7 +602,7 @@ onMounted(() => {
 
 .admin-dashboard-grid {
   display: grid;
-  gap: var(--ds-space-6);
+  gap: var(--ds-space-5);
 }
 
 .admin-dashboard-grid--2-1 {
@@ -570,11 +649,15 @@ onMounted(() => {
   }
 }
 
+@media (max-width: 1200px) {
+  .admin-dashboard-workspace { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-dashboard-quick { grid-column: 1 / -1; }
+}
 @media (max-width: 991px) {
   .admin-dashboard-grid--2-1,
-  .admin-dashboard-grid--3 {
-    grid-template-columns: 1fr;
-  }
+  .admin-dashboard-grid--3,
+  .admin-dashboard-workspace { grid-template-columns: 1fr; }
+  .admin-dashboard-quick { grid-column: auto; }
 }
 
 @media (max-width: 575px) {
@@ -637,6 +720,10 @@ onMounted(() => {
   .admin-dashboard-grid--2-1 { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
-  .admin-dashboard .page-header { padding: var(--ds-space-4); }
+  .admin-dashboard-hero { align-items: flex-start; flex-direction: column; min-height: 0; }
+  .admin-dashboard-hero-mark { inset-inline-end: -4rem; top: -5rem; }
+  .admin-dashboard-hero-actions { width: 100%; }
+  .admin-dashboard-hero-actions > * { flex: 1 1 auto; }
+  .admin-dashboard-secondary-action { width: 100%; }
 }
 </style>
