@@ -1313,3 +1313,13 @@ Completed page families now include:
 - Shared Table component visual treatment and unit test.
 
 Still active/incomplete: shared dashboard shell and navigation polish, product/company/inquiry details and forms, reports/settings, notifications, public homepage/catalogue/product details, and remaining route pages. Do not declare overall completion until every existing page has been audited and implemented, tests/builds pass, and documentation coverage is reconciled.
+
+
+## UI redesign checkpoint — 2026-11-02
+
+Recently completed:
+- Admin and Company inquiry detail workspaces.
+- Company settings workspace.
+- The shared Table unit test assertion was fixed after CI revealed that the test stub did not render Column children; see `07abcc2`.
+
+Continue the full redesign. Remaining significant page families include notifications/preferences and management/detail forms across roles, plus the public marketplace homepage/catalogue and shared shell. Do not claim completion until the full route inventory is reconciled and CI passes on the latest commit.
