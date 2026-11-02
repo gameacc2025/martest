@@ -7,7 +7,7 @@
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
+            <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در مجوزها" @input="debounceSearch" />
           </span>
         </template>
         <template #end>
@@ -26,8 +26,8 @@
         <Column header="عملیات">
           <template #body="slotProps">
             <div class="flex gap-2">
-              <Button icon="pi pi-pencil" severity="info" rounded text @click="editPermission(slotProps.data)" />
-              <Button icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(slotProps.data)" />
+              <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش مجوز" @click="editPermission(slotProps.data)" />
+              <Button icon="pi pi-trash" severity="danger" rounded text aria-label="حذف مجوز" @click="confirmDelete(slotProps.data)" />
             </div>
           </template>
         </Column>
@@ -341,9 +341,15 @@ async function deletePermission() {
 .management-data-table :deep(.p-paginator-page),
 .management-data-table :deep(.p-paginator-next),
 .management-data-table :deep(.p-paginator-prev) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
+}
+.management-data-table :deep(.p-button.p-button-text) {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
 }
 @media (max-width: 700px) {
   .management-data-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
