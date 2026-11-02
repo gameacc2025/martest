@@ -1403,3 +1403,10 @@ Continue to Notifications, detail pages, account/profile pages and public websit
 The shared workspace heading now also covers Admin Notification Management/Folders, System Settings, Inquiry Subscription Management and Company User Management/Reports. Action slots retain the original refresh, inbox and CSV export actions. Total shared-heading coverage is 16 Admin/Company operational screens. Commits: `c5f2126`, `7df3c0c`, `fc7963e`, `dcabf38`, `5eca4cd`, `1bd79b4`.
 
 Continue to detail pages, account pages, notification inboxes, and public catalog/checkout. Full UI redesign is still in progress.
+
+
+## Account and commerce UI checkpoint — 2026-11-02
+
+Shared workspace headings now cover Company Profile and Website Profile, Orders, Wishlist and My Inquiries. Existing breadcrumbs and page actions are preserved. Commits: `95e8111`, `de3d47f`, `7991a04`, `ecfc860`, `959035d`.
+
+Continue the remaining Website catalog, checkout/cart, detail pages, account screens, notification inboxes and all remaining panel modules.
