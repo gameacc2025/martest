@@ -136,4 +136,7 @@ const list = computed(() => props.messages.filter(Boolean))
 .form-alert-list {
   color: var(--ds-color-text);
 }
+
+.form-alert { border-radius: var(--ds-radius-lg); }
+
 </style>
