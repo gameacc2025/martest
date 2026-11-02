@@ -57,7 +57,7 @@
     </div>
 
     <!-- Create/Edit Role Dialog -->
-    <Dialog v-model:visible="showDialog" :header="dialogHeader" :modal="true" class="p-fluid" :style="{ width: '700px' }">
+    <Dialog v-model:visible="showDialog" :header="dialogHeader" :modal="true" class="p-fluid" :style="{ width: '700px', maxWidth: '96vw' }" :breakpoints="{ '960px': '92vw', '640px': '96vw' }">
       <div class="field">
         <label for="name">نام نقش (انگلیسی)</label>
         <InputText id="name" v-model="currentRole.name" :disabled="isEditMode" placeholder="مثال: EDITOR" />
@@ -101,21 +101,29 @@
         <!-- Grouped Permission Selector -->
         <div class="permission-group-selector">
           <div v-for="(group, groupName) in filteredPermissionGroups" :key="groupName" class="permission-group">
-            <div class="permission-group-header" @click="toggleGroup(groupName)">
-              <div class="flex items-center gap-2">
+            <div class="permission-group-header">
+              <div class="permission-group-select">
                 <Checkbox
+                  :inputId="`permission-group-${groupName}`"
                   :modelValue="isGroupAllChecked(group)"
                   :binary="true"
                   @update:modelValue="toggleGroupAll($event, group)"
                 />
-                <span>{{ groupName }}</span>
+                <label :for="`permission-group-${groupName}`">{{ groupName }}</label>
               </div>
-              <span class="permission-group-count">
-                {{ getSelectedCountInGroup(group) }} / {{ group.length }}
-                <i class="pi" :class="expandedGroups[groupName] ? 'pi-chevron-down' : 'pi-chevron-left'" style="margin-inline-start: 0.5rem; font-size: 0.75rem;"></i>
-              </span>
+              <button
+                type="button"
+                class="permission-group-toggle"
+                :aria-expanded="Boolean(expandedGroups[groupName])"
+                :aria-controls="`permission-group-items-${groupName}`"
+                :aria-label="`باز و بسته کردن گروه ${groupName}`"
+                @click="toggleGroup(groupName)"
+              >
+                <span class="permission-group-count">{{ getSelectedCountInGroup(group) }} / {{ group.length }}</span>
+                <i class="pi" :class="expandedGroups[groupName] ? 'pi-chevron-down' : 'pi-chevron-left'" aria-hidden="true"></i>
+              </button>
             </div>
-            <div v-if="expandedGroups[groupName]" class="permission-group-items">
+            <div v-if="expandedGroups[groupName]" :id="`permission-group-items-${groupName}`" class="permission-group-items">
               <div v-for="perm in group" :key="perm.id" class="permission-item">
                 <Checkbox
                   :modelValue="currentRole.permissionIds?.includes(perm.id)"
@@ -562,4 +570,59 @@ async function deleteRole() {
   .management-data-toolbar :deep(.p-select) { width: 100%; }
   .management-data-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
+
+.permission-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  min-height: 3.25rem;
+  padding: .35rem .65rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+}
+.permission-group-select {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  min-width: 0;
+  min-height: 2.75rem;
+}
+.permission-group-select label {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-semibold);
+  cursor: pointer;
+}
+.permission-group-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: .4rem .65rem;
+  border: 0;
+  border-radius: var(--ds-radius-md);
+  background: transparent;
+  color: var(--ds-color-text-muted);
+  cursor: pointer;
+}
+.permission-group-toggle:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-primary); }
+.permission-group-toggle:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+.permission-group-items { padding: .5rem .75rem; }
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 2.75rem;
+  padding: .3rem .25rem;
+  border-bottom: 1px solid var(--ds-color-border);
+}
+.permission-item:last-child { border-bottom: 0; }
+.permission-item label { cursor: pointer; line-height: 1.7; }
+.role-list-page .management-data-toolbar :deep(.p-inputtext) { min-height: 2.75rem; }
+
 </style>
