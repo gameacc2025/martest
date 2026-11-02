@@ -181,3 +181,11 @@ At commit 6a7cb3efc58b60a04f6de1e57df833263d0a75da, GitHub CI test-and-build com
 Added Paces-style title/description hierarchy above the management toolbars for Admin categories, companies, users, roles, permissions, products and inquiries; Company products, inquiries and company users; and the legacy Admin order view. Existing toolbar actions, filters, server pagination, row actions, API calls and permission conditions remain in place.
 
 Commits: Admin category/company/user/role/permission headers c350236, f7110ca, 1dae02f, e2ae56f, 5aaef1b; product/inquiry/order headers 035f82e, 5f23c04, 64641ca; Company product/inquiry/user headers b6dde92, 6ba2592, af2f45a.
+
+
+## Verification result — commit b5220ea
+
+- GitHub CI / test-and-build: **passed**. This includes the repository unit/component test and all three production app builds.
+- Database Migration Validation: **passed**.
+- Runtime Validation: **failed** in the existing Playwright smoke suite. Compose configuration, service startup/health, and database migrations all passed; the panel smoke tests then timed out waiting for #app in Website/Company/Admin, and the STAFF auth-flow test also failed. This is recorded as an unresolved runtime-check failure; no root cause has been established and it is not being treated as a visual redesign acceptance test.
+- No local browser testing was performed. The successful build proves the current Vue/SCSS source compiles; it does not prove runtime rendering or visual correctness.
