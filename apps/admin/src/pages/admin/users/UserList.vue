@@ -9,8 +9,8 @@
         <p>حساب‌های کاربری و وضعیت دسترسی آن‌ها را مدیریت کنید.</p>
       </div>
     </header>
-    <div class="card ds-panel">
-      <Toolbar class="ds-toolbar">
+    <div class="card ds-panel identity-management-surface">
+      <Toolbar class="ds-toolbar identity-management-toolbar">
         <template #start>
           <span class="p-input-icon-right search-wrap">
             <i class="pi pi-search" />
@@ -44,6 +44,7 @@
       </Toolbar>
 
       <DataTable
+        class="identity-management-table"
         :value="users"
         :loading="loading"
         lazy
@@ -940,4 +941,73 @@ async function deleteUser() {
   .user-list-page :deep(.p-toolbar-end) { width: 100%; }
 }
 
+
+/* Identity and access directory — unified data density and mobile filter behavior. */
+.identity-management-surface {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.identity-management-toolbar {
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.identity-management-toolbar :deep(.p-toolbar-start),
+.identity-management-toolbar :deep(.p-toolbar-end) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+.identity-management-toolbar :deep(.p-inputtext),
+.identity-management-toolbar :deep(.p-select) {
+  min-height: 2.65rem;
+  border-radius: var(--ds-radius-md);
+}
+.identity-management-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
+.identity-management-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.identity-management-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  vertical-align: middle;
+}
+.identity-management-table :deep(.p-datatable-tbody > tr) { transition: background-color var(--ds-transition-fast); }
+.identity-management-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
+.identity-management-table :deep(.p-paginator) {
+  justify-content: flex-start;
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.identity-management-table :deep(.p-paginator-page),
+.identity-management-table :deep(.p-paginator-next),
+.identity-management-table :deep(.p-paginator-prev) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+}
+.identity-management-table :deep(.p-button.p-button-text) { width: 2.2rem; height: 2.2rem; }
+@media (max-width: 700px) {
+  .identity-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
+  .identity-management-toolbar :deep(.p-toolbar-start),
+  .identity-management-toolbar :deep(.p-toolbar-end),
+  .identity-management-toolbar .toolbar-filters { width: 100%; }
+  .identity-management-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .identity-management-toolbar :deep(.p-inputtext),
+  .identity-management-toolbar :deep(.p-select) { width: 100%; margin: 0; }
+  .identity-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
+}
 </style>
