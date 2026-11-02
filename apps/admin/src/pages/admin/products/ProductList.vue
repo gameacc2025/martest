@@ -1,7 +1,8 @@
 <template>
   <div class="product-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <div class="card ds-panel">
+<header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت محصولات</h1><p class="ds-page-heading__description">کاتالوگ محصولات را جستجو، فیلتر و مدیریت کنید.</p></div></header>
+        <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
@@ -517,6 +518,7 @@ onMounted(() => {
 
 /* Consistent catalogue management surface and dense-table hierarchy. */
 .product-list-page { gap: var(--ds-space-5); }
+.product-list-page .ds-page-heading { margin-bottom: 0; }
 .product-list-page .card {
   border-radius: var(--ds-radius-xl);
   border-color: var(--ds-color-border);
