@@ -24,50 +24,45 @@
         </template>
       </Toolbar>
 
-      <DataTable class="product-management-table" :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
-        :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll" v-if="products.length > 0 || loading">
-        <Column field="id" header="شناسه" sortable></Column>
-        <Column field="title" header="عنوان" sortable></Column>
-        <Column header="شرکت">
-          <template #body="{ data }">
-            {{ data.company?.name || '-' }}
-          </template>
-        </Column>
-        <Column header="دسته‌بندی">
-          <template #body="{ data }">
-            {{ data.category?.name || '-' }}
-          </template>
-        </Column>
-        <Column field="status" header="وضعیت">
-          <template #body="{ data }">
-            <div class="status-cell">
-              <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
-              <span v-if="getUnreviewedEditCount(data) > 0" class="unreviewed-badge" v-tooltip.top="'تغییرات پس از تأیید که هنوز بازبینی نشده‌اند'">
-                <i class="pi pi-pencil" />
-                {{ getUnreviewedEditCount(data) }} ویرایش
-              </span>
-            </div>
-          </template>
-        </Column>
-        <Column header="عملیات">
-          <template #body="{ data }">
-            <div class="flex gap-2">
-              <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'پیش‌نمایش'" @click="showPreview(data)" />
-              <Button v-if="canEditProduct(data) && data.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
-              <Button v-if="canApproveProduct && canApprove(data)" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" :loading="approvingId === data.id" @click="approveProduct(data)" />
-              <Button v-if="canRejectProduct && canReject(data)" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" @click="openRejectDialog(data)" />
-              <Button v-if="canPublishProduct && canPublish(data)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" :loading="publishingId === data.id" @click="publishProduct(data)" />
-              <Button v-if="canHideProduct && canHide(data)" icon="pi pi-eye-slash" severity="secondary" rounded text v-tooltip.top="'مخفی کردن از سایت'" :loading="hidingId === data.id" @click="hideProduct(data)" />
-              <Button v-if="canArchiveProduct && canArchive(data)" icon="pi pi-folder" severity="secondary" rounded text v-tooltip.top="'بایگانی محصول'" :loading="archivingId === data.id" @click="archiveProduct(data)" />
-              <Button v-if="canRestoreProduct && canRestoreDraft(data)" icon="pi pi-replay" severity="warning" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" :loading="restoringId === data.id" @click="restoreProductToDraft(data)" />
-              <Button v-if="canDuplicateProduct(data)" icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
-              <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
-              <Button v-if="canDeleteProduct(data)" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <SharedDataTable
+        v-if="products.length > 0 || loading"
+        class="product-management-table"
+        title="فهرست محصولات"
+        :columns="productTableColumns"
+        :rows="products"
+        :loading="loading"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        :mobile-card-layout="true"
+        @request="onTableRequest"
+      >
+        <template #status="{ row }">
+          <div class="status-cell">
+            <Tag :value="statusLabel(row.status)" :severity="statusSeverity(row.status)" />
+            <span v-if="getUnreviewedEditCount(row) > 0" class="unreviewed-badge" v-tooltip.top="'تغییرات پس از تأیید که هنوز بازبینی نشده‌اند'">
+              <i class="pi pi-pencil" />
+              {{ getUnreviewedEditCount(row) }} ویرایش
+            </span>
+          </div>
+        </template>
+        <template #actions="{ row }">
+          <Button icon="pi pi-eye" severity="secondary" rounded text v-tooltip.top="'پیش‌نمایش'" aria-label="پیش‌نمایش محصول" @click="showPreview(row)" />
+          <Button v-if="canEditProduct(row) && row.status === 'DRAFT'" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" aria-label="ویرایش محصول" @click="editProduct(row)" />
+          <Button v-if="canApproveProduct && canApprove(row)" icon="pi pi-check" severity="success" rounded text v-tooltip.top="'تأیید'" aria-label="تأیید محصول" :loading="approvingId === row.id" @click="approveProduct(row)" />
+          <Button v-if="canRejectProduct && canReject(row)" icon="pi pi-times" severity="danger" rounded text v-tooltip.top="'رد'" aria-label="رد محصول" @click="openRejectDialog(row)" />
+          <Button v-if="canPublishProduct && canPublish(row)" icon="pi pi-globe" severity="success" rounded text v-tooltip.top="'انتشار در سایت'" aria-label="انتشار محصول" :loading="publishingId === row.id" @click="publishProduct(row)" />
+          <Button v-if="canHideProduct && canHide(row)" icon="pi pi-eye-slash" severity="secondary" rounded text v-tooltip.top="'مخفی کردن از سایت'" aria-label="مخفی کردن محصول" :loading="hidingId === row.id" @click="hideProduct(row)" />
+          <Button v-if="canArchiveProduct && canArchive(row)" icon="pi pi-folder" severity="secondary" rounded text v-tooltip.top="'بایگانی محصول'" aria-label="بایگانی محصول" :loading="archivingId === row.id" @click="archiveProduct(row)" />
+          <Button v-if="canRestoreProduct && canRestoreDraft(row)" icon="pi pi-replay" severity="warning" rounded text v-tooltip.top="'بازگردانی به پیش‌نویس'" aria-label="بازگردانی محصول" :loading="restoringId === row.id" @click="restoreProductToDraft(row)" />
+          <Button v-if="canDuplicateProduct(row)" icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" aria-label="کپی محصول" @click="duplicateProduct(row)" />
+          <Button v-if="row.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" aria-label="مشاهده علت رد" @click="showRejection(row)" />
+          <Button v-if="canDeleteProduct(row)" icon="pi pi-trash" severity="danger" rounded text v-tooltip.top="'حذف محصول'" aria-label="حذف محصول" @click="confirmDelete(row)" />
+        </template>
+      </SharedDataTable>
 
       <div v-else-if="loadError" class="table-state product-management-state">
         <i class="pi pi-exclamation-triangle" />
@@ -147,6 +142,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
@@ -224,6 +220,13 @@ const previewProduct = ref(null)
 // Use centralized status helpers from config/product.js
 const statusLabel = getStatusLabel
 const statusSeverity = getStatusSeverity
+const productTableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 6rem' },
+  { field: 'title', header: 'عنوان', sortable: true },
+  { field: 'company.name', header: 'شرکت' },
+  { field: 'category.name', header: 'دسته‌بندی' },
+  { field: 'status', header: 'وضعیت', slot: 'status' },
+]
 
 
 const pagination = ref({
@@ -252,14 +255,14 @@ function debounceSearch() {
   }, 500)
 }
 
-async function fetchProducts(page = 1) {
+async function fetchProducts(page = 1, limit = pagination.value.limit) {
   loading.value = true
   loadError.value = ''
   try {
     // Management listing: use the authenticated endpoint so the caller sees
     // ALL statuses (SUPER_ADMIN → every company, company user → own company).
     // The public `list` endpoint would only return PUBLISHED products.
-    const params = { page, search: searchQuery.value }
+    const params = { page, limit, search: searchQuery.value }
     if (statusFilter.value) params.status = statusFilter.value
     const res = await productsApi.myProducts(params)
     // New envelope: res.data = { data: [...], meta: {...} }
@@ -298,8 +301,9 @@ async function fetchCompanies() {
   }
 }
 
-function onPageChange(event) {
-  fetchProducts(event.page + 1)
+function onTableRequest({ page, rows }) {
+  pagination.value.limit = rows
+  fetchProducts(page, rows)
 }
 
 function openCreateDialog() {
