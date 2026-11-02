@@ -2282,3 +2282,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - It reflects title/category/subcategory and conditionally company selection based on the existing permission context. Existing validation remains authoritative.
 - No business logic/API/payload/save/media changes.
 - Commits: `62ad6a7`, `d626f49`. CI pending.
+
+
+## UI redesign — inquiry wizard batch 9 (2026-11-02)
+
+- Both Admin and Company inquiry creation screens now provide a live step context/progress indicator and selected item count.
+- Uses existing step state and inquiry item array only; no workflow, validation, draft, permission or API changes.
+- Commits: `ec4c1f2`, `914ba4f`. CI pending.
