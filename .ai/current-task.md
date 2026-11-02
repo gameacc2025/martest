@@ -1153,3 +1153,8 @@ Added disabled, role-scoped labels for calendar/tasks, documents/assets, organiz
 ### UI redesign — batch 5 progress
 
 Added consistent Paces-style page headers above the management lists in Admin and Company. The page-level title/description now sits above the existing toolbar and data table; API calls, filters, pagination, actions and permission checks are unchanged. Continue with final source audit and CI verification.
+
+
+### Verification checkpoint
+
+At commit b5220ea, CI test-and-build and database migration validation passed. Runtime Validation failed only in the Playwright smoke workflow after successful Compose/service/migration startup; it timed out waiting for #app on all three panel roots and also failed the STAFF auth-flow scenario. The cause is not established. Do not claim full runtime verification. Continue prioritizing component/unit tests and builds; browser automation is not the focus unless explicitly requested.
