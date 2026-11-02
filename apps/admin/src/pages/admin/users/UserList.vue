@@ -1,14 +1,7 @@
 <template>
   <div class="user-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <header class="management-page-intro" aria-labelledby="management-page-title">
-      <span class="management-page-icon"><i class="pi pi-users"></i></span>
-      <div class="management-page-copy">
-        <span>مدیریت هویت و دسترسی</span>
-        <h1 id="management-page-title">مدیریت کاربران</h1>
-        <p>حساب‌های کاربری و وضعیت دسترسی آن‌ها را مدیریت کنید.</p>
-      </div>
-    </header>
+    <WorkspacePageHeading eyebrow="مدیریت هویت و دسترسی" title="مدیریت کاربران" description="حساب‌های کاربری و وضعیت دسترسی آن‌ها را مدیریت کنید." icon="pi pi-users" heading-id="management-page-title" />
     <div class="card ds-panel identity-management-surface">
       <Toolbar class="ds-toolbar identity-management-toolbar">
         <template #start>
@@ -375,6 +368,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/stores/admin/users";
 import { useRoleStore } from "@/stores/admin/roles";
