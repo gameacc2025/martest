@@ -1,8 +1,8 @@
 <template>
-  <div class="user-list-page">
+  <div class="user-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <div class="card">
-      <Toolbar>
+    <div class="card ds-panel">
+      <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right search-wrap">
             <i class="pi pi-search" />
@@ -832,5 +832,37 @@ async function deleteUser() {
   flex-wrap: wrap;
   gap: 0.35rem;
   align-items: center;
+}
+
+/* Shared Paces-style list hierarchy; query, pagination and permissions unchanged. */
+.user-list-page { gap: var(--ds-space-5); }
+.user-list-page .card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.user-list-page :deep(.p-toolbar) {
+  background: var(--ds-color-surface);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.user-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  white-space: nowrap;
+}
+.user-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
+  border-color: var(--ds-color-border);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+@media (max-width: 640px) {
+  .user-list-page { gap: var(--ds-space-3); }
+  .user-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
 </style>
