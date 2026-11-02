@@ -82,4 +82,9 @@ const visible = computed({
   border-radius: var(--ds-radius-lg);
   box-shadow: var(--ds-shadow-xl);
 }
+
+.ds-dialog { border-radius: var(--ds-radius-xl); overflow: hidden; }
+.ds-dialog .p-dialog-header { border-bottom: 1px solid var(--ds-color-border); }
+.ds-dialog .p-dialog-footer { border-top: 1px solid var(--ds-color-border); }
+
 </style>
