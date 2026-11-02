@@ -609,4 +609,118 @@ function typeLabel(item) {
   .mail-header .header-actions { width: 100%; flex-wrap: wrap; }
 }
 
+
+/* Customer inbox: align all surfaces with the shared light/dark design tokens. */
+.mail-page { background: var(--ds-color-background); color: var(--ds-color-text); }
+.mail-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.mail-header h1 { color: var(--ds-color-text); font-size: clamp(1.25rem, 2vw, var(--ds-font-size-2xl)); }
+.mail-header .subtitle { color: var(--ds-color-text-muted); }
+.mail-header .eyebrow { color: var(--ds-color-primary); }
+.unread-total {
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 20%, transparent);
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+}
+.settings-link {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+}
+.settings-link:hover { background: var(--ds-color-surface-hover); }
+.mail-toolbar {
+  padding: .75rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+.search-box {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+}
+.search-box:focus-within {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+.mail-layout {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.mail-sidebar { background: var(--ds-color-surface-alt); border-color: var(--ds-color-border); }
+.sidebar-heading,
+.folder-link>i,
+.folder-link b { color: var(--ds-color-text-muted); }
+.folder-link { color: var(--ds-color-text); border-radius: var(--ds-radius-md); }
+.folder-link:hover { background: var(--ds-color-surface-hover); }
+.folder-link.active {
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+}
+.folder-link.active>i,
+.folder-link.active b { color: var(--ds-color-primary); }
+.sidebar-divider,
+.message-list-panel,
+.list-heading,
+.message-list-panel,
+.reading-toolbar,
+.message-meta,
+.message-footer,
+.pagination { border-color: var(--ds-color-border); }
+.sidebar-note {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
+}
+.message-list-panel { background: var(--ds-color-surface); }
+.list-count,
+.row-status,
+.reading-empty-icon { background: var(--ds-color-surface-alt); color: var(--ds-color-text-muted); }
+.message-row {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+}
+.message-row:hover { background: var(--ds-color-surface-hover); }
+.message-row.selected {
+  background: color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface));
+  box-shadow: inset -3px 0 var(--ds-color-primary);
+}
+.message-row.unread { background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface)); }
+.row-status.is-unread,
+.sender-avatar { background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
+.row-category,
+.reading-category i,
+.message-footer i { color: var(--ds-color-primary); }
+.row-preview,
+.row-topline time,
+.message-meta time,
+.message-footer,
+.pagination span { color: var(--ds-color-text-muted); }
+.inline-folder-select {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+}
+.reading-panel { background: var(--ds-color-surface); }
+.reading-toolbar { background: var(--ds-color-surface-alt); }
+.message-body { color: var(--ds-color-text); }
+.bulk-actions { border-color: var(--ds-color-border); background: var(--ds-color-surface-alt); }
+.list-state,
+.reading-empty { color: var(--ds-color-text-muted); }
+.empty-list strong,
+.reading-empty h2 { color: var(--ds-color-text); }
+@media (max-width: 640px) {
+  .mail-header { padding: var(--ds-space-4); align-items: stretch; }
+  .mail-header .header-actions { width: 100%; }
+  .mail-toolbar { align-items: stretch; }
+}
+
 </style>
