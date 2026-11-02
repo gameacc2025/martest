@@ -21,6 +21,10 @@
         <Card class="filters-card ds-card">
           <template #content>
             <div class="filters-inner">
+              <div class="filters-heading">
+                <div class="filters-heading-icon"><i class="pi pi-sliders-h"></i></div>
+                <div><h2>فیلتر محصولات</h2><p>نتایج را دقیق‌تر محدود کنید</p></div>
+              </div>
               <!-- Search -->
               <div class="filter-group">
                 <label for="product-search">جستجو</label>
@@ -111,8 +115,12 @@
 
         <!-- Products Grid -->
         <template v-else>
-          <div class="products-count">
-            <span>{{ totalItems }} محصول یافت شد</span>
+          <div class="products-results-heading">
+            <div class="products-count">
+              <span class="products-count-number">{{ totalItems.toLocaleString('fa-IR') }}</span>
+              <span>محصول در کاتالوگ</span>
+            </div>
+            <span class="products-results-context"><i class="pi pi-check-circle"></i> فقط محصولات منتشرشده</span>
           </div>
           <div class="products-grid">
             <div
@@ -121,6 +129,7 @@
               class="product-card"
               role="link"
               tabindex="0"
+              :aria-label="`مشاهده جزئیات ${product.title}`"
               @click="goToProduct(product)"
               @keydown.enter.prevent="goToProduct(product)"
               @keydown.space.prevent="goToProduct(product)"
@@ -134,13 +143,16 @@
                 <div v-else class="empty-image">
                   <i class="pi pi-image"></i>
                 </div>
+                <span v-if="product.category?.nameFa || product.category?.name" class="product-category-badge">
+                  {{ product.category.nameFa || product.category.name }}
+                </span>
                 <span v-if="product.prices && product.prices[0]" class="product-price-badge">
                   {{ formatPrice(product.prices[0].price) }}
                 </span>
               </div>
               <div class="product-info">
                 <h3 class="product-title">{{ product.title }}</h3>
-                <p class="product-company">{{ product.company?.name || 'تأمین‌کننده' }}</p>
+                <p class="product-company"><i class="pi pi-building"></i>{{ product.company?.name || 'تأمین‌کننده' }}</p>
                 <p v-if="product.shortDescription" class="product-desc">{{ product.shortDescription }}</p>
               </div>
             </div>
@@ -550,4 +562,191 @@ watch(() => route.query.category, (newVal) => {
     grid-template-columns: 1fr;
   }
 }
+
+/* Catalog composition: compact filter rail and product-first results area. */
+.products-page { padding-block: clamp(1.5rem, 3vw, 2.75rem); }
+.listing-page-header {
+  align-items: center;
+  margin-bottom: 1.75rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(115deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface));
+  box-shadow: var(--ds-shadow-xs);
+}
+.listing-heading-copy .ds-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-bottom: .55rem;
+  color: var(--ds-color-primary);
+  font-weight: var(--ds-font-weight-bold);
+}
+.listing-heading-copy .ds-h1 {
+  color: var(--ds-color-brand-deep);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 850;
+}
+.listing-heading-copy .ds-lead { margin: .5rem 0 0; }
+.breadcrumb-wrap { margin: 0; }
+.filters-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  box-shadow: var(--ds-shadow-xs);
+}
+.filters-card::before {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  background: var(--ds-color-primary);
+  content: "";
+}
+.filters-card :deep(.p-card-content) { padding: 1.25rem; }
+.filters-inner { gap: 1.2rem; }
+.filters-heading {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ds-color-border);
+}
+.filters-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: .85rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.1rem;
+}
+.filters-heading h2 {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-bold);
+}
+.filters-heading p {
+  margin: .2rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+}
+.filter-group label { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
+.filter-group :deep(.p-inputtext),
+.filter-group :deep(.p-inputnumber-input),
+.filter-group :deep(.p-select) {
+  width: 100%;
+  min-height: 2.7rem;
+  border-radius: var(--ds-radius-md);
+}
+.filter-actions { gap: .6rem; }
+.products-results-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.products-count {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 0;
+  margin: 0;
+  color: var(--ds-color-text-muted);
+}
+.products-count-number {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+.products-results-context {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--ds-color-success);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.products-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 1.1rem; }
+.product-card {
+  position: relative;
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  transition: transform var(--ds-transition), box-shadow var(--ds-transition), border-color var(--ds-transition);
+}
+.product-card:hover,
+.product-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: var(--ds-shadow-lg);
+}
+.product-image {
+  aspect-ratio: 5 / 4;
+  background: linear-gradient(145deg, var(--ds-color-surface-alt), var(--ds-color-surface-hover));
+}
+.product-image img { object-fit: contain; padding: .75rem; }
+.empty-image { display: grid; place-items: center; width: 100%; height: 100%; }
+.empty-image i { opacity: .45; color: var(--ds-color-primary); }
+.product-category-badge {
+  position: absolute;
+  top: .8rem;
+  inset-inline-start: .8rem;
+  max-width: calc(100% - 1.6rem);
+  overflow: hidden;
+  padding: .3rem .6rem;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
+  border-radius: var(--ds-radius-pill);
+  background: color-mix(in srgb, var(--ds-color-surface) 92%, transparent);
+  color: var(--ds-color-primary-text);
+  font-size: .68rem;
+  font-weight: var(--ds-font-weight-bold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+}
+.product-price-badge {
+  bottom: .8rem;
+  inset-inline-end: .8rem;
+  padding: .45rem .7rem;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-sm);
+  font-size: .8rem;
+}
+.product-info { padding: 1rem 1rem 1.1rem; }
+.product-title { font-size: .98rem; line-height: 1.65; }
+.product-company {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--ds-color-text-muted);
+}
+.product-company i { color: var(--ds-color-primary); font-size: .75rem; }
+.product-desc { line-height: 1.8; }
+.state-box {
+  min-height: 20rem;
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+}
+.pagination-wrap { margin-top: 1.5rem; }
+@media (max-width: 900px) {
+  .filters-sidebar { position: static; }
+}
+@media (max-width: 576px) {
+  .listing-page-header { align-items: flex-start; }
+  .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+  .product-info { padding: .75rem; }
+  .product-title { font-size: .85rem; }
+  .product-company, .product-desc { font-size: .7rem; }
+  .product-price-badge { font-size: .68rem; }
+}
+@media (max-width: 360px) {
+  .products-grid { grid-template-columns: 1fr; }
+}
+
 </style>
