@@ -397,3 +397,20 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - CI passed on `7767afe` and `b52f642` (test/build workflow).
 - Runtime Validation is a separate Playwright smoke workflow and has reported failures/cancellations on some commits; it is not being used as the acceptance criterion for this visual batch. Review its failure separately if it blocks release.
 - CI for the newest commits is pending/in progress; this latest batch is not yet signed off.
+
+
+## Inquiry details and company settings — 2026-11-02
+
+### Completed
+- Admin InquiryDetail now composes request metadata and requested items as a two-column first row; response cards and status history span the full content width. Loading/error states, response actions, attachments and workflow permissions are preserved.
+- Company InquiryDetail now aligns to the dashboard's shared content width (removed a nested max-width/padding container), with clearer status/deadline banners, request sections, response cards and responsive sidebar collapse.
+- CompanySettings now uses the shared shell width instead of a nested 1000px/padded container. Tabs, system metadata, editable sections and notification toggles receive consistent token-based panels and mobile behavior.
+- No changes to inquiry lifecycle, sealed-response visibility, response decision permissions, company scope, settings API or data.
+
+### Commits
+- `5e1d159` — Admin InquiryDetail
+- `f6bc9b8` — Company InquiryDetail
+- `26b6f8f` — CompanySettings
+
+### Test correction
+- CI exposed an incorrect assertion in the newly added shared Table test (the Column stub was not rendered by the test stub). The test was corrected in `07abcc2`; the earlier failure was test-harness-only, not a product-code failure. CI for the corrected/latest code is still pending.
