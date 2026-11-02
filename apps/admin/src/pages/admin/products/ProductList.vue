@@ -10,7 +10,7 @@
   </div>
 </section>
         <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
-      <Toolbar class="ds-toolbar">
+      <Toolbar class="ds-toolbar product-management-toolbar">
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
@@ -25,7 +25,7 @@
         </template>
       </Toolbar>
 
-      <DataTable :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
+      <DataTable class="product-management-table" :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
         :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
         @page="onPageChange" responsiveLayout="scroll" v-if="products.length > 0 || loading">
         <Column field="id" header="شناسه" sortable></Column>
@@ -70,13 +70,13 @@
         </Column>
       </DataTable>
 
-      <div v-else-if="loadError" class="table-state">
+      <div v-else-if="loadError" class="table-state product-management-state">
         <i class="pi pi-exclamation-triangle" />
         <p>{{ loadError }}</p>
         <Button label="تلاش مجدد" icon="pi pi-refresh" severity="secondary" @click="fetchProducts(pagination.page)" />
       </div>
 
-      <div v-else class="table-state">
+      <div v-else class="table-state product-management-state">
         <i class="pi pi-box" />
         <p>محصولی یافت نشد</p>
       </div>
@@ -652,4 +652,151 @@ onMounted(() => {
   .product-list-page :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
 
+
+/* Product operations: distinct command surface and readable review table. */
+.product-management-intro {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  min-height: 8rem;
+  padding: clamp(1.25rem, 2.4vw, 1.8rem);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, var(--ds-color-border));
+  border-radius: var(--ds-radius-xl);
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--ds-color-primary) 13%, transparent), transparent 42%),
+    var(--ds-color-surface);
+}
+.product-management-intro-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 3.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 24%, transparent);
+  border-radius: 1.1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.45rem;
+}
+.product-management-intro-copy { min-width: 0; }
+.product-management-intro-copy > span {
+  color: var(--ds-color-primary-text);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-management-intro-copy h1 {
+  margin: .2rem 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-management-intro-copy p {
+  margin: 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.8;
+}
+.product-management-surface {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-management-toolbar {
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.product-management-toolbar :deep(.p-toolbar-start),
+.product-management-toolbar :deep(.p-toolbar-end) {
+  gap: .65rem;
+  flex-wrap: wrap;
+}
+.product-management-toolbar :deep(.p-inputtext),
+.product-management-toolbar :deep(.p-select) {
+  min-height: 2.65rem;
+  border-radius: var(--ds-radius-md);
+}
+.product-management-table :deep(.p-datatable-table-container) {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.product-management-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.product-management-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  vertical-align: middle;
+}
+.product-management-table :deep(.p-datatable-tbody > tr) {
+  transition: background-color var(--ds-transition-fast);
+}
+.product-management-table :deep(.p-datatable-tbody > tr:hover) {
+  background: var(--ds-color-surface-hover);
+}
+.product-management-table :deep(.p-paginator) {
+  justify-content: flex-start;
+  gap: .3rem;
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.product-management-table :deep(.p-paginator-page),
+.product-management-table :deep(.p-paginator-next),
+.product-management-table :deep(.p-paginator-prev) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+}
+.product-management-table :deep(.p-paginator-page.p-highlight) {
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+}
+.product-management-table :deep(.p-button.p-button-text) {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+.product-management-state {
+  display: grid;
+  place-items: center;
+  gap: .65rem;
+  min-height: 15rem;
+  padding: 2rem;
+  color: var(--ds-color-text-muted);
+  text-align: center;
+}
+.product-management-state > i {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1.1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.45rem;
+}
+@media (max-width: 700px) {
+  .product-management-intro { align-items: flex-start; }
+  .product-management-intro-icon { flex-basis: 2.9rem; width: 2.9rem; height: 2.9rem; }
+  .product-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
+  .product-management-toolbar :deep(.p-toolbar-start),
+  .product-management-toolbar :deep(.p-toolbar-end) { width: 100%; }
+  .product-management-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .product-management-toolbar :deep(.p-inputtext),
+  .product-management-toolbar :deep(.p-select) { width: 100%; margin: 0; }
+  .product-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
+}
 </style>
