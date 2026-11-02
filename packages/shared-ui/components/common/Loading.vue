@@ -71,4 +71,20 @@ const spinnerSize = computed(() => {
 .app-loading-text-sm {
   font-size: 0.875rem;
 }
+
+.app-loading-fullscreen {
+  z-index: var(--ds-z-overlay);
+  background: color-mix(in srgb, var(--ds-color-surface) 88%, transparent);
+}
+.app-loading-content {
+  min-width: 180px;
+  padding: var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-lg);
+}
+.app-loading-text { color: var(--ds-color-text-muted); }
+.app-loading-inline { color: var(--ds-color-primary); }
+
 </style>
