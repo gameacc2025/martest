@@ -279,4 +279,112 @@ button{border:0;border-radius:7px;padding:.75rem 1rem;cursor:pointer}.primary{ba
   .subscription-heading-icon { width: 2.7rem; height: 2.7rem; }
 }
 
+
+/* Public inquiry subscription: pricing and quota workspace aligned to the marketplace container. */
+.subscription-page {
+  width: 100%;
+  max-width: var(--ds-container-max-wide);
+  margin-inline: auto;
+  padding: var(--ds-space-8) var(--ds-container-pad) var(--ds-space-16);
+  color: var(--ds-color-text);
+  gap: var(--ds-space-5);
+}
+.subscription-page .heading {
+  align-items: center;
+  gap: 1.25rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.subscription-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.subscription-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.35rem;
+}
+.subscription-page .eyebrow { color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.subscription-page h1 { margin: .25rem 0; color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
+.subscription-page p { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
+.subscription-page .panel,
+.subscription-page .plan-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.subscription-page .active { border-inline-start: 4px solid var(--ds-color-success); }
+.subscription-page .pending { border-inline-start: 4px solid var(--ds-color-warning); }
+.subscription-page .active-pill { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-page .pending-pill { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
+.subscription-page .quota {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.subscription-page .quota > span { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.subscription-page .quota strong { color: var(--ds-color-text); font-variant-numeric: tabular-nums; }
+.subscription-page .meter { background: var(--ds-color-surface-hover); }
+.subscription-page .meter span { background: var(--ds-color-primary); }
+.subscription-page .plan-card {
+  padding: clamp(1rem, 2vw, 1.4rem);
+  transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast), transform var(--ds-transition-fast);
+}
+.subscription-page .plan-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
+.subscription-page .plan-card.chosen {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-color-primary) 16%, transparent);
+}
+.subscription-page .plan-head h3 { color: var(--ds-color-text); }
+.subscription-page .plan-head span,
+.subscription-page .description,
+.subscription-page .footnote { color: var(--ds-color-text-muted); }
+.subscription-page .price { color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); }
+.subscription-page .plan-card ul { color: var(--ds-color-text); line-height: 1.8; }
+.subscription-page input {
+  width: 100%;
+  min-height: 2.65rem;
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text);
+}
+.subscription-page input:focus {
+  border-color: var(--ds-color-primary);
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+.subscription-page .primary {
+  min-height: 2.7rem;
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-primary);
+  color: var(--ds-color-primary-contrast);
+  font-weight: var(--ds-font-weight-bold);
+}
+.subscription-page .secondary {
+  min-height: 2.7rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text);
+}
+.subscription-page .error,
+.subscription-page .success { border: 1px solid; border-radius: var(--ds-radius-md); }
+.subscription-page .error { border-color: color-mix(in srgb, var(--ds-color-danger) 30%, transparent); background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.subscription-page .success { border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent); background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+@media (max-width: 760px) {
+  .subscription-page { padding: var(--ds-space-5) var(--ds-space-3) var(--ds-space-10); }
+  .subscription-page .heading { align-items: stretch; flex-direction: column; }
+  .subscription-page .refresh-action { width: 100%; justify-content: center; }
+  .subscription-heading-identity { align-items: flex-start; }
+  .subscription-page .quota-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) { .subscription-page .quota-grid { grid-template-columns: minmax(0, 1fr); } }
 </style>
