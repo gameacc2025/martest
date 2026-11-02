@@ -126,18 +126,33 @@ describe('Company notification inbox', () => {
     expect(apiGet).toHaveBeenCalledWith('/settings/notifications/unread-count')
   })
 
+  it('uses a native keyboard-operable button for opening each message', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+
+    const openButton = wrapper.find('.message-row-open')
+    expect(openButton.element.tagName).toBe('BUTTON')
+    expect(openButton.attributes('type')).toBe('button')
+    expect(openButton.attributes('aria-pressed')).toBe('false')
+    await openButton.trigger('click')
+    expect(openButton.attributes('aria-pressed')).toBe('true')
+    expect(apiPatch).not.toHaveBeenCalled()
+  })
+
   it('marks a message read only on double-click, not on a single click', async () => {
     wrapper = shallowMount(Notifications, {
       global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
     })
 
     await flushPromises()
-    await wrapper.findAll('.message-row')[1].trigger('click')
+    await wrapper.findAll('.message-row-open')[1].trigger('click')
     await flushPromises()
     expect(apiPatch).not.toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).toContain('unread')
 
-    await wrapper.findAll('.message-row')[1].trigger('dblclick')
+    await wrapper.findAll('.message-row-open')[1].trigger('dblclick')
     await flushPromises()
     expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).not.toContain('unread')
