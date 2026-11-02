@@ -49,7 +49,7 @@ describe('Company InquiryList', () => {
         stubs: {
           WorkspacePageHeading: true,
           Toolbar: true,
-          Tabs: { template: '<div><slot /></div>' },
+          Tabs: { template: '<div class="p-tabs"><slot /></div>' },
           TabList: { template: '<div><slot /></div>' },
           Tab: { template: '<button><slot /></button>' },
           TabPanels: { template: '<div><slot /></div>' },
@@ -76,7 +76,7 @@ describe('Company InquiryList', () => {
 
     expect(wrapper.get('[role="alert"]').text()).toContain('دریافت استعلام‌ها ناموفق بود')
     expect(wrapper.get('[role="alert"]').text()).toContain('تلاش مجدد')
-    expect(wrapper.find('.inquiry-management-surface .p-tabs').exists()).toBe(false)
+    expect(wrapper.find('.p-tabs').exists()).toBe(false)
   })
 
   it('retries the existing list endpoint and returns to the inbox after success', async () => {
@@ -94,6 +94,6 @@ describe('Company InquiryList', () => {
 
     expect(mocks.list).toHaveBeenCalledTimes(2)
     expect(wrapper.find('[role="alert"]').exists()).toBe(false)
-    expect(wrapper.find('.inquiry-management-surface').exists()).toBe(true)
+    expect(wrapper.find('.p-tabs').exists()).toBe(true)
   })
 })
