@@ -1299,3 +1299,17 @@ Additional pages completed after dashboard/table batches:
 - Admin inquiry review list.
 
 The overall UI redesign remains active and incomplete. Continue through detail/create/edit forms, users/roles/permissions/settings, notifications, public homepage/catalogue/details, and shared shell components. Preserve APIs, roles, access checks, tenant boundaries and existing data semantics.
+
+
+## Current UI redesign progress — 2026-11-02
+
+Completed page families now include:
+- Admin and Company dashboards.
+- Admin product and company directories.
+- Company product catalogue.
+- Admin and Company inquiry lists.
+- Admin and Company user directories.
+- Admin roles, permissions and categories.
+- Shared Table component visual treatment and unit test.
+
+Still active/incomplete: shared dashboard shell and navigation polish, product/company/inquiry details and forms, reports/settings, notifications, public homepage/catalogue/product details, and remaining route pages. Do not declare overall completion until every existing page has been audited and implemented, tests/builds pass, and documentation coverage is reconciled.
