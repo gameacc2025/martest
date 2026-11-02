@@ -2322,3 +2322,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Total adoption: 16 Admin/Company operational screens across list, report, settings, subscription and notification management.
 - No API or business logic changed.
 - Commits: `c5f2126`, `7df3c0c`, `fc7963e`, `dcabf38`, `5eca4cd`, `1bd79b4`. CI pending.
+
+
+## UI redesign — account and commerce headings batch 14 (2026-11-02)
+
+- Shared workspace heading adopted on Company Profile and Website Profile, Orders, Wishlist and My Inquiries.
+- Breadcrumbs and My Inquiries action buttons remain in the named actions slot.
+- No account, order, wishlist, inquiry or route behavior changed.
+- Commits: `95e8111`, `de3d47f`, `7991a04`, `ecfc860`, `959035d`. CI pending.
