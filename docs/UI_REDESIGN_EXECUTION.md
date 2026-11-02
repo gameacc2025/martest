@@ -414,3 +414,23 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 
 ### Test correction
 - CI exposed an incorrect assertion in the newly added shared Table test (the Column stub was not rendered by the test stub). The test was corrected in `07abcc2`; the earlier failure was test-harness-only, not a product-code failure. CI for the corrected/latest code is still pending.
+
+
+## Notifications and company catalogue batch — 2026-11-02
+
+### Completed
+- Admin notification management composer and delivery status panel now use design-system surfaces, clear hierarchy, responsive composition, tokenized controls and accessible focus states. Existing audience/channel rules and worker-backed delivery semantics remain unchanged.
+- Admin notification folder management now uses responsive configuration cards/rows and tokenized form controls. System INBOX/SAVED restrictions and admin-defined folder scope remain unchanged.
+- Admin and Company notification preference matrices now have consistent event/channel table hierarchy, explicit unavailable SMS state, horizontal overflow on small screens and responsive save actions. Preference data and save API unchanged.
+- Company-wide products page now wraps its server-paginated DataTable in a dedicated catalogue surface, with matching header/body/paginator treatment. Existing product visibility and API behavior unchanged.
+
+### Commits
+- `7875672` — NotificationManagement
+- `8985db7` — NotificationFolders
+- `387e7e9` — Admin NotificationPreferences
+- `43e9fcb` — Company NotificationPreferences
+- `e239d42` / `dc92478` — CompanyProducts surface and template whitespace correction
+
+### Verification
+- CI and database migration validation passed on `dfc47e5` after the shared Table test correction.
+- Newer notification/catalogue commits have CI queued/in progress; do not treat them as verified until the latest run finishes.
