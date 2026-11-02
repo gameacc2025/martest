@@ -516,8 +516,8 @@ defineExpose({ clearSelection })
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
 }
 .ent-table-toolbar-end > :deep(button) {
-  min-width: 2.7rem;
-  min-height: 2.7rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
 
@@ -612,8 +612,10 @@ defineExpose({ clearSelection })
   white-space: nowrap;
 }
 .ent-table-actions :deep(button) {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
 
@@ -669,8 +671,8 @@ defineExpose({ clearSelection })
 .ent-table :deep(.p-paginator .p-paginator-prev),
 .ent-table :deep(.p-paginator .p-paginator-next),
 .ent-table :deep(.p-paginator .p-paginator-last) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
 .ent-table :deep(.p-paginator .p-paginator-page.p-highlight) {
