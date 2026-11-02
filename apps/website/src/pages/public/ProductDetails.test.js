@@ -98,6 +98,15 @@ describe('Website Product Details', () => {
     expect(wrapper.find('.main-image').attributes('src')).toBe('/primary.png')
   })
 
+  it('keeps category, product tags and retail price-history action in the product hierarchy', async () => {
+    wrapper = shallowMount(ProductDetails)
+    await flushPromises()
+
+    expect(wrapper.find('.category-chip').text()).toBe('فیبر نوری')
+    expect(wrapper.find('.product-tags').text()).toContain('#شبکه')
+    expect(wrapper.find('[aria-label="نمودار قیمت خرده‌فروشی شش ماه اخیر"]').exists()).toBe(true)
+  })
+
   it('announces a not-found state when the store returns no product', async () => {
     getProductById.mockResolvedValueOnce({})
     wrapper = shallowMount(ProductDetails)
