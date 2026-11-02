@@ -553,3 +553,14 @@ Extended `WorkspacePageHeading.vue` to additional operational screens:
 The shared heading now covers 16 Admin/Company operational pages. All page-specific descriptions, existing actions and routes were retained. No API, permission, data, validation, subscription or notification behavior changed.
 
 Commits: `c5f2126`, `7df3c0c`, `fc7963e`, `dcabf38`, `5eca4cd`, `1bd79b4`. CI pending.
+
+
+## Account and commerce pages — batch 14 (2026-11-02)
+
+Adopted the shared workspace heading on:
+- Company: User Profile.
+- Website: User Profile, Orders, Wishlist and My Inquiries.
+
+Existing breadcrumb navigation is retained through the actions slot. My Inquiries preserves its subscription, back-to-list and refresh actions. Page-specific content, route behavior, account state, order data, wishlist actions and inquiry flows remain unchanged.
+
+Commits: `95e8111`, `de3d47f`, `7991a04`, `ecfc860`, `959035d`. CI pending.
