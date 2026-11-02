@@ -434,3 +434,26 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 ### Verification
 - CI and database migration validation passed on `dfc47e5` after the shared Table test correction.
 - Newer notification/catalogue commits have CI queued/in progress; do not treat them as verified until the latest run finishes.
+
+
+## Public marketplace and shared workspace refinement — 2026-11-02
+
+### Completed
+- Shared DashboardSidebar now has a two-line brand lockup (Telecom Market + Persian product descriptor), stronger focus-visible navigation, more deliberate section spacing and refined active/submenu surfaces. Route filtering, planned-route disabled behavior, collapse and mobile drawer behavior are unchanged.
+- Public Companies directory received improved responsive search/filter hierarchy, supplier/category cards, focus-visible category interaction and tokenized loading/empty presentation.
+- Public ContactUs now has a balanced form/information column, consistent card surfaces, tokenized contact/social accents and improved form-control focus styling.
+- Public Addresses now uses the marketplace container width, tokenized address cards/forms/notices and responsive action layout.
+- Public MyInquiries now uses the wide marketplace content container and tokenized request/detail/response/sealed states. Existing visibility rules, response decisions and conversation behavior are unchanged.
+- Public InquirySubscription now uses the same subscription-plan/quota visual system as the Company panel, within the public marketplace container. Plan selection, payment redirect/manual verification and quota semantics are unchanged.
+- Notification management/folder/preferences changes from the previous batch are recorded above.
+
+### Commits
+- `abdefd7` — shared DashboardSidebar brand/navigation
+- `bdf55c3` — public Companies
+- `fca4b8d` — public ContactUs
+- `f61e2e5` — public Addresses
+- `d31d278` — public MyInquiries
+- `63724e4` — public InquirySubscription
+
+### Verification
+- Latest CI and migration validation results are checked on the current main commit separately. No browser testing is claimed.
