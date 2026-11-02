@@ -37,7 +37,7 @@
  *     toggleable?: boolean,        // can be hidden via column-visibility menu
  *   }
  */
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Button from 'primevue/button'
@@ -113,7 +113,7 @@ const hasFilters = computed(() => props.columns.some((c) => c.filter))
 
 // The count PrimeVue paginator should use.
 const effectiveTotal = computed(() =>
-  props.lazy ? props.totalRecords ?? props.rows.length : props.rows.length
+  props.lazy ? props.totalRecords ?? props.rows.length : displayRows.value.length
 )
 
 // ── Client-side derived rows (search + filter + no server) ──
@@ -220,6 +220,8 @@ function onSearchInput() {
   }, 400)
 }
 
+onUnmounted(() => clearTimeout(searchTimer))
+
 function onFilterChange() {
   page.value = 1
   if (props.lazy) emitRequest()
@@ -249,6 +251,10 @@ defineExpose({ clearSelection })
     <div v-if="title || searchable || columnToggle || $slots.toolbar || (selectable && selection.length)" class="ent-table-toolbar">
       <div class="ent-table-toolbar-start">
         <h2 v-if="title" class="ent-table-title">{{ title }}</h2>
+        <span class="ent-table-record-count" aria-live="polite">
+          <i class="pi pi-list" aria-hidden="true"></i>
+          {{ effectiveTotal.toLocaleString('fa-IR') }} رکورد
+        </span>
 
         <!-- Bulk actions appear when rows are selected -->
         <div v-if="selectable && selection.length" class="ent-table-bulk">
@@ -578,5 +584,82 @@ defineExpose({ clearSelection })
 }
 .ent-table-toolbar { background: var(--ds-color-surface); }
 .ent-table-title { font-weight: var(--ds-font-weight-bold); }
+
+.ent-table-record-count {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  white-space: nowrap;
+}
+.ent-table-record-count i { color: var(--ds-color-primary); }
+.ent-table-toolbar-end { min-width: 0; }
+.ent-table-search :deep(input) {
+  min-height: 2.65rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+}
+.ent-table-search :deep(input:focus) {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+.ent-table-filters { align-items: center; }
+.ent-table-filter :deep(.p-inputtext),
+.ent-table-filter :deep(.p-select) { border-radius: var(--ds-radius-md); }
+.ent-table :deep(.p-datatable-table-container) { overflow-x: auto; }
+.ent-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  color: var(--ds-color-text-muted);
+  background: var(--ds-color-surface-alt);
+  border-color: var(--ds-color-border);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.ent-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .9rem 1rem;
+  color: var(--ds-color-text);
+  border-color: var(--ds-color-border);
+  font-size: var(--ds-font-size-sm);
+  vertical-align: middle;
+}
+.ent-table :deep(.p-datatable-tbody > tr) {
+  transition: background-color var(--ds-transition-fast);
+}
+.ent-table :deep(.p-datatable-tbody > tr:hover) {
+  background: var(--ds-color-surface-hover);
+}
+.ent-table :deep(.p-datatable-tbody > tr.p-datatable-row-selected) {
+  background: var(--ds-color-info-soft);
+}
+.ent-table :deep(.p-paginator) {
+  justify-content: center;
+  gap: .25rem;
+  padding: .85rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.ent-table :deep(.p-paginator-current) {
+  margin-inline-start: auto;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+}
+.ent-table :deep(.p-datatable-empty-message > td) {
+  padding: 0;
+  border: 0;
+}
+.ent-table :deep(.p-datatable-column-header-content) { gap: .4rem; }
+@media (max-width: 640px) {
+  .ent-table-toolbar { align-items: stretch; padding: var(--ds-space-3); }
+  .ent-table-toolbar-start,
+  .ent-table-toolbar-end { width: 100%; }
+  .ent-table-toolbar-end { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .ent-table-search { min-width: 0; width: 100%; }
+  .ent-table-search :deep(input) { width: 100%; min-width: 0; }
+  .ent-table-record-count { margin-inline-start: auto; }
+  .ent-table :deep(.p-paginator) { flex-wrap: wrap; }
+  .ent-table :deep(.p-paginator-current) { width: 100%; margin: .25rem 0 0; text-align: center; }
+}
 
 </style>
