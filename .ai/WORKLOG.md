@@ -2455,3 +2455,9 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Updated page description to reflect actual profile capabilities; no API, route or auth behavior changed.
 - Added UserProfile tests for identity rendering, fallback avatar, editor dialog and retryable API failure.
 - Commits: fdbff06 profile redesign; ab1ac85 tests; 064f18e copy/unused-state cleanup. CI pending on newest head.
+## Public address book UI — 2026-11-02
+
+- Address book uses PrimeIcons for map markers, clear default-address state, consistent 44px actions/fields and visible focus styles.
+- Existing create/update/delete/default API and form fields preserved.
+- Added Addresses tests for real API rows, default state, form open/label and empty state.
+- Commits: fa6db5f address UI; 316e0a4 tests; 5038b04 label assertions. CI pending on newest head.
