@@ -306,4 +306,13 @@ const openImage = (imageUrl) => {
   font-size: 0.75rem;
   color: var(--text-color-secondary);
 }
+
+.review-card :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.review-image { border-radius: var(--ds-radius-md); }
+.review-title { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
+
 </style>
