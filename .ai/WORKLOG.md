@@ -2274,3 +2274,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Preserved existing sidebar filtering, access profile routing, search, theme, notification, user menu and logout behavior.
 - Commits: `9fe9d5f`, `39cfd56`, `399c989`, `8e5b9bf`.
 - Tests have been authored but not executed in this editing session.
+
+
+## UI redesign — product editor batch 8 (2026-11-02)
+
+- Added identical live required-field progress guidance to Admin and Company product editors.
+- It reflects title/category/subcategory and conditionally company selection based on the existing permission context. Existing validation remains authoritative.
+- No business logic/API/payload/save/media changes.
+- Commits: `62ad6a7`, `d626f49`. CI pending.
