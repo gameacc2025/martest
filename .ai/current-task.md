@@ -1277,3 +1277,15 @@ Completed Admin legacy Order list and Notification Folder management visual refi
 Commits: `7232a6e`, `fecd896`.
 
 Continue with the final admin/company/public page inventory, shared shells, accessibility and CI verification. Tests/builds are not yet run locally.
+
+
+## UI redesign checkpoint — 2026-11-02 (continued)
+
+The active task is still the full Paces-inspired redesign of all existing Admin, Company and Website UI. This is not complete.
+
+Latest completed batches:
+- Admin and Company dashboards received new workspace composition.
+- Shared Table.vue received a full table-surface redesign.
+- Admin ProductList and CompanyList received management-surface, toolbar, data-grid and responsive refinements.
+
+Latest commit: `7010dc6`. CI run `41449786538` is pending/in progress at checkpoint time. Next work: continue through shared dashboard shell and the remaining admin/company/website page families, preserving API/auth/permission behavior and avoiding fake data or inactive route links.
