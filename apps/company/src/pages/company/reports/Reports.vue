@@ -245,4 +245,22 @@ function exportInquiriesCSV() {
     grid-template-columns: 1fr;
   }
 }
+
+.reports-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.reports-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.reports-page .page-header h1 {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-2xl);
+}
+.reports-page .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.reports-page :deep(.p-tabs),
+.reports-page :deep(.p-tablist) { border-color: var(--ds-color-border); }
+.reports-page :deep(.p-tabpanels) { background: transparent; padding-inline: 0; }
+
 </style>
