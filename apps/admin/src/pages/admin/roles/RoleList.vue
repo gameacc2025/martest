@@ -398,6 +398,7 @@ async function saveRole() {
       toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نقش با موفقیت ایجاد شد', life: 3000 })
     }
     closeDialog()
+    tableRef.value?.resetPage()
     loadRoles()
   } catch (error) {
     toast.add({ severity: 'error', summary: 'خطا', detail: error.message || 'خطا در ذخیره نقش', life: 3000 })
@@ -414,6 +415,7 @@ async function deleteRole() {
     await roleStore.deleteRole(roleToDelete.value.id)
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نقش با موفقیت حذف شد', life: 3000 })
     showDeleteDialog.value = false
+    tableRef.value?.resetPage()
     loadRoles()
   } catch (error) {
     toast.add({ severity: 'error', summary: 'خطا', detail: error.message || 'خطا در حذف نقش', life: 3000 })
