@@ -1333,3 +1333,13 @@ Additional completed areas:
 - Company-wide product catalogue page.
 
 Remaining route inventory to audit: auth/forgot-password screens, company subscription and product alias routes, order legacy route, not-found states, public Website pages and the shared dashboard shell. The full redesign remains active/incomplete.
+
+
+## Public UI and shared navigation checkpoint — 2026-11-02
+
+Completed in the latest pass:
+- Shared dashboard sidebar branding/navigation refinement.
+- Public company directory, contact page, address book, customer inquiry center and public inquiry subscription page.
+- These changes preserve existing APIs, route names, user/tenant scope, sealed inquiry privacy, and payment verification behavior.
+
+Continue auditing remaining public/auth/account pages and shared components. Overall redesign remains in progress; do not declare completion until the full page/component inventory and final CI verification are complete.
