@@ -292,7 +292,14 @@ async function saveCreate() {
 
 <template>
   <div class="user-list-page ds-stack">
-<header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">کاربران شرکت</h1><p class="ds-page-heading__description">اعضای شرکت و وضعیت حساب‌های آن‌ها را مدیریت کنید.</p></div></header>
+<header class="management-page-intro" aria-labelledby="management-page-title">
+      <span class="management-page-icon"><i class="pi pi-users"></i></span>
+      <div class="management-page-copy">
+        <span>مدیریت اعضای سازمان</span>
+        <h1 id="management-page-title">کاربران شرکت</h1>
+        <p>اعضای شرکت و وضعیت حساب‌های آن‌ها را مدیریت کنید.</p>
+      </div>
+    </header>
         <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
@@ -754,4 +761,70 @@ async function saveCreate() {
   .user-list-page { gap: var(--ds-space-3); }
   .user-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
+
+.user-list-page { gap: clamp(1rem, 2vw, 1.5rem); }
+.management-page-intro {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.management-page-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.management-page-copy { min-width: 0; }
+.management-page-copy > span {
+  display: block;
+  margin-bottom: .2rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.management-page-copy h1 {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-weight: 800;
+}
+.management-page-copy p {
+  margin: .35rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.7;
+}
+.user-list-page .card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.user-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
+.user-list-page :deep(.p-toolbar-start),
+.user-list-page :deep(.p-toolbar-end) { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.user-list-page :deep(.p-toolbar .p-inputtext),
+.user-list-page :deep(.p-toolbar .p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.user-list-page :deep(.p-toolbar .p-button) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.user-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+.user-list-page :deep(.p-datatable-tbody > tr) { transition: background var(--ds-transition-fast); }
+.user-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
+@media (max-width: 640px) {
+  .management-page-intro { align-items: flex-start; padding: 1rem; }
+  .management-page-icon { width: 2.75rem; height: 2.75rem; }
+  .user-list-page :deep(.p-toolbar-start),
+  .user-list-page :deep(.p-toolbar-end) { width: 100%; }
+}
+
 </style>
