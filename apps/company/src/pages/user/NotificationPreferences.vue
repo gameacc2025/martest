@@ -70,4 +70,34 @@ async function savePreferences() {
 
 <style scoped>
 .notification-preferences{direction:rtl}.page-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}.page-header h1{margin:0;font-size:1.5rem;font-weight:700}.page-header p,.muted{color:var(--text-color-secondary);font-size:.85rem}.back-link{color:var(--primary-color);text-decoration:none}.settings-card{border:1px solid var(--surface-border);border-radius:12px;background:var(--surface-card);overflow:hidden}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:.85rem 1rem;border-bottom:1px solid var(--surface-border);text-align:right}thead th{background:var(--surface-ground);font-size:.85rem}td{text-align:center}tbody th{font-weight:500}tbody th small{display:block;color:var(--text-color-secondary);font-size:.72rem;margin-top:.25rem}input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:var(--primary-color)}footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem;flex-wrap:wrap}.state{text-align:center;padding:3rem}
+
+.notification-preferences .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.notification-preferences .page-header h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
+.notification-preferences .settings-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.notification-preferences table { width: 100%; border-collapse: collapse; }
+.notification-preferences th,
+.notification-preferences td {
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-color-border);
+  text-align: start;
+}
+.notification-preferences thead th {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+}
+@media (max-width: 640px) { .notification-preferences .page-header { padding: var(--ds-space-4); } }
+
 </style>
