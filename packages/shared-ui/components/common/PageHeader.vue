@@ -54,4 +54,13 @@ defineProps({
   padding: var(--ds-space-3) var(--ds-space-5);
 }
 
+
+.page-header-pro {
+  background: var(--ds-color-surface);
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+
 </style>
