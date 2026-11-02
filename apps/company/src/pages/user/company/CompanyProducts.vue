@@ -78,10 +78,10 @@ function formatPrice(price) {
 
 <template>
   <div class="company-products-page">
-    <div class="page-header">
-      <h1>محصولات شرکت</h1>
+    <header class="page-header ds-page-heading">
+      <div class="products-heading-copy"><span class="products-eyebrow"><i class="pi pi-building"></i> کاتالوگ شرکت</span><h1>محصولات شرکت</h1><p>فهرست محصولات ثبت‌شده شرکت و وضعیت انتشار آن‌ها را مدیریت کنید.</p></div>
       <Button label="محصول جدید" icon="pi pi-plus" @click="router.push({ name: 'manage-product-create' })" />
-    </div>
+    </header>
 
     <DataTable :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
       :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20]"
@@ -166,5 +166,11 @@ function formatPrice(price) {
   font-weight: var(--ds-font-weight-bold);
 }
 @media (max-width: 640px) { .page-header { padding: var(--ds-space-4); } }
+
+
+.products-heading-copy { min-width: 0; }
+.products-eyebrow { display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .4rem; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.company-products-page .page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
+@media (max-width: 640px) { .company-products-page .page-header { align-items: stretch; } }
 
 </style>
