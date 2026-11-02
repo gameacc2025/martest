@@ -52,6 +52,11 @@ describe('DataTable', () => {
     expect(wrapper.classes()).toContain('ent-table--mobile-cards')
   })
 
+  it('exposes a pagination reset for external filter changes', () => {
+    const wrapper = mountTable()
+    expect(typeof wrapper.vm.resetPage).toBe('function')
+  })
+
   it('allows a page to retain the classic scroll table layout when required', () => {
     const wrapper = mountTable({ mobileCardLayout: false })
     expect(wrapper.classes()).not.toContain('ent-table--mobile-cards')
