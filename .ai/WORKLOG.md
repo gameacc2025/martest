@@ -2044,3 +2044,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Refined Website commerce page headings; corrected semantic header closing tags in Checkout and Orders immediately after reviewing the resulting templates.
 - Updated the execution tracker. No intentional API, auth, route, permission, tenant, or business-logic changes.
 - Local pnpm tests/builds remain unrun in this connector-only session.
+
+
+## 2026-11-02 — PACES-RTL-UI-REDESIGN — execution batch 3
+
+- Aligned Company personal/company product views, Admin system settings and legacy order list, Website contact and inquiry subscription, plus the legacy Website products catalogue.
+- Refined shared auth handoff, dashboard footer/breadcrumb and feedback state components; updated Admin/Company loading gates with accessible status semantics.
+- Added role-scoped, non-interactive planned module labels to the shared dashboard sidebar for CRM, finance, HR, procurement, inventory/logistics, support, projects/operations, BI, and integrations/security. They deliberately have no route/action. Added a Vitest regression test for this navigation contract.
+- Future module items are planning labels only; active menu items still require real routes and permissions.
+- Local tests/builds are still not executed from this connected repository editing environment.
