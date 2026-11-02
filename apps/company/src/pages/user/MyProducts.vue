@@ -67,7 +67,7 @@ function formatPrice(price) {
   <div class="my-products-page">
     <header class="page-header ds-page-heading">
       <div class="products-heading-copy"><span class="products-eyebrow"><i class="pi pi-box"></i> کاتالوگ من</span><h1>محصولات من</h1><p>محصولاتی را که مدیریت آن‌ها به حساب شما واگذار شده جستجو و پیگیری کنید.</p></div>
-      <Button label="محصول جدید" icon="pi pi-plus" @click="router.push({ name: 'manage-product-create' })" />
+      <Button label="محصول جدید" icon="pi pi-plus" aria-label="ایجاد محصول جدید" @click="router.push({ name: 'manage-product-create' })" />
     </header>
 
     <div class="card">
@@ -75,7 +75,7 @@ function formatPrice(price) {
         <template #start>
           <span class="p-input-icon-right">
             <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." @keyup.enter="fetchProducts(1)" />
+            <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در محصولات من" @keyup.enter="fetchProducts(1)" />
           </span>
         </template>
       </Toolbar>
@@ -102,9 +102,9 @@ function formatPrice(price) {
         <Column header="عملیات">
           <template #body="{ data }">
             <div class="flex gap-2">
-              <Button icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش'" @click="editProduct(data)" />
+              <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش محصول" v-tooltip.top="'ویرایش'" @click="editProduct(data)" />
               <router-link :to="{ name: 'manage-product-edit', params: { id: data.id } }">
-                <Button icon="pi pi-history" severity="secondary" rounded text v-tooltip.top="'تاریخچه'" />
+                <Button icon="pi pi-history" severity="secondary" rounded text aria-label="مشاهده تاریخچه محصول" v-tooltip.top="'تاریخچه'" />
               </router-link>
             </div>
           </template>
@@ -157,6 +157,24 @@ function formatPrice(price) {
   border: 0;
   border-bottom: 1px solid var(--ds-color-border);
   background: var(--ds-color-surface);
+}
+.my-products-page :deep(.p-toolbar .p-inputtext) { min-height: 2.75rem; }
+.my-products-page :deep(.p-button) { min-height: 2.75rem; }
+.my-products-page :deep(.p-button.p-button-text) {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+}
+.my-products-page :deep(.p-paginator-page),
+.my-products-page :deep(.p-paginator-next),
+.my-products-page :deep(.p-paginator-prev) {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+.my-products-page :deep(.p-inputtext:focus-visible),
+.my-products-page :deep(.p-button:focus-visible) {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
 }
 .company-products-page :deep(.p-datatable),
 .my-products-page :deep(.p-datatable) { border-radius: var(--ds-radius-xl); }
