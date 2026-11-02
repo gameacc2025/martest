@@ -1215,3 +1215,17 @@ Completed the next page family:
 Commits: `ec8f735`, `14361df`, `5da81bd`.
 
 Continue with inquiry details/subscriptions, notifications/preferences, user/company/category/role/permission/settings pages, orders, public auth/cart/checkout/company/category pages, and shared components. No local tests/builds have been run; do not claim verified or complete.
+
+
+## UI redesign — batch 12 checkpoint (2026-11-02)
+
+Completed:
+- Website customer inquiry subscription visual refresh.
+- Admin inquiry detail contextual header.
+- Website notification inbox light/dark token alignment.
+- Admin/Company/Website notification preferences shared visual treatment.
+- Admin users/companies/categories and Company users list workspace refresh.
+
+Commits: `ef00252`, `6cf7465`, `d9cd191`, `e77f07a`, `5cf6289`, `c44bb78`, `1a91159`, `5e40f45`, `b9f25de`, `3df74f0`.
+
+Continue the rest of the page inventory and shared component audit. No local tests/builds have been executed; verify with CI before sign-off.
