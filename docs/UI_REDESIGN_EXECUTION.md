@@ -491,3 +491,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Added `DashboardHeader.test.js` for both configured and omitted workspace labels.
 - Commits: `9fe9d5f` shared header; `39cfd56` Admin shell; `399c989` Company shell; `8e5b9bf` tests.
 - Test/build execution is still pending; no local verification is claimed.
+
+
+## Product editor — batch 8 (2026-11-02)
+
+- Added a live required-information completion panel to both Admin and Company product editors.
+- The checklist is derived from the same required values used by each editor's existing validation: title, category, subcategory, and company only where the current access context requires company selection.
+- The panel communicates completed/remaining required fields with an accessible progressbar and responsive checklist.
+- No validation rule, payload shape, permission check, API call, save flow, or media upload behavior was changed.
+- Commits: `62ad6a7` Company editor; `d626f49` Admin editor.
+- CI validation for this batch is pending.
