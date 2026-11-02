@@ -139,3 +139,17 @@ A markup review caught two commerce page header closing tags after the initial h
 - Added disabled, explicitly labelled planned-module entries to the shared Admin/Company sidebar for CRM, finance, HR, procurement, inventory/logistics, support, projects/operations, BI, and integrations/security. These entries have no route or click action and are permission/role scoped. Added a regression test for the roadmap menu contract.
 
 Recent commits: Company product views c3d2339/9946e62; Admin order/settings ca4b483/4f5ce4a; Company dashboard donut fde356c; Website contact/subscription/legacy catalogue 1b7bf37/c0f4d52/84bf494; shared auth/shell/feedback 4962549/eff3cf6/bb1bfb9/7f698b6/78a307d; planned menu 39f42e0/fe74038/025c5bd; app loading gates f67b924/63f9333.
+
+
+## Additional migration batch 4 — shared component system
+
+- Refined the dashboard panel/KPI/quick-action/inquiry-pipeline/welcome/system-status components to a consistent radius, elevation and responsive hierarchy.
+- Refined shared dialog chrome, PageHeader, review cards, form alerts/actions and shared Input.
+- Added a rendering test proving planned roadmap items are rendered as disabled non-links (in addition to the navigation-config test).
+- Replaced remaining non-brand hard-coded hover colors in legacy Website cart/checkout/order pages with design tokens.
+
+## Page inventory audit
+
+The repository currently contains 69 Vue page files across Admin, Company and Website. The active page families have been migrated or were already using the shared design system before this redesign. The remaining page files are transitional gates/shared-state wrappers and legacy pages; do not invent new backend functionality for them. The execution tracker remains open until component audit, full local tests/builds and CI are green.
+
+Recent shared component commits: DashboardPanel 20fd890, KpiCard 92a7116, QuickActions e5d6db0, InquiryPipeline af954b5, WelcomeBanner 21f3dd9, SystemStatus 030f46b, Dialog 6d9e8a4, PageHeader 61c1800, ReviewCard 925f02e, FormAlert 700a1d2, FormActions 3157c88, Input 8bd9dc7, DashboardSidebar test c64264a. Website token cleanup: ad447c3, 47b21aa, f0905f2.
