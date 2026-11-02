@@ -310,7 +310,7 @@ async function requestPlan(plan) {
 .subscription-page .plan-head h3 { margin: 0; font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
 .subscription-page .plan-duration { display: inline-flex; align-items: center; gap: .35rem; flex: 0 0 auto; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
 .subscription-page .description { min-height: 3rem; }
-.subscription-page .price { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); font-weight: var(--ds-font-weight-extrabold); font-variant-numeric: tabular-nums; }
+.subscription-page .price { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); font-weight: var(--ds-font-weight-bold); font-variant-numeric: tabular-nums; }
 .subscription-page .plan-card ul { display: grid; gap: .55rem; margin: 0; padding: 1rem 1.2rem 0 0; border-top: 1px solid var(--ds-color-border); color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
 .subscription-page .reference { display: grid; gap: .45rem; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); }
 .subscription-page input {
