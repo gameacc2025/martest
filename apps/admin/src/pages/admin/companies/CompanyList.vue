@@ -1,14 +1,13 @@
 <template>
   <div class="company-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <header class="management-page-intro" aria-labelledby="management-page-title">
-      <span class="management-page-icon"><i class="pi pi-building"></i></span>
-      <div class="management-page-copy">
-        <span>مدیریت اعضای بازارگاه</span>
-        <h1 id="management-page-title">مدیریت شرکت‌ها</h1>
-        <p>اطلاعات، وضعیت و تأیید شرکت‌های عضو بازارگاه را مدیریت کنید.</p>
-      </div>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="مدیریت اعضای بازارگاه"
+      title="مدیریت شرکت‌ها"
+      description="اطلاعات، وضعیت و تأیید شرکت‌های عضو بازارگاه را مدیریت کنید."
+      icon="pi pi-building"
+      heading-id="management-page-title"
+    />
     <div class="card ds-panel company-management-surface">
       <Toolbar class="ds-toolbar company-management-toolbar">
         <template #start>
@@ -329,6 +328,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useCompanyStore } from '@/stores/companies'
