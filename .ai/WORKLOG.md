@@ -2167,3 +2167,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin/Company/Website notification preference pages have consistent contextual heading, table surfaces and responsive save footer.
 - Commits: 156d029, d76e548, 884de96 and notification preference commits e77f07a, 5cf6289, c44bb78.
 - Verification not yet performed locally; continue remaining UI inventory and obtain CI results.
+
+
+## 2026-11-02 — UI redesign batch 14
+
+- Public Companies directory now has a contextual header and improved search/filter/card hierarchy.
+- Shopping Cart, Checkout and Wishlist now share a contextual commerce header, responsive breadcrumbs and token-based card/empty-state styling.
+- Existing API/state, navigation, cart actions and payment selection behavior preserved; no new B2C/backend capability implied.
+- Commits: cc4842e, 91f35bd, a4c41fd, 32e88c0. No local test/build/browser execution.
