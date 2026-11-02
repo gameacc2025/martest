@@ -4,7 +4,7 @@
       <header class="mb-6 ds-page-heading">
         <h1 class="text-2xl font-bold ds-page-heading__title">تسویه حساب</h1>
         <Breadcrumb :home="home" :model="items" class="mt-2" />
-      </div>
+      </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Checkout Steps -->
