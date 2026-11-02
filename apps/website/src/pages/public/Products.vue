@@ -1,10 +1,10 @@
 <template>
   <div class="products-page">
     <div class="products-container">
-      <div class="products-head">
-        <h1 class="products-title">محصولات</h1>
+      <header class="products-head">
+        <div class="products-heading-copy"><span class="ds-eyebrow">کاتالوگ بازارگاه</span><h1 class="products-title">محصولات</h1><p>تجهیزات مخابراتی و شبکه را بر اساس دسته‌بندی، قیمت و موجودی پیدا کنید.</p></div>
         <Breadcrumb :home="home" :model="items" class="products-breadcrumb" />
-      </div>
+      </header>
 
       <!-- Search and Filters -->
       <div class="products-filters">
@@ -825,5 +825,29 @@ const isInWishlist = (productId) => {
   border-radius: var(--ds-radius-xl);
   box-shadow: var(--ds-shadow-xs);
 }
+
+
+.products-page { background: var(--ds-color-background); color: var(--ds-color-text); }
+.products-head {
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 7%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.products-heading-copy .ds-eyebrow { display: inline-block; margin-bottom: .2rem; font-weight: var(--ds-font-weight-bold); }
+.products-heading-copy .products-title { margin: 0; color: var(--ds-color-text); }
+.products-heading-copy p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.products-breadcrumb { margin: 0; }
+.products-filters :deep(.p-card) { border-color: var(--ds-color-border); border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-xs); }
+.products-filters :deep(.p-inputtext), .products-filters :deep(.p-select) { min-height: 2.7rem; border-radius: var(--ds-radius-md); }
+.products-grid--4 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
+.products-grid--5 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+.product-list-image img, .category-image, .brand-image { object-fit: contain; padding: .5rem; background: var(--ds-color-surface-alt); }
+.product-list-item { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); }
+.category-card { border-radius: var(--ds-radius-xl); }
+@media (max-width: 576px) { .products-head { align-items: flex-start; flex-direction: column; padding: 1rem; } .products-grid--4, .products-grid--5 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; } }
+@media (max-width: 360px) { .products-grid--4, .products-grid--5 { grid-template-columns: 1fr; } }
 
 </style>
