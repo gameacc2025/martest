@@ -583,8 +583,8 @@ const goToCart = () => {
 }
 
 .payment-method:hover {
-  border-color: #6366f1;
-  background-color: #f8fafc;
+  border-color: var(--ds-color-primary);
+  background-color: var(--ds-color-surface-hover);
 }
 
 :deep(.p-steps .p-steps-item) {
