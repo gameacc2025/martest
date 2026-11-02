@@ -153,9 +153,9 @@ function createInquiry() {
 </script>
 
 <template>
-  <div class="inquiry-list-page">
-    <div class="card">
-      <Toolbar class="list-toolbar">
+  <div class="inquiry-list-page ds-stack">
+    <div class="card ds-panel">
+      <Toolbar class="list-toolbar ds-toolbar">
         <template #start>
           <div class="toolbar-filters">
             <span class="p-input-icon-right search-wrap">
@@ -365,5 +365,36 @@ function createInquiry() {
   .status-filter {
     width: 100%;
   }
+}
+
+/* Shared inbox/list visual language; filtering and server pagination unchanged. */
+.inquiry-list-page { gap: var(--ds-space-5); }
+.inquiry-list-page .card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.inquiry-list-page :deep(.p-toolbar) {
+  background: var(--ds-color-surface);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.inquiry-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.inquiry-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
+  border-color: var(--ds-color-border);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+@media (max-width: 640px) {
+  .inquiry-list-page { gap: var(--ds-space-3); }
+  .inquiry-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
 </style>
