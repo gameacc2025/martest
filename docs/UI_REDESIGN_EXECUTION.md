@@ -656,3 +656,13 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 
 ### Verification
 - These changes are committed directly to `main`. Await the latest GitHub Actions CI run for frontend/shared tests and builds; no local build is available in this connected editing session.
+
+
+## Responsive shared tables — batch 7 (2026-11-02)
+
+- The shared `DataTable` now switches to a card-based row layout below 768px by default, so each value is paired with its column label instead of forcing a wide desktop table into a narrow viewport.
+- Search, column controls, filters, row actions, selection checkboxes, pagination, empty state and loading behavior remain available. Custom cell slots keep the existing `row` and `value` slot contract.
+- Added the `mobileCardLayout` opt-out prop for the few tables whose data density requires the classic horizontal-scroll presentation.
+- Added focused tests for the default and opt-out behavior.
+- Commits: `4c60743` shared responsive table implementation; `775d757` component test coverage.
+- Tests/builds have not yet been run in this connected editing session. CI result must be checked before marking the batch verified.
