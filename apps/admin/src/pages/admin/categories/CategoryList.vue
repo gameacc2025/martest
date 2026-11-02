@@ -1,10 +1,8 @@
 <template>
   <div class="category-list-page ds-stack">
     <!-- Card with Toolbar -->
+    <header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت دسته‌بندی‌ها</h1><p class="ds-page-heading__description">دسته‌بندی محصولات را مدیریت و ساختار کاتالوگ را مرتب کنید.</p></div></header>
     <div class="card ds-panel">
-      <div class="card-head">
-        <h1 class="card-head-title"><i class="pi pi-sitemap"></i> مدیریت دسته‌بندی‌ها</h1>
-      </div>
       <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
@@ -218,6 +216,7 @@ onMounted(() => {
 
 /* Shared Paces-style list hierarchy; query, pagination and permissions unchanged. */
 .category-list-page { gap: var(--ds-space-5); }
+.category-list-page .ds-page-heading { margin-bottom: 0; }
 .category-list-page .card {
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
