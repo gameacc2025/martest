@@ -2200,3 +2200,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin legacy Orders list receives a sales-context header and responsive toolbar/table surface; no missing order API capability is implied.
 - Admin Notification Folders receives a contextual heading, responsive creation form/list rows and design-token-based states. System folders remain protected and users still cannot create folders.
 - Commits: 7232a6e, fecd896. No local test/build/browser execution.
+
+
+## UI redesign — management tables batch (2026-11-02)
+
+- Shared `Table.vue` now has a cohesive token-based table surface, table header/body hierarchy, hover/focus, paginator, loading overlay and empty state.
+- Admin ProductList and CompanyList now use refined management surfaces/toolbars and responsive table/pagination presentation.
+- Existing data sources, API calls, pagination, permission checks and product/company workflow handlers were preserved.
+- Commits: `0256af2`, `1092b84`, `c21d18d`, `7010dc6`.
+- CI run `41449786538` for `7010dc6` was still in progress when this note was added. No local tests/builds or browser tests are claimed.
