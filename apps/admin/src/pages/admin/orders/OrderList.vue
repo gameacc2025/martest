@@ -1,10 +1,7 @@
 <template>
   <div class="order-list-page">
     <!-- Card with Toolbar -->
-<header class="order-management-intro">
-  <span class="order-management-icon"><i class="pi pi-receipt"></i></span>
-  <div><span>مدیریت فروش</span><h1>مدیریت سفارش‌ها</h1><p>فهرست سفارش‌های قدیمی؛ دسترسی و داده‌های این بخش تابع وضعیت API موجود است.</p></div>
-</header>
+<WorkspacePageHeading eyebrow="مدیریت فروش" title="مدیریت سفارش‌ها" description="فهرست سفارش‌های قدیمی؛ دسترسی و داده‌های این بخش تابع وضعیت API موجود است." icon="pi pi-receipt" />
         <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
@@ -74,6 +71,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted } from 'vue'
 import { ordersApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
