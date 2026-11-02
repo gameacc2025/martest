@@ -274,12 +274,6 @@ function createInquiry() {
               </template>
             </SharedDataTable>
 
-            <div v-else-if="!loading" class="state-block">
-              <i class="pi pi-inbox state-icon"></i>
-              <h3>استعلامی ثبت نشده</h3>
-              <p>هنوز استعلامی ایجاد نشده است.</p>
-              <Button v-if="canCreate" label="ایجاد استعلام جدید" icon="pi pi-plus" @click="createInquiry" />
-            </div>
           </TabPanel>
         </TabPanels>
       </Tabs>
