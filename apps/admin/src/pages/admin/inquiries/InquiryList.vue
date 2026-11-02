@@ -154,7 +154,14 @@ function createInquiry() {
 
 <template>
   <div class="inquiry-list-page ds-stack">
-<header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت استعلام‌ها</h1><p class="ds-page-heading__description">درخواست‌ها، وضعیت رسیدگی و پاسخ‌های تأمین‌کنندگان را پیگیری کنید.</p></div></header>
+<section class="inquiry-workspace-intro" aria-labelledby="inquiry-workspace-title">
+  <span class="inquiry-workspace-icon"><i class="pi pi-inbox"></i></span>
+  <div class="inquiry-workspace-copy">
+    <span class="inquiry-workspace-eyebrow">مرکز رسیدگی به درخواست‌ها</span>
+    <h1 id="inquiry-workspace-title">مدیریت استعلام‌ها</h1>
+    <p>درخواست‌های ثبت‌شده، روند رسیدگی و پاسخ تأمین‌کنندگان را از یک نمای واحد مدیریت کنید.</p>
+  </div>
+</section>
         <div class="card ds-panel">
       <Toolbar class="list-toolbar ds-toolbar">
         <template #start>
@@ -399,4 +406,82 @@ function createInquiry() {
   .inquiry-list-page { gap: var(--ds-space-3); }
   .inquiry-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
+
+/* Inquiry workspace: the primary operational inbox for this role. */
+.inquiry-list-page { gap: clamp(1rem, 2vw, 1.5rem); }
+.inquiry-workspace-intro {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-workspace-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.35rem;
+}
+.inquiry-workspace-copy { min-width: 0; }
+.inquiry-workspace-eyebrow {
+  display: block;
+  margin-bottom: .2rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.inquiry-workspace-copy h1 {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-weight: 800;
+}
+.inquiry-workspace-copy p {
+  margin: .35rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.7;
+}
+.inquiry-list-page .card {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
+.inquiry-list-page :deep(.p-toolbar-start),
+.inquiry-list-page :deep(.p-toolbar-end) { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.inquiry-list-page :deep(.p-toolbar .p-inputtext),
+.inquiry-list-page :deep(.p-toolbar .p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.inquiry-list-page :deep(.p-toolbar .p-button) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.inquiry-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+.inquiry-list-page :deep(.p-datatable-thead > tr > th) { white-space: nowrap; }
+.inquiry-list-page :deep(.p-datatable-tbody > tr) { transition: background var(--ds-transition-fast); }
+.inquiry-list-page :deep(.p-paginator) { border-top: 1px solid var(--ds-color-border); background: var(--ds-color-surface); }
+.inquiry-list-page .state-block {
+  min-height: 14rem;
+  justify-content: center;
+  border-top: 1px solid var(--ds-color-border);
+  color: var(--ds-color-text-muted);
+}
+.inquiry-list-page .state-icon { color: var(--ds-color-primary); }
+@media (max-width: 640px) {
+  .inquiry-workspace-intro { align-items: flex-start; padding: 1rem; }
+  .inquiry-workspace-icon { width: 2.75rem; height: 2.75rem; }
+  .inquiry-list-page :deep(.p-toolbar-start),
+  .inquiry-list-page :deep(.p-toolbar-end),
+  .inquiry-list-page .toolbar-filters { width: 100%; }
+  .inquiry-list-page :deep(.p-toolbar-end) { justify-content: stretch; }
+  .inquiry-list-page :deep(.p-toolbar-end .p-button) { width: 100%; }
+}
+
 </style>
