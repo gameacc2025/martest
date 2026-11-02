@@ -2023,3 +2023,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Deliverable:** A dedicated future-module blueprint, cross-referenced from the architecture roadmap and AI project context.
 - **Verification:** Documentation-only; no application tests required. Verify the updated documents on main after commit.
 - **Commit:** Pending
+
+
+## 2026-11-02 — PACES-RTL-UI-REDESIGN — execution batch 1
+
+- Started the full UI redesign on `main`, using Paces RTL as a structural reference while retaining Telecom brand tokens, Vazirmatn, RTL, PrimeVue 4, existing APIs, routes, permissions, tenant boundaries, and workflows.
+- Added shared enterprise page primitives and cross-app PrimeVue styling for panels, KPI cards, headings, toolbars, tables, dialogs, tabs, form controls, badges, and responsive states.
+- Refined shared dashboard header; Admin and Company workspace shells; Admin and Company dashboards; public marketplace shell; Admin/Company product lists; Admin/Company inquiry list/detail/create pages; Admin category/company/user/role/permission lists; Company user list/reports; Admin notification management/folders; Website company directory, cart, checkout, orders, order details and wishlist.
+- Added `docs/UI_REDESIGN_EXECUTION.md` with migrated-page inventory, commits, remaining page inventory, and verification requirements.
+- All changes are visual-only; no API contracts, endpoint paths, auth, permissions, or business flows were intentionally changed.
+- Verification caveat: this connected repository session cannot run the local pnpm test/build commands. Do not mark UI redesign complete until local tests/builds and remaining page migrations are complete.
+- Latest redesign documentation commit at this update: `858956e82fbc4da6bba3f56ca959113ccbb56776` (subsequent UI commits may be newer).
