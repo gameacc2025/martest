@@ -1531,3 +1531,11 @@ Admin and Company inboxes now have semantic message-row interaction structure:
 Single click still selects only; double click still marks unread as read. Folder, category, API, copy/move and bulk behavior remain unchanged. 44px minimum targets and responsive row wrapping are applied. Focused tests were added for both panels.
 
 Continue the full UI route inventory after CI verification. No new branch: main only.
+
+## Latest UI implementation — subscriptions and homepage cards (2026-11-02)
+
+- Company InquirySubscription is now a shared-heading workspace with tokenized responsive plan/usage surfaces and accessible quota progress indicators. Existing payment/subscription/API semantics are unchanged.
+- Website Home featured/recent cards now share the catalogue's B2B pricing logic: real price tier if present, explicit supplier-inquiry state if absent; supplier verification only when returned by API; optional brand/model/SKU.
+- Focused tests added for the subscription page and homepage card states.
+- CI test/build passed at f2ee67b before the homepage card commits. Re-run CI on the newest main head; migration/runtime checks are separate and still pending.
+- Continue through remaining route inventory, especially public account and detail pages, then re-audit Admin/Company forms, detail pages and shared shells. No new branches.
