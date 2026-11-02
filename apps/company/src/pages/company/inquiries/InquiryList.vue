@@ -155,8 +155,8 @@ function createInquiry() {
     <p>درخواست‌های مرتبط با محصولات شرکت را بررسی کنید و وضعیت پاسخ‌گویی را دنبال کنید.</p>
   </div>
 </section>
-        <div class="card ds-panel">
-      <Toolbar class="list-toolbar ds-toolbar">
+        <div class="card ds-panel inquiry-management-surface">
+      <Toolbar class="list-toolbar ds-toolbar inquiry-management-toolbar">
         <template #start>
           <div class="toolbar-filters">
             <span class="search-wrap">
@@ -295,7 +295,8 @@ function createInquiry() {
 <style scoped>
 .inquiry-list-page {
   direction: rtl;
-  padding: 1.5rem;
+  padding: 0;
+  gap: clamp(1rem, 2vw, 1.5rem);
 }
 
 .page-header {
@@ -637,4 +638,80 @@ function createInquiry() {
   .inquiry-list-page :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
 
+
+/* Inquiry inbox: clear workflow navigation and consistent operational table. */
+.inquiry-management-surface {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-management-toolbar {
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.inquiry-management-toolbar :deep(.p-toolbar-start),
+.inquiry-management-toolbar :deep(.p-toolbar-end) { gap: .65rem; flex-wrap: wrap; }
+.inquiry-management-toolbar :deep(.p-inputtext),
+.inquiry-management-toolbar :deep(.p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.inquiry-management-surface :deep(.p-tablist) {
+  padding-inline: 1.2rem;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+}
+.inquiry-management-surface :deep(.p-tab) {
+  min-height: 3.25rem;
+  padding-inline: 1.1rem;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.inquiry-management-surface :deep(.p-tab.p-tab-active) {
+  color: var(--ds-color-primary-text);
+  border-color: var(--ds-color-primary);
+}
+.inquiry-management-surface :deep(.p-tabpanels) { padding: 0; background: transparent; }
+.inquiry-management-surface :deep(.p-tabpanel) { padding: 0; }
+.inquiry-management-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
+.inquiry-management-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.inquiry-management-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  vertical-align: middle;
+}
+.inquiry-management-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
+.inquiry-management-table :deep(.p-paginator) {
+  justify-content: flex-start;
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.inquiry-management-table :deep(.p-paginator-page),
+.inquiry-management-table :deep(.p-paginator-next),
+.inquiry-management-table :deep(.p-paginator-prev) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+}
+@media (max-width: 640px) {
+  .inquiry-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
+  .inquiry-management-toolbar :deep(.p-toolbar-start),
+  .inquiry-management-toolbar :deep(.p-toolbar-end),
+  .inquiry-management-toolbar .toolbar-filters { width: 100%; }
+  .inquiry-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
+  .inquiry-management-surface :deep(.p-tablist) { overflow-x: auto; padding-inline: .65rem; }
+  .inquiry-management-surface :deep(.p-tab) { white-space: nowrap; }
+}
 </style>
