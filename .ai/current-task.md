@@ -1241,3 +1241,12 @@ Completed:
 Commits: 156d029, d76e548, 884de96, e77f07a, 5cf6289, c44bb78.
 
 Continue through remaining public pages, admin/company forms/details and shared shell/components. Tests/builds are still outstanding; do not claim completion.
+
+
+## UI redesign — batch 14 checkpoint (2026-11-02)
+
+Completed the public company directory plus Shopping Cart, Checkout and Wishlist page-level visual refresh. Existing behavior is preserved; no additional backend capability is claimed.
+
+Commits: cc4842e, 91f35bd, a4c41fd, 32e88c0.
+
+Continue remaining website public pages and admin/company page families; local verification is still outstanding.
