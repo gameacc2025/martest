@@ -174,3 +174,10 @@ The shared disabled roadmap section now also includes Calendar/Tasks, Documents/
 ## CI checkpoint
 
 At commit 6a7cb3efc58b60a04f6de1e57df833263d0a75da, GitHub CI test-and-build completed successfully and Database Migration Validation completed successfully. Runtime Validation (compose-and-browser) was still in progress at the last check. Later menu-only commits require their own CI completion before final sign-off. No local browser test was performed.
+
+
+## Additional migration batch 5 — consistent list page headers
+
+Added Paces-style title/description hierarchy above the management toolbars for Admin categories, companies, users, roles, permissions, products and inquiries; Company products, inquiries and company users; and the legacy Admin order view. Existing toolbar actions, filters, server pagination, row actions, API calls and permission conditions remain in place.
+
+Commits: Admin category/company/user/role/permission headers c350236, f7110ca, 1dae02f, e2ae56f, 5aaef1b; product/inquiry/order headers 035f82e, 5f23c04, 64641ca; Company product/inquiry/user headers b6dde92, 6ba2592, af2f45a.
