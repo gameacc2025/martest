@@ -1,14 +1,15 @@
 <template>
   <main class="categories-page ds-page" aria-labelledby="categories-title">
     <div class="cat-container ds-container">
-      <header class="cat-head">
-        <div class="cat-heading-copy">
-          <span class="ds-eyebrow">بازارگاه تجهیزات مخابراتی</span>
-          <h1 id="categories-title" class="ds-h1">دسته‌بندی محصولات</h1>
-          <p class="ds-lead">برای پیدا کردن تجهیزات موردنیاز، دسته‌بندی مناسب را انتخاب کنید.</p>
-        </div>
-        <Breadcrumb :home="home" :model="items" class="cat-breadcrumb" />
-      </header>
+      <WorkspacePageHeading
+        eyebrow="بازارگاه تجهیزات مخابراتی"
+        title="دسته‌بندی محصولات"
+        description="برای پیدا کردن تجهیزات موردنیاز، دسته‌بندی مناسب را انتخاب کنید."
+        icon="pi pi-th-large"
+        heading-id="categories-title"
+      >
+        <template #actions><Breadcrumb :home="home" :model="items" class="cat-breadcrumb" /></template>
+      </WorkspacePageHeading>
 
       <div v-if="loading" class="cat-state" role="status" aria-live="polite">
         <ProgressSpinner />
@@ -64,6 +65,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
