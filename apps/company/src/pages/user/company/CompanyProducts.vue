@@ -83,7 +83,7 @@ function formatPrice(price) {
       <Button label="محصول جدید" icon="pi pi-plus" @click="router.push({ name: 'manage-product-create' })" />
     </header>
 
-    <DataTable :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
+    <section class="product-catalogue-surface" aria-label="فهرست محصولات شرکت">\n      <DataTable class="product-catalogue-table" :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
       :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20]"
       @page="(e) => fetchProducts(e.page + 1)" responsiveLayout="scroll">
         <Column field="title" header="عنوان" sortable></Column>
@@ -108,7 +108,7 @@ function formatPrice(price) {
             <Button icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش'" @click="editProduct(data)" />
           </template>
         </Column>
-    </DataTable>
+    </DataTable>\n    </section>
   </div>
 </template>
 
@@ -173,4 +173,48 @@ function formatPrice(price) {
 .company-products-page .page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
 @media (max-width: 640px) { .company-products-page .page-header { align-items: stretch; } }
 
+
+/* Company-wide catalogue page uses the same data surface as the manage-products route. */
+.company-products-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.company-products-page .product-catalogue-surface {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.company-products-page .product-catalogue-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
+.company-products-page .product-catalogue-table :deep(.p-datatable-thead > tr > th) {
+  padding: .9rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.company-products-page .product-catalogue-table :deep(.p-datatable-tbody > tr > td) {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  vertical-align: middle;
+}
+.company-products-page .product-catalogue-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
+.company-products-page .product-catalogue-table :deep(.p-paginator) {
+  justify-content: flex-start;
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.company-products-page .product-catalogue-table :deep(.p-paginator-page),
+.company-products-page .product-catalogue-table :deep(.p-paginator-next),
+.company-products-page .product-catalogue-table :deep(.p-paginator-prev) {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border-radius: var(--ds-radius-md);
+}
+@media (max-width: 640px) {
+  .company-products-page .page-header { align-items: stretch; padding: var(--ds-space-4); }
+  .company-products-page .page-header :deep(.p-button) { width: 100%; justify-content: center; }
+}
 </style>
