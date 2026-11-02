@@ -28,6 +28,7 @@ const mountCategories = () => shallowMount(Categories, {
       Badge: { props: ['value'], template: '<span>{{ value }}</span>' },
       Breadcrumb: { template: '<nav class="breadcrumb-stub" />' },
       ProgressSpinner: { template: '<span class="spinner-stub" />' },
+      WorkspacePageHeading: false,
     },
   },
 })
