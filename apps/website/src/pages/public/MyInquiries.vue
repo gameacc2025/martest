@@ -370,7 +370,8 @@ onMounted(async () => {
                 </select>
               </label>
               <label v-if="smsAvailable" class="conversation-sms-option"><input v-model="notifyBySms" type="checkbox" /> ارسال اعلان پیامکی به گیرنده (یک سهمیه پیامک مصرف می‌کند)</label>
-              <Textarea v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="پیام خود را بنویسید…" class="w-full" />
+              <label for="customer-inquiry-message">پیام جدید</label>
+              <Textarea id="customer-inquiry-message" v-model="messageDraft" rows="3" maxlength="5000" autoResize placeholder="متن پیام را وارد کنید…" class="w-full" />
               <p v-if="messageNotice" class="message-notice" role="status">{{ messageNotice }}</p>
               <div class="conversation-actions"><small>{{ messageDraft.trim().length.toLocaleString('fa-IR') }} / ۵۰۰۰</small><Button type="submit" label="ارسال پیام" icon="pi pi-send" :loading="sendingMessage" :disabled="!messageDraft.trim() || !Number(recipientCompanyId) || messageDraft.trim().length > 5000" /></div>
             </form>
@@ -660,7 +661,18 @@ onMounted(async () => {
   background: var(--ds-color-surface-alt);
   color: var(--ds-color-text);
 }
-.my-inquiries-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+.my-inquiries-page :deep(.p-button) { min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
+.my-inquiries-page input,
+.my-inquiries-page select,
+.my-inquiries-page textarea { min-height: 2.75rem; }
+.my-inquiries-page :deep(.p-button):focus-visible,
+.my-inquiries-page a:focus-visible,
+.my-inquiries-page input:focus-visible,
+.my-inquiries-page select:focus-visible,
+.my-inquiries-page textarea:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
 @media (max-width: 768px) {
   .my-inquiries-page { padding: var(--ds-space-5) var(--ds-space-3) 3rem; }
   .my-inquiries-page .page-heading { align-items: stretch; }
