@@ -872,3 +872,6 @@ The current full UI redesign uses the Paces RTL admin template as a visual/layou
 ### Planned modules in dashboard navigation
 
 The shared Admin/Company sidebar may show planned roadmap items as disabled, non-interactive labels (CRM, finance, HR, procurement, inventory/logistics, support, projects/operations, BI, integrations/security). These entries must have no route, no click action, and no implication that the module is live. They are role-scoped for relevant Staff/Company users. Actual navigation only appears when backend, permission, tenant, audit, test and UI implementation is ready.
+
+
+The Paces product catalog lists 28+ application pages and 280+ prebuilt pages across ecommerce, chat/email, projects/tasks, invoices/finance, CRM, HRM, support, file management, calendar, companies, BI, and integrations. The preview index is not fully retrievable in this environment; distinguish catalog-listed categories from directly inspected page content. The disabled future menu should cover the approved enterprise blueprint but must never create fake routes or actions.
