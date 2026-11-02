@@ -196,6 +196,7 @@ function createInquiry() {
 
       <!-- Skeleton loader for the first load -->
       <DataTable
+        class="inquiry-management-table"
         v-if="loading && !inquiries.length"
         :value="skeletonRows"
         responsiveLayout="scroll"
@@ -221,6 +222,7 @@ function createInquiry() {
 
       <!-- Data table -->
       <DataTable
+        class="inquiry-management-table"
         v-else
         :value="inquiries"
         :loading="loading"
