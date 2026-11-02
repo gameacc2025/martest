@@ -523,7 +523,7 @@ const goBack = () => router.push('/products')
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
   background: var(--pd-accent-soft);
-  color: color-mix(in srgb, var(--pd-accent) 75%, #064c50);
+  color: var(--ds-color-primary-text);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -566,9 +566,11 @@ const goBack = () => router.push('/products')
   margin: 0 0 0.9rem;
 }
 
-.price-icon-actions :deep(.p-button) {
-  width: 2.55rem;
-  height: 2.55rem;
+ .price-icon-actions :deep(.p-button) {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
   color: var(--pd-text);
   border-color: var(--pd-border);
 }
@@ -661,8 +663,9 @@ const goBack = () => router.push('/products')
   padding: 0.35rem 0.7rem;
   border: 1px solid rgba(255,255,255,.7);
   border-radius: 0.5rem;
-  background: rgba(255,255,255,.9);
-  color: #334155;
+  background: var(--ds-color-surface);
+  border: 1px solid var(--pd-border);
+  color: var(--pd-text);
   font-size: 0.78rem;
   font-weight: 700;
   backdrop-filter: blur(8px);
@@ -1358,6 +1361,18 @@ const goBack = () => router.push('/products')
     width: 38px;
     height: 38px;
   }
+}
+
+/* Accessible control sizing and focus treatment for gallery and purchase actions. */
+.thumbnail-button:focus-visible,
+.price-icon-actions :deep(.p-button):focus-visible,
+.dialog-actions :deep(.p-button):focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 3px;
+}
+.dialog-actions :deep(.p-button),
+.state-actions :deep(.p-button) {
+  min-height: 2.75rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
