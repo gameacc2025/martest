@@ -111,8 +111,15 @@ async function requestPlan(plan) {
 <template>
   <main class="subscription-page" dir="rtl">
     <header class="heading">
-      <div><h1>اشتراک استعلام</h1><p>سهمیه استعلام، پاسخ شرکت‌ها، پیام داخلی و پیامک بر اساس طرح اشتراک محاسبه می‌شود.</p></div>
-      <button class="secondary" :disabled="loading" @click="load">به‌روزرسانی</button>
+      <div class="subscription-heading-identity">
+        <span class="subscription-heading-icon"><i class="pi pi-wallet"></i></span>
+        <div>
+          <span class="eyebrow">حساب کاربری و خدمات استعلام</span>
+          <h1>اشتراک استعلام</h1>
+          <p>سهمیه استعلام، پاسخ شرکت‌ها، پیام داخلی و پیامک بر اساس طرح اشتراک محاسبه می‌شود.</p>
+        </div>
+      </div>
+      <button class="secondary refresh-action" :disabled="loading" @click="load"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
     </header>
 
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
@@ -201,5 +208,75 @@ button{border:0;border-radius:7px;padding:.75rem 1rem;cursor:pointer}.primary{ba
 .subscription-page .active { border-color: color-mix(in srgb, var(--ds-color-success) 45%, var(--ds-color-border)); }
 .subscription-page .pending { border-color: color-mix(in srgb, var(--ds-color-warning) 45%, var(--ds-color-border)); }
 @media (max-width: 640px) { .subscription-page .heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); } }
+
+
+/* Customer subscription center. */
+.subscription-page { gap: clamp(1rem, 2vw, 1.5rem); }
+.subscription-page .heading {
+  align-items: center;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+}
+.subscription-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.subscription-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.35rem;
+}
+.subscription-page .heading .eyebrow {
+  display: inline-block;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.subscription-page .heading h1 { margin: .25rem 0 .35rem; }
+.subscription-page .refresh-action { display: inline-flex; align-items: center; gap: .45rem; }
+.subscription-page .quota-grid { gap: .8rem; }
+.subscription-page .quota {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+.subscription-page .quota strong { color: var(--ds-color-text); font-variant-numeric: tabular-nums; }
+.subscription-page .plan-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  transition: transform var(--ds-transition), border-color var(--ds-transition), box-shadow var(--ds-transition);
+}
+.subscription-page .plan-card::before {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 3px;
+  background: var(--ds-color-border);
+  content: "";
+}
+.subscription-page .plan-card.chosen::before { background: var(--ds-color-primary); }
+.subscription-page .plan-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
+.subscription-page .plan-head h3 { color: var(--ds-color-text); }
+.subscription-page .plan-card li { color: var(--ds-color-text-muted); line-height: 1.7; }
+.subscription-page .price { color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); }
+.subscription-page .reference input { width: 100%; box-sizing: border-box; border-radius: var(--ds-radius-md); }
+.subscription-page .footnote {
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+  font-size: var(--ds-font-size-xs);
+}
+@media (max-width: 640px) {
+  .subscription-page .heading { align-items: stretch; }
+  .subscription-heading-identity { align-items: flex-start; }
+  .subscription-heading-icon { width: 2.7rem; height: 2.7rem; }
+}
 
 </style>
