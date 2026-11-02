@@ -46,7 +46,13 @@ async function savePreferences() {
 
 <template>
   <section class="notification-preferences" dir="rtl">
-    <header class="page-header"><div><h1>تنظیمات اعلان‌ها</h1><p>کانال دریافت هر نوع اعلان را برای حساب خود انتخاب کنید.</p></div><router-link to="/notifications" class="back-link"><i class="pi pi-arrow-right"></i> بازگشت به صندوق اعلان‌ها</router-link></header>
+    <header class="page-header preferences-heading">
+      <div class="preferences-heading-identity">
+        <span class="preferences-heading-icon"><i class="pi pi-bell"></i></span>
+        <div><span class="preferences-eyebrow">حساب مدیریتی</span><h1>تنظیمات اعلان‌ها</h1><p>کانال دریافت هر نوع اعلان را برای حساب خود انتخاب کنید.</p></div>
+      </div>
+      <router-link to="/notifications" class="back-link"><i class="pi pi-arrow-right"></i> بازگشت به صندوق اعلان‌ها</router-link>
+    </header>
     <div v-if="loading" class="state"><ProgressSpinner /><p>در حال دریافت تنظیمات…</p></div>
     <div v-else class="settings-card"><div class="table-wrap"><table>
       <thead><tr><th>رویداد</th><th>داخل برنامه</th><th>ایمیل</th><th>پیامک</th></tr></thead>
@@ -86,5 +92,50 @@ async function savePreferences() {
   font-size: var(--ds-font-size-xs);
 }
 @media (max-width: 640px) { .notification-preferences .page-header { padding: var(--ds-space-4); } }
+
+
+.notification-preferences { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.notification-preferences .page-header { margin-bottom: 0; }
+.preferences-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.preferences-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+  flex: 0 0 auto;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.25rem;
+}
+.preferences-eyebrow {
+  display: block;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.notification-preferences .page-header h1 { margin: .2rem 0; }
+.notification-preferences .page-header p { margin: .25rem 0 0; color: var(--ds-color-text-muted); line-height: 1.7; }
+.notification-preferences .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  white-space: nowrap;
+  text-decoration: none;
+  font-weight: var(--ds-font-weight-semibold);
+}
+.notification-preferences .settings-card footer {
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+}
+.notification-preferences .table-wrap { overflow-x: auto; }
+.notification-preferences table { min-width: 38rem; }
+.notification-preferences tbody tr:hover { background: var(--ds-color-surface-hover); }
+.notification-preferences input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--ds-color-primary); }
+@media (max-width: 640px) {
+  .notification-preferences .page-header { align-items: stretch; flex-direction: column; }
+  .preferences-heading-identity { align-items: flex-start; }
+  .notification-preferences .back-link { align-self: flex-start; }
+}
 
 </style>
