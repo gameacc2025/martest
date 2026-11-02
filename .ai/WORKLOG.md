@@ -2377,3 +2377,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added tests in `DataTable.test.js` for default card mode and opt-out.
 - Commits: `4c607432` implementation, `775d757c` tests.
 - Not yet locally executed; verify via CI before sign-off.
+
+
+## UI redesign — product management tables batch 8 (2026-11-02)
+
+- Admin and Company product lists migrated from duplicated PrimeVue table markup to shared `DataTable.vue`.
+- Existing real product API, permission-aware action visibility, company tenant scoping, review/publish/delete actions and dialogs retained.
+- Company title column preserves brand/model secondary metadata; status badges and action slots preserve the existing commands.
+- Search/status filters remain in the toolbar; lazy pagination is wired through shared `request` event and page size; filter/search resets the shared paginator.
+- Shared DataTable now exposes `resetPage()`; test added for this contract.
+- Commits: `d5312ab`, `173907e`, `e07b1fc`, `334f1d4`, `e2d958d`, `3a256fb`.
+- CI/build verification pending.
