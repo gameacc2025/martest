@@ -135,7 +135,7 @@ describe('Company notification inbox', () => {
     const openButton = wrapper.find('.message-row-open')
     expect(openButton.element.tagName).toBe('BUTTON')
     expect(openButton.attributes('type')).toBe('button')
-    expect(openButton.attributes('aria-pressed')).toBe('false')
+    expect(openButton.attributes('aria-pressed')).toBe('true')
     await openButton.trigger('click')
     expect(openButton.attributes('aria-pressed')).toBe('true')
     expect(apiPatch).not.toHaveBeenCalled()
