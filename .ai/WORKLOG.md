@@ -2297,3 +2297,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin and Company editors now use the same component and keep their own existing access-aware required check arrays.
 - Added tests for percentage/count rendering and empty-list safety.
 - Commits: `a5f6fa2`, `5ad87a1`, `49d779d`, `6332362`. CI pending.
+
+
+## UI redesign — shared page heading batch 11 (2026-11-02)
+
+- Created reusable `WorkspacePageHeading.vue` and migrated Admin product/company/inquiry lists plus Company inquiry list.
+- Added tests for all content props, optional description/eyebrow, custom heading ID and action slot.
+- Existing list data, search, filters, routes, permission-gated actions and API flows were not changed.
+- Commits: `1a0e4fc`, `15f1e40`, `3c2b4d5`, `541944a`, `cb083f0`, `a34b8e1`. CI pending.
