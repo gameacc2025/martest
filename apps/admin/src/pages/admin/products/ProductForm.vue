@@ -782,7 +782,7 @@ async function removeExistingDocument(docId) {
           <div v-if="canFeature" class="field">
             <label>محصول ویژه</label>
             <div class="flex align-items-center gap-2 mt-2">
-              <InputSwitch v-model="form.isFeatured" />
+              <InputSwitch v-model="form.isFeatured" aria-label="محصول ویژه" />
               <span>{{ form.isFeatured ? 'بله' : 'خیر' }}</span>
             </div>
           </div>
@@ -924,20 +924,20 @@ async function removeExistingDocument(docId) {
           <div v-for="(tier, index) in priceTiers" :key="index" class="price-tier-row">
             <div class="field-grid-4">
               <div class="field">
-                <label>حداقل تعداد</label>
-                <InputNumber v-model="tier.minQuantity" :min="1" class="w-full" />
+                <label :for="'price-min-' + index">حداقل تعداد</label>
+                <InputNumber :inputId="'price-min-' + index" v-model="tier.minQuantity" :min="1" class="w-full" />
               </div>
               <div class="field">
-                <label>حداکثر تعداد</label>
-                <InputNumber v-model="tier.maxQuantity" :min="1" class="w-full" />
+                <label :for="'price-max-' + index">حداکثر تعداد</label>
+                <InputNumber :inputId="'price-max-' + index" v-model="tier.maxQuantity" :min="1" class="w-full" />
               </div>
               <div class="field">
-                <label>قیمت (ریال)</label>
-                <InputNumber v-model="tier.price" :min="0" class="w-full" />
+                <label :for="'price-value-' + index">قیمت (ریال)</label>
+                <InputNumber :inputId="'price-value-' + index" v-model="tier.price" :min="0" class="w-full" />
               </div>
               <div class="field">
-                <label>واحد</label>
-                <InputText v-model="tier.unit" placeholder="مثلاً عدد" class="w-full" />
+                <label :for="'price-unit-' + index">واحد</label>
+                <InputText :id="'price-unit-' + index" v-model="tier.unit" placeholder="مثلاً عدد" class="w-full" />
               </div>
             </div>
             <Button icon="pi pi-trash" severity="danger" text :aria-label="'حذف ردیف قیمت ' + (index + 1)" @click="removePriceTier(index)" />
