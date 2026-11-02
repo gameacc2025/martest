@@ -564,3 +564,15 @@ Adopted the shared workspace heading on:
 Existing breadcrumb navigation is retained through the actions slot. My Inquiries preserves its subscription, back-to-list and refresh actions. Page-specific content, route behavior, account state, order data, wishlist actions and inquiry flows remain unchanged.
 
 Commits: `95e8111`, `de3d47f`, `7991a04`, `ecfc860`, `959035d`. CI pending.
+
+
+## Public marketplace heading rollout — batch 15 (2026-11-02)
+
+Adopted the shared workspace heading in Website:
+- Product Listing, Categories and Companies.
+- Shopping Cart and Checkout.
+- Addresses and Contact Us.
+
+Breadcrumbs and page actions are retained through the actions slot. The product/category/company catalog pages preserve their existing filter controls and results; cart/checkout retain all current commerce flows; addresses and contact retain their existing forms and handlers.
+
+Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.
