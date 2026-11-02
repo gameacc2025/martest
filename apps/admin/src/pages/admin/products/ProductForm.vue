@@ -954,9 +954,9 @@ async function removeExistingDocument(docId) {
             <img :src="resolveMediaUrl(img.url)" :alt="img.altText" />
 
             <div class="image-actions">
-              <Button v-if="!img.isPrimary" icon="pi pi-star" severity="success" rounded text v-tooltip.top="'انتخاب به‌عنوان تصویر اصلی'" aria-label="انتخاب تصویر اصلی" @click="setPrimaryImage(img.id) />
-              <Button icon="pi pi-arrow-up" severity="secondary" rounded text :disabled="index === 0" v-tooltip.top="'انتقال به بالا'" aria-label="انتقال تصویر به بالا" @click="moveExistingImage(img.id, -1) />
-              <Button icon="pi pi-arrow-down" severity="secondary" rounded text :disabled="index === productImages.length - 1" v-tooltip.top="'انتقال به پایین'" aria-label="انتقال تصویر به پایین" @click="moveExistingImage(img.id, 1) />
+              <Button v-if="!img.isPrimary" icon="pi pi-star" severity="success" rounded text v-tooltip.top="'انتخاب به‌عنوان تصویر اصلی'" aria-label="انتخاب تصویر اصلی" @click="setPrimaryImage(img.id)" />
+              <Button icon="pi pi-arrow-up" severity="secondary" rounded text :disabled="index === 0" v-tooltip.top="'انتقال به بالا'" aria-label="انتقال تصویر به بالا" @click="moveExistingImage(img.id, -1)" />
+              <Button icon="pi pi-arrow-down" severity="secondary" rounded text :disabled="index === productImages.length - 1" v-tooltip.top="'انتقال به پایین'" aria-label="انتقال تصویر به پایین" @click="moveExistingImage(img.id, 1)" />
               <Button icon="pi pi-times" severity="danger" rounded class="image-remove" aria-label="حذف تصویر" @click="removeExistingImage(img.id)" />
             </div>
             <Tag v-if="img.isPrimary" value="اصلی" severity="success" class="image-badge" />
