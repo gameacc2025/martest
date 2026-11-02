@@ -744,4 +744,28 @@ const isValidEmail = (email) => {
     display: none;
   }
 }
+
+.auth-page { background: var(--ds-color-background); color: var(--ds-color-text); }
+.auth-back {
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  box-shadow: var(--ds-shadow-xs);
+}
+.auth-back:hover { color: var(--ds-color-primary); border-color: var(--ds-color-primary); }
+.auth-form,
+.auth-card,
+.auth-panel {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-lg);
+}
+.auth-page :deep(.p-inputtext),
+.auth-page :deep(.p-password),
+.auth-page :deep(.p-select) { border-radius: var(--ds-radius-md); }
+.auth-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
+@media (max-width: 640px) {
+  .auth-back { top: var(--ds-space-3); inset-inline-end: var(--ds-space-3); }
+}
+
 </style>
