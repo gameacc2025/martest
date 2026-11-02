@@ -193,6 +193,7 @@ async function savePermission() {
       toast.add({ severity: 'success', summary: 'موفقیت', detail: 'مجوز با موفقیت ایجاد شد', life: 3000 })
     }
     closeDialog()
+    tableRef.value?.resetPage()
     loadPermissions()
   } catch (error) {
     toast.add({ severity: 'error', summary: 'خطا', detail: error.message || 'خطا در ذخیره مجوز', life: 3000 })
@@ -209,6 +210,7 @@ async function deletePermission() {
     await permissionStore.deletePermission(permissionToDelete.value.id)
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'مجوز با موفقیت حذف شد', life: 3000 })
     showDeleteDialog.value = false
+    tableRef.value?.resetPage()
     loadPermissions()
   } catch (error) {
     toast.add({ severity: 'error', summary: 'خطا', detail: error.message || 'خطا در حذف مجوز', life: 3000 })
