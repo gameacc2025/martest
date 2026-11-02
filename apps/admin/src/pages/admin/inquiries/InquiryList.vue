@@ -1,24 +1,23 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi } from '@telecom/api-client'
 import Button from 'primevue/button'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import Dialog from 'primevue/dialog'
 import Textarea from 'primevue/textarea'
-import Skeleton from 'primevue/skeleton'
 import Toolbar from 'primevue/toolbar'
 
 const router = useRouter()
 const toast = useToast()
 
 const inquiries = ref([])
+const tableRef = ref(null)
 const loading = ref(false)
 const errored = ref(false)
 
@@ -26,6 +25,16 @@ const errored = ref(false)
 const pagination = ref({ page: 1, limit: 10, total: 0 })
 const sortField = ref('createdAt')
 const sortOrder = ref(-1)
+const tableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
+  { field: 'title', header: 'عنوان', sortable: true },
+  { field: 'company.name', header: 'شرکت', slot: 'company' },
+  { field: 'priority', header: 'اولویت', slot: 'priority' },
+  { field: 'status', header: 'وضعیت', sortable: true, slot: 'status' },
+  { field: '_count.items', header: 'اقلام', slot: 'itemsCount' },
+  { field: '_count.responses', header: 'پاسخ‌ها', slot: 'responsesCount' },
+  { field: 'createdAt', header: 'تاریخ ایجاد', sortable: true, slot: 'createdDate' },
+]
 const searchQuery = ref('')
 const statusFilter = ref(null)
 
@@ -58,9 +67,6 @@ const statusLabels = {
 const PRIORITY_LABELS = { LOW: 'کم', NORMAL: 'عادی', HIGH: 'زیاد', URGENT: 'فوری' }
 const PRIORITY_SEVERITY = { LOW: 'secondary', NORMAL: 'info', HIGH: 'warn', URGENT: 'danger' }
 
-// Skeleton placeholder rows shown while the first page loads.
-const skeletonRows = Array.from({ length: 5 }, (_, i) => ({ id: i }))
-
 function statusLabel(s) { return statusLabels[s] || s || '—' }
 function formatDate(v) {
   if (!v) return '—'
@@ -69,13 +75,13 @@ function formatDate(v) {
 
 onMounted(() => fetchInquiries())
 
-async function fetchInquiries(page = pagination.value.page) {
+async function fetchInquiries(page = pagination.value.page, limit = pagination.value.limit) {
   loading.value = true
   errored.value = false
   try {
     const res = await inquiriesApi.list({
       page,
-      limit: pagination.value.limit,
+      limit,
       search: searchQuery.value || undefined,
       status: statusFilter.value || undefined,
       sortBy: sortField.value,
@@ -100,21 +106,25 @@ async function fetchInquiries(page = pagination.value.page) {
 }
 
 let searchTimer
+function resetTablePage() {
+  tableRef.value?.resetPage()
+}
 function debounceSearch() {
   clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => fetchInquiries(1), 450)
+  searchTimer = setTimeout(() => {
+    resetTablePage()
+    fetchInquiries(1)
+  }, 450)
 }
 function applyStatusFilter() {
+  resetTablePage()
   fetchInquiries(1)
 }
-function onPage(event) {
-  pagination.value.limit = event.rows
-  fetchInquiries(event.page + 1)
-}
-function onSort(event) {
-  sortField.value = event.sortField || 'createdAt'
-  sortOrder.value = event.sortOrder || -1
-  fetchInquiries(1)
+function onTableRequest({ page, rows, sortField: requestedSortField, sortOrder: requestedSortOrder }) {
+  pagination.value.limit = rows
+  if (requestedSortField) sortField.value = requestedSortField
+  if (requestedSortOrder) sortOrder.value = requestedSortOrder === 'asc' ? 1 : -1
+  fetchInquiries(page, rows)
 }
 
 function openStatusDialog(inquiry) {
@@ -194,99 +204,58 @@ function createInquiry() {
         </template>
       </Toolbar>
 
-      <!-- Skeleton loader for the first load -->
-      <DataTable
-        class="inquiry-management-table"
-        v-if="loading && !inquiries.length"
-        :value="skeletonRows"
-        responsiveLayout="scroll"
-      >
-        <Column header="شناسه"><template #body><Skeleton width="2rem" /></template></Column>
-        <Column header="عنوان"><template #body><Skeleton width="10rem" /></template></Column>
-        <Column header="شرکت"><template #body><Skeleton width="8rem" /></template></Column>
-        <Column header="اولویت"><template #body><Skeleton width="4rem" /></template></Column>
-        <Column header="وضعیت"><template #body><Skeleton width="5rem" /></template></Column>
-        <Column header="اقلام"><template #body><Skeleton width="2rem" /></template></Column>
-        <Column header="پاسخ‌ها"><template #body><Skeleton width="2rem" /></template></Column>
-        <Column header="تاریخ"><template #body><Skeleton width="6rem" /></template></Column>
-        <Column header="عملیات"><template #body><Skeleton width="4rem" /></template></Column>
-      </DataTable>
-
-      <!-- Error state -->
-      <div v-else-if="errored" class="state-block">
-        <i class="pi pi-exclamation-triangle state-icon" style="color: var(--p-red-500)"></i>
+      <div v-if="errored" class="state-block" role="alert">
+        <i class="pi pi-exclamation-triangle state-icon"></i>
         <h3>خطا در دریافت اطلاعات</h3>
         <p>مشکلی در ارتباط با سرور رخ داد.</p>
         <Button label="تلاش مجدد" icon="pi pi-refresh" @click="fetchInquiries(1)" />
       </div>
 
-      <!-- Data table -->
-      <DataTable
-        class="inquiry-management-table"
+      <SharedDataTable
         v-else
-        :value="inquiries"
+        ref="tableRef"
+        class="inquiry-management-table"
+        title="فهرست استعلام‌ها"
+        :columns="tableColumns"
+        :rows="inquiries"
         :loading="loading"
-        lazy
-        paginator
-        :rows="pagination.limit"
-        :first="(pagination.page - 1) * pagination.limit"
-        :totalRecords="pagination.total"
-        :rowsPerPageOptions="[5, 10, 20, 50]"
-        :sortField="sortField"
-        :sortOrder="sortOrder"
-        @page="onPage"
-        @sort="onSort"
-        responsiveLayout="scroll"
-        dataKey="id"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[5, 10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        :initial-sort-field="sortField"
+        :initial-sort-order="sortOrder"
+        empty-message="استعلامی یافت نشد. با فیلترهای فعلی نتیجه‌ای وجود ندارد."
+        @request="onTableRequest"
       >
-        <Column field="id" header="شناسه" sortable style="width: 5rem"></Column>
-        <Column field="title" header="عنوان" sortable></Column>
-        <Column header="شرکت">
-          <template #body="{ data }">{{ data.company?.name || '—' }}</template>
-        </Column>
-        <Column header="اولویت">
-          <template #body="{ data }">
-            <Tag v-if="data.priority" :severity="PRIORITY_SEVERITY[data.priority] || 'secondary'">
-              {{ PRIORITY_LABELS[data.priority] || data.priority }}
-            </Tag>
-            <span v-else class="muted">—</span>
-          </template>
-        </Column>
-        <Column field="status" header="وضعیت" sortable>
-          <template #body="{ data }">
-            <Tag :value="statusLabel(data.status)" :severity="statusSeverity[data.status]" />
-          </template>
-        </Column>
-        <Column header="اقلام" style="width: 5rem">
-          <template #body="{ data }">{{ data._count?.items ?? data.items?.length ?? 0 }}</template>
-        </Column>
-        <Column header="پاسخ‌ها" style="width: 5rem">
-          <template #body="{ data }">{{ data._count?.responses ?? data.responses?.length ?? 0 }}</template>
-        </Column>
-        <Column field="createdAt" header="تاریخ ایجاد" sortable>
-          <template #body="{ data }">{{ formatDate(data.createdAt) }}</template>
-        </Column>
-        <Column header="عملیات" style="width: 7rem">
-          <template #body="{ data }">
-            <div class="flex gap-2">
-              <Button icon="pi pi-eye" severity="info" rounded text
-                v-tooltip.top="'مشاهده'" aria-label="مشاهده استعلام" @click="viewInquiry(data)" />
-              <Button icon="pi pi-refresh" severity="warn" rounded text
-                v-tooltip.top="'تغییر وضعیت'" aria-label="تغییر وضعیت" @click="openStatusDialog(data)" />
-            </div>
-          </template>
-        </Column>
-
-        <!-- Empty state -->
-        <template #empty>
-          <div class="state-block">
-            <i class="pi pi-inbox state-icon"></i>
-            <h3>استعلامی یافت نشد</h3>
-            <p>هنوز درخواست استعلامی ثبت نشده است یا با فیلترهای فعلی نتیجه‌ای وجود ندارد.</p>
-            <Button label="ایجاد درخواست جدید" icon="pi pi-plus" @click="createInquiry" />
-          </div>
+        <template #company="{ row }">
+          {{ row.company?.name || '—' }}
         </template>
-      </DataTable>
+        <template #priority="{ row }">
+          <Tag v-if="row.priority" :severity="PRIORITY_SEVERITY[row.priority] || 'secondary'">
+            {{ PRIORITY_LABELS[row.priority] || row.priority }}
+          </Tag>
+          <span v-else class="muted">—</span>
+        </template>
+        <template #status="{ row }">
+          <Tag :value="statusLabel(row.status)" :severity="statusSeverity[row.status] || 'secondary'" />
+        </template>
+        <template #itemsCount="{ row }">
+          {{ row._count?.items ?? row.items?.length ?? 0 }}
+        </template>
+        <template #responsesCount="{ row }">
+          {{ row._count?.responses ?? row.responses?.length ?? 0 }}
+        </template>
+        <template #createdDate="{ row }">
+          {{ formatDate(row.createdAt) }}
+        </template>
+        <template #actions="{ row }">
+          <Button icon="pi pi-eye" severity="info" rounded text v-tooltip.top="'مشاهده'" aria-label="مشاهده استعلام" @click="viewInquiry(row)" />
+          <Button icon="pi pi-refresh" severity="warn" rounded text v-tooltip.top="'تغییر وضعیت'" aria-label="تغییر وضعیت استعلام" @click="openStatusDialog(row)" />
+        </template>
+      </SharedDataTable>
     </div>
 
     <!-- Status Change Dialog -->
