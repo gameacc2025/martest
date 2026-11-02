@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { onMounted, ref } from 'vue'
 import { apiGet, apiPost, apiPatch } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
@@ -70,13 +71,17 @@ async function updateFolder(folder, changes) {
 
 <template>
   <section class="folder-page" dir="rtl">
-    <header class="page-heading folder-heading">
-      <div class="folder-heading-identity">
-        <span class="folder-heading-icon"><i class="pi pi-folder-open"></i></span>
-        <div><span class="folder-heading-eyebrow">ساختار صندوق پیام‌ها</span><h1>مدیریت پوشه‌های اعلان</h1><p>پوشه‌های قابل استفاده در هر پنل را مدیریت کنید. کاربران امکان ساخت پوشه ندارند.</p></div>
-      </div>
-      <button class="secondary refresh-action" :disabled="loading" @click="loadFolders"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="ساختار صندوق پیام‌ها"
+      title="مدیریت پوشه‌های اعلان"
+      description="پوشه‌های قابل استفاده در هر پنل را مدیریت کنید. کاربران امکان ساخت پوشه ندارند."
+      icon="pi pi-folder-open"
+      heading-id="notification-folders-title"
+    >
+      <template #actions>
+        <button class="secondary refresh-action" :disabled="loading" @click="loadFolders"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
+      </template>
+    </WorkspacePageHeading>
 
     <form class="panel create-form" @submit.prevent="createFolder">
       <h2>ایجاد پوشه</h2>
