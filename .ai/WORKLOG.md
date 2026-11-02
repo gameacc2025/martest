@@ -2034,3 +2034,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - All changes are visual-only; no API contracts, endpoint paths, auth, permissions, or business flows were intentionally changed.
 - Verification caveat: this connected repository session cannot run the local pnpm test/build commands. Do not mark UI redesign complete until local tests/builds and remaining page migrations are complete.
 - Latest redesign documentation commit at this update: `858956e82fbc4da6bba3f56ca959113ccbb56776` (subsequent UI commits may be newer).
+
+
+## 2026-11-02 — PACES-RTL-UI-REDESIGN — execution batch 2
+
+- Migrated Admin/Company product editors, inquiry subscription pages, company settings, profile pages, notification inboxes and notification preferences.
+- Migrated Website login/register/password recovery, customer profile, address management and customer inquiry workspace; aligned Admin/Company password recovery and password change.
+- Refined shared Card, Button, Badge, DataTable, FormSection and ProductCard components.
+- Refined Website commerce page headings; corrected semantic header closing tags in Checkout and Orders immediately after reviewing the resulting templates.
+- Updated the execution tracker. No intentional API, auth, route, permission, tenant, or business-logic changes.
+- Local pnpm tests/builds remain unrun in this connector-only session.
