@@ -458,4 +458,65 @@ const resetForm = () => {
 .contact-page :deep(.card-title-row i) { color: var(--ds-color-primary); }
 @media (max-width: 640px) { .contact-page-heading { align-items: flex-start; flex-direction: column; padding: 1rem; } }
 
+
+/* Contact workspace: accessible form hierarchy and balanced information column. */
+.contact-page { color: var(--ds-color-text); }
+.contact-page-heading {
+  align-items: center;
+  gap: 1.25rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.contact-page-heading h1 { color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
+.contact-page-heading p { color: var(--ds-color-text-muted); line-height: 1.8; }
+.contact-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
+  gap: clamp(1rem, 2vw, 1.5rem);
+}
+.contact-page .form-card,
+.contact-page .info-card,
+.contact-page .map-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.contact-page .card-title-row { color: var(--ds-color-text); }
+.contact-page .card-title-row i { color: var(--ds-color-primary); }
+.contact-page .info-card-inner h4 { color: var(--ds-color-text); }
+.contact-page .info-card-inner p { color: var(--ds-color-text-muted); line-height: 1.8; }
+.contact-page .info-icon,
+.contact-page .social-link {
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+}
+.contact-page .info-icon i { color: var(--ds-color-primary); }
+.contact-page .social-link:hover { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.contact-page .hour-value { color: var(--ds-color-text); }
+.contact-page .hour-closed { color: var(--ds-color-danger); }
+.contact-page :deep(.p-inputtext),
+.contact-page :deep(.p-textarea),
+.contact-page :deep(.p-select) {
+  width: 100%;
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+}
+.contact-page :deep(.p-inputtext:focus),
+.contact-page :deep(.p-textarea:focus) {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+.contact-page .map-container { border-radius: var(--ds-radius-lg); }
+@media (max-width: 900px) {
+  .contact-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .contact-page-heading { align-items: flex-start; flex-direction: column; }
+  .contact-page .form-actions { flex-wrap: wrap; }
+  .contact-page .form-actions :deep(.p-button) { flex: 1 1 auto; }
+}
 </style>
