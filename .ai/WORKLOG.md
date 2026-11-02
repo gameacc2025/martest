@@ -2070,3 +2070,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Expanded the menu config test to cover the full planned domain taxonomy.
 - Expanded the Paces reference audit using the official product catalog. The preview index remains unavailable to direct retrieval (cache miss); the audit distinguishes pages directly inspected from categories listed in the catalog.
 - CI checkpoint at 6a7cb3e: test-and-build success; database migration validation success; runtime compose/browser validation still running. Newer menu commits need fresh CI confirmation.
+
+
+## 2026-11-02 — PACES-RTL-UI-REDESIGN — execution batch 5
+
+- Added consistent page title/description hierarchy above table toolbars across Admin categories, companies, users, roles, permissions, products and inquiries; Company products, inquiries and company users; and legacy Admin order view.
+- Existing list filters, API calls, server pagination, actions and permission gates were preserved.
+- The execution tracker now reflects all 69 page files audited and separates completed page migration from remaining verification and inaccessible Paces preview pages.
