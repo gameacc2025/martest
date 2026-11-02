@@ -161,7 +161,12 @@ onMounted(loadSettings)
 .threshold-control-row { display: flex; align-items: center; gap: .75rem; }
 .threshold-control :deep(.p-inputnumber) { width: 10rem; }
 .threshold-control :deep(.p-inputnumber-input) { width: 100%; border-radius: var(--ds-radius-md); }
-.threshold-control :deep(.p-button) { min-height: 2.7rem; border-radius: var(--ds-radius-md); }
+.threshold-control :deep(.p-button) { min-height: 2.75rem; border-radius: var(--ds-radius-md); }
+.threshold-control :deep(.p-button:focus-visible),
+.threshold-control :deep(.p-inputnumber-input:focus-visible) {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
 .system-setting-state,
 .system-setting-note,
 .system-setting-error { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; font-size: var(--ds-font-size-sm); line-height: 1.8; }
