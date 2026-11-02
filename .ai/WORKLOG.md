@@ -2084,3 +2084,9 @@ This file is the shared, version-controlled memory for agents working on the rep
 - CI test-and-build passed, including component/unit tests and production builds for Website, Company and Admin.
 - Database Migration Validation passed.
 - Runtime Validation failed in the Playwright smoke suite: compose config, service health and migrations passed; the SPA panel tests timed out waiting for #app across Website/Company/Admin, and the STAFF auth-flow scenario failed. No root cause was established. Per project direction, browser automation was not pursued as the primary UI verification path.
+
+
+## Paces preview access correction — 2026-11-02
+
+- The unparameterized Bootstrap index at themes.coderthemes.com/paces/bootstrap/index.html is accessible and exposes the full navigation tree.
+- The ?rtl URL and most individual child-page URLs still return cache miss in the retrieval environment. The index menu has been catalogued in docs/PACES_RTL_UI_REFERENCE_AUDIT.md; individual child-page content is not claimed as inspected unless a searchable page was actually returned.
