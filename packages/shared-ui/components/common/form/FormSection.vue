@@ -108,4 +108,11 @@ defineProps({
   flex-direction: column;
   gap: var(--ds-space-5);
 }
+
+.form-section--card {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.form-section-title { color: var(--ds-color-text); font-weight: var(--ds-font-weight-bold); }
+
 </style>
