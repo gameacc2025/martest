@@ -1,14 +1,7 @@
 <template>
   <div class="category-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <header class="management-page-intro" aria-labelledby="management-page-title">
-      <span class="management-page-icon"><i class="pi pi-sitemap"></i></span>
-      <div class="management-page-copy">
-        <span>ساختار کاتالوگ</span>
-        <h1 id="management-page-title">مدیریت دسته‌بندی‌ها</h1>
-        <p>دسته‌بندی محصولات را مدیریت و ساختار کاتالوگ را مرتب کنید.</p>
-      </div>
-    </header>
+    <WorkspacePageHeading eyebrow="ساختار کاتالوگ" title="مدیریت دسته‌بندی‌ها" description="دسته‌بندی محصولات را مدیریت و ساختار کاتالوگ را مرتب کنید." icon="pi pi-sitemap" heading-id="management-page-title" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
@@ -84,6 +77,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, computed, onMounted } from 'vue'
 import { categoriesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
