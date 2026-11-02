@@ -285,15 +285,22 @@ function formatPrice(price) {
 <template>
   <div class="inquiry-detail-page">
     <ConfirmDialog />
-    <div class="page-header ds-detail-heading">
-      <div>
-        <Button icon="pi pi-arrow-right" text @click="router.push({ name: 'admin-inquiries' })" />
-        <h1>جزئیات درخواست استعلام</h1>
+    <header class="page-header inquiry-detail-heading">
+      <div class="inquiry-detail-heading-copy">
+        <span class="inquiry-detail-eyebrow"><i class="pi pi-inbox"></i> مرکز مدیریت استعلام‌ها</span>
+        <div class="inquiry-detail-title-row">
+          <Button icon="pi pi-arrow-right" text rounded aria-label="بازگشت به فهرست استعلام‌ها" @click="router.push({ name: 'admin-inquiries' })" />
+          <div>
+            <h1>جزئیات درخواست استعلام</h1>
+            <p v-if="inquiry">{{ inquiry.title }}</p>
+            <p v-else>بررسی مشخصات درخواست و پاسخ‌های تأمین‌کنندگان</p>
+          </div>
+        </div>
       </div>
       <div class="page-header-actions" v-if="canCreateResponse">
         <Button label="ارسال پاسخ" icon="pi pi-send" @click="openCreateDialog" />
       </div>
-    </div>
+    </header>
 
     <div v-if="loading" class="text-center py-8">
       <ProgressSpinner />
@@ -691,4 +698,62 @@ function formatPrice(price) {
   .inquiry-detail-page .page-header { padding: var(--ds-space-4); }
   .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+.inquiry-detail-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.inquiry-detail-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-detail-heading-copy { min-width: 0; }
+.inquiry-detail-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-bottom: .55rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.inquiry-detail-title-row { display: flex; align-items: flex-start; gap: .5rem; }
+.inquiry-detail-title-row h1 {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.25rem, 2vw, var(--ds-font-size-xl));
+  font-weight: 800;
+}
+.inquiry-detail-title-row p {
+  margin: .35rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.inquiry-detail-heading .page-header-actions { flex: 0 0 auto; }
+.inquiry-detail-page .detail-card,
+.inquiry-detail-page .response-card {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.inquiry-detail-page .response-card { background: var(--ds-color-surface); }
+.inquiry-detail-page .response-item-form { border-color: var(--ds-color-border); border-radius: var(--ds-radius-lg); }
+.inquiry-detail-page .state-block {
+  min-height: 16rem;
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+}
+@media (max-width: 640px) {
+  .inquiry-detail-heading { align-items: stretch; flex-direction: column; padding: 1rem; }
+  .inquiry-detail-heading .page-header-actions { width: 100%; }
+  .inquiry-detail-heading .page-header-actions :deep(.p-button) { width: 100%; justify-content: center; }
+}
+
 </style>
