@@ -139,4 +139,8 @@ function faNumber(v) {
 .kpi-card--success { --kpi-accent: var(--ds-color-success); --kpi-soft: var(--ds-color-success-soft); }
 .kpi-card--warning { --kpi-accent: var(--ds-color-warning); --kpi-soft: var(--ds-color-warning-soft); }
 .kpi-card--danger  { --kpi-accent: var(--ds-color-danger);  --kpi-soft: var(--ds-color-danger-soft); }
+
+.kpi-card { border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-xs); }
+.kpi-card-icon { border-radius: var(--ds-radius-lg); }
+
 </style>
