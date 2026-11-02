@@ -134,7 +134,8 @@ async function fetchInquiries(page = pagination.value.page, limit = pagination.v
 
 let searchTimer
 function resetTablePage() {
-  tableRef.value?.resetPage()
+  const tables = Array.isArray(tableRef.value) ? tableRef.value : [tableRef.value]
+  tables.forEach((table) => table?.resetPage())
 }
 function debounceSearch() {
   clearTimeout(searchTimer)
