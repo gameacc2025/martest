@@ -70,9 +70,12 @@ async function updateFolder(folder, changes) {
 
 <template>
   <section class="folder-page" dir="rtl">
-    <header class="page-heading">
-      <div><h1>مدیریت پوشه‌های اعلان</h1><p>پوشه‌های قابل استفاده در هر پنل را مدیریت کنید. کاربران امکان ساخت پوشه ندارند.</p></div>
-      <button class="secondary" :disabled="loading" @click="loadFolders">به‌روزرسانی</button>
+    <header class="page-heading folder-heading">
+      <div class="folder-heading-identity">
+        <span class="folder-heading-icon"><i class="pi pi-folder-open"></i></span>
+        <div><span class="folder-heading-eyebrow">ساختار صندوق پیام‌ها</span><h1>مدیریت پوشه‌های اعلان</h1><p>پوشه‌های قابل استفاده در هر پنل را مدیریت کنید. کاربران امکان ساخت پوشه ندارند.</p></div>
+      </div>
+      <button class="secondary refresh-action" :disabled="loading" @click="loadFolders"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
     </header>
 
     <form class="panel create-form" @submit.prevent="createFolder">
@@ -156,6 +159,51 @@ button:disabled{opacity:.55;cursor:wait}.primary{background:#01bec2;color:#062f3
 }
 @media (max-width: 640px) {
   .folder-page .page-heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); }
+}
+
+
+.folder-page { gap: var(--ds-space-5); }
+.folder-page .page-heading {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.folder-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.folder-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.folder-heading-identity > div { min-width: 0; }
+.folder-heading-eyebrow { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.folder-page .page-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
+.folder-page .page-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.folder-page .panel { padding: clamp(1rem, 2vw, 1.5rem); }
+.folder-page .create-form { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, .8fr) auto; }
+.folder-page .panel h2 { color: var(--ds-color-text); font-weight: var(--ds-font-weight-bold); }
+.folder-page .folder-row { border-color: var(--ds-color-border); }
+.folder-page .folder-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: var(--ds-radius-md); background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
+.folder-page .folder-info strong { color: var(--ds-color-text); }
+.folder-page .folder-info small { color: var(--ds-color-text-muted); }
+.folder-page .primary { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.folder-page .secondary { border: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); color: var(--ds-color-text); }
+.folder-page .error { background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.folder-page .success { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.folder-page .refresh-action { display: inline-flex; align-items: center; gap: .45rem; }
+@media (max-width: 900px) { .folder-page .create-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .folder-page .page-heading { align-items: stretch; flex-direction: column; padding: 1rem; }
+  .folder-heading-identity { align-items: flex-start; }
+  .folder-page .create-form { grid-template-columns: 1fr; }
+  .folder-page .folder-row { align-items: stretch; }
 }
 
 </style>
