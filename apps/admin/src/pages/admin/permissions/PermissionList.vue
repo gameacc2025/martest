@@ -15,23 +15,26 @@
         </template>
       </Toolbar>
 
-      <DataTable class="management-data-table" :value="permissions" :loading="loading" :paginator="true" :rows="pagination.limit"
-        :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll">
-        <Column field="id" header="شناسه" sortable></Column>
-        <Column field="name" header="نام مجوز" sortable></Column>
-        <Column field="label" header="عنوان" sortable></Column>
-        <Column field="group" header="گروه"></Column>
-        <Column field="description" header="توضیحات"></Column>
-        <Column header="عملیات">
-          <template #body="slotProps">
-            <div class="flex gap-2">
-              <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش مجوز" @click="editPermission(slotProps.data)" />
-              <Button icon="pi pi-trash" severity="danger" rounded text aria-label="حذف مجوز" @click="confirmDelete(slotProps.data)" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <SharedDataTable
+        ref="tableRef"
+        class="management-data-table"
+        title="فهرست مجوزها"
+        :columns="tableColumns"
+        :rows="permissions"
+        :loading="loading"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[5, 10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        @request="onTableRequest"
+      >
+        <template #actions="{ row }">
+          <Button icon="pi pi-pencil" severity="info" rounded text aria-label="ویرایش مجوز" @click="editPermission(row)" />
+          <Button icon="pi pi-trash" severity="danger" rounded text aria-label="حذف مجوز" @click="confirmDelete(row)" />
+        </template>
+      </SharedDataTable>
     </div>
 
     <!-- Create/Edit Permission Dialog -->
@@ -71,6 +74,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { usePermissionStore } from '@/stores/admin/permissions'
 import { useToast } from 'primevue/usetoast'
@@ -79,6 +83,7 @@ const toast = useToast()
 const permissionStore = usePermissionStore()
 
 const permissions = ref([])
+const tableRef = ref(null)
 const loading = ref(false)
 const pagination = ref({
   page: 1,
@@ -88,6 +93,13 @@ const pagination = ref({
 })
 
 const searchQuery = ref('')
+const tableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
+  { field: 'name', header: 'نام مجوز', sortable: true },
+  { field: 'label', header: 'عنوان', sortable: true },
+  { field: 'group', header: 'گروه' },
+  { field: 'description', header: 'توضیحات' },
+]
 const showDialog = ref(false)
 const isEditMode = ref(false)
 const currentPermission = ref({})
@@ -110,14 +122,16 @@ function debounceSearch() {
 }
 
 function applyFilters() {
+  tableRef.value?.resetPage()
   loadPermissions(1)
 }
 
-async function loadPermissions(page = 1) {
+async function loadPermissions(page = 1, limit = pagination.value.limit) {
   try {
     loading.value = true
     const response = await permissionStore.getPermissions({
       page,
+      limit,
       search: searchQuery.value
     })
     permissions.value = response.permissions || []
@@ -134,8 +148,9 @@ async function loadPermissions(page = 1) {
   }
 }
 
-function onPageChange(event) {
-  loadPermissions(event.page + 1)
+function onTableRequest({ page, rows }) {
+  pagination.value.limit = rows
+  loadPermissions(page, rows)
 }
 
 function openCreateDialog() {
