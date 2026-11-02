@@ -1,10 +1,15 @@
 <template>
   <div class="orders-page">
     <div class="ds-container ds-page">
-      <header class="orders-page-heading">
-        <div><span class="ds-eyebrow"><i class="pi pi-receipt"></i> حساب کاربری</span><h1 class="ds-page-heading__title">سفارش‌های من</h1><p>وضعیت و جزئیات سفارش‌های ثبت‌شده را پیگیری کنید.</p></div>
-        <Breadcrumb :home="home" :model="items" />
-      </header>
+      <WorkspacePageHeading
+        eyebrow="حساب کاربری"
+        title="سفارش‌های من"
+        description="وضعیت و جزئیات سفارش‌های ثبت‌شده را پیگیری کنید."
+        icon="pi pi-receipt"
+        heading-id="orders-page-title"
+      >
+        <template #actions><Breadcrumb :home="home" :model="items" /></template>
+      </WorkspacePageHeading>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Sidebar Filters -->
@@ -208,6 +213,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Breadcrumb from 'primevue/breadcrumb'
