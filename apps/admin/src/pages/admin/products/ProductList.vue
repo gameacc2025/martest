@@ -16,7 +16,7 @@
             <InputText v-model="searchQuery" placeholder="جستجو..." @input="debounceSearch" />
           </span>
           <Select v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value"
-            placeholder="فیلتر وضعیت" class="ml-2" style="min-width: 160px" @change="fetchProducts(1)" />
+            placeholder="فیلتر وضعیت" class="ml-2" style="min-width: 160px" @change="onStatusFilterChange" />
         </template>
 
         <template #end>
@@ -25,6 +25,7 @@
       </Toolbar>
 
       <SharedDataTable
+        ref="productTableRef"
         v-if="products.length > 0 || loading"
         class="product-management-table"
         title="فهرست محصولات"
@@ -188,6 +189,7 @@ function canDuplicateProduct(product) {
 
 
 const products = ref([])
+const productTableRef = ref(null)
 const companies = ref([])
 const categories = ref([])
 const loading = ref(false)
@@ -248,9 +250,19 @@ const dialogHeader = computed(() => {
   return editingId.value ? 'ویرایش محصول' : 'ایجاد محصول جدید'
 })
 
+function resetTablePage() {
+  productTableRef.value?.resetPage()
+}
+
+function onStatusFilterChange() {
+  resetTablePage()
+  fetchProducts(1)
+}
+
 function debounceSearch() {
   clearTimeout(debounceSearch.timer)
   debounceSearch.timer = setTimeout(() => {
+    resetTablePage()
     fetchProducts(1)
   }, 500)
 }
@@ -635,6 +647,10 @@ onMounted(() => {
   background: var(--ds-color-surface);
 }
 .product-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+@media (max-width: 767px) {
+  .product-list-page :deep(.ent-table--mobile-cards .p-datatable-table-container) { overflow: visible; }
+  .product-list-page :deep(.ent-table--mobile-cards .p-datatable-table) { min-width: 0; }
+}
 .product-list-page :deep(.p-datatable-tbody > tr) { transition: background var(--ds-transition-fast); }
 .product-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
 .product-list-page :deep(.p-datatable .p-button.p-button-text) {
