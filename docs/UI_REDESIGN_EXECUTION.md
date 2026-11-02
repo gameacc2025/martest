@@ -676,3 +676,14 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Company title cells retain brand/model metadata through the shared table's named slot; status badges and all action controls retain their prior behavior.
 - Commits: `d5312ab` Admin list migration, `173907e` Company list migration, `e07b1fc` paginator reset API, `334f1d4` reset test, `e2d958d` / `3a256fb` filter-reset wiring.
 - CI and app builds are pending; no local execution is claimed.
+
+
+## Admin directory and category lists — batch 9 (2026-11-02)
+
+- Admin Companies, Users and Categories pages now use the shared responsive DataTable rather than page-local PrimeVue table markup.
+- Company list preserves logo/name/type/contact/status/verification/date cells and permission-gated edit/approve/verify/deactivate actions. Company phone fallback (`phoneNumber`) is retained.
+- User list preserves avatar/name/access type/company/roles/status/join date and permission-gated view/edit/delete actions. Existing server-side sort state is passed through the shared table request event.
+- Category list preserves image/name/slug cells and edit/delete actions.
+- Search and filters remain connected to existing stores/API calls; table pagination, selected page size and paginator resets are wired to existing server pagination.
+- Commits: `a0f30fe` Categories, `f993736` Companies, `06586b3` phone fallback, `70a640e` category mutation reset, `09452c4` Users, `4f155e6` initial sort support.
+- CI is pending; these changes are not marked verified.
