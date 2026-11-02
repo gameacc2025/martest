@@ -1519,3 +1519,15 @@ Next work:
 3. Add focused tests for visible hierarchy and interactions.
 4. Check CI/migration/runtime workflow separately on the latest commit; fix test/build regressions, but don't prioritize browser smoke unless it reveals a genuine application issue.
 5. Keep .ai/WORKLOG.md, this file, docs/UI_REDESIGN_EXECUTION.md and design-system page overrides current.
+
+
+## Latest UI checkpoint — notification inboxes (2026-11-02)
+
+Admin and Company inboxes now have semantic message-row interaction structure:
+- article wrapper;
+- labeled checkbox for independent bulk selection;
+- native open button with aria-pressed and native keyboard support;
+- separate read/unread and delete actions.
+Single click still selects only; double click still marks unread as read. Folder, category, API, copy/move and bulk behavior remain unchanged. 44px minimum targets and responsive row wrapping are applied. Focused tests were added for both panels.
+
+Continue the full UI route inventory after CI verification. No new branch: main only.
