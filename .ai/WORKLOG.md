@@ -2107,3 +2107,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Client-side count reflects filtered results; lazy mode uses the API-provided total. Search timers are cleaned up on unmount.
 - Added DataTable unit coverage for client, filtered and lazy result counts.
 - Commits: `c0be61b`, `3f3ab5f`. CI started from GitHub pushes; await final results. No local build/test execution.
+
+
+## UI redesign — batch 8 (2026-11-02)
+
+- Admin and Company product editors now use a structured editor heading, explicit contextual guidance, improved section hierarchy, responsive fields and token-based PrimeVue surfaces.
+- Admin inquiry subscriptions now show live plan/pending/enforcement metrics and a responsive policy/form/review workspace.
+- Company reports now have an analytics-oriented header and improved report tabs/export presentation.
+- API calls, product form state, role checks, subscription policy and CSV export logic were preserved.
+- Commits: `e14505e`, `d288067`, `18a67c5`, `90cf711`. Await CI.
