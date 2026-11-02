@@ -2158,3 +2158,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin users, companies, categories and Company users lists now have role-specific workspace identity and consistent toolbar/table treatment.
 - Commits: `ef00252`, `6cf7465`, `d9cd191`, `e77f07a`, `5cf6289`, `c44bb78`, `1a91159`, `5e40f45`, `b9f25de`, `3df74f0`.
 - API calls, quotas, payments, notification preferences, filters, pagination, permission gates and row actions were not intentionally changed. No local test/build execution; verification outstanding.
+
+
+## 2026-11-02 — UI redesign batch 13
+
+- Customer login/register pages now have a more deliberate brand/form split, consistent surface and input/focus treatment, and responsive layout.
+- Registration account-type choice now exposes a keyboard-operable radio group with a single radio semantic; selected values and registration logic remain unchanged.
+- Admin/Company/Website notification preference pages have consistent contextual heading, table surfaces and responsive save footer.
+- Commits: 156d029, d76e548, 884de96 and notification preference commits e77f07a, 5cf6289, c44bb78.
+- Verification not yet performed locally; continue remaining UI inventory and obtain CI results.
