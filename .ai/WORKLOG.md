@@ -2147,3 +2147,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Preserved all inquiry step state, validation, save-draft and submit behavior; preserved homepage API data and navigation.
 - Commits: `ec8f735`, `14361df`, `5da81bd`.
 - Verification remains outstanding; no local test/build/browser execution claimed.
+
+
+## 2026-11-02 — UI redesign batch 12
+
+- Customer inquiry subscription page now has a stronger account-context header and more distinct quota/plan/payment surfaces.
+- Admin inquiry detail shows the loaded inquiry title in a dedicated contextual header; all response actions and permission checks remain unchanged.
+- Website notification inbox now uses shared light/dark tokens for its folder rail, message list and reading pane.
+- Admin/Company/Website notification preferences use one consistent settings-page identity and responsive table/footer styling.
+- Admin users, companies, categories and Company users lists now have role-specific workspace identity and consistent toolbar/table treatment.
+- Commits: `ef00252`, `6cf7465`, `d9cd191`, `e77f07a`, `5cf6289`, `c44bb78`, `1a91159`, `5e40f45`, `b9f25de`, `3df74f0`.
+- API calls, quotas, payments, notification preferences, filters, pagination, permission gates and row actions were not intentionally changed. No local test/build execution; verification outstanding.
