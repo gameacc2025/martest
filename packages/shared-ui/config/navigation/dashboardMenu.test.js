@@ -18,7 +18,7 @@ describe('dashboard navigation roadmap entries', () => {
 
   it('covers the agreed enterprise domains without inventing endpoints', () => {
     const titles = plannedItems.map((item) => item.title).join(' ')
-    for (const domain of ['CRM', 'مالی', 'منابع انسانی', 'تدارکات', 'لجستیک', 'پشتیبانی', 'پروژه‌ها', 'BI', 'امنیت']) {
+    for (const domain of ['CRM', 'مالی', 'منابع انسانی', 'تدارکات', 'لجستیک', 'پشتیبانی', 'پروژه‌ها', 'BI', 'امنیت', 'تقویم', 'اسناد', 'ارتباطات', 'مرکز دانش', 'ممیزی']) {
       expect(titles).toContain(domain)
     }
   })
