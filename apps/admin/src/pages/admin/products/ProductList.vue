@@ -1,8 +1,15 @@
 <template>
   <div class="product-list-page ds-stack">
     <!-- Card with Toolbar -->
-<header class="ds-page-heading"><div class="ds-page-heading__copy"><h1 class="ds-page-heading__title">مدیریت محصولات</h1><p class="ds-page-heading__description">کاتالوگ محصولات را جستجو، فیلتر و مدیریت کنید.</p></div></header>
-        <div class="card ds-panel">
+<section class="product-management-intro" aria-labelledby="product-management-title">
+  <div class="product-management-intro-icon"><i class="pi pi-box"></i></div>
+  <div class="product-management-intro-copy">
+    <span>کنترل کاتالوگ</span>
+    <h1 id="product-management-title">مدیریت محصولات</h1>
+    <p>کاتالوگ محصولات بازارگاه را بررسی، ارزیابی و مدیریت کنید.</p>
+  </div>
+</section>
+        <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
       <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
@@ -73,7 +80,7 @@
         <i class="pi pi-box" />
         <p>محصولی یافت نشد</p>
       </div>
-    </div>
+    </section>
 
     <!-- Create/Edit Product Dialog -->
     <Dialog v-model:visible="showDialog" :header="dialogHeader" :modal="true" class="p-fluid">
@@ -555,4 +562,94 @@ onMounted(() => {
   .product-list-page :deep(.p-toolbar-start),
   .product-list-page :deep(.p-toolbar-end) { flex-wrap: wrap; }
 }
+
+/* Product operations workspace — consistent between admin and company portals. */
+.product-list-page { gap: clamp(1rem, 2vw, 1.5rem); }
+.product-management-intro {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-management-intro-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.35rem;
+}
+.product-management-intro-copy { min-width: 0; }
+.product-management-intro-copy > span {
+  display: block;
+  margin-bottom: .2rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-management-intro-copy h1 {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, 1.7rem);
+  font-weight: 800;
+}
+.product-management-intro-copy p {
+  margin: .35rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.7;
+}
+.product-management-surface {
+  overflow: hidden;
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-list-page :deep(.p-toolbar) { flex-wrap: wrap; }
+.product-list-page :deep(.p-toolbar-start),
+.product-list-page :deep(.p-toolbar-end) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .7rem;
+}
+.product-list-page :deep(.p-toolbar .p-inputtext),
+.product-list-page :deep(.p-toolbar .p-select) {
+  min-height: 2.65rem;
+  border-radius: var(--ds-radius-md);
+}
+.product-list-page :deep(.p-toolbar .p-button) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
+.product-list-page :deep(.p-paginator) {
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.product-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+.product-list-page :deep(.p-datatable-tbody > tr) { transition: background var(--ds-transition-fast); }
+.product-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
+.product-list-page :deep(.p-datatable .p-button.p-button-text) {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+.table-state {
+  min-height: 15rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.table-state i { color: var(--ds-color-primary); opacity: .65; }
+@media (max-width: 640px) {
+  .product-management-intro { align-items: flex-start; padding: 1rem; }
+  .product-management-intro-icon { width: 2.75rem; height: 2.75rem; }
+  .product-list-page :deep(.p-toolbar-start),
+  .product-list-page :deep(.p-toolbar-end) { width: 100%; }
+  .product-list-page :deep(.p-toolbar-end) { justify-content: stretch; }
+  .product-list-page :deep(.p-toolbar-end .p-button) { width: 100%; }
+}
+
 </style>
