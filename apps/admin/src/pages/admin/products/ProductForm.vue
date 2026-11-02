@@ -1186,4 +1186,39 @@ async function removeExistingDocument(docId) {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.product-form-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.product-form-page .page-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-form-page .page-header h1 {
+  color: var(--ds-color-text);
+  font-size: clamp(1.2rem, 2vw, var(--ds-font-size-xl));
+}
+.product-form-page .form-grid { gap: var(--ds-space-5); }
+.product-form-page :deep(.p-card),
+.product-form-page .form-section {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  background: var(--ds-color-surface);
+}
+.product-form-page :deep(.p-card-title) {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-form-page label {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-semibold);
+}
+@media (max-width: 640px) {
+  .product-form-page .page-header { padding: var(--ds-space-4); }
+  .product-form-page .page-header-actions { flex-wrap: wrap; }
+}
+
 </style>
