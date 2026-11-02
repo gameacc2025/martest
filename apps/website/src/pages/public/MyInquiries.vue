@@ -268,14 +268,19 @@ onMounted(async () => {
   <main class="my-inquiries-page" dir="rtl">
     <div class="inquiries-container">
       <header class="page-heading">
-        <div>
-          <p class="eyebrow">حساب کاربری</p>
-          <h1>استعلام‌های من</h1>
-          <p class="page-description">درخواست‌های قیمت، وضعیت بررسی و پیشنهادهای تأمین‌کنندگان را پیگیری کنید.</p>
+        <div class="heading-identity">
+          <span class="heading-icon"><i class="pi pi-inbox"></i></span>
+          <div>
+            <p class="eyebrow">فضای کاربری و پیگیری درخواست‌ها</p>
+            <h1>استعلام‌های من</h1>
+            <p class="page-description">درخواست‌های قیمت، وضعیت بررسی و پیشنهادهای تأمین‌کنندگان را پیگیری کنید.</p>
+          </div>
         </div>
-        <Button label="اشتراک استعلام" icon="pi pi-wallet" severity="primary" outlined @click="router.push({ name: 'inquiry-subscription' })" />
-        <Button v-if="isDetail" label="بازگشت به فهرست" icon="pi pi-arrow-right" severity="secondary" outlined @click="backToList" />
-        <Button v-else label="به‌روزرسانی" icon="pi pi-refresh" severity="secondary" outlined :loading="loadingList" @click="refresh" />
+        <div class="page-heading-actions">
+          <Button label="اشتراک استعلام" icon="pi pi-wallet" severity="primary" outlined @click="router.push({ name: 'inquiry-subscription' })" />
+          <Button v-if="isDetail" label="بازگشت به فهرست" icon="pi pi-arrow-right" severity="secondary" outlined @click="backToList" />
+          <Button v-else label="به‌روزرسانی" icon="pi pi-refresh" severity="secondary" outlined :loading="loadingList" @click="refresh" />
+        </div>
       </header>
 
       <section v-if="isDetail" class="detail-panel">
@@ -498,6 +503,74 @@ onMounted(async () => {
 @media (max-width: 640px) {
   .my-inquiries-page { padding: var(--ds-space-4) var(--ds-space-3); }
   .my-inquiries-page .page-heading { padding: var(--ds-space-4); }
+}
+
+
+/* Customer inquiry center: separate identity from page-level actions. */
+.my-inquiries-page { padding: clamp(1.5rem, 3vw, 2.75rem) 1rem 4rem; }
+.my-inquiries-page .page-heading {
+  align-items: center;
+  gap: 1.25rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  margin-bottom: 1.25rem;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
+}
+.heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.35rem;
+}
+.my-inquiries-page .eyebrow {
+  margin: 0;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.my-inquiries-page .page-heading h1 { margin: .25rem 0 .35rem; }
+.my-inquiries-page .page-description { max-width: 42rem; font-size: var(--ds-font-size-sm); }
+.page-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; }
+.my-inquiries-page .list-panel,
+.my-inquiries-page .detail-panel { padding: clamp(1rem, 2vw, 1.75rem); }
+.my-inquiries-page .inquiry-row {
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  transition: border-color var(--ds-transition-fast), background var(--ds-transition-fast), transform var(--ds-transition-fast);
+}
+.my-inquiries-page .inquiry-row:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--ds-color-primary) 42%, var(--ds-color-border));
+  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
+}
+.my-inquiries-page .row-icon { background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
+.my-inquiries-page .metadata-grid > div { border: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); }
+.my-inquiries-page .item-row,
+.my-inquiries-page .response-card,
+.my-inquiries-page .conversation-message { border-color: var(--ds-color-border); border-radius: var(--ds-radius-lg); }
+.my-inquiries-page .sealed-notice {
+  border: 1px solid color-mix(in srgb, var(--ds-color-info) 22%, transparent);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-info-soft);
+  color: var(--ds-color-text);
+}
+.my-inquiries-page .conversation-form select,
+.my-inquiries-page .conversation-form textarea { border-radius: var(--ds-radius-md); }
+@media (max-width: 700px) {
+  .my-inquiries-page .page-heading { align-items: stretch; }
+  .heading-identity { align-items: flex-start; }
+  .page-heading-actions { width: 100%; }
+  .page-heading-actions > * { flex: 1 1 auto; }
+}
+@media (max-width: 440px) {
+  .heading-icon { width: 2.7rem; height: 2.7rem; }
+  .my-inquiries-page .page-heading h1 { font-size: 1.45rem; }
+  .page-heading-actions { display: grid; grid-template-columns: 1fr; }
 }
 
 </style>
