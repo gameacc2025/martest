@@ -51,9 +51,10 @@ async function changePassword() {
 
 <template>
   <div class="change-password-page">
-    <div class="page-header">
-      <h1>تغییر رمز عبور</h1>
-    </div>
+    <header class="page-header security-heading">
+      <span class="security-heading-icon"><i class="pi pi-lock"></i></span>
+      <div><span class="security-heading-eyebrow">امنیت حساب</span><h1>تغییر رمز عبور</h1><p>برای حفظ امنیت حساب، رمز فعلی و رمز جدید خود را وارد کنید.</p></div>
+    </header>
 
     <Card class="form-section">
       <template #content>
@@ -119,5 +120,33 @@ async function changePassword() {
 .change-password-page label { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
 .change-password-page :deep(.p-inputtext) { border-radius: var(--ds-radius-md); }
 @media (max-width: 640px) { .change-password-page .page-header { padding: var(--ds-space-4); } }
+
+
+.change-password-page .page-header { margin-bottom: 0; }
+.security-heading {
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.security-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.security-heading > div { min-width: 0; }
+.security-heading-eyebrow { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.security-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
+.security-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+@media (max-width: 640px) { .security-heading { align-items: flex-start; padding: 1rem; } }
 
 </style>
