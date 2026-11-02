@@ -2014,3 +2014,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added the restricted public product schema (removing creator ID, edit counter, deletedAt and statusHistory), public catalogue query filters, management query filters, and a two-projection detail response for authorized COMPANY/STAFF callers.
 - Added schema tests for public product privacy, management projection completeness and inquiry list pagination/privacy; added generated `/docs/json` integration coverage for public/management product routes and query parameters.
 - Updated API and AI project documentation. CI/migration validation pending.
+
+
+## 2026-11-02 — PRODUCT-PLATFORM-VISION — Expand roadmap to a modular enterprise platform
+- **Status:** DOCUMENTATION PLANNED
+- **Goal:** Extend the product vision beyond the current telecom marketplace to include future CRM, finance/accounting, HR, procurement, inventory, logistics, customer support, project/operations, document/asset management, BI, security, and integration modules.
+- **Decision:** Distinguish planned modules from implemented capabilities. Future menu groups may be documented and designed now, but no fake routes, APIs, or operational controls may be exposed. Each module requires real authorization, tenant boundaries, APIs, tests, auditability, and release readiness before activation.
+- **Deliverable:** A dedicated future-module blueprint, cross-referenced from the architecture roadmap and AI project context.
+- **Verification:** Documentation-only; no application tests required. Verify the updated documents on main after commit.
+- **Commit:** Pending
