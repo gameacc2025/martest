@@ -135,4 +135,10 @@ const faNumber = (v) => (Number(v) || 0).toLocaleString('fa-IR')
     display: none;
   }
 }
+
+.pipeline-stage { border-radius: var(--ds-radius-lg); }
+@media (max-width: 900px) {
+  .inquiry-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 </style>
