@@ -2,16 +2,15 @@
   <main class="products-page ds-page" aria-labelledby="products-page-title">
 
     <!-- Breadcrumb as page title -->
-    <header class="listing-page-header">
-      <div class="listing-heading-copy">
-        <span class="ds-eyebrow">بازارگاه تجهیزات مخابراتی</span>
-        <h1 id="products-page-title" class="ds-h1">محصولات</h1>
-        <p class="ds-lead">محصولات را با جستجو، دسته‌بندی و محدوده قیمت پیدا کنید.</p>
-      </div>
-      <div class="breadcrumb-wrap">
-        <Breadcrumb :home="home" :model="items" />
-      </div>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="بازارگاه تجهیزات مخابراتی"
+      title="محصولات"
+      description="محصولات را با جستجو، دسته‌بندی و محدوده قیمت پیدا کنید."
+      icon="pi pi-box"
+      heading-id="products-page-title"
+    >
+      <template #actions><Breadcrumb :home="home" :model="items" class="breadcrumb-wrap" /></template>
+    </WorkspacePageHeading>
 
     <!-- Two Column Layout: Filters (right) + Products (left) -->
     <div class="products-grid-layout">
@@ -174,6 +173,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
