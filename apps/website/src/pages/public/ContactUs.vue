@@ -1,10 +1,15 @@
 <template>
   <div class="contact-page">
 
-    <header class="contact-page-heading">
-      <div><span class="ds-eyebrow"><i class="pi pi-headphones"></i> ارتباط با بازارگاه</span><h1>تماس با ما</h1><p>برای دریافت راهنمایی، پیگیری درخواست یا ارسال پیام با تیم ما در ارتباط باشید.</p></div>
-      <Breadcrumb :home="home" :model="items" />
-    </header>
+    <WorkspacePageHeading
+      eyebrow="ارتباط با بازارگاه"
+      title="تماس با ما"
+      description="برای دریافت راهنمایی، پیگیری درخواست یا ارسال پیام با تیم ما در ارتباط باشید."
+      icon="pi pi-headphones"
+      heading-id="contact-page-title"
+    >
+      <template #actions><Breadcrumb :home="home" :model="items" /></template>
+    </WorkspacePageHeading>
 
     <!-- Two Column Layout -->
     <div class="contact-grid">
@@ -219,6 +224,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref } from 'vue'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
