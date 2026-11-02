@@ -212,3 +212,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 ### Verification
 - Source changes committed directly to `main` through the connected GitHub repository.
 - Local test/build execution is not available in this connected editing step; these commits are not marked as locally verified. Continue with component coverage and CI checks before sign-off.
+
+
+## Shared data-table refinement — batch 7 (2026-11-02)
+
+- The shared `DataTable` now reports the actual visible client-side result count (including filters) and the server-provided total in lazy mode.
+- Search debounce timers are cleared when the component unmounts.
+- Added token-driven PrimeVue table header/body/hover/selected-row/paginator styling, improved mobile toolbar layout, and clearer focus treatment.
+- Added `DataTable.test.js` coverage for client counts, lazy server totals and filtered counts.
+- Commits: `c0be61b` shared table refinement; `3f3ab5f` table tests.
+- CI was triggered by the pushes and is being checked; no local test execution is claimed.
