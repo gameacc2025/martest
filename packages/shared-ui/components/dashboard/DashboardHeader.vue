@@ -34,6 +34,8 @@ const props = defineProps({
   isCompanyAdmin: { type: Boolean, default: false },
   // Current theme mode.
   isDark: { type: Boolean, default: false },
+  // Current workspace context, supplied by the host application.
+  workspaceLabel: { type: String, default: '' },
   // Route to the user's dashboard.
   dashboardRoute: { type: Object, default: () => ({ name: 'home' }) },
   // Route for the home breadcrumb.
@@ -121,6 +123,11 @@ function logout() {
       >
         <i class="pi pi-bars"></i>
       </button>
+
+      <div v-if="workspaceLabel" class="dash-header-workspace" aria-label="فضای کاری فعلی">
+        <span class="dash-header-workspace-mark"><i class="pi pi-th-large"></i></span>
+        <span class="dash-header-workspace-label">{{ workspaceLabel }}</span>
+      </div>
 
       <!-- Company identity (logo + name) -->
       <div v-if="companyName" class="dash-header-company">
@@ -523,6 +530,9 @@ function logout() {
 
 /* Hide company name label on very narrow screens (logo stays). */
 @media (max-width: 575px) {
+  .dash-header-workspace { padding-inline: .45rem; gap: .35rem; border-inline-start: 0; }
+  .dash-header-workspace-mark { width: 2rem; height: 2rem; }
+  .dash-header-workspace-label { max-width: 7rem; font-size: .75rem; }
   .dash-header-company-name {
     display: none;
   }
@@ -542,6 +552,33 @@ function logout() {
   backdrop-filter: blur(14px);
 }
 
+.dash-header-workspace {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  min-width: 0;
+  padding-inline: .9rem;
+  border-inline-start: 1px solid var(--ds-color-border);
+}
+.dash-header-workspace-mark {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 20%, transparent);
+  border-radius: .75rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+}
+.dash-header-workspace-label {
+  overflow: hidden;
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dash-header-icon-btn {
   border: 1px solid transparent;
   border-radius: var(--ds-radius-md, 10px);
