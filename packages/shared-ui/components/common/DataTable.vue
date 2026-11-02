@@ -242,7 +242,13 @@ function toggleColMenu(e) {
 function clearSelection() {
   selection.value = []
 }
-defineExpose({ clearSelection })
+
+function resetPage() {
+  page.value = 1
+  selection.value = []
+}
+
+defineExpose({ clearSelection, resetPage })
 </script>
 
 <template>
