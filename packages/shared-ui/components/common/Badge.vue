@@ -82,4 +82,8 @@ const severity = computed(() => severityMap[props.variant] || 'info')
   background: var(--ds-color-surface-alt);
   color: var(--ds-color-text-muted);
 }
+
+.ds-badge { border-radius: var(--ds-radius-pill); padding-inline: var(--ds-space-3); }
+.ds-badge-dot { flex: 0 0 auto; }
+
 </style>
