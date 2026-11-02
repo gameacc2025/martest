@@ -358,3 +358,20 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 ### Verification
 - CI started for `7010dc6` (run `41449786538`); test/build outcome is pending at the time of this update.
 - No local browser testing was performed. Do not mark this batch as fully verified until CI completes.
+
+
+## Company catalogue and inquiry workspaces — 2026-11-02
+
+### Completed
+- Company ProductList now shares the admin catalogue's visual language: a clear catalogue intro, compact responsive toolbar, token-driven table header/body/pagination and mobile filter layout. Removed the extra page-level padding that caused nested dashboard content to be inset twice.
+- Company InquiryList now has a dedicated management surface, clearer tab navigation and a consistent responsive server-side table/paginator presentation.
+- Admin InquiryList now has a dedicated review surface and consistent toolbar, loading skeleton/data table, row hover and pagination presentation.
+- These changes are presentation-only. Company-scoped product actions, STAFF-only review boundaries, inquiry scope tabs, server pagination/sorting, filters, API calls and permissions remain intact.
+
+### Commits
+- `4e5cd98` — Company ProductList
+- `55ec8ed` + `17e43c0` — Company InquiryList styles and table hook
+- `9036416` + `7c2f7af` — Admin InquiryList styles and table hooks
+
+### Verification
+- CI was triggered by the preceding commit `7010dc6`; its run status is being checked separately. This latest batch is not marked verified until CI for the latest main commit completes.
