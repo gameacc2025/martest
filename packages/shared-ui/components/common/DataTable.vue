@@ -571,4 +571,12 @@ defineExpose({ clearSelection })
     width: 100%;
   }
 }
+
+.ent-table {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.ent-table-toolbar { background: var(--ds-color-surface); }
+.ent-table-title { font-weight: var(--ds-font-weight-bold); }
+
 </style>
