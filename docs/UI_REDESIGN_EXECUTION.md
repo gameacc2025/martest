@@ -501,3 +501,12 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - No validation rule, payload shape, permission check, API call, save flow, or media upload behavior was changed.
 - Commits: `62ad6a7` Company editor; `d626f49` Admin editor.
 - CI validation for this batch is pending.
+
+
+## Inquiry authoring wizard — batch 9 (2026-11-02)
+
+- Admin and Company inquiry creation wizards now show an explicit current-step context, five-step progress bar and live selected-item count above the PrimeVue stepper.
+- The progress derives from the existing `activeStep` state; selected-item count derives from the existing inquiry form model.
+- Existing linear step navigation, step validation, draft save/restore, inquiry options, product selection, API calls and submit behavior remain unchanged.
+- Commits: `ec4c1f2` Company wizard; `914ba4f` Admin wizard.
+- CI validation pending.
