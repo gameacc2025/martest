@@ -206,4 +206,114 @@ button:disabled{opacity:.55;cursor:wait}.primary{background:#01bec2;color:#062f3
   .folder-page .folder-row { align-items: stretch; }
 }
 
+
+/* Notification folder registry — readable configuration cards and responsive rows. */
+.folder-page { gap: var(--ds-space-5); color: var(--ds-color-text); }
+.folder-page .folder-heading {
+  align-items: center;
+  gap: 1rem;
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.folder-page .folder-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.folder-page .folder-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.3rem;
+}
+.folder-page .folder-heading-eyebrow { color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+.folder-page h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: clamp(1.25rem, 2vw, var(--ds-font-size-2xl)); font-weight: 800; }
+.folder-page h2 { margin: 0 0 1rem; color: var(--ds-color-text); font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
+.folder-page p { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
+.folder-page .panel {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.folder-page .create-form {
+  grid-template-columns: minmax(220px, 1.5fr) minmax(180px, 1fr) minmax(130px, .7fr) auto;
+  align-items: end;
+  gap: 1rem;
+}
+.folder-page label { color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); }
+.folder-page input,
+.folder-page select {
+  min-height: 2.65rem;
+  padding: .65rem .8rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text);
+  font: inherit;
+}
+.folder-page input:focus,
+.folder-page select:focus {
+  border-color: var(--ds-color-primary);
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+.folder-page button {
+  min-height: 2.65rem;
+  border-radius: var(--ds-radius-md);
+  font: inherit;
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+}
+.folder-page button.primary { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.folder-page button.secondary { border: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); color: var(--ds-color-text); }
+.folder-page .folder-list { gap: .65rem; }
+.folder-page .folder-row {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(150px, 1fr) minmax(140px, .9fr) minmax(140px, .9fr) auto minmax(80px, .35fr);
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+.folder-page .folder-row:last-child { border-bottom: 1px solid var(--ds-color-border); }
+.folder-page .folder-icon {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: .8rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+}
+.folder-page .folder-info { min-width: 0; display: grid; gap: .25rem; }
+.folder-page .folder-info strong { color: var(--ds-color-text); }
+.folder-page .folder-info small { color: var(--ds-color-text-muted); line-height: 1.6; }
+.folder-page .inline-field { min-width: 0; }
+.folder-page .inline-field.order { max-width: none; }
+.folder-page .toggle { display: flex; align-items: center; gap: .4rem; white-space: nowrap; }
+.folder-page .toggle input { width: 1rem; min-height: 1rem; accent-color: var(--ds-color-primary); }
+.folder-page .message { padding: .8rem 1rem; border: 1px solid; border-radius: var(--ds-radius-md); }
+.folder-page .message.error { border-color: color-mix(in srgb, var(--ds-color-danger) 30%, transparent); background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.folder-page .message.success { border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent); background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+@media (max-width: 1100px) {
+  .folder-page .folder-row { grid-template-columns: 2.5rem minmax(160px, 1fr) minmax(140px, 1fr) minmax(140px, 1fr); }
+  .folder-page .folder-row .toggle,
+  .folder-page .folder-row .order { grid-column: auto; }
+  .folder-page .create-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .folder-page .folder-heading { align-items: flex-start; flex-direction: column; padding: var(--ds-space-4); }
+  .folder-page .create-form { grid-template-columns: minmax(0, 1fr); }
+  .folder-page .folder-row { grid-template-columns: 2.5rem minmax(0, 1fr); }
+  .folder-page .folder-row > .inline-field,
+  .folder-page .folder-row > .toggle { grid-column: 1 / -1; }
+}
 </style>
