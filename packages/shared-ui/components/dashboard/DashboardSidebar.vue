@@ -208,6 +208,19 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
               />
             </a>
 
+            <!-- Planned modules are intentionally visible but non-interactive until implemented. -->
+            <span
+              v-else-if="item.planned"
+              class="dash-sidebar-link dash-sidebar-link--planned"
+              role="note"
+              aria-disabled="true"
+              v-tooltip="collapsed ? { value: item.title + ' — در برنامه توسعه', ...tooltipOptions } : null"
+            >
+              <i :class="item.icon" class="dash-sidebar-link-icon"></i>
+              <span class="dash-sidebar-link-text">{{ item.title }}</span>
+              <span class="dash-sidebar-planned-badge">آینده</span>
+            </span>
+
             <!-- Leaf: internal route -->
             <router-link
               v-else
@@ -419,6 +432,26 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   transform: rotate(180deg);
 }
 
+/* Planned entries communicate roadmap scope without pretending a route exists. */
+.dash-sidebar-link--planned {
+  opacity: 0.62;
+  cursor: default;
+}
+.dash-sidebar-link--planned:hover {
+  background: transparent;
+  color: var(--ds-sidebar-fg);
+  padding-inline-start: 0.75rem;
+}
+.dash-sidebar-planned-badge {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--ds-sidebar-border);
+  border-radius: 999px;
+  color: var(--ds-sidebar-muted);
+  font-size: 0.65rem;
+  line-height: 1.5;
+}
+
 /* ---- Submenu ---- */
 .dash-sidebar-sublist {
   margin-top: 0.15rem;
@@ -461,6 +494,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   .dash-sidebar--collapsed .dash-sidebar-section,
   .dash-sidebar--collapsed .dash-sidebar-link-text,
   .dash-sidebar--collapsed .dash-sidebar-badge,
+  .dash-sidebar--collapsed .dash-sidebar-planned-badge,
   .dash-sidebar--collapsed .dash-sidebar-caret {
     display: none;
   }
