@@ -1547,3 +1547,6 @@ Continue remaining Website account/inquiry/detail pages and audit all route page
 ## Latest public account UI — address book (2026-11-02)
 
 Address cards and empty state now use PrimeIcons; edit/delete/default actions and all fields have 44px targets and focus styles. Existing API behavior unchanged. Address-book tests added for list, default address, form and empty state. Continue through remaining public pages and Admin/Company form/detail pages; latest head requires CI verification.
+## Latest shared shell UI — 2026-11-02
+
+Admin and Company share a more accessible responsive shell: mobile drawer state is synchronized with header toggles; toggles expose aria-expanded/aria-controls and dynamic labels; open drawer is a modal navigation dialog; header controls meet 44px and visible focus/reduced-motion standards. Permission-filtered menus, routes, theme, auth and API behavior unchanged. Tests added. Continue all remaining UI pages after CI verification.
