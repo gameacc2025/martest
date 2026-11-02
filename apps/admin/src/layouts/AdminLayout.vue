@@ -68,6 +68,7 @@ onUnmounted(() => {
     class="dash-layout"
     :class="{ 'dash-layout--collapsed': sidebarCollapsed }"
   >
+    <a class="dash-layout-skip" href="#main-content">رفتن به محتوای اصلی</a>
     <!-- Sidebar: fixed on desktop, drawer on mobile -->
     <div class="dash-layout-sidebar" :class="{ 'dash-layout-sidebar--open': mobileOpen }">
       <DashboardSidebar
@@ -108,7 +109,7 @@ onUnmounted(() => {
         <!-- One clean white breadcrumb bar for every dashboard page. -->
         <PageHeader :home-route="homeRoute" />
 
-        <main class="dash-layout-page">
+        <main id="main-content" class="dash-layout-page" tabindex="-1">
           <router-view v-slot="{ Component, route }">
             <transition name="page" mode="out-in">
               <component :is="Component" :key="route.path" />
@@ -258,4 +259,29 @@ onUnmounted(() => {
   .dash-layout-content { padding-inline: 0.75rem; }
 }
 
+
+/* Keyboard users can bypass the navigation chrome and enter page content. */
+.dash-layout-skip {
+  position: fixed;
+  z-index: 2000;
+  inset-block-start: .5rem;
+  inset-inline-start: .5rem;
+  transform: translateY(-160%);
+  padding: .7rem 1rem;
+  border: 1px solid var(--ds-color-primary);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+  text-decoration: none;
+  box-shadow: var(--ds-shadow-md);
+  transition: transform var(--ds-transition-fast);
+}
+.dash-layout-skip:focus {
+  transform: translateY(0);
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+.dash-layout-page:focus { outline: none; }
 </style>
