@@ -531,9 +531,15 @@ function createInquiry() {
 .inquiry-management-table :deep(.p-paginator-page),
 .inquiry-management-table :deep(.p-paginator-next),
 .inquiry-management-table :deep(.p-paginator-prev) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
+}
+.inquiry-management-table :deep(.p-button.p-button-text) {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
 }
 .inquiry-management-table :deep(.p-datatable-empty-message > td) { padding: 0; }
 @media (max-width: 640px) {
