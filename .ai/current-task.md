@@ -1174,3 +1174,8 @@ Completed in the latest structural batch:
 - Company dashboard: authenticated company identity/status hero, inquiry pipeline plus quick actions in a responsive two-column workspace.
 
 Preserve API contracts, auth, role/permission filtering, tenant isolation, routes and Telecom brand tokens. Continue through shared shell and all page families. Add focused component tests and run all app tests/builds; current batch has not been locally verified.
+
+
+## Latest shared UI batch — 2026-11-02
+
+The shared DataTable component now has a clearer record-count toolbar, token-driven header/body/hover/selection/paginator surfaces, improved mobile toolbar behavior, and unmount cleanup for the search debounce. Added focused tests for client-side, filtered and lazy server counts. Commits: `c0be61b`, `3f3ab5f`. Await CI; continue full app UI migration.
