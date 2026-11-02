@@ -1163,3 +1163,14 @@ At commit b5220ea, CI test-and-build and database migration validation passed. R
 ### Paces reference access correction
 
 The unparameterized Bootstrap index is accessible and its navigation tree has been catalogued. The ?rtl preview URL and most individual child-page URLs remain cache-miss. Treat menu labels as a page inventory only; do not describe every child page as directly inspected.
+
+
+## Current UI implementation checkpoint — 2026-11-02
+
+Active task remains the complete Paces-inspired RTL redesign across Admin, Company and Website. Do not stop at dashboard completion.
+
+Completed in the latest structural batch:
+- Admin dashboard: branded workspace welcome hero, primary workflow actions, three-column operational workspace with responsive collapse.
+- Company dashboard: authenticated company identity/status hero, inquiry pipeline plus quick actions in a responsive two-column workspace.
+
+Preserve API contracts, auth, role/permission filtering, tenant isolation, routes and Telecom brand tokens. Continue through shared shell and all page families. Add focused component tests and run all app tests/builds; current batch has not been locally verified.
