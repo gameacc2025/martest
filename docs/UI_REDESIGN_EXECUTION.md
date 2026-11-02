@@ -375,3 +375,25 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 
 ### Verification
 - CI was triggered by the preceding commit `7010dc6`; its run status is being checked separately. This latest batch is not marked verified until CI for the latest main commit completes.
+
+
+## Identity, access and catalogue administration batch — 2026-11-02
+
+### Completed
+- Admin UserList and Company UserList now share a dedicated responsive management surface, toolbar and table/paginator treatment. Company-side self-protection and access activation restrictions are unchanged.
+- Admin RoleList, PermissionList and CategoryList now use a consistent surface, toolbar and responsive data-table presentation.
+- Added `packages/shared-ui/components/common/Table.test.js` covering row/loading passthrough, configured empty-state copy and the existing column configuration contract.
+- No changes to user/role/permission/category APIs, authorization predicates, role semantics or data operations.
+
+### Commits
+- `9927176` — Admin UserList
+- `b52f642` — Company UserList
+- `8b54d91` — RoleList
+- `d065562` — PermissionList
+- `b6ce439` — CategoryList
+- `95ac38b` — shared Table unit tests
+
+### CI evidence
+- CI passed on `7767afe` and `b52f642` (test/build workflow).
+- Runtime Validation is a separate Playwright smoke workflow and has reported failures/cancellations on some commits; it is not being used as the acceptance criterion for this visual batch. Review its failure separately if it blocks release.
+- CI for the newest commits is pending/in progress; this latest batch is not yet signed off.
