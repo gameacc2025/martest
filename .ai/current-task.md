@@ -1158,3 +1158,8 @@ Added consistent Paces-style page headers above the management lists in Admin an
 ### Verification checkpoint
 
 At commit b5220ea, CI test-and-build and database migration validation passed. Runtime Validation failed only in the Playwright smoke workflow after successful Compose/service/migration startup; it timed out waiting for #app on all three panel roots and also failed the STAFF auth-flow scenario. The cause is not established. Do not claim full runtime verification. Continue prioritizing component/unit tests and builds; browser automation is not the focus unless explicitly requested.
+
+
+### Paces reference access correction
+
+The unparameterized Bootstrap index is accessible and its navigation tree has been catalogued. The ?rtl preview URL and most individual child-page URLs remain cache-miss. Treat menu labels as a page inventory only; do not describe every child page as directly inspected.
