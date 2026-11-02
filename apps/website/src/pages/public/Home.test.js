@@ -41,6 +41,25 @@ describe('Website homepage redesign contracts', () => {
     expect(source).toContain('.product-card:focus-visible')
   })
 
+
+  it('provides a manual pause control and pauses while the hero is hovered or focused', () => {
+    expect(source).toContain('class="hero-play-toggle"')
+    expect(source).toContain(':aria-pressed="slideshowPaused"')
+    expect(source).toContain('function toggleSlideshow()')
+    expect(source).toContain('@mouseenter="onSlideshowEnter"')
+    expect(source).toContain('@focusin="onSlideshowFocusIn"')
+    expect(source).toContain("prefers-reduced-motion: reduce")
+  })
+
+  it('does not publish unsupported hard-coded marketplace statistics or claims', () => {
+    expect(source).not.toContain('const stats =')
+    expect(source).not.toContain('+250')
+    expect(source).not.toContain('+1,500')
+    expect(source).not.toContain('+5,000')
+    expect(source).not.toContain('بیش از ۲۵۰ تأمین‌کننده')
+    expect(source).toContain('ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان')
+  })
+
   it('uses the shared design system for the redesigned page', () => {
     expect(source).toContain('class="home-page ds-page"')
     expect(source).toContain('class="home-container ds-container ds-stack"')
