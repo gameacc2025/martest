@@ -332,3 +332,11 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Admin/Company personal profiles now have a common account-context header and refined tabs/cards/forms; Company Change Password has a clear security header.
 - Commits: a51eea5, 5715c4a, c2da3c9, d3391a1, 7bf11c2, 70f7445, 5e0a572.
 - No local test/build or browser execution; verification remains outstanding.
+
+
+## UI redesign — order and notification folder administration batch 17 (2026-11-02)
+
+- Admin legacy Orders list now has an explicit sales/legacy context header and a responsive toolbar/table surface; no unsupported order API capability was added.
+- Admin Notification Folders now has a folder-structure header, responsive creation form and list rows, consistent system-folder vs admin-folder surfaces, and token-based success/error/action styling. User folder creation remains unavailable; system INBOX/SAVED folders remain protected by the existing logic.
+- Commits: `7232a6e`, `fecd896`.
+- No local tests/builds/browser execution; verification remains outstanding.
