@@ -810,4 +810,20 @@ const isInWishlist = (productId) => {
   color: var(--ds-color-text-muted);
   margin: 0 0 var(--ds-space-3) 0;
 }
+
+.products-page { background: var(--ds-color-background); color: var(--ds-color-text); }
+.products-head {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.products-title { color: var(--ds-color-text); }
+.products-filters :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+
 </style>
