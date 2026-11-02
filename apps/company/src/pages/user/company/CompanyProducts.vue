@@ -83,7 +83,8 @@ function formatPrice(price) {
       <Button label="محصول جدید" icon="pi pi-plus" @click="router.push({ name: 'manage-product-create' })" />
     </header>
 
-    <section class="product-catalogue-surface" aria-label="فهرست محصولات شرکت">\n      <DataTable class="product-catalogue-table" :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
+    <section class="product-catalogue-surface" aria-label="فهرست محصولات شرکت">
+      <DataTable class="product-catalogue-table" :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
       :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20]"
       @page="(e) => fetchProducts(e.page + 1)" responsiveLayout="scroll">
         <Column field="title" header="عنوان" sortable></Column>
@@ -108,7 +109,8 @@ function formatPrice(price) {
             <Button icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش'" @click="editProduct(data)" />
           </template>
         </Column>
-    </DataTable>\n    </section>
+    </DataTable>
+    </section>
   </div>
 </template>
 
