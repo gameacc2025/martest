@@ -93,6 +93,9 @@ defineProps({
   flex-wrap: wrap;
   gap: .6rem;
 }
+.workspace-page-heading-actions :deep(.p-button),
+.workspace-page-heading-actions :deep(a) { min-height: 2.75rem; }
+.workspace-page-heading-actions :deep(.p-button) { border-radius: var(--ds-radius-md); }
 @media (max-width: 640px) {
   .workspace-page-heading { align-items: flex-start; flex-wrap: wrap; padding: 1rem; }
   .workspace-page-heading-icon { flex-basis: 2.75rem; width: 2.75rem; height: 2.75rem; }
