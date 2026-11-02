@@ -1,13 +1,12 @@
 <template>
   <main class="system-settings-page" dir="rtl">
-    <header class="system-settings-heading">
-      <span class="system-settings-icon"><i class="pi pi-cog"></i></span>
-      <div>
-        <span class="ds-eyebrow">پیکربندی و سیاست‌های سامانه</span>
-        <h1>تنظیمات سیستم</h1>
-        <p>مقادیر عملیاتی و قواعد عمومی بازارگاه را مدیریت کنید.</p>
-      </div>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="پیکربندی و سیاست‌های سامانه"
+      title="تنظیمات سیستم"
+      description="مقادیر عملیاتی و قواعد عمومی بازارگاه را مدیریت کنید."
+      icon="pi pi-cog"
+      heading-id="system-settings-title"
+    />
 
     <section class="system-setting-card" aria-labelledby="product-edit-threshold-title">
       <div class="system-setting-heading">
@@ -54,6 +53,7 @@
 </template>
 
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted } from 'vue'
 import { adminApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
