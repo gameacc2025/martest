@@ -312,3 +312,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Checkout payment-method selection and cart/wishlist item behavior were not changed. These screens remain presentation work over their existing route/state; no new payment/cart backend behavior is claimed.
 - Commits: cc4842e Companies; 91f35bd Shopping Cart; a4c41fd Checkout; 32e88c0 Wishlist.
 - No local test/build/browser execution; verification remains outstanding.
+
+
+## UI redesign — public catalog, order and support pages batch 15 (2026-11-02)
+
+- Public Products page now has a contextual catalog header, refined filters, responsive two-column mobile grid and product image containment.
+- Orders and Order Details now use a consistent account/order context header, breadcrumb placement and token-based card surfaces.
+- Contact Us now has a true page heading and breadcrumb separated from the form; contact information cards/social controls use brand tokens rather than fixed cyan colors.
+- Existing search/filter/sort/pagination, order data, navigation and contact form submission remain unchanged.
+- Commits: `f1d2e99`, `8cd0cac`, `e349467`, `41bcdf8`.
+- No local tests/builds or browser tests run; verification outstanding.
