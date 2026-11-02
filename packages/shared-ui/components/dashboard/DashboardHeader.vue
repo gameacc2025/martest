@@ -162,6 +162,7 @@ function logout() {
         type="button"
         class="dash-header-icon-btn dash-header-mobile-only"
         aria-label="جستجو"
+        aria-haspopup="dialog"
         @click="toggleSearchPanel"
       >
         <i class="pi pi-search"></i>
@@ -184,6 +185,7 @@ function logout() {
         type="button"
         class="dash-header-icon-btn"
         :aria-label="isDark ? 'حالت روشن' : 'حالت تیره'"
+        :title="isDark ? 'تغییر به حالت روشن' : 'تغییر به حالت تیره'"
         @click="emit('toggle-theme')"
       >
         <i class="pi" :class="isDark ? 'pi-sun' : 'pi-moon'"></i>
@@ -193,7 +195,7 @@ function logout() {
       <router-link
         :to="{ name: 'notifications' }"
         class="dash-header-icon-btn dash-header-bell"
-        aria-label="اعلان‌ها"
+        :aria-label="notificationCount > 0 ? `اعلان‌ها، ${notificationCount} خوانده‌نشده` : 'اعلان‌ها'"
       >
         <i class="pi pi-bell"></i>
         <Badge
@@ -210,7 +212,8 @@ function logout() {
       <button
         type="button"
         class="dash-header-user"
-        aria-haspopup="true"
+        aria-haspopup="menu"
+        :aria-label="`منوی حساب کاربری، ${displayName}`"
         @click="toggleUserMenu"
       >
         <span class="dash-header-avatar">
@@ -278,8 +281,8 @@ function logout() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border: none;
   background: transparent;
   border-radius: var(--content-border-radius, 8px);
@@ -403,6 +406,7 @@ function logout() {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
+  min-height: 2.75rem;
   padding: 0.3rem 0.6rem;
   border: 1px solid var(--surface-border);
   border-radius: 2rem;
