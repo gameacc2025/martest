@@ -22,39 +22,36 @@
         </template>
       </Toolbar>
 
-      <DataTable :value="orders" :loading="loading" :paginator="true" :rows="pagination.limit"
-        :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll">
-        <Column field="id" header="شناسه" sortable></Column>
-        <Column header="کاربر">
-          <template #body="{ data }">
-            {{ data.user?.username || '-' }}
-          </template>
-        </Column>
-        <Column field="status" header="وضعیت" sortable>
-          <template #body="{ data }">
-            <Tag :value="data.status" :severity="getSeverity(data.status)" />
-          </template>
-        </Column>
-        <Column field="totalAmount" header="مبلغ">
-          <template #body="{ data }">
-            {{ Number(data.totalAmount).toLocaleString('fa-IR') }}
-          </template>
-        </Column>
-        <Column field="createdAt" header="تاریخ" sortable>
-          <template #body="{ data }">
-            {{ new Date(data.createdAt).toLocaleDateString('fa-IR') }}
-          </template>
-        </Column>
-        <Column header="عملیات">
-          <template #body="{ data }">
-            <div class="flex gap-2">
-              <Button icon="pi pi-eye" severity="info" rounded text aria-label="مشاهده سفارش" @click="viewOrder(data)" />
-              <Button icon="pi pi-pencil" severity="warn" rounded text aria-label="تغییر وضعیت سفارش" @click="editStatus(data)" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <SharedDataTable
+        ref="tableRef"
+        class="order-management-table"
+        title="فهرست سفارش‌ها"
+        :columns="tableColumns"
+        :rows="orders"
+        :loading="loading"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[5, 10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        @request="onTableRequest"
+      >
+        <template #orderUser="{ row }">{{ row.user?.username || '—' }}</template>
+        <template #orderStatus="{ row }">
+          <Tag :value="row.status" :severity="getSeverity(row.status)" />
+        </template>
+        <template #orderAmount="{ row }">
+          {{ Number(row.totalAmount || 0).toLocaleString('fa-IR') }}
+        </template>
+        <template #orderDate="{ row }">
+          {{ row.createdAt ? new Date(row.createdAt).toLocaleDateString('fa-IR') : '—' }}
+        </template>
+        <template #actions="{ row }">
+          <Button icon="pi pi-eye" severity="info" rounded text aria-label="مشاهده سفارش" @click="viewOrder(row)" />
+          <Button icon="pi pi-pencil" severity="warn" rounded text aria-label="تغییر وضعیت سفارش" @click="editStatus(row)" />
+        </template>
+      </SharedDataTable>
     </div>
 
     <!-- Status Update Dialog -->
@@ -73,6 +70,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, onMounted } from 'vue'
 import { ordersApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
@@ -80,11 +78,19 @@ import { useToast } from 'primevue/usetoast'
 const toast = useToast()
 
 const orders = ref([])
+const tableRef = ref(null)
 const loading = ref(false)
 const showDialog = ref(false)
 const editingId = ref(null)
 const searchQuery = ref('')
 const statusFilter = ref(null)
+const tableColumns = [
+  { field: 'id', header: 'شناسه', style: 'width: 5rem' },
+  { field: 'user.username', header: 'کاربر', slot: 'orderUser' },
+  { field: 'status', header: 'وضعیت', slot: 'orderStatus' },
+  { field: 'totalAmount', header: 'مبلغ', slot: 'orderAmount' },
+  { field: 'createdAt', header: 'تاریخ', slot: 'orderDate' },
+]
 
 const statusOptions = ref([
   { label: 'در انتظار', value: 'PENDING' },
@@ -126,13 +132,14 @@ function debounceSearch() {
 }
 
 function applyFilters() {
+  tableRef.value?.resetPage()
   fetchOrders(1)
 }
 
-async function fetchOrders(page = 1) {
+async function fetchOrders(page = 1, limit = pagination.value.limit) {
   loading.value = true
   try {
-    const res = await ordersApi.list({ page, search: searchQuery.value, status: statusFilter.value })
+    const res = await ordersApi.list({ page, limit, search: searchQuery.value, status: statusFilter.value })
     const body = res.data
     const items = body?.data?.data || body?.data || body?.items || body || []
     orders.value = Array.isArray(items) ? items : []
@@ -152,8 +159,9 @@ async function fetchOrders(page = 1) {
   }
 }
 
-function onPageChange(event) {
-  fetchOrders(event.page + 1)
+function onTableRequest({ page, rows }) {
+  pagination.value.limit = rows
+  fetchOrders(page, rows)
 }
 
 function viewOrder(order) {
@@ -173,7 +181,8 @@ async function saveStatus() {
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'وضعیت سفارش با موفقیت بروزرسانی شد', life: 3000 })
     showDialog.value = false
     editingId.value = null
-    await fetchOrders()
+    tableRef.value?.resetPage()
+    await fetchOrders(1)
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در بروزرسانی سفارش', life: 3000 })
   }
