@@ -283,3 +283,14 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Public homepage refined: branded hero hierarchy, search CTA, product image containment, category/product card surfaces, responsive two-column mobile product grid and compact stats/features.
 - Commits: `ec8f735` Admin inquiry create; `14361df` Company inquiry create; `5da81bd` Website homepage.
 - No local tests/builds or browser checks were run. Current main CI status must be checked before sign-off.
+
+
+## UI redesign — subscription, notifications and management lists batch 12 (2026-11-02)
+
+- Customer inquiry subscription: added a clear account-context header, quota surfaces, plan selection states and payment-reference guidance styling; subscription/payment logic and API payloads are unchanged.
+- Admin inquiry detail: added a contextual detail header that shows the live inquiry title when loaded; response permission gates and all detail actions remain unchanged.
+- Website notification inbox: replaced hardcoded light-only surfaces with shared design tokens so inbox/sidebar/list/reading pane states adapt to the active theme.
+- Admin, Company and Website notification preferences: added consistent settings identity, accessible table layout, responsive footer/action treatment and token-based surfaces; preference values and save behavior unchanged.
+- Admin users/companies/categories and Company users lists: rebuilt the page intro with role-specific icon/context and aligned toolbar/table surfaces; existing search, filters, server pagination, dialogs and permissions preserved.
+- Commits: `ef00252`, `6cf7465`, `d9cd191`, `e77f07a`, `5cf6289`, `c44bb78`, `1a91159`, `5e40f45`, `b9f25de`, `3df74f0`.
+- Verification is still pending; no local tests/builds or browser tests were run.
