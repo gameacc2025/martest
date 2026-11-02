@@ -541,3 +541,15 @@ Extended the shared `WorkspacePageHeading.vue` pattern to:
 Together with batch 11, the shared heading now covers Admin Products/Companies/Inquiries and Company Products/Inquiries as well. Page copy and the legacy-order/API availability disclaimer were preserved exactly. Search, filters, permissions, routes, table columns, dialogs and data loading were not changed.
 
 Commits: `3a3611a`, `f2e5bd2`, `e8ecb49`, `10e2c67`, `5a3fd61`, `e693b5d`. CI pending.
+
+
+## Cross-module workspace heading expansion — batch 13 (2026-11-02)
+
+Extended `WorkspacePageHeading.vue` to additional operational screens:
+- Company: User management and Reports/Analytics (including the existing tab-dependent CSV export actions in the heading action slot).
+- Admin: System Settings and Inquiry Subscription Management (including the existing refresh action).
+- Admin Notification Management and Notification Folder Management (including their existing inbox and refresh actions).
+
+The shared heading now covers 16 Admin/Company operational pages. All page-specific descriptions, existing actions and routes were retained. No API, permission, data, validation, subscription or notification behavior changed.
+
+Commits: `c5f2126`, `7df3c0c`, `fc7963e`, `dcabf38`, `5eca4cd`, `1bd79b4`. CI pending.
