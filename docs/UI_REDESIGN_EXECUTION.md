@@ -457,3 +457,27 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 
 ### Verification
 - Latest CI and migration validation results are checked on the current main commit separately. No browser testing is claimed.
+
+
+## Account, subscription and accessibility pass — 2026-11-02
+
+### Completed
+- Shared Admin and Company dashboard layouts now expose a keyboard-visible skip link to the main page content; the main content target is focusable. No route or navigation behavior changed.
+- Website Addresses and MyInquiries now use the full marketplace container and design-system tokens for cards, forms, response states and responsive actions.
+- Public InquirySubscription now aligns with Company subscription plan/quota surfaces.
+- Website Companies and ContactUs pages received consistent filter/card/form layouts and responsive states.
+- Company and Admin notification preference tables, folder management and notification composer were updated in the preceding batch.
+- The auth pages, profile pages, product editor forms, inquiry creation steppers, reports, categories, company profiles, FAQ, terms, search and product detail pages were audited; most already had Paces-inspired/design-token treatments from earlier work and were retained rather than needlessly rewritten.
+
+### Commits
+- `63724e4` — public InquirySubscription
+- `abdefd7` — DashboardSidebar
+- `bdf55c3` — Companies
+- `fca4b8d` — ContactUs
+- `f61e2e5` — Addresses
+- `d31d278` — MyInquiries
+- `bda68aa` — AdminLayout skip navigation
+- `1ed455e` — CompanyLayout skip navigation
+
+### Verification
+- CI status for the newest commit is pending; previous green run `dfc47e5` remains the latest confirmed test/build checkpoint until the new run completes.
