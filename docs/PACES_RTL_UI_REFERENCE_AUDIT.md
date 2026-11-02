@@ -98,8 +98,48 @@ https://themes.coderthemes.com/paces/bootstrap/index.html?rtl
 - برای ماژول‌های آینده، فقط نقشه اطلاعات و وضعیت planned قابل نمایش است؛ هیچ action ظاهری که عمل نمی‌کند ساخته نشود.
 - هر صفحه جداگانه پورت شود: ابتدا بررسی API و state موجود، سپس تغییر template/style، سپس تست regression و build.
 
-## صفحات بررسی‌نشده
-صفحات Email/Chat/Calendar/File Manager/Invoice/Project/Task/Ticket/Product Details/Order/CRM/Finance/Recruitment/Employee Details و سایر لینک‌های قالب در این مرحله محتوای کامل قابل واکشی نداشتند. نام این‌ها در نتایج/فهرست‌های قالب یا به‌عنوان دسته‌های مورد انتظار دیده می‌شود، اما جزئیات دقیق هر صفحه در این سند عمداً جعل نشده است. بررسی دقیق آن‌ها نیازمند URL قابل دسترس یا فایل‌های خود قالب است.
+## فهرست کامل‌تر ناوبری قابل مشاهده در صفحه اصلی Paces
+
+صفحه پایه Bootstrap بدون query یعنی `https://themes.coderthemes.com/paces/bootstrap/index.html` قابل واکشی شد. صفحه `?rtl` همچنان cache miss می‌دهد، اما نسخه پایه فهرست ناوبری و گروه‌بندی صفحات را نمایش می‌دهد. این فهرست برای ثبت دامنه‌ها استفاده شده است؛ محتوای همه صفحات فرعی جداگانه قابل واکشی نبود.
+
+### اپلیکیشن‌ها و صفحات تجاری
+- Dashboardها: Ecommerce، Analytics، CRM، Finance، Projects
+- Ecommerce: Products، Products Grid، Product Details، Add Product، Categories، Orders، Order Details، Add/Edit Order، Customers، Cart، Checkout، Sellers، Seller Details، Refunds، Reviews، Inventory، Warehouse، Product Stocks، Purchased Orders، Reports، Product Views، Sales، Attributes، Settings
+- Chat
+- Projects: My Projects، Projects List، View Project، Kanban Board، Team Board، Activity Stream
+- Tasks: Task List، Task Details، Create Task
+- Invoice: Invoices، Single Invoice، New Invoice
+- CRM: Contacts، Opportunities، Deals، Leads، Pipeline، Campaign، Proposals، Estimations، Customers، Activities
+- Users: Contacts، Profile، Account Settings، Roles، Role Details، Permissions
+- Finance: Expenses، Expense Category، Income، Transactions، Banks & Cards
+- HRM: Staffs List، Staff Profile، Add Staffs، Departments، Attendance، Leaves، Add Leave، Holidays، Payroll، Create Salary Slip
+- Email: Inbox، Details، Compose
+- Support Center: Ticket List، Ticket Details، New Ticket
+- Promo: Coupons، Gift Cards، Discounts
+- More Apps: Social Feed، Pro AI، File Manager، Calendar، Companies، Todo، Pin Board، Clients، Outlook View، Vote List، Issue Tracker، API Keys، Manage Apps، Blog (List/Grid/Article/Add Article)، Forum (View/Post)
+
+### صفحات عمومی و تنظیمات قالب
+- Custom Pages: About Us، Contact Us، Pricing، Empty Page، Timeline، Gallery، FAQ، Sitemap، Search Results، Coming Soon، Privacy Policy، Terms & Conditions
+- Authentication variants: Basic، Card، Split؛ هر کدام شامل Sign In، Sign Up، Reset Password، New Password، Two Factor، Lock Screen، Success Mail، Login with PIN، Delete Account
+- Error Pages: 400، 401، 403، 404، 408، 500، Maintenance
+- Layouts: Horizontal، Boxed، Scrollable، Compact، Preloader
+- Sidebar variants: Light، Gradient، Gray، Image، Compact، On Hover، Offcanvas، No Icons with Lines، Sidebar with Lines
+- Topbar variants: Dark، Gray، Gradient
+- Components: Accordions، Alerts، Buttons، Badges، Colors، Breadcrumb، Cards، Carousel، Collapse، Images، Dropdowns، Videos، Grid، Links، List Group، Modals، Notifications، Offcanvas، Placeholders، Pagination، Popovers، Progress، Scrollspy، Spinners، Tabs، Tooltips، Typography، Utilities
+- Widgets: Charts، Mixed، Social، Statistics، Weather
+- Charts: ApexCharts (Area/Bar/Bubble/Candlestick/Column/Heatmap/Line/Mixed/Timeline/Boxplot/Treemap/Pie/Radar/RadialBar/Scatter/Polar/Sparklines/Range/Funnel/Slope)، ECharts (Line/Bar/Pie/Scatter/Geo/Gauge/Candlestick/Area/Radar/Heatmap/Other)، Chart.js (Area/Bar/Line/Other)
+- Forms: Basic Elements، Validation، Wizard، Select، Pickers، File Uploads، Text Editors، Range Slider، Image Cropper، Layouts، Other Plugins
+- Tables: Static Tables، Custom Tables، DataTables (Basic/Export/Select/Ajax/JavaScript/Data Rendering/Scroll/Fixed Columns/Fixed Header/Show-Hide Columns/Child Rows/Column Search/Range Search/Add Rows/Checkbox Select)
+- Icons: Tabler، Lucide، Remix، Solar Duotone، Flags
+- Maps: Google Maps، Vector Maps، Leaflet Maps
+
+### محدودیت واکشی محتوای صفحات فرعی
+
+لینک‌های منو قابل استخراج‌اند، اما بیشتر صفحات فرعی در زمان بازکردن مستقیم با cache miss برمی‌گردند. نمونه‌هایی که محتوایشان مستقیماً قابل مشاهده بود: Ecommerce Dashboard، Cards، Badges، Role Details، HRM Attendance، DataTables Basic و JavaScript. بنابراین:
+- این سند فهرست ناوبری را از index قابل دسترس ثبت می‌کند.
+- فقط صفحات بالا به‌عنوان «محتوای مستقیم بررسی‌شده» محسوب می‌شوند.
+- برای بازبینی دقیق UI همه 280+ صفحه، ZIP سورس/نسخه خریداری‌شده قالب یا دسترسی مستقیم مرورگر به همه URLها لازم است.
+- هیچ داده دمو یا workflow مشاهده‌نشده‌ای به‌عنوان رفتار واقعی Telecom Marketplace پیاده‌سازی نمی‌شود.
 
 ## منابع واکشی‌شده
 - Paces Cards: https://themes.coderthemes.com/paces/bootstrap/ui-cards.html
