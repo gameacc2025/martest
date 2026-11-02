@@ -246,7 +246,7 @@ defineExpose({ clearSelection })
 </script>
 
 <template>
-  <div class="ent-table">
+  <div class="ent-table" :class="{ 'ent-table--mobile-cards': mobileCardLayout }">
     <!-- Toolbar -->
     <div v-if="title || searchable || columnToggle || $slots.toolbar || (selectable && selection.length)" class="ent-table-toolbar">
       <div class="ent-table-toolbar-start">
@@ -361,6 +361,7 @@ defineExpose({ clearSelection })
       removableSort
       responsiveLayout="scroll"
       class="ent-table-dt"
+      :class="{ 'ent-table-dt--selectable': selectable }"
       paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
       currentPageReportTemplate="{first} تا {last} از {totalRecords}"
       v-bind="$attrs"
@@ -380,20 +381,22 @@ defineExpose({ clearSelection })
         :style="col.style"
       >
         <template #body="{ data }">
-          <!-- Custom slot -->
-          <slot
-            v-if="col.slot"
-            :name="col.slot"
-            :row="data"
-            :value="getValue(data, col.field)"
-          />
-          <!-- Status badge -->
-          <Tag
-            v-else-if="col.type === 'badge'"
-            :severity="badgeFor(col, data).severity"
-          >{{ badgeFor(col, data).label }}</Tag>
-          <!-- Default / formatted -->
-          <span v-else>{{ formatCell(col, data) }}</span>
+          <div class="ent-table-cell-content" :data-label="col.header">
+            <!-- Custom slots keep their original row/value contract. -->
+            <slot
+              v-if="col.slot"
+              :name="col.slot"
+              :row="data"
+              :value="getValue(data, col.field)"
+            />
+            <!-- Status badge -->
+            <Tag
+              v-else-if="col.type === 'badge'"
+              :severity="badgeFor(col, data).severity"
+            >{{ badgeFor(col, data).label }}</Tag>
+            <!-- Default / formatted -->
+            <span v-else>{{ formatCell(col, data) }}</span>
+          </div>
         </template>
       </Column>
 
@@ -404,7 +407,7 @@ defineExpose({ clearSelection })
         :style="'width: 1%; white-space: nowrap'"
       >
         <template #body="{ data }">
-          <div class="ent-table-actions">
+          <div class="ent-table-actions ent-table-cell-content" :data-label="actionsHeader">
             <slot name="actions" :row="data"></slot>
           </div>
         </template>
@@ -716,4 +719,133 @@ defineExpose({ clearSelection })
   .ent-table *::before,
   .ent-table *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+/* Mobile-first card presentation: retain every column/action without horizontal scrolling. */
+@media (max-width: 767px) {
+  .ent-table--mobile-cards .ent-table-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: .85rem;
+    padding: 1rem;
+  }
+  .ent-table--mobile-cards .ent-table-toolbar-start,
+  .ent-table--mobile-cards .ent-table-toolbar-end {
+    width: 100%;
+  }
+  .ent-table--mobile-cards .ent-table-toolbar-end {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .5rem;
+  }
+  .ent-table--mobile-cards .ent-table-toolbar-end > :deep(.ent-table-search) {
+    min-width: 0;
+    grid-column: 1 / -1;
+  }
+  .ent-table--mobile-cards .ent-table-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding: .85rem 1rem;
+  }
+  .ent-table--mobile-cards .ent-table-filter,
+  .ent-table--mobile-cards .ent-table-filter :deep(.p-inputtext),
+  .ent-table--mobile-cards .ent-table-filter :deep(.p-select) {
+    width: 100%;
+    min-width: 0;
+  }
+  .ent-table--mobile-cards :deep(.p-datatable-table-container) {
+    overflow: visible;
+  }
+  .ent-table--mobile-cards :deep(.p-datatable-table) {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+  .ent-table--mobile-cards :deep(.p-datatable-thead) {
+    display: none;
+  }
+  .ent-table--mobile-cards :deep(.p-datatable-tbody) {
+    display: grid;
+    gap: .75rem;
+    padding: .75rem;
+  }
+  .ent-table--mobile-cards :deep(.p-datatable-tbody > tr) {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .15rem .65rem;
+    padding: .55rem;
+    border: 1px solid var(--ds-color-border);
+    border-radius: var(--ds-radius-lg);
+    background: var(--ds-color-surface);
+    box-shadow: var(--ds-shadow-xs);
+  }
+  .ent-table--mobile-cards :deep(.p-datatable-tbody > tr > td) {
+    display: block;
+    min-width: 0;
+    padding: .55rem .6rem;
+    border: 0;
+    background: transparent;
+    overflow-wrap: anywhere;
+  }
+  .ent-table--mobile-cards :deep(.p-datatable-tbody > tr > td:first-child) {
+    border-inline-start: 0;
+  }
+  .ent-table--mobile-cards .ent-table-cell-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .3rem;
+    min-width: 0;
+    line-height: 1.55;
+  }
+  .ent-table--mobile-cards .ent-table-cell-content::before {
+    content: attr(data-label);
+    color: var(--ds-color-text-muted);
+    font-size: var(--ds-font-size-xs);
+    font-weight: var(--ds-font-weight-medium);
+  }
+  .ent-table--mobile-cards .ent-table-actions {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .ent-table--mobile-cards .ent-table-actions::before {
+    flex-basis: 100%;
+  }
+  .ent-table--mobile-cards .ent-table-actions :deep(button) {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+  .ent-table--mobile-cards .ent-table-dt--selectable :deep(.p-datatable-tbody > tr > td:first-child) {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: .35rem;
+    inset-inline-end: .35rem;
+    width: auto;
+    padding: .35rem;
+  }
+  .ent-table--mobile-cards .ent-table-dt--selectable :deep(.p-datatable-tbody > tr > td:nth-child(2)) {
+    padding-inline-end: 2.5rem;
+  }
+  .ent-table--mobile-cards :deep(.p-paginator) {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: .25rem;
+    padding: .75rem .5rem;
+  }
+  .ent-table--mobile-cards .ent-table-empty {
+    min-height: 10rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ent-table *,
+  .ent-table *::before,
+  .ent-table *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+
 </style>
