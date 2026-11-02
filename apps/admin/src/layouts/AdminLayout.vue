@@ -92,6 +92,7 @@ onUnmounted(() => {
     <div class="dash-layout-main">
       <DashboardHeader
         :collapsed="sidebarCollapsed"
+        workspace-label="مدیریت بازارگاه"
         :user="authStore.user"
         :is-super-admin="authStore.isSuperAdmin"
         :is-company-admin="authStore.isCompanyAdmin"
