@@ -924,4 +924,117 @@ onBeforeUnmount(() => {
   .hero-search { grid-template-columns: auto minmax(0, 1fr); border-radius: var(--ds-radius-xl); }
   .hero-search-btn { grid-column: 1 / -1; width: 100%; }
 }
+
+/* Home marketplace refinement: stronger hero hierarchy and product imagery. */
+.home-page { padding-block: clamp(1.25rem, 2.5vw, 2.5rem) 3.5rem; }
+.home-container { gap: clamp(1.25rem, 2.5vw, 2rem); }
+.hero {
+  min-height: 22rem;
+  border-radius: calc(var(--ds-radius-xl) + .35rem);
+  background:
+    radial-gradient(circle at 84% 18%, color-mix(in srgb, var(--ds-color-primary) 16%, transparent), transparent 22rem),
+    linear-gradient(120deg, color-mix(in srgb, var(--ds-navy) 5%, var(--ds-color-surface)), var(--ds-color-surface));
+}
+.hero-content { max-width: 46rem; }
+.hero-badge {
+  align-self: flex-start;
+  padding: .35rem .7rem;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 24%, transparent);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-primary-soft);
+  font-size: var(--ds-font-size-xs);
+}
+.hero-title { max-width: 14ch; letter-spacing: -.035em; }
+.hero-desc { max-width: 42rem; font-size: var(--ds-font-size-md); }
+.hero-search {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+  max-width: 40rem;
+}
+.hero-search-input { min-height: 2.7rem; }
+.hero-search-btn { min-height: 2.65rem; }
+.hero-visual {
+  min-height: 17rem;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 28%, transparent);
+  border-radius: var(--ds-radius-xl);
+  background:
+    radial-gradient(circle at 30% 28%, color-mix(in srgb, var(--ds-brand) 35%, transparent), transparent 50%),
+    var(--ds-hero-gradient);
+}
+.hero-glow { opacity: .6; }
+.hero-icon { filter: drop-shadow(0 1rem 1.5rem rgba(0,0,0,.2)); }
+.hero-dot { border: 0; }
+.section-block {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.section-head { gap: 1rem; }
+.section-title { font-size: clamp(1.05rem, 1.7vw, 1.3rem); }
+.filters-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.filters-inner :deep(.p-inputtext),
+.filters-inner :deep(.p-select),
+.filters-inner :deep(.p-inputnumber-input) { border-radius: var(--ds-radius-md); }
+.category-card {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+.cat-thumb { background: var(--ds-color-surface-alt); }
+.product-card {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-card:hover,
+.product-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--ds-shadow-md);
+}
+.product-image {
+  aspect-ratio: 5 / 4;
+  background: linear-gradient(145deg, var(--ds-color-surface-alt), var(--ds-color-surface-hover));
+}
+.product-image img { object-fit: contain; padding: .75rem; }
+.product-info { padding: .9rem; }
+.product-title { color: var(--ds-color-text); line-height: 1.65; }
+.product-vendor { display: flex; align-items: center; gap: .35rem; }
+.stats-bar,
+.features-bar {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.stat-icon,
+.feature-icon { background: var(--ds-color-primary-soft); }
+.stat-icon i,
+.feature-icon i { color: var(--ds-color-primary); }
+@media (max-width: 900px) {
+  .hero { min-height: 0; }
+  .hero-content { max-width: none; }
+  .hero-visual { min-height: 13rem; }
+}
+@media (max-width: 560px) {
+  .hero-title { max-width: none; font-size: 1.65rem; }
+  .hero-actions { flex-direction: row; }
+  .hero-actions .btn { flex: 1 1 0; padding-inline: .75rem; font-size: .82rem; }
+  .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+  .stats-bar,
+  .features-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat-item,
+  .feature-item { justify-content: flex-start; padding: .5rem; }
+  .stat-value { font-size: 1rem; }
+  .feature-text h3 { font-size: .78rem; }
+  .feature-text p { font-size: .68rem; }
+  .hero-visual { min-height: 10rem; }
+}
+@media (max-width: 360px) {
+  .products-grid { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; }
+}
+
 </style>
