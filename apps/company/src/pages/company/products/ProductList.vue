@@ -16,60 +16,48 @@
         </template>
       </Toolbar>
 
-      <DataTable class="product-management-table" :value="products" :loading="loading" :paginator="true" :rows="pagination.limit"
-        :totalRecords="pagination.total" :rowsPerPageOptions="[5, 10, 20, 50]"
-        @page="onPageChange" responsiveLayout="scroll" :rowHover="true"
-        v-if="products.length > 0 || loading">
-        <Column field="id" header="شناسه" sortable style="width: 80px"></Column>
-        <Column field="title" header="عنوان" sortable>
-          <template #body="{ data }">
-            <div>
-              <div class="product-title">{{ data.title }}</div>
-              <div v-if="data.brand || data.model" class="product-meta">
-                {{ [data.brand, data.model].filter(Boolean).join(' · ') }}
-              </div>
-            </div>
-          </template>
-        </Column>
-        <Column header="شرکت">
-          <template #body="{ data }">
-            {{ data.company?.name || '-' }}
-          </template>
-        </Column>
-        <Column header="دسته‌بندی">
-          <template #body="{ data }">
-            {{ data.category?.name || '-' }}
-          </template>
-        </Column>
-        <Column field="status" header="وضعیت" style="width: 170px">
-          <template #body="{ data }">
-            <div class="status-cell">
-              <Tag :value="statusLabel(data.status)" :severity="statusSeverity(data.status)" />
-              <span v-if="getUnreviewedEditCount(data) > 0" class="unreviewed-badge" v-tooltip.top="'شمار ویرایش‌های پس از تأیید که هنوز بازبینی نشده‌اند'">
-                <i class="pi pi-pencil" />
-                {{ getUnreviewedEditCount(data) }} ویرایش بدون بازبینی
-              </span>
-            </div>
-          </template>
-        </Column>
-        <Column header="عملیات" style="width: 160px">
-          <template #body="{ data }">
-            <div class="actions-cell">
-              <Button v-if="canSubmitForReview(data)" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" @click="submitForReview(data)" />
-              <Button v-if="data.status === 'APPROVED'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت پس از تأیید STAFF'" @click="publishProduct(data)" />
-              <Button v-if="canEdit(data)" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" @click="editProduct(data)" />
-              <!-- Approve/Reject are STAFF-only actions (products.approve / products.reject —
-                   see backend/prisma/seed.js). Company roles never hold these permissions;
-                   the backend already 403s them, but the buttons don't belong in this panel
-                   at all — the review happens in the Admin Panel. -->
-              <Button icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" @click="duplicateProduct(data)" />
-              <Button v-if="data.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" @click="showRejection(data)" />
-              <!-- products.delete: COMPANY_MANAGER only, COMPANY_USER does not have it -->
-              <Button v-if="canDelete" icon="pi pi-trash" severity="danger" rounded text @click="confirmDelete(data)" />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <SharedDataTable
+        v-if="products.length > 0 || loading"
+        class="product-management-table"
+        title="فهرست محصولات شرکت"
+        :columns="productTableColumns"
+        :rows="products"
+        :loading="loading"
+        :lazy="true"
+        :total-records="pagination.total"
+        :rows-per-page="pagination.limit"
+        :rows-per-page-options="[10, 20, 50]"
+        :searchable="false"
+        :column-toggle="false"
+        :mobile-card-layout="true"
+        @request="onTableRequest"
+      >
+        <template #productTitle="{ row }">
+          <div class="product-title-cell">
+            <strong class="product-title">{{ row.title }}</strong>
+            <span v-if="row.brand || row.model" class="product-meta">
+              {{ [row.brand, row.model].filter(Boolean).join(' · ') }}
+            </span>
+          </div>
+        </template>
+        <template #status="{ row }">
+          <div class="status-cell">
+            <Tag :value="statusLabel(row.status)" :severity="statusSeverity(row.status)" />
+            <span v-if="getUnreviewedEditCount(row) > 0" class="unreviewed-badge" v-tooltip.top="'شمار ویرایش‌های پس از تأیید که هنوز بازبینی نشده‌اند'">
+              <i class="pi pi-pencil" />
+              {{ getUnreviewedEditCount(row) }} ویرایش بدون بازبینی
+            </span>
+          </div>
+        </template>
+        <template #actions="{ row }">
+          <Button v-if="canSubmitForReview(row)" icon="pi pi-send" severity="success" rounded text v-tooltip.top="'ارسال برای بررسی'" aria-label="ارسال محصول برای بررسی" @click="submitForReview(row)" />
+          <Button v-if="row.status === 'APPROVED'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === row.id" v-tooltip.top="'انتشار در سایت پس از تأیید STAFF'" aria-label="انتشار محصول" @click="publishProduct(row)" />
+          <Button v-if="canEdit(row)" icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش محصول'" aria-label="ویرایش محصول" @click="editProduct(row)" />
+          <Button icon="pi pi-copy" severity="secondary" rounded text v-tooltip.top="'کپی محصول'" aria-label="کپی محصول" @click="duplicateProduct(row)" />
+          <Button v-if="row.status === 'REJECTED'" icon="pi pi-info-circle" severity="warning" rounded text v-tooltip.top="'علت رد'" aria-label="مشاهده علت رد" @click="showRejection(row)" />
+          <Button v-if="canDelete" icon="pi pi-trash" severity="danger" rounded text v-tooltip.top="'حذف محصول'" aria-label="حذف محصول" @click="confirmDelete(row)" />
+        </template>
+      </SharedDataTable>
 
       <div v-else-if="loadError" class="empty-state">
         <i class="pi pi-exclamation-triangle"></i>
@@ -132,6 +120,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
@@ -173,6 +162,13 @@ const statusOptions = STATUS_OPTIONS
 // Use centralized status helpers from config/product.js
 const statusLabel = getStatusLabel
 const statusSeverity = getStatusSeverity
+const productTableColumns = [
+  { field: 'id', header: 'شناسه', sortable: true, style: 'width: 6rem' },
+  { field: 'title', header: 'عنوان', sortable: true, slot: 'productTitle' },
+  { field: 'company.name', header: 'شرکت' },
+  { field: 'category.name', header: 'دسته‌بندی' },
+  { field: 'status', header: 'وضعیت', slot: 'status' },
+]
 
 
 const pagination = ref({
@@ -201,14 +197,14 @@ function debounceSearch() {
   }, 500)
 }
 
-async function fetchProducts(page = 1) {
+async function fetchProducts(page = 1, limit = pagination.value.limit) {
   loading.value = true
   loadError.value = ''
   try {
     // Management listing: use the authenticated endpoint so the caller sees
     // ALL statuses (SUPER_ADMIN → every company, company user → own company).
     // The public `list` endpoint would only return PUBLISHED products.
-    const params = { page, search: searchQuery.value }
+    const params = { page, limit, search: searchQuery.value }
     if (statusFilter.value) params.status = statusFilter.value
     const res = await productsApi.myProducts(params)
     // New envelope: res.data = { data: [...], meta: {...} }
@@ -247,8 +243,9 @@ async function fetchCompanies() {
   }
 }
 
-function onPageChange(event) {
-  fetchProducts(event.page + 1)
+function onTableRequest({ page, rows }) {
+  pagination.value.limit = rows
+  fetchProducts(page, rows)
 }
 
 function openCreateDialog() {
