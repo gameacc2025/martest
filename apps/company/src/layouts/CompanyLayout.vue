@@ -235,4 +235,27 @@ onUnmounted(() => {
     padding: 0 0.75rem 0.75rem;
   }
 }
+
+/* Paces-inspired workspace proportions; shared page components stay intact. */
+.dash-layout {
+  background: var(--ds-color-background);
+}
+
+.dash-layout-content {
+  max-width: 1760px;
+  padding: 0 clamp(1rem, 2vw, 2rem) 2rem;
+}
+
+.dash-layout-page {
+  padding-top: 0.75rem;
+}
+
+@media (min-width: 1600px) {
+  .dash-layout-content { padding-inline: 2.25rem; }
+}
+
+@media (max-width: 575px) {
+  .dash-layout-content { padding-inline: 0.75rem; }
+}
+
 </style>
