@@ -875,3 +875,6 @@ The shared Admin/Company sidebar may show planned roadmap items as disabled, non
 
 
 The Paces product catalog lists 28+ application pages and 280+ prebuilt pages across ecommerce, chat/email, projects/tasks, invoices/finance, CRM, HRM, support, file management, calendar, companies, BI, and integrations. The preview index is not fully retrievable in this environment; distinguish catalog-listed categories from directly inspected page content. The disabled future menu should cover the approved enterprise blueprint but must never create fake routes or actions.
+
+
+The Paces Bootstrap base index (without query string) is accessible and provides the full navigation tree. The RTL query variant and most individual subpages remain inaccessible through retrieval (cache miss); distinguish the navigation inventory from directly inspected page contents.
