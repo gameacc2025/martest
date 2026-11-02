@@ -232,3 +232,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Company reports: added an explanatory report header and refined tabs, export actions, KPI/chart spacing and responsive behavior. Export logic and API-derived metrics remain unchanged.
 - Commits: `e14505e` Admin inquiry subscription workspace; `d288067` Admin product editor; `18a67c5` Company product editor; `90cf711` Company reports.
 - CI for this latest batch is pending; no local tests/builds claimed.
+
+
+## Admin notification, company catalogue/subscription and customer profile — batch 9 (2026-11-02)
+
+- Admin notification management: clarified the compose-page hierarchy and delivery-status workspace; refined metric tiles and delivery table states with design tokens.
+- Company personal-products and company-products views: added distinct page context and descriptions while retaining their existing table, filters and product routes.
+- Company inquiry subscription: improved subscription heading, active/pending state surfaces, quota meters and selectable plan cards; payment flow and quota data remain unchanged.
+- Website customer profile: replaced the plain heading with an account-context header and responsive profile workspace; retained existing profile actions and account data.
+- Commits: `5761ae7` Admin notification management; `eceda9f` Company personal products; `e895213` Company product directory; `f99c289` Company subscription; `77b0f74` Website customer profile.
+- CI for the latest source changes is pending; no local tests/builds claimed.
