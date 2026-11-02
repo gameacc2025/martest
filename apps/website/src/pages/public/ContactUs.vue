@@ -411,4 +411,26 @@ const resetForm = () => {
   .form-row-2 { grid-template-columns: 1fr; }
   .contact-hero { padding: 1.5rem; }
 }
+
+.contact-page { color: var(--ds-color-text); }
+.contact-page .breadcrumb-wrap { margin-bottom: var(--ds-space-5); }
+.contact-page .contact-form-col,
+.contact-page .contact-info-col {
+  min-width: 0;
+}
+.contact-page :deep(.form-section--card) {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.contact-page :deep(.form-section-title) {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-bold);
+}
+.contact-page :deep(.p-inputtext),
+.contact-page :deep(.p-textarea),
+.contact-page :deep(.p-select) { border-radius: var(--ds-radius-md); }
+@media (max-width: 900px) {
+  .contact-page .contact-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 </style>
