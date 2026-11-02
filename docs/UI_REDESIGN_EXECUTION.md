@@ -322,3 +322,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Existing search/filter/sort/pagination, order data, navigation and contact form submission remain unchanged.
 - Commits: `f1d2e99`, `8cd0cac`, `e349467`, `41bcdf8`.
 - No local tests/builds or browser tests run; verification outstanding.
+
+
+## UI redesign — access, system and account settings batch 16 (2026-11-02)
+
+- Admin Roles and Permissions lists now use distinct security/access page identity and consistent responsive toolbars/tables.
+- Admin System Settings was rebuilt from inline-styled markup into a semantic settings workspace with a contextual heading, descriptive setting card, labeled threshold control, loading/error/default states and responsive save action. The setting value, min/max, API load/save and retry behavior are unchanged.
+- Company Settings now presents organization identity and the existing live status/verification badges above the profile/contact/notifications/security tabs; form data and permission gates are unchanged.
+- Admin/Company personal profiles now have a common account-context header and refined tabs/cards/forms; Company Change Password has a clear security header.
+- Commits: a51eea5, 5715c4a, c2da3c9, d3391a1, 7bf11c2, 70f7445, 5e0a572.
+- No local test/build or browser execution; verification remains outstanding.
