@@ -88,6 +88,9 @@
         <template #companyType="{ row }">
           <Tag :severity="getTypeSeverity(row.type)">{{ getTypeLabel(row.type) }}</Tag>
         </template>
+        <template #companyPhone="{ row }">
+          {{ row.phone || row.phoneNumber || '—' }}
+        </template>
         <template #companyStatus="{ row }">
           <Tag :severity="getStatusSeverity(row.status)">{{ getStatusLabel(row.status) }}</Tag>
         </template>
@@ -296,7 +299,7 @@ const tableColumns = [
   { field: 'name', header: 'نام شرکت', sortable: true, slot: 'companyName' },
   { field: 'type', header: 'نوع', slot: 'companyType' },
   { field: 'email', header: 'ایمیل' },
-  { field: 'phone', header: 'تلفن' },
+  { field: 'phone', header: 'تلفن', slot: 'companyPhone' },
   { field: 'status', header: 'وضعیت', slot: 'companyStatus' },
   { field: 'isVerified', header: 'تأیید', slot: 'verification' },
   { field: 'createdAt', header: 'تاریخ ایجاد', sortable: true, slot: 'createdDate' },
@@ -403,6 +406,7 @@ async function submitCreateCompany() {
 
     await companyStore.createCompany(payload)
     createDialogVisible.value = false
+    tableRef.value?.resetPage()
     toast.add({ severity: 'success', summary: 'موفق', detail: 'شرکت با موفقیت ایجاد شد', life: 3000 })
     await loadCompanies(1)
   } catch (error) {
