@@ -687,3 +687,13 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Search and filters remain connected to existing stores/API calls; table pagination, selected page size and paginator resets are wired to existing server pagination.
 - Commits: `a0f30fe` Categories, `f993736` Companies, `06586b3` phone fallback, `70a640e` category mutation reset, `09452c4` Users, `4f155e6` initial sort support.
 - CI is pending; these changes are not marked verified.
+
+
+## Inquiry list workspaces — batch 10 (2026-11-02)
+
+- Admin and Company inquiry lists now use the shared responsive DataTable with labeled mobile row cards.
+- Admin list retains the real `inquiriesApi.list` endpoint, server-side status/search/sort/page state, status-change dialog and detail/create routes.
+- Company list retains scope tabs (all/sent/received), status/search/sort/page state, deadline urgency/passed indicators, priority labels, and the permission-gated create action.
+- Scope/status/search changes reset the table paginator; the shared table continues to emit lazy requests to the existing API.
+- Commits: `d4d102d` Admin inquiry list; `a497b8a` Company inquiry list; `cca3d37` scoped paginator reset; `2860f1b` orphan empty-state fix.
+- A CI failure was traced to an orphaned `v-else-if` in the Company inquiry template and fixed in `2860f1b`. Shared table mobile prop was separately fixed in `d9c42c9`; final CI rerun is pending.
