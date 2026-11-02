@@ -1268,3 +1268,12 @@ Completed Admin Roles/Permissions lists, System Settings, Company Settings, Admi
 Commits: a51eea5, 5715c4a, c2da3c9, d3391a1, 7bf11c2, 70f7445, 5e0a572.
 
 Continue remaining page inventory and shared shell audit. No local tests/builds run yet.
+
+
+## UI redesign — batch 17 checkpoint (2026-11-02)
+
+Completed Admin legacy Order list and Notification Folder management visual refinements. Existing folder restrictions and protected system folders are unchanged.
+
+Commits: `7232a6e`, `fecd896`.
+
+Continue with the final admin/company/public page inventory, shared shells, accessibility and CI verification. Tests/builds are not yet run locally.
