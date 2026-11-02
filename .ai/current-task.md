@@ -1289,3 +1289,13 @@ Latest completed batches:
 - Admin ProductList and CompanyList received management-surface, toolbar, data-grid and responsive refinements.
 
 Latest commit: `7010dc6`. CI run `41449786538` is pending/in progress at checkpoint time. Next work: continue through shared dashboard shell and the remaining admin/company/website page families, preserving API/auth/permission behavior and avoiding fake data or inactive route links.
+
+
+## Latest UI coverage — 2026-11-02
+
+Additional pages completed after dashboard/table batches:
+- Company product catalogue.
+- Company inquiry list with scope tabs.
+- Admin inquiry review list.
+
+The overall UI redesign remains active and incomplete. Continue through detail/create/edit forms, users/roles/permissions/settings, notifications, public homepage/catalogue/details, and shared shell components. Preserve APIs, roles, access checks, tenant boundaries and existing data semantics.
