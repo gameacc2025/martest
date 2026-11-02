@@ -16,6 +16,7 @@
             <InputText
               v-model="searchQuery"
               placeholder="جستجوی شرکت..."
+              aria-label="جستجو در شرکت‌ها"
               @input="debounceSearch"
             />
           </span>
@@ -26,6 +27,7 @@
             optionLabel="label"
             optionValue="value"
             placeholder="وضعیت"
+            aria-label="فیلتر وضعیت شرکت"
             class="filter-control"
             @change="applyFilters"
           />
@@ -36,6 +38,7 @@
             optionLabel="label"
             optionValue="value"
             placeholder="نوع شرکت"
+            aria-label="فیلتر نوع شرکت"
             class="filter-control"
             @change="applyFilters"
           />
@@ -832,9 +835,15 @@ function formatDate(value) {
 .company-management-table :deep(.p-paginator-page),
 .company-management-table :deep(.p-paginator-next),
 .company-management-table :deep(.p-paginator-prev) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
+}
+.company-management-table :deep(.p-paginator-page.p-highlight).company-management-table :deep(.p-button.p-button-text) {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
 }
 .company-management-table :deep(.p-paginator-page.p-highlight) {
   background: var(--ds-color-primary-soft);
