@@ -138,13 +138,17 @@ function exportInquiriesCSV() {
 
 <template>
   <div class="reports-page">
-    <div class="page-header">
-      <h1>گزارش‌ها</h1>
-      <div class="page-header-actions">
-        <Button v-if="activeTab === 'products'" label="خروجی CSV" icon="pi pi-download" severity="secondary" outlined @click="exportProductsCSV" />
-        <Button v-if="activeTab === 'inquiries'" label="خروجی CSV" icon="pi pi-download" severity="secondary" outlined @click="exportInquiriesCSV" />
+    <header class="page-header reports-heading">
+      <div class="reports-heading-copy">
+        <span class="reports-eyebrow"><i class="pi pi-chart-pie"></i> بینش عملکرد شرکت</span>
+        <h1>گزارش‌ها و تحلیل‌ها</h1>
+        <p>نمای کلی وضعیت کاتالوگ محصولات و جریان استعلام‌های شرکت بر پایه داده‌های سامانه.</p>
       </div>
-    </div>
+      <div class="page-header-actions">
+        <Button v-if="activeTab === 'products'" label="دریافت گزارش محصولات" icon="pi pi-download" severity="secondary" outlined @click="exportProductsCSV" />
+        <Button v-if="activeTab === 'inquiries'" label="دریافت گزارش استعلام‌ها" icon="pi pi-download" severity="secondary" outlined @click="exportInquiriesCSV" />
+      </div>
+    </header>
 
     <Tabs v-model:value="activeTab">
       <TabList>
@@ -263,4 +267,45 @@ function exportInquiriesCSV() {
 .reports-page :deep(.p-tablist) { border-color: var(--ds-color-border); }
 .reports-page :deep(.p-tabpanels) { background: transparent; padding-inline: 0; }
 
+.reports-heading { align-items: center; }
+.reports-heading-copy { min-width: 0; }
+.reports-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-bottom: .55rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.reports-page .reports-heading h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+}
+.reports-heading-copy p {
+  margin: .5rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.8;
+}
+.reports-page :deep(.p-tablist) {
+  padding: .35rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+}
+.reports-page :deep(.p-tab) {
+  border-radius: var(--ds-radius-md);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.reports-page :deep(.p-tab[aria-selected="true"]) {
+  background: var(--ds-color-info-soft);
+  color: var(--ds-color-primary);
+}
+.reports-page :deep(.p-tabpanels) { padding-top: var(--ds-space-5); }
+@media (max-width: 640px) {
+  .reports-page .reports-heading { align-items: stretch; }
+  .reports-page .page-header-actions { width: 100%; }
+  .reports-page .page-header-actions :deep(.p-button) { width: 100%; }
+}
 </style>
