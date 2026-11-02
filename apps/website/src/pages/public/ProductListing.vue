@@ -150,9 +150,30 @@
                 </span>
               </div>
               <div class="product-info">
-                <h3 class="product-title">{{ product.title }}</h3>
-                <p class="product-company"><i class="pi pi-building"></i>{{ product.company?.name || 'تأمین‌کننده' }}</p>
+                <div class="product-identity">
+                  <h3 class="product-title">{{ product.title }}</h3>
+                  <span v-if="product.company?.isVerified" class="product-verified" title="شرکت تأیید شده">
+                    <i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده تأییدشده
+                  </span>
+                </div>
+                <p class="product-company"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || 'تأمین‌کننده' }}</p>
+                <div v-if="product.brand || product.model || product.sku" class="product-meta">
+                  <span v-if="product.brand"><i class="pi pi-tag" aria-hidden="true"></i>{{ product.brand }}</span>
+                  <span v-if="product.model"><i class="pi pi-box" aria-hidden="true"></i>{{ product.model }}</span>
+                  <span v-if="product.sku" class="product-sku"><i class="pi pi-hashtag" aria-hidden="true"></i>{{ product.sku }}</span>
+                </div>
                 <p v-if="product.shortDescription" class="product-desc">{{ product.shortDescription }}</p>
+                <div class="product-card-footer">
+                  <span v-if="product.prices?.length" class="product-card-price">
+                    <small>شروع قیمت از</small>
+                    <strong>{{ formatPrice(product.prices[0].price) }}</strong>
+                  </span>
+                  <span v-else class="product-card-price product-card-price--inquiry">
+                    <small>قیمت</small>
+                    <strong>استعلام از تأمین‌کننده</strong>
+                  </span>
+                  <span class="product-card-link">جزئیات محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
+                </div>
               </div>
             </div>
           </div>
@@ -730,16 +751,76 @@ watch(() => route.query.category, (newVal) => {
   box-shadow: var(--ds-shadow-sm);
   font-size: .8rem;
 }
-.product-info { padding: 1rem 1rem 1.1rem; }
-.product-title { font-size: .98rem; line-height: 1.65; }
+.product-info {
+  display: flex;
+  min-height: 13.5rem;
+  flex-direction: column;
+  padding: 1rem 1rem .85rem;
+}
+.product-identity { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
+.product-title {
+  flex: 1;
+  min-width: 0;
+  font-size: .98rem;
+  line-height: 1.7;
+}
+.product-verified {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: .25rem;
+  padding: .22rem .4rem;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-success-soft);
+  color: var(--ds-color-success);
+  font-size: .65rem;
+  font-weight: var(--ds-font-weight-semibold);
+}
 .product-company {
   display: flex;
   align-items: center;
   gap: .4rem;
+  margin: .35rem 0;
   color: var(--ds-color-text-muted);
 }
 .product-company i { color: var(--ds-color-primary); font-size: .75rem; }
+.product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem .65rem;
+  margin: .3rem 0 .45rem;
+  color: var(--ds-color-text-muted);
+  font-size: .7rem;
+}
+.product-meta span { display: inline-flex; align-items: center; gap: .25rem; }
+.product-meta i { color: var(--ds-color-primary); font-size: .68rem; }
+.product-sku { direction: ltr; unicode-bidi: isolate; }
 .product-desc { line-height: 1.8; }
+.product-card-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: .65rem;
+  margin-top: auto;
+  padding-top: .85rem;
+  border-top: 1px solid var(--ds-color-border);
+}
+.product-card-price { display: flex; min-width: 0; flex-direction: column; gap: .15rem; }
+.product-card-price small { color: var(--ds-color-text-muted); font-size: .68rem; }
+.product-card-price strong { color: var(--ds-color-text); font-size: .86rem; line-height: 1.5; }
+.product-card-price--inquiry strong { color: var(--ds-color-primary); font-size: .78rem; }
+.product-card-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: .35rem;
+  min-height: 2.75rem;
+  color: var(--ds-color-primary);
+  font-size: .75rem;
+  font-weight: var(--ds-font-weight-bold);
+}
+.product-card-link i { transition: transform var(--ds-transition-fast); }
+.product-card:hover .product-card-link i { transform: translateX(-3px); }
 .state-box {
   min-height: 20rem;
   border: 1px dashed var(--ds-color-border);
@@ -759,10 +840,13 @@ watch(() => route.query.category, (newVal) => {
 @media (max-width: 576px) {
   .listing-page-header { align-items: flex-start; }
   .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
-  .product-info { padding: .75rem; }
-  .product-title { font-size: .85rem; }
+   .product-info { min-height: 13rem; padding: .75rem; }
+  .product-title { font-size: .84rem; }
   .product-company, .product-desc { font-size: .7rem; }
   .product-price-badge { font-size: .68rem; }
+  .product-verified { font-size: .58rem; }
+  .product-card-footer { align-items: flex-start; flex-direction: column; gap: .25rem; }
+  .product-card-link { min-height: 2.5rem; }
 }
 @media (max-width: 360px) {
   .products-grid { grid-template-columns: 1fr; }
