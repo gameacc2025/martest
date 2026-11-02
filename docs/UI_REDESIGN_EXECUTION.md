@@ -222,3 +222,13 @@ This batch replaces the previous dashboard-only heading treatment with an actual
 - Added `DataTable.test.js` coverage for client counts, lazy server totals and filtered counts.
 - Commits: `c0be61b` shared table refinement; `3f3ab5f` table tests.
 - CI was triggered by the pushes and is being checked; no local test execution is claimed.
+
+
+## Product editor, subscriptions and reporting — batch 8 (2026-11-02)
+
+- Admin product editor: replaced the plain title row with a structured editor header, contextual guidance, accessible back action and explicit save-product action; improved section headings, field spacing, PrimeVue input surfaces, technical-spec empty state, price-tier and document surfaces.
+- Company product editor: applied the same guided editor hierarchy while preserving company routes and existing save/permission behavior.
+- Admin inquiry subscriptions: added a live overview strip for defined plans, pending purchase requests and enforcement state; reorganized the page heading and improved responsive plan form, policy panel and review tables using design tokens.
+- Company reports: added an explanatory report header and refined tabs, export actions, KPI/chart spacing and responsive behavior. Export logic and API-derived metrics remain unchanged.
+- Commits: `e14505e` Admin inquiry subscription workspace; `d288067` Admin product editor; `18a67c5` Company product editor; `90cf711` Company reports.
+- CI for this latest batch is pending; no local tests/builds claimed.
