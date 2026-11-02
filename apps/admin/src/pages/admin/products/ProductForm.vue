@@ -23,6 +23,7 @@ import FileUpload from 'primevue/fileupload'
 import Tag from 'primevue/tag'
 import ProgressSpinner from 'primevue/progressspinner'
 import RequiredFieldsProgress from '@telecom/shared-ui/components/common/RequiredFieldsProgress.vue'
+import FormSectionHeader from '@telecom/shared-ui/components/common/FormSectionHeader.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -716,7 +717,7 @@ async function removeExistingDocument(docId) {
     <div v-else class="form-grid">
       <!-- Left Column: Basic Info -->
       <div class="form-section">
-        <h2>اطلاعات پایه</h2>
+        <FormSectionHeader title="اطلاعات پایه" description="عنوان، شناسه و توضیحات محصول" icon="pi pi-box" />
 
         <div class="field">
           <label for="product-title">عنوان محصول <span class="required">*</span></label>
@@ -753,7 +754,7 @@ async function removeExistingDocument(docId) {
 
       <!-- Right Column: Classification -->
       <div class="form-section">
-        <h2>دسته‌بندی و شرکت</h2>
+        <FormSectionHeader title="دسته‌بندی و شرکت" description="جایگاه محصول و محدوده نمایش آن در بازارگاه" icon="pi pi-sitemap" />
 
         <div v-if="canChooseCompany" class="field">
           <label for="product-company">شرکت <span class="required">*</span></label>
@@ -791,7 +792,7 @@ async function removeExistingDocument(docId) {
 
       <!-- Change Reason (only in edit mode) -->
       <div v-if="isEditMode" class="form-section full-width">
-        <h2>علت ویرایش</h2>
+        <FormSectionHeader title="علت ویرایش" description="دلیل تغییر اطلاعات برای ثبت در سوابق محصول" icon="pi pi-pencil" />
         <div class="field">
           <label for="product-change-reason">توضیح تغییرات <span class="required">*</span></label>
           <Textarea id="product-change-reason" v-model="changeReason" placeholder="دلیل ویرایش محصول را وارد کنید (مثلاً تغییر قیمت، اصلاح اطلاعات و...)" rows="2" class="w-full" />
@@ -801,7 +802,7 @@ async function removeExistingDocument(docId) {
 
       <!-- Specifications -->
       <div class="form-section full-width">
-        <h2>مشخصات فنی</h2>
+        <FormSectionHeader title="مشخصات فنی" description="ویژگی‌های استاندارد و مشخصات تکمیلی محصول" icon="pi pi-sliders-h" />
 
         <div v-if="!form.subcategoryId" class="empty-section">
           <p>برای نمایش مشخصات، ابتدا زیردسته را انتخاب کنید</p>
@@ -910,10 +911,11 @@ async function removeExistingDocument(docId) {
 
       <!-- Price Tiers -->
       <div class="form-section full-width">
-        <div class="section-header">
-          <h2>قیمت‌گذاری</h2>
-          <Button label="افزودن ردیف قیمت" icon="pi pi-plus" size="small" @click="addPriceTier" />
-        </div>
+        <FormSectionHeader title="قیمت‌گذاری" description="تعریف قیمت بر اساس بازه تعداد سفارش" icon="pi pi-wallet">
+          <template #actions>
+            <Button label="افزودن ردیف قیمت" icon="pi pi-plus" size="small" @click="addPriceTier" />
+          </template>
+        </FormSectionHeader>
 
 
         <div v-if="priceTiers.length === 0" class="empty-section">
@@ -947,7 +949,7 @@ async function removeExistingDocument(docId) {
 
       <!-- Images -->
       <div class="form-section full-width">
-        <h2>تصاویر محصول</h2>
+        <FormSectionHeader title="تصاویر محصول" description="تصویر اصلی و گالری تصاویر محصول" icon="pi pi-images" />
 
         <div v-if="isEditMode && productImages.length > 0" class="images-grid">
           <div v-for="(img, index) in productImages" :key="img.id" class="image-item">
@@ -977,7 +979,7 @@ async function removeExistingDocument(docId) {
 
       <!-- Documents -->
       <div class="form-section full-width">
-        <h2>اسناد محصول</h2>
+        <FormSectionHeader title="اسناد محصول" description="دیتاشیت، کاتالوگ، راهنما و گواهی‌ها" icon="pi pi-file-pdf" />
 
         <div v-if="isEditMode && productDocuments.length > 0" class="documents-list">
           <div v-for="doc in productDocuments" :key="doc.id" class="document-item">
@@ -1371,5 +1373,81 @@ async function removeExistingDocument(docId) {
   .product-editor-title-row { align-items: flex-start; }
   .product-editor-title-row p { max-width: 100%; }
   .product-editor-heading .page-header-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+/* Shared form hierarchy and responsive control rhythm. */
+.product-form-page .form-grid { align-items: start; }
+.product-form-page .form-section {
+  min-width: 0;
+  padding: clamp(1.1rem, 2vw, 1.6rem);
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-form-page .field { min-width: 0; margin-bottom: 1.1rem; }
+.product-form-page .field:last-child { margin-bottom: 0; }
+.product-form-page .field > label {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  margin-bottom: .45rem;
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.product-form-page :deep(.p-inputtext),
+.product-form-page :deep(.p-textarea),
+.product-form-page :deep(.p-select),
+.product-form-page :deep(.p-inputnumber-input),
+.product-form-page :deep(.p-multiselect),
+.product-form-page :deep(.p-calendar .p-inputtext) {
+  min-height: 2.75rem;
+  border-radius: var(--ds-radius-md);
+}
+.product-form-page :deep(.p-textarea) { min-height: 5.5rem; }
+.product-form-page .field-grid,
+.product-form-page .spec-grid { align-items: start; }
+.product-form-page .price-tier-row {
+  align-items: flex-start;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.product-form-page .custom-spec-row {
+  padding: .8rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.product-form-page .document-item {
+  flex-wrap: wrap;
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+}
+.product-form-page .image-item { background: var(--ds-color-surface-alt); }
+.product-form-page .image-actions :deep(.p-button),
+.product-form-page .image-remove { min-width: 2.75rem; min-height: 2.75rem; }
+.product-form-page .page-header-actions { align-items: center; flex-wrap: wrap; }
+@media (max-width: 1100px) {
+  .product-form-page .field-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .product-form-page .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .product-form-page .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .product-form-page .custom-spec-row { align-items: stretch; flex-wrap: wrap; }
+  .product-form-page .custom-spec-title,
+  .product-form-page .custom-spec-value { flex: 1 1 100%; min-width: 0; }
+  .product-form-page .price-tier-row { flex-direction: column; }
+  .product-form-page .price-tier-row > .field-grid-4 { width: 100%; }
+  .product-form-page .page-header { align-items: flex-start; flex-direction: column; gap: .9rem; }
+  .product-form-page .page-header-actions { width: 100%; }
+  .product-form-page .page-header-actions :deep(.p-button) { flex: 1 1 auto; }
+}
+@media (max-width: 480px) {
+  .product-form-page .field-grid,
+  .product-form-page .field-grid-4,
+  .product-form-page .spec-grid { grid-template-columns: minmax(0, 1fr); }
+  .product-form-page .document-item > span { flex: 1 1 100%; overflow-wrap: anywhere; }
 }
 </style>
