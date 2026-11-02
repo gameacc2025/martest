@@ -43,10 +43,12 @@
                 tabindex="0"
                 @click="userType = 'customer'"
                 @keydown.enter.space.prevent="userType = 'customer'"
+                @keydown.right.prevent="userType = 'company'"
+                @keydown.left.prevent="userType = 'customer'"
               >
                 <i class="pi pi-user reg-type-icon"></i>
                 <span>کاربر عادی</span>
-                <RadioButton v-model="userType" value="customer" class="reg-type-radio" />
+                <input v-model="userType" type="radio" value="customer" class="reg-type-radio" aria-hidden="true" tabindex="-1" />
               </div>
               <div
                 class="user-type-selector"
@@ -56,10 +58,12 @@
                 tabindex="0"
                 @click="userType = 'company'"
                 @keydown.enter.space.prevent="userType = 'company'"
+                @keydown.right.prevent="userType = 'customer'"
+                @keydown.left.prevent="userType = 'company'"
               >
                 <i class="pi pi-building reg-type-icon"></i>
                 <span>شرکت</span>
-                <RadioButton v-model="userType" value="company" class="reg-type-radio" />
+                <input v-model="userType" type="radio" value="company" class="reg-type-radio" aria-hidden="true" tabindex="-1" />
               </div>
             </div>
 
@@ -356,7 +360,6 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
-import RadioButton from 'primevue/radiobutton'
 import Textarea from 'primevue/textarea'
 
 const router = useRouter()
