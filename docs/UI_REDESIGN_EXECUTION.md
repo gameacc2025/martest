@@ -576,3 +576,34 @@ Adopted the shared workspace heading in Website:
 Breadcrumbs and page actions are retained through the actions slot. The product/category/company catalog pages preserve their existing filter controls and results; cart/checkout retain all current commerce flows; addresses and contact retain their existing forms and handlers.
 
 Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.
+
+
+## Shared shell and public navigation — batch 7 (2026-11-02)
+
+### Repository / branch policy
+- Confirmed GitHub has only the `main` branch; no additional remote branches or open PRs were present at the time of inspection.
+- All subsequent changes in this batch were committed directly to `main`; no branch was created.
+
+### Public website shell
+- Added a keyboard skip link targeting the main content and made the main landmark programmatically focusable.
+- Mobile navigation now exposes `aria-expanded` and `aria-controls`, changes its menu icon/label with state, and closes on route changes (including back/forward) and successful search navigation.
+- Improved the mobile navigation panel's bounded scrolling and focus-visible styles; reduced-motion mode now also suppresses animation duration.
+- Existing route names, PKCE panel handoff URLs, auth/access-profile routing, category loading and API calls remain unchanged.
+
+### Shared dashboard navigation
+- Refined dashboard header controls with descriptive notification/account labels, explicit search dialog semantics and a title for the theme switch.
+- Increased dashboard icon controls and account trigger to the 44px minimum target.
+- Added a named navigation landmark to the shared sidebar and increased the collapse control to the same 44px target.
+- Existing menu generation, permission filtering, routes, theme handling, notification link and logout behavior remain unchanged.
+
+### Tests
+- Added `apps/website/src/layouts/PublicLayout.test.js` for skip-link target, mobile-menu accessibility state and automatic close on route change.
+- Extended `DashboardHeader.test.js` for descriptive labels on notification, theme and account controls.
+- Test/build execution has not been performed in this connected GitHub editing environment. These tests are authored but not yet verified.
+
+### Commits
+- `7655d32` public website shell accessibility/navigation
+- `ca9591d` public layout navigation tests
+- `f531a4b` shared dashboard header controls
+- `4b53d8f` shared dashboard sidebar navigation
+- `3bb6ab5` dashboard header tests
