@@ -46,6 +46,17 @@ describe('DataTable', () => {
     expect(wrapper.find('.ent-table-record-count').text()).toContain('۱۴۷')
   })
 
+
+  it('uses the responsive card layout by default on narrow screens', () => {
+    const wrapper = mountTable()
+    expect(wrapper.classes()).toContain('ent-table--mobile-cards')
+  })
+
+  it('allows a page to retain the classic scroll table layout when required', () => {
+    const wrapper = mountTable({ mobileCardLayout: false })
+    expect(wrapper.classes()).not.toContain('ent-table--mobile-cards')
+  })
+
   it('uses the filtered client-side result count', async () => {
     const wrapper = mountTable()
     // The search ref is reflected in the computed count; update it through
