@@ -644,8 +644,10 @@ onMounted(() => {
 .product-list-page :deep(.p-datatable-tbody > tr) { transition: background var(--ds-transition-fast); }
 .product-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
 .product-list-page :deep(.p-datatable .p-button.p-button-text) {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  min-height: 2.75rem;
 }
 .table-state {
   min-height: 15rem;
@@ -758,8 +760,8 @@ onMounted(() => {
 .product-management-table :deep(.p-paginator-page),
 .product-management-table :deep(.p-paginator-next),
 .product-management-table :deep(.p-paginator-prev) {
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
 .product-management-table :deep(.p-paginator-page.p-highlight) {
