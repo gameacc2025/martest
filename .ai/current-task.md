@@ -1189,3 +1189,18 @@ Completed structural/visual work on Admin and Company product editors, Admin inq
 ## UI implementation — batch 9 (2026-11-02)
 
 Completed UI refinements for Admin notification management, Company product views and subscription page, and Website customer profile. These changes preserve the existing data and workflows. Commits: `5761ae7`, `eceda9f`, `e895213`, `f99c289`, `77b0f74`. Continue the remaining page inventory and wait for CI before sign-off.
+
+
+## UI redesign — batch 10 checkpoint (2026-11-02)
+
+Completed:
+- Shared dashboard page context header (section/title/breadcrumb) and shared DataTable visual system.
+- Public website header brand lockup and mobile navigation styling.
+- Public product catalog filter/result/product-card composition.
+- Admin and Company product list and inquiry list workspaces.
+- Customer My Inquiries page identity/action hierarchy.
+- Added PageHeader unit tests.
+
+Relevant commits: `48ce7a6`, `012f0ea`, `ca1cec4`, `e37de59`, `038a467`, `f763480`, `f9a2f47`, `0f64a5c`, `b933ca0`, `efac6fc`.
+
+Still active: complete remaining page families (product forms/details, inquiry details/create/subscription, notification inbox/preferences, user/company/category/role/permission/settings pages, reports/orders, public home/auth/company/category/cart/checkout and error states), shared component audit, and test/build verification. Current main has no reported CI status checks; no local test/build execution is claimed.
