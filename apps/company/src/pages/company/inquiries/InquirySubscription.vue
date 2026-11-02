@@ -1,4 +1,5 @@
 <script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { apiGet, apiPost } from '@telecom/shared-core/http/apiClient'
@@ -110,18 +111,23 @@ async function requestPlan(plan) {
 
 <template>
   <main class="subscription-page" dir="rtl">
-    <header class="heading ds-page-heading">
-      <div class="subscription-heading-copy">
-        <span class="eyebrow"><i class="pi pi-wallet"></i> اشتراک و سهمیه خدمات</span>
-        <h1>اشتراک استعلام شرکت</h1>
-        <p>طرح فعال، میزان مصرف و درخواست خرید را مدیریت کنید؛ سهمیه‌ها بر اساس دوره اشتراک محاسبه می‌شوند.</p>
-      </div>
-      <button class="secondary refresh-action" :disabled="loading" @click="load"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="اشتراک و سهمیه خدمات"
+      title="اشتراک استعلام شرکت"
+      description="طرح فعال، میزان مصرف و درخواست خرید را مدیریت کنید؛ سهمیه‌ها بر اساس دوره اشتراک محاسبه می‌شوند."
+      icon="pi pi-wallet"
+      heading-id="company-inquiry-subscription-title"
+    >
+      <template #actions>
+        <button type="button" class="secondary refresh-action" :disabled="loading" @click="load">
+          <i class="pi pi-refresh" aria-hidden="true"></i> به‌روزرسانی
+        </button>
+      </template>
+    </WorkspacePageHeading>
 
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
     <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
-    <p v-if="loading">در حال دریافت اطلاعات…</p>
+    <div v-if="loading" class="subscription-loading" role="status"><i class="pi pi-spin pi-spinner" aria-hidden="true"></i><span>در حال دریافت اطلاعات اشتراک…</span></div>
 
     <section v-if="currentSubscription" class="panel active">
       <div><span class="eyebrow">اشتراک فعلی</span><h2>{{ currentSubscription.plan?.name || 'اشتراک فعال' }}</h2><p>اعتبار تا {{ date(currentSubscription.endsAt) }}</p></div>
@@ -136,19 +142,29 @@ async function requestPlan(plan) {
       <h2>مصرف سهمیه در دوره جاری</h2>
       <div class="quota-grid">
         <article v-for="(item, key) in quota.quotas" :key="key" class="quota">
-          <span>{{ usageLabels[key] || key }}</span>
+          <span class="quota-label">{{ usageLabels[key] || key }}</span>
           <strong>{{ item.remaining.toLocaleString('fa-IR') }} <small>از {{ item.limit.toLocaleString('fa-IR') }} باقی‌مانده</small></strong>
-          <div class="meter"><span :style="{ width: (item.limit ? Math.min(100, item.used / item.limit * 100) : 100) + '%' }"></span></div>
+          <div
+            class="meter"
+            role="progressbar"
+            :aria-label="'مصرف سهمیه ' + (usageLabels[key] || key)"
+            aria-valuemin="0"
+            :aria-valuemax="Math.max(1, Number(item.limit) || 0)"
+            :aria-valuenow="item.limit ? Math.min(Number(item.limit), Number(item.used) || 0) : 0"
+            :aria-valuetext="item.limit ? ((Number(item.used) || 0).toLocaleString('fa-IR') + ' مصرف‌شده از ' + Number(item.limit).toLocaleString('fa-IR')) : 'بدون سقف مشخص'"
+          >
+            <span :style="{ width: (item.limit ? Math.min(100, item.used / item.limit * 100) : 100) + '%' }"></span>
+          </div>
         </article>
       </div>
     </section>
 
     <section class="plans-section">
-      <div class="section-heading"><h2>طرح‌های موجود</h2><p>طرح را انتخاب کنید تا درخواست اشتراک برای بررسی ثبت شود.</p></div>
+      <div class="section-heading"><div><span class="eyebrow">انتخاب پلن</span><h2>طرح‌های موجود</h2><p>طرح را انتخاب کنید تا درخواست اشتراک برای بررسی ثبت شود.</p></div></div>
       <div v-if="!loading && !plans.length" class="panel empty">در حال حاضر طرح فعالی برای خرید تعریف نشده است.</div>
       <div class="plans-grid">
         <article v-for="plan in plans" :key="plan.id" class="plan-card" :class="{ chosen: selectedPlanId === plan.id }">
-          <div class="plan-head"><h3>{{ plan.name }}</h3><span>{{ plan.durationDays.toLocaleString('fa-IR') }} روز</span></div>
+          <div class="plan-head"><h3>{{ plan.name }}</h3><span class="plan-duration"><i class="pi pi-calendar" aria-hidden="true"></i>{{ plan.durationDays.toLocaleString('fa-IR') }} روز</span></div>
           <p class="description">{{ plan.description || 'طرح اشتراک خدمات استعلام' }}</p>
           <strong class="price">{{ money(plan.price, plan.currency) }}</strong>
           <ul>
@@ -160,7 +176,7 @@ async function requestPlan(plan) {
           <label v-if="selectedPlanId === plan.id" class="reference">شماره پیگیری پرداخت (در صورت پرداخت خارج از سامانه)
             <input v-model="paymentReference" maxlength="120" placeholder="شماره پیگیری"/>
           </label>
-          <button class="primary" :disabled="submitting || !!currentSubscription || !!pendingSubscription" @click="selectedPlanId === plan.id ? requestPlan(plan) : selectedPlanId = plan.id">
+          <button type="button" class="primary plan-action" :aria-pressed="selectedPlanId === plan.id" :disabled="submitting || !!currentSubscription || !!pendingSubscription" @click="selectedPlanId === plan.id ? requestPlan(plan) : selectedPlanId = plan.id">
             {{ submitting && selectedPlanId === plan.id ? 'در حال ثبت…' : selectedPlanId === plan.id ? 'ثبت درخواست برای بررسی' : 'انتخاب طرح' }}
           </button>
         </article>
@@ -171,79 +187,177 @@ async function requestPlan(plan) {
 </template>
 
 <style scoped>
-.subscription-page{display:grid;gap:1.25rem;color:var(--text-color,#1f2937)}
-.heading,.section-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem}
-h1{font-size:1.45rem;margin:0 0 .35rem}h2{font-size:1.08rem;margin:0 0 .75rem}h3{margin:0;font-size:1.05rem}
-p{line-height:1.8;color:var(--text-color-secondary,#64748b);margin:.25rem 0}
-.panel,.plan-card{background:var(--surface-card,#fff);border:1px solid var(--surface-border,#e5e7eb);border-radius:12px;padding:1.2rem}
-.active{border-color:#10b981}.pending{border-color:#f59e0b}
-.eyebrow{font-size:.8rem;color:var(--text-color-secondary,#64748b)}
-.status{white-space:nowrap;border-radius:999px;padding:.4rem .8rem;font-size:.85rem}.active-pill{background:#d1fae5;color:#065f46}.pending-pill{background:#fef3c7;color:#92400e}
-.quota-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}.quota{padding:1rem;border:1px solid var(--surface-border,#e5e7eb);border-radius:8px;display:grid;gap:.75rem}.quota>span{font-size:.9rem}.quota strong{font-size:1.2rem}.quota small{font-size:.8rem;font-weight:400;color:var(--text-color-secondary,#64748b)}.meter{height:6px;border-radius:999px;background:var(--surface-ground,#f1f5f9);overflow:hidden}.meter span{display:block;height:100%;background:#0ea5a4}
-.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-top:1rem}.plan-card{display:flex;flex-direction:column;gap:1rem}.plan-card.chosen{border-color:#0d9488;box-shadow:0 0 0 1px #0d9488}.plan-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem}.plan-head span{font-size:.8rem;color:var(--text-color-secondary,#64748b)}.description{min-height:3rem}.price{font-size:1.4rem}.plan-card ul{padding-right:1.2rem;margin:0;display:grid;gap:.45rem;font-size:.9rem}.reference{display:grid;gap:.4rem;font-size:.85rem}input{padding:.7rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-ground,#fff);color:inherit}
-button{border:0;border-radius:7px;padding:.75rem 1rem;cursor:pointer}.primary{background:#0f9e9a;color:#fff;margin-top:auto}.secondary{background:var(--surface-hover,#eef2f7);color:inherit}.primary:disabled,.secondary:disabled{opacity:.55;cursor:not-allowed}
-.notice{padding:.8rem 1rem;border-radius:8px}.error{background:#fee2e2;color:#991b1b}.success{background:#d1fae5;color:#065f46}.empty{color:var(--text-color-secondary,#64748b)}.footnote{font-size:.85rem}
-@media(max-width:800px){.quota-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.heading,.section-heading{align-items:flex-start;flex-direction:column}}
-@media(max-width:480px){.quota-grid{grid-template-columns:1fr}}
-
-.subscription-admin .heading,
-.subscription-page .heading {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
+.subscription-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
+  min-width: 0;
+  color: var(--ds-color-text);
+}
+.subscription-page h1,
+.subscription-page h2,
+.subscription-page h3 { margin-top: 0; color: var(--ds-color-text); }
+.subscription-page h2 { margin-bottom: .45rem; font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
+.subscription-page p { margin: .25rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.85; }
+.subscription-page .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.subscription-page .refresh-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 2.75rem;
+  padding: .65rem .95rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text);
+  font: inherit;
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  cursor: pointer;
+}
+.subscription-page .refresh-action:hover { border-color: var(--ds-color-primary); color: var(--ds-color-primary); }
+.subscription-page .refresh-action:disabled { opacity: .55; cursor: not-allowed; }
+.subscription-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  min-height: 8rem;
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  color: var(--ds-color-text-muted);
+}
+.subscription-loading i { color: var(--ds-color-primary); }
+.subscription-page .notice {
+  padding: .9rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-lg);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.8;
+}
+.subscription-page .notice.error { border-color: color-mix(in srgb, var(--ds-color-danger) 25%, transparent); background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.subscription-page .notice.success { border-color: color-mix(in srgb, var(--ds-color-success) 25%, transparent); background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-page .panel,
+.subscription-page .plan-card {
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.4rem);
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.subscription-admin,
-.subscription-page { gap: var(--ds-space-5); }
-.subscription-admin .panel,
-.subscription-page .panel {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
-.subscription-admin h1,
-.subscription-page h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
-.subscription-admin input,
-.subscription-admin select,
-.subscription-page input,
-.subscription-page select {
-  border-color: var(--ds-color-border);
+.subscription-page .active { border-inline-start: 4px solid var(--ds-color-success); }
+.subscription-page .pending { border-inline-start: 4px solid var(--ds-color-warning); }
+.subscription-page .status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: .35rem .75rem;
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.subscription-page .active-pill { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-page .pending-pill { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
+.subscription-page .quota-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ds-space-4);
+  margin-top: var(--ds-space-4);
+}
+.subscription-page .quota {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.subscription-page .quota-label { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); }
+.subscription-page .quota strong { color: var(--ds-color-text); font-size: var(--ds-font-size-xl); font-variant-numeric: tabular-nums; }
+.subscription-page .quota small { display: block; margin-top: .15rem; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-normal); }
+.subscription-page .meter { height: .5rem; overflow: hidden; border-radius: var(--ds-radius-pill); background: var(--ds-color-border); }
+.subscription-page .meter span { display: block; height: 100%; border-radius: inherit; background: var(--ds-color-primary); transition: width var(--ds-transition); }
+.subscription-page .plans-section { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.subscription-page .section-heading h2 { margin: .2rem 0; font-size: var(--ds-font-size-xl); }
+.subscription-page .plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  align-items: stretch;
+  gap: var(--ds-space-4);
+}
+.subscription-page .plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  transition: border-color var(--ds-transition), box-shadow var(--ds-transition), transform var(--ds-transition);
+}
+.subscription-page .plan-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
+.subscription-page .plan-card.chosen { border-color: var(--ds-color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-color-primary) 16%, transparent); }
+.subscription-page .plan-head { display: flex; align-items: flex-start; justify-content: space-between; gap: .65rem; }
+.subscription-page .plan-head h3 { margin: 0; font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
+.subscription-page .plan-duration { display: inline-flex; align-items: center; gap: .35rem; flex: 0 0 auto; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.subscription-page .description { min-height: 3rem; }
+.subscription-page .price { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); font-weight: var(--ds-font-weight-extrabold); font-variant-numeric: tabular-nums; }
+.subscription-page .plan-card ul { display: grid; gap: .55rem; margin: 0; padding: 1rem 1.2rem 0 0; border-top: 1px solid var(--ds-color-border); color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.subscription-page .reference { display: grid; gap: .45rem; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); }
+.subscription-page input {
+  width: 100%;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  padding: .65rem .8rem;
+  border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
   color: var(--ds-color-text);
+  font: inherit;
+}
+.subscription-page input:focus-visible,
+.subscription-page button:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+.subscription-page .primary,
+.subscription-page .secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: .65rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md);
+  font: inherit;
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-bold);
+  cursor: pointer;
+}
+.subscription-page .primary { margin-top: auto; background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.subscription-page .primary:hover { background: var(--ds-color-primary-hover); }
+.subscription-page .secondary { background: var(--ds-color-surface-alt); border-color: var(--ds-color-border); color: var(--ds-color-text); }
+.subscription-page button:disabled { opacity: .55; cursor: not-allowed; }
+.subscription-page .empty { color: var(--ds-color-text-muted); }
+.subscription-page .footnote { padding: .85rem 1rem; border-inline-start: 3px solid var(--ds-color-info); border-radius: var(--ds-radius-md); background: var(--ds-color-info-soft); font-size: var(--ds-font-size-xs); }
+@media (max-width: 1100px) {
+  .subscription-page .quota-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .subscription-admin .heading,
-  .subscription-page .heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); }
-}
-
-.subscription-page .heading { align-items: center; }
-.subscription-heading-copy { min-width: 0; }
-.subscription-page .eyebrow { display: inline-flex; align-items: center; gap: .45rem; color: var(--ds-color-primary); font-weight: var(--ds-font-weight-bold); }
-.subscription-page .heading h1 { margin: .35rem 0; font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
-.subscription-page .heading p { margin: 0; }
-.subscription-page .refresh-action { display: inline-flex; align-items: center; gap: .5rem; }
-.subscription-page .active { border-inline-start: 4px solid var(--ds-color-success); }
-.subscription-page .pending { border-inline-start: 4px solid var(--ds-color-warning); }
-.subscription-page .active-pill { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
-.subscription-page .pending-pill { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
-.subscription-page .quota { border-color: var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface); }
-.subscription-page .quota strong { color: var(--ds-color-text); font-variant-numeric: tabular-nums; }
-.subscription-page .meter { background: var(--ds-color-surface-alt); }
-.subscription-page .meter span { background: var(--ds-color-primary); }
-.subscription-page .plan-card { border-radius: var(--ds-radius-xl); box-shadow: var(--ds-shadow-xs); transition: border-color var(--ds-transition), box-shadow var(--ds-transition), transform var(--ds-transition); }
-.subscription-page .plan-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
-.subscription-page .plan-card.chosen { border-color: var(--ds-color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-color-primary) 16%, transparent); }
-.subscription-page .price { color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); }
-.subscription-page input { width: 100%; box-sizing: border-box; }
-.subscription-page .primary { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
-.subscription-page .secondary { border: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); color: var(--ds-color-text); }
-.subscription-page .error { background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
-.subscription-page .success { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
-@media (max-width: 640px) {
-  .subscription-page .heading { align-items: stretch; }
   .subscription-page .quota-grid { grid-template-columns: 1fr; }
+  .subscription-page .panel { padding: 1rem; }
+  .subscription-page .plan-head { align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .subscription-page *, .subscription-page *::before, .subscription-page *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
 </style>
