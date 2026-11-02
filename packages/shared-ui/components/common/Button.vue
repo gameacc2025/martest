@@ -65,4 +65,14 @@ const pvSize = computed(() => (props.size === 'md' ? undefined : props.size))
 .ds-btn.ds-btn--full {
   width: 100%;
 }
+
+.ds-btn { min-height: var(--ds-touch-target); }
+.ds-btn:focus-visible {
+  outline: 3px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+.ds-btn:not(:disabled) { box-shadow: var(--ds-shadow-xs); }
+.ds-btn:not(:disabled):hover { transform: translateY(-1px); }
+.ds-btn:disabled { cursor: not-allowed; }
+
 </style>
