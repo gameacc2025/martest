@@ -347,9 +347,9 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
 <style scoped>
 .settings-page {
   direction: rtl;
-  padding: 1.5rem;
-  max-width: 1000px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: none;
+  margin: 0;
 }
 
 /* ── Page Header ────────────────────────────────────── */
@@ -814,4 +814,114 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
   .settings-page .trust-badges { width: 100%; }
 }
 
+
+/* Organization settings are a full-width workspace within the shared shell. */
+.settings-page { display: flex; flex-direction: column; gap: clamp(1rem, 2vw, 1.5rem); }
+.settings-page .settings-heading {
+  align-items: center;
+  gap: 1.25rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background:
+    radial-gradient(circle at 5% 0%, color-mix(in srgb, var(--ds-color-primary) 12%, transparent), transparent 38%),
+    var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.settings-page .settings-heading-identity { min-width: 0; }
+.settings-page .settings-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 24%, transparent);
+  border-radius: 1rem;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.35rem;
+}
+.settings-page .settings-heading h1 {
+  margin: .2rem 0;
+  color: var(--ds-color-text);
+  font-size: clamp(1.3rem, 2vw, var(--ds-font-size-2xl));
+  font-weight: var(--ds-font-weight-bold);
+}
+.settings-page .settings-heading p {
+  margin: .35rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.8;
+}
+.settings-page :deep(.p-tablist) {
+  padding-inline: .65rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.settings-page :deep(.p-tab) {
+  min-height: 3.2rem;
+  padding-inline: 1.1rem;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+}
+.settings-page :deep(.p-tab.p-tab-active) {
+  color: var(--ds-color-primary-text);
+  border-color: var(--ds-color-primary);
+}
+.settings-page :deep(.p-tabpanels) { padding: var(--ds-space-5) 0 0; background: transparent; }
+.settings-page .tab-content { display: grid; gap: var(--ds-space-5); }
+.settings-page .meta-section,
+.settings-page .form-section {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.settings-page .meta-section h3,
+.settings-page .form-section h3 {
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-bold);
+}
+.settings-page .section-hint {
+  margin: .35rem 0 1.1rem;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1.7;
+}
+.settings-page .meta-grid { gap: .75rem; }
+.settings-page .meta-item {
+  min-width: 0;
+  padding: .9rem 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+}
+.settings-page .meta-label { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.settings-page .meta-value { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); overflow-wrap: anywhere; }
+.settings-page .tab-actions {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: .25rem;
+}
+.settings-page .switch-row {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+}
+.settings-page .switch-info > i { color: var(--ds-color-primary); }
+@media (max-width: 700px) {
+  .settings-page .settings-heading { align-items: flex-start; flex-direction: column; }
+  .settings-page .trust-badges { width: 100%; }
+  .settings-page :deep(.p-tablist) { overflow-x: auto; }
+  .settings-page :deep(.p-tab) { white-space: nowrap; }
+  .settings-page .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .settings-page .tab-actions,
+  .settings-page .tab-actions :deep(.p-button) { width: 100%; }
+}
 </style>
