@@ -83,4 +83,8 @@ defineProps({
 .quick-action-item--warning { --qa-accent: var(--ds-color-warning); --qa-soft: var(--ds-color-warning-soft); }
 .quick-action-item--danger  { --qa-accent: var(--ds-color-danger);  --qa-soft: var(--ds-color-danger-soft); }
 .quick-action-item--info    { --qa-accent: var(--ds-color-info);    --qa-soft: var(--ds-color-info-soft); }
+
+.quick-action-item { border-radius: var(--ds-radius-lg); min-height: 56px; }
+.quick-action-item:focus-visible { outline: 3px solid var(--ds-color-focus); outline-offset: 2px; }
+
 </style>
