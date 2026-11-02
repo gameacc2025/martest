@@ -1382,3 +1382,10 @@ Continue with inquiry detail/response/message surfaces and product detail/catalo
 The product-editor completion indicator is now a reusable shared-ui component, adopted by Admin and Company forms, with focused tests. The editors retain their existing role-aware required-field definitions. Commits: `a5f6fa2`, `5ad87a1`, `49d779d`, `6332362`.
 
 Continue the full UI rollout; next focus inquiry detail/response messaging, product details and remaining list/form families.
+
+
+## Shared list heading checkpoint — 2026-11-02
+
+Admin Product/Company/Inquiry lists and Company Inquiry list now use shared `WorkspacePageHeading.vue`. A dedicated test suite covers the component's content, optional slots and accessibility heading ID. Existing page behavior is unchanged. Commits: `1a0e4fc`, `15f1e40`, `3c2b4d5`, `541944a`, `cb083f0`, `a34b8e1`.
+
+Continue migrating the remaining list/detail/form surfaces; do not mark the full redesign complete.
