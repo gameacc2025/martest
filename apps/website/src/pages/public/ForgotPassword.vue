@@ -17,15 +17,16 @@
 
               <form @submit.prevent="handleSubmit" class="fp-form">
                 <div class="field">
-                  <label>آدرس ایمیل</label>
+                  <label for="forgot-password-email">آدرس ایمیل</label>
                   <InputText
+                    id="forgot-password-email"
                     v-model="email"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
                     class="fp-input"
                     :class="{ 'p-invalid': errors.email }"
                   />
-                  <small v-if="errors.email" class="p-error block">{{ errors.email }}</small>
+                  <small v-if="errors.email" class="p-error block" role="alert">{{ errors.email }}</small>
                 </div>
 
                 <Button
@@ -47,7 +48,7 @@
               </div>
             </div>
 
-            <div v-else class="fp-text-center">
+            <div v-else class="fp-text-center" role="status">
               <i class="pi pi-envelope fp-success-icon"></i>
               <h2 class="fp-success-title">لینک بازنشانی ارسال شد!</h2>
               <p class="fp-desc">
@@ -248,5 +249,12 @@ const goToLogin = () => {
 .forgot-password-page .fp-title h1 { color: var(--ds-color-text); }
 .forgot-password-page .fp-desc { color: var(--ds-color-text-muted); line-height: var(--ds-line-height-relaxed); }
 .forgot-password-page :deep(.p-inputtext) { border-radius: var(--ds-radius-md); }
+.forgot-password-page :deep(.p-button) { min-height: 2.75rem; }
+.forgot-password-page :deep(.p-button:focus-visible),
+.forgot-password-page :deep(.p-inputtext:focus-visible),
+.forgot-password-page a:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
 
 </style>
