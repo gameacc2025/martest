@@ -51,6 +51,13 @@ describe('Website homepage redesign contracts', () => {
     expect(source).toContain("prefers-reduced-motion: reduce")
   })
 
+  it('shows supplier trust and explicit inquiry pricing when no price tier exists', () => {
+    expect(source).toContain('company?.isVerified')
+    expect(source).toContain('استعلام از تأمین‌کننده')
+    expect(source).toContain('class="product-card-cta"')
+    expect(source).toContain('class="product-sku"')
+  })
+
   it('does not publish unsupported hard-coded marketplace statistics or claims', () => {
     expect(source).not.toContain('const stats =')
     expect(source).not.toContain('+250')
