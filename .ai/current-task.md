@@ -1250,3 +1250,12 @@ Completed the public company directory plus Shopping Cart, Checkout and Wishlist
 Commits: cc4842e, 91f35bd, a4c41fd, 32e88c0.
 
 Continue remaining website public pages and admin/company page families; local verification is still outstanding.
+
+
+## UI redesign — batch 15 checkpoint (2026-11-02)
+
+Completed Website Products catalog, Orders, Order Details and Contact Us page refinements. Existing data flows and interactions were preserved.
+
+Commits: `f1d2e99`, `8cd0cac`, `e349467`, `41bcdf8`.
+
+Remaining focus: Admin/Company role and permission/settings forms, other management details, order pages and final shared-shell/page audit. Verification still outstanding.
