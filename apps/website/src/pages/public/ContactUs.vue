@@ -224,16 +224,6 @@
       </Card>
     </div>
 
-    <!-- Success Dialog -->
-    <Dialog v-model:visible="successDialog" header="پیام شما ارسال شد" :modal="true">
-      <div class="text-center">
-        <i class="pi pi-check-circle" style="font-size: 3rem; color: var(--p-green-500); margin-bottom: 1rem;"></i>
-        <p>پیام شما با موفقیت ارسال شد. در اسرع وقت با شما تماس خواهیم گرفت.</p>
-      </div>
-      <template #footer>
-        <Button label="بستن" icon="pi pi-check" @click="successDialog = false" />
-      </template>
-    </Dialog>
   </div>
 </template>
 
@@ -246,14 +236,12 @@ import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import Select from 'primevue/select'
-import Dialog from 'primevue/dialog'
 import { FormSection, FormField, FormGrid, FormActions, FormAlert } from '@telecom/shared-ui/components/common/form'
 
 
 const form = ref({ name: '', email: '', phone: '', subject: null, message: '' })
 const errors = ref({})
 const loading = ref(false)
-const successDialog = ref(false)
 
 const home = ref({ icon: 'pi pi-home', to: '/' })
 const items = ref([{ label: 'تماس با ما' }])
@@ -266,18 +254,14 @@ const subjectOptions = ref([
   { label: 'سوال عمومی', value: 'general_question' }
 ])
 
-const handleSubmit = async () => {
+const handleSubmit = () => {
   errors.value = {}
-  loading.value = true
-  try {
-    if (!validateForm()) { loading.value = false; return }
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    successDialog.value = true
-    resetForm()
-  } catch (error) {
-    errors.value = { general: 'خطا در ارسال پیام.' }
-  } finally {
-    loading.value = false
+  if (!validateForm()) return
+
+  // No verified public contact-message endpoint exists yet. Never simulate
+  // delivery or clear the visitor's message when nothing was actually sent.
+  errors.value = {
+    general: 'سرویس ارسال پیام هنوز فعال نشده است؛ پیام شما ارسال نشده و اطلاعات واردشده پاک نخواهد شد.'
   }
 }
 
