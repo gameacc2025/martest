@@ -78,6 +78,11 @@ describe('Company notification inbox', () => {
 
     expect(apiGetPaginated).toHaveBeenCalledWith('/settings/notifications?page=1&limit=20')
     expect(wrapper.findAll('.message-row')).toHaveLength(3)
+    expect(wrapper.findAll('.row-sender')).toHaveLength(3)
+    expect(wrapper.findAll('.row-subject')).toHaveLength(3)
+    expect(wrapper.find('.row-sender').text()).toBe('سامانه مخابرات')
+    expect(wrapper.find('.row-subject').text()).toContain('تست1')
+    expect(wrapper.find('input[name="notification-search"]').attributes('autocomplete')).toBe('off')
     expect(wrapper.text()).toContain('تست1')
     expect(wrapper.text()).toContain('وضعیت محصول تغییر کرد')
     expect(wrapper.text()).toContain('پاسخ جدید به استعلام')

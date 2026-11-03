@@ -21,20 +21,40 @@ defineProps({
 
 <style scoped>
 .workspace-page-heading {
-  display: flex; min-width: 0; align-items: flex-end; justify-content: space-between;
-  flex-wrap: wrap; gap: var(--ds-space-4); margin-block: .5rem var(--ds-space-6);
-  padding: 0 0 var(--ds-space-4); border-bottom: 1px solid var(--ds-color-border);
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: .5rem 0 1.25rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--ds-color-border);
+  border-inline-start: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
+  box-shadow: var(--ds-shadow-xs);
 }
 .workspace-page-heading-copy { min-width: 0; flex: 1 1 24rem; }
 .workspace-page-heading h1 {
-  margin: 0; color: var(--ds-color-text); font-size: clamp(1.45rem, 2vw, 1.8rem);
-  font-weight: var(--ds-font-weight-bold); line-height: 1.35; text-wrap: balance;
+  margin: 0;
+  color: var(--ds-color-text);
+  font-size: 1.28rem;
+  font-weight: var(--ds-font-weight-bold);
+  line-height: 1.45;
+  text-wrap: balance;
 }
-.workspace-page-heading p { max-width: 68ch; margin: .4rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: var(--ds-line-height-relaxed); }
+.workspace-page-heading p {
+  max-width: 68ch;
+  margin: .3rem 0 0;
+  color: var(--ds-color-text-muted);
+  font-size: .82rem;
+  line-height: var(--ds-line-height-relaxed);
+}
 .workspace-page-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ds-space-2); }
-.workspace-page-heading-actions :deep(.p-button), .workspace-page-heading-actions :deep(a) { min-height: 2.75rem; }
+.workspace-page-heading-actions :deep(.p-button), .workspace-page-heading-actions :deep(a) { min-height: 2.65rem; }
 @media (max-width: 640px) {
-  .workspace-page-heading { align-items: stretch; flex-direction: column; gap: var(--ds-space-3); margin-bottom: var(--ds-space-4); }
+  .workspace-page-heading { align-items: stretch; flex-direction: column; gap: .75rem; margin-bottom: 1rem; padding: .85rem; }
   .workspace-page-heading-actions { width: 100%; }
   .workspace-page-heading-actions > :deep(*) { flex: 1 1 auto; }
 }

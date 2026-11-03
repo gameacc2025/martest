@@ -2803,3 +2803,20 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** Pending atomic tree/commit creation.
 - **Push:** Pending.
 - **Next:** Continue remaining Admin/Company report/detail and public inquiry/order/account pages; maintain the documented commerce prototype caveat and finish 69-page inventory.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-16 — CORRECT VISUAL DIRECTION AND EMAIL INBOX REDESIGN
+- **Status:** IN_PROGRESS — corrective design pass after owner feedback that the earlier work was too flat/minimal and typography too large.
+- **Goal:** Replace over-minimal presentation with compact, expressive, brand-led UI while preserving product truth and workflows.
+- **Claimed scope:** Admin/Company/Website notification inboxes; shared WorkspacePageHeading, KpiCard and global skill refinement layer; relevant tests and design docs.
+- **Changes:**
+  - Rebuilt all three notification inbox list rows into email-style sender / subject / category / preview hierarchy. Added a clear sender identity already used in the reading pane; no sender data was invented.
+  - Applied a branded navy mailbox header with restrained teal accent, compact search/command bar, differentiated folder rail, dense message list and dedicated reading surface.
+  - Reduced inbox heading/body/list typography and restored visual layering, compact surfaces and depth using existing semantic tokens.
+  - Restored subtle visual hierarchy in shared WorkspacePageHeading and KpiCard; reduced KPI number size and brought back deliberate surface separation in shared card/panel/toolbar rules.
+  - Added assertions to all three notification page tests for sender and subject hierarchy.
+- **Behavior preserved:** API requests, routes, INBOX/SAVED folder normalization, categories, unread counts, single-click selection, double-click mark-read, bulk read state, delete, save and move actions are unchanged.
+- **Verification:** Static source/structure review only. Automated tests, builds and browser checks NOT RUN — owner instruction.
+- **Commit:** Pending.
+- **Push:** Pending.
+- **Next:** Continue the corrected design direction across remaining Admin/Company operational screens and Website marketplace; review page density, typography and intentional brand character instead of blanket minimalism.

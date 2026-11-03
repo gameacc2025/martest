@@ -1,6 +1,6 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book, customer profile, contact, authentication, product editors, system settings, catalogues, account security, notification preferences and Wishlist have received phased updates; full 69-page redesign remains in progress.  
+**Status:** IN_PROGRESS — owner feedback identified over-minimal/oversized visual direction; a richer, compact, brand-led direction is now being applied. The three notification inboxes and shared workspace primitives have received a corrective pass; the full 69-page redesign remains in progress.
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -149,3 +149,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Wishlist category filters are keyboard-operable buttons; remove actions are labeled; missing prices are excluded from the estimated total rather than treated as zero.
 - Password, notification, wishlist and cart store/API behavior is unchanged.
 - Static review only; tests/build/browser checks NOT RUN — owner instruction.
+
+
+### Visual direction correction and email inbox redesign — Phase 16
+- Owner feedback: previous phases over-applied minimalism, producing visually flat pages and oversized headings/metrics. Do not continue stripping surfaces or reducing every page to plain text and borders.
+- New execution direction: compact Persian/Vazirmatn typography, intentional brand presence using the existing teal/navy/petrol palette, meaningful surface layers, subtle depth, denser information hierarchy, and consistent interaction states. No new brand, font, dependencies, or fabricated content.
+- Admin, Company and Website notification inboxes now use a recognizable email-client structure: branded mailbox header, search/command bar, folder/category rail, sender/subject/preview rows, unread emphasis, and a dedicated reading pane.
+- Shared WorkspacePageHeading and KpiCard now use compact type sizes and intentional surface treatment; shared refinement layer restores subtle card/panel/toolbar depth and compact operational metrics instead of removing all visual character.
+- Notification APIs, folder membership, read/unread semantics, double-click behavior, bulk operations, delete/save/move behavior and role routes remain unchanged.
+- Added regression assertions for sender/subject hierarchy in all three notification inbox test files.
+- Static structural review completed; tests/build/browser checks NOT RUN — owner instruction.
+- Next: apply the corrected visual direction to remaining Admin/Company operational screens and public marketplace surfaces; review typography/density and restore purposeful brand character without generic templates.

@@ -129,3 +129,16 @@ The shared stylesheet loads skill-refinements.scss as a mixin and emits it after
 - Shared DataTable provides loading/busy and empty-state semantics, restrained mobile row surfaces and consistent keyboard focus.
 - Product management and inquiry/RFQ page families inherit the cross-app surface rules from skill-refinements.scss.
 - Keep product lifecycle, inquiry access/eligibility, quotas, subscription/payment, API contracts and role permissions unchanged during visual refinement.
+
+
+## Corrective visual direction — 2026-11-03
+
+The first skill pass was too austere: feedback identified lifeless/plain pages and oversized typography. Do not interpret minimalism as removing all character. Keep the product's existing palette and Vazirmatn, but use compact operational type, purposeful color, differentiated surface layers and restrained elevation. Do not use generic gradients, icon-tile KPI templates, decorative blur or invented data.
+
+- Operational page titles should generally sit around 20–22px, with body and table text around 13–15px where the density requires it; avoid oversized headings and 32px+ KPI values.
+- Use real hierarchy: title/description, grouped panels, compact toolbars, clearly differentiated selected/unread/error/success states and data-led accent color.
+- Cards and panels may use 1px borders, 10–14px radii and subtle navy-tinted shadows when they clarify grouping; avoid both nested card stacks and completely unframed walls of text.
+- Inbox pages should follow familiar email-client conventions: folder rail, search and command toolbar, sender identity, subject, preview, time, unread emphasis and a dedicated reading pane.
+- Admin, Company and Website notification inboxes have been refactored to this email-client hierarchy using existing API-backed messages and the existing notification actions.
+- Shared WorkspacePageHeading, KpiCard and skill-refinements.scss now use compact typography and intentional surface depth.
+- Preserve the established brand tokens, RTL, light/dark theme behavior, API contracts and existing user actions.

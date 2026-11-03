@@ -138,3 +138,19 @@ The shared DataTable, form-section heading and required-field progress primitive
 - Wishlist uses semantic category controls, contextual remove labels and transparent estimated-price totals that exclude unknown prices.
 - Existing password, preference, wishlist and cart behavior remains unchanged.
 - Tests/build/browser screenshots remain NOT RUN by owner instruction.
+
+
+## Corrective art direction — 2026-11-03
+
+Owner feedback rejected the previous over-minimal visual direction: the interface felt lifeless, excessively plain and oversized. The redesign must not equate Taste's restraint with removing all visual structure. The revised direction keeps the existing Telecom Marketplace identity while restoring compact hierarchy and deliberate visual character:
+
+- Use Vazirmatn at compact, consistent operational sizes; avoid oversized page headings and KPI figures.
+- Bring back clear surface layering, borders and subtle navy-tinted elevation where it helps grouping and focus.
+- Use teal/navy/petrol for purposeful brand presence and real status/data meaning, not decorative gradients.
+- Preserve density and email conventions in operational screens; do not turn an inbox into a generic flat list.
+- All three notification inboxes now have sender, subject, preview, folder/category navigation, search/commands and a reading pane in a recognizable email-client composition.
+- Shared workspace headings, KPI cards and global surface rules now have compact typography and a more deliberate surface hierarchy.
+- Existing APIs, permission boundaries, route behavior, and notification interactions remain unchanged.
+- Static review only; tests/build/browser checks NOT RUN by owner instruction.
+
+Next phases must apply this corrected direction across remaining pages, not repeat the earlier blanket removal of card surfaces, iconography, and visual detail.
