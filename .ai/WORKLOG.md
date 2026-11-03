@@ -2583,3 +2583,19 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Documentation:** Updated API route inventory, OpenAPI route metadata, API documentation, current-task, and UI execution log. Added route/service regression tests and updated inventory coverage assertions.
 - **Deployment prerequisite:** Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, and a real monitored `CONTACT_INBOX_EMAIL` in backend runtime environment. Do not commit credentials. No actual mailbox or SMTP provider credentials were available in repository context.
 - **Verification:** No tests, builds, or browser checks were run per owner instruction. Runtime email delivery is not claimed.
+
+
+## 2026-11-03 — UI-SKILLS-INSTALLATION — CODEX SKILLS POLICY AND INSTALLER
+
+- **Status:** REPOSITORY SETUP COMMITTED; LOCAL INSTALLATION PENDING.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Install and operationalize UI UX Pro Max, Taste Skill, Impeccable, and Vercel Web Design Guidelines for recurring UI changes.
+- **Findings:** Existing UI UX Pro Max skill was present under `.opencode/skills/ui-ux-pro-max`; Codex uses the project-level `.agents/skills` directory. Taste Skill's official v2 install name is `design-taste-frontend` and is currently experimental. The upstream Vercel skill fetches the latest web-interface rules at review time.
+- **Files added:** `.ai/UI_SKILLS.md`; `scripts/install-ui-skills.ps1`.
+- **Files updated:** `AGENTS.md`, `.ai/PROTOCOL.md`, `docs/AI_AGENT_WORKFLOW.md`, `.ai/current-task.md`.
+- **Installer behavior:** Installs `ui-ux-pro-max-cli` globally and runs `uipro init --ai codex`; installs Taste Skill for Codex, runs `npx impeccable install`, and installs Vercel's `web-design-guidelines` skill for Codex.
+- **Mandatory usage:** Every meaningful UI change must read `.ai/UI_SKILLS.md` and the relevant installed skill files. Skills must not override the project's Vue/PrimeVue/Tailwind architecture, existing brand, Persian/RTL support, accessibility, API contracts, or business rules.
+- **Verification:** Confirmed the existing skill and project instruction files by fetching them from remote `main`; verified the new files and updates through successful GitHub write responses. The PowerShell installer was NOT executed: this session cannot run commands in the user's local Windows checkout. Local Codex skill availability is NOT VERIFIED. No tests, builds, or browser checks were run.
+- **Commits:** `691df493882c4bdb29b7dc44530abe66657504c3` (skill policy); `9b3bc1a84130a37392c9a10df33a15089bd2df23` (installer); `28be2940d3e2379b245af2b1c6b37ca30d203555` (AGENTS); `4c435d04486d5ef27e34caed43c2969affb5e2a5` (protocol); `ada060fd37501cf49ef9e4aa5adaaba86fb98812` (workflow docs).
+- **Push:** Changes committed directly to remote `main` through GitHub API.
+- **Next action:** Run `.scripts\install-ui-skills.ps1` from the local project root in PowerShell, then restart Codex. Do not claim local installation complete until the command succeeds and generated skill folders are present.
