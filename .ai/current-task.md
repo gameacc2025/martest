@@ -240,4 +240,4 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added regression coverage for RTL direction and icon-only header controls in Admin, Company and Website notification tests.
 - Existing notification APIs, routes, drawer behavior and message actions are unchanged.
 - Static source review only; tests/build/browser checks NOT RUN.
-- **Branch:** fix/notifications-rtl-toolbar-icons. Awaiting PR merge.
+- **Merged:** PR #83 — https://github.com/gameacc2025/martest/pull/83. Squash commit: fc8baacd3457513d95e356542bec0c25ff8e0f68.
