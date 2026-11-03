@@ -197,3 +197,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - No product data, supplier details, price values, cart/wishlist behavior, API contracts or route behavior changed.
 - Static source review only; tests/build/browser checks NOT RUN — owner instruction.
 - **Commit:** e6c1ce4df63bdc2b6609c6941ee92123bd48fceb — https://github.com/gameacc2025/martest/commit/e6c1ce4df63bdc2b6609c6941ee92123bd48fceb
+
+
+### Company/admin operational forms and catalogues — Phase 20
+- Admin and Company product forms now use a compact framed editor header with a contextual product icon, reduced title scale and subtly elevated form sections/repeater rows.
+- Company personal product list and company-wide catalogue now use contextual icons, compact page headings, framed data surfaces, and denser table typography.
+- Company settings page now has a contextual company icon, compact title and a brand-tinted framed header while preserving existing trust/status indicators.
+- Admin and Company inquiry creation pages retain their stepper and progress semantics but use compact heading/field typography and a clearer stepper surface.
+- Admin inquiry detail title and cards use compact type and stronger grouping.
+- All API requests, form validation, save/publish workflows, inquiry steps, permissions, routes and company status/verification data remain unchanged.
+- Static source review only; tests/build/browser checks NOT RUN — owner instruction.

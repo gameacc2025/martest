@@ -872,4 +872,11 @@ function formatPrice(price) {
   .inquiry-detail-heading .page-header-actions :deep(.p-button) { width: 100%; }
   .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+.inquiry-detail-page .page-title-group h1,.inquiry-detail-page .inquiry-detail-title-row h1 { font-size: 1.25rem; line-height: 1.45; }
+.inquiry-detail-page .page-header { box-shadow: var(--ds-shadow-sm); }
+.inquiry-detail-page .detail-card { box-shadow: var(--ds-shadow-sm); }
+.inquiry-detail-page :deep(.p-card-title) { font-size: .95rem; }
+.inquiry-detail-page .info-value { font-size: .82rem; }
+
 </style>

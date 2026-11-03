@@ -175,3 +175,12 @@ Use a distinct Persuade composition for public discovery without oversized gener
 - Supplier profile headers should communicate company identity with a contextual mark and existing company data; do not invent ratings, certifications or claims.
 - Search pages need a clear query context, search action, filters, sort controls, result count and pagination as distinct but compact zones.
 - Shared product cards use real imagery, concise metadata, clear pricing and actions with subtle surface depth.
+
+
+## Admin and Company operational forms — 2026-11-03
+
+- Product editor pages use a contextual product icon, compact heading and distinct form sections; repeated prices/specifications/images/documents remain grouped as repeatable data, not decorative cards.
+- Company product tables use a compact page heading and framed catalogue surface.
+- Company settings uses existing company status and verification data in a compact header; never invent verification claims.
+- Inquiry creation uses a visible progress indicator and stepper with compact labels; keep the user's progress and field hierarchy obvious.
+- Inquiry detail should separate inquiry metadata, items, deadline, responses and actions without excessive heading size.

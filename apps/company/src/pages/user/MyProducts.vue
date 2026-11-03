@@ -59,7 +59,7 @@ function formatPrice(price) {
 <template>
   <div class="my-products-page">
     <header class="page-header ds-page-heading">
-      <div class="products-heading-copy"><h1>محصولات من</h1><p>محصولاتی را که مدیریت آن‌ها به حساب شما واگذار شده جستجو و پیگیری کنید.</p></div>
+      <div class="products-heading-copy"><span class="products-heading-icon" aria-hidden="true"><i class="pi pi-box"></i></span><div><h1>محصولات من</h1><p>محصولاتی را که مدیریت آن‌ها به حساب شما واگذار شده جستجو و پیگیری کنید.</p></div></div>
       <router-link :to="{ name: 'manage-product-create' }" class="products-create-link"><i class="pi pi-plus" aria-hidden="true"></i> محصول جدید</router-link>
     </header>
 
@@ -193,5 +193,43 @@ function formatPrice(price) {
 .products-create-link:focus-visible, .table-action-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 .table-action-link { display: inline-grid; width: var(--ds-touch-target); height: var(--ds-touch-target); place-items: center; border-radius: var(--ds-radius-sm); color: var(--ds-color-text-muted); text-decoration: none; }
 .table-action-link:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-primary-text); }
+
+
+.products-heading-copy { display: flex; align-items: center; gap: .8rem; }
+.products-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
+  border-radius: 9px;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+  font-size: 1.05rem;
+}
+.my-products-page .page-header,.company-products-page .page-header {
+  align-items: center;
+  padding: .95rem 1.1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
+  box-shadow: var(--ds-shadow-xs);
+}
+.my-products-page .page-header h1,.company-products-page .page-header h1 { font-size: 1.25rem; line-height: 1.45; }
+.my-products-page .page-header p,.company-products-page .page-header p { font-size: .78rem; }
+.my-products-page .card,.company-products-page .product-catalogue-surface {
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-sm);
+}
+.my-products-page :deep(.p-toolbar) { background: var(--ds-color-surface-alt); }
+.my-products-page :deep(.p-datatable-thead > tr > th),
+.company-products-page .product-catalogue-table :deep(.p-datatable-thead > tr > th) { font-size: .74rem; }
+.my-products-page :deep(.p-datatable-tbody > tr > td),
+.company-products-page .product-catalogue-table :deep(.p-datatable-tbody > tr > td) { font-size: .82rem; }
+@media (max-width: 640px) {
+  .my-products-page .page-header,.company-products-page .page-header { align-items: flex-start; padding: .85rem; }
+  .products-heading-icon { width: 2.2rem; height: 2.2rem; }
+}
 
 </style>

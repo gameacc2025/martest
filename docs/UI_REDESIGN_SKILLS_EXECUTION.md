@@ -189,3 +189,13 @@ Next phases must apply this corrected direction across remaining pages, not repe
 - Added structural regression assertions for the new heading/identity/search compositions.
 - Existing APIs, data, product pricing, inquiry permissions, cart/wishlist events, routes and pagination remain unchanged.
 - Static review only; tests/build/browser checks NOT RUN by owner instruction.
+
+
+## Admin and Company operational forms/catalogues — 2026-11-03
+
+- Product editors: contextual product icon, compact title, framed header and softly elevated form sections/repeater rows.
+- Company product views: contextual icons, compact heading, surfaced catalogue table and compact data typography.
+- Company settings: contextual company icon and framed header while retaining real status/verification indicators.
+- Inquiry create/detail: compact title/labels and clear progress/stepper/surface hierarchy while preserving existing stepper semantics.
+- No API, form validation, role/permission, route, publish or inquiry workflow changes.
+- Static review only; tests/build/browser checks NOT RUN by owner instruction.

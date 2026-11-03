@@ -674,4 +674,13 @@ async function submitInquiry() {
   .inquiry-create-page :deep(.p-step) { flex: 0 0 auto; }
 }
 
+
+.inquiry-create-page .page-header-title h1 { font-size: 1.25rem; line-height: 1.45; }
+.inquiry-create-page .page-header-title p { font-size: .78rem; }
+.inquiry-create-page .inquiry-editor-eyebrow { font-size: .72rem; }
+.inquiry-create-page .inquiry-stepper { box-shadow: var(--ds-shadow-sm); }
+.inquiry-create-page .step-title { font-size: .95rem; }
+.inquiry-create-page .field label { font-size: .78rem; }
+.inquiry-create-page .step-body { padding: 1.1rem .5rem; }
+
 </style>

@@ -142,6 +142,7 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
       <!-- Page Header with Trust Signals -->
       <header class="page-header settings-heading">
         <div class="settings-heading-identity">
+          <span class="settings-heading-icon" aria-hidden="true"><i class="pi pi-building"></i></span>
           <div>
             <h1>تنظیمات شرکت</h1>
             <p>اطلاعات عمومی، راه‌های تماس، اعلان‌ها و امنیت حساب شرکت را مدیریت کنید.</p>
@@ -922,4 +923,20 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
   .settings-page .tab-actions,
   .settings-page .tab-actions :deep(.p-button) { width: 100%; }
 }
+
+.settings-page .settings-heading {
+  align-items: center;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
+  box-shadow: var(--ds-shadow-xs);
+}
+.settings-page .settings-heading-identity { display: flex; align-items: center; gap: .8rem; }
+.settings-page .settings-heading h1 { font-size: 1.25rem; line-height: 1.45; }
+.settings-page .settings-heading p { font-size: .78rem; }
+.settings-page .settings-heading-icon { width: 2.5rem; height: 2.5rem; border-radius: 9px; font-size: 1.05rem; }
+.settings-page .trust-badge { min-height: 2.25rem; font-size: .72rem; }
+@media (max-width: 700px) { .settings-page .settings-heading { padding: .85rem; } .settings-page .settings-heading-identity { align-items: flex-start; } }
+
 </style>

@@ -2871,3 +2871,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** e6c1ce4df63bdc2b6609c6941ee92123bd48fceb (updated origin/main).
 - **Push:** Remote main ref updated and verified.
 - **Next:** Continue through public account/inquiry/notification pages and Admin/Company operational pages; then audit all 69 page entries for compact typography, responsive layouts, RTL and light/dark states.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-20 — ADMIN/COMPANY FORMS AND CATALOGUES
+- **Status:** IN_PROGRESS — product editing, company catalogues/settings and inquiry authoring/detail screens received the compact brand-led treatment.
+- **Scope:** Admin ProductForm and InquiryCreate/Detail; Company ProductForm, MyProducts, CompanyProducts, CompanySettings and InquiryCreate.
+- **Changes:**
+  - Product forms now have a contextual box icon, compact H1, framed tinted header, elevated form sections and repeatable image/price/spec/document rows.
+  - MyProducts and CompanyProducts use meaningful box/building icons, framed compact headings, stronger data surfaces and compact table type.
+  - CompanySettings uses a contextual company mark and framed header while retaining API-driven status/verification badges.
+  - Inquiry creation stepper/progress and detail pages retain existing step semantics, with compact headings/labels and clearer surface grouping.
+- **Behavior preserved:** Product CRUD, media/document uploads, required-field validation, publish flow, inquiry creation steps, save draft, permission checks, settings tabs and trust state remain unchanged.
+- **Verification:** Static source/structure review only. Tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** Pending.
+- **Push:** Pending.
+- **Next:** Continue remaining public account and content pages; then Admin/Company notifications, subscriptions and remaining table/detail families.

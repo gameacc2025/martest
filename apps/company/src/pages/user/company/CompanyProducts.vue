@@ -73,7 +73,7 @@ function formatPrice(price) {
 <template>
   <div class="company-products-page">
     <header class="page-header ds-page-heading">
-      <div class="products-heading-copy"><h1>محصولات شرکت</h1><p>فهرست محصولات ثبت‌شده شرکت و وضعیت انتشار آن‌ها را مدیریت کنید.</p></div>
+      <div class="products-heading-copy"><span class="products-heading-icon" aria-hidden="true"><i class="pi pi-building"></i></span><div><h1>محصولات شرکت</h1><p>فهرست محصولات ثبت‌شده شرکت و وضعیت انتشار آن‌ها را مدیریت کنید.</p></div></div>
       <router-link :to="{ name: 'manage-product-create' }" class="company-products-create-link"><i class="pi pi-plus" aria-hidden="true"></i> محصول جدید</router-link>
     </header>
 
@@ -223,4 +223,42 @@ function formatPrice(price) {
   .company-products-page .page-header { align-items: stretch; padding: var(--ds-space-4); }
    .company-products-page .page-header :deep(.p-button), .company-products-create-link { width: 100%; justify-content: center; }
 }
+
+.products-heading-copy { display: flex; align-items: center; gap: .8rem; }
+.products-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
+  border-radius: 9px;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+  font-size: 1.05rem;
+}
+.my-products-page .page-header,.company-products-page .page-header {
+  align-items: center;
+  padding: .95rem 1.1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
+  box-shadow: var(--ds-shadow-xs);
+}
+.my-products-page .page-header h1,.company-products-page .page-header h1 { font-size: 1.25rem; line-height: 1.45; }
+.my-products-page .page-header p,.company-products-page .page-header p { font-size: .78rem; }
+.my-products-page .card,.company-products-page .product-catalogue-surface {
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-sm);
+}
+.my-products-page :deep(.p-toolbar) { background: var(--ds-color-surface-alt); }
+.my-products-page :deep(.p-datatable-thead > tr > th),
+.company-products-page .product-catalogue-table :deep(.p-datatable-thead > tr > th) { font-size: .74rem; }
+.my-products-page :deep(.p-datatable-tbody > tr > td),
+.company-products-page .product-catalogue-table :deep(.p-datatable-tbody > tr > td) { font-size: .82rem; }
+@media (max-width: 640px) {
+  .my-products-page .page-header,.company-products-page .page-header { align-items: flex-start; padding: .85rem; }
+  .products-heading-icon { width: 2.2rem; height: 2.2rem; }
+}
+
 </style>

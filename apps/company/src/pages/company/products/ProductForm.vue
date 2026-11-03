@@ -694,6 +694,7 @@ async function removeExistingDocument(docId) {
       <div class="product-editor-heading-copy">
                 <div class="product-editor-title-row">
           <router-link :to="{ name: 'manage-products' }" class="product-back-link" aria-label="بازگشت به فهرست محصولات"><i class="pi pi-arrow-right" aria-hidden="true"></i></router-link>
+          <span class="product-editor-icon" aria-hidden="true"><i class="pi pi-box"></i></span>
           <div>
             <h1>{{ isEditMode ? 'ویرایش محصول' : 'افزودن محصول جدید' }}</h1>
             <p>{{ isEditMode ? 'اطلاعات و مشخصات محصول شرکت را بازبینی و اصلاح کنید.' : 'مشخصات محصول را برای ثبت در کاتالوگ شرکت تکمیل کنید.' }}</p>
@@ -1535,4 +1536,51 @@ async function removeExistingDocument(docId) {
   .product-form-page .page-header-actions :deep(.p-button),
   .product-form-page .page-header-actions .product-cancel-link { flex: 1 1 0; }
 }
+
+/* Product editor: compact title with a meaningful task icon and framed form surfaces. */
+.product-form-page .page-header {
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-form-page .product-editor-title-row { align-items: center; gap: .65rem; }
+.product-form-page .product-editor-title-row h1 {
+  font-size: clamp(1.25rem, 1.8vw, 1.65rem);
+  line-height: 1.45;
+}
+.product-form-page .product-editor-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
+  border-radius: 9px;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+  font-size: 1.05rem;
+}
+.product-form-page .product-editor-title-row p { font-size: .78rem; line-height: 1.7; }
+.product-form-page .form-section {
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-form-page .form-section h2 { font-size: .94rem; }
+.product-form-page .field > label { font-size: .8rem; }
+.product-form-page .field small { font-size: .72rem; }
+.product-form-page .price-tier-row,
+.product-form-page .custom-spec-row,
+.product-form-page .document-item { box-shadow: var(--ds-shadow-xs); }
+.product-form-page .image-item { box-shadow: var(--ds-shadow-xs); }
+@media (max-width: 767px) {
+  .product-form-page .page-header { align-items: stretch; padding: .85rem; }
+  .product-form-page .product-editor-title-row { align-items: flex-start; }
+  .product-form-page .product-editor-icon { width: 2.2rem; height: 2.2rem; }
+}
+
 </style>
