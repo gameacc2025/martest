@@ -178,3 +178,14 @@ Next phases must apply this corrected direction across remaining pages, not repe
 - Updated stale Home/Categories/ProductListing tests to assert the current static hero and semantic links/buttons rather than removed slideshow or click-router handlers.
 - Product/category API data, routes, category IDs, search/filter/pagination behavior and price logic remain unchanged.
 - Static review only; tests/build/browser checks NOT RUN by owner instruction.
+
+
+## Public product, supplier and search surfaces — 2026-11-03
+
+- Product details: compact framed title, stronger gallery and content surfaces, differentiated purchase panel, compact price typography and clearer section markers.
+- Supplier profile: contextual company identity mark, framed lightly tinted hero and compact catalog heading.
+- Search results: framed search/query context, surfaced filter panel, compact results/sort toolbar and paginator.
+- Shared ProductCard: contained imagery, compact title/company/price hierarchy, distinct footer/action region and restrained hover depth with reduced-motion handling.
+- Added structural regression assertions for the new heading/identity/search compositions.
+- Existing APIs, data, product pricing, inquiry permissions, cart/wishlist events, routes and pagination remain unchanged.
+- Static review only; tests/build/browser checks NOT RUN by owner instruction.

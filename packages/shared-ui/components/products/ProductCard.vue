@@ -415,4 +415,33 @@ const formatPrice = (price) => {
   background: var(--ds-color-surface-hover);
 }
 
+
+/* Shared product cards: real imagery, compact metadata and deliberate action hierarchy. */
+.product-card :deep(.p-card) {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+  transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast), transform var(--ds-transition-fast);
+}
+.product-card:not(.product-card--skeleton):hover :deep(.p-card) {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ds-color-primary) 35%, var(--ds-color-border));
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-md);
+}
+.product-media { background: var(--ds-color-surface-alt); }
+.product-image { object-fit: contain; padding: .65rem; }
+.product-card :deep(.p-card-footer) { background: var(--ds-color-surface-alt); }
+.product-name { font-size: .9rem; line-height: 1.6; }
+.product-company { font-size: .72rem; }
+.final-price { font-size: .9rem; }
+.product-reviews-count,.product-features { font-size: .72rem; }
+.product-actions :deep(.p-button) { min-height: 2.75rem; font-size: .74rem; }
+.product-wishlist :deep(.p-button) { min-width: 2.75rem; min-height: 2.75rem; }
+@media (prefers-reduced-motion: reduce) {
+  .product-card :deep(.p-card) { transition: none; }
+  .product-card:not(.product-card--skeleton):hover :deep(.p-card) { transform: none; }
+}
+
 </style>

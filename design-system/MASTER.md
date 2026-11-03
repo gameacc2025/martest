@@ -166,3 +166,12 @@ Use a distinct Persuade composition for public discovery without oversized gener
 - Feature rows should use their actual, task-relevant icons and concise descriptions, not unsupported statistics.
 - Avoid backdrop blur for ordinary category/price chips; use solid surfaces and readable contrast.
 - Use real API-backed products, images, supplier verification, prices and category counts only.
+
+
+## Public product and supplier surfaces — 2026-11-03
+
+- Product detail pages should make the product title/category/technical metadata, gallery, price/inquiry actions and supplier identity distinct without oversized type.
+- Use a compact framed title panel, a clear image canvas and a differentiated purchase panel; price should be visually prominent but not dominate the page.
+- Supplier profile headers should communicate company identity with a contextual mark and existing company data; do not invent ratings, certifications or claims.
+- Search pages need a clear query context, search action, filters, sort controls, result count and pagination as distinct but compact zones.
+- Shared product cards use real imagery, concise metadata, clear pricing and actions with subtle surface depth.

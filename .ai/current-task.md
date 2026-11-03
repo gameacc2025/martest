@@ -186,3 +186,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Existing product/category APIs, route names, query parameters, filters, price rendering and loading/error/empty states remain unchanged.
 - Static source review only; tests/build/browser checks NOT RUN — owner instruction.
 - **Commit:** 17230aed53ccd532da211b7fea86a3d12192e80d — https://github.com/gameacc2025/martest/commit/17230aed53ccd532da211b7fea86a3d12192e80d
+
+
+### Public product, supplier and search experience — Phase 19
+- Product detail page now has a compact framed product heading, stronger image/gallery surface, differentiated purchase panel, and compact section/price typography.
+- Supplier profile now uses a purposeful company identity mark and a framed brand-tinted header; product catalog and pagination remain API-backed.
+- Search results now have a framed query header, compact search controls, a clearer filter rail, results summary and paginator surfaces.
+- Shared ProductCard now uses image containment, compact title/company/price hierarchy, a clear footer/action area, subtle elevation and accessible reduced-motion handling.
+- Added component regression assertions for product detail heading, company identity mark and search header.
+- No product data, supplier details, price values, cart/wishlist behavior, API contracts or route behavior changed.
+- Static source review only; tests/build/browser checks NOT RUN — owner instruction.

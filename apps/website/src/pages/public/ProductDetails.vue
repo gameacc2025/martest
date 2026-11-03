@@ -1386,4 +1386,53 @@ const goBack = () => router.push('/products')
     scroll-behavior: auto !important;
   }
 }
+
+/* Product detail hierarchy: compact title, clear price emphasis and distinct reading surfaces. */
+.product-heading {
+  margin-bottom: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--pd-border);
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--pd-accent) 3%, var(--pd-surface));
+  box-shadow: var(--ds-shadow-xs);
+}
+.product-heading h1 { font-size: clamp(1.3rem, 2vw, 1.7rem); line-height: 1.5; letter-spacing: 0; }
+.product-meta { margin-top: .55rem; font-size: .78rem; gap: .45rem .85rem; }
+.category-chip { border: 1px solid color-mix(in srgb, var(--pd-accent) 18%, var(--pd-border)); border-radius: 6px; font-size: .7rem; }
+.gallery-card,.content-card,.purchase-card,.company-card,.help-card,.tags-card {
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+}
+.gallery-card { padding: .85rem; }
+.main-image-frame { border: 1px solid var(--pd-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface-alt); }
+.content-card { padding: 1.1rem; }
+.section-heading { margin-bottom: .85rem; }
+.section-icon,.company-avatar,.help-icon { width: 2.5rem; height: 2.5rem; border-radius: 9px; font-size: 1rem; }
+.section-heading h2 { font-size: .96rem; }
+.section-heading p { font-size: .73rem; }
+.short-description { font-size: .88rem; }
+.full-description { font-size: .84rem; }
+.specification-row { border-radius: 6px; }
+.purchase-card {
+  border-color: color-mix(in srgb, var(--pd-accent) 22%, var(--pd-border));
+  background: color-mix(in srgb, var(--pd-accent) 3%, var(--pd-surface));
+  box-shadow: var(--ds-shadow-sm);
+}
+.price-caption { font-size: .76rem; }
+.product-price { color: var(--ds-color-primary-text); font-size: clamp(1.15rem, 1.7vw, 1.4rem); }
+.price-note,.price-tier { font-size: .73rem; }
+.price-unavailable { border: 1px solid var(--pd-border); background: var(--pd-surface); font-size: .78rem; }
+.company-card { background: var(--pd-surface); }
+.company-title h2 { font-size: .9rem; }
+.company-type { font-size: .7rem; }
+.help-card { border: 1px solid var(--pd-border); }
+.help-card strong { font-size: .8rem; }
+.help-card p { font-size: .73rem; }
+.tags-card h2 { font-size: .84rem; }
+.product-tag { border: 1px solid var(--pd-border); font-size: .7rem; }
+@media (max-width: 760px) {
+  .product-heading { padding: .85rem; }
+  .purchase-card { box-shadow: var(--ds-shadow-xs); }
+}
+
 </style>

@@ -136,12 +136,15 @@ function goToProducts() {
 
       <template v-else>
         <header class="company-hero">
-          <div class="company-hero__copy">
+          <div class="company-hero__identity">
+            <span class="company-hero__icon" aria-hidden="true"><i class="pi pi-building"></i></span>
+            <div class="company-hero__copy">
             <h1 id="company-profile-title" class="ds-h1">{{ company?.name || 'محصولات منتشرشده این شرکت' }}</h1>
             <p v-if="company?.type" class="company-type">{{ company.type }}</p>
             <p class="ds-lead">
               این فهرست فقط محصولاتی را نشان می‌دهد که در کاتالوگ عمومی منتشر شده‌اند.
             </p>
+            </div>
           </div>
           <div class="company-hero__meta">
             <span class="ds-badge ds-badge--info">{{ totalProducts.toLocaleString('fa-IR') }} محصول عمومی</span>
@@ -234,4 +237,48 @@ function goToProducts() {
   .company-hero__meta { grid-column: auto; align-items: stretch; }
   .company-product-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+.company-hero {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: color-mix(in srgb, var(--ds-color-primary) 4%, var(--ds-color-surface));
+  box-shadow: var(--ds-shadow-xs);
+}
+.company-hero__identity { display: flex; min-width: 0; align-items: center; gap: .85rem; }
+.company-hero__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.8rem;
+  width: 2.8rem;
+  height: 2.8rem;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
+  border-radius: 10px;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+  font-size: 1.1rem;
+}
+.company-hero__copy h1 { font-size: clamp(1.25rem, 2vw, 1.65rem); line-height: 1.45; }
+.company-hero__copy .ds-lead { margin-top: .3rem; font-size: .78rem; line-height: 1.7; }
+.company-type { font-size: .76rem; }
+.company-hero__meta { align-items: flex-end; gap: .5rem; }
+.company-hero__meta .ds-badge { font-size: .72rem; }
+.company-hero__meta :deep(.p-button) { min-height: 2.75rem; font-size: .76rem; }
+.company-products-section { gap: 1rem; }
+.company-products-section .ds-section-head { padding-bottom: .65rem; border-bottom: 1px solid var(--ds-color-border); }
+.company-products-section .ds-h2 { font-size: 1rem; }
+.company-state { border-radius: var(--ds-radius-lg); box-shadow: var(--ds-shadow-xs); }
+@media (max-width: 1000px) {
+  .company-hero { grid-template-columns: minmax(0,1fr); }
+  .company-hero__meta { align-items: flex-start; }
+}
+@media (max-width: 640px) {
+  .company-hero { padding: .85rem; }
+  .company-hero__identity { align-items: flex-start; }
+  .company-hero__icon { flex-basis: 2.4rem; width: 2.4rem; height: 2.4rem; }
+}
+
 </style>

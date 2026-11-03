@@ -86,6 +86,7 @@ describe('Website Company Profile', () => {
 
     expect(getProducts).toHaveBeenCalledWith({ page: 1, limit: 12, companyId: 37 })
     expect(wrapper.find('#company-profile-title').text()).toContain('شرکت ارتباطات نمونه')
+    expect(wrapper.find('.company-hero__icon').exists()).toBe(true)
     expect(wrapper.find('.company-type').text()).toBe('SUPPLIER')
     expect(wrapper.find('.product-card h3').text()).toBe('تجهیزات انتقال نوری')
     expect(wrapper.find('.company-hero__meta').text()).toContain('۱ محصول عمومی')

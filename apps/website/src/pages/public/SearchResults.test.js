@@ -108,6 +108,7 @@ describe('Website Search Results', () => {
       sortOrder: 'desc',
     })
     expect(wrapper.find('#search-results-title').text()).toContain('فیبر نوری')
+    expect(wrapper.find('.sr-head').exists()).toBe(true)
     expect(wrapper.find('.product-card h3').text()).toBe('مودم فیبر نوری')
     expect(wrapper.find('.sr-results-count').text()).toContain('۱')
   })

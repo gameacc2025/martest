@@ -2855,3 +2855,19 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** 17230aed53ccd532da211b7fea86a3d12192e80d (updated origin/main).
 - **Push:** Remote main ref updated and verified.
 - **Next:** Continue corrected art direction through public product details, company profiles and account pages, then complete Admin/Company list/detail screens and 69-page audit.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-19 — PRODUCT DETAILS, SUPPLIER PROFILE AND SEARCH
+- **Status:** IN_PROGRESS — public product/supplier/search surfaces received the corrected compact and layered visual system.
+- **Scope:** ProductDetails, CompanyProfile, SearchResults, shared ProductCard and page regression tests.
+- **Changes:**
+  - ProductDetails uses a framed compact title area, differentiated gallery/content/purchase/company/help surfaces, compact price hierarchy and clearer section markers.
+  - CompanyProfile has a contextual company identity mark, framed tinted hero, compact company metadata and clearer product section hierarchy.
+  - SearchResults uses a framed query/search header, surfaced filters, compact result count/sort toolbar, clear empty/error states and a framed paginator.
+  - Shared ProductCard uses contained product imagery, compact identity/pricing, a differentiated footer and subtle surface elevation; reduced-motion users do not receive hover lift.
+  - Added regression assertions for product heading, company identity mark and search header.
+- **Behavior preserved:** product and company APIs, search API, query synchronization, category/filter/sort/pagination, retail pricing, inquiry eligibility, cart and wishlist events unchanged.
+- **Verification:** Static source/structure review only. Tests, builds and browser checks NOT RUN — owner instruction.
+- **Commit:** Pending.
+- **Push:** Pending.
+- **Next:** Continue through public account/inquiry/notification pages and Admin/Company operational pages; then audit all 69 page entries for compact typography, responsive layouts, RTL and light/dark states.
