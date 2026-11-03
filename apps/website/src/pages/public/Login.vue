@@ -43,6 +43,10 @@
               <InputText
                 id="login-phone"
                 v-model="form.phone"
+                type="tel"
+                inputmode="tel"
+                autocomplete="username"
+                required
                 placeholder="شماره تلفن خود را وارد کنید"
                 class="auth-input"
                 :class="{ 'p-invalid': error && !form.phone }"
@@ -54,6 +58,8 @@
               <Password
                 inputId="login-password"
                 v-model="form.password"
+                autocomplete="current-password"
+                required
                 placeholder="رمز عبور خود را وارد کنید"
                 class="auth-input"
                 inputClass="w-full"
