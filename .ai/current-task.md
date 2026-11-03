@@ -251,3 +251,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Existing notification APIs, routes, drawer behavior and message actions are unchanged.
 - Static source review only; tests/build/browser checks NOT RUN.
 - **Merged:** PR #83 — https://github.com/gameacc2025/martest/pull/83. Squash commit: fc8baacd3457513d95e356542bec0c25ff8e0f68.
+
+
+### Notification mailbox follow-up — 2026-11-03
+- Removed the duplicate internal `mail-breadcrumb` from Admin, Company and Website inboxes; the shared layout breadcrumb is now the only page path.
+- Preserved the inbox title and compact header actions.
+- Bounded the desktop mailbox to the viewport with independent sidebar/message-list scrolling; the RTL reading drawer remains right-anchored and becomes full-screen on mobile.
+- Added regression tests in all three apps for the absence of the duplicate breadcrumb.
+- API/business behavior unchanged. Automated tests/builds/browser checks NOT RUN; verify CI before marking this slice validated.
