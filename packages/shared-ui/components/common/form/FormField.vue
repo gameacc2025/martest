@@ -14,7 +14,7 @@
  *
  * Token-driven; RTL-aware; responsive.
  */
-import { computed, useId } from 'vue'
+import { computed, getCurrentInstance } from 'vue'
 
 const props = defineProps({
   label: { type: String, default: '' },
@@ -25,8 +25,12 @@ const props = defineProps({
   success: { type: String, default: '' },
 })
 
-// A stable id so the label can be associated for accessibility.
-const fieldId = useId()
+// Vue instance UIDs are available throughout the declared Vue 3.4+ range.
+// This avoids depending on useId(), which was introduced in Vue 3.5.
+const instance = getCurrentInstance()
+const fieldId = `ds-form-field-${instance?.uid ?? 'field'}`
+const messageId = computed(() => `${fieldId}-message`)
+const message = computed(() => errorText.value || props.success || props.help)
 
 const errorText = computed(() => {
   if (Array.isArray(props.error)) return props.error.filter(Boolean).join('، ')
@@ -43,17 +47,17 @@ const hasError = computed(() => !!errorText.value)
     </label>
 
     <div class="form-field-control">
-      <slot :id="fieldId" :invalid="hasError"></slot>
+      <slot :id="fieldId" :invalid="hasError" :described-by="message ? messageId : undefined"></slot>
     </div>
 
     <!-- Error takes precedence, then success, then help. -->
-    <small v-if="hasError" class="form-field-msg form-field-msg--error" role="alert">
-      <i class="pi pi-exclamation-circle"></i> {{ errorText }}
+    <small v-if="hasError" :id="messageId" class="form-field-msg form-field-msg--error" role="alert">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i> {{ errorText }}
     </small>
-    <small v-else-if="success" class="form-field-msg form-field-msg--success">
-      <i class="pi pi-check-circle"></i> {{ success }}
+    <small v-else-if="success" :id="messageId" class="form-field-msg form-field-msg--success" aria-live="polite">
+      <i class="pi pi-check-circle" aria-hidden="true"></i> {{ success }}
     </small>
-    <small v-else-if="help" class="form-field-msg form-field-msg--help">
+    <small v-else-if="help" :id="messageId" class="form-field-msg form-field-msg--help">
       {{ help }}
     </small>
   </div>
