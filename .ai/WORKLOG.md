@@ -2889,7 +2889,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 ## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-21 — RIGHT-SIDE NOTIFICATION READING DRAWER
-- **Status:** IMPLEMENTED ON FEATURE BRANCH — awaiting merge.
+- **Status:** MERGED INTO MAIN.
 - **Scope:** Admin, Company and Website notification inbox pages and their regression tests.
 - **Changes:**
   - Replaced the fixed third-column reading panel with a viewport-level right-side drawer modeled on the supplied email reading-pane reference.
