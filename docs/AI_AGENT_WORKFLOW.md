@@ -43,3 +43,16 @@ A task is complete only when applicable tests/checks have been run and reported 
 ## Agent handoff
 
 At the end of a session, record what changed, commands and results, commit SHA, push state, open risks, and one actionable next step in `.ai/WORKLOG.md` and `.ai/current-task.md`. The next agent must read that handoff before continuing.
+
+
+## Mandatory UI/UX skills
+
+Every meaningful UI change must follow `.ai/UI_SKILLS.md` and load the relevant installed skill instructions before editing. The shared toolkit is UI UX Pro Max, Taste Skill, Impeccable, and Vercel Web Design Guidelines. Use each skill according to the surface and task type, while preserving the repository's Vue/PrimeVue/Tailwind architecture, current design system, Persian/RTL support, accessibility, API contracts, and business behavior. Do not follow a generic recommendation that conflicts with an explicit product decision.
+
+Install/update the Codex skills from the repository root in PowerShell with:
+
+```powershell
+.\scripts\install-ui-skills.ps1
+```
+
+The owner has asked agents not to focus on browser testing. Browser automation, screenshot loops, and interactive visual checks remain NOT RUN unless explicitly re-authorized. Static review and writing regression tests are still expected where applicable. See `.ai/UI_SKILLS.md` for the complete routing and verification policy.
