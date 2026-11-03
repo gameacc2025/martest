@@ -359,27 +359,20 @@ function categoryIcon(item) {
 
 <template>
   <section class="mail-page" dir="rtl">
-    <header class="mail-header">
-      <div class="mail-title-group">
-        <div class="mail-title-copy">
-          <h1>صندوق اعلان‌ها</h1>
-          
-        </div>
-      </div>
-      <div class="header-actions" aria-label="ابزارهای صندوق اعلان">
-        <span class="header-icon-wrap" :title="`${unreadCount} اعلان خوانده‌نشده`">
-          <i class="pi pi-envelope" aria-hidden="true"></i>
-          <span v-if="unreadCount" class="header-icon-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
-        </span>
-        <router-link to="/notification-preferences" class="header-icon-button" aria-label="تنظیمات اعلان‌ها" title="تنظیمات اعلان‌ها">
-          <i class="pi pi-cog" aria-hidden="true"></i>
-        </router-link>
-      </div>
-    </header>
-
     <div class="mail-layout">
       <aside class="mail-sidebar" aria-label="پوشه‌ها و دسته‌بندی پیام‌ها">
-        <div class="sidebar-top"><span><i class="pi pi-inbox"></i> صندوق پیام‌ها</span><span class="sidebar-total">{{ folderCounts.all }}</span></div>
+        <div class="sidebar-top">
+          <span class="sidebar-heading"><i class="pi pi-inbox" aria-hidden="true"></i> صندوق پیام‌ها <b class="sidebar-total">{{ folderCounts.all }}</b></span>
+          <div class="sidebar-header-actions" aria-label="ابزارهای صندوق اعلان">
+            <span class="header-icon-wrap" :title="`${unreadCount} اعلان خوانده‌نشده`" aria-label="اعلان‌های خوانده‌نشده">
+              <i class="pi pi-envelope" aria-hidden="true"></i>
+              <span v-if="unreadCount" class="header-icon-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+            </span>
+            <router-link to="/notification-preferences" class="header-icon-button" aria-label="تنظیمات اعلان‌ها" title="تنظیمات اعلان‌ها">
+              <i class="pi pi-cog" aria-hidden="true"></i>
+            </router-link>
+          </div>
+        </div>
         <router-link to="/notification-preferences" class="sidebar-compose"><i class="pi pi-cog"></i> تنظیمات اعلان‌ها</router-link>
         <p class="sidebar-section-title">پوشه‌ها</p>
 
@@ -519,18 +512,21 @@ function categoryIcon(item) {
 </template>
 
 <style scoped>
-.mail-page{min-width:0;padding:1rem;background:#f3f5fa;color:#17243a;font-family:var(--ds-font-family);direction:rtl}
-.mail-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:4.4rem;margin:0 0 .85rem;padding:.25rem .1rem;background:transparent}
-.mail-title-copy h1{margin:0;color:#17243a;font-size:1.08rem;font-weight:700;line-height:1.5}
-.header-actions{display:flex;align-items:center;gap:.4rem}
+.mail-page{width:calc(100% + 3rem);min-width:0;margin-inline:-1.5rem;padding:0;background:#f3f5fa;color:#17243a;font-family:var(--ds-font-family);direction:rtl}
+.sidebar-header-actions{display:flex;align-items:center;gap:.35rem}
+.sidebar-heading{display:flex;align-items:center;gap:.5rem;min-width:0}
+.sidebar-heading>i{color:#8175ee}
+.header-icon-wrap,.header-icon-button{position:relative;display:grid;place-items:center;flex:0 0 2rem;width:2rem;height:2rem;border:1px solid #e7e9f2;border-radius:50%;background:#fff;color:#7b70ed;font-size:.82rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
+.header-icon-wrap:hover,.header-icon-button:hover{border-color:#d7d2ff;background:#f4f2ff}
+.header-icon-badge{position:absolute;top:-.28rem;inset-inline-end:-.28rem;display:grid;place-items:center;min-width:1rem;height:1rem;padding:0 .18rem;border:2px solid #fff;border-radius:1rem;background:#8275f4;color:#fff;font-size:.55rem;font-weight:700;line-height:1}
 .header-icon-wrap,.header-icon-button{position:relative;display:grid;place-items:center;flex:0 0 2.25rem;width:2.25rem;height:2.25rem;border:1px solid #e7e9f2;border-radius:50%;background:#fff;color:#7b70ed;font-size:.9rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
 .header-icon-wrap:hover,.header-icon-button:hover{border-color:#d7d2ff;background:#f4f2ff}
 .header-icon-badge{position:absolute;top:-.28rem;inset-inline-end:-.28rem;display:grid;place-items:center;min-width:1rem;height:1rem;padding:0 .18rem;border:2px solid #f3f5fa;border-radius:1rem;background:#8275f4;color:#fff;font-size:.55rem;font-weight:700;line-height:1}
 
-.mail-layout{display:grid;direction:rtl;grid-template-columns:260px minmax(0,1fr);height:calc(100dvh - 130px);min-height:32rem;overflow:hidden;border:1px solid #e9eaf2;border-radius:5px;background:#fff;box-shadow:0 2px 12px rgba(26,39,68,.035)}
+.mail-layout{display:grid;direction:rtl;grid-template-columns:260px minmax(0,1fr);height:calc(100dvh - 130px);min-height:32rem;overflow:hidden;border:0;border-radius:0;background:#fff;box-shadow:none}
 .mail-sidebar{direction:rtl;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:.75rem .65rem;border-inline-end:1px solid #eceef5;background:#fff}
-.sidebar-top{display:flex;align-items:center;justify-content:space-between;min-height:3rem;margin:0 0 .65rem;padding:.35rem .6rem;color:#23324a;font-size:.8rem;font-weight:700}
-.sidebar-top span:first-child{display:flex;align-items:center;gap:.5rem}.sidebar-top i{color:#8175ee}
+.sidebar-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;min-height:3rem;margin:0 0 .65rem;padding:.35rem .45rem;color:#23324a;font-size:.8rem;font-weight:700}
+.sidebar-top i{color:#8175ee}
 .sidebar-total{display:grid;place-items:center;min-width:1.35rem;height:1.35rem;border-radius:4px;background:#8275f4;color:#fff;font-size:.65rem}
 .sidebar-compose{display:flex;align-items:center;justify-content:center;gap:.45rem;min-height:2.55rem;margin:0 0 .9rem;border:1px solid #eeeff6;border-radius:20px;background:#f8f9fc;color:#33435d;font-size:.76rem;text-decoration:none}
 .sidebar-compose:hover{border-color:#d9d5ff;background:#f2f0ff;color:#7668e8}
@@ -583,7 +579,7 @@ function categoryIcon(item) {
 .pagination span{color:#8a96aa;font-size:.7rem;font-variant-numeric:tabular-nums}
 .mail-page button{font-family:inherit}.mail-page button:focus-visible,.mail-page a:focus-visible,.mail-page select:focus-visible{outline:2px solid #8174f0;outline-offset:2px}
 @media(max-width:1050px){.mail-layout{grid-template-columns:220px minmax(0,1fr)}.list-toolbar{flex-wrap:wrap}.list-search{order:3;flex:1 1 100%;width:100%;max-width:100%;margin:0}}
-@media(max-width:700px){.mail-layout{height:auto;min-height:0}.mail-page{padding:.55rem}.mail-header{align-items:flex-start;flex-direction:column;padding:.25rem 0}.header-actions{width:100%;justify-content:flex-start}.mail-layout{grid-template-columns:minmax(0,1fr);min-height:0}.mail-sidebar{border-inline-end:0;border-bottom:1px solid #eceef5;padding:.55rem}.sidebar-top,.sidebar-compose,.sidebar-section-title,.sidebar-divider{display:none}.mail-sidebar .folder-link{display:inline-flex;width:auto;min-height:2.15rem;margin:.1rem}.list-toolbar{gap:.45rem;padding:.5rem}.list-toolbar-left{flex:1}.list-search{order:0;flex:1 1 100%;width:100%;max-width:100%;margin:0}.toolbar-actions{margin-inline-start:auto}.message-row{padding-inline:.25rem;gap:.25rem}.row-select{flex-basis:1rem}.row-status{flex-basis:1.7rem;width:1.7rem;height:1.7rem}.row-actions :deep(.p-button){min-width:1.8rem;width:1.8rem;height:1.8rem}}
+@media(max-width:700px){.mail-page{width:calc(100% + 1.1rem);margin-inline:-.55rem}.mail-layout{height:auto;min-height:0}.mail-layout{grid-template-columns:minmax(0,1fr);min-height:0}.mail-sidebar{border-inline-end:0;border-bottom:1px solid #eceef5;padding:.55rem}.sidebar-compose,.sidebar-section-title,.sidebar-divider{display:none}.sidebar-top{display:flex}.sidebar-header-actions{gap:.25rem}.mail-sidebar .folder-link{display:inline-flex;width:auto;min-height:2.15rem;margin:.1rem}.list-toolbar{gap:.45rem;padding:.5rem}.list-toolbar-left{flex:1}.list-search{order:0;flex:1 1 100%;width:100%;max-width:100%;margin:0}.toolbar-actions{margin-inline-start:auto}.message-row{padding-inline:.25rem;gap:.25rem}.row-select{flex-basis:1rem}.row-status{flex-basis:1.7rem;width:1.7rem;height:1.7rem}.row-actions :deep(.p-button){min-width:1.8rem;width:1.8rem;height:1.8rem}}
 @media(prefers-reduced-motion:reduce){.mail-page *,.mail-page *::before,.mail-page *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 
