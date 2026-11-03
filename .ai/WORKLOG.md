@@ -2852,6 +2852,6 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Rewrote stale homepage/category/listing test assertions to match the current static hero and semantic router-link/button implementation.
 - **Behavior preserved:** Product/category APIs, route names, category query IDs, filters, pagination, price display, and loading/error/empty states unchanged.
 - **Verification:** Static source/structure review only. Tests, builds and browser checks NOT RUN — owner instruction.
-- **Commit:** Pending.
-- **Push:** Pending.
+- **Commit:** 17230aed53ccd532da211b7fea86a3d12192e80d (updated origin/main).
+- **Push:** Remote main ref updated and verified.
 - **Next:** Continue corrected art direction through public product details, company profiles and account pages, then complete Admin/Company list/detail screens and 69-page audit.
