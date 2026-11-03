@@ -289,3 +289,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Updated shared KPI and DashboardPanel components; all API-backed dashboard data, route destinations and permission checks remain unchanged.
 - UI-only work. Per owner instruction, no UI tests/build/browser validation was run.
 - Remaining: continue route-specific polish for every Admin and Company management page; this shared layer is the common foundation, not a claim that every page has been individually redesigned.
+
+
+## Dashboard correction — 2026-11-03
+- Admin dashboard now places platform analytics directly after the KPI row; operational shortcuts and service health are secondary. The chart visualizes existing aggregate counts only; it is not a time-series trend.
+- Company dashboard now includes two API-backed status charts: received inquiries by status and company products by lifecycle status. Both use existing inquiry stats/product list data; no sample values or backend changes.
+- Shared AnalyticsChart now has clearer grid structure, baseline, wider bars and compact labels.
+- No API contracts, routes, permissions or business workflows changed. UI tests/builds were intentionally not run in this pass.
