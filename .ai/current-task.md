@@ -1562,3 +1562,10 @@ Admin and Company share a more accessible responsive shell: mobile drawer state 
 
 - Hardened Admin and Company mobile drawer scroll-lock ownership: the shell now records whether it actually acquired the body lock and only restores it when it owns that lock. Unmount cleanup no longer clears a body overflow value when the drawer was never opened.
 - UI-only. API, backend, routes, stores, auth and permission behavior unchanged. Browser testing intentionally not run per user instruction.
+
+
+## Public account navigation correction — 2026-11-03
+
+- Public header account-menu and mobile profile links now respect `accessProfile.type`: CUSTOMER remains on Website `/profile`; STAFF is handed off to Admin `/profile`; COMPANY is handed off to Company `/profile`.
+- The public account dropdown also sends STAFF inquiry navigation to Admin `/inquiries` rather than the Company panel. PKCE handoff remains in use; no tokens are placed in URLs.
+- No API/backend changes. Browser testing intentionally not run per user instruction.
