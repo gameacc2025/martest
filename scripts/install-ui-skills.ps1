@@ -3,27 +3,31 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $repoRoot
 try {
-    Write-Host 'Installing UI UX Pro Max for Codex...'
+    # UI UX Pro Max has a native all-assistants installer.
+    Write-Host 'Installing UI UX Pro Max for all supported assistants...'
     npm install --global ui-ux-pro-max-cli
     if ($LASTEXITCODE -ne 0) { throw 'npm install --global ui-ux-pro-max-cli failed.' }
 
-    uipro init --ai codex
-    if ($LASTEXITCODE -ne 0) { throw 'uipro init --ai codex failed.' }
+    uipro init --ai all
+    if ($LASTEXITCODE -ne 0) { throw 'uipro init --ai all failed.' }
 
-    Write-Host 'Installing Taste Skill (design-taste-frontend) for Codex...'
-    npx --yes skills add https://github.com/Leonxlnx/taste-skill --skill design-taste-frontend -a codex
+    # The Skills CLI targets every supported agent directory with --agent '*'.
+    # Project scope keeps the skills shared with the repository/team.
+    Write-Host 'Installing Taste Skill for all supported agents...'
+    npx --yes skills add Leonxlnx/taste-skill --skill design-taste-frontend --agent '*' --yes
     if ($LASTEXITCODE -ne 0) { throw 'Taste Skill installation failed.' }
 
-    Write-Host 'Installing Impeccable...'
-    npx --yes impeccable install
-    if ($LASTEXITCODE -ne 0) { throw 'Impeccable installation failed.' }
+    Write-Host 'Installing Impeccable for all supported agents...'
+    npx --yes skills add pbakaus/impeccable --skill impeccable --agent '*' --yes
+    if ($LASTEXITCODE -ne 0) { throw 'Impeccable skill installation failed.' }
 
-    Write-Host 'Installing Vercel Web Design Guidelines for Codex...'
-    npx --yes skills add vercel-labs/agent-skills --skill web-design-guidelines -a codex
+    Write-Host 'Installing Vercel Web Design Guidelines for all supported agents...'
+    npx --yes skills add vercel-labs/agent-skills --skill web-design-guidelines --agent '*' --yes
     if ($LASTEXITCODE -ne 0) { throw 'Vercel Web Design Guidelines installation failed.' }
 
     Write-Host ''
-    Write-Host 'Installation commands completed. Review the generated .agents/skills and Impeccable files, then restart Codex so it reloads the skills.'
+    Write-Host 'All installation commands completed. Check the installed agent skill directories and restart your coding agents.'
+    Write-Host 'For Impeccable-specific native integrations or commands, optionally run: npx impeccable install'
     Write-Host 'No tests, builds, or browser checks were run by this installer.'
 }
 finally {
