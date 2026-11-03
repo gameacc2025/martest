@@ -8,7 +8,7 @@
 
 **Validation policy:** Regression tests were added for request validation and missing SMTP configuration. Per owner instruction, no tests, build, or browser checks were run; do not claim runtime delivery is verified.
 
-**Latest implementation commit:** `c8f1ff4` (contact SMTP configuration regression test). All changes are committed directly to `main`.
+**Latest implementation commit:** `1fc950d` (require an explicitly configured SMTP sender). The route inventory and OpenAPI coverage now include 151 registered module routes. All changes are committed directly to `main`.
 
 
 ---
