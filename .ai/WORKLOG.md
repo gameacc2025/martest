@@ -2561,3 +2561,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Final pass: per-instance Input fallback IDs; additive ARIA descriptions; DataTable filter names; Vue 3.4-compatible FormField IDs/feedback; Contact Us Select label association; consistent accessible forgot-password fields in all three apps; login and registration autofill semantics.
 - Contact Us backend integration remains unresolved until an approved endpoint and verified business contact details are supplied. No fake endpoint or successful-send behavior added.
 - UI source implementation is complete. Responsive/dark/RTL visual acceptance and build/CI/runtime sign-off are not claimed. Tests/browser checks were not run per user instruction. No API/backend/database/auth/permission/business-flow changes.
+
+
+## 2026-11-03 — CONTACT-FORM-FAKE-SUCCESS — COMPLETE
+
+- **Status:** DONE — committed directly to `main`.
+- **Finding:** Website Contact Us simulated a successful delivery with a one-second timeout, displayed a success dialog, and cleared the visitor's message despite having no confirmed public submission endpoint.
+- **Fix:** Removed the simulated delay and false success dialog. After client-side validation, the form now explicitly says the message was not sent because the delivery service is not configured; entered values remain intact for later retry. Removed the unused loading state.
+- **Scope:** Website UI only. No backend, API contract, database, or business workflow changed. No endpoint was invented.
+- **Commits:** `4730732` (behavior fix), `113dd19` (unused state cleanup), `7f3b289` (current-task handoff), `5db4892` (UI execution log).
+- **Verification:** Source changes and documentation were committed through the GitHub repository interface. No browser tests, automated tests, or builds were run, per owner instruction.
+- **Remaining:** A real contact workflow still requires an approved endpoint and verified business contact details.
