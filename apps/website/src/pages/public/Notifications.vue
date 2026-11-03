@@ -586,8 +586,8 @@ function typeLabel(item) {
 </style>
 
 <style>
-.reading-overlay{position:fixed;inset:0;z-index:1200;display:flex;justify-content:flex-start;background:rgba(10,18,30,.52);backdrop-filter:blur(1.5px)}
-.reading-drawer{display:flex;flex-direction:column;width:min(40rem,42vw);height:100%;min-width:0;background:#fff;color:#182235;box-shadow:-12px 0 36px rgba(12,24,40,.18);border-inline-start:1px solid #e9eaf2;direction:rtl;animation:notification-drawer-in .22s ease-out both}
+.reading-overlay{position:fixed;inset:0;z-index:1200;display:flex;direction:rtl;justify-content:flex-start;background:rgba(10,18,30,.52);backdrop-filter:blur(1.5px)}
+.reading-drawer{display:flex;flex-direction:column;width:min(38rem,38vw);height:100%;min-width:0;background:#fff;color:#182235;box-shadow:-12px 0 36px rgba(12,24,40,.18);border-inline-start:1px solid #e9eaf2;direction:rtl;animation:notification-drawer-in .22s ease-out both}
 .drawer-toolbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:.75rem;min-height:3.35rem;padding:.35rem .75rem;border-bottom:1px solid #eceef5;background:#fff}
 .drawer-tool-group{display:flex;align-items:center;gap:.2rem}
 .drawer-scroll{flex:1;min-height:0;overflow-y:auto;padding:1.2rem 1.35rem 1.5rem}
