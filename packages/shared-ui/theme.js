@@ -5,20 +5,8 @@
  * (palette, surfaces, focus ring, component shape) lives here or in
  * assets/design-system/tokens.scss; pages must not hardcode brand colors.
  *
- * Brand palette
- *   Primary (brand)  #01bec2  logo, icons, indicators, focus ring in dark mode
- *   Secondary (deep) #003a54  hero/sidebar surfaces, headings in light mode
- *   Petrol           #004d6f  pressed states, footer
- *   Text on teal     #0a6a78  links / text that sits on light surfaces
- *
- * ACCESSIBILITY RULE (WCAG 2.1 AA, verified numerically):
- *   white on #01bec2 is only 2.30:1 and FAILS. Therefore the light-theme
- *   *action* color (buttons, links, checked states) is the deeper shade
- *   {primary.700} #00797f (white 5.20:1, 4.90:1 on the #f4f9fb page).
- *   In the dark theme the bright brand teal is used with deep-blue text
- *   (#003a54 on #01bec2 = 5.28:1; #01bec2 on #08293a = 6.59:1).
- *   To change the action color later, edit ONLY the two `primary` blocks below
- *   and re-check contrast.
+ * Shared palette: turquoise #12B8A6, sky #39BFE0, technical blue #2878C7,
+ * deep navy #173B63 and dark sidebar #142B46.
  */
 import { definePreset } from '@primevue/themes'
 import Lara from '@primevue/themes/lara'
