@@ -49,6 +49,7 @@ flowchart LR
   api --> mod_auth["auth module"]
   api --> mod_categories["categories module"]
   api --> mod_companies["companies module"]
+  api --> mod_contact["contact module"]
   api --> mod_inquiries["inquiries module"]
   api --> mod_notifications["notifications module"]
   api --> mod_permissions["permissions module"]
@@ -63,6 +64,7 @@ flowchart LR
   mod_auth --> db
   mod_categories --> db
   mod_companies --> db
+  mod_contact --> db
   mod_inquiries --> db
   mod_notifications --> db
   mod_permissions --> db
