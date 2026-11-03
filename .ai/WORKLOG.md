@@ -2983,3 +2983,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Applied consistently to Admin, Company and Website notification inboxes; notification data, API calls, routes and actions are unchanged.
 - Updated all three notification component regression suites for the new sidebar action placement and removed header.
 - Automated tests/builds/browser rendering were not run in this session.
+
+
+## 2026-11-03 — UI-BRAND-TURQUOISE-01 — Approved turquoise/sky palette and first real-page sample
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Establish the owner-approved turquoise + sky-blue brand palette with a dark sidebar, then validate it on a real production page before expanding through all applications.
+- **Claimed scope:** Shared PrimeVue preset and SCSS tokens, global design-system documentation, Notifications inbox reference, and Admin/Company/Website notification page accents.
+- **Changes:** Replaced the shared PrimeVue semantic primary ramp with turquoise (#12B8A6; accessible light action #087F78); introduced sky blue (#39BFE0), technical blue (#2878C7), navy (#173B63), amber (#E7A64B), and a dark sidebar (#142B46). Updated shared semantic tokens and dark-mode sidebar surfaces. Updated all three existing notification inboxes to use the new turquoise selected/unread/focus accents instead of the previous violet. Updated design-system/MASTER.md, current-task handoff, and added design-system/pages/notifications.md.
+- **Preserved:** Vue/PrimeVue stack, API contracts, route names, authentication, permissions, tenant boundaries, notification endpoints/actions, folder semantics and message behavior.
+- **Verification:** GitHub remote files re-fetched/updated successfully. Local Vitest/build/browser checks were NOT RUN in this session because edits were made through GitHub repository APIs without a local checkout. Full cross-app rollout remains in progress.
+- **Commits:** theme `ab22d0c6acb385178ff80e4014c2ee5cd5b15175`; tokens `4bb2e1081d0aae391540f5533327bba0e36d32b3`; master design system `2ba60c42b6e608ec3e8f1fac0392045a53e49e9e`; current-task `586464948eba76200b87e986631cdd73826fb445`; admin inbox `525bcec52cec4bb18136167f8a589b8ec3a792ef`; company inbox `fb71cbcc81c4f1bd28b683f3c52be8cae5deb635`; website inbox `7748f091f0782feeddd9d9d9f2f769164e84c706`; page reference `dcbf23810667a6549c845ce1838f78ab27f37b62`.
+- **Push:** Changes were committed directly to remote `main` by GitHub contents API.
+- **Risks / open questions:** Existing pages outside Notifications may still contain hardcoded legacy colors. Audit and migrate them in controlled batches to semantic tokens; do not global-replace unrelated semantic/status colors.
+- **Next action:** Audit the shared shell/public header and the main dashboard/product/inquiry page families; convert legacy palette usage to shared semantic tokens, add focused tests, then run workspace tests/builds in the user's local checkout or a connected execution environment.
