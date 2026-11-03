@@ -208,3 +208,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - All API requests, form validation, save/publish workflows, inquiry steps, permissions, routes and company status/verification data remain unchanged.
 - Static source review only; tests/build/browser checks NOT RUN — owner instruction.
 - **Commit:** be7633927702f5a81cfdd85535eea027dbd7c958 — https://github.com/gameacc2025/martest/commit/be7633927702f5a81cfdd85535eea027dbd7c958
+
+
+### Notification reading drawer — Phase 21
+- Replaced the permanently embedded reading column in all three notification inboxes (Admin, Company and Website) with a full-height right-side reading drawer matching the supplied email-client reference.
+- Selecting a message opens the drawer over the inbox; the rest of the application is dimmed, the drawer scrolls independently, and the close control returns to the inbox.
+- Drawer includes a compact top action bar, subject/date, sender identity, category, message body, save, move-to-folder, mark-read/unread and delete actions, all wired to the existing notification handlers/APIs.
+- Initial page load no longer auto-opens the first notification. Single click opens the drawer; the established double-click-to-mark-read behavior is preserved.
+- Added regression coverage for drawer opening/closing and semantic message-button interaction in all three app test suites.
+- No API, backend, schema, routing, folder membership or authorization changes.
+- Static source review only; tests/build/browser checks NOT RUN.
+- **Branch:** feat/notifications-right-reading-pane. Awaiting PR merge.
