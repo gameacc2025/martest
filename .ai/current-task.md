@@ -1,6 +1,6 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search and address book have received phased updates; full 69-page redesign remains in progress.  
+**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book and customer profile have received phased updates; full 69-page redesign remains in progress.  
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -45,7 +45,7 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 
 ## Remaining phases
 1. Admin and Company operational pages: list surfaces for category/company/user/role/permission/product and Company product/user settings have received a first refinement; continue detail/edit flows, orders, reports and operational edge states.
-2. Public Website: company directory/profile, FAQ/Terms, About, search results and address book received first-pass refinements; Contact, profile, checkout/cart/order and inquiry pages remain.
+2. Public Website: company directory/profile, FAQ/Terms, About, search results, address book and customer profile received first-pass refinements; Contact, authentication, checkout/cart/order and inquiry pages remain.
 3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility, loading/empty/error/disabled states and Vercel guideline review.
 4. Full 69-page inventory and documentation update, then a truthful completion report.
 
@@ -104,4 +104,12 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - SearchResults has explicit search metadata, conditional disclosure semantics, sort state and quieter flat layout.
 - Addresses has semantic form field names/types, load retry, non-conflicting empty/error states and keyboard focus.
 - Existing API calls, search URL behavior, address payloads and cart/wishlist actions are unchanged.
+- Static review only; tests/build/browser checks NOT RUN — owner instruction.
+
+
+### Customer profile — Phase 11
+- Account profile surfaces are flatter and data-first; profile details use simple rows, not nested cards.
+- Account navigation uses router links; edit/password/logout remain actions.
+- Avatar and form fields now expose layout/accessibility metadata; failed initial profile loads no longer leave a blank profile shell.
+- Existing profile, password, avatar and logout actions are unchanged.
 - Static review only; tests/build/browser checks NOT RUN — owner instruction.

@@ -1,6 +1,6 @@
 <template>
   <div class="user-profile-page">
-    <div class="ds-container ds-page">
+    <main class="ds-container ds-page" aria-labelledby="public-profile-title" :aria-busy="profileLoading || saving">
       <WorkspacePageHeading
         eyebrow="حساب کاربری"
         title="پروفایل من"
@@ -17,16 +17,16 @@
         <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined :loading="profileLoading" @click="loadUserProfile" />
       </div>
 
-      <div v-if="profileLoading && !user.fullName" class="profile-loading" role="status">
+      <div v-if="profileLoading && !user.fullName" class="profile-loading" role="status" aria-live="polite" aria-busy="true">
         <i class="pi pi-spin pi-spinner" aria-hidden="true"></i><span>در حال دریافت اطلاعات حساب…</span>
       </div>
 
-      <div v-else class="profile-layout">
+      <div v-else-if="!profileError" class="profile-layout">
         <aside class="profile-sidebar" aria-label="اطلاعات و منوی حساب کاربری">
           <Card class="profile-identity-card">
             <template #content>
               <div class="profile-identity">
-                <img v-if="user.avatar" :src="user.avatar" :alt="'تصویر پروفایل ' + (user.fullName || 'کاربر')" class="profile-avatar" />
+                <img v-if="user.avatar" :src="user.avatar" :alt="'تصویر پروفایل ' + (user.fullName || 'کاربر')" width="100" height="100" decoding="async" class="profile-avatar" />
                 <span v-else class="profile-avatar-fallback" aria-hidden="true">{{ userInitial }}</span>
                 <h2>{{ user.fullName || user.email || 'کاربر' }}</h2>
                 <p class="profile-email">{{ user.email || 'ایمیلی ثبت نشده است' }}</p>
@@ -43,8 +43,8 @@
             <template #title>دسترسی‌های حساب</template>
             <template #content>
               <nav class="profile-menu" aria-label="منوی حساب کاربری">
-                <Button label="اعلان‌ها" icon="pi pi-bell" text class="profile-menu-action" @click="goToNotifications" />
-                <Button label="آدرس‌های من" icon="pi pi-map-marker" text class="profile-menu-action" @click="goToAddresses" />
+                <router-link :to="{ name: 'notifications' }" class="profile-menu-action"><i class="pi pi-bell" aria-hidden="true"></i><span>اعلان‌ها</span></router-link>
+                <router-link to="/profile/addresses" class="profile-menu-action"><i class="pi pi-map-marker" aria-hidden="true"></i><span>آدرس‌های من</span></router-link>
                 <Button label="خروج از حساب" icon="pi pi-sign-out" text severity="danger" class="profile-menu-action profile-menu-action--danger" @click="logout" />
               </nav>
             </template>
@@ -55,7 +55,6 @@
           <Card class="profile-details-card">
             <template #title>
               <div class="profile-card-heading">
-                <span class="profile-card-icon"><i class="pi pi-id-card" aria-hidden="true"></i></span>
                 <div><h2 id="profile-details-title">اطلاعات حساب</h2><p>مشخصات ثبت‌شده برای حساب کاربری شما</p></div>
               </div>
             </template>
@@ -71,7 +70,7 @@
           </Card>
         </section>
       </div>
-    </div>
+    </main>
 
     <!-- Edit Profile Dialog -->
     <Dialog
@@ -88,6 +87,8 @@
             <InputText
               id="profile-first-name"
               v-model="editForm.firstName"
+              name="firstName"
+              autocomplete="given-name"
               placeholder="نام خود را وارد کنید"
               class="w-full"
             />
@@ -97,6 +98,8 @@
             <InputText
               id="profile-last-name"
               v-model="editForm.lastName"
+              name="lastName"
+              autocomplete="family-name"
               placeholder="نام خانوادگی خود را وارد کنید"
               class="w-full"
             />
@@ -109,6 +112,7 @@
           <FileUpload
             mode="basic"
             name="avatar"
+            aria-label="انتخاب تصویر پروفایل"
             accept="image/*"
             chooseLabel="انتخاب تصویر"
             :maxFileSize="1000000"
@@ -150,6 +154,8 @@
           <Password
             inputId="profile-current-password"
             v-model="passwordForm.currentPassword"
+            name="currentPassword"
+            autocomplete="current-password"
             placeholder="رمز عبور فعلی را وارد کنید"
             class="w-full"
             :feedback="false"
@@ -162,6 +168,8 @@
           <Password
             inputId="profile-new-password"
             v-model="passwordForm.newPassword"
+            name="newPassword"
+            autocomplete="new-password"
             placeholder="رمز عبور جدید را وارد کنید"
             class="w-full"
             :feedback="false"
@@ -174,6 +182,8 @@
           <Password
             inputId="profile-confirm-password"
             v-model="passwordForm.confirmPassword"
+            name="confirmPassword"
+            autocomplete="new-password"
             placeholder="رمز عبور جدید را مجدداً وارد کنید"
             class="w-full"
             :feedback="false"
@@ -353,14 +363,6 @@ const onAvatarUpload = async (event) => {
   }
 }
 
-const goToNotifications = () => {
-  router.push({ name: 'notifications' })
-}
-
-const goToAddresses = () => {
-  router.push('/profile/addresses')
-}
-
 const logout = async () => {
   await authStore.logout()
   router.push({ name: 'login' })
@@ -381,9 +383,9 @@ const logout = async () => {
 .user-profile-page :deep(.p-card) {
   overflow: hidden;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  box-shadow: none;
 }
 .user-profile-page :deep(.p-card-body) { padding: clamp(1rem, 2vw, 1.5rem); }
 .user-profile-page :deep(.p-card-title) { margin-bottom: var(--ds-space-4); color: var(--ds-color-text); }
@@ -395,14 +397,13 @@ const logout = async () => {
   width: 6.25rem;
   height: 6.25rem;
   margin-bottom: 1rem;
-  border: 4px solid var(--ds-color-surface-alt);
+  border: 2px solid var(--ds-color-border);
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: var(--ds-shadow-sm);
 }
 .profile-avatar-fallback {
-  background: var(--ds-hero-gradient);
-  color: var(--ds-on-navy);
+  background: var(--ds-color-brand-deep);
+  color: var(--ds-color-on-brand);
   font-size: 2rem;
   font-weight: var(--ds-font-weight-bold);
 }
@@ -424,20 +425,25 @@ const logout = async () => {
 .profile-primary-actions { display: grid; gap: .6rem; margin-top: 1.25rem; }
 .profile-action { width: 100%; min-height: 2.75rem; justify-content: center; }
 .profile-menu { display: grid; gap: .35rem; }
-.profile-menu-action { width: 100%; min-height: 2.75rem; justify-content: flex-start; }
+ .profile-menu-action {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .75rem;
+  padding: .65rem .75rem;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  text-decoration: none;
+  transition: background-color var(--ds-transition-fast), color var(--ds-transition-fast);
+}
+.profile-menu-action:hover { background: var(--ds-color-surface-hover); }
+.profile-menu-action:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 .profile-menu-action--danger { color: var(--ds-color-danger); }
 .profile-card-heading { display: flex; align-items: center; gap: .8rem; }
-.profile-card-icon {
-  display: grid;
-  place-items: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  flex: 0 0 auto;
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.1rem;
-}
 .profile-card-heading h2 { margin: 0; font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
 .profile-card-heading p { margin: .2rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-normal); }
 .profile-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 0; }
@@ -446,10 +452,11 @@ const logout = async () => {
   flex-direction: column;
   gap: .4rem;
   min-width: 0;
-  padding: 1rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface-alt);
+  padding: .85rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
 }
 .profile-detail-row dt { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-semibold); }
 .profile-detail-row dd { margin: 0; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); overflow-wrap: anywhere; }
@@ -462,9 +469,10 @@ const logout = async () => {
   min-height: 7rem;
   padding: 1rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
   color: var(--ds-color-text-muted);
+  box-shadow: none;
 }
 .profile-loading i { color: var(--ds-color-primary); }
 .profile-error { flex-wrap: wrap; border-color: color-mix(in srgb, var(--ds-color-danger) 28%, transparent); background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }

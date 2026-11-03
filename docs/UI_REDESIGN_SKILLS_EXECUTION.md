@@ -93,3 +93,11 @@ The shared DataTable, form-section heading and required-field progress primitive
 - Address book fields now carry names and semantic input metadata; loading and load-error states no longer fall through to a misleading empty state, and edit/delete controls have context-aware names.
 - Search, cart, wishlist and address CRUD contracts remain unchanged.
 - Tests/build/browser screenshots remain NOT RUN by owner instruction.
+
+
+## Customer profile — 2026-11-03
+
+- Public UserProfile is now a quieter account workspace with flat detail rows, fewer decorative icon tiles, and semantic router links for navigation.
+- Avatar media reserves dimensions; profile/password fields carry names and autocomplete; avatar upload has an accessible name.
+- Loading and initial-load failure states are explicit. Profile update/password/avatar/logout APIs remain unchanged.
+- No tests/build/browser checks were run, per owner instruction.

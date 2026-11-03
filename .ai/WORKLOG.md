@@ -2741,3 +2741,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** Pending atomic tree/commit creation.
 - **Push:** Pending.
 - **Next action:** Continue orders/cart/checkout and customer profile, contact page, public account and remaining Admin/Company details; finish cross-app responsive/theme/accessibility review.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-11 — CUSTOMER PROFILE
+- **Status:** IN_PROGRESS — public account profile layout refined.
+- **Scope:** Website UserProfile.
+- **Changes:** Flattened nested account cards and profile detail rows; removed the decorative ID-card icon tile and avatar shadow; converted account navigation to real router links while keeping logout/edit/password actions as buttons; added avatar dimensions/decoding; added names/autocomplete to profile and password fields; added accessible name to avatar upload; improved loading/error semantics and prevented an empty profile shell from rendering after a failed initial load.
+- **Business behavior:** Profile update, password change, avatar upload, logout and route destinations remain unchanged.
+- **Verification:** Static source review only. Tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Next:** Continue ContactUs and authentication pages, then account/order/cart/checkout surfaces and remaining Admin/Company detail pages. Prototype commerce flows need a separate truthful UX pass; do not invent payment/order API behavior.
