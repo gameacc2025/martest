@@ -137,13 +137,13 @@ describe('Website notification inbox', () => {
     })
 
     await flushPromises()
-    await wrapper.findAll('.message-row')[1].trigger('click')
+    await wrapper.findAll('.message-row-open')[1].trigger('click')
     await flushPromises()
     expect(wrapper.find('.reading-overlay').exists()).toBe(true)
     expect(apiPatch).not.toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).toContain('unread')
 
-    await wrapper.findAll('.message-row')[1].trigger('dblclick')
+    await wrapper.findAll('.message-row-open')[1].trigger('dblclick')
     await flushPromises()
     expect(apiPatch).toHaveBeenCalledWith('/settings/notifications/7/read-state', { isRead: true })
     expect(wrapper.findAll('.message-row')[1].classes()).not.toContain('unread')
