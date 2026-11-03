@@ -2898,5 +2898,7 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Added tests for drawer open/close and button interaction; corrected the Website test to target the semantic message button.
 - **Behavior preserved:** Existing notification APIs, fixed INBOX/SAVED folders, copy/move semantics, selection, bulk actions, delete and read-state behavior.
 - **Verification:** Static review only. Tests/build/browser checks NOT RUN; no local runtime was available.
-- **Branch:** feat/notifications-right-reading-pane.
-- **Next:** Review branch diff and merge the focused notification change; then continue remaining UI redesign phases.
+- **Branch:** feat/notifications-right-reading-pane (merged; cleanup pending).
+- **PR:** #81 — https://github.com/gameacc2025/martest/pull/81.
+- **Merge commit:** fbad7a813e5f64759d4f1311bc4e9468e714d2dc.
+- **Next:** Continue remaining UI redesign phases.
