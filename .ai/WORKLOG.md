@@ -2939,3 +2939,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **PR:** #83 — https://github.com/gameacc2025/martest/pull/83.
 - **Merge commit:** fc8baacd3457513d95e356542bec0c25ff8e0f68.
 - **Next:** Run tests/build when local execution is available.
+
+
+## 2026-11-03 — NOTIFICATIONS-RTL-MAIL-READER — Correct the inbox to match the mail reference
+- **Status:** IMPLEMENTED — automated verification pending.
+- **Scope:** Company, Admin and Website notification inboxes; corresponding frontend regression tests; notification implementation notes and current-task handoff.
+- **Changes:** Limited the sidebar to the two fixed system folders (INBOX and SAVED), kept event categories separate, aligned Website folder-membership filtering with Company/Admin, anchored the reading drawer to the physical right edge by explicitly setting RTL direction on the overlay, narrowed the drawer, expanded the search field into available toolbar space, converted bulk read/unread/delete actions to icon-only controls with accessible labels/titles, and changed row selection semantics to `aria-expanded` plus `aria-controls`.
+- **Behavior preserved:** Single click opens the message without marking it read; double-click requests the read-state API; copy/save/move, bulk actions, deletion, pagination, and existing API contracts remain intact.
+- **Regression tests:** Updated all three app test files for the two-folder model, drawer expansion state, and icon-only bulk actions.
+- **Verification:** GitHub source re-fetch/static checks confirm all three inboxes contain the fixed-folder filter, RTL right-edge drawer positioning, expanded-state semantics, and flexible search width. Unit tests, production builds, and browser rendering have NOT been run in this session. Do not claim visual acceptance or passing CI until the Actions run is inspected.
+- **Commits:** Company UI `d6bc939` then RTL correction `d9d36ce`; Admin UI `b6b4491` then RTL correction `d25488d`; Website UI `b3020d5` then RTL correction `653fb9f`; tests `f37f2bc`, `a581adc`, `4d33c16`; AI handoff `2553177`; notification docs `e6025e5`.
+- **Push:** Changes are committed directly to remote `main`.
+- **Known limitation:** Search/category filtering remains limited to the currently fetched server page unless the backend list API is extended; no backend changes were made in this UI correction.
+- **Next action:** Inspect GitHub Actions for the latest main commit, fix any failures, and provide the local sync command.
