@@ -56,6 +56,8 @@ const env = {
   smtpUser: process.env.SMTP_USER || null,
   smtpPass: process.env.SMTP_PASS || null,
   smtpFrom: process.env.SMTP_FROM || 'noreply@telecommarketplace.local',
+  // Public contact form destination; deliberately has no guessed default.
+  contactInboxEmail: process.env.CONTACT_INBOX_EMAIL || null,
   // SMS provider configuration (Twilio). When not set, SMS is never queued
   // by the delivery worker — the dispatch service already marks SMS as
   // notImplemented.
