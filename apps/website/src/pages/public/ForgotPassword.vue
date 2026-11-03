@@ -21,12 +21,20 @@
                   <InputText
                     id="forgot-password-email"
                     v-model="email"
+                    autocomplete="email"
+                    required
+                    :aria-invalid="errors.email ? 'true' : undefined"
+                    :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
+                    required
+                    autocomplete="email"
+                    :aria-invalid="errors.email ? 'true' : undefined"
+                    :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     class="fp-input"
                     :class="{ 'p-invalid': errors.email }"
                   />
-                  <small v-if="errors.email" class="p-error block" role="alert">{{ errors.email }}</small>
+                  <small v-if="errors.email" id="forgot-password-email-error" class="p-error block" role="alert">{{ errors.email }}</small>
                 </div>
 
                 <Button
