@@ -1575,3 +1575,12 @@ Admin and Company share a more accessible responsive shell: mobile drawer state 
 
 - Added explicit accessible names to desktop/mobile product search inputs and the public notifications icon link; labeled the desktop primary navigation and marked its decorative bell icon hidden from assistive technology.
 - Existing destinations, search submission, notification routing, and responsive behavior are unchanged. Browser testing intentionally not run per user instruction.
+
+
+## 2026-11-03 — Shared form-field accessibility refinement
+
+- Shared `Input.vue` now associates visible labels with the actual input using an explicit or per-instance fallback ID.
+- Hint/error text is connected through `aria-describedby`; invalid fields expose `aria-invalid` and PrimeVue invalid styling.
+- Native input attributes (including autocomplete, required, inputmode, maxlength and caller-provided ARIA attributes) are forwarded to the real input instead of the wrapper. Existing v-model, field types, disabled state, hint/error precedence and design tokens are preserved.
+- Scope is shared UI only. No API, backend, routes, permissions or data contracts changed.
+- Browser testing and test execution were intentionally not run per the user's instruction. Source review only; runtime/build verification remains unclaimed.
