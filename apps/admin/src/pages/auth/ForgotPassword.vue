@@ -19,6 +19,7 @@
                 <div class="field">
                   <label for="forgot-password-email">آدرس ایمیل</label>
                   <InputText
+                    id="forgot-password-email"
                     v-model="email"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
