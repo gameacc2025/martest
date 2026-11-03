@@ -2502,3 +2502,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Change:** Explicit labels for desktop/mobile search, notifications link, and desktop primary navigation; decorative bell icon hidden from screen readers.
 - **Behavior preserved:** Search, navigation, notification destination, account routing, and API behavior.
 - **Verification:** Browser testing intentionally NOT RUN per user instruction. No backend/schema/API changes.
+
+
+## 2026-11-03 — Shared form-field accessibility refinement
+
+- Shared `Input.vue` now associates visible labels with the actual input using an explicit or per-instance fallback ID.
+- Hint/error text is connected through `aria-describedby`; invalid fields expose `aria-invalid` and PrimeVue invalid styling.
+- Native input attributes (including autocomplete, required, inputmode, maxlength and caller-provided ARIA attributes) are forwarded to the real input instead of the wrapper. Existing v-model, field types, disabled state, hint/error precedence and design tokens are preserved.
+- Scope is shared UI only. No API, backend, routes, permissions or data contracts changed.
+- Browser testing and test execution were intentionally not run per the user's instruction. Source review only; runtime/build verification remains unclaimed.
