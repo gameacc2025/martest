@@ -25,9 +25,9 @@ Avoid neumorphism, excessive gradients, ornamental glass cards, over-animated da
 
 ## Brand and typography
 
-The approved brand direction is **Turquoise + Sky Blue with a dark navy sidebar**. Use the shared tokens in `packages/shared-ui/assets/design-system/tokens.scss` and PrimeVue preset:
-- Primary turquoise: `#12B8A6` (brand accent; light-theme actions use accessible darker ramp).
-- Sky blue: `#39BFE0` (secondary accent, active icon/highlight).
+The approved brand direction is **Sky Blue primary + Turquoise secondary with a dark navy sidebar**, matching the owner-approved dashboard reference. Use the shared tokens in `packages/shared-ui/assets/design-system/tokens.scss` and PrimeVue preset:
+- Primary sky blue: `#39BFE0` (vivid primary buttons, selected states and brand highlights).
+- Secondary turquoise: `#12B8A6` (complementary actions and secondary emphasis).
 - Technical blue: `#2878C7` (links and informational emphasis).
 - Deep navy: `#173B63`; dark sidebar: `#142B46`.
 - Warm amber: `#E7A64B` (warning/limited promotional emphasis).
@@ -36,7 +36,7 @@ The approved brand direction is **Turquoise + Sky Blue with a dark navy sidebar*
 - Semantic colors: PrimeVue palette aliases through `--ds-color-*`.
 - Surfaces, borders, spacing, radii, shadows and motion: `--ds-*` tokens.
 
-Do not use bright turquoise as white-button text background without checking contrast; use the darker accessible primary action shade. Keep the palette disciplined: navy anchors navigation, turquoise owns primary brand accents, sky/blue are supporting colors, amber is reserved for warnings. Do not import external fonts or add a second icon library; use installed PrimeIcons consistently.
+Keep primary buttons vivid sky blue (#39BFE0) with light text as approved by the owner; use restrained hover shifts rather than muting the base color. Keep the palette disciplined: navy anchors navigation, sky blue owns primary brand accents, turquoise is the complementary accent, amber is reserved for warnings. Do not import external fonts or add a second icon library; use installed PrimeIcons consistently.
 
 ## Layout and spacing
 
