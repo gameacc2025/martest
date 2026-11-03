@@ -2975,3 +2975,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Moved the shared `PageHeader` / breadcrumb outside `.dash-layout-content` in both Admin and Company layouts.
 - The breadcrumb is no longer constrained by the content wrapper's `max-width: 1600px` or horizontal padding. The remaining page content and footer remain inside `.dash-layout-content` and retain its width, centering and padding rules.
 - This is a structural layout fix; no notification API, data, or business logic changed. Automated tests/builds were not run in this session.
+
+
+### Mailbox edge-to-edge refinement — 2026-11-03
+- Removed the redundant in-page mailbox header; unread and notification-settings icon actions now live in the mailbox sidebar header beside the folder identity/count.
+- Removed page-level horizontal padding and the mailbox card border/radius/shadow so the email workspace reaches the available main-column edges beside the application navigation. Mobile retains a small safe inset while the sidebar controls remain visible.
+- Applied consistently to Admin, Company and Website notification inboxes; notification data, API calls, routes and actions are unchanged.
+- Updated all three notification component regression suites for the new sidebar action placement and removed header.
+- Automated tests/builds/browser rendering were not run in this session.
