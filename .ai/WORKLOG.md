@@ -2886,3 +2886,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** be7633927702f5a81cfdd85535eea027dbd7c958 (updated origin/main).
 - **Push:** Remote main ref updated and verified.
 - **Next:** Continue remaining public account and content pages; then Admin/Company notifications, subscriptions and remaining table/detail families.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-21 — RIGHT-SIDE NOTIFICATION READING DRAWER
+- **Status:** IMPLEMENTED ON FEATURE BRANCH — awaiting merge.
+- **Scope:** Admin, Company and Website notification inbox pages and their regression tests.
+- **Changes:**
+  - Replaced the fixed third-column reading panel with a viewport-level right-side drawer modeled on the supplied email reading-pane reference.
+  - Added dimmed backdrop, independent drawer scrolling, compact toolbar, close action, subject/date, sender row, category, body, and existing message actions.
+  - Inbox loads closed; selecting a row opens details. Existing double-click-to-mark-read behavior is retained.
+  - Added tests for drawer open/close and button interaction; corrected the Website test to target the semantic message button.
+- **Behavior preserved:** Existing notification APIs, fixed INBOX/SAVED folders, copy/move semantics, selection, bulk actions, delete and read-state behavior.
+- **Verification:** Static review only. Tests/build/browser checks NOT RUN; no local runtime was available.
+- **Branch:** feat/notifications-right-reading-pane.
+- **Next:** Review branch diff and merge the focused notification change; then continue remaining UI redesign phases.
