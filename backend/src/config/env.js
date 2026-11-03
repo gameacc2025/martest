@@ -55,7 +55,7 @@ const env = {
   smtpPort: parseInt(process.env.SMTP_PORT, 10) || 587,
   smtpUser: process.env.SMTP_USER || null,
   smtpPass: process.env.SMTP_PASS || null,
-  smtpFrom: process.env.SMTP_FROM || 'noreply@telecommarketplace.local',
+  smtpFrom: process.env.SMTP_FROM || null,
   // Public contact form destination; deliberately has no guessed default.
   contactInboxEmail: process.env.CONTACT_INBOX_EMAIL || null,
   // SMS provider configuration (Twilio). When not set, SMS is never queued
