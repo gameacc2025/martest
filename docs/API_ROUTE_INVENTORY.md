@@ -1,6 +1,6 @@
 # API route inventory
 
-Generated from the Fastify route registrations on `main` at 2026-10-31. All paths below include the `/api/v1` prefix.
+Generated from the Fastify route registrations on `main` at 2026-11-03. All paths below include the `/api/v1` prefix.
 
 ## How to read this inventory
 
@@ -28,6 +28,14 @@ Mixed public and authenticated session routes; see each row.
 | POST | `/api/v1/auth/logout-all` | `fastify.authenticate` |
 | GET | `/api/v1/auth/me` | `fastify.authenticate` |
 | PATCH | `/api/v1/auth/users/:id/password` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('users.reset_password')` |
+
+### contact — `/api/v1/contact`
+
+Public Website contact submission; no authentication required. The endpoint is SMTP-backed and rate-limited.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| POST | `/api/v1/contact/messages` | `Public; 3 requests / 10 minutes / IP; configured SMTP inbox required` |
 
 ### users — `/api/v1/users`
 
