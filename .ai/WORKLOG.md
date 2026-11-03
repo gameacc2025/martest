@@ -2519,3 +2519,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Marked decorative search and empty-state icons as hidden from assistive technology.
 - Kept server-side request payloads, filtering, pagination, column visibility, selection, row actions and table layout unchanged.
 - UI-only change; no API/backend changes. No tests or browser checks run by explicit user instruction; runtime/build verification is not claimed.
+
+
+## 2026-11-03 — Shared form-field compatibility and feedback semantics
+
+- Replaced the Vue 3.5-only `useId()` dependency in shared `FormField.vue` with a component-instance ID compatible with the package's declared Vue 3.4+ range.
+- Connected help, success and validation feedback to the rendered control through a stable `aria-describedby` slot prop and message ID; validation errors retain alert semantics and success feedback is announced politely.
+- Decorative status icons are hidden from assistive technology. Existing slot contract (`id`, `invalid`), validation display precedence and form business logic remain unchanged; the additive `describedBy` slot prop is available to consumers.
+- UI/shared component only; no API/backend changes. Tests and browser checks were not run per explicit instruction; build/runtime verification is not claimed.
