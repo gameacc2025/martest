@@ -105,9 +105,9 @@ describe('Admin notification inbox', () => {
     await flushPromises()
 
     const folderLabels = wrapper.findAll('button[data-folder-id]').map(button => button.text())
-    expect(folderLabels).not.toContain(expect.stringContaining('خوانده‌نشده'))
-    expect(folderLabels).not.toContain(expect.stringContaining('خوانده‌شده'))
-    expect(folderLabels).not.toContain(expect.stringContaining('همه پیام‌ها'))
+    expect(folderLabels.some(label => label.includes('خوانده‌نشده'))).toBe(false)
+    expect(folderLabels.some(label => label.includes('خوانده‌شده'))).toBe(false)
+    expect(folderLabels.some(label => label.includes('همه پیام‌ها'))).toBe(false)
     expect(wrapper.findAll('.category-link').length).toBeGreaterThan(0)
   })
 
