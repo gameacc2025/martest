@@ -29,25 +29,25 @@ function faNumber(value) {
 .kpi-card {
   display: flex;
   min-width: 0;
-  min-height: 6rem;
+  min-height: 6.5rem;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   gap: .35rem;
   padding: .85rem 1rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
+  border: 1px solid #e0ebf1;
+  border-radius: 1rem;
   background: var(--ds-color-surface);
   color: var(--ds-color-text);
   text-decoration: none;
-  box-shadow: var(--ds-shadow-xs);
+  box-shadow: 0 3px 14px rgba(25,57,82,.045);
   transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast), background-color var(--ds-transition-fast);
 }
 .kpi-card-label { display: flex; align-items: center; gap: .4rem; color: var(--ds-color-text-muted); font-size: .78rem; font-weight: var(--ds-font-weight-medium); line-height: 1.5; }
 .kpi-card-label i { color: var(--kpi-value-color, var(--ds-color-primary-text)); font-size: .92rem; }
 .kpi-card-value {
   color: var(--kpi-value-color, var(--ds-color-text));
-  font-size: 1.4rem;
+  font-size: 1.32rem;
   font-weight: var(--ds-font-weight-bold);
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
