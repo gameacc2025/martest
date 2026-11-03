@@ -34,7 +34,7 @@ const attrs = useAttrs()
 
 // A stable per-instance fallback keeps labels associated even when older
 // call sites have not yet supplied an explicit id.
-const inputId = computed(() => props.id || (props.name ? `ds-field-${props.name}` : `ds-field-${instance?.uid ?? 'input'}`))
+const inputId = computed(() => props.id || `ds-field-${instance?.uid ?? 'input'}`)
 const messageId = computed(() => `${inputId.value}-message`)
 const message = computed(() => props.error || props.hint)
 const describedBy = computed(() => [attrs['aria-describedby'], message.value ? messageId.value : null].filter(Boolean).join(' ') || undefined)
