@@ -41,9 +41,18 @@ function closeMobile() {
 // Close the mobile drawer whenever the route changes (a nav item was clicked).
 watch(() => route.fullPath, closeMobile)
 
-// Lock body scroll while the mobile drawer is open.
+// Lock body scroll while the mobile drawer is open, then restore the
+// exact inline value that was present before the drawer opened.
+let previousBodyOverflow = ''
+
 watch(mobileOpen, (open) => {
-  document.body.style.overflow = open ? 'hidden' : ''
+  if (open) {
+    previousBodyOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return
+  }
+
+  document.body.style.overflow = previousBodyOverflow
 })
 
 function onKeydown(e) {
@@ -59,7 +68,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
-  document.body.style.overflow = ''
+  document.body.style.overflow = previousBodyOverflow
 })
 </script>
 
