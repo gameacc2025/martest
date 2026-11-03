@@ -73,6 +73,7 @@
                   <label for="register-first-name">نام</label>
                   <InputText
                     id="register-first-name"
+                  autocomplete="given-name"
                     v-model="form.firstName"
                     placeholder="نام خود را وارد کنید"
                     class="auth-input"
@@ -84,6 +85,7 @@
                   <label for="register-last-name">نام خانوادگی</label>
                   <InputText
                     id="register-last-name"
+                  autocomplete="family-name"
                     v-model="form.lastName"
                     placeholder="نام خانوادگی خود را وارد کنید"
                     class="auth-input"
@@ -98,6 +100,7 @@
                   <label for="register-email">ایمیل <span class="reg-optional">(اختیاری)</span></label>
                   <InputText
                     id="register-email"
+                  autocomplete="email"
                     v-model="form.email"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
@@ -110,6 +113,7 @@
                   <label for="register-phone">شماره تلفن <span class="reg-required">*</span></label>
                   <InputText
                     id="register-phone"
+                  autocomplete="tel"
                     v-model="form.phone"
                     placeholder="شماره تلفن خود را وارد کنید"
                     class="auth-input"
@@ -123,6 +127,7 @@
                 <label for="register-password">رمز عبور</label>
                 <Password
                   inputId="register-password"
+                  autocomplete="new-password"
                   v-model="form.password"
                   placeholder="رمز عبور خود را وارد کنید"
                   class="auth-input"
@@ -137,6 +142,7 @@
                 <label for="register-confirm-password">تکرار رمز عبور</label>
                 <Password
                   inputId="register-confirm-password"
+                  autocomplete="new-password"
                   v-model="form.confirmPassword"
                   placeholder="رمز عبور را مجدداً وارد کنید"
                   class="auth-input"
@@ -154,6 +160,7 @@
                 <label for="register-company-name">نام شرکت</label>
                 <InputText
                   id="register-company-name"
+                  autocomplete="organization"
                   v-model="form.companyName"
                   placeholder="نام شرکت خود را وارد کنید"
                   class="auth-input"
@@ -167,6 +174,7 @@
                   <label for="register-company-name-en">نام انگلیسی شرکت</label>
                   <InputText
                     id="register-company-name-en"
+                  autocomplete="organization"
                     v-model="form.companyNameEn"
                     placeholder="نام انگلیسی شرکت"
                     class="auth-input"
@@ -201,6 +209,7 @@
                   <label for="register-company-email">ایمیل شرکت</label>
                   <InputText
                     id="register-company-email"
+                  autocomplete="email"
                     v-model="form.email"
                     placeholder="آدرس ایمیل شرکت"
                     type="email"
@@ -216,6 +225,7 @@
                   <label for="register-company-phone">شماره تلفن شرکت</label>
                   <InputText
                     id="register-company-phone"
+                  autocomplete="tel"
                     v-model="form.phone"
                     placeholder="شماره تلفن شرکت"
                     class="auth-input"
@@ -227,6 +237,7 @@
                   <label for="register-company-website">وب‌سایت شرکت</label>
                   <InputText
                     id="register-company-website"
+                  autocomplete="url"
                     v-model="form.website"
                     placeholder="https://example.com"
                     class="auth-input"
@@ -258,6 +269,7 @@
                   <label for="register-manager-first-name">نام مدیر</label>
                   <InputText
                     id="register-manager-first-name"
+                  autocomplete="given-name"
                     v-model="form.managerFirstName"
                     placeholder="نام مدیر شرکت"
                     class="auth-input"
@@ -269,6 +281,7 @@
                   <label for="register-manager-last-name">نام خانوادگی مدیر</label>
                   <InputText
                     id="register-manager-last-name"
+                  autocomplete="family-name"
                     v-model="form.managerLastName"
                     placeholder="نام خانوادگی مدیر"
                     class="auth-input"
@@ -283,6 +296,7 @@
                   <label for="register-manager-email">ایمیل مدیر <span class="reg-optional">(اختیاری)</span></label>
                   <InputText
                     id="register-manager-email"
+                  autocomplete="email"
                     v-model="form.managerEmail"
                     placeholder="ایمیل مدیر شرکت"
                     type="email"
@@ -295,6 +309,7 @@
                   <label for="register-manager-phone">شماره همراه مدیر <span class="reg-required">*</span></label>
                   <InputText
                     id="register-manager-phone"
+                  autocomplete="tel"
                     v-model="form.managerPhone"
                     placeholder="شماره همراه مدیر"
                     class="auth-input"
@@ -309,6 +324,7 @@
                   <label for="register-company-password">رمز عبور مدیر</label>
                   <Password
                     inputId="register-company-password"
+                  autocomplete="new-password"
                     v-model="form.password"
                     placeholder="رمز عبور را وارد کنید"
                     class="auth-input"
@@ -322,6 +338,7 @@
                   <label for="register-company-confirm-password">تکرار رمز عبور</label>
                   <Password
                     inputId="register-company-confirm-password"
+                  autocomplete="new-password"
                     v-model="form.confirmPassword"
                     placeholder="رمز عبور را مجدداً وارد کنید"
                     class="auth-input"
