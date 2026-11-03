@@ -44,15 +44,25 @@ watch(() => route.fullPath, closeMobile)
 // Lock body scroll while the mobile drawer is open, then restore the
 // exact inline value that was present before the drawer opened.
 let previousBodyOverflow = ''
+let bodyScrollLocked = false
+
+function releaseBodyScrollLock() {
+  if (!bodyScrollLocked) return
+  document.body.style.overflow = previousBodyOverflow
+  bodyScrollLocked = false
+}
 
 watch(mobileOpen, (open) => {
   if (open) {
-    previousBodyOverflow = document.body.style.overflow
+    if (!bodyScrollLocked) {
+      previousBodyOverflow = document.body.style.overflow
+      bodyScrollLocked = true
+    }
     document.body.style.overflow = 'hidden'
     return
   }
 
-  document.body.style.overflow = previousBodyOverflow
+  releaseBodyScrollLock()
 })
 
 function onKeydown(e) {
@@ -68,7 +78,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
-  document.body.style.overflow = previousBodyOverflow
+  releaseBodyScrollLock()
 })
 </script>
 
