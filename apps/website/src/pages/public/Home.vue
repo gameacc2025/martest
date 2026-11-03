@@ -459,8 +459,8 @@ onMounted(() => {
   padding: clamp(1.5rem, 4vw, 3.25rem);
   border: 0;
   border-radius: var(--ds-radius-lg);
-  background: var(--ds-navy);
-  color: var(--ds-on-navy);
+  background: var(--ds-color-brand-deep);
+  color: var(--ds-color-on-brand);
 }
 .hero-content { display: flex; max-width: 58rem; flex-direction: column; gap: var(--ds-space-5); }
 .hero-copy { display: flex; flex-direction: column; gap: var(--ds-space-3); }
@@ -473,7 +473,7 @@ onMounted(() => {
   line-height: 1.35;
   text-wrap: balance;
 }
-.hero-desc { max-width: 58ch; margin: 0; color: var(--ds-on-navy-muted); font-size: var(--ds-font-size-md); line-height: 1.9; }
+.hero-desc { max-width: 58ch; margin: 0; color: var(--ds-color-on-brand-muted); font-size: var(--ds-font-size-md); line-height: 1.9; }
 .hero-search {
   display: grid;
   max-width: 48rem;

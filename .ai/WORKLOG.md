@@ -2657,3 +2657,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Phase 2/3 commit:** b1c7f7b5b53f39feae20eeb345fcc2967164db65.
 - **Phase 4 commit:** Pending atomic tree/commit creation.
 - **Next:** Continue with remaining Admin/Company operational pages and public company/profile/search/inquiry pages.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-5 — GLOBAL PRIMEVUE AND SHARED DESIGN REFINEMENT
+- **Status:** IN_PROGRESS — global refinement layer prepared; full page inventory remains.
+- **Scope:** Shared stylesheet entry, new skill-refinements.scss mixin, Design System source-of-truth and admin/company/public dashboard hero token alignment.
+- **Changes:** Added a cross-app refinement mixin emitted after legacy Sakai overrides; made legacy stat cards typography-led and icon-free; converted quick-action cards to quiet navigation rows; removed generic shadows from PrimeVue cards/panels and shared cards; standardized 44px input/button targets, visible focus rings, explicit transitions, data-first DataTable headers/rows and restrained toolbars; retained dialog elevation for true overlays; added reduced-motion overrides.
+- **Theme tokens:** Replaced legacy navy aliases in the three new hero surfaces with declared semantic brand tokens (brand-deep/on-brand/on-brand-muted); corrected the button foreground token to the declared primary-contrast token.
+- **Tests/build/browser:** NOT RUN — owner instruction. This stylesheet change has been statically checked against the declared token names; no Sass compilation or runtime acceptance is claimed.
+- **API/backend/auth/permissions:** No changes.
+- **Phase 4 commit:** Pending/recorded separately in the previous checkpoint.
+- **Phase 5 commit:** Pending atomic tree/commit creation.
+- **Next:** Continue page-family review and redesign for inquiry, product management, user/role management, public profiles/search, orders/cart and content pages.

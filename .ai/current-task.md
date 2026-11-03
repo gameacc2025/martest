@@ -56,3 +56,10 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 
 ## Prior independent backlog
 Company-owned API/tenant-isolation audit and SMS/provider integration remain separate. Do not silently mark them complete or change backend behavior during this UI-only task.
+
+
+### Global shared component layer
+- Added a cross-app skill refinement mixin to the shared Sass entry, emitted after legacy Sakai overrides.
+- PrimeVue cards/panels, DataTables, toolbars, inputs and buttons now use flatter surfaces, consistent touch targets and explicit keyboard focus; dialog elevation is retained.
+- Legacy stat and quick-action components are restyled data-first and as navigation rows.
+- Static token-name review found no undefined semantic token references in the new mixin. Sass compilation was not run.

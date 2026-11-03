@@ -116,3 +116,8 @@ The four installed skills are now the required review framework, with this file 
 - API contracts, routes, PKCE, RBAC, tenant ownership, inquiry and product workflows are immutable during UI-only work.
 
 See docs/UI_REDESIGN_SKILLS_EXECUTION.md for phased execution and .ai/current-task.md for the active handoff.
+
+
+## Global shared component refinement layer (2026-11-03)
+
+The shared stylesheet loads skill-refinements.scss as a mixin and emits it after the legacy Sakai rules. It applies the same skill-driven rules across Admin, Company and Website: typography-led legacy stat cards, compact quick-action rows, restrained PrimeVue cards/panels, explicit button/input focus states, 44px input targets, quieter DataTables and toolbars, and reduced-motion support. Dialog elevation is retained because dialogs are true overlays. Keep this layer semantic-token driven and do not add per-app palette overrides.

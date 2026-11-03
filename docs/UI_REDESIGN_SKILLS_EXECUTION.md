@@ -47,3 +47,8 @@ The owner has explicitly asked not to run browser-focused checks or tests/builds
 - Notification preferences: simplified matrix and empty/loading states.
 - Full UI redesign remains IN_PROGRESS. Do not treat these slices as completion of all 69 pages.
 - Automated tests/builds/browser visual checks remain NOT RUN by owner instruction.
+
+
+## Global shared UI checkpoint — 2026-11-03
+
+The shared PrimeVue/Sakai layer now applies the skill refinements after the legacy styles across Admin, Company and Website. This improves the full application surface in one place: cards/panels no longer add nested shadows, metrics become data-first, quick actions become rows, inputs/buttons get consistent touch targets and focus states, tables use clearer data hierarchy, and motion respects reduced-motion preferences. Page-specific review is still required for each workflow and no full redesign completion is claimed.

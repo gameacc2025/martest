@@ -503,19 +503,19 @@ onMounted(() => {
 .admin-dashboard-hero {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
   gap: var(--ds-space-5); min-height: 8.5rem; padding: clamp(1.25rem, 2.5vw, 2rem);
-  border-radius: var(--ds-radius-lg); background: var(--ds-navy); color: var(--ds-on-navy);
+  border-radius: var(--ds-radius-lg); background: var(--ds-color-brand-deep); color: var(--ds-color-on-brand);
 }
 .admin-dashboard-hero-copy { min-width: 0; }
 .admin-dashboard-hero h1 {
   margin: 0; color: inherit; font-size: clamp(1.5rem, 2.3vw, 1.9rem);
   font-weight: var(--ds-font-weight-bold); line-height: 1.4; text-wrap: balance;
 }
-.admin-dashboard-hero p { max-width: 44rem; margin: .5rem 0 0; color: var(--ds-on-navy-muted); line-height: var(--ds-line-height-relaxed); }
+.admin-dashboard-hero p { max-width: 44rem; margin: .5rem 0 0; color: var(--ds-color-on-brand-muted); line-height: var(--ds-line-height-relaxed); }
 .admin-dashboard-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
 .admin-dashboard-secondary-action {
   display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center;
   gap: .5rem; padding: .6rem .9rem; border: 1px solid rgba(255,255,255,.38);
-  border-radius: var(--ds-radius-md); color: var(--ds-on-navy); text-decoration: none;
+  border-radius: var(--ds-radius-md); color: var(--ds-color-on-brand); text-decoration: none;
   font-weight: var(--ds-font-weight-semibold);
 }
 .admin-dashboard-secondary-action:hover { background: rgba(255,255,255,.09); }
