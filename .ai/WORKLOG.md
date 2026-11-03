@@ -2486,3 +2486,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Change:** Track ownership of the body scroll lock. Restore the captured inline overflow only when the drawer actually acquired the lock; release is idempotent and safe on unmount. This prevents a layout that never opened its drawer from clearing another component's scroll lock.
 - **Behavior preserved:** Drawer open/close, Escape dismissal, route-change dismissal, navigation, auth, permissions, API and backend contracts.
 - **Verification:** Browser testing intentionally NOT RUN per user instruction. No backend/schema/API changes.
+
+
+## 2026-11-03 — PUBLIC-ACCOUNT-ACCESS-ROUTING
+- **Status:** DONE — public account navigation corrected on `main`.
+- **Scope:** Website public header dropdown and mobile navigation.
+- **Change:** CUSTOMER profile stays on Website; STAFF profile and inquiry management use Admin PKCE handoff; COMPANY profile/inquiry navigation uses Company PKCE handoff. Mobile profile navigation now follows the same access-profile split.
+- **Behavior preserved:** Access type remains the sole app-membership selector; role/permission checks, authentication, and PKCE session transfer remain unchanged. No token is placed in a URL.
+- **Verification:** Browser testing intentionally NOT RUN per user instruction. No backend/schema/API changes.
