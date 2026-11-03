@@ -3006,3 +3006,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Components:** Refined shared KpiCard and DashboardPanel presentation. No API requests, data contracts, permissions, routes or business logic were changed.
 - **Validation:** Skipped UI tests/build/browser checks per explicit owner instruction.
 - **Commits:** workspace layer b574336; KPI component 7273e58; DashboardPanel a37b25f.
+
+
+## 2026-11-03 — Admin/Company page-family rollout
+- Extended the visual rebuild to the Admin and Company operational page families through the shared global layer: management tables, search/filter toolbars, form fields, dialogs, page headings, metric cards and responsive states now share the approved compact visual language.
+- Recolored Admin and Company inboxes from the old violet accent to the approved sky-blue/turquoise brand while preserving inbox behavior and existing notification actions.
+- Updated shared KPI and dashboard panel components and kept existing route targets, API-backed data, permission gates and form behavior intact.
+- Owner requested no UI tests/build; none were run.
+- Commits: global workspace layer b574336; KPI 7273e58; DashboardPanel a37b25f; Admin inbox 65c2319; Company inbox 0e3aac2; docs current-task 20eb437; docs worklog ff01c22; design system bb75a49.
