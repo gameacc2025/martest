@@ -66,21 +66,23 @@
      Primary turquoise #12b8a6 · sky #39bfe0 · technical blue #2878c7.
      Use these for hero/sidebar/footer surfaces instead of raw hex.
      -------------------------------------------------------- */
-  --ds-brand: #01bec2;
-  --ds-navy: #003a54;
-  --ds-petrol: #004d6f;
+  --ds-brand: #12b8a6;
+  --ds-sky: #39bfe0;
+  --ds-tech-blue: #2878c7;
+  --ds-navy: #173b63;
+  --ds-amber: #e7a64b;
   --ds-on-navy: #ffffff;
-  --ds-on-navy-muted: #b9dbe6;
-  --ds-hero-gradient: linear-gradient(135deg, #003a54 0%, #004d6f 100%);
+  --ds-on-navy-muted: #b7cad9;
+  --ds-hero-gradient: linear-gradient(135deg, #173b63 0%, #2878c7 100%);
 
-  --ds-sidebar-bg: #003a54;
-  --ds-sidebar-border: rgba(255, 255, 255, 0.08);
-  --ds-sidebar-fg: #cfe6ee;          /* 9.35:1 on #003a54 */
+  --ds-sidebar-bg: #142b46;
+  --ds-sidebar-border: rgba(211, 231, 242, 0.12);
+  --ds-sidebar-fg: #d7e6ef;
   --ds-sidebar-fg-strong: #ffffff;
-  --ds-sidebar-muted: #9fc3d1;       /* 6.46:1 on #003a54 */
+  --ds-sidebar-muted: #a9c2d3;
   --ds-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --ds-sidebar-active-bg: rgba(1, 190, 194, 0.18);
-  --ds-sidebar-accent: #01bec2;
+  --ds-sidebar-active-bg: rgba(18, 184, 166, 0.18);
+  --ds-sidebar-accent: #39bfe0;
 
   /* --------------------------------------------------------
      TYPOGRAPHY SCALE (modular, ~1.2 ratio)
@@ -169,8 +171,8 @@
   --ds-z-toast: 1200;
 
   /* Production-safe redesign aliases: no data or domain behavior implied. */
-  --ds-color-brand-deep: var(--p-primary-950, #003a54);
-  --ds-color-brand-dark: var(--p-primary-900, #004d6f);
+  --ds-color-brand-deep: var(--p-primary-950, #063b3a);
+  --ds-color-brand-dark: var(--p-primary-900, #0b5551);
   --ds-color-on-brand: #ffffff;
   --ds-color-on-brand-muted: var(--p-primary-200, #b9dbe6);
   --ds-color-accent: var(--p-primary-color);
