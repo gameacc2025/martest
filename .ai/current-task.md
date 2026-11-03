@@ -1,6 +1,6 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book and customer profile have received phased updates; full 69-page redesign remains in progress.  
+**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book, customer profile, contact and authentication have received phased updates; full 69-page redesign remains in progress.  
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -45,7 +45,7 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 
 ## Remaining phases
 1. Admin and Company operational pages: list surfaces for category/company/user/role/permission/product and Company product/user settings have received a first refinement; continue detail/edit flows, orders, reports and operational edge states.
-2. Public Website: company directory/profile, FAQ/Terms, About, search results, address book and customer profile received first-pass refinements; Contact, authentication, checkout/cart/order and inquiry pages remain.
+2. Public Website: company directory/profile, FAQ/Terms, About, search results, address book, customer profile, Contact and authentication received first-pass refinements; orders, cart/checkout and inquiry pages remain.
 3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility, loading/empty/error/disabled states and Vercel guideline review.
 4. Full 69-page inventory and documentation update, then a truthful completion report.
 
@@ -113,3 +113,15 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Avatar and form fields now expose layout/accessibility metadata; failed initial profile loads no longer leave a blank profile shell.
 - Existing profile, password, avatar and logout actions are unchanged.
 - Static review only; tests/build/browser checks NOT RUN — owner instruction.
+
+
+### Contact and authentication — Phase 12
+- Contact form retains shared validation components and real contact API; form fields now have stable names and the page uses flatter surfaces.
+- Login/register use the shared BrandMark and a solid brand panel; registration account-type choice uses native labeled radio inputs.
+- Password recovery now has one set of ARIA validation attributes, named email field and semantic links for navigation/email-client launch.
+- No authentication, PKCE, registration or contact API contract changed.
+- Static review only; tests/build/browser checks NOT RUN — owner instruction.
+
+### Commerce prototype limitation
+- Orders.vue currently supplies a hard-coded empty result object; Checkout.vue simulates order confirmation/payment and ShoppingCart.vue simulates discount validation.
+- These are not production commerce integrations. Do not represent them as completed during a visual-only redesign; align the UX with approved B2B inquiry-first product policy and real APIs before activation.

@@ -15,7 +15,7 @@
     <div class="contact-grid">
       <!-- Left: Contact Form (65%) -->
       <div class="contact-form-col">
-        <FormSection title="فرم تماس" icon="pi pi-envelope">
+        <FormSection title="فرم تماس">
           <form @submit.prevent="handleSubmit" class="contact-form">
             <FormAlert v-if="errors.general" variant="error" :message="errors.general" />
             <FormAlert v-if="successMessage" variant="success" :message="successMessage" />
@@ -26,6 +26,7 @@
                   <InputText
                     v-model="form.name"
                     :id="id"
+                    name="contactName"
                     :aria-describedby="describedBy"
                     autocomplete="name"
                     placeholder="نام خود را وارد کنید"
@@ -38,6 +39,7 @@
                   <InputText
                     v-model="form.email"
                     :id="id"
+                    name="contactEmail"
                     :aria-describedby="describedBy"
                     autocomplete="email"
                     placeholder="example@email.com"
@@ -53,6 +55,7 @@
                 <InputText
                   v-model="form.phone"
                   :id="id"
+                  name="contactPhone"
                   :aria-describedby="describedBy"
                   autocomplete="tel"
                   inputmode="tel"
@@ -67,6 +70,7 @@
                 <Select
                   v-model="form.subject"
                   :inputId="id"
+                  name="contactSubject"
                   :aria-describedby="describedBy"
                   :options="subjectOptions"
                   optionLabel="label"
@@ -82,8 +86,9 @@
                 <Textarea
                   v-model="form.message"
                   :id="id"
+                  name="contactMessage"
                   :aria-describedby="describedBy"
-                  placeholder="پیام خود را اینجا بنویسید..."
+                  placeholder="پیام خود را اینجا بنویسید…"
                   rows="5"
                   :invalid="invalid"
                 />
@@ -115,7 +120,6 @@
         <Card class="info-card">
           <template #content>
             <div class="info-card-inner">
-              <div class="info-icon"><i class="pi pi-shield"></i></div>
               <div>
                 <h4>پیگیری پیام</h4>
                 <p>پس از ارسال موفق، پیام شما به صندوق پشتیبانی بازارگاه تحویل داده می‌شود. پاسخ احتمالی به نشانی ایمیلی که وارد کرده‌اید ارسال خواهد شد.</p>
@@ -310,7 +314,7 @@ const resetForm = () => {
   justify-content: center;
   color: #004D6F;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: background-color var(--ds-transition-fast), color var(--ds-transition-fast), border-color var(--ds-transition-fast);
 }
 .social-link:hover {
   background: #004D6F;
@@ -375,9 +379,7 @@ const resetForm = () => {
 .contact-page-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: var(--ds-font-weight-bold); }
 .contact-page-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
 .contact-page-heading :deep(.p-breadcrumb) { padding: 0; border: 0; background: transparent; }
-.contact-page :deep(.info-icon), .contact-page :deep(.social-link) { background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
-.contact-page :deep(.info-icon i) { color: var(--ds-color-primary); }
-.contact-page :deep(.social-link:hover) { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.contact-page :deep(.social-link:hover) { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); color: var(--ds-color-primary-text); }
 .contact-page :deep(.card-title-row i) { color: var(--ds-color-primary); }
 @media (max-width: 640px) { .contact-page-heading { align-items: flex-start; flex-direction: column; padding: 1rem; } }
 
@@ -403,9 +405,9 @@ const resetForm = () => {
 .contact-page .info-card,
 .contact-page .map-card {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  box-shadow: none;
   overflow: hidden;
 }
 .contact-page .card-title-row { color: var(--ds-color-text); }
@@ -428,10 +430,13 @@ const resetForm = () => {
   border-color: var(--ds-color-border);
   border-radius: var(--ds-radius-md);
 }
-.contact-page :deep(.p-inputtext:focus),
-.contact-page :deep(.p-textarea:focus) {
-  border-color: var(--ds-color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+.contact-page :deep(.p-inputtext:focus-visible),
+.contact-page :deep(.p-textarea:focus-visible),
+.contact-page :deep(.p-select:focus-visible) {
+  border-color: var(--ds-color-focus);
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 .contact-page .map-container { border-radius: var(--ds-radius-lg); }
 @media (max-width: 900px) {

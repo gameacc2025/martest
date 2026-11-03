@@ -2,20 +2,18 @@
   <div class="auth-page">
     <!-- Back to site button -->
     <router-link :to="{ name: 'home' }" class="auth-back">
-      <i class="pi pi-arrow-right"></i>
+      <i class="pi pi-arrow-right" aria-hidden="true"></i>
       <span>بازگشت به سایت</span>
     </router-link>
 
     <div class="auth-split">
       <!-- Visual / telecom side -->
       <div class="auth-visual">
-        <div class="auth-visual-overlay"></div>
         <div class="auth-visual-content">
           <div class="auth-brand">
-            <i class="pi pi-wifi"></i>
+            <BrandMark :size="36" aria-hidden="true" />
             <span>Telecom Market</span>
           </div>
-          <i class="pi pi-server auth-visual-icon"></i>
           <h2 class="auth-visual-title">بازارگاه تجهیزات مخابراتی</h2>
           <p class="auth-visual-text">
             کاتالوگ تخصصی تجهیزات مخابراتی و شبکه را بررسی کنید و محصولات موردنیاز خود را بیابید.
@@ -34,7 +32,7 @@
           <form @submit.prevent="handleSubmit" class="auth-form">
             <!-- Registration success message -->
             <div v-if="route.query.registered" class="auth-success" role="status">
-              <i class="pi pi-check-circle"></i>
+              <i class="pi pi-check-circle" aria-hidden="true"></i>
               <span>ثبت نام با موفقیت انجام شد. حساب کاربری شما پس از تأیید مدیر سیستم فعال خواهد شد.</span>
             </div>
 
@@ -43,6 +41,7 @@
               <InputText
                 id="login-phone"
                 v-model="form.phone"
+                name="phone"
                 type="tel"
                 inputmode="tel"
                 autocomplete="username"
@@ -58,6 +57,7 @@
               <Password
                 inputId="login-password"
                 v-model="form.password"
+                name="password"
                 autocomplete="current-password"
                 required
                 placeholder="رمز عبور خود را وارد کنید"
@@ -109,6 +109,7 @@ import { isExternalUrl, readMintRequest, buildCallbackUrl, mintHandoffCode } fro
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
+import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -291,20 +292,18 @@ async function handleSubmit() {
   gap: var(--ds-space-2);
   padding: var(--ds-space-2) var(--ds-space-4);
   border-radius: var(--ds-radius-lg);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
   color: var(--ds-color-text);
   font-weight: var(--ds-font-weight-bold);
   font-size: var(--ds-font-size-sm);
   text-decoration: none;
-  box-shadow: var(--ds-shadow-md);
-  transition: all var(--ds-transition);
+  box-shadow: none;
+  transition: background-color var(--ds-transition-fast), color var(--ds-transition-fast), border-color var(--ds-transition-fast);
 }
 .auth-back:hover {
-  background: #ffffff;
-  color: var(--ds-color-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--ds-shadow-lg);
+  background: var(--ds-color-surface-hover);
+  color: var(--ds-color-primary-text);
 }
 
 .auth-split {
@@ -316,33 +315,20 @@ async function handleSubmit() {
 /* ---- Visual side ---- */
 .auth-visual {
   position: relative;
-  background: linear-gradient(
-    135deg,
-    var(--p-primary-900) 0%,
-    var(--p-primary-700) 55%,
-    var(--p-primary-500) 100%
-  );
+  background: var(--ds-color-brand-deep);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
 
-.auth-visual-overlay {
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(circle at 25% 25%, rgba(72, 217, 240, 0.35), transparent 55%),
-    radial-gradient(circle at 75% 80%, rgba(1, 190, 194, 0.3), transparent 55%);
-}
-
 .auth-visual-content {
   position: relative;
   z-index: 1;
-  text-align: center;
-  color: #ffffff;
-  padding: 3rem;
-  max-width: 440px;
+  text-align: start;
+  color: var(--ds-color-on-brand);
+  padding: clamp(2rem, 5vw, 4rem);
+  max-width: 34rem;
 }
 
 .auth-brand {
@@ -353,17 +339,6 @@ async function handleSubmit() {
   font-weight: 800;
   margin-bottom: 3rem;
 }
-.auth-brand i {
-  font-size: 1.7rem;
-  color: var(--p-primary-300);
-}
-
-.auth-visual-icon {
-  font-size: 6rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 2rem;
-}
-
 .auth-visual-title {
   font-size: 2rem;
   font-weight: 800;
@@ -374,7 +349,7 @@ async function handleSubmit() {
 .auth-visual-text {
   font-size: 1rem;
   line-height: 2;
-  color: rgba(255, 255, 255, 0.85);
+  color: color-mix(in srgb, var(--ds-color-on-brand) 82%, transparent);
   margin: 0;
 }
 
@@ -384,6 +359,7 @@ async function handleSubmit() {
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  background: var(--ds-color-background);
 }
 
 .auth-form-wrap {

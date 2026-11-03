@@ -2752,3 +2752,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** Pending atomic tree/commit creation.
 - **Push:** Pending.
 - **Next:** Continue ContactUs and authentication pages, then account/order/cart/checkout surfaces and remaining Admin/Company detail pages. Prototype commerce flows need a separate truthful UX pass; do not invent payment/order API behavior.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-12 — CONTACT AND AUTHENTICATION
+- **Status:** IN_PROGRESS — contact, login, registration and password recovery surfaces refined.
+- **Scope:** Website ContactUs, Login, Register and ForgotPassword.
+- **Contact:** Kept the existing FormField/FormAlert validation flow and contact API; added stable field names, removed decorative form/info icons, flattened information surfaces, and replaced transition-all/focus styling with explicit transitions and visible keyboard focus.
+- **Authentication:** Replaced generic Wi-Fi/server glyph artwork with the shared BrandMark, removed radial overlay/gradient and blur/lift chrome, used the solid brand surface, and added stable login/registration field names. Registration account-type selection now uses native radio inputs inside labels rather than custom div role=radio elements, preserving the same customer/company values and v-model.
+- **Password recovery:** Removed duplicate ARIA attributes, added a named email field and stable main heading, converted navigation to router links and email-client launch to a mailto link, and flattened the form surface.
+- **Business behavior:** Login/PKCE handoff, registration payloads/account type, contact submission, password recovery API and destinations remain unchanged.
+- **Verification:** Static source review only. Tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Known commerce blocker:** Orders currently render a hard-coded empty data object; Checkout simulates payment/order confirmation and ShoppingCart simulates discount validation. Do not claim these are working or make them look production-ready without replacing those stubs with approved real flows. The B2B inquiry path remains the active commercial workflow.
+- **Next:** Continue Admin/Company detail screens and public notifications/orders/inquiries, then align the prototype cart/checkout UI with the approved product direction and finish responsive/theme review.

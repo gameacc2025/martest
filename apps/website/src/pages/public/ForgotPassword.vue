@@ -1,12 +1,11 @@
 <template>
-  <div class="forgot-password-page">
+  <main class="forgot-password-page" aria-labelledby="forgot-password-title" :aria-busy="loading">
     <div class="fp-container">
       <div class="fp-inner">
         <Card>
           <template #title>
             <div class="fp-title">
-              <i class="pi pi-lock"></i>
-              <h1>فراموشی رمز عبور</h1>
+              <h1 id="forgot-password-title">فراموشی رمز عبور</h1>
             </div>
           </template>
           <template #content>
@@ -20,13 +19,12 @@
                   <label for="forgot-password-email">آدرس ایمیل</label>
                   <InputText
                     id="forgot-password-email"
+                    name="email"
                     v-model="email"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
                     required
                     autocomplete="email"
-                    :aria-invalid="errors.email ? 'true' : undefined"
-                    :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     :aria-invalid="errors.email ? 'true' : undefined"
                     :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     class="fp-input"
@@ -45,12 +43,7 @@
               </form>
 
               <div class="fp-back-link">
-                <Button
-                  label="بازگشت به صفحه ورود"
-                  icon="pi pi-arrow-right"
-                  class="p-button-text p-button-link"
-                  @click="goToLogin"
-                />
+                <router-link :to="{ name: 'login' }" class="fp-back-link__anchor">بازگشت به صفحه ورود</router-link>
               </div>
             </div>
 
@@ -63,42 +56,30 @@
               </p>
 
               <div class="fp-action-list">
-                <Button
-                  label="بررسی ایمیل"
-                  icon="pi pi-external-link"
-                  class="fp-input p-button-primary"
-                  @click="checkEmail"
-                />
+                <a :href="'mailto:' + email" class="fp-input fp-check-email">بررسی ایمیل <i class="pi pi-external-link" aria-hidden="true"></i></a>
                 <Button
                   label="ارسال مجدد لینک"
                   icon="pi pi-refresh"
                   class="fp-input p-button-outlined"
                   @click="resendLink"
                 />
-                <Button
-                  label="بازگشت به صفحه ورود"
-                  icon="pi pi-arrow-right"
-                  class="fp-input p-button-text"
-                  @click="goToLogin"
-                />
+                <router-link :to="{ name: 'login' }" class="fp-input fp-back-link__anchor">بازگشت به صفحه ورود</router-link>
               </div>
             </div>
           </template>
         </Card>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const email = ref('')
@@ -149,18 +130,10 @@ const isValidEmail = (email) => {
   return emailRegex.test(email)
 }
 
-const checkEmail = () => {
-  // Open user's email client
-  window.location.href = `mailto:${email.value}`
-}
-
 const resendLink = () => {
   emailSent.value = false
 }
 
-const goToLogin = () => {
-  router.push({ name: 'login' })
-}
 </script>
 
 <style scoped>
@@ -248,10 +221,28 @@ const goToLogin = () => {
 .forgot-password-page { min-height: 70vh; background: var(--ds-color-background); }
 .forgot-password-page :deep(.p-card) {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-lg);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: none;
 }
-.forgot-password-page .fp-title i { color: var(--ds-color-primary); }
+.forgot-password-page .fp-title { text-align: start; }
+.fp-back-link__anchor,
+.fp-check-email {
+  display: inline-flex;
+  min-height: var(--ds-touch-target);
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .7rem 1rem;
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-color-primary-text);
+  font-weight: var(--ds-font-weight-semibold);
+  text-decoration: none;
+}
+.fp-back-link__anchor:hover { background: var(--ds-color-surface-hover); }
+.fp-check-email { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.fp-back-link__anchor:focus-visible,
+.fp-check-email:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 .forgot-password-page .fp-title h1 { color: var(--ds-color-text); }
 .forgot-password-page .fp-desc { color: var(--ds-color-text-muted); line-height: var(--ds-line-height-relaxed); }
 .forgot-password-page :deep(.p-inputtext) { border-radius: var(--ds-radius-md); }

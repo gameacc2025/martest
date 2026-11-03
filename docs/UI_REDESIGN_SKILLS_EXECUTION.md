@@ -101,3 +101,13 @@ The shared DataTable, form-section heading and required-field progress primitive
 - Avatar media reserves dimensions; profile/password fields carry names and autocomplete; avatar upload has an accessible name.
 - Loading and initial-load failure states are explicit. Profile update/password/avatar/logout APIs remain unchanged.
 - No tests/build/browser checks were run, per owner instruction.
+
+
+## Contact and authentication — 2026-11-03
+
+- ContactUs keeps its real contact API and shared validation components, while adding stable field names and removing decorative icon/card chrome.
+- Login and registration share the BrandMark and a solid brand panel; the registration type selector now uses native labeled radio controls rather than custom div-based radios.
+- ForgotPassword removes duplicate ARIA attributes and uses semantic links for navigation and mail-client launch.
+- Auth/PKCE, registration, contact and password recovery contracts are unchanged.
+- Commerce caveat: Orders still use a hard-coded empty result; Checkout simulates payment/order confirmation; ShoppingCart simulates discount validation. These are prototypes, not real production integrations, and must not be presented as completed features.
+- Tests/build/browser screenshots remain NOT RUN by owner instruction.
