@@ -2572,3 +2572,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commits:** `4730732` (behavior fix), `113dd19` (unused state cleanup), `7f3b289` (current-task handoff), `5db4892` (UI execution log).
 - **Verification:** Source changes and documentation were committed through the GitHub repository interface. No browser tests, automated tests, or builds were run, per owner instruction.
 - **Remaining:** A real contact workflow still requires an approved endpoint and verified business contact details.
+
+
+## 2026-11-03 — CONTACT-FORM-ENDPOINT-01 — IMPLEMENTATION COMPLETE / DEPLOYMENT CONFIG PENDING
+
+- **Finding:** Website Contact Us had no API route; earlier code simulated delivery. Displayed phone/address/hours/social/map data had no authoritative source in the repository.
+- **Backend:** Added public `POST /api/v1/contact/messages`, strict body schema, allow-listed subjects, field length limits, and a 3-request/10-minute per-IP rate limit. SMTP recipient is read only from server environment; visitor email is `Reply-To`. No database migration or dependency was added.
+- **Delivery safety:** SMTP and `CONTACT_INBOX_EMAIL` are mandatory. Missing configuration returns `503 CONTACT_DELIVERY_NOT_CONFIGURED`; no console fallback or fake success. Error handler preserves the safe 503 response.
+- **Frontend:** Website now calls the shared API client, shows success only after the backend confirms SMTP acceptance, keeps entered data after errors, and removes unverified static contact details.
+- **Documentation:** Updated API route inventory, OpenAPI route metadata, API documentation, current-task, and UI execution log. Added route/service regression tests and updated inventory coverage assertions.
+- **Deployment prerequisite:** Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, and a real monitored `CONTACT_INBOX_EMAIL` in backend runtime environment. Do not commit credentials. No actual mailbox or SMTP provider credentials were available in repository context.
+- **Verification:** No tests, builds, or browser checks were run per owner instruction. Runtime email delivery is not claimed.
