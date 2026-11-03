@@ -1,10 +1,12 @@
-# Active execution — UI completion and shared-component quality pass (2026-11-03)
+# UI redesign implementation — source work complete (2026-11-03)
 
-**Current scope:** Finish the remaining UI consistency, responsive and accessibility refinements across Website, Company, Admin and shared UI. The existing execution log records the 69 application page files as migrated; this pass is addressing shared component and page-level gaps found during source review.
+**Implementation status:** All 69 Vue page files across Website, Company and Admin are recorded as migrated or audited against the shared Design System. The shared component and auth/contact accessibility follow-up in this pass is also committed. No additional UI source task is currently identified by the repository's execution inventory.
 
-**User constraints:** UI-only. Do not modify backend, API contracts, database, auth/permission logic or business workflows. Do not run browser tests or spend time running tests. Continue committing directly to `main` and append factual updates to this file, `.ai/WORKLOG.md` and `docs/UI_REDESIGN_EXECUTION.md`.
+**User constraints:** UI-only; no backend, API contracts, database, auth/permission logic or business workflows changed. Browser testing and test execution are intentionally omitted at the user's direction. Do not claim build/runtime/visual verification without evidence. All changes are committed directly to `main`.
 
-**Current completed source refinements in this pass:** shared Input label/feedback/ARIA handling; DataTable filter accessible names; FormField Vue 3.4 compatibility and feedback associations; Website Contact Us field label/feedback wiring. Contact Us submission integration remains intentionally unresolved; no endpoint or successful submission is invented.
+**Latest finishing changes:** unique fallback IDs and additive ARIA descriptions in shared Input; accessible DataTable filters; Vue 3.4-compatible FormField feedback associations; Contact Us Select label binding; accessible password-recovery forms in all three apps; login autofill semantics; registration autofill hints.
+
+**Explicitly unresolved (not fabricated):** Contact Us still has no confirmed public submission endpoint or verified business contact details. Final responsive/dark/RTL review against running apps and build/CI sign-off require an environment/run the user has not authorized in this no-test pass. The separate security-audit handoff below is retained as historical project context.
 
 ---
 
