@@ -1649,3 +1649,14 @@ Admin and Company share a more accessible responsive shell: mobile drawer state 
 - Final pass: per-instance Input fallback IDs; additive ARIA descriptions; DataTable filter names; Vue 3.4-compatible FormField IDs/feedback; Contact Us Select label association; consistent accessible forgot-password fields in all three apps; login and registration autofill semantics.
 - Contact Us backend integration remains unresolved until an approved endpoint and verified business contact details are supplied. No fake endpoint or successful-send behavior added.
 - UI source implementation is complete. Responsive/dark/RTL visual acceptance and build/CI/runtime sign-off are not claimed. Tests/browser checks were not run per user instruction. No API/backend/database/auth/permission/business-flow changes.
+
+
+## 2026-11-03 — UI-SKILLS-INSTALLATION — CODEX INSTALLER AND MANDATORY AI POLICY
+
+- **Status:** REPOSITORY SETUP PREPARED; LOCAL INSTALLATION PENDING.
+- **Goal:** Make UI UX Pro Max, Taste Skill, Impeccable, and Vercel Web Design Guidelines available to Codex and mandatory references for future UI work.
+- **Findings:** UI UX Pro Max already exists under `.opencode/skills/ui-ux-pro-max`, but Codex's project skill directory is `.agents/skills`. The Taste Skill upstream v2 is experimental; its official install name is `design-taste-frontend`. Impeccable and Vercel publish Codex-compatible skill installs.
+- **Changes:** Added `.ai/UI_SKILLS.md` with mandatory skill routing, project-specific guardrails, and verification policy; added `scripts/install-ui-skills.ps1` to install/update all four upstream tools for Codex; updated `AGENTS.md`, `.ai/PROTOCOL.md`, and `docs/AI_AGENT_WORKFLOW.md` so future agents must load the relevant skills before UI changes.
+- **Install command:** From the local repository root in PowerShell run `.scripts\install-ui-skills.ps1`. Restart Codex after successful installation.
+- **Verification:** Remote repository files were re-read before edits and all additions were committed to `main`. The installer was NOT executed because this session has GitHub repository access but no access to the user's local Windows shell. Skill installation on the local machine is therefore NOT VERIFIED. No tests, builds, or browser checks were run.
+- **Next action:** User runs the PowerShell installer locally; then Codex must be restarted. Future UI tasks must follow `.ai/UI_SKILLS.md`.
