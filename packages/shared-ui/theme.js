@@ -25,19 +25,19 @@ import Lara from '@primevue/themes/lara'
 
 const TelecomPreset = definePreset(Lara, {
   semantic: {
-    // Brand ramp built around #01bec2 (500). 700 is the light-theme action shade.
+    // Accessible action ramp anchored in the turquoise brand.
     primary: {
-      50: '#e8fafb',
-      100: '#c6f3f5',
-      200: '#93e8eb',
-      300: '#55dbdf',
-      400: '#1ecbd0',
-      500: '#01bec2',
-      600: '#00a3a8',
-      700: '#00797f',
-      800: '#0a6a78',
-      900: '#004d6f',
-      950: '#003a54'
+      50: '#e8f8f6',
+      100: '#c9eee9',
+      200: '#9ce0d7',
+      300: '#66cfc2',
+      400: '#35c1b1',
+      500: '#12b8a6',
+      600: '#0b9d91',
+      700: '#087f78',
+      800: '#086660',
+      900: '#0b5551',
+      950: '#063b3a'
     },
     // Slightly softer corners than the stock Lara template: calmer, more "enterprise".
     formField: { borderRadius: '10px' },
@@ -54,31 +54,31 @@ const TelecomPreset = definePreset(Lara, {
           activeColor: '{primary.900}'
         },
         highlight: {
-          background: '#def5fb',
-          focusBackground: '#c6edf6',
-          color: '#0a6a78',
-          focusColor: '#004d6f'
+          background: '#dff6f3',
+          focusBackground: '#c8eee9',
+          color: '#086660',
+          focusColor: '#063b3a'
         },
         // Cool, blue-tinted neutral ramp. 200 = hairline border, 600 = secondary text.
         surface: {
           0: '#ffffff',
-          50: '#f9fcfd',
-          100: '#f4f9fb',
-          200: '#d5e6ed',
-          300: '#b9d3de',
-          400: '#8fb0bf',
-          500: '#6b8c9b',
-          600: '#476a79',
-          700: '#2c5062',
-          800: '#16435a',
-          900: '#003a54',
-          950: '#022a3d'
+          50: '#f8fbfd',
+          100: '#f0f6f9',
+          200: '#dce8ee',
+          300: '#bfd2dc',
+          400: '#91adbc',
+          500: '#6c8b9c',
+          600: '#506f82',
+          700: '#38596e',
+          800: '#28475f',
+          900: '#173b63',
+          950: '#102b49'
         },
         text: {
-          color: '#003a54',
-          hoverColor: '#022a3d',
-          mutedColor: '#476a79',
-          hoverMutedColor: '#2c5062'
+          color: '#203247',
+          hoverColor: '#102b49',
+          mutedColor: '#526b7b',
+          hoverMutedColor: '#38596e'
         },
         formField: {
           // 3:1 against white for the control boundary (WCAG 1.4.11).
@@ -89,36 +89,36 @@ const TelecomPreset = definePreset(Lara, {
       dark: {
         primary: {
           color: '{primary.500}',
-          contrastColor: '#003a54',
+          contrastColor: '#063b3a',
           hoverColor: '{primary.400}',
           activeColor: '{primary.300}'
         },
         highlight: {
-          background: 'rgba(1, 190, 194, 0.16)',
-          focusBackground: 'rgba(1, 190, 194, 0.24)',
+          background: 'rgba(18, 184, 166, 0.16)',
+          focusBackground: 'rgba(18, 184, 166, 0.24)',
           color: '{primary.300}',
           focusColor: '{primary.200}'
         },
         // page #04202e (950), card #08293a (900), hover #0c3347 (800), border #16495f (700)
         surface: {
           0: '#ffffff',
-          50: '#e8f4f8',
-          100: '#cfe6ee',
-          200: '#b0d0dc',
-          300: '#8fb5c5',
-          400: '#6d98ac',
-          500: '#4f7f95',
-          600: '#2f5f77',
-          700: '#16495f',
-          800: '#0c3347',
-          900: '#08293a',
-          950: '#04202e'
+          50: '#eaf3f8',
+          100: '#d4e5ef',
+          200: '#b4cfdf',
+          300: '#8eb4cb',
+          400: '#6697b5',
+          500: '#477b9d',
+          600: '#326385',
+          700: '#244e70',
+          800: '#1b3f60',
+          900: '#142f4b',
+          950: '#0b2036'
         },
         text: {
-          color: '#e8f4f8',
+          color: '#eaf3f8',
           hoverColor: '#ffffff',
-          mutedColor: '#9fc3d1',
-          hoverMutedColor: '#cfe6ee'
+          mutedColor: '#a9c5d5',
+          hoverMutedColor: '#d4e5ef'
         }
       }
     }
@@ -135,7 +135,7 @@ const TelecomPreset = definePreset(Lara, {
       root: {
         borderRadius: '14px',
         // Navy-tinted elevation instead of neutral black: reads as one family with the brand.
-        shadow: '0 1px 2px rgba(0, 58, 84, 0.06), 0 6px 16px rgba(0, 58, 84, 0.07)'
+        shadow: '0 1px 2px rgba(23, 59, 99, 0.06), 0 6px 16px rgba(23, 59, 99, 0.07)'
       }
     },
     tag: {
