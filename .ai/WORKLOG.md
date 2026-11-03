@@ -2683,3 +2683,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **API/backend/auth/permissions:** No changes.
 - **Phase 6 commit:** Pending atomic tree/commit creation.
 - **Next:** Continue with public company/search/content pages and remaining Admin/Company operational pages, then cross-app theme/responsive review.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-7 — ADMIN/COMPANY MANAGEMENT AND SETTINGS
+- **Status:** IN_PROGRESS — operational list/settings refinement slice implemented; full three-app redesign continues.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Continue the skill-driven UI redesign across Admin and Company management workflows without changing API, permission, tenant, or business behavior.
+- **Scope:** Admin category/company/user/role/permission/product lists; Company product/user lists and company settings; shared design-system skill refinement layer.
+- **Changes:** Unified management data surfaces/toolbars to flat token-based borders and removed generic shadows/rounded intro icon treatments across the relevant workspace page families. Simplified Company Settings heading, flattened profile/contact/settings sections and tabs, and aligned mobile actions. Added stable name and autocomplete metadata and explicit accessible names to management search fields. Marked search glyphs decorative. Added explicit dimensions, alt fallback, lazy loading and async decoding to category images. Company Settings fields now have explicit label/input associations, meaningful names and autocomplete, correct email/tel/url input types, and a phone input mode.
+- **Business behavior:** No API calls, routes, permissions, role assignments, tenant ownership, product lifecycle or form submission logic changed.
+- **Verification:** Static source review of changed snippets only. Automated tests/builds/browser checks NOT RUN — owner instruction. No rendered visual acceptance is claimed.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Risks / open questions:** Existing Company Settings logo action remains visually present but its handler/real upload flow was not changed in this UI-only pass; review separately before calling that control functional. Other page families remain.
+- **Next action:** Continue remaining Company/Admin detail and reports surfaces, then Website public profiles, search, content/help/legal and account/commerce pages; finish with full page inventory and cross-theme/RTL static review.

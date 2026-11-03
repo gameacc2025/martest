@@ -1,6 +1,6 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery and notification/settings surfaces updated; full 69-page redesign remains in progress.  
+**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists and Company settings have received phased updates; full 69-page redesign remains in progress.  
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -44,7 +44,7 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 - Added a shared fixed-folder normalizer and unit tests.
 
 ## Remaining phases
-1. Admin and Company operational pages: products/forms, category and company management, users/roles/permissions, orders, reports, inquiry/RFQ detail/list/create/subscription flows.
+1. Admin and Company operational pages: list surfaces for category/company/user/role/permission/product and Company product/user settings have received a first refinement; continue detail/edit flows, orders, reports and operational edge states.
 2. Public Website: search results, company profiles, content/help/legal, profile, addresses, checkout/cart/order and inquiry pages.
 3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility, loading/empty/error/disabled states and Vercel guideline review.
 4. Full 69-page inventory and documentation update, then a truthful completion report.
@@ -71,3 +71,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Product form/list and inquiry/RFQ page families receive cross-app flat-surface refinements.
 - Website inquiry subscription now uses the shared page heading and accessible quota progress meters.
 - New component regression tests are authored; execution remains NOT RUN by owner instruction.
+
+
+### Admin/Company management and settings — Phase 7
+- Unified flat management surfaces and toolbars across category, company, user, role, permission and product lists.
+- Refined Company Settings heading, profile/contact sections, metadata and tabs to remove decorative gradient/icon-card styling.
+- Added explicit names/autocomplete/accessibility labels to the relevant search inputs.
+- Added explicit image dimensions, alt fallback, lazy loading and async decoding to category images.
+- Added explicit for/id, name, autocomplete and semantic input types to Company Settings profile/contact fields.
+- No API, route, authorization, tenant or business behavior changed.
+- Static source review only; tests/build/browser checks NOT RUN — owner instruction.

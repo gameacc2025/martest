@@ -142,9 +142,7 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
       <!-- Page Header with Trust Signals -->
       <header class="page-header settings-heading">
         <div class="settings-heading-identity">
-          <span class="settings-heading-icon"><i class="pi pi-building"></i></span>
           <div>
-            <span class="settings-heading-eyebrow">پروفایل و کنترل‌های سازمانی</span>
             <h1>تنظیمات شرکت</h1>
             <p>اطلاعات عمومی، راه‌های تماس، اعلان‌ها و امنیت حساب شرکت را مدیریت کنید.</p>
           </div>
@@ -204,17 +202,17 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
                 <p class="section-hint">اطلاعات قابل ویرایش شرکت</p>
                 <div class="form-grid">
                   <div class="field">
-                    <label>نام شرکت <span class="required">*</span></label>
-                    <InputText v-model="profile.name" class="w-full" />
+                    <label for="companyName">نام شرکت <span class="required">*</span></label>
+                    <InputText id="companyName" v-model="profile.name" name="companyName" autocomplete="organization" class="w-full" />
                   </div>
                   <div class="field">
-                    <label>نام انگلیسی</label>
-                    <InputText v-model="profile.nameEn" class="w-full" />
+                    <label for="companyNameEn">نام انگلیسی</label>
+                    <InputText id="companyNameEn" v-model="profile.nameEn" name="companyNameEn" autocomplete="off" class="w-full" />
                   </div>
                 </div>
                 <div class="field">
-                  <label>توضیحات</label>
-                  <Textarea v-model="profile.description" rows="4" class="w-full" placeholder="معرفی کوتاه شرکت..." />
+                  <label for="companyDescription">توضیحات</label>
+                  <Textarea id="companyDescription" v-model="profile.description" name="companyDescription" rows="4" class="w-full" placeholder="معرفی کوتاه شرکت…" />
                 </div>
                 <div class="field">
                   <label>لوگو</label>
@@ -241,21 +239,21 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
                 <p class="section-hint">اطلاعات تماس برای خریداران و شرکای تجاری</p>
                 <div class="form-grid">
                   <div class="field">
-                    <label>ایمیل</label>
-                    <InputText v-model="contact.email" class="w-full" type="email" placeholder="info@company.com" />
+                    <label for="companyEmail">ایمیل</label>
+                    <InputText id="companyEmail" v-model="contact.email" name="companyEmail" autocomplete="email" class="w-full" type="email" placeholder="info@company.com" />
                   </div>
                   <div class="field">
-                    <label>تلفن</label>
-                    <InputText v-model="contact.phone" class="w-full" placeholder="021-XXXXXXXX" />
+                    <label for="companyPhone">تلفن</label>
+                    <InputText id="companyPhone" v-model="contact.phone" name="companyPhone" autocomplete="tel" inputmode="tel" class="w-full" placeholder="021-XXXXXXXX" />
                   </div>
                 </div>
                 <div class="field">
-                  <label>آدرس</label>
-                  <Textarea v-model="contact.address" rows="3" class="w-full" placeholder="آدرس کامل شرکت..." />
+                  <label for="companyAddress">آدرس</label>
+                  <Textarea id="companyAddress" v-model="contact.address" name="companyAddress" rows="3" class="w-full" placeholder="آدرس کامل شرکت…" />
                 </div>
                 <div class="field">
-                  <label>وب‌سایت</label>
-                  <InputText v-model="contact.website" class="w-full" placeholder="https://" />
+                  <label for="companyWebsite">وب‌سایت</label>
+                  <InputText id="companyWebsite" v-model="contact.website" name="companyWebsite" autocomplete="url" type="url" class="w-full" placeholder="https://example.com" />
                 </div>
               </div>
 

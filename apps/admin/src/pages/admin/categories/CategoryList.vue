@@ -6,8 +6,8 @@
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
           <span class="p-input-icon-right">
-            <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در دسته‌بندی‌ها" @input="debounceSearch" />
+            <i class="pi pi-search" aria-hidden="true" />
+            <InputText v-model="searchQuery" name="categorySearch" autocomplete="off" placeholder="جستجو…" aria-label="جستجو در دسته‌بندی‌ها" @input="debounceSearch" />
           </span>
         </template>
         <template #end>
@@ -34,9 +34,12 @@
           <img
             v-if="row.image"
             :src="row.image"
-            :alt="row.nameFa"
+            :alt="row.nameFa || row.nameEn || 'تصویر دسته‌بندی'"
+            width="56"
+            height="44"
             class="category-table-image"
             loading="lazy"
+            decoding="async"
           />
           <span v-else class="category-table-image-placeholder" aria-label="بدون تصویر">
             <i class="pi pi-image" aria-hidden="true"></i>
@@ -67,7 +70,7 @@
         <label for="image">آدرس تصویر دسته‌بندی</label>
         <InputText id="image" v-model="form.image" placeholder="https://... یا /uploads/..." />
         <small>آدرس عمومی تصویر را وارد کنید؛ تصویر در صفحه دسته‌بندی‌ها و صفحه اصلی نمایش داده می‌شود.</small>
-        <img v-if="form.image" :src="form.image" :alt="form.nameFa" style="display: block; max-width: 100%; max-height: 160px; margin-top: 0.75rem; object-fit: contain;" />
+        <img v-if="form.image" :src="form.image" :alt="form.nameFa || 'پیش‌نمایش تصویر دسته‌بندی'" width="640" height="360" loading="lazy" decoding="async" style="display: block; max-width: 100%; max-height: 160px; margin-top: 0.75rem; object-fit: contain;" />
       </div>
       <template #footer>
         <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="closeDialog" />

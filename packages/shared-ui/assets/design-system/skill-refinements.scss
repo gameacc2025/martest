@@ -344,4 +344,69 @@
   .product-form-page .page-header-actions .p-button { flex: 1 1 auto; }
 }
 
+
+
+/* Skill pass: keep operational lists quiet, legible and consistent across apps. */
+.management-data-surface,
+.company-management-surface,
+.identity-management-surface,
+.product-management-surface {
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+}
+.management-data-toolbar,
+.company-management-toolbar,
+.identity-management-toolbar,
+.product-management-toolbar {
+  border-radius: 0 !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+}
+.management-page-intro,
+.access-management-intro,
+.order-management-intro,
+.company-management-intro,
+.identity-management-intro {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.management-page-icon,
+.access-management-icon,
+.order-management-icon,
+.company-management-intro-icon,
+.identity-management-icon { display: none !important; }
+
+.settings-page .settings-heading {
+  padding: 0 0 var(--ds-space-4) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--ds-color-border) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.settings-page .settings-heading-icon,
+.settings-page .settings-heading-eyebrow { display: none !important; }
+.settings-page .meta-section,
+.settings-page .form-section {
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+}
+.settings-page .meta-item,
+.settings-page .switch-row { border-radius: var(--ds-radius-sm) !important; }
+.settings-page .p-tablist {
+  border-radius: var(--ds-radius-md) !important;
+  box-shadow: none !important;
+}
+.settings-page .p-tab { min-height: 2.75rem !important; }
+.settings-page .field :is(input, textarea, select) { max-width: 100%; }
+.settings-page .field label { cursor: pointer; }
+@media (max-width: 700px) {
+  .settings-page .tab-actions .p-button { min-height: 2.75rem; }
+}
 }

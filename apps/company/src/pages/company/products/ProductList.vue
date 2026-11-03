@@ -6,7 +6,7 @@
       <Toolbar class="ds-toolbar product-management-toolbar">
         <template #start>
           <span class="search-input">
-            <InputText v-model="searchQuery" placeholder="جستجوی محصول..." @input="debounceSearch" />
+            <InputText v-model="searchQuery" name="companyProductSearch" autocomplete="off" placeholder="جستجوی محصول…" aria-label="جستجو در محصولات شرکت" @input="debounceSearch" />
           </span>
           <Select v-model="statusFilter" :options="statusOptions" optionLabel="label" optionValue="value"
             placeholder="فیلتر وضعیت" class="filter-dropdown" @change="onStatusFilterChange" />

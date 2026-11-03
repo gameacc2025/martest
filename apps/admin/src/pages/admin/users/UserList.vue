@@ -6,8 +6,8 @@
       <Toolbar class="ds-toolbar identity-management-toolbar">
         <template #start>
           <span class="p-input-icon-right search-wrap">
-            <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در کاربران" @input="debounceSearch" />
+            <i class="pi pi-search" aria-hidden="true" />
+            <InputText v-model="searchQuery" name="userSearch" autocomplete="off" placeholder="جستجو…" aria-label="جستجو در کاربران" @input="debounceSearch" />
           </span>
           <Select
             v-model="statusFilter"

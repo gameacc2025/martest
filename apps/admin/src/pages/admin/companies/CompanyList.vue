@@ -12,10 +12,12 @@
       <Toolbar class="ds-toolbar company-management-toolbar">
         <template #start>
           <span class="p-input-icon-right">
-            <i class="pi pi-search" />
+            <i class="pi pi-search" aria-hidden="true" />
             <InputText
               v-model="searchQuery"
-              placeholder="جستجوی شرکت..."
+              name="companySearch"
+              autocomplete="off"
+              placeholder="جستجوی شرکت…"
               aria-label="جستجو در شرکت‌ها"
               @input="debounceSearch"
             />

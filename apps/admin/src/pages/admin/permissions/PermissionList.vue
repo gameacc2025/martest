@@ -6,8 +6,8 @@
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
           <span class="p-input-icon-right">
-            <i class="pi pi-search" />
-            <InputText v-model="searchQuery" placeholder="جستجو..." aria-label="جستجو در مجوزها" @input="debounceSearch" />
+            <i class="pi pi-search" aria-hidden="true" />
+            <InputText v-model="searchQuery" name="permissionSearch" autocomplete="off" placeholder="جستجو…" aria-label="جستجو در مجوزها" @input="debounceSearch" />
           </span>
         </template>
         <template #end>

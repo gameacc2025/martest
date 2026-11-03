@@ -57,3 +57,13 @@ The shared PrimeVue/Sakai layer now applies the skill refinements after the lega
 ## Workflow-family checkpoint — 2026-11-03
 
 The shared DataTable, form-section heading and required-field progress primitives have been refined. Product authoring/catalogue management and inquiry/RFQ pages now inherit cross-app flat-surface rules. Website inquiry subscription uses the shared heading and accessible quota meters. These changes do not complete the remaining public profiles, order/checkout, help/legal, user/role management, or all 69 pages.
+
+
+## Admin/Company management checkpoint — 2026-11-03
+
+- Admin category, company, user, role, permission and product list screens received a consistent flat, data-first management surface and toolbar treatment.
+- Company product and user list search controls now expose stable names, autocomplete behavior and accessible names.
+- Company Settings no longer uses a decorative icon/eyebrow hero; status/verification facts remain visible, and profile/contact forms use explicit label associations, semantic input types and autocomplete metadata.
+- Category list/preview images now reserve layout space and load below the fold lazily.
+- This checkpoint does not complete the remaining detail/edit workflows, reports, or the public Website page inventory.
+- No API, route, permission, tenant ownership or business behavior changed. Tests/builds/browser checks remain NOT RUN by owner instruction.
