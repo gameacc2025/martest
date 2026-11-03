@@ -20,10 +20,7 @@
         <Card class="filters-card ds-card">
           <template #content>
             <div class="filters-inner">
-              <div class="filters-heading">
-                <div class="filters-heading-icon"><i class="pi pi-sliders-h"></i></div>
-                <div><h2>فیلتر محصولات</h2><p>نتایج را دقیق‌تر محدود کنید</p></div>
-              </div>
+              <div class="filters-heading"><h2>فیلتر محصولات</h2><p>نتایج را دقیق‌تر محدود کنید</p></div>
               <!-- Search -->
               <div class="filter-group">
                 <label for="product-search">جستجو</label>
@@ -119,25 +116,25 @@
               <span class="products-count-number">{{ totalItems.toLocaleString('fa-IR') }}</span>
               <span>محصول در کاتالوگ</span>
             </div>
-            <span class="products-results-context"><i class="pi pi-check-circle"></i> فقط محصولات منتشرشده</span>
+            <span class="products-results-context">فقط محصولات منتشرشده</span>
           </div>
           <div class="products-grid">
-            <div
+            <router-link
               v-for="product in products"
               :key="product.id"
+              :to="{ name: 'product-details', params: { id: product.id } }"
               class="product-card"
-              role="link"
-              tabindex="0"
-              :aria-label="`مشاهده جزئیات ${product.title}`"
-              @click="goToProduct(product)"
-              @keydown.enter.prevent="goToProduct(product)"
-              @keydown.space.prevent="goToProduct(product)"
+              :aria-label="'مشاهده جزئیات ' + product.title"
             >
               <div class="product-image">
                 <img
                   v-if="getProductImage(product)?.url"
                   :src="getProductImage(product).url"
                   :alt="product.title"
+                  width="640"
+                  height="480"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div v-else class="empty-image">
                   <i class="pi pi-image"></i>
@@ -156,7 +153,7 @@
                     <i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده تأییدشده
                   </span>
                 </div>
-                <p class="product-company"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || 'تأمین‌کننده' }}</p>
+                <p v-if="product.company?.name" class="product-company"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company.name }}</p>
                 <div v-if="product.brand || product.model || product.sku" class="product-meta">
                   <span v-if="product.brand"><i class="pi pi-tag" aria-hidden="true"></i>{{ product.brand }}</span>
                   <span v-if="product.model"><i class="pi pi-box" aria-hidden="true"></i>{{ product.model }}</span>
@@ -175,7 +172,7 @@
                   <span class="product-card-link">جزئیات محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
                 </div>
               </div>
-            </div>
+            </router-link>
           </div>
 
           <!-- Pagination -->
@@ -197,7 +194,7 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
@@ -209,7 +206,6 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 
 const route = useRoute()
-const router = useRouter()
 const productsStore = useProductsStore()
 
 const products = ref([])
@@ -316,10 +312,6 @@ const onPageChange = (event) => {
   loadProducts()
 }
 
-const goToProduct = (product) => {
-  router.push({ name: 'product-details', params: { id: product.id } })
-}
-
 const getProductImage = (product) => (
   product?.images?.find((image) => image?.isPrimary && image?.url)
   || product?.images?.find((image) => image?.url)
@@ -344,9 +336,7 @@ watch(() => route.query.category, (newVal) => {
 .products-page {
   direction: rtl;
   width: 100%;
-  background:
-    radial-gradient(ellipse at 8% 0%, color-mix(in srgb, var(--ds-color-primary) 6%, transparent), transparent 32rem),
-    var(--ds-color-background);
+  background: var(--ds-color-background);
   max-width: var(--ds-container-max-wide);
   margin-inline: auto;
   padding-inline: var(--ds-container-pad);
@@ -400,10 +390,7 @@ watch(() => route.query.category, (newVal) => {
   top: 5rem;
   align-self: start;
 }
-.filters-card {
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-sm);
-}
+.filters-card { border-radius: var(--ds-radius-md); box-shadow: none; border: 1px solid var(--ds-color-border); }
 .filters-card :deep(.p-card-content) { padding: var(--ds-space-5); }
 .filters-inner {
   display: flex;
@@ -459,19 +446,17 @@ watch(() => route.query.category, (newVal) => {
 }
 
 .product-card {
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
+  display: block;
+  min-width: 0;
   overflow: hidden;
-  cursor: pointer;
-  transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
 }
-.product-card:hover,
-.product-card:focus-visible {
-  box-shadow: var(--ds-shadow-md);
-  transform: translateY(-3px);
-  border-color: var(--ds-color-primary);
-}
+.product-card:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
 .product-card:focus-visible {
   outline: 3px solid var(--ds-color-focus);
   outline-offset: 3px;
@@ -490,10 +475,6 @@ watch(() => route.query.category, (newVal) => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--ds-transition);
-}
-.product-card:hover .product-image img {
-  transform: scale(1.05);
 }
 .empty-image i {
   font-size: 2.5rem;

@@ -2627,3 +2627,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **API/backend/auth/permissions:** No changes.
 - **Commit:** Pending atomic tree/commit creation.
 - **Next:** Continue with Admin and Company dashboard page composition, then public marketplace, then all remaining page families and cross-app hardening.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-2-3 — DASHBOARDS AND PUBLIC MARKETPLACE
+- **Status:** IN_PROGRESS — dashboard and first public discovery/product slices implemented; full UI remains in progress.
+- **Scope:** Admin Dashboard, Company Dashboard, public Home, ProductListing, Categories and ProductDetails.
+- **Admin/Company:** Removed decorative dashboard kickers/marks, gradients and hero shadows; introduced a solid navy heading band; retained actual API-driven values, status and company verification; added aria-labels to icon-only moderation controls.
+- **Public Home:** Removed autoplay slideshow/timer code and generic icon illustration; introduced a static search-first marketplace hero; changed product cards to router links and category tiles to real buttons; removed missing-count-to-zero and absent-supplier placeholder assumptions; flattened sections and removed hover lift/shadows; added image sizing hints.
+- **Catalogue/Categories:** Converted product tiles to real router links and category tiles to router links; flattened product/category card styling; removed fake zero counts and omitted absent supplier names; added responsive image dimensions and lazy loading.
+- **Product details:** Flattened content surfaces, removed decorative gradient/backdrop blur, used semantic danger tokens for active actions, and added image dimensions/loading hints plus group semantics for action clusters.
+- **Tests:** Phase 1 component tests remain authored but NOT RUN — owner instruction. No page-level tests were executed.
+- **Build/browser:** NOT RUN — owner instruction.
+- **API/backend/auth/permissions:** No changes.
+- **Phase 1 commit:** e90dedfbd1e9cbab7d3636247f3f58def18ec46e (recorded after the previous pending marker).
+- **Phase 2/3 commit:** Pending atomic tree/commit creation.
+- **Next:** Continue through remaining public pages and Admin/Company page families, with special focus on inquiry workflows, notification screens, forms, tables, responsive and accessible states.

@@ -1,15 +1,13 @@
 <template>
   <div class="company-dashboard">
-    <!-- Company workspace welcome. Identity comes from the authenticated company profile. -->
     <section class="company-dashboard-hero" aria-labelledby="company-dashboard-title">
       <div class="company-dashboard-hero-copy">
-        <span class="company-dashboard-eyebrow"><i class="pi pi-building"></i> فضای کاری شرکت</span>
-        <h1 id="company-dashboard-title">{{ companyName ? `خوش آمدید، ${companyName}` : 'داشبورد شرکت' }}</h1>
+        <h1 id="company-dashboard-title">{{ companyName ? 'خوش آمدید، ' + companyName : 'داشبورد شرکت' }}</h1>
         <p>وضعیت محصولات، فرصت‌های استعلام و فعالیت‌های اخیر شرکت را از اینجا مدیریت کنید.</p>
         <div class="company-dashboard-hero-status">
           <span class="company-dashboard-status-dot" :class="{ 'is-active': company?.status === 'ACTIVE' }"></span>
           {{ companyStatusLabel }}
-          <span v-if="company?.isVerified" class="company-dashboard-verified"><i class="pi pi-verified"></i> شرکت تأیید شده</span>
+          <span v-if="company?.isVerified" class="company-dashboard-verified"><i class="pi pi-verified" aria-hidden="true"></i> شرکت تأیید شده</span>
         </div>
       </div>
       <div class="company-dashboard-hero-actions">
@@ -17,10 +15,9 @@
           <Button label="افزودن محصول" icon="pi pi-plus" />
         </router-link>
         <router-link :to="{ name: 'company-inquiries' }" class="company-dashboard-secondary-action">
-          <i class="pi pi-inbox"></i><span>مشاهده استعلام‌ها</span>
+          <i class="pi pi-inbox" aria-hidden="true"></i><span>مشاهده استعلام‌ها</span>
         </router-link>
       </div>
-      <span class="company-dashboard-hero-mark" aria-hidden="true"><i class="pi pi-chart-line"></i></span>
     </section>
 
     <!-- Stats error (non-blocking) -->
@@ -136,7 +133,7 @@
         <!-- Loaded state -->
         <div v-else class="cd-summary">
           <span class="cd-summary-logo">
-            <img v-if="companyLogo" :src="companyLogo" :alt="companyName" />
+            <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="64" height="64" decoding="async" />
             <i v-else class="pi pi-building"></i>
           </span>
           <div class="cd-summary-main">
@@ -698,17 +695,6 @@ onMounted(() => {
 }
 
 /* Paces-inspired dashboard rhythm with company-scoped data unchanged. */
-.company-dashboard .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.company-dashboard .page-header h1 {
-  color: var(--ds-color-text);
-  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
-}
 .cd-kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 .cd-grid--1-1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .cd-grid--2-1 { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
@@ -719,101 +705,33 @@ onMounted(() => {
 @media (max-width: 640px) {
   .company-dashboard .page-header { padding: var(--ds-space-4); }
 }
-/* Paces-inspired company command center — no changes to API-backed state. */
 .company-dashboard-hero {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ds-space-6);
-  min-height: 184px;
-  overflow: hidden;
-  padding: clamp(1.5rem, 3vw, 2.25rem);
-  border: 1px solid color-mix(in srgb, var(--ds-navy) 12%, transparent);
-  border-radius: var(--ds-radius-xl);
-  color: var(--ds-on-navy);
-  background: var(--ds-hero-gradient);
-  box-shadow: var(--ds-shadow-md);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: var(--ds-space-5); min-height: 9rem; padding: clamp(1.25rem, 2.5vw, 2rem);
+  border-radius: var(--ds-radius-lg); background: var(--ds-navy); color: var(--ds-on-navy);
 }
-.company-dashboard-hero-copy,
-.company-dashboard-hero-actions { position: relative; z-index: 1; }
-.company-dashboard-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  margin-bottom: .6rem;
-  color: var(--ds-brand);
-  font-size: var(--ds-font-size-sm);
-  font-weight: 700;
-}
+.company-dashboard-hero-copy { min-width: 0; }
 .company-dashboard-hero h1 {
-  margin: 0;
-  color: inherit;
-  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
-  font-weight: 800;
+  margin: 0; color: inherit; font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  font-weight: var(--ds-font-weight-bold); line-height: 1.4; text-wrap: balance;
 }
-.company-dashboard-hero p {
-  max-width: 44rem;
-  margin: .6rem 0 0;
-  color: var(--ds-on-navy-muted);
-  line-height: 1.8;
-}
+.company-dashboard-hero p { max-width: 44rem; margin: .5rem 0 0; color: var(--ds-on-navy-muted); line-height: var(--ds-line-height-relaxed); }
 .company-dashboard-hero-status {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .45rem;
-  margin-top: .9rem;
-  color: var(--ds-on-navy-muted);
-  font-size: var(--ds-font-size-xs);
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: .45rem;
+  margin-top: .8rem; color: var(--ds-on-navy-muted); font-size: var(--ds-font-size-xs);
 }
-.company-dashboard-status-dot {
-  width: .5rem;
-  height: .5rem;
-  border-radius: 50%;
-  background: var(--ds-color-warning);
-}
-.company-dashboard-status-dot.is-active { background: #39d98a; }
+.company-dashboard-status-dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--ds-color-warning); }
+.company-dashboard-status-dot.is-active { background: var(--ds-color-success); }
 .company-dashboard-verified { display: inline-flex; align-items: center; gap: .3rem; margin-inline-start: .5rem; color: var(--ds-brand); }
-.company-dashboard-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.company-dashboard-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
 .company-dashboard-secondary-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  min-height: 2.75rem;
-  padding: .65rem 1rem;
-  border: 1px solid rgba(255,255,255,.28);
-  border-radius: var(--ds-radius-md);
-  color: var(--ds-on-navy);
-  text-decoration: none;
-  font-weight: 700;
-  background: rgba(255,255,255,.08);
+  display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center;
+  gap: .5rem; padding: .6rem .9rem; border: 1px solid rgba(255,255,255,.38);
+  border-radius: var(--ds-radius-md); color: var(--ds-on-navy); text-decoration: none;
+  font-weight: var(--ds-font-weight-semibold);
 }
-.company-dashboard-secondary-action:hover { background: rgba(255,255,255,.15); }
-.company-dashboard-hero-mark {
-  position: absolute;
-  z-index: 0;
-  inset-inline-end: 42%;
-  top: -4.5rem;
-  display: grid;
-  place-items: center;
-  width: 18rem;
-  height: 18rem;
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 50%;
-  color: rgba(255,255,255,.08);
-  font-size: 9rem;
-  transform: rotate(-12deg);
-}
-.company-dashboard-hero-mark::before {
-  content: "";
-  position: absolute;
-  inset: 1.4rem;
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: inherit;
-}
+.company-dashboard-secondary-action:hover { background: rgba(255,255,255,.09); }
+.company-dashboard-secondary-action:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 3px; }
 .company-dashboard-operations {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr);
@@ -834,7 +752,6 @@ onMounted(() => {
 }
 @media (max-width: 640px) {
   .company-dashboard-hero { align-items: flex-start; flex-direction: column; min-height: 0; }
-  .company-dashboard-hero-mark { inset-inline-end: -4rem; top: -5rem; }
   .company-dashboard-hero-actions { width: 100%; }
   .company-dashboard-hero-actions > * { flex: 1 1 auto; }
   .company-dashboard-secondary-action { width: 100%; }

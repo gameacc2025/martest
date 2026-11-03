@@ -1,9 +1,7 @@
 <template>
   <div class="admin-dashboard">
-    <!-- Workspace welcome: clear hierarchy and one primary action. -->
     <section class="admin-dashboard-hero" aria-labelledby="admin-dashboard-title">
       <div class="admin-dashboard-hero-copy">
-        <span class="admin-dashboard-eyebrow"><i class="pi pi-sparkles"></i> مرکز فرماندهی بازارگاه</span>
         <h1 id="admin-dashboard-title">داشبورد مدیریت</h1>
         <p>نمایی یکپارچه از کاربران، شرکت‌ها، محصولات و جریان استعلام‌های پلتفرم.</p>
       </div>
@@ -12,10 +10,9 @@
           <Button label="ایجاد محصول" icon="pi pi-plus" />
         </router-link>
         <router-link :to="{ name: 'admin-inquiries' }" class="admin-dashboard-secondary-action">
-          <i class="pi pi-inbox"></i><span>مدیریت استعلام‌ها</span>
+          <i class="pi pi-inbox" aria-hidden="true"></i><span>مدیریت استعلام‌ها</span>
         </router-link>
       </div>
-      <span class="admin-dashboard-hero-mark" aria-hidden="true"><i class="pi pi-chart-line"></i></span>
     </section>
 
     <!-- KPI cards -->
@@ -147,6 +144,7 @@
                     severity="success"
                     rounded
                     text
+                    aria-label="تأیید محصول"
                     v-tooltip.top="'تأیید'"
                     :loading="approvingId === product.id"
                     @click="approveProduct(product)"
@@ -156,11 +154,12 @@
                     severity="danger"
                     rounded
                     text
+                    aria-label="رد محصول"
                     v-tooltip.top="'رد'"
                     @click="openRejectDialog(product)"
                   />
                   <router-link :to="{ name: 'admin-product-edit', params: { id: product.id } }">
-                    <Button icon="pi pi-eye" severity="info" rounded text v-tooltip.top="'مشاهده'" />
+                    <Button icon="pi pi-eye" severity="info" rounded text aria-label="مشاهده محصول" v-tooltip.top="'مشاهده'" />
                   </router-link>
                 </div>
               </td>
@@ -501,89 +500,26 @@ onMounted(() => {
   gap: var(--ds-space-6);
 }
 
-/* Paces-style welcome band, using the platform's own teal/navy identity. */
 .admin-dashboard-hero {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ds-space-6);
-  min-height: 176px;
-  overflow: hidden;
-  padding: clamp(1.5rem, 3vw, 2.25rem);
-  border: 1px solid color-mix(in srgb, var(--ds-navy) 12%, transparent);
-  border-radius: var(--ds-radius-xl);
-  color: var(--ds-on-navy);
-  background: var(--ds-hero-gradient);
-  box-shadow: var(--ds-shadow-md);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: var(--ds-space-5); min-height: 8.5rem; padding: clamp(1.25rem, 2.5vw, 2rem);
+  border-radius: var(--ds-radius-lg); background: var(--ds-navy); color: var(--ds-on-navy);
 }
-.admin-dashboard-hero-copy,
-.admin-dashboard-hero-actions { position: relative; z-index: 1; }
-.admin-dashboard-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  margin-bottom: .65rem;
-  color: var(--ds-brand);
-  font-size: var(--ds-font-size-sm);
-  font-weight: 700;
-}
+.admin-dashboard-hero-copy { min-width: 0; }
 .admin-dashboard-hero h1 {
-  margin: 0;
-  color: inherit;
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
-  font-weight: 800;
+  margin: 0; color: inherit; font-size: clamp(1.5rem, 2.3vw, 1.9rem);
+  font-weight: var(--ds-font-weight-bold); line-height: 1.4; text-wrap: balance;
 }
-.admin-dashboard-hero p {
-  max-width: 42rem;
-  margin: .65rem 0 0;
-  color: var(--ds-on-navy-muted);
-  line-height: 1.8;
-}
-.admin-dashboard-hero-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .75rem;
-}
+.admin-dashboard-hero p { max-width: 44rem; margin: .5rem 0 0; color: var(--ds-on-navy-muted); line-height: var(--ds-line-height-relaxed); }
+.admin-dashboard-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
 .admin-dashboard-secondary-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  min-height: 2.75rem;
-  padding: .65rem 1rem;
-  border: 1px solid rgba(255,255,255,.28);
-  border-radius: var(--ds-radius-md);
-  color: var(--ds-on-navy);
-  text-decoration: none;
-  font-weight: 700;
-  background: rgba(255,255,255,.08);
+  display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center;
+  gap: .5rem; padding: .6rem .9rem; border: 1px solid rgba(255,255,255,.38);
+  border-radius: var(--ds-radius-md); color: var(--ds-on-navy); text-decoration: none;
+  font-weight: var(--ds-font-weight-semibold);
 }
-.admin-dashboard-secondary-action:hover { background: rgba(255,255,255,.15); }
-.admin-dashboard-hero-mark {
-  position: absolute;
-  z-index: 0;
-  inset-inline-end: 42%;
-  top: -4.5rem;
-  display: grid;
-  place-items: center;
-  width: 18rem;
-  height: 18rem;
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 50%;
-  color: rgba(255,255,255,.08);
-  font-size: 9rem;
-  transform: rotate(-12deg);
-}
-.admin-dashboard-hero-mark::before {
-  content: "";
-  position: absolute;
-  inset: 1.4rem;
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: inherit;
-}
+.admin-dashboard-secondary-action:hover { background: rgba(255,255,255,.09); }
+.admin-dashboard-secondary-action:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 3px; }
 .admin-dashboard-workspace {
   display: grid;
   grid-template-columns: minmax(280px, 1.1fr) minmax(320px, 1.25fr) minmax(240px, .8fr);
@@ -702,17 +638,6 @@ onMounted(() => {
 
 
 /* Paces-inspired dashboard rhythm with API-backed widgets unchanged. */
-.admin-dashboard .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.admin-dashboard .page-header h1 {
-  color: var(--ds-color-text);
-  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
-}
 .admin-dashboard-kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 .admin-dashboard-grid--2-1 { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
 .admin-dashboard-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
@@ -721,7 +646,6 @@ onMounted(() => {
 }
 @media (max-width: 640px) {
   .admin-dashboard-hero { align-items: flex-start; flex-direction: column; min-height: 0; }
-  .admin-dashboard-hero-mark { inset-inline-end: -4rem; top: -5rem; }
   .admin-dashboard-hero-actions { width: 100%; }
   .admin-dashboard-hero-actions > * { flex: 1 1 auto; }
   .admin-dashboard-secondary-action { width: 100%; }

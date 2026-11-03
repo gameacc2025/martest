@@ -28,38 +28,35 @@
         <p>در حال حاضر دسته‌بندی فعالی برای نمایش وجود ندارد.</p>
       </div>
 
-      <div v-else class="cat-grid" aria-label="دسته‌بندی محصولات">
-          <Card
+      <section v-else class="cat-grid" aria-label="دسته‌بندی محصولات">
+          <router-link
             v-for="category in categories"
             :key="category.id"
-            class="category-card ds-card"
+            :to="{ name: 'products', query: { category: category.id } }"
+            class="category-card"
+            :aria-label="'مشاهده محصولات دسته ' + (category.nameFa || category.nameEn || category.slug)"
           >
-            <template #content>
-              <div class="cat-thumb">
-                <img
-                  v-if="category.image"
-                  :src="category.image"
-                  :alt="category.nameFa || category.nameEn || category.slug"
-                  class="cat-thumb-img"
-                />
-                <div v-else class="cat-thumb-placeholder">
-                  <i class="pi pi-folder"></i>
-                </div>
-              </div>
-              <h3 class="cat-name">{{ category.nameFa || category.nameEn || category.slug }}</h3>
-              <p v-if="category.description" class="cat-desc">{{ category.description }}</p>
-              <div class="cat-footer-row">
-                <Badge :value="(category.productCount || 0).toLocaleString('fa-IR')" severity="info" />
-                <Button
-                  label="مشاهده محصولات"
-                  icon="pi pi-arrow-left"
-                  class="p-button-outlined p-button-sm"
-                  @click="viewCategoryProducts(category.id)"
-                />
-              </div>
-            </template>
-          </Card>
-      </div>
+            <div class="cat-thumb">
+              <img
+                v-if="category.image"
+                :src="category.image"
+                :alt="category.nameFa || category.nameEn || category.slug"
+                width="640"
+                height="360"
+                loading="lazy"
+                decoding="async"
+                class="cat-thumb-img"
+              />
+              <div v-else class="cat-thumb-placeholder"><i class="pi pi-folder" aria-hidden="true"></i></div>
+            </div>
+            <h3 class="cat-name">{{ category.nameFa || category.nameEn || category.slug }}</h3>
+            <p v-if="category.description" class="cat-desc">{{ category.description }}</p>
+            <div class="cat-footer-row">
+              <Badge :value="category.productCount == null ? '—' : Number(category.productCount).toLocaleString('fa-IR')" severity="info" />
+              <span class="cat-link">مشاهده محصولات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
+            </div>
+          </router-link>
+      </section>
     </div>
   </main>
 </template>
@@ -67,15 +64,11 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import Breadcrumb from 'primevue/breadcrumb'
-import Button from 'primevue/button'
-import Card from 'primevue/card'
 import Badge from 'primevue/badge'
 import ProgressSpinner from 'primevue/progressspinner'
 
-const router = useRouter()
 const productsStore = useProductsStore()
 
 const categories = ref([])
@@ -109,20 +102,12 @@ const loadCategories = async () => {
   }
 }
 
-const viewCategoryProducts = (categoryId) => {
-  router.push({
-    name: 'products',
-    query: { category: categoryId }
-  })
-}
 </script>
 
 <style scoped>
 .categories-page {
   direction: rtl;
-  background:
-    radial-gradient(ellipse at 8% 0%, color-mix(in srgb, var(--ds-color-primary) 6%, transparent), transparent 32rem),
-    var(--ds-color-background);
+  background: var(--ds-color-background);
 }
 
 .cat-container {
@@ -214,18 +199,20 @@ const viewCategoryProducts = (categoryId) => {
 }
 
 .category-card {
+  display: flex;
+  min-width: 0;
   height: 100%;
-  border-radius: var(--ds-radius-xl);
-  overflow: hidden;
-  transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
+  flex-direction: column;
+  padding: var(--ds-space-4);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  text-decoration: none;
+  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
 }
-
-.category-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--ds-color-primary);
-  box-shadow: var(--ds-shadow-md);
-}
-
+.category-card:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
+.category-card:focus-visible { outline: 3px solid var(--ds-color-focus); outline-offset: 3px; }
 .cat-thumb {
   aspect-ratio: 16 / 9;
   background: var(--ds-color-background);
@@ -275,11 +262,5 @@ const viewCategoryProducts = (categoryId) => {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--ds-space-3);
-}
-.category-card :deep(.p-card-content) { height: 100%; }
-.category-card :deep(.p-button) { min-height: var(--ds-touch-target); }
-.category-card:focus-within {
-  outline: 3px solid var(--ds-color-focus);
-  outline-offset: 3px;
 }
 </style>

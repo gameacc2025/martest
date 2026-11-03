@@ -49,6 +49,10 @@
                   v-if="activeImage"
                   :src="activeImage"
                   :alt="product.title || 'تصویر محصول'"
+                  width="1200"
+                  height="750"
+                  fetchpriority="high"
+                  decoding="async"
                   class="main-image"
                   @error="imageFailed = true"
                   v-show="!imageFailed"
@@ -59,7 +63,7 @@
                 </div>
                 <span v-if="product.brand" class="image-brand">{{ product.brand }}</span>
               </div>
-              <div v-if="galleryImages.length > 1" class="thumbnail-list" aria-label="تصاویر محصول">
+              <div v-if="galleryImages.length > 1" class="thumbnail-list" role="group" aria-label="تصاویر محصول">
                 <button
                   v-for="(image, index) in galleryImages"
                   :key="image.url || index"
@@ -70,7 +74,7 @@
                   :aria-pressed="image.url === activeImage"
                   @click="selectImage(image.url)"
                 >
-                  <img :src="image.url" :alt="'تصویر ' + (index + 1)" />
+                  <img :src="image.url" :alt="'تصویر ' + (index + 1)" width="160" height="100" loading="lazy" decoding="async" />
                 </button>
               </div>
             </div>
@@ -127,7 +131,7 @@
                 </div>
               </div>
 
-              <div class="price-icon-actions" aria-label="عملیات قیمت محصول">
+              <div class="price-icon-actions" role="group" aria-label="عملیات قیمت محصول">
                 <Button v-if="canCreateInquiry" icon="pi pi-file-edit" rounded outlined severity="secondary"
                   aria-label="ثبت استعلام قیمت" title="ثبت استعلام قیمت" :disabled="inquirySubmitting"
                   @click="inquiryDialogOpen = true" />
@@ -582,9 +586,9 @@ const goBack = () => router.push('/products')
 }
 
 .price-icon-actions .icon-action--active {
-  color: #d9485f !important;
-  border-color: #f1b8c1 !important;
-  background: #fff7f8 !important;
+  color: var(--ds-color-danger) !important;
+  border-color: color-mix(in srgb, var(--ds-color-danger) 42%, var(--pd-border)) !important;
+  background: var(--ds-color-danger-soft) !important;
 }
 
 .product-layout {
@@ -609,8 +613,8 @@ const goBack = () => router.push('/products')
 .help-card {
   background: var(--pd-surface);
   border: 1px solid var(--pd-border);
-  border-radius: 1rem;
-  box-shadow: var(--ds-shadow-sm);
+  border-radius: var(--ds-radius-md);
+  box-shadow: none;
 }
 
 .gallery-card {
@@ -627,7 +631,7 @@ const goBack = () => router.push('/products')
   aspect-ratio: 1.6 / 1;
   overflow: hidden;
   border-radius: 0.75rem;
-  background: linear-gradient(145deg, var(--pd-ground), color-mix(in srgb, var(--pd-accent) 5%, white));
+  background: var(--ds-color-surface-alt);
 }
 
 .main-image {
@@ -668,7 +672,6 @@ const goBack = () => router.push('/products')
   color: var(--pd-text);
   font-size: 0.78rem;
   font-weight: 700;
-  backdrop-filter: blur(8px);
 }
 
 .thumbnail-list {

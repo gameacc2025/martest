@@ -1,9 +1,8 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 import { useRouter } from 'vue-router'
 import { productsApi } from '@telecom/api-client'
-import { useCartStore } from '../../stores/cart'
 import { useProductsStore } from '../../stores/products'
 import { formatPrice } from '../../utils/helpers'
 
@@ -17,7 +16,6 @@ import Select from 'primevue/select'
 import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
 
 const router = useRouter()
-const cartStore = useCartStore()
 const productsStore = useProductsStore()
 
 const featuredProducts = ref([])
@@ -55,81 +53,6 @@ const features = [
   { icon: 'pi pi-file-edit', title: 'استعلام قیمت', text: 'ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان' },
   { icon: 'pi pi-sliders-h', title: 'مشخصات فنی', text: 'بررسی جزئیات و ویژگی‌های ثبت‌شده محصولات' }
 ]
-
-// ── Hero slideshow (banner carousel) ─────────────────────
-const slides = [
-  {
-    icon: 'pi pi-server',
-    badge: 'بازارگاه تخصصی تجهیزات مخابراتی',
-    title: 'بازارگاه تجهیزات مخابراتی',
-    desc: 'کاتالوگ تخصصی تجهیزات مخابراتی و شبکه؛ محصولات و مشخصات ثبت‌شده را یکجا بررسی کنید.',
-    primary: { label: 'مشاهده محصولات', to: { name: 'products' } },
-    outline: { label: 'دسته‌بندی محصولات', to: { name: 'categories' } }
-  },
-  {
-    icon: 'pi pi-wifi',
-    badge: 'جستجوی دقیق محصولات',
-    title: 'تجهیزات فیبر نوری و شبکه',
-    desc: 'محصولات حوزه فیبر نوری و شبکه را بر اساس دسته‌بندی، برند و مشخصات فنی جستجو کنید.',
-    primary: { label: 'مشاهده محصولات', to: { name: 'products' } },
-    outline: { label: 'دسته‌بندی محصولات', to: { name: 'categories' } }
-  },
-  {
-    icon: 'pi pi-verified',
-    badge: 'مسیر استعلام و تأمین',
-    title: 'همکاری با تأمین‌کنندگان معتبر',
-    desc: 'درخواست قیمت ثبت کنید و پیشنهادهای تأمین‌کنندگان را در مسیر استعلام دنبال کنید.',
-    primary: { label: 'مشاهده محصولات', to: { name: 'products' } },
-    outline: { label: 'دسته‌بندی محصولات', to: { name: 'categories' } }
-  }
-]
-const currentSlide = ref(0)
-const slideshowPaused = ref(false)
-const slideshowHovered = ref(false)
-const slideshowFocused = ref(false)
-let slideTimer = null
-
-function goToSlide(i) {
-  currentSlide.value = i
-}
-function nextSlide() {
-  currentSlide.value = (currentSlide.value + 1) % slides.length
-}
-function startSlideshow(force = false) {
-  stopSlideshow()
-  if (slideshowPaused.value || slideshowHovered.value || (slideshowFocused.value && !force)) return
-  slideTimer = setInterval(nextSlide, 5000)
-}
-function stopSlideshow() {
-  if (slideTimer) {
-    clearInterval(slideTimer)
-    slideTimer = null
-  }
-}
-function onSlideshowEnter() {
-  slideshowHovered.value = true
-  stopSlideshow()
-}
-function onSlideshowLeave() {
-  slideshowHovered.value = false
-  startSlideshow()
-}
-function onSlideshowFocusIn() {
-  slideshowFocused.value = true
-  stopSlideshow()
-}
-function onSlideshowFocusOut(event) {
-  if (!event.currentTarget.contains(event.relatedTarget)) {
-    slideshowFocused.value = false
-    startSlideshow()
-  }
-}
-function toggleSlideshow() {
-  slideshowPaused.value = !slideshowPaused.value
-  if (slideshowPaused.value) stopSlideshow()
-  else startSlideshow(true)
-}
-
 
 async function fetchProducts() {
   try {
@@ -181,10 +104,6 @@ function getProductImage(product) {
     || null
 }
 
-function goToProduct(product) {
-  router.push({ name: 'product-details', params: { id: product.id } })
-}
-
 // Hero search follows the marketplace convention: it takes the visitor to the
 // dedicated search-results page (same target as the header search), rather than
 // silently re-filtering the homepage grid.
@@ -214,14 +133,6 @@ async function fetchCategories() {
 onMounted(() => {
   fetchProducts()
   fetchCategories()
-  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-    slideshowPaused.value = true
-  }
-  startSlideshow()
-})
-
-onBeforeUnmount(() => {
-  stopSlideshow()
 })
 </script>
 
@@ -230,82 +141,29 @@ onBeforeUnmount(() => {
   <div class="home-page ds-page" dir="rtl">
     <div class="home-container ds-container ds-stack">
 
-      <!-- Hero Slideshow -->
-      <section
-        class="hero-slideshow"
-        @mouseenter="onSlideshowEnter"
-        @mouseleave="onSlideshowLeave"
-        @focusin="onSlideshowFocusIn"
-        @focusout="onSlideshowFocusOut"
-      >
-        <div class="hero">
-          <div class="hero-content">
-            <!-- Rotating headline only. The search bar below stays mounted so
-                 typing is never interrupted by a slide change. -->
-            <transition name="slide-fade" mode="out-in">
-              <div class="hero-copy" :key="currentSlide">
-                <span class="hero-badge">
-                  <i class="pi pi-check-circle"></i>
-                  {{ slides[currentSlide].badge }}
-                </span>
-                <h1 class="hero-title">{{ slides[currentSlide].title }}</h1>
-                <p class="hero-desc">{{ slides[currentSlide].desc }}</p>
-              </div>
-            </transition>
-
-            <!-- Marketplace pattern: the search bar IS the primary CTA -->
-            <form class="hero-search" role="search" @submit.prevent="heroSearch">
-              <i class="pi pi-search hero-search-icon" aria-hidden="true"></i>
-              <input
-                v-model="searchQuery"
-                type="search"
-                class="hero-search-input"
-                placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…"
-                aria-label="جستجوی محصولات"
-              />
-              <button type="submit" class="hero-search-btn">جستجو</button>
-            </form>
-
-            <div class="hero-actions">
-              <router-link :to="slides[currentSlide].primary.to" class="btn btn-primary">
-                {{ slides[currentSlide].primary.label }}
-                <i class="pi pi-angle-left"></i>
-              </router-link>
-              <router-link :to="slides[currentSlide].outline.to" class="btn btn-outline">
-                <i class="pi pi-th-large"></i>
-                {{ slides[currentSlide].outline.label }}
-              </router-link>
-            </div>
+      <section class="hero" aria-labelledby="home-title">
+        <div class="hero-content">
+          <div class="hero-copy">
+            <h1 id="home-title" class="hero-title">تجهیزات مخابراتی و شبکه را دقیق پیدا کنید</h1>
+            <p class="hero-desc">محصولات، مشخصات فنی و تأمین‌کنندگان بازارگاه را جستجو کنید و برای دریافت قیمت، مسیر استعلام را دنبال کنید.</p>
           </div>
-
-          <div class="hero-visual">
-            <div class="hero-glow"></div>
-            <i :class="slides[currentSlide].icon" class="hero-icon"></i>
+          <form class="hero-search" role="search" @submit.prevent="heroSearch">
+            <i class="pi pi-search hero-search-icon" aria-hidden="true"></i>
+            <input
+              v-model="searchQuery"
+              type="search"
+              class="hero-search-input"
+              placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…"
+              aria-label="جستجوی محصولات"
+            />
+            <button type="submit" class="hero-search-btn">جستجو</button>
+          </form>
+          <div class="hero-actions">
+            <router-link :to="{ name: 'products' }" class="btn btn-primary">مشاهده کاتالوگ <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
+            <router-link :to="{ name: 'categories' }" class="btn btn-outline">مرور دسته‌بندی‌ها</router-link>
           </div>
-        </div>
-
-        <!-- Slideshow dots -->
-        <div class="hero-dots" aria-label="انتخاب اسلاید معرفی">
-          <button
-            v-for="(slide, i) in slides"
-            :key="i"
-            class="hero-dot"
-            :class="{ active: currentSlide === i }"
-            @click="goToSlide(i)"
-            :aria-label="`اسلاید ${i + 1}`"
-          ></button>
-          <button
-            type="button"
-            class="hero-play-toggle"
-            :aria-pressed="slideshowPaused"
-            :aria-label="slideshowPaused ? 'پخش خودکار اسلایدها' : 'توقف پخش خودکار اسلایدها'"
-            @click="toggleSlideshow"
-          >
-            <i :class="slideshowPaused ? 'pi pi-play' : 'pi pi-pause'" aria-hidden="true"></i>
-          </button>
         </div>
       </section>
-
 
       <!-- Two Column Layout: Filters (right) + Main (left) -->
       <div class="home-layout">
@@ -392,7 +250,7 @@ onBeforeUnmount(() => {
           <section class="section-block ds-card" aria-labelledby="categories-heading">
             <div class="section-head">
               <router-link :to="{ name: 'categories' }" class="panel-link">مشاهده همه</router-link>
-              <h2 id="categories-heading" class="section-title ds-h2"><i class="pi pi-folder"></i> دسته‌بندی محصولات</h2>
+              <h2 id="categories-heading" class="section-title ds-h2">دسته‌بندی محصولات</h2>
             </div>
             <div v-if="categoriesLoading" class="state-box">
               <i class="pi pi-spin pi-spinner"></i>
@@ -413,13 +271,16 @@ onBeforeUnmount(() => {
             >
               <template #item="{ data: category }">
                 <div class="cat-slide">
-                  <Card class="category-card" role="button" tabindex="0" :aria-label="'مشاهده محصولات دسته ' + (category.nameFa || category.nameEn || category.slug)" @click="viewCategoryProducts(category.id)" @keydown.enter.prevent="viewCategoryProducts(category.id)" @keydown.space.prevent="viewCategoryProducts(category.id)">
-                    <template #content>
+                  <button type="button" class="category-card" :aria-label="'مشاهده محصولات دسته ' + (category.nameFa || category.nameEn || category.slug)" @click="viewCategoryProducts(category.id)">
                       <div class="cat-thumb">
                         <img
                           v-if="category.image"
                           :src="category.image"
                           :alt="category.nameFa || category.nameEn || category.slug"
+                          width="160"
+                          height="120"
+                          loading="lazy"
+                          decoding="async"
                           class="cat-thumb-img"
                         />
                         <div v-else class="cat-thumb-placeholder">
@@ -428,11 +289,10 @@ onBeforeUnmount(() => {
                       </div>
                       <h3 class="cat-name">{{ category.nameFa || category.nameEn || category.slug }}</h3>
                       <div class="cat-footer-row">
-                        <Badge :value="(category.productCount || 0).toLocaleString('fa-IR')" severity="info" />
+                        <Badge :value="category.productCount == null ? '—' : Number(category.productCount).toLocaleString('fa-IR')" severity="info" />
                         <span class="cat-link">مشاهده <i class="pi pi-arrow-left"></i></span>
                       </div>
-                    </template>
-                  </Card>
+                  </button>
                 </div>
               </template>
             </Carousel>
@@ -444,7 +304,7 @@ onBeforeUnmount(() => {
               <button class="nav-btn" @click="fetchProducts" :disabled="loading" aria-label="بارگذاری مجدد">
                 <i class="pi" :class="loading ? 'pi-spin pi-spinner' : 'pi-refresh'"></i>
               </button>
-              <h2 id="featured-heading" class="section-title ds-h2"><i class="pi pi-star-fill"></i> محصولات ویژه</h2>
+              <h2 id="featured-heading" class="section-title ds-h2">محصولات ویژه</h2>
             </div>
 
             <div v-if="loading" class="products-grid">
@@ -460,9 +320,9 @@ onBeforeUnmount(() => {
               <Button label="حذف فیلترها" icon="pi pi-times" severity="secondary" text @click="resetFilters" />
             </div>
             <div v-else class="products-grid">
-              <div v-for="product in featuredProducts" :key="product.id" class="product-card" role="link" tabindex="0" :aria-label="`مشاهده جزئیات ${product.title}`" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
+              <router-link v-for="product in featuredProducts" :key="product.id" :to="{ name: 'product-details', params: { id: product.id } }" class="product-card" :aria-label="'مشاهده جزئیات ' + product.title">
                 <div class="product-image">
-                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
+                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" width="640" height="480" loading="lazy" decoding="async" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
                 </div>
                 <div class="product-info">
@@ -472,7 +332,7 @@ onBeforeUnmount(() => {
                       <i class="pi pi-verified" aria-hidden="true"></i>
                     </span>
                   </div>
-                  <p class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor || 'تأمین‌کننده' }}</p>
+                  <p v-if="product.company?.name || product.vendor" class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor }}</p>
                   <div v-if="product.brand || product.model || product.sku" class="product-meta">
                     <span v-if="product.brand">{{ product.brand }}</span>
                     <span v-if="product.model">{{ product.model }}</span>
@@ -490,7 +350,7 @@ onBeforeUnmount(() => {
                     <span class="product-card-cta">جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
                   </div>
                 </div>
-              </div>
+              </router-link>
             </div>
           </section>
 
@@ -498,16 +358,16 @@ onBeforeUnmount(() => {
           <section class="section-block ds-card" aria-labelledby="recent-heading">
             <div class="section-head">
               <router-link v-if="recentProducts.length > 0" :to="{ name: 'products' }" class="panel-link">مشاهده همه</router-link>
-              <h2 id="recent-heading" class="section-title ds-h2"><i class="pi pi-clock"></i> جدیدترین محصولات</h2>
+              <h2 id="recent-heading" class="section-title ds-h2">جدیدترین محصولات</h2>
             </div>
             <div v-if="recentProducts.length === 0 && !loading" class="state-box">
               <i class="pi pi-box"></i>
               <p>در حال حاضر محصولی موجود نیست</p>
             </div>
             <div v-else class="products-grid">
-              <div v-for="product in recentProducts" :key="product.id" class="product-card" role="link" tabindex="0" :aria-label="`مشاهده جزئیات ${product.title}`" @click="goToProduct(product)" @keydown.enter.prevent="goToProduct(product)" @keydown.space.prevent="goToProduct(product)">
+              <router-link v-for="product in recentProducts" :key="product.id" :to="{ name: 'product-details', params: { id: product.id } }" class="product-card" :aria-label="'مشاهده جزئیات ' + product.title">
                 <div class="product-image">
-                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" />
+                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" width="640" height="480" loading="lazy" decoding="async" />
                   <div v-else class="empty-image"><i class="pi pi-image"></i></div>
                   <span class="tile-badge">جدید</span>
                 </div>
@@ -518,7 +378,7 @@ onBeforeUnmount(() => {
                       <i class="pi pi-verified" aria-hidden="true"></i>
                     </span>
                   </div>
-                  <p class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor || 'تأمین‌کننده' }}</p>
+                  <p v-if="product.company?.name || product.vendor" class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor }}</p>
                   <div v-if="product.brand || product.model || product.sku" class="product-meta">
                     <span v-if="product.brand">{{ product.brand }}</span>
                     <span v-if="product.model">{{ product.model }}</span>
@@ -536,7 +396,7 @@ onBeforeUnmount(() => {
                     <span class="product-card-cta">جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
                   </div>
                 </div>
-              </div>
+              </router-link>
             </div>
           </section>
         </div>
@@ -545,7 +405,6 @@ onBeforeUnmount(() => {
       <!-- Verified marketplace capabilities; no hard-coded business metrics. -->
       <section class="features-bar" aria-label="امکانات بازارگاه">
         <div v-for="(feature, i) in features" :key="i" class="feature-item">
-          <div class="feature-icon"><i :class="feature.icon"></i></div>
           <div class="feature-text">
             <h3>{{ feature.title }}</h3>
             <p>{{ feature.text }}</p>
@@ -595,189 +454,61 @@ onBeforeUnmount(() => {
 
 /* Hero */
 .hero {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  align-items: center;
-  gap: var(--ds-space-8);
-  background: linear-gradient(125deg, color-mix(in srgb, var(--ds-color-primary) 11%, var(--ds-color-surface)) 0%, var(--hero-center, var(--ds-color-surface)) 55%, color-mix(in srgb, var(--ds-color-accent) 10%, var(--ds-color-surface)) 100%);
-  border: 1px solid var(--ds-color-border);
-  border-radius: calc(var(--ds-radius-xl) + 0.25rem);
-  padding: clamp(1.25rem, 3vw, 2.5rem);
-  box-shadow: var(--ds-shadow-sm);
+  display: block;
   overflow: hidden;
+  padding: clamp(1.5rem, 4vw, 3.25rem);
+  border: 0;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-navy);
+  color: var(--ds-on-navy);
 }
-
-:global(.app-dark) .hero {
-  --hero-center: var(--p-surface-800);
+.hero-content { display: flex; max-width: 58rem; flex-direction: column; gap: var(--ds-space-5); }
+.hero-copy { display: flex; flex-direction: column; gap: var(--ds-space-3); }
+.hero-title {
+  max-width: 20ch;
+  margin: 0;
+  color: inherit;
+  font-size: clamp(1.9rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.35;
+  text-wrap: balance;
 }
-
-.hero-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-4);
-  text-align: start;
-  min-width: 0;
-}
-
-.hero-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-3);
-}
-
-/* Search-first CTA (marketplace pattern) */
+.hero-desc { max-width: 58ch; margin: 0; color: var(--ds-on-navy-muted); font-size: var(--ds-font-size-md); line-height: 1.9; }
 .hero-search {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  max-width: 48rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--ds-space-2);
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--ds-radius-pill);
-  padding-block: 0.375rem;
-  padding-inline: 1.125rem 0.375rem;
-  box-shadow: var(--ds-shadow-md);
-  max-width: 36rem;
-}
-
-.hero-search:focus-within {
-  border-color: var(--primary-color);
-  box-shadow: var(--ds-shadow-md);
-}
-
-.hero-search-icon {
-  color: var(--text-color-secondary);
-  font-size: 1rem;
-}
-
-.hero-search-input {
-  border: none;
-  background: transparent;
-  outline: none;
-  font: inherit;
-  color: var(--text-color);
-  width: 100%;
-  min-width: 0;
-  padding-block: 0.5rem;
-}
-
-.hero-search-input::placeholder {
-  color: var(--text-color-secondary);
-}
-
- .hero-search-btn {
-  min-height: 2.75rem;
-  border: none;
-  cursor: pointer;
-  background: var(--primary-color);
-  color: var(--primary-contrast-color);
-  font: inherit;
-  font-weight: 700;
-  padding: 0.625rem 1.5rem;
-  border-radius: var(--ds-radius-pill);
-  transition: background var(--ds-transition-fast);
-}
-
-.hero-search-btn:hover {
-  background: var(--ds-color-primary-hover);
-}
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  color: var(--primary-color); font-weight: 700; font-size: 0.95rem;
-}
-.hero-title {
-  color: var(--ds-color-text); font-size: clamp(1.8rem, 3.2vw, 2.7rem); font-weight: 850;
-  line-height: 1.3; margin: 0;
-}
-
-:global(.app-dark) .hero-title {
-  color: var(--p-primary-200);
-}
-
-.hero-desc {
-  color: var(--text-color-secondary); font-size: 1.05rem; line-height: 1.9; margin: 0;
-}
-.hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.hero-visual {
-  position: relative; height: 260px; border-radius: 0.75rem;
-  background: linear-gradient(145deg, var(--ds-color-brand-dark), var(--ds-color-primary));
-  display: flex; align-items: center; justify-content: center; overflow: hidden;
-}
-.hero-glow {
-  position: absolute; inset: -30%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 60%);
-}
-.hero-icon { font-size: clamp(4rem, 7vw, 6.5rem); color: var(--ds-color-on-brand); opacity: 0.95; z-index: 1; filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.16)); }
-
-/* Hero Slideshow */
-.hero-slideshow { position: relative; }
-.hero-dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: .35rem;
-  margin-top: var(--ds-space-4);
-}
-.hero-dot {
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  min-width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-}
-.hero-dot::before {
-  content: "";
-  width: .5rem;
-  height: .5rem;
-  border-radius: 50%;
-  background: var(--ds-color-border, var(--surface-border));
-  transition: width var(--ds-transition-fast), background var(--ds-transition-fast);
-}
-.hero-dot.active::before {
-  width: 1.5rem;
-  border-radius: var(--ds-radius-pill);
-  background: var(--ds-color-primary);
-}
-.hero-play-toggle {
-  display: grid;
-  place-items: center;
-  width: 2.75rem;
-  min-width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem;
+  padding: .35rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: 50%;
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  color: var(--ds-color-text);
-  cursor: pointer;
 }
-.hero-play-toggle:hover { border-color: var(--ds-color-primary); color: var(--ds-color-primary); }
-.hero-play-toggle:focus-visible,
-.hero-dot:focus-visible {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 2px;
+.hero-search:focus-within {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 22%, transparent);
 }
-
-/* Slide transition */
-.slide-fade-enter-active { transition: all 0.5s ease; }
-.slide-fade-leave-active { transition: all 0.35s ease; }
-.slide-fade-enter-from { opacity: 0; transform: translateX(-20px); }
-.slide-fade-leave-to { opacity: 0; transform: translateX(20px); }
-
-
+.hero-search-icon { padding-inline-start: .65rem; color: var(--ds-color-text-muted); font-size: 1rem; }
+.hero-search-input {
+  width: 100%; min-width: 0; min-height: 2.75rem; padding: .5rem .35rem;
+  border: 0; outline: 0; background: transparent; color: var(--ds-color-text); font: inherit;
+}
+.hero-search-input::placeholder { color: var(--ds-color-text-muted); }
+.hero-search-btn {
+  min-height: 2.75rem; padding: .6rem 1.4rem; border: 0; border-radius: var(--ds-radius-sm);
+  background: var(--ds-color-accent); color: var(--ds-color-on-accent); font: inherit;
+  font-weight: 700; cursor: pointer; transition: background-color var(--ds-transition-fast);
+}
+.hero-search-btn:hover { background: var(--ds-color-primary-hover); }
+.hero-search-btn:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
 /* Buttons */
 .btn {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1.5rem; border-radius: 0.65rem; font-weight: 700;
   font-size: 0.95rem; cursor: pointer; text-decoration: none;
-  transition: all 0.2s ease; border: 1px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; border: 1px solid transparent;
 }
 .btn-primary { background: var(--primary-color); color: var(--primary-contrast-color); }
 .btn-primary:hover { background: var(--ds-color-primary-hover); }
@@ -862,7 +593,6 @@ onBeforeUnmount(() => {
   display: flex; align-items: center; gap: 0.625rem;
   margin: 0; font-size: clamp(1.1rem, 1.7vw, 1.35rem); font-weight: 800; color: var(--ds-color-text);
 }
-.section-title i { color: var(--primary-color); }
 .panel-link {
   font-size: 0.85rem; color: var(--primary-color); text-decoration: none; font-weight: 600;
 }
@@ -872,14 +602,12 @@ onBeforeUnmount(() => {
 .cat-carousel :deep(.p-carousel-item) { padding: 0.25rem; }
 .cat-slide { padding: 0.25rem; height: 100%; }
 .category-card {
-  cursor: pointer;
-  transition: box-shadow var(--ds-transition), transform var(--ds-transition), border-color var(--ds-transition);
-  height: 100%;
+  display: block; width: 100%; height: 100%; padding: 1rem; text-align: start;
+  font: inherit; color: var(--ds-color-text); cursor: pointer;
+  border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface); transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
 }
-.category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--ds-shadow-lg);
-}
+.category-card:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
 .cat-thumb {
   aspect-ratio: 16 / 9;
   background: var(--surface-ground);
@@ -912,18 +640,11 @@ onBeforeUnmount(() => {
   gap: var(--ds-space-4);
 }
 .product-card {
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg);
-  overflow: hidden; cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  display: block; min-width: 0; overflow: hidden; border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md); background: var(--ds-color-surface); color: inherit;
+  text-decoration: none; transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
 }
-.product-card:hover,
-.product-card:focus-visible {
-  box-shadow: var(--ds-shadow-md);
-  transform: translateY(-2px);
-  border-color: var(--ds-color-primary);
-  outline: none;
-}
+.product-card:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
 .product-card:focus-visible,
 .category-card:focus-visible {
   outline: 3px solid var(--ds-color-focus);
@@ -954,7 +675,7 @@ onBeforeUnmount(() => {
   width: 2.75rem; min-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; border-radius: 0.75rem;
   border: 1px solid var(--surface-border); background: var(--surface-card);
   color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .nav-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
 .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -970,22 +691,16 @@ onBeforeUnmount(() => {
 
 /* Verified marketplace capabilities */
 .features-bar {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
-  background: var(--surface-card); border: 1px solid var(--surface-border);
-  border-radius: 1rem; padding: 1rem 1.25rem;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0;
+  border-block: 1px solid var(--ds-color-border); padding: .5rem 0;
 }
 .feature-item {
-  display: flex; align-items: center; gap: 0.75rem; justify-content: center;
-  text-align: right; padding: 0 0.75rem;
-  border-inline-start: 1px solid var(--surface-border);
+  display: flex; flex-direction: column; align-items: flex-start; gap: .35rem;
+  padding: .75rem 1rem; text-align: start; border-inline-start: 1px solid var(--ds-color-border);
 }
-.feature-item:last-child { border-inline-start: none; }
-.feature-icon {
-  width: 2.5rem; height: 2.5rem; border-radius: 50%;
-  background: var(--p-primary-50); display: flex; align-items: center;
-  justify-content: center; flex-shrink: 0;
-}
-.feature-icon i { font-size: 1.1rem; color: var(--primary-color); }
+.feature-item:first-child { border-inline-start: 0; }
+.feature-text h3 { margin: 0; font-size: .9rem; font-weight: 700; color: var(--ds-color-text); }
+.feature-text p { margin: 0; font-size: .78rem; color: var(--ds-color-text-muted); line-height: 1.7; }
 .feature-text h3 { margin: 0 0 0.2rem; font-size: 0.9rem; font-weight: 700; }
 .feature-text p { margin: 0; font-size: 0.75rem; color: var(--text-color-secondary); }
 
@@ -996,8 +711,6 @@ onBeforeUnmount(() => {
 @media (max-width: 900px) {
   .home-layout { grid-template-columns: 1fr; }
   .filters-sidebar { position: static; }
-  .hero { grid-template-columns: 1fr; padding: 2rem; }
-  .hero-visual { order: 2; height: 200px; }
   .features-bar { grid-template-columns: repeat(2, 1fr); }
   .feature-item { border-inline-start: none; }
 }
@@ -1008,59 +721,29 @@ onBeforeUnmount(() => {
   .products-grid, .features-bar { grid-template-columns: 1fr; }
   .home-container { gap: var(--ds-space-4); }
   .hero { padding: 1.25rem; }
-  .hero-search { grid-template-columns: auto minmax(0, 1fr); border-radius: var(--ds-radius-xl); }
+  .hero-search { grid-template-columns: auto minmax(0, 1fr); }
   .hero-search-btn { grid-column: 1 / -1; width: 100%; }
 }
 
-/* Home marketplace refinement: stronger hero hierarchy and product imagery. */
-.home-page { padding-block: clamp(1.25rem, 2.5vw, 2.5rem) 3.5rem; }
+/* Marketplace surfaces: flat, product-led and consistent with the shared system. */
+.home-page { padding-block: clamp(1.25rem, 2.5vw, 2.5rem) 3.5rem; background: var(--ds-color-background); }
 .home-container { gap: clamp(1.25rem, 2.5vw, 2rem); }
-.hero {
-  min-height: 22rem;
-  border-radius: calc(var(--ds-radius-xl) + .35rem);
-  background:
-    radial-gradient(circle at 84% 18%, color-mix(in srgb, var(--ds-color-primary) 16%, transparent), transparent 22rem),
-    linear-gradient(120deg, color-mix(in srgb, var(--ds-navy) 5%, var(--ds-color-surface)), var(--ds-color-surface));
-}
-.hero-content { max-width: 46rem; }
-.hero-badge {
-  align-self: flex-start;
-  padding: .35rem .7rem;
-  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 24%, transparent);
-  border-radius: var(--ds-radius-pill);
-  background: var(--ds-color-primary-soft);
-  font-size: var(--ds-font-size-xs);
-}
-.hero-title { max-width: 14ch; letter-spacing: -.035em; }
-.hero-desc { max-width: 42rem; font-size: var(--ds-font-size-md); }
-.hero-search {
-  border-color: var(--ds-color-border);
-  background: var(--ds-color-surface);
-  max-width: 40rem;
-}
- .hero-search-input { min-height: 2.75rem; }
-.hero-search-btn { min-height: 2.65rem; }
-.hero-visual {
-  min-height: 17rem;
-  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 28%, transparent);
-  border-radius: var(--ds-radius-xl);
-  background:
-    radial-gradient(circle at 30% 28%, color-mix(in srgb, var(--ds-brand) 35%, transparent), transparent 50%),
-    var(--ds-hero-gradient);
-}
-.hero-glow { opacity: .6; }
-.hero-icon { filter: drop-shadow(0 1rem 1.5rem rgba(0,0,0,.2)); }
-.hero-dot { border: 0; }
-.section-block {
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+.hero-search { max-width: 48rem; }
+.hero-actions .btn { min-height: 2.75rem; }
+.home-page .section-block {
+  padding: 1.25rem 0;
+  border: 0;
+  border-top: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .section-head { gap: 1rem; }
 .section-title { font-size: clamp(1.05rem, 1.7vw, 1.3rem); }
 .filters-card {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+  border-radius: var(--ds-radius-md);
+  box-shadow: none;
 }
 .filters-inner :deep(.p-inputtext),
 .filters-inner :deep(.p-select),
@@ -1082,15 +765,8 @@ onBeforeUnmount(() => {
   background: var(--ds-color-surface);
 }
 .cat-thumb { background: var(--ds-color-surface-alt); }
-.product-card {
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.product-card:hover,
-.product-card:focus-visible {
-  transform: translateY(-3px);
-  box-shadow: var(--ds-shadow-md);
-}
+.product-card { border-radius: var(--ds-radius-md); box-shadow: none; }
+.product-card:hover, .product-card:focus-visible { transform: none; box-shadow: none; }
 .product-image {
   aspect-ratio: 5 / 4;
   background: linear-gradient(145deg, var(--ds-color-surface-alt), var(--ds-color-surface-hover));
@@ -1099,18 +775,10 @@ onBeforeUnmount(() => {
 .product-info { padding: .9rem; }
 .product-title { color: var(--ds-color-text); line-height: 1.65; }
 .product-vendor { display: flex; align-items: center; gap: .35rem; }
- .features-bar {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.feature-icon { background: var(--ds-color-primary-soft); }
-.feature-icon i { color: var(--ds-color-primary); }
+ .features-bar { border-radius: 0; background: transparent; box-shadow: none; padding-inline: 0; }
 @media (max-width: 900px) {
   .hero { min-height: 0; }
   .hero-content { max-width: none; }
-  .hero-visual { min-height: 13rem; }
 }
 @media (max-width: 560px) {
   .hero-title { max-width: none; font-size: 1.65rem; }
@@ -1118,10 +786,10 @@ onBeforeUnmount(() => {
   .hero-actions .btn { flex: 1 1 0; padding-inline: .75rem; font-size: .82rem; }
   .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
   .features-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .feature-item { justify-content: flex-start; padding: .5rem; }
-  .feature-text h3 { font-size: .78rem; }
-  .feature-text p { font-size: .68rem; }
-  .hero-visual { min-height: 10rem; }
+  .feature-item { padding: .75rem .5rem; }
+  .feature-item:nth-child(odd) { border-inline-start: 0; }
+  .feature-text h3 { font-size: .82rem; }
+  .feature-text p { font-size: .72rem; }
 }
 @media (max-width: 360px) {
   .products-grid { grid-template-columns: 1fr; }
@@ -1129,12 +797,10 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .slide-fade-enter-active,
-  .slide-fade-leave-active,
-  .hero-dot::before,
   .product-card,
   .category-card,
-  .nav-btn {
+  .nav-btn,
+  .product-card-cta i {
     transition: none !important;
     animation: none !important;
   }
@@ -1181,7 +847,7 @@ onBeforeUnmount(() => {
 .home-page .product-price small { color: var(--ds-color-text-muted); font-size: .65rem; font-weight: var(--ds-font-weight-normal); }
 .home-page .product-price strong { color: var(--ds-color-primary); font-size: .85rem; line-height: 1.5; }
 .home-page .product-price--inquiry strong { font-size: .75rem; }
-.home-page .product-card-cta { display: inline-flex; align-items: center; gap: .3rem; flex: 0 0 auto; min-height: 2.75rem; color: var(--ds-color-primary); font-size: .75rem; font-weight: var(--ds-font-weight-bold); }
+.home-page .product-card-cta { display: inline-flex; align-items: center; gap: .3rem; flex: 0 0 auto; min-height: 2.75rem; color: var(--ds-color-primary-text); font-size: .75rem; font-weight: var(--ds-font-weight-bold); }
 .home-page .product-card-cta i { transition: transform var(--ds-transition-fast); }
 .home-page .product-card:hover .product-card-cta i { transform: translateX(-3px); }
 @media (max-width: 560px) {
