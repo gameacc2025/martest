@@ -6,10 +6,10 @@ These skills are the project's reusable design and frontend-quality toolkit. The
 
 | Skill | Install target | Use it for |
 |---|---|---|
-| UI UX Pro Max | Codex: `.agents/skills/ui-ux-pro-max`; existing OpenCode copy: `.opencode/skills/ui-ux-pro-max` | Design-system decisions, layout patterns, palettes, typography pairings, component and page design guidance |
-| Taste Skill (`design-taste-frontend`) | `.agents/skills/design-taste-frontend` | Distinctive art direction, composition, typography, spacing, visual hierarchy, motion, and avoiding generic/template-like UI |
-| Impeccable | `.agents/skills/impeccable` | UX planning, critique, polish, responsive/accessibility audits, interaction and edge-case quality |
-| Vercel Web Design Guidelines | `.agents/skills/web-design-guidelines` | Review UI implementation against current web-interface, accessibility, responsive, and interaction guidelines |
+| UI UX Pro Max | All assistants supported by `uipro init --ai all`; universal skill copy plus agent-specific locations; existing OpenCode copy: `.opencode/skills/ui-ux-pro-max` | Design-system decisions, layout patterns, palettes, typography pairings, component and page design guidance |
+| Taste Skill (`design-taste-frontend`) | All supported agent directories selected by Skills CLI `--agent '*'` (including `.agents/skills/`) | Distinctive art direction, composition, typography, spacing, visual hierarchy, motion, and avoiding generic/template-like UI |
+| Impeccable | All supported agent directories selected by Skills CLI `--agent '*'` (including `.agents/skills/`) | UX planning, critique, polish, responsive/accessibility audits, interaction and edge-case quality |
+| Vercel Web Design Guidelines | All supported agent directories selected by Skills CLI `--agent '*'` (including `.agents/skills/`) | Review UI implementation against current web-interface, accessibility, responsive, and interaction guidelines |
 
 The upstream skills are maintained by their respective authors. Do not replace their full skill files with summaries. The installer targets all supported agent directories at project scope so the skills are shared with the repository/team.
 
@@ -53,4 +53,4 @@ Run from the repository root in PowerShell:
 .\scripts\install-ui-skills.ps1
 ```
 
-The script installs/updates all four upstream skills for all supported agents. To update later, rerun the same script. Upstream URLs and install names are maintained in the script. Do not commit generated local caches, browser binaries, credentials, or environment files.
+The script installs/updates all four upstream skills at project scope for all supported agents. UI UX Pro Max uses its native `uipro init --ai all` mode; the other three use the Skills CLI `--agent '*'` target. The Skills CLI documents `--agent '*'` as installing a specific skill to all supported agents. To update later, rerun the same script. Impeccable's native installer can optionally add agent-specific integrations via `npx impeccable install`; the shared skill itself is installed for all agents by the script. Upstream URLs and install names are maintained in the script. Do not commit generated local caches, browser binaries, credentials, or environment files.
