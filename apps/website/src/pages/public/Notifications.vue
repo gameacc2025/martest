@@ -470,7 +470,6 @@ function typeLabel(item) {
       <aside class="reading-drawer" role="dialog" aria-modal="true" aria-labelledby="notification-detail-title" @keydown.esc="closeNotification">
         <header class="drawer-toolbar">
           <div class="drawer-tool-group">
-            <Button icon="pi pi-print" severity="secondary" text rounded aria-label="چاپ اعلان" @click="window.print?.()" />
             <Button :icon="selectedNotification.isRead ? 'pi pi-envelope' : 'pi pi-envelope-open'" severity="secondary" text rounded
               :aria-label="selectedNotification.isRead ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان خوانده‌شده'"
               :loading="busyIds.has(selectedNotification.id)" @click="setNotificationReadState(selectedNotification, !selectedNotification.isRead)" />
