@@ -796,3 +796,8 @@ A follow-up hardens the Admin and Company mobile drawer cleanup: the layout now 
 ## 2026-11-03 — Public account navigation by access profile
 
 Corrected Website account dropdown and mobile profile navigation to follow the existing access-profile split: CUSTOMER stays on Website, STAFF uses Admin, and COMPANY uses Company. STAFF inquiry navigation now opens Admin inquiry management rather than incorrectly entering the Company portal. Existing PKCE handoff is retained; no access token is placed in a URL. No backend/API/permission changes. Browser testing was intentionally not run per user instruction.
+
+
+## 2026-11-03 — Public shell accessible names
+
+Added explicit accessible names to desktop/mobile product search controls and the notifications icon link, labeled the desktop primary navigation, and hid the decorative bell icon from assistive technology. Existing search, navigation, notification routing and responsive behavior remain unchanged. Browser testing was intentionally not run per user instruction.
