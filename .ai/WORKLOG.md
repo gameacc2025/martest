@@ -2494,3 +2494,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Change:** CUSTOMER profile stays on Website; STAFF profile and inquiry management use Admin PKCE handoff; COMPANY profile/inquiry navigation uses Company PKCE handoff. Mobile profile navigation now follows the same access-profile split.
 - **Behavior preserved:** Access type remains the sole app-membership selector; role/permission checks, authentication, and PKCE session transfer remain unchanged. No token is placed in a URL.
 - **Verification:** Browser testing intentionally NOT RUN per user instruction. No backend/schema/API changes.
+
+
+## 2026-11-03 — PUBLIC-SHELL-ACCESSIBLE-NAMES
+- **Status:** DONE — accessibility labels committed on `main`.
+- **Scope:** Website PublicLayout.
+- **Change:** Explicit labels for desktop/mobile search, notifications link, and desktop primary navigation; decorative bell icon hidden from screen readers.
+- **Behavior preserved:** Search, navigation, notification destination, account routing, and API behavior.
+- **Verification:** Browser testing intentionally NOT RUN per user instruction. No backend/schema/API changes.
