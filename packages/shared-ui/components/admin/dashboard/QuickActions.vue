@@ -1,90 +1,32 @@
 <script setup>
-/**
- * QuickActions — grid of navigation shortcuts for common admin tasks.
- *
- * Actions are passed in as a config array so the parent controls destinations
- * and labels. Purely presentational; each item is a router-link. Token-driven.
- */
-defineProps({
-  // [{ label, icon, to, tone? }]
-  actions: { type: Array, default: () => [] },
-})
+/** Compact navigation list for common workspace tasks; destinations stay host-owned. */
+defineProps({ actions: { type: Array, default: () => [] } })
 </script>
 
 <template>
-  <div class="quick-actions">
-    <router-link
-      v-for="action in actions"
-      :key="action.label"
-      :to="action.to"
-      class="quick-action-item"
-      :class="`quick-action-item--${action.tone || 'primary'}`"
-    >
-      <span class="quick-action-icon">
-        <i :class="action.icon"></i>
-      </span>
+  <nav class="quick-actions" aria-label="دسترسی سریع">
+    <router-link v-for="action in actions" :key="action.label" :to="action.to" class="quick-action-item">
+      <i :class="action.icon" class="quick-action-icon" aria-hidden="true"></i>
       <span class="quick-action-label">{{ action.label }}</span>
-      <i class="pi pi-angle-left quick-action-arrow"></i>
+      <i class="pi pi-arrow-left quick-action-arrow" aria-hidden="true"></i>
     </router-link>
-  </div>
+  </nav>
 </template>
 
 <style scoped>
-.quick-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--ds-space-3);
-}
-
+.quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--ds-space-6); }
 .quick-action-item {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-  padding: var(--ds-space-4);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface);
-  color: var(--ds-color-text);
-  text-decoration: none;
-  font-weight: var(--ds-font-weight-semibold);
-  font-size: var(--ds-font-size-sm);
-  transition: background-color var(--ds-transition), border-color var(--ds-transition), transform var(--ds-transition);
+  display: flex; min-width: 0; min-height: 3.25rem; align-items: center; gap: var(--ds-space-3);
+  padding: .65rem .15rem; border-bottom: 1px solid var(--ds-color-border); color: var(--ds-color-text);
+  text-decoration: none; font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-medium);
+  transition: color var(--ds-transition-fast);
 }
-
-.quick-action-item:hover {
-  background: var(--ds-color-surface-hover);
-  border-color: var(--qa-accent, var(--ds-color-primary));
-  transform: translateY(-1px);
-}
-
-.quick-action-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--ds-radius-md);
-  background: var(--qa-soft, var(--ds-color-info-soft));
-  color: var(--qa-accent, var(--ds-color-primary));
-  flex-shrink: 0;
-}
-
-.quick-action-icon i {
-  font-size: 1.2rem;
-}
-
-.quick-action-arrow {
-  margin-inline-start: auto;
-  color: var(--ds-color-text-muted);
-}
-
-.quick-action-item--primary { --qa-accent: var(--ds-color-primary); --qa-soft: var(--ds-color-info-soft); }
-.quick-action-item--success { --qa-accent: var(--ds-color-success); --qa-soft: var(--ds-color-success-soft); }
-.quick-action-item--warning { --qa-accent: var(--ds-color-warning); --qa-soft: var(--ds-color-warning-soft); }
-.quick-action-item--danger  { --qa-accent: var(--ds-color-danger);  --qa-soft: var(--ds-color-danger-soft); }
-.quick-action-item--info    { --qa-accent: var(--ds-color-info);    --qa-soft: var(--ds-color-info-soft); }
-
-.quick-action-item { border-radius: var(--ds-radius-lg); min-height: 56px; }
-.quick-action-item:focus-visible { outline: 3px solid var(--ds-color-focus); outline-offset: 2px; }
-
+.quick-action-icon { flex: 0 0 1.25rem; color: var(--ds-color-text-muted); font-size: 1.05rem; text-align: center; }
+.quick-action-label { min-width: 0; overflow-wrap: anywhere; }
+.quick-action-arrow { margin-inline-start: auto; color: var(--ds-color-text-muted); font-size: .8rem; transition: transform var(--ds-transition-fast), color var(--ds-transition-fast); }
+.quick-action-item:hover, .quick-action-item:hover .quick-action-icon, .quick-action-item:hover .quick-action-arrow { color: var(--ds-color-primary-text); }
+.quick-action-item:hover .quick-action-arrow { transform: translateX(-2px); }
+.quick-action-item:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+@media (max-width: 640px) { .quick-actions { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .quick-action-item, .quick-action-arrow { transition: none; } }
 </style>

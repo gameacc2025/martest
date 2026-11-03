@@ -1,44 +1,15 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
-
-const routeState = vi.hoisted(() => ({
-  meta: { title: 'مدیریت کاربران', section: 'مدیریت' },
-}))
-
-vi.mock('vue-router', () => ({
-  useRoute: () => routeState,
-}))
-
 import PageHeader from './PageHeader.vue'
 
 describe('PageHeader', () => {
-  it('renders the active route title and section context', () => {
+  it('renders a lightweight breadcrumb without duplicating the page heading', () => {
     const wrapper = mount(PageHeader, {
-      global: {
-        stubs: {
-          DashboardBreadcrumb: {
-            template: '<nav class="breadcrumb-test-stub">مسیر صفحه</nav>',
-          },
-        },
-      },
+      global: { stubs: { DashboardBreadcrumb: { template: '<span class="breadcrumb-test-stub">مسیر صفحه</span>' } } },
     })
-
-    expect(wrapper.find('.page-header-pro__title').text()).toBe('مدیریت کاربران')
-    expect(wrapper.find('.page-header-pro__eyebrow').text()).toBe('مدیریت')
-    expect(wrapper.find('.breadcrumb-test-stub').exists()).toBe(true)
-  })
-
-  it('falls back to a useful title and context when route metadata is absent', async () => {
-    routeState.meta = {}
-    const wrapper = mount(PageHeader, {
-      global: {
-        stubs: {
-          DashboardBreadcrumb: true,
-        },
-      },
-    })
-
-    expect(wrapper.find('.page-header-pro__title').text()).toBe('داشبورد')
-    expect(wrapper.find('.page-header-pro__eyebrow').text()).toBe('فضای کاری')
+    expect(wrapper.find('nav[aria-label="مسیر صفحه"]').exists()).toBe(true)
+    expect(wrapper.find('.breadcrumb-test-stub').text()).toBe('مسیر صفحه')
+    expect(wrapper.find('h1').exists()).toBe(false)
+    expect(wrapper.find('.page-header-pro__eyebrow').exists()).toBe(false)
   })
 })

@@ -2614,3 +2614,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commits:** `50ac4d2766c68ea7e9d5fdc763fe6794ee379f72`, `006c0b202192b370311c5f0792d97bfe9bbf246c`, `1c64a5d098adb506ea1440daa9c65864abd9f846`, `8ec1dac034f00fb4692f029101cf9432aa359cb4`, plus instruction-file updates `07aacd2fc808f76775710ae816039b7918ab1bbc`, `8d23ff80361d8ea6775e10146e8dea1b71611b07`, and `2ba67b02d8e81baac57276f7d779e6fc09b2ef34`.
 - **Verification:** Remote contents inspected after writes. Local PowerShell installer NOT RUN; local installation for any agent is NOT VERIFIED. No tests/builds/browser checks run.
 - **Next action:** Pull remote `main`, execute `.scripts\install-ui-skills.ps1` locally, and restart all coding agents.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-1 — SHARED WORKSPACE FOUNDATION
+- **Status:** IN_PROGRESS — first shared-component slice implemented; full three-app redesign continues.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Apply UI UX Pro Max, Taste Skill, Impeccable and Vercel Web Interface Guidelines to the full Website, Company and Admin UI without changing product behavior.
+- **Scope:** Shared workspace headings, breadcrumb shell, dashboard KPI presentation, dashboard section framing and quick actions.
+- **Changes:** Replaced icon-tile KPI cards with typography-led metrics; removed decorative dashboard-panel icons and card shadows; changed quick actions to compact navigation rows; simplified shared page headings; removed duplicate page-title chrome from the workspace breadcrumb row. Legacy icon/eyebrow props remain accepted where callers still supply them.
+- **Tests:** Added/updated focused component tests for KpiCard, DashboardPanel, QuickActions, WorkspacePageHeading and PageHeader. NOT RUN — owner instruction.
+- **Build/browser:** NOT RUN — owner instruction. No screenshot or runtime acceptance is claimed.
+- **API/backend/auth/permissions:** No changes.
+- **Commit:** Pending atomic tree/commit creation.
+- **Next:** Continue with Admin and Company dashboard page composition, then public marketplace, then all remaining page families and cross-app hardening.

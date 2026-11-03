@@ -101,3 +101,18 @@ Review at 375px, 640px, 768px, 992px, 1200px and wide desktop. Ensure tables hav
 - [ ] Relevant component tests pass.
 - [ ] Admin, Company and Website production builds pass.
 - [ ] `.ai/WORKLOG.md`, `.ai/current-task.md` and this design system reflect the actual state.
+
+
+## Skill-based visual execution (2026-11-03)
+
+The four installed skills are now the required review framework, with this file remaining the product's visual source of truth. Use data-first operational screens, flat section separation, typography-led KPIs, restrained navigation and purposeful accent color. Public discovery should use the marketplace's real catalogue and telecom context rather than generic icon-card scaffolding. Preserve the existing teal/navy identity, Vazirmatn, RTL, PrimeVue and all product/API constraints.
+
+- Admin and Company are Operate surfaces; optimize for scanability, real task completion, dense but legible data, and truthful loading/empty/error states.
+- Website discovery and product pages are Persuade surfaces; use real API-backed products, prices, supplier identity and images, without invented trust claims.
+- Help and legal pages are Read surfaces; prioritize reading hierarchy and clear wayfinding.
+- UI UX Pro Max and Vercel checks govern accessibility, keyboard/focus, touch targets, responsive behavior, form feedback and performance.
+- Taste's app-screen rules discourage icon-tile KPIs, generic hero-metric cards, decorative chart chrome and excessive card framing.
+- Impeccable refines within this established visual world; do not create a new brand or replace the palette.
+- API contracts, routes, PKCE, RBAC, tenant ownership, inquiry and product workflows are immutable during UI-only work.
+
+See docs/UI_REDESIGN_SKILLS_EXECUTION.md for phased execution and .ai/current-task.md for the active handoff.
