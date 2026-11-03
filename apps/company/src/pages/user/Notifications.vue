@@ -363,7 +363,7 @@ function categoryIcon(item) {
       <div class="mail-title-group">
         <div class="mail-title-copy">
           <h1>صندوق اعلان‌ها</h1>
-          <nav class="mail-breadcrumb" aria-label="مسیر صفحه"><span>پنل کاربری</span><i class="pi pi-angle-left"></i><span>اعلان‌ها</span><i class="pi pi-angle-left"></i><strong>{{ activeCategoryLabel }}</strong></nav>
+          
         </div>
       </div>
       <div class="header-actions" aria-label="ابزارهای صندوق اعلان">
@@ -522,15 +522,13 @@ function categoryIcon(item) {
 .mail-page{min-width:0;padding:1rem;background:#f3f5fa;color:#17243a;font-family:var(--ds-font-family);direction:rtl}
 .mail-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:4.4rem;margin:0 0 .85rem;padding:.25rem .1rem;background:transparent}
 .mail-title-copy h1{margin:0;color:#17243a;font-size:1.08rem;font-weight:700;line-height:1.5}
-.mail-breadcrumb{display:flex;align-items:center;gap:.5rem;margin-top:.22rem;color:#818da5;font-size:.7rem}
-.mail-breadcrumb i{font-size:.62rem}.mail-breadcrumb strong{color:#27364d;font-weight:600}
 .header-actions{display:flex;align-items:center;gap:.4rem}
 .header-icon-wrap,.header-icon-button{position:relative;display:grid;place-items:center;flex:0 0 2.25rem;width:2.25rem;height:2.25rem;border:1px solid #e7e9f2;border-radius:50%;background:#fff;color:#7b70ed;font-size:.9rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
 .header-icon-wrap:hover,.header-icon-button:hover{border-color:#d7d2ff;background:#f4f2ff}
 .header-icon-badge{position:absolute;top:-.28rem;inset-inline-end:-.28rem;display:grid;place-items:center;min-width:1rem;height:1rem;padding:0 .18rem;border:2px solid #f3f5fa;border-radius:1rem;background:#8275f4;color:#fff;font-size:.55rem;font-weight:700;line-height:1}
 
-.mail-layout{display:grid;direction:rtl;grid-template-columns:260px minmax(0,1fr);min-height:calc(100vh - 130px);overflow:hidden;border:1px solid #e9eaf2;border-radius:5px;background:#fff;box-shadow:0 2px 12px rgba(26,39,68,.035)}
-.mail-sidebar{direction:rtl;min-width:0;padding:.75rem .65rem;border-inline-end:1px solid #eceef5;background:#fff}
+.mail-layout{display:grid;direction:rtl;grid-template-columns:260px minmax(0,1fr);height:calc(100dvh - 130px);min-height:32rem;overflow:hidden;border:1px solid #e9eaf2;border-radius:5px;background:#fff;box-shadow:0 2px 12px rgba(26,39,68,.035)}
+.mail-sidebar{direction:rtl;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:.75rem .65rem;border-inline-end:1px solid #eceef5;background:#fff}
 .sidebar-top{display:flex;align-items:center;justify-content:space-between;min-height:3rem;margin:0 0 .65rem;padding:.35rem .6rem;color:#23324a;font-size:.8rem;font-weight:700}
 .sidebar-top span:first-child{display:flex;align-items:center;gap:.5rem}.sidebar-top i{color:#8175ee}
 .sidebar-total{display:grid;place-items:center;min-width:1.35rem;height:1.35rem;border-radius:4px;background:#8275f4;color:#fff;font-size:.65rem}
@@ -542,7 +540,7 @@ function categoryIcon(item) {
 .folder-link:hover{border-color:#dcd8ff;background:#faf9ff}.folder-link.active{border-color:#d9d5ff;background:#f3f1ff;color:#7769eb}.folder-link.active>i,.folder-link.active b{color:#7769eb}
 .sidebar-divider{height:1px;margin:.8rem .4rem;background:#edf0f5}
 .category-link{min-height:2.35rem}.category-link>i{font-size:.65rem}
-.message-list-panel{display:flex;direction:rtl;flex-direction:column;min-width:0;background:#fff}
+.message-list-panel{display:flex;direction:rtl;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#fff}
 .list-toolbar{display:flex;align-items:center;gap:.8rem;min-height:4.1rem;padding:.55rem .8rem;border-bottom:1px solid #eceef5;background:#f8f9fc}
 .list-toolbar-left{display:flex;align-items:center;gap:.55rem;flex:0 0 auto}
 .select-visible{display:inline-flex;align-items:center;gap:.45rem;color:#26354b;font-size:.76rem;white-space:nowrap}
@@ -560,7 +558,7 @@ function categoryIcon(item) {
 .search-box>.pi{flex:0 0 auto;font-size:.85rem;color:#8290a8}
 .result-count{color:#8a96aa;font-size:.67rem;white-space:nowrap}
 .bulk-actions{display:flex;align-items:center;gap:.05rem;padding:.1rem .2rem;border:1px solid #e9eaf2;border-radius:5px;background:#fff}
-.message-items{flex:1;min-width:0}
+.message-items{flex:1;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .message-row{display:flex;align-items:center;gap:.45rem;min-width:0;min-height:4.55rem;padding:.35rem .7rem;border:0;border-bottom:1px solid #edf0f5;background:#fff;color:#17243a;transition:background .14s}
 .message-row:hover{background:#fafaff}.message-row.selected{background:#f7f6ff;box-shadow:inset -3px 0 #8275f4}
 .message-row.unread{background:#fff}.message-row.unread .row-subject strong,.message-row.unread .row-sender{font-weight:750;color:#17243a}
@@ -585,7 +583,7 @@ function categoryIcon(item) {
 .pagination span{color:#8a96aa;font-size:.7rem;font-variant-numeric:tabular-nums}
 .mail-page button{font-family:inherit}.mail-page button:focus-visible,.mail-page a:focus-visible,.mail-page select:focus-visible{outline:2px solid #8174f0;outline-offset:2px}
 @media(max-width:1050px){.mail-layout{grid-template-columns:220px minmax(0,1fr)}.list-toolbar{flex-wrap:wrap}.list-search{order:3;flex:1 1 100%;width:100%;max-width:100%;margin:0}}
-@media(max-width:700px){.mail-page{padding:.55rem}.mail-header{align-items:flex-start;flex-direction:column;padding:.25rem 0}.header-actions{width:100%;justify-content:flex-start}.mail-layout{grid-template-columns:minmax(0,1fr);min-height:0}.mail-sidebar{border-inline-end:0;border-bottom:1px solid #eceef5;padding:.55rem}.sidebar-top,.sidebar-compose,.sidebar-section-title,.sidebar-divider{display:none}.mail-sidebar .folder-link{display:inline-flex;width:auto;min-height:2.15rem;margin:.1rem}.list-toolbar{gap:.45rem;padding:.5rem}.list-toolbar-left{flex:1}.list-search{order:0;flex:1 1 100%;width:100%;max-width:100%;margin:0}.toolbar-actions{margin-inline-start:auto}.message-row{padding-inline:.25rem;gap:.25rem}.row-select{flex-basis:1rem}.row-status{flex-basis:1.7rem;width:1.7rem;height:1.7rem}.row-actions :deep(.p-button){min-width:1.8rem;width:1.8rem;height:1.8rem}}
+@media(max-width:700px){.mail-layout{height:auto;min-height:0}.mail-page{padding:.55rem}.mail-header{align-items:flex-start;flex-direction:column;padding:.25rem 0}.header-actions{width:100%;justify-content:flex-start}.mail-layout{grid-template-columns:minmax(0,1fr);min-height:0}.mail-sidebar{border-inline-end:0;border-bottom:1px solid #eceef5;padding:.55rem}.sidebar-top,.sidebar-compose,.sidebar-section-title,.sidebar-divider{display:none}.mail-sidebar .folder-link{display:inline-flex;width:auto;min-height:2.15rem;margin:.1rem}.list-toolbar{gap:.45rem;padding:.5rem}.list-toolbar-left{flex:1}.list-search{order:0;flex:1 1 100%;width:100%;max-width:100%;margin:0}.toolbar-actions{margin-inline-start:auto}.message-row{padding-inline:.25rem;gap:.25rem}.row-select{flex-basis:1rem}.row-status{flex-basis:1.7rem;width:1.7rem;height:1.7rem}.row-actions :deep(.p-button){min-width:1.8rem;width:1.8rem;height:1.8rem}}
 @media(prefers-reduced-motion:reduce){.mail-page *,.mail-page *::before,.mail-page *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 
@@ -610,6 +608,6 @@ function categoryIcon(item) {
 .drawer-folder-control label{color:#8a96aa;font-size:.76rem}
 .drawer-folder-control .inline-folder-select{min-width:9rem;min-height:2.25rem;padding:.35rem .55rem;border:1px solid #e3e7f0;border-radius:6px;background:#fff;color:#26354b}
 @keyframes notification-drawer-in{from{transform:translateX(24px);opacity:.75}to{transform:translateX(0);opacity:1}}
-@media(max-width:760px){.reading-drawer{width:min(100%,32rem)}.drawer-scroll{padding:1rem}.drawer-subject-line{flex-direction:column;gap:.35rem}.drawer-subject-line time{padding:0}}
+@media(max-width:760px){.reading-drawer{width:100vw;max-width:none;min-height:100dvh}.drawer-scroll{padding:1rem}.drawer-subject-line{flex-direction:column;gap:.35rem}.drawer-subject-line time{padding:0}}
 @media(prefers-reduced-motion:reduce){.reading-drawer{animation:none}}
 </style>
