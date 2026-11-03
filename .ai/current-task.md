@@ -218,4 +218,4 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added regression coverage for drawer opening/closing and semantic message-button interaction in all three app test suites.
 - No API, backend, schema, routing, folder membership or authorization changes.
 - Static source review only; tests/build/browser checks NOT RUN.
-- **Branch:** feat/notifications-right-reading-pane. Awaiting PR merge.
+- **Merged:** PR #81 — https://github.com/gameacc2025/martest/pull/81. Squash commit: fbad7a813e5f64759d4f1311bc4e9468e714d2dc.
