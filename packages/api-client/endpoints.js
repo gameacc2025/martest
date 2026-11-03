@@ -5,6 +5,8 @@
  */
 
 export const endpoints = {
+  // Public contact form
+  contact: { submit: '/contact/messages' },
   // Authentication
   auth: {
     login: '/auth/login',
