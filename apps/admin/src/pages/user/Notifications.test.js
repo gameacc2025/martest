@@ -199,4 +199,16 @@ describe('Admin notification inbox', () => {
     expect(wrapper.find('.reading-overlay').exists()).toBe(false)
     expect(apiPatch).not.toHaveBeenCalled()
   })
+
+  it('renders the email-client two-column inbox with folders and an integrated search toolbar', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+    expect(wrapper.find('.mail-sidebar').exists()).toBe(true)
+    expect(wrapper.find('.message-list-panel').exists()).toBe(true)
+    expect(wrapper.find('.list-toolbar').exists()).toBe(true)
+    expect(wrapper.find('.list-search').exists()).toBe(true)
+    expect(wrapper.find('.mail-toolbar').exists()).toBe(false)
+  })
 })

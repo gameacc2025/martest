@@ -2902,3 +2902,21 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **PR:** #81 — https://github.com/gameacc2025/martest/pull/81.
 - **Merge commit:** fbad7a813e5f64759d4f1311bc4e9468e714d2dc.
 - **Next:** Continue remaining UI redesign phases.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-22 — MATCH FULL EMAIL INBOX REFERENCE
+- **Status:** IMPLEMENTED ON FEATURE BRANCH — awaiting merge.
+- **Reference:** User-provided Myron Mail inbox screenshot (2026-11-03).
+- **Scope:** Admin, Company and Website notification inbox pages and regression tests.
+- **Changes:**
+  - Rebuilt page header as a light compact title/breadcrumb area with existing notification settings and unread count.
+  - Rebuilt inbox as exactly two content columns: left folder/category navigation and right message list. Removed the obsolete three-column grid that left a phantom empty column after Phase 21.
+  - Integrated select-page, search, refresh, mark-all-read and contextual bulk actions into a compact mail toolbar above the message rows.
+  - Refined row spacing, sender marker, subject/preview hierarchy, date, unread state, hover and selected state to match the reference's compact email list.
+  - Kept the right-side overlay reading drawer from Phase 21.
+  - Added structural tests in all three apps.
+- **Behavior preserved:** Existing notification endpoints, unread counts, fixed folders, category filtering, pagination, selection, bulk operations, read/unread, save/move and delete behavior.
+- **No fabricated features:** No fake sender names, compose action, star persistence or report export was introduced where the data/API does not support it.
+- **Verification:** Static source review only. Tests/build/browser checks NOT RUN because no local execution environment is connected.
+- **Branch:** fix/notifications-mail-layout-reference.
+- **Next:** Merge after review; then continue the remaining UI redesign backlog.
