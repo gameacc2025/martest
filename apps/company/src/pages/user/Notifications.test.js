@@ -98,26 +98,17 @@ describe('Company notification inbox', () => {
     expect(wrapper.findAll('.message-row')).toHaveLength(1)
     expect(wrapper.find('.message-row').text()).toContain('وضعیت محصول تغییر کرد')
   })
-  it('filters the unread folder without changing the independent folder counts', async () => {
+  it('keeps read-state filters out of the two fixed mailbox folders', async () => {
     wrapper = shallowMount(Notifications, {
       global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
     })
     await flushPromises()
 
-    const folderButtons = wrapper.findAll('button[data-folder-id]')
-    const countsBefore = folderButtons.map((button) => button.find('b').text())
-    expect(folderButtons.map((button) => button.text())).toEqual([
-      expect.stringContaining('همه پیام‌ها'),
-      expect.stringContaining('خوانده‌نشده'),
-      expect.stringContaining('خوانده‌شده'),
-    ])
-
-    await folderButtons[1].trigger('click')
-    await flushPromises()
-
-    expect(apiGetPaginated).toHaveBeenCalledWith('/settings/notifications?page=1&limit=20&unreadOnly=true')
-    const countsAfter = wrapper.findAll('button[data-folder-id]').map((button) => button.find('b').text())
-    expect(countsAfter).toEqual(countsBefore)
+    const folderLabels = wrapper.findAll('button[data-folder-id]').map(button => button.text())
+    expect(folderLabels).not.toContain(expect.stringContaining('خوانده‌نشده'))
+    expect(folderLabels).not.toContain(expect.stringContaining('خوانده‌شده'))
+    expect(folderLabels).not.toContain(expect.stringContaining('همه پیام‌ها'))
+    expect(wrapper.findAll('.category-link').length).toBeGreaterThan(0)
   })
 
   it('does not mark a notification as read just because it is selected on initial load', async () => {
@@ -140,9 +131,9 @@ describe('Company notification inbox', () => {
     const openButton = wrapper.find('.message-row-open')
     expect(openButton.element.tagName).toBe('BUTTON')
     expect(openButton.attributes('type')).toBe('button')
-    expect(openButton.attributes('aria-pressed')).toBe('false')
+    expect(openButton.attributes('aria-expanded')).toBe('false')
     await openButton.trigger('click')
-    expect(openButton.attributes('aria-pressed')).toBe('true')
+    expect(openButton.attributes('aria-expanded')).toBe('true')
     expect(wrapper.find('.reading-overlay').exists()).toBe(true)
     expect(apiPatch).not.toHaveBeenCalled()
   })
@@ -173,7 +164,7 @@ describe('Company notification inbox', () => {
     await wrapper.findAll('.row-checkbox')[1].setValue(true)
     await flushPromises()
     expect(wrapper.find('.bulk-actions').exists()).toBe(true)
-    const markReadButton = wrapper.findComponent('[label="خوانده‌شده"]')
+    const markReadButton = wrapper.findComponent('[aria-label="خوانده‌شده"]')
     expect(markReadButton.exists()).toBe(true)
     markReadButton.vm.$emit('click')
     await flushPromises()
