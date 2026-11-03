@@ -63,10 +63,11 @@
 
   /* --------------------------------------------------------
      BRAND + SHELL (constant brand surfaces; flipped in dark below)
-     Primary turquoise #12b8a6 · sky #39bfe0 · technical blue #2878c7.
+     Primary sky #39bfe0 · secondary turquoise #12b8a6 · technical blue #2878c7.
      Use these for hero/sidebar/footer surfaces instead of raw hex.
      -------------------------------------------------------- */
-  --ds-brand: #12b8a6;
+  --ds-brand: #39bfe0;
+  --ds-turquoise: #12b8a6;
   --ds-sky: #39bfe0;
   --ds-tech-blue: #2878c7;
   --ds-navy: #173b63;
@@ -81,7 +82,7 @@
   --ds-sidebar-fg-strong: #ffffff;
   --ds-sidebar-muted: #a9c2d3;
   --ds-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --ds-sidebar-active-bg: rgba(18, 184, 166, 0.18);
+  --ds-sidebar-active-bg: rgba(57, 191, 224, 0.20);
   --ds-sidebar-accent: #39bfe0;
 
   /* --------------------------------------------------------
@@ -177,8 +178,8 @@
   --ds-color-on-brand-muted: var(--p-primary-200, #b9dbe6);
   --ds-color-accent: var(--p-primary-color);
   --ds-color-on-accent: var(--p-primary-contrast-color);
-  --ds-color-primary-text: var(--p-primary-800, #086660);
-  --ds-color-primary-soft: var(--p-primary-50, #e8f8f6);
+  --ds-color-primary-text: var(--p-primary-800, #14718c);
+  --ds-color-primary-soft: var(--p-primary-50, #eaf9fc);
   --ds-color-focus: var(--p-primary-color);
   --ds-container-max: 1280px;
   --ds-touch-target: 44px;
