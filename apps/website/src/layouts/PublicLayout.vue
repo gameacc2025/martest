@@ -188,7 +188,7 @@ function logout() {
               </span>
             </router-link>
 
-            <nav class="public-nav-desktop">
+            <nav class="public-nav-desktop" aria-label="منوی اصلی">
               <router-link to="/" class="public-nav-link" active-class="public-nav-link-active">صفحه اصلی</router-link>
               <MegaMenu :categories="megaMenuCategories" />
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active">درباره ما</router-link>
@@ -201,13 +201,13 @@ function logout() {
             <div class="public-search-desktop">
               <IconField>
                 <InputIcon class="pi pi-search" />
-                <InputText v-model="searchQuery" @keyup.enter="search" placeholder="جستجو..." class="public-search-input" />
+                <InputText v-model="searchQuery" @keyup.enter="search" placeholder="جستجو..." aria-label="جستجوی محصولات" class="public-search-input" />
               </IconField>
             </div>
 
             <template v-if="user">
-              <a :href="notificationHref" class="public-icon-link public-notifications-link">
-                <i class="pi pi-bell"></i>
+              <a :href="notificationHref" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها">
+                <i class="pi pi-bell" aria-hidden="true"></i>
                 <span v-if="notificationCount > 0" class="public-cart-badge">{{ notificationCount }}</span>
               </a>
 
@@ -249,7 +249,7 @@ function logout() {
         <div v-if="mobileMenuOpen" class="public-search-mobile">
           <IconField>
             <InputIcon class="pi pi-search" />
-            <InputText v-model="searchQuery" @keyup.enter="search" placeholder="جستجوی محصولات..." class="public-search-input-full" />
+            <InputText v-model="searchQuery" @keyup.enter="search" placeholder="جستجوی محصولات..." aria-label="جستجوی محصولات" class="public-search-input-full" />
           </IconField>
         </div>
       </div>
