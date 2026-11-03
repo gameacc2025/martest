@@ -2599,3 +2599,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commits:** `691df493882c4bdb29b7dc44530abe66657504c3` (skill policy); `9b3bc1a84130a37392c9a10df33a15089bd2df23` (installer); `28be2940d3e2379b245af2b1c6b37ca30d203555` (AGENTS); `4c435d04486d5ef27e34caed43c2969affb5e2a5` (protocol); `ada060fd37501cf49ef9e4aa5adaaba86fb98812` (workflow docs).
 - **Push:** Changes committed directly to remote `main` through GitHub API.
 - **Next action:** Run `.scripts\install-ui-skills.ps1` from the local project root in PowerShell, then restart Codex. Do not claim local installation complete until the command succeeds and generated skill folders are present.
+
+
+## 2026-11-03 — UI-SKILLS-ALL-AGENTS — EXPAND FROM CODEX TO ALL SUPPORTED AGENTS
+
+- **Owner clarification:** The original Codex-only installation target was insufficient; all supported coding agents must receive the skills.
+- **Implementation:** Updated `scripts/install-ui-skills.ps1`:
+  - UI UX Pro Max: `uipro init --ai all`.
+  - Taste Skill: Skills CLI `--agent '*'`.
+  - Impeccable: Skills CLI `--agent '*'` (shared skill installation); native `npx impeccable install` left as an optional integration setup because it offers agent-specific integration choices.
+  - Vercel Web Design Guidelines: Skills CLI `--agent '*'`.
+- **Documentation:** Clarified all-agent targets in `.ai/UI_SKILLS.md`, `AGENTS.md`, `.ai/PROTOCOL.md`, and `docs/AI_AGENT_WORKFLOW.md`.
+- **Source verification:** Skills CLI docs explicitly support `--agent '*'` to install a specific skill to all supported agents; UI UX Pro Max CLI documents `--ai all`; Impeccable documents `npx skills add pbakaus/impeccable` as a shared skill installation route. See official docs: https://github.com/vercel-labs/skills/blob/main/docs/commands.md, https://www.npmjs.com/package/ui-ux-pro-max-cli, https://impeccable.style/docs/.
+- **Commits:** `50ac4d2766c68ea7e9d5fdc763fe6794ee379f72`, `006c0b202192b370311c5f0792d97bfe9bbf246c`, `1c64a5d098adb506ea1440daa9c65864abd9f846`, `8ec1dac034f00fb4692f029101cf9432aa359cb4`, plus instruction-file updates `07aacd2fc808f76775710ae816039b7918ab1bbc`, `8d23ff80361d8ea6775e10146e8dea1b71611b07`, and `2ba67b02d8e81baac57276f7d779e6fc09b2ef34`.
+- **Verification:** Remote contents inspected after writes. Local PowerShell installer NOT RUN; local installation for any agent is NOT VERIFIED. No tests/builds/browser checks run.
+- **Next action:** Pull remote `main`, execute `.scripts\install-ui-skills.ps1` locally, and restart all coding agents.
