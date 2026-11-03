@@ -21,14 +21,12 @@
                   <InputText
                     id="forgot-password-email"
                     v-model="email"
-                    autocomplete="email"
-                    required
-                    :aria-invalid="errors.email ? 'true' : undefined"
-                    :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
                     required
                     autocomplete="email"
+                    :aria-invalid="errors.email ? 'true' : undefined"
+                    :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     :aria-invalid="errors.email ? 'true' : undefined"
                     :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     class="fp-input"
