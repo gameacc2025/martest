@@ -17,15 +17,19 @@
 
               <form @submit.prevent="handleSubmit" class="fp-form">
                 <div class="field">
-                  <label>آدرس ایمیل</label>
+                  <label for="forgot-password-email">آدرس ایمیل</label>
                   <InputText
                     v-model="email"
                     placeholder="آدرس ایمیل خود را وارد کنید"
                     type="email"
+                    required
+                    autocomplete="email"
+                    :aria-invalid="errors.email ? 'true' : undefined"
+                    :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
                     class="fp-input"
                     :class="{ 'p-invalid': errors.email }"
                   />
-                  <small v-if="errors.email" class="p-error block">{{ errors.email }}</small>
+                  <small v-if="errors.email" id="forgot-password-email-error" class="p-error block" role="alert">{{ errors.email }}</small>
                 </div>
 
                 <Button
