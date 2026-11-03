@@ -206,9 +206,10 @@ describe('Website notification inbox', () => {
     await flushPromises()
 
     expect(wrapper.find('.mail-page').attributes('dir')).toBe('rtl')
-    expect(wrapper.find('.header-actions .pi-envelope').exists()).toBe(true)
-    expect(wrapper.find('.header-actions .pi-cog').exists()).toBe(true)
-    expect(wrapper.find('.header-actions .settings-link').exists()).toBe(false)
+    expect(wrapper.find('.mail-header').exists()).toBe(false)
+    expect(wrapper.find('.sidebar-header-actions .pi-envelope').exists()).toBe(true)
+    expect(wrapper.find('.sidebar-header-actions .pi-cog').exists()).toBe(true)
+    expect(wrapper.find('.sidebar-header-actions .header-icon-button').exists()).toBe(true)
     expect(wrapper.find('.list-search input').exists()).toBe(true)
   })
 
@@ -218,7 +219,8 @@ describe('Website notification inbox', () => {
       global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
     })
     await flushPromises()
-    expect(wrapper.find('.mail-header h1').text()).toBe('صندوق اعلان‌ها')
+    expect(wrapper.find('.mail-header').exists()).toBe(false)
+    expect(wrapper.find('.sidebar-top').text()).toContain('صندوق پیام‌ها')
     expect(wrapper.find('.mail-breadcrumb').exists()).toBe(false)
     expect(wrapper.find('.page-header-pro').exists()).toBe(false)
   })
