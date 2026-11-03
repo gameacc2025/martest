@@ -1,3 +1,13 @@
+# Active execution — UI completion and shared-component quality pass (2026-11-03)
+
+**Current scope:** Finish the remaining UI consistency, responsive and accessibility refinements across Website, Company, Admin and shared UI. The existing execution log records the 69 application page files as migrated; this pass is addressing shared component and page-level gaps found during source review.
+
+**User constraints:** UI-only. Do not modify backend, API contracts, database, auth/permission logic or business workflows. Do not run browser tests or spend time running tests. Continue committing directly to `main` and append factual updates to this file, `.ai/WORKLOG.md` and `docs/UI_REDESIGN_EXECUTION.md`.
+
+**Current completed source refinements in this pass:** shared Input label/feedback/ARIA handling; DataTable filter accessible names; FormField Vue 3.4 compatibility and feedback associations; Website Contact Us field label/feedback wiring. Contact Us submission integration remains intentionally unresolved; no endpoint or successful submission is invented.
+
+---
+
 # Current Task — 2026-10-30
 
 ## Active handoff: Step 11 — Company-owned API authorization and tenant-isolation audit
