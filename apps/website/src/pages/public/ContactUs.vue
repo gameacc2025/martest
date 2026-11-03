@@ -98,7 +98,6 @@
                 type="submit"
                 label="ارسال پیام"
                 icon="pi pi-send"
-                :loading="loading"
               />
               <Button
                 type="button"
@@ -241,7 +240,6 @@ import { FormSection, FormField, FormGrid, FormActions, FormAlert } from '@telec
 
 const form = ref({ name: '', email: '', phone: '', subject: null, message: '' })
 const errors = ref({})
-const loading = ref(false)
 
 const home = ref({ icon: 'pi pi-home', to: '/' })
 const items = ref([{ label: 'تماس با ما' }])
