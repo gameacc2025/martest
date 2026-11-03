@@ -9,6 +9,7 @@ export {
   apiClient,
   API_BASE_URL,
   authApi,
+  contactApi,
   productsApi,
   companiesApi,
   categoriesApi,
