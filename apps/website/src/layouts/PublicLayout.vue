@@ -79,10 +79,15 @@ const userMenuItems = computed(() => {
         { label: 'آدرس‌های من', icon: 'pi pi-map-marker', command: () => router.push('/profile/addresses') },
         { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => router.push('/my-inquiries') },
       ]
-    : [
-        { label: 'پروفایل', icon: 'pi pi-user', command: () => goToCompanyApp('/profile') },
-        { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => goToCompanyApp('/profile?tab=inquiries') },
-      ]
+    : canAccessDashboard.value
+      ? [
+          { label: 'پروفایل', icon: 'pi pi-user', command: () => goToAdminApp('/profile') },
+          { label: 'استعلام‌ها', icon: 'pi pi-file', command: () => goToAdminApp('/inquiries') },
+        ]
+      : [
+          { label: 'پروفایل', icon: 'pi pi-user', command: () => goToCompanyApp('/profile') },
+          { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => goToCompanyApp('/profile?tab=inquiries') },
+        ]
   if (canAccessDashboard.value) {
     items.push({
       label: 'پنل مدیریت',
@@ -279,7 +284,30 @@ function logout() {
               <i class="pi pi-bell"></i>
               <span>اعلان‌ها {{ notificationCount > 0 ? `(${notificationCount})` : '' }}</span>
             </a>
-            <a :href="panelStartUrl(companyAppUrl, '/profile')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <router-link
+              v-if="authStore.isCustomer"
+              :to="{ name: 'profile' }"
+              @click="mobileMenuOpen = false"
+              class="public-mobile-nav-link"
+            >
+              <i class="pi pi-user"></i>
+              <span>{{ displayName }}</span>
+            </router-link>
+            <a
+              v-else-if="canAccessDashboard"
+              :href="panelStartUrl(adminAppUrl, '/profile')"
+              @click="mobileMenuOpen = false"
+              class="public-mobile-nav-link"
+            >
+              <i class="pi pi-user"></i>
+              <span>{{ displayName }}</span>
+            </a>
+            <a
+              v-else
+              :href="panelStartUrl(companyAppUrl, '/profile')"
+              @click="mobileMenuOpen = false"
+              class="public-mobile-nav-link"
+            >
               <i class="pi pi-user"></i>
               <span>{{ displayName }}</span>
             </a>
