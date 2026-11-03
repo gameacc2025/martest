@@ -281,3 +281,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Applied consistently to Admin, Company and Website notification inboxes; notification data, API calls, routes and actions are unchanged.
 - Updated all three notification component regression suites for the new sidebar action placement and removed header.
 - Automated tests/builds/browser rendering were not run in this session.
+
+
+### Admin + Company panel visual rebuild — 2026-11-03
+- Applied the approved reference direction to the shared workspace shell used by Admin and Company: navy gradient sidebar, bright sky-blue active navigation and primary actions, turquoise secondary actions, clean white topbar, cool-gray canvas and compact Vazirmatn typography.
+- Refined dashboard hero panels, workspace page headings, KPI cards, operational panels, toolbars, form controls, tables, dialogs, responsive spacing and reduced-motion behavior.
+- Updated shared KPI and DashboardPanel components; all API-backed dashboard data, route destinations and permission checks remain unchanged.
+- UI-only work. Per owner instruction, no UI tests/build/browser validation was run.
+- Remaining: continue route-specific polish for every Admin and Company management page; this shared layer is the common foundation, not a claim that every page has been individually redesigned.
