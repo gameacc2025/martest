@@ -1,9 +1,9 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundation and first dashboard/public marketplace slices implemented; this UI redesign is not complete.  
+**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery and notification/settings surfaces updated; full 69-page redesign remains in progress.  
 **Repository:** gameacc2025/martest  
 **Branch:** main  
-**Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and relevant UI documentation.
+**Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
 
 ## Product constraints
 Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/navy/petrol palette, logo), Vue 3/JavaScript/PrimeVue 4 stack, APIs, routes, PKCE authentication, app-context/RBAC, tenant isolation, inquiry/RFQ rules, product lifecycle, notification behavior and commerce contracts. Do not add fake data or unsupported claims. No backend/schema/API/business-rule changes during this UI-only task.
@@ -23,30 +23,36 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 - PageHeader is a lightweight breadcrumb row, avoiding duplicate page titles.
 - Focused component regression tests were added.
 
-### Admin and Company dashboards
-- Removed decorative hero kickers, oversized ornamental marks, gradients and shadows.
-- Replaced dashboard welcome panels with a solid brand-navy workspace heading and clear actions.
-- Added accessible labels to icon-only product review actions.
-- Preserved API-backed metrics, company status and verification state.
+### Admin and Company dashboards/shell
+- Simplified dashboard hero panels and removed decorative kickers/marks, gradients and shadows.
+- Added accessible labels to icon-only product moderation actions.
+- Updated shared topbar focus states, removed glass/shadow chrome, and made sidebar active state quieter with aria-current.
+- Updated layout skip-target focus styling.
 
 ### Public marketplace
-- Replaced auto-rotating generic homepage slideshow/illustration with a static search-first marketplace introduction.
-- Removed autoplay timers and associated motion code.
-- Converted homepage and catalogue product tiles into real router links; category tiles into semantic buttons/links.
-- Removed unsupported zero fallbacks for missing category product counts and omitted absent supplier names.
-- Flattened homepage/catalogue/category/product-detail surfaces and removed decorative card shadows/gradients.
-- Added image dimensions/loading/decoding hints to prevent layout shifts.
+- Replaced homepage autoplay slideshow with a static search-first introduction.
+- Converted homepage/catalogue product tiles and category tiles to semantic links/buttons.
+- Updated public shell to use the shared BrandMark, removed unsupported footer marketing claims, corrected footer category links to use category IDs, and flattened sticky header chrome.
+- Flattened Home, ProductListing, Categories and ProductDetails surfaces; removed fake zero counts and absent supplier placeholders; added image layout hints.
+
+### Notifications and preferences
+- All three inboxes now expose only the fixed INBOX and SAVED folders, in a stable order; custom/user-created folders are not shown.
+- Kept All/Read/Unread filters and notification type categories.
+- Preserved copy-to-SAVED and explicit move semantics, bulk delete/read-state actions and double-click-to-mark-read behavior.
+- Website inbox rows now use semantic buttons rather than clickable divs.
+- Reworked inbox and notification-preference surfaces to flat, readable tables/lists with responsive overflow and focus states.
+- Added a shared fixed-folder normalizer and unit tests.
 
 ## Remaining phases
-1. Complete Admin and Company pages: navigation shell, tables, detail views, product management, inquiry/RFQ workflows, subscriptions, notification inboxes, account and settings.
-2. Complete public Website: search results, product/company profiles, content/help/legal pages and responsive catalogue states.
-3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility and Vercel guideline review.
-4. Update the full 69-page inventory and documentation, then provide a truthful completion report.
+1. Admin and Company operational pages: products/forms, category and company management, users/roles/permissions, orders, reports, inquiry/RFQ detail/list/create/subscription flows.
+2. Public Website: search results, company profiles, content/help/legal, profile, addresses, checkout/cart/order and inquiry pages.
+3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility, loading/empty/error/disabled states and Vercel guideline review.
+4. Full 69-page inventory and documentation update, then a truthful completion report.
 
 ## Verification
 - Browser/screenshot inspection: NOT RUN — owner instruction.
-- Automated tests/builds: NOT RUN — owner instruction.
-- Static review: ongoing. Do not claim runtime, visual or full redesign acceptance until all pages are reviewed and the user-authorized checks are performed.
+- Automated tests/builds: NOT RUN — owner instruction. Regression tests are authored, not executed.
+- Static review: ongoing. Do not claim runtime, visual or full redesign acceptance until all pages are reviewed and checks are authorized.
 
 ## Prior independent backlog
 Company-owned API/tenant-isolation audit and SMS/provider integration remain separate. Do not silently mark them complete or change backend behavior during this UI-only task.

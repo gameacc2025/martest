@@ -179,6 +179,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
                       :to="{ name: child.route }"
                       class="dash-sidebar-link dash-sidebar-sublink"
                       :class="{ 'dash-sidebar-link--active': isItemActive(child) }"
+                      :aria-current="isItemActive(child) ? 'page' : undefined"
                       @click="emit('navigate')"
                     >
                       <span class="dash-sidebar-active-bar" v-if="isItemActive(child)"></span>
@@ -233,6 +234,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
               :to="{ name: item.route }"
               class="dash-sidebar-link"
               :class="{ 'dash-sidebar-link--active': isItemActive(item) }"
+              :aria-current="isItemActive(item) ? 'page' : undefined"
               v-tooltip="collapsed ? { value: item.title, ...tooltipOptions } : null"
               @click="emit('navigate')"
             >
@@ -358,10 +360,11 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   align-items: center;
   gap: 0.75rem;
   width: 100%;
+  min-height: 2.75rem;
   padding: 0.6rem 0.75rem;
   border: none;
   background: transparent;
-  border-radius: var(--content-border-radius, 10px);
+  border-radius: var(--content-border-radius, 8px);
   color: var(--ds-sidebar-fg);
   font-size: 0.9rem;
   font-weight: 500;
@@ -369,7 +372,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   text-align: start;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, padding-inline-start 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .dash-sidebar-link:hover {
@@ -377,24 +380,18 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   color: var(--ds-sidebar-fg-strong);
 }
 
-/* Subtle inward nudge on hover (RTL-safe, expanded mode only). */
-.dash-sidebar:not(.dash-sidebar--collapsed) .dash-sidebar-link:not(.dash-sidebar-link--active):hover {
-  padding-inline-start: 1rem;
-}
-
-
 /* Active item: translucent brand wash + white text + brand-colored icon (never color alone: the bar marks it too). */
 .dash-sidebar-link--active {
-  background: var(--ds-sidebar-active-bg);
+  background: color-mix(in srgb, var(--ds-sidebar-fg-strong) 7%, transparent);
   color: var(--ds-sidebar-fg-strong);
 }
 
 .dash-sidebar-link--active .dash-sidebar-link-icon {
-  color: var(--ds-sidebar-accent);
+  color: var(--ds-sidebar-fg-strong);
 }
 
 .dash-sidebar-link--active:hover {
-  background: var(--ds-sidebar-active-bg);
+  background: color-mix(in srgb, var(--ds-sidebar-fg-strong) 7%, transparent);
   color: var(--ds-sidebar-fg-strong);
 }
 
@@ -404,8 +401,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   inset-inline-start: -0.6rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 60%;
+  width: 2px;
+  height: 52%;
   border-radius: 0 3px 3px 0;
   background: var(--ds-sidebar-accent);
 }
@@ -446,7 +443,6 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 .dash-sidebar-link--planned:hover {
   background: transparent;
   color: var(--ds-sidebar-fg);
-  padding-inline-start: 0.75rem;
 }
 .dash-sidebar-planned-badge {
   flex: 0 0 auto;

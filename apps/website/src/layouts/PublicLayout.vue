@@ -10,6 +10,7 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import Menu from 'primevue/menu'
 import MegaMenu from '@telecom/shared-ui/components/common/MegaMenu.vue'
+import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -181,7 +182,7 @@ function logout() {
           <!-- Right side: Logo + Navigation -->
           <div class="public-header-right">
             <router-link :to="{ name: 'home' }" class="public-logo" aria-label="صفحه اصلی بازارگاه مخابرات">
-              <span class="public-logo-mark"><i class="pi pi-wifi"></i></span>
+              <BrandMark class="public-logo-mark" :size="40" />
               <span class="public-logo-name">
                 <strong>Telecom</strong>
                 <small>Marketplace</small>
@@ -208,13 +209,13 @@ function logout() {
             <template v-if="user">
               <a :href="notificationHref" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها">
                 <i class="pi pi-bell" aria-hidden="true"></i>
-                <span v-if="notificationCount > 0" class="public-cart-badge">{{ notificationCount }}</span>
+                <span v-if="notificationCount > 0" class="public-notification-badge">{{ notificationCount }}</span>
               </a>
 
               <!-- User dropdown menu -->
               <button type="button" class="public-user-trigger" @click="toggleUserMenu" aria-haspopup="true">
                 <span class="public-user-avatar">
-                  <img v-if="authStore.profile?.avatar" :src="authStore.profile.avatar" alt="" />
+                  <img v-if="authStore.profile?.avatar" :src="authStore.profile.avatar" alt="" width="32" height="32" decoding="async" />
                   <span v-else>{{ displayName.charAt(0) }}</span>
                 </span>
 
@@ -338,7 +339,7 @@ function logout() {
             <h3 class="public-footer-heading">دسته‌بندی‌ها</h3>
             <ul class="public-footer-list">
               <li v-for="cat in footerCategories" :key="cat.id">
-                <router-link :to="{ name: 'products', query: { category: cat.slug } }" class="public-footer-link">{{ cat.nameFa }}</router-link>
+                <router-link :to="{ name: 'products', query: { category: cat.id } }" class="public-footer-link">{{ cat.nameFa }}</router-link>
               </li>
             </ul>
           </div>
@@ -355,15 +356,14 @@ function logout() {
           <!-- About Us (left side) -->
           <div class="public-footer-about">
             <div class="public-footer-brand">
-              <i class="pi pi-wifi"></i>
+              <BrandMark :size="32" />
               <span>Telecom Market</span>
             </div>
             <h3 class="public-footer-heading">درباره ما</h3>
             <p class="public-footer-about-text">
-              بازارگاه تخصصی تجهیزات مخابراتی، با هدف ایجاد فضایی مطمئن برای
-              خرید و فروش تجهیزات با کیفیت بالا راه‌اندازی شده است. ما با
-              همکاری بهترین تولیدکنندگان و تأمین‌کنندگان، محصولات معتبر را
-              با بهترین قیمت ارائه می‌دهیم.
+              فضایی برای مشاهده تجهیزات مخابراتی، بررسی اطلاعات ثبت‌شده محصولات
+              و ارتباط با تأمین‌کنندگان. کاربران می‌توانند بر اساس دسته‌بندی و
+              مشخصات فنی جستجو کنند و در صورت نیاز درخواست استعلام ثبت کنند.
             </p>
             <router-link :to="{ name: 'about' }" class="public-footer-about-btn">
               اطلاعات بیشتر درباره ما
@@ -409,7 +409,7 @@ function logout() {
   outline: 3px solid var(--ds-color-focus);
   outline-offset: 2px;
 }
-.public-main:focus { outline: none; }
+.public-main:focus { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
 
 .public-container {
   width: 100%;
@@ -507,7 +507,7 @@ function logout() {
   background: var(--surface-hover);
 }
 
-.public-cart-badge {
+.public-notification-badge {
   position: absolute;
   top: -0.25rem;
   inset-inline-end: -0.25rem;
@@ -732,10 +732,7 @@ function logout() {
   margin-bottom: 1rem;
 }
 
-.public-footer-brand i {
-  font-size: 1.5rem;
-  color: var(--footer-accent);
-}
+.public-footer-brand .brand-mark { width: 2rem; height: 2rem; }
 
 .public-footer-about-text {
   font-size: 0.9rem;
@@ -875,17 +872,17 @@ function logout() {
 }
 /* Public marketplace shell — shared brand system, Paces-level polish. */
 .public-header {
-  background: color-mix(in srgb, var(--ds-color-surface) 94%, transparent);
+  background: var(--ds-color-surface);
   border-bottom-color: var(--ds-color-border);
-  box-shadow: var(--ds-shadow-xs);
-  backdrop-filter: blur(14px);
+  box-shadow: none;
 }
 .public-logo {
-  width: 2.5rem;
-  height: 2.5rem;
-  justify-content: center;
-  border-radius: var(--ds-radius-lg);
-  background: color-mix(in srgb, var(--ds-color-primary) 10%, transparent);
+  width: auto;
+  height: auto;
+  justify-content: flex-start;
+  gap: .65rem;
+  border-radius: 0;
+  background: transparent;
 }
 .public-nav-link {
   min-height: 2.5rem;
@@ -938,18 +935,7 @@ function logout() {
   background: transparent;
   text-decoration: none;
 }
-.public-logo-mark {
-  display: grid;
-  place-items: center;
-  width: 2.7rem;
-  height: 2.7rem;
-  flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 22%, transparent);
-  border-radius: .9rem;
-  background: color-mix(in srgb, var(--ds-color-primary) 11%, var(--ds-color-surface));
-  color: var(--ds-color-primary);
-}
-.public-logo-mark i { font-size: 1.35rem; }
+.public-logo-mark { display: block; flex: 0 0 auto; }
 .public-logo-name {
   display: flex;
   flex-direction: column;

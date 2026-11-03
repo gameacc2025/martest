@@ -2642,3 +2642,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Phase 1 commit:** e90dedfbd1e9cbab7d3636247f3f58def18ec46e (recorded after the previous pending marker).
 - **Phase 2/3 commit:** Pending atomic tree/commit creation.
 - **Next:** Continue through remaining public pages and Admin/Company page families, with special focus on inquiry workflows, notification screens, forms, tables, responsive and accessible states.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-4 — APP SHELLS, NOTIFICATIONS AND PREFERENCES
+- **Status:** IN_PROGRESS — shell and notification/settings surfaces updated; remaining operational/public pages continue.
+- **Scope:** PublicLayout, DashboardHeader, DashboardSidebar, AdminLayout, CompanyLayout, three notification inboxes, three notification-preference pages, shared notification-folder utility.
+- **Public shell:** Uses shared BrandMark in header/footer; removes unsupported "best suppliers/best price" claims; corrects footer category navigation to use category IDs; removes glass blur/shadow from sticky header; preserves skip link and visible focus.
+- **Workspace shell:** Flattens shared header surface, adds explicit keyboard focus to icon actions/search, removes sidebar hover nudge, tones down active state and adds aria-current to active nav links; fixes skip-target focus outline in both layouts.
+- **Notifications:** All three user inboxes normalize server folders to fixed INBOX/SAVED only, in stable order, with fixed Persian labels; custom folders are excluded from display and move targets. Preserves All/Unread/Read filters, type categories, copy-to-SAVED, move action, bulk read/unread/delete, per-message actions and double-click-to-mark-read. Website rows now use semantic article/button structure rather than a clickable div.
+- **Notification preferences:** Simplifies headings and channel matrix, adds empty state, loading/busy semantics, visible checkbox focus, and responsive table scrolling; preserves existing preference API payloads and channel behavior.
+- **Tests:** Added shared utility tests for fixed notification folder normalization and ordering. NOT RUN — owner instruction.
+- **Build/browser:** NOT RUN — owner instruction.
+- **API/backend/auth/permissions:** No changes.
+- **Phase 2/3 commit:** b1c7f7b5b53f39feae20eeb345fcc2967164db65.
+- **Phase 4 commit:** Pending atomic tree/commit creation.
+- **Next:** Continue with remaining Admin/Company operational pages and public company/profile/search/inquiry pages.

@@ -36,3 +36,14 @@ Rework the full customer-facing Website, Company Portal and Admin interface usin
 
 ## Verification constraints
 The owner has explicitly asked not to run browser-focused checks or tests/builds. Add/update tests and perform static source review, but mark test execution, builds and visual/browser checks NOT RUN — owner instruction. Do not claim runtime or visual acceptance.
+
+
+## Progress checkpoint — 2026-11-03
+
+- Shared workspace foundation: implemented and committed.
+- Admin/Company dashboard hero and public Home/catalogue/category/product-detail first pass: implemented and committed.
+- Public and workspace shells: refined and pending/committed in the current phase.
+- Notification inboxes: fixed INBOX/SAVED-only folder presentation, semantic message rows, responsive list/detail layout and retained copy/move/read/bulk actions.
+- Notification preferences: simplified matrix and empty/loading states.
+- Full UI redesign remains IN_PROGRESS. Do not treat these slices as completion of all 69 pages.
+- Automated tests/builds/browser visual checks remain NOT RUN by owner instruction.

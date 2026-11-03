@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { apiGet, apiGetPaginated, apiPatch, apiDelete, apiPost } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
+import { normalizeFixedNotificationFolders, notificationFolderLabel } from '@telecom/shared-ui/utils/notificationFolders'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
 
@@ -29,7 +30,7 @@ const folders = computed(() => [
   { id: 'read', label: 'خوانده‌شده', icon: 'pi-check-circle', count: folderCounts.value.read },
   ...userFolders.value.map(folder => ({
     id: folder.id,
-    label: folder.name,
+    label: notificationFolderLabel(folder),
     icon: folder.key === 'SAVED' ? 'pi-bookmark' : folder.key === 'INBOX' ? 'pi-inbox' : 'pi-folder',
     count: folderCounts.value[folder.id] ?? 0,
   })),
@@ -120,9 +121,9 @@ onMounted(async () => {
 async function fetchUserFolders() {
   try {
     const result = await apiGet(endpoints.notifications.folders())
-    userFolders.value = Array.isArray(result) ? result : []
+    userFolders.value = normalizeFixedNotificationFolders(result)
     const saved = userFolders.value.find(folder => folder.key === 'SAVED')
-    targetFolderId.value = saved?.id ?? userFolders.value.find(folder => !folder.isSystem)?.id ?? null
+    targetFolderId.value = saved?.id ?? null
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'دریافت پوشه‌ها انجام نشد.', life: 3000 })
   }
@@ -364,7 +365,6 @@ function typeLabel(item) {
   <section class="mail-page" dir="rtl">
     <header class="mail-header">
       <div>
-        <p class="eyebrow">مرکز پیام‌ها</p>
         <h1>صندوق اعلان‌های مدیریت</h1>
         <p class="subtitle">اعلان‌های دریافتی حساب مدیریتی را دسته‌بندی و مدیریت کنید.</p>
       </div>
@@ -481,7 +481,7 @@ function typeLabel(item) {
               <Button icon="pi pi-trash" severity="danger" text rounded aria-label="حذف پیام" :loading="busyIds.has(selectedNotification.id)" @click="deleteNotification(selectedNotification)" />
               <Button icon="pi pi-bookmark" severity="secondary" text rounded aria-label="ذخیره پیام" @click="saveNotification(selectedNotification)" />
               <select v-model="targetFolderId" class="inline-folder-select" aria-label="انتقال به پوشه">
-                <option v-for="folder in userFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
+                <option v-for="folder in userFolders" :key="folder.id" :value="folder.id">{{ notificationFolderLabel(folder) }}</option>
               </select>
               <Button icon="pi pi-folder-open" severity="secondary" text rounded aria-label="انتقال به پوشه انتخاب‌شده" @click="applyFolderAction(selectedNotification, 'move')" />
             </div>
@@ -667,4 +667,107 @@ function typeLabel(item) {
   .mail-page .row-actions { margin-inline-start: 3rem; }
 }
 
+
+/* Skill-based inbox refinement: quiet, readable and task-first. */
+.mail-page {
+  max-width: 100%;
+  margin-inline: auto;
+  padding: clamp(1rem, 2vw, 1.75rem);
+  background: var(--ds-color-background);
+  color: var(--ds-color-text);
+}
+.mail-header {
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ds-color-border);
+}
+.mail-header .eyebrow { display: none; }
+.mail-header h1 { margin: 0; color: var(--ds-color-text); font-size: clamp(1.4rem, 2vw, 1.75rem); line-height: 1.4; }
+.mail-header .subtitle { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.unread-total { color: var(--ds-color-text-muted); }
+.mail-layout {
+  overflow: hidden;
+  gap: 0;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: none;
+}
+.mail-sidebar { padding: 1rem; border-inline-end: 1px solid var(--ds-color-border); background: var(--ds-color-surface); }
+.sidebar-heading { color: var(--ds-color-text-muted); font-size: .72rem; font-weight: 700; }
+.folder-link {
+  min-height: 2.75rem;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-color-text);
+  transition: background-color var(--ds-transition-fast), color var(--ds-transition-fast);
+}
+.folder-link:hover { background: var(--ds-color-surface-hover); }
+.folder-link.active {
+  border-inline-start: 2px solid var(--ds-color-primary);
+  background: color-mix(in srgb, var(--ds-color-primary) 7%, var(--ds-color-surface));
+  color: var(--ds-color-primary-text);
+  font-weight: 700;
+}
+.folder-link.active > i, .folder-link.active b { color: var(--ds-color-primary-text); }
+.folder-link:focus-visible, .message-row-open:focus-visible, .clear-search:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+.message-list-panel { min-width: 0; border-inline-end: 1px solid var(--ds-color-border); background: var(--ds-color-surface); }
+.list-heading { border-bottom: 1px solid var(--ds-color-border); }
+.message-items { gap: 0; }
+.message-row {
+  display: flex;
+  min-width: 0;
+  align-items: stretch;
+  gap: .6rem;
+  padding: .45rem .65rem;
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color var(--ds-transition-fast);
+}
+.message-row:hover, .message-row.selected { background: var(--ds-color-surface-hover); }
+.message-row.unread { border-inline-start: 2px solid var(--ds-color-primary); background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface)); }
+.message-row-open {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: .7rem;
+  padding: .5rem 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  font: inherit;
+  cursor: pointer;
+}
+.row-content { min-width: 0; }
+.row-preview { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.row-actions { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .15rem; }
+.row-actions :deep(.p-button), .reading-actions :deep(.p-button) { min-width: 2.75rem; min-height: 2.75rem; }
+.reading-panel { min-width: 0; background: var(--ds-color-surface); border: 0; }
+.reading-toolbar { border-bottom: 1px solid var(--ds-color-border); }
+.message-detail { padding: clamp(1rem, 2vw, 1.5rem); }
+.message-detail h2 { color: var(--ds-color-text); font-size: 1.15rem; line-height: 1.6; }
+.message-body { color: var(--ds-color-text); line-height: 1.9; overflow-wrap: anywhere; }
+.inline-folder-select { min-height: 2.5rem; border-color: var(--ds-color-border); border-radius: var(--ds-radius-sm); background: var(--ds-color-surface); color: var(--ds-color-text); }
+.mail-page button { font-family: inherit; }
+@media (max-width: 700px) {
+  .mail-page { padding: .75rem; }
+  .mail-layout { border-radius: var(--ds-radius-md); }
+  .mail-sidebar { border-inline-end: 0; border-bottom: 1px solid var(--ds-color-border); }
+  .message-list-panel { border-inline-end: 0; border-bottom: 1px solid var(--ds-color-border); }
+  .message-row { flex-wrap: wrap; }
+  .message-row-open { flex-basis: calc(100% - 2rem); }
+  .row-actions { margin-inline-start: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .folder-link, .message-row { transition: none; }
+}
 </style>

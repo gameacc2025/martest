@@ -127,7 +127,7 @@ onUnmounted(() => {
       />
 
       <div class="dash-layout-content">
-        <!-- One clean white breadcrumb bar for every dashboard page. -->
+        <!-- Lightweight breadcrumb row; each page owns its single H1. -->
         <PageHeader :home-route="homeRoute" />
 
         <main id="main-content" class="dash-layout-page" tabindex="-1">
@@ -304,5 +304,5 @@ onUnmounted(() => {
   outline: 3px solid var(--ds-color-focus);
   outline-offset: 2px;
 }
-.dash-layout-page:focus { outline: none; }
+.dash-layout-page:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
 </style>

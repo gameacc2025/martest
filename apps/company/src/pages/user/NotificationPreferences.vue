@@ -50,13 +50,12 @@ async function savePreferences() {
   <section class="notification-preferences" dir="rtl">
     <header class="page-header preferences-heading">
       <div class="preferences-heading-identity">
-        <span class="preferences-heading-icon"><i class="pi pi-bell"></i></span>
-        <div><span class="preferences-eyebrow">حساب شرکت</span><h1>تنظیمات اعلان‌ها</h1><p>روش دریافت اعلان‌های مربوط به شرکت خود را مدیریت کنید.</p></div>
+        <div><h1>تنظیمات اعلان‌ها</h1><p>روش دریافت اعلان‌های مربوط به شرکت خود را مدیریت کنید.</p></div>
       </div>
       <router-link to="/notifications" class="back-link"><i class="pi pi-arrow-right"></i> بازگشت به صندوق اعلان‌ها</router-link>
     </header>
-    <div v-if="loading" class="state"><ProgressSpinner /> <p>در حال دریافت تنظیمات…</p></div>
-    <div v-else class="settings-card">
+    <div v-if="loading" class="state" role="status" aria-live="polite" aria-busy="true"><ProgressSpinner /> <p>در حال دریافت تنظیمات…</p></div>
+    <div v-else class="settings-card" :aria-busy="saving ? 'true' : 'false'">
       <div class="table-wrap"><table>
         <thead><tr><th>رویداد</th><th>داخل برنامه</th><th>ایمیل</th><th>پیامک</th></tr></thead>
         <tbody><tr v-for="event in preferences" :key="event.eventType">
@@ -64,7 +63,7 @@ async function savePreferences() {
           <td><input v-model="event.channels.IN_APP" type="checkbox" :aria-label="`${event.label}: داخل برنامه`"></td>
           <td><input v-model="event.channels.EMAIL" type="checkbox" :aria-label="`${event.label}: ایمیل`"></td>
           <td><span class="muted">{{ smsAvailable ? (event.channels.SMS ? 'فعال' : 'خاموش') : 'غیرفعال' }}</span></td>
-        </tr></tbody>
+        </tr><tr v-if="!preferences.length"><td colspan="4" class="muted">تنظیمی برای نمایش وجود ندارد.</td></tr></tbody>
       </table></div>
       <footer><span class="muted">تنظیمات برای اعلان‌های آینده اعمال می‌شود.</span><Button label="ذخیره تنظیمات" icon="pi pi-save" :loading="saving" :disabled="loading || saving" @click="savePreferences" /></footer>
     </div>
@@ -72,187 +71,46 @@ async function savePreferences() {
 </template>
 
 <style scoped>
-.notification-preferences{direction:rtl}.page-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}.page-header h1{margin:0;font-size:1.5rem;font-weight:700}.page-header p,.muted{color:var(--text-color-secondary);font-size:.85rem}.back-link{color:var(--primary-color);text-decoration:none}.settings-card{border:1px solid var(--surface-border);border-radius:12px;background:var(--surface-card);overflow:hidden}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:.85rem 1rem;border-bottom:1px solid var(--surface-border);text-align:right}thead th{background:var(--surface-ground);font-size:.85rem}td{text-align:center}tbody th{font-weight:500}tbody th small{display:block;color:var(--text-color-secondary);font-size:.72rem;margin-top:.25rem}input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:var(--primary-color)}footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem;flex-wrap:wrap}.state{text-align:center;padding:3rem}
-
-.notification-preferences .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+.notification-preferences { display: flex; flex-direction: column; gap: 1.25rem; direction: rtl; color: var(--ds-color-text); }
+.page-header {
+  display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  margin: 0; padding: 0 0 1rem; border: 0; border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0; background: transparent; box-shadow: none;
 }
-.notification-preferences .page-header h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
-.notification-preferences .settings-card {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-  overflow: hidden;
+.preferences-heading-identity { display: flex; align-items: center; min-width: 0; }
+.preferences-heading-icon, .preferences-eyebrow { display: none; }
+.page-header h1 { margin: 0; color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, 1.75rem); font-weight: 750; line-height: 1.4; }
+.page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
+.back-link {
+  display: inline-flex; min-height: 2.75rem; align-items: center; gap: .5rem;
+  padding: .55rem .8rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-sm);
+  background: var(--ds-color-surface); color: var(--ds-color-text); font-size: var(--ds-font-size-sm);
+  font-weight: 600; text-decoration: none;
 }
-.notification-preferences table { width: 100%; border-collapse: collapse; }
-.notification-preferences th,
-.notification-preferences td {
-  padding: var(--ds-space-4) var(--ds-space-5);
-  border-bottom: 1px solid var(--ds-color-border);
-  text-align: start;
+.back-link:hover { background: var(--ds-color-surface-hover); }
+.back-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.settings-card { overflow: hidden; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: none; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; min-width: 620px; border-collapse: collapse; }
+th, td { padding: 1rem 1.1rem; border-bottom: 1px solid var(--ds-color-border); text-align: start; }
+thead th { background: var(--ds-color-surface-alt); color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); font-weight: 700; white-space: nowrap; }
+tbody th { min-width: 15rem; color: var(--ds-color-text); font-weight: 600; }
+tbody th small { display: block; margin-top: .25rem; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); direction: ltr; text-align: right; }
+td { min-width: 7rem; text-align: center; }
+tbody tr:hover th, tbody tr:hover td { background: var(--ds-color-surface-hover); }
+input[type="checkbox"] { width: 1.2rem; height: 1.2rem; accent-color: var(--ds-color-primary); cursor: pointer; }
+input[type="checkbox"]:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
+.muted { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.settings-card footer {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  padding: 1rem 1.25rem; border-top: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt);
 }
-.notification-preferences thead th {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-}
-@media (max-width: 640px) { .notification-preferences .page-header { padding: var(--ds-space-4); } }
-
-
-.notification-preferences { display: flex; flex-direction: column; gap: var(--ds-space-5); }
-.notification-preferences .page-header { margin-bottom: 0; }
-.preferences-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
-.preferences-heading-icon {
-  display: grid;
-  place-items: center;
-  width: 3.1rem;
-  height: 3.1rem;
-  flex: 0 0 auto;
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.25rem;
-}
-.preferences-eyebrow {
-  display: block;
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
-.notification-preferences .page-header h1 { margin: .2rem 0; }
-.notification-preferences .page-header p { margin: .25rem 0 0; color: var(--ds-color-text-muted); line-height: 1.7; }
-.notification-preferences .back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  white-space: nowrap;
-  text-decoration: none;
-  font-weight: var(--ds-font-weight-semibold);
-}
-.notification-preferences .settings-card footer {
-  border-top: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface-alt);
-}
-.notification-preferences .table-wrap { overflow-x: auto; }
-.notification-preferences table { min-width: 38rem; }
-.notification-preferences tbody tr:hover { background: var(--ds-color-surface-hover); }
-.notification-preferences input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--ds-color-primary); }
+.settings-card footer :deep(.p-button) { min-height: 2.75rem; }
+.state { display: grid; place-items: center; min-height: 14rem; color: var(--ds-color-text-muted); }
 @media (max-width: 640px) {
-  .notification-preferences .page-header { align-items: stretch; flex-direction: column; }
-  .preferences-heading-identity { align-items: flex-start; }
-  .notification-preferences .back-link { align-self: flex-start; }
-}
-
-
-/* Preference matrix: readable event rows, clear channel controls and mobile scroll. */
-.notification-preferences { display: flex; flex-direction: column; gap: var(--ds-space-5); color: var(--ds-color-text); }
-.notification-preferences .preferences-heading {
-  align-items: center;
-  gap: 1rem;
-  padding: var(--ds-space-5) var(--ds-space-6);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.notification-preferences .preferences-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
-.notification-preferences .preferences-heading-icon {
-  display: grid;
-  place-items: center;
-  width: 3.2rem;
-  height: 3.2rem;
-  flex: 0 0 auto;
-  border-radius: 1rem;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.3rem;
-}
-.notification-preferences .preferences-eyebrow { color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
-.notification-preferences .page-header h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: clamp(1.25rem, 2vw, var(--ds-font-size-2xl)); }
-.notification-preferences .page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); line-height: 1.8; }
-.notification-preferences .back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .65rem .9rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface);
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-semibold);
-  text-decoration: none;
-}
-.notification-preferences .back-link:hover { background: var(--ds-color-surface-hover); }
-.notification-preferences .settings-card {
-  overflow: hidden;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.notification-preferences table { width: 100%; border-collapse: separate; border-spacing: 0; }
-.notification-preferences thead th {
-  padding: 1rem;
-  border-bottom: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-  text-align: center;
-  white-space: nowrap;
-}
-.notification-preferences thead th:first-child { text-align: right; }
-.notification-preferences tbody th,
-.notification-preferences tbody td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface);
-}
-.notification-preferences tbody tr:last-child th,
-.notification-preferences tbody tr:last-child td { border-bottom: 0; }
-.notification-preferences tbody tr:hover th,
-.notification-preferences tbody tr:hover td { background: var(--ds-color-surface-hover); }
-.notification-preferences tbody th { min-width: 15rem; text-align: right; }
-.notification-preferences tbody th strong { display: block; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); }
-.notification-preferences tbody th small { display: block; margin-top: .25rem; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); direction: ltr; text-align: right; }
-.notification-preferences tbody td { min-width: 7rem; text-align: center; }
-.notification-preferences input[type="checkbox"] {
-  width: 1.1rem;
-  height: 1.1rem;
-  accent-color: var(--ds-color-primary);
-  cursor: pointer;
-}
-.notification-preferences .muted { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
-.notification-preferences footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  border-top: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface-alt);
-}
-.notification-preferences .state {
-  display: grid;
-  place-items: center;
-  min-height: 14rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  color: var(--ds-color-text-muted);
-}
-@media (max-width: 760px) {
-  .notification-preferences .preferences-heading { align-items: flex-start; flex-direction: column; padding: var(--ds-space-4); }
-  .notification-preferences .back-link { width: 100%; justify-content: center; }
-  .notification-preferences .table-wrap { overflow-x: auto; }
-  .notification-preferences table { min-width: 620px; }
-  .notification-preferences footer { align-items: stretch; flex-direction: column; }
-  .notification-preferences footer :deep(.p-button) { width: 100%; justify-content: center; }
+  .page-header { align-items: stretch; flex-direction: column; }
+  .back-link { align-self: flex-start; }
+  .settings-card footer { align-items: stretch; flex-direction: column; }
+  .settings-card footer :deep(.p-button) { width: 100%; justify-content: center; }
 }
 </style>

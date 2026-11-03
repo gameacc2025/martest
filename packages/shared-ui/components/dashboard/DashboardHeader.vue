@@ -138,7 +138,7 @@ function logout() {
       <!-- Company identity (logo + name) -->
       <div v-if="companyName" class="dash-header-company">
         <span class="dash-header-company-logo">
-          <img v-if="companyLogo" :src="companyLogo" :alt="companyName" />
+          <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="32" height="32" decoding="async" />
           <i v-else class="pi pi-building"></i>
         </span>
         <span class="dash-header-company-name">{{ companyName }}</span>
@@ -223,7 +223,7 @@ function logout() {
         @click="toggleUserMenu"
       >
         <span class="dash-header-avatar">
-          <img v-if="user?.avatarUrl" :src="user.avatarUrl" alt="" />
+          <img v-if="user?.avatarUrl" :src="user.avatarUrl" alt="" width="32" height="32" decoding="async" />
           <span v-else>{{ displayName.charAt(0) }}</span>
         </span>
         <span class="dash-header-user-meta">
@@ -237,7 +237,7 @@ function logout() {
         <template #start>
           <div class="dash-header-user-card">
             <span class="dash-header-avatar dash-header-avatar--lg">
-              <img v-if="user?.avatarUrl" :src="user.avatarUrl" alt="" />
+              <img v-if="user?.avatarUrl" :src="user.avatarUrl" alt="" width="44" height="44" decoding="async" />
               <span v-else>{{ displayName.charAt(0) }}</span>
             </span>
             <div class="dash-header-user-card-meta">
@@ -301,6 +301,11 @@ function logout() {
 .dash-header-icon-btn:hover {
   background: var(--surface-hover);
   color: var(--text-color);
+}
+.dash-header-icon-btn:focus-visible,
+.dash-header-user:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
 }
 
 .dash-header-icon-btn i {
@@ -397,9 +402,9 @@ function logout() {
   transition: border-color var(--transition-duration, 0.2s), box-shadow var(--transition-duration, 0.2s);
 }
 
-.dash-header-search-input:focus {
+.dash-header-search-input:focus-visible {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 1px var(--primary-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-color-focus) 35%, transparent);
 }
 
 .dash-header-search-popover .dash-header-search-input {
@@ -556,10 +561,9 @@ function logout() {
 
 /* Enterprise topbar refinement — preserve brand and all existing actions. */
 .dash-header {
-  background: color-mix(in srgb, var(--surface-card) 94%, transparent);
+  background: var(--surface-card);
   border-bottom-color: var(--ds-color-border);
-  box-shadow: var(--ds-shadow-xs);
-  backdrop-filter: blur(14px);
+  box-shadow: none;
 }
 
 .dash-header-workspace {
