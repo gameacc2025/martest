@@ -25,15 +25,18 @@ Avoid neumorphism, excessive gradients, ornamental glass cards, over-animated da
 
 ## Brand and typography
 
-Use the existing tokens in `packages/shared-ui/assets/design-system/tokens.scss`:
-- Primary teal: `#01bec2`.
-- Deep navy: `#003a54`.
-- Petrol: `#004d6f`.
+The approved brand direction is **Turquoise + Sky Blue with a dark navy sidebar**. Use the shared tokens in `packages/shared-ui/assets/design-system/tokens.scss` and PrimeVue preset:
+- Primary turquoise: `#12B8A6` (brand accent; light-theme actions use accessible darker ramp).
+- Sky blue: `#39BFE0` (secondary accent, active icon/highlight).
+- Technical blue: `#2878C7` (links and informational emphasis).
+- Deep navy: `#173B63`; dark sidebar: `#142B46`.
+- Warm amber: `#E7A64B` (warning/limited promotional emphasis).
+- Canvas: `#F2F7FA`; text: `#203247`.
 - Typeface: Vazirmatn through `--ds-font-family`.
 - Semantic colors: PrimeVue palette aliases through `--ds-color-*`.
 - Surfaces, borders, spacing, radii, shadows and motion: `--ds-*` tokens.
 
-Do not replace the brand with the generic blue palette from the skill's SaaS example. The palette is a reference pattern, while the existing Telecom colors are an explicit product constraint. Do not import external fonts or add a second icon library; use the installed PrimeIcons consistently.
+Do not use bright turquoise as white-button text background without checking contrast; use the darker accessible primary action shade. Keep the palette disciplined: navy anchors navigation, turquoise owns primary brand accents, sky/blue are supporting colors, amber is reserved for warnings. Do not import external fonts or add a second icon library; use installed PrimeIcons consistently.
 
 ## Layout and spacing
 
@@ -184,3 +187,17 @@ Use a distinct Persuade composition for public discovery without oversized gener
 - Company settings uses existing company status and verification data in a compact header; never invent verification claims.
 - Inquiry creation uses a visible progress indicator and stepper with compact labels; keep the user's progress and field hierarchy obvious.
 - Inquiry detail should separate inquiry metadata, items, deadline, responses and actions without excessive heading size.
+
+
+## Approved visual direction — Turquoise / Sky / Dark Navy (2026-11-03)
+
+This replaces the previous teal/petrol brand palette by explicit product-owner choice.
+- Primary brand: `#12B8A6`; accessible light action: `#087F78`.
+- Secondary sky: `#39BFE0`; technical blue: `#2878C7`.
+- Dark sidebar: `#142B46`; deep brand navy: `#173B63`.
+- Warm semantic accent: `#E7A64B`; use only for warnings and rare emphasis.
+- Light canvas: `#F2F7FA`; white surface; primary text: `#203247`.
+- Keep typography compact and Persian-first (Vazirmatn), with RTL layouts and explicit LTR isolation for technical values.
+- The first real-page reference is the shared Notifications inbox: folder rail, compact toolbar/search, sender/subject/preview rows, unread state and a reading pane. It must use existing API data and actions; no mock message content.
+- Sidebar remains dark in both app themes; its active state uses a restrained turquoise/sky accent and accessible contrast.
+- API, route, authentication, permission, tenant and business logic are unchanged.
