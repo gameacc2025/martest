@@ -196,3 +196,4 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added component regression assertions for product detail heading, company identity mark and search header.
 - No product data, supplier details, price values, cart/wishlist behavior, API contracts or route behavior changed.
 - Static source review only; tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** e6c1ce4df63bdc2b6609c6941ee92123bd48fceb — https://github.com/gameacc2025/martest/commit/e6c1ce4df63bdc2b6609c6941ee92123bd48fceb
