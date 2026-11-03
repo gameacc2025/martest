@@ -531,7 +531,7 @@ function typeLabel(item) {
 .unread-total{display:inline-flex;align-items:center;gap:.4rem;padding:.48rem .7rem;border-radius:5px;background:#eeedff;color:#7668e8;font-size:.72rem;font-weight:700}
 .settings-link{display:inline-flex;align-items:center;gap:.4rem;padding:.48rem .7rem;border:1px solid #e7e8f0;border-radius:5px;background:#fff;color:#46536a;font-size:.72rem;text-decoration:none}
 .mail-layout{display:grid;direction:ltr;grid-template-columns:260px minmax(0,1fr);min-height:calc(100vh - 130px);overflow:hidden;border:1px solid #e9eaf2;border-radius:5px;background:#fff;box-shadow:0 2px 12px rgba(26,39,68,.035)}
-.mail-sidebar{direction:rtl;min-width:0;padding:.75rem .65rem;border-inline-end:1px solid #eceef5;background:#fff}
+.mail-sidebar{direction:rtl;min-width:0;padding:.75rem .65rem;border-inline-start:1px solid #eceef5;background:#fff}
 .sidebar-top{display:flex;align-items:center;justify-content:space-between;min-height:3rem;margin:0 0 .65rem;padding:.35rem .6rem;color:#23324a;font-size:.8rem;font-weight:700}
 .sidebar-top span:first-child{display:flex;align-items:center;gap:.5rem}.sidebar-top i{color:#8175ee}
 .sidebar-total{display:grid;place-items:center;min-width:1.35rem;height:1.35rem;border-radius:4px;background:#8275f4;color:#fff;font-size:.65rem}
