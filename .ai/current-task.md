@@ -1660,3 +1660,14 @@ Admin and Company share a more accessible responsive shell: mobile drawer state 
 - **Install command:** From the local repository root in PowerShell run `.scripts\install-ui-skills.ps1`. Restart Codex after successful installation.
 - **Verification:** Remote repository files were re-read before edits and all additions were committed to `main`. The installer was NOT executed because this session has GitHub repository access but no access to the user's local Windows shell. Skill installation on the local machine is therefore NOT VERIFIED. No tests, builds, or browser checks were run.
 - **Next action:** User runs the PowerShell installer locally; then Codex must be restarted. Future UI tasks must follow `.ai/UI_SKILLS.md`.
+
+
+## 2026-11-03 — UI-SKILLS-ALL-AGENTS — EXPANDED INSTALL TARGET
+
+- **Status:** ALL-AGENT INSTALLER AND POLICY COMMITTED; LOCAL INSTALLATION PENDING.
+- **Owner clarification:** Skills must be installed for every supported coding agent, not only Codex.
+- **Installer changes:** UI UX Pro Max now runs `uipro init --ai all`; Taste Skill, Impeccable, and Vercel Web Design Guidelines use the Skills CLI with `--agent '*'` at project scope. Impeccable's shared skill is installed through the Skills CLI; its native `npx impeccable install` remains optional for agent-specific integrations.
+- **Documentation:** Updated `.ai/UI_SKILLS.md`, `AGENTS.md`, `.ai/PROTOCOL.md`, and `docs/AI_AGENT_WORKFLOW.md` to describe all-agent installation and mandatory use.
+- **Evidence:** Current Skills CLI documentation confirms `--agent '*'` targets all supported agents; UI UX Pro Max CLI documents `uipro init --ai all`; Impeccable documents both its native installer and Skills CLI install path. References: Vercel Skills CLI docs and UI UX Pro Max CLI docs.
+- **Verification:** Remote files re-read and writes committed to remote `main`. The installer was NOT executed because this session has no access to the user's local PowerShell environment. Local agent installations remain NOT VERIFIED. No tests, builds, or browser checks run.
+- **Next action:** Pull `main`, run `.scripts\install-ui-skills.ps1` from repository root in PowerShell, then restart coding agents.
