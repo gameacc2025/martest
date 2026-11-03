@@ -265,3 +265,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Shared PageHeader/Breadcrumb moved outside the constrained `.dash-layout-content` wrapper in Admin and Company layouts.
 - The breadcrumb now spans the available main-column width; page content and footer retain the existing max-width and padding constraints.
 - No API or notification behavior changed. Automated validation not run.
+
+
+### Mailbox edge-to-edge refinement — 2026-11-03
+- Removed the redundant in-page mailbox header; unread and notification-settings icon actions now live in the mailbox sidebar header beside the folder identity/count.
+- Removed page-level horizontal padding and the mailbox card border/radius/shadow so the email workspace reaches the available main-column edges beside the application navigation. Mobile retains a small safe inset while the sidebar controls remain visible.
+- Applied consistently to Admin, Company and Website notification inboxes; notification data, API calls, routes and actions are unchanged.
+- Updated all three notification component regression suites for the new sidebar action placement and removed header.
+- Automated tests/builds/browser rendering were not run in this session.
