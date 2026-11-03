@@ -3014,3 +3014,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Updated shared KPI and dashboard panel components and kept existing route targets, API-backed data, permission gates and form behavior intact.
 - Owner requested no UI tests/build; none were run.
 - Commits: global workspace layer b574336; KPI 7273e58; DashboardPanel a37b25f; Admin inbox 65c2319; Company inbox 0e3aac2; docs current-task 20eb437; docs worklog ff01c22; design system bb75a49.
+
+
+## Dashboard correction — 2026-11-03
+- Admin dashboard now places platform analytics directly after the KPI row; operational shortcuts and service health are secondary. The chart visualizes existing aggregate counts only; it is not a time-series trend.
+- Company dashboard now includes two API-backed status charts: received inquiries by status and company products by lifecycle status. Both use existing inquiry stats/product list data; no sample values or backend changes.
+- Shared AnalyticsChart now has clearer grid structure, baseline, wider bars and compact labels.
+- No API contracts, routes, permissions or business workflows changed. UI tests/builds were intentionally not run in this pass.
