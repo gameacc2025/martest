@@ -876,3 +876,17 @@ Added explicit accessible names to desktop/mobile product search controls and th
 No API, backend, database, authentication flow, permission, route, or business workflow was changed. Contact Us message submission remains intentionally unresolved because no verified public endpoint or authoritative contact data is available; no endpoint or success state was invented.
 
 **Not claimed as complete:** visual acceptance against running apps in responsive/dark/RTL modes, local test/build results, and latest CI/runtime validation. Browser and automated tests were not run at the user's explicit request. These are verification gates, not unimplemented page migrations. Exact Paces catalog parity also remains out of scope until its source assets are available.
+
+
+## Contact Us functional integration — 2026-11-03
+
+The earlier Contact Us placeholder has been replaced by a real API integration:
+
+- Website submits to `POST /api/v1/contact/messages`; validation and a 3-per-10-minute per-IP limit are enforced by Fastify.
+- Backend sends through SMTP to the server-only `CONTACT_INBOX_EMAIL`. The recipient cannot be supplied by the browser; visitor email is set as Reply-To.
+- Missing SMTP or inbox configuration returns HTTP 503 and never falls back to console logging or fake success.
+- The form clears only after SMTP accepts the message. Failed requests retain entered values and display an error.
+- Unverified static phone, address, hours, social links and map were removed rather than presenting guessed business details.
+- Added route, service, API-client, app registration, OpenAPI and route-inventory coverage plus regression test source.
+- **Deployment prerequisite:** configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, and a real monitored `CONTACT_INBOX_EMAIL` in the backend environment. These values cannot be inferred from source.
+- No test, build, or browser run was performed in this pass.
