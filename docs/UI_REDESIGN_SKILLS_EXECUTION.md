@@ -129,3 +129,12 @@ The shared DataTable, form-section heading and required-field progress primitive
 - Website Products uses semantic search/category/brand controls, explicit loading/error/empty states, stable image dimensions, and reduced decorative card/gradient/hover treatment.
 - Existing API, route, publishing, filtering, sort, pagination, cart and wishlist contracts are preserved.
 - Tests/build/browser screenshots remain NOT RUN by owner instruction.
+
+
+## Account security, notification preferences and Wishlist — 2026-11-03
+
+- Admin/Company password pages have explicit label associations, autocomplete, stable names and visible password-length guidance.
+- Website/Admin/Company notification preferences use named channel controls, table captions and scoped headers.
+- Wishlist uses semantic category controls, contextual remove labels and transparent estimated-price totals that exclude unknown prices.
+- Existing password, preference, wishlist and cart behavior remains unchanged.
+- Tests/build/browser screenshots remain NOT RUN by owner instruction.

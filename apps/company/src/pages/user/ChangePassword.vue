@@ -50,103 +50,62 @@ async function changePassword() {
 </script>
 
 <template>
-  <div class="change-password-page">
-    <header class="page-header security-heading">
-      <span class="security-heading-icon"><i class="pi pi-lock"></i></span>
-      <div><span class="security-heading-eyebrow">امنیت حساب</span><h1>تغییر رمز عبور</h1><p>برای حفظ امنیت حساب، رمز فعلی و رمز جدید خود را وارد کنید.</p></div>
+  <main class="change-password-page" aria-labelledby="change-password-title" :aria-busy="saving">
+    <header class="page-header">
+      <div><h1 id="change-password-title">تغییر رمز عبور</h1><p>برای حفظ امنیت حساب، رمز فعلی و رمز جدید خود را وارد کنید.</p></div>
     </header>
 
     <Card class="form-section">
       <template #content>
         <div class="field">
-          <label>رمز عبور فعلی</label>
-          <InputText v-model="form.currentPassword" type="password" class="w-full" />
+          <label for="current-password">رمز عبور فعلی</label>
+          <InputText id="current-password" name="currentPassword" v-model="form.currentPassword" type="password" autocomplete="current-password" required class="w-full" />
         </div>
         <div class="field">
-          <label>رمز عبور جدید</label>
-          <InputText v-model="form.newPassword" type="password" class="w-full" placeholder="حداقل ۸ کاراکتر" />
+          <label for="new-password">رمز عبور جدید</label>
+          <InputText id="new-password" name="newPassword" v-model="form.newPassword" type="password" autocomplete="new-password" minlength="8" required aria-describedby="new-password-hint" class="w-full" placeholder="حداقل ۸ کاراکتر" />
+          <small id="new-password-hint" class="field-hint">حداقل ۸ کاراکتر</small>
         </div>
         <div class="field">
-          <label>تکرار رمز عبور جدید</label>
-          <InputText v-model="form.confirmPassword" type="password" class="w-full" />
+          <label for="confirm-password">تکرار رمز عبور جدید</label>
+          <InputText id="confirm-password" name="confirmPassword" v-model="form.confirmPassword" type="password" autocomplete="new-password" required class="w-full" />
         </div>
-        <Button label="تغییر رمز عبور" icon="pi pi-lock" :loading="saving" @click="changePassword" />
+        <Button type="button" label="تغییر رمز عبور" icon="pi pi-lock" :loading="saving" :disabled="saving" @click="changePassword" />
       </template>
     </Card>
-  </div>
+  </main>
 </template>
 
 <style scoped>
-.change-password-page {
-  direction: rtl;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.form-section {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
-  max-width: 400px;
-}
-
-.change-password-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.change-password-page { display: flex; flex-direction: column; gap: var(--ds-space-5); direction: rtl; }
 .change-password-page .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 0 var(--ds-space-4);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
-.change-password-page .page-header h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
+.change-password-page .page-header h1 { margin: 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: var(--ds-font-weight-bold); }
+.change-password-page .page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
 .change-password-page .form-section {
-  max-width: 520px;
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.change-password-page .field { gap: var(--ds-space-2); }
-.change-password-page label { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
-.change-password-page :deep(.p-inputtext) { border-radius: var(--ds-radius-md); }
-@media (max-width: 640px) { .change-password-page .page-header { padding: var(--ds-space-4); } }
-
-
-.change-password-page .page-header { margin-bottom: 0; }
-.security-heading {
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
+  width: 100%;
+  max-width: 34rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  box-shadow: none;
 }
-.security-heading-icon {
-  display: grid;
-  place-items: center;
-  width: 3.2rem;
-  height: 3.2rem;
-  flex: 0 0 auto;
-  border-radius: 1rem;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.3rem;
-}
-.security-heading > div { min-width: 0; }
-.security-heading-eyebrow { display: block; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
-.security-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
-.security-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
-@media (max-width: 640px) { .security-heading { align-items: flex-start; padding: 1rem; } }
-
+.change-password-page .field { display: flex; flex-direction: column; gap: var(--ds-space-2); margin-bottom: var(--ds-space-4); }
+.change-password-page .field label { color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); cursor: pointer; }
+.change-password-page .field-hint { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.change-password-page :deep(.p-inputtext) { min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
+.change-password-page :deep(.p-inputtext:focus-visible),
+.change-password-page :deep(.p-button:focus-visible) { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.change-password-page :deep(.p-button) { min-height: var(--ds-touch-target); }
+@media (max-width: 640px) { .change-password-page .form-section { max-width: none; } }
 </style>

@@ -2790,3 +2790,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** Pending atomic tree/commit creation.
 - **Push:** Pending.
 - **Next:** Continue Wishlist, notification preferences, inquiry subscription and public orders; Admin/Company reports/settings/details; audit remaining 69-page inventory and known commerce stubs.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-15 — ACCOUNT SECURITY, NOTIFICATION PREFERENCES AND WISHLIST
+- **Status:** IN_PROGRESS — cross-app account security and notification preference screens refined.
+- **Scope:** Admin/Company ChangePassword; Admin/Company/Website NotificationPreferences; Website Wishlist.
+- **Security forms:** Added explicit field ids/labels, names, current/new-password autocomplete, required/minimum-length metadata and accessible password guidance; flattened security panels and heading; loading state reflects save activity.
+- **Notification preferences:** Added a table caption, scoped column headers, stable names for per-event channel checkboxes, accessible loading announcements, and disabled save while data is loading/saving. Existing channel availability and save APIs are preserved.
+- **Wishlist:** Category filters are native buttons, remove actions have product-specific accessible names, empty state is announced, navigation to products is a link, and estimated total only sums items with known prices (otherwise it displays that no price is recorded). Surfaces are flatter and no longer use decorative icon tiles.
+- **Business behavior:** Password update, notification preference payloads, wishlist add/remove/clear and cart event handlers remain unchanged.
+- **Verification:** Static source review only. Tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Next:** Continue remaining Admin/Company report/detail and public inquiry/order/account pages; maintain the documented commerce prototype caveat and finish 69-page inventory.

@@ -1,5 +1,5 @@
 <template>
-  <div class="wishlist-page">
+  <main class="wishlist-page" aria-labelledby="wishlist-page-title">
     <div class="ds-container ds-page">
       <WorkspacePageHeading
         eyebrow="مجموعه منتخب شما"
@@ -11,16 +11,11 @@
         <template #actions><Breadcrumb :home="home" :model="items" /></template>
       </WorkspacePageHeading>
 
-      <div v-if="wishlistItems.length === 0" class="wishlist-empty-state">
-        <i class="pi pi-heart text-6xl text-gray-300 mb-4"></i>
+      <div v-if="wishlistItems.length === 0" class="wishlist-empty-state" role="status">
+        <i class="pi pi-heart text-6xl text-gray-300 mb-4" aria-hidden="true"></i>
         <h2 class="text-xl font-semibold mb-2">لیست علاقه مندی های شما خالی است</h2>
         <p class="text-gray-500 mb-6">هیچ محصولی را به لیست علاقه مندی های خود اضافه نکرده اید</p>
-        <Button
-          label="مشاهده محصولات"
-          icon="pi pi-shopping-bag"
-          class="p-button-primary"
-          @click="goToProducts"
-        />
+        <router-link to="/products" class="wishlist-browse-link"><i class="pi pi-shopping-bag" aria-hidden="true"></i> مشاهده محصولات</router-link>
       </div>
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -42,11 +37,7 @@
                     label="افزودن به سبد"
                     @click="addToCart(product)"
                   />
-                  <Button
-                    icon="pi pi-trash"
-                    class="p-button-danger p-button-sm"
-                    @click="removeFromWishlist(product.id)"
-                  />
+                  <Button type="button" icon="pi pi-trash" class="p-button-danger p-button-sm" :aria-label="'حذف ' + (product.name || product.title || 'محصول') + ' از علاقه‌مندی‌ها'" @click="removeFromWishlist(product.id)" />
                 </div>
               </template>
             </ProductCard>
@@ -65,8 +56,9 @@
                 </div>
 
                 <div class="flex justify-between">
-                  <span>مجموع قیمت تخمینی:</span>
-                  <span class="font-semibold">{{ formatPrice(totalPrice) }}</span>
+                  <span>جمع قیمت اقلام دارای قیمت:</span>
+                  <span v-if="pricedItems.length" class="font-semibold">{{ formatPrice(totalPrice) }}</span>
+                  <span v-else class="font-semibold">ثبت نشده</span>
                 </div>
               </div>
             </template>
@@ -93,22 +85,24 @@
             <template #title>دسته بندی ها</template>
             <template #content>
               <div class="space-y-2">
-                <div
+                <button
                   v-for="category in categories"
                   :key="category.id"
-                  class="flex justify-between items-center p-2 rounded hover:bg-gray-50 cursor-pointer"
+                  type="button"
+                  class="wishlist-category-filter"
+                  :aria-label="'نمایش محصولات دسته ' + category.name"
                   @click="filterByCategory(category.id)"
                 >
                   <span>{{ category.name }}</span>
-                  <span class="text-gray-500">{{ category.count }}</span>
-                </div>
+                  <span class="wishlist-category-count">{{ category.count.toLocaleString('fa-IR') }}</span>
+                </button>
               </div>
             </template>
           </Card>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -164,8 +158,9 @@ const loadCategories = () => {
   categories.value = Object.values(categoryMap)
 }
 
+const pricedItems = computed(() => wishlistItems.value.filter(product => product.price != null))
 const totalPrice = computed(() => {
-  return wishlistItems.value.reduce((sum, product) => sum + (product.price || 0), 0)
+  return pricedItems.value.reduce((sum, product) => sum + Number(product.price), 0)
 })
 
 const formatPrice = (price) => {
@@ -214,62 +209,74 @@ const filterByCategory = (categoryId) => {
   })
 }
 
-const goToProducts = () => {
-  router.push('/products')
-}
 </script>
 
 <style scoped>
-.wishlist-page {
-  direction: rtl;
-}
-
-.wishlist-page { color: var(--ds-color-text); }
+.wishlist-page { direction: rtl; color: var(--ds-color-text); }
 .wishlist-page .ds-page-heading {
   align-items: flex-end;
-  padding-bottom: var(--ds-space-4);
+  padding: 0 0 var(--ds-space-4);
+  border: 0;
   border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
-.wishlist-page .ds-page-heading__title {
-  color: var(--ds-color-text);
-  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
-  font-weight: var(--ds-font-weight-bold);
-}
+.wishlist-page .ds-page-heading__title { color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); font-weight: var(--ds-font-weight-bold); }
 .wishlist-page :deep(.p-card) {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: none;
 }
-.wishlist-page :deep(.p-card .p-card-title) {
-  color: var(--ds-color-text);
-  font-weight: var(--ds-font-weight-bold);
-}
-.wishlist-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
-.commerce-page-heading {
+.wishlist-page :deep(.p-card .p-card-title) { color: var(--ds-color-text); font-weight: var(--ds-font-weight-bold); }
+.wishlist-page :deep(.p-button) { min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
+.wishlist-empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: var(--ds-space-6);
-  padding: clamp(1rem, 2vw, 1.5rem);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 7%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
-  box-shadow: var(--ds-shadow-xs);
+  justify-content: center;
+  min-height: 18rem;
+  gap: .8rem;
+  padding: 2rem;
+  border-top: 1px solid var(--ds-color-border);
+  background: transparent;
+  text-align: center;
 }
-.commerce-heading-copy { min-width: 0; }
-.commerce-heading-copy .ds-eyebrow { display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .25rem; font-weight: var(--ds-font-weight-bold); }
-.commerce-heading-copy h1 { margin: 0; color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); font-weight: var(--ds-font-weight-bold); }
-.commerce-heading-copy p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
-.commerce-page-heading :deep(.p-breadcrumb) { padding: 0; background: transparent; border: 0; }
-.wishlist-page { color: var(--ds-color-text); }
-.wishlist-page :deep(.p-card) { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
-.wishlist-page :deep(.p-card-title) { color: var(--ds-color-text); font-weight: var(--ds-font-weight-bold); }
-.wishlist-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
-.wishlist-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 22rem; gap: .8rem; padding: 2rem; border: 1px dashed var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); text-align: center; }
-.wishlist-empty-state > i { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 1.25rem; background: var(--ds-color-primary-soft); color: var(--ds-color-primary); font-size: 1.8rem; }
+.wishlist-empty-state > i { color: var(--ds-color-text-muted); font-size: 1.6rem; }
 .wishlist-empty-state h2 { margin: 0; color: var(--ds-color-text); }
 .wishlist-empty-state p { color: var(--ds-color-text-muted); }
-
+.wishlist-browse-link {
+  display: inline-flex;
+  min-height: var(--ds-touch-target);
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .65rem 1rem;
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-primary);
+  color: var(--ds-color-primary-contrast);
+  font-weight: var(--ds-font-weight-semibold);
+  text-decoration: none;
+}
+.wishlist-browse-link:focus-visible,
+.wishlist-category-filter:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.wishlist-category-filter {
+  display: flex;
+  width: 100%;
+  min-height: var(--ds-touch-target);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .5rem .25rem;
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: transparent;
+  color: var(--ds-color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.wishlist-category-filter:hover { color: var(--ds-color-primary-text); background: var(--ds-color-surface-hover); }
+.wishlist-category-count { color: var(--ds-color-text-muted); font-variant-numeric: tabular-nums; }
 </style>

@@ -61,18 +61,19 @@ async function savePreferences() {
     <div v-if="loading" class="state" role="status" aria-live="polite" aria-busy="true">در حال بارگذاری تنظیمات…</div>
     <div v-else class="settings-card" :aria-busy="saving ? 'true' : 'false'">
       <div class="table-wrap"><table>
-        <thead><tr><th>رویداد</th><th>داخل برنامه</th><th>ایمیل</th><th>پیامک</th></tr></thead>
+        <caption class="sr-only">تنظیمات روش دریافت اعلان‌ها</caption>
+        <thead><tr><th scope="col">رویداد</th><th scope="col">داخل برنامه</th><th scope="col">ایمیل</th><th scope="col">پیامک</th></tr></thead>
         <tbody>
           <tr v-for="event in preferences" :key="event.eventType">
             <th scope="row"><strong>{{ event.label }}</strong><small>{{ event.eventType }}</small></th>
-            <td><input v-model="event.channels.IN_APP" type="checkbox" :aria-label="`${event.label}: اعلان داخل برنامه`"></td>
-            <td><input v-model="event.channels.EMAIL" type="checkbox" :aria-label="`${event.label}: ایمیل`"></td>
+            <td><input v-model="event.channels.IN_APP" type="checkbox" :name="event.eventType + '-IN_APP'" :aria-label="`${event.label}: اعلان داخل برنامه`"></td>
+            <td><input v-model="event.channels.EMAIL" type="checkbox" :name="event.eventType + '-EMAIL'" :aria-label="`${event.label}: ایمیل`"></td>
             <td><span class="unavailable" :title="smsAvailable ? 'در دسترس' : 'ارسال پیامک هنوز فعال نیست'">{{ smsAvailable ? (event.channels.SMS ? 'فعال' : 'خاموش') : 'به‌زودی' }}</span></td>
           </tr>
-          <tr v-if="!preferences.length"><td colspan="4" class="muted">تنظیمی برای نمایش وجود ندارد.</td></tr>
+          <tr v-if="!preferences.length"><td colspan="4" class="muted" role="status">تنظیمی برای نمایش وجود ندارد.</td></tr>
         </tbody>
       </table></div>
-      <footer class="actions"><p>تغییرات پس از ذخیره روی اعلان‌های بعدی اعمال می‌شوند.</p><button class="button button-primary" :disabled="saving" @click="savePreferences">{{ saving ? 'در حال ذخیره…' : 'ذخیره تنظیمات' }}</button></footer>
+      <footer class="actions"><p>تغییرات پس از ذخیره روی اعلان‌های بعدی اعمال می‌شوند.</p><button class="button button-primary" :disabled="loading || saving" @click="savePreferences">{{ saving ? 'در حال ذخیره…' : 'ذخیره تنظیمات' }}</button></footer>
     </div>
   </section>
 </template>

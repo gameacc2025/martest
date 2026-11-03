@@ -50,12 +50,13 @@ async function savePreferences() {
       <div class="preferences-heading-identity">
         <div><h1>تنظیمات اعلان‌ها</h1><p>کانال دریافت هر نوع اعلان را برای حساب خود انتخاب کنید.</p></div>
       </div>
-      <router-link to="/notifications" class="back-link"><i class="pi pi-arrow-right"></i> بازگشت به صندوق اعلان‌ها</router-link>
+      <router-link to="/notifications" class="back-link"><i class="pi pi-arrow-right" aria-hidden="true"></i> بازگشت به صندوق اعلان‌ها</router-link>
     </header>
-    <div v-if="loading" class="state" role="status" aria-live="polite" aria-busy="true"><ProgressSpinner /><p>در حال دریافت تنظیمات…</p></div>
+    <div v-if="loading" class="state" role="status" aria-live="polite" aria-busy="true"><ProgressSpinner aria-label="در حال دریافت تنظیمات اعلان‌ها" /><p>در حال دریافت تنظیمات…</p></div>
     <div v-else class="settings-card" :aria-busy="saving ? 'true' : 'false'"><div class="table-wrap"><table>
-      <thead><tr><th>رویداد</th><th>داخل برنامه</th><th>ایمیل</th><th>پیامک</th></tr></thead>
-      <tbody><tr v-for="event in preferences" :key="event.eventType"><th scope="row"><strong>{{ event.label }}</strong><small>{{ event.eventType }}</small></th><td><input v-model="event.channels.IN_APP" type="checkbox" :aria-label="`${event.label}: داخل برنامه`"></td><td><input v-model="event.channels.EMAIL" type="checkbox" :aria-label="`${event.label}: ایمیل`"></td><td><span class="muted">{{ smsAvailable ? (event.channels.SMS ? 'فعال' : 'خاموش') : 'غیرفعال' }}</span></td></tr><tr v-if="!preferences.length"><td colspan="4" class="muted">تنظیمی برای نمایش وجود ندارد.</td></tr></tbody>
+        <caption class="sr-only">تنظیمات روش دریافت اعلان‌ها</caption>
+      <thead><tr><th scope="col">رویداد</th><th scope="col">داخل برنامه</th><th scope="col">ایمیل</th><th scope="col">پیامک</th></tr></thead>
+      <tbody><tr v-for="event in preferences" :key="event.eventType"><th scope="row"><strong>{{ event.label }}</strong><small>{{ event.eventType }}</small></th><td><input v-model="event.channels.IN_APP" type="checkbox" :name="event.eventType + '-IN_APP'" :aria-label="`${event.label}: داخل برنامه`"></td><td><input v-model="event.channels.EMAIL" type="checkbox" :name="event.eventType + '-EMAIL'" :aria-label="`${event.label}: ایمیل`"></td><td><span class="muted">{{ smsAvailable ? (event.channels.SMS ? 'فعال' : 'خاموش') : 'غیرفعال' }}</span></td></tr><tr v-if="!preferences.length"><td colspan="4" class="muted" role="status">تنظیمی برای نمایش وجود ندارد.</td></tr></tbody>
     </table></div><footer><span class="muted">تنظیمات برای اعلان‌های آینده اعمال می‌شود.</span><Button label="ذخیره تنظیمات" icon="pi pi-save" :loading="saving" :disabled="loading || saving" @click="savePreferences" /></footer></div>
   </section>
 </template>
