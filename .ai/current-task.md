@@ -230,3 +230,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added structural regression tests for the two-column email composition and integrated search toolbar in all three app test suites.
 - Static source review only; tests/build/browser checks NOT RUN.
 - **Merged:** PR #82 — https://github.com/gameacc2025/martest/pull/82. Squash commit: f2a2c47584329d3b4354d9d7ba56f9bb894d2048.
+
+
+### Notification RTL and toolbar refinement — Phase 23
+- Corrected the inbox grid to use RTL flow so the folder sidebar is on the right and the message list is on the left for Persian UI; moved the sidebar divider to its visual inner edge.
+- Replaced text-heavy header actions with compact icon-only unread and settings controls; unread count is shown as a small badge and accessible labels/tooltips remain available.
+- Constrained desktop search to a compact 320px maximum instead of allowing it to stretch across the toolbar; it becomes full-width only on smaller screens.
+- Added explicit PrimeIcons font/display rules for inline and PrimeVue button icons while retaining the existing global PrimeIcons stylesheet import.
+- Added regression coverage for RTL direction and icon-only header controls in Admin, Company and Website notification tests.
+- Existing notification APIs, routes, drawer behavior and message actions are unchanged.
+- Static source review only; tests/build/browser checks NOT RUN.
+- **Branch:** fix/notifications-rtl-toolbar-icons. Awaiting PR merge.
