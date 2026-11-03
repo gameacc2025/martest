@@ -2478,3 +2478,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Browser tests intentionally NOT RUN per user instruction. No backend, schema or API changes.
 - **Commits:** Recorded in GitHub history for the two layout changes and the AI handoff update.
 - **Next:** Continue remaining routed UI pages and shared form/dialog refinements; keep all work on `main`.
+
+
+## 2026-11-03 — MOBILE-DRAWER-SCROLL-LOCK-OWNERSHIP
+- **Status:** DONE — follow-up correction committed directly to `main`.
+- **Scope:** Admin and Company dashboard layouts.
+- **Change:** Track ownership of the body scroll lock. Restore the captured inline overflow only when the drawer actually acquired the lock; release is idempotent and safe on unmount. This prevents a layout that never opened its drawer from clearing another component's scroll lock.
+- **Behavior preserved:** Drawer open/close, Escape dismissal, route-change dismissal, navigation, auth, permissions, API and backend contracts.
+- **Verification:** Browser testing intentionally NOT RUN per user instruction. No backend/schema/API changes.
