@@ -1,12 +1,12 @@
-# Current Task — Full UI redesign using the four installed skills
+# Current Task — Full UI redesign: Turquoise / Sky palette + dark sidebar
 
-**Status:** IN_PROGRESS — owner feedback identified over-minimal/oversized visual direction; a richer, compact, brand-led direction is now being applied. The three notification inboxes and shared workspace primitives have received a corrective pass; the full 69-page redesign remains in progress.
+**Status:** IN_PROGRESS — owner approved turquoise/sky-blue palette with dark sidebar; shared theme/tokens and real-page sample are the first milestone. The three notification inboxes and shared workspace primitives have received a corrective pass; the full 69-page redesign remains in progress.
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
 
 ## Product constraints
-Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/navy/petrol palette, logo), Vue 3/JavaScript/PrimeVue 4 stack, APIs, routes, PKCE authentication, app-context/RBAC, tenant isolation, inquiry/RFQ rules, product lifecycle, notification behavior and commerce contracts. Do not add fake data or unsupported claims. No backend/schema/API/business-rule changes during this UI-only task.
+Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first RTL, dark sidebar, existing logo), Vue 3/JavaScript/PrimeVue 4 stack, APIs, routes, PKCE authentication, app-context/RBAC, tenant isolation, inquiry/RFQ rules, product lifecycle, notification behavior and commerce contracts. Do not add fake data or unsupported claims. No backend/schema/API/business-rule changes during this UI-only task.
 
 ## Required skill workflow
 - UI UX Pro Max: accessibility, responsive layout, semantic tokens, form feedback and performance guidance.
