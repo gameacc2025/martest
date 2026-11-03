@@ -374,9 +374,14 @@ function typeLabel(item) {
           <nav class="mail-breadcrumb" aria-label="مسیر صفحه"><span>پنل کاربری</span><i class="pi pi-angle-left"></i><span>اعلان‌ها</span><i class="pi pi-angle-left"></i><strong>{{ activeCategoryLabel }}</strong></nav>
         </div>
       </div>
-      <div class="header-actions">
-        <span class="unread-total"><i class="pi pi-envelope"></i>{{ unreadCount }} خوانده‌نشده</span>
-        <router-link to="/notification-preferences" class="settings-link"><i class="pi pi-cog"></i> تنظیمات اعلان‌ها</router-link>
+      <div class="header-actions" aria-label="ابزارهای صندوق اعلان">
+        <span class="header-icon-wrap" :title="`${unreadCount} اعلان خوانده‌نشده`">
+          <i class="pi pi-envelope" aria-hidden="true"></i>
+          <span v-if="unreadCount" class="header-icon-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+        </span>
+        <router-link to="/notification-preferences" class="header-icon-button" aria-label="تنظیمات اعلان‌ها" title="تنظیمات اعلان‌ها">
+          <i class="pi pi-cog" aria-hidden="true"></i>
+        </router-link>
       </div>
     </header>
 
@@ -527,11 +532,13 @@ function typeLabel(item) {
 .mail-title-copy h1{margin:0;color:#17243a;font-size:1.08rem;font-weight:700;line-height:1.5}
 .mail-breadcrumb{display:flex;align-items:center;gap:.5rem;margin-top:.22rem;color:#818da5;font-size:.7rem}
 .mail-breadcrumb i{font-size:.62rem}.mail-breadcrumb strong{color:#27364d;font-weight:600}
-.header-actions{display:flex;align-items:center;gap:.5rem}
-.unread-total{display:inline-flex;align-items:center;gap:.4rem;padding:.48rem .7rem;border-radius:5px;background:#eeedff;color:#7668e8;font-size:.72rem;font-weight:700}
-.settings-link{display:inline-flex;align-items:center;gap:.4rem;padding:.48rem .7rem;border:1px solid #e7e8f0;border-radius:5px;background:#fff;color:#46536a;font-size:.72rem;text-decoration:none}
-.mail-layout{display:grid;direction:ltr;grid-template-columns:260px minmax(0,1fr);min-height:calc(100vh - 130px);overflow:hidden;border:1px solid #e9eaf2;border-radius:5px;background:#fff;box-shadow:0 2px 12px rgba(26,39,68,.035)}
-.mail-sidebar{direction:rtl;min-width:0;padding:.75rem .65rem;border-inline-start:1px solid #eceef5;background:#fff}
+.header-actions{display:flex;align-items:center;gap:.4rem}
+.header-icon-wrap,.header-icon-button{position:relative;display:grid;place-items:center;flex:0 0 2.25rem;width:2.25rem;height:2.25rem;border:1px solid #e7e9f2;border-radius:50%;background:#fff;color:#7b70ed;font-size:.9rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
+.header-icon-wrap:hover,.header-icon-button:hover{border-color:#d7d2ff;background:#f4f2ff}
+.header-icon-badge{position:absolute;top:-.28rem;inset-inline-end:-.28rem;display:grid;place-items:center;min-width:1rem;height:1rem;padding:0 .18rem;border:2px solid #f3f5fa;border-radius:1rem;background:#8275f4;color:#fff;font-size:.55rem;font-weight:700;line-height:1}
+
+.mail-layout{display:grid;direction:rtl;grid-template-columns:260px minmax(0,1fr);min-height:calc(100vh - 130px);overflow:hidden;border:1px solid #e9eaf2;border-radius:5px;background:#fff;box-shadow:0 2px 12px rgba(26,39,68,.035)}
+.mail-sidebar{direction:rtl;min-width:0;padding:.75rem .65rem;border-inline-end:1px solid #eceef5;background:#fff}
 .sidebar-top{display:flex;align-items:center;justify-content:space-between;min-height:3rem;margin:0 0 .65rem;padding:.35rem .6rem;color:#23324a;font-size:.8rem;font-weight:700}
 .sidebar-top span:first-child{display:flex;align-items:center;gap:.5rem}.sidebar-top i{color:#8175ee}
 .sidebar-total{display:grid;place-items:center;min-width:1.35rem;height:1.35rem;border-radius:4px;background:#8275f4;color:#fff;font-size:.65rem}
@@ -549,12 +556,16 @@ function typeLabel(item) {
 .select-visible{display:inline-flex;align-items:center;gap:.45rem;color:#26354b;font-size:.76rem;white-space:nowrap}
 .select-visible input,.row-checkbox{width:.9rem;height:.9rem;accent-color:#8174f0;cursor:pointer}
 .list-count{color:#8a96aa;font-size:.68rem}
-.search-box{display:flex;align-items:center;gap:.5rem;min-width:100px;min-height:2.35rem;padding:0 .7rem;border:1px solid #e3e7f0;border-radius:20px;background:#fff;color:#98a4b7}
+.search-box{display:flex;align-items:center;gap:.5rem;flex:0 1 320px;min-width:100px;min-height:2.35rem;padding:0 .7rem;border:1px solid #e3e7f0;border-radius:20px;background:#fff;color:#98a4b7}
 .search-box:focus-within{border-color:#bdb6ff;box-shadow:0 0 0 2px #8174f018}
 .search-box input{width:100%;min-width:0;padding:.45rem 0;border:0;outline:0;background:transparent;color:#26354b;font:inherit;font-size:.7rem}
-.search-box input::placeholder{color:#9aa5b8}.list-search{flex:1}
+.search-box input::placeholder{color:#9aa5b8}.list-search{flex:0 1 320px;width:min(320px,34vw);max-width:34vw;margin-inline:auto}
 .clear-search{display:grid;place-items:center;width:1.6rem;height:1.6rem;border:0;border-radius:50%;background:transparent;color:#8a96aa;cursor:pointer}
 .toolbar-actions{display:flex;align-items:center;gap:.15rem;flex:0 0 auto}
+.mail-page :deep(.pi),.reading-overlay .pi{display:inline-block;font-family:primeicons!important;font-style:normal;font-weight:400;font-variant:normal;line-height:1;text-transform:none;speak:none;-webkit-font-smoothing:antialiased}
+.mail-page :deep(.p-button-icon){display:inline-block!important;font-family:primeicons!important;font-size:.9rem;line-height:1;opacity:1;visibility:visible}
+.mail-page :deep(.p-button-icon-only){display:inline-flex;align-items:center;justify-content:center;min-width:2rem;min-height:2rem}
+.search-box>.pi{flex:0 0 auto;font-size:.85rem;color:#8290a8}
 .result-count{color:#8a96aa;font-size:.67rem;white-space:nowrap}
 .bulk-actions{display:flex;align-items:center;gap:.05rem;padding:.1rem .2rem;border:1px solid #e9eaf2;border-radius:5px;background:#fff}
 .message-items{flex:1;min-width:0}
@@ -581,8 +592,8 @@ function typeLabel(item) {
 .pagination{display:flex;align-items:center;justify-content:center;gap:.6rem;min-height:3rem;margin-top:auto;padding:.4rem;border-top:1px solid #edf0f5}
 .pagination span{color:#8a96aa;font-size:.7rem;font-variant-numeric:tabular-nums}
 .mail-page button{font-family:inherit}.mail-page button:focus-visible,.mail-page a:focus-visible,.mail-page select:focus-visible{outline:2px solid #8174f0;outline-offset:2px}
-@media(max-width:1050px){.mail-layout{grid-template-columns:220px minmax(0,1fr)}.list-toolbar{flex-wrap:wrap}.list-search{order:3;flex-basis:100%}}
-@media(max-width:700px){.mail-page{padding:.55rem}.mail-header{align-items:flex-start;flex-direction:column;padding:.25rem 0}.header-actions{width:100%;justify-content:flex-start}.mail-layout{grid-template-columns:minmax(0,1fr);min-height:0}.mail-sidebar{border-inline-end:0;border-bottom:1px solid #eceef5;padding:.55rem}.sidebar-top,.sidebar-compose,.sidebar-section-title,.sidebar-divider{display:none}.mail-sidebar .folder-link{display:inline-flex;width:auto;min-height:2.15rem;margin:.1rem}.list-toolbar{gap:.45rem;padding:.5rem}.list-toolbar-left{flex:1}.list-search{order:0;flex-basis:100%}.toolbar-actions{margin-inline-start:auto}.message-row{padding-inline:.25rem;gap:.25rem}.row-select{flex-basis:1rem}.row-status{flex-basis:1.7rem;width:1.7rem;height:1.7rem}.row-actions :deep(.p-button){min-width:1.8rem;width:1.8rem;height:1.8rem}}
+@media(max-width:1050px){.mail-layout{grid-template-columns:220px minmax(0,1fr)}.list-toolbar{flex-wrap:wrap}.list-search{order:3;flex:1 1 100%;width:100%;max-width:100%;margin:0}}
+@media(max-width:700px){.mail-page{padding:.55rem}.mail-header{align-items:flex-start;flex-direction:column;padding:.25rem 0}.header-actions{width:100%;justify-content:flex-start}.mail-layout{grid-template-columns:minmax(0,1fr);min-height:0}.mail-sidebar{border-inline-end:0;border-bottom:1px solid #eceef5;padding:.55rem}.sidebar-top,.sidebar-compose,.sidebar-section-title,.sidebar-divider{display:none}.mail-sidebar .folder-link{display:inline-flex;width:auto;min-height:2.15rem;margin:.1rem}.list-toolbar{gap:.45rem;padding:.5rem}.list-toolbar-left{flex:1}.list-search{order:0;flex:1 1 100%;width:100%;max-width:100%;margin:0}.toolbar-actions{margin-inline-start:auto}.message-row{padding-inline:.25rem;gap:.25rem}.row-select{flex-basis:1rem}.row-status{flex-basis:1.7rem;width:1.7rem;height:1.7rem}.row-actions :deep(.p-button){min-width:1.8rem;width:1.8rem;height:1.8rem}}
 @media(prefers-reduced-motion:reduce){.mail-page *,.mail-page *::before,.mail-page *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 
