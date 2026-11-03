@@ -46,6 +46,14 @@ const multipartFileBody = (fieldName = 'file') => ({
 });
 
 const docs = {
+  'POST /api/v1/contact/messages': {
+    summary: 'Submit a public contact message',
+    description: 'Validates a visitor message and sends it to CONTACT_INBOX_EMAIL through configured SMTP. Public, rate limited to three attempts per ten minutes. Returns success only after SMTP accepts the message.',
+    tags: ['Contact'],
+    authRequired: false,
+    includeNotFound: false,
+    responses: messageResponse('Contact message accepted by the configured SMTP server.'),
+  },
   'POST /api/v1/auth/register': {
     summary: 'Register customer account',
     description: 'Creates a Website customer account using phone, password and personal name fields. Authentication required: none. Permission required: none. Rate limited.',
