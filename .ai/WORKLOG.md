@@ -2535,3 +2535,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Connected help/validation feedback through `aria-describedby`; added appropriate name/email/telephone autocomplete metadata and telephone input mode.
 - Existing field validation, submit handler, contact content and API behavior were not changed. The previously documented contact submission integration remains unresolved and is not represented as functional by this UI-only change.
 - No tests or browser checks run per explicit user instruction; no build/runtime verification claimed.
+
+
+## 2026-11-03 — Shared input ARIA attribute composition
+
+- Shared Input now preserves caller-supplied `aria-describedby` references while appending its own hint/error message ID; caller-provided `aria-invalid` is retained unless the component has an active validation error.
+- This keeps the shared field's accessible feedback additive instead of overwriting descriptions supplied by page-specific forms.
+- No data, validation, API or backend behavior changed. No tests/browser checks run per instruction; runtime/build verification remains unclaimed.
