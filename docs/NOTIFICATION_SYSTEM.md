@@ -46,12 +46,12 @@ Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, an
 
 - Website inbox: `apps/website/src/pages/public/Notifications.vue` — route `/notifications`.
 - Website preferences: `apps/website/src/pages/public/NotificationPreferences.vue` — route `/notification-preferences`.
-- Company inbox: `apps/company/src/pages/user/Notifications.vue` — email-style inbox with All/Unread/Read folders, event-type categories, search, message list/reading pane, read/delete actions, and pagination. Uses `apiGetPaginated()` and normalizes both paginated envelopes and legacy/nested response shapes. Legacy `type: null` notifications are categorized from title/message text; `ADMIN_ANNOUNCEMENT` is categorized as an announcement. Category matching must not let the generic `other` predicate consume null types before text-based classification. A regression test in each app selects the Products category and asserts that a legacy null-type product notification is shown.
+- Company inbox: `apps/company/src/pages/user/Notifications.vue` — email-style RTL inbox with only the fixed INBOX and SAVED folders, separate event-type category filters, expanding search toolbar, message list, right-edge reading drawer, read/delete actions, and pagination. Uses `apiGetPaginated()` and normalizes both paginated envelopes and legacy/nested response shapes. Legacy `type: null` notifications are categorized from title/message text; `ADMIN_ANNOUNCEMENT` is categorized as an announcement. Category matching must not let the generic `other` predicate consume null types before text-based classification. A regression test in each app selects the Products category and asserts that a legacy null-type product notification is shown.
 - Website/customer inbox: `apps/website/src/pages/public/Notifications.vue` — same categorized inbox and response normalization for ordinary users.
 - Admin inbox: `apps/admin/src/pages/user/Notifications.vue` — same categorized inbox for staff, with the separate notification management/send page still available. Regression tests cover the inbox in all three apps.
 - Shared dashboard navigation includes notification preferences in both Company/Admin apps and exposes the admin send/monitor page only when the current app route exists and the user has the `notifications.send` permission. The Website header unread badge uses `endpoints.notifications.unreadCount` (`/settings/notifications/unread-count`) rather than the obsolete `/api/v1/notifications/unread-count` path.
 - When the inbox opens, the first visible notification is selected in the reading pane but is **not** marked as read. A single click selects/opens a row; double-click explicitly marks it read, and the UI only changes read state after the PATCH succeeds.
-- All/Unread/Read and saved/custom folder counts are loaded independently from the current message page. Switching folders applies the corresponding server query and must not overwrite unrelated folder counts.
+- INBOX and SAVED counts are loaded independently from the current message page. Only these two fixed folders are exposed in the user-facing sidebar; event categories remain separate filters. Switching folders applies the corresponding server query and must not overwrite the other folder count.
 - Category/search filters operate on the currently loaded server page; global category filtering across all pages would require a backend query contract.
 - Regression tests in Website, Company and Admin cover paginated rows, legacy null-type categorization, unread-folder query filtering, stable folder counts, single-click vs double-click read semantics, failed read requests, and bulk read-state IDs. Backend tests cover user scoping and read/delete ownership.
 - Company preferences: `apps/company/src/pages/user/NotificationPreferences.vue` — route `/notification-preferences`.
@@ -60,6 +60,13 @@ Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, an
 - Company/Admin inbox routes and navigation should be verified in each app's router before changing links.
 
 The shared API client lives in `packages/api-client`; use it instead of adding page-specific HTTP clients. For paginated inbox lists, the Company page must call `apiGetPaginated()` from `packages/shared-core/http/apiClient.js`: `apiGet()` unwraps `{ data, meta }` to the inner `data` value and therefore discards pagination metadata. The Company inbox has a regression test for rendering rows from the paginated response (`apps/company/src/pages/user/Notifications.test.js`).
+
+
+### RTL mail-reader layout correction (2026-11-03)
+
+The Company, Admin and Website inboxes expose exactly two fixed system folders: INBOX (دریافتی‌ها) and SAVED (ذخیره‌شده‌ها). Categories are separate filters and must not be represented as folders. The reading drawer is anchored to the physical right edge for RTL layouts, overlays the mailbox with a dimmed backdrop, and is controlled by selecting a message row; row state is communicated through `aria-expanded` and `aria-controls`. The search field flexes to available toolbar width, and bulk read/unread/delete controls are icon-only with accessible labels and titles. Website list rendering also applies folder-membership filtering consistently with Company/Admin.
+
+Single click opens/selects without changing read state; double-click marks read only after the read-state API succeeds. Existing API routes, ownership, folder copy/move behavior, and pagination are unchanged. Automated verification for the 2026-11-03 correction is pending until CI completes.
 
 ## Inquiry/RFQ notification integration
 
