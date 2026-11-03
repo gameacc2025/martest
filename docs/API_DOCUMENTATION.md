@@ -534,3 +534,14 @@ Both `{ companyIds }` and `{ roles, companyId }` descriptors are restricted to A
 
 - Public `GET /products` and public/customer `GET /products/:id` use a restricted product schema that excludes creator IDs, edit counters, deletion metadata and moderation status history. Authorized COMPANY/STAFF callers of the detail endpoint may receive the management projection; `/products/my-products` remains explicitly management-only.
 - Documented distinct public and management query filters, and added schema-level plus generated `/docs/json` integration tests for field privacy, detail projection alternatives and query parameter coverage.
+
+
+## فرم تماس عمومی وب‌سایت
+
+- مسیر `POST /api/v1/contact/messages` عمومی است و به توکن ورود نیاز ندارد؛ محدودیت آن سه درخواست در هر ۱۰ دقیقه برای هر IP است.
+- ورودی شامل نام، ایمیل، موضوع از فهرست مجاز، متن پیام و تلفن اختیاری است. طول فیلدها در schema سمت سرور محدود می‌شود.
+- پیام فقط از طریق SMTP واقعی ارسال می‌شود. اگر `SMTP_HOST` یا `CONTACT_INBOX_EMAIL` تنظیم نشده باشد، endpoint با `503 CONTACT_DELIVERY_NOT_CONFIGURED` پاسخ می‌دهد؛ هیچ fallback کنسولی یا موفقیت ساختگی وجود ندارد.
+- ایمیل پاسخ‌دهنده در `Reply-To` قرار می‌گیرد و مقصد فقط از متغیر محیطی سرور خوانده می‌شود؛ کلاینت نمی‌تواند گیرنده را تعیین کند.
+- تنظیمات لازم در `backend/.env`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` و `CONTACT_INBOX_EMAIL`. مقدار `CONTACT_INBOX_EMAIL` باید صندوق واقعی و تحت نظارت کسب‌وکار باشد. هیچ آدرس یا اطلاعات تماس فرضی در کد به‌عنوان مقصد استفاده نمی‌شود.
+- در رابط تماس، اطلاعات تلفن/آدرس/نقشه/شبکه اجتماعی تأییدنشده حذف شده‌اند. فرم فقط پس از پذیرش پیام توسط SMTP موفقیت را اعلام و ورودی را پاک می‌کند.
+- تست‌های رگرسیون برای اعتبارسنجی route و نبود پیکربندی SMTP نوشته شده‌اند؛ اجرای تست در این مرحله انجام نشده است.
