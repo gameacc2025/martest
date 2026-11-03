@@ -2835,6 +2835,6 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Updated WorkspacePageHeading, KpiCard, DashboardPanel and QuickActions tests for the new contextual-icon contract.
 - **Behavior preserved:** routes, data, role/permission filtering, navigation, theme toggling, dashboard metrics and action destinations unchanged.
 - **Verification:** Static source/structure review only. Automated tests, builds and browser checks NOT RUN — owner instruction.
-- **Commit:** Pending.
-- **Push:** Pending.
+- **Commit:** b8d5f9ae80eb767b8dbc5ee930b6d8bb79f18823 (updated origin/main).
+- **Push:** Remote main ref updated and verified.
 - **Next:** Continue corrected visual direction through remaining Admin/Company list/detail pages and public marketplace pages.

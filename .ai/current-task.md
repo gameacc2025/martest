@@ -172,3 +172,4 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Updated component tests to assert the restored contextual icon and navigation hierarchy.
 - API, routing, permissions, responsive shell behavior and dashboard data contracts are unchanged.
 - Static review only; tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** b8d5f9ae80eb767b8dbc5ee930b6d8bb79f18823 — https://github.com/gameacc2025/martest/commit/b8d5f9ae80eb767b8dbc5ee930b6d8bb79f18823
