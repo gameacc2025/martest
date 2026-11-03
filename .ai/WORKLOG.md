@@ -2922,3 +2922,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **PR:** #82 — https://github.com/gameacc2025/martest/pull/82.
 - **Merge commit:** f2a2c47584329d3b4354d9d7ba56f9bb894d2048.
 - **Next:** Continue the remaining UI redesign backlog.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-23 — RTL, ICON HEADER AND SEARCH DENSITY
+- **Status:** IMPLEMENTED ON FEATURE BRANCH — awaiting merge.
+- **Scope:** Admin, Company and Website notification inbox pages and tests.
+- **Changes:**
+  - Fixed grid direction to RTL, placing the folder column on the right and the message list on the left; corrected the sidebar's inner divider edge.
+  - Converted unread/settings header actions to compact icon-only controls with accessible labels, titles and unread-count badge.
+  - Limited desktop search width to 320px; on tablet/mobile it expands to available width to preserve usability.
+  - Explicitly reinforced PrimeIcons font rendering for inline and PrimeVue action icons. Existing shared stylesheet already imports the PrimeIcons CSS.
+  - Added tests for RTL root direction and icon-only header controls in all three apps.
+- **Behavior preserved:** Existing notification endpoints, folder filtering, counts, search behavior, selection, bulk actions and right-side reading drawer.
+- **Verification:** Static source review only. Tests/build/browser checks NOT RUN.
+- **Branch:** fix/notifications-rtl-toolbar-icons.
+- **Next:** Merge focused fix; run tests/build when local execution is available.
