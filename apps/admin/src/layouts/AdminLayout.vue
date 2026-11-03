@@ -126,10 +126,10 @@ onUnmounted(() => {
         @logout="authStore.logout()"
       />
 
-      <div class="dash-layout-content">
-        <!-- Lightweight breadcrumb row; each page owns its single H1. -->
-        <PageHeader :home-route="homeRoute" />
+      <!-- Breadcrumb is intentionally outside the constrained content wrapper. -->
+      <PageHeader :home-route="homeRoute" />
 
+      <div class="dash-layout-content">
         <main id="main-content" class="dash-layout-page" tabindex="-1">
           <router-view v-slot="{ Component, route }">
             <transition name="page" mode="out-in">
