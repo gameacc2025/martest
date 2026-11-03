@@ -110,21 +110,21 @@ async function requestPlan(plan) {
 
 <template>
   <main class="subscription-page" dir="rtl">
-    <header class="heading">
-      <div class="subscription-heading-identity">
-        <span class="subscription-heading-icon"><i class="pi pi-wallet"></i></span>
-        <div>
-          <span class="eyebrow">حساب کاربری و خدمات استعلام</span>
-          <h1>اشتراک استعلام</h1>
-          <p>سهمیه استعلام، پاسخ شرکت‌ها، پیام داخلی و پیامک بر اساس طرح اشتراک محاسبه می‌شود.</p>
-        </div>
-      </div>
-      <button class="secondary refresh-action" :disabled="loading" @click="load"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
-    </header>
+    <WorkspacePageHeading
+      title="اشتراک استعلام"
+      description="سهمیه استعلام، پاسخ شرکت‌ها، پیام داخلی و پیامک بر اساس طرح اشتراک محاسبه می‌شود."
+      heading-id="public-inquiry-subscription-title"
+    >
+      <template #actions>
+        <button type="button" class="secondary refresh-action" :disabled="loading" @click="load">
+          <i class="pi pi-refresh" aria-hidden="true"></i> به‌روزرسانی
+        </button>
+      </template>
+    </WorkspacePageHeading>
 
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
     <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
-    <p v-if="loading">در حال دریافت اطلاعات…</p>
+    <p v-if="loading" role="status" aria-live="polite" aria-busy="true">در حال دریافت اطلاعات…</p>
 
     <section v-if="currentSubscription" class="panel active">
       <div><span class="eyebrow">اشتراک فعلی</span><h2>{{ currentSubscription.plan?.name || 'اشتراک فعال' }}</h2><p>اعتبار تا {{ date(currentSubscription.endsAt) }}</p></div>
@@ -141,7 +141,7 @@ async function requestPlan(plan) {
         <article v-for="(item, key) in quota.quotas" :key="key" class="quota">
           <span>{{ usageLabels[key] || key }}</span>
           <strong>{{ item.remaining.toLocaleString('fa-IR') }} <small>از {{ item.limit.toLocaleString('fa-IR') }} باقی‌مانده</small></strong>
-          <div class="meter"><span :style="{ width: (item.limit ? Math.min(100, item.used / item.limit * 100) : 100) + '%' }"></span></div>
+          <div class="meter" role="progressbar" :aria-label="'مصرف سهمیه ' + (usageLabels[key] || key)" aria-valuemin="0" :aria-valuemax="Math.max(1, Number(item.limit) || 0)" :aria-valuenow="Number(item.used) || 0"><span :style="{ width: (item.limit ? Math.min(100, item.used / item.limit * 100) : 100) + '%' }"></span></div>
         </article>
       </div>
     </section>
@@ -174,217 +174,48 @@ async function requestPlan(plan) {
 </template>
 
 <style scoped>
-.subscription-page{display:grid;gap:1.25rem;color:var(--text-color,#1f2937)}
-.heading,.section-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem}
-h1{font-size:1.45rem;margin:0 0 .35rem}h2{font-size:1.08rem;margin:0 0 .75rem}h3{margin:0;font-size:1.05rem}
-p{line-height:1.8;color:var(--text-color-secondary,#64748b);margin:.25rem 0}
-.panel,.plan-card{background:var(--surface-card,#fff);border:1px solid var(--surface-border,#e5e7eb);border-radius:12px;padding:1.2rem}
-.active{border-color:#10b981}.pending{border-color:#f59e0b}
-.eyebrow{font-size:.8rem;color:var(--text-color-secondary,#64748b)}
-.status{white-space:nowrap;border-radius:999px;padding:.4rem .8rem;font-size:.85rem}.active-pill{background:#d1fae5;color:#065f46}.pending-pill{background:#fef3c7;color:#92400e}
-.quota-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}.quota{padding:1rem;border:1px solid var(--surface-border,#e5e7eb);border-radius:8px;display:grid;gap:.75rem}.quota>span{font-size:.9rem}.quota strong{font-size:1.2rem}.quota small{font-size:.8rem;font-weight:400;color:var(--text-color-secondary,#64748b)}.meter{height:6px;border-radius:999px;background:var(--surface-ground,#f1f5f9);overflow:hidden}.meter span{display:block;height:100%;background:#0ea5a4}
-.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-top:1rem}.plan-card{display:flex;flex-direction:column;gap:1rem}.plan-card.chosen{border-color:#0d9488;box-shadow:0 0 0 1px #0d9488}.plan-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem}.plan-head span{font-size:.8rem;color:var(--text-color-secondary,#64748b)}.description{min-height:3rem}.price{font-size:1.4rem}.plan-card ul{padding-right:1.2rem;margin:0;display:grid;gap:.45rem;font-size:.9rem}.reference{display:grid;gap:.4rem;font-size:.85rem}input{padding:.7rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-ground,#fff);color:inherit}
-button{border:0;border-radius:7px;padding:.75rem 1rem;cursor:pointer}.primary{background:#0f9e9a;color:#fff;margin-top:auto}.secondary{background:var(--surface-hover,#eef2f7);color:inherit}.primary:disabled,.secondary:disabled{opacity:.55;cursor:not-allowed}
-.notice{padding:.8rem 1rem;border-radius:8px}.error{background:#fee2e2;color:#991b1b}.success{background:#d1fae5;color:#065f46}.empty{color:var(--text-color-secondary,#64748b)}.footnote{font-size:.85rem}
-@media(max-width:800px){.quota-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.heading,.section-heading{align-items:flex-start;flex-direction:column}}
-@media(max-width:480px){.quota-grid{grid-template-columns:1fr}}
-
-.subscription-page { gap: var(--ds-space-5); color: var(--ds-color-text); }
-.subscription-page .heading {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+.subscription-page { display: flex; flex-direction: column; gap: 1.25rem; max-width: 80rem; margin: 0 auto; padding: clamp(1rem, 2vw, 1.75rem); direction: rtl; color: var(--ds-color-text); }
+.subscription-page .panel { padding: 1.25rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: none; }
+.subscription-page .panel.active { border-inline-start: 3px solid var(--ds-color-success); }
+.subscription-page .panel.pending { border-inline-start: 3px solid var(--ds-color-warning); }
+.subscription-page .quota-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .75rem; margin-top: 1rem; }
+.subscription-page .quota { display: grid; gap: .5rem; padding: .85rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-sm); background: var(--ds-color-surface-alt); }
+.subscription-page .quota strong { color: var(--ds-color-text); font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.subscription-page .quota small { color: var(--ds-color-text-muted); font-size: .75rem; font-weight: 400; }
+.subscription-page .meter { overflow: hidden; height: .45rem; border-radius: 999px; background: var(--ds-color-border); }
+.subscription-page .meter > span { display: block; height: 100%; border-radius: inherit; background: var(--ds-color-primary); transition: width var(--ds-transition-fast); }
+.subscription-page .plans-section { display: grid; gap: 1rem; }
+.subscription-page .section-heading {
+  display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap;
+  gap: .75rem; padding-bottom: .75rem; border-bottom: 1px solid var(--ds-color-border);
 }
-.subscription-page h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
-.subscription-page .panel,
-.subscription-page .plan-card {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.subscription-page .active { border-color: color-mix(in srgb, var(--ds-color-success) 45%, var(--ds-color-border)); }
-.subscription-page .pending { border-color: color-mix(in srgb, var(--ds-color-warning) 45%, var(--ds-color-border)); }
-@media (max-width: 640px) { .subscription-page .heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); } }
-
-
-/* Customer subscription center. */
-.subscription-page { gap: clamp(1rem, 2vw, 1.5rem); }
-.subscription-page .heading {
-  align-items: center;
-  padding: clamp(1rem, 2vw, 1.5rem);
-  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
-}
-.subscription-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
-.subscription-heading-icon {
-  display: grid;
-  place-items: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  flex: 0 0 auto;
-  border-radius: 1rem;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.35rem;
-}
-.subscription-page .heading .eyebrow {
-  display: inline-block;
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
-.subscription-page .heading h1 { margin: .25rem 0 .35rem; }
-.subscription-page .refresh-action { display: inline-flex; align-items: center; gap: .45rem; }
-.subscription-page .quota-grid { gap: .8rem; }
-.subscription-page .quota {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
-}
-.subscription-page .quota strong { color: var(--ds-color-text); font-variant-numeric: tabular-nums; }
-.subscription-page .plan-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-  transition: transform var(--ds-transition), border-color var(--ds-transition), box-shadow var(--ds-transition);
-}
-.subscription-page .plan-card::before {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 3px;
-  background: var(--ds-color-border);
-  content: "";
-}
-.subscription-page .plan-card.chosen::before { background: var(--ds-color-primary); }
-.subscription-page .plan-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
-.subscription-page .plan-head h3 { color: var(--ds-color-text); }
-.subscription-page .plan-card li { color: var(--ds-color-text-muted); line-height: 1.7; }
-.subscription-page .price { color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); }
-.subscription-page .reference input { width: 100%; box-sizing: border-box; border-radius: var(--ds-radius-md); }
-.subscription-page .footnote {
-  margin-top: 1rem;
-  padding: .85rem 1rem;
-  border: 1px dashed var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface-alt);
-  font-size: var(--ds-font-size-xs);
-}
-@media (max-width: 640px) {
-  .subscription-page .heading { align-items: stretch; }
-  .subscription-heading-identity { align-items: flex-start; }
-  .subscription-heading-icon { width: 2.7rem; height: 2.7rem; }
-}
-
-
-/* Public inquiry subscription: pricing and quota workspace aligned to the marketplace container. */
-.subscription-page {
-  width: 100%;
-  max-width: var(--ds-container-max-wide);
-  margin-inline: auto;
-  padding: var(--ds-space-8) var(--ds-container-pad) var(--ds-space-16);
-  color: var(--ds-color-text);
-  gap: var(--ds-space-5);
-}
-.subscription-page .heading {
-  align-items: center;
-  gap: 1.25rem;
-  padding: clamp(1rem, 2vw, 1.5rem);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
-  box-shadow: var(--ds-shadow-xs);
-}
-.subscription-heading-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
-.subscription-heading-icon {
-  display: grid;
-  place-items: center;
-  width: 3.25rem;
-  height: 3.25rem;
-  flex: 0 0 auto;
-  border-radius: 1rem;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.35rem;
-}
-.subscription-page .eyebrow { color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
-.subscription-page h1 { margin: .25rem 0; color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); }
-.subscription-page p { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.8; }
-.subscription-page .panel,
-.subscription-page .plan-card {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.subscription-page .active { border-inline-start: 4px solid var(--ds-color-success); }
-.subscription-page .pending { border-inline-start: 4px solid var(--ds-color-warning); }
-.subscription-page .active-pill { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
-.subscription-page .pending-pill { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
-.subscription-page .quota {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface-alt);
-}
-.subscription-page .quota > span { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
-.subscription-page .quota strong { color: var(--ds-color-text); font-variant-numeric: tabular-nums; }
-.subscription-page .meter { background: var(--ds-color-surface-hover); }
-.subscription-page .meter span { background: var(--ds-color-primary); }
-.subscription-page .plan-card {
-  padding: clamp(1rem, 2vw, 1.4rem);
-  transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast), transform var(--ds-transition-fast);
-}
-.subscription-page .plan-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
-.subscription-page .plan-card.chosen {
-  border-color: var(--ds-color-primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-color-primary) 16%, transparent);
-}
-.subscription-page .plan-head h3 { color: var(--ds-color-text); }
-.subscription-page .plan-head span,
-.subscription-page .description,
-.subscription-page .footnote { color: var(--ds-color-text-muted); }
-.subscription-page .price { color: var(--ds-color-primary); font-size: var(--ds-font-size-2xl); }
-.subscription-page .plan-card ul { color: var(--ds-color-text); line-height: 1.8; }
-.subscription-page input {
-  width: 100%;
-  min-height: 2.65rem;
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text);
-}
-.subscription-page input:focus {
-  border-color: var(--ds-color-primary);
-  outline: 0;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
-}
-.subscription-page .primary {
-  min-height: 2.7rem;
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-primary);
-  color: var(--ds-color-primary-contrast);
-  font-weight: var(--ds-font-weight-bold);
-}
-.subscription-page .secondary {
-  min-height: 2.7rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text);
-}
-.subscription-page .error,
-.subscription-page .success { border: 1px solid; border-radius: var(--ds-radius-md); }
-.subscription-page .error { border-color: color-mix(in srgb, var(--ds-color-danger) 30%, transparent); background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
-.subscription-page .success { border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent); background: var(--ds-color-success-soft); color: var(--ds-color-success); }
-@media (max-width: 760px) {
-  .subscription-page { padding: var(--ds-space-5) var(--ds-space-3) var(--ds-space-10); }
-  .subscription-page .heading { align-items: stretch; flex-direction: column; }
-  .subscription-page .refresh-action { width: 100%; justify-content: center; }
-  .subscription-heading-identity { align-items: flex-start; }
-  .subscription-page .quota-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 480px) { .subscription-page .quota-grid { grid-template-columns: minmax(0, 1fr); } }
+.subscription-page .section-heading h2 { margin: 0; color: var(--ds-color-text); font-size: 1.15rem; }
+.subscription-page .section-heading p { margin: .3rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+.subscription-page .status { display: inline-flex; align-items: center; min-height: 1.75rem; padding: .2rem .65rem; border-radius: 999px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.subscription-page .active-pill { background: color-mix(in srgb, var(--ds-color-success) 12%, var(--ds-color-surface)); color: var(--ds-color-success); }
+.subscription-page .pending-pill { background: color-mix(in srgb, var(--ds-color-warning) 12%, var(--ds-color-surface)); color: var(--ds-color-warning); }
+.subscription-page .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1rem; margin-top: 1rem; }
+.subscription-page .plan-card { display: flex; min-width: 0; flex-direction: column; gap: 1rem; padding: 1.25rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: none; transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast); }
+.subscription-page .plan-card.chosen { border-color: var(--ds-color-primary); box-shadow: inset 0 0 0 1px var(--ds-color-primary); }
+.subscription-page .plan-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
+.subscription-page .plan-head h3 { margin: 0; color: var(--ds-color-text); font-size: 1.05rem; }
+.subscription-page .plan-head span { color: var(--ds-color-text-muted); font-size: .8rem; }
+.subscription-page .description { min-height: 3rem; margin: 0; color: var(--ds-color-text-muted); line-height: 1.8; }
+.subscription-page .price { color: var(--ds-color-text); font-size: 1.5rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.subscription-page .plan-card ul { display: grid; gap: .5rem; margin: 0; padding-inline-start: 1.2rem; color: var(--ds-color-text-muted); font-size: .9rem; }
+.subscription-page .reference { display: grid; gap: .4rem; color: var(--ds-color-text); font-size: .85rem; }
+.subscription-page input { min-height: 2.75rem; padding: .65rem .75rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-sm); background: var(--ds-color-surface); color: inherit; font: inherit; }
+.subscription-page input:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.subscription-page button { min-height: 2.75rem; font-family: inherit; }
+.subscription-page .notice { padding: .75rem 1rem; border: 1px solid transparent; border-radius: var(--ds-radius-sm); }
+.subscription-page .notice.error { border-color: color-mix(in srgb, var(--ds-color-danger) 30%, transparent); background: color-mix(in srgb, var(--ds-color-danger) 8%, var(--ds-color-surface)); color: var(--ds-color-danger); }
+.subscription-page .notice.success { border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent); background: color-mix(in srgb, var(--ds-color-success) 8%, var(--ds-color-surface)); color: var(--ds-color-success); }
+.subscription-page .primary { padding: .7rem 1rem; border: 1px solid var(--ds-color-primary); border-radius: var(--ds-radius-sm); background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); font-weight: 700; cursor: pointer; }
+.subscription-page .primary:hover { background: var(--ds-color-primary-hover); }
+.subscription-page .secondary { padding: .65rem .9rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-sm); background: var(--ds-color-surface); color: var(--ds-color-text); cursor: pointer; }
+.subscription-page button:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.subscription-page button:disabled { opacity: .55; cursor: not-allowed; }
+.subscription-page .state { padding: 2rem; text-align: center; color: var(--ds-color-text-muted); }
+@media (max-width: 640px) { .subscription-page .plan-card { padding: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .subscription-page .meter > span, .subscription-page .plan-card { transition: none; } }
 </style>

@@ -255,7 +255,7 @@ defineExpose({ clearSelection, resetPage })
 </script>
 
 <template>
-  <div class="ent-table" :class="{ 'ent-table--mobile-cards': mobileCardLayout }">
+  <div class="ent-table" :class="{ 'ent-table--mobile-cards': mobileCardLayout }" :aria-busy="loading ? 'true' : 'false'">
     <!-- Toolbar -->
     <div v-if="title || searchable || columnToggle || $slots.toolbar || (selectable && selection.length)" class="ent-table-toolbar">
       <div class="ent-table-toolbar-start">
@@ -346,7 +346,7 @@ defineExpose({ clearSelection, resetPage })
     </div>
 
     <!-- Loading skeleton -->
-    <div v-if="loading" class="ent-table-skeleton">
+    <div v-if="loading" class="ent-table-skeleton" role="status" aria-label="در حال بارگذاری جدول">
       <div class="ent-table-skeleton-row ent-table-skeleton-head">
         <Skeleton v-for="n in shownColumns.length" :key="`sh-${n}`" height="1.25rem" />
       </div>
@@ -426,10 +426,7 @@ defineExpose({ clearSelection, resetPage })
 
       <!-- Empty state -->
       <template #empty>
-        <div class="ent-table-empty">
-          <i class="pi pi-inbox" aria-hidden="true"></i>
-          <span>{{ emptyMessage }}</span>
-        </div>
+        <div class="ent-table-empty" role="status"><span>{{ emptyMessage }}</span></div>
       </template>
     </DataTable>
   </div>
@@ -440,9 +437,9 @@ defineExpose({ clearSelection, resetPage })
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  box-shadow: none;
 }
 
 /* Toolbar: title/count on one side, search and view controls on the other. */
@@ -516,7 +513,7 @@ defineExpose({ clearSelection, resetPage })
 }
 .ent-table-search :deep(input) {
   width: 100%;
-  min-height: 2.7rem;
+  min-height: 2.75rem;
   padding-inline-start: 2.4rem;
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-md);
@@ -527,7 +524,7 @@ defineExpose({ clearSelection, resetPage })
 .ent-table-search :deep(input:focus) {
   border-color: var(--ds-color-primary);
   background: var(--ds-color-surface);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-focus) 28%, transparent);
 }
 .ent-table-toolbar-end > :deep(button) {
   min-width: 2.75rem;
@@ -572,7 +569,7 @@ defineExpose({ clearSelection, resetPage })
 .ent-table-filter :deep(.p-inputtext),
 .ent-table-filter :deep(.p-select) {
   min-width: 12rem;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   border-radius: var(--ds-radius-md);
 }
 
@@ -785,9 +782,9 @@ defineExpose({ clearSelection, resetPage })
     gap: .15rem .65rem;
     padding: .55rem;
     border: 1px solid var(--ds-color-border);
-    border-radius: var(--ds-radius-lg);
+    border-radius: var(--ds-radius-md);
     background: var(--ds-color-surface);
-    box-shadow: var(--ds-shadow-xs);
+    box-shadow: none;
   }
   .ent-table--mobile-cards :deep(.p-datatable-tbody > tr > td) {
     display: block;

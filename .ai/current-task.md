@@ -63,3 +63,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - PrimeVue cards/panels, DataTables, toolbars, inputs and buttons now use flatter surfaces, consistent touch targets and explicit keyboard focus; dialog elevation is retained.
 - Legacy stat and quick-action components are restyled data-first and as navigation rows.
 - Static token-name review found no undefined semantic token references in the new mixin. Sass compilation was not run.
+
+
+### Forms, tables and inquiry workflows
+- Shared FormSectionHeader and RequiredFieldsProgress are now typography-first and free of decorative icon/kicker treatment.
+- Shared DataTable has semantic loading/empty states, aria-busy, quieter mobile rows and consistent focus/touch targets.
+- Product form/list and inquiry/RFQ page families receive cross-app flat-surface refinements.
+- Website inquiry subscription now uses the shared page heading and accessible quota progress meters.
+- New component regression tests are authored; execution remains NOT RUN by owner instruction.

@@ -2669,3 +2669,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Phase 4 commit:** Pending/recorded separately in the previous checkpoint.
 - **Phase 5 commit:** Pending atomic tree/commit creation.
 - **Next:** Continue page-family review and redesign for inquiry, product management, user/role management, public profiles/search, orders/cart and content pages.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-6 — FORMS, DATA TABLES AND INQUIRY FLOWS
+- **Status:** IN_PROGRESS — shared form/table primitives and inquiry workflow surfaces refined; remaining page families continue.
+- **Scope:** FormSectionHeader, RequiredFieldsProgress, shared DataTable, product-form/list global refinements, admin/company inquiry detail/create/list/subscription global refinements, website inquiry subscription page.
+- **Form primitives:** Removed decorative icon tiles from FormSectionHeader; made the section title/description the hierarchy. RequiredFieldsProgress now uses a flat semantic progress surface without an eyebrow label.
+- **DataTable:** Added aria-busy to the table shell, status semantics to loading/empty states, removed the empty-state icon tile, reduced mobile row framing/shadows, aligned filter/search targets with the 44px rule and updated focus color.
+- **Product management:** Added global refinements for ProductForm sections, page header, progress panel, image/price rows and ProductList management surfaces; no product fields or lifecycle/API behavior changed.
+- **Inquiry/RFQ:** Added global flat-surface rules for list/detail/create/subscription workflows; removed the redundant Company InquiryList table title; replaced Website InquirySubscription's custom icon/eyebrow header with WorkspacePageHeading; added accessible progress semantics to quota meters and retained subscription behavior.
+- **Tests:** Added FormSectionHeader and RequiredFieldsProgress component regression tests. NOT RUN — owner instruction. Existing fixed notification-folder tests also remain unexecuted.
+- **Build/browser:** NOT RUN — owner instruction.
+- **API/backend/auth/permissions:** No changes.
+- **Phase 6 commit:** Pending atomic tree/commit creation.
+- **Next:** Continue with public company/search/content pages and remaining Admin/Company operational pages, then cross-app theme/responsive review.

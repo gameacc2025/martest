@@ -52,3 +52,8 @@ The owner has explicitly asked not to run browser-focused checks or tests/builds
 ## Global shared UI checkpoint — 2026-11-03
 
 The shared PrimeVue/Sakai layer now applies the skill refinements after the legacy styles across Admin, Company and Website. This improves the full application surface in one place: cards/panels no longer add nested shadows, metrics become data-first, quick actions become rows, inputs/buttons get consistent touch targets and focus states, tables use clearer data hierarchy, and motion respects reduced-motion preferences. Page-specific review is still required for each workflow and no full redesign completion is claimed.
+
+
+## Workflow-family checkpoint — 2026-11-03
+
+The shared DataTable, form-section heading and required-field progress primitives have been refined. Product authoring/catalogue management and inquiry/RFQ pages now inherit cross-app flat-surface rules. Website inquiry subscription uses the shared heading and accessible quota meters. These changes do not complete the remaining public profiles, order/checkout, help/legal, user/role management, or all 69 pages.

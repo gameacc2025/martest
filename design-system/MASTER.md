@@ -121,3 +121,11 @@ See docs/UI_REDESIGN_SKILLS_EXECUTION.md for phased execution and .ai/current-ta
 ## Global shared component refinement layer (2026-11-03)
 
 The shared stylesheet loads skill-refinements.scss as a mixin and emits it after the legacy Sakai rules. It applies the same skill-driven rules across Admin, Company and Website: typography-led legacy stat cards, compact quick-action rows, restrained PrimeVue cards/panels, explicit button/input focus states, 44px input targets, quieter DataTables and toolbars, and reduced-motion support. Dialog elevation is retained because dialogs are true overlays. Keep this layer semantic-token driven and do not add per-app palette overrides.
+
+
+## Forms, tables and inquiry workflow refinement (2026-11-03)
+
+- FormSectionHeader uses a clear title/description hierarchy without an icon tile; RequiredFieldsProgress is a flat semantic progress surface.
+- Shared DataTable provides loading/busy and empty-state semantics, restrained mobile row surfaces and consistent keyboard focus.
+- Product management and inquiry/RFQ page families inherit the cross-app surface rules from skill-refinements.scss.
+- Keep product lifecycle, inquiry access/eligibility, quotas, subscription/payment, API contracts and role permissions unchanged during visual refinement.

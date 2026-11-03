@@ -224,7 +224,6 @@ function createInquiry() {
             <SharedDataTable
               ref="tableRef"
               class="inquiry-management-table"
-              title="استعلام‌های شرکت"
               :columns="tableColumns"
               :rows="inquiries"
               :loading="loading"

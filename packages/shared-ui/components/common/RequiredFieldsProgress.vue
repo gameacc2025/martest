@@ -17,7 +17,6 @@ const percentage = computed(() => props.checks.length
   <section class="required-fields-progress" aria-label="تکمیل اطلاعات ضروری">
     <div class="progress-heading">
       <div>
-        <span class="progress-eyebrow">{{ eyebrow }}</span>
         <strong>{{ title }}</strong>
       </div>
       <span class="progress-value" aria-live="polite">
@@ -54,9 +53,9 @@ const percentage = computed(() => props.checks.length
   gap: .85rem;
   padding: 1.1rem 1.35rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  box-shadow: none;
 }
 .progress-heading {
   display: flex;
@@ -65,11 +64,7 @@ const percentage = computed(() => props.checks.length
   gap: 1rem;
 }
 .progress-heading > div { display: grid; gap: .15rem; }
-.progress-eyebrow {
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
+
 .progress-heading strong {
   color: var(--ds-color-text);
   font-size: var(--ds-font-size-sm);
