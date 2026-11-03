@@ -1569,3 +1569,9 @@ Admin and Company share a more accessible responsive shell: mobile drawer state 
 - Public header account-menu and mobile profile links now respect `accessProfile.type`: CUSTOMER remains on Website `/profile`; STAFF is handed off to Admin `/profile`; COMPANY is handed off to Company `/profile`.
 - The public account dropdown also sends STAFF inquiry navigation to Admin `/inquiries` rather than the Company panel. PKCE handoff remains in use; no tokens are placed in URLs.
 - No API/backend changes. Browser testing intentionally not run per user instruction.
+
+
+## Public shell accessibility pass — 2026-11-03
+
+- Added explicit accessible names to desktop/mobile product search inputs and the public notifications icon link; labeled the desktop primary navigation and marked its decorative bell icon hidden from assistive technology.
+- Existing destinations, search submission, notification routing, and responsive behavior are unchanged. Browser testing intentionally not run per user instruction.
