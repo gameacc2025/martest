@@ -69,7 +69,7 @@
               <template #default="{ id, invalid, describedBy }">
                 <Select
                   v-model="form.subject"
-                  :id="id"
+                  :inputId="id"
                   :aria-describedby="describedBy"
                   :options="subjectOptions"
                   optionLabel="label"
