@@ -153,12 +153,14 @@ function logout() {
     <div class="dash-header-end">
       <!-- Inline search (desktop) -->
       <form class="dash-header-search dash-header-desktop-only" @submit.prevent="submitSearch">
-        <i class="pi pi-search dash-header-search-icon"></i>
+        <i class="pi pi-search dash-header-search-icon" aria-hidden="true"></i>
         <input
           v-model="searchQuery"
           type="search"
+          name="workspace-search"
+          autocomplete="off"
           class="dash-header-search-input"
-          placeholder="جستجو..."
+          placeholder="جستجو…"
           aria-label="جستجو"
         />
       </form>
@@ -178,8 +180,10 @@ function logout() {
           <input
             v-model="searchQuery"
             type="search"
+            name="workspace-search"
+            autocomplete="off"
             class="dash-header-search-input"
-            placeholder="جستجو..."
+            placeholder="جستجو…"
             aria-label="جستجو"
           />
         </form>
@@ -561,9 +565,9 @@ function logout() {
 
 /* Enterprise topbar refinement — preserve brand and all existing actions. */
 .dash-header {
-  background: var(--surface-card);
+  background: var(--ds-color-surface);
   border-bottom-color: var(--ds-color-border);
-  box-shadow: none;
+  box-shadow: var(--ds-shadow-xs);
 }
 
 .dash-header-workspace {
@@ -571,8 +575,10 @@ function logout() {
   align-items: center;
   gap: .65rem;
   min-width: 0;
-  padding-inline: .9rem;
-  border-inline-start: 1px solid var(--ds-color-border);
+  padding: .35rem .65rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
 }
 .dash-header-workspace-mark {
   display: grid;

@@ -382,16 +382,16 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 
 /* Active item: translucent brand wash + white text + brand-colored icon (never color alone: the bar marks it too). */
 .dash-sidebar-link--active {
-  background: color-mix(in srgb, var(--ds-sidebar-fg-strong) 7%, transparent);
+  background: var(--ds-sidebar-active-bg);
   color: var(--ds-sidebar-fg-strong);
 }
 
 .dash-sidebar-link--active .dash-sidebar-link-icon {
-  color: var(--ds-sidebar-fg-strong);
+  color: var(--ds-sidebar-accent);
 }
 
 .dash-sidebar-link--active:hover {
-  background: color-mix(in srgb, var(--ds-sidebar-fg-strong) 7%, transparent);
+  background: color-mix(in srgb, var(--ds-sidebar-active-bg) 78%, var(--ds-sidebar-hover));
   color: var(--ds-sidebar-fg-strong);
 }
 
@@ -566,7 +566,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   border-radius: var(--ds-radius-md);
 }
 .dash-sidebar-link--active {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ds-sidebar-accent) 22%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ds-sidebar-accent) 32%, transparent);
 }
 .dash-sidebar-sublist {
   margin-inline: .35rem;

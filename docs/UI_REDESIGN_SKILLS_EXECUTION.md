@@ -154,3 +154,15 @@ Owner feedback rejected the previous over-minimal visual direction: the interfac
 - Static review only; tests/build/browser checks NOT RUN by owner instruction.
 
 Next phases must apply this corrected direction across remaining pages, not repeat the earlier blanket removal of card surfaces, iconography, and visual detail.
+
+
+## Shared workspace character restoration — 2026-11-03
+
+- Shared page headings now include their meaningful route-specific icon beside a compact title; eyebrow labels remain omitted.
+- KPI labels, dashboard panel titles and quick actions use contextual icons and clearer hierarchy without large icon tiles.
+- Dashboard panels and quick actions regain deliberate surface framing and subtle elevation; table and data density remain compact.
+- Admin/Company sidebar active states use a restrained teal brand wash and icon accent; topbar workspace context is surfaced.
+- Shared management/access/order/company/identity intros and settings/product-management icon marks are restored instead of being hidden by global styling.
+- Updated component tests for contextual heading/KPI/panel/quick-action icon output.
+- Existing API, role, permission, route, responsive and theme behavior remains unchanged.
+- Tests/build/browser checks NOT RUN by owner instruction.

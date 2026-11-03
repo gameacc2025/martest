@@ -2820,3 +2820,21 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** 9fc2eda2c9d3330200ddf810eea5f845b28959bb (updated origin/main).
 - **Push:** Remote main ref updated and verified.
 - **Next:** Continue the corrected design direction across remaining Admin/Company operational screens and Website marketplace; review page density, typography and intentional brand character instead of blanket minimalism.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-17 — RESTORE SHARED WORKSPACE CHARACTER
+- **Status:** IN_PROGRESS — shared headings, dashboard panels, quick actions and navigation shell now reflect the corrected visual direction.
+- **Goal:** Restore meaningful page identity and surface hierarchy without returning to oversized typography or generic decorative cards.
+- **Scope:** Shared WorkspacePageHeading, KpiCard, DashboardPanel, QuickActions, DashboardHeader, DashboardSidebar and global skill refinements; component regression tests.
+- **Changes:**
+  - WorkspacePageHeading now shows its route-specific PrimeIcon beside a compact H1; eyebrow labels remain suppressed.
+  - KpiCard shows its route-specific icon inline with the label, keeps values compact, and uses a lightly elevated surface.
+  - DashboardPanel restores a small contextual icon and framed header/body; QuickActions are compact surfaced navigation links with clear hover/focus.
+  - Sidebar active state now carries a visible teal brand wash/icon; topbar workspace context is framed and topbar has subtle elevation.
+  - Management/access/order/company/identity intro surfaces and settings/product-management icons are restored using semantic tokens.
+  - Updated WorkspacePageHeading, KpiCard, DashboardPanel and QuickActions tests for the new contextual-icon contract.
+- **Behavior preserved:** routes, data, role/permission filtering, navigation, theme toggling, dashboard metrics and action destinations unchanged.
+- **Verification:** Static source/structure review only. Automated tests, builds and browser checks NOT RUN — owner instruction.
+- **Commit:** Pending.
+- **Push:** Pending.
+- **Next:** Continue corrected visual direction through remaining Admin/Company list/detail pages and public marketplace pages.

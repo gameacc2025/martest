@@ -18,7 +18,7 @@ function faNumber(value) {
 <template>
   <component :is="to ? 'router-link' : 'div'" :to="to || undefined" class="kpi-card"
     :class="['kpi-card--' + tone, { 'kpi-card--link': to }]">
-    <span class="kpi-card-label">{{ label }}</span>
+    <span class="kpi-card-label"><i :class="icon" aria-hidden="true"></i>{{ label }}</span>
     <span v-if="loading" class="kpi-card-value kpi-card-value--skeleton" aria-label="در حال بارگذاری"></span>
     <strong v-else class="kpi-card-value">{{ faNumber(value) }}</strong>
     <span v-if="to" class="kpi-card-destination">مشاهده جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
@@ -43,7 +43,8 @@ function faNumber(value) {
   box-shadow: var(--ds-shadow-xs);
   transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast), background-color var(--ds-transition-fast);
 }
-.kpi-card-label { color: var(--ds-color-text-muted); font-size: .78rem; font-weight: var(--ds-font-weight-medium); line-height: 1.5; }
+.kpi-card-label { display: flex; align-items: center; gap: .4rem; color: var(--ds-color-text-muted); font-size: .78rem; font-weight: var(--ds-font-weight-medium); line-height: 1.5; }
+.kpi-card-label i { color: var(--kpi-value-color, var(--ds-color-primary-text)); font-size: .92rem; }
 .kpi-card-value {
   color: var(--kpi-value-color, var(--ds-color-text));
   font-size: 1.4rem;

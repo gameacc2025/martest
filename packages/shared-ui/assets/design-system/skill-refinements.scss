@@ -369,16 +369,31 @@
 .order-management-intro,
 .company-management-intro,
 .identity-management-intro {
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-lg) !important;
+  background: color-mix(in srgb, var(--ds-color-primary) 4%, var(--ds-color-surface)) !important;
+  box-shadow: var(--ds-shadow-xs) !important;
 }
 .management-page-icon,
 .access-management-icon,
 .order-management-icon,
 .company-management-intro-icon,
-.identity-management-icon { display: none !important; }
+.identity-management-icon {
+  display: grid !important;
+  place-items: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
+  border-radius: 9px;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+  font-size: 1.1rem;
+}
 
 .settings-page .settings-heading {
   padding: 0 0 var(--ds-space-4) !important;
@@ -388,7 +403,7 @@
   background: transparent !important;
   box-shadow: none !important;
 }
-.settings-page .settings-heading-icon,
+.settings-page .settings-heading-icon { display: grid !important; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 9px; background: var(--ds-color-primary-soft); color: var(--ds-color-primary-text); }
 .settings-page .settings-heading-eyebrow { display: none !important; }
 .settings-page .meta-section,
 .settings-page .form-section {

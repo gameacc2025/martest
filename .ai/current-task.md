@@ -161,3 +161,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Static structural review completed; tests/build/browser checks NOT RUN — owner instruction.
 - **Commit:** 9fc2eda2c9d3330200ddf810eea5f845b28959bb — https://github.com/gameacc2025/martest/commit/9fc2eda2c9d3330200ddf810eea5f845b28959bb
 - Next: apply the corrected visual direction to remaining Admin/Company operational screens and public marketplace surfaces; review typography/density and restore purposeful brand character without generic templates.
+
+
+### Shared workspace visual character — Phase 17
+- Restored contextual PrimeIcons in shared page headings, KPI labels and dashboard section headers without adding oversized icon tiles or decorative gradients.
+- Dashboard panels and quick actions now have clear surface framing, restrained elevation, compact labels and purposeful hover/focus states.
+- Rebalanced Admin/Company navigation: active items use the established teal wash and accent icon; topbar workspace context is a compact, surfaced control.
+- Shared management, access, order, company and identity intro regions now retain meaningful icon marks and subtle brand-tinted surfaces instead of being flattened or hidden globally.
+- Settings and product management headings retain their contextual icon marks while keeping eyebrow labels suppressed.
+- Updated component tests to assert the restored contextual icon and navigation hierarchy.
+- API, routing, permissions, responsive shell behavior and dashboard data contracts are unchanged.
+- Static review only; tests/build/browser checks NOT RUN — owner instruction.

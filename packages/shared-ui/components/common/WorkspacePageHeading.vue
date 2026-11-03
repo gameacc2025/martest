@@ -12,7 +12,10 @@ defineProps({
 <template>
   <section class="workspace-page-heading" :aria-labelledby="headingId">
     <div class="workspace-page-heading-copy">
-      <h1 :id="headingId">{{ title }}</h1>
+      <div class="workspace-page-heading-title-row">
+        <i class="workspace-page-heading-icon" :class="icon" aria-hidden="true"></i>
+        <h1 :id="headingId">{{ title }}</h1>
+      </div>
       <p v-if="description">{{ description }}</p>
     </div>
     <div v-if="$slots.actions" class="workspace-page-heading-actions"><slot name="actions"></slot></div>
@@ -36,6 +39,8 @@ defineProps({
   box-shadow: var(--ds-shadow-xs);
 }
 .workspace-page-heading-copy { min-width: 0; flex: 1 1 24rem; }
+.workspace-page-heading-title-row { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+.workspace-page-heading-icon { flex: 0 0 auto; color: var(--ds-color-primary-text); font-size: 1.2rem; }
 .workspace-page-heading h1 {
   margin: 0;
   color: var(--ds-color-text);

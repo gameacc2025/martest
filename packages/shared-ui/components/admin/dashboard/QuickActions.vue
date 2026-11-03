@@ -14,18 +14,29 @@ defineProps({ actions: { type: Array, default: () => [] } })
 </template>
 
 <style scoped>
-.quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--ds-space-6); }
+.quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
 .quick-action-item {
-  display: flex; min-width: 0; min-height: 3.25rem; align-items: center; gap: var(--ds-space-3);
-  padding: .65rem .15rem; border-bottom: 1px solid var(--ds-color-border); color: var(--ds-color-text);
-  text-decoration: none; font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-medium);
-  transition: color var(--ds-transition-fast);
+  display: flex;
+  min-width: 0;
+  min-height: 3.4rem;
+  align-items: center;
+  gap: .7rem;
+  padding: .65rem .8rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  box-shadow: var(--ds-shadow-xs);
+  text-decoration: none;
+  font-size: .8rem;
+  font-weight: var(--ds-font-weight-medium);
+  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
 }
-.quick-action-icon { flex: 0 0 1.25rem; color: var(--ds-color-text-muted); font-size: 1.05rem; text-align: center; }
+.quick-action-icon { flex: 0 0 auto; color: var(--ds-color-primary-text); font-size: 1.05rem; }
 .quick-action-label { min-width: 0; overflow-wrap: anywhere; }
-.quick-action-arrow { margin-inline-start: auto; color: var(--ds-color-text-muted); font-size: .8rem; transition: transform var(--ds-transition-fast), color var(--ds-transition-fast); }
-.quick-action-item:hover, .quick-action-item:hover .quick-action-icon, .quick-action-item:hover .quick-action-arrow { color: var(--ds-color-primary-text); }
-.quick-action-item:hover .quick-action-arrow { transform: translateX(-2px); }
+.quick-action-arrow { margin-inline-start: auto; color: var(--ds-color-text-muted); font-size: .78rem; transition: transform var(--ds-transition-fast), color var(--ds-transition-fast); }
+.quick-action-item:hover { border-color: color-mix(in srgb, var(--ds-color-primary) 35%, var(--ds-color-border)); background: var(--ds-color-surface-hover); box-shadow: var(--ds-shadow-sm); }
+.quick-action-item:hover .quick-action-arrow { color: var(--ds-color-primary-text); transform: translateX(-2px); }
 .quick-action-item:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 @media (max-width: 640px) { .quick-actions { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .quick-action-item, .quick-action-arrow { transition: none; } }

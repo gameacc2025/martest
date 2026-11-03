@@ -142,3 +142,15 @@ The first skill pass was too austere: feedback identified lifeless/plain pages a
 - Admin, Company and Website notification inboxes have been refactored to this email-client hierarchy using existing API-backed messages and the existing notification actions.
 - Shared WorkspacePageHeading, KpiCard and skill-refinements.scss now use compact typography and intentional surface depth.
 - Preserve the established brand tokens, RTL, light/dark theme behavior, API contracts and existing user actions.
+
+
+## Shared workspace visual character — 2026-11-03
+
+Avoid the false choice between oversized decorative dashboard tiles and completely plain text rows. Use compact contextual icons, meaningful surface framing and small but visible brand accents:
+
+- Shared page headings pair a compact 20px title with the route-specific PrimeIcon; keep eyebrow labels out.
+- KPI values remain compact (about 22px) while their meaningful icon sits inline with the label, not in a generic tinted circle.
+- Dashboard panels have a framed header/body with a contextual icon; quick actions are compact surfaced links with visible hover/focus.
+- Sidebar active navigation uses the existing teal wash/icon accent against the established navy shell.
+- Management/access/order/company/identity intro surfaces may use a subtle brand tint and their route-specific icon to identify the task.
+- Keep cards/panels purposeful and shallow; avoid both nested-card stacks and completely unframed content.

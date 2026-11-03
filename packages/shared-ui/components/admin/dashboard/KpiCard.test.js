@@ -3,11 +3,11 @@ import { mount } from '@vue/test-utils'
 import KpiCard from './KpiCard.vue'
 
 describe('KpiCard', () => {
-  it('renders the supplied value and label without a decorative icon tile', () => {
+  it('renders the supplied value, label and compact contextual icon', () => {
     const wrapper = mount(KpiCard, { props: { label: 'محصولات منتشر شده', value: 1250, icon: 'pi pi-box' } })
     expect(wrapper.find('.kpi-card-label').text()).toBe('محصولات منتشر شده')
     expect(wrapper.find('.kpi-card-value').text()).toBe('۱٬۲۵۰')
-    expect(wrapper.find('.kpi-card-icon').exists()).toBe(false)
+    expect(wrapper.find('.kpi-card-label i').classes()).toContain('pi-box')
   })
 
   it('shows a loading placeholder and keeps the supplied destination', () => {
