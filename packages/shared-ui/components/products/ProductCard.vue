@@ -26,7 +26,11 @@
         <div class="product-media">
           <img
             :src="product.image || '/placeholder-product.jpg'"
-            :alt="product.name"
+            :alt="product.name || 'تصویر محصول'"
+            width="640"
+            height="480"
+            loading="lazy"
+            decoding="async"
             class="product-image"
           />
           <div v-if="product.discount > 0" class="product-discount">
@@ -34,7 +38,10 @@
           </div>
           <div class="product-wishlist">
             <Button
+              type="button"
               icon="pi pi-heart"
+              :aria-label="product.isInWishlist ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'"
+              :aria-pressed="Boolean(product.isInWishlist)"
               :class="['p-button-rounded', 'p-button-text', 'p-button-plain', { 'is-active': product.isInWishlist }]"
               @click="$emit('toggle-wishlist', product)"
             />
@@ -46,7 +53,7 @@
           <div class="product-info-head">
             <div>
               <h3 class="product-name">{{ product.name }}</h3>
-              <p v-if="product.company" class="product-company">{{ product.company.name }}</p>
+              <p v-if="product.company?.name" class="product-company">{{ product.company.name }}</p>
             </div>
           </div>
 
@@ -66,15 +73,15 @@
 
           <div class="product-features">
             <div v-if="product.specs?.ram" class="product-feature">
-              <i class="pi pi-memory"></i>
+              <i class="pi pi-memory" aria-hidden="true"></i>
               <span>RAM: {{ product.specs.ram }}</span>
             </div>
             <div v-if="product.specs?.storage" class="product-feature">
-              <i class="pi pi-hard-drive"></i>
+              <i class="pi pi-hard-drive" aria-hidden="true"></i>
               <span>حافظه: {{ product.specs.storage }}</span>
             </div>
             <div v-if="product.specs?.cpu" class="product-feature">
-              <i class="pi pi-cog"></i>
+              <i class="pi pi-cog" aria-hidden="true"></i>
               <span>پردازنده: {{ product.specs.cpu }}</span>
             </div>
           </div>
@@ -183,12 +190,7 @@ const formatPrice = (price) => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: var(--ds-radius-md) var(--ds-radius-md) 0 0;
-  transition: transform var(--ds-transition);
-}
-
-.product-card:hover .product-image {
-  transform: scale(1.05);
+  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
 }
 
 .product-discount {
@@ -402,15 +404,15 @@ const formatPrice = (price) => {
 
 .product-card :deep(.p-card) {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: none;
   overflow: hidden;
-  transition: transform var(--ds-transition), box-shadow var(--ds-transition), border-color var(--ds-transition);
+  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
 }
 .product-card:not(.product-card--skeleton):hover :deep(.p-card) {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--ds-color-primary) 40%, var(--ds-color-border));
-  box-shadow: var(--ds-shadow-md);
+  border-color: var(--ds-color-primary);
+  background: var(--ds-color-surface-hover);
 }
 
 </style>

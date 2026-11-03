@@ -84,3 +84,12 @@ The shared DataTable, form-section heading and required-field progress primitive
 - Product links are semantic router links, product images include dimensions/lazy decoding, and missing supplier details are not replaced with invented generic labels.
 - Existing API-backed product content and navigation destinations are preserved.
 - No tests/build/browser screenshots were run, per owner instruction.
+
+
+## Search, address book and shared ProductCard — 2026-11-03
+
+- Shared ProductCard now stabilizes image layout, lazily loads product media, exposes wishlist pressed state and accessible labels, and removes generic hover lift/zoom/shadows.
+- SearchResults has an explicitly named search input, accessible filter disclosure, sort state, and a flat search heading/state layout.
+- Address book fields now carry names and semantic input metadata; loading and load-error states no longer fall through to a misleading empty state, and edit/delete controls have context-aware names.
+- Search, cart, wishlist and address CRUD contracts remain unchanged.
+- Tests/build/browser screenshots remain NOT RUN by owner instruction.

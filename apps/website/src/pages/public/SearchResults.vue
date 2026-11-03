@@ -1,7 +1,7 @@
 <template>
   <main class="search-results-page ds-page" aria-labelledby="search-results-title">
     <div class="sr-container ds-container ds-stack">
-      <header class="sr-head ds-card ds-card--pad">
+      <header class="sr-head">
         <div class="sr-heading-copy">
           <span class="ds-eyebrow">بازارگاه تجهیزات مخابراتی</span>
           <h1 id="search-results-title" class="ds-h1">
@@ -15,7 +15,9 @@
           <InputText
             id="product-search-query"
             v-model="searchQuery"
-            placeholder="نام یا مدل محصول را وارد کنید..."
+            name="productSearchQuery"
+            type="search"
+            placeholder="نام یا مدل محصول را وارد کنید…"
             class="sr-search-input"
             autocomplete="off"
           />
@@ -26,7 +28,7 @@
             :icon="showFilters ? 'pi pi-times' : 'pi pi-filter'"
             class="sr-secondary-button"
             :aria-expanded="showFilters"
-            aria-controls="search-filters"
+            :aria-controls="showFilters ? 'search-filters' : undefined"
             @click="toggleFilters"
           />
         </form>
@@ -86,12 +88,13 @@
                 <template v-else-if="loading">در حال جستجو...</template>
               </p>
             </div>
-            <div class="sr-sort-actions" aria-label="مرتب‌سازی نتایج">
+            <div class="sr-sort-actions" role="group" aria-label="مرتب‌سازی نتایج">
               <Button
                 type="button"
                 icon="pi pi-calendar"
                 class="sr-icon-button"
                 aria-label="مرتب‌سازی بر اساس جدیدترین محصولات"
+                :aria-pressed="sortOption === 'date_desc'"
                 title="جدیدترین محصولات"
                 @click="sortBy('date', 'desc')"
               />
@@ -100,6 +103,7 @@
                 icon="pi pi-sort-alpha-up"
                 class="sr-icon-button"
                 aria-label="مرتب‌سازی بر اساس نام"
+                :aria-pressed="sortOption === 'name_asc'"
                 title="مرتب‌سازی بر اساس نام"
                 @click="sortBy('name', 'asc')"
               />
@@ -111,13 +115,14 @@
                 optionLabel="label"
                 optionValue="value"
                 class="sr-sort-dropdown"
+                aria-label="مرتب‌سازی محصولات"
                 @change="onSortChange"
               />
             </div>
           </div>
 
           <div v-if="loading" class="sr-state ds-card" role="status" aria-live="polite" aria-busy="true">
-            <ProgressSpinner />
+            <ProgressSpinner aria-label="در حال جستجوی محصولات" />
             <h3 class="sr-state-title">در حال جستجوی محصولات</h3>
             <p class="sr-state-text">لطفاً چند لحظه صبر کنید.</p>
           </div>
@@ -375,7 +380,9 @@ const viewProduct = (product) => {
 
 .sr-head {
   display: grid;
-  gap: var(--ds-space-6);
+  gap: var(--ds-space-5);
+  padding-bottom: var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-color-border);
 }
 
 .sr-heading-copy {
@@ -432,6 +439,9 @@ const viewProduct = (product) => {
 .sr-filter-card {
   position: sticky;
   top: var(--ds-space-4);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: none;
 }
 
 .sr-filter-block {
@@ -505,6 +515,10 @@ const viewProduct = (product) => {
 .sr-state {
   display: flex;
   min-height: 17rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;

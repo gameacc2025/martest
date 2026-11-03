@@ -2727,3 +2727,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** Pending atomic tree/commit creation.
 - **Push:** Pending.
 - **Next action:** Continue SearchResults, Contact/About-adjacent public pages, customer profile, addresses, orders, checkout/cart and inquiry pages; then cross-app responsive/theme review.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-10 — SEARCH, ADDRESS BOOK AND SHARED PRODUCT CARD
+- **Status:** IN_PROGRESS — public search/account address surfaces and shared product card refined.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Scope:** Website SearchResults and Addresses; shared ProductCard.
+- **Shared ProductCard:** Added image width/height, lazy loading and async decoding; made wishlist control a typed button with accessible name and pressed state; marked specification icons decorative; omitted a supplier line when the company has no name; removed image zoom, hover lift and generic card shadow.
+- **SearchResults:** Added stable search input name/type and corrected placeholder typography; made filter disclosure aria-controls conditional on visibility; added pressed state to quick-sort controls, a labeled sort group/selector and accessible loading announcement; flattened the title and filter/state surfaces.
+- **Addresses:** Added stable field names and semantic phone input type; improved loading status and load-error retry; prevented the empty-state message from appearing alongside a load error; removed decorative location icon tiles; flattened address surfaces and strengthened visible keyboard focus; added context-specific labels to edit/delete controls.
+- **Business behavior:** Preserved search API/query/URL behavior, cart/wishlist events, address CRUD endpoints and payloads.
+- **Verification:** Static source review only. Automated tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Next action:** Continue orders/cart/checkout and customer profile, contact page, public account and remaining Admin/Company details; finish cross-app responsive/theme/accessibility review.

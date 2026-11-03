@@ -135,7 +135,7 @@ async function deleteAddress(address) {
 </script>
 
 <template>
-  <main class="ds-container ds-page addresses-page" dir="rtl">
+  <main class="ds-container ds-page addresses-page" dir="rtl" aria-labelledby="addresses-page-title" :aria-busy="loading || saving">
     <WorkspacePageHeading
       eyebrow="حساب کاربری"
       title="آدرس‌های من"
@@ -149,35 +149,38 @@ async function deleteAddress(address) {
       </template>
     </WorkspacePageHeading>
 
-    <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
+    <p v-if="errorMessage" class="notice error" role="alert">
+      {{ errorMessage }}
+      <button v-if="!loading && !addresses.length && !formVisible" class="text-button" type="button" @click="loadAddresses">تلاش دوباره</button>
+    </p>
     <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
 
     <section v-if="formVisible" class="address-card form-card">
       <h2>{{ editingId ? 'ویرایش آدرس' : 'ثبت آدرس جدید' }}</h2>
       <form class="address-form" @submit.prevent="saveAddress">
         <label>عنوان آدرس
-          <input v-model="form.label" maxlength="50" placeholder="مثلاً خانه یا محل کار">
+          <input v-model="form.label" name="addressLabel" maxlength="50" autocomplete="off" placeholder="مثلاً خانه یا محل کار">
         </label>
         <label>نام تحویل‌گیرنده *
-          <input v-model="form.recipientName" required maxlength="120" autocomplete="name">
+          <input v-model="form.recipientName" name="recipientName" required maxlength="120" autocomplete="name">
         </label>
         <label>شماره تماس تحویل‌گیرنده *
-          <input v-model="form.recipientPhone" required maxlength="30" autocomplete="tel" inputmode="tel">
+          <input v-model="form.recipientPhone" name="recipientPhone" type="tel" required maxlength="30" autocomplete="tel" inputmode="tel">
         </label>
         <label>استان *
-          <input v-model="form.province" required maxlength="100" autocomplete="address-level1">
+          <input v-model="form.province" name="province" required maxlength="100" autocomplete="address-level1">
         </label>
         <label>شهر *
-          <input v-model="form.city" required maxlength="100" autocomplete="address-level2">
+          <input v-model="form.city" name="city" required maxlength="100" autocomplete="address-level2">
         </label>
         <label>کد پستی
-          <input v-model="form.postalCode" maxlength="30" autocomplete="postal-code" inputmode="numeric">
+          <input v-model="form.postalCode" name="postalCode" maxlength="30" autocomplete="postal-code" inputmode="numeric">
         </label>
         <label class="full-width">نشانی کامل *
-          <textarea v-model="form.addressLine" required minlength="5" maxlength="1000" rows="3" autocomplete="street-address" placeholder="خیابان، کوچه، پلاک، واحد و جزئیات لازم"></textarea>
+          <textarea v-model="form.addressLine" name="addressLine" required minlength="5" maxlength="1000" rows="3" autocomplete="street-address" placeholder="خیابان، کوچه، پلاک، واحد و جزئیات لازم"></textarea>
         </label>
         <label class="default-choice full-width">
-          <input v-model="form.isDefault" type="checkbox">
+          <input v-model="form.isDefault" name="isDefault" type="checkbox">
           این آدرس، آدرس پیش‌فرض من باشد
         </label>
         <div class="form-actions full-width">
@@ -187,18 +190,17 @@ async function deleteAddress(address) {
       </form>
     </section>
 
-    <div v-if="loading" class="state" role="status">در حال دریافت آدرس‌ها…</div>
+    <div v-if="loading" class="state" role="status" aria-live="polite" aria-busy="true">در حال دریافت آدرس‌ها…</div>
     <section v-else-if="addresses.length" class="address-list" aria-label="فهرست آدرس‌ها">
       <article v-for="address in addresses" :key="address.id" class="address-card">
         <div class="address-top">
           <div class="address-title">
-            <span class="address-pin" aria-hidden="true"><i class="pi pi-map-marker"></i></span>
             <h2>{{ address.label || 'آدرس من' }}</h2>
             <span v-if="address.isDefault" class="default-badge">آدرس پیش‌فرض</span>
           </div>
           <div class="address-actions">
-            <button class="text-button" type="button" @click="openEdit(address)">ویرایش</button>
-            <button class="text-button danger-text" type="button" :disabled="deletingId === address.id" @click="deleteAddress(address)">{{ deletingId === address.id ? 'در حال حذف…' : 'حذف' }}</button>
+            <button class="text-button" type="button" :aria-label="'ویرایش آدرس ' + (address.label || address.city)" @click="openEdit(address)">ویرایش</button>
+            <button class="text-button danger-text" type="button" :aria-label="'حذف آدرس ' + (address.label || address.city)" :disabled="deletingId === address.id" @click="deleteAddress(address)">{{ deletingId === address.id ? 'در حال حذف…' : 'حذف' }}</button>
           </div>
         </div>
         <p class="recipient">{{ address.recipientName }} <span>·</span> {{ address.recipientPhone }}</p>
@@ -207,8 +209,7 @@ async function deleteAddress(address) {
         <button v-if="!address.isDefault" class="button button-secondary make-default" type="button" @click="setDefault(address)">انتخاب به‌عنوان آدرس پیش‌فرض</button>
       </article>
     </section>
-    <section v-else class="empty-state">
-      <div class="empty-icon" aria-hidden="true"><i class="pi pi-map-marker"></i></div>
+    <section v-else-if="!errorMessage" class="empty-state" role="status">
       <h2>هنوز آدرسی ثبت نکرده‌اید</h2>
       <p>برای دسترسی سریع‌تر، آدرس خانه یا محل کارتان را اضافه کنید.</p>
       <button class="button button-primary" type="button" @click="openCreate">ثبت اولین آدرس</button>
@@ -217,21 +218,23 @@ async function deleteAddress(address) {
 </template>
 
 <style scoped>
-.addresses-page{direction:rtl;max-width:var(--ds-container-max-wide)}.page-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}.page-heading h1{margin:.2rem 0;font-size:1.7rem;font-weight:800;color:var(--text-color)}.eyebrow{margin:0;color:var(--primary-color);font-size:.85rem}.muted{margin:.5rem 0 0;color:var(--text-color-secondary);font-size:.92rem;line-height:1.8}.heading-actions,.address-actions,.form-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}.button{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:9px;padding:.7rem 1rem;font:inherit;font-size:.9rem;text-decoration:none;cursor:pointer;transition:opacity .15s,background .15s}.button:disabled{opacity:.55;cursor:not-allowed}.button-primary{background:var(--primary-color);color:#fff}.button-secondary{background:var(--surface-card);border-color:var(--surface-border);color:var(--text-color)}.notice{padding:.8rem 1rem;border-radius:9px;margin-bottom:1rem;line-height:1.7}.error{background:var(--red-50);color:var(--red-700)}.success{background:var(--green-50);color:var(--green-700)}.address-list{display:grid;gap:1rem}.address-card{padding:1.2rem;border:1px solid var(--surface-border);border-radius:14px;background:var(--surface-card);box-shadow:0 2px 10px #00000005}.address-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}.address-title{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.address-title h2,.form-card h2,.empty-state h2{margin:0;font-size:1.1rem;font-weight:750;color:var(--text-color)}.address-pin{font-size:1.4rem;color:var(--primary-color)}.default-badge{font-size:.75rem;font-weight:700;color:var(--primary-color);background:var(--primary-50);padding:.3rem .55rem;border-radius:999px}.text-button{border:0;background:transparent;color:var(--primary-color);font:inherit;font-size:.86rem;cursor:pointer;padding:.3rem}.text-button:disabled{opacity:.5}.danger-text{color:var(--red-600)}.recipient{font-weight:650;margin:.9rem 0 .35rem;color:var(--text-color)}.recipient span{color:var(--text-color-secondary);padding:0 .25rem}.address-line{line-height:1.9;margin:.3rem 0;color:var(--text-color)}.postal{font-size:.85rem;color:var(--text-color-secondary);margin:.5rem 0}.make-default{margin-top:.6rem;font-size:.82rem;padding:.5rem .7rem}.form-card{margin-bottom:1.2rem}.form-card h2{margin-bottom:1rem}.address-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.address-form label{display:flex;flex-direction:column;gap:.45rem;font-size:.88rem;font-weight:600;color:var(--text-color)}.address-form input:not([type=checkbox]),.address-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--surface-border);border-radius:8px;background:var(--surface-ground);color:var(--text-color);padding:.75rem;font:inherit;font-weight:400;min-width:0}.address-form input:focus,.address-form textarea:focus{outline:2px solid var(--primary-color);outline-offset:1px}.full-width{grid-column:1/-1}.default-choice{flex-direction:row!important;align-items:center;gap:.6rem!important}.default-choice input{width:1rem;height:1rem;accent-color:var(--primary-color)}.form-actions{justify-content:flex-start}.state,.empty-state{padding:3rem 1rem;text-align:center;color:var(--text-color-secondary)}.empty-state{border:1px dashed var(--surface-border);border-radius:14px;background:var(--surface-card)}.empty-state h2{margin:.8rem 0}.empty-state p{line-height:1.8}.empty-icon{font-size:2.4rem;color:var(--primary-color)}@media(max-width:640px){.address-form{grid-template-columns:1fr}.full-width{grid-column:auto}.heading-actions{width:100%}.heading-actions .button{flex:1}.address-card{padding:1rem}.address-actions{width:100%;justify-content:flex-start}}
+.addresses-page{direction:rtl;max-width:var(--ds-container-max-wide)}.page-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}.page-heading h1{margin:.2rem 0;font-size:1.7rem;font-weight:800;color:var(--text-color)}.eyebrow{margin:0;color:var(--primary-color);font-size:.85rem}.muted{margin:.5rem 0 0;color:var(--text-color-secondary);font-size:.92rem;line-height:1.8}.heading-actions,.address-actions,.form-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}.button{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:9px;padding:.7rem 1rem;font:inherit;font-size:.9rem;text-decoration:none;cursor:pointer;transition:opacity .15s,background .15s}.button:disabled{opacity:.55;cursor:not-allowed}.button-primary{background:var(--primary-color);color:#fff}.button-secondary{background:var(--surface-card);border-color:var(--surface-border);color:var(--text-color)}.notice{padding:.8rem 1rem;border-radius:9px;margin-bottom:1rem;line-height:1.7}.error{background:var(--red-50);color:var(--red-700)}.success{background:var(--green-50);color:var(--green-700)}.address-list{display:grid;gap:1rem}.address-card{padding:1.2rem;border:1px solid var(--surface-border);border-radius:14px;background:var(--surface-card);box-shadow:0 2px 10px #00000005}.address-top{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}.address-title{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}.address-title h2,.form-card h2,.empty-state h2{margin:0;font-size:1.1rem;font-weight:750;color:var(--text-color)}.address-pin{font-size:1.4rem;color:var(--primary-color)}.default-badge{font-size:.75rem;font-weight:700;color:var(--primary-color);background:var(--primary-50);padding:.3rem .55rem;border-radius:999px}.text-button{border:0;background:transparent;color:var(--primary-color);font:inherit;font-size:.86rem;cursor:pointer;padding:.3rem}.text-button:disabled{opacity:.5}.danger-text{color:var(--red-600)}.recipient{font-weight:650;margin:.9rem 0 .35rem;color:var(--text-color)}.recipient span{color:var(--text-color-secondary);padding:0 .25rem}.address-line{line-height:1.9;margin:.3rem 0;color:var(--text-color)}.postal{font-size:.85rem;color:var(--text-color-secondary);margin:.5rem 0}.make-default{margin-top:.6rem;font-size:.82rem;padding:.5rem .7rem}.form-card{margin-bottom:1.2rem}.form-card h2{margin-bottom:1rem}.address-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.address-form label{display:flex;flex-direction:column;gap:.45rem;font-size:.88rem;font-weight:600;color:var(--text-color)}.address-form input:not([type=checkbox]),.address-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--surface-border);border-radius:8px;background:var(--surface-ground);color:var(--text-color);padding:.75rem;font:inherit;font-weight:400;min-width:0}.address-form input:focus-visible,.address-form textarea:focus-visible{outline:2px solid var(--ds-color-focus);outline-offset:2px}.full-width{grid-column:1/-1}.default-choice{flex-direction:row!important;align-items:center;gap:.6rem!important}.default-choice input{width:1rem;height:1rem;accent-color:var(--primary-color)}.form-actions{justify-content:flex-start}.state,.empty-state{padding:3rem 1rem;text-align:center;color:var(--text-color-secondary)}.empty-state{border:1px dashed var(--surface-border);border-radius:14px;background:var(--surface-card)}.empty-state h2{margin:.8rem 0}.empty-state p{line-height:1.8}.empty-icon{font-size:2.4rem;color:var(--primary-color)}@media(max-width:640px){.address-form{grid-template-columns:1fr}.full-width{grid-column:auto}.heading-actions{width:100%}.heading-actions .button{flex:1}.address-card{padding:1rem}.address-actions{width:100%;justify-content:flex-start}}
 
-.addresses-page .page-heading {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+.addresses-page .ds-page-heading {
+  align-items: flex-end;
+  padding: 0 0 var(--ds-space-4);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .addresses-page .page-heading h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
 .addresses-page .address-card {
   border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  box-shadow: none;
 }
 .addresses-page input,
 .addresses-page select,
@@ -248,15 +251,16 @@ async function deleteAddress(address) {
   max-width: var(--ds-container-max-wide);
   color: var(--ds-color-text);
 }
-.addresses-page .page-heading {
-  align-items: center;
+.addresses-page .ds-page-heading {
+  align-items: flex-end;
   gap: 1.25rem;
   margin-bottom: var(--ds-space-5);
-  padding: clamp(1rem, 2vw, 1.5rem);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  padding: 0 0 var(--ds-space-4);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .addresses-page .page-heading h1 { color: var(--ds-color-text); font-size: clamp(1.3rem, 2vw, var(--ds-font-size-2xl)); }
 .addresses-page .eyebrow { color: var(--ds-color-primary); font-weight: var(--ds-font-weight-bold); }
@@ -264,12 +268,10 @@ async function deleteAddress(address) {
 .addresses-page .address-card {
   padding: clamp(1rem, 2vw, 1.4rem);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-  transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+  box-shadow: none;
 }
-.addresses-page .address-card:hover { border-color: color-mix(in srgb, var(--ds-color-primary) 30%, var(--ds-color-border)); }
 .addresses-page .address-title h2,
 .addresses-page .form-card h2,
 .addresses-page .empty-state h2 { color: var(--ds-color-text); font-size: var(--ds-font-size-lg); }
@@ -301,16 +303,17 @@ async function deleteAddress(address) {
   background: var(--ds-color-surface-alt);
   color: var(--ds-color-text);
 }
-.addresses-page .address-form input:focus,
-.addresses-page .address-form textarea:focus {
-  border-color: var(--ds-color-primary);
-  outline: 0;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+.addresses-page .address-form input:focus-visible,
+.addresses-page .address-form textarea:focus-visible {
+  border-color: var(--ds-color-focus);
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 .addresses-page .notice { border: 1px solid; border-radius: var(--ds-radius-md); }
 .addresses-page .notice.error { border-color: color-mix(in srgb, var(--ds-color-danger) 30%, transparent); background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
 .addresses-page .notice.success { border-color: color-mix(in srgb, var(--ds-color-success) 30%, transparent); background: var(--ds-color-success-soft); color: var(--ds-color-success); }
-.addresses-page .empty-state { border-color: var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface-alt); }
+.addresses-page .empty-state { border: 0; border-top: 1px solid var(--ds-color-border); border-radius: 0; background: transparent; }
 @media (max-width: 640px) {
   .addresses-page .page-heading { align-items: stretch; }
   .addresses-page .heading-actions { display: grid; grid-template-columns: 1fr; }
@@ -330,8 +333,7 @@ async function deleteAddress(address) {
   font-weight: var(--ds-font-weight-semibold);
 }
 .addresses-page .text-button:hover { background: var(--ds-color-surface-hover); }
-.addresses-page .address-pin { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; border-radius: var(--ds-radius-lg); background: var(--ds-color-primary-soft); font-size: 1.1rem; }
-.addresses-page .empty-icon { display: grid; place-items: center; width: 4rem; height: 4rem; margin-inline: auto; border-radius: 50%; background: var(--ds-color-primary-soft); font-size: 1.6rem; }
+
 .addresses-page .address-form input:not([type="checkbox"]),
 .addresses-page .address-form textarea { min-height: var(--ds-touch-target); }
 .addresses-page .default-choice { min-height: var(--ds-touch-target); }
