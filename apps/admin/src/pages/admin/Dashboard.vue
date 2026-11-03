@@ -57,18 +57,37 @@
       {{ statsError }}
     </Message>
 
-    <!-- Operational workspace: actions, platform overview and service health. -->
-    <section class="admin-dashboard-workspace" aria-label="نمای عملیاتی">
+    <section class="admin-dashboard-analytics" aria-label="آمار و تحلیل پلتفرم">
+      <DashboardPanel title="نمای کلی پلتفرم" icon="pi pi-chart-bar" class="admin-dashboard-analytics-panel">
+        <template #actions><span class="admin-dashboard-hint">مقایسه حجم داده‌های ثبت‌شده در سامانه</span></template>
+        <div class="admin-dashboard-chart-layout">
+          <div class="admin-dashboard-chart-main">
+            <AnalyticsChart :series="analyticsSeries" :loading="loadingStats || loadingInquiryStats" tone="primary" :height="250" />
+          </div>
+          <div class="admin-dashboard-chart-aside">
+            <div class="admin-dashboard-chart-stat">
+              <span>کاربران ثبت‌شده</span><strong>{{ (stats.totalUsers || 0).toLocaleString('fa-IR') }}</strong>
+            </div>
+            <div class="admin-dashboard-chart-stat">
+              <span>شرکت‌های ثبت‌شده</span><strong>{{ (stats.totalCompanies || 0).toLocaleString('fa-IR') }}</strong>
+            </div>
+            <div class="admin-dashboard-chart-stat">
+              <span>محصولات سامانه</span><strong>{{ (stats.totalProducts || 0).toLocaleString('fa-IR') }}</strong>
+            </div>
+            <div class="admin-dashboard-chart-stat">
+              <span>استعلام‌های فعال</span><strong>{{ activeInquiries === null ? '—' : activeInquiries.toLocaleString('fa-IR') }}</strong>
+            </div>
+          </div>
+        </div>
+      </DashboardPanel>
+    </section>
+
+    <!-- Operational shortcuts and service health are secondary to analytics. -->
+    <section class="admin-dashboard-workspace" aria-label="ابزارهای عملیاتی">
       <DashboardPanel title="دسترسی سریع" icon="pi pi-bolt" class="admin-dashboard-quick">
         <template #actions><span class="admin-dashboard-hint">میان‌برهای مدیریت</span></template>
         <QuickActions :actions="quickActions" />
       </DashboardPanel>
-
-      <DashboardPanel title="نمای کلی پلتفرم" icon="pi pi-chart-bar" class="admin-dashboard-analytics">
-        <template #actions><span class="admin-dashboard-hint">بر اساس داده‌های دریافتی</span></template>
-        <AnalyticsChart :series="analyticsSeries" :loading="loadingStats" tone="primary" />
-      </DashboardPanel>
-
       <DashboardPanel title="سلامت سرویس‌ها" icon="pi pi-server" class="admin-dashboard-health">
         <template #actions><span class="admin-dashboard-hint">وضعیت اتصال</span></template>
         <SystemStatus :services="systemServices" />
@@ -522,7 +541,7 @@ onMounted(() => {
 .admin-dashboard-secondary-action:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 3px; }
 .admin-dashboard-workspace {
   display: grid;
-  grid-template-columns: minmax(280px, 1.1fr) minmax(320px, 1.25fr) minmax(240px, .8fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, .85fr);
   align-items: stretch;
   gap: var(--ds-space-5);
 }
@@ -587,7 +606,7 @@ onMounted(() => {
 
 @media (max-width: 1200px) {
   .admin-dashboard-workspace { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .admin-dashboard-quick { grid-column: 1 / -1; }
+  .admin-dashboard-quick { grid-column: auto; }
 }
 @media (max-width: 991px) {
   .admin-dashboard-grid--2-1,
