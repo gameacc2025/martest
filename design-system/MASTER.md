@@ -201,3 +201,7 @@ This replaces the previous teal/petrol brand palette by explicit product-owner c
 - The first real-page reference is the shared Notifications inbox: folder rail, compact toolbar/search, sender/subject/preview rows, unread state and a reading pane. It must use existing API data and actions; no mock message content.
 - Sidebar remains dark in both app themes; its active state uses a restrained turquoise/sky accent and accessible contrast.
 - API, route, authentication, permission, tenant and business logic are unchanged.
+
+
+## Admin and Company workspace implementation
+The shared workspace stylesheet is the visual source of truth for the Admin and Company portals. It defines the dark navy navigation rail, vivid sky-blue primary controls, turquoise secondary actions, compact Vazirmatn type scale, white/cool-gray surfaces, data tables, forms, dialogs, dashboard heroes and responsive shell behavior. Shared dashboard metric and panel components use the same tokens. This layer is presentation-only and must not change API, permission, route or tenant behavior.
