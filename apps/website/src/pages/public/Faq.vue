@@ -58,13 +58,9 @@ function toggleFaq(index) {
         <span aria-current="page">سوالات متداول</span>
       </nav>
 
-      <header class="faq-hero ds-card">
-        <span class="faq-hero__icon" aria-hidden="true"><i class="pi pi-question-circle"></i></span>
-        <div>
-          <span class="ds-eyebrow">راهنمای استفاده</span>
-          <h1 id="faq-title" class="ds-h1">سوالات متداول</h1>
-          <p class="ds-lead">پاسخ پرسش‌های رایج درباره محصولات، دسترسی استعلام و فرایند تأمین.</p>
-        </div>
+      <header class="faq-hero">
+        <h1 id="faq-title" class="ds-h1">سوالات متداول</h1>
+        <p class="ds-lead">پاسخ پرسش‌های رایج درباره محصولات، دسترسی استعلام و فرایند تأمین.</p>
       </header>
 
       <section class="faq-list" aria-label="فهرست پرسش‌ها">
@@ -99,8 +95,7 @@ function toggleFaq(index) {
         </article>
       </section>
 
-      <footer class="faq-support ds-card">
-        <span class="faq-support__icon" aria-hidden="true"><i class="pi pi-headphones"></i></span>
+      <footer class="faq-support">
         <div>
           <h2>پاسخ پرسش خود را پیدا نکردید؟</h2>
           <p>سوال خود را برای پشتیبانی ارسال کنید تا راهنمایی مناسب دریافت کنید.</p>
@@ -117,27 +112,86 @@ function toggleFaq(index) {
 .faq-breadcrumb { display: flex; align-items: center; gap: var(--ds-space-2); color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
 .faq-breadcrumb a { color: var(--ds-color-primary-text); text-decoration: none; }
 .faq-breadcrumb a:hover { text-decoration: underline; }
-.faq-hero { display: flex; align-items: center; gap: var(--ds-space-5); padding: clamp(1.25rem, 4vw, 2.5rem); background: linear-gradient(120deg, var(--ds-color-surface), var(--ds-color-surface-hover)); }
-.faq-hero__icon { display: flex; flex: 0 0 4rem; width: 4rem; height: 4rem; align-items: center; justify-content: center; border-radius: var(--ds-radius-xl); background: var(--ds-color-brand-dark); color: var(--ds-color-on-brand); font-size: 1.75rem; }
-.faq-hero .ds-lead { max-width: 65ch; }
-.faq-list { display: flex; flex-direction: column; gap: var(--ds-space-3); }
-.faq-item { overflow: hidden; }
+.faq-hero {
+  padding: 0 0 var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-color-border);
+}
+.faq-hero .ds-lead { max-width: 68ch; margin-bottom: 0; }
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--ds-color-border);
+}
+.faq-item {
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
 .faq-item__heading { margin: 0; font-size: inherit; }
-.faq-question { display: flex; width: 100%; min-height: 4.25rem; align-items: center; justify-content: space-between; gap: var(--ds-space-4); padding: var(--ds-space-4) var(--ds-space-5); border: 0; background: transparent; color: var(--ds-color-text); text-align: right; font: inherit; font-weight: var(--ds-font-weight-bold); cursor: pointer; }
-.faq-question:hover { background: var(--ds-color-surface-hover); }
-.faq-question__icon { display: inline-flex; flex: 0 0 2rem; width: 2rem; height: 2rem; align-items: center; justify-content: center; border-radius: var(--ds-radius-pill); background: var(--ds-color-primary-subtle); color: var(--ds-color-primary-text); }
-.faq-answer { padding: 0 var(--ds-space-5) var(--ds-space-5); color: var(--ds-color-text-muted); line-height: var(--ds-line-height-relaxed); }
+.faq-question {
+  display: flex;
+  width: 100%;
+  min-height: 4rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-4) 0;
+  border: 0;
+  background: transparent;
+  color: var(--ds-color-text);
+  text-align: right;
+  font: inherit;
+  font-weight: var(--ds-font-weight-semibold);
+  cursor: pointer;
+  transition: color var(--ds-transition-fast);
+}
+.faq-question:hover { color: var(--ds-color-primary-text); }
+.faq-question:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 3px;
+}
+.faq-question__icon {
+  display: inline-flex;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-color-text-muted);
+}
+.faq-answer {
+  max-width: 72ch;
+  padding: 0 0 var(--ds-space-5);
+  color: var(--ds-color-text-muted);
+  line-height: var(--ds-line-height-relaxed);
+}
 .faq-answer p { margin: 0; }
-.faq-answer .ds-link { margin-top: var(--ds-space-3); }
-.faq-support { display: flex; align-items: center; gap: var(--ds-space-4); padding: var(--ds-space-5); }
-.faq-support__icon { display: flex; flex: 0 0 3rem; width: 3rem; height: 3rem; align-items: center; justify-content: center; border-radius: var(--ds-radius-lg); background: var(--ds-color-primary-subtle); color: var(--ds-color-primary-text); font-size: 1.25rem; }
-.faq-support h2 { margin: 0 0 var(--ds-space-1); color: var(--ds-color-text); font-size: var(--ds-font-size-md); font-weight: var(--ds-font-weight-bold); }
-.faq-support p { margin: 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: var(--ds-line-height-relaxed); }
-.faq-support .ds-btn { margin-inline-start: auto; white-space: nowrap; }
+.faq-answer .ds-link { display: inline-flex; margin-top: var(--ds-space-3); }
+.faq-support {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-5);
+  padding: var(--ds-space-5) 0 0;
+  border-top: 1px solid var(--ds-color-border);
+}
+.faq-support h2 {
+  margin: 0 0 var(--ds-space-1);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-md);
+  font-weight: var(--ds-font-weight-bold);
+}
+.faq-support p {
+  margin: 0;
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  line-height: var(--ds-line-height-relaxed);
+}
+.faq-support .ds-btn { white-space: nowrap; }
 @media (max-width: 640px) {
-  .faq-hero { align-items: flex-start; }
-  .faq-hero__icon { flex-basis: 3rem; width: 3rem; height: 3rem; }
-  .faq-support { align-items: flex-start; flex-wrap: wrap; }
-  .faq-support .ds-btn { margin-inline-start: 0; }
+  .faq-support { align-items: flex-start; flex-direction: column; }
+  .faq-support .ds-btn { width: 100%; justify-content: center; }
 }
 </style>

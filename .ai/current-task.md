@@ -1,6 +1,6 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists and Company settings have received phased updates; full 69-page redesign remains in progress.  
+**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile and public read pages have received phased updates; full 69-page redesign remains in progress.  
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -45,7 +45,7 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 
 ## Remaining phases
 1. Admin and Company operational pages: list surfaces for category/company/user/role/permission/product and Company product/user settings have received a first refinement; continue detail/edit flows, orders, reports and operational edge states.
-2. Public Website: search results, company profiles, content/help/legal, profile, addresses, checkout/cart/order and inquiry pages.
+2. Public Website: company directory/profile and FAQ/Terms received first-pass refinements; search results, About/Contact, profile, addresses, checkout/cart/order and inquiry pages remain.
 3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility, loading/empty/error/disabled states and Vercel guideline review.
 4. Full 69-page inventory and documentation update, then a truthful completion report.
 
@@ -81,3 +81,12 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added explicit for/id, name, autocomplete and semantic input types to Company Settings profile/contact fields.
 - No API, route, authorization, tenant or business behavior changed.
 - Static source review only; tests/build/browser checks NOT RUN — owner instruction.
+
+
+### Public company discovery and read pages — Phase 8
+- Company directory now uses semantic search/filter/category controls, explicit loading/error/empty states, keyboard focus, and a non-decorative category navigation treatment.
+- Company profile uses a flat title-first header, truthful public-catalog explanation and stable heading IDs for loading/error/success states.
+- FAQ uses a flat accessible accordion list and a concise support close.
+- Terms uses a readable long-form column and section dividers; existing legal copy was preserved unchanged.
+- No API, route, permissions or business behavior changed.
+- Static source review only; automated tests/build/browser checks NOT RUN — owner instruction.

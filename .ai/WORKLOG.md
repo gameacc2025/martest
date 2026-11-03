@@ -2697,3 +2697,20 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Pending.
 - **Risks / open questions:** Existing Company Settings logo action remains visually present but its handler/real upload flow was not changed in this UI-only pass; review separately before calling that control functional. Other page families remain.
 - **Next action:** Continue remaining Company/Admin detail and reports surfaces, then Website public profiles, search, content/help/legal and account/commerce pages; finish with full page inventory and cross-theme/RTL static review.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-8 — PUBLIC COMPANY DISCOVERY AND READ PAGES
+- **Status:** IN_PROGRESS — public company directory/profile and help/legal reading surfaces refined; full redesign remains in progress.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Continue public Website redesign with semantic interactions, reliable data states and readable content surfaces.
+- **Scope:** Website Companies, CompanyProfile, FAQ and Terms pages.
+- **Company directory:** Converted category filters from clickable divs to native buttons with accessible names and visible keyboard focus; removed hover lift/box-shadow and transition-all; added a real search form with a labeled input and named submit button; added aria-pressed to verification filters and accessible names to category/sort filters; added loading/error/empty states and a retry action; hide pagination when the current result set does not need it; omit unknown company counts instead of rendering undefined.
+- **Company profile:** Simplified the title-first company header and removed decorative icon tile/gradient; added stable main heading IDs across loading/error/success states; clarified that only publicly published products are shown; preserved the existing public catalog API and cart/wishlist/product actions.
+- **FAQ:** Replaced nested icon-card accordion presentation with a flat question list, explicit keyboard focus and a compact support close; preserved all question/answer content and accordion behavior.
+- **Terms:** Changed the page to a readable long-form column with section separators and removed decorative hero/card chrome; preserved legal copy verbatim.
+- **Business behavior:** No API, route, access, company follow/favorite, cart, inquiry, or legal content contract changed.
+- **Verification:** Static source review only. Automated tests/builds/browser checks NOT RUN — owner instruction. Taste/Impeccable browser inspection and screenshot loops NOT RUN by owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Risks / open questions:** Public CompanyProfile still derives company identity from published product data because the current frontend flow does not use a public company-detail endpoint. No unsupported company profile data was added.
+- **Next action:** Continue public content and customer account/commerce surfaces, then complete Admin/Company detail pages and cross-app responsive/theme/accessibility audit.

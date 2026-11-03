@@ -122,27 +122,25 @@ function goToProducts() {
       <Breadcrumb :home="home" :model="[{ label: company?.name || 'صفحه شرکت' }]" aria-label="مسیر صفحه" />
 
       <section v-if="loading" class="company-state ds-card" role="status" aria-live="polite" aria-busy="true">
-        <ProgressSpinner />
-        <h1>در حال دریافت محصولات شرکت</h1>
-        <p>چند لحظه صبر کنید...</p>
+        <ProgressSpinner aria-label="در حال دریافت محصولات شرکت" />
+        <h1 id="company-profile-title">در حال دریافت محصولات شرکت</h1>
+        <p>چند لحظه صبر کنید…</p>
       </section>
 
       <section v-else-if="errorMessage" class="company-state company-state--error ds-card" role="alert">
         <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-        <h1>دریافت اطلاعات شرکت ناموفق بود</h1>
+        <h1 id="company-profile-title">دریافت اطلاعات شرکت ناموفق بود</h1>
         <p>{{ errorMessage }}</p>
         <Button label="تلاش دوباره" icon="pi pi-refresh" @click="loadCompanyProducts" />
       </section>
 
       <template v-else>
-        <header class="company-hero ds-card">
-          <span class="company-hero__icon" aria-hidden="true"><i class="pi pi-building"></i></span>
+        <header class="company-hero">
           <div class="company-hero__copy">
-            <span class="ds-eyebrow">تأمین‌کننده در بازارگاه مخابرات</span>
-            <h1 id="company-profile-title" class="ds-h1">{{ company?.name || 'محصولات این شرکت' }}</h1>
+            <h1 id="company-profile-title" class="ds-h1">{{ company?.name || 'محصولات منتشرشده این شرکت' }}</h1>
             <p v-if="company?.type" class="company-type">{{ company.type }}</p>
             <p class="ds-lead">
-              در این صفحه فقط محصولاتی نمایش داده می‌شوند که در کاتالوگ عمومی منتشر شده‌اند.
+              این فهرست فقط محصولاتی را نشان می‌دهد که در کاتالوگ عمومی منتشر شده‌اند.
             </p>
           </div>
           <div class="company-hero__meta">
@@ -197,22 +195,14 @@ function goToProducts() {
 .company-profile-shell { padding-block: var(--ds-space-8) var(--ds-space-16); }
 .company-hero {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
   gap: var(--ds-space-6);
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-  background: linear-gradient(120deg, var(--ds-color-surface), var(--ds-color-surface-hover));
-}
-.company-hero__icon {
-  display: flex;
-  width: 5rem;
-  height: 5rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-brand-dark);
-  color: var(--ds-color-on-brand);
-  font-size: 2rem;
+  padding: 0 0 var(--ds-space-5);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: transparent;
+  box-shadow: none;
 }
 .company-hero__copy { min-width: 0; }
 .company-type { margin: var(--ds-space-2) 0 0; color: var(--ds-color-primary-text); font-weight: var(--ds-font-weight-bold); }
@@ -235,13 +225,12 @@ function goToProducts() {
 .company-state--error { border-color: var(--ds-status-danger-fg); }
 .company-paginator { margin-top: var(--ds-space-4); }
 @media (max-width: 1000px) {
-  .company-hero { grid-template-columns: auto minmax(0, 1fr); }
-  .company-hero__meta { grid-column: 1 / -1; flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .company-hero { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .company-hero__meta { grid-column: auto; flex-direction: row; align-items: center; flex-wrap: wrap; }
   .company-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
   .company-hero { grid-template-columns: minmax(0, 1fr); }
-  .company-hero__icon { width: 4rem; height: 4rem; }
   .company-hero__meta { grid-column: auto; align-items: stretch; }
   .company-product-grid { grid-template-columns: minmax(0, 1fr); }
 }

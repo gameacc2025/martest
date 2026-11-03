@@ -17,15 +17,18 @@
           <template #content>
             <div class="comp-filter-grid">
               <div class="comp-filter-search">
-                <div class="p-inputgroup">
+                <form class="p-inputgroup" role="search" @submit.prevent="searchCompanies">
+                  <label class="comp-visually-hidden" for="company-search-query">جستجوی شرکت‌ها</label>
                   <InputText
+                    id="company-search-query"
                     v-model="searchQuery"
-                    placeholder="جستجوی شرکت ها..."
+                    name="companySearch"
+                    autocomplete="off"
+                    placeholder="نام شرکت را جستجو کنید…"
                     class="comp-search-input"
-                    @keyup.enter="searchCompanies"
                   />
-                  <Button icon="pi pi-search" class="p-button-primary" @click="searchCompanies" />
-                </div>
+                  <Button type="submit" icon="pi pi-search" class="p-button-primary" aria-label="جستجوی شرکت‌ها" />
+                </form>
               </div>
               <div>
                 <Select
@@ -33,7 +36,8 @@
                   :options="categoryOptions"
                   optionLabel="name"
                   optionValue="id"
-                  placeholder="انتخاب دسته بندی"
+                  placeholder="انتخاب دسته‌بندی"
+                  aria-label="فیلتر دسته‌بندی شرکت"
                   class="comp-full"
                   @change="applyFilters"
                 />
@@ -45,18 +49,21 @@
                 label="همه"
                 class="p-button-outlined"
                 :class="{ 'p-button-primary': verificationFilter === 'all' }"
+                :aria-pressed="verificationFilter === 'all'"
                 @click="verificationFilter = 'all'; applyFilters()"
               />
               <Button
                 label="تایید شده"
                 class="p-button-outlined p-button-success"
                 :class="{ 'p-button-primary': verificationFilter === 'verified' }"
+                :aria-pressed="verificationFilter === 'verified'"
                 @click="verificationFilter = 'verified'; applyFilters()"
               />
               <Button
                 label="در انتظار تایید"
                 class="p-button-outlined p-button-warning"
                 :class="{ 'p-button-primary': verificationFilter === 'pending' }"
+                :aria-pressed="verificationFilter === 'pending'"
                 @click="verificationFilter = 'pending'; applyFilters()"
               />
             </div>
@@ -87,18 +94,26 @@
               :options="sortOptions"
               optionLabel="label"
               optionValue="value"
+              aria-label="مرتب‌سازی فهرست شرکت‌ها"
               class="comp-sort"
               @change="applyFilters"
             />
           </div>
         </div>
 
-        <div v-if="loading" class="comp-state">
-          <ProgressSpinner />
-          <p class="comp-state-text">در حال بارگذاری...</p>
+        <div v-if="loading" class="comp-state" role="status" aria-live="polite" aria-busy="true">
+          <ProgressSpinner aria-label="در حال بارگذاری شرکت‌ها" />
+          <p class="comp-state-text">در حال بارگذاری شرکت‌ها…</p>
         </div>
 
-        <div v-else-if="companies.length === 0" class="comp-state">
+        <div v-else-if="companiesError" class="comp-state comp-state--error" role="alert">
+          <i class="pi pi-exclamation-triangle comp-empty-icon" aria-hidden="true"></i>
+          <h3 class="comp-empty-title">دریافت فهرست شرکت‌ها ناموفق بود</h3>
+          <p class="comp-empty-text">{{ companiesError }}</p>
+          <Button label="تلاش دوباره" icon="pi pi-refresh" @click="loadCompanies" />
+        </div>
+
+        <div v-else-if="companies.length === 0" class="comp-state" role="status">
           <i class="pi pi-building comp-empty-icon"></i>
           <h3 class="comp-empty-title">هیچ شرکتی یافت نشد</h3>
           <p class="comp-empty-text">با فیلترهای فعلی هیچ شرکتی یافت نشد</p>
@@ -113,7 +128,7 @@
           />
         </div>
 
-        <div class="comp-paginator">
+        <div v-if="totalCompanies > perPage" class="comp-paginator">
           <Paginator
             :rows="perPage"
             :totalRecords="totalCompanies"
@@ -127,16 +142,18 @@
       <div class="comp-section">
         <h2 class="comp-h2">دسته بندی شرکت ها</h2>
         <div class="comp-category-grid">
-          <div
+          <button
             v-for="category in categories"
             :key="category.id"
+            type="button"
             class="category-card"
+            :aria-label="'نمایش شرکت‌های دسته ' + category.name"
             @click="filterByCategory(category.id)"
           >
-            <i class="pi pi-building"></i>
-            <h3>{{ category.name }}</h3>
-            <p>{{ category.companyCount }} شرکت</p>
-          </div>
+            <i class="pi pi-building" aria-hidden="true"></i>
+            <span class="category-card-title">{{ category.name }}</span>
+            <span v-if="category.companyCount != null" class="category-card-count">{{ Number(category.companyCount).toLocaleString('fa-IR') }} شرکت</span>
+          </button>
         </div>
       </div>
     </div>
@@ -164,6 +181,7 @@ const companies = ref([])
 const featuredCompanies = ref([])
 const categories = ref([])
 const loading = ref(false)
+const companiesError = ref('')
 const totalCompanies = ref(0)
 const perPage = ref(12)
 const currentPage = ref(1)
@@ -218,6 +236,7 @@ const loadCategories = async () => {
 
 const loadCompanies = async () => {
   loading.value = true
+  companiesError.value = ''
   try {
     const params = {
       page: currentPage.value,
@@ -234,6 +253,9 @@ const loadCompanies = async () => {
     totalCompanies.value = data.total
   } catch (error) {
     console.error('Error loading companies:', error)
+    companies.value = []
+    totalCompanies.value = 0
+    companiesError.value = 'اتصال به فهرست شرکت‌ها برقرار نشد. دوباره تلاش کنید.'
   } finally {
     loading.value = false
   }
@@ -465,18 +487,32 @@ const toggleFollow = async (companyId) => {
 }
 
 .category-card {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 7.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
   padding: 1rem;
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  font: inherit;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast), color var(--ds-transition-fast);
 }
 
 .category-card:hover {
-  background: var(--surface-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--ds-color-primary);
+  background: var(--ds-color-surface-hover);
+}
+.category-card:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 3px;
 }
 
 .category-card i {
@@ -486,15 +522,14 @@ const toggleFollow = async (companyId) => {
   display: block;
 }
 
-.category-card h3 {
-  font-weight: 600;
-  margin: 0;
+.category-card-title {
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
 }
-
-.category-card p {
-  font-size: 0.875rem;
-  color: var(--text-color-secondary);
-  margin: 0.25rem 0 0 0;
+.category-card-count {
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
 }
 
 .comp-head { align-items: flex-end; }
@@ -578,15 +613,19 @@ const toggleFollow = async (companyId) => {
   transition: border-color var(--ds-transition-fast), background var(--ds-transition-fast), transform var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
 }
 .category-card i { color: var(--ds-color-primary); }
-.category-card:hover,
-.category-card:focus-visible {
+.category-card:hover {
   border-color: var(--ds-color-primary);
   background: var(--ds-color-surface-hover);
-  box-shadow: var(--ds-shadow-md);
-  transform: translateY(-2px);
-  outline: none;
+}
+.category-card:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 3px;
 }
 .comp-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-3);
   padding: 3rem 1.5rem;
   border: 1px dashed var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
@@ -595,11 +634,21 @@ const toggleFollow = async (companyId) => {
 }
 .comp-empty-title { color: var(--ds-color-text); }
 .comp-empty-text { color: var(--ds-color-text-muted); line-height: 1.8; }
+.comp-state--error { border-color: var(--ds-status-danger-fg); }
+.comp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .comp-paginator { margin-top: var(--ds-space-5); }
 @media (max-width: 640px) {
   .comp-head { align-items: flex-start; flex-direction: column; }
   .comp-heading-identity { align-items: flex-start; }
-  .comp-verify-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .comp-verify-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); }
   .comp-verify-filters :deep(.p-button) { justify-content: center; padding-inline: .45rem; }
   .comp-list-head { align-items: stretch; flex-direction: column; }
 }
