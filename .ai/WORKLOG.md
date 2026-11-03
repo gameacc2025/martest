@@ -2883,6 +2883,6 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Inquiry creation stepper/progress and detail pages retain existing step semantics, with compact headings/labels and clearer surface grouping.
 - **Behavior preserved:** Product CRUD, media/document uploads, required-field validation, publish flow, inquiry creation steps, save draft, permission checks, settings tabs and trust state remain unchanged.
 - **Verification:** Static source/structure review only. Tests/build/browser checks NOT RUN — owner instruction.
-- **Commit:** Pending.
-- **Push:** Pending.
+- **Commit:** be7633927702f5a81cfdd85535eea027dbd7c958 (updated origin/main).
+- **Push:** Remote main ref updated and verified.
 - **Next:** Continue remaining public account and content pages; then Admin/Company notifications, subscriptions and remaining table/detail families.

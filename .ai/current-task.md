@@ -207,3 +207,4 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Admin inquiry detail title and cards use compact type and stronger grouping.
 - All API requests, form validation, save/publish workflows, inquiry steps, permissions, routes and company status/verification data remain unchanged.
 - Static source review only; tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** be7633927702f5a81cfdd85535eea027dbd7c958 — https://github.com/gameacc2025/martest/commit/be7633927702f5a81cfdd85535eea027dbd7c958
