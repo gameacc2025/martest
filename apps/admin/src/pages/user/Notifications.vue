@@ -141,7 +141,7 @@ async function fetchNotifications() {
     notifications.value = normalized.data
     total.value = Number(normalized.meta?.total ?? notifications.value.length)
     totalPages.value = Math.max(1, Number(normalized.meta?.totalPages || 1))
-    if (!notifications.value.some(item => item.id === selectedId.value)) selectedId.value = notifications.value[0]?.id ?? null
+    if (!notifications.value.some(item => item.id === selectedId.value)) selectedId.value = null
     selectedIds.value = new Set([...selectedIds.value].filter(id => notifications.value.some(item => item.id === id)))
   } catch {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'دریافت اعلان‌ها انجام نشد. دوباره تلاش کنید.', life: 3500 })
@@ -189,6 +189,10 @@ async function fetchFolderCounts() {
 
 function openNotification(item) {
   selectedId.value = item.id
+}
+
+function closeNotification() {
+  selectedId.value = null
 }
 
 async function openNotificationAndMarkRead(item) {
@@ -468,38 +472,51 @@ function typeLabel(item) {
         </footer>
       </section>
 
-      <section class="reading-panel" aria-label="متن پیام انتخاب‌شده">
-        <template v-if="selectedNotification">
-          <div class="reading-toolbar">
-            <span class="reading-category"><i class="pi pi-tag"></i>{{ typeLabel(selectedNotification) }}</span>
-            <div class="reading-actions">
-              <Button :icon="selectedNotification.isRead ? 'pi pi-envelope' : 'pi pi-envelope-open'" severity="secondary" text rounded
-                :aria-label="selectedNotification.isRead ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان خوانده‌شده'"
-                :loading="busyIds.has(selectedNotification.id)" @click="setNotificationReadState(selectedNotification, !selectedNotification.isRead)" />
-              <Button icon="pi pi-trash" severity="danger" text rounded aria-label="حذف پیام" :loading="busyIds.has(selectedNotification.id)" @click="deleteNotification(selectedNotification)" />
-              <Button icon="pi pi-bookmark" severity="secondary" text rounded aria-label="ذخیره پیام" @click="saveNotification(selectedNotification)" />
-              <select v-model="targetFolderId" class="inline-folder-select" aria-label="انتقال به پوشه">
-                <option v-for="folder in userFolders" :key="folder.id" :value="folder.id">{{ notificationFolderLabel(folder) }}</option>
-              </select>
-              <Button icon="pi pi-folder-open" severity="secondary" text rounded aria-label="انتقال به پوشه انتخاب‌شده" @click="applyFolderAction(selectedNotification, 'move')" />
+    </div>
+
+    <div v-if="selectedNotification" class="reading-overlay" @click.self="closeNotification">
+      <aside class="reading-drawer" role="dialog" aria-modal="true" aria-labelledby="notification-detail-title" @keydown.esc="closeNotification">
+        <header class="drawer-toolbar">
+          <div class="drawer-tool-group">
+            <Button :icon="selectedNotification.isRead ? 'pi pi-envelope' : 'pi pi-envelope-open'" severity="secondary" text rounded
+              :aria-label="selectedNotification.isRead ? 'علامت‌گذاری به‌عنوان خوانده‌نشده' : 'علامت‌گذاری به‌عنوان خوانده‌شده'"
+              :loading="busyIds.has(selectedNotification.id)" @click="setNotificationReadState(selectedNotification, !selectedNotification.isRead)" />
+            <Button icon="pi pi-refresh" severity="secondary" text rounded aria-label="بروزرسانی فهرست" :loading="loading" @click="fetchNotifications()" />
+          </div>
+          <Button icon="pi pi-times" severity="secondary" text rounded aria-label="بستن جزئیات اعلان" @click="closeNotification" />
+        </header>
+
+        <div class="drawer-scroll">
+          <div class="drawer-subject-line">
+            <h2 id="notification-detail-title">{{ selectedNotification.title }}</h2>
+            <time>{{ formatFullDate(selectedNotification.createdAt) }}</time>
+          </div>
+          <div class="drawer-sender">
+            <span class="sender-avatar"><i class="pi pi-bell"></i></span>
+            <div class="sender-copy">
+              <strong>سامانه مخابرات</strong>
+              <span>برای شما</span>
+            </div>
+            <div class="drawer-message-actions">
+              <Button icon="pi pi-bookmark" severity="secondary" text rounded aria-label="ذخیره اعلان" @click="saveNotification(selectedNotification)" />
+              <Button icon="pi pi-folder-open" severity="secondary" text rounded aria-label="انتقال به پوشه ذخیره‌شده" @click="applyFolderAction(selectedNotification, 'move', targetFolderId)" />
+              <Button icon="pi pi-trash" severity="danger" text rounded aria-label="حذف اعلان" :loading="busyIds.has(selectedNotification.id)" @click="deleteNotification(selectedNotification)" />
             </div>
           </div>
-          <article class="message-detail">
-            <h2>{{ selectedNotification.title }}</h2>
-            <div class="message-meta">
-              <span class="sender-avatar"><i class="pi pi-bell"></i></span>
-              <div><strong>سامانه مخابرات</strong><time>{{ formatFullDate(selectedNotification.createdAt) }}</time></div>
-            </div>
-            <div class="message-body">{{ selectedNotification.message }}</div>
+          <div class="drawer-message-content">
+            <span class="drawer-category">{{ typeLabel(selectedNotification) }}</span>
+            <p>{{ selectedNotification.message }}</p>
             <div class="message-footer"><i class="pi pi-shield"></i> این پیام از طرف سامانه ارسال شده است.</div>
-          </article>
-        </template>
-        <div v-else class="reading-empty">
-          <div class="reading-empty-icon"><i class="pi pi-envelope"></i></div>
-          <h2>پیامی را انتخاب کنید</h2>
-          <p>برای مشاهده متن کامل، یکی از پیام‌های فهرست را انتخاب کنید.</p>
+          </div>
+          <div class="drawer-folder-control">
+            <label for="notification-target-folder">پوشه مقصد</label>
+            <select id="notification-target-folder" v-model="targetFolderId" class="inline-folder-select" aria-label="انتخاب پوشه مقصد">
+              <option v-for="folder in userFolders" :key="folder.id" :value="folder.id">{{ notificationFolderLabel(folder) }}</option>
+            </select>
+            <Button label="انتقال" icon="pi pi-folder-open" severity="secondary" outlined size="small" @click="applyFolderAction(selectedNotification, 'move')" />
+          </div>
         </div>
-      </section>
+      </aside>
     </div>
   </section>
 </template>
@@ -601,4 +618,30 @@ function typeLabel(item) {
 @media(prefers-reduced-motion:reduce){.mail-page *,.mail-page *::before,.mail-page *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 
 
+</style>
+
+<style>
+/* Right-side email reading pane, shared across all notification inboxes. */
+.reading-overlay{position:fixed;inset:0;z-index:1200;display:flex;justify-content:flex-end;background:rgba(10,18,30,.52);backdrop-filter:blur(1.5px)}
+.reading-drawer{display:flex;flex-direction:column;width:min(46rem,52vw);height:100%;min-width:0;background:var(--ds-color-surface,#fff);color:var(--ds-color-text,#182235);box-shadow:-12px 0 36px rgba(12,24,40,.18);border-inline-start:1px solid var(--ds-color-border);direction:rtl;animation:notification-drawer-in .22s ease-out both}
+.drawer-toolbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:.75rem;min-height:3.35rem;padding:.35rem .75rem;border-bottom:1px solid var(--ds-color-border);background:var(--ds-color-surface)}
+.drawer-tool-group{display:flex;align-items:center;gap:.2rem}
+.drawer-scroll{flex:1;min-height:0;overflow-y:auto;padding:1.2rem 1.35rem 1.5rem}
+.drawer-subject-line{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:.1rem 0 1.25rem}
+.drawer-subject-line h2{margin:0;color:var(--ds-color-text);font-size:1.12rem;line-height:1.8;font-weight:700}
+.drawer-subject-line time{flex:0 0 auto;padding-top:.35rem;color:var(--ds-color-text-muted);font-size:.72rem;white-space:nowrap}
+.drawer-sender{display:flex;align-items:center;gap:.75rem;padding:0 0 1rem;border-bottom:1px solid var(--ds-color-border)}
+.drawer-sender .sender-avatar{display:grid;place-items:center;flex:0 0 2.5rem;width:2.5rem;height:2.5rem;border-radius:50%;background:color-mix(in srgb,var(--ds-color-primary) 12%,var(--ds-color-surface));color:var(--ds-color-primary)}
+.sender-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:.12rem}.sender-copy strong{font-size:.85rem}.sender-copy span{color:var(--ds-color-text-muted);font-size:.72rem}
+.drawer-message-actions{display:flex;align-items:center;gap:.1rem}
+.drawer-message-content{padding:1.2rem 0;min-height:12rem;color:var(--ds-color-text);font-size:.88rem;line-height:2}
+.drawer-message-content p{margin:.7rem 0 1.5rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.drawer-category{display:inline-flex;padding:.16rem .55rem;border-radius:5px;background:var(--ds-color-surface-alt);color:var(--ds-color-text-muted);font-size:.7rem}
+.drawer-message-content .message-footer{display:flex;align-items:center;gap:.4rem;margin-top:1.5rem;padding-top:.8rem;border-top:1px solid var(--ds-color-border);color:var(--ds-color-text-muted);font-size:.75rem}
+.drawer-folder-control{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;padding:1rem 0;border-top:1px solid var(--ds-color-border)}
+.drawer-folder-control label{color:var(--ds-color-text-muted);font-size:.76rem}
+.drawer-folder-control .inline-folder-select{min-width:9rem;min-height:2.25rem;padding:.35rem .55rem;border:1px solid var(--ds-color-border);border-radius:6px;background:var(--ds-color-surface);color:var(--ds-color-text)}
+@keyframes notification-drawer-in{from{transform:translateX(24px);opacity:.75}to{transform:translateX(0);opacity:1}}
+@media(max-width:760px){.reading-drawer{width:min(100%,32rem)}.drawer-scroll{padding:1rem}.drawer-subject-line{flex-direction:column;gap:.35rem}.drawer-subject-line time{padding:0}}
+@media(prefers-reduced-motion:reduce){.reading-drawer{animation:none}}
 </style>

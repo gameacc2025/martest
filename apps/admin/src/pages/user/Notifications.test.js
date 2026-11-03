@@ -140,9 +140,10 @@ describe('Admin notification inbox', () => {
     const openButton = wrapper.find('.message-row-open')
     expect(openButton.element.tagName).toBe('BUTTON')
     expect(openButton.attributes('type')).toBe('button')
-    expect(openButton.attributes('aria-pressed')).toBe('true')
+    expect(openButton.attributes('aria-pressed')).toBe('false')
     await openButton.trigger('click')
     expect(openButton.attributes('aria-pressed')).toBe('true')
+    expect(wrapper.find('.reading-overlay').exists()).toBe(true)
     expect(apiPatch).not.toHaveBeenCalled()
   })
 
@@ -183,5 +184,19 @@ describe('Admin notification inbox', () => {
     })
   })
 
-})
 
+  it('closes the right-side reading drawer without changing notification state', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+    await wrapper.find('.message-row-open').trigger('click')
+    expect(wrapper.find('.reading-overlay').exists()).toBe(true)
+    const closeButton = wrapper.findComponent('[aria-label="بستن جزئیات اعلان"]')
+    expect(closeButton.exists()).toBe(true)
+    closeButton.vm.$emit('click')
+    await flushPromises()
+    expect(wrapper.find('.reading-overlay').exists()).toBe(false)
+    expect(apiPatch).not.toHaveBeenCalled()
+  })
+})
