@@ -2968,3 +2968,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Regression coverage:** Added a matching test to each app asserting that the mailbox title remains and the duplicate `mail-breadcrumb` is absent.
 - **Preserved:** Existing notification API calls, folder/category behavior, read/unread semantics, bulk actions, delete/save/move behavior, pagination and permissions were not changed.
 - **Verification:** GitHub source edits and regression test source updates are committed. Vitest, app builds and browser rendering were NOT RUN in this session; CI must be checked before claiming test success.
+
+
+## 2026-11-03 — BREADCRUMB-FULL-WIDTH-LAYOUT
+- **Status:** IMPLEMENTED on `main`.
+- Moved the shared `PageHeader` / breadcrumb outside `.dash-layout-content` in both Admin and Company layouts.
+- The breadcrumb is no longer constrained by the content wrapper's `max-width: 1600px` or horizontal padding. The remaining page content and footer remain inside `.dash-layout-content` and retain its width, centering and padding rules.
+- This is a structural layout fix; no notification API, data, or business logic changed. Automated tests/builds were not run in this session.
