@@ -17,11 +17,8 @@
       <div class="contact-form-col">
         <FormSection title="فرم تماس" icon="pi pi-envelope">
           <form @submit.prevent="handleSubmit" class="contact-form">
-            <FormAlert
-              v-if="errors.general"
-              variant="error"
-              :message="errors.general"
-            />
+            <FormAlert v-if="errors.general" variant="error" :message="errors.general" />
+            <FormAlert v-if="successMessage" variant="success" :message="successMessage" />
 
             <FormGrid :columns="2">
               <FormField label="نام و نام خانوادگی" :error="errors.name" required>
@@ -98,6 +95,8 @@
                 type="submit"
                 label="ارسال پیام"
                 icon="pi pi-send"
+                :loading="loading"
+                :disabled="loading"
               />
               <Button
                 type="button"
@@ -112,115 +111,19 @@
         </FormSection>
       </div>
 
-      <!-- Right: Contact Information (35%) -->
-      <div class="contact-info-col">
-        <!-- Phone -->
+      <aside class="contact-info-col" aria-label="راهنمای ارسال پیام">
         <Card class="info-card">
           <template #content>
             <div class="info-card-inner">
-              <div class="info-icon"><i class="pi pi-phone"></i></div>
+              <div class="info-icon"><i class="pi pi-shield"></i></div>
               <div>
-                <h4>تلفن تماس</h4>
-                <p>۰۲۱-۱۲۳۴۵۶۷۸</p>
+                <h4>پیگیری پیام</h4>
+                <p>پس از ارسال موفق، پیام شما به صندوق پشتیبانی بازارگاه تحویل داده می‌شود. پاسخ احتمالی به نشانی ایمیلی که وارد کرده‌اید ارسال خواهد شد.</p>
               </div>
             </div>
           </template>
         </Card>
-
-        <!-- Email -->
-        <Card class="info-card">
-          <template #content>
-            <div class="info-card-inner">
-              <div class="info-icon"><i class="pi pi-envelope"></i></div>
-              <div>
-                <h4>ایمیل</h4>
-                <p>info@telecom-marketplace.ir</p>
-              </div>
-            </div>
-          </template>
-        </Card>
-
-        <!-- Address -->
-        <Card class="info-card">
-          <template #content>
-            <div class="info-card-inner">
-              <div class="info-icon"><i class="pi pi-map-marker"></i></div>
-              <div>
-                <h4>آدرس</h4>
-                <p>تهران، خیابان ولیعصر، پلاک ۱۲۳، طبقه ۴</p>
-              </div>
-            </div>
-          </template>
-        </Card>
-
-        <!-- Working Hours -->
-        <Card class="info-card">
-          <template #content>
-            <div class="info-card-inner">
-              <div class="info-icon"><i class="pi pi-clock"></i></div>
-              <div>
-                <h4>ساعت کاری</h4>
-                <div class="hours-list">
-                  <div class="hour-row">
-                    <span>شنبه تا چهارشنبه</span>
-                    <span class="hour-value">۸:۰۰ - ۱۷:۰۰</span>
-                  </div>
-                  <div class="hour-row">
-                    <span>پنجشنبه</span>
-                    <span class="hour-value">۸:۰۰ - ۱۴:۰۰</span>
-                  </div>
-                  <div class="hour-row">
-                    <span>جمعه</span>
-                    <span class="hour-closed">تعطیل</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </Card>
-
-        <!-- Social Networks -->
-        <Card class="info-card">
-          <template #content>
-            <div class="info-card-inner">
-              <div class="info-icon"><i class="pi pi-share-alt"></i></div>
-              <div>
-                <h4>شبکه‌های اجتماعی</h4>
-                <div class="social-icons">
-                  <a href="https://instagram.com/telecom-marketplace" target="_blank" class="social-link" aria-label="اینستاگرام">
-                    <i class="pi pi-instagram"></i>
-                  </a>
-                  <a href="https://t.me/telecom_marketplace" target="_blank" class="social-link" aria-label="تلگرام">
-                    <i class="pi pi-telegram"></i>
-                  </a>
-                  <a href="https://linkedin.com/company/telecom-marketplace" target="_blank" class="social-link" aria-label="لینکدین">
-                    <i class="pi pi-linkedin"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </template>
-        </Card>
-      </div>
-    </div>
-
-    <!-- Google Map -->
-    <div class="map-section">
-      <Card class="map-card">
-        <template #content>
-          <div class="map-container">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3239.999999999999!2d51.3889739153167!3d35.689197479999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDQxJzE0LjAiTiA1McKwMjMnMTQuMiJX!5e0!3m2!1sen!2s!4v1234567890123!5m2!1sen!2s"
-              width="100%"
-              height="100%"
-              style="border:0;"
-              allowfullscreen=""
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-            ></iframe>
-          </div>
-        </template>
-      </Card>
+      </aside>
     </div>
 
   </div>
@@ -229,6 +132,7 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { ref } from 'vue'
+import { contactApi } from '@telecom/api-client'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -240,6 +144,8 @@ import { FormSection, FormField, FormGrid, FormActions, FormAlert } from '@telec
 
 const form = ref({ name: '', email: '', phone: '', subject: null, message: '' })
 const errors = ref({})
+const successMessage = ref('')
+const loading = ref(false)
 
 const home = ref({ icon: 'pi pi-home', to: '/' })
 const items = ref([{ label: 'تماس با ما' }])
@@ -252,14 +158,28 @@ const subjectOptions = ref([
   { label: 'سوال عمومی', value: 'general_question' }
 ])
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   errors.value = {}
+  successMessage.value = ''
   if (!validateForm()) return
 
-  // No verified public contact-message endpoint exists yet. Never simulate
-  // delivery or clear the visitor's message when nothing was actually sent.
-  errors.value = {
-    general: 'سرویس ارسال پیام هنوز فعال نشده است؛ پیام شما ارسال نشده و اطلاعات واردشده پاک نخواهد شد.'
+  loading.value = true
+  try {
+    await contactApi.sendMessage({
+      name: form.value.name.trim(),
+      email: form.value.email.trim(),
+      phone: form.value.phone.trim(),
+      subject: form.value.subject,
+      message: form.value.message.trim(),
+    })
+    resetForm()
+    successMessage.value = 'پیام شما با موفقیت به صندوق پشتیبانی تحویل داده شد.'
+  } catch (error) {
+    errors.value = {
+      general: error?.message || 'ارسال پیام انجام نشد. لطفاً کمی بعد دوباره تلاش کنید.'
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -277,6 +197,7 @@ const validateForm = () => {
 const resetForm = () => {
   form.value = { name: '', email: '', phone: '', subject: null, message: '' }
   errors.value = {}
+  successMessage.value = ''
 }
 </script>
 
