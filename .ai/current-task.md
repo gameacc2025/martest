@@ -159,4 +159,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Notification APIs, folder membership, read/unread semantics, double-click behavior, bulk operations, delete/save/move behavior and role routes remain unchanged.
 - Added regression assertions for sender/subject hierarchy in all three notification inbox test files.
 - Static structural review completed; tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** 9fc2eda2c9d3330200ddf810eea5f845b28959bb — https://github.com/gameacc2025/martest/commit/9fc2eda2c9d3330200ddf810eea5f845b28959bb
 - Next: apply the corrected visual direction to remaining Admin/Company operational screens and public marketplace surfaces; review typography/density and restore purposeful brand character without generic templates.

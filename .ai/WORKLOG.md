@@ -2817,6 +2817,6 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Added assertions to all three notification page tests for sender and subject hierarchy.
 - **Behavior preserved:** API requests, routes, INBOX/SAVED folder normalization, categories, unread counts, single-click selection, double-click mark-read, bulk read state, delete, save and move actions are unchanged.
 - **Verification:** Static source/structure review only. Automated tests, builds and browser checks NOT RUN — owner instruction.
-- **Commit:** Pending.
-- **Push:** Pending.
+- **Commit:** 9fc2eda2c9d3330200ddf810eea5f845b28959bb (updated origin/main).
+- **Push:** Remote main ref updated and verified.
 - **Next:** Continue the corrected design direction across remaining Admin/Company operational screens and Website marketplace; review page density, typography and intentional brand character instead of blanket minimalism.
