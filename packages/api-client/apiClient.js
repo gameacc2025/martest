@@ -70,6 +70,11 @@ export const authApi = {
   verifyEmail: (token) => api.post(endpoints.auth.verifyEmail, { token })
 }
 
+// Public contact form API
+export const contactApi = {
+  sendMessage: (data) => api.post(endpoints.contact.submit, data),
+}
+
 // Products API
 export const productsApi = {
   list: (params = {}) => api.get(endpoints.products.list, { params }),
