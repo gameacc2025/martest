@@ -841,3 +841,14 @@ Added explicit accessible names to desktop/mobile product search controls and th
 - Shared Input now preserves caller-supplied `aria-describedby` references while appending its own hint/error message ID; caller-provided `aria-invalid` is retained unless the component has an active validation error.
 - This keeps the shared field's accessible feedback additive instead of overwriting descriptions supplied by page-specific forms.
 - No data, validation, API or backend behavior changed. No tests/browser checks run per instruction; runtime/build verification remains unclaimed.
+
+
+## 2026-11-03 — Authentication and contact form finishing pass
+
+- Corrected the Contact Us subject Select to receive PrimeVue's `inputId` prop, so its FormField label targets the actual internal input rather than the component wrapper.
+- Shared Input now always generates a per-instance fallback ID when no explicit ID is supplied; repeated field names no longer risk duplicate document IDs.
+- Website, Admin and Company password-recovery forms now use a single explicit email input ID, a matching label, email autocomplete, required semantics, and an associated announced validation message.
+- Website login now advertises username/phone and current-password autofill semantics, with telephone input mode and required fields.
+- Website registration fields now expose appropriate browser autofill hints for names, email, phone, organization, website and new passwords.
+- Existing form state, validation handlers, API calls, auth flows, routing and backend contracts are unchanged. UI-only changes.
+- No tests or browser checks run per explicit instruction. No build/runtime verification is claimed; final CI/build sign-off remains outside this no-test pass.
