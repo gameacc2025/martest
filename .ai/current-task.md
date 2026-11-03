@@ -15,6 +15,14 @@ Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first R
 - Vercel Web Interface Guidelines: semantic controls, keyboard/focus, image layout stability, reduced motion and robust states.
 
 ## Implemented slices
+### Approved turquoise brand foundation — 2026-11-03
+- Owner selected the turquoise/sky-blue palette with dark sidebar.
+- Shared PrimeVue preset and design tokens now define turquoise primary (#12B8A6; accessible light action #087F78), sky (#39BFE0), technical blue (#2878C7), navy (#173B63), dark sidebar (#142B46), amber (#E7A64B), and cool light surfaces.
+- Added `design-system/pages/notifications.md` as the first real-page visual reference and applied turquoise selected/unread/focus accents to all three existing Notifications inboxes.
+- Updated `design-system/MASTER.md` and WORKLOG. No API, route, auth, permission, tenant, notification, or backend behavior was changed.
+- Verification: remote source re-fetch only; tests/build/browser checks NOT RUN in this session.
+
+
 ### Shared workspace foundation
 - KpiCard uses typography-led real values without decorative icon tiles.
 - DashboardPanel is a flat titled section.
@@ -163,7 +171,7 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 ### Visual direction correction and email inbox redesign — Phase 16
 - Owner feedback: previous phases over-applied minimalism, producing visually flat pages and oversized headings/metrics. Do not continue stripping surfaces or reducing every page to plain text and borders.
-- New execution direction: compact Persian/Vazirmatn typography, intentional brand presence using the existing teal/navy/petrol palette, meaningful surface layers, subtle depth, denser information hierarchy, and consistent interaction states. No new brand, font, dependencies, or fabricated content.
+- New execution direction: compact Persian/Vazirmatn typography, intentional brand presence using the approved turquoise/sky/navy palette (#12B8A6, #39BFE0, #2878C7, #173B63), dark sidebar (#142B46), meaningful surface layers, subtle depth, denser information hierarchy, and consistent interaction states. No new brand, font, dependencies, or fabricated content.
 - Admin, Company and Website notification inboxes now use a recognizable email-client structure: branded mailbox header, search/command bar, folder/category rail, sender/subject/preview rows, unread emphasis, and a dedicated reading pane.
 - Shared WorkspacePageHeading and KpiCard now use compact type sizes and intentional surface treatment; shared refinement layer restores subtle card/panel/toolbar depth and compact operational metrics instead of removing all visual character.
 - Notification APIs, folder membership, read/unread semantics, double-click behavior, bulk operations, delete/save/move behavior and role routes remain unchanged.
