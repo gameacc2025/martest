@@ -229,4 +229,4 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Kept real app capabilities only: no fabricated sender identities, compose flow, star/label persistence or export actions. Existing API data, routes, folder model and handlers are preserved.
 - Added structural regression tests for the two-column email composition and integrated search toolbar in all three app test suites.
 - Static source review only; tests/build/browser checks NOT RUN.
-- **Branch:** fix/notifications-mail-layout-reference. Awaiting PR review/merge.
+- **Merged:** PR #82 — https://github.com/gameacc2025/martest/pull/82. Squash commit: f2a2c47584329d3b4354d9d7ba56f9bb894d2048.
