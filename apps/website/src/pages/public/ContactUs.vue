@@ -25,18 +25,24 @@
 
             <FormGrid :columns="2">
               <FormField label="نام و نام خانوادگی" :error="errors.name" required>
-                <template #default="{ invalid }">
+                <template #default="{ id, invalid, describedBy }">
                   <InputText
                     v-model="form.name"
+                    :id="id"
+                    :aria-describedby="describedBy"
+                    autocomplete="name"
                     placeholder="نام خود را وارد کنید"
                     :invalid="invalid"
                   />
                 </template>
               </FormField>
               <FormField label="ایمیل" :error="errors.email" required>
-                <template #default="{ invalid }">
+                <template #default="{ id, invalid, describedBy }">
                   <InputText
                     v-model="form.email"
+                    :id="id"
+                    :aria-describedby="describedBy"
+                    autocomplete="email"
                     placeholder="example@email.com"
                     type="email"
                     :invalid="invalid"
@@ -46,9 +52,13 @@
             </FormGrid>
 
             <FormField label="شماره تلفن" :error="errors.phone" help="اختیاری — برای تماس سریع‌تر">
-              <template #default="{ invalid }">
+              <template #default="{ id, invalid, describedBy }">
                 <InputText
                   v-model="form.phone"
+                  :id="id"
+                  :aria-describedby="describedBy"
+                  autocomplete="tel"
+                  inputmode="tel"
                   placeholder="۰۹۱۲۱۲۳۴۵۶۷"
                   :invalid="invalid"
                 />
@@ -56,9 +66,11 @@
             </FormField>
 
             <FormField label="موضوع" :error="errors.subject" required>
-              <template #default="{ invalid }">
+              <template #default="{ id, invalid, describedBy }">
                 <Select
                   v-model="form.subject"
+                  :id="id"
+                  :aria-describedby="describedBy"
                   :options="subjectOptions"
                   optionLabel="label"
                   optionValue="value"
@@ -69,9 +81,11 @@
             </FormField>
 
             <FormField label="پیام" :error="errors.message" required help="حداقل ۱۰ کاراکتر">
-              <template #default="{ invalid }">
+              <template #default="{ id, invalid, describedBy }">
                 <Textarea
                   v-model="form.message"
+                  :id="id"
+                  :aria-describedby="describedBy"
                   placeholder="پیام خود را اینجا بنویسید..."
                   rows="5"
                   :invalid="invalid"
