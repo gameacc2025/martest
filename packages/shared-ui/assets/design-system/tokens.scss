@@ -63,7 +63,7 @@
 
   /* --------------------------------------------------------
      BRAND + SHELL (constant brand surfaces; flipped in dark below)
-     Primary brand #01bec2 · secondary deep blue #003a54.
+     Primary turquoise #12b8a6 · sky #39bfe0 · technical blue #2878c7.
      Use these for hero/sidebar/footer surfaces instead of raw hex.
      -------------------------------------------------------- */
   --ds-brand: #01bec2;
@@ -145,7 +145,7 @@
      SHADOW SYSTEM (elevation)
      -------------------------------------------------------- */
   /* Navy-tinted so elevation reads as part of the brand, not neutral grey. */
-  --ds-shadow-xs: 0 1px 2px rgba(0, 58, 84, 0.06);
+  --ds-shadow-xs: 0 1px 2px rgba(23, 59, 99, 0.06);
   --ds-shadow-sm: 0 1px 3px rgba(0, 58, 84, 0.08), 0 1px 2px rgba(0, 58, 84, 0.04);
   --ds-shadow-md: 0 4px 12px rgba(0, 58, 84, 0.09);
   --ds-shadow-lg: 0 8px 24px rgba(0, 58, 84, 0.13);
@@ -175,8 +175,8 @@
   --ds-color-on-brand-muted: var(--p-primary-200, #b9dbe6);
   --ds-color-accent: var(--p-primary-color);
   --ds-color-on-accent: var(--p-primary-contrast-color);
-  --ds-color-primary-text: var(--p-primary-800, #0a6a78);
-  --ds-color-primary-soft: var(--p-primary-50, #e8fafb);
+  --ds-color-primary-text: var(--p-primary-800, #086660);
+  --ds-color-primary-soft: var(--p-primary-50, #e8f8f6);
   --ds-color-focus: var(--p-primary-color);
   --ds-container-max: 1280px;
   --ds-touch-target: 44px;
@@ -187,8 +187,8 @@
   --ds-status-warning-fg: #8a4b00;
   --ds-status-danger-bg: #fde8e8;
   --ds-status-danger-fg: #9b1c1c;
-  --ds-status-info-bg: #def5fb;
-  --ds-status-info-fg: #0a6a78;
+  --ds-status-info-bg: #e0f3fa;
+  --ds-status-info-fg: #175d82;
   --ds-status-muted-bg: #eceff1;
   --ds-status-muted-fg: #37474f;
 }
@@ -199,14 +199,14 @@
    need to soften the elevation shadows for dark surfaces.
    ------------------------------------------------------------ */
 :root.app-dark {
-  --ds-hero-gradient: linear-gradient(135deg, #021824 0%, #003a54 100%);
-  --ds-sidebar-bg: #021824;
+  --ds-hero-gradient: linear-gradient(135deg, #0b2036 0%, #173b63 100%);
+  --ds-sidebar-bg: #0b1d31;
   --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
   --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
   --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
   --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.65);
-  --ds-color-primary-text: var(--p-primary-300, #55dbdf);
+  --ds-color-primary-text: var(--p-primary-300, #66cfc2);
   --ds-color-primary-soft: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
   --ds-status-success-bg: rgba(34, 197, 94, 0.16);
   --ds-status-success-fg: #86efac;
@@ -214,8 +214,8 @@
   --ds-status-warning-fg: #fcd34d;
   --ds-status-danger-bg: rgba(239, 68, 68, 0.16);
   --ds-status-danger-fg: #fca5a5;
-  --ds-status-info-bg: rgba(1, 190, 194, 0.16);
-  --ds-status-info-fg: #7ddfe2;
+  --ds-status-info-bg: rgba(18, 184, 166, 0.16);
+  --ds-status-info-fg: #8ce6dc;
   --ds-status-muted-bg: rgba(148, 163, 184, 0.16);
   --ds-status-muted-fg: #cbd5e1;
 }
