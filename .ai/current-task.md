@@ -4,9 +4,9 @@
 
 **User constraints:** UI-only; no backend, API contracts, database, auth/permission logic or business workflows changed. Browser testing and test execution are intentionally omitted at the user's direction. Do not claim build/runtime/visual verification without evidence. All changes are committed directly to `main`.
 
-**Latest finishing changes:** unique fallback IDs and additive ARIA descriptions in shared Input; accessible DataTable filters; Vue 3.4-compatible FormField feedback associations; Contact Us Select label binding; accessible password-recovery forms in all three apps; login autofill semantics; registration autofill hints.
+**Latest finishing changes:** unique fallback IDs and additive ARIA descriptions in shared Input; accessible DataTable filters; Vue 3.4-compatible FormField feedback associations; Contact Us Select label binding; accessible password-recovery forms in all three apps; login autofill semantics; registration autofill hints. Contact Us no longer simulates successful delivery: without a confirmed endpoint it now states that the message was not sent and preserves the entered content.
 
-**Explicitly unresolved (not fabricated):** Contact Us still has no confirmed public submission endpoint or verified business contact details. Final responsive/dark/RTL review against running apps and build/CI sign-off require an environment/run the user has not authorized in this no-test pass. The separate security-audit handoff below is retained as historical project context.
+**Explicitly unresolved (not fabricated):** Contact Us still has no confirmed public submission endpoint or verified business contact details. Its previous fake success dialog and artificial delay have been removed; the form now gives an honest unavailable message and keeps the user's input. Final responsive/dark/RTL review against running apps and build/CI sign-off require an environment/run the user has not authorized in this no-test pass. The separate security-audit handoff below is retained as historical project context.
 
 ---
 
