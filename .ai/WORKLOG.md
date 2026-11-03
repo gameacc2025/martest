@@ -2469,3 +2469,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Header actions/search targets meet 44px and have visible focus styles; reduced motion is respected.
 - Tests added to DashboardHeader and DashboardSidebar suites.
 - Commits: 5205452 header; a4c6364 AdminLayout; 48e6562 CompanyLayout; 1823a5f header tests; 50188bb sidebar semantics; 21c24a1 sidebar tests. CI pending.
+
+## 2026-11-03 — DASHBOARD-MOBILE-SCROLL-RESTORE
+- **Status:** DONE — UI-only refinement committed to `main`.
+- **Scope:** Admin and Company dashboard layouts.
+- **Change:** Preserve and restore the body's pre-existing inline `overflow` value around the mobile navigation drawer lifecycle, including unmount cleanup. Previously the layouts always reset it to an empty string, potentially clearing a scroll lock owned by another overlay.
+- **Behavior preserved:** Mobile drawer state, Escape/overlay dismissal, navigation, route guards, permission-filtered menus, theme, authentication, API calls and backend contracts.
+- **Verification:** Browser tests intentionally NOT RUN per user instruction. No backend, schema or API changes.
+- **Commits:** Recorded in GitHub history for the two layout changes and the AI handoff update.
+- **Next:** Continue remaining routed UI pages and shared form/dialog refinements; keep all work on `main`.
