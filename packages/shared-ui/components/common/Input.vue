@@ -6,11 +6,15 @@
  * styling comes from `--ds-*` tokens (spacing, radius, colors) and PrimeVue's
  * theme; no hardcoded colors.
  */
-import { computed } from 'vue'
+import { computed, getCurrentInstance } from 'vue'
 import InputText from 'primevue/inputtext'
+
+defineOptions({ inheritAttrs: false })
 
 const props = defineProps({
   modelValue: { type: [String, Number], default: '' },
+  id: { type: String, default: '' },
+  name: { type: String, default: '' },
   type: {
     type: String,
     default: 'text',
@@ -25,6 +29,13 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+const instance = getCurrentInstance()
+
+// A stable per-instance fallback keeps labels associated even when older
+// call sites have not yet supplied an explicit id.
+const inputId = computed(() => props.id || (props.name ? `ds-field-${props.name}` : `ds-field-${instance?.uid ?? 'input'}`))
+const messageId = computed(() => `${inputId.value}-message`)
+const message = computed(() => props.error || props.hint)
 
 const value = computed({
   get: () => props.modelValue,
@@ -34,17 +45,21 @@ const value = computed({
 
 <template>
   <div class="ds-field" :class="{ 'ds-field--full': fullWidth }">
-    <label v-if="label" class="ds-field-label">{{ label }}</label>
+    <label v-if="label" class="ds-field-label" :for="inputId">{{ label }}</label>
     <InputText
+      v-bind="$attrs"
+      :id="inputId"
+      :name="name || undefined"
       v-model="value"
       :type="type"
       :placeholder="placeholder"
       :disabled="disabled"
       :invalid="!!error"
+      :aria-invalid="error ? 'true' : undefined"
+      :aria-describedby="message ? messageId : undefined"
       class="ds-field-input"
     />
-    <small v-if="error" class="ds-field-error">{{ error }}</small>
-    <small v-else-if="hint" class="ds-field-hint">{{ hint }}</small>
+    <small v-if="message" :id="messageId" :class="error ? 'ds-field-error' : 'ds-field-hint'">{{ message }}</small>
   </div>
 </template>
 
@@ -60,7 +75,7 @@ const value = computed({
 
 .ds-field-label {
   font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-medium);
+  font-weight: var(--ds-font-weight-semibold);
   color: var(--ds-color-text);
   margin-bottom: var(--ds-space-2);
 }
@@ -80,7 +95,13 @@ const value = computed({
   margin-top: var(--ds-space-1);
   font-size: var(--ds-font-size-xs);
 }
-.ds-field-label { font-weight: var(--ds-font-weight-semibold); }
-.ds-field-input :deep(.p-inputtext) { min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
-.ds-field-input :deep(.p-inputtext:focus) { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent); }
+
+.ds-field-input :deep(.p-inputtext) {
+  min-height: var(--ds-touch-target);
+  border-radius: var(--ds-radius-md);
+}
+
+.ds-field-input :deep(.p-inputtext:focus) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
 </style>
