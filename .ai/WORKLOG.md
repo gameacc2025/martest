@@ -2905,7 +2905,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 ## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-22 — MATCH FULL EMAIL INBOX REFERENCE
-- **Status:** IMPLEMENTED ON FEATURE BRANCH — awaiting merge.
+- **Status:** MERGED INTO MAIN.
 - **Reference:** User-provided Myron Mail inbox screenshot (2026-11-03).
 - **Scope:** Admin, Company and Website notification inbox pages and regression tests.
 - **Changes:**
@@ -2918,5 +2918,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Behavior preserved:** Existing notification endpoints, unread counts, fixed folders, category filtering, pagination, selection, bulk operations, read/unread, save/move and delete behavior.
 - **No fabricated features:** No fake sender names, compose action, star persistence or report export was introduced where the data/API does not support it.
 - **Verification:** Static source review only. Tests/build/browser checks NOT RUN because no local execution environment is connected.
-- **Branch:** fix/notifications-mail-layout-reference.
-- **Next:** Merge after review; then continue the remaining UI redesign backlog.
+- **Branch:** fix/notifications-mail-layout-reference (merged; cleanup pending).
+- **PR:** #82 — https://github.com/gameacc2025/martest/pull/82.
+- **Merge commit:** f2a2c47584329d3b4354d9d7ba56f9bb894d2048.
+- **Next:** Continue the remaining UI redesign backlog.
