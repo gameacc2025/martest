@@ -219,3 +219,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - No API, backend, schema, routing, folder membership or authorization changes.
 - Static source review only; tests/build/browser checks NOT RUN.
 - **Merged:** PR #81 — https://github.com/gameacc2025/martest/pull/81. Squash commit: fbad7a813e5f64759d4f1311bc4e9468e714d2dc.
+
+
+### Notification inbox visual correction — Phase 22 (owner reference screenshot)
+- Reworked the complete notification inbox composition in Admin, Company and Website to match the supplied Myron Mail reference: light neutral page header with breadcrumb, compact folder sidebar on the left, and a full-width message list on the right.
+- Moved search into the list toolbar alongside select-page, refresh, mark-all-read and contextual bulk actions; removed the separate oversized toolbar and dark navy hero header.
+- Replaced the old three-column grid definition (which no longer matched its two template children) with the intended two-column sidebar + message-list layout.
+- Tightened row density, typography, border treatment, folder navigation, selected/unread states and responsive behavior; retained the right-side full-height reading drawer from Phase 21.
+- Kept real app capabilities only: no fabricated sender identities, compose flow, star/label persistence or export actions. Existing API data, routes, folder model and handlers are preserved.
+- Added structural regression tests for the two-column email composition and integrated search toolbar in all three app test suites.
+- Static source review only; tests/build/browser checks NOT RUN.
+- **Branch:** fix/notifications-mail-layout-reference. Awaiting PR review/merge.
