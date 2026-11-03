@@ -519,10 +519,6 @@ function categoryIcon(item) {
 .header-icon-wrap,.header-icon-button{position:relative;display:grid;place-items:center;flex:0 0 2rem;width:2rem;height:2rem;border:1px solid #e7e9f2;border-radius:50%;background:#fff;color:#7b70ed;font-size:.82rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
 .header-icon-wrap:hover,.header-icon-button:hover{border-color:#d7d2ff;background:#f4f2ff}
 .header-icon-badge{position:absolute;top:-.28rem;inset-inline-end:-.28rem;display:grid;place-items:center;min-width:1rem;height:1rem;padding:0 .18rem;border:2px solid #fff;border-radius:1rem;background:#8275f4;color:#fff;font-size:.55rem;font-weight:700;line-height:1}
-.header-icon-wrap,.header-icon-button{position:relative;display:grid;place-items:center;flex:0 0 2.25rem;width:2.25rem;height:2.25rem;border:1px solid #e7e9f2;border-radius:50%;background:#fff;color:#7b70ed;font-size:.9rem;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
-.header-icon-wrap:hover,.header-icon-button:hover{border-color:#d7d2ff;background:#f4f2ff}
-.header-icon-badge{position:absolute;top:-.28rem;inset-inline-end:-.28rem;display:grid;place-items:center;min-width:1rem;height:1rem;padding:0 .18rem;border:2px solid #f3f5fa;border-radius:1rem;background:#8275f4;color:#fff;font-size:.55rem;font-weight:700;line-height:1}
-
 .mail-layout{display:grid;direction:rtl;grid-template-columns:260px minmax(0,1fr);height:calc(100dvh - 130px);min-height:32rem;overflow:hidden;border:0;border-radius:0;background:#fff;box-shadow:none}
 .mail-sidebar{direction:rtl;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:.75rem .65rem;border-inline-end:1px solid #eceef5;background:#fff}
 .sidebar-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;min-height:3rem;margin:0 0 .65rem;padding:.35rem .45rem;color:#23324a;font-size:.8rem;font-weight:700}
