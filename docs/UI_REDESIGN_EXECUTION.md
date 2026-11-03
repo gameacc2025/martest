@@ -782,3 +782,7 @@ Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c
 - Added shared component tests for desktop/mobile toggle states and mobile modal navigation semantics.
 - No routes, menu definitions, permission filtering, auth, theme or API behavior changed.
 - CI on the latest shell commits is pending; no local test/build execution is claimed.
+
+## 2026-11-03 — Dashboard mobile scroll-lock refinement
+
+Admin and Company layouts now restore the body's previous inline overflow value when the mobile navigation drawer closes or the layout unmounts. This prevents the drawer cleanup from clearing a scroll lock established by another overlay. No API, permission, route, store, or backend behavior changed. Browser tests were intentionally not run per the user's UI-only execution instruction.
