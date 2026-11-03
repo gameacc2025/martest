@@ -1,6 +1,6 @@
 # Notifications inbox — approved visual reference
 
-This is the first production page family used to validate the Turquoise / Sky / Dark Navy system.
+This is the first production page family used to validate the Sky Blue / Turquoise / Dark Navy system.
 
 ## Composition (RTL)
 - Dark fixed folder/navigation rail on the right, with brand mark, fixed INBOX/SAVED folders and their independent counts.
@@ -10,8 +10,8 @@ This is the first production page family used to validate the Turquoise / Sky / 
 - On narrow screens, folder navigation becomes a compact horizontal strip; the list and reader use the available viewport width.
 
 ## Tokens
-- Brand: `#12B8A6`; accessible action shade: `#087F78`.
-- Sky accent: `#39BFE0`; deep navy: `#173B63`; dark sidebar: `#142B46`.
+- Primary brand: `#39BFE0`; secondary turquoise: `#12B8A6`.
+- Deep navy: `#173B63`; dark sidebar: `#142B46`.
 - Canvas: `#F2F7FA`; surface: `#FFFFFF`; text: `#203247`.
 - Vazirmatn, compact 13–15px row typography, 20–22px page heading, 4px spacing base.
 
