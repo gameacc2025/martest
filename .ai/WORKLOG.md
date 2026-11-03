@@ -2511,3 +2511,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Native input attributes (including autocomplete, required, inputmode, maxlength and caller-provided ARIA attributes) are forwarded to the real input instead of the wrapper. Existing v-model, field types, disabled state, hint/error precedence and design tokens are preserved.
 - Scope is shared UI only. No API, backend, routes, permissions or data contracts changed.
 - Browser testing and test execution were intentionally not run per the user's instruction. Source review only; runtime/build verification remains unclaimed.
+
+
+## 2026-11-03 — Shared data-table filter accessibility
+
+- Added descriptive accessible names to every generated per-column text/select filter so controls remain identifiable without relying on placeholder text.
+- Marked decorative search and empty-state icons as hidden from assistive technology.
+- Kept server-side request payloads, filtering, pagination, column visibility, selection, row actions and table layout unchanged.
+- UI-only change; no API/backend changes. No tests or browser checks run by explicit user instruction; runtime/build verification is not claimed.
