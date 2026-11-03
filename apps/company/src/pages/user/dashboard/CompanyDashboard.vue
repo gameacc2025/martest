@@ -85,6 +85,22 @@
       />
     </div>
 
+    <section class="company-dashboard-analytics" aria-label="آمار و تحلیل عملکرد">
+      <DashboardPanel title="تحلیل عملکرد شرکت" icon="pi pi-chart-bar" class="company-dashboard-chart">
+        <template #actions><span class="cd-hint">بر پایه اطلاعات واقعی محصولات و استعلام‌ها</span></template>
+        <div class="cd-analytics-grid">
+          <div class="cd-analytics-block">
+            <div class="cd-analytics-heading"><strong>وضعیت استعلام‌های دریافتی</strong><span>تفکیک بر اساس وضعیت</span></div>
+            <AnalyticsChart :series="inquiryStatusSeries" :loading="statsLoading" tone="primary" :height="210" />
+          </div>
+          <div class="cd-analytics-block">
+            <div class="cd-analytics-heading"><strong>وضعیت محصولات</strong><span>بر اساس فهرست محصولات شرکت</span></div>
+            <AnalyticsChart :series="productStatusSeries" :loading="productsLoading" tone="success" :height="210" />
+          </div>
+        </div>
+      </DashboardPanel>
+    </section>
+
     <!-- Primary operations: inquiry pipeline and frequently used actions. -->
     <section class="company-dashboard-operations" aria-label="عملیات اصلی شرکت">
       <DashboardPanel title="جریان استعلام‌ها" icon="pi pi-sitemap" class="company-dashboard-pipeline">
@@ -200,6 +216,7 @@ import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickAct
 import DashboardPanel from '@telecom/shared-ui/components/admin/dashboard/DashboardPanel.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
 import InquiryPipeline from '@telecom/shared-ui/components/admin/dashboard/InquiryPipeline.vue'
+import AnalyticsChart from '@telecom/shared-ui/components/admin/dashboard/AnalyticsChart.vue'
 import ScoreCard from '@telecom/shared-ui/components/admin/dashboard/ScoreCard.vue'
 
 const router = useRouter()
@@ -607,6 +624,13 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: var(--ds-space-4);
 }
+
+.company-dashboard-analytics { min-width: 0; }
+.cd-analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.cd-analytics-block { min-width: 0; padding: .9rem 1rem .65rem; border: 1px solid var(--ds-color-border); border-radius: 12px; background: var(--ds-color-surface); }
+.cd-analytics-heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-bottom: .35rem; }
+.cd-analytics-heading strong { color: var(--ds-color-text); font-size: .85rem; font-weight: 700; }
+.cd-analytics-heading span { color: var(--ds-color-text-muted); font-size: .72rem; }
 
 /* ── Two-column grids */
 .cd-grid { display: grid; gap: var(--ds-space-6); }
