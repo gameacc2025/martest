@@ -13,19 +13,20 @@ import Lara from '@primevue/themes/lara'
 
 const TelecomPreset = definePreset(Lara, {
   semantic: {
-    // Accessible action ramp anchored in the turquoise brand.
+    // Brand-primary sky ramp. Keep the vivid #39BFE0 at the center; darker
+    // steps are reserved for text, borders and hover states.
     primary: {
-      50: '#e8f8f6',
-      100: '#c9eee9',
-      200: '#9ce0d7',
-      300: '#66cfc2',
-      400: '#35c1b1',
-      500: '#12b8a6',
-      600: '#0b9d91',
-      700: '#087f78',
-      800: '#086660',
-      900: '#0b5551',
-      950: '#063b3a'
+      50: '#eaf9fc',
+      100: '#d5f3f9',
+      200: '#b2e9f4',
+      300: '#86dced',
+      400: '#5ccce5',
+      500: '#39bfe0',
+      600: '#22a8cc',
+      700: '#168eaf',
+      800: '#14718c',
+      900: '#155d72',
+      950: '#103f50'
     },
     // Slightly softer corners than the stock Lara template: calmer, more "enterprise".
     formField: { borderRadius: '10px' },
@@ -36,16 +37,16 @@ const TelecomPreset = definePreset(Lara, {
     colorScheme: {
       light: {
         primary: {
-          color: '{primary.700}',
-          contrastColor: '#ffffff',
-          hoverColor: '{primary.800}',
-          activeColor: '{primary.900}'
+          color: '{primary.500}',
+          contrastColor: '#f7fdff',
+          hoverColor: '{primary.600}',
+          activeColor: '{primary.700}'
         },
         highlight: {
-          background: '#dff6f3',
-          focusBackground: '#c8eee9',
-          color: '#086660',
-          focusColor: '#063b3a'
+          background: '#eaf9fc',
+          focusBackground: '#d5f3f9',
+          color: '#155d72',
+          focusColor: '#103f50'
         },
         // Cool, blue-tinted neutral ramp. 200 = hairline border, 600 = secondary text.
         surface: {
@@ -82,8 +83,8 @@ const TelecomPreset = definePreset(Lara, {
           activeColor: '{primary.300}'
         },
         highlight: {
-          background: 'rgba(18, 184, 166, 0.16)',
-          focusBackground: 'rgba(18, 184, 166, 0.24)',
+          background: 'rgba(57, 191, 224, 0.16)',
+          focusBackground: 'rgba(57, 191, 224, 0.24)',
           color: '{primary.300}',
           focusColor: '{primary.200}'
         },
