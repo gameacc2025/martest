@@ -69,8 +69,15 @@ const faNumber = (v) => (Number(v) || 0).toLocaleString('fa-IR')
   display: flex;
   align-items: flex-end;
   justify-content: space-around;
-  gap: var(--ds-space-2);
-  padding-top: var(--ds-space-4);
+  gap: clamp(.5rem, 2vw, 1.5rem);
+  padding: 1rem .75rem 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: repeating-linear-gradient(
+    to top,
+    transparent 0,
+    transparent calc(25% - 1px),
+    color-mix(in srgb, var(--ds-color-border) 72%, transparent) 25%
+  );
 }
 
 .analytics-chart-col {
@@ -101,17 +108,20 @@ const faNumber = (v) => (Number(v) || 0).toLocaleString('fa-IR')
 
 .analytics-chart-bar {
   width: 100%;
-  max-width: 2.5rem;
-  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
+  max-width: 3.25rem;
+  min-height: 3px;
+  border-radius: 7px 7px 0 0;
   background: linear-gradient(
     to top,
     var(--chart-accent),
     color-mix(in srgb, var(--chart-accent) 55%, transparent)
   );
-  transition: height var(--ds-transition-slow);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--chart-accent) 18%, transparent);
+  transition: height var(--ds-transition-slow), filter var(--ds-transition-fast);
 }
 
 .analytics-chart-label {
+  padding-top: .45rem;
   font-size: var(--ds-font-size-xs);
   color: var(--ds-color-text-muted);
   white-space: nowrap;
