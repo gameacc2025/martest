@@ -86,6 +86,14 @@ The repository inventory contains 69 Vue page files across the three application
 6. Run the relevant app tests and build in the local project environment; record actual results (do not infer success from source edits).
 7. Commit the page and update this log plus the AI worklog/current-task documents.
 
+## Contact form honesty follow-up — 2026-11-03
+
+- Removed the artificial timeout and success dialog from the Website Contact Us form.
+- A valid submission now clearly states that no message was sent because no confirmed public submission endpoint is configured; entered values are preserved.
+- Removed the now-unused loading state. No API contract or backend code was changed.
+- Verified by source inspection only; no browser, test, or build run was performed.
+- Still unresolved: authoritative business contact details and a real approved submission endpoint.
+
 ## Verification status
 
 The commits above are source edits made through the connected GitHub repository interface. A local pnpm test/build has **not** been run in this execution environment. Do not mark the redesign complete until all inventory sections are migrated and the user/local CI confirms the required tests and builds.
