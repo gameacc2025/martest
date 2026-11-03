@@ -1,4 +1,4 @@
-# Current Task — Full UI redesign: Turquoise / Sky palette + dark sidebar
+# Current Task — Full UI redesign: Sky Blue primary / Turquoise secondary palette + dark sidebar
 
 **Status:** IN_PROGRESS — owner approved turquoise/sky-blue palette with dark sidebar; shared theme/tokens and real-page sample are the first milestone. The three notification inboxes and shared workspace primitives have received a corrective pass; the full 69-page redesign remains in progress.
 **Repository:** gameacc2025/martest  
@@ -17,7 +17,7 @@ Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first R
 ## Implemented slices
 ### Approved turquoise brand foundation — 2026-11-03
 - Owner selected the turquoise/sky-blue palette with dark sidebar.
-- Shared PrimeVue preset and design tokens now define turquoise primary (#12B8A6; accessible light action #087F78), sky (#39BFE0), technical blue (#2878C7), navy (#173B63), dark sidebar (#142B46), amber (#E7A64B), and cool light surfaces.
+- Shared PrimeVue preset and design tokens now define sky-blue primary (#39BFE0), turquoise secondary (#12B8A6), technical blue (#2878C7), navy (#173B63), dark sidebar (#142B46), amber (#E7A64B), and cool light surfaces.
 - Added `design-system/pages/notifications.md` as the first real-page visual reference and applied turquoise selected/unread/focus accents to all three existing Notifications inboxes.
 - Updated `design-system/MASTER.md` and WORKLOG. No API, route, auth, permission, tenant, notification, or backend behavior was changed.
 - Verification: remote source re-fetch only; tests/build/browser checks NOT RUN in this session.
