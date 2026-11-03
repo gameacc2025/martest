@@ -37,11 +37,21 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 
 ### Notifications and preferences
 - All three inboxes now expose only the fixed INBOX and SAVED folders, in a stable order; custom/user-created folders are not shown.
-- Kept All/Read/Unread filters and notification type categories.
+- Sidebar exposes only the fixed INBOX and SAVED folders; notification type categories remain separate filters. Read/unread state is shown per row and in the global unread badge, not as extra folders.
 - Preserved copy-to-SAVED and explicit move semantics, bulk delete/read-state actions and double-click-to-mark-read behavior.
 - Website inbox rows now use semantic buttons rather than clickable divs.
 - Reworked inbox and notification-preference surfaces to flat, readable tables/lists with responsive overflow and focus states.
 - Added a shared fixed-folder normalizer and unit tests.
+
+
+### Notification inbox correction — 2026-11-03
+- The three inboxes now render only the two fixed system folders (INBOX and SAVED); category labels remain a separate filter group.
+- Selecting a message opens the reading drawer from the physical right edge in RTL. The overlay uses a narrower mail-reader width, and the row exposes `aria-expanded` / `aria-controls` rather than toggle-button semantics.
+- Search now grows into the available toolbar space (with a sensible max width) instead of being constrained to a small fixed-width field. Bulk read/unread/delete actions are icon-only with accessible labels and titles.
+- Website now applies folder-membership filtering consistently with Company/Admin.
+- Added/updated frontend regression assertions for the fixed-folder model, drawer expansion state and icon-only bulk actions.
+- API contracts, copy/save/move semantics, read-state behavior (single click opens; double-click marks read), and pagination remain unchanged.
+- Verification: source changes were committed directly to remote `main`; automated tests/build and browser rendering have NOT been run in this session. CI status must be checked before treating the task as verified.
 
 ## Remaining phases
 1. Admin and Company operational pages: category/company/user/role/permission/product lists, Company product/user settings, both product editors and system settings have received first refinements; continue detail/edit flows, orders, reports and operational edge states.
