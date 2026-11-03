@@ -2997,3 +2997,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Changes were committed directly to remote `main` by GitHub contents API.
 - **Risks / open questions:** Existing pages outside Notifications may still contain hardcoded legacy colors. Audit and migrate them in controlled batches to semantic tokens; do not global-replace unrelated semantic/status colors.
 - **Next action:** Audit the shared shell/public header and the main dashboard/product/inquiry page families; convert legacy palette usage to shared semantic tokens, add focused tests, then run workspace tests/builds in the user's local checkout or a connected execution environment.
+
+
+## 2026-11-03 — ADMIN + COMPANY PANEL VISUAL REBUILD
+- **Status:** Shared shell and core dashboard components redesigned; route-by-route page refinement remains in progress.
+- **Reference:** Owner-approved dashboard visual with vivid #39BFE0 primary, #12B8A6 secondary, navy navigation and compact Persian typography.
+- **Implemented:** Shared main stylesheet now includes a dedicated workspace refinement layer: Admin/Company shell, sidebar, topbar, dashboard heroes, page headings, KPI cards, operational panels, toolbars, PrimeVue controls, tables, dialogs, responsive layouts and reduced-motion handling.
+- **Components:** Refined shared KpiCard and DashboardPanel presentation. No API requests, data contracts, permissions, routes or business logic were changed.
+- **Validation:** Skipped UI tests/build/browser checks per explicit owner instruction.
+- **Commits:** workspace layer b574336; KPI component 7273e58; DashboardPanel a37b25f.
