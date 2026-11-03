@@ -56,6 +56,18 @@ module.exports = fp(async function errorHandlerPlugin(fastify) {
       });
     }
 
+    // ── Explicit service-unavailable errors ─────────────────────
+    // Keep the configured public contact endpoint's disabled state visible
+    // without exposing provider credentials or SMTP internals.
+    if (error.statusCode === 503) {
+      return reply.code(503).send({
+        error: {
+          code: error.code || 'SERVICE_UNAVAILABLE',
+          message: error.message || 'Service temporarily unavailable.',
+        },
+      });
+    }
+
     // ── App-thrown errors (service layer throws { statusCode, message }) ──
     if (error.statusCode && error.statusCode < 500) {
       return reply.code(error.statusCode).send({
