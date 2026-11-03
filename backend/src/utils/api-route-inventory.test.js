@@ -5,6 +5,7 @@ const path = require('node:path');
 
 const modules = [
   ['auth', 'auth.routes.js', '/auth'],
+  ['contact', 'contact.routes.js', '/contact'],
   ['users', 'user.routes.js', '/users'],
   ['addresses', 'address.routes.js', '/addresses'],
   ['roles', 'role.routes.js', '/roles'],
