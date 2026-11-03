@@ -791,3 +791,8 @@ Admin and Company layouts now restore the body's previous inline overflow value 
 ## 2026-11-03 — Mobile drawer scroll-lock ownership
 
 A follow-up hardens the Admin and Company mobile drawer cleanup: the layout now tracks whether it acquired the body scroll lock and restores the previous inline overflow only when it owns that lock. Unmounting a layout whose drawer was never opened no longer clears an unrelated overlay's scroll lock. No API, route, permission, store, or backend behavior changed. Browser testing was intentionally not run per user instruction.
+
+
+## 2026-11-03 — Public account navigation by access profile
+
+Corrected Website account dropdown and mobile profile navigation to follow the existing access-profile split: CUSTOMER stays on Website, STAFF uses Admin, and COMPANY uses Company. STAFF inquiry navigation now opens Admin inquiry management rather than incorrectly entering the Company portal. Existing PKCE handoff is retained; no access token is placed in a URL. No backend/API/permission changes. Browser testing was intentionally not run per user instruction.
