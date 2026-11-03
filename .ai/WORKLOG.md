@@ -2958,3 +2958,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - The first CI attempt for this change stopped before frontend tests because the checked-in generated dependency graph omitted the currently registered `contact` and `settings` backend modules.
 - Refreshed `docs/architecture/DEPENDENCY_GRAPH.generated.mmd` to match the generator output shown by CI. This is a pre-existing generated-document drift, not a notification runtime failure.
 - The corrected commit has a new CI run pending; frontend tests/build remain unverified until that run completes.
+
+
+## 2026-11-03 — NOTIFICATIONS-DUPLICATE-HEADER-AND-SCROLL — Remove duplicated breadcrumb and correct mailbox scrolling
+- **Status:** IMPLEMENTED — static source changes committed to `main`; automated execution remains NOT RUN.
+- **Problem:** Each notification page rendered an internal `mail-breadcrumb` while the shared dashboard layout already rendered `page-header-pro`, producing two competing page paths.
+- **Changes:** Removed the redundant page-level breadcrumb from Admin, Company and Website inboxes while preserving the shared layout breadcrumb, page title, unread indicator and settings action. Removed the now-unused breadcrumb styles.
+- **Layout correction:** The desktop mailbox now uses a viewport-bounded layout; the sidebar and message list scroll independently; the reading drawer remains anchored to the right in RTL; the mobile drawer expands to full viewport width/height. The mobile mailbox returns to natural document height to avoid trapping the page in a fixed-height grid.
+- **Regression coverage:** Added a matching test to each app asserting that the mailbox title remains and the duplicate `mail-breadcrumb` is absent.
+- **Preserved:** Existing notification API calls, folder/category behavior, read/unread semantics, bulk actions, delete/save/move behavior, pagination and permissions were not changed.
+- **Verification:** GitHub source edits and regression test source updates are committed. Vitest, app builds and browser rendering were NOT RUN in this session; CI must be checked before claiming test success.
