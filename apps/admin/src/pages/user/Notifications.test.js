@@ -215,4 +215,14 @@ describe('Admin notification inbox', () => {
     expect(wrapper.find('.list-search input').exists()).toBe(true)
   })
 
+
+  it('renders only the shared layout breadcrumb and keeps the mailbox heading', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a><slot /></a>' } } },
+    })
+    await flushPromises()
+    expect(wrapper.find('.mail-header h1').text()).toBe('صندوق اعلان‌ها')
+    expect(wrapper.find('.mail-breadcrumb').exists()).toBe(false)
+    expect(wrapper.find('.page-header-pro').exists()).toBe(false)
+  })
 })
