@@ -6,7 +6,7 @@
  * styling comes from `--ds-*` tokens (spacing, radius, colors) and PrimeVue's
  * theme; no hardcoded colors.
  */
-import { computed, getCurrentInstance } from 'vue'
+import { computed, getCurrentInstance, useAttrs } from 'vue'
 import InputText from 'primevue/inputtext'
 
 defineOptions({ inheritAttrs: false })
@@ -30,12 +30,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 const instance = getCurrentInstance()
+const attrs = useAttrs()
 
 // A stable per-instance fallback keeps labels associated even when older
 // call sites have not yet supplied an explicit id.
 const inputId = computed(() => props.id || (props.name ? `ds-field-${props.name}` : `ds-field-${instance?.uid ?? 'input'}`))
 const messageId = computed(() => `${inputId.value}-message`)
 const message = computed(() => props.error || props.hint)
+const describedBy = computed(() => [attrs['aria-describedby'], message.value ? messageId.value : null].filter(Boolean).join(' ') || undefined)
+const ariaInvalid = computed(() => props.error ? 'true' : attrs['aria-invalid'])
 
 const value = computed({
   get: () => props.modelValue,
@@ -55,8 +58,8 @@ const value = computed({
       :placeholder="placeholder"
       :disabled="disabled"
       :invalid="!!error"
-      :aria-invalid="error ? 'true' : undefined"
-      :aria-describedby="message ? messageId : undefined"
+      :aria-invalid="ariaInvalid"
+      :aria-describedby="describedBy"
       class="ds-field-input"
     />
     <small v-if="message" :id="messageId" :class="error ? 'ds-field-error' : 'ds-field-hint'">{{ message }}</small>
