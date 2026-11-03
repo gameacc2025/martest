@@ -52,7 +52,7 @@ const docs = {
     tags: ['Contact'],
     authRequired: false,
     includeNotFound: false,
-    responses: messageResponse('Contact message accepted by the configured SMTP server.'),
+    responses: { 200: { description: 'Contact message accepted by the configured SMTP server.', type: 'object', properties: { success: { type: 'boolean' } }, required: ['success'] } },
   },
   'POST /api/v1/auth/register': {
     summary: 'Register customer account',
