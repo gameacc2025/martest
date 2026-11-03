@@ -1550,3 +1550,9 @@ Address cards and empty state now use PrimeIcons; edit/delete/default actions an
 ## Latest shared shell UI — 2026-11-02
 
 Admin and Company share a more accessible responsive shell: mobile drawer state is synchronized with header toggles; toggles expose aria-expanded/aria-controls and dynamic labels; open drawer is a modal navigation dialog; header controls meet 44px and visible focus/reduced-motion standards. Permission-filtered menus, routes, theme, auth and API behavior unchanged. Tests added. Continue all remaining UI pages after CI verification.
+
+## UI shell refinement — 2026-11-03
+
+- Admin and Company mobile navigation now restores the body's pre-existing inline overflow value when the drawer closes or the layout unmounts, instead of always forcing an empty value. This avoids overwriting a scroll-lock state owned by another overlay.
+- Scope is UI-only; route/menu permissions, API calls, stores, and backend contracts are unchanged.
+- Browser testing intentionally not run per task direction. Continue the remaining UI route inventory and keep this handoff current.
