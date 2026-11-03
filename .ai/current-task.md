@@ -1,12 +1,15 @@
-# UI redesign implementation — source work complete (2026-11-03)
+# Contact form delivery — implementation committed (2026-11-03)
 
-**Implementation status:** All 69 Vue page files across Website, Company and Admin are recorded as migrated or audited against the shared Design System. The shared component and auth/contact accessibility follow-up in this pass is also committed. No additional UI source task is currently identified by the repository's execution inventory.
+**Current status:** The Website Contact Us form is now wired to a new public backend endpoint, `POST /api/v1/contact/messages`. The endpoint validates the request, applies a per-IP rate limit, and sends mail only through configured SMTP to the server-side `CONTACT_INBOX_EMAIL`. The frontend reports success only after SMTP accepts the message and preserves the form contents on failure.
 
-**User constraints:** UI-only; no backend, API contracts, database, auth/permission logic or business workflows changed. Browser testing and test execution are intentionally omitted at the user's direction. Do not claim build/runtime/visual verification without evidence. All changes are committed directly to `main`.
+**Configuration still required before live delivery:** Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, and a real monitored `CONTACT_INBOX_EMAIL` in `backend/.env` (or the production backend environment). These business/provider values are not available in the repository and have not been fabricated. Until configured, the endpoint returns `503 CONTACT_DELIVERY_NOT_CONFIGURED`.
 
-**Latest finishing changes:** unique fallback IDs and additive ARIA descriptions in shared Input; accessible DataTable filters; Vue 3.4-compatible FormField feedback associations; Contact Us Select label binding; accessible password-recovery forms in all three apps; login autofill semantics; registration autofill hints. Contact Us no longer simulates successful delivery: without a confirmed endpoint it now states that the message was not sent and preserves the entered content.
+**Security and scope:** Public route, strict schema, allow-listed subject values, maximum field lengths, server-owned recipient, visitor email in Reply-To, and 3 requests / 10 minutes / IP. Unverified phone/address/hours/social/map details were removed from Contact Us. No database migration or new dependency was introduced.
 
-**Explicitly unresolved (not fabricated):** Contact Us still has no confirmed public submission endpoint or verified business contact details. Its previous fake success dialog and artificial delay have been removed; the form now gives an honest unavailable message and keeps the user's input. Final responsive/dark/RTL review against running apps and build/CI sign-off require an environment/run the user has not authorized in this no-test pass. The separate security-audit handoff below is retained as historical project context.
+**Validation policy:** Regression tests were added for request validation and missing SMTP configuration. Per owner instruction, no tests, build, or browser checks were run; do not claim runtime delivery is verified.
+
+**Latest implementation commit:** `c8f1ff4` (contact SMTP configuration regression test). All changes are committed directly to `main`.
+
 
 ---
 
@@ -35,9 +38,9 @@
 - Do not claim full security sign-off until the complete route inventory is covered.
 - Preserve strict app-context boundaries: STAFF/SUPER_ADMIN must not gain COMPANY context by wildcard permission; COMPANY operations must be scoped to the authenticated company.
 
-## Deferred UI / integration item — Contact Us
+## Historical handoff — Contact Us integration (superseded by the 2026-11-03 implementation above)
 
-`ContactUs.vue` contains hardcoded phone/email/address/social/map details and a submit handler that simulates success with a timeout. No public contact submission API was found in source searches or route inventory. Do not invent an endpoint or claim a message was sent. Define a real contact-message workflow and authoritative business contact details before implementing it.
+At the time of the earlier handoff, no contact endpoint existed. The 2026-11-03 implementation added an SMTP-backed public endpoint and removed unverified contact details. Live delivery still depends on real SMTP credentials and a verified monitored inbox being configured outside source control.
 
 ## Remaining backlog after Step 11
 
