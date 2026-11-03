@@ -2952,3 +2952,9 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Changes are committed directly to remote `main`.
 - **Known limitation:** Search/category filtering remains limited to the currently fetched server page unless the backend list API is extended; no backend changes were made in this UI correction.
 - **Next action:** Inspect GitHub Actions for the latest main commit, fix any failures, and provide the local sync command.
+
+
+### CI follow-up — generated architecture graph
+- The first CI attempt for this change stopped before frontend tests because the checked-in generated dependency graph omitted the currently registered `contact` and `settings` backend modules.
+- Refreshed `docs/architecture/DEPENDENCY_GRAPH.generated.mmd` to match the generator output shown by CI. This is a pre-existing generated-document drift, not a notification runtime failure.
+- The corrected commit has a new CI run pending; frontend tests/build remain unverified until that run completes.
