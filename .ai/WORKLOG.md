@@ -2838,3 +2838,20 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** b8d5f9ae80eb767b8dbc5ee930b6d8bb79f18823 (updated origin/main).
 - **Push:** Remote main ref updated and verified.
 - **Next:** Continue corrected visual direction through remaining Admin/Company list/detail pages and public marketplace pages.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-18 — PUBLIC MARKETPLACE VISUAL CORRECTION
+- **Status:** IN_PROGRESS — public homepage, category discovery and product listing received the corrected richer/compact visual direction.
+- **Scope:** Website Home, Categories, ProductListing and their existing page tests.
+- **Changes:**
+  - Homepage hero now has a small brand/context label, a compact 25px–36px title range, strong search treatment and restrained teal accent.
+  - Homepage sections, filters and API-backed product/category cards use deliberate surface framing, light depth and restrained hover feedback.
+  - Restored the already-defined contextual icons in the marketplace capability row; no new or invented claims/data were introduced.
+  - Product listing heading typography is reduced; product cards use subtle elevation; product category badge uses a solid surface and no backdrop blur.
+  - Category cards use image-led layout, compact type and controlled hover/focus treatment.
+  - Rewrote stale homepage/category/listing test assertions to match the current static hero and semantic router-link/button implementation.
+- **Behavior preserved:** Product/category APIs, route names, category query IDs, filters, pagination, price display, and loading/error/empty states unchanged.
+- **Verification:** Static source/structure review only. Tests, builds and browser checks NOT RUN — owner instruction.
+- **Commit:** Pending.
+- **Push:** Pending.
+- **Next:** Continue corrected art direction through public product details, company profiles and account pages, then complete Admin/Company list/detail screens and 69-page audit.

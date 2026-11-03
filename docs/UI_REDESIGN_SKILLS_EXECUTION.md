@@ -166,3 +166,15 @@ Next phases must apply this corrected direction across remaining pages, not repe
 - Updated component tests for contextual heading/KPI/panel/quick-action icon output.
 - Existing API, role, permission, route, responsive and theme behavior remains unchanged.
 - Tests/build/browser checks NOT RUN by owner instruction.
+
+
+## Public marketplace visual correction — 2026-11-03
+
+- Homepage hero now balances a compact branded context label, reduced title size, clear search and a restrained teal edge accent.
+- Home product/category sections, filters and cards regain distinct surfaces, subtle elevation and restrained interaction feedback.
+- The four existing marketplace capability descriptions now show their defined contextual PrimeIcons in a compact feature row.
+- Product listing heading and product-card typography are compact; product category chips use solid surfaces rather than backdrop blur.
+- Category discovery cards use the actual category imagery, clear metadata and subtle depth.
+- Updated stale Home/Categories/ProductListing tests to assert the current static hero and semantic links/buttons rather than removed slideshow or click-router handlers.
+- Product/category API data, routes, category IDs, search/filter/pagination behavior and price logic remain unchanged.
+- Static review only; tests/build/browser checks NOT RUN by owner instruction.

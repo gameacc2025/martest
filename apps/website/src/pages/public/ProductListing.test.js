@@ -2,8 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { reactive } from 'vue'
 
-const { routerPush, getProducts, getCategories, routeState } = vi.hoisted(() => ({
-  routerPush: vi.fn(),
+const { getProducts, getCategories, routeState } = vi.hoisted(() => ({
   getProducts: vi.fn(),
   getCategories: vi.fn(),
   routeState: { current: null },
@@ -11,7 +10,6 @@ const { routerPush, getProducts, getCategories, routeState } = vi.hoisted(() => 
 
 vi.mock('vue-router', () => ({
   useRoute: () => routeState.current,
-  useRouter: () => ({ push: routerPush }),
 }))
 
 vi.mock('../../stores/products', () => ({
@@ -22,6 +20,11 @@ import ProductListing from './ProductListing.vue'
 
 describe('Website Product Listing', () => {
   let wrapper
+
+  const mountListing = () => shallowMount(ProductListing, { global: { stubs: {
+    WorkspacePageHeading: false,
+    RouterLink: { props: ['to'], template: '<a class="product-card" :data-route="to.name" :data-product-id="to.params?.id"><slot /></a>' },
+  } } })
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -48,7 +51,7 @@ describe('Website Product Listing', () => {
   })
 
   it('preserves the initial category query and API/store parameter contract', async () => {
-    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    wrapper = mountListing()
     await flushPromises()
 
     expect(getCategories).toHaveBeenCalledOnce()
@@ -62,20 +65,17 @@ describe('Website Product Listing', () => {
     expect(wrapper.find('#products-page-title').text()).toBe('محصولات')
   })
 
-  it('navigates to the existing product-details route on keyboard activation', async () => {
-    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+  it('links each product card to its existing product-details route', async () => {
+    wrapper = mountListing()
     await flushPromises()
 
-    await wrapper.find('.product-card').trigger('keydown.enter')
-
-    expect(routerPush).toHaveBeenCalledWith({
-      name: 'product-details',
-      params: { id: 42 },
-    })
+    const link = wrapper.find('.product-card')
+    expect(link.attributes('data-route')).toBe('product-details')
+    expect(link.attributes('data-product-id')).toBe('42')
   })
 
   it('renders product identity, supplier trust and a clear details action from API data', async () => {
-    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    wrapper = mountListing()
     await flushPromises()
 
     expect(wrapper.find('.product-meta').text()).toContain('FiberPro')
@@ -91,7 +91,7 @@ describe('Website Product Listing', () => {
       data: [{ id: 43, title: 'آنتن مخابراتی', company: { name: 'تأمین‌کننده' }, prices: [] }],
       meta: { page: 1, limit: 12, total: 1, totalPages: 1 },
     })
-    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    wrapper = mountListing()
     await flushPromises()
 
     expect(wrapper.find('.product-card-price').text()).toContain('استعلام از تأمین‌کننده')
@@ -100,7 +100,7 @@ describe('Website Product Listing', () => {
 
   it('announces product loading errors accessibly', async () => {
     getProducts.mockRejectedValueOnce(new Error('offline'))
-    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    wrapper = mountListing()
     await flushPromises()
 
     expect(wrapper.find('[role="alert"]').exists()).toBe(true)
@@ -112,14 +112,14 @@ describe('Website Product Listing', () => {
       data: [],
       meta: { page: 1, limit: 12, total: 0, totalPages: 0 },
     })
-    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    wrapper = mountListing()
     await flushPromises()
 
     expect(wrapper.find('[role="status"]').text()).toContain('هیچ محصولی یافت نشد')
   })
 
   it('keeps route-query category changes connected to product loading', async () => {
-    wrapper = shallowMount(ProductListing, { global: { stubs: { WorkspacePageHeading: false } } })
+    wrapper = mountListing()
     await flushPromises()
     getProducts.mockClear()
 

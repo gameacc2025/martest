@@ -144,6 +144,7 @@ onMounted(() => {
       <section class="hero" aria-labelledby="home-title">
         <div class="hero-content">
           <div class="hero-copy">
+            <span class="hero-eyebrow"><i class="pi pi-broadcast" aria-hidden="true"></i> بازارگاه تخصصی تجهیزات مخابراتی</span>
             <h1 id="home-title" class="hero-title">تجهیزات مخابراتی و شبکه را دقیق پیدا کنید</h1>
             <p class="hero-desc">محصولات، مشخصات فنی و تأمین‌کنندگان بازارگاه را جستجو کنید و برای دریافت قیمت، مسیر استعلام را دنبال کنید.</p>
           </div>
@@ -152,6 +153,8 @@ onMounted(() => {
             <input
               v-model="searchQuery"
               type="search"
+              name="homepage-search"
+              autocomplete="off"
               class="hero-search-input"
               placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…"
               aria-label="جستجوی محصولات"
@@ -182,6 +185,8 @@ onMounted(() => {
                   <div class="p-inputgroup">
                     <InputText
                       id="home-product-search"
+                      name="homepage-filter-search"
+                      autocomplete="off"
                       v-model="searchQuery"
                       placeholder="نام محصول..."
                       @keyup.enter="applyFilters"
@@ -301,7 +306,7 @@ onMounted(() => {
           <!-- Featured Products -->
           <section class="section-block ds-card" aria-labelledby="featured-heading">
             <div class="section-head">
-              <button class="nav-btn" @click="fetchProducts" :disabled="loading" aria-label="بارگذاری مجدد">
+              <button type="button" class="nav-btn" @click="fetchProducts" :disabled="loading" aria-label="بارگذاری مجدد">
                 <i class="pi" :class="loading ? 'pi-spin pi-spinner' : 'pi-refresh'"></i>
               </button>
               <h2 id="featured-heading" class="section-title ds-h2">محصولات ویژه</h2>
@@ -404,7 +409,8 @@ onMounted(() => {
 
       <!-- Verified marketplace capabilities; no hard-coded business metrics. -->
       <section class="features-bar" aria-label="امکانات بازارگاه">
-        <div v-for="(feature, i) in features" :key="i" class="feature-item">
+        <div v-for="feature in features" :key="feature.title" class="feature-item">
+          <span class="feature-icon"><i :class="feature.icon" aria-hidden="true"></i></span>
           <div class="feature-text">
             <h3>{{ feature.title }}</h3>
             <p>{{ feature.text }}</p>
@@ -855,5 +861,37 @@ onMounted(() => {
   .home-page .home-product-footer { align-items: flex-start; flex-direction: column; }
   .home-page .product-card-cta { min-height: 2.5rem; }
 }
+
+
+.hero{position:relative;border:1px solid color-mix(in srgb,var(--ds-brand) 24%,transparent);border-radius:var(--ds-radius-xl);background:var(--ds-navy);box-shadow:var(--ds-shadow-md)}
+.hero::before{position:absolute;inset-block:1.25rem;inset-inline-start:0;width:3px;border-radius:0 3px 3px 0;background:var(--ds-brand);content:""}
+.hero-copy{gap:.65rem}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;color:var(--ds-brand);font-size:.74rem;font-weight:700;letter-spacing:.01em}
+.hero-title{max-width:25ch;font-size:clamp(1.55rem,2.6vw,2.25rem);line-height:1.45}
+.hero-desc{max-width:64ch;font-size:.88rem;line-height:1.85}
+.hero-search{border-radius:10px;box-shadow:var(--ds-shadow-sm)}
+.hero-search-btn{border-radius:7px}
+.hero-actions .btn{min-height:2.75rem;font-size:.82rem}
+.home-page .section-block{padding:1.05rem 1.15rem 1.2rem;border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs)}
+.home-page .section-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.9rem;padding-bottom:.7rem;border-bottom:1px solid var(--ds-color-border)}
+.home-page .section-title{font-size:1rem;font-weight:750}
+.home-page .panel-link{color:var(--ds-color-primary-text);font-size:.76rem;font-weight:700}
+.home-page .filters-card{border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-sm)}
+.home-page .product-card{border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs);transition:border-color var(--ds-transition-fast),box-shadow var(--ds-transition-fast),transform var(--ds-transition-fast)}
+.home-page .product-card:hover,.home-page .product-card:focus-visible{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ds-color-primary) 38%,var(--ds-color-border));box-shadow:var(--ds-shadow-md)}
+.home-page .product-image{background:var(--ds-color-surface-alt)}
+.home-page .product-title{font-size:.88rem;line-height:1.65}
+.home-page .product-price strong{font-size:.86rem}
+.home-page .category-card{border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs);transition:border-color var(--ds-transition-fast),box-shadow var(--ds-transition-fast),transform var(--ds-transition-fast)}
+.home-page .category-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ds-color-primary) 35%,var(--ds-color-border));box-shadow:var(--ds-shadow-sm)}
+.home-page .features-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;padding:0;border:0}
+.home-page .feature-item{display:flex;min-width:0;min-height:5.5rem;flex-direction:row;align-items:center;gap:.7rem;padding:.8rem;border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-md);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs)}
+.home-page .feature-item:first-child{border-inline-start:1px solid var(--ds-color-border)}
+.home-page .feature-icon{display:grid;place-items:center;flex:0 0 2.25rem;width:2.25rem;height:2.25rem;border:1px solid color-mix(in srgb,var(--ds-color-primary) 18%,transparent);border-radius:8px;background:var(--ds-color-primary-soft);color:var(--ds-color-primary-text);font-size:.95rem}
+.home-page .feature-text h3{font-size:.8rem}
+.home-page .feature-text p{font-size:.7rem;line-height:1.6}
+@media(max-width:900px){.home-page .features-bar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.hero-title{font-size:1.55rem}.hero-desc{font-size:.82rem}.home-page .section-block{padding:.85rem}.home-page .features-bar{grid-template-columns:repeat(2,minmax(0,1fr))}.home-page .feature-item{align-items:flex-start;padding:.65rem}.home-page .feature-icon{flex-basis:2rem;width:2rem;height:2rem}}
+@media(max-width:360px){.home-page .features-bar{grid-template-columns:1fr}}
 
 </style>

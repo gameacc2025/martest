@@ -173,3 +173,15 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - API, routing, permissions, responsive shell behavior and dashboard data contracts are unchanged.
 - Static review only; tests/build/browser checks NOT RUN — owner instruction.
 - **Commit:** b8d5f9ae80eb767b8dbc5ee930b6d8bb79f18823 — https://github.com/gameacc2025/martest/commit/b8d5f9ae80eb767b8dbc5ee930b6d8bb79f18823
+
+
+### Public marketplace visual correction — Phase 18
+- Homepage hero is now more branded but less oversized: compact context label, reduced title scale, prominent search field and a restrained teal edge accent.
+- Restored distinct surfaces for homepage category/product sections, filters and product cards; product cards regain subtle elevation and restrained hover response.
+- Marketplace capability items now display their existing contextual icons and use compact, grouped feature surfaces.
+- Product listing title and card hierarchy is compact; product category badge no longer relies on backdrop blur; cards use controlled depth.
+- Category cards regain image-led hierarchy, subtle elevation and hover/focus feedback.
+- Corrected stale tests for Homepage slideshow removal and native link/button semantics on Home, Categories and ProductListing. The tests now assert the current implementation rather than the former slideshow/router-push behavior.
+- Search inputs now expose stable names and autocomplete behavior; no product data, prices, categories or claims were fabricated.
+- Existing product/category APIs, route names, query parameters, filters, price rendering and loading/error/empty states remain unchanged.
+- Static source review only; tests/build/browser checks NOT RUN — owner instruction.

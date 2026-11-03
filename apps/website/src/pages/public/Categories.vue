@@ -263,4 +263,26 @@ const loadCategories = async () => {
   flex-wrap: wrap;
   gap: var(--ds-space-3);
 }
+
+/* Category cards use real image-led hierarchy and restrained depth. */
+.categories-page { padding-bottom: 2rem; }
+.cat-grid { gap: 1rem; }
+.category-card {
+  padding: .85rem;
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  transition: transform var(--ds-transition-fast), box-shadow var(--ds-transition-fast), border-color var(--ds-transition-fast);
+}
+.category-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ds-color-primary) 35%, var(--ds-color-border));
+  box-shadow: var(--ds-shadow-md);
+}
+.cat-thumb { background: var(--ds-color-surface-alt); }
+.cat-name { font-size: .98rem; line-height: 1.55; }
+.cat-desc { font-size: .8rem; }
+.cat-footer-row { padding-top: .65rem; border-top: 1px solid var(--ds-color-border); }
+.cat-link { color: var(--ds-color-primary-text); font-size: .75rem; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .category-card { transition: none; } .category-card:hover { transform: none; } }
+
 </style>

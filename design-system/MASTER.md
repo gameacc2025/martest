@@ -154,3 +154,15 @@ Avoid the false choice between oversized decorative dashboard tiles and complete
 - Sidebar active navigation uses the existing teal wash/icon accent against the established navy shell.
 - Management/access/order/company/identity intro surfaces may use a subtle brand tint and their route-specific icon to identify the task.
 - Keep cards/panels purposeful and shallow; avoid both nested-card stacks and completely unframed content.
+
+
+## Public marketplace composition — 2026-11-03
+
+Use a distinct Persuade composition for public discovery without oversized generic hero typography:
+
+- Brand the hero with a compact marketplace context label, strong search affordance and existing navy/teal identity.
+- Keep hero titles around 25–36px; product/category headings around 14–16px; supporting copy around 12–14px.
+- Public category and product cards may use a real image area, compact metadata, one-pixel borders, subtle elevation and restrained hover feedback.
+- Feature rows should use their actual, task-relevant icons and concise descriptions, not unsupported statistics.
+- Avoid backdrop blur for ordinary category/price chips; use solid surfaces and readable contrast.
+- Use real API-backed products, images, supplier verification, prices and category counts only.

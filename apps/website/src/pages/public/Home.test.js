@@ -34,21 +34,21 @@ describe('Website homepage redesign contracts', () => {
     expect(source).toContain('featuredProducts.length === 0')
   })
 
-  it('makes category and product tiles keyboard accessible', () => {
-    expect(source).toContain('role="button" tabindex="0"')
-    expect(source).toContain('@keydown.enter.prevent="viewCategoryProducts(category.id)"')
-    expect(source).toContain('@keydown.enter.prevent="goToProduct(product)"')
+  it('uses native category buttons and semantic product links for keyboard navigation', () => {
+    expect(source).toContain('type="button" class="category-card"')
+    expect(source).toContain('<router-link v-for="product in featuredProducts"')
+    expect(source).toContain('class="product-card"')
     expect(source).toContain('.product-card:focus-visible')
   })
 
 
-  it('provides a manual pause control and pauses while the hero is hovered or focused', () => {
-    expect(source).toContain('class="hero-play-toggle"')
-    expect(source).toContain(':aria-pressed="slideshowPaused"')
-    expect(source).toContain('function toggleSlideshow()')
-    expect(source).toContain('@mouseenter="onSlideshowEnter"')
-    expect(source).toContain('@focusin="onSlideshowFocusIn"')
-    expect(source).toContain("prefers-reduced-motion: reduce")
+  it('uses a static search-first hero with a compact branded identity', () => {
+    expect(source).toContain('class="hero-eyebrow"')
+    expect(source).toContain('role="search"')
+    expect(source).toContain('name="homepage-search"')
+    expect(source).toContain('autocomplete="off"')
+    expect(source).not.toContain('hero-play-toggle')
+    expect(source).not.toContain('setInterval(')
   })
 
   it('shows supplier trust and explicit inquiry pricing when no price tier exists', () => {
@@ -65,6 +65,7 @@ describe('Website homepage redesign contracts', () => {
     expect(source).not.toContain('+5,000')
     expect(source).not.toContain('بیش از ۲۵۰ تأمین‌کننده')
     expect(source).toContain('ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان')
+    expect(source).toContain('class="feature-icon"')
   })
 
   it('uses the shared design system for the redesigned page', () => {

@@ -1,14 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 
-const { routerPush, getCategories } = vi.hoisted(() => ({
-  routerPush: vi.fn(),
-  getCategories: vi.fn(),
-}))
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: routerPush }),
-}))
+const { getCategories } = vi.hoisted(() => ({ getCategories: vi.fn() }))
 
 vi.mock('../../stores/products', () => ({
   useProductsStore: () => ({ getCategories }),
@@ -29,6 +22,10 @@ const mountCategories = () => shallowMount(Categories, {
       Breadcrumb: { template: '<nav class="breadcrumb-stub" />' },
       ProgressSpinner: { template: '<span class="spinner-stub" />' },
       WorkspacePageHeading: false,
+      RouterLink: {
+        props: ['to'],
+        template: '<a class="category-card" :data-route="to.name" :data-category="to.query.category"><slot /></a>',
+      },
     },
   },
 })
@@ -68,16 +65,13 @@ describe('Website Categories', () => {
     expect(wrapper.find('.cat-grid').exists()).toBe(true)
   })
 
-  it('navigates with the existing products route and category query', async () => {
+  it('links to the existing products route with the selected category query', async () => {
     wrapper = mountCategories()
     await flushPromises()
 
-    wrapper.find('button').trigger('click')
-
-    expect(routerPush).toHaveBeenCalledWith({
-      name: 'products',
-      query: { category: 7 },
-    })
+    const link = wrapper.find('a.category-card')
+    expect(link.attributes('data-route')).toBe('products')
+    expect(link.attributes('data-category')).toBe('7')
   })
 
   it('announces an accessible loading state while categories are pending', async () => {
