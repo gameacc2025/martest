@@ -285,7 +285,7 @@ defineExpose({ clearSelection, resetPage })
         <slot name="toolbar"></slot>
 
         <span v-if="searchable" class="ent-table-search">
-          <i class="pi pi-search"></i>
+          <i class="pi pi-search" aria-hidden="true"></i>
           <InputText
             v-model="search"
             :placeholder="searchPlaceholder"
@@ -330,6 +330,7 @@ defineExpose({ clearSelection, resetPage })
             optionLabel="label"
             optionValue="value"
             :placeholder="col.header"
+            :aria-label="`فیلتر ${col.header}`"
             showClear
             @change="onFilterChange"
           />
@@ -337,6 +338,7 @@ defineExpose({ clearSelection, resetPage })
             v-else
             v-model="columnFilters[col.field]"
             :placeholder="col.header"
+            :aria-label="`فیلتر ${col.header}`"
             @input="onFilterChange"
           />
         </div>
@@ -425,7 +427,7 @@ defineExpose({ clearSelection, resetPage })
       <!-- Empty state -->
       <template #empty>
         <div class="ent-table-empty">
-          <i class="pi pi-inbox"></i>
+          <i class="pi pi-inbox" aria-hidden="true"></i>
           <span>{{ emptyMessage }}</span>
         </div>
       </template>
