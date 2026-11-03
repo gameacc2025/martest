@@ -1,6 +1,6 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book, customer profile, contact, authentication and Admin/Company product editors have received phased updates; full 69-page redesign remains in progress.  
+**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book, customer profile, contact, authentication, product editors, system settings and catalogues have received phased updates; full 69-page redesign remains in progress.  
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -44,8 +44,8 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 - Added a shared fixed-folder normalizer and unit tests.
 
 ## Remaining phases
-1. Admin and Company operational pages: category/company/user/role/permission/product lists, Company product/user settings and both product editors have received first refinements; continue detail/edit flows, orders, reports and operational edge states.
-2. Public Website: company directory/profile, FAQ/Terms, About, search results, address book, customer profile, Contact and authentication received first-pass refinements; orders, cart/checkout and inquiry pages remain.
+1. Admin and Company operational pages: category/company/user/role/permission/product lists, Company product/user settings, both product editors and system settings have received first refinements; continue detail/edit flows, orders, reports and operational edge states.
+2. Public Website: company directory/profile, FAQ/Terms, About, search results, address book, customer profile, Contact, authentication and legacy Products catalogue received first-pass refinements; Wishlist, orders, cart/checkout and inquiry pages remain.
 3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility, loading/empty/error/disabled states and Vercel guideline review.
 4. Full 69-page inventory and documentation update, then a truthful completion report.
 
@@ -133,3 +133,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Inputs now expose stable names, file upload fields have names, document controls have context-specific accessible names, and the featured switch has an explicit label association.
 - Product creation/edit payloads, ownership, permissions, spec templates, tier rules, media handlers and approval lifecycle are unchanged.
 - Static source review only; tests/build/browser checks NOT RUN — owner instruction.
+
+
+### System settings and product catalogues — Phase 14
+- Admin SystemSettings is a flat API-backed setting surface with no decorative icon/gradient.
+- Company MyProducts and CompanyProducts use semantic navigation links, accessible actions, stable search metadata and no false zero prices.
+- Website Products uses native search/category/brand controls, accessible pressed/view states, real loading/error/empty states, stable image dimensions and flatter data-first surfaces.
+- Existing APIs, route destinations, filters, sorting, pagination, publish, cart and wishlist event contracts remain unchanged.
+- Static review only; tests/build/browser checks NOT RUN — owner instruction.

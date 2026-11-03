@@ -120,3 +120,12 @@ The shared DataTable, form-section heading and required-field progress primitive
 - Featured product switch is associated with its visible label.
 - Product API payloads, role/ownership checks, specifications, pricing tiers, media handling and moderation lifecycle remain unchanged.
 - Tests/build/browser screenshots remain NOT RUN by owner instruction.
+
+
+## System settings and product catalogues — 2026-11-03
+
+- Admin SystemSettings now uses a flat setting surface; the threshold remains API-backed and its save/retry behavior is unchanged.
+- Company MyProducts and CompanyProducts now have semantic create/edit/history navigation, context-specific publish labels, named search and non-fabricated missing-price display.
+- Website Products uses semantic search/category/brand controls, explicit loading/error/empty states, stable image dimensions, and reduced decorative card/gradient/hover treatment.
+- Existing API, route, publishing, filtering, sort, pagination, cart and wishlist contracts are preserved.
+- Tests/build/browser screenshots remain NOT RUN by owner instruction.

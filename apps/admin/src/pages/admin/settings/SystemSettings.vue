@@ -10,7 +10,6 @@
 
     <section class="system-setting-card" aria-labelledby="product-edit-threshold-title">
       <div class="system-setting-heading">
-        <span class="system-setting-symbol"><i class="pi pi-shield"></i></span>
         <div class="system-setting-copy">
           <h2 id="product-edit-threshold-title">سقف ویرایش‌های پس از تأیید محصول</h2>
           <p>
@@ -26,6 +25,7 @@
           <InputNumber
             inputId="product-edit-threshold"
             v-model="threshold"
+            name="productEditThreshold"
             :min="1"
             :max="1000"
             :showButtons="true"
@@ -38,11 +38,11 @@
         </div>
       </div>
 
-      <div v-if="loading" class="system-setting-state" role="status">
-        <i class="pi pi-spin pi-spinner"></i> در حال بارگذاری تنظیمات...
+      <div v-if="loading" class="system-setting-state" role="status" aria-live="polite" aria-busy="true">
+        <i class="pi pi-spin pi-spinner" aria-hidden="true"></i> در حال بارگذاری تنظیمات…
       </div>
       <div v-if="error" class="system-setting-error" role="alert">
-        <i class="pi pi-exclamation-circle"></i><span>{{ error }}</span>
+        <i class="pi pi-exclamation-circle" aria-hidden="true"></i><span>{{ error }}</span>
         <Button label="تلاش مجدد" icon="pi pi-refresh" text size="small" severity="secondary" @click="loadSettings" />
       </div>
       <p v-else-if="!configured" class="system-setting-note">
@@ -109,41 +109,23 @@ onMounted(loadSettings)
 </script>
 <style scoped>
 .system-settings-page { display: flex; flex-direction: column; gap: var(--ds-space-5); direction: rtl; }
-.system-settings-heading {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
-  box-shadow: var(--ds-shadow-xs);
+.system-settings-page .ds-page-heading {
+  padding: 0 0 var(--ds-space-4);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
-.system-settings-icon,
-.system-setting-symbol {
-  display: grid;
-  place-items: center;
-  width: 3.2rem;
-  height: 3.2rem;
-  flex: 0 0 auto;
-  border-radius: 1rem;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.3rem;
-}
-.system-settings-heading > div { min-width: 0; }
-.system-settings-heading h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
-.system-settings-heading p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
 .system-setting-card {
+  width: 100%;
   max-width: 56rem;
   padding: clamp(1rem, 2vw, 1.5rem);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
 }
 .system-setting-heading { display: flex; align-items: flex-start; gap: 1rem; }
-.system-setting-symbol { background: var(--ds-color-info-soft); }
 .system-setting-copy { min-width: 0; }
 .system-setting-copy h2 { margin: 0 0 .5rem; color: var(--ds-color-text); font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
 .system-setting-copy p { max-width: 58rem; margin: 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.9; }
@@ -160,13 +142,10 @@ onMounted(loadSettings)
 .threshold-control > label { display: block; margin-bottom: .4rem; color: var(--ds-color-text); font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); }
 .threshold-control-row { display: flex; align-items: center; gap: .75rem; }
 .threshold-control :deep(.p-inputnumber) { width: 10rem; }
-.threshold-control :deep(.p-inputnumber-input) { width: 100%; border-radius: var(--ds-radius-md); }
-.threshold-control :deep(.p-button) { min-height: 2.75rem; border-radius: var(--ds-radius-md); }
+.threshold-control :deep(.p-inputnumber-input) { width: 100%; min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
+.threshold-control :deep(.p-button) { min-height: var(--ds-touch-target); border-radius: var(--ds-radius-md); }
 .threshold-control :deep(.p-button:focus-visible),
-.threshold-control :deep(.p-inputnumber-input:focus-visible) {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 2px;
-}
+.threshold-control :deep(.p-inputnumber-input:focus-visible) { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 .system-setting-state,
 .system-setting-note,
 .system-setting-error { display: flex; align-items: center; gap: .5rem; margin-top: 1rem; font-size: var(--ds-font-size-sm); line-height: 1.8; }
@@ -174,11 +153,10 @@ onMounted(loadSettings)
 .system-setting-note { color: var(--ds-color-text-muted); }
 .system-setting-error { flex-wrap: wrap; color: var(--ds-color-danger); }
 @media (max-width: 640px) {
-  .system-settings-heading { align-items: flex-start; padding: 1rem; }
-  .system-settings-icon, .system-setting-symbol { width: 2.75rem; height: 2.75rem; }
   .system-setting-heading { flex-direction: column; }
   .threshold-control { align-items: stretch; }
   .threshold-control-row { align-items: stretch; flex-direction: column; }
-  .threshold-control :deep(.p-inputnumber), .threshold-control-row :deep(.p-button) { width: 100%; }
+  .threshold-control :deep(.p-inputnumber),
+  .threshold-control-row :deep(.p-button) { width: 100%; }
 }
 </style>

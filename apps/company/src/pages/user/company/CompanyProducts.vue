@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { productsApi } from '@telecom/api-client'
 import Button from 'primevue/button'
@@ -9,7 +8,6 @@ import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import ProgressSpinner from 'primevue/progressspinner'
 
-const router = useRouter()
 const toast = useToast()
 
 const products = ref([])
@@ -53,10 +51,6 @@ async function fetchProducts(page = 1) {
   }
 }
 
-function editProduct(product) {
-  router.push({ name: 'manage-product-edit', params: { id: product.id } })
-}
-
 async function publishProduct(product) {
   publishingId.value = product.id
   try {
@@ -79,8 +73,8 @@ function formatPrice(price) {
 <template>
   <div class="company-products-page">
     <header class="page-header ds-page-heading">
-      <div class="products-heading-copy"><span class="products-eyebrow"><i class="pi pi-building"></i> کاتالوگ شرکت</span><h1>محصولات شرکت</h1><p>فهرست محصولات ثبت‌شده شرکت و وضعیت انتشار آن‌ها را مدیریت کنید.</p></div>
-      <Button label="محصول جدید" icon="pi pi-plus" @click="router.push({ name: 'manage-product-create' })" />
+      <div class="products-heading-copy"><h1>محصولات شرکت</h1><p>فهرست محصولات ثبت‌شده شرکت و وضعیت انتشار آن‌ها را مدیریت کنید.</p></div>
+      <router-link :to="{ name: 'manage-product-create' }" class="company-products-create-link"><i class="pi pi-plus" aria-hidden="true"></i> محصول جدید</router-link>
     </header>
 
     <section class="product-catalogue-surface" aria-label="فهرست محصولات شرکت">
@@ -100,13 +94,13 @@ function formatPrice(price) {
         </Column>
         <Column header="قیمت">
           <template #body="{ data }">
-            {{ formatPrice(data.prices?.[0]?.price || 0) }}
+            {{ data.prices?.[0]?.price != null ? formatPrice(data.prices[0].price) : '—' }}
           </template>
         </Column>
         <Column header="عملیات">
           <template #body="{ data }">
-            <Button v-if="data.status === 'APPROVED'" icon="pi pi-globe" severity="success" rounded text :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت پس از تأیید STAFF'" @click="publishProduct(data)" />
-            <Button icon="pi pi-pencil" severity="info" rounded text v-tooltip.top="'ویرایش'" @click="editProduct(data)" />
+            <Button v-if="data.status === 'APPROVED'" icon="pi pi-globe" severity="success" rounded text :aria-label="'انتشار محصول ' + data.title" :loading="publishingId === data.id" v-tooltip.top="'انتشار در سایت پس از تأیید STAFF'" @click="publishProduct(data)" />
+            <router-link :to="{ name: 'manage-product-edit', params: { id: data.id } }" class="company-table-action-link" :aria-label="'ویرایش محصول ' + data.title"><i class="pi pi-pencil" aria-hidden="true"></i></router-link>
           </template>
         </Column>
     </DataTable>
@@ -171,7 +165,7 @@ function formatPrice(price) {
 
 
 .products-heading-copy { min-width: 0; }
-.products-eyebrow { display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .4rem; color: var(--ds-color-primary); font-size: var(--ds-font-size-xs); font-weight: var(--ds-font-weight-bold); }
+
 .company-products-page .page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
 @media (max-width: 640px) { .company-products-page .page-header { align-items: stretch; } }
 
@@ -181,9 +175,9 @@ function formatPrice(price) {
 .company-products-page .product-catalogue-surface {
   overflow: hidden;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  box-shadow: none;
 }
 .company-products-page .product-catalogue-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
 .company-products-page .product-catalogue-table :deep(.p-datatable-thead > tr > th) {
@@ -208,6 +202,16 @@ function formatPrice(price) {
   border-top: 1px solid var(--ds-color-border);
   background: var(--ds-color-surface);
 }
+.company-products-page .page-header { padding: 0 0 var(--ds-space-4); border: 0; border-bottom: 1px solid var(--ds-color-border); border-radius: 0; background: transparent; box-shadow: none; }
+.company-products-create-link {
+  display: inline-flex; min-height: var(--ds-touch-target); align-items: center; justify-content: center; gap: .5rem;
+  padding: .65rem 1rem; border-radius: var(--ds-radius-md); background: var(--ds-color-primary); color: var(--ds-color-primary-contrast);
+  font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); text-decoration: none;
+}
+.company-products-create-link:hover { background: var(--ds-color-primary-hover); }
+.company-products-create-link:focus-visible, .company-table-action-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.company-table-action-link { display: inline-grid; width: var(--ds-touch-target); height: var(--ds-touch-target); place-items: center; border-radius: var(--ds-radius-sm); color: var(--ds-color-text-muted); text-decoration: none; }
+.company-table-action-link:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-primary-text); }
 .company-products-page .product-catalogue-table :deep(.p-paginator-page),
 .company-products-page .product-catalogue-table :deep(.p-paginator-next),
 .company-products-page .product-catalogue-table :deep(.p-paginator-prev) {
@@ -217,6 +221,6 @@ function formatPrice(price) {
 }
 @media (max-width: 640px) {
   .company-products-page .page-header { align-items: stretch; padding: var(--ds-space-4); }
-  .company-products-page .page-header :deep(.p-button) { width: 100%; justify-content: center; }
+   .company-products-page .page-header :deep(.p-button), .company-products-create-link { width: 100%; justify-content: center; }
 }
 </style>

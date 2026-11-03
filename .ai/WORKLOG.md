@@ -2777,3 +2777,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** Pending atomic tree/commit creation.
 - **Push:** Pending.
 - **Next:** Continue product detail views, Admin/Company order/report/permission details and inquiry workflow pages; then public order/inquiry states and remaining cross-theme checks.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-14 — SYSTEM SETTINGS AND PRODUCT CATALOGUE SURFACES
+- **Status:** IN_PROGRESS — Admin system setting and Company product catalogues plus public legacy Products route refined.
+- **Scope:** Admin SystemSettings; Company MyProducts and CompanyProducts; Website Products.
+- **Admin settings:** Removed decorative symbol tile/gradient; flattened setting panel; retained live API-backed threshold, validation, save/retry behavior; added stable field name and loading semantics.
+- **Company catalogues:** Removed eyebrow icon labels; converted create/edit/history navigation to semantic router links; kept publishing as a button and added product-specific accessible label; omitted absent price values instead of rendering zero; added named search field and flattened table surfaces.
+- **Website Products:** Rebuilt the legacy catalog page as a flat title/search/filter/data hierarchy; added semantic search form, accessible filter/sort/view controls, pressed states, semantic category/brand buttons, explicit loading/error/empty states, image dimensions/lazy loading and correct missing-count/price handling; removed hover lift/shadows and gradient surfaces.
+- **Business behavior:** System settings API, product list APIs, company publishing flow, route destinations, cart/wishlist events, filters, sort and pagination behavior preserved.
+- **Verification:** Static source review only. Tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Next:** Continue Wishlist, notification preferences, inquiry subscription and public orders; Admin/Company reports/settings/details; audit remaining 69-page inventory and known commerce stubs.
