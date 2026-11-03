@@ -351,6 +351,10 @@ function formatFullDate(value) {
 function typeLabel(item) {
   return categoryDefinitions.find(category => category.id === categoryFor(item))?.label || 'سایر پیام‌ها'
 }
+
+function categoryIcon(item) {
+  return categoryDefinitions.find(category => category.id === categoryFor(item))?.icon || 'pi-bell'
+}
 </script>
 
 <template>
@@ -441,7 +445,7 @@ function typeLabel(item) {
             </label>
             <button type="button" class="message-row-open" :aria-expanded="selectedId === item.id" :aria-controls="'notification-reading-drawer'"
               @click="openNotification(item)" @dblclick="openNotificationAndMarkRead(item)">
-              <span class="row-status" aria-hidden="true"><i class="pi pi-bell"></i></span>
+              <span class="row-status" aria-hidden="true"><i :class="['pi', categoryIcon(item)]"></i></span>
               <span class="row-content">
                 <span class="row-topline"><strong class="row-sender">سامانه مخابرات</strong><time>{{ formatTime(item.createdAt) }}</time></span>
                 <span class="row-subject"><strong>{{ item.title }}</strong><span class="row-category">{{ typeLabel(item) }}</span></span>
@@ -485,7 +489,7 @@ function typeLabel(item) {
             <time>{{ formatFullDate(selectedNotification.createdAt) }}</time>
           </div>
           <div class="drawer-sender">
-            <span class="sender-avatar"><i class="pi pi-bell"></i></span>
+            <span class="sender-avatar"><i :class="['pi', categoryIcon(selectedNotification)]"></i></span>
             <div class="sender-copy">
               <strong>سامانه مخابرات</strong>
               <span>برای شما</span>
