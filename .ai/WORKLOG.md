@@ -2925,7 +2925,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 ## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-23 — RTL, ICON HEADER AND SEARCH DENSITY
-- **Status:** IMPLEMENTED ON FEATURE BRANCH — awaiting merge.
+- **Status:** MERGED INTO MAIN.
 - **Scope:** Admin, Company and Website notification inbox pages and tests.
 - **Changes:**
   - Fixed grid direction to RTL, placing the folder column on the right and the message list on the left; corrected the sidebar's inner divider edge.
@@ -2935,5 +2935,7 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Added tests for RTL root direction and icon-only header controls in all three apps.
 - **Behavior preserved:** Existing notification endpoints, folder filtering, counts, search behavior, selection, bulk actions and right-side reading drawer.
 - **Verification:** Static source review only. Tests/build/browser checks NOT RUN.
-- **Branch:** fix/notifications-rtl-toolbar-icons.
-- **Next:** Merge focused fix; run tests/build when local execution is available.
+- **Branch:** fix/notifications-rtl-toolbar-icons (merged; cleanup pending).
+- **PR:** #83 — https://github.com/gameacc2025/martest/pull/83.
+- **Merge commit:** fc8baacd3457513d95e356542bec0c25ff8e0f68.
+- **Next:** Run tests/build when local execution is available.
