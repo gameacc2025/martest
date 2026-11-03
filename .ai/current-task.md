@@ -259,3 +259,9 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Bounded the desktop mailbox to the viewport with independent sidebar/message-list scrolling; the RTL reading drawer remains right-anchored and becomes full-screen on mobile.
 - Added regression tests in all three apps for the absence of the duplicate breadcrumb.
 - API/business behavior unchanged. Automated tests/builds/browser checks NOT RUN; verify CI before marking this slice validated.
+
+
+### Breadcrumb width isolation — 2026-11-03
+- Shared PageHeader/Breadcrumb moved outside the constrained `.dash-layout-content` wrapper in Admin and Company layouts.
+- The breadcrumb now spans the available main-column width; page content and footer retain the existing max-width and padding constraints.
+- No API or notification behavior changed. Automated validation not run.
