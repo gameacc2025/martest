@@ -2714,3 +2714,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Pending.
 - **Risks / open questions:** Public CompanyProfile still derives company identity from published product data because the current frontend flow does not use a public company-detail endpoint. No unsupported company profile data was added.
 - **Next action:** Continue public content and customer account/commerce surfaces, then complete Admin/Company detail pages and cross-app responsive/theme/accessibility audit.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-9 — ABOUT PAGE AND PRODUCT DISCOVERY CONTENT
+- **Status:** IN_PROGRESS — About page composition refined; public content/account pages remain.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Replace generic icon-card marketing layout with a more specific editorial explanation of the marketplace and its real catalog.
+- **Scope:** Website AboutUs page.
+- **Changes:** Removed decorative hero illustration/orbs and eyebrow labels; retained the existing marketplace proposition and actions. Converted value tiles into a restrained two-column text list, workflow steps into a sequence of flat rows, and retained the real published-product list as the repeated archive module. Product navigation now uses router links rather than buttons; product images reserve dimensions and load lazily; missing supplier names are omitted instead of replaced with a generic claim. Removed unused router navigation code and icon metadata.
+- **Business behavior:** Product API query, featured product selection, price rendering, route destinations and error/retry states remain unchanged.
+- **Verification:** Static source review only. Tests/builds/browser visual checks NOT RUN — owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Next action:** Continue SearchResults, Contact/About-adjacent public pages, customer profile, addresses, orders, checkout/cart and inquiry pages; then cross-app responsive/theme review.

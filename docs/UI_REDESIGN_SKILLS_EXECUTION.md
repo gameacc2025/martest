@@ -76,3 +76,11 @@ The shared DataTable, form-section heading and required-field progress primitive
 - FAQ accordion now uses a flat list with clear focus and less decorative chrome. Its business answers and accordion behavior are unchanged.
 - Terms page is a long-form reading column with clear section separators. Legal copy is preserved verbatim; no legal policy was rewritten.
 - Tests/builds/browser screenshots remain NOT RUN by owner instruction.
+
+
+## About page — 2026-11-03
+
+- AboutUs now uses a title-first hero, text-led values, a clear sequence of marketplace steps and the real published-product archive instead of decorative hero art and generic icon tiles.
+- Product links are semantic router links, product images include dimensions/lazy decoding, and missing supplier details are not replaced with invented generic labels.
+- Existing API-backed product content and navigation destinations are preserved.
+- No tests/build/browser screenshots were run, per owner instruction.
