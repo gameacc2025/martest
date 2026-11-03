@@ -2766,3 +2766,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Pending.
 - **Known commerce blocker:** Orders currently render a hard-coded empty data object; Checkout simulates payment/order confirmation and ShoppingCart simulates discount validation. Do not claim these are working or make them look production-ready without replacing those stubs with approved real flows. The B2B inquiry path remains the active commercial workflow.
 - **Next:** Continue Admin/Company detail screens and public notifications/orders/inquiries, then align the prototype cart/checkout UI with the approved product direction and finish responsive/theme review.
+
+
+## 2026-11-03 — UI-REDESIGN-SKILLS-PHASE-13 — ADMIN/COMPANY PRODUCT EDITORS
+- **Status:** IN_PROGRESS — shared product editor surfaces refined across Admin and Company.
+- **Scope:** Admin ProductForm and Company ProductForm.
+- **Changes:** Removed decorative editor eyebrow/icon and section icon props; changed back/cancel navigation controls to router links; flattened the editor heading and form sections; standardized section borders, radius, spacing, price/spec/document rows and image surfaces; added image dimensions, lazy loading, decoding and alt fallbacks; added stable field names to base, classification, specification, price, document and file-upload inputs; associated the featured-product switch with its label; added accessible names to document removal and dynamic document fields; improved loading announcements and mobile action layout.
+- **Business behavior:** Product create/update payloads, category/specification templates, price tier rules, image/document upload handlers, review/publish workflow, company ownership and permission checks remain unchanged.
+- **Verification:** Static source review only. Tests/build/browser checks NOT RUN — owner instruction.
+- **Commit:** Pending atomic tree/commit creation.
+- **Push:** Pending.
+- **Next:** Continue product detail views, Admin/Company order/report/permission details and inquiry workflow pages; then public order/inquiry states and remaining cross-theme checks.

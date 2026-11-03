@@ -1,6 +1,6 @@
 # Current Task — Full UI redesign using the four installed skills
 
-**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book, customer profile, contact and authentication have received phased updates; full 69-page redesign remains in progress.  
+**Status:** IN_PROGRESS — shared foundations, dashboards, public discovery, notifications, inquiry flows, management lists, Company settings, company directory/profile, FAQ/Terms, About, search, address book, customer profile, contact, authentication and Admin/Company product editors have received phased updates; full 69-page redesign remains in progress.  
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -44,7 +44,7 @@ Preserve the Telecom Marketplace identity (Vazirmatn, Persian-first RTL, teal/na
 - Added a shared fixed-folder normalizer and unit tests.
 
 ## Remaining phases
-1. Admin and Company operational pages: list surfaces for category/company/user/role/permission/product and Company product/user settings have received a first refinement; continue detail/edit flows, orders, reports and operational edge states.
+1. Admin and Company operational pages: category/company/user/role/permission/product lists, Company product/user settings and both product editors have received first refinements; continue detail/edit flows, orders, reports and operational edge states.
 2. Public Website: company directory/profile, FAQ/Terms, About, search results, address book, customer profile, Contact and authentication received first-pass refinements; orders, cart/checkout and inquiry pages remain.
 3. Cross-app hardening: RTL/LTR isolation, dark/light themes, mobile/tablet layouts, keyboard/accessibility, loading/empty/error/disabled states and Vercel guideline review.
 4. Full 69-page inventory and documentation update, then a truthful completion report.
@@ -125,3 +125,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 ### Commerce prototype limitation
 - Orders.vue currently supplies a hard-coded empty result object; Checkout.vue simulates order confirmation/payment and ShoppingCart.vue simulates discount validation.
 - These are not production commerce integrations. Do not represent them as completed during a visual-only redesign; align the UX with approved B2B inquiry-first product policy and real APIs before activation.
+
+
+### Admin/Company product editors — Phase 13
+- Both product editor screens now share a flatter, task-first heading and low-noise section hierarchy.
+- Decorative section icons/eyebrow removed; navigation actions are links; image previews reserve dimensions and load lazily.
+- Inputs now expose stable names, file upload fields have names, document controls have context-specific accessible names, and the featured switch has an explicit label association.
+- Product creation/edit payloads, ownership, permissions, spec templates, tier rules, media handlers and approval lifecycle are unchanged.
+- Static source review only; tests/build/browser checks NOT RUN — owner instruction.

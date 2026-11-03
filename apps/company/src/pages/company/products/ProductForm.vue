@@ -692,9 +692,8 @@ async function removeExistingDocument(docId) {
   <div class="product-form-page">
     <header class="page-header product-editor-heading">
       <div class="product-editor-heading-copy">
-        <div class="product-editor-eyebrow"><i class="pi pi-box"></i> کاتالوگ شرکت</div>
-        <div class="product-editor-title-row">
-          <Button icon="pi pi-arrow-right" text rounded aria-label="بازگشت به فهرست محصولات" @click="router.push({ name: 'manage-products' })" />
+                <div class="product-editor-title-row">
+          <router-link :to="{ name: 'manage-products' }" class="product-back-link" aria-label="بازگشت به فهرست محصولات"><i class="pi pi-arrow-right" aria-hidden="true"></i></router-link>
           <div>
             <h1>{{ isEditMode ? 'ویرایش محصول' : 'افزودن محصول جدید' }}</h1>
             <p>{{ isEditMode ? 'اطلاعات و مشخصات محصول شرکت را بازبینی و اصلاح کنید.' : 'مشخصات محصول را برای ثبت در کاتالوگ شرکت تکمیل کنید.' }}</p>
@@ -702,87 +701,97 @@ async function removeExistingDocument(docId) {
         </div>
       </div>
       <div class="page-header-actions">
-        <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="router.push({ name: 'manage-products' })" />
+        <router-link :to="{ name: 'manage-products' }" class="product-cancel-link">انصراف</router-link>
         <Button label="ذخیره محصول" icon="pi pi-check" :loading="saving" @click="saveProduct" />
       </div>
     </header>
 
-    <RequiredFieldsProgress :checks="requiredFormChecks" eyebrow="آمادگی ثبت محصول" title="اطلاعات ضروری" />
+    <RequiredFieldsProgress :checks="requiredFormChecks" title="اطلاعات ضروری" />
 
     <div v-if="pageLoading" class="text-center py-8">
-      <ProgressSpinner />
+      <ProgressSpinner aria-label="در حال بارگذاری فرم محصول" />
     </div>
 
     <div v-else class="form-grid">
       <!-- Left Column: Basic Info -->
       <div class="form-section">
-        <FormSectionHeader title="اطلاعات پایه" description="عنوان، شناسه و توضیحات محصول" icon="pi pi-box" />
+        <FormSectionHeader title="اطلاعات پایه" description="عنوان، شناسه و توضیحات محصول" />
 
         <div class="field">
           <label for="product-title">عنوان محصول <span class="required">*</span></label>
-          <InputText id="product-title" v-model="form.title" :class="{ 'p-invalid': errors.title }" class="w-full" />
+          <InputText id="product-title"
+            name="productTitle" v-model="form.title" :class="{ 'p-invalid': errors.title }" class="w-full" />
           <small v-if="errors.title" class="p-error">{{ errors.title }}</small>
         </div>
 
         <div class="field">
           <label for="product-short-description">توضیح کوتاه</label>
-          <Textarea id="product-short-description" v-model="form.shortDescription" rows="2" class="w-full" />
+          <Textarea id="product-short-description"
+            name="productShortDescription" v-model="form.shortDescription" rows="2" class="w-full" />
         </div>
 
         <div class="field">
           <label for="product-description">توضیحات کامل</label>
-          <Textarea id="product-description" v-model="form.description" rows="5" class="w-full" />
+          <Textarea id="product-description"
+            name="productDescription" v-model="form.description" rows="5" class="w-full" />
         </div>
 
         <div class="field-grid">
           <div class="field">
             <label for="product-sku">شناسه SKU</label>
-            <InputText id="product-sku" v-model="form.sku" class="w-full" />
+            <InputText id="product-sku"
+            name="productSku" v-model="form.sku" class="w-full" />
           </div>
           <div class="field">
             <label for="product-brand">برند</label>
-            <InputText id="product-brand" v-model="form.brand" class="w-full" />
+            <InputText id="product-brand"
+            name="productBrand" v-model="form.brand" class="w-full" />
           </div>
         </div>
 
         <div class="field">
           <label for="product-model">مدل</label>
-          <InputText id="product-model" v-model="form.model" class="w-full" />
+          <InputText id="product-model"
+            name="productModel" v-model="form.model" class="w-full" />
         </div>
       </div>
 
       <!-- Right Column: Classification -->
       <div class="form-section">
-        <FormSectionHeader title="دسته‌بندی و شرکت" description="جایگاه محصول و محدوده نمایش آن در بازارگاه" icon="pi pi-sitemap" />
+        <FormSectionHeader title="دسته‌بندی و شرکت" description="جایگاه محصول و محدوده نمایش آن در بازارگاه" />
 
         <div v-if="canChooseCompany" class="field">
           <label for="product-company">شرکت <span class="required">*</span></label>
-          <Select inputId="product-company" v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب شرکت" class="w-full" :class="{ 'p-invalid': errors.companyId }" />
+          <Select inputId="product-company"
+            name="productCompany" v-model="form.companyId" :options="companies" optionLabel="name" optionValue="id" placeholder="انتخاب شرکت" class="w-full" :class="{ 'p-invalid': errors.companyId }" />
           <small v-if="errors.companyId" class="p-error">{{ errors.companyId }}</small>
         </div>
 
 
         <div class="field">
           <label for="product-category">دسته‌بندی <span class="required">*</span></label>
-          <Select inputId="product-category" v-model="form.categoryId" :options="categories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب دسته‌بندی" class="w-full" :class="{ 'p-invalid': errors.categoryId }" />
+          <Select inputId="product-category"
+            name="productCategory" v-model="form.categoryId" :options="categories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب دسته‌بندی" class="w-full" :class="{ 'p-invalid': errors.categoryId }" />
           <small v-if="errors.categoryId" class="p-error">{{ errors.categoryId }}</small>
         </div>
 
         <div class="field">
           <label for="product-subcategory">زیردسته <span class="required">*</span></label>
-          <Select inputId="product-subcategory" v-model="form.subcategoryId" :options="subcategories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب زیردسته" class="w-full" :disabled="!form.categoryId" :class="{ 'p-invalid': errors.subcategoryId }" />
+          <Select inputId="product-subcategory"
+            name="productSubcategory" v-model="form.subcategoryId" :options="subcategories" optionLabel="nameFa" optionValue="id" placeholder="انتخاب زیردسته" class="w-full" :disabled="!form.categoryId" :class="{ 'p-invalid': errors.subcategoryId }" />
           <small v-if="errors.subcategoryId" class="p-error">{{ errors.subcategoryId }}</small>
         </div>
 
         <div class="field-grid">
           <div class="field">
             <label for="product-visibility">قابلیت نمایش</label>
-            <Select inputId="product-visibility" v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
+            <Select inputId="product-visibility"
+            name="productVisibility" v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
           </div>
           <div v-if="canFeature" class="field">
-            <label>محصول ویژه</label>
+            <label for="product-featured">محصول ویژه</label>
             <div class="flex align-items-center gap-2 mt-2">
-              <InputSwitch v-model="form.isFeatured" aria-label="محصول ویژه" />
+              <InputSwitch inputId="product-featured" v-model="form.isFeatured" aria-label="محصول ویژه" />
               <span>{{ form.isFeatured ? 'بله' : 'خیر' }}</span>
             </div>
           </div>
@@ -791,17 +800,18 @@ async function removeExistingDocument(docId) {
 
       <!-- Change Reason (only in edit mode) -->
       <div v-if="isEditMode" class="form-section full-width">
-        <FormSectionHeader title="علت ویرایش" description="دلیل تغییر اطلاعات برای ثبت در سوابق محصول" icon="pi pi-pencil" />
+        <FormSectionHeader title="علت ویرایش" description="دلیل تغییر اطلاعات برای ثبت در سوابق محصول" />
         <div class="field">
           <label for="product-change-reason">توضیح تغییرات <span class="required">*</span></label>
-          <Textarea id="product-change-reason" v-model="changeReason" placeholder="دلیل ویرایش محصول را وارد کنید (مثلاً تغییر قیمت، اصلاح اطلاعات و...)" rows="2" class="w-full" />
+          <Textarea id="product-change-reason"
+            name="productChangeReason" v-model="changeReason" placeholder="دلیل ویرایش محصول را وارد کنید (مثلاً تغییر قیمت، اصلاح اطلاعات و...)" rows="2" class="w-full" />
           <small class="text-muted">این توضیحات در لاگ تغییرات محصول ذخیره می‌شوند.</small>
         </div>
       </div>
 
       <!-- Specifications -->
       <div class="form-section full-width">
-        <FormSectionHeader title="مشخصات فنی" description="ویژگی‌های استاندارد و مشخصات تکمیلی محصول" icon="pi pi-sliders-h" />
+        <FormSectionHeader title="مشخصات فنی" description="ویژگی‌های استاندارد و مشخصات تکمیلی محصول" />
 
         <div v-if="!form.subcategoryId" class="empty-section">
           <p>برای نمایش مشخصات، ابتدا زیردسته را انتخاب کنید</p>
@@ -809,7 +819,7 @@ async function removeExistingDocument(docId) {
 
         <template v-else>
           <div v-if="templateLoading" class="text-center py-4">
-            <ProgressSpinner style="width: 32px; height: 32px" />
+            <ProgressSpinner aria-label="در حال دریافت الگوی مشخصات فنی" style="width: 32px; height: 32px" />
           </div>
 
           <!-- Standard fields from the subcategory template -->
@@ -900,7 +910,7 @@ async function removeExistingDocument(docId) {
                 @update:fieldId="spec.fieldId = $event"
                 @invalid="onSpecInvalid"
               />
-              <InputText v-model="spec.value" :aria-label="'مقدار ویژگی سفارشی ' + (index + 1)" placeholder="مقدار (مثلاً 100000 ساعت)" class="custom-spec-value" />
+              <InputText v-model="spec.value" :name="'customSpecValue-' + index" :aria-label="'مقدار ویژگی سفارشی ' + (index + 1)" placeholder="مقدار (مثلاً 100000 ساعت)" class="custom-spec-value" />
               <Button icon="pi pi-trash" severity="danger" text :aria-label="'حذف ویژگی ' + (index + 1)" @click="removeCustomSpec(index)" />
             </div>
 
@@ -910,7 +920,7 @@ async function removeExistingDocument(docId) {
 
       <!-- Price Tiers -->
       <div class="form-section full-width">
-        <FormSectionHeader title="قیمت‌گذاری" description="تعریف قیمت بر اساس بازه تعداد سفارش" icon="pi pi-wallet">
+        <FormSectionHeader title="قیمت‌گذاری" description="تعریف قیمت بر اساس بازه تعداد سفارش">
           <template #actions>
             <Button label="افزودن ردیف قیمت" icon="pi pi-plus" size="small" @click="addPriceTier" />
           </template>
@@ -938,7 +948,7 @@ async function removeExistingDocument(docId) {
               </div>
               <div class="field">
                 <label :for="'price-unit-' + index">واحد</label>
-                <InputText :id="'price-unit-' + index" v-model="tier.unit" placeholder="مثلاً عدد" class="w-full" />
+                <InputText :id="'price-unit-' + index" :name="'priceUnit-' + index" v-model="tier.unit" placeholder="مثلاً عدد" class="w-full" />
               </div>
             </div>
             <Button icon="pi pi-trash" severity="danger" text :aria-label="'حذف ردیف قیمت ' + (index + 1)" @click="removePriceTier(index)" />
@@ -948,11 +958,11 @@ async function removeExistingDocument(docId) {
 
       <!-- Images -->
       <div class="form-section full-width">
-        <FormSectionHeader title="تصاویر محصول" description="تصویر اصلی و گالری تصاویر محصول" icon="pi pi-images" />
+        <FormSectionHeader title="تصاویر محصول" description="تصویر اصلی و گالری تصاویر محصول" />
 
         <div v-if="isEditMode && productImages.length > 0" class="images-grid">
           <div v-for="(img, index) in productImages" :key="img.id" class="image-item">
-            <img :src="resolveMediaUrl(img.url)" :alt="img.altText" />
+            <img :src="resolveMediaUrl(img.url)" :alt="img.altText || form.title || 'تصویر محصول'" width="640" height="480" loading="lazy" decoding="async" />
 
             <div class="image-actions">
               <Button v-if="!img.isPrimary" icon="pi pi-star" severity="success" rounded text v-tooltip.top="'انتخاب به‌عنوان تصویر اصلی'" aria-label="انتخاب تصویر اصلی" @click="setPrimaryImage(img.id)" />
@@ -966,39 +976,39 @@ async function removeExistingDocument(docId) {
 
         <div v-if="newImages.length > 0" class="images-grid mt-2">
           <div v-for="(file, index) in newImages" :key="index" class="image-item">
-            <img :src="previewImageUrl(file)" :alt="file.name" />
+            <img :src="previewImageUrl(file)" :alt="file.name || 'پیش‌نمایش تصویر جدید محصول'" width="640" height="480" loading="lazy" decoding="async" />
 
             <Button icon="pi pi-times" severity="danger" rounded class="image-remove" :aria-label="'حذف تصویر جدید ' + (index + 1)" @click="removeNewImage(index)" />
             <Tag value="جدید" severity="info" class="image-badge" />
           </div>
         </div>
 
-        <FileUpload mode="basic" accept="image/*" :maxFileSize="5000000" @select="onImageSelect" chooseLabel="افزودن تصویر" class="mt-2" />
+        <FileUpload name="productImages" mode="basic" accept="image/*" :maxFileSize="5000000" @select="onImageSelect" chooseLabel="افزودن تصویر" class="mt-2" />
       </div>
 
       <!-- Documents -->
       <div class="form-section full-width">
-        <FormSectionHeader title="اسناد محصول" description="دیتاشیت، کاتالوگ، راهنما و گواهی‌ها" icon="pi pi-file-pdf" />
+        <FormSectionHeader title="اسناد محصول" description="دیتاشیت، کاتالوگ، راهنما و گواهی‌ها" />
 
         <div v-if="isEditMode && productDocuments.length > 0" class="documents-list">
           <div v-for="doc in productDocuments" :key="doc.id" class="document-item">
-            <i class="pi pi-file-pdf"></i>
+            <i class="pi pi-file-pdf" aria-hidden="true"></i>
             <span>{{ doc.title || doc.url }}</span>
             <Tag :value="doc.type" severity="info" />
-            <Button icon="pi pi-trash" severity="danger" text @click="removeExistingDocument(doc.id)" />
+            <Button icon="pi pi-trash" severity="danger" text :aria-label="'حذف سند ' + (doc.title || doc.url)" @click="removeExistingDocument(doc.id)" />
           </div>
         </div>
 
         <div v-if="newDocuments.length > 0" class="documents-list mt-2">
           <div v-for="(doc, index) in newDocuments" :key="index" class="document-item">
             <i class="pi pi-file-pdf"></i>
-            <InputText v-model="doc.title" placeholder="عنوان سند" class="w-6" />
-            <Select v-model="doc.type" :options="['DATASHEET', 'CATALOG', 'MANUAL', 'CERTIFICATE']" class="w-4" />
-            <Button icon="pi pi-trash" severity="danger" text @click="removeNewDocument(index)" />
+            <InputText v-model="doc.title" :name="'documentTitle-' + index" :aria-label="'عنوان سند جدید ' + (index + 1)" placeholder="عنوان سند" class="w-6" />
+            <Select v-model="doc.type" :name="'documentType-' + index" :aria-label="'نوع سند جدید ' + (index + 1)" :options="['DATASHEET', 'CATALOG', 'MANUAL', 'CERTIFICATE']" class="w-4" />
+            <Button icon="pi pi-trash" severity="danger" text :aria-label="'حذف سند جدید ' + (index + 1)" @click="removeNewDocument(index)" />
           </div>
         </div>
 
-        <FileUpload mode="basic" accept=".pdf" :maxFileSize="20000000" @select="onDocumentSelect" chooseLabel="افزودن سند" class="mt-2" />
+        <FileUpload name="productDocuments" mode="basic" accept=".pdf" :maxFileSize="20000000" @select="onDocumentSelect" chooseLabel="افزودن سند" class="mt-2" />
       </div>
     </div>
   </div>
@@ -1258,15 +1268,6 @@ async function removeExistingDocument(docId) {
 /* Company product editor visual system. */
 .product-editor-heading { align-items: center; }
 .product-editor-heading-copy { min-width: 0; }
-.product-editor-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  margin-bottom: .6rem;
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
 .product-editor-title-row { display: flex; align-items: center; gap: .5rem; }
 .product-editor-title-row h1 {
   display: block;
@@ -1445,5 +1446,93 @@ async function removeExistingDocument(docId) {
   .product-form-page .field-grid-4,
   .product-form-page .spec-grid { grid-template-columns: minmax(0, 1fr); }
   .product-form-page .document-item > span { flex: 1 1 100%; overflow-wrap: anywhere; }
+}
+
+/* Product editor: task-first, low-noise sections and stable form controls. */
+.product-form-page .page-header {
+  align-items: flex-end;
+  gap: var(--ds-space-5);
+  padding: 0 0 var(--ds-space-4);
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.product-form-page .product-editor-heading-copy { min-width: 0; }
+.product-form-page .product-editor-title-row { align-items: flex-start; gap: .75rem; }
+.product-form-page .product-editor-title-row h1 { text-wrap: balance; }
+.product-form-page .form-section {
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  border-inline-start-width: 1px;
+  background: var(--ds-color-surface);
+  box-shadow: none;
+}
+.product-form-page .form-section-heading { margin-bottom: var(--ds-space-4); }
+.product-form-page .form-section-heading__copy h2 { font-size: var(--ds-font-size-md); }
+.product-form-page .form-section-heading__copy p { max-width: 68ch; }
+.product-form-page .price-tier-row,
+.product-form-page .custom-spec-row,
+.product-form-page .document-item {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-color-surface-alt);
+  box-shadow: none;
+}
+.product-form-page .image-item { border-radius: var(--ds-radius-md); }
+.product-form-page .image-item img { width: 100%; height: 100%; object-fit: cover; }
+.product-form-page .product-back-link {
+  display: inline-grid;
+  width: var(--ds-touch-target);
+  height: var(--ds-touch-target);
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+  text-decoration: none;
+}
+.product-form-page .product-back-link:hover { background: var(--ds-color-surface-hover); }
+.product-form-page .product-cancel-link {
+  display: inline-flex;
+  min-height: var(--ds-touch-target);
+  align-items: center;
+  justify-content: center;
+  padding-inline: .9rem;
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  text-decoration: none;
+}
+.product-form-page .product-cancel-link:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-text); }
+.product-form-page .product-back-link:focus-visible,
+.product-form-page .product-cancel-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+.product-form-page .page-header-actions { gap: var(--ds-space-2); }
+.product-form-page :deep(.p-fileupload-choose),
+.product-form-page :deep(.p-button) { min-height: var(--ds-touch-target); }
+.product-form-page .image-actions :deep(.p-button),
+.product-form-page .image-remove { min-width: var(--ds-touch-target); width: var(--ds-touch-target); min-height: var(--ds-touch-target); height: var(--ds-touch-target); }
+.product-form-page .field > label { cursor: pointer; }
+.product-form-page :deep(.p-inputtext:focus-visible),
+.product-form-page :deep(.p-textarea:focus-visible),
+.product-form-page :deep(.p-select:focus-visible),
+.product-form-page :deep(.p-inputnumber-input:focus-visible),
+.product-form-page :deep(.p-multiselect:focus-visible),
+.product-form-page :deep(.p-datepicker-input:focus-visible),
+.product-form-page :deep(.p-button:focus-visible),
+.product-form-page :deep(.p-fileupload-choose:focus-visible) {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 767px) {
+  .product-form-page .page-header { align-items: stretch; flex-direction: column; }
+  .product-form-page .page-header-actions { display: flex; width: 100%; }
+  .product-form-page .page-header-actions :deep(.p-button),
+  .product-form-page .page-header-actions .product-cancel-link { flex: 1 1 0; }
 }
 </style>

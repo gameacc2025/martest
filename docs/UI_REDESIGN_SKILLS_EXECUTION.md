@@ -111,3 +111,12 @@ The shared DataTable, form-section heading and required-field progress primitive
 - Auth/PKCE, registration, contact and password recovery contracts are unchanged.
 - Commerce caveat: Orders still use a hard-coded empty result; Checkout simulates payment/order confirmation; ShoppingCart simulates discount validation. These are prototypes, not real production integrations, and must not be presented as completed features.
 - Tests/build/browser screenshots remain NOT RUN by owner instruction.
+
+
+## Admin/Company product editors — 2026-11-03
+
+- Both product editor pages now use a simpler heading and section hierarchy, without decorative icon/eyebrow chrome.
+- Back/cancel navigation is semantic; inputs and uploads have stable names; image previews reserve dimensions; dynamic document controls are labeled.
+- Featured product switch is associated with its visible label.
+- Product API payloads, role/ownership checks, specifications, pricing tiers, media handling and moderation lifecycle remain unchanged.
+- Tests/build/browser screenshots remain NOT RUN by owner instruction.
