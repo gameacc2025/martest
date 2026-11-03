@@ -1556,3 +1556,9 @@ Admin and Company share a more accessible responsive shell: mobile drawer state 
 - Admin and Company mobile navigation now restores the body's pre-existing inline overflow value when the drawer closes or the layout unmounts, instead of always forcing an empty value. This avoids overwriting a scroll-lock state owned by another overlay.
 - Scope is UI-only; route/menu permissions, API calls, stores, and backend contracts are unchanged.
 - Browser testing intentionally not run per task direction. Continue the remaining UI route inventory and keep this handoff current.
+
+
+## UI shell follow-up — 2026-11-03
+
+- Hardened Admin and Company mobile drawer scroll-lock ownership: the shell now records whether it actually acquired the body lock and only restores it when it owns that lock. Unmount cleanup no longer clears a body overflow value when the drawer was never opened.
+- UI-only. API, backend, routes, stores, auth and permission behavior unchanged. Browser testing intentionally not run per user instruction.
