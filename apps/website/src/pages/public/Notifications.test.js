@@ -208,4 +208,17 @@ describe('Website notification inbox', () => {
     expect(wrapper.find('.list-search').exists()).toBe(true)
     expect(wrapper.find('.mail-toolbar').exists()).toBe(false)
   })
+  it('keeps the mail inbox RTL and renders compact icon-only header actions', async () => {
+    wrapper = shallowMount(Notifications, {
+      global: { stubs: { 'router-link': { template: '<a v-bind="$attrs"><slot /></a>' } } },
+    })
+    await flushPromises()
+
+    expect(wrapper.find('.mail-page').attributes('dir')).toBe('rtl')
+    expect(wrapper.find('.header-actions .pi-envelope').exists()).toBe(true)
+    expect(wrapper.find('.header-actions .pi-cog').exists()).toBe(true)
+    expect(wrapper.find('.header-actions .settings-link').exists()).toBe(false)
+    expect(wrapper.find('.list-search input').exists()).toBe(true)
+  })
+
 })
