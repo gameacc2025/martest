@@ -11,7 +11,7 @@ These skills are the project's reusable design and frontend-quality toolkit. The
 | Impeccable | `.agents/skills/impeccable` | UX planning, critique, polish, responsive/accessibility audits, interaction and edge-case quality |
 | Vercel Web Design Guidelines | `.agents/skills/web-design-guidelines` | Review UI implementation against current web-interface, accessibility, responsive, and interaction guidelines |
 
-The upstream skills are maintained by their respective authors. Do not replace their full skill files with summaries. Use the installer script to fetch/update the official versions.
+The upstream skills are maintained by their respective authors. Do not replace their full skill files with summaries. The installer targets all supported agent directories at project scope so the skills are shared with the repository/team.
 
 ## Mandatory workflow for every UI task
 
@@ -53,4 +53,4 @@ Run from the repository root in PowerShell:
 .\scripts\install-ui-skills.ps1
 ```
 
-The script installs/updates all four upstream skills for Codex. To update later, rerun the same script. Upstream URLs and install names are maintained in the script. Do not commit generated local caches, browser binaries, credentials, or environment files.
+The script installs/updates all four upstream skills for all supported agents. To update later, rerun the same script. Upstream URLs and install names are maintained in the script. Do not commit generated local caches, browser binaries, credentials, or environment files.
