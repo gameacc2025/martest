@@ -49,7 +49,7 @@ At the end of a session, record what changed, commands and results, commit SHA, 
 
 Every meaningful UI change must follow `.ai/UI_SKILLS.md` and load the relevant installed skill instructions before editing. The shared toolkit is UI UX Pro Max, Taste Skill, Impeccable, and Vercel Web Design Guidelines. Use each skill according to the surface and task type, while preserving the repository's Vue/PrimeVue/Tailwind architecture, current design system, Persian/RTL support, accessibility, API contracts, and business behavior. Do not follow a generic recommendation that conflicts with an explicit product decision.
 
-Install/update the Codex skills from the repository root in PowerShell with:
+Install/update the agent skills from the repository root in PowerShell with:
 
 ```powershell
 .\scripts\install-ui-skills.ps1
