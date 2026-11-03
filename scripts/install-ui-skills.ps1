@@ -18,7 +18,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Taste Skill installation failed.' }
 
     Write-Host 'Installing Impeccable for all supported agents...'
-    npx --yes skills add pbakaus/impeccable --skill impeccable --agent '*' --yes
+    npx --yes skills add pbakaus/impeccable --agent '*' --yes
     if ($LASTEXITCODE -ne 0) { throw 'Impeccable skill installation failed.' }
 
     Write-Host 'Installing Vercel Web Design Guidelines for all supported agents...'
