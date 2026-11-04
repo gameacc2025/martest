@@ -18,7 +18,7 @@
 ## پروفایل
 
 صفحه `/profile` از context احراز هویت برای نمایش مشخصات استفاده می‌کند. قرارداد واقعی Backend بررسی شد:
-- `GET /settings/profile` اطلاعات هویتی، Profile، AccessProfile و نقش‌ها را برمی‌گرداند.
+- بارگذاری اولیه صفحه از `GET /auth/me` استفاده می‌کند و context جداگانه `user/profile/accessProfile/roles/permissions` را می‌گیرد؛ endpoint مستقل `GET /settings/profile` نیز اطلاعات هویتی، Profile، AccessProfile و نقش‌ها را برمی‌گرداند.
 - `PATCH /settings/profile` فقط firstName/lastName/avatar را روی Profile تغییر می‌دهد؛ ایمیل و شماره تماس در این endpoint قابل ویرایش نیستند.
 - `PATCH /settings/change-password` رمز فعلی را بررسی می‌کند، رمز جدید را hash می‌کند و RefreshTokenهای قبلی را باطل می‌کند.
 - `POST /settings/profile/avatar` اکنون فایل واقعی JPEG/PNG/WebP را با سقف ۱ مگابایت اعتبارسنجی و ذخیره می‌کند؛ نام فایل تصادفی است و امضای باینری فایل نیز بررسی می‌شود. فایل قبلی پس از ثبت موفق URL پاک‌سازی می‌شود.
