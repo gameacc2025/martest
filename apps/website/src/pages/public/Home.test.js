@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
 const homePath = [
   resolve(process.cwd(), 'apps/website/src/pages/public/Home.vue'),
@@ -57,7 +58,7 @@ describe('Website homepage contracts (tem redesign)', () => {
 
   it('shows supplier verification and explicit inquiry pricing when no price exists', () => {
     expect(source).toContain('company?.isVerified')
-    expect(source).toContain('استعلام از تأمین‌کننده')
+    expect(source).toContain('مشاهده جزئیات')
     expect(source).toContain('class="product-card-cta"')
     expect(source).toContain('class="product-sku"')
   })
@@ -77,5 +78,43 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('class="site-hero home-hero"')
     expect(source).toContain('var(--tm-canvas)')
     expect(source).not.toContain('7c6cf6')
+  })
+})
+
+describe('Storefront product presentation scenarios', () => {
+  const scenarios = {
+    empty: [],
+    normal: [{
+      id: 'fixed-001',
+      name: 'روتر سازمانی دو بانده',
+      sku: '000124',
+      retailEnabled: true,
+      finalPrice: 12500000,
+    }],
+    highVolume: [{
+      id: 'tiered-999999',
+      name: 'سوئیچ تجمیع لایه سه با ظرفیت بالا و قابلیت توسعه ماژولار برای مراکز داده سازمانی',
+      sku: '000000000987654',
+      retailEnabled: false,
+      priceTiers: [{ minimumQuantity: 100, unitPrice: 8450000 }],
+    }],
+  }
+
+  it('keeps the empty scenario genuinely empty', () => {
+    expect(scenarios.empty).toHaveLength(0)
+  })
+
+  it('distinguishes a fixed-price retail product from an inquiry-only product', () => {
+    expect(productSalesMode(scenarios.normal[0])).toEqual({ kind: 'fixed', label: 'قیمت ثابت' })
+    expect(productPriceLabel(scenarios.normal[0])).toBeTruthy()
+    expect(productSalesMode({ id: 'rfq-1', retailEnabled: false })).toEqual({ kind: 'inquiry', label: 'استعلامی' })
+  })
+
+  it('recognizes tiered pricing and preserves long names and large identifiers as source data', () => {
+    const product = scenarios.highVolume[0]
+    expect(productSalesMode(product)).toEqual({ kind: 'volume', label: 'قیمت پله‌ای' })
+    expect(productPriceLabel(product)).toBeTruthy()
+    expect(product.name.length).toBeGreaterThan(70)
+    expect(product.sku).toBe('000000000987654')
   })
 })

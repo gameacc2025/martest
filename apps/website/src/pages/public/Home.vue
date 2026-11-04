@@ -12,6 +12,7 @@ import { useAuthStore } from '../../stores/auth'
 import { productsApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { formatPrice } from '../../utils/helpers'
+import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
 const router = useRouter()
 const productsStore = useProductsStore()
@@ -79,28 +80,6 @@ function categoryIcon(category) {
 function categoryProductCount(category) {
   const count = Number(category?.productCount ?? category?.productsCount ?? category?._count?.products)
   return Number.isFinite(count) && count >= 0 ? count : null
-}
-
-function productSalesMode(product) {
-  if (Array.isArray(product?.priceTiers) && product.priceTiers.length > 0) {
-    return { kind: 'volume', label: 'قیمت پله‌ای' }
-  }
-  if (product?.retailEnabled && Number(product?.finalPrice ?? product?.price) > 0) {
-    return { kind: 'fixed', label: 'قیمت ثابت' }
-  }
-  return { kind: 'inquiry', label: 'استعلامی' }
-}
-
-function productPriceLabel(product) {
-  const mode = productSalesMode(product)
-  const fixedPrice = product?.finalPrice ?? product?.price
-  if (mode.kind === 'fixed') return formatPrice(fixedPrice)
-  if (mode.kind === 'volume') {
-    const firstTier = product.priceTiers[0]
-    const tierPrice = firstTier?.unitPrice ?? firstTier?.price
-    return Number(tierPrice) > 0 ? `از ${formatPrice(tierPrice)}` : 'قیمت پله‌ای'
-  }
-  return 'استعلامی'
 }
 
 function productAvailabilityLabel(product) {
