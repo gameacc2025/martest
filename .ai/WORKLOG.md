@@ -3043,3 +3043,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED; inspect CI when available without running browser checks.
 - **Next action:** Refine Admin and Company inquiry list workspaces with the same reference-led system while preserving inquiry permissions, role boundaries, filters, server pagination, and response workflows.
 
+## 2026-11-04 — UI-REFERENCE-INQUIRY-LISTS — Admin and Company inquiry workspaces
+- **Status:** PARTIAL — both inquiry list workspaces refined; full UI redesign remains in progress.
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Extend the approved reference-led panel design to the core B2B inquiry/RFQ workspaces.
+- **Claimed scope:** apps/admin/src/pages/admin/inquiries/InquiryList.vue and apps/company/src/pages/company/inquiries/InquiryList.vue; UI-only.
+- **Changes:** Matched the compact title treatment, pale blue/turquoise toolbar, cyan primary actions, table density, record-count hierarchy, keyboard focus and reduced-motion styling across both roles. Preserved Admin/Company differences, Company create permission, inquiry scope tabs, API-backed data, filters, server pagination/sorting, response counts, deadline states and existing detail/create routes.
+- **Verification:** Source inspection only. Tests/build/browser checks NOT RUN per owner instruction.
+- **Commits:** Admin cf969d8c437d79b941a366e215c8a64676923a49; Company 6df737098b4e367ea984d175dc2744dd7150f49f.
+- **Push:** Both files and documentation were written directly to remote main.
+- **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED. No browser checks were run.
+- **Next action:** Refine Admin user/role management and Company user management, preserving the existing role and permission boundaries.
+
