@@ -13,7 +13,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
-import { categoriesApi, endpoints } from '@telecom/api-client'
+import { categoriesApi, inquiriesApi, endpoints } from '@telecom/api-client'
 import { apiGet } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -26,12 +26,15 @@ import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const cartItemCount = computed(() => cartStore.itemCount)
+const commerceMenuOpen = ref(false)
+const myInquiryCount = ref(null)
 const router = useRouter()
 const route = useRoute()
 
 // Keep the responsive navigation in sync with route changes (including
 // browser back/forward) so it never remains open over a new page.
-watch(() => route.fullPath, () => { mobileMenuOpen.value = false })
+watch(() => route.fullPath, () => { mobileMenuOpen.value = false; commerceMenuOpen.value = false })
+watch(() => [authStore.isAuthenticated, authStore.isCustomer], () => { fetchMyInquiryCount() })
 
 // CUSTOMER notifications live on the website. COMPANY and STAFF users are
 // redirected to their own panels through the configured PKCE handoff URLs.
@@ -126,6 +129,36 @@ const userMenuItems = computed(() => {
   return items
 })
 
+async function fetchMyInquiryCount() {
+  if (!authStore.isAuthenticated || !authStore.isCustomer) {
+    myInquiryCount.value = null
+    return
+  }
+  try {
+    const result = await inquiriesApi.list({ scope: 'sent', page: 1, limit: 1 })
+    const body = result?.data ?? result
+    const payload = body?.data ?? body
+    const meta = payload?.meta ?? body?.meta
+    const total = Number(meta?.total ?? meta?.totalItems)
+    if (Number.isFinite(total)) myInquiryCount.value = total
+    else if (Array.isArray(payload)) myInquiryCount.value = payload.length
+    else if (Array.isArray(payload?.data)) myInquiryCount.value = payload.data.length
+    else myInquiryCount.value = null
+  } catch {
+    myInquiryCount.value = null
+  }
+}
+
+function countLabel(value) {
+  const count = Number(value) || 0
+  return count > 99 ? '۹۹+' : count.toLocaleString('fa-IR')
+}
+
+function closeCommerceMenu() { commerceMenuOpen.value = false }
+function handleDocumentPointerDown(event) {
+  if (event.target instanceof Element && !event.target.closest('.public-commerce-actions')) closeCommerceMenu()
+}
+
 function toggleUserMenu(event) {
   userMenu.value?.toggle(event)
 }
@@ -142,7 +175,9 @@ const megaMenuCategories = ref([])
 
 onMounted(async () => {
   window.addEventListener('scroll', updateHeaderSearchVisibility, { passive: true })
+  document.addEventListener('pointerdown', handleDocumentPointerDown)
   updateHeaderSearchVisibility()
+  fetchMyInquiryCount()
   // Fetch notification count for logged-in users
   if (isAuthenticated.value) {
     try {
@@ -166,7 +201,10 @@ onMounted(async () => {
   }
 })
 
-onUnmounted(() => window.removeEventListener('scroll', updateHeaderSearchVisibility))
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateHeaderSearchVisibility)
+  document.removeEventListener('pointerdown', handleDocumentPointerDown)
+})
 
 function search() {
   if (searchQuery.value.trim()) {
@@ -220,14 +258,29 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
-            <div class="public-commerce-actions" aria-label="خرید و استعلام">
-              <router-link to="/cart" class="public-icon-link public-cart-link" aria-label="سبد خرید">
+            <div class="public-commerce-actions">
+              <button
+                type="button"
+                class="public-icon-link public-commerce-trigger"
+                aria-label="سبد خرید و استعلام"
+                aria-controls="public-commerce-menu"
+                :aria-expanded="commerceMenuOpen"
+                @click.stop="commerceMenuOpen = !commerceMenuOpen"
+                @keydown.esc.stop.prevent="closeCommerceMenu"
+              >
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
-                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ cartItemCount > 99 ? '۹۹+' : cartItemCount.toLocaleString('fa-IR') }}</span>
-              </router-link>
-              <router-link v-if="authStore.isCustomer" to="/my-inquiries" class="public-icon-link public-rfq-link" aria-label="لیست استعلام‌ها">
-                <i class="pi pi-file-edit" aria-hidden="true"></i>
-              </router-link>
+                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
+              </button>
+              <div v-if="commerceMenuOpen" id="public-commerce-menu" class="public-commerce-menu" role="group" aria-label="مسیرهای خرید و استعلام">
+                <router-link to="/cart" class="public-commerce-tab" @click="closeCommerceMenu">
+                  <span><i class="pi pi-shopping-cart" aria-hidden="true"></i> خرید</span>
+                  <b>{{ countLabel(cartItemCount) }}</b>
+                </router-link>
+                <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" to="/my-inquiries" class="public-commerce-tab" @click="closeCommerceMenu">
+                  <span><i class="pi pi-file-edit" aria-hidden="true"></i> استعلام</span>
+                  <b v-if="myInquiryCount !== null">{{ countLabel(myInquiryCount) }}</b>
+                </router-link>
+              </div>
             </div>
             <div v-if="showHeaderSearch" class="public-search-desktop">
               <IconField>
@@ -519,7 +572,14 @@ function logout() {
 .public-nav-link-active { color: var(--tm-blue); border-bottom-color: var(--tm-cyan); }
 
 .public-header-actions { display: flex; align-items: center; gap: 7px; margin-inline-start: auto; flex: none; }
-.public-commerce-actions { display: inline-flex; align-items: center; gap: 4px; padding-inline-end: 6px; border-inline-end: 1px solid var(--tm-line); }
+.public-commerce-actions { position: relative; display: inline-flex; align-items: center; padding-inline-end: 6px; border-inline-end: 1px solid var(--tm-line); }
+.public-commerce-trigger { border: 0; background: transparent; cursor: pointer; }
+.public-commerce-menu { position: absolute; inset-inline-end: 0; inset-block-start: calc(100% + 8px); z-index: 1200; display: grid; gap: 4px; min-width: 220px; padding: 8px; border: 1px solid var(--tm-line); border-radius: 12px; background: var(--tm-surface); box-shadow: var(--tm-shadow-lg); }
+.public-commerce-tab { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px; padding: .55rem .7rem; border-radius: 8px; color: var(--tm-ink); text-decoration: none; font-size: 13px; font-weight: 700; }
+.public-commerce-tab > span { display: inline-flex; align-items: center; gap: .55rem; }
+.public-commerce-tab > b { color: var(--tm-blue); font-variant-numeric: tabular-nums; }
+.public-commerce-tab:hover,.public-commerce-tab:focus-visible { background: var(--tm-surface-alt); outline: none; }
+.public-commerce-tab:focus-visible { box-shadow: 0 0 0 2px var(--ds-color-focus); }
 .public-search-desktop { display: none; width: 290px; }
 .public-search-input,
 .public-search-input-full { width: 100%; }

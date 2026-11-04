@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   route: { current: null },
   routerPush: vi.fn(),
   categoryList: vi.fn(),
+  inquiriesList: vi.fn(),
   logout: vi.fn(),
   auth: null,
 }))
@@ -22,6 +23,7 @@ vi.mock('../stores/auth', () => ({
 
 vi.mock('@telecom/api-client', () => ({
   categoriesApi: { list: mocks.categoryList },
+  inquiriesApi: { list: mocks.inquiriesList },
 }))
 
 vi.mock('@telecom/shared-core/http/apiClient', () => ({
@@ -47,6 +49,7 @@ describe('PublicLayout responsive navigation', () => {
       logout: mocks.logout,
     }
     mocks.categoryList.mockResolvedValue({ data: [] })
+    mocks.inquiriesList.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
   })
 
   afterEach(() => {
@@ -69,6 +72,13 @@ describe('PublicLayout responsive navigation', () => {
       },
     })
   }
+
+  it('keeps the RFQ destination hidden for guests and exposes the commerce menu trigger' , async () => {
+    wrapper = mountLayout()
+    await flushPromises()
+    expect(wrapper.find('.public-commerce-trigger').attributes('aria-label')).toBe('سبد خرید و استعلام')
+    expect(wrapper.find('.public-rfq-link').exists()).toBe(false)
+  })
 
   it('provides a keyboard-accessible skip link to the main content', async () => {
     wrapper = mountLayout()
