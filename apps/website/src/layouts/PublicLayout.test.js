@@ -80,6 +80,22 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.find('.public-rfq-link').exists()).toBe(false)
   })
 
+  it('shows independent purchase and RFQ counts for signed-in customers', async () => {
+    mocks.auth.isAuthenticated = true
+    mocks.inquiriesList.mockResolvedValue({ data: { data: [{}], meta: { total: 12 } } })
+    wrapper = mountLayout()
+    await flushPromises()
+    await wrapper.get('.public-commerce-trigger').trigger('click')
+    await nextTick()
+
+    const tabs = wrapper.findAll('.public-commerce-tab')
+    expect(tabs).toHaveLength(2)
+    expect(tabs[0].text()).toContain('خرید')
+    expect(tabs[0].text()).toContain('۰')
+    expect(tabs[1].text()).toContain('استعلام')
+    expect(tabs[1].text()).toContain('۱۲')
+  })
+
   it('provides a keyboard-accessible skip link to the main content', async () => {
     wrapper = mountLayout()
     await flushPromises()

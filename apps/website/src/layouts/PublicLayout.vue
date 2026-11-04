@@ -258,7 +258,7 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
-            <div class="public-commerce-actions">
+            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
               <button
                 type="button"
                 class="public-icon-link public-commerce-trigger"
@@ -266,7 +266,6 @@ function logout() {
                 aria-controls="public-commerce-menu"
                 :aria-expanded="commerceMenuOpen"
                 @click.stop="commerceMenuOpen = !commerceMenuOpen"
-                @keydown.esc.stop.prevent="closeCommerceMenu"
               >
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
                 <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
