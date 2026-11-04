@@ -124,7 +124,7 @@
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
@@ -163,6 +163,12 @@ const rejectionReason = ref('')
 const searchQuery = ref('')
 const statusFilter = ref(typeof route.query.status === 'string' ? route.query.status : null)
 const statusOptions = STATUS_OPTIONS
+
+watch(() => route.query.status, (status) => {
+  statusFilter.value = typeof status === 'string' ? status : null
+  resetTablePage()
+  fetchProducts(1)
+})
 
 // Use centralized status helpers from config/product.js
 const statusLabel = getStatusLabel

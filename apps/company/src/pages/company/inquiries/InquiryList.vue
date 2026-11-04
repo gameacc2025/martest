@@ -2,7 +2,7 @@
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi } from '@telecom/api-client'
@@ -58,6 +58,13 @@ const tableColumns = [
 const searchQuery = ref('')
 const statusFilter = ref(typeof route.query.status === 'string' ? route.query.status : null)
 const scopeFilter = ref(typeof route.query.scope === 'string' ? route.query.scope : 'all')
+
+watch(() => [route.query.status, route.query.scope], ([status, scope]) => {
+  statusFilter.value = typeof status === 'string' ? status : null
+  scopeFilter.value = typeof scope === 'string' ? scope : 'all'
+  resetTablePage()
+  fetchInquiries(1)
+})
 
 const statusOptions = [
   { label: 'همه', value: null },
