@@ -458,3 +458,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added a named production Docker volume `user_uploads:/app/uploads` so static user uploads survive container replacement. Dev backend bind mount already persists `backend/uploads`.
 - No Prisma schema or migration changes. This is a narrowly scoped backend correctness/security fix discovered during the UI account audit; it is an explicit exception to the UI-only redesign scope, not a broader backend feature phase.
 - Automated tests/build/browser checks NOT RUN. Source was re-fetched for static review.
+
+
+### Website profile form hardening — 2026-11-04
+- Profile name fields are now required and capped at 50 characters before calling the backend; empty values no longer silently skip persistence and close as success.
+- Password form validates current password (6–100 backend-compatible), new password (8–100), and confirmation before API submission.
+- Avatar picker is restricted to JPEG/PNG/WebP, 1 MB, disabled during upload; duplicate submissions are guarded.
+- Missing avatar multipart file now returns a structured 400 AppError rather than a generic 500.
+- Added Vitest cases for profile and password validation; expanded Node unit cases for forged MIME/signature and oversized avatar files.
+- Avatar URLs are served same-origin in both dev Vite proxy (/uploads) and production nginx proxy (/uploads); no frontend URL rewriting is required.
+- Tests/build/browser NOT RUN.
+**Next:** Begin retail backend R1 audit/implementation from the existing commerce domain contract, starting with schema/product eligibility, price tier semantics, stock and tenant access; do not activate checkout/payment until the server-side policy and gateway contract are verified.
