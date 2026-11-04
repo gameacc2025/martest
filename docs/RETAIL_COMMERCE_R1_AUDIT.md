@@ -12,7 +12,7 @@ The current backend is a product catalogue + B2B inquiry platform, not a retail 
 
 | Area | Current implementation | Retail implication |
 |---|---|---|
-| Product identity | Product has title, SKU, company/category, status, visibility and media | No retail-specific enable/disable flag |
+| Product identity | Product has title, SKU, company/category, status, visibility, media and `retailEnabled` (default false) | Opt-in flag exists; it is not sufficient to make a product purchasable |
 | Product workflow | DRAFT → PENDING_REVIEW → APPROVED → PUBLISHED; company publishes after staff approval | Retail must require published/public state, not just product existence |
 | Company state | Company has PENDING/ACTIVE/INACTIVE/SUSPENDED and soft-delete | Retail eligibility must require ACTIVE and not deleted |
 | Price | ProductPriceTier uses Decimal(18,2), min/max quantity, validFrom/validTo | A minQuantity=1 tier is a retail-price candidate, but no checkout resolver enforces validity windows/range selection yet |
@@ -57,10 +57,10 @@ These defaults let the backend be built without accidentally turning every exist
 
 ## Next implementation slices
 
-- **R1a — Eligibility:** Prisma migration for `retailEnabled=false`; service-level eligibility resolver and public retail catalogue/detail endpoints; company-active/deleted checks; tests.
+- **R1a follow-up — Eligibility resolver:** server-side retail catalogue/detail endpoints; company-active/deleted checks; current valid minQuantity=1 price selection; tests. Keep results non-purchasable until R1b stock exists.
 - **R1b — Inventory:** InventoryBalance, InventoryMovement, InventoryReservation; audited stock adjustment commands; atomic reserve/release/consume operations; concurrency tests.
 - **R1 exit:** Existing products remain retail-disabled; no checkout endpoint is enabled until eligibility, price resolution, inventory reservation and tenant/security tests pass.
 
 ## Verification
 
-Source audit and R1a source changes performed against current `main`: Prisma Product/ProductPriceTier/ProductPriceSnapshot/Company/User/AccessProfile/Address models, product service/routes, app route registration, and the retail domain design. No schema, migration, API, or UI behavior was changed in this audit. Runtime tests/build/browser were not run.
+Source audit and R1a source changes performed against current `main`: Prisma Product/ProductPriceTier/ProductPriceSnapshot/Company/User/AccessProfile/Address models, product service/routes, app route registration, and the retail domain design. R1a changed the Product schema, added a migration, updated product request schemas/projection and Admin/Company forms, and added tests. No retail catalogue, inventory, order or payment behavior is enabled. Runtime tests/build/browser were not run.
