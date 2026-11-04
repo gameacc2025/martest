@@ -320,3 +320,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **Commits:** Admin cf969d8c437d79b941a366e215c8a64676923a49; Company 6df737098b4e367ea984d175dc2744dd7150f49f.
 - Next: continue with Admin users/roles and Company user-management screens, then product and order/report surfaces.
 
+### Identity and access workspaces refinement — 2026-11-04
+- Applied the same approved panel reference to Admin users, Admin roles and Company users: compact page heading, pale blue/turquoise workspace toolbar, sky-blue primary actions, denser tables, improved record-count hierarchy, clear focus states and reduced-motion handling.
+- Preserved STAFF/COMPANY context separation, existing role/access-profile boundaries, permission gates, role assignment and deletion restrictions, Company member visibility/access toggling, API/store calls, pagination and routes.
+- No API, backend, authorization or business logic was changed.
+- Verification: source-only review; tests/build/browser rendering NOT RUN per owner instruction.
+- **Commits:** Admin users 9676dc7b7d5a0ea225fdd70cfbcafdbd244d12fd; Admin roles 87c540ba539daeb5c12139814f60a53155973f4a; Company users aa3acfce509df821d2536de3a2d3f1a69e05b114.
+- Next: continue the same visual pass on Admin products/categories and Company product management, then orders and reports.
+
