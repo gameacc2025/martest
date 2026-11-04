@@ -1,0 +1,789 @@
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
+import { inquiriesApi, API_BASE_URL } from '@telecom/api-client'
+import { useAuthStore } from '../../../stores/auth'
+import { canUseSupplierResponseActions as isSupplierAccessContext } from './inquiryResponsePermissions.js'
+import Button from 'primevue/button'
+import Tag from 'primevue/tag'
+import Card from 'primevue/card'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
+import ProgressSpinner from 'primevue/progressspinner'
+import ConfirmDialog from 'primevue/confirmdialog'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
+const confirm = useConfirm()
+const auth = useAuthStore()
+
+const inquiry = ref(null)
+const loading = ref(true)
+const errored = ref(false)
+
+const showResponseDialog = ref(false)
+const responseItems = ref([])
+const editingResponseId = ref(null)
+const savingResponse = ref(false)
+const uploadingResponseId = ref(null)
+
+const statusLabels = {
+  DRAFT: 'پیش‌نویس', SUBMITTED: 'ارسال شده', OPEN: 'باز',
+  CLOSED: 'بسته شده', EXPIRED: 'منقضی شده', COMPLETED: 'تکمیل شده', CANCELLED: 'لغو شده',
+}
+
+const statusSeverity = {
+  DRAFT: 'secondary', SUBMITTED: 'info', OPEN: 'success',
+  CLOSED: 'warn', EXPIRED: 'danger', COMPLETED: 'success', CANCELLED: 'danger',
+}
+
+const responseStatusLabels = {
+  PENDING: 'در انتظار', SELECTED: 'انتخاب شده', REJECTED: 'رد شده',
+  EXPIRED: 'منقضی شده', WITHDRAWN: 'پس گرفته شده',
+}
+
+const responseStatusSeverity = {
+  PENDING: 'info', SELECTED: 'success', REJECTED: 'danger',
+  EXPIRED: 'warn', WITHDRAWN: 'secondary',
+}
+
+// Current user's company id — sourced from the accessProfile (the single
+// source of company context now that `user` is identity-only).
+const myCompanyId = computed(() => Number(auth.companyId) || null)
+const canManageSupplierResponses = computed(() => isSupplierAccessContext(auth.accessType))
+
+const isSuperAdmin = computed(() => auth.isSuperAdmin)
+
+
+// Deadline passed? (client-side hint; server is the source of truth)
+const deadlinePassed = computed(() => {
+  const d = inquiry.value?.responseDeadline
+  return d ? new Date(d) <= new Date() : false
+})
+
+const isOpen = computed(() => inquiry.value?.status === 'OPEN' && !inquiry.value?.closedAt)
+
+// The caller's own response for this inquiry (if any).
+const myResponse = computed(() => {
+  if (!inquiry.value?.responses || !myCompanyId.value) return null
+  return inquiry.value.responses.find((r) => r.company?.id === myCompanyId.value) || null
+})
+
+// Can this company create a new response? Open, before deadline, no existing
+// active response, and not the buyer themselves.
+const canCreateResponse = computed(() => {
+  if (!canManageSupplierResponses.value || !isOpen.value || deadlinePassed.value) return false
+  if (inquiry.value?.company?.id === myCompanyId.value) return false
+  return !myResponse.value
+})
+
+function canEditResponse(response) {
+  return (
+    canManageSupplierResponses.value &&
+    isOpen.value &&
+    !deadlinePassed.value &&
+    inquiry.value?.allowEditResponse &&
+    response?.status === 'PENDING'
+  )
+}
+
+function canWithdrawResponse(response) {
+  return (
+    canManageSupplierResponses.value &&
+    isOpen.value &&
+    !deadlinePassed.value &&
+    inquiry.value?.allowWithdrawResponse &&
+    response?.status === 'PENDING'
+  )
+}
+
+function isMyResponse(response) {
+  return canManageSupplierResponses.value && myCompanyId.value && response.company?.id === myCompanyId.value
+}
+
+onMounted(() => {
+  fetchInquiry()
+})
+
+async function fetchInquiry() {
+  loading.value = true
+  errored.value = false
+  try {
+    const response = await inquiriesApi.getById(route.params.id)
+    // getById body is the envelope { data: inquiry }; raw api.get exposes it
+    // under response.data, so the inquiry itself is response.data.data.
+    const body = response?.data ?? response
+    inquiry.value = body?.data ?? body
+  } catch (err) {
+    errored.value = true
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت اطلاعات درخواست', life: 3000 })
+  } finally {
+    loading.value = false
+  }
+}
+
+
+// ── Create / edit response ───────────────────────────────────
+function openCreateDialog() {
+  editingResponseId.value = null
+  responseItems.value = (inquiry.value?.items || []).map((item) => ({
+    inquiryItemId: item.id,
+    price: 0,
+    availableQuantity: 0,
+    deliveryTime: '',
+    description: '',
+    productTitle: item.product?.title || '',
+  }))
+  showResponseDialog.value = true
+}
+
+function openEditDialog(response) {
+  editingResponseId.value = response.id
+  // Pre-fill from existing response items, keyed by inquiryItemId.
+  const byItem = new Map((response.items || []).map((ri) => [ri.inquiryItem?.id ?? ri.inquiryItemId, ri]))
+  responseItems.value = (inquiry.value?.items || []).map((item) => {
+    const existing = byItem.get(item.id)
+    return {
+      inquiryItemId: item.id,
+      price: existing ? Number(existing.price) : 0,
+      availableQuantity: existing ? existing.availableQuantity : 0,
+      deliveryTime: existing?.deliveryTime || '',
+      description: existing?.description || '',
+      productTitle: item.product?.title || '',
+    }
+  })
+  showResponseDialog.value = true
+}
+
+function validateResponseItems() {
+  const valid = responseItems.value.filter((it) => it.price > 0 && it.description && it.deliveryTime)
+  if (valid.length === 0) {
+    toast.add({ severity: 'warn', summary: 'خطا', detail: 'برای حداقل یک قلم قیمت، زمان تحویل و توضیحات وارد کنید', life: 3500 })
+    return null
+  }
+  return valid.map((it) => ({
+    inquiryItemId: it.inquiryItemId,
+    price: it.price,
+    availableQuantity: it.availableQuantity,
+    deliveryTime: it.deliveryTime,
+    description: it.description,
+  }))
+}
+
+async function saveResponse() {
+  const items = validateResponseItems()
+  if (!items) return
+
+  savingResponse.value = true
+  try {
+    if (editingResponseId.value) {
+      await inquiriesApi.updateResponse(route.params.id, editingResponseId.value, { items })
+      toast.add({ severity: 'success', summary: 'موفقیت', detail: 'پاسخ ویرایش شد', life: 3000 })
+    } else {
+      await inquiriesApi.submitResponse(route.params.id, { items })
+      toast.add({ severity: 'success', summary: 'موفقیت', detail: 'پاسخ با موفقیت ارسال شد', life: 3000 })
+    }
+    showResponseDialog.value = false
+    await fetchInquiry()
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در ثبت پاسخ', life: 3500 })
+  } finally {
+    savingResponse.value = false
+  }
+}
+
+// ── Withdraw ─────────────────────────────────────────────────
+function confirmWithdraw(response) {
+  confirm.require({
+    message: 'آیا از پس‌گرفتن این پاسخ مطمئن هستید؟ این عمل قابل بازگشت نیست.',
+    header: 'پس‌گرفتن پاسخ',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'پس‌گرفتن',
+    rejectLabel: 'انصراف',
+    acceptClass: 'p-button-danger',
+    accept: () => withdrawResponse(response),
+  })
+}
+
+async function withdrawResponse(response) {
+  try {
+    await inquiriesApi.withdrawResponse(route.params.id, response.id)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'پاسخ پس گرفته شد', life: 3000 })
+    await fetchInquiry()
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در پس‌گرفتن پاسخ', life: 3500 })
+  }
+}
+
+// ── Attachments ──────────────────────────────────────────────
+function triggerUpload(response) {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx'
+  input.onchange = () => {
+    const file = input.files?.[0]
+    if (file) uploadAttachment(response, file)
+  }
+  input.click()
+}
+
+async function uploadAttachment(response, file) {
+  uploadingResponseId.value = response.id
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    await inquiriesApi.uploadResponseAttachment(route.params.id, response.id, formData)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'فایل بارگذاری شد', life: 3000 })
+    await fetchInquiry()
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در بارگذاری فایل', life: 3500 })
+  } finally {
+    uploadingResponseId.value = null
+  }
+}
+
+async function downloadAttachment(response, attachment) {
+  try {
+    const result = await inquiriesApi.downloadResponseAttachment(route.params.id, response.id, attachment.id)
+    const blob = result.data
+    if (!(blob instanceof Blob)) throw new Error('فایل دریافتی معتبر نیست.')
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = attachment.filename || 'attachment'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در دریافت فایل', life: 3500 })
+  }
+}
+
+async function deleteAttachment(response, attachment) {
+  try {
+    await inquiriesApi.deleteResponseAttachment(route.params.id, response.id, attachment.id)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'فایل حذف شد', life: 3000 })
+    await fetchInquiry()
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در حذف فایل', life: 3500 })
+  }
+}
+
+
+function formatPrice(price) {
+  return new Intl.NumberFormat('fa-IR', { style: 'currency', currency: 'IRR' }).format(price)
+}
+</script>
+
+<template>
+  <div class="inquiry-detail-page">
+    <ConfirmDialog />
+    <WorkspacePageHeading
+      heading-id="inquiry-detail-title"
+      icon="pi pi-inbox"
+      eyebrow="مرکز مدیریت استعلام‌ها"
+      title="جزئیات درخواست استعلام"
+      :description="inquiry ? inquiry.title : 'بررسی مشخصات درخواست و پاسخ‌های تأمین‌کنندگان'"
+    >
+      <template #actions>
+        <Button icon="pi pi-arrow-right" text rounded aria-label="بازگشت به فهرست استعلام‌ها" @click="router.push({ name: 'admin-inquiries' })" />
+        <Button v-if="canCreateResponse" label="ارسال پاسخ" icon="pi pi-send" @click="openCreateDialog" />
+      </template>
+    </WorkspacePageHeading>
+
+    <div v-if="loading" class="text-center py-8">
+      <ProgressSpinner />
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="errored" class="state-block" role="alert">
+      <i class="pi pi-exclamation-triangle state-icon" style="color: var(--p-red-500)"></i>
+      <h3>خطا در دریافت اطلاعات</h3>
+      <p>دریافت جزئیات استعلام با مشکل مواجه شد.</p>
+      <div class="flex gap-2">
+        <Button label="تلاش مجدد" icon="pi pi-refresh" @click="fetchInquiry" />
+        <Button label="بازگشت" icon="pi pi-arrow-right" severity="secondary" text @click="router.push({ name: 'admin-inquiries' })" />
+      </div>
+    </div>
+
+    <div v-else-if="inquiry" class="detail-grid">
+
+      <!-- Inquiry Info -->
+      <Card class="detail-card">
+        <template #title>اطلاعات درخواست</template>
+        <template #content>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">عنوان</span>
+              <span class="info-value">{{ inquiry.title }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">شرکت</span>
+              <span class="info-value">{{ inquiry.company?.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">وضعیت</span>
+              <Tag :value="statusLabels[inquiry.status]" :severity="statusSeverity[inquiry.status]" />
+            </div>
+            <div class="info-item">
+              <span class="info-label">تاریخ ایجاد</span>
+              <span class="info-value">{{ new Date(inquiry.createdAt).toLocaleDateString('fa-IR') }}</span>
+            </div>
+            <div class="info-item" v-if="inquiry.description">
+              <span class="info-label">توضیحات</span>
+              <span class="info-value">{{ inquiry.description }}</span>
+            </div>
+            <div class="info-item" v-if="inquiry.responseDeadline">
+              <span class="info-label">مهلت پاسخ</span>
+              <span class="info-value" :class="{ 'text-danger': deadlinePassed }">
+                {{ new Date(inquiry.responseDeadline).toLocaleString('fa-IR') }}
+                <Tag v-if="deadlinePassed" value="گذشته" severity="danger" class="ms-1" />
+              </span>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <!-- Inquiry Items -->
+      <Card class="detail-card">
+        <template #title>اقلام درخواست ({{ inquiry.items?.length || 0 }})</template>
+        <template #content>
+          <DataTable :value="inquiry.items || []" responsiveLayout="scroll">
+            <Column field="product.title" header="محصول"></Column>
+            <Column field="quantity" header="تعداد"></Column>
+            <Column field="description" header="توضیحات"></Column>
+          </DataTable>
+        </template>
+      </Card>
+
+      <!-- Responses -->
+      <Card class="detail-card" v-if="inquiry.responses?.length">
+        <template #title>پاسخ‌ها ({{ inquiry.responses.length }})</template>
+        <template #content>
+          <div v-for="response in inquiry.responses" :key="response.id" class="response-card">
+            <div class="response-header">
+              <div class="response-header-info">
+                <span class="font-semibold">{{ response.company?.name }}</span>
+                <Tag
+                  :value="responseStatusLabels[response.status] || response.status"
+                  :severity="responseStatusSeverity[response.status] || 'info'"
+                />
+                <Tag v-if="isMyResponse(response)" value="پاسخ شما" severity="contrast" />
+              </div>
+              <div class="response-actions" v-if="isMyResponse(response)">
+                <Button
+                  v-if="canEditResponse(response)"
+                  label="ویرایش" icon="pi pi-pencil" size="small" text
+                  @click="openEditDialog(response)"
+                />
+                <Button
+                  v-if="canEditResponse(response)"
+                  label="افزودن فایل" icon="pi pi-paperclip" size="small" text
+                  :loading="uploadingResponseId === response.id"
+                  @click="triggerUpload(response)"
+                />
+                <Button
+                  v-if="canWithdrawResponse(response)"
+                  label="انصراف" icon="pi pi-times-circle" size="small" text severity="danger"
+                  @click="confirmWithdraw(response)"
+                />
+              </div>
+            </div>
+
+            <DataTable :value="response.items || []" responsiveLayout="scroll" size="small">
+              <Column header="محصول">
+                <template #body="{ data }">
+                  {{ data.inquiryItem?.product?.title || '-' }}
+                </template>
+              </Column>
+              <Column field="price" header="قیمت">
+                <template #body="{ data }">{{ formatPrice(data.price) }}</template>
+              </Column>
+              <Column field="availableQuantity" header="تعداد موجود"></Column>
+              <Column field="deliveryTime" header="زمان تحویل"></Column>
+              <Column field="description" header="توضیحات"></Column>
+            </DataTable>
+
+            <!-- Attachments -->
+            <div v-if="response.attachments?.length" class="attachments">
+              <span class="attachments-label">
+                <i class="pi pi-paperclip"></i> فایل‌های پیوست:
+              </span>
+              <div class="attachment-list">
+                <div v-for="att in response.attachments" :key="att.id" class="attachment-chip">
+                  <a href="#" @click.prevent="downloadAttachment(response, att)">
+                    <i class="pi pi-file"></i> {{ att.filename }}
+                  </a>
+                  <Button
+                    v-if="isMyResponse(response) && canEditResponse(response)"
+                    icon="pi pi-times" text rounded size="small" severity="danger"
+                    aria-label="حذف فایل پیوست"
+                    @click="deleteAttachment(response, att)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <!-- Status History -->
+      <Card class="detail-card" v-if="inquiry.statusHistory?.length">
+        <template #title>تاریخچه وضعیت</template>
+        <template #content>
+          <DataTable :value="inquiry.statusHistory" responsiveLayout="scroll" size="small">
+            <Column header="از وضعیت">
+              <template #body="{ data }">
+                <Tag :value="statusLabels[data.previousStatus]" :severity="statusSeverity[data.previousStatus]" size="small" />
+              </template>
+            </Column>
+            <Column header="به وضعیت">
+              <template #body="{ data }">
+                <Tag :value="statusLabels[data.newStatus]" :severity="statusSeverity[data.newStatus]" size="small" />
+              </template>
+            </Column>
+            <Column header="تغییر دهنده">
+              <template #body="{ data }">{{ data.changedBy?.fullName || '-' }}</template>
+            </Column>
+            <Column field="comment" header="توضیحات"></Column>
+            <Column header="تاریخ">
+              <template #body="{ data }">
+                {{ new Date(data.createdAt).toLocaleDateString('fa-IR') }}
+              </template>
+            </Column>
+          </DataTable>
+        </template>
+      </Card>
+    </div>
+
+    <!-- Response Dialog (create / edit) -->
+    <Dialog
+      v-model:visible="showResponseDialog"
+      :header="editingResponseId ? 'ویرایش پاسخ' : 'ارسال پاسخ'"
+      :modal="true"
+      :style="{ width: '700px', maxWidth: '96vw' }"
+      :breakpoints="{ '960px': '92vw', '640px': '96vw' }"
+    >
+      <div v-for="(item, index) in responseItems" :key="index" class="response-item-form">
+        <h4 class="mb-2">{{ item.productTitle }}</h4>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="field">
+            <label :for="'response-price-' + index">قیمت (ریال)</label>
+            <InputNumber :inputId="'response-price-' + index" v-model="item.price" :min="0" class="w-full" />
+          </div>
+          <div class="field">
+            <label :for="'response-quantity-' + index">تعداد موجود</label>
+            <InputNumber :inputId="'response-quantity-' + index" v-model="item.availableQuantity" :min="0" class="w-full" />
+          </div>
+          <div class="field">
+            <label :for="'response-delivery-' + index">زمان تحویل</label>
+            <InputText :id="'response-delivery-' + index" v-model="item.deliveryTime" placeholder="مثلاً ۳ روز کاری" class="w-full" />
+          </div>
+          <div class="field">
+            <label :for="'response-description-' + index">توضیحات</label>
+            <InputText :id="'response-description-' + index" v-model="item.description" placeholder="توضیحات پاسخ" class="w-full" />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="showResponseDialog = false" />
+        <Button
+          :label="editingResponseId ? 'ذخیره تغییرات' : 'ارسال پاسخ'"
+          icon="pi pi-check"
+          :loading="savingResponse"
+          @click="saveResponse"
+        />
+      </template>
+    </Dialog>
+  </div>
+</template>
+
+<style scoped>
+.inquiry-detail-page {
+  direction: rtl;
+}
+
+.detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: var(--tm-muted);
+}
+
+.info-value {
+  font-weight: 600;
+}
+
+.text-danger {
+  color: var(--tm-red);
+}
+
+.ms-1 {
+  margin-inline-start: 0.5rem;
+}
+
+.response-card {
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.response-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.response-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.response-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.response-item-form {
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.attachments {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--tm-line);
+}
+
+.attachments-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--tm-muted);
+  margin-bottom: 0.5rem;
+}
+
+.attachment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.attachment-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-canvas);
+}
+
+.attachment-chip a {
+  color: var(--tm-blue);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.state-icon {
+  font-size: 2.5rem;
+  color: var(--tm-muted);
+  margin-bottom: 0.25rem;
+}
+
+.state-block h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.state-block p {
+  margin: 0 0 0.75rem;
+  color: var(--tm-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Inquiry record: clear identity, status, actions and readable information cards. */
+.inquiry-detail-page { display: flex; flex-direction: column; gap: 16px; }
+
+.inquiry-detail-page :deep(.p-card) {
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
+}
+
+.inquiry-detail-page :deep(.p-card-title) {
+  color: var(--tm-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.inquiry-detail-page .response-card {
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+}
+
+@media (max-width: 640px) {
+  .inquiry-detail-page { padding: 10px; }
+.inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.inquiry-detail-page { display: flex; flex-direction: column; gap: 16px; }
+
+.inquiry-detail-page .detail-card,
+.inquiry-detail-page .response-card {
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
+}
+
+.inquiry-detail-page .response-card { background: var(--tm-surface); }
+
+.inquiry-detail-page .response-item-form { border-color: var(--tm-line); border-radius: var(--tm-radius-lg); }
+
+.inquiry-detail-page .state-block {
+  min-height: 16rem;
+  border: 1px dashed var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+}
+
+/* Review workspace: primary request and line items side by side, responses/history full width. */
+.inquiry-detail-page { display: flex; flex-direction: column; gap: clamp(1rem, 2vw, 1.5rem); }
+
+.inquiry-detail-page .detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+
+.inquiry-detail-page :deep(.detail-card) {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
+}
+
+.inquiry-detail-page :deep(.detail-card:nth-child(n + 3)) { grid-column: 1 / -1; }
+
+.inquiry-detail-page :deep(.p-card-title) {
+  padding-bottom: .8rem;
+  border-bottom: 1px solid var(--tm-line);
+}
+
+.inquiry-detail-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+
+.inquiry-detail-page :deep(.p-datatable-thead > tr > th) {
+  background: var(--tm-surface-alt);
+  color: var(--tm-muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.inquiry-detail-page :deep(.p-datatable-tbody > tr > td) {
+  border-color: var(--tm-line);
+  color: var(--tm-ink);
+}
+
+.inquiry-detail-page .response-card {
+  padding: 1.1rem;
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+}
+
+.inquiry-detail-page .response-header { padding-bottom: .75rem; border-bottom: 1px solid var(--tm-line); }
+
+.inquiry-detail-page .info-grid { gap: 1.1rem; }
+
+.inquiry-detail-page .response-actions :deep(.p-button),
+.inquiry-detail-page .state-block :deep(.p-button) {
+  min-height: 2.75rem;
+}
+
+.inquiry-detail-page :deep(.p-button):focus-visible,
+.inquiry-detail-page a:focus-visible,
+.inquiry-detail-page input:focus-visible {
+  outline: 2px solid var(--tm-cyan-strong);
+  outline-offset: 2px;
+}
+
+.inquiry-detail-page .info-label { color: var(--tm-muted); font-size: 11.5px; }
+
+.inquiry-detail-page .info-value { color: var(--tm-ink); line-height: 1.7; }
+
+.inquiry-detail-page .state-block {
+  min-height: 16rem;
+  justify-content: center;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+}
+
+@media (max-width: 900px) {
+  .inquiry-detail-page .detail-grid { grid-template-columns: minmax(0, 1fr); }
+.inquiry-detail-page :deep(.detail-card:nth-child(n + 3)) { grid-column: auto; }
+}
+
+@media (max-width: 640px) {
+  .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.inquiry-detail-page .detail-card { box-shadow: 0 1px 3px rgba(20, 35, 63, 0.06); }
+
+.inquiry-detail-page :deep(.p-card-title) { font-size: .95rem; }
+
+.inquiry-detail-page .info-value { font-size: .82rem; }
+</style>

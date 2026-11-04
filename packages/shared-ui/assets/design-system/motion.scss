@@ -1,0 +1,176 @@
+/* ============================================================
+   Telecom Marketplace — Motion Layer
+   ============================================================
+
+   Professional, SUBTLE micro-interactions layered on top of the design
+   system. Everything here is:
+     - Token-driven (uses --ds-transition* + --ds-shadow* only).
+     - GPU-cheap (animates transform/opacity — never layout properties).
+     - Dependency-free (pure CSS + Vue's built-in <Transition>).
+     - Accessible (fully disabled under prefers-reduced-motion).
+
+   Reference feel: Stripe / Linear / Vercel — motion you feel, not notice.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. Page / route transitions (paired with Vue <Transition name="page">)
+   ------------------------------------------------------------ */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity var(--ds-transition), transform var(--ds-transition);
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* Fade-only variant for overlapping/absolute contexts */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--ds-transition);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------
+   2. Card hover — gentle lift + shadow (opt-in via .ds-interactive)
+   ------------------------------------------------------------ */
+.ds-interactive {
+  transition:
+    transform var(--ds-transition),
+    box-shadow var(--ds-transition),
+    border-color var(--ds-transition);
+  will-change: transform;
+}
+.ds-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-md);
+}
+.ds-interactive:active {
+  transform: translateY(0);
+  transition-duration: var(--ds-transition-fast, 0.15s);
+}
+
+/* PrimeVue cards inside dashboards get the same lift automatically. */
+.p-card {
+  transition:
+    box-shadow var(--ds-transition),
+    transform var(--ds-transition),
+    border-color var(--ds-transition);
+}
+.p-card:hover {
+  box-shadow: var(--ds-shadow-md);
+}
+
+/* ------------------------------------------------------------
+   3. Button feedback — press + focus ring polish
+   ------------------------------------------------------------ */
+.p-button {
+  transition:
+    background-color var(--ds-transition),
+    border-color var(--ds-transition),
+    color var(--ds-transition),
+    box-shadow var(--ds-transition),
+    transform var(--ds-transition-fast, 0.15s);
+}
+.p-button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+.p-button:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ------------------------------------------------------------
+   4. Dropdown / overlay animations (PrimeVue connected overlays)
+   ------------------------------------------------------------ */
+.p-select-overlay,
+.p-dropdown-panel,
+.p-multiselect-overlay,
+.p-datepicker-panel,
+.p-menu,
+.p-popover,
+.p-autocomplete-overlay {
+  transform-origin: top center;
+  animation: ds-overlay-in var(--ds-transition) ease;
+}
+
+@keyframes ds-overlay-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Overlay list items get a subtle indent on hover (RTL-safe). */
+.p-select-option,
+.p-dropdown-item,
+.p-multiselect-option {
+  transition:
+    background-color var(--ds-transition-fast, 0.15s),
+    padding-inline-start var(--ds-transition-fast, 0.15s);
+}
+
+/* ------------------------------------------------------------
+   5. Sidebar nav item transitions
+   ------------------------------------------------------------ */
+.p-dialog {
+  animation: ds-dialog-in var(--ds-transition) ease;
+}
+@keyframes ds-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ------------------------------------------------------------
+   6. Reusable entrance helper (e.g. skeleton → content swap)
+   ------------------------------------------------------------ */
+.ds-fade-in {
+  animation: ds-fade-in var(--ds-transition-slow, 0.3s) ease both;
+}
+@keyframes ds-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------
+   Accessibility: honor the user's reduced-motion preference.
+   Disable ALL motion (but keep final states) for those users.
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active,
+  .fade-enter-active,
+  .fade-leave-active,
+  .ds-interactive,
+  .p-card,
+  .p-button,
+  .p-select-overlay,
+  .p-dropdown-panel,
+  .p-multiselect-overlay,
+  .p-datepicker-panel,
+  .p-menu,
+  .p-popover,
+  .p-autocomplete-overlay,
+  .p-dialog,
+  .ds-fade-in {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

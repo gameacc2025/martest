@@ -1,0 +1,21 @@
+/**
+ * @telecom/shared-ui
+ *
+ * Barrel exports for shared UI components, theme, composables, and config.
+ */
+export { default as theme } from './theme.js'
+
+// Composables
+export { useSidebarState } from './composables/useSidebarState.js'
+export { useTheme } from './composables/useTheme.js'
+export { useDashboardMenu } from './composables/useDashboardMenu.js'
+
+// Config
+export * from './config/productReservedSpecificationKeys.js'
+export { dashboardMenu, PUBLIC_SITE_URL } from './config/navigation/dashboardMenu.js'
+
+// Unified widget library (Website + Admin + Company)
+export * from './components/ui/index.js'
+// Operational module shell (CRM, finance, support and retail operations)
+export { default as OperationalWorkspace } from './components/operations/OperationalWorkspace.vue'
+export { default as TicketDeskWorkspace } from './components/operations/TicketDeskWorkspace.vue'

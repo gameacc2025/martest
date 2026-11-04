@@ -1,0 +1,1144 @@
+/* ============================================
+   Telecom Market - Sakai Design System
+   Main Stylesheet
+   ============================================ */
+
+/* PrimeIcons */
+@use 'primeicons/primeicons.css';
+
+/* ============================================
+   Design System — tokens + utilities
+   (semantic aliases over PrimeVue theme vars)
+   ============================================ */
+@use './design-system/tokens.scss';
+@use './design-system/utilities.scss';
+@use './design-system/motion.scss';
+@use './design-system/pages.scss';
+@use './design-system/skill-refinements.scss' as skill;
+@use './design-system/brand-overrides.scss';
+
+/* ============================================
+   Sakai Layout System (from NewCSS)
+   ============================================ */
+@use './NewCSS/layout/layout.scss';
+
+
+/* ============================================
+   Admin Dashboard - Sakai Design Extensions
+   ============================================ */
+
+/* ---- Page Header ---- */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-color);
+        line-height: 1.3;
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .page-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+}
+
+/* ---- Grid System ---- */
+.grid {
+    display: grid;
+    gap: 1.5rem;
+
+    &.grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    &.grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    &.grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 991px) {
+    .grid {
+        &.grid-2,
+        &.grid-3,
+        &.grid-4 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    .grid {
+        &.grid-2,
+        &.grid-3,
+        &.grid-4 {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+/* ---- Stat Cards ---- */
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--surface-card);
+    border-radius: var(--content-border-radius);
+    border: 1px solid var(--surface-border);
+    transition: box-shadow var(--transition-duration);
+
+    &:hover {
+        box-shadow: var(--ds-shadow-md);
+    }
+
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: var(--content-border-radius);
+        flex-shrink: 0;
+
+        i {
+            font-size: 1.75rem;
+        }
+    }
+
+    .stat-content {
+        h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-color);
+            line-height: 1.2;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-color-secondary);
+            font-weight: 500;
+        }
+    }
+}
+
+/* ---- Quick Action Cards ---- */
+.quick-action {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--content-border-radius);
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all var(--transition-duration);
+
+    i {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    &:hover {
+        background: var(--surface-hover);
+        border-color: var(--primary-color);
+        box-shadow: var(--ds-shadow-md);
+    }
+}
+
+/* ---- Data Table (Native) ---- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        tr {
+            th {
+                text-align: start;
+                padding: 1rem 1.25rem;
+                font-weight: 700;
+                color: var(--text-color);
+                background: var(--surface-hover);
+                border-bottom: 2px solid var(--surface-border);
+                font-size: 0.875rem;
+                white-space: nowrap;
+            }
+        }
+    }
+
+    tbody {
+        tr {
+            transition: background-color var(--transition-duration);
+
+            &:hover {
+                background: var(--surface-hover);
+            }
+
+            td {
+                padding: 1rem 1.25rem;
+                border-bottom: 1px solid var(--surface-border);
+                color: var(--text-color);
+                font-size: 0.875rem;
+            }
+
+            &:last-child {
+                td {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+}
+
+/* ---- Loading & Error States ---- */
+.loading-state,
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+
+    i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: var(--text-color-secondary);
+        margin: 0.5rem 0 0 0;
+    }
+}
+
+.error-state {
+    i {
+        color: var(--p-red-500);
+    }
+}
+
+/* ---- Text Utilities ---- */
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.text-muted {
+    color: var(--text-color-secondary);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+    margin-bottom: 2rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.mr-2 {
+    margin-inline-end: 0.5rem;
+}
+
+/* ---- Flex Utilities ---- */
+.flex {
+    display: flex;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.w-full {
+    width: 100%;
+}
+
+/* ---- Overflow ---- */
+.overflow-x-auto {
+    overflow-x: auto;
+}
+
+/* ============================================
+   PrimeVue Component Overrides (Sakai Design)
+   ============================================ */
+
+/* ---- Button ---- */
+.p-button {
+    border-radius: var(--content-border-radius);
+    font-weight: 600;
+    transition: all var(--transition-duration);
+
+    .p-button-label {
+        font-weight: 600;
+    }
+}
+
+/* ---- InputText / InputNumber / Password ---- */
+.p-inputtext,
+.p-inputnumber .p-inputtext,
+.p-password .p-inputtext {
+    border-radius: var(--content-border-radius);
+    height: 2.5rem;
+    transition: border-color var(--transition-duration), box-shadow var(--transition-duration);
+
+    &:hover {
+        border-color: var(--primary-color);
+    }
+
+    &:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 1px var(--primary-color);
+    }
+}
+
+/* ---- Password wrapper ---- */
+.p-password {
+    width: 100%;
+
+    .p-inputtext {
+        width: 100%;
+    }
+}
+
+/* ---- Dropdown / Select ---- */
+.p-dropdown,
+.p-select,
+.p-multiselect {
+    border-radius: var(--content-border-radius);
+    height: 2.5rem;
+
+    .p-dropdown-label,
+    .p-select-label {
+        color: var(--text-color);
+    }
+
+    &:hover {
+        border-color: var(--primary-color);
+    }
+
+    &.p-focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 1px var(--primary-color);
+    }
+}
+
+.p-dropdown-panel,
+.p-select-overlay,
+.p-multiselect-overlay {
+    border-radius: var(--content-border-radius);
+    box-shadow: var(--ds-shadow-md);
+
+    .p-dropdown-item,
+    .p-select-option,
+    .p-multiselect-option {
+        padding: 0.75rem 1rem;
+        border-radius: var(--content-border-radius);
+        color: var(--text-color);
+
+        &:hover {
+            background: var(--surface-hover);
+        }
+
+        &.p-highlight {
+            background: var(--primary-color);
+            color: var(--primary-contrast-color);
+        }
+    }
+}
+
+/* ---- DataTable ---- */
+.p-datatable {
+    .p-datatable-header {
+        background: var(--surface-card);
+        border: none;
+        padding: 1.5rem;
+        border-radius: var(--content-border-radius);
+    }
+
+    .p-datatable-thead > tr > th {
+        background: var(--surface-hover);
+        color: var(--text-color);
+        font-weight: 700;
+        font-size: 0.875rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 2px solid var(--surface-border);
+    }
+
+    .p-datatable-tbody > tr {
+        background: var(--surface-card);
+        transition: background-color var(--transition-duration);
+
+        > td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--surface-border);
+            color: var(--text-color);
+            font-size: 0.875rem;
+        }
+
+        &:hover {
+            background: var(--surface-hover);
+        }
+
+        &:last-child {
+            > td {
+                border-bottom: none;
+            }
+        }
+    }
+
+    .p-datatable-footer {
+        background: var(--surface-card);
+        border: none;
+        padding: 1rem 1.25rem;
+    }
+
+    .p-paginator {
+        background: var(--surface-card);
+        border: none;
+        padding: 1rem 1.25rem;
+        border-radius: 0 0 var(--content-border-radius) var(--content-border-radius);
+
+        .p-paginator-pages .p-paginator-page {
+            border-radius: var(--content-border-radius);
+            margin: 0 0.125rem;
+            min-width: 2.5rem;
+            height: 2.5rem;
+
+            &.p-paginator-page-selected {
+                background: var(--primary-color);
+                color: var(--primary-contrast-color);
+            }
+        }
+    }
+}
+
+/* ---- Dialog ---- */
+.p-dialog {
+    border-radius: var(--content-border-radius);
+    box-shadow: var(--ds-shadow-xl);
+
+    .p-dialog-header {
+        padding: 1.5rem 2rem 1rem 2rem;
+        border-bottom: 1px solid var(--surface-border);
+        border-radius: var(--content-border-radius) var(--content-border-radius) 0 0;
+        background: var(--surface-card);
+
+        .p-dialog-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-color);
+        }
+    }
+
+    .p-dialog-content {
+        padding: 1.5rem 2rem;
+        background: var(--surface-card);
+    }
+
+    .p-dialog-footer {
+        padding: 1rem 2rem 1.5rem 2rem;
+        border-top: 1px solid var(--surface-border);
+        background: var(--surface-card);
+        border-radius: 0 0 var(--content-border-radius) var(--content-border-radius);
+    }
+}
+
+/* ---- Tag ---- */
+.p-tag {
+    border-radius: var(--content-border-radius);
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+
+/* ---- Toolbar ---- */
+.p-toolbar {
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--content-border-radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+
+    .p-toolbar-start,
+    .p-toolbar-center,
+    .p-toolbar-end {
+        gap: 0.75rem;
+    }
+}
+
+/* ---- Card ---- */
+.p-card {
+    border-radius: var(--content-border-radius);
+    border: 1px solid var(--surface-border);
+    background: var(--surface-card);
+    box-shadow: none;
+
+    .p-card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--surface-border);
+    }
+
+    .p-card-title {
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .p-card-content {
+        padding: 1.5rem;
+    }
+
+    .p-card-footer {
+        padding: 0 1.5rem 1.5rem 1.5rem;
+    }
+}
+
+/* ---- Panel ---- */
+.p-panel {
+    border-radius: var(--content-border-radius);
+    border: 1px solid var(--surface-border);
+    background: var(--surface-card);
+
+    .p-panel-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--surface-border);
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .p-panel-content {
+        padding: 1.5rem;
+    }
+}
+
+/* ---- InputSwitch / ToggleSwitch ---- */
+.p-inputswitch,
+.p-toggleswitch {
+    .p-inputswitch-slider {
+        border-radius: 1rem;
+    }
+}
+
+/* ---- Checkbox ---- */
+.p-checkbox {
+    .p-checkbox-box {
+        border-radius: var(--content-border-radius);
+
+        &.p-highlight {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+    }
+}
+
+/* ---- Toast ---- */
+.p-toast {
+    .p-toast-message {
+        border-radius: var(--content-border-radius);
+        box-shadow: var(--ds-shadow-md);
+
+        .p-toast-message-content {
+            padding: 1rem 1.25rem;
+        }
+    }
+}
+
+/* ---- ConfirmDialog ---- */
+.p-confirmdialog {
+    border-radius: var(--content-border-radius);
+}
+
+/* ---- Form Fields ---- */
+.field {
+    margin-bottom: 1.5rem;
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 0.875rem;
+    }
+}
+
+/* ---- Status Filter ---- */
+.status-filter {
+    width: 150px;
+}
+
+/* ---- Permission Group Selector (RoleList) ---- */
+.permission-search-box {
+    margin-bottom: 1rem;
+}
+
+.permission-group-selector {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--content-border-radius);
+    padding: 0.5rem;
+    background: var(--surface-card);
+}
+
+.permission-group {
+    margin-bottom: 0.5rem;
+
+    .permission-group-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: var(--surface-hover);
+        border-radius: var(--content-border-radius);
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-color);
+        transition: background-color var(--transition-duration);
+
+        &:hover {
+            background: var(--surface-border);
+        }
+
+        .permission-group-count {
+            font-size: 0.875rem;
+            color: var(--text-color-secondary);
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .permission-group-items {
+        padding: 0.5rem 0.5rem 0.5rem 1rem;
+    }
+
+    .permission-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--content-border-radius);
+        transition: background-color var(--transition-duration);
+
+        &:hover {
+            background: var(--surface-hover);
+        }
+
+        label {
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-color);
+            margin: 0;
+            font-weight: 500;
+        }
+    }
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+[dir='rtl'] {
+    .p-datatable {
+        .p-datatable-thead > tr > th,
+        .p-datatable-tbody > tr > td {
+            text-align: start;
+        }
+    }
+
+    .p-dialog {
+        .p-dialog-header,
+        .p-dialog-content,
+        .p-dialog-footer {
+            text-align: start;
+        }
+    }
+}
+
+/* ============================================
+   Responsive Admin Panel
+   ============================================ */
+@media (max-width: 991px) {
+    .layout-wrapper.layout-static {
+        .layout-sidebar {
+            position: fixed;
+            top: 0;
+            inset-inline-start: 0;
+            height: 100vh;
+            z-index: 999;
+            transform: translateX(-100%);
+            transition: transform var(--layout-section-transition-duration);
+
+            &[style*='display: block'],
+            .layout-mobile-active & {
+                transform: translateX(0);
+            }
+        }
+
+        .layout-main-container {
+            padding: 6rem 1rem 0 1rem;
+        }
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .page-header-actions {
+            width: 100%;
+        }
+    }
+}
+
+@media (max-width: 767px) {
+    .layout-wrapper.layout-static {
+        .layout-main-container {
+            padding: 5rem 0.5rem 0 0.5rem;
+        }
+    }
+
+    .stat-card {
+        padding: 1rem;
+        gap: 1rem;
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+
+            i {
+                font-size: 1.5rem;
+            }
+        }
+
+        .stat-content {
+            h3 {
+                font-size: 1.5rem;
+            }
+        }
+    }
+
+    .p-datatable {
+        .p-datatable-thead > tr > th,
+        .p-datatable-tbody > tr > td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    .p-toolbar {
+        padding: 1rem;
+
+        .p-toolbar-start,
+        .p-toolbar-center,
+        .p-toolbar-end {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+    }
+}
+
+/* ============================================
+   Dark Mode Admin Panel Overrides
+   ============================================ */
+:root[class*='app-dark'] {
+    .layout-wrapper.layout-static {
+        .layout-topbar {
+            .layout-topbar-logo span {
+                color: var(--text-color);
+            }
+        }
+
+        .page-header {
+            h1, h2, h3 {
+                color: var(--text-color);
+            }
+        }
+
+        .stat-card {
+            .stat-icon {
+                background-color: var(--soft-background, var(--surface-hover));
+                color: var(--primary-color);
+            }
+        }
+    }
+
+    .quick-action {
+        i {
+            color: var(--primary-color);
+        }
+    }
+}
+
+
+/* ============================================================
+   Cross-application enterprise UI layer
+   Applied to Admin, Company and Website through the shared entry.
+   Semantic tokens preserve the Telecom brand and dark-mode mapping.
+   ============================================================ */
+
+:where(.p-card, .p-panel, .p-datatable, .p-dialog, .p-popover, .p-menu) {
+  border-color: var(--ds-color-border);
+}
+
+.p-card,
+.p-panel {
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.p-card .p-card-title,
+.p-panel .p-panel-title {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+.p-toolbar {
+  gap: var(--ds-space-3);
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+}
+
+.p-inputtext,
+.p-textarea,
+.p-select,
+.p-multiselect,
+.p-inputnumber,
+.p-password,
+.p-datepicker,
+.p-autocomplete {
+  border-radius: var(--ds-radius-md);
+}
+
+.p-inputtext,
+.p-textarea {
+  color: var(--ds-color-text);
+}
+
+.p-inputtext:focus,
+.p-textarea:focus {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 14%, transparent);
+}
+
+.p-button {
+  border-radius: var(--ds-radius-md);
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link) {
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ds-navy) 10%, transparent);
+}
+
+.p-datatable {
+  color: var(--ds-color-text);
+  border-radius: var(--ds-radius-lg);
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  transition: background-color var(--ds-transition-fast);
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--ds-color-surface-hover);
+}
+
+.p-paginator {
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
+}
+
+.p-dialog {
+  border-radius: var(--ds-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-xl);
+}
+
+.p-dialog .p-dialog-header {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  border-bottom: 1px solid var(--ds-color-border);
+}
+
+.p-dialog .p-dialog-content {
+  padding: var(--ds-space-6);
+}
+
+.p-dialog .p-dialog-footer {
+  padding: var(--ds-space-4) var(--ds-space-6);
+  border-top: 1px solid var(--ds-color-border);
+}
+
+.p-tag,
+.p-badge {
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+.p-message {
+  border-radius: var(--ds-radius-lg);
+}
+
+.p-tabs,
+.p-tablist {
+  border-color: var(--ds-color-border);
+}
+
+.p-tab {
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+@media (max-width: 640px) {
+  .p-dialog {
+    width: calc(100vw - 1.5rem) !important;
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .p-dialog .p-dialog-header,
+  .p-dialog .p-dialog-content,
+  .p-dialog .p-dialog-footer {
+    padding-inline: var(--ds-space-4);
+  }
+
+  .p-toolbar {
+    align-items: stretch;
+  }
+}
+
+/* Emit the cross-app refinement layer after all legacy Sakai overrides. */
+@include skill.apply();
+
+
+/* ============================================================
+   ADMIN + COMPANY WORKSPACE — complete visual refinement layer
+   Owner-approved reference: vivid sky blue, turquoise, navy rail,
+   cool white surfaces and compact Persian typography.
+   ============================================================ */
+:root {
+  --workspace-brand: #0790de;
+  --workspace-brand-hover: #0679bd;
+  --workspace-turquoise: #09d3d1;
+  --workspace-navy: #092643;
+  --workspace-ink: #0f2d4d;
+  --workspace-muted: #6a7fa0;
+  --workspace-line: #e5ebf6;
+  --workspace-canvas: #eaeef9;
+  --workspace-surface: #fff;
+}
+html { font-size: 15px; }
+body { background: var(--workspace-canvas); color: var(--workspace-ink); font-size: .9375rem; line-height: 1.55; }
+body, button, input, textarea, select, .p-component { font-family: 'Vazirmatn','Inter',system-ui,sans-serif; }
+.dash-layout { background: var(--workspace-canvas) !important; }
+.dash-layout-main { min-height: 100vh; }
+.dash-layout-content { max-width: 1800px; padding: 0 clamp(1rem,2vw,2rem) 2rem; }
+.dash-layout-page { padding-top: .65rem; }
+.dash-layout-sidebar { background: var(--workspace-navy); }
+.dash-sidebar { background: linear-gradient(165deg,#193b5b 0%,#092643 52%,#10243b 100%) !important; color: #eaf5fb; }
+.dash-sidebar-brand { min-height: 4.6rem; padding: .85rem 1rem; border-bottom: 1px solid rgba(229,244,251,.12); }
+.dash-sidebar-brand-text { font-size: .98rem; font-weight: 750; color: #fff; }
+.dash-sidebar-brand-tagline { color: #a9c5d7; font-size: .65rem; }
+.dash-sidebar-section { color: #8eafc4; font-size: .66rem; letter-spacing: .04em; }
+.dash-sidebar-nav { padding: .65rem .7rem 1.5rem; }
+.dash-sidebar-list,.dash-sidebar-sublist { gap: .24rem; }
+.dash-sidebar-link { min-height: 2.65rem; padding: .58rem .8rem; border-radius: .75rem; color: #dcebf4; font-size: .84rem; }
+.dash-sidebar-link-icon { font-size: .98rem; color: #a8c4d7; }
+.dash-sidebar-link:hover { background: rgba(255,255,255,.075); color: #fff; }
+.dash-sidebar-link--active { color: #fff !important; background: linear-gradient(100deg,rgba(7,144,222,.25),rgba(9,211,209,.12)) !important; box-shadow: inset 3px 0 #0790de, inset 0 0 0 1px rgba(7,144,222,.18); }
+.dash-sidebar-link--active .dash-sidebar-link-icon { color: #58d0ec !important; }
+.dash-sidebar-active-bar { background: #0790de; }
+.dash-sidebar-badge { background: #09d3d1; color: #fff; }
+.dash-header { position: sticky; top: 0; z-index: 30; min-height: 4.2rem; padding-inline: clamp(1rem,2vw,2rem); background: rgba(255,255,255,.94) !important; border-bottom: 1px solid var(--workspace-line); box-shadow: 0 3px 16px rgba(25,57,82,.045) !important; backdrop-filter: blur(14px); }
+.dash-header-workspace { border: 1px solid #e5ebf6; background: #f6fafc; border-radius: .85rem; }
+.dash-header-workspace-mark { background: #e3f4fd !important; color: #0679bd !important; }
+.dash-header-workspace-label { color: #29465c; font-size: .83rem; }
+.dash-header-icon-btn:hover { background: #eaf8fb !important; color: #0679bd !important; }
+.dash-header-user { border-color: #e5ebf6; background: #fff; border-radius: .85rem; }
+.dash-layout-overlay { backdrop-filter: blur(3px); }
+.workspace-page-heading { margin: .4rem 0 1.15rem; padding: 1rem 1.15rem; border: 1px solid #e0ebf1; border-radius: 1rem; background: linear-gradient(110deg,#fff 0%,#f2f8fd 100%); box-shadow: 0 3px 14px rgba(28,69,94,.035); }
+.workspace-page-heading-icon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: .8rem; background: #e3f4fd; color: #0679bd; font-size: 1rem; }
+.workspace-page-heading h1 { font-size: 1.22rem; letter-spacing: -.02em; color: #263f53; }
+.workspace-page-heading p { font-size: .79rem; color: #6a7fa0; }
+.admin-dashboard-hero,.company-dashboard-hero { position: relative; overflow: hidden; border: 1px solid rgba(7,144,222,.2); border-radius: 1.15rem; background: linear-gradient(112deg,#173d5b 0%,#1a5573 58%,#167d91 100%) !important; box-shadow: 0 12px 28px rgba(24,74,103,.12); }
+.admin-dashboard-hero::after,.company-dashboard-hero::after { content:''; position:absolute; width:18rem; height:18rem; inset-inline-end:-5rem; top:-10rem; border:1px solid rgba(255,255,255,.12); border-radius:50%; box-shadow:0 0 0 2rem rgba(255,255,255,.025),0 0 0 4rem rgba(255,255,255,.02); pointer-events:none; }
+.admin-dashboard-hero h1,.company-dashboard-hero h1 { font-size:1.55rem !important; color:#f7fbff; }
+.admin-dashboard-hero p,.company-dashboard-hero p { color:#d2eaf2; font-size:.85rem; }
+.admin-dashboard-secondary-action,.company-dashboard-secondary-action { border-color:rgba(255,255,255,.34); background:rgba(255,255,255,.055); color:#f7fbff; }
+.admin-dashboard-secondary-action:hover,.company-dashboard-secondary-action:hover { background:rgba(255,255,255,.14); }
+.admin-dashboard-hero .p-button,.company-dashboard-hero .p-button { background:#0790de; border-color:#0790de; color:#f7fbff; }
+.admin-dashboard-kpis,.cd-kpis { gap: .85rem; }
+.admin-dashboard-kpis > *, .cd-kpis > * { min-width:0; }
+.p-card,.p-panel { border:1px solid var(--workspace-line); border-radius:1rem; background:#fff; box-shadow:0 3px 14px rgba(25,57,82,.045); }
+.p-card .p-card-body { padding:1.1rem; }
+.p-card .p-card-title,.p-panel .p-panel-title { color:#2a4357; font-size:.95rem; font-weight:700; }
+.p-toolbar { padding:.75rem .9rem; border:1px solid var(--workspace-line); border-radius:.9rem; background:#fff; }
+.p-inputtext,.p-textarea,.p-select,.p-multiselect,.p-inputnumber-input,.p-password-input { min-height:2.55rem; border-color:#e2e8f4; border-radius:.7rem; background:#fff; color:#30495d; font-size:.83rem; }
+.p-inputtext::placeholder,.p-textarea::placeholder { color:#9aabb7; }
+.p-inputtext:enabled:focus,.p-textarea:enabled:focus,.p-select:not(.p-disabled).p-focus,.p-multiselect:not(.p-disabled).p-focus { border-color:#0790de; box-shadow:0 0 0 3px rgba(7,144,222,.13); }
+.p-button { min-height:2.45rem; padding:.58rem .9rem; border-radius:.72rem; font-size:.82rem; font-weight:650; }
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success) { background:#0790de; border-color:#0790de; color:#f7fbff; box-shadow:0 3px 10px rgba(7,144,222,.18); }
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):enabled:hover { background:#0679bd; border-color:#0679bd; color:#fff; }
+.p-button.p-button-secondary { background:#09d3d1; border-color:#09d3d1; color:#f7fffe; }
+.p-button.p-button-secondary:enabled:hover { background:#07888e; border-color:#07888e; }
+.p-button.p-button-outlined { color:#0679bd; border-color:#0790de; background:transparent; }
+.p-button.p-button-text { color:#0679bd; }
+.p-datatable { overflow:hidden; border:1px solid var(--workspace-line); border-radius:.9rem; background:#fff; }
+.p-datatable .p-datatable-header { padding:.85rem 1rem; border-bottom:1px solid var(--workspace-line); background:#fff; }
+.p-datatable .p-datatable-thead > tr > th { padding:.8rem .9rem; border-color:#e8eff3; background:#f5f9fb; color:#6a7fa0; font-size:.73rem; font-weight:700; }
+.p-datatable .p-datatable-tbody > tr > td { padding:.78rem .9rem; border-color:#edf2f5; color:#40586b; font-size:.79rem; }
+.p-datatable .p-datatable-tbody > tr:hover { background:#f2f8fd; }
+.p-paginator { padding:.55rem .8rem; border-color:var(--workspace-line); background:#fff; }
+.p-tag,.p-badge { font-size:.7rem; font-weight:650; }
+.p-dialog { border:1px solid #e5ebf6; border-radius:1rem; overflow:hidden; box-shadow:0 20px 60px rgba(18,43,66,.18); }
+.p-dialog .p-dialog-header { padding:1rem 1.25rem; background:#f8fbfc; }
+.p-dialog .p-dialog-title { color:#29465b; font-size:.98rem; font-weight:700; }
+.p-dialog .p-dialog-content { padding:1.15rem 1.25rem; }
+.p-dialog .p-dialog-footer { padding:.85rem 1.25rem; background:#fbfdfe; }
+.field { margin-bottom:1rem; }
+.field > label,.p-float-label label { color:#61798a; font-size:.78rem; font-weight:600; }
+.page-header h1,.workspace-page-heading h1 { font-weight:750; }
+h1 { font-size:1.55rem; line-height:1.4; }
+h2 { font-size:1.25rem; line-height:1.45; }
+h3 { font-size:1.08rem; line-height:1.5; }
+small,.text-sm { font-size:.78rem; }
+@media(max-width:991px) { .dash-layout-content { padding-inline:1rem; } .dash-header { padding-inline:1rem; } }
+@media(max-width:640px) { .dash-layout-content { padding-inline:.75rem; } .workspace-page-heading { padding:.85rem; } .admin-dashboard-hero h1,.company-dashboard-hero h1 { font-size:1.3rem !important; } .p-toolbar { align-items:stretch; } }
+@media(prefers-reduced-motion:reduce) { .dash-layout *, .dash-layout *::before, .dash-layout *::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; } }
+
+
+/* ============================================================
+   Reference dashboard system — Admin + Company workspaces only
+   ============================================================ */
+.dash-layout {
+  --ds-ref-cyan:#27d3ee;
+  --ds-ref-turquoise:#12c8b8;
+  --ds-ref-blue:#278de8;
+  --ds-ref-violet:#8064e9;
+  --ds-ref-pink:#ed76a5;
+  --ds-ref-ink:#0f2d4d;
+  --ds-ref-muted:#7188a2;
+  --ds-ref-canvas:#f2f6fc;
+  --ds-ref-line:#e2e8f4;
+  --ds-ref-shadow:0 4px 16px rgba(30,77,128,.055);
+  background:var(--ds-ref-canvas)!important;
+  color:var(--ds-ref-ink);
+  font-family:'Vazirmatn',Tahoma,sans-serif;
+  font-size:13px;
+}
+.dash-layout-main{background:var(--ds-ref-canvas)}
+.dash-layout-content{width:100%;max-width:none}
+.dash-layout-page{color:var(--ds-ref-ink)}
+.dash-layout .page-header{margin:.35rem 0 .85rem!important}
+.dash-layout .page-header h1,.dash-layout .page-header h2{color:var(--ds-ref-ink)!important;font-size:1.22rem!important;font-weight:800!important}
+.dash-layout .page-header h3{color:var(--ds-ref-ink)!important;font-size:1rem!important}
+.dash-layout .page-header p,.dash-layout .page-description{color:var(--ds-ref-muted);font-size:.78rem}
+.dash-layout .p-card,.dash-layout .p-panel,.dash-layout .p-datatable{border:1px solid var(--ds-ref-line);border-radius:14px;background:#fff;box-shadow:var(--ds-ref-shadow)}
+.dash-layout .p-card .p-card-body{padding:1rem 1.1rem}
+.dash-layout .p-card .p-card-title,.dash-layout .p-panel .p-panel-title{color:var(--ds-ref-ink);font-size:.9rem;font-weight:800}
+.dash-layout .p-panel .p-panel-header{padding:.8rem 1rem;border-bottom:1px solid #eef2fb;background:#fff}
+.dash-layout .p-panel .p-panel-content{padding:1rem}
+.dash-layout .p-button{border-radius:9px;font-family:inherit;font-size:.78rem;font-weight:700}
+.dash-layout .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):not(.p-button-warn){border-color:var(--ds-ref-cyan);background:linear-gradient(105deg,#08a9c5,#27d3ee);color:#fff;box-shadow:0 4px 12px rgba(18,184,208,.16)}
+.dash-layout .p-button.p-button-outlined{border-color:#9bdce8;color:#0679bd;background:#f4fcfe}
+.dash-layout .p-button.p-button-text{color:#168fb3}
+.dash-layout .p-button:focus-visible{outline:2px solid #27d3ee;outline-offset:2px}
+.dash-layout .p-inputtext,.dash-layout .p-textarea,.dash-layout .p-select,.dash-layout .p-multiselect,.dash-layout .p-datepicker-input,.dash-layout .p-inputnumber-input,.dash-layout .p-password-input{min-height:2.55rem;border:1px solid #d9e5f0;border-radius:9px;background:#fbfdff;color:var(--ds-ref-ink);font-family:inherit;font-size:.78rem}
+.dash-layout .p-inputtext:focus,.dash-layout .p-textarea:focus,.dash-layout .p-select:focus,.dash-layout .p-multiselect:focus,.dash-layout .p-inputnumber-input:focus{border-color:#64cddd;box-shadow:0 0 0 3px rgba(18,184,208,.11)}
+.dash-layout .field label,.dash-layout .form-label{color:#526f8c;font-size:.76rem;font-weight:700}
+.dash-layout .p-datatable .p-datatable-thead>tr>th{padding:.75rem .85rem;border-color:#e8eff6;background:#f5f8fc;color:#5e7894;font-size:.72rem;font-weight:800;white-space:nowrap}
+.dash-layout .p-datatable .p-datatable-tbody>tr>td{padding:.72rem .85rem;border-color:#edf2f7;color:#294766;font-size:.76rem}
+.dash-layout .p-datatable .p-datatable-tbody>tr:hover{background:#f5fbfd}
+.dash-layout .p-paginator{padding:.55rem;background:#fff}
+.dash-layout .p-tag{border-radius:999px;font-size:.67rem;font-weight:700}
+.dash-layout .p-badge{font-size:.65rem}
+.dash-layout .p-toolbar{gap:.65rem;padding:.75rem .9rem;border:1px solid var(--ds-ref-line);border-radius:12px;background:#fff}
+.dash-layout .p-breadcrumb{padding:.35rem 0;background:transparent;border:0}
+.dash-layout .grid{gap:1rem}
+.dash-layout .field{margin-bottom:1rem}
+.dash-layout .p-divider{border-color:#e7eef6}
+.dash-layout .p-message{border-radius:10px;font-size:.76rem}
+.dash-layout .p-dialog{overflow:hidden;border-radius:15px}
+.dash-layout .p-dialog .p-dialog-header{padding:1rem 1.2rem;color:var(--ds-ref-ink);font-size:.95rem;font-weight:800}
+.dash-layout .p-dialog .p-dialog-content{padding:1.1rem 1.2rem}
+.dash-layout .p-dialog .p-dialog-footer{padding:.8rem 1.2rem;border-top:1px solid #eef2fb}
+.dash-layout .admin-dashboard,.dash-layout .company-dashboard{display:flex;flex-direction:column;gap:1rem}
+.dash-layout .admin-dashboard-hero,.dash-layout .company-dashboard-hero{min-height:13.5rem;padding:1.7rem 2rem;border:0;border-radius:16px;background:radial-gradient(circle at 86% 34%,rgba(255,255,255,.26),transparent 17%),radial-gradient(circle at 78% 110%,rgba(14,220,226,.38),transparent 36%),linear-gradient(112deg,#3159bd 0%,#168fc7 52%,#11b6cf 100%);box-shadow:0 8px 22px rgba(28,112,180,.14)}
+.dash-layout .admin-dashboard-hero h1,.dash-layout .company-dashboard-hero h1{font-size:1.45rem;font-weight:900}
+.dash-layout .admin-dashboard-hero p,.dash-layout .company-dashboard-hero p{max-width:34rem;color:rgba(255,255,255,.9);font-size:.82rem}
+.dash-layout .admin-dashboard-hero .p-button,.dash-layout .company-dashboard-hero .p-button{min-height:2.55rem;border-color:#13c9d8;border-radius:999px;background:linear-gradient(100deg,#08c0cb,#4ce0e5);color:#073b59;box-shadow:none}
+.dash-layout .admin-dashboard-secondary-action,.dash-layout .company-dashboard-secondary-action{border-radius:999px;font-size:.75rem}
+.dash-layout .admin-dashboard-kpis,.dash-layout .cd-kpis{gap:.75rem!important}
+.dash-layout .admin-dashboard-analytics,.dash-layout .company-dashboard-analytics{min-width:0}
+.dash-layout .admin-dashboard-workspace,.dash-layout .company-dashboard-operations{gap:1rem}
+.dash-layout .admin-dashboard-grid,.dash-layout .cd-grid{gap:1rem}
+.dash-layout .admin-dashboard-hint,.dash-layout .cd-hint{color:#8499ae;font-size:.68rem}
+.dash-layout .analytics-chart-label{color:#7289a4;font-size:.68rem}
+.dash-layout .analytics-chart-value{color:#476581;font-size:.68rem}
+.dash-layout .analytics-chart-bar{border-radius:7px 7px 0 0}
+@media(max-width:991px){.dash-layout .dash-layout-content{padding-inline:.9rem}.dash-layout .admin-dashboard-hero,.dash-layout .company-dashboard-hero{min-height:11rem;padding:1.2rem}}
+@media(max-width:575px){.dash-layout{font-size:12px}.dash-layout .dash-layout-content{padding-inline:.65rem}.dash-layout .p-card .p-card-body{padding:.8rem}}

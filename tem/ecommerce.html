@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl"><head><meta charset="utf-8"><title>Ecommerce</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.ec{display:grid;grid-template-columns:1fr 400px;gap:24px;align-items:start}
+.ec-l>*{margin-bottom:24px}.ec-r>*{margin-bottom:24px}
+.ec-s4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.ec-st{padding:20px;display:flex;gap:16px;height:103px;direction:ltr;text-align:left}
+.ec-st .i{width:40px;height:40px;border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+.ec-st small{display:block;color:#8a90a6;font-size:14px;margin-bottom:6px}.ec-st b{font-size:21px;font-weight:500;display:block;margin-bottom:8px}.ec-st em{font-style:normal;font-size:12px;color:#8a90a6}
+.ec-r2{display:grid;grid-template-columns:1.9fr 1fr;gap:24px}
+.ec-r3{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:24px}
+.ec-c{padding:20px}.ec-c h3{font-size:19px;font-weight:400;margin-bottom:16px;direction:ltr;text-align:left}
+.ec-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;direction:ltr}
+.ec-hd h3{margin:0}
+.seg{display:flex;font-size:13px}.seg span{padding:7px 14px;background:#e8e6fb;color:#7c6cf6}.seg span.on{background:#7c6cf6;color:#fff}
+.seg+.x{margin-left:10px}
+.br{display:flex;gap:14px;align-items:center;padding:11px 0;direction:ltr}
+.br .ic{width:38px;height:38px;border-radius:50%;background:#f4f5fa;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.br .m{flex:1;font-size:15px;font-weight:500}.br .m small{display:block;color:#8a90a6;font-size:13px;font-weight:400;margin-top:3px}
+.br .n{width:110px;text-align:right;font-size:17px}.br .n i{display:block;height:4px;border-radius:2px;margin-bottom:4px}
+.ro{display:flex;gap:12px;align-items:center;padding:11px 0;direction:ltr}.ro .a{width:40px;height:40px;border-radius:50%;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;font-size:13px}
+.ro .m{flex:1;font-size:15px;font-weight:500}.ro .m small{display:block;color:#8a90a6;font-size:13px;font-weight:400;margin-top:4px}
+.ro .p{text-align:right;font-size:15px;font-weight:500}.ro .p span{font-size:11px;font-weight:400;padding:3px 8px;border-radius:3px;display:inline-block;margin-top:6px}
+.fn{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:14px}.fn div{background:#8878f7;color:#fff;text-align:center;font-size:12px;font-weight:600;padding:9px 0;border-radius:3px}
+.ts{display:flex;gap:12px;align-items:center;padding:9px 0;direction:ltr}.ts .im{width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none}
+.ts .m{flex:1;font-size:15px;font-weight:500}.ts .m small{display:block;color:#8a90a6;font-size:13px;font-weight:400;margin-top:4px}
+.ts .p{text-align:right;font-size:15px}.ts .p small{display:block;color:#8a90a6;font-size:13px;margin-top:4px}
+.dc{background:linear-gradient(120deg,#f7d9ef,#e3d4fb 55%,#d6e0fb);padding:20px;height:190px;border-radius:4px;direction:ltr;text-align:left;position:relative}
+.dc b{font-size:19px;font-weight:500;margin-left:12px}.dc .tg{position:absolute;top:20px;right:16px;background:#7c6cf6;color:#fff;font-size:10px;padding:3px 9px;border-radius:10px}
+.dc .no{margin:20px 0 26px;font-size:16px;letter-spacing:2px}.dc .nm{font-size:15px;margin-bottom:24px}.dc .ex{font-size:14px}
+.dc .mc{position:absolute;right:18px;bottom:22px;display:flex}.dc .mc i{width:20px;height:20px;border-radius:50%}
+.sg2{display:flex;justify-content:center;margin:14px 0 22px}
+.sgr{border:1px solid #eceef5;border-radius:4px;direction:ltr}.sgr div{display:flex;justify-content:space-between;padding:12px 14px;font-size:14px;border-bottom:1px solid #f0f1f6}.sgr div:last-child{border:0}
+.sgr i{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
+.em{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;direction:ltr}.em div{border:1px solid #eceef5;border-radius:4px;height:70px;display:flex;align-items:flex-start;justify-content:center;font-size:36px;padding-top:6px}
+</style></head>
+<body data-layout="myron" data-menu="Dashboards>Ecommerce"><div class="page">
+<div class="head"><div><h1>Ecommerce</h1><div class="crumb">Dashboards <i>«</i> <b>Ecommerce</b></div></div>
+<div class="btns"><button class="btn btn-up">Plan Upgrade</button><button class="btn btn-exp">Export Report</button></div></div>
+<div class="ec"><div class="ec-l">
+<div class="ec-s4">
+<div class="card ec-st"><div class="i" style="background:#8878f7">🛍</div><div><small>Total Sales</small><b>25,27,543.00</b><em><span class="up">↑ 0.45%</span> This Year</em></div></div>
+<div class="card ec-st"><div class="i" style="background:#ff6a3d">$</div><div><small>Total Revenue</small><b>$1.85M</b><em><span class="down">↓ 1.75%</span> This Year</em></div></div>
+<div class="card ec-st"><div class="i" style="background:#22c55e">🛒</div><div><small>Total Orders</small><b>10,25,327</b><em><span class="down">↓ 25.96%</span> This Year</em></div></div>
+<div class="card ec-st"><div class="i" style="background:#f5a623">☺</div><div><small>Total Customers</small><b>320K</b><em><span class="up">↑ 12.45%</span> This Year</em></div></div></div>
+<div class="ec-r2">
+<div class="card ec-c"><div class="ec-hd"><h3>Revenue Analytics</h3><div style="display:flex;gap:10px;align-items:center"><div class="seg"><span class="on">Day</span><span>Week</span><span>Month</span><span>Year</span></div><span class="seg" style="display:flex"><span style="background:#f4f5fa;color:#1d2130">Export ⇗</span></span></div></div>
+<div style="text-align:center;font-size:12px;margin-top:8px;color:#1d2130"><span style="color:#7c6cf6">●</span> Expenses &nbsp;&nbsp; <span style="color:#ff6a3d">●</span> Revenue</div>
+<svg id="rev" viewBox="0 0 760 300" style="width:100%;direction:ltr"></svg></div>
+<div class="card ec-c"><h3>Visitors By Browser</h3>
+<div class="br"><span class="ic">🌐</span><div class="m">Google Chrome<small>Google Inc</small></div><div class="n"><i style="background:#8878f7;width:42%;margin-left:auto"></i>5,120</div></div>
+<div class="br"><span class="ic">🧭</span><div class="m">Safari<small>Apple Inc.</small></div><div class="n"><i style="background:#ff6a3d;width:20%;margin-left:auto"></i>1,760</div></div>
+<div class="br"><span class="ic">🦊</span><div class="m">Firefox<small>Mozilla Corporation</small></div><div class="n"><i style="background:#f5a623;width:22%;margin-left:auto"></i>930</div></div>
+<div class="br"><span class="ic">⭕</span><div class="m">Opera<small>Opera Software</small></div><div class="n"><i style="background:#2bb3e8;width:55%;margin-left:auto"></i>610</div></div>
+<div class="br"><span class="ic">🌀</span><div class="m">Microsoft Edge<small>Microsoft Corporation</small></div><div class="n"><i style="background:#22c55e;width:20%;margin-left:auto"></i>310</div></div></div></div>
+<div class="ec-r3">
+<div class="card ec-c"><div class="ec-hd"><h3>Recent Orders</h3><span class="btn" style="background:#f4f5fa;padding:7px 10px;font-size:12px">View All</span></div>
+<div class="ro"><span class="a" style="background:#e8358a">AS</span><div class="m">Ananya Sharma<small>13,Apr 2025</small></div><div class="p">$249.99<br><span style="background:#dcf5e6;color:#22b866">Delivered</span></div></div>
+<div class="ro"><span class="a" style="background:#6b3a2a">JC</span><div class="m">John Carter<small>13,Apr 2025</small></div><div class="p">$129.00<br><span style="background:#fdf1df;color:#f5a623">Pending</span></div></div>
+<div class="ro"><span class="a" style="background:#8a5fc9">RP</span><div class="m">Riya Patel<small>12,Apr 2025</small></div><div class="p">$78.50<br><span style="background:#dff1fa;color:#2bb3e8">Shipped</span></div></div>
+<div class="ro"><span class="a" style="background:#7a4a2e">AM</span><div class="m">Akash Mehta<small>12,Apr 2025</small></div><div class="p">$320.00</div></div></div>
+<div class="card ec-c"><h3>Top Product Categories</h3><div class="fn"><div style="width:100%">Electronics</div><div style="width:80%">Fashion</div><div style="width:68%">Home &amp; Kitchen</div><div style="width:56%">Personal Care</div><div style="width:46%">Sports &amp; Fitness</div><div style="width:36%">Baby Products</div></div></div>
+<div class="card ec-c"><h3>Top Selling Products</h3>
+<div class="ts"><span class="im" style="background:#fde9b5">🎧</span><div class="m">Wireless Headphones<small>Electronics</small></div><div class="p">1,240 - Sales<small>$24,800</small></div></div>
+<div class="ts"><span class="im" style="background:#e4eadd">🧴</span><div class="m">Organic Face Cream<small>Beauty &amp; Health</small></div><div class="p">980 - Sales<small>$13,720</small></div></div>
+<div class="ts"><span class="im" style="background:#e1e3ea">⌚</span><div class="m">Smart Fitness Watch<small>Wearables</small></div><div class="p">860 - Sales<small>$25,800</small></div></div>
+<div class="ts"><span class="im" style="background:#ead9f2">👟</span><div class="m">Casual Sneakers<small>Footwear</small></div><div class="p">790 - Sales<small>$18,170</small></div></div></div>
+</div></div>
+<div class="ec-r">
+<div class="dc"><div><span style="font-size:24px;color:#d99a1f">▤</span><b>Debit Card</b></div><span class="tg">Max Bank</span><div class="no">**** **** **** ****</div><div class="nm">ELISA GIBSON ANABELLA</div><div class="ex">Exp Date:05/27</div><div class="mc"><i style="background:#2bb3e8"></i><i style="background:#f0453a;margin-left:-8px"></i></div></div>
+<div class="card ec-c"><h3>Customer Segmentation</h3><div class="sg2"><div class="rg" style="--s:190px;--t:14px;--g:conic-gradient(#8878f7 0 50%,#00c853 50% 91%,#fbb53c 91% 100%)"><div class="ctr" style="text-align:center"><small style="font-size:12px">Total Customers</small><b style="display:block;font-size:22px;font-weight:500;margin-top:4px">36347</b></div></div></div>
+<div class="sgr"><div><span><i style="background:#8878f7"></i>New Customers <span class="up" style="font-size:12px">↑4.23%</span></span><b style="font-weight:500">18,235</b></div><div><span><i style="background:#22c55e"></i>Old Customers <span class="up" style="font-size:12px">↑8.96%</span></span><b style="font-weight:500">12,743</b></div><div><span><i style="background:#f5a623"></i>Returning Customers <span class="down" style="font-size:12px">↓6.46%</span></span><b style="font-weight:500">5,369</b></div></div></div>
+<div class="card ec-c"><div class="ec-hd"><h3>Customers Satisfaction</h3><a style="font-size:13px">View report →</a></div><div style="color:#8a90a6;font-size:14px;direction:ltr">Total Customers - <b style="color:#1d2130;font-weight:500">25,765</b></div><div class="em"><div>😀</div><div>🙂</div><div>😡</div></div></div>
+</div></div></div>
+<script src="charts.js"></script>
+<script>
+var A=[118,38,70,70,38,98,70,30,35,38,15,32],B=[100,48,55,25,50,40,42,58,55,35,50,60],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],s='';
+for(var g=0;g<=6;g++){var y=260-g*40;s+='<line x1="50" x2="750" y1="'+y+'" y2="'+y+'" stroke="#eef0f6"/><text x="38" y="'+(y+4)+'" font-size="11" fill="#8a90a6" text-anchor="end">'+(g*20)+'</text>'}
+M.forEach(function(m,i){s+='<text x="'+(60+i*62)+'" y="282" font-size="11" fill="#8a90a6" text-anchor="middle">'+m+'</text>'});
+var pa=pts(A,60,742,20,260,120),pb=pts(B,60,742,20,260,120);
+s+='<path d="'+smooth(pa)+' L742,260 L60,260Z" fill="#8878f7" opacity=".1"/><path d="'+smooth(pa)+'" fill="none" stroke="#8878f7" stroke-width="2"/><path d="'+smooth(pb)+'" fill="none" stroke="#ff6a3d" stroke-width="1.5" stroke-dasharray="4 3"/>';
+document.getElementById('rev').innerHTML=s;
+</script>
+<script src="layout.js"></script></body></html>

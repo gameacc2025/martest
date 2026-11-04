@@ -1,0 +1,28 @@
+{
+  "name": "telecom-marketplace",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev:website": "pnpm --filter @telecom/website dev",
+    "dev:company": "pnpm --filter @telecom/company dev",
+    "dev:admin": "pnpm --filter @telecom/admin dev",
+    "dev:all": "pnpm run --parallel dev:website dev:company dev:admin",
+    "build": "pnpm run build:website && pnpm run build:company && pnpm run build:admin",
+    "build:website": "pnpm --filter @telecom/website build",
+    "build:company": "pnpm --filter @telecom/company build",
+    "build:admin": "pnpm --filter @telecom/admin build",
+    "test": "vitest run && node --test packages/auth/sessionHandoff.test.js",
+    "test:watch": "vitest",
+    "test:shared-ui": "pnpm --filter @telecom/shared-ui test",
+    "test:shared-core": "pnpm --filter @telecom/shared-core test",
+    "test:api-client": "pnpm --filter @telecom/api-client test",
+    "test:auth": "pnpm --filter @telecom/auth test",
+    "architecture:graph": "node scripts/generate-architecture-graph.mjs --write",
+    "architecture:check": "node scripts/generate-architecture-graph.mjs --check"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "2.5.1",
+    "happy-dom": "21.0.4",
+    "vitest": "5.0.5"
+  }
+}

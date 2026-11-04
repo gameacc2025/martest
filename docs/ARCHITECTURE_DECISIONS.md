@@ -1,0 +1,48 @@
+# Architecture Decisions (FROZEN)
+
+> این تصمیم‌ها **قطعی و غیرقابل‌بازبینی** هستند. در تمام Sprintها باید رعایت شوند.
+> از این لحظه هیچ تحلیل یا بازبینی مجدد معماری انجام نمی‌شود؛ فقط بر اساس این تصمیم‌ها و گزارش نهایی کدنویسی می‌شود.
+
+## Frozen Rules
+
+### AD-1 — CUSTOMER فقط خریدار است
+- CUSTOMER هیچ Inquiry ثبت **نمی‌کند**.
+- نقش `CUSTOMER_USER` نباید permissionهای `inquiries.create` یا `leads.create` داشته باشد.
+- هیچ Route یا UI برای ثبت Inquiry توسط CUSTOMER نباید فعال باشد.
+
+### AD-2 — هر User فقط متعلق به یک Company است
+- Multi Company Membership وجود **ندارد**.
+- رابطه User→Company یک‌به‌چند از سمت Company است (هر User حداکثر یک `companyId`).
+- هیچ ساختار عضویت چندگانه (membership table چند‌شرکتی) اضافه نمی‌شود.
+
+### AD-3 — Company Panel اجازه مدیریت کاربران را ندارد
+- Company Panel **نمی‌تواند** کاربر ایجاد، حذف یا ویرایش کند.
+- فقط می‌تواند:
+  - لیست کاربران شرکت را **مشاهده** کند (`users.read` محدود به شرکت خود).
+  - کاربران را **فعال/غیرفعال** کند (`users.activate` / `users.deactivate` محدود به شرکت خود).
+- permissionهای `users.create`، `users.update`، `users.delete`، `users.assign_roles` نباید در نقش‌های COMPANY باشند.
+
+### AD-4 — Commerce فاز آینده B2C است (Disabled، نه Deleted)
+- Cart / Checkout / Orders / Wishlist مربوط به فاز آینده B2C هستند.
+- فعلاً **حذف نمی‌شوند**، فقط **غیرفعال** می‌شوند.
+- هیچ Route فعال، هیچ UI فعال، و هیچ لینک/ارجاع فعالی به آن‌ها نباید وجود داشته باشد.
+
+### AD-5 — بدون بازبینی مجدد معماری
+- از این لحظه هیچ تحلیل یا Refactor معماری خودسرانه انجام نمی‌شود.
+- فقط بر اساس گزارش نهایی و این تصمیم‌ها کدنویسی می‌شود.
+
+### AD-6 — AccessProfile.type مرز قطعی پنل است
+- نقش `SUPER_ADMIN` نمی‌تواند با وجود wildcard permission از بررسی زمینه برنامه عبور کند.
+- ورود به Admin نیازمند `AccessProfile.type = STAFF` و ورود به Company نیازمند `AccessProfile.type = COMPANY` است.
+- ثبت‌نام CUSTOMER طبق قرارداد فعلی `AccessProfile` ندارد؛ فقط `CUSTOMER_USER` بدون AccessProfile می‌تواند از زمینه پیش‌فرض Website استفاده کند. این fallback هرگز دسترسی STAFF/COMPANY نمی‌دهد و برای SUPER_ADMIN معتبر نیست.
+- middleware عمومی `requireAccessType` و PKCE handoff باید این مرز را در هر مرحله enforce کنند.
+- عملیات سراسری با AccessProfile مناسب STAFF و permissionهای لازم انجام می‌شود؛ role membership به‌تنهایی زمینه کاربر را تغییر نمی‌دهد.
+- تست‌های auth، RBAC و handoff باید دسترسی مجاز، زمینه ناسازگار، AccessProfile غایب و access غیرفعال را پوشش دهند.
+
+## Sprint Workflow (الزامی)
+در ابتدای هر Sprint:
+1. فقط مواردی که قرار است تغییر کنند اعلام می‌شود.
+2. تغییرات اعمال می‌شود.
+3. تست گرفته می‌شود.
+4. گزارش داده می‌شود.
+5. منتظر تأیید مالک پروژه می‌مانیم (قبل از Sprint بعدی).

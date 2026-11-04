@@ -1,0 +1,366 @@
+<script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import { computed, onMounted, ref } from 'vue'
+import { apiGet, apiPost, apiPatch } from '@telecom/shared-core/http/apiClient'
+import { endpoints } from '@telecom/api-client'
+
+const loading = ref(false)
+const saving = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+const settings = ref({ subscriptionEnforcement: false })
+const plans = ref([])
+const subscriptions = ref([])
+const form = ref({
+  code: '', name: '', description: '', durationDays: 30, price: 0, currency: 'IRR',
+  inquiriesPerPeriod: 5, responsesPerPeriod: 3, internalMessagesPerPeriod: 30, smsPerPeriod: 0, isActive: true,
+})
+const pending = computed(() => subscriptions.value.filter(item => item.status === 'PENDING_PAYMENT'))
+const statusLabels = { PENDING_PAYMENT: 'در انتظار تأیید پرداخت', ACTIVE: 'فعال', EXPIRED: 'منقضی', CANCELLED: 'لغو شده', SUSPENDED: 'تعلیق شده' }
+const usageLabels = { inquiriesPerPeriod: 'ثبت استعلام', responsesPerPeriod: 'پاسخ شرکت', internalMessagesPerPeriod: 'پیام داخلی', smsPerPeriod: 'پیامک' }
+
+function unwrap(value) { return value?.data?.data ?? value?.data ?? value ?? {} }
+function money(value, currency = 'IRR') {
+  const amount = Number(value || 0).toLocaleString('fa-IR')
+  return currency === 'IRR' ? amount + ' ریال' : amount + ' ' + currency
+}
+function date(value) { return value ? new Date(value).toLocaleDateString('fa-IR') : '—' }
+function ownerName(item) {
+  if (item.company) return 'شرکت: ' + (item.company.name || ('#' + item.company.id))
+  if (item.user) return item.user.phone || item.user.email || ('کاربر #' + item.user.id)
+  return 'مالک نامشخص'
+}
+
+onMounted(loadAll)
+async function loadAll() {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const [settingsResult, plansResult, subsResult] = await Promise.all([
+      apiGet(endpoints.inquirySubscriptions.adminSettings),
+      apiGet(endpoints.inquirySubscriptions.adminPlans),
+      apiGet(endpoints.inquirySubscriptions.adminSubscriptions),
+    ])
+    settings.value = { subscriptionEnforcement: !!unwrap(settingsResult).subscriptionEnforcement }
+    plans.value = Array.isArray(unwrap(plansResult)) ? unwrap(plansResult) : []
+    subscriptions.value = Array.isArray(unwrap(subsResult)) ? unwrap(subsResult) : []
+  } catch {
+    errorMessage.value = 'دریافت اطلاعات اشتراک انجام نشد؛ مجوز مدیریت تنظیمات و اتصال سرور را بررسی کنید.'
+  } finally {
+    loading.value = false
+  }
+}
+async function toggleEnforcement() {
+  errorMessage.value = ''
+  successMessage.value = ''
+  saving.value = true
+  const next = !settings.value.subscriptionEnforcement
+  if (next && !window.confirm('با فعال‌کردن این گزینه، حساب‌های بدون اشتراک فعال نمی‌توانند استعلام ثبت کنند یا به استعلام پاسخ دهند. آیا طرح‌ها و اشتراک‌های لازم را آماده کرده‌اید؟')) {
+    saving.value = false
+    return
+  }
+  try {
+    const result = await apiPatch(endpoints.inquirySubscriptions.adminSettings, { subscriptionEnforcement: next })
+    settings.value.subscriptionEnforcement = !!unwrap(result).subscriptionEnforcement
+    successMessage.value = settings.value.subscriptionEnforcement
+      ? 'کنترل سهمیه فعال شد؛ حساب‌های فاقد اشتراک فعال، دسترسی محدود خواهند داشت.'
+      : 'کنترل سهمیه غیرفعال شد.'
+  } catch {
+    errorMessage.value = 'ذخیره تنظیم کنترل سهمیه انجام نشد.'
+  } finally {
+    saving.value = false
+  }
+}
+async function createPlan() {
+  errorMessage.value = ''
+  successMessage.value = ''
+  if (!/^[a-z0-9][a-z0-9_-]{1,49}$/.test(form.value.code.trim().toLowerCase())) {
+    errorMessage.value = 'کد طرح باید ۲ تا ۵۰ نویسه و شامل حروف انگلیسی کوچک، عدد، خط تیره یا زیرخط باشد.'
+    return
+  }
+  saving.value = true
+  try {
+    await apiPost(endpoints.inquirySubscriptions.adminPlans, {
+      ...form.value,
+      code: form.value.code.trim().toLowerCase(),
+      name: form.value.name.trim(),
+      description: form.value.description.trim() || undefined,
+      durationDays: Number(form.value.durationDays),
+      price: Number(form.value.price),
+      inquiriesPerPeriod: Number(form.value.inquiriesPerPeriod),
+      responsesPerPeriod: Number(form.value.responsesPerPeriod),
+      internalMessagesPerPeriod: Number(form.value.internalMessagesPerPeriod),
+      smsPerPeriod: Number(form.value.smsPerPeriod),
+    })
+    successMessage.value = 'طرح اشتراک ساخته شد.'
+    form.value = { ...form.value, code: '', name: '', description: '' }
+    await loadAll()
+  } catch (error) {
+    errorMessage.value = error?.message || 'ساخت طرح انجام نشد.'
+  } finally {
+    saving.value = false
+  }
+}
+
+async function togglePlan(plan) {
+  saving.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+  try {
+    await apiPatch(endpoints.inquirySubscriptions.adminPlan(plan.id), { isActive: !plan.isActive })
+    successMessage.value = plan.isActive ? 'طرح غیرفعال شد و خرید جدید آن بسته شد.' : 'طرح دوباره فعال شد.'
+    await loadAll()
+  } catch (error) {
+    errorMessage.value = error?.message || 'تغییر وضعیت طرح انجام نشد.'
+  } finally {
+    saving.value = false
+  }
+}
+
+async function activateSubscription(item) {
+  if (!window.confirm('تأیید می‌کنید پرداخت این درخواست را خارج از سامانه بررسی کرده‌اید؟')) return
+  errorMessage.value = ''
+  successMessage.value = ''
+  saving.value = true
+  try {
+    await apiPost(endpoints.inquirySubscriptions.activate(item.id), { paymentConfirmed: true, notes: 'پرداخت توسط مدیر خارج از سامانه بررسی و تأیید شد.' })
+    successMessage.value = 'اشتراک با موفقیت فعال شد.'
+    await loadAll()
+  } catch (error) {
+    errorMessage.value = error?.message || 'فعال‌سازی اشتراک انجام نشد.'
+  } finally {
+    saving.value = false
+  }
+}
+
+async function rejectSubscription(item) {
+  const notes = window.prompt('دلیل رد درخواست اشتراک #' + item.id + ' را وارد کنید:')
+  if (notes === null) return
+  if (!notes.trim()) {
+    errorMessage.value = 'برای رد درخواست، ثبت دلیل الزامی است.'
+    return
+  }
+  errorMessage.value = ''
+  successMessage.value = ''
+  saving.value = true
+  try {
+    await apiPost(endpoints.inquirySubscriptions.reject(item.id), { notes: notes.trim() })
+    successMessage.value = 'درخواست اشتراک رد شد.'
+    await loadAll()
+  } catch (error) {
+    errorMessage.value = error?.message || 'رد درخواست انجام نشد.'
+  } finally {
+    saving.value = false
+  }
+}
+</script>
+
+<template>
+  <main class="subscription-admin" dir="rtl">
+    <WorkspacePageHeading
+      eyebrow="درآمد و دسترسی"
+      title="مدیریت اشتراک‌های استعلام"
+      description="طرح‌ها، سهمیه‌های مصرف و درخواست‌های خرید را از یک فضای کاری یکپارچه مدیریت کنید."
+      icon="pi pi-wallet"
+      heading-id="inquiry-subscriptions-title"
+    >
+      <template #actions>
+        <button class="secondary refresh-action" :disabled="loading" @click="loadAll"><i class="pi pi-refresh"></i> به‌روزرسانی</button>
+      </template>
+    </WorkspacePageHeading>
+
+    <section class="subscription-overview" aria-label="خلاصه اشتراک‌ها">
+      <article class="overview-card">
+        <span class="overview-icon"><i class="pi pi-tags"></i></span>
+        <div><span class="overview-label">طرح‌های تعریف‌شده</span><strong>{{ plans.length.toLocaleString('fa-IR') }}</strong></div>
+      </article>
+      <article class="overview-card">
+        <span class="overview-icon overview-icon--warning"><i class="pi pi-clock"></i></span>
+        <div><span class="overview-label">درخواست‌های در انتظار</span><strong>{{ pending.length.toLocaleString('fa-IR') }}</strong></div>
+      </article>
+      <article class="overview-card" :class="{ 'overview-card--enabled': settings.subscriptionEnforcement }">
+        <span class="overview-icon overview-icon--success"><i class="pi pi-shield"></i></span>
+        <div><span class="overview-label">کنترل سهمیه</span><strong>{{ settings.subscriptionEnforcement ? 'فعال' : 'غیرفعال' }}</strong></div>
+      </article>
+    </section>
+    <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
+
+    <section class="panel enforcement">
+      <div><h2>کنترل اجباری سهمیه</h2><p>در حالت فعال، ثبت استعلام، پاسخ شرکت و پیام‌های داخلی به اشتراک فعال و سهمیهٔ باقی‌مانده نیاز دارند. پیامک همیشه سهمیهٔ جداگانهٔ پولی دارد.</p></div>
+      <button :class="settings.subscriptionEnforcement ? 'danger' : 'primary'" :disabled="saving" @click="toggleEnforcement">
+        {{ settings.subscriptionEnforcement ? 'فعال است؛ غیرفعال کن' : 'غیرفعال است؛ فعال کن' }}
+      </button>
+    </section>
+
+    <section class="panel">
+      <h2>ایجاد طرح اشتراک</h2>
+      <form class="plan-form" @submit.prevent="createPlan">
+        <label>کد یکتا<input v-model="form.code" required maxlength="50" placeholder="basic-monthly"/></label>
+        <label>نام طرح<input v-model="form.name" required maxlength="100" placeholder="اشتراک پایه"/></label>
+        <label>مدت اعتبار (روز)<input v-model.number="form.durationDays" required type="number" min="1" max="3650"/></label>
+        <label>قیمت<input v-model.number="form.price" required type="number" min="1" step="1"/></label>
+        <label>واحد پول<select v-model="form.currency"><option value="IRR">ریال</option><option value="TOMAN">تومان</option><option value="EUR">EUR</option><option value="USD">USD</option></select></label>
+        <label>سهمیه ثبت استعلام<input v-model.number="form.inquiriesPerPeriod" required type="number" min="0"/></label>
+        <label>سهمیه پاسخ شرکت<input v-model.number="form.responsesPerPeriod" required type="number" min="0"/></label>
+        <label>سهمیه پیام داخلی<input v-model.number="form.internalMessagesPerPeriod" required type="number" min="0"/></label>
+        <label>سهمیه پیامک<input v-model.number="form.smsPerPeriod" required type="number" min="0"/></label>
+        <label class="wide">توضیحات<input v-model="form.description" maxlength="1000" placeholder="شرح امکانات و شرایط طرح"/></label>
+        <label class="checkbox"><input v-model="form.isActive" type="checkbox"/> طرح فعال باشد</label>
+        <button class="primary" type="submit" :disabled="saving">ایجاد طرح</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>طرح‌های تعریف‌شده ({{ plans.length.toLocaleString('fa-IR') }})</h2>
+      <div v-if="!plans.length" class="muted">هنوز طرحی ثبت نشده است.</div>
+      <div v-else class="table-wrap"><table><thead><tr><th>طرح</th><th>قیمت</th><th>مدت</th><th>سهمیه‌ها</th><th>وضعیت</th></tr></thead>
+        <tbody><tr v-for="plan in plans" :key="plan.id"><td><strong>{{ plan.name }}</strong><small>{{ plan.code }}</small></td><td>{{ money(plan.price, plan.currency) }}</td><td>{{ plan.durationDays }} روز</td><td><small v-for="(label, key) in usageLabels" :key="key">{{ label }}: {{ Number(plan[key] || 0).toLocaleString('fa-IR') }}<br/></small></td><td><span :class="plan.isActive ? 'pill on' : 'pill off'">{{ plan.isActive ? 'فعال' : 'غیرفعال' }}</span><button class="secondary small" :disabled="saving" @click="togglePlan(plan)">{{ plan.isActive ? 'غیرفعال‌کردن' : 'فعال‌کردن' }}</button></td></tr></tbody>
+      </table></div>
+    </section>
+
+    <section class="panel">
+      <h2>درخواست‌های در انتظار تأیید ({{ pending.length.toLocaleString('fa-IR') }})</h2>
+      <p class="muted">فعال‌سازی دستی فقط پس از بررسی واقعی پرداخت انجام شود. شماره پیگیری به‌تنهایی مدرک پرداخت نیست.</p>
+      <div v-if="!pending.length" class="muted">درخواستی در انتظار بررسی نیست.</div>
+      <div v-else class="table-wrap"><table><thead><tr><th>مالک</th><th>طرح</th><th>شماره پیگیری</th><th>ثبت درخواست</th><th>عملیات</th></tr></thead>
+        <tbody><tr v-for="item in pending" :key="item.id"><td>{{ ownerName(item) }}</td><td>{{ item.plan?.name || '—' }}</td><td>{{ item.paymentProvider === 'ZARINPAL' ? ('زرین‌پال · ' + (item.paymentAuthority || 'در انتظار شناسه')) : (item.paymentReference || 'ثبت نشده') }}</td><td>{{ date(item.createdAt) }}</td><td class="actions"><template v-if="item.paymentProvider === 'ZARINPAL'"><span class="muted">تأیید فقط از طریق callback درگاه</span></template><template v-else><button class="primary small" :disabled="saving" @click="activateSubscription(item)">تأیید پرداخت و فعال‌سازی</button><button class="danger small" :disabled="saving" @click="rejectSubscription(item)">رد درخواست</button></template></td></tr></tbody>
+      </table></div>
+    </section>
+
+    <section class="panel">
+      <h2>آخرین اشتراک‌ها ({{ subscriptions.length.toLocaleString('fa-IR') }})</h2>
+      <div v-if="!subscriptions.length" class="muted">اشتراکی ثبت نشده است.</div>
+      <div v-else class="table-wrap"><table><thead><tr><th>مالک</th><th>طرح</th><th>وضعیت</th><th>شروع</th><th>پایان</th></tr></thead>
+        <tbody><tr v-for="item in subscriptions" :key="item.id"><td>{{ ownerName(item) }}</td><td>{{ item.plan?.name || '—' }}</td><td><span class="pill" :class="item.status === 'ACTIVE' ? 'on' : item.status === 'PENDING_PAYMENT' ? 'wait' : 'off'">{{ statusLabels[item.status] || item.status }}</span></td><td>{{ date(item.startsAt) }}</td><td>{{ date(item.endsAt) }}</td></tr></tbody>
+      </table></div>
+    </section>
+  </main>
+</template>
+
+<style scoped>
+.subscription-admin{display:grid;gap:1rem;color:var(--text-color,var(--tm-ink))}.heading{display:flex;justify-content:space-between;align-items:center;gap:1rem}h1{font-size:1.45rem;margin:0 0 .35rem}h2{font-size:1.05rem;margin:0 0 .85rem}p{line-height:1.8;color:var(--text-color-secondary,var(--tm-muted));margin:.25rem 0}.panel{padding:1.2rem;border:1px solid var(--surface-border,var(--tm-line));border-radius:12px;background:var(--surface-card,#fff)}.enforcement{display:flex;align-items:center;justify-content:space-between;gap:1rem}.plan-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.plan-form label{display:grid;gap:.4rem;font-size:.9rem}.plan-form .wide{grid-column:span 2}.plan-form .checkbox{display:flex;align-items:center;gap:.5rem}.plan-form input:not([type=checkbox]),.plan-form select{min-width:0;padding:.7rem;border:1px solid var(--surface-border,var(--tm-line-strong));border-radius:7px;background:var(--surface-ground,#fff);color:inherit}.plan-form input[type=checkbox]{width:1rem;height:1rem}button{border:0;border-radius:7px;padding:.7rem 1rem;cursor:pointer;white-space:nowrap}.primary{background:var(--tm-green);color:#fff}.danger{background:var(--tm-red);color:#fff}.actions{display:flex;gap:.5rem;flex-wrap:wrap}.secondary{background:var(--surface-hover,var(--tm-surface-alt));color:inherit}.danger{background:var(--tm-red);color:#fff}.small{padding:.5rem .7rem;font-size:.85rem}button:disabled{opacity:.55;cursor:not-allowed}.notice{padding:.8rem 1rem;border-radius:8px}.error{background:var(--tm-red-soft);color:var(--tm-red)}.success{background:var(--tm-green-soft);color:var(--tm-green)}.muted{color:var(--text-color-secondary,var(--tm-muted));padding:.5rem 0}.table-wrap{width:100%;overflow:auto}table{border-collapse:collapse;width:100%;min-width:650px;text-align:right}th,td{padding:.75rem;border-bottom:1px solid var(--surface-border,var(--tm-line));vertical-align:top}th{font-weight:600;font-size:.85rem}td small{display:block;color:var(--text-color-secondary,var(--tm-muted));font-size:.8rem;margin-top:.2rem}.pill{display:inline-block;border-radius:999px;padding:.3rem .65rem;font-size:.8rem;white-space:nowrap}.on{background:var(--tm-green-soft);color:var(--tm-green)}.off{background:var(--tm-line);color:var(--tm-ink-soft)}.wait{background:var(--tm-amber-soft);color:#92400e}@media(max-width:800px){.plan-form{grid-template-columns:repeat(2,minmax(0,1fr))}.enforcement,.heading{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.plan-form{grid-template-columns:1fr}.plan-form .wide{grid-column:auto}}
+
+.subscription-admin .heading,
+.subscription-page .heading {
+  padding: var(--ds-space-5) var(--ds-space-6);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
+.subscription-admin,
+.subscription-page { gap: var(--ds-space-5); }
+.subscription-admin .panel,
+.subscription-page .panel {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.subscription-admin h1,
+.subscription-page h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); }
+.subscription-admin input,
+.subscription-admin select,
+.subscription-page input,
+.subscription-page select {
+  border-color: var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text);
+}
+@media (max-width: 640px) {
+  .subscription-admin .heading,
+  .subscription-page .heading { align-items: stretch; flex-direction: column; padding: var(--ds-space-4); }
+}
+
+/* Subscription operations workspace: metrics, policy and review queues. */
+.subscription-admin .heading {
+  align-items: center;
+  min-height: 7rem;
+}
+.subscription-admin .heading-copy { min-width: 0; }
+.subscription-admin .heading .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--ds-color-primary);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.subscription-admin .heading h1 {
+  margin: .35rem 0;
+  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
+}
+.subscription-admin .heading p { margin: 0; }
+.subscription-admin .refresh-action { display: inline-flex; align-items: center; gap: .5rem; }
+.subscription-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ds-space-4);
+}
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+  min-width: 0;
+  padding: var(--ds-space-5);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.overview-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 3rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-info-soft);
+  color: var(--ds-color-primary);
+  font-size: 1.2rem;
+}
+.overview-icon--warning { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
+.overview-icon--success { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.overview-label { display: block; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
+.overview-card strong { display: block; margin-top: .25rem; color: var(--ds-color-text); font-size: var(--ds-font-size-xl); }
+.subscription-admin .enforcement {
+  border-inline-start: 4px solid var(--ds-color-primary);
+  align-items: center;
+}
+.subscription-admin .plan-form { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.subscription-admin .panel h2 { display: flex; align-items: center; gap: .5rem; }
+.subscription-admin .table-wrap { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg); }
+.subscription-admin table { border-collapse: separate; border-spacing: 0; }
+.subscription-admin th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-weight: var(--ds-font-weight-bold);
+  white-space: nowrap;
+}
+.subscription-admin td { color: var(--ds-color-text); }
+.subscription-admin tbody tr:hover { background: var(--ds-color-surface-hover); }
+.subscription-admin .primary { background: var(--ds-color-primary); color: var(--ds-color-primary-contrast); }
+.subscription-admin .danger { background: var(--ds-color-danger); color: var(--ds-color-danger-contrast); }
+.subscription-admin .secondary { border: 1px solid var(--ds-color-border); background: var(--ds-color-surface-alt); color: var(--ds-color-text); }
+.subscription-admin .error { background: var(--ds-color-danger-soft); color: var(--ds-color-danger); }
+.subscription-admin .success { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-admin .on { background: var(--ds-color-success-soft); color: var(--ds-color-success); }
+.subscription-admin .off { background: var(--ds-color-surface-alt); color: var(--ds-color-text-muted); }
+.subscription-admin .wait { background: var(--ds-color-warning-soft); color: var(--ds-color-warning); }
+.subscription-admin .pill { font-weight: var(--ds-font-weight-semibold); }
+@media (max-width: 900px) {
+  .subscription-admin .plan-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .subscription-overview { grid-template-columns: 1fr; }
+  .subscription-admin .heading { align-items: flex-start; }
+  .subscription-admin .plan-form { grid-template-columns: 1fr; }
+  .subscription-admin .plan-form .wide { grid-column: auto; }
+  .subscription-admin .enforcement { align-items: stretch; }
+}
+</style>

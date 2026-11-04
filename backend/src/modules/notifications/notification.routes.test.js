@@ -1,0 +1,181 @@
+// مسیر فایل: backend/src/modules/notifications/notification.routes.test.js
+// =============================================================
+// Integration tests — Notification routes (auth wiring)
+//
+// Run with:  node --test
+// =============================================================
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const Module = require('node:module');
+const Fastify = require('fastify');
+
+function injectMock(relativePath, exportsObj) {
+  const resolved = require.resolve(path.join(__dirname, relativePath));
+  const original = require.cache[resolved];
+  require.cache[resolved] = new Module(resolved);
+  require.cache[resolved].exports = exportsObj;
+  require.cache[resolved].loaded = true;
+  test.after(() => {
+    if (original) require.cache[resolved] = original;
+    else delete require.cache[resolved];
+  });
+  return resolved;
+}
+
+injectMock('../../config/db', {});
+
+const hit = {};
+const trivialController = {};
+for (const name of ['list', 'getUnreadCount', 'markAsRead', 'markAllAsRead', 'setReadState', 'bulkSetReadState', 'bulkRemove', 'remove', 'listFolders', 'changeFolder']) {
+  trivialController[name] = async (request, reply) => {
+    hit[name] = true;
+    return reply.code(200).send({ ok: true });
+  };
+}
+injectMock('./notification.controller', trivialController);
+
+const notificationRoutes = require('./notification.routes');
+
+async function buildApp() {
+  const app = Fastify();
+  app.decorate('authenticate', async (request, reply) => {
+    const raw = request.headers['x-test-user'];
+    if (!raw) {
+      return reply.code(401).send({ error: true, code: 'UNAUTHORIZED', message: 'Authentication required.' });
+    }
+    request.user = JSON.parse(raw);
+  });
+  await app.register(notificationRoutes, { prefix: '/api/v1/settings/notifications' });
+  await app.ready();
+  return app;
+}
+
+test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
+
+test('GET /: requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/settings/notifications',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.list, true);
+  await app.close();
+});
+
+test('GET /: without auth -> 401', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'GET', url: '/api/v1/settings/notifications' });
+  assert.equal(res.statusCode, 401);
+  await app.close();
+});
+
+test('GET /unread-count: requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/settings/notifications/unread-count',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.getUnreadCount, true);
+  await app.close();
+});
+
+test('PATCH /:id/read: requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/settings/notifications/1/read',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.markAsRead, true);
+  await app.close();
+});
+
+test('PATCH /:id/read-state accepts a boolean read state', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/settings/notifications/1/read-state',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }), 'content-type': 'application/json' },
+    payload: { isRead: false },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.setReadState, true);
+  await app.close();
+});
+
+test('POST /bulk-read-state and /bulk-delete validate requests', async () => {
+  const app = await buildApp();
+  const headers = { 'x-test-user': JSON.stringify({ id: 1 }), 'content-type': 'application/json' };
+  const read = await app.inject({ method: 'POST', url: '/api/v1/settings/notifications/bulk-read-state', headers, payload: { ids: [1, 2], isRead: true } });
+  assert.equal(read.statusCode, 200);
+  assert.equal(hit.bulkSetReadState, true);
+  const remove = await app.inject({ method: 'POST', url: '/api/v1/settings/notifications/bulk-delete', headers, payload: { ids: [1, 2] } });
+  assert.equal(remove.statusCode, 200);
+  assert.equal(hit.bulkRemove, true);
+  const invalid = await app.inject({ method: 'POST', url: '/api/v1/settings/notifications/bulk-delete', headers, payload: { ids: [] } });
+  assert.equal(invalid.statusCode, 400);
+  await app.close();
+});
+
+test('PATCH /read-all: requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/settings/notifications/read-all',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.markAllAsRead, true);
+  await app.close();
+});
+
+test('DELETE /:id: requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'DELETE',
+    url: '/api/v1/settings/notifications/1',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.remove, true);
+  await app.close();
+});
+
+test('DELETE /:id: without auth -> 401', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'DELETE', url: '/api/v1/settings/notifications/1' });
+  assert.equal(res.statusCode, 401);
+  await app.close();
+});
+
+test('GET /folders: requires authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'GET',
+    url: '/api/v1/settings/notifications/folders?app=WEBSITE',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }) },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.listFolders, true);
+  await app.close();
+});
+
+test('POST /:id/folders: requires authentication and valid action', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/settings/notifications/1/folders',
+    headers: { 'x-test-user': JSON.stringify({ id: 1 }), 'content-type': 'application/json' },
+    payload: { folderId: 2, action: 'copy' },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.changeFolder, true);
+  await app.close();
+});

@@ -1,0 +1,469 @@
+<script setup>
+import BrandMark from '../common/BrandMark.vue'
+/**
+ * DashboardSidebar — the single, reusable enterprise sidebar.
+ *
+ * One component for every dashboard role (Super Admin + Company users). The
+ * shell is identical; only the permission/role-filtered items differ.
+ * There is intentionally no second sidebar component.
+ *
+ * Visual source: `tem/telecom.html` `.sd` — navy gradient rail, LTR wordmark,
+ * cyan primary-action pill, compact icon+label items with a cyan count chip,
+ * a support card and a copyright line.
+ *
+ * Features kept from the previous shell:
+ *   - Expanded 207px / collapsed 76px (icon-only) rail.
+ *   - Collapse button (desktop) with persisted state.
+ *   - Tooltips on icons while collapsed (PrimeVue `v-tooltip`).
+ *   - Nested submenus (expand/collapse) + section groups.
+ *   - Active route indicator (also lights up a parent when a child is active).
+ *   - Badges per item.
+ *
+ * Collapse is a desktop concept; on mobile the parent renders this as a full
+ * drawer and passes `collapsed = false`.
+ */
+import { ref, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
+
+const props = defineProps({
+  // Desktop collapsed (icon-only) state, owned by the parent/shared store.
+  collapsed: { type: Boolean, default: false },
+  // Mobile drawer open state (used only for a class hook).
+  mobileOpen: { type: Boolean, default: false },
+  // Pre-filtered menu items (array of section objects).
+  menuItems: { type: Array, default: () => [] },
+  user: { type: Object, default: null },
+  // Optional primary call-to-action shown directly under the brand.
+  // Shape: { label: string, route: string, params?: object }
+  primaryAction: { type: Object, default: null },
+})
+
+const emit = defineEmits(['navigate', 'toggle-collapse'])
+
+const route = useRoute()
+
+// Track which parent submenus are open (keyed by title).
+const openGroups = ref({})
+
+function isItemActive(item) {
+  return item.route && route.name === item.route
+}
+
+function isParentActive(item) {
+  return Array.isArray(item.children) && item.children.some(isItemActive)
+}
+
+function isGroupOpen(item) {
+  return !!openGroups.value[item.title]
+}
+
+function toggleGroup(item) {
+  // In collapsed (icon) mode we don't expand inline; hovering shows tooltip.
+  if (props.collapsed) return
+  openGroups.value = { ...openGroups.value, [item.title]: !openGroups.value[item.title] }
+}
+
+function onExternal(item, event) {
+  event.preventDefault()
+  window.open(item.url, '_blank', 'noopener,noreferrer')
+  emit('navigate')
+}
+
+function badgeText(badge) {
+  if (badge === null || badge === undefined) return ''
+  return typeof badge === 'object' ? badge.value : badge
+}
+
+// Auto-open the submenu that contains the active route.
+watch(
+  () => route.name,
+  () => {
+    for (const group of props.menuItems) {
+      for (const item of group.items) {
+        if (isParentActive(item)) {
+          openGroups.value = { ...openGroups.value, [item.title]: true }
+        }
+      }
+    }
+  },
+  { immediate: true }
+)
+
+// When expanding from collapsed mode, reopen any submenu holding the active route.
+watch(
+  () => props.collapsed,
+  (isCollapsed) => {
+    if (!isCollapsed) {
+      for (const group of props.menuItems) {
+        for (const item of group.items) {
+          if (isParentActive(item)) {
+            openGroups.value = { ...openGroups.value, [item.title]: true }
+          }
+        }
+      }
+    }
+  }
+)
+
+const tooltipOptions = computed(() => ({ position: 'left' }))
+</script>
+
+<template>
+  <aside
+    class="dash-sidebar"
+    :role="mobileOpen ? 'dialog' : null"
+    :aria-modal="mobileOpen ? 'true' : null"
+    :aria-label="mobileOpen ? 'منوی ناوبری پنل' : 'ناوبری پنل'"
+    :class="{
+      'dash-sidebar--collapsed': collapsed,
+      'dash-sidebar--mobile-open': mobileOpen,
+    }"
+  >
+    <!-- Brand: LTR wordmark + desktop collapse toggle -->
+    <div class="dash-sidebar-brand">
+      <BrandMark class="dash-sidebar-brand-icon" :size="34" />
+      <span class="dash-sidebar-brand-text">Telecom<br />Market</span>
+      <button
+        type="button"
+        class="dash-sidebar-collapse-btn dash-sidebar-desktop-only"
+        :aria-label="collapsed ? 'باز کردن منو' : 'جمع کردن منو'"
+        @click="emit('toggle-collapse')"
+      >
+        <i class="pi" :class="collapsed ? 'pi-angle-double-left' : 'pi-angle-double-right'"></i>
+      </button>
+    </div>
+
+    <!-- Primary action pill (tem `.np`) -->
+    <router-link
+      v-if="primaryAction"
+      :to="{ name: primaryAction.route, params: primaryAction.params }"
+      class="dash-sidebar-cta"
+      @click="emit('navigate')"
+    >
+      <span aria-hidden="true">+</span> {{ primaryAction.label }}
+    </router-link>
+
+    <nav class="dash-sidebar-nav" aria-label="منوی داشبورد">
+      <template v-for="group in props.menuItems" :key="group.section">
+        <p class="dash-sidebar-section">{{ group.section }}</p>
+
+        <ul class="dash-sidebar-list">
+          <li v-for="item in group.items" :key="item.route || item.url || item.title">
+            <!-- Parent with nested children -->
+            <template v-if="item.children">
+              <button
+                type="button"
+                class="dash-sidebar-link dash-sidebar-parent"
+                :class="{ 'dash-sidebar-link--active': isParentActive(item) }"
+                v-tooltip="collapsed ? { value: item.title, ...tooltipOptions } : null"
+                :aria-expanded="isGroupOpen(item)"
+                @click="toggleGroup(item)"
+              >
+                <i :class="item.icon" class="dash-sidebar-link-icon"></i>
+                <span class="dash-sidebar-link-text">{{ item.title }}</span>
+                <span v-if="item.badge" class="dash-sidebar-count">{{ badgeText(item.badge) }}</span>
+                <i
+                  class="pi pi-chevron-down dash-sidebar-caret"
+                  :class="{ 'dash-sidebar-caret--open': isGroupOpen(item) }"
+                ></i>
+              </button>
+
+              <!-- Submenu (hidden when collapsed) -->
+              <transition name="dash-submenu">
+                <ul
+                  v-show="isGroupOpen(item) && !collapsed"
+                  class="dash-sidebar-sublist"
+                >
+                  <li v-for="child in item.children" :key="child.route || child.url || child.title">
+                    <a
+                      v-if="child.external"
+                      :href="child.url"
+                      class="dash-sidebar-link dash-sidebar-sublink"
+                      @click="onExternal(child, $event)"
+                    >
+                      <i :class="child.icon" class="dash-sidebar-link-icon"></i>
+                      <span class="dash-sidebar-link-text">{{ child.title }}</span>
+                    </a>
+                    <router-link
+                      v-else
+                      :to="{ name: child.route }"
+                      class="dash-sidebar-link dash-sidebar-sublink"
+                      :class="{ 'dash-sidebar-link--active': isItemActive(child) }"
+                      :aria-current="isItemActive(child) ? 'page' : undefined"
+                      @click="emit('navigate')"
+                    >
+                      <i :class="child.icon" class="dash-sidebar-link-icon"></i>
+                      <span class="dash-sidebar-link-text">{{ child.title }}</span>
+                      <span v-if="child.badge" class="dash-sidebar-count">{{ badgeText(child.badge) }}</span>
+                    </router-link>
+                  </li>
+                </ul>
+              </transition>
+            </template>
+
+            <!-- Leaf: external link -->
+            <a
+              v-else-if="item.external"
+              :href="item.url"
+              class="dash-sidebar-link"
+              v-tooltip="collapsed ? { value: item.title, ...tooltipOptions } : null"
+              @click="onExternal(item, $event)"
+            >
+              <i :class="item.icon" class="dash-sidebar-link-icon"></i>
+              <span class="dash-sidebar-link-text">{{ item.title }}</span>
+              <span v-if="item.badge" class="dash-sidebar-count">{{ badgeText(item.badge) }}</span>
+            </a>
+
+            <!-- Planned modules are intentionally visible but non-interactive until implemented. -->
+            <span
+              v-else-if="item.planned"
+              class="dash-sidebar-link dash-sidebar-link--planned"
+              role="note"
+              aria-disabled="true"
+              v-tooltip="collapsed ? { value: item.title + ' — در برنامه توسعه', ...tooltipOptions } : null"
+            >
+              <i :class="item.icon" class="dash-sidebar-link-icon"></i>
+              <span class="dash-sidebar-link-text">{{ item.title }}</span>
+              <span class="dash-sidebar-planned-badge">آینده</span>
+            </span>
+
+            <!-- Leaf: internal route -->
+            <router-link
+              v-else
+              :to="{ name: item.route }"
+              class="dash-sidebar-link"
+              :class="{ 'dash-sidebar-link--active': isItemActive(item) }"
+              :aria-current="isItemActive(item) ? 'page' : undefined"
+              v-tooltip="collapsed ? { value: item.title, ...tooltipOptions } : null"
+              @click="emit('navigate')"
+            >
+              <i :class="item.icon" class="dash-sidebar-link-icon"></i>
+              <span class="dash-sidebar-link-text">{{ item.title }}</span>
+              <span v-if="item.badge" class="dash-sidebar-count">{{ badgeText(item.badge) }}</span>
+            </router-link>
+          </li>
+        </ul>
+      </template>
+    </nav>
+
+    <!-- Support card (tem `.sup`) -->
+    <div class="dash-sidebar-support">
+      <span class="dash-sidebar-support-mark" aria-hidden="true"><i class="pi pi-headset"></i></span>
+      <b>با ما در ارتباط باشید</b>
+      <small>پشتیبانی ۲۴ ساعته</small>
+      <span class="dash-sidebar-support-btn">تماس پشتیبانی ←</span>
+    </div>
+    <div class="dash-sidebar-copyright">2025 Telecom Market ©</div>
+  </aside>
+</template>
+
+<style scoped>
+.dash-sidebar {
+  --dash-sidebar-expanded: 207px;
+  --dash-sidebar-collapsed: 76px;
+  display: flex;
+  flex-direction: column;
+  width: var(--dash-sidebar-expanded);
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 26px 14px;
+  background: linear-gradient(#0a1c3f, #08142e);
+  color: #cfd9ee;
+  transition: width 0.24s ease;
+}
+
+/* ---- Brand (tem `.lg`) ---- */
+.dash-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 6px 26px;
+  direction: ltr;
+  line-height: 1.1;
+}
+.dash-sidebar-brand-text {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dash-sidebar-collapse-btn { display: none; }
+
+/* ---- Primary action (tem `.np`) ---- */
+.dash-sidebar-cta {
+  display: block;
+  margin-bottom: 26px;
+  padding: 11px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #16b8e8, #2ed3ee);
+  color: #05213f;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dash-sidebar-cta:hover { filter: brightness(1.03); }
+
+/* ---- Navigation (tem `.mi`) ---- */
+.dash-sidebar-nav { padding: 0; }
+.dash-sidebar-section {
+  margin: 14px 6px 6px;
+  color: #7f93b8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.dash-sidebar-list,
+.dash-sidebar-sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dash-sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #e2e9f7;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+.dash-sidebar-link:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+.dash-sidebar-link--active {
+  background: linear-gradient(90deg, #17b4d9, #0f5f88);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: none;
+}
+.dash-sidebar-link-icon {
+  width: 22px;
+  flex-shrink: 0;
+  color: #a8bbd9;
+  font-size: 16px;
+  text-align: center;
+}
+.dash-sidebar-link:hover .dash-sidebar-link-icon,
+.dash-sidebar-link--active .dash-sidebar-link-icon { color: #fff; }
+.dash-sidebar-link-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* tem `.mi .c` */
+.dash-sidebar-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  margin-inline-start: auto;
+  padding: 0 5px;
+  border-radius: 50%;
+  background: #2ed3ee;
+  color: #05213f;
+  font-size: 11px;
+  font-weight: 700;
+  flex: none;
+}
+.dash-sidebar-caret { font-size: 0.7rem; transition: transform 0.2s; }
+.dash-sidebar-caret--open { transform: rotate(180deg); }
+.dash-sidebar-link--planned { opacity: 0.52; cursor: default; }
+.dash-sidebar-link--planned:hover { background: transparent; color: #e2e9f7; }
+.dash-sidebar-planned-badge {
+  padding: 0.1rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.6rem;
+}
+.dash-sidebar-sublist {
+  margin: 4px 0 4px;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.12);
+}
+.dash-sidebar-sublink { min-height: 38px; padding-block: 8px; font-size: 13px; }
+.dash-submenu-enter-active,
+.dash-submenu-leave-active { overflow: hidden; max-height: 500px; transition: opacity 0.2s, max-height 0.25s; }
+.dash-submenu-enter-from,
+.dash-submenu-leave-to { max-height: 0; opacity: 0; }
+.dash-sidebar-link:focus-visible { outline: 2px solid #2ed3ee; outline-offset: 2px; }
+
+/* ---- Support + copyright (tem `.sup` / `.cp`) ---- */
+.dash-sidebar-support {
+  margin-top: auto;
+  padding: 52px 14px 14px;
+  border: 1px solid #1c3d6b;
+  border-radius: 10px;
+  background: linear-gradient(#10315d, #0a2347);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.dash-sidebar-support-mark {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  color: #2ed3ee;
+}
+.dash-sidebar-support b { display: block; margin-bottom: 4px; color: #fff; font-size: 13px; }
+.dash-sidebar-support small { font-size: 11px; color: #9fb4d8; }
+.dash-sidebar-support-btn {
+  display: block;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 6px;
+  background: #17b4d9;
+  color: #05213f;
+  font-weight: 600;
+}
+.dash-sidebar-copyright {
+  margin-top: 16px;
+  color: #9fb4d8;
+  font-size: 10px;
+  text-align: center;
+  direction: ltr;
+}
+
+@media (min-width: 992px) {
+  .dash-sidebar--collapsed { width: var(--dash-sidebar-collapsed); padding-inline: 10px; }
+  .dash-sidebar--collapsed .dash-sidebar-brand { justify-content: center; margin-inline: 0; }
+  .dash-sidebar--collapsed .dash-sidebar-brand-text,
+  .dash-sidebar--collapsed .dash-sidebar-section,
+  .dash-sidebar--collapsed .dash-sidebar-link-text,
+  .dash-sidebar--collapsed .dash-sidebar-count,
+  .dash-sidebar--collapsed .dash-sidebar-planned-badge,
+  .dash-sidebar--collapsed .dash-sidebar-caret,
+  .dash-sidebar--collapsed .dash-sidebar-cta,
+  .dash-sidebar--collapsed .dash-sidebar-support,
+  .dash-sidebar--collapsed .dash-sidebar-copyright { display: none; }
+  .dash-sidebar--collapsed .dash-sidebar-link { justify-content: center; padding-inline: 0; }
+  .dash-sidebar--collapsed .dash-sidebar-link-icon { width: auto; }
+  .dash-sidebar-desktop-only { display: inline-flex; }
+}
+@media (max-width: 991px) {
+  .dash-sidebar { width: 207px; }
+  .dash-sidebar-desktop-only { display: none; }
+}
+</style>

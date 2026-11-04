@@ -1,0 +1,60 @@
+name: Database Migration Validation
+
+on:
+  push:
+    branches: [main, feature/inquiry-completion]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  prisma-migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: telecom_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d telecom_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/telecom_test?schema=public
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.15.0
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
+
+      - name: Validate Prisma schema and generate client
+        working-directory: backend
+        run: npx prisma validate && npx prisma generate
+
+      - name: Apply all migrations to a fresh PostgreSQL database
+        working-directory: backend
+        run: npx prisma migrate deploy
+
+      - name: Verify migration state
+        working-directory: backend
+        run: npx prisma migrate status

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl"><head><meta charset="utf-8"><title>Plans</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<style>
+.pl{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 16px}
+.pc{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;position:relative;direction:ltr;text-align:left}
+.pc.cur{border:2px solid #7c3aed}
+.pc .bd{position:absolute;top:-12px;left:16px;background:#7c3aed;color:#fff;font-size:10px;font-weight:700;letter-spacing:.4px;padding:3px 10px;border-radius:999px}
+.pc h3{font-size:15px;font-weight:600}.pc small{display:block;color:#4b5563;font-size:12px;margin:2px 0 18px}
+.pc .pr{font:700 28px 'JetBrains Mono',monospace}.pc .pr span{font:400 14px Inter;color:#4b5563}
+.pc .us{color:#4b5563;font-size:12px;margin:6px 0 18px}
+.pc ul{list-style:none;margin-bottom:18px}.pc li{display:flex;gap:12px;font-size:14px;padding:6px 0}
+.pc li i{font-style:normal;color:#15803d;width:14px}.pc li.no{color:#6b7280}.pc li.no i{color:#9ca3af}
+.pc .bt{width:100%;justify-content:center;padding:11px}.pc .bt.dis{color:#9ca3af}.pc .bt.cu{background:#f3f4f6;border-color:#f3f4f6;color:#4b5563}
+.ent{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;display:flex;gap:20px;align-items:flex-start;margin-bottom:28px;direction:ltr;text-align:left}
+.ent .ei{width:48px;height:48px;border-radius:10px;background:#fdf1de;color:#d97706;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.ent b{font-size:15px;font-weight:600}.ent p{color:#4b5563;font-size:14px;margin:4px 0 12px}
+.ent .ch{display:flex;gap:20px;font-size:14px}.ent .ch i{font-style:normal;color:#15803d;margin-right:8px}
+.ent .rt{margin-left:auto;text-align:right}.ent .rt span{display:block;color:#4b5563;font-size:14px;margin:6px 0 12px}
+.sh{font-size:13px;font-weight:600;letter-spacing:.4px;color:#374151;margin-bottom:12px;direction:ltr;text-align:left}
+.cmp{direction:ltr;text-align:left}
+.cmp table{width:100%;border-collapse:collapse;background:#fff}
+.cmp th{font-weight:500;font-size:12.5px;color:#4b5563;padding:13px 16px;text-align:center;border-bottom:1px solid #e5e7eb}
+.cmp td{padding:0 16px;height:41px;text-align:center;border-bottom:1px solid #e5e7eb;font-size:14px}
+.cmp th:first-child,.cmp td:first-child{text-align:left;width:34%}
+.cmp td:first-child{color:#374151}
+.cmp .k{color:#15803d}.cmp .d{color:#9ca3af}
+</style></head>
+<body data-layout="admin" data-menu="Plans"><div class="pg">
+<div class="ph"><div><h1>Plans</h1><p>You are on <b>Business</b>, billed annually at 1,200 seats.</p></div><div class="acts"><span class="bt">▭ Billing</span></div></div>
+<div class="pl">
+<div class="pc"><h3>Free</h3><small>For trying things out</small><div class="pr">$0 <span>/ seat / mo</span></div><div class="us">Up to 10 seats</div>
+<ul><li><i>✓</i>User directory</li><li><i>✓</i>3 base roles</li><li><i>✓</i>Password + MFA sign-in</li><li><i>✓</i>7-day audit retention</li><li class="no"><i>✕</i>Custom roles</li><li class="no"><i>✕</i>SSO</li></ul><span class="bt dis">Downgrade</span></div>
+<div class="pc"><h3>Starter</h3><small>For small teams</small><div class="pr">$9 <span>/ seat / mo</span></div><div class="us">Up to 50 seats</div>
+<ul><li><i>✓</i>Everything in Free</li><li><i>✓</i>All 5 base roles</li><li><i>✓</i>Static groups</li><li><i>✓</i>90-day audit retention</li><li class="no"><i>✕</i>Custom roles</li><li class="no"><i>✕</i>SSO</li></ul><span class="bt">Downgrade</span></div>
+<div class="pc"><h3>Team</h3><small>For growing organisations</small><div class="pr">$18 <span>/ seat / mo</span></div><div class="us">Up to 500 seats</div>
+<ul><li><i>✓</i>Everything in Starter</li><li><i>✓</i>Custom roles</li><li><i>✓</i>Dynamic groups</li><li><i>✓</i>SSO (SAML)</li><li><i>✓</i>1-year audit retention</li><li class="no"><i>✕</i>SCIM provisioning</li></ul><span class="bt">Downgrade</span></div>
+<div class="pc cur"><span class="bd">CURRENT PLAN</span><h3>Business</h3><small>For companies with compliance needs</small><div class="pr">$28 <span>/ seat / mo</span></div><div class="us">Unlimited seats</div>
+<ul><li><i>✓</i>Everything in Team</li><li><i>✓</i>Scoped admin roles</li><li><i>✓</i>Access recertification</li><li><i>✓</i>Risk scoring</li><li><i>✓</i>400-day audit retention</li><li class="no"><i>✕</i>SCIM &amp; log streaming</li></ul><span class="bt cu">Current plan</span></div>
+</div>
+<div class="ent"><div class="ei">◆</div><div><b>Enterprise</b><p>Everything in Business, plus SCIM provisioning, audit-log streaming to S3 / Splunk / Datadog, a dedicated tenant, custom data residency, and a 99.99% uptime SLA.</p>
+<div class="ch"><span><i>✓</i>SCIM provisioning</span><span><i>✓</i>Log streaming</span><span><i>✓</i>Data residency</span><span><i>✓</i>Named CSM</span><span><i>✓</i>99.99% SLA</span></div></div>
+<div class="rt"><span>Custom pricing</span><span class="bt pr" style="display:inline-flex">Talk to sales</span></div></div>
+<div class="sh">FULL COMPARISON</div>
+<div class="cmp card"><table><thead><tr><th>Feature</th><th>Free</th><th>Starter</th><th>Team</th><th>Business</th><th>Enterprise</th></tr></thead><tbody>
+<tr><td>Seats</td><td>10</td><td>50</td><td>500</td><td>Unlimited</td><td>Unlimited</td></tr>
+<tr><td>Base roles</td><td>3</td><td>5</td><td>5</td><td>5</td><td>5</td></tr>
+<tr><td>Custom roles</td><td class="d">—</td><td class="d">—</td><td class="k">✓</td><td class="k">✓</td><td class="k">✓</td></tr>
+<tr><td>Dynamic groups</td><td class="d">—</td><td class="d">—</td><td class="k">✓</td><td class="k">✓</td><td class="k">✓</td></tr>
+</tbody></table></div>
+</div><script src="layout.js"></script></body></html>

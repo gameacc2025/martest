@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl"><head><meta charset="utf-8"><title>Security Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<style>
+.r3{display:grid;grid-template-columns:1fr 1fr 2.03fr;gap:16px;margin-bottom:16px}
+.r3 .cd{display:flex;flex-direction:column;min-height:385px}
+.r3 .body{flex:1;display:flex;align-items:center;justify-content:center}
+.r3 .ft{padding:16px 16px;border-top:1px solid #e5e7eb;font-size:13px;color:#4b5563;direction:ltr;text-align:left}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #e5e7eb;direction:ltr}
+.sg div{text-align:center;padding:12px 0;font-size:12px;color:#4b5563;border-inline-start:1px solid #e5e7eb}
+.sg div:first-child{border:0}.sg b{display:block;font:700 13px 'JetBrains Mono',monospace;color:#111827;margin-top:6px}
+.hd{direction:ltr;text-align:left}
+.r2b{display:grid;grid-template-columns:2.6fr 1fr;gap:16px}
+.fb2{height:210px;display:flex;align-items:flex-end;gap:26px;padding:0 20px 0 56px;margin:24px 20px 20px 64px;position:relative;direction:ltr;background:repeating-linear-gradient(to bottom,transparent 0 45px,#e5e7eb 45px 46px)}
+.fb2 .y{position:absolute;left:-44px;top:-8px;height:100%;display:flex;flex-direction:column;justify-content:space-between;font-size:12px;color:#4b5563}
+.fb2 .c{flex:1;display:flex;flex-direction:column-reverse}.fb2 .c i{display:block}
+.am{padding:24px 20px;direction:ltr}.am .l{font-size:12px;color:#4b5563;display:flex;align-items:center;gap:14px;margin-bottom:12px}.am .l span{width:100px;text-align:right}.am .l i{display:block;height:24px;background:#9966ff;border-radius:0 3px 3px 0}
+</style></head>
+<body data-layout="admin" data-menu="Security"><div class="pg">
+<div class="ph"><div><h1>Security Center</h1><p>Authentication posture, sign-in risk, and policy compliance.</p></div><div class="acts"><span class="bt">▭ Sessions</span><span class="bt pr">⛉ Review policy</span></div></div>
+<div class="alert"><div class="ai">⛉</div><div><b>14 accounts flagged as high risk</b><small>Impossible-travel sign-ins detected in the last 24 hours. Review before the accounts are used again.</small></div><span class="bt dn">Review now</span></div>
+<div class="kpis">
+<div class="kpi"><div class="t"><span>MFA enrolled</span><span>☝</span></div><div class="v">6,975</div><div class="s">78% of all users</div></div>
+<div class="kpi"><div class="t"><span>Failed sign-ins</span><span>⊗</span></div><div class="v">2,290</div><div class="s g">−7.3% <span style="color:#4b5563">vs. last month</span></div></div>
+<div class="kpi"><div class="t"><span>Blocked attempts</span><span>⊘</span></div><div class="v">344</div><div class="s">Rate limiting and geo rules</div></div>
+<div class="kpi"><div class="t"><span>High-risk users</span><span>⚠</span></div><div class="v">110</div><div class="s">96 high · 14 critical</div></div></div>
+<div class="r3">
+<div class="cd"><div class="h hd"><b>MFA adoption</b></div><div class="body"><div class="rg" style="--s:166px;--t:14px;--g:conic-gradient(#9966ff 0 78%,#f6f3fb 78% 100%)"><div class="ctr"><b style="font-size:28px;display:block">78%</b><small style="font-size:12px;font-weight:600">MFA enrolled</small></div></div></div><div class="ft">1,967 users still need to enrol.</div></div>
+<div class="cd"><div class="h hd"><b>Password health</b></div><div class="body"><div class="rg" style="--s:166px;--t:14px;--g:conic-gradient(#25b8a0 0 91%,#eef8f6 91% 100%)"><div class="ctr"><b style="font-size:28px;display:block">91%</b><small style="font-size:12px;font-weight:600">Policy compliant</small></div></div></div><div class="ft">804 passwords fail the length or reuse rule.</div></div>
+<div class="cd"><div class="h hd"><div><b>Risk distribution</b><small>Flagged sign-ins in the last 30 days</small></div></div><div class="body"><div class="rg" style="--s:212px;--t:30px;--g:conic-gradient(#00a884 0 77.4%,#f0a830 77.4% 95.4%,#ff7fb0 95.4% 99.4%,#dc2644 99.4% 100%)"><div class="ctr"><small style="font-size:17px;color:#4b5563;display:block;margin-bottom:6px">Flagged</small><b class="mono" style="font-size:22px">2,380</b></div></div></div>
+<div class="sg"><div>Low<b>1,842</b></div><div>Medium<b>428</b></div><div>High<b>96</b></div><div>Critical<b style="color:#b91c1c">14</b></div></div></div>
+</div>
+<div class="r2b">
+<div class="cd"><div class="h hd"><div><b>Failed &amp; blocked sign-ins</b><small>Attempts that did not result in a session</small></div><div class="lg"><span><i style="background:#f0a830"></i>Failed</span><span><i style="background:#dc2644"></i>Blocked</span></div></div>
+<div class="fb2" id="fb2"><div class="y"><span>4000</span><span>3000</span><span>2000</span><span>1000</span><span>0</span></div></div></div>
+<div class="cd"><div class="h hd"><div><b>Authentication methods</b><small>Primary method per user</small></div></div>
+<div class="am"><div class="l"><span>Password + MFA</span><i style="width:290px"></i></div><div class="l"><span>SSO (SAML)</span><i style="width:220px"></i></div></div></div>
+</div></div>
+<script>
+var v=[[12,40],[20,55],[8,48],[14,38],[30,60],[10,44],[24,62],[16,50],[9,42],[18,56]],h='';
+v.forEach(function(a){h+='<div class="c"><i style="height:'+a[0]+'px;background:#f0a830"></i><i style="height:'+a[1]+'px;background:#e0485f;border-radius:3px 3px 0 0"></i></div>'});
+document.getElementById('fb2').insertAdjacentHTML('beforeend',h);
+</script>
+<script src="layout.js"></script></body></html>

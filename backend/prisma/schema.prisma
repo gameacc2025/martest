@@ -1,0 +1,1021 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  label       String
+  description String?
+  isSystem    Boolean          @default(false)
+  // Which domain this role belongs to (STAFF / COMPANY / CUSTOMER). Set
+  // explicitly when the role is created — NOT inferred from the role name.
+  // This is what lets a brand-new custom role (e.g. "COMPANY_ACCOUNTANT")
+  // be correctly recognized as a company-scoped role without any code
+  // change, and is the source of truth for GET /roles/assignable and for
+  // the role-scope check in user.service.js createUser().
+  scope       RoleScope
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@index([isSystem])
+  @@index([scope])
+}
+
+enum RoleScope {
+  STAFF
+  COMPANY
+  CUSTOMER
+}
+
+model Permission {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  label       String
+  description String?
+  group       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles RolePermission[]
+
+  @@index([group])
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  assignedAt   DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  userId     Int
+  roleId     Int
+  assignedAt DateTime @default(now())
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model AccessProfile {
+  id        Int               @id @default(autoincrement())
+  userId    Int               @unique
+  type      AccessProfileType
+  companyId Int?
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  user      User              @relation(fields:[userId], references:[id], onDelete:Cascade)
+  company   Company?          @relation(fields:[companyId], references:[id])
+
+  @@index([type])
+  @@index([companyId])
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  firstName String?
+  lastName  String?
+  avatar    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id                  Int                  @id @default(autoincrement())
+  name                String               @unique
+  nameEn              String?
+  nationalId          String?              @unique
+  registrationNumber  String?
+  type                CompanyType?
+  description         String?
+  logo                String?
+  email               String?
+  phone               String?
+  address             String?
+  website             String?
+  status              CompanyStatus        @default(PENDING)
+  isVerified          Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
+  accessProfiles      AccessProfile[]
+  products            Product[]
+  inquiries           Inquiry[]
+  responses           InquiryResponse[]
+  inquiryLimit        CompanyInquiryLimit?
+  limits              CompanyLimit[]
+  inquirySubscriptions InquirySubscription[]
+  sentInquiryMessages InquiryMessage[] @relation("InquiryMessageSenderCompany")
+  receivedInquiryMessages InquiryMessage[] @relation("InquiryMessageRecipientCompany")
+
+  @@index([status])
+  @@index([deletedAt])
+  @@index([isVerified])
+  @@index([nationalId])
+}
+
+model User {
+  id            Int              @id @default(autoincrement())
+  email         String?          @unique
+  phone         String           @unique
+  passwordHash  String
+  status        UserStatus       @default(ACTIVE)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  profile       Profile?
+  accessProfile   AccessProfile?
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+  handoffCodes  HandoffCode[]
+  notifications Notification[]
+  notificationPreferences NotificationPreference[]
+  notificationDeliveries  NotificationDelivery[]
+  products      Product[]        @relation("ProductCreatedBy")
+  productStatusChanges ProductStatusHistory[]
+  productActivityLogs ProductActivityLog[]
+  inquiryStatusChanges InquiryStatusHistory[]
+  buyerInquiries      Inquiry[]          @relation("InquiryBuyer")
+  inquirySubscriptions InquirySubscription[]
+  sentInquiryMessages InquiryMessage[] @relation("InquiryMessageSenderUser")
+  receivedInquiryMessages InquiryMessage[] @relation("InquiryMessageRecipientUser")
+  addresses                Address[]
+
+  @@index([email])
+  @@index([status])
+  @@index([phone])
+}
+
+model Address {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  label          String   @default("خانه")
+  recipientName  String
+  recipientPhone String
+  province       String
+  city           String
+  addressLine    String
+  postalCode     String?
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isDefault])
+  @@index([userId, createdAt])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// One-time, PKCE-bound code used to hand a live session from the website
+// to the admin/company panel (see handoff.service.js). Stored hashed;
+// single-use (deleted atomically on redeem); 60-second TTL.
+model HandoffCode {
+  id        Int      @id @default(autoincrement())
+  codeHash  String   @unique
+  userId    Int
+  app       String   // 'admin' | 'company'
+  challenge String   // base64url(SHA-256(verifier)) supplied by the panel
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Category {
+  id            Int            @id @default(autoincrement())
+  slug          String         @unique
+  nameFa        String
+  nameEn        String
+  image         String?
+  status        CategoryStatus @default(ACTIVE)
+  showInMenu    Boolean        @default(true)
+  sortOrder     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subcategories Subcategory[]
+  products      Product[]
+
+  @@index([status])
+  @@index([showInMenu])
+  @@index([sortOrder])
+}
+
+model Subcategory {
+  id                    Int                               @id @default(autoincrement())
+  categoryId            Int
+  slug                  String                            @unique
+  nameFa                String
+  nameEn                String
+  status                CategoryStatus                    @default(ACTIVE)
+  sortOrder             Int                               @default(0)
+  createdAt             DateTime                          @default(now())
+  updatedAt             DateTime                          @updatedAt
+  category              Category                          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  specificationTemplate SpecificationTemplate?
+  products              Product[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model SpecificationTemplate {
+  id            Int                  @id @default(autoincrement())
+  subcategoryId Int                  @unique
+  name          String
+  description   String?
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  subcategory   Subcategory          @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  fields        SpecificationField[]
+
+  @@index([isActive])
+}
+
+model SpecificationField {
+  id         Int                    @id @default(autoincrement())
+  templateId Int
+  name       String
+  key        String
+  type       SpecificationFieldType
+  isRequired Boolean                @default(false)
+  unit       String?
+  options    Json?
+  sortOrder  Int                    @default(0)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+  template   SpecificationTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, key])
+  @@index([templateId])
+  @@index([sortOrder])
+}
+
+// Global, reusable specification field library.
+// These are NOT attached to any template — they are a shared catalogue
+// of predefined fields (توان, ولتاژ, نوع کانکتور, ...) that can be
+// referenced when building product `attributes` (via fieldId) or when
+// composing subcategory templates.
+model SpecificationLibraryField {
+  id          Int                    @id @default(autoincrement())
+  title       String
+  slug        String                 @unique
+  type        SpecificationFieldType
+  defaultUnit String?
+  description String?
+  isActive    Boolean                @default(true)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([isActive])
+  @@index([slug])
+}
+
+
+model Product {
+
+  id               Int                @id @default(autoincrement())
+  title            String
+  slug             String             @unique
+  shortDescription String?
+  description      String?
+  sku              String?
+  brand            String?
+  model            String?
+  specifications   Json?
+  status           ProductStatus      @default(DRAFT)
+  visibility       ProductVisibility  @default(PUBLIC)
+  // Retail sales are explicitly opt-in. Existing products stay non-retail.
+  retailEnabled    Boolean            @default(false)
+  isFeatured       Boolean            @default(false)
+  // Number of post-approval edits made by a company user. Reset to 0 on every
+  // approve; once it reaches the system-configured review threshold the product
+  // is automatically sent back to PENDING_REVIEW (see product.service.js).
+  editsSinceApproval Int             @default(0)
+  companyId        Int
+  categoryId       Int
+  subcategoryId    Int
+  createdByUserId  Int
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  deletedAt        DateTime?
+  company          Company            @relation(fields: [companyId], references: [id])
+  category         Category           @relation(fields: [categoryId], references: [id])
+  subcategory      Subcategory        @relation(fields: [subcategoryId], references: [id])
+  createdBy        User               @relation("ProductCreatedBy", fields: [createdByUserId], references: [id])
+
+  images           ProductImage[]
+  documents        ProductDocument[]
+  prices           ProductPriceTier[]
+  priceSnapshots   ProductPriceSnapshot[]
+  statusHistory    ProductStatusHistory[]
+  activityLog      ProductActivityLog[]
+  inquiryItems     InquiryItem[]
+
+  @@index([companyId])
+  @@index([categoryId])
+  @@index([createdByUserId])
+  @@index([status])
+  @@index([visibility])
+  @@index([isFeatured])
+  @@index([deletedAt])
+  @@index([sku])
+}
+
+model ProductStatusHistory {
+  id             Int           @id @default(autoincrement())
+  productId      Int
+  previousStatus ProductStatus
+  newStatus      ProductStatus
+  changedByUserId Int
+  comment        String?
+  createdAt      DateTime      @default(now())
+  product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  changedBy      User          @relation(fields: [changedByUserId], references: [id])
+
+  @@index([productId])
+  @@index([changedByUserId])
+  @@index([newStatus])
+  @@index([createdAt])
+}
+
+// Immutable audit trail of every product change: field edits, price-tier
+// changes, media changes, and status workflow transitions. Unlike
+// ProductStatusHistory (which only records status transitions), this captures
+// every content mutation so staff can see exactly what a company changed.
+model ProductActivityLog {
+  id           Int                  @id @default(autoincrement())
+  productId    Int
+  actorUserId  Int
+  action       ProductActivityAction
+  detail       String?
+  comment      String?
+  createdAt    DateTime             @default(now())
+  product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  actor        User                 @relation(fields: [actorUserId], references: [id])
+
+  @@index([productId])
+  @@index([actorUserId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model ProductImage {
+  id           Int      @id @default(autoincrement())
+  productId    Int
+  url          String
+  thumbnailUrl String?
+  altText      String?
+  isPrimary    Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([isPrimary])
+  @@index([sortOrder])
+}
+
+model ProductDocument {
+  id        Int                 @id @default(autoincrement())
+  productId Int
+  type      ProductDocumentType
+  title     String?
+  url       String
+  sortOrder Int                 @default(0)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([type])
+  @@index([sortOrder])
+}
+
+model ProductPriceTier {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  minQuantity Int
+  maxQuantity Int?
+  price       Decimal   @db.Decimal(18, 2)
+  unit        String?
+  validFrom   DateTime  @default(now())
+  validTo     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([minQuantity])
+  @@index([validFrom])
+  @@index([validTo])
+}
+
+model ProductPriceSnapshot {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  priceTierId Int?
+  minQuantity Int
+  maxQuantity Int?
+  price       Decimal  @db.Decimal(18, 2)
+  unit        String?
+  action      String
+  recordedAt  DateTime @default(now())
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, recordedAt])
+  @@index([priceTierId])
+}
+
+model Inquiry {
+  id               Int               @id @default(autoincrement())
+  title            String
+  description      String?
+  // Exactly one buyer identity is set: companyId for B2B company buyers,
+  // buyerUserId for CUSTOMER buyers. Enforced by a PostgreSQL CHECK constraint.
+  companyId        Int?
+  buyerUserId      Int?
+  status           InquiryStatus     @default(DRAFT)
+
+  // ── Phase 2: professional inquiry model ────────────────────
+  priority         InquiryPriority       @default(NORMAL)
+  visibilityMode   InquiryVisibilityMode @default(NORMAL)
+  confidential     Boolean               @default(false)
+
+  // Scheduling
+  publishDate      DateTime?
+  responseDeadline DateTime?
+  autoClose        Boolean               @default(true)
+
+  // Sealed-bid reveal settings
+  allowEarlyReveal Boolean               @default(false)
+  revealedAt       DateTime?
+
+  // Response controls
+  allowEditResponse     Boolean          @default(true)
+  allowWithdrawResponse Boolean          @default(false)
+
+  closedAt         DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  company          Company?          @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  buyerUser        User?              @relation("InquiryBuyer", fields: [buyerUserId], references: [id], onDelete: Cascade)
+  items            InquiryItem[]
+  responses        InquiryResponse[]
+  messages         InquiryMessage[]
+  statusHistory    InquiryStatusHistory[]
+
+  @@index([companyId])
+  @@index([buyerUserId])
+  @@index([status])
+  @@index([priority])
+  @@index([visibilityMode])
+  @@index([confidential])
+  @@index([publishDate])
+  @@index([responseDeadline])
+  @@index([revealedAt])
+  @@index([closedAt])
+}
+
+
+
+model InquiryMessage {
+  id                Int       @id @default(autoincrement())
+  inquiryId         Int
+  senderUserId      Int?
+  senderCompanyId   Int?
+  recipientUserId   Int?
+  recipientCompanyId Int?
+  body              String    @db.VarChar(5000)
+  createdAt         DateTime  @default(now())
+  readAt            DateTime?
+  inquiry           Inquiry   @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  senderUser        User?     @relation("InquiryMessageSenderUser", fields: [senderUserId], references: [id], onDelete: Cascade)
+  senderCompany     Company?  @relation("InquiryMessageSenderCompany", fields: [senderCompanyId], references: [id], onDelete: Cascade)
+  recipientUser     User?     @relation("InquiryMessageRecipientUser", fields: [recipientUserId], references: [id], onDelete: Cascade)
+  recipientCompany  Company?  @relation("InquiryMessageRecipientCompany", fields: [recipientCompanyId], references: [id], onDelete: Cascade)
+
+  @@index([inquiryId, createdAt])
+  @@index([senderUserId])
+  @@index([senderCompanyId])
+  @@index([recipientUserId])
+  @@index([recipientCompanyId])
+}
+
+model InquiryStatusHistory {
+  id             Int           @id @default(autoincrement())
+  inquiryId      Int
+  previousStatus InquiryStatus
+  newStatus      InquiryStatus
+  changedByUserId Int?
+  source         String        @default("USER")
+  comment        String?
+  createdAt      DateTime      @default(now())
+  inquiry        Inquiry       @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  changedBy      User?         @relation(fields: [changedByUserId], references: [id])
+
+  @@index([inquiryId])
+  @@index([changedByUserId])
+  @@index([newStatus])
+  @@index([createdAt])
+}
+
+model InquiryItem {
+  id            Int                   @id @default(autoincrement())
+  inquiryId     Int
+  productId     Int
+  description   String?
+  quantity      Int
+  attachment    String?
+  createdAt     DateTime              @default(now())
+  inquiry       Inquiry               @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  product       Product               @relation(fields: [productId], references: [id])
+  responseItems InquiryResponseItem[]
+
+  @@index([inquiryId])
+  @@index([productId])
+}
+
+model InquiryResponse {
+  id          Int                   @id @default(autoincrement())
+  inquiryId   Int
+  companyId   Int
+  status      InquiryResponseStatus @default(PENDING)
+  withdrawnAt DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  inquiry     Inquiry               @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  company     Company               @relation(fields: [companyId], references: [id])
+  items       InquiryResponseItem[]
+  attachments InquiryResponseAttachment[]
+
+  @@unique([inquiryId, companyId])
+  @@index([inquiryId])
+  @@index([companyId])
+  @@index([status])
+}
+
+model InquiryResponseAttachment {
+  id         Int             @id @default(autoincrement())
+  responseId Int
+  url        String
+  filename   String
+  mimetype   String?
+  size       Int?
+  createdAt  DateTime        @default(now())
+  response   InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+}
+
+
+model InquiryResponseItem {
+  id                Int             @id @default(autoincrement())
+  responseId        Int
+  inquiryItemId     Int
+  price             Decimal         @db.Decimal(18, 2)
+  currency          String          @default("IRR")
+  availableQuantity Int
+  deliveryTime      String?
+  description       String?
+  response          InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  inquiryItem       InquiryItem     @relation(fields: [inquiryItemId], references: [id])
+
+  @@unique([responseId, inquiryItemId])
+  @@index([responseId])
+  @@index([inquiryItemId])
+  @@index([currency])
+}
+
+model CompanyInquiryLimit {
+  id                 Int      @id @default(autoincrement())
+  companyId          Int      @unique
+  maxOpenInquiries   Int      @default(5)
+  maxActiveResponses Int      @default(20)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model CompanyLimit {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  key       String
+  value     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, key])
+  @@index([companyId])
+  @@index([key])
+}
+
+// Commercial plans and auditable usage for the RFQ/inquiry revenue model.
+// Enforcement is rollout-gated by SystemSetting key "inquiry.subscription_enforcement"
+// so deployment can be migrated before existing users are required to subscribe.
+model InquiryPlan {
+  id                         Int      @id @default(autoincrement())
+  code                       String   @unique
+  name                       String
+  description                String?
+  durationDays               Int
+  price                      Decimal  @db.Decimal(18, 2)
+  currency                   String   @default("IRR")
+  inquiriesPerPeriod         Int      @default(0)
+  responsesPerPeriod         Int      @default(0)
+  internalMessagesPerPeriod  Int      @default(0)
+  smsPerPeriod               Int      @default(0)
+  isActive                   Boolean  @default(true)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+  subscriptions              InquirySubscription[]
+
+  @@index([isActive])
+}
+
+model InquirySubscription {
+  id          Int      @id @default(autoincrement())
+  planId      Int
+  companyId   Int?
+  userId      Int?
+  status      InquirySubscriptionStatus @default(PENDING_PAYMENT)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  activatedBy Int?
+  paymentReference String? @unique
+  paymentProvider String?
+  paymentAuthority String? @unique
+  paymentRefId String?
+  paymentAmount Int?
+  paymentVerifiedAt DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  plan        InquiryPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user        User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usage       InquiryUsageEvent[]
+
+  @@index([companyId, status, endsAt])
+  @@index([userId, status, endsAt])
+  @@index([planId])
+}
+
+model InquiryUsageEvent {
+  id             BigInt   @id @default(autoincrement())
+  subscriptionId Int
+  usageType      InquiryUsageType
+  quantity       Int      @default(1)
+  referenceType  String?
+  referenceId    String?
+  idempotencyKey String?  @unique
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  subscription   InquirySubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, usageType, createdAt])
+  @@index([referenceType, referenceId])
+}
+
+enum InquirySubscriptionStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
+
+enum InquiryUsageType {
+  INQUIRY_CREATE
+  RESPONSE_SUBMIT
+  INTERNAL_MESSAGE
+  SMS
+}
+
+// Platform-wide, admin-managed key/value settings (e.g. the threshold of
+// post-approval edits that pushes a PUBLISHED product back into review).
+model SystemSetting {
+  id            Int      @id @default(autoincrement())
+  key           String   @unique
+  value         String
+  updatedByUserId Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([key])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  // Event key from src/modules/notifications/notification.events.js
+  // (e.g. 'PRODUCT_STATUS_CHANGED'). Null = legacy/untyped row created
+  // before the central dispatch service existed.
+  type      String?
+  // Structured event payload (e.g. { productId, status }) for deep-linking.
+  data      Json?
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderMemberships NotificationFolderMembership[]
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([type])
+}
+
+// Per-user, per-event, per-channel opt-in/out matrix (flow/06 §3: NO channel
+// is mandatory — every (user, event, channel) can be switched off, only the
+// defaults are sensible: IN_APP + EMAIL on, SMS off).
+// A missing row means "use the event's channel defaults".
+//
+// VERIFIED against the live database (2026-10-24, `prisma db pull`): column
+// types, nullability, the (userId, eventType, channel) unique index and the
+// CASCADE FK to User all match this definition 1:1. `updatedAt` is NOT NULL
+// with NO database default — `@updatedAt` is populated by the Prisma Client on
+// write, so raw-SQL inserts must supply it explicitly.
+ 
+// Admin-managed folders. INBOX and SAVED are immutable system folders.
+// Scope controls which app inboxes can display a folder; memberships are
+// associations, so copy adds a second association and move swaps one.
+model NotificationFolder {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  name      String
+  scope     NotificationFolderScope @default(ALL)
+  isSystem  Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memberships NotificationFolderMembership[]
+
+  @@index([scope, isActive, sortOrder])
+}
+
+model NotificationFolderMembership {
+  id             Int @id @default(autoincrement())
+  notificationId Int
+  folderId       Int
+  createdAt      DateTime @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  folder         NotificationFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, folderId])
+  @@index([folderId])
+}
+
+enum NotificationFolderScope {
+  ALL
+  WEBSITE
+  COMPANY
+  ADMIN
+}
+
+model NotificationPreference {
+  id        Int                 @id @default(autoincrement())
+  userId    Int
+  eventType String
+  channel   NotificationChannel
+  enabled   Boolean
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventType, channel])
+  @@index([userId])
+}
+
+// Delivery log + outbox — one row per (dispatch, recipient, channel).
+// External delivery (email) happens OUTSIDE the business transaction: the
+// dispatch persists a PENDING row atomically with the business op, and the
+// delivery worker (notification.delivery.service.js) later hands it to the
+// configured provider. A provider outage therefore never corrupts or
+// blocks the business transaction that requested the notification.
+//
+// VERIFIED against the live database (2026-10-24, `prisma db pull`): all 18
+// columns, both enums, the (eventType, dedupeKey, channel) unique index, the
+// three supporting indexes and the CASCADE FK to User match this definition
+// 1:1. `nextAttemptAt` DOES have a DB default (CURRENT_TIMESTAMP); `updatedAt`
+// does NOT (client-side `@updatedAt`). Rows with a NULL `dedupeKey` are exempt
+// from the unique index (PostgreSQL allows duplicate NULLs).
+model NotificationDelivery {
+  id             Int                        @id @default(autoincrement())
+  userId         Int
+  // Optional link to the in-app Notification row this delivery corresponds to.
+  //
+  // DELIBERATELY a scalar `Int?` with NO `@relation`: the live PostgreSQL table
+  // has NO foreign key on this column (verified via `prisma db pull` against the
+  // running database — only `userId` carries an FK). Declaring `@relation` here
+  // would make Prisma believe a constraint exists that the database does not
+  // have, so `db pull` / `migrate diff` would report phantom drift and any
+  // future `migrate dev` would try to ALTER the table.
+  //
+  // Per the no-destructive-migrations rule we preserve the actual database
+  // structure instead of inventing a constraint. To adopt a real relation later:
+  //   1. verify no orphaned values (SQL below currently returns 0);
+  //   2. add the FK + `@relation` in one reviewed migration.
+  //     SELECT COUNT(*) FROM "NotificationDelivery" d
+  //     WHERE d."notificationId" IS NOT NULL AND NOT EXISTS
+  //       (SELECT 1 FROM "Notification" n WHERE n.id = d."notificationId");
+  //
+  // Usage today: dispatch only queues EMAIL delivery rows, so this stays NULL
+  // (all current rows are NULL). It is reserved for traceability if/when
+  // IN_APP deliveries are logged as rows too. EMAIL rows are standalone
+  // because a user may disable the in-app channel while keeping email.
+  notificationId Int?
+  eventType      String
+  channel        NotificationChannel
+  status         NotificationDeliveryStatus @default(PENDING)
+  // Frozen snapshot of the message — the worker sends it without re-reading
+  // the (possibly long-gone) business context that produced it.
+  recipient      String?                    // email address (EMAIL); phone for future SMS
+  subject        String?
+  body           String?
+  provider       String?                    // adapter that (last) handled it: 'smtp' | 'console' | ...
+  attempts       Int                        @default(0)
+  maxAttempts    Int                        @default(3)
+  nextAttemptAt  DateTime                   @default(now())
+  lastError      String?
+  sentAt         DateTime?
+  // Event-level idempotency key. A second dispatch with the same
+  // (eventType, dedupeKey, channel) is a silent no-op — safe duplicate dispatch.
+  dedupeKey      String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  user           User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Idempotency: the same (event, dedupeKey, channel) can only be queued once.
+  // Rows without a dedupeKey (NULL) are exempt (Postgres allows NULL duplicates).
+  @@unique([eventType, dedupeKey, channel])
+  @@index([userId])
+  @@index([eventType])
+  @@index([channel, status, nextAttemptAt])
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum CompanyType {
+  MANUFACTURER
+  IMPORTER
+  TELECOM_OPERATOR
+}
+
+enum CompanyStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
+enum AccessProfileType {
+  STAFF
+  COMPANY
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SpecificationFieldType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  SELECT
+  MULTI_SELECT
+  DATE
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+  HIDDEN
+  ARCHIVED
+}
+
+enum ProductActivityAction {
+  CREATE
+  EDIT
+  PRICE_TIER_CREATE
+  PRICE_TIER_UPDATE
+  PRICE_TIER_DELETE
+  IMAGE_UPLOAD
+  IMAGE_DELETE
+  IMAGE_SET_PRIMARY
+  IMAGE_SORT
+  DOCUMENT_UPLOAD
+  DOCUMENT_DELETE
+  SUBMIT_REVIEW
+  APPROVE
+  REJECT
+  PUBLISH
+  HIDE
+  ARCHIVE
+  RESTORE_DRAFT
+}
+
+enum ProductVisibility {
+  PUBLIC
+  PRIVATE
+  COMPANY_ONLY
+}
+
+enum ProductDocumentType {
+  DATASHEET
+  CATALOG
+  MANUAL
+  CERTIFICATE
+}
+
+enum InquiryStatus {
+  DRAFT
+  SUBMITTED
+  OPEN
+  CLOSED
+  EXPIRED
+  COMPLETED
+  CANCELLED
+}
+
+enum InquiryResponseStatus {
+  PENDING
+  SELECTED
+  REJECTED
+  EXPIRED
+  WITHDRAWN
+}
+
+
+enum InquiryPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum InquiryVisibilityMode {
+  NORMAL
+  SEALED
+  ANONYMOUS_SEALED
+}
+

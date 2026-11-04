@@ -1,0 +1,105 @@
+# =============================================================
+# Docker Compose - Production
+# اجرا:
+# docker compose up -d --build
+# Set VITE_COMPANY_APP_URL and VITE_ADMIN_APP_URL in .env to the
+# public browser-reachable origins when deploying outside localhost.
+# =============================================================
+
+services:
+  postgres:
+    image: postgres:18.4-bookworm
+    container_name: telecom_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-telecom}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-telecom_marketplace}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-telecom} -d ${POSTGRES_DB:-telecom_marketplace}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - telecom_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: telecom_backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-telecom}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@postgres:5432/${POSTGRES_DB:-telecom_marketplace}?schema=public
+    ports:
+      - "3000:3000"
+    volumes:
+      - inquiry_private_uploads:/app/private-uploads
+      - user_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - telecom_net
+
+  website:
+    build:
+      context: .
+      dockerfile: apps/website/Dockerfile
+      args:
+        VITE_COMPANY_APP_URL: ${VITE_COMPANY_APP_URL:-http://localhost:3002}
+        VITE_ADMIN_APP_URL: ${VITE_ADMIN_APP_URL:-http://localhost:3003}
+    container_name: telecom_website
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    networks:
+      - telecom_net
+
+  company:
+    build:
+      context: .
+      dockerfile: apps/company/Dockerfile
+      args:
+        VITE_COMPANY_APP_URL: ${VITE_COMPANY_APP_URL:-http://localhost:3002}
+        VITE_ADMIN_APP_URL: ${VITE_ADMIN_APP_URL:-http://localhost:3003}
+    container_name: telecom_company
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    networks:
+      - telecom_net
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        VITE_COMPANY_APP_URL: ${VITE_COMPANY_APP_URL:-http://localhost:3002}
+        VITE_ADMIN_APP_URL: ${VITE_ADMIN_APP_URL:-http://localhost:3003}
+    container_name: telecom_admin
+    restart: unless-stopped
+    ports:
+      - "3003:80"
+    depends_on:
+      - backend
+    networks:
+      - telecom_net
+
+networks:
+  telecom_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  inquiry_private_uploads:
+  user_uploads:

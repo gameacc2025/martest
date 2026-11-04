@@ -1,0 +1,526 @@
+@mixin apply {
+/* ============================================================
+   Skill-driven refinement layer
+   Shared by Admin, Company and Website through main.scss.
+   Preserve the existing Telecom palette and semantic status colors.
+   ============================================================ */
+
+/* Operational metrics: typography first, not icon tiles or hover cards. */
+.stat-card {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: .45rem;
+  min-width: 0;
+  padding: 1rem 1.15rem;
+  border: 0;
+  border-inline-start: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: none;
+}
+.stat-card:hover { box-shadow: none; }
+.stat-card .stat-icon { display: none; }
+.stat-card .stat-content h3 {
+  color: var(--ds-color-text);
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-variant-numeric: tabular-nums;
+}
+.stat-card .stat-content p { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
+
+/* Quick actions become quiet navigation rows rather than another card grid. */
+.quick-action {
+  min-height: 2.75rem;
+  padding: .7rem .15rem;
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: var(--ds-font-size-sm);
+  transition: color var(--ds-transition-fast), border-color var(--ds-transition-fast);
+}
+.quick-action i { color: var(--ds-color-text-muted); font-size: 1.1rem; }
+.quick-action:hover {
+  border-color: var(--ds-color-primary);
+  background: transparent;
+  box-shadow: none;
+}
+.quick-action:hover i { color: var(--ds-color-primary-text); }
+
+/* PrimeVue surfaces: one-pixel separation, no nested shadows. */
+.p-card,
+.p-panel {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: none;
+}
+.p-card .p-card-header,
+.p-panel .p-panel-header {
+  border-color: var(--ds-color-border);
+  background: transparent;
+}
+.p-card .p-card-title,
+.p-panel .p-panel-title { color: var(--ds-color-text); }
+.p-card .p-card-content,
+.p-panel .p-panel-content { color: var(--ds-color-text); }
+
+/* Buttons use explicit transitions and consistent touch targets. */
+.p-button {
+  min-height: 2.75rem;
+  border-radius: var(--ds-radius-sm);
+  font-weight: var(--ds-font-weight-semibold);
+  box-shadow: none;
+  transition: background-color var(--ds-transition-fast), border-color var(--ds-transition-fast), color var(--ds-transition-fast);
+}
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link) { box-shadow: none; }
+.p-button:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
+}
+
+/* Inputs: 44px minimum, clear focus, no focus ring suppression. */
+.p-inputtext,
+.p-inputnumber .p-inputtext,
+.p-password .p-inputtext,
+.p-textarea,
+.p-select,
+.p-multiselect,
+.p-dropdown {
+  min-height: 2.75rem;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-color-text);
+}
+.p-inputtext:focus,
+.p-inputnumber .p-inputtext:focus,
+.p-password .p-inputtext:focus,
+.p-textarea:focus,
+.p-select.p-focus,
+.p-multiselect.p-focus,
+.p-dropdown.p-focus {
+  border-color: var(--ds-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-focus) 28%, transparent);
+}
+.p-inputtext:focus-visible,
+.p-textarea:focus-visible,
+.p-select:focus-visible,
+.p-multiselect:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 1px; }
+.p-checkbox:focus-within,
+.p-toggleswitch:focus-within { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
+
+/* Tables are data surfaces, not cards nested inside cards. */
+.p-datatable {
+  overflow: hidden;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: none;
+}
+.p-datatable .p-datatable-header,
+.p-datatable .p-datatable-footer {
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+}
+.p-datatable .p-datatable-thead > tr > th {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-xs);
+  font-weight: var(--ds-font-weight-bold);
+}
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: .85rem 1rem;
+  border-color: var(--ds-color-border);
+  color: var(--ds-color-text);
+  font-size: var(--ds-font-size-sm);
+}
+.p-datatable .p-datatable-tbody > tr { transition: background-color var(--ds-transition-fast); }
+.p-datatable .p-datatable-tbody > tr:hover { background: var(--ds-color-surface-hover); }
+.p-datatable .p-paginator {
+  border: 0;
+  border-top: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: var(--ds-color-surface);
+}
+
+/* Shared design-system primitives follow the same flat surface language. */
+.ds-card { border-radius: var(--ds-radius-md); box-shadow: none; }
+.ds-card--hover:hover { transform: none; box-shadow: none; }
+.ds-panel {
+  border: 0;
+  border-top: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ds-stat-card {
+  border: 0;
+  border-inline-start: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ds-stat-card__icon { display: none; }
+.ds-stat-card__value { font-variant-numeric: tabular-nums; }
+.ds-table-container { border-radius: var(--ds-radius-md); box-shadow: none; }
+.ds-form-section { border-radius: var(--ds-radius-md); box-shadow: none; }
+
+/* Toolbars become a control row, not a second surface card. */
+.p-toolbar {
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 0;
+}
+.p-toolbar .p-toolbar-start,
+.p-toolbar .p-toolbar-end { gap: var(--ds-space-2); }
+
+/* Keep dialog elevation because it is a true overlay, not page chrome. */
+.p-dialog { border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-lg); }
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-footer { background: var(--ds-color-surface); }
+
+@media (max-width: 640px) {
+  .stat-card { padding: .75rem; border-inline-start: 0; border-bottom: 1px solid var(--ds-color-border); }
+  .p-datatable .p-datatable-thead > tr > th,
+  .p-datatable .p-datatable-tbody > tr > td { padding: .7rem .65rem; }
+  .p-toolbar { align-items: stretch; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-action,
+  .p-datatable .p-datatable-tbody > tr,
+  .p-button { transition: none; }
+}
+
+/* Inquiry/RFQ workflows: keep the task and the real status ahead of decoration. */
+.inquiry-list-page .card,
+.inquiry-list-page .inquiry-management-surface,
+.inquiry-detail-page .page-header,
+.inquiry-detail-page .detail-section,
+.inquiry-detail-page .sidebar-card,
+.inquiry-detail-page .response-card,
+.inquiry-detail-page .detail-card,
+.inquiry-create-page .page-header,
+.inquiry-create-page .inquiry-stepper,
+.inquiry-create-page .inquiry-progress-card,
+.subscription-page .heading,
+.subscription-page .panel,
+.subscription-page .plan-card,
+.subscription-page .overview-card,
+.my-inquiries-page .list-panel,
+.my-inquiries-page .detail-panel,
+.my-inquiries-page .section-panel {
+  box-shadow: none !important;
+  border-radius: var(--ds-radius-md);
+}
+.inquiry-list-page .card,
+.inquiry-list-page .inquiry-management-surface {
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface);
+}
+.inquiry-list-page .inquiry-workspace-intro {
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface-alt) !important;
+  box-shadow: none !important;
+}
+.inquiry-detail-page .page-header,
+.inquiry-create-page .page-header,
+.subscription-page .heading {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--ds-color-border) !important;
+}
+.inquiry-detail-page .detail-section,
+.inquiry-detail-page .sidebar-card,
+.inquiry-detail-page .response-card,
+.inquiry-detail-page .detail-card {
+  border: 1px solid var(--ds-color-border) !important;
+  background: var(--ds-color-surface) !important;
+}
+.inquiry-create-page .inquiry-editor-eyebrow { display: none; }
+.inquiry-create-page .inquiry-progress-card {
+  border: 1px solid var(--ds-color-border) !important;
+  background: var(--ds-color-surface-alt) !important;
+}
+.subscription-page .panel,
+.subscription-page .plan-card,
+.subscription-page .overview-card,
+.my-inquiries-page .list-panel,
+.my-inquiries-page .detail-panel,
+.my-inquiries-page .section-panel {
+  border: 1px solid var(--ds-color-border) !important;
+  background: var(--ds-color-surface) !important;
+}
+.subscription-page .plan-card {
+  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
+}
+.subscription-page .plan-card:hover { transform: none !important; box-shadow: none !important; }
+.subscription-page .plan-card.chosen {
+  border-color: var(--ds-color-primary);
+  box-shadow: inset 0 0 0 1px var(--ds-color-primary) !important;
+}
+.my-inquiries-page .list-panel,
+.my-inquiries-page .detail-panel { padding: clamp(1rem, 2vw, 1.5rem); }
+.inquiry-create-page .page-header-actions,
+.subscription-page .page-header-actions { gap: var(--ds-space-2); }
+.inquiry-create-page :deep(.p-stepper),
+.inquiry-create-page .inquiry-stepper { background: transparent; }
+.inquiry-create-page :deep(.p-stepper-panels) { background: var(--ds-color-surface); }
+.inquiry-create-page :deep(.p-stepper-header) { min-height: 2.75rem; }
+@media (max-width: 640px) {
+  .inquiry-create-page .page-header { align-items: stretch; flex-direction: column; }
+  .inquiry-create-page .page-header-actions { width: 100%; }
+  .inquiry-create-page .page-header-actions :deep(.p-button) { flex: 1 1 auto; }
+  .subscription-page .plan-card { min-width: 0; }
+}
+
+
+/* Product authoring and catalogue management: calm, consistent work surfaces. */
+.product-form-page .product-editor-eyebrow { display: none !important; }
+.product-form-page .page-header {
+  align-items: flex-end;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border: 0;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: transparent;
+  box-shadow: none;
+}
+.product-form-page .form-section {
+  border: 1px solid var(--ds-color-border) !important;
+  border-inline-start: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+  padding: 1.25rem;
+}
+.product-form-page .custom-specs { border-top: 1px solid var(--ds-color-border); }
+.product-form-page .price-tier-row {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-color-surface-alt);
+}
+.product-form-page .image-item { border-radius: var(--ds-radius-sm); }
+.product-form-page .form-grid { gap: 1rem; }
+.product-form-page .page-header-actions { flex-wrap: wrap; }
+.product-form-page .page-header-actions .p-button { min-height: 2.75rem; }
+.product-form-page .field label { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
+.product-form-page .field :is(input, textarea, select) { max-width: 100%; }
+.product-list-page .product-management-surface,
+.product-list-page .card {
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+}
+.product-list-page .product-management-intro {
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface-alt) !important;
+  box-shadow: none !important;
+}
+.product-list-page .product-management-intro-icon,
+.product-list-page .product-management-intro-copy > span { display: none !important; }
+.product-list-page .product-management-toolbar {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.product-list-page .product-management-table .p-datatable-tbody > tr > td { vertical-align: middle; }
+.product-list-page .table-state { background: var(--ds-color-surface); }
+@media (max-width: 760px) {
+  .product-form-page .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .product-form-page .page-header { align-items: stretch; flex-direction: column; }
+  .product-form-page .page-header-actions { width: 100%; }
+  .product-form-page .page-header-actions .p-button { flex: 1 1 auto; }
+}
+
+
+
+/* Skill pass: keep operational lists quiet, legible and consistent across apps. */
+.management-data-surface,
+.company-management-surface,
+.identity-management-surface,
+.product-management-surface {
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+}
+.management-data-toolbar,
+.company-management-toolbar,
+.identity-management-toolbar,
+.product-management-toolbar {
+  border-radius: 0 !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+}
+.management-page-intro,
+.access-management-intro,
+.order-management-intro,
+.company-management-intro,
+.identity-management-intro {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-lg) !important;
+  background: color-mix(in srgb, var(--ds-color-primary) 4%, var(--ds-color-surface)) !important;
+  box-shadow: var(--ds-shadow-xs) !important;
+}
+.management-page-icon,
+.access-management-icon,
+.order-management-icon,
+.company-management-intro-icon,
+.identity-management-icon {
+  display: grid !important;
+  place-items: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
+  border-radius: 9px;
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
+  font-size: 1.1rem;
+}
+
+.settings-page .settings-heading {
+  padding: 0 0 var(--ds-space-4) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--ds-color-border) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.settings-page .settings-heading-icon { display: grid !important; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 9px; background: var(--ds-color-primary-soft); color: var(--ds-color-primary-text); }
+.settings-page .settings-heading-eyebrow { display: none !important; }
+.settings-page .meta-section,
+.settings-page .form-section {
+  border: 1px solid var(--ds-color-border) !important;
+  border-radius: var(--ds-radius-md) !important;
+  background: var(--ds-color-surface) !important;
+  box-shadow: none !important;
+}
+.settings-page .meta-item,
+.settings-page .switch-row { border-radius: var(--ds-radius-sm) !important; }
+.settings-page .p-tablist {
+  border-radius: var(--ds-radius-md) !important;
+  box-shadow: none !important;
+}
+.settings-page .p-tab { min-height: 2.75rem !important; }
+.settings-page .field :is(input, textarea, select) { max-width: 100%; }
+.settings-page .field label { cursor: pointer; }
+@media (max-width: 700px) {
+  .settings-page .tab-actions .p-button { min-height: 2.75rem; }
+}
+
+
+/* Rebalanced visual character: restore intentional surface depth and compact hierarchy. */
+.stat-card {
+  display: flex;
+  min-height: 5.75rem;
+  align-items: center;
+  flex-direction: row;
+  gap: .8rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+  transition: border-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+}
+.stat-card:hover { border-color: color-mix(in srgb, var(--ds-color-primary) 28%, var(--ds-color-border)); box-shadow: var(--ds-shadow-sm); }
+.stat-card .stat-icon {
+  display: inline-flex;
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ds-color-primary-text);
+  font-size: 1.15rem;
+}
+.stat-card .stat-content { display: grid; min-width: 0; gap: .2rem; }
+.stat-card .stat-content h3 { font-size: 1.35rem; line-height: 1.25; }
+.stat-card .stat-content p { font-size: .78rem; line-height: 1.5; }
+
+.quick-action {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 3rem;
+  padding: .65rem .8rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+  font-size: .82rem;
+  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast), box-shadow var(--ds-transition-fast);
+}
+.quick-action i { color: var(--ds-color-primary-text); font-size: 1rem; }
+.quick-action:hover {
+  border-color: color-mix(in srgb, var(--ds-color-primary) 35%, var(--ds-color-border));
+  background: var(--ds-color-surface-hover);
+  box-shadow: var(--ds-shadow-sm);
+}
+
+.p-card, .p-panel {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.p-card .p-card-title, .p-panel .p-panel-title { font-size: .98rem; font-weight: var(--ds-font-weight-bold); }
+
+.ds-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.ds-card--hover:hover { transform: translateY(-1px); box-shadow: var(--ds-shadow-sm); }
+.ds-panel {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.ds-stat-card {
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+.ds-stat-card__icon { display: inline-flex; color: var(--ds-color-primary-text); }
+
+.p-toolbar {
+  padding: .65rem .85rem;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
+  box-shadow: var(--ds-shadow-xs);
+}
+.p-datatable { box-shadow: var(--ds-shadow-xs); }
+.p-datatable .p-datatable-thead > tr > th { padding: .7rem .85rem; font-size: .75rem; }
+.p-datatable .p-datatable-tbody > tr > td { padding: .72rem .85rem; font-size: .82rem; }
+
+@media (max-width: 640px) {
+  .stat-card { min-height: 5rem; padding: .75rem; }
+  .quick-action { min-height: 2.75rem; }
+}
+
+}

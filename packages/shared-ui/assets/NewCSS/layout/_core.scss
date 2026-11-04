@@ -1,0 +1,37 @@
+/* Vazirmatn Variable Font */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../../fonts/Vazirmatn-RD.woff2') format('woff2 supports variations'),
+       url('../../fonts/Vazirmatn-RD.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+    height: 100%;
+    /* 16px is the web standard base size. The old 14px made every rem-based
+       size 12.5% smaller than intended, which is why text read as "too small". */
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: 'Vazirmatn', 'Inter', 'Lato', system-ui, -apple-system, sans-serif;
+    color: var(--text-color);
+    background-color: var(--surface-ground);
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    text-decoration: none;
+}
+
+.layout-wrapper {
+    min-height: 100vh;
+}

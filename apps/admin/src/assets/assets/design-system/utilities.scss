@@ -1,0 +1,153 @@
+/* ============================================================
+   Telecom Marketplace — Design System Utilities
+   ============================================================
+
+   Thin, token-driven helper classes for common layout/typography needs so
+   pages don't reinvent spacing or hardcode values. Every declaration resolves
+   to a `--ds-*` token — no raw hex, no magic numbers.
+
+   Prefix: `ds-` to avoid clashing with PrimeVue/Sakai classes.
+   ============================================================ */
+
+/* ---- Surface / panel ---- */
+.ds-surface {
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+}
+
+.ds-elevated {
+  box-shadow: var(--ds-shadow-md);
+}
+
+/* ---- Typography ---- */
+.ds-title {
+  font-size: var(--ds-font-size-2xl);
+  font-weight: var(--ds-font-weight-bold);
+  line-height: var(--ds-line-height-tight);
+  color: var(--ds-color-text);
+  margin: 0;
+}
+
+.ds-heading {
+  font-size: var(--ds-font-size-xl);
+  font-weight: var(--ds-font-weight-bold);
+  color: var(--ds-color-text);
+  margin: 0;
+}
+
+.ds-subheading {
+  font-size: var(--ds-font-size-lg);
+  font-weight: var(--ds-font-weight-semibold);
+  color: var(--ds-color-text);
+  margin: 0;
+}
+
+.ds-text {
+  font-size: var(--ds-font-size-md);
+  color: var(--ds-color-text);
+}
+
+.ds-text-sm {
+  font-size: var(--ds-font-size-sm);
+}
+
+.ds-text-xs {
+  font-size: var(--ds-font-size-xs);
+}
+
+.ds-text-muted {
+  color: var(--ds-color-text-muted);
+}
+
+.ds-text-primary {
+  color: var(--ds-color-primary);
+}
+
+.ds-text-success {
+  color: var(--ds-color-success);
+}
+.ds-text-warning {
+  color: var(--ds-color-warning);
+}
+.ds-text-danger {
+  color: var(--ds-color-danger);
+}
+
+.ds-font-medium {
+  font-weight: var(--ds-font-weight-medium);
+}
+.ds-font-semibold {
+  font-weight: var(--ds-font-weight-semibold);
+}
+.ds-font-bold {
+  font-weight: var(--ds-font-weight-bold);
+}
+
+/* ---- Flex / layout ---- */
+.ds-flex {
+  display: flex;
+}
+.ds-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.ds-items-center {
+  align-items: center;
+}
+.ds-justify-between {
+  justify-content: space-between;
+}
+.ds-flex-wrap {
+  flex-wrap: wrap;
+}
+.ds-flex-1 {
+  flex: 1;
+}
+
+/* ---- Gap (spacing tokens) ---- */
+.ds-gap-1 { gap: var(--ds-space-1); }
+.ds-gap-2 { gap: var(--ds-space-2); }
+.ds-gap-3 { gap: var(--ds-space-3); }
+.ds-gap-4 { gap: var(--ds-space-4); }
+.ds-gap-6 { gap: var(--ds-space-6); }
+
+/* ---- Padding ---- */
+.ds-p-2 { padding: var(--ds-space-2); }
+.ds-p-3 { padding: var(--ds-space-3); }
+.ds-p-4 { padding: var(--ds-space-4); }
+.ds-p-6 { padding: var(--ds-space-6); }
+
+/* ---- Margin bottom (vertical rhythm) ---- */
+.ds-mb-2 { margin-bottom: var(--ds-space-2); }
+.ds-mb-3 { margin-bottom: var(--ds-space-3); }
+.ds-mb-4 { margin-bottom: var(--ds-space-4); }
+.ds-mb-6 { margin-bottom: var(--ds-space-6); }
+.ds-mb-8 { margin-bottom: var(--ds-space-8); }
+
+/* ---- Responsive grid (auto-fit cards) ---- */
+.ds-grid {
+  display: grid;
+  gap: var(--ds-space-6);
+}
+.ds-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.ds-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.ds-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.ds-grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+@media (max-width: 991px) {
+  .ds-grid-3,
+  .ds-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .ds-grid-2,
+  .ds-grid-3,
+  .ds-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
