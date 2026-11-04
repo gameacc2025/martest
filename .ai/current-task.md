@@ -448,3 +448,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 **Verification:** GitHub source writes plus re-fetch/static review only. Vitest/build/browser tests NOT RUN. No backend, schema, migration or API implementation changed.
 
 **Next:** Audit auth-store profile operations against actual package/backend endpoints before modifying profile editing/avatar/password. Then move to operational retail backend R1 from `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` only after validating product retail eligibility, stock, shipping, commission, returns and payment provider.
+
+
+### Customer profile API correction — 2026-11-04
+- Audited `packages/auth/store.js`, the website profile page, settings routes/controller/schema/service, and the shared FormData request handling.
+- Confirmed profile name updates use `PATCH /settings/profile`; password changes use `PATCH /settings/change-password` and revoke refresh tokens; avatar uses `POST/DELETE /settings/profile/avatar`.
+- Fixed a fake avatar implementation: backend now validates JPEG/PNG/WebP MIME plus file signature, enforces a 1 MB limit, writes a generated safe filename under `uploads/avatars`, persists the URL only after file write, and best-effort cleans up the replaced file.
+- Added per-route multipart limits and unit coverage for invalid MIME and actual file persistence.
+- Added a named production Docker volume `user_uploads:/app/uploads` so static user uploads survive container replacement. Dev backend bind mount already persists `backend/uploads`.
+- No Prisma schema or migration changes. This is a narrowly scoped backend correctness/security fix discovered during the UI account audit; it is an explicit exception to the UI-only redesign scope, not a broader backend feature phase.
+- Automated tests/build/browser checks NOT RUN. Source was re-fetched for static review.
