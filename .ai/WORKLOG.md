@@ -3332,3 +3332,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** GitHub source writes and re-fetch/static review only. Vitest, production build and browser checks NOT RUN. Backend/Prisma/API code unchanged.
 - **Known follow-up:** Profile page calls auth-store methods for profile update/avatar/password; verify exact installed `@telecom/auth` implementation and backend routes before altering this contract. Route guards are UX only; server authorization remains authoritative.
 - **Next:** Audit auth package and profile operations, then plan/implement retail backend R1 with explicit product eligibility, inventory, shipping, commission, return and gateway policy constraints.
+
+
+## 2026-11-04 — WEBSITE-PROFILE-API-01 — Verify profile contract and implement real avatar storage
+- **Status:** IMPLEMENTED; tests authored, not executed.
+- **Scope:** Website customer profile + backend settings avatar endpoint + production upload persistence.
+- **Audit:** `@telecom/auth` calls the real profile/password/avatar endpoints. Profile updates are restricted to firstName/lastName/avatar; password changes verify the current password and revoke refresh tokens.
+- **Fix:** Replaced the placeholder avatar URL generator with real local file persistence. Only JPEG, PNG and WebP are accepted; request file limit and post-write size checks cap files at 1 MB; binary signatures are checked; server-generated UUID filenames prevent path traversal; DB URL is updated only after successful write; previous local avatar cleanup is best-effort.
+- **Ops:** Added named Docker volume `user_uploads` at `/app/uploads` in production compose. Dev backend bind mount persists `backend/uploads`.
+- **Tests:** Updated settings service unit tests for invalid MIME and actual file writing in a temporary directory. Tests were NOT RUN. Build/browser checks NOT RUN.
+- **Schema:** No Prisma schema or migration changes.
+- **Limit:** Local disk storage is suitable for the current single-backend deployment. Multi-replica deployments should use shared object storage.
+- **Commit sequence:** `dcf91b2`, `a5cf591`, `a168e93`, `98af86b`, `b4593ec`, `fd0ce6a`, `37b4d20`, `1984058` (see GitHub history).
