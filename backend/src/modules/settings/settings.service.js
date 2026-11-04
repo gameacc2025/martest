@@ -7,7 +7,8 @@
 const prisma = require('../../config/db');
 const { hashPassword, verifyPassword } = require('../../utils/password');
 const { AppError } = require('../../utils/error');
-const fs = require('node:fs/promises');
+const fs = require('node:fs');
+const fsp = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { pipeline } = require('node:stream/promises');
@@ -56,7 +57,7 @@ async function removeAvatarFile(avatarUrl) {
   const filePath = avatarDiskPath(avatarUrl);
   if (!filePath) return;
   try {
-    await fs.unlink(filePath);
+    await fsp.unlink(filePath);
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
@@ -112,7 +113,7 @@ async function uploadAvatar(userId, file) {
   }
 
   const directory = avatarDirectory();
-  await fs.mkdir(directory, { recursive: true });
+  await fsp.mkdir(directory, { recursive: true });
   const filename = `${userId}-${randomUUID()}${extension}`;
   const destination = path.join(directory, filename);
   const avatar = `/uploads/avatars/${filename}`;
@@ -138,7 +139,7 @@ async function uploadAvatar(userId, file) {
     await removeAvatarFile(previous?.avatar);
     return avatar;
   } catch (error) {
-    try { await fs.unlink(destination); } catch (cleanupError) {
+    try { await fsp.unlink(destination); } catch (cleanupError) {
       if (cleanupError.code !== 'ENOENT') throw cleanupError;
     }
     throw error;
