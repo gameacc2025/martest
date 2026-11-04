@@ -2391,6 +2391,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Pages that were already on `ds-*` tokens inherit the tem palette automatically because `--ds-color-*` resolve through the new PrimeVue `--p-*` blue ramp.
 - AD-4 surfaces (`Checkout`, `Orders`, `OrderDetails`, cart/wishlist) intentionally untouched.
 - Committed phase 2 as `c71d44c` (`feat(ui): cascade tem widgets through catalogue, lists and dashboard shell`).
+- Committed phase 3 as `7853339` (`feat(ui): adopt tem page heads on public content and notification settings`).
 
 **Verification (phase 3):** `npx vitest run` → 56 files / 310 tests pass; all three production builds pass. Browser/visual checks `NOT RUN`.
 - Shared workspace heading adopted in Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us.

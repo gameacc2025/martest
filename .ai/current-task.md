@@ -372,5 +372,6 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 6. Commit phase 3 on `main` and record the SHA in WORKLOG.
 
 **Phase 2 commit:** `c71d44c`.
+**Phase 3 commit:** `7853339`.
 
 **Open decision:** whether to keep the legacy website `components/products/ProductCard.vue` alongside the new Tem product card, or migrate all product surfaces to one shared card.
