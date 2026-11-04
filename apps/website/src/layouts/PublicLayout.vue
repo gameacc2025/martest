@@ -12,6 +12,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useCartStore } from '../stores/cart'
 import { categoriesApi, endpoints } from '@telecom/api-client'
 import { apiGet } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
@@ -23,6 +24,8 @@ import MegaMenu from '@telecom/shared-ui/components/common/MegaMenu.vue'
 import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 
 const authStore = useAuthStore()
+const cartStore = useCartStore()
+const cartItemCount = computed(() => cartStore.itemCount)
 const router = useRouter()
 const route = useRoute()
 
@@ -213,6 +216,10 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
+            <router-link to="/cart" class="public-icon-link public-cart-link" aria-label="سبد خرید">
+              <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+              <span v-if="cartItemCount > 0" class="public-notification-badge">{{ cartItemCount > 99 ? '۹۹+' : cartItemCount.toLocaleString('fa-IR') }}</span>
+            </router-link>
             <div class="public-search-desktop">
               <IconField>
                 <InputIcon class="pi pi-search" />
