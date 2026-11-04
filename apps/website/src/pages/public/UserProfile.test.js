@@ -62,8 +62,8 @@ describe('Website account profile workspace', () => {
             props: ['visible', 'header'],
             template: '<div v-if="visible" role="dialog"><h2>{{ header }}</h2><slot /></div>',
           },
-          InputText: { inheritAttrs: false, template: '<input v-bind="$attrs" />' },
-          Password: { inheritAttrs: false, template: '<input v-bind="$attrs" />' },
+          InputText: { inheritAttrs: false, props: ['modelValue'], emits: ['update:modelValue'], template: '<input :value="modelValue" v-bind="$attrs" @input="$emit(\'update:modelValue\', $event.target.value)" />' },
+          Password: { inheritAttrs: false, props: ['modelValue'], emits: ['update:modelValue'], template: '<input :value="modelValue" v-bind="$attrs" @input="$emit(\'update:modelValue\', $event.target.value)" />' },
           FileUpload: { template: '<button type="button">انتخاب تصویر</button>' },
         },
       },
@@ -116,4 +116,36 @@ describe('Website account profile workspace', () => {
     expect(getProfile).toHaveBeenCalledTimes(2)
     expect(wrapper.find('.profile-identity h2').text()).toBe('مریم احمدی')
   })
+  it('does not submit an empty profile name to the backend', async () => {
+    mountPage()
+    await flushPromises()
+    await wrapper.find('.profile-primary-actions button').trigger('click')
+    await flushPromises()
+
+    await wrapper.find('#profile-first-name').setValue(' ')
+    await wrapper.find('#profile-last-name').setValue('احمدی')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(updateProfile).not.toHaveBeenCalled()
+    expect(wrapper.find('[role="alert"]').text()).toContain('نام و نام خانوادگی الزامی است')
+  })
+
+  it('validates password length and confirmation before calling the API', async () => {
+    mountPage()
+    await flushPromises()
+    await wrapper.findAll('.profile-primary-actions button')[1].trigger('click')
+    await flushPromises()
+
+    const fields = wrapper.findAll('[role="dialog"] input')
+    await fields[0].setValue('old-password')
+    await fields[1].setValue('short')
+    await fields[2].setValue('short')
+    await wrapper.find('[role="dialog"] form').trigger('submit')
+    await flushPromises()
+
+    expect(changePassword).not.toHaveBeenCalled()
+    expect(wrapper.find('[role="alert"]').text()).toContain('حداقل ۸ نویسه')
+  })
+
 })
