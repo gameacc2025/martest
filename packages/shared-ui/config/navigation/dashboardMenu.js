@@ -145,6 +145,21 @@ export const dashboardMenu = [
     ],
   },
   {
+    section: 'CRM و مشتریان',
+    items: [
+      { title: 'مرکز CRM', icon: 'pi pi-address-book', route: 'admin-crm', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+      { title: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', route: 'admin-tickets', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+      { title: 'سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', route: 'admin-retail-orders', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+      { title: 'تیکت‌های شرکت', icon: 'pi pi-headphones', route: 'company-tickets', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+    ],
+  },
+  {
+    section: 'مالی',
+    items: [
+      { title: 'مالی و تسویه حساب', icon: 'pi pi-wallet', route: 'admin-finance', roles: ['SUPER_ADMIN', 'ADMIN'] },
+    ],
+  },
+  {
     section: 'حساب کاربری',
     items: [
       { title: 'پروفایل من', icon: 'pi pi-user', route: 'profile' },
