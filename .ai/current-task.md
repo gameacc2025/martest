@@ -469,3 +469,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Avatar URLs are served same-origin in both dev Vite proxy (/uploads) and production nginx proxy (/uploads); no frontend URL rewriting is required.
 - Tests/build/browser NOT RUN.
 **Next:** Begin retail backend R1 audit/implementation from the existing commerce domain contract, starting with schema/product eligibility, price tier semantics, stock and tenant access; do not activate checkout/payment until the server-side policy and gateway contract are verified.
+
+
+## Next phase — RETAIL-COMMERCE-R1 — Backend readiness audit
+- Audited current Prisma Product/ProductPriceTier/ProductPriceSnapshot/Company/User/AccessProfile/Address models and product service/routes.
+- Confirmed no retail enable flag, no inventory balance/movement/reservation models, no Order/SellerOrder models, and no retail payment/webhook APIs. Legacy /orders backend module is removed.
+- Product price tiers use Decimal(18,2), quantity bounds and validity dates; minQuantity=1 is only a candidate retail price and is not yet a server-side checkout resolver.
+- Retail eligibility must be opt-in, default false; require PUBLISHED + PUBLIC product, ACTIVE non-deleted seller, a currently valid minQuantity=1 tier and positive available stock.
+- Added docs/RETAIL_COMMERCE_R1_AUDIT.md with findings, safe defaults, open engineering decisions and R1a/R1b slices.
+- No schema/API/checkout activation in this audit. Tests/build/browser NOT RUN.
+**Next:** Implement R1a retail eligibility and server-resolved retail catalogue/price contract; keep every existing product retail-disabled by default.
