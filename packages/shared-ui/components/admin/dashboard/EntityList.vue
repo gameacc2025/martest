@@ -21,7 +21,7 @@ const toneClass = (tone) => `entity-badge--${tone || 'gray'}`
 </script>
 
 <template>
-  <div class="entity-list">
+  <div class="entity-list" role="list">
     <!-- Loading skeletons -->
     <template v-if="loading">
       <div v-for="n in skeletonRows" :key="`sk-${n}`" class="entity-row entity-row--skeleton">
@@ -47,11 +47,12 @@ const toneClass = (tone) => `entity-badge--${tone || 'gray'}`
         :key="item.id"
         :to="item.to || undefined"
         class="entity-row"
+        role="listitem"
         :class="{ 'entity-row--link': item.to }"
       >
         <span class="entity-avatar">
           <img v-if="item.avatar" :src="item.avatar" :alt="item.title" />
-          <i v-else-if="item.icon" :class="item.icon"></i>
+          <i v-else-if="item.icon" :class="item.icon" aria-hidden="true"></i>
           <span v-else>{{ item.initial || (item.title || '?').charAt(0) }}</span>
         </span>
 
@@ -89,6 +90,12 @@ const toneClass = (tone) => `entity-badge--${tone || 'gray'}`
   color: inherit;
 }
 
+@media (max-width: 520px) {
+  .entity-row { align-items: flex-start; flex-wrap: wrap; }
+  .entity-main { flex-basis: calc(100% - 3.25rem); }
+  .entity-side { margin-inline-start: 3.25rem; flex-wrap: wrap; }
+}
+
 .entity-row:last-child {
   border-bottom: none;
 }
@@ -100,6 +107,8 @@ const toneClass = (tone) => `entity-badge--${tone || 'gray'}`
   padding-inline: var(--ds-space-2);
   border-radius: var(--ds-radius-sm);
 }
+
+.entity-row--link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 
 .entity-row--link:hover {
   background: var(--ds-color-surface-hover);
@@ -136,17 +145,15 @@ const toneClass = (tone) => `entity-badge--${tone || 'gray'}`
   font-size: var(--ds-font-size-sm);
   font-weight: var(--ds-font-weight-semibold);
   color: var(--ds-color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .entity-subtitle {
   font-size: var(--ds-font-size-xs);
   color: var(--ds-color-text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .entity-side {
