@@ -36,6 +36,18 @@ const routes = [
         meta: { title: "اعلان‌های من", requiresAuth: true },
       },
       {
+        path: "cart",
+        name: "customer-cart",
+        component: () => import("../pages/public/ShoppingCart.vue"),
+        meta: { title: "سبد خرید" },
+      },
+      {
+        path: "checkout",
+        name: "customer-checkout",
+        component: () => import("../pages/public/Checkout.vue"),
+        meta: { title: "تکمیل اطلاعات سفارش", requiresAuth: true, customerOnly: true },
+      },
+      {
         path: "orders",
         name: "customer-retail-orders",
         component: () => import("../pages/public/RetailOrders.vue"),
