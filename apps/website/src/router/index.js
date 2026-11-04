@@ -200,6 +200,22 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: "home" });
   }
 
+  // Customer support belongs to the Website context. Route Company and STAFF
+  // identities to their own support desk through the existing PKCE handoff.
+  if (to.meta.customerOnly && isAuthed && !authStore.isCustomer) {
+    const supportPath = '/support/tickets';
+    const companyUrl = import.meta.env.VITE_COMPANY_APP_URL || '';
+    const adminUrl = import.meta.env.VITE_ADMIN_APP_URL || '';
+    if (authStore.isCompany && companyUrl) {
+      window.location.href = `${companyUrl}/auth/start?redirect=${encodeURIComponent(supportPath)}`;
+    } else if (authStore.isStaff && adminUrl) {
+      window.location.href = `${adminUrl}/auth/start?redirect=${encodeURIComponent(supportPath)}`;
+    } else {
+      return next({ name: 'home' });
+    }
+    return;
+  }
+
   next();
 });
 
