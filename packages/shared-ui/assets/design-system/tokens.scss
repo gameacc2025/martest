@@ -245,3 +245,36 @@
 @media (min-width: 1920px) { :root { --ds-container-max-wide: 1800px; } }
 @media (min-width: 2240px) { :root { --ds-container-max-wide: 1920px; } }
 @media (min-width: 2560px) { :root { --ds-container-max-wide: 1920px; } }
+
+
+/* Dark scheme overrides: semantic states stay legible on deep navy surfaces. */
+:root.app-dark {
+  --ds-color-brand-deep: #071429;
+  --ds-color-brand-dark: #092643;
+  --ds-color-on-brand: #ffffff;
+  --ds-color-on-brand-muted: #b6c7d8;
+  --ds-color-primary-text: #a4d7f1;
+  --ds-color-link: #a4d7f1;
+  --ds-color-link-hover: #d0f8fc;
+  --ds-color-primary-soft: rgba(39, 211, 238, 0.14);
+  --ds-color-neutral: #b6c7d8;
+  --ds-color-neutral-soft: #1b344f;
+  --ds-color-success: #7ce0a5;
+  --ds-color-success-soft: rgba(31, 191, 117, 0.16);
+  --ds-color-warning: #ffd08a;
+  --ds-color-warning-soft: rgba(240, 174, 69, 0.16);
+  --ds-color-danger: #ff9b9b;
+  --ds-color-danger-soft: rgba(238, 94, 94, 0.16);
+  --ds-color-info: #8ce6f0;
+  --ds-color-info-soft: rgba(39, 211, 238, 0.14);
+  --ds-status-success-bg: rgba(31, 191, 117, 0.16);
+  --ds-status-success-fg: #7ce0a5;
+  --ds-status-warning-bg: rgba(240, 174, 69, 0.16);
+  --ds-status-warning-fg: #ffd08a;
+  --ds-status-danger-bg: rgba(238, 94, 94, 0.16);
+  --ds-status-danger-fg: #ff9b9b;
+  --ds-status-info-bg: rgba(39, 211, 238, 0.14);
+  --ds-status-info-fg: #8ce6f0;
+  --ds-status-muted-bg: #1b344f;
+  --ds-status-muted-fg: #b6c7d8;
+}

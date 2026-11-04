@@ -407,8 +407,8 @@ function productStatusTone(status) {
 }
 
 const RESPONSE_STATUS_LABELS = {
-  PENDING: 'در انتظار', SELECTED: 'انتخاب‌شده', REJECTED: 'ردشده',
-  EXPIRED: 'منقضی', WITHDRAWN: 'پس‌گرفته‌شده',
+  PENDING: 'در انتظار', SELECTED: 'انتخاب‌شده', REJECTED: 'رد شده',
+  EXPIRED: 'منقضی‌شده', WITHDRAWN: 'پس‌گرفته‌شده',
 }
 function responseStatusLabel(s) { return RESPONSE_STATUS_LABELS[s] || s || '—' }
 function responseStatusTone(s) {
