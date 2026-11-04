@@ -10,6 +10,8 @@ const addresses = ref([])
 const loading = ref(true)
 const saving = ref(false)
 const deletingId = ref(null)
+const settingDefaultId = ref(null)
+const formError = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const editingId = ref(null)
@@ -46,6 +48,7 @@ function openCreate() {
   editingId.value = null
   Object.assign(form, emptyForm())
   formVisible.value = true
+  formError.value = ''
   errorMessage.value = ''
   successMessage.value = ''
 }
@@ -63,6 +66,7 @@ function openEdit(address) {
     isDefault: Boolean(address.isDefault),
   })
   formVisible.value = true
+  formError.value = ''
   errorMessage.value = ''
   successMessage.value = ''
 }
@@ -70,22 +74,47 @@ function openEdit(address) {
 function cancelEdit() {
   formVisible.value = false
   editingId.value = null
+  formError.value = ''
   Object.assign(form, emptyForm())
 }
 
+function normalizeDigits(value) {
+  return String(value)
+    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 1776))
+    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 1632))
+}
+
 async function saveAddress() {
+  if (saving.value) return
   errorMessage.value = ''
   successMessage.value = ''
+  formError.value = ''
+
+  const recipientPhone = normalizeDigits(form.recipientPhone).trim()
+  const postalCode = normalizeDigits(form.postalCode).trim()
+  if (!form.recipientName.trim() || !form.province.trim() || !form.city.trim() || !form.addressLine.trim()) {
+    formError.value = 'لطفاً تمام فیلدهای ضروری را تکمیل کنید.'
+    return
+  }
+  if (recipientPhone.length < 5 || recipientPhone.length > 30) {
+    formError.value = 'شماره تماس تحویل‌گیرنده باید حداقل ۵ و حداکثر ۳۰ نویسه باشد.'
+    return
+  }
+  if (postalCode && !/^\\d{5,30}$/.test(postalCode)) {
+    formError.value = 'کد پستی باید فقط شامل ارقام باشد.'
+    return
+  }
+
   saving.value = true
   const payload = {
     ...form,
     label: form.label.trim() || 'خانه',
     recipientName: form.recipientName.trim(),
-    recipientPhone: form.recipientPhone.trim(),
+    recipientPhone,
     province: form.province.trim(),
     city: form.city.trim(),
     addressLine: form.addressLine.trim(),
-    postalCode: form.postalCode.trim() || null,
+    postalCode: postalCode || null,
   }
   try {
     if (editingId.value) {
@@ -105,6 +134,8 @@ async function saveAddress() {
 }
 
 async function setDefault(address) {
+  if (settingDefaultId.value || address.isDefault) return
+  settingDefaultId.value = address.id
   errorMessage.value = ''
   successMessage.value = ''
   try {
@@ -113,6 +144,8 @@ async function setDefault(address) {
     await loadAddresses()
   } catch (error) {
     errorMessage.value = error?.serverMessage || error?.message || 'تغییر آدرس پیش‌فرض ناموفق بود.'
+  } finally {
+    settingDefaultId.value = null
   }
 }
 
@@ -157,7 +190,8 @@ async function deleteAddress(address) {
 
     <section v-if="formVisible" class="address-card form-card">
       <h2>{{ editingId ? 'ویرایش آدرس' : 'ثبت آدرس جدید' }}</h2>
-      <form class="address-form" @submit.prevent="saveAddress">
+      <form class="address-form" @submit.prevent="saveAddress" novalidate>
+        <p v-if="formError" class="notice error full-width" role="alert">{{ formError }}</p>
         <label>عنوان آدرس
           <input v-model="form.label" name="addressLabel" maxlength="50" autocomplete="off" placeholder="مثلاً خانه یا محل کار">
         </label>
@@ -184,8 +218,8 @@ async function deleteAddress(address) {
           این آدرس، آدرس پیش‌فرض من باشد
         </label>
         <div class="form-actions full-width">
-          <button class="button button-secondary" type="button" :disabled="saving" @click="cancelEdit">انصراف</button>
-          <button class="button button-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ذخیره…' : 'ذخیره آدرس' }}</button>
+          <button class="button button-secondary" type="button"  :disabled="saving" @click="cancelEdit">انصراف</button>
+          <button class="button button-primary" type="submit" :disabled="saving || deletingId !== null">{{ saving ? 'در حال ذخیره…' : 'ذخیره آدرس' }}</button>
         </div>
       </form>
     </section>
@@ -207,7 +241,7 @@ async function deleteAddress(address) {
         <p class="recipient">{{ address.recipientName }} <span>·</span> {{ address.recipientPhone }}</p>
         <p class="address-line">{{ address.province }}، {{ address.city }}، {{ address.addressLine }}</p>
         <p v-if="address.postalCode" class="postal">کد پستی: {{ address.postalCode }}</p>
-        <button v-if="!address.isDefault" class="button button-secondary make-default" type="button" @click="setDefault(address)">انتخاب به‌عنوان آدرس پیش‌فرض</button>
+        <button v-if="!address.isDefault" class="button button-secondary make-default" type="button"  :disabled="Boolean(settingDefaultId) || saving" @click="setDefault(address)">{{ settingDefaultId === address.id ? 'در حال تغییر…' : 'انتخاب به‌عنوان آدرس پیش‌فرض' }}</button>
       </article>
     </section>
     <section v-else-if="!errorMessage" class="empty-state" role="status">
