@@ -167,6 +167,19 @@ test('POST /: COMPANY with products.create -> 200', async () => {
   await app.close();
 });
 
+test('POST /: accepts explicit retailEnabled opt-in while default remains omitted', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/products',
+    headers: userHeader('COMPANY', ['products.create']),
+    payload: { title: 'Retail opt-in product', categoryId: 1, subcategoryId: 1, retailEnabled: true },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.create, true);
+  await app.close();
+});
+
 test('POST /: STAFF with products.create -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
