@@ -149,7 +149,7 @@
             <span>دسترسی پنل</span>
             <b>
               <Tag :severity="infoUser.accessProfile?.isActive ? 'success' : 'danger'">
-                {{ infoUser.accessProfile?.isActive ? 'فعال (صفحه جاری)' : 'غیرفعال' }}
+                {{ infoUser.accessProfile?.isActive ? 'فعال' : 'غیرفعال' }}
               </Tag>
             </b>
           </div>
@@ -369,7 +369,7 @@ const pagination = ref({ page: 1, limit: 10, total: 0, totalPages: 1 });
 
 const kpiItems = computed(() => [
   { label: 'کل کاربران', value: pagination.value.total, icon: 'pi pi-users', tone: 'primary' },
-  { label: 'فعال', value: users.value.filter((item) => item.status === 'ACTIVE').length, icon: 'pi pi-user-check', tone: 'success' },
+  { label: 'فعال (صفحه جاری)', value: users.value.filter((item) => item.status === 'ACTIVE').length, icon: 'pi pi-user-check', tone: 'success' },
   { label: 'در انتظار (صفحه جاری)', value: users.value.filter((item) => item.status === 'PENDING').length, icon: 'pi pi-clock', tone: 'warning' },
   { label: 'کاربران شرکت (صفحه جاری)', value: users.value.filter((item) => item.accessProfile?.type === 'COMPANY').length, icon: 'pi pi-building', tone: 'info' },
   { label: 'مشتریان (صفحه جاری)', value: users.value.filter((item) => item.accessProfile?.type === 'CUSTOMER').length, icon: 'pi pi-user', tone: 'accent' },
