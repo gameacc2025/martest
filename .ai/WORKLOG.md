@@ -3344,3 +3344,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Schema:** No Prisma schema or migration changes.
 - **Limit:** Local disk storage is suitable for the current single-backend deployment. Multi-replica deployments should use shared object storage.
 - **Commit sequence:** `dcf91b2`, `a5cf591`, `a168e93`, `98af86b`, `b4593ec`, `fd0ce6a`, `37b4d20`, `1984058` (see GitHub history).
+
+
+## 2026-11-04 — WEBSITE-PROFILE-UX-02 — Harden profile/password/avatar form validation
+- **Status:** IMPLEMENTED; tests authored, not executed.
+- Profile name updates now require non-empty first/last names (max 50 characters) matching backend schema; blank values no longer silently skip update.
+- Password form validates current password length (min 6), new password length (8–100), and confirmation before API calls.
+- Avatar picker accepts JPEG/PNG/WebP only, enforces 1 MB client-side, and blocks duplicate submissions while uploading.
+- Missing avatar file now returns structured 400 AVATAR_FILE_REQUIRED instead of generic 500.
+- Tests: Website Vitest cases added for empty profile name and short password; settings Node tests cover forged signature and >1 MB file cleanup. NOT RUN.
+- Static hosting audit confirmed /uploads is proxied to Fastify in both dev Vite config and production nginx, so persisted relative avatar URLs resolve same-origin.
+- No Prisma schema/migration changes. Build/browser tests NOT RUN.
