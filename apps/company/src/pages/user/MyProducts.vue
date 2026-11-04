@@ -7,6 +7,7 @@ import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import InputText from 'primevue/inputtext'
 import ProgressSpinner from 'primevue/progressspinner'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 
 const toast = useToast()
 
@@ -58,10 +59,16 @@ function formatPrice(price) {
 
 <template>
   <div class="my-products-page">
-    <header class="page-header ds-page-heading">
-      <div class="products-heading-copy"><span class="products-heading-icon" aria-hidden="true"><i class="pi pi-box"></i></span><div><h1>محصولات من</h1><p>محصولاتی را که مدیریت آن‌ها به حساب شما واگذار شده جستجو و پیگیری کنید.</p></div></div>
-      <router-link :to="{ name: 'manage-product-create' }" class="products-create-link"><i class="pi pi-plus" aria-hidden="true"></i> محصول جدید</router-link>
-    </header>
+    <WorkspacePageHeading
+      heading-id="my-products-title"
+      icon="pi pi-box"
+      title="محصولات من"
+      description="محصولاتی را که مدیریت آن‌ها به حساب شما واگذار شده جستجو و پیگیری کنید."
+    >
+      <template #actions>
+        <router-link :to="{ name: 'manage-product-create' }" class="products-create-link"><i class="pi pi-plus" aria-hidden="true"></i> محصول جدید</router-link>
+      </template>
+    </WorkspacePageHeading>
 
     <div class="card">
       <Toolbar>
@@ -110,126 +117,80 @@ function formatPrice(price) {
   direction: rtl;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--ds-space-3);
-  padding: 0 0 var(--ds-space-4);
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  border-radius: 0;
-  box-shadow: none;
-}
-.page-header h1 { color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); margin: 0; }
 .my-products-page,
-.company-products-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
+.company-products-page { display: flex; flex-direction: column; gap: 16px; }
+
 .my-products-page .card {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius);
   box-shadow: none;
   overflow: hidden;
 }
+
 .my-products-page :deep(.p-toolbar) {
   border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface);
+  border-bottom: 1px solid var(--tm-line);
+  background: var(--tm-surface);
 }
+
 .my-products-page :deep(.p-toolbar .p-inputtext) { min-height: 2.75rem; }
+
 .my-products-page :deep(.p-button) { min-height: 2.75rem; }
+
 .my-products-page :deep(.p-button.p-button-text) {
   width: 2.75rem;
   min-width: 2.75rem;
   height: 2.75rem;
 }
+
 .my-products-page :deep(.p-paginator-page),
 .my-products-page :deep(.p-paginator-next),
 .my-products-page :deep(.p-paginator-prev) {
   min-width: 2.75rem;
   min-height: 2.75rem;
 }
+
 .my-products-page :deep(.p-inputtext:focus-visible),
 .my-products-page :deep(.p-button:focus-visible) {
-  outline: 2px solid var(--ds-color-focus);
+  outline: 2px solid var(--tm-cyan-strong);
   outline-offset: 2px;
 }
+
 .company-products-page :deep(.p-datatable),
-.my-products-page :deep(.p-datatable) { border-radius: var(--ds-radius-md); }
+.my-products-page :deep(.p-datatable) { border-radius: var(--tm-radius); }
+
 .company-products-page :deep(.p-datatable-thead > tr > th),
 .my-products-page :deep(.p-datatable-thead > tr > th) {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
+  background: var(--tm-surface-alt);
+  color: var(--tm-muted);
+  font-size: 11.5px;
+  font-weight: 700;
 }
-@media (max-width: 640px) { .page-header { padding: var(--ds-space-4); } }
 
-
-.products-heading-copy { min-width: 0; }
-
-.my-products-page .page-header p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
-@media (max-width: 640px) { .my-products-page .page-header { align-items: stretch; } }
 .products-create-link {
-  display: inline-flex; min-height: var(--ds-touch-target); align-items: center; justify-content: center; gap: .5rem;
-  padding: .65rem 1rem; border-radius: var(--ds-radius-md); background: var(--ds-color-primary); color: var(--ds-color-primary-contrast);
-  font-size: var(--ds-font-size-sm); font-weight: var(--ds-font-weight-semibold); text-decoration: none;
+  display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: .5rem;
+  padding: .65rem 1rem; border-radius: var(--tm-radius); background: var(--tm-blue); color: #fff;
+  font-size: 12.5px; font-weight: 600; text-decoration: none;
 }
-.products-create-link:hover { background: var(--ds-color-primary-hover); }
-.products-create-link:focus-visible, .table-action-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
-.table-action-link { display: inline-grid; width: var(--ds-touch-target); height: var(--ds-touch-target); place-items: center; border-radius: var(--ds-radius-sm); color: var(--ds-color-text-muted); text-decoration: none; }
-.table-action-link:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-primary-text); }
 
+.products-create-link:hover { background: var(--tm-blue-strong); }
 
-.products-heading-copy { display: flex; align-items: center; gap: .8rem; }
-.products-heading-icon {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
-  border-radius: 9px;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary-text);
-  font-size: 1.05rem;
-}
-.my-products-page .page-header,.company-products-page .page-header {
-  align-items: center;
-  padding: .95rem 1.1rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
-  box-shadow: var(--ds-shadow-xs);
-}
-.my-products-page .page-header h1,.company-products-page .page-header h1 { font-size: 1.25rem; line-height: 1.45; }
-.my-products-page .page-header p,.company-products-page .page-header p { font-size: .78rem; }
+.products-create-link:focus-visible, .table-action-link:focus-visible { outline: 2px solid var(--tm-cyan-strong); outline-offset: 2px; }
+
+.table-action-link { display: inline-grid; width: 44px; height: 44px; place-items: center; border-radius: var(--tm-radius-sm); color: var(--tm-muted); text-decoration: none; }
+
+.table-action-link:hover { background: var(--tm-surface-alt); color: var(--tm-blue-strong); }
+
 .my-products-page .card,.company-products-page .product-catalogue-surface {
-  border-radius: var(--ds-radius-lg);
-  box-shadow: var(--ds-shadow-sm);
+  border-radius: var(--tm-radius-lg);
+  box-shadow: 0 1px 3px rgba(20, 35, 63, 0.06);
 }
-.my-products-page :deep(.p-toolbar) { background: var(--ds-color-surface-alt); }
+
+.my-products-page :deep(.p-toolbar) { background: var(--tm-surface-alt); }
+
 .my-products-page :deep(.p-datatable-thead > tr > th),
 .company-products-page .product-catalogue-table :deep(.p-datatable-thead > tr > th) { font-size: .74rem; }
+
 .my-products-page :deep(.p-datatable-tbody > tr > td),
 .company-products-page .product-catalogue-table :deep(.p-datatable-tbody > tr > td) { font-size: .82rem; }
-@media (max-width: 640px) {
-  .my-products-page .page-header,.company-products-page .page-header { align-items: flex-start; padding: .85rem; }
-  .products-heading-icon { width: 2.2rem; height: 2.2rem; }
-}
-
 </style>

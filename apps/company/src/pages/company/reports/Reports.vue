@@ -225,37 +225,17 @@ function exportInquiriesCSV() {
   direction: rtl;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.page-header h1 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.page-header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--ds-space-4);
-  margin-bottom: var(--ds-space-6);
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .chart-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--ds-space-6);
+  gap: 20px;
 }
 
 @media (max-width: 1200px) {
@@ -270,59 +250,34 @@ function exportInquiriesCSV() {
   }
 }
 
-.reports-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
-.reports-page .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.reports-page .page-header h1 {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-2xl);
-}
+.reports-page { display: flex; flex-direction: column; gap: 16px; }
+
 .reports-page .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+
 .reports-page :deep(.p-tabs),
-.reports-page :deep(.p-tablist) { border-color: var(--ds-color-border); }
+.reports-page :deep(.p-tablist) { border-color: var(--tm-line); }
+
 .reports-page :deep(.p-tabpanels) { background: transparent; padding-inline: 0; }
 
-.reports-heading { align-items: center; }
-.reports-heading-copy { min-width: 0; }
-.reports-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  margin-bottom: .55rem;
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
-.reports-page .reports-heading h1 {
-  margin: 0;
-  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
-}
-.reports-heading-copy p {
-  margin: .5rem 0 0;
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-sm);
-  line-height: 1.8;
-}
 .reports-page :deep(.p-tablist) {
   padding: .35rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
+
 .reports-page :deep(.p-tab) {
-  border-radius: var(--ds-radius-md);
-  font-weight: var(--ds-font-weight-semibold);
+  border-radius: var(--tm-radius);
+  font-weight: 600;
 }
+
 .reports-page :deep(.p-tab[aria-selected="true"]) {
-  background: var(--ds-color-info-soft);
-  color: var(--ds-color-primary);
+  background: var(--tm-blue-soft);
+  color: var(--tm-blue);
 }
-.reports-page :deep(.p-tabpanels) { padding-top: var(--ds-space-5); }
+
+.reports-page :deep(.p-tabpanels) { padding-top: 16px; }
+
 .reports-error-state {
   display: flex;
   min-height: 16rem;
@@ -330,23 +285,26 @@ function exportInquiriesCSV() {
   align-items: center;
   justify-content: center;
   gap: .65rem;
-  padding: var(--ds-space-6);
-  border: 1px dashed var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  color: var(--ds-color-text-muted);
+  padding: 20px;
+  border: 1px dashed var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+  color: var(--tm-muted);
   text-align: center;
 }
-.reports-error-state > i { color: var(--ds-color-danger); font-size: 2rem; }
-.reports-error-state h3 { margin: 0; color: var(--ds-color-text); }
+
+.reports-error-state > i { color: var(--tm-red); font-size: 2rem; }
+
+.reports-error-state h3 { margin: 0; color: var(--tm-ink); }
+
 .reports-error-state p { margin: 0; max-width: 32rem; }
-.reports-error-state :deep(.p-button),
-.reports-page .page-header-actions :deep(.p-button) { min-height: 2.75rem; }
+
+.reports-error-state :deep(.p-button) { min-height: 2.75rem; }
+
 .reports-page :deep(.p-tab) { min-height: 2.75rem; }
 
 @media (max-width: 640px) {
-  .reports-page .reports-heading { align-items: stretch; }
-  .reports-page .page-header-actions { width: 100%; }
-  .reports-page .page-header-actions :deep(.p-button) { width: 100%; }
+  .reports-page :deep(.p-tablist) { overflow-x: auto; }
+  .reports-page :deep(.p-tab) { white-space: nowrap; }
 }
 </style>

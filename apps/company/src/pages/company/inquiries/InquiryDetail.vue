@@ -17,6 +17,7 @@ import InputNumber from 'primevue/inputnumber'
 import Textarea from 'primevue/textarea'
 import ProgressSpinner from 'primevue/progressspinner'
 import ConfirmDialog from 'primevue/confirmdialog'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -459,25 +460,20 @@ function formatPrice(price) {
     <!-- Inquiry Detail -->
     <template v-else-if="inquiry">
       <!-- Page Header -->
-      <div class="page-header ds-detail-heading">
-        <div class="page-header-left">
-          <Button icon="pi pi-arrow-right" text aria-label="بازگشت به فهرست استعلام‌ها" @click="router.push({ name: 'company-inquiries' })" />
-          <div class="page-title-group">
-            <h1>{{ inquiry.title }}</h1>
-            <div class="page-meta">
-              <Tag :value="statusLabels[inquiry.status]" :severity="statusSeverity[inquiry.status]" :icon="statusIcons[inquiry.status]" />
-              <Tag v-if="inquiry.priority && inquiry.priority !== 'NORMAL'" :value="PRIORITY_LABELS[inquiry.priority]" :severity="PRIORITY_SEVERITY[inquiry.priority]" />
-              <span v-if="inquiry.company?.name" class="meta-company">
-                <i class="pi pi-building"></i>
-                {{ inquiry.company.name }}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="page-header-actions" v-if="canCreateResponse">
-          <Button label="ارسال پاسخ" icon="pi pi-send" size="large" @click="openCreateDialog" />
-        </div>
-      </div>
+      <WorkspacePageHeading
+        heading-id="inquiry-detail-title"
+        icon="pi pi-inbox"
+        eyebrow="فضای کاری شرکت"
+        :title="inquiry.title"
+        :description="inquiry.company?.name ? 'درخواست استعلام از ' + inquiry.company.name : 'جزئیات درخواست استعلام و پاسخ‌های تأمین‌کنندگان'"
+      >
+        <template #actions>
+          <Tag :value="statusLabels[inquiry.status]" :severity="statusSeverity[inquiry.status]" :icon="statusIcons[inquiry.status]" />
+          <Tag v-if="inquiry.priority && inquiry.priority !== 'NORMAL'" :value="PRIORITY_LABELS[inquiry.priority]" :severity="PRIORITY_SEVERITY[inquiry.priority]" />
+          <Button v-if="canCreateResponse" label="ارسال پاسخ" icon="pi pi-send" @click="openCreateDialog" />
+          <Button icon="pi pi-arrow-right" text rounded aria-label="بازگشت به فهرست استعلام‌ها" @click="router.push({ name: 'company-inquiries' })" />
+        </template>
+      </WorkspacePageHeading>
 
       <!-- Deadline Banner -->
       <div v-if="inquiry.responseDeadline" class="deadline-banner" role="status" :class="{ 'deadline-urgent': deadlineApproaching, 'deadline-passed': deadlinePassed }">
@@ -699,51 +695,6 @@ function formatPrice(price) {
   margin: 0;
 }
 
-/* ── Page Header ────────────────────────────────────── */
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.page-header-left {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.page-title-group h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text-color);
-  line-height: 1.4;
-}
-
-.page-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.meta-company {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  color: var(--text-color-secondary);
-}
-
-.page-header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
 /* ── Deadline Banner ────────────────────────────────── */
 .deadline-banner {
   display: flex;
@@ -751,23 +702,23 @@ function formatPrice(price) {
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   margin-bottom: 1.5rem;
-  background: var(--surface-hover);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
-  color: var(--text-color);
+  background: var(--tm-surface-alt);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  color: var(--tm-ink);
   font-size: 0.9rem;
 }
 
 .deadline-banner.deadline-urgent {
-  background: color-mix(in srgb, var(--ds-color-warning) 10%, transparent);
-  border-color: var(--ds-color-warning);
-  color: var(--ds-color-warning);
+  background: color-mix(in srgb, var(--tm-amber) 10%, transparent);
+  border-color: var(--tm-amber);
+  color: var(--tm-amber);
 }
 
 .deadline-banner.deadline-passed {
-  background: color-mix(in srgb, var(--ds-color-danger) 10%, transparent);
-  border-color: var(--ds-color-danger);
-  color: var(--ds-color-danger);
+  background: color-mix(in srgb, var(--tm-red) 10%, transparent);
+  border-color: var(--tm-red);
+  color: var(--tm-red);
 }
 
 /* ── Main Grid ──────────────────────────────────────── */
@@ -792,18 +743,18 @@ function formatPrice(price) {
 
 /* ── Sections ───────────────────────────────────────── */
 .detail-section {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  background: var(--tm-surface);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
   padding: 1.5rem;
-  box-shadow: var(--ds-shadow-sm);
+  box-shadow: 0 1px 3px rgba(20, 35, 63, 0.06);
 }
 
 .detail-section h2 {
   font-size: 1rem;
   font-weight: 700;
   margin: 0 0 1rem;
-  color: var(--text-color);
+  color: var(--tm-ink);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -816,15 +767,15 @@ function formatPrice(price) {
   min-width: 1.25rem;
   height: 1.25rem;
   padding: 0 0.375rem;
-  background: var(--surface-hover);
-  border-radius: var(--ds-radius-full);
+  background: var(--tm-surface-alt);
+  border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
 }
 
 .description-text {
-  color: var(--text-color);
+  color: var(--tm-ink);
   line-height: 1.7;
   margin: 0;
   white-space: pre-wrap;
@@ -839,9 +790,9 @@ function formatPrice(price) {
 
 .item-card {
   padding: 1rem;
-  background: var(--surface-hover);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  background: var(--tm-surface-alt);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
 }
 
 .item-header {
@@ -853,26 +804,26 @@ function formatPrice(price) {
 
 .item-product {
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--tm-ink);
 }
 
 .item-quantity {
   font-size: 0.875rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   font-weight: 500;
 }
 
 .item-description {
   margin: 0.5rem 0 0;
   font-size: 0.875rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   line-height: 1.5;
 }
 
 .empty-section {
   text-align: center;
   padding: 2rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
 }
 
 .empty-section p {
@@ -880,50 +831,61 @@ function formatPrice(price) {
 }
 
 /* ── Responses ──────────────────────────────────────── */
-.message-section{border-top:1px solid var(--surface-border,var(--tm-line));padding-top:1.25rem}
-.message-heading,.message-meta,.message-send-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
-.message-list{display:grid;gap:.75rem;max-height:420px;overflow:auto;margin:1rem 0}
-.message-bubble{border:1px solid var(--surface-border,var(--tm-line));border-radius:10px;padding:.8rem 1rem;background:var(--surface-card,#fff);max-width:92%}
-.message-bubble.message-mine{margin-inline-start:auto;background:var(--surface-ground,var(--tm-surface-alt))}
-.message-meta{font-size:.8rem;color:var(--text-color-secondary,var(--tm-muted));flex-wrap:wrap}
-.message-bubble p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.55rem 0 0;color:var(--text-color,var(--tm-ink));line-height:1.8}
-.message-composer{display:grid;gap:.65rem;margin-top:1rem}
+.message-section {border-top:1px solid var(--tm-line);padding-top:1.25rem}
+
+.message-heading,.message-meta,.message-send-row {display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+
+.message-list {display:grid;gap:.75rem;max-height:420px;overflow:auto;margin:1rem 0}
+
+.message-bubble {border:1px solid var(--tm-line);border-radius:10px;padding:.8rem 1rem;background:var(--tm-surface);max-width:92%}
+
+.message-bubble.message-mine {margin-inline-start:auto;background:var(--tm-canvas)}
+
+.message-meta {font-size:.8rem;color:var(--tm-muted);flex-wrap:wrap}
+
+.message-bubble p {white-space:pre-wrap;overflow-wrap:anywhere;margin:.55rem 0 0;color:var(--tm-ink);line-height:1.8}
+
+.message-composer {display:grid;gap:.65rem;margin-top:1rem}
+
 .message-composer-label {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-semibold);
+  color: var(--tm-ink);
+  font-size: 12.5px;
+  font-weight: 600;
 }
+
 .message-list { overscroll-behavior: contain; }
-.inquiry-detail-page .page-header-actions :deep(.p-button),
+
 .inquiry-detail-page .response-actions :deep(.p-button),
 .inquiry-detail-page .message-heading :deep(.p-button),
 .inquiry-detail-page .attachment-chip :deep(.p-button),
 .inquiry-detail-page .state-actions :deep(.p-button) {
   min-height: 2.75rem;
 }
+
 .inquiry-detail-page .attachment-chip :deep(.p-button) {
   min-width: 2.75rem;
   width: 2.75rem;
 }
-.inquiry-detail-page .page-header-left > :deep(.p-button) {
-  min-width: 2.75rem;
-  width: 2.75rem;
-  min-height: 2.75rem;
-  height: 2.75rem;
-}
+
 .inquiry-detail-page :deep(.p-button):focus-visible,
 .inquiry-detail-page a:focus-visible,
 .inquiry-detail-page select:focus-visible,
 .inquiry-detail-page textarea:focus-visible,
 .inquiry-detail-page input:focus-visible {
-  outline: 2px solid var(--ds-color-focus);
+  outline: 2px solid var(--tm-cyan-strong);
   outline-offset: 2px;
 }
 
-.message-recipient{display:grid;gap:.4rem;max-width:360px;font-size:.9rem}
-.message-sms-option{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text-color-secondary,var(--tm-muted))}.message-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,var(--tm-green))}
-.message-recipient select{padding:.65rem;border:1px solid var(--surface-border,var(--tm-line-strong));border-radius:7px;background:var(--surface-card,#fff);color:inherit}
-.message-send-row small{color:var(--text-color-secondary,var(--tm-muted))}
+.message-recipient {display:grid;gap:.4rem;max-width:360px;font-size:.9rem}
+
+.message-sms-option {display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--tm-muted)}
+
+.message-sms-option input {width:1rem;height:1rem;accent-color:var(--tm-blue)}
+
+.message-recipient select {padding:.65rem;border:1px solid var(--tm-line);border-radius:7px;background:var(--tm-surface);color:inherit}
+
+.message-send-row small {color:var(--tm-muted)}
+
 .withdrawn-response-notice {
   margin: 0 0 1rem;
   padding: 0.875rem 1rem;
@@ -941,15 +903,15 @@ function formatPrice(price) {
 }
 
 .response-card {
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
   padding: 1rem;
-  background: var(--surface-card);
+  background: var(--tm-surface);
 }
 
 .response-card.response-mine {
-  border-color: var(--ds-color-primary);
-  background: color-mix(in srgb, var(--ds-color-primary) 3%, transparent);
+  border-color: var(--tm-blue);
+  background: color-mix(in srgb, var(--tm-blue) 3%, transparent);
 }
 
 .response-header {
@@ -970,7 +932,7 @@ function formatPrice(price) {
 
 .response-company {
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--tm-ink);
 }
 
 .response-actions {
@@ -983,13 +945,13 @@ function formatPrice(price) {
 .attachments {
   margin-top: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px dashed var(--surface-border);
+  border-top: 1px dashed var(--tm-line);
 }
 
 .attachments-label {
   display: block;
   font-size: 0.85rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   margin-bottom: 0.5rem;
 }
 
@@ -1004,13 +966,13 @@ function formatPrice(price) {
   align-items: center;
   gap: 0.25rem;
   padding: 0.375rem 0.625rem;
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
-  background: var(--surface-hover);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface-alt);
 }
 
 .attachment-chip a {
-  color: var(--ds-color-primary);
+  color: var(--tm-blue);
   text-decoration: none;
   font-size: 0.85rem;
 }
@@ -1021,18 +983,18 @@ function formatPrice(price) {
 
 /* ── Sidebar ────────────────────────────────────────── */
 .sidebar-card {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  background: var(--tm-surface);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
   padding: 1.25rem;
-  box-shadow: var(--ds-shadow-sm);
+  box-shadow: 0 1px 3px rgba(20, 35, 63, 0.06);
 }
 
 .sidebar-card h3 {
   font-size: 0.9rem;
   font-weight: 700;
   margin: 0 0 1rem;
-  color: var(--text-color);
+  color: var(--tm-ink);
 }
 
 .sidebar-info {
@@ -1049,12 +1011,12 @@ function formatPrice(price) {
 
 .sidebar-info-item .info-label {
   font-size: 0.8rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
 }
 
 .sidebar-info-item .info-value {
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--tm-ink);
 }
 
 /* ── Status Timeline ────────────────────────────────── */
@@ -1068,7 +1030,7 @@ function formatPrice(price) {
   display: flex;
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--tm-line);
 }
 
 .timeline-item:last-child {
@@ -1083,11 +1045,15 @@ function formatPrice(price) {
   flex-shrink: 0;
 }
 
-.timeline-dot.dot-secondary { background: var(--text-color-secondary); }
-.timeline-dot.dot-info { background: var(--ds-color-info); }
-.timeline-dot.dot-success { background: var(--ds-color-success); }
-.timeline-dot.dot-warn { background: var(--ds-color-warning); }
-.timeline-dot.dot-danger { background: var(--ds-color-danger); }
+.timeline-dot.dot-secondary { background: var(--tm-muted); }
+
+.timeline-dot.dot-info { background: var(--tm-blue); }
+
+.timeline-dot.dot-success { background: var(--tm-green); }
+
+.timeline-dot.dot-warn { background: var(--tm-amber); }
+
+.timeline-dot.dot-danger { background: var(--tm-red); }
 
 .timeline-content {
   display: flex;
@@ -1105,25 +1071,25 @@ function formatPrice(price) {
 
 .timeline-user {
   font-size: 0.8rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
 }
 
 .timeline-date {
   font-size: 0.75rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
 }
 
 .timeline-comment {
   margin: 0.25rem 0 0;
   font-size: 0.8rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   line-height: 1.4;
 }
 
 /* ── Response Dialog ────────────────────────────────── */
 .response-item-form {
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
   padding: 1rem;
   margin-bottom: 1rem;
 }
@@ -1132,7 +1098,7 @@ function formatPrice(price) {
   margin: 0 0 1rem;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--tm-ink);
 }
 
 .response-item-grid {
@@ -1155,17 +1121,17 @@ function formatPrice(price) {
 }
 
 .skeleton-card {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  background: var(--tm-surface);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
   padding: 1.5rem;
 }
 
 .skeleton-line {
-  background: linear-gradient(90deg, var(--surface-hover) 25%, var(--surface-border) 50%, var(--surface-hover) 75%);
+  background: linear-gradient(90deg, var(--tm-surface-alt) 25%, var(--tm-line) 50%, var(--tm-surface-alt) 75%);
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
-  border-radius: var(--ds-radius-sm);
+  border-radius: 6px;
 }
 
 .skeleton-title {
@@ -1215,18 +1181,18 @@ function formatPrice(price) {
 }
 
 .state-icon.error {
-  color: var(--ds-color-danger);
+  color: var(--tm-red);
 }
 
 .state-block h3 {
   margin: 0;
   font-size: 1.05rem;
-  color: var(--text-color);
+  color: var(--tm-ink);
 }
 
 .state-block p {
   margin: 0 0 0.75rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   font-size: 0.9rem;
   max-width: 24rem;
 }
@@ -1238,12 +1204,12 @@ function formatPrice(price) {
 
 /* ── Deadline Classes ───────────────────────────────── */
 .deadline-urgent {
-  color: var(--ds-color-warning) !important;
+  color: var(--tm-amber) !important;
   font-weight: 600;
 }
 
 .deadline-passed {
-  color: var(--ds-color-danger) !important;
+  color: var(--tm-red) !important;
   font-weight: 600;
 }
 
@@ -1262,140 +1228,121 @@ function formatPrice(price) {
   .inquiry-detail-page {
     padding: 1rem;
   }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .page-header-left {
-    flex-direction: column;
-  }
-
-  .response-item-grid {
+.response-item-grid {
     grid-template-columns: 1fr;
   }
-
-  .skeleton-grid {
+.skeleton-grid {
     grid-template-columns: 1fr;
   }
 }
 
 /* Inquiry record: clear identity, status, actions and readable information cards. */
-.inquiry-detail-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
-.inquiry-detail-page .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.inquiry-detail-page .page-header h1 {
-  color: var(--ds-color-text);
-  font-size: clamp(1.2rem, 2vw, var(--ds-font-size-xl));
-}
+.inquiry-detail-page { display: flex; flex-direction: column; gap: 16px; }
+
 .inquiry-detail-page :deep(.p-card) {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
 }
+
 .inquiry-detail-page :deep(.p-card-title) {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
+  color: var(--tm-ink);
+  font-size: 14px;
+  font-weight: 700;
 }
+
 .inquiry-detail-page .response-card {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
+
 @media (max-width: 640px) {
-  .inquiry-detail-page { padding: var(--ds-space-3); }
-  .inquiry-detail-page .page-header { padding: var(--ds-space-4); }
-  .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
+  .inquiry-detail-page { padding: 10px; }
+.inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* Company response workspace: align to the dashboard content grid, not a nested container. */
 .inquiry-detail-page { display: flex; flex-direction: column; gap: clamp(1rem, 2vw, 1.5rem); }
+
 .inquiry-detail-page .detail-grid {
   grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
   gap: clamp(1rem, 2vw, 1.5rem);
 }
+
 .inquiry-detail-page .detail-main,
-.inquiry-detail-page .detail-sidebar { min-width: 0; gap: var(--ds-space-5); }
+.inquiry-detail-page .detail-sidebar { min-width: 0; gap: 16px; }
+
 .inquiry-detail-page .detail-section,
 .inquiry-detail-page .sidebar-card {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
 }
+
 .inquiry-detail-page .detail-section { padding: clamp(1rem, 2vw, 1.5rem); }
+
 .inquiry-detail-page .detail-section h2,
 .inquiry-detail-page .sidebar-card h3 {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
+  color: var(--tm-ink);
+  font-size: 14px;
+  font-weight: 700;
 }
+
 .inquiry-detail-page .item-card,
 .inquiry-detail-page .response-card {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
+
 .inquiry-detail-page .item-card { padding: 1rem; }
+
 .inquiry-detail-page .response-card { padding: 1.1rem; }
+
 .inquiry-detail-page .item-description,
-.inquiry-detail-page .description-text { color: var(--ds-color-text-muted); line-height: 1.8; }
+.inquiry-detail-page .description-text { color: var(--tm-muted); line-height: 1.8; }
+
 .inquiry-detail-page .deadline-banner {
   margin: 0;
   padding: .9rem 1.1rem;
-  border-radius: var(--ds-radius-lg);
-  font-weight: var(--ds-font-weight-semibold);
+  border-radius: var(--tm-radius-lg);
+  font-weight: 600;
 }
-.inquiry-detail-page .page-header {
-  padding: 1.2rem 1.4rem;
-  margin: 0;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.inquiry-detail-page .page-title-group h1 {
-  color: var(--ds-color-text);
-  font-size: clamp(1.2rem, 2vw, var(--ds-font-size-xl));
-}
-.inquiry-detail-page .page-meta { gap: .55rem; }
+
 .inquiry-detail-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+
 .inquiry-detail-page :deep(.p-datatable-thead > tr > th) {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
+  background: var(--tm-surface-alt);
+  color: var(--tm-muted);
+  font-size: 11.5px;
+  font-weight: 700;
   white-space: nowrap;
 }
+
 .inquiry-detail-page :deep(.p-datatable-tbody > tr > td) {
-  border-color: var(--ds-color-border);
-  color: var(--ds-color-text);
+  border-color: var(--tm-line);
+  color: var(--tm-ink);
 }
+
 .inquiry-detail-page .detail-skeleton {
-  gap: var(--ds-space-5);
+  gap: 16px;
   max-width: none;
 }
+
 .inquiry-detail-page .skeleton-card {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
+
 @media (max-width: 1024px) {
   .inquiry-detail-page .detail-grid { grid-template-columns: minmax(0, 1fr); }
-  .inquiry-detail-page .detail-sidebar { order: 0; }
+.inquiry-detail-page .detail-sidebar { order: 0; }
 }
+
 @media (max-width: 767px) {
   .inquiry-detail-page { padding: 0; }
-  .inquiry-detail-page .page-header { padding: 1rem; }
-  .inquiry-detail-page .page-header-left { flex-direction: row; }
-  .inquiry-detail-page .page-header-actions,
-  .inquiry-detail-page .page-header-actions :deep(.p-button) { width: 100%; }
 }
 </style>

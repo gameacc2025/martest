@@ -16,6 +16,7 @@ import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import ProgressSpinner from 'primevue/progressspinner'
 import ConfirmDialog from 'primevue/confirmdialog'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -285,22 +286,18 @@ function formatPrice(price) {
 <template>
   <div class="inquiry-detail-page">
     <ConfirmDialog />
-    <header class="page-header inquiry-detail-heading">
-      <div class="inquiry-detail-heading-copy">
-        <span class="inquiry-detail-eyebrow"><i class="pi pi-inbox"></i> مرکز مدیریت استعلام‌ها</span>
-        <div class="inquiry-detail-title-row">
-          <Button icon="pi pi-arrow-right" text rounded aria-label="بازگشت به فهرست استعلام‌ها" @click="router.push({ name: 'admin-inquiries' })" />
-          <div>
-            <h1>جزئیات درخواست استعلام</h1>
-            <p v-if="inquiry">{{ inquiry.title }}</p>
-            <p v-else>بررسی مشخصات درخواست و پاسخ‌های تأمین‌کنندگان</p>
-          </div>
-        </div>
-      </div>
-      <div class="page-header-actions" v-if="canCreateResponse">
-        <Button label="ارسال پاسخ" icon="pi pi-send" @click="openCreateDialog" />
-      </div>
-    </header>
+    <WorkspacePageHeading
+      heading-id="inquiry-detail-title"
+      icon="pi pi-inbox"
+      eyebrow="مرکز مدیریت استعلام‌ها"
+      title="جزئیات درخواست استعلام"
+      :description="inquiry ? inquiry.title : 'بررسی مشخصات درخواست و پاسخ‌های تأمین‌کنندگان'"
+    >
+      <template #actions>
+        <Button icon="pi pi-arrow-right" text rounded aria-label="بازگشت به فهرست استعلام‌ها" @click="router.push({ name: 'admin-inquiries' })" />
+        <Button v-if="canCreateResponse" label="ارسال پاسخ" icon="pi pi-send" @click="openCreateDialog" />
+      </template>
+    </WorkspacePageHeading>
 
     <div v-if="loading" class="text-center py-8">
       <ProgressSpinner />
@@ -514,21 +511,6 @@ function formatPrice(price) {
   direction: rtl;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.page-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  display: inline;
-  margin-inline-start: 0.5rem;
-}
-
 .detail-grid {
   display: flex;
   flex-direction: column;
@@ -549,7 +531,7 @@ function formatPrice(price) {
 
 .info-label {
   font-size: 0.875rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
 }
 
 .info-value {
@@ -557,7 +539,7 @@ function formatPrice(price) {
 }
 
 .text-danger {
-  color: var(--p-red-500);
+  color: var(--tm-red);
 }
 
 .ms-1 {
@@ -565,8 +547,8 @@ function formatPrice(price) {
 }
 
 .response-card {
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
   padding: 1rem;
   margin-bottom: 1rem;
 }
@@ -594,8 +576,8 @@ function formatPrice(price) {
 }
 
 .response-item-form {
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
   padding: 1rem;
   margin-bottom: 1rem;
 }
@@ -603,13 +585,13 @@ function formatPrice(price) {
 .attachments {
   margin-top: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px dashed var(--surface-border);
+  border-top: 1px dashed var(--tm-line);
 }
 
 .attachments-label {
   display: block;
   font-size: 0.85rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   margin-bottom: 0.5rem;
 }
 
@@ -624,13 +606,13 @@ function formatPrice(price) {
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
-  background: var(--surface-ground);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-canvas);
 }
 
 .attachment-chip a {
-  color: var(--primary-color);
+  color: var(--tm-blue);
   text-decoration: none;
   font-size: 0.85rem;
 }
@@ -646,7 +628,7 @@ function formatPrice(price) {
 
 .state-icon {
   font-size: 2.5rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   margin-bottom: 0.25rem;
 }
 
@@ -657,7 +639,7 @@ function formatPrice(price) {
 
 .state-block p {
   margin: 0 0 0.75rem;
-  color: var(--text-color-secondary);
+  color: var(--tm-muted);
   font-size: 0.9rem;
 }
 
@@ -668,215 +650,140 @@ function formatPrice(price) {
 }
 
 /* Inquiry record: clear identity, status, actions and readable information cards. */
-.inquiry-detail-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
-.inquiry-detail-page .page-header {
-  padding: var(--ds-space-5) var(--ds-space-6);
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.inquiry-detail-page .page-header h1 {
-  color: var(--ds-color-text);
-  font-size: clamp(1.2rem, 2vw, var(--ds-font-size-xl));
-}
+.inquiry-detail-page { display: flex; flex-direction: column; gap: 16px; }
+
 .inquiry-detail-page :deep(.p-card) {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.inquiry-detail-page :deep(.p-card-title) {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
-}
-.inquiry-detail-page .response-card {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
-}
-@media (max-width: 640px) {
-  .inquiry-detail-page { padding: var(--ds-space-3); }
-  .inquiry-detail-page .page-header { padding: var(--ds-space-4); }
-  .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
 }
 
-.inquiry-detail-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
-.inquiry-detail-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+.inquiry-detail-page :deep(.p-card-title) {
+  color: var(--tm-ink);
+  font-size: 14px;
+  font-weight: 700;
 }
-.inquiry-detail-heading-copy { min-width: 0; }
-.inquiry-detail-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  margin-bottom: .55rem;
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
+
+.inquiry-detail-page .response-card {
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
-.inquiry-detail-title-row { display: flex; align-items: flex-start; gap: .5rem; }
-.inquiry-detail-title-row h1 {
-  margin: 0;
-  color: var(--ds-color-text);
-  font-size: clamp(1.25rem, 2vw, var(--ds-font-size-xl));
-  font-weight: 800;
+
+@media (max-width: 640px) {
+  .inquiry-detail-page { padding: 10px; }
+.inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
 }
-.inquiry-detail-title-row p {
-  margin: .35rem 0 0;
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-sm);
-  line-height: 1.7;
-  overflow-wrap: anywhere;
-}
-.inquiry-detail-heading .page-header-actions { flex: 0 0 auto; }
+
+.inquiry-detail-page { display: flex; flex-direction: column; gap: 16px; }
+
 .inquiry-detail-page .detail-card,
 .inquiry-detail-page .response-card {
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.inquiry-detail-page .response-card { background: var(--ds-color-surface); }
-.inquiry-detail-page .response-item-form { border-color: var(--ds-color-border); border-radius: var(--ds-radius-lg); }
-.inquiry-detail-page .state-block {
-  min-height: 16rem;
-  border: 1px dashed var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-}
-@media (max-width: 640px) {
-  .inquiry-detail-heading { align-items: stretch; flex-direction: column; padding: 1rem; }
-  .inquiry-detail-heading .page-header-actions { width: 100%; }
-  .inquiry-detail-heading .page-header-actions :deep(.p-button) { width: 100%; justify-content: center; }
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
 }
 
+.inquiry-detail-page .response-card { background: var(--tm-surface); }
+
+.inquiry-detail-page .response-item-form { border-color: var(--tm-line); border-radius: var(--tm-radius-lg); }
+
+.inquiry-detail-page .state-block {
+  min-height: 16rem;
+  border: 1px dashed var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+}
 
 /* Review workspace: primary request and line items side by side, responses/history full width. */
 .inquiry-detail-page { display: flex; flex-direction: column; gap: clamp(1rem, 2vw, 1.5rem); }
-.inquiry-detail-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.inquiry-detail-heading-copy { min-width: 0; }
-.inquiry-detail-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  margin-bottom: .55rem;
-  color: var(--ds-color-primary);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
-.inquiry-detail-title-row { display: flex; align-items: flex-start; gap: .5rem; }
-.inquiry-detail-title-row h1 {
-  margin: 0;
-  color: var(--ds-color-text);
-  font-size: clamp(1.25rem, 2vw, var(--ds-font-size-xl));
-  font-weight: var(--ds-font-weight-bold);
-}
-.inquiry-detail-title-row p {
-  margin: .35rem 0 0;
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-sm);
-  line-height: 1.7;
-}
+
 .inquiry-detail-page .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: var(--ds-space-5);
+  gap: 16px;
 }
+
 .inquiry-detail-page :deep(.detail-card) {
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+  box-shadow: 0 1px 2px rgba(20, 35, 63, 0.05);
 }
+
 .inquiry-detail-page :deep(.detail-card:nth-child(n + 3)) { grid-column: 1 / -1; }
+
 .inquiry-detail-page :deep(.p-card-title) {
   padding-bottom: .8rem;
-  border-bottom: 1px solid var(--ds-color-border);
+  border-bottom: 1px solid var(--tm-line);
 }
+
 .inquiry-detail-page :deep(.p-datatable-table-container) { overflow-x: auto; }
+
 .inquiry-detail-page :deep(.p-datatable-thead > tr > th) {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
+  background: var(--tm-surface-alt);
+  color: var(--tm-muted);
+  font-size: 11.5px;
+  font-weight: 700;
   white-space: nowrap;
 }
+
 .inquiry-detail-page :deep(.p-datatable-tbody > tr > td) {
-  border-color: var(--ds-color-border);
-  color: var(--ds-color-text);
+  border-color: var(--tm-line);
+  color: var(--tm-ink);
 }
+
 .inquiry-detail-page .response-card {
   padding: 1.1rem;
-  border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
+  border-color: var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
-.inquiry-detail-page .response-header { padding-bottom: .75rem; border-bottom: 1px solid var(--ds-color-border); }
+
+.inquiry-detail-page .response-header { padding-bottom: .75rem; border-bottom: 1px solid var(--tm-line); }
+
 .inquiry-detail-page .info-grid { gap: 1.1rem; }
-.inquiry-detail-page .page-header-actions :deep(.p-button),
+
 .inquiry-detail-page .response-actions :deep(.p-button),
 .inquiry-detail-page .state-block :deep(.p-button) {
   min-height: 2.75rem;
 }
-.inquiry-detail-page .inquiry-detail-title-row > :deep(.p-button) {
-  min-width: 2.75rem;
-  width: 2.75rem;
-  min-height: 2.75rem;
-  height: 2.75rem;
-}
+
 .inquiry-detail-page :deep(.p-button):focus-visible,
 .inquiry-detail-page a:focus-visible,
 .inquiry-detail-page input:focus-visible {
-  outline: 2px solid var(--ds-color-focus);
+  outline: 2px solid var(--tm-cyan-strong);
   outline-offset: 2px;
 }
 
-.inquiry-detail-page .info-label { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
-.inquiry-detail-page .info-value { color: var(--ds-color-text); line-height: 1.7; }
+.inquiry-detail-page .info-label { color: var(--tm-muted); font-size: 11.5px; }
+
+.inquiry-detail-page .info-value { color: var(--tm-ink); line-height: 1.7; }
+
 .inquiry-detail-page .state-block {
   min-height: 16rem;
   justify-content: center;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
+
 @media (max-width: 900px) {
   .inquiry-detail-page .detail-grid { grid-template-columns: minmax(0, 1fr); }
-  .inquiry-detail-page :deep(.detail-card:nth-child(n + 3)) { grid-column: auto; }
+.inquiry-detail-page :deep(.detail-card:nth-child(n + 3)) { grid-column: auto; }
 }
+
 @media (max-width: 640px) {
-  .inquiry-detail-heading { align-items: flex-start; flex-direction: column; padding: 1rem; }
-  .inquiry-detail-heading .page-header-actions,
-  .inquiry-detail-heading .page-header-actions :deep(.p-button) { width: 100%; }
   .inquiry-detail-page .info-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
-.inquiry-detail-page .page-title-group h1,.inquiry-detail-page .inquiry-detail-title-row h1 { font-size: 1.25rem; line-height: 1.45; }
-.inquiry-detail-page .page-header { box-shadow: var(--ds-shadow-sm); }
-.inquiry-detail-page .detail-card { box-shadow: var(--ds-shadow-sm); }
-.inquiry-detail-page :deep(.p-card-title) { font-size: .95rem; }
-.inquiry-detail-page .info-value { font-size: .82rem; }
+.inquiry-detail-page .detail-card { box-shadow: 0 1px 3px rgba(20, 35, 63, 0.06); }
 
+.inquiry-detail-page :deep(.p-card-title) { font-size: .95rem; }
+
+.inquiry-detail-page .info-value { font-size: .82rem; }
 </style>
