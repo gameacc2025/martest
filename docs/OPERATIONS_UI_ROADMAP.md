@@ -42,6 +42,7 @@ HTMLهای **tem/** مرجع بصری و رفتاری هستند، نه کد ق�
 
 پوسته عملیاتی قابل استفاده مجدد:
 - **components/operations/OperationalWorkspace.vue** — ترکیب صفحه، KPI، highlights، فیلتر وضعیت، جستجو و جدول برای prototypeهای دامنه‌ای.
+- **components/operations/TicketDeskWorkspace.vue** — صندوق تیکت، فیلتر و جستجو، انتخاب تیکت، مکالمه و نمایش کنترل‌شده یادداشت داخلی در پنل STAFF.
 - **KpiStatsRow** و **KpiCard** — خلاصه وضعیت بالای صفحات فهرستی.
 
 ## نگاشت فایل‌های HTML مرجع TEM به ویجت‌های Vue
