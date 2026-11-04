@@ -18,7 +18,7 @@ const modules = {
     description: 'نمای یکپارچه سرنخ‌ها، مشتریان، تعاملات و پیگیری‌های تیم فروش.',
     stats: [
       { label: 'مخاطبین فعال', value: 1284, icon: 'pi pi-users', tone: 'primary', meta: 'پرونده‌های قابل پیگیری' },
-      { label: 'سرنخ‌های جدید', value: 86, icon: 'pi pi-user-plus', tone: 'info', meta: 'در این ماه' },
+      { label: 'سرنخ‌های جدید', value: 86, icon: 'pi pi-user-plus', tone: 'accent', meta: 'در این ماه' },
       { label: 'فرصت‌های فروش', value: 42, icon: 'pi pi-chart-line', tone: 'success', meta: 'در قیف فروش' },
       { label: 'پیگیری‌های امروز', value: 17, icon: 'pi pi-calendar-clock', tone: 'warning', meta: 'وظایف سررسیدشده' },
     ],
@@ -88,7 +88,7 @@ const modules = {
     stats: [
       { label: 'سفارش‌های امروز', value: 128, icon: 'pi pi-shopping-bag', tone: 'primary', meta: 'همه کانال‌ها' },
       { label: 'در انتظار پردازش', value: 23, icon: 'pi pi-hourglass', tone: 'warning', meta: 'نیازمند اقدام' },
-      { label: 'ارسال‌شده', value: 86, icon: 'pi pi-truck', tone: 'info', meta: 'در مسیر تحویل' },
+      { label: 'ارسال‌شده', value: 86, icon: 'pi pi-truck', tone: 'accent', meta: 'در مسیر تحویل' },
       { label: 'مرجوعی / بازپرداخت', value: 7, icon: 'pi pi-replay', tone: 'danger', meta: 'در حال بررسی' },
     ],
     highlights: [
