@@ -372,7 +372,7 @@ const kpiItems = computed(() => [
   { label: 'فعال (صفحه جاری)', value: users.value.filter((item) => item.status === 'ACTIVE').length, icon: 'pi pi-user-check', tone: 'success' },
   { label: 'در انتظار (صفحه جاری)', value: users.value.filter((item) => item.status === 'PENDING').length, icon: 'pi pi-clock', tone: 'warning' },
   { label: 'کاربران شرکت (صفحه جاری)', value: users.value.filter((item) => item.accessProfile?.type === 'COMPANY').length, icon: 'pi pi-building', tone: 'info' },
-  { label: 'مشتریان (صفحه جاری)', value: users.value.filter((item) => item.accessProfile?.type === 'CUSTOMER').length, icon: 'pi pi-user', tone: 'accent' },
+  { label: 'مشتریان (صفحه جاری)', value: users.value.filter((item) => item.accessProfile?.type === 'CUSTOMER').length, icon: 'pi pi-user', tone: 'info' },
 ])
 
 const searchQuery = ref("");
