@@ -224,7 +224,7 @@ test('uploadAvatar: writes the file and stores its generated URL for the caller'
     file: Readable.from(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x70, 0x6e, 0x67])),
   });
   assert.match(result, /^\/uploads\/avatars\/1-[a-f0-9-]+\.png$/);
-  assert.equal(fs.readFileSync(path.join(avatarDir, path.basename(result))).subarray(0, 8), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  assert.deepEqual(fs.readFileSync(path.join(avatarDir, path.basename(result))).subarray(0, 8), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
   assert.equal(calls.profileUpsert.length, 1);
   assert.deepEqual(calls.profileUpsert[0].where, { userId: 1 });
   assert.equal(calls.profileUpsert[0].update.avatar, result);
