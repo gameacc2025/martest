@@ -930,3 +930,8 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 ## 2026-11-04 — Profile form validation
 - Profile UI requires firstName and lastName (max 50 chars); password form validates backend-compatible lengths and confirmation; avatar picker accepts JPEG/PNG/WebP up to 1 MB and prevents duplicate uploads.
 - Avatar upload route returns a structured 400 when multipart file is missing. /uploads is proxied to backend in Vite dev and production nginx.
+
+
+## 2026-11-04 — Retail product opt-in
+- Product now has a retailEnabled flag defaulting false; a migration adds the column and lookup index. Admin and Company product editors can explicitly enable the flag.
+- This is only an eligibility declaration. No inventory or retail order/payment API exists yet; the website must not treat retailEnabled alone as purchasable. Future retail resolver must also require PUBLISHED + PUBLIC, active/non-deleted seller, current minQuantity=1 price tier and available inventory.
