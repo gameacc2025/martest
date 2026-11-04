@@ -60,7 +60,7 @@ describe('Website Terms and Privacy page', () => {
 
     expect(wrapper.find('#terms-usage').element.tagName).toBe('H2')
     expect(wrapper.find('#terms-privacy').element.tagName).toBe('H2')
-    expect(wrapper.find('.terms-hero.ds-card').exists()).toBe(true)
+    expect(wrapper.find('header.terms-hero h1#terms-title').exists()).toBe(true)
     expect(wrapper.find('.terms-section.ds-card').exists()).toBe(true)
   })
 })

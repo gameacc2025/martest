@@ -11,7 +11,8 @@
     "./assets/*": "./assets/*",
     "./components/*": "./components/*",
     "./composables/*": "./composables/*",
-    "./config/*": "./config/*"
+    "./config/*": "./config/*",
+    "./utils/*": "./utils/*"
   },
   "scripts": {
     "test": "vitest run",

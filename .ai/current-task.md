@@ -335,3 +335,8 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **Commits:** Admin products 43af31135b1dcc37dec5ac901b135f738fe915dd; Admin categories 66e8226cbbc2790b563083fc47511cdf05b745ff; Company products e1f3c5ebeb2141efa44e40c636d1bd5758c0a4b0.
 - Next: refine product editors/details and operational order/report pages, then continue the remaining route inventory.
 
+
+
+### Verified baseline — 2026-11-04
+- Full Vitest suite and all three production builds were executed and pass (306/306 tests). Earlier "NOT RUN" notes above are superseded for tests/builds; browser/visual checks remain NOT RUN.
+- Open owner decisions: canonical primary color for website vs panels (AGENTS.md vs MASTER.md), and token-ization of hard-coded hex colors in shared dashboard components (dark theme).

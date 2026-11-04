@@ -195,6 +195,7 @@ async function deleteAddress(address) {
       <article v-for="address in addresses" :key="address.id" class="address-card">
         <div class="address-top">
           <div class="address-title">
+            <span class="address-pin" aria-hidden="true"><i class="pi pi-map-marker"></i></span>
             <h2>{{ address.label || 'آدرس من' }}</h2>
             <span v-if="address.isDefault" class="default-badge">آدرس پیش‌فرض</span>
           </div>
@@ -210,6 +211,7 @@ async function deleteAddress(address) {
       </article>
     </section>
     <section v-else-if="!errorMessage" class="empty-state" role="status">
+      <span class="empty-icon" aria-hidden="true"><i class="pi pi-map-marker"></i></span>
       <h2>هنوز آدرسی ثبت نکرده‌اید</h2>
       <p>برای دسترسی سریع‌تر، آدرس خانه یا محل کارتان را اضافه کنید.</p>
       <button class="button button-primary" type="button" @click="openCreate">ثبت اولین آدرس</button>

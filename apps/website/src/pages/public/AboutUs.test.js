@@ -102,15 +102,13 @@ describe('Website About Us', () => {
     consoleError.mockRestore()
   })
 
-  it('navigates to the existing product details route from the product card', async () => {
+  it('links to the existing product details route from the product card', async () => {
     wrapper = mountAboutUs()
     await flushPromises()
 
-    await wrapper.find('.about-product__open').trigger('click')
-
-    expect(routerPush).toHaveBeenCalledWith({
-      name: 'product-details',
-      params: { id: 51 },
-    })
+    // The card is a semantic link, so navigation is delegated to router-link rather than router.push.
+    expect(wrapper.find('.about-product__open').element.tagName).toBe('A')
+    expect(wrapper.find('.about-product__open').attributes('href')).toBe('product-details')
+    expect(routerPush).not.toHaveBeenCalled()
   })
 })

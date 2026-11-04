@@ -3079,3 +3079,19 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED. No browser checks were run.
 - **Next action:** Continue product editors/details, then order and report workspaces; complete the remaining Admin, Company and Website route inventory.
 
+
+
+## 2026-11-04 — UI-VERIFY-BASELINE-01 — First executed verification of the reference-led UI redesign
+- **Status:** DONE (verification + test/export fixes only; no new visual work)
+- **Agent:** Claude (local checkout, pnpm 9, Node 22)
+- **Goal:** The 2026-11-03/04 redesign passes were committed without running tests or builds. Establish a real baseline before continuing.
+- **Baseline found:** `pnpm exec vitest run` = 5 failed / 291 passed (296). Builds of admin, company and website passed.
+- **Root causes and fixes:**
+  - `@telecom/shared-ui/utils/notificationFolders` was not covered by the package `exports` map, so the website Notifications test could not resolve it. Added `"./utils/*"` to `packages/shared-ui/package.json`.
+  - `KpiCard.test.js` expected the icon inside the label; the redesigned card renders it in `.kpi-card-icon`. Test updated.
+  - `Addresses.vue` lost its decorative map-marker marks; restored `.address-pin` / `.empty-icon` (aria-hidden) to match the reference direction and the existing tests.
+  - `AboutUs.test.js` expected `router.push` on click; the product card is now a semantic `router-link`. Test now asserts the anchor target.
+  - `Terms.test.js` expected the hero to be a `.ds-card`; the hero is intentionally unframed. Test now asserts the semantic header/h1.
+- **Verification:** full Vitest run 55/55 files, 306/306 tests passed; `pnpm --filter @telecom/{admin,company,website} build` all succeeded. Browser/visual checks NOT RUN.
+- **Open questions (not decided here):** (1) `AGENTS.md` still lists primary `#01bec2` / 8px radius, while `design-system/MASTER.md` documents sky `#39BFE0` + turquoise `#12B8A6` + navy `#142B46`; the owner must confirm which is canonical for the website vs the panels. (2) `KpiCard.vue` and parts of the panel layer use hard-coded hex values instead of `--ds-*` tokens, so dark theme coverage is NOT VERIFIED.
+- **Next action:** token-ize hard-coded colors in the shared dashboard components, then continue the remaining page families listed in `.ai/current-task.md`.
