@@ -100,7 +100,7 @@ async function saveAddress() {
     formError.value = 'شماره تماس تحویل‌گیرنده باید حداقل ۵ و حداکثر ۳۰ نویسه باشد.'
     return
   }
-  if (postalCode && !/^\\d{5,30}$/.test(postalCode)) {
+  if (postalCode && !/^\d{5,30}$/.test(postalCode)) {
     formError.value = 'کد پستی باید فقط شامل ارقام باشد.'
     return
   }
