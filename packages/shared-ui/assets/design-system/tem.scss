@@ -12,90 +12,57 @@
    ============================================================ */
 
 :root {
-  /* ---- Brand ramps ------------------------------------------------ */
-  --tm-navy: #0a1c3f;
-  --tm-navy-deep: #08142e;
-  --tm-navy-soft: #123058;
-
-  --tm-blue: #1a73e8;
-  --tm-blue-strong: #1155b0;
-  --tm-blue-soft: #e8f1fe;
-
-  --tm-cyan: #2ed3ee;
-  --tm-cyan-strong: #16b8e8;
-  --tm-cyan-deep: #0f5f88;
-  --tm-cyan-soft: #e4f8fd;
-
-  --tm-green: #18c8a0;
-  --tm-green-soft: #ddf8f1;
-  --tm-amber: #f0b040;
-  --tm-amber-soft: #fdf1da;
-  --tm-red: #ef4d4d;
-  --tm-red-soft: #fde6e6;
-  --tm-violet: #7b5cf0;
-  --tm-violet-soft: #ece7fd;
-  --tm-pink: #ed76a5;
-  --tm-pink-soft: #fde8f1;
-
-  /* ---- Surfaces / ink --------------------------------------------- */
-  --tm-canvas: #eef3fb;
-  --tm-surface: #ffffff;
-  --tm-surface-alt: #f7f9fd;
-  --tm-surface-sunk: #f2f6fc;
-  --tm-line: #e3e9f4;
-  --tm-line-strong: #d3dced;
-
-  --tm-ink: #14233f;
-  --tm-ink-soft: #33496b;
-  --tm-muted: #6b7a99;
-  --tm-faint: #93a1bb;
-
-  /* ---- Shape / elevation ------------------------------------------ */
-  --tm-radius-sm: 6px;
-  --tm-radius: 8px;
-  --tm-radius-lg: 12px;
-  --tm-radius-pill: 999px;
-
-  --tm-shadow-xs: 0 1px 2px rgba(16, 42, 74, 0.05);
-  --tm-shadow-sm: 0 2px 8px rgba(16, 42, 74, 0.06);
-  --tm-shadow-md: 0 10px 26px rgba(16, 42, 74, 0.08);
-  --tm-shadow-lg: 0 24px 60px rgba(11, 30, 55, 0.18);
-
-  /* ---- Typography -------------------------------------------------- */
-  --tm-font: 'Vazirmatn', Tahoma, system-ui, sans-serif;
-  --tm-font-num: 'Vazirmatn', Tahoma, system-ui, sans-serif;
-
-  --tm-fs-caption: 11px;
-  --tm-fs-tiny: 12px;
-  --tm-fs-sm: 13px;
-  --tm-fs-body: 14px;
-  --tm-fs-lg: 16px;
-  --tm-fs-title: 18px;
-  --tm-fs-h2: 21px;
-  --tm-fs-h1: 26px;
-
-  /* ---- Aliases consumed by existing shared components -------------- */
-  --ds-brand: #1a73e8;
-  --ds-accent: #2ed3ee;
-  --ds-accent-end: #55e0f4;
-  --ds-turquoise: #18c8a0;
-  --ds-sky: #6cb6f5;
-  --ds-tech-blue: #1155b0;
-  --ds-navy: #0a1c3f;
-  --ds-canvas: #eef3fb;
-  --ds-hero-gradient: linear-gradient(120deg, #0a1c3f 0%, #12507a 55%, #16b8e8 100%);
-  --ds-cta-gradient: linear-gradient(100deg, #16b8e8 0%, #2ed3ee 100%);
-
-  --ds-sidebar-bg: linear-gradient(180deg, #0a1c3f 0%, #08142e 100%);
-  --ds-sidebar-border: rgba(207, 217, 238, 0.12);
-  --ds-sidebar-fg: #cfd9ee;
-  --ds-sidebar-fg-strong: #ffffff;
-  --ds-sidebar-muted: #8ea3c6;
-  --ds-sidebar-hover: rgba(255, 255, 255, 0.06);
-  --ds-sidebar-active-bg: linear-gradient(90deg, #17b4d9, #0f5f88);
-  --ds-sidebar-accent: #2ed3ee;
+  /* ---- Brand, surfaces and semantic states: aliases to tokens.scss ---- */
+  --tm-navy: var(--ds-navy);
+  --tm-navy-deep: var(--ds-color-brand-deep);
+  --tm-navy-soft: var(--ds-color-brand-dark);
+  --tm-blue: var(--ds-brand);
+  --tm-blue-strong: var(--ds-color-primary-text);
+  --tm-blue-soft: var(--ds-color-primary-soft);
+  --tm-cyan: var(--ds-accent);
+  --tm-cyan-strong: var(--ds-color-primary);
+  --tm-cyan-deep: var(--ds-color-primary-text);
+  --tm-cyan-soft: var(--ds-color-primary-soft);
+  --tm-green: var(--ds-color-success);
+  --tm-green-soft: var(--ds-color-success-soft);
+  --tm-amber: var(--ds-color-warning);
+  --tm-amber-soft: var(--ds-color-warning-soft);
+  --tm-red: var(--ds-color-danger);
+  --tm-red-soft: var(--ds-color-danger-soft);
+  --tm-violet: var(--ds-violet);
+  --tm-violet-soft: var(--ds-color-info-soft);
+  --tm-pink: var(--ds-violet);
+  --tm-pink-soft: var(--ds-color-info-soft);
+  --tm-canvas: var(--ds-color-background);
+  --tm-surface: var(--ds-color-surface);
+  --tm-surface-alt: var(--ds-color-surface-alt);
+  --tm-surface-sunk: var(--ds-color-surface-alt);
+  --tm-line: var(--ds-color-border);
+  --tm-line-strong: var(--ds-color-border);
+  --tm-ink: var(--ds-color-text);
+  --tm-ink-soft: color-mix(in srgb, var(--ds-color-text) 82%, var(--ds-color-text-muted));
+  --tm-muted: var(--ds-color-text-muted);
+  --tm-faint: color-mix(in srgb, var(--ds-color-text-muted) 72%, var(--ds-color-surface));
+  --tm-radius-sm: var(--ds-radius-sm);
+  --tm-radius: var(--ds-radius-md);
+  --tm-radius-lg: var(--ds-radius-lg);
+  --tm-radius-pill: var(--ds-radius-pill);
+  --tm-shadow-xs: var(--ds-shadow-xs);
+  --tm-shadow-sm: var(--ds-shadow-sm);
+  --tm-shadow-md: var(--ds-shadow-md);
+  --tm-shadow-lg: var(--ds-shadow-lg);
+  --tm-font: var(--ds-font-family);
+  --tm-font-num: var(--ds-font-family);
+  --tm-fs-caption: 0.8125rem;
+  --tm-fs-tiny: 0.8125rem;
+  --tm-fs-sm: 0.875rem;
+  --tm-fs-body: 0.9375rem;
+  --tm-fs-lg: 1rem;
+  --tm-fs-title: 1.125rem;
+  --tm-fs-h2: 1.3125rem;
+  --tm-fs-h1: clamp(1.5rem, 1.8vw, 1.75rem);
+  --tm-container-max: var(--ds-container-max-wide);
 }
-
 html {
   font-size: 15px;
 }
@@ -105,6 +72,7 @@ body {
   background: var(--tm-canvas);
   color: var(--tm-ink);
   font-size: var(--tm-fs-body);
+  color-scheme: light dark;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -156,7 +124,11 @@ a { color: var(--tm-blue); }
 
 .tm-muted { color: var(--tm-muted); }
 .tm-ink { color: var(--tm-ink); }
-.tm-num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.tm-num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; letter-spacing: -0.02em; }
+.tm-prose { max-width: var(--ds-prose-measure); }
+.tm-control { min-height: var(--ds-control-height); }
+.tm-touch-target { min-width: var(--ds-touch-target); min-height: var(--ds-touch-target); }
+.tm-grid--stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: var(--ds-space-4); }
 
 .tm-section-title {
   display: flex;
@@ -1071,9 +1043,9 @@ body .company-management-toolbar {
 
 .site-container {
   width: 100%;
-  max-width: 1240px;
+  max-width: var(--ds-container-max-wide);
   margin-inline: auto;
-  padding-inline: clamp(14px, 2vw, 28px);
+  padding-inline: var(--ds-container-pad);
 }
 
 .site-hero {
