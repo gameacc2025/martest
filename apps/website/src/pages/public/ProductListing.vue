@@ -465,8 +465,8 @@ watch(() => route.query.category, (newVal) => {
   padding: 4px 9px;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-pill);
-  background: #fff;
-  color: var(--tm-cyan-deep);
+  background: var(--tm-surface);
+  color: var(--tm-ink);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.45;
