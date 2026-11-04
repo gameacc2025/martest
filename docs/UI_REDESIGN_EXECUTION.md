@@ -900,3 +900,5 @@ The earlier Contact Us placeholder has been replaced by a real API integration:
 - Expanded Company dashboard KPIs using existing company-scoped API data and added a support shortcut. Expanded list KPI summaries for companies, users, products, inquiries and orders; status counts are explicitly scoped to the currently loaded page, while total counts come from API pagination metadata.
 - Added docs/OPERATIONS_UI_ROADMAP.md with module boundaries, UI status, future API requirements and phased delivery plan.
 - Verification: no GitHub Actions/CI workflows were inspected or run per owner instruction. Local app builds/browser checks were not available through the remote repository editing session; do not infer runtime validation from successful GitHub writes.
+
+- Added the customer-facing Website support-ticket prototype and account-menu entry. Customer-only routing is enforced; Company and STAFF users are sent through the existing PKCE handoff to their panel support desk.
