@@ -118,6 +118,9 @@ const pagination = ref({
 
 const kpiItems = computed(() => [
   { label: 'کل دسته‌بندی‌ها', value: pagination.value.total, icon: 'pi pi-sitemap', tone: 'primary' },
+  { label: 'نمایش در منو (صفحه جاری)', value: categories.value.filter((item) => item.showInMenu).length, icon: 'pi pi-list', tone: 'info' },
+  { label: 'دارای تصویر (صفحه جاری)', value: categories.value.filter((item) => Boolean(item.image)).length, icon: 'pi pi-image', tone: 'success' },
+  { label: 'فعال (صفحه جاری)', value: categories.value.filter((item) => item.status === 'ACTIVE').length, icon: 'pi pi-check-circle', tone: 'success' },
 ])
 
 const tableColumns = [
