@@ -49,7 +49,7 @@ async function changePassword(request, reply) {
  */
 async function uploadAvatar(request, reply) {
   const { id } = request.user;
-  const file = await request.file();
+  const file = await request.file({ limits: { fileSize: 1_000_000, files: 1 } });
 
   if (!file) {
     throw new Error('No file uploaded');
