@@ -22,6 +22,8 @@ const props = defineProps({
   to: { type: [String, Object], default: null },
   /** Force LTR numeric layout for mixed digit sets. */
   numeric: { type: Boolean, default: true },
+  featured: { type: Boolean, default: false },
+  zeroMeta: { type: String, default: 'موردی ثبت نشده است' },
 })
 
 const formatted = computed(() => {
@@ -32,6 +34,8 @@ const formatted = computed(() => {
   return Number.isFinite(number) ? number.toLocaleString('fa-IR') : String(raw)
 })
 
+const isZero = computed(() => !props.loading && props.value !== null && props.value !== undefined && props.value !== '' && Number(props.value) === 0)
+const supportMeta = computed(() => props.meta || (isZero.value ? props.zeroMeta : ''))
 const tag = computed(() => (props.to ? 'router-link' : 'div'))
 </script>
 
@@ -40,18 +44,19 @@ const tag = computed(() => (props.to ? 'router-link' : 'div'))
     :is="tag"
     :to="to || undefined"
     class="tm-stat"
-    :class="`tm-stat--${tone}`"
+    :class="[`tm-stat--${tone}`, { 'tm-stat--featured': featured }]"
     :aria-busy="loading ? 'true' : undefined"
   >
     <span class="tm-stat__icon" aria-hidden="true"><i :class="icon"></i></span>
     <span class="tm-stat__body">
       <span class="tm-stat__label">{{ label }}</span>
-      <span class="tm-stat__value" :class="{ 'tm-num': numeric }">{{ formatted }}</span>
-      <span v-if="meta || delta" class="tm-stat__meta">
+      <span v-if="loading" class="tm-stat__skeleton" aria-hidden="true"></span>
+      <span v-else class="tm-stat__value" :class="{ 'tm-num': numeric }">{{ formatted }}</span>
+      <span v-if="supportMeta || delta" class="tm-stat__meta">
         <span v-if="delta" class="tm-stat__delta" :class="deltaDirection ? `tm-stat__delta--${deltaDirection}` : ''">
           {{ delta }}
         </span>
-        <span v-if="meta">{{ meta }}</span>
+        <span v-if="supportMeta">{{ supportMeta }}</span>
       </span>
     </span>
   </component>

@@ -18,9 +18,8 @@ function display(value) {
     <li v-for="item in items" :key="item.label" class="tm-legend__item">
       <span class="tm-legend__swatch" :style="{ background: item.color }" aria-hidden="true"></span>
       <span class="tm-legend__label">{{ item.label }}</span>
-      <span v-if="item.value !== undefined" class="tm-legend__value" :class="{ 'tm-num': numeric }">
-        {{ display(item.value) }}
-      </span>
+      <span v-if="item.value !== undefined" class="tm-legend__value" :class="{ 'tm-num': numeric }">{{ display(item.value) }}</span>
+      <span v-if="item.percent !== undefined" class="tm-legend__percent" :class="{ 'tm-num': numeric }">{{ display(item.percent) }}٪</span>
     </li>
   </ul>
 </template>

@@ -23,6 +23,11 @@ const total = computed(() =>
   props.segments.reduce((sum, s) => sum + (Number(s.value) || 0), 0)
 )
 
+const accessibleLabel = computed(() => {
+  if (!total.value) return 'وضعیت محصولات؛ داده‌ای برای نمایش ثبت نشده است'
+  return `وضعیت محصولات؛ مجموع ${total.value.toLocaleString('fa-IR')} مورد؛ ${props.segments.map((s) => `${s.label}: ${Number(s.value || 0).toLocaleString('fa-IR')}`).join('، ')}`
+})
+
 const arcs = computed(() => {
   if (!total.value) return []
   let offset = 0
@@ -46,7 +51,7 @@ const arcs = computed(() => {
 
 <template>
   <div class="tm-donut-wrap">
-    <svg class="tm-donut" viewBox="0 0 100 100" role="img" aria-label="نمودار حلقه‌ای سهم داده‌ها">
+    <svg class="tm-donut" viewBox="0 0 100 100" role="img" :aria-label="accessibleLabel">
       <circle
         cx="50" cy="50" :r="RADIUS"
         fill="none" stroke="var(--tm-surface-sunk)" :stroke-width="thickness"
