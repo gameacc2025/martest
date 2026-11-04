@@ -111,7 +111,7 @@ describe('authentication gate', () => {
 
     expect(router.currentRoute.value.name).toBe('company-dashboard')
     expect(document.title).toContain('داشبورد شرکت')
-    expect(document.title).toContain('Telecom Marketplace')
+    expect(document.title).toContain('Telecom Market')
   })
 
   it('blocks an anonymous visitor from a protected route (navigation aborted, session absent)', async () => {

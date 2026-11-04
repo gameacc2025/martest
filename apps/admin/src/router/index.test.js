@@ -116,7 +116,7 @@ describe('authentication gate', () => {
 
     expect(router.currentRoute.value.name).toBe('admin-dashboard')
     expect(document.title).toContain('داشبورد مدیریت')
-    expect(document.title).toContain('Telecom Marketplace')
+    expect(document.title).toContain('Telecom Market')
   })
 
   it('blocks an anonymous visitor from a protected route (navigation aborted, session absent)', async () => {
@@ -169,7 +169,7 @@ describe('app selection (accessProfile.type only — roles never select the app)
 
     await router.push({ path: '/login', query: { redirect: '/orders' } })
 
-    expect(router.currentRoute.value.path).toBe('/orders')
+    expect(router.currentRoute.value.path).toBe('/retail/orders')
   })
 
   it('never lets a COMPANY user reach an admin page — logs them out and exits', async () => {
