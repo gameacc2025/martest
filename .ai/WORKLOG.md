@@ -3067,3 +3067,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED. No browser checks were run.
 - **Next action:** Refine Admin product/category management and Company product-management pages, then continue orders and reports.
 
+## 2026-11-04 — UI-REFERENCE-CATALOGUES — Product and category management lists
+- **Status:** PARTIAL — three catalogue pages refined; full UI redesign remains in progress.
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Extend the approved reference-led panel visual system to Admin and Company catalogue management.
+- **Claimed scope:** Admin ProductList, Admin CategoryList and Company ProductList Vue pages; UI-only.
+- **Changes:** Unified compact page heading, pale blue/turquoise toolbar, sky-blue primary actions, data-table density, record-count hierarchy, focus outlines and reduced-motion styling. Existing APIs/stores, server pagination, filters, approval/publish lifecycle, permissions, routes and loading/empty states remain unchanged.
+- **Verification:** Source inspection only. Tests/build/browser checks NOT RUN per owner instruction.
+- **Commits:** Admin products 43af31135b1dcc37dec5ac901b135f738fe915dd; Admin categories 66e8226cbbc2790b563083fc47511cdf05b745ff; Company products e1f3c5ebeb2141efa44e40c636d1bd5758c0a4b0.
+- **Push:** Changes written directly to remote main.
+- **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED. No browser checks were run.
+- **Next action:** Continue product editors/details, then order and report workspaces; complete the remaining Admin, Company and Website route inventory.
+
