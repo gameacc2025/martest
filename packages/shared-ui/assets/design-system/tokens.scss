@@ -66,37 +66,37 @@
      Primary sky #39bfe0 · secondary turquoise #12b8a6 · technical blue #2878c7.
      Use these for hero/sidebar/footer surfaces instead of raw hex.
      -------------------------------------------------------- */
-  --ds-brand: #39bfe0;
-  --ds-turquoise: #12b8a6;
-  --ds-sky: #39bfe0;
-  --ds-tech-blue: #2878c7;
-  --ds-navy: #173b63;
+  --ds-brand: #12b8d0;
+  --ds-turquoise: #12c8b8;
+  --ds-sky: #12b8d0;
+  --ds-tech-blue: #278de8;
+  --ds-navy: #12395b;
   --ds-amber: #e7a64b;
   --ds-on-navy: #ffffff;
   --ds-on-navy-muted: #b7cad9;
-  --ds-hero-gradient: linear-gradient(135deg, #173b63 0%, #2878c7 100%);
+  --ds-hero-gradient: linear-gradient(115deg, #3158bd 0%, #178fc9 48%, #13b8d0 100%);
 
-  --ds-sidebar-bg: #142b46;
+  --ds-sidebar-bg: #102b46;
   --ds-sidebar-border: rgba(211, 231, 242, 0.12);
-  --ds-sidebar-fg: #d7e6ef;
+  --ds-sidebar-fg: #dcebf5;
   --ds-sidebar-fg-strong: #ffffff;
-  --ds-sidebar-muted: #a9c2d3;
+  --ds-sidebar-muted: #9db8cc;
   --ds-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --ds-sidebar-active-bg: rgba(57, 191, 224, 0.20);
-  --ds-sidebar-accent: #39bfe0;
+  --ds-sidebar-active-bg: linear-gradient(100deg, #079bb9 0%, #12b8d0 100%);
+  --ds-sidebar-accent: #28d8e8;
 
   /* --------------------------------------------------------
      TYPOGRAPHY SCALE (modular, ~1.2 ratio)
      -------------------------------------------------------- */
   --ds-font-family: var(--font-family, 'Vazirmatn', -apple-system, 'Segoe UI', Tahoma, sans-serif);
 
-  --ds-font-size-xs: 0.8125rem; /* 13px — captions, badges */
-  --ds-font-size-sm: 0.9375rem; /* 15px — body small, table cells */
-  --ds-font-size-md: 1rem;      /* 16px — base body */
-  --ds-font-size-lg: 1.125rem;  /* 18px — card titles */
-  --ds-font-size-xl: 1.375rem;  /* 22px — section headings */
-  --ds-font-size-2xl: 1.75rem;  /* 28px — page titles */
-  --ds-font-size-3xl: 2.25rem;  /* 36px — hero/stat numbers */
+  --ds-font-size-xs: 0.75rem; /* 13px — captions, badges */
+  --ds-font-size-sm: 0.875rem; /* 15px — body small, table cells */
+  --ds-font-size-md: 0.9375rem;      /* 16px — base body */
+  --ds-font-size-lg: 1rem;  /* 18px — card titles */
+  --ds-font-size-xl: 1.2rem;  /* 22px — section headings */
+  --ds-font-size-2xl: 1.5rem;  /* 28px — page titles */
+  --ds-font-size-3xl: 2rem;  /* 36px — hero/stat numbers */
 
   --ds-font-weight-normal: 400;
   --ds-font-weight-medium: 500;
@@ -128,7 +128,7 @@
      ONE content width and ONE gutter scale (the biggest source
      of the "misaligned / no proportions" look before).
      -------------------------------------------------------- */
-  --ds-container-max: 1280px;
+  --ds-container-max: 1760px;
   --ds-container-max-wide: 1760px;  /* for content-heavy pages (products with sidebar) */
   --ds-container-pad: 1rem;         /* small screens */
   --ds-container-pad-lg: 2rem;      /* >= 768px */
