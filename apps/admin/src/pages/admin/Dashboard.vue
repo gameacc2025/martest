@@ -1,5 +1,6 @@
 <template>
   <div class="admin-dashboard">
+    <section class="admin-dashboard-overview">
     <section class="admin-dashboard-hero" aria-labelledby="admin-dashboard-title">
       <div class="admin-dashboard-hero-copy">
         <h1 id="admin-dashboard-title">داشبورد مدیریت</h1>
@@ -51,6 +52,7 @@
         :to="{ name: 'admin-inquiries' }"
       />
     </div>
+    </section>
 
     <!-- Stats error (non-blocking) -->
     <Message v-if="statsError" severity="error" :closable="false" class="admin-dashboard-msg">
@@ -516,15 +518,15 @@ onMounted(() => {
   direction: rtl;
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-6);
+  gap: 1rem;
 }
 
 .admin-dashboard-hero {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
   gap: var(--ds-space-5); min-height: 8.5rem; padding: clamp(1.25rem, 2.5vw, 2rem);
-  border-radius: var(--ds-radius-lg); background: var(--ds-color-brand-deep); color: var(--ds-color-on-brand);
+  border-radius: 16px; background: var(--ds-hero-gradient); color: #fff;
 }
-.admin-dashboard-hero-copy { min-width: 0; }
+.admin-dashboard-hero::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.42; background: radial-gradient(circle at 82% 28%, rgba(255,255,255,.3), transparent 19%), radial-gradient(circle at 74% 110%, rgba(14,220,226,.4), transparent 34%), repeating-radial-gradient(circle at 83% 52%, transparent 0 28px, rgba(255,255,255,.12) 29px 30px, transparent 31px 55px); }\n.admin-dashboard-hero-copy, .admin-dashboard-hero-actions { position:relative; z-index:1; }\n.admin-dashboard-hero-copy { min-width: 0; }
 .admin-dashboard-hero h1 {
   margin: 0; color: inherit; font-size: clamp(1.5rem, 2.3vw, 1.9rem);
   font-weight: var(--ds-font-weight-bold); line-height: 1.4; text-wrap: balance;
@@ -664,7 +666,7 @@ onMounted(() => {
   .admin-dashboard-grid--2-1 { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
-  .admin-dashboard-hero { align-items: flex-start; flex-direction: column; min-height: 0; }
+  .admin-dashboard-overview { grid-template-columns:1fr; direction:rtl; }\n  .admin-dashboard-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }\n  .admin-dashboard-hero { align-items: flex-start; flex-direction: column; min-height: 0; }
   .admin-dashboard-hero-actions { width: 100%; }
   .admin-dashboard-hero-actions > * { flex: 1 1 auto; }
   .admin-dashboard-secondary-action { width: 100%; }
