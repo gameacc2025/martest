@@ -19,17 +19,17 @@ const MAP = {
   ACTIVE: { label: 'فعال', tone: 'success' },
   INACTIVE: { label: 'غیرفعال', tone: 'neutral' },
   PENDING: { label: 'در انتظار', tone: 'warning' },
-  APPROVED: { label: 'تأییدشده', tone: 'info' },
-  REJECTED: { label: 'ردشده', tone: 'danger' },
+  APPROVED: { label: 'تأیید شده', tone: 'info' },
+  REJECTED: { label: 'رد شده', tone: 'danger' },
   SUSPENDED: { label: 'تعلیق‌شده', tone: 'danger' },
   BLOCKED: { label: 'مسدود', tone: 'danger' },
   VERIFIED: { label: 'احرازشده', tone: 'success' },
   UNVERIFIED: { label: 'احرازنشده', tone: 'warning' },
   DRAFT: { label: 'پیش‌نویس', tone: 'neutral' },
-  PENDING_REVIEW: { label: 'در انتظار بررسی', tone: 'warning' },
+  PENDING_REVIEW: { label: 'در انتظار تأیید', tone: 'warning' },
   HIDDEN: { label: 'پنهان', tone: 'neutral' },
-  PUBLISHED: { label: 'منتشرشده', tone: 'success' },
-  ARCHIVED: { label: 'بایگانی', tone: 'neutral' },
+  PUBLISHED: { label: 'منتشر شده', tone: 'success' },
+  ARCHIVED: { label: 'بایگانی', tone: 'danger' },
 
   // inquiries
   SUBMITTED: { label: 'ارسال‌شده', tone: 'info' },
@@ -37,8 +37,9 @@ const MAP = {
   IN_PROGRESS: { label: 'در حال بررسی', tone: 'warning' },
   RESPONDED: { label: 'پاسخ داده‌شده', tone: 'success' },
   CLOSED: { label: 'بسته‌شده', tone: 'neutral' },
-  EXPIRED: { label: 'منقضی', tone: 'danger' },
+  EXPIRED: { label: 'منقضی‌شده', tone: 'danger' },
   CANCELLED: { label: 'لغوشده', tone: 'danger' },
+  COMPLETED: { label: 'تکمیل‌شده', tone: 'success' },
 
   // orders / payments
   PAID: { label: 'پرداخت‌شده', tone: 'success' },

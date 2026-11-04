@@ -9,27 +9,22 @@ export const PRODUCT_STATUSES = Object.freeze([
 ])
 
 const SEGMENT_DEFINITIONS = [
-  { status: 'PUBLISHED', label: 'منتشرشده', color: 'var(--ds-status-success-fg)' },
-  { status: 'APPROVED', label: 'تأییدشده، آماده انتشار', color: 'var(--ds-status-info-fg)' },
-  { status: 'PENDING_REVIEW', label: 'در انتظار بررسی', color: 'var(--ds-status-warning-fg)' },
+  { status: 'PUBLISHED', label: 'منتشر شده', color: 'var(--ds-status-success-fg)' },
+  { status: 'APPROVED', label: 'تأیید شده', color: 'var(--ds-status-info-fg)' },
+  { status: 'PENDING_REVIEW', label: 'در انتظار تأیید', color: 'var(--ds-status-warning-fg)' },
   { status: 'DRAFT', label: 'پیش‌نویس', color: 'var(--ds-status-muted-fg)' },
-  { status: 'REJECTED', label: 'ردشده', color: 'var(--ds-status-danger-fg)' },
+  { status: 'HIDDEN', label: 'پنهان', color: 'var(--ds-status-muted-fg)' },
+  { status: 'ARCHIVED', label: 'بایگانی', color: 'var(--ds-status-danger-fg)' },
+  { status: 'REJECTED', label: 'رد شده', color: 'var(--ds-status-danger-fg)' },
 ]
 
 export function buildProductSegments(counts) {
   if (!counts || PRODUCT_STATUSES.some((status) => !Number.isFinite(counts[status]) || counts[status] < 0)) return []
-  return [
-    ...SEGMENT_DEFINITIONS.map((segment) => ({
-      label: segment.label,
-      value: counts[segment.status],
-      color: segment.color,
-    })),
-    {
-      label: 'پنهان / بایگانی',
-      value: counts.HIDDEN + counts.ARCHIVED,
-      color: 'var(--ds-color-neutral)',
-    },
-  ]
+  return SEGMENT_DEFINITIONS.map((segment) => ({
+    label: segment.label,
+    value: counts[segment.status],
+    color: segment.color,
+  }))
 }
 
 export function sumProductStatusCounts(segments) {

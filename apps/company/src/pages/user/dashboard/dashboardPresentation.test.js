@@ -39,6 +39,8 @@ describe('Company dashboard product status scenarios', () => {
     const segments = buildProductSegments(scenarios.normal)
     expect(sumProductStatusCounts(segments)).toBe(30)
     expect(buildProductLegendItems(segments).reduce((sum, item) => sum + item.value, 0)).toBe(30)
+    expect(segments.find((item) => item.label === 'پنهان').color).toBe('var(--ds-status-muted-fg)')
+    expect(segments.find((item) => item.label === 'بایگانی').color).toBe('var(--ds-status-danger-fg)')
   })
 
   it('keeps high-volume counts numeric and identifies the dominant segment', () => {

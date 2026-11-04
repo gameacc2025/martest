@@ -402,7 +402,7 @@ function productStatusTone(status) {
   if (status === 'PUBLISHED') return 'success'
   if (status === 'APPROVED') return 'info'
   if (status === 'PENDING_REVIEW') return 'warning'
-  if (status === 'REJECTED') return 'danger'
+  if (status === 'REJECTED' || status === 'ARCHIVED') return 'danger'
   return 'gray'
 }
 
