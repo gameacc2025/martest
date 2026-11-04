@@ -413,3 +413,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Retail commerce follow-up: customer Website /orders and Company /retail/orders previews are registered; Admin legacy /orders redirects to /retail/orders. Legacy order endpoints/stores are deprecated because backend has no Order model or /orders routes. Domain/API/ledger design is documented in docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md; no real order/payment API or migration has been created.
 
 - Support desk UI now uses shared TicketDeskWorkspace across Admin, Company and Website CUSTOMER. Admin can preview internal notes; Company/Customer never receive them in their page data. All write actions remain disabled pending backend. See docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md for the API/model contract.
+
+- CRM domain contract is documented in docs/CRM_DOMAIN_DESIGN.md. The initial CRM is internal STAFF-only and references canonical User/Company records instead of duplicating identity data.
