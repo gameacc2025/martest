@@ -21,35 +21,6 @@
       </div>
     </section>
 
-    <!-- Stats error (non-blocking) -->
-    <DashboardPanel v-if="statsError" title="آمار داشبورد" icon="pi pi-exclamation-triangle">
-      <NoDataState
-        icon="pi pi-exclamation-triangle"
-        title="خطا در دریافت آمار داشبورد"
-        description="بارگذاری آمار با مشکل مواجه شد. لطفاً دوباره تلاش کنید."
-        retryable
-        :loading="statsLoading"
-        size="sm"
-        @retry="retryAll"
-      />
-    </DashboardPanel>
-
-    <!-- 1. Alerts — actionable items first (skill: "pending actions most visible") -->
-    <div v-if="alerts.length" class="cd-alerts">
-      <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
-        <div class="cd-alert-icon">
-          <i :class="alert.icon"></i>
-        </div>
-        <div class="cd-alert-body">
-          <span class="cd-alert-message">{{ alert.message }}</span>
-        </div>
-        <router-link v-if="alert.to" :to="alert.to" class="cd-alert-action">
-          مشاهده
-          <i class="pi pi-angle-left"></i>
-        </router-link>
-      </div>
-    </div>
-
     <!-- 2. KPI cards — business health metrics -->
     <div class="cd-kpis">
       <KpiCard
@@ -86,6 +57,35 @@
       />
     </div>
     </section>
+
+    <!-- Stats error (non-blocking) -->
+    <DashboardPanel v-if="statsError" title="آمار داشبورد" icon="pi pi-exclamation-triangle">
+      <NoDataState
+        icon="pi pi-exclamation-triangle"
+        title="خطا در دریافت آمار داشبورد"
+        description="بارگذاری آمار با مشکل مواجه شد. لطفاً دوباره تلاش کنید."
+        retryable
+        :loading="statsLoading"
+        size="sm"
+        @retry="retryAll"
+      />
+    </DashboardPanel>
+
+    <!-- 1. Alerts — actionable items first (skill: "pending actions most visible") -->
+    <div v-if="alerts.length" class="cd-alerts">
+      <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
+        <div class="cd-alert-icon">
+          <i :class="alert.icon"></i>
+        </div>
+        <div class="cd-alert-body">
+          <span class="cd-alert-message">{{ alert.message }}</span>
+        </div>
+        <router-link v-if="alert.to" :to="alert.to" class="cd-alert-action">
+          مشاهده
+          <i class="pi pi-angle-left"></i>
+        </router-link>
+      </div>
+    </div>
 
     <section class="company-dashboard-analytics" aria-label="آمار و تحلیل عملکرد">
       <DashboardPanel title="تحلیل عملکرد شرکت" icon="pi pi-chart-bar" class="company-dashboard-chart">
