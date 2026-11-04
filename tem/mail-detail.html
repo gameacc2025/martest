@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl"><head><meta charset="utf-8"><title>Mail Detail</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.ml{display:grid;grid-template-columns:1fr 330px;gap:12px;padding:12px;background:#fff;border-radius:4px;align-items:start}
+.ml-l{border:1px solid #eceef5;border-radius:4px;background:#fff;order:2}
+.ml-r{order:1;border:1px solid #eceef5;border-radius:4px}
+.ml-l .nm{margin:16px 16px 0;padding:11px;border-radius:20px;background:#f4f5fa;text-align:center;font-size:14px}
+.ml-l .gp{font-size:10px;letter-spacing:.8px;color:#8a90a6;padding:20px 16px 8px;direction:ltr;text-align:left;border-top:1px solid #f0f1f6;margin-top:14px}
+.ml-l .it{display:flex;align-items:center;gap:12px;margin:0 16px 8px;padding:10px 12px;border:1px solid #f0f1f6;border-radius:4px;font-size:14px;color:#1d2130;direction:ltr}
+.ml-l .it.on{background:#e8e6fb;color:#7c6cf6;border-color:#d4d0f7}
+.ml-l .it b{margin-left:auto;background:#7c6cf6;color:#fff;font-size:10px;font-weight:400;padding:2px 6px;border-radius:3px}
+.ml-l .it i{font-style:normal;color:#8a90a6;width:16px;text-align:center}
+.ml-l .it.on i{color:#7c6cf6}
+.ml-l .lb i{width:10px;height:10px;border-radius:50%;border:1.5px solid;display:inline-block;margin:0 3px}
+.ml-h{display:flex;align-items:center;gap:14px;padding:16px;background:#f7f8fc;direction:ltr}
+.ml-h .s{flex:1;background:#fff;border:1px solid #eceef5;border-radius:20px;padding:10px 14px;font-size:13px;color:#8a90a6}
+.ml-h .ib{width:36px;height:36px;border-radius:50%;background:#e8e6fb;color:#7c6cf6;display:flex;align-items:center;justify-content:center;font-size:14px}
+.ml-h b{font-weight:500;font-size:16px}
+.ck{width:14px;height:14px;border:1px solid #d6d9e5;border-radius:3px;display:inline-block;flex:none}
+.ck.on{background:#7c6cf6;border-color:#7c6cf6;color:#fff;font-size:10px;text-align:center;line-height:13px}
+.mr{display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid #f0f1f6;direction:ltr;cursor:pointer;min-height:77px}
+.mr.sel{background:#f4f2fd;border-inline-start:2px solid #7c6cf6}
+.mr .st{color:#f5a623;font-size:18px}.mr .bm{color:#8a90a6;font-size:15px;width:16px}
+.mr .av{width:40px;height:40px;border-radius:50%;color:#fff;font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center;flex:none}
+.mr .nm2{width:122px;font-size:14px;flex:none}
+.mr .bd{flex:1;min-width:0}.mr .bd b{font-weight:500;font-size:14px;display:block;margin-bottom:5px}.mr .bd small{color:#8a90a6;font-size:13px;display:block;line-height:1.45}
+.mr .tg{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;margin-left:6px;color:#fff;vertical-align:middle}
+.mr .tm{font-size:13px;width:60px;text-align:right}
+.ov{position:fixed;inset:0;background:rgba(10,14,25,.55);z-index:50;display:none}
+.ov.open{display:block}
+.pn{position:absolute;top:0;bottom:0;inset-inline-end:0;width:655px;max-width:100%;background:#fff;display:flex;flex-direction:column;direction:ltr;text-align:left}
+.pn .tbr{display:flex;align-items:center;gap:10px;padding:14px 12px 14px 14px;border-bottom:1px solid #f0f1f6}
+.pn .tbr .b{width:36px;height:36px;border-radius:4px;background:#e8e6fb;color:#7c6cf6;display:flex;align-items:center;justify-content:center}
+.pn .tbr .x{margin-left:auto;width:36px;height:36px;border:1px solid #e3e5ee;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer}
+.pn .tt{display:flex;justify-content:space-between;align-items:center;padding:20px 24px 18px}.pn .tt h2{font-size:22px;font-weight:500}.pn .tt small{color:#8a90a6;font-size:13px}
+.pn .fr{display:flex;align-items:center;gap:12px;padding:0 24px 24px}.pn .fr .av{width:40px;height:40px;border-radius:50%;background:#e8358a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+.pn .fr b{font-weight:500;font-size:16px;display:block}.pn .fr small{color:#8a90a6;font-size:12px}.pn .fr .ic{margin-left:auto;display:flex;gap:16px;color:#8a90a6;font-size:14px}
+.pn .bo{padding:0 24px;color:#8a90a6;font-size:14px;line-height:1.6}.pn .bo p{margin-bottom:16px}.pn .bo .sig{color:#8a90a6}.pn .bo b{color:#1d2130;font-weight:400}
+.pn .at{display:flex;gap:16px;padding:6px 24px 0}.pn .at div{width:130px;border:1px solid #eceef5;border-radius:3px;text-align:center;font-size:14px;padding-bottom:8px}
+.pn .at div i{display:block;height:82px;margin-bottom:8px;font-style:normal}
+.pn .ed{margin:48px 24px 0;border:1px solid #eceef5;border-radius:3px;height:166px}
+.pn .ed .tl{display:flex;gap:18px;padding:14px 18px;border-bottom:1px solid #eceef5;font-size:14px}
+.pn .ft{margin-top:auto;border-top:1px solid #f0f1f6;padding:14px 24px;display:flex;justify-content:flex-end;gap:10px}
+</style></head>
+<body data-layout="myron" data-menu="Apps>Email>Mail App" data-open="1"><div class="page">
+<div class="head"><div><h1>Mail App</h1><div class="crumb">Apps <i>«</i> Email <i>«</i> <b>Mail App</b></div></div>
+<div class="btns"><button class="btn btn-up">Plan Upgrade</button><button class="btn btn-exp">Export Report</button></div></div>
+<div class="ml">
+<div class="ml-l"><div class="nm">⊕ New Mail</div>
+<div class="gp">MAILS</div>
+<div class="it on"><i>✉</i>All Mails<b>5</b></div><div class="it"><i>⇩</i>Inbox</div><div class="it"><i>➤</i>Sent</div><div class="it"><i>⌸</i>Drafts</div><div class="it"><i>ⓘ</i>Spam</div><div class="it"><i>⚑</i>Important</div><div class="it"><i>🗑</i>Trash</div><div class="it"><i>▭</i>Archive</div><div class="it"><i>☆</i>Starred</div>
+<div class="gp">SETTINGS</div><div class="it"><i>⚙</i>Settings</div>
+<div class="gp">LABELS</div><div class="it lb"><i style="color:#7c6cf6">○</i>Mail</div><div class="it lb"><i style="color:#f0453a">○</i>Home</div><div class="it lb"><i style="color:#22c55e">○</i>Work</div><div class="it lb"><i style="color:#2bb3e8">○</i>Friends</div><div style="height:6px"></div></div>
+<div class="ml-r"><div class="ml-h"><span class="ck"></span><b>All Mails</b><span class="s">Search Email</span><span class="ib">⟳</span><span class="ib">▭</span><span class="ib">🗑</span><span class="ib">ⓘ</span><span class="ib">⋮</span></div><div id="rows"></div></div>
+</div></div>
+<div class="ov" id="ov"><div class="pn">
+<div class="tbr"><span class="b">🖶</span><span class="b">✉</span><span class="b">⟳</span><span class="x" id="cl">×</span></div>
+<div class="tt"><h2>Invoice #45678 – Payment Due Soon</h2><small>Feb 22 2025,03:05PM</small></div>
+<div class="fr"><span class="av">SS</span><div><b>Sarah Smith</b><small>to:me</small></div><div class="ic"><span>☆</span><span>▭</span><span>ⓘ</span><span>🗑</span><span>↩</span></div></div>
+<div class="bo"><p>Dear Sarah</p><p>Thank you for your prompt attention to this matter. As we approach the end of the month, please ensure that the payment is made by the 28th to avoid any late fees. You can find the invoice attached to this email. If you require any further clarification or need assistance with the payment process, don't hesitate to reach out.</p><p>Looking forward to your confirmation.</p><p class="sig" style="margin-bottom:0">Best Regards,<br><b>Finance Team</b></p></div>
+<div class="at"><div><i style="background:linear-gradient(#27424a,#0e1c20)"></i><u>Download ⤓</u></div><div><i style="background:linear-gradient(#8ac6e6,#d9eefa)"></i><u>Download ⤓</u></div></div>
+<div class="ed"><div class="tl"><b>B</b><i>I</i><u>U</u><span>▣</span><span>▤</span></div></div>
+<div class="ft"><span class="btn btn-p">➦ Forward</span><span class="btn" style="background:#ff4b3a;color:#fff">↩ Reply</span></div>
+</div></div>
+<script>
+var R=[['AT','Amelia Turner','[Reminder] Client Meeting at 3 PM Today','Hi John, just a quick reminder about our meeting with ABC Corp at 3 PM. Let me know if you need any changes. Regards, Sarah.','10:15 AM',1,'#a3224a'],
+['SS','Sarah Smith','Invoice #45678 – Payment Due Soon','Dear Sarah, your invoice for February services is attached. Kindly process the payment before the due date. Let me know if you have any questions. Best, Finance Team.','09:45 AM',1,'#e8358a'],
+['DJ','David Johnson','Project Alpha – Weekly Update & Next Steps','Hi David, please find attached the latest updates on Project Alpha. Let\'s connect tomorrow to discuss the next steps. Regards, James.','01 Mar',1,'#6b3a2a','Personal','#7c6cf6'],
+['EC','Emily Carter','HR Policy Changes Effective Next Month','Hello Emily, please review the attached HR policy changes regarding annual leaves and remote work. Let us know if you have any concerns. HR Department.','01 Mar',0,'#f0a020'],
+['MW','Mark Wilson','Your Subscription is Expiring','Hi Mark, your premium subscription is set to expire on March 5. Click here to renew and continue enjoying premium features.','29 Feb',0,'#7a4a2e','Social','#22c55e'],
+['OB','Olivia Brown','Job Application for Marketing Analyst','Dear Olivia, thank you for applying to our company. Your application is under review, and we will get back to you soon. Best regards, HR Team.','29 Feb',0,'#e8358a'],
+['DL','Daniel Lee','Top Industry News & Trends','Hello Daniel, this week\'s newsletter covers the latest trends in technology and business. Don\'t miss out on our expert insights! Read more inside.','29 Feb',0,'#5a3a1a'],
+['SM','Sophia Miller','Unusual Login Attempt Detected','Hi Sophia, we detected an unusual login attempt on your account from a new device. If this wasn\'t you, please reset your password immediately.','29 Feb',0,'#e8742a'],
+['MA','Michael Adams','Your Order #98765 Has Been Shipped!','Hi Michael, your order has been dispatched and is expected to arrive within 3-5 business days. Track your order using the link inside.','29 Feb',0,'#4a3b2a']],h='';
+R.forEach(function(r,i){h+='<div class="mr'+(r[5]?' sel':'')+'" data-i="'+i+'"><span class="ck'+(r[5]?' on':'')+'">'+(r[5]?'✓':'')+'</span><span class="st">★</span><span class="bm">'+(i==2||i==7?'<span style="color:#7c6cf6">▮</span>':'▯')+'</span><span class="av" style="background:'+r[6]+'">'+r[0]+'</span><span class="nm2">'+r[1]+'</span><span class="bd"><b>'+r[2]+(r[7]?'<span class="tg" style="background:'+r[8]+'">'+r[7]+'</span>':'')+'</b><small>'+r[3]+'</small></span><span class="tm">'+r[4]+'</span></div>'});
+document.getElementById('rows').innerHTML=h;
+var ov=document.getElementById('ov');
+document.getElementById('rows').addEventListener('click',function(e){if(e.target.closest('.mr'))ov.classList.add('open')});
+document.getElementById('cl').onclick=function(){ov.classList.remove('open')};
+ov.addEventListener('click',function(e){if(e.target===ov)ov.classList.remove('open')});
+if(document.body.dataset.open==='1')ov.classList.add('open');
+</script>
+<script src="layout.js"></script></body></html>

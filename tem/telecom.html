@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>Telecom Market</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Vazirmatn,Tahoma,sans-serif;background:#eef3fb;color:#14233f;font-size:13px}
+.app{display:flex;min-height:100vh}
+.sd{width:207px;background:linear-gradient(#0a1c3f,#08142e);color:#cfd9ee;padding:26px 14px;display:flex;flex-direction:column;flex:none;position:sticky;top:0;height:100vh}
+.lg{display:flex;align-items:center;gap:10px;margin:0 6px 26px;color:#fff;font-size:20px;font-weight:600;direction:ltr;line-height:1.1}
+.lg i{font-style:normal;font-size:34px;color:#2ed3ee}
+.np{background:linear-gradient(90deg,#16b8e8,#2ed3ee);color:#05213f;border-radius:8px;padding:11px;text-align:center;font-weight:600;margin-bottom:26px;font-size:14px}
+.mi{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:6px;color:#e2e9f7}
+.mi.on{background:linear-gradient(90deg,#17b4d9,#0f5f88);color:#fff}
+.mi .c{margin-inline-start:auto;background:#2ed3ee;color:#05213f;border-radius:50%;width:22px;height:22px;font-size:11px;display:flex;align-items:center;justify-content:center}
+.mi i{font-style:normal;width:22px;text-align:center;font-size:16px}
+.sup{margin-top:auto;border:1px solid #1c3d6b;border-radius:10px;background:linear-gradient(#10315d,#0a2347);padding:100px 14px 14px;text-align:center;position:relative;overflow:hidden}
+.sup:before{content:'📡';position:absolute;top:12px;left:0;right:0;font-size:64px}
+.sup b{display:block;color:#fff;margin-bottom:4px;font-size:13px}.sup small{font-size:11px;color:#9fb4d8}
+.sup span{display:block;margin-top:12px;background:#17b4d9;color:#05213f;border-radius:6px;padding:8px;font-weight:600}
+.cp{text-align:center;font-size:10px;color:#9fb4d8;margin-top:16px;direction:ltr}
+.mn{flex:1;padding:22px 24px;min-width:0}
+.tp{display:flex;align-items:center;gap:20px;margin-bottom:22px}
+.us{display:flex;align-items:center;gap:12px}.us .a{width:54px;height:54px;border-radius:50%;background:#7a5a3e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px}
+.us b{display:block;font-size:14px}.us small{color:#7686a3;font-size:11px}
+.tp .ib{width:46px;height:46px;border-radius:50%;background:#f3f6fc;box-shadow:0 2px 6px rgba(20,40,90,.08);display:flex;align-items:center;justify-content:center;font-size:18px;position:relative}
+.tp .ib em{position:absolute;top:2px;right:2px;background:#e8262d;color:#fff;font-style:normal;font-size:10px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.sr{flex:1;background:#f3f6fc;border-radius:24px;padding:14px 22px;color:#6b7b99;font-size:14px;box-shadow:0 2px 6px rgba(20,40,90,.05);display:flex;justify-content:space-between}
+.g{display:grid;grid-template-columns:488px 1fr;gap:20px}
+.cd{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(20,40,90,.06);padding:18px}
+.st4{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.st{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 2px 8px rgba(20,40,90,.05);position:relative;height:122px;overflow:hidden}
+.st .i{position:absolute;top:14px;inset-inline-end:16px;width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.st b{display:block;font-size:24px;margin-top:2px;font-weight:700}.st small{color:#5d6d8a;font-size:13px}.st .d{position:absolute;bottom:10px;inset-inline-start:14px;font-size:12px;font-weight:600}
+.st svg{position:absolute;bottom:0;inset-inline-end:0;width:62%;height:44px}
+.hero{border-radius:12px;background:linear-gradient(110deg,#0c7bb3,#0b3f86);color:#fff;padding:36px 30px;height:238px;position:relative;overflow:hidden}
+.hero:after{content:'🗼🏙️';position:absolute;inset-inline-end:-6px;bottom:-14px;font-size:140px;opacity:.9;letter-spacing:-20px}
+.hero h2{font-size:30px;font-weight:700}.hero h2 span{color:#2ed3ee}.hero p{margin:14px 0 24px;font-size:14px}
+.hero .b{display:inline-block;background:#2ed3ee;color:#05213f;padding:12px 22px;border-radius:24px;font-weight:600}
+.hero .dt{position:absolute;bottom:16px;inset-inline-start:50%;display:flex;gap:8px;z-index:2}.hero .dt i{width:12px;height:12px;border-radius:50%;border:2px solid #fff;display:block}.hero .dt i.on{background:#fff}
+.ch h3,.hh{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.hr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tb{display:flex;gap:8px}.tb span{padding:7px 18px;border-radius:8px;background:#f1f5fb;font-size:12px}.tb .on{background:#1a73e8;color:#fff}
+.lgd{display:flex;gap:18px;font-size:12px;justify-content:center;margin:-4px 0 4px;direction:rtl}.lgd i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:6px}
+.nt{margin-bottom:16px}.nt .it{display:flex;gap:14px;align-items:center;background:#f4f7fc;border-radius:8px;padding:12px 16px;margin-bottom:2px}
+.nt .it .c{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.nt .it b{font-size:14px;display:block}.nt .it small{color:#7686a3;font-size:11px}
+.sp{display:flex;align-items:center;background:linear-gradient(110deg,#e8f4fb,#d9e9fb);border-radius:14px;padding:18px;height:176px;overflow:hidden;position:relative}
+.sp .ph{font-size:130px;position:absolute;inset-inline-start:0;bottom:-14px}
+.sp .tx{margin-inline-start:auto;width:60%}.sp b{font-size:20px;display:block;margin-bottom:6px}.sp small{color:#4f5f7d;font-size:13px}
+.sp span{display:inline-block;margin-top:18px;border:1px solid #1a9de0;color:#1a9de0;border-radius:18px;padding:7px 16px;font-size:13px}
+.b2{display:grid;grid-template-columns:1fr 288px;gap:16px;margin-top:16px}
+.pr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pc{border:1px solid #e6edf8;border-radius:8px;padding:12px;text-align:center}
+.pc .im{font-size:52px;height:80px}.pc b{font-size:12px;display:block}.pc small{font-size:11px;color:#6b7b99;display:block;margin:10px 0}
+.pc span{display:block;background:#e3f2fb;color:#1a73e8;border-radius:6px;padding:7px;font-size:11px}
+.dn{display:flex;gap:16px;align-items:center}.dl{font-size:11px}.dl div{display:flex;align-items:center;gap:8px;margin:20px 0}.dl i{width:8px;height:8px;border-radius:50%}
+.ad{margin-top:14px;background:linear-gradient(110deg,#d9ecfa,#a9d3f3);border-radius:10px;padding:16px;font-size:12px}
+.ad b{display:block;font-size:13px}.ad span{display:inline-block;margin-top:10px;background:#0a1c3f;color:#fff;border-radius:14px;padding:5px 16px;font-size:11px}
+.rg{width:var(--s);height:var(--s);border-radius:50%;background:var(--g);position:relative;display:flex;align-items:center;justify-content:center;flex:none}.rg:before{content:"";position:absolute;inset:var(--t);border-radius:50%;background:#fff}.rg .ctr{position:relative;text-align:center}
+</style></head><body>
+<div class="app">
+<aside class="sd"><div class="lg"><i>◎</i><span>Telecom<br>Market</span></div>
+<div class="np">＋ ثبت محصول جدید</div>
+<div class="mi on"><i>⌂</i>داشبورد</div><div class="mi"><i>⬡</i>محصولات</div><div class="mi"><i>▤</i>استعلام‌ها<span class="c">8</span></div><div class="mi"><i>✉</i>صندوق پیام‌ها<span class="c">9</span></div><div class="mi"><i>☺</i>شرکت‌ها</div><div class="mi"><i>▥</i>گزارش‌ها</div><div class="mi"><i>⚙</i>تنظیمات</div><div class="mi"><i>☊</i>پشتیبانی</div>
+<div class="sup"><b>با ما در ارتباط باشید</b><small>پشتیبانی ۲۴ ساعته</small><span>تماس پشتیبانی ←</span></div><div class="cp">2025 Telecom Market ©</div></aside>
+<main class="mn">
+<div class="tp"><div class="sr"><span>جستجو در محصولات، شرکت‌ها و ...</span><span>🔍</span></div><span class="ib">⛶</span><span class="ib">☾</span><span class="ib">🔔<em>3</em></span><div class="us"><span class="a">☺</span><div><b>علی محمدی ⌄</b><small>مدیر سیستم</small></div></div></div>
+<div class="g">
+<div>
+<div class="st4">
+<div class="st"><span class="i" style="background:#e6f0fd;color:#1a73e8">⬡</span><b>۱۸۷</b><small>شرکت عضو</small><span class="d" style="color:#18a864">↑ ۸٪</span><svg viewBox="0 0 100 40"><path d="M0,34 C25,30 35,36 55,22 S85,10 100,8" fill="none" stroke="#2f8de4" stroke-width="2"/></svg></div>
+<div class="st"><span class="i" style="background:#e9e7fb;color:#6a5ae0">▤</span><b>۱۴۵۶</b><small>استعلام ثبت شده</small><span class="d" style="color:#18a864">↑ ۱۵٪</span><svg viewBox="0 0 100 40"><path d="M0,34 C25,30 35,36 55,22 S85,10 100,8" fill="none" stroke="#2f8de4" stroke-width="2"/></svg></div>
+<div class="st"><span class="i" style="background:#e1f6ef;color:#18a864">☺</span><b>۹۲۸</b><small>کاربر فعال</small><span class="d" style="color:#18a864">↑ ۱۲٪</span><svg viewBox="0 0 100 40"><path d="M0,30 C25,34 35,24 55,26 S85,12 100,8" fill="none" stroke="#18c8a0" stroke-width="2"/></svg></div>
+<div class="st"><span class="i" style="background:#efeafd;color:#6a5ae0">▭</span><b>۳۲۶</b><small>پیام جدید</small><span class="d" style="color:#e8262d">↑ ۷٪</span><svg viewBox="0 0 100 40"><path d="M0,34 C25,32 35,36 55,26 S85,18 100,12" fill="none" stroke="#f46a8e" stroke-width="2"/></svg></div></div>
+<div class="cd nt"><div class="hr"><span class="hh">🔔 اعلان‌های اخیر</span><a style="color:#1a73e8;font-size:12px">← مشاهده همه</a></div>
+<div class="it"><span class="c" style="background:#e3ecfd;color:#1a73e8">✉</span><div><b>استعلام جدید دریافت شد</b><small>شرکت ارتباطات پیشرو • ۵ دقیقه پیش</small></div></div>
+<div class="it"><span class="c" style="background:#d6f3e4;color:#18a864">✔</span><div><b>محصول شما تأیید شد</b><small>مدیریت بازارگاه • ۱ ساعت پیش</small></div></div>
+<div class="it"><span class="c" style="background:#e6e3fb;color:#6a5ae0">▭</span><div><b>پیام جدید از شرکت آریا</b><small>در صندوق پیام‌ها • ۲ ساعت پیش</small></div></div></div>
+<div class="sp"><div class="tx"><b>پشتیبانی آنلاین</b><small>همیشه در کنار شما هستیم</small><br><span>← شروع گفتگو</span></div><div class="ph">👩‍💼</div></div></div>
+<div>
+<div class="hero"><h2>بازارگاه <span>تجهیزات</span> مخابراتی</h2><p>پلتفرم جامع، خرید، فروش و استعلام تجهیزات شبکه و مخابرات</p><span class="b">مشاهده محصولات ←</span><div class="dt"><i></i><i></i><i class="on"></i></div></div>
+<div class="cd ch" style="margin-top:16px"><div class="hr"><span class="hh">▥ آمار کلی سامانه</span><div class="tb"><span>۷ روز</span><span class="on">۳۰ روز</span><span>۹۰ روز</span></div></div>
+<div class="lgd"><span><i style="background:#2f8de4"></i>محصولات</span><span><i style="background:#18c8a0"></i>استعلام‌ها</span></div>
+<svg id="c" viewBox="0 0 640 210" style="width:100%;direction:ltr"></svg></div>
+<div class="b2"><div class="cd"><div class="hr"><span class="hh">★ محصولات ویژه</span><a style="color:#1a73e8;font-size:12px">← مشاهده همه</a></div>
+<div class="pr"><div class="pc"><div class="im">🔌</div><b>کابل فیبر نوری</b><small>۲,۵۰۰,۰۰۰ تومان</small><span>← مشاهده جزئیات</span></div><div class="pc"><div class="im">🖥️</div><b>سوئیچ مدیریتی</b><small>۲,۶۰۰,۰۰۰ تومان</small><span>← مشاهده جزئیات</span></div><div class="pc"><div class="im">📶</div><b>اکسس پوینت حرفه‌ای</b><small>۱,۸۵۰,۰۰۰ تومان</small><span>← مشاهده جزئیات</span></div><div class="pc"><div class="im">🗄️</div><b>سوئیچ شبکه لایه ۳</b><small>۴۸,۰۰۰,۰۰۰ تومان</small><span>← مشاهده جزئیات</span></div></div></div>
+<div><div class="cd"><span class="hh" style="margin-bottom:6px">وضعیت استعلام‌ها</span><div class="dn"><div class="rg" style="--s:112px;--t:12px;--g:conic-gradient(#f5a623 0 35%,#2f8de4 35% 75%,#18c8a0 75% 100%)"><div class="ctr"><b style="font-size:20px;display:block">۱۴۵۶</b><small style="font-size:10px;color:#6b7b99">مجموع</small></div></div><div class="dl"><div><i style="background:#f5a623"></i>در انتظار ۳۵٪</div><div><i style="background:#2f8de4"></i>در حال بررسی ۴۰٪</div><div><i style="background:#18c8a0"></i>تکمیل شده ۲۵٪</div></div></div></div>
+<div class="ad"><b>رشد کسب‌وکار خود را با ما تجربه کنید</b>به بزرگترین بازارگاه تجهیزات مخابراتی بپیوندید<br><span>ثبت رایگان ←</span></div></div></div>
+</div></div></main></div>
+<script src="charts.js"></script>
+<script>
+var a=[62,50,60,85,55,48,70,80,70,68,95,98,92,80,95,100,100,110,130],b=[48,52,60,58,45,40,60,70,55,48,50,62,70,75,60,35,50,40,55],
+ pa=pts(a,50,630,20,170,150),pb=pts(b,50,630,20,170,150),s='';
+['۰','۵۰۰','۱۰۰۰','۱۵۰۰'].forEach(function(t,i){var y=170-i*50;s+='<line x1="50" x2="630" y1="'+y+'" y2="'+y+'" stroke="#e9eef7" stroke-dasharray="2 3"/><text x="40" y="'+(y+4)+'" font-size="11" fill="#6b7b99" text-anchor="end">'+t+'</text>'});
+['۱ آذر','۲۸ آبان','۱۹ آبان','۲۲ آبان','۲۲ آبان','۱۶ آبان','۱۳ آبان'].forEach(function(t,i){s+='<text x="'+(50+i*96.6)+'" y="198" font-size="11" fill="#6b7b99" text-anchor="middle">'+t+'</text>'});
+s+='<path d="'+smooth(pa)+' L630,170 L50,170Z" fill="#2f8de4" opacity=".1"/><path d="'+smooth(pa)+'" fill="none" stroke="#2f8de4" stroke-width="2"/><path d="'+smooth(pb)+'" fill="none" stroke="#18c8a0" stroke-width="2"/>';
+document.getElementById('c').innerHTML=s;
+</script></body></html>

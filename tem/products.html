@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl"><head><meta charset="utf-8"><title>Products</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.wrap{display:grid;grid-template-columns:388px 1fr;gap:24px;margin-top:24px}
+.filter{padding:16px 20px}
+.filter h3{font-size:18px;font-weight:400;display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.clear{background:#fbe4de;color:#f0613f;font-size:12px;padding:7px 10px;border-radius:3px;font-weight:400}
+.box{border:1px dashed #e6e8f0;border-radius:4px;padding:16px;margin-bottom:12px}
+.box h4{font-size:16px;font-weight:500;margin-bottom:20px}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;font-size:13px}
+.row small{color:#8a90a6;font-size:12px}
+.cb{width:15px;height:15px;border-radius:3px;border:1px solid #e0e3ec}
+.cb.on{background:#7c6cf6;border-color:#7c6cf6;color:#fff;font-size:10px;text-align:center;line-height:14px}
+.more{background:#e8e6fb;color:#7c6cf6;font-size:12px;padding:12px;display:flex;justify-content:space-between;border-radius:3px}
+.sl{height:4px;background:#eceef5;border-radius:2px;margin:24px 0 20px;position:relative}
+.sl i{position:absolute;inset-inline-start:42%;width:38%;height:4px;background:#7c6cf6;top:0}
+.dots{display:flex;gap:14px}.dots span{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #e3e5ee;display:block}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-content:start}
+.pc{padding:8px 8px 24px}
+.pimg{background:#f7f8fc;height:252px;display:flex;align-items:center;justify-content:center;font-size:110px;margin-bottom:14px}
+.pc h5{font-size:16px;font-weight:500;padding:0 8px 8px}
+.pr{display:flex;justify-content:space-between;align-items:center;padding:0 8px;margin-bottom:11px}
+.pr b{font-size:20px;font-weight:500}.pr s{font-size:11px;color:#8a90a6;margin-inline-start:6px}
+.stars{color:#f5a623;font-size:11px}
+.add{margin:0 8px;border:1px solid #cfcbf7;background:#ebe9fc;color:#7c6cf6;padding:11px;text-align:center;border-radius:3px}
+</style></head><body data-layout="myron" data-menu="Pages>Products"><div class="page">
+<div class="head"><div><h1>Products</h1><div class="crumb">Pages <i>«</i> Ecommerce <i>«</i> <b>Products</b></div></div>
+<div class="btns"><button class="btn btn-up">Plan Upgrade</button><button class="btn btn-exp">Export Report</button></div></div>
+<div class="card toolbar"><div style="font-size:17px">Showing <span class="blu">87,949</span> products found.</div>
+<div style="display:flex;border:1px solid #e3e5ee;border-radius:3px;padding:4px;width:797px"><input style="border:0;flex:1" placeholder="Search Product.."><button class="btn btn-p" style="padding:8px 15px;font-size:13px">Search</button></div>
+<div class="sel" style="color:#1d2130">⇅ Sort By ⌵</div></div>
+<div class="wrap">
+<div class="card filter"><h3>Filter <span class="clear">Clear All</span></h3>
+<div class="box"><h4>Categories</h4>
+<div class="row"><span>Home Appliances <small>(5,894)</small></span><span class="cb on">✓</span></div>
+<div class="row"><span>Fashion &amp; Trends <small>(3,120)</small></span><span class="cb"></span></div>
+<div class="row"><span>Furniture &amp; Decor <small>(9,432)</small></span><span class="cb on">✓</span></div>
+<div class="row"><span>Beauty &amp; Wellness <small>(6,589)</small></span><span class="cb on">✓</span></div>
+<div class="row"><span>Outdoor &amp; Sports Equipment <small>(4,786)</small></span><span class="cb"></span></div>
+<div class="more"><span>MORE</span><span>+</span></div></div>
+<div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h4 style="margin:0">Price Range</h4><input style="width:52px;text-align:center" value="50.00"><input style="width:65px;text-align:center" value="90.00"></div>
+<div class="sl"><i></i></div><div style="text-align:center;font-size:16px;font-weight:500">$50.00K &nbsp;-- &nbsp;$90.00K</div></div>
+<div class="box"><h4>Colors</h4><div class="dots"><span style="background:#8b7cf8"></span><span style="background:#f0453a"></span><span style="background:#f5b32c"></span><span style="background:#ff6a3d"></span><span style="background:#2bb3e8"></span></div></div>
+<div class="box"><h4>Brand</h4>
+<div class="row"><span>Zenith <small>(1,223)</small></span><span class="cb on">✓</span></div>
+<div class="row"><span>FlexWear <small>(3,145)</small></span><span class="cb on">✓</span></div>
+<div class="row"><span>OmegaTech <small>(895)</small></span><span class="cb on">✓</span></div>
+<div class="row"><span>ProActive <small>(512)</small></span><span class="cb"></span></div></div></div>
+<div class="grid">
+<div class="card pc"><div class="pimg">🎒</div><h5>Women's Luxury Slim Bag</h5><div class="pr"><span><b>$120</b><s>$180.00</s></span><span class="stars">★★★★☆</span></div><div class="add">🛒 Add to Cart</div></div>
+<div class="card pc"><div class="pimg">🪑</div><h5>Ergonomic Office Chair</h5><div class="pr"><span><b>$130</b><s>$200.00</s></span><span class="stars">★★★★☆</span></div><div class="add">🛒 Add to Cart</div></div>
+<div class="card pc"><div class="pimg">📷</div><h5>High-Resolution DSLR Camera</h5><div class="pr"><span><b>$252</b><s>$320.00</s></span><span class="stars">★★★★☆</span></div><div class="add">🛒 Add to Cart</div></div>
+<div class="card pc"><div class="pimg">👟</div><h5>Sleek Leather Sneakers</h5><div class="pr"><span><b>$1,753</b><s>$2,254.00</s></span><span class="stars">★★★★☆</span></div><div class="add">🛒 Add to Cart</div></div>
+<div class="card pc"><div class="pimg">⏰</div><h5>Multi-Function Alarm Clock</h5></div>
+<div class="card pc"><div class="pimg">⌚</div><h5>Elegant Stainless Steel Watch</h5></div>
+<div class="card pc"><div class="pimg">🧥</div><h5>Stylish Cozy Zip-Up Hoodie</h5></div>
+<div class="card pc"><div class="pimg">💡</div><h5>Sleek and Minimalist Lamp</h5></div>
+</div></div></div><script src="layout.js"></script></body></html>
