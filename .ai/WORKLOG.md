@@ -3423,3 +3423,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Strengthened shared TEM surface/card elevation across stat tiles, KPI cards, panels, tables and surface primitives; added a distinct dark-theme shadow recipe. No fake bestseller/revenue claims or mock products were introduced because the current public product API does not expose sales ranking.
 - Added homepage source-contract assertions for slider behavior, lifecycle cleanup and the expanded catalogue shelf.
 - Verification: remote source edits + static re-fetch only in this pass; Vitest/build/visual browser checks remain NOT RUN. Continue full Website/Admin/Company layout audit and resolve remaining page-specific card overrides before calling the redesign complete.
+
+
+### Card elevation audit follow-up — 2026-11-04
+- Found and removed a shared TEM regression: legacy Admin/Company list `.card` wrappers explicitly used `box-shadow: none`, which overrode the intended raised-card language. These wrappers now use the shared persistent card shadow.
+- PrimeVue DataTable surfaces now receive the same elevation when standalone; nested tables inside an existing entity surface remain frameless and shadowless to avoid double cards.
+- Homepage category and capability cards now share the persistent elevation and stronger hover lift.
+- Verification remains static source review only; wait for Actions on the current `main` head and address only failures that intersect this UI slice. Existing CI failures previously observed on the older head included unrelated backend message/avatar tests and browser app startup/navigation failures.

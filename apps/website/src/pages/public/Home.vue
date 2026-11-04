@@ -500,12 +500,13 @@ onUnmounted(stopSlider)
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius);
   background: var(--tm-surface);
+  box-shadow: var(--tm-card-shadow);
   cursor: pointer;
   text-align: start;
   font-family: inherit;
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
-.category-card:hover { border-color: var(--tm-cyan-strong); box-shadow: var(--tm-shadow-sm); transform: translateY(-1px); }
+.category-card:hover { border-color: var(--tm-cyan-strong); box-shadow: var(--tm-card-shadow-hover); transform: translateY(-2px); }
 .category-card:focus-visible { outline: 2px solid var(--tm-cyan); outline-offset: 2px; }
 .category-card__icon {
   display: grid;
@@ -590,6 +591,7 @@ onUnmounted(stopSlider)
   background: var(--tm-surface);
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-lg);
+  box-shadow: var(--tm-card-shadow);
 }
 .feature-icon {
   display: grid;

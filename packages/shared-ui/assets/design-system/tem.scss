@@ -777,7 +777,7 @@ body .order-list-page .card {
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-lg);
   background: var(--tm-surface);
-  box-shadow: none;
+  box-shadow: var(--tm-card-shadow);
   overflow: hidden;
 }
 
@@ -932,14 +932,15 @@ body .company-management-toolbar {
 
 /* tem `table.t` — a plain white table: quiet header text, hairline row
    separators and 49px rows. No colored header band. */
-.p-datatable {
+ .p-datatable {
   overflow: hidden;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-lg);
   background: var(--tm-surface);
+  box-shadow: var(--tm-card-shadow);
 }
 /* SharedDataTable already draws the surface card; avoid a double frame. */
-.ent-table .p-datatable { border: 0; border-radius: 0; }
+.ent-table .p-datatable { border: 0; border-radius: 0; box-shadow: none; }
 .p-datatable .p-datatable-header { padding: 12px 16px; border-bottom: 1px solid var(--tm-line); background: var(--tm-surface); }
 .p-datatable .p-datatable-thead > tr > th {
   padding: 12px 16px;

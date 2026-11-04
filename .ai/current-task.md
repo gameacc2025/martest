@@ -522,3 +522,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Latest source slice: homepage featured slider + latest 12 product-card grid; shared TEM shadows strengthened for light and dark modes; test contracts updated.
 - Do not fabricate best-seller rankings, ratings, revenue, stock or brand data. Add those shelves only after authoritative API data exists.
 - Remaining: audit all Admin/Company/Website routes for layout/card overrides and fix only grounded defects; preserve APIs, auth, RBAC, workflows and existing design palette. Run Vitest + all three production builds if local workspace is available; inspect GitHub Actions after each push. Visual browser checks remain unavailable/not performed.
+
+
+### Card elevation audit follow-up — 2026-11-04
+- Found and removed a shared TEM regression: legacy Admin/Company list `.card` wrappers explicitly used `box-shadow: none`, which overrode the intended raised-card language. These wrappers now use the shared persistent card shadow.
+- PrimeVue DataTable surfaces now receive the same elevation when standalone; nested tables inside an existing entity surface remain frameless and shadowless to avoid double cards.
+- Homepage category and capability cards now share the persistent elevation and stronger hover lift.
+- Verification remains static source review only; wait for Actions on the current `main` head and address only failures that intersect this UI slice. Existing CI failures previously observed on the older head included unrelated backend message/avatar tests and browser app startup/navigation failures.
