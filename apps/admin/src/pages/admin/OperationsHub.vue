@@ -105,12 +105,96 @@ const modules = {
     ],
   },
 }
-modules.crmLeads = { ...modules.crm, title: 'سرنخ‌ها و مشتریان بالقوه', eyebrow: 'CRM · LEADS' }
-modules.crmPipeline = { ...modules.crm, title: 'قیف فرصت‌های فروش', eyebrow: 'CRM · PIPELINE' }
-modules.crmActivities = { ...modules.crm, title: 'تعاملات و پیگیری‌ها', eyebrow: 'CRM · ACTIVITIES' }
-modules.financeSettlements = { ...modules.finance, title: 'تسویه با شرکت‌ها', eyebrow: 'FINANCE · SETTLEMENTS' }
-modules.financeTransactions = { ...modules.finance, title: 'تراکنش‌ها و گردش حساب', eyebrow: 'FINANCE · TRANSACTIONS' }
-modules.financeInvoices = { ...modules.finance, title: 'صورتحساب‌ها و اسناد مالی', eyebrow: 'FINANCE · INVOICES' }
+modules.crmLeads = {
+  ...modules.crm,
+  title: 'سرنخ‌ها و مشتریان بالقوه',
+  eyebrow: 'CRM · LEADS',
+  columns: [
+    { key: 'primary', label: 'سرنخ / شناسه' }, { key: 'owner', label: 'مخاطب' },
+    { key: 'category', label: 'منبع جذب' }, { key: 'date', label: 'تاریخ ثبت' },
+    { key: 'statusLabel', label: 'وضعیت' },
+  ],
+  rows: [
+    { id: 11, primary: 'LD-1042 — اپراتور منطقه‌ای', owner: 'شرکت ارتباط‌گستر', category: 'فرم سایت', date: 'امروز', statusLabel: 'جدید', statusTone: 'info' },
+    { id: 12, primary: 'LD-1038 — تأمین‌کننده تجهیزات', owner: 'گروه شبکه آریا', category: 'معرفی همکار', date: 'دیروز', statusLabel: 'تماس اولیه', statusTone: 'warning' },
+    { id: 13, primary: 'LD-1027 — خریدار سازمانی', owner: 'مخابرات شرق', category: 'استعلام', date: '۳ روز پیش', statusLabel: 'تبدیل‌شده', statusTone: 'success' },
+  ],
+}
+modules.crmPipeline = {
+  ...modules.crm,
+  title: 'قیف فرصت‌های فروش',
+  eyebrow: 'CRM · PIPELINE',
+  columns: [
+    { key: 'primary', label: 'فرصت فروش' }, { key: 'owner', label: 'حساب / شرکت' },
+    { key: 'category', label: 'ارزش احتمالی' }, { key: 'date', label: 'موعد تصمیم' },
+    { key: 'statusLabel', label: 'مرحله' },
+  ],
+  rows: [
+    { id: 21, primary: 'OP-208 — توسعه شبکه دسترسی', owner: 'اپراتور منطقه‌ای', category: '۲٫۸ میلیارد ریال', date: '۱۴۰۵/۰۹/۱۵', statusLabel: 'مذاکره', statusTone: 'warning' },
+    { id: 22, primary: 'OP-204 — تأمین سوئیچ', owner: 'شرکت زیرساخت', category: '۱٫۲ میلیارد ریال', date: '۱۴۰۵/۰۹/۰۸', statusLabel: 'پیشنهاد ارسال‌شده', statusTone: 'info' },
+    { id: 23, primary: 'OP-199 — ماژول نوری', owner: 'پیمانکار مخابراتی', category: '۶۸۰ میلیون ریال', date: '۱۴۰۵/۰۸/۲۸', statusLabel: 'برنده‌شده', statusTone: 'success' },
+  ],
+}
+modules.crmActivities = {
+  ...modules.crm,
+  title: 'تعاملات و پیگیری‌ها',
+  eyebrow: 'CRM · ACTIVITIES',
+  columns: [
+    { key: 'primary', label: 'فعالیت' }, { key: 'owner', label: 'مسئول' },
+    { key: 'category', label: 'نوع تعامل' }, { key: 'date', label: 'سررسید' },
+    { key: 'statusLabel', label: 'وضعیت' },
+  ],
+  rows: [
+    { id: 31, primary: 'تماس پیگیری با شرکت ارتباط‌گستر', owner: 'مریم احمدی', category: 'تماس', date: 'امروز، ۱۴:۰۰', statusLabel: 'سررسید امروز', statusTone: 'warning' },
+    { id: 32, primary: 'ارسال پیشنهاد قیمت سوئیچ', owner: 'علی رضایی', category: 'ارسال پیشنهاد', date: 'فردا', statusLabel: 'برنامه‌ریزی‌شده', statusTone: 'info' },
+    { id: 33, primary: 'جلسه معرفی خدمات بازارگاه', owner: 'تیم فروش', category: 'جلسه', date: 'دیروز', statusLabel: 'انجام‌شده', statusTone: 'success' },
+  ],
+}
+modules.financeSettlements = {
+  ...modules.finance,
+  title: 'تسویه با شرکت‌ها',
+  eyebrow: 'FINANCE · SETTLEMENTS',
+  columns: [
+    { key: 'primary', label: 'شناسه تسویه' }, { key: 'owner', label: 'شرکت' },
+    { key: 'category', label: 'مبلغ قابل پرداخت' }, { key: 'date', label: 'تاریخ درخواست' },
+    { key: 'statusLabel', label: 'وضعیت' },
+  ],
+  rows: [
+    { id: 41, primary: 'ST-2048', owner: 'تجهیزات شبکه نوین', category: '۸۴ میلیون ریال', date: 'امروز', statusLabel: 'در انتظار تأیید', statusTone: 'warning' },
+    { id: 42, primary: 'ST-2042', owner: 'پارس مخابرات', category: '۱۲۶ میلیون ریال', date: 'دیروز', statusLabel: 'در حال پردازش', statusTone: 'info' },
+    { id: 43, primary: 'ST-2031', owner: 'فناوری ارتباطات شرق', category: '۲۴۰ میلیون ریال', date: '۲ روز پیش', statusLabel: 'واریزشده', statusTone: 'success' },
+  ],
+}
+modules.financeTransactions = {
+  ...modules.finance,
+  title: 'تراکنش‌ها و گردش حساب',
+  eyebrow: 'FINANCE · TRANSACTIONS',
+  columns: [
+    { key: 'primary', label: 'شناسه تراکنش' }, { key: 'owner', label: 'طرف حساب' },
+    { key: 'category', label: 'نوع تراکنش' }, { key: 'date', label: 'تاریخ' },
+    { key: 'statusLabel', label: 'وضعیت' },
+  ],
+  rows: [
+    { id: 51, primary: 'TX-9812', owner: 'درگاه پرداخت', category: 'دریافت سفارش', date: 'امروز، ۱۱:۲۰', statusLabel: 'موفق', statusTone: 'success' },
+    { id: 52, primary: 'TX-9808', owner: 'شرکت پارس مخابرات', category: 'پرداخت تسویه', date: 'امروز، ۰۹:۴۵', statusLabel: 'در انتظار تطبیق', statusTone: 'warning' },
+    { id: 53, primary: 'TX-9799', owner: 'مشتری سازمانی', category: 'بازپرداخت', date: 'دیروز', statusLabel: 'ناموفق', statusTone: 'danger' },
+  ],
+}
+modules.financeInvoices = {
+  ...modules.finance,
+  title: 'صورتحساب‌ها و اسناد مالی',
+  eyebrow: 'FINANCE · INVOICES',
+  columns: [
+    { key: 'primary', label: 'شماره سند' }, { key: 'owner', label: 'طرف حساب' },
+    { key: 'category', label: 'نوع سند' }, { key: 'date', label: 'سررسید' },
+    { key: 'statusLabel', label: 'وضعیت' },
+  ],
+  rows: [
+    { id: 61, primary: 'INV-4421', owner: 'تجهیزات شبکه نوین', category: 'صورتحساب کمیسیون', date: '۱۴۰۵/۰۹/۰۱', statusLabel: 'صادرشده', statusTone: 'info' },
+    { id: 62, primary: 'INV-4418', owner: 'مشتری سازمانی', category: 'فاکتور فروش', date: '۱۴۰۵/۰۸/۲۸', statusLabel: 'پرداخت‌شده', statusTone: 'success' },
+    { id: 63, primary: 'INV-4412', owner: 'پارس مخابرات', category: 'صورتحساب تسویه', date: '۱۴۰۵/۰۸/۲۵', statusLabel: 'سررسیدگذشته', statusTone: 'danger' },
+  ],
+}
 
 const page = computed(() => modules[props.module] || modules.tickets)
 </script>
