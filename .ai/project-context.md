@@ -925,3 +925,8 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Profile fields are firstName/lastName/avatar; User email and phone are identity fields and are not writable through the profile endpoint.
 - Avatar storage is local under backend `uploads/avatars`, limited to JPEG/PNG/WebP and 1 MB, with generated filenames and file-signature validation. Production Compose mounts persistent named volume `user_uploads` at `/app/uploads`; dev uses the backend source bind mount.
 - Local-disk avatar storage assumes one backend instance. Multi-replica deployments require shared object storage.
+
+
+## 2026-11-04 — Profile form validation
+- Profile UI requires firstName and lastName (max 50 chars); password form validates backend-compatible lengths and confirmation; avatar picker accepts JPEG/PNG/WebP up to 1 MB and prevents duplicate uploads.
+- Avatar upload route returns a structured 400 when multipart file is missing. /uploads is proxied to backend in Vite dev and production nginx.
