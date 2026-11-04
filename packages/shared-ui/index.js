@@ -18,3 +18,4 @@ export { dashboardMenu, PUBLIC_SITE_URL } from './config/navigation/dashboardMen
 export * from './components/ui/index.js'
 // Operational module shell (CRM, finance, support and retail operations)
 export { default as OperationalWorkspace } from './components/operations/OperationalWorkspace.vue'
+export { default as TicketDeskWorkspace } from './components/operations/TicketDeskWorkspace.vue'
