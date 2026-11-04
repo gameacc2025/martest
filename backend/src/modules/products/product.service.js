@@ -92,6 +92,7 @@ const publicProductSelect = {
   specifications: true,
   status: true,
   visibility: true,
+  retailEnabled: true,
   isFeatured: true,
   companyId: true,
   categoryId: true,
