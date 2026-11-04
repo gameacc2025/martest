@@ -4,7 +4,7 @@
 
 Use the Paces RTL preview as a layout and interaction reference, not as a source of brand colors or application code. Keep the Telecom Marketplace identity (Vazirmatn, RTL, teal primary, deep navy, light/dark theme), Vue 3, PrimeVue 4, current API contracts, router guards, permissions, tenant boundaries, and business workflows.
 
-The public Website remains a marketplace experience; Admin and Company remain separate authenticated workspaces. Future CRM, HR, finance, support, operations, and BI modules are planned information architecture only until their backend, permissions, tests, and workflows exist.
+The public Website remains a marketplace experience; Admin and Company remain separate authenticated workspaces. Future modules may receive explicitly labelled UI-only prototypes when requested by the product owner, but they remain non-operational until backend contracts, permissions, tests, audit and workflows exist.
 
 ## Completed in this execution
 
@@ -890,3 +890,13 @@ The earlier Contact Us placeholder has been replaced by a real API integration:
 - Added route, service, API-client, app registration, OpenAPI and route-inventory coverage plus regression test source.
 - **Deployment prerequisite:** configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, and a real monitored `CONTACT_INBOX_EMAIL` in the backend environment. These values cannot be inferred from source.
 - No test, build, or browser run was performed in this pass.
+
+
+## Operations UI foundation — 2026-11-04
+
+- Extracted and catalogued the reusable TEM widget family under packages/shared-ui/components/ui (page header, stat card, panel, toolbar, status pill, segmented control, empty state, avatar/user cell, bar/donut charts, legend and meter).
+- Added the shared OperationalWorkspace composition for prototype list/dashboard screens. It uses the existing PrimeVue and shared TEM primitives, with search and status filters, and an explicit demo-data notice.
+- Added Admin UI routes for CRM, finance/settlements, support tickets and retail orders; added Company support-ticket preview. These are mock-data prototypes only; no backend/API or database behavior is claimed.
+- Expanded Company dashboard KPIs using existing company-scoped API data and added a support shortcut. Expanded list KPI summaries for companies, users, products, inquiries and orders; status counts are explicitly scoped to the currently loaded page, while total counts come from API pagination metadata.
+- Added docs/OPERATIONS_UI_ROADMAP.md with module boundaries, UI status, future API requirements and phased delivery plan.
+- Verification: no GitHub Actions/CI workflows were inspected or run per owner instruction. Local app builds/browser checks were not available through the remote repository editing session; do not infer runtime validation from successful GitHub writes.
