@@ -399,3 +399,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Expanded Company dashboard metrics from existing company-scoped data and added support shortcut. Expanded table KPI summaries for companies, users, products, inquiries and orders. Status breakdowns explicitly say «صفحه جاری»; only the total uses pagination metadata.
 - Added docs/OPERATIONS_UI_ROADMAP.md and updated the future-module blueprint and UI redesign execution log.
 - CI/GitHub Actions not inspected or run per owner instruction. Local build/browser verification not performed through the remote GitHub editing session.
+
+- Follow-up: CRM has subroutes for overview/leads/pipeline/activities; Finance has overview/settlements/transactions/invoices. Support and Retail Orders are separate menu groups. Added TemLineChart to the shared TEM widget exports. Admin dashboard now uses existing aggregate API fields for active users, pending products and total inquiries; Company dashboard uses authoritative pagination/stat fields for total products and open inquiries.
