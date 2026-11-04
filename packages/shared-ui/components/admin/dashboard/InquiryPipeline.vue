@@ -17,7 +17,7 @@ const faNumber = (v) => (Number(v) || 0).toLocaleString('fa-IR')
 </script>
 
 <template>
-  <div class="inquiry-pipeline">
+  <div class="inquiry-pipeline" role="group" aria-label="جریان استعلام‌ها" :aria-busy="loading">
     <component
       :is="stage.to ? 'router-link' : 'div'"
       v-for="(stage, i) in stages"
@@ -28,7 +28,7 @@ const faNumber = (v) => (Number(v) || 0).toLocaleString('fa-IR')
     >
       <div class="pipeline-stage-top">
         <span class="pipeline-stage-icon">
-          <i :class="stage.icon || 'pi pi-circle-fill'"></i>
+          <i :class="stage.icon || 'pi pi-circle-fill'" aria-hidden="true"></i>
         </span>
         <span v-if="loading" class="pipeline-stage-value pipeline-stage-value--skeleton"></span>
         <span v-else class="pipeline-stage-value">{{ faNumber(stage.value) }}</span>
@@ -60,6 +60,8 @@ const faNumber = (v) => (Number(v) || 0).toLocaleString('fa-IR')
   border-top: 3px solid var(--stage-accent);
   transition: box-shadow var(--ds-transition), transform var(--ds-transition);
 }
+
+.pipeline-stage--link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 
 .pipeline-stage--link:hover {
   box-shadow: var(--ds-shadow-md);

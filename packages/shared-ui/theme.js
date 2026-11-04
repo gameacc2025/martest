@@ -59,6 +59,7 @@ const TelecomPreset = definePreset(Lara, {
           hoverMutedColor: '#3e536f',
         },
         formField: {
+          background: '#ffffff',
           borderColor: '#c0ccdf',
           placeholderColor: '#52678a',
         },
@@ -98,6 +99,7 @@ const TelecomPreset = definePreset(Lara, {
           hoverMutedColor: '#dbe5f4',
         },
         formField: {
+          background: '#162f4b',
           borderColor: '#39536f',
           placeholderColor: '#a9b8d6',
         },
@@ -119,6 +121,10 @@ const TelecomPreset = definePreset(Lara, {
         borderRadius: '12px',
         shadow: '0 1px 2px rgba(9, 38, 67, 0.06)',
       },
+      colorScheme: {
+        light: { root: { background: '#ffffff' } },
+        dark: { root: { background: '#0d2038' } },
+      },
     },
     tag: {
       root: { fontSize: '0.8125rem', fontWeight: '600', borderRadius: '999px' },
@@ -129,6 +135,11 @@ const TelecomPreset = definePreset(Lara, {
           header: { background: '#f7f9fd' },
           headerCell: { background: '#f7f9fd', hoverBackground: '#eaeef9', color: '#52678a' },
           row: { stripedBackground: '#f7f9fd' },
+        },
+        dark: {
+          header: { background: '#162f4b' },
+          headerCell: { background: '#162f4b', hoverBackground: '#273e5a', color: '#b6c7d8' },
+          row: { stripedBackground: '#0d2038' },
         },
       },
     },
