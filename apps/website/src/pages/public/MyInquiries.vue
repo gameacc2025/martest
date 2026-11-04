@@ -17,6 +17,16 @@ const loadingDetail = ref(false)
 const saving = ref(false)
 const decidingResponseId = ref(null)
 const messages = ref([])
+const messagesError = ref('')
+let detailRequestSequence = 0
+const recipientCompanies = computed(() => {
+  const companies = new Map()
+  for (const response of selected.value?.responses || []) {
+    const company = response?.company
+    if (company?.id && !companies.has(String(company.id))) companies.set(String(company.id), company)
+  }
+  return [...companies.values()]
+})
 const quotaSummary = ref(null)
 const notifyBySms = ref(false)
 const messageNotice = ref('')
@@ -102,35 +112,53 @@ async function loadList() {
 
 async function loadDetail() {
   const id = route.params.id
+  const requestSequence = ++detailRequestSequence
   if (!id) {
     selected.value = null
+    messages.value = []
+    messagesError.value = ''
+    quotaSummary.value = null
+    recipientCompanyId.value = null
     detailError.value = ''
+    loadingDetail.value = false
     return
   }
   loadingDetail.value = true
   detailError.value = ''
+  messages.value = []
+  messagesError.value = ''
+  recipientCompanyId.value = null
   try {
-    selected.value = unwrapInquiry(await inquiriesApi.getById(id))
+    const inquiry = unwrapInquiry(await inquiriesApi.getById(id))
+    if (requestSequence !== detailRequestSequence || String(route.params.id) !== String(id)) return
+    selected.value = inquiry
+    const companies = [...new Map((inquiry?.responses || [])
+      .filter((response) => response?.company?.id)
+      .map((response) => [String(response.company.id), response.company])).values()]
+    recipientCompanyId.value = companies.length === 1 ? companies[0].id : null
     await Promise.all([loadMessages(), loadQuota()])
   } catch (err) {
+    if (requestSequence !== detailRequestSequence) return
     selected.value = null
     detailError.value = err?.response?.data?.message || err?.response?.data?.error?.message
       || err?.serverMessage || err?.message || 'دریافت جزئیات استعلام ناموفق بود.'
   } finally {
-    loadingDetail.value = false
+    if (requestSequence === detailRequestSequence) loadingDetail.value = false
   }
 }
 
 async function loadMessages() {
   if (!selected.value?.id) return
   loadingMessages.value = true
+  messagesError.value = ''
   try {
     const result = await inquiriesApi.listMessages(selected.value.id)
     const body = result?.data ?? result
     const payload = body?.data ?? body
     messages.value = Array.isArray(payload) ? payload : []
-  } catch {
-    messages.value = []
+  } catch (err) {
+    messagesError.value = err?.response?.data?.message || err?.response?.data?.error?.message
+      || err?.serverMessage || err?.message || 'دریافت پیام‌های گفتگو ناموفق بود.'
   } finally {
     loadingMessages.value = false
   }
@@ -256,8 +284,7 @@ function backToList() {
 }
 
 watch(() => route.params.id, () => {
-  if (route.params.id) loadDetail()
-  else selected.value = null
+  loadDetail()
 })
 onMounted(async () => {
   await loadList()
@@ -353,6 +380,7 @@ onMounted(async () => {
             </div>
             <p class="conversation-note">ارسال هر پیام از سهمیهٔ پیام داخلی اشتراک شما مصرف می‌کند.</p>
             <div v-if="loadingMessages && !messages.length" class="empty-inline">در حال دریافت پیام‌ها…</div>
+            <div v-else-if="messagesError" class="inline-error" role="alert">{{ messagesError }} <Button label="تلاش دوباره" text size="small" @click="loadMessages" /></div>
             <div v-else-if="!messages.length" class="empty-inline">هنوز پیامی ثبت نشده است.</div>
             <div v-else class="conversation-list" aria-live="polite">
               <article v-for="message in messages" :key="message.id" class="conversation-message">
@@ -364,8 +392,8 @@ onMounted(async () => {
               <label>شرکت دریافت‌کننده
                 <select v-model="recipientCompanyId" required>
                   <option :value="null" disabled>انتخاب شرکت پاسخ‌دهنده</option>
-                  <option v-for="response in selected.responses" :key="response.company?.id" :value="response.company?.id" :disabled="!response.company?.id">
-                    {{ response.company?.name || 'شرکت پاسخ‌دهنده' }}
+                  <option v-for="company in recipientCompanies" :key="company.id" :value="company.id">
+                    {{ company.name || 'شرکت پاسخ‌دهنده' }}
                   </option>
                 </select>
               </label>
