@@ -24,6 +24,12 @@ watch(() => props.tickets, (items) => {
   }
 }, { deep: true })
 
+watch(filteredTickets, (items) => {
+  if (!items.some((ticket) => ticket.id === selectedTicketId.value)) {
+    selectedTicketId.value = items[0]?.id ?? null
+  }
+}, { immediate: true })
+
 const filteredTickets = computed(() => props.tickets.filter((ticket) => {
   const text = [ticket.code, ticket.subject, ticket.category, ticket.requesterName].join(' ').toLocaleLowerCase()
   const matchesQuery = !query.value || text.includes(query.value.toLocaleLowerCase())
