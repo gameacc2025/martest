@@ -112,6 +112,10 @@ const pagination = ref({
 
 const kpiItems = computed(() => [
   { label: 'کل سفارش‌ها', value: pagination.value.total, icon: 'pi pi-receipt', tone: 'primary' },
+  { label: 'در انتظار', value: orders.value.filter((item) => item.status === 'PENDING').length, icon: 'pi pi-clock', tone: 'warning' },
+  { label: 'ارسال‌شده', value: orders.value.filter((item) => item.status === 'SHIPPED').length, icon: 'pi pi-truck', tone: 'info' },
+  { label: 'تحویل‌شده', value: orders.value.filter((item) => item.status === 'DELIVERED').length, icon: 'pi pi-check-circle', tone: 'success' },
+  { label: 'لغو / بازپرداخت', value: orders.value.filter((item) => ['CANCELLED', 'REFUNDED'].includes(item.status)).length, icon: 'pi pi-replay', tone: 'danger' },
 ])
 
 const form = ref({
