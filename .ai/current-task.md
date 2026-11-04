@@ -1,12 +1,12 @@
 ﻿# Current Task — Full UI rebuild on the `tem/` visual language (UI-REDESIGN-TEM-01)
 
-**Status:** IN_PROGRESS — the unified `tem/` (navy/cyan/blue) system is applied across the shared shell, all Admin/Company list pages, the detail/form/settings workspaces, and the public Website. Phases 1–5 are committed on `main`; remaining work is the residual detail screens, account/auth brand pass, and the page-inventory/decision items listed below. Nothing pushed (only when authorized). Browser/visual checks `NOT RUN` per owner instruction.
+**Status:** IN_PROGRESS — TEM widget extraction and the first operations UI foundation are committed directly to `main`. Admin CRM, finance/settlement, support-ticket and retail-order prototypes plus Company support-ticket prototype exist with explicitly labelled sample data. API/domain implementation remains a future phase. Browser/build checks were not run in this remote-editing session; GitHub Actions/CI was not inspected or run per owner instruction.
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
 
 ## Product constraints
-Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first RTL, dark sidebar, existing logo), Vue 3/JavaScript/PrimeVue 4 stack, APIs, routes, PKCE authentication, app-context/RBAC, tenant isolation, inquiry/RFQ rules, product lifecycle, notification behavior and commerce contracts. Do not add fake data or unsupported claims. No backend/schema/API/business-rule changes during this UI-only task.
+Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first RTL, dark sidebar, existing logo), Vue 3/JavaScript/PrimeVue 4 stack, APIs, routes, PKCE authentication, app-context/RBAC, tenant isolation, inquiry/RFQ rules, product lifecycle, notification behavior and commerce contracts. Do not present fake data as real or make unsupported claims. Explicitly requested UI-only prototypes may use clearly labelled sample data, must remain disconnected from guessed APIs, and must not execute real business/financial operations. No backend/schema/API/business-rule changes during this UI-only task.
 
 ## Required skill workflow
 - UI UX Pro Max: accessibility, responsive layout, semantic tokens, form feedback and performance guidance.
@@ -390,3 +390,12 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 **Phase 5 commit:** `61dcab7`.
 
 **Open decision:** whether to keep the legacy website `components/products/ProductCard.vue` alongside the new Tem product card, or migrate all product surfaces to one shared card.
+
+
+## 2026-11-04 — TEM widget reuse and operations UI foundation
+- Added the reusable OperationalWorkspace composition under packages/shared-ui and exported it from the shared package.
+- Reused the existing TEM widget family (TemPageHeader, TemStatCard, TemPanel, TemToolbar, TemStatusPill, charts, legend, meter, avatar and user cell) instead of creating page-specific duplicates.
+- Added Admin routes for CRM, finance/settlements, support tickets and retail orders; added a Company support-ticket preview. All new records are visibly demo data; no APIs, migrations or operational actions were fabricated.
+- Expanded Company dashboard metrics from existing company-scoped data and added support shortcut. Expanded table KPI summaries for companies, users, products, inquiries and orders. Status breakdowns explicitly say «صفحه جاری»; only the total uses pagination metadata.
+- Added docs/OPERATIONS_UI_ROADMAP.md and updated the future-module blueprint and UI redesign execution log.
+- CI/GitHub Actions not inspected or run per owner instruction. Local build/browser verification not performed through the remote GitHub editing session.
