@@ -3295,3 +3295,23 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Support UX refinement:** Added shared TicketDeskWorkspace with inbox filtering, ticket selection, conversation thread, requester/assignee/priority context, and STAFF-only internal-note rendering. Admin, Company and Website support pages now use this shared workspace; Admin route uses TicketDesk.vue. Reply composer, attachment, assignment and close controls remain disabled until real support APIs exist. Added docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md with tenant isolation, status/SLA, private attachments, permissions, APIs and acceptance scenarios.
 
 - Added docs/CRM_DOMAIN_DESIGN.md: STAFF-only CRM boundaries, canonical User/Company linking, Lead conversion idempotency, Opportunity pipeline/history, Activity vs Task, permission set, aggregate metrics, API contract and acceptance scenarios.
+
+
+## 2026-11-04 — WEBSITE-CART-CHECKOUT-SAFETY-01 — Customer cart and checkout UI
+
+- **Status:** PARTIAL — UI foundation and safety boundary committed; operational commerce remains blocked on backend phases.
+- **Goal:** Make the existing Website cart/checkout routes usable without presenting local calculations or simulated payment as real commerce.
+- **Changes:**
+  - Registered `/cart` and authenticated CUSTOMER-only `/checkout`; added a cart shortcut/count to PublicLayout.
+  - Rebuilt ShoppingCart using the actual Pinia cart store methods. Removed stale calls to undefined `removeFromCart`, `increaseQuantity`, and `decreaseQuantity`.
+  - Removed fake coupon success, fixed discount, fabricated shipping result, and unimplemented recommended-product calls.
+  - Hardened local cart persistence and input validation; malformed localStorage no longer crashes store initialization.
+  - Added `apps/website/src/stores/cart.test.js` for add/increment, invalid products/quantities, update rules, removal/clear and malformed storage.
+  - Rebuilt Checkout to capture delivery details and provide a review step only. Removed card number, CVV2 and expiry inputs, and removed the generated fake order number/success state. Final order submission is disabled until real APIs exist.
+  - Persian and Arabic numerals are normalized for phone/postal-code validation.
+- **Docs:** Added `docs/WEBSITE_CART_CHECKOUT_STATUS.md`; updated `docs/OPERATIONS_UI_ROADMAP.md`, `.ai/current-task.md`, and `.ai/project-context.md`.
+- **Verification:** Remote writes succeeded. Source was re-fetched during editing and statically reviewed. Website Vitest, production build and browser checks: **NOT RUN** per owner instruction. No backend, schema, API, inventory, payment or finance code changed.
+- **Commits:** `f0aa015` cart store; `46db11f` cart page; `5229ff7` checkout safety rebuild; `4c5dce4` routes; `a8150cb` public header; `ef93c54` cart tests; `44c82e4` Persian digit validation; `fd80c04` remove unregistered tooltip; `211b387` cart/checkout status doc; `b7306a9` roadmap; `e5da159` current task; `640f1dc` project context.
+- **Push:** All writes committed directly to remote `main`; latest observed task commit is recorded after final verification.
+- **Risks / open questions:** Cart remains localStorage-only; product retail eligibility, authoritative price/stock, shipping/tax/discount calculations, server checkout, order persistence, payment gateway and order history are not implemented. Do not enable product add-to-cart for all products.
+- **Next:** Continue Website customer account/inquiry surfaces within UI scope, or begin documented retail backend R1 only when the user explicitly authorizes operational commerce and outstanding policy decisions are resolved.
