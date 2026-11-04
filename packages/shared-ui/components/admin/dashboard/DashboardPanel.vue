@@ -25,33 +25,9 @@ defineProps({
 </template>
 
 <style scoped>
-.dash-panel {
-  display: flex;
-  min-width: 0;
-  height: 100%;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-}
-.dash-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .75rem;
-  padding: .85rem 1rem;
-  border-bottom: 1px solid #e3edf2;
-  background: linear-gradient(100deg, #f7fbfd 0%, #eef8fb 100%);
-}
-.dash-panel-heading { display: flex; min-width: 0; align-items: center; gap: .6rem; }
-.dash-panel-title-icon { flex: 0 0 auto; color: var(--ds-color-primary-text); font-size: 1rem; }
-.dash-panel-title { min-width: 0; margin: 0; color: var(--ds-color-text); font-size: .9rem; font-weight: var(--ds-font-weight-bold); line-height: 1.45; }
-.dash-panel-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
-.dash-panel-link { display: inline-flex; min-height: 2.65rem; align-items: center; gap: .4rem; color: var(--ds-color-primary-text); font-size: .78rem; font-weight: var(--ds-font-weight-semibold); text-decoration: none; white-space: nowrap; }
-.dash-panel-link:hover { text-decoration: underline; }
-.dash-panel-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
-.dash-panel-body { min-width: 0; flex: 1; padding: 1rem; }
+.dash-panel{display:flex;min-width:0;height:100%;flex-direction:column;overflow:hidden;border:1px solid #dfe9f4;border-radius:15px;background:#fff;box-shadow:0 3px 13px rgba(32,79,130,.035)}
+.dash-panel-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.65rem;padding:.8rem 1rem;border-bottom:1px solid #edf2f8;background:#fff}
+.dash-panel-heading{display:flex;min-width:0;align-items:center;gap:.55rem}.dash-panel-title-icon{flex:0 0 auto;color:#168fca;font-size:.95rem}.dash-panel-title{min-width:0;margin:0;color:#18385e;font-size:.85rem;font-weight:800;line-height:1.45}
+.dash-panel-actions{display:flex;align-items:center;flex-wrap:wrap;gap:.55rem}.dash-panel-link{display:inline-flex;min-height:2rem;align-items:center;gap:.35rem;color:#078eae;font-size:.72rem;font-weight:700;text-decoration:none;white-space:nowrap}.dash-panel-link:hover{text-decoration:underline}.dash-panel-link:focus-visible{outline:2px solid #12b8d0;outline-offset:3px}
+.dash-panel-body{min-width:0;flex:1;padding:.85rem 1rem}
 </style>
