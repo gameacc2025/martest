@@ -419,6 +419,7 @@ const quickActions = [
   { label: 'کاربران شرکت', icon: 'pi pi-users', to: { name: 'company-users' }, tone: 'secondary' },
   { label: 'پروفایل شرکت', icon: 'pi pi-building', to: { name: 'company-settings' }, tone: 'warning' },
   { label: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', to: { name: 'company-tickets' }, tone: 'info' },
+  { label: 'وضعیت تسویه‌ها', icon: 'pi pi-wallet', to: { name: 'company-finance-settlements' }, tone: 'warning' },
 
 ]
 
