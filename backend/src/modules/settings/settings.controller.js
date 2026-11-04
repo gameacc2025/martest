@@ -9,6 +9,7 @@
 
 const settingsService = require('./settings.service');
 const { success } = require('../../utils/success');
+const { AppError } = require('../../utils/error');
 
 /**
  * GET /api/v1/settings/profile
@@ -52,7 +53,7 @@ async function uploadAvatar(request, reply) {
   const file = await request.file({ limits: { fileSize: 1_000_000, files: 1 } });
 
   if (!file) {
-    throw new Error('No file uploaded');
+    throw new AppError('No avatar file was uploaded.', 400, true, 'AVATAR_FILE_REQUIRED');
   }
 
   const avatarUrl = await settingsService.uploadAvatar(id, file);
