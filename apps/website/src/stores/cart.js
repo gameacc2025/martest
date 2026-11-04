@@ -1,61 +1,85 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
+
+const STORAGE_KEY = 'cart'
+
+function readStoredItems() {
+  if (typeof localStorage === 'undefined') return []
+  try {
+    const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    return Array.isArray(value) ? value.filter((item) => item && item.id != null) : []
+  } catch {
+    return []
+  }
+}
+
+function toPositiveInteger(value, fallback = 1) {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
 
 export const useCartStore = defineStore('cart', () => {
-  const items = ref(JSON.parse(localStorage.getItem('cart') || '[]'))
+  const items = ref(readStoredItems())
 
-  const itemCount = computed(() => items.value.reduce((total, item) => total + item.quantity, 0))
-  const subtotal = computed(() => items.value.reduce((total, item) => total + (item.price * item.quantity), 0))
+  const itemCount = computed(() => items.value.reduce((total, item) => total + toPositiveInteger(item.quantity), 0))
+  const subtotal = computed(() => items.value.reduce((total, item) => {
+    const price = Number(item.price)
+    return total + (Number.isFinite(price) && price > 0 ? price : 0) * toPositiveInteger(item.quantity)
+  }, 0))
 
-  // Add to cart
+  function persist() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items.value))
+    }
+  }
+
   function addItem(product, quantity = 1) {
-    const existingItem = items.value.find(item => item.id === product.id)
+    if (!product || product.id == null) return false
+    const amount = toPositiveInteger(quantity, 0)
+    const price = Number(product.price ?? product.prices?.[0]?.price)
+    if (!amount || !Number.isFinite(price) || price <= 0) return false
 
-    if (existingItem) {
-      existingItem.quantity += quantity
+    const existing = items.value.find((item) => String(item.id) === String(product.id))
+    if (existing) {
+      existing.quantity = toPositiveInteger(existing.quantity) + amount
     } else {
+      const firstImage = Array.isArray(product.images) ? product.images[0] : null
       items.value.push({
         id: product.id,
-        name: product.title,
-        price: product.prices?.[0]?.price || 0,
-        currency: product.prices?.[0]?.currency || 'IRR',
-        image: product.images?.[0] || null,
-        quantity
+        name: product.name || product.title || 'محصول',
+        price,
+        currency: product.currency || product.prices?.[0]?.currency || 'IRR',
+        image: typeof firstImage === 'string' ? firstImage : firstImage?.url || product.image || null,
+        quantity: amount,
       })
     }
 
-    saveToLocalStorage()
+    persist()
+    return true
   }
 
-  // Remove from cart
   function removeItem(productId) {
-    items.value = items.value.filter(item => item.id !== productId)
-    saveToLocalStorage()
+    items.value = items.value.filter((item) => String(item.id) !== String(productId))
+    persist()
   }
 
-  // Update quantity
   function updateQuantity(productId, newQuantity) {
-    const item = items.value.find(item => item.id === productId)
-    if (item && newQuantity > 0) {
-      item.quantity = newQuantity
-      saveToLocalStorage()
-    }
+    const quantity = Number(newQuantity)
+    const item = items.value.find((entry) => String(entry.id) === String(productId))
+    if (!item || !Number.isInteger(quantity) || quantity < 1) return false
+    item.quantity = quantity
+    persist()
+    return true
   }
 
-  // Clear cart
   function clearCart() {
     items.value = []
-    saveToLocalStorage()
+    persist()
   }
 
-  // Save to localStorage
-  function saveToLocalStorage() {
-    localStorage.setItem('cart', JSON.stringify(items.value))
-  }
-
-  // Load from localStorage
   function loadFromLocalStorage() {
-    items.value = JSON.parse(localStorage.getItem('cart') || '[]')
+    items.value = readStoredItems()
+    return items.value
   }
 
   return {
@@ -66,6 +90,6 @@ export const useCartStore = defineStore('cart', () => {
     removeItem,
     updateQuantity,
     clearCart,
-    loadFromLocalStorage
+    loadFromLocalStorage,
   }
 })
