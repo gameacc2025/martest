@@ -214,3 +214,21 @@ The shared workspace stylesheet is the visual source of truth for the Admin and 
 - Scoped the new global surface/form/table styles to .dash-layout so the public website does not inherit the panel-only restyle. Restored the shared PrimeVue theme and base design tokens to their previous website palette.
 - Admin and Company page data, API contracts, routes, permissions and business logic were not intentionally changed. The dashboard visuals use existing API data only; no synthetic historical series was added.
 - UI build/browser tests were not run in this pass, per the current instruction.
+
+
+## Palette sampled from the owner's mockup — 2026-11-04 (CURRENT, supersedes earlier palette sections)
+
+Owner instruction: all colors are derived from the supplied "Telecom Market" dashboard mockup, not from the previous repo palette. Single source of truth: `packages/shared-ui/assets/design-system/tokens.scss` (`--ds-*`) and the PrimeVue preset in `packages/shared-ui/theme.js`.
+
+| Role | Value | Notes |
+| --- | --- | --- |
+| Sidebar navy | `#092643` → `#062f4f` (vertical gradient) | active item wash `#0d6d90`, accent `#27e5f1` |
+| Primary blue | `#0790de` (ramp 50–950 in theme.js) | links, tabs, chart series 1; PrimeVue `primary.color` = 600 `#0679bd` for AA with white text |
+| Cyan CTA | `#3fddf3` → `#4cd1f3` gradient, text `#062f4f` | primary `.p-button`, sidebar CTA (contrast 7.6:1) |
+| Teal | `#09d3d1` | chart series 2, "completed" accents |
+| Green / amber / violet | `#0fb683` / `#fdc076` / `#a193f6` | success, pending, KPI icon tint |
+| Hero gradient | `#086394` → `#4fabdd` | `--ds-hero-gradient` |
+| Canvas / border / text | `#eaeef9` / `#e2e8f4` / `#0f2d4d` | muted text `#52678a` |
+| Dark theme | surfaces `#071d36`–`#16304f`, primary cyan `#27d3ee` | sidebar `#071d36` → `#05263f` |
+
+Rules: no hex in components when a `--ds-*` token exists; neutral ramp is blue-lavender (matches `#eaeef9`), not teal-gray. `BrandMark.vue` logo colors are unchanged pending an owner decision on the logo asset. Browser/visual verification: NOT RUN.

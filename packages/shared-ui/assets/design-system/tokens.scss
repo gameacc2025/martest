@@ -63,27 +63,33 @@
 
   /* --------------------------------------------------------
      BRAND + SHELL (constant brand surfaces; flipped in dark below)
-     Primary sky #39bfe0 · secondary turquoise #12b8a6 · technical blue #2878c7.
+     Primary sky #0790de · secondary turquoise #09d3d1 · technical blue #0b7bc9.
      Use these for hero/sidebar/footer surfaces instead of raw hex.
      -------------------------------------------------------- */
-  --ds-brand: #39bfe0;
-  --ds-turquoise: #12b8a6;
-  --ds-sky: #39bfe0;
-  --ds-tech-blue: #2878c7;
-  --ds-navy: #173b63;
-  --ds-amber: #e7a64b;
+  --ds-brand: #0790de;
+  --ds-accent: #27d3ee;          /* cyan CTA / active accents (dark text on top) */
+  --ds-accent-end: #4cd1f3;
+  --ds-turquoise: #09d3d1;       /* second chart series, "completed" accents */
+  --ds-sky: #4fabdd;
+  --ds-tech-blue: #0b7bc9;
+  --ds-navy: #092643;
+  --ds-amber: #fdc076;
+  --ds-green: #0fb683;
+  --ds-violet: #a193f6;
+  --ds-canvas: #eaeef9;
   --ds-on-navy: #ffffff;
-  --ds-on-navy-muted: #b7cad9;
-  --ds-hero-gradient: linear-gradient(135deg, #173b63 0%, #2878c7 100%);
+  --ds-on-navy-muted: #a9b8d6;
+  --ds-hero-gradient: linear-gradient(135deg, #086394 0%, #4fabdd 100%);
+  --ds-cta-gradient: linear-gradient(90deg, #3fddf3 0%, #4cd1f3 100%);
 
-  --ds-sidebar-bg: #142b46;
-  --ds-sidebar-border: rgba(211, 231, 242, 0.12);
-  --ds-sidebar-fg: #d7e6ef;
+  --ds-sidebar-bg: linear-gradient(180deg, #092643 0%, #062f4f 100%);
+  --ds-sidebar-border: rgba(169, 184, 214, 0.14);
+  --ds-sidebar-fg: #d6dff0;
   --ds-sidebar-fg-strong: #ffffff;
-  --ds-sidebar-muted: #a9c2d3;
+  --ds-sidebar-muted: #a9b8d6;
   --ds-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --ds-sidebar-active-bg: rgba(57, 191, 224, 0.20);
-  --ds-sidebar-accent: #28d8e8;
+  --ds-sidebar-active-bg: #0d6d90;
+  --ds-sidebar-accent: #27e5f1;
 
   /* --------------------------------------------------------
      TYPOGRAPHY SCALE (modular, ~1.2 ratio)
@@ -148,7 +154,7 @@
      SHADOW SYSTEM (elevation)
      -------------------------------------------------------- */
   /* Navy-tinted so elevation reads as part of the brand, not neutral grey. */
-  --ds-shadow-xs: 0 1px 2px rgba(23, 59, 99, 0.06);
+  --ds-shadow-xs: 0 1px 2px rgba(9, 38, 67, 0.06);
   --ds-shadow-sm: 0 1px 3px rgba(0, 58, 84, 0.08), 0 1px 2px rgba(0, 58, 84, 0.04);
   --ds-shadow-md: 0 4px 12px rgba(0, 58, 84, 0.09);
   --ds-shadow-lg: 0 8px 24px rgba(0, 58, 84, 0.13);
@@ -172,14 +178,14 @@
   --ds-z-toast: 1200;
 
   /* Production-safe redesign aliases: no data or domain behavior implied. */
-  --ds-color-brand-deep: var(--p-primary-950, #063b3a);
+  --ds-color-brand-deep: var(--p-primary-950, #062f4f);
   --ds-color-brand-dark: var(--p-primary-900, #0b5551);
   --ds-color-on-brand: #ffffff;
   --ds-color-on-brand-muted: var(--p-primary-200, #b9dbe6);
   --ds-color-accent: var(--p-primary-color);
   --ds-color-on-accent: var(--p-primary-contrast-color);
-  --ds-color-primary-text: var(--p-primary-800, #14718c);
-  --ds-color-primary-soft: var(--p-primary-50, #eaf9fc);
+  --ds-color-primary-text: var(--p-primary-800, #0a5f98);
+  --ds-color-primary-soft: var(--p-primary-50, #e8f5fd);
   --ds-color-focus: var(--p-primary-color);
   --ds-container-max: 1280px;
   --ds-touch-target: 44px;
@@ -190,8 +196,8 @@
   --ds-status-warning-fg: #8a4b00;
   --ds-status-danger-bg: #fde8e8;
   --ds-status-danger-fg: #9b1c1c;
-  --ds-status-info-bg: #e0f3fa;
-  --ds-status-info-fg: #175d82;
+  --ds-status-info-bg: #e3f1fd;
+  --ds-status-info-fg: #0a4d7c;
   --ds-status-muted-bg: #eceff1;
   --ds-status-muted-fg: #37474f;
 }
@@ -202,14 +208,14 @@
    need to soften the elevation shadows for dark surfaces.
    ------------------------------------------------------------ */
 :root.app-dark {
-  --ds-hero-gradient: linear-gradient(135deg, #0b2036 0%, #173b63 100%);
-  --ds-sidebar-bg: #0b1d31;
+  --ds-hero-gradient: linear-gradient(135deg, #062f4f 0%, #086394 100%);
+  --ds-sidebar-bg: linear-gradient(180deg, #071d36 0%, #05263f 100%);
   --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
   --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
   --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
   --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.65);
-  --ds-color-primary-text: var(--p-primary-300, #66cfc2);
+  --ds-color-primary-text: var(--p-primary-300, #7fe0f7);
   --ds-color-primary-soft: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
   --ds-status-success-bg: rgba(34, 197, 94, 0.16);
   --ds-status-success-fg: #86efac;
@@ -217,7 +223,7 @@
   --ds-status-warning-fg: #fcd34d;
   --ds-status-danger-bg: rgba(239, 68, 68, 0.16);
   --ds-status-danger-fg: #fca5a5;
-  --ds-status-info-bg: rgba(18, 184, 166, 0.16);
+  --ds-status-info-bg: rgba(9, 211, 209, 0.16);
   --ds-status-info-fg: #8ce6dc;
   --ds-status-muted-bg: rgba(148, 163, 184, 0.16);
   --ds-status-muted-fg: #cbd5e1;

@@ -3095,3 +3095,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** full Vitest run 55/55 files, 306/306 tests passed; `pnpm --filter @telecom/{admin,company,website} build` all succeeded. Browser/visual checks NOT RUN.
 - **Open questions (not decided here):** (1) `AGENTS.md` still lists primary `#01bec2` / 8px radius, while `design-system/MASTER.md` documents sky `#39BFE0` + turquoise `#12B8A6` + navy `#142B46`; the owner must confirm which is canonical for the website vs the panels. (2) `KpiCard.vue` and parts of the panel layer use hard-coded hex values instead of `--ds-*` tokens, so dark theme coverage is NOT VERIFIED.
 - **Next action:** token-ize hard-coded colors in the shared dashboard components, then continue the remaining page families listed in `.ai/current-task.md`.
+
+
+## 2026-11-04 — UI-PALETTE-MOCKUP-01 — Palette re-derived from the owner's mockup
+- **Status:** DONE (palette layer); per-page visual review NOT RUN
+- **Agent:** Claude (local checkout)
+- **Goal:** Owner instruction: stop using the repo palette; every color must come from the supplied dashboard mockup.
+- **Method:** sampled median pixel colors of the mockup regions (sidebar, active item, CTA, hero, canvas, cards, chart lines, donut, KPI tiles), then mapped them to tokens.
+- **Changes:** `theme.js` (primary ramp, light/dark surfaces, text, highlight, contrast colors), `tokens.scss` (brand/shell/hero/CTA tokens, dark overrides, info status), `brand-overrides.scss` (tokens instead of hex; cyan CTA buttons with navy text; sidebar via tokens), `main.scss` workspace canvas/ink, scripted remap of old-palette hex in 8 shared-ui files (KpiCard, DashboardSidebar, etc.), `design-system/MASTER.md` current-palette section.
+- **Verification:** `vitest run` 55/55 files, 306/306 tests; admin/company/website builds succeed; WCAG contrast computed for key pairs (all >= 4.69:1). Browser screenshots NOT RUN.
+- **Open:** `BrandMark.vue` still uses the old logo colors; scoped component CSS still contains some one-off light tints (e.g. `#f5fbfd`) that were not remapped; AGENTS.md still lists the old primary color and should be updated by the owner.
