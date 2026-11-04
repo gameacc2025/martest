@@ -3408,3 +3408,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - The same run still reports two backend test failures unrelated to this UI-only scope: POST /messages rejects invalid payloads (asserted status 0) and uploadAvatar missing-file error expectation. No backend source, Prisma schema or API behavior was changed in this redesign.
 - Latest source commit at this update: 6d1bb13. Its CI run is pending.
 - Playwright responsive checks at 360/768/1366/1920/2560px are authored but not yet executed; no visual browser screenshots were captured.
+
+
+## 2026-11-04 — Storefront density and card elevation correction
+- User clarified that product cards must retain the original white raised surface and visible shadow, and that the public catalogue should follow `tem/shop.html` while showing many more products.
+- Updated public catalogue layout to mirror the reference: right-side filters, left-side product grid, wider responsive container, 24-item initial page and 24/48/96 pagination. Increased card elevation and hover depth; long names/categories wrap rather than being ellipsized.
+- Homepage product cards now retain a visible shadow and stronger hover elevation. Theme surfaces remain token-driven for light/dark mode.
+- No fake filters, prices, stock counts, or sort behavior added where the current API does not provide the required data.

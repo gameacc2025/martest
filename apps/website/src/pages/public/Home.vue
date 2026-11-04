@@ -466,14 +466,15 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background: var(--tm-surface);
-  border: 1px solid var(--tm-line);
+  border: 1px solid color-mix(in srgb, var(--tm-line-strong) 62%, transparent);
   border-radius: var(--tm-radius-lg);
+  box-shadow: 0 4px 16px rgba(9, 38, 67, 0.075), 0 1px 3px rgba(9, 38, 67, 0.045);
   overflow: hidden;
   text-decoration: none;
   color: inherit;
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
-.product-card:hover { border-color: var(--tm-line-strong); box-shadow: var(--tm-shadow-sm); transform: translateY(-2px); }
+.product-card:hover { border-color: var(--tm-cyan-strong); box-shadow: 0 12px 28px rgba(9, 38, 67, 0.14), 0 3px 8px rgba(9, 38, 67, 0.07); transform: translateY(-3px); }
 .product-card:focus-visible { outline: 2px solid var(--tm-cyan); outline-offset: 2px; }
 
 .product-card__main { display: flex; flex-direction: column; flex: 1; min-width: 0; color: inherit; text-decoration: none; }

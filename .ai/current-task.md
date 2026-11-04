@@ -509,3 +509,9 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Completed: Website header/search behavior, category mega-menu/navigation wording, purchase/RFQ switcher with authenticated RFQ count, hero/CTA, 4×2 category grid, mode-aware product cards, recent-products table with mobile card layout, compact benefits and footer link deduplication.
 - Safety: fixed-price CTA is visible but disabled until authoritative Order and Inventory services exist. No fake stock/order/revenue values were introduced and no backend/schema/API/business-rule code was changed.
 - Open: supplier/product trust totals and brand logos, contact address/phone/ENAMAD/payment/returns, product availability/brand filters, compare, ratings/reviews require verified source data or API support. Do not fill these with placeholders that look real.
+
+
+### Focused correction — shop listing and product-card elevation (2026-11-04)
+- In response to visual feedback, restore distinct white elevated product cards (soft persistent shadow, stronger hover elevation, fine border) rather than flat blending into the canvas.
+- Rebuild public catalogue composition around `tem/shop.html`: filters on the RTL right, product grid on the left, dense responsive grid, wide container, and larger page sizes (24/48/96). Keep live filters/API contract; do not fabricate unsupported facets.
+- Prevent product title/category truncation; allow natural wrapping. Verify dark mode still uses the same semantic surface tokens.

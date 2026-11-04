@@ -277,3 +277,9 @@ The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/a
 - Dark semantic status pairs use brighter foregrounds on translucent/deep state surfaces; primary dark controls use cyan #27d3ee with #05213f foreground.
 - Contrast spot-checks: light primary button 4.69:1; light muted text on canvas 4.94:1; light status pairs all exceed 4.5:1; dark status and muted pairs exceed 8:1 on #0d2038.
 - PrimeVue form fields, cards and DataTable headers have explicit dark-scheme surfaces so they do not fall back to white controls.
+
+### Storefront shop-card density refinement — 2026-11-04
+- Restored visible white card surfaces with persistent soft elevation and a stronger hover shadow; the dark theme continues to use its own semantic surface tokens.
+- Public product listing now follows the `tem/shop.html` composition: product results on the left, filter panel on the right, compact product tiles, and a wider fluid container up to 1920px.
+- Catalogue page size defaults to 24 products, with 24/48/96 pagination choices. Product names and category labels wrap instead of being truncated with ellipses.
+- Product grid expands by available width on wide screens; category, price and search filters continue to use the existing live catalogue store/API. No unsupported brand/stock filter or sort API is fabricated.

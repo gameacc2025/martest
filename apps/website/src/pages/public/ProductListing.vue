@@ -185,7 +185,7 @@
               aria-label="صفحه‌بندی محصولات"
               :rows="filters.limit"
               :totalRecords="totalItems"
-              :rowsPerPageOptions="[12, 24, 48]"
+              :rowsPerPageOptions="[24, 48, 96]"
               @page="onPageChange"
             />
           </div>
@@ -228,7 +228,7 @@ const filters = ref({
   minPrice: null,
   maxPrice: null,
   page: 1,
-  limit: 12
+  limit: 24
 })
 
 const categoryOptions = ref([{ id: null, name: 'همه دسته‌ها' }])
@@ -292,7 +292,7 @@ const applyFilters = () => {
     minPrice: minPrice.value,
     maxPrice: maxPrice.value,
     page: 1,
-    limit: 12
+    limit: 24
   }
   loadProducts()
 }
@@ -302,7 +302,7 @@ const resetFilters = () => {
   selectedCategory.value = null
   minPrice.value = null
   maxPrice.value = null
-  filters.value = { search: '', category: null, minPrice: null, maxPrice: null, page: 1, limit: 12 }
+  filters.value = { search: '', category: null, minPrice: null, maxPrice: null, page: 1, limit: 24 }
   loadProducts()
 }
 
@@ -336,7 +336,7 @@ watch(() => route.query.category, (newVal) => {
 .products-page {
   direction: rtl;
   width: 100%;
-  max-width: 1240px;
+  max-width: min(100%, 1920px);
   margin-inline: auto;
   padding-inline: clamp(14px, 2vw, 28px);
 }
@@ -344,7 +344,7 @@ watch(() => route.query.category, (newVal) => {
 /* Two Column Layout */
 .products-grid-layout {
   display: grid;
-  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -418,10 +418,10 @@ watch(() => route.query.category, (newVal) => {
 }
 
 /* Products Grid */
-.products-grid {
+ .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 18px;
 }
 
 .product-card {
@@ -429,24 +429,25 @@ watch(() => route.query.category, (newVal) => {
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--tm-line);
+  border: 1px solid color-mix(in srgb, var(--tm-line-strong) 62%, transparent);
   border-radius: var(--tm-radius-lg);
   background: var(--tm-surface);
+  box-shadow: 0 4px 16px rgba(9, 38, 67, 0.075), 0 1px 3px rgba(9, 38, 67, 0.045);
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 .product-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--tm-line-strong);
-  box-shadow: var(--tm-shadow-sm);
+  transform: translateY(-3px);
+  border-color: var(--tm-cyan-strong);
+  box-shadow: 0 12px 28px rgba(9, 38, 67, 0.14), 0 3px 8px rgba(9, 38, 67, 0.07);
 }
 .product-card:focus-visible { outline: 2px solid var(--tm-cyan-strong); outline-offset: 2px; }
 
 .product-image {
   position: relative;
   aspect-ratio: 5 / 4;
-  background: var(--tm-surface-alt);
+  background: linear-gradient(145deg, var(--tm-surface-alt), var(--tm-surface));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -461,16 +462,16 @@ watch(() => route.query.category, (newVal) => {
   top: 10px;
   inset-inline-start: 10px;
   max-width: calc(100% - 20px);
-  overflow: hidden;
-  padding: 3px 9px;
+  padding: 4px 9px;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-pill);
   background: #fff;
   color: var(--tm-cyan-deep);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .product-price-badge {
   position: absolute;
@@ -500,10 +501,7 @@ watch(() => route.query.category, (newVal) => {
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.7;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 .product-verified {
   display: inline-flex;
@@ -542,10 +540,7 @@ watch(() => route.query.category, (newVal) => {
   color: var(--tm-muted);
   font-size: 11.5px;
   line-height: 1.8;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 .product-card-footer {
   display: flex;
@@ -604,6 +599,13 @@ watch(() => route.query.category, (newVal) => {
 @media (max-width: 900px) {
   .products-grid-layout { grid-template-columns: minmax(0, 1fr); }
   .filters-sidebar { position: static; order: -1; }
+}
+@media (min-width: 1600px) {
+  .products-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 20px; }
+}
+@media (min-width: 2200px) {
+  .products-page { padding-inline: clamp(24px, 2.2vw, 48px); }
+  .products-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 22px; }
 }
 @media (max-width: 576px) {
   .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }

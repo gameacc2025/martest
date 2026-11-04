@@ -41,7 +41,7 @@ describe('Website Product Listing', () => {
         prices: [{ price: 1200000 }],
         images: [{ isPrimary: true, url: '/product-42.png' }],
       }],
-      meta: { page: 1, limit: 12, total: 1, totalPages: 1 },
+      meta: { page: 1, limit: 24, total: 1, totalPages: 1 },
     })
   })
 
@@ -57,12 +57,19 @@ describe('Website Product Listing', () => {
     expect(getCategories).toHaveBeenCalledOnce()
     expect(getProducts).toHaveBeenCalledWith({
       page: 1,
-      limit: 12,
+      limit: 24,
       status: 'PUBLISHED',
       categoryId: 7,
     })
     expect(wrapper.find('.product-card').exists()).toBe(true)
+    expect(wrapper.find('.products-count-number').text()).toBe('۱')
     expect(wrapper.find('#products-page-title').text()).toBe('محصولات')
+  })
+
+  it('requests a dense 24-product page from the live catalogue API' , async () => {
+    wrapper = mountListing()
+    await flushPromises()
+    expect(getProducts).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 24, status: 'PUBLISHED' }))
   })
 
   it('links each product card to its existing product-details route', async () => {
@@ -89,7 +96,7 @@ describe('Website Product Listing', () => {
   it('clearly presents inquiry pricing when the API has no published price tier', async () => {
     getProducts.mockResolvedValueOnce({
       data: [{ id: 43, title: 'آنتن مخابراتی', company: { name: 'تأمین‌کننده' }, prices: [] }],
-      meta: { page: 1, limit: 12, total: 1, totalPages: 1 },
+      meta: { page: 1, limit: 24, total: 1, totalPages: 1 },
     })
     wrapper = mountListing()
     await flushPromises()
@@ -110,7 +117,7 @@ describe('Website Product Listing', () => {
   it('shows the empty state when the live API returns no products', async () => {
     getProducts.mockResolvedValueOnce({
       data: [],
-      meta: { page: 1, limit: 12, total: 0, totalPages: 0 },
+      meta: { page: 1, limit: 24, total: 0, totalPages: 0 },
     })
     wrapper = mountListing()
     await flushPromises()
@@ -128,7 +135,7 @@ describe('Website Product Listing', () => {
 
     expect(getProducts).toHaveBeenCalledWith({
       page: 1,
-      limit: 12,
+      limit: 24,
       status: 'PUBLISHED',
       categoryId: 9,
     })
