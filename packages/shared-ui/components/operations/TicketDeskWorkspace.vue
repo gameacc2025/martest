@@ -24,12 +24,6 @@ watch(() => props.tickets, (items) => {
   }
 }, { deep: true })
 
-watch(filteredTickets, (items) => {
-  if (!items.some((ticket) => ticket.id === selectedTicketId.value)) {
-    selectedTicketId.value = items[0]?.id ?? null
-  }
-}, { immediate: true })
-
 const filteredTickets = computed(() => props.tickets.filter((ticket) => {
   const text = [ticket.code, ticket.subject, ticket.category, ticket.requesterName].join(' ').toLocaleLowerCase()
   const matchesQuery = !query.value || text.includes(query.value.toLocaleLowerCase())
@@ -38,6 +32,12 @@ const filteredTickets = computed(() => props.tickets.filter((ticket) => {
     || (statusFilter.value === 'CLOSED' && ticket.status === 'CLOSED')
   return matchesQuery && matchesStatus
 }))
+
+watch(filteredTickets, (items) => {
+  if (!items.some((ticket) => ticket.id === selectedTicketId.value)) {
+    selectedTicketId.value = items[0]?.id ?? null
+  }
+}, { immediate: true })
 
 const selectedTicket = computed(() => props.tickets.find((ticket) => ticket.id === selectedTicketId.value) || null)
 const visibleMessages = computed(() => (selectedTicket.value?.messages || []).filter((message) => props.showInternalNotes || !message.internal))
