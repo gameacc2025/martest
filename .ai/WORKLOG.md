@@ -3278,3 +3278,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Enriched Admin dashboard with additional existing backend aggregate fields: active users, pending products and total inquiries (the backend currently exposes the inquiry count under its legacy counts.orders key; UI labels it correctly as inquiries). Company dashboard uses API pagination metadata for total products and inquiry aggregate stats for open inquiry count.
 
 - **Additional TEM extraction:** Added and exported TemMailLayout, TemMailRow and TemMailReader from the mail.html / mail-detail.html patterns, plus TemActivityTimeline for CRM/support activity feeds. Added TemLineChart from charts.js. The full widget catalog is documented in docs/OPERATIONS_UI_ROADMAP.md.
+
+- **Customer support entry:** Added Website /support/tickets for CUSTOMER accounts, linked from the customer account menu. The route is customer-only; COMPANY and STAFF identities are redirected through the existing PKCE handoff to their respective Company/Admin support workspaces. All three support UIs remain explicitly sample-data prototypes pending ticket APIs.
