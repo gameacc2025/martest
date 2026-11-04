@@ -313,3 +313,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **Commit:** fd827614e35c8f91708294c3e0c3cfdee08d69d7.
 - Next: apply the same approved visual system to the Admin inquiry list and Company inquiry list, keeping the role-specific actions and real inquiry data intact.
 
+### Inquiry workspaces visual refinement — 2026-11-04
+- Applied the reference-led Admin/Company panel identity to both inquiry list workspaces: compact branded page heading, pale blue/turquoise toolbar surface, sky-blue primary action, tighter table typography/density, clearer record-count treatment, accessible focus outline and reduced-motion handling.
+- Kept role-specific permissions, inquiry scopes/tabs, search/status filters, server-side pagination/sorting, deadlines, response counts, status display and route actions unchanged. No API, backend, schema, permission or RFQ business logic was changed.
+- Verification: source-only review; tests/build/browser rendering NOT RUN per owner instruction.
+- **Commits:** Admin cf969d8c437d79b941a366e215c8a64676923a49; Company 6df737098b4e367ea984d175dc2744dd7150f49f.
+- Next: continue with Admin users/roles and Company user-management screens, then product and order/report surfaces.
+
