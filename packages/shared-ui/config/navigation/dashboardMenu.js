@@ -155,8 +155,13 @@ export const dashboardMenu = [
           { title: 'تعاملات و پیگیری‌ها', icon: 'pi pi-calendar-clock', route: 'admin-crm-activities' },
         ],
       },
-      { title: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', route: 'admin-tickets', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-      { title: 'تیکت‌های شرکت', icon: 'pi pi-headphones', route: 'company-tickets', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+    ],
+  },
+  {
+    section: 'پشتیبانی',
+    items: [
+      { title: 'مرکز تیکت‌های سامانه', icon: 'pi pi-headphones', route: 'admin-tickets', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+      { title: 'تیکت‌های شرکت', icon: 'pi pi-comments', route: 'company-tickets', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
     ],
   },
   {
@@ -173,7 +178,12 @@ export const dashboardMenu = [
           { title: 'صورتحساب‌ها و اسناد', icon: 'pi pi-file-invoice', route: 'admin-finance-invoices' },
         ],
       },
-      { title: 'سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', route: 'admin-retail-orders', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+    ],
+  },
+  {
+    section: 'فروش خرده‌فروشی',
+    items: [
+      { title: 'مدیریت سفارش‌ها', icon: 'pi pi-shopping-cart', route: 'admin-retail-orders', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
     ],
   },
   {
