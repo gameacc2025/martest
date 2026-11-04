@@ -5,7 +5,7 @@
  * (palette, surfaces, focus ring, component shape) lives here or in
  * assets/design-system/tokens.scss; pages must not hardcode brand colors.
  *
- * Shared palette: turquoise #12B8A6, sky #39BFE0, technical blue #2878C7,
+ * Shared palette: cyan #12B8D0, turquoise #12C8B8, technical blue #278DE8,
  * deep navy #173B63 and dark sidebar #142B46.
  */
 import { definePreset } from '@primevue/themes'
@@ -16,17 +16,17 @@ const TelecomPreset = definePreset(Lara, {
     // Brand-primary sky ramp. Keep the vivid #39BFE0 at the center; darker
     // steps are reserved for text, borders and hover states.
     primary: {
-      50: '#eaf9fc',
-      100: '#d5f3f9',
-      200: '#b2e9f4',
-      300: '#86dced',
-      400: '#5ccce5',
-      500: '#39bfe0',
-      600: '#22a8cc',
-      700: '#168eaf',
-      800: '#14718c',
-      900: '#155d72',
-      950: '#103f50'
+      50: '#e9f9fd',
+      100: '#c9f1f8',
+      200: '#9fe5f0',
+      300: '#66d6e9',
+      400: '#35c8e2',
+      500: '#12b8d0',
+      600: '#079fbd',
+      700: '#087e9b',
+      800: '#08677f',
+      900: '#075468',
+      950: '#073d50'
     },
     // Slightly softer corners than the stock Lara template: calmer, more "enterprise".
     formField: { borderRadius: '10px' },
@@ -38,15 +38,15 @@ const TelecomPreset = definePreset(Lara, {
       light: {
         primary: {
           color: '{primary.500}',
-          contrastColor: '#f7fdff',
+          contrastColor: '#f5fdff',
           hoverColor: '{primary.600}',
           activeColor: '{primary.700}'
         },
         highlight: {
-          background: '#eaf9fc',
-          focusBackground: '#d5f3f9',
-          color: '#155d72',
-          focusColor: '#103f50'
+          background: '#e9f9fd',
+          focusBackground: '#c9f1f8',
+          color: '#075468',
+          focusColor: '#073d50'
         },
         // Cool, blue-tinted neutral ramp. 200 = hairline border, 600 = secondary text.
         surface: {
