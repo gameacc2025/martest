@@ -3030,3 +3030,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Scoped the new global surface/form/table styles to .dash-layout so the public website does not inherit the panel-only restyle. Restored the shared PrimeVue theme and base design tokens to their previous website palette.
 - Admin and Company page data, API contracts, routes, permissions and business logic were not intentionally changed. The dashboard visuals use existing API data only; no synthetic historical series was added.
 - UI build/browser tests were not run in this pass, per the current instruction.
+
+## 2026-11-04 — UI-REFERENCE-ADMIN-COMPANIES — Admin company management visual refinement
+- **Status:** PARTIAL — one operational page refined; full UI redesign remains in progress.
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Continue the reference-led Admin/Company UI redesign after the shared panel shell and dashboards.
+- **Claimed scope:** apps/admin/src/pages/admin/companies/CompanyList.vue; no API/backend scope.
+- **Changes:** Refined the company management heading, filter toolbar, primary action, table density, avatar presentation, focus states, and reduced-motion behavior using the approved sky-blue/navy panel identity. Existing company store calls, server-side pagination, filters, permission gates, create/edit/status/verification workflows remain unchanged.
+- **Verification:** Source inspection only. Tests/build/browser checks NOT RUN per owner instruction.
+- **Commit:** fd827614e35c8f91708294c3e0c3cfdee08d69d7.
+- **Push:** Written directly to remote main; commit returned by GitHub.
+- **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED; inspect CI when available without running browser checks.
+- **Next action:** Refine Admin and Company inquiry list workspaces with the same reference-led system while preserving inquiry permissions, role boundaries, filters, server pagination, and response workflows.
+
