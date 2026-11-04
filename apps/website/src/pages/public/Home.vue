@@ -9,7 +9,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
-import { useCartStore } from '../../stores/cart'
 import { productsApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
@@ -17,8 +16,6 @@ import { productSalesMode, productPriceLabel } from './homePresentation.js'
 const router = useRouter()
 const productsStore = useProductsStore()
 const authStore = useAuthStore()
-const cartStore = useCartStore()
-const cartFeedback = ref('')
 const showMyInquiriesLink = computed(() => authStore.isAuthenticated && authStore.isCustomer)
 
 const featuredProducts = ref([])
@@ -95,14 +92,6 @@ function productCategoryName(product) {
   return product?.category?.nameFa || product?.category?.name || product?.category?.nameEn || ''
 }
 
-function addFixedPriceProduct(product) {
-  if (productSalesMode(product).kind !== 'fixed') return
-  const price = Number(product?.finalPrice ?? product?.price)
-  const added = cartStore.addItem({ ...product, price })
-  cartFeedback.value = added
-    ? `${product.name || product.title || 'محصول'} به سبد خرید افزوده شد.`
-    : 'افزودن این محصول به سبد خرید ممکن نشد؛ قیمت معتبر در دسترس نیست.'
-}
 
 function getProductImage(product) {
   return product?.images?.find((image) => image?.isPrimary && image?.url)
@@ -263,12 +252,11 @@ onMounted(() => {
             </router-link>
             <div class="product-card__foot">
               <span class="product-card__price">{{ productPriceLabel(product) }}</span>
-              <button v-if="productSalesMode(product).kind === 'fixed'" type="button" class="tm-btn tm-btn--accent tm-btn--sm" :aria-label="'افزودن به سبد خرید: ' + (product.name || product.title)" @click="addFixedPriceProduct(product)">افزودن به سبد</button>
+              <button v-if="productSalesMode(product).kind === 'fixed'" type="button" class="tm-btn tm-btn--accent tm-btn--sm" disabled :aria-label="'افزودن به سبد برای ' + (product.name || product.title) + ' غیرفعال است؛ سرویس سفارش و موجودی هنوز آماده نیست'" title="خرید مستقیم پس از راه‌اندازی سرویس سفارش و موجودی فعال می‌شود">افزودن به سبد</button>
               <router-link v-else :to="productRoute(product)" class="product-card-cta" :aria-label="(productSalesMode(product).kind === 'volume' ? 'استعلام عمده: ' : 'درخواست استعلام: ') + (product.name || product.title)">{{ productSalesMode(product).kind === 'volume' ? 'استعلام عمده' : 'درخواست استعلام' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
             </div>
           </article>
         </div>
-        <p class="sr-only" role="status" aria-live="polite">{{ cartFeedback }}</p>
       </section>
 
       <!-- Recent products -->
