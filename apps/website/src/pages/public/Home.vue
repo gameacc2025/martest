@@ -8,12 +8,15 @@
  */
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../../stores/auth'
 import { productsApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { formatPrice } from '../../utils/helpers'
 
 const router = useRouter()
 const productsStore = useProductsStore()
+const authStore = useAuthStore()
+const showMyInquiriesLink = computed(() => authStore.isAuthenticated && authStore.isCustomer)
 
 const featuredProducts = ref([])
 const recentProducts = ref([])
@@ -25,12 +28,12 @@ const error = ref(null)
 const searchQuery = ref('')
 
 const features = [
-  { icon: 'pi pi-box', title: 'کاتالوگ تخصصی', text: 'تجهیزات مخابراتی و شبکه در یک فضای یکپارچه' },
-  { icon: 'pi pi-search', title: 'جستجو و فیلتر', text: 'یافتن محصولات بر اساس دسته‌بندی و محدوده قیمت' },
-  { icon: 'pi pi-file-edit', title: 'استعلام قیمت', text: 'ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان' },
-  { icon: 'pi pi-sliders-h', title: 'مشخصات فنی', text: 'بررسی جزئیات و ویژگی‌های ثبت‌شده محصولات' }
+  { icon: 'pi pi-file-edit', title: 'استعلام برای پروژه‌ها', text: 'درخواست قیمت را برای نیازهای سازمانی ثبت کنید و پاسخ تأمین‌کنندگان را پیگیری کنید.' },
+  { icon: 'pi pi-list-check', title: 'بررسی مشخصات فنی', text: 'اطلاعات فنی ثبت‌شده محصولات را پیش از انتخاب بررسی کنید.' },
+  { icon: 'pi pi-building', title: 'شناخت تأمین‌کننده', text: 'مشخصات شرکت و وضعیت احراز آن را در صورت ثبت و تأیید مشاهده کنید.' },
+  { icon: 'pi pi-sliders-h', title: 'جستجو و فیلتر', text: 'محصولات را بر اساس دسته‌بندی و اطلاعات قابل‌دسترس محدود کنید.' },
+  { icon: 'pi pi-shopping-cart', title: 'خرید یا استعلام', text: 'نوع ارائه هر محصول را پیش از ورود به جزئیات آن تشخیص دهید.' },
 ]
-
 const visibleCategories = computed(() => categories.value.slice(0, 8))
 
 async function fetchProducts() {
@@ -58,6 +61,57 @@ async function fetchProducts() {
   } finally {
     loading.value = false
   }
+}
+
+function categoryIcon(category) {
+  const name = [category?.nameFa, category?.name, category?.nameEn, category?.slug].filter(Boolean).join(' ').toLowerCase()
+  if (name.includes('کابل') || name.includes('cable')) return 'pi pi-bolt'
+  if (name.includes('روتر') || name.includes('سوئیچ') || name.includes('switch') || name.includes('router')) return 'pi pi-sitemap'
+  if (name.includes('فیبر') || name.includes('fiber') || name.includes('fibre')) return 'pi pi-share-alt'
+  if (name.includes('بی‌سیم') || name.includes('بیسیم') || name.includes('wireless')) return 'pi pi-wifi'
+  if (name.includes('نوری') || name.includes('optical')) return 'pi pi-sun'
+  if (name.includes('موبایل') || name.includes('mobile') || name.includes('cellular')) return 'pi pi-mobile'
+  if (name.includes('دیتا') || name.includes('data')) return 'pi pi-database'
+  return 'pi pi-box'
+}
+
+function categoryProductCount(category) {
+  const count = Number(category?.productCount ?? category?.productsCount ?? category?._count?.products)
+  return Number.isFinite(count) && count >= 0 ? count : null
+}
+
+function productSalesMode(product) {
+  if (Array.isArray(product?.priceTiers) && product.priceTiers.length > 0) {
+    return { kind: 'volume', label: 'قیمت پله‌ای' }
+  }
+  if (product?.retailEnabled && Number(product?.finalPrice ?? product?.price) > 0) {
+    return { kind: 'fixed', label: 'قیمت ثابت' }
+  }
+  return { kind: 'inquiry', label: 'استعلامی' }
+}
+
+function productPriceLabel(product) {
+  const mode = productSalesMode(product)
+  const fixedPrice = product?.finalPrice ?? product?.price
+  if (mode.kind === 'fixed') return formatPrice(fixedPrice)
+  if (mode.kind === 'volume') {
+    const firstTier = product.priceTiers[0]
+    const tierPrice = firstTier?.unitPrice ?? firstTier?.price
+    return Number(tierPrice) > 0 ? `از ${formatPrice(tierPrice)}` : 'قیمت پله‌ای'
+  }
+  return 'استعلامی'
+}
+
+function productAvailabilityLabel(product) {
+  const status = String(product?.stockStatus || product?.availability || '').toUpperCase()
+  if (['IN_STOCK', 'AVAILABLE'].includes(status)) return 'موجود'
+  if (['OUT_OF_STOCK', 'UNAVAILABLE'].includes(status)) return 'ناموجود'
+  if (['PREORDER', 'PRE_ORDER'].includes(status)) return 'پیش‌فروش'
+  return ''
+}
+
+function productCategoryName(product) {
+  return product?.category?.nameFa || product?.category?.name || product?.category?.nameEn || ''
 }
 
 function getProductImage(product) {
@@ -103,48 +157,44 @@ onMounted(() => {
 
 <template>
   <div class="home-page" dir="rtl">
-    <div class="home-container">
-
-      <!-- Hero -->
-      <section class="site-hero home-hero" aria-labelledby="home-title">
-        <div class="home-hero__copy">
-          <span class="home-hero__eyebrow">
-            <i class="pi pi-broadcast" aria-hidden="true"></i>
-            بازارگاه تخصصی تجهیزات مخابراتی
-          </span>
-          <h1 id="home-title">تجهیزات مخابراتی و شبکه را دقیق پیدا کنید</h1>
-          <p>
-            محصولات، مشخصات فنی و تأمین‌کنندگان بازارگاه را جستجو کنید و برای دریافت
-            قیمت، مسیر استعلام را دنبال کنید.
-          </p>
-
-          <form class="home-hero__search" role="search" @submit.prevent="heroSearch">
-            <i class="pi pi-search" aria-hidden="true"></i>
-            <input
-              v-model="searchQuery"
-              type="search"
-              name="homepage-search"
-              autocomplete="off"
-              placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…"
-              aria-label="جستجوی محصولات"
-            />
-            <button type="submit" class="tm-btn tm-btn--accent">جستجو</button>
-          </form>
-
-          <div class="home-hero__links">
-            <router-link :to="{ name: 'products' }">مشاهده همه محصولات</router-link>
-            <router-link :to="{ name: 'categories' }">دسته‌بندی‌ها</router-link>
-            <router-link :to="{ name: 'my-inquiries' }">استعلام‌های من</router-link>
+    <section class="home-hero-band">
+      <div class="home-container">
+        <section class="site-hero home-hero" aria-labelledby="home-title">
+          <div class="home-hero__copy">
+            <span class="home-hero__eyebrow"><i class="pi pi-broadcast" aria-hidden="true"></i> بازارگاه تخصصی تجهیزات مخابراتی</span>
+            <h1 id="home-title">تجهیزات مخابراتی برای خرید و پروژه</h1>
+            <p>محصولات شبکه را پیدا کنید، قیمت‌های قابل‌خرید را ببینید یا برای نیازهای سازمانی درخواست استعلام بفرستید.</p>
+            <form class="home-hero__search" role="search" @submit.prevent="heroSearch">
+              <i class="pi pi-search" aria-hidden="true"></i>
+              <input v-model="searchQuery" type="search" name="homepage-search" autocomplete="off" placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…" aria-label="جستجوی محصولات" />
+              <button type="submit" class="tm-btn tm-btn--accent">جستجو</button>
+            </form>
+            <div class="home-hero__actions">
+              <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">مشاهده محصولات</router-link>
+              <router-link :to="{ name: 'my-inquiries' }" class="tm-btn tm-btn--outline">ثبت درخواست استعلام</router-link>
+            </div>
+            <div class="home-hero__links">
+              <router-link :to="{ name: 'products' }">همه محصولات</router-link>
+              <router-link :to="{ name: 'categories' }">دسته‌بندی‌ها</router-link>
+              <router-link v-if="showMyInquiriesLink" :to="{ name: 'my-inquiries' }">استعلام‌های من</router-link>
+            </div>
           </div>
-        </div>
-
-        <div class="home-hero__aside" aria-hidden="true">
-          <span class="home-hero__badge"><i class="pi pi-shield"></i> اطلاعات ثبت‌شده تأمین‌کنندگان</span>
-          <span class="home-hero__badge"><i class="pi pi-chart-line"></i> مقایسه مشخصات فنی</span>
-          <span class="home-hero__badge"><i class="pi pi-send"></i> ثبت درخواست استعلام</span>
-        </div>
-      </section>
-
+          <div class="home-hero__visual" aria-label="نمونه محصول از کاتالوگ بازارگاه">
+            <div class="home-hero__product">
+              <img v-if="featuredProducts.length && getProductImage(featuredProducts[0])" :src="getProductImage(featuredProducts[0]).url" :alt="featuredProducts[0].name || 'تصویر محصول مخابراتی'" width="420" height="320" fetchpriority="high" decoding="async" />
+              <i v-else class="pi pi-box" aria-hidden="true"></i>
+              <span v-if="featuredProducts.length" class="home-hero__product-caption">{{ featuredProducts[0].name }}</span>
+            </div>
+            <ul class="home-hero__benefits">
+              <li><i class="pi pi-check-circle" aria-hidden="true"></i><span>کاتالوگ تخصصی تجهیزات شبکه</span></li>
+              <li><i class="pi pi-file-edit" aria-hidden="true"></i><span>مسیر جداگانه برای استعلام پروژه‌ای</span></li>
+              <li><i class="pi pi-building" aria-hidden="true"></i><span>اطلاعات تأمین‌کنندگان ثبت‌شده</span></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </section>
+    <div class="home-container">
       <!-- Categories -->
       <section class="home-section" aria-labelledby="home-categories">
         <div class="site-section-title">
@@ -169,8 +219,8 @@ onMounted(() => {
             class="category-card"
             @click="viewCategoryProducts(category.id)"
           >
-            <span class="category-card__icon" aria-hidden="true"><i class="pi pi-th-large"></i></span>
-            <span class="category-card__name">{{ category.nameFa || category.nameEn || category.name }}</span>
+            <span class="category-card__icon" aria-hidden="true"><i :class="categoryIcon(category)"></i></span>
+            <span class="category-card__content"><span class="category-card__name">{{ category.nameFa || category.nameEn || category.name }}</span><small v-if="categoryProductCount(category) !== null">{{ categoryProductCount(category).toLocaleString('fa-IR') }} محصول</small></span>
           </button>
         </div>
       </section>
@@ -222,15 +272,15 @@ onMounted(() => {
                 <i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده احرازشده
               </span>
 
-              <span class="product-card__name">{{ product.name }}</span>
+              <span class="product-card__mode" :class="`product-card__mode--${productSalesMode(product).kind}`">{{ productSalesMode(product).label }}</span>
+              <span class="product-card__name">{{ product.name || product.title }}</span>
+              <span v-if="product.sku" class="product-sku">کد محصول: <b dir="ltr">{{ product.sku }}</b></span>
+              <span v-if="productCategoryName(product)" class="product-card__category">{{ productCategoryName(product) }}</span>
               <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
-              <span v-if="product.sku" class="product-sku">کد: {{ product.sku }}</span>
-
+              <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
               <span class="product-card__foot">
-                <span v-if="product.finalPrice || product.price" class="product-card__price">
-                  {{ formatPrice(product.finalPrice || product.price) }}
-                </span>
-                <span v-else class="product-card-cta">استعلام از تأمین‌کننده</span>
+                <span class="product-card__price">{{ productPriceLabel(product) }}</span>
+                <span class="product-card-cta">مشاهده جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
               </span>
             </span>
           </router-link>
@@ -241,7 +291,7 @@ onMounted(() => {
       <section v-if="recentProducts.length" class="home-section" aria-labelledby="home-recent">
         <div class="site-section-title">
           <h2 id="home-recent">تازه‌ترین محصولات</h2>
-          <router-link :to="{ name: 'products' }">همه محصولات</router-link>
+          <router-link :to="{ name: 'products' }">مشاهده همه محصولات</router-link>
         </div>
 
         <div class="tm-table-wrap">
@@ -252,18 +302,18 @@ onMounted(() => {
                 <tr>
                   <th scope="col">محصول</th>
                   <th scope="col">تأمین‌کننده</th>
+                  <th scope="col">نوع ارائه</th>
                   <th scope="col" class="tm-table__num">قیمت</th>
+                  <th scope="col">اقدام</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="product in recentProducts" :key="product.id">
-                  <td>
-                    <router-link :to="productRoute(product)" class="home-recent__name">{{ product.name }}</router-link>
-                  </td>
-                  <td>{{ product.company?.name || '—' }}</td>
-                  <td class="tm-table__num">
-                    {{ product.finalPrice || product.price ? formatPrice(product.finalPrice || product.price) : 'استعلامی' }}
-                  </td>
+                  <td data-label="محصول"><router-link :to="productRoute(product)" class="home-recent__product"><img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title" width="52" height="52" loading="lazy" decoding="async" /><span class="home-recent__product-copy"><b>{{ product.name || product.title }}</b><small v-if="product.sku">کد: <span dir="ltr">{{ product.sku }}</span></small><small v-if="productCategoryName(product)">{{ productCategoryName(product) }}</small></span></router-link></td>
+                  <td data-label="تأمین‌کننده">{{ product.company?.name || '—' }}</td>
+                  <td data-label="نوع ارائه"><span class="product-card__mode" :class="`product-card__mode--${productSalesMode(product).kind}`">{{ productSalesMode(product).label }}</span></td>
+                  <td data-label="قیمت" class="tm-table__num">{{ productPriceLabel(product) }}</td>
+                  <td data-label="اقدام"><router-link :to="productRoute(product)" class="home-recent__action">مشاهده <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></td>
                 </tr>
               </tbody>
             </table>
@@ -274,7 +324,7 @@ onMounted(() => {
       <!-- Capabilities -->
       <section class="home-section" aria-labelledby="home-features">
         <div class="site-section-title">
-          <h2 id="home-features">امکانات بازارگاه</h2>
+          <h2 id="home-features">چرا Telecom Market؟</h2>
         </div>
         <div class="home-feature-grid">
           <article v-for="feature in features" :key="feature.title" class="home-feature">
@@ -297,17 +347,35 @@ onMounted(() => {
         </router-link>
       </section>
 
+      <section class="home-cta home-cta--retail">
+        <div><h2>برای خرید مستقیم آماده‌اید؟</h2><p>محصولات دارای قیمت ثابت را در کاتالوگ پیدا کنید و جزئیات شرایط ارائه را بررسی کنید.</p></div>
+        <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">جستجوی محصولات قیمت‌دار</router-link>
+      </section>
+
     </div>
   </div>
 </template>
 
 <style scoped>
 .home-page { background: var(--tm-canvas); }
+.home-hero-band { width: 100%; padding-block: clamp(1rem, 2vw, 2rem); background: var(--ds-hero-gradient); }
+.home-hero-band .home-container { padding-block: 0; }
+.home-hero { border-radius: var(--tm-radius-lg); background: transparent; }
+.home-hero__actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+.home-hero__actions .tm-btn { min-height: 44px; }
+.home-hero__visual { display: grid; grid-template-columns: minmax(0,1fr) minmax(150px,.72fr); gap: 1rem; align-items: center; }
+.home-hero__product { min-width: 0; min-height: 250px; display: grid; place-items: center; gap: .5rem; padding: 1rem; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; background: rgba(255,255,255,.1); color: #fff; }
+.home-hero__product img { width: 100%; max-height: 230px; object-fit: contain; }
+.home-hero__product > i { font-size: 5rem; color: rgba(255,255,255,.82); }
+.home-hero__product-caption { max-width: 100%; color: #fff; font-size: .8125rem; text-align: center; overflow-wrap: anywhere; }
+.home-hero__benefits { display: grid; gap: .85rem; list-style: none; margin: 0; padding: 0; color: #f4fbff; font-size: .875rem; }
+.home-hero__benefits li { display: flex; gap: .55rem; align-items: flex-start; }
+.home-hero__benefits i { color: #8ef3f1; margin-top: .2rem; }
 .home-container {
   width: 100%;
-  max-width: 1240px;
+  max-width: var(--ds-container-max-wide);
   margin-inline: auto;
-  padding-inline: clamp(14px, 2vw, 28px);
+  padding-inline: var(--ds-container-pad);
   display: flex;
   flex-direction: column;
   gap: 34px;
@@ -377,7 +445,7 @@ onMounted(() => {
 
 .home-category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: 12px;
 }
 
@@ -406,11 +474,13 @@ onMounted(() => {
   color: var(--tm-cyan-deep);
   flex: none;
 }
-.category-card__name { font-size: 12.5px; font-weight: 600; color: var(--tm-ink); line-height: 1.5; }
+.category-card__content { display: flex; flex-direction: column; min-width: 0; gap: .2rem; }
+.category-card__name { font-size: 13px; font-weight: 700; color: var(--tm-ink); line-height: 1.5; overflow-wrap: anywhere; }
+.category-card__content small { color: var(--tm-muted); font-size: 13px; }
 
 .home-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: 16px;
 }
 
@@ -444,22 +514,27 @@ onMounted(() => {
   font-weight: 600;
   color: var(--tm-ink);
   line-height: 1.7;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  display: block;
+  overflow-wrap: anywhere;
 }
 .product-card__company { font-size: 11.5px; color: var(--tm-muted); }
 .product-sku { font-size: 10.5px; color: var(--tm-faint); }
-.product-card__foot { margin-top: auto; padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.product-card__foot { margin-top: auto; padding-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .product-card__price { font-size: 13px; font-weight: 700; color: var(--tm-blue); }
-.product-card-cta { font-size: 11px; font-weight: 600; color: var(--tm-cyan-deep); }
+.product-card-cta { font-size: 13px; font-weight: 700; color: var(--tm-cyan-deep); }
+.product-card-cta i { margin-inline-start: .3rem; }
 .product-card__body .tm-pill { align-self: flex-start; }
 
 .home-recent__name { color: var(--tm-ink); font-weight: 600; text-decoration: none; }
+.home-recent__product { display: flex; align-items: center; gap: .7rem; color: var(--tm-ink); text-decoration: none; min-width: 220px; }
+.home-recent__product img { width: 52px; height: 52px; object-fit: contain; border-radius: 8px; background: var(--tm-surface-alt); }
+.home-recent__product-copy { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.home-recent__product-copy b { overflow-wrap: anywhere; }
+.home-recent__product-copy small { color: var(--tm-muted); font-size: 13px; }
+.home-recent__action { display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .home-recent__name:hover { color: var(--tm-blue); }
 
-.home-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.home-feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 14px; }
 .home-feature {
   padding: 18px;
   background: #fff;
@@ -477,7 +552,7 @@ onMounted(() => {
   margin-bottom: 12px;
 }
 .home-feature h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
-.home-feature p { margin: 0; font-size: 12px; line-height: 1.8; color: var(--tm-muted); }
+.home-feature p { margin: 0; font-size: 13px; line-height: 1.8; color: var(--tm-muted); }
 
 .home-cta {
   display: flex;
@@ -493,6 +568,9 @@ onMounted(() => {
   color: #fff;
 }
 .home-cta h2 { margin: 0 0 6px; font-size: 19px; color: #fff; }
+.home-cta--retail { background: var(--tm-surface); color: var(--tm-ink); border: 1px solid var(--tm-line); }
+.home-cta--retail h2 { color: var(--tm-ink); }
+.home-cta--retail p { color: var(--tm-muted); }
 .home-cta p { margin: 0; font-size: 12.5px; color: var(--tm-cyan-soft); }
 
 .home-empty {
@@ -534,7 +612,19 @@ onMounted(() => {
 
 @media (max-width: 900px) {
   .home-hero { grid-template-columns: 1fr; }
-  .home-hero__aside { display: none; }
+  .home-hero__visual { grid-template-columns: minmax(0, 1fr); }
+  .home-hero__product { min-height: 180px; }
+  .home-hero__benefits { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+}
+@media (max-width: 700px) {
+  .tm-table { display: block; }
+  .tm-table thead { display: none; }
+  .tm-table tbody,.tm-table tr { display: grid; width: 100%; }
+  .tm-table tr { gap: .35rem; padding: .85rem; border-bottom: 1px solid var(--tm-line); }
+  .tm-table td { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; border: 0; padding: .25rem 0; text-align: start; }
+  .tm-table td::before { content: attr(data-label); color: var(--tm-muted); font-weight: 700; flex: none; }
+  .tm-table td:first-child { display: block; }
+  .tm-table td:first-child::before { display: none; }
 }
 @media (max-width: 575px) {
   .home-hero__search { flex-wrap: wrap; }

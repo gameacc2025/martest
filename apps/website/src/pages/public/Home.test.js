@@ -44,6 +44,11 @@ describe('Website homepage contracts (tem redesign)', () => {
 
   it('uses a search-first hero wired to the search route', () => {
     expect(source).toContain('class="home-hero__eyebrow"')
+    expect(source).toContain('ثبت درخواست استعلام')
+    expect(source).toContain('showMyInquiriesLink')
+    expect(source).toContain('productSalesMode(product)')
+    expect(source).toContain('categoryIcon(category)')
+    expect(source).toContain('چرا Telecom Market؟')
     expect(source).toContain('role="search"')
     expect(source).toContain('name="homepage-search"')
     expect(source).toContain('autocomplete="off"')
