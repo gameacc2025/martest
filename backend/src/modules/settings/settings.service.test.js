@@ -11,6 +11,12 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
+const fs = require('node:fs');
+const os = require('node:os');
+const { Readable } = require('node:stream');
+const avatarDir = fs.mkdtempSync(path.join(os.tmpdir(), 'telecom-avatar-test-'));
+process.env.AVATAR_UPLOAD_DIR = avatarDir;
+test.after(() => fs.rmSync(avatarDir, { recursive: true, force: true }));
 const Module = require('node:module');
 
 const serviceDir = __dirname;
@@ -61,6 +67,7 @@ const mockPrisma = {
     },
   },
   profile: {
+    findUnique: async () => null,
     upsert: async (args) => {
       calls.profileUpsert.push(args);
       return {};
@@ -200,23 +207,32 @@ test('changePassword: on success, updates the hash AND revokes all refresh token
 });
 
 // ── uploadAvatar / deleteAvatar ──────────────────────────────
-
-test('uploadAvatar: upserts a per-user avatar URL and returns it', async () => {
+test('uploadAvatar: rejects unsupported content types without persisting a URL', async () => {
   resetMocks();
+  await assert.rejects(
+    () => uploadAvatar(1, { mimetype: 'text/plain', file: Readable.from('not an image') }),
+    (err) => err.statusCode === 415
+  );
+  assert.equal(calls.profileUpsert.length, 0);
+});
 
-  const result = await uploadAvatar(1, {});
-
+test('uploadAvatar: writes the file and stores its generated URL for the caller', async () => {
+  resetMocks();
+  const result = await uploadAvatar(1, {
+    mimetype: 'image/png',
+    filename: '../../unsafe.png',
+    file: Readable.from(Buffer.from('png-content')),
+  });
+  assert.match(result, /^\/uploads\/avatars\/1-[a-f0-9-]+\.png$/);
+  assert.equal(fs.readFileSync(path.join(avatarDir, path.basename(result)), 'utf8'), 'png-content');
   assert.equal(calls.profileUpsert.length, 1);
   assert.deepEqual(calls.profileUpsert[0].where, { userId: 1 });
-  assert.ok(result.startsWith('/uploads/avatars/1-'));
   assert.equal(calls.profileUpsert[0].update.avatar, result);
 });
 
-test('deleteAvatar: clears the avatar field to null', async () => {
+test('deleteAvatar: clears the avatar field and is scoped to the caller', async () => {
   resetMocks();
-
-  await deleteAvatar(1);
-
-  assert.deepEqual(calls.profileUpdate[0].where, { userId: 1 });
+  await deleteAvatar(7);
+  assert.deepEqual(calls.profileUpdate[0].where, { userId: 7 });
   assert.deepEqual(calls.profileUpdate[0].data, { avatar: null });
 });
