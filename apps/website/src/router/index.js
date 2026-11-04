@@ -195,7 +195,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Set page title
   if (to.meta.title) {
-    document.title = `${to.meta.title} | Telecom Marketplace`;
+    document.title = `${to.meta.title} | Telecom Market`;
   }
 
   // Protected routes

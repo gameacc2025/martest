@@ -51,7 +51,7 @@
       <div class="cd-kpi-group">
         <div class="cd-kpi-group__heading"><h2>عملکرد</h2><span>شاخص‌های پاسخ‌گویی و جایگاه</span></div>
         <div class="cd-kpi-group__grid">
-          <TemStatCard label="نرخ پاسخ‌دهی" :value="companyResponseRate === null ? null : companyResponseRate + '%'" icon="pi pi-chart-line" tone="success" :loading="statsLoading"  :meta="companyResponseRate === 0 ? 'هنوز پاسخی با نتیجه ثبت نشده است' : 'بر اساس آمار ثبت‌شده استعلام‌ها'" zero-meta="هنوز داده کافی برای محاسبه وجود ندارد" />
+          <TemStatCard label="نرخ پاسخ‌دهی"  :value="companyResponseRate === null ? null : companyResponseRate.toLocaleString('fa-IR') + '٪'" icon="pi pi-chart-line" tone="success" :loading="statsLoading"  :meta="companyResponseRate === 0 ? 'هنوز پاسخی با نتیجه ثبت نشده است' : 'بر اساس آمار ثبت‌شده استعلام‌ها'" zero-meta="هنوز داده کافی برای محاسبه وجود ندارد" />
           <TemStatCard label="رتبه شرکت" :value="companyRank ? companyRank.toLocaleString('fa-IR') : null" icon="pi pi-star" tone="warning" :loading="statsLoading" :meta="companyRankTotal ? 'از ' + companyRankTotal.toLocaleString('fa-IR') + ' شرکت' : 'پس از محاسبه رتبه توسط سامانه نمایش داده می‌شود'" zero-meta="رتبه‌ای برای شرکت ثبت نشده است" />
         </div>
       </div>
