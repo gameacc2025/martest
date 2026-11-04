@@ -146,14 +146,15 @@ onUnmounted(() => {
 
 <style scoped>
 .dash-layout {
-  --dash-sidebar-width: 240px;
+  --dash-sidebar-width: 208px;
   --dash-sidebar-collapsed-width: 76px;
   --dash-header-height: 4rem;
 
 
   display: flex;
+  flex-direction: row-reverse;
   min-height: 100vh;
-  background: var(--surface-ground);
+  background: #f2f6fc;
   direction: rtl;
 }
 
@@ -264,16 +265,16 @@ onUnmounted(() => {
 }
 
 .dash-layout-content {
-  max-width: 1760px;
-  padding: 0 clamp(1rem, 2vw, 2rem) 2rem;
+  max-width: none;
+  padding: 0 clamp(1rem, 1.55vw, 1.65rem) 1.5rem;
 }
 
 .dash-layout-page {
-  padding-top: 0.75rem;
+  padding-top: 0.8rem;
 }
 
 @media (min-width: 1600px) {
-  .dash-layout-content { padding-inline: 2.25rem; }
+  .dash-layout-content { padding-inline: 1.65rem; }
 }
 
 @media (max-width: 575px) {
