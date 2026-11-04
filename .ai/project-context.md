@@ -918,3 +918,10 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Website Router marks `/profile`, `/profile/addresses`, and `/my-inquiries` CUSTOMER-only. COMPANY/STAFF direct navigation is handed off by PKCE to panel-specific destinations.
 - Checkout and Addresses digit-validation regexes were re-fetched and corrected to use actual digit classes.
 - Details: `docs/WEBSITE_CUSTOMER_ACCOUNT_STATUS.md`. Do not treat these route guards as backend authorization.
+
+
+## 2026-11-04 — Customer profile and avatar storage
+- Website customer profile operations map to backend settings routes: `GET/PATCH /settings/profile`, `PATCH /settings/change-password`, and `POST/DELETE /settings/profile/avatar`.
+- Profile fields are firstName/lastName/avatar; User email and phone are identity fields and are not writable through the profile endpoint.
+- Avatar storage is local under backend `uploads/avatars`, limited to JPEG/PNG/WebP and 1 MB, with generated filenames and file-signature validation. Production Compose mounts persistent named volume `user_uploads` at `/app/uploads`; dev uses the backend source bind mount.
+- Local-disk avatar storage assumes one backend instance. Multi-replica deployments require shared object storage.
