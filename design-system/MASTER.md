@@ -205,3 +205,12 @@ This replaces the previous teal/petrol brand palette by explicit product-owner c
 
 ## Admin and Company workspace implementation
 The shared workspace stylesheet is the visual source of truth for the Admin and Company portals. It defines the dark navy navigation rail, vivid sky-blue primary controls, turquoise secondary actions, compact Vazirmatn type scale, white/cool-gray surfaces, data tables, forms, dialogs, dashboard heroes and responsive shell behavior. Shared dashboard metric and panel components use the same tokens. This layer is presentation-only and must not change API, permission, route or tenant behavior.
+
+
+## Reference-led panel redesign — 2026-11-04
+- Re-opened the original generated dashboard references from the conversation and reset the implementation direction to that visual system: deep navy left navigation, vivid cyan active state, pale blue-gray canvas, compact white cards, rounded search topbar, gradient telecom hero, colored KPI icon tiles, and compact chart/panel hierarchy.
+- Rebuilt shared dashboard sidebar/header styling and left-side desktop shell placement for Admin and Company. Added the account identity footer to the sidebar.
+- Reworked KPI tiles and dashboard panels; adjusted Admin and Company dashboard hero/KPI composition to a wide hero beside a 2×2 KPI block.
+- Scoped the new global surface/form/table styles to .dash-layout so the public website does not inherit the panel-only restyle. Restored the shared PrimeVue theme and base design tokens to their previous website palette.
+- Admin and Company page data, API contracts, routes, permissions and business logic were not intentionally changed. The dashboard visuals use existing API data only; no synthetic historical series was added.
+- UI build/browser tests were not run in this pass, per the current instruction.
