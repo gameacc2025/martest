@@ -56,7 +56,7 @@ const savingStatus = ref(false)
 
 const statusOptions = [
   { label: 'همه', value: null },
-  { label: 'پیش‌نویس (صفحه جاری)', value: 'DRAFT' },
+  { label: 'پیش‌نویس', value: 'DRAFT' },
   { label: 'ارسال شده', value: 'SUBMITTED' },
   { label: 'باز', value: 'OPEN' },
   { label: 'بسته شده', value: 'CLOSED' },
