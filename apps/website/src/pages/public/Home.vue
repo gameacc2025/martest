@@ -41,7 +41,11 @@ function nextSlide() { goToSlide(activeSlide.value + 1) }
 function previousSlide() { goToSlide(activeSlide.value - 1) }
 function startSlider() {
   if (slideTimer) clearInterval(slideTimer)
-  if (featuredSlides.value.length > 1) slideTimer = setInterval(nextSlide, 6500)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  if (!reducedMotion && featuredSlides.value.length > 1) slideTimer = setInterval(nextSlide, 6500)
+}
+function handleSliderFocusOut(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) startSlider()
 }
 function stopSlider() {
   if (slideTimer) clearInterval(slideTimer)
@@ -184,7 +188,7 @@ onUnmounted(stopSlider)
             </div>
           </div>
           <div class="home-hero__visual" aria-label="اسلایدر محصولات منتخب فروشگاه">
-            <div v-if="activeFeaturedProduct" class="home-featured-slider" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="startSlider">
+            <div v-if="activeFeaturedProduct" class="home-featured-slider" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="handleSliderFocusOut">
               <div class="home-featured-slider__media">
                 <img v-if="getProductImage(activeFeaturedProduct)" :src="getProductImage(activeFeaturedProduct).url" :alt="activeFeaturedProduct.name || activeFeaturedProduct.title || 'محصول منتخب'" width="560" height="390" fetchpriority="high" decoding="async" />
                 <i v-else class="pi pi-box" aria-hidden="true"></i>

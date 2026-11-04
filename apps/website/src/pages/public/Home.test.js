@@ -55,6 +55,8 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('name="homepage-search"')
     expect(source).toContain('autocomplete="off"')
     expect(source).toContain('setInterval(nextSlide, 6500)')
+    expect(source).toContain("window.matchMedia?.('(prefers-reduced-motion: reduce)')")
+    expect(source).toContain('handleSliderFocusOut')
   })
 
   it('shows supplier verification and explicit inquiry pricing when no price exists', () => {

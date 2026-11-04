@@ -3430,3 +3430,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - PrimeVue DataTable surfaces now receive the same elevation when standalone; nested tables inside an existing entity surface remain frameless and shadowless to avoid double cards.
 - Homepage category and capability cards now share the persistent elevation and stronger hover lift.
 - Verification remains static source review only; wait for Actions on the current `main` head and address only failures that intersect this UI slice. Existing CI failures previously observed on the older head included unrelated backend message/avatar tests and browser app startup/navigation failures.
+
+- Accessibility refinement: slider auto-rotation now respects `prefers-reduced-motion`; keyboard focus remains a pause state until focus leaves the slider rather than restarting when moving between its controls.
