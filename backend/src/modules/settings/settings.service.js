@@ -120,9 +120,20 @@ async function uploadAvatar(userId, file) {
 
   try {
     await pipeline(file.file, fs.createWriteStream(destination));
-    if (file.file.truncated) {
+    if (file.file.truncated || (await fsp.stat(destination)).size > AVATAR_MAX_BYTES) {
       throw new AppError('Avatar image must be 1 MB or smaller.', 413);
     }
+
+    // Verify the actual file signature; multipart MIME types are user supplied.
+    const handle = await fsp.open(destination, 'r');
+    const header = Buffer.alloc(12);
+    try { await handle.read(header, 0, header.length, 0); } finally { await handle.close(); }
+    const validSignature = file.mimetype === 'image/png'
+      ? header.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+      : file.mimetype === 'image/jpeg'
+        ? header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff
+        : header.toString('ascii', 0, 4) === 'RIFF' && header.toString('ascii', 8, 12) === 'WEBP';
+    if (!validSignature) throw new AppError('The uploaded file is not a valid image of the selected type.', 415);
 
     const previous = await prisma.profile.findUnique({
       where: { userId },
