@@ -1,13 +1,13 @@
 ﻿# Current Task — Full UI rebuild on the `tem/` visual language (UI-REDESIGN-TEM-01)
 
-**Status:** IN_PROGRESS — TEM widget extraction and the first operations UI foundation are committed directly to `main`. Admin CRM, finance/settlement, support-ticket and retail-order prototypes plus Company support-ticket prototype exist with explicitly labelled sample data. API/domain implementation remains a future phase. Browser/build checks were not run in this remote-editing session; GitHub Actions/CI was not inspected or run per owner instruction.
+**Status:** IN_PROGRESS — the first seller-dashboard and storefront implementation pass is committed directly to main (latest source commit at this snapshot: f941b2c). Shared semantic tokens, theme preset, dashboard/home composition and targeted regression tests are in place. GitHub Actions has been inspected; the latest unit workflow is pending. Responsive Playwright coverage was added for 360/768/1366/1920/2560px but has not yet been executed.
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
 
 
 ## Active focused subtask — UI-SELLER-HOME-REDESIGN-01 (2026-11-04)
-**Status:** IN_PROGRESS — scoped under the broader UI-REDESIGN-TEM-01 effort.
+**Status:** IN_PROGRESS — shared foundation and first page pass committed; final CI and responsive visual verification still pending.
 
 Rebuild only these two surfaces first: Company seller dashboard and Website public homepage. Follow the supplied Telecom Market requirements A–D, with the current mockup-derived navy/sky/cyan palette, Vazirmatn, Persian RTL, Vue 3/JavaScript/PrimeVue 4, and live API data. Reuse existing shared components and the tem/telecom.html / tem/shop.html references; do not create a competing design system.
 
@@ -78,8 +78,10 @@ Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first R
 4. Full 69-page inventory and documentation update, then a truthful completion report.
 
 ## Verification
-- Browser/screenshot inspection: NOT RUN — owner instruction.
-- Automated tests/builds: NOT RUN — owner instruction. Regression tests are authored, not executed.
+- GitHub Actions: the run for 01c247a completed successfully; the run for f941b2c is pending at this documentation snapshot. An earlier run exposed stale Telecom Marketplace smoke-test assertions; those assertions were updated to Telecom Market.
+- Targeted tests added/updated: Home sales-mode scenarios, dashboard product-status scenarios, PublicLayout commerce/RFQ visibility and count, InquiryList route mocks, router/smoke brand expectations.
+- Responsive Playwright coverage added for 360, 768, 1366, 1920 and 2560px. E2E/browser rendering has NOT yet been run.
+- Local production builds and screenshot inspection: NOT RUN in this remote source-editing session.
 - Static review: ongoing. Do not claim runtime, visual or full redesign acceptance until all pages are reviewed and checks are authorized.
 
 ## Prior independent backlog
@@ -499,3 +501,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added product service and route schema tests; NOT RUN.
 - Migration not applied to any database in this session. Build/browser NOT RUN.
 **Next:** R1b inventory balance/movement/reservation models and atomic stock operations; only after stock exists should the retail catalogue resolver return sellable items.
+
+
+### Progress snapshot — UI-SELLER-HOME-REDESIGN-01 (2026-11-04)
+- Completed: semantic design tokens and PrimeVue preset aligned to the current mockup palette; light/dark status colors; BrandMark and app titles use Telecom Market; shared chart/status/skeleton/legend refinements.
+- Completed: Company dashboard KPI grouping, lifecycle status donut + legend/90% fallback, inquiry pipeline, filtered navigation links, responsive operations columns, rank/zero explanations and retry/empty/error handling.
+- Completed: Website header/search behavior, category mega-menu/navigation wording, purchase/RFQ switcher with authenticated RFQ count, hero/CTA, 4×2 category grid, mode-aware product cards, recent-products table with mobile card layout, compact benefits and footer link deduplication.
+- Safety: fixed-price CTA is visible but disabled until authoritative Order and Inventory services exist. No fake stock/order/revenue values were introduced and no backend/schema/API/business-rule code was changed.
+- Open: supplier/product trust totals and brand logos, contact address/phone/ENAMAD/payment/returns, product availability/brand filters, compare, ratings/reviews require verified source data or API support. Do not fill these with placeholders that look real.

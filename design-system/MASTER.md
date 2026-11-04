@@ -232,3 +232,41 @@ Owner instruction: all colors are derived from the supplied "Telecom Market" das
 | Dark theme | surfaces `#071d36`–`#16304f`, primary cyan `#27d3ee` | sidebar `#071d36` → `#05263f` |
 
 Rules: no hex in components when a `--ds-*` token exists; neutral ramp is blue-lavender (matches `#eaeef9`), not teal-gray. `BrandMark.vue` logo colors are unchanged pending an owner decision on the logo asset. Browser/visual verification: NOT RUN.
+
+
+## Current implementation baseline — 2026-11-04 (supersedes historical palette notes)
+
+The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/assets/design-system/tokens.scss, and the aliases in tem.scss.
+
+### Brand and contrast
+- Deep navy: #092643 with the darker #062f4f shell gradient.
+- Brand sky: #0790de; accessible light-theme primary control: #0679bd with white text (4.69:1).
+- Cyan accent: #27d3ee with deep-navy foreground; turquoise secondary: #09d3d1.
+- Light canvas: #eaeef9; primary text: #0f2d4d; muted text: #52678a (4.94:1 on canvas).
+- Text links use the darker semantic primary-text token, not the brighter brand swatch.
+- Semantic states are centralized: success #14693a, warning #8a4b00, danger #9b1c1c, info #0a4d7c, neutral #37474f, each on its matching soft surface. Expired uses the same danger foreground/background everywhere.
+- Dark mode overrides semantic foreground/background pairs for navy surfaces; status text remains high contrast.
+- Focus rings use the theme primary color and remain visible in both schemes.
+
+### Layout and type
+- Shared containers use fluid width and logical inline padding, with a 1,400px content target, 1,760px wide default, 1,800px at 1,920px viewport and a 1,920px maximum on very wide displays.
+- Card grids use auto-fit/auto-fill min-width tracks where item counts are variable. The eight homepage categories use a deliberate 4×2 layout to avoid the previous 7+1 orphan row; the four feature cards use a balanced 4×1 / 2×2 layout.
+- Persian secondary text is at least 13px; body text is 14–15px. Numeric KPI values use tabular numerals and Persian locale formatting.
+- Base controls are at least 40px high; icon/action targets are 44px. Focus-visible styles and explicit accessible names are required.
+- The root .app-dark class owns the dark color scheme and semantic status overrides.
+
+### Shared primitives
+- Reuse Button, Card/TemPanel, Badge/TemStatusPill, Input, DataTable, TemDonutChart/TemBarChart/TemLineChart, SkeletonLoader, TemEmptyState and NoDataState/ServerError. Keep their loading, empty, error, disabled and focus behavior aligned to the shared tokens.
+
+### Seller dashboard
+- KPI groups: محصولات (3), استعلام‌ها (3), عملکرد (2); actionable inquiry and review metrics are emphasized.
+- Product lifecycle donut has a center total, a nearby legend with count/percentage and a progress-bar fallback when one segment exceeds 90%.
+- The duplicated inquiry bar chart is removed; the horizontal inquiry pipeline owns the status summary and links into filtered lists.
+- Loading/error/empty/retry states are provided. Orders, revenue and low-stock metrics remain visibly unavailable until authoritative Order/Inventory APIs exist.
+
+### Storefront homepage
+- Homepage search is in the hero; the sticky header search appears only after the hero scrolls out of view.
+- Commerce menu groups purchase and RFQ destinations; the RFQ destination and count are shown only to authenticated customers.
+- Product cards distinguish fixed price, inquiry-only and volume pricing. The fixed-price add-to-cart control is intentionally disabled until order and inventory APIs are available; do not enable checkout based on retailEnabled alone.
+- Latest products include image/name/SKU/category, supplier, sales mode, price and an action; mobile converts the table into cards.
+- Supplier totals, brand logos, ratings/reviews, compare, stock, contact/address, ENAMAD and payment/return badges are not invented when the API or approved organization data is absent. Price/category/search filtering exists in the public catalogue; brand/availability/compare/review work remains dependent on real data/API support.

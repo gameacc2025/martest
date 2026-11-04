@@ -3388,3 +3388,16 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Remote main is the working target; changes will be pushed only after reviewed commits.
 - **Risks / open questions:** Retail Order and Inventory models/APIs are absent. Existing dashboard product status counts are derived from a 20-item page, not authoritative status aggregates. Public product projection may not include inventory/volume-price details.
 - **Next action:** Inspect the exact product/inquiry filter contracts and finish the shared token layer before changing the two page compositions.
+
+
+## 2026-11-04 — UI-SELLER-HOME-REDESIGN-01 — First implementation pass
+
+- **Status:** IN_PROGRESS — first pass committed to remote main; final responsive/browser verification remains open.
+- **Shared system:** aligned PrimeVue preset and design tokens to the current Telecom Market mockup palette; added accessible light/dark semantic status foreground/background pairs; aligned BrandMark, status pills, badges, charts, stat cards and skeleton grids; raised secondary text floors and removed ellipsis from important KPI/legend labels.
+- **Company dashboard:** grouped KPIs into Products / Inquiries / Performance; moved inquiry summary to a horizontal pipeline; added lifecycle status counts from per-status API queries, donut center total, legend percentages and dominant-status progress fallback; linked cards/stages to filtered product/inquiry lists; preserved honest loading/empty/error states and explanatory zero/rank states. Orders/revenue/stock remain unavailable because no authoritative APIs exist.
+- **Storefront:** refined sticky header and hero search behavior, added one commerce menu with separate purchase/RFQ destinations and authenticated-customer inquiry count, standardized Telecom Market naming, arranged eight categories in a 4×2 grid, made product cards distinguish fixed/inquiry/volume pricing, and rebuilt latest-products table with mobile card layout.
+- **Retail safety:** the fixed-price add-to-cart control is deliberately disabled until Order and Inventory APIs are available. Existing local cart preview is not treated as a live order/checkout flow. No backend/schema/API/business-rule changes were made.
+- **Tests:** added product-presentation fixtures for empty/normal/high-volume data; added dashboard lifecycle fixtures for zero/normal/high-volume counts; updated route mocks, smoke-test branding and PublicLayout RFQ switcher assertions; extended Playwright viewport coverage to 360/768/1366/1920/2560px.
+- **CI:** an earlier CI run failed only on stale app smoke assertions still expecting Telecom Marketplace; assertions were updated. The run for commit 01c247a passed. The run for f941b2c was pending at this log update. Playwright/browser visual checks and local builds have not been run.
+- **Known data/API gaps:** no Order/Inventory APIs, no supplier-count/brand-logo aggregate, no verified address/phone/ENAMAD/payment/return configuration, and no brand/availability/compare/review support in the current public product query contract. These must remain absent or explicitly unavailable until real sources are approved.
+- **Latest commit at this log update:** f941b2c (responsive E2E viewport coverage).

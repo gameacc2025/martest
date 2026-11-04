@@ -34,3 +34,7 @@
 ## معیار فعال‌سازی خرید واقعی
 
 خرید تنها بعد از اجرای فازهای R1 تا R3 در `RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` فعال شود: مجازسازی محصول و قیمت، موجودی و رزرو اتمیک، checkout چندفروشنده‌ای و snapshotها، پرداخت server-to-server، callback امضاشده و idempotent، تست‌های دامنه و audit. تا آن زمان دکمه ثبت سفارش و پرداخت باید غیرفعال بماند.
+
+
+## UI safety note — 2026-11-04
+The storefront fixed-price add-to-cart control is shown disabled with an explanation until authoritative Order and Inventory APIs exist. The localStorage cart is a preview only; it must not be represented as a completed purchase, reservation, payment or order. Do not enable the control from retailEnabled and a displayed price alone.
