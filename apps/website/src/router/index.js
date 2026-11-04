@@ -69,13 +69,13 @@ const routes = [
         path: "profile",
         name: "profile",
         component: UserProfile,
-        meta: { title: "پروفایل کاربر", requiresAuth: true },
+        meta: { title: "پروفایل کاربر", requiresAuth: true, customerOnly: true, panelRedirect: "/profile" },
       },
       {
         path: "profile/addresses",
         name: "profile-addresses",
         component: Addresses,
-        meta: { title: "آدرس‌های من", requiresAuth: true },
+        meta: { title: "آدرس‌های من", requiresAuth: true, customerOnly: true, panelRedirect: "/profile" },
       },
       {
         path: "categories",
@@ -99,7 +99,7 @@ const routes = [
         path: "my-inquiries/:id?",
         name: "my-inquiries",
         component: () => import("../pages/public/MyInquiries.vue"),
-        meta: { title: "استعلام‌های من", requiresAuth: true },
+        meta: { title: "استعلام‌های من", requiresAuth: true, customerOnly: true, panelRedirect: "/inquiries" },
       },
       {
         path: "products/:id",
@@ -221,13 +221,13 @@ router.beforeEach(async (to, from, next) => {
   // Customer support belongs to the Website context. Route Company and STAFF
   // identities to their own support desk through the existing PKCE handoff.
   if (to.meta.customerOnly && isAuthed && !authStore.isCustomer) {
-    const supportPath = '/support/tickets';
+    const panelRedirect = to.meta.panelRedirect || '/support/tickets';
     const companyUrl = import.meta.env.VITE_COMPANY_APP_URL || '';
     const adminUrl = import.meta.env.VITE_ADMIN_APP_URL || '';
     if (authStore.isCompany && companyUrl) {
-      window.location.href = `${companyUrl}/auth/start?redirect=${encodeURIComponent(supportPath)}`;
+      window.location.href = `${companyUrl}/auth/start?redirect=${encodeURIComponent(panelRedirect)}`;
     } else if (authStore.isStaff && adminUrl) {
-      window.location.href = `${adminUrl}/auth/start?redirect=${encodeURIComponent(supportPath)}`;
+      window.location.href = `${adminUrl}/auth/start?redirect=${encodeURIComponent(panelRedirect)}`;
     } else {
       return next({ name: 'home' });
     }
