@@ -319,6 +319,8 @@ model Product {
   specifications   Json?
   status           ProductStatus      @default(DRAFT)
   visibility       ProductVisibility  @default(PUBLIC)
+  // Retail sales are explicitly opt-in. Existing products stay non-retail.
+  retailEnabled    Boolean            @default(false)
   isFeatured       Boolean            @default(false)
   // Number of post-approval edits made by a company user. Reset to 0 on every
   // approve; once it reaches the system-configured review threshold the product
