@@ -894,3 +894,5 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Additional reusable TEM primitives: TemLineChart, TemMailLayout, TemMailRow, TemMailReader and TemActivityTimeline. They are exported through packages/shared-ui/components/ui/index.js and are presentation-only.
 
 - Support desk UI exists for Admin, Company and Website CUSTOMER contexts. Website route /support/tickets is customer-only; COMPANY and STAFF identities are redirected via PKCE handoff to their panel support route. The current UI uses sample data only; ticket APIs are future work.
+
+- Retail commerce: the backend currently has no Order model or /api/v1/orders routes; legacy endpoint definitions and Pinia stores are deprecated. Use docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md as the R0 design reference. Prototype routes: Admin /retail/orders, Company /retail/orders, Website CUSTOMER /orders. They use explicit sample-data notices only; no real order/payment action exists.
