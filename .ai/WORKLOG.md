@@ -3374,3 +3374,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin and Company ProductForm now expose an opt-in toggle with clear disclosure that this alone does not enable purchasing; stock and checkout are not available yet.
 - Added product service and route tests for accepting/persisting explicit opt-in. Tests NOT RUN; migration NOT APPLIED; build/browser NOT RUN.
 - No retail catalogue endpoint, inventory, reservation, order or payment API is active.
+
+
+## 2026-11-04 — UI-SELLER-HOME-REDESIGN-01 — Seller dashboard and storefront foundation
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT / GitHub remote source workflow
+- **Goal:** Rebuild the Company seller dashboard and public Website homepage around the supplied requirements and repository Telecom Market HTML references.
+- **Claimed scope:** Shared design tokens and primitives; Company dashboard information hierarchy, KPI groups, inquiry pipeline, sidebar navigation and responsive shell; Website homepage hero, navigation/search, categories, product cards, recent-products table, trust/benefits/footer; targeted tests and UI documentation.
+- **Constraints:** Vue 3 + JavaScript + PrimeVue 4; preserve live API contracts, auth/PKCE, RBAC, tenant boundaries and inquiry/retail safety. No backend/schema/API/business-rule changes. Retail order, inventory, stock and payment metrics must remain explicitly unavailable until their APIs exist; sample scenarios belong in tests/demo fixtures, not production API claims.
+- **Reference:** tem/telecom.html for the seller dashboard composition; tem/shop.html for catalogue/product patterns; current design-system/MASTER.md and the user's explicit A–D brief for final decisions.
+- **Verification plan:** Static source review; targeted component/page tests; builds where execution is available; responsive checks at 360, 768, 1366, 1920 and 2560px. Do not claim browser/rendered checks unless actually run.
+- **Commit:** Task claim recorded; implementation not yet committed.
+- **Push:** Remote main is the working target; changes will be pushed only after reviewed commits.
+- **Risks / open questions:** Retail Order and Inventory models/APIs are absent. Existing dashboard product status counts are derived from a 20-item page, not authoritative status aggregates. Public product projection may not include inventory/volume-price details.
+- **Next action:** Inspect the exact product/inquiry filter contracts and finish the shared token layer before changing the two page compositions.

@@ -5,6 +5,16 @@
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
 
+
+## Active focused subtask — UI-SELLER-HOME-REDESIGN-01 (2026-11-04)
+**Status:** IN_PROGRESS — scoped under the broader UI-REDESIGN-TEM-01 effort.
+
+Rebuild only these two surfaces first: Company seller dashboard and Website public homepage. Follow the supplied Telecom Market requirements A–D, with the current mockup-derived navy/sky/cyan palette, Vazirmatn, Persian RTL, Vue 3/JavaScript/PrimeVue 4, and live API data. Reuse existing shared components and the tem/telecom.html / tem/shop.html references; do not create a competing design system.
+
+Acceptance targets: tokenized semantic states/type/spacing/containers; readable Persian numerals and WCAG AA text; keyboard focus and icon labels; light/dark compatibility; responsive layouts at 360/768/1366/1920/2560; seller KPI groups and one inquiry pipeline (no duplicate status chart); no duplicated actions; responsive marketplace hero/categories/products/recent table; clear fixed-price/RFQ/volume distinctions only where source data supports them; loading/empty/error states; tests and documentation.
+
+Safety boundary: existing retail backend has no Order or Inventory models/routes. Do not invent live order/revenue/stock values or enable purchase/checkout from the retailEnabled flag alone. Use honest unavailable/preview states until authoritative APIs exist.
+
 ## Product constraints
 Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first RTL, dark sidebar, existing logo), Vue 3/JavaScript/PrimeVue 4 stack, APIs, routes, PKCE authentication, app-context/RBAC, tenant isolation, inquiry/RFQ rules, product lifecycle, notification behavior and commerce contracts. Do not present fake data as real or make unsupported claims. Explicitly requested UI-only prototypes may use clearly labelled sample data, must remain disconnected from guessed APIs, and must not execute real business/financial operations. No backend/schema/API/business-rule changes during this UI-only task.
 
