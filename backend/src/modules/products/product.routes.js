@@ -46,6 +46,7 @@ const productBodyProperties = {
   specifications: { type: 'object', additionalProperties: true },
   status: { type: 'string', enum: productStatuses },
   visibility: { type: 'string', enum: productVisibilities },
+  retailEnabled: { type: 'boolean' },
   isFeatured: { type: 'boolean' },
   companyId: { type: 'integer', minimum: 1 },
   categoryId: { type: 'integer', minimum: 1 },
