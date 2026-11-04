@@ -9,6 +9,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import { useCartStore } from '../../stores/cart'
 import { productsApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
@@ -16,6 +17,8 @@ import { productSalesMode, productPriceLabel } from './homePresentation.js'
 const router = useRouter()
 const productsStore = useProductsStore()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
+const cartFeedback = ref('')
 const showMyInquiriesLink = computed(() => authStore.isAuthenticated && authStore.isCustomer)
 
 const featuredProducts = ref([])
@@ -90,6 +93,15 @@ function productAvailabilityLabel(product) {
 
 function productCategoryName(product) {
   return product?.category?.nameFa || product?.category?.name || product?.category?.nameEn || ''
+}
+
+function addFixedPriceProduct(product) {
+  if (productSalesMode(product).kind !== 'fixed') return
+  const price = Number(product?.finalPrice ?? product?.price)
+  const added = cartStore.addItem({ ...product, price })
+  cartFeedback.value = added
+    ? `${product.name || product.title || 'محصول'} به سبد خرید افزوده شد.`
+    : 'افزودن این محصول به سبد خرید ممکن نشد؛ قیمت معتبر در دسترس نیست.'
 }
 
 function getProductImage(product) {
@@ -233,43 +245,30 @@ onMounted(() => {
         </div>
 
         <div v-else class="home-product-grid">
-          <router-link
-            v-for="product in featuredProducts"
-            :key="product.id"
-            :to="productRoute(product)"
-            class="product-card"
-          >
-            <span class="product-card__media">
-              <img
-                v-if="getProductImage(product)"
-                :src="getProductImage(product).url"
-                :alt="product.name"
-                width="320"
-                height="240"
-                loading="lazy"
-                decoding="async"
-              />
-              <i v-else class="pi pi-box" aria-hidden="true"></i>
-            </span>
-
-            <span class="product-card__body">
-              <span v-if="product.company?.isVerified" class="tm-pill tm-pill--success">
-                <i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده احرازشده
+          <article v-for="product in featuredProducts" :key="product.id" class="product-card">
+            <router-link :to="productRoute(product)" class="product-card__main">
+              <span class="product-card__media">
+                <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" decoding="async" />
+                <i v-else class="pi pi-box" aria-hidden="true"></i>
               </span>
-
-              <span class="product-card__mode" :class="`product-card__mode--${productSalesMode(product).kind}`">{{ productSalesMode(product).label }}</span>
-              <span class="product-card__name">{{ product.name || product.title }}</span>
-              <span v-if="product.sku" class="product-sku">کد محصول: <b dir="ltr">{{ product.sku }}</b></span>
-              <span v-if="productCategoryName(product)" class="product-card__category">{{ productCategoryName(product) }}</span>
-              <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
-              <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
-              <span class="product-card__foot">
-                <span class="product-card__price">{{ productPriceLabel(product) }}</span>
-                <span class="product-card-cta">مشاهده جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
+              <span class="product-card__body">
+                <span v-if="product.company?.isVerified" class="tm-pill tm-pill--success"><i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده احرازشده</span>
+                <span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span>
+                <span class="product-card__name">{{ product.name || product.title }}</span>
+                <span v-if="product.sku" class="product-sku">کد محصول: <b dir="ltr">{{ product.sku }}</b></span>
+                <span v-if="productCategoryName(product)" class="product-card__category">{{ productCategoryName(product) }}</span>
+                <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
+                <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
               </span>
-            </span>
-          </router-link>
+            </router-link>
+            <div class="product-card__foot">
+              <span class="product-card__price">{{ productPriceLabel(product) }}</span>
+              <button v-if="productSalesMode(product).kind === 'fixed'" type="button" class="tm-btn tm-btn--accent tm-btn--sm" :aria-label="'افزودن به سبد خرید: ' + (product.name || product.title)" @click="addFixedPriceProduct(product)">افزودن به سبد</button>
+              <router-link v-else :to="productRoute(product)" class="product-card-cta" :aria-label="(productSalesMode(product).kind === 'volume' ? 'استعلام عمده: ' : 'درخواست استعلام: ') + (product.name || product.title)">{{ productSalesMode(product).kind === 'volume' ? 'استعلام عمده' : 'درخواست استعلام' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
+            </div>
+          </article>
         </div>
+        <p class="sr-only" role="status" aria-live="polite">{{ cartFeedback }}</p>
       </section>
 
       <!-- Recent products -->
@@ -489,6 +488,8 @@ onMounted(() => {
 .product-card:hover { border-color: var(--tm-line-strong); box-shadow: var(--tm-shadow-sm); transform: translateY(-2px); }
 .product-card:focus-visible { outline: 2px solid var(--tm-cyan); outline-offset: 2px; }
 
+.product-card__main { display: flex; flex-direction: column; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
+.product-card__main:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; border-radius: 12px; }
 .product-card__media {
   display: grid;
   place-items: center;
@@ -510,7 +511,8 @@ onMounted(() => {
 }
 .product-card__company { font-size: 13px; color: var(--tm-muted); }
 .product-sku { font-size: 13px; color: var(--tm-faint); }
-.product-card__foot { margin-top: auto; padding-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.product-card__foot { margin-top: auto; padding: 10px 14px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.product-card__foot .tm-btn { min-height: 44px; }
 .product-card__price { font-size: 13px; font-weight: 700; color: var(--tm-blue); }
 .product-card-cta { font-size: 13px; font-weight: 700; color: var(--tm-cyan-deep); }
 .product-card-cta i { margin-inline-start: .3rem; }

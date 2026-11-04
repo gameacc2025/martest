@@ -58,7 +58,10 @@ describe('Website homepage contracts (tem redesign)', () => {
 
   it('shows supplier verification and explicit inquiry pricing when no price exists', () => {
     expect(source).toContain('company?.isVerified')
-    expect(source).toContain('مشاهده جزئیات')
+    expect(source).toContain('افزودن به سبد')
+    expect(source).toContain('درخواست استعلام')
+    expect(source).toContain('استعلام عمده')
+    expect(source).toContain('addFixedPriceProduct(product)')
     expect(source).toContain('class="product-card-cta"')
     expect(source).toContain('class="product-sku"')
   })
