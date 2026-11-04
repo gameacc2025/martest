@@ -126,7 +126,6 @@ const quickActions = [
   { label: 'سفارشات', icon: 'pi pi-shopping-cart', to: { name: 'admin-orders' }, tone: 'primary' },
   { label: 'استعلام‌ها', icon: 'pi pi-inbox', to: { name: 'admin-inquiries' }, tone: 'danger' },
   { label: 'مرکز CRM', icon: 'pi pi-address-book', to: { name: 'admin-crm' }, tone: 'info' },
-  { label: 'مالی و تسویه', icon: 'pi pi-wallet', to: { name: 'admin-finance' }, tone: 'warning' },
   { label: 'تیکت‌ها', icon: 'pi pi-headphones', to: { name: 'admin-tickets' }, tone: 'primary' },
   { label: 'سفارش خرده‌فروشی', icon: 'pi pi-shopping-cart', to: { name: 'admin-retail-orders' }, tone: 'success' },
 ]
