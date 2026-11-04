@@ -31,6 +31,7 @@ HTMLهای **tem/** مرجع بصری و رفتاری هستند، نه کد ق�
 | TemAvatar | آواتار |
 | TemUserCell | سلول هویت کاربر |
 | TemBarChart | نمودار میله‌ای CSS بدون وابستگی نموداری |
+| TemLineChart | نمودار روند SVG چندسری با داده ورودی صفحه |
 | TemDonutChart | نمودار حلقه‌ای SVG |
 | TemLegend | راهنمای نمودار |
 | TemMeter | شاخص پیشرفت |
