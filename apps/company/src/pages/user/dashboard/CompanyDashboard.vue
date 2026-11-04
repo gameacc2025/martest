@@ -1,5 +1,6 @@
 <template>
   <div class="company-dashboard">
+    <section class="company-dashboard-overview">
     <section class="company-dashboard-hero" aria-labelledby="company-dashboard-title">
       <div class="company-dashboard-hero-copy">
         <h1 id="company-dashboard-title">{{ companyName ? 'خوش آمدید، ' + companyName : 'داشبورد شرکت' }}</h1>
@@ -84,6 +85,7 @@
         :to="{ name: 'company-inquiries' }"
       />
     </div>
+    </section>
 
     <section class="company-dashboard-analytics" aria-label="آمار و تحلیل عملکرد">
       <DashboardPanel title="تحلیل عملکرد شرکت" icon="pi pi-chart-bar" class="company-dashboard-chart">
@@ -732,9 +734,9 @@ onMounted(() => {
 .company-dashboard-hero {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
   gap: var(--ds-space-5); min-height: 9rem; padding: clamp(1.25rem, 2.5vw, 2rem);
-  border-radius: var(--ds-radius-lg); background: var(--ds-color-brand-deep); color: var(--ds-color-on-brand);
+  position:relative; overflow:hidden; border-radius:16px; background:var(--ds-hero-gradient); color:#fff;
 }
-.company-dashboard-hero-copy { min-width: 0; }
+.company-dashboard-hero::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.42; background:radial-gradient(circle at 82% 25%,rgba(255,255,255,.3),transparent 20%),radial-gradient(circle at 74% 110%,rgba(14,220,226,.4),transparent 34%),repeating-radial-gradient(circle at 83% 52%,transparent 0 28px,rgba(255,255,255,.12) 29px 30px,transparent 31px 55px); }\n.company-dashboard-hero-copy,.company-dashboard-hero-actions { position:relative; z-index:1; }\n.company-dashboard-hero-copy { min-width: 0; }
 .company-dashboard-hero h1 {
   margin: 0; color: inherit; font-size: clamp(1.4rem, 2.2vw, 1.85rem);
   font-weight: var(--ds-font-weight-bold); line-height: 1.4; text-wrap: balance;
@@ -764,7 +766,7 @@ onMounted(() => {
 }
 .company-dashboard-operations > * { min-width: 0; }
 .cd-hint { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
-.company-dashboard .cd-kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.company-dashboard-overview { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(290px,1fr); gap:1rem; direction:ltr; align-items:stretch; }\n.company-dashboard-overview > * { min-width:0; direction:rtl; }\n.company-dashboard .cd-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); gap:.75rem; }
 .company-dashboard .cd-grid--1-1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .company-dashboard .cd-grid--2-1 { grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); }
 @media (max-width: 1100px) {
