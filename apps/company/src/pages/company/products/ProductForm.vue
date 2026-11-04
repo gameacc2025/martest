@@ -85,6 +85,7 @@ const form = ref({
   categoryId: null,
   subcategoryId: null,
   visibility: 'PUBLIC',
+  retailEnabled: false,
   isFeatured: false,
 })
 
@@ -345,6 +346,7 @@ async function loadProduct(id) {
       categoryId: product.categoryId || null,
       subcategoryId: product.subcategoryId || null,
       visibility: product.visibility || 'PUBLIC',
+      retailEnabled: product.retailEnabled === true,
       isFeatured: product.isFeatured || false,
     }
 
@@ -457,6 +459,7 @@ function buildProductPayload() {
     categoryId: form.value.categoryId,
     subcategoryId: form.value.subcategoryId,
     visibility: form.value.visibility,
+    retailEnabled: !!form.value.retailEnabled,
     specifications: buildSpecificationsPayload(),
   }
 
@@ -785,6 +788,14 @@ async function removeExistingDocument(docId) {
             <label for="product-visibility">قابلیت نمایش</label>
             <Select inputId="product-visibility"
             name="productVisibility" v-model="form.visibility" :options="['PUBLIC', 'PRIVATE', 'COMPANY_ONLY']" class="w-full" />
+          </div>
+          <div class="field">
+            <label for="product-retail-enabled">عرض برای فروش خرده‌فروشی</label>
+            <div class="flex align-items-center gap-2 mt-2">
+              <InputSwitch inputId="product-retail-enabled" v-model="form.retailEnabled" aria-label="فعال‌سازی عرضه خرده‌فروشی" />
+              <span>{{ form.retailEnabled ? 'درخواست فعال‌سازی' : 'غیرفعال' }}</span>
+            </div>
+            <small class="text-muted">این گزینه به‌تنهایی امکان خرید ایجاد نمی‌کند؛ فروش پس از راه‌اندازی موجودی و checkout امن فعال می‌شود.</small>
           </div>
           <div v-if="canFeature" class="field">
             <label for="product-featured">محصول ویژه</label>
