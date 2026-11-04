@@ -401,3 +401,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - CI/GitHub Actions not inspected or run per owner instruction. Local build/browser verification not performed through the remote GitHub editing session.
 
 - Follow-up: CRM has subroutes for overview/leads/pipeline/activities; Finance has overview/settlements/transactions/invoices. Support and Retail Orders are separate menu groups. Added TemLineChart to the shared TEM widget exports. Admin dashboard now uses existing aggregate API fields for active users, pending products and total inquiries; Company dashboard uses authoritative pagination/stat fields for total products and open inquiries.
+
+- Additional TEM extraction: added/exported TemLineChart, TemMailLayout, TemMailRow, TemMailReader and TemActivityTimeline; see docs/OPERATIONS_UI_ROADMAP.md for the complete reusable widget inventory.
