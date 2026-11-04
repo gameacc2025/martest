@@ -235,6 +235,10 @@ const pagination = ref({
 
 const kpiItems = computed(() => [
   { label: 'کل محصولات', value: pagination.value.total, icon: 'pi pi-box', tone: 'primary' },
+  { label: 'منتشرشده', value: products.value.filter((item) => ['PUBLISHED', 'APPROVED'].includes(item.status)).length, icon: 'pi pi-check-circle', tone: 'success' },
+  { label: 'در انتظار بررسی', value: products.value.filter((item) => item.status === 'PENDING_REVIEW').length, icon: 'pi pi-clock', tone: 'warning' },
+  { label: 'پیش‌نویس', value: products.value.filter((item) => item.status === 'DRAFT').length, icon: 'pi pi-file-edit', tone: 'info' },
+  { label: 'ردشده', value: products.value.filter((item) => item.status === 'REJECTED').length, icon: 'pi pi-times-circle', tone: 'danger' },
 ])
 
 const form = ref({
