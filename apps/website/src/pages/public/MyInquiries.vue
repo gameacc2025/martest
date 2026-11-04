@@ -136,7 +136,7 @@ async function loadDetail() {
       .filter((response) => response?.company?.id)
       .map((response) => [String(response.company.id), response.company])).values()]
     recipientCompanyId.value = companies.length === 1 ? companies[0].id : null
-    await Promise.all([loadMessages(), loadQuota()])
+    await Promise.all([loadMessages(inquiry.id, requestSequence), loadQuota()])
   } catch (err) {
     if (requestSequence !== detailRequestSequence) return
     selected.value = null
@@ -147,20 +147,24 @@ async function loadDetail() {
   }
 }
 
-async function loadMessages() {
-  if (!selected.value?.id) return
+async function loadMessages(inquiryId = selected.value?.id, requestSequence = detailRequestSequence) {
+  if (!inquiryId) return
   loadingMessages.value = true
   messagesError.value = ''
   try {
-    const result = await inquiriesApi.listMessages(selected.value.id)
+    const result = await inquiriesApi.listMessages(inquiryId)
+    if (requestSequence !== detailRequestSequence || String(selected.value?.id) !== String(inquiryId)) return
     const body = result?.data ?? result
     const payload = body?.data ?? body
     messages.value = Array.isArray(payload) ? payload : []
   } catch (err) {
+    if (requestSequence !== detailRequestSequence || String(selected.value?.id) !== String(inquiryId)) return
     messagesError.value = err?.response?.data?.message || err?.response?.data?.error?.message
       || err?.serverMessage || err?.message || 'دریافت پیام‌های گفتگو ناموفق بود.'
   } finally {
-    loadingMessages.value = false
+    if (requestSequence === detailRequestSequence && String(selected.value?.id) === String(inquiryId)) {
+      loadingMessages.value = false
+    }
   }
 }
 
