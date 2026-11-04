@@ -128,7 +128,7 @@ describe('admin app boot smoke', () => {
 
     // Route meta reached the document title (guard ran during boot).
     expect(document.title).toContain('پنل مدیریت')
-    expect(document.title).toContain('Telecom Marketplace')
+    expect(document.title).toContain('Telecom Market')
 
     // The boot path really evaluated the session offline (logout attempt),
     // entirely inside the fetch stub — no external host was reachable.

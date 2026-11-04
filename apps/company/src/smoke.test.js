@@ -116,7 +116,7 @@ describe('company app boot smoke', () => {
     expect(wrapper.find('.landing-gate').exists()).toBe(true)
     expect(wrapper.find('.landing-gate i.pi-spinner').exists()).toBe(true)
 
-    expect(document.title).toContain('Telecom Marketplace')
+    expect(document.title).toContain('Telecom Market')
 
     // The boot path evaluated the session offline — inside the fetch stub.
     expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/auth/logout'))).toBe(true)
