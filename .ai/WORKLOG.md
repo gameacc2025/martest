@@ -3284,3 +3284,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Table coverage follow-up:** Added current-page KPI breakdowns to Admin categories, roles and permissions, Company users and Company inquiry lists. This also corrected a pre-existing undefined kpiItems reference in PermissionList.vue. Notification delivery monitoring already had live summary metrics and was retained.
 
 - Added a source-to-component mapping for the complete TEM HTML inventory (analytics, sales, ecommerce, transactions, orders, customers, mail, products, cart/checkout, plans/subscriptions, roles/users/security, telecom and index) to docs/OPERATIONS_UI_ROADMAP.md.
+
+- Added a Company-side settlement status prototype (/finance/settlements), a role-scoped company finance menu item and a dashboard shortcut. Sample balances are explicitly labelled as preview data; no payout/settlement API or payment action was created.
