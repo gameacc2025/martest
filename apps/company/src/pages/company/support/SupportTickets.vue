@@ -5,7 +5,7 @@ const stats = [
   { label: 'تیکت‌های باز شرکت', value: 8, icon: 'pi pi-inbox', tone: 'primary', meta: 'درخواست‌های ثبت‌شده' },
   { label: 'در انتظار پاسخ', value: 3, icon: 'pi pi-clock', tone: 'warning', meta: 'نیازمند پیگیری' },
   { label: 'پاسخ کارشناسان', value: 12, icon: 'pi pi-comments', tone: 'success', meta: 'در این ماه' },
-  { label: 'میانگین پاسخ', value: '۳٫۱ ساعت', icon: 'pi pi-stopwatch', tone: 'info', meta: 'شاخص نمونه' },
+  { label: 'میانگین پاسخ', value: '۳٫۱ ساعت', icon: 'pi pi-stopwatch', tone: 'accent', meta: 'شاخص نمونه' },
 ]
 const columns = [
   { key: 'primary', label: 'موضوع تیکت' },
