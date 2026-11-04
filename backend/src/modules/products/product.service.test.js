@@ -677,6 +677,13 @@ function publishedProduct(overrides = {}) {
   });
 }
 
+test('updateProduct: persists explicit retail opt-in under normal product ownership rules', async () => {
+  fx.product = publishedProduct({ retailEnabled: false, editsSinceApproval: 0 });
+  await service.updateProduct(1, { retailEnabled: true }, companyA);
+  const updateArgs = calls['product.update'].at(-1);
+  assert.equal(updateArgs.data.retailEnabled, true);
+});
+
 test('updateProduct: below threshold — PUBLISHED edit keeps status and increments editsSinceApproval', async () => {
   fx.product = publishedProduct({ editsSinceApproval: 2, title: 'Old' });
   await service.updateProduct(1, { title: 'New' }, companyA);
