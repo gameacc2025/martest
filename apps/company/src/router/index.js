@@ -88,6 +88,8 @@ const routes = [
       { path: "/inquiries/:id", name: "company-inquiry-detail", component: () => import("../pages/company/inquiries/InquiryDetail.vue"), meta: { title: "جزئیات استعلام" } },
       // ── Users (company members) ──────────────────────────
       { path: "/users", name: "company-users", component: () => import("../pages/company/users/UserList.vue"), meta: { title: "کاربران شرکت" } },
+      // ── Support desk ──────────────────────────────────────
+      { path: "/support/tickets", name: "company-tickets", component: () => import("../pages/company/support/SupportTickets.vue"), meta: { title: "پشتیبانی و تیکت‌ها" } },
       // ── Reports ──────────────────────────────────────────
       { path: "/reports", name: "company-reports", component: () => import("../pages/company/reports/Reports.vue"), meta: { title: "گزارش‌ها" } },
     ],
