@@ -575,6 +575,17 @@ test('createProduct: a company user cannot spoof a companyId that isn\'t their o
   );
 });
 
+test('createProduct: retail eligibility is explicit and passed through only when enabled', async () => {
+  await service.createProduct({
+    title: 'Retail candidate',
+    categoryId: 1,
+    subcategoryId: 1,
+    retailEnabled: true,
+  }, companyA);
+  const createArgs = calls['product.create'].at(-1);
+  assert.equal(createArgs.data.retailEnabled, true);
+});
+
 test('createProduct: a company user creates products under their own company when no companyId is sent', async () => {
   await service.createProduct({ title: 'New', categoryId: 1, subcategoryId: 1 }, companyA);
   const createArgs = calls['product.create'].at(-1);
