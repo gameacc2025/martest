@@ -23,6 +23,7 @@ const recentProducts = ref([])
 const categories = ref([])
 const loading = ref(false)
 const categoriesLoading = ref(false)
+const categoriesError = ref(false)
 const error = ref(null)
 
 const searchQuery = ref('')
@@ -139,10 +140,12 @@ function viewCategoryProducts(categoryId) {
 async function fetchCategories() {
   try {
     categoriesLoading.value = true
+    categoriesError.value = false
     // Use the same store method as the Categories page so the data shape matches.
     const data = await productsStore.getCategories()
     categories.value = Array.isArray(data) ? data : []
   } catch (err) {
+    categoriesError.value = true
     categories.value = []
   } finally {
     categoriesLoading.value = false
@@ -183,7 +186,7 @@ onMounted(() => {
             <div class="home-hero__product">
               <img v-if="featuredProducts.length && getProductImage(featuredProducts[0])" :src="getProductImage(featuredProducts[0]).url" :alt="featuredProducts[0].name || 'تصویر محصول مخابراتی'" width="420" height="320" fetchpriority="high" decoding="async" />
               <i v-else class="pi pi-box" aria-hidden="true"></i>
-              <span v-if="featuredProducts.length" class="home-hero__product-caption">{{ featuredProducts[0].name }}</span>
+              <span v-if="featuredProducts.length" class="home-hero__product-caption">{{ featuredProducts[0].name || featuredProducts[0].title }}</span>
             </div>
             <ul class="home-hero__benefits">
               <li><i class="pi pi-check-circle" aria-hidden="true"></i><span>کاتالوگ تخصصی تجهیزات شبکه</span></li>
@@ -206,6 +209,10 @@ onMounted(() => {
           <div v-for="i in 8" :key="i" class="home-category-card home-skeleton"></div>
         </div>
 
+        <div v-else-if="categoriesError" class="home-empty">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i><p>دریافت دسته‌بندی‌ها با مشکل روبه‌رو شد.</p>
+          <button type="button" class="tm-btn tm-btn--sm" @click="fetchCategories">تلاش دوباره</button>
+        </div>
         <div v-else-if="categories.length === 0" class="home-empty">
           <i class="pi pi-th-large" aria-hidden="true"></i>
           <p>دسته‌بندی‌ای برای نمایش ثبت نشده است.</p>
@@ -239,6 +246,7 @@ onMounted(() => {
         <div v-else-if="error" class="home-empty">
           <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
           <p>{{ error }}</p>
+          <button type="button" class="tm-btn tm-btn--sm" @click="fetchProducts">تلاش دوباره</button>
         </div>
 
         <div v-else-if="featuredProducts.length === 0" class="home-empty">
@@ -288,30 +296,36 @@ onMounted(() => {
       </section>
 
       <!-- Recent products -->
-      <section v-if="recentProducts.length" class="home-section" aria-labelledby="home-recent">
+      <section class="home-section" aria-labelledby="home-recent">
         <div class="site-section-title">
           <h2 id="home-recent">تازه‌ترین محصولات</h2>
           <router-link :to="{ name: 'products' }">مشاهده همه محصولات</router-link>
         </div>
 
-        <div class="tm-table-wrap">
+        <div v-if="loading" class="home-product-grid" aria-busy="true">
+          <div v-for="n in 3" :key="n" class="home-skeleton" style="min-height:100px"></div>
+        </div>
+        <div v-else-if="error" class="home-empty">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i><p>{{ error }}</p>
+          <button type="button" class="tm-btn tm-btn--sm" @click="fetchProducts">تلاش دوباره</button>
+        </div>
+        <div v-else-if="recentProducts.length === 0" class="home-empty">
+          <i class="pi pi-box" aria-hidden="true"></i><p>هنوز محصول تازه‌ای برای نمایش منتشر نشده است.</p>
+          <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده همه محصولات</router-link>
+        </div>
+        <div v-else class="tm-table-wrap">
           <div class="tm-table-scroll">
             <table class="tm-table">
               <caption class="sr-only">تازه‌ترین محصولات منتشرشده در بازارگاه</caption>
-              <thead>
-                <tr>
-                  <th scope="col">محصول</th>
-                  <th scope="col">تأمین‌کننده</th>
-                  <th scope="col">نوع ارائه</th>
-                  <th scope="col" class="tm-table__num">قیمت</th>
-                  <th scope="col">اقدام</th>
-                </tr>
-              </thead>
+              <thead><tr><th scope="col">محصول</th><th scope="col">تأمین‌کننده</th><th scope="col">نوع ارائه</th><th scope="col" class="tm-table__num">قیمت</th><th scope="col">اقدام</th></tr></thead>
               <tbody>
                 <tr v-for="product in recentProducts" :key="product.id">
-                  <td data-label="محصول"><router-link :to="productRoute(product)" class="home-recent__product"><img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title" width="52" height="52" loading="lazy" decoding="async" /><span class="home-recent__product-copy"><b>{{ product.name || product.title }}</b><small v-if="product.sku">کد: <span dir="ltr">{{ product.sku }}</span></small><small v-if="productCategoryName(product)">{{ productCategoryName(product) }}</small></span></router-link></td>
+                  <td data-label="محصول"><router-link :to="productRoute(product)" class="home-recent__product">
+                    <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title" width="52" height="52" loading="lazy" decoding="async" />
+                    <span class="home-recent__product-copy"><b>{{ product.name || product.title }}</b><small v-if="product.sku">کد: <span dir="ltr">{{ product.sku }}</span></small><small v-if="productCategoryName(product)">{{ productCategoryName(product) }}</small></span>
+                  </router-link></td>
                   <td data-label="تأمین‌کننده">{{ product.company?.name || '—' }}</td>
-                  <td data-label="نوع ارائه"><span class="product-card__mode" :class="`product-card__mode--${productSalesMode(product).kind}`">{{ productSalesMode(product).label }}</span></td>
+                  <td data-label="نوع ارائه"><span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span></td>
                   <td data-label="قیمت" class="tm-table__num">{{ productPriceLabel(product) }}</td>
                   <td data-label="اقدام"><router-link :to="productRoute(product)" class="home-recent__action">مشاهده <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></td>
                 </tr>

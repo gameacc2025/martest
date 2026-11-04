@@ -9,7 +9,7 @@
  * customer/company/staff menu branching, notification unread count, search
  * routing, category loading for the mega menu and footer, and mobile nav.
  */
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
@@ -58,6 +58,9 @@ function goToAdminApp(path = '/') {
 
 const searchQuery = ref('')
 const mobileMenuOpen = ref(false)
+const headerSearchVisible = ref(false)
+const showHeaderSearch = computed(() => route.name !== 'home' || headerSearchVisible.value)
+function updateHeaderSearchVisibility() { headerSearchVisible.value = window.scrollY > 320 }
 const notificationCount = ref(0)
 const userMenu = ref(null)
 
@@ -138,6 +141,8 @@ const footerCategories = ref([])
 const megaMenuCategories = ref([])
 
 onMounted(async () => {
+  window.addEventListener('scroll', updateHeaderSearchVisibility, { passive: true })
+  updateHeaderSearchVisibility()
   // Fetch notification count for logged-in users
   if (isAuthenticated.value) {
     try {
@@ -160,6 +165,8 @@ onMounted(async () => {
     console.error('Error loading categories:', err)
   }
 })
+
+onUnmounted(() => window.removeEventListener('scroll', updateHeaderSearchVisibility))
 
 function search() {
   if (searchQuery.value.trim()) {
@@ -200,15 +207,12 @@ function logout() {
           <div class="public-header-right">
             <router-link :to="{ name: 'home' }" class="public-logo" aria-label="صفحه اصلی بازارگاه مخابرات">
               <BrandMark class="public-logo-mark" :size="38" />
-              <span class="public-logo-name">
-                <strong>Telecom</strong>
-                <small>Marketplace</small>
-              </span>
+              <span class="public-logo-name"><strong>Telecom Market</strong></span>
             </router-link>
 
             <nav class="public-nav-desktop" aria-label="منوی اصلی">
               <router-link to="/" class="public-nav-link" active-class="public-nav-link-active">صفحه اصلی</router-link>
-              <router-link to="/products" class="public-nav-link" active-class="public-nav-link-active">محصولات</router-link>
+              <router-link to="/products" class="public-nav-link" active-class="public-nav-link-active">همه محصولات</router-link>
               <MegaMenu :categories="megaMenuCategories" />
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active">درباره ما</router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active">تماس با ما</router-link>
@@ -216,11 +220,16 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
-            <router-link to="/cart" class="public-icon-link public-cart-link" aria-label="سبد خرید">
-              <i class="pi pi-shopping-cart" aria-hidden="true"></i>
-              <span v-if="cartItemCount > 0" class="public-notification-badge">{{ cartItemCount > 99 ? '۹۹+' : cartItemCount.toLocaleString('fa-IR') }}</span>
-            </router-link>
-            <div class="public-search-desktop">
+            <div class="public-commerce-actions" aria-label="خرید و استعلام">
+              <router-link to="/cart" class="public-icon-link public-cart-link" aria-label="سبد خرید">
+                <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ cartItemCount > 99 ? '۹۹+' : cartItemCount.toLocaleString('fa-IR') }}</span>
+              </router-link>
+              <router-link v-if="authStore.isCustomer" to="/my-inquiries" class="public-icon-link public-rfq-link" aria-label="لیست استعلام‌ها">
+                <i class="pi pi-file-edit" aria-hidden="true"></i>
+              </router-link>
+            </div>
+            <div v-if="showHeaderSearch" class="public-search-desktop">
               <IconField>
                 <InputIcon class="pi pi-search" />
                 <InputText
@@ -269,7 +278,7 @@ function logout() {
           </div>
         </div>
 
-        <div v-if="mobileMenuOpen" class="public-search-mobile">
+        <div v-if="mobileMenuOpen && showHeaderSearch" class="public-search-mobile">
           <IconField>
             <InputIcon class="pi pi-search" />
             <InputText
@@ -291,7 +300,7 @@ function logout() {
           <li>
             <router-link :to="{ name: 'products' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-box"></i>
-              <span>محصولات</span>
+              <span>همه محصولات</span>
             </router-link>
           </li>
           <li>
@@ -384,12 +393,11 @@ function logout() {
           <div>
             <h3 class="public-footer-heading">دسترسی سریع</h3>
             <ul class="public-footer-list">
-              <li v-for="item in navItems" :key="item.path">
-                <router-link :to="item.path" class="public-footer-link">{{ item.name }}</router-link>
-              </li>
-              <li><router-link :to="{ name: 'products' }" class="public-footer-link">محصولات</router-link></li>
-            </ul>
-          </div>
+              <li><router-link to="/" class="public-footer-link">صفحه اصلی</router-link></li>
+              <li><router-link to="/products" class="public-footer-link">همه محصولات</router-link></li>
+              <li><router-link to="/categories" class="public-footer-link">دسته‌بندی‌ها</router-link></li>
+              <li><router-link to="/about" class="public-footer-link">درباره ما</router-link></li>
+            </ul></div>
 
           <div>
             <h3 class="public-footer-heading">دسته‌بندی‌ها</h3>
@@ -405,14 +413,13 @@ function logout() {
             <ul class="public-footer-list">
               <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
               <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
-              <li><router-link :to="{ name: 'about' }" class="public-footer-link">درباره ما</router-link></li>
               <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و حریم خصوصی</router-link></li>
             </ul>
           </div>
         </div>
 
         <div class="public-footer-bottom">
-          <p>© {{ new Date().getFullYear() }} Telecom Marketplace. تمام حقوق محفوظ است.</p>
+          <p>© {{ new Date().getFullYear() }} Telecom Market. تمام حقوق محفوظ است.</p>
         </div>
       </div>
     </footer>
@@ -448,15 +455,15 @@ function logout() {
 
 .public-container {
   width: 100%;
-  max-width: 1240px;
-  margin: 0 auto;
-  padding-inline: clamp(14px, 2vw, 28px);
+  max-width: var(--ds-container-max-wide);
+  margin-inline: auto;
+  padding-inline: var(--ds-container-pad);
 }
 
 /* ---------- Utility strip ---------- */
 .public-utility-bar {
   background: var(--tm-navy);
-  color: rgba(255,255,255,.24);
+  color: #d5e2f0;
   font-size: 12px;
 }
 .public-utility-inner {
@@ -469,7 +476,7 @@ function logout() {
 .public-utility-message { display: inline-flex; align-items: center; gap: 8px; }
 .public-utility-message i { color: var(--tm-cyan); font-size: 12px; }
 .public-utility-links { display: flex; align-items: center; gap: 18px; }
-.public-utility-links a { color: rgba(255,255,255,.24); text-decoration: none; }
+.public-utility-links a { color: #d5e2f0; text-decoration: none; }
 .public-utility-links a:hover { color: var(--tm-cyan); }
 
 /* ---------- Header ---------- */
@@ -485,7 +492,7 @@ function logout() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 68px;
+  min-height: 62px;
   gap: 16px;
 }
 
@@ -502,11 +509,12 @@ function logout() {
 .public-logo-name strong { font-size: 17px; font-weight: 700; color: var(--tm-navy); }
 .public-logo-name small { font-size: 10px; letter-spacing: 0.16em; color: var(--tm-muted); text-transform: uppercase; }
 
-.public-nav-desktop { display: none; align-items: center; gap: 22px; }
+.public-nav-desktop { display: none; align-items: center; gap: clamp(10px, 1.1vw, 18px); flex-wrap: nowrap; white-space: nowrap; }
 .public-nav-link {
   font-size: 13px;
   font-weight: 600;
   color: var(--tm-ink-soft);
+  white-space: nowrap;
   text-decoration: none;
   padding: 6px 0;
   border-bottom: 2px solid transparent;
@@ -515,7 +523,8 @@ function logout() {
 .public-nav-link:hover { color: var(--tm-blue); }
 .public-nav-link-active { color: var(--tm-blue); border-bottom-color: var(--tm-cyan); }
 
-.public-header-actions { display: flex; align-items: center; gap: 10px; margin-inline-start: auto; }
+.public-header-actions { display: flex; align-items: center; gap: 7px; margin-inline-start: auto; flex: none; }
+.public-commerce-actions { display: inline-flex; align-items: center; gap: 4px; padding-inline-end: 6px; border-inline-end: 1px solid var(--tm-line); }
 .public-search-desktop { display: none; width: 290px; }
 .public-search-input,
 .public-search-input-full { width: 100%; }
@@ -526,8 +535,8 @@ function logout() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--tm-radius);
   color: var(--tm-ink-soft);
   text-decoration: none;
@@ -562,6 +571,7 @@ function logout() {
   font-family: inherit;
 }
 .public-user-trigger:hover { border-color: var(--tm-cyan-strong); }
+.public-user-trigger:focus-visible,.public-icon-link:focus-visible,.public-nav-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
 .public-user-avatar {
   display: grid;
   place-items: center;
@@ -617,8 +627,8 @@ function logout() {
 }
 .public-footer-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: minmax(260px, 1.6fr) repeat(3, minmax(180px, 1fr));
+  gap: clamp(1.25rem, 2vw, 2rem);
   padding-bottom: 32px;
 }
 .public-footer-heading {
@@ -628,7 +638,7 @@ function logout() {
   color: #fff;
 }
 .public-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.public-footer-link { color: rgba(255,255,255,.72); font-size: 12.5px; text-decoration: none; }
+.public-footer-link { color: #d5e2f0; font-size: 12.5px; text-decoration: none; }
 .public-footer-link:hover { color: var(--tm-cyan); }
 .public-footer-brand { display: flex; align-items: center; gap: 9px; color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 .public-footer-about-text { margin: 0 0 14px; font-size: 12.5px; line-height: 1.9; color: rgba(255,255,255,.72); }
@@ -658,16 +668,23 @@ function logout() {
   .public-search-mobile { display: none; }
 }
 
+@media (max-width: 1199px) {
+  .public-header-right { gap: 12px; }
+  .public-nav-desktop { gap: 10px; }
+  .public-logo-name strong { font-size: 15px; }
+  .public-search-desktop { width: 205px; }
+}
+
 @media (max-width: 991px) {
   .public-utility-message { font-size: 11px; }
   .public-user-name { display: none; }
-  .public-footer-grid { grid-template-columns: 1fr 1fr; }
+  .public-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .public-footer-about { grid-column: 1 / -1; }
 }
 
 @media (max-width: 575px) {
   .public-utility-links { display: none; }
-  .public-footer-grid { grid-template-columns: 1fr; }
+  .public-footer-grid { grid-template-columns: minmax(0, 1fr); }
   .public-main { padding-top: 16px; }
 }
 </style>
