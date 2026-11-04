@@ -276,15 +276,15 @@ const pagination = ref({
 
 const kpiItems = computed(() => [
   { label: 'کل شرکت‌ها', value: pagination.value.total, icon: 'pi pi-building', tone: 'primary' },
-  { label: 'فعال', value: companies.value.filter((item) => item.status === 'ACTIVE').length, icon: 'pi pi-check-circle', tone: 'success' },
+  { label: 'فعال (صفحه جاری)', value: companies.value.filter((item) => item.status === 'ACTIVE').length, icon: 'pi pi-check-circle', tone: 'success' },
   { label: 'در انتظار تأیید', value: companies.value.filter((item) => item.status === 'PENDING').length, icon: 'pi pi-clock', tone: 'warning' },
-  { label: 'تأیید مدارک', value: companies.value.filter((item) => item.isVerified).length, icon: 'pi pi-verified', tone: 'info' },
-  { label: 'تعلیق‌شده', value: companies.value.filter((item) => item.status === 'SUSPENDED').length, icon: 'pi pi-ban', tone: 'danger' },
+  { label: 'تأیید مدارک (صفحه جاری)', value: companies.value.filter((item) => item.isVerified).length, icon: 'pi pi-verified', tone: 'info' },
+  { label: 'تعلیق‌شده (صفحه جاری)', value: companies.value.filter((item) => item.status === 'SUSPENDED').length, icon: 'pi pi-ban', tone: 'danger' },
 ])
 
 const statusOptions = ref([
   { label: 'همه', value: null },
-  { label: 'در انتظار', value: 'PENDING' },
+  { label: 'در انتظار (صفحه جاری)', value: 'PENDING' },
   { label: 'فعال', value: 'ACTIVE' },
   { label: 'غیرفعال', value: 'INACTIVE' },
   { label: 'تعلیق شده', value: 'SUSPENDED' },
