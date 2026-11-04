@@ -8,6 +8,8 @@ export const useStatsStore = defineStore('stats', () => {
   const stats = ref({
     totalUsers: 0,
     activeUsers: 0,
+    pendingProducts: 0,
+    totalInquiries: 0,
     totalProducts: 0,
     totalOrders: 0,
     totalCompanies: 0,
@@ -30,6 +32,8 @@ export const useStatsStore = defineStore('stats', () => {
       stats.value = {
         totalUsers: data.counts?.users || 0,
         activeUsers: data.counts?.activeUsers || 0,
+        pendingProducts: data.counts?.pendingProducts || 0,
+        totalInquiries: data.counts?.orders || 0,
         totalProducts: data.counts?.products || 0,
         totalOrders: data.counts?.orders || 0,
         totalCompanies: data.counts?.companies || 0,
