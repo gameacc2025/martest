@@ -1,3 +1,7 @@
+<script setup>
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+</script>
+
 <template>
   <main class="terms-page ds-page" dir="rtl" aria-labelledby="terms-title">
     <div class="terms-container ds-container ds-stack">
@@ -7,10 +11,14 @@
         <span aria-current="page">قوانین و حریم خصوصی</span>
       </nav>
 
-      <header class="terms-hero">
-        <h1 id="terms-title" class="ds-h1">قوانین و حریم خصوصی</h1>
-        <p class="ds-lead">شرایط استفاده از وب‌سایت و توضیحات مربوط به حریم خصوصی را در این صفحه مطالعه کنید.</p>
-      </header>
+      <WorkspacePageHeading
+        class="terms-hero"
+        eyebrow="قوانین و شفافیت"
+        title="قوانین و حریم خصوصی"
+        description="شرایط استفاده از وب‌سایت و توضیحات مربوط به حریم خصوصی را در این صفحه مطالعه کنید."
+        icon="pi pi-shield"
+        heading-id="terms-title"
+      />
 
       <div class="terms-sections" aria-label="متن قوانین و حریم خصوصی">
         <section class="terms-section ds-card" aria-labelledby="terms-intro">

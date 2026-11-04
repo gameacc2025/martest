@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { productsApi } from '@telecom/api-client'
 import { formatPrice } from '../../utils/helpers'
 import Breadcrumb from 'primevue/breadcrumb'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import Button from 'primevue/button'
 
 const home = { icon: 'pi pi-home', to: '/' }
@@ -84,18 +85,18 @@ function getProductImage(product) {
     <div class="about-container ds-container ds-stack">
       <Breadcrumb :home="home" :model="breadcrumbItems" aria-label="مسیر صفحه" />
 
-      <section class="about-hero" aria-labelledby="about-title">
-        <div class="about-hero__copy">
-          <h1 id="about-title" class="ds-h1">تأمین تجهیزات مخابراتی؛ ساده‌تر و شفاف‌تر</h1>
-          <p class="ds-lead">
-            بستری برای پیدا کردن تجهیزات، آشنایی با تأمین‌کنندگان و مقایسه پیشنهادها در زنجیره تأمین مخابرات و شبکه.
-          </p>
-          <div class="about-hero__actions">
-            <router-link :to="{ name: 'products' }" class="ds-btn ds-btn--primary">مشاهده محصولات</router-link>
-            <router-link :to="{ name: 'contact' }" class="ds-btn ds-btn--outline">تماس با ما</router-link>
-          </div>
-        </div>
-      </section>
+      <WorkspacePageHeading
+        eyebrow="درباره بازارگاه مخابرات"
+        title="تأمین تجهیزات مخابراتی؛ ساده‌تر و شفاف‌تر"
+        description="بستری برای پیدا کردن تجهیزات، آشنایی با تأمین‌کنندگان و مقایسه پیشنهادها در زنجیره تأمین مخابرات و شبکه."
+        icon="pi pi-building"
+        heading-id="about-title"
+      >
+        <template #actions>
+          <router-link :to="{ name: 'products' }" class="tm-btn">مشاهده محصولات</router-link>
+          <router-link :to="{ name: 'contact' }" class="tm-btn tm-btn--ghost">تماس با ما</router-link>
+        </template>
+      </WorkspacePageHeading>
 
       <section class="about-section" aria-labelledby="about-mission-title">
         <header class="ds-section-head">

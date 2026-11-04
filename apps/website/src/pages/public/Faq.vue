@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 
 const faqs = ref([
   {
@@ -58,10 +59,14 @@ function toggleFaq(index) {
         <span aria-current="page">سوالات متداول</span>
       </nav>
 
-      <header class="faq-hero">
-        <h1 id="faq-title" class="ds-h1">سوالات متداول</h1>
-        <p class="ds-lead">پاسخ پرسش‌های رایج درباره محصولات، دسترسی استعلام و فرایند تأمین.</p>
-      </header>
+      <WorkspacePageHeading
+        class="faq-hero"
+        eyebrow="پشتیبانی و راهنما"
+        title="سوالات متداول"
+        description="پاسخ پرسش‌های رایج درباره محصولات، دسترسی استعلام و فرایند تأمین."
+        icon="pi pi-question-circle"
+        heading-id="faq-title"
+      />
 
       <section class="faq-list" aria-label="فهرست پرسش‌ها">
         <article v-for="(faq, index) in faqs" :key="faq.question" class="faq-item ds-card">

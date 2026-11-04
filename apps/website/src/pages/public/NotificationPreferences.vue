@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { apiGet, apiPatch } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 
 const preferences = ref([])
 const loading = ref(false)
@@ -49,13 +50,17 @@ async function savePreferences() {
 
 <template>
   <section class="ds-container ds-page preferences-page" dir="rtl">
-    <header class="page-heading">
-      <div class="preferences-heading-identity">
-        
-        <div><h1>تنظیمات اعلان‌ها</h1><p class="muted">انتخاب کنید هر رویداد از چه راهی به شما اطلاع داده شود.</p></div>
-      </div>
-      <router-link class="button button-secondary" to="/notifications">بازگشت به اعلان‌ها</router-link>
-    </header>
+    <WorkspacePageHeading
+      eyebrow="اعلان‌ها"
+      title="تنظیمات اعلان‌ها"
+      description="انتخاب کنید هر رویداد از چه راهی به شما اطلاع داده شود."
+      icon="pi pi-bell"
+      heading-id="notification-preferences-title"
+    >
+      <template #actions>
+        <router-link class="tm-btn tm-btn--ghost" to="/notifications">بازگشت به اعلان‌ها</router-link>
+      </template>
+    </WorkspacePageHeading>
     <p v-if="errorMessage" class="notice error" role="alert">{{ errorMessage }}</p>
     <p v-if="successMessage" class="notice success" role="status">{{ successMessage }}</p>
     <div v-if="loading" class="state" role="status" aria-live="polite" aria-busy="true">در حال بارگذاری تنظیمات…</div>

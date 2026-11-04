@@ -2382,6 +2382,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 **Verification (phase 2):** `npx vitest run` → 56 files / 310 tests pass; `pnpm run build:website|build:admin|build:company` pass. Browser/visual checks `NOT RUN` (owner-prohibited).
 
 **Remaining for phase 3:** static public content pages (`AboutUs`, `ContactUs`, `Faq`, `Terms`) on `WorkspacePageHeading`/`TemPanel`; account pages (`UserProfile`, `Addresses`, `Orders`, `OrderDetails`, `MyInquiries`, `NotificationPreferences`, `InquirySubscription`) on Tem widgets; auth pages (`Login`, `Register`, `ForgotPassword`) brand pass; Admin/Company detail workspaces (`ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList`, settings); verify the cascade on every list page rather than rewriting each.
+
+### 2026-11-04 — UI-REDESIGN-TEM-01: phase 3 (public content + account head consistency)
+
+- **Status:** IN_PROGRESS
+- **Agent:** OpenCode (local checkout)
+- `AboutUs.vue`, `Faq.vue`, `Terms.vue`, `NotificationPreferences.vue`: replaced bespoke hero/markup with the shared `WorkspacePageHeading` (eyebrow/title/description/icon + actions). Test contracts kept: `#about-title`, `.about-values`/`.about-steps`; `.faq-hero`/`#faq-title`/8 questions; `main[dir=rtl][aria-labelledby=terms-title]`, `header.terms-hero h1#terms-title`, `.terms-section` ×4; `.terms-breadcrumb`.
+- Pages that were already on `ds-*` tokens inherit the tem palette automatically because `--ds-color-*` resolve through the new PrimeVue `--p-*` blue ramp.
+- AD-4 surfaces (`Checkout`, `Orders`, `OrderDetails`, cart/wishlist) intentionally untouched.
+- Committed phase 2 as `c71d44c` (`feat(ui): cascade tem widgets through catalogue, lists and dashboard shell`).
+
+**Verification (phase 3):** `npx vitest run` → 56 files / 310 tests pass; all three production builds pass. Browser/visual checks `NOT RUN`.
 - Shared workspace heading adopted in Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us.
 - Breadcrumbs and actions preserved via named slot; no data/filter/cart/checkout/address/contact API behavior changed.
 - Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.

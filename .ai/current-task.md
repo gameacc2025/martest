@@ -363,12 +363,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Dashboard shell (`DashboardSidebar`, `DashboardHeader`) and `BrandMark` aligned to the navy/cyan/blue brand.
 - Verification: three production builds pass; 310/310 Vitest tests pass. Visual checks `NOT RUN`.
 
-**Remaining (phase 3):**
-1. Static public content pages (`AboutUs`, `ContactUs`, `Faq`, `Terms`) on `WorkspacePageHeading`/`TemPanel`.
-2. Account pages (`UserProfile`, `Addresses`, `Orders`, `OrderDetails`, `MyInquiries`, `NotificationPreferences`, `InquirySubscription`) on Tem widgets.
+**Remaining (phase 3+):**
+1. Static public content pages — done in phase 3 (`AboutUs`, `Faq`, `Terms`, `NotificationPreferences` use `WorkspacePageHeading`).
+2. Account pages (`UserProfile`, `Addresses`, `MyInquiries`, `InquirySubscription`) — already on `WorkspacePageHeading`; audit for any remaining bespoke widgets.
 3. Auth pages (`Login`, `Register`, `ForgotPassword`) brand pass.
 4. Admin/Company detail workspaces (`ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList`, settings) — audit the shared-component cascade first; only rewrite where it is insufficient. Preserve server pagination/permissions.
 5. `Products.vue` is exported from `pages/public/index.js` but not routed — decide whether to keep/delete.
-6. Commit phase 2/3 on `main` and record SHAs in WORKLOG.
+6. Commit phase 3 on `main` and record the SHA in WORKLOG.
+
+**Phase 2 commit:** `c71d44c`.
 
 **Open decision:** whether to keep the legacy website `components/products/ProductCard.vue` alongside the new Tem product card, or migrate all product surfaces to one shared card.
