@@ -201,6 +201,7 @@ import { useToast } from 'primevue/usetoast'
 import { inquiriesApi, productsApi } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
 import { NoDataState } from '@telecom/shared-ui/components/common/feedback'
+import { PRODUCT_STATUSES, buildProductSegments, buildProductLegendItems, sumProductStatusCounts } from './dashboardPresentation.js'
 
 import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickActions.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
@@ -259,24 +260,9 @@ const pipelineStages = computed(() => {
 })
 
 // Product lifecycle counts come from server-side status filters, not the first 20 rows.
-const PRODUCT_STATUSES = ['PUBLISHED', 'APPROVED', 'PENDING_REVIEW', 'DRAFT', 'REJECTED', 'HIDDEN', 'ARCHIVED']
-const productSegments = computed(() => {
-  const counts = productStatusCounts.value
-  if (!counts || PRODUCT_STATUSES.some((status) => counts[status] === null)) return []
-  return [
-    { label: 'منتشرشده', value: counts.PUBLISHED, color: 'var(--ds-status-success-fg)' },
-    { label: 'تأییدشده، آماده انتشار', value: counts.APPROVED, color: 'var(--ds-status-info-fg)' },
-    { label: 'در انتظار بررسی', value: counts.PENDING_REVIEW, color: 'var(--ds-status-warning-fg)' },
-    { label: 'پیش‌نویس', value: counts.DRAFT, color: 'var(--ds-status-muted-fg)' },
-    { label: 'ردشده', value: counts.REJECTED, color: 'var(--ds-status-danger-fg)' },
-    { label: 'پنهان / بایگانی', value: counts.HIDDEN + counts.ARCHIVED, color: 'var(--ds-color-neutral)' },
-  ]
-})
-const productTotal = computed(() => productSegments.value.reduce((sum, item) => sum + item.value, 0))
-const productLegendItems = computed(() => productSegments.value
-  .filter((item) => item.value > 0)
-  .map((item) => ({ ...item, percent: productTotal.value ? Math.round((item.value / productTotal.value) * 100) : 0 }))
-)
+const productSegments = computed(() => buildProductSegments(productStatusCounts.value))
+const productTotal = computed(() => sumProductStatusCounts(productSegments.value))
+const productLegendItems = computed(() => buildProductLegendItems(productSegments.value))
 const dominantProductSegment = computed(() => productLegendItems.value.find((item) => item.percent > 90) || null)
 
 // ── Company score / rank (only if the API provides it) ──────
