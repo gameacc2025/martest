@@ -187,6 +187,12 @@ export const dashboardMenu = [
     ],
   },
   {
+    section: 'مالی شرکت',
+    items: [
+      { title: 'وضعیت تسویه‌ها', icon: 'pi pi-wallet', route: 'company-finance-settlements', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+    ],
+  },
+  {
     section: 'حساب کاربری',
     items: [
       { title: 'پروفایل من', icon: 'pi pi-user', route: 'profile' },
