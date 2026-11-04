@@ -32,8 +32,7 @@ const features = [
   { icon: 'pi pi-file-edit', title: 'استعلام برای پروژه‌ها', text: 'درخواست قیمت را برای نیازهای سازمانی ثبت کنید و پاسخ تأمین‌کنندگان را پیگیری کنید.' },
   { icon: 'pi pi-list-check', title: 'بررسی مشخصات فنی', text: 'اطلاعات فنی ثبت‌شده محصولات را پیش از انتخاب بررسی کنید.' },
   { icon: 'pi pi-building', title: 'شناخت تأمین‌کننده', text: 'مشخصات شرکت و وضعیت احراز آن را در صورت ثبت و تأیید مشاهده کنید.' },
-  { icon: 'pi pi-sliders-h', title: 'جستجو و فیلتر', text: 'محصولات را بر اساس دسته‌بندی و اطلاعات قابل‌دسترس محدود کنید.' },
-  { icon: 'pi pi-shopping-cart', title: 'خرید یا استعلام', text: 'نوع ارائه هر محصول را پیش از ورود به جزئیات آن تشخیص دهید.' },
+  { icon: 'pi pi-shopping-cart', title: 'خرید یا استعلام', text: 'نوع ارائه، قیمت و شرایط هر محصول را پیش از مشاهده جزئیات بررسی کنید.' },
 ]
 const visibleCategories = computed(() => categories.value.slice(0, 8))
 
@@ -49,9 +48,9 @@ async function fetchProducts() {
 
     // Featured is a server-side product flag, not a slice of recent results.
     try {
-      const featuredResponse = await productsApi.list({ ...params, limit: 8, featured: true })
+      const featuredResponse = await productsApi.list({ ...params, limit: 12, featured: true })
       const featuredItems = featuredResponse?.data?.data ?? []
-      featuredProducts.value = Array.isArray(featuredItems) ? featuredItems : []
+      featuredProducts.value = Array.isArray(featuredItems) ? featuredItems.slice(0, 12) : []
     } catch (featuredError) {
       featuredProducts.value = []
     }
@@ -427,7 +426,7 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: var(--tm-cyan-soft);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
 }
 .home-hero__badge i { color: var(--tm-cyan); }
@@ -437,7 +436,7 @@ onMounted(() => {
 
 .home-category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -448,7 +447,7 @@ onMounted(() => {
   padding: 14px;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius);
-  background: #fff;
+  background: var(--tm-surface);
   cursor: pointer;
   text-align: start;
   font-family: inherit;
@@ -472,7 +471,7 @@ onMounted(() => {
 
 .home-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 16px;
 }
 
@@ -509,8 +508,8 @@ onMounted(() => {
   display: block;
   overflow-wrap: anywhere;
 }
-.product-card__company { font-size: 11.5px; color: var(--tm-muted); }
-.product-sku { font-size: 10.5px; color: var(--tm-faint); }
+.product-card__company { font-size: 13px; color: var(--tm-muted); }
+.product-sku { font-size: 13px; color: var(--tm-faint); }
 .product-card__foot { margin-top: auto; padding-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .product-card__price { font-size: 13px; font-weight: 700; color: var(--tm-blue); }
 .product-card-cta { font-size: 13px; font-weight: 700; color: var(--tm-cyan-deep); }
@@ -529,7 +528,7 @@ onMounted(() => {
 .tm-table tbody tr[role='link']:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
 .home-recent__name:hover { color: var(--tm-blue); }
 
-.home-feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 14px; }
+.home-feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .home-feature {
   padding: 18px;
   background: #fff;
@@ -558,7 +557,7 @@ onMounted(() => {
   padding: 26px 28px;
   border-radius: var(--tm-radius-lg);
   background:
-    radial-gradient(circle at 90% 20%, rgba(46, 211, 238, 0.25), transparent 45%),
+    radial-gradient(circle at 90% 20%, color-mix(in srgb, var(--ds-accent) 24%, transparent), transparent 45%),
     linear-gradient(118deg, var(--tm-navy), var(--tm-navy-soft));
   color: #fff;
 }
@@ -607,6 +606,7 @@ onMounted(() => {
 
 @media (max-width: 900px) {
   .home-hero { grid-template-columns: 1fr; }
+  .home-category-grid,.home-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-hero__visual { grid-template-columns: minmax(0, 1fr); }
   .home-hero__product { min-height: 180px; }
   .home-hero__benefits { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
