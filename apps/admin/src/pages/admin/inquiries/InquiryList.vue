@@ -29,6 +29,10 @@ const sortOrder = ref(-1)
 
 const kpiItems = computed(() => [
   { label: 'کل استعلام‌ها', value: pagination.value.total, icon: 'pi pi-inbox', tone: 'primary' },
+  { label: 'باز', value: inquiries.value.filter((item) => item.status === 'OPEN').length, icon: 'pi pi-folder-open', tone: 'info' },
+  { label: 'ارسال‌شده', value: inquiries.value.filter((item) => item.status === 'SUBMITTED').length, icon: 'pi pi-send', tone: 'warning' },
+  { label: 'تکمیل‌شده', value: inquiries.value.filter((item) => item.status === 'COMPLETED').length, icon: 'pi pi-check-circle', tone: 'success' },
+  { label: 'منقضی / لغو', value: inquiries.value.filter((item) => ['EXPIRED', 'CANCELLED'].includes(item.status)).length, icon: 'pi pi-times-circle', tone: 'danger' },
 ])
 
 const tableColumns = [
