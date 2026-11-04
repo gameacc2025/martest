@@ -167,7 +167,7 @@ test('POST /: COMPANY with products.create -> 200', async () => {
   await app.close();
 });
 
-test('POST /: accepts explicit retailEnabled opt-in while default remains omitted', async () => {
+test('POST /: accepts explicit retailEnabled opt-in', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'POST',
