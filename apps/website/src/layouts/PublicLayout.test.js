@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { reactive, nextTick } from 'vue'
+import { createPinia, setActivePinia } from 'pinia'
 
 const mocks = vi.hoisted(() => ({
   route: { current: null },
@@ -34,7 +35,8 @@ describe('PublicLayout responsive navigation', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.route.current = reactive({ fullPath: '/', query: {} })
+    setActivePinia(createPinia())
+    mocks.route.current = reactive({ name: 'home', path: '/', fullPath: '/', query: {} })
     mocks.auth = {
       user: null,
       profile: null,

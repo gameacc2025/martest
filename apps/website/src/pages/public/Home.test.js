@@ -14,7 +14,7 @@ const source = readFileSync(homePath, 'utf8')
 describe('Website homepage contracts (tem redesign)', () => {
   it('keeps the production API and category store as the source of page data', () => {
     expect(source).toContain('productsApi.list(params)')
-    expect(source).toContain('productsApi.list({ ...params, limit: 8, featured: true })')
+    expect(source).toContain('productsApi.list({ ...params, limit: 12, featured: true })')
     expect(source).toContain('productsStore.getCategories()')
     expect(source).not.toContain('USE_MOCK')
     expect(source).not.toContain('mockData')

@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mocks.push }),
+  useRoute: () => ({ query: {} }),
 }))
 
 vi.mock('primevue/usetoast', () => ({
