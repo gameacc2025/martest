@@ -409,3 +409,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Completed list KPI coverage for Admin categories, roles and permissions, Company users and Company inquiry pages; the notification-delivery page already exposes live aggregate delivery stats. PermissionList.vue now has its missing kpiItems computed definition.
 
 - Added Company-side settlement preview (/finance/settlements), its menu item and dashboard shortcut. All amounts are demo data pending a secure settlement ledger/API.
+
+- Retail commerce follow-up: customer Website /orders and Company /retail/orders previews are registered; Admin legacy /orders redirects to /retail/orders. Legacy order endpoints/stores are deprecated because backend has no Order model or /orders routes. Domain/API/ledger design is documented in docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md; no real order/payment API or migration has been created.
