@@ -515,3 +515,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - In response to visual feedback, restore distinct white elevated product cards (soft persistent shadow, stronger hover elevation, fine border) rather than flat blending into the canvas.
 - Rebuild public catalogue composition around `tem/shop.html`: filters on the RTL right, product grid on the left, dense responsive grid, wide container, and larger page sizes (24/48/96). Keep live filters/API contract; do not fabricate unsupported facets.
 - Prevent product title/category truncation; allow natural wrapping. Verify dark mode still uses the same semantic surface tokens.
+
+
+## Current focus — UI-REDESIGN-CARD-AND-STOREFRONT-02 (2026-11-04)
+- Priority: finish the Website homepage as a product-led storefront with a live featured-product slider and multiple dense product shelves; make white surfaces/cards visibly elevated according to `tem/analytics.html` and the shared TEM card system.
+- Latest source slice: homepage featured slider + latest 12 product-card grid; shared TEM shadows strengthened for light and dark modes; test contracts updated.
+- Do not fabricate best-seller rankings, ratings, revenue, stock or brand data. Add those shelves only after authoritative API data exists.
+- Remaining: audit all Admin/Company/Website routes for layout/card overrides and fix only grounded defects; preserve APIs, auth, RBAC, workflows and existing design palette. Run Vitest + all three production builds if local workspace is available; inspect GitHub Actions after each push. Visual browser checks remain unavailable/not performed.

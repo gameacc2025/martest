@@ -6,7 +6,7 @@
  * (recent + featured flag) and the category store used by /categories.
  * There is no mock data and no fabricated marketplace statistic.
  */
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { productsApi } from '@telecom/api-client'
@@ -27,6 +27,26 @@ const categoriesError = ref(false)
 const error = ref(null)
 
 const searchQuery = ref('')
+const activeSlide = ref(0)
+let slideTimer = null
+const featuredSlides = computed(() => featuredProducts.value.slice(0, 5))
+const activeFeaturedProduct = computed(() => featuredSlides.value[activeSlide.value] || featuredSlides.value[0] || null)
+
+function goToSlide(index) {
+  const total = featuredSlides.value.length
+  if (!total) return
+  activeSlide.value = (index + total) % total
+}
+function nextSlide() { goToSlide(activeSlide.value + 1) }
+function previousSlide() { goToSlide(activeSlide.value - 1) }
+function startSlider() {
+  if (slideTimer) clearInterval(slideTimer)
+  if (featuredSlides.value.length > 1) slideTimer = setInterval(nextSlide, 6500)
+}
+function stopSlider() {
+  if (slideTimer) clearInterval(slideTimer)
+  slideTimer = null
+}
 
 const features = [
   { icon: 'pi pi-file-edit', title: 'استعلام برای پروژه‌ها', text: 'درخواست قیمت را برای نیازهای سازمانی ثبت کنید و پاسخ تأمین‌کنندگان را پیگیری کنید.' },
@@ -40,17 +60,19 @@ async function fetchProducts() {
   try {
     loading.value = true
     error.value = null
-    const params = { page: 1, limit: 12, status: 'PUBLISHED' }
+    const params = { page: 1, limit: 24, status: 'PUBLISHED' }
 
     const response = await productsApi.list(params)
     const items = response?.data?.data ?? []
-    recentProducts.value = (Array.isArray(items) ? items : []).slice(0, 4)
+    recentProducts.value = (Array.isArray(items) ? items : []).slice(0, 12)
 
     // Featured is a server-side product flag, not a slice of recent results.
     try {
       const featuredResponse = await productsApi.list({ ...params, limit: 12, featured: true })
       const featuredItems = featuredResponse?.data?.data ?? []
       featuredProducts.value = Array.isArray(featuredItems) ? featuredItems.slice(0, 12) : []
+      activeSlide.value = 0
+      startSlider()
     } catch (featuredError) {
       featuredProducts.value = []
     }
@@ -134,6 +156,7 @@ onMounted(() => {
   fetchProducts()
   fetchCategories()
 })
+onUnmounted(stopSlider)
 </script>
 
 <template>
@@ -160,11 +183,31 @@ onMounted(() => {
               <router-link v-if="showMyInquiriesLink" :to="{ name: 'my-inquiries' }">استعلام‌های من</router-link>
             </div>
           </div>
-          <div class="home-hero__visual" aria-label="نمونه محصول از کاتالوگ بازارگاه">
-            <div class="home-hero__product">
-              <img v-if="featuredProducts.length && getProductImage(featuredProducts[0])" :src="getProductImage(featuredProducts[0]).url" :alt="featuredProducts[0].name || 'تصویر محصول مخابراتی'" width="420" height="320" fetchpriority="high" decoding="async" />
-              <i v-else class="pi pi-box" aria-hidden="true"></i>
-              <span v-if="featuredProducts.length" class="home-hero__product-caption">{{ featuredProducts[0].name || featuredProducts[0].title }}</span>
+          <div class="home-hero__visual" aria-label="اسلایدر محصولات منتخب فروشگاه">
+            <div v-if="activeFeaturedProduct" class="home-featured-slider" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="startSlider">
+              <div class="home-featured-slider__media">
+                <img v-if="getProductImage(activeFeaturedProduct)" :src="getProductImage(activeFeaturedProduct).url" :alt="activeFeaturedProduct.name || activeFeaturedProduct.title || 'محصول منتخب'" width="560" height="390" fetchpriority="high" decoding="async" />
+                <i v-else class="pi pi-box" aria-hidden="true"></i>
+                <span class="home-featured-slider__flag"><i class="pi pi-star-fill" aria-hidden="true"></i> منتخب فروشگاه</span>
+              </div>
+              <div class="home-featured-slider__content">
+                <span class="home-featured-slider__eyebrow">{{ productCategoryName(activeFeaturedProduct) || 'تجهیزات تخصصی مخابراتی' }}</span>
+                <h2>{{ activeFeaturedProduct.name || activeFeaturedProduct.title }}</h2>
+                <p v-if="activeFeaturedProduct.company?.name">{{ activeFeaturedProduct.company.name }}</p>
+                <strong>{{ productPriceLabel(activeFeaturedProduct) }}</strong>
+                <router-link :to="productRoute(activeFeaturedProduct)" class="tm-btn tm-btn--accent">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
+              </div>
+              <div v-if="featuredSlides.length > 1" class="home-featured-slider__controls" aria-label="کنترل اسلایدر">
+                <button type="button" aria-label="اسلاید قبلی" @click="previousSlide"><i class="pi pi-chevron-right" aria-hidden="true"></i></button>
+                <div class="home-featured-slider__dots">
+                  <button v-for="(slide, index) in featuredSlides" :key="slide.id" type="button" :class="{ 'is-active': index === activeSlide }" :aria-label="'نمایش اسلاید ' + (index + 1)" :aria-pressed="index === activeSlide" @click="goToSlide(index)"></button>
+                </div>
+                <button type="button" aria-label="اسلاید بعدی" @click="nextSlide"><i class="pi pi-chevron-left" aria-hidden="true"></i></button>
+              </div>
+            </div>
+            <div v-else class="home-hero__product">
+              <i class="pi pi-box" aria-hidden="true"></i>
+              <span class="home-hero__product-caption">محصولات تخصصی شبکه و مخابرات</span>
             </div>
             <ul class="home-hero__benefits">
               <li><i class="pi pi-check-circle" aria-hidden="true"></i><span>کاتالوگ تخصصی تجهیزات شبکه</span></li>
@@ -277,25 +320,28 @@ onMounted(() => {
           <i class="pi pi-box" aria-hidden="true"></i><p>هنوز محصول تازه‌ای برای نمایش منتشر نشده است.</p>
           <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده همه محصولات</router-link>
         </div>
-        <div v-else class="tm-table-wrap">
-          <div class="tm-table-scroll">
-            <table class="tm-table">
-              <caption class="sr-only">تازه‌ترین محصولات منتشرشده در بازارگاه</caption>
-              <thead><tr><th scope="col">محصول</th><th scope="col">تأمین‌کننده</th><th scope="col">نوع ارائه</th><th scope="col" class="tm-table__num">قیمت</th><th scope="col">اقدام</th></tr></thead>
-              <tbody>
-                <tr v-for="product in recentProducts" :key="product.id" role="link" tabindex="0" :aria-label="'مشاهده محصول ' + (product.name || product.title)" @click="router.push(productRoute(product))" @keydown.enter.prevent="router.push(productRoute(product))">
-                  <td data-label="محصول"><router-link :to="productRoute(product)" class="home-recent__product" @click.stop>
-                    <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title" width="52" height="52" loading="lazy" decoding="async" />
-                    <span class="home-recent__product-copy"><b>{{ product.name || product.title }}</b><small v-if="product.sku">کد: <span dir="ltr">{{ product.sku }}</span></small><small v-if="productCategoryName(product)">{{ productCategoryName(product) }}</small></span>
-                  </router-link></td>
-                  <td data-label="تأمین‌کننده">{{ product.company?.name || '—' }}</td>
-                  <td data-label="نوع ارائه"><span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span></td>
-                  <td data-label="قیمت" class="tm-table__num">{{ productPriceLabel(product) }}</td>
-                  <td data-label="اقدام"><router-link :to="productRoute(product)" class="home-recent__action" @click.stop>مشاهده <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div v-else class="home-product-grid home-product-grid--recent">
+          <article v-for="product in recentProducts" :key="product.id" class="product-card">
+            <router-link :to="productRoute(product)" class="product-card__main">
+              <span class="product-card__media">
+                <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" decoding="async" />
+                <i v-else class="pi pi-box" aria-hidden="true"></i>
+              </span>
+              <span class="product-card__body">
+                <span v-if="product.company?.isVerified" class="tm-pill tm-pill--success"><i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده احرازشده</span>
+                <span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span>
+                <span class="product-card__name">{{ product.name || product.title }}</span>
+                <span v-if="product.sku" class="product-sku">کد محصول: <b dir="ltr">{{ product.sku }}</b></span>
+                <span v-if="productCategoryName(product)" class="product-card__category">{{ productCategoryName(product) }}</span>
+                <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
+                <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
+              </span>
+            </router-link>
+            <div class="product-card__foot">
+              <span class="product-card__price">{{ productPriceLabel(product) }}</span>
+              <router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -341,7 +387,7 @@ onMounted(() => {
 .home-hero { border-radius: var(--tm-radius-lg); background: transparent; }
 .home-hero__actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
 .home-hero__actions .tm-btn { min-height: 44px; }
-.home-hero__visual { display: grid; grid-template-columns: minmax(0,1fr) minmax(150px,.72fr); gap: 1rem; align-items: center; }
+.home-hero__visual { display: grid; grid-template-columns: minmax(0,1fr); gap: 1rem; align-items: center; }
 .home-hero__product { min-width: 0; min-height: 250px; display: grid; place-items: center; gap: .5rem; padding: 1rem; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; background: rgba(255,255,255,.1); color: #fff; }
 .home-hero__product img { width: 100%; max-height: 230px; object-fit: contain; }
 .home-hero__product > i { font-size: 5rem; color: rgba(255,255,255,.82); }
@@ -358,6 +404,25 @@ onMounted(() => {
   flex-direction: column;
   gap: 34px;
 }
+
+
+.home-featured-slider { position: relative; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); min-height: 300px; overflow: hidden; border: 1px solid rgba(255,255,255,.24); border-radius: 18px; background: linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.07)); box-shadow: 0 14px 34px rgba(3,18,45,.22); }
+.home-featured-slider__media { position: relative; display: grid; place-items: center; min-width: 0; padding: 1.25rem; background: rgba(255,255,255,.08); }
+.home-featured-slider__media img { width: 100%; height: 230px; object-fit: contain; filter: drop-shadow(0 12px 14px rgba(0,0,0,.16)); }
+.home-featured-slider__media > i { font-size: 5rem; color: rgba(255,255,255,.8); }
+.home-featured-slider__flag { position: absolute; top: 12px; inset-inline-start: 12px; display: inline-flex; gap: 6px; align-items: center; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.94); color: var(--tm-navy); font-size: 12px; font-weight: 700; }
+.home-featured-slider__content { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .7rem; min-width: 0; padding: 1.5rem; color: #fff; }
+.home-featured-slider__eyebrow { color: #9af2ee; font-size: 12px; font-weight: 700; }
+.home-featured-slider__content h2 { margin: 0; color: #fff; font-size: clamp(17px, 1.6vw, 23px); line-height: 1.7; overflow-wrap: anywhere; }
+.home-featured-slider__content p { margin: 0; color: rgba(255,255,255,.72); font-size: 13px; }
+.home-featured-slider__content strong { color: #fff; font-size: 15px; }
+.home-featured-slider__controls { position: absolute; inset-inline: 14px; bottom: 12px; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
+.home-featured-slider__controls > button,.home-featured-slider__dots button { pointer-events: auto; }
+.home-featured-slider__controls > button { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; background: rgba(5,25,55,.42); color: #fff; cursor: pointer; }
+.home-featured-slider__dots { display: flex; align-items: center; gap: 6px; }
+.home-featured-slider__dots button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 99px; background: rgba(255,255,255,.45); cursor: pointer; transition: width .18s ease, background .18s ease; }
+.home-featured-slider__dots button.is-active { width: 22px; background: #fff; }
+.home-product-grid--recent { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
 
 /* Hero */
 .home-hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr); gap: 32px; align-items: center; }
@@ -600,6 +665,10 @@ onMounted(() => {
 }
 
 @media (max-width: 900px) {
+  .home-featured-slider { grid-template-columns: minmax(0,1fr); }
+  .home-featured-slider__media { min-height: 190px; }
+  .home-featured-slider__media img { height: 180px; }
+  .home-featured-slider__content { padding-bottom: 3.2rem; }
   .home-hero { grid-template-columns: 1fr; }
   .home-category-grid,.home-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-hero__visual { grid-template-columns: minmax(0, 1fr); }
@@ -617,6 +686,10 @@ onMounted(() => {
   .tm-table td:first-child::before { display: none; }
 }
 @media (max-width: 575px) {
+  .home-featured-slider { min-height: 0; }
+  .home-featured-slider__content { padding: 1rem 1rem 3.2rem; }
+  .home-featured-slider__media { min-height: 150px; }
+  .home-featured-slider__media img { height: 145px; }
   .home-hero__search { flex-wrap: wrap; }
   .home-hero__search .tm-btn { width: 100%; }
   .home-container { gap: 26px; }

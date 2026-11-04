@@ -3415,3 +3415,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Updated public catalogue layout to mirror the reference: right-side filters, left-side product grid, wider responsive container, 24-item initial page and 24/48/96 pagination. Increased card elevation and hover depth; long names/categories wrap rather than being ellipsized.
 - Homepage product cards now retain a visible shadow and stronger hover elevation. Theme surfaces remain token-driven for light/dark mode.
 - No fake filters, prices, stock counts, or sort behavior added where the current API does not provide the required data.
+
+
+### Storefront + shared card elevation correction — 2026-11-04
+- Reworked the Website homepage hero visual into a live-data featured-product slider (up to five server-flagged featured products), with previous/next controls, position dots, keyboard-accessible buttons, 6.5s rotation, pause on hover/focus and timer cleanup on unmount.
+- Increased the homepage published-product fetch to 24 and render the latest 12 as a dense responsive product-card grid instead of a short plain table; product details, supplier, SKU, category, availability, price mode and route actions remain sourced from the live product API.
+- Strengthened shared TEM surface/card elevation across stat tiles, KPI cards, panels, tables and surface primitives; added a distinct dark-theme shadow recipe. No fake bestseller/revenue claims or mock products were introduced because the current public product API does not expose sales ranking.
+- Added homepage source-contract assertions for slider behavior, lifecycle cleanup and the expanded catalogue shelf.
+- Verification: remote source edits + static re-fetch only in this pass; Vitest/build/visual browser checks remain NOT RUN. Continue full Website/Admin/Company layout audit and resolve remaining page-specific card overrides before calling the redesign complete.
