@@ -16,19 +16,19 @@
   --tm-navy: var(--ds-navy);
   --tm-navy-deep: var(--ds-color-brand-deep);
   --tm-navy-soft: var(--ds-color-brand-dark);
-  --tm-blue: var(--ds-brand);
-  --tm-blue-strong: var(--ds-color-primary-text);
+  --tm-blue: var(--ds-color-link);
+  --tm-blue-strong: var(--ds-color-link-hover);
   --tm-blue-soft: var(--ds-color-primary-soft);
   --tm-cyan: var(--ds-accent);
   --tm-cyan-strong: var(--ds-color-primary);
   --tm-cyan-deep: var(--ds-color-primary-text);
   --tm-cyan-soft: var(--ds-color-primary-soft);
-  --tm-green: var(--ds-color-success);
-  --tm-green-soft: var(--ds-color-success-soft);
-  --tm-amber: var(--ds-color-warning);
-  --tm-amber-soft: var(--ds-color-warning-soft);
-  --tm-red: var(--ds-color-danger);
-  --tm-red-soft: var(--ds-color-danger-soft);
+  --tm-green: var(--ds-status-success-fg);
+  --tm-green-soft: var(--ds-status-success-bg);
+  --tm-amber: var(--ds-status-warning-fg);
+  --tm-amber-soft: var(--ds-status-warning-bg);
+  --tm-red: var(--ds-status-danger-fg);
+  --tm-red-soft: var(--ds-status-danger-bg);
   --tm-violet: var(--ds-violet);
   --tm-violet-soft: var(--ds-color-info-soft);
   --tm-pink: var(--ds-violet);
@@ -42,7 +42,7 @@
   --tm-ink: var(--ds-color-text);
   --tm-ink-soft: color-mix(in srgb, var(--ds-color-text) 82%, var(--ds-color-text-muted));
   --tm-muted: var(--ds-color-text-muted);
-  --tm-faint: color-mix(in srgb, var(--ds-color-text-muted) 72%, var(--ds-color-surface));
+  --tm-faint: var(--ds-status-muted-fg);
   --tm-radius-sm: var(--ds-radius-sm);
   --tm-radius: var(--ds-radius-md);
   --tm-radius-lg: var(--ds-radius-lg);
@@ -217,7 +217,7 @@ a { color: var(--tm-blue); }
 .tm-btn:hover { background: var(--tm-blue-strong); }
 
 .tm-btn--ghost {
-  background: #fff;
+  background: var(--tm-surface);
   border-color: var(--tm-line-strong);
   color: var(--tm-ink-soft);
 }
@@ -546,7 +546,7 @@ a.tm-kpi:hover {
 }
 .tm-segmented button:hover { color: var(--tm-ink); }
 .tm-segmented button[aria-pressed='true'] {
-  background: #fff;
+  background: var(--tm-surface);
   color: var(--tm-blue);
   box-shadow: var(--tm-shadow-xs);
 }
@@ -699,7 +699,7 @@ a.tm-kpi:hover {
   z-index: 30;
   min-height: 64px;
   padding-inline: clamp(14px, 1.6vw, 24px);
-  background: #fff !important;
+  background: var(--tm-surface) !important;
   border-bottom: 1px solid var(--tm-line);
   box-shadow: none !important;
   backdrop-filter: none;
@@ -713,7 +713,7 @@ a.tm-kpi:hover {
 .dash-header-workspace-mark { background: var(--tm-cyan-soft) !important; color: var(--tm-cyan-deep) !important; }
 .dash-header-workspace-label { color: var(--tm-ink-soft); font-size: var(--tm-fs-tiny); }
 .dash-header-icon-btn:hover { background: var(--tm-cyan-soft) !important; color: var(--tm-cyan-deep) !important; }
-.dash-header-user { border-color: var(--tm-line); background: #fff; border-radius: var(--tm-radius); }
+.dash-header-user { border-color: var(--tm-line); background: var(--tm-surface); border-radius: var(--tm-radius); }
 .dash-layout-overlay { backdrop-filter: blur(2px); }
 
 /* Workspace page heading — exact `tem/admin.css` `.ph` / `telecom` page head:
@@ -888,7 +888,7 @@ body .company-management-toolbar {
   min-height: 40px;
   border: 1px solid var(--tm-line-strong);
   border-radius: var(--tm-radius);
-  background: #fff;
+  background: var(--tm-surface);
   color: var(--tm-ink);
   font-family: inherit;
   font-size: var(--tm-fs-sm);
@@ -921,7 +921,7 @@ body .company-management-toolbar {
   background: var(--tm-blue-strong);
   border-color: var(--tm-blue-strong);
 }
-.p-button.p-button-outlined { color: var(--tm-blue); border-color: var(--tm-line-strong); background: #fff; }
+.p-button.p-button-outlined { color: var(--tm-blue); border-color: var(--tm-line-strong); background: var(--tm-surface); }
 .p-button.p-button-outlined:enabled:hover { background: var(--tm-blue-soft); border-color: var(--tm-blue); color: var(--tm-blue-strong); }
 .p-button.p-button-text { color: var(--tm-blue); }
 .p-button.p-button-secondary { background: var(--tm-cyan); border-color: var(--tm-cyan); color: #05213f; }
@@ -932,11 +932,11 @@ body .company-management-toolbar {
   overflow: hidden;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-lg);
-  background: #fff;
+  background: var(--tm-surface);
 }
 /* SharedDataTable already draws the surface card; avoid a double frame. */
 .ent-table .p-datatable { border: 0; border-radius: 0; }
-.p-datatable .p-datatable-header { padding: 12px 16px; border-bottom: 1px solid var(--tm-line); background: #fff; }
+.p-datatable .p-datatable-header { padding: 12px 16px; border-bottom: 1px solid var(--tm-line); background: var(--tm-surface); }
 .p-datatable .p-datatable-thead > tr > th {
   padding: 12px 16px;
   border-color: var(--tm-line);
@@ -956,7 +956,7 @@ body .company-management-toolbar {
   vertical-align: middle;
 }
 .p-datatable .p-datatable-tbody > tr:hover { background: var(--tm-surface-alt); }
-.p-paginator { padding: 10px 14px; border-color: var(--tm-line); background: #fff; }
+.p-paginator { padding: 10px 14px; border-color: var(--tm-line); background: var(--tm-surface); }
 .p-paginator .p-paginator-page,
 .p-paginator .p-paginator-first,
 .p-paginator .p-paginator-prev,
@@ -1047,7 +1047,7 @@ body .company-management-toolbar {
 .site-shell { background: var(--tm-canvas); }
 
 .site-header {
-  background: #fff;
+  background: var(--tm-surface);
   border-bottom: 1px solid var(--tm-line);
 }
 
@@ -1070,7 +1070,7 @@ body .company-management-toolbar {
 }
 
 .site-card {
-  background: #fff;
+  background: var(--tm-surface);
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-lg);
   box-shadow: var(--tm-shadow-xs);

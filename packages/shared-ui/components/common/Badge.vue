@@ -62,21 +62,21 @@ const severity = computed(() => severityMap[props.variant] || 'info')
 
 /* Soft (tinted) variants — token-driven backgrounds/foregrounds. */
 .ds-badge--soft.ds-badge--success {
-  background: var(--ds-color-success-soft);
-  color: var(--ds-color-success);
+  background: var(--ds-status-success-bg);
+  color: var(--ds-status-success-fg);
 }
 .ds-badge--soft.ds-badge--warning {
-  background: var(--ds-color-warning-soft);
-  color: var(--ds-color-warning);
+  background: var(--ds-status-warning-bg);
+  color: var(--ds-status-warning-fg);
 }
 .ds-badge--soft.ds-badge--danger {
-  background: var(--ds-color-danger-soft);
-  color: var(--ds-color-danger);
+  background: var(--ds-status-danger-bg);
+  color: var(--ds-status-danger-fg);
 }
 .ds-badge--soft.ds-badge--primary,
 .ds-badge--soft.ds-badge--info {
-  background: var(--ds-color-info-soft);
-  color: var(--ds-color-info);
+  background: var(--ds-status-info-bg);
+  color: var(--ds-status-info-fg);
 }
 .ds-badge--soft.ds-badge--gray {
   background: var(--ds-color-surface-alt);

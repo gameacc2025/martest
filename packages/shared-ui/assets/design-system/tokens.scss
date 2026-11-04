@@ -45,21 +45,21 @@
   --ds-color-text-muted: var(--p-text-muted-color, var(--text-color-secondary));
 
   /* Status — anchored to PrimeVue's semantic palettes */
-  --ds-color-success: var(--p-green-500);
+  --ds-color-success: var(--ds-status-success-fg);
   --ds-color-success-contrast: var(--p-surface-0);
-  --ds-color-success-soft: var(--p-green-50);
+  --ds-color-success-soft: var(--ds-status-success-bg);
 
-  --ds-color-warning: var(--p-amber-500);
+  --ds-color-warning: var(--ds-status-warning-fg);
   --ds-color-warning-contrast: var(--p-surface-950);
-  --ds-color-warning-soft: var(--p-amber-50);
+  --ds-color-warning-soft: var(--ds-status-warning-bg);
 
-  --ds-color-danger: var(--p-red-500);
+  --ds-color-danger: var(--ds-status-danger-fg);
   --ds-color-danger-contrast: var(--p-surface-0);
-  --ds-color-danger-soft: var(--p-red-50);
+  --ds-color-danger-soft: var(--ds-status-danger-bg);
 
-  --ds-color-info: var(--p-primary-500);
+  --ds-color-info: var(--ds-status-info-fg);
   --ds-color-info-contrast: var(--p-primary-contrast-color);
-  --ds-color-info-soft: var(--p-primary-50);
+  --ds-color-info-soft: var(--ds-status-info-bg);
 
   /* --------------------------------------------------------
      BRAND + SHELL (constant brand surfaces; flipped in dark below)
@@ -186,7 +186,9 @@
   --ds-color-on-brand-muted: var(--p-primary-200, #b9dbe6);
   --ds-color-accent: var(--p-primary-color);
   --ds-color-on-accent: var(--p-primary-contrast-color);
-  --ds-color-primary-text: var(--p-primary-800, #0a5f98);
+  --ds-color-primary-text: var(--p-primary-800, #084b76);
+  --ds-color-link: var(--ds-color-primary-text);
+  --ds-color-link-hover: var(--p-primary-900, #073a5c);
   --ds-color-primary-soft: var(--p-primary-50, #e8f5fd);
   --ds-color-focus: var(--p-primary-color);
   --ds-container-max: 1400px;
