@@ -36,6 +36,12 @@ const routes = [
         meta: { title: "اعلان‌های من", requiresAuth: true },
       },
       {
+        path: "orders",
+        name: "customer-retail-orders",
+        component: () => import("../pages/public/RetailOrders.vue"),
+        meta: { title: "سفارش‌های من", requiresAuth: true, customerOnly: true },
+      },
+      {
         path: "support/tickets",
         name: "customer-tickets",
         component: () => import("../pages/public/SupportTickets.vue"),
