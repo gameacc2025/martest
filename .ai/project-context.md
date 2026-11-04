@@ -887,3 +887,6 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - These routes are navigation/UI scaffolding only. No CRM, finance, ticket or retail-order backend/API/data model is implied. Implement server-side RBAC and tenant scoping before operational activation.
 - List KPI breakdowns in Admin company/user/product/inquiry/order pages and Company product page are calculated from the currently loaded page and labelled accordingly; only total counts are server pagination totals. Do not use them as platform-wide aggregates.
 - See docs/OPERATIONS_UI_ROADMAP.md for the UI inventory, domain boundaries and implementation phases.
+
+- CRM navigation is nested (overview, leads, pipeline, activities); Finance navigation is nested (overview, settlements, transactions, invoices). Support and retail-order navigation are separate groups. TemLineChart is exported alongside the other TEM chart primitives.
+- Admin dashboard aggregate fields include activeUsers, pendingProducts and totalInquiries; the backend currently serializes total inquiry count under counts.orders, so the frontend deliberately labels it as inquiries rather than retail orders.
