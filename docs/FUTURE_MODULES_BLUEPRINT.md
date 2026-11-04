@@ -159,3 +159,7 @@ Telecom Marketplace در بلندمدت باید بتواند از یک بازا
 ## مرجع طراحی تیکتینگ
 
 قرارداد دامنه چندکاناله تیکت، دسترسی Website/Company/STAFF، یادداشت داخلی، SLA و APIهای پیشنهادی در [docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md](./SUPPORT_TICKETING_DOMAIN_DESIGN.md) ثبت شده است. UI مشترک TicketDeskWorkspace در هر سه اپ prototype است و هنوز API یا migration ندارد.
+
+## مرجع طراحی CRM
+
+قرارداد مدل حساب/مخاطب، سرنخ و تبدیل، فرصت فروش، pipeline، فعالیت، وظیفه، دسترسی و شاخص‌های CRM در [docs/CRM_DOMAIN_DESIGN.md](./CRM_DOMAIN_DESIGN.md) ثبت شده است. نسخه اول CRM برای STAFF داخلی طراحی شده و داده هویتی User/Company را تکرار نمی‌کند.
