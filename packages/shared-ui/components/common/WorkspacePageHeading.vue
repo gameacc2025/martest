@@ -3,10 +3,13 @@
  * WorkspacePageHeading — the single page-head block for public pages and
  * secondary workspaces.
  *
- * Visible variant follows the unified `tem` page head (eyebrow, H1,
- * description, right-aligned actions). When a page already renders the
- * breadcrumb from the layout, pass `sr-only` so the H1 stays available to
- * screen readers without repeating the "where am I" banner.
+ * Visual source: `tem/admin.css` `.ph` / `tem/style.css` `.head` — a bare
+ * title row (large bold H1 + quiet description) with actions pushed to the
+ * opposite edge. No card chrome.
+ *
+ * When a page already renders the breadcrumb from the layout, pass `sr-only`
+ * so the H1 stays available to screen readers without repeating the
+ * "where am I" banner.
  */
 defineProps({
   title: { type: String, required: true },
@@ -25,11 +28,15 @@ defineProps({
     :aria-labelledby="headingId"
   >
     <div class="workspace-page-heading-copy tm-page-head__main">
-      <span v-if="eyebrow && !srOnly" class="workspace-page-heading-eyebrow">
-        <i v-if="icon" :class="icon" aria-hidden="true"></i>
-        {{ eyebrow }}
-      </span>
-      <h1 :id="headingId" class="workspace-page-heading-title tm-page-head__title">{{ title }}</h1>
+      <div class="workspace-page-heading-title-row">
+        <span v-if="icon && !srOnly" class="workspace-page-heading-icon" aria-hidden="true">
+          <i :class="icon"></i>
+        </span>
+        <div class="workspace-page-heading-text">
+          <span v-if="eyebrow && !srOnly" class="workspace-page-heading-eyebrow">{{ eyebrow }}</span>
+          <h1 :id="headingId" class="workspace-page-heading-title tm-page-head__title">{{ title }}</h1>
+        </div>
+      </div>
       <p v-if="description && !srOnly" class="workspace-page-heading-description tm-page-head__desc">
         {{ description }}
       </p>
@@ -42,35 +49,38 @@ defineProps({
 
 <style scoped>
 .workspace-page-heading {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 .workspace-page-heading-copy { min-width: 0; }
-.workspace-page-heading-eyebrow {
-  display: inline-flex;
+.workspace-page-heading-title-row {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-  padding: 4px 10px;
-  border: 1px solid var(--tm-cyan-soft);
-  border-radius: var(--tm-radius-pill);
-  background: var(--tm-cyan-soft);
+  gap: 12px;
+  min-width: 0;
+}
+.workspace-page-heading-text { min-width: 0; }
+.workspace-page-heading-eyebrow {
+  display: block;
+  margin-bottom: 2px;
   color: var(--tm-cyan-deep);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 .workspace-page-heading-title {
   margin: 0;
   color: var(--tm-ink);
-  font-size: var(--tm-fs-h1);
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.35;
+  letter-spacing: -0.3px;
   text-wrap: balance;
 }
 .workspace-page-heading-description {
-  margin: 5px 0 0;
+  margin: 6px 0 0;
   color: var(--tm-muted);
-  font-size: var(--tm-fs-sm);
-  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 68ch;
 }
 .workspace-page-heading-actions {
   display: flex;
@@ -91,6 +101,6 @@ defineProps({
   .workspace-page-heading { align-items: stretch; flex-direction: column; gap: 12px; }
   .workspace-page-heading-actions { width: 100%; }
   .workspace-page-heading-actions > :deep(*) { flex: 1 1 auto; }
-  .workspace-page-heading--sr-only { position: absolute; }
+  .workspace-page-heading-title { font-size: 20px; }
 }
 </style>

@@ -412,6 +412,88 @@ a.tm-stat:hover {
 .tm-stat--danger  .tm-stat__icon { background: var(--tm-red-soft);   color: #c92f2f; }
 .tm-stat--violet  .tm-stat__icon { background: var(--tm-violet-soft); color: var(--tm-violet); }
 
+/* KPI tile — exact `tem/admin.css` `.kpi` composition.
+   Label row (with icon) → large value → quiet caption. This is the
+   summary-stat tile that sits above every list/table screen. */
+.tm-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tm-kpi {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 114px;
+  padding: 16px;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+  box-shadow: none;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+a.tm-kpi:hover {
+  border-color: var(--tm-line-strong);
+  box-shadow: var(--tm-shadow-sm);
+}
+
+.tm-kpi__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: var(--tm-muted);
+  font-size: var(--tm-fs-body);
+  line-height: 1.4;
+}
+
+.tm-kpi__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tm-kpi__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--tm-radius-sm);
+  background: var(--tm-blue-soft);
+  color: var(--tm-blue);
+  font-size: 13px;
+}
+
+.tm-kpi__value {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--tm-ink);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.tm-kpi__meta {
+  margin-top: auto;
+  color: var(--tm-muted);
+  font-size: var(--tm-fs-tiny);
+}
+
+.tm-kpi--accent  .tm-kpi__icon { background: var(--tm-cyan-soft);   color: var(--tm-cyan-deep); }
+.tm-kpi--success .tm-kpi__icon { background: var(--tm-green-soft);  color: #0c8a6e; }
+.tm-kpi--warning .tm-kpi__icon { background: var(--tm-amber-soft);  color: #a86c05; }
+.tm-kpi--danger  .tm-kpi__icon { background: var(--tm-red-soft);    color: #c92f2f; }
+.tm-kpi--violet  .tm-kpi__icon { background: var(--tm-violet-soft); color: var(--tm-violet); }
+
 /* Grids */
 .tm-grid { display: grid; gap: 16px; }
 .tm-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -652,15 +734,22 @@ a.tm-stat:hover {
 .dash-header-user { border-color: var(--tm-line); background: #fff; border-radius: var(--tm-radius); }
 .dash-layout-overlay { backdrop-filter: blur(2px); }
 
-/* Workspace page heading */
+/* Workspace page heading — exact `tem/admin.css` `.ph` / `telecom` page head:
+   a bare title row (large bold H1 + quiet description) with actions pushed
+   to the opposite edge. No card chrome. */
 .workspace-page-heading {
-  margin: 4px 0 16px;
-  padding: 16px 18px;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-lg);
-  background: #fff;
-  box-shadow: var(--tm-shadow-xs);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 2px 0 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
+.workspace-page-heading-copy { min-width: 0; }
 .workspace-page-heading-icon {
   display: grid;
   place-items: center;
@@ -671,8 +760,56 @@ a.tm-stat:hover {
   color: var(--tm-cyan-deep);
   font-size: 16px;
 }
-.workspace-page-heading h1 { font-size: var(--tm-fs-title); font-weight: 700; color: var(--tm-ink); }
-.workspace-page-heading p { font-size: var(--tm-fs-sm); color: var(--tm-muted); }
+.workspace-page-heading h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; color: var(--tm-ink); }
+.workspace-page-heading p { margin-top: 4px; font-size: var(--tm-fs-body); color: var(--tm-muted); }
+.workspace-page-heading-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  color: var(--tm-cyan-deep);
+  font-size: var(--tm-fs-tiny);
+  font-weight: 700;
+}
+
+/* Legacy list-page surface wrappers were built as nested cards. Fold them into
+   one tem `.cd`-style card: the wrapper is the card, the shared table inside it
+   must not draw a second frame. `body` raises specificity above the scoped
+   page rules without `!important`. */
+body .management-data-surface,
+body .identity-management-surface,
+body .company-management-surface,
+body .category-management-surface,
+body .company-list-page .card,
+body .user-list-page .card,
+body .role-list-page .card,
+body .product-list-page .card,
+body .category-list-page .card,
+body .permission-list-page .card,
+body .inquiry-list-page .card,
+body .order-list-page .card {
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+body .management-data-surface > .ent-table,
+body .identity-management-surface > .ent-table,
+body .company-management-surface > .ent-table,
+body .category-management-surface > .ent-table {
+  border: 0;
+  border-radius: 0;
+}
+
+body .management-data-toolbar,
+body .identity-management-toolbar,
+body .company-management-toolbar {
+  padding: 12px 16px;
+  background: var(--tm-surface);
+  border-bottom: 1px solid var(--tm-line);
+}
 
 /* Dashboard hero (Admin + Company) */
 .admin-dashboard-hero,
@@ -744,12 +881,18 @@ a.tm-stat:hover {
 .p-panel .p-panel-header { padding: 14px 18px; border-bottom: 1px solid var(--tm-line); }
 .p-panel .p-panel-content { padding: 18px; }
 
+/* tem `.tools` — a quiet control strip that lives inside a card, so it has
+   no outer border of its own; only the divider against the table below. */
 .p-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 12px 16px;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-lg);
+  border: 0;
+  border-bottom: 1px solid var(--tm-line);
+  border-radius: 0;
   background: var(--tm-surface);
-  gap: 10px;
 }
 
 .p-inputtext,
@@ -801,27 +944,34 @@ a.tm-stat:hover {
 .p-button.p-button-text { color: var(--tm-blue); }
 .p-button.p-button-secondary { background: var(--tm-cyan); border-color: var(--tm-cyan); color: #05213f; }
 
+/* tem `table.t` — a plain white table: quiet header text, hairline row
+   separators and 49px rows. No colored header band. */
 .p-datatable {
   overflow: hidden;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-lg);
   background: #fff;
 }
+/* SharedDataTable already draws the surface card; avoid a double frame. */
+.ent-table .p-datatable { border: 0; border-radius: 0; }
 .p-datatable .p-datatable-header { padding: 12px 16px; border-bottom: 1px solid var(--tm-line); background: #fff; }
 .p-datatable .p-datatable-thead > tr > th {
-  padding: 11px 14px;
+  padding: 12px 16px;
   border-color: var(--tm-line);
-  background: var(--tm-surface-alt);
+  background: transparent;
   color: var(--tm-muted);
-  font-size: var(--tm-fs-caption);
-  font-weight: 700;
+  font-size: 12.5px;
+  font-weight: 500;
   white-space: nowrap;
 }
 .p-datatable .p-datatable-tbody > tr > td {
-  padding: 12px 14px;
-  border-color: var(--tm-line);
-  color: var(--tm-ink-soft);
-  font-size: var(--tm-fs-sm);
+  height: 49px;
+  padding: 0 16px;
+  border-top: 1px solid var(--tm-line);
+  border-bottom: 0;
+  color: var(--tm-ink);
+  font-size: var(--tm-fs-body);
+  vertical-align: middle;
 }
 .p-datatable .p-datatable-tbody > tr:hover { background: var(--tm-surface-alt); }
 .p-paginator { padding: 10px 14px; border-color: var(--tm-line); background: #fff; }
@@ -836,8 +986,28 @@ a.tm-stat:hover {
   border-color: var(--tm-blue);
 }
 
-.p-tag, .p-badge { border-radius: var(--tm-radius-pill); font-size: var(--tm-fs-caption); font-weight: 600; }
-.p-tag { padding: 3px 9px; }
+/* tem `.pill` — a soft status chip with a leading dot. */
+.p-tag, .p-badge { border-radius: var(--tm-radius-pill); font-size: var(--tm-fs-tiny); font-weight: 600; }
+.p-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  font-weight: 500;
+}
+.p-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+.p-tag.p-tag-success { background: #dcfce7; color: #15803d; }
+.p-tag.p-tag-danger  { background: #fee2e2; color: #b91c1c; }
+.p-tag.p-tag-warn    { background: #fef3c7; color: #b45309; }
+.p-tag.p-tag-info    { background: var(--tm-blue-soft); color: var(--tm-blue-strong); }
+.p-tag.p-tag-secondary { background: #f3f4f6; color: #4b5563; }
 
 .p-dialog {
   border: 1px solid var(--tm-line);

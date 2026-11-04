@@ -298,7 +298,7 @@ async function saveCreate() {
 
 <template>
   <div class="user-list-page ds-stack">
-    <WorkspacePageHeading sr-only title="کاربران شرکت" heading-id="company-user-management-title" />
+    <WorkspacePageHeading title="کاربران شرکت" heading-id="company-user-management-title" />
     <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel identity-management-surface">
       <Toolbar class="ds-toolbar identity-management-toolbar">
@@ -742,28 +742,8 @@ async function saveCreate() {
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
-.user-list-page :deep(.p-toolbar) {
-  background: var(--ds-color-surface);
-  border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
-  padding: var(--ds-space-4) var(--ds-space-5);
-}
-.user-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-  padding: var(--ds-space-4) var(--ds-space-5);
-  white-space: nowrap;
-}
-.user-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
-  border-color: var(--ds-color-border);
-  padding: var(--ds-space-4) var(--ds-space-5);
-}
 @media (max-width: 640px) {
   .user-list-page { gap: var(--ds-space-3); }
-  .user-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
 
 .user-list-page { gap: clamp(1rem, 2vw, 1.5rem); }
@@ -815,20 +795,9 @@ async function saveCreate() {
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
-.user-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
-.user-list-page :deep(.p-toolbar-start),
-.user-list-page :deep(.p-toolbar-end) { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
-.user-list-page :deep(.p-toolbar .p-inputtext),
-.user-list-page :deep(.p-toolbar .p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
-.user-list-page :deep(.p-toolbar .p-button) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
-.user-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
-.user-list-page :deep(.p-datatable-tbody > tr) { transition: background var(--ds-transition-fast); }
-.user-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
 @media (max-width: 640px) {
   .management-page-intro { align-items: flex-start; padding: 1rem; }
   .management-page-icon { width: 2.75rem; height: 2.75rem; }
-  .user-list-page :deep(.p-toolbar-start),
-  .user-list-page :deep(.p-toolbar-end) { width: 100%; }
 }
 
 
@@ -846,132 +815,4 @@ async function saveCreate() {
   border-bottom: 1px solid var(--ds-color-border);
   background: var(--ds-color-surface);
 }
-.identity-management-toolbar :deep(.p-toolbar-start),
-.identity-management-toolbar :deep(.p-toolbar-end) {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .65rem;
-}
-.identity-management-toolbar :deep(.p-inputtext),
-.identity-management-toolbar :deep(.p-select) {
-  min-height: 2.65rem;
-  border-radius: var(--ds-radius-md);
-}
-.identity-management-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
-.identity-management-table :deep(.p-datatable-thead > tr > th) {
-  padding: .9rem 1rem;
-  border-color: var(--ds-color-border);
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-  white-space: nowrap;
-}
-.identity-management-table :deep(.p-datatable-tbody > tr > td) {
-  padding: .85rem 1rem;
-  border-color: var(--ds-color-border);
-  color: var(--ds-color-text);
-  vertical-align: middle;
-}
-.identity-management-table :deep(.p-datatable-tbody > tr) { transition: background-color var(--ds-transition-fast); }
-.identity-management-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
-.identity-management-table :deep(.p-paginator) {
-  justify-content: flex-start;
-  padding: .8rem 1rem;
-  border-top: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface);
-}
-.identity-management-table :deep(.p-paginator-page),
-.identity-management-table :deep(.p-paginator-next),
-.identity-management-table :deep(.p-paginator-prev) {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  border-radius: var(--ds-radius-md);
-}
-.identity-management-table :deep(.p-button.p-button-text) { width: 2.75rem; min-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; }
-@media (max-width: 700px) {
-  .identity-management-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
-  .identity-management-toolbar :deep(.p-toolbar-start),
-  .identity-management-toolbar :deep(.p-toolbar-end),
-  .identity-management-toolbar .toolbar-filters { width: 100%; }
-  .identity-management-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .identity-management-toolbar :deep(.p-inputtext),
-  .identity-management-toolbar :deep(.p-select) { width: 100%; margin: 0; }
-  .identity-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
-}
 </style>
-
-/* Reference-led identity workspace: compact, branded and data-first. */
-.user-list-page { gap: 1.1rem; }
-.user-list-page :deep(.workspace-page-heading) {
-  margin: 0;
-  padding: 1rem 1.2rem;
-  border-color: var(--tm-line);
-  border-radius: 15px;
-  background: linear-gradient(108deg, var(--tm-surface-alt) 0%, #fff 58%, var(--tm-surface-alt) 100%);
-  box-shadow: 0 4px 14px rgba(30, 77, 128, .055);
-}
-.user-list-page :deep(.workspace-page-heading h1) {
-  font-size: 1.22rem;
-  font-weight: 800;
-  letter-spacing: -.015em;
-}
-.user-list-page :deep(.workspace-page-heading-icon) { color: var(--tm-cyan-deep); font-size: 1.15rem; }
-.user-list-page :deep(.workspace-page-heading p) { margin-top: .22rem; color: var(--tm-muted); font-size: .77rem; }
-.identity-management-surface {
-  border-color: var(--tm-line);
-  border-radius: 15px;
-  box-shadow: 0 5px 18px rgba(28, 73, 119, .055);
-}
-.identity-management-toolbar {
-  padding: .85rem 1rem;
-  background: linear-gradient(100deg, var(--tm-surface-alt) 0%, #fff 62%, var(--tm-surface-alt) 100%);
-}
-.identity-management-toolbar :deep(.p-toolbar-start) { flex: 1 1 30rem; min-width: 0; }
-.identity-management-toolbar :deep(.p-toolbar-end) { flex: 0 0 auto; }
-.identity-management-toolbar :deep(.p-inputtext), .identity-management-toolbar :deep(.p-select) {
-  min-height: 2.65rem;
-  border-radius: 9px;
-  background: #fff;
-}
-.identity-management-toolbar :deep(.p-button:not(.p-button-text):not(.p-button-outlined)) {
-  min-height: 2.7rem;
-  border-color: var(--tm-cyan);
-  background: linear-gradient(105deg, var(--tm-cyan-strong), var(--tm-cyan));
-  color: var(--tm-surface);
-  box-shadow: 0 3px 9px rgba(38, 160, 197, .16);
-}
-.identity-management-table :deep(.ent-table-toolbar) {
-  padding: .8rem 1rem;
-  border-bottom: 1px solid var(--tm-line);
-  background: #fff;
-}
-.identity-management-table :deep(.ent-table-title) { color: var(--tm-ink); font-size: .88rem; font-weight: 800; }
-.identity-management-table :deep(.ent-table-record-count) { color: var(--tm-muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
-.identity-management-table :deep(.p-datatable-thead > tr > th) {
-  padding: .78rem .9rem;
-  background: var(--tm-surface-alt);
-  color: var(--tm-muted);
-  font-size: .7rem;
-  font-weight: 800;
-}
-.identity-management-table :deep(.p-datatable-tbody > tr > td) { padding: .72rem .9rem; color: var(--tm-ink-soft); font-size: .76rem; }
-.identity-management-table :deep(.p-datatable-tbody > tr:hover) { background: var(--tm-surface-alt); }
-.identity-management-table :deep(.p-button.p-button-text) { min-width: 2.75rem; min-height: 2.75rem; border-radius: 9px; }
-.user-list-page :deep(.p-button:focus-visible), .user-list-page :deep(.p-inputtext:focus-visible), .user-list-page :deep(.p-select:focus-visible) {
-  outline: 2px solid var(--tm-cyan);
-  outline-offset: 2px;
-}
-@media (max-width: 760px) {
-  .user-list-page :deep(.workspace-page-heading) { padding: .85rem .9rem; }
-  .identity-management-toolbar { padding: .75rem; }
-  .identity-management-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .identity-management-toolbar :deep(.p-inputtext), .identity-management-toolbar :deep(.p-select) { min-width: 0; width: 100%; }
-  .identity-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
-  .identity-management-table :deep(.ent-table-toolbar) { align-items: flex-start; flex-direction: column; gap: .5rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .identity-management-table :deep(.p-datatable-tbody > tr), .identity-management-table :deep(.p-button) { transition: none; }
-}
-

@@ -24,7 +24,7 @@ defineProps({
 
 <template>
   <div
-    class="kpi-stats-row tm-grid tm-grid--stats"
+    class="kpi-stats-row tm-kpis"
     :style="{ gap }"
     role="region"
     aria-label="آمار کلی صفحه"

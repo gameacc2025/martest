@@ -1,17 +1,17 @@
 <script setup>
 /**
- * DashboardHeader — professional SaaS-style top bar.
+ * DashboardHeader — tem-style top bar (`tem/telecom.html` `.tp`).
  *
  * One header shared by every dashboard role (Super Admin + Company users).
  * Purely presentational: it emits UI intents (toggle-sidebar, toggle-mobile)
  * and reads identity/theme from props. It never touches API calls or stores.
  *
- * Layout (RTL):
- *   [toggle] [company logo + name] [breadcrumb] ......... [search] [theme] [bell] [user ▾]
+ * Composition (RTL, matching the reference):
+ *   [nav toggles + workspace/breadcrumb] .... [search pill] [theme] [bell] [user ▾]
  *
  * Responsive:
  *   - Search collapses to an icon-triggered popover on small screens.
- *   - Breadcrumb + company name hide on narrow widths.
+ *   - Workspace/breadcrumb hide on narrow widths.
  */
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -106,7 +106,7 @@ function logout() {
 
 <template>
   <header class="dash-header">
-    <!-- Start: sidebar toggles, company identity, breadcrumb -->
+    <!-- Start: navigation toggles, workspace context, breadcrumb -->
     <div class="dash-header-start">
       <button
         type="button"
@@ -138,31 +138,35 @@ function logout() {
       <!-- Company identity (logo + name) -->
       <div v-if="companyName" class="dash-header-company">
         <span class="dash-header-company-logo">
-          <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="32" height="32" decoding="async" />
+          <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="28" height="28" decoding="async" />
           <i v-else class="pi pi-building"></i>
         </span>
         <span class="dash-header-company-name">{{ companyName }}</span>
       </div>
 
-      <span v-if="showBreadcrumb" class="dash-header-divider dash-header-desktop-only" aria-hidden="true"></span>
-
-      <DashboardBreadcrumb v-if="showBreadcrumb" :home-route="homeRoute" class="dash-header-breadcrumb dash-header-desktop-only" />
+      <DashboardBreadcrumb
+        v-if="showBreadcrumb"
+        :home-route="homeRoute"
+        class="dash-header-breadcrumb dash-header-desktop-only"
+      />
     </div>
 
-    <!-- End: search, theme, notifications, user -->
+    <!-- End: search pill, icon buttons, account chip -->
     <div class="dash-header-end">
-      <!-- Inline search (desktop) -->
-      <form class="dash-header-search dash-header-desktop-only" @submit.prevent="submitSearch">
-        <i class="pi pi-search dash-header-search-icon" aria-hidden="true"></i>
+      <!-- Inline search pill (desktop) — tem `.sr` -->
+      <form class="dash-header-pill dash-header-desktop-only" role="search" @submit.prevent="submitSearch">
         <input
           v-model="searchQuery"
           type="search"
           name="workspace-search"
           autocomplete="off"
-          class="dash-header-search-input"
-          placeholder="جستجو…"
+          class="dash-header-pill-input"
+          placeholder="جستجو در محصولات، شرکت‌ها و ..."
           aria-label="جستجو"
         />
+        <button type="submit" class="dash-header-pill-go" aria-label="جستجو">
+          <i class="pi pi-search" aria-hidden="true"></i>
+        </button>
       </form>
 
       <!-- Search trigger (mobile) -->
@@ -176,19 +180,18 @@ function logout() {
         <i class="pi pi-search"></i>
       </button>
       <Popover ref="searchPanel">
-        <form class="dash-header-search-popover" @submit.prevent="submitSearch">
+        <form class="dash-header-search-popover" role="search" @submit.prevent="submitSearch">
           <input
             v-model="searchQuery"
             type="search"
             name="workspace-search"
             autocomplete="off"
-            class="dash-header-search-input"
-            placeholder="جستجو…"
+            class="dash-header-pill-input"
+            placeholder="جستجو..."
             aria-label="جستجو"
           />
         </form>
       </Popover>
-
 
       <!-- Theme switch -->
       <button
@@ -216,9 +219,7 @@ function logout() {
         />
       </router-link>
 
-      <span class="dash-header-divider" aria-hidden="true"></span>
-
-      <!-- User dropdown -->
+      <!-- User chip — tem `.us` -->
       <button
         type="button"
         class="dash-header-user"
@@ -227,14 +228,13 @@ function logout() {
         @click="toggleUserMenu"
       >
         <span class="dash-header-avatar">
-          <img v-if="user?.avatarUrl" :src="user.avatarUrl" alt="" width="32" height="32" decoding="async" />
+          <img v-if="user?.avatarUrl" :src="user.avatarUrl" alt="" width="40" height="40" decoding="async" />
           <span v-else>{{ displayName.charAt(0) }}</span>
         </span>
         <span class="dash-header-user-meta">
-          <span class="dash-header-user-name">{{ displayName }}</span>
+          <span class="dash-header-user-name">{{ displayName }} <i class="pi pi-chevron-down dash-header-user-caret"></i></span>
           <span class="dash-header-user-role">{{ roleLabel }}</span>
         </span>
-        <i class="pi pi-chevron-down dash-header-user-caret"></i>
       </button>
 
       <Menu ref="userMenu" :model="userMenuItems" :popup="true" class="dash-header-user-menu">
@@ -259,22 +259,211 @@ function logout() {
 </template>
 
 <style scoped>
+/* tem `.tp` — a calm top row floating on the pale canvas; no card or rule. */
+.dash-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 72px;
+  padding: 14px clamp(14px, 1.6vw, 24px);
+  background: var(--tm-canvas);
+  border: 0;
+  box-shadow: none;
+}
+.dash-header-start,
+.dash-header-end { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.dash-header-start { flex: 0 1 auto; }
+.dash-header-end { flex: 1 1 auto; justify-content: flex-end; }
 
-.dash-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:1rem;height:68px;padding:0 1.5rem;background:rgba(255,255,255,.94);border-bottom:1px solid var(--tm-line);box-shadow:0 2px 12px rgba(30,74,120,.035);backdrop-filter:blur(14px)}
-.dash-header-start,.dash-header-end{display:flex;align-items:center;gap:.55rem;min-width:0}.dash-header-start{flex:1}
-.dash-header-icon-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:2.55rem;height:2.55rem;min-width:2.55rem;border:1px solid transparent;border-radius:50%;background:var(--tm-surface-alt);color:var(--tm-ink-soft);text-decoration:none;cursor:pointer;transition:.18s}
-.dash-header-icon-btn:hover{border-color:var(--tm-line-strong);background:var(--tm-cyan-soft);color:var(--tm-cyan-deep)}.dash-header-icon-btn:focus-visible,.dash-header-user:focus-visible{outline:2px solid var(--tm-cyan);outline-offset:2px}.dash-header-icon-btn i{font-size:1.05rem}
-.dash-header-bell-badge{position:absolute;top:-.12rem;inset-inline-end:-.12rem;transform:scale(.78);transform-origin:top right}
-.dash-header-divider{width:1px;height:1.6rem;background:var(--tm-line);margin:0 .25rem;flex-shrink:0}
-.dash-header-company{display:flex;align-items:center;gap:.5rem;min-width:0}.dash-header-company-logo{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;overflow:hidden;flex-shrink:0;border-radius:9px;background:var(--tm-cyan-soft);color:var(--tm-cyan-deep)}.dash-header-company-logo img{width:100%;height:100%;object-fit:cover}.dash-header-company-name{max-width:12rem;overflow:hidden;color:var(--tm-ink);font-size:.8rem;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
-.dash-header-breadcrumb{min-width:0}
-.dash-header-search{position:relative;display:flex;align-items:center}.dash-header-search-icon{position:absolute;inset-inline-start:.9rem;color:var(--tm-muted);font-size:.95rem;pointer-events:none}.dash-header-search-input{width:min(38vw,27rem);height:2.65rem;padding:0 .95rem;padding-inline-start:2.5rem;border:1px solid transparent;border-radius:999px;outline:0;background:var(--tm-surface-alt);color:var(--tm-ink);font-family:inherit;font-size:.78rem;transition:.18s}.dash-header-search-input::placeholder{color:var(--tm-faint)}.dash-header-search-input:focus{border-color:var(--tm-cyan);background:#fff;box-shadow:0 0 0 3px rgba(18,184,208,.12)}.dash-header-search-popover .dash-header-search-input{width:min(70vw,20rem);padding-inline-start:.9rem}
-.dash-header-user{display:inline-flex;align-items:center;gap:.55rem;min-height:2.55rem;padding:.25rem .65rem;border:1px solid var(--tm-line);border-radius:999px;background:var(--tm-surface-alt);color:var(--tm-ink);cursor:pointer}.dash-header-user:hover{background:var(--tm-cyan-soft)}.dash-header-avatar{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;overflow:hidden;flex-shrink:0;border-radius:50%;background:var(--tm-cyan-strong);color:#fff;font-size:.82rem;font-weight:800}.dash-header-avatar img{width:100%;height:100%;object-fit:cover}.dash-header-avatar--lg{width:2.75rem;height:2.75rem;font-size:1rem}
-.dash-header-user-meta{display:flex;flex-direction:column;line-height:1.25;text-align:start}.dash-header-user-name{max-width:9rem;overflow:hidden;font-size:.77rem;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.dash-header-user-role{color:var(--tm-muted);font-size:.65rem}.dash-header-user-caret{color:var(--tm-muted);font-size:.65rem}
-.dash-header-user-card{display:flex;align-items:center;gap:.75rem;min-width:15rem;padding:1rem;border-bottom:1px solid var(--tm-line)}.dash-header-user-card-meta{display:flex;flex-direction:column;gap:.15rem;min-width:0}.dash-header-user-card-name{color:var(--tm-ink);font-size:.9rem;font-weight:700}.dash-header-user-card-role,.dash-header-user-card-company{color:var(--tm-muted);font-size:.72rem}.dash-header-user-card-company{display:inline-flex;align-items:center;gap:.3rem;margin-top:.15rem}
-.dash-header-mobile-only{display:inline-flex}.dash-header-desktop-only{display:none}
-@media(min-width:992px){.dash-header-mobile-only{display:none}.dash-header-desktop-only{display:inline-flex}.dash-header-breadcrumb.dash-header-desktop-only{display:flex}}
-@media(max-width:575px){.dash-header{height:60px;padding:0 .65rem}.dash-header-company-name,.dash-header-user-meta,.dash-header-user-caret{display:none}.dash-header-search-input{width:2.55rem;padding:0}.dash-header-search-icon{display:none}.dash-header-workspace{display:none}}
-@media(prefers-reduced-motion:reduce){.dash-header *{transition:none!important}}
+/* tem `.ib` — round, light, softly shadowed icon button. */
+.dash-header-icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: #f3f6fc;
+  color: var(--tm-ink-soft);
+  box-shadow: 0 2px 6px rgba(20, 40, 90, 0.08);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+.dash-header-icon-btn:hover { background: var(--tm-cyan-soft); color: var(--tm-cyan-deep); }
+.dash-header-icon-btn:focus-visible,
+.dash-header-user:focus-visible,
+.dash-header-pill-go:focus-visible { outline: 2px solid var(--tm-cyan-strong); outline-offset: 2px; }
+.dash-header-icon-btn i { font-size: 18px; }
+.dash-header-bell-badge { position: absolute; top: -2px; inset-inline-end: -2px; transform: scale(0.8); transform-origin: top right; }
 
+/* tem `.sr` — wide pill search field. */
+.dash-header-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 520px;
+  height: 46px;
+  padding: 0 18px 0 8px;
+  border-radius: 24px;
+  background: #f3f6fc;
+  box-shadow: 0 2px 6px rgba(20, 40, 90, 0.05);
+}
+.dash-header-pill-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--tm-ink);
+  font-family: inherit;
+  font-size: 14px;
+}
+.dash-header-pill-input::placeholder { color: #6b7b99; }
+.dash-header-pill-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #6b7b99;
+  cursor: pointer;
+}
+.dash-header-pill-go:hover { color: var(--tm-blue); }
+.dash-header-search-popover .dash-header-pill-input {
+  width: min(70vw, 20rem);
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #f3f6fc;
+}
+
+/* Workspace context chip */
+.dash-header-workspace {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--tm-line);
+  border-radius: 999px;
+  background: #fff;
+  white-space: nowrap;
+}
+.dash-header-workspace-mark { display: grid; place-items: center; color: var(--tm-cyan-deep); font-size: 13px; }
+.dash-header-workspace-label { color: var(--tm-ink-soft); font-size: 12px; font-weight: 600; }
+
+/* Company identity */
+.dash-header-company { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.dash-header-company-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--tm-cyan-soft);
+  color: var(--tm-cyan-deep);
+}
+.dash-header-company-logo img { width: 100%; height: 100%; object-fit: cover; }
+.dash-header-company-name {
+  max-width: 12rem;
+  overflow: hidden;
+  color: var(--tm-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-header-breadcrumb { min-width: 0; }
+
+/* tem `.us` — avatar + name + role. */
+.dash-header-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 3px 10px 3px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--tm-ink);
+  cursor: pointer;
+}
+.dash-header-user:hover { background: #f3f6fc; }
+.dash-header-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #7a5a3e;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+.dash-header-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.dash-header-avatar--lg { width: 44px; height: 44px; font-size: 18px; }
+.dash-header-user-meta { display: flex; flex-direction: column; line-height: 1.3; text-align: start; }
+.dash-header-user-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 10rem;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-header-user-caret { font-size: 10px; color: var(--tm-muted); }
+.dash-header-user-role { color: #7686a3; font-size: 11px; }
+.dash-header-user-card { display: flex; align-items: center; gap: 0.75rem; min-width: 15rem; padding: 1rem; border-bottom: 1px solid var(--tm-line); }
+.dash-header-user-card-meta { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.dash-header-user-card-name { color: var(--tm-ink); font-size: 0.9rem; font-weight: 700; }
+.dash-header-user-card-role,
+.dash-header-user-card-company { color: var(--tm-muted); font-size: 0.72rem; }
+.dash-header-user-card-company { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.15rem; }
+
+.dash-header-mobile-only { display: inline-flex; }
+.dash-header-desktop-only { display: none; }
+@media (min-width: 992px) {
+  .dash-header-mobile-only { display: none; }
+  .dash-header-desktop-only { display: inline-flex; }
+  .dash-header-pill.dash-header-desktop-only { display: flex; }
+  .dash-header-breadcrumb.dash-header-desktop-only { display: flex; }
+}
+@media (max-width: 991px) {
+  .dash-header { gap: 10px; }
+  .dash-header-workspace { display: none; }
+}
+@media (max-width: 575px) {
+  .dash-header { min-height: 62px; padding: 10px 12px; }
+  .dash-header-company-name,
+  .dash-header-user-meta { display: none; }
+  .dash-header-icon-btn { width: 42px; height: 42px; min-width: 42px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-header * { transition: none !important; }
+}
 </style>

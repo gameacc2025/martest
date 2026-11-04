@@ -7,21 +7,23 @@ import BrandMark from '../common/BrandMark.vue'
  * shell is identical; only the permission/role-filtered items differ.
  * There is intentionally no second sidebar component.
  *
- * Features:
- *   - Expanded 240px / collapsed 76px (icon-only) rail.
+ * Visual source: `tem/telecom.html` `.sd` — navy gradient rail, LTR wordmark,
+ * cyan primary-action pill, compact icon+label items with a cyan count chip,
+ * a support card and a copyright line.
+ *
+ * Features kept from the previous shell:
+ *   - Expanded 207px / collapsed 76px (icon-only) rail.
  *   - Collapse button (desktop) with persisted state.
  *   - Tooltips on icons while collapsed (PrimeVue `v-tooltip`).
  *   - Nested submenus (expand/collapse) + section groups.
  *   - Active route indicator (also lights up a parent when a child is active).
  *   - Badges per item.
- *   - Smooth width/rotation/expand transitions.
  *
  * Collapse is a desktop concept; on mobile the parent renders this as a full
  * drawer and passes `collapsed = false`.
  */
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import Badge from 'primevue/badge'
 
 const props = defineProps({
   // Desktop collapsed (icon-only) state, owned by the parent/shared store.
@@ -31,6 +33,9 @@ const props = defineProps({
   // Pre-filtered menu items (array of section objects).
   menuItems: { type: Array, default: () => [] },
   user: { type: Object, default: null },
+  // Optional primary call-to-action shown directly under the brand.
+  // Shape: { label: string, route: string, params?: object }
+  primaryAction: { type: Object, default: null },
 })
 
 const emit = defineEmits(['navigate', 'toggle-collapse'])
@@ -62,6 +67,11 @@ function onExternal(item, event) {
   event.preventDefault()
   window.open(item.url, '_blank', 'noopener,noreferrer')
   emit('navigate')
+}
+
+function badgeText(badge) {
+  if (badge === null || badge === undefined) return ''
+  return typeof badge === 'object' ? badge.value : badge
 }
 
 // Auto-open the submenu that contains the active route.
@@ -109,15 +119,10 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
       'dash-sidebar--mobile-open': mobileOpen,
     }"
   >
-    <!-- Brand + collapse button -->
+    <!-- Brand: LTR wordmark + desktop collapse toggle -->
     <div class="dash-sidebar-brand">
-      <div class="dash-sidebar-brand-main">
-        <BrandMark class="dash-sidebar-brand-icon" :size="32" />
-        <span class="dash-sidebar-brand-copy">
-          <span class="dash-sidebar-brand-text">Telecom Market</span>
-          <span class="dash-sidebar-brand-tagline">تجهیزات مخابراتی و شبکه</span>
-        </span>
-      </div>
+      <BrandMark class="dash-sidebar-brand-icon" :size="34" />
+      <span class="dash-sidebar-brand-text">Telecom<br />Market</span>
       <button
         type="button"
         class="dash-sidebar-collapse-btn dash-sidebar-desktop-only"
@@ -127,6 +132,16 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
         <i class="pi" :class="collapsed ? 'pi-angle-double-left' : 'pi-angle-double-right'"></i>
       </button>
     </div>
+
+    <!-- Primary action pill (tem `.np`) -->
+    <router-link
+      v-if="primaryAction"
+      :to="{ name: primaryAction.route, params: primaryAction.params }"
+      class="dash-sidebar-cta"
+      @click="emit('navigate')"
+    >
+      <span aria-hidden="true">+</span> {{ primaryAction.label }}
+    </router-link>
 
     <nav class="dash-sidebar-nav" aria-label="منوی داشبورد">
       <template v-for="group in props.menuItems" :key="group.section">
@@ -144,15 +159,9 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
                 :aria-expanded="isGroupOpen(item)"
                 @click="toggleGroup(item)"
               >
-                <span class="dash-sidebar-active-bar" v-if="isParentActive(item)"></span>
                 <i :class="item.icon" class="dash-sidebar-link-icon"></i>
                 <span class="dash-sidebar-link-text">{{ item.title }}</span>
-                <Badge
-                  v-if="item.badge"
-                  :value="item.badge.value"
-                  :severity="item.badge.severity"
-                  class="dash-sidebar-badge"
-                />
+                <span v-if="item.badge" class="dash-sidebar-count">{{ badgeText(item.badge) }}</span>
                 <i
                   class="pi pi-chevron-down dash-sidebar-caret"
                   :class="{ 'dash-sidebar-caret--open': isGroupOpen(item) }"
@@ -183,15 +192,9 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
                       :aria-current="isItemActive(child) ? 'page' : undefined"
                       @click="emit('navigate')"
                     >
-                      <span class="dash-sidebar-active-bar" v-if="isItemActive(child)"></span>
                       <i :class="child.icon" class="dash-sidebar-link-icon"></i>
                       <span class="dash-sidebar-link-text">{{ child.title }}</span>
-                      <Badge
-                        v-if="child.badge"
-                        :value="child.badge.value"
-                        :severity="child.badge.severity"
-                        class="dash-sidebar-badge"
-                      />
+                      <span v-if="child.badge" class="dash-sidebar-count">{{ badgeText(child.badge) }}</span>
                     </router-link>
                   </li>
                 </ul>
@@ -208,12 +211,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
             >
               <i :class="item.icon" class="dash-sidebar-link-icon"></i>
               <span class="dash-sidebar-link-text">{{ item.title }}</span>
-              <Badge
-                v-if="item.badge"
-                :value="item.badge.value"
-                :severity="item.badge.severity"
-                class="dash-sidebar-badge"
-              />
+              <span v-if="item.badge" class="dash-sidebar-count">{{ badgeText(item.badge) }}</span>
             </a>
 
             <!-- Planned modules are intentionally visible but non-interactive until implemented. -->
@@ -239,54 +237,233 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
               v-tooltip="collapsed ? { value: item.title, ...tooltipOptions } : null"
               @click="emit('navigate')"
             >
-              <span class="dash-sidebar-active-bar" v-if="isItemActive(item)"></span>
               <i :class="item.icon" class="dash-sidebar-link-icon"></i>
               <span class="dash-sidebar-link-text">{{ item.title }}</span>
-              <Badge
-                v-if="item.badge"
-                :value="item.badge.value"
-                :severity="item.badge.severity"
-                class="dash-sidebar-badge"
-              />
+              <span v-if="item.badge" class="dash-sidebar-count">{{ badgeText(item.badge) }}</span>
             </router-link>
           </li>
         </ul>
       </template>
     </nav>
-    <footer class="dash-sidebar-profile">
-      <span class="dash-sidebar-profile-avatar">{{ (user?.displayName || user?.fullName || user?.username || 'ک').charAt(0) }}</span>
-      <span class="dash-sidebar-profile-meta">
-        <strong>{{ user?.displayName || user?.fullName || user?.username || 'کاربر پنل' }}</strong>
-        <small>{{ user?.company?.name || 'مدیریت سامانه' }}</small>
-      </span>
-    </footer>
+
+    <!-- Support card (tem `.sup`) -->
+    <div class="dash-sidebar-support">
+      <span class="dash-sidebar-support-mark" aria-hidden="true"><i class="pi pi-headset"></i></span>
+      <b>با ما در ارتباط باشید</b>
+      <small>پشتیبانی ۲۴ ساعته</small>
+      <span class="dash-sidebar-support-btn">تماس پشتیبانی ←</span>
+    </div>
+    <div class="dash-sidebar-copyright">2025 Telecom Market ©</div>
   </aside>
 </template>
 
 <style scoped>
+.dash-sidebar {
+  --dash-sidebar-expanded: 207px;
+  --dash-sidebar-collapsed: 76px;
+  display: flex;
+  flex-direction: column;
+  width: var(--dash-sidebar-expanded);
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 26px 14px;
+  background: linear-gradient(#0a1c3f, #08142e);
+  color: #cfd9ee;
+  transition: width 0.24s ease;
+}
 
-.dash-sidebar{--dash-sidebar-expanded:208px;--dash-sidebar-collapsed:68px;display:flex;flex-direction:column;width:var(--dash-sidebar-expanded);height:100%;overflow-x:hidden;overflow-y:auto;background:linear-gradient(180deg,var(--tm-navy) 0%,var(--tm-navy-deep) 100%);color:rgba(255,255,255,.86);border-inline-end:1px solid rgba(255,255,255,.08);transition:width .24s ease}
-.dash-sidebar-brand{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:flex-start;min-height:76px;padding:0 1.1rem;background:linear-gradient(180deg,var(--tm-navy) 0%,var(--tm-navy) 100%);border-bottom:1px solid rgba(255,255,255,.09)}
-.dash-sidebar-brand-main{display:flex;align-items:center;gap:.7rem;min-width:0}.dash-sidebar-brand-icon{flex-shrink:0}.dash-sidebar-brand-copy{display:flex;flex-direction:column;gap:.15rem;min-width:0}
-.dash-sidebar-brand-text{color:#fff;font-size:.96rem;font-weight:800;line-height:1.2;white-space:nowrap}.dash-sidebar-brand-tagline{color:rgba(255,255,255,.55);font-size:.62rem;white-space:nowrap}
-.dash-sidebar-collapse-btn{display:none}
-.dash-sidebar-nav{padding:.8rem .65rem 1.25rem}.dash-sidebar-section{margin:1.1rem .7rem .45rem;color:rgba(255,255,255,.45);font-size:.65rem;font-weight:700;letter-spacing:.04em;white-space:nowrap}
-.dash-sidebar-list,.dash-sidebar-sublist{display:flex;flex-direction:column;gap:.28rem;margin:0;padding:0;list-style:none}
-.dash-sidebar-link{position:relative;display:flex;align-items:center;gap:.8rem;width:100%;min-height:2.65rem;padding:.58rem .85rem;border:0;border-radius:9px;background:transparent;color:rgba(255,255,255,.80);font-family:inherit;font-size:.82rem;font-weight:500;text-align:start;text-decoration:none;cursor:pointer;transition:background .18s,color .18s}
-.dash-sidebar-link:hover{background:rgba(255,255,255,.075);color:#fff}.dash-sidebar-link--active{background:linear-gradient(105deg,var(--tm-cyan-strong) 0%,var(--tm-cyan) 100%);color:#fff;box-shadow:0 5px 14px rgba(0,174,204,.2)}.dash-sidebar-link--active .dash-sidebar-link-icon{color:#fff}
-.dash-sidebar-active-bar{display:none}.dash-sidebar-link-icon{width:1.3rem;flex-shrink:0;color:rgba(255,255,255,.62);font-size:1rem;text-align:center}.dash-sidebar-link--active .dash-sidebar-link-icon{color:#fff}
-.dash-sidebar-link-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dash-sidebar-badge{flex-shrink:0}.dash-sidebar-caret{font-size:.7rem;transition:transform .2s}.dash-sidebar-caret--open{transform:rotate(180deg)}
-.dash-sidebar-link--planned{opacity:.52;cursor:default}.dash-sidebar-link--planned:hover{background:transparent;color:rgba(255,255,255,.80)}.dash-sidebar-planned-badge{padding:.1rem .35rem;border:1px solid rgba(255,255,255,.16);border-radius:999px;color:rgba(255,255,255,.55);font-size:.6rem}
-.dash-sidebar-sublist{margin:.2rem .35rem .35rem;padding-inline-start:.75rem;border-inline-start:1px solid rgba(255,255,255,.12)}.dash-sidebar-sublink{min-height:2.35rem;font-size:.77rem}
-.dash-submenu-enter-active,.dash-submenu-leave-active{overflow:hidden;max-height:500px;transition:opacity .2s,max-height .25s}.dash-submenu-enter-from,.dash-submenu-leave-to{max-height:0;opacity:0}
-.dash-sidebar-link:focus-visible{outline:2px solid var(--tm-cyan);outline-offset:2px}
-.dash-sidebar-profile{position:sticky;bottom:0;display:flex;align-items:center;gap:.65rem;margin-top:auto;padding:.85rem .8rem;border-top:1px solid rgba(255,255,255,.1);background:var(--tm-navy-deep)}
-.dash-sidebar-profile-avatar{display:grid;width:2.25rem;height:2.25rem;flex:0 0 auto;place-items:center;border:2px solid rgba(255,255,255,.18);border-radius:50%;background:linear-gradient(135deg,var(--tm-cyan),var(--tm-blue));color:#fff;font-size:.8rem;font-weight:900}
-.dash-sidebar-profile-meta{display:flex;min-width:0;flex-direction:column;gap:.08rem}
-.dash-sidebar-profile-meta strong{overflow:hidden;color:#fff;font-size:.72rem;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
-.dash-sidebar-profile-meta small{overflow:hidden;color:rgba(255,255,255,.55);font-size:.62rem;text-overflow:ellipsis;white-space:nowrap}
+/* ---- Brand (tem `.lg`) ---- */
+.dash-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 6px 26px;
+  direction: ltr;
+  line-height: 1.1;
+}
+.dash-sidebar-brand-text {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dash-sidebar-collapse-btn { display: none; }
 
-@media(min-width:992px){.dash-sidebar--collapsed{width:var(--dash-sidebar-collapsed)}.dash-sidebar--collapsed .dash-sidebar-brand{justify-content:center;padding:0}.dash-sidebar--collapsed .dash-sidebar-profile-meta,.dash-sidebar--collapsed .dash-sidebar-section,.dash-sidebar--collapsed .dash-sidebar-link-text,.dash-sidebar--collapsed .dash-sidebar-badge,.dash-sidebar--collapsed .dash-sidebar-planned-badge,.dash-sidebar--collapsed .dash-sidebar-caret{display:none}.dash-sidebar--collapsed .dash-sidebar-link{justify-content:center;padding:.7rem 0}.dash-sidebar--collapsed .dash-sidebar-link-icon{width:auto}.dash-sidebar-desktop-only{display:none}}
-@media(max-width:991px){.dash-sidebar{width:208px}.dash-sidebar-brand{min-height:68px}.dash-sidebar-desktop-only{display:none}}
+/* ---- Primary action (tem `.np`) ---- */
+.dash-sidebar-cta {
+  display: block;
+  margin-bottom: 26px;
+  padding: 11px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #16b8e8, #2ed3ee);
+  color: #05213f;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dash-sidebar-cta:hover { filter: brightness(1.03); }
 
+/* ---- Navigation (tem `.mi`) ---- */
+.dash-sidebar-nav { padding: 0; }
+.dash-sidebar-section {
+  margin: 14px 6px 6px;
+  color: #7f93b8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.dash-sidebar-list,
+.dash-sidebar-sublist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dash-sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #e2e9f7;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+.dash-sidebar-link:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+.dash-sidebar-link--active {
+  background: linear-gradient(90deg, #17b4d9, #0f5f88);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: none;
+}
+.dash-sidebar-link-icon {
+  width: 22px;
+  flex-shrink: 0;
+  color: #a8bbd9;
+  font-size: 16px;
+  text-align: center;
+}
+.dash-sidebar-link:hover .dash-sidebar-link-icon,
+.dash-sidebar-link--active .dash-sidebar-link-icon { color: #fff; }
+.dash-sidebar-link-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* tem `.mi .c` */
+.dash-sidebar-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  margin-inline-start: auto;
+  padding: 0 5px;
+  border-radius: 50%;
+  background: #2ed3ee;
+  color: #05213f;
+  font-size: 11px;
+  font-weight: 700;
+  flex: none;
+}
+.dash-sidebar-caret { font-size: 0.7rem; transition: transform 0.2s; }
+.dash-sidebar-caret--open { transform: rotate(180deg); }
+.dash-sidebar-link--planned { opacity: 0.52; cursor: default; }
+.dash-sidebar-link--planned:hover { background: transparent; color: #e2e9f7; }
+.dash-sidebar-planned-badge {
+  padding: 0.1rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.6rem;
+}
+.dash-sidebar-sublist {
+  margin: 4px 0 4px;
+  padding-inline-start: 0.75rem;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.12);
+}
+.dash-sidebar-sublink { min-height: 38px; padding-block: 8px; font-size: 13px; }
+.dash-submenu-enter-active,
+.dash-submenu-leave-active { overflow: hidden; max-height: 500px; transition: opacity 0.2s, max-height 0.25s; }
+.dash-submenu-enter-from,
+.dash-submenu-leave-to { max-height: 0; opacity: 0; }
+.dash-sidebar-link:focus-visible { outline: 2px solid #2ed3ee; outline-offset: 2px; }
+
+/* ---- Support + copyright (tem `.sup` / `.cp`) ---- */
+.dash-sidebar-support {
+  margin-top: auto;
+  padding: 52px 14px 14px;
+  border: 1px solid #1c3d6b;
+  border-radius: 10px;
+  background: linear-gradient(#10315d, #0a2347);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.dash-sidebar-support-mark {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  color: #2ed3ee;
+}
+.dash-sidebar-support b { display: block; margin-bottom: 4px; color: #fff; font-size: 13px; }
+.dash-sidebar-support small { font-size: 11px; color: #9fb4d8; }
+.dash-sidebar-support-btn {
+  display: block;
+  margin-top: 12px;
+  padding: 8px;
+  border-radius: 6px;
+  background: #17b4d9;
+  color: #05213f;
+  font-weight: 600;
+}
+.dash-sidebar-copyright {
+  margin-top: 16px;
+  color: #9fb4d8;
+  font-size: 10px;
+  text-align: center;
+  direction: ltr;
+}
+
+@media (min-width: 992px) {
+  .dash-sidebar--collapsed { width: var(--dash-sidebar-collapsed); padding-inline: 10px; }
+  .dash-sidebar--collapsed .dash-sidebar-brand { justify-content: center; margin-inline: 0; }
+  .dash-sidebar--collapsed .dash-sidebar-brand-text,
+  .dash-sidebar--collapsed .dash-sidebar-section,
+  .dash-sidebar--collapsed .dash-sidebar-link-text,
+  .dash-sidebar--collapsed .dash-sidebar-count,
+  .dash-sidebar--collapsed .dash-sidebar-planned-badge,
+  .dash-sidebar--collapsed .dash-sidebar-caret,
+  .dash-sidebar--collapsed .dash-sidebar-cta,
+  .dash-sidebar--collapsed .dash-sidebar-support,
+  .dash-sidebar--collapsed .dash-sidebar-copyright { display: none; }
+  .dash-sidebar--collapsed .dash-sidebar-link { justify-content: center; padding-inline: 0; }
+  .dash-sidebar--collapsed .dash-sidebar-link-icon { width: auto; }
+  .dash-sidebar-desktop-only { display: inline-flex; }
+}
+@media (max-width: 991px) {
+  .dash-sidebar { width: 207px; }
+  .dash-sidebar-desktop-only { display: none; }
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="role-list-page ds-stack">
-    <WorkspacePageHeading sr-only title="مدیریت نقش‌ها" heading-id="role-management-title" />
+    <WorkspacePageHeading title="مدیریت نقش‌ها" heading-id="role-management-title" />
     <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
@@ -442,28 +442,8 @@ async function deleteRole() {
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
-.role-list-page :deep(.p-toolbar) {
-  background: var(--ds-color-surface);
-  border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
-  padding: var(--ds-space-4) var(--ds-space-5);
-}
-.role-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-  padding: var(--ds-space-4) var(--ds-space-5);
-  white-space: nowrap;
-}
-.role-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
-  border-color: var(--ds-color-border);
-  padding: var(--ds-space-4) var(--ds-space-5);
-}
 @media (max-width: 640px) {
   .role-list-page { gap: var(--ds-space-3); }
-  .role-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
 
 .role-list-page { gap: clamp(1rem, 2vw, 1.5rem); }
@@ -504,15 +484,9 @@ async function deleteRole() {
 }
 .access-management-intro p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
 .role-list-page .card { border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
-.role-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
-.role-list-page :deep(.p-toolbar-start), .role-list-page :deep(.p-toolbar-end) { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
-.role-list-page :deep(.p-toolbar .p-inputtext) { min-height: 2.75rem; border-radius: var(--ds-radius-md); }
-.role-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
-.role-list-page :deep(.p-datatable-thead > tr > th) { white-space: nowrap; }
 @media (max-width: 640px) {
   .access-management-intro { align-items: flex-start; padding: 1rem; }
   .access-management-icon { width: 2.75rem; height: 2.75rem; }
-  .role-list-page :deep(.p-toolbar-start), .role-list-page :deep(.p-toolbar-end) { width: 100%; }
 }
 
 
@@ -529,70 +503,6 @@ async function deleteRole() {
   padding: 1rem 1.2rem;
   border-bottom: 1px solid var(--ds-color-border);
   background: var(--ds-color-surface);
-}
-.management-data-toolbar :deep(.p-toolbar-start),
-.management-data-toolbar :deep(.p-toolbar-end) {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .65rem;
-}
-.management-data-toolbar :deep(.p-inputtext),
-.management-data-toolbar :deep(.p-select) {
-  min-height: 2.75rem;
-  border-radius: var(--ds-radius-md);
-}
-.management-data-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
-.management-data-table :deep(.p-datatable-thead > tr > th) {
-  padding: .9rem 1rem;
-  border-color: var(--ds-color-border);
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-  white-space: nowrap;
-}
-.management-data-table :deep(.p-datatable-tbody > tr > td) {
-  padding: .85rem 1rem;
-  border-color: var(--ds-color-border);
-  color: var(--ds-color-text);
-  vertical-align: middle;
-}
-.management-data-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
-.management-data-table :deep(.p-paginator) {
-  justify-content: flex-start;
-  padding: .8rem 1rem;
-  border-top: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface);
-}
-.management-data-table :deep(.p-paginator-page),
-.management-data-table :deep(.p-paginator-next),
-.management-data-table :deep(.p-paginator-prev) {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  border-radius: var(--ds-radius-md);
-}
-.management-data-table :deep(.p-button.p-button-text) {
-  width: 2.75rem;
-  min-width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem;
-}
-.management-data-toolbar :deep(.p-toolbar-end .p-button) { min-height: 2.75rem; }
-.management-data-toolbar :deep(.p-inputtext:focus-visible),
-.management-data-toolbar :deep(.p-select:focus-visible),
-.management-data-toolbar :deep(.p-button:focus-visible) {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 2px;
-}
-@media (max-width: 700px) {
-  .management-data-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
-  .management-data-toolbar :deep(.p-toolbar-start),
-  .management-data-toolbar :deep(.p-toolbar-end) { width: 100%; }
-  .management-data-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .management-data-toolbar :deep(.p-inputtext),
-  .management-data-toolbar :deep(.p-select) { width: 100%; }
-  .management-data-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
 
 .permission-group-header {
@@ -647,81 +557,6 @@ async function deleteRole() {
 }
 .permission-item:last-child { border-bottom: 0; }
 .permission-item label { cursor: pointer; line-height: 1.7; }
-.role-list-page .management-data-toolbar :deep(.p-inputtext) { min-height: 2.75rem; }
 
 .role-permission-tags { display: flex; flex-wrap: wrap; gap: .35rem; max-width: 32rem; }
 </style>
-
-/* Reference-led identity workspace: compact, branded and data-first. */
-.role-list-page { gap: 1.1rem; }
-.role-list-page :deep(.workspace-page-heading) {
-  margin: 0;
-  padding: 1rem 1.2rem;
-  border-color: var(--tm-line);
-  border-radius: 15px;
-  background: linear-gradient(108deg, var(--tm-surface-alt) 0%, #fff 58%, var(--tm-surface-alt) 100%);
-  box-shadow: 0 4px 14px rgba(30, 77, 128, .055);
-}
-.role-list-page :deep(.workspace-page-heading h1) {
-  font-size: 1.22rem;
-  font-weight: 800;
-  letter-spacing: -.015em;
-}
-.role-list-page :deep(.workspace-page-heading-icon) { color: var(--tm-cyan-deep); font-size: 1.15rem; }
-.role-list-page :deep(.workspace-page-heading p) { margin-top: .22rem; color: var(--tm-muted); font-size: .77rem; }
-.management-data-surface {
-  border-color: var(--tm-line);
-  border-radius: 15px;
-  box-shadow: 0 5px 18px rgba(28, 73, 119, .055);
-}
-.management-data-toolbar {
-  padding: .85rem 1rem;
-  background: linear-gradient(100deg, var(--tm-surface-alt) 0%, #fff 62%, var(--tm-surface-alt) 100%);
-}
-.management-data-toolbar :deep(.p-toolbar-start) { flex: 1 1 30rem; min-width: 0; }
-.management-data-toolbar :deep(.p-toolbar-end) { flex: 0 0 auto; }
-.management-data-toolbar :deep(.p-inputtext), .management-data-toolbar :deep(.p-select) {
-  min-height: 2.65rem;
-  border-radius: 9px;
-  background: #fff;
-}
-.management-data-toolbar :deep(.p-button:not(.p-button-text):not(.p-button-outlined)) {
-  min-height: 2.7rem;
-  border-color: var(--tm-cyan);
-  background: linear-gradient(105deg, var(--tm-cyan-strong), var(--tm-cyan));
-  color: var(--tm-surface);
-  box-shadow: 0 3px 9px rgba(38, 160, 197, .16);
-}
-.management-data-table :deep(.ent-table-toolbar) {
-  padding: .8rem 1rem;
-  border-bottom: 1px solid var(--tm-line);
-  background: #fff;
-}
-.management-data-table :deep(.ent-table-title) { color: var(--tm-ink); font-size: .88rem; font-weight: 800; }
-.management-data-table :deep(.ent-table-record-count) { color: var(--tm-muted); font-size: .72rem; font-variant-numeric: tabular-nums; }
-.management-data-table :deep(.p-datatable-thead > tr > th) {
-  padding: .78rem .9rem;
-  background: var(--tm-surface-alt);
-  color: var(--tm-muted);
-  font-size: .7rem;
-  font-weight: 800;
-}
-.management-data-table :deep(.p-datatable-tbody > tr > td) { padding: .72rem .9rem; color: var(--tm-ink-soft); font-size: .76rem; }
-.management-data-table :deep(.p-datatable-tbody > tr:hover) { background: var(--tm-surface-alt); }
-.management-data-table :deep(.p-button.p-button-text) { min-width: 2.75rem; min-height: 2.75rem; border-radius: 9px; }
-.role-list-page :deep(.p-button:focus-visible), .role-list-page :deep(.p-inputtext:focus-visible), .role-list-page :deep(.p-select:focus-visible) {
-  outline: 2px solid var(--tm-cyan);
-  outline-offset: 2px;
-}
-@media (max-width: 760px) {
-  .role-list-page :deep(.workspace-page-heading) { padding: .85rem .9rem; }
-  .management-data-toolbar { padding: .75rem; }
-  .management-data-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .management-data-toolbar :deep(.p-inputtext), .management-data-toolbar :deep(.p-select) { min-width: 0; width: 100%; }
-  .management-data-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
-  .management-data-table :deep(.ent-table-toolbar) { align-items: flex-start; flex-direction: column; gap: .5rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .management-data-table :deep(.p-datatable-tbody > tr), .management-data-table :deep(.p-button) { transition: none; }
-}
-

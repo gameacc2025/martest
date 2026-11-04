@@ -42,10 +42,18 @@ describe('Admin management page accessibility contracts', () => {
     expect(orders).toContain('aria-label="تغییر وضعیت سفارش"')
   })
 
-  it('sets 44px action and pagination targets on management tables', () => {
+  it('keeps 44px action and pagination targets via the shared table layer', () => {
+    const dataTable = readFileSync(
+      resolve(process.cwd(), 'packages/shared-ui/components/common/DataTable.vue'),
+      'utf8'
+    )
+    expect(dataTable).toContain('min-height: 2.75rem')
+    expect(dataTable).toContain('min-width: 2.75rem')
+
+    // Management pages delegate table styling to the shared tem layer instead
+    // of re-declaring per-page PrimeVue overrides.
     for (const source of [categories, roles, permissions, orders]) {
-      expect(source).toContain('min-height: 2.75rem')
-      expect(source).toContain('min-width: 2.75rem')
+      expect(source).not.toContain(':deep(')
     }
   })
 })

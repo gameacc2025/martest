@@ -95,6 +95,7 @@ onUnmounted(() => {
         :mobile-open="mobileOpen"
         :menu-items="menu"
         :user="authStore.user"
+        :primary-action="{ label: 'ثبت محصول جدید', route: 'manage-product-create' }"
         @navigate="closeMobile"
         @toggle-collapse="toggleSidebar"
       />
@@ -147,7 +148,7 @@ onUnmounted(() => {
 
 <style scoped>
 .dash-layout {
-  --dash-sidebar-width: 208px;
+  --dash-sidebar-width: 207px;
   --dash-sidebar-collapsed-width: 76px;
   --dash-header-height: 4rem;
 
@@ -259,9 +260,9 @@ onUnmounted(() => {
   }
 }
 
-/* Paces-inspired workspace proportions; shared page components stay intact. */
+/* tem canvas + full-bleed workspace proportions. */
 .dash-layout {
-  background: var(--ds-color-background);
+  background: var(--tm-canvas);
 }
 
 .dash-layout-content {

@@ -1,7 +1,7 @@
 <template>
   <div class="permission-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <WorkspacePageHeading sr-only title="مدیریت مجوزها" heading-id="permission-management-title" />
+    <WorkspacePageHeading title="مدیریت مجوزها" heading-id="permission-management-title" />
     <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
@@ -234,28 +234,8 @@ async function deletePermission() {
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
-.permission-list-page :deep(.p-toolbar) {
-  background: var(--ds-color-surface);
-  border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl) var(--ds-radius-xl) 0 0;
-  padding: var(--ds-space-4) var(--ds-space-5);
-}
-.permission-list-page :deep(.p-datatable .p-datatable-thead > tr > th) {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-  padding: var(--ds-space-4) var(--ds-space-5);
-  white-space: nowrap;
-}
-.permission-list-page :deep(.p-datatable .p-datatable-tbody > tr > td) {
-  border-color: var(--ds-color-border);
-  padding: var(--ds-space-4) var(--ds-space-5);
-}
 @media (max-width: 640px) {
   .permission-list-page { gap: var(--ds-space-3); }
-  .permission-list-page :deep(.p-toolbar) { align-items: stretch; }
 }
 
 .permission-list-page { gap: clamp(1rem, 2vw, 1.5rem); }
@@ -296,15 +276,9 @@ async function deletePermission() {
 }
 .access-management-intro p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
 .permission-list-page .card { border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
-.permission-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
-.permission-list-page :deep(.p-toolbar-start), .permission-list-page :deep(.p-toolbar-end) { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
-.permission-list-page :deep(.p-toolbar .p-inputtext) { min-height: 2.75rem; border-radius: var(--ds-radius-md); }
-.permission-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
-.permission-list-page :deep(.p-datatable-thead > tr > th) { white-space: nowrap; }
 @media (max-width: 640px) {
   .access-management-intro { align-items: flex-start; padding: 1rem; }
   .access-management-icon { width: 2.75rem; height: 2.75rem; }
-  .permission-list-page :deep(.p-toolbar-start), .permission-list-page :deep(.p-toolbar-end) { width: 100%; }
 }
 
 
@@ -321,69 +295,5 @@ async function deletePermission() {
   padding: 1rem 1.2rem;
   border-bottom: 1px solid var(--ds-color-border);
   background: var(--ds-color-surface);
-}
-.management-data-toolbar :deep(.p-toolbar-start),
-.management-data-toolbar :deep(.p-toolbar-end) {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .65rem;
-}
-.management-data-toolbar :deep(.p-inputtext),
-.management-data-toolbar :deep(.p-select) {
-  min-height: 2.75rem;
-  border-radius: var(--ds-radius-md);
-}
-.management-data-table :deep(.p-datatable-table-container) { overflow-x: auto; scrollbar-width: thin; }
-.management-data-table :deep(.p-datatable-thead > tr > th) {
-  padding: .9rem 1rem;
-  border-color: var(--ds-color-border);
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-  white-space: nowrap;
-}
-.management-data-table :deep(.p-datatable-tbody > tr > td) {
-  padding: .85rem 1rem;
-  border-color: var(--ds-color-border);
-  color: var(--ds-color-text);
-  vertical-align: middle;
-}
-.management-data-table :deep(.p-datatable-tbody > tr:hover) { background: var(--ds-color-surface-hover); }
-.management-data-table :deep(.p-paginator) {
-  justify-content: flex-start;
-  padding: .8rem 1rem;
-  border-top: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface);
-}
-.management-data-table :deep(.p-paginator-page),
-.management-data-table :deep(.p-paginator-next),
-.management-data-table :deep(.p-paginator-prev) {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  border-radius: var(--ds-radius-md);
-}
-.management-data-table :deep(.p-button.p-button-text) {
-  width: 2.75rem;
-  min-width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem;
-}
-.management-data-toolbar :deep(.p-toolbar-end .p-button) { min-height: 2.75rem; }
-.management-data-toolbar :deep(.p-inputtext:focus-visible),
-.management-data-toolbar :deep(.p-select:focus-visible),
-.management-data-toolbar :deep(.p-button:focus-visible) {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 2px;
-}
-@media (max-width: 700px) {
-  .management-data-toolbar :deep(.p-toolbar) { align-items: stretch; flex-direction: column; }
-  .management-data-toolbar :deep(.p-toolbar-start),
-  .management-data-toolbar :deep(.p-toolbar-end) { width: 100%; }
-  .management-data-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .management-data-toolbar :deep(.p-inputtext),
-  .management-data-toolbar :deep(.p-select) { width: 100%; }
-  .management-data-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
 </style>

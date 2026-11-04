@@ -1,7 +1,7 @@
 <template>
   <div class="order-list-page">
     <!-- Card with Toolbar -->
-    <WorkspacePageHeading sr-only title="مدیریت سفارش‌ها" heading-id="order-management-title" />
+    <WorkspacePageHeading title="مدیریت سفارش‌ها" heading-id="order-management-title" />
     <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
@@ -215,17 +215,6 @@ onMounted(() => {
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
-.order-list-page :deep(.p-toolbar) {
-  border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface);
-}
-.order-list-page :deep(.p-datatable-thead > tr > th) {
-  background: var(--ds-color-surface-alt);
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-bold);
-}
 
 .order-list-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
 .order-list-page .ds-page-heading { margin-bottom: 0; }
@@ -257,22 +246,6 @@ onMounted(() => {
 .order-management-intro h1 { margin: .2rem 0; color: var(--ds-color-text); font-size: var(--ds-font-size-2xl); font-weight: 800; }
 .order-management-intro p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
 .order-list-page .card { background: var(--ds-color-surface); }
-.order-list-page :deep(.p-toolbar) { flex-wrap: wrap; gap: .75rem; }
-.order-list-page :deep(.p-toolbar .p-inputtext), .order-list-page :deep(.p-toolbar .p-select) { min-height: 2.65rem; border-radius: var(--ds-radius-md); }
-.order-list-page :deep(.p-datatable-table-container) { overflow-x: auto; }
-.order-list-page :deep(.p-datatable-tbody > tr > td) { vertical-align: middle; }
-.order-list-page :deep(.p-toolbar .p-button),
-.order-list-page :deep(.p-button.p-button-text) { min-height: 2.75rem; }
-.order-list-page :deep(.p-button.p-button-text) {
-  width: 2.75rem;
-  min-width: 2.75rem;
-}
-.order-list-page :deep(.p-paginator-page),
-.order-list-page :deep(.p-paginator-next),
-.order-list-page :deep(.p-paginator-prev) {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-}
 @media (max-width: 640px) { .order-management-intro { align-items: flex-start; padding: 1rem; } .order-management-icon { width: 2.75rem; height: 2.75rem; } }
 
 </style>
