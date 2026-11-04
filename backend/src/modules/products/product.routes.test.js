@@ -245,6 +245,32 @@ test('PATCH /:id: accepts existing price tier IDs and null optional tier fields'
   await app.close();
 });
 
+test('PATCH /:id: accepts explicit retailEnabled boolean', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/products/1',
+    headers: userHeader('COMPANY', ['products.update']),
+    payload: { retailEnabled: true },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.update, true);
+  await app.close();
+});
+
+test('PATCH /:id: rejects a non-boolean retailEnabled value', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/products/1',
+    headers: userHeader('COMPANY', ['products.update']),
+    payload: { retailEnabled: 'yes' },
+  });
+  assert.equal(res.statusCode, 400);
+  assert.equal(hit.update, undefined);
+  await app.close();
+});
+
 test('PATCH /:id: COMPANY with products.update -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
