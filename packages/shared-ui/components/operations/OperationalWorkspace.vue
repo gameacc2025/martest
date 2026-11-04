@@ -61,8 +61,8 @@ const filteredRows = computed(() => props.rows.filter((row) => {
         <div class="tm-workspace__filters" aria-label="فیلتر وضعیت">
           <button v-for="status in statuses" :key="status" type="button" :class="{ active: selectedStatus === status }" @click="selectedStatus = status">{{ status }}</button>
         </div>
-        <Button label="خروجی" icon="pi pi-download" severity="secondary" outlined size="small" />
-        <Button label="ایجاد مورد" icon="pi pi-plus" size="small" />
+        <Button label="خروجی (فاز API)" icon="pi pi-download" severity="secondary" outlined size="small" disabled />
+        <Button label="ایجاد مورد (فاز API)" icon="pi pi-plus" size="small" disabled />
       </div>
 
       <div class="tm-workspace__table-wrap">
