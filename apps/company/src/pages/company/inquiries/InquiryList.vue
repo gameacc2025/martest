@@ -37,6 +37,10 @@ const sortField = ref('createdAt')
 
 const kpiItems = computed(() => [
   { label: 'کل استعلام‌های شرکت', value: pagination.value.total, icon: 'pi pi-comments', tone: 'primary' },
+  { label: 'باز (صفحه جاری)', value: inquiries.value.filter((item) => item.status === 'OPEN').length, icon: 'pi pi-folder-open', tone: 'info' },
+  { label: 'ارسال‌شده (صفحه جاری)', value: inquiries.value.filter((item) => item.status === 'SUBMITTED').length, icon: 'pi pi-send', tone: 'warning' },
+  { label: 'تکمیل‌شده (صفحه جاری)', value: inquiries.value.filter((item) => item.status === 'COMPLETED').length, icon: 'pi pi-check-circle', tone: 'success' },
+  { label: 'منقضی / لغو (صفحه جاری)', value: inquiries.value.filter((item) => ['EXPIRED', 'CANCELLED'].includes(item.status)).length, icon: 'pi pi-times-circle', tone: 'danger' },
 ])
 const sortOrder = ref(-1)
 const tableColumns = [
