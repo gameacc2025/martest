@@ -175,11 +175,11 @@ function continueToReview() {
   const phone = normalizeDigits(shipping.phone).replace(/[\\s-]/g, '')
   const postalCode = normalizeDigits(shipping.postalCode).trim()
   if (!shipping.fullName.trim()) nextErrors.fullName = 'نام گیرنده را وارد کنید.'
-  if (!/^0?\\d{10}$/.test(phone)) nextErrors.phone = 'شماره تماس معتبر وارد کنید.'
+  if (!/^0?\d{10}$/.test(phone)) nextErrors.phone = 'شماره تماس معتبر وارد کنید.'
   if (!shipping.province.trim()) nextErrors.province = 'استان را وارد کنید.'
   if (!shipping.city.trim()) nextErrors.city = 'شهر را وارد کنید.'
   if (!shipping.address.trim()) nextErrors.address = 'نشانی کامل را وارد کنید.'
-  if (!/^\\d{10}$/.test(postalCode)) nextErrors.postalCode = 'کد پستی باید ۱۰ رقم باشد.'
+  if (!/^\d{10}$/.test(postalCode)) nextErrors.postalCode = 'کد پستی باید ۱۰ رقم باشد.'
   errors.value = nextErrors
   if (!Object.keys(nextErrors).length) currentStep.value = 1
 }
