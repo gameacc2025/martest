@@ -155,3 +155,7 @@ Telecom Marketplace در بلندمدت باید بتواند از یک بازا
 ## مرجع طراحی سفارش خرده‌فروشی و تسویه
 
 قرارداد دامنه، موجودیت‌ها، ماشین وضعیت، APIهای پیشنهادی، ledger دوبل، سیاست تسویه و سناریوهای پذیرش در [docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md](./RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md) نگهداری می‌شود. تا زمان تکمیل فازهای R1 تا R7، پیش‌نمایش‌های سفارش و تسویه صرفاً داده نمونه هستند.
+
+## مرجع طراحی تیکتینگ
+
+قرارداد دامنه چندکاناله تیکت، دسترسی Website/Company/STAFF، یادداشت داخلی، SLA و APIهای پیشنهادی در [docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md](./SUPPORT_TICKETING_DOMAIN_DESIGN.md) ثبت شده است. UI مشترک TicketDeskWorkspace در هر سه اپ prototype است و هنوز API یا migration ندارد.
