@@ -153,3 +153,11 @@ Date: 2026-10-29
 Decision: Deliver the legacy UI redesign as small page-level ports against current main, starting with Website homepage.
 Reason: The source patch is stale and contains mock-data/auth-guard hazards. Small changes reduce regression risk and make API, route, and state preservation reviewable.
 Impact: Homepage styling and keyboard accessibility are changed without replacing API/store logic. Each page must have regression coverage and a passing targeted test/build before the next page starts.
+
+
+---
+
+Date: 2026-11-04
+Decision: TEM-derived widgets belong in packages/shared-ui as presentational Vue components; domain pages own data retrieval and permissions. Future CRM, finance, support and retail modules may receive UI-only prototypes when explicitly requested, but every prototype must be visibly marked as sample data and remain disconnected from guessed APIs or real business actions.
+Reason: Reuse the reference UI consistently across Admin and Company without duplicating components or coupling shared presentation to a specific backend domain. Explicit prototypes let product and engineering validate navigation and workflows before committing to backend contracts.
+Impact: Never treat prototype values as live metrics. Do not expose financial actions or tenant data without server-side RBAC, audit logging and domain APIs. See docs/OPERATIONS_UI_ROADMAP.md.
