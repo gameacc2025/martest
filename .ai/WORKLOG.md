@@ -3055,3 +3055,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED. No browser checks were run.
 - **Next action:** Refine Admin user/role management and Company user management, preserving the existing role and permission boundaries.
 
+## 2026-11-04 — UI-REFERENCE-IDENTITY — User and role management workspaces
+- **Status:** PARTIAL — three identity/access pages refined; full UI redesign remains in progress.
+- **Agent:** ChatGPT via GitHub repository tools
+- **Goal:** Continue the reference-led redesign across identity and access operations.
+- **Claimed scope:** Admin UserList, Admin RoleList and Company UserList Vue pages; UI-only.
+- **Changes:** Unified compact heading, pale blue/turquoise toolbar, sky-blue primary action, compact table hierarchy, focus outlines and reduced-motion behavior. Preserved Admin STAFF and Company COMPANY boundaries, existing permissions, role/access-profile restrictions, Company member access toggles, APIs/stores, pagination and routes.
+- **Verification:** Source inspection only. Tests/build/browser checks NOT RUN per owner instruction.
+- **Commits:** Admin users 9676dc7b7d5a0ea225fdd70cfbcafdbd244d12fd; Admin roles 87c540ba539daeb5c12139814f60a53155973f4a; Company users aa3acfce509df821d2536de3a2d3f1a69e05b114.
+- **Push:** Changes written directly to remote main.
+- **Risks / open questions:** Visual rendering and runtime compatibility remain NOT VERIFIED. No browser checks were run.
+- **Next action:** Refine Admin product/category management and Company product-management pages, then continue orders and reports.
+
