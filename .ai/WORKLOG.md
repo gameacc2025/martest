@@ -3286,3 +3286,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added a source-to-component mapping for the complete TEM HTML inventory (analytics, sales, ecommerce, transactions, orders, customers, mail, products, cart/checkout, plans/subscriptions, roles/users/security, telecom and index) to docs/OPERATIONS_UI_ROADMAP.md.
 
 - Added a Company-side settlement status prototype (/finance/settlements), a role-scoped company finance menu item and a dashboard shortcut. Sample balances are explicitly labelled as preview data; no payout/settlement API or payment action was created.
+
+- **Final UI refinements:** CRM leads, pipeline and activity pages now have distinct columns and demo records; Finance settlements, transactions and invoices likewise have dedicated layouts/data rather than identical generic tables. Added Company-side settlement status preview with its own menu and dashboard shortcut. Website customer support was added with correct customer-only routing and panel handoff for Company/STAFF users.
