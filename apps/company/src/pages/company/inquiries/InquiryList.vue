@@ -3,7 +3,7 @@ import WorkspacePageHeading from '@telecom/shared-ui/components/common/Workspace
 import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { inquiriesApi } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
@@ -20,6 +20,7 @@ import Tabs from 'primevue/tabs'
 import ProgressSpinner from 'primevue/progressspinner'
 
 const router = useRouter()
+const route = useRoute()
 const toast = useToast()
 const auth = useAuthStore()
 
@@ -55,8 +56,8 @@ const tableColumns = [
   { field: 'createdAt', header: 'تاریخ ایجاد', sortable: true, slot: 'createdDate' },
 ]
 const searchQuery = ref('')
-const statusFilter = ref(null)
-const scopeFilter = ref('all')
+const statusFilter = ref(typeof route.query.status === 'string' ? route.query.status : null)
+const scopeFilter = ref(typeof route.query.scope === 'string' ? route.query.scope : 'all')
 
 const statusOptions = [
   { label: 'همه', value: null },

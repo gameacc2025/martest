@@ -1,10 +1,6 @@
 ﻿<template>
   <div class="company-dashboard">
-    <TemPageHeader
-      :title="companyName ? 'خوش آمدید، ' + companyName : 'داشبورد شرکت'"
-      description="وضعیت محصولات، فرصت‌های استعلام و فعالیت‌های اخیر شرکت را از اینجا مدیریت کنید."
-      :crumb="[{ label: 'داشبورد شرکت', to: { name: 'company-dashboard' } }, { label: 'نمای کلی' }]"
-    >
+    <TemPageHeader :title="companyName ? 'خوش آمدید، ' + companyName : 'داشبورد شرکت'">
       <template #actions>
         <span class="company-dashboard-status">
           <span class="company-dashboard-status-dot" :class="{ 'is-active': company?.status === 'ACTIVE' }"></span>
@@ -13,11 +9,8 @@
             <i class="pi pi-verified" aria-hidden="true"></i> تأیید شده
           </span>
         </span>
-        <router-link :to="{ name: 'manage-product-create' }" class="tm-btn">
+        <router-link :to="{ name: 'manage-product-create' }" class="tm-btn tm-btn--accent">
           <i class="pi pi-plus" aria-hidden="true"></i> افزودن محصول
-        </router-link>
-        <router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost">
-          <i class="pi pi-inbox" aria-hidden="true"></i> استعلام‌ها
         </router-link>
       </template>
     </TemPageHeader>
@@ -38,72 +31,30 @@
       </div>
     </div>
 
-    <!-- KPI cards — business health metrics -->
-    <section class="tm-grid tm-grid--stats" aria-label="شاخص‌های کلیدی شرکت">
-      <TemStatCard
-        label="منتشرشده (۲۰ محصول اخیر)"
-        :value="publishedProducts"
-        icon="pi pi-check-circle"
-        tone="success"
-        :loading="productsLoading"
-        :to="{ name: 'manage-products' }"
-      />
-      <TemStatCard
-        label="در انتظار بررسی (۲۰ محصول اخیر)"
-        :value="pendingReviewProducts"
-        icon="pi pi-clock"
-        tone="warning"
-        :loading="productsLoading"
-        :to="{ name: 'manage-products' }"
-      />
-      <TemStatCard
-        label="استعلام‌های دریافتی"
-        :value="receivedInquiries"
-        icon="pi pi-inbox"
-        tone="primary"
-        :loading="statsLoading"
-        :to="{ name: 'company-inquiries' }"
-      />
-      <TemStatCard
-        label="پاسخ‌های در انتظار"
-        :value="pendingResponses"
-        icon="pi pi-reply"
-        tone="danger"
-        :loading="statsLoading"
-        :to="{ name: 'company-inquiries' }"
-      />
-      <TemStatCard
-        label="کل محصولات شرکت"
-        :value="totalCompanyProducts"
-        icon="pi pi-box"
-        tone="accent"
-        :loading="productsLoading"
-        :to="{ name: 'manage-products' }"
-      />
-      <TemStatCard
-        label="نرخ موفقیت پاسخ‌گویی"
-        :value="companyResponseRate === null ? null : companyResponseRate + '%'"
-        icon="pi pi-chart-line"
-        tone="success"
-        :loading="statsLoading"
-        meta="بر اساس آمار استعلام‌ها"
-      />
-      <TemStatCard
-        label="رتبه شرکت"
-        :value="companyRank ? companyRank.toLocaleString('fa-IR') : null"
-        icon="pi pi-star"
-        tone="warning"
-        :loading="statsLoading"
-        :meta="companyRankTotal ? 'از ' + companyRankTotal.toLocaleString('fa-IR') + ' شرکت' : 'در صورت ارائه رتبه توسط سرویس'"
-      />
-      <TemStatCard
-        label="استعلام‌های باز"
-        :value="openInquiryCount"
-        icon="pi pi-clock"
-        tone="info"
-        :loading="inquiriesLoading"
-        :to="{ name: 'company-inquiries' }"
-      />
+    <section class="cd-kpi-groups" aria-label="شاخص‌های کلیدی شرکت">
+      <div class="cd-kpi-group">
+        <div class="cd-kpi-group__heading"><h2>محصولات</h2><span>وضعیت کاتالوگ شرکت</span></div>
+        <div class="cd-kpi-group__grid">
+          <TemStatCard label="کل محصولات" :value="totalCompanyProducts" icon="pi pi-box" tone="primary" :loading="productsLoading" :to="{ name: 'manage-products' }" zero-meta="هنوز محصولی ثبت نشده است" />
+          <TemStatCard label="منتشرشده" :value="publishedProducts" icon="pi pi-check-circle" tone="success" :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PUBLISHED' } }" zero-meta="محصول منتشرشده‌ای ندارید" />
+          <TemStatCard label="در انتظار بررسی" :value="pendingReviewProducts" icon="pi pi-clock" tone="warning" featured :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PENDING_REVIEW' } }" zero-meta="درخواستی برای بررسی ندارید" />
+        </div>
+      </div>
+      <div class="cd-kpi-group">
+        <div class="cd-kpi-group__heading"><h2>استعلام‌ها</h2><span>فرصت‌های پاسخ‌گویی شرکت</span></div>
+        <div class="cd-kpi-group__grid">
+          <TemStatCard label="استعلام‌های دریافتی" :value="receivedInquiries" icon="pi pi-inbox" tone="primary" featured :loading="statsLoading" :to="{ name: 'company-inquiries', query: { scope: 'received' } }" zero-meta="هنوز استعلامی دریافت نکرده‌اید" />
+          <TemStatCard label="استعلام‌های باز" :value="openInquiryCount" icon="pi pi-folder-open" tone="info" :loading="statsLoading" :to="{ name: 'company-inquiries', query: { scope: 'received', status: 'OPEN' } }" zero-meta="استعلام بازی وجود ندارد" />
+          <TemStatCard label="پاسخ‌های در انتظار" :value="pendingResponses" icon="pi pi-reply" tone="danger" featured :loading="statsLoading" :to="{ name: 'company-inquiries', query: { scope: 'received', status: 'SUBMITTED' } }" zero-meta="پاسخ معوقی ندارید" />
+        </div>
+      </div>
+      <div class="cd-kpi-group">
+        <div class="cd-kpi-group__heading"><h2>عملکرد</h2><span>شاخص‌های پاسخ‌گویی و جایگاه</span></div>
+        <div class="cd-kpi-group__grid">
+          <TemStatCard label="نرخ پاسخ‌دهی" :value="companyResponseRate === null ? null : companyResponseRate + '%'" icon="pi pi-chart-line" tone="success" :loading="statsLoading" meta="بر اساس آمار ثبت‌شده استعلام‌ها" zero-meta="هنوز داده کافی برای محاسبه وجود ندارد" />
+          <TemStatCard label="رتبه شرکت" :value="companyRank ? companyRank.toLocaleString('fa-IR') : null" icon="pi pi-star" tone="warning" :loading="statsLoading" :meta="companyRankTotal ? 'از ' + companyRankTotal.toLocaleString('fa-IR') + ' شرکت' : 'پس از محاسبه رتبه توسط سامانه نمایش داده می‌شود'" zero-meta="رتبه‌ای برای شرکت ثبت نشده است" />
+        </div>
+      </div>
     </section>
 
     <!-- Stats error (non-blocking) -->
@@ -119,27 +70,31 @@
       />
     </TemPanel>
 
-    <!-- Analytics -->
-    <TemPanel title="تحلیل عملکرد شرکت" icon="pi pi-chart-bar">
-      <template #actions><span class="cd-hint">بر پایه اطلاعات واقعی محصولات و استعلام‌ها</span></template>
-      <div class="cd-analytics-grid">
-        <div class="cd-analytics-block">
-          <div class="cd-analytics-heading">
-            <strong>وضعیت استعلام‌های دریافتی</strong>
-            <span>تفکیک بر اساس وضعیت</span>
+    <TemPanel title="وضعیت محصولات" icon="pi pi-chart-pie">
+      <template #actions><span class="cd-hint">تفکیک بر اساس وضعیت فعلی کاتالوگ</span></template>
+      <div v-if="productsLoading" class="cd-chart-skeleton" aria-busy="true">
+        <span v-for="n in 4" :key="n"></span>
+      </div>
+      <NoDataState v-else-if="productsError" icon="pi pi-exclamation-triangle" title="خطا در دریافت محصولات" description="اتصال به فهرست محصولات برقرار نشد. دوباره تلاش کنید." retryable @retry="fetchProducts" />
+      <NoDataState v-else-if="!productStatusCounts" icon="pi pi-chart-pie" title="آمار تفکیکی محصولات در دسترس نیست" description="داده وضعیت محصولات از سرویس مدیریت دریافت نشد." retryable @retry="fetchProducts" />
+      <div v-else-if="productTotal === 0" class="cd-chart-empty">
+        <i class="pi pi-box" aria-hidden="true"></i>
+        <strong>هنوز محصولی ثبت نشده است</strong>
+        <span>با ثبت اولین محصول، وضعیت کاتالوگ در این بخش نمایش داده می‌شود.</span>
+        <router-link :to="{ name: 'manage-product-create' }" class="tm-btn tm-btn--sm">ثبت محصول</router-link>
+      </div>
+      <div v-else-if="dominantProductSegment" class="cd-product-progress-list">
+        <div v-for="segment in productLegendItems" :key="segment.label" class="cd-product-progress-item">
+          <div class="cd-product-progress-heading">
+            <span><i :style="{ background: segment.color }"></i>{{ segment.label }}</span>
+            <strong>{{ segment.value.toLocaleString('fa-IR') }} <small>({{ segment.percent.toLocaleString('fa-IR') }}٪)</small></strong>
           </div>
-          <TemBarChart :series="inquiryStatusSeries" :height="200" :loading="statsLoading" />
+          <div class="tm-meter"><span class="tm-meter__fill" :style="{ width: segment.percent + '%', background: segment.color }"></span></div>
         </div>
-        <div class="cd-analytics-block">
-          <div class="cd-analytics-heading">
-            <strong>وضعیت محصولات</strong>
-            <span>بر اساس فهرست محصولات شرکت</span>
-          </div>
-          <div class="cd-donut-row">
-            <TemDonutChart :segments="productSegments" />
-            <TemLegend :items="productSegments" />
-          </div>
-        </div>
+      </div>
+      <div v-else class="cd-donut-row">
+        <TemDonutChart :segments="productSegments" :center-value="productTotal.toLocaleString('fa-IR')" center-label="محصول" />
+        <TemLegend :items="productLegendItems" />
       </div>
     </TemPanel>
 
@@ -155,6 +110,20 @@
         <QuickActions :actions="quickActions" />
       </TemPanel>
     </section>
+
+    <TemPanel title="فروش خرده‌فروشی" icon="pi pi-shopping-cart">
+      <div class="cd-commerce-grid">
+        <div class="cd-commerce-metric"><span>سفارش‌های جدید</span><strong>—</strong><small>پس از اتصال سرویس سفارش نمایش داده می‌شود</small></div>
+        <div class="cd-commerce-metric"><span>سفارش‌های در حال ارسال</span><strong>—</strong><small>داده عملیاتی هنوز در دسترس نیست</small></div>
+        <div class="cd-commerce-metric"><span>سفارش‌های تحویل‌شده</span><strong>—</strong><small>داده عملیاتی هنوز در دسترس نیست</small></div>
+        <div class="cd-commerce-metric"><span>فروش و درآمد</span><strong>—</strong><small>پس از راه‌اندازی API مالی نمایش داده می‌شود</small></div>
+        <div class="cd-commerce-metric cd-commerce-metric--notice"><span><i class="pi pi-exclamation-triangle" aria-hidden="true"></i> هشدار موجودی</span><p>سرویس موجودی متصل نیست؛ در حال حاضر نمی‌توان کمبود موجودی را محاسبه کرد.</p></div>
+      </div>
+      <div class="cd-commerce-actions">
+        <router-link :to="{ name: 'company-retail-orders' }" class="tm-btn tm-btn--ghost tm-btn--sm">پیش‌نمایش سفارش‌ها</router-link>
+        <router-link :to="{ name: 'manage-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">مدیریت محصولات</router-link>
+      </div>
+    </TemPanel>
 
     <!-- Activity -->
     <div class="cd-grid cd-grid--1-1">
@@ -174,55 +143,33 @@
       </TemPanel>
     </div>
 
-    <!-- Company summary + score -->
-    <div class="cd-grid cd-grid--2-1">
-      <TemPanel title="خلاصه شرکت" icon="pi pi-building">
-        <template #actions>
-          <router-link :to="{ name: 'company-settings' }" class="tm-btn tm-btn--ghost tm-btn--sm">ویرایش پروفایل</router-link>
-        </template>
-        <div v-if="companyLoading" class="cd-summary">
-          <span class="cd-summary-logo cd-skeleton"></span>
-          <div class="cd-summary-main">
-            <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--lg"></span>
-            <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--sm"></span>
-            <div class="cd-skeleton-tags">
-              <span class="cd-skeleton cd-skeleton-tag"></span>
-              <span class="cd-skeleton cd-skeleton-tag"></span>
-            </div>
+    <TemPanel title="خلاصه شرکت" icon="pi pi-building">
+      <template #actions>
+        <router-link :to="{ name: 'company-settings' }" class="tm-btn tm-btn--ghost tm-btn--sm">ویرایش پروفایل شرکت</router-link>
+      </template>
+      <div v-if="companyLoading" class="cd-summary" aria-busy="true">
+        <span class="cd-summary-logo cd-skeleton"></span>
+        <div class="cd-summary-main">
+          <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--lg"></span>
+          <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--sm"></span>
+          <div class="cd-skeleton-tags"><span class="cd-skeleton cd-skeleton-tag"></span><span class="cd-skeleton cd-skeleton-tag"></span></div>
+        </div>
+      </div>
+      <div v-else class="cd-summary">
+        <span class="cd-summary-logo">
+          <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="64" height="64" decoding="async" />
+          <i v-else class="pi pi-building" aria-hidden="true"></i>
+        </span>
+        <div class="cd-summary-main">
+          <h3 class="cd-summary-name">{{ companyName || 'نام شرکت ثبت نشده است' }}</h3>
+          <p v-if="company?.nameEn" class="cd-summary-sub" dir="ltr">{{ company.nameEn }}</p>
+          <div class="cd-summary-tags">
+            <span class="tm-pill" :class="company?.status === 'ACTIVE' ? 'tm-pill--success' : 'tm-pill--warning'">{{ companyStatusLabel }}</span>
+            <span v-if="company?.isVerified" class="tm-pill tm-pill--info"><i class="pi pi-verified" aria-hidden="true"></i> تأیید شده</span>
           </div>
         </div>
-        <div v-else class="cd-summary">
-          <span class="cd-summary-logo">
-            <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="64" height="64" decoding="async" />
-            <i v-else class="pi pi-building"></i>
-          </span>
-          <div class="cd-summary-main">
-            <h3 class="cd-summary-name">{{ companyName || '—' }}</h3>
-            <p v-if="company?.nameEn" class="cd-summary-sub">{{ company.nameEn }}</p>
-            <div class="cd-summary-tags">
-              <span class="tm-pill" :class="company?.status === 'ACTIVE' ? 'tm-pill--success' : 'tm-pill--warning'">
-                {{ companyStatusLabel }}
-              </span>
-              <span v-if="company?.isVerified" class="tm-pill tm-pill--info">
-                <i class="pi pi-verified"></i> تأیید شده
-              </span>
-            </div>
-          </div>
-        </div>
-      </TemPanel>
-
-      <TemPanel title="امتیاز و رتبه شرکت" icon="pi pi-star">
-        <ScoreCard
-          :score="companyScore"
-          :max="100"
-          label="امتیاز عملکرد"
-          :rank="companyRank"
-          :rank-total="companyRankTotal"
-          tone="primary"
-          :loading="statsLoading"
-        />
-      </TemPanel>
-    </div>
+      </div>
+    </TemPanel>
 
     <!-- Recent products -->
     <TemPanel title="محصولات اخیر" icon="pi pi-box">
@@ -258,11 +205,9 @@ import { NoDataState } from '@telecom/shared-ui/components/common/feedback'
 import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickActions.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
 import InquiryPipeline from '@telecom/shared-ui/components/admin/dashboard/InquiryPipeline.vue'
-import ScoreCard from '@telecom/shared-ui/components/admin/dashboard/ScoreCard.vue'
 import TemPageHeader from '@telecom/shared-ui/components/ui/TemPageHeader.vue'
 import TemStatCard from '@telecom/shared-ui/components/ui/TemStatCard.vue'
 import TemPanel from '@telecom/shared-ui/components/ui/TemPanel.vue'
-import TemBarChart from '@telecom/shared-ui/components/ui/TemBarChart.vue'
 import TemDonutChart from '@telecom/shared-ui/components/ui/TemDonutChart.vue'
 import TemLegend from '@telecom/shared-ui/components/ui/TemLegend.vue'
 
@@ -277,7 +222,9 @@ const statsError = ref(false)
 
 const products = ref([])
 const totalCompanyProducts = ref(null)
+const productStatusCounts = ref(null)
 const productsLoading = ref(true)
+const productsError = ref(false)
 
 const openInquiries = ref([])
 const inquiriesLoading = ref(true)
@@ -296,12 +243,8 @@ const companyStatusLabel = computed(() =>
 // ── KPIs (from real /inquiries/stats + products list) ───────
 const receivedInquiries = computed(() => stats.value?.received?.total ?? 0)
 const pendingResponses = computed(() => stats.value?.responses?.awaiting ?? 0)
-const publishedProducts = computed(
-  () => products.value.filter((p) => p.status === 'PUBLISHED' || p.status === 'APPROVED').length
-)
-const pendingReviewProducts = computed(
-  () => products.value.filter((p) => p.status === 'PENDING_REVIEW').length
-)
+const publishedProducts = computed(() => productStatusCounts.value?.PUBLISHED ?? null)
+const pendingReviewProducts = computed(() => productStatusCounts.value?.PENDING_REVIEW ?? null)
 const openInquiryCount = computed(() => stats.value?.received?.byStatus?.OPEN ?? 0)
 
 // ── Inquiry pipeline (real received.byStatus) ───────────────
@@ -315,31 +258,28 @@ const pipelineStages = computed(() => {
   ]
 })
 
-// Bar series for the inquiry-status chart (same real `received.byStatus` data).
-const inquiryStatusSeries = computed(() =>
-  pipelineStages.value.map((stage) => ({ label: stage.label, value: stage.value }))
-)
-
-// Product lifecycle shares from the company's own product list.
+// Product lifecycle counts come from server-side status filters, not the first 20 rows.
+const PRODUCT_STATUSES = ['PUBLISHED', 'APPROVED', 'PENDING_REVIEW', 'DRAFT', 'REJECTED', 'HIDDEN', 'ARCHIVED']
 const productSegments = computed(() => {
-  const counts = { PUBLISHED: 0, PENDING_REVIEW: 0, DRAFT: 0, REJECTED: 0 }
-  for (const product of products.value) {
-    if (product.status in counts) counts[product.status] += 1
-    else if (product.status === 'APPROVED') counts.PUBLISHED += 1
-  }
+  const counts = productStatusCounts.value
+  if (!counts || PRODUCT_STATUSES.some((status) => counts[status] === null)) return []
   return [
-    { label: 'منتشرشده', value: counts.PUBLISHED, color: '#18c8a0' },
-    { label: 'در انتظار تأیید', value: counts.PENDING_REVIEW, color: '#f0b040' },
-    { label: 'پیش‌نویس', value: counts.DRAFT, color: 'var(--tm-muted)' },
-    { label: 'ردشده', value: counts.REJECTED, color: '#ef4d4d' },
+    { label: 'منتشرشده', value: counts.PUBLISHED, color: 'var(--ds-status-success-fg)' },
+    { label: 'تأییدشده، آماده انتشار', value: counts.APPROVED, color: 'var(--ds-status-info-fg)' },
+    { label: 'در انتظار بررسی', value: counts.PENDING_REVIEW, color: 'var(--ds-status-warning-fg)' },
+    { label: 'پیش‌نویس', value: counts.DRAFT, color: 'var(--ds-status-muted-fg)' },
+    { label: 'ردشده', value: counts.REJECTED, color: 'var(--ds-status-danger-fg)' },
+    { label: 'پنهان / بایگانی', value: counts.HIDDEN + counts.ARCHIVED, color: 'var(--ds-color-neutral)' },
   ]
 })
+const productTotal = computed(() => productSegments.value.reduce((sum, item) => sum + item.value, 0))
+const productLegendItems = computed(() => productSegments.value
+  .filter((item) => item.value > 0)
+  .map((item) => ({ ...item, percent: productTotal.value ? Math.round((item.value / productTotal.value) * 100) : 0 }))
+)
+const dominantProductSegment = computed(() => productLegendItems.value.find((item) => item.percent > 90) || null)
 
 // ── Company score / rank (only if the API provides it) ──────
-const companyScore = computed(() => {
-  const rate = stats.value?.responses?.successRate
-  return typeof rate === 'number' ? Math.round(rate) : null
-})
 const companyRank = computed(() => stats.value?.ranking?.position ?? null)
 const companyRankTotal = computed(() => stats.value?.ranking?.total ?? null)
 const companyResponseRate = computed(() => {
@@ -412,23 +352,15 @@ const upcomingDeadlines = computed(() =>
 
 // ── Quick actions ───────────────────────────────────────────
 const quickActions = [
-  { label: 'استعلام‌ها', icon: 'pi pi-inbox', to: { name: 'company-inquiries' }, tone: 'primary' },
-  { label: 'محصولات شرکت', icon: 'pi pi-box', to: { name: 'manage-products' }, tone: 'success' },
-  { label: 'افزودن محصول', icon: 'pi pi-plus', to: { name: 'manage-product-create' }, tone: 'info' },
-  { label: 'گزارش‌ها', icon: 'pi pi-chart-bar', to: { name: 'company-reports' }, tone: 'secondary' },
-  { label: 'کاربران شرکت', icon: 'pi pi-users', to: { name: 'company-users' }, tone: 'secondary' },
-  { label: 'پروفایل شرکت', icon: 'pi pi-building', to: { name: 'company-settings' }, tone: 'warning' },
-  { label: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', to: { name: 'company-tickets' }, tone: 'info' },
-  { label: 'سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', to: { name: 'company-retail-orders' }, tone: 'info' },
-  { label: 'وضعیت تسویه‌ها', icon: 'pi pi-wallet', to: { name: 'company-finance-settlements' }, tone: 'warning' },
-
+  { label: 'پاسخ به استعلام‌های معلق', icon: 'pi pi-reply', to: { name: 'company-inquiries', query: { scope: 'received', status: 'SUBMITTED' } }, tone: 'primary' },
+  { label: 'ویرایش پروفایل شرکت', icon: 'pi pi-building', to: { name: 'company-settings' }, tone: 'secondary' },
 ]
 
 // ── Alerts / Warnings ─────────────────────────────────────
 const alerts = computed(() => {
   const items = []
-  const incomplete = products.value.filter((p) => p.status === 'DRAFT')
-  if (incomplete.length > 0) {
+  const incomplete = productStatusCounts.value?.DRAFT ?? 0
+  if (incomplete > 0) {
     items.push({
       id: 'incomplete-products',
       severity: 'warning',
@@ -437,8 +369,8 @@ const alerts = computed(() => {
       to: { name: 'manage-products' },
     })
   }
-  const rejected = products.value.filter((p) => p.status === 'REJECTED')
-  if (rejected.length > 0) {
+  const rejected = productStatusCounts.value?.REJECTED ?? 0
+  if (rejected > 0) {
     items.push({
       id: 'rejected-products',
       severity: 'danger',
@@ -544,18 +476,39 @@ async function fetchStats() {
 
 async function fetchProducts() {
   productsLoading.value = true
+  productsError.value = false
   try {
-    // Company dashboard shows the company's own products across ALL statuses,
-    // so use the authenticated management endpoint (not the public list which
-    // only returns PUBLISHED products).
-    const res = await productsApi.myProducts({ limit: 20, sort: 'createdAt:desc' })
+    const [listResult, ...statusResults] = await Promise.allSettled([
+      productsApi.myProducts({ limit: 20, sort: 'createdAt:desc' }),
+      ...PRODUCT_STATUSES.map((status) => productsApi.myProducts({ page: 1, limit: 1, status })),
+    ])
+    if (listResult.status !== 'fulfilled') throw listResult.reason
+
+    const res = listResult.value
     products.value = unwrapList(res)
     const body = res?.data ?? res
     const meta = body?.data?.meta ?? body?.meta
-    totalCompanyProducts.value = Number.isFinite(Number(meta?.total)) ? Number(meta.total) : null
+    const overallTotal = Number(meta?.total)
+    totalCompanyProducts.value = Number.isFinite(overallTotal) ? overallTotal : null
+
+    const counts = {}
+    PRODUCT_STATUSES.forEach((status, index) => {
+      const result = statusResults[index]
+      if (result.status !== 'fulfilled') { counts[status] = null; return }
+      const responseBody = result.value?.data ?? result.value
+      const responseMeta = responseBody?.data?.meta ?? responseBody?.meta
+      const count = Number(responseMeta?.total)
+      counts[status] = Number.isFinite(count) ? count : null
+    })
+    productStatusCounts.value = PRODUCT_STATUSES.every((status) => counts[status] !== null) ? counts : null
+    if (totalCompanyProducts.value === null && productStatusCounts.value) {
+      totalCompanyProducts.value = PRODUCT_STATUSES.reduce((sum, status) => sum + counts[status], 0)
+    }
   } catch (err) {
-    console.error('Error fetching products:', err)
+    productsError.value = true
     products.value = []
+    productStatusCounts.value = null
+    console.error('Error fetching company product dashboard data:', err)
   } finally {
     productsLoading.value = false
   }
@@ -611,8 +564,35 @@ onMounted(() => {
   direction: rtl;
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-6);
+  gap: var(--ds-section-gap);
 }
+.cd-kpi-groups { display: grid; gap: var(--ds-space-6); }
+.cd-kpi-group { min-width: 0; }
+.cd-kpi-group__heading { display: flex; align-items: baseline; gap: .65rem; margin-bottom: .75rem; }
+.cd-kpi-group__heading h2 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--ds-color-text); }
+.cd-kpi-group__heading span { color: var(--ds-color-text-muted); font-size: .8125rem; }
+.cd-kpi-group__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: var(--ds-space-3); }
+.cd-chart-skeleton { display: grid; grid-template-columns: repeat(4, 1fr); align-items: end; gap: 1rem; height: 150px; padding: 1rem; }
+.cd-chart-skeleton span { height: 45%; border-radius: 8px; background: var(--ds-color-surface-alt); animation: cd-pulse 1.2s ease-in-out infinite; }
+.cd-chart-skeleton span:nth-child(2) { height: 72%; } .cd-chart-skeleton span:nth-child(3) { height: 56%; } .cd-chart-skeleton span:nth-child(4) { height: 88%; }
+.cd-chart-empty { display: flex; flex-direction: column; align-items: center; gap: .65rem; padding: 2rem; color: var(--ds-color-text-muted); text-align: center; }
+.cd-chart-empty > i { font-size: 1.5rem; color: var(--ds-color-primary); }
+.cd-chart-empty strong { color: var(--ds-color-text); }
+.cd-product-progress-list { display: grid; gap: 1rem; max-width: 760px; }
+.cd-product-progress-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: .45rem; color: var(--ds-color-text); font-size: .875rem; }
+.cd-product-progress-heading > span { display: inline-flex; align-items: center; gap: .5rem; }
+.cd-product-progress-heading i { width: .65rem; height: .65rem; border-radius: 2px; }
+.cd-product-progress-heading small { color: var(--ds-color-text-muted); font-weight: 500; }
+.cd-donut-row { display: grid; grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); align-items: center; gap: 1.25rem; max-width: 720px; }
+.cd-donut-row :deep(.tm-donut-wrap) { max-width: 190px; }
+.cd-commerce-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: .75rem; }
+.cd-commerce-metric { display: flex; flex-direction: column; gap: .35rem; min-height: 112px; padding: .9rem 1rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface-alt); }
+.cd-commerce-metric > span { color: var(--ds-color-text-muted); font-size: .8125rem; font-weight: 700; }
+.cd-commerce-metric strong { color: var(--ds-color-text); font-size: 1.25rem; }
+.cd-commerce-metric small,.cd-commerce-metric p { margin: 0; color: var(--ds-color-text-muted); font-size: .8125rem; line-height: 1.6; }
+.cd-commerce-metric--notice { grid-column: span 2; }
+.cd-commerce-metric--notice > span { color: var(--ds-status-warning-fg); }
+.cd-commerce-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
 
 /* Page header */
 .page-header {
@@ -794,6 +774,9 @@ onMounted(() => {
 }
 @media (max-width: 575px) {
   .cd-kpis { grid-template-columns: 1fr; }
+  .cd-donut-row { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .cd-commerce-metric--notice { grid-column: auto; }
+  .cd-kpi-group__heading { flex-wrap: wrap; }
   .cd-alert { flex-wrap: wrap; }
   .cd-alert-action { width: 100%; justify-content: center; margin-top: var(--ds-space-1); }
 }

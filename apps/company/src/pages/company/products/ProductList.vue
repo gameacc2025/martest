@@ -125,7 +125,7 @@ import WorkspacePageHeading from '@telecom/shared-ui/components/common/Workspace
 import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { productsApi, companiesApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
@@ -134,6 +134,7 @@ import Select from 'primevue/select'
 
 const toast = useToast()
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 
 // The company filter/selector is only meaningful (and permitted) for
@@ -160,7 +161,7 @@ const editingId = ref(null)
 const productToDelete = ref(null)
 const rejectionReason = ref('')
 const searchQuery = ref('')
-const statusFilter = ref(null)
+const statusFilter = ref(typeof route.query.status === 'string' ? route.query.status : null)
 const statusOptions = STATUS_OPTIONS
 
 // Use centralized status helpers from config/product.js
