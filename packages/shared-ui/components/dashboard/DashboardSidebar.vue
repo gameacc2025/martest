@@ -30,6 +30,7 @@ const props = defineProps({
   mobileOpen: { type: Boolean, default: false },
   // Pre-filtered menu items (array of section objects).
   menuItems: { type: Array, default: () => [] },
+  user: { type: Object, default: null },
 })
 
 const emit = defineEmits(['navigate', 'toggle-collapse'])
@@ -252,6 +253,13 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
         </ul>
       </template>
     </nav>
+    <footer class="dash-sidebar-profile">
+      <span class="dash-sidebar-profile-avatar">{{ (user?.displayName || user?.fullName || user?.username || 'ک').charAt(0) }}</span>
+      <span class="dash-sidebar-profile-meta">
+        <strong>{{ user?.displayName || user?.fullName || user?.username || 'کاربر پنل' }}</strong>
+        <small>{{ user?.company?.name || 'مدیریت سامانه' }}</small>
+      </span>
+    </footer>
   </aside>
 </template>
 
@@ -272,7 +280,13 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 .dash-sidebar-sublist{margin:.2rem .35rem .35rem;padding-inline-start:.75rem;border-inline-start:1px solid rgba(255,255,255,.12)}.dash-sidebar-sublink{min-height:2.35rem;font-size:.77rem}
 .dash-submenu-enter-active,.dash-submenu-leave-active{overflow:hidden;max-height:500px;transition:opacity .2s,max-height .25s}.dash-submenu-enter-from,.dash-submenu-leave-to{max-height:0;opacity:0}
 .dash-sidebar-link:focus-visible{outline:2px solid #4de3ee;outline-offset:2px}
-@media(min-width:992px){.dash-sidebar--collapsed{width:var(--dash-sidebar-collapsed)}.dash-sidebar--collapsed .dash-sidebar-brand{justify-content:center;padding:0}.dash-sidebar--collapsed .dash-sidebar-brand-copy,.dash-sidebar--collapsed .dash-sidebar-section,.dash-sidebar--collapsed .dash-sidebar-link-text,.dash-sidebar--collapsed .dash-sidebar-badge,.dash-sidebar--collapsed .dash-sidebar-planned-badge,.dash-sidebar--collapsed .dash-sidebar-caret{display:none}.dash-sidebar--collapsed .dash-sidebar-link{justify-content:center;padding:.7rem 0}.dash-sidebar--collapsed .dash-sidebar-link-icon{width:auto}.dash-sidebar-desktop-only{display:none}}
+.dash-sidebar-profile{position:sticky;bottom:0;display:flex;align-items:center;gap:.65rem;margin-top:auto;padding:.85rem .8rem;border-top:1px solid rgba(255,255,255,.1);background:#0d2945}
+.dash-sidebar-profile-avatar{display:grid;width:2.25rem;height:2.25rem;flex:0 0 auto;place-items:center;border:2px solid rgba(255,255,255,.18);border-radius:50%;background:linear-gradient(135deg,#18c4d7,#268de8);color:#fff;font-size:.8rem;font-weight:900}
+.dash-sidebar-profile-meta{display:flex;min-width:0;flex-direction:column;gap:.08rem}
+.dash-sidebar-profile-meta strong{overflow:hidden;color:#f4faff;font-size:.72rem;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.dash-sidebar-profile-meta small{overflow:hidden;color:#91aec5;font-size:.62rem;text-overflow:ellipsis;white-space:nowrap}
+
+@media(min-width:992px){.dash-sidebar--collapsed{width:var(--dash-sidebar-collapsed)}.dash-sidebar--collapsed .dash-sidebar-brand{justify-content:center;padding:0}.dash-sidebar--collapsed .dash-sidebar-profile-meta,.dash-sidebar--collapsed .dash-sidebar-section,.dash-sidebar--collapsed .dash-sidebar-link-text,.dash-sidebar--collapsed .dash-sidebar-badge,.dash-sidebar--collapsed .dash-sidebar-planned-badge,.dash-sidebar--collapsed .dash-sidebar-caret{display:none}.dash-sidebar--collapsed .dash-sidebar-link{justify-content:center;padding:.7rem 0}.dash-sidebar--collapsed .dash-sidebar-link-icon{width:auto}.dash-sidebar-desktop-only{display:none}}
 @media(max-width:991px){.dash-sidebar{width:208px}.dash-sidebar-brand{min-height:68px}.dash-sidebar-desktop-only{display:none}}
 
 </style>
