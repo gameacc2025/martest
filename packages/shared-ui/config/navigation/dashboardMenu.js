@@ -187,6 +187,12 @@ export const dashboardMenu = [
     ],
   },
   {
+    section: 'فروش خرده‌فروشی شرکت',
+    items: [
+      { title: 'سفارش‌های دریافتی', icon: 'pi pi-shopping-cart', route: 'company-retail-orders', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+    ],
+  },
+  {
     section: 'مالی شرکت',
     items: [
       { title: 'وضعیت تسویه‌ها', icon: 'pi pi-wallet', route: 'company-finance-settlements', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
