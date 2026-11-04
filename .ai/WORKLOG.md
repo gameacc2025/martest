@@ -3276,3 +3276,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Follow-up in same execution:** Added CRM subroutes for overview, leads, sales pipeline and activities; added Finance subroutes for overview, company settlements, transactions and invoices. Navigation now groups CRM and Finance under real nested menus and separates Support and Retail Orders into their own sections.
 - Added/exported TemLineChart as another reusable TEM-derived chart primitive.
 - Enriched Admin dashboard with additional existing backend aggregate fields: active users, pending products and total inquiries (the backend currently exposes the inquiry count under its legacy counts.orders key; UI labels it correctly as inquiries). Company dashboard uses API pagination metadata for total products and inquiry aggregate stats for open inquiry count.
+
+- **Additional TEM extraction:** Added and exported TemMailLayout, TemMailRow and TemMailReader from the mail.html / mail-detail.html patterns, plus TemActivityTimeline for CRM/support activity feeds. Added TemLineChart from charts.js. The full widget catalog is documented in docs/OPERATIONS_UI_ROADMAP.md.
