@@ -113,7 +113,7 @@
             mode="basic"
             name="avatar"
             aria-label="انتخاب تصویر پروفایل"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             chooseLabel="انتخاب تصویر"
             :maxFileSize="1000000"
             @select="onAvatarUpload"
@@ -307,17 +307,23 @@ const changePassword = () => {
 
 const saveProfile = async () => {
   formError.value = ''
+  const firstName = editForm.value.firstName.trim()
+  const lastName = editForm.value.lastName.trim()
+
+  if (!firstName || !lastName) {
+    formError.value = 'نام و نام خانوادگی الزامی است.'
+    return
+  }
+  if (firstName.length > 50 || lastName.length > 50) {
+    formError.value = 'نام و نام خانوادگی باید حداکثر ۵۰ نویسه باشند.'
+    return
+  }
+  if (saving.value) return
+
   saving.value = true
   try {
     // The backend profile API accepts only firstName and lastName here.
-    const updateData = {}
-    if (editForm.value.firstName?.trim()) updateData.firstName = editForm.value.firstName.trim()
-    if (editForm.value.lastName?.trim()) updateData.lastName = editForm.value.lastName.trim()
-    if (Object.keys(updateData).length === 0) {
-      editProfileDialog.value = false
-      return
-    }
-    await authStore.updateProfile(updateData)
+    await authStore.updateProfile({ firstName, lastName })
     await loadUserProfile()
     editProfileDialog.value = false
   } catch (error) {
@@ -329,11 +335,26 @@ const saveProfile = async () => {
 
 const saveNewPassword = async () => {
   formError.value = ''
+  if (!passwordForm.value.currentPassword || passwordForm.value.currentPassword.length < 6) {
+    formError.value = 'رمز عبور فعلی باید حداقل ۶ نویسه باشد.'
+    return
+  }
+  if (!passwordForm.value.newPassword || passwordForm.value.newPassword.length < 8) {
+    formError.value = 'رمز عبور جدید باید حداقل ۸ نویسه باشد.'
+    return
+  }
+  if (passwordForm.value.newPassword.length > 100) {
+    formError.value = 'رمز عبور جدید نمی‌تواند بیشتر از ۱۰۰ نویسه باشد.'
+    return
+  }
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    formError.value = 'تکرار رمز عبور جدید با رمز عبور یکسان نیست.'
+    return
+  }
+  if (saving.value) return
+
   saving.value = true
   try {
-    if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-      throw new Error('تکرار رمز عبور جدید با رمز عبور یکسان نیست.')
-    }
     await authStore.changePassword({
       currentPassword: passwordForm.value.currentPassword,
       newPassword: passwordForm.value.newPassword,
@@ -352,14 +373,27 @@ const saveNewPassword = async () => {
 }
 
 const onAvatarUpload = async (event) => {
-  const file = event.files[0]
-  if (file) {
-    try {
-      await authStore.uploadAvatar(file)
-      await loadUserProfile()
-    } catch (error) {
-      formError.value = error?.serverMessage || error?.message || 'بارگذاری تصویر پروفایل ناموفق بود.'
-    }
+  formError.value = ''
+  const file = event.files?.[0]
+  if (!file) return
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    formError.value = 'فقط تصویر JPEG، PNG یا WebP قابل بارگذاری است.'
+    return
+  }
+  if (file.size > 1_000_000) {
+    formError.value = 'حجم تصویر باید حداکثر یک مگابایت باشد.'
+    return
+  }
+  if (saving.value) return
+
+  saving.value = true
+  try {
+    await authStore.uploadAvatar(file)
+    await loadUserProfile()
+  } catch (error) {
+    formError.value = error?.serverMessage || error?.message || 'بارگذاری تصویر پروفایل ناموفق بود.'
+  } finally {
+    saving.value = false
   }
 }
 
