@@ -793,7 +793,7 @@ async function removeExistingDocument(docId) {
             <label for="product-retail-enabled">عرض برای فروش خرده‌فروشی</label>
             <div class="flex align-items-center gap-2 mt-2">
               <InputSwitch inputId="product-retail-enabled" v-model="form.retailEnabled" aria-label="فعال‌سازی عرضه خرده‌فروشی" />
-              <span>{{ form.retailEnabled ? 'درخواست فعال‌سازی' : 'غیرفعال' }}</span>
+              <span>{{ form.retailEnabled ? 'فعال' : 'غیرفعال' }}</span>
             </div>
             <small class="text-muted">این گزینه به‌تنهایی امکان خرید ایجاد نمی‌کند؛ فروش پس از راه‌اندازی موجودی و checkout امن فعال می‌شود.</small>
           </div>
