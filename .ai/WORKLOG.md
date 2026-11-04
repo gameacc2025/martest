@@ -3401,3 +3401,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **CI:** an earlier CI run failed only on stale app smoke assertions still expecting Telecom Marketplace; assertions were updated. The run for commit 01c247a passed. The run for f941b2c was pending at this log update. Playwright/browser visual checks and local builds have not been run.
 - **Known data/API gaps:** no Order/Inventory APIs, no supplier-count/brand-logo aggregate, no verified address/phone/ENAMAD/payment/return configuration, and no brand/availability/compare/review support in the current public product query contract. These must remain absent or explicitly unavailable until real sources are approved.
 - **Latest commit at this log update:** f941b2c (responsive E2E viewport coverage).
+
+
+## 2026-11-04 — CI verification update
+- The CI run for 6d8bc9b completed: architecture graph passed; frontend/shared unit tests passed; all three frontend app builds passed after the build step was changed to run with always().
+- The same run still reports two backend test failures unrelated to this UI-only scope: POST /messages rejects invalid payloads (asserted status 0) and uploadAvatar missing-file error expectation. No backend source, Prisma schema or API behavior was changed in this redesign.
+- Latest source commit at this update: 6d1bb13. Its CI run is pending.
+- Playwright responsive checks at 360/768/1366/1920/2560px are authored but not yet executed; no visual browser screenshots were captured.

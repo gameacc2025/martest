@@ -1,6 +1,6 @@
 ﻿# Current Task — Full UI rebuild on the `tem/` visual language (UI-REDESIGN-TEM-01)
 
-**Status:** IN_PROGRESS — the first seller-dashboard and storefront implementation pass is committed directly to main (latest source commit at this snapshot: f941b2c). Shared semantic tokens, theme preset, dashboard/home composition and targeted regression tests are in place. GitHub Actions has been inspected; the latest unit workflow is pending. Responsive Playwright coverage was added for 360/768/1366/1920/2560px but has not yet been executed.
+**Status:** IN_PROGRESS — the first seller-dashboard and storefront implementation pass is committed directly to main (latest source commit at this snapshot: 6d1bb13). Shared semantic tokens, theme preset, dashboard/home composition and targeted regression tests are in place. GitHub Actions has been inspected; the latest unit workflow is pending. Responsive Playwright coverage was added for 360/768/1366/1920/2560px but has not yet been executed.
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -78,9 +78,9 @@ Apply the newly approved turquoise/sky/navy identity (Vazirmatn, Persian-first R
 4. Full 69-page inventory and documentation update, then a truthful completion report.
 
 ## Verification
-- GitHub Actions: the run for 01c247a completed successfully; the run for f941b2c is pending at this documentation snapshot. An earlier run exposed stale Telecom Marketplace smoke-test assertions; those assertions were updated to Telecom Market.
+- GitHub Actions: the run for 01c247a completed successfully; the run for 6d8bc9b completed with frontend/shared tests and all frontend builds passing; backend tests still fail two unrelated existing tests. The run for 6d1bb13 is pending at this documentation snapshot. An earlier run exposed stale Telecom Marketplace smoke-test assertions; those assertions were updated to Telecom Market.
 - Targeted tests added/updated: Home sales-mode scenarios, dashboard product-status scenarios, PublicLayout commerce/RFQ visibility and count, InquiryList route mocks, router/smoke brand expectations.
-- Responsive Playwright coverage added for 360, 768, 1366, 1920 and 2560px. E2E/browser rendering has NOT yet been run.
+- Responsive Playwright coverage added for 360, 768, 1366, 1920 and 2560px. E2E/browser rendering has NOT yet been run. The latest build step now runs even when backend tests fail, so frontend build feedback is not suppressed by unrelated backend failures.
 - Local production builds and screenshot inspection: NOT RUN in this remote source-editing session.
 - Static review: ongoing. Do not claim runtime, visual or full redesign acceptance until all pages are reviewed and checks are authorized.
 

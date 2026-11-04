@@ -270,3 +270,10 @@ The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/a
 - Product cards distinguish fixed price, inquiry-only and volume pricing. The fixed-price add-to-cart control is intentionally disabled until order and inventory APIs are available; do not enable checkout based on retailEnabled alone.
 - Latest products include image/name/SKU/category, supplier, sales mode, price and an action; mobile converts the table into cards.
 - Supplier totals, brand logos, ratings/reviews, compare, stock, contact/address, ENAMAD and payment/return badges are not invented when the API or approved organization data is absent. Price/category/search filtering exists in the public catalogue; brand/availability/compare/review work remains dependent on real data/API support.
+
+
+### Dark surface and contrast verification addendum — 2026-11-04
+- Dark surfaces are explicitly mapped: background #071429, card/content surface #0d2038, raised/input surface #162f4b, border #273e5a, primary text #eef3fb and muted text #a9b8d6.
+- Dark semantic status pairs use brighter foregrounds on translucent/deep state surfaces; primary dark controls use cyan #27d3ee with #05213f foreground.
+- Contrast spot-checks: light primary button 4.69:1; light muted text on canvas 4.94:1; light status pairs all exceed 4.5:1; dark status and muted pairs exceed 8:1 on #0d2038.
+- PrimeVue form fields, cards and DataTable headers have explicit dark-scheme surfaces so they do not fall back to white controls.
