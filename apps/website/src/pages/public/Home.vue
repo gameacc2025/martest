@@ -406,7 +406,7 @@ onMounted(() => {
   background: rgba(46, 211, 238, 0.14);
   border: 1px solid rgba(46, 211, 238, 0.35);
   color: var(--tm-cyan-soft);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
 }
 .home-hero h1 { margin: 16px 0 12px; font-size: clamp(24px, 3vw, 38px); line-height: 1.35; color: #fff; }
@@ -417,7 +417,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 6px 6px 6px 14px;
-  background: #fff;
+  background: var(--tm-surface);
   border-radius: var(--tm-radius);
   max-width: 620px;
 }
@@ -436,7 +436,7 @@ onMounted(() => {
 .home-hero__search .tm-btn { flex: none; }
 
 .home-hero__links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; }
-.home-hero__links a { color: var(--tm-cyan-soft); font-size: 12.5px; font-weight: 600; text-decoration: none; }
+.home-hero__links a { color: var(--tm-cyan-soft); font-size: 13px; font-weight: 600; text-decoration: none; }
 .home-hero__links a:hover { color: #fff; text-decoration: underline; }
 
 .home-hero__aside { display: flex; flex-direction: column; gap: 10px; }

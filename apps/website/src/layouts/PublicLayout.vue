@@ -442,7 +442,7 @@ function logout() {
   padding: 0.7rem 1rem;
   border: 1px solid var(--tm-blue);
   border-radius: var(--tm-radius);
-  background: #fff;
+  background: var(--tm-surface);
   color: var(--tm-ink);
   font-size: var(--tm-fs-sm);
   font-weight: 700;
@@ -464,7 +464,7 @@ function logout() {
 .public-utility-bar {
   background: var(--tm-navy);
   color: #d5e2f0;
-  font-size: 12px;
+  font-size: 13px;
 }
 .public-utility-inner {
   display: flex;
@@ -506,7 +506,7 @@ function logout() {
   flex-shrink: 0;
 }
 .public-logo-name { display: flex; flex-direction: column; line-height: 1.1; }
-.public-logo-name strong { font-size: 17px; font-weight: 700; color: var(--tm-navy); }
+.public-logo-name strong { font-size: 17px; font-weight: 700; color: var(--tm-ink); }
 .public-logo-name small { font-size: 10px; letter-spacing: 0.16em; color: var(--tm-muted); text-transform: uppercase; }
 
 .public-nav-desktop { display: none; align-items: center; gap: clamp(10px, 1.1vw, 18px); flex-wrap: nowrap; white-space: nowrap; }
@@ -638,7 +638,7 @@ function logout() {
   color: #fff;
 }
 .public-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.public-footer-link { color: #d5e2f0; font-size: 12.5px; text-decoration: none; }
+.public-footer-link { color: #d5e2f0; font-size: 13px; text-decoration: none; }
 .public-footer-link:hover { color: var(--tm-cyan); }
 .public-footer-brand { display: flex; align-items: center; gap: 9px; color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 .public-footer-about-text { margin: 0 0 14px; font-size: 12.5px; line-height: 1.9; color: rgba(255,255,255,.72); }
@@ -656,7 +656,7 @@ function logout() {
 .public-footer-bottom {
   border-top: 1px solid rgba(207, 217, 238, 0.14);
   padding: 16px 0;
-  font-size: 11.5px;
+  font-size: 13px;
   color: rgba(255,255,255,.55);
   text-align: center;
 }
@@ -676,7 +676,7 @@ function logout() {
 }
 
 @media (max-width: 991px) {
-  .public-utility-message { font-size: 11px; }
+  .public-utility-message { font-size: 13px; }
   .public-user-name { display: none; }
   .public-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .public-footer-about { grid-column: 1 / -1; }

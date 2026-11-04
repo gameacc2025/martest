@@ -62,6 +62,7 @@
   --tm-fs-h2: 1.3125rem;
   --tm-fs-h1: clamp(1.5rem, 1.8vw, 1.75rem);
   --tm-container-max: var(--ds-container-max-wide);
+  color-scheme: light;
 }
 html {
   font-size: 15px;
@@ -365,9 +366,7 @@ a.tm-stat:hover {
   text-overflow: clip;
   line-height: 1.55;
   min-height: 2.4em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
 }
 .tm-stat__value {
   display: block;
@@ -385,13 +384,13 @@ a.tm-stat:hover {
   color: var(--tm-muted);
 }
 .tm-stat__delta { font-weight: 700; }
-.tm-stat__delta--up { color: #0c8a6e; }
-.tm-stat__delta--down { color: #c92f2f; }
+.tm-stat__delta--up { color: var(--ds-status-success-fg); }
+.tm-stat__delta--down { color: var(--ds-status-danger-fg); }
 
 .tm-stat--accent .tm-stat__icon { background: var(--tm-cyan-soft); color: var(--tm-cyan-deep); }
-.tm-stat--success .tm-stat__icon { background: var(--tm-green-soft); color: #0c8a6e; }
-.tm-stat--warning .tm-stat__icon { background: var(--tm-amber-soft); color: #a86c05; }
-.tm-stat--danger  .tm-stat__icon { background: var(--tm-red-soft);   color: #c92f2f; }
+.tm-stat--success .tm-stat__icon { background: var(--ds-status-success-bg); color: var(--ds-status-success-fg); }
+.tm-stat--warning .tm-stat__icon { background: var(--ds-status-warning-bg); color: var(--ds-status-warning-fg); }
+.tm-stat--danger  .tm-stat__icon { background: var(--ds-status-danger-bg); color: var(--ds-status-danger-fg); }
 .tm-stat--violet  .tm-stat__icon { background: var(--tm-violet-soft); color: var(--tm-violet); }
 
 /* KPI tile — exact `tem/admin.css` `.kpi` composition.
@@ -1133,14 +1132,14 @@ body .company-management-toolbar {
   min-height: 3px;
   transition: height 0.4s ease;
 }
-.tm-bars__fill--alt { background: linear-gradient(180deg, #a78bfa, var(--tm-violet)); }
+.tm-bars__fill--alt { background: var(--ds-status-info-fg); }
 .tm-bars__label {
   font-size: var(--tm-fs-caption);
   color: var(--tm-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
   max-width: 100%;
+  text-align: center;
 }
 
 .tm-donut {
@@ -1205,3 +1204,4 @@ body .company-management-toolbar {
   }
 }
 :root.app-dark { color-scheme: dark; }
+:root:not(.app-dark) { color-scheme: light; }
