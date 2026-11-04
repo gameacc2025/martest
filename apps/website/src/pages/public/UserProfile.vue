@@ -114,8 +114,9 @@
             name="avatar"
             aria-label="انتخاب تصویر پروفایل"
             accept="image/jpeg,image/png,image/webp"
-            chooseLabel="انتخاب تصویر"
+            :chooseLabel="saving ? 'در حال پردازش…' : 'انتخاب تصویر'"
             :maxFileSize="1000000"
+            :disabled="saving"
             @select="onAvatarUpload"
             class="w-full"
           />
@@ -398,6 +399,7 @@ const onAvatarUpload = async (event) => {
 }
 
 const logout = async () => {
+  if (saving.value) return
   await authStore.logout()
   router.push({ name: 'login' })
 }
