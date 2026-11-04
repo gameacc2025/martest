@@ -415,3 +415,21 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Support desk UI now uses shared TicketDeskWorkspace across Admin, Company and Website CUSTOMER. Admin can preview internal notes; Company/Customer never receive them in their page data. All write actions remain disabled pending backend. See docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md for the API/model contract.
 
 - CRM domain contract is documented in docs/CRM_DOMAIN_DESIGN.md. The initial CRM is internal STAFF-only and references canonical User/Company records instead of duplicating identity data.
+
+
+## 2026-11-04 — WEBSITE-CART-CHECKOUT-SAFETY-01
+
+**Status:** UI slice committed on `main`; checkout remains intentionally non-operational.
+
+- Registered Website routes `/cart` and authenticated CUSTOMER-only `/checkout`.
+- Added cart access and item-count badge to the public header.
+- Rebuilt ShoppingCart around the existing Pinia cart contract; removed unsupported discount/shipping calculations, fake recommended products, and calls to store methods that did not exist.
+- Hardened cart localStorage parsing, product/price/quantity validation, quantity updates, and persistence.
+- Added unit tests for cart add/increment, invalid input, quantity update, removal/clear, and malformed storage.
+- Rebuilt Checkout as delivery-information + review only. Removed card number/CVV/expiry collection and fake order success. Final submit remains disabled until the server order/payment flow exists.
+- Checkout accepts Persian/Arabic digits for phone and postal-code validation.
+- Updated `docs/WEBSITE_CART_CHECKOUT_STATUS.md` and `docs/OPERATIONS_UI_ROADMAP.md`.
+
+**Verification:** GitHub source writes and source re-fetch/static review only. Vitest/build/browser checks NOT RUN per owner instruction. No backend/schema/API/payment behavior changed.
+
+**Next:** Continue Website customer surfaces (address book/profile and inquiry pages) or, when the scope moves to operational commerce, implement R1 from `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` only after resolving the documented retail eligibility, inventory, shipping, commission, return-window and payment-provider decisions. Do not activate cart purchase actions before real server-side pricing, inventory reservation, order and payment APIs are available.
