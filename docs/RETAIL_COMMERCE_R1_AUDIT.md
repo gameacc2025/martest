@@ -1,7 +1,7 @@
 # Retail Commerce R1 — Backend Readiness Audit
 
 **Date:** 2026-11-04  
-**Status:** Audit complete; no retail schema/API activation in this phase.  
+**Status:** R1 audit complete; R1a opt-in product flag implemented; retail catalogue and inventory remain disabled.  
 **Branch:** main
 
 ## Executive result
@@ -46,6 +46,15 @@ These defaults let the backend be built without accidentally turning every exist
 - Reservation TTL must be configurable and the expiration worker/cleanup mechanism must be specified before R2 checkout.
 - Stock adjustment permissions and whether a company user may increase stock without staff approval must be encoded in the permission catalogue and server routes.
 
+## R1a implementation record
+
+- Added `Product.retailEnabled Boolean @default(false)` and a PostgreSQL migration plus a composite lookup index.
+- Added the boolean to product create/update request schemas and the public product projection.
+- Added an explicit opt-in switch to both Admin and Company product forms. Existing products load as disabled unless the persisted flag is true.
+- Product owner/STAFF access continues through the existing `products.update` permission and service-level company ownership checks.
+- The UI explicitly states that this flag alone does not make the product purchasable; stock and secure checkout are still required.
+- No public retail catalogue endpoint or order/payment route has been enabled yet. No stock model exists yet.
+
 ## Next implementation slices
 
 - **R1a — Eligibility:** Prisma migration for `retailEnabled=false`; service-level eligibility resolver and public retail catalogue/detail endpoints; company-active/deleted checks; tests.
@@ -54,4 +63,4 @@ These defaults let the backend be built without accidentally turning every exist
 
 ## Verification
 
-Source audit performed against current `main`: Prisma Product/ProductPriceTier/ProductPriceSnapshot/Company/User/AccessProfile/Address models, product service/routes, app route registration, and the retail domain design. No schema, migration, API, or UI behavior was changed in this audit. Runtime tests/build/browser were not run.
+Source audit and R1a source changes performed against current `main`: Prisma Product/ProductPriceTier/ProductPriceSnapshot/Company/User/AccessProfile/Address models, product service/routes, app route registration, and the retail domain design. No schema, migration, API, or UI behavior was changed in this audit. Runtime tests/build/browser were not run.
