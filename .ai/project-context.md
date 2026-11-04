@@ -892,3 +892,5 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Admin dashboard aggregate fields include activeUsers, pendingProducts and totalInquiries; the backend currently serializes total inquiry count under counts.orders, so the frontend deliberately labels it as inquiries rather than retail orders.
 
 - Additional reusable TEM primitives: TemLineChart, TemMailLayout, TemMailRow, TemMailReader and TemActivityTimeline. They are exported through packages/shared-ui/components/ui/index.js and are presentation-only.
+
+- Support desk UI exists for Admin, Company and Website CUSTOMER contexts. Website route /support/tickets is customer-only; COMPANY and STAFF identities are redirected via PKCE handoff to their panel support route. The current UI uses sample data only; ticket APIs are future work.
