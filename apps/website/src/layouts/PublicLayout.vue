@@ -254,7 +254,7 @@ function logout() {
                   <span v-else>{{ displayName.charAt(0) }}</span>
                 </span>
                 <span class="public-user-name">{{ displayName }}</span>
-                <i class="pi pi-chevron-down public-user-caret"></i>
+                <i class="pi pi-chevron-down public-user-caret" aria-hidden="true"></i>
               </button>
               <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
             </template>

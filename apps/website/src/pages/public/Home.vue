@@ -11,7 +11,6 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { productsApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
-import { formatPrice } from '../../utils/helpers'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
 const router = useRouter()
@@ -298,15 +297,15 @@ onMounted(() => {
               <caption class="sr-only">تازه‌ترین محصولات منتشرشده در بازارگاه</caption>
               <thead><tr><th scope="col">محصول</th><th scope="col">تأمین‌کننده</th><th scope="col">نوع ارائه</th><th scope="col" class="tm-table__num">قیمت</th><th scope="col">اقدام</th></tr></thead>
               <tbody>
-                <tr v-for="product in recentProducts" :key="product.id">
-                  <td data-label="محصول"><router-link :to="productRoute(product)" class="home-recent__product">
+                <tr v-for="product in recentProducts" :key="product.id" role="link" tabindex="0" :aria-label="'مشاهده محصول ' + (product.name || product.title)" @click="router.push(productRoute(product))" @keydown.enter.prevent="router.push(productRoute(product))">
+                  <td data-label="محصول"><router-link :to="productRoute(product)" class="home-recent__product" @click.stop>
                     <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title" width="52" height="52" loading="lazy" decoding="async" />
                     <span class="home-recent__product-copy"><b>{{ product.name || product.title }}</b><small v-if="product.sku">کد: <span dir="ltr">{{ product.sku }}</span></small><small v-if="productCategoryName(product)">{{ productCategoryName(product) }}</small></span>
                   </router-link></td>
                   <td data-label="تأمین‌کننده">{{ product.company?.name || '—' }}</td>
                   <td data-label="نوع ارائه"><span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span></td>
                   <td data-label="قیمت" class="tm-table__num">{{ productPriceLabel(product) }}</td>
-                  <td data-label="اقدام"><router-link :to="productRoute(product)" class="home-recent__action">مشاهده <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></td>
+                  <td data-label="اقدام"><router-link :to="productRoute(product)" class="home-recent__action" @click.stop>مشاهده <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></td>
                 </tr>
               </tbody>
             </table>
@@ -401,11 +400,11 @@ onMounted(() => {
   max-width: 620px;
 }
 .home-hero__search i { color: var(--tm-muted); font-size: 14px; }
+.home-hero__search:focus-within { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
 .home-hero__search input {
   flex: 1;
   min-width: 0;
   border: 0;
-  outline: 0;
   background: transparent;
   font-family: inherit;
   font-size: 13.5px;
@@ -525,6 +524,9 @@ onMounted(() => {
 .home-recent__product-copy b { overflow-wrap: anywhere; }
 .home-recent__product-copy small { color: var(--tm-muted); font-size: 13px; }
 .home-recent__action { display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.tm-table tbody tr[role='link'] { cursor: pointer; }
+.tm-table tbody tr[role='link']:hover { background: var(--tm-surface-alt); }
+.tm-table tbody tr[role='link']:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
 .home-recent__name:hover { color: var(--tm-blue); }
 
 .home-feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 14px; }

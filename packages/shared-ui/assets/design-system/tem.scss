@@ -129,7 +129,7 @@ a { color: var(--tm-blue); }
 .tm-prose { max-width: var(--ds-prose-measure); }
 .tm-control { min-height: var(--ds-control-height); }
 .tm-touch-target { min-width: var(--ds-touch-target); min-height: var(--ds-touch-target); }
-.tm-grid--stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: var(--ds-space-4); }
+.tm-grid--stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: var(--ds-space-4); }
 
 .tm-section-title {
   display: flex;
@@ -398,7 +398,7 @@ a.tm-stat:hover {
    summary-stat tile that sits above every list/table screen. */
 .tm-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
