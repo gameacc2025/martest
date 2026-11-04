@@ -3260,3 +3260,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 **Still to do:** the public Website surfaces (`ProductDetails`, catalogue, `Home`, `PublicLayout`) are already tem-based with real APIs and tests, so no change is required there. `InquirySubscriptions` and `NotificationManagement` have no summary rows; add them only if a real, non-paginated breakdown exists (do not fabricate counts from a single page).
 
+
+
+## 2026-11-04 — UI-OPERATIONS-FOUNDATION-01 — TEM widgets and operational prototypes
+- **Status:** UI foundation implemented; domain APIs and business workflows remain pending.
+- **Owner instruction:** Continue directly on main; do not inspect or run GitHub Actions/CI. No CI workflows were inspected or triggered for this work.
+- **Architecture:** Reuse the existing TEM primitives in packages/shared-ui; keep data fetching in app pages/stores. Added OperationalWorkspace as a composable prototype shell, with explicit sample-data disclosure and no guessed API calls.
+- **UI routes:** Admin /crm, /finance, /support/tickets, /retail/orders; Company /support/tickets.
+- **Dashboard/list coverage:** Expanded Company dashboard with existing API-derived metrics and support shortcut. Added current-page status KPI breakdowns to Admin company, user, product, inquiry and order lists, and Company product list. Current-page counts are explicitly labelled; total counts continue to use pagination metadata.
+- **Docs:** Added docs/OPERATIONS_UI_ROADMAP.md; updated docs/FUTURE_MODULES_BLUEPRINT.md, docs/UI_REDESIGN_EXECUTION.md and .ai/current-task.md.
+- **Key commits:** OperationalWorkspace 2b98896; Admin module routes f0e3ef2; Company support route f02a321; menu/navigation ce7f97b; dashboard additions 58c4bdc, 6400c85; list KPIs 4f096b0, a4180e0, 1292edc, 657f427, ff6af28, Company product KPIs 605fd42; documentation 0c47c8f, ff18f15, 9a179e7, current-task 1b03792.
+- **Verification:** GitHub file writes succeeded. Local app builds, component tests and browser checks were not run because this session edited the remote repository through GitHub tools and owner asked not to run CI. Do not describe these pages as production-ready.
+- **Next:** Finish the complete TEM inventory mapping; enrich admin/company dashboards with authoritative aggregate endpoints only after API contracts are defined; implement CRM, support, finance/settlement and retail-order domain models/APIs/permissions in the documented sequence.
