@@ -72,6 +72,38 @@
         :loading="statsLoading"
         :to="{ name: 'company-inquiries' }"
       />
+      <TemStatCard
+        label="کل محصولات شرکت"
+        :value="products.length"
+        icon="pi pi-box"
+        tone="accent"
+        :loading="productsLoading"
+        :to="{ name: 'manage-products' }"
+      />
+      <TemStatCard
+        label="نرخ موفقیت پاسخ‌گویی"
+        :value="companyResponseRate === null ? null : companyResponseRate + '%'"
+        icon="pi pi-chart-line"
+        tone="success"
+        :loading="statsLoading"
+        meta="بر اساس آمار استعلام‌ها"
+      />
+      <TemStatCard
+        label="رتبه شرکت"
+        :value="companyRank ? companyRank.toLocaleString('fa-IR') : null"
+        icon="pi pi-star"
+        tone="warning"
+        :loading="statsLoading"
+        :meta="companyRankTotal ? 'از ' + companyRankTotal.toLocaleString('fa-IR') + ' شرکت' : 'در صورت ارائه رتبه توسط سرویس'"
+      />
+      <TemStatCard
+        label="استعلام‌های باز"
+        :value="openInquiries.length"
+        icon="pi pi-clock"
+        tone="info"
+        :loading="inquiriesLoading"
+        :to="{ name: 'company-inquiries' }"
+      />
     </section>
 
     <!-- Stats error (non-blocking) -->
@@ -308,6 +340,10 @@ const companyScore = computed(() => {
 })
 const companyRank = computed(() => stats.value?.ranking?.position ?? null)
 const companyRankTotal = computed(() => stats.value?.ranking?.total ?? null)
+const companyResponseRate = computed(() => {
+  const value = stats.value?.responses?.successRate
+  return typeof value === 'number' && Number.isFinite(value) ? Math.round(value * 10) / 10 : null
+})
 
 // ── Recent products (real products list) ────────────────────
 const recentProducts = computed(() =>
@@ -380,6 +416,8 @@ const quickActions = [
   { label: 'گزارش‌ها', icon: 'pi pi-chart-bar', to: { name: 'company-reports' }, tone: 'secondary' },
   { label: 'کاربران شرکت', icon: 'pi pi-users', to: { name: 'company-users' }, tone: 'secondary' },
   { label: 'پروفایل شرکت', icon: 'pi pi-building', to: { name: 'company-settings' }, tone: 'warning' },
+  { label: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', to: { name: 'company-tickets' }, tone: 'info' },
+
 ]
 
 // ── Alerts / Warnings ─────────────────────────────────────
