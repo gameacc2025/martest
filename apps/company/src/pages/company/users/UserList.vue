@@ -28,6 +28,9 @@ const pagination = ref({ page: 1, limit: 10, total: 0 })
 
 const kpiItems = computed(() => [
   { label: 'کل کاربران شرکت', value: pagination.value.total, icon: 'pi pi-users', tone: 'primary' },
+  { label: 'فعال (صفحه جاری)', value: users.value.filter((item) => item.status === 'ACTIVE').length, icon: 'pi pi-user-check', tone: 'success' },
+  { label: 'در انتظار (صفحه جاری)', value: users.value.filter((item) => item.status === 'PENDING').length, icon: 'pi pi-clock', tone: 'warning' },
+  { label: 'ردشده (صفحه جاری)', value: users.value.filter((item) => item.status === 'REJECTED').length, icon: 'pi pi-user-minus', tone: 'danger' },
 ])
 
 const searchQuery = ref('')
