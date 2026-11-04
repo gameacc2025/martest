@@ -901,3 +901,77 @@ async function saveCreate() {
   .identity-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
 }
 </style>
+
+/* Reference-led identity workspace: compact, branded and data-first. */
+.user-list-page { gap: 1.1rem; }
+.user-list-page :deep(.workspace-page-heading) {
+  margin: 0;
+  padding: 1rem 1.2rem;
+  border-color: #d9e8f4;
+  border-radius: 15px;
+  background: linear-gradient(108deg, #edf7ff 0%, #fff 58%, #effbfa 100%);
+  box-shadow: 0 4px 14px rgba(30, 77, 128, .055);
+}
+.user-list-page :deep(.workspace-page-heading h1) {
+  font-size: 1.22rem;
+  font-weight: 800;
+  letter-spacing: -.015em;
+}
+.user-list-page :deep(.workspace-page-heading-icon) { color: #168fb8; font-size: 1.15rem; }
+.user-list-page :deep(.workspace-page-heading p) { margin-top: .22rem; color: #607c97; font-size: .77rem; }
+.identity-management-surface {
+  border-color: #dce8f3;
+  border-radius: 15px;
+  box-shadow: 0 5px 18px rgba(28, 73, 119, .055);
+}
+.identity-management-toolbar {
+  padding: .85rem 1rem;
+  background: linear-gradient(100deg, #f6fbff 0%, #fff 62%, #f3fbfb 100%);
+}
+.identity-management-toolbar :deep(.p-toolbar-start) { flex: 1 1 30rem; min-width: 0; }
+.identity-management-toolbar :deep(.p-toolbar-end) { flex: 0 0 auto; }
+.identity-management-toolbar :deep(.p-inputtext), .identity-management-toolbar :deep(.p-select) {
+  min-height: 2.65rem;
+  border-radius: 9px;
+  background: #fff;
+}
+.identity-management-toolbar :deep(.p-button:not(.p-button-text):not(.p-button-outlined)) {
+  min-height: 2.7rem;
+  border-color: #31b7d7;
+  background: linear-gradient(105deg, #249fc9, #39bfe0);
+  color: #f4fbfd;
+  box-shadow: 0 3px 9px rgba(38, 160, 197, .16);
+}
+.identity-management-table :deep(.ent-table-toolbar) {
+  padding: .8rem 1rem;
+  border-bottom: 1px solid #e5edf5;
+  background: #fff;
+}
+.identity-management-table :deep(.ent-table-title) { color: #183b61; font-size: .88rem; font-weight: 800; }
+.identity-management-table :deep(.ent-table-record-count) { color: #7188a2; font-size: .72rem; font-variant-numeric: tabular-nums; }
+.identity-management-table :deep(.p-datatable-thead > tr > th) {
+  padding: .78rem .9rem;
+  background: #f3f7fc;
+  color: #627d98;
+  font-size: .7rem;
+  font-weight: 800;
+}
+.identity-management-table :deep(.p-datatable-tbody > tr > td) { padding: .72rem .9rem; color: #294766; font-size: .76rem; }
+.identity-management-table :deep(.p-datatable-tbody > tr:hover) { background: #f1f9fc; }
+.identity-management-table :deep(.p-button.p-button-text) { min-width: 2.75rem; min-height: 2.75rem; border-radius: 9px; }
+.user-list-page :deep(.p-button:focus-visible), .user-list-page :deep(.p-inputtext:focus-visible), .user-list-page :deep(.p-select:focus-visible) {
+  outline: 2px solid #39bfe0;
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .user-list-page :deep(.workspace-page-heading) { padding: .85rem .9rem; }
+  .identity-management-toolbar { padding: .75rem; }
+  .identity-management-toolbar :deep(.p-toolbar-start) { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .identity-management-toolbar :deep(.p-inputtext), .identity-management-toolbar :deep(.p-select) { min-width: 0; width: 100%; }
+  .identity-management-toolbar :deep(.p-toolbar-end .p-button) { width: 100%; }
+  .identity-management-table :deep(.ent-table-toolbar) { align-items: flex-start; flex-direction: column; gap: .5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .identity-management-table :deep(.p-datatable-tbody > tr), .identity-management-table :deep(.p-button) { transition: none; }
+}
+
