@@ -1,4 +1,4 @@
-# Telecom Marketplace — UI Design System
+# Telecom Market — UI Design System
 
 > Source of truth for the RTL Vue 3 marketplace. This document translates the repository's `ui-ux-pro-max` skill recommendations into the existing product identity and design tokens. It does not authorize a brand-color or typography replacement.
 

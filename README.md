@@ -1,4 +1,4 @@
-# Telecom Marketplace
+# Telecom Market
 
 
 **Language rule for agents:** Always respond to the user in English, regardless of the language they use. Only explicitly requested localized deliverable content may use another language; agent explanations and reports remain English.
