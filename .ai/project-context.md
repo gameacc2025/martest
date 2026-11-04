@@ -896,3 +896,5 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Support desk UI exists for Admin, Company and Website CUSTOMER contexts. Website route /support/tickets is customer-only; COMPANY and STAFF identities are redirected via PKCE handoff to their panel support route. The current UI uses sample data only; ticket APIs are future work.
 
 - Retail commerce: the backend currently has no Order model or /api/v1/orders routes; legacy endpoint definitions and Pinia stores are deprecated. Use docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md as the R0 design reference. Prototype routes: Admin /retail/orders, Company /retail/orders, Website CUSTOMER /orders. They use explicit sample-data notices only; no real order/payment action exists.
+
+- Support UI: shared packages/shared-ui/components/operations/TicketDeskWorkspace.vue powers Admin /support/tickets, Company /support/tickets and Website CUSTOMER /support/tickets. It supports inbox filtering and conversation preview; internal notes are shown only in Admin prototype. No ticket backend exists yet; contract is docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md.
