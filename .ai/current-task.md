@@ -328,3 +328,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **Commits:** Admin users 9676dc7b7d5a0ea225fdd70cfbcafdbd244d12fd; Admin roles 87c540ba539daeb5c12139814f60a53155973f4a; Company users aa3acfce509df821d2536de3a2d3f1a69e05b114.
 - Next: continue the same visual pass on Admin products/categories and Company product management, then orders and reports.
 
+### Product and category catalogue refinement — 2026-11-04
+- Applied the approved reference-led Admin/Company panel treatment to Admin Product List, Admin Category List and Company Product List: compact branded headings, pale blue/turquoise toolbars, cyan primary actions, compact record-count/table hierarchy, keyboard focus and reduced-motion states.
+- Preserved the existing product/category APIs, server pagination, search/status filters, product lifecycle and approval/publishing controls, role permissions, routes, and empty/loading states. No backend or business logic changed.
+- Verification: source-only review; tests/build/browser rendering NOT RUN per owner instruction.
+- **Commits:** Admin products 43af31135b1dcc37dec5ac901b135f738fe915dd; Admin categories 66e8226cbbc2790b563083fc47511cdf05b745ff; Company products e1f3c5ebeb2141efa44e40c636d1bd5758c0a4b0.
+- Next: refine product editors/details and operational order/report pages, then continue the remaining route inventory.
+
