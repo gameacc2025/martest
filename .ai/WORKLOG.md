@@ -3133,7 +3133,7 @@ This file is the shared, version-controlled memory for agents working on the rep
     - Admin: RoleList (کل نقش‌ها), UserList (کل کاربران), CategoryList (کل دسته‌بندی‌ها), CompanyList (کل شرکت‌ها), InquiryList (کل استعلام‌ها), OrderList (کل سفارش‌ها), PermissionList (کل مجوزها), ProductList (کل محصولات).
     - Company: ProductList (کل محصولات شرکت), UserList (کل کاربران شرکت), InquiryList (کل استعلام‌های شرکت).
   - `WorkspacePageHeading.test.js`: updated to the slimmed API + srOnly behavior.
-- **Verification:** `pnpm exec vitest run` — 56 files, 310 tests passed (306 baseline + 4 new). `pnpm --filter @telecom/admin build` ✓; `pnpm --filter @telecom/company build` ✓. Website build unaffected (no website page changed). Browser/visual checks NOT RUN per owner instruction.
-- **Commit:** to be recorded on commit.
+- **Verification:** `pnpm exec vitest run` — 56 files, 310 tests passed (306 baseline + 4 new). `pnpm --filter @telecom/admin build` ✓; `pnpm --filter @telecom/company build` ✓; `pnpm --filter @telecom/website build` ✓. Browser/visual checks NOT RUN per owner instruction.
+- **Commit:** `df51a0c` (feat(ui): KPI summary cards on data/table pages with sr-only headings). Not pushed (push not authorized in this task).
 - **Next action:** token-ize remaining hard-coded page-level hex colors; continue remaining route inventory per `.ai/current-task.md`.
 
