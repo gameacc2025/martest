@@ -1,3 +1,6 @@
+// DEPRECATED: legacy /orders endpoints were removed from the backend.
+// Do not wire this store to UI. The replacement retail commerce domain is
+// specified in docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md.
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiGet, apiGetPaginated, apiPost, apiPatch, handleApiError, endpoints } from '@telecom/api-client'
