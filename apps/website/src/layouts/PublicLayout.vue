@@ -469,14 +469,14 @@ function logout() {
   min-height: 36px;
 }
 .public-utility-message { display: inline-flex; align-items: center; gap: 8px; }
-.public-utility-message i { color: var(--tm-cyan); font-size: 12px; }
+.public-utility-message i { color: var(--tm-cyan); font-size: 13px; }
 .public-utility-links { display: flex; align-items: center; gap: 18px; }
 .public-utility-links a { color: #d5e2f0; text-decoration: none; }
 .public-utility-links a:hover { color: var(--tm-cyan); }
 
 /* ---------- Header ---------- */
 .public-header {
-  background: #fff;
+  background: var(--tm-surface);
   border-bottom: 1px solid var(--tm-line);
   position: sticky;
   top: 0;
@@ -502,7 +502,7 @@ function logout() {
 }
 .public-logo-name { display: flex; flex-direction: column; line-height: 1.1; }
 .public-logo-name strong { font-size: 17px; font-weight: 700; color: var(--tm-ink); }
-.public-logo-name small { font-size: 10px; letter-spacing: 0.16em; color: var(--tm-muted); text-transform: uppercase; }
+.public-logo-name small { font-size: 13px; letter-spacing: 0.16em; color: var(--tm-muted); text-transform: uppercase; }
 
 .public-nav-desktop { display: none; align-items: center; gap: clamp(10px, 1.1vw, 18px); flex-wrap: nowrap; white-space: nowrap; }
 .public-nav-link {
@@ -547,7 +547,7 @@ function logout() {
   padding: 0 4px;
   background: var(--tm-red);
   color: #fff;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   border-radius: var(--tm-radius-pill);
   display: grid;
@@ -561,7 +561,7 @@ function logout() {
   padding: 4px 8px 4px 4px;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-pill);
-  background: #fff;
+  background: var(--tm-surface);
   cursor: pointer;
   font-family: inherit;
 }
@@ -576,13 +576,13 @@ function logout() {
   overflow: hidden;
   background: var(--tm-blue-soft);
   color: var(--tm-blue-strong);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   flex: none;
 }
 .public-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.public-user-name { font-size: 12px; font-weight: 600; color: var(--tm-ink); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.public-user-caret { font-size: 10px; color: var(--tm-muted); }
+.public-user-name { font-size: 13px; font-weight: 600; color: var(--tm-ink); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.public-user-caret { font-size: 13px; color: var(--tm-muted); }
 
 .public-login-link { text-decoration: none; }
 
@@ -590,7 +590,7 @@ function logout() {
 
 /* ---------- Mobile nav ---------- */
 .public-mobile-nav {
-  background: #fff;
+  background: var(--tm-surface);
   border-bottom: 1px solid var(--tm-line);
   box-shadow: var(--tm-shadow-sm);
 }
@@ -636,14 +636,14 @@ function logout() {
 .public-footer-link { color: #d5e2f0; font-size: 13px; text-decoration: none; }
 .public-footer-link:hover { color: var(--tm-cyan); }
 .public-footer-brand { display: flex; align-items: center; gap: 9px; color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
-.public-footer-about-text { margin: 0 0 14px; font-size: 12.5px; line-height: 1.9; color: rgba(255,255,255,.72); }
+.public-footer-about-text { margin: 0 0 14px; font-size: 13px; line-height: 1.9; color: rgba(255,255,255,.72); }
 .public-footer-about-btn {
   display: inline-flex;
   padding: 7px 14px;
   border: 1px solid rgba(46, 211, 238, 0.5);
   border-radius: var(--tm-radius-pill);
   color: var(--tm-cyan);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   text-decoration: none;
 }
