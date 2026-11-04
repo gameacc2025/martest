@@ -403,3 +403,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Follow-up: CRM has subroutes for overview/leads/pipeline/activities; Finance has overview/settlements/transactions/invoices. Support and Retail Orders are separate menu groups. Added TemLineChart to the shared TEM widget exports. Admin dashboard now uses existing aggregate API fields for active users, pending products and total inquiries; Company dashboard uses authoritative pagination/stat fields for total products and open inquiries.
 
 - Additional TEM extraction: added/exported TemLineChart, TemMailLayout, TemMailRow, TemMailReader and TemActivityTimeline; see docs/OPERATIONS_UI_ROADMAP.md for the complete reusable widget inventory.
+
+- Support now has a customer-facing Website route (/support/tickets) and account-menu entry. COMPANY and STAFF identities are routed via PKCE handoff to their own panel support desk; customer-only access is enforced in the Website router.
