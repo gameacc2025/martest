@@ -44,6 +44,26 @@ HTMLهای **tem/** مرجع بصری و رفتاری هستند، نه کد ق�
 - **components/operations/OperationalWorkspace.vue** — ترکیب صفحه، KPI، highlights، فیلتر وضعیت، جستجو و جدول برای prototypeهای دامنه‌ای.
 - **KpiStatsRow** و **KpiCard** — خلاصه وضعیت بالای صفحات فهرستی.
 
+## نگاشت فایل‌های HTML مرجع TEM به ویجت‌های Vue
+
+| فایل مرجع | الگوهای استخراج‌شده / معادل مشترک |
+|---|---|
+| analytics.html | TemStatCard، TemLineChart، TemBarChart، TemDonutChart، TemLegend، TemMeter، DashboardPanel |
+| sales.html | TemStatCard، TemLineChart، TemPanel، EntityList، TemStatusPill |
+| ecommerce.html | TemStatCard، TemLineChart، TemDonutChart، TemLegend، ProductCard، EntityList |
+| transactions.html | TemStatCard، KpiStatsRow، DataTable، TemToolbar، TemStatusPill، TemUserCell |
+| orders.html | TemStatCard، KpiStatsRow، DataTable، TemToolbar، TemStatusPill، TemAvatar |
+| customers.html | KpiStatsRow، DataTable، TemToolbar، TemUserCell، TemAvatar، TemStatusPill |
+| mail.html / mail-detail.html | TemMailLayout، TemMailRow، TemMailReader |
+| products.html / shop.html / product-details.html | ProductCard، TemAvatar، TemUserCell، TemStatusPill، TemPanel |
+| cart.html / checkout.html / order-details.html | TemPanel، shared form fields/actions، TemStatusPill |
+| plans.html / subscriptions.html | TemPanel، TemStatCard، TemStatusPill، shared comparison/table primitives |
+| roles.html / users.html / security.html | DataTable، KpiStatsRow، TemToolbar، TemUserCell، TemAvatar، TemStatusPill |
+| telecom.html | TemPanel، TemStatCard، TemLineChart، TemBarChart، TemDonutChart |
+| index.html | shared dashboard shell، TemPageHeader، TemPanel، dashboard navigation primitives |
+
+این نگاشت عمداً رفتار/ساختار را به ویجت‌های مشترک موجود وصل می‌کند؛ از انتقال HTML خام یا استایل‌های وابسته به قالب Myron جلوگیری می‌شود. هر صفحه در اپ‌ها فقط ترکیب‌کننده این primitives و مالک داده/مجوز باقی می‌ماند.
+
 ## UIهای ایجادشده
 
 | اپ | مسیر | وضعیت UI | منبع داده |
