@@ -890,3 +890,5 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 
 - CRM navigation is nested (overview, leads, pipeline, activities); Finance navigation is nested (overview, settlements, transactions, invoices). Support and retail-order navigation are separate groups. TemLineChart is exported alongside the other TEM chart primitives.
 - Admin dashboard aggregate fields include activeUsers, pendingProducts and totalInquiries; the backend currently serializes total inquiry count under counts.orders, so the frontend deliberately labels it as inquiries rather than retail orders.
+
+- Additional reusable TEM primitives: TemLineChart, TemMailLayout, TemMailRow, TemMailReader and TemActivityTimeline. They are exported through packages/shared-ui/components/ui/index.js and are presentation-only.
