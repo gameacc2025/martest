@@ -216,6 +216,30 @@ test('uploadAvatar: rejects unsupported content types without persisting a URL',
   assert.equal(calls.profileUpsert.length, 0);
 });
 
+test('uploadAvatar: rejects a forged image MIME type when the binary signature does not match', async () => {
+  resetMocks();
+  await assert.rejects(
+    () => uploadAvatar(1, { mimetype: 'image/png', file: Readable.from(Buffer.from('not-a-png')) }),
+    (err) => err.statusCode === 415
+  );
+  assert.equal(calls.profileUpsert.length, 0);
+  assert.equal(fs.readdirSync(avatarDir).length, 0);
+});
+
+test('uploadAvatar: rejects files larger than 1 MB and removes the temporary file', async () => {
+  resetMocks();
+  const oversized = Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    Buffer.alloc(1_000_001),
+  ]);
+  await assert.rejects(
+    () => uploadAvatar(1, { mimetype: 'image/png', file: Readable.from(oversized) }),
+    (err) => err.statusCode === 413
+  );
+  assert.equal(calls.profileUpsert.length, 0);
+  assert.equal(fs.readdirSync(avatarDir).length, 0);
+});
+
 test('uploadAvatar: writes the file and stores its generated URL for the caller', async () => {
   resetMocks();
   const result = await uploadAvatar(1, {
