@@ -909,3 +909,12 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Checkout currently collects delivery details for review only. It intentionally does not collect card data, submit an order, reserve stock, or claim payment success. The final action is disabled until backend retail checkout and a real payment provider are implemented.
 - Do not add generic add-to-cart actions to every catalog product. Retail eligibility and server-validated price/stock must be introduced by the retail commerce backend first.
 - Status and activation criteria: `docs/WEBSITE_CART_CHECKOUT_STATUS.md`; domain contract: `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md`.
+
+
+## 2026-11-04 Website customer account/inquiry refinements
+
+- Customer address book `/profile/addresses` uses the authenticated `/addresses` API (backend restricts route to CUSTOMER and scopes by request.user.id). UI now validates required values, normalizes Persian/Arabic digits in phone/postal code, validates postal digits, and guards default-address mutations.
+- `/my-inquiries` now deduplicates supplier-company options and ignores stale inquiry/message requests after navigation; draft/message/SMS state is cleared between inquiry details, and message-fetch failures are distinct from an empty conversation.
+- Website Router marks `/profile`, `/profile/addresses`, and `/my-inquiries` CUSTOMER-only. COMPANY/STAFF direct navigation is handed off by PKCE to panel-specific destinations.
+- Checkout and Addresses digit-validation regexes were re-fetched and corrected to use actual digit classes.
+- Details: `docs/WEBSITE_CUSTOMER_ACCOUNT_STATUS.md`. Do not treat these route guards as backend authorization.
