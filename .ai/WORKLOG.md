@@ -3355,3 +3355,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Tests: Website Vitest cases added for empty profile name and short password; settings Node tests cover forged signature and >1 MB file cleanup. NOT RUN.
 - Static hosting audit confirmed /uploads is proxied to Fastify in both dev Vite config and production nginx, so persisted relative avatar URLs resolve same-origin.
 - No Prisma schema/migration changes. Build/browser tests NOT RUN.
+
+
+## 2026-11-04 — RETAIL-COMMERCE-R1-AUDIT — Verify backend readiness for retail sales
+- **Status:** AUDIT COMPLETE; no runtime behavior changed.
+- **Findings:** Product has no retail opt-in flag; ProductPriceTier has Decimal(18,2), quantity bounds and validity dates; no inventory balance/movement/reservation models; no Order/SellerOrder models; no retail payment/webhook APIs; legacy /orders backend module is removed.
+- **Eligibility gap:** Public product catalogue checks PUBLISHED/PUBLIC but does not include a verified ACTIVE/non-deleted company constraint in the inspected query. Retail must enforce it explicitly.
+- **Safe defaults:** Retail disabled for existing products, stock zero unless explicitly adjusted, only current valid minQuantity=1 price tier, seller company ACTIVE/non-deleted, atomic inventory reservations. No checkout/payment activation in R1.
+- **Docs:** Added docs/RETAIL_COMMERCE_R1_AUDIT.md with verified state, safe defaults, unresolved engineering details and implementation slices R1a/R1b.
+- **Verification:** Source inspection only. No schema/migration/API changes; tests/build/browser NOT RUN.
+- **Next:** Implement R1a eligibility flag + retail catalogue/price resolver, followed by R1b inventory balance/movement/reservations.
