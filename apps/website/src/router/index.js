@@ -36,6 +36,12 @@ const routes = [
         meta: { title: "اعلان‌های من", requiresAuth: true },
       },
       {
+        path: "support/tickets",
+        name: "customer-tickets",
+        component: () => import("../pages/public/SupportTickets.vue"),
+        meta: { title: "پشتیبانی و تیکت‌های من", requiresAuth: true, customerOnly: true },
+      },
+      {
         path: "notification-preferences",
         name: "notification-preferences",
         component: () => import("../pages/public/NotificationPreferences.vue"),
