@@ -89,6 +89,7 @@ const userMenuItems = computed(() => {
         { label: 'پروفایل', icon: 'pi pi-user', command: () => router.push('/profile') },
         { label: 'آدرس‌های من', icon: 'pi pi-map-marker', command: () => router.push('/profile/addresses') },
         { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => router.push('/my-inquiries') },
+        { label: 'سفارش‌های من', icon: 'pi pi-shopping-bag', command: () => router.push('/orders') },
         { label: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', command: () => router.push('/support/tickets') },
       ]
     : canAccessDashboard.value
