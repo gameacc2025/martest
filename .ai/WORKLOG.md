@@ -3365,3 +3365,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Docs:** Added docs/RETAIL_COMMERCE_R1_AUDIT.md with verified state, safe defaults, unresolved engineering details and implementation slices R1a/R1b.
 - **Verification:** Source inspection only. No schema/migration/API changes; tests/build/browser NOT RUN.
 - **Next:** Implement R1a eligibility flag + retail catalogue/price resolver, followed by R1b inventory balance/movement/reservations.
+
+
+## 2026-11-04 — RETAIL-COMMERCE-R1a — Explicit product retail eligibility
+- **Status:** IMPLEMENTED IN SOURCE; migration/tests not executed.
+- Added Product.retailEnabled Boolean @default(false); existing products remain non-retail by default. Added migration 20261104130000_product_retail_eligibility with a composite index.
+- Product create/update schemas accept the flag; public product projection exposes the persisted flag. Existing product management ownership and products.update permission remain the authorization boundary.
+- Admin and Company ProductForm now expose an opt-in toggle with clear disclosure that this alone does not enable purchasing; stock and checkout are not available yet.
+- Added product service and route tests for accepting/persisting explicit opt-in. Tests NOT RUN; migration NOT APPLIED; build/browser NOT RUN.
+- No retail catalogue endpoint, inventory, reservation, order or payment API is active.
