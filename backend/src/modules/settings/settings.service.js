@@ -118,6 +118,7 @@ async function uploadAvatar(userId, file) {
   const destination = path.join(directory, filename);
   const avatar = `/uploads/avatars/${filename}`;
 
+  let previous;
   try {
     await pipeline(file.file, fs.createWriteStream(destination));
     if (file.file.truncated || (await fsp.stat(destination)).size > AVATAR_MAX_BYTES) {
@@ -135,26 +136,22 @@ async function uploadAvatar(userId, file) {
         : header.toString('ascii', 0, 4) === 'RIFF' && header.toString('ascii', 8, 12) === 'WEBP';
     if (!validSignature) throw new AppError('The uploaded file is not a valid image of the selected type.', 415);
 
-    const previous = await prisma.profile.findUnique({
-      where: { userId },
-      select: { avatar: true },
-    });
-
+    previous = await prisma.profile.findUnique({ where: { userId }, select: { avatar: true } });
     await prisma.profile.upsert({
       where: { userId },
       create: { userId, avatar },
       update: { avatar },
     });
-
-    // Cleanup is deliberately after the new URL is committed.
-    await removeAvatarFile(previous?.avatar);
-    return avatar;
   } catch (error) {
     try { await fsp.unlink(destination); } catch (cleanupError) {
       if (cleanupError.code !== 'ENOENT') throw cleanupError;
     }
     throw error;
   }
+
+  // Cleanup is best-effort and happens only after the new URL is committed.
+  try { await removeAvatarFile(previous?.avatar); } catch { /* stale file is safer than a broken new URL */ }
+  return avatar;
 }
 
 async function deleteAvatar(userId) {
