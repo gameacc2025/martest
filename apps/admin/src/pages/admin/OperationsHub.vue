@@ -105,6 +105,13 @@ const modules = {
     ],
   },
 }
+modules.crmLeads = { ...modules.crm, title: 'سرنخ‌ها و مشتریان بالقوه', eyebrow: 'CRM · LEADS' }
+modules.crmPipeline = { ...modules.crm, title: 'قیف فرصت‌های فروش', eyebrow: 'CRM · PIPELINE' }
+modules.crmActivities = { ...modules.crm, title: 'تعاملات و پیگیری‌ها', eyebrow: 'CRM · ACTIVITIES' }
+modules.financeSettlements = { ...modules.finance, title: 'تسویه با شرکت‌ها', eyebrow: 'FINANCE · SETTLEMENTS' }
+modules.financeTransactions = { ...modules.finance, title: 'تراکنش‌ها و گردش حساب', eyebrow: 'FINANCE · TRANSACTIONS' }
+modules.financeInvoices = { ...modules.finance, title: 'صورتحساب‌ها و اسناد مالی', eyebrow: 'FINANCE · INVOICES' }
+
 const page = computed(() => modules[props.module] || modules.tickets)
 </script>
 
