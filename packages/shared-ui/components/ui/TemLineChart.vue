@@ -11,7 +11,6 @@ const props = defineProps({
   labels: { type: Array, default: () => [] },
   height: { type: Number, default: 240 },
   loading: { type: Boolean, default: false },
-  valueFormatter: { type: Function, default: null },
 })
 const WIDTH = 640
 const TOP = 18
@@ -36,11 +35,6 @@ const plotted = computed(() => props.series.map((item, seriesIndex) => {
   }
 }))
 const gridY = [TOP, TOP + (BOTTOM - TOP) / 3, TOP + 2 * (BOTTOM - TOP) / 3, BOTTOM]
-function format(value) {
-  const number = Number(value)
-  if (!Number.isFinite(number)) return '—'
-  return props.valueFormatter ? props.valueFormatter(number) : number.toLocaleString('fa-IR')
-}
 </script>
 
 <template>
