@@ -36,8 +36,8 @@
         <div class="cd-kpi-group__heading"><h2>محصولات</h2><span>وضعیت کاتالوگ شرکت</span></div>
         <div class="cd-kpi-group__grid">
           <TemStatCard label="کل محصولات" :value="totalCompanyProducts" icon="pi pi-box" tone="primary" :loading="productsLoading" :to="{ name: 'manage-products' }" zero-meta="هنوز محصولی ثبت نشده است" />
-          <TemStatCard label="منتشرشده" :value="publishedProducts" icon="pi pi-check-circle" tone="success" :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PUBLISHED' } }" zero-meta="محصول منتشرشده‌ای ندارید" />
-          <TemStatCard label="در انتظار بررسی" :value="pendingReviewProducts" icon="pi pi-clock" tone="warning" featured :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PENDING_REVIEW' } }" zero-meta="درخواستی برای بررسی ندارید" />
+          <TemStatCard label="منتشر شده" :value="publishedProducts" icon="pi pi-check-circle" tone="success" :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PUBLISHED' } }" zero-meta="محصول منتشرشده‌ای ندارید" />
+          <TemStatCard label="در انتظار تأیید" :value="pendingReviewProducts" icon="pi pi-clock" tone="warning" featured :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PENDING_REVIEW' } }" zero-meta="درخواستی برای بررسی ندارید" />
         </div>
       </div>
       <div class="cd-kpi-group">
