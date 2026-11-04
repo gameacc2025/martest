@@ -40,6 +40,7 @@ services:
       - "3000:3000"
     volumes:
       - inquiry_private_uploads:/app/private-uploads
+      - user_uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,3 +102,4 @@ networks:
 volumes:
   postgres_data:
   inquiry_private_uploads:
+  user_uploads:
