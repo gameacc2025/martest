@@ -1,13 +1,8 @@
 <template>
   <div class="company-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <WorkspacePageHeading
-      eyebrow="مدیریت اعضای بازارگاه"
-      title="مدیریت شرکت‌ها"
-      description="اطلاعات، وضعیت و تأیید شرکت‌های عضو بازارگاه را مدیریت کنید."
-      icon="pi pi-building"
-      heading-id="management-page-title"
-    />
+    <WorkspacePageHeading sr-only title="مدیریت شرکت‌ها" heading-id="company-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel company-management-surface">
       <Toolbar class="ds-toolbar company-management-toolbar">
         <template #start>
@@ -245,6 +240,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
@@ -277,6 +273,10 @@ const pagination = ref({
   total: 0,
   totalPages: 1,
 })
+
+const kpiItems = computed(() => [
+  { label: 'کل شرکت‌ها', value: pagination.value.total, icon: 'pi pi-building', tone: 'primary' },
+])
 
 const statusOptions = ref([
   { label: 'همه', value: null },

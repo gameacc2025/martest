@@ -1,7 +1,7 @@
 <template>
   <div class="user-list-page ds-stack">
-    <!-- Card with Toolbar -->
-    <WorkspacePageHeading eyebrow="مدیریت هویت و دسترسی" title="مدیریت کاربران" description="حساب‌های کاربری و وضعیت دسترسی آن‌ها را مدیریت کنید." icon="pi pi-users" heading-id="management-page-title" />
+    <WorkspacePageHeading sr-only title="مدیریت کاربران" heading-id="user-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel identity-management-surface">
       <Toolbar class="ds-toolbar identity-management-toolbar">
         <template #start>
@@ -339,6 +339,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from "vue";
 import { useUserStore } from "@/stores/admin/users";
@@ -365,6 +366,10 @@ const users = ref([]);
 const tableRef = ref(null);
 const loading = ref(false);
 const pagination = ref({ page: 1, limit: 10, total: 0, totalPages: 1 });
+
+const kpiItems = computed(() => [
+  { label: 'کل کاربران', value: pagination.value.total, icon: 'pi pi-users', tone: 'primary' },
+])
 
 const searchQuery = ref("");
 const statusFilter = ref(null);

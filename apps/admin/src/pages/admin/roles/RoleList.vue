@@ -1,7 +1,7 @@
 <template>
   <div class="role-list-page ds-stack">
-    <!-- Card with Toolbar -->
-    <WorkspacePageHeading eyebrow="کنترل دسترسی" title="مدیریت نقش‌ها" description="نقش‌ها و دسترسی‌های مبتنی بر مجوز را مدیریت کنید." icon="pi pi-shield" heading-id="access-management-title" />
+    <WorkspacePageHeading sr-only title="مدیریت نقش‌ها" heading-id="role-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
@@ -158,6 +158,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoleStore } from '@/stores/admin/roles'
@@ -178,6 +179,10 @@ const pagination = ref({
   total: 0,
   totalPages: 1,
 })
+
+const kpiItems = computed(() => [
+  { label: 'کل نقش‌ها', value: pagination.value.total, icon: 'pi pi-shield', tone: 'primary' },
+])
 
 const searchQuery = ref('')
 const tableColumns = [

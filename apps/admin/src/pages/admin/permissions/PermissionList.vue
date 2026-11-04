@@ -1,7 +1,8 @@
 <template>
   <div class="permission-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <WorkspacePageHeading eyebrow="سیاست‌های دسترسی" title="مدیریت مجوزها" description="فهرست مجوزهای سامانه و کاربرد آن‌ها را مدیریت کنید." icon="pi pi-key" heading-id="access-management-title" />
+    <WorkspacePageHeading sr-only title="مدیریت مجوزها" heading-id="permission-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
@@ -74,6 +75,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { usePermissionStore } from '@/stores/admin/permissions'

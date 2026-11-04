@@ -1,14 +1,9 @@
 <template>
   <div class="product-list-page ds-stack">
     <!-- Card with Toolbar -->
-<WorkspacePageHeading
-      eyebrow="کنترل کاتالوگ"
-      title="مدیریت محصولات"
-      description="کاتالوگ محصولات بازارگاه را بررسی، ارزیابی و مدیریت کنید."
-      icon="pi pi-box"
-      heading-id="product-management-title"
-    />
-        <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
+    <WorkspacePageHeading sr-only title="مدیریت محصولات" heading-id="product-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
+    <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
       <Toolbar class="ds-toolbar product-management-toolbar">
         <template #start>
           <span class="p-input-icon-right">
@@ -143,6 +138,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -230,13 +226,16 @@ const productTableColumns = [
   { field: 'status', header: 'وضعیت', slot: 'status' },
 ]
 
-
 const pagination = ref({
   page: 1,
   limit: 10,
   total: 0,
   totalPages: 1,
 })
+
+const kpiItems = computed(() => [
+  { label: 'کل محصولات', value: pagination.value.total, icon: 'pi pi-box', tone: 'primary' },
+])
 
 const form = ref({
   title: '',

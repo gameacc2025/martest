@@ -1,7 +1,8 @@
 <template>
   <div class="category-list-page ds-stack">
     <!-- Card with Toolbar -->
-    <WorkspacePageHeading eyebrow="ساختار کاتالوگ" title="مدیریت دسته‌بندی‌ها" description="دسته‌بندی محصولات را مدیریت و ساختار کاتالوگ را مرتب کنید." icon="pi pi-sitemap" heading-id="management-page-title" />
+    <WorkspacePageHeading sr-only title="مدیریت دسته‌بندی‌ها" heading-id="category-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
     <div class="card ds-panel management-data-surface">
       <Toolbar class="ds-toolbar management-data-toolbar">
         <template #start>
@@ -91,6 +92,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { categoriesApi } from '@telecom/api-client'
@@ -113,6 +115,10 @@ const pagination = ref({
   total: 0,
   totalPages: 1,
 })
+
+const kpiItems = computed(() => [
+  { label: 'کل دسته‌بندی‌ها', value: pagination.value.total, icon: 'pi pi-sitemap', tone: 'primary' },
+])
 
 const tableColumns = [
   { field: 'id', header: 'شناسه', sortable: true, style: 'width: 6rem' },

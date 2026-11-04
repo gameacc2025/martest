@@ -1,5 +1,6 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -33,6 +34,10 @@ const errored = ref(false)
 
 const pagination = ref({ page: 1, limit: 10, total: 0 })
 const sortField = ref('createdAt')
+
+const kpiItems = computed(() => [
+  { label: 'کل استعلام‌های شرکت', value: pagination.value.total, icon: 'pi pi-comments', tone: 'primary' },
+])
 const sortOrder = ref(-1)
 const tableColumns = [
   { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
@@ -169,14 +174,9 @@ function createInquiry() {
 
 <template>
   <div class="inquiry-list-page ds-stack">
-<WorkspacePageHeading
-      eyebrow="فرصت‌های فروش و تأمین"
-      title="استعلام‌های شرکت"
-      description="درخواست‌های مرتبط با محصولات شرکت را بررسی کنید و وضعیت پاسخ‌گویی را دنبال کنید."
-      icon="pi pi-comments"
-      heading-id="inquiry-workspace-title"
-    />
-        <div class="card ds-panel inquiry-management-surface">
+    <WorkspacePageHeading sr-only title="استعلام‌های شرکت" heading-id="company-inquiry-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
+    <div class="card ds-panel inquiry-management-surface">
       <Toolbar class="list-toolbar ds-toolbar inquiry-management-toolbar">
         <template #start>
           <div class="toolbar-filters">

@@ -1,25 +1,26 @@
 <script setup>
-/** Plain, task-first page heading. Legacy eyebrow/icon props remain compatible. */
+/**
+ * Minimal page heading — title + optional actions slot.
+ * RTL-first. When a page already shows a breadcrumb, pass `sr-only` to keep
+ * the heading available to screen readers without a second visible "where am
+ * I" banner on the page.
+ */
 defineProps({
-  eyebrow: { type: String, default: '' },
   title: { type: String, required: true },
-  description: { type: String, default: '' },
-  icon: { type: String, default: 'pi pi-th-large' },
   headingId: { type: String, default: 'workspace-page-title' },
+  srOnly: { type: Boolean, default: false },
 })
 </script>
 
 <template>
-  <section class="workspace-page-heading" :aria-labelledby="headingId">
-    <div class="workspace-page-heading-copy">
-      <div class="workspace-page-heading-title-row">
-        <i class="workspace-page-heading-icon" :class="icon" aria-hidden="true"></i>
-        <h1 :id="headingId">{{ title }}</h1>
-      </div>
-      <p v-if="description">{{ description }}</p>
-    </div>
+  <header
+    class="workspace-page-heading"
+    :class="{ 'workspace-page-heading--sr-only': srOnly }"
+    :aria-labelledby="headingId"
+  >
+    <h1 :id="headingId" class="workspace-page-heading-title">{{ title }}</h1>
     <div v-if="$slots.actions" class="workspace-page-heading-actions"><slot name="actions"></slot></div>
-  </section>
+  </header>
 </template>
 
 <style scoped>
@@ -30,37 +31,28 @@ defineProps({
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  margin: .5rem 0 1.25rem;
-  padding: 1rem 1.2rem;
-  border: 1px solid var(--ds-color-border);
-  border-inline-start: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: color-mix(in srgb, var(--ds-color-primary) 3%, var(--ds-color-surface));
-  box-shadow: var(--ds-shadow-xs);
+  margin-bottom: 1rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
-.workspace-page-heading-copy { min-width: 0; flex: 1 1 24rem; }
-.workspace-page-heading-title-row { display: flex; align-items: center; gap: .65rem; min-width: 0; }
-.workspace-page-heading-icon { flex: 0 0 auto; color: var(--ds-color-primary-text); font-size: 1.2rem; }
-.workspace-page-heading h1 {
+.workspace-page-heading-title {
   margin: 0;
   color: var(--ds-color-text);
-  font-size: 1.28rem;
+  font-size: 1.35rem;
   font-weight: var(--ds-font-weight-bold);
-  line-height: 1.45;
+  line-height: 1.35;
   text-wrap: balance;
-}
-.workspace-page-heading p {
-  max-width: 68ch;
-  margin: .3rem 0 0;
-  color: var(--ds-color-text-muted);
-  font-size: .82rem;
-  line-height: var(--ds-line-height-relaxed);
 }
 .workspace-page-heading-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ds-space-2); }
 .workspace-page-heading-actions :deep(.p-button), .workspace-page-heading-actions :deep(a) { min-height: 2.65rem; }
+.workspace-page-heading--sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
 @media (max-width: 640px) {
-  .workspace-page-heading { align-items: stretch; flex-direction: column; gap: .75rem; margin-bottom: 1rem; padding: .85rem; }
+  .workspace-page-heading { align-items: stretch; flex-direction: column; gap: .75rem; }
   .workspace-page-heading-actions { width: 100%; }
   .workspace-page-heading-actions > :deep(*) { flex: 1 1 auto; }
+  .workspace-page-heading--sr-only { position: absolute; }
 }
 </style>

@@ -3105,3 +3105,35 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Changes:** `theme.js` (primary ramp, light/dark surfaces, text, highlight, contrast colors), `tokens.scss` (brand/shell/hero/CTA tokens, dark overrides, info status), `brand-overrides.scss` (tokens instead of hex; cyan CTA buttons with navy text; sidebar via tokens), `main.scss` workspace canvas/ink, scripted remap of old-palette hex in 8 shared-ui files (KpiCard, DashboardSidebar, etc.), `design-system/MASTER.md` current-palette section.
 - **Verification:** `vitest run` 55/55 files, 306/306 tests; admin/company/website builds succeed; WCAG contrast computed for key pairs (all >= 4.69:1). Browser screenshots NOT RUN.
 - **Open:** `BrandMark.vue` still uses the old logo colors; scoped component CSS still contains some one-off light tints (e.g. `#f5fbfd`) that were not remapped; AGENTS.md still lists the old primary color and should be updated by the owner.
+- **Page-level old palette remnants:** Admin/Company/Website page components (CategoryList, CompanyList, InquiryList, ProductList, RoleList, UserList, Notifications) still contain hard-coded `#39bfe0` / `#12b8a6` in scoped styles. These were not covered by the shared-ui patch and need separate token-ization.
+
+## 2026-11-04 — UI-PALETTE-VERIFICATION-01 — Verified baseline for mockup-derived palette
+- **Status:** DONE
+- **Agent:** AI (local checkout, pnpm 9, Node 22)
+- **Applied commits:** `7cd9f35` (test baseline), `6c8d7f7` (mockup palette)
+- **Verification executed:**
+  - `pnpm install --frozen-lockfile` ✓
+  - `pnpm exec vitest run` — 55 files, 306 tests passed ✓
+  - `pnpm --filter @telecom/admin build` ✓
+  - `pnpm --filter @telecom/company build` ✓
+  - `pnpm --filter @telecom/website build` ✓
+- **Old palette check:** `git grep` on `packages/shared-ui` returns no old hex (`#39bfe0`, `#12b8a6`, `#173b63`, `#142b46`, `#12b8d0`). ✓
+- **Remaining old hex:** Found in app-level page components (listed above) — NOT in shared-ui.
+- **Browser/visual checks:** NOT RUN (per owner instruction)
+- **Next action:** Token-ize hard-coded colors in app-level page components; continue remaining route inventory per `.ai/current-task.md`.
+
+## 2026-11-04 — UI-LIST-KPI-HEADINGS — KPI summary cards + de-cluttered headings on data/table pages
+- **Status:** DONE (implementation + tests + builds)
+- **Agent:** Claude (local checkout)
+- **Goal:** User feedback: the verbose page header (`<section class="workspace-page-heading">` with eyebrow/icon/description) is "too much" on every page, and since a breadcrumb (`<PageHeader>`/`DashboardBreadcrumb`) already tells the user where they are, data/table pages should instead show a small set of KPI summary cards across the top (e.g. "کل نقش‌ها", "کل کاربران", "کل محصولات").
+- **Changes:**
+  - `packages/shared-ui/components/common/WorkspacePageHeading.vue`: slimmed to a single titled H1 + optional actions slot. Added `srOnly` prop — when set, the heading is visually hidden (screen-reader only) so pages that already show a breadcrumb don't render a second visible "where am I" banner while keeping an accessible page-title H1.
+  - `packages/shared-ui/components/common/KpiStatsRow.vue` (+ `.test.js`): new shared component that renders a row of `KpiCard`s from an `items` array (label/value/icon/tone/to) and forwards the page `loading` state.
+  - App list/table pages updated to `sr-only` heading + KpiStatsRow driven by their existing `pagination.total` (no new data fetching / metrics invented):
+    - Admin: RoleList (کل نقش‌ها), UserList (کل کاربران), CategoryList (کل دسته‌بندی‌ها), CompanyList (کل شرکت‌ها), InquiryList (کل استعلام‌ها), OrderList (کل سفارش‌ها), PermissionList (کل مجوزها), ProductList (کل محصولات).
+    - Company: ProductList (کل محصولات شرکت), UserList (کل کاربران شرکت), InquiryList (کل استعلام‌های شرکت).
+  - `WorkspacePageHeading.test.js`: updated to the slimmed API + srOnly behavior.
+- **Verification:** `pnpm exec vitest run` — 56 files, 310 tests passed (306 baseline + 4 new). `pnpm --filter @telecom/admin build` ✓; `pnpm --filter @telecom/company build` ✓. Website build unaffected (no website page changed). Browser/visual checks NOT RUN per owner instruction.
+- **Commit:** to be recorded on commit.
+- **Next action:** token-ize remaining hard-coded page-level hex colors; continue remaining route inventory per `.ai/current-task.md`.
+

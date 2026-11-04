@@ -1,8 +1,9 @@
 <template>
   <div class="order-list-page">
     <!-- Card with Toolbar -->
-<WorkspacePageHeading eyebrow="مدیریت فروش" title="مدیریت سفارش‌ها" description="فهرست سفارش‌های قدیمی؛ دسترسی و داده‌های این بخش تابع وضعیت API موجود است." icon="pi pi-receipt" />
-        <div class="card ds-panel">
+    <WorkspacePageHeading sr-only title="مدیریت سفارش‌ها" heading-id="order-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
+    <div class="card ds-panel">
       <Toolbar class="ds-toolbar">
         <template #start>
           <span class="p-input-icon-right">
@@ -70,8 +71,9 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ordersApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
 
@@ -107,6 +109,10 @@ const pagination = ref({
   total: 0,
   totalPages: 1,
 })
+
+const kpiItems = computed(() => [
+  { label: 'کل سفارش‌ها', value: pagination.value.total, icon: 'pi pi-receipt', tone: 'primary' },
+])
 
 const form = ref({
   status: 'PENDING'

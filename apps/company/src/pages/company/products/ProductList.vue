@@ -1,8 +1,9 @@
 <template>
   <div class="product-list-page ds-stack">
     <!-- Card with Toolbar -->
-<WorkspacePageHeading eyebrow="کاتالوگ شرکت" title="مدیریت محصولات شرکت" description="محصولات شرکت را مدیریت کنید و روند بررسی و انتشار آن‌ها را دنبال کنید." icon="pi pi-briefcase" heading-id="product-management-title" />
-        <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
+    <WorkspacePageHeading sr-only title="مدیریت محصولات شرکت" heading-id="company-product-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
+    <section class="card ds-panel product-management-surface" aria-label="فهرست و ابزارهای مدیریت محصولات">
       <Toolbar class="ds-toolbar product-management-toolbar">
         <template #start>
           <span class="search-input">
@@ -121,6 +122,7 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import SharedDataTable from '@telecom/shared-ui/components/common/DataTable.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -179,6 +181,10 @@ const pagination = ref({
   total: 0,
   totalPages: 1,
 })
+
+const kpiItems = computed(() => [
+  { label: 'کل محصولات شرکت', value: pagination.value.total, icon: 'pi pi-briefcase', tone: 'primary' },
+])
 
 const form = ref({
   title: '',

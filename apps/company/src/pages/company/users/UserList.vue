@@ -1,5 +1,6 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import KpiStatsRow from '@telecom/shared-ui/components/common/KpiStatsRow.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '../../../stores/auth'
@@ -24,6 +25,10 @@ const userStore = useCompanyUsersStore()
 const users = ref([])
 const loading = ref(false)
 const pagination = ref({ page: 1, limit: 10, total: 0 })
+
+const kpiItems = computed(() => [
+  { label: 'کل کاربران شرکت', value: pagination.value.total, icon: 'pi pi-users', tone: 'primary' },
+])
 
 const searchQuery = ref('')
 const statusFilter = ref(null)
@@ -293,14 +298,9 @@ async function saveCreate() {
 
 <template>
   <div class="user-list-page ds-stack">
-<WorkspacePageHeading
-      eyebrow="مدیریت اعضای سازمان"
-      title="کاربران شرکت"
-      description="اعضای شرکت و وضعیت حساب‌های آن‌ها را مدیریت کنید."
-      icon="pi pi-users"
-      heading-id="management-page-title"
-    />
-        <div class="card ds-panel identity-management-surface">
+    <WorkspacePageHeading sr-only title="کاربران شرکت" heading-id="company-user-management-title" />
+    <KpiStatsRow :items="kpiItems" :loading="loading" />
+    <div class="card ds-panel identity-management-surface">
       <Toolbar class="ds-toolbar identity-management-toolbar">
         <template #start>
           <div class="toolbar-filters">

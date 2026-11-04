@@ -340,3 +340,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 ### Verified baseline — 2026-11-04
 - Full Vitest suite and all three production builds were executed and pass (306/306 tests). Earlier "NOT RUN" notes above are superseded for tests/builds; browser/visual checks remain NOT RUN.
 - Open owner decisions: canonical primary color for website vs panels (AGENTS.md vs MASTER.md), and token-ization of hard-coded hex colors in shared dashboard components (dark theme).
+- **Applied and verified:** UI-PALETTE-MOCKUP-01 (commits `7cd9f35`, `6c8d7f7`). Shared-ui package is clean of old palette hex. App-level page components (CategoryList, CompanyList, InquiryList, ProductList, RoleList, UserList, Notifications) still contain hard-coded `#39bfe0` / `#12b8a6` — these need separate token-ization passes.
+
+### UI-LIST-KPI-HEADINGS — 2026-11-04 (current focus)
+- Replaced the verbose page header (eyebrow/icon/description) with an `sr-only` H1 + a row of KPI summary cards on all admin/company data & table pages (roles, users, categories, companies, inquiries, orders, permissions, products). The breadcrumb (rendered by `PageHeader` in the layout) now carries the visible "where am I" indication; the shared `WorkspacePageHeading` gained an `srOnly` prop and a new `KpiStatsRow` component was added.
+- KPI cards read from the existing `pagination.total` — no new data fetching or invented metrics. Verified: 310/310 tests, admin + company builds pass.
+- Next: token-ize remaining hard-coded page-level hex colors, then continue remaining route inventory (product editors/details, order/report workspaces, website pages).
+
