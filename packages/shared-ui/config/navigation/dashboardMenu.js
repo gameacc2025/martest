@@ -127,12 +127,9 @@ export const dashboardMenu = [
   {
     section: 'ماژول‌های آینده',
     items: [
-      { title: 'مدیریت ارتباط با مشتری (CRM)', icon: 'pi pi-address-book', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
-      { title: 'مالی و حسابداری', icon: 'pi pi-wallet', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'منابع انسانی (HR)', icon: 'pi pi-users', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'تدارکات و خرید', icon: 'pi pi-shopping-bag', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'انبار و لجستیک', icon: 'pi pi-box', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
-      { title: 'پشتیبانی و تیکتینگ', icon: 'pi pi-headphones', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'پروژه‌ها و عملیات', icon: 'pi pi-sitemap', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'هوش تجاری و تحلیل (BI)', icon: 'pi pi-chart-line', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'یکپارچه‌سازی و امنیت', icon: 'pi pi-shield', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
