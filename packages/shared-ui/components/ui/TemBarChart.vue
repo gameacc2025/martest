@@ -26,6 +26,8 @@ function heightPct(value) {
   return Math.max(4, Math.round((n / max.value) * 100))
 }
 
+const accessibleLabel = computed(() => `نمودار میله‌ای؛ ${props.series.map((item) => `${item.label}: ${format(item.value)}`).join('، ') || 'داده‌ای برای نمایش نیست'}`)
+
 function format(value) {
   const n = Number(value)
   if (!Number.isFinite(n)) return '—'
@@ -42,7 +44,7 @@ function format(value) {
       <i class="pi pi-chart-bar" aria-hidden="true"></i>
       <strong>داده‌ای برای نمایش نیست</strong>
     </div>
-    <div v-else class="tm-bars" role="img" aria-label="نمودار میله‌ای داده‌های موجود">
+    <div v-else class="tm-bars" role="img" :aria-label="accessibleLabel">
       <div v-for="item in series" :key="item.label" class="tm-bars__col">
         <span class="tm-bars__value">{{ format(item.value) }}</span>
         <span class="tm-bars__track">
@@ -62,7 +64,7 @@ function format(value) {
 .tm-chart { width: 100%; min-width: 0; }
 .tm-bars { align-items: flex-end; }
 .tm-bars__col { justify-content: flex-end; }
-.tm-bars__value { font-size: 11px; color: var(--tm-muted); font-variant-numeric: tabular-nums; }
+.tm-bars__value { font-size: 13px; color: var(--tm-muted); font-variant-numeric: tabular-nums; }
 .tm-bars__track { min-height: 0; }
 .tm-chart__skeleton { display: flex; align-items: flex-end; gap: 12px; height: 100%; }
 .tm-chart__skeleton span {

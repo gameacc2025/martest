@@ -17,7 +17,14 @@ const props = defineProps({
 const RADIUS = 42
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
-const PALETTE = ['#1a73e8', '#2ed3ee', '#18c8a0', '#f0b040', '#7b5cf0', '#ed76a5', '#6b7a99']
+const PALETTE = [
+  'var(--ds-status-success-fg)',
+  'var(--ds-status-info-fg)',
+  'var(--ds-status-warning-fg)',
+  'var(--ds-status-danger-fg)',
+  'var(--ds-status-muted-fg)',
+  'var(--ds-color-neutral)',
+]
 
 const total = computed(() =>
   props.segments.reduce((sum, s) => sum + (Number(s.value) || 0), 0)
