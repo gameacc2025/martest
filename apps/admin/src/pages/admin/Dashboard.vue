@@ -36,7 +36,7 @@ const toast = useToast()
 const router = useRouter()
 
 // ── State ───────────────────────────────────────────────────
-const stats = ref({ totalUsers: 0, totalCompanies: 0, totalProducts: 0, recentUsers: [] })
+const stats = ref({ totalUsers: 0, activeUsers: 0, totalCompanies: 0, totalProducts: 0, pendingProducts: 0, totalInquiries: 0, recentUsers: [] })
 const loadingStats = ref(false)
 const statsError = ref(null)
 
@@ -353,6 +353,30 @@ onMounted(() => {
         icon="pi pi-inbox"
         tone="warning"
         :loading="loadingInquiryStats"
+        :to="{ name: 'admin-inquiries' }"
+      />
+      <TemStatCard
+        label="کاربران فعال"
+        :value="stats.activeUsers"
+        icon="pi pi-user-check"
+        tone="success"
+        :loading="loadingStats"
+        :to="{ name: 'admin-users' }"
+      />
+      <TemStatCard
+        label="محصولات در انتظار بررسی"
+        :value="stats.pendingProducts"
+        icon="pi pi-clock"
+        tone="warning"
+        :loading="loadingStats"
+        :to="{ name: 'admin-products' }"
+      />
+      <TemStatCard
+        label="کل استعلام‌ها"
+        :value="stats.totalInquiries"
+        icon="pi pi-comments"
+        tone="accent"
+        :loading="loadingStats"
         :to="{ name: 'admin-inquiries' }"
       />
     </section>
