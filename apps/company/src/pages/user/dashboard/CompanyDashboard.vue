@@ -41,7 +41,7 @@
     <!-- KPI cards — business health metrics -->
     <section class="tm-grid tm-grid--stats" aria-label="شاخص‌های کلیدی شرکت">
       <TemStatCard
-        label="محصولات منتشر شده"
+        label="منتشرشده (۲۰ محصول اخیر)"
         :value="publishedProducts"
         icon="pi pi-check-circle"
         tone="success"
@@ -49,7 +49,7 @@
         :to="{ name: 'manage-products' }"
       />
       <TemStatCard
-        label="در انتظار بررسی"
+        label="در انتظار بررسی (۲۰ محصول اخیر)"
         :value="pendingReviewProducts"
         icon="pi pi-clock"
         tone="warning"
@@ -74,7 +74,7 @@
       />
       <TemStatCard
         label="کل محصولات شرکت"
-        :value="products.length"
+        :value="totalCompanyProducts"
         icon="pi pi-box"
         tone="accent"
         :loading="productsLoading"
@@ -98,7 +98,7 @@
       />
       <TemStatCard
         label="استعلام‌های باز"
-        :value="openInquiries.length"
+        :value="openInquiryCount"
         icon="pi pi-clock"
         tone="info"
         :loading="inquiriesLoading"
@@ -276,6 +276,7 @@ const statsLoading = ref(true)
 const statsError = ref(false)
 
 const products = ref([])
+const totalCompanyProducts = ref(null)
 const productsLoading = ref(true)
 
 const openInquiries = ref([])
@@ -301,6 +302,7 @@ const publishedProducts = computed(
 const pendingReviewProducts = computed(
   () => products.value.filter((p) => p.status === 'PENDING_REVIEW').length
 )
+const openInquiryCount = computed(() => stats.value?.received?.byStatus?.OPEN ?? 0)
 
 // ── Inquiry pipeline (real received.byStatus) ───────────────
 const pipelineStages = computed(() => {
@@ -546,6 +548,9 @@ async function fetchProducts() {
     // only returns PUBLISHED products).
     const res = await productsApi.myProducts({ limit: 20, sort: 'createdAt:desc' })
     products.value = unwrapList(res)
+    const body = res?.data ?? res
+    const meta = body?.data?.meta ?? body?.meta
+    totalCompanyProducts.value = Number.isFinite(Number(meta?.total)) ? Number(meta.total) : null
   } catch (err) {
     console.error('Error fetching products:', err)
     products.value = []
