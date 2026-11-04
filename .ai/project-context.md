@@ -878,3 +878,12 @@ The Paces product catalog lists 28+ application pages and 280+ prebuilt pages ac
 
 
 The Paces Bootstrap base index (without query string) is accessible and provides the full navigation tree. The RTL query variant and most individual subpages remain inaccessible through retrieval (cache miss); distinguish the navigation inventory from directly inspected page contents.
+
+
+## 2026-11-04 UI operations context
+- TEM-derived Vue widget primitives live in packages/shared-ui/components/ui and are exported through the shared package barrel. Reuse them; do not recreate page-local KPI, panel, toolbar, status, or chart widgets.
+- OperationalWorkspace is the shared UI-only prototype shell for future domain modules. It displays a clear sample-data notice and does not call APIs.
+- Admin prototypes: CRM (/crm), Finance & Settlements (/finance), Support Tickets (/support/tickets), Retail Orders (/retail/orders). Company prototype: Support Tickets (/support/tickets).
+- These routes are navigation/UI scaffolding only. No CRM, finance, ticket or retail-order backend/API/data model is implied. Implement server-side RBAC and tenant scoping before operational activation.
+- List KPI breakdowns in Admin company/user/product/inquiry/order pages and Company product page are calculated from the currently loaded page and labelled accordingly; only total counts are server pagination totals. Do not use them as platform-wide aggregates.
+- See docs/OPERATIONS_UI_ROADMAP.md for the UI inventory, domain boundaries and implementation phases.
