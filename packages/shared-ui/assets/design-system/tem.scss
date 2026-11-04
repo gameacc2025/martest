@@ -387,6 +387,8 @@ a.tm-stat:hover {
 .tm-stat__delta--down { color: var(--ds-status-danger-fg); }
 
 .tm-stat--accent .tm-stat__icon { background: var(--tm-cyan-soft); color: var(--tm-cyan-deep); }
+.tm-stat--primary .tm-stat__icon { background: var(--ds-color-primary-soft); color: var(--ds-color-primary-text); }
+.tm-stat--info .tm-stat__icon { background: var(--ds-status-info-bg); color: var(--ds-status-info-fg); }
 .tm-stat--success .tm-stat__icon { background: var(--ds-status-success-bg); color: var(--ds-status-success-fg); }
 .tm-stat--warning .tm-stat__icon { background: var(--ds-status-warning-bg); color: var(--ds-status-warning-fg); }
 .tm-stat--danger  .tm-stat__icon { background: var(--ds-status-danger-bg); color: var(--ds-status-danger-fg); }

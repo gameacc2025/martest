@@ -131,14 +131,14 @@ defineProps({
 /* Cards grid */
 .sk-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: var(--ds-space-4);
 }
 
 /* KPIs */
 .sk-kpis {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: var(--ds-space-4);
 }
 .sk-kpi {

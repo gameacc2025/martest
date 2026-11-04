@@ -17,7 +17,7 @@ const TOP = 18
 const BOTTOM = 196
 const LEFT = 42
 const RIGHT = 624
-const COLORS = ['#2878c7', '#12b8a6', '#e7a64b', '#7b5cf0']
+const COLORS = ['var(--ds-status-info-fg)', 'var(--ds-status-success-fg)', 'var(--ds-status-warning-fg)', 'var(--ds-color-neutral)']
 const maxValue = computed(() => Math.max(1, ...props.series.flatMap((item) => item.values || []).map((value) => Number(value) || 0)))
 const plotted = computed(() => props.series.map((item, seriesIndex) => {
   const values = Array.isArray(item.values) ? item.values : []
@@ -65,9 +65,9 @@ const gridY = [TOP, TOP + (BOTTOM - TOP) / 3, TOP + 2 * (BOTTOM - TOP) / 3, BOTT
 .tm-line-chart { width:100%; min-width:0; position:relative; }
 .tm-line-chart svg { width:100%; height:calc(100% - 25px); display:block; overflow:visible; }
 .tm-line-chart__grid line { stroke:var(--tm-line); stroke-dasharray:3 5; stroke-width:1; }
-.tm-line-chart__labels text { fill:var(--tm-muted); font-size:10px; font-family:var(--tm-font); }
+.tm-line-chart__labels text { fill:var(--tm-muted); font-size:13px; font-family:var(--tm-font); }
 .tm-line-chart__legend { display:flex; flex-wrap:wrap; justify-content:center; gap:16px; padding-top:5px; }
-.tm-line-chart__legend span { display:inline-flex; align-items:center; gap:6px; color:var(--tm-muted); font-size:11px; }
+.tm-line-chart__legend span { display:inline-flex; align-items:center; gap:6px; color:var(--tm-muted); font-size:13px; }
 .tm-line-chart__legend i { width:8px; height:8px; border-radius:50%; }
 .tm-line-chart__loading { display:flex; height:100%; align-items:flex-end; gap:12px; padding:16px; }
 .tm-line-chart__loading span { flex:1; height:40%; border-radius:8px; background:var(--tm-surface-sunk); animation:tm-line-pulse 1.3s ease-in-out infinite; }
