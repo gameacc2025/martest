@@ -3315,3 +3315,20 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** All writes committed directly to remote `main`; latest observed task commit is recorded after final verification.
 - **Risks / open questions:** Cart remains localStorage-only; product retail eligibility, authoritative price/stock, shipping/tax/discount calculations, server checkout, order persistence, payment gateway and order history are not implemented. Do not enable product add-to-cart for all products.
 - **Next:** Continue Website customer account/inquiry surfaces within UI scope, or begin documented retail backend R1 only when the user explicitly authorizes operational commerce and outstanding policy decisions are resolved.
+
+
+## 2026-11-04 — WEBSITE-CUSTOMER-ACCOUNT-INQUIRY-02 — Account and RFQ follow-up
+
+- **Status:** PARTIAL — Website UX and route-level actor routing improved; profile backend contract still needs a dedicated audit.
+- **Changes:**
+  - Address book validates required fields, normalizes Persian/Arabic numerals for phone/postal code, validates postal digits, surfaces form errors and guards default-address requests against duplicate clicks.
+  - Inquiry detail loading now uses request sequence checks so stale detail/message responses cannot replace the currently selected inquiry after fast navigation.
+  - Supplier options in inquiry conversation are deduplicated by company ID; a single available supplier is preselected. Message draft, SMS flag and notice are cleared when changing inquiry.
+  - Message retrieval errors are visible and retryable instead of being silently represented as an empty conversation.
+  - Website profile, address book and sent-inquiry routes are marked CUSTOMER-only. Company/Staff users are redirected through PKCE to their own panel route.
+  - Re-fetched Checkout and Addresses source revealed escaped regex patterns that would not match digits; corrected both patterns.
+- **Docs:** Added `docs/WEBSITE_CUSTOMER_ACCOUNT_STATUS.md`; updated `docs/OPERATIONS_UI_ROADMAP.md`, `.ai/current-task.md`, and `.ai/project-context.md`.
+- **Commits:** `092e21f` inquiry detail/message race handling; `58200db` stale conversation response guard; `36a8237` address validation/default action; `714eda4` checkout digit regex; `740b24d` address digit regex; `a57349e` inquiry draft reset; `26ebd08` customer-only route enforcement; `a6c10bf` customer account status doc; `db136f4` roadmap; `4a65b53` current-task; `b6f9108` project context.
+- **Verification:** GitHub source writes and re-fetch/static review only. Vitest, production build and browser checks NOT RUN. Backend/Prisma/API code unchanged.
+- **Known follow-up:** Profile page calls auth-store methods for profile update/avatar/password; verify exact installed `@telecom/auth` implementation and backend routes before altering this contract. Route guards are UX only; server authorization remains authoritative.
+- **Next:** Audit auth package and profile operations, then plan/implement retail backend R1 with explicit product eligibility, inventory, shipping, commission, return and gateway policy constraints.
