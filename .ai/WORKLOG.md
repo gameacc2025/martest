@@ -2398,6 +2398,32 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Breadcrumbs and actions preserved via named slot; no data/filter/cart/checkout/address/contact API behavior changed.
 - Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.
 
+### 2026-11-04 — UI-REDESIGN-TEM-01: phase 4 (structural shell + list rebuild to `tem`)
+
+- **Status:** IN_PROGRESS
+- **Agent:** OpenCode (local checkout)
+- **Objective:** Stop the "token-swap" look and actually reproduce the `tem/` layouts/components. Keep navy/cyan (`telecom.html`) as the unified brand, but adopt the tem **composition**.
+
+**Dashboard shell (shared, so all three apps inherit it)**
+- `DashboardSidebar.vue` rebuilt to `tem/telecom.html` `.sd`: 207px navy-gradient rail, LTR `Telecom Market` wordmark, `+ ثبت محصول جدید` cyan primary-action pill, icon+label items with a cyan count chip, support card and `2025 Telecom Market ©`. Collapse/submenu/planned/tooltip/mobile-dialog behaviour and the `.dash-sidebar-link--planned` span contract preserved. Added `primaryAction` prop.
+- `DashboardHeader.vue` rebuilt to tem `.tp`: canvas background, wide pill search, 46px round icon buttons, avatar + name + role user chip with caret. Kept `.dash-header-start`, `.dash-header-workspace(-label)`, `.dash-header-bell`, `button[aria-label="حالت تیره"]`, `button[aria-haspopup="menu"]` test contracts.
+- `AdminLayout.vue` / `CompanyLayout.vue`: pass `primaryAction` (`admin-product-create` / `manage-product-create`), sidebar width 207px, `.dash-layout` background `var(--tm-canvas)`.
+
+**Shared widgets**
+- `tem.scss`: added exact tem `.tm-kpis`/`.tm-kpi` tile composition; `.workspace-page-heading` is now a plain `.ph` row (no card); `.p-toolbar` tightened to tem `.tools` (border-bottom only, no outer border); `.p-datatable` tightened to `table.t` (transparent header, 12.5px/500 header text, 49px rows, `border-top` only); `.p-tag` → tem `.pill` (dot + severity colour map); `body`-prefixed normalization so legacy list surfaces (`.management-data-surface`, identity/company/category surfaces, per-page `.card`) become one tem card and their inner `.ent-table` loses the double border.
+- `KpiCard.vue` → tem `.kpi` structure (label row + icon chip, 24px value, caption); kept `kpi-card-*` hooks and skeleton. `KpiStatsRow.vue` → `tm-kpis` grid. `WorkspacePageHeading.vue` → tem `.ph`.
+
+**List pages (11)**
+- Admin: `CategoryList`, `CompanyList`, `InquiryList`, `OrderList`, `PermissionList`, `ProductList`, `RoleList`, `UserList`. Company: `InquiryList`, `ProductList`, `UserList`.
+- Revealed the visible `WorkspacePageHeading` (removed `sr-only`), stripped every `:deep()` scoped rule and dead CSS after `</style>` (net −2154 lines); pages now delegate table/toolbar styling to the shared tem layer.
+- `ManagementPages.test.js`: the per-page `min-height: 2.75rem` assertion now asserts the shared `DataTable.vue` owns 44px targets and that pages no longer contain `:deep(`.
+
+**Verification (phase 4):** `npx vitest run` → 56 files / 310 tests pass (one transient timeout in `apps/company/src/pages/company/inquiries/InquiryList.test.js` under parallel load; re-ran and it passed twice in isolation — pre-existing flake, not caused by these edits). `pnpm run build:admin`, `build:company`, `build:website` all pass. Browser/visual checks `NOT RUN` (owner-prohibited).
+- **Commit:** `150bc35` — `feat(ui): rebuild dashboard shell and list pages to tem structure`.
+- **Push:** Not pushed (local `main` ahead of `origin/main`; push not authorised this task).
+
+**Still to do:** Admin/Company detail workspaces (`ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList` dialog/detail, settings, inquiries detail/create) and the public Website surfaces (`PublicLayout`/`Home`/`ProductListing`/`ProductDetails`/`Categories`/`SearchResults`) still need fidelity passes against `tem/shop*`/`product-details.html`.
+
 
 ## UI implementation — shared shell batch 7 (2026-11-02)
 

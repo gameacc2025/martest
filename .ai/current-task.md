@@ -363,15 +363,22 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Dashboard shell (`DashboardSidebar`, `DashboardHeader`) and `BrandMark` aligned to the navy/cyan/blue brand.
 - Verification: three production builds pass; 310/310 Vitest tests pass. Visual checks `NOT RUN`.
 
-**Remaining (phase 3+):**
-1. Static public content pages — done in phase 3 (`AboutUs`, `Faq`, `Terms`, `NotificationPreferences` use `WorkspacePageHeading`).
-2. Account pages (`UserProfile`, `Addresses`, `MyInquiries`, `InquirySubscription`) — already on `WorkspacePageHeading`; audit for any remaining bespoke widgets.
-3. Auth pages (`Login`, `Register`, `ForgotPassword`) brand pass.
-4. Admin/Company detail workspaces (`ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList`, settings) — audit the shared-component cascade first; only rewrite where it is insufficient. Preserve server pagination/permissions.
-5. `Products.vue` is exported from `pages/public/index.js` but not routed — decide whether to keep/delete.
-6. Commit phase 3 on `main` and record the SHA in WORKLOG.
+**Done (phase 4 — structural shell + list rebuild):**
+- True structural rebuild, not a token swap. `DashboardSidebar` → tem `.sd` (207px navy rail, cyan CTA pill, count chips, support card, copyright); `DashboardHeader` → tem `.tp` (canvas row, pill search, 46px round icon buttons, avatar user chip). Test contracts kept.
+- `tem.scss`: exact `.tm-kpis`/`.tm-kpi` tiles, bare `.ph` page head, `.tools` toolbar, `table.t` rows (49px, transparent header), `.pill` tags, and `body`-prefixed normalization folding legacy list surfaces into one tem card.
+- 11 Admin/Company list pages: visible `WorkspacePageHeading`, all `:deep()` overrides and dead CSS stripped (−2154 lines); pages delegate to the shared layer.
+- `AdminLayout`/`CompanyLayout`: `primaryAction` wired (`admin-product-create` / `manage-product-create`), 207px rail, canvas background.
+- Verification: 310/310 Vitest, three production builds pass. Visual checks `NOT RUN`.
+
+**Remaining (phase 5+):**
+1. Admin/Company detail + form workspaces: `ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList` detail/dialog, settings, inquiry detail/create — audit the shared cascade first, rewrite only where insufficient. Preserve server pagination/permissions.
+2. Public Website surfaces against `tem/shop*` / `product-details.html`: `PublicLayout`, `Home`, `ProductListing`, `ProductDetails`, `Categories`, `SearchResults` fidelity pass.
+3. Account pages (`UserProfile`, `Addresses`, `MyInquiries`, `InquirySubscription`) and auth pages (`Login`, `Register`, `ForgotPassword`) brand pass.
+4. `Products.vue` is exported from `pages/public/index.js` but not routed — decide whether to keep/delete.
+5. Re-run `npx vitest run` + the three builds after each phase; commit per phase on `main`; do not push without authorization.
 
 **Phase 2 commit:** `c71d44c`.
 **Phase 3 commit:** `7853339`.
+**Phase 4 commit:** `150bc35`.
 
 **Open decision:** whether to keep the legacy website `components/products/ProductCard.vue` alongside the new Tem product card, or migrate all product surfaces to one shared card.
