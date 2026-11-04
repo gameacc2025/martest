@@ -128,6 +128,9 @@ async function loadDetail() {
   messages.value = []
   messagesError.value = ''
   recipientCompanyId.value = null
+  messageDraft.value = ''
+  messageNotice.value = ''
+  notifyBySms.value = false
   try {
     const inquiry = unwrapInquiry(await inquiriesApi.getById(id))
     if (requestSequence !== detailRequestSequence || String(route.params.id) !== String(id)) return
