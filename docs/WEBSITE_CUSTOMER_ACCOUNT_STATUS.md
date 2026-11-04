@@ -17,7 +17,14 @@
 
 ## پروفایل
 
-صفحه `/profile` از context احراز هویت برای نمایش مشخصات استفاده می‌کند و عملیات پروفایل/رمز/تصویر را از auth store فراخوانی می‌کند. در این مرحله قرارداد Backend آن عملیات تغییر داده نشده است؛ پیش از توسعه بیشتر باید پیاده‌سازی دقیق store و endpointهای مربوطه با هم تطبیق داده شوند.
+صفحه `/profile` از context احراز هویت برای نمایش مشخصات استفاده می‌کند. قرارداد واقعی Backend بررسی شد:
+- `GET /settings/profile` اطلاعات هویتی، Profile، AccessProfile و نقش‌ها را برمی‌گرداند.
+- `PATCH /settings/profile` فقط firstName/lastName/avatar را روی Profile تغییر می‌دهد؛ ایمیل و شماره تماس در این endpoint قابل ویرایش نیستند.
+- `PATCH /settings/change-password` رمز فعلی را بررسی می‌کند، رمز جدید را hash می‌کند و RefreshTokenهای قبلی را باطل می‌کند.
+- `POST /settings/profile/avatar` اکنون فایل واقعی JPEG/PNG/WebP را با سقف ۱ مگابایت اعتبارسنجی و ذخیره می‌کند؛ نام فایل تصادفی است و امضای باینری فایل نیز بررسی می‌شود. فایل قبلی پس از ثبت موفق URL پاک‌سازی می‌شود.
+- `DELETE /settings/profile/avatar` مقدار آواتار را پاک و فایل محلی قبلی را حذف می‌کند.
+
+ذخیره آواتار روی دیسک محلی backend انجام می‌شود. volume با نام `user_uploads` در Docker production به `/app/uploads` متصل شده تا فایل‌ها پایدار بمانند. در توسعه، پوشه `backend/uploads` به‌واسطه bind mount پروژه روی میزبان باقی می‌ماند. برای چند replica یا استقرار چندسروره، object storage مشترک باید جایگزین این ذخیره‌سازی محلی شود.
 
 ## مرکز استعلام مشتری
 
@@ -36,4 +43,4 @@
 
 ## محدودیت بررسی
 
-تغییرات در این مرحله روی فایل‌های Website و Router متمرکز بوده‌اند. تست Vitest، build و browser test اجرا نشده‌اند. Backend، Prisma schema و migrations تغییر نکرده‌اند.
+در مرحله تکمیلی پروفایل، Backend settings service/controller و volume ذخیره فایل تغییر کردند؛ Prisma schema و migration تغییر نکردند. تست‌های Node برای اعتبارسنجی و ذخیره آواتار نوشته/به‌روزرسانی شدند اما اجرا نشده‌اند. تست Vitest، build و browser test نیز اجرا نشده‌اند.
