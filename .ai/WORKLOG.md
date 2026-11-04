@@ -3282,3 +3282,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Customer support entry:** Added Website /support/tickets for CUSTOMER accounts, linked from the customer account menu. The route is customer-only; COMPANY and STAFF identities are redirected through the existing PKCE handoff to their respective Company/Admin support workspaces. All three support UIs remain explicitly sample-data prototypes pending ticket APIs.
 
 - **Table coverage follow-up:** Added current-page KPI breakdowns to Admin categories, roles and permissions, Company users and Company inquiry lists. This also corrected a pre-existing undefined kpiItems reference in PermissionList.vue. Notification delivery monitoring already had live summary metrics and was retained.
+
+- Added a source-to-component mapping for the complete TEM HTML inventory (analytics, sales, ecommerce, transactions, orders, customers, mail, products, cart/checkout, plans/subscriptions, roles/users/security, telecom and index) to docs/OPERATIONS_UI_ROADMAP.md.
