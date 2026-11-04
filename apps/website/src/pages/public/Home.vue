@@ -1,19 +1,16 @@
 <script setup>
+/**
+ * Website homepage — unified "tem" storefront composition.
+ *
+ * Data comes exclusively from the live marketplace APIs: the product list
+ * (recent + featured flag) and the category store used by /categories.
+ * There is no mock data and no fabricated marketplace statistic.
+ */
 import { ref, computed, onMounted } from 'vue'
-
 import { useRouter } from 'vue-router'
 import { productsApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { formatPrice } from '../../utils/helpers'
-
-import Carousel from 'primevue/carousel'
-import Card from 'primevue/card'
-import Badge from 'primevue/badge'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import InputNumber from 'primevue/inputnumber'
-import Select from 'primevue/select'
-import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
 
 const router = useRouter()
 const productsStore = useProductsStore()
@@ -25,27 +22,7 @@ const loading = ref(false)
 const categoriesLoading = ref(false)
 const error = ref(null)
 
-// ── Filters (right sidebar) ──────────────────────────────
 const searchQuery = ref('')
-const selectedCategory = ref(null)
-const minPrice = ref(null)
-const maxPrice = ref(null)
-const categoryOptions = computed(() => [
-  { id: null, name: 'همه دسته‌ها' },
-  ...categories.value.map((category) => ({
-    ...category,
-    name: category.nameFa || category.nameEn || category.name || category.slug,
-  }))
-])
-
-// ── Category carousel responsive breakpoints ─────────────
-const carouselResponsiveOptions = [
-  { breakpoint: '1400px', numVisible: 5, numScroll: 2 },
-  { breakpoint: '1100px', numVisible: 4, numScroll: 2 },
-  { breakpoint: '900px', numVisible: 3, numScroll: 1 },
-  { breakpoint: '640px', numVisible: 2, numScroll: 1 },
-  { breakpoint: '480px', numVisible: 1, numScroll: 1 }
-]
 
 const features = [
   { icon: 'pi pi-box', title: 'کاتالوگ تخصصی', text: 'تجهیزات مخابراتی و شبکه در یک فضای یکپارچه' },
@@ -54,20 +31,17 @@ const features = [
   { icon: 'pi pi-sliders-h', title: 'مشخصات فنی', text: 'بررسی جزئیات و ویژگی‌های ثبت‌شده محصولات' }
 ]
 
+const visibleCategories = computed(() => categories.value.slice(0, 8))
+
 async function fetchProducts() {
   try {
     loading.value = true
     error.value = null
     const params = { page: 1, limit: 12, status: 'PUBLISHED' }
-    if (searchQuery.value) params.search = searchQuery.value
-    if (selectedCategory.value) params.categoryId = Number(selectedCategory.value)
-    if (minPrice.value != null) params.minPrice = Number(minPrice.value)
-    if (maxPrice.value != null) params.maxPrice = Number(maxPrice.value)
 
     const response = await productsApi.list(params)
     const items = response?.data?.data ?? []
-    const recent = Array.isArray(items) ? items : []
-    recentProducts.value = recent.slice(0, 4)
+    recentProducts.value = (Array.isArray(items) ? items : []).slice(0, 4)
 
     // Featured is a server-side product flag, not a slice of recent results.
     try {
@@ -86,27 +60,18 @@ async function fetchProducts() {
   }
 }
 
-function applyFilters() {
-  fetchProducts()
-}
-
-function resetFilters() {
-  searchQuery.value = ''
-  selectedCategory.value = null
-  minPrice.value = null
-  maxPrice.value = null
-  fetchProducts()
-}
-
 function getProductImage(product) {
   return product?.images?.find((image) => image?.isPrimary && image?.url)
     || product?.images?.find((image) => image?.url)
     || null
 }
 
+function productRoute(product) {
+  return { name: 'product-details', params: { id: product.id } }
+}
+
 // Hero search follows the marketplace convention: it takes the visitor to the
-// dedicated search-results page (same target as the header search), rather than
-// silently re-filtering the homepage grid.
+// dedicated search-results page (same target as the header search).
 function heroSearch() {
   const q = searchQuery.value.trim()
   router.push({ name: 'search', query: q ? { q } : {} })
@@ -136,286 +101,200 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
-  <div class="home-page ds-page" dir="rtl">
-    <div class="home-container ds-container ds-stack">
+  <div class="home-page" dir="rtl">
+    <div class="home-container">
 
-      <section class="hero" aria-labelledby="home-title">
-        <div class="hero-content">
-          <div class="hero-copy">
-            <span class="hero-eyebrow"><i class="pi pi-broadcast" aria-hidden="true"></i> بازارگاه تخصصی تجهیزات مخابراتی</span>
-            <h1 id="home-title" class="hero-title">تجهیزات مخابراتی و شبکه را دقیق پیدا کنید</h1>
-            <p class="hero-desc">محصولات، مشخصات فنی و تأمین‌کنندگان بازارگاه را جستجو کنید و برای دریافت قیمت، مسیر استعلام را دنبال کنید.</p>
-          </div>
-          <form class="hero-search" role="search" @submit.prevent="heroSearch">
-            <i class="pi pi-search hero-search-icon" aria-hidden="true"></i>
+      <!-- Hero -->
+      <section class="site-hero home-hero" aria-labelledby="home-title">
+        <div class="home-hero__copy">
+          <span class="home-hero__eyebrow">
+            <i class="pi pi-broadcast" aria-hidden="true"></i>
+            بازارگاه تخصصی تجهیزات مخابراتی
+          </span>
+          <h1 id="home-title">تجهیزات مخابراتی و شبکه را دقیق پیدا کنید</h1>
+          <p>
+            محصولات، مشخصات فنی و تأمین‌کنندگان بازارگاه را جستجو کنید و برای دریافت
+            قیمت، مسیر استعلام را دنبال کنید.
+          </p>
+
+          <form class="home-hero__search" role="search" @submit.prevent="heroSearch">
+            <i class="pi pi-search" aria-hidden="true"></i>
             <input
               v-model="searchQuery"
               type="search"
               name="homepage-search"
               autocomplete="off"
-              class="hero-search-input"
               placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…"
               aria-label="جستجوی محصولات"
             />
-            <button type="submit" class="hero-search-btn">جستجو</button>
+            <button type="submit" class="tm-btn tm-btn--accent">جستجو</button>
           </form>
-          <div class="hero-actions">
-            <router-link :to="{ name: 'products' }" class="btn btn-primary">مشاهده کاتالوگ <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-            <router-link :to="{ name: 'categories' }" class="btn btn-outline">مرور دسته‌بندی‌ها</router-link>
+
+          <div class="home-hero__links">
+            <router-link :to="{ name: 'products' }">مشاهده همه محصولات</router-link>
+            <router-link :to="{ name: 'categories' }">دسته‌بندی‌ها</router-link>
+            <router-link :to="{ name: 'my-inquiries' }">استعلام‌های من</router-link>
+          </div>
+        </div>
+
+        <div class="home-hero__aside" aria-hidden="true">
+          <span class="home-hero__badge"><i class="pi pi-shield"></i> اطلاعات ثبت‌شده تأمین‌کنندگان</span>
+          <span class="home-hero__badge"><i class="pi pi-chart-line"></i> مقایسه مشخصات فنی</span>
+          <span class="home-hero__badge"><i class="pi pi-send"></i> ثبت درخواست استعلام</span>
+        </div>
+      </section>
+
+      <!-- Categories -->
+      <section class="home-section" aria-labelledby="home-categories">
+        <div class="site-section-title">
+          <h2 id="home-categories">دسته‌بندی محصولات</h2>
+          <router-link :to="{ name: 'categories' }">همه دسته‌بندی‌ها</router-link>
+        </div>
+
+        <div v-if="categoriesLoading" class="home-category-grid" aria-busy="true">
+          <div v-for="i in 8" :key="i" class="home-category-card home-skeleton"></div>
+        </div>
+
+        <div v-else-if="categories.length === 0" class="home-empty">
+          <i class="pi pi-th-large" aria-hidden="true"></i>
+          <p>دسته‌بندی‌ای برای نمایش ثبت نشده است.</p>
+        </div>
+
+        <div v-else class="home-category-grid">
+          <button
+            v-for="category in visibleCategories"
+            :key="category.id"
+            type="button"
+            class="category-card"
+            @click="viewCategoryProducts(category.id)"
+          >
+            <span class="category-card__icon" aria-hidden="true"><i class="pi pi-th-large"></i></span>
+            <span class="category-card__name">{{ category.nameFa || category.nameEn || category.name }}</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Featured products -->
+      <section class="home-section" aria-labelledby="home-featured">
+        <div class="site-section-title">
+          <h2 id="home-featured">محصولات ویژه</h2>
+          <router-link :to="{ name: 'products' }">همه محصولات</router-link>
+        </div>
+
+        <div v-if="loading" class="home-product-grid" aria-busy="true">
+          <div v-for="i in 4" :key="i" class="home-product-card home-skeleton"></div>
+        </div>
+
+        <div v-else-if="error" class="home-empty">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+          <p>{{ error }}</p>
+        </div>
+
+        <div v-else-if="featuredProducts.length === 0" class="home-empty">
+          <i class="pi pi-box" aria-hidden="true"></i>
+          <p>هنوز محصول ویژه‌ای منتشر نشده است. همه محصولات منتشرشده را ببینید.</p>
+          <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده محصولات</router-link>
+        </div>
+
+        <div v-else class="home-product-grid">
+          <router-link
+            v-for="product in featuredProducts"
+            :key="product.id"
+            :to="productRoute(product)"
+            class="product-card"
+          >
+            <span class="product-card__media">
+              <img
+                v-if="getProductImage(product)"
+                :src="getProductImage(product).url"
+                :alt="product.name"
+                width="320"
+                height="240"
+                loading="lazy"
+                decoding="async"
+              />
+              <i v-else class="pi pi-box" aria-hidden="true"></i>
+            </span>
+
+            <span class="product-card__body">
+              <span v-if="product.company?.isVerified" class="tm-pill tm-pill--success">
+                <i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده احرازشده
+              </span>
+
+              <span class="product-card__name">{{ product.name }}</span>
+              <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
+              <span v-if="product.sku" class="product-sku">کد: {{ product.sku }}</span>
+
+              <span class="product-card__foot">
+                <span v-if="product.finalPrice || product.price" class="product-card__price">
+                  {{ formatPrice(product.finalPrice || product.price) }}
+                </span>
+                <span v-else class="product-card-cta">استعلام از تأمین‌کننده</span>
+              </span>
+            </span>
+          </router-link>
+        </div>
+      </section>
+
+      <!-- Recent products -->
+      <section v-if="recentProducts.length" class="home-section" aria-labelledby="home-recent">
+        <div class="site-section-title">
+          <h2 id="home-recent">تازه‌ترین محصولات</h2>
+          <router-link :to="{ name: 'products' }">همه محصولات</router-link>
+        </div>
+
+        <div class="tm-table-wrap">
+          <div class="tm-table-scroll">
+            <table class="tm-table">
+              <caption class="sr-only">تازه‌ترین محصولات منتشرشده در بازارگاه</caption>
+              <thead>
+                <tr>
+                  <th scope="col">محصول</th>
+                  <th scope="col">تأمین‌کننده</th>
+                  <th scope="col" class="tm-table__num">قیمت</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="product in recentProducts" :key="product.id">
+                  <td>
+                    <router-link :to="productRoute(product)" class="home-recent__name">{{ product.name }}</router-link>
+                  </td>
+                  <td>{{ product.company?.name || '—' }}</td>
+                  <td class="tm-table__num">
+                    {{ product.finalPrice || product.price ? formatPrice(product.finalPrice || product.price) : 'استعلامی' }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
 
-      <!-- Two Column Layout: Filters (right) + Main (left) -->
-      <div class="home-layout">
-
-        <!-- Right: Filters Sidebar -->
-        <aside class="filters-sidebar" aria-label="فیلتر محصولات">
-          <Card class="filters-card">
-            <template #title>
-              <span class="filters-title"><i class="pi pi-filter"></i> فیلتر محصولات</span>
-            </template>
-            <template #content>
-              <div class="filters-inner">
-                <!-- Search -->
-                <div class="filter-group">
-                  <label for="home-product-search">جستجو</label>
-                  <div class="p-inputgroup">
-                    <InputText
-                      id="home-product-search"
-                      name="homepage-filter-search"
-                      autocomplete="off"
-                      v-model="searchQuery"
-                      placeholder="نام محصول..."
-                      @keyup.enter="applyFilters"
-                      class="w-full"
-                    />
-                    <Button icon="pi pi-search" aria-label="اجرای جستجوی محصولات" @click="applyFilters" />
-                  </div>
-                </div>
-
-                <!-- Category -->
-                <div class="filter-group">
-                  <label for="home-category-filter">دسته‌بندی</label>
-                  <Select
-                    inputId="home-category-filter"
-                    v-model="selectedCategory"
-                    :options="categoryOptions"
-                    optionLabel="name"
-                    optionValue="id"
-                    placeholder="همه دسته‌ها"
-                    class="w-full"
-                    @change="applyFilters"
-                  />
-                </div>
-
-                <!-- Price Range -->
-                <div class="filter-group">
-                  <label>محدوده قیمت (تومان)</label>
-                  <div class="price-range">
-                    <InputNumber
-                      inputId="home-minimum-price"
-                      aria-label="حداقل قیمت"
-                      v-model="minPrice"
-                      placeholder="حداقل"
-                      class="price-input"
-                      :min="0"
-                      @keyup.enter="applyFilters"
-                    />
-                    <span class="price-separator">—</span>
-                    <InputNumber
-                      inputId="home-maximum-price"
-                      aria-label="حداکثر قیمت"
-                      v-model="maxPrice"
-                      placeholder="حداکثر"
-                      class="price-input"
-                      :min="0"
-                      @keyup.enter="applyFilters"
-                    />
-                  </div>
-                </div>
-
-
-                <!-- Actions -->
-                <div class="filter-actions">
-                  <Button label="اعمال فیلتر" icon="pi pi-filter" class="w-full" @click="applyFilters" />
-                  <Button label="پاک کردن" icon="pi pi-times" severity="secondary" text class="w-full" @click="resetFilters" />
-                </div>
-              </div>
-            </template>
-          </Card>
-        </aside>
-
-        <!-- Left: Main Content -->
-        <div class="home-main">
-
-          <!-- Categories Slider -->
-          <section class="section-block ds-card" aria-labelledby="categories-heading">
-            <div class="section-head">
-              <router-link :to="{ name: 'categories' }" class="panel-link">مشاهده همه</router-link>
-              <h2 id="categories-heading" class="section-title ds-h2">دسته‌بندی محصولات</h2>
-            </div>
-            <div v-if="categoriesLoading" class="state-box">
-              <i class="pi pi-spin pi-spinner"></i>
-              <p>در حال دریافت دسته‌بندی‌ها...</p>
-            </div>
-            <div v-else-if="categories.length === 0" class="state-box">
-              <i class="pi pi-folder-open"></i>
-              <p>دسته‌بندی‌ای موجود نیست</p>
-            </div>
-            <Carousel
-              v-else
-              :value="categories"
-              :numVisible="4"
-              :numScroll="2"
-              :responsiveOptions="carouselResponsiveOptions"
-              :showIndicators="false"
-              class="cat-carousel"
-            >
-              <template #item="{ data: category }">
-                <div class="cat-slide">
-                  <button type="button" class="category-card" :aria-label="'مشاهده محصولات دسته ' + (category.nameFa || category.nameEn || category.slug)" @click="viewCategoryProducts(category.id)">
-                      <div class="cat-thumb">
-                        <img
-                          v-if="category.image"
-                          :src="category.image"
-                          :alt="category.nameFa || category.nameEn || category.slug"
-                          width="160"
-                          height="120"
-                          loading="lazy"
-                          decoding="async"
-                          class="cat-thumb-img"
-                        />
-                        <div v-else class="cat-thumb-placeholder">
-                          <i class="pi pi-folder"></i>
-                        </div>
-                      </div>
-                      <h3 class="cat-name">{{ category.nameFa || category.nameEn || category.slug }}</h3>
-                      <div class="cat-footer-row">
-                        <Badge :value="category.productCount == null ? '—' : Number(category.productCount).toLocaleString('fa-IR')" severity="info" />
-                        <span class="cat-link">مشاهده <i class="pi pi-arrow-left"></i></span>
-                      </div>
-                  </button>
-                </div>
-              </template>
-            </Carousel>
-          </section>
-
-          <!-- Featured Products -->
-          <section class="section-block ds-card" aria-labelledby="featured-heading">
-            <div class="section-head">
-              <button type="button" class="nav-btn" @click="fetchProducts" :disabled="loading" aria-label="بارگذاری مجدد">
-                <i class="pi" :class="loading ? 'pi-spin pi-spinner' : 'pi-refresh'"></i>
-              </button>
-              <h2 id="featured-heading" class="section-title ds-h2">محصولات ویژه</h2>
-            </div>
-
-            <div v-if="loading" class="products-grid">
-              <ProductCard v-for="n in 6" :key="n" skeleton />
-            </div>
-            <div v-else-if="error" class="state-box error">
-              <i class="pi pi-exclamation-triangle"></i>
-              <p>{{ error }}</p>
-            </div>
-            <div v-else-if="featuredProducts.length === 0" class="state-box">
-              <i class="pi pi-box"></i>
-              <p>محصول ویژه‌ای با فیلترهای فعلی یافت نشد</p>
-              <Button label="حذف فیلترها" icon="pi pi-times" severity="secondary" text @click="resetFilters" />
-            </div>
-            <div v-else class="products-grid">
-              <router-link v-for="product in featuredProducts" :key="product.id" :to="{ name: 'product-details', params: { id: product.id } }" class="product-card" :aria-label="'مشاهده جزئیات ' + product.title">
-                <div class="product-image">
-                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" width="640" height="480" loading="lazy" decoding="async" />
-                  <div v-else class="empty-image"><i class="pi pi-image"></i></div>
-                </div>
-                <div class="product-info">
-                  <div class="product-identity">
-                    <h3 class="product-title">{{ product.title }}</h3>
-                    <span v-if="product.company?.isVerified" class="product-verified" title="شرکت تأیید شده">
-                      <i class="pi pi-verified" aria-hidden="true"></i>
-                    </span>
-                  </div>
-                  <p v-if="product.company?.name || product.vendor" class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor }}</p>
-                  <div v-if="product.brand || product.model || product.sku" class="product-meta">
-                    <span v-if="product.brand">{{ product.brand }}</span>
-                    <span v-if="product.model">{{ product.model }}</span>
-                    <span v-if="product.sku" class="product-sku">{{ product.sku }}</span>
-                  </div>
-                  <div class="home-product-footer">
-                    <span v-if="product.prices?.length" class="product-price">
-                      <small>شروع قیمت از</small>
-                      <strong>{{ formatPrice(product.prices[0].price, product.prices[0].currency) }}</strong>
-                    </span>
-                    <span v-else class="product-price product-price--inquiry">
-                      <small>قیمت</small>
-                      <strong>استعلام از تأمین‌کننده</strong>
-                    </span>
-                    <span class="product-card-cta">جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
-                  </div>
-                </div>
-              </router-link>
-            </div>
-          </section>
-
-          <!-- Recent Products -->
-          <section class="section-block ds-card" aria-labelledby="recent-heading">
-            <div class="section-head">
-              <router-link v-if="recentProducts.length > 0" :to="{ name: 'products' }" class="panel-link">مشاهده همه</router-link>
-              <h2 id="recent-heading" class="section-title ds-h2">جدیدترین محصولات</h2>
-            </div>
-            <div v-if="recentProducts.length === 0 && !loading" class="state-box">
-              <i class="pi pi-box"></i>
-              <p>در حال حاضر محصولی موجود نیست</p>
-            </div>
-            <div v-else class="products-grid">
-              <router-link v-for="product in recentProducts" :key="product.id" :to="{ name: 'product-details', params: { id: product.id } }" class="product-card" :aria-label="'مشاهده جزئیات ' + product.title">
-                <div class="product-image">
-                  <img v-if="getProductImage(product)?.url" :src="getProductImage(product).url" :alt="product.title" width="640" height="480" loading="lazy" decoding="async" />
-                  <div v-else class="empty-image"><i class="pi pi-image"></i></div>
-                  <span class="tile-badge">جدید</span>
-                </div>
-                <div class="product-info">
-                  <div class="product-identity">
-                    <h3 class="product-title">{{ product.title }}</h3>
-                    <span v-if="product.company?.isVerified" class="product-verified" title="شرکت تأیید شده">
-                      <i class="pi pi-verified" aria-hidden="true"></i>
-                    </span>
-                  </div>
-                  <p v-if="product.company?.name || product.vendor" class="product-vendor"><i class="pi pi-building" aria-hidden="true"></i>{{ product.company?.name || product.vendor }}</p>
-                  <div v-if="product.brand || product.model || product.sku" class="product-meta">
-                    <span v-if="product.brand">{{ product.brand }}</span>
-                    <span v-if="product.model">{{ product.model }}</span>
-                    <span v-if="product.sku" class="product-sku">{{ product.sku }}</span>
-                  </div>
-                  <div class="home-product-footer">
-                    <span v-if="product.prices?.length" class="product-price">
-                      <small>شروع قیمت از</small>
-                      <strong>{{ formatPrice(product.prices[0].price, product.prices[0].currency) }}</strong>
-                    </span>
-                    <span v-else class="product-price product-price--inquiry">
-                      <small>قیمت</small>
-                      <strong>استعلام از تأمین‌کننده</strong>
-                    </span>
-                    <span class="product-card-cta">جزئیات <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
-                  </div>
-                </div>
-              </router-link>
-            </div>
-          </section>
+      <!-- Capabilities -->
+      <section class="home-section" aria-labelledby="home-features">
+        <div class="site-section-title">
+          <h2 id="home-features">امکانات بازارگاه</h2>
         </div>
-      </div>
-
-      <!-- Verified marketplace capabilities; no hard-coded business metrics. -->
-      <section class="features-bar" aria-label="امکانات بازارگاه">
-        <div v-for="feature in features" :key="feature.title" class="feature-item">
-          <span class="feature-icon"><i :class="feature.icon" aria-hidden="true"></i></span>
-          <div class="feature-text">
+        <div class="home-feature-grid">
+          <article v-for="feature in features" :key="feature.title" class="home-feature">
+            <span class="feature-icon" aria-hidden="true"><i :class="feature.icon"></i></span>
             <h3>{{ feature.title }}</h3>
             <p>{{ feature.text }}</p>
-          </div>
+          </article>
         </div>
+      </section>
+
+      <!-- Inquiry CTA -->
+      <section class="home-cta">
+        <div>
+          <h2>محصول مورد نظر را پیدا نکردید؟</h2>
+          <p>ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان، بدون نیاز به خرید مستقیم.</p>
+        </div>
+        <router-link :to="{ name: 'my-inquiries' }" class="tm-btn tm-btn--accent">
+          <i class="pi pi-file-edit" aria-hidden="true"></i>
+          ثبت درخواست استعلام
+        </router-link>
       </section>
 
     </div>
@@ -423,475 +302,247 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.home-page {
-  background:
-    radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--ds-color-primary) 7%, transparent), transparent 34rem),
-    var(--ds-color-background);
-  padding: 1.5rem 0 3rem;
-}
+.home-page { background: var(--tm-canvas); }
 .home-container {
   width: 100%;
-  max-width: var(--ds-container-max-wide);
-  margin: 0 auto;
-  padding-inline: var(--ds-container-pad);
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: clamp(14px, 2vw, 28px);
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-8);
+  gap: 34px;
 }
-
-@media (min-width: 768px) {
-  .home-container {
-    padding-inline: var(--ds-container-pad-lg);
-  }
-}
-
-@media (min-width: 1920px) {
-  .home-container {
-    padding-inline: var(--ds-container-pad-xl);
-  }
-}
-
-@media (min-width: 1920px) {
-  .home-container {
-    padding-inline: var(--ds-container-pad-xl);
-  }
-}
-
 
 /* Hero */
-.hero {
-  display: block;
-  overflow: hidden;
-  padding: clamp(1.5rem, 4vw, 3.25rem);
-  border: 0;
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-brand-deep);
-  color: var(--ds-color-on-brand);
-}
-.hero-content { display: flex; max-width: 58rem; flex-direction: column; gap: var(--ds-space-5); }
-.hero-copy { display: flex; flex-direction: column; gap: var(--ds-space-3); }
-.hero-title {
-  max-width: 20ch;
-  margin: 0;
-  color: inherit;
-  font-size: clamp(1.9rem, 3.5vw, 3rem);
-  font-weight: 800;
-  line-height: 1.35;
-  text-wrap: balance;
-}
-.hero-desc { max-width: 58ch; margin: 0; color: var(--ds-color-on-brand-muted); font-size: var(--ds-font-size-md); line-height: 1.9; }
-.hero-search {
-  display: grid;
-  max-width: 48rem;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+.home-hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr); gap: 32px; align-items: center; }
+.home-hero__eyebrow {
+  display: inline-flex;
   align-items: center;
-  gap: var(--ds-space-2);
-  padding: .35rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface);
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: var(--tm-radius-pill);
+  background: rgba(46, 211, 238, 0.14);
+  border: 1px solid rgba(46, 211, 238, 0.35);
+  color: #bdf3fb;
+  font-size: 11.5px;
+  font-weight: 600;
 }
-.hero-search:focus-within {
-  border-color: var(--ds-color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ds-color-primary) 22%, transparent);
-}
-.hero-search-icon { padding-inline-start: .65rem; color: var(--ds-color-text-muted); font-size: 1rem; }
-.hero-search-input {
-  width: 100%; min-width: 0; min-height: 2.75rem; padding: .5rem .35rem;
-  border: 0; outline: 0; background: transparent; color: var(--ds-color-text); font: inherit;
-}
-.hero-search-input::placeholder { color: var(--ds-color-text-muted); }
-.hero-search-btn {
-  min-height: 2.75rem; padding: .6rem 1.4rem; border: 0; border-radius: var(--ds-radius-sm);
-  background: var(--ds-color-accent); color: var(--ds-color-on-accent); font: inherit;
-  font-weight: 700; cursor: pointer; transition: background-color var(--ds-transition-fast);
-}
-.hero-search-btn:hover { background: var(--ds-color-primary-hover); }
-.hero-search-btn:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
-.hero-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
-/* Buttons */
-.btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.75rem 1.5rem; border-radius: 0.65rem; font-weight: 700;
-  font-size: 0.95rem; cursor: pointer; text-decoration: none;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; border: 1px solid transparent;
-}
-.btn-primary { background: var(--primary-color); color: var(--primary-contrast-color); }
-.btn-primary:hover { background: var(--ds-color-primary-hover); }
-.btn-outline { background: transparent; color: var(--btn-outline-color, var(--text-color)); border-color: var(--surface-border); }
-.btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.home-hero h1 { margin: 16px 0 12px; font-size: clamp(24px, 3vw, 38px); line-height: 1.35; color: #fff; }
+.home-hero p { margin: 0 0 22px; max-width: 56ch; color: #cfe6f2; font-size: 14px; line-height: 1.9; }
 
-/* Dark mode: outline button needs lighter text on dark backgrounds */
-:global(.app-dark) .btn-outline {
-  --btn-outline-color: var(--p-primary-300);
-}
-
-/* Two Column Layout */
-.home-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 1.25rem;
-  align-items: start;
-}
-
-/* Filters Sidebar */
-.filters-sidebar {
-  position: sticky;
-  top: 5rem;
-  align-self: start;
-}
-.filters-card {
-  border-radius: 1rem;
-  box-shadow: var(--ds-shadow-sm);
-}
-.filters-card :deep(.p-card-body) { padding: 1.25rem; }
-.filters-card :deep(.p-card-title) { margin-bottom: 1rem; }
-.filters-card :deep(.p-card-content) { padding: 0; }
-.filters-title {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  font-size: 1rem; font-weight: 800; color: var(--text-color);
-}
-.filters-title i { color: var(--primary-color); }
-.filters-inner { display: flex; flex-direction: column; gap: 1.1rem; }
-.filter-group label {
-  display: block; font-size: 0.8rem; font-weight: 700;
-  color: var(--text-color); margin-bottom: 0.5rem;
-}
-/* Make PrimeVue inputs fill the sidebar width uniformly */
-.filters-inner :deep(.p-inputtext),
-.filters-inner :deep(.p-select),
-.filters-inner :deep(.p-inputnumber),
-.filters-inner :deep(.p-inputnumber-input) {
-  width: 100%;
-}
-.filters-inner :deep(.p-inputgroup) { width: 100%; }
-.price-range {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+.home-hero__search {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  background: #fff;
+  border-radius: var(--tm-radius);
+  max-width: 620px;
 }
-.price-input :deep(.p-inputnumber-input) { text-align: center; }
-.price-separator {
-  font-size: 0.9rem; color: var(--text-color-secondary); text-align: center;
-}
-.filter-actions {
-  display: flex; flex-direction: column; gap: 0.5rem;
-  margin-top: 0.25rem; padding-top: 1rem; border-top: 1px solid var(--surface-border);
-}
-
-
-/* Main */
-.home-main { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
-
-/* Section Block */
-.section-block {
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  padding: clamp(1rem, 2vw, 1.5rem);
-  box-shadow: var(--ds-shadow-xs);
-}
-.section-head {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
-}
-.section-title {
-  display: flex; align-items: center; gap: 0.625rem;
-  margin: 0; font-size: clamp(1.1rem, 1.7vw, 1.35rem); font-weight: 800; color: var(--ds-color-text);
-}
-.panel-link {
-  font-size: 0.85rem; color: var(--primary-color); text-decoration: none; font-weight: 600;
-}
-.panel-link:hover { text-decoration: underline; }
-
-/* Category Carousel */
-.cat-carousel :deep(.p-carousel-item) { padding: 0.25rem; }
-.cat-slide { padding: 0.25rem; height: 100%; }
-.category-card {
-  display: block; width: 100%; height: 100%; padding: 1rem; text-align: start;
-  font: inherit; color: var(--ds-color-text); cursor: pointer;
-  border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface); transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
-}
-.category-card:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
-.cat-thumb {
-  aspect-ratio: 16 / 9;
-  background: var(--surface-ground);
-  border-radius: var(--content-border-radius);
-  margin-bottom: 0.75rem;
-  overflow: hidden;
-}
-.cat-thumb-img { width: 100%; height: 100%; object-fit: cover; }
-.cat-thumb-placeholder {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-}
-.cat-thumb-placeholder i { font-size: 2.5rem; color: var(--text-color-secondary); }
-.cat-name {
-  font-size: 1rem; font-weight: 600; margin: 0 0 0.5rem 0;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.cat-footer-row {
-  display: flex; align-items: center; justify-content: space-between;
-}
-.cat-link {
-  font-size: 0.8rem; color: var(--primary-color); font-weight: 600;
-  display: inline-flex; align-items: center; gap: 0.25rem;
-}
-
-/* Products Grid */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  gap: var(--ds-space-4);
-}
-.product-card {
-  display: block; min-width: 0; overflow: hidden; border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md); background: var(--ds-color-surface); color: inherit;
-  text-decoration: none; transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
-}
-.product-card:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
-.product-card:focus-visible,
-.category-card:focus-visible {
-  outline: 3px solid var(--ds-color-focus);
-  outline-offset: 3px;
-}
-.product-image {
-  position: relative; aspect-ratio: 4 / 3; background: var(--surface-ground);
-  overflow: hidden; display: flex; align-items: center; justify-content: center;
-}
-.product-image img { width: 100%; height: 100%; object-fit: cover; }
-.empty-image i { font-size: 2rem; color: var(--text-color-secondary); opacity: 0.4; }
-.tile-badge {
-  position: absolute; top: 0.5rem; inset-inline-start: 0.5rem;
-  background: var(--primary-color); color: var(--primary-contrast-color);
-  font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.625rem; border-radius: var(--ds-radius-pill);
-}
-.product-info { padding: var(--ds-space-3); }
-.product-title {
-  margin: 0 0 0.375rem; font-size: 0.95rem; font-weight: 700; line-height: 1.5;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  min-height: 2.85em;
-}
-.product-vendor { margin: 0 0 0.625rem; font-size: 0.8rem; color: var(--text-color-secondary); }
-.product-price { font-weight: 800; color: var(--ds-color-primary); font-size: 1rem; }
-
-/* Nav buttons */
- .nav-btn {
-  width: 2.75rem; min-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; border-radius: 0.75rem;
-  border: 1px solid var(--surface-border); background: var(--surface-card);
-  color: var(--text-color); cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-}
-.nav-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
-.nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* State boxes */
-.state-box {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 0.5rem; padding: 2rem 1rem; color: var(--text-color-secondary);
-}
-.state-box i { font-size: 2rem; }
-.state-box.error i { color: var(--ds-color-danger); }
-.state-box p { margin: 0; }
-
-/* Verified marketplace capabilities */
-.features-bar {
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0;
-  border-block: 1px solid var(--ds-color-border); padding: .5rem 0;
-}
-.feature-item {
-  display: flex; flex-direction: column; align-items: flex-start; gap: .35rem;
-  padding: .75rem 1rem; text-align: start; border-inline-start: 1px solid var(--ds-color-border);
-}
-.feature-item:first-child { border-inline-start: 0; }
-.feature-text h3 { margin: 0; font-size: .9rem; font-weight: 700; color: var(--ds-color-text); }
-.feature-text p { margin: 0; font-size: .78rem; color: var(--ds-color-text-muted); line-height: 1.7; }
-.feature-text h3 { margin: 0 0 0.2rem; font-size: 0.9rem; font-weight: 700; }
-.feature-text p { margin: 0; font-size: 0.75rem; color: var(--text-color-secondary); }
-
-/* Responsive */
-@media (max-width: 1100px) {
-  .products-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 900px) {
-  .home-layout { grid-template-columns: 1fr; }
-  .filters-sidebar { position: static; }
-  .features-bar { grid-template-columns: repeat(2, 1fr); }
-  .feature-item { border-inline-start: none; }
-}
-@media (max-width: 560px) {
-  .hero-title { font-size: 1.75rem; }
-  .hero-actions { flex-direction: column; }
-  .btn { justify-content: center; }
-  .products-grid, .features-bar { grid-template-columns: 1fr; }
-  .home-container { gap: var(--ds-space-4); }
-  .hero { padding: 1.25rem; }
-  .hero-search { grid-template-columns: auto minmax(0, 1fr); }
-  .hero-search-btn { grid-column: 1 / -1; width: 100%; }
-}
-
-/* Marketplace surfaces: flat, product-led and consistent with the shared system. */
-.home-page { padding-block: clamp(1.25rem, 2.5vw, 2.5rem) 3.5rem; background: var(--ds-color-background); }
-.home-container { gap: clamp(1.25rem, 2.5vw, 2rem); }
-.hero-search { max-width: 48rem; }
-.hero-actions .btn { min-height: 2.75rem; }
-.home-page .section-block {
-  padding: 1.25rem 0;
+.home-hero__search i { color: var(--tm-muted); font-size: 14px; }
+.home-hero__search input {
+  flex: 1;
+  min-width: 0;
   border: 0;
-  border-top: 1px solid var(--ds-color-border);
-  border-radius: 0;
+  outline: 0;
   background: transparent;
-  box-shadow: none;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--tm-ink);
+  padding: 9px 0;
 }
-.section-head { gap: 1rem; }
-.section-title { font-size: clamp(1.05rem, 1.7vw, 1.3rem); }
-.filters-card {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
-  box-shadow: none;
+.home-hero__search .tm-btn { flex: none; }
+
+.home-hero__links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; }
+.home-hero__links a { color: #bdf3fb; font-size: 12.5px; font-weight: 600; text-decoration: none; }
+.home-hero__links a:hover { color: #fff; text-decoration: underline; }
+
+.home-hero__aside { display: flex; flex-direction: column; gap: 10px; }
+.home-hero__badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border-radius: var(--tm-radius);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e6f4fb;
+  font-size: 12.5px;
+  font-weight: 500;
 }
-.filters-inner :deep(.p-inputtext),
-.filters-inner :deep(.p-select),
-.filters-inner :deep(.p-inputnumber-input) { border-radius: var(--ds-radius-md); }
-.filters-inner :deep(.p-inputtext),
-.filters-inner :deep(.p-select),
-.filters-inner :deep(.p-inputnumber-input) { min-height: 2.75rem; }
-.filter-actions :deep(.p-button) { min-height: 2.75rem; }
-.hero-actions .btn { min-height: 2.75rem; }
-.category-card { min-height: 10rem; cursor: pointer; }
-.category-card:focus-visible {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 3px;
+.home-hero__badge i { color: var(--tm-cyan); }
+
+/* Sections */
+.home-section { min-width: 0; }
+
+.home-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
 }
+
 .category-card {
-  overflow: hidden;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius);
+  background: #fff;
+  cursor: pointer;
+  text-align: start;
+  font-family: inherit;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
-.cat-thumb { background: var(--ds-color-surface-alt); }
-.product-card { border-radius: var(--ds-radius-md); box-shadow: none; }
-.product-card:hover, .product-card:focus-visible { transform: none; box-shadow: none; }
-.product-image {
-  aspect-ratio: 5 / 4;
-  background: linear-gradient(145deg, var(--ds-color-surface-alt), var(--ds-color-surface-hover));
-}
-.product-image img { object-fit: contain; padding: .75rem; }
-.product-info { padding: .9rem; }
-.product-title { color: var(--ds-color-text); line-height: 1.65; }
-.product-vendor { display: flex; align-items: center; gap: .35rem; }
- .features-bar { border-radius: 0; background: transparent; box-shadow: none; padding-inline: 0; }
-@media (max-width: 900px) {
-  .hero { min-height: 0; }
-  .hero-content { max-width: none; }
-}
-@media (max-width: 560px) {
-  .hero-title { max-width: none; font-size: 1.65rem; }
-  .hero-actions { flex-direction: row; }
-  .hero-actions .btn { flex: 1 1 0; padding-inline: .75rem; font-size: .82rem; }
-  .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
-  .features-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .feature-item { padding: .75rem .5rem; }
-  .feature-item:nth-child(odd) { border-inline-start: 0; }
-  .feature-text h3 { font-size: .82rem; }
-  .feature-text p { font-size: .72rem; }
-}
-@media (max-width: 360px) {
-  .products-grid { grid-template-columns: 1fr; }
-  .hero-actions { flex-direction: column; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .product-card,
-  .category-card,
-  .nav-btn,
-  .product-card-cta i {
-    transition: none !important;
-    animation: none !important;
-  }
-  .product-card:hover,
-  .product-card:focus-visible,
-  .category-card:hover,
-  .category-card:focus-visible { transform: none !important; }
-}
-
-/* Homepage product cards follow the same supplier/pricing hierarchy as catalogue results. */
-.home-page .product-info { display: flex; min-height: 12rem; flex-direction: column; gap: .35rem; }
-.home-page .product-identity { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
-.home-page .product-title { flex: 1; min-width: 0; margin: 0; }
-.home-page .product-verified {
+.category-card:hover { border-color: var(--tm-cyan-strong); box-shadow: var(--tm-shadow-sm); transform: translateY(-1px); }
+.category-card:focus-visible { outline: 2px solid var(--tm-cyan); outline-offset: 2px; }
+.category-card__icon {
   display: grid;
   place-items: center;
-  flex: 0 0 1.6rem;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 50%;
-  background: var(--ds-color-success-soft);
-  color: var(--ds-color-success);
-  font-size: .8rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--tm-cyan-soft);
+  color: var(--tm-cyan-deep);
+  flex: none;
 }
-.home-page .product-vendor { margin: .25rem 0; }
-.home-page .product-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .25rem .55rem;
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
+.category-card__name { font-size: 12.5px; font-weight: 600; color: var(--tm-ink); line-height: 1.5; }
+
+.home-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
 }
-.home-page .product-sku { direction: ltr; unicode-bidi: isolate; }
-.home-page .home-product-footer {
+
+.product-card {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+.product-card:hover { border-color: var(--tm-line-strong); box-shadow: var(--tm-shadow-sm); transform: translateY(-2px); }
+.product-card:focus-visible { outline: 2px solid var(--tm-cyan); outline-offset: 2px; }
+
+.product-card__media {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background: var(--tm-surface-alt);
+  color: var(--tm-faint);
+  font-size: 30px;
+}
+.product-card__media img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
+
+.product-card__body { display: flex; flex-direction: column; gap: 6px; padding: 14px; flex: 1; }
+.product-card__name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--tm-ink);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.product-card__company { font-size: 11.5px; color: var(--tm-muted); }
+.product-sku { font-size: 10.5px; color: var(--tm-faint); }
+.product-card__foot { margin-top: auto; padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.product-card__price { font-size: 13px; font-weight: 700; color: var(--tm-blue); }
+.product-card-cta { font-size: 11px; font-weight: 600; color: var(--tm-cyan-deep); }
+.product-card__body .tm-pill { align-self: flex-start; }
+
+.home-recent__name { color: var(--tm-ink); font-weight: 600; text-decoration: none; }
+.home-recent__name:hover { color: var(--tm-blue); }
+
+.home-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.home-feature {
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+}
+.feature-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--tm-blue-soft);
+  color: var(--tm-blue);
+  margin-bottom: 12px;
+}
+.home-feature h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+.home-feature p { margin: 0; font-size: 12px; line-height: 1.8; color: var(--tm-muted); }
+
+.home-cta {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: .5rem;
-  margin-top: auto;
-  padding-top: .7rem;
-  border-top: 1px solid var(--ds-color-border);
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 26px 28px;
+  border-radius: var(--tm-radius-lg);
+  background:
+    radial-gradient(circle at 90% 20%, rgba(46, 211, 238, 0.25), transparent 45%),
+    linear-gradient(118deg, #0a1c3f, #12507a);
+  color: #fff;
 }
-.home-page .product-price { display: flex; min-width: 0; flex-direction: column; gap: .1rem; font-size: .9rem; }
-.home-page .product-price small { color: var(--ds-color-text-muted); font-size: .65rem; font-weight: var(--ds-font-weight-normal); }
-.home-page .product-price strong { color: var(--ds-color-primary); font-size: .85rem; line-height: 1.5; }
-.home-page .product-price--inquiry strong { font-size: .75rem; }
-.home-page .product-card-cta { display: inline-flex; align-items: center; gap: .3rem; flex: 0 0 auto; min-height: 2.75rem; color: var(--ds-color-primary-text); font-size: .75rem; font-weight: var(--ds-font-weight-bold); }
-.home-page .product-card-cta i { transition: transform var(--ds-transition-fast); }
-.home-page .product-card:hover .product-card-cta i { transform: translateX(-3px); }
-@media (max-width: 560px) {
-  .home-page .product-info { min-height: 12.5rem; padding: .7rem; }
-  .home-page .home-product-footer { align-items: flex-start; flex-direction: column; }
-  .home-page .product-card-cta { min-height: 2.5rem; }
+.home-cta h2 { margin: 0 0 6px; font-size: 19px; color: #fff; }
+.home-cta p { margin: 0; font-size: 12.5px; color: #cfe6f2; }
+
+.home-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 38px 20px;
+  background: #fff;
+  border: 1px dashed var(--tm-line-strong);
+  border-radius: var(--tm-radius-lg);
+  color: var(--tm-muted);
+  text-align: center;
+}
+.home-empty i { font-size: 24px; color: var(--tm-faint); }
+.home-empty p { margin: 0; font-size: 13px; }
+
+.home-skeleton {
+  min-height: 150px;
+  background: linear-gradient(90deg, var(--tm-surface-alt) 25%, #eef3fb 37%, var(--tm-surface-alt) 63%);
+  background-size: 400% 100%;
+  animation: home-shimmer 1.4s ease infinite;
+  border-radius: var(--tm-radius-lg);
+  border: 1px solid var(--tm-line);
+}
+@keyframes home-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-
-.hero{position:relative;border:1px solid color-mix(in srgb,var(--ds-brand) 24%,transparent);border-radius:var(--ds-radius-xl);background:var(--ds-navy);box-shadow:var(--ds-shadow-md)}
-.hero::before{position:absolute;inset-block:1.25rem;inset-inline-start:0;width:3px;border-radius:0 3px 3px 0;background:var(--ds-brand);content:""}
-.hero-copy{gap:.65rem}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:.45rem;color:var(--ds-brand);font-size:.74rem;font-weight:700;letter-spacing:.01em}
-.hero-title{max-width:25ch;font-size:clamp(1.55rem,2.6vw,2.25rem);line-height:1.45}
-.hero-desc{max-width:64ch;font-size:.88rem;line-height:1.85}
-.hero-search{border-radius:10px;box-shadow:var(--ds-shadow-sm)}
-.hero-search-btn{border-radius:7px}
-.hero-actions .btn{min-height:2.75rem;font-size:.82rem}
-.home-page .section-block{padding:1.05rem 1.15rem 1.2rem;border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs)}
-.home-page .section-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.9rem;padding-bottom:.7rem;border-bottom:1px solid var(--ds-color-border)}
-.home-page .section-title{font-size:1rem;font-weight:750}
-.home-page .panel-link{color:var(--ds-color-primary-text);font-size:.76rem;font-weight:700}
-.home-page .filters-card{border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-sm)}
-.home-page .product-card{border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs);transition:border-color var(--ds-transition-fast),box-shadow var(--ds-transition-fast),transform var(--ds-transition-fast)}
-.home-page .product-card:hover,.home-page .product-card:focus-visible{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ds-color-primary) 38%,var(--ds-color-border));box-shadow:var(--ds-shadow-md)}
-.home-page .product-image{background:var(--ds-color-surface-alt)}
-.home-page .product-title{font-size:.88rem;line-height:1.65}
-.home-page .product-price strong{font-size:.86rem}
-.home-page .category-card{border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs);transition:border-color var(--ds-transition-fast),box-shadow var(--ds-transition-fast),transform var(--ds-transition-fast)}
-.home-page .category-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ds-color-primary) 35%,var(--ds-color-border));box-shadow:var(--ds-shadow-sm)}
-.home-page .features-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;padding:0;border:0}
-.home-page .feature-item{display:flex;min-width:0;min-height:5.5rem;flex-direction:row;align-items:center;gap:.7rem;padding:.8rem;border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-md);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs)}
-.home-page .feature-item:first-child{border-inline-start:1px solid var(--ds-color-border)}
-.home-page .feature-icon{display:grid;place-items:center;flex:0 0 2.25rem;width:2.25rem;height:2.25rem;border:1px solid color-mix(in srgb,var(--ds-color-primary) 18%,transparent);border-radius:8px;background:var(--ds-color-primary-soft);color:var(--ds-color-primary-text);font-size:.95rem}
-.home-page .feature-text h3{font-size:.8rem}
-.home-page .feature-text p{font-size:.7rem;line-height:1.6}
-@media(max-width:900px){.home-page .features-bar{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.hero-title{font-size:1.55rem}.hero-desc{font-size:.82rem}.home-page .section-block{padding:.85rem}.home-page .features-bar{grid-template-columns:repeat(2,minmax(0,1fr))}.home-page .feature-item{align-items:flex-start;padding:.65rem}.home-page .feature-icon{flex-basis:2rem;width:2rem;height:2rem}}
-@media(max-width:360px){.home-page .features-bar{grid-template-columns:1fr}}
-
+@media (max-width: 900px) {
+  .home-hero { grid-template-columns: 1fr; }
+  .home-hero__aside { display: none; }
+}
+@media (max-width: 575px) {
+  .home-hero__search { flex-wrap: wrap; }
+  .home-hero__search .tm-btn { width: 100%; }
+  .home-container { gap: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-skeleton { animation: none; }
+  .product-card:hover, .category-card:hover { transform: none; }
+}
 </style>

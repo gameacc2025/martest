@@ -938,7 +938,7 @@ async function saveCreate() {
 .identity-management-toolbar :deep(.p-button:not(.p-button-text):not(.p-button-outlined)) {
   min-height: 2.7rem;
   border-color: #31b7d7;
-  background: linear-gradient(105deg, #249fc9, #39bfe0);
+  background: linear-gradient(105deg, var(--tm-cyan-strong), var(--tm-cyan));
   color: #f4fbfd;
   box-shadow: 0 3px 9px rgba(38, 160, 197, .16);
 }
@@ -960,7 +960,7 @@ async function saveCreate() {
 .identity-management-table :deep(.p-datatable-tbody > tr:hover) { background: #f1f9fc; }
 .identity-management-table :deep(.p-button.p-button-text) { min-width: 2.75rem; min-height: 2.75rem; border-radius: 9px; }
 .user-list-page :deep(.p-button:focus-visible), .user-list-page :deep(.p-inputtext:focus-visible), .user-list-page :deep(.p-select:focus-visible) {
-  outline: 2px solid #39bfe0;
+  outline: 2px solid var(--tm-cyan);
   outline-offset: 2px;
 }
 @media (max-width: 760px) {

@@ -1,77 +1,28 @@
-<template>
+﻿<template>
   <div class="company-dashboard">
-    <section class="company-dashboard-overview">
-    <section class="company-dashboard-hero" aria-labelledby="company-dashboard-title">
-      <div class="company-dashboard-hero-copy">
-        <h1 id="company-dashboard-title">{{ companyName ? 'خوش آمدید، ' + companyName : 'داشبورد شرکت' }}</h1>
-        <p>وضعیت محصولات، فرصت‌های استعلام و فعالیت‌های اخیر شرکت را از اینجا مدیریت کنید.</p>
-        <div class="company-dashboard-hero-status">
+    <TemPageHeader
+      :title="companyName ? 'خوش آمدید، ' + companyName : 'داشبورد شرکت'"
+      description="وضعیت محصولات، فرصت‌های استعلام و فعالیت‌های اخیر شرکت را از اینجا مدیریت کنید."
+      :crumb="[{ label: 'داشبورد شرکت', to: { name: 'company-dashboard' } }, { label: 'نمای کلی' }]"
+    >
+      <template #actions>
+        <span class="company-dashboard-status">
           <span class="company-dashboard-status-dot" :class="{ 'is-active': company?.status === 'ACTIVE' }"></span>
           {{ companyStatusLabel }}
-          <span v-if="company?.isVerified" class="company-dashboard-verified"><i class="pi pi-verified" aria-hidden="true"></i> شرکت تأیید شده</span>
-        </div>
-      </div>
-      <div class="company-dashboard-hero-actions">
-        <router-link :to="{ name: 'manage-product-create' }">
-          <Button label="افزودن محصول" icon="pi pi-plus" />
+          <span v-if="company?.isVerified" class="company-dashboard-verified">
+            <i class="pi pi-verified" aria-hidden="true"></i> تأیید شده
+          </span>
+        </span>
+        <router-link :to="{ name: 'manage-product-create' }" class="tm-btn">
+          <i class="pi pi-plus" aria-hidden="true"></i> افزودن محصول
         </router-link>
-        <router-link :to="{ name: 'company-inquiries' }" class="company-dashboard-secondary-action">
-          <i class="pi pi-inbox" aria-hidden="true"></i><span>مشاهده استعلام‌ها</span>
+        <router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost">
+          <i class="pi pi-inbox" aria-hidden="true"></i> استعلام‌ها
         </router-link>
-      </div>
-    </section>
+      </template>
+    </TemPageHeader>
 
-    <!-- 2. KPI cards — business health metrics -->
-    <div class="cd-kpis">
-      <KpiCard
-        label="محصولات منتشر شده"
-        :value="publishedProducts"
-        icon="pi pi-check-circle"
-        tone="success"
-        :loading="productsLoading"
-        :to="{ name: 'manage-products' }"
-      />
-      <KpiCard
-        label="در انتظار بررسی"
-        :value="pendingReviewProducts"
-        icon="pi pi-clock"
-        tone="warning"
-        :loading="productsLoading"
-        :to="{ name: 'manage-products' }"
-      />
-      <KpiCard
-        label="استعلام‌های دریافتی"
-        :value="receivedInquiries"
-        icon="pi pi-inbox"
-        tone="primary"
-        :loading="statsLoading"
-        :to="{ name: 'company-inquiries' }"
-      />
-      <KpiCard
-        label="پاسخ‌های در انتظار"
-        :value="pendingResponses"
-        icon="pi pi-reply"
-        tone="danger"
-        :loading="statsLoading"
-        :to="{ name: 'company-inquiries' }"
-      />
-    </div>
-    </section>
-
-    <!-- Stats error (non-blocking) -->
-    <DashboardPanel v-if="statsError" title="آمار داشبورد" icon="pi pi-exclamation-triangle">
-      <NoDataState
-        icon="pi pi-exclamation-triangle"
-        title="خطا در دریافت آمار داشبورد"
-        description="بارگذاری آمار با مشکل مواجه شد. لطفاً دوباره تلاش کنید."
-        retryable
-        :loading="statsLoading"
-        size="sm"
-        @retry="retryAll"
-      />
-    </DashboardPanel>
-
-    <!-- 1. Alerts — actionable items first (skill: "pending actions most visible") -->
+    <!-- Alerts — actionable items first -->
     <div v-if="alerts.length" class="cd-alerts">
       <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
         <div class="cd-alert-icon">
@@ -87,56 +38,116 @@
       </div>
     </div>
 
-    <section class="company-dashboard-analytics" aria-label="آمار و تحلیل عملکرد">
-      <DashboardPanel title="تحلیل عملکرد شرکت" icon="pi pi-chart-bar" class="company-dashboard-chart">
-        <template #actions><span class="cd-hint">بر پایه اطلاعات واقعی محصولات و استعلام‌ها</span></template>
-        <div class="cd-analytics-grid">
-          <div class="cd-analytics-block">
-            <div class="cd-analytics-heading"><strong>وضعیت استعلام‌های دریافتی</strong><span>تفکیک بر اساس وضعیت</span></div>
-            <AnalyticsChart :series="inquiryStatusSeries" :loading="statsLoading" tone="primary" :height="210" />
+    <!-- KPI cards — business health metrics -->
+    <section class="tm-grid tm-grid--stats" aria-label="شاخص‌های کلیدی شرکت">
+      <TemStatCard
+        label="محصولات منتشر شده"
+        :value="publishedProducts"
+        icon="pi pi-check-circle"
+        tone="success"
+        :loading="productsLoading"
+        :to="{ name: 'manage-products' }"
+      />
+      <TemStatCard
+        label="در انتظار بررسی"
+        :value="pendingReviewProducts"
+        icon="pi pi-clock"
+        tone="warning"
+        :loading="productsLoading"
+        :to="{ name: 'manage-products' }"
+      />
+      <TemStatCard
+        label="استعلام‌های دریافتی"
+        :value="receivedInquiries"
+        icon="pi pi-inbox"
+        tone="primary"
+        :loading="statsLoading"
+        :to="{ name: 'company-inquiries' }"
+      />
+      <TemStatCard
+        label="پاسخ‌های در انتظار"
+        :value="pendingResponses"
+        icon="pi pi-reply"
+        tone="danger"
+        :loading="statsLoading"
+        :to="{ name: 'company-inquiries' }"
+      />
+    </section>
+
+    <!-- Stats error (non-blocking) -->
+    <TemPanel v-if="statsError" title="آمار داشبورد" icon="pi pi-exclamation-triangle">
+      <NoDataState
+        icon="pi pi-exclamation-triangle"
+        title="خطا در دریافت آمار داشبورد"
+        description="بارگذاری آمار با مشکل مواجه شد. لطفاً دوباره تلاش کنید."
+        retryable
+        :loading="statsLoading"
+        size="sm"
+        @retry="retryAll"
+      />
+    </TemPanel>
+
+    <!-- Analytics -->
+    <TemPanel title="تحلیل عملکرد شرکت" icon="pi pi-chart-bar">
+      <template #actions><span class="cd-hint">بر پایه اطلاعات واقعی محصولات و استعلام‌ها</span></template>
+      <div class="cd-analytics-grid">
+        <div class="cd-analytics-block">
+          <div class="cd-analytics-heading">
+            <strong>وضعیت استعلام‌های دریافتی</strong>
+            <span>تفکیک بر اساس وضعیت</span>
           </div>
-          <div class="cd-analytics-block">
-            <div class="cd-analytics-heading"><strong>وضعیت محصولات</strong><span>بر اساس فهرست محصولات شرکت</span></div>
-            <AnalyticsChart :series="productStatusSeries" :loading="productsLoading" tone="success" :height="210" />
+          <TemBarChart :series="inquiryStatusSeries" :height="200" :loading="statsLoading" />
+        </div>
+        <div class="cd-analytics-block">
+          <div class="cd-analytics-heading">
+            <strong>وضعیت محصولات</strong>
+            <span>بر اساس فهرست محصولات شرکت</span>
+          </div>
+          <div class="cd-donut-row">
+            <TemDonutChart :segments="productSegments" />
+            <TemLegend :items="productSegments" />
           </div>
         </div>
-      </DashboardPanel>
-    </section>
+      </div>
+    </TemPanel>
 
-    <!-- Primary operations: inquiry pipeline and frequently used actions. -->
+    <!-- Primary operations -->
     <section class="company-dashboard-operations" aria-label="عملیات اصلی شرکت">
-      <DashboardPanel title="جریان استعلام‌ها" icon="pi pi-sitemap" class="company-dashboard-pipeline">
-        <template #actions><router-link :to="{ name: 'company-inquiries' }" class="cd-link">مشاهده همه</router-link></template>
+      <TemPanel title="جریان استعلام‌ها" icon="pi pi-sitemap">
+        <template #actions>
+          <router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost tm-btn--sm">مشاهده همه</router-link>
+        </template>
         <InquiryPipeline :stages="pipelineStages" :loading="statsLoading" />
-      </DashboardPanel>
-      <DashboardPanel title="دسترسی سریع" icon="pi pi-bolt" class="company-dashboard-quick">
-        <template #actions><span class="cd-hint">میان‌برهای پرکاربرد</span></template>
+      </TemPanel>
+      <TemPanel title="دسترسی سریع" icon="pi pi-bolt">
         <QuickActions :actions="quickActions" />
-      </DashboardPanel>
+      </TemPanel>
     </section>
 
-    <!-- 4. Activity: deadlines + recent activities -->
+    <!-- Activity -->
     <div class="cd-grid cd-grid--1-1">
-      <DashboardPanel title="مهلت‌های پیش‌رو" icon="pi pi-calendar-clock" :to="{ name: 'company-inquiries' }">
+      <TemPanel title="مهلت‌های پیشرو" icon="pi pi-calendar-clock">
+        <template #actions>
+          <router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost tm-btn--sm">استعلام‌ها</router-link>
+        </template>
         <EntityList
           :items="upcomingDeadlines"
           :loading="inquiriesLoading"
           empty-message="مهلت نزدیکی وجود ندارد."
         />
-      </DashboardPanel>
+      </TemPanel>
 
-      <DashboardPanel title="فعالیت‌های اخیر" icon="pi pi-history">
+      <TemPanel title="فعالیت‌های اخیر" icon="pi pi-history">
         <EntityList :items="recentActivities" :loading="statsLoading" empty-message="فعالیتی ثبت نشده است." />
-      </DashboardPanel>
+      </TemPanel>
     </div>
 
-    <!-- 5. Secondary: company summary + score -->
+    <!-- Company summary + score -->
     <div class="cd-grid cd-grid--2-1">
-      <DashboardPanel title="خلاصه شرکت" icon="pi pi-building">
+      <TemPanel title="خلاصه شرکت" icon="pi pi-building">
         <template #actions>
-          <router-link :to="{ name: 'company-settings' }" class="cd-link">ویرایش پروفایل</router-link>
+          <router-link :to="{ name: 'company-settings' }" class="tm-btn tm-btn--ghost tm-btn--sm">ویرایش پروفایل</router-link>
         </template>
-        <!-- Loading skeleton -->
         <div v-if="companyLoading" class="cd-summary">
           <span class="cd-summary-logo cd-skeleton"></span>
           <div class="cd-summary-main">
@@ -148,7 +159,6 @@
             </div>
           </div>
         </div>
-        <!-- Loaded state -->
         <div v-else class="cd-summary">
           <span class="cd-summary-logo">
             <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="64" height="64" decoding="async" />
@@ -158,19 +168,18 @@
             <h3 class="cd-summary-name">{{ companyName || '—' }}</h3>
             <p v-if="company?.nameEn" class="cd-summary-sub">{{ company.nameEn }}</p>
             <div class="cd-summary-tags">
-              <span class="cd-tag" :class="company?.status === 'ACTIVE' ? 'cd-tag--success' : 'cd-tag--warning'">
-                <i class="pi pi-circle-fill"></i>
+              <span class="tm-pill" :class="company?.status === 'ACTIVE' ? 'tm-pill--success' : 'tm-pill--warning'">
                 {{ companyStatusLabel }}
               </span>
-              <span v-if="company?.isVerified" class="cd-tag cd-tag--info">
+              <span v-if="company?.isVerified" class="tm-pill tm-pill--info">
                 <i class="pi pi-verified"></i> تأیید شده
               </span>
             </div>
           </div>
         </div>
-      </DashboardPanel>
+      </TemPanel>
 
-      <DashboardPanel title="امتیاز و رتبه شرکت" icon="pi pi-star">
+      <TemPanel title="امتیاز و رتبه شرکت" icon="pi pi-star">
         <ScoreCard
           :score="companyScore"
           :max="100"
@@ -180,14 +189,16 @@
           tone="primary"
           :loading="statsLoading"
         />
-      </DashboardPanel>
+      </TemPanel>
     </div>
 
-    <!-- 6. Recent products -->
-    <DashboardPanel title="محصولات اخیر" icon="pi pi-box" :to="{ name: 'manage-products' }">
+    <!-- Recent products -->
+    <TemPanel title="محصولات اخیر" icon="pi pi-box">
+      <template #actions>
+        <router-link :to="{ name: 'manage-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه محصولات</router-link>
+      </template>
       <EntityList :items="recentProducts" :loading="productsLoading" empty-message="هنوز محصولی ثبت نشده است." />
-    </DashboardPanel>
-
+    </TemPanel>
   </div>
 </template>
 
@@ -211,15 +222,17 @@ import { useToast } from 'primevue/usetoast'
 import { inquiriesApi, productsApi } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
 import { NoDataState } from '@telecom/shared-ui/components/common/feedback'
-import Button from 'primevue/button'
 
-import KpiCard from '@telecom/shared-ui/components/admin/dashboard/KpiCard.vue'
 import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickActions.vue'
-import DashboardPanel from '@telecom/shared-ui/components/admin/dashboard/DashboardPanel.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
 import InquiryPipeline from '@telecom/shared-ui/components/admin/dashboard/InquiryPipeline.vue'
-import AnalyticsChart from '@telecom/shared-ui/components/admin/dashboard/AnalyticsChart.vue'
 import ScoreCard from '@telecom/shared-ui/components/admin/dashboard/ScoreCard.vue'
+import TemPageHeader from '@telecom/shared-ui/components/ui/TemPageHeader.vue'
+import TemStatCard from '@telecom/shared-ui/components/ui/TemStatCard.vue'
+import TemPanel from '@telecom/shared-ui/components/ui/TemPanel.vue'
+import TemBarChart from '@telecom/shared-ui/components/ui/TemBarChart.vue'
+import TemDonutChart from '@telecom/shared-ui/components/ui/TemDonutChart.vue'
+import TemLegend from '@telecom/shared-ui/components/ui/TemLegend.vue'
 
 const router = useRouter()
 const toast = useToast()
@@ -261,10 +274,30 @@ const pendingReviewProducts = computed(
 const pipelineStages = computed(() => {
   const by = stats.value?.received?.byStatus || {}
   return [
-    { key: 'new', label: 'جدید', value: by.SUBMITTED ?? by.OPEN ?? 0, tone: 'info', icon: 'pi pi-inbox', to: { name: 'company-inquiries' } },
+    { key: 'new', label: 'جدید', value: by.SUBMITTED ?? 0, tone: 'info', icon: 'pi pi-inbox', to: { name: 'company-inquiries' } },
     { key: 'reviewing', label: 'در حال بررسی', value: by.OPEN ?? 0, tone: 'primary', icon: 'pi pi-search', to: { name: 'company-inquiries' } },
     { key: 'answered', label: 'پاسخ‌داده‌شده', value: (by.CLOSED ?? 0) + (by.COMPLETED ?? 0), tone: 'success', icon: 'pi pi-check', to: { name: 'company-inquiries' } },
     { key: 'expired', label: 'منقضی‌شده', value: by.EXPIRED ?? 0, tone: 'danger', icon: 'pi pi-calendar-times', to: { name: 'company-inquiries' } },
+  ]
+})
+
+// Bar series for the inquiry-status chart (same real `received.byStatus` data).
+const inquiryStatusSeries = computed(() =>
+  pipelineStages.value.map((stage) => ({ label: stage.label, value: stage.value }))
+)
+
+// Product lifecycle shares from the company's own product list.
+const productSegments = computed(() => {
+  const counts = { PUBLISHED: 0, PENDING_REVIEW: 0, DRAFT: 0, REJECTED: 0 }
+  for (const product of products.value) {
+    if (product.status in counts) counts[product.status] += 1
+    else if (product.status === 'APPROVED') counts.PUBLISHED += 1
+  }
+  return [
+    { label: 'منتشرشده', value: counts.PUBLISHED, color: '#18c8a0' },
+    { label: 'در انتظار تأیید', value: counts.PENDING_REVIEW, color: '#f0b040' },
+    { label: 'پیش‌نویس', value: counts.DRAFT, color: '#93a1bb' },
+    { label: 'ردشده', value: counts.REJECTED, color: '#ef4d4d' },
   ]
 })
 
@@ -787,5 +820,47 @@ onMounted(() => {
   .company-dashboard-hero-actions { width: 100%; }
   .company-dashboard-hero-actions > * { flex: 1 1 auto; }
   .company-dashboard-secondary-action { width: 100%; }
+}
+
+/* ---- tem dashboard additions ---- */
+.company-dashboard-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--tm-muted);
+}
+.company-dashboard-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tm-amber);
+  flex: none;
+}
+.company-dashboard-status-dot.is-active { background: var(--tm-green); }
+.company-dashboard-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: 4px;
+  color: #0c8a6e;
+  font-weight: 600;
+}
+.cd-donut-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 160px) 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 8px 0;
+}
+.cd-analytics-block {
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius);
+  background: var(--tm-surface-alt);
+  padding: 14px 16px;
+}
+@media (max-width: 575px) {
+  .cd-donut-row { grid-template-columns: 1fr; }
 }
 </style>

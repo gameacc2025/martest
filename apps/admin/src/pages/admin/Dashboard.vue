@@ -1,228 +1,13 @@
-<template>
-  <div class="admin-dashboard">
-    <section class="admin-dashboard-overview">
-    <section class="admin-dashboard-hero" aria-labelledby="admin-dashboard-title">
-      <div class="admin-dashboard-hero-copy">
-        <h1 id="admin-dashboard-title">داشبورد مدیریت</h1>
-        <p>نمایی یکپارچه از کاربران، شرکت‌ها، محصولات و جریان استعلام‌های پلتفرم.</p>
-      </div>
-      <div class="admin-dashboard-hero-actions">
-        <router-link :to="{ name: 'admin-product-create' }">
-          <Button label="ایجاد محصول" icon="pi pi-plus" />
-        </router-link>
-        <router-link :to="{ name: 'admin-inquiries' }" class="admin-dashboard-secondary-action">
-          <i class="pi pi-inbox" aria-hidden="true"></i><span>مدیریت استعلام‌ها</span>
-        </router-link>
-      </div>
-    </section>
-
-    <!-- KPI cards -->
-
-    <div class="admin-dashboard-kpis">
-      <KpiCard
-        label="کاربران کل"
-        :value="stats.totalUsers"
-        icon="pi pi-users"
-        tone="primary"
-        :loading="loadingStats"
-        :to="{ name: 'admin-users' }"
-      />
-      <KpiCard
-        label="شرکت‌ها"
-        :value="stats.totalCompanies"
-        icon="pi pi-building"
-        tone="info"
-        :loading="loadingStats"
-        :to="{ name: 'admin-companies' }"
-      />
-      <KpiCard
-        label="محصولات کل"
-        :value="stats.totalProducts"
-        icon="pi pi-box"
-        tone="success"
-        :loading="loadingStats"
-        :to="{ name: 'admin-products' }"
-      />
-      <KpiCard
-        label="استعلام‌های فعال"
-        :value="activeInquiries"
-        icon="pi pi-inbox"
-        tone="warning"
-        :loading="loadingInquiryStats"
-        :to="{ name: 'admin-inquiries' }"
-      />
-    </div>
-    </section>
-
-    <!-- Stats error (non-blocking) -->
-    <Message v-if="statsError" severity="error" :closable="false" class="admin-dashboard-msg">
-      {{ statsError }}
-    </Message>
-
-    <section class="admin-dashboard-analytics" aria-label="آمار و تحلیل پلتفرم">
-      <DashboardPanel title="نمای کلی پلتفرم" icon="pi pi-chart-bar" class="admin-dashboard-analytics-panel">
-        <template #actions><span class="admin-dashboard-hint">مقایسه حجم داده‌های ثبت‌شده در سامانه</span></template>
-        <div class="admin-dashboard-chart-layout">
-          <div class="admin-dashboard-chart-main">
-            <AnalyticsChart :series="analyticsSeries" :loading="loadingStats || loadingInquiryStats" tone="primary" :height="250" />
-          </div>
-          <div class="admin-dashboard-chart-aside">
-            <div class="admin-dashboard-chart-stat">
-              <span>کاربران ثبت‌شده</span><strong>{{ (stats.totalUsers || 0).toLocaleString('fa-IR') }}</strong>
-            </div>
-            <div class="admin-dashboard-chart-stat">
-              <span>شرکت‌های ثبت‌شده</span><strong>{{ (stats.totalCompanies || 0).toLocaleString('fa-IR') }}</strong>
-            </div>
-            <div class="admin-dashboard-chart-stat">
-              <span>محصولات سامانه</span><strong>{{ (stats.totalProducts || 0).toLocaleString('fa-IR') }}</strong>
-            </div>
-            <div class="admin-dashboard-chart-stat">
-              <span>استعلام‌های فعال</span><strong>{{ activeInquiries === null ? '—' : activeInquiries.toLocaleString('fa-IR') }}</strong>
-            </div>
-          </div>
-        </div>
-      </DashboardPanel>
-    </section>
-
-    <!-- Operational shortcuts and service health are secondary to analytics. -->
-    <section class="admin-dashboard-workspace" aria-label="ابزارهای عملیاتی">
-      <DashboardPanel title="دسترسی سریع" icon="pi pi-bolt" class="admin-dashboard-quick">
-        <template #actions><span class="admin-dashboard-hint">میان‌برهای مدیریت</span></template>
-        <QuickActions :actions="quickActions" />
-      </DashboardPanel>
-      <DashboardPanel title="سلامت سرویس‌ها" icon="pi pi-server" class="admin-dashboard-health">
-        <template #actions><span class="admin-dashboard-hint">وضعیت اتصال</span></template>
-        <SystemStatus :services="systemServices" />
-      </DashboardPanel>
-    </section>
-
-    <!-- Latest lists -->
-    <div class="admin-dashboard-grid admin-dashboard-grid--3">
-      <DashboardPanel
-        title="آخرین شرکت‌ها"
-        icon="pi pi-building"
-        :to="{ name: 'admin-companies' }"
-      >
-        <EntityList :items="latestCompanies" :loading="loadingCompanies" />
-      </DashboardPanel>
-
-      <DashboardPanel
-        title="آخرین کاربران"
-        icon="pi pi-user-plus"
-        :to="{ name: 'admin-users' }"
-      >
-        <EntityList :items="latestUsers" :loading="loadingStats" />
-      </DashboardPanel>
-
-      <DashboardPanel
-        title="آخرین محصولات"
-        icon="pi pi-box"
-        :to="{ name: 'admin-products' }"
-      >
-        <EntityList :items="latestProducts" :loading="loadingProducts" />
-      </DashboardPanel>
-    </div>
-
-    <!-- Recent activity: products pending approval (actionable) -->
-    <DashboardPanel
-      title="فعالیت اخیر — محصولات در انتظار تأیید"
-      icon="pi pi-clock"
-      :to="{ name: 'admin-products' }"
-    >
-      <SkeletonLoader v-if="loadingPending" variant="table" :count="4" :columns="5" />
-
-      <EmptyState
-        v-else-if="!pendingProducts.length"
-        icon="pi pi-check-circle"
-        title="همه‌چیز مرتب است"
-        description="هیچ محصولی در انتظار تأیید نیست."
-        size="sm"
-      />
-
-
-      <div v-else class="admin-dashboard-table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>عنوان</th>
-              <th>شرکت</th>
-              <th>دسته‌بندی</th>
-              <th>تاریخ</th>
-              <th>عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="product in pendingProducts" :key="product.id">
-              <td class="font-semibold" data-label="عنوان">{{ product.title }}</td>
-              <td data-label="شرکت">{{ product.company?.name || '—' }}</td>
-              <td data-label="دسته‌بندی">{{ product.category?.nameFa || '—' }}</td>
-              <td data-label="تاریخ">{{ formatDate(product.createdAt) }}</td>
-              <td data-label="عملیات">
-
-                <div class="flex gap-2">
-                  <Button
-                    icon="pi pi-check"
-                    severity="success"
-                    rounded
-                    text
-                    aria-label="تأیید محصول"
-                    v-tooltip.top="'تأیید'"
-                    :loading="approvingId === product.id"
-                    @click="approveProduct(product)"
-                  />
-                  <Button
-                    icon="pi pi-times"
-                    severity="danger"
-                    rounded
-                    text
-                    aria-label="رد محصول"
-                    v-tooltip.top="'رد'"
-                    @click="openRejectDialog(product)"
-                  />
-                  <router-link :to="{ name: 'admin-product-edit', params: { id: product.id } }">
-                    <Button icon="pi pi-eye" severity="info" rounded text aria-label="مشاهده محصول" v-tooltip.top="'مشاهده'" />
-                  </router-link>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </DashboardPanel>
-
-    <!-- Reject dialog -->
-    <Dialog
-      v-model:visible="showRejectDialog"
-      header="رد محصول"
-      :modal="true"
-      :style="{ width: '32rem' }"
-      :breakpoints="{ '640px': '92vw' }"
-    >
-
-      <div class="field">
-        <label>علت رد <span class="text-red-500">*</span></label>
-        <Textarea v-model="rejectReason" placeholder="علت رد محصول را وارد کنید..." rows="3" class="w-full" />
-      </div>
-      <template #footer>
-        <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="showRejectDialog = false" />
-        <Button label="رد محصول" icon="pi pi-times" severity="danger" :loading="rejectingId !== null" @click="rejectProduct" />
-      </template>
-    </Dialog>
-  </div>
-</template>
-
 <script setup>
 /**
- * Admin Dashboard — enterprise marketplace command center.
+ * Admin Dashboard — marketplace command center.
  *
- * Composed entirely from reusable, presentational dashboard components
- * (KpiCard, QuickActions, DashboardPanel, EntityList,
- * SystemStatus, AnalyticsChart). This page is the ONLY place that talks to the
- * stores/APIs; the child components stay dumb and API-agnostic so they're ready
- * for any data source.
+ * Composed from the shared Tem widget library plus the existing presentational
+ * dashboard components. This page is the ONLY place that talks to stores/APIs;
+ * child components stay dumb so they remain reusable.
  *
- * Data sources (all existing endpoints — no backend changes, no fake business
- * logic): admin stats, inquiry stats, companies list, products list.
+ * Data sources (all existing endpoints — no backend changes, no fabricated
+ * business logic): admin stats, inquiry stats, companies list, products list.
  */
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -237,13 +22,13 @@ import Textarea from 'primevue/textarea'
 import Message from 'primevue/message'
 import { SkeletonLoader, EmptyState } from '@telecom/shared-ui/components/common/feedback'
 
-
-import KpiCard from '@telecom/shared-ui/components/admin/dashboard/KpiCard.vue'
+import TemPageHeader from '@telecom/shared-ui/components/ui/TemPageHeader.vue'
+import TemStatCard from '@telecom/shared-ui/components/ui/TemStatCard.vue'
+import TemPanel from '@telecom/shared-ui/components/ui/TemPanel.vue'
+import TemBarChart from '@telecom/shared-ui/components/ui/TemBarChart.vue'
 import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickActions.vue'
-import DashboardPanel from '@telecom/shared-ui/components/admin/dashboard/DashboardPanel.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
 import SystemStatus from '@telecom/shared-ui/components/admin/dashboard/SystemStatus.vue'
-import AnalyticsChart from '@telecom/shared-ui/components/admin/dashboard/AnalyticsChart.vue'
 
 const authStore = useAuthStore()
 const statsStore = useStatsStore()
@@ -493,16 +278,15 @@ async function rejectProduct() {
   }
 }
 
-  // The platform admin dashboard aggregates system-wide stats. App membership
-  // is decided by accessProfile.type (STAFF) at the router/landing gate, so we
-  // don't re-derive it here. Feature access WITHIN the app is permission-based:
-  // this page requires dashboard.read.
+// The platform admin dashboard aggregates system-wide stats. App membership
+// is decided by accessProfile.type (STAFF) at the router/landing gate, so we
+// don't re-derive it here. Feature access WITHIN the app is permission-based:
+// this page requires dashboard.read.
 onMounted(() => {
   if (!authStore.hasPermission('dashboard.read')) {
     router.replace({ name: 'admin-dashboard' })
     return
   }
-
 
   // Fire independent requests in parallel.
   fetchStats()
@@ -513,160 +297,267 @@ onMounted(() => {
 })
 </script>
 
+<template>
+  <div class="admin-dashboard">
+    <TemPageHeader
+      title="داشبورد مدیریت"
+      description="نمایی یکپارچه از کاربران، شرکت‌ها، محصولات و جریان استعلام‌های پلتفرم."
+      :crumb="[{ label: 'پنل مدیریت', to: { name: 'admin-dashboard' } }, { label: 'داشبورد' }]"
+    >
+      <template #actions>
+        <router-link :to="{ name: 'admin-product-create' }" class="tm-btn">
+          <i class="pi pi-plus" aria-hidden="true"></i> ایجاد محصول
+        </router-link>
+        <router-link :to="{ name: 'admin-inquiries' }" class="tm-btn tm-btn--ghost">
+          <i class="pi pi-inbox" aria-hidden="true"></i> مدیریت استعلام‌ها
+        </router-link>
+      </template>
+    </TemPageHeader>
+
+    <Message v-if="statsError" severity="error" :closable="false" class="admin-dashboard-msg">
+      {{ statsError }}
+    </Message>
+
+    <!-- KPI row -->
+    <section class="tm-grid tm-grid--stats" aria-label="آمار کلیدی پلتفرم">
+      <TemStatCard
+        label="کاربران کل"
+        :value="stats.totalUsers"
+        icon="pi pi-users"
+        tone="primary"
+        :loading="loadingStats"
+        :to="{ name: 'admin-users' }"
+      />
+      <TemStatCard
+        label="شرکت‌ها"
+        :value="stats.totalCompanies"
+        icon="pi pi-building"
+        tone="accent"
+        :loading="loadingStats"
+        :to="{ name: 'admin-companies' }"
+      />
+      <TemStatCard
+        label="محصولات کل"
+        :value="stats.totalProducts"
+        icon="pi pi-box"
+        tone="success"
+        :loading="loadingStats"
+        :to="{ name: 'admin-products' }"
+      />
+      <TemStatCard
+        label="استعلام‌های فعال"
+        :value="activeInquiries"
+        icon="pi pi-inbox"
+        tone="warning"
+        :loading="loadingInquiryStats"
+        :to="{ name: 'admin-inquiries' }"
+      />
+    </section>
+
+    <!-- Analytics + workspace -->
+    <div class="admin-dashboard-split">
+      <TemPanel title="نمای کلی پلتفرم" subtitle="مقایسه حجم داده‌های ثبت‌شده در سامانه">
+        <TemBarChart :series="analyticsSeries" :height="260" :loading="loadingStats || loadingInquiryStats" />
+      </TemPanel>
+
+      <div class="admin-dashboard-side">
+        <TemPanel title="دسترسی سریع" icon="pi pi-bolt">
+          <QuickActions :actions="quickActions" />
+        </TemPanel>
+        <TemPanel title="سلامت سرویس‌ها" icon="pi pi-server">
+          <SystemStatus :services="systemServices" />
+        </TemPanel>
+      </div>
+    </div>
+
+    <!-- Latest lists -->
+    <div class="admin-dashboard-grid">
+      <TemPanel title="آخرین شرکت‌ها" icon="pi pi-building">
+        <template #actions>
+          <router-link :to="{ name: 'admin-companies' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link>
+        </template>
+        <EntityList :items="latestCompanies" :loading="loadingCompanies" />
+      </TemPanel>
+
+      <TemPanel title="آخرین کاربران" icon="pi pi-user-plus">
+        <template #actions>
+          <router-link :to="{ name: 'admin-users' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link>
+        </template>
+        <EntityList :items="latestUsers" :loading="loadingStats" />
+      </TemPanel>
+
+      <TemPanel title="آخرین محصولات" icon="pi pi-box">
+        <template #actions>
+          <router-link :to="{ name: 'admin-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link>
+        </template>
+        <EntityList :items="latestProducts" :loading="loadingProducts" />
+      </TemPanel>
+    </div>
+
+    <!-- Product approval queue (actionable business workflow) -->
+    <TemPanel title="فعالیت اخیر — محصولات در انتظار تأیید" icon="pi pi-clock" flush>
+      <template #actions>
+        <router-link :to="{ name: 'admin-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">صف بررسی</router-link>
+      </template>
+
+      <div v-if="loadingPending" class="admin-dashboard-pad">
+        <SkeletonLoader variant="table" :count="4" :columns="5" />
+      </div>
+
+      <div v-else-if="!pendingProducts.length" class="admin-dashboard-pad">
+        <EmptyState
+          icon="pi pi-check-circle"
+          title="همه‌چیز مرتب است"
+          description="هیچ محصولی در انتظار تأیید نیست."
+          size="sm"
+        />
+      </div>
+
+      <div v-else class="admin-dashboard-table-wrap">
+        <table class="tm-table">
+          <caption class="sr-only">محصولات در انتظار تأیید</caption>
+          <thead>
+            <tr>
+              <th scope="col">عنوان</th>
+              <th scope="col">شرکت</th>
+              <th scope="col">دسته‌بندی</th>
+              <th scope="col">تاریخ</th>
+              <th scope="col">عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="product in pendingProducts" :key="product.id">
+              <td class="admin-dashboard-cell-title" data-label="عنوان">{{ product.title }}</td>
+              <td data-label="شرکت">{{ product.company?.name || '—' }}</td>
+              <td data-label="دسته‌بندی">{{ product.category?.nameFa || '—' }}</td>
+              <td data-label="تاریخ">{{ formatDate(product.createdAt) }}</td>
+              <td data-label="عملیات">
+                <div class="admin-dashboard-row-actions">
+                  <Button
+                    icon="pi pi-check"
+                    severity="success"
+                    rounded
+                    text
+                    aria-label="تأیید محصول"
+                    v-tooltip.top="'تأیید'"
+                    :loading="approvingId === product.id"
+                    @click="approveProduct(product)"
+                  />
+                  <Button
+                    icon="pi pi-times"
+                    severity="danger"
+                    rounded
+                    text
+                    aria-label="رد محصول"
+                    v-tooltip.top="'رد'"
+                    @click="openRejectDialog(product)"
+                  />
+                  <router-link :to="{ name: 'admin-product-edit', params: { id: product.id } }">
+                    <Button icon="pi pi-eye" severity="info" rounded text aria-label="مشاهده محصول" v-tooltip.top="'مشاهده'" />
+                  </router-link>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </TemPanel>
+
+    <Dialog
+      v-model:visible="showRejectDialog"
+      header="رد محصول"
+      :modal="true"
+      :style="{ width: '32rem' }"
+      :breakpoints="{ '640px': '92vw' }"
+    >
+      <div class="field">
+        <label for="reject-reason">علت رد <span class="text-red-500">*</span></label>
+        <Textarea id="reject-reason" v-model="rejectReason" placeholder="علت رد محصول را وارد کنید..." rows="3" class="w-full" />
+      </div>
+      <template #footer>
+        <Button label="انصراف" icon="pi pi-times" severity="secondary" text @click="showRejectDialog = false" />
+        <Button label="رد محصول" icon="pi pi-times" severity="danger" :loading="rejectingId !== null" @click="rejectProduct" />
+      </template>
+    </Dialog>
+  </div>
+</template>
+
 <style scoped>
 .admin-dashboard {
   direction: rtl;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
 }
 
-.admin-dashboard-overview { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(290px,1fr); gap:1rem; direction:ltr; align-items:stretch; }
-.admin-dashboard-overview > * { min-width:0; direction:rtl; }
-.admin-dashboard-hero {
-  position:relative; overflow:hidden; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  gap: var(--ds-space-5); min-height: 8.5rem; padding: clamp(1.25rem, 2.5vw, 2rem);
-  border-radius: 16px; background: var(--ds-hero-gradient); color: #fff;
-}
-.admin-dashboard-hero::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.42; background: radial-gradient(circle at 82% 28%, rgba(255,255,255,.3), transparent 19%), radial-gradient(circle at 74% 110%, rgba(14,220,226,.4), transparent 34%), repeating-radial-gradient(circle at 83% 52%, transparent 0 28px, rgba(255,255,255,.12) 29px 30px, transparent 31px 55px); }
-.admin-dashboard-hero-copy, .admin-dashboard-hero-actions { position:relative; z-index:1; }
-.admin-dashboard-hero-copy { min-width: 0; }
-.admin-dashboard-hero h1 {
-  margin: 0; color: inherit; font-size: clamp(1.5rem, 2.3vw, 1.9rem);
-  font-weight: var(--ds-font-weight-bold); line-height: 1.4; text-wrap: balance;
-}
-.admin-dashboard-hero p { max-width: 44rem; margin: .5rem 0 0; color: var(--ds-color-on-brand-muted); line-height: var(--ds-line-height-relaxed); }
-.admin-dashboard-hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
-.admin-dashboard-secondary-action {
-  display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center;
-  gap: .5rem; padding: .6rem .9rem; border: 1px solid rgba(255,255,255,.38);
-  border-radius: var(--ds-radius-md); color: var(--ds-color-on-brand); text-decoration: none;
-  font-weight: var(--ds-font-weight-semibold);
-}
-.admin-dashboard-secondary-action:hover { background: rgba(255,255,255,.09); }
-.admin-dashboard-secondary-action:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 3px; }
-.admin-dashboard-workspace {
+.admin-dashboard-msg { margin: 0; }
+
+.admin-dashboard-split {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(280px, .85fr);
-  align-items: stretch;
-  gap: var(--ds-space-5);
+  grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr);
+  gap: 16px;
+  align-items: start;
 }
-.admin-dashboard-workspace > * { min-width: 0; }
 
-
-
-.admin-dashboard-kpis { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); gap:.75rem; }
+.admin-dashboard-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
 
 .admin-dashboard-grid {
   display: grid;
-  gap: var(--ds-space-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
 }
 
-.admin-dashboard-grid--2-1 {
-  grid-template-columns: 2fr 1fr;
-}
+.admin-dashboard-pad { padding: 16px; }
+.admin-dashboard-table-wrap { overflow-x: auto; }
+.admin-dashboard-cell-title { font-weight: 600; color: var(--tm-ink); }
+.admin-dashboard-row-actions { display: flex; align-items: center; gap: 2px; }
 
-.admin-dashboard-grid--3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.admin-dashboard-hint {
-  font-size: var(--ds-font-size-xs);
-  color: var(--ds-color-text-muted);
-}
-
-.admin-dashboard-table-wrap {
-  overflow-x: auto;
-}
-
-/* Base table styling (desktop). */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.data-table th,
-.data-table td {
-  padding: var(--ds-space-3);
-  text-align: start;
-  border-bottom: 1px solid var(--ds-color-border);
-  font-size: var(--ds-font-size-sm);
-}
-.data-table th {
-  font-weight: var(--ds-font-weight-semibold);
-  color: var(--ds-color-text-muted);
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+  border: 0;
 }
 
-
-/* Responsive breakpoints */
-
-@media (max-width: 1200px) { .admin-dashboard-overview { grid-template-columns:minmax(0,1.2fr) minmax(260px,1fr); } }
-
-@media (max-width: 1200px) {
-  .admin-dashboard-workspace { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .admin-dashboard-quick { grid-column: auto; }
-}
 @media (max-width: 991px) {
-  .admin-dashboard-grid--2-1,
-  .admin-dashboard-grid--3,
-  .admin-dashboard-workspace { grid-template-columns: 1fr; }
-  .admin-dashboard-quick { grid-column: auto; }
+  .admin-dashboard-split { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 575px) {
-  .admin-dashboard-kpis {
-    grid-template-columns: 1fr;
-  }
-
-  /* Stacked-card table: no horizontal scroll on small screens.
-     Each row becomes a card and each cell shows its column label. */
+@media (max-width: 640px) {
   .admin-dashboard-table-wrap { overflow-x: visible; }
-  .data-table thead { display: none; }
-  .data-table,
-  .data-table tbody,
-  .data-table tr,
-  .data-table td {
-    display: block;
-    width: 100%;
+  .admin-dashboard-table-wrap .tm-table thead { display: none; }
+  .admin-dashboard-table-wrap .tm-table,
+  .admin-dashboard-table-wrap .tm-table tbody,
+  .admin-dashboard-table-wrap .tm-table tr,
+  .admin-dashboard-table-wrap .tm-table td { display: block; width: 100%; }
+  .admin-dashboard-table-wrap .tm-table tr {
+    border: 1px solid var(--tm-line);
+    border-radius: var(--tm-radius);
+    margin: 10px;
+    padding: 6px;
   }
-  .data-table tr {
-    border: 1px solid var(--ds-color-border);
-    border-radius: var(--ds-radius-md);
-    margin-bottom: var(--ds-space-3);
-    padding: var(--ds-space-2);
-  }
-  .data-table td {
+  .admin-dashboard-table-wrap .tm-table td {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--ds-space-3);
-    border-bottom: 1px solid var(--ds-color-border);
-    padding: var(--ds-space-2) var(--ds-space-3);
+    gap: 12px;
+    padding: 8px 10px;
   }
-  .data-table tr td:last-child { border-bottom: none; }
-  /* Show the column name (from data-label) before each value. */
-  .data-table td::before {
+  .admin-dashboard-table-wrap .tm-table td::before {
     content: attr(data-label);
-    font-weight: var(--ds-font-weight-semibold);
-    color: var(--ds-color-text-muted);
-    font-size: var(--ds-font-size-xs);
+    font-weight: 700;
+    color: var(--tm-muted);
+    font-size: 11px;
   }
-}
-
-
-/* Paces-inspired dashboard rhythm with API-backed widgets unchanged. */
-.admin-dashboard-kpis { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
-.admin-dashboard-grid--2-1 { grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); }
-.admin-dashboard-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
-@media (max-width: 900px) {
-  .admin-dashboard-grid--2-1 { grid-template-columns: minmax(0, 1fr); }
-}
-@media (max-width: 640px) {
-  .admin-dashboard-overview { grid-template-columns:1fr; direction:rtl; }
-  .admin-dashboard-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .admin-dashboard-hero { align-items: flex-start; flex-direction: column; min-height: 0; }
-  .admin-dashboard-hero-actions { width: 100%; }
-  .admin-dashboard-hero-actions > * { flex: 1 1 auto; }
-  .admin-dashboard-secondary-action { width: 100%; }
 }
 </style>

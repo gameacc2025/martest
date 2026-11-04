@@ -1,114 +1,115 @@
 /**
- * @telecom/shared-ui — PrimeVue Theme (design system v2)
+ * @telecom/shared-ui — PrimeVue Theme
  *
- * One preset shared by website, company and admin apps. Every visual decision
- * (palette, surfaces, focus ring, component shape) lives here or in
- * assets/design-system/tokens.scss; pages must not hardcode brand colors.
+ * One preset shared by the website, company and admin apps. It encodes the
+ * unified "tem" visual language: deep navy structure, a blue primary action,
+ * a cyan accent and cool blue-gray surfaces. All visual decisions belong
+ * here or in assets/design-system/tem.scss — pages must not hardcode brand
+ * hex values.
  *
- * Shared palette: turquoise #09d3d1, sky #0790de, technical blue #0b7bc9,
- * deep navy #0f2d4d and dark sidebar #092643.
+ * Palette:
+ *   navy       #0a1c3f / #08142e
+ *   blue       #1a73e8 (accent) · #1565cf (button base) · #1155b0 (hover)
+ *   cyan       #2ed3ee / #16b8e8
+ *   green      #18c8a0
+ *   canvas     #eef3fb
  */
 import { definePreset } from '@primevue/themes'
 import Lara from '@primevue/themes/lara'
 
 const TelecomPreset = definePreset(Lara, {
   semantic: {
-    // Brand-primary sky ramp. Keep the vivid #0790de at the center; darker
-    // steps are reserved for text, borders and hover states.
     primary: {
-      50: '#e8f5fd',
-      100: '#d2ecfb',
-      200: '#a9d9f6',
-      300: '#6fbff0',
-      400: '#34a4e8',
-      500: '#0790de',
-      600: '#0679bd',
-      700: '#0a5f98',
-      800: '#0a4d7c',
-      900: '#083a60',
-      950: '#062f4f'
+      50: '#e8f1fe',
+      100: '#d3e4fd',
+      200: '#a9cbfa',
+      300: '#77aef6',
+      400: '#4792f0',
+      500: '#1a73e8',
+      600: '#1565cf',
+      700: '#1155b0',
+      800: '#0e468f',
+      900: '#0b3570',
+      950: '#082550'
     },
-    // Slightly softer corners than the stock Lara template: calmer, more "enterprise".
-    formField: { borderRadius: '10px' },
-    content: { borderRadius: '10px' },
-    // Lara ships an invisible focus ring (width 0). A visible ring is mandatory
-    // for keyboard users (WCAG 2.4.7).
-    focusRing: { width: '2px', style: 'solid', color: '{primary.color}', offset: '2px' },
+    formField: { borderRadius: '8px' },
+    content: { borderRadius: '8px' },
+    // A visible keyboard ring is mandatory (WCAG 2.4.7).
+    focusRing: { width: '2px', style: 'solid', color: '#16b8e8', offset: '2px' },
     colorScheme: {
       light: {
         primary: {
-          // 600 keeps white button text above 4.5:1; 500 (#0790de) is the brand accent for tabs/charts.
           color: '{primary.600}',
           contrastColor: '#ffffff',
           hoverColor: '{primary.700}',
           activeColor: '{primary.800}'
         },
         highlight: {
-          background: '#e8f5fd',
-          focusBackground: '#d2ecfb',
-          color: '#0a4d7c',
-          focusColor: '#083a60'
+          background: '#e8f1fe',
+          focusBackground: '#d3e4fd',
+          color: '#1155b0',
+          focusColor: '#0e468f'
         },
-        // Cool, blue-tinted neutral ramp. 200 = hairline border, 600 = secondary text.
+        // Cool blue-tinted neutral ramp. 200 = hairline border, 500/600 = muted text.
         surface: {
           0: '#ffffff',
-          50: '#f7fafc',
-          100: '#eef2fb',
-          200: '#e2e8f4',
-          300: '#cdd6e8',
-          400: '#9aaccb',
-          500: '#6a7fa0',
-          600: '#52678a',
-          700: '#3a4f72',
-          800: '#1f3a5c',
-          900: '#0f2d4d',
-          950: '#092643'
+          50: '#f7f9fd',
+          100: '#f2f6fc',
+          200: '#e3e9f4',
+          300: '#d3dced',
+          400: '#a3b1ca',
+          500: '#6b7a99',
+          600: '#576685',
+          700: '#3d4d6b',
+          800: '#25374f',
+          900: '#14233f',
+          950: '#0a1c3f'
         },
         text: {
-          color: '#0f2d4d',
-          hoverColor: '#092643',
-          mutedColor: '#52678a',
-          hoverMutedColor: '#3a4f72'
+          color: '#14233f',
+          hoverColor: '#0a1c3f',
+          mutedColor: '#6b7a99',
+          hoverMutedColor: '#576685'
         },
         formField: {
           // 3:1 against white for the control boundary (WCAG 1.4.11).
-          borderColor: '{surface.500}',
-          placeholderColor: '{surface.600}'
-        }
+          borderColor: '{surface.300}',
+          placeholderColor: '{surface.500}'
+        },
+        content: { background: '#ffffff', borderColor: '#e3e9f4' }
       },
       dark: {
         primary: {
-          color: '#27d3ee',
-          contrastColor: '#062f4f',
-          hoverColor: '#4cd1f3',
-          activeColor: '#7fe0f7'
+          color: '#2ed3ee',
+          contrastColor: '#05213f',
+          hoverColor: '#55e0f4',
+          activeColor: '#7fe8f7'
         },
         highlight: {
-          background: 'rgba(39, 211, 238, 0.14)',
-          focusBackground: 'rgba(39, 211, 238, 0.22)',
+          background: 'rgba(46, 211, 238, 0.14)',
+          focusBackground: 'rgba(46, 211, 238, 0.22)',
           color: '{primary.300}',
           focusColor: '{primary.200}'
         },
-        // page #04202e (950), card #08293a (900), hover #0c3347 (800), border #16495f (700)
         surface: {
           0: '#ffffff',
-          50: '#eaeef9',
-          100: '#d6dff0',
-          200: '#b4c2de',
-          300: '#8ea2c8',
-          400: '#6b81ac',
-          500: '#4e6591',
-          600: '#37507a',
-          700: '#243d62',
-          800: '#16304f',
-          900: '#0d2845',
-          950: '#071d36'
+          50: '#eef3fb',
+          100: '#dbe5f4',
+          200: '#bccbe3',
+          300: '#94a8c6',
+          400: '#7188a8',
+          500: '#526987',
+          600: '#3a5170',
+          700: '#263c59',
+          800: '#16294a',
+          900: '#0d1e3a',
+          950: '#071429'
         },
         text: {
-          color: '#eaeef9',
+          color: '#eef3fb',
           hoverColor: '#ffffff',
-          mutedColor: '#a9c5d5',
-          hoverMutedColor: '#d6dff0'
+          mutedColor: '#a3b1ca',
+          hoverMutedColor: '#dbe5f4'
         }
       }
     }
@@ -116,27 +117,26 @@ const TelecomPreset = definePreset(Lara, {
   components: {
     button: {
       root: {
-        borderRadius: '10px',
-        paddingX: '1.1rem',
+        borderRadius: '8px',
+        paddingX: '1rem',
         label: { fontWeight: '600' }
       }
     },
     card: {
       root: {
-        borderRadius: '14px',
-        // Navy-tinted elevation instead of neutral black: reads as one family with the brand.
-        shadow: '0 1px 2px rgba(9, 38, 67, 0.06), 0 6px 16px rgba(9, 38, 67, 0.07)'
+        borderRadius: '12px',
+        shadow: '0 1px 2px rgba(16, 42, 74, 0.05)'
       }
     },
     tag: {
-      root: { fontSize: '0.8125rem', fontWeight: '600' }
+      root: { fontSize: '0.75rem', fontWeight: '600', borderRadius: '999px' }
     },
     datatable: {
       colorScheme: {
         light: {
-          header: { background: '{surface.100}' },
-          headerCell: { background: '{surface.100}', hoverBackground: '{surface.200}', color: '{text.muted.color}' },
-          row: { stripedBackground: '{surface.50}' }
+          header: { background: '#f7f9fd' },
+          headerCell: { background: '#f7f9fd', hoverBackground: '#f2f6fc', color: '#6b7a99' },
+          row: { stripedBackground: '#f7f9fd' }
         }
       }
     }

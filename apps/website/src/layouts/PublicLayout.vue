@@ -1,8 +1,18 @@
 <script setup>
+/**
+ * PublicLayout — website shell.
+ *
+ * Visual language: unified "tem" system (navy utility strip, white command
+ * header, cyan/blue accents, pale canvas, Vazirmatn RTL).
+ *
+ * All existing behaviour is preserved verbatim: PKCE panel handoff links,
+ * customer/company/staff menu branching, notification unread count, search
+ * routing, category loading for the mega menu and footer, and mobile nav.
+ */
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { categoriesApi } from '@telecom/api-client'
+import { categoriesApi, endpoints } from '@telecom/api-client'
 import { apiGet } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -129,7 +139,7 @@ onMounted(async () => {
       const result = await apiGet(endpoints.notifications.unreadCount)
       notificationCount.value = Number(result?.count ?? result?.data?.count ?? 0)
     } catch (err) {
-      // Ignore
+      // Non-blocking: the badge simply stays hidden.
     }
   }
 
@@ -161,28 +171,30 @@ function logout() {
 </script>
 
 <template>
-  <div class="public-shell">
+  <div class="public-shell site-shell">
     <a class="public-skip-link" href="#public-main">رفتن به محتوای اصلی</a>
-    <!-- Header -->
-    <header class="public-header">
-      <div class="public-utility-bar">
-        <div class="public-container public-utility-inner">
-          <span class="public-utility-message">
-            <i class="pi pi-building" aria-hidden="true"></i>
-            بازارگاه تخصصی تجهیزات مخابراتی و خرید سازمانی
-          </span>
-          <nav class="public-utility-links" aria-label="دسترسی‌های راهنما">
-            <router-link :to="{ name: 'faq' }">راهنمای کاربران</router-link>
-            <router-link :to="{ name: 'contact' }">ارتباط با ما</router-link>
-          </nav>
-        </div>
+
+    <!-- Utility strip -->
+    <div class="public-utility-bar">
+      <div class="public-container public-utility-inner">
+        <span class="public-utility-message">
+          <i class="pi pi-building" aria-hidden="true"></i>
+          بازارگاه تخصصی تجهیزات مخابراتی و خرید سازمانی
+        </span>
+        <nav class="public-utility-links" aria-label="دسترسی‌های راهنما">
+          <router-link :to="{ name: 'faq' }">راهنمای کاربران</router-link>
+          <router-link :to="{ name: 'contact' }">ارتباط با ما</router-link>
+        </nav>
       </div>
+    </div>
+
+    <!-- Command header -->
+    <header class="public-header">
       <div class="public-container">
         <div class="public-header-row">
-          <!-- Right side: Logo + Navigation -->
           <div class="public-header-right">
             <router-link :to="{ name: 'home' }" class="public-logo" aria-label="صفحه اصلی بازارگاه مخابرات">
-              <BrandMark class="public-logo-mark" :size="40" />
+              <BrandMark class="public-logo-mark" :size="38" />
               <span class="public-logo-name">
                 <strong>Telecom</strong>
                 <small>Marketplace</small>
@@ -191,18 +203,24 @@ function logout() {
 
             <nav class="public-nav-desktop" aria-label="منوی اصلی">
               <router-link to="/" class="public-nav-link" active-class="public-nav-link-active">صفحه اصلی</router-link>
+              <router-link to="/products" class="public-nav-link" active-class="public-nav-link-active">محصولات</router-link>
               <MegaMenu :categories="megaMenuCategories" />
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active">درباره ما</router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active">تماس با ما</router-link>
             </nav>
           </div>
 
-          <!-- Left side: Search + Actions -->
           <div class="public-header-actions">
             <div class="public-search-desktop">
               <IconField>
                 <InputIcon class="pi pi-search" />
-                <InputText v-model="searchQuery" @keyup.enter="search" placeholder="جستجو..." aria-label="جستجوی محصولات" class="public-search-input" />
+                <InputText
+                  v-model="searchQuery"
+                  @keyup.enter="search"
+                  placeholder="جستجوی محصول، برند یا شرکت…"
+                  aria-label="جستجوی محصولات"
+                  class="public-search-input"
+                />
               </IconField>
             </div>
 
@@ -212,27 +230,23 @@ function logout() {
                 <span v-if="notificationCount > 0" class="public-notification-badge">{{ notificationCount }}</span>
               </a>
 
-              <!-- User dropdown menu -->
               <button type="button" class="public-user-trigger" @click="toggleUserMenu" aria-haspopup="true">
                 <span class="public-user-avatar">
                   <img v-if="authStore.profile?.avatar" :src="authStore.profile.avatar" alt="" width="32" height="32" decoding="async" />
                   <span v-else>{{ displayName.charAt(0) }}</span>
                 </span>
-
                 <span class="public-user-name">{{ displayName }}</span>
                 <i class="pi pi-chevron-down public-user-caret"></i>
               </button>
               <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
             </template>
 
-
             <template v-else>
-              <router-link :to="{ name: 'login' }" class="p-button p-component public-btn-primary-link">
-                ورود
+              <router-link :to="{ name: 'login' }" class="tm-btn tm-btn--sm public-login-link">
+                ورود / ثبت‌نام
               </router-link>
             </template>
 
-            <!-- Mobile menu toggle -->
             <PvButton
               :icon="mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'"
               text
@@ -246,20 +260,31 @@ function logout() {
           </div>
         </div>
 
-        <!-- Mobile search -->
         <div v-if="mobileMenuOpen" class="public-search-mobile">
           <IconField>
             <InputIcon class="pi pi-search" />
-            <InputText v-model="searchQuery" @keyup.enter="search" placeholder="جستجوی محصولات..." aria-label="جستجوی محصولات" class="public-search-input-full" />
+            <InputText
+              v-model="searchQuery"
+              @keyup.enter="search"
+              placeholder="جستجوی محصولات..."
+              aria-label="جستجوی محصولات"
+              class="public-search-input-full"
+            />
           </IconField>
         </div>
       </div>
     </header>
 
-    <!-- Mobile Navigation -->
+    <!-- Mobile navigation -->
     <div v-if="mobileMenuOpen" id="public-mobile-navigation" class="public-mobile-nav">
       <nav class="public-container" aria-label="منوی اصلی موبایل">
         <ul class="public-mobile-nav-list">
+          <li>
+            <router-link :to="{ name: 'products' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+              <i class="pi pi-box"></i>
+              <span>محصولات</span>
+            </router-link>
+          </li>
           <li>
             <router-link :to="{ name: 'categories' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-th-large"></i>
@@ -312,7 +337,12 @@ function logout() {
               <i class="pi pi-user"></i>
               <span>{{ displayName }}</span>
             </a>
-
+          </li>
+          <li v-else>
+            <router-link :to="{ name: 'login' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+              <i class="pi pi-sign-in"></i>
+              <span>ورود / ثبت‌نام</span>
+            </router-link>
           </li>
         </ul>
       </nav>
@@ -327,39 +357,11 @@ function logout() {
     <footer class="public-footer">
       <div class="public-container public-footer-inner">
         <div class="public-footer-grid">
-          <div>
-            <h3 class="public-footer-heading">دسترسی سریع</h3>
-            <ul class="public-footer-list">
-              <li v-for="item in navItems" :key="item.path">
-                <router-link :to="item.path" class="public-footer-link">{{ item.name }}</router-link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="public-footer-heading">دسته‌بندی‌ها</h3>
-            <ul class="public-footer-list">
-              <li v-for="cat in footerCategories" :key="cat.id">
-                <router-link :to="{ name: 'products', query: { category: cat.id } }" class="public-footer-link">{{ cat.nameFa }}</router-link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="public-footer-heading">خدمات مشتری</h3>
-            <ul class="public-footer-list">
-              <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
-              <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
-              <li><router-link :to="{ name: 'about' }" class="public-footer-link">درباره ما</router-link></li>
-              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و حریم خصوصی</router-link></li>
-            </ul>
-          </div>
-
-          <!-- About Us (left side) -->
           <div class="public-footer-about">
             <div class="public-footer-brand">
-              <BrandMark :size="32" />
+              <BrandMark :size="34" />
               <span>Telecom Market</span>
             </div>
-            <h3 class="public-footer-heading">درباره ما</h3>
             <p class="public-footer-about-text">
               فضایی برای مشاهده تجهیزات مخابراتی، بررسی اطلاعات ثبت‌شده محصولات
               و ارتباط با تأمین‌کنندگان. کاربران می‌توانند بر اساس دسته‌بندی و
@@ -369,6 +371,35 @@ function logout() {
               اطلاعات بیشتر درباره ما
             </router-link>
           </div>
+
+          <div>
+            <h3 class="public-footer-heading">دسترسی سریع</h3>
+            <ul class="public-footer-list">
+              <li v-for="item in navItems" :key="item.path">
+                <router-link :to="item.path" class="public-footer-link">{{ item.name }}</router-link>
+              </li>
+              <li><router-link :to="{ name: 'products' }" class="public-footer-link">محصولات</router-link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="public-footer-heading">دسته‌بندی‌ها</h3>
+            <ul class="public-footer-list">
+              <li v-for="cat in footerCategories" :key="cat.id">
+                <router-link :to="{ name: 'products', query: { category: cat.id } }" class="public-footer-link">{{ cat.nameFa }}</router-link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="public-footer-heading">خدمات مشتری</h3>
+            <ul class="public-footer-list">
+              <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
+              <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
+              <li><router-link :to="{ name: 'about' }" class="public-footer-link">درباره ما</router-link></li>
+              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و حریم خصوصی</router-link></li>
+            </ul>
+          </div>
         </div>
 
         <div class="public-footer-bottom">
@@ -376,7 +407,6 @@ function logout() {
         </div>
       </div>
     </footer>
-
   </div>
 </template>
 
@@ -390,43 +420,53 @@ function logout() {
 .public-skip-link {
   position: fixed;
   z-index: 2000;
-  inset-block-start: .5rem;
-  inset-inline-start: .5rem;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 0.5rem;
   transform: translateY(-160%);
-  padding: .7rem 1rem;
-  border: 1px solid var(--ds-color-primary);
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface);
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-bold);
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--tm-blue);
+  border-radius: var(--tm-radius);
+  background: #fff;
+  color: var(--tm-ink);
+  font-size: var(--tm-fs-sm);
+  font-weight: 700;
   text-decoration: none;
-  box-shadow: var(--ds-shadow-md);
-  transition: transform var(--ds-transition-fast);
+  box-shadow: var(--tm-shadow-md);
+  transition: transform 0.16s ease;
 }
-.public-skip-link:focus {
-  transform: translateY(0);
-  outline: 3px solid var(--ds-color-focus);
-  outline-offset: 2px;
-}
-.public-main:focus { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
+.public-skip-link:focus { transform: translateY(0); outline: 3px solid var(--tm-cyan); outline-offset: 2px; }
+.public-main:focus { outline: 2px solid var(--tm-cyan); outline-offset: 3px; }
 
 .public-container {
   width: 100%;
-  max-width: var(--ds-container-max);
+  max-width: 1240px;
   margin: 0 auto;
-  padding-inline: var(--ds-container-pad);
+  padding-inline: clamp(14px, 2vw, 28px);
 }
 
-@media (min-width: 768px) {
-  .public-container {
-    padding-inline: var(--ds-container-pad-lg);
-  }
+/* ---------- Utility strip ---------- */
+.public-utility-bar {
+  background: var(--tm-navy);
+  color: #cfd9ee;
+  font-size: 12px;
 }
+.public-utility-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
+}
+.public-utility-message { display: inline-flex; align-items: center; gap: 8px; }
+.public-utility-message i { color: var(--tm-cyan); font-size: 12px; }
+.public-utility-links { display: flex; align-items: center; gap: 18px; }
+.public-utility-links a { color: #cfd9ee; text-decoration: none; }
+.public-utility-links a:hover { color: var(--tm-cyan); }
 
+/* ---------- Header ---------- */
 .public-header {
-  background: var(--surface-card);
-  border-bottom: 1px solid var(--surface-border);
+  background: #fff;
+  border-bottom: 1px solid var(--tm-line);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -436,604 +476,189 @@ function logout() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 4rem;
-  gap: 1rem;
+  min-height: 68px;
+  gap: 16px;
 }
 
-.public-header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-shrink: 0;
-}
+.public-header-right { display: flex; align-items: center; gap: 26px; min-width: 0; }
 
 .public-logo {
   display: flex;
   align-items: center;
-  font-size: 1.5rem;
-  color: var(--primary-color);
+  gap: 10px;
+  text-decoration: none;
   flex-shrink: 0;
 }
+.public-logo-name { display: flex; flex-direction: column; line-height: 1.1; }
+.public-logo-name strong { font-size: 17px; font-weight: 700; color: var(--tm-navy); }
+.public-logo-name small { font-size: 10px; letter-spacing: 0.16em; color: var(--tm-muted); text-transform: uppercase; }
 
-.public-logo i {
-  font-size: 1.5rem;
-}
-
-.public-search-desktop {
-  display: none;
-  max-width: 20rem;
-}
-
-.public-search-input,
-.public-search-input-full {
-  width: 100%;
-}
-
-.public-nav-desktop {
-  display: none;
-  align-items: center;
-  gap: 1.5rem;
-}
-
+.public-nav-desktop { display: none; align-items: center; gap: 22px; }
 .public-nav-link {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-color-secondary);
-  transition: color var(--transition-duration);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tm-ink-soft);
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
+.public-nav-link:hover { color: var(--tm-blue); }
+.public-nav-link-active { color: var(--tm-blue); border-bottom-color: var(--tm-cyan); }
 
-.public-nav-link:hover,
-.public-nav-link-active {
-  color: var(--primary-color);
-}
-
-.public-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+.public-header-actions { display: flex; align-items: center; gap: 10px; margin-inline-start: auto; }
+.public-search-desktop { display: none; width: 290px; }
+.public-search-input,
+.public-search-input-full { width: 100%; }
+.public-search-input :deep(.p-inputtext) { border-radius: var(--tm-radius-pill); padding-inline-start: 2.2rem; background: var(--tm-surface-alt); }
 
 .public-icon-link {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border-radius: var(--content-border-radius);
-  color: var(--text-color-secondary);
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--tm-radius);
+  color: var(--tm-ink-soft);
+  text-decoration: none;
 }
-
-.public-icon-link:hover {
-  background: var(--surface-hover);
-}
+.public-icon-link:hover { background: var(--tm-cyan-soft); color: var(--tm-cyan-deep); }
 
 .public-notification-badge {
   position: absolute;
-  top: -0.25rem;
-  inset-inline-end: -0.25rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  background: var(--primary-color);
-  color: var(--primary-contrast-color);
-  font-size: 0.65rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 1px;
+  inset-inline-end: 1px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  background: var(--tm-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--tm-radius-pill);
+  display: grid;
+  place-items: center;
 }
 
-.public-profile-link {
-  display: none;
-}
-
-.public-dashboard-btn {
-  display: none;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--content-border-radius);
-  background: var(--primary-color);
-  color: #ffffff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.2s;
-}
-
-.public-dashboard-btn:hover {
-  background: var(--p-primary-400);
-}
-
-.public-dashboard-btn i {
-  font-size: 0.85rem;
-}
-
-.public-notifications-link {
-  display: none;
-}
-
-/* User dropdown trigger */
 .public-user-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.6rem;
-  border: 1px solid var(--surface-border);
-  border-radius: 2rem;
-  background: var(--surface-card);
-  color: var(--text-color);
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-pill);
+  background: #fff;
   cursor: pointer;
-  transition: background 0.2s;
+  font-family: inherit;
 }
-
-.public-user-trigger:hover {
-  background: var(--surface-hover);
-}
-
+.public-user-trigger:hover { border-color: var(--tm-cyan-strong); }
 .public-user-avatar {
-  width: 1.75rem;
-  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: var(--primary-color);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
+  overflow: hidden;
+  background: var(--tm-blue-soft);
+  color: var(--tm-blue-strong);
+  font-size: 12px;
   font-weight: 700;
-  overflow: hidden;
+  flex: none;
 }
+.public-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.public-user-name { font-size: 12px; font-weight: 600; color: var(--tm-ink); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.public-user-caret { font-size: 10px; color: var(--tm-muted); }
 
-.public-user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.public-login-link { text-decoration: none; }
+
+.public-search-mobile { padding-bottom: 14px; }
+
+/* ---------- Mobile nav ---------- */
+.public-mobile-nav {
+  background: #fff;
+  border-bottom: 1px solid var(--tm-line);
+  box-shadow: var(--tm-shadow-sm);
 }
-
-.public-user-name {
-  display: none;
-  font-size: 0.85rem;
+.public-mobile-nav-list { list-style: none; margin: 0; padding: 8px 0 16px; display: flex; flex-direction: column; gap: 2px; }
+.public-mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: var(--tm-radius);
+  color: var(--tm-ink-soft);
+  font-size: 13px;
   font-weight: 600;
-  max-width: 8rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.public-user-caret {
-  font-size: 0.7rem;
-  color: var(--text-color-secondary);
-}
-
-.public-btn-primary-link {
   text-decoration: none;
 }
+.public-mobile-nav-link:hover { background: var(--tm-surface-alt); color: var(--tm-blue); }
+.public-mobile-nav-link i { color: var(--tm-muted); }
+.public-mobile-auth { border-top: 1px solid var(--tm-line); margin-top: 8px; padding-top: 8px; }
 
+/* ---------- Main ---------- */
+.public-main { flex: 1; padding: 24px 0 48px; }
 
-.public-mobile-toggle {
-  display: inline-flex;
-}
-
-.public-search-mobile {
-  padding-bottom: 1rem;
-}
-
-.public-mobile-nav {
-  background: var(--surface-card);
-  border-bottom: 1px solid var(--surface-border);
-}
-
-.public-mobile-nav-list {
-  list-style: none;
-  margin: 0;
-  padding: 1rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.public-mobile-nav-link {
-  display: block;
-  width: 100%;
-  text-align: start;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  color: var(--text-color-secondary);
-  border-radius: var(--content-border-radius);
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.public-mobile-nav-link:hover {
-  background: var(--surface-hover);
-}
-
-.public-mobile-nav-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.public-mobile-auth {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--surface-border);
-}
-
-.public-btn-full {
-  width: 100%;
-  text-align: center;
-  justify-content: center;
-}
-
-.public-main {
-  flex: 1;
-}
-
+/* ---------- Footer ---------- */
 .public-footer {
-  /* Footer colors use a deliberate dark-teal palette that is
-     intentionally not the same as the light-mode surface tokens.
-     Scoped variables preserve the current visual result and
-     enable dark-mode adaptation via .app-dark. */
-  --footer-bg: #004d6f;
-  --footer-border: #003a54;
-  --footer-text: #d7eef6;
-  --footer-heading: #ffffff;
-  --footer-muted: #b9dcea;
-  --footer-muted-hover: #ffffff;
-  --footer-bottom: #9cc9da;
-  --footer-accent: var(--primary-color);
-  --footer-accent-hover: var(--p-primary-400);
-
-  background: var(--footer-bg);
-  border-top: 1px solid var(--footer-border);
-  color: var(--footer-text);
+  background: linear-gradient(180deg, #0a1c3f 0%, #08142e 100%);
+  color: #cfd9ee;
+  padding: 42px 0 0;
+  margin-top: auto;
 }
-
-/* Dark mode: use the same teal primary scale, shifted for dark surfaces.
-   The accent teal remains the brand color. */
-:global(.app-dark) .public-footer {
-  --footer-bg: var(--p-surface-950);
-  --footer-border: var(--p-surface-900);
-  --footer-text: var(--p-surface-300);
-  --footer-heading: var(--p-surface-0);
-  --footer-muted: var(--p-surface-400);
-  --footer-muted-hover: var(--p-surface-100);
-  --footer-bottom: var(--p-surface-500);
-}
-
-.public-footer-inner {
-  padding: 3rem 1rem 2rem;
-}
-
 .public-footer-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2.5rem;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 32px;
+  padding-bottom: 32px;
 }
-
-/* About Us block (left side) */
-.public-footer-about {
-  max-width: 420px;
-  margin-inline-start: auto;
-}
-
-
-.public-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.25rem;
+.public-footer-heading {
+  margin: 0 0 14px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--footer-heading);
-  margin-bottom: 1rem;
+  color: #fff;
 }
-
-.public-footer-brand .brand-mark { width: 2rem; height: 2rem; }
-
-.public-footer-about-text {
-  font-size: 0.9rem;
-  line-height: 2;
-  color: var(--footer-muted);
-  margin: 0 0 1.25rem;
-}
-
+.public-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.public-footer-link { color: #b9c8e0; font-size: 12.5px; text-decoration: none; }
+.public-footer-link:hover { color: var(--tm-cyan); }
+.public-footer-brand { display: flex; align-items: center; gap: 9px; color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.public-footer-about-text { margin: 0 0 14px; font-size: 12.5px; line-height: 1.9; color: #b9c8e0; }
 .public-footer-about-btn {
   display: inline-flex;
-  align-items: center;
-  padding: 0.7rem 1.5rem;
-  border-radius: 0.6rem;
-  background: var(--footer-accent);
-  color: var(--primary-contrast-color);
-  font-weight: 700;
-  font-size: 0.9rem;
+  padding: 7px 14px;
+  border: 1px solid rgba(46, 211, 238, 0.5);
+  border-radius: var(--tm-radius-pill);
+  color: var(--tm-cyan);
+  font-size: 12px;
+  font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s ease;
 }
-
-.public-footer-about-btn:hover {
-  background: var(--footer-accent-hover);
-}
-
-.public-footer-heading {
-  font-weight: 700;
-  color: var(--footer-heading);
-  margin: 0 0 1rem 0;
-}
-
-.public-footer-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.public-footer-link {
-  font-size: 0.875rem;
-  color: var(--footer-muted);
-  transition: color 0.2s ease;
-}
-
-.public-footer-link:hover {
-  color: var(--footer-muted-hover);
-}
-
+.public-footer-about-btn:hover { background: rgba(46, 211, 238, 0.12); }
 .public-footer-bottom {
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(207, 217, 238, 0.14);
+  padding: 16px 0;
+  font-size: 11.5px;
+  color: #8ea3c6;
   text-align: center;
-  font-size: 0.875rem;
-  color: var(--footer-bottom);
 }
-
-@media (min-width: 768px) {
-  .public-search-desktop {
-    display: flex;
-  }
-
-  .public-profile-link {
-    display: inline-flex;
-  }
-
-  .public-notifications-link {
-    display: inline-flex;
-  }
-
-  .public-dashboard-btn {
-    display: inline-flex;
-  }
-
-  .public-user-name {
-    display: inline;
-  }
-
-  .public-footer-grid {
-    grid-template-columns: 1fr 1fr 1fr 1.5fr;
-  }
-
-}
-
-
 
 @media (min-width: 992px) {
-  .public-nav-desktop {
-    display: flex;
-  }
-
-  .public-search-toggle,
-  .public-mobile-toggle {
-    display: none;
-  }
+  .public-nav-desktop { display: flex; }
+  .public-search-desktop { display: block; }
+  .public-mobile-toggle { display: none !important; }
+  .public-search-mobile { display: none; }
 }
 
-/* Two-tier storefront header: compact utility strip + primary navigation. */
-.public-utility-bar {
-  min-height: 2.25rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--ds-on-navy) 12%, transparent);
-  background: var(--ds-navy);
-  color: var(--ds-on-navy-muted);
-}
-.public-utility-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 2.25rem;
-}
-.public-utility-message,
-.public-utility-links {
-  display: inline-flex;
-  align-items: center;
-  gap: .55rem;
-  font-size: .72rem;
-  line-height: 1.5;
-}
-.public-utility-message i { color: var(--ds-brand); }
-.public-utility-links { gap: 1.1rem; }
-.public-utility-links a {
-  color: var(--ds-on-navy);
-  text-decoration: none;
-  transition: color var(--ds-transition-fast);
-}
-.public-utility-links a:hover { color: var(--ds-brand); }
-.public-utility-links a:focus-visible {
-  outline: 2px solid var(--ds-brand);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-@media (max-width: 767px) {
-  .public-utility-bar { display: none; }
-}
-/* Public marketplace shell — shared brand system, Paces-level polish. */
-.public-header {
-  background: var(--ds-color-surface);
-  border-bottom-color: var(--ds-color-border);
-  box-shadow: none;
-}
-.public-logo {
-  width: auto;
-  height: auto;
-  justify-content: flex-start;
-  gap: .65rem;
-  border-radius: 0;
-  background: transparent;
-}
-.public-nav-link {
-  min-height: 2.5rem;
-  display: inline-flex;
-  align-items: center;
-  position: relative;
-  text-decoration: none;
-  transition: color var(--ds-transition-fast);
-}
-.public-nav-link:hover,
-.public-nav-link-active { color: var(--ds-color-primary); }
-.public-nav-link-active::after {
-  position: absolute;
-  inset-inline: 0;
-  bottom: -0.75rem;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--ds-color-primary);
-  content: "";
-}
-.public-search-input {
-  border-radius: var(--ds-radius-lg);
-  background: var(--ds-color-surface-alt);
-}
-.public-icon-link,
-.public-user-trigger {
-  border-radius: var(--ds-radius-lg);
-}
-.public-mobile-nav {
-  border-bottom: 1px solid var(--ds-color-border);
-  box-shadow: var(--ds-shadow-sm);
-}
-@media (max-width: 767px) {
-  .public-header-row { height: 3.75rem; }
-  .public-nav-link-active::after { display: none; }
+@media (max-width: 991px) {
+  .public-utility-message { font-size: 11px; }
+  .public-user-name { display: none; }
+  .public-footer-grid { grid-template-columns: 1fr 1fr; }
+  .public-footer-about { grid-column: 1 / -1; }
 }
 
-/* Public marketplace header: clear brand lockup and deliberate action grouping. */
-.public-header-row { min-height: 4.5rem; }
-.public-header-right { gap: clamp(.85rem, 1.8vw, 1.75rem); }
-.public-logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: .65rem;
-  width: auto;
-  height: auto;
-  padding: .25rem 0;
-  border-radius: 0;
-  background: transparent;
-  text-decoration: none;
+@media (max-width: 575px) {
+  .public-utility-links { display: none; }
+  .public-footer-grid { grid-template-columns: 1fr; }
+  .public-main { padding-top: 16px; }
 }
-.public-logo-mark { display: block; flex: 0 0 auto; }
-.public-logo-name {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: .05rem;
-  line-height: 1.1;
-}
-.public-logo-name strong {
-  color: var(--ds-color-brand-deep);
-  font-size: 1.05rem;
-  font-weight: 850;
-  letter-spacing: -.025em;
-}
-.public-logo-name small {
-  color: var(--ds-color-text-muted);
-  font-size: .62rem;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-.public-header-actions { gap: .6rem; }
-.public-search-desktop { width: clamp(12rem, 19vw, 19rem); }
-.public-search-desktop :deep(.p-iconfield) { width: 100%; }
-.public-search-input { min-height: 2.7rem; border-color: var(--ds-color-border); }
-.public-icon-link {
-  width: 2.65rem;
-  height: 2.65rem;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-}
-.public-icon-link:hover {
-  border-color: var(--ds-color-border);
-  color: var(--ds-color-primary);
-}
-.public-user-trigger {
-  min-height: 2.65rem;
-  border-radius: var(--ds-radius-pill);
-  border-color: var(--ds-color-border);
-  background: var(--ds-color-surface);
-}
-.public-user-trigger:hover { border-color: color-mix(in srgb, var(--ds-color-primary) 35%, var(--ds-color-border)); }
-.public-mobile-nav {
-  position: absolute;
-  inset-inline: 0;
-  z-index: 99;
-  background: var(--ds-color-surface);
-}
-.public-mobile-nav-list { gap: .35rem; }
-.public-mobile-nav-link {
-  display: flex;
-  align-items: center;
-  gap: .7rem;
-  min-height: 2.8rem;
-  border-radius: var(--ds-radius-md);
-}
-.public-mobile-nav-link i { width: 1.2rem; color: var(--ds-color-primary); }
-.public-main { min-width: 0; }
-.public-mobile-toggle {
-  width: 2.75rem;
-  height: 2.75rem;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  color: var(--ds-color-text);
-}
-.public-mobile-toggle:focus-visible,
-.public-user-trigger:focus-visible,
-.public-icon-link:focus-visible,
-.public-nav-link:focus-visible,
-.public-mobile-nav-link:focus-visible {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 3px;
-}
-.public-mobile-nav {
-  max-height: min(70vh, 34rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border-top: 1px solid var(--ds-color-border);
-}
-.public-mobile-nav-link { min-height: 2.9rem; }
-.public-footer { background: var(--ds-navy); }
-.public-footer-inner { padding-top: clamp(2.5rem, 5vw, 4rem); }
-.public-footer-grid { align-items: start; }
-.public-footer-bottom { margin-top: 3rem; }
-@media (max-width: 767px) {
-  .public-header-row { min-height: 4rem; height: 4rem; }
-  .public-logo-mark { width: 2.45rem; height: 2.45rem; }
-  .public-logo-name strong { font-size: .98rem; }
-  .public-logo-name small { font-size: .57rem; }
-  .public-user-trigger { padding: .25rem; border: 0; background: transparent; }
-  .public-user-caret { display: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .public-shell *, .public-shell *::before, .public-shell *::after {
-    scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
-    animation-duration: .01ms !important;
-  }
-}
-
 </style>

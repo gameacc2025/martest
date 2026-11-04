@@ -13,3 +13,6 @@ export { useDashboardMenu } from './composables/useDashboardMenu.js'
 // Config
 export * from './config/productReservedSpecificationKeys.js'
 export { dashboardMenu, PUBLIC_SITE_URL } from './config/navigation/dashboardMenu.js'
+
+// Unified widget library (Website + Admin + Company)
+export * from './components/ui/index.js'

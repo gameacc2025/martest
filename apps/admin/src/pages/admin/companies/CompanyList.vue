@@ -844,7 +844,7 @@ function formatDate(value) {
 .company-management-toolbar :deep(.p-button:not(.p-button-text):not(.p-button-outlined)) {
   min-height: 2.7rem;
   border-color: #31b7d7;
-  background: linear-gradient(105deg, #249fc9, #39bfe0);
+  background: linear-gradient(105deg, var(--tm-cyan-strong), var(--tm-cyan));
   color: #f4fbfd;
   box-shadow: 0 3px 9px rgba(38, 160, 197, .16);
 }
@@ -892,7 +892,7 @@ function formatDate(value) {
 .company-management-toolbar :deep(.p-button:focus-visible),
 .company-management-toolbar :deep(.p-inputtext:focus-visible),
 .company-management-toolbar :deep(.p-select:focus-visible) {
-  outline: 2px solid #39bfe0;
+  outline: 2px solid var(--tm-cyan);
   outline-offset: 2px;
 }
 @media (max-width: 760px) {

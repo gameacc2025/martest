@@ -2334,6 +2334,27 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 ## UI redesign — public marketplace batch 15 (2026-11-02)
 
+
+
+### 2026-11-04 — UI-REDESIGN-TEM-01: full redesign on the `tem/` visual language (phase 1)
+
+- **Status:** IN_PROGRESS (phase 1 of a multi-phase rebuild)
+- **Agent:** OpenCode (local checkout)
+- **Objective:** Rebuild the entire Website / Company / Admin UI on the layouts, components and visual language of the `tem/` HTML references as ONE unified design system — not a theme swap. Reusable widgets mandatory; real APIs, auth, RBAC, routes and business rules unchanged; no mock data.
+
+**Phase 1 — foundation (this entry)**
+- New authoritative visual layer `packages/shared-ui/assets/design-system/tem.scss`: `--tm-*` tokens (navy `#0a1c3f`/`#08142e`, blue `#1a73e8` primary action, cyan `#2ed3ee` accent, green/amber/red/violet/pink support, canvas `#eef3fb`, ink `#14233f`, line `#e3e9f4`), Vazirmatn type scale, buttons/pills/panels/stat tiles/grids/toolbar/avatars/segmented/empty/alert/table primitives, dashboard-shell overrides, PrimeVue alignment, public-shell primitives, charts, responsive + reduced-motion rules. Loaded after `assets/main.scss` in each app's `main.js` (Sass `@use` cannot follow rules in `main.scss`).
+- `packages/shared-ui/theme.js` rewritten to the blue/cyan/navy ramp (primary 500 `#1a73e8`, 600 `#1565cf`, focus ring `#16b8e8`, cool blue-tinted surface ramp, datatable header `#f7f9fd`).
+- New reusable widget library `packages/shared-ui/components/ui/`: `TemPageHeader`, `TemStatCard`, `TemPanel`, `TemToolbar`, `TemStatusPill`, `TemSegmented`, `TemEmptyState`, `TemAvatar`, `TemUserCell`, `TemBarChart`, `TemDonutChart`, `TemLegend`, `TemMeter` + `index.js`, exported from `packages/shared-ui/index.js`. The earlier uncommitted `components/website/` attempt and `Shop.vue` were inspected and removed (invalid markup, hardcoded purple, mock fallback data).
+- `apps/website/src/layouts/PublicLayout.vue` rebuilt: navy utility strip, white command header, pill search, `/products` nav, navy footer — all handoff/auth/menu/notification/category logic preserved; latent missing `endpoints` import fixed.
+- `apps/website/src/pages/public/Home.vue` rebuilt as a real-API storefront (hero search, category tiles, featured products, recent-products table, capabilities, inquiry CTA) with loading/error/empty states; `Home.test.js` rewritten (8 contracts).
+- `apps/admin/src/pages/admin/Dashboard.vue` rebuilt on Tem widgets, preserving every fetcher and the product approve/reject workflow.
+- `apps/company/src/pages/user/dashboard/CompanyDashboard.vue` rebuilt on Tem widgets; added the previously undefined `inquiryStatusSeries` / `productSegments` computeds; fixed a pipeline double-count (`by.SUBMITTED ?? by.OPEN`).
+- Token-ized the remaining page-level brand hex (`#249fc9`, `#39bfe0`, `#12b8a6`, `#e8f8f6`, `#fafaff`) across the admin/company list pages and all three notification inboxes.
+
+**Verification (phase 1):** `pnpm run build:website|build:admin|build:company` pass; `npx vitest run` → 56 files / 310 tests pass. Browser/visual checks `NOT RUN` (owner-prohibited).
+
+**Still to do:** website catalogue pages (`ProductListing`, `Products`, `Categories`, `ProductDetails`), remaining Admin/Company list & detail workspaces on Tem widgets, remaining public pages (about/contact/faq/terms/profile/orders/inquiries), dashboard shell visual audit.
 - Shared workspace heading adopted in Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us.
 - Breadcrumbs and actions preserved via named slot; no data/filter/cart/checkout/address/contact API behavior changed.
 - Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.

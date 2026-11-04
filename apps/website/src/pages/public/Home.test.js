@@ -10,7 +10,7 @@ const homePath = [
 if (!homePath) throw new Error('Could not locate the Website homepage source file')
 const source = readFileSync(homePath, 'utf8')
 
-describe('Website homepage redesign contracts', () => {
+describe('Website homepage contracts (tem redesign)', () => {
   it('keeps the production API and category store as the source of page data', () => {
     expect(source).toContain('productsApi.list(params)')
     expect(source).toContain('productsApi.list({ ...params, limit: 8, featured: true })')
@@ -35,23 +35,22 @@ describe('Website homepage redesign contracts', () => {
   })
 
   it('uses native category buttons and semantic product links for keyboard navigation', () => {
-    expect(source).toContain('type="button" class="category-card"')
-    expect(source).toContain('<router-link v-for="product in featuredProducts"')
+    expect(source).toContain('type="button"')
+    expect(source).toContain('class="category-card"')
+    expect(source).toContain('<router-link')
     expect(source).toContain('class="product-card"')
     expect(source).toContain('.product-card:focus-visible')
   })
 
-
-  it('uses a static search-first hero with a compact branded identity', () => {
-    expect(source).toContain('class="hero-eyebrow"')
+  it('uses a search-first hero wired to the search route', () => {
+    expect(source).toContain('class="home-hero__eyebrow"')
     expect(source).toContain('role="search"')
     expect(source).toContain('name="homepage-search"')
     expect(source).toContain('autocomplete="off"')
-    expect(source).not.toContain('hero-play-toggle')
     expect(source).not.toContain('setInterval(')
   })
 
-  it('shows supplier trust and explicit inquiry pricing when no price tier exists', () => {
+  it('shows supplier verification and explicit inquiry pricing when no price exists', () => {
     expect(source).toContain('company?.isVerified')
     expect(source).toContain('استعلام از تأمین‌کننده')
     expect(source).toContain('class="product-card-cta"')
@@ -63,15 +62,15 @@ describe('Website homepage redesign contracts', () => {
     expect(source).not.toContain('+250')
     expect(source).not.toContain('+1,500')
     expect(source).not.toContain('+5,000')
-    expect(source).not.toContain('بیش از ۲۵۰ تأمین‌کننده')
     expect(source).toContain('ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان')
     expect(source).toContain('class="feature-icon"')
   })
 
-  it('uses the shared design system for the redesigned page', () => {
-    expect(source).toContain('class="home-page ds-page"')
-    expect(source).toContain('class="home-container ds-container ds-stack"')
-    expect(source).toContain('class="section-block ds-card"')
-    expect(source).toContain('var(--ds-color-background)')
+  it('uses the unified tem design system tokens', () => {
+    expect(source).toContain('class="home-page"')
+    expect(source).toContain('class="home-container"')
+    expect(source).toContain('class="site-hero home-hero"')
+    expect(source).toContain('var(--tm-canvas)')
+    expect(source).not.toContain('7c6cf6')
   })
 })

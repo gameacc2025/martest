@@ -1,4 +1,4 @@
-# Current Task — Full UI redesign: Sky Blue primary / Turquoise secondary palette + dark sidebar
+﻿# Current Task — Full UI redesign: Sky Blue primary / Turquoise secondary palette + dark sidebar
 
 **Status:** IN_PROGRESS — owner approved turquoise/sky-blue palette with dark sidebar; shared theme/tokens and real-page sample are the first milestone. The three notification inboxes and shared workspace primitives have received a corrective pass; the full 69-page redesign remains in progress.
 **Repository:** gameacc2025/martest  
@@ -342,9 +342,26 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Open owner decisions: canonical primary color for website vs panels (AGENTS.md vs MASTER.md), and token-ization of hard-coded hex colors in shared dashboard components (dark theme).
 - **Applied and verified:** UI-PALETTE-MOCKUP-01 (commits `7cd9f35`, `6c8d7f7`). Shared-ui package is clean of old palette hex. App-level page components (CategoryList, CompanyList, InquiryList, ProductList, RoleList, UserList, Notifications) still contain hard-coded `#39bfe0` / `#12b8a6` — these need separate token-ization passes.
 
-### UI-LIST-KPI-HEADINGS — 2026-11-04 (current focus)
-- Replaced the verbose page header (eyebrow/icon/description) with an `sr-only` H1 + a row of KPI summary cards on all admin/company data & table pages (roles, users, categories, companies, inquiries, orders, permissions, products). The breadcrumb (rendered by `PageHeader` in the layout) now carries the visible "where am I" indication; the shared `WorkspacePageHeading` gained an `srOnly` prop and a new `KpiStatsRow` component was added.
-- KPI cards read from the existing `pagination.total` — no new data fetching or invented metrics. Verified: 310/310 tests, admin + company builds pass.
-- **RTL sidebar fix (2026-11-04):** Admin/Company sidebar appeared LTR because `.dash-layout` combined `direction: rtl` with `flex-direction: row-reverse`, doubling the reversal so the sidebar landed on the LEFT. Removed `row-reverse` in both layouts so `direction: rtl` places the sidebar on the right. Verified: 92/92 admin+company tests, admin + company builds pass.
-- Next: token-ize remaining hard-coded page-level hex colors, then continue remaining route inventory (product editors/details, order/report workspaces, website pages).
 
+### UI-REDESIGN-TEM-01 — full redesign on the `tem/` visual language — 2026-11-04 (current focus)
+
+**Owner directive:** complete UI/UX rebuild of Website, Admin and Company using the `tem/` HTML files as the primary design source — layouts, visual language, components, colours, typography, spacing, navigation and interactions. One unified brand across all three apps, reusable widgets mandatory, high visual fidelity. Real APIs, auth, RBAC, routing, backend and business rules preserved. No mock data. Persian RTL + Vazirmatn. Browser automation and screenshot loops prohibited → visual checks `NOT RUN`.
+
+**Done (phase 1):**
+- `packages/shared-ui/assets/design-system/tem.scss` — authoritative unified visual layer (`--tm-*` tokens + `--ds-*` aliases, typography, buttons/pills, panels, stat tiles, grids, toolbar, avatar, segmented, empty/alert, tables, dashboard shell overrides, PrimeVue alignment, public shell, charts, responsive, reduced-motion).
+- `packages/shared-ui/theme.js` — PrimeVue preset moved to the blue/cyan/navy ramp.
+- `packages/shared-ui/components/ui/` — 13 reusable presentational widgets + barrel; exported from `packages/shared-ui/index.js`.
+- `apps/{website,admin,company}/src/main.js` — `tem.scss` imported after `assets/main.scss`.
+- Website shell (`PublicLayout.vue`) and homepage (`Home.vue` + `Home.test.js`) rebuilt; Admin `Dashboard.vue` and Company `CompanyDashboard.vue` rebuilt on Tem widgets with all fetchers/approval workflow preserved.
+- Brand hex token-ized in admin/company list pages and all three notification inboxes.
+- Verification: three production builds pass; 310/310 Vitest tests pass.
+
+**Remaining:**
+1. Website catalogue: `ProductListing.vue`, `Products.vue`, `Categories.vue`, `ProductDetails.vue`.
+2. Remaining Admin list/detail workspaces (users, companies, products, categories, roles, inquiries, orders, permissions, settings) on Tem widgets while preserving DataTable/server pagination/permissions.
+3. Remaining Company workspaces (products, inquiries, users, reports, settings).
+4. Remaining public pages (about, contact, faq, terms, profile, addresses, orders, my-inquiries, notifications, search, auth).
+5. Dashboard shell visual audit (`DashboardHeader.vue`, `DashboardSidebar.vue`, `BrandMark`).
+6. Commit phases on `main`, then record SHAs in WORKLOG.
+
+**Open decision:** whether to keep the legacy website `components/products/ProductCard.vue` alongside the new Tem product card, or migrate all product surfaces to one shared card.
