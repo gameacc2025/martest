@@ -479,3 +479,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added docs/RETAIL_COMMERCE_R1_AUDIT.md with findings, safe defaults, open engineering decisions and R1a/R1b slices.
 - No schema/API/checkout activation in this audit. Tests/build/browser NOT RUN.
 **Next:** Implement R1a retail eligibility and server-resolved retail catalogue/price contract; keep every existing product retail-disabled by default.
+
+
+### RETAIL-COMMERCE-R1a — Product retail opt-in
+- Added Product.retailEnabled Boolean @default(false) with PostgreSQL migration and composite lookup index.
+- Added retailEnabled to product create/update JSON schema and public product projection.
+- Added opt-in toggle to Admin and Company ProductForm; old products remain disabled by default.
+- Toggle is only an opt-in declaration; no retail catalogue, inventory, reservation, order or payment route is enabled. Existing products cannot be purchased from this field alone.
+- Added product service and route schema tests; NOT RUN.
+- Migration not applied to any database in this session. Build/browser NOT RUN.
+**Next:** R1b inventory balance/movement/reservation models and atomic stock operations; only after stock exists should the retail catalogue resolver return sellable items.
