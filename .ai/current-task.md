@@ -407,3 +407,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Support now has a customer-facing Website route (/support/tickets) and account-menu entry. COMPANY and STAFF identities are routed via PKCE handoff to their own panel support desk; customer-only access is enforced in the Website router.
 
 - Completed list KPI coverage for Admin categories, roles and permissions, Company users and Company inquiry pages; the notification-delivery page already exposes live aggregate delivery stats. PermissionList.vue now has its missing kpiItems computed definition.
+
+- Added Company-side settlement preview (/finance/settlements), its menu item and dashboard shortcut. All amounts are demo data pending a secure settlement ledger/API.
