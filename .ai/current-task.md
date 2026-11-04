@@ -356,12 +356,19 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Brand hex token-ized in admin/company list pages and all three notification inboxes.
 - Verification: three production builds pass; 310/310 Vitest tests pass.
 
-**Remaining:**
-1. Website catalogue: `ProductListing.vue`, `Products.vue`, `Categories.vue`, `ProductDetails.vue`.
-2. Remaining Admin list/detail workspaces (users, companies, products, categories, roles, inquiries, orders, permissions, settings) on Tem widgets while preserving DataTable/server pagination/permissions.
-3. Remaining Company workspaces (products, inquiries, users, reports, settings).
-4. Remaining public pages (about, contact, faq, terms, profile, addresses, orders, my-inquiries, notifications, search, auth).
-5. Dashboard shell visual audit (`DashboardHeader.vue`, `DashboardSidebar.vue`, `BrandMark`).
-6. Commit phases on `main`, then record SHAs in WORKLOG.
+**Done (phase 2):**
+- Shared-component cascade: `KpiCard` → `.tm-stat` (all `kpi-card-*` hooks kept), `KpiStatsRow` → `.tm-grid--stats`, `DashboardPanel` → `.tm-panel` (all `.dash-panel-*` hooks kept), `WorkspacePageHeading` gained `eyebrow`/`description`/`icon` + visible tem page-head while keeping `sr-only`.
+- Website catalogue rebuilt: `ProductListing`, `Categories`, `ProductDetails` (style block only), `SearchResults` (Tem widgets).
+- Legacy hex sweep → `--tm-*` across the 9 Admin/Company list pages, 3 Notifications inboxes, `MyInquiries`, `ContactUs`, `Inquiry*`, `NotificationFolders`, `StatDonut`, layouts, `PublicLayout`, `Home`, `ProductDetails`.
+- Dashboard shell (`DashboardSidebar`, `DashboardHeader`) and `BrandMark` aligned to the navy/cyan/blue brand.
+- Verification: three production builds pass; 310/310 Vitest tests pass. Visual checks `NOT RUN`.
+
+**Remaining (phase 3):**
+1. Static public content pages (`AboutUs`, `ContactUs`, `Faq`, `Terms`) on `WorkspacePageHeading`/`TemPanel`.
+2. Account pages (`UserProfile`, `Addresses`, `Orders`, `OrderDetails`, `MyInquiries`, `NotificationPreferences`, `InquirySubscription`) on Tem widgets.
+3. Auth pages (`Login`, `Register`, `ForgotPassword`) brand pass.
+4. Admin/Company detail workspaces (`ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList`, settings) — audit the shared-component cascade first; only rewrite where it is insufficient. Preserve server pagination/permissions.
+5. `Products.vue` is exported from `pages/public/index.js` but not routed — decide whether to keep/delete.
+6. Commit phase 2/3 on `main` and record SHAs in WORKLOG.
 
 **Open decision:** whether to keep the legacy website `components/products/ProductCard.vue` alongside the new Tem product card, or migrate all product surfaces to one shared card.

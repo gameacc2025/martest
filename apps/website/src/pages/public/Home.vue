@@ -323,12 +323,12 @@ onMounted(() => {
   border-radius: var(--tm-radius-pill);
   background: rgba(46, 211, 238, 0.14);
   border: 1px solid rgba(46, 211, 238, 0.35);
-  color: #bdf3fb;
+  color: var(--tm-cyan-soft);
   font-size: 11.5px;
   font-weight: 600;
 }
 .home-hero h1 { margin: 16px 0 12px; font-size: clamp(24px, 3vw, 38px); line-height: 1.35; color: #fff; }
-.home-hero p { margin: 0 0 22px; max-width: 56ch; color: #cfe6f2; font-size: 14px; line-height: 1.9; }
+.home-hero p { margin: 0 0 22px; max-width: 56ch; color: var(--tm-cyan-soft); font-size: 14px; line-height: 1.9; }
 
 .home-hero__search {
   display: flex;
@@ -354,7 +354,7 @@ onMounted(() => {
 .home-hero__search .tm-btn { flex: none; }
 
 .home-hero__links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; }
-.home-hero__links a { color: #bdf3fb; font-size: 12.5px; font-weight: 600; text-decoration: none; }
+.home-hero__links a { color: var(--tm-cyan-soft); font-size: 12.5px; font-weight: 600; text-decoration: none; }
 .home-hero__links a:hover { color: #fff; text-decoration: underline; }
 
 .home-hero__aside { display: flex; flex-direction: column; gap: 10px; }
@@ -366,7 +366,7 @@ onMounted(() => {
   border-radius: var(--tm-radius);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #e6f4fb;
+  color: var(--tm-cyan-soft);
   font-size: 12.5px;
   font-weight: 500;
 }
@@ -489,11 +489,11 @@ onMounted(() => {
   border-radius: var(--tm-radius-lg);
   background:
     radial-gradient(circle at 90% 20%, rgba(46, 211, 238, 0.25), transparent 45%),
-    linear-gradient(118deg, #0a1c3f, #12507a);
+    linear-gradient(118deg, var(--tm-navy), var(--tm-navy-soft));
   color: #fff;
 }
 .home-cta h2 { margin: 0 0 6px; font-size: 19px; color: #fff; }
-.home-cta p { margin: 0; font-size: 12.5px; color: #cfe6f2; }
+.home-cta p { margin: 0; font-size: 12.5px; color: var(--tm-cyan-soft); }
 
 .home-empty {
   display: flex;
@@ -512,7 +512,7 @@ onMounted(() => {
 
 .home-skeleton {
   min-height: 150px;
-  background: linear-gradient(90deg, var(--tm-surface-alt) 25%, #eef3fb 37%, var(--tm-surface-alt) 63%);
+  background: linear-gradient(90deg, var(--tm-surface-alt) 25%, var(--tm-canvas) 37%, var(--tm-surface-alt) 63%);
   background-size: 400% 100%;
   animation: home-shimmer 1.4s ease infinite;
   border-radius: var(--tm-radius-lg);

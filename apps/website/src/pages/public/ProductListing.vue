@@ -1,7 +1,6 @@
 <template>
-  <main class="products-page ds-page" aria-labelledby="products-page-title">
+  <main class="products-page" aria-labelledby="products-page-title">
 
-    <!-- Breadcrumb as page title -->
     <WorkspacePageHeading
       eyebrow="بازارگاه تجهیزات مخابراتی"
       title="محصولات"
@@ -9,7 +8,12 @@
       icon="pi pi-box"
       heading-id="products-page-title"
     >
-      <template #actions><Breadcrumb :home="home" :model="items" class="breadcrumb-wrap" /></template>
+      <template #actions>
+        <span class="tm-pill tm-pill--accent">
+          <i class="pi pi-check-circle" aria-hidden="true"></i>
+          فقط محصولات منتشرشده
+        </span>
+      </template>
     </WorkspacePageHeading>
 
     <!-- Two Column Layout: Filters (right) + Products (left) -->
@@ -17,72 +21,68 @@
 
       <!-- Right: Filters Sidebar -->
       <aside class="filters-sidebar" aria-label="فیلتر محصولات">
-        <Card class="filters-card ds-card">
-          <template #content>
-            <div class="filters-inner">
-              <div class="filters-heading"><h2>فیلتر محصولات</h2><p>نتایج را دقیق‌تر محدود کنید</p></div>
-              <!-- Search -->
-              <div class="filter-group">
-                <label for="product-search">جستجو</label>
-                <div class="p-inputgroup">
-                  <InputText
-                    id="product-search"
-                    v-model="searchQuery"
-                    placeholder="نام محصول..."
-                    @keyup.enter="applyFilters"
-                    class="w-full"
-                  />
-                  <Button icon="pi pi-search" aria-label="اجرای جستجو" @click="applyFilters" />
-                </div>
-              </div>
+        <TemPanel title="فیلتر محصولات" subtitle="نتایج را دقیق‌تر محدود کنید" icon="pi pi-filter">
 
-              <!-- Category -->
-              <div class="filter-group">
-                <label for="product-category">دسته‌بندی</label>
-                <Select
-                  inputId="product-category"
-                  v-model="selectedCategory"
-                  :options="categoryOptions"
-                  optionLabel="name"
-                  optionValue="id"
-                  placeholder="همه دسته‌ها"
-                  class="w-full"
-                  @change="applyFilters"
-                />
-              </div>
-
-              <!-- Price Range -->
-              <div class="filter-group">
-                <label>محدوده قیمت</label>
-                <div class="price-range">
-                  <InputNumber
-                    inputId="minimum-price"
-                    aria-label="حداقل قیمت"
-                    v-model="minPrice"
-                    placeholder="از"
-                    class="w-full"
-                    @keyup.enter="applyFilters"
-                  />
-                  <span class="price-separator">تا</span>
-                  <InputNumber
-                    inputId="maximum-price"
-                    aria-label="حداکثر قیمت"
-                    v-model="maxPrice"
-                    placeholder="تا"
-                    class="w-full"
-                    @keyup.enter="applyFilters"
-                  />
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="filter-actions">
-                <Button label="اعمال فیلتر" icon="pi pi-filter" class="w-full" @click="applyFilters" />
-                <Button label="پاک کردن" icon="pi pi-times" severity="secondary" text class="w-full" @click="resetFilters" />
-              </div>
+          <!-- Search -->
+          <div class="filter-group">
+            <label for="product-search">جستجو</label>
+            <div class="filter-search">
+              <InputText
+                id="product-search"
+                v-model="searchQuery"
+                placeholder="نام محصول..."
+                @keyup.enter="applyFilters"
+                class="w-full"
+              />
+              <Button icon="pi pi-search" aria-label="اجرای جستجو" @click="applyFilters" />
             </div>
-          </template>
-        </Card>
+          </div>
+
+          <!-- Category -->
+          <div class="filter-group">
+            <label for="product-category">دسته‌بندی</label>
+            <Select
+              inputId="product-category"
+              v-model="selectedCategory"
+              :options="categoryOptions"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="همه دسته‌ها"
+              class="w-full"
+              @change="applyFilters"
+            />
+          </div>
+
+          <!-- Price Range -->
+          <div class="filter-group">
+            <label>محدوده قیمت</label>
+            <div class="price-range">
+              <InputNumber
+                inputId="minimum-price"
+                aria-label="حداقل قیمت"
+                v-model="minPrice"
+                placeholder="از"
+                class="w-full"
+                @keyup.enter="applyFilters"
+              />
+              <span class="price-separator">تا</span>
+              <InputNumber
+                inputId="maximum-price"
+                aria-label="حداکثر قیمت"
+                v-model="maxPrice"
+                placeholder="تا"
+                class="w-full"
+                @keyup.enter="applyFilters"
+              />
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="filter-actions">
+            <Button label="اعمال فیلتر" icon="pi pi-filter" class="w-full" @click="applyFilters" />
+            <Button label="پاک کردن" icon="pi pi-times" severity="secondary" text class="w-full" @click="resetFilters" />
+          </div>
+        </TemPanel>
       </aside>
 
       <!-- Left: Products -->
@@ -116,8 +116,12 @@
               <span class="products-count-number">{{ totalItems.toLocaleString('fa-IR') }}</span>
               <span>محصول در کاتالوگ</span>
             </div>
-            <span class="products-results-context">فقط محصولات منتشرشده</span>
+            <span class="products-results-context">
+              <i class="pi pi-sliders-h" aria-hidden="true"></i>
+              {{ filters.category ? 'فیلترشده بر اساس دسته‌بندی' : 'همه دسته‌بندی‌ها' }}
+            </span>
           </div>
+
           <div class="products-grid">
             <router-link
               v-for="product in products"
@@ -193,12 +197,11 @@
 
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import TemPanel from '@telecom/shared-ui/components/ui/TemPanel.vue'
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
-import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
-import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
@@ -227,9 +230,6 @@ const filters = ref({
   page: 1,
   limit: 12
 })
-
-const home = ref({ icon: 'pi pi-home', to: '/' })
-const items = ref([{ label: 'محصولات' }])
 
 const categoryOptions = ref([{ id: null, name: 'همه دسته‌ها' }])
 
@@ -336,51 +336,16 @@ watch(() => route.query.category, (newVal) => {
 .products-page {
   direction: rtl;
   width: 100%;
-  background: var(--ds-color-background);
-  max-width: var(--ds-container-max-wide);
+  max-width: 1240px;
   margin-inline: auto;
-  padding-inline: var(--ds-container-pad);
-  padding-block: var(--ds-space-6);
+  padding-inline: clamp(14px, 2vw, 28px);
 }
-
-@media (min-width: 768px) {
-  .products-page {
-    padding-inline: var(--ds-container-pad-lg);
-    padding-block: var(--ds-space-8);
-  }
-}
-
-@media (min-width: 1920px) {
-  .products-page {
-    padding-inline: var(--ds-container-pad-xl);
-  }
-}
-
-@media (min-width: 1920px) {
-  .products-page {
-    padding-inline: var(--ds-container-pad-xl);
-  }
-}
-
-/* Page header */
-.listing-page-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--ds-space-4);
-  margin-bottom: var(--ds-space-6);
-}
-.listing-heading-copy { min-width: 0; }
-.listing-heading-copy .ds-h1 { margin: 0; }
-.listing-heading-copy .ds-lead { max-width: 42rem; }
-.breadcrumb-wrap { margin-top: var(--ds-space-2); }
 
 /* Two Column Layout */
 .products-grid-layout {
   display: grid;
-  grid-template-columns: minmax(240px, 280px) 1fr;
-  gap: var(--ds-space-6);
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
 }
 
@@ -389,139 +354,223 @@ watch(() => route.query.category, (newVal) => {
   position: sticky;
   top: 5rem;
   align-self: start;
+  min-width: 0;
 }
-.filters-card { border-radius: var(--ds-radius-md); box-shadow: none; border: 1px solid var(--ds-color-border); }
-.filters-card :deep(.p-card-content) { padding: var(--ds-space-5); }
-.filters-inner {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-4);
-}
+.filter-group { margin-bottom: 14px; }
+.filter-group:last-of-type { margin-bottom: 0; }
 .filter-group label {
   display: block;
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-semibold);
-  color: var(--ds-color-text-muted);
-  margin-bottom: var(--ds-space-2);
+  margin-bottom: 6px;
+  color: var(--tm-ink-soft);
+  font-size: var(--tm-fs-tiny);
+  font-weight: 600;
 }
+.filter-search { display: flex; align-items: stretch; gap: 6px; }
+.filter-search :deep(.p-button) { flex: none; }
 .price-range {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: var(--ds-space-2);
+  gap: 6px;
 }
 .price-separator {
-  font-size: var(--ds-font-size-sm);
-  color: var(--ds-color-text-muted);
-  text-align: center;
+  color: var(--tm-muted);
+  font-size: var(--tm-fs-tiny);
 }
 .filter-actions {
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-2);
-  padding-top: var(--ds-space-3);
-  border-top: 1px solid var(--ds-color-border);
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--tm-line);
 }
 
-/* Products Main */
-.products-main {
-  min-height: 400px;
-}
-.products-count {
+/* Results */
+.products-main { min-height: 400px; min-width: 0; }
+.products-results-heading {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  min-height: 2.5rem;
-  font-size: var(--ds-font-size-sm);
-  font-weight: var(--ds-font-weight-semibold);
-  color: var(--ds-color-text-muted);
-  margin-bottom: var(--ds-space-3);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.products-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--tm-muted);
+  font-size: var(--tm-fs-sm);
+}
+.products-count-number {
+  color: var(--tm-ink);
+  font-size: var(--tm-fs-h2);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.products-results-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--tm-muted);
+  font-size: var(--tm-fs-tiny);
 }
 
 /* Products Grid */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
-  gap: var(--ds-space-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 14px;
 }
 
 .product-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
-  background: var(--ds-color-surface);
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
   color: inherit;
   text-decoration: none;
-  transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
-.product-card:hover { border-color: var(--ds-color-primary); background: var(--ds-color-surface-hover); }
-.product-card:focus-visible {
-  outline: 3px solid var(--ds-color-focus);
-  outline-offset: 3px;
+.product-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--tm-line-strong);
+  box-shadow: var(--tm-shadow-sm);
 }
+.product-card:focus-visible { outline: 2px solid var(--tm-cyan-strong); outline-offset: 2px; }
 
 .product-image {
   position: relative;
-  aspect-ratio: 4 / 3;
-  background: var(--surface-ground);
+  aspect-ratio: 5 / 4;
+  background: var(--tm-surface-alt);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
-.product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.empty-image i {
-  font-size: 2.5rem;
-  color: var(--text-color-secondary);
-  opacity: 0.3;
+.product-image img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
+.empty-image { display: grid; place-items: center; width: 100%; height: 100%; }
+.empty-image i { font-size: 28px; color: var(--tm-faint); }
+
+.product-category-badge {
+  position: absolute;
+  top: 10px;
+  inset-inline-start: 10px;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  padding: 3px 9px;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-pill);
+  background: #fff;
+  color: var(--tm-cyan-deep);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .product-price-badge {
   position: absolute;
-  bottom: 0.75rem;
-  inset-inline-end: 0.75rem;
-  background: var(--ds-color-brand-dark);
-  color: var(--ds-color-on-brand);
-  font-size: 0.75rem;
+  bottom: 10px;
+  inset-inline-end: 10px;
+  padding: 5px 9px;
+  border-radius: var(--tm-radius);
+  background: var(--tm-navy);
+  color: #fff;
+  font-size: 11.5px;
   font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.5rem;
 }
 
 .product-info {
-  padding: 0.75rem;
+  display: flex;
+  flex: 1;
+  min-height: 12.5rem;
+  flex-direction: column;
+  padding: 12px 12px 10px;
 }
+.product-identity { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .product-title {
-  margin: 0 0 0.25rem;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text-color);
-  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+  margin: 0 0 4px;
+  color: var(--tm-ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.7;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+.product-verified {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: var(--tm-radius-pill);
+  background: var(--tm-green-soft);
+  color: #0c8a6e;
+  font-size: 10px;
+  font-weight: 700;
 }
 .product-company {
-  margin: 0 0 0.25rem;
-  font-size: 0.75rem;
-  color: var(--text-color-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 3px 0;
+  color: var(--tm-muted);
+  font-size: 11.5px;
 }
+.product-company i { color: var(--tm-blue); font-size: 11px; }
+.product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 4px 0 6px;
+  color: var(--tm-muted);
+  font-size: 10.5px;
+}
+.product-meta span { display: inline-flex; align-items: center; gap: 3px; }
+.product-meta i { color: var(--tm-blue); font-size: 10px; }
+.product-sku { direction: ltr; unicode-bidi: isolate; }
 .product-desc {
   margin: 0;
-  font-size: 0.75rem;
-  color: var(--text-color-secondary);
-  line-height: 1.5;
+  color: var(--tm-muted);
+  font-size: 11.5px;
+  line-height: 1.8;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.product-card-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--tm-line);
+}
+.product-card-price { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.product-card-price small { color: var(--tm-muted); font-size: 10.5px; }
+.product-card-price strong { color: var(--tm-ink); font-size: 12.5px; line-height: 1.5; }
+.product-card-price--inquiry strong { color: var(--tm-blue); font-size: 11.5px; }
+.product-card-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  color: var(--tm-blue);
+  font-size: 11px;
+  font-weight: 700;
+}
+.product-card-link i { transition: transform 0.15s ease; }
+.product-card:hover .product-card-link i { transform: translateX(-3px); }
 
 /* State boxes */
 .state-box {
@@ -529,349 +578,47 @@ watch(() => route.query.category, (newVal) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 3rem 1rem;
-  color: var(--text-color-secondary);
+  gap: 8px;
+  min-height: 20rem;
+  padding: 40px 16px;
+  border: 1px dashed var(--tm-line-strong);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
+  color: var(--tm-muted);
   text-align: center;
 }
-.state-box i { font-size: 2.5rem; opacity: 0.3; }
-.state-box h3 { margin: 0; font-size: 1.1rem; color: var(--text-color); }
-.state-box p { margin: 0; font-size: 0.9rem; }
+.state-box i { font-size: 28px; color: var(--tm-faint); }
+.state-box h3 { margin: 0; color: var(--tm-ink); font-size: 15px; }
+.state-box p { margin: 0; font-size: 13px; }
+.state-box.error i { color: var(--tm-red); }
 
 /* Pagination */
 .pagination-wrap {
-  margin-top: var(--ds-space-6);
-  background: var(--ds-color-surface);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+  margin-top: 18px;
   overflow: hidden;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius-lg);
+  background: var(--tm-surface);
 }
 
-/* Responsive */
 @media (max-width: 900px) {
-  .products-grid-layout {
-    grid-template-columns: 1fr;
-    gap: var(--ds-space-4);
-  }
-  .filters-sidebar {
-    position: static;
-    order: -1;
-  }
-}
-
-@media (max-width: 576px) {
-  .products-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Catalog composition: compact filter rail and product-first results area. */
-.products-page { padding-block: clamp(1.5rem, 3vw, 2.75rem); }
-.listing-page-header {
-  align-items: center;
-  margin-bottom: 1.75rem;
-  padding: clamp(1.25rem, 2.5vw, 2rem);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: linear-gradient(115deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface));
-  box-shadow: var(--ds-shadow-xs);
-}
-.listing-heading-copy .ds-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  margin-bottom: .55rem;
-  color: var(--ds-color-primary);
-  font-weight: var(--ds-font-weight-bold);
-}
-.listing-heading-copy .ds-h1 {
-  color: var(--ds-color-brand-deep);
-  font-size: clamp(1.6rem, 3vw, 2.25rem);
-  font-weight: 850;
-}
-.listing-heading-copy .ds-lead { margin: .5rem 0 0; }
-.breadcrumb-wrap { margin: 0; }
-.filters-card {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--ds-color-border);
-  box-shadow: var(--ds-shadow-xs);
-}
-.filters-card::before {
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 3px;
-  background: var(--ds-color-primary);
-  content: "";
-}
-.filters-card :deep(.p-card-content) { padding: 1.25rem; }
-.filters-inner { gap: 1.2rem; }
-.filters-heading {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--ds-color-border);
-}
-.filters-heading-icon {
-  display: grid;
-  place-items: center;
-  width: 2.65rem;
-  height: 2.65rem;
-  border-radius: .85rem;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary);
-  font-size: 1.1rem;
-}
-.filters-heading h2 {
-  margin: 0;
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-md);
-  font-weight: var(--ds-font-weight-bold);
-}
-.filters-heading p {
-  margin: .2rem 0 0;
-  color: var(--ds-color-text-muted);
-  font-size: var(--ds-font-size-xs);
-}
-.filter-group label { color: var(--ds-color-text); font-weight: var(--ds-font-weight-semibold); }
-.filter-group :deep(.p-inputtext),
-.filter-group :deep(.p-inputnumber-input),
-.filter-group :deep(.p-select) {
-  width: 100%;
-  min-height: 2.7rem;
-  border-radius: var(--ds-radius-md);
-}
-.filter-actions :deep(.p-button) { min-height: 2.75rem; }
-.filter-group :deep(.p-inputtext:focus-visible),
-.filter-group :deep(.p-inputnumber-input:focus-visible),
-.filter-group :deep(.p-select:focus-visible),
-.filter-actions :deep(.p-button:focus-visible) {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 2px;
-}
-.filter-actions { gap: .6rem; }
-.products-results-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .75rem;
-  margin-bottom: 1rem;
-}
-.products-count {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  min-height: 0;
-  margin: 0;
-  color: var(--ds-color-text-muted);
-}
-.products-count-number {
-  color: var(--ds-color-text);
-  font-size: var(--ds-font-size-lg);
-  font-weight: var(--ds-font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
-.products-results-context {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  color: var(--ds-color-success);
-  font-size: var(--ds-font-size-xs);
-  font-weight: var(--ds-font-weight-semibold);
-}
-.products-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: 1.1rem; }
-.product-card {
-  position: relative;
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-  transition: transform var(--ds-transition), box-shadow var(--ds-transition), border-color var(--ds-transition);
-}
-.product-card:hover,
-.product-card:focus-visible {
-  transform: translateY(-4px);
-  box-shadow: var(--ds-shadow-lg);
-}
-.product-card:focus-visible {
-  outline: 2px solid var(--ds-color-focus);
-  outline-offset: 3px;
-}
-.product-image {
-  aspect-ratio: 5 / 4;
-  background: linear-gradient(145deg, var(--ds-color-surface-alt), var(--ds-color-surface-hover));
-}
-.product-image img { object-fit: contain; padding: .75rem; }
-.empty-image { display: grid; place-items: center; width: 100%; height: 100%; }
-.empty-image i { opacity: .45; color: var(--ds-color-primary); }
-.product-category-badge {
-  position: absolute;
-  top: .8rem;
-  inset-inline-start: .8rem;
-  max-width: calc(100% - 1.6rem);
-  overflow: hidden;
-  padding: .3rem .6rem;
-  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
-  border-radius: var(--ds-radius-pill);
-  background: color-mix(in srgb, var(--ds-color-surface) 92%, transparent);
-  color: var(--ds-color-primary-text);
-  font-size: .68rem;
-  font-weight: var(--ds-font-weight-bold);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  backdrop-filter: blur(8px);
-}
-.product-price-badge {
-  bottom: .8rem;
-  inset-inline-end: .8rem;
-  padding: .45rem .7rem;
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: var(--ds-radius-md);
-  box-shadow: var(--ds-shadow-sm);
-  font-size: .8rem;
-}
-.product-info {
-  display: flex;
-  min-height: 13.5rem;
-  flex-direction: column;
-  padding: 1rem 1rem .85rem;
-}
-.product-identity { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
-.product-title {
-  flex: 1;
-  min-width: 0;
-  font-size: .98rem;
-  line-height: 1.7;
-}
-.product-verified {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: .25rem;
-  padding: .22rem .4rem;
-  border-radius: var(--ds-radius-pill);
-  background: var(--ds-color-success-soft);
-  color: var(--ds-color-success);
-  font-size: .65rem;
-  font-weight: var(--ds-font-weight-semibold);
-}
-.product-company {
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  margin: .35rem 0;
-  color: var(--ds-color-text-muted);
-}
-.product-company i { color: var(--ds-color-primary); font-size: .75rem; }
-.product-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .35rem .65rem;
-  margin: .3rem 0 .45rem;
-  color: var(--ds-color-text-muted);
-  font-size: .7rem;
-}
-.product-meta span { display: inline-flex; align-items: center; gap: .25rem; }
-.product-meta i { color: var(--ds-color-primary); font-size: .68rem; }
-.product-sku { direction: ltr; unicode-bidi: isolate; }
-.product-desc { line-height: 1.8; }
-.product-card-footer {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: .65rem;
-  margin-top: auto;
-  padding-top: .85rem;
-  border-top: 1px solid var(--ds-color-border);
-}
-.product-card-price { display: flex; min-width: 0; flex-direction: column; gap: .15rem; }
-.product-card-price small { color: var(--ds-color-text-muted); font-size: .68rem; }
-.product-card-price strong { color: var(--ds-color-text); font-size: .86rem; line-height: 1.5; }
-.product-card-price--inquiry strong { color: var(--ds-color-primary); font-size: .78rem; }
-.product-card-link {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: .35rem;
-  min-height: 2.75rem;
-  color: var(--ds-color-primary);
-  font-size: .75rem;
-  font-weight: var(--ds-font-weight-bold);
-}
-.product-card-link i { transition: transform var(--ds-transition-fast); }
-.product-card:hover .product-card-link i { transform: translateX(-3px); }
-.state-box {
-  min-height: 20rem;
-  border: 1px dashed var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: var(--ds-color-surface);
-}
-.pagination-wrap { margin-top: 1.5rem; }
-.pagination-wrap :deep(.p-paginator-page),
-.pagination-wrap :deep(.p-paginator-next),
-.pagination-wrap :deep(.p-paginator-prev) {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-}
-@media (max-width: 900px) {
-  .filters-sidebar { position: static; }
+  .products-grid-layout { grid-template-columns: minmax(0, 1fr); }
+  .filters-sidebar { position: static; order: -1; }
 }
 @media (max-width: 576px) {
-  .listing-page-header { align-items: flex-start; }
-  .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
-   .product-info { min-height: 13rem; padding: .75rem; }
-  .product-title { font-size: .84rem; }
-  .product-company, .product-desc { font-size: .7rem; }
-  .product-price-badge { font-size: .68rem; }
-  .product-verified { font-size: .58rem; }
-  .product-card-footer { align-items: flex-start; flex-direction: column; gap: .25rem; }
-  .product-card-link { min-height: 2.5rem; }
+  .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .product-info { min-height: 12rem; padding: 10px; }
+  .product-title { font-size: 12.5px; }
+  .product-company, .product-desc { font-size: 10.5px; }
+  .product-price-badge { font-size: 10px; }
+  .product-verified { display: none; }
+  .product-card-footer { align-items: flex-start; flex-direction: column; gap: 4px; }
 }
 @media (max-width: 360px) {
-  .products-grid { grid-template-columns: 1fr; }
+  .products-grid { grid-template-columns: minmax(0, 1fr); }
 }
-
-
-/* Marketplace listing: stronger product framing with compact, scannable typography. */
-.listing-page-header {
-  margin-bottom: 1.25rem;
-  padding: 1rem 1.2rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: color-mix(in srgb, var(--ds-color-primary) 4%, var(--ds-color-surface));
-  box-shadow: var(--ds-shadow-xs);
+@media (prefers-reduced-motion: reduce) {
+  .product-card:hover { transform: none; }
+  .product-card:hover .product-card-link i { transform: none; }
 }
-.listing-heading-copy .ds-h1 { font-size: clamp(1.3rem, 2vw, 1.7rem); line-height: 1.4; }
-.listing-heading-copy .ds-lead { font-size: .82rem; line-height: 1.7; }
-.filters-card { border-radius: var(--ds-radius-lg); box-shadow: var(--ds-shadow-sm); }
-.product-card {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  box-shadow: var(--ds-shadow-xs);
-  transition: transform var(--ds-transition-fast), box-shadow var(--ds-transition-fast), border-color var(--ds-transition-fast);
-}
-.product-card:hover,.product-card:focus-visible {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--ds-color-primary) 35%, var(--ds-color-border));
-  box-shadow: var(--ds-shadow-md);
-}
-.product-image { background: var(--ds-color-surface-alt); }
-.product-category-badge {
-  border: 1px solid var(--ds-color-border);
-  background: var(--ds-color-surface);
-  box-shadow: var(--ds-shadow-xs);
-  backdrop-filter: none;
-}
-.product-info { min-height: 12.5rem; }
-.product-title { font-size: .9rem; }
-.product-card-price strong { font-size: .82rem; }
-.product-card-link { font-size: .72rem; }
-@media (max-width: 576px) {
-  .listing-page-header { padding: .85rem; }
-  .product-info { min-height: 12rem; }
-  .product-title { font-size: .82rem; }
-}
-
 </style>

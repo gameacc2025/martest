@@ -1,5 +1,10 @@
 <script setup>
-/** Row of KPI metric cards for list-page summaries. */
+/**
+ * KpiStatsRow — responsive row of KpiCard metric tiles for list pages.
+ *
+ * The grid is intentionally auto-fit: it shows 4 tiles on wide screens and
+ * stacks cleanly on tablet/mobile without any page-level media queries.
+ */
 import KpiCard from '@telecom/shared-ui/components/admin/dashboard/KpiCard.vue'
 
 defineProps({
@@ -13,13 +18,13 @@ defineProps({
     )
   },
   loading: { type: Boolean, default: false },
-  gap: { type: String, default: 'var(--ds-space-4)' },
+  gap: { type: String, default: '14px' },
 })
 </script>
 
 <template>
   <div
-    class="kpi-stats-row"
+    class="kpi-stats-row tm-grid tm-grid--stats"
     :style="{ gap }"
     role="region"
     aria-label="آمار کلی صفحه"
@@ -39,23 +44,9 @@ defineProps({
 
 <style scoped>
 .kpi-stats-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ds-space-4);
-  margin-bottom: var(--ds-space-5);
-}
-.kpi-stats-row :deep(.kpi-card) {
-  flex: 1 1 16rem;
-  min-width: 16rem;
+  margin-bottom: 16px;
 }
 @media (max-width: 640px) {
-  .kpi-stats-row {
-    gap: var(--ds-space-3);
-    margin-bottom: var(--ds-space-4);
-  }
-  .kpi-stats-row :deep(.kpi-card) {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
+  .kpi-stats-row { margin-bottom: 12px; }
 }
 </style>

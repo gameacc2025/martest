@@ -796,9 +796,9 @@ function formatDate(value) {
 .company-list-page :deep(.workspace-page-heading) {
   margin: 0;
   padding: 1rem 1.2rem;
-  border-color: #d9e8f4;
+  border-color: var(--tm-line);
   border-radius: 15px;
-  background: linear-gradient(108deg, #edf7ff 0%, #ffffff 58%, #effbfa 100%);
+  background: linear-gradient(108deg, var(--tm-surface-alt) 0%, #ffffff 58%, var(--tm-surface-alt) 100%);
   box-shadow: 0 4px 14px rgba(30, 77, 128, .055);
 }
 .company-list-page :deep(.workspace-page-heading h1) {
@@ -807,23 +807,23 @@ function formatDate(value) {
   letter-spacing: -.015em;
 }
 .company-list-page :deep(.workspace-page-heading-icon) {
-  color: #168fb8;
+  color: var(--tm-cyan-deep);
   font-size: 1.15rem;
 }
 .company-list-page :deep(.workspace-page-heading p) {
   margin-top: .22rem;
-  color: #607c97;
+  color: var(--tm-muted);
   font-size: .77rem;
 }
 .company-management-surface {
-  border-color: #dce8f3;
+  border-color: var(--tm-line);
   border-radius: 15px;
   box-shadow: 0 5px 18px rgba(28, 73, 119, .055);
 }
 .company-management-toolbar {
   align-items: center;
   padding: .85rem 1rem;
-  background: linear-gradient(100deg, #f6fbff 0%, #fff 62%, #f3fbfb 100%);
+  background: linear-gradient(100deg, var(--tm-surface-alt) 0%, #fff 62%, var(--tm-surface-alt) 100%);
 }
 .company-management-toolbar :deep(.p-toolbar-start) {
   flex: 1 1 34rem;
@@ -843,45 +843,45 @@ function formatDate(value) {
 }
 .company-management-toolbar :deep(.p-button:not(.p-button-text):not(.p-button-outlined)) {
   min-height: 2.7rem;
-  border-color: #31b7d7;
+  border-color: var(--tm-cyan);
   background: linear-gradient(105deg, var(--tm-cyan-strong), var(--tm-cyan));
-  color: #f4fbfd;
+  color: var(--tm-surface);
   box-shadow: 0 3px 9px rgba(38, 160, 197, .16);
 }
 .company-management-table :deep(.ent-table-toolbar) {
   padding: .8rem 1rem;
-  border-bottom: 1px solid #e5edf5;
+  border-bottom: 1px solid var(--tm-line);
   background: #fff;
 }
 .company-management-table :deep(.ent-table-title) {
-  color: #183b61;
+  color: var(--tm-ink);
   font-size: .88rem;
   font-weight: 800;
 }
 .company-management-table :deep(.ent-table-record-count) {
-  color: #7188a2;
+  color: var(--tm-muted);
   font-size: .72rem;
   font-variant-numeric: tabular-nums;
 }
 .company-management-table :deep(.p-datatable-thead > tr > th) {
   padding: .78rem .9rem;
-  background: #f3f7fc;
-  color: #627d98;
+  background: var(--tm-surface-alt);
+  color: var(--tm-muted);
   font-size: .7rem;
   font-weight: 800;
 }
 .company-management-table :deep(.p-datatable-tbody > tr > td) {
   padding: .72rem .9rem;
-  color: #294766;
+  color: var(--tm-ink-soft);
   font-size: .76rem;
 }
 .company-management-table :deep(.p-datatable-tbody > tr:hover) {
-  background: #f1f9fc;
+  background: var(--tm-surface-alt);
 }
 .company-management-table :deep(.p-avatar) {
-  border: 1px solid #dcebf4;
-  background: #eaf6fc;
-  color: #1685a9;
+  border: 1px solid var(--tm-line);
+  background: var(--tm-cyan-soft);
+  color: var(--tm-cyan-deep);
 }
 .company-management-table :deep(.p-button.p-button-text) {
   min-width: 2.75rem;

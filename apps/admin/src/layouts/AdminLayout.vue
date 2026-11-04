@@ -154,7 +154,7 @@ onUnmounted(() => {
 
   display: flex;
   min-height: 100vh;
-  background: #f2f6fc;
+  background: var(--tm-canvas);
   direction: rtl;
 }
 

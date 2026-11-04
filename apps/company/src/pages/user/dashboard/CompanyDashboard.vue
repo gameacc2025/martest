@@ -296,7 +296,7 @@ const productSegments = computed(() => {
   return [
     { label: 'منتشرشده', value: counts.PUBLISHED, color: '#18c8a0' },
     { label: 'در انتظار تأیید', value: counts.PENDING_REVIEW, color: '#f0b040' },
-    { label: 'پیش‌نویس', value: counts.DRAFT, color: '#93a1bb' },
+    { label: 'پیش‌نویس', value: counts.DRAFT, color: 'var(--tm-muted)' },
     { label: 'ردشده', value: counts.REJECTED, color: '#ef4d4d' },
   ]
 })

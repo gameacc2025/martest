@@ -71,14 +71,14 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: var(--surface-ground, #f8fafc);
+  background: var(--surface-ground, var(--tm-surface-alt));
 }
 .handoff-icon {
   font-size: 2.5rem;
-  color: var(--primary-color, #2563eb);
+  color: var(--primary-color, var(--tm-blue));
 }
 .handoff-text {
-  color: var(--text-color-secondary, #64748b);
+  color: var(--text-color-secondary, var(--tm-muted));
   font-size: 1rem;
 }
 

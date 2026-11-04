@@ -242,7 +242,7 @@ const resetForm = () => {
   font-weight: 700;
   font-size: 1.1rem;
 }
-.card-title-row i { color: #0DAFBE; }
+.card-title-row i { color: var(--tm-cyan-deep); }
 .form-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -272,13 +272,13 @@ const resetForm = () => {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 0.5rem;
-  background: #DEF5FB;
+  background: var(--tm-cyan-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.info-icon i { font-size: 1.1rem; color: #004D6F; }
+.info-icon i { font-size: 1.1rem; color: var(--tm-ink); }
 .info-card-inner h4 {
   margin: 0 0 0.25rem;
   font-size: 0.85rem;
@@ -308,16 +308,16 @@ const resetForm = () => {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: #DEF5FB;
+  background: var(--tm-cyan-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #004D6F;
+  color: var(--tm-ink);
   text-decoration: none;
   transition: background-color var(--ds-transition-fast), color var(--ds-transition-fast), border-color var(--ds-transition-fast);
 }
 .social-link:hover {
-  background: #004D6F;
+  background: var(--tm-ink);
   color: #fff;
 }
 

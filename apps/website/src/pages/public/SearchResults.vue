@@ -1,46 +1,56 @@
 <template>
-  <main class="search-results-page ds-page" aria-labelledby="search-results-title">
-    <div class="sr-container ds-container ds-stack">
+  <main class="search-results-page" aria-labelledby="search-results-title">
+    <div class="sr-container">
       <header class="sr-head">
-        <div class="sr-heading-copy">
-          <span class="ds-eyebrow">بازارگاه تجهیزات مخابراتی</span>
-          <h1 id="search-results-title" class="ds-h1">
-            {{ query ? `نتایج جستجو برای «${query}»` : 'جستجوی محصولات' }}
-          </h1>
-          <p class="ds-lead">محصولات موردنیازتان را پیدا کنید و نتایج را بر اساس دسته‌بندی و قیمت محدود کنید.</p>
-        </div>
+      <WorkspacePageHeading
+        eyebrow="بازارگاه تجهیزات مخابراتی"
+        :title="query ? `نتایج جستجو برای «${query}»` : 'جستجوی محصولات'"
+        description="محصولات موردنیازتان را پیدا کنید و نتایج را بر اساس دستهبندی و قیمت محدود کنید."
+        icon="pi pi-search"
+        heading-id="search-results-title"
+      >
+        <template #actions>
+          <span class="tm-pill tm-pill--accent">
+            <i class="pi pi-list" aria-hidden="true"></i>
+            {{ totalResults.toLocaleString('fa-IR') }} نتیجه
+          </span>
+        </template>
+      </WorkspacePageHeading>
 
-        <form class="sr-search-row" role="search" @submit.prevent="performSearch">
-          <label class="sr-visually-hidden" for="product-search-query">جستجوی محصولات</label>
-          <InputText
-            id="product-search-query"
-            v-model="searchQuery"
-            name="productSearchQuery"
-            type="search"
-            placeholder="نام یا مدل محصول را وارد کنید…"
-            class="sr-search-input"
-            autocomplete="off"
-          />
-          <Button type="submit" label="جستجو" icon="pi pi-search" class="sr-primary-button" />
+      <TemToolbar class="sr-toolbar">
+        <template #start>
+          <form class="sr-search-row" role="search" @submit.prevent="performSearch">
+            <label class="sr-visually-hidden" for="product-search-query">جستجوی محصولات</label>
+            <InputText
+              id="product-search-query"
+              v-model="searchQuery"
+              name="productSearchQuery"
+              type="search"
+              placeholder="نام یا مدل محصول را وارد کنید..."
+              class="sr-search-input"
+              autocomplete="off"
+            />
+            <Button type="submit" label="جستجو" icon="pi pi-search" />
+          </form>
+        </template>
+        <template #end>
           <Button
             type="button"
             :label="showFilters ? 'بستن فیلترها' : 'فیلترها'"
             :icon="showFilters ? 'pi pi-times' : 'pi pi-filter'"
-            class="sr-secondary-button"
+            severity="secondary"
+            outlined
             :aria-expanded="showFilters"
             :aria-controls="showFilters ? 'search-filters' : undefined"
             @click="toggleFilters"
           />
-        </form>
+        </template>
+      </TemToolbar>
       </header>
 
       <div class="sr-layout" :class="{ 'sr-layout--with-filters': showFilters }">
         <aside v-if="showFilters" id="search-filters" class="sr-sidebar" aria-label="فیلترهای جستجو">
-          <Card class="sr-filter-card">
-            <template #title>
-              <h2 class="ds-card-title">فیلترهای جستجو</h2>
-            </template>
-            <template #content>
+          <TemPanel class="sr-filter-card" title="فیلترهای جستجو" icon="pi pi-filter">
               <section class="sr-filter-block" aria-labelledby="category-filter-title">
                 <h3 id="category-filter-title">دسته‌بندی</h3>
                 <Tree
@@ -75,8 +85,7 @@
                 <Button label="اعمال فیلترها" icon="pi pi-check" class="sr-primary-button sr-full" @click="applyFilters" />
                 <Button label="حذف فیلترها" icon="pi pi-times" class="sr-secondary-button sr-full" @click="clearFilters" />
               </div>
-            </template>
-          </Card>
+          </TemPanel>
         </aside>
 
         <section class="sr-results" aria-labelledby="sr-results-heading">
@@ -134,12 +143,15 @@
             <Button label="تلاش دوباره" icon="pi pi-refresh" class="sr-primary-button" @click="performSearch({ resetPage: false })" />
           </div>
 
-          <div v-else-if="products.length === 0" class="sr-state ds-card" role="status">
-            <i class="pi pi-search sr-state-icon" aria-hidden="true"></i>
-            <h3 class="sr-state-title">محصولی پیدا نشد</h3>
-            <p class="sr-state-text">عبارت جستجو یا فیلترها را تغییر دهید و دوباره تلاش کنید.</p>
-            <Button label="حذف فیلترها" icon="pi pi-filter-slash" class="sr-secondary-button" @click="clearFilters" />
-          </div>
+          <TemEmptyState
+            v-else-if="products.length === 0"
+            role="status"
+            icon="pi pi-search"
+            title="محصولی پیدا نشد"
+            description="عبارت جستجو یا فیلترها را تغییر دهید و دوباره تلاش کنید."
+          >
+            <Button label="حذف فیلترها" icon="pi pi-filter-slash" severity="secondary" outlined @click="clearFilters" />
+          </TemEmptyState>
 
           <div v-else class="sr-product-grid">
             <ProductCard
@@ -175,12 +187,15 @@ import { useCartStore } from '../../stores/cart'
 import { useWishlistStore } from '../../stores/wishlist'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
-import Card from 'primevue/card'
 import Tree from 'primevue/tree'
 import Slider from 'primevue/slider'
 import Select from 'primevue/select'
 import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import TemToolbar from '@telecom/shared-ui/components/ui/TemToolbar.vue'
+import TemPanel from '@telecom/shared-ui/components/ui/TemPanel.vue'
+import TemEmptyState from '@telecom/shared-ui/components/ui/TemEmptyState.vue'
 import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
 
 const route = useRoute()
@@ -380,9 +395,7 @@ const viewProduct = (product) => {
 
 .sr-head {
   display: grid;
-  gap: var(--ds-space-5);
-  padding-bottom: var(--ds-space-5);
-  border-bottom: 1px solid var(--ds-color-border);
+  gap: 12px;
 }
 
 .sr-heading-copy {
@@ -595,15 +608,15 @@ const viewProduct = (product) => {
 }
 
 /* Search page: clear query context, compact filters and a framed result workspace. */
-.sr-container { padding-block: 1.5rem 3.5rem; }
-.sr-head {
-  gap: .9rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: color-mix(in srgb, var(--ds-color-primary) 4%, var(--ds-color-surface));
-  box-shadow: var(--ds-shadow-xs);
+.sr-container {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: clamp(14px, 2vw, 28px);
+  padding-block: 1.25rem 3.5rem;
 }
+.sr-toolbar { margin-bottom: 1rem; }
+
 .sr-heading-copy { gap: .25rem; }
 .sr-heading-copy .ds-eyebrow { color: var(--ds-color-primary-text); font-size: .72rem; }
 .sr-heading-copy .ds-h1 { font-size: clamp(1.3rem, 2vw, 1.7rem); line-height: 1.45; }
@@ -625,7 +638,6 @@ const viewProduct = (product) => {
 .sr-product-grid { gap: .9rem; }
 .sr-paginator { padding: .6rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
 @media (max-width: 640px) {
-  .sr-head { padding: .85rem; }
   .sr-search-row > :deep(.p-button) { flex: 1 1 auto; }
   .sr-results-head { align-items: flex-start; flex-direction: column; }
 }

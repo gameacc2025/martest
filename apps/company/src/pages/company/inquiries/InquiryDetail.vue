@@ -880,13 +880,13 @@ function formatPrice(price) {
 }
 
 /* ── Responses ──────────────────────────────────────── */
-.message-section{border-top:1px solid var(--surface-border,#e5e7eb);padding-top:1.25rem}
+.message-section{border-top:1px solid var(--surface-border,var(--tm-line));padding-top:1.25rem}
 .message-heading,.message-meta,.message-send-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
 .message-list{display:grid;gap:.75rem;max-height:420px;overflow:auto;margin:1rem 0}
-.message-bubble{border:1px solid var(--surface-border,#e5e7eb);border-radius:10px;padding:.8rem 1rem;background:var(--surface-card,#fff);max-width:92%}
-.message-bubble.message-mine{margin-inline-start:auto;background:var(--surface-ground,#f8fafc)}
-.message-meta{font-size:.8rem;color:var(--text-color-secondary,#64748b);flex-wrap:wrap}
-.message-bubble p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.55rem 0 0;color:var(--text-color,#1f2937);line-height:1.8}
+.message-bubble{border:1px solid var(--surface-border,var(--tm-line));border-radius:10px;padding:.8rem 1rem;background:var(--surface-card,#fff);max-width:92%}
+.message-bubble.message-mine{margin-inline-start:auto;background:var(--surface-ground,var(--tm-surface-alt))}
+.message-meta{font-size:.8rem;color:var(--text-color-secondary,var(--tm-muted));flex-wrap:wrap}
+.message-bubble p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.55rem 0 0;color:var(--text-color,var(--tm-ink));line-height:1.8}
 .message-composer{display:grid;gap:.65rem;margin-top:1rem}
 .message-composer-label {
   color: var(--ds-color-text);
@@ -921,9 +921,9 @@ function formatPrice(price) {
 }
 
 .message-recipient{display:grid;gap:.4rem;max-width:360px;font-size:.9rem}
-.message-sms-option{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text-color-secondary,#64748b)}.message-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,#0f9e9a)}
-.message-recipient select{padding:.65rem;border:1px solid var(--surface-border,#cbd5e1);border-radius:7px;background:var(--surface-card,#fff);color:inherit}
-.message-send-row small{color:var(--text-color-secondary,#64748b)}
+.message-sms-option{display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text-color-secondary,var(--tm-muted))}.message-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,var(--tm-green))}
+.message-recipient select{padding:.65rem;border:1px solid var(--surface-border,var(--tm-line-strong));border-radius:7px;background:var(--surface-card,#fff);color:inherit}
+.message-send-row small{color:var(--text-color-secondary,var(--tm-muted))}
 .withdrawn-response-notice {
   margin: 0 0 1rem;
   padding: 0.875rem 1rem;

@@ -2355,6 +2355,33 @@ This file is the shared, version-controlled memory for agents working on the rep
 **Verification (phase 1):** `pnpm run build:website|build:admin|build:company` pass; `npx vitest run` → 56 files / 310 tests pass. Browser/visual checks `NOT RUN` (owner-prohibited).
 
 **Still to do:** website catalogue pages (`ProductListing`, `Products`, `Categories`, `ProductDetails`), remaining Admin/Company list & detail workspaces on Tem widgets, remaining public pages (about/contact/faq/terms/profile/orders/inquiries), dashboard shell visual audit.
+
+### 2026-11-04 — UI-REDESIGN-TEM-01: phase 2 (shared-component cascade + palette sweep)
+
+- **Status:** IN_PROGRESS
+- **Agent:** OpenCode (local checkout)
+
+**Shared-component cascade (the high-leverage layer)**
+- `KpiCard.vue` now renders the `.tm-stat` widget while keeping every `kpi-card-*` class hook; `info` tone maps to the cyan accent.
+- `KpiStatsRow.vue` uses `.tm-grid--stats` (auto-fit 4→≤4 columns) instead of hardcoded flex.
+- `DashboardPanel.vue` renders `.tm-panel`/`.tm-panel__*` with the `.dash-panel-*` hooks retained (incl. `.dash-panel-title-icon`).
+- `WorkspacePageHeading.vue` gained `eyebrow`/`description`/`icon` props and the visible `tem` page-head treatment while keeping the `sr-only` variant and `.workspace-page-heading*` hooks.
+
+**Website catalogue**
+- `ProductListing.vue` rebuilt on `WorkspacePageHeading` + `TemPanel`: two-column filter/catalogue layout, tem product cards, explicit loading/error/empty states, paginator; all store/API contracts unchanged.
+- `Categories.vue` rebuilt on `WorkspacePageHeading`: tem category cards with real `productCount`, loading/error/empty states.
+- `ProductDetails.vue`: replaced the 976-line page style block with a tem-token stylesheet (gallery, purchase card with navy/cyan price block, specs, company card, dialogs, price-history); template/script untouched.
+- `SearchResults.vue` rebuilt on `WorkspacePageHeading` + `TemToolbar` + `TemPanel` + `TemEmptyState`; `.sr-head`/`role=status`/`role=alert` test contracts retained; search store + router contract unchanged.
+
+**Palette sweep (legacy hex → `--tm-*`)**
+- Token-ized the duplicated "reference-led catalogue workspace" block across the 6 Admin + 3 Company list pages.
+- Token-ized legacy palettes in `MyInquiries`, `ContactUs`, `Notifications` (×3), `InquirySubscriptions`, `InquiryDetail`, `NotificationFolders`, `StatDonut`, `AdminLayout`/`CompanyLayout`, `PublicLayout`, `Home`, `ProductDetails`.
+- Dashboard shell aligned: `DashboardSidebar.vue` (navy gradient, cyan active state, white-alpha text) and `DashboardHeader.vue` (surface/line/cyan/ink tokens).
+- `BrandMark.vue` updated to the unified cyan-tile / navy-glyph brand pair.
+
+**Verification (phase 2):** `npx vitest run` → 56 files / 310 tests pass; `pnpm run build:website|build:admin|build:company` pass. Browser/visual checks `NOT RUN` (owner-prohibited).
+
+**Remaining for phase 3:** static public content pages (`AboutUs`, `ContactUs`, `Faq`, `Terms`) on `WorkspacePageHeading`/`TemPanel`; account pages (`UserProfile`, `Addresses`, `Orders`, `OrderDetails`, `MyInquiries`, `NotificationPreferences`, `InquirySubscription`) on Tem widgets; auth pages (`Login`, `Register`, `ForgotPassword`) brand pass; Admin/Company detail workspaces (`ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList`, settings); verify the cascade on every list page rather than rewriting each.
 - Shared workspace heading adopted in Website Product Listing, Categories, Companies, Shopping Cart, Checkout, Addresses and Contact Us.
 - Breadcrumbs and actions preserved via named slot; no data/filter/cart/checkout/address/contact API behavior changed.
 - Commits: `9d364ed`, `2ba3744`, `364b7bb`, `dc76bc8`, `a6c964c`, `4888705`, `583c051`. CI pending.

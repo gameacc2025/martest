@@ -98,26 +98,26 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: var(--surface-ground, #f8fafc);
+  background: var(--surface-ground, var(--tm-surface-alt));
   text-align: center;
   padding: 1.5rem;
 }
 .handoff-icon {
   font-size: 2.5rem;
-  color: var(--primary-color, #2563eb);
+  color: var(--primary-color, var(--tm-blue));
 }
 .handoff-icon--error {
-  color: var(--p-red-500, #ef4444);
+  color: var(--p-red-500, var(--tm-red));
 }
 .handoff-text {
-  color: var(--text-color-secondary, #64748b);
+  color: var(--text-color-secondary, var(--tm-muted));
   font-size: 1rem;
 }
 .handoff-button {
   border: none;
   border-radius: 0.5rem;
   padding: 0.6rem 1.5rem;
-  background: var(--primary-color, #2563eb);
+  background: var(--primary-color, var(--tm-blue));
   color: #fff;
   font: inherit;
   cursor: pointer;
