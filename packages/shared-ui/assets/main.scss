@@ -1072,157 +1072,73 @@ small,.text-sm { font-size:.78rem; }
 
 
 /* ============================================================
-   Reference dashboard system — shared Admin + Company surfaces
-   Visual source: Modern Persian Telecom Marketplace Dashboard.
-   Keep route data, API calls and permissions in their page components.
+   Reference dashboard system — Admin + Company workspaces only
    ============================================================ */
-:root {
-  --ds-ref-cyan: #12b8d0;
-  --ds-ref-turquoise: #12c8b8;
-  --ds-ref-blue: #278de8;
-  --ds-ref-violet: #8064e9;
-  --ds-ref-pink: #ed76a5;
-  --ds-ref-ink: #17385e;
-  --ds-ref-muted: #7188a2;
-  --ds-ref-canvas: #f2f6fc;
-  --ds-ref-line: #dfe9f4;
-  --ds-ref-shadow: 0 4px 16px rgba(30, 77, 128, .055);
+.dash-layout {
+  --ds-ref-cyan:#12b8d0;
+  --ds-ref-turquoise:#12c8b8;
+  --ds-ref-blue:#278de8;
+  --ds-ref-violet:#8064e9;
+  --ds-ref-pink:#ed76a5;
+  --ds-ref-ink:#17385e;
+  --ds-ref-muted:#7188a2;
+  --ds-ref-canvas:#f2f6fc;
+  --ds-ref-line:#dfe9f4;
+  --ds-ref-shadow:0 4px 16px rgba(30,77,128,.055);
+  background:var(--ds-ref-canvas)!important;
+  color:var(--ds-ref-ink);
+  font-family:'Vazirmatn',Tahoma,sans-serif;
+  font-size:13px;
 }
-html, body, #app {
-  min-height: 100%;
-  background: var(--ds-ref-canvas);
-  color: var(--ds-ref-ink);
-  font-family: 'Vazirmatn', Tahoma, sans-serif;
-  font-size: 13px;
-}
-body { line-height: 1.65; }
-.dash-layout { background: var(--ds-ref-canvas) !important; }
-.dash-layout-main { background: var(--ds-ref-canvas); }
-.dash-layout-content { width: 100%; }
-.dash-layout-page { color: var(--ds-ref-ink); }
-.page-header { margin: .35rem 0 .85rem !important; }
-.page-header h1, .page-header h2 { color: var(--ds-ref-ink) !important; font-size: 1.22rem !important; font-weight: 800 !important; }
-.page-header h3 { color: var(--ds-ref-ink) !important; font-size: 1rem !important; }
-.page-header p, .page-description { color: var(--ds-ref-muted); font-size: .78rem; }
-
-/* Surfaces */
-.p-card, .p-panel, .p-datatable, .p-dialog, .p-drawer, .p-popover,
-.p-select, .p-multiselect, .p-datepicker, .p-paginator {
-  border-color: var(--ds-ref-line);
-}
-.p-card, .p-panel, .p-datatable {
-  border: 1px solid var(--ds-ref-line);
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: var(--ds-ref-shadow);
-}
-.p-card .p-card-body { padding: 1rem 1.1rem; }
-.p-card .p-card-title, .p-panel .p-panel-title { color: var(--ds-ref-ink); font-size: .9rem; font-weight: 800; }
-.p-panel .p-panel-header { padding: .8rem 1rem; border-bottom: 1px solid #edf2f8; background: #fff; }
-.p-panel .p-panel-content { padding: 1rem; }
-
-/* Brand actions */
-.p-button { border-radius: 9px; font-family: inherit; font-size: .78rem; font-weight: 700; }
-.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):not(.p-button-warn) {
-  border-color: var(--ds-ref-cyan);
-  background: linear-gradient(105deg, #08a9c5, #18c4d7);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(18,184,208,.16);
-}
-.p-button:not(.p-button-text):not(.p-button-outlined):hover { filter: brightness(.97); }
-.p-button.p-button-outlined { border-color: #9bdce8; color: #078eae; background: #f4fcfe; }
-.p-button.p-button-text { color: #168fb3; }
-.p-button:focus-visible { outline: 2px solid #12b8d0; outline-offset: 2px; }
-
-/* Forms */
-.p-inputtext, .p-textarea, .p-select, .p-multiselect, .p-datepicker-input,
-.p-inputnumber-input, .p-password-input {
-  min-height: 2.55rem;
-  border: 1px solid #d9e5f0;
-  border-radius: 9px;
-  background: #fbfdff;
-  color: var(--ds-ref-ink);
-  font-family: inherit;
-  font-size: .78rem;
-}
-.p-inputtext:focus, .p-textarea:focus, .p-select:focus, .p-multiselect:focus,
-.p-inputnumber-input:focus {
-  border-color: #64cddd;
-  box-shadow: 0 0 0 3px rgba(18,184,208,.11);
-}
-.p-floatlabel label, .field label, .form-label { color: #526f8c; font-size: .76rem; font-weight: 700; }
-
-/* Data tables */
-.p-datatable .p-datatable-thead > tr > th {
-  padding: .75rem .85rem;
-  border-color: #e8eff6;
-  background: #f5f8fc;
-  color: #5e7894;
-  font-size: .72rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.p-datatable .p-datatable-tbody > tr > td {
-  padding: .72rem .85rem;
-  border-color: #edf2f7;
-  color: #294766;
-  font-size: .76rem;
-}
-.p-datatable .p-datatable-tbody > tr:hover { background: #f5fbfd; }
-.p-paginator { padding: .55rem; background: #fff; }
-.p-tag { border-radius: 999px; font-size: .67rem; font-weight: 700; }
-.p-badge { font-size: .65rem; }
-
-/* All list/form workspaces use compact, deliberate spacing. */
-.dash-layout-page .p-toolbar { gap: .65rem; padding: .75rem .9rem; border: 1px solid var(--ds-ref-line); border-radius: 12px; background: #fff; }
-.dash-layout-page .p-breadcrumb { padding: .35rem 0; background: transparent; border: 0; }
-.dash-layout-page .grid { gap: 1rem; }
-.dash-layout-page .field { margin-bottom: 1rem; }
-.dash-layout-page .p-divider { border-color: #e7eef6; }
-.dash-layout-page .p-message { border-radius: 10px; font-size: .76rem; }
-.dash-layout-page .p-dialog { border-radius: 15px; overflow: hidden; }
-.p-dialog .p-dialog-header { padding: 1rem 1.2rem; color: var(--ds-ref-ink); font-size: .95rem; font-weight: 800; }
-.p-dialog .p-dialog-content { padding: 1.1rem 1.2rem; }
-.p-dialog .p-dialog-footer { padding: .8rem 1.2rem; border-top: 1px solid #edf2f8; }
-
-/* Dashboard canvas and rhythm */
-.admin-dashboard, .company-dashboard { display:flex; flex-direction:column; gap:1rem; }
-.admin-dashboard-hero, .company-dashboard-hero {
-  min-height: 13.5rem;
-  padding: 1.7rem 2rem;
-  border: 0;
-  border-radius: 16px;
-  background:
-    radial-gradient(circle at 86% 34%, rgba(255,255,255,.26), transparent 17%),
-    radial-gradient(circle at 78% 110%, rgba(14,220,226,.38), transparent 36%),
-    linear-gradient(112deg, #3159bd 0%, #168fc7 52%, #11b6cf 100%);
-  box-shadow: 0 8px 22px rgba(28,112,180,.14);
-}
-.admin-dashboard-hero h1, .company-dashboard-hero h1 { font-size:1.45rem; font-weight:900; }
-.admin-dashboard-hero p, .company-dashboard-hero p { max-width:34rem; color:rgba(255,255,255,.9); font-size:.82rem; }
-.admin-dashboard-hero .p-button, .company-dashboard-hero .p-button {
-  min-height:2.55rem;
-  border-color:#13c9d8;
-  border-radius:999px;
-  background:linear-gradient(100deg,#08c0cb,#4ce0e5);
-  color:#073b59;
-  box-shadow:none;
-}
-.admin-dashboard-secondary-action, .company-dashboard-secondary-action { border-radius:999px; font-size:.75rem; }
-.admin-dashboard-kpis, .cd-kpis { gap:.75rem !important; }
-.admin-dashboard-analytics, .company-dashboard-analytics { min-width:0; }
-.admin-dashboard-workspace, .company-dashboard-operations { gap:1rem; }
-.admin-dashboard-grid, .cd-grid { gap:1rem; }
-.admin-dashboard-hint, .cd-hint { color:#8499ae; font-size:.68rem; }
-.analytics-chart-label { color:#7289a4; font-size:.68rem; }
-.analytics-chart-value { color:#476581; font-size:.68rem; }
-.analytics-chart-bar { border-radius:7px 7px 0 0; }
-@media(max-width:991px) {
-  .dash-layout-content { padding-inline: .9rem; }
-  .admin-dashboard-hero, .company-dashboard-hero { min-height:11rem; padding:1.2rem; }
-}
-@media(max-width:575px) {
-  html, body, #app { font-size:12px; }
-  .dash-layout-content { padding-inline:.65rem; }
-  .p-card .p-card-body { padding:.8rem; }
-}
+.dash-layout-main{background:var(--ds-ref-canvas)}
+.dash-layout-content{width:100%;max-width:none}
+.dash-layout-page{color:var(--ds-ref-ink)}
+.dash-layout .page-header{margin:.35rem 0 .85rem!important}
+.dash-layout .page-header h1,.dash-layout .page-header h2{color:var(--ds-ref-ink)!important;font-size:1.22rem!important;font-weight:800!important}
+.dash-layout .page-header h3{color:var(--ds-ref-ink)!important;font-size:1rem!important}
+.dash-layout .page-header p,.dash-layout .page-description{color:var(--ds-ref-muted);font-size:.78rem}
+.dash-layout .p-card,.dash-layout .p-panel,.dash-layout .p-datatable{border:1px solid var(--ds-ref-line);border-radius:14px;background:#fff;box-shadow:var(--ds-ref-shadow)}
+.dash-layout .p-card .p-card-body{padding:1rem 1.1rem}
+.dash-layout .p-card .p-card-title,.dash-layout .p-panel .p-panel-title{color:var(--ds-ref-ink);font-size:.9rem;font-weight:800}
+.dash-layout .p-panel .p-panel-header{padding:.8rem 1rem;border-bottom:1px solid #edf2f8;background:#fff}
+.dash-layout .p-panel .p-panel-content{padding:1rem}
+.dash-layout .p-button{border-radius:9px;font-family:inherit;font-size:.78rem;font-weight:700}
+.dash-layout .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):not(.p-button-warn){border-color:var(--ds-ref-cyan);background:linear-gradient(105deg,#08a9c5,#18c4d7);color:#fff;box-shadow:0 4px 12px rgba(18,184,208,.16)}
+.dash-layout .p-button.p-button-outlined{border-color:#9bdce8;color:#078eae;background:#f4fcfe}
+.dash-layout .p-button.p-button-text{color:#168fb3}
+.dash-layout .p-button:focus-visible{outline:2px solid #12b8d0;outline-offset:2px}
+.dash-layout .p-inputtext,.dash-layout .p-textarea,.dash-layout .p-select,.dash-layout .p-multiselect,.dash-layout .p-datepicker-input,.dash-layout .p-inputnumber-input,.dash-layout .p-password-input{min-height:2.55rem;border:1px solid #d9e5f0;border-radius:9px;background:#fbfdff;color:var(--ds-ref-ink);font-family:inherit;font-size:.78rem}
+.dash-layout .p-inputtext:focus,.dash-layout .p-textarea:focus,.dash-layout .p-select:focus,.dash-layout .p-multiselect:focus,.dash-layout .p-inputnumber-input:focus{border-color:#64cddd;box-shadow:0 0 0 3px rgba(18,184,208,.11)}
+.dash-layout .field label,.dash-layout .form-label{color:#526f8c;font-size:.76rem;font-weight:700}
+.dash-layout .p-datatable .p-datatable-thead>tr>th{padding:.75rem .85rem;border-color:#e8eff6;background:#f5f8fc;color:#5e7894;font-size:.72rem;font-weight:800;white-space:nowrap}
+.dash-layout .p-datatable .p-datatable-tbody>tr>td{padding:.72rem .85rem;border-color:#edf2f7;color:#294766;font-size:.76rem}
+.dash-layout .p-datatable .p-datatable-tbody>tr:hover{background:#f5fbfd}
+.dash-layout .p-paginator{padding:.55rem;background:#fff}
+.dash-layout .p-tag{border-radius:999px;font-size:.67rem;font-weight:700}
+.dash-layout .p-badge{font-size:.65rem}
+.dash-layout .p-toolbar{gap:.65rem;padding:.75rem .9rem;border:1px solid var(--ds-ref-line);border-radius:12px;background:#fff}
+.dash-layout .p-breadcrumb{padding:.35rem 0;background:transparent;border:0}
+.dash-layout .grid{gap:1rem}
+.dash-layout .field{margin-bottom:1rem}
+.dash-layout .p-divider{border-color:#e7eef6}
+.dash-layout .p-message{border-radius:10px;font-size:.76rem}
+.dash-layout .p-dialog{overflow:hidden;border-radius:15px}
+.dash-layout .p-dialog .p-dialog-header{padding:1rem 1.2rem;color:var(--ds-ref-ink);font-size:.95rem;font-weight:800}
+.dash-layout .p-dialog .p-dialog-content{padding:1.1rem 1.2rem}
+.dash-layout .p-dialog .p-dialog-footer{padding:.8rem 1.2rem;border-top:1px solid #edf2f8}
+.dash-layout .admin-dashboard,.dash-layout .company-dashboard{display:flex;flex-direction:column;gap:1rem}
+.dash-layout .admin-dashboard-hero,.dash-layout .company-dashboard-hero{min-height:13.5rem;padding:1.7rem 2rem;border:0;border-radius:16px;background:radial-gradient(circle at 86% 34%,rgba(255,255,255,.26),transparent 17%),radial-gradient(circle at 78% 110%,rgba(14,220,226,.38),transparent 36%),linear-gradient(112deg,#3159bd 0%,#168fc7 52%,#11b6cf 100%);box-shadow:0 8px 22px rgba(28,112,180,.14)}
+.dash-layout .admin-dashboard-hero h1,.dash-layout .company-dashboard-hero h1{font-size:1.45rem;font-weight:900}
+.dash-layout .admin-dashboard-hero p,.dash-layout .company-dashboard-hero p{max-width:34rem;color:rgba(255,255,255,.9);font-size:.82rem}
+.dash-layout .admin-dashboard-hero .p-button,.dash-layout .company-dashboard-hero .p-button{min-height:2.55rem;border-color:#13c9d8;border-radius:999px;background:linear-gradient(100deg,#08c0cb,#4ce0e5);color:#073b59;box-shadow:none}
+.dash-layout .admin-dashboard-secondary-action,.dash-layout .company-dashboard-secondary-action{border-radius:999px;font-size:.75rem}
+.dash-layout .admin-dashboard-kpis,.dash-layout .cd-kpis{gap:.75rem!important}
+.dash-layout .admin-dashboard-analytics,.dash-layout .company-dashboard-analytics{min-width:0}
+.dash-layout .admin-dashboard-workspace,.dash-layout .company-dashboard-operations{gap:1rem}
+.dash-layout .admin-dashboard-grid,.dash-layout .cd-grid{gap:1rem}
+.dash-layout .admin-dashboard-hint,.dash-layout .cd-hint{color:#8499ae;font-size:.68rem}
+.dash-layout .analytics-chart-label{color:#7289a4;font-size:.68rem}
+.dash-layout .analytics-chart-value{color:#476581;font-size:.68rem}
+.dash-layout .analytics-chart-bar{border-radius:7px 7px 0 0}
+@media(max-width:991px){.dash-layout .dash-layout-content{padding-inline:.9rem}.dash-layout .admin-dashboard-hero,.dash-layout .company-dashboard-hero{min-height:11rem;padding:1.2rem}}
+@media(max-width:575px){.dash-layout{font-size:12px}.dash-layout .dash-layout-content{padding-inline:.65rem}.dash-layout .p-card .p-card-body{padding:.8rem}}
