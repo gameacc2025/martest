@@ -640,7 +640,7 @@ function logout() {
   flex: none;
 }
 .public-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.public-user-name { font-size: 13px; font-weight: 600; color: var(--tm-ink); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.public-user-name { font-size: 13px; font-weight: 600; color: var(--tm-ink); max-width: 180px; white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
 .public-user-caret { font-size: 13px; color: var(--tm-muted); }
 
 .public-login-link { text-decoration: none; }
@@ -696,17 +696,6 @@ function logout() {
 .public-footer-link:hover { color: var(--tm-cyan); }
 .public-footer-brand { display: flex; align-items: center; gap: 9px; color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 .public-footer-about-text { margin: 0 0 14px; font-size: 13px; line-height: 1.9; color: rgba(255,255,255,.72); }
-.public-footer-about-btn {
-  display: inline-flex;
-  padding: 7px 14px;
-  border: 1px solid rgba(46, 211, 238, 0.5);
-  border-radius: var(--tm-radius-pill);
-  color: var(--tm-cyan);
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-}
-.public-footer-about-btn:hover { background: rgba(46, 211, 238, 0.12); }
 .public-footer-bottom {
   border-top: 1px solid rgba(207, 217, 238, 0.14);
   padding: 16px 0;
