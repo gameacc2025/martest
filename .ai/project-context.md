@@ -898,3 +898,5 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Retail commerce: the backend currently has no Order model or /api/v1/orders routes; legacy endpoint definitions and Pinia stores are deprecated. Use docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md as the R0 design reference. Prototype routes: Admin /retail/orders, Company /retail/orders, Website CUSTOMER /orders. They use explicit sample-data notices only; no real order/payment action exists.
 
 - Support UI: shared packages/shared-ui/components/operations/TicketDeskWorkspace.vue powers Admin /support/tickets, Company /support/tickets and Website CUSTOMER /support/tickets. It supports inbox filtering and conversation preview; internal notes are shown only in Admin prototype. No ticket backend exists yet; contract is docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md.
+
+- CRM prototype routes in Admin are backed by sample data only. Use docs/CRM_DOMAIN_DESIGN.md for the proposed STAFF-only Account/Lead/Opportunity/Activity/Task domain and API/permission contract; no CRM backend models or routes exist yet.
