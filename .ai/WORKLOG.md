@@ -3234,3 +3234,29 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 - **Next action:** token-ize remaining hard-coded page-level hex colors; continue remaining route inventory per `.ai/current-task.md`.
 
+
+### 2026-11-04 — UI-REDESIGN-TEM-01: phase 5 (detail + form workspaces to tem widgets)
+
+- **Status:** IN_PROGRESS
+- **Agent:** OpenCode (local checkout)
+- **Objective:** Convert the remaining Admin/Company detail, form and settings workspaces from bespoke page headers to the shared tem page-head and `--tm-*` tokens, without changing API, auth, routing or business behaviour.
+
+**Converted workspaces (10 files)**
+- Admin + Company `ProductForm.vue`: header → `WorkspacePageHeading` (`pi pi-box`; back/cancel/save in `#actions`); style block rewritten to tem tokens.
+- `CompanySettings.vue`: header → `WorkspacePageHeading` (trust badges in `#actions`); style rewritten to tem tokens; restored the `.skeleton-header` rule.
+- Admin + Company `InquiryCreate.vue`: header → `WorkspacePageHeading` (eyebrow/title/description preserved; back/draft/cancel in `#actions`); dead header CSS pruned; 44px targets retained.
+- Admin + Company `InquiryDetail.vue`: header → `WorkspacePageHeading` (Admin description = inquiry title; Company dynamic title/description + status/priority tags + back/respond in `#actions`); dead header CSS pruned.
+- `Reports.vue`: dead header CSS pruned, tokens normalised, tab horizontal-scroll fallback added; KPI grid + charts retained.
+- `MyProducts.vue` + `CompanyProducts.vue`: legacy routed product lists, headers → `WorkspacePageHeading`, dead header CSS pruned, tokens normalised.
+
+**Contracts kept**
+- Admin/Company `FormAccessibility.test.js`: `ProductForm` label ids + dynamic `inputId` bindings; `InquiryCreate` retains `min-height: 2.75rem`.
+- `Reports.test.js`: product/inquiry API error + retry strings stay inside the correct tab.
+- Legacy `--ds-*` / `--surface-*` tokens still resolve through the PrimeVue `TelecomPreset`, so remaining unconverted pages are not off-palette. All `var(--tm-*)` references were verified to resolve in `tem.scss`.
+
+**Verification (phase 5):** `npx vitest run` → 56 files / 310 tests pass. `pnpm run build:admin`, `pnpm run build:company`, `pnpm run build:website` all pass. Browser/visual checks `NOT RUN` (owner-prohibited).
+- **Commit:** `61dcab7` — `refactor: convert inquiry, product, settings and report workspaces to tem widgets` (10 files, +1094 / −2534).
+- **Push:** Not pushed (local `main` ahead of `origin/main`; push not authorised this task).
+
+**Still to do:** the public Website surfaces (`ProductDetails`, catalogue, `Home`, `PublicLayout`) are already tem-based with real APIs and tests, so no change is required there. `InquirySubscriptions` and `NotificationManagement` have no summary rows; add them only if a real, non-paginated breakdown exists (do not fabricate counts from a single page).
+

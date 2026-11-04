@@ -1,6 +1,6 @@
-﻿# Current Task — Full UI redesign: Sky Blue primary / Turquoise secondary palette + dark sidebar
+﻿# Current Task — Full UI rebuild on the `tem/` visual language (UI-REDESIGN-TEM-01)
 
-**Status:** IN_PROGRESS — owner approved turquoise/sky-blue palette with dark sidebar; shared theme/tokens and real-page sample are the first milestone. The three notification inboxes and shared workspace primitives have received a corrective pass; the full 69-page redesign remains in progress.
+**Status:** IN_PROGRESS — the unified `tem/` (navy/cyan/blue) system is applied across the shared shell, all Admin/Company list pages, the detail/form/settings workspaces, and the public Website. Phases 1–5 are committed on `main`; remaining work is the residual detail screens, account/auth brand pass, and the page-inventory/decision items listed below. Nothing pushed (only when authorized). Browser/visual checks `NOT RUN` per owner instruction.
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
@@ -370,15 +370,23 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - `AdminLayout`/`CompanyLayout`: `primaryAction` wired (`admin-product-create` / `manage-product-create`), 207px rail, canvas background.
 - Verification: 310/310 Vitest, three production builds pass. Visual checks `NOT RUN`.
 
+**Done (phase 5 — detail + form workspaces to tem widgets):**
+- Admin + Company `ProductForm.vue`, `CompanySettings.vue`, `InquiryCreate.vue`, `InquiryDetail.vue`, `Reports.vue`, and legacy `MyProducts.vue` / `CompanyProducts.vue`: bespoke page headers replaced with the shared `WorkspacePageHeading` (icon/eyebrow/title/description + `#actions` slot); dead header CSS pruned; scoped styles normalised onto `--tm-*` tokens.
+- Contracts kept: `FormAccessibility.test.js` label ids / dynamic `inputId` / `min-height: 2.75rem`; `Reports.test.js` per-tab API error + retry strings. Legacy `--ds-*` tokens still resolve through `TelecomPreset`; all `var(--tm-*)` references verified defined in `tem.scss`.
+- Verification: 310/310 Vitest, three production builds pass. Visual checks `NOT RUN`.
+- **Commit:** `61dcab7` (10 files, +1094 / −2534).
+
 **Remaining (phase 5+):**
-1. Admin/Company detail + form workspaces: `ProductForm`, `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList` detail/dialog, settings, inquiry detail/create — audit the shared cascade first, rewrite only where insufficient. Preserve server pagination/permissions.
-2. Public Website surfaces against `tem/shop*` / `product-details.html`: `PublicLayout`, `Home`, `ProductListing`, `ProductDetails`, `Categories`, `SearchResults` fidelity pass.
+1. Admin/Company: `CompanyDetail`, `UserDetail`, `RoleDetail`, `PermissionList` detail/dialog, and remaining settings/order detail surfaces — audit the shared cascade first, rewrite only where insufficient. Preserve server pagination/permissions.
+2. Public Website surfaces are already tem-based on `--tm-*` with real APIs and passing tests (`PublicLayout`, `Home`, `ProductListing`, `ProductDetails`, `Categories`, `SearchResults`); no further change required unless a specific gap is found.
 3. Account pages (`UserProfile`, `Addresses`, `MyInquiries`, `InquirySubscription`) and auth pages (`Login`, `Register`, `ForgotPassword`) brand pass.
 4. `Products.vue` is exported from `pages/public/index.js` but not routed — decide whether to keep/delete.
-5. Re-run `npx vitest run` + the three builds after each phase; commit per phase on `main`; do not push without authorization.
+5. `InquirySubscriptions.vue` / `NotificationManagement.vue` have no summary-stat row; add one only if a real, non-paginated breakdown exists (do not fabricate counts).
+6. Re-run `npx vitest run` + the three builds after each phase; commit per phase on `main`; do not push without authorization.
 
 **Phase 2 commit:** `c71d44c`.
 **Phase 3 commit:** `7853339`.
 **Phase 4 commit:** `150bc35`.
+**Phase 5 commit:** `61dcab7`.
 
 **Open decision:** whether to keep the legacy website `components/products/ProductCard.vue` alongside the new Tem product card, or migrate all product surfaces to one shared card.
