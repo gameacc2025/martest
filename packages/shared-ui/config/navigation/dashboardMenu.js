@@ -144,16 +144,36 @@ export const dashboardMenu = [
   {
     section: 'CRM و مشتریان',
     items: [
-      { title: 'مرکز CRM', icon: 'pi pi-address-book', route: 'admin-crm', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+      {
+        title: 'مدیریت ارتباط با مشتری',
+        icon: 'pi pi-address-book',
+        roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
+        children: [
+          { title: 'نمای کلی CRM', icon: 'pi pi-th-large', route: 'admin-crm' },
+          { title: 'سرنخ‌ها و مشتریان بالقوه', icon: 'pi pi-user-plus', route: 'admin-crm-leads' },
+          { title: 'قیف فرصت‌های فروش', icon: 'pi pi-filter', route: 'admin-crm-pipeline' },
+          { title: 'تعاملات و پیگیری‌ها', icon: 'pi pi-calendar-clock', route: 'admin-crm-activities' },
+        ],
+      },
       { title: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', route: 'admin-tickets', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-      { title: 'سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', route: 'admin-retail-orders', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
       { title: 'تیکت‌های شرکت', icon: 'pi pi-headphones', route: 'company-tickets', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
     ],
   },
   {
     section: 'مالی',
     items: [
-      { title: 'مالی و تسویه حساب', icon: 'pi pi-wallet', route: 'admin-finance', roles: ['SUPER_ADMIN', 'ADMIN'] },
+      {
+        title: 'مالی و حسابداری',
+        icon: 'pi pi-wallet',
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+        children: [
+          { title: 'نمای کلی مالی', icon: 'pi pi-chart-pie', route: 'admin-finance' },
+          { title: 'تسویه با شرکت‌ها', icon: 'pi pi-building', route: 'admin-finance-settlements' },
+          { title: 'تراکنش‌ها و گردش حساب', icon: 'pi pi-arrow-right-arrow-left', route: 'admin-finance-transactions' },
+          { title: 'صورتحساب‌ها و اسناد', icon: 'pi pi-file-invoice', route: 'admin-finance-invoices' },
+        ],
+      },
+      { title: 'سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', route: 'admin-retail-orders', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
     ],
   },
   {
