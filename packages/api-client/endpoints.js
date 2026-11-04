@@ -94,7 +94,9 @@ export const endpoints = {
     update: (id) => `/categories/${id}`,
     delete: (id) => `/categories/${id}`
   },
-  // Orders
+  // DEPRECATED LEGACY CONTRACT: backend/src/app.js has no /orders routes and
+  // backend/prisma/schema.prisma has no Order model. Do not call these paths.
+  // Replace this block only when /retail/* domain APIs are implemented.
   orders: {
     list: '/orders',
     get: (id) => `/orders/${id}`,
