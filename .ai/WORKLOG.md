@@ -3144,6 +3144,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Fix:** Removed `flex-direction: row-reverse;` from both layouts; `direction: rtl` alone now places the sidebar on the right and content on the left, consistent with the mobile off-canvas drawer (`inset-inline-start: 0` + `[dir=rtl] translateX(100%)`).
 - **Verification:** `vitest run apps/admin apps/company` — 19 files / 92 tests passed. `pnpm --filter @telecom/admin build` ✓; `pnpm --filter @telecom/company build` ✓. Browser/visual check NOT RUN per owner instruction.
 - **Commit:** to be recorded on commit.
+- **Commit record:** `a9acd9c` (fix(ui): place Admin/Company sidebar on the right (RTL)). Push pending owner confirmation.
 
 - **Next action:** token-ize remaining hard-coded page-level hex colors; continue remaining route inventory per `.ai/current-task.md`.
 
