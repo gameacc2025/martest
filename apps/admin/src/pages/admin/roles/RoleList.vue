@@ -182,6 +182,9 @@ const pagination = ref({
 
 const kpiItems = computed(() => [
   { label: 'کل نقش‌ها', value: pagination.value.total, icon: 'pi pi-shield', tone: 'primary' },
+  { label: 'نقش‌های سیستمی (صفحه جاری)', value: roles.value.filter((item) => item.isSystem).length, icon: 'pi pi-lock', tone: 'warning' },
+  { label: 'نقش‌های شرکتی (صفحه جاری)', value: roles.value.filter((item) => item.scope === 'COMPANY').length, icon: 'pi pi-building', tone: 'info' },
+  { label: 'دارای کاربر (صفحه جاری)', value: roles.value.filter((item) => (item._count?.users || 0) > 0).length, icon: 'pi pi-users', tone: 'success' },
 ])
 
 const searchQuery = ref('')
