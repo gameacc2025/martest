@@ -594,6 +594,10 @@ onMounted(() => {
   border: 0;
 }
 
+@media (min-width: 1920px) {
+  .home-product-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+}
+
 @media (max-width: 900px) {
   .home-hero { grid-template-columns: 1fr; }
   .home-category-grid,.home-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
