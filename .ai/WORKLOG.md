@@ -3280,3 +3280,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Additional TEM extraction:** Added and exported TemMailLayout, TemMailRow and TemMailReader from the mail.html / mail-detail.html patterns, plus TemActivityTimeline for CRM/support activity feeds. Added TemLineChart from charts.js. The full widget catalog is documented in docs/OPERATIONS_UI_ROADMAP.md.
 
 - **Customer support entry:** Added Website /support/tickets for CUSTOMER accounts, linked from the customer account menu. The route is customer-only; COMPANY and STAFF identities are redirected through the existing PKCE handoff to their respective Company/Admin support workspaces. All three support UIs remain explicitly sample-data prototypes pending ticket APIs.
+
+- **Table coverage follow-up:** Added current-page KPI breakdowns to Admin categories, roles and permissions, Company users and Company inquiry lists. This also corrected a pre-existing undefined kpiItems reference in PermissionList.vue. Notification delivery monitoring already had live summary metrics and was retained.
