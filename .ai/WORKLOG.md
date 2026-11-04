@@ -3135,5 +3135,15 @@ This file is the shared, version-controlled memory for agents working on the rep
   - `WorkspacePageHeading.test.js`: updated to the slimmed API + srOnly behavior.
 - **Verification:** `pnpm exec vitest run` — 56 files, 310 tests passed (306 baseline + 4 new). `pnpm --filter @telecom/admin build` ✓; `pnpm --filter @telecom/company build` ✓; `pnpm --filter @telecom/website build` ✓. Browser/visual checks NOT RUN per owner instruction.
 - **Commit:** `df51a0c` (feat(ui): KPI summary cards on data/table pages with sr-only headings). Not pushed (push not authorized in this task).
+
+## 2026-11-04 — UI-RTL-SIDEBAR-FIX — Sidebar rendered LTR due to double flex reversal
+- **Status:** DONE
+- **Agent:** Claude (local checkout)
+- **Goal:** User reported the Admin/Company sidebar menu (and overall shell) renders left-to-right instead of RTL.
+- **Root cause:** `.dash-layout` in `AdminLayout.vue` and `CompanyLayout.vue` set BOTH `direction: rtl;` AND `flex-direction: row-reverse;`. With `direction: rtl` the default `row` already lays children right-to-left (sidebar → right); `row-reverse` flips it back so the sidebar lands on the LEFT — the LTR appearance the user saw.
+- **Fix:** Removed `flex-direction: row-reverse;` from both layouts; `direction: rtl` alone now places the sidebar on the right and content on the left, consistent with the mobile off-canvas drawer (`inset-inline-start: 0` + `[dir=rtl] translateX(100%)`).
+- **Verification:** `vitest run apps/admin apps/company` — 19 files / 92 tests passed. `pnpm --filter @telecom/admin build` ✓; `pnpm --filter @telecom/company build` ✓. Browser/visual check NOT RUN per owner instruction.
+- **Commit:** to be recorded on commit.
+
 - **Next action:** token-ize remaining hard-coded page-level hex colors; continue remaining route inventory per `.ai/current-task.md`.
 

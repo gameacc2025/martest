@@ -153,7 +153,6 @@ onUnmounted(() => {
 
 
   display: flex;
-  flex-direction: row-reverse;
   min-height: 100vh;
   background: #f2f6fc;
   direction: rtl;

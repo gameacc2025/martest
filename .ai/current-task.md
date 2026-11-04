@@ -345,5 +345,6 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 ### UI-LIST-KPI-HEADINGS — 2026-11-04 (current focus)
 - Replaced the verbose page header (eyebrow/icon/description) with an `sr-only` H1 + a row of KPI summary cards on all admin/company data & table pages (roles, users, categories, companies, inquiries, orders, permissions, products). The breadcrumb (rendered by `PageHeader` in the layout) now carries the visible "where am I" indication; the shared `WorkspacePageHeading` gained an `srOnly` prop and a new `KpiStatsRow` component was added.
 - KPI cards read from the existing `pagination.total` — no new data fetching or invented metrics. Verified: 310/310 tests, admin + company builds pass.
+- **RTL sidebar fix (2026-11-04):** Admin/Company sidebar appeared LTR because `.dash-layout` combined `direction: rtl` with `flex-direction: row-reverse`, doubling the reversal so the sidebar landed on the LEFT. Removed `row-reverse` in both layouts so `direction: rtl` places the sidebar on the right. Verified: 92/92 admin+company tests, admin + company builds pass.
 - Next: token-ize remaining hard-coded page-level hex colors, then continue remaining route inventory (product editors/details, order/report workspaces, website pages).
 
