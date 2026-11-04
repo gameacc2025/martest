@@ -433,3 +433,18 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 **Verification:** GitHub source writes and source re-fetch/static review only. Vitest/build/browser checks NOT RUN per owner instruction. No backend/schema/API/payment behavior changed.
 
 **Next:** Continue Website customer surfaces (address book/profile and inquiry pages) or, when the scope moves to operational commerce, implement R1 from `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` only after resolving the documented retail eligibility, inventory, shipping, commission, return-window and payment-provider decisions. Do not activate cart purchase actions before real server-side pricing, inventory reservation, order and payment APIs are available.
+
+
+## 2026-11-04 — WEBSITE-CUSTOMER-ACCOUNT-INQUIRY-02
+
+**Status:** UI and route guard improvements committed on `main`.
+
+- Improved `apps/website/src/pages/public/Addresses.vue`: client validation, Persian/Arabic digit normalization for phone/postal code, server-schema length alignment, visible form errors, and a guarded default-address update state.
+- Improved `apps/website/src/pages/public/MyInquiries.vue`: request sequence guards prevent stale inquiry/message responses from overwriting the active detail; supplier company options are deduplicated; a sole supplier is selected automatically; draft/message/SMS state resets on navigation; message-load errors are visible and retryable.
+- Updated Website router so `/profile`, `/profile/addresses`, and `/my-inquiries` are CUSTOMER-only. COMPANY and STAFF users are redirected through PKCE to their corresponding panel path.
+- Corrected escaped digit-validation regexes in both Checkout and Addresses discovered during source re-fetch.
+- Added `docs/WEBSITE_CUSTOMER_ACCOUNT_STATUS.md`; updated operations roadmap, current task, project context and worklog.
+
+**Verification:** GitHub source writes plus re-fetch/static review only. Vitest/build/browser tests NOT RUN. No backend, schema, migration or API implementation changed.
+
+**Next:** Audit auth-store profile operations against actual package/backend endpoints before modifying profile editing/avatar/password. Then move to operational retail backend R1 from `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` only after validating product retail eligibility, stock, shipping, commission, returns and payment provider.
