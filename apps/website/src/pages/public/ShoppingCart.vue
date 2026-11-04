@@ -1,385 +1,185 @@
 <template>
-  <div class="shopping-cart-page">
-    <div class="ds-container ds-page">
+  <main class="cart-page ds-page" dir="rtl">
+    <div class="ds-container cart-shell">
       <WorkspacePageHeading
-        eyebrow="خرید محصولات"
         title="سبد خرید"
-        description="اقلام انتخاب‌شده و تعداد موردنیاز را پیش از ادامه بررسی کنید."
-        icon="pi pi-shopping-cart"
+        description="محصولات انتخاب‌شده را مرور و تعداد موردنیاز را اصلاح کنید."
         heading-id="shopping-cart-title"
       >
-        <template #actions><Breadcrumb :home="home" :model="items" /></template>
+        <template #actions>
+          <Breadcrumb :home="home" :model="breadcrumbs" />
+        </template>
       </WorkspacePageHeading>
 
-      <div v-if="cartItems.length === 0" class="cart-empty-state">
-        <i class="pi pi-shopping-cart text-6xl text-gray-300 mb-4"></i>
-        <h2 class="text-xl font-semibold mb-2">سبد خرید شما خالی است</h2>
-        <p class="text-gray-500 mb-6">هیچ محصولی به سبد خرید خود اضافه نکرده اید</p>
-        <Button
-          label="بازگشت به صفحه اصلی"
-          icon="pi pi-home"
-          class="p-button-primary"
-          @click="goToHome"
-        />
-        <Button
-          label="مشاهده محصولات"
-          icon="pi pi-shopping-bag"
-          class="p-button-outlined ml-4"
-          @click="goToProducts"
-        />
-      </div>
+      <section v-if="cartItems.length === 0" class="cart-empty" aria-labelledby="cart-empty-title">
+        <span class="cart-empty-mark" aria-hidden="true"><i class="pi pi-shopping-cart"></i></span>
+        <h2 id="cart-empty-title">سبد خرید خالی است</h2>
+        <p>هنوز محصولی به سبد خرید اضافه نشده است.</p>
+        <Button label="مشاهده محصولات" icon="pi pi-arrow-left" @click="goToProducts" />
+      </section>
 
-      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Cart Items -->
-        <div class="lg:col-span-2">
-          <Card>
-            <template #title>محصولات سبد خرید ({{ cartItems.length }})</template>
-            <template #content>
-              <div class="space-y-4">
-                <div
-                  v-for="(item, index) in cartItems"
-                  :key="item.id"
-                  class="cart-item flex gap-4 p-4 border-b border-gray-100"
-                >
-                  <div class="flex-shrink-0">
-                    <img
-                      :src="item.image || '/placeholder-product.jpg'"
-                      :alt="item.name"
-                      class="w-20 h-20 object-cover rounded"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <div class="flex justify-between items-start">
-                      <div>
-                        <h3 class="font-semibold">{{ item.name }}</h3>
-                        <p class="text-sm text-gray-500" v-if="item.variant">
-                          {{ item.variant }}
-                        </p>
-                      </div>
-                      <Button
-                        icon="pi pi-trash"
-                        class="p-button-rounded p-button-text p-button-danger"
-                        @click="removeFromCart(index)"
-                      />
-                    </div>
-                    <div class="flex justify-between items-center mt-2">
-                      <div class="text-primary font-bold">
-                        {{ formatPrice(item.price * item.quantity) }}
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <Button
-                          icon="pi pi-minus"
-                          class="p-button-rounded p-button-text"
-                          @click="decreaseQuantity(index)"
-                          :disabled="item.quantity <= 1"
-                        />
-                        <span class="px-3 py-1 bg-gray-100 rounded">{{ item.quantity }}</span>
-                        <Button
-                          icon="pi pi-plus"
-                          class="p-button-rounded p-button-text"
-                          @click="increaseQuantity(index)"
-                        />
-                      </div>
-                    </div>
-                  </div>
+      <div v-else class="cart-layout">
+        <section class="cart-items-panel" aria-labelledby="cart-items-title">
+          <header class="cart-panel-heading">
+            <div>
+              <h2 id="cart-items-title">اقلام انتخاب‌شده</h2>
+              <p>{{ itemCount.toLocaleString('fa-IR') }} عدد محصول</p>
+            </div>
+            <Button label="خالی‌کردن سبد" icon="pi pi-trash" severity="secondary" text size="small" @click="clearCart" />
+          </header>
+
+          <article v-for="item in cartItems" :key="item.id" class="cart-item">
+            <div class="cart-item-image">
+              <img v-if="item.image" :src="item.image" :alt="item.name" width="104" height="104" loading="lazy" />
+              <i v-else class="pi pi-image" aria-hidden="true"></i>
+            </div>
+
+            <div class="cart-item-main">
+              <h3>{{ item.name }}</h3>
+              <p class="cart-item-unit">{{ formatPrice(item.price, item.currency) }} <span>برای هر واحد</span></p>
+              <div class="cart-item-controls">
+                <div class="quantity-control" :aria-label="'تعداد ' + item.name">
+                  <button type="button" :aria-label="'افزایش تعداد ' + item.name" @click="changeQuantity(item, 1)">
+                    <i class="pi pi-plus" aria-hidden="true"></i>
+                  </button>
+                  <output :aria-label="'تعداد فعلی ' + item.name">{{ item.quantity.toLocaleString('fa-IR') }}</output>
+                  <button type="button" :aria-label="'کاهش تعداد ' + item.name" :disabled="item.quantity <= 1" @click="changeQuantity(item, -1)">
+                    <i class="pi pi-minus" aria-hidden="true"></i>
+                  </button>
                 </div>
+                <button type="button" class="remove-item" :aria-label="'حذف ' + item.name + ' از سبد'" @click="removeItem(item.id)">
+                  <i class="pi pi-trash" aria-hidden="true"></i>
+                  <span>حذف</span>
+                </button>
               </div>
-            </template>
-          </Card>
+            </div>
 
-          <div class="mt-6 text-right">
-            <Button
-              label="ادامه خرید"
-              icon="pi pi-arrow-left"
-              class="p-button-outlined"
-              @click="continueShopping"
-            />
+            <div class="cart-item-total">
+              <span>جمع این ردیف</span>
+              <strong>{{ formatPrice(Number(item.price) * item.quantity, item.currency) }}</strong>
+            </div>
+          </article>
+
+          <div class="cart-continue">
+            <Button label="ادامه خرید" icon="pi pi-arrow-left" severity="secondary" text @click="goToProducts" />
           </div>
-        </div>
+        </section>
 
-        <!-- Cart Summary -->
-        <div class="lg:col-span-1">
-          <Card>
-            <template #title>مجموع سبد خرید</template>
-            <template #content>
-              <div class="space-y-4">
-                <div class="flex justify-between">
-                  <span>مجموع قیمت محصولات:</span>
-                  <span class="font-semibold">{{ formatPrice(subtotal) }}</span>
-                </div>
-
-                <div class="flex justify-between" v-if="discount > 0">
-                  <span>تخفیف:</span>
-                  <span class="font-semibold text-green-600">-{{ formatPrice(discount) }}</span>
-                </div>
-
-                <div class="flex justify-between">
-                  <span>هزینه ارسال:</span>
-                  <span class="font-semibold">{{ shippingCost > 0 ? formatPrice(shippingCost) : 'رایگان' }}</span>
-                </div>
-
-                <div class="flex justify-between border-t pt-4">
-                  <span class="font-bold">مبلغ قابل پرداخت:</span>
-                  <span class="font-bold text-primary">{{ formatPrice(total) }}</span>
-                </div>
-              </div>
-            </template>
-            <template #footer>
-              <div class="flex flex-col gap-2">
-                <Button
-                  label="تسویه حساب"
-                  icon="pi pi-check"
-                  class="p-button-primary w-full"
-                  @click="proceedToCheckout"
-                  :disabled="cartItems.length === 0"
-                />
-                <Button
-                  label="بررسی سبد خرید"
-                  icon="pi pi-shopping-cart"
-                  class="p-button-outlined w-full"
-                  @click="reviewCart"
-                />
-              </div>
-            </template>
-          </Card>
-
-          <!-- Discount Code -->
-          <Card class="mt-4">
-            <template #title>کد تخفیف</template>
-            <template #content>
-              <div class="flex gap-2">
-                <InputText
-                  v-model="discountCode"
-                  placeholder="کد تخفیف را وارد کنید"
-                  class="flex-1"
-                />
-                <Button
-                  label="اعمال"
-                  icon="pi pi-ticket"
-                  class="p-button-success"
-                  @click="applyDiscountCode"
-                  :disabled="!discountCode"
-                />
-              </div>
-              <div v-if="discountApplied" class="mt-2 text-green-600 text-sm">
-                کد تخفیف با موفقیت اعمال شد!
-              </div>
-              <div v-if="discountError" class="mt-2 text-red-500 text-sm">
-                {{ discountError }}
-              </div>
-            </template>
-          </Card>
-        </div>
-      </div>
-
-      <!-- Related Products -->
-      <div class="mt-12">
-        <h2 class="text-xl font-bold mb-6">محصولات پیشنهادی</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <ProductCard
-            v-for="product in recommendedProducts"
-            :key="product.id"
-            :product="product"
-            @add-to-cart="addToCart"
-          />
-        </div>
+        <aside class="cart-summary" aria-labelledby="cart-summary-title">
+          <h2 id="cart-summary-title">خلاصه سبد</h2>
+          <div class="summary-row">
+            <span>تعداد اقلام</span>
+            <strong>{{ itemCount.toLocaleString('fa-IR') }}</strong>
+          </div>
+          <div class="summary-row summary-total">
+            <span>جمع قیمت‌های ذخیره‌شده</span>
+            <strong>{{ formatPrice(subtotal) }}</strong>
+          </div>
+          <p class="summary-disclaimer">
+            قیمت‌های سبد فقط نسخه ذخیره‌شده در مرورگر هستند و هنوز از سمت سرور برای موجودی، قیمت نهایی و هزینه ارسال تأیید نشده‌اند.
+          </p>
+          <Button label="ادامه به اطلاعات ارسال" icon="pi pi-arrow-left" class="checkout-button" @click="goToCheckout" />
+          <div class="checkout-unavailable">
+            <i class="pi pi-info-circle" aria-hidden="true"></i>
+            <span>ثبت سفارش و پرداخت آنلاین تا اتصال سرویس سفارش و درگاه بانکی فعال نیست.</span>
+          </div>
+        </aside>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
-import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCartStore } from '../../stores/cart'
-import { useProductsStore } from '../../stores/products'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
-import Card from 'primevue/card'
-import InputText from 'primevue/inputtext'
-import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
+import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import { useCartStore } from '../../stores/cart'
 
 const router = useRouter()
 const cartStore = useCartStore()
-const productsStore = useProductsStore()
-
 const cartItems = computed(() => cartStore.items)
-const recommendedProducts = ref([])
-const discountCode = ref('')
-const discountApplied = ref(false)
-const discountError = ref('')
-const shippingCost = ref(0)
+const itemCount = computed(() => cartStore.itemCount)
+const subtotal = computed(() => cartStore.subtotal)
 
-const home = ref({
-  icon: 'pi pi-home',
-  to: '/'
-})
+const home = { icon: 'pi pi-home', to: '/' }
+const breadcrumbs = [{ label: 'سبد خرید', to: '/cart' }]
 
-const items = ref([
-  { label: 'سبد خرید', to: '/cart' }
-])
-
-onMounted(async () => {
-  await loadRecommendedProducts()
-  await calculateShippingCost()
-})
-
-const loadRecommendedProducts = async () => {
+function formatPrice(value, currency = 'IRR') {
+  const amount = Number(value)
+  if (!Number.isFinite(amount)) return '—'
   try {
-    const data = await productsStore.getRecommendedProducts()
-    recommendedProducts.value = data.slice(0, 4)
-  } catch (error) {
-    console.error('Error loading recommended products:', error)
+    return new Intl.NumberFormat('fa-IR', { style: 'currency', currency }).format(amount)
+  } catch {
+    return new Intl.NumberFormat('fa-IR').format(amount)
   }
 }
 
-const calculateShippingCost = async () => {
-  try {
-    const cost = await productsStore.calculateShippingCost(cartItems.value)
-    shippingCost.value = cost
-  } catch (error) {
-    console.error('Error calculating shipping cost:', error)
-    shippingCost.value = 0
-  }
+function changeQuantity(item, delta) {
+  cartStore.updateQuantity(item.id, item.quantity + delta)
 }
 
-const subtotal = computed(() => {
-  return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-})
-
-const discount = computed(() => {
-  return discountApplied.value ? 50000 : 0
-})
-
-const total = computed(() => {
-  return subtotal.value - discount.value + shippingCost.value
-})
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('fa-IR', {
-    style: 'currency',
-    currency: 'IRR'
-  }).format(price)
+function removeItem(productId) {
+  cartStore.removeItem(productId)
 }
 
-const removeFromCart = (index) => {
-  cartStore.removeFromCart(index)
+function clearCart() {
+  cartStore.clearCart()
 }
 
-const increaseQuantity = (index) => {
-  cartStore.increaseQuantity(index)
+function goToProducts() {
+  router.push({ name: 'products' })
 }
 
-const decreaseQuantity = (index) => {
-  cartStore.decreaseQuantity(index)
-}
-
-const addToCart = (product) => {
-  cartStore.addToCart({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    image: product.image,
-    quantity: 1
-  })
-}
-
-const continueShopping = () => {
-  router.push('/products')
-}
-
-const proceedToCheckout = () => {
-  router.push('/checkout')
-}
-
-const reviewCart = () => {
-  // Scroll to top of cart
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-const goToHome = () => {
-  router.push('/')
-}
-
-const goToProducts = () => {
-  router.push('/products')
-}
-
-const applyDiscountCode = async () => {
-  try {
-    discountError.value = ''
-    // Simulate API call to validate discount code
-    await new Promise(resolve => setTimeout(resolve, 500))
-    discountApplied.value = true
-    discountError.value = ''
-  } catch (error) {
-    discountError.value = 'کد تخفیف معتبر نیست'
-    discountApplied.value = false
-  }
+function goToCheckout() {
+  router.push({ name: 'customer-checkout' })
 }
 </script>
 
 <style scoped>
-.shopping-cart-page {
-  direction: rtl;
-}
-
-.cart-item {
-  transition: all 0.2s ease;
-}
-
-.cart-item:hover {
-  background-color: var(--ds-color-surface-hover);
-}
-
-.shopping-cart-page { color: var(--ds-color-text); }
-.shopping-cart-page .ds-page-heading {
-  align-items: flex-end;
-  padding-bottom: var(--ds-space-4);
-  border-bottom: 1px solid var(--ds-color-border);
-}
-.shopping-cart-page .ds-page-heading__title {
-  color: var(--ds-color-text);
-  font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl));
-  font-weight: var(--ds-font-weight-bold);
-}
-.shopping-cart-page :deep(.p-card) {
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-}
-.shopping-cart-page :deep(.p-card .p-card-title) {
-  color: var(--ds-color-text);
-  font-weight: var(--ds-font-weight-bold);
-}
-.shopping-cart-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
-.commerce-page-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: var(--ds-space-6);
-  padding: clamp(1rem, 2vw, 1.5rem);
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
-  background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 7%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
-  box-shadow: var(--ds-shadow-xs);
-}
-.commerce-heading-copy { min-width: 0; }
-.commerce-heading-copy .ds-eyebrow { display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .25rem; font-weight: var(--ds-font-weight-bold); }
-.commerce-heading-copy h1 { margin: 0; color: var(--ds-color-text); font-size: clamp(1.35rem, 2vw, var(--ds-font-size-2xl)); font-weight: var(--ds-font-weight-bold); }
-.commerce-heading-copy p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); line-height: 1.7; }
-.commerce-page-heading :deep(.p-breadcrumb) { padding: 0; background: transparent; border: 0; }
-.shopping-cart-page { color: var(--ds-color-text); }
-.shopping-cart-page :deep(.p-card) { border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
-.shopping-cart-page :deep(.p-card-title) { color: var(--ds-color-text); font-weight: var(--ds-font-weight-bold); }
-.shopping-cart-page :deep(.p-button) { border-radius: var(--ds-radius-md); }
-.cart-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 22rem; gap: .8rem; padding: 2rem; border: 1px dashed var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); text-align: center; }
-.cart-empty-state > i { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 1.25rem; background: var(--ds-color-primary-soft); color: var(--ds-color-primary); font-size: 1.8rem; }
-.cart-empty-state h2 { margin: 0; color: var(--ds-color-text); }
-.cart-empty-state p { color: var(--ds-color-text-muted); }
-.cart-item { border-bottom: 1px solid var(--ds-color-border); }
-
+.cart-page { color: var(--ds-color-text); }
+.cart-shell { padding-block: var(--ds-space-6) var(--ds-space-12); }
+.cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 21rem; gap: 1.25rem; align-items: start; }
+.cart-items-panel, .cart-summary { min-width: 0; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); }
+.cart-items-panel { padding: clamp(1rem, 2vw, 1.5rem); }
+.cart-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--ds-color-border); }
+.cart-panel-heading h2, .cart-summary h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+.cart-panel-heading p { margin: .25rem 0 0; color: var(--ds-color-text-muted); font-size: .8rem; }
+.cart-item { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) auto; gap: 1rem; align-items: center; padding: 1.15rem 0; border-bottom: 1px solid var(--ds-color-border); }
+.cart-item-image { display: grid; place-items: center; width: 5.5rem; aspect-ratio: 1; overflow: hidden; border-radius: var(--ds-radius-lg); background: var(--ds-color-surface-muted, var(--ds-color-surface-hover)); color: var(--ds-color-text-muted); }
+.cart-item-image img { width: 100%; height: 100%; object-fit: contain; }
+.cart-item-image i { font-size: 1.4rem; }
+.cart-item-main { min-width: 0; }
+.cart-item-main h3 { margin: 0; font-size: .95rem; font-weight: 650; }
+.cart-item-unit { margin: .35rem 0 .75rem; color: var(--ds-color-text); font-size: .85rem; font-weight: 600; }
+.cart-item-unit span { margin-inline-start: .25rem; color: var(--ds-color-text-muted); font-size: .75rem; font-weight: 400; }
+.cart-item-controls { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.quantity-control { display: inline-flex; align-items: center; gap: .25rem; padding: .2rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); }
+.quantity-control button { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border: 0; border-radius: var(--ds-radius-sm); background: transparent; color: var(--ds-color-text); cursor: pointer; }
+.quantity-control button:hover:not(:disabled) { background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
+.quantity-control button:disabled { opacity: .35; cursor: not-allowed; }
+.quantity-control output { min-width: 1.8rem; text-align: center; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.remove-item { display: inline-flex; align-items: center; gap: .35rem; border: 0; background: transparent; color: var(--ds-color-text-muted); font: inherit; font-size: .78rem; cursor: pointer; }
+.remove-item:hover { color: var(--ds-color-danger, #b42318); }
+.cart-item-total { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; white-space: nowrap; }
+.cart-item-total span { color: var(--ds-color-text-muted); font-size: .72rem; }
+.cart-item-total strong { font-size: .9rem; }
+.cart-continue { padding-top: 1rem; }
+.cart-summary { position: sticky; top: 1rem; padding: 1.25rem; }
+.cart-summary h2 { padding-bottom: 1rem; border-bottom: 1px solid var(--ds-color-border); }
+.summary-row { display: flex; justify-content: space-between; gap: .75rem; padding: .85rem 0; color: var(--ds-color-text-muted); font-size: .85rem; }
+.summary-row strong { color: var(--ds-color-text); }
+.summary-total { align-items: flex-start; border-top: 1px solid var(--ds-color-border); color: var(--ds-color-text); }
+.summary-total strong { max-width: 60%; color: var(--ds-color-primary); font-size: 1.05rem; text-align: left; }
+.summary-disclaimer { margin: .25rem 0 1rem; color: var(--ds-color-text-muted); font-size: .76rem; line-height: 1.8; }
+.checkout-button { width: 100%; justify-content: center; }
+.checkout-unavailable { display: flex; align-items: flex-start; gap: .5rem; margin-top: .9rem; padding-top: .85rem; border-top: 1px solid var(--ds-color-border); color: var(--ds-color-text-muted); font-size: .75rem; line-height: 1.75; }
+.checkout-unavailable i { margin-top: .2rem; color: var(--ds-color-primary); }
+.cart-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 22rem; padding: 2rem; border: 1px dashed var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); text-align: center; }
+.cart-empty-mark { display: grid; place-items: center; width: 4rem; height: 4rem; margin-bottom: 1rem; border-radius: 1rem; background: var(--ds-color-primary-soft); color: var(--ds-color-primary); font-size: 1.6rem; }
+.cart-empty h2 { margin: 0; font-size: 1.15rem; }
+.cart-empty p { margin: .5rem 0 1.25rem; color: var(--ds-color-text-muted); font-size: .9rem; }
+@media (max-width: 900px) { .cart-layout { grid-template-columns: minmax(0, 1fr); } .cart-summary { position: static; } }
+@media (max-width: 560px) { .cart-item { grid-template-columns: 4rem minmax(0, 1fr); gap: .75rem; } .cart-item-image { width: 4rem; } .cart-item-total { grid-column: 2; align-items: flex-start; } .cart-panel-heading { align-items: flex-start; } }
 </style>
