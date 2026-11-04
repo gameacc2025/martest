@@ -26,5 +26,5 @@ function display(value) {
 
 <style scoped>
 .tm-legend { list-style: none; margin: 0; padding: 0; }
-.tm-legend__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-legend__label { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 </style>

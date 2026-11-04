@@ -51,7 +51,7 @@
       <div class="cd-kpi-group">
         <div class="cd-kpi-group__heading"><h2>عملکرد</h2><span>شاخص‌های پاسخ‌گویی و جایگاه</span></div>
         <div class="cd-kpi-group__grid">
-          <TemStatCard label="نرخ پاسخ‌دهی" :value="companyResponseRate === null ? null : companyResponseRate + '%'" icon="pi pi-chart-line" tone="success" :loading="statsLoading" meta="بر اساس آمار ثبت‌شده استعلام‌ها" zero-meta="هنوز داده کافی برای محاسبه وجود ندارد" />
+          <TemStatCard label="نرخ پاسخ‌دهی" :value="companyResponseRate === null ? null : companyResponseRate + '%'" icon="pi pi-chart-line" tone="success" :loading="statsLoading"  :meta="companyResponseRate === 0 ? 'هنوز پاسخی با نتیجه ثبت نشده است' : 'بر اساس آمار ثبت‌شده استعلام‌ها'" zero-meta="هنوز داده کافی برای محاسبه وجود ندارد" />
           <TemStatCard label="رتبه شرکت" :value="companyRank ? companyRank.toLocaleString('fa-IR') : null" icon="pi pi-star" tone="warning" :loading="statsLoading" :meta="companyRankTotal ? 'از ' + companyRankTotal.toLocaleString('fa-IR') + ' شرکت' : 'پس از محاسبه رتبه توسط سامانه نمایش داده می‌شود'" zero-meta="رتبه‌ای برای شرکت ثبت نشده است" />
         </div>
       </div>
@@ -251,10 +251,10 @@ const openInquiryCount = computed(() => stats.value?.received?.byStatus?.OPEN ??
 const pipelineStages = computed(() => {
   const by = stats.value?.received?.byStatus || {}
   return [
-    { key: 'new', label: 'جدید', value: by.SUBMITTED ?? 0, tone: 'info', icon: 'pi pi-inbox', to: { name: 'company-inquiries' } },
-    { key: 'reviewing', label: 'در حال بررسی', value: by.OPEN ?? 0, tone: 'primary', icon: 'pi pi-search', to: { name: 'company-inquiries' } },
+    { key: 'new', label: 'جدید', value: by.SUBMITTED ?? 0, tone: 'info', icon: 'pi pi-inbox', to: { name: 'company-inquiries', query: { scope: 'received', status: 'SUBMITTED' } } },
+    { key: 'reviewing', label: 'در حال بررسی', value: by.OPEN ?? 0, tone: 'primary', icon: 'pi pi-search', to: { name: 'company-inquiries', query: { scope: 'received', status: 'OPEN' } } },
     { key: 'answered', label: 'پاسخ‌داده‌شده', value: (by.CLOSED ?? 0) + (by.COMPLETED ?? 0), tone: 'success', icon: 'pi pi-check', to: { name: 'company-inquiries' } },
-    { key: 'expired', label: 'منقضی‌شده', value: by.EXPIRED ?? 0, tone: 'danger', icon: 'pi pi-calendar-times', to: { name: 'company-inquiries' } },
+    { key: 'expired', label: 'منقضی‌شده', value: by.EXPIRED ?? 0, tone: 'danger', icon: 'pi pi-calendar-times', to: { name: 'company-inquiries', query: { scope: 'received', status: 'EXPIRED' } } },
   ]
 })
 
@@ -365,8 +365,8 @@ const alerts = computed(() => {
       id: 'incomplete-products',
       severity: 'warning',
       icon: 'pi pi-file-edit',
-      message: `${incomplete.length} محصول ناقص (پیش‌نویس) نیازمند تکمیل و ارسال برای بررسی`,
-      to: { name: 'manage-products' },
+      message: `${incomplete.toLocaleString('fa-IR')} محصول ناقص (پیش‌نویس) نیازمند تکمیل و ارسال برای بررسی`,
+      to: { name: 'manage-products', query: { status: 'DRAFT' } },
     })
   }
   const rejected = productStatusCounts.value?.REJECTED ?? 0
@@ -375,8 +375,8 @@ const alerts = computed(() => {
       id: 'rejected-products',
       severity: 'danger',
       icon: 'pi pi-times-circle',
-      message: `${rejected.length} محصول رد شده نیازمند بازبینی و اصلاح`,
-      to: { name: 'manage-products' },
+      message: `${rejected.toLocaleString('fa-IR')} محصول رد شده نیازمند بازبینی و اصلاح`,
+      to: { name: 'manage-products', query: { status: 'REJECTED' } },
     })
   }
   const expiringInquiries = openInquiries.value.filter((inq) => {
@@ -413,7 +413,8 @@ function productStatusLabel(status) {
   return status || '—'
 }
 function productStatusTone(status) {
-  if (status === 'PUBLISHED' || status === 'APPROVED') return 'success'
+  if (status === 'PUBLISHED') return 'success'
+  if (status === 'APPROVED') return 'info'
   if (status === 'PENDING_REVIEW') return 'warning'
   if (status === 'REJECTED') return 'danger'
   return 'gray'
@@ -567,6 +568,9 @@ onMounted(() => {
   gap: var(--ds-section-gap);
 }
 .cd-kpi-groups { display: grid; gap: var(--ds-space-6); }
+.company-dashboard-operations { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); gap: var(--ds-space-4); align-items: start; }
+@media (max-width: 900px) { .company-dashboard-operations { grid-template-columns: minmax(0, 1fr); } }
+
 .cd-kpi-group { min-width: 0; }
 .cd-kpi-group__heading { display: flex; align-items: baseline; gap: .65rem; margin-bottom: .75rem; }
 .cd-kpi-group__heading h2 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--ds-color-text); }
@@ -777,6 +781,7 @@ onMounted(() => {
   .cd-donut-row { grid-template-columns: minmax(0, 1fr); justify-items: center; }
   .cd-commerce-metric--notice { grid-column: auto; }
   .cd-kpi-group__heading { flex-wrap: wrap; }
+  .company-dashboard-operations { grid-template-columns: minmax(0, 1fr); }
   .cd-alert { flex-wrap: wrap; }
   .cd-alert-action { width: 100%; justify-content: center; margin-top: var(--ds-space-1); }
 }

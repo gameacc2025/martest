@@ -190,7 +190,7 @@ export const dashboardMenu = [
     section: 'فروش خرده‌فروشی شرکت',
     items: [
       { title: 'سفارش‌های دریافتی', icon: 'pi pi-shopping-cart', route: 'company-retail-orders', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
-      { title: 'موجودی محصولات', icon: 'pi pi-warehouse', planned: true, roles: ['COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'پس از اتصال سرویس', severity: 'secondary' } },
+      { title: 'موجودی محصولات', icon: 'pi pi-box', planned: true, roles: ['COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'پس از اتصال سرویس', severity: 'secondary' } },
     ],
   },
   {
