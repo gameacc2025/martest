@@ -94,6 +94,13 @@ const pagination = ref({
   totalPages: 1,
 })
 
+const kpiItems = computed(() => [
+  { label: 'کل مجوزها', value: pagination.value.total, icon: 'pi pi-lock', tone: 'primary' },
+  { label: 'گروه‌های مجوز (صفحه جاری)', value: new Set(permissions.value.map((item) => item.group).filter(Boolean)).size, icon: 'pi pi-folder', tone: 'info' },
+  { label: 'دارای توضیح (صفحه جاری)', value: permissions.value.filter((item) => Boolean(item.description)).length, icon: 'pi pi-align-right', tone: 'success' },
+  { label: 'نمایش داده‌شده', value: permissions.value.length, icon: 'pi pi-list', tone: 'warning' },
+])
+
 const searchQuery = ref('')
 const tableColumns = [
   { field: 'id', header: 'شناسه', sortable: true, style: 'width: 5rem' },
