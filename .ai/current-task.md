@@ -305,3 +305,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Scoped the new global surface/form/table styles to .dash-layout so the public website does not inherit the panel-only restyle. Restored the shared PrimeVue theme and base design tokens to their previous website palette.
 - Admin and Company page data, API contracts, routes, permissions and business logic were not intentionally changed. The dashboard visuals use existing API data only; no synthetic historical series was added.
 - UI build/browser tests were not run in this pass, per the current instruction.
+
+### Admin company management refinement — 2026-11-04
+- Applied the approved reference-led panel visual language to the Admin Company List: compact title treatment, pale blue-to-white workspace surface, denser filter toolbar, cyan primary action, refined data-table hierarchy, company avatar treatment, and explicit focus/reduced-motion states.
+- The page continues to use the existing company store, server pagination, filters, permission gates, create/edit dialogs, status activation, and verification actions. No API, route, authorization, or business logic was changed.
+- Verification: source-only review; tests/build/browser rendering NOT RUN per owner instruction.
+- **Commit:** fd827614e35c8f91708294c3e0c3cfdee08d69d7.
+- Next: apply the same approved visual system to the Admin inquiry list and Company inquiry list, keeping the role-specific actions and real inquiry data intact.
+
