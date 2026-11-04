@@ -80,6 +80,11 @@ const routes = [
       // ── Orders ────────────────────────────────────────────
       { path: "/orders", name: "admin-orders", component: () => import("../pages/admin/orders/OrderList.vue"), meta: { title: "مدیریت سفارشات" } },
       // ── Inquiries ─────────────────────────────────────────
+      // Operational modules: UI-first, demo data until domain APIs are delivered.
+      { path: "/crm", name: "admin-crm", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "crm" }, meta: { title: "مدیریت ارتباط با مشتریان" } },
+      { path: "/finance", name: "admin-finance", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "finance" }, meta: { title: "مالی و تسویه حساب" } },
+      { path: "/support/tickets", name: "admin-tickets", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "tickets" }, meta: { title: "مرکز پشتیبانی و تیکت‌ها" } },
+      { path: "/retail/orders", name: "admin-retail-orders", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "orders" }, meta: { title: "سفارش‌های خرده‌فروشی" } },
       { path: "/inquiry-subscriptions", name: "admin-inquiry-subscriptions", component: () => import("../pages/admin/inquiries/InquirySubscriptions.vue"), meta: { title: "اشتراک‌های استعلام" } },
       { path: "/inquiries", name: "admin-inquiries", component: () => import("../pages/admin/inquiries/InquiryList.vue"), meta: { title: "مدیریت استعلام‌ها" } },
       { path: "/inquiries/create", name: "admin-inquiry-create", component: () => import("../pages/admin/inquiries/InquiryCreate.vue"), meta: { title: "ایجاد استعلام جدید" } },
