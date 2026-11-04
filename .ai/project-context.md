@@ -900,3 +900,12 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Support UI: shared packages/shared-ui/components/operations/TicketDeskWorkspace.vue powers Admin /support/tickets, Company /support/tickets and Website CUSTOMER /support/tickets. It supports inbox filtering and conversation preview; internal notes are shown only in Admin prototype. No ticket backend exists yet; contract is docs/SUPPORT_TICKETING_DOMAIN_DESIGN.md.
 
 - CRM prototype routes in Admin are backed by sample data only. Use docs/CRM_DOMAIN_DESIGN.md for the proposed STAFF-only Account/Lead/Opportunity/Activity/Task domain and API/permission contract; no CRM backend models or routes exist yet.
+
+
+## 2026-11-04 Website cart/checkout boundary
+
+- Website `/cart` and authenticated CUSTOMER-only `/checkout` routes now exist; the public header exposes the cart and its locally stored item count.
+- `apps/website/src/stores/cart.js` is browser-local state only. It validates positive prices/quantities and safely handles malformed localStorage; it is not a server cart or authoritative inventory/price source.
+- Checkout currently collects delivery details for review only. It intentionally does not collect card data, submit an order, reserve stock, or claim payment success. The final action is disabled until backend retail checkout and a real payment provider are implemented.
+- Do not add generic add-to-cart actions to every catalog product. Retail eligibility and server-validated price/stock must be introduced by the retail commerce backend first.
+- Status and activation criteria: `docs/WEBSITE_CART_CHECKOUT_STATUS.md`; domain contract: `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md`.
