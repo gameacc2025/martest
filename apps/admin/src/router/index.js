@@ -78,7 +78,7 @@ const routes = [
       // ── Categories ────────────────────────────────────────
       { path: "/categories", name: "admin-categories", component: () => import("../pages/admin/categories/CategoryList.vue"), meta: { title: "مدیریت دسته‌بندی‌ها" } },
       // ── Orders ────────────────────────────────────────────
-      { path: "/orders", name: "admin-orders", component: () => import("../pages/admin/orders/OrderList.vue"), meta: { title: "مدیریت سفارشات" } },
+      { path: "/orders", name: "admin-orders", redirect: { name: "admin-retail-orders" }, meta: { title: "سفارش‌های خرده‌فروشی" } },
       // ── Inquiries ─────────────────────────────────────────
       // Operational modules: UI-first, demo data until domain APIs are delivered.
       { path: "/crm", name: "admin-crm", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "crm" }, meta: { title: "مدیریت ارتباط با مشتریان" } },
