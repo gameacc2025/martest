@@ -163,7 +163,7 @@ onUnmounted(stopSlider)
 
     <div class="shop-feature-stage">
     <section v-if="activeFeatured" class="shop-hero" aria-label="محصولات منتخب فروشگاه" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="startSlider">
-      <div class="shop-hero-copy">
+      <div :key="activeFeatured.id || activeSlide" class="shop-hero-copy" aria-live="polite">
         <span class="shop-eyebrow"><i class="pi pi-sparkles"></i> پیشنهادهای منتخب فروشگاه</span>
         <h1>{{ productName(activeFeatured) }}</h1>
         <p>{{ activeFeatured.shortDescription || activeFeatured.description || 'مشخصات فنی و اطلاعات تأمین‌کننده این محصول را مشاهده کنید.' }}</p>
@@ -181,7 +181,7 @@ onUnmounted(stopSlider)
           <button type="button" aria-label="اسلاید بعدی" @click="nextSlide"><i class="pi pi-chevron-left"></i></button>
         </div>
       </div>
-      <router-link :to="productRoute(activeFeatured)" class="shop-hero-media" :aria-label="'مشاهده ' + productName(activeFeatured)">
+      <router-link :key="activeFeatured.id || activeSlide" :to="productRoute(activeFeatured)" class="shop-hero-media" :aria-label="'مشاهده ' + productName(activeFeatured)">
         <img v-if="imageOf(activeFeatured)?.url" :src="imageOf(activeFeatured).url" :alt="productName(activeFeatured)" width="720" height="460" fetchpriority="high" />
         <i v-else class="pi pi-box"></i>
         <span class="shop-hero-label">منتخب بازارگاه</span>
@@ -292,6 +292,9 @@ onUnmounted(stopSlider)
 .shop-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.82fr);gap:28px;align-items:center;min-height:316px;margin:0;padding:28px 30px;background:linear-gradient(116deg,#0b2548 0%,#103c69 58%,#176a91 100%);border-radius:5px;box-shadow:0 12px 30px rgba(13,43,83,.17);color:#fff;overflow:hidden}
 .shop-hero:before{content:"";position:absolute;width:390px;height:390px;inset-inline-end:-145px;top:-210px;border:1px solid rgba(255,255,255,.12);border-radius:50%;box-shadow:0 0 0 34px rgba(255,255,255,.035),0 0 0 72px rgba(255,255,255,.025);pointer-events:none}
 .shop-hero-copy,.shop-hero-media{z-index:1}
+.shop-hero-copy{animation:shop-hero-enter .42s cubic-bezier(.2,.7,.2,1) both}
+.shop-hero-media{animation:shop-hero-enter .5s cubic-bezier(.2,.7,.2,1) both}
+@keyframes shop-hero-enter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 .shop-company-banner{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;min-width:0;padding:25px 23px;background:linear-gradient(145deg,#f4f1ff 0%,#e7edff 100%);border:1px solid #e0ddf7;border-radius:5px;overflow:hidden}
 .shop-company-banner-icon{display:grid;place-items:center;width:44px;height:44px;background:#fff;color:#7164db;border-radius:5px;font-size:20px;box-shadow:0 4px 14px rgba(73,67,150,.1)}
 .shop-company-banner-kicker{color:#7669d7;font-size:11px;font-weight:700}
@@ -323,5 +326,5 @@ onUnmounted(stopSlider)
 @media(max-width:1200px){.shop-feature-stage{grid-template-columns:minmax(0,1fr) 260px}.shop-hero{gap:18px;padding:22px}.shop-catalog-layout{grid-template-columns:280px minmax(0,1fr)}.shop-category-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.shop-featured-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-catalog-layout{grid-template-columns:260px minmax(0,1fr)}}
 @media(max-width:820px){.shop-feature-stage{grid-template-columns:1fr}.shop-hero{grid-template-columns:minmax(0,1fr) minmax(220px,.75fr);padding:20px}.shop-hero-media{height:210px}.shop-company-banner{min-height:210px}.shop-benefits{grid-template-columns:1fr}.shop-catalog-layout{grid-template-columns:1fr;grid-template-areas:"filters" "products"}.shop-filter-sidebar{position:static}.shop-results-toolbar{align-items:flex-start;flex-direction:column}.shop-results-tools{width:100%;justify-content:space-between}}
 @media(max-width:520px){.shop-feature-stage{gap:10px}.shop-hero{grid-template-columns:1fr;padding:17px}.shop-hero-media{grid-row:1;height:190px}.shop-company-banner{padding:19px}.shop-page{padding-inline:12px}.shop-category-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-featured-grid{grid-template-columns:1fr}.shop-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.shop-product-image{height:135px}.shop-product-info{padding:9px}.shop-product-title{font-size:11px}.shop-product-bottom b{font-size:10px}.shop-results-tools>span{display:none}}
-@media(prefers-reduced-motion:reduce){.shop-product-card,.shop-category-tile,.shop-hero-media img{transition:none}}
+@media(prefers-reduced-motion:reduce){.shop-product-card,.shop-category-tile,.shop-hero-media img{transition:none}.shop-hero-copy,.shop-hero-media{animation:none}}
 </style>
