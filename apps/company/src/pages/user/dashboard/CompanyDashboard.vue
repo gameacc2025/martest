@@ -226,6 +226,9 @@ const dashboardMetrics = computed(() => buildCompanyDashboardMetrics({ stats: st
 // ── Quick actions ────────────────────────────────────────────
 const quickActions = [
   { label: 'پاسخ به استعلام‌های معلق', icon: 'pi pi-reply', to: { name: 'company-inquiries', query: { scope: 'received', status: 'SUBMITTED' } }, tone: 'primary' },
+  { label: 'مدیریت محصولات', icon: 'pi pi-box', to: { name: 'manage-products' }, tone: 'secondary' },
+  { label: 'مشاهده همه استعلام‌ها', icon: 'pi pi-inbox', to: { name: 'company-inquiries' }, tone: 'secondary' },
+  { label: 'مشاهده سفارش‌ها', icon: 'pi pi-shopping-cart', to: { name: 'company-retail-orders' }, tone: 'secondary' },
   { label: 'ویرایش پروفایل شرکت', icon: 'pi pi-building', to: { name: 'company-settings' }, tone: 'secondary' },
 ]
 
