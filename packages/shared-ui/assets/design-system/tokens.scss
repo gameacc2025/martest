@@ -66,30 +66,30 @@
      Primary sky #0790de · secondary turquoise #09d3d1 · technical blue #0b7bc9.
      Use these for hero/sidebar/footer surfaces instead of raw hex.
      -------------------------------------------------------- */
-  --ds-brand: #0790de;
-  --ds-accent: #27d3ee;          /* cyan CTA / active accents (dark text on top) */
-  --ds-accent-end: #4cd1f3;
-  --ds-turquoise: #09d3d1;       /* second chart series, "completed" accents */
-  --ds-sky: #4fabdd;
-  --ds-tech-blue: #0b7bc9;
-  --ds-navy: #092643;
-  --ds-amber: #fdc076;
-  --ds-green: #0fb683;
-  --ds-violet: #a193f6;
-  --ds-canvas: #eaeef9;
+  --ds-brand: #7c6cf6;
+  --ds-accent: #2bb3e8;          /* cyan CTA / active accents (dark text on top) */
+  --ds-accent-end: #8878f7;
+  --ds-turquoise: #2bb3e8;       /* second chart series, "completed" accents */
+  --ds-sky: #2bb3e8;
+  --ds-tech-blue: #7c6cf6;
+  --ds-navy: #0d1420;
+  --ds-amber: #f5a623;
+  --ds-green: #22c55e;
+  --ds-violet: #8878f7;
+  --ds-canvas: #f4f5fa;
   --ds-on-navy: #ffffff;
   --ds-on-navy-muted: #a9b8d6;
-  --ds-hero-gradient: linear-gradient(135deg, #086394 0%, #4fabdd 100%);
-  --ds-cta-gradient: linear-gradient(90deg, #3fddf3 0%, #4cd1f3 100%);
+  --ds-hero-gradient: linear-gradient(135deg, #7c6cf6 0%, #2bb3e8 100%);
+  --ds-cta-gradient: linear-gradient(90deg, #7c6cf6 0%, #8878f7 100%);
 
-  --ds-sidebar-bg: linear-gradient(180deg, #092643 0%, #062f4f 100%);
+  --ds-sidebar-bg: #0d1420;
   --ds-sidebar-border: rgba(169, 184, 214, 0.14);
   --ds-sidebar-fg: #d6dff0;
   --ds-sidebar-fg-strong: #ffffff;
   --ds-sidebar-muted: #a9b8d6;
   --ds-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --ds-sidebar-active-bg: #0d6d90;
-  --ds-sidebar-accent: #27e5f1;
+  --ds-sidebar-active-bg: #7c6cf6;
+  --ds-sidebar-accent: #8878f7;
 
   /* --------------------------------------------------------
      TYPOGRAPHY SCALE (modular, ~1.2 ratio)
@@ -145,10 +145,10 @@
   /* --------------------------------------------------------
      BORDER RADIUS
      -------------------------------------------------------- */
-  --ds-radius-sm: 4px;
-  --ds-radius-md: 6px;
-  --ds-radius-lg: 8px;
-  --ds-radius-xl: 8px;
+  --ds-radius-sm: 3px;
+  --ds-radius-md: 4px;
+  --ds-radius-lg: 4px;
+  --ds-radius-xl: 4px;
   --ds-radius-pill: 999px;
   --ds-radius-circle: 50%;
 
@@ -156,10 +156,10 @@
      SHADOW SYSTEM (elevation)
      -------------------------------------------------------- */
   /* Navy-tinted so elevation reads as part of the brand, not neutral grey. */
-  --ds-shadow-xs: 0 2px 8px rgba(9, 38, 67, 0.075), 0 1px 2px rgba(9, 38, 67, 0.035);
-  --ds-shadow-sm: 0 4px 12px rgba(0, 58, 84, 0.09), 0 1px 3px rgba(0, 58, 84, 0.045);
-  --ds-shadow-md: 0 8px 20px rgba(0, 58, 84, 0.13), 0 2px 5px rgba(0, 58, 84, 0.06);
-  --ds-shadow-lg: 0 8px 24px rgba(0, 58, 84, 0.13);
+  --ds-shadow-xs: 0 1px 3px rgba(20, 20, 60, 0.04);
+  --ds-shadow-sm: 0 1px 3px rgba(20, 20, 60, 0.04);
+  --ds-shadow-md: 0 4px 16px rgba(20, 20, 60, 0.09);
+  --ds-shadow-lg: 0 12px 28px rgba(20, 20, 60, 0.14);
   --ds-shadow-xl: 0 20px 40px rgba(0, 58, 84, 0.16);
 
   /* --------------------------------------------------------
