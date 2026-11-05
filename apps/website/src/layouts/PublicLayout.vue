@@ -499,8 +499,7 @@ function logout() {
           <div>
             <h3 class="public-footer-heading">دسترسی سریع</h3>
             <ul class="public-footer-list">
-              <li><router-link to="/" class="public-footer-link">صفحه اصلی</router-link></li>
-              <li><router-link to="/products" class="public-footer-link">همه محصولات</router-link></li>
+              <li><router-link :to="{ name: 'products' }" class="public-footer-link">همه محصولات</router-link></li>
               <li><router-link to="/categories" class="public-footer-link">دسته‌بندی‌ها</router-link></li>
               <li><router-link to="/about" class="public-footer-link">درباره ما</router-link></li>
             </ul></div>
