@@ -46,6 +46,17 @@ function goToSubcategory(categoryId, subcategoryId) {
   isMenuOpen.value = false
   router.push({ name: 'products', query: { category: String(subcategoryId || categoryId) } })
 }
+
+function categoryIcon(category) {
+  const label = String(category?.nameFa || category?.slug || '').toLowerCase()
+  if (/فیبر|نوری|fiber/.test(label)) return 'pi pi-share-alt'
+  if (/شبکه|سوئیچ|روتر|network|switch|router/.test(label)) return 'pi pi-sitemap'
+  if (/آنتن|بی.?سیم|wireless|antenna/.test(label)) return 'pi pi-wifi'
+  if (/کابل|cable/.test(label)) return 'pi pi-bolt'
+  if (/برق|باتری|power|ups/.test(label)) return 'pi pi-battery-full'
+  if (/تلفن|مخابرات|phone/.test(label)) return 'pi pi-phone'
+  return 'pi pi-tag'
+}
 </script>
 
 <template>
@@ -70,7 +81,7 @@ function goToSubcategory(categoryId, subcategoryId) {
               @mouseenter="toggleCategory(cat)"
               @click="goToCategory(cat.id)"
             >
-              <i class="pi pi-tag mega-cat-icon" aria-hidden="true"></i>
+              <i  :class="categoryIcon(cat)" class="mega-cat-icon" aria-hidden="true"></i>
               <span class="mega-cat-name">{{ cat.nameFa }}</span>
             </div>
           </div>
@@ -82,7 +93,6 @@ function goToSubcategory(categoryId, subcategoryId) {
                 <h3>{{ activeCategory.nameFa }}</h3>
                 <button class="mega-view-all" @click="goToCategory(activeCategory.id)">
                   مشاهده همه
-                  <i class="pi pi-arrow-left"></i>
                 </button>
               </div>
               <div class="mega-subcat-grid">
@@ -97,7 +107,7 @@ function goToSubcategory(categoryId, subcategoryId) {
               </div>
             </template>
             <div v-else class="mega-subcat-empty">
-              <i class="pi pi-arrow-left"></i>
+              <i class="pi pi-th-large"></i>
               <span>یک دسته را انتخاب کنید</span>
             </div>
           </div>
