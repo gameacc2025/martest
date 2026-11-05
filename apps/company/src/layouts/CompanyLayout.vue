@@ -149,11 +149,11 @@ onUnmounted(() => {
         <div class="company-message-drawer__head"><div><strong>پیام‌ها</strong><span>{{ newMessageCount.toLocaleString('fa-IR') }} پیام جدید</span></div><button type="button" aria-label="بستن پیام‌ها" @click="closeMessages"><i class="pi pi-times"></i></button></div>
         <div class="company-message-sample-note"><i class="pi pi-info-circle"></i> پیام‌های نمایشی؛ تا زمان اتصال API پیام‌ها</div>
         <div class="company-message-list">
-          <router-link v-for="message in sampleMessages" :key="message.id" :to="{ name: 'company-inquiries' }" class="company-message-item" :class="{ 'is-unread': message.unread }" @click="closeMessages">
+          <router-link v-for="message in sampleMessages" :key="message.id" :to="{ name: 'notifications' }" class="company-message-item" :class="{ 'is-unread': message.unread }" @click="closeMessages">
             <span class="company-message-item__avatar"><i class="pi pi-user"></i></span><span class="company-message-item__body"><span class="company-message-item__top"><strong>{{ message.sender }}</strong><time>{{ message.time }}</time></span><b>{{ message.subject }}</b><small>{{ message.preview }}</small></span><i v-if="message.unread" class="company-message-item__dot" aria-label="خوانده‌نشده"></i>
           </router-link>
         </div>
-        <router-link :to="{ name: 'company-inquiries' }" class="company-message-drawer__footer" @click="closeMessages">مشاهده همه پیام‌ها <i class="pi pi-angle-left"></i></router-link>
+        <router-link :to="{ name: 'notifications' }" class="company-message-drawer__footer" @click="closeMessages">مشاهده همه پیام‌ها <i class="pi pi-angle-left"></i></router-link>
       </aside>
 
       <!-- Breadcrumb is intentionally outside the constrained content wrapper. -->
