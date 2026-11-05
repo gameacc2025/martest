@@ -145,10 +145,10 @@
   /* --------------------------------------------------------
      BORDER RADIUS
      -------------------------------------------------------- */
-  --ds-radius-sm: 6px;
-  --ds-radius-md: var(--content-border-radius, 10px);
-  --ds-radius-lg: 14px;
-  --ds-radius-xl: 18px;
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 6px;
+  --ds-radius-lg: 8px;
+  --ds-radius-xl: 8px;
   --ds-radius-pill: 999px;
   --ds-radius-circle: 50%;
 
@@ -156,9 +156,9 @@
      SHADOW SYSTEM (elevation)
      -------------------------------------------------------- */
   /* Navy-tinted so elevation reads as part of the brand, not neutral grey. */
-  --ds-shadow-xs: 0 1px 2px rgba(9, 38, 67, 0.06);
-  --ds-shadow-sm: 0 1px 3px rgba(0, 58, 84, 0.08), 0 1px 2px rgba(0, 58, 84, 0.04);
-  --ds-shadow-md: 0 4px 12px rgba(0, 58, 84, 0.09);
+  --ds-shadow-xs: 0 2px 8px rgba(9, 38, 67, 0.075), 0 1px 2px rgba(9, 38, 67, 0.035);
+  --ds-shadow-sm: 0 4px 12px rgba(0, 58, 84, 0.09), 0 1px 3px rgba(0, 58, 84, 0.045);
+  --ds-shadow-md: 0 8px 20px rgba(0, 58, 84, 0.13), 0 2px 5px rgba(0, 58, 84, 0.06);
   --ds-shadow-lg: 0 8px 24px rgba(0, 58, 84, 0.13);
   --ds-shadow-xl: 0 20px 40px rgba(0, 58, 84, 0.16);
 
@@ -221,8 +221,8 @@
 :root.app-dark {
   --ds-hero-gradient: linear-gradient(135deg, #062f4f 0%, #086394 100%);
   --ds-sidebar-bg: linear-gradient(180deg, #071d36 0%, #05263f 100%);
-  --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --ds-shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --ds-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.38), 0 1px 3px rgba(0, 0, 0, 0.24);
   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
   --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
   --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.65);

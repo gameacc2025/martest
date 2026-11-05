@@ -314,7 +314,7 @@ function logout() {
   max-width: 520px;
   height: 46px;
   padding: 0 18px 0 8px;
-  border-radius: 24px;
+  border-radius: 6px;
   background: #f3f6fc;
   box-shadow: 0 2px 6px rgba(20, 40, 90, 0.05);
 }
@@ -349,7 +349,7 @@ function logout() {
   width: min(70vw, 20rem);
   height: 40px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: 6px;
   background: #f3f6fc;
 }
 
@@ -378,7 +378,7 @@ function logout() {
   height: 30px;
   overflow: hidden;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--tm-cyan-soft);
   color: var(--tm-cyan-deep);
 }

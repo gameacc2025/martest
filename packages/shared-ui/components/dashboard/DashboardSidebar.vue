@@ -12,7 +12,7 @@ import BrandMark from '../common/BrandMark.vue'
  * a support card and a copyright line.
  *
  * Features kept from the previous shell:
- *   - Expanded 207px / collapsed 76px (icon-only) rail.
+ *   - Expanded 256px / collapsed 76px (icon-only) rail.
  *   - Collapse button (desktop) with persisted state.
  *   - Tooltips on icons while collapsed (PrimeVue `v-tooltip`).
  *   - Nested submenus (expand/collapse) + section groups.
@@ -259,7 +259,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 
 <style scoped>
 .dash-sidebar {
-  --dash-sidebar-expanded: 207px;
+  --dash-sidebar-expanded: 256px;
   --dash-sidebar-collapsed: 76px;
   display: flex;
   flex-direction: column;
@@ -295,7 +295,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   display: block;
   margin-bottom: 26px;
   padding: 11px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: linear-gradient(90deg, #16b8e8, #2ed3ee);
   color: #05213f;
   font-size: 14px;
@@ -334,7 +334,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   min-height: 44px;
   padding: 12px 16px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: #e2e9f7;
   font-family: inherit;
@@ -411,7 +411,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   margin-top: auto;
   padding: 52px 14px 14px;
   border: 1px solid #1c3d6b;
-  border-radius: 10px;
+  border-radius: 6px;
   background: linear-gradient(#10315d, #0a2347);
   text-align: center;
   position: relative;
@@ -463,7 +463,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   .dash-sidebar-desktop-only { display: inline-flex; }
 }
 @media (max-width: 991px) {
-  .dash-sidebar { width: 207px; }
+  .dash-sidebar { width: 256px; }
   .dash-sidebar-desktop-only { display: none; }
 }
 </style>

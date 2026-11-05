@@ -148,7 +148,7 @@ onUnmounted(() => {
 
 <style scoped>
 .dash-layout {
-  --dash-sidebar-width: 207px;
+  --dash-sidebar-width: 256px;
   --dash-sidebar-collapsed-width: 76px;
   --dash-header-height: 4rem;
 
