@@ -11,7 +11,7 @@ defineProps({ homeRoute: { type: Object, default: () => ({ name: 'home' }) } })
 </template>
 
 <style scoped>
-.page-header-pro { display: flex; min-width: 0; min-height: 2.75rem; align-items: center; margin: .5rem 0 .75rem; padding: 0; background: transparent; }
+.page-header-pro { display: flex; width: 100%; min-width: 0; min-height: 2.5rem; align-items: center; margin: 0; padding: .45rem clamp(1rem, 1.55vw, 1.65rem); background: var(--tm-surface, #fff); border-block: 1px solid var(--tm-line, #eceef5); box-shadow: 0 1px 3px rgba(20, 20, 60, .035); }
 .page-header-pro__breadcrumb { min-width: 0; padding: 0; }
-@media (max-width: 640px) { .page-header-pro { min-height: 2.5rem; margin-block: .35rem .5rem; } }
+@media (max-width: 640px) { .page-header-pro { min-height: 2.35rem; padding-inline: .75rem; } }
 </style>
