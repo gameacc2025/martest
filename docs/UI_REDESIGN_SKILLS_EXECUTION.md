@@ -218,3 +218,13 @@ Next phases must apply this corrected direction across remaining pages, not repe
 
 - Final polish follow-up (`a87be94`): company dashboard analytics/hero surfaces, company inquiry message bubbles, About Us product cards and Website inquiry-subscription plan/panel cards were brought onto the shared 6–8px radius and elevation rules.
 - Latest CI on the preceding documentation commit confirmed frontend/shared tests PASS and all three frontend production builds PASS; backend test step continues to fail only on the two existing assertions for invalid POST /messages payload and missing uploadAvatar file. Migration validation passed. Latest commit CI/migration/runtime workflows are still running/pending.
+
+
+## 2026-11-05 — Exact TEM reference port (corrective visual pass)
+- User clarified that the supplied `tem/analytics.html` and `tem/shop.html` are the exact visual references, not inspiration. Replaced the previous cyan/blue workspace treatment with the actual `tem/style.css` palette and surface language.
+- Source values now used by the shared visual layer: canvas `#f4f5fa`, ink `#1d2130`, white cards, 4px card corners, hairline `#eceef5`, subtle `0 1px 3px rgba(20,20,60,.04)` elevation, violet `#7c6cf6`, cyan `#2bb3e8`, green `#22c55e`, orange `#ff6a3d`, amber `#f5a623`.
+- Replaced the flat/transparent card and stat overrides in `skill-refinements.scss` with the TEM analytics KPI/card hierarchy, colored compact icon tiles, real white panel surfaces, table treatment and shop-style card surfaces.
+- Removed the conflicting appended cyan gradient workspace theme from shared `main.scss`; the exact reference port is now the final shared layer for Admin, Company and Website. Existing RTL direction, live APIs, route logic, permissions and business rules are preserved.
+- Updated the semantic brand/radius/elevation tokens and `tem.scss` aliases to the supplied template values.
+- Commit: `eba0a64852d1d93367ef9ae4474f37c9ead28ac5`.
+- Verification note: source changes committed to `main`; CI/build and browser visual inspection must be checked separately. Do not claim pixel-perfect verification without browser screenshots.
