@@ -725,3 +725,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Source commits: b70b7552, 3c47ae03, 6cdfa7a8, 93318ebb; test commits: 5d3b55df, 82397131, 50f6fc86.
 
 - Category rows now select a context-appropriate icon (fiber, network, wireless, cable, power, telecom, or generic tag) and the remaining decorative arrows were removed from the category navigation. Follow-up source commit: f958be9f.
+
+
+## 2026-11-05 — WEBSITE-PUBLIC-LAYOUT-TEMPLATE-ERROR-FIX
+- **Status:** PATCHED — runtime/build verification pending.
+- Fixed the header authentication conditional structure in `apps/website/src/layouts/PublicLayout.vue`: replaced adjacent `<template v-if>` / `<template v-else>` wrappers with explicit `<div v-if>` / `<div v-else>` containers to make the header branch boundaries unambiguous while preserving the authenticated and guest controls.
+- The full template tag-balance check reports no unmatched or unclosed elements. Vite build/dev server has not been run in this remote GitHub edit session.
+- Commit: 3c1beac5777e9384766d21d2fd44d0a21e8743f4.
