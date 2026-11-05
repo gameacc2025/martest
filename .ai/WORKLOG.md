@@ -3607,3 +3607,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Removed the redundant visible `TemPageHeader` title/description block from `OperationalWorkspace`, used by the prototype order/settlement/report workspaces; preserved the workspace notice, filters, actions, and table content.
 - Existing heading actions remain visible; the semantic heading remains available to assistive technology. No route, sidebar, API, backend, permission, or business-logic changes.
 - Static source review only; automated tests/build/browser verification not run in this remote edit session.
+
+
+## 2026-11-05 — WEBSITE-HOMEPAGE-CATALOGUE-HEADER-01
+- **Status:** IMPLEMENTED — verification pending.
+- **Goal:** Remove the redundant homepage surface from navigation by making the existing all-products catalogue the root page, correct the category menu trigger styling, and place the cart beside a compact recent-notifications dropdown.
+- **Changes:** Root route renders the unchanged ProductListing component; `/products` remains a route alias; old Home component is no longer imported/routed. Removed duplicate homepage navigation entry and updated brand/logout/guest redirects to catalogue route. Flattened shared MegaMenu trigger styling. Added live five-item notification preview using existing unread-count/list endpoints; dropdown opens toward the left in RTL. Cart is adjacent to bell for authenticated users and remains visible for guests.
+- **Tests:** Added PublicLayout coverage for the five-notification limit and preview. Tests/build/browser checks NOT RUN in this remote GitHub editing session.
+- **Backend impact:** None. No API contracts, schema, authorization, or business logic changed.
+- **Commits:** `46a2cdce31555a96a82ba1d196fdd6cf6b2776c4`, `78225fff5cddb96ee77d444b507e1d68086ab9f7`, `32a23291204ded77caf70c3d185eb52390b9f6e9`, `ac03fe61b74db917cb719b6d03df984449a6fdd2`, `753e421e0b35df584aea94d28f3b786fd30c109b`, `d5da3e39e95278a0bbd07c6b655d4fce009863a1`.
+- **Next:** Run Website test/build, validate header and dropdown at mobile/desktop widths, and search for stale `home` route-name references.
