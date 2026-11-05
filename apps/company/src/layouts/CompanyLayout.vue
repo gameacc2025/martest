@@ -95,7 +95,6 @@ onUnmounted(() => {
         :mobile-open="mobileOpen"
         :menu-items="menu"
         :user="authStore.user"
-        :primary-action="{ label: 'ثبت محصول جدید', route: 'manage-product-create' }"
         @navigate="closeMobile"
         @toggle-collapse="toggleSidebar"
       />
