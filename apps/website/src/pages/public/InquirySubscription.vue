@@ -175,7 +175,7 @@ async function requestPlan(plan) {
 
 <style scoped>
 .subscription-page { display: flex; flex-direction: column; gap: 1.25rem; max-width: 80rem; margin: 0 auto; padding: clamp(1rem, 2vw, 1.75rem); direction: rtl; color: var(--ds-color-text); }
-.subscription-page .panel { padding: 1.25rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: none; }
+.subscription-page .panel { padding: 1.25rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: var(--tm-card-shadow); }
 .subscription-page .panel.active { border-inline-start: 3px solid var(--ds-color-success); }
 .subscription-page .panel.pending { border-inline-start: 3px solid var(--ds-color-warning); }
 .subscription-page .quota-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .75rem; margin-top: 1rem; }
@@ -195,7 +195,7 @@ async function requestPlan(plan) {
 .subscription-page .active-pill { background: color-mix(in srgb, var(--ds-color-success) 12%, var(--ds-color-surface)); color: var(--ds-color-success); }
 .subscription-page .pending-pill { background: color-mix(in srgb, var(--ds-color-warning) 12%, var(--ds-color-surface)); color: var(--ds-color-warning); }
 .subscription-page .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1rem; margin-top: 1rem; }
-.subscription-page .plan-card { display: flex; min-width: 0; flex-direction: column; gap: 1rem; padding: 1.25rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: none; transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast); }
+.subscription-page .plan-card { display: flex; min-width: 0; flex-direction: column; gap: 1rem; padding: 1.25rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); box-shadow: var(--tm-card-shadow); transition: border-color var(--ds-transition-fast), background-color var(--ds-transition-fast); }
 .subscription-page .plan-card.chosen { border-color: var(--ds-color-primary); box-shadow: inset 0 0 0 1px var(--ds-color-primary); }
 .subscription-page .plan-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
 .subscription-page .plan-head h3 { margin: 0; color: var(--ds-color-text); font-size: 1.05rem; }

@@ -837,7 +837,7 @@ function formatPrice(price) {
 
 .message-list {display:grid;gap:.75rem;max-height:420px;overflow:auto;margin:1rem 0}
 
-.message-bubble {border:1px solid var(--tm-line);border-radius:10px;padding:.8rem 1rem;background:var(--tm-surface);max-width:92%}
+.message-bubble {border:1px solid var(--tm-line);border-radius:6px;padding:.8rem 1rem;background:var(--tm-surface);max-width:92%}
 
 .message-bubble.message-mine {margin-inline-start:auto;background:var(--tm-canvas)}
 
