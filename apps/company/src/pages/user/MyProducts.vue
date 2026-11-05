@@ -66,7 +66,6 @@ function formatPrice(price) {
       description="محصولاتی را که مدیریت آن‌ها به حساب شما واگذار شده جستجو و پیگیری کنید."
     >
       <template #actions>
-        <router-link :to="{ name: 'manage-product-create' }" class="products-create-link"><i class="pi pi-plus" aria-hidden="true"></i> محصول جدید</router-link>
       </template>
     </WorkspacePageHeading>
 
