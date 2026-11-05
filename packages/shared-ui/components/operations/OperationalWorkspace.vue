@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import TemPageHeader from '../ui/TemPageHeader.vue'
@@ -18,8 +19,18 @@ const props = defineProps({
   demo: { type: Boolean, default: true },
 })
 const query = ref('')
-const selectedStatus = ref('همه')
+const route = useRoute()
+const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : 'همه')
 const statuses = computed(() => ['همه', ...new Set(props.rows.map((row) => row.statusLabel).filter(Boolean))])
+
+watch(
+  () => route.query.status,
+  (status) => {
+    const nextStatus = typeof status === 'string' ? status : 'همه'
+    selectedStatus.value = statuses.value.includes(nextStatus) ? nextStatus : 'همه'
+  },
+  { immediate: true },
+)
 const filteredRows = computed(() => props.rows.filter((row) => {
   const matchesQuery = !query.value || Object.values(row).some((value) => String(value ?? '').toLowerCase().includes(query.value.toLowerCase()))
   const matchesStatus = selectedStatus.value === 'همه' || row.statusLabel === selectedStatus.value
