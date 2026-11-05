@@ -630,3 +630,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Preserve product creation buttons only in the canonical Admin and Company product-list pages.
 - Add a DashboardSidebar regression test for the absence of duplicate controls/CTA.
 - No API/backend/auth/permission/route/business-logic changes. Build and tests have not yet been run in this remote editing session.
+
+
+## Latest UI slice — Header/breadcrumb/dashboard cleanup (2026-11-05)
+- Shared Admin/Company header: removed workspace-label chip entirely.
+- Shared PageHeader: breadcrumb now sits in a compact full-width card, aligned to the main workspace gutters.
+- Company dashboard: removed the active/verified status toolbar and the Products KPI heading/subtitle; company status remains available in the summary panel.
+- No API/backend/auth/permission/route/business-logic changes. Static source checks only; tests/build/browser NOT RUN.
