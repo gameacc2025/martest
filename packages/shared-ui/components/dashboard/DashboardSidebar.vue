@@ -43,7 +43,9 @@ const route = useRoute()
 const openGroups = ref({})
 
 function isItemActive(item) {
-  return item.route && route.name === item.route
+  if (!item.route || route.name !== item.route) return false
+  if (item.query?.status) return String(route.query.status || 'همه') === String(item.query.status)
+  return true
 }
 
 function isParentActive(item) {
@@ -165,7 +167,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
                     </a>
                     <router-link
                       v-else
-                      :to="{ name: child.route }"
+                      :to="{ name: child.route, query: child.query || undefined }"
                       class="dash-sidebar-link dash-sidebar-sublink"
                       :class="{ 'dash-sidebar-link--active': isItemActive(child) }"
                       :aria-current="isItemActive(child) ? 'page' : undefined"
@@ -225,13 +227,6 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
       </template>
     </nav>
 
-    <!-- Support card (tem `.sup`) -->
-    <div class="dash-sidebar-support">
-      <span class="dash-sidebar-support-mark" aria-hidden="true"><i class="pi pi-headset"></i></span>
-      <b>با ما در ارتباط باشید</b>
-      <small>پشتیبانی ۲۴ ساعته</small>
-      <span class="dash-sidebar-support-btn">تماس پشتیبانی ←</span>
-    </div>
     <div class="dash-sidebar-copyright">2025 Telecom Market ©</div>
   </aside>
 </template>
@@ -368,40 +363,9 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 .dash-submenu-leave-to { max-height: 0; opacity: 0; }
 .dash-sidebar-link:focus-visible { outline: 2px solid #2ed3ee; outline-offset: 2px; }
 
-/* ---- Support + copyright (tem `.sup` / `.cp`) ---- */
-.dash-sidebar-support {
-  margin-top: auto;
-  padding: 52px 14px 14px;
-  border: 1px solid #1c3d6b;
-  border-radius: 6px;
-  background: linear-gradient(#10315d, #0a2347);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-.dash-sidebar-support-mark {
-  position: absolute;
-  top: 8px;
-  left: 0;
-  right: 0;
-  display: grid;
-  place-items: center;
-  font-size: 32px;
-  color: #2ed3ee;
-}
-.dash-sidebar-support b { display: block; margin-bottom: 4px; color: #fff; font-size: 13px; }
-.dash-sidebar-support small { font-size: 11px; color: #9fb4d8; }
-.dash-sidebar-support-btn {
-  display: block;
-  margin-top: 12px;
-  padding: 8px;
-  border-radius: 6px;
-  background: #17b4d9;
-  color: #05213f;
-  font-weight: 600;
-}
 .dash-sidebar-copyright {
-  margin-top: 16px;
+  margin-top: auto;
+  padding-top: 16px;
   color: #9fb4d8;
   font-size: 10px;
   text-align: center;
@@ -417,7 +381,6 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   .dash-sidebar--collapsed .dash-sidebar-count,
   .dash-sidebar--collapsed .dash-sidebar-planned-badge,
   .dash-sidebar--collapsed .dash-sidebar-caret,
-  .dash-sidebar--collapsed .dash-sidebar-support,
   .dash-sidebar--collapsed .dash-sidebar-copyright { display: none; }
   .dash-sidebar--collapsed .dash-sidebar-link { justify-content: center; padding-inline: 0; }
   .dash-sidebar--collapsed .dash-sidebar-link-icon { width: auto; }
