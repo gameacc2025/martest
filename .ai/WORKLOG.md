@@ -3600,3 +3600,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added focused regression tests for Admin, Company, object-shaped roles, missing roles, permission gates and app-specific route filtering.
 - Updated the stale navigation comment: retail order pages are UI prototypes with sample data; no Orders API/backend domain was introduced.
 - Frontend-only change. No backend, schema, API, database, auth contract or permission assignments changed. Automated test/build results are pending execution in the repository environment.
+
+
+## 2026-11-05 — Remove duplicate Admin/Company page titles
+- Made `WorkspacePageHeading` screen-reader-only by default for the Admin and Company workspace pages. The breadcrumb remains the single visible page locator, while the active sidebar item continues to indicate the selected section.
+- Removed the redundant visible `TemPageHeader` title/description block from `OperationalWorkspace`, used by the prototype order/settlement/report workspaces; preserved the workspace notice, filters, actions, and table content.
+- Existing heading actions remain visible; the semantic heading remains available to assistive technology. No route, sidebar, API, backend, permission, or business-logic changes.
+- Static source review only; automated tests/build/browser verification not run in this remote edit session.
