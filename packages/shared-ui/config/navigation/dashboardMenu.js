@@ -178,13 +178,35 @@ export const dashboardMenu = [
   {
     section: 'فروش خرده‌فروشی',
     items: [
-      { title: 'مدیریت سفارش‌ها', icon: 'pi pi-shopping-cart', route: 'admin-retail-orders', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+      {
+        title: 'سفارشات',
+        icon: 'pi pi-shopping-cart',
+        roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
+        children: [
+          { title: 'همه سفارش‌ها', icon: 'pi pi-list', route: 'admin-retail-orders', query: { status: 'همه' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+          { title: 'در انتظار پردازش', icon: 'pi pi-hourglass', route: 'admin-retail-orders', query: { status: 'در انتظار پردازش' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+          { title: 'ارسال‌شده', icon: 'pi pi-truck', route: 'admin-retail-orders', query: { status: 'ارسال‌شده' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+          { title: 'تحویل‌شده', icon: 'pi pi-check-circle', route: 'admin-retail-orders', query: { status: 'تحویل‌شده' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+          { title: 'مرجوعی', icon: 'pi pi-replay', route: 'admin-retail-orders', query: { status: 'مرجوعی' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+        ],
+      },
     ],
   },
   {
     section: 'فروش خرده‌فروشی شرکت',
     items: [
-      { title: 'سفارش‌های دریافتی', icon: 'pi pi-shopping-cart', route: 'company-retail-orders', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+      {
+        title: 'سفارشات',
+        icon: 'pi pi-shopping-cart',
+        roles: ['COMPANY_MANAGER', 'COMPANY_USER'],
+        children: [
+          { title: 'همه سفارش‌ها', icon: 'pi pi-list', route: 'company-retail-orders', query: { status: 'همه' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+          { title: 'جدید؛ نیازمند پذیرش', icon: 'pi pi-inbox', route: 'company-retail-orders', query: { status: 'جدید؛ نیازمند پذیرش' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+          { title: 'در حال آماده‌سازی', icon: 'pi pi-box', route: 'company-retail-orders', query: { status: 'در حال آماده‌سازی' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+          { title: 'ارسال‌شده', icon: 'pi pi-truck', route: 'company-retail-orders', query: { status: 'ارسال‌شده' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+          { title: 'تحویل‌شده', icon: 'pi pi-check-circle', route: 'company-retail-orders', query: { status: 'تحویل‌شده' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+        ],
+      },
       { title: 'موجودی محصولات', icon: 'pi pi-box', planned: true, roles: ['COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'پس از اتصال سرویس', severity: 'secondary' } },
     ],
   },
