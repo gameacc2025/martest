@@ -6,7 +6,6 @@
     {{ companyStatusLabel }}
     <span v-if="company?.isVerified" class="company-dashboard-verified"><i class="pi pi-verified" aria-hidden="true"></i> تأیید شده</span>
   </span>
-  <router-link :to="{ name: 'manage-product-create' }" class="tm-btn tm-btn--accent"><i class="pi pi-plus" aria-hidden="true"></i> افزودن محصول</router-link>
 </div>
     <!-- Alerts — actionable items first -->
     <div v-if="alerts.length" class="cd-alerts">
@@ -74,7 +73,6 @@
         <i class="pi pi-box" aria-hidden="true"></i>
         <strong>هنوز محصولی ثبت نشده است</strong>
         <span>با ثبت اولین محصول، وضعیت کاتالوگ در این بخش نمایش داده می‌شود.</span>
-        <router-link :to="{ name: 'manage-product-create' }" class="tm-btn tm-btn--sm">ثبت محصول</router-link>
       </div>
       <div v-else-if="dominantProductSegment" class="cd-product-progress-list">
         <div v-for="segment in productLegendItems" :key="segment.label" class="cd-product-progress-item">
