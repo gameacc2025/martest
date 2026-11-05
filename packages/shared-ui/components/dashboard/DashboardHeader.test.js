@@ -12,8 +12,8 @@ vi.mock('vue-router', () => ({
 
 import DashboardHeader from './DashboardHeader.vue'
 
-describe('DashboardHeader workspace context', () => {
-  it('renders the host application workspace label', () => {
+describe('DashboardHeader', () => {
+  it('never renders the removed workspace identity chip', () => {
     const wrapper = mount(DashboardHeader, {
       props: { workspaceLabel: 'مدیریت بازارگاه' },
       global: {
@@ -27,11 +27,9 @@ describe('DashboardHeader workspace context', () => {
       },
     })
 
-    expect(wrapper.find('.dash-header-workspace').exists()).toBe(true)
-    expect(wrapper.find('.dash-header-workspace-label').text()).toBe('مدیریت بازارگاه')
-    expect(wrapper.find('.dash-header-workspace').attributes('aria-label')).toBe('فضای کاری فعلی')
+    expect(wrapper.find('.dash-header-workspace').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('مدیریت بازارگاه')
   })
-
 
   it('provides descriptive labels for notification, theme and account controls', () => {
     const wrapper = mount(DashboardHeader, {
@@ -80,21 +78,4 @@ describe('DashboardHeader workspace context', () => {
     await wrapper.setProps({ collapsed: false, mobileOpen: false })
     expect(wrapper.find('.dash-header-desktop-only').attributes('aria-label')).toBe('جمع کردن منو')
     expect(wrapper.find('.dash-header-start .dash-header-mobile-only').attributes('aria-label')).toBe('باز کردن منو')
-  })
-
-  it('does not render an empty workspace identity when no label is supplied', () => {
-    const wrapper = mount(DashboardHeader, {
-      global: {
-        stubs: {
-          Menu: true,
-          Badge: true,
-          Popover: true,
-          DashboardBreadcrumb: true,
-          RouterLink: { template: '<a><slot /></a>' },
-        },
-      },
-    })
-
-    expect(wrapper.find('.dash-header-workspace').exists()).toBe(false)
-  })
-})
+  })})
