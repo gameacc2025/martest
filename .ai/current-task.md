@@ -713,3 +713,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Keep semantic page headings available to screen readers. Preserve heading action slots and all page content/actions.
 - Remove the redundant title block from `OperationalWorkspace` pages as well.
 - Frontend-only: no routes, menu definitions, APIs, backend, permissions, or business logic changes. Tests/build/browser verification pending.
+
+
+## 2026-11-05 — WEBSITE-NAV-NOTIFICATION-DRAWER-CATEGORY-FILTER-02
+- **Status:** IMPLEMENTED — verification pending.
+- Changed the public header's primary catalogue label from «همه محصولات» to «منوی اصلی» and added appropriate icons to desktop/mobile navigation items. Replaced the hamburger glyph with a compass/navigation icon; removed the category trigger caret and per-category chevron indicators.
+- Replaced the compact notification dropdown with a fixed, full-height drawer that slides in from the physical left edge, includes a backdrop/close control, and retains the latest-five live API preview and unread styling. No notification API or backend changes.
+- Fixed category navigation: the menu previously passed category slugs, while ProductListing expects numeric category IDs and sends them as categoryId to the existing products API. Main-category and subcategory clicks now navigate with their IDs so the catalogue's existing route watcher reloads filtered products.
+- Updated MegaMenu and PublicLayout regression tests for category IDs, subcategory filtering, drawer presentation and primary navigation label. Tests/build/browser checks have NOT been run in this GitHub remote-edit session.
+- No backend, database, API contract, authentication or permissions changes.
+- Source commits: b70b7552, 3c47ae03, 6cdfa7a8, 93318ebb; test commits: 5d3b55df, 82397131, 50f6fc86.
