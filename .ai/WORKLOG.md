@@ -3621,3 +3621,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Follow-up alignment:** The cart control was moved immediately beside the notification bell for signed-in users while retaining guest cart access; the duplicate footer homepage link was also removed and a navigation regression assertion was added. Follow-up commits: `d5da3e39e95278a0bbd07c6b655d4fce009863a1`, `ed298f6d6a6ff3700df5634162f03c0c0abe9c34`, `e54327385d0e6cb387103276f14c95257042cfad`.
 
 - **Test maintenance:** Updated the cart trigger accessible-name expectation after the control was separated from the RFQ menu. Commit: `0606b2af677b855c46bfacd45ed08ee63c95d0c5`.
+
+
+## 2026-11-05 — WEBSITE-NAV-NOTIFICATION-DRAWER-CATEGORY-FILTER-02
+- **Status:** IMPLEMENTED — verification pending.
+- Changed the public header's primary catalogue label from «همه محصولات» to «منوی اصلی» and added appropriate icons to desktop/mobile navigation items. Replaced the hamburger glyph with a compass/navigation icon; removed the category trigger caret and per-category chevron indicators.
+- Replaced the compact notification dropdown with a fixed, full-height drawer that slides in from the physical left edge, includes a backdrop/close control, and retains the latest-five live API preview and unread styling. No notification API or backend changes.
+- Fixed category navigation: the menu previously passed category slugs, while ProductListing expects numeric category IDs and sends them as categoryId to the existing products API. Main-category and subcategory clicks now navigate with their IDs so the catalogue's existing route watcher reloads filtered products.
+- Updated MegaMenu and PublicLayout regression tests for category IDs, subcategory filtering, drawer presentation and primary navigation label. Tests/build/browser checks have NOT been run in this GitHub remote-edit session.
+- No backend, database, API contract, authentication or permissions changes.
+- Source commits: b70b7552, 3c47ae03, 6cdfa7a8, 93318ebb; test commits: 5d3b55df, 82397131, 50f6fc86.
