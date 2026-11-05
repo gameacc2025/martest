@@ -210,8 +210,8 @@ const upcomingDeadlines = computed(() =>
     }))
 )
 
-const recentApprovedProducts = computed(() => products.value.filter(p => p.status === 'APPROVED').slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'محصول شرکت', icon: 'pi pi-box', badge: 'تأیید شده', badgeTone: 'success', to: { name: 'manage-products', query: { status: 'APPROVED' } } })))
-const recentPendingProducts = computed(() => products.value.filter(p => p.status === 'PENDING_REVIEW').slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'در صف بررسی', icon: 'pi pi-clock', badge: 'در انتظار تأیید', badgeTone: 'warning', to: { name: 'manage-products', query: { status: 'PENDING_REVIEW' } } })))
+const recentApprovedProducts = computed(() => products.value.filter(p => ['APPROVED', 'PUBLISHED'].includes(p.status)).slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'محصول شرکت', icon: 'pi pi-box', badge: 'تأیید شده', badgeTone: 'success', to: { name: 'manage-products', query: { status: 'APPROVED' } } })))
+const recentPendingProducts = computed(() => products.value.filter(p => ['PENDING_REVIEW', 'DRAFT', 'REJECTED'].includes(p.status)).slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'نیازمند بررسی', icon: 'pi pi-clock', badge: productStatusLabel(p.status), badgeTone: 'warning', to: { name: 'manage-products', query: { status: 'PENDING_REVIEW' } } })))
 const recentAnsweredInquiries = computed(() => {
   const seen = new Set()
   return (stats.value?.recentResponses || []).filter(r => {
