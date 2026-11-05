@@ -4,6 +4,7 @@ import {
   buildProductSegments,
   buildProductLegendItems,
   sumProductStatusCounts,
+  buildCompanyDashboardMetrics,
 } from './dashboardPresentation.js'
 
 const scenarios = {
@@ -55,5 +56,31 @@ describe('Company dashboard product status scenarios', () => {
   it('does not draw a partial chart when any server status count is missing', () => {
     const incomplete = { ...scenarios.normal, ARCHIVED: null }
     expect(buildProductSegments(incomplete)).toEqual([])
+  })
+})
+
+
+describe('Company dashboard compact ecommerce metrics', () => {
+  it('uses live inquiry and product counts where APIs provide them', () => {
+    const metrics = buildCompanyDashboardMetrics({
+      stats: { received: { byStatus: { SUBMITTED: 2, OPEN: 3, CLOSED: 4, COMPLETED: 1 } }, responses: { total: 7 } },
+      productStatusCounts: { APPROVED: 16, PENDING_REVIEW: 2 },
+    })
+    expect(metrics.find(item => item.key === 'active-inquiries')).toMatchObject({ value: 5, sample: false })
+    expect(metrics.find(item => item.key === 'answered-inquiries')).toMatchObject({ value: 5, sample: false })
+    expect(metrics.find(item => item.key === 'participated-inquiries')).toMatchObject({ value: 7, sample: false })
+    expect(metrics.find(item => item.key === 'approved-products')).toMatchObject({ value: 16, sample: false })
+    expect(metrics.find(item => item.key === 'pending-products')).toMatchObject({ value: 2, sample: false })
+  })
+
+  it('marks unsupported order and inventory numbers as sample data', () => {
+    const metrics = buildCompanyDashboardMetrics({ stats: null, productStatusCounts: null })
+    expect(metrics).toHaveLength(9)
+    expect(metrics.filter(item => item.sample).map(item => item.key)).toEqual([
+      'active-inquiries', 'answered-inquiries', 'participated-inquiries', 'approved-products',
+      'pending-products', 'active-orders', 'shipping-orders', 'delivered-orders', 'out-of-stock',
+    ])
+    expect(metrics.find(item => item.key === 'active-orders').value).toBe(11)
+    expect(metrics.find(item => item.key === 'out-of-stock').value).toBe(3)
   })
 })
