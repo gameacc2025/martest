@@ -585,3 +585,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - The public catalog API currently supports sorting by `createdAt`, `updatedAt`, and `title`, but exposes no sales/order-count metric. Therefore this pass labels the server-flagged items as `محصولات ویژه` rather than falsely calling them best sellers. A truthful best-seller ranking requires a real sales aggregate/API; no fabricated ranking or backend schema change was introduced.
 - Commit: `61f135ba26de72f57c025efa669fa510228e79d3`.
 - CI, runtime validation, and migration validation were triggered for this commit and must be checked before claiming success. No browser screenshot validation was performed in this remote session.
+
+
+## 2026-11-05 — TEM storefront and dashboard layout implementation
+- Rebuilt Website `ProductListing.vue` around the supplied `tem/shop.html` composition: featured-product slider, category browsing tiles, selected products, filter sidebar, search, category/price filters, sort choices supported by the live API, product cards, and pagination. The listing is now a store catalogue rather than a plain filter form plus generic grid.
+- Applied the requested Admin/Company sidebar color `#0d2b53` via semantic sidebar tokens and shell selectors, and widened the expanded sidebar to 280px.
+- Admin and Company dashboard KPI rows and panel surfaces now use the tighter TEM analytics rhythm and 137px KPI tiles.
+- Tests for the new shop structure, API contract, product routes, supplier details, price inquiry state, empty/error states, and category route updates were added/updated. A test-only issue with PrimeVue Select stubs and an error alert role was corrected.
+- Sales/order count data does not exist in the current public Product API or Prisma schema, so the storefront presents products explicitly flagged `isFeatured` as `محصولات ویژه`; it does not falsely label them best sellers. A real best-seller section requires a sales aggregate/API and cannot be truthfully derived from current product catalogue data.
+- Implementation commits: `61f135ba`, `f138ea86`, `f5530466`, `60714786`, `8a70af80`, `90c2dd50`. Latest source commit: `90c2dd50d8305a9a177c05ef5736245c79cb09ea`.
+- CI/build, migration validation, and runtime checks have been triggered; final results are pending. Do not claim browser visual verification without screenshots.
