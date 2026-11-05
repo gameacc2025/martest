@@ -316,25 +316,28 @@ function logout() {
                   <i class="pi pi-bell" aria-hidden="true"></i>
                   <span v-if="notificationCount > 0" class="public-notification-badge">{{ countLabel(notificationCount) }}</span>
                 </button>
-                <section v-if="notificationMenuOpen" id="public-notifications-menu" class="public-notifications-menu" aria-label="پنج اعلان آخر">
-                  <header class="public-notifications-menu__header">
-                    <strong>اعلان‌های اخیر</strong>
-                    <span v-if="notificationCount > 0">{{ countLabel(notificationCount) }} خوانده‌نشده</span>
-                  </header>
-                  <div v-if="notificationLoading" class="public-notifications-menu__state" role="status">در حال دریافت اعلان‌ها…</div>
-                  <div v-else-if="latestNotifications.length" class="public-notifications-menu__list">
-                    <button v-for="item in latestNotifications" :key="item.id" type="button" class="public-notification-item" :class="{ 'is-unread': !item.isRead }" @click="openNotificationCenter">
-                      <span class="public-notification-item__dot" aria-hidden="true"></span>
-                      <span class="public-notification-item__body">
-                        <strong>{{ item.title || 'اعلان جدید' }}</strong>
-                        <span>{{ item.message || item.body || 'برای مشاهده جزئیات، صندوق اعلان‌ها را باز کنید.' }}</span>
-                        <time v-if="item.createdAt || item.created_at" :datetime="item.createdAt || item.created_at">{{ formatNotificationTime(item.createdAt || item.created_at) }}</time>
-                      </span>
-                    </button>
-                  </div>
-                  <div v-else class="public-notifications-menu__state">اعلانی برای نمایش وجود ندارد.</div>
-                  <button type="button" class="public-notifications-menu__all" @click="openNotificationCenter">مشاهده همه اعلان‌ها <i class="pi pi-arrow-left" aria-hidden="true"></i></button>
-                </section>
+                <div v-if="notificationMenuOpen" class="public-notifications-layer" @click.self="closeNotificationMenu">
+  <section id="public-notifications-menu" class="public-notifications-drawer" role="dialog" aria-modal="true" aria-label="اعلان‌های اخیر">
+    <header class="public-notifications-menu__header">
+      <div class="public-notifications-menu__heading"><strong>اعلان‌های اخیر</strong><span>آخرین ۵ اعلان</span></div>
+      <span v-if="notificationCount > 0" class="public-notifications-menu__unread">{{ countLabel(notificationCount) }} خوانده‌نشده</span>
+      <button type="button" class="public-notifications-close" aria-label="بستن اعلان‌ها" @click="closeNotificationMenu"><i class="pi pi-times" aria-hidden="true"></i></button>
+    </header>
+    <div v-if="notificationLoading" class="public-notifications-menu__state" role="status">در حال دریافت اعلان‌ها…</div>
+    <div v-else-if="latestNotifications.length" class="public-notifications-menu__list">
+      <button v-for="item in latestNotifications" :key="item.id" type="button" class="public-notification-item" :class="{ 'is-unread': !item.isRead }" @click="openNotificationCenter">
+        <span class="public-notification-item__dot" aria-hidden="true"></span>
+        <span class="public-notification-item__body">
+          <strong>{{ item.title || 'اعلان جدید' }}</strong>
+          <span>{{ item.message || item.body || 'برای مشاهده جزئیات، صندوق اعلان‌ها را باز کنید.' }}</span>
+          <time v-if="item.createdAt || item.created_at" :datetime="item.createdAt || item.created_at">{{ formatNotificationTime(item.createdAt || item.created_at) }}</time>
+        </span>
+      </button>
+    </div>
+    <div v-else class="public-notifications-menu__state">اعلانی برای نمایش وجود ندارد.</div>
+    <button type="button" class="public-notifications-menu__all" @click="openNotificationCenter">مشاهده همه اعلان‌ها <i class="pi pi-arrow-left" aria-hidden="true"></i></button>
+  </section>
+</div>
               </div>
 
             <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
@@ -790,38 +793,29 @@ function logout() {
 }
 
 
-/* Header notification preview: anchored to the bell and opening toward the left in RTL. */
-.public-notifications-actions { position: relative; display: inline-flex; align-items: center; }
+/* Fixed notification drawer slides in from the physical left edge, like the dashboard inbox. */
+.public-notifications-actions { position: static; display: inline-flex; align-items: center; }
 .public-notifications-link { border: 0; background: transparent; cursor: pointer; }
-.public-notifications-menu {
-  position: absolute;
-  inset-inline-start: 0;
-  inset-block-start: calc(100% + 10px);
-  z-index: 1250;
-  width: min(360px, calc(100vw - 24px));
-  overflow: hidden;
-  border: 1px solid var(--tm-line);
-  border-radius: 14px;
-  background: var(--tm-surface);
-  box-shadow: var(--tm-shadow-lg);
-  text-align: start;
-}
-.public-notifications-menu__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 15px; border-bottom: 1px solid var(--tm-line); color: var(--tm-ink); font-size: 13px; }
-.public-notifications-menu__header span { color: var(--tm-muted); font-size: 11px; }
-.public-notifications-menu__list { display: grid; }
-.public-notification-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--tm-line); background: transparent; color: var(--tm-ink); text-align: start; cursor: pointer; font: inherit; }
+.public-notifications-layer { position: fixed; inset: 0; z-index: 1400; background: rgba(7,20,39,.38); }
+.public-notifications-drawer { position: absolute; inset-block: 0; left: 0; display: flex; flex-direction: column; width: min(410px,92vw); height: 100%; overflow: hidden; border-inline-end: 1px solid var(--tm-line); background: var(--tm-surface); box-shadow: 18px 0 48px rgba(7,20,39,.18); text-align: start; animation: public-notifications-enter .22s ease-out; }
+@keyframes public-notifications-enter { from { transform: translateX(-28px); opacity: .7; } to { transform: translateX(0); opacity: 1; } }
+.public-notifications-menu__header { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 16px 18px; border-bottom: 1px solid var(--tm-line); color: var(--tm-ink); }
+.public-notifications-menu__heading { display: grid; flex: 1; gap: 4px; }
+.public-notifications-menu__heading strong { font-size: 15px; font-weight: 700; }
+.public-notifications-menu__heading span,.public-notifications-menu__unread { color: var(--tm-muted); font-size: 11px; }
+.public-notifications-close { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--tm-line); border-radius: 8px; background: var(--tm-surface); color: var(--tm-ink-soft); cursor: pointer; }
+.public-notifications-menu__list { flex: 1; overflow-y: auto; }
+.public-notification-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 16px 17px; border: 0; border-bottom: 1px solid var(--tm-line); background: transparent; color: var(--tm-ink); text-align: start; cursor: pointer; font: inherit; }
 .public-notification-item:hover { background: var(--tm-canvas); }
-.public-notification-item.is-unread { background: color-mix(in srgb, var(--tm-cyan) 6%, var(--tm-surface)); }
+.public-notification-item.is-unread { background: color-mix(in srgb,var(--tm-cyan) 6%,var(--tm-surface)); }
 .public-notification-item__dot { flex: 0 0 7px; width: 7px; height: 7px; margin-top: 6px; border-radius: 50%; background: transparent; }
 .public-notification-item.is-unread .public-notification-item__dot { background: var(--tm-cyan); }
-.public-notification-item__body { display: grid; min-width: 0; gap: 4px; }
+.public-notification-item__body { display: grid; min-width: 0; gap: 5px; }
 .public-notification-item__body strong { overflow: hidden; color: var(--tm-ink); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.public-notification-item__body > span { display: -webkit-box; overflow: hidden; color: var(--tm-ink-soft); font-size: 11px; line-height: 1.7; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.public-notification-item__body > span { display: -webkit-box; overflow: hidden; color: var(--tm-ink-soft); font-size: 11px; line-height: 1.8; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .public-notification-item__body time { color: var(--tm-muted); font-size: 10px; }
-.public-notifications-menu__state { padding: 22px 14px; color: var(--tm-muted); font-size: 12px; text-align: center; }
-.public-notifications-menu__all { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 42px; border: 0; background: var(--tm-surface); color: var(--tm-blue); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.public-notifications-menu__state { display: grid; flex: 1; place-items: center; padding: 22px 14px; color: var(--tm-muted); font-size: 12px; text-align: center; }
+.public-notifications-menu__all { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 52px; border: 0; border-top: 1px solid var(--tm-line); background: var(--tm-surface); color: var(--tm-blue); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
 .public-notifications-menu__all:hover { background: var(--tm-canvas); }
-.public-notification-item:focus-visible, .public-notifications-menu__all:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
-@media (max-width: 575px) { .public-notifications-menu { inset-inline-start: -52px; } }
-
-</style>
+.public-notification-item:focus-visible,.public-notifications-menu__all:focus-visible,.public-notifications-close:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) { .public-notifications-drawer { animation: none; } }
