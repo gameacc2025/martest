@@ -212,6 +212,8 @@ function logout() {
         />
       </router-link>
 
+      <slot name="messages" />
+
       <!-- User chip — tem `.us` -->
       <button
         type="button"
