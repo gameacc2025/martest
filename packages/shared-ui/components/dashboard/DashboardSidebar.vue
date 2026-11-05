@@ -33,9 +33,6 @@ const props = defineProps({
   // Pre-filtered menu items (array of section objects).
   menuItems: { type: Array, default: () => [] },
   user: { type: Object, default: null },
-  // Optional primary call-to-action shown directly under the brand.
-  // Shape: { label: string, route: string, params?: object }
-  primaryAction: { type: Object, default: null },
 })
 
 const emit = defineEmits(['navigate', 'toggle-collapse'])
@@ -119,29 +116,11 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
       'dash-sidebar--mobile-open': mobileOpen,
     }"
   >
-    <!-- Brand: LTR wordmark + desktop collapse toggle -->
+    <!-- Brand: LTR wordmark -->
     <div class="dash-sidebar-brand">
       <BrandMark class="dash-sidebar-brand-icon" :size="34" />
       <span class="dash-sidebar-brand-text">Telecom<br />Market</span>
-      <button
-        type="button"
-        class="dash-sidebar-collapse-btn dash-sidebar-desktop-only"
-        :aria-label="collapsed ? 'باز کردن منو' : 'جمع کردن منو'"
-        @click="emit('toggle-collapse')"
-      >
-        <i class="pi" :class="collapsed ? 'pi-angle-double-left' : 'pi-angle-double-right'"></i>
-      </button>
     </div>
-
-    <!-- Primary action pill (tem `.np`) -->
-    <router-link
-      v-if="primaryAction"
-      :to="{ name: primaryAction.route, params: primaryAction.params }"
-      class="dash-sidebar-cta"
-      @click="emit('navigate')"
-    >
-      <span aria-hidden="true">+</span> {{ primaryAction.label }}
-    </router-link>
 
     <nav class="dash-sidebar-nav" aria-label="منوی داشبورد">
       <template v-for="group in props.menuItems" :key="group.section">
@@ -289,22 +268,6 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   white-space: nowrap;
 }
 .dash-sidebar-collapse-btn { display: none; }
-
-/* ---- Primary action (tem `.np`) ---- */
-.dash-sidebar-cta {
-  display: block;
-  margin-bottom: 26px;
-  padding: 11px;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #16b8e8, #2ed3ee);
-  color: #05213f;
-  font-size: 14px;
-  font-weight: 600;
-  text-align: center;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.dash-sidebar-cta:hover { filter: brightness(1.03); }
 
 /* ---- Navigation (tem `.mi`) ---- */
 .dash-sidebar-nav { padding: 0; }
