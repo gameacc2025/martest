@@ -330,7 +330,20 @@ const recentAnsweredInquiries = computed(() => {
 })
 const dashboardMetrics = computed(() => buildCompanyDashboardMetrics({ stats: stats.value, productStatusCounts: productStatusCounts.value }))
 
-// ── Quick actions ───────────────────────────────────────────
+const recentApprovedProducts = computed(() => products.value.filter(p => p.status === 'APPROVED').slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'محصول شرکت', icon: 'pi pi-box', badge: 'تأیید شده', badgeTone: 'success', to: { name: 'manage-products', query: { status: 'APPROVED' } } })))
+const recentPendingProducts = computed(() => products.value.filter(p => p.status === 'PENDING_REVIEW').slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'در صف بررسی', icon: 'pi pi-clock', badge: 'در انتظار تأیید', badgeTone: 'warning', to: { name: 'manage-products', query: { status: 'PENDING_REVIEW' } } })))
+const recentAnsweredInquiries = computed(() => {
+  const seen = new Set()
+  return (stats.value?.recentResponses || []).filter(r => {
+    const id = r.inquiry?.id
+    if (!id || seen.has(id)) return false
+    seen.add(id)
+    return true
+  }).slice(0, 5).map(r => ({ id: r.inquiry.id, title: r.inquiry.title || 'استعلام', subtitle: 'آخرین پاسخ: ' + responseStatusLabel(r.status), icon: 'pi pi-reply', badge: responseStatusLabel(r.status), badgeTone: responseStatusTone(r.status), meta: formatDate(r.createdAt), to: { name: 'company-inquiry-detail', params: { id: r.inquiry.id } } }))
+})
+const dashboardMetrics = computed(() => buildCompanyDashboardMetrics({ stats: stats.value, productStatusCounts: productStatusCounts.value }))
+
+// ── Quick actions ────────────────────────────────────────────
 const quickActions = [
   { label: 'پاسخ به استعلام‌های معلق', icon: 'pi pi-reply', to: { name: 'company-inquiries', query: { scope: 'received', status: 'SUBMITTED' } }, tone: 'primary' },
   { label: 'ویرایش پروفایل شرکت', icon: 'pi pi-building', to: { name: 'company-settings' }, tone: 'secondary' },
