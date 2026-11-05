@@ -35,7 +35,7 @@
  * Sections are just visual groups; a section with no visible items is hidden.
  */
 
-export const PUBLIC_SITE_URL = import.meta.env.VITE_PUBLIC_SITE_URL || '/'
+export const PUBLIC_SITE_URL = import.meta.env.VITE_PUBLIC_SITE_URL || import.meta.env.VITE_WEBSITE_APP_URL || '/'
 
 // Real backend role names (see backend/prisma/seed.js → ROLES):
 //   STAFF:    SUPER_ADMIN, ADMIN, MODERATOR
@@ -47,7 +47,7 @@ export const dashboardMenu = [
     section: 'پیشخوان',
     items: [
       {
-        title: 'داشبورد مدیریت',
+        title: 'داشبورد',
         icon: 'pi pi-home',
         route: 'admin-dashboard',
         roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
@@ -72,7 +72,7 @@ export const dashboardMenu = [
     ],
   },
   {
-    section: 'بازرگانی',
+    section: '',
     items: [
       { title: 'محصولات', icon: 'pi pi-box', route: 'admin-products', permission: 'products.read' },
       {
@@ -89,7 +89,7 @@ export const dashboardMenu = [
     ],
   },
   {
-    section: 'بازرگانی',
+    section: '',
     items: [
       { title: 'داشبورد', icon: 'pi pi-home', route: 'company-dashboard', roles: ['COMPANY_MANAGER', 'COMPANY_USER'], permission: 'dashboard.read' },
       // Every item below is gated purely by permission — NOT by hardcoding
