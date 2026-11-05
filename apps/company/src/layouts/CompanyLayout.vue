@@ -163,8 +163,6 @@ onUnmounted(() => {
 .dash-layout-sidebar {
   flex-shrink: 0;
   width: var(--dash-sidebar-width);
-  overflow-y: auto;
-  overscroll-behavior: contain;
   transition: width var(--transition-duration, 0.2s);
 }
 
@@ -268,10 +266,8 @@ onUnmounted(() => {
 }
 
 .dash-layout-content {
-  width: 100%;
-  max-width: 1920px;
-  margin-inline: auto;
-  padding: 0 clamp(1rem, 1.55vw, 2.5rem) 1.5rem;
+  max-width: none;
+  padding: 0 clamp(1rem, 1.55vw, 1.65rem) 1.5rem;
 }
 
 .dash-layout-page {
