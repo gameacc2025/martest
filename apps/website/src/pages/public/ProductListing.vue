@@ -429,25 +429,25 @@ watch(() => route.query.category, (newVal) => {
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--tm-line-strong) 62%, transparent);
-  border-radius: var(--tm-radius-lg);
+  border: 1px solid #eceef5;
+  border-radius: 4px;
   background: var(--tm-surface);
-  box-shadow: 0 4px 16px rgba(9, 38, 67, 0.075), 0 1px 3px rgba(9, 38, 67, 0.045);
+  box-shadow: 0 1px 3px rgba(20,20,60,.04);
   color: inherit;
   text-decoration: none;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 .product-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--tm-cyan-strong);
-  box-shadow: 0 12px 28px rgba(9, 38, 67, 0.14), 0 3px 8px rgba(9, 38, 67, 0.07);
+  transform: none;
+  border-color: #dcd7fb;
+  box-shadow: 0 4px 12px rgba(20,20,60,.08);
 }
 .product-card:focus-visible { outline: 2px solid var(--tm-cyan-strong); outline-offset: 2px; }
 
 .product-image {
   position: relative;
   aspect-ratio: 5 / 4;
-  background: linear-gradient(145deg, var(--tm-surface-alt), var(--tm-surface));
+  background: #f4f5fa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -464,7 +464,7 @@ watch(() => route.query.category, (newVal) => {
   max-width: calc(100% - 20px);
   padding: 4px 9px;
   border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-pill);
+  border-radius: 3px;
   background: var(--tm-surface);
   color: var(--tm-ink);
   font-size: 12px;
