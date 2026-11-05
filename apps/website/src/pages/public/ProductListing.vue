@@ -247,7 +247,7 @@ onUnmounted(stopSlider)
         </div>
 
         <div v-if="loading" class="shop-state"><ProgressSpinner /><span>در حال دریافت محصولات…</span></div>
-        <div v-else-if="error" class="shop-state shop-state--error"><i class="pi pi-exclamation-circle"></i><b>بارگذاری محصولات ناموفق بود</b><span>{{ error }}</span><Button label="تلاش دوباره" @click="loadProducts" /></div>
+        <div v-else-if="error" class="shop-state shop-state--error" role="alert"><i class="pi pi-exclamation-circle"></i><b>بارگذاری محصولات ناموفق بود</b><span>{{ error }}</span><Button label="تلاش دوباره" @click="loadProducts" /></div>
         <div v-else-if="!products.length" class="shop-state"><i class="pi pi-search"></i><b>هیچ محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><Button label="حذف فیلترها" severity="secondary" @click="resetFilters" /></div>
         <template v-else>
           <div class="shop-product-grid">

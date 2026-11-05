@@ -26,7 +26,7 @@ describe('Website Product Listing — TEM storefront', () => {
     Button: { props: ['label'], template: '<button><slot />{{ label }}</button>' },
     InputText: { template: '<input />' },
     InputNumber: { template: '<input />' },
-    Select: { template: '<select />' },
+    Select: { props: ['options', 'modelValue'], template: '<div class="select-stub" />' },
     ProgressSpinner: { template: '<span>loading</span>' },
     Paginator: { template: '<nav />' },
   } } })
