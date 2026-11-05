@@ -3536,3 +3536,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Removed obsolete toolbar/status CSS. No API, backend, auth, permissions, route or business behavior changes.
 - Verification: static source review confirms the workspace chip, Company status toolbar and Products heading are absent; tests/build/browser were NOT RUN in this remote source-editing session.
 - Commits: `c745163a`, `7519a30e`, `5792414c`, `ec78d135`, `37dc8b93`, `6e1a220d`.
+
+
+## 2026-11-05 — Company ecommerce dashboard layout and messages drawer
+- Rebuilt the Company dashboard composition from `tem/ecommerce.html`: compact 96px metric cards in a four-column desktop grid, a 1.9:1 main/aside split, compact two- and three-panel rows, and tighter panel/list spacing.
+- Added nine requested KPI cards: active inquiries, answered inquiries, participated inquiries, approved products, unapproved products, active orders, shipping orders, delivered orders, and out-of-stock products.
+- Inquiry and product metrics use existing company-scoped APIs. Approved totals combine APPROVED + PUBLISHED; unapproved totals combine PENDING_REVIEW + DRAFT + REJECTED. Recent product lists fetch the latest five per status using existing product API filters. Inquiry activity, approaching deadlines and recent responses use existing inquiry statistics/list data.
+- Order and inventory endpoints do not currently exist as operational company APIs (legacy orders routes are deprecated/removed; retail orders are a UI prototype). Per user instruction, these values are populated with clearly tagged sample numbers, not presented as live data.
+- Added a Company-only messages icon in the shared header slot. It opens a fixed left-side drawer directly below the 64px header, with a badge and five sample message rows. The drawer explicitly labels its content/count as sample until a messages inbox API exists. It does not call per-inquiry listMessages because that endpoint marks recipient messages as read when fetched.
+- Added pure KPI presentation helper and tests for live values and sample fallbacks. No backend/schema/API/auth/permission changes.
+- Static source review only; tests/build/browser NOT RUN in this remote editing session.
+- Commits: `e7387e68`, `9b2888b5`, `51a6537f`, `2a42a6e3`, `120372e8`, `9b2888b5`, `2a25d226`, `588bab86`, `b84d2d92`, `053733ab`, `f58a118f`, `bc0ab4c0`, `802117ad`, `c66e45b7`, `01e8b20c`.
