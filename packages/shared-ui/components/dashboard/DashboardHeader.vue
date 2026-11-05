@@ -36,8 +36,6 @@ const props = defineProps({
   isCompanyAdmin: { type: Boolean, default: false },
   // Current theme mode.
   isDark: { type: Boolean, default: false },
-  // Current workspace context, supplied by the host application.
-  workspaceLabel: { type: String, default: '' },
   // Route to the user's dashboard.
   dashboardRoute: { type: Object, default: () => ({ name: 'home' }) },
   // Route for the home breadcrumb.
@@ -129,11 +127,6 @@ function logout() {
       >
         <i class="pi pi-bars"></i>
       </button>
-
-      <div v-if="workspaceLabel" class="dash-header-workspace" aria-label="فضای کاری فعلی">
-        <span class="dash-header-workspace-mark"><i class="pi pi-th-large"></i></span>
-        <span class="dash-header-workspace-label">{{ workspaceLabel }}</span>
-      </div>
 
       <!-- Company identity (logo + name) -->
       <div v-if="companyName" class="dash-header-company">
@@ -353,21 +346,6 @@ function logout() {
   background: #f3f6fc;
 }
 
-/* Workspace context chip */
-.dash-header-workspace {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid var(--tm-line);
-  border-radius: 999px;
-  background: #fff;
-  white-space: nowrap;
-}
-.dash-header-workspace-mark { display: grid; place-items: center; color: var(--tm-cyan-deep); font-size: 13px; }
-.dash-header-workspace-label { color: var(--tm-ink-soft); font-size: 12px; font-weight: 600; }
-
 /* Company identity */
 .dash-header-company { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .dash-header-company-logo {
@@ -455,7 +433,6 @@ function logout() {
 }
 @media (max-width: 991px) {
   .dash-header { gap: 10px; }
-  .dash-header-workspace { display: none; }
 }
 @media (max-width: 575px) {
   .dash-header { min-height: 62px; padding: 10px 12px; }
