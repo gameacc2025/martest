@@ -819,3 +819,4 @@ function logout() {
 .public-notifications-menu__all:hover { background: var(--tm-canvas); }
 .public-notification-item:focus-visible,.public-notifications-menu__all:focus-visible,.public-notifications-close:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
 @media (prefers-reduced-motion: reduce) { .public-notifications-drawer { animation: none; } }
+</style>
