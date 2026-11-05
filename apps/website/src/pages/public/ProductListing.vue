@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import Button from 'primevue/button'
@@ -11,7 +11,6 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Paginator from 'primevue/paginator'
 
 const route = useRoute()
-const router = useRouter()
 const productsStore = useProductsStore()
 const products = ref([])
 const featuredProducts = ref([])
@@ -106,7 +105,7 @@ async function loadProducts() {
     totalPages.value = result.meta?.totalPages ?? result.totalPages ?? 1
     totalItems.value = result.meta?.total ?? result.total ?? products.value.length
   } catch {
-    error.value = 'دریافت محصولات با مشکل روبه‌رو شد. دوباره تلاش کنید.'
+    error.value = 'خطا در دریافت محصولات. دوباره تلاش کنید.'
     products.value = []
     totalItems.value = 0
   } finally { loading.value = false }
@@ -127,7 +126,6 @@ function resetFilters() {
   maxPrice.value = null
   selectedSort.value = 'createdAt:desc'
   filters.value = { search: '', category: null, minPrice: null, maxPrice: null, page: 1, limit: 24, sortBy: 'createdAt', sortOrder: 'desc' }
-  router.replace({ name: route.name, query: {} })
   loadProducts()
 }
 function onPageChange(event) {
@@ -244,17 +242,17 @@ onUnmounted(stopSlider)
 
       <section class="shop-products-area" aria-label="محصولات فروشگاه" aria-live="polite" :aria-busy="loading">
         <div class="shop-results-toolbar">
-          <div><span class="shop-results-kicker">کاتالوگ عمومی</span><h2>جدیدترین محصولات</h2><p>{{ totalItems.toLocaleString('fa-IR') }} محصول منتشرشده در بازارگاه</p></div>
+          <div><span class="shop-results-kicker">کاتالوگ عمومی</span><h2>جدیدترین محصولات</h2><p><span class="products-count-number">{{ totalItems.toLocaleString('fa-IR') }}</span> محصول منتشرشده در بازارگاه</p></div>
           <div class="shop-results-tools"><span><i class="pi pi-th-large"></i> نمایش شبکه‌ای</span><Select v-model="selectedSort" :options="sortOptions" optionLabel="label" optionValue="value" aria-label="مرتب‌سازی محصولات" @change="applyFilters" /></div>
         </div>
 
         <div v-if="loading" class="shop-state"><ProgressSpinner /><span>در حال دریافت محصولات…</span></div>
         <div v-else-if="error" class="shop-state shop-state--error"><i class="pi pi-exclamation-circle"></i><b>بارگذاری محصولات ناموفق بود</b><span>{{ error }}</span><Button label="تلاش دوباره" @click="loadProducts" /></div>
-        <div v-else-if="!products.length" class="shop-state"><i class="pi pi-search"></i><b>محصولی با این مشخصات پیدا نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><Button label="حذف فیلترها" severity="secondary" @click="resetFilters" /></div>
+        <div v-else-if="!products.length" class="shop-state"><i class="pi pi-search"></i><b>هیچ محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><Button label="حذف فیلترها" severity="secondary" @click="resetFilters" /></div>
         <template v-else>
           <div class="shop-product-grid">
             <article v-for="product in remainingProducts" :key="product.id" class="shop-product-card">
-              <router-link :to="productRoute(product)" class="shop-product-image">
+              <router-link :to="productRoute(product)" class="shop-product-image product-card">
                 <img v-if="imageOf(product)?.url" :src="imageOf(product).url" :alt="productName(product)" loading="lazy" width="480" height="360" />
                 <i v-else class="pi pi-box"></i>
                 <span v-if="categoryName(product)" class="shop-product-category">{{ categoryName(product) }}</span>
@@ -262,9 +260,10 @@ onUnmounted(stopSlider)
               </router-link>
               <div class="shop-product-info">
                 <div class="shop-product-brand">{{ product.brand || product.company?.name || 'تجهیزات شبکه' }}</div>
+                <span v-if="product.company?.isVerified" class="product-verified"><i class="pi pi-verified"></i> تأمین‌کننده تأییدشده</span>
                 <router-link :to="productRoute(product)" class="shop-product-title">{{ productName(product) }}</router-link>
-                <div class="shop-product-specs"><span v-if="product.model">مدل: {{ product.model }}</span><span v-if="product.sku">شناسه: {{ product.sku }}</span></div>
-                <div class="shop-product-bottom"><div><small>{{ product.prices?.length ? 'قیمت پایه' : 'قیمت' }}</small><b>{{ productPrice(product) }}</b></div><router-link :to="productRoute(product)" aria-label="مشاهده جزئیات"><i class="pi pi-arrow-left"></i></router-link></div>
+                <div class="shop-product-specs product-meta"><span v-if="product.brand">{{ product.brand }}</span><span v-if="product.model">{{ product.model }}</span><span v-if="product.sku">شناسه: {{ product.sku }}</span></div>
+                <div class="shop-product-bottom product-card-footer"><div class="product-card-price"><small>{{ product.prices?.length ? 'شروع قیمت از' : 'قیمت' }}</small><b>{{ productPrice(product) }}</b></div><router-link :to="productRoute(product)" aria-label="مشاهده جزئیات"><i class="pi pi-arrow-left"></i><span>جزئیات محصول</span></router-link></div>
               </div>
             </article>
           </div>
