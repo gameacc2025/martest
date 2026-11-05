@@ -645,3 +645,8 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added recent activity, approaching inquiries, recently approved/unapproved products, recent answered inquiries, quick actions, and a Company-only left-side messages drawer with five clearly marked sample messages.
 - Messages drawer is placed below the header; it does not fetch inquiry threads because the existing per-inquiry messages endpoint marks received messages as read during retrieval.
 - New KPI helper tests added. Static source review only; tests/build/browser not run yet.
+
+
+### Latest follow-up
+- Product approved/unapproved counts now combine lifecycle statuses correctly, and recent product panels fetch latest records per status.
+- Quick access expanded. Updated DashboardHeader regression test to match the removed workspace chip; latest CI is pending.
