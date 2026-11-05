@@ -5,7 +5,6 @@ import PublicLayout from "../layouts/PublicLayout.vue";
 import { useAuthStore } from "../stores/auth";
 
 // Public Pages
-import Home from "../pages/public/Home.vue";
 import Categories from "../pages/public/Categories.vue";
 import ProductListing from "../pages/public/ProductListing.vue";
 import ProductDetails from "../pages/public/ProductDetails.vue";
@@ -28,7 +27,7 @@ const routes = [
     path: "/",
     component: PublicLayout,
     children: [
-      { path: "", name: "home", component: Home, meta: { title: "صفحه اصلی" } },
+      { path: "", alias: "/products", name: "products", component: ProductListing, meta: { title: "همه محصولات" } },
       {
         path: "notifications",
         name: "notifications",
@@ -82,12 +81,6 @@ const routes = [
         name: "categories",
         component: Categories,
         meta: { title: "دسته بندی ها" },
-      },
-      {
-        path: "products",
-        name: "products",
-        component: ProductListing,
-        meta: { title: "محصولات" },
       },
       {
         path: "inquiry-subscription",
@@ -215,7 +208,7 @@ router.beforeEach(async (to, from, next) => {
   // the step that mints the panel's one-time code (see Login.vue).
   const handoffMinting = to.name === "login" && !!to.query.app && !!to.query.challenge;
   if (to.meta.guestOnly && isAuthed && !handoffMinting) {
-    return next({ name: "home" });
+    return next({ name: "products" });
   }
 
   // Customer support belongs to the Website context. Route Company and STAFF
@@ -229,7 +222,7 @@ router.beforeEach(async (to, from, next) => {
     } else if (authStore.isStaff && adminUrl) {
       window.location.href = `${adminUrl}/auth/start?redirect=${encodeURIComponent(panelRedirect)}`;
     } else {
-      return next({ name: 'home' });
+      return next({ name: 'products' });
     }
     return;
   }
