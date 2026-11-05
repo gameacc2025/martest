@@ -3562,3 +3562,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Sales amount, monthly curve and growth percentage are explicitly labeled sample/demo data; no sales API exists yet and no revenue is represented as real.
 - Preserved the existing inquiry/product API-backed KPI values and all routes/permissions/business behavior. No backend, schema, API or database changes.
 - Updated dashboard presentation tests for the eight KPI contract. Static source review only; Vitest/build/browser verification not run in this remote edit.
+
+
+## 2026-11-05 — Company dashboard single-column KPI layout
+- Reworked the dashboard top overview into a two-column region: all eight compact KPI cards are stacked in one vertical column, with Quick access in the adjacent column and aligned to the KPI stack.
+- Reduced KPI card height, padding, icon, label and value sizes further. On narrow screens the overview stacks naturally.
+- Kept the sample sales chart in the lower right-side dashboard content; summary panel remains removed. No API/backend/permission changes.
+- Static source checks only; automated tests/build not run during remote repository edits.
