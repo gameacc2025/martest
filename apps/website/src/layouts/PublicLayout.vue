@@ -62,7 +62,7 @@ function goToAdminApp(path = '/') {
 const searchQuery = ref('')
 const mobileMenuOpen = ref(false)
 const headerSearchVisible = ref(false)
-const showHeaderSearch = computed(() => route.name !== 'home' || headerSearchVisible.value)
+const showHeaderSearch = computed(() => route.name !== 'products' || headerSearchVisible.value)
 function updateHeaderSearchVisibility() { headerSearchVisible.value = window.scrollY > 320 }
 const notificationCount = ref(0)
 const latestNotifications = ref([])
@@ -213,8 +213,8 @@ function toggleUserMenu(event) {
 
 
 const navItems = [
-  { name: 'درباره ما', path: '/about' },
-  { name: 'تماس با ما', path: '/contact' }
+  { name: 'درباره ما', path: '/about', icon: 'pi pi-info-circle' },
+  { name: 'تماس با ما', path: '/contact', icon: 'pi pi-phone' }
 ]
 
 const footerCategories = ref([])
@@ -289,10 +289,10 @@ function logout() {
             </router-link>
 
             <nav class="public-nav-desktop" aria-label="منوی اصلی">
-              <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active">همه محصولات</router-link>
+              <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>منوی اصلی</span></router-link>
               <MegaMenu :categories="megaMenuCategories" />
-              <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active">درباره ما</router-link>
-              <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active">تماس با ما</router-link>
+              <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
+              <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
             </nav>
           </div>
 
@@ -380,7 +380,7 @@ function logout() {
             </div>
 
             <PvButton
-              :icon="mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'"
+              :icon="mobileMenuOpen ? 'pi pi-times' : 'pi pi-compass'"
               text
               rounded
               class="public-mobile-toggle"
@@ -413,8 +413,8 @@ function logout() {
         <ul class="public-mobile-nav-list">
           <li>
             <router-link :to="{ name: 'products' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
-              <i class="pi pi-box"></i>
-              <span>همه محصولات</span>
+              <i class="pi pi-home"></i>
+              <span>منوی اصلی</span>
             </router-link>
           </li>
           <li>
