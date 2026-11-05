@@ -47,17 +47,15 @@ const tag = computed(() => (props.to ? 'router-link' : 'div'))
     :class="[`tm-stat--${tone}`, { 'tm-stat--featured': featured }]"
     :aria-busy="loading ? 'true' : undefined"
   >
-    <span class="tm-stat__icon" aria-hidden="true"><i :class="icon"></i></span>
-    <span class="tm-stat__body">
+    <span class="tm-stat__top">
       <span class="tm-stat__label">{{ label }}</span>
+      <span class="tm-stat__icon" aria-hidden="true"><i :class="icon"></i></span>
+    </span>
+    <span class="tm-stat__value-row">
       <span v-if="loading" class="tm-stat__skeleton" aria-hidden="true"></span>
       <span v-else class="tm-stat__value" :class="{ 'tm-num': numeric }">{{ formatted }}</span>
-      <span v-if="supportMeta || delta" class="tm-stat__meta">
-        <span v-if="delta" class="tm-stat__delta" :class="deltaDirection ? `tm-stat__delta--${deltaDirection}` : ''">
-          {{ delta }}
-        </span>
-        <span v-if="supportMeta">{{ supportMeta }}</span>
-      </span>
+      <span v-if="delta" class="tm-stat__delta" :class="deltaDirection ? `tm-stat__delta--${deltaDirection}` : ''">{{ delta }}</span>
     </span>
+    <span v-if="supportMeta" class="tm-stat__meta">{{ supportMeta }}</span>
   </component>
 </template>

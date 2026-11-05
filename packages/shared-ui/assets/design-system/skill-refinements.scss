@@ -59,7 +59,17 @@ a { color:#7c6cf6; }
   align-items:stretch; gap:8px; border:1px solid #eceef5; border-radius:4px;
   background:#fff; box-shadow:0 1px 3px rgba(20,20,60,.04);
 }
-.tm-kpi__top,.tm-stat__top { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; color:#1d2130; font-size:14px; }
+.tm-kpi__top,.tm-stat__top {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-bottom:8px; color:#1d2130; font-size:14px; line-height:1.4;
+}
+.tm-stat__value-row { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; }
+.tm-stat__body { display:contents; }
+.tm-stat__delta {
+  flex:none; padding:3px 7px; border-radius:3px; font-size:10px; line-height:1.4;
+  background:#dcf5e6; color:#22b866; font-weight:600;
+}
+.tm-stat__delta--down { background:#fde4e4; color:#f0453a; }
 .tm-kpi__icon,.tm-stat__icon,.stat-card .stat-icon,.ds-stat-card__icon {
   display:grid; place-items:center; width:28px; height:28px; min-width:28px; border-radius:4px;
   background:#e8e6fb; color:#7c6cf6; font-size:14px;
@@ -67,8 +77,8 @@ a { color:#7c6cf6; }
 .tm-kpi__value,.tm-stat__value,.stat-card .stat-content h3,.ds-stat-card__value {
   color:#1d2130; font-size:24px; font-weight:600; line-height:1.25; font-variant-numeric:tabular-nums;
 }
-.tm-kpi__label,.tm-stat__label,.stat-card .stat-content p,.ds-stat-card__label { color:#1d2130; font-size:13px; font-weight:500; }
-.tm-kpi__meta,.tm-stat__meta { color:#8a90a6; font-size:12px; }
+.tm-kpi__label,.tm-stat__label,.stat-card .stat-content p,.ds-stat-card__label { color:#1d2130; font-size:13px; font-weight:500; min-height:0; margin:0; }
+.tm-kpi__meta,.tm-stat__meta { display:block; margin-top:auto; color:#8a90a6; font-size:12px; line-height:1.45; }
 .tm-kpi--violet .tm-kpi__icon,.tm-stat--violet .tm-stat__icon { background:#e8e6fb;color:#7c6cf6; }
 .tm-kpi--success .tm-kpi__icon,.tm-stat--success .tm-stat__icon { background:#dcf5e6;color:#22b866; }
 .tm-kpi--warning .tm-kpi__icon,.tm-stat--warning .tm-stat__icon { background:#fdf0d9;color:#f5a623; }
