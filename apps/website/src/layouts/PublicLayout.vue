@@ -14,7 +14,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
 import { categoriesApi, inquiriesApi, endpoints } from '@telecom/api-client'
-import { apiGet } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import IconField from 'primevue/iconfield'
@@ -34,7 +34,7 @@ const route = useRoute()
 // Keep the responsive navigation in sync with route changes (including
 // browser back/forward) so it never remains open over a new page.
 watch(() => route.fullPath, () => { mobileMenuOpen.value = false; commerceMenuOpen.value = false })
-watch(() => [authStore.isAuthenticated, authStore.isCustomer], () => { fetchMyInquiryCount() })
+watch(() => [authStore.isAuthenticated, authStore.isCustomer], () => { fetchMyInquiryCount(); fetchHeaderNotifications() })
 
 // CUSTOMER notifications live on the website. COMPANY and STAFF users are
 // redirected to their own panels through the configured PKCE handoff URLs.
@@ -65,6 +65,9 @@ const headerSearchVisible = ref(false)
 const showHeaderSearch = computed(() => route.name !== 'home' || headerSearchVisible.value)
 function updateHeaderSearchVisibility() { headerSearchVisible.value = window.scrollY > 320 }
 const notificationCount = ref(0)
+const latestNotifications = ref([])
+const notificationMenuOpen = ref(false)
+const notificationLoading = ref(false)
 const userMenu = ref(null)
 
 const user = computed(() => authStore.user)
@@ -155,8 +158,53 @@ function countLabel(value) {
 }
 
 function closeCommerceMenu() { commerceMenuOpen.value = false }
+function closeNotificationMenu() { notificationMenuOpen.value = false }
 function handleDocumentPointerDown(event) {
-  if (event.target instanceof Element && !event.target.closest('.public-commerce-actions')) closeCommerceMenu()
+  if (!(event.target instanceof Element)) return
+  if (!event.target.closest('.public-commerce-actions')) closeCommerceMenu()
+  if (!event.target.closest('.public-notifications-actions')) closeNotificationMenu()
+}
+
+function normalizeHeaderNotifications(result) {
+  if (Array.isArray(result)) return result
+  if (Array.isArray(result?.data)) return result.data
+  if (Array.isArray(result?.data?.data)) return result.data.data
+  if (Array.isArray(result?.notifications)) return result.notifications
+  return []
+}
+
+async function fetchHeaderNotifications() {
+  if (!authStore.isAuthenticated) {
+    notificationCount.value = 0
+    latestNotifications.value = []
+    return
+  }
+  notificationLoading.value = true
+  try {
+    const [countResult, listResult] = await Promise.all([
+      apiGet(endpoints.notifications.unreadCount),
+      apiGetPaginated(`${endpoints.notifications.list}?page=1&limit=5`),
+    ])
+    notificationCount.value = Number(countResult?.count ?? countResult?.data?.count ?? 0)
+    latestNotifications.value = normalizeHeaderNotifications(listResult).slice(0, 5)
+  } catch {
+    latestNotifications.value = []
+  } finally {
+    notificationLoading.value = false
+  }
+}
+
+function formatNotificationTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleString('fa-IR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+function openNotificationCenter() {
+  closeNotificationMenu()
+  if (authStore.isCustomer) router.push({ name: 'notifications' })
+  else window.location.href = notificationHref.value
 }
 
 function toggleUserMenu(event) {
@@ -165,7 +213,6 @@ function toggleUserMenu(event) {
 
 
 const navItems = [
-  { name: 'صفحه اصلی', path: '/' },
   { name: 'درباره ما', path: '/about' },
   { name: 'تماس با ما', path: '/contact' }
 ]
@@ -178,15 +225,8 @@ onMounted(async () => {
   document.addEventListener('pointerdown', handleDocumentPointerDown)
   updateHeaderSearchVisibility()
   fetchMyInquiryCount()
-  // Fetch notification count for logged-in users
-  if (isAuthenticated.value) {
-    try {
-      const result = await apiGet(endpoints.notifications.unreadCount)
-      notificationCount.value = Number(result?.count ?? result?.data?.count ?? 0)
-    } catch (err) {
-      // Non-blocking: the badge simply stays hidden.
-    }
-  }
+  // Keep the header badge and its five-message preview in sync with live notifications.
+  await fetchHeaderNotifications()
 
   // Load categories for MegaMenu and footer
   try {
@@ -216,7 +256,7 @@ function search() {
 
 function logout() {
   authStore.logout()
-  router.push({ name: 'home' })
+  router.push({ name: 'products' })
 }
 </script>
 
@@ -243,14 +283,13 @@ function logout() {
       <div class="public-container">
         <div class="public-header-row">
           <div class="public-header-right">
-            <router-link :to="{ name: 'home' }" class="public-logo" aria-label="صفحه اصلی بازارگاه مخابرات">
+            <router-link :to="{ name: 'products' }" class="public-logo" aria-label="بازارگاه تجهیزات مخابراتی">
               <BrandMark class="public-logo-mark" :size="38" />
               <span class="public-logo-name"><strong>Telecom Market</strong></span>
             </router-link>
 
             <nav class="public-nav-desktop" aria-label="منوی اصلی">
-              <router-link to="/" class="public-nav-link" active-class="public-nav-link-active">صفحه اصلی</router-link>
-              <router-link to="/products" class="public-nav-link" active-class="public-nav-link-active">همه محصولات</router-link>
+              <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active">همه محصولات</router-link>
               <MegaMenu :categories="megaMenuCategories" />
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active">درباره ما</router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active">تماس با ما</router-link>
@@ -258,29 +297,6 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
-            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
-              <button
-                type="button"
-                class="public-icon-link public-commerce-trigger"
-                aria-label="سبد خرید و استعلام"
-                aria-controls="public-commerce-menu"
-                :aria-expanded="commerceMenuOpen"
-                @click.stop="commerceMenuOpen = !commerceMenuOpen"
-              >
-                <i class="pi pi-shopping-cart" aria-hidden="true"></i>
-                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
-              </button>
-              <div v-if="commerceMenuOpen" id="public-commerce-menu" class="public-commerce-menu" role="group" aria-label="مسیرهای خرید و استعلام">
-                <router-link to="/cart" class="public-commerce-tab" @click="closeCommerceMenu">
-                  <span><i class="pi pi-shopping-cart" aria-hidden="true"></i> خرید</span>
-                  <b>{{ countLabel(cartItemCount) }}</b>
-                </router-link>
-                <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" to="/my-inquiries" class="public-commerce-tab" @click="closeCommerceMenu">
-                  <span><i class="pi pi-file-edit" aria-hidden="true"></i> استعلام</span>
-                  <b v-if="myInquiryCount !== null">{{ countLabel(myInquiryCount) }}</b>
-                </router-link>
-              </div>
-            </div>
             <div v-if="showHeaderSearch" class="public-search-desktop">
               <IconField>
                 <InputIcon class="pi pi-search" />
@@ -295,10 +311,31 @@ function logout() {
             </div>
 
             <template v-if="user">
-              <a :href="notificationHref" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها">
-                <i class="pi pi-bell" aria-hidden="true"></i>
-                <span v-if="notificationCount > 0" class="public-notification-badge">{{ notificationCount }}</span>
-              </a>
+              <div class="public-notifications-actions" @keydown.esc.stop.prevent="closeNotificationMenu">
+                <button type="button" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها" aria-controls="public-notifications-menu" :aria-expanded="notificationMenuOpen" @click.stop="notificationMenuOpen = !notificationMenuOpen">
+                  <i class="pi pi-bell" aria-hidden="true"></i>
+                  <span v-if="notificationCount > 0" class="public-notification-badge">{{ countLabel(notificationCount) }}</span>
+                </button>
+                <section v-if="notificationMenuOpen" id="public-notifications-menu" class="public-notifications-menu" aria-label="پنج اعلان آخر">
+                  <header class="public-notifications-menu__header">
+                    <strong>اعلان‌های اخیر</strong>
+                    <span v-if="notificationCount > 0">{{ countLabel(notificationCount) }} خوانده‌نشده</span>
+                  </header>
+                  <div v-if="notificationLoading" class="public-notifications-menu__state" role="status">در حال دریافت اعلان‌ها…</div>
+                  <div v-else-if="latestNotifications.length" class="public-notifications-menu__list">
+                    <button v-for="item in latestNotifications" :key="item.id" type="button" class="public-notification-item" :class="{ 'is-unread': !item.isRead }" @click="openNotificationCenter">
+                      <span class="public-notification-item__dot" aria-hidden="true"></span>
+                      <span class="public-notification-item__body">
+                        <strong>{{ item.title || 'اعلان جدید' }}</strong>
+                        <span>{{ item.message || item.body || 'برای مشاهده جزئیات، صندوق اعلان‌ها را باز کنید.' }}</span>
+                        <time v-if="item.createdAt || item.created_at" :datetime="item.createdAt || item.created_at">{{ formatNotificationTime(item.createdAt || item.created_at) }}</time>
+                      </span>
+                    </button>
+                  </div>
+                  <div v-else class="public-notifications-menu__state">اعلانی برای نمایش وجود ندارد.</div>
+                  <button type="button" class="public-notifications-menu__all" @click="openNotificationCenter">مشاهده همه اعلان‌ها <i class="pi pi-arrow-left" aria-hidden="true"></i></button>
+                </section>
+              </div>
 
               <button type="button" class="public-user-trigger" @click="toggleUserMenu" aria-haspopup="true">
                 <span class="public-user-avatar">
@@ -310,6 +347,17 @@ function logout() {
               </button>
               <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
             </template>
+
+            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
+              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-commerce-menu" :aria-expanded="commerceMenuOpen" @click.stop="commerceMenuOpen = !commerceMenuOpen">
+                <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
+              </button>
+              <div v-if="commerceMenuOpen" id="public-commerce-menu" class="public-commerce-menu" role="group" aria-label="مسیرهای خرید و استعلام">
+                <router-link to="/cart" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-shopping-cart" aria-hidden="true"></i> سبد خرید</span><b>{{ countLabel(cartItemCount) }}</b></router-link>
+                <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" to="/my-inquiries" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-file-edit" aria-hidden="true"></i> استعلام</span><b v-if="myInquiryCount !== null">{{ countLabel(myInquiryCount) }}</b></router-link>
+              </div>
+            </div>
 
             <template v-else>
               <router-link :to="{ name: 'login' }" class="tm-btn tm-btn--sm public-login-link">
@@ -730,4 +778,40 @@ function logout() {
   .public-footer-grid { grid-template-columns: minmax(0, 1fr); }
   .public-main { padding-top: 16px; }
 }
+
+
+/* Header notification preview: anchored to the bell and opening toward the left in RTL. */
+.public-notifications-actions { position: relative; display: inline-flex; align-items: center; }
+.public-notifications-link { border: 0; background: transparent; cursor: pointer; }
+.public-notifications-menu {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: calc(100% + 10px);
+  z-index: 1250;
+  width: min(360px, calc(100vw - 24px));
+  overflow: hidden;
+  border: 1px solid var(--tm-line);
+  border-radius: 14px;
+  background: var(--tm-surface);
+  box-shadow: var(--tm-shadow-lg);
+  text-align: start;
+}
+.public-notifications-menu__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 15px; border-bottom: 1px solid var(--tm-line); color: var(--tm-ink); font-size: 13px; }
+.public-notifications-menu__header span { color: var(--tm-muted); font-size: 11px; }
+.public-notifications-menu__list { display: grid; }
+.public-notification-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--tm-line); background: transparent; color: var(--tm-ink); text-align: start; cursor: pointer; font: inherit; }
+.public-notification-item:hover { background: var(--tm-canvas); }
+.public-notification-item.is-unread { background: color-mix(in srgb, var(--tm-cyan) 6%, var(--tm-surface)); }
+.public-notification-item__dot { flex: 0 0 7px; width: 7px; height: 7px; margin-top: 6px; border-radius: 50%; background: transparent; }
+.public-notification-item.is-unread .public-notification-item__dot { background: var(--tm-cyan); }
+.public-notification-item__body { display: grid; min-width: 0; gap: 4px; }
+.public-notification-item__body strong { overflow: hidden; color: var(--tm-ink); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.public-notification-item__body > span { display: -webkit-box; overflow: hidden; color: var(--tm-ink-soft); font-size: 11px; line-height: 1.7; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.public-notification-item__body time { color: var(--tm-muted); font-size: 10px; }
+.public-notifications-menu__state { padding: 22px 14px; color: var(--tm-muted); font-size: 12px; text-align: center; }
+.public-notifications-menu__all { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 42px; border: 0; background: var(--tm-surface); color: var(--tm-blue); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.public-notifications-menu__all:hover { background: var(--tm-canvas); }
+.public-notification-item:focus-visible, .public-notifications-menu__all:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
+@media (max-width: 575px) { .public-notifications-menu { inset-inline-start: -52px; } }
+
 </style>
