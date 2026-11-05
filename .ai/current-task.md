@@ -621,3 +621,12 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 4. Add/update focused regression tests and docs; run permitted non-browser tests/builds when repository execution is available. Browser screenshot testing remains prohibited unless the owner authorizes it.
 
 **Current next action:** Step 2 — inspect `dashboardMenu`, Company auth permissions, Company routes/stores, and page implementations; identify displayable modules and gaps without changing behavior.
+
+
+## UI-SIDEBAR-PRODUCT-CTA-02 (2026-11-05)
+**Status:** Implemented and committed to `main`.
+- Keep the header sidebar toggle; remove the duplicate collapse control from inside the sidebar.
+- Remove product creation CTAs from the shared sidebar, both layouts, the Company dashboard (including empty state), CompanyProducts and MyProducts.
+- Preserve product creation buttons only in the canonical Admin and Company product-list pages.
+- Add a DashboardSidebar regression test for the absence of duplicate controls/CTA.
+- No API/backend/auth/permission/route/business-logic changes. Build and tests have not yet been run in this remote editing session.
