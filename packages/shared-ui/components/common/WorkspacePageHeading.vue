@@ -14,7 +14,7 @@
 defineProps({
   title: { type: String, required: true },
   headingId: { type: String, default: 'workspace-page-title' },
-  srOnly: { type: Boolean, default: false },
+  srOnly: { type: Boolean, default: true },
   description: { type: String, default: '' },
   eyebrow: { type: String, default: '' },
   icon: { type: String, default: '' },
