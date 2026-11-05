@@ -75,12 +75,11 @@ describe('Company dashboard compact ecommerce metrics', () => {
 
   it('marks unsupported order and inventory numbers as sample data', () => {
     const metrics = buildCompanyDashboardMetrics({ stats: null, productStatusCounts: null })
-    expect(metrics).toHaveLength(9)
+    expect(metrics).toHaveLength(8)
     expect(metrics.filter(item => item.sample).map(item => item.key)).toEqual([
       'active-inquiries', 'answered-inquiries', 'participated-inquiries', 'approved-products',
-      'pending-products', 'active-orders', 'shipping-orders', 'delivered-orders', 'out-of-stock',
+      'pending-products', 'active-orders', 'shipping-orders', 'delivered-orders',
     ])
     expect(metrics.find(item => item.key === 'active-orders').value).toBe(11)
-    expect(metrics.find(item => item.key === 'out-of-stock').value).toBe(3)
   })
 })
