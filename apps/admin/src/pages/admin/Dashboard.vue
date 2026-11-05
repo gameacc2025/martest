@@ -521,9 +521,9 @@ onMounted(() => {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
-.admin-dashboard :deep(.tm-stat-card) { min-height: 137px; }
+.admin-dashboard :deep(.tm-stat) { min-height: 137px; }
 .admin-dashboard :deep(.tm-panel) { border-radius: 4px; box-shadow: 0 1px 3px rgba(20,20,60,.04); }
-.admin-dashboard :deep(.tm-panel__header) { min-height: 56px; padding: 16px 20px; }
+.admin-dashboard :deep(.tm-panel__head) { min-height: 56px; padding: 16px 20px; }
 .admin-dashboard :deep(.tm-panel__body) { padding: 18px 20px; }
 
 .admin-dashboard-msg { margin: 0; }
