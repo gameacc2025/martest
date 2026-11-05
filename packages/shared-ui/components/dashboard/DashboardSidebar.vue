@@ -35,7 +35,7 @@ const props = defineProps({
   user: { type: Object, default: null },
 })
 
-const emit = defineEmits(['navigate', 'toggle-collapse'])
+const emit = defineEmits(['navigate'])
 
 const route = useRoute()
 
@@ -267,7 +267,6 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   font-weight: 600;
   white-space: nowrap;
 }
-.dash-sidebar-collapse-btn { display: none; }
 
 /* ---- Navigation (tem `.mi`) ---- */
 .dash-sidebar-nav { padding: 0; }
@@ -418,15 +417,12 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   .dash-sidebar--collapsed .dash-sidebar-count,
   .dash-sidebar--collapsed .dash-sidebar-planned-badge,
   .dash-sidebar--collapsed .dash-sidebar-caret,
-  .dash-sidebar--collapsed .dash-sidebar-cta,
   .dash-sidebar--collapsed .dash-sidebar-support,
   .dash-sidebar--collapsed .dash-sidebar-copyright { display: none; }
   .dash-sidebar--collapsed .dash-sidebar-link { justify-content: center; padding-inline: 0; }
   .dash-sidebar--collapsed .dash-sidebar-link-icon { width: auto; }
-  .dash-sidebar-desktop-only { display: inline-flex; }
 }
 @media (max-width: 991px) {
   .dash-sidebar { width: 256px; }
-  .dash-sidebar-desktop-only { display: none; }
 }
 </style>
