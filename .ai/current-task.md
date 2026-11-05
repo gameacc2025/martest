@@ -680,3 +680,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Add a “سفارشات” parent with working status submenus in both Admin and Company sidebars. Children use the existing retail order routes and query-based status filters; statuses must match the sample rows shown by each panel. Clearly identify the order workspace as sample/prototype until APIs exist.
 - Keep ticket handling separate from notifications. Notifications report events; ticket workspace owns the support case lifecycle. Product-related tickets should route to the company that owns the product, while Admin can oversee/reassign. This is a recommendation only; do not implement backend/schema changes without a separate approved task.
 - Preserve current APIs, roles, permissions and business workflows. Static checks only; tests/build/browser not run.
+
+
+## Current task — Dashboard home visibility and ticket navigation (2026-11-05)
+- Keep “داشبورد” as the first, directly accessible Home item in the sidebar for both Admin and Company panels, under a visible “پیشخوان” group. Do not make the essential home link depend on `dashboard.read`; keep app role scoping and the correct app-specific route.
+- Provide a nested “تیکت‌ها” sidebar group in each panel with “همه تیکت‌ها”, “تیکت‌های باز”, and “تیکت‌های بسته‌شده”. Use the panel-specific ticket route and synchronize the submenu status query with the ticket inbox filter.
+- Keep tickets separate from notifications. Ticket page content is still a clearly marked UI preview with sample data; no backend/API/schema/auth/permission changes in this navigation task.
+- Static checks only; automated tests/build/browser verification not run.
