@@ -80,7 +80,6 @@ function formatPrice(price) {
       description="فهرست محصولات ثبت‌شده شرکت و وضعیت انتشار آن‌ها را مدیریت کنید."
     >
       <template #actions>
-        <router-link :to="{ name: 'manage-product-create' }" class="company-products-create-link"><i class="pi pi-plus" aria-hidden="true"></i> محصول جدید</router-link>
       </template>
     </WorkspacePageHeading>
 
