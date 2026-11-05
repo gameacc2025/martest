@@ -605,3 +605,19 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - No backend/API or database changes were made.
 - Commits: `4c7600b7`, `a97ceb5b`, `2b4b33c0`, `8cffe782`, `f0970a4e`.
 - CI and runtime/database validation were triggered for the source changes; final workflow results must be checked before reporting a green status. Browser visual verification was not performed.
+
+
+## Focused follow-up — UI-COMPANY-ADMIN-PARITY-01 (2026-11-05)
+**Status:** IN_PROGRESS — Step 1 shell geometry aligned and committed as `9482da86c943e7ff1256a84911537b56ffc0c4c2`.
+
+**User goal:** Bring the existing Admin panel presentation to the Company Portal so both have the same layout/composition; show every module and data surface that is genuinely available to a company user, while excluding STAFF-only controls and data.
+
+**Accepted scope:** UI/presentation only. Preserve existing Company APIs, auth/PKCE, accessProfile boundary, permissions, tenant ownership, routes, and business behavior. Do not change backend/schema/API or fabricate data. Keep company-specific workspace identity and actions.
+
+**Sequence:**
+1. Align the shared dashboard shell geometry — committed; static source review only.
+2. Audit Admin navigation and page families against Company routes, role/permission visibility, and available API data. Produce the company-visible page matrix.
+3. Implement page composition parity one page family at a time, reusing shared components and existing Company data flows.
+4. Add/update focused regression tests and docs; run permitted non-browser tests/builds when repository execution is available. Browser screenshot testing remains prohibited unless the owner authorizes it.
+
+**Current next action:** Step 2 — inspect `dashboardMenu`, Company auth permissions, Company routes/stores, and page implementations; identify displayable modules and gaps without changing behavior.
