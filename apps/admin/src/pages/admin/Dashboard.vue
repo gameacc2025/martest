@@ -514,8 +514,17 @@ onMounted(() => {
   direction: rtl;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
+.admin-dashboard :deep(.tm-grid--stats) {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.admin-dashboard :deep(.tm-stat-card) { min-height: 137px; }
+.admin-dashboard :deep(.tm-panel) { border-radius: 4px; box-shadow: 0 1px 3px rgba(20,20,60,.04); }
+.admin-dashboard :deep(.tm-panel__header) { min-height: 56px; padding: 16px 20px; }
+.admin-dashboard :deep(.tm-panel__body) { padding: 18px 20px; }
 
 .admin-dashboard-msg { margin: 0; }
 
@@ -556,11 +565,16 @@ onMounted(() => {
   border: 0;
 }
 
+@media (max-width: 1200px) {
+  .admin-dashboard :deep(.tm-grid--stats) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 @media (max-width: 991px) {
   .admin-dashboard-split { grid-template-columns: 1fr; }
+  .admin-dashboard :deep(.tm-grid--stats) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
+  .admin-dashboard :deep(.tm-grid--stats) { grid-template-columns: 1fr; }
   .admin-dashboard-table-wrap { overflow-x: visible; }
   .admin-dashboard-table-wrap .tm-table thead { display: none; }
   .admin-dashboard-table-wrap .tm-table,
