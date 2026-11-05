@@ -36,12 +36,15 @@ describe('MegaMenu', () => {
     await wrapper.find('.mega-trigger').trigger('click')
     expect(wrapper.find('.mega-dropdown').isVisible()).toBe(true)
 
+    expect(wrapper.find('.mega-trigger .pi-bars').exists()).toBe(false)
+    expect(wrapper.find('.mega-trigger .pi-chevron-down').exists()).toBe(false)
+    expect(wrapper.find('.mega-cat-icon').exists()).toBe(true)
     await wrapper.find('.mega-cat-item').trigger('click')
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({
       name: 'products',
-      query: { category: 'fiber-optics' },
+      query: { category: '12' },
     })
     wrapper.unmount()
   })
