@@ -687,3 +687,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Provide a nested “تیکت‌ها” sidebar group in each panel with “همه تیکت‌ها”, “تیکت‌های باز”, and “تیکت‌های بسته‌شده”. Use the panel-specific ticket route and synchronize the submenu status query with the ticket inbox filter.
 - Keep tickets separate from notifications. Ticket page content is still a clearly marked UI preview with sample data; no backend/API/schema/auth/permission changes in this navigation task.
 - Static checks only; automated tests/build/browser verification not run.
+
+
+## Sidebar visibility regression — 2026-11-05
+- Root cause found: `useDashboardMenu` read roles from `authStore.user.roles`, while `@telecom/auth` exposes authorization separately as `authStore.roles`. The resulting empty role list hid role-scoped Dashboard, Orders and Ticket menu entries.
+- Corrected the shared resolver to read `authStore.roles`; preserved permission checks and router route-existence checks.
+- Added regression coverage for Admin and Company role menus, supported role object shapes, missing roles, permission-gated links and route filtering.
+- No backend/API/database/auth-contract changes. Retail orders remain a clearly identified UI prototype pending a real backend domain/API.
