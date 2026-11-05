@@ -732,3 +732,9 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Fixed the header authentication conditional structure in `apps/website/src/layouts/PublicLayout.vue`: replaced adjacent `<template v-if>` / `<template v-else>` wrappers with explicit `<div v-if>` / `<div v-else>` containers to make the header branch boundaries unambiguous while preserving the authenticated and guest controls.
 - The full template tag-balance check reports no unmatched or unclosed elements. Vite build/dev server has not been run in this remote GitHub edit session.
 - Commit: 3c1beac5777e9384766d21d2fd44d0a21e8743f4.
+
+
+## 2026-11-05 — WEBSITE-PUBLIC-LAYOUT-VUE-PARSER-FOLLOW-UP
+- The reported Vite SFC parser error persisted after the earlier auth-branch wrapper change. Follow-up cleanup removed the nested JavaScript template literal from the mobile notification-count interpolation, replacing it with a plain concatenation expression and the existing `countLabel` formatter.
+- Source commits: `d3ad966e53803b60168af439fc9ecc5c0c6992d6`, `aafa889baafb9051809a4ff1c4110327a411c1bf`.
+- Important: remote source edits and static tag-balance checks are not equivalent to running `@vue/compiler-sfc`; the Vite compiler/build has not been executed here. If the error remains, capture the current exact line range from the running checkout because it may not be synchronized with `main`.
