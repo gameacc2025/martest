@@ -3569,3 +3569,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Reduced KPI card height, padding, icon, label and value sizes further. On narrow screens the overview stacks naturally.
 - Kept the sample sales chart in the lower right-side dashboard content; summary panel remains removed. No API/backend/permission changes.
 - Static source checks only; automated tests/build not run during remote repository edits.
+
+
+## 2026-11-05 — Dashboard navigation and message destinations
+- Company message drawer sample rows and “مشاهده همه پیام‌ها” now navigate to the existing `notifications` page, not inquiries. The drawer content remains explicitly labeled sample/demo until a message API is available.
+- The sidebar only renders section headings when a non-empty label exists. Removed the “بازرگانی” heading for both Admin and Company navigation groups.
+- Admin and Company dashboard links are labeled “داشبورد”. Public-site navigation resolves `VITE_PUBLIC_SITE_URL` first, then `VITE_WEBSITE_APP_URL`; production Admin/Company Docker builds now receive the website URL build argument.
+- Demo-only data currently includes Company message previews and the Company sales chart; both are visibly identified as sample data and must not be represented as live records.
+- No backend/API/auth/permission changes. Static source checks only; build and browser verification not run.
