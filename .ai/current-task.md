@@ -658,3 +658,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Sales chart values and growth are demo-only, visibly labeled, and must be replaced by an authoritative sales API when available. Do not present sample revenue as actual company revenue.
 - Keep all existing Company APIs, route names, tenant boundaries, permissions and workflows unchanged. No backend/schema/database work.
 - Next: run focused dashboard tests and Company production build when local execution is available; inspect CI for the new commits. No browser testing performed.
+
+
+## Current task — KPI cards one column with adjacent Quick access (2026-11-05)
+- Eight KPI cards must be in a single vertical column, compact in height and typography.
+- Place Quick access in the adjacent column, aligned with the top and vertical extent of the KPI stack; on mobile stack it below the metrics.
+- Keep the sample sales chart in the lower dashboard content. Company summary stays removed.
+- Preserve all Company API, tenant, route and permission behavior; no backend/schema changes.
