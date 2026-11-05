@@ -3517,3 +3517,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Committed directly to `main` through GitHub Contents API; remote commit created successfully.
 - **Risks / open questions:** Menu contents are role/permission/route-filtered by the shared `useDashboardMenu`; this must be audited against company-visible modules in the next step. Some Company-only operational pages are explicitly UI prototypes where APIs are pending; they must not be presented as live data.
 - **Next action:** Inventory the Admin navigation/page families against Company routes, permissions, and real API-backed screens; define the company-visible subset while preserving the exact Admin shell and page composition.
+
+
+## 2026-11-05 — UI-SIDEBAR-PRODUCT-CTA-02 — Remove duplicate sidebar and product creation actions
+- **Status:** IMPLEMENTED — changes committed to `main`; execution tests/build not run in this remote edit session.
+- **User request:** Keep only one sidebar collapse control (the one in the header); remove product-create buttons/links everywhere except the product-list page.
+- **Changes:** Removed the collapse icon/button from `DashboardSidebar.vue`, its unused emit and styling, and the obsolete layout listeners in AdminLayout and CompanyLayout. The header's sidebar toggle remains the single control.
+- **Product CTA cleanup:** Removed the sidebar primary action from both layouts and removed the primary-action prop/rendering/styles from the shared sidebar. Removed create-product links from the Company dashboard (header and empty state), CompanyProducts, and MyProducts. The create buttons in `apps/admin/src/pages/admin/products/ProductList.vue` and `apps/company/src/pages/company/products/ProductList.vue` are intentionally retained.
+- **Tests:** Added a DashboardSidebar regression test asserting no internal collapse control and no product-create CTA are rendered. Not executed in this session.
+- **Scope:** Frontend only. No API, backend, permission, route, or business-logic changes.
+- **Next action:** Continue the Company/Admin page-parity inventory and implementation.
