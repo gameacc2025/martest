@@ -550,7 +550,7 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 
 ## 2026-11-05 — Latest UI status
-- Cross-app visual consistency pass now includes Admin, Company and Website dashboard, catalogue, account, inquiry, notification, subscription and settings surfaces. The shared 4/6/8px radius scale, 256px expanded panel sidebars (76px collapsed), card elevation and RTL shell rules are in place.
+- Cross-app visual consistency pass now includes Admin, Company and Website dashboard, catalogue, account, inquiry, notification, subscription and settings surfaces. The shared 4/6/8px radius scale, 280px expanded panel sidebars (76px collapsed), card elevation and RTL shell rules are in place.
 - Latest UI commit: `a87be946bd9f0a1ba34e2462655f5f261ad0e1a3`.
 
 - Final polish follow-up (`a87be94`): company dashboard analytics/hero surfaces, company inquiry message bubbles, About Us product cards and Website inquiry-subscription plan/panel cards were brought onto the shared 6–8px radius and elevation rules.
@@ -576,3 +576,12 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Files changed in this correction: `tokens.scss`, `skill-refinements.scss`, shared `main.scss`, `tem.scss`, `TemStatCard.vue`, Website `Home.vue` and `ProductListing.vue`.
 - Implementation commits: `eba0a648` (shared exact palette/surface port), `907dc86d` / `add4aadc` / `de3dad4a` / `05841b5c` (storefront card/homepage port and CSS/test corrections), `8858f510` (TEM KPI composition), `f424df23` (shell navigation and hero surfaces).
 - Verification on `f424df23`: frontend/shared tests PASS; production builds for Website, Admin and Company PASS; database migration validation PASS. Backend tests still fail on the two existing assertions `POST /messages rejects invalid payloads` and `uploadAvatar` missing-file test. Runtime/browser smoke validation is queued/pending; no claim of completed browser visual inspection.
+
+
+## 2026-11-05 — Shop page structural rebuild + requested sidebar color
+- Rebuilt `apps/website/src/pages/public/ProductListing.vue` as a full RTL storefront composition using the supplied `tem/shop.html` layout language: deep navy featured-product carousel, trust/benefit strip, category tiles, featured-product rail, sticky filter sidebar, search, category selection, price bounds, server-supported sort choices, product grid cards, and pagination.
+- Kept the existing public product/category store APIs, published/public catalog constraints, product detail route, image selection, and pagination response handling. No checkout or cart action was fabricated.
+- Updated dashboard sidebar semantic token and shell surfaces to the user-requested exact `#0d2b53`; expanded the desktop sidebar from 256px to 280px and retained responsive collapse behavior.
+- The public catalog API currently supports sorting by `createdAt`, `updatedAt`, and `title`, but exposes no sales/order-count metric. Therefore this pass labels the server-flagged items as `محصولات ویژه` rather than falsely calling them best sellers. A truthful best-seller ranking requires a real sales aggregate/API; no fabricated ranking or backend schema change was introduced.
+- Commit: `61f135ba26de72f57c025efa669fa510228e79d3`.
+- CI, runtime validation, and migration validation were triggered for this commit and must be checked before claiming success. No browser screenshot validation was performed in this remote session.
