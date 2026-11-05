@@ -3466,3 +3466,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Updated the semantic brand/radius/elevation tokens and `tem.scss` aliases to the supplied template values.
 - Commit: `eba0a64852d1d93367ef9ae4474f37c9ead28ac5`.
 - Verification note: source changes committed to `main`; CI/build and browser visual inspection must be checked separately. Do not claim pixel-perfect verification without browser screenshots.
+
+
+## 2026-11-05 — Exact supplied TEM visual implementation (not inspiration)
+- Corrected the previous redesign to use the actual files in `tem/`: `style.css`, `analytics.html`, `shop.html`, and `layout.js`. This pass intentionally removes the invented cyan-gradient workspace treatment and the transparent/flat-card overrides that contradicted the supplied reference.
+- Shared visual values: canvas `#f4f5fa`, ink `#1d2130`, white cards, hairline `#eceef5`, 4px card corners, restrained `0 1px 3px rgba(20,20,60,.04)` elevation; primary violet `#7c6cf6`, secondary violet `#8878f7`, cyan `#2bb3e8`, green `#22c55e`, orange `#ff6a3d`, amber `#f5a623`.
+- Updated the shared PrimeVue/design-system layer, semantic tokens, TEM aliases, Admin/Company shell and active navigation. KPI cards now follow the template hierarchy: label + compact colored icon row, large metric + delta row, quiet comparison caption. Panels/tables use the same white surfaces and fine separators as the reference.
+- Website homepage hero, featured products, category tiles, and product listing cards were updated to the TEM white-card/pale-canvas palette and subtle elevation. Existing live product/category API calls, route names, permission gates, checkout safeguards, and RTL layout remain unchanged.
+- Files changed in this correction: `tokens.scss`, `skill-refinements.scss`, shared `main.scss`, `tem.scss`, `TemStatCard.vue`, Website `Home.vue` and `ProductListing.vue`.
+- Implementation commits: `eba0a648` (shared exact palette/surface port), `907dc86d` / `add4aadc` / `de3dad4a` / `05841b5c` (storefront card/homepage port and CSS/test corrections), `8858f510` (TEM KPI composition), `f424df23` (shell navigation and hero surfaces).
+- Verification on `f424df23`: frontend/shared tests PASS; production builds for Website, Admin and Company PASS; database migration validation PASS. Backend tests still fail on the two existing assertions `POST /messages rejects invalid payloads` and `uploadAvatar` missing-file test. Runtime/browser smoke validation is queued/pending; no claim of completed browser visual inspection.
