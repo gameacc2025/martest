@@ -694,3 +694,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Corrected the shared resolver to read `authStore.roles`; preserved permission checks and router route-existence checks.
 - Added regression coverage for Admin and Company role menus, supported role object shapes, missing roles, permission-gated links and route filtering.
 - No backend/API/database/auth-contract changes. Retail orders remain a clearly identified UI prototype pending a real backend domain/API.
+
+
+## Current task — Remove duplicate Admin/Company page heading blocks (2026-11-05)
+- Hide the repeated visible page title blocks on Admin and Company pages; use the existing breadcrumb as the visible page title and the active sidebar styling as the navigation context.
+- Keep semantic page headings available to screen readers. Preserve heading action slots and all page content/actions.
+- Remove the redundant title block from `OperationalWorkspace` pages as well.
+- Frontend-only: no routes, menu definitions, APIs, backend, permissions, or business logic changes. Tests/build/browser verification pending.
