@@ -96,7 +96,6 @@ onUnmounted(() => {
         :menu-items="menu"
         :user="authStore.user"
         @navigate="closeMobile"
-        @toggle-collapse="toggleSidebar"
       />
 
     </div>
