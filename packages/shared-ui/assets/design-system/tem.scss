@@ -1249,13 +1249,9 @@ body .company-management-toolbar {
 .product-card .p-card {
   box-shadow: var(--tm-card-shadow);
 }
-.tm-panel:hover,
-.tm-surface:hover,
-.tm-stat:hover,
-.card:hover,
-.ds-panel:hover,
-.p-card:hover,
-.product-card:hover .p-card {
+.product-card:hover .p-card,
+.category-card:hover,
+.home-feature:hover {
   box-shadow: var(--tm-card-shadow-hover);
 }
 

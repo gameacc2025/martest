@@ -531,3 +531,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Verification remains static source review only; wait for Actions on the current `main` head and address only failures that intersect this UI slice. Existing CI failures previously observed on the older head included unrelated backend message/avatar tests and browser app startup/navigation failures.
 
 - Accessibility refinement: slider auto-rotation now respects `prefers-reduced-motion`; keyboard focus remains a pause state until focus leaves the slider rather than restarting when moving between its controls.
+
+
+## 2026-11-05 — Active UI polish handoff
+- Current task remains cross-app visual QA against `tem/analytics.html` (Admin/Company) and `tem/shop.html` (Website), all RTL.
+- Completed in this slice: unified radius/elevation tokens, card surface consistency, compact control corners, storefront homepage card geometry, and 256px Admin/Company sidebars (76px collapsed).
+- Preserve existing APIs, route guards, permissions, business workflows, and non-operational checkout safeguards. Never invent data or unsupported facets.
+- Latest implementation commit: `294952a11964352aee25c7ded5f23c0b77baec96`.
+- Verification still required in a local workspace: `pnpm -r test` / the repository's documented Vitest command and production builds for Website, Admin and Company; visual browser checks were not run.

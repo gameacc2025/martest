@@ -3432,3 +3432,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Verification remains static source review only; wait for Actions on the current `main` head and address only failures that intersect this UI slice. Existing CI failures previously observed on the older head included unrelated backend message/avatar tests and browser app startup/navigation failures.
 
 - Accessibility refinement: slider auto-rotation now respects `prefers-reduced-motion`; keyboard focus remains a pause state until focus leaves the slider rather than restarting when moving between its controls.
+
+
+## 2026-11-05 — Cross-app card, radius and sidebar alignment
+- Aligned shared design tokens with the supplied TEM reference geometry: 4px/6px/8px radius scale, with pill radii reserved for intentional badges only; strengthened light/dark card elevation while keeping dashboard panels quiet until interactive.
+- Standardized Admin and Company expanded sidebar width at 256px (collapsed rail remains 76px), with matching component and shell widths. Compactened sidebar and header control corners.
+- Applied the shared card surface/elevation treatment to TEM panels, statistics, PrimeVue cards, legacy card wrappers and storefront card families. Avoided blanket hover lift on non-interactive dashboard panels.
+- Reduced oversized corner radii in the storefront homepage featured/product visual surfaces. Existing live product/category API behavior, auth, permissions, checkout safety and RTL direction remain unchanged.
+- Commit: 294952a11964352aee25c7ded5f23c0b77baec96 (shared visual alignment); follow-up documentation commit recorded below.
+- Verification: source-level remote edits and static re-fetch only. Local Vitest/build/browser runs were not possible from this remote GitHub editing session; do not report them as passing.
