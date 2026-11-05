@@ -64,13 +64,13 @@ describe('Company dashboard compact ecommerce metrics', () => {
   it('uses live inquiry and product counts where APIs provide them', () => {
     const metrics = buildCompanyDashboardMetrics({
       stats: { received: { byStatus: { SUBMITTED: 2, OPEN: 3, CLOSED: 4, COMPLETED: 1 } }, responses: { total: 7 } },
-      productStatusCounts: { APPROVED: 16, PENDING_REVIEW: 2 },
+      productStatusCounts: { APPROVED: 16, PUBLISHED: 4, PENDING_REVIEW: 2, DRAFT: 1, REJECTED: 1 },
     })
     expect(metrics.find(item => item.key === 'active-inquiries')).toMatchObject({ value: 5, sample: false })
     expect(metrics.find(item => item.key === 'answered-inquiries')).toMatchObject({ value: 5, sample: false })
     expect(metrics.find(item => item.key === 'participated-inquiries')).toMatchObject({ value: 7, sample: false })
-    expect(metrics.find(item => item.key === 'approved-products')).toMatchObject({ value: 16, sample: false })
-    expect(metrics.find(item => item.key === 'pending-products')).toMatchObject({ value: 2, sample: false })
+    expect(metrics.find(item => item.key === 'approved-products')).toMatchObject({ value: 20, sample: false })
+    expect(metrics.find(item => item.key === 'pending-products')).toMatchObject({ value: 4, sample: false })
   })
 
   it('marks unsupported order and inventory numbers as sample data', () => {
