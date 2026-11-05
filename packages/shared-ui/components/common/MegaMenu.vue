@@ -300,26 +300,25 @@ function goToSubcategory(categorySlug, subcategorySlug) {
 }
 
 .mega-trigger {
-  min-height: var(--ds-touch-target, 44px);
+  min-height: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.625rem;
-  padding: 0.625rem 1rem;
-  border: 1px solid var(--ds-color-border, var(--surface-border));
-  border-radius: var(--ds-radius-md, 10px);
-  background: var(--ds-color-surface, var(--surface-card));
-  color: var(--ds-color-text, var(--text-color));
+  gap: 0.45rem;
+  padding: 6px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--tm-ink-soft, var(--ds-color-text, var(--text-color)));
   font: inherit;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  white-space: nowrap;
+  transition: color 150ms ease;
 }
 
-.mega-trigger:hover {
-  border-color: var(--ds-color-primary-text, var(--primary-color));
-  background: var(--ds-color-primary-soft, var(--surface-hover));
-}
+.mega-trigger:hover { color: var(--tm-blue, var(--ds-color-primary-text, var(--primary-color))); }
 
 .mega-trigger:focus-visible {
   outline: 3px solid var(--ds-color-focus, var(--primary-color));
