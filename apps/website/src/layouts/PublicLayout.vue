@@ -425,7 +425,7 @@ function logout() {
           </li>
           <li v-for="item in navItems" :key="item.path">
             <router-link :to="item.path" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
-              {{ item.name }}
+              <i :class="item.icon || 'pi pi-circle'" aria-hidden="true"></i><span>{{ item.name }}</span>
             </router-link>
           </li>
           <li v-if="user" class="public-mobile-auth">
