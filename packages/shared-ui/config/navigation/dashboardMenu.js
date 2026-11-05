@@ -51,9 +51,14 @@ export const dashboardMenu = [
         icon: 'pi pi-home',
         route: 'admin-dashboard',
         roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
-        permission: 'dashboard.read',
       },
 
+    ],
+  },
+  {
+    section: 'پیشخوان',
+    items: [
+      { title: 'داشبورد', icon: 'pi pi-home', route: 'company-dashboard', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
     ],
   },
   {
@@ -91,7 +96,6 @@ export const dashboardMenu = [
   {
     section: '',
     items: [
-      { title: 'داشبورد', icon: 'pi pi-home', route: 'company-dashboard', roles: ['COMPANY_MANAGER', 'COMPANY_USER'], permission: 'dashboard.read' },
       // Every item below is gated purely by permission — NOT by hardcoding
       // "COMPANY_MANAGER" / "COMPANY_USER". This means: the day you create a
       // third company role (e.g. "COMPANY_VIEWER") and grant it a subset of
@@ -155,8 +159,26 @@ export const dashboardMenu = [
   {
     section: 'پشتیبانی',
     items: [
-      { title: 'مرکز تیکت‌های سامانه', icon: 'pi pi-headphones', route: 'admin-tickets', roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-      { title: 'تیکت‌های شرکت', icon: 'pi pi-comments', route: 'company-tickets', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+      {
+        title: 'تیکت‌ها',
+        icon: 'pi pi-headphones',
+        roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
+        children: [
+          { title: 'همه تیکت‌ها', icon: 'pi pi-list', route: 'admin-tickets', query: { status: 'ALL' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+          { title: 'تیکت‌های باز', icon: 'pi pi-envelope', route: 'admin-tickets', query: { status: 'OPEN' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+          { title: 'تیکت‌های بسته‌شده', icon: 'pi pi-check-circle', route: 'admin-tickets', query: { status: 'CLOSED' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
+        ],
+      },
+      {
+        title: 'تیکت‌ها',
+        icon: 'pi pi-comments',
+        roles: ['COMPANY_MANAGER', 'COMPANY_USER'],
+        children: [
+          { title: 'همه تیکت‌ها', icon: 'pi pi-list', route: 'company-tickets', query: { status: 'ALL' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+          { title: 'تیکت‌های باز', icon: 'pi pi-envelope', route: 'company-tickets', query: { status: 'OPEN' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+          { title: 'تیکت‌های بسته‌شده', icon: 'pi pi-check-circle', route: 'company-tickets', query: { status: 'CLOSED' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
+        ],
+      },
     ],
   },
   {
