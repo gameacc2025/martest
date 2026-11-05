@@ -3554,3 +3554,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Expanded quick actions to products, inquiries, orders and company profile.
 - CI on the intermediate handoff head found one stale shared-header test that still expected the workspace chip after its intentional removal. Updated the test to assert the chip is absent; a fresh CI run is pending for the latest commit.
 - Latest code/test commits include `bc0ab4c0`, `802117ad`, `c66e45b7`, `053733ab`, `f58a118f`, `01e8b20c`, and `3832abf7`.
+
+
+## 2026-11-05 — Company dashboard KPI and sales-chart refinement
+- Changed the Company dashboard KPI grid to three columns with smaller, tighter cards. The eight headline metrics now occupy three rows (3 + 3 + 2); removed the stock-out KPI to match the requested eight-card count.
+- Removed the Company summary panel from the right rail. Quick access remains, and a compact 12-month sales chart preview now fills the lower right-rail space.
+- Sales amount, monthly curve and growth percentage are explicitly labeled sample/demo data; no sales API exists yet and no revenue is represented as real.
+- Preserved the existing inquiry/product API-backed KPI values and all routes/permissions/business behavior. No backend, schema, API or database changes.
+- Updated dashboard presentation tests for the eight KPI contract. Static source review only; Vitest/build/browser verification not run in this remote edit.
