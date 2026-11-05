@@ -53,13 +53,7 @@ export const dashboardMenu = [
         roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
         permission: 'dashboard.read',
       },
-      {
-        title: 'داشبورد شرکت',
-        icon: 'pi pi-home',
-        route: 'company-dashboard',
-        roles: ['COMPANY_MANAGER', 'COMPANY_USER'],
-        permission: 'dashboard.read',
-      },
+
     ],
   },
   {
@@ -95,8 +89,9 @@ export const dashboardMenu = [
     ],
   },
   {
-    section: 'شرکت من',
+    section: 'داشبورد',
     items: [
+      { title: 'داشبورد', icon: 'pi pi-home', route: 'company-dashboard', roles: ['COMPANY_MANAGER', 'COMPANY_USER'], permission: 'dashboard.read' },
       // Every item below is gated purely by permission — NOT by hardcoding
       // "COMPANY_MANAGER" / "COMPANY_USER". This means: the day you create a
       // third company role (e.g. "COMPANY_VIEWER") and grant it a subset of
