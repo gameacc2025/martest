@@ -3547,3 +3547,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added pure KPI presentation helper and tests for live values and sample fallbacks. No backend/schema/API/auth/permission changes.
 - Static source review only; tests/build/browser NOT RUN in this remote editing session.
 - Commits: `e7387e68`, `9b2888b5`, `51a6537f`, `2a42a6e3`, `120372e8`, `9b2888b5`, `2a25d226`, `588bab86`, `b84d2d92`, `053733ab`, `f58a118f`, `bc0ab4c0`, `802117ad`, `c66e45b7`, `01e8b20c`.
+
+
+### Ecommerce dashboard implementation follow-up
+- Refined product KPI semantics: approved = APPROVED + PUBLISHED; unapproved = PENDING_REVIEW + DRAFT + REJECTED. Recent approved/unapproved lists now fetch the latest five records per lifecycle status using the existing Company product endpoint.
+- Expanded quick actions to products, inquiries, orders and company profile.
+- CI on the intermediate handoff head found one stale shared-header test that still expected the workspace chip after its intentional removal. Updated the test to assert the chip is absent; a fresh CI run is pending for the latest commit.
+- Latest code/test commits include `bc0ab4c0`, `802117ad`, `c66e45b7`, `053733ab`, `f58a118f`, `01e8b20c`, and `3832abf7`.
