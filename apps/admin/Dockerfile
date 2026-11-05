@@ -13,8 +13,10 @@ WORKDIR /app
 # Vite embeds these URLs in the browser bundle at build time.
 ARG VITE_COMPANY_APP_URL=http://localhost:3002
 ARG VITE_ADMIN_APP_URL=http://localhost:3003
+ARG VITE_WEBSITE_APP_URL=http://localhost:3001
 ENV VITE_COMPANY_APP_URL=${VITE_COMPANY_APP_URL}
 ENV VITE_ADMIN_APP_URL=${VITE_ADMIN_APP_URL}
+ENV VITE_WEBSITE_APP_URL=${VITE_WEBSITE_APP_URL}
 
 # Copy workspace root files first (pnpm resolution)
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
