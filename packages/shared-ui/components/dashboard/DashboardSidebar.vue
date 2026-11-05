@@ -124,7 +124,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 
     <nav class="dash-sidebar-nav" aria-label="منوی داشبورد">
       <template v-for="group in props.menuItems" :key="group.section">
-        <p class="dash-sidebar-section">{{ group.section }}</p>
+        <p v-if="group.section" class="dash-sidebar-section">{{ group.section }}</p>
 
         <ul class="dash-sidebar-list">
           <li v-for="item in group.items" :key="item.route || item.url || item.title">
