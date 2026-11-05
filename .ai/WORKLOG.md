@@ -3592,3 +3592,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Replaced separate flat ticket links with a nested “تیکت‌ها” menu in each panel: “همه تیکت‌ها”, “تیکت‌های باز”, and “تیکت‌های بسته‌شده”. Admin children route to `admin-tickets`; Company children route to `company-tickets`.
 - `TicketDeskWorkspace` now reads `route.query.status` and synchronizes its existing ALL/OPEN/CLOSED inbox filter with the selected sidebar submenu. The existing local inbox filter buttons continue to work.
 - Ticket list content and stats remain explicitly demo/sample data; no ticket APIs, backend, database, auth, or permission model were changed. Static checks only; automated tests/build/browser verification not run.
+
+
+## 2026-11-05 — Sidebar role visibility regression
+- Fixed the shared sidebar role resolver to read the auth store's top-level `roles` array. The auth contract deliberately keeps `user` (identity), `roles`, and `permissions` as separate fields; reading `authStore.user.roles` returned an empty role list and hid every role-scoped dashboard, order and ticket navigation entry.
+- Kept app-specific role scopes and explicit permission checks intact. Admin/Company dashboards and their respective order submenus now resolve from the actual role field; links still require a route registered in the current app.
+- Added focused regression tests for Admin, Company, object-shaped roles, missing roles, permission gates and app-specific route filtering.
+- Updated the stale navigation comment: retail order pages are UI prototypes with sample data; no Orders API/backend domain was introduced.
+- Frontend-only change. No backend, schema, API, database, auth contract or permission assignments changed. Automated test/build results are pending execution in the repository environment.
