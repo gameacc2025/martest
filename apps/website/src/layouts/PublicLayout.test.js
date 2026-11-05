@@ -82,7 +82,7 @@ describe('PublicLayout responsive navigation', () => {
   it('keeps the RFQ destination hidden for guests and exposes the commerce menu trigger' , async () => {
     wrapper = mountLayout()
     await flushPromises()
-    expect(wrapper.find('.public-commerce-trigger').attributes('aria-label')).toBe('سبد خرید و استعلام')
+    expect(wrapper.find('.public-commerce-trigger').attributes('aria-label')).toBe('سبد خرید')
     expect(wrapper.find('.public-rfq-link').exists()).toBe(false)
   })
 
