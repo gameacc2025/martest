@@ -3585,3 +3585,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin submenu statuses match the admin order preview rows; Company submenu statuses match the company order preview rows. These order screens and counts are still UI prototypes with sample data, not live order APIs.
 - Support tickets should remain a separate workflow/module from notifications. Notifications are event alerts; tickets are persistent cases with requester, product/company ownership, assignee, status, priority, message thread and history. Proposed routing for product tickets: customer → product-owning company; platform Admin retains oversight and reassignment. This is an architecture recommendation only, not a backend implementation or approved schema change.
 - No API/backend/auth/permission changes. Static source checks only; automated tests/build/browser verification not run.
+
+
+## 2026-11-05 — Explicit dashboard home and ticket sidebar submenus
+- Made the Dashboard entry an explicit first “پیشخوان” section for both Admin and Company panels. Removed the `dashboard.read` menu gate from these two home links so an authenticated user in the correct app role does not lose the essential Home navigation due to an optional/missing permission assignment. App-specific route names and role scopes remain intact.
+- Replaced separate flat ticket links with a nested “تیکت‌ها” menu in each panel: “همه تیکت‌ها”, “تیکت‌های باز”, and “تیکت‌های بسته‌شده”. Admin children route to `admin-tickets`; Company children route to `company-tickets`.
+- `TicketDeskWorkspace` now reads `route.query.status` and synchronizes its existing ALL/OPEN/CLOSED inbox filter with the selected sidebar submenu. The existing local inbox filter buttons continue to work.
+- Ticket list content and stats remain explicitly demo/sample data; no ticket APIs, backend, database, auth, or permission model were changed. Static checks only; automated tests/build/browser verification not run.
