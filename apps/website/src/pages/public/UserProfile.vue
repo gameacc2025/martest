@@ -421,7 +421,7 @@ const logout = async () => {
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  box-shadow: none;
+  box-shadow: var(--ds-shadow-sm);
 }
 .user-profile-page :deep(.p-card-body) { padding: clamp(1rem, 2vw, 1.5rem); }
 .user-profile-page :deep(.p-card-title) { margin-bottom: var(--ds-space-4); color: var(--ds-color-text); }
