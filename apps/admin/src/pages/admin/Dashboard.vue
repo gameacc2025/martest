@@ -22,7 +22,6 @@ import Textarea from 'primevue/textarea'
 import Message from 'primevue/message'
 import { SkeletonLoader, EmptyState } from '@telecom/shared-ui/components/common/feedback'
 
-import TemPageHeader from '@telecom/shared-ui/components/ui/TemPageHeader.vue'
 import TemStatCard from '@telecom/shared-ui/components/ui/TemStatCard.vue'
 import TemPanel from '@telecom/shared-ui/components/ui/TemPanel.vue'
 import TemBarChart from '@telecom/shared-ui/components/ui/TemBarChart.vue'
@@ -302,21 +301,6 @@ onMounted(() => {
 
 <template>
   <div class="admin-dashboard">
-    <TemPageHeader
-      title="داشبورد مدیریت"
-      description="نمایی یکپارچه از کاربران، شرکت‌ها، محصولات و جریان استعلام‌های پلتفرم."
-      :crumb="[{ label: 'پنل مدیریت', to: { name: 'admin-dashboard' } }, { label: 'داشبورد' }]"
-    >
-      <template #actions>
-        <router-link :to="{ name: 'admin-product-create' }" class="tm-btn">
-          <i class="pi pi-plus" aria-hidden="true"></i> ایجاد محصول
-        </router-link>
-        <router-link :to="{ name: 'admin-inquiries' }" class="tm-btn tm-btn--ghost">
-          <i class="pi pi-inbox" aria-hidden="true"></i> مدیریت استعلام‌ها
-        </router-link>
-      </template>
-    </TemPageHeader>
-
     <Message v-if="statsError" severity="error" :closable="false" class="admin-dashboard-msg">
       {{ statsError }}
     </Message>

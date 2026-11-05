@@ -1,20 +1,5 @@
 ﻿<template>
   <div class="company-dashboard">
-    <TemPageHeader :title="companyName ? 'خوش آمدید، ' + companyName : 'داشبورد شرکت'">
-      <template #actions>
-        <span class="company-dashboard-status">
-          <span class="company-dashboard-status-dot" :class="{ 'is-active': company?.status === 'ACTIVE' }"></span>
-          {{ companyStatusLabel }}
-          <span v-if="company?.isVerified" class="company-dashboard-verified">
-            <i class="pi pi-verified" aria-hidden="true"></i> تأیید شده
-          </span>
-        </span>
-        <router-link :to="{ name: 'manage-product-create' }" class="tm-btn tm-btn--accent">
-          <i class="pi pi-plus" aria-hidden="true"></i> افزودن محصول
-        </router-link>
-      </template>
-    </TemPageHeader>
-
     <!-- Alerts — actionable items first -->
     <div v-if="alerts.length" class="cd-alerts">
       <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
@@ -206,7 +191,6 @@ import { PRODUCT_STATUSES, buildProductSegments, buildProductLegendItems, sumPro
 import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickActions.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
 import InquiryPipeline from '@telecom/shared-ui/components/admin/dashboard/InquiryPipeline.vue'
-import TemPageHeader from '@telecom/shared-ui/components/ui/TemPageHeader.vue'
 import TemStatCard from '@telecom/shared-ui/components/ui/TemStatCard.vue'
 import TemPanel from '@telecom/shared-ui/components/ui/TemPanel.vue'
 import TemDonutChart from '@telecom/shared-ui/components/ui/TemDonutChart.vue'
