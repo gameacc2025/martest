@@ -7,9 +7,9 @@
  * title row (large bold H1 + quiet description) with actions pushed to the
  * opposite edge. No card chrome.
  *
- * When a page already renders the breadcrumb from the layout, pass `sr-only`
- * so the H1 stays available to screen readers without repeating the
- * "where am I" banner.
+ * Dashboard pages use the layout breadcrumb as their visible page locator.
+ * The heading stays available to assistive technology by default, while any
+ * action slot remains visible.
  */
 defineProps({
   title: { type: String, required: true },
@@ -23,11 +23,11 @@ defineProps({
 
 <template>
   <header
+    v-if="!srOnly || $slots.actions"
     class="workspace-page-heading tm-page-head"
-    :class="{ 'workspace-page-heading--sr-only': srOnly }"
     :aria-labelledby="headingId"
   >
-    <div class="workspace-page-heading-copy tm-page-head__main">
+    <div class="workspace-page-heading-copy tm-page-head__main" :class="{ 'workspace-page-heading-copy--sr-only': srOnly }">
       <div class="workspace-page-heading-title-row">
         <span v-if="icon && !srOnly" class="workspace-page-heading-icon" aria-hidden="true">
           <i :class="icon"></i>
@@ -88,7 +88,7 @@ defineProps({
   flex-wrap: wrap;
   gap: 8px;
 }
-.workspace-page-heading--sr-only {
+.workspace-page-heading-copy--sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
