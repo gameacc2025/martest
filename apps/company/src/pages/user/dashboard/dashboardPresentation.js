@@ -62,6 +62,5 @@ export function buildCompanyDashboardMetrics({ stats, productStatusCounts }) {
     make('active-orders', 'سفارش‌های فعال', null, 11, 'pi pi-shopping-cart', 'violet', { name: 'company-retail-orders' }),
     make('shipping-orders', 'سفارش‌های در حال ارسال', null, 4, 'pi pi-truck', 'cyan', { name: 'company-retail-orders' }),
     make('delivered-orders', 'سفارش‌های تحویل‌شده', null, 28, 'pi pi-check-square', 'green', { name: 'company-retail-orders' }),
-    make('out-of-stock', 'کالاهای ناموجود در انبار', null, 3, 'pi pi-exclamation-triangle', 'orange', { name: 'manage-products' }),
   ]
 }
