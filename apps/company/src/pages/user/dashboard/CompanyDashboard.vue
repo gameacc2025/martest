@@ -96,6 +96,7 @@ const statsLoading = ref(true)
 const statsError = ref(false)
 
 const products = ref([])
+const productsByStatus = ref({})
 const totalCompanyProducts = ref(null)
 const productStatusCounts = ref(null)
 const productsLoading = ref(true)
@@ -210,8 +211,8 @@ const upcomingDeadlines = computed(() =>
     }))
 )
 
-const recentApprovedProducts = computed(() => products.value.filter(p => ['APPROVED', 'PUBLISHED'].includes(p.status)).slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'محصول شرکت', icon: 'pi pi-box', badge: 'تأیید شده', badgeTone: 'success', to: { name: 'manage-products', query: { status: 'APPROVED' } } })))
-const recentPendingProducts = computed(() => products.value.filter(p => ['PENDING_REVIEW', 'DRAFT', 'REJECTED'].includes(p.status)).slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'نیازمند بررسی', icon: 'pi pi-clock', badge: productStatusLabel(p.status), badgeTone: 'warning', to: { name: 'manage-products', query: { status: 'PENDING_REVIEW' } } })))
+const recentApprovedProducts = computed(() => [...(productsByStatus.value.APPROVED || []), ...(productsByStatus.value.PUBLISHED || [])].slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'محصول شرکت', icon: 'pi pi-box', badge: 'تأیید شده', badgeTone: 'success', to: { name: 'manage-products', query: { status: 'APPROVED' } } })))
+const recentPendingProducts = computed(() => [...(productsByStatus.value.PENDING_REVIEW || []), ...(productsByStatus.value.DRAFT || []), ...(productsByStatus.value.REJECTED || [])].slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'نیازمند بررسی', icon: 'pi pi-clock', badge: productStatusLabel(p.status), badgeTone: 'warning', to: { name: 'manage-products', query: { status: 'PENDING_REVIEW' } } })))
 const recentAnsweredInquiries = computed(() => {
   const seen = new Set()
   return (stats.value?.recentResponses || []).filter(r => {
@@ -357,7 +358,7 @@ async function fetchProducts() {
   try {
     const [listResult, ...statusResults] = await Promise.allSettled([
       productsApi.myProducts({ limit: 20, sort: 'createdAt:desc' }),
-      ...PRODUCT_STATUSES.map((status) => productsApi.myProducts({ page: 1, limit: 1, status })),
+      ...PRODUCT_STATUSES.map((status) => productsApi.myProducts({ page: 1, limit: 5, sort: 'createdAt:desc', status })),
     ])
     if (listResult.status !== 'fulfilled') throw listResult.reason
 
@@ -378,6 +379,12 @@ async function fetchProducts() {
       counts[status] = Number.isFinite(count) ? count : null
     })
     productStatusCounts.value = PRODUCT_STATUSES.every((status) => counts[status] !== null) ? counts : null
+    const statusProducts = {}
+    PRODUCT_STATUSES.forEach((status, index) => {
+      const result = statusResults[index]
+      statusProducts[status] = result.status === 'fulfilled' ? unwrapList(result.value) : []
+    })
+    productsByStatus.value = statusProducts
     if (totalCompanyProducts.value === null && productStatusCounts.value) {
       totalCompanyProducts.value = PRODUCT_STATUSES.reduce((sum, status) => sum + counts[status], 0)
     }
