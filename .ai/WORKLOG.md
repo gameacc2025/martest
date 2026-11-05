@@ -3527,3 +3527,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Added a DashboardSidebar regression test asserting no internal collapse control and no product-create CTA are rendered. Not executed in this session.
 - **Scope:** Frontend only. No API, backend, permission, route, or business-logic changes.
 - **Next action:** Continue the Company/Admin page-parity inventory and implementation.
+
+
+## 2026-11-05 — Header and Company dashboard cleanup
+- Removed the workspace identity chip (`مدیریت بازارگاه` / company workspace) from the shared dashboard header in both Admin and Company; the header now keeps navigation controls and account/actions only.
+- Changed the shared breadcrumb row into a compact, full-width white card with a fine border and subtle elevation, spanning the main workspace width rather than appearing as loose text.
+- Removed the Company dashboard's active/verified status toolbar and the Products KPI group heading/subtitle; kept the underlying company status data where it is still used in the company summary.
+- Removed obsolete toolbar/status CSS. No API, backend, auth, permissions, route or business behavior changes.
+- Verification: static source review confirms the workspace chip, Company status toolbar and Products heading are absent; tests/build/browser were NOT RUN in this remote source-editing session.
+- Commits: `c745163a`, `7519a30e`, `5792414c`, `ec78d135`, `37dc8b93`, `6e1a220d`.
