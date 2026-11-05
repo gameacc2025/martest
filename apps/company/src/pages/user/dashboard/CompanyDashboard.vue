@@ -41,14 +41,19 @@
       </div>
       <aside class="cd-dashboard-aside">
         <TemPanel title="دسترسی سریع" icon="pi pi-bolt"><QuickActions :actions="quickActions" /></TemPanel>
-        <TemPanel title="خلاصه شرکت" icon="pi pi-building">
-          <template #actions><router-link :to="{ name: 'company-settings' }" class="tm-btn tm-btn--ghost tm-btn--sm">ویرایش</router-link></template>
-          <div v-if="companyLoading" class="cd-summary" aria-busy="true"><span class="cd-summary-logo cd-skeleton"></span><div class="cd-summary-main"><span class="cd-skeleton cd-skeleton-line cd-skeleton-line--lg"></span><span class="cd-skeleton cd-skeleton-line cd-skeleton-line--sm"></span></div></div>
-          <div v-else class="cd-summary">
-            <span class="cd-summary-logo"><img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="64" height="64" decoding="async" /><i v-else class="pi pi-building" aria-hidden="true"></i></span>
-            <div class="cd-summary-main"><h3 class="cd-summary-name">{{ companyName || 'نام شرکت ثبت نشده است' }}</h3><p v-if="company?.nameEn" class="cd-summary-sub" dir="ltr">{{ company.nameEn }}</p>
-              <div class="cd-summary-tags"><span class="tm-pill" :class="company?.status === 'ACTIVE' ? 'tm-pill--success' : 'tm-pill--warning'">{{ companyStatusLabel }}</span><span v-if="company?.isVerified" class="tm-pill tm-pill--info"><i class="pi pi-verified" aria-hidden="true"></i> تأیید شده</span></div>
-            </div>
+        <TemPanel title="میزان فروش" icon="pi pi-chart-line">
+          <template #actions><span class="cd-sample-tag">داده نمونه</span></template>
+          <div class="cd-sales-chart">
+            <div class="cd-sales-chart__summary"><strong>۵۶٫۸ <small>میلیون تومان</small></strong><span><i class="pi pi-arrow-up-left" aria-hidden="true"></i> ۱۸٫۶٪ <small>نسبت به ماه قبل</small></span></div>
+            <svg class="cd-sales-chart__plot" viewBox="0 0 320 150" role="img" aria-label="نمودار نمونه فروش در دوازده ماه گذشته">
+              <defs><linearGradient id="cd-sales-area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#7c6cf6" stop-opacity=".24"/><stop offset="100%" stop-color="#7c6cf6" stop-opacity="0"/></linearGradient></defs>
+              <path d="M8 120H312 M8 82H312 M8 44H312" class="cd-sales-chart__grid"/>
+              <path d="M8 118 L35 108 L62 112 L89 91 L116 96 L143 76 L170 82 L197 59 L224 65 L251 42 L278 48 L312 18 L312 132 L8 132 Z" fill="url(#cd-sales-area)"/>
+              <path d="M8 118 L35 108 L62 112 L89 91 L116 96 L143 76 L170 82 L197 59 L224 65 L251 42 L278 48 L312 18" class="cd-sales-chart__line"/>
+              <circle cx="312" cy="18" r="4" class="cd-sales-chart__point"/>
+            </svg>
+            <div class="cd-sales-chart__months"><span>آذر</span><span>دی</span><span>بهمن</span><span>اسفند</span><span>فروردین</span><span>اردیبهشت</span><span>خرداد</span><span>تیر</span><span>مرداد</span><span>شهریور</span><span>مهر</span><span>آبان</span></div>
+            <p class="cd-sales-chart__note">مقادیر نمایشی هستند و پس از آماده‌شدن API فروش با داده واقعی جایگزین می‌شوند.</p>
           </div>
         </TemPanel>
       </aside>
@@ -449,19 +454,29 @@ onMounted(() => {
 .company-dashboard :deep(.tm-panel__head){min-height:48px;padding:12px 15px}
 .company-dashboard :deep(.tm-panel__head h3){font-size:.9rem;font-weight:650}
 .company-dashboard :deep(.tm-panel__body){padding:12px 15px}
-.cd-dashboard-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.cd-dashboard-metric{display:flex;align-items:center;gap:12px;min-width:0;min-height:96px;padding:13px 14px;border:1px solid var(--tm-line);border-radius:4px;background:var(--tm-surface);box-shadow:0 1px 3px rgba(20,20,60,.04);color:var(--tm-ink);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
+.cd-dashboard-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cd-dashboard-metric{display:flex;align-items:center;gap:9px;min-width:0;min-height:80px;padding:9px 11px;border:1px solid var(--tm-line);border-radius:4px;background:var(--tm-surface);box-shadow:0 1px 3px rgba(20,20,60,.04);color:var(--tm-ink);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
 .cd-dashboard-metric:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(20,20,60,.08)}
-.cd-dashboard-metric__icon{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:6px;font-size:16px}
+.cd-dashboard-metric__icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:6px;font-size:16px}
 .cd-dashboard-metric--violet .cd-dashboard-metric__icon{color:#7c6cf6;background:#efedff}.cd-dashboard-metric--green .cd-dashboard-metric__icon{color:#16a765;background:#e7f8ef}.cd-dashboard-metric--cyan .cd-dashboard-metric__icon{color:#1699c9;background:#e5f6fc}.cd-dashboard-metric--amber .cd-dashboard-metric__icon{color:#c98712;background:#fff5df}.cd-dashboard-metric--orange .cd-dashboard-metric__icon{color:#e75f37;background:#fff0e9}
-.cd-dashboard-metric__content{display:flex;flex-direction:column;min-width:0;gap:3px}.cd-dashboard-metric__label{overflow:hidden;color:var(--tm-muted);font-size:.74rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.cd-dashboard-metric__content strong{color:var(--tm-ink);font-size:1.22rem;font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}.cd-dashboard-metric__content small{display:flex;align-items:center;gap:5px;min-height:15px;color:var(--tm-muted);font-size:.64rem;line-height:1.4}
+.cd-dashboard-metric__content{display:flex;flex-direction:column;min-width:0;gap:3px}.cd-dashboard-metric__label{overflow:hidden;color:var(--tm-muted);font-size:.74rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.cd-dashboard-metric__content strong{color:var(--tm-ink);font-size:1.12rem;font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}.cd-dashboard-metric__content small{display:flex;align-items:center;gap:5px;min-height:15px;color:var(--tm-muted);font-size:.64rem;line-height:1.4}
 .cd-sample-tag{display:inline-flex;padding:1px 5px;border-radius:3px;background:#fff2d8;color:#98630b;font-size:.62rem;font-weight:700}
 .cd-dashboard-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(290px,1fr);gap:18px;align-items:start}.cd-dashboard-main,.cd-dashboard-aside{display:grid;min-width:0;gap:18px}.cd-dashboard-two-up{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}.cd-dashboard-three-up{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
-.cd-summary{display:flex;align-items:center;gap:12px;min-width:0}.cd-summary-logo{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;flex:0 0 46px;overflow:hidden;border-radius:4px;background:var(--tm-surface-alt);color:var(--tm-primary);font-size:1.2rem}.cd-summary-logo img{width:100%;height:100%;object-fit:cover}.cd-summary-main{min-width:0}.cd-summary-name{margin:0;color:var(--tm-ink);font-size:.88rem;font-weight:700}.cd-summary-sub{margin:3px 0 0;color:var(--tm-muted);font-size:.72rem}.cd-summary-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
-.cd-skeleton{display:block;background:var(--tm-surface-alt);animation:cd-pulse 1.2s ease-in-out infinite}.cd-skeleton-line{height:10px;margin-bottom:8px;border-radius:3px}.cd-skeleton-line--lg{width:130px}.cd-skeleton-line--sm{width:82px}@keyframes cd-pulse{50%{opacity:.4}}
-@media(max-width:1280px){.cd-dashboard-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.cd-dashboard-three-up{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cd-sales-chart{display:flex;flex-direction:column;gap:9px;min-width:0}
+.cd-sales-chart__summary{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.cd-sales-chart__summary>strong{color:var(--tm-ink);font-size:1.25rem;font-weight:750;line-height:1.2}
+.cd-sales-chart__summary>strong small{color:var(--tm-muted);font-size:.68rem;font-weight:500}
+.cd-sales-chart__summary>span{display:flex;align-items:center;gap:3px;color:#16a765;font-size:.72rem;font-weight:700;white-space:nowrap}
+.cd-sales-chart__summary>span small{color:var(--tm-muted);font-size:.62rem;font-weight:500}
+.cd-sales-chart__plot{display:block;width:100%;height:auto;overflow:visible}
+.cd-sales-chart__grid{fill:none;stroke:var(--tm-line);stroke-width:1;stroke-dasharray:3 4}
+.cd-sales-chart__line{fill:none;stroke:#7c6cf6;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.cd-sales-chart__point{fill:#fff;stroke:#7c6cf6;stroke-width:3}
+.cd-sales-chart__months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px 2px;color:var(--tm-muted);font-size:.61rem;text-align:center}
+.cd-sales-chart__note{margin:0;padding-top:8px;border-top:1px solid var(--tm-line);color:var(--tm-muted);font-size:.65rem;line-height:1.6}
+@media(max-width:1280px){.cd-dashboard-three-up{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1000px){.cd-dashboard-columns{grid-template-columns:minmax(0,1fr)}.cd-dashboard-aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:720px){.cd-dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cd-dashboard-two-up,.cd-dashboard-three-up,.cd-dashboard-aside{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metric{min-height:86px;padding:10px;gap:9px}.cd-dashboard-metric__icon{width:34px;height:34px;flex-basis:34px}.cd-dashboard-metric__content strong{font-size:1.08rem}}
+@media(max-width:720px){.cd-dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cd-dashboard-two-up,.cd-dashboard-three-up,.cd-dashboard-aside{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metric{min-height:74px;padding:8px;gap:8px}.cd-dashboard-metric__icon{width:32px;height:32px;flex-basis:32px}.cd-dashboard-metric__content strong{font-size:1rem}}
 @media(max-width:390px){.cd-dashboard-metrics{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.cd-dashboard-metric{transition:none}}
 </style>
