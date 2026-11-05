@@ -310,7 +310,7 @@ function logout() {
               </IconField>
             </div>
 
-            <template v-if="user">
+            <div v-if="user" class="public-authenticated-actions">
               <div class="public-notifications-actions" @keydown.esc.stop.prevent="closeNotificationMenu">
                 <button type="button" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها" aria-controls="public-notifications-menu" :aria-expanded="notificationMenuOpen" @click.stop="notificationMenuOpen = !notificationMenuOpen">
                   <i class="pi pi-bell" aria-hidden="true"></i>
@@ -360,13 +360,13 @@ function logout() {
                 <i class="pi pi-chevron-down public-user-caret" aria-hidden="true"></i>
               </button>
               <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
-            </template>
+            </div>
 
-            <template v-else>
+            <div v-else class="public-guest-actions">
               <router-link :to="{ name: 'login' }" class="tm-btn tm-btn--sm public-login-link">
                 ورود / ثبت‌نام
               </router-link>
-            </template>
+            </div>
 
             <div v-if="!user" class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
               <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-commerce-menu" :aria-expanded="commerceMenuOpen" @click.stop="commerceMenuOpen = !commerceMenuOpen">
