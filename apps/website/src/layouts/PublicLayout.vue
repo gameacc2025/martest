@@ -337,14 +337,6 @@ function logout() {
                 </section>
               </div>
 
-              <button type="button" class="public-user-trigger" @click="toggleUserMenu" aria-haspopup="true">
-                <span class="public-user-avatar">
-                  <img v-if="authStore.profile?.avatar" :src="authStore.profile.avatar" alt="" width="32" height="32" decoding="async" />
-                  <span v-else>{{ displayName.charAt(0) }}</span>
-                </span>
-                <span class="public-user-name">{{ displayName }}</span>
-                <i class="pi pi-chevron-down public-user-caret" aria-hidden="true"></i>
-              </button>
             <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
               <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-commerce-menu" :aria-expanded="commerceMenuOpen" @click.stop="commerceMenuOpen = !commerceMenuOpen">
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
@@ -356,6 +348,14 @@ function logout() {
               </div>
             </div>
 
+              <button type="button" class="public-user-trigger" @click="toggleUserMenu" aria-haspopup="true">
+                <span class="public-user-avatar">
+                  <img v-if="authStore.profile?.avatar" :src="authStore.profile.avatar" alt="" width="32" height="32" decoding="async" />
+                  <span v-else>{{ displayName.charAt(0) }}</span>
+                </span>
+                <span class="public-user-name">{{ displayName }}</span>
+                <i class="pi pi-chevron-down public-user-caret" aria-hidden="true"></i>
+              </button>
               <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
             </template>
 
@@ -364,6 +364,17 @@ function logout() {
                 ورود / ثبت‌نام
               </router-link>
             </template>
+
+            <div v-if="!user" class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
+              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-commerce-menu" :aria-expanded="commerceMenuOpen" @click.stop="commerceMenuOpen = !commerceMenuOpen">
+                <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
+              </button>
+              <div v-if="commerceMenuOpen" id="public-commerce-menu" class="public-commerce-menu" role="group" aria-label="مسیرهای خرید و استعلام">
+                <router-link to="/cart" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-shopping-cart" aria-hidden="true"></i> سبد خرید</span><b>{{ countLabel(cartItemCount) }}</b></router-link>
+                <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" to="/my-inquiries" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-file-edit" aria-hidden="true"></i> استعلام</span><b v-if="myInquiryCount !== null">{{ countLabel(myInquiryCount) }}</b></router-link>
+              </div>
+            </div>
 
             <PvButton
               :icon="mobileMenuOpen ? 'pi pi-times' : 'pi pi-bars'"
