@@ -3505,3 +3505,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - No backend/API or database changes were made.
 - Commits: `4c7600b7`, `a97ceb5b`, `2b4b33c0`, `8cffe782`, `f0970a4e`.
 - CI and runtime/database validation were triggered for the source changes; final workflow results must be checked before reporting a green status. Browser visual verification was not performed.
+
+
+## 2026-11-05 — UI-COMPANY-ADMIN-SHELL-01 — Align company shell with admin
+- **Status:** PARTIAL — shell alignment slice committed; page inventory and page-by-page parity remain for subsequent steps.
+- **Goal:** Make the Company Portal use the same visual shell geometry and composition as Admin while retaining company-specific identity, navigation, routes, and permissions.
+- **Scope:** `apps/company/src/layouts/CompanyLayout.vue` only for implementation; no API, auth, permission, route, backend, or business-logic changes.
+- **Changes:** Removed the Company-only sidebar overflow behavior and removed its 1920px content cap; aligned content width and horizontal padding with `apps/admin/src/layouts/AdminLayout.vue`. Shared header/sidebar/footer/page-header components and company-specific labels/actions remain intact.
+- **Verification:** Compared AdminLayout and CompanyLayout source; static diff review only. Unit tests/build NOT RUN in this remote GitHub editing session. Browser visual verification NOT RUN (owner instruction).
+- **Commit:** `9482da86c943e7ff1256a84911537b56ffc0c4c2`.
+- **Push:** Committed directly to `main` through GitHub Contents API; remote commit created successfully.
+- **Risks / open questions:** Menu contents are role/permission/route-filtered by the shared `useDashboardMenu`; this must be audited against company-visible modules in the next step. Some Company-only operational pages are explicitly UI prototypes where APIs are pending; they must not be presented as live data.
+- **Next action:** Inventory the Admin navigation/page families against Company routes, permissions, and real API-backed screens; define the company-visible subset while preserving the exact Admin shell and page composition.
