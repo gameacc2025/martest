@@ -87,10 +87,9 @@ export const dashboardMenu = [
         permission: 'inquiries.read',
         badge: { value: 'جدید', severity: 'info' },
       },
-      // "سفارشات" (Orders) intentionally absent: the Orders backend module no
-      // longer exists (no Order model, no /api/v1/orders routes — see
-      // BACKEND_AUDIT_REPORT.md and backend/src/app.js), and `orders.read`
-      // isn't a permission in the catalogue anymore either.
+      // Retail order navigation is a UI prototype only. The destination route
+      // uses clearly labelled sample data until an authoritative Orders API
+      // and backend domain are implemented. Do not infer live order records.
     ],
   },
   {
