@@ -1,10 +1,22 @@
 ﻿# Current Task — Full UI rebuild on the `tem/` visual language (UI-REDESIGN-TEM-01)
 
-**Status:** IN_PROGRESS — the first seller-dashboard and storefront implementation pass is committed directly to main (latest source commit at this snapshot: 6d1bb13). Shared semantic tokens, theme preset, dashboard/home composition and targeted regression tests are in place. GitHub Actions has been inspected; the latest unit workflow is pending. Responsive Playwright coverage was added for 360/768/1366/1920/2560px but has not yet been executed.
+**Status:** IN_PROGRESS — the first seller-dashboard and storefront implementation pass is committed directly to main. On 2026-11-05 the public catalogue was promoted to `/` without changing ProductListing content, the duplicate homepage navigation entry was removed, the category menu trigger was flattened, and the header gained a live five-notification preview beside the cart. Targeted regression coverage was added; execution and visual verification are still pending.
 **Repository:** gameacc2025/martest  
 **Branch:** main  
 **Scope:** apps/website, apps/company, apps/admin, packages/shared-ui, design-system/, .ai/ and UI documentation.
 
+
+
+## Website header and homepage consolidation — 2026-11-05
+
+- The root route now renders the existing ProductListing page; the legacy `/products` path remains an alias and query filters are preserved. The old separate Home page is no longer routed or shown in the primary navigation. ProductListing content and API behavior were not changed.
+- Removed the duplicate “صفحه اصلی” header navigation item; brand mark now returns to the catalogue root.
+- Flattened the shared MegaMenu category trigger to match adjacent header links (no surrounding box/border fill); dropdown content and category routing remain intact.
+- Repositioned the cart icon directly beside the notification bell for authenticated users (and retained cart access for guests).
+- Added a live latest-five notification preview dropdown anchored to the bell and opening toward the left in RTL. It uses the existing notifications list and unread-count endpoints; no mock data or backend changes. Selecting an item opens the existing notification center.
+- Added PublicLayout regression coverage for the five-item preview. Automated tests/build and browser rendering have NOT been run in this remote GitHub editing session.
+- Source commits: `46a2cdc`, `78225ff`, `32a2329`, `ac03fe6`, `753e421`, `d5da3e3`.
+- **Next:** execute Website tests/build, review responsive header/dropdown alignment, and inspect whether any other source still references the old `home` route name.
 
 ## Active focused subtask — UI-SELLER-HOME-REDESIGN-01 (2026-11-04)
 **Status:** IN_PROGRESS — shared foundation and first page pass committed; final CI and responsive visual verification still pending.
