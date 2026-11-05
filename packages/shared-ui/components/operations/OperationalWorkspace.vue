@@ -3,7 +3,6 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import TemPageHeader from '../ui/TemPageHeader.vue'
 import TemStatCard from '../ui/TemStatCard.vue'
 import TemPanel from '../ui/TemPanel.vue'
 import TemStatusPill from '../ui/TemStatusPill.vue'
@@ -45,8 +44,6 @@ const filteredRows = computed(() => props.rows.filter((row) => {
       <span>{{ demo ? 'پیش‌نمایش رابط کاربری — داده‌های این صفحه نمونه هستند و به API متصل نیستند.' : 'اطلاعات این صفحه از سرویس‌های سامانه دریافت می‌شوند.' }}</span>
       <span class="tm-workspace__eyebrow">{{ eyebrow }}</span>
     </div>
-
-    <TemPageHeader :title="title" :description="description" />
 
     <section v-if="stats.length" class="tm-workspace__stats" aria-label="شاخص‌های کلیدی">
       <TemStatCard v-for="item in stats" :key="item.label" v-bind="item" />
