@@ -3617,3 +3617,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Backend impact:** None. No API contracts, schema, authorization, or business logic changed.
 - **Commits:** `46a2cdce31555a96a82ba1d196fdd6cf6b2776c4`, `78225fff5cddb96ee77d444b507e1d68086ab9f7`, `32a23291204ded77caf70c3d185eb52390b9f6e9`, `ac03fe61b74db917cb719b6d03df984449a6fdd2`, `753e421e0b35df584aea94d28f3b786fd30c109b`, `d5da3e39e95278a0bbd07c6b655d4fce009863a1`.
 - **Next:** Run Website test/build, validate header and dropdown at mobile/desktop widths, and search for stale `home` route-name references.
+
+- **Follow-up alignment:** The cart control was moved immediately beside the notification bell for signed-in users while retaining guest cart access; the duplicate footer homepage link was also removed and a navigation regression assertion was added. Follow-up commits: `d5da3e39e95278a0bbd07c6b655d4fce009863a1`, `ed298f6d6a6ff3700df5634162f03c0c0abe9c34`, `e54327385d0e6cb387103276f14c95257042cfad`.
