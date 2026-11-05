@@ -25,6 +25,18 @@ const { menu } = useDashboardMenu(authStore)
 const { collapsed: sidebarCollapsed, toggle: toggleSidebar } = useSidebarState()
 // Mobile: drawer open.
 const mobileOpen = ref(false)
+const messagesOpen = ref(false)
+const sampleMessages = ref([
+  { id: 1, sender: 'تأمین‌کننده تجهیزات شبکه', subject: 'پیگیری پاسخ استعلام', preview: 'لطفاً زمان تحویل پیشنهادی را بررسی بفرمایید.', time: '۱۰:۴۲', unread: true },
+  { id: 2, sender: 'واحد خرید شرکت آریا', subject: 'درخواست پیش‌فاکتور', preview: 'برای تعداد درخواستی امکان ارائه تخفیف وجود دارد؟', time: 'دیروز', unread: true },
+  { id: 3, sender: 'سامانه مخابرات', subject: 'وضعیت بررسی محصول', preview: 'مدارک محصول برای بررسی تکمیلی ارجاع شد.', time: 'دیروز', unread: true },
+  { id: 4, sender: 'شرکت ارتباط‌گستر', subject: 'پاسخ به پیام شما', preview: 'مشخصات فنی ارسال‌شده دریافت شد.', time: '۲ روز پیش', unread: false },
+  { id: 5, sender: 'واحد بازرگانی', subject: 'هماهنگی ارسال کالا', preview: 'لطفاً آدرس تحویل را تأیید کنید.', time: '۳ روز پیش', unread: false },
+])
+const newMessageCount = computed(() => sampleMessages.value.filter(message => message.unread).length)
+
+function toggleMessages() { messagesOpen.value = !messagesOpen.value }
+function closeMessages() { messagesOpen.value = false }
 
 // Dashboard route for the header
 const dashboardRoute = computed(() => ({ name: 'company-dashboard' }))
@@ -36,6 +48,7 @@ function toggleMobile() {
 
 function closeMobile() {
   mobileOpen.value = false
+  closeMessages()
 }
 
 // Close the mobile drawer whenever the route changes (a nav item was clicked).
@@ -66,7 +79,7 @@ watch(mobileOpen, (open) => {
 })
 
 function onKeydown(e) {
-  if (e.key === 'Escape') closeMobile()
+  if (e.key === 'Escape') { closeMobile(); closeMessages() }
 }
 
 onMounted(() => {
