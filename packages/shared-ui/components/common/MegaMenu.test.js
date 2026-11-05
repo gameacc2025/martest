@@ -49,6 +49,18 @@ describe('MegaMenu', () => {
     wrapper.unmount()
   })
 
+  it('routes a selected subcategory through the numeric category filter accepted by ProductListing', async () => {
+    const wrapper = mount(MegaMenu, {
+      attachTo: document.body,
+      props: { categories: [{ id: 20, nameFa: 'شبکه', subcategories: [{ id: 21, nameFa: 'سوئیچ' }] }] },
+    })
+    await wrapper.find('.mega-trigger').trigger('click')
+    await wrapper.find('.mega-cat-item').trigger('mouseenter')
+    await wrapper.find('.mega-subcat-item').trigger('click')
+    expect(routerPush).toHaveBeenCalledWith({ name: 'products', query: { category: '21' } })
+    wrapper.unmount()
+  })
+
   it('closes when a click occurs outside the menu', async () => {
     const wrapper = mount(MegaMenu, {
       attachTo: document.body,
