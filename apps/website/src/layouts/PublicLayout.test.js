@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   routerPush: vi.fn(),
   categoryList: vi.fn(),
   inquiriesList: vi.fn(),
+  apiGet: vi.fn(),
+  apiGetPaginated: vi.fn(),
   logout: vi.fn(),
   auth: null,
 }))
@@ -24,10 +26,12 @@ vi.mock('../stores/auth', () => ({
 vi.mock('@telecom/api-client', () => ({
   categoriesApi: { list: mocks.categoryList },
   inquiriesApi: { list: mocks.inquiriesList },
+  endpoints: { notifications: { unreadCount: '/notifications/unread-count', list: '/notifications' } },
 }))
 
 vi.mock('@telecom/shared-core/http/apiClient', () => ({
-  apiGet: vi.fn(),
+  apiGet: mocks.apiGet,
+  apiGetPaginated: mocks.apiGetPaginated,
 }))
 
 import PublicLayout from './PublicLayout.vue'
@@ -38,7 +42,7 @@ describe('PublicLayout responsive navigation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
-    mocks.route.current = reactive({ name: 'home', path: '/', fullPath: '/', query: {} })
+    mocks.route.current = reactive({ name: 'products', path: '/', fullPath: '/', query: {} })
     mocks.auth = {
       user: null,
       profile: null,
@@ -50,6 +54,8 @@ describe('PublicLayout responsive navigation', () => {
     }
     mocks.categoryList.mockResolvedValue({ data: [] })
     mocks.inquiriesList.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+    mocks.apiGet.mockResolvedValue({ count: 0 })
+    mocks.apiGetPaginated.mockResolvedValue({ data: [] })
   })
 
   afterEach(() => {
@@ -94,6 +100,20 @@ describe('PublicLayout responsive navigation', () => {
     expect(tabs[0].text()).toContain('۰')
     expect(tabs[1].text()).toContain('استعلام')
     expect(tabs[1].text()).toContain('۱۲')
+  })
+
+  it('loads and displays at most five recent notifications in a left-opening preview', async () => {
+    mocks.auth.user = { id: 'customer-1' }
+    mocks.auth.isAuthenticated = true
+    mocks.apiGetPaginated.mockResolvedValue({ data: Array.from({ length: 7 }, (_, index) => ({ id: index + 1, title: `اعلان ${index + 1}`, message: 'متن اعلان', isRead: false })) })
+    wrapper = mountLayout()
+    await flushPromises()
+    expect(mocks.apiGetPaginated).toHaveBeenCalledWith('/notifications?page=1&limit=5')
+    await wrapper.get('.public-notifications-link').trigger('click')
+    await nextTick()
+    expect(wrapper.findAll('.public-notification-item')).toHaveLength(5)
+    expect(wrapper.get('.public-notifications-menu').attributes('aria-label')).toBe('پنج اعلان آخر')
+    expect(wrapper.get('.public-notifications-menu').element.querySelector('.public-notifications-menu__all')).toBeTruthy()
   })
 
   it('provides a keyboard-accessible skip link to the main content', async () => {
