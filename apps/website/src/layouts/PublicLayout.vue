@@ -440,7 +440,7 @@ function logout() {
 
             <a :href="notificationHref" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-bell"></i>
-              <span>اعلان‌ها {{ notificationCount > 0 ? `(${notificationCount})` : '' }}</span>
+              <span>اعلان‌ها {{ notificationCount > 0 ? `(${countLabel(notificationCount)})` : '' }}</span>
             </a>
             <router-link
               v-if="authStore.isCustomer"
