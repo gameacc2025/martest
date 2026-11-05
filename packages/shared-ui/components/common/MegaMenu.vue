@@ -35,16 +35,16 @@ function toggleCategory(cat) {
   }
 }
 
-function goToCategory(slug) {
+function goToCategory(categoryId) {
   activeCategory.value = null
   isMenuOpen.value = false
-  router.push({ name: 'products', query: { category: slug } })
+  router.push({ name: 'products', query: { category: String(categoryId) } })
 }
 
-function goToSubcategory(categorySlug, subcategorySlug) {
+function goToSubcategory(categoryId, subcategoryId) {
   activeCategory.value = null
   isMenuOpen.value = false
-  router.push({ name: 'products', query: { category: categorySlug, subcategory: subcategorySlug } })
+  router.push({ name: 'products', query: { category: String(subcategoryId || categoryId) } })
 }
 </script>
 
@@ -52,9 +52,8 @@ function goToSubcategory(categorySlug, subcategorySlug) {
   <div class="mega-menu-wrapper" ref="menuRef">
     <!-- Trigger Button -->
     <button class="mega-trigger" @click="isMenuOpen = !isMenuOpen">
-      <i class="pi pi-bars"></i>
+      <i class="pi pi-th-large" aria-hidden="true"></i>
       <span>دسته‌بندی محصولات</span>
-      <i class="pi" :class="isMenuOpen ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
     </button>
 
     <!-- Dropdown -->
@@ -69,10 +68,10 @@ function goToSubcategory(categorySlug, subcategorySlug) {
               class="mega-cat-item"
               :class="{ 'is-active': activeCategory?.id === cat.id }"
               @mouseenter="toggleCategory(cat)"
-              @click="goToCategory(cat.slug)"
+              @click="goToCategory(cat.id)"
             >
+              <i class="pi pi-tag mega-cat-icon" aria-hidden="true"></i>
               <span class="mega-cat-name">{{ cat.nameFa }}</span>
-              <i class="pi pi-chevron-left mega-cat-arrow"></i>
             </div>
           </div>
 
@@ -81,7 +80,7 @@ function goToSubcategory(categorySlug, subcategorySlug) {
             <template v-if="activeCategory">
               <div class="mega-subcat-header">
                 <h3>{{ activeCategory.nameFa }}</h3>
-                <button class="mega-view-all" @click="goToCategory(activeCategory.slug)">
+                <button class="mega-view-all" @click="goToCategory(activeCategory.id)">
                   مشاهده همه
                   <i class="pi pi-arrow-left"></i>
                 </button>
@@ -91,7 +90,7 @@ function goToSubcategory(categorySlug, subcategorySlug) {
                   v-for="sub in activeCategory.subcategories"
                   :key="sub.id"
                   class="mega-subcat-item"
-                  @click="goToSubcategory(activeCategory.slug, sub.slug)"
+                  @click="goToSubcategory(activeCategory.id, sub.id)"
                 >
                   <span class="mega-subcat-name">{{ sub.nameFa }}</span>
                 </div>
@@ -182,10 +181,8 @@ function goToSubcategory(categorySlug, subcategorySlug) {
   font-weight: 600;
 }
 
-.mega-cat-arrow {
-  font-size: 0.7rem;
-  color: var(--text-color-secondary);
-}
+.mega-cat-icon { flex: 0 0 18px; color: var(--ds-color-primary-text, var(--primary-color)); font-size: 14px; }
+.mega-cat-name { flex: 1; }
 
 /* Subcategories panel */
 .mega-subcats {
