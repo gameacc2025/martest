@@ -3577,3 +3577,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Admin and Company dashboard links are labeled “داشبورد”. Public-site navigation resolves `VITE_PUBLIC_SITE_URL` first, then `VITE_WEBSITE_APP_URL`; production Admin/Company Docker builds now receive the website URL build argument.
 - Demo-only data currently includes Company message previews and the Company sales chart; both are visibly identified as sample data and must not be represented as live records.
 - No backend/API/auth/permission changes. Static source checks only; build and browser verification not run.
+
+
+## 2026-11-05 — Sidebar contact card removal and order status submenus
+- Removed the “با ما در ارتباط باشید / تماس پشتیبانی” promotional contact card from the shared dashboard sidebar; retained the small copyright footer.
+- Replaced the flat retail order links with a “سفارشات” parent menu and status submenus in both Admin and Company panels. Each submenu points to the existing panel-specific order page with a status query parameter; `OperationalWorkspace` reads that parameter and applies its existing sample-row status filter.
+- Admin submenu statuses match the admin order preview rows; Company submenu statuses match the company order preview rows. These order screens and counts are still UI prototypes with sample data, not live order APIs.
+- Support tickets should remain a separate workflow/module from notifications. Notifications are event alerts; tickets are persistent cases with requester, product/company ownership, assignee, status, priority, message thread and history. Proposed routing for product tickets: customer → product-owning company; platform Admin retains oversight and reassignment. This is an architecture recommendation only, not a backend implementation or approved schema change.
+- No API/backend/auth/permission changes. Static source checks only; automated tests/build/browser verification not run.
