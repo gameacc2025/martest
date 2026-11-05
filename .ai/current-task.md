@@ -665,3 +665,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Place Quick access in the adjacent column, aligned with the top and vertical extent of the KPI stack; on mobile stack it below the metrics.
 - Keep the sample sales chart in the lower dashboard content. Company summary stays removed.
 - Preserve all Company API, tenant, route and permission behavior; no backend/schema changes.
+
+
+## Current task — Dashboard navigation and message destination fixes (2026-11-05)
+- Company message drawer preview rows and footer “مشاهده همه پیام‌ها” must route to the existing `notifications` page, not inquiries. Keep all preview content clearly labeled sample/demo until a real message API exists.
+- Do not render empty sidebar section headings. The “بازرگانی” heading is removed from Admin and Company navigation; both roles have a direct “داشبورد” item targeting their own dashboard route.
+- “مشاهده سایت” must open the public website: resolve `VITE_PUBLIC_SITE_URL` then `VITE_WEBSITE_APP_URL`; pass the website URL through production Docker build args for both panel apps.
+- Document every demo-only area (currently Company message previews and sales chart) as sample data; never imply these are live API records.
+- Preserve existing routes, permissions, APIs and backend behavior. No backend/schema changes.
