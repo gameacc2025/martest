@@ -3495,3 +3495,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Sales/order count data does not exist in the current public Product API or Prisma schema, so the storefront presents products explicitly flagged `isFeatured` as `محصولات ویژه`; it does not falsely label them best sellers. A real best-seller section requires a sales aggregate/API and cannot be truthfully derived from current product catalogue data.
 - Implementation commits: `61f135ba`, `f138ea86`, `f5530466`, `60714786`, `8a70af80`, `90c2dd50`. Latest source commit: `90c2dd50d8305a9a177c05ef5736245c79cb09ea`.
 - CI/build, migration validation, and runtime checks have been triggered; final results are pending. Do not claim browser visual verification without screenshots.
+
+
+## 2026-11-05 — Panel header cleanup and storefront refinement
+- Removed the redundant `TemPageHeader` page-title/breadcrumb/action block from both the Admin dashboard and Company dashboard. The Company dashboard retains its active/verified status and add-product action in a compact toolbar, without restoring the large page header.
+- Reworked the storefront feature stage into two adjacent, independent blocks: a dark navy featured-product carousel and a separate light company/supplier promotion banner. The featured product text and image now enter with a short transition; reduced-motion preferences are respected.
+- Made the storefront filter sidebar explicit in the desktop grid (310px, right-to-left) and pinned its visibility; the product search remains at the top of the sidebar. On mobile, filters stack above the product results.
+- Added/updated storefront tests asserting the filter search and paired banner sections are rendered.
+- No backend/API or database changes were made.
+- Commits: `4c7600b7`, `a97ceb5b`, `2b4b33c0`, `8cffe782`, `f0970a4e`.
+- CI and runtime/database validation were triggered for the source changes; final workflow results must be checked before reporting a green status. Browser visual verification was not performed.
