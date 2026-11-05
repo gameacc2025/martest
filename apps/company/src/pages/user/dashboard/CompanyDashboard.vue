@@ -1,13 +1,6 @@
 ﻿<template>
   <div class="company-dashboard">
-    <div class="company-dashboard-toolbar">
-  <span class="company-dashboard-status">
-    <span class="company-dashboard-status-dot" :class="{ 'is-active': company?.status === 'ACTIVE' }"></span>
-    {{ companyStatusLabel }}
-    <span v-if="company?.isVerified" class="company-dashboard-verified"><i class="pi pi-verified" aria-hidden="true"></i> تأیید شده</span>
-  </span>
-</div>
-    <!-- Alerts — actionable items first -->
+        <!-- Alerts — actionable items first -->
     <div v-if="alerts.length" class="cd-alerts">
       <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
         <div class="cd-alert-icon">
@@ -25,8 +18,7 @@
 
     <section class="cd-kpi-groups" aria-label="شاخص‌های کلیدی شرکت">
       <div class="cd-kpi-group">
-        <div class="cd-kpi-group__heading"><h2>محصولات</h2><span>وضعیت کاتالوگ شرکت</span></div>
-        <div class="cd-kpi-group__grid">
+                <div class="cd-kpi-group__grid">
           <TemStatCard label="کل محصولات" :value="totalCompanyProducts" icon="pi pi-box" tone="primary" :loading="productsLoading" :to="{ name: 'manage-products' }" zero-meta="هنوز محصولی ثبت نشده است" />
           <TemStatCard label="منتشر شده" :value="publishedProducts" icon="pi pi-check-circle" tone="success" :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PUBLISHED' } }" zero-meta="محصول منتشرشده‌ای ندارید" />
           <TemStatCard label="در انتظار تأیید" :value="pendingReviewProducts" icon="pi pi-clock" tone="warning" featured :loading="productsLoading" :to="{ name: 'manage-products', query: { status: 'PENDING_REVIEW' } }" zero-meta="درخواستی برای بررسی ندارید" />
