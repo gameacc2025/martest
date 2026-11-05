@@ -102,6 +102,14 @@ describe('PublicLayout responsive navigation', () => {
     expect(tabs[1].text()).toContain('۱۲')
   })
 
+  it('shows only the catalogue entry in the primary navigation', async () => {
+    wrapper = mountLayout()
+    await flushPromises()
+    const links = wrapper.findAll('.public-nav-link').map(link => link.text().trim())
+    expect(links).toContain('همه محصولات')
+    expect(links).not.toContain('صفحه اصلی')
+  })
+
   it('loads and displays at most five recent notifications in a left-opening preview', async () => {
     mocks.auth.user = { id: 'customer-1' }
     mocks.auth.isAuthenticated = true
