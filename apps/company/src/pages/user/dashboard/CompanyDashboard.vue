@@ -17,6 +17,7 @@
         </router-link>
       </div>
       <aside class="cd-dashboard-quick-access">
+        <TemPanel title="دسترسی سریع" icon="pi pi-bolt"><QuickActions :actions="quickActions" /></TemPanel>
       </aside>
     </section>
     <section class="cd-dashboard-columns" aria-label="نمای کلی فعالیت شرکت">
@@ -44,7 +45,6 @@
         </div>
       </div>
       <aside class="cd-dashboard-aside">
-        <TemPanel title="دسترسی سریع" icon="pi pi-bolt"><QuickActions :actions="quickActions" /></TemPanel>
         <TemPanel title="میزان فروش" icon="pi pi-chart-line">
           <template #actions><span class="cd-sample-tag">داده نمونه</span></template>
           <div class="cd-sales-chart">
@@ -458,11 +458,11 @@ onMounted(() => {
 .company-dashboard :deep(.tm-panel__head){min-height:48px;padding:12px 15px}
 .company-dashboard :deep(.tm-panel__head h3){font-size:.9rem;font-weight:650}
 .company-dashboard :deep(.tm-panel__body){padding:12px 15px}
-.cd-dashboard-overview{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);gap:14px;align-items:stretch;margin-bottom:18px}
-.cd-dashboard-metrics{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0}
-.cd-dashboard-quick-access{display:grid;min-width:0;align-content:start}
+.cd-dashboard-overview{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:14px;align-items:stretch;margin-bottom:18px}
+.cd-dashboard-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(94px,auto);gap:8px;min-width:0}
+.cd-dashboard-quick-access{display:grid;min-width:0;align-content:stretch}
 .cd-dashboard-quick-access :deep(.tm-panel){height:100%}
-.cd-dashboard-metric{display:flex;align-items:center;gap:8px;min-width:0;min-height:62px;padding:6px 10px;border:1px solid var(--tm-line);border-radius:4px;background:var(--tm-surface);box-shadow:0 1px 3px rgba(20,20,60,.04);color:var(--tm-ink);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
+.cd-dashboard-metric{display:flex;align-items:center;gap:8px;min-width:0;min-height:94px;padding:9px 10px;border:1px solid var(--tm-line);border-radius:4px;background:var(--tm-surface);box-shadow:0 1px 3px rgba(20,20,60,.04);color:var(--tm-ink);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
 .cd-dashboard-metric:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(20,20,60,.08)}
 .cd-dashboard-metric__icon{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:6px;font-size:14px}
 .cd-dashboard-metric--violet .cd-dashboard-metric__icon{color:#7c6cf6;background:#efedff}.cd-dashboard-metric--green .cd-dashboard-metric__icon{color:#16a765;background:#e7f8ef}.cd-dashboard-metric--cyan .cd-dashboard-metric__icon{color:#1699c9;background:#e5f6fc}.cd-dashboard-metric--amber .cd-dashboard-metric__icon{color:#c98712;background:#fff5df}.cd-dashboard-metric--orange .cd-dashboard-metric__icon{color:#e75f37;background:#fff0e9}
@@ -481,9 +481,9 @@ onMounted(() => {
 .cd-sales-chart__point{fill:#fff;stroke:#7c6cf6;stroke-width:3}
 .cd-sales-chart__months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px 2px;color:var(--tm-muted);font-size:.61rem;text-align:center}
 .cd-sales-chart__note{margin:0;padding-top:8px;border-top:1px solid var(--tm-line);color:var(--tm-muted);font-size:.65rem;line-height:1.6}
-@media(max-width:1280px){.cd-dashboard-three-up{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:1000px){.cd-dashboard-overview{grid-template-columns:minmax(0,1fr) minmax(230px,.8fr)}.cd-dashboard-columns{grid-template-columns:minmax(0,1fr)}.cd-dashboard-aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:720px){.cd-dashboard-overview{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metrics{grid-template-columns:minmax(0,1fr);gap:5px}.cd-dashboard-two-up,.cd-dashboard-three-up,.cd-dashboard-aside{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metric{min-height:58px;padding:6px 8px;gap:7px}.cd-dashboard-metric__icon{width:29px;height:29px;flex-basis:29px}.cd-dashboard-metric__content strong{font-size:.96rem}}
+@media(max-width:1000px){.cd-dashboard-overview{grid-template-columns:minmax(0,2fr) minmax(230px,1fr)}.cd-dashboard-columns{grid-template-columns:minmax(0,1fr)}.cd-dashboard-aside{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:720px){.cd-dashboard-overview{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(86px,auto);gap:7px}.cd-dashboard-two-up,.cd-dashboard-three-up,.cd-dashboard-aside{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metric{min-height:86px;padding:8px;gap:7px}.cd-dashboard-metric__icon{width:29px;height:29px;flex-basis:29px}.cd-dashboard-metric__content strong{font-size:.96rem}}
+@media(max-width:460px){.cd-dashboard-metrics{grid-template-columns:minmax(0,1fr)}}
 
 @media(prefers-reduced-motion:reduce){.cd-dashboard-metric{transition:none}}
 </style>
