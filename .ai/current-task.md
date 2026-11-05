@@ -673,3 +673,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - “مشاهده سایت” must open the public website: resolve `VITE_PUBLIC_SITE_URL` then `VITE_WEBSITE_APP_URL`; pass the website URL through production Docker build args for both panel apps.
 - Document every demo-only area (currently Company message previews and sales chart) as sample data; never imply these are live API records.
 - Preserve existing routes, permissions, APIs and backend behavior. No backend/schema changes.
+
+
+## Current task — Sidebar and order menu refinement (2026-11-05)
+- Remove the sidebar promotional “با ما در ارتباط باشید / تماس پشتیبانی” card.
+- Add a “سفارشات” parent with working status submenus in both Admin and Company sidebars. Children use the existing retail order routes and query-based status filters; statuses must match the sample rows shown by each panel. Clearly identify the order workspace as sample/prototype until APIs exist.
+- Keep ticket handling separate from notifications. Notifications report events; ticket workspace owns the support case lifecycle. Product-related tickets should route to the company that owns the product, while Admin can oversee/reassign. This is a recommendation only; do not implement backend/schema changes without a separate approved task.
+- Preserve current APIs, roles, permissions and business workflows. Static checks only; tests/build/browser not run.
