@@ -1,5 +1,13 @@
 ﻿<template>
   <div class="company-dashboard">
+    <div class="company-dashboard-toolbar">
+  <span class="company-dashboard-status">
+    <span class="company-dashboard-status-dot" :class="{ 'is-active': company?.status === 'ACTIVE' }"></span>
+    {{ companyStatusLabel }}
+    <span v-if="company?.isVerified" class="company-dashboard-verified"><i class="pi pi-verified" aria-hidden="true"></i> تأیید شده</span>
+  </span>
+  <router-link :to="{ name: 'manage-product-create' }" class="tm-btn tm-btn--accent"><i class="pi pi-plus" aria-hidden="true"></i> افزودن محصول</router-link>
+</div>
     <!-- Alerts — actionable items first -->
     <div v-if="alerts.length" class="cd-alerts">
       <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
@@ -537,6 +545,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 24px;
 }
+.company-dashboard-toolbar{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:42px}.company-dashboard-toolbar .company-dashboard-status{margin-inline-start:auto}
 .cd-kpi-groups { display: grid; gap: 24px; }
 .company-dashboard :deep(.tm-panel) { border-radius: 4px; box-shadow: 0 1px 3px rgba(20,20,60,.04); }
 .company-dashboard :deep(.tm-panel__head) { min-height: 56px; padding: 16px 20px; }
