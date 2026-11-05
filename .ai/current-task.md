@@ -539,3 +539,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Preserve existing APIs, route guards, permissions, business workflows, and non-operational checkout safeguards. Never invent data or unsupported facets.
 - Latest implementation commit: `294952a11964352aee25c7ded5f23c0b77baec96`.
 - Verification still required in a local workspace: `pnpm -r test` / the repository's documented Vitest command and production builds for Website, Admin and Company; visual browser checks were not run.
+
+
+## 2026-11-05 — Latest handoff
+- Cross-app reference alignment has been applied in shared TEM tokens and the relevant Admin, Company and Website card/layout overrides. Expanded sidebar is 256px, collapsed 76px; semantic radii 4/6/8px; card elevation is shared and dark-mode aware.
+- Additional page fixes cover System Settings, Notification Management, Inquiry Subscriptions, Product Details, Website Profile, Addresses and My Inquiries.
+- Implementation commits: `294952a`, `8b06f63`, `796df66`, `48e96d1` (latest).
+- Latest CI frontend/shared tests passed. Backend tests fail on the two known unrelated assertions for invalid POST /messages payloads and missing uploadAvatar file. Frontend build/runtime results were pending at last check; do not call all checks green.
+- No backend/schema/API changes. No browser screenshots were taken in this remote source-editing session.

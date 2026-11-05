@@ -3441,3 +3441,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Reduced oversized corner radii in the storefront homepage featured/product visual surfaces. Existing live product/category API behavior, auth, permissions, checkout safety and RTL direction remain unchanged.
 - Commit: 294952a11964352aee25c7ded5f23c0b77baec96 (shared visual alignment); follow-up documentation commit recorded below.
 - Verification: source-level remote edits and static re-fetch only. Local Vitest/build/browser runs were not possible from this remote GitHub editing session; do not report them as passing.
+
+
+## 2026-11-05 — Final cross-app card and layout polish
+- Follow-up fixes after the shared token/sidebar pass: System Settings surface now uses the shared card elevation; Notification Management and Inquiry Subscription panels/controls use compact 6px corners; Product Details media corner reduced to 8px; Website profile PrimeVue cards restored to visible elevation; Addresses and My Inquiries cards/rows standardized to the 6–8px radius scale and shared shadow.
+- Kept auth back-links and non-surface alert/error states intentionally flat; no blanket shadow was applied to every element.
+- Implementation commits: `294952a11964352aee25c7ded5f23c0b77baec96`, `8b06f6389fa97e2f0221df70cd65c5321cce4ed6`, `796df663eee7102f72f00704f97762579d7ad459`, `48e96d13aab20fdeb44c018dba3f2154374c8e8f`.
+- Latest CI: frontend/shared tests passed; backend test suite failed on the same two unrelated assertions: POST /messages invalid-payload test and uploadAvatar missing-file test. Frontend build was still in progress when checked. Migration validation and runtime checks were still running/queued. Browser screenshots were not captured.
+- Push state: all changes are committed directly to `main`; no feature branch was created.

@@ -199,3 +199,15 @@ Next phases must apply this corrected direction across remaining pages, not repe
 - Inquiry create/detail: compact title/labels and clear progress/stepper/surface hierarchy while preserving existing stepper semantics.
 - No API, form validation, role/permission, route, publish or inquiry workflow changes.
 - Static review only; tests/build/browser checks NOT RUN by owner instruction.
+
+
+## Cross-app TEM reference alignment — 2026-11-05
+
+- Applied the installed Taste Skill app-screen guidance, UI UX Pro Max, shared Design System tokens and the repository's RTL/accessibility constraints to the current cross-app polish pass.
+- Used `tem/analytics.html` as the admin/company density and layout reference and `tem/shop.html` as the storefront/card-grid reference; product pages and the shell remain Persian RTL.
+- Standardized the semantic radius scale to 4/6/8px (pill radius retained only for intentional chips/badges), strengthened persistent light/dark surface elevation, and removed blanket hover-lift from non-interactive panels.
+- Expanded both Admin and Company desktop sidebars from 207px to 256px; preserved the 76px collapsed rail and full-width mobile drawer behavior.
+- Aligned header/search controls, sidebar items, settings, notification/subscription panels, profile cards, address cards and inquiry surfaces to compact reference corners and consistent surface depth.
+- Storefront homepage featured visual and product/category cards keep live API data, natural RTL reading order, responsive card grids and reduced-motion behavior. No backend, API, permissions, or checkout behavior was changed.
+- Commits: `294952a` (shared tokens/shell/home), `8b06f63` (docs + hover behavior), `796df66` (settings/notification/product detail), `48e96d1` (customer account surfaces).
+- Verification: CI frontend/shared test step passed on the latest run. Backend test step still fails on two existing unrelated assertions (`POST /messages rejects invalid payloads`, `uploadAvatar` missing-file test). Frontend build step was still running at the last inspection; runtime/browser validation was queued. No local visual browser inspection was performed in this remote GitHub session.
