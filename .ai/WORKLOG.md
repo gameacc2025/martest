@@ -3619,3 +3619,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Next:** Run Website test/build, validate header and dropdown at mobile/desktop widths, and search for stale `home` route-name references.
 
 - **Follow-up alignment:** The cart control was moved immediately beside the notification bell for signed-in users while retaining guest cart access; the duplicate footer homepage link was also removed and a navigation regression assertion was added. Follow-up commits: `d5da3e39e95278a0bbd07c6b655d4fce009863a1`, `ed298f6d6a6ff3700df5634162f03c0c0abe9c34`, `e54327385d0e6cb387103276f14c95257042cfad`.
+
+- **Test maintenance:** Updated the cart trigger accessible-name expectation after the control was separated from the RFQ menu. Commit: `0606b2af677b855c46bfacd45ed08ee63c95d0c5`.
