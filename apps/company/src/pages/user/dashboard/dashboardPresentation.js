@@ -41,3 +41,25 @@ export function buildProductLegendItems(segments) {
       percent: Math.round((segment.value / total) * 100),
     }))
 }
+
+export function buildCompanyDashboardMetrics({ stats, productStatusCounts }) {
+  const by = stats?.received?.byStatus || {}
+  const responseTotal = stats?.responses?.total ?? stats?.responses?.count ?? null
+  const active = Number(by.SUBMITTED || 0) + Number(by.OPEN || 0)
+  const answered = Number(by.CLOSED || 0) + Number(by.COMPLETED || 0)
+  const make = (key, label, actual, sampleValue, icon, tone, to, hint = '') => ({
+    key, label, value: actual == null ? sampleValue : actual,
+    sample: actual == null, icon, tone, to, hint,
+  })
+  return [
+    make('active-inquiries', 'استعلام‌های فعال', stats?.received?.byStatus ? active : null, 18, 'pi pi-inbox', 'violet', { name: 'company-inquiries', query: { scope: 'received', status: 'OPEN' } }, 'آمار واقعی استعلام‌ها'),
+    make('answered-inquiries', 'استعلام‌های پاسخ‌داده‌شده', stats?.received?.byStatus ? answered : null, 12, 'pi pi-reply', 'green', { name: 'company-inquiries', query: { scope: 'received' } }, 'آمار واقعی استعلام‌ها'),
+    make('participated-inquiries', 'استعلام‌های مشارکت‌شده', responseTotal, 9, 'pi pi-send', 'cyan', { name: 'company-inquiries' }),
+    make('approved-products', 'محصولات تأییدشده', productStatusCounts?.APPROVED, 24, 'pi pi-check-circle', 'green', { name: 'manage-products', query: { status: 'APPROVED' } }, 'آمار واقعی کاتالوگ'),
+    make('pending-products', 'محصولات تأییدنشده', productStatusCounts?.PENDING_REVIEW, 5, 'pi pi-clock', 'amber', { name: 'manage-products', query: { status: 'PENDING_REVIEW' } }),
+    make('active-orders', 'سفارش‌های فعال', null, 11, 'pi pi-shopping-cart', 'violet', { name: 'company-retail-orders' }),
+    make('shipping-orders', 'سفارش‌های در حال ارسال', null, 4, 'pi pi-truck', 'cyan', { name: 'company-retail-orders' }),
+    make('delivered-orders', 'سفارش‌های تحویل‌شده', null, 28, 'pi pi-check-square', 'green', { name: 'company-retail-orders' }),
+    make('out-of-stock', 'کالاهای ناموجود در انبار', null, 3, 'pi pi-exclamation-triangle', 'orange', { name: 'manage-products' }),
+  ]
+}
