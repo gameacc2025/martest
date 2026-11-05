@@ -3449,3 +3449,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Implementation commits: `294952a11964352aee25c7ded5f23c0b77baec96`, `8b06f6389fa97e2f0221df70cd65c5321cce4ed6`, `796df663eee7102f72f00704f97762579d7ad459`, `48e96d13aab20fdeb44c018dba3f2154374c8e8f`.
 - Latest CI: frontend/shared tests passed; backend test suite failed on the same two unrelated assertions: POST /messages invalid-payload test and uploadAvatar missing-file test. Frontend build was still in progress when checked. Migration validation and runtime checks were still running/queued. Browser screenshots were not captured.
 - Push state: all changes are committed directly to `main`; no feature branch was created.
+
+
+## 2026-11-05 — Final component-level consistency sweep
+
+- Final polish follow-up (`a87be94`): company dashboard analytics/hero surfaces, company inquiry message bubbles, About Us product cards and Website inquiry-subscription plan/panel cards were brought onto the shared 6–8px radius and elevation rules.
+- Latest CI on the preceding documentation commit confirmed frontend/shared tests PASS and all three frontend production builds PASS; backend test step continues to fail only on the two existing assertions for invalid POST /messages payload and missing uploadAvatar file. Migration validation passed. Latest commit CI/migration/runtime workflows are still running/pending.
+- Latest implementation commit: `a87be946bd9f0a1ba34e2462655f5f261ad0e1a3`. No backend, schema, migration, API, permission or workflow changes.

@@ -547,3 +547,12 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Implementation commits: `294952a`, `8b06f63`, `796df66`, `48e96d1` (latest).
 - Latest CI frontend/shared tests passed. Backend tests fail on the two known unrelated assertions for invalid POST /messages payloads and missing uploadAvatar file. Frontend build/runtime results were pending at last check; do not call all checks green.
 - No backend/schema/API changes. No browser screenshots were taken in this remote source-editing session.
+
+
+## 2026-11-05 — Latest UI status
+- Cross-app visual consistency pass now includes Admin, Company and Website dashboard, catalogue, account, inquiry, notification, subscription and settings surfaces. The shared 4/6/8px radius scale, 256px expanded panel sidebars (76px collapsed), card elevation and RTL shell rules are in place.
+- Latest UI commit: `a87be946bd9f0a1ba34e2462655f5f261ad0e1a3`.
+
+- Final polish follow-up (`a87be94`): company dashboard analytics/hero surfaces, company inquiry message bubbles, About Us product cards and Website inquiry-subscription plan/panel cards were brought onto the shared 6–8px radius and elevation rules.
+- Latest CI on the preceding documentation commit confirmed frontend/shared tests PASS and all three frontend production builds PASS; backend test step continues to fail only on the two existing assertions for invalid POST /messages payload and missing uploadAvatar file. Migration validation passed. Latest commit CI/migration/runtime workflows are still running/pending.
+- Visual browser screenshots were not manually captured. Do not claim pixel-perfect browser verification.

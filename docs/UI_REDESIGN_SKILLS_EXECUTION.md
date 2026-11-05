@@ -211,3 +211,10 @@ Next phases must apply this corrected direction across remaining pages, not repe
 - Storefront homepage featured visual and product/category cards keep live API data, natural RTL reading order, responsive card grids and reduced-motion behavior. No backend, API, permissions, or checkout behavior was changed.
 - Commits: `294952a` (shared tokens/shell/home), `8b06f63` (docs + hover behavior), `796df66` (settings/notification/product detail), `48e96d1` (customer account surfaces).
 - Verification: CI frontend/shared test step passed on the latest run. Backend test step still fails on two existing unrelated assertions (`POST /messages rejects invalid payloads`, `uploadAvatar` missing-file test). Frontend build step was still running at the last inspection; runtime/browser validation was queued. No local visual browser inspection was performed in this remote GitHub session.
+
+
+## Final component consistency sweep — 2026-11-05
+- Added the final company dashboard, inquiry conversation, About Us product and Website inquiry-subscription card refinements (commit `a87be94`).
+
+- Final polish follow-up (`a87be94`): company dashboard analytics/hero surfaces, company inquiry message bubbles, About Us product cards and Website inquiry-subscription plan/panel cards were brought onto the shared 6–8px radius and elevation rules.
+- Latest CI on the preceding documentation commit confirmed frontend/shared tests PASS and all three frontend production builds PASS; backend test step continues to fail only on the two existing assertions for invalid POST /messages payload and missing uploadAvatar file. Migration validation passed. Latest commit CI/migration/runtime workflows are still running/pending.
