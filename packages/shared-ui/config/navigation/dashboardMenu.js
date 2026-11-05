@@ -89,7 +89,7 @@ export const dashboardMenu = [
     ],
   },
   {
-    section: 'داشبورد',
+    section: 'بازرگانی',
     items: [
       { title: 'داشبورد', icon: 'pi pi-home', route: 'company-dashboard', roles: ['COMPANY_MANAGER', 'COMPANY_USER'], permission: 'dashboard.read' },
       // Every item below is gated purely by permission — NOT by hardcoding
