@@ -79,7 +79,7 @@ describe('Website Product Listing — TEM storefront', () => {
   it('renders supplier trust, product metadata and inquiry/retail price from API data', async () => {
     wrapper = mountListing()
     await flushPromises()
-    expect(wrapper.find('.product-meta').text()).toContain('FiberPro')
+    expect(wrapper.find('.shop-product-brand').text()).toContain('FiberPro')
     expect(wrapper.find('.product-meta').text()).toContain('XG-1200')
     expect(wrapper.find('.product-meta').text()).toContain('FP-XG1200')
     expect(wrapper.find('.product-verified').text()).toContain('تأمین‌کننده تأییدشده')
