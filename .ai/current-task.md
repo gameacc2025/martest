@@ -650,3 +650,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 ### Latest follow-up
 - Product approved/unapproved counts now combine lifecycle statuses correctly, and recent product panels fetch latest records per status.
 - Quick access expanded. Updated DashboardHeader regression test to match the removed workspace chip; latest CI is pending.
+
+
+## Current task — Company dashboard density and sales preview (2026-11-05)
+- KPI area: exactly eight cards, three columns on desktop (three rows: 3 + 3 + 2), reduced card/icon/number sizing; responsive two-column/mobile stacking retained.
+- Right rail: remove Company summary panel; retain Quick access and use the remaining space for a compact 12-month sales trend chart.
+- Sales chart values and growth are demo-only, visibly labeled, and must be replaced by an authoritative sales API when available. Do not present sample revenue as actual company revenue.
+- Keep all existing Company APIs, route names, tenant boundaries, permissions and workflows unchanged. No backend/schema/database work.
+- Next: run focused dashboard tests and Company production build when local execution is available; inspect CI for the new commits. No browser testing performed.
