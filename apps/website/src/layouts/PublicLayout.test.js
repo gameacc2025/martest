@@ -106,11 +106,11 @@ describe('PublicLayout responsive navigation', () => {
     wrapper = mountLayout()
     await flushPromises()
     const links = wrapper.findAll('.public-nav-link').map(link => link.text().trim())
-    expect(links).toContain('همه محصولات')
+    expect(links).toContain('منوی اصلی')
     expect(links).not.toContain('صفحه اصلی')
   })
 
-  it('loads and displays at most five recent notifications in a left-opening preview', async () => {
+  it('loads and displays at most five recent notifications in a left-side drawer', async () => {
     mocks.auth.user = { id: 'customer-1' }
     mocks.auth.isAuthenticated = true
     mocks.apiGetPaginated.mockResolvedValue({ data: Array.from({ length: 7 }, (_, index) => ({ id: index + 1, title: `اعلان ${index + 1}`, message: 'متن اعلان', isRead: false })) })
@@ -119,9 +119,10 @@ describe('PublicLayout responsive navigation', () => {
     expect(mocks.apiGetPaginated).toHaveBeenCalledWith('/notifications?page=1&limit=5')
     await wrapper.get('.public-notifications-link').trigger('click')
     await nextTick()
+    expect(wrapper.find('.public-notifications-layer').exists()).toBe(true)
     expect(wrapper.findAll('.public-notification-item')).toHaveLength(5)
-    expect(wrapper.get('.public-notifications-menu').attributes('aria-label')).toBe('پنج اعلان آخر')
-    expect(wrapper.get('.public-notifications-menu').element.querySelector('.public-notifications-menu__all')).toBeTruthy()
+    expect(wrapper.get('.public-notifications-drawer').attributes('aria-label')).toBe('اعلان‌های اخیر')
+    expect(wrapper.get('.public-notifications-drawer').element.querySelector('.public-notifications-menu__all')).toBeTruthy()
   })
 
   it('provides a keyboard-accessible skip link to the main content', async () => {
