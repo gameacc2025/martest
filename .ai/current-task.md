@@ -637,3 +637,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Shared PageHeader: breadcrumb now sits in a compact full-width card, aligned to the main workspace gutters.
 - Company dashboard: removed the active/verified status toolbar and the Products KPI heading/subtitle; company status remains available in the summary panel.
 - No API/backend/auth/permission/route/business-logic changes. Static source checks only; tests/build/browser NOT RUN.
+
+
+## Latest focus — Company ecommerce dashboard
+- Port the compact card sizing and asymmetrical content layout from `tem/ecommerce.html` into Company dashboard.
+- Dashboard now has nine requested metrics; live inquiry/product counts use existing APIs and order/inventory counts are explicitly sample data until APIs exist.
+- Added recent activity, approaching inquiries, recently approved/unapproved products, recent answered inquiries, quick actions, and a Company-only left-side messages drawer with five clearly marked sample messages.
+- Messages drawer is placed below the header; it does not fetch inquiry threads because the existing per-inquiry messages endpoint marks received messages as read during retrieval.
+- New KPI helper tests added. Static source review only; tests/build/browser not run yet.
