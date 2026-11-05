@@ -58,3 +58,21 @@ describe('DashboardSidebar mobile drawer semantics', () => {
     expect(wrapper.find('aside').attributes('aria-label')).toBe('منوی ناوبری پنل')
   })
 })
+
+
+describe('DashboardSidebar actions', () => {
+  it('does not render a second collapse control or a product creation action', () => {
+    const wrapper = mount(DashboardSidebar, {
+      props: {
+        menuItems: [],
+      },
+      global: {
+        stubs: { BrandMark: true, Badge: true, RouterLink: true },
+        directives: { tooltip: () => {} },
+      },
+    })
+
+    expect(wrapper.find('.dash-sidebar-collapse-btn').exists()).toBe(false)
+    expect(wrapper.find('.dash-sidebar-cta').exists()).toBe(false)
+  })
+})
