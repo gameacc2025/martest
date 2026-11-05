@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import TemPageHeader from '../ui/TemPageHeader.vue'
 import TemStatCard from '../ui/TemStatCard.vue'
 import TemStatusPill from '../ui/TemStatusPill.vue'
@@ -14,9 +15,18 @@ const props = defineProps({
   showRequesterIdentity: { type: Boolean, default: true },
 })
 
+const route = useRoute()
 const selectedTicketId = ref(props.tickets[0]?.id ?? null)
 const query = ref('')
-const statusFilter = ref('ALL')
+const statusFilter = ref(['ALL', 'OPEN', 'CLOSED'].includes(route.query.status) ? route.query.status : 'ALL')
+
+watch(
+  () => route.query.status,
+  (status) => {
+    statusFilter.value = ['ALL', 'OPEN', 'CLOSED'].includes(status) ? status : 'ALL'
+  },
+  { immediate: true },
+)
 
 watch(() => props.tickets, (items) => {
   if (!items.some((ticket) => ticket.id === selectedTicketId.value)) {
