@@ -115,7 +115,7 @@ onMounted(loadSettings)
   border-bottom: 1px solid var(--ds-color-border);
   border-radius: 0;
   background: transparent;
-  box-shadow: none;
+  box-shadow: var(--tm-card-shadow);
 }
 .system-setting-card {
   width: 100%;

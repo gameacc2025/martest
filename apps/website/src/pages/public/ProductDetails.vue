@@ -494,7 +494,7 @@ const goBack = () => router.push('/products')
   width: 54px;
   height: 54px;
   margin-bottom: 6px;
-  border-radius: 14px;
+  border-radius: 8px;
   background: var(--tm-cyan-soft);
   color: var(--tm-cyan-deep);
   font-size: 24px;
