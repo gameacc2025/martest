@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="company-dashboard">
     <div v-if="alerts.length" class="cd-alerts">
       <div v-for="alert in alerts" :key="alert.id" class="cd-alert" :class="`cd-alert--${alert.severity}`">
@@ -53,113 +53,6 @@
         </TemPanel>
       </aside>
     </section>
-  </div>
-</template>
-      <div v-if="productsLoading" class="cd-chart-skeleton" aria-busy="true">
-        <span v-for="n in 4" :key="n"></span>
-      </div>
-      <NoDataState v-else-if="productsError" icon="pi pi-exclamation-triangle" title="خطا در دریافت محصولات" description="اتصال به فهرست محصولات برقرار نشد. دوباره تلاش کنید." retryable @retry="fetchProducts" />
-      <NoDataState v-else-if="!productStatusCounts" icon="pi pi-chart-pie" title="آمار تفکیکی محصولات در دسترس نیست" description="داده وضعیت محصولات از سرویس مدیریت دریافت نشد." retryable @retry="fetchProducts" />
-      <div v-else-if="productTotal === 0" class="cd-chart-empty">
-        <i class="pi pi-box" aria-hidden="true"></i>
-        <strong>هنوز محصولی ثبت نشده است</strong>
-        <span>با ثبت اولین محصول، وضعیت کاتالوگ در این بخش نمایش داده می‌شود.</span>
-      </div>
-      <div v-else-if="dominantProductSegment" class="cd-product-progress-list">
-        <div v-for="segment in productLegendItems" :key="segment.label" class="cd-product-progress-item">
-          <div class="cd-product-progress-heading">
-            <span><i :style="{ background: segment.color }"></i>{{ segment.label }}</span>
-            <strong>{{ segment.value.toLocaleString('fa-IR') }} <small>({{ segment.percent.toLocaleString('fa-IR') }}٪)</small></strong>
-          </div>
-          <div class="tm-meter"><span class="tm-meter__fill" :style="{ width: segment.percent + '%', background: segment.color }"></span></div>
-        </div>
-      </div>
-      <div v-else class="cd-donut-row">
-        <TemDonutChart :segments="productSegments" :center-value="productTotal.toLocaleString('fa-IR')" center-label="محصول" />
-        <TemLegend :items="productLegendItems" />
-      </div>
-    </TemPanel>
-
-    <!-- Primary operations -->
-    <section class="company-dashboard-operations" aria-label="عملیات اصلی شرکت">
-      <TemPanel title="جریان استعلام‌ها" icon="pi pi-sitemap">
-        <template #actions>
-          <router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost tm-btn--sm">مشاهده همه</router-link>
-        </template>
-        <InquiryPipeline :stages="pipelineStages" :loading="statsLoading" />
-      </TemPanel>
-      <TemPanel title="دسترسی سریع" icon="pi pi-bolt">
-        <QuickActions :actions="quickActions" />
-      </TemPanel>
-    </section>
-
-    <TemPanel title="فروش خرده‌فروشی" icon="pi pi-shopping-cart">
-      <div class="cd-commerce-grid">
-        <div class="cd-commerce-metric"><span>سفارش‌های جدید</span><strong>—</strong><small>پس از اتصال سرویس سفارش نمایش داده می‌شود</small></div>
-        <div class="cd-commerce-metric"><span>سفارش‌های در حال ارسال</span><strong>—</strong><small>داده عملیاتی هنوز در دسترس نیست</small></div>
-        <div class="cd-commerce-metric"><span>سفارش‌های تحویل‌شده</span><strong>—</strong><small>داده عملیاتی هنوز در دسترس نیست</small></div>
-        <div class="cd-commerce-metric"><span>فروش و درآمد</span><strong>—</strong><small>پس از راه‌اندازی API مالی نمایش داده می‌شود</small></div>
-        <div class="cd-commerce-metric cd-commerce-metric--notice"><span><i class="pi pi-exclamation-triangle" aria-hidden="true"></i> هشدار موجودی</span><p>سرویس موجودی متصل نیست؛ در حال حاضر نمی‌توان کمبود موجودی را محاسبه کرد.</p></div>
-      </div>
-      <div class="cd-commerce-actions">
-        <router-link :to="{ name: 'company-retail-orders' }" class="tm-btn tm-btn--ghost tm-btn--sm">پیش‌نمایش سفارش‌ها</router-link>
-        <router-link :to="{ name: 'manage-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">مدیریت محصولات</router-link>
-      </div>
-    </TemPanel>
-
-    <!-- Activity -->
-    <div class="cd-grid cd-grid--1-1">
-      <TemPanel title="مهلت‌های پیشرو" icon="pi pi-calendar-clock">
-        <template #actions>
-          <router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost tm-btn--sm">استعلام‌ها</router-link>
-        </template>
-        <EntityList
-          :items="upcomingDeadlines"
-          :loading="inquiriesLoading"
-          empty-message="مهلت نزدیکی وجود ندارد."
-        />
-      </TemPanel>
-
-      <TemPanel title="فعالیت‌های اخیر" icon="pi pi-history">
-        <EntityList :items="recentActivities" :loading="statsLoading" empty-message="فعالیتی ثبت نشده است." />
-      </TemPanel>
-    </div>
-
-    <TemPanel title="خلاصه شرکت" icon="pi pi-building">
-      <template #actions>
-        <router-link :to="{ name: 'company-settings' }" class="tm-btn tm-btn--ghost tm-btn--sm">ویرایش پروفایل شرکت</router-link>
-      </template>
-      <div v-if="companyLoading" class="cd-summary" aria-busy="true">
-        <span class="cd-summary-logo cd-skeleton"></span>
-        <div class="cd-summary-main">
-          <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--lg"></span>
-          <span class="cd-skeleton cd-skeleton-line cd-skeleton-line--sm"></span>
-          <div class="cd-skeleton-tags"><span class="cd-skeleton cd-skeleton-tag"></span><span class="cd-skeleton cd-skeleton-tag"></span></div>
-        </div>
-      </div>
-      <div v-else class="cd-summary">
-        <span class="cd-summary-logo">
-          <img v-if="companyLogo" :src="companyLogo" :alt="companyName" width="64" height="64" decoding="async" />
-          <i v-else class="pi pi-building" aria-hidden="true"></i>
-        </span>
-        <div class="cd-summary-main">
-          <h3 class="cd-summary-name">{{ companyName || 'نام شرکت ثبت نشده است' }}</h3>
-          <p v-if="company?.nameEn" class="cd-summary-sub" dir="ltr">{{ company.nameEn }}</p>
-          <div class="cd-summary-tags">
-            <span class="tm-pill" :class="company?.status === 'ACTIVE' ? 'tm-pill--success' : 'tm-pill--warning'">{{ companyStatusLabel }}</span>
-            <span v-if="company?.isVerified" class="tm-pill tm-pill--info"><i class="pi pi-verified" aria-hidden="true"></i> تأیید شده</span>
-          </div>
-        </div>
-      </div>
-    </TemPanel>
-
-    <!-- Recent products -->
-    <TemPanel title="محصولات اخیر" icon="pi pi-box">
-      <template #actions>
-        <router-link :to="{ name: 'manage-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه محصولات</router-link>
-      </template>
-      <EntityList :items="recentProducts" :loading="productsLoading" empty-message="هنوز محصولی ثبت نشده است." />
-    </TemPanel>
   </div>
 </template>
 
