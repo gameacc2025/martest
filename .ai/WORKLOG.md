@@ -3631,3 +3631,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Updated MegaMenu and PublicLayout regression tests for category IDs, subcategory filtering, drawer presentation and primary navigation label. Tests/build/browser checks have NOT been run in this GitHub remote-edit session.
 - No backend, database, API contract, authentication or permissions changes.
 - Source commits: b70b7552, 3c47ae03, 6cdfa7a8, 93318ebb; test commits: 5d3b55df, 82397131, 50f6fc86.
+
+- Category rows now select a context-appropriate icon (fiber, network, wireless, cable, power, telecom, or generic tag) and the remaining decorative arrows were removed from the category navigation. Follow-up source commit: f958be9f.
