@@ -648,7 +648,7 @@ a.tm-kpi:hover {
 .dash-layout-sidebar { background: var(--tm-navy); }
 
 .dash-sidebar {
-  background: linear-gradient(180deg, #0a1c3f 0%, #08142e 100%) !important;
+  background: #0d1420 !important;
   color: var(--ds-sidebar-fg);
   border-inline-end: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -689,12 +689,12 @@ a.tm-kpi:hover {
 
 .dash-sidebar-link--active {
   color: #fff !important;
-  background: linear-gradient(90deg, #17b4d9, #0f5f88) !important;
+  background: #7c6cf6 !important;
   box-shadow: none;
   font-weight: 600;
 }
 .dash-sidebar-link--active .dash-sidebar-link-icon { color: #fff !important; }
-.dash-sidebar-active-bar { background: var(--tm-cyan); }
+.dash-sidebar-active-bar { background: #8878f7; }
 .dash-sidebar-badge { background: var(--tm-cyan) !important; color: var(--tm-navy) !important; font-weight: 700; }
 
 .dash-header {
@@ -802,17 +802,15 @@ body .company-management-toolbar {
 .company-dashboard-hero {
   position: relative;
   overflow: hidden;
-  border: 0 !important;
-  border-radius: var(--tm-radius-lg) !important;
-  background:
-    radial-gradient(circle at 88% 26%, rgba(46, 211, 238, 0.28), transparent 42%),
-    linear-gradient(118deg, #0a1c3f 0%, #124a72 58%, #1189b5 100%) !important;
-  box-shadow: var(--tm-shadow-sm) !important;
+  border: 1px solid var(--tm-line) !important;
+  border-radius: 4px !important;
+  background: var(--tm-surface) !important;
+  box-shadow: var(--tm-card-shadow) !important;
 }
 
 .admin-dashboard-hero::after,
 .company-dashboard-hero::after {
-  content: '';
+  content: none;
   position: absolute;
   width: 340px;
   height: 340px;
@@ -825,25 +823,25 @@ body .company-management-toolbar {
 }
 
 .admin-dashboard-hero h1,
-.company-dashboard-hero h1 { font-size: 24px !important; font-weight: 700; color: #fff; }
+.company-dashboard-hero h1 { font-size: 20px !important; font-weight: 600; color: var(--tm-ink); }
 
 .admin-dashboard-hero p,
-.company-dashboard-hero p { color: #cfe6f2; font-size: var(--tm-fs-sm); }
+.company-dashboard-hero p { color: var(--tm-muted); font-size: var(--tm-fs-sm); }
 
 .admin-dashboard-secondary-action,
 .company-dashboard-secondary-action {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
+  border-color: var(--tm-line);
+  background: var(--tm-surface-alt);
+  color: var(--tm-ink);
 }
 .admin-dashboard-secondary-action:hover,
-.company-dashboard-secondary-action:hover { background: rgba(255, 255, 255, 0.16); }
+.company-dashboard-secondary-action:hover { background: var(--tm-blue-soft); }
 
 .admin-dashboard-hero .p-button,
 .company-dashboard-hero .p-button {
-  background: linear-gradient(100deg, var(--tm-cyan-strong), var(--tm-cyan)) !important;
-  border-color: var(--tm-cyan) !important;
-  color: #05213f !important;
+  background: var(--tm-blue) !important;
+  border-color: var(--tm-blue) !important;
+  color: #fff !important;
   font-weight: 700;
 }
 
