@@ -345,9 +345,6 @@ function logout() {
                 <span class="public-user-name">{{ displayName }}</span>
                 <i class="pi pi-chevron-down public-user-caret" aria-hidden="true"></i>
               </button>
-              <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
-            </template>
-
             <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
               <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-commerce-menu" :aria-expanded="commerceMenuOpen" @click.stop="commerceMenuOpen = !commerceMenuOpen">
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
@@ -358,6 +355,9 @@ function logout() {
                 <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" to="/my-inquiries" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-file-edit" aria-hidden="true"></i> استعلام</span><b v-if="myInquiryCount !== null">{{ countLabel(myInquiryCount) }}</b></router-link>
               </div>
             </div>
+
+              <Menu ref="userMenu" :model="userMenuItems" :popup="true" />
+            </template>
 
             <template v-else>
               <router-link :to="{ name: 'login' }" class="tm-btn tm-btn--sm public-login-link">
