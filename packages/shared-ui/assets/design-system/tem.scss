@@ -645,12 +645,12 @@ a.tm-kpi:hover {
 
 .dash-layout-page { padding-top: 10px; }
 
-.dash-layout-sidebar { background: var(--tm-navy); }
+.dash-layout-sidebar { background: #0d2b53; }
 
 .dash-sidebar {
-  background: #0d1420 !important;
+  background: #0d2b53 !important;
   color: var(--ds-sidebar-fg);
-  border-inline-end: 1px solid rgba(255, 255, 255, 0.05);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .dash-sidebar-brand {
@@ -1254,7 +1254,7 @@ body .company-management-toolbar {
 }
 
 /* Match the supplied analytics/shop shell proportions and compact controls. */
-.dash-sidebar { width: 256px; }
+.dash-sidebar { width: 280px; }
 .dash-header-icon-btn,
 .dash-header-workspace,
 .dash-header-user,
@@ -1271,5 +1271,5 @@ body .company-management-toolbar {
   border-radius: 6px;
 }
 @media (max-width: 991px) {
-  .dash-sidebar { width: 256px; }
+  .dash-sidebar { width: 280px; }
 }
