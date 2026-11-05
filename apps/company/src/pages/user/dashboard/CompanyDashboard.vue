@@ -535,7 +535,6 @@ onMounted(() => {
   flex-direction: column;
   gap: 24px;
 }
-.company-dashboard-toolbar{display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:42px}.company-dashboard-toolbar .company-dashboard-status{margin-inline-start:auto}
 .cd-kpi-groups { display: grid; gap: 24px; }
 .company-dashboard :deep(.tm-panel) { border-radius: 4px; box-shadow: 0 1px 3px rgba(20,20,60,.04); }
 .company-dashboard :deep(.tm-panel__head) { min-height: 56px; padding: 16px 20px; }
@@ -830,30 +829,6 @@ onMounted(() => {
 }
 
 /* ---- tem dashboard additions ---- */
-.company-dashboard-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 8px;
-  font-size: 13px;
-  color: var(--tm-muted);
-}
-.company-dashboard-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--tm-amber);
-  flex: none;
-}
-.company-dashboard-status-dot.is-active { background: var(--tm-green); }
-.company-dashboard-verified {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-inline-start: 4px;
-  color: #0c8a6e;
-  font-weight: 600;
-}
 .cd-donut-row {
   display: grid;
   grid-template-columns: minmax(120px, 160px) 1fr;
