@@ -136,13 +136,14 @@ onUnmounted(() => {
         @toggle-mobile="toggleMobile"
         @toggle-theme="toggleTheme"
         @logout="authStore.logout()"
+      >
         <template #messages>
           <button type="button" class="company-message-trigger" :class="{ 'is-open': messagesOpen }" aria-label="پیام‌ها" :aria-expanded="messagesOpen" @click="toggleMessages">
             <i class="pi pi-envelope" aria-hidden="true"></i>
             <span v-if="newMessageCount" class="company-message-trigger__badge">{{ newMessageCount > 9 ? '۹+' : newMessageCount }}</span>
           </button>
         </template>
-      />
+      </DashboardHeader>
       <div v-if="messagesOpen" class="company-message-backdrop" @click="closeMessages"></div>
       <aside v-if="messagesOpen" class="company-message-drawer" aria-label="پیام‌های اخیر" @click.stop>
         <div class="company-message-drawer__head"><div><strong>پیام‌ها</strong><span>{{ newMessageCount.toLocaleString('fa-IR') }} پیام جدید</span></div><button type="button" aria-label="بستن پیام‌ها" @click="closeMessages"><i class="pi pi-times"></i></button></div>
