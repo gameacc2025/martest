@@ -69,7 +69,7 @@ describe('useDashboardMenu role resolution', () => {
   it('supports role objects returned by compatible auth contexts', () => {
     const items = visibleItemsFor([{ name: 'COMPANY_MANAGER' }])
     expect(findItem(items, 'داشبورد')?.route).toBe('company-dashboard')
-    expect(findItem(items, 'سفارشات')?.route).toBeUndefined()
+    expect(findItem(items, 'سفارشات')?.children).toHaveLength(5)
   })
 
   it('does not show another app dashboard when the user has no matching role', () => {
