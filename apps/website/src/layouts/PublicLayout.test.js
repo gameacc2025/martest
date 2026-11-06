@@ -67,7 +67,7 @@ describe('PublicLayout responsive navigation', () => {
     return mount(PublicLayout, {
       global: {
         stubs: {
-          RouterLink: { template: '<a><slot /></a>' },
+          RouterLink: { props: ['to'], template: '<a :data-route="to?.name || to"><slot /></a>' },
           RouterView: { template: '<div />' },
           MegaMenu: true,
           Menu: true,
@@ -124,6 +124,9 @@ describe('PublicLayout responsive navigation', () => {
     const productsLink = links.find(link => link.text().includes('محصولات'))
     expect(homeLink).toBeTruthy()
     expect(productsLink).toBeTruthy()
+    expect(homeLink.attributes('data-route')).toBe('home')
+    expect(productsLink.attributes('data-route')).toBe('products')
+    expect(wrapper.get('.public-logo').attributes('data-route')).toBe('home')
     expect(wrapper.get('.public-logo').attributes('aria-label')).toContain('صفحه اصلی')
   })
 
