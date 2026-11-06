@@ -15,7 +15,7 @@ describe('Website homepage contracts (tem redesign)', () => {
   it('keeps the production API and category store as the source of page data', () => {
     expect(source).toContain('productsApi.list(params)')
     expect(source).toContain('productsApi.list({ ...params, limit: 8, featured: true })')
-    expect(source).toContain('const params = { page: 1, limit: 24, status: \'PUBLISHED\' }')
+    expect(source).toContain('const params = { page: 1, limit: 8, status: \'PUBLISHED\' }')
     expect(source).toContain('productsStore.getCategories()')
     expect(source).not.toContain('USE_MOCK')
     expect(source).not.toContain('mockData')
