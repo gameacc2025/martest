@@ -775,7 +775,6 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   .tm-table td:first-child::before { display: none; }
 }
 @media (max-width: 575px) {
-   .home-product-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 210px)); gap: 8px; }
   .home-featured-slider { min-height: 0; }
   .home-promo-banner { min-height:230px; }
   .home-featured-slider__content { padding: 1rem 1rem 3.2rem; }
@@ -789,6 +788,8 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   .home-skeleton { animation: none; }
   .product-card:hover, .category-card:hover { transform: none; }
 }
+
+@media(max-width:520px){.home-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),210px));gap:8px}}
 
 /* Campaign hero and horizontally browsable category rail */
 .home-campaign-hero{position:relative;min-height:clamp(330px,39vw,510px);overflow:hidden;background:#092747}
