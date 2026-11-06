@@ -6,8 +6,8 @@
 - **Side drawers:** notification and cart previews are already on main via merged PR #88; both use the same PrimeVue Drawer behavior.
 - **Changed:** Home.vue, ProductListing.vue, Categories.vue, PublicLayout.vue, StoreProductCard.vue, corresponding Home/ProductListing/Categories tests.
 - **Verification:** NOT RUN in this GitHub-only editing session. Run focused Website tests and pnpm run build:website locally; browser visual verification remains pending.
-- **Commits on main:** 5ec0a84 (drawer merge), 1a40052, e1cfe57, e2f6ba6, 65fa381, 635492c, 4d39fa9, 3cf4998, fb1078b, 0661e04, 5012ff9, 2271882, 33c11ba.
-- **Branch policy:** main is the only working branch. Delete the two obsolete remote branches from the local checkout with: git push origin --delete feat/tem-storefront-drawers feat/website-home-storefront; then remove local tracking branches if present.
+- **Commits on main:** 5ec0a84 (drawer merge), 1a40052, e1cfe57, e2f6ba6, 65fa381, 635492c, 4d39fa9, 3cf4998, 770e951, fb1078b, 0661e04, 5012ff9, 2271882, 33c11ba.
+- **Branch policy:** main is the only working branch. Remote branch listing now returns main only. In the local checkout, run git fetch origin --prune then git branch -D feat/tem-storefront-drawers feat/website-home-storefront if those local branches still exist.
 - **Next:** verify Vue SFC compilation/tests/build in the user's local checkout, visually compare Home/Products/Categories against Telecom Market.html, then continue extracting only the remaining reference components that have real data/actions.
 
 ## 2026-11-06 — Unified public-site side drawers (TEM-DRAWERS-01)
