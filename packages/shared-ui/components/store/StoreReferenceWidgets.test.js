@@ -4,6 +4,8 @@ import StoreBenefitGrid from './StoreBenefitGrid.vue'
 import StoreFaqList from './StoreFaqList.vue'
 import StoreOfferBanner from './StoreOfferBanner.vue'
 import StoreCatalogRequest from './StoreCatalogRequest.vue'
+import StoreBreadcrumb from './StoreBreadcrumb.vue'
+import StorePageHeading from './StorePageHeading.vue'
 
 const RouterLinkStub = {
   props: ['to'],
@@ -39,6 +41,21 @@ describe('Reference storefront widgets', () => {
     })
     expect(wrapper.text()).toContain('پیشنهاد ویژه')
     expect(wrapper.find('a').attributes('data-route')).toBe('products')
+  })
+
+  it('renders the reference breadcrumb items and route destinations', () => {
+    const wrapper = mount(StoreBreadcrumb, {
+      props: { items: [{ label: 'صفحه اصلی', to: { name: 'home' } }, { label: 'همه محصولات' }] },
+      global: { stubs: { RouterLink: RouterLinkStub } },
+    })
+    expect(wrapper.find('a').attributes('data-route')).toBe('home')
+    expect(wrapper.text()).toContain('همه محصولات')
+  })
+
+  it('renders the compact reference page heading', () => {
+    const wrapper = mount(StorePageHeading, { props: { headingId: 'catalog-title', title: 'همه محصولات', description: 'توضیح صفحه' } })
+    expect(wrapper.find('#catalog-title').text()).toBe('همه محصولات')
+    expect(wrapper.text()).toContain('توضیح صفحه')
   })
 
   it('keeps the catalog request form disabled until a real submit service exists', () => {
