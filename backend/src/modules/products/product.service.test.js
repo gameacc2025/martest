@@ -605,11 +605,12 @@ test('createProduct: derives a shared catalogCode from manufacturer and model wh
 });
 
 test('listSimilarProducts: resolves only published public listings with the same catalogCode', async () => {
-  fx.product = { id: 99, catalogCode: 'TEL-CISCO-C9300-48P' };
+  fx.product = { id: 99, companyId: 10, catalogCode: 'TEL-CISCO-C9300-48P' };
   const result = await service.listSimilarProducts(99);
   assert.deepEqual(result, []);
   const query = calls['product.findMany'].at(-1);
   assert.equal(query.where.catalogCode, 'TEL-CISCO-C9300-48P');
+  assert.deepEqual(query.where.companyId, { not: 10 });
   assert.equal(query.where.status, 'PUBLISHED');
   assert.equal(query.where.visibility, 'PUBLIC');
   assert.equal(query.where.deletedAt, null);
