@@ -292,3 +292,9 @@ The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/a
 - The hero includes a real search form wired to the existing search route. Pre-footer promo cards use only existing routes and substantiated marketplace capabilities.
 - Preserve the approved Telecom Market blue/cyan/navy identity; do not introduce violet/purple accents into public catalogue surfaces. Use semantic design tokens for focus, surface and accent states.
 - Do not label featured products as bestsellers: the current domain/public API has no verified sales aggregate. No sales ranking or order count may be fabricated.
+
+
+### Catalogue density alignment — 2026-11-06
+- Dedicated `/products` is a task-focused catalogue: do not place the supplier-marketing banner or general marketplace-benefits strip between its featured hero and filters/results.
+- Product tiles follow the shared TEM compact rhythm (4:5 image, 11px body padding, compact two-line title and footer). Use denser responsive catalogue tracks: five desktop columns, six on very wide screens, four medium desktop, three tablet and two mobile.
+- Keep marketing/service messaging on the homepage, not repeated in the catalogue browsing flow.
