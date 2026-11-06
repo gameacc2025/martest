@@ -37,10 +37,6 @@ function companyRouteAccess({ staffOnly = false } = {}) {
 }
 
 async function companyRoutes(fastify) {
-  // Public storefront profile returns only explicitly approved company fields.
-  // Register before the auth hook; private management routes remain protected.
-  fastify.get('/public/:id', ctrl.getPublicOne);
-
   // All routes require authentication
   fastify.addHook('onRequest', fastify.authenticate);
 
