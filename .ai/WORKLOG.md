@@ -1,3 +1,8 @@
+## Public company storefront route hardening — 2026-11-06
+- Registered `GET /api/v1/companies/public/:id` directly on the root Fastify app scope instead of inside the company-management plugin. The route is therefore independent of the plugin's authentication hook.
+- Added a full-app route-registration regression assertion and synchronized API inventory/OpenAPI metadata to mark the route public.
+- The route still uses the same allowlisted controller/service projection; no private company relations are exposed.
+
 
 
 ## 2026-11-06 — Retail catalogue and company storefront
