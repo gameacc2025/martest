@@ -946,3 +946,11 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Public feed returns only PUBLISHED, isActive=true, non-deleted records within startsAt/endsAt. Staff CRUD and upload endpoints require STAFF context and banners.* / media.upload permissions.
 - Admin route is /banners; public homepage fetches through bannersApi.listActive('HOME_HERO'). The advertising carousel is independently timed and visually wider than the featured-product slider.
 - Apply migration 20261106100000_promotional_banners before running the app against a database. Local verification is still required; remote source editing did not execute Prisma, Node, or Vite checks.
+
+## 2026-11-06 — Development demo marketplace and shared product identity
+- Development seed adds 10 demo companies (3 company types), 3 role-scoped users per company, 5 CUSTOMER_USER accounts, and 150 product listings covering all 15 current top-level categories. Every manufacturer/model family is listed by two companies.
+- Demo accounts use A123@456 by default (DEMO_USER_PASSWORD override); seed is skipped in production or when SEED_DEMO_DATA=false.
+- Product.catalogCode is a shared manufacturer/model identity, distinct from supplier-specific sku. RFQ publication dispatches to active suppliers with PUBLISHED products sharing the code, plus STAFF observers; buyer company is excluded.
+- Local destructive reset is explicit: npm run db:reset:dev only runs when NODE_ENV=development and DATABASE_URL points to telecom_marketplace. It performs db push --force-reset then seed. Normal container startup does not wipe data.
+- Keep migration history for production; do not delete migration directories to solve a development database state mismatch.
+- Demo product prices are indicative only; confirm product variants/specifications with manufacturer datasheets before commercial publication.
