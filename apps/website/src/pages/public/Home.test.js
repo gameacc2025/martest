@@ -52,7 +52,7 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('home-category-track')
     expect(source).toContain('همه دسته‌بندی‌ها')
     expect(source).toContain('categoryIcon(category)')
-    expect(source).toContain('چرا Telecom Market؟')
+    expect(source).not.toContain('چرا Telecom Market؟')
     expect(source).toContain('ثبت درخواست استعلام')
   })
 
@@ -109,6 +109,12 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).not.toContain('home-features')
     expect(source).not.toContain('home-feature-grid')
     expect(source).not.toContain('class="feature-icon"')
+  })
+
+  it('loads the latest retail-enabled products independently from featured products', () => {
+    expect(source).toContain('retailEnabled: true')
+    expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
+    expect(source).toContain('retailLatestProducts')
   })
 
   it('uses the unified tem design system tokens', () => {
