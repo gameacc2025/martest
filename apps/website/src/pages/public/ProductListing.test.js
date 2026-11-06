@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
-import { existsSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 
 const { getProducts, getCategories, routeState } = vi.hoisted(() => ({
   getProducts: vi.fn(),
@@ -10,37 +8,16 @@ const { getProducts, getCategories, routeState } = vi.hoisted(() => ({
   routeState: { current: null },
 }))
 
-vi.mock('vue-router', () => ({
-  useRoute: () => routeState.current,
-}))
-
-vi.mock('../../stores/products', () => ({
-  useProductsStore: () => ({ getProducts, getCategories }),
-}))
+vi.mock('vue-router', () => ({ useRoute: () => routeState.current }))
+vi.mock('../../stores/products', () => ({ useProductsStore: () => ({ getProducts, getCategories }) }))
 
 import ProductListing from './ProductListing.vue'
 
-const productListingPath = [
-  resolve(process.cwd(), 'apps/website/src/pages/public/ProductListing.vue'),
-  resolve(process.cwd(), 'src/pages/public/ProductListing.vue'),
-].find(existsSync)
-if (!productListingPath) throw new Error('Could not locate ProductListing.vue')
-
-const readShared = (path) => {
-  const candidates = [
-    resolve(process.cwd(), 'packages/shared-ui', path),
-    resolve(process.cwd(), '../../packages/shared-ui', path),
-  ]
-  const file = candidates.find(existsSync)
-  if (!file) throw new Error(`Could not locate shared store widget: ${path}`)
-  return readFileSync(file, 'utf8')
-}
-
-describe('Website Product Listing — TEM storefront', () => {
+describe('Website Product Listing — Telecom Market reference', () => {
   let wrapper
   const mountListing = () => mount(ProductListing, { global: { stubs: {
-    PageHeader: { template: '<header><h1 id="products-page-title">فروشگاه</h1><slot /></header>' },
-    RouterLink: { props: ['to'], template: '<a :data-route="to.name" :data-product-id="to.params?.id"><slot /></a>' },
+    RouterLink: { props: ['to'], template: '<a :data-route="to.name" :data-product-id="to.params?.id" :data-category="to.query?.category"><slot /></a>' },
+    StoreFilterPanel: { template: '<aside class="filter-stub"><slot /></aside>' },
     Button: { props: ['label'], template: '<button><slot />{{ label }}</button>' },
     InputText: { template: '<input />' },
     InputNumber: { template: '<input />' },
@@ -52,7 +29,7 @@ describe('Website Product Listing — TEM storefront', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     routeState.current = reactive({ name: 'products', query: { category: '7' } })
-    getCategories.mockResolvedValue([{ id: 7, nameFa: 'فیبر نوری' }])
+    getCategories.mockResolvedValue([{ id: 7, nameFa: 'فیبر نوری', productCount: 12 }])
     getProducts.mockResolvedValue({
       data: [{
         id: 42, title: 'مودم فیبر نوری', brand: 'FiberPro', model: 'XG-1200', sku: 'FP-XG1200',
@@ -65,78 +42,60 @@ describe('Website Product Listing — TEM storefront', () => {
 
   afterEach(() => { wrapper?.unmount(); wrapper = undefined })
 
-  it('loads published catalogue products with route category and server-supported sort', async () => {
+  it('loads published products with the route category and server-supported sort', async () => {
     wrapper = mountListing()
     await flushPromises()
     expect(getCategories).toHaveBeenCalledOnce()
     expect(getProducts).toHaveBeenCalledWith(expect.objectContaining({
       page: 1, limit: 24, status: 'PUBLISHED', categoryId: 7, sortBy: 'createdAt', sortOrder: 'desc',
     }))
-    expect(wrapper.find('.shop-product-card').exists()).toBe(true)
-    expect(wrapper.find('.products-count-number').text()).toBe('۱')
-    expect(wrapper.find('#products-page-title').exists()).toBe(true)
+    expect(wrapper.find('.reference-product-grid').exists()).toBe(true)
+    expect(wrapper.find('.reference-products-toolbar').text()).toContain('۱ محصول')
+    expect(wrapper.find('.reference-page-heading h1').text()).toBe('همه محصولات')
   })
 
-  it('renders the TEM store layout with filters, featured rail and category browsing', async () => {
+  it('renders the reference breadcrumb, filter sidebar and three-column product grid', async () => {
     wrapper = mountListing()
     await flushPromises()
-    expect(wrapper.find('.shop-filter-sidebar').exists()).toBe(true)
-    expect(wrapper.find('.shop-filter-sidebar .shop-search').exists()).toBe(true)
-    expect(wrapper.find('.shop-company-banner').exists()).toBe(false)
-    expect(wrapper.find('.shop-benefits').exists()).toBe(false)
-    expect(wrapper.find('.shop-feature-stage .shop-hero').exists()).toBe(true)
-    expect(wrapper.find('.shop-category-strip').exists()).toBe(true)
-    expect(wrapper.find('.shop-featured-section').exists()).toBe(true)
-    expect(wrapper.find('.shop-results-toolbar h2').text()).toBe('جدیدترین محصولات')
+    expect(wrapper.find('.reference-breadcrumb').text()).toContain('صفحه اصلی')
+    expect(wrapper.find('.filter-stub').exists()).toBe(true)
+    expect(wrapper.find('.reference-search').exists()).toBe(true)
+    expect(wrapper.find('.reference-category-choice').exists()).toBe(true)
+    expect(wrapper.find('.reference-product-grid').exists()).toBe(true)
+    expect(wrapper.find('.reference-catalog-layout').exists()).toBe(true)
   })
 
-  it('applies the retail-only filter through the public API and supports the homepage retail deep link', async () => {
+  it('applies the retail-only filter through the public API', async () => {
     routeState.current.query = { retail: '1' }
     wrapper = mountListing()
     await flushPromises()
     expect(getProducts).toHaveBeenCalledWith(expect.objectContaining({ retailEnabled: true }))
-    expect(wrapper.find('.shop-retail-filter input').exists()).toBe(true)
+    expect(wrapper.find('.reference-filter-choice input').exists()).toBe(true)
   })
 
   it('links products to the existing product-details route', async () => {
     wrapper = mountListing()
     await flushPromises()
-    const link = wrapper.find('.shop-product-card .product-card__main')
+    const link = wrapper.find('.product-card__main')
     expect(link.attributes('data-route')).toBe('product-details')
     expect(link.attributes('data-product-id')).toBe('42')
   })
 
-  it('renders supplier trust, product metadata and inquiry/retail price from API data', async () => {
+  it('renders supplier verification, metadata and inquiry/retail price from API data', async () => {
     wrapper = mountListing()
     await flushPromises()
     expect(wrapper.find('.product-card__brand').text()).toContain('FiberPro')
     expect(wrapper.find('.product-meta').text()).toContain('XG-1200')
     expect(wrapper.find('.product-meta').text()).toContain('FP-XG1200')
     expect(wrapper.find('.product-verified').text()).toContain('تأمین‌کننده تأییدشده')
-    expect(wrapper.find('.product-card-footer').text()).toContain('جزئیات محصول')
     expect(wrapper.find('.product-card-price').text()).toContain('شروع قیمت از')
   })
 
   it('clearly labels products without a public price as inquiry-priced', async () => {
-    getProducts.mockResolvedValueOnce({
-      data: [{ id: 43, title: 'آنتن مخابراتی', company: { name: 'تأمین‌کننده' }, prices: [] }],
-      meta: { page: 1, limit: 24, total: 1, totalPages: 1 },
-    })
+    getProducts.mockResolvedValueOnce({ data: [{ id: 43, title: 'آنتن مخابراتی', company: { name: 'تأمین‌کننده' }, prices: [] }], meta: { page: 1, limit: 24, total: 1, totalPages: 1 } })
     wrapper = mountListing()
     await flushPromises()
     expect(wrapper.find('.product-card-price').text()).toContain('استعلام قیمت')
-  })
-
-  it('uses compact portrait cards sized to the shared TEM product-card template', async () => {
-    wrapper = mountListing()
-    await flushPromises()
-    const source = readFileSync(productListingPath, 'utf8')
-    const cardSource = readShared('components/store/StoreProductCard.vue').replace(/\s+/g, '')
-    expect(source).toContain('repeat(auto-fill,minmax(min(100%,168px),210px))')
-    expect(cardSource).toContain('aspect-ratio:4/5')
-    expect(cardSource).toContain('flex-direction:column')
-    expect(cardSource).toContain('padding:11px')
-    expect(wrapper.find('.shop-product-card').exists()).toBe(true)
   })
 
   it('announces catalogue loading errors accessibly', async () => {
@@ -147,11 +106,11 @@ describe('Website Product Listing — TEM storefront', () => {
     expect(wrapper.find('[role="alert"]').text()).toContain('خطا در دریافت محصولات')
   })
 
-  it('shows the empty catalogue state', async () => {
+  it('shows an empty catalogue state', async () => {
     getProducts.mockResolvedValueOnce({ data: [], meta: { page: 1, limit: 24, total: 0, totalPages: 0 } })
     wrapper = mountListing()
     await flushPromises()
-    expect(wrapper.find('.shop-state').text()).toContain('هیچ محصولی یافت نشد')
+    expect(wrapper.find('.reference-state').text()).toContain('محصولی یافت نشد')
   })
 
   it('keeps route-query category changes connected to product loading', async () => {
