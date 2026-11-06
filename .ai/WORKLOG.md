@@ -3785,3 +3785,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - No API, backend, schema or commerce behavior changes.
 
 - **Latest verification (code SHA `3d43d3e`):** Home (15), ProductListing (9), SearchResults (6), PublicLayout (9), MegaMenu (4), and StorefrontCardSizing (3) tests pass. Backend tests and all frontend builds pass; Database Migration Validation succeeds. The complete frontend/shared suite still has five unrelated existing failures (FAQ 1, Terms 2, WorkspacePageHeading 2). Runtime Validation is still in progress. No manual visual/browser design review was performed.
+
+
+## 2026-11-06 — HOMEPAGE-REMOVE-REDUNDANT-BENEFIT-SECTIONS
+- Removed the three-item `home-marketplace-benefits` strip directly beneath the homepage hero.
+- Removed the entire «چرا Telecom Market؟» capability-card section and its now-unused feature data/CSS, including responsive and reduced-motion references.
+- Kept the campaign/featured-product hero, categories, product shelves, promo navigation and inquiry CTA intact; no API, backend, schema or route changes.
+- Updated homepage source-contract tests to assert these redundant blocks stay absent.
+- Verification: source edits committed; tests/build/browser visual checks have not been run in this remote GitHub editing session.
