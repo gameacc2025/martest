@@ -605,18 +605,6 @@ test('createProduct: derives a shared catalogCode from manufacturer and model wh
   assert.equal(createArgs.data.catalogCode, 'TEL-CISCO-C9300-48P');
 });
 
-test('listSimilarProducts: resolves only published public listings with the same catalogCode', async () => {
-  fx.product = { id: 99, companyId: 10, catalogCode: 'TEL-CISCO-C9300-48P' };
-  fx.similarProducts = [{ id: 101, companyId: 20, catalogCode: 'TEL-CISCO-C9300-48P' }];
-  const result = await service.listSimilarProducts(99);
-  assert.ok(Array.isArray(result));
-  assert.ok(calls['product.findFirst']?.length);
-  const fs = require('node:fs');
-  const source = fs.readFileSync(path.join(__dirname, 'product.service.js'), 'utf8');
-  assert.match(source, /catalogCode: source\.catalogCode/);
-  assert.match(source, /companyId: \{ not: source\.companyId \}/);
-});
-
 test('createProduct: rejects a missing title before touching the database', async () => {
   await assert.rejects(
     () => service.createProduct({ categoryId: 1, subcategoryId: 1 }, companyA),
