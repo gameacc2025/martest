@@ -1,7 +1,7 @@
 <template>
   <div class="auth-page">
     <!-- Back to site button -->
-    <router-link :to="{ name: 'home' }" class="auth-back">
+    <router-link :to="{ name: 'products' }" class="auth-back">
       <i class="pi pi-arrow-right" aria-hidden="true"></i>
       <span>بازگشت به سایت</span>
     </router-link>
