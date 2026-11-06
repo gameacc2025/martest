@@ -615,5 +615,6 @@ const isInWishlist = (productId) => {
   .sort-dropdown { flex: 1; min-width: 0; }
   .product-list-actions { width: 100%; min-width: 0; }
 }
+@media (max-width: 520px) { .products-grid--4, .products-grid--5 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 210px)); gap: 8px; } }
 
 </style>
