@@ -40,6 +40,8 @@ describe('MegaMenu', () => {
     expect(wrapper.find('.mega-trigger .pi-chevron-down').exists()).toBe(false)
     expect(wrapper.find('.mega-cat-icon').exists()).toBe(true)
     await wrapper.find('.mega-cat-item').trigger('click')
+    expect(wrapper.find('.mega-subcat-header').exists()).toBe(true)
+    await wrapper.find('.mega-view-all').trigger('click')
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({
@@ -61,6 +63,15 @@ describe('MegaMenu', () => {
     wrapper.unmount()
   })
 
+  it('closes on Escape for keyboard users', async () => {
+    const wrapper = mount(MegaMenu, { props: { categories: [] } })
+    await wrapper.find('.mega-trigger').trigger('click')
+    expect(wrapper.find('.mega-dropdown').exists()).toBe(true)
+    await wrapper.find('.mega-menu-wrapper').trigger('keydown.esc')
+    expect(wrapper.find('.mega-dropdown').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   it('closes when a click occurs outside the menu', async () => {
     const wrapper = mount(MegaMenu, {
       attachTo: document.body,
@@ -72,7 +83,7 @@ describe('MegaMenu', () => {
 
     document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     await flushPromises()
-    expect(wrapper.find('.mega-dropdown').isVisible()).toBe(false)
+    expect(wrapper.find('.mega-dropdown').exists()).toBe(false)
     wrapper.unmount()
   })
 })
