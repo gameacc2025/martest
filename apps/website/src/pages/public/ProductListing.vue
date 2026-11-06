@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import StoreProductCard from '@telecom/shared-ui/components/store/StoreProductCard.vue'
 import StoreFilterPanel from '@telecom/shared-ui/components/store/StoreFilterPanel.vue'
+import StoreBreadcrumb from '@telecom/shared-ui/components/store/StoreBreadcrumb.vue'
+import StorePageHeading from '@telecom/shared-ui/components/store/StorePageHeading.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
@@ -131,16 +133,8 @@ watch(() => route.query.retail, value => {
 <template>
   <main class="reference-catalog-page" dir="rtl">
     <div class="reference-container">
-      <nav class="reference-breadcrumb" aria-label="مسیر صفحه">
-        <router-link :to="{ name: 'home' }">صفحه اصلی</router-link>
-        <i class="pi pi-angle-left" aria-hidden="true" />
-        <span>همه محصولات</span>
-      </nav>
-
-      <header class="reference-page-heading">
-        <h1>همه محصولات</h1>
-        <p>محصولات تخصصی تأمین‌کنندگان؛ خرید فوری یا ثبت استعلام</p>
-      </header>
+      <StoreBreadcrumb class="reference-breadcrumb" :items="[{ label: 'صفحه اصلی', to: { name: 'home' } }, { label: 'همه محصولات' }]" />
+      <StorePageHeading class="reference-page-heading" title="همه محصولات" description="محصولات تخصصی تأمین‌کنندگان؛ خرید فوری یا ثبت استعلام" />
 
       <div class="reference-catalog-layout">
         <StoreFilterPanel class="reference-filter-panel" title="فیلتر محصولات" clear-label="حذف همه" @clear="resetFilters">
