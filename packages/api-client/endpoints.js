@@ -48,6 +48,7 @@ export const endpoints = {
   // Companies
   companies: {
     list: '/companies',
+    publicProfile: (id) => `/companies/public/${id}`,
     get: (id) => `/companies/${id}`,
     products: (id) => `/companies/${id}/products`,
     create: '/companies',
