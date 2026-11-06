@@ -89,6 +89,13 @@ const statusLabel = (status) => statusOptions.find((item) => item.value === stat
 const statusTone = (status) => status === 'PUBLISHED' ? 'success' : status === 'ARCHIVED' ? 'secondary' : 'warn'
 const dateLabel = (value) => value ? new Date(value).toLocaleString('fa-IR') : 'بدون محدودیت'
 
+function toLocalDateTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return local.toISOString().slice(0, 16)
+}
 function normalizeDate(value) {
   if (!value) return null
   const date = new Date(value)
@@ -111,7 +118,7 @@ function openCreate() {
 }
 function edit(item) {
   editingId.value = item.id
-  form.value = { ...emptyForm(), ...item, startsAt: item.startsAt ? new Date(item.startsAt).toISOString().slice(0,16) : '', endsAt: item.endsAt ? new Date(item.endsAt).toISOString().slice(0,16) : '' }
+  form.value = { ...emptyForm(), ...item, startsAt: toLocalDateTime(item.startsAt), endsAt: toLocalDateTime(item.endsAt) }
   dialog.value = true
 }
 async function uploadImage(event) {
