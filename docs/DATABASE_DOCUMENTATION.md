@@ -68,7 +68,7 @@ Enums تعریف‌شده در schema شامل این موارد هستند:
 
 ## Migration و استقرار
 
-Migrationها در `backend/prisma/migrations/` قرار دارند. migration `20261027200000_customer_addresses` جدول `Address`، foreign key مالکیت و index یکتای جزئی برای حداکثر یک آدرس پیش‌فرض برای هر کاربر را ایجاد می‌کند. چون Prisma schema یکتایی جزئی را مدل نمی‌کند، index جزئی فقط در SQL migration تعریف شده و نباید از migration حذف شود. در production، Dockerfile بک‌اند `prisma migrate deploy` را قبل از seed و شروع سرور اجرا می‌کند.
+Migrationها در `backend/prisma/migrations/` قرار دارند و با Prisma ORM 7.10.1 مدیریت می‌شوند. migration `20261027200000_customer_addresses` جدول `Address`، foreign key مالکیت و index یکتای جزئی برای حداکثر یک آدرس پیش‌فرض برای هر کاربر را ایجاد می‌کند. چون Prisma schema یکتایی جزئی را مدل نمی‌کند، index جزئی فقط در SQL migration تعریف شده و نباید از migration حذف شود. در توسعه و استقرار، `prisma migrate deploy` migrationهای ثبت‌شده را اعمال می‌کند. Prisma CLI تنظیمات اتصال و seed را از `backend/prisma.config.ts` می‌خواند؛ اتصال runtime با PrismaPg و node-postgres انجام می‌شود. نسخه Prisma CLI، Client و PostgreSQL adapter روی 7.10.1 قفل شده‌اند.
 
 قبل از migration محیط واقعی:
 1. مقصد دیتابیس و نسخه schema را بررسی کنید.
@@ -83,7 +83,7 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 
 ## توسعه محلی و داده‌های آزمایشی
 
-- سرویس توسعه هنگام راه‌اندازی، Prisma db push و سپس prisma/seed.js را اجرا می‌کند؛ راه‌اندازی عادی دیتابیس را reset نمی‌کند.
+- سرویس توسعه هنگام راه‌اندازی، `prisma migrate deploy` و سپس `prisma db seed` را اجرا می‌کند؛ راه‌اندازی عادی دیتابیس را reset نمی‌کند.
 - برای بازسازی کامل دیتابیس توسعه، ابتدا بک‌اند فعال را متوقف کنید، سپس reset را در کانتینر یک‌بارمصرف اجرا و بک‌اند را دوباره بالا بیاورید:
 
   docker compose -f docker-compose.dev.yml stop backend
@@ -97,7 +97,7 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 
 ## سیاست تاریخچه Migration
 
-فایل‌های migration تاریخی برای ردیابی و استقرار production نگه‌داری می‌شوند. محیط توسعه از db push استفاده می‌کند و برای شروع از صفر باید از اسکریپت reset محافظت‌شده بالا استفاده شود؛ حذف دسته‌جمعی migrationها جایگزین reset دیتابیس نیست و تاریخچه استقرار را از بین می‌برد.
+مخزن از یک baseline اولیه تولیدشده از schema فعلی و migrationهای افزایشی بعدی استفاده می‌کند. تغییر schema فقط با migration جدید انجام می‌شود؛ `db push` در startup یا reset روزمره استفاده نمی‌شود. Reset توسعه با `prisma migrate reset` و سپس `prisma db seed` انجام می‌شود و اسکریپت `db:reset:dev` مقصد را به development و دیتابیس `telecom_marketplace` محدود می‌کند. قاعده‌های PostgreSQL که Prisma Schema Language مدل نمی‌کند (CHECK constraintهای مالکیت، partial unique index آدرس پیش‌فرض و trigger عضویت INBOX) باید به‌صورت SQL صریح در baseline نگه‌داری شوند.
 
 
 ### حساب‌های ورود آزمایشی
