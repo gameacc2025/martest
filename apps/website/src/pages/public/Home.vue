@@ -395,9 +395,9 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         <article class="home-promo-card home-promo-card--suppliers">
           <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-building"></i></span>
           <span class="home-promo-card__eyebrow">شبکه تأمین</span>
-          <h2>تأمین‌کنندگان را با اطلاعات واقعی بشناسید</h2>
-          <p>پروفایل شرکت‌ها و وضعیت تأیید آن‌ها را در بازارگاه مشاهده کنید.</p>
-          <router-link :to="{ name: 'companies' }">مشاهده شرکت‌ها <i class="pi pi-arrow-left"></i></router-link>
+          <h2>اطلاعات تأمین‌کننده را کنار محصول بررسی کنید</h2>
+          <p>نام شرکت عرضه‌کننده و وضعیت تأیید آن را در اطلاعات هر محصول ببینید.</p>
+          <router-link :to="{ name: 'products' }">مشاهده کاتالوگ محصولات <i class="pi pi-arrow-left"></i></router-link>
         </article>
         <article class="home-promo-card home-promo-card--inquiry">
           <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-file-edit"></i></span>
