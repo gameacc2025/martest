@@ -201,6 +201,12 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
             <p v-if="activeBanner.description">{{ activeBanner.description }}</p>
             <a v-if="activeBanner.targetUrl" :href="activeBanner.targetUrl" class="tm-btn tm-btn--accent">{{ activeBanner.ctaLabel || 'مشاهده پیشنهاد' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></a>
             <router-link v-else :to="{ name: 'products' }" class="tm-btn tm-btn--accent">{{ activeBanner.ctaLabel || 'مشاهده محصولات' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
+            <form class="home-hero__search" role="search" aria-label="جستجوی محصولات" @submit.prevent="heroSearch">
+              <i class="pi pi-search" aria-hidden="true"></i>
+              <label class="sr-only" for="home-hero-search">جستجوی محصول</label>
+              <input id="home-hero-search" v-model="searchQuery" type="search" placeholder="نام محصول، برند یا مدل را جستجو کنید…" autocomplete="off" />
+              <button type="submit" class="tm-btn tm-btn--accent tm-btn--sm">جستجو</button>
+            </form>
           </div>
           <div v-if="promotionalBanners.length > 1" class="home-campaign-hero__controls" aria-label="کنترل اسلایدهای تبلیغاتی">
             <button type="button" aria-label="اسلاید قبلی" @click="activeBannerIndex = (activeBannerIndex - 1 + promotionalBanners.length) % promotionalBanners.length"><i class="pi pi-chevron-right"></i></button>
@@ -215,6 +221,12 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
           <h1>تجهیزات حرفه‌ای شبکه، یک‌جا و مطمئن</h1>
           <p>محصولات تأمین‌کنندگان را بررسی کنید و برای نیازهای پروژه‌ای استعلام بگیرید.</p>
           <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">مشاهده محصولات</router-link>
+            <form class="home-hero__search" role="search" aria-label="جستجوی محصولات" @submit.prevent="heroSearch">
+              <i class="pi pi-search" aria-hidden="true"></i>
+              <label class="sr-only" for="home-hero-search-fallback">جستجوی محصول</label>
+              <input id="home-hero-search-fallback" v-model="searchQuery" type="search" placeholder="نام محصول، برند یا مدل را جستجو کنید…" autocomplete="off" />
+              <button type="submit" class="tm-btn tm-btn--accent tm-btn--sm">جستجو</button>
+            </form>
         </div>
       </div>
     </section>
@@ -371,6 +383,31 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </router-link>
       </section>
 
+      <!-- Promotional discovery cards -->
+      <section class="home-promo-grid" aria-label="راهکارهای بازارگاه">
+        <article class="home-promo-card home-promo-card--catalog">
+          <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-box"></i></span>
+          <span class="home-promo-card__eyebrow">کاتالوگ تخصصی</span>
+          <h2>تجهیزات مناسب پروژه‌تان را دقیق‌تر پیدا کنید</h2>
+          <p>دسته‌بندی‌ها و مشخصات محصولات منتشرشده را کنار هم بررسی کنید.</p>
+          <router-link :to="{ name: 'categories' }">مرور دسته‌بندی‌ها <i class="pi pi-arrow-left"></i></router-link>
+        </article>
+        <article class="home-promo-card home-promo-card--suppliers">
+          <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-building"></i></span>
+          <span class="home-promo-card__eyebrow">شبکه تأمین</span>
+          <h2>تأمین‌کنندگان را با اطلاعات واقعی بشناسید</h2>
+          <p>پروفایل شرکت‌ها و وضعیت تأیید آن‌ها را در بازارگاه مشاهده کنید.</p>
+          <router-link :to="{ name: 'companies' }">مشاهده شرکت‌ها <i class="pi pi-arrow-left"></i></router-link>
+        </article>
+        <article class="home-promo-card home-promo-card--inquiry">
+          <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-file-edit"></i></span>
+          <span class="home-promo-card__eyebrow">نیازهای سازمانی</span>
+          <h2>برای خریدهای پروژه‌ای استعلام بگیرید</h2>
+          <p>نیاز خود را ثبت کنید و پاسخ تأمین‌کنندگان را از مسیر استعلام پیگیری کنید.</p>
+          <router-link :to="{ name: 'my-inquiries' }">ثبت درخواست استعلام <i class="pi pi-arrow-left"></i></router-link>
+        </article>
+      </section>
+
       <section class="home-cta home-cta--retail">
         <div><h2>برای خرید مستقیم آماده‌اید؟</h2><p>محصولات دارای قیمت ثابت را در کاتالوگ پیدا کنید و جزئیات شرایط ارائه را بررسی کنید.</p></div>
         <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">جستجوی محصولات قیمت‌دار</router-link>
@@ -500,6 +537,18 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
 /* Sections */
 .home-section { min-width: 0; }
+.home-promo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.home-promo-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:220px;padding:20px;border:1px solid var(--tm-line);border-radius:5px;background:var(--tm-surface);box-shadow:var(--tm-card-shadow);overflow:hidden}
+.home-promo-card:before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:3px;background:var(--tm-cyan)}
+.home-promo-card__icon{display:grid;place-items:center;width:38px;height:38px;margin-bottom:12px;border-radius:5px;background:var(--tm-blue-soft);color:var(--tm-blue);font-size:17px}
+.home-promo-card__eyebrow{color:var(--tm-blue);font-size:11px;font-weight:700}
+.home-promo-card h2{margin:7px 0 5px;color:var(--tm-ink);font-size:15px;font-weight:700;line-height:1.7}
+.home-promo-card p{margin:0 0 16px;color:var(--tm-muted);font-size:12px;line-height:1.9}
+.home-promo-card>a{display:inline-flex;align-items:center;gap:8px;margin-top:auto;color:var(--tm-blue);font-size:12px;font-weight:700;text-decoration:none}
+.home-promo-card>a:hover{text-decoration:underline}
+@media(max-width:900px){.home-promo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:575px){.home-promo-grid{grid-template-columns:1fr}.home-promo-card{min-height:0;padding:16px}}
+
 
 .home-category-grid {
   display: grid;
