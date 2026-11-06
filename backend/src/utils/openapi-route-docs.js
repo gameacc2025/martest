@@ -2999,7 +2999,6 @@ Object.assign(docs, {
       },
     },
   },
-,
   ['GET /api/v1/products/:id/similar']: {
     summary: 'List matching products from other suppliers',
     description: 'Returns published public listings from other active companies that share the same manufacturer/model catalogCode. Authentication required: none.',
