@@ -6,3 +6,6 @@ export { default as StoreBenefitGrid } from './StoreBenefitGrid.vue'
 export { default as StoreFaqList } from './StoreFaqList.vue'
 export { default as StoreOfferBanner } from './StoreOfferBanner.vue'
 export { default as StoreCatalogRequest } from './StoreCatalogRequest.vue'
+
+export { default as StoreBreadcrumb } from './StoreBreadcrumb.vue'
+export { default as StorePageHeading } from './StorePageHeading.vue'
