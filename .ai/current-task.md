@@ -824,3 +824,9 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Verification update for code SHA `ee46af7`: changed-surface tests (Home, ProductListing, PublicLayout and MegaMenu) pass; all frontend builds and backend tests pass; Database Migration Validation passes. The aggregate frontend/shared test step still reports 5 unrelated existing failures in FAQ (1), Terms (2) and WorkspacePageHeading (2). Runtime Validation's disposable Compose/browser-smoke workflow is still running. No manual visual inspection of the homepage has been performed.
 
 - Menu interaction contract preserved after final review: clicking a top-level category navigates directly to its filtered catalogue; hover/focus reveals its subcategory panel; subcategory buttons route to their filtered catalogue. Escape closes the dropdown.
+
+
+## Cross-site product-card sizing — 2026-11-06
+- Extended the shared bounded product-card tracks beyond Home and ProductListing to SearchResults, the legacy Products surface and Wishlist. All product-card grids now use 168–210px tracks above 520px and 150–210px tracks at <=520px, with content-width-driven column counts.
+- Compact sizing also applied to shared `ProductCard` and `TemProductCard`: 4:5 image frame, contain-fit image with 10px inset, 11px body padding, 44px two-line title and compact footer. Search/legacy/Wishlist product grids no longer expand into oversized cards.
+- Added `StorefrontCardSizing.test.js` to enforce the same sizing contract across all five Website product surfaces and both shared card components.
