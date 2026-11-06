@@ -86,7 +86,7 @@ describe('Website homepage contracts (tem redesign)', () => {
   })
 
 
-  it('uses the same compact five/six-column product-card rhythm as the catalogue on desktop', () => {
+  it('uses the same bounded product-card width as the catalogue', () => {
     expect(source).toContain('repeat(auto-fill, minmax(min(100%, 168px), 210px))')
     expect(source).toContain('aspect-ratio:4 / 5')
     expect(source).toContain('padding:11px')
