@@ -21,7 +21,7 @@
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Wishlist Items -->
         <div class="lg:col-span-2">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="wishlist-product-grid">
             <ProductCard
               v-for="product in wishlistItems"
               :key="product.id"
@@ -279,4 +279,6 @@ const filterByCategory = (categoryId) => {
 }
 .wishlist-category-filter:hover { color: var(--ds-color-primary-text); background: var(--ds-color-surface-hover); }
 .wishlist-category-count { color: var(--ds-color-text-muted); font-variant-numeric: tabular-nums; }
+.wishlist-product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,168px),210px));justify-content:start;gap:10px}
+@media(max-width:520px){.wishlist-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),210px));gap:8px}}
 </style>
