@@ -80,6 +80,17 @@ const productInclude = {
 // Public catalog responses must not expose moderation history, creator IDs,
 // edit counters, deletion metadata, or staff identity. Select public fields
 // explicitly rather than using `include` (which returns every scalar column).
+function normalizeCatalogCode(value) {
+  if (!value) return null;
+  const normalized = String(value).trim().toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return normalized || null;
+}
+
+function buildCatalogCode(brand, model) {
+  if (!String(brand || '').trim() || !String(model || '').trim()) return null;
+  return normalizeCatalogCode('TEL-' + brand + '-' + model);
+}
+
 const publicProductSelect = {
   id: true,
   title: true,
@@ -87,6 +98,7 @@ const publicProductSelect = {
   shortDescription: true,
   description: true,
   sku: true,
+  catalogCode: true,
   brand: true,
   model: true,
   specifications: true,
@@ -942,6 +954,9 @@ async function createProduct(data, caller) {
     status: _status,
     ...productData
   } = data;
+  productData.catalogCode = data.catalogCode !== undefined
+    ? normalizeCatalogCode(data.catalogCode)
+    : buildCatalogCode(productData.brand, productData.model);
 
   return prisma.$transaction(async (tx) => {
     const created = await tx.product.create({
@@ -975,6 +990,14 @@ async function updateProduct(id, data, caller) {
   const updateData = { ...data };
   delete updateData.companyId;
   delete updateData.priceTiers;
+  if (data.catalogCode !== undefined) {
+    updateData.catalogCode = normalizeCatalogCode(data.catalogCode);
+  } else if (data.brand !== undefined || data.model !== undefined) {
+    updateData.catalogCode = buildCatalogCode(
+      data.brand !== undefined ? data.brand : product.brand,
+      data.model !== undefined ? data.model : product.model,
+    );
+  }
 
   // The product editor submits its full price-tier collection. Reconcile it
   // atomically with the product edit so a threshold-crossing edit cannot leave
