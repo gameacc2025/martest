@@ -120,6 +120,10 @@ async function buildApp() {
   await app.register(require('./plugins/swagger.plugin'));
 
   // ── 5. Routes ─────────────────────────────────────────────────
+  // Public company storefront endpoint is registered at the root scope so it
+  // can never inherit the company-management authentication hook.
+  app.get('/api/v1/companies/public/:id', require('./modules/companies/company.controller').getPublicOne);
+
   await app.register(require('./modules/auth/auth.routes'), { prefix: '/api/v1/auth' });
   await app.register(require('./modules/contact/contact.routes'), { prefix: '/api/v1/contact' });
   await app.register(require('./modules/banners/banner.routes'), { prefix: '/api/v1/banners' });
