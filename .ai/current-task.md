@@ -6,7 +6,7 @@
 - **Intentionally not fabricated:** marketplace metrics, seller counts, brand directory, testimonials, blog articles, limited-time offers and best-seller rankings. The best-seller section explains that real order/sales data is required. Brand filtering/blog content require confirmed API/CMS contracts.
 - **Changed files:** apps/website/src/pages/public/Home.vue, ProductListing.vue, Categories.vue; apps/website/src/layouts/PublicLayout.vue; packages/shared-ui/components/store/StoreProductCard.vue; matching page tests.
 - **Verification:** NOT RUN in this GitHub-only editing session. Local focused tests, Website build and browser comparison are still required.
-- **Local branch cleanup:** after git pull --ff-only origin main, delete obsolete remote refs using git push origin --delete feat/tem-storefront-drawers feat/website-home-storefront. Remove matching local branches only after switching to main.
+- **Local branch cleanup:** remote branch listing now returns main only; in the local checkout run git fetch origin --prune, then git branch -D feat/tem-storefront-drawers feat/website-home-storefront if they still exist.
 - **Next:** continue reference-driven component extraction, with no backend changes unless a verified missing API is separately required.
 
 ---
