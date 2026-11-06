@@ -3748,3 +3748,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added/updated source-contract tests for homepage limits, card proportions, hero search, promo cards and catalogue card layout. Tests/build/browser visual checks were NOT RUN in this remote GitHub editing session.
 
 - Follow-up consistency pass: the reusable `TemProductCard` shared widget now also uses the portrait 4:5 media frame and semantic blue/cyan design tokens, so newly adopted shared cards do not reintroduce the old horizontal image or violet accent.
+
+
+## 2026-11-06 — WEBSITE-CATALOGUE-COMPACT — Remove marketing blocks and reduce product cards
+- **Status:** IMPLEMENTED on `main`; verification pending.
+- **Request:** Remove the supplier marketing banner and benefits strip from the product listing page, and reduce oversized product cards to the established TEM template scale.
+- **Changes:** Removed `.shop-company-banner` and `.shop-benefits` from `ProductListing.vue`; made the featured hero full-width; matched card media/body/title/footer measurements to the shared TEM product-card component; increased catalogue grid density to 5 columns on desktop and 6 on wide screens, with 4/3/2 responsive fallbacks.
+- **Tests:** Updated `ProductListing.test.js` to assert that marketing blocks are absent and compact TEM sizing/density is retained. Tests/build/browser rendering NOT RUN in this remote GitHub editing session.
+- **Commits:** `db7cb95` catalogue UI; `c403ef4` regression assertions.
+- **Next:** Pull `main`, run Website tests/build, and visually inspect card density at 1366px/1920px and mobile.
