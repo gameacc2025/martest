@@ -92,7 +92,7 @@ test('changePassword: extracts currentPassword/newPassword and scopes to the cal
 
 test('uploadAvatar: throws when request.file() resolves to a falsy value (no file part uploaded)', async () => {
   const request = makeRequest({ user: { id: 7 }, file: async () => undefined });
-  await assert.rejects(() => controller.uploadAvatar(request, makeReply()), /No file uploaded/);
+  await assert.rejects(() => controller.uploadAvatar(request, makeReply()), /No avatar file was uploaded/);
   assert.equal(calls.uploadAvatar, undefined);
 });
 
