@@ -3757,3 +3757,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Updated `ProductListing.test.js` to assert that marketing blocks are absent and compact TEM sizing/density is retained. Tests/build/browser rendering NOT RUN in this remote GitHub editing session.
 - **Commits:** `db7cb95` catalogue UI; `c403ef4` regression assertions.
 - **Next:** Pull `main`, run Website tests/build, and visually inspect card density at 1366px/1920px and mobile.
+
+
+
+## 2026-11-06 — WEBSITE-HOME-STOREFRONT-FIX — Navigation, shared card sizing and homepage composition
+- **Status:** IMPLEMENTED on `main`; CI pending at handoff.
+- **User-reported issues:** Homepage navigation/menu did not work, homepage product cards were much larger than catalogue cards, and the homepage lacked a recognizable storefront feel.
+- **Root cause:** The desktop/mobile “منوی اصلی” links and brand mark pointed to `products` rather than `home`, despite the root route already being a separate Home page. The homepage used a four-column, fluid-width grid and a separate card style while the catalogue used a denser grid, making homepage cards visibly larger.
+- **Changes:** Corrected logo and desktop/mobile navigation to `home`; added a separate `products` navigation item. Rebuilt MegaMenu category selection as accessible buttons with stable hover/focus behavior and functional subcategory buttons. Reworked the no-campaign homepage hero with a live featured product spotlight, search and discovery links; added a concise capability strip and improved storefront section hierarchy. Unified Home and ProductListing card tracks and sizing (168–210px bounded width, 4:5 media, 10px image inset, 11px body padding, two-line 44px title), while preserving responsive layout and 8-item product shelves.
+- **Data boundary:** Existing active campaign API and real featured/recent product/category APIs remain the only sources; no fake campaign imagery, fake statistics, backend or schema changes.
+- **Tests:** Updated Home, ProductListing and PublicLayout assertions. GitHub Actions CI run 42267844444 and Runtime Validation 42267844653 were pending/in progress at last check; no browser visual verification performed.
+- **Commits:** `c2d4031`, `9a53579`, `e85e11c`, `6e9ed29`, `4fe588a`, `e4e5846`, `a3d0f6e`, `b96d973`, `737b40b`, `f8994fb`, `ec9f346`, `0976766`, `d7568e1`, `914892a`, `fcdcb6d`.
+- **Next:** Check CI results; run/inspect the Website at 1366px, 1920px and mobile after local sync.
