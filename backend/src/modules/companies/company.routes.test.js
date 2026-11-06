@@ -46,7 +46,7 @@ injectMock('../../config/db', {});
 
 const hit = {};
 const trivialController = {};
-for (const name of ['list', 'getOne', 'getProducts', 'getSettings', 'getStatistics', 'create', 'update', 'remove', 'restore', 'changeStatus', 'toggleVerify', 'updateLogo', 'updateSettings']) {
+for (const name of ['list', 'getOne', 'getPublicOne', 'getProducts', 'getSettings', 'getStatistics', 'create', 'update', 'remove', 'restore', 'changeStatus', 'toggleVerify', 'updateLogo', 'updateSettings']) {
   trivialController[name] = async (request, reply) => {
     hit[name] = true;
     return reply.code(200).send({ ok: true });
@@ -118,6 +118,14 @@ for (const c of cases) {
     await app.close();
   });
 }
+
+test('GET /public/:id: storefront profile is accessible without authentication', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'GET', url: '/api/v1/companies/public/37' });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.getPublicOne, true);
+  await app.close();
+});
 
 // ── requireAnyPermission routes accept the SECOND listed permission too ──
 
