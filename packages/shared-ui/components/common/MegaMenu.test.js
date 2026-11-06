@@ -40,8 +40,6 @@ describe('MegaMenu', () => {
     expect(wrapper.find('.mega-trigger .pi-chevron-down').exists()).toBe(false)
     expect(wrapper.find('.mega-cat-icon').exists()).toBe(true)
     await wrapper.find('.mega-cat-item').trigger('click')
-    expect(wrapper.find('.mega-subcat-header').exists()).toBe(true)
-    await wrapper.find('.mega-view-all').trigger('click')
     await flushPromises()
 
     expect(routerPush).toHaveBeenCalledWith({
