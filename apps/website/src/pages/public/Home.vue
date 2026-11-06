@@ -775,7 +775,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   .tm-table td:first-child::before { display: none; }
 }
 @media (max-width: 575px) {
-   .home-product-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 8px; }
+   .home-product-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 210px)); gap: 8px; }
   .home-featured-slider { min-height: 0; }
   .home-promo-banner { min-height:230px; }
   .home-featured-slider__content { padding: 1rem 1rem 3.2rem; }
