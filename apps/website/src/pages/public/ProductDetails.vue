@@ -326,6 +326,7 @@ const loadSimilarProducts = async (productId) => {
   try {
     const response = await apiGet(`/products/${productId}/similar`)
     const payload = response?.data?.data ?? response?.data ?? response
+    if (String(route.params.id) !== String(productId)) return
     similarProducts.value = Array.isArray(payload) ? payload : []
   } catch {
     // Similar listings are supplementary; a failed lookup must not break product details.
