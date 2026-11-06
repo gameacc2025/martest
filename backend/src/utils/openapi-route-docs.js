@@ -3012,6 +3012,10 @@ Object.assign(docs, {
         required: ['data'],
         properties: { data: { type: 'array', items: step16lPublicProductSchema } },
       },
+      401: step16jGuardErrorResponse,
+      403: step16jGuardErrorResponse,
+      429: step16jRateLimitErrorResponse,
+      500: step16jGuardErrorResponse,
     },
   },
 });
