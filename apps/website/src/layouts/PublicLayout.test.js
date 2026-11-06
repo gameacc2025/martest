@@ -104,7 +104,7 @@ describe('PublicLayout responsive navigation', () => {
     await nextTick()
 
     expect(wrapper.get('#public-search-popover').exists()).toBe(true)
-    expect(wrapper.get('#public-header-search').exists()).toBe(true)
+    expect(wrapper.get('.public-search-popover__field').exists()).toBe(true)
   })
 
   it('shows only the catalogue entry in the primary navigation', async () => {
