@@ -613,7 +613,6 @@ const isInWishlist = (productId) => {
   .products-head { align-items: flex-start; flex-direction: column; }
   .section-actions { width: 100%; }
   .sort-dropdown { flex: 1; min-width: 0; }
-  .products-grid--4, .products-grid--5 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 210px)); gap: 8px; }
   .product-list-actions { width: 100%; min-width: 0; }
 }
 
