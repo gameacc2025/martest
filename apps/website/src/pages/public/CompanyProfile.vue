@@ -141,6 +141,7 @@ function goToProducts() {
             <div class="company-hero__copy">
             <h1 id="company-profile-title" class="ds-h1">{{ company?.name || 'محصولات منتشرشده این شرکت' }}</h1>
             <p v-if="company?.type" class="company-type">{{ company.type }}</p>
+            <p v-if="company?.description" class="company-description">{{ company.description }}</p>
             <p class="ds-lead">
               این فهرست فقط محصولاتی را نشان می‌دهد که در کاتالوگ عمومی منتشر شده‌اند.
             </p>
@@ -151,7 +152,9 @@ function goToProducts() {
             <Button label="همه محصولات" icon="pi pi-arrow-left" severity="secondary" outlined @click="goToProducts" />
           </div>
         </header>
-
+        <section class="company-contact-strip" aria-label="اطلاعات تماس شرکت">
+          <div v-if="company?.address"><i class="pi pi-map-marker"></i><span><b>آدرس</b>{{ company.address }}</span></div><a v-if="company?.phone" :href="'tel:' + company.phone"><i class="pi pi-phone"></i><span><b>تلفن</b>{{ company.phone }}</span></a><a v-if="company?.email" :href="'mailto:' + company.email"><i class="pi pi-envelope"></i><span><b>ایمیل</b>{{ company.email }}</span></a><a v-if="company?.website" :href="company.website" target="_blank" rel="noopener noreferrer"><i class="pi pi-globe"></i><span><b>وب‌سایت</b>{{ company.website }}</span></a><span v-if="company?.isVerified" class="company-verified"><i class="pi pi-verified"></i> شرکت تأییدشده</span>
+        </section>
         <section class="company-products-section" aria-labelledby="company-products-title">
           <header class="ds-section-head">
             <div>
@@ -195,6 +198,7 @@ function goToProducts() {
 
 <style scoped>
 .company-profile-page { direction: rtl; }
+.company-description{margin:.35rem 0 0;color:var(--ds-color-text-muted);font-size:.82rem;line-height:1.9}.company-contact-strip{display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;padding:.9rem 1rem;border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface)}.company-contact-strip>div,.company-contact-strip>a{display:flex;align-items:flex-start;gap:.5rem;min-width:0;color:var(--ds-color-text);font-size:.78rem;line-height:1.8;text-decoration:none;overflow-wrap:anywhere}.company-contact-strip i{margin-top:.2rem;color:var(--ds-color-primary-text)}.company-contact-strip b{display:block;color:var(--ds-color-text-muted);font-size:.68rem}.company-contact-strip .company-verified{display:inline-flex;align-items:center;gap:.35rem;color:var(--ds-color-primary-text);font-size:.75rem;font-weight:700}
 .company-profile-shell { padding-block: var(--ds-space-8) var(--ds-space-16); }
 .company-hero {
   display: grid;
