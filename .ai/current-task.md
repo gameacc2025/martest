@@ -832,3 +832,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added `StorefrontCardSizing.test.js` to enforce the same sizing contract across all five Website product surfaces and both shared card components.
 
 - **Latest verification (code SHA `3d43d3e`):** all changed-surface tests, including the new 3-test `StorefrontCardSizing.test.js`, pass; all frontend builds and backend tests pass; Database Migration Validation passes. The aggregate frontend/shared suite remains red only for five unrelated existing tests (FAQ 1, Terms 2, WorkspacePageHeading 2). Runtime Validation (Compose and browser smoke) is still running. Manual visual review at desktop/mobile widths remains unperformed.
+
+
+## 2026-11-06 — HOMEPAGE-REMOVE-REDUNDANT-BENEFIT-SECTIONS
+- Removed the three-item `home-marketplace-benefits` strip directly beneath the homepage hero.
+- Removed the entire «چرا Telecom Market؟» capability-card section and its now-unused feature data/CSS, including responsive and reduced-motion references.
+- Kept the campaign/featured-product hero, categories, product shelves, promo navigation and inquiry CTA intact; no API, backend, schema or route changes.
+- Updated homepage source-contract tests to assert these redundant blocks stay absent.
+- Verification: source edits committed; tests/build/browser visual checks have not been run in this remote GitHub editing session.
