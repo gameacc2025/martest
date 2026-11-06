@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 const { getProducts, getCategories, routeState } = vi.hoisted(() => ({
   getProducts: vi.fn(),
@@ -17,6 +19,12 @@ vi.mock('../../stores/products', () => ({
 }))
 
 import ProductListing from './ProductListing.vue'
+
+const productListingPath = [
+  resolve(process.cwd(), 'apps/website/src/pages/public/ProductListing.vue'),
+  resolve(process.cwd(), 'src/pages/public/ProductListing.vue'),
+].find(existsSync)
+if (!productListingPath) throw new Error('Could not locate ProductListing.vue')
 
 describe('Website Product Listing — TEM storefront', () => {
   let wrapper
@@ -104,7 +112,7 @@ describe('Website Product Listing — TEM storefront', () => {
   it('uses compact portrait cards sized to the shared TEM product-card template', async () => {
     wrapper = mountListing()
     await flushPromises()
-    const source = (await import('node:fs')).readFileSync(new URL('./ProductListing.vue', import.meta.url), 'utf8')
+    const source = readFileSync(productListingPath, 'utf8')
     expect(source).toContain('repeat(auto-fill,minmax(min(100%,168px),210px))')
     expect(source).toContain('aspect-ratio:4 / 5')
     expect(source).toContain('flex-direction:column;padding:11px')
