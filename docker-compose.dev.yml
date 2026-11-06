@@ -56,6 +56,8 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://telecom:telecom_pass@postgres:5432/telecom_marketplace?schema=public
+      SUPER_ADMIN_PASSWORD: A123@456
+      DEMO_USER_PASSWORD: A123@456
       CHOKIDAR_USEPOLLING: "true"
 
     ports:
