@@ -31,6 +31,17 @@ export const useCompanyStore = defineStore('companies', () => {
     }
   }
 
+  // ── Get public storefront profile (no authentication) ─────
+  const getPublicCompany = async (id) => {
+    try {
+      const company = await apiGet(endpoints.companies.publicProfile(id))
+      return company
+    } catch (err) {
+      error.value = handleApiError(err).message || 'خطا در دریافت معرفی شرکت'
+      throw err
+    }
+  }
+
   // ── Get single company by ID ──────────────────────────────
   const getCompanyById = async (id, params = {}) => {
     try {
@@ -238,6 +249,7 @@ export const useCompanyStore = defineStore('companies', () => {
     total,
     getCompanies,
     getCompanyById,
+    getPublicCompany,
     createCompany,
     updateCompany,
     deleteCompany,
