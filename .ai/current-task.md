@@ -756,3 +756,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **Verification:** remote source review only. Vue SFC compilation, unit tests, package builds and browser rendering remain NOT RUN; browser checks are prohibited unless the owner authorizes them.
 - **Commits:** `5430734ddf08a650ac225641228ef286676389e7`, `a2ffbfd15f410c59b5ba9887dcca6dd45c5dbc81`.
 - **Next action:** pull latest `main` locally and continue Website UI rewrite with `TemProductCard` and the new shared widget library.
+## Current task — Promotional banner campaigns (2026-11-06)
+- **Status:** Implemented in source on main; verification and database migration application remain pending.
+- A dedicated Banner domain now exists, separate from Product. It supports scheduled campaigns, image upload, target link, CTA, placement and priority.
+- Backend routes are registered at /api/v1/banners: public active feed plus STAFF-only management endpoints. Authorization uses existing banners.create/read/update/delete and media.upload permissions.
+- Admin UI route: /banners; sidebar item is permission-gated. Website homepage uses bannersApi.listActive('HOME_HERO') to render an independent, slightly wider campaign carousel alongside the product slider.
+- No blog work, cart/checkout behavior, product workflow or inquiry/RFQ behavior was changed.
+- **Do not claim tests/builds/migration passed:** they have not been executed in this remote source-edit session. Apply migration and run the documented checks locally.
+- **GitHub branch cleanup:** user requested deletion of feat/advertising-banners. The connected GitHub actions expose branch creation/ref movement but no branch/ref deletion action; do not claim deletion.
