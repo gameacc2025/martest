@@ -1,5 +1,5 @@
 ## Website homepage motion & liveliness — 2026-11-07 (HOME-LIVELY-01)
-- **Status:** DONE. Homepage now has a reduced-motion-gated motion layer built from its existing elements; palette/style system unchanged.
+- **Status:** DONE. Homepage now has a reduced-motion-gated motion layer built from its existing elements; palette/style system unchanged. Commit b813e77a (pushed to origin/main).
 - `apps/website/src/pages/public/Home.vue`: `vReveal` directive + shared `IntersectionObserver` (sections, titles, category cards, product shelves, CTAs; bounded stagger); campaign-banner crossfade + subtle `home-hero-drift`; section-title underline sweep; product-card image zoom + CTA arrow nudge (hover/pointer:fine only); autoplay loops pause while the tab is hidden.
 - Hidden states are scoped to `prefers-reduced-motion: no-preference` / `:not(.is-revealed)` and use `animation-fill-mode: backwards`, so the reduced/no-JS page is the finished page and post-reveal hover transforms are not shadowed.
 - Only existing `--tm-*` tokens used; no new colors, deps, API/route/backend/business changes.

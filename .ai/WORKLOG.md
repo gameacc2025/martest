@@ -3831,7 +3831,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Code change:** none required — the route was already correct and committed. Operational note: after editing backend source under Docker on Windows, run `docker restart telecom_backend_dev`.
 
 ## 2026-11-07 - HOME-LIVELY-01 - Homepage motion & interaction pass
-- **Status:** DONE
+- **Status:** DONE — commit b813e77a (pushed to origin/main)
 - **Agent:** OpenCode (DeepSeek V4.1 Flash)
 - **Goal:** Make the Website homepage feel more dynamic/lively using its existing elements, without changing the palette/style system.
 - **Scope (actual):** apps/website/src/pages/public/Home.vue (+ Home.test.js assertions). No API/route/backend/business changes; no new colors, no new dependencies.
