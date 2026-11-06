@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
-import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import PageHeader from '@telecom/shared-ui/components/common/PageHeader.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
@@ -155,11 +155,7 @@ onUnmounted(stopSlider)
 
 <template>
   <main class="shop-page" dir="rtl">
-    <WorkspacePageHeading eyebrow="بازارگاه تجهیزات مخابراتی" title="فروشگاه تجهیزات شبکه و مخابرات" description="محصولات تخصصی را جستجو کنید، دسته‌بندی‌ها را مرور کنید و مشخصات و قیمت تأمین‌کنندگان را مقایسه کنید." icon="pi pi-shopping-bag" heading-id="products-page-title">
-      <template #actions>
-        <span class="shop-trust"><i class="pi pi-shield-check"></i> کاتالوگ محصولات تأییدشده</span>
-      </template>
-    </WorkspacePageHeading>
+    <PageHeader :home-route="{ name: 'products' }" />
 
     <div class="shop-feature-stage">
     <section v-if="activeFeatured" class="shop-hero" aria-label="محصولات منتخب فروشگاه" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="startSlider">
