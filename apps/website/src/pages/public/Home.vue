@@ -7,6 +7,10 @@ import { productSalesMode, productPriceLabel } from './homePresentation.js'
 import StoreSectionHeading from '@telecom/shared-ui/components/store/StoreSectionHeading.vue'
 import StoreCategoryCard from '@telecom/shared-ui/components/store/StoreCategoryCard.vue'
 import StoreProductCard from '@telecom/shared-ui/components/store/StoreProductCard.vue'
+import StoreBenefitGrid from '@telecom/shared-ui/components/store/StoreBenefitGrid.vue'
+import StoreFaqList from '@telecom/shared-ui/components/store/StoreFaqList.vue'
+import StoreOfferBanner from '@telecom/shared-ui/components/store/StoreOfferBanner.vue'
+import StoreCatalogRequest from '@telecom/shared-ui/components/store/StoreCatalogRequest.vue'
 
 const router = useRouter()
 const productsStore = useProductsStore()
@@ -26,6 +30,18 @@ const categoriesError = ref(false)
 const error = ref(null)
 const searchQuery = ref('')
 const searchMode = ref('retail')
+const benefits = [
+  { icon: 'pi pi-verified', title: 'تأمین‌کننده تأییدشده', description: 'احراز هویت و بررسی سابقه تمام فروشندگان' },
+  { icon: 'pi pi-shield', title: 'گارانتی اصالت', description: 'تضمین اصل بودن کالا و ضمانت‌نامه معتبر' },
+  { icon: 'pi pi-wrench', title: 'پشتیبانی فنی', description: 'مشاوره انتخاب تجهیز متناسب با پروژه' },
+  { icon: 'pi pi-file-edit', title: 'پیش‌فاکتور رسمی', description: 'صدور فاکتور رسمی و پرداخت سازمانی' },
+]
+const faqs = [
+  { question: 'چطور پیش‌فاکتور رسمی دریافت کنم؟', answer: 'از طریق دکمه «استعلام قیمت» درخواست ثبت کنید. پیشنهاد تأمین‌کنندگان ظرف ۲۴ ساعت کاری برای شما ارسال می‌شود.' },
+  { question: 'گارانتی و اصالت کالا چگونه تضمین می‌شود؟', answer: 'همه فروشندگان احراز هویت شده‌اند و هر محصول گارانتی‌نامه معتبر دارد.' },
+  { question: 'خرید فوری با استعلام چه فرقی دارد؟', answer: 'کالاهای با قیمت مشخص مستقیم خریداری می‌شوند؛ تجهیزات استعلامی برای حجم و پروژه قیمت اختصاصی می‌گیرند.' },
+  { question: 'ارسال و ترخیص چقدر طول می‌کشد؟', answer: 'محصولات موجود در ۳ تا ۵ روز کاری ارسال می‌شوند؛ زمان تأمین و ترخیص کالاهای وارداتی در پیشنهاد ذکر می‌شود.' },
+]
 
 function prefersReducedMotion() {
   return typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
@@ -240,13 +256,7 @@ onUnmounted(() => {
 
       <section class="home-section" aria-labelledby="home-why">
         <StoreSectionHeading heading-id="home-why" title="چرا Telecom Market؟" />
-        <div class="home-benefits">
-          <article><i class="pi pi-verified" aria-hidden="true" /><b>تأمین‌کننده قابل بررسی</b><p>احراز هویت و بررسی سابقه تمام فروشندگان</p></article>
-          <article><i class="pi pi-shield" aria-hidden="true" /><b>گارانتی اصالت</b><p>تضمین اصل بودن کالا و ضمانت‌نامه معتبر</p></article>
-          <article><i class="pi pi-wrench" aria-hidden="true" /><b>پشتیبانی فنی</b><p>مشاوره انتخاب تجهیز متناسب با پروژه</p></article>
-          <article><i class="pi pi-file-edit" aria-hidden="true" /><b>پیش‌فاکتور رسمی</b><p>صدور فاکتور رسمی و پرداخت سازمانی</p></article>
-        </div>
-      </section>
+        <StoreBenefitGrid :items="benefits" />     </section>
 
       <section class="home-section" aria-labelledby="home-retail-latest">
         <StoreSectionHeading heading-id="home-retail-latest" title="جدیدترین محصولات خرده‌فروشی" action-label="همه محصولات خرده‌فروشی" :action-to="{ name: 'products', query: { retail: '1' } }" />
@@ -263,14 +273,13 @@ onUnmounted(() => {
         <div class="home-state"><i class="pi pi-chart-bar" aria-hidden="true" /><span>رتبه‌بندی فروش تا زمان فراهم‌شدن دادهٔ واقعی سفارش و فروش نمایش داده نمی‌شود.</span></div>
       </section>
 
-      <section class="home-offer" aria-labelledby="home-offer-title">
-        <div>
-          <h2 id="home-offer-title">پیشنهاد ویژه تجهیزات خرده‌فروشی</h2>
-          <p>تخفیف محدود روی سوئیچ، روتر و تجهیزات فیبر نوری</p>
-          <small>در حال حاضر پیشنهاد زمان‌دار فعالی از سامانه دریافت نشده است.</small>
-        </div>
-        <router-link :to="{ name: 'products', query: { retail: '1' } }" class="home-btn home-btn--offer">مشاهده محصولات خرده‌فروشی</router-link>
-      </section>
+      <StoreOfferBanner
+        title="پیشنهاد ویژه تجهیزات خرده‌فروشی"
+        description="تخفیف محدود روی سوئیچ، روتر و تجهیزات فیبر نوری"
+        note="در حال حاضر پیشنهاد زمان‌دار فعالی از سامانه دریافت نشده است."
+        action-label="مشاهده محصولات خرده‌فروشی"
+        :action-to="{ name: 'products', query: { retail: '1' } }"
+      />
 
       <section class="home-section" aria-labelledby="home-blog">
         <StoreSectionHeading heading-id="home-blog" title="آخرین اخبار و مطالب آموزشی" />
@@ -282,24 +291,16 @@ onUnmounted(() => {
         <div class="home-state"><i class="pi pi-comments" aria-hidden="true" /><span>نظر تأییدشده‌ای برای انتشار در این بخش ثبت نشده است.</span></div>
       </section>
 
-      <section class="home-catalog-request" aria-labelledby="home-catalog-title">
-        <div>
-          <h2 id="home-catalog-title">دانلود کاتالوگ محصولات</h2>
-          <p>کاتالوگ PDF برندها و مشخصات فنی را برای ایمیل شما می‌فرستیم.</p>
-        </div>
-        <form class="home-catalog-request__form" @submit.prevent>
-          <input type="text" name="company" placeholder="نام شرکت" aria-label="نام شرکت" />
-          <input type="email" name="email" placeholder="ایمیل سازمانی" aria-label="ایمیل سازمانی" />
-          <button type="submit" disabled title="سرویس ارسال کاتالوگ هنوز به فرم متصل نشده است">دریافت کاتالوگ</button>
-        </form>
-      </section>
+      <StoreCatalogRequest
+        title="دانلود کاتالوگ محصولات"
+        description="کاتالوگ PDF برندها و مشخصات فنی را برای ایمیل شما می‌فرستیم."
+        disabled
+        disabled-reason="سرویس ارسال کاتالوگ هنوز به فرم متصل نشده است"
+      />
 
       <section class="home-faq home-section" aria-labelledby="home-faq">
         <StoreSectionHeading heading-id="home-faq" title="سؤالات متداول" />
-        <details open><summary>چطور درخواست استعلام ثبت کنم؟</summary><p>از طریق دکمه ثبت درخواست استعلام وارد مسیر مربوط شوید و اطلاعات نیاز پروژه را ثبت کنید.</p></details>
-        <details><summary>چطور محصول مناسب را پیدا کنم؟</summary><p>از جستجو و دسته‌بندی محصولات استفاده کنید و مشخصات محصول را در صفحه جزئیات بررسی کنید.</p></details>
-        <details><summary>خرید فوری با استعلام چه تفاوتی دارد؟</summary><p>برای محصولاتی که قیمت و امکان خرده‌فروشی آن‌ها فعال است، شرایط خرید در صفحه محصول نمایش داده می‌شود؛ سایر موارد از مسیر استعلام پیگیری می‌شوند.</p></details>
-        <details><summary>اطلاعات تأمین‌کننده را کجا ببینم؟</summary><p>اطلاعات عمومی شرکت عرضه‌کننده در صفحه جزئیات محصول در دسترس است.</p></details>
+        <StoreFaqList :items="faqs" />
       </section>
 
       <section class="home-rfq">
@@ -339,33 +340,5 @@ onUnmounted(() => {
 .home-content{display:flex;flex-direction:column;gap:30px;padding-block:28px 40px}
 .home-section{min-width:0}.home-category-track{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}.home-category-track::-webkit-scrollbar{display:none}.home-category-track>:deep(.store-category-card){flex:0 0 172px;scroll-snap-align:start}
 .home-product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.home-benefits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.home-benefits article{min-width:0;padding:18px;border-radius:14px;background:#fff;box-shadow:var(--tm-card-shadow);font-size:13px;color:var(--tm-muted)}
-.home-benefits article>i{display:grid;place-items:center;width:42px;height:42px;margin-bottom:10px;border-radius:12px;background:var(--tm-chip);color:var(--tm-blue);font-size:19px}
-.home-benefits b{display:block;margin-bottom:4px;color:var(--tm-ink);font-size:14px}.home-benefits p{margin:0;font-size:12px;line-height:1.9}
-.home-product-action{display:inline-flex;align-items:center;gap:7px;color:var(--tm-blue);font-size:12px;font-weight:700;text-decoration:none}
-.home-state{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;min-height:110px;padding:22px;border:1px dashed var(--tm-line);border-radius:14px;background:#fff;color:var(--tm-muted);font-size:13px;text-align:center}
-.home-state>i{color:var(--tm-blue);font-size:22px}.home-state button{border:0;background:transparent;color:var(--tm-blue);font:inherit;font-weight:700;cursor:pointer}
-.home-loading-card{flex:0 0 172px;height:108px;border-radius:14px;background:linear-gradient(90deg,#eceef5,#f8f9fc,#eceef5);background-size:200% 100%;animation:home-shimmer 1.4s infinite}
-.home-loading-product{height:270px;border-radius:14px;background:linear-gradient(90deg,#eceef5,#f8f9fc,#eceef5);background-size:200% 100%;animation:home-shimmer 1.4s infinite}
-@keyframes home-shimmer{to{background-position-x:-200%}}
-.home-faq details{margin-bottom:10px;padding:14px 18px;border-radius:12px;background:#fff;box-shadow:var(--tm-card-shadow);font-size:13px}
-.home-faq summary{color:var(--tm-ink);font-weight:700;cursor:pointer}.home-faq details p{margin:8px 0 0;color:var(--tm-muted);font-size:12px;line-height:1.9}
-.home-rfq{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:4px 0 10px;padding:26px 30px;border:1px solid var(--tm-line);border-radius:18px;background:linear-gradient(90deg,var(--tm-chip),#fff)}
-.home-rfq h2{margin:0;color:var(--tm-ink);font-size:20px}.home-rfq p{margin:4px 0 0;color:var(--tm-muted);font-size:13px}
-@media(max-width:900px){.home-hero__inner{grid-template-columns:1fr}.home-hero__featured{max-width:560px}.home-benefits{grid-template-columns:repeat(2,minmax(0,1fr))}.home-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.home-container{padding-inline:14px}.home-hero{padding:30px 0 36px}.home-hero h1{font-size:27px}.home-hero__tabs{display:flex;width:100%}.home-hero__tabs button{flex:1;padding-inline:8px;font-size:11px}.home-hero__search input{font-size:11px}.home-hero__search button{padding-inline:10px}.home-benefits{grid-template-columns:1fr 1fr;gap:9px}.home-benefits article{padding:13px}.home-product-grid{gap:9px}.home-rfq{padding:20px}.home-rfq h2{font-size:17px}}
-@media(prefers-reduced-motion:reduce){.home-loading-card,.home-loading-product{animation:none}}
-
-.home-offer{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:4px 0;border-radius:18px;background:linear-gradient(100deg,#7b2ff7,#2aa7e8);color:#fff;padding:22px 28px}
-.home-offer h2{margin:0;color:#fff;font-size:20px}.home-offer p{margin:2px 0;color:#fff;font-size:13px}.home-offer small{font-size:11px;color:rgba(255,255,255,.86)}
-.home-btn--offer{background:#fff;color:#4b3bd6}
-.home-catalog-request{display:grid;grid-template-columns:1fr 1.2fr;gap:24px;align-items:center;margin:4px 0;padding:24px 28px;border:1px solid var(--tm-line);border-radius:18px;background:#fff}
-.home-catalog-request h2{margin:0;font-size:20px}.home-catalog-request p{margin:4px 0 0;color:var(--tm-muted);font-size:13px}
-.home-catalog-request__form{display:flex;gap:8px;flex-wrap:wrap}
-.home-catalog-request__form input{flex:1;min-width:150px;height:42px;padding:9px 12px;border:1px solid var(--tm-line);border-radius:10px;background:var(--tm-canvas);color:var(--tm-ink);font:inherit;font-size:12px}
-.home-catalog-request__form button{min-height:42px;padding:8px 16px;border:0;border-radius:10px;background:linear-gradient(90deg,#6c5ce7,#2aa7e8);color:#fff;font:inherit;font-size:12px;font-weight:700}
-.home-catalog-request__form button:disabled{opacity:.55;cursor:not-allowed}
-@media(max-width:900px){.home-catalog-request{grid-template-columns:1fr}}
 @media(max-width:560px){.home-offer{padding:20px}.home-catalog-request{padding:18px}.home-catalog-request__form{display:grid;grid-template-columns:1fr}}
 </style>
