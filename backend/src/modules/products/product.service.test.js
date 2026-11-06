@@ -386,6 +386,15 @@ test('listProducts: anonymous callers are clamped to PUBLISHED + PUBLIC, and can
   assert.equal(capturedWhere.visibility, 'PUBLIC');
 });
 
+test('listProducts: retailEnabled=true restricts public catalogue results to retail-enabled products', async () => {
+  let capturedWhere;
+  mockPrisma.product.findMany = async (args) => { capturedWhere = args.where; return []; };
+  await service.listProducts({ skip: 0, take: 10, filters: { retailEnabled: 'true' }, caller: anonymous, publicOnly: true });
+  assert.equal(capturedWhere.retailEnabled, true);
+  assert.equal(capturedWhere.status, 'PUBLISHED');
+  assert.equal(capturedWhere.visibility, 'PUBLIC');
+});
+
 test('listProducts: applies price range, featured flag, and allowlisted sorting without weakening public visibility', async () => {
   let capturedWhere;
   let capturedOrderBy;
