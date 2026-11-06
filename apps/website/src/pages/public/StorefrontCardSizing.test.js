@@ -13,6 +13,16 @@ const read = (path) => {
   return readFileSync(file, 'utf8').replace(/\s+/g, '')
 }
 
+const readShared = (path) => {
+  const candidates = [
+    resolve(root, 'packages/shared-ui', path),
+    resolve(root, '../../packages/shared-ui', path),
+  ]
+  const file = candidates.find(existsSync)
+  if (!file) throw new Error(`Could not locate shared product card: ${path}`)
+  return readFileSync(file, 'utf8').replace(/\\s+/g, '')
+}
+
 const surfaces = {
   home: read('pages/public/Home.vue'),
   catalogue: read('pages/public/ProductListing.vue'),
@@ -35,8 +45,8 @@ describe('Website storefront product-card sizing contract', () => {
   })
 
   it('keeps shared product-card image, body and title dimensions compact', () => {
-    const sharedCard = read('../../../../packages/shared-ui/components/products/ProductCard.vue')
-    const temCard = read('../../../../packages/shared-ui/components/tem/TemProductCard.vue')
+    const sharedCard = readShared('components/products/ProductCard.vue')
+    const temCard = readShared('components/tem/TemProductCard.vue')
     expect(sharedCard).toContain('aspect-ratio:4/5')
     expect(sharedCard).toContain('padding:11px')
     expect(sharedCard).toContain('min-height:44px')
