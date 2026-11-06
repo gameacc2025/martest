@@ -211,6 +211,14 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
       </div>
       <div v-else class="home-campaign-hero__fallback">
         <div class="home-container">
+          <span>بازارگاه تخصصی تجهیزات مخابراتی</span>
+          <h1>تجهیزات حرفه‌ای شبکه، یک‌جا و مطمئن</h1>
+          <p>محصولات تأمین‌کنندگان را بررسی کنید و برای نیازهای پروژه‌ای استعلام بگیرید.</p>
+          <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">مشاهده محصولات</router-link>
+        </div>
+      </div>
+    </section>
+    <div class="home-container">
       <!-- Categories -->
       <section class="home-section" aria-labelledby="home-categories">
         <div class="site-section-title">
