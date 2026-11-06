@@ -3722,3 +3722,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Scope:** Website login navigation only. No authentication API, token/session handling, PKCE handoff, panel router, backend, database, or migrations changed.
 - **Verification:** Source-level regression test added; test/build execution was not available in the remote GitHub editing session. Pull latest `main` and run the Website test suite/build locally.
 - **Commits:** Login fix `716d239`; regression test `041de07`.
+
+## 2026-11-06 — WEBSITE-HOMEPAGE-STOREFRONT-REFINEMENT
+- **Status:** Implemented remotely on feat/website-home-storefront; local compiler/test/build verification pending.
+- Replaced the static two-column hero composition with a full-width campaign hero driven by the existing bannersApi.listActive('HOME_HERO') feed. The Banner domain already owns image, placement, priority and publication scheduling; the homepage consumes only active campaigns.
+- Changed the homepage category presentation to a horizontally browsable rail and retained the explicit all-categories destination.
+- Kept featured products labelled «محصولات منتخب», not «پرفروش‌ترین»: the public Product API and current domain do not expose a verified sales aggregate. Do not fabricate bestseller rankings or sales counts. A true bestseller section requires a sales/order aggregate and public read contract.
+- Replaced the permanent header search field with an icon-triggered search popover connected to the existing named search route.
+- Replaced both guest/customer compact commerce menus with one left-edge cart drawer using the existing Pinia cart store: thumbnails, unit price, quantity increment/decrement, remove, subtotal, continue shopping and checkout navigation.
+- Existing checkout safety remains unchanged: the cart is a local preview; no order, stock reservation, or payment is created. Do not enable purchase claims without the Retail Commerce domain and authoritative server validation.
+- Added/updated homepage and layout source-contract tests. Tests, Vue SFC compilation, package builds and browser rendering have NOT been run in this remote editing session.
+- No backend, schema, migration, API contract, authentication, permission or order-flow changes.
+
