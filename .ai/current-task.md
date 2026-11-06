@@ -818,3 +818,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Homepage product cards now follow the same visual structure and dimensions as catalogue cards. Both grids use bounded 168–210px card tracks, 4:5 media, 10px image inset, 11px body padding and 44px two-line titles; column count adapts to available width, including the catalogue filter sidebar. Both mobile grids cap tracks at 210px.
 - Each product shelf still shows at most 8 products; no fake banners, supplier claims, or product/order metrics were added. Campaign banners continue to come only from the active scheduled banner API.
 - Regression tests updated for home/catalogue navigation and card sizing. CI for latest main commit is running; browser visual inspection has not been performed in this remote GitHub editing session.
+
+- Final alignment: Home and ProductListing now use the same 150–210px card track at the <=520px breakpoint as well; the catalogue no longer applies smaller mobile body/title overrides. MegaMenu now also closes on Escape and exposes `aria-controls`. Latest responsive/menu commits: `166e018`, `a06b76b`, `df3e22a`, `894a404`.
