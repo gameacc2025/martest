@@ -1,30 +1,24 @@
-// =============================================================
-// Prisma Client Singleton
-//
-// Exports a single PrismaClient instance shared across the app.
-// Using multiple instances would exhaust the connection pool.
-//
-// In development, logs query errors and warnings.
-// In production, only logs errors to reduce noise.
-// =============================================================
-
+// Prisma Client singleton — Prisma ORM 7 + PostgreSQL driver adapter.
 const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
 const { nodeEnv } = require('./env');
 
+if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required to initialize Prisma Client.');
+
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
+  connectionTimeoutMillis: 5000,
+  idleTimeoutMillis: 30000,
+});
+
 const prisma = new PrismaClient({
+  adapter,
   log: nodeEnv === 'development'
-    ? [
-        { emit: 'stdout', level: 'error' },
-        { emit: 'stdout', level: 'warn' },
-        // Uncomment the line below to log all queries (very verbose):
-        // { emit: 'stdout', level: 'query' },
-      ]
+    ? [{ emit: 'stdout', level: 'error' }, { emit: 'stdout', level: 'warn' }]
     : [{ emit: 'stdout', level: 'error' }],
 });
 
-// Graceful shutdown — close DB connection when app exits
-process.on('beforeExit', async () => {
-  await prisma.$disconnect();
-});
+process.on('beforeExit', async () => prisma.$disconnect());
 
 module.exports = prisma;
