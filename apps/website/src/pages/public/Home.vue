@@ -88,17 +88,17 @@ async function fetchProducts() {
   try {
     loading.value = true
     error.value = null
-    const params = { page: 1, limit: 24, status: 'PUBLISHED' }
+    const params = { page: 1, limit: 8, status: 'PUBLISHED' }
 
     const response = await productsApi.list(params)
     const items = response?.data?.data ?? []
-    recentProducts.value = (Array.isArray(items) ? items : []).slice(0, 12)
+    recentProducts.value = (Array.isArray(items) ? items : []).slice(0, 8)
 
     // Featured is a server-side product flag, not a slice of recent results.
     try {
-      const featuredResponse = await productsApi.list({ ...params, limit: 12, featured: true })
+      const featuredResponse = await productsApi.list({ ...params, limit: 8, featured: true })
       const featuredItems = featuredResponse?.data?.data ?? []
-      featuredProducts.value = Array.isArray(featuredItems) ? featuredItems.slice(0, 12) : []
+      featuredProducts.value = Array.isArray(featuredItems) ? featuredItems.slice(0, 8) : []
       activeSlide.value = 0
       startSlider()
     } catch (featuredError) {
@@ -277,7 +277,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div>
 
         <div v-else class="home-product-grid">
-          <article v-for="product in featuredProducts" :key="product.id" class="product-card">
+          <article v-for="product in featuredProducts.slice(0, 8)" :key="product.id" class="product-card">
             <router-link :to="productRoute(product)" class="product-card__main">
               <span class="product-card__media">
                 <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" decoding="async" />
@@ -321,7 +321,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
           <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده همه محصولات</router-link>
         </div>
         <div v-else class="home-product-grid home-product-grid--recent">
-          <article v-for="product in recentProducts" :key="product.id" class="product-card">
+          <article v-for="product in recentProducts.slice(0, 8)" :key="product.id" class="product-card">
             <router-link :to="productRoute(product)" class="product-card__main">
               <span class="product-card__media">
                 <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" decoding="async" />
@@ -539,8 +539,8 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
 .home-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .product-card {
@@ -563,28 +563,28 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 .product-card__media {
   display: grid;
   place-items: center;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   background: var(--tm-surface-alt);
   color: var(--tm-faint);
   font-size: 30px;
 }
 .product-card__media img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
 
-.product-card__body { display: flex; flex-direction: column; gap: 6px; padding: 14px; flex: 1; }
+.product-card__body { display: flex; flex-direction: column; gap: 5px; padding: 11px; flex: 1; }
 .product-card__name {
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--tm-ink);
   line-height: 1.7;
   display: block;
   overflow-wrap: anywhere;
 }
-.product-card__company { font-size: 13px; color: var(--tm-muted); }
-.product-sku { font-size: 13px; color: var(--tm-faint); }
-.product-card__foot { margin-top: auto; padding: 10px 14px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.product-card__company { font-size: 11.5px; color: var(--tm-muted); }
+.product-sku { font-size: 11px; color: var(--tm-faint); }
+.product-card__foot { margin-top: auto; padding: 9px 11px 11px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .product-card__foot .tm-btn { min-height: 44px; }
-.product-card__price { font-size: 13px; font-weight: 700; color: var(--tm-blue); }
-.product-card-cta { font-size: 13px; font-weight: 700; color: var(--tm-blue); }
+.product-card__price { font-size: 12px; font-weight: 700; color: var(--tm-blue); }
+.product-card-cta { font-size: 11.5px; font-weight: 700; color: var(--tm-blue); }
 .product-card-cta i { margin-inline-start: .3rem; }
 .product-card__body .tm-pill { align-self: flex-start; }
 
@@ -677,11 +677,12 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   border: 0;
 }
 
-@media (min-width: 1920px) {
-  .home-product-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
+@media (min-width: 1200px) {
+  .home-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
+  .home-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .home-featured-slider { grid-template-columns: minmax(0,1fr); }
   .home-featured-slider__media { min-height: 190px; }
   .home-featured-slider__media img { height: 180px; }
@@ -705,6 +706,12 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   .tm-table td:first-child::before { display: none; }
 }
 @media (max-width: 575px) {
+  .home-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .product-card__body { padding: 9px; }
+  .product-card__foot { padding: 8px 9px 9px; }
+  .product-card__foot .tm-btn { min-height: 38px; }
+  .product-card__price { font-size: 11px; }
+  .product-card-cta { font-size: 10.5px; }
   .home-featured-slider { min-height: 0; }
   .home-promo-banner { min-height:230px; }
   .home-featured-slider__content { padding: 1rem 1rem 3.2rem; }
