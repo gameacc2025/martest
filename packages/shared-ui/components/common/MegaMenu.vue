@@ -31,9 +31,14 @@ function setActiveCategory(cat) {
   activeCategory.value = cat
 }
 
+function closeMenu() {
+  isMenuOpen.value = false
+  activeCategory.value = null
+}
+
 function toggleMenu() {
-  isMenuOpen.value = !isMenuOpen.value
-  if (!isMenuOpen.value) activeCategory.value = null
+  if (isMenuOpen.value) closeMenu()
+  else isMenuOpen.value = true
 }
 
 function goToCategory(categoryId) {
@@ -61,16 +66,16 @@ function categoryIcon(category) {
 </script>
 
 <template>
-  <div class="mega-menu-wrapper" ref="menuRef">
+  <div class="mega-menu-wrapper" ref="menuRef" @keydown.esc.stop.prevent="closeMenu">
     <!-- Trigger Button -->
-    <button type="button" class="mega-trigger" :aria-expanded="isMenuOpen" aria-haspopup="true" @click="toggleMenu">
+    <button type="button" class="mega-trigger" :aria-expanded="isMenuOpen" aria-haspopup="true" aria-controls="mega-dropdown" @click="toggleMenu">
       <i class="pi pi-th-large" aria-hidden="true"></i>
       <span>دسته‌بندی محصولات</span>
     </button>
 
     <!-- Dropdown -->
     <Transition name="mega">
-      <div v-if="isMenuOpen" class="mega-dropdown" role="region" aria-label="دسته‌بندی‌های محصولات">
+      <div v-if="isMenuOpen" id="mega-dropdown" class="mega-dropdown" role="region" aria-label="دسته‌بندی‌های محصولات">
         <div class="mega-content">
           <!-- Category List (right side in RTL) -->
           <div v-if="props.categories.length" class="mega-categories">
