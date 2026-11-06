@@ -7,6 +7,14 @@
 
 
 
+## Retail catalogue and public company storefront — 2026-11-06
+- Added a public retailEnabled product-list filter, backed by Prisma query filtering and the existing public PUBLISHED/PUBLIC visibility clamp.
+- Added a homepage section for the newest retail-enabled products; the request is a separate live API query and does not infer retail eligibility from a price tier.
+- Expanded the public product response company projection with company description, logo, contact and address fields so the company storefront can display its public profile alongside published products.
+- Updated the public company page to render description, address, phone, email, website and verification state when present.
+- Best-selling retail ranking remains intentionally unavailable: the current schema has no order/sales records or sales aggregate. Do not substitute featured flags or arbitrary sorting and call them best-selling.
+- Targeted test updates added for retail filtering, homepage retail query and company contact details. Execution is pending; do not claim tests/build passed until CI is inspected.
+
 ## Website catalogue breadcrumb and spacing — 2026-11-06
 - Replaced the public catalogue's large WorkspacePageHeading and trust badge with the shared lightweight PageHeader breadcrumb.
 - Set the catalogue route meta title to “فروشگاه تجهیزات شبکه و مخابرات”; the breadcrumb home link points to the catalogue route.
