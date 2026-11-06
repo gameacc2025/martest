@@ -176,6 +176,7 @@ const statusSeverity = getStatusSeverity
 const productTableColumns = [
   { field: 'id', header: 'شناسه', sortable: true, style: 'width: 6rem' },
   { field: 'title', header: 'عنوان', sortable: true, slot: 'productTitle' },
+  { field: 'catalogCode', header: 'کد کالای مشترک', sortable: true },
   { field: 'company.name', header: 'شرکت' },
   { field: 'category.name', header: 'دسته‌بندی' },
   { field: 'status', header: 'وضعیت', slot: 'status' },
