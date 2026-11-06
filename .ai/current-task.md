@@ -808,3 +808,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - The featured-product hero remains, now spans the full catalogue content width instead of reserving an empty banner column.
 - Reduced catalogue product-card footprint to match the shared TEM card rhythm: portrait 4:5 image, 11px body padding, compact 13px/44px two-line title, smaller image inset and tighter footer spacing. Desktop density is five columns, six on very wide screens, four at medium desktop, three at tablet and two on mobile.
 - No API, route, backend or product behavior changes. Test assertions updated; execution and browser visual verification remain pending.
+
+
+
+## Website homepage/menu/card consistency pass — 2026-11-06
+- Corrected the public header's “صفحه اصلی” destination: logo and desktop/mobile homepage navigation now resolve to route `home`; a separate “محصولات” link resolves to `products`.
+- Fixed MegaMenu interaction: trigger exposes expanded state; category rows are real keyboard-accessible buttons; hover/focus selects a category without toggling it closed; subcategory actions are buttons; empty category data has a clear state.
+- Reworked the homepage fallback hero into a storefront composition with live featured-product spotlight, real product search, and catalog/category shortcuts. Added a concise marketplace capabilities strip and strengthened section-heading/product-shelf hierarchy.
+- Homepage product cards now follow the same visual structure and dimensions as catalogue cards. Both grids use bounded 168–210px card tracks, 4:5 media, 10px image inset, 11px body padding and 44px two-line titles; column count adapts to available width, including the catalogue filter sidebar. Both mobile grids cap tracks at 210px.
+- Each product shelf still shows at most 8 products; no fake banners, supplier claims, or product/order metrics were added. Campaign banners continue to come only from the active scheduled banner API.
+- Regression tests updated for home/catalogue navigation and card sizing. CI for latest main commit is running; browser visual inspection has not been performed in this remote GitHub editing session.
