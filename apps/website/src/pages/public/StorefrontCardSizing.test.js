@@ -20,7 +20,7 @@ const readShared = (path) => {
   ]
   const file = candidates.find(existsSync)
   if (!file) throw new Error(`Could not locate shared product card: ${path}`)
-  return readFileSync(file, 'utf8').replace(/\\s+/g, '')
+  return readFileSync(file, 'utf8').replace(/\s+/g, '')
 }
 
 const surfaces = {
