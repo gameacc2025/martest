@@ -3783,3 +3783,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Compact shared ProductCard and TemProductCard dimensions: 4:5 media, contain-fit images with 10px inset, 11px content padding, 44px two-line titles, compact footer; removed the old mobile-only shrinking on TEM cards.
 - Added a cross-surface contract test at `apps/website/src/pages/public/StorefrontCardSizing.test.js`.
 - No API, backend, schema or commerce behavior changes.
+
+- **Latest verification (code SHA `3d43d3e`):** Home (15), ProductListing (9), SearchResults (6), PublicLayout (9), MegaMenu (4), and StorefrontCardSizing (3) tests pass. Backend tests and all frontend builds pass; Database Migration Validation succeeds. The complete frontend/shared suite still has five unrelated existing failures (FAQ 1, Terms 2, WorkspacePageHeading 2). Runtime Validation is still in progress. No manual visual/browser design review was performed.
