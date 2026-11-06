@@ -276,13 +276,14 @@ function logout() {
       <div class="public-container">
         <div class="public-header-row">
           <div class="public-header-right">
-            <router-link :to="{ name: 'products' }" class="public-logo" aria-label="بازارگاه تجهیزات مخابراتی">
+            <router-link :to="{ name: 'home' }" class="public-logo" aria-label="صفحه اصلی بازارگاه تجهیزات مخابراتی">
               <BrandMark class="public-logo-mark" :size="38" />
               <span class="public-logo-name"><strong>Telecom Market</strong></span>
             </router-link>
 
             <nav class="public-nav-desktop" aria-label="منوی اصلی">
-              <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>منوی اصلی</span></router-link>
+              <router-link :to="{ name: 'home' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>صفحه اصلی</span></router-link>
+              <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-box" aria-hidden="true"></i><span>محصولات</span></router-link>
               <MegaMenu :categories="megaMenuCategories" />
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
@@ -418,9 +419,15 @@ function logout() {
       <nav class="public-container" aria-label="منوی اصلی موبایل">
         <ul class="public-mobile-nav-list">
           <li>
-            <router-link :to="{ name: 'products' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+            <router-link :to="{ name: 'home' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-home"></i>
-              <span>منوی اصلی</span>
+              <span>صفحه اصلی</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link :to="{ name: 'products' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
+              <i class="pi pi-box"></i>
+              <span>محصولات</span>
             </router-link>
           </li>
           <li>
