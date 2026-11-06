@@ -3647,3 +3647,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Follow-up to the persistent `Element is missing end tag` report: removed a nested JavaScript template literal from the mobile notification-count interpolation and used a plain concatenation expression with the existing Persian count formatter.
 - Source commits: `d3ad966e53803b60168af439fc9ecc5c0c6992d6`, `aafa889baafb9051809a4ff1c4110327a411c1bf`.
 - The remote editing environment cannot run the project's Vite/Vue compiler; do not treat static tag balance as compiler verification. If this does not resolve the error, compare the user's running checkout with `main` and inspect the exact parser location from that checkout.
+
+
+## 2026-11-06 — WEBSITE-PRODUCT-CATALOGUE-HEADER-BREADCRUMB
+- **Status:** IMPLEMENTED — source committed directly to main; local build and browser verification not available in this GitHub editing session.
+- **Request:** Remove the duplicate catalogue page heading and trust badge; tighten the gap below the public navigation; show the current page path using the same shared breadcrumb pattern as Admin/Company.
+- **Changes:** Replaced the ProductListing WorkspacePageHeading (including its title, description, icon and “کاتالوگ محصولات تأییدشده” badge) with the shared PageHeader breadcrumb. Configured the public catalogue route title as “فروشگاه تجهیزات شبکه و مخابرات” so the breadcrumb shows the page name, and reduced PublicLayout main top padding from 24px to 10px. Breadcrumb home points to the catalogue route; no API/backend behavior changed.
+- **Verification:** Source-anchor checks passed before writing. Vue build, unit tests, responsive browser rendering and screenshot inspection are NOT RUN in this remote GitHub editing session.
+- **Commits:** Pending remote writes.
+- **Next:** Pull main locally and verify the breadcrumb alignment and the reduced navigation-to-content gap at desktop and mobile widths.
