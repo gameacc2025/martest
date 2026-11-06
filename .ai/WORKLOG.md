@@ -3680,3 +3680,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commits:** schema 595c6d4; migration edcc7ea; backend module 92a9d36, 277d10e, e294f67; route registration c3acee4; API client 5057ae9, ade3410, 7c5393e; Admin UI/router/nav bba8906, 099a439, c08511c, b6248a2, 77c8f41; Website 813c743, d3077c0; tests 5ae3df1; backend hardening 8dd1bdb, e1c9fe9.
 - **Next required local verification:** pull latest main; run npx prisma validate, npx prisma migrate status, node --test src/modules/banners/banner.routes.test.js inside backend, then run Admin and Website package builds. Apply the new migration before testing against the dev database.
 - Follow-up accessibility fix: campaign auto-rotation now respects the browser's prefers-reduced-motion setting (commit 8c1a1c7).
+
+
+## 2026-11-06 — DEVELOPMENT-DATABASE-RESET-AND-DEMO-MARKETPLACE
+- Added a repeatable development fixture set: 10 demo companies, 30 company users split across manager/catalog/sales roles, 5 customer accounts, and 150 supplier product listings (five models per each of 15 top-level categories, each model listed by two suppliers).
+- Added shared Product.catalogCode (manufacturer + model identity) separate from seller SKU. Published inquiry notification resolution now fans out to active companies with published listings carrying the same catalog code, while keeping STAFF permission-based dispatch and excluding the buyer company.
+- Added guarded npm run db:reset:dev: it refuses production and unexpected database targets, then runs prisma db push --force-reset and the existing idempotent seed.
+- Preserved historical migrations for production. Added migration 20261106120000_product_catalog_identity; development's db-push workflow does not call migrate deploy.
+- Demo product models are real-world references; prices are indicative development fixtures and product specifications must be verified against the exact manufacturer datasheet before commercial use.
+- Verification NOT RUN in this remote GitHub editing session. Run Prisma validate, seed tests, inquiry tests, and a clean local dev reset before relying on the fixtures.
