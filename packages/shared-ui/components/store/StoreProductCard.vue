@@ -112,8 +112,8 @@ function setAction(event) {
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  border: 1px solid var(--tm-line, #e4e7f2);
-  border-radius: 4px;
+  border: 0;
+  border-radius: 14px;
   background: var(--tm-surface, #fff);
   box-shadow: var(--tm-card-shadow, 0 2px 8px rgba(9, 38, 67, 0.06));
   overflow: hidden;
@@ -137,11 +137,12 @@ function setAction(event) {
   position: relative;
   display: grid;
   place-items: center;
-  aspect-ratio: 4 / 5;
-  min-height: 0;
-  background: #f4f5fa;
-  color: #a5a9bb;
-  font-size: 36px;
+  height: 130px;
+  min-height: 130px;
+  aspect-ratio: auto;
+  background: linear-gradient(135deg, var(--tm-chip, #eceaff), var(--tm-canvas, #f4f5fa));
+  color: var(--tm-blue, #6c5ce7);
+  font-size: 22px;
   overflow: hidden;
 }
 .product-card__media img {
@@ -184,13 +185,13 @@ function setAction(event) {
   flex: 1;
   flex-direction: column;
   gap: 4px;
-  padding: 11px;
+  padding: 14px;
 }
 .product-card__brand {
   margin-bottom: 2px;
   color: var(--tm-blue, #7c6cf6);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -231,8 +232,8 @@ function setAction(event) {
   min-height: 44px;
   overflow: hidden;
   color: var(--tm-ink, #12182b);
-  font-size: 13px;
-  font-weight: 650;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1.8;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -243,7 +244,7 @@ function setAction(event) {
   gap: 5px 10px;
   margin-top: 4px;
   color: var(--tm-muted, #6b7390);
-  font-size: 10px;
+  font-size: 11px;
 }
 .product-card__specs b { font-weight: 500; }
 .product-card__company,
@@ -254,8 +255,8 @@ function setAction(event) {
   justify-content: space-between;
   gap: 8px;
   margin-top: auto;
-  padding: 10px 11px 11px;
-  border-top: 1px solid var(--tm-line, #e4e7f2);
+  padding: 0 14px 14px;
+  border-top: 0;
 }
 .product-card__price {
   display: flex;
@@ -263,6 +264,7 @@ function setAction(event) {
   gap: 3px;
   color: var(--tm-ink, #12182b);
   font-size: 12px;
+  font-weight: 800;
 }
 .product-card__price small {
   color: var(--tm-muted, #6b7390);
