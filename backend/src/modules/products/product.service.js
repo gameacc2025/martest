@@ -924,6 +924,36 @@ async function getProductById(id, caller) {
   return product;
 }
 
+async function listSimilarProducts(id) {
+  const productId = Number(id);
+  const source = await prisma.product.findFirst({
+    where: {
+      id: productId,
+      deletedAt: null,
+      status: 'PUBLISHED',
+      visibility: 'PUBLIC',
+      company: { status: 'ACTIVE', deletedAt: null },
+    },
+    select: { id: true, catalogCode: true },
+  });
+  if (!source) return null;
+  if (!source.catalogCode) return [];
+
+  return prisma.product.findMany({
+    where: {
+      id: { not: source.id },
+      catalogCode: source.catalogCode,
+      status: 'PUBLISHED',
+      visibility: 'PUBLIC',
+      deletedAt: null,
+      company: { status: 'ACTIVE', deletedAt: null },
+    },
+    select: publicProductSelect,
+    orderBy: { createdAt: 'desc' },
+    take: 20,
+  });
+}
+
 async function createProduct(data, caller) {
   if (!data.title?.trim()) throw { statusCode: 400, code: 'TITLE_REQUIRED', message: 'title is required.' };
   if (!isSuperAdmin(caller) && !isStaffUser(caller) && !isCompanyUser(caller) && caller?.accessType) {
@@ -1605,6 +1635,7 @@ module.exports = {
   MAX_DOCUMENT_BYTES,
   listProducts,
   getProductById,
+  listSimilarProducts,
   createProduct,
   updateProduct,
   deleteProduct,
