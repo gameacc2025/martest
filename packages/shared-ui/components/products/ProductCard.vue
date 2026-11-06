@@ -171,12 +171,12 @@ const formatPrice = (price) => {
 }
 
 .product-card :deep(.p-card-content) {
-  padding: var(--ds-space-4);
+  padding: 11px;
   flex: 1;
 }
 
 .product-card :deep(.p-card-footer) {
-  padding: var(--ds-space-4);
+  padding: 10px 11px 11px;
   border-top: 1px solid var(--ds-color-border);
 }
 
@@ -189,8 +189,9 @@ const formatPrice = (price) => {
 .product-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: var(--ds-radius-sm) var(--ds-radius-sm) 0 0;
+  object-fit: contain;
+  padding: 10px;
+  border-radius: 0;
 }
 
 .product-discount {
@@ -225,18 +226,18 @@ const formatPrice = (price) => {
 
 .product-name {
   font-weight: var(--ds-font-weight-semibold);
-  font-size: .84rem;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.8;
   margin: 0 0 var(--ds-space-1) 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 3em;
+  min-height: 44px;
 }
 
 .product-company {
-  font-size: var(--ds-font-size-sm);
+  font-size: 10px;
   color: var(--ds-color-text-muted);
   margin: 0;
 }
@@ -245,7 +246,7 @@ const formatPrice = (price) => {
   display: flex;
   align-items: center;
   gap: var(--ds-space-2);
-  margin-bottom: var(--ds-space-3);
+  margin-bottom: 8px;
 }
 
 .product-reviews-count {
@@ -257,7 +258,7 @@ const formatPrice = (price) => {
   display: flex;
   align-items: center;
   gap: var(--ds-space-2);
-  margin-bottom: var(--ds-space-3);
+  margin-bottom: 8px;
 }
 
 .original-price {
@@ -277,7 +278,7 @@ const formatPrice = (price) => {
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-1);
-  font-size: var(--ds-font-size-sm);
+  font-size: 10px;
   color: var(--ds-color-text-muted);
 }
 
@@ -326,10 +327,10 @@ const formatPrice = (price) => {
   animation: sk-shimmer 1.4s ease infinite;
 }
 .sk-body {
-  padding: var(--ds-space-4);
+  padding: 11px;
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-3);
+  gap: 8px;
   flex: 1;
 }
 .sk-line {
