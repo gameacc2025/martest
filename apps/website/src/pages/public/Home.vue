@@ -158,7 +158,7 @@ onUnmounted(() => {
     <section class="home-hero" aria-label="بازارگاه تخصصی تجهیزات شبکه و مخابرات">
       <div class="home-container home-hero__inner">
         <div class="home-hero__copy">
-          <span class="home-hero__tag">{{ activeBanner?.eyebrow || 'بازارگاه تخصصی تجهیزات شبکه و مخابرات' }}</span>
+          <span class="home-hero__tag">{{ activeBanner?.title || 'بازارگاه تخصصی تجهیزات شبکه و مخابرات' }}</span>
           <h1>تجهیزات پروژه‌تان را<br />سریع و مطمئن تأمین کنید</h1>
           <p>{{ activeBanner?.description || 'هم خرید فوری با قیمت مشخص، هم استعلام و پیش‌فاکتور سازمانی از تأمین‌کنندگان بازارگاه.' }}</p>
 
