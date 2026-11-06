@@ -263,6 +263,37 @@ onUnmounted(() => {
         <div class="home-state"><i class="pi pi-chart-bar" aria-hidden="true" /><span>رتبه‌بندی فروش تا زمان فراهم‌شدن دادهٔ واقعی سفارش و فروش نمایش داده نمی‌شود.</span></div>
       </section>
 
+      <section class="home-offer" aria-labelledby="home-offer-title">
+        <div>
+          <h2 id="home-offer-title">پیشنهاد ویژه تجهیزات خرده‌فروشی</h2>
+          <p>تخفیف محدود روی سوئیچ، روتر و تجهیزات فیبر نوری</p>
+          <small>در حال حاضر پیشنهاد زمان‌دار فعالی از سامانه دریافت نشده است.</small>
+        </div>
+        <router-link :to="{ name: 'products', query: { retail: '1' } }" class="home-btn home-btn--offer">مشاهده محصولات خرده‌فروشی</router-link>
+      </section>
+
+      <section class="home-section" aria-labelledby="home-blog">
+        <StoreSectionHeading heading-id="home-blog" title="آخرین اخبار و مطالب آموزشی" />
+        <div class="home-state"><i class="pi pi-book" aria-hidden="true" /><span>مطالب وبلاگ پس از اتصال محتوای منتشرشده نمایش داده می‌شوند.</span></div>
+      </section>
+
+      <section class="home-section" aria-labelledby="home-testimonials">
+        <StoreSectionHeading heading-id="home-testimonials" title="نظر مشتریان سازمانی" />
+        <div class="home-state"><i class="pi pi-comments" aria-hidden="true" /><span>نظر تأییدشده‌ای برای انتشار در این بخش ثبت نشده است.</span></div>
+      </section>
+
+      <section class="home-catalog-request" aria-labelledby="home-catalog-title">
+        <div>
+          <h2 id="home-catalog-title">دانلود کاتالوگ محصولات</h2>
+          <p>کاتالوگ PDF برندها و مشخصات فنی را برای ایمیل شما می‌فرستیم.</p>
+        </div>
+        <form class="home-catalog-request__form" @submit.prevent>
+          <input type="text" name="company" placeholder="نام شرکت" aria-label="نام شرکت" />
+          <input type="email" name="email" placeholder="ایمیل سازمانی" aria-label="ایمیل سازمانی" />
+          <button type="submit" disabled title="سرویس ارسال کاتالوگ هنوز به فرم متصل نشده است">دریافت کاتالوگ</button>
+        </form>
+      </section>
+
       <section class="home-faq home-section" aria-labelledby="home-faq">
         <StoreSectionHeading heading-id="home-faq" title="سؤالات متداول" />
         <details open><summary>چطور درخواست استعلام ثبت کنم؟</summary><p>از طریق دکمه ثبت درخواست استعلام وارد مسیر مربوط شوید و اطلاعات نیاز پروژه را ثبت کنید.</p></details>
@@ -325,4 +356,16 @@ onUnmounted(() => {
 @media(max-width:900px){.home-hero__inner{grid-template-columns:1fr}.home-hero__featured{max-width:560px}.home-benefits{grid-template-columns:repeat(2,minmax(0,1fr))}.home-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.home-container{padding-inline:14px}.home-hero{padding:30px 0 36px}.home-hero h1{font-size:27px}.home-hero__tabs{display:flex;width:100%}.home-hero__tabs button{flex:1;padding-inline:8px;font-size:11px}.home-hero__search input{font-size:11px}.home-hero__search button{padding-inline:10px}.home-benefits{grid-template-columns:1fr 1fr;gap:9px}.home-benefits article{padding:13px}.home-product-grid{gap:9px}.home-rfq{padding:20px}.home-rfq h2{font-size:17px}}
 @media(prefers-reduced-motion:reduce){.home-loading-card,.home-loading-product{animation:none}}
+
+.home-offer{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:4px 0;border-radius:18px;background:linear-gradient(100deg,#7b2ff7,#2aa7e8);color:#fff;padding:22px 28px}
+.home-offer h2{margin:0;color:#fff;font-size:20px}.home-offer p{margin:2px 0;color:#fff;font-size:13px}.home-offer small{font-size:11px;color:rgba(255,255,255,.86)}
+.home-btn--offer{background:#fff;color:#4b3bd6}
+.home-catalog-request{display:grid;grid-template-columns:1fr 1.2fr;gap:24px;align-items:center;margin:4px 0;padding:24px 28px;border:1px solid var(--tm-line);border-radius:18px;background:#fff}
+.home-catalog-request h2{margin:0;font-size:20px}.home-catalog-request p{margin:4px 0 0;color:var(--tm-muted);font-size:13px}
+.home-catalog-request__form{display:flex;gap:8px;flex-wrap:wrap}
+.home-catalog-request__form input{flex:1;min-width:150px;height:42px;padding:9px 12px;border:1px solid var(--tm-line);border-radius:10px;background:var(--tm-canvas);color:var(--tm-ink);font:inherit;font-size:12px}
+.home-catalog-request__form button{min-height:42px;padding:8px 16px;border:0;border-radius:10px;background:linear-gradient(90deg,#6c5ce7,#2aa7e8);color:#fff;font:inherit;font-size:12px;font-weight:700}
+.home-catalog-request__form button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:900px){.home-catalog-request{grid-template-columns:1fr}}
+@media(max-width:560px){.home-offer{padding:20px}.home-catalog-request{padding:18px}.home-catalog-request__form{display:grid;grid-template-columns:1fr}}
 </style>
