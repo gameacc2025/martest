@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useProductsStore } from '../../stores/products'
 import StoreCategoryCard from '@telecom/shared-ui/components/store/StoreCategoryCard.vue'
+import StoreBreadcrumb from '@telecom/shared-ui/components/store/StoreBreadcrumb.vue'
+import StorePageHeading from '@telecom/shared-ui/components/store/StorePageHeading.vue'
 import ProgressSpinner from 'primevue/progressspinner'
 
 const productsStore = useProductsStore()
@@ -40,16 +42,8 @@ async function loadCategories() {
 <template>
   <main class="reference-categories-page" dir="rtl">
     <div class="reference-categories-container">
-      <nav class="reference-breadcrumb" aria-label="مسیر صفحه">
-        <router-link :to="{ name: 'home' }">صفحه اصلی</router-link>
-        <i class="pi pi-angle-left" aria-hidden="true" />
-        <span>همه دسته‌بندی‌ها</span>
-      </nav>
-
-      <header class="reference-page-heading">
-        <h1>همه دسته‌بندی‌ها</h1>
-        <p>تجهیزات را بر اساس حوزه کاربرد مرور کنید</p>
-      </header>
+      <StoreBreadcrumb class="reference-breadcrumb" :items="[{ label: 'صفحه اصلی', to: { name: 'home' } }, { label: 'همه دسته‌بندی‌ها' }]" />
+      <StorePageHeading class="reference-page-heading" heading-id="categories-title" title="همه دسته‌بندی‌ها" description="تجهیزات را بر اساس حوزه کاربرد مرور کنید" />
 
       <div v-if="loading" class="reference-categories-state" role="status"><ProgressSpinner /><span>در حال دریافت دسته بندی ها...</span></div>
       <div v-else-if="error" class="reference-categories-state" role="alert"><i class="pi pi-exclamation-circle" /><span>{{ error }}</span><button type="button" @click="loadCategories">تلاش دوباره</button></div>
