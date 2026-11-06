@@ -35,6 +35,15 @@ async function list(request, reply) {
 }
 
 /**
+ * GET /api/v1/companies/public/:id — intentionally limited public profile.
+ */
+async function getPublicOne(request, reply) {
+  const company = await companyService.getPublicCompanyById(request.params.id);
+  if (!company) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'شرکت یافت نشد' } });
+  return reply.send(success(company));
+}
+
+/**
  * GET /api/v1/companies/:id
  */
 async function getOne(request, reply) {
@@ -138,7 +147,7 @@ async function getProducts(request, reply) {
 }
 
 module.exports = {
-  list, getOne, create, update, remove, restore,
+  list, getOne, getPublicOne, create, update, remove, restore,
   changeStatus, toggleVerify, updateLogo,
   getSettings, updateSettings, getStatistics, getProducts,
 };
