@@ -21,7 +21,7 @@ const CATALOG = [
  ['Prysmian','Sirocco HD 96F','کابل میکرو‌داکت ۹۶ کور برای شبکه FTTH','fiber','96F','G.657.A2','متر',210000],
  ['OFS','AccuTube+ 48F','کابل فیبر نوری ۴۸ کور برای شبکه دسترسی','fiber','48F','G.652.D','متر',142000],
  ['Fujikura','SWR/RTS 12F Drop','کابل دراپ فیبر نوری برای اتصال مشترک FTTH','drop','12F','G.657.A2','متر',42000],
- ['CommScope','FOSC-400B4','محفظه اتصال و حفاظت شبکه فیبر نوری بیرونی','closure','96 ports','IP68','عدد',98000000]]},
+ ['CommScope','LazrSPEED 550 12F','کابل فیبر نوری چندحالته OM4 برای زیرساخت مراکز داده','fiber','12F','OM4 50/125 µm','متر',98000]]},
  {category:'network-it-equipment',subcategory:'switching-routing',items:[
  ['Cisco','Catalyst C9300-48P','سوئیچ مدیریتی لایه ۳ با ۴۸ پورت گیگابیت PoE+','switch','48x1G PoE+','StackWise','عدد',1850000000],
  ['HPE Aruba','6300M JL658A','سوئیچ سازمانی لایه ۳ با uplink ده‌گیگابیتی','switch','48x1G','10/25GbE','عدد',1420000000],
@@ -39,7 +39,7 @@ const CATALOG = [
  ['Ciena','6500 Packet-Optical','سامانه انتقال packet-optical برای شبکه مترو و backbone','Optical transport','Modular','OTN / WDM','عدد',14800000000],
  ['Huawei','OptiX OSN 9800','پلتفرم انتقال نوری پرظرفیت برای backbone و دیتاسنتر','OTN','Terabit-class','OTN / DWDM','عدد',13800000000],
  ['Infinera','GX Series','سامانه انتقال نوری همگرا برای شبکه long-haul و metro','Optical transport','Modular','Coherent optics','عدد',16200000000],
- ['Ceragon','IP-50C','رادیو انتقال packet microwave برای backhaul','Microwave radio','Split-mount','E-band / microwave','عدد',2150000000]]},
+ ['Ciena','Waveserver 5','پلتفرم انتقال نوری فشرده برای اتصال دیتاسنتر و شبکه مترو','Optical transport','400G coherent optics','DWDM / coherent','عدد',2150000000]]},
  {category:'satellite-vsat',subcategory:'satellite-modems',items:[
  ['Hughes','JUPITER HT1300','مودم ماهواره‌ای باند Ka برای ترمینال VSAT','Satellite modem','Ka-band','DVB-S2X','عدد',185000000],
  ['ST Engineering iDirect','X7','مودم ماهواره‌ای حرفه‌ای برای شبکه VSAT و خدمات IP','Satellite modem','High-throughput','DVB-S2X','عدد',265000000],
@@ -63,7 +63,7 @@ const CATALOG = [
  ['Delta','DPR 2900B','ماژول یکسوساز ۲۹۰۰ وات برای تغذیه DC مخابراتی','Rectifier','48 VDC / 2900 W','Hot-swap','عدد',148000000],
  ['Huawei','ETP48100-B1','سامانه تغذیه DC مخابراتی با کنترلر و یکسوساز','Power system','-48 VDC','Battery management','دستگاه',625000000],
  ['Vertiv','NetSure 7100','سامانه توزیع و یکسوسازی DC برای سایت شبکه','Power system','-48 VDC','Modular rectifiers','دستگاه',1850000000],
- ['Eaton','93PM 30 kVA','UPS آنلاین سه‌فاز برای حفاظت تغذیه تجهیزات حیاتی','UPS','30 kVA','Double-conversion','دستگاه',2450000000]]},
+ ['Huawei','R4850G2','ماژول یکسوساز سوئیچینگ برای سامانه تغذیه مخابراتی -۴۸ ولت','Rectifier','48 VDC / 3000 W class','Hot-swap','عدد',245000000]]},
  {category:'shelter-outdoor-cabinet',subcategory:'shelters-cabinets',items:[
  ['Vertiv','XTE 401','کابینت بیرونی مخابراتی با مدیریت حرارتی و حفاظت محیطی','Outdoor cabinet','Telecom enclosure','Thermal management','دستگاه',1480000000],
  ['Huawei','TBC300','کابینت outdoor برای تجهیزات دسترسی و تغذیه مخابراتی','Outdoor cabinet','Telecom site','IP-rated enclosure','دستگاه',1250000000],
@@ -104,7 +104,7 @@ const CATALOG = [
  ['EXFO','MaxTester 730C','OTDR چندطول‌موج برای تست و عیب‌یابی فیبر نوری','OTDR','Field tester','1310/1550 nm variants','عدد',985000000],
  ['VIAVI','SmartOTDR','دستگاه OTDR قابل‌حمل برای نصب و نگهداری فیبر','OTDR','Access network testing','1310/1550 nm variants','عدد',825000000],
  ['Anritsu','MT9085 Series','OTDR دستی برای تست شبکه دسترسی فیبر','OTDR','Field tester','SM / MM variants','عدد',765000000],
- ['Fluke Networks','DSX2-8000','تستر کابل مسی برای گواهی‌سنجی لینک‌های ساخت‌یافته','Cable certifier','Copper cabling','Permanent link / channel','عدد',1250000000],
+ ['VIAVI','MTS-4000 V2','پلتفرم ماژولار تست فیبر نوری برای نصب و نگهداری شبکه دسترسی','Optical test platform','Modular field platform','OTDR / optical modules','عدد',1250000000],
  ['Yokogawa','AQ1210','OTDR دستی برای تست و نگهداری شبکه فیبر نوری','OTDR','Field tester','SM / MM variants','عدد',725000000]]},
 ];
 
@@ -245,16 +245,31 @@ async function seedDemoMarketplace(prisma, { permissionByName }) {
         const tier = await prisma.productPriceTier.findFirst({
           where: { productId: product.id, minQuantity: 1 },
         });
-        if (tier) {
-          await prisma.productPriceTier.update({
-            where: { id: tier.id },
-            data: { maxQuantity: null, price, unit, validFrom: new Date(), validTo: null },
-          });
-        } else {
-          await prisma.productPriceTier.create({
-            data: { productId: product.id, minQuantity: 1, maxQuantity: null, price, unit, validFrom: new Date() },
-          });
-        }
+        const savedTier = tier
+          ? await prisma.productPriceTier.update({
+              where: { id: tier.id },
+              data: { maxQuantity: null, price, unit, validFrom: new Date(), validTo: null },
+            })
+          : await prisma.productPriceTier.create({
+              data: { productId: product.id, minQuantity: 1, maxQuantity: null, price, unit, validFrom: new Date() },
+            });
+
+        // Six months of explicitly synthetic history makes the price chart usable in development.
+        const snapshotFactors = [0.91, 0.93, 0.96, 0.98, 1.01, 1];
+        const snapshotNow = new Date();
+        await prisma.productPriceSnapshot.deleteMany({ where: { productId: product.id } });
+        await prisma.productPriceSnapshot.createMany({
+          data: snapshotFactors.map((factor, monthIndex) => ({
+            productId: product.id,
+            priceTierId: savedTier.id,
+            minQuantity: 1,
+            maxQuantity: null,
+            price: Math.round(Number(price) * factor),
+            unit,
+            action: 'DEMO_SEED',
+            recordedAt: new Date(snapshotNow.getFullYear(), snapshotNow.getMonth() - (5 - monthIndex), 1),
+          })),
+        });
         productCount++;
       }
     }
