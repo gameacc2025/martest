@@ -64,7 +64,8 @@ describe('Website Product Listing — TEM storefront', () => {
     await flushPromises()
     expect(wrapper.find('.shop-filter-sidebar').exists()).toBe(true)
     expect(wrapper.find('.shop-filter-sidebar .shop-search').exists()).toBe(true)
-    expect(wrapper.find('.shop-feature-stage .shop-company-banner').exists()).toBe(true)
+    expect(wrapper.find('.shop-company-banner').exists()).toBe(false)
+    expect(wrapper.find('.shop-benefits').exists()).toBe(false)
     expect(wrapper.find('.shop-feature-stage .shop-hero').exists()).toBe(true)
     expect(wrapper.find('.shop-category-strip').exists()).toBe(true)
     expect(wrapper.find('.shop-featured-section').exists()).toBe(true)
@@ -100,12 +101,14 @@ describe('Website Product Listing — TEM storefront', () => {
     expect(wrapper.find('.product-card-price').text()).toContain('استعلام قیمت')
   })
 
-  it('uses compact portrait cards in a consistent four-column desktop grid', async () => {
+  it('uses compact portrait cards sized to the shared TEM product-card template', async () => {
     wrapper = mountListing()
     await flushPromises()
     const source = (await import('node:fs')).readFileSync(new URL('./ProductListing.vue', import.meta.url), 'utf8')
-    expect(source).toContain('grid-template-columns:repeat(4,minmax(0,1fr))')
+    expect(source).toContain('grid-template-columns:repeat(5,minmax(0,1fr))')
+    expect(source).toContain('grid-template-columns:repeat(6,minmax(0,1fr))')
     expect(source).toContain('aspect-ratio:4 / 5')
+    expect(source).toContain('flex-direction:column;padding:11px')
     expect(wrapper.find('.shop-product-card').exists()).toBe(true)
   })
 
