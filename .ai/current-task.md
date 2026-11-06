@@ -744,3 +744,15 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - The reported Vite SFC parser error persisted after the earlier auth-branch wrapper change. Follow-up cleanup removed the nested JavaScript template literal from the mobile notification-count interpolation, replacing it with a plain concatenation expression and the existing `countLabel` formatter.
 - Source commits: `d3ad966e53803b60168af439fc9ecc5c0c6992d6`, `aafa889baafb9051809a4ff1c4110327a411c1bf`.
 - Important: remote source edits and static tag-balance checks are not equivalent to running `@vue/compiler-sfc`; the Vite compiler/build has not been executed here. If the error remains, capture the current exact line range from the running checkout because it may not be synchronized with `main`.
+
+
+## Current task — Adopt Myron template widgets as shared Vue components (2026-11-06)
+- **Status:** IMPLEMENTED remotely; local compiler/build verification pending.
+- The old `tem/` reference directory was replaced by `store-template/` in the user's preceding commit. Treat `store-template/` as the visual reference, not as runtime application code.
+- Added reusable Vue SFCs in `packages/shared-ui/components/tem/` and exported them through `@telecom/shared-ui`. This is a presentation library only: consuming apps own API data, permissions, and actions.
+- Priority component for the next Website phase: `TemProductCard`; preserve the live product API, category navigation, supplier verification and inquiry-first marketplace behavior. Do not introduce a sample cart/checkout/payment flow.
+- No Website pages have been rewritten in this task. Next phase is the Website redesign and refinement using these shared components.
+- **Deferred backlog:** Blog public listing/detail pages and Admin content authoring/management are tracked in GitHub issue [#84](https://github.com/gameacc2025/martest/issues/84). This includes Prisma models, migrations, real CRUD/publish APIs, STAFF permissions, SEO metadata and published-only public visibility. Do not implement now; revisit after Website UI rewrite.
+- **Verification:** remote source review only. Vue SFC compilation, unit tests, package builds and browser rendering remain NOT RUN; browser checks are prohibited unless the owner authorizes them.
+- **Commits:** `5430734ddf08a650ac225641228ef286676389e7`, `a2ffbfd15f410c59b5ba9887dcca6dd45c5dbc81`.
+- **Next action:** pull latest `main` locally and continue Website UI rewrite with `TemProductCard` and the new shared widget library.

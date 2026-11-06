@@ -935,3 +935,9 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 ## 2026-11-04 — Retail product opt-in
 - Product now has a retailEnabled flag defaulting false; a migration adds the column and lookup index. Admin and Company product editors can explicitly enable the flag.
 - This is only an eligibility declaration. No inventory or retail order/payment API exists yet; the website must not treat retailEnabled alone as purchasable. Future retail resolver must also require PUBLISHED + PUBLIC, active/non-deleted seller, current minQuantity=1 price tier and available inventory.
+
+
+## Myron template adoption (2026-11-06)
+- UI reference source: repository root `store-template/`. Its HTML/CSS/JS and demo data are design references only; do not load the template's localStorage-backed demo runtime into the marketplace apps.
+- Reusable Vue 3 widgets live in `packages/shared-ui/components/tem/` and are exported from the `@telecom/shared-ui` package root. Components are presentation primitives; data and behavior remain in Website/Admin/Company apps and use existing APIs and authorization.
+- Blog is not implemented yet. Public blog pages and Admin authoring/publishing are deferred to GitHub issue #84 and require real backend persistence, API endpoints, and STAFF permissions.

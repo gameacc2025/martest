@@ -3656,3 +3656,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Source-anchor checks passed before writing. Vue build, unit tests, responsive browser rendering and screenshot inspection are NOT RUN in this remote GitHub editing session.
 - **Commits:** `970e622`, `a396a2e`, `3490f27`, `7e773fe`, `735374b` (source, layout, route metadata, worklog and task record); dead trust-badge styling cleanup committed separately.
 - **Next:** Pull main locally and verify the breadcrumb alignment and the reduced navigation-to-content gap at desktop and mobile widths.
+
+
+## 2026-11-06 — SHARED-UI-MYRON-TEMPLATE-WIDGETS
+- **Status:** IMPLEMENTED — local compiler/build verification pending.
+- Added a reusable Vue 3 widget library at `packages/shared-ui/components/tem/`, translated from the new `store-template/components/` reference. The library contains product/stat cards, data cards, toolbar/filter panel, progress/price/legend rows, customer/mail/chat/FAQ widgets, plan/role/tracking/cart/order widgets, confirm modal, badges, buttons, card border, page header, section and alert components.
+- Exported the widget library through `@telecom/shared-ui`; consuming apps can use the components without importing template HTML or its sample JavaScript.
+- Product card is data-driven via a product object and optional route/slots. No sample products, localStorage cart behavior, payment flow, or mock backend was copied into the marketplace.
+- Blog work is deferred to GitHub issue #84: public blog listing/detail plus Admin authoring and publishing, backed by real Prisma models, APIs, and STAFF permissions. Do not start blog implementation during the current Website UI rewrite phase.
+- **Verification:** repository source anchors and export paths inspected; Vue SFC compile, package tests, app builds and browser checks NOT RUN in the remote GitHub editing session. Browser verification remains disallowed by owner instruction.
+- **Commits:** `5430734ddf08a650ac225641228ef286676389e7` (widget library and shared export), `a2ffbfd15f410c59b5ba9887dcca6dd45c5dbc81` (complete widget exports and RoleCard fix).
+- **Next:** pull `main` locally; run the project's normal package/build checks when authorized, then use these shared widgets as the building blocks for the Website redesign.
