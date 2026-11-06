@@ -100,6 +100,15 @@ describe('Website Product Listing — TEM storefront', () => {
     expect(wrapper.find('.product-card-price').text()).toContain('استعلام قیمت')
   })
 
+  it('uses compact portrait cards in a consistent four-column desktop grid', async () => {
+    wrapper = mountListing()
+    await flushPromises()
+    const source = (await import('node:fs')).readFileSync(new URL('./ProductListing.vue', import.meta.url), 'utf8')
+    expect(source).toContain('grid-template-columns:repeat(4,minmax(0,1fr))')
+    expect(source).toContain('aspect-ratio:4 / 5')
+    expect(wrapper.find('.shop-product-card').exists()).toBe(true)
+  })
+
   it('announces catalogue loading errors accessibly', async () => {
     getProducts.mockRejectedValueOnce(new Error('offline'))
     wrapper = mountListing()
