@@ -69,6 +69,7 @@ describe('PublicLayout responsive navigation', () => {
         stubs: {
           RouterLink: { props: ['to'], template: '<a :data-route="to?.name || to"><slot /></a>' },
           RouterView: { template: '<div />' },
+          Drawer: { inheritAttrs: false, props: ['visible'], emits: ['update:visible'], template: '<div v-if="visible" v-bind="$attrs"><slot name="header" /><slot /><slot name="footer" /></div>' },
           MegaMenu: true,
           Menu: true,
           IconField: { template: '<div><slot /></div>' },
@@ -93,6 +94,7 @@ describe('PublicLayout responsive navigation', () => {
     await nextTick()
 
     expect(wrapper.get('.public-cart-drawer').attributes('aria-label')).toBe('سبد خرید')
+    expect(wrapper.get('.public-cart-drawer').attributes('position')).toBe('left')
     expect(wrapper.get('.public-cart-drawer__empty').text()).toContain('سبد خرید خالی است')
     expect(wrapper.get('.public-cart-drawer__empty a').text()).toContain('مشاهده محصولات')
   })
@@ -139,9 +141,11 @@ describe('PublicLayout responsive navigation', () => {
     expect(mocks.apiGetPaginated).toHaveBeenCalledWith('/notifications?page=1&limit=5')
     await wrapper.get('.public-notifications-link').trigger('click')
     await nextTick()
-    expect(wrapper.find('.public-notifications-layer').exists()).toBe(true)
+    expect(wrapper.find('.public-notifications-drawer').exists()).toBe(true)
     expect(wrapper.findAll('.public-notification-item')).toHaveLength(5)
     expect(wrapper.get('.public-notifications-drawer').attributes('aria-label')).toBe('اعلان‌های اخیر')
+    expect(wrapper.get('.public-notifications-drawer').attributes('position')).toBe('left')
+    expect(wrapper.get('.public-cart-drawer').exists()).toBe(false)
     expect(wrapper.get('.public-notifications-drawer').element.querySelector('.public-notifications-menu__all')).toBeTruthy()
   })
 
