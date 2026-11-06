@@ -76,12 +76,6 @@ async function fetchPromotionalBanners() {
   }
 }
 
-const features = [
-  { icon: 'pi pi-file-edit', title: 'استعلام برای پروژه‌ها', text: 'درخواست قیمت را برای نیازهای سازمانی ثبت کنید و پاسخ تأمین‌کنندگان را پیگیری کنید.' },
-  { icon: 'pi pi-list-check', title: 'بررسی مشخصات فنی', text: 'اطلاعات فنی ثبت‌شده محصولات را پیش از انتخاب بررسی کنید.' },
-  { icon: 'pi pi-building', title: 'شناخت تأمین‌کننده', text: 'مشخصات شرکت و وضعیت احراز آن را در صورت ثبت و تأیید مشاهده کنید.' },
-  { icon: 'pi pi-shopping-cart', title: 'خرید یا استعلام', text: 'نوع ارائه، قیمت و شرایط هر محصول را پیش از مشاهده جزئیات بررسی کنید.' },
-]
 const visibleCategories = computed(() => categories.value)
 
 async function fetchProducts() {
@@ -245,11 +239,6 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div>
       </div>
     </section>
-    <div class="home-marketplace-benefits" aria-label="امکانات بازارگاه">
-      <div><i class="pi pi-verified" aria-hidden="true"></i><span><strong>تأمین‌کنندگان قابل بررسی</strong><small>مشاهده مشخصات و وضعیت تأیید شرکت</small></span></div>
-      <div><i class="pi pi-file-check" aria-hidden="true"></i><span><strong>اطلاعات تخصصی محصول</strong><small>بررسی مدل، شناسه و جزئیات فنی</small></span></div>
-      <div><i class="pi pi-comments" aria-hidden="true"></i><span><strong>استعلام برای پروژه‌ها</strong><small>ثبت درخواست و دریافت پیشنهاد</small></span></div>
-    </div>
     <div class="home-container">
       <!-- Categories -->
       <section class="home-section" aria-labelledby="home-categories">
@@ -379,19 +368,6 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div>
       </section>
 
-      <!-- Capabilities -->
-      <section class="home-section" aria-labelledby="home-features">
-        <div class="site-section-title">
-          <h2 id="home-features">چرا Telecom Market؟</h2>
-        </div>
-        <div class="home-feature-grid">
-          <article v-for="feature in features" :key="feature.title" class="home-feature">
-            <span class="feature-icon" aria-hidden="true"><i :class="feature.icon"></i></span>
-            <h3>{{ feature.title }}</h3>
-            <p>{{ feature.text }}</p>
-          </article>
-        </div>
-      </section>
 
       <!-- Inquiry CTA -->
       <section class="home-cta">
@@ -673,26 +649,6 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 .tm-table tbody tr[role='link']:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
 .home-recent__name:hover { color: var(--tm-blue); }
 
-.home-feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.home-feature {
-  padding: 18px;
-  background: var(--tm-surface);
-  border: 1px solid var(--tm-line);
-  border-radius: 4px;
-  box-shadow: var(--tm-card-shadow);
-}
-.feature-icon {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 4px;
-  background: var(--tm-blue-soft);
-  color: var(--tm-blue);
-  margin-bottom: 12px;
-}
-.home-feature h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
-.home-feature p { margin: 0; font-size: 13px; line-height: 1.8; color: var(--tm-muted); }
 
 .home-cta {
   display: flex;
@@ -757,7 +713,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   .home-featured-slider__media img { height: 180px; }
   .home-featured-slider__content { padding-bottom: 3.2rem; }
   .home-hero { grid-template-columns: 1fr; }
-  .home-category-grid,.home-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-hero__visual { grid-template-columns: minmax(0, 1fr); }
   .home-promo-banner { min-height:260px; }
   .home-hero__visual .home-hero__benefits { grid-column:1; }
@@ -842,14 +798,6 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 .home-section .site-section-title h2{position:relative;margin:0;color:var(--tm-ink);font-size:19px;font-weight:800}
 .home-section .site-section-title h2:after{content:"";position:absolute;right:0;bottom:-11px;width:48px;height:3px;border-radius:4px;background:var(--tm-cyan)}
 .home-section .site-section-title>a{display:inline-flex;align-items:center;gap:7px;color:var(--tm-blue);font-size:12px;font-weight:700;text-decoration:none}
-.home-marketplace-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:var(--ds-container-max-wide);margin:-18px auto 28px;padding:0 var(--ds-container-pad)}
-.home-marketplace-benefits>div{display:flex;align-items:center;gap:12px;min-width:0;padding:16px 20px;background:var(--tm-surface);border-inline-start:1px solid var(--tm-line)}
-.home-marketplace-benefits>div:first-child{border-inline-start:0;border-radius:0 5px 5px 0}
-.home-marketplace-benefits>div:last-child{border-radius:5px 0 0 5px}
-.home-marketplace-benefits i{display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;background:var(--tm-blue-soft);color:var(--tm-blue);font-size:16px}
-.home-marketplace-benefits span{display:grid;gap:3px;min-width:0}
-.home-marketplace-benefits strong{color:var(--tm-ink);font-size:12px}
-.home-marketplace-benefits small{color:var(--tm-muted);font-size:10px;line-height:1.6}
 .home-campaign-hero__fallback{width:100%;background:radial-gradient(circle at 15% 30%,rgba(18,184,166,.28),transparent 32%),linear-gradient(115deg,#082746 0%,#0c4268 58%,#126b83 100%)}
 .home-campaign-hero__fallback-inner{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);align-items:center;gap:clamp(24px,5vw,72px);padding-block:52px}
 .home-campaign-hero__fallback-copy{max-width:680px}
@@ -869,10 +817,8 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 .home-campaign-hero__spotlight-placeholder{font-size:76px}
 .home-promo-card{border-radius:7px;transition:transform .18s,border-color .18s,box-shadow .18s}
 .home-promo-card:hover{transform:translateY(-3px);border-color:var(--tm-cyan);box-shadow:var(--tm-card-shadow-hover)}
-.home-feature{border-radius:7px;transition:border-color .18s,box-shadow .18s}
-.home-feature:hover{border-color:var(--tm-line-strong);box-shadow:var(--tm-card-shadow-hover)}
 .home-cta{border-radius:7px;background:linear-gradient(110deg,var(--tm-surface),var(--tm-blue-soft))}
-@media(max-width:1200px){.home-marketplace-benefits{margin-top:-12px}.home-campaign-hero__fallback-inner{gap:28px}}
-@media(max-width:820px){.home-marketplace-benefits{grid-template-columns:1fr;margin:0 auto 22px}.home-marketplace-benefits>div{border-inline-start:0;border-bottom:1px solid var(--tm-line)}.home-marketplace-benefits>div:first-child,.home-marketplace-benefits>div:last-child{border-radius:0}.home-campaign-hero__fallback-inner{grid-template-columns:1fr;padding-block:36px}.home-campaign-hero__spotlight{min-height:220px}.home-campaign-hero__spotlight img{height:130px}}
-@media(prefers-reduced-motion:reduce){.home-promo-card,.home-feature{transition:none}.home-promo-card:hover{transform:none}}
+@media(max-width:1200px){.home-campaign-hero__fallback-inner{gap:28px}}
+@media(max-width:820px){.home-campaign-hero__fallback-inner{grid-template-columns:1fr;padding-block:36px}.home-campaign-hero__spotlight{min-height:220px}.home-campaign-hero__spotlight img{height:130px}}
+@media(prefers-reduced-motion:reduce){.home-promo-card{transition:none}.home-promo-card:hover{transform:none}}
 </style>
