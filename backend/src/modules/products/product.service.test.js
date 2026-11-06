@@ -55,6 +55,7 @@ function resetMocks() {
     priceTiers: [],
     existingTier: null,      // prisma.productPriceTier.findFirst result
     createdProduct: { id: 1 },
+    similarProducts: [],
     updatedProduct: { id: 1 },
     superAdminUserIds: [],
     companyUserIds: [],
@@ -94,7 +95,7 @@ const mockPrisma = {
     create: async (args) => { recordCall('product.create', args); return fx.createdProduct; },
     update: async (args) => { recordCall('product.update', args); return fx.updatedProduct; },
     count: async () => 0,
-    findMany: async (args) => { recordCall('product.findMany', args); return []; },
+    findMany: async (args) => { recordCall('product.findMany', args); return fx.similarProducts; },
   },
   category: { findUnique: async () => fx.category },
   subcategory: { findUnique: async () => fx.subcategory },
@@ -606,11 +607,10 @@ test('createProduct: derives a shared catalogCode from manufacturer and model wh
 
 test('listSimilarProducts: resolves only published public listings with the same catalogCode', async () => {
   fx.product = { id: 99, companyId: 10, catalogCode: 'TEL-CISCO-C9300-48P' };
+  fx.similarProducts = [{ id: 101, companyId: 20, catalogCode: 'TEL-CISCO-C9300-48P' }];
   const result = await service.listSimilarProducts(99);
-  assert.deepEqual(result, []);
+  assert.deepEqual(result, fx.similarProducts);
   assert.ok(calls['product.findFirst']?.length);
-  // The service returns an empty list from the mocked query while its source
-  // product has a valid catalog identity; the public resolver is exercised.
 });
 
 test('createProduct: rejects a missing title before touching the database', async () => {
