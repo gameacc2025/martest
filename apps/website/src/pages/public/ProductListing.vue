@@ -1,10 +1,7 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
-import PageHeader from '@telecom/shared-ui/components/common/PageHeader.vue'
-import StoreSectionHeading from '@telecom/shared-ui/components/store/StoreSectionHeading.vue'
-import StoreCategoryCard from '@telecom/shared-ui/components/store/StoreCategoryCard.vue'
 import StoreProductCard from '@telecom/shared-ui/components/store/StoreProductCard.vue'
 import StoreFilterPanel from '@telecom/shared-ui/components/store/StoreFilterPanel.vue'
 import Button from 'primevue/button'
@@ -17,10 +14,8 @@ import Paginator from 'primevue/paginator'
 const route = useRoute()
 const productsStore = useProductsStore()
 const products = ref([])
-const featuredProducts = ref([])
 const categories = ref([])
 const loading = ref(false)
-const featuredLoading = ref(false)
 const error = ref(null)
 const totalPages = ref(1)
 const totalItems = ref(0)
@@ -29,11 +24,6 @@ const selectedCategory = ref(null)
 const minPrice = ref(null)
 const maxPrice = ref(null)
 const retailOnly = ref(false)
-const sortBy = ref('createdAt')
-const sortOrder = ref('desc')
-const activeSlide = ref(0)
-let slideTimer = null
-
 const filters = ref({ search: '', category: null, minPrice: null, maxPrice: null, retailOnly: false, page: 1, limit: 24, sortBy: 'createdAt', sortOrder: 'desc' })
 const sortOptions = [
   { label: 'جدیدترین', value: 'createdAt:desc' },
@@ -47,14 +37,8 @@ const categoryOptions = computed(() => categories.value.map(category => ({
   label: category.nameFa || category.nameEn || category.name || category.slug,
   count: Number(category.productCount ?? category.productsCount ?? category._count?.products) || null,
 })))
-const activeFeatured = computed(() => featuredProducts.value[activeSlide.value] || featuredProducts.value[0] || null)
-const latestProducts = computed(() => products.value.slice(0, 8))
 const remainingProducts = computed(() => products.value)
 
-function imageOf(product) {
-  return product?.images?.find(image => image?.isPrimary && image?.url)
-    || product?.images?.find(image => image?.url) || null
-}
 function productName(product) { return product?.title || product?.name || 'محصول بدون عنوان' }
 function categoryName(product) { return product?.category?.nameFa || product?.category?.name || product?.category?.nameEn || '' }
 function formatPrice(price) {
@@ -66,34 +50,12 @@ function productPrice(product) {
   return price === undefined || price === null ? 'استعلام قیمت' : formatPrice(price)
 }
 function productRoute(product) { return { name: 'product-details', params: { id: product.id } } }
-function slideTo(index) {
-  if (!featuredProducts.value.length) return
-  activeSlide.value = (index + featuredProducts.value.length) % featuredProducts.value.length
-}
-function nextSlide() { slideTo(activeSlide.value + 1) }
-function previousSlide() { slideTo(activeSlide.value - 1) }
-function stopSlider() { if (slideTimer) clearInterval(slideTimer); slideTimer = null }
-function startSlider() {
-  stopSlider()
-  if (featuredProducts.value.length > 1 && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-    slideTimer = setInterval(nextSlide, 6000)
-  }
-}
+
 async function loadCategories() {
   try {
     const result = await productsStore.getCategories()
     categories.value = Array.isArray(result) ? result : []
   } catch { categories.value = [] }
-}
-async function loadFeatured() {
-  try {
-    featuredLoading.value = true
-    const result = await productsStore.getProducts({ page: 1, limit: 8, status: 'PUBLISHED', featured: true, sortBy: 'createdAt', sortOrder: 'desc' }) || {}
-    const list = Array.isArray(result.data) ? result.data : (result.data?.products ?? result.data?.items ?? result.products ?? result.items ?? [])
-    featuredProducts.value = Array.isArray(list) ? list : []
-    activeSlide.value = 0
-    startSlider()
-  } catch { featuredProducts.value = [] } finally { featuredLoading.value = false }
 }
 async function loadProducts() {
   try {
@@ -117,11 +79,11 @@ async function loadProducts() {
   } finally { loading.value = false }
 }
 function applyFilters() {
-  const [nextSortBy, nextSortOrder] = selectedSort.value.split(':')
+  const [sortBy, sortOrder] = selectedSort.value.split(':')
   filters.value = {
     search: searchQuery.value.trim(), category: selectedCategory.value,
     minPrice: minPrice.value, maxPrice: maxPrice.value, retailOnly: retailOnly.value,
-    page: 1, limit: filters.value.limit, sortBy: nextSortBy, sortOrder: nextSortOrder,
+    page: 1, limit: filters.value.limit, sortBy, sortOrder,
   }
   loadProducts()
 }
@@ -150,7 +112,7 @@ onMounted(async () => {
   if (route.query.category && Number.isInteger(id) && id > 0) selectedCategory.value = id
   filters.value.category = selectedCategory.value
   filters.value.retailOnly = retailOnly.value
-  await Promise.all([loadCategories(), loadProducts(), loadFeatured()])
+  await Promise.all([loadCategories(), loadProducts()])
 })
 watch(() => route.query.category, value => {
   const id = Number(value)
@@ -159,174 +121,106 @@ watch(() => route.query.category, value => {
   filters.value.page = 1
   loadProducts()
 })
-onUnmounted(stopSlider)
+watch(() => route.query.retail, value => {
+  retailOnly.value = value === '1' || value === 'true'
+  filters.value.retailOnly = retailOnly.value
+  filters.value.page = 1
+  loadProducts()
+})
 </script>
-
 <template>
-  <main class="shop-page" dir="rtl">
-    <PageHeader :home-route="{ name: 'products' }" />
+  <main class="reference-catalog-page" dir="rtl">
+    <div class="reference-container">
+      <nav class="reference-breadcrumb" aria-label="مسیر صفحه">
+        <router-link :to="{ name: 'home' }">صفحه اصلی</router-link>
+        <i class="pi pi-angle-left" aria-hidden="true" />
+        <span>همه محصولات</span>
+      </nav>
 
-    <div class="shop-feature-stage">
-    <section v-if="activeFeatured" class="shop-hero" aria-label="محصولات منتخب فروشگاه" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="startSlider">
-      <div :key="activeFeatured.id || activeSlide" class="shop-hero-copy" aria-live="polite">
-        <span class="shop-eyebrow"><i class="pi pi-sparkles"></i> پیشنهادهای منتخب فروشگاه</span>
-        <h1>{{ productName(activeFeatured) }}</h1>
-        <p>{{ activeFeatured.shortDescription || activeFeatured.description || 'مشخصات فنی و اطلاعات تأمین‌کننده این محصول را مشاهده کنید.' }}</p>
-        <div class="shop-hero-meta">
-          <span v-if="categoryName(activeFeatured)"><i class="pi pi-tag"></i>{{ categoryName(activeFeatured) }}</span>
-          <span v-if="activeFeatured.company?.name"><i class="pi pi-building"></i>{{ activeFeatured.company.name }}</span>
-        </div>
-        <div class="shop-hero-actions">
-          <router-link :to="productRoute(activeFeatured)" class="shop-primary-btn">مشاهده محصول <i class="pi pi-arrow-left"></i></router-link>
-          <router-link :to="{ name: 'products' }" class="shop-secondary-btn">همه محصولات</router-link>
-        </div>
-        <div v-if="featuredProducts.length > 1" class="shop-slider-controls">
-          <button type="button" aria-label="اسلاید قبلی" @click="previousSlide"><i class="pi pi-chevron-right"></i></button>
-          <div class="shop-slider-dots"><button v-for="(product, index) in featuredProducts" :key="product.id" type="button" :class="{ active: index === activeSlide }" :aria-label="'نمایش پیشنهاد ' + (index + 1)" @click="slideTo(index)"></button></div>
-          <button type="button" aria-label="اسلاید بعدی" @click="nextSlide"><i class="pi pi-chevron-left"></i></button>
-        </div>
-      </div>
-      <router-link :key="activeFeatured.id || activeSlide" :to="productRoute(activeFeatured)" class="shop-hero-media" :aria-label="'مشاهده ' + productName(activeFeatured)">
-        <img v-if="imageOf(activeFeatured)?.url" :src="imageOf(activeFeatured).url" :alt="productName(activeFeatured)" width="720" height="460" fetchpriority="high" />
-        <i v-else class="pi pi-box"></i>
-        <span class="shop-hero-label">منتخب بازارگاه</span>
-      </router-link>
-    </section>
+      <header class="reference-page-heading">
+        <h1>همه محصولات</h1>
+        <p>محصولات تخصصی تأمین‌کنندگان؛ خرید فوری یا ثبت استعلام</p>
+      </header>
 
-    <section v-else-if="featuredLoading" class="shop-hero shop-hero--loading" aria-busy="true">
-      <ProgressSpinner /><span>در حال آماده‌سازی پیشنهادهای فروشگاه…</span>
-    </section>
-
-    </div>
-
-    <section v-if="categoryOptions.length" class="shop-category-section">
-      <StoreSectionHeading
-        eyebrow="مرور سریع"
-        title="خرید بر اساس دسته‌بندی"
-        action-label="همه دسته‌ها"
-        :action-to="{ name: 'categories' }"
-      />
-      <div class="shop-category-strip">
-        <StoreCategoryCard
-          v-for="category in categoryOptions.slice(0, 8)"
-          :key="category.id"
-          as="button"
-          variant="tile"
-          :category="category"
-          icon="pi pi-box"
-          :count="category.count"
-          :active="selectedCategory === category.id"
-          @select="chooseCategory(category.id)"
-        />
-      </div>
-    </section>
-
-    <section v-if="featuredProducts.length" class="shop-featured-section">
-      <StoreSectionHeading eyebrow="انتخاب بازارگاه" title="محصولات ویژه">
-        <template #actions>
-          <span class="shop-section-note">منتخب‌های منتشرشده از کاتالوگ تأمین‌کنندگان</span>
-        </template>
-      </StoreSectionHeading>
-      <div class="shop-featured-grid">
-        <router-link v-for="product in featuredProducts.slice(0, 4)" :key="product.id" :to="productRoute(product)" class="shop-mini-product">
-          <span class="shop-mini-image"><img v-if="imageOf(product)?.url" :src="imageOf(product).url" :alt="productName(product)" loading="lazy" /><i v-else class="pi pi-box"></i></span>
-          <span class="shop-mini-content"><b>{{ productName(product) }}</b><small>{{ categoryName(product) || 'تجهیزات مخابراتی' }}</small><strong>{{ productPrice(product) }}</strong></span>
-          <i class="pi pi-angle-left shop-mini-arrow"></i>
-        </router-link>
-      </div>
-    </section>
-
-    <div class="shop-catalog-layout">
-      <StoreFilterPanel
-        class="shop-filter-sidebar"
-        aria-label="فیلتر محصولات"
-        title="فیلتر محصولات"
-        clear-label="حذف همه"
-        @clear="resetFilters"
-      >
-        <div class="shop-filter-section">
-          <h3>جستجوی محصول</h3>
-          <form class="shop-search" @submit.prevent="applyFilters"><InputText v-model="searchQuery" placeholder="نام، برند یا مدل محصول…" /><Button type="submit" icon="pi pi-search" aria-label="جستجو" /></form>
-        </div>
-        <div class="shop-filter-section">
-          <h3>دسته‌بندی‌ها</h3>
-          <button type="button" class="shop-filter-option" :class="{ active: !selectedCategory }" @click="chooseCategory(null)"><span class="shop-check"></span> همه محصولات</button>
-          <button v-for="category in categoryOptions" :key="category.id" type="button" class="shop-filter-option" :class="{ active: selectedCategory === category.id }" @click="chooseCategory(category.id)"><span class="shop-check"></span><span>{{ category.label }}</span><small v-if="category.count">{{ category.count.toLocaleString('fa-IR') }}</small></button>
-        </div>
-        <div class="shop-filter-section">
-          <h3>محدوده قیمت <small>ریال</small></h3>
-          <div class="shop-price-inputs"><InputNumber v-model="minPrice" inputId="shop-min-price" placeholder="از" :useGrouping="true" /><span>تا</span><InputNumber v-model="maxPrice" inputId="shop-max-price" placeholder="تا" :useGrouping="true" /></div>
-        </div>
-        <div class="shop-filter-section"><h3>نوع فروش</h3><label class="shop-retail-filter"><input v-model="retailOnly" type="checkbox" @change="applyFilters" /><span class="shop-retail-filter__check"><i class="pi pi-check"></i></span><span><b>فقط محصولات خرده‌فروشی</b><small>فروش تکی این محصولات فعال است</small></span></label></div>
-        <div class="shop-filter-section shop-filter-section--last">
-          <h3>مرتب‌سازی</h3>
-          <Select v-model="selectedSort" :options="sortOptions" optionLabel="label" optionValue="value" class="shop-sort-select" />
-        </div>
-        <div class="shop-filter-actions"><Button label="اعمال فیلترها" icon="pi pi-filter" @click="applyFilters" /><button type="button" @click="resetFilters">پاک کردن فیلترها</button></div>
-      </StoreFilterPanel>
-
-      <section class="shop-products-area" aria-label="محصولات فروشگاه" aria-live="polite" :aria-busy="loading">
-        <div class="shop-results-toolbar">
-          <div><span class="shop-results-kicker">کاتالوگ عمومی</span><h2>جدیدترین محصولات</h2><p><span class="products-count-number">{{ totalItems.toLocaleString('fa-IR') }}</span> محصول منتشرشده در بازارگاه</p></div>
-          <div class="shop-results-tools"><span><i class="pi pi-th-large"></i> نمایش شبکه‌ای</span><Select v-model="selectedSort" :options="sortOptions" optionLabel="label" optionValue="value" aria-label="مرتب‌سازی محصولات" @change="applyFilters" /></div>
-        </div>
-
-        <div v-if="loading" class="shop-state"><ProgressSpinner /><span>در حال دریافت محصولات…</span></div>
-        <div v-else-if="error" class="shop-state shop-state--error" role="alert"><i class="pi pi-exclamation-circle"></i><b>بارگذاری محصولات ناموفق بود</b><span>{{ error }}</span><Button label="تلاش دوباره" @click="loadProducts" /></div>
-        <div v-else-if="!products.length" class="shop-state"><i class="pi pi-search"></i><b>هیچ محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><Button label="حذف فیلترها" severity="secondary" @click="resetFilters" /></div>
-        <template v-else>
-          <div class="shop-product-grid">
-            <StoreProductCard
-              v-for="product in remainingProducts"
-              :key="product.id"
-              class="shop-product-card"
-              :product="product"
-              :to="productRoute(product)"
-              :category="categoryName(product)"
-              :verified="Boolean(product.company?.isVerified)"
-              :brand="product.brand || product.company?.name || 'تجهیزات شبکه'"
-              :featured="Boolean(product.isFeatured)"
-              :price-label="productPrice(product)"
-            />
+      <div class="reference-catalog-layout">
+        <StoreFilterPanel class="reference-filter-panel" title="فیلتر محصولات" clear-label="حذف همه" @clear="resetFilters">
+          <div class="reference-filter-group">
+            <h2>جستجوی محصول</h2>
+            <form class="reference-search" @submit.prevent="applyFilters">
+              <InputText v-model="searchQuery" placeholder="نام محصول، برند یا مدل…" aria-label="جستجوی محصول" />
+              <Button type="submit" icon="pi pi-search" aria-label="جستجو" />
+            </form>
           </div>
-          <div v-if="totalPages > 1" class="shop-pagination"><Paginator aria-label="صفحه‌بندی محصولات" :rows="filters.limit" :totalRecords="totalItems" :rowsPerPageOptions="[24, 48, 96]" @page="onPageChange" /></div>
-        </template>
-      </section>
+
+          <div class="reference-filter-group">
+            <h2>نوع خرید</h2>
+            <label class="reference-filter-choice"><input v-model="retailOnly" type="checkbox" @change="applyFilters" /><span>فقط محصولات خرده‌فروشی</span></label>
+          </div>
+
+          <div class="reference-filter-group">
+            <h2>دسته‌بندی</h2>
+            <button type="button" class="reference-category-choice" :class="{ 'is-active': !selectedCategory }" @click="chooseCategory(null)">همه دسته‌بندی‌ها</button>
+            <button v-for="category in categoryOptions" :key="category.id" type="button" class="reference-category-choice" :class="{ 'is-active': selectedCategory === category.id }" @click="chooseCategory(category.id)">
+              <span>{{ category.label }}</span><small v-if="category.count">{{ category.count.toLocaleString('fa-IR') }}</small>
+            </button>
+          </div>
+
+          <div class="reference-filter-group">
+            <h2>محدوده قیمت <small>ریال</small></h2>
+            <div class="reference-price-range">
+              <InputNumber v-model="minPrice" inputId="reference-min-price" placeholder="از" :useGrouping="true" />
+              <span>تا</span>
+              <InputNumber v-model="maxPrice" inputId="reference-max-price" placeholder="تا" :useGrouping="true" />
+            </div>
+            <Button label="اعمال محدوده قیمت" icon="pi pi-filter" class="reference-apply-button" @click="applyFilters" />
+          </div>
+        </StoreFilterPanel>
+
+        <section class="reference-products-area" aria-label="فهرست محصولات" :aria-busy="loading">
+          <div class="reference-products-toolbar">
+            <span>{{ totalItems.toLocaleString('fa-IR') }} محصول</span>
+            <label>مرتب‌سازی:
+              <Select v-model="selectedSort" :options="sortOptions" optionLabel="label" optionValue="value" aria-label="مرتب‌سازی محصولات" @change="applyFilters" />
+            </label>
+          </div>
+
+          <div v-if="loading" class="reference-state" role="status"><ProgressSpinner /><span>در حال دریافت محصولات…</span></div>
+          <div v-else-if="error" class="reference-state" role="alert"><i class="pi pi-exclamation-circle" /><b>دریافت محصولات ناموفق بود</b><span>{{ error }}</span><Button label="تلاش دوباره" @click="loadProducts" /></div>
+          <div v-else-if="!products.length" class="reference-state"><i class="pi pi-search" /><b>محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><Button label="حذف فیلترها" severity="secondary" @click="resetFilters" /></div>
+          <template v-else>
+            <div class="reference-product-grid">
+              <StoreProductCard v-for="product in remainingProducts" :key="product.id" :product="product" :to="productRoute(product)" :category="categoryName(product)" :verified="Boolean(product.company?.isVerified)" :brand="product.brand || product.company?.name || ''" :price-label="productPrice(product)" />
+            </div>
+            <div v-if="totalPages > 1" class="reference-pagination">
+              <Paginator aria-label="صفحه‌بندی محصولات" :rows="filters.limit" :totalRecords="totalItems" :rowsPerPageOptions="[24, 48, 96]" @page="onPageChange" />
+            </div>
+          </template>
+        </section>
+      </div>
     </div>
   </main>
 </template>
-
 <style scoped>
-.shop-page{direction:rtl;max-width:1920px;margin-inline:auto;padding:0 clamp(14px,1.8vw,28px) 40px;color:var(--tm-ink)}
-.shop-feature-stage{display:block;margin:18px 0 22px}
-.shop-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.82fr);gap:28px;align-items:center;min-height:316px;margin:0;padding:28px 30px;background:linear-gradient(116deg,#0b2548 0%,#103c69 58%,#176a91 100%);border-radius:5px;box-shadow:0 12px 30px rgba(13,43,83,.17);color:#fff;overflow:hidden}
-.shop-hero:before{content:"";position:absolute;width:390px;height:390px;inset-inline-end:-145px;top:-210px;border:1px solid rgba(255,255,255,.12);border-radius:50%;box-shadow:0 0 0 34px rgba(255,255,255,.035),0 0 0 72px rgba(255,255,255,.025);pointer-events:none}
-.shop-hero-copy,.shop-hero-media{z-index:1}
-.shop-hero-copy{animation:shop-hero-enter .42s cubic-bezier(.2,.7,.2,1) both}
-.shop-hero-media{animation:shop-hero-enter .5s cubic-bezier(.2,.7,.2,1) both}
-@keyframes shop-hero-enter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
-.shop-hero-copy{min-width:0}.shop-eyebrow{display:inline-flex;align-items:center;gap:8px;color:#b8d9f4;font-size:12px;font-weight:600}.shop-hero h1{margin:14px 0 9px;color:#fff;font-size:clamp(22px,2.2vw,30px);font-weight:600;line-height:1.5}.shop-hero p{max-width:620px;margin:0;color:#d8e7f6;font-size:13px;line-height:2}
-.shop-hero-meta{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;color:#d8e7f6;font-size:12px}.shop-hero-meta span{display:flex;align-items:center;gap:6px}.shop-hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.shop-primary-btn,.shop-secondary-btn{display:inline-flex;align-items:center;gap:9px;padding:10px 15px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none}.shop-primary-btn{background:#fff;color:#0d2b53}.shop-secondary-btn{border:1px solid rgba(255,255,255,.35);color:#fff}.shop-hero-media{position:relative;display:grid;place-items:center;height:250px;min-width:0;padding:12px;background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.055));border:1px solid rgba(255,255,255,.2);border-radius:5px;overflow:hidden}
-.shop-hero-media:after{content:"";position:absolute;inset:10px;border:1px solid rgba(255,255,255,.12);border-radius:3px;pointer-events:none}
-.shop-hero-media img{position:relative;z-index:1;filter:drop-shadow(0 14px 18px rgba(0,0,0,.2));transition:transform .45s ease}
-.shop-hero-media:hover img{transform:scale(1.045)}.shop-hero-media img{width:100%;height:100%;object-fit:contain}.shop-hero-media>i{font-size:90px;color:#d6e8fa}.shop-hero-label{position:absolute;top:12px;inset-inline-start:12px;padding:5px 9px;background:var(--tm-blue);color:#fff;border-radius:3px;font-size:11px}.shop-slider-controls{display:flex;align-items:center;gap:10px;margin-top:18px}.shop-slider-controls>button{width:29px;height:29px;border:1px solid rgba(255,255,255,.35);border-radius:3px;background:transparent;color:#fff}.shop-slider-dots{display:flex;gap:6px}.shop-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:#9eb6d0}.shop-slider-dots button.active{width:21px;border-radius:4px;background:#fff}
-.shop-hero--loading{display:flex;justify-content:center;gap:14px;color:#fff;min-height:316px}
-.shop-category-section,.shop-featured-section{margin-bottom:28px}.shop-results-kicker{color:var(--tm-blue);font-size:11px;font-weight:600}.shop-section-note{color:var(--tm-muted);font-size:11px}
-.shop-category-strip{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}
-.shop-featured-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.shop-mini-product{display:flex;align-items:center;gap:10px;min-width:0;padding:10px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;color:inherit;text-decoration:none;box-shadow:var(--tm-card-shadow)}.shop-mini-image{display:grid;place-items:center;flex:none;width:68px;height:68px;background:#f4f5fa;border-radius:3px;overflow:hidden}.shop-mini-image img{width:100%;height:100%;object-fit:contain;padding:5px}.shop-mini-image i{font-size:23px;color:var(--tm-blue)}.shop-mini-content{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}.shop-mini-content b{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.shop-mini-content small{color:var(--tm-muted);font-size:10px}.shop-mini-content strong{font-size:11px;color:var(--tm-blue)}.shop-mini-arrow{color:#9aa0b4}
-.shop-catalog-layout{display:grid;grid-template-columns:310px minmax(0,1fr);grid-template-areas:"filters products";gap:22px;align-items:start;direction:rtl}
-.shop-filter-sidebar{grid-area:filters;display:block!important;visibility:visible;min-width:0}
-.shop-products-area{grid-area:products;min-width:0}
-
-.shop-filter-section h3{color:var(--tm-ink)}
-.shop-search :deep(.p-inputtext){text-align:right}
-.shop-search :deep(.p-inputtext)::placeholder{color:#9aa1b3}.shop-filter-sidebar{position:sticky;top:82px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);overflow:hidden}.shop-filter-actions>button{border:0;background:none;color:var(--tm-blue);font-size:11px;cursor:pointer}.shop-filter-section{padding:17px 16px;border-bottom:1px solid var(--tm-line)}.shop-filter-section h3{display:flex;justify-content:space-between;margin:0 0 12px;font-size:13px;font-weight:600}.shop-filter-section h3 small{color:var(--tm-muted);font-size:10px;font-weight:400}.shop-search{display:flex;gap:6px}.shop-search :deep(.p-inputtext){width:100%;min-width:0;height:38px;font-size:11px}.shop-search :deep(.p-button){flex:none;width:40px;background:var(--tm-blue);border-color:var(--tm-blue)}.shop-filter-option{display:flex;align-items:center;gap:9px;width:100%;padding:8px 0;border:0;background:none;color:var(--tm-ink-soft);text-align:start;font-size:12px;cursor:pointer}.shop-filter-option small{margin-inline-start:auto;color:var(--tm-muted);font-size:10px}.shop-check{width:15px;height:15px;flex:none;border:1px solid #cfd3e0;border-radius:3px}.shop-filter-option.active{color:var(--tm-blue);font-weight:600}.shop-filter-option.active .shop-check{border-color:var(--tm-blue);background:var(--tm-blue);box-shadow:inset 0 0 0 3px #fff}.shop-price-inputs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}.shop-price-inputs :deep(.p-inputnumber),.shop-price-inputs :deep(.p-inputtext){width:100%;min-width:0}.shop-price-inputs :deep(.p-inputtext){height:36px;padding:7px;font-size:11px}.shop-price-inputs>span{color:var(--tm-muted);font-size:10px}.shop-sort-select{width:100%}.shop-retail-filter{display:flex;align-items:flex-start;gap:9px;cursor:pointer;color:var(--tm-ink);font-size:12px;line-height:1.8}.shop-retail-filter input{position:absolute;opacity:0;pointer-events:none}.shop-retail-filter__check{display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;margin-top:3px;border:1px solid var(--tm-line);border-radius:3px;background:var(--tm-surface);color:transparent}.shop-retail-filter input:checked + .shop-retail-filter__check{border-color:var(--tm-blue);background:var(--tm-blue);color:#fff}.shop-retail-filter input:focus-visible + .shop-retail-filter__check{outline:2px solid var(--tm-blue);outline-offset:2px}.shop-retail-filter__check i{font-size:10px}.shop-retail-filter b,.shop-retail-filter small{display:block}.shop-retail-filter small{color:var(--tm-muted);font-size:11px}
-.shop-filter-actions{display:grid;gap:9px;padding:14px 16px}.shop-filter-actions :deep(.p-button){height:39px;background:var(--tm-blue);border-color:var(--tm-blue);font-size:12px}.shop-filter-actions>button{padding:5px}
-.shop-results-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:14px;padding:15px 17px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow)}.shop-results-toolbar h2{margin:3px 0;font-size:17px;font-weight:600}.shop-results-toolbar p{margin:0;color:var(--tm-muted);font-size:11px}.shop-results-tools{display:flex;align-items:center;gap:12px}.shop-results-tools>span{display:flex;align-items:center;gap:5px;color:var(--tm-muted);font-size:11px}.shop-results-tools :deep(.p-select){min-width:145px;font-size:11px}
-.shop-product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,168px),210px));justify-content:start;gap:10px}
-.shop-state{display:flex;min-height:300px;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px;background:var(--tm-surface);border:1px dashed var(--tm-line-strong);border-radius:4px;color:var(--tm-muted);text-align:center}.shop-state>i{font-size:30px;color:var(--tm-blue)}.shop-state>b{color:var(--tm-ink);font-size:14px}.shop-state>span{font-size:12px}.shop-state--error>i{color:#d94848}.shop-pagination{margin-top:18px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;overflow:hidden}
-@media(max-width:1200px){.shop-hero{gap:18px;padding:22px}.shop-catalog-layout{grid-template-columns:280px minmax(0,1fr)}.shop-category-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.shop-featured-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.shop-catalog-layout{grid-template-columns:260px minmax(0,1fr)}}
-@media(max-width:820px){.shop-hero{grid-template-columns:minmax(0,1fr) minmax(220px,.75fr);padding:20px}.shop-hero-media{height:210px}.shop-catalog-layout{grid-template-columns:1fr;grid-template-areas:"filters" "products"}.shop-filter-sidebar{position:static}.shop-results-toolbar{align-items:flex-start;flex-direction:column}.shop-results-tools{width:100%;justify-content:space-between}}
-@media(max-width:520px){.shop-hero{grid-template-columns:1fr;padding:17px}.shop-hero-media{grid-row:1;height:190px}.shop-page{padding-inline:12px}.shop-category-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-featured-grid{grid-template-columns:1fr}.shop-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),210px));gap:8px}.shop-results-tools>span{display:none}}
-@media(prefers-reduced-motion:reduce){.shop-hero-media img{transition:none}.shop-hero-copy,.shop-hero-media{animation:none}}
+.reference-catalog-page{--tm-canvas:#f4f5fa;--tm-surface:#fff;--tm-ink:#12182b;--tm-muted:#6b7390;--tm-line:#e4e7f2;--tm-blue:#6c5ce7;--tm-cyan:#2aa7e8;--tm-green:#0f9d73;--tm-chip:#eceaff;--tm-card-shadow:0 2px 10px rgba(20,30,70,.06);min-height:60vh;background:var(--tm-canvas);color:var(--tm-ink);font-family:Vazirmatn,Tahoma,sans-serif}
+.reference-container{width:100%;max-width:1240px;margin-inline:auto;padding:0 20px 40px}
+.reference-breadcrumb{display:flex;align-items:center;gap:7px;padding:18px 0 4px;color:var(--tm-muted);font-size:13px}
+.reference-breadcrumb a{color:var(--tm-blue);text-decoration:none}.reference-breadcrumb i{font-size:11px}
+.reference-page-heading{padding:6px 0 4px}.reference-page-heading h1{margin:0;color:var(--tm-ink);font-size:28px;line-height:1.6;font-weight:800}.reference-page-heading p{margin:0;color:var(--tm-muted);font-size:14px}
+.reference-catalog-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;margin:18px 0;align-items:start}
+.reference-filter-panel{position:sticky;top:82px;min-width:0}.reference-filter-panel :deep(.store-filter-panel){border:0;border-radius:14px;background:var(--tm-surface);box-shadow:var(--tm-card-shadow)}
+.reference-filter-panel :deep(.store-filter-panel__head){padding:16px;background:var(--tm-surface);border-bottom:1px solid var(--tm-line)}
+.reference-filter-panel :deep(.store-filter-panel__body){padding:0 16px}
+.reference-filter-group{padding:14px 0;border-bottom:1px solid var(--tm-line)}
+.reference-filter-group:last-child{border-bottom:0}.reference-filter-group h2{display:flex;justify-content:space-between;gap:8px;margin:0 0 9px;color:var(--tm-ink);font-size:14px;font-weight:700}.reference-filter-group h2 small{color:var(--tm-muted);font-size:11px;font-weight:400}
+.reference-search{display:flex;gap:6px}.reference-search :deep(.p-inputtext){width:100%;min-width:0;height:38px;font-size:12px;text-align:right}.reference-search :deep(.p-button){flex:none;width:40px;background:var(--tm-blue);border-color:var(--tm-blue)}
+.reference-filter-choice{display:flex;align-items:center;gap:8px;color:var(--tm-muted);font-size:12px;cursor:pointer}.reference-filter-choice input{accent-color:var(--tm-blue)}
+.reference-category-choice{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:7px 0;border:0;background:transparent;color:var(--tm-muted);font:inherit;font-size:12px;text-align:start;cursor:pointer}.reference-category-choice small{color:var(--tm-muted);font-size:10px}.reference-category-choice.is-active{color:var(--tm-blue);font-weight:700}
+.reference-price-range{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}.reference-price-range :deep(.p-inputnumber),.reference-price-range :deep(.p-inputtext){width:100%;min-width:0}.reference-price-range :deep(.p-inputtext){height:36px;padding:7px;font-size:11px}.reference-price-range>span{color:var(--tm-muted);font-size:10px}
+.reference-apply-button{width:100%;margin-top:10px;background:var(--tm-blue);border-color:var(--tm-blue);font-size:12px}
+.reference-products-area{min-width:0}.reference-products-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;color:var(--tm-muted);font-size:13px}.reference-products-toolbar label{display:flex;align-items:center;gap:8px}.reference-products-toolbar :deep(.p-select){min-width:150px;font-size:12px}
+.reference-product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.reference-pagination{margin-top:18px;overflow:hidden;border:1px solid var(--tm-line);border-radius:12px;background:var(--tm-surface)}
+.reference-state{display:flex;min-height:260px;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px;border:1px dashed var(--tm-line);border-radius:14px;background:var(--tm-surface);color:var(--tm-muted);text-align:center;font-size:13px}.reference-state>i{color:var(--tm-blue);font-size:28px}.reference-state>b{color:var(--tm-ink);font-size:14px}
+@media(max-width:900px){.reference-catalog-layout{grid-template-columns:1fr}.reference-filter-panel{position:static}.reference-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.reference-container{padding-inline:14px}.reference-page-heading h1{font-size:24px}.reference-products-toolbar{align-items:flex-start;flex-direction:column}.reference-product-grid{gap:9px}}
 </style>
