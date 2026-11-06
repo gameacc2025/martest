@@ -2,7 +2,7 @@
 /**
  * StoreProductCard — product tile extracted from `Telecom Market.html` (`.p`).
  *
- * Structure (RTL): portrait media with category/rank badges → brand + verified
+ * Structure (RTL): compact media area (130px, as in the reference) with category/rank badges → brand + verified
  * supplier → sales-mode chip → product name → model/SKU meta → price or an
  * explicit inquiry label → action slot.
  *
