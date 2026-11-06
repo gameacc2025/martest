@@ -1,3 +1,13 @@
+## 2026-11-06 — Unified public-site side drawers (TEM-DRAWERS-01)
+- **Status:** IMPLEMENTED on `feat/tem-storefront-drawers`; awaiting local build/test verification and PR review.
+- Replaced the bespoke notification popover overlay and bespoke cart overlay with PrimeVue 4 `Drawer` instances. Both enter from the same physical left edge (matching the existing RTL storefront drawer behavior), use the same modal/backdrop, scroll locking, dismiss-on-backdrop, and Escape behavior.
+- Preserved existing live notification endpoints, unread badge, latest-five preview, role-based destination behavior, cart store, quantity controls, item removal, subtotal and checkout navigation.
+- Added/updated `PublicLayout.test.js` contracts to cover the shared drawer position and contents.
+- No backend, API, route, auth, pricing or order workflow changes.
+- **Verification:** NOT RUN in this GitHub-only editing session. Run the Website test suite and `pnpm run build:website` from the local checkout; browser/visual verification remains pending.
+- **Commits:** `d662006` (drawer conversion), `58f0bc2` (drawer layout cleanup), `cca89b1` (drawer regression coverage).
+- **Next:** run focused `PublicLayout.test.js`, Website build, then continue the broader Telecom Market reference audit and extract any remaining missing widgets/API backlog into issue #87.
+
 ## Public company storefront route hardening — 2026-11-06
 - Registered `GET /api/v1/companies/public/:id` directly on the root Fastify app scope instead of inside the company-management plugin. The route is therefore independent of the plugin's authentication hook.
 - Added a full-app route-registration regression assertion and synchronized API inventory/OpenAPI metadata to mark the route public.
