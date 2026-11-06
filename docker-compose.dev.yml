@@ -71,7 +71,7 @@ services:
       postgres:
         condition: service_healthy
 
-    # The backend entrypoint runs `prisma db push` + `seed` before the HTTP
+    # The backend entrypoint runs `prisma migrate deploy` + `prisma db seed` before the HTTP
     # server starts listening on 3000. Without a healthcheck the Vite dev
     # servers (which proxy /api to this container) come up first and return
     # "502 Bad Gateway" until the API is actually ready.
