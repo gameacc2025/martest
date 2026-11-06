@@ -9,7 +9,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
-import { productsApi } from '@telecom/api-client'
+import { productsApi, bannersApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
@@ -20,6 +20,10 @@ const showMyInquiriesLink = computed(() => authStore.isAuthenticated && authStor
 
 const featuredProducts = ref([])
 const recentProducts = ref([])
+const promotionalBanners = ref([])
+const activeBannerIndex = ref(0)
+let bannerTimer = null
+const activeBanner = computed(() => promotionalBanners.value[activeBannerIndex.value] || promotionalBanners.value[0] || null)
 const categories = ref([])
 const loading = ref(false)
 const categoriesLoading = ref(false)
@@ -50,6 +54,25 @@ function handleSliderFocusOut(event) {
 function stopSlider() {
   if (slideTimer) clearInterval(slideTimer)
   slideTimer = null
+}
+function startBannerSlider() {
+  if (bannerTimer) clearInterval(bannerTimer)
+  if (promotionalBanners.value.length > 1) bannerTimer = setInterval(() => { activeBannerIndex.value = (activeBannerIndex.value + 1) % promotionalBanners.value.length }, 7000)
+}
+function stopBannerSlider() {
+  if (bannerTimer) clearInterval(bannerTimer)
+  bannerTimer = null
+}
+async function fetchPromotionalBanners() {
+  try {
+    const response = await bannersApi.listActive('HOME_HERO')
+    const data = response?.data?.data ?? response?.data ?? []
+    promotionalBanners.value = Array.isArray(data) ? data : []
+    activeBannerIndex.value = 0
+    startBannerSlider()
+  } catch (error) {
+    promotionalBanners.value = []
+  }
 }
 
 const features = [
@@ -159,8 +182,9 @@ async function fetchCategories() {
 onMounted(() => {
   fetchProducts()
   fetchCategories()
+  fetchPromotionalBanners()
 })
-onUnmounted(stopSlider)
+onUnmounted(() => { stopSlider(); stopBannerSlider() })
 </script>
 
 <template>
@@ -187,7 +211,7 @@ onUnmounted(stopSlider)
               <router-link v-if="showMyInquiriesLink" :to="{ name: 'my-inquiries' }">استعلام‌های من</router-link>
             </div>
           </div>
-          <div class="home-hero__visual" aria-label="اسلایدر محصولات منتخب فروشگاه">
+          <div class="home-hero__visual" :class="{ 'home-hero__visual--no-banner': !activeBanner }" aria-label="اسلایدر محصولات منتخب و بنر تبلیغاتی">
             <div v-if="activeFeaturedProduct" class="home-featured-slider" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="handleSliderFocusOut">
               <div class="home-featured-slider__media">
                 <img v-if="getProductImage(activeFeaturedProduct)" :src="getProductImage(activeFeaturedProduct).url" :alt="activeFeaturedProduct.name || activeFeaturedProduct.title || 'محصول منتخب'" width="560" height="390" fetchpriority="high" decoding="async" />
@@ -213,6 +237,19 @@ onUnmounted(stopSlider)
               <i class="pi pi-box" aria-hidden="true"></i>
               <span class="home-hero__product-caption">محصولات تخصصی شبکه و مخابرات</span>
             </div>
+            <a v-if="activeBanner" class="home-promo-banner" :href="activeBanner.targetUrl || undefined" :class="{ 'home-promo-banner--clickable': !!activeBanner.targetUrl }" @mouseenter="stopBannerSlider" @mouseleave="startBannerSlider" @focusin="stopBannerSlider" @focusout="startBannerSlider">
+              <img :src="activeBanner.imageUrl" :alt="activeBanner.title" width="720" height="420" loading="eager" decoding="async" />
+              <span class="home-promo-banner__shade"></span>
+              <span class="home-promo-banner__content">
+                <span class="home-promo-banner__eyebrow">پیشنهاد ویژه بازارگاه</span>
+                <strong>{{ activeBanner.title }}</strong>
+                <span v-if="activeBanner.description">{{ activeBanner.description }}</span>
+                <span v-if="activeBanner.ctaLabel" class="home-promo-banner__cta">{{ activeBanner.ctaLabel }} <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
+              </span>
+              <span v-if="promotionalBanners.length > 1" class="home-promo-banner__dots" aria-label="اسلایدهای تبلیغاتی">
+                <button v-for="(banner, index) in promotionalBanners" :key="banner.id" type="button" :class="{ 'is-active': index === activeBannerIndex }" :aria-label="'نمایش بنر ' + (index + 1)" @click.prevent="activeBannerIndex = index; stopBannerSlider()"></button>
+              </span>
+            </a>
             <ul class="home-hero__benefits">
               <li><i class="pi pi-check-circle" aria-hidden="true"></i><span>کاتالوگ تخصصی تجهیزات شبکه</span></li>
               <li><i class="pi pi-file-edit" aria-hidden="true"></i><span>مسیر جداگانه برای استعلام پروژه‌ای</span></li>
@@ -391,7 +428,21 @@ onUnmounted(stopSlider)
 .home-hero { border:1px solid var(--tm-line); border-radius:4px; background:var(--tm-surface); box-shadow:var(--tm-card-shadow); padding:24px; }
 .home-hero__actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
 .home-hero__actions .tm-btn { min-height: 44px; }
-.home-hero__visual { display: grid; grid-template-columns: minmax(0,1fr); gap: 1rem; align-items: center; }
+.home-hero__visual { display: grid; grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr); gap: 1rem; align-items: stretch; }
+.home-hero__visual--no-banner .home-featured-slider,
+.home-hero__visual--no-banner .home-hero__product { grid-column: 1 / -1; }
+.home-hero__visual .home-hero__benefits { grid-column: 1 / -1; }
+.home-promo-banner { position:relative; display:block; min-width:0; min-height:330px; overflow:hidden; border:1px solid var(--tm-line); border-radius:4px; background:var(--tm-surface-alt); color:#fff; text-decoration:none; box-shadow:var(--tm-card-shadow); isolation:isolate; }
+.home-promo-banner > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
+.home-promo-banner__shade { position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,rgba(5,18,39,.78),rgba(5,18,39,.12) 100%); }
+.home-promo-banner__content { position:absolute; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; gap:.65rem; padding:clamp(1.25rem,2.2vw,2rem); }
+.home-promo-banner__eyebrow { font-size:.75rem; font-weight:800; color:#d7f8ff; }
+.home-promo-banner__content strong { max-width:24ch; font-size:clamp(1.35rem,2vw,2rem); line-height:1.65; font-weight:900; }
+.home-promo-banner__content > span:not(.home-promo-banner__eyebrow):not(.home-promo-banner__cta) { max-width:38ch; font-size:.9rem; line-height:1.9; color:rgba(255,255,255,.9); }
+.home-promo-banner__cta { display:inline-flex; align-items:center; gap:.5rem; margin-top:.3rem; padding:.65rem 1rem; border-radius:4px; background:#fff; color:#132c4c; font-size:.8rem; font-weight:800; }
+.home-promo-banner__dots { position:absolute; inset-inline-start:1rem; top:1rem; display:flex; gap:.4rem; }
+.home-promo-banner__dots button { width:7px; height:7px; padding:0; border:0; border-radius:10px; background:rgba(255,255,255,.55); cursor:pointer; }
+.home-promo-banner__dots button.is-active { width:22px; background:#fff; }
 .home-hero__product { min-width: 0; min-height: 250px; display: grid; place-items: center; gap: .5rem; padding: 1rem; border: 1px solid var(--tm-line); border-radius: 4px; background: var(--tm-canvas); color: var(--tm-ink); }
 .home-hero__product img { width: 100%; max-height: 230px; object-fit: contain; }
 .home-hero__product > i { font-size: 5rem; color: var(--tm-violet); }
@@ -678,6 +729,8 @@ onUnmounted(stopSlider)
   .home-hero { grid-template-columns: 1fr; }
   .home-category-grid,.home-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-hero__visual { grid-template-columns: minmax(0, 1fr); }
+  .home-promo-banner { min-height:260px; }
+  .home-hero__visual .home-hero__benefits { grid-column:1; }
   .home-hero__product { min-height: 180px; }
   .home-hero__benefits { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 }
@@ -693,6 +746,7 @@ onUnmounted(stopSlider)
 }
 @media (max-width: 575px) {
   .home-featured-slider { min-height: 0; }
+  .home-promo-banner { min-height:230px; }
   .home-featured-slider__content { padding: 1rem 1rem 3.2rem; }
   .home-featured-slider__media { min-height: 150px; }
   .home-featured-slider__media img { height: 145px; }
