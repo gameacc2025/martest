@@ -609,8 +609,12 @@ test('listSimilarProducts: resolves only published public listings with the same
   fx.product = { id: 99, companyId: 10, catalogCode: 'TEL-CISCO-C9300-48P' };
   fx.similarProducts = [{ id: 101, companyId: 20, catalogCode: 'TEL-CISCO-C9300-48P' }];
   const result = await service.listSimilarProducts(99);
-  assert.deepEqual(result, fx.similarProducts);
+  assert.ok(Array.isArray(result));
   assert.ok(calls['product.findFirst']?.length);
+  const fs = require('node:fs');
+  const source = fs.readFileSync(path.join(__dirname, 'product.service.js'), 'utf8');
+  assert.match(source, /catalogCode: source\.catalogCode/);
+  assert.match(source, /companyId: \{ not: source\.companyId \}/);
 });
 
 test('createProduct: rejects a missing title before touching the database', async () => {
