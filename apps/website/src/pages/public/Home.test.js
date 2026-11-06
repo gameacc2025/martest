@@ -83,7 +83,7 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('home-campaign-hero__controls')
     expect(source).toContain('aria-label="پیشنهادهای ویژه بازارگاه"')
     expect(source).toContain('function nextSlide()')
-    expect(source).toContain('onUnmounted(stopSlider)')
+    expect(source).toContain('onUnmounted(() => { stopSlider(); stopBannerSlider() })')
     expect(source).toContain('home-product-grid--recent')
     expect(source).toContain('var(--tm-canvas)')
     expect(source).not.toContain('7c6cf6')
