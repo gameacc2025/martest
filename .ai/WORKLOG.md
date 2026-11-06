@@ -3829,3 +3829,21 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Fix:** `docker restart telecom_backend_dev`. Verified `GET /api/v1/companies/public/35` → 200 (direct `:3000` and via Vite `:3001`) and `GET /api/v1/products?page=1&limit=12&companyId=35` → 200 (12 items, total 15).
 - **Verification:** `apps/website/src/pages/public/CompanyProfile.test.js` → 7/7 pass; backend `src/app.test.js` inside the container → 21/22 pass, including "GET /api/v1/companies/public/:id is registered at the root scope". The one failure is `ENOENT /docs/API_ROUTE_INVENTORY.md` because the container only mounts `./backend`, not the repo `docs/` folder.
 - **Code change:** none required — the route was already correct and committed. Operational note: after editing backend source under Docker on Windows, run `docker restart telecom_backend_dev`.
+
+## 2026-11-07 - HOME-LIVELY-01 - Homepage motion & interaction pass
+- **Status:** DONE
+- **Agent:** OpenCode (DeepSeek V4.1 Flash)
+- **Goal:** Make the Website homepage feel more dynamic/lively using its existing elements, without changing the palette/style system.
+- **Scope (actual):** apps/website/src/pages/public/Home.vue (+ Home.test.js assertions). No API/route/backend/business changes; no new colors, no new dependencies.
+- **What changed:**
+  - `vReveal` directive + shared `IntersectionObserver`: sections, section titles, category cards and all product shelves/page CTAs fade/rise in once, with a bounded stagger (`revealDelay`). Hidden state is scoped to `prefers-reduced-motion: no-preference` and `:not(.is-revealed)`, so the reduced/no-JS page is the finished page. `animation-fill-mode: backwards` (not `both`) so post-reveal hover transforms are not shadowed.
+  - Campaign hero: stacked `<img>` crossfade (`is-active` opacity switch) plus a subtle `home-hero-drift` ken-burns; copy/spotlight fade in. The outgoing banner eases its scale back as it fades.
+  - Section-title underline sweep, product-card image zoom + CTA arrow nudge, category-icon tint on hover (hover/pointer:fine only).
+  - Autoplay loops pause while the tab is hidden and resume on return (`visibilitychange`).
+- **Palette/style:** reuse existing `--tm-*` tokens only; `Home.test.js` still asserts no literal `7c6cf6`.
+- **Verification (actually run):**
+  - `npx vitest run apps/website/src/pages/public/Home.test.js apps/website/src/pages/public/StorefrontCardSizing.test.js` -> 2 files, 21 tests passed.
+  - `pnpm run build:website` -> built successfully (Vite, ~12s).
+  - Full `npx vitest run` -> 57 files passed, 3 failed (5 tests): `Faq.test.js` (1), `Terms.test.js` (2), `WorkspacePageHeading.test.js` (2). These are the same pre-existing unrelated failures recorded in the preceding entry; none of the failing files is touched by this change.
+  - Browser/visual checks: **NOT RUN** (owner instruction prohibits browser automation/screenshot loops).
+- **Known minor note:** the `home-hero-drift` scale resets when a banner is deactivated; it is eased over the same 0.9s crossfade so it is not a hard snap.

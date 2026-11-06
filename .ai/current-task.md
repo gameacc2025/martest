@@ -1,3 +1,9 @@
+## Website homepage motion & liveliness — 2026-11-07 (HOME-LIVELY-01)
+- **Status:** DONE. Homepage now has a reduced-motion-gated motion layer built from its existing elements; palette/style system unchanged.
+- `apps/website/src/pages/public/Home.vue`: `vReveal` directive + shared `IntersectionObserver` (sections, titles, category cards, product shelves, CTAs; bounded stagger); campaign-banner crossfade + subtle `home-hero-drift`; section-title underline sweep; product-card image zoom + CTA arrow nudge (hover/pointer:fine only); autoplay loops pause while the tab is hidden.
+- Hidden states are scoped to `prefers-reduced-motion: no-preference` / `:not(.is-revealed)` and use `animation-fill-mode: backwards`, so the reduced/no-JS page is the finished page and post-reveal hover transforms are not shadowed.
+- Only existing `--tm-*` tokens used; no new colors, deps, API/route/backend/business changes.
+- Verification: `Home.test.js` + `StorefrontCardSizing.test.js` -> 21/21 passed; `pnpm run build:website` succeeded; full `npx vitest run` -> 57 files passed with only the 5 known pre-existing unrelated failures (FAQ 1, Terms 2, WorkspacePageHeading 2). Browser/visual checks **NOT RUN** (owner instruction).
 ## Public company storefront route hardening — 2026-11-06
 - Registered `GET /api/v1/companies/public/:id` directly on the root Fastify app scope instead of inside the company-management plugin. The route is therefore independent of the plugin's authentication hook.
 - Added a full-app route-registration regression assertion and synchronized API inventory/OpenAPI metadata to mark the route public.

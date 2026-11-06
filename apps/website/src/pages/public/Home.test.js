@@ -134,6 +134,26 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('var(--tm-canvas)')
     expect(source).not.toContain('7c6cf6')
   })
+
+  it('adds a reduced-motion-gated motion layer without hiding the finished page', () => {
+    // Entrance choreography is opt-in via IntersectionObserver, and the hidden
+    // state only exists under prefers-reduced-motion: no-preference.
+    expect(source).toContain('prefers-reduced-motion: no-preference')
+    expect(source).toContain('prefers-reduced-motion:reduce')
+    expect(source).toContain('const vReveal')
+    expect(source).toContain('home-reveal')
+    expect(source).toContain('is-revealed')
+    // Campaign banners crossfade between stacked, opacity-switched images.
+    expect(source).toContain("'is-active': index === activeBannerIndex")
+    expect(source).toContain('.home-campaign-hero__image.is-active')
+    expect(source).toContain('@keyframes home-hero-drift')
+    // Autoplay loops pause while the tab is hidden.
+    expect(source).toContain("addEventListener('visibilitychange', handleVisibilityChange)")
+    expect(source).toContain('prefersReducedMotion()')
+    // Interaction feedback animates transform/opacity only.
+    expect(source).toContain('.home-page .product-card:hover .product-card__media img')
+    expect(source).toContain('revealDelay(index)')
+  })
 })
 
 describe('Storefront product presentation scenarios', () => {

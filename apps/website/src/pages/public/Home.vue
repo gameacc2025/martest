@@ -65,6 +65,43 @@ function stopBannerSlider() {
   if (bannerTimer) clearInterval(bannerTimer)
   bannerTimer = null
 }
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+}
+// Pause the two autoplay loops while the tab is hidden so off-screen work stops.
+function handleVisibilityChange() {
+  if (typeof document !== 'undefined' && document.hidden) { stopSlider(); stopBannerSlider() }
+  else { startSlider(); startBannerSlider() }
+}
+// Entrance choreography for the storefront sections. The hidden state lives under
+// `prefers-reduced-motion: no-preference` in CSS, so the reduced/no-JS page is the
+// finished page; the observer only adds the revealed class once per element.
+let revealObserver = null
+function getRevealObserver() {
+  if (revealObserver || typeof IntersectionObserver === 'undefined') return revealObserver
+  revealObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue
+      entry.target.classList.add('is-revealed')
+      revealObserver.unobserve(entry.target)
+    }
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 })
+  return revealObserver
+}
+const vReveal = {
+  mounted(el) {
+    if (prefersReducedMotion()) { el.classList.add('is-revealed'); return }
+    el.classList.add('home-reveal')
+    const observer = getRevealObserver()
+    if (!observer) { el.classList.add('is-revealed'); return }
+    observer.observe(el)
+  },
+  unmounted(el) { if (revealObserver) revealObserver.unobserve(el) },
+}
+// Bound the stagger so the last card in a long shelf never waits long.
+function revealDelay(index, step = 45) {
+  return Math.min(index, 9) * step + 'ms'
+}
 async function fetchPromotionalBanners() {
   try {
     const response = await bannersApi.listActive('HOME_HERO')
@@ -182,15 +219,29 @@ onMounted(() => {
   fetchProducts()
   fetchCategories()
   fetchPromotionalBanners()
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 onUnmounted(() => { stopSlider(); stopBannerSlider() })
+onUnmounted(() => {
+  if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', handleVisibilityChange)
+  if (revealObserver) { revealObserver.disconnect(); revealObserver = null }
+})
 </script>
 
 <template>
   <div class="home-page" dir="rtl">
     <section class="home-campaign-hero" aria-label="پیشنهادهای ویژه بازارگاه">
       <div v-if="activeBanner" class="home-campaign-hero__slide">
-        <img class="home-campaign-hero__image" :src="activeBanner.imageUrl" :alt="activeBanner.title" fetchpriority="high" decoding="async" />
+        <img
+          v-for="(banner, index) in promotionalBanners"
+          :key="banner.id"
+          class="home-campaign-hero__image"
+          :class="{ 'is-active': index === activeBannerIndex }"
+          :src="banner.imageUrl"
+          :alt="index === activeBannerIndex ? banner.title : ''"
+          :fetchpriority="index === 0 ? 'high' : 'auto'"
+          decoding="async"
+        />
         <div class="home-campaign-hero__shade"></div>
         <div class="home-container home-campaign-hero__inner">
           <div class="home-campaign-hero__copy">
@@ -246,7 +297,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
     <div class="home-container">
       <!-- Categories -->
       <section class="home-section" aria-labelledby="home-categories">
-        <div class="site-section-title">
+        <div v-reveal class="site-section-title">
           <h2 id="home-categories">دسته‌بندی محصولات</h2>
           <router-link :to="{ name: 'categories' }">همه دسته‌بندی‌ها</router-link>
         </div>
@@ -266,10 +317,12 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
         <div v-else class="home-category-track" aria-label="دسته‌بندی‌های محصولات">
           <button
-            v-for="category in visibleCategories"
+            v-for="(category, index) in visibleCategories"
             :key="category.id"
+            v-reveal
             type="button"
             class="category-card"
+            :style="{ '--reveal-delay': revealDelay(index) }"
             @click="viewCategoryProducts(category.id)"
           >
             <span class="category-card__icon" aria-hidden="true"><i :class="categoryIcon(category)"></i></span>
@@ -280,7 +333,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
       <!-- Featured products -->
       <section class="home-section" aria-labelledby="home-featured">
-        <div class="site-section-title">
+        <div v-reveal class="site-section-title">
           <h2 id="home-featured">محصولات منتخب</h2>
           <router-link :to="{ name: 'products' }">همه محصولات</router-link>
         </div>
@@ -302,7 +355,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div>
 
         <div v-else class="home-product-grid">
-          <article v-for="product in featuredProducts.slice(0, 8)" :key="product.id" class="product-card">
+          <article v-for="(product, index) in featuredProducts.slice(0, 8)" :key="product.id" v-reveal class="product-card" :style="{ '--reveal-delay': revealDelay(index) }">
             <router-link :to="productRoute(product)" class="product-card__main">
               <span class="product-card__media">
                 <span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span>
@@ -330,7 +383,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
       <!-- Recent products -->
       <section class="home-section" aria-labelledby="home-recent">
-        <div class="site-section-title">
+        <div v-reveal class="site-section-title">
           <h2 id="home-recent">تازه‌ترین محصولات</h2>
           <router-link :to="{ name: 'products' }">مشاهده همه محصولات</router-link>
         </div>
@@ -347,7 +400,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
           <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده همه محصولات</router-link>
         </div>
         <div v-else class="home-product-grid home-product-grid--recent">
-          <article v-for="product in recentProducts.slice(0, 8)" :key="product.id" class="product-card">
+          <article v-for="(product, index) in recentProducts.slice(0, 8)" :key="product.id" v-reveal class="product-card" :style="{ '--reveal-delay': revealDelay(index) }">
             <router-link :to="productRoute(product)" class="product-card__main">
               <span class="product-card__media">
                 <span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span>
@@ -374,9 +427,9 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
 
       <section class="home-section home-retail-section" aria-labelledby="home-retail-latest">
-        <div class="site-section-title"><div><h2 id="home-retail-latest">جدیدترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">محصولاتی که امکان خرید تکی آن‌ها فعال شده است</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">همه محصولات خرده‌فروشی</router-link></div>
+        <div v-reveal class="site-section-title"><div><h2 id="home-retail-latest">جدیدترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">محصولاتی که امکان خرید تکی آن‌ها فعال شده است</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">همه محصولات خرده‌فروشی</router-link></div>
         <div v-if="retailLatestProducts.length" class="home-product-grid">
-          <article v-for="product in retailLatestProducts" :key="product.id" class="product-card">
+          <article v-for="(product, index) in retailLatestProducts" :key="product.id" v-reveal class="product-card" :style="{ '--reveal-delay': revealDelay(index) }">
             <router-link :to="productRoute(product)" class="product-card__main"><span class="product-card__media"><span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span><img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" /><i v-else class="pi pi-box" aria-hidden="true"></i></span>
               <span class="product-card__body"><span class="product-card__brand">{{ product.brand || product.company?.name || 'تجهیزات شبکه و مخابرات' }}</span><span class="product-card__mode product-card__mode--fixed">فروش خرده‌فروشی</span><span class="product-card__name">{{ product.name || product.title }}</span><span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" class="product-sku" dir="ltr">{{ product.sku }}</b></span><span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span></span></router-link>
             <div class="product-card__foot"><span class="product-card__price"><small>قیمت</small><b>{{ productPriceLabel(product) }}</b></span><router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></div>
@@ -385,12 +438,12 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
       </section>
 
       <section class="home-section home-retail-bestsellers" aria-labelledby="home-retail-bestsellers">
-        <div class="site-section-title"><div><h2 id="home-retail-bestsellers">پرفروش‌ترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">رتبه‌بندی بر اساس تعداد فروش ثبت‌شده</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">مشاهده محصولات خرده‌فروشی</router-link></div>
+        <div v-reveal class="site-section-title"><div><h2 id="home-retail-bestsellers">پرفروش‌ترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">رتبه‌بندی بر اساس تعداد فروش ثبت‌شده</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">مشاهده محصولات خرده‌فروشی</router-link></div>
         <div class="home-empty home-retail-bestsellers__unavailable" role="status"><i class="pi pi-chart-bar" aria-hidden="true"></i><p>با راه‌اندازی ثبت سفارش و گزارش فروش، این بخش بر اساس آمار واقعی فروش نمایش داده می‌شود.</p></div>
       </section>
 
       <!-- Inquiry CTA -->
-      <section class="home-cta">
+      <section v-reveal class="home-cta">
         <div>
           <h2>محصول مورد نظر را پیدا نکردید؟</h2>
           <p>ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان، بدون نیاز به خرید مستقیم.</p>
@@ -403,21 +456,21 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
       <!-- Promotional discovery cards -->
       <section class="home-promo-grid" aria-label="راهکارهای بازارگاه">
-        <article class="home-promo-card home-promo-card--catalog">
+        <article v-reveal class="home-promo-card home-promo-card--catalog" :style="{ '--reveal-delay': '0ms' }">
           <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-box"></i></span>
           <span class="home-promo-card__eyebrow">کاتالوگ تخصصی</span>
           <h2>تجهیزات مناسب پروژه‌تان را دقیق‌تر پیدا کنید</h2>
           <p>دسته‌بندی‌ها و مشخصات محصولات منتشرشده را کنار هم بررسی کنید.</p>
           <router-link :to="{ name: 'categories' }">مرور دسته‌بندی‌ها <i class="pi pi-arrow-left"></i></router-link>
         </article>
-        <article class="home-promo-card home-promo-card--suppliers">
+        <article v-reveal class="home-promo-card home-promo-card--suppliers" :style="{ '--reveal-delay': '90ms' }">
           <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-building"></i></span>
           <span class="home-promo-card__eyebrow">شبکه تأمین</span>
           <h2>اطلاعات تأمین‌کننده را کنار محصول بررسی کنید</h2>
           <p>نام شرکت عرضه‌کننده و وضعیت تأیید آن را در اطلاعات هر محصول ببینید.</p>
           <router-link :to="{ name: 'products' }">مشاهده کاتالوگ محصولات <i class="pi pi-arrow-left"></i></router-link>
         </article>
-        <article class="home-promo-card home-promo-card--inquiry">
+        <article v-reveal class="home-promo-card home-promo-card--inquiry" :style="{ '--reveal-delay': '180ms' }">
           <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-file-edit"></i></span>
           <span class="home-promo-card__eyebrow">نیازهای سازمانی</span>
           <h2>برای خریدهای پروژه‌ای استعلام بگیرید</h2>
@@ -426,7 +479,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </article>
       </section>
 
-      <section class="home-cta home-cta--retail">
+      <section v-reveal class="home-cta home-cta--retail">
         <div><h2>برای خرید مستقیم آماده‌اید؟</h2><p>محصولات دارای قیمت ثابت را در کاتالوگ پیدا کنید و جزئیات شرایط ارائه را بررسی کنید.</p></div>
         <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">جستجوی محصولات قیمت‌دار</router-link>
       </section>
@@ -841,4 +894,43 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 @media(max-width:1200px){.home-campaign-hero__fallback-inner{gap:28px}}
 @media(max-width:820px){.home-campaign-hero__fallback-inner{grid-template-columns:1fr;padding-block:36px}.home-campaign-hero__spotlight{min-height:220px}.home-campaign-hero__spotlight img{height:130px}}
 @media(prefers-reduced-motion:reduce){.home-promo-card{transition:none}.home-promo-card:hover{transform:none}}
+
+/* ── Motion layer ──────────────────────────────────────────────
+   Storefront entrance choreography and interaction feedback. Every hidden
+   state lives inside prefers-reduced-motion: no-preference, so the reduced
+   page is the finished page. Only transform/opacity are animated. */
+.home-page{--home-ease-out:cubic-bezier(.22,1,.36,1);--home-ease-expo:cubic-bezier(.16,1,.3,1)}
+
+/* Crossfade between scheduled campaign banners (the one moving picture). */
+.home-campaign-hero__image{opacity:0}
+.home-campaign-hero__image.is-active{opacity:1}
+
+@media (prefers-reduced-motion: no-preference){
+  .home-reveal:not(.is-revealed){opacity:0}
+  .home-reveal.is-revealed{animation:home-reveal-in 720ms var(--home-ease-expo) var(--reveal-delay,0ms) backwards}
+
+  .home-section .site-section-title.home-reveal h2:after{transform:scaleX(0);transform-origin:right}
+  .home-section .site-section-title.is-revealed h2:after{transform:scaleX(1);transition:transform 700ms var(--home-ease-expo) .34s}
+
+  .home-campaign-hero__copy{animation:home-hero-in .7s var(--home-ease-out) both}
+  .home-campaign-hero__fallback-copy{animation:home-hero-in .7s var(--home-ease-out) .06s both}
+  .home-campaign-hero__spotlight{animation:home-hero-in .8s var(--home-ease-expo) .16s both}
+
+  .home-campaign-hero__image{transition:opacity .9s var(--home-ease-out),transform .9s var(--home-ease-out)}
+  .home-campaign-hero__image.is-active{animation:home-hero-drift 9s var(--home-ease-out) both}
+}
+
+@keyframes home-reveal-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes home-hero-in{from{opacity:0;transform:translateY(16px)}}
+@keyframes home-hero-drift{from{transform:scale(1.015)}to{transform:scale(1.08)}}
+
+@media (hover:hover) and (pointer:fine){
+  .home-page .product-card__media img{transition:transform .5s var(--home-ease-out)}
+  .home-page .product-card:hover .product-card__media img{transform:scale(1.05)}
+  .home-page .product-card-cta i{transition:transform .3s var(--home-ease-out)}
+  .home-page .product-card:hover .product-card-cta i{transform:translateX(-4px)}
+  .home-category-track .category-card:hover .category-card__icon{background:var(--tm-cyan-soft);color:var(--tm-blue-strong)}
+}
+
+@media (prefers-reduced-motion:reduce){.home-campaign-hero__image.is-active{animation:none}}
 </style>
