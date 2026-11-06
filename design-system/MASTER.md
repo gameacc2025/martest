@@ -305,3 +305,8 @@ The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/a
 - Preserve the 4:5 media frame, 10px image inset, 11px body padding and 44px two-line product title on both surfaces. Grid column count is content-width-driven; do not force identical column counts where the catalogue sidebar changes available width.
 
 - Mobile sizing follows the same bounded track on both surfaces (150px minimum, 210px maximum at <=520px); do not shrink only the catalogue card body/title at mobile breakpoints.
+
+
+### Website-wide product-card parity — 2026-11-06
+- All Website product grids (Home, ProductListing, SearchResults, legacy Products, Wishlist) use bounded card tracks: 168–210px above 520px viewport width and 150–210px at <=520px. The number of columns follows the actual content width; the card itself must not grow beyond 210px.
+- Shared ProductCard and TemProductCard use a 4:5 image, contain-fit with 10px inset, 11px body padding, 44px two-line title and compact footer. Avoid page-specific mobile typography/padding overrides that change card size.
