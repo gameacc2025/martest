@@ -219,3 +219,18 @@ export const inquiriesApi = {
   downloadResponseAttachment: (id, responseId, attachmentId) => api.get(endpoints.inquiries.downloadResponseAttachment(id, responseId, attachmentId), { responseType: 'blob' }),
   deleteResponseAttachment: (id, responseId, attachmentId) => api.delete(endpoints.inquiries.deleteResponseAttachment(id, responseId, attachmentId)),
 }
+
+// Promotional banners — independent from the product catalogue.
+export const bannersApi = {
+  listActive: (placement = 'HOME_HERO') => api.get(endpoints.banners.active, { params: { placement } }),
+  list: (params = {}) => api.get(endpoints.banners.manage, { params }),
+  getById: (id) => api.get(endpoints.banners.get(id)),
+  create: (data) => api.post(endpoints.banners.create, data),
+  update: (id, data) => api.patch(endpoints.banners.update(id), data),
+  archive: (id) => api.delete(endpoints.banners.archive(id)),
+  uploadImage: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(endpoints.banners.upload, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+}
