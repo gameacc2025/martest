@@ -592,6 +592,18 @@ test('createProduct: a company user creates products under their own company whe
   assert.equal(createArgs.data.companyId, 10);
 });
 
+test('createProduct: derives a shared catalogCode from manufacturer and model when omitted', async () => {
+  await service.createProduct({
+    title: 'Cisco Catalyst',
+    categoryId: 1,
+    subcategoryId: 1,
+    brand: 'Cisco',
+    model: 'C9300-48P',
+  }, companyA);
+  const createArgs = calls['product.create'].at(-1);
+  assert.equal(createArgs.data.catalogCode, 'TEL-CISCO-C9300-48P');
+});
+
 test('createProduct: rejects a missing title before touching the database', async () => {
   await assert.rejects(
     () => service.createProduct({ categoryId: 1, subcategoryId: 1 }, companyA),
