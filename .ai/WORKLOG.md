@@ -3816,3 +3816,8 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Kept the campaign/featured-product hero, categories, product shelves, promo navigation and inquiry CTA intact; no API, backend, schema or route changes.
 - Updated homepage source-contract tests to assert these redundant blocks stay absent.
 - Verification: source edits committed; tests/build/browser visual checks have not been run in this remote GitHub editing session.
+
+## Public company profile route follow-up — 2026-11-06
+- Follow-up CI exposed a stale OpenAPI route inventory assertion (152 vs 153); updated the expected count to 153.
+- Updated CompanyProfile component tests to assert the current storefront markup (`company-logo`, `company-kind`, `product-count`) rather than obsolete selectors.
+- The public endpoint is registered at the Fastify root scope and its controller/service exports are present. Local Docker runtime still cannot be restarted from this remote session; deployment/restart state on the user's machine remains unverified.
