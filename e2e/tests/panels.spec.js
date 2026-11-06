@@ -46,13 +46,13 @@ for (const panel of panels) {
 }
 
 
-test('Website homepage remains horizontally contained at all required viewport widths', async ({ browser }) => {
+test('Website storefront remains horizontally contained at all required viewport widths', async ({ browser }) => {
   const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const response = await page.goto(process.env.WEBSITE_URL || 'http://localhost:3001/', { waitUntil: 'networkidle' });
   expect(response?.status()).toBe(200);
-  await expect(page.locator('.home-hero')).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator('.shop-page')).toBeVisible({ timeout: 20_000 });
 
   for (const width of viewports) {
     await page.setViewportSize({ width, height: 900 });
