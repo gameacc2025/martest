@@ -28,6 +28,7 @@
 // =============================================================
 
 const { PrismaClient } = require('@prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
 const { hashPassword } = require('../src/utils/password');
 const { countTaxonomy, seedMarketplaceCategories } = require('./seeds/categories');
 const { DEFAULT_COMPANIES, seedCompanies, seedMainCompany } = require('./seeds/companies');
@@ -35,7 +36,7 @@ const { LIBRARY_FIELDS, seedSpecificationLibrary } = require('./seeds/specificat
 const { seedSpecificationTemplates } = require('./seeds/specification-templates');
 const { seedDemoMarketplace } = require('./seeds/demo-marketplace');
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL, max: 5, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30000 }) });
 
 // Initial Super Admin — phone is the authentication identity (required),
 // email is optional.
