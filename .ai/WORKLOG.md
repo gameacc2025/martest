@@ -3769,3 +3769,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Tests:** Updated Home, ProductListing and PublicLayout assertions. GitHub Actions CI run 42267844444 and Runtime Validation 42267844653 were pending/in progress at last check; no browser visual verification performed.
 - **Commits:** `c2d4031`, `9a53579`, `e85e11c`, `6e9ed29`, `4fe588a`, `e4e5846`, `a3d0f6e`, `b96d973`, `737b40b`, `f8994fb`, `ec9f346`, `0976766`, `d7568e1`, `914892a`, `fcdcb6d`.
 - **Next:** Check CI results; run/inspect the Website at 1366px, 1920px and mobile after local sync.
+
+- **Final polish:** Aligned the mobile card breakpoint/maximum width between Home and ProductListing, removed catalogue-only mobile typography/padding overrides, added Escape handling and `aria-controls` to MegaMenu. Commits: `166e018`, `a06b76b`, `df3e22a`, `894a404`.
