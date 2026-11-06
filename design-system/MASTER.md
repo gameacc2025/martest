@@ -303,3 +303,5 @@ The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/a
 ### Shared storefront product-card sizing — 2026-11-06
 - Homepage shelves and the dedicated product catalogue use the same bounded card track: 168px minimum on normal widths and 210px maximum, with a compact two-column mobile fallback. This keeps card width consistent even though the catalogue reserves space for its filter sidebar.
 - Preserve the 4:5 media frame, 10px image inset, 11px body padding and 44px two-line product title on both surfaces. Grid column count is content-width-driven; do not force identical column counts where the catalogue sidebar changes available width.
+
+- Mobile sizing follows the same bounded track on both surfaces (150px minimum, 210px maximum at <=520px); do not shrink only the catalogue card body/title at mobile breakpoints.
