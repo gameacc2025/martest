@@ -33,6 +33,7 @@ const { countTaxonomy, seedMarketplaceCategories } = require('./seeds/categories
 const { DEFAULT_COMPANIES, seedCompanies, seedMainCompany } = require('./seeds/companies');
 const { LIBRARY_FIELDS, seedSpecificationLibrary } = require('./seeds/specification-library');
 const { seedSpecificationTemplates } = require('./seeds/specification-templates');
+const { seedDemoMarketplace } = require('./seeds/demo-marketplace');
 
 const prisma = new PrismaClient();
 
@@ -480,6 +481,9 @@ async function main() {
   await seedCompanies(prisma);
   console.log(`  ✓ ${DEFAULT_COMPANIES.length} default telecom companies`);
 
+  // ── 11. Development demo marketplace ────────────────────────
+  const demoSeed = await seedDemoMarketplace(prisma, { permissionByName: permBy });
+
   // ── Summary ─────────────────────────────────────────────────
   console.log('\n─────────────────────────────────────────');
   console.log('Seed completed successfully!');
@@ -487,7 +491,9 @@ async function main() {
   console.log(`  Permissions: ${PERMISSIONS.length}`);
   console.log(`  Assignments: ${assignmentCount}`);
   console.log(`  Categories:  ${taxonomy.categories} (subcategories: ${taxonomy.subcategories})`);
-  console.log(`  Companies:   ${DEFAULT_COMPANIES.length + 1}`);
+  console.log(`  Companies:   ${DEFAULT_COMPANIES.length + 1 + demoSeed.companies} (including demo)`);
+  console.log(`  Demo users:  ${demoSeed.users}`);
+  console.log(`  Demo products: ${demoSeed.products}`);
   console.log(`  Spec Fields: ~${LIBRARY_FIELDS.length} predefined`);
   console.log('\nSuper Admin login:');
   console.log(`  phone:    ${SUPER_ADMIN_USER.phone}`);
