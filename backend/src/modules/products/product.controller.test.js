@@ -94,9 +94,15 @@ test('list: forwards pagination + filters + caller to the service', async () => 
   const [opts] = calls.listProducts;
   assert.deepEqual(opts.filters, {
     search: 'x', companyId: '3', categoryId: undefined, status: undefined,
-    minPrice: undefined, maxPrice: undefined, featured: undefined, sortBy: undefined, sortOrder: undefined,
+    minPrice: undefined, maxPrice: undefined, featured: undefined, retailEnabled: undefined, sortBy: undefined, sortOrder: undefined,
   });
   assert.equal(opts.caller, user);
+});
+
+test('list: forwards the retailEnabled filter', async () => {
+  const reply = makeReply();
+  await controller.list(makeRequest({ query: { retailEnabled: 'true' } }), reply);
+  assert.equal(calls.listProducts[0].filters.retailEnabled, 'true');
 });
 
 test('list: forwards price, featured, and sorting query filters', async () => {
@@ -107,7 +113,7 @@ test('list: forwards price, featured, and sorting query filters', async () => {
 
   assert.deepEqual(calls.listProducts[0].filters, {
     search: undefined, companyId: undefined, categoryId: undefined, status: undefined,
-    minPrice: '100', maxPrice: '500', featured: 'true', sortBy: 'title', sortOrder: 'asc',
+    minPrice: '100', maxPrice: '500', featured: 'true', retailEnabled: undefined, sortBy: 'title', sortOrder: 'asc',
   });
 });
 
