@@ -80,6 +80,14 @@ describe('Website Product Listing — TEM storefront', () => {
     expect(wrapper.find('.shop-results-toolbar h2').text()).toBe('جدیدترین محصولات')
   })
 
+  it('applies the retail-only filter through the public API and supports the homepage retail deep link', async () => {
+    routeState.current.query = { retail: '1' }
+    wrapper = mountListing()
+    await flushPromises()
+    expect(getProducts).toHaveBeenCalledWith(expect.objectContaining({ retailEnabled: true }))
+    expect(wrapper.find('.shop-retail-filter input').exists()).toBe(true)
+  })
+
   it('links products to the existing product-details route', async () => {
     wrapper = mountListing()
     await flushPromises()
