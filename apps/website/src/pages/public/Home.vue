@@ -1,14 +1,6 @@
 <script setup>
-/**
- * Website homepage — unified "tem" storefront composition.
- *
- * Data comes exclusively from the live marketplace APIs: the product list
- * (recent + featured flag) and the category store used by /categories.
- * There is no mock data and no fabricated marketplace statistic.
- */
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
 import { productsApi, bannersApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
@@ -18,8 +10,6 @@ import StoreProductCard from '@telecom/shared-ui/components/store/StoreProductCa
 
 const router = useRouter()
 const productsStore = useProductsStore()
-const authStore = useAuthStore()
-const showMyInquiriesLink = computed(() => authStore.isAuthenticated && authStore.isCustomer)
 
 const featuredProducts = ref([])
 const recentProducts = ref([])
@@ -28,83 +18,34 @@ const promotionalBanners = ref([])
 const activeBannerIndex = ref(0)
 let bannerTimer = null
 const activeBanner = computed(() => promotionalBanners.value[activeBannerIndex.value] || promotionalBanners.value[0] || null)
+const activeFeaturedProduct = computed(() => featuredProducts.value[0] || null)
 const categories = ref([])
 const loading = ref(false)
 const categoriesLoading = ref(false)
 const categoriesError = ref(false)
 const error = ref(null)
-
 const searchQuery = ref('')
 const searchMode = ref('retail')
-const activeSlide = ref(0)
-let slideTimer = null
-const featuredSlides = computed(() => featuredProducts.value.slice(0, 5))
-const activeFeaturedProduct = computed(() => featuredSlides.value[activeSlide.value] || featuredSlides.value[0] || null)
 
-function goToSlide(index) {
-  const total = featuredSlides.value.length
-  if (!total) return
-  activeSlide.value = (index + total) % total
-}
-function nextSlide() { goToSlide(activeSlide.value + 1) }
-function previousSlide() { goToSlide(activeSlide.value - 1) }
-function startSlider() {
-  if (slideTimer) clearInterval(slideTimer)
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  if (!reducedMotion && featuredSlides.value.length > 1) slideTimer = setInterval(nextSlide, 6500)
-}
-function handleSliderFocusOut(event) {
-  if (!event.currentTarget.contains(event.relatedTarget)) startSlider()
-}
-function stopSlider() {
-  if (slideTimer) clearInterval(slideTimer)
-  slideTimer = null
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
 }
 function startBannerSlider() {
-  if (bannerTimer) clearInterval(bannerTimer)
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  if (!reducedMotion && promotionalBanners.value.length > 1) bannerTimer = setInterval(() => { activeBannerIndex.value = (activeBannerIndex.value + 1) % promotionalBanners.value.length }, 7000)
+  stopBannerSlider()
+  if (!prefersReducedMotion() && promotionalBanners.value.length > 1) {
+    bannerTimer = setInterval(() => {
+      activeBannerIndex.value = (activeBannerIndex.value + 1) % promotionalBanners.value.length
+    }, 7000)
+  }
 }
 function stopBannerSlider() {
   if (bannerTimer) clearInterval(bannerTimer)
   bannerTimer = null
 }
-function prefersReducedMotion() {
-  return typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
-}
-// Pause the two autoplay loops while the tab is hidden so off-screen work stops.
 function handleVisibilityChange() {
-  if (typeof document !== 'undefined' && document.hidden) { stopSlider(); stopBannerSlider() }
-  else { startSlider(); startBannerSlider() }
-}
-// Entrance choreography for the storefront sections. The hidden state lives under
-// `prefers-reduced-motion: no-preference` in CSS, so the reduced/no-JS page is the
-// finished page; the observer only adds the revealed class once per element.
-let revealObserver = null
-function getRevealObserver() {
-  if (revealObserver || typeof IntersectionObserver === 'undefined') return revealObserver
-  revealObserver = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (!entry.isIntersecting) continue
-      entry.target.classList.add('is-revealed')
-      revealObserver.unobserve(entry.target)
-    }
-  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 })
-  return revealObserver
-}
-const vReveal = {
-  mounted(el) {
-    if (prefersReducedMotion()) { el.classList.add('is-revealed'); return }
-    el.classList.add('home-reveal')
-    const observer = getRevealObserver()
-    if (!observer) { el.classList.add('is-revealed'); return }
-    observer.observe(el)
-  },
-  unmounted(el) { if (revealObserver) revealObserver.unobserve(el) },
-}
-// Bound the stagger so the last card in a long shelf never waits long.
-function revealDelay(index, step = 45) {
-  return Math.min(index, 9) * step + 'ms'
+  if (typeof document === 'undefined') return
+  if (document.hidden) stopBannerSlider()
+  else startBannerSlider()
 }
 async function fetchPromotionalBanners() {
   try {
@@ -113,45 +54,37 @@ async function fetchPromotionalBanners() {
     promotionalBanners.value = Array.isArray(data) ? data : []
     activeBannerIndex.value = 0
     startBannerSlider()
-  } catch (error) {
+  } catch {
     promotionalBanners.value = []
   }
 }
-
-const visibleCategories = computed(() => categories.value)
-
+function normalizeProducts(response) {
+  const data = response?.data?.data ?? response?.data ?? []
+  return Array.isArray(data) ? data : []
+}
 async function fetchProducts() {
   try {
     loading.value = true
     error.value = null
     const params = { page: 1, limit: 8, status: 'PUBLISHED' }
-
-    const response = await productsApi.list(params)
-    const items = response?.data?.data ?? []
-    recentProducts.value = (Array.isArray(items) ? items : []).slice(0, 8)
-
-    // Featured is a server-side product flag, not a slice of recent results.
-    try {
-      const retailResponse = await productsApi.list({ page: 1, limit: 8, status: 'PUBLISHED', retailEnabled: true, sortBy: 'createdAt', sortOrder: 'desc' })
-      const retailItems = retailResponse?.data?.data ?? []
-      retailLatestProducts.value = Array.isArray(retailItems) ? retailItems.slice(0, 8) : []
-      const featuredResponse = await productsApi.list({ ...params, limit: 8, featured: true })
-      const featuredItems = featuredResponse?.data?.data ?? []
-      featuredProducts.value = Array.isArray(featuredItems) ? featuredItems.slice(0, 8) : []
-      activeSlide.value = 0
-      startSlider()
-    } catch (featuredError) {
-      featuredProducts.value = []
-    }
+    const [recentResult, retailResult, featuredResult] = await Promise.allSettled([
+      productsApi.list(params),
+      productsApi.list({ ...params, retailEnabled: true, sortBy: 'createdAt', sortOrder: 'desc' }),
+      productsApi.list({ ...params, featured: true }),
+    ])
+    if (recentResult.status === 'rejected') throw recentResult.reason
+    recentProducts.value = normalizeProducts(recentResult.value).slice(0, 8)
+    retailLatestProducts.value = retailResult.status === 'fulfilled' ? normalizeProducts(retailResult.value).slice(0, 8) : []
+    featuredProducts.value = featuredResult.status === 'fulfilled' ? normalizeProducts(featuredResult.value).slice(0, 8) : []
   } catch (err) {
     error.value = 'خطا در دریافت محصولات'
-    featuredProducts.value = []
     recentProducts.value = []
+    retailLatestProducts.value = []
+    featuredProducts.value = []
   } finally {
     loading.value = false
   }
 }
-
 function categoryIcon(category) {
   const name = [category?.nameFa, category?.name, category?.nameEn, category?.slug].filter(Boolean).join(' ').toLowerCase()
   if (name.includes('کابل') || name.includes('cable')) return 'pi pi-bolt'
@@ -163,12 +96,10 @@ function categoryIcon(category) {
   if (name.includes('دیتا') || name.includes('data')) return 'pi pi-database'
   return 'pi pi-box'
 }
-
 function categoryProductCount(category) {
   const count = Number(category?.productCount ?? category?.productsCount ?? category?._count?.products)
   return Number.isFinite(count) && count >= 0 ? count : null
 }
-
 function productAvailabilityLabel(product) {
   const status = String(product?.stockStatus || product?.availability || '').toUpperCase()
   if (['IN_STOCK', 'AVAILABLE'].includes(status)) return 'موجود'
@@ -176,48 +107,39 @@ function productAvailabilityLabel(product) {
   if (['PREORDER', 'PRE_ORDER'].includes(status)) return 'پیش‌فروش'
   return ''
 }
-
 function productCategoryName(product) {
   return product?.category?.nameFa || product?.category?.name || product?.category?.nameEn || ''
 }
-
-
 function getProductImage(product) {
-  return product?.images?.find((image) => image?.isPrimary && image?.url)
-    || product?.images?.find((image) => image?.url)
+  return product?.images?.find(image => image?.isPrimary && image?.url)
+    || product?.images?.find(image => image?.url)
     || null
 }
-
 function productRoute(product) {
   return { name: 'product-details', params: { id: product.id } }
 }
-
-// Hero search follows the marketplace convention: it takes the visitor to the
-// dedicated search-results page (same target as the header search).
 function heroSearch() {
-  const q = searchQuery.value.trim()
-  router.push({ name: 'search', query: q ? { q } : {} })
+  const query = searchQuery.value.trim()
+  router.push({ name: 'search', query: query ? { q: query } : {} })
   searchQuery.value = ''
 }
-
 function viewCategoryProducts(categoryId) {
   router.push({ name: 'products', query: { category: categoryId } })
 }
-
 async function fetchCategories() {
   try {
     categoriesLoading.value = true
     categoriesError.value = false
-    // Use the same store method as the Categories page so the data shape matches.
     const data = await productsStore.getCategories()
     categories.value = Array.isArray(data) ? data : []
-  } catch (err) {
+  } catch {
     categoriesError.value = true
     categories.value = []
   } finally {
     categoriesLoading.value = false
   }
 }
+const visibleCategories = computed(() => categories.value)
 
 onMounted(() => {
   fetchProducts()
@@ -225,12 +147,12 @@ onMounted(() => {
   fetchPromotionalBanners()
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', handleVisibilityChange)
 })
-onUnmounted(() => { stopSlider(); stopBannerSlider() })
 onUnmounted(() => {
+  stopBannerSlider()
   if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', handleVisibilityChange)
-  if (revealObserver) { revealObserver.disconnect(); revealObserver = null }
 })
 </script>
+
 <template>
   <main class="home-page" dir="rtl">
     <section class="home-hero" aria-label="بازارگاه تخصصی تجهیزات شبکه و مخابرات">
@@ -319,10 +241,10 @@ onUnmounted(() => {
       <section class="home-section" aria-labelledby="home-why">
         <StoreSectionHeading heading-id="home-why" title="چرا Telecom Market؟" />
         <div class="home-benefits">
-          <article><i class="pi pi-verified" aria-hidden="true" /><b>تأمین‌کننده قابل بررسی</b><p>اطلاعات شرکت عرضه‌کننده و وضعیت تأیید آن را در صفحه محصول ببینید.</p></article>
-          <article><i class="pi pi-shield" aria-hidden="true" /><b>اطلاعات شفاف محصول</b><p>مشخصات و شرایط ارائه محصول را پیش از ثبت درخواست بررسی کنید.</p></article>
-          <article><i class="pi pi-wrench" aria-hidden="true" /><b>تجهیزات تخصصی</b><p>محصولات شبکه و مخابرات را در دسته‌بندی‌های تخصصی مرور کنید.</p></article>
-          <article><i class="pi pi-file-edit" aria-hidden="true" /><b>استعلام سازمانی</b><p>برای نیازهای پروژه‌ای، درخواست استعلام خود را ثبت و پیگیری کنید.</p></article>
+          <article><i class="pi pi-verified" aria-hidden="true" /><b>تأمین‌کننده قابل بررسی</b><p>احراز هویت و بررسی سابقه تمام فروشندگان</p></article>
+          <article><i class="pi pi-shield" aria-hidden="true" /><b>گارانتی اصالت</b><p>تضمین اصل بودن کالا و ضمانت‌نامه معتبر</p></article>
+          <article><i class="pi pi-wrench" aria-hidden="true" /><b>پشتیبانی فنی</b><p>مشاوره انتخاب تجهیز متناسب با پروژه</p></article>
+          <article><i class="pi pi-file-edit" aria-hidden="true" /><b>پیش‌فاکتور رسمی</b><p>صدور فاکتور رسمی و پرداخت سازمانی</p></article>
         </div>
       </section>
 
