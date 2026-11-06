@@ -168,6 +168,7 @@ async function productRoutes(fastify) {
   // GET /my-products endpoint below so they can see every status.
   fastify.get('/', ctrl.list);
   fastify.get('/:id/price-history', { schema: { params: idParamSchema, summary: 'Get complete public retail price history for charting', tags: ['Products'] } }, ctrl.getPriceHistory);
+  fastify.get('/:id/similar', { schema: { params: idParamSchema, summary: 'List other active suppliers offering the same manufacturer/model', tags: ['Products'] } }, ctrl.getSimilar);
   fastify.get('/:id', { schema: { params: idParamSchema } }, ctrl.getOne);
 
   // ── Authenticated routes ───────────────────────────────────
