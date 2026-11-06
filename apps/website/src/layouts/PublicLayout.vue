@@ -326,7 +326,7 @@ function logout() {
 </div>
               </div>
 
-            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
+            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCartDrawer">
               <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-cart-drawer" :aria-expanded="cartDrawerOpen" @click.stop="cartDrawerOpen = true">
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
                 <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
@@ -350,7 +350,7 @@ function logout() {
               </router-link>
             </div>
 
-            <div v-if="!user" class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
+            <div v-if="!user" class="public-commerce-actions" @keydown.esc.stop.prevent="closeCartDrawer">
               <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-cart-drawer" :aria-expanded="cartDrawerOpen" @click.stop="cartDrawerOpen = true">
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
                 <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
