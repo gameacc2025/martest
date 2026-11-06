@@ -9,7 +9,7 @@
  * customer/company/staff menu branching, notification unread count, search
  * routing, category loading for the mega menu and footer, and mobile nav.
  */
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
@@ -831,7 +831,8 @@ function logout() {
 .public-notifications-actions { position: static; display: inline-flex; align-items: center; }
 .public-notifications-link { border: 0; background: transparent; cursor: pointer; }
 .public-notifications-drawer { display: flex; flex-direction: column; height: 100%; overflow: hidden; border-inline-end: 1px solid var(--tm-line); background: var(--tm-surface); text-align: start; }
-.public-notifications-drawer .p-drawer-content { flex: 1; min-height: 0; padding: 0; }
+.public-notifications-drawer .p-drawer-header,.public-cart-drawer .p-drawer-header { padding: 0; border: 0; }
+.public-notifications-drawer .p-drawer-content { display: flex; flex: 1; min-height: 0; flex-direction: column; padding: 0; }
 .public-notifications-drawer .p-drawer-footer { padding: 0; border-top: 1px solid var(--tm-line); }
 .public-notifications-menu__header { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 16px 18px; border-bottom: 1px solid var(--tm-line); color: var(--tm-ink); }
 .public-notifications-menu__heading { display: grid; flex: 1; gap: 4px; }
