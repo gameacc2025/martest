@@ -82,7 +82,7 @@ const features = [
   { icon: 'pi pi-building', title: 'شناخت تأمین‌کننده', text: 'مشخصات شرکت و وضعیت احراز آن را در صورت ثبت و تأیید مشاهده کنید.' },
   { icon: 'pi pi-shopping-cart', title: 'خرید یا استعلام', text: 'نوع ارائه، قیمت و شرایط هر محصول را پیش از مشاهده جزئیات بررسی کنید.' },
 ]
-const visibleCategories = computed(() => categories.value.slice(0, 8))
+const visibleCategories = computed(() => categories.value)
 
 async function fetchProducts() {
   try {
