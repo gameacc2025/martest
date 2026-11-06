@@ -84,7 +84,11 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 ## توسعه محلی و داده‌های آزمایشی
 
 - سرویس توسعه هنگام راه‌اندازی، Prisma db push و سپس prisma/seed.js را اجرا می‌کند؛ راه‌اندازی عادی دیتابیس را reset نمی‌کند.
-- برای بازسازی کامل دیتابیس توسعه، پس از بالا آمدن سرویس‌ها دستور زیر را اجرا کنید: docker compose -f docker-compose.dev.yml run --rm backend npm run db:reset:dev
+- برای بازسازی کامل دیتابیس توسعه، ابتدا بک‌اند فعال را متوقف کنید، سپس reset را در کانتینر یک‌بارمصرف اجرا و بک‌اند را دوباره بالا بیاورید:
+
+  docker compose -f docker-compose.dev.yml stop backend
+  docker compose -f docker-compose.dev.yml run --rm backend npm run db:reset:dev
+  docker compose -f docker-compose.dev.yml up -d backend
 - این دستور فقط با NODE_ENV=development و مقصد telecom_marketplace مجاز است و تمام داده‌های فعلی همان دیتابیس را حذف می‌کند.
 - Seed توسعه قابل تکرار است و در production داده آزمایشی ایجاد نمی‌کند. رمز حساب‌های آزمایشی از DEMO_USER_PASSWORD قابل تنظیم است و مقدار پیش‌فرض توسعه A123@456 است؛ این رمز را در production استفاده نکنید.
 - Seed شامل ۱۰ شرکت نمایشی (علاوه بر Main و شرکت‌های پیش‌فرض)، سه کاربر با نقش‌های مدیریتی/کاتالوگ/فروش برای هر شرکت، پنج مشتری و پنج خانواده محصول برای هر یک از ۱۵ دسته‌بندی سطح اول است. هر خانواده محصول برای دو تأمین‌کننده ثبت می‌شود.
