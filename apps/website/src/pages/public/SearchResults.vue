@@ -606,6 +606,9 @@ const viewProduct = (product) => {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+@media (min-width: 1440px) {
+  .sr-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 
 /* Search page: clear query context, compact filters and a framed result workspace. */
 .sr-container {
