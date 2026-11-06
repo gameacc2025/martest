@@ -7,6 +7,13 @@
 
 
 
+## Company storefront redesign and independent public profile — 2026-11-06
+- Rebuilt the public company profile page as a storefront: compact company identity header, dedicated company introduction, verified status, contact details, membership date and a tighter responsive product grid.
+- Reduced the product grid whitespace by moving from 3 columns / large gaps to 5 desktop columns with 12px gaps, 4/3 tablet columns and 2 mobile columns.
+- Added a dedicated unauthenticated GET /companies/public/:id endpoint with an explicit safe field allowlist; only ACTIVE, non-deleted companies are returned. Product counts include only PUBLISHED + PUBLIC products. Private user, inquiry and company-limit relations are not selected.
+- The company introduction now loads independently of products, so it remains visible when the company has no published products.
+- Added UI, service, controller and route regression coverage. CI/build verification is pending.
+  
 ## Retail catalogue and public company storefront — 2026-11-06
 - Added a public retailEnabled product-list filter, backed by Prisma query filtering and the existing public PUBLISHED/PUBLIC visibility clamp.
 - Added a homepage section for the newest retail-enabled products; the request is a separate live API query and does not infer retail eligibility from a price tier.
