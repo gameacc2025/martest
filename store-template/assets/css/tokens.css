@@ -1,0 +1,12 @@
+/* Design tokens extracted from the reference screenshots (Myron-style admin) */
+:root{
+  --primary:#8c7bf7;--secondary:#ff5c39;--warning:#ffb830;--info:#2fb8ee;--success:#0ac655;--danger:#ff3a3a;--light:#f5f6fa;--dark:#14171e;
+  --primary-g:linear-gradient(135deg,#a78bfa,#8c7bf7);--secondary-g:linear-gradient(135deg,#ff8a5c,#ff5c39);--warning-g:linear-gradient(135deg,#ffd166,#ffb830);--info-g:linear-gradient(135deg,#5fd0f5,#2fb8ee);--success-g:linear-gradient(135deg,#3fe08a,#0ac655);--danger-g:linear-gradient(135deg,#ff7a7a,#ff3a3a);
+  --primary-t:#eeebfe;--secondary-t:#ffeae5;--warning-t:#fff4de;--info-t:#e3f6fd;--success-t:#dff8e9;--danger-t:#ffe4e4;--light-t:#f1f2f6;
+  --bg:#f5f6fa;--card:#fff;--text:#1b2133;--muted:#8c97b2;--border:#eceff5;--input-border:#dfe3ec;
+  --side-bg:#14171e;--side-text:#aab1c3;--side-w:252px;--header-h:64px;
+  --active-g:linear-gradient(90deg,#e76fe0,#8f7af8);
+  --radius:6px;--shadow:0 1px 4px rgba(20,23,30,.06);--shadow-lg:0 12px 32px rgba(20,23,30,.14);
+  --font:'Vazirmatn','Vazir',Tahoma,'Segoe UI',sans-serif;
+}
+[data-theme=dark]{--bg:#0f1219;--card:#181c26;--text:#e8ebf3;--muted:#8d97b0;--border:#252a38;--input-border:#2d3344;--light:#1f2431;--light-t:#222838;--primary-t:#262347;--secondary-t:#3a2420;--warning-t:#3a2f1a;--info-t:#16303b;--success-t:#173325;--danger-t:#3b1d1f}
