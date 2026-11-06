@@ -182,6 +182,23 @@ async function listCompanies(options = {}) {
  * @param {boolean} includeDeleted - Include soft-deleted companies
  * @returns {Promise<object|null>} Company object or null
  */
+async function getPublicCompanyById(id) {
+  const company = await prisma.company.findFirst({
+    where: { id: Number(id), status: 'ACTIVE', deletedAt: null },
+    select: {
+      id: true, name: true, nameEn: true, type: true, description: true,
+      logo: true, email: true, phone: true, address: true, website: true,
+      isVerified: true, createdAt: true,
+      _count: {
+        select: {
+          products: { where: { status: 'PUBLISHED', visibility: 'PUBLIC' } },
+        },
+      },
+    },
+  });
+  return company;
+}
+
 async function getCompanyById(id, includeDeleted = false) {
   const where = { id: Number(id) };
   if (!includeDeleted) where.deletedAt = null;
@@ -580,6 +597,7 @@ async function getCompanyProducts(companyId, options = {}) {
 module.exports = {
   listCompanies,
   getCompanyById,
+  getPublicCompanyById,
   createCompany,
   updateCompany,
   deleteCompany,
