@@ -47,6 +47,7 @@ flowchart LR
   api --> mod_addresses["addresses module"]
   api --> mod_admin["admin module"]
   api --> mod_auth["auth module"]
+  api --> mod_banners["banners module"]
   api --> mod_categories["categories module"]
   api --> mod_companies["companies module"]
   api --> mod_contact["contact module"]
@@ -62,6 +63,7 @@ flowchart LR
   mod_addresses --> db
   mod_admin --> db
   mod_auth --> db
+  mod_banners --> db
   mod_categories --> db
   mod_companies --> db
   mod_contact --> db
