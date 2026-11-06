@@ -1019,3 +1019,32 @@ enum InquiryVisibilityMode {
   ANONYMOUS_SEALED
 }
 
+// Independent promotional campaigns. These records are managed by STAFF and
+// are never coupled to Product or its featured-product workflow.
+model Banner {
+  id          Int         @id @default(autoincrement())
+  title       String      @db.VarChar(120)
+  description String?     @db.VarChar(300)
+  imageUrl    String
+  targetUrl   String?
+  ctaLabel    String?     @db.VarChar(40)
+  placement   String      @default("HOME_HERO") @db.VarChar(40)
+  sortOrder   Int         @default(0)
+  status      BannerStatus @default(DRAFT)
+  isActive    Boolean     @default(true)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+
+  @@index([placement, status, isActive, sortOrder])
+  @@index([startsAt, endsAt])
+  @@index([deletedAt])
+}
+
+enum BannerStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
