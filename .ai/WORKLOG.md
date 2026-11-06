@@ -3746,3 +3746,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Bestseller data constraint:** no authoritative sales/order aggregate or public bestseller endpoint exists. The homepage section therefore remains honestly labelled «محصولات منتخب» and uses the existing featured flag; do not rename it «پرفروش‌ترین» or infer sales rank until a real aggregate/API is available.
 - No backend, schema, migration, API contract, authentication, permission or commerce behavior changed. Checkout remains a preview and fixed-price cart actions remain disabled.
 - Added/updated source-contract tests for homepage limits, card proportions, hero search, promo cards and catalogue card layout. Tests/build/browser visual checks were NOT RUN in this remote GitHub editing session.
+
+- Follow-up consistency pass: the reusable `TemProductCard` shared widget now also uses the portrait 4:5 media frame and semantic blue/cyan design tokens, so newly adopted shared cards do not reintroduce the old horizontal image or violet accent.
