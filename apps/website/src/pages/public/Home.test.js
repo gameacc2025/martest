@@ -14,7 +14,7 @@ const source = readFileSync(homePath, 'utf8')
 describe('Website homepage contracts (tem redesign)', () => {
   it('keeps the production API and category store as the source of page data', () => {
     expect(source).toContain('productsApi.list(params)')
-    expect(source).toContain('productsApi.list({ ...params, limit: 12, featured: true })')
+    expect(source).toContain('productsApi.list({ ...params, limit: 8, featured: true })')
     expect(source).toContain('const params = { page: 1, limit: 24, status: \'PUBLISHED\' }')
     expect(source).toContain('productsStore.getCategories()')
     expect(source).not.toContain('USE_MOCK')
@@ -65,6 +65,15 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('disabled')
     expect(source).toContain('class="product-card-cta"')
     expect(source).toContain('class="product-sku"')
+  })
+
+  it('limits each homepage product section to two desktop rows and uses portrait product imagery', () => {
+    expect(source).toContain('limit: 8, status: \'PUBLISHED\'')
+    expect(source).toContain('limit: 8, featured: true')
+    expect(source).toContain('featuredProducts.slice(0, 8)')
+    expect(source).toContain('recentProducts.slice(0, 8)')
+    expect(source).toContain('aspect-ratio: 4 / 5')
+    expect(source).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))')
   })
 
   it('does not publish unsupported hard-coded marketplace statistics or claims', () => {
