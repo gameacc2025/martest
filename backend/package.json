@@ -15,7 +15,8 @@
     "test": "node --experimental-test-isolation=process --test",
     "test:coverage": "node --experimental-test-isolation=process --test --experimental-test-coverage --test-coverage-exclude=\"**/*.test.js\" --test-coverage-exclude=\"prisma/**\"",
     "test:ci": "node --experimental-test-isolation=process --test --experimental-test-coverage --test-coverage-exclude=\"**/*.test.js\" --test-coverage-exclude=\"prisma/**\" --test-coverage-lines=95 --test-coverage-branches=90 --test-coverage-functions=90",
-    "worker:notifications": "node src/workers/notification-delivery.worker.js"
+    "worker:notifications": "node src/workers/notification-delivery.worker.js",
+    "db:reset:dev": "node scripts/reset-dev-db.js"
   },
   "dependencies": {
     "@fastify/cookie": "^9.4.0",
