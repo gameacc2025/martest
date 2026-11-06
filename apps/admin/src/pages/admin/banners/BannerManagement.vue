@@ -3,7 +3,7 @@
     <WorkspacePageHeading title="مدیریت بنرهای تبلیغاتی" heading-id="banner-management-title" />
     <div class="banner-intro">
       <div><span class="banner-intro__eyebrow">کمپین‌ها و جشنواره‌ها</span><h2>جایگاه تبلیغات صفحه اصلی</h2><p>بنرها مستقل از محصولات مدیریت می‌شوند و فقط در زمان‌بندی و وضعیت انتشار معتبر نمایش داده خواهند شد.</p></div>
-      <Button label="بنر جدید" icon="pi pi-plus" @click="openCreate" />
+      <Button v-if="canCreate" label="بنر جدید" icon="pi pi-plus" @click="openCreate" />
     </div>
     <div class="banner-toolbar">
       <InputText v-model="search" placeholder="جستجو در عنوان بنر…" @keyup.enter="load" />
@@ -28,8 +28,8 @@
         </Column>
         <Column header="عملیات" style="width: 130px">
           <template #body="{ data }">
-            <Button icon="pi pi-pencil" text rounded aria-label="ویرایش بنر" @click="edit(data)" />
-            <Button icon="pi pi-inbox" text rounded severity="danger" aria-label="آرشیو بنر" @click="archive(data)" />
+            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش بنر" @click="edit(data)" />
+            <Button v-if="canDelete" icon="pi pi-inbox" text rounded severity="danger" aria-label="آرشیو بنر" @click="archive(data)" />
           </template>
         </Column>
         <template #empty><div class="banner-empty">هنوز بنر تبلیغاتی ثبت نشده است.</div></template>
@@ -40,7 +40,7 @@
       <div class="banner-form">
         <div class="banner-form__field"><label for="banner-title">عنوان بنر *</label><InputText id="banner-title" v-model="form.title" maxlength="120" /></div>
         <div class="banner-form__field"><label for="banner-description">متن کوتاه</label><Textarea id="banner-description" v-model="form.description" rows="2" maxlength="300" auto-resize /></div>
-        <div class="banner-form__field"><label>تصویر بنر *</label><div class="banner-upload"><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage" /><Button label="انتخاب تصویر" icon="pi pi-upload" severity="secondary" outlined :loading="uploading" @click="fileInput?.click()" /><span>{{ form.imageUrl ? 'تصویر بارگذاری شده است' : 'JPG، PNG یا WebP — حداکثر ۸ مگابایت' }}</span></div><img v-if="form.imageUrl" :src="form.imageUrl" alt="پیش‌نمایش بنر" class="banner-preview" /></div>
+        <div class="banner-form__field"><label>تصویر بنر *</label><div class="banner-upload"><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage" /><Button v-if="canUpload" label="انتخاب تصویر" icon="pi pi-upload" severity="secondary" outlined :loading="uploading" @click="fileInput?.click()" /><span>{{ form.imageUrl ? 'تصویر بارگذاری شده است' : 'JPG، PNG یا WebP — حداکثر ۸ مگابایت' }}</span></div><img v-if="form.imageUrl" :src="form.imageUrl" alt="پیش‌نمایش بنر" class="banner-preview" /></div>
         <div class="banner-form__grid">
           <div class="banner-form__field"><label for="banner-target">لینک مقصد</label><InputText id="banner-target" v-model="form.targetUrl" placeholder="/products یا https://…" /></div>
           <div class="banner-form__field"><label for="banner-cta">متن دکمه</label><InputText id="banner-cta" v-model="form.ctaLabel" maxlength="40" placeholder="مشاهده جشنواره" /></div>
@@ -51,7 +51,7 @@
         </div>
         <div class="banner-form__field banner-form__switch"><Checkbox v-model="form.isActive" input-id="banner-active" binary /><label for="banner-active">بنر فعال باشد</label></div>
       </div>
-      <template #footer><Button label="انصراف" severity="secondary" text @click="dialog = false" /><Button label="ذخیره بنر" icon="pi pi-check" :loading="saving" @click="save" /></template>
+      <template #footer><Button label="انصراف" severity="secondary" text @click="dialog = false" /><Button v-if="(editingId && canUpdate) || (!editingId && canCreate)" label="ذخیره بنر" icon="pi pi-check" :loading="saving" @click="save" /></template>
     </Dialog>
   </div>
 </template>
@@ -60,9 +60,15 @@
 import { ref, onMounted } from 'vue'
 import { bannersApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '../../../stores/auth'
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 
 const toast = useToast()
+const authStore = useAuthStore()
+const canCreate = authStore.hasPermission('banners.create')
+const canUpdate = authStore.hasPermission('banners.update')
+const canDelete = authStore.hasPermission('banners.delete')
+const canUpload = authStore.hasPermission('media.upload')
 const items = ref([])
 const loading = ref(false)
 const saving = ref(false)
