@@ -38,3 +38,11 @@
 
 ## UI safety note — 2026-11-04
 The storefront fixed-price add-to-cart control is shown disabled with an explanation until authoritative Order and Inventory APIs exist. The localStorage cart is a preview only; it must not be represented as a completed purchase, reservation, payment or order. Do not enable the control from retailEnabled and a displayed price alone.
+
+## بهبود هدر و سبد خرید — 2026-11-06
+
+- هدر عمومی به‌جای فیلد دائمی، جستجوی آیکونی با پنجره بازشونده و ارسال به مسیر نتایج جستجو دارد.
+- سبد خرید از هدر در یک drawer ثابت از لبه فیزیکی چپ باز می‌شود؛ تصویر بندانگشتی، قیمت، تعداد، حذف کالا و جمع کل از Pinia cart store خوانده می‌شوند.
+- CTA تسویه فقط به مسیر checkout موجود هدایت می‌کند؛ محدودیت‌های خرید واقعی و غیرفعال بودن ثبت سفارش/پرداخت تا زمان ایجاد API معتبر همچنان برقرار است.
+- این رابط به‌تنهایی سفارش، رزرو موجودی یا پرداخت ایجاد نمی‌کند.
+
