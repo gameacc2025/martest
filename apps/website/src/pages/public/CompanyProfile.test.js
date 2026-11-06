@@ -33,7 +33,7 @@ const productFixture = () => ({
   id: 82,
   title: 'تجهیزات انتقال نوری',
   companyId: 37,
-  company: { id: 37, name: 'شرکت ارتباطات نمونه', type: 'SUPPLIER' },
+  company: { id: 37, name: 'شرکت ارتباطات نمونه', type: 'SUPPLIER', description: 'تأمین‌کننده تجهیزات شبکه', address: 'تهران', phone: '02112345678', email: 'info@example.test', website: 'https://example.test', isVerified: true },
   prices: [{ price: 3150000 }],
   images: [{ isPrimary: true, url: '/products/optical-82.png' }],
   specifications: { standard: { ports: 8 } },
@@ -103,6 +103,16 @@ describe('Website Company Profile', () => {
     await flushPromises()
 
     expect(getProducts).toHaveBeenCalledWith({ page: 1, limit: 12, companyId: 45 })
+  })
+
+  it('renders public company details and contact links as a storefront', async () => {
+    wrapper = mountCompanyProfile()
+    await flushPromises()
+    expect(wrapper.text()).toContain('تأمین‌کننده تجهیزات شبکه')
+    expect(wrapper.text()).toContain('تهران')
+    expect(wrapper.find('a[href="tel:02112345678"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="mailto:info@example.test"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="https://example.test"]').exists()).toBe(true)
   })
 
   it('shows an explicit empty state when the company has no public products', async () => {
