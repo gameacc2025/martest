@@ -3689,3 +3689,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Preserved historical migrations for production. Added migration 20261106120000_product_catalog_identity; development's db-push workflow does not call migrate deploy.
 - Demo product models are real-world references; prices are indicative development fixtures and product specifications must be verified against the exact manufacturer datasheet before commercial use.
 - Verification NOT RUN in this remote GitHub editing session. Run Prisma validate, seed tests, inquiry tests, and a clean local dev reset before relying on the fixtures.
+
+
+- Added a public similar-listings endpoint and product create/update catalogCode derivation; added service tests for code generation and cross-supplier lookup. The development seed also creates six months of synthetic first-tier price snapshots per listing for chart UI coverage.
