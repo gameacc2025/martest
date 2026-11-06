@@ -68,7 +68,7 @@ const TRANSITIONS = {
 };
 
 const productInclude = {
-  company: { select: { id: true, name: true, type: true } },
+  company: { select: { id: true, name: true, nameEn: true, type: true, description: true, logo: true, email: true, phone: true, address: true, website: true, isVerified: true } },
   category: { select: { id: true, nameFa: true, nameEn: true, slug: true } },
   subcategory: { select: { id: true, nameFa: true, nameEn: true, slug: true } },
   prices: { orderBy: [{ minQuantity: 'asc' }, { createdAt: 'asc' }] },
@@ -836,6 +836,8 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
 
   const featured = parseOptionalBoolean(filters.featured);
   if (featured !== undefined) where.isFeatured = featured;
+  const retailEnabled = parseOptionalBoolean(filters.retailEnabled);
+  if (retailEnabled !== undefined) where.retailEnabled = retailEnabled;
 
   if (minPrice !== undefined || maxPrice !== undefined) {
     where.prices = {
