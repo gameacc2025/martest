@@ -141,9 +141,11 @@ function chooseCategory(id) {
   applyFilters()
 }
 onMounted(async () => {
+  retailOnly.value = route.query.retail === '1' || route.query.retail === 'true'
   const id = Number(route.query.category)
   if (route.query.category && Number.isInteger(id) && id > 0) selectedCategory.value = id
   filters.value.category = selectedCategory.value
+  filters.value.retailOnly = retailOnly.value
   await Promise.all([loadCategories(), loadProducts(), loadFeatured()])
 })
 watch(() => route.query.category, value => {
