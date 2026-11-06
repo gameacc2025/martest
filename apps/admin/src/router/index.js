@@ -77,6 +77,7 @@ const routes = [
       { path: "/products/:id/edit", name: "admin-product-edit", component: () => import("../pages/admin/products/ProductForm.vue"), meta: { title: "ویرایش محصول" } },
       // ── Categories ────────────────────────────────────────
       { path: "/categories", name: "admin-categories", component: () => import("../pages/admin/categories/CategoryList.vue"), meta: { title: "مدیریت دسته‌بندی‌ها" } },
+      { path: "/banners", name: "admin-banners", component: () => import("../pages/admin/banners/BannerManagement.vue"), meta: { title: "مدیریت بنرهای تبلیغاتی" } },
       // ── Orders ────────────────────────────────────────────
       { path: "/orders", name: "admin-orders", redirect: { name: "admin-retail-orders" }, meta: { title: "سفارش‌های خرده‌فروشی" } },
       // ── Inquiries ─────────────────────────────────────────
