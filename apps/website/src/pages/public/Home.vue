@@ -273,7 +273,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div>
 
         <div v-if="loading" class="home-product-grid" aria-busy="true">
-          <div v-for="i in 4" :key="i" class="home-product-card home-skeleton"></div>
+          <div v-for="i in 8" :key="i" class="product-card home-product-skeleton home-skeleton"></div>
         </div>
 
         <div v-else-if="error" class="home-empty">
@@ -322,7 +322,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div>
 
         <div v-if="loading" class="home-product-grid" aria-busy="true">
-          <div v-for="n in 3" :key="n" class="home-skeleton" style="min-height:100px"></div>
+          <div v-for="n in 8" :key="n" class="product-card home-product-skeleton home-skeleton"></div>
         </div>
         <div v-else-if="error" class="home-empty">
           <i class="pi pi-exclamation-triangle" aria-hidden="true"></i><p>{{ error }}</p>
@@ -704,6 +704,8 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 .home-empty i { font-size: 24px; color: var(--tm-faint); }
 .home-empty p { margin: 0; font-size: 13px; }
 
+.home-product-skeleton{min-height:430px}
+@media(max-width:575px){.home-product-skeleton{min-height:320px}}
 .home-skeleton {
   min-height: 150px;
   background: linear-gradient(90deg, var(--tm-surface-alt) 25%, var(--tm-canvas) 37%, var(--tm-surface-alt) 63%);
