@@ -14,7 +14,7 @@ describe('Website homepage — Telecom Market reference', () => {
   it('uses live product, category and campaign APIs rather than fabricated catalogue data', () => {
     expect(source).toContain("bannersApi.listActive('HOME_HERO')")
     expect(source).toContain('productsApi.list(params)')
-    expect(source).toContain('productsApi.list({ ...params, limit: 8, featured: true })')
+    expect(source).toContain('productsApi.list({ ...params, featured: true })')
     expect(source).toContain('retailEnabled: true')
     expect(source).toContain('productsStore.getCategories()')
     expect(source).not.toContain('mockData')
