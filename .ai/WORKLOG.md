@@ -1,3 +1,14 @@
+
+
+## 2026-11-06 — Retail catalogue and company storefront
+- Added a retail-only filter to the public catalogue; checkbox state is included in the API request, and the homepage deep link /products?retail=1 initializes it.
+- Added retailEnabled to the public product-list API filter while preserving the PUBLISHED + PUBLIC clamp.
+- Added a live homepage section for the latest retail-enabled products.
+- Public product company projection now carries public-facing description/logo/contact/address/website/verification fields; company profile page displays these fields and the published product catalogue.
+- Added/updated regression tests for API query filtering, homepage retail content, and public company contact links.
+- Best-selling retail products cannot be truthfully ranked yet: no Order/Sale model or aggregate exists. Featured products are not treated as best sellers.
+- Source commits were written individually to main; test/docs updates follow.
+- Verification: NOT RUN in this GitHub-only editing session; CI must be inspected before claiming success.
 # Agent Worklog — Telecom Marketplace
 
 This file is the shared, version-controlled memory for agents working on the repository. Append new entries; never erase completed work. Keep it factual and do not store secrets.
