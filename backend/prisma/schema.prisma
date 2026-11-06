@@ -314,6 +314,8 @@ model Product {
   shortDescription String?
   description      String?
   sku              String?
+  // Shared manufacturer/model identity across supplier listings; not a seller SKU.
+  catalogCode      String?
   brand            String?
   model            String?
   specifications   Json?
@@ -354,6 +356,7 @@ model Product {
   @@index([isFeatured])
   @@index([deletedAt])
   @@index([sku])
+  @@index([catalogCode])
 }
 
 model ProductStatusHistory {
