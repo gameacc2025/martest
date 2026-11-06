@@ -298,3 +298,8 @@ The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/a
 - Dedicated `/products` is a task-focused catalogue: do not place the supplier-marketing banner or general marketplace-benefits strip between its featured hero and filters/results.
 - Product tiles follow the shared TEM compact rhythm (4:5 image, 11px body padding, compact two-line title and footer). Use denser responsive catalogue tracks: five desktop columns, six on very wide screens, four medium desktop, three tablet and two mobile.
 - Keep marketing/service messaging on the homepage, not repeated in the catalogue browsing flow.
+
+
+### Shared storefront product-card sizing — 2026-11-06
+- Homepage shelves and the dedicated product catalogue use the same bounded card track: 168px minimum on normal widths and 210px maximum, with a compact two-column mobile fallback. This keeps card width consistent even though the catalogue reserves space for its filter sidebar.
+- Preserve the 4:5 media frame, 10px image inset, 11px body padding and 44px two-line product title on both surfaces. Grid column count is content-width-driven; do not force identical column counts where the catalogue sidebar changes available width.
