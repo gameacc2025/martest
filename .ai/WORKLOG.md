@@ -3667,3 +3667,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** repository source anchors and export paths inspected; Vue SFC compile, package tests, app builds and browser checks NOT RUN in the remote GitHub editing session. Browser verification remains disallowed by owner instruction.
 - **Commits:** `5430734ddf08a650ac225641228ef286676389e7` (widget library and shared export), `a2ffbfd15f410c59b5ba9887dcca6dd45c5dbc81` (complete widget exports and RoleCard fix).
 - **Next:** pull `main` locally; run the project's normal package/build checks when authorized, then use these shared widgets as the building blocks for the Website redesign.
+## 2026-11-06 — PROMOTIONAL-BANNERS-END-TO-END
+- **Status:** Source implementation committed directly to main; runtime verification pending.
+- Added a standalone Prisma Banner model and migration. Campaign content is independent of Product and supports title, description, image, target URL, CTA, placement, sort order, draft/published/archived state, activation and scheduled start/end.
+- Added public GET /api/v1/banners/active which returns only published, active, non-deleted campaigns inside their schedule window; staff CRUD/list/archive and image upload endpoints are protected by STAFF access context plus existing banners.* / media.upload permissions.
+- Reused existing permission catalogue and assignments in backend/prisma/seed.js: ADMIN receives banner CRUD; MODERATOR is read-only; SUPER_ADMIN keeps the standard bypass.
+- Added JPEG/PNG/WebP signature checks, generated filenames, isolated upload directory and an 8 MiB multipart limit.
+- Added bannersApi to @telecom/api-client, a STAFF banner-management page at /banners, and the permission-gated Admin sidebar item.
+- Website homepage now requests active HOME_HERO banners and displays an independent advertising carousel beside the featured-product slider. The advertising panel is wider, independently timed, and never uses product records. No static/demo banner appears when no active campaign exists.
+- Added route integration tests for public access, authentication, STAFF boundary, permissions and payload validation.
+- **Verification:** source and route wiring inspected; Prisma validate/migrate status, Node tests, Vue SFC compile, app builds and browser rendering have NOT been run in this remote GitHub editing session.
+- **Commits:** schema 595c6d4; migration edcc7ea; backend module 92a9d36, 277d10e, e294f67; route registration c3acee4; API client 5057ae9, ade3410, 7c5393e; Admin UI/router/nav bba8906, 099a439, c08511c, b6248a2, 77c8f41; Website 813c743, d3077c0; tests 5ae3df1; backend hardening 8dd1bdb, e1c9fe9.
+- **Next required local verification:** pull latest main; run npx prisma validate, npx prisma migrate status, node --test src/modules/banners/banner.routes.test.js inside backend, then run Admin and Website package builds. Apply the new migration before testing against the dev database.
