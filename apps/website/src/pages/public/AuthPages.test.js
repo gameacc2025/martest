@@ -17,6 +17,11 @@ const register = readPage('Register.vue')
 const forgotPassword = readPage('ForgotPassword.vue')
 
 describe('Website authentication page accessibility contracts', () => {
+  it('uses a registered route for the login page back link', () => {
+    expect(login).toContain("<router-link :to=\"{ name: 'products' }\" class=\"auth-back\">")
+    expect(login).not.toContain("name: 'home'")
+  })
+
   it('associates login labels with phone and password controls', () => {
     expect(login).toContain('<label for="login-phone">')
     expect(login).toContain('id="login-phone"')
