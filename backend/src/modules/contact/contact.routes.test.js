@@ -56,6 +56,7 @@ test('POST /messages sends a validated public contact message without authentica
 });
 
 test('POST /messages rejects invalid payloads', async () => {
+  sent.length = 0;
   const app = await buildApp();
   const response = await app.inject({
     method: 'POST',
