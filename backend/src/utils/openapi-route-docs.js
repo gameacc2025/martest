@@ -272,6 +272,7 @@ Object.assign(docs, {
 });
 
 Object.assign(docs, {
+  'GET /api/v1/companies/public/:id': { summary: 'Get public company storefront profile', description: 'Returns an allowlisted public profile for an ACTIVE, non-deleted company. No authentication required.', tags: ['Companies'], authRequired: false, includeNotFound: false, params: idParam(), responses: resourceResponse('Public company profile returned successfully.') },
   'GET /api/v1/companies': { summary: 'List companies', description: 'Lists companies. Authentication required: Bearer JWT. Permission required: companies.read.', tags: ['Companies'], permission: 'companies.read', querystring: paginationQuery, responses: paginatedResponse('Companies returned successfully.') },
   'GET /api/v1/companies/:id': { summary: 'Get company by ID', description: 'Returns a company by numeric ID. Authentication required: Bearer JWT. Permission required: companies.read.', tags: ['Companies'], permission: 'companies.read', params: idParam(), responses: resourceResponse('Company returned successfully.') },
   'GET /api/v1/companies/:id/products': { summary: 'Get company products', description: 'Returns products for a company. Authentication required: Bearer JWT. Permission required: companies.read.', tags: ['Companies'], permission: 'companies.read', params: idParam(), responses: resourceResponse('Company products returned successfully.') },
