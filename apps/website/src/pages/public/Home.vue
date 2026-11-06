@@ -321,7 +321,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
                 <span v-if="product.company?.isVerified" class="product-card__verified"><i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده تأییدشده</span>
                 <span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span>
                 <span class="product-card__name">{{ product.name || product.title }}</span>
-                <span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" dir="ltr">{{ product.sku }}</b><b v-if="productCategoryName(product)">{{ productCategoryName(product) }}</b></span>
+                <span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" class="product-sku" dir="ltr">{{ product.sku }}</b><b v-if="productCategoryName(product)">{{ productCategoryName(product) }}</b></span>
                 <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
                 <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
               </span>
@@ -366,7 +366,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
                 <span v-if="product.company?.isVerified" class="product-card__verified"><i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده تأییدشده</span>
                 <span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span>
                 <span class="product-card__name">{{ product.name || product.title }}</span>
-                <span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" dir="ltr">{{ product.sku }}</b><b v-if="productCategoryName(product)">{{ productCategoryName(product) }}</b></span>
+                <span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" class="product-sku" dir="ltr">{{ product.sku }}</b><b v-if="productCategoryName(product)">{{ productCategoryName(product) }}</b></span>
                 <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
                 <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
               </span>
