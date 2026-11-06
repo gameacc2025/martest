@@ -772,3 +772,6 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added a guarded development reset script requiring NODE_ENV=development and the telecom_marketplace database; it runs prisma db push --force-reset followed by the idempotent seed. Normal startup does not reset the database.
 - Historical migrations are preserved for production deployments; a new migration adds catalogCode for migration-based deployments.
 - Remote GitHub source edits only. Prisma validation, database reset, seed execution, Node tests, and app builds remain to be run locally; do not report them as passed.
+
+
+- Public product detail now exposes catalogCode and GET /api/v1/products/:id/similar returns matching public listings from other active suppliers. Product create/update derives the shared code from brand + model unless an explicit code is provided.
