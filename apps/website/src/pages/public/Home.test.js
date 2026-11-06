@@ -76,6 +76,15 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))')
   })
 
+  it('keeps a real hero search and pre-footer promotional navigation cards', () => {
+    expect(source).toContain('role="search" aria-label="جستجوی محصولات"')
+    expect(source).toContain('@submit.prevent="heroSearch"')
+    expect(source).toContain('home-promo-grid')
+    expect(source).toContain('home-promo-card--catalog')
+    expect(source).toContain('home-promo-card--suppliers')
+    expect(source).toContain('home-promo-card--inquiry')
+  })
+
   it('does not publish unsupported hard-coded marketplace statistics or claims', () => {
     expect(source).not.toContain('const stats =')
     expect(source).not.toContain('+250')
