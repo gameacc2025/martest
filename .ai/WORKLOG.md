@@ -3734,3 +3734,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added/updated homepage and layout source-contract tests. Tests, Vue SFC compilation, package builds and browser rendering have NOT been run in this remote editing session.
 - No backend, schema, migration, API contract, authentication, permission or order-flow changes.
 
+
+
+## 2026-11-06 — WEBSITE PRODUCT CARD CONSISTENCY AND HOMEPAGE COMPLETION
+
+- Standardized public product-card image proportions to portrait 4:5 across the homepage, primary catalogue, legacy product grid, search results, and the shared ProductCard component. Cards use compact typography/spacing and consistent grid sizing; mobile grids retain two columns where space allows.
+- Homepage featured and newest sections each request and render at most 8 products (two rows at four columns on desktop). Loading placeholders now follow the same count and card silhouette.
+- Added a live hero search form connected to the existing `search` route in both scheduled-campaign and no-campaign hero states.
+- Added three pre-footer discovery/promo cards linking only to existing routes and describing capabilities backed by current catalogue, company metadata and inquiry workflows.
+- Removed the catalogue's remaining violet accents in favor of the approved blue/cyan semantic tokens; homepage card focus uses the shared focus token.
+- **Bestseller data constraint:** no authoritative sales/order aggregate or public bestseller endpoint exists. The homepage section therefore remains honestly labelled «محصولات منتخب» and uses the existing featured flag; do not rename it «پرفروش‌ترین» or infer sales rank until a real aggregate/API is available.
+- No backend, schema, migration, API contract, authentication, permission or commerce behavior changed. Checkout remains a preview and fixed-price cart actions remain disabled.
+- Added/updated source-contract tests for homepage limits, card proportions, hero search, promo cards and catalogue card layout. Tests/build/browser visual checks were NOT RUN in this remote GitHub editing session.
