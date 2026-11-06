@@ -147,6 +147,8 @@ const formatPrice = (price) => {
 <style scoped>
 .product-card {
   direction: rtl;
+  width: 100%;
+  max-width: 210px;
   height: 100%;
 }
 
@@ -154,8 +156,9 @@ const formatPrice = (price) => {
   height: 100%;
 }
 
-.product-card :deep(.p-card) {
+ .product-card :deep(.p-card) {
   height: 100%;
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
 }
