@@ -85,6 +85,22 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('home-promo-card--inquiry')
   })
 
+
+  it('uses the same compact five/six-column product-card rhythm as the catalogue on desktop', () => {
+    expect(source).toContain('grid-template-columns: repeat(5, minmax(0, 1fr))')
+    expect(source).toContain('grid-template-columns: repeat(6, minmax(0, 1fr))')
+    expect(source).toContain('aspect-ratio:4 / 5')
+    expect(source).toContain('padding:11px')
+    expect(source).toContain('min-height:44px')
+  })
+
+  it('renders a real product spotlight and marketplace benefits in the homepage hero area', () => {
+    expect(source).toContain('home-campaign-hero__spotlight')
+    expect(source).toContain('activeFeaturedProduct')
+    expect(source).toContain('home-marketplace-benefits')
+    expect(source).toContain('home-campaign-hero__quick-links')
+  })
+
   it('does not publish unsupported hard-coded marketplace statistics or claims', () => {
     expect(source).not.toContain('const stats =')
     expect(source).not.toContain('+250')
