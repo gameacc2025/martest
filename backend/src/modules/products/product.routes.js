@@ -41,6 +41,7 @@ const productBodyProperties = {
   shortDescription: { type: 'string' },
   description: { type: 'string' },
   sku: { type: 'string', maxLength: 100 },
+  catalogCode: { type: 'string', maxLength: 180 },
   brand: { type: 'string', maxLength: 100 },
   model: { type: 'string', maxLength: 100 },
   specifications: { type: 'object', additionalProperties: true },
