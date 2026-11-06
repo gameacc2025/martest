@@ -174,6 +174,7 @@ Public marketplace GET routes; nested management routes inherit authentication a
 |---|---|---|
 | GET | `/api/v1/products` | `Public` |
 | GET | `/api/v1/products/:id/price-history` | `Public` |
+| GET | `/api/v1/products/:id/similar` | `Public` |
 | GET | `/api/v1/products/:id` | `Public` |
 | GET | `/api/v1/products/my-products` | `requireAccessType(...MANAGE_TYPES), requirePermission('products.read')` |
 | GET | `/api/v1/products/:id/manage` | `requireAccessType(...MANAGE_TYPES), requirePermission('products.read')` |
