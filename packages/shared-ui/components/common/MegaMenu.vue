@@ -96,15 +96,16 @@ function categoryIcon(category) {
           <div class="mega-subcats">
             <template v-if="activeCategory">
               <div class="mega-subcat-header">
-                <h3>{{ activeCategory.nameFa }}</h3>
+                <h3>{{ activeCategory.nameFa || activeCategory.name || activeCategory.nameEn }}</h3>
                 <button class="mega-view-all" @click="goToCategory(activeCategory.id)">
                   مشاهده همه
                 </button>
               </div>
               <div class="mega-subcat-grid">
-                <div
+                <button
                   v-for="sub in activeCategory.subcategories"
                   :key="sub.id"
+                  type="button"
                   class="mega-subcat-item"
                   @click="goToSubcategory(activeCategory.id, sub.id)"
                 >
