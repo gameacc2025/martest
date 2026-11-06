@@ -237,9 +237,10 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
               <i class="pi pi-box" aria-hidden="true"></i>
               <span class="home-hero__product-caption">محصولات تخصصی شبکه و مخابرات</span>
             </div>
-            <a v-if="activeBanner" class="home-promo-banner" :href="activeBanner.targetUrl || undefined" :class="{ 'home-promo-banner--clickable': !!activeBanner.targetUrl }" @mouseenter="stopBannerSlider" @mouseleave="startBannerSlider" @focusin="stopBannerSlider" @focusout="startBannerSlider">
+            <div v-if="activeBanner" class="home-promo-banner" @mouseenter="stopBannerSlider" @mouseleave="startBannerSlider" @focusin="stopBannerSlider" @focusout="startBannerSlider">
               <img :src="activeBanner.imageUrl" :alt="activeBanner.title" width="720" height="420" loading="eager" decoding="async" />
               <span class="home-promo-banner__shade"></span>
+              <a v-if="activeBanner.targetUrl" class="home-promo-banner__hitarea" :href="activeBanner.targetUrl" :aria-label="activeBanner.title"></a>
               <span class="home-promo-banner__content">
                 <span class="home-promo-banner__eyebrow">پیشنهاد ویژه بازارگاه</span>
                 <strong>{{ activeBanner.title }}</strong>
@@ -249,7 +250,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
               <span v-if="promotionalBanners.length > 1" class="home-promo-banner__dots" aria-label="اسلایدهای تبلیغاتی">
                 <button v-for="(banner, index) in promotionalBanners" :key="banner.id" type="button" :class="{ 'is-active': index === activeBannerIndex }" :aria-label="'نمایش بنر ' + (index + 1)" @click.prevent="activeBannerIndex = index; stopBannerSlider()"></button>
               </span>
-            </a>
+            </div>
             <ul class="home-hero__benefits">
               <li><i class="pi pi-check-circle" aria-hidden="true"></i><span>کاتالوگ تخصصی تجهیزات شبکه</span></li>
               <li><i class="pi pi-file-edit" aria-hidden="true"></i><span>مسیر جداگانه برای استعلام پروژه‌ای</span></li>
@@ -435,12 +436,13 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 .home-promo-banner { position:relative; display:block; min-width:0; min-height:330px; overflow:hidden; border:1px solid var(--tm-line); border-radius:4px; background:var(--tm-surface-alt); color:#fff; text-decoration:none; box-shadow:var(--tm-card-shadow); isolation:isolate; }
 .home-promo-banner > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
 .home-promo-banner__shade { position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,rgba(5,18,39,.78),rgba(5,18,39,.12) 100%); }
-.home-promo-banner__content { position:absolute; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; gap:.65rem; padding:clamp(1.25rem,2.2vw,2rem); }
+.home-promo-banner__hitarea { position:absolute; inset:0; z-index:0; }
+.home-promo-banner__content { position:absolute; pointer-events:none; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; gap:.65rem; padding:clamp(1.25rem,2.2vw,2rem); }
 .home-promo-banner__eyebrow { font-size:.75rem; font-weight:800; color:#d7f8ff; }
 .home-promo-banner__content strong { max-width:24ch; font-size:clamp(1.35rem,2vw,2rem); line-height:1.65; font-weight:900; }
 .home-promo-banner__content > span:not(.home-promo-banner__eyebrow):not(.home-promo-banner__cta) { max-width:38ch; font-size:.9rem; line-height:1.9; color:rgba(255,255,255,.9); }
 .home-promo-banner__cta { display:inline-flex; align-items:center; gap:.5rem; margin-top:.3rem; padding:.65rem 1rem; border-radius:4px; background:#fff; color:#132c4c; font-size:.8rem; font-weight:800; }
-.home-promo-banner__dots { position:absolute; inset-inline-start:1rem; top:1rem; display:flex; gap:.4rem; }
+.home-promo-banner__dots { position:absolute; z-index:2; inset-inline-start:1rem; top:1rem; display:flex; gap:.4rem; }
 .home-promo-banner__dots button { width:7px; height:7px; padding:0; border:0; border-radius:10px; background:rgba(255,255,255,.55); cursor:pointer; }
 .home-promo-banner__dots button.is-active { width:22px; background:#fff; }
 .home-hero__product { min-width: 0; min-height: 250px; display: grid; place-items: center; gap: .5rem; padding: 1rem; border: 1px solid var(--tm-line); border-radius: 4px; background: var(--tm-canvas); color: var(--tm-ink); }
