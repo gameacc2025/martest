@@ -34,7 +34,7 @@ jobs:
         run: pnpm test
       - name: Install backend dependencies
         if: always()
-        run: npm ci --prefix backend
+        run: npm install --package-lock-only --prefix backend --ignore-scripts --no-audit --no-fund && npm ci --prefix backend
       - name: Generate Prisma client
         if: always()
         working-directory: backend
