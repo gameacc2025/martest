@@ -182,7 +182,7 @@ const formatPrice = (price) => {
 
 .product-media {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
 }
 
@@ -225,7 +225,7 @@ const formatPrice = (price) => {
 
 .product-name {
   font-weight: var(--ds-font-weight-semibold);
-  font-size: var(--ds-font-size-md);
+  font-size: .84rem;
   line-height: 1.5;
   margin: 0 0 var(--ds-space-1) 0;
   display: -webkit-box;
@@ -269,7 +269,7 @@ const formatPrice = (price) => {
 .final-price {
   color: var(--ds-color-primary);
   font-weight: var(--ds-font-weight-bold);
-  font-size: var(--ds-font-size-lg);
+  font-size: .9rem;
 }
 
 .product-features {
@@ -315,7 +315,7 @@ const formatPrice = (price) => {
   flex-direction: column;
 }
 .sk-image {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
   background: linear-gradient(
     90deg,
     var(--ds-color-surface-alt) 25%,
