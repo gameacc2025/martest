@@ -801,3 +801,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **Bestseller data constraint:** no authoritative sales/order aggregate or public bestseller endpoint exists. The homepage section therefore remains honestly labelled «محصولات منتخب» and uses the existing featured flag; do not rename it «پرفروش‌ترین» or infer sales rank until a real aggregate/API is available.
 - No backend, schema, migration, API contract, authentication, permission or commerce behavior changed. Checkout remains a preview and fixed-price cart actions remain disabled.
 - Added/updated source-contract tests for homepage limits, card proportions, hero search, promo cards and catalogue card layout. Tests/build/browser visual checks were NOT RUN in this remote GitHub editing session.
+
+
+## Website catalogue cleanup and card-density correction — 2026-11-06
+- Removed the supplier-promotion banner and the three-item marketplace-benefits strip from the dedicated `/products` catalogue; these marketing elements do not belong in the product browsing/filtering flow.
+- The featured-product hero remains, now spans the full catalogue content width instead of reserving an empty banner column.
+- Reduced catalogue product-card footprint to match the shared TEM card rhythm: portrait 4:5 image, 11px body padding, compact 13px/44px two-line title, smaller image inset and tighter footer spacing. Desktop density is five columns, six on very wide screens, four at medium desktop, three at tablet and two on mobile.
+- No API, route, backend or product behavior changes. Test assertions updated; execution and browser visual verification remain pending.
