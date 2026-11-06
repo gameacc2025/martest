@@ -24,12 +24,13 @@ const searchQuery = ref('')
 const selectedCategory = ref(null)
 const minPrice = ref(null)
 const maxPrice = ref(null)
+const retailOnly = ref(false)
 const sortBy = ref('createdAt')
 const sortOrder = ref('desc')
 const activeSlide = ref(0)
 let slideTimer = null
 
-const filters = ref({ search: '', category: null, minPrice: null, maxPrice: null, page: 1, limit: 24, sortBy: 'createdAt', sortOrder: 'desc' })
+const filters = ref({ search: '', category: null, minPrice: null, maxPrice: null, retailOnly: false, page: 1, limit: 24, sortBy: 'createdAt', sortOrder: 'desc' })
 const sortOptions = [
   { label: 'جدیدترین', value: 'createdAt:desc' },
   { label: 'قدیمی‌ترین', value: 'createdAt:asc' },
@@ -99,6 +100,7 @@ async function loadProducts() {
     if (filters.value.category) params.categoryId = Number(filters.value.category)
     if (filters.value.minPrice !== null && filters.value.minPrice !== '') params.minPrice = Number(filters.value.minPrice)
     if (filters.value.maxPrice !== null && filters.value.maxPrice !== '') params.maxPrice = Number(filters.value.maxPrice)
+    if (filters.value.retailOnly) params.retailEnabled = true
     const result = await productsStore.getProducts(params) || {}
     const list = Array.isArray(result.data) ? result.data : (result.data?.products ?? result.data?.items ?? result.products ?? result.items ?? [])
     products.value = Array.isArray(list) ? list : []
@@ -114,7 +116,7 @@ function applyFilters() {
   const [nextSortBy, nextSortOrder] = selectedSort.value.split(':')
   filters.value = {
     search: searchQuery.value.trim(), category: selectedCategory.value,
-    minPrice: minPrice.value, maxPrice: maxPrice.value,
+    minPrice: minPrice.value, maxPrice: maxPrice.value, retailOnly: retailOnly.value,
     page: 1, limit: filters.value.limit, sortBy: nextSortBy, sortOrder: nextSortOrder,
   }
   loadProducts()
@@ -124,8 +126,9 @@ function resetFilters() {
   selectedCategory.value = null
   minPrice.value = null
   maxPrice.value = null
+  retailOnly.value = false
   selectedSort.value = 'createdAt:desc'
-  filters.value = { search: '', category: null, minPrice: null, maxPrice: null, page: 1, limit: 24, sortBy: 'createdAt', sortOrder: 'desc' }
+  filters.value = { search: '', category: null, minPrice: null, maxPrice: null, retailOnly: false, page: 1, limit: 24, sortBy: 'createdAt', sortOrder: 'desc' }
   loadProducts()
 }
 function onPageChange(event) {
@@ -226,6 +229,7 @@ onUnmounted(stopSlider)
           <h3>محدوده قیمت <small>ریال</small></h3>
           <div class="shop-price-inputs"><InputNumber v-model="minPrice" inputId="shop-min-price" placeholder="از" :useGrouping="true" /><span>تا</span><InputNumber v-model="maxPrice" inputId="shop-max-price" placeholder="تا" :useGrouping="true" /></div>
         </div>
+        <div class="shop-filter-section"><h3>نوع فروش</h3><label class="shop-retail-filter"><input v-model="retailOnly" type="checkbox" /><span class="shop-retail-filter__check"><i class="pi pi-check"></i></span><span><b>فقط محصولات خرده‌فروشی</b><small>فروش تکی این محصولات فعال است</small></span></label></div>
         <div class="shop-filter-section shop-filter-section--last">
           <h3>مرتب‌سازی</h3>
           <Select v-model="selectedSort" :options="sortOptions" optionLabel="label" optionValue="value" class="shop-sort-select" />
@@ -291,7 +295,8 @@ onUnmounted(stopSlider)
 .shop-filter-head{background:#fbfbfe}
 .shop-filter-section h3{color:var(--tm-ink)}
 .shop-search :deep(.p-inputtext){text-align:right}
-.shop-search :deep(.p-inputtext)::placeholder{color:#9aa1b3}.shop-filter-sidebar{position:sticky;top:82px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);overflow:hidden}.shop-filter-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--tm-line)}.shop-filter-head>div{display:flex;align-items:center;gap:9px;font-size:14px}.shop-filter-head>div i{color:var(--tm-blue)}.shop-filter-head button,.shop-filter-actions>button{border:0;background:none;color:var(--tm-blue);font-size:11px;cursor:pointer}.shop-filter-section{padding:17px 16px;border-bottom:1px solid var(--tm-line)}.shop-filter-section h3{display:flex;justify-content:space-between;margin:0 0 12px;font-size:13px;font-weight:600}.shop-filter-section h3 small{color:var(--tm-muted);font-size:10px;font-weight:400}.shop-search{display:flex;gap:6px}.shop-search :deep(.p-inputtext){width:100%;min-width:0;height:38px;font-size:11px}.shop-search :deep(.p-button){flex:none;width:40px;background:var(--tm-blue);border-color:var(--tm-blue)}.shop-filter-option{display:flex;align-items:center;gap:9px;width:100%;padding:8px 0;border:0;background:none;color:var(--tm-ink-soft);text-align:start;font-size:12px;cursor:pointer}.shop-filter-option small{margin-inline-start:auto;color:var(--tm-muted);font-size:10px}.shop-check{width:15px;height:15px;flex:none;border:1px solid #cfd3e0;border-radius:3px}.shop-filter-option.active{color:var(--tm-blue);font-weight:600}.shop-filter-option.active .shop-check{border-color:var(--tm-blue);background:var(--tm-blue);box-shadow:inset 0 0 0 3px #fff}.shop-price-inputs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}.shop-price-inputs :deep(.p-inputnumber),.shop-price-inputs :deep(.p-inputtext){width:100%;min-width:0}.shop-price-inputs :deep(.p-inputtext){height:36px;padding:7px;font-size:11px}.shop-price-inputs>span{color:var(--tm-muted);font-size:10px}.shop-sort-select{width:100%}.shop-filter-actions{display:grid;gap:9px;padding:14px 16px}.shop-filter-actions :deep(.p-button){height:39px;background:var(--tm-blue);border-color:var(--tm-blue);font-size:12px}.shop-filter-actions>button{padding:5px}
+.shop-search :deep(.p-inputtext)::placeholder{color:#9aa1b3}.shop-filter-sidebar{position:sticky;top:82px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);overflow:hidden}.shop-filter-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--tm-line)}.shop-filter-head>div{display:flex;align-items:center;gap:9px;font-size:14px}.shop-filter-head>div i{color:var(--tm-blue)}.shop-filter-head button,.shop-filter-actions>button{border:0;background:none;color:var(--tm-blue);font-size:11px;cursor:pointer}.shop-filter-section{padding:17px 16px;border-bottom:1px solid var(--tm-line)}.shop-filter-section h3{display:flex;justify-content:space-between;margin:0 0 12px;font-size:13px;font-weight:600}.shop-filter-section h3 small{color:var(--tm-muted);font-size:10px;font-weight:400}.shop-search{display:flex;gap:6px}.shop-search :deep(.p-inputtext){width:100%;min-width:0;height:38px;font-size:11px}.shop-search :deep(.p-button){flex:none;width:40px;background:var(--tm-blue);border-color:var(--tm-blue)}.shop-filter-option{display:flex;align-items:center;gap:9px;width:100%;padding:8px 0;border:0;background:none;color:var(--tm-ink-soft);text-align:start;font-size:12px;cursor:pointer}.shop-filter-option small{margin-inline-start:auto;color:var(--tm-muted);font-size:10px}.shop-check{width:15px;height:15px;flex:none;border:1px solid #cfd3e0;border-radius:3px}.shop-filter-option.active{color:var(--tm-blue);font-weight:600}.shop-filter-option.active .shop-check{border-color:var(--tm-blue);background:var(--tm-blue);box-shadow:inset 0 0 0 3px #fff}.shop-price-inputs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}.shop-price-inputs :deep(.p-inputnumber),.shop-price-inputs :deep(.p-inputtext){width:100%;min-width:0}.shop-price-inputs :deep(.p-inputtext){height:36px;padding:7px;font-size:11px}.shop-price-inputs>span{color:var(--tm-muted);font-size:10px}.shop-sort-select{width:100%}.shop-retail-filter{display:flex;align-items:flex-start;gap:9px;cursor:pointer;color:var(--tm-ink);font-size:12px;line-height:1.8}.shop-retail-filter input{position:absolute;opacity:0;pointer-events:none}.shop-retail-filter__check{display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;margin-top:3px;border:1px solid var(--tm-line);border-radius:3px;background:var(--tm-surface);color:transparent}.shop-retail-filter input:checked + .shop-retail-filter__check{border-color:var(--tm-blue);background:var(--tm-blue);color:#fff}.shop-retail-filter input:focus-visible + .shop-retail-filter__check{outline:2px solid var(--tm-blue);outline-offset:2px}.shop-retail-filter__check i{font-size:10px}.shop-retail-filter b,.shop-retail-filter small{display:block}.shop-retail-filter small{color:var(--tm-muted);font-size:11px}
+.shop-filter-actions{display:grid;gap:9px;padding:14px 16px}.shop-filter-actions :deep(.p-button){height:39px;background:var(--tm-blue);border-color:var(--tm-blue);font-size:12px}.shop-filter-actions>button{padding:5px}
 .shop-results-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:14px;padding:15px 17px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow)}.shop-results-toolbar h2{margin:3px 0;font-size:17px;font-weight:600}.shop-results-toolbar p{margin:0;color:var(--tm-muted);font-size:11px}.shop-results-tools{display:flex;align-items:center;gap:12px}.shop-results-tools>span{display:flex;align-items:center;gap:5px;color:var(--tm-muted);font-size:11px}.shop-results-tools :deep(.p-select){min-width:145px;font-size:11px}
 .shop-product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,168px),210px));justify-content:start;gap:10px}.shop-product-card{display:flex;flex-direction:column;min-width:0;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);overflow:hidden;transition:box-shadow .18s,border-color .18s}.shop-product-card:hover{border-color:var(--tm-line-strong);box-shadow:0 5px 16px rgba(20,20,60,.09)}.shop-product-image{position:relative;display:grid;place-items:center;aspect-ratio:4 / 5;min-height:0;background:#f4f5fa;overflow:hidden}.shop-product-image img{width:100%;height:100%;object-fit:contain;padding:10px}.shop-product-image>i{font-size:36px;color:#a5a9bb}.shop-product-category,.shop-product-featured{position:absolute;top:10px;padding:4px 7px;border-radius:3px;background:#fff;color:#525a70;font-size:10px}.shop-product-category{inset-inline-start:10px}.shop-product-featured{inset-inline-end:10px;background:var(--tm-blue-soft);color:var(--tm-blue)}.shop-product-info{display:flex;flex:1;flex-direction:column;padding:11px}.shop-product-brand{margin-bottom:5px;color:var(--tm-blue);font-size:10px;font-weight:600}.shop-product-title{display:-webkit-box;min-height:44px;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:var(--tm-ink);font-size:13px;font-weight:650;line-height:1.8;text-decoration:none}.shop-product-specs{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:8px;color:var(--tm-muted);font-size:10px}.shop-product-bottom{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-top:auto;padding-top:10px;border-top:1px solid var(--tm-line)}.shop-product-bottom small,.shop-product-bottom b{display:block}.shop-product-bottom small{color:var(--tm-muted);font-size:10px}.shop-product-bottom b{margin-top:4px;color:var(--tm-ink);font-size:12px;font-weight:700}.shop-product-bottom>a{display:grid;place-items:center;width:32px;height:32px;background:var(--tm-blue-soft);color:var(--tm-blue);border-radius:3px;text-decoration:none}
 .shop-state{display:flex;min-height:300px;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px;background:var(--tm-surface);border:1px dashed var(--tm-line-strong);border-radius:4px;color:var(--tm-muted);text-align:center}.shop-state>i{font-size:30px;color:var(--tm-blue)}.shop-state>b{color:var(--tm-ink);font-size:14px}.shop-state>span{font-size:12px}.shop-state--error>i{color:#d94848}.shop-pagination{margin-top:18px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;overflow:hidden}
