@@ -3821,3 +3821,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Follow-up CI exposed a stale OpenAPI route inventory assertion (152 vs 153); updated the expected count to 153.
 - Updated CompanyProfile component tests to assert the current storefront markup (`company-logo`, `company-kind`, `product-count`) rather than obsolete selectors.
 - The public endpoint is registered at the Fastify root scope and its controller/service exports are present. Local Docker runtime still cannot be restarted from this remote session; deployment/restart state on the user's machine remains unverified.
+
+## Public company 404 resolved by restarting stale dev backend — 2026-11-07
+- **Symptom:** `GET /api/v1/companies/public/35` returned Fastify's default 404 ("Route GET /api/v1/companies/public/35 not found") on the Website company profile page.
+- **Diagnosis:** the source already registers the route (`backend/src/app.js:125`) and the controller/service/OpenAPI entry exist; the same file inside `telecom_backend_dev` also contains the route. The running Node process predated the Nov 6 22:50–23:05 route commits and never reloaded.
+- **Root cause:** the dev backend runs `node --watch src/server.js` (see `backend/Dockerfile.dev`); on Docker Desktop for Windows, edits through the bind-mounted `./backend` do not reliably emit inotify events, so `--watch` never restarts the process.
+- **Fix:** `docker restart telecom_backend_dev`. Verified `GET /api/v1/companies/public/35` → 200 (direct `:3000` and via Vite `:3001`) and `GET /api/v1/products?page=1&limit=12&companyId=35` → 200 (12 items, total 15).
+- **Verification:** `apps/website/src/pages/public/CompanyProfile.test.js` → 7/7 pass; backend `src/app.test.js` inside the container → 21/22 pass, including "GET /api/v1/companies/public/:id is registered at the root scope". The one failure is `ENOENT /docs/API_ROUTE_INVENTORY.md` because the container only mounts `./backend`, not the repo `docs/` folder.
+- **Code change:** none required — the route was already correct and committed. Operational note: after editing backend source under Docker on Windows, run `docker restart telecom_backend_dev`.
