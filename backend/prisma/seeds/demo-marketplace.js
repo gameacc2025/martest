@@ -140,13 +140,19 @@ async function upsertDemoUser(prisma, { phone, passwordHash, role, companyId = n
 }
 
 async function seedDemoMarketplace(prisma, { permissionByName }) {
-  if (process.env.NODE_ENV === 'production' || process.env.SEED_DEMO_DATA === 'false') {
+  if (process.env.NODE_ENV !== 'development' || process.env.SEED_DEMO_DATA === 'false') {
     console.log('Skipping demo marketplace data outside development.');
     return { companies: 0, users: 0, products: 0 };
   }
   const demoPassword = process.env.DEMO_USER_PASSWORD || 'A123@456';
   const passwordHash = await require('../../src/utils/password').hashPassword(demoPassword);
   const roleDefinitions = [
+    {
+      name: 'DEMO_COMPANY_MANAGER', label: 'مدیر شرکت آزمایشی',
+      description: 'مدیریت عملیات شرکت بدون امکان ایجاد یا تخصیص حساب کاربری جدید.',
+      scope: 'COMPANY',
+      permissions: ['dashboard.read','company_profile.read','company_profile.update','products.create','products.read','products.update','products.submit_review','products.publish','product_images.create','product_images.update','product_images.delete','product_documents.create','product_documents.update','product_documents.delete','leads.read','leads.update','inquiries.create','inquiries.read','inquiries.respond','sales.create','sales.read','sales.update','reports.read','notifications.read','tickets.create','tickets.read','tickets.reply','media.upload','media.read'],
+    },
     {
       name: 'DEMO_CATALOG_MANAGER', label: 'مدیر کاتالوگ آزمایشی',
       description: 'مدیریت محصولات و مدارک کاتالوگ شرکت آزمایشی.', scope: 'COMPANY',
@@ -175,7 +181,6 @@ async function seedDemoMarketplace(prisma, { permissionByName }) {
       });
     }
   }
-  const managerRole = await prisma.role.findUnique({ where: { name: 'COMPANY_MANAGER' } });
   const customerRole = await prisma.role.findUnique({ where: { name: 'CUSTOMER_USER' } });
   const companyRows = [];
   const companyUsers = new Map();
@@ -190,7 +195,7 @@ async function seedDemoMarketplace(prisma, { permissionByName }) {
     });
     companyRows.push(company);
     const users = [];
-    const assignedRoles = [managerRole, roles.DEMO_CATALOG_MANAGER, roles.DEMO_SALES_MANAGER];
+    const assignedRoles = [roles.DEMO_COMPANY_MANAGER, roles.DEMO_CATALOG_MANAGER, roles.DEMO_SALES_MANAGER];
     for (let j = 0; j < assignedRoles.length; j++) {
       const phone = '099110' + String(i * 3 + j + 1).padStart(5, '0');
       users.push(await upsertDemoUser(prisma, {
