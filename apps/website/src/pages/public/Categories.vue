@@ -29,7 +29,7 @@ async function loadCategories() {
     const data = await productsStore.getCategories()
     categories.value = Array.isArray(data) ? data : []
   } catch (err) {
-    error.value = 'دریافت دسته‌بندی‌ها ناموفق بود. دوباره تلاش کنید.'
+    error.value = 'خطا در دریافت دسته بندی ها'
     console.error('Error loading categories:', err)
   } finally {
     loading.value = false
@@ -51,10 +51,10 @@ async function loadCategories() {
         <p>تجهیزات را بر اساس حوزه کاربرد مرور کنید</p>
       </header>
 
-      <div v-if="loading" class="reference-categories-state" role="status"><ProgressSpinner /><span>در حال دریافت دسته‌بندی‌ها…</span></div>
+      <div v-if="loading" class="reference-categories-state" role="status"><ProgressSpinner /><span>در حال دریافت دسته بندی ها...</span></div>
       <div v-else-if="error" class="reference-categories-state" role="alert"><i class="pi pi-exclamation-circle" /><span>{{ error }}</span><button type="button" @click="loadCategories">تلاش دوباره</button></div>
       <div v-else-if="!categories.length" class="reference-categories-state"><i class="pi pi-folder-open" /><span>دسته‌بندی فعالی برای نمایش وجود ندارد.</span></div>
-      <section v-else class="reference-category-grid" aria-label="همه دسته‌بندی‌های محصولات">
+      <section v-else class="reference-category-grid cat-grid" aria-label="همه دسته‌بندی‌های محصولات">
         <StoreCategoryCard v-for="category in categories" :key="category.id" variant="panel" :category="category" :icon="categoryIcon(category)" :to="{ name: 'products', query: { category: category.id } }" />
       </section>
     </div>
