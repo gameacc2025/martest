@@ -3692,3 +3692,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 
 - Added a public similar-listings endpoint and product create/update catalogCode derivation; added service tests for code generation and cross-supplier lookup. The development seed also creates six months of synthetic first-tier price snapshots per listing for chart UI coverage.
+
+- Completed the cross-supplier UX: Website product details show offers from other suppliers with the same catalog identity; company/admin management tables expose the shared code. Seed specification data now fills the website's standard key/value display format.
+- Regenerated the previously stale architecture graph. CI now continues to backend checks after frontend test failures, making independent failures visible.
