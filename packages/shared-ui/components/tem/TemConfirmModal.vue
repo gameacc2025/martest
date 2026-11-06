@@ -1,0 +1,9 @@
+<script setup>
+defineProps({modelValue:{type:Boolean,default:false},title:{type:String,default:'تأیید عملیات'},message:String,confirmLabel:{type:String,default:'تأیید'},cancelLabel:{type:String,default:'انصراف'},loading:Boolean,danger:{type:Boolean,default:true}})
+const emit=defineEmits(['update:modelValue','confirm','cancel'])
+function close(){emit('update:modelValue',false);emit('cancel')}
+</script>
+<template><Teleport to="body"><div v-if="modelValue" class="backdrop" @click.self="close"><section class="dialog" role="dialog" aria-modal="true" :aria-label="title"><header><h3>{{title}}</h3><button type="button" aria-label="بستن" @click="close">×</button></header><p>{{message}}</p><slot/><footer><button type="button" class="cancel" @click="close">{{cancelLabel}}</button><button type="button" :class="{danger}" :disabled="loading" @click="emit('confirm')">{{loading?'در حال انجام…':confirmLabel}}</button></footer></section></div></Teleport></template>
+<style scoped>
+.backdrop{position:fixed;inset:0;z-index:1300;display:grid;place-items:center;padding:20px;background:#14171e80}.dialog{width:min(100%,430px);padding:19px;border-radius:7px;background:var(--tm-surface,#fff);box-shadow:0 18px 55px #14171e33;direction:rtl}.dialog header,.dialog footer{display:flex;align-items:center;justify-content:space-between;gap:10px}.dialog h3{margin:0;font-size:15px}.dialog header button{border:0;background:none;font-size:22px;cursor:pointer}.dialog p{color:var(--tm-muted,#8c97b2);font-size:12px;line-height:1.9}.dialog footer{justify-content:flex-start;margin-top:18px}.dialog footer button{min-height:36px;padding:0 13px;border:0;border-radius:4px;font:inherit;font-size:11px;cursor:pointer}.cancel{background:#f1f2f6;color:#555}.danger{background:#ff3a3a;color:#fff}
+</style>
