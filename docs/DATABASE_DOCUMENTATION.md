@@ -87,7 +87,7 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 - برای بازسازی کامل دیتابیس توسعه، ابتدا بک‌اند فعال را متوقف کنید، سپس reset را در کانتینر یک‌بارمصرف اجرا و بک‌اند را دوباره بالا بیاورید:
 
   docker compose -f docker-compose.dev.yml stop backend
-  docker compose -f docker-compose.dev.yml run --rm backend npm run db:reset:dev
+  docker compose -f docker-compose.dev.yml run --rm --build backend npm run db:reset:dev
   docker compose -f docker-compose.dev.yml up -d backend
 - این دستور فقط با NODE_ENV=development و مقصد telecom_marketplace مجاز است و تمام داده‌های فعلی همان دیتابیس را حذف می‌کند.
 - Seed توسعه قابل تکرار است و در production داده آزمایشی ایجاد نمی‌کند. رمز حساب‌های آزمایشی از DEMO_USER_PASSWORD قابل تنظیم است و مقدار پیش‌فرض توسعه A123@456 است؛ این رمز را در production استفاده نکنید.
