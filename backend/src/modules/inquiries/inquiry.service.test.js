@@ -50,6 +50,7 @@ const fx = {
   responseCount: 0,
   recentResponses: [],
   notificationRecipients: [],
+  notificationInquiryItems: [],
 };
 
 // groupBy returns one row-set per call; stats() calls each groupBy twice
@@ -111,7 +112,10 @@ const mockPrisma = {
   },
   inquiryItem: {
     count: async () => fx.inquiryItemCount,
-    findMany: async () => fx.ownedItemIds.map((id) => ({ id })),
+    findMany: async (args) => {
+      if (args?.select?.product) return fx.notificationInquiryItems;
+      return fx.ownedItemIds.map((id) => ({ id }));
+    },
     findFirst: async (args) => { record('inquiryItem.findFirst', args); return fx.inquiryItem; },
     create: async (args) => {
       record('inquiryItem.create', args);
@@ -285,6 +289,7 @@ function resetMocks() {
   fx.responseCount = 0;
   fx.recentResponses = [];
   fx.notificationRecipients = [];
+  fx.notificationInquiryItems = [];
   queues.inquiryGroupBy = [];
   queues.responseGroupBy = [];
 }
@@ -601,6 +606,25 @@ test('createInquiry: CUSTOMER creates an immediately open inquiry owned by the a
   assert.ok(create.data.publishDate instanceof Date);
   assert.equal(inquiry.id, 7);
   assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_PUBLISHED'));
+});
+
+test('createInquiry: published RFQ notifies every active supplier carrying the same catalogCode', async () => {
+  resetMocks();
+  const catalogCode = 'TEL-CISCO-C9300-48P';
+  fx.products = [
+    { id: 41, companyId: 20, catalogCode, status: 'PUBLISHED', company: { status: 'ACTIVE' } },
+    { id: 42, companyId: 30, catalogCode, status: 'PUBLISHED', company: { status: 'ACTIVE' } },
+  ];
+  fx.notificationInquiryItems = [{ product: { companyId: 20, catalogCode } }];
+  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  await inquiryService.createInquiry({
+    title: 'Cisco Catalyst request',
+    items: [{ productId: 41, quantity: 2 }],
+  }, customer);
+  const supplierDispatch = calls.dispatchNotification.find(([event, recipients]) =>
+    event === 'INQUIRY_PUBLISHED' && Array.isArray(recipients?.companyIds));
+  assert.ok(supplierDispatch);
+  assert.deepEqual(supplierDispatch[1].companyIds, [20, 30]);
 });
 
 test('createInquiry: rejects a response deadline that is already past', async () => {
