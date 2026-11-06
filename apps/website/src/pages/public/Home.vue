@@ -605,7 +605,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 .product-card:hover { border-color: var(--tm-line-strong); box-shadow: var(--tm-card-shadow-hover); transform: none; }
-.product-card:focus-visible { outline: 2px solid var(--tm-violet); outline-offset: 2px; }
+.product-card:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 
 .product-card__main { display: flex; flex-direction: column; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
 .product-card__main:focus-visible { outline: 2px solid var(--tm-violet); outline-offset: 3px; border-radius: 4px; }
