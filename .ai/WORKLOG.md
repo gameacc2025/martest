@@ -3695,3 +3695,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 
 - Completed the cross-supplier UX: Website product details show offers from other suppliers with the same catalog identity; company/admin management tables expose the shared code. Seed specification data now fills the website's standard key/value display format.
 - Regenerated the previously stale architecture graph. CI now continues to backend checks after frontend test failures, making independent failures visible.
+
+
+## 2026-11-06 — PRISMA-7-BASELINE — Upgrade Prisma ORM and reset migration history
+- **Status:** IN_PROGRESS — Prisma 7 source changes committed; GitHub Actions is generating the lockfile and a fresh baseline against PostgreSQL 18.4.
+- **Goal:** Upgrade from Prisma 6 to the latest stable Prisma ORM 7.10.1, remove deprecated package.json Prisma configuration, use the PostgreSQL driver adapter, and replace the mixed db-push/migration history with one clean baseline.
+- **Changes:** Pinned `prisma`, `@prisma/client`, and `@prisma/adapter-pg` to 7.10.1; added `backend/prisma.config.ts`; moved DATABASE_URL out of schema.prisma; configured runtime and seed clients with PrismaPg; replaced startup db push with migrate deploy + db seed; changed guarded dev reset to migrate reset + db seed.
+- **Compatibility decision:** Prisma ORM 8 remains a release candidate. The existing backend is CommonJS JavaScript, so this upgrade retains the compatible `prisma-client-js` generator (legacy/deprecated) rather than forcing a TypeScript/ESM generated-client migration into the same change.
+- **Custom SQL preserved in the baseline:** inquiry buyer XOR check, subscription owner XOR check, InquiryMessage sender/recipient XOR checks, Address partial unique default-address index, default INBOX/SAVED folder rows, and automatic INBOX membership trigger.
+- **Verification:** Pending the one-time GitHub Actions baseline generation, lockfile update, and fresh PostgreSQL 18.4 migration deployment. Local database has not been reset.
+- **Next:** Inspect the baseline workflow and CI results; only then ask the user to pull and run the guarded development reset.
