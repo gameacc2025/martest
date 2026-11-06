@@ -62,6 +62,16 @@ export const endpoints = {
     search: '/companies/search',
     myCompanies: '/companies/me'
   },
+  // Independent promotional banners / campaigns
+  banners: {
+    active: '/banners/active',
+    manage: '/banners/manage',
+    get: (id) => `/banners/manage/${id}`,
+    create: '/banners/manage',
+    update: (id) => `/banners/manage/${id}`,
+    archive: (id) => `/banners/manage/${id}`,
+    upload: '/banners/manage/upload',
+  },
   // Products
   products: {
     list: '/products',
