@@ -595,10 +595,30 @@ function shapeInquiryForCaller(inquiry, caller) {
 async function notifyInquiryPublished(tx, inquiry) {
   const rows = await tx.inquiryItem.findMany({
     where: { inquiryId: inquiry.id },
-    select: { product: { select: { companyId: true } } },
+    select: { product: { select: { companyId: true, catalogCode: true } } },
   });
-  const companyIds = [...new Set(rows.map((row) => Number(row.product?.companyId)).filter((id) => id > 0))];
-  const context = { inquiry: { id: inquiry.id, title: inquiry.title } };
+
+  // Notify all active suppliers listing the same globally identified product.
+  const catalogCodes = [...new Set(rows.map((row) => row.product?.catalogCode).filter(Boolean))];
+  const directlyReferencedCompanyIds = rows
+    .map((row) => Number(row.product?.companyId))
+    .filter((id) => id > 0);
+  const matchingProducts = catalogCodes.length
+    ? await tx.product.findMany({
+        where: {
+          catalogCode: { in: catalogCodes },
+          status: 'PUBLISHED',
+          deletedAt: null,
+          company: { status: 'ACTIVE', deletedAt: null },
+        },
+        select: { companyId: true },
+      })
+    : [];
+  const companyIds = [...new Set([
+    ...directlyReferencedCompanyIds,
+    ...matchingProducts.map((product) => Number(product.companyId)),
+  ].filter((id) => id > 0 && id !== Number(inquiry.companyId)))];
+  const context = { inquiry: { id: inquiry.id, title: inquiry.title, catalogCodes } };
 
   if (companyIds.length) {
     await dispatchNotification('INQUIRY_PUBLISHED', { companyIds }, context, {
