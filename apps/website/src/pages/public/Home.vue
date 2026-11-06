@@ -704,8 +704,8 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 .home-empty i { font-size: 24px; color: var(--tm-faint); }
 .home-empty p { margin: 0; font-size: 13px; }
 
-.home-product-skeleton{min-height:430px}
-@media(max-width:575px){.home-product-skeleton{min-height:320px}}
+.product-card.home-product-skeleton{min-height:430px}
+@media(max-width:575px){.product-card.home-product-skeleton{min-height:320px}}
 .home-skeleton {
   min-height: 150px;
   background: linear-gradient(90deg, var(--tm-surface-alt) 25%, var(--tm-canvas) 37%, var(--tm-surface-alt) 63%);
