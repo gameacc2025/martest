@@ -283,7 +283,6 @@ onUnmounted(stopSlider)
 
 <style scoped>
 .shop-page{direction:rtl;max-width:1920px;margin-inline:auto;padding:0 clamp(14px,1.8vw,28px) 40px;color:var(--tm-ink)}
-.shop-trust{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;background:#e7f7ee;color:#14693a;border:1px solid #d3efdf;border-radius:4px;font-size:12px}
 .shop-feature-stage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:stretch;margin:18px 0 22px}
 .shop-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.82fr);gap:28px;align-items:center;min-height:316px;margin:0;padding:28px 30px;background:linear-gradient(116deg,#0b2548 0%,#103c69 58%,#176a91 100%);border-radius:5px;box-shadow:0 12px 30px rgba(13,43,83,.17);color:#fff;overflow:hidden}
 .shop-hero:before{content:"";position:absolute;width:390px;height:390px;inset-inline-end:-145px;top:-210px;border:1px solid rgba(255,255,255,.12);border-radius:50%;box-shadow:0 0 0 34px rgba(255,255,255,.035),0 0 0 72px rgba(255,255,255,.025);pointer-events:none}
