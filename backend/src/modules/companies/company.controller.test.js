@@ -41,6 +41,7 @@ function resetMocks() {
 
 const mockCompanyService = {
   listCompanies: async (...args) => { calls.listCompanies = args; return fx.listResult ?? { items: [], total: 0 }; },
+  getPublicCompanyById: async (...args) => { calls.getPublicCompanyById = args; return fx.publicCompany; },
   getCompanyById: async (...args) => { calls.getCompanyById = args; return fx.company; },
   createCompany: async (...args) => { calls.createCompany = args; return fx.created; },
   updateCompany: async (...args) => { calls.updateCompany = args; return fx.updated; },
@@ -87,6 +88,22 @@ test('list: forwards pagination + filters to the service and wraps the result as
   assert.equal(opts.search, 'x');
   assert.equal(opts.type, 'MANUFACTURER');
   assert.deepEqual(reply._body, { data: [{ id: 1 }], meta: { total: 1, page: 2, limit: 10, totalPages: 1 } });
+});
+
+// ── getPublicOne ───────────────────────────────────────────────
+test('getPublicOne: returns a limited public profile without private company data', async () => {
+  fx.publicCompany = { id: 37, name: 'Acme', description: 'About' };
+  const reply = makeReply();
+  await controller.getPublicOne(makeRequest({ params: { id: '37' } }), reply);
+  assert.deepEqual(calls.getPublicCompanyById, ['37']);
+  assert.deepEqual(reply._body, { data: fx.publicCompany });
+});
+
+test('getPublicOne: returns 404 when the public company is not found', async () => {
+  fx.publicCompany = null;
+  const reply = makeReply();
+  await controller.getPublicOne(makeRequest({ params: { id: '37' } }), reply);
+  assert.equal(reply._statusCode, 404);
 });
 
 // ── getOne ────────────────────────────────────────────────────
