@@ -170,6 +170,7 @@ injectMock('../../config/db', mockPrisma);
 const {
   listCompanies,
   getCompanyById,
+  getPublicCompanyById,
   createCompany,
   updateCompany,
   deleteCompany,
@@ -270,6 +271,17 @@ test('listCompanies: returns { items, total }', async () => {
   fx.companiesTotal = 1;
   const result = await listCompanies({});
   assert.deepEqual(result, { items: fx.companies, total: 1 });
+});
+
+// ── Public storefront profile ─────────────────────────────────
+test('getPublicCompanyById: returns only active, non-deleted public company fields and published product count', async () => {
+  resetMocks();
+  fx.companyFirst = { id: 37, name: 'Acme', description: 'About', _count: { products: 3 } };
+  const result = await getPublicCompanyById('37');
+  assert.deepEqual(calls.companyFindFirst[0].where, { id: 37, status: 'ACTIVE', deletedAt: null });
+  assert.deepEqual(calls.companyFindFirst[0].select._count.select.products.where, { status: 'PUBLISHED', visibility: 'PUBLIC' });
+  assert.equal(calls.companyFindFirst[0].select.accessProfiles, undefined);
+  assert.deepEqual(result, fx.companyFirst);
 });
 
 // ── getCompanyById ────────────────────────────────────────────
