@@ -6,6 +6,7 @@ import { useAuthStore } from "../stores/auth";
 
 // Public Pages
 import Categories from "../pages/public/Categories.vue";
+import Home from "../pages/public/Home.vue";
 import ProductListing from "../pages/public/ProductListing.vue";
 import ProductDetails from "../pages/public/ProductDetails.vue";
 import SearchResults from "../pages/public/SearchResults.vue";
@@ -27,7 +28,8 @@ const routes = [
     path: "/",
     component: PublicLayout,
     children: [
-      { path: "", alias: "/products", name: "products", component: ProductListing, meta: { title: "فروشگاه تجهیزات شبکه و مخابرات" } },
+      { path: "", name: "home", component: Home, meta: { title: "بازارگاه تجهیزات شبکه و مخابرات" } },
+      { path: "products", name: "products", component: ProductListing, meta: { title: "فروشگاه تجهیزات شبکه و مخابرات" } },
       {
         path: "notifications",
         name: "notifications",
