@@ -99,6 +99,31 @@ describe('Website Product Details', () => {
     expect(wrapper.find('.main-image').attributes('src')).toBe('/primary.png')
   })
 
+  it('shows matching supplier offers when a shared catalogCode exists', async () => {
+    getProductById.mockResolvedValueOnce({
+      ...productFixture(),
+      catalogCode: 'TEL-CISCO-C9300-48P',
+    })
+    apiGet.mockResolvedValueOnce({
+      data: { data: [{
+        id: 88,
+        title: 'روتر فیبر نوری',
+        brand: 'نمونه',
+        model: 'R-100',
+        company: { name: 'تأمین‌کننده دوم' },
+        prices: [{ minQuantity: 1, price: 950000 }],
+      }] },
+    })
+
+    wrapper = shallowMount(ProductDetails)
+    await flushPromises()
+
+    expect(apiGet).toHaveBeenCalledWith('/products/42/similar')
+    expect(wrapper.find('.similar-products-card').exists()).toBe(true)
+    expect(wrapper.text()).toContain('همین کالا نزد تأمین‌کنندگان دیگر')
+    expect(wrapper.text()).toContain('تأمین‌کننده دوم')
+  })
+
   it('keeps category, product tags and retail price-history action in the product hierarchy', async () => {
     wrapper = shallowMount(ProductDetails)
     await flushPromises()
