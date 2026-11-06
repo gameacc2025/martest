@@ -41,6 +41,14 @@ describe('Website homepage — Telecom Market reference', () => {
     expect(source).toContain('productRoute(product)')
   })
 
+  it('uses the extracted reference benefit, offer, FAQ and catalog widgets', () => {
+    expect(source).toContain('StoreBenefitGrid')
+    expect(source).toContain('StoreOfferBanner')
+    expect(source).toContain('StoreFaqList')
+    expect(source).toContain('StoreCatalogRequest')
+    expect(source).toContain('disabled-reason')
+  })
+
   it('keeps the best-seller shelf honest until real order data exists', () => {
     expect(source).toContain('پرفروش‌ترین محصولات خرده‌فروشی')
     expect(source).toContain('دادهٔ واقعی سفارش و فروش')
