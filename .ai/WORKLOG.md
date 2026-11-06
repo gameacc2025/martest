@@ -3654,5 +3654,5 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Request:** Remove the duplicate catalogue page heading and trust badge; tighten the gap below the public navigation; show the current page path using the same shared breadcrumb pattern as Admin/Company.
 - **Changes:** Replaced the ProductListing WorkspacePageHeading (including its title, description, icon and “کاتالوگ محصولات تأییدشده” badge) with the shared PageHeader breadcrumb. Configured the public catalogue route title as “فروشگاه تجهیزات شبکه و مخابرات” so the breadcrumb shows the page name, and reduced PublicLayout main top padding from 24px to 10px. Breadcrumb home points to the catalogue route; no API/backend behavior changed.
 - **Verification:** Source-anchor checks passed before writing. Vue build, unit tests, responsive browser rendering and screenshot inspection are NOT RUN in this remote GitHub editing session.
-- **Commits:** Pending remote writes.
+- **Commits:** `970e622`, `a396a2e`, `3490f27`, `7e773fe`, `735374b` (source, layout, route metadata, worklog and task record); dead trust-badge styling cleanup committed separately.
 - **Next:** Pull main locally and verify the breadcrumb alignment and the reduced navigation-to-content gap at desktop and mobile widths.
