@@ -24,7 +24,7 @@ async function archive(request, reply) {
   return reply.send(success(await service.archive(Number(request.params.id))));
 }
 async function upload(request, reply) {
-  const file = await request.file();
+  const file = await request.file({ limits: { fileSize: 8 * 1024 * 1024 } });
   return reply.code(201).send(success(await service.uploadImage(file)));
 }
 module.exports = { listPublic, listAdmin, getAdmin, create, update, archive, upload };
