@@ -1,3 +1,12 @@
+## Current active task — Telecom Market storefront alignment + unified side drawers (2026-11-06)
+- **Status:** IN PROGRESS — first focused implementation slice committed on `feat/tem-storefront-drawers`.
+- **Reference:** root `Telecom Market.html`; public Home, Products and Categories must stay aligned with its design system and extracted shared widgets.
+- **Completed in this slice:** cart and notification previews now use the same PrimeVue 4 side Drawer, entering from the left edge for the RTL storefront. Shared modal/backdrop, body-scroll lock, outside-click dismissal and Escape dismissal are enabled. Existing API calls, latest-five notification preview, unread count, cart state and quantity/checkout interactions remain intact.
+- **Changed:** `apps/website/src/layouts/PublicLayout.vue`, `apps/website/src/layouts/PublicLayout.test.js`.
+- **Commits:** `d662006`, `58f0bc2`, `cca89b1` on `feat/tem-storefront-drawers`.
+- **Verification:** NOT RUN here; local test/build and visual check required. Do not claim green.
+- **Backlog:** continue the full reference-to-theme/widget audit; verify missing API contracts before adding mock adapters; track missing API work in issue #87 and reuse existing issue #84 for Blog/CMS work. Keep backend scope unchanged unless a separately approved API task requires it.
+
 ## Storefront widget extraction — 2026-11-07 (STORE-WIDGETS-01)
 - **Status:** DONE. Commit `194eed79` on `main` (not pushed).
 - New shared widgets in `packages/shared-ui/components/store/`: `StoreSectionHeading`, `StoreCategoryCard` (tile/panel), `StoreProductCard`, `StoreFilterPanel`, barrel `index.js`.

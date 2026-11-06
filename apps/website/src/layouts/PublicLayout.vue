@@ -9,7 +9,7 @@
  * customer/company/staff menu branching, notification unread count, search
  * routing, category loading for the mega menu and footer, and mobile nav.
  */
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
@@ -18,6 +18,7 @@ import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Menu from 'primevue/menu'
+import Drawer from 'primevue/drawer'
 import MegaMenu from '@telecom/shared-ui/components/common/MegaMenu.vue'
 import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 
@@ -32,7 +33,7 @@ const route = useRoute()
 
 // Keep the responsive navigation in sync with route changes (including
 // browser back/forward) so it never remains open over a new page.
-watch(() => route.fullPath, () => { mobileMenuOpen.value = false; cartDrawerOpen.value = false; searchPanelOpen.value = false })
+watch(() => route.fullPath, () => { mobileMenuOpen.value = false; cartDrawerOpen.value = false; notificationDrawerOpen.value = false; searchPanelOpen.value = false })
 watch(() => [authStore.isAuthenticated, authStore.isCustomer], () => { fetchMyInquiryCount(); fetchHeaderNotifications() })
 
 // CUSTOMER notifications live on the website. COMPANY and STAFF users are
@@ -62,7 +63,7 @@ const searchQuery = ref('')
 const mobileMenuOpen = ref(false)
 const notificationCount = ref(0)
 const latestNotifications = ref([])
-const notificationMenuOpen = ref(false)
+const notificationDrawerOpen = ref(false)
 const notificationLoading = ref(false)
 const userMenu = ref(null)
 
@@ -154,11 +155,7 @@ function countLabel(value) {
 }
 
 function closeCartDrawer() { cartDrawerOpen.value = false }
-function closeNotificationMenu() { notificationMenuOpen.value = false }
-function handleDocumentPointerDown(event) {
-  if (!(event.target instanceof Element)) return
-  if (!event.target.closest('.public-notifications-actions')) closeNotificationMenu()
-}
+function closeNotificationDrawer() { notificationDrawerOpen.value = false }
 
 function normalizeHeaderNotifications(result) {
   if (Array.isArray(result)) return result
@@ -197,7 +194,7 @@ function formatNotificationTime(value) {
 }
 
 function openNotificationCenter() {
-  closeNotificationMenu()
+  closeNotificationDrawer()
   if (authStore.isCustomer) router.push({ name: 'notifications' })
   else window.location.href = notificationHref.value
 }
@@ -216,7 +213,6 @@ const footerCategories = ref([])
 const megaMenuCategories = ref([])
 
 onMounted(async () => {
-  document.addEventListener('pointerdown', handleDocumentPointerDown)
   fetchMyInquiryCount()
   // Keep the header badge and its five-message preview in sync with live notifications.
   await fetchHeaderNotifications()
@@ -235,7 +231,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  document.removeEventListener('pointerdown', handleDocumentPointerDown)
 })
 
 function search() {
@@ -296,33 +291,46 @@ function logout() {
             </button>
 
             <div v-if="user" class="public-authenticated-actions">
-              <div class="public-notifications-actions" @keydown.esc.stop.prevent="closeNotificationMenu">
-                <button type="button" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها" aria-controls="public-notifications-menu" :aria-expanded="notificationMenuOpen" @click.stop="notificationMenuOpen = !notificationMenuOpen">
+              <div class="public-notifications-actions" @keydown.esc.stop.prevent="closeNotificationDrawer">
+                <button type="button" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها" aria-controls="public-notifications-menu"  :aria-expanded="notificationDrawerOpen" @click.stop="notificationDrawerOpen = true">
                   <i class="pi pi-bell" aria-hidden="true"></i>
                   <span v-if="notificationCount > 0" class="public-notification-badge">{{ countLabel(notificationCount) }}</span>
                 </button>
-                <div v-if="notificationMenuOpen" class="public-notifications-layer" @click.self="closeNotificationMenu">
-  <section id="public-notifications-menu" class="public-notifications-drawer" role="dialog" aria-modal="true" aria-label="اعلان‌های اخیر">
-    <header class="public-notifications-menu__header">
-      <div class="public-notifications-menu__heading"><strong>اعلان‌های اخیر</strong><span>آخرین ۵ اعلان</span></div>
-      <span v-if="notificationCount > 0" class="public-notifications-menu__unread">{{ countLabel(notificationCount) }} خوانده‌نشده</span>
-      <button type="button" class="public-notifications-close" aria-label="بستن اعلان‌ها" @click="closeNotificationMenu"><i class="pi pi-times" aria-hidden="true"></i></button>
-    </header>
-    <div v-if="notificationLoading" class="public-notifications-menu__state" role="status">در حال دریافت اعلان‌ها…</div>
-    <div v-else-if="latestNotifications.length" class="public-notifications-menu__list">
-      <button v-for="item in latestNotifications" :key="item.id" type="button" class="public-notification-item" :class="{ 'is-unread': !item.isRead }" @click="openNotificationCenter">
-        <span class="public-notification-item__dot" aria-hidden="true"></span>
-        <span class="public-notification-item__body">
-          <strong>{{ item.title || 'اعلان جدید' }}</strong>
-          <span>{{ item.message || item.body || 'برای مشاهده جزئیات، صندوق اعلان‌ها را باز کنید.' }}</span>
-          <time v-if="item.createdAt || item.created_at" :datetime="item.createdAt || item.created_at">{{ formatNotificationTime(item.createdAt || item.created_at) }}</time>
-        </span>
-      </button>
-    </div>
-    <div v-else class="public-notifications-menu__state">اعلانی برای نمایش وجود ندارد.</div>
-    <button type="button" class="public-notifications-menu__all" @click="openNotificationCenter">مشاهده همه اعلان‌ها <i class="pi pi-arrow-left" aria-hidden="true"></i></button>
-  </section>
-</div>
+                <Drawer
+                  id="public-notifications-menu"
+                  v-model:visible="notificationDrawerOpen"
+                  position="left"
+                  :modal="true"
+                  :dismissable="true"
+                  :block-scroll="true"
+                  :show-close-icon="false"
+                  class="public-notifications-drawer"
+                  :style="{ width: 'min(410px, 92vw)' }"
+                  aria-label="اعلان‌های اخیر"
+                >
+                  <template #header>
+                    <header class="public-notifications-menu__header">
+                      <div class="public-notifications-menu__heading"><strong>اعلان‌های اخیر</strong><span>آخرین ۵ اعلان</span></div>
+                      <span v-if="notificationCount > 0" class="public-notifications-menu__unread">{{ countLabel(notificationCount) }} خوانده‌نشده</span>
+                      <button type="button" class="public-notifications-close" aria-label="بستن اعلان‌ها" @click="closeNotificationDrawer"><i class="pi pi-times" aria-hidden="true"></i></button>
+                    </header>
+                  </template>
+                  <div v-if="notificationLoading" class="public-notifications-menu__state" role="status">در حال دریافت اعلان‌ها…</div>
+                  <div v-else-if="latestNotifications.length" class="public-notifications-menu__list">
+                    <button v-for="item in latestNotifications" :key="item.id" type="button" class="public-notification-item" :class="{ 'is-unread': !item.isRead }" @click="openNotificationCenter">
+                      <span class="public-notification-item__dot" aria-hidden="true"></span>
+                      <span class="public-notification-item__body">
+                        <strong>{{ item.title || 'اعلان جدید' }}</strong>
+                        <span>{{ item.message || item.body || 'برای مشاهده جزئیات، صندوق اعلان‌ها را باز کنید.' }}</span>
+                        <time v-if="item.createdAt || item.created_at" :datetime="item.createdAt || item.created_at">{{ formatNotificationTime(item.createdAt || item.created_at) }}</time>
+                      </span>
+                    </button>
+                  </div>
+                  <div v-else class="public-notifications-menu__state">اعلانی برای نمایش وجود ندارد.</div>
+                  <template #footer>
+                    <button type="button" class="public-notifications-menu__all" @click="openNotificationCenter">مشاهده همه اعلان‌ها <i class="pi pi-arrow-left" aria-hidden="true"></i></button>
+                  </template>
+                </Drawer>
               </div>
 
             <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCartDrawer">
@@ -381,38 +389,51 @@ function logout() {
       </div>
     </header>
 
-    <div v-if="cartDrawerOpen" class="public-cart-layer" @click.self="closeCartDrawer" @keydown.esc.stop.prevent="closeCartDrawer" tabindex="-1">
-      <aside id="public-cart-drawer" class="public-cart-drawer" role="dialog" aria-modal="true" aria-label="سبد خرید">
+    <Drawer
+      id="public-cart-drawer"
+      v-model:visible="cartDrawerOpen"
+      position="left"
+      :modal="true"
+      :dismissable="true"
+      :block-scroll="true"
+      :show-close-icon="false"
+      class="public-cart-drawer"
+      :style="{ width: 'min(440px, 94vw)' }"
+      aria-label="سبد خرید"
+    >
+      <template #header>
         <header class="public-cart-drawer__header">
           <div><strong>سبد خرید شما</strong><span>{{ countLabel(cartItemCount) }} قلم کالا</span></div>
           <button type="button" aria-label="بستن سبد خرید" @click="closeCartDrawer"><i class="pi pi-times"></i></button>
         </header>
-        <div v-if="cartStore.items.length" class="public-cart-drawer__items">
-          <article v-for="item in cartStore.items" :key="item.id" class="public-cart-item">
-            <router-link :to="{ name: 'product-details', params: { id: item.id } }" class="public-cart-item__image" @click="closeCartDrawer">
-              <img v-if="item.image" :src="item.image" :alt="item.name" loading="lazy" />
-              <i v-else class="pi pi-box" aria-hidden="true"></i>
-            </router-link>
-            <div class="public-cart-item__body">
-              <router-link :to="{ name: 'product-details', params: { id: item.id } }" @click="closeCartDrawer">{{ item.name }}</router-link>
-              <strong>{{ Number(item.price).toLocaleString('fa-IR') }} ریال</strong>
-              <div class="public-cart-item__controls">
-                <button type="button" :aria-label="'افزایش تعداد ' + item.name" @click="cartStore.updateQuantity(item.id, item.quantity + 1)"><i class="pi pi-plus"></i></button>
-                <span>{{ countLabel(item.quantity) }}</span>
-                <button type="button" :aria-label="'کاهش تعداد ' + item.name" :disabled="item.quantity <= 1" @click="cartStore.updateQuantity(item.id, item.quantity - 1)"><i class="pi pi-minus"></i></button>
-                <button type="button" class="remove" :aria-label="'حذف ' + item.name" @click="cartStore.removeItem(item.id)"><i class="pi pi-trash"></i></button>
-              </div>
+      </template>
+      <div v-if="cartStore.items.length" class="public-cart-drawer__items">
+        <article v-for="item in cartStore.items" :key="item.id" class="public-cart-item">
+          <router-link :to="{ name: 'product-details', params: { id: item.id } }" class="public-cart-item__image" @click="closeCartDrawer">
+            <img v-if="item.image" :src="item.image" :alt="item.name" loading="lazy" />
+            <i v-else class="pi pi-box" aria-hidden="true"></i>
+          </router-link>
+          <div class="public-cart-item__body">
+            <router-link :to="{ name: 'product-details', params: { id: item.id } }" @click="closeCartDrawer">{{ item.name }}</router-link>
+            <strong>{{ Number(item.price).toLocaleString('fa-IR') }} ریال</strong>
+            <div class="public-cart-item__controls">
+              <button type="button" :aria-label="'افزایش تعداد ' + item.name" @click="cartStore.updateQuantity(item.id, item.quantity + 1)"><i class="pi pi-plus"></i></button>
+              <span>{{ countLabel(item.quantity) }}</span>
+              <button type="button" :aria-label="'کاهش تعداد ' + item.name" :disabled="item.quantity <= 1" @click="cartStore.updateQuantity(item.id, item.quantity - 1)"><i class="pi pi-minus"></i></button>
+              <button type="button" class="remove" :aria-label="'حذف ' + item.name" @click="cartStore.removeItem(item.id)"><i class="pi pi-trash"></i></button>
             </div>
-          </article>
-        </div>
-        <div v-else class="public-cart-drawer__empty"><i class="pi pi-shopping-bag"></i><strong>سبد خرید خالی است</strong><span>محصولات موردنیازتان را به سبد اضافه کنید.</span><router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent" @click="closeCartDrawer">مشاهده محصولات</router-link></div>
+          </div>
+        </article>
+      </div>
+      <div v-else class="public-cart-drawer__empty"><i class="pi pi-shopping-bag"></i><strong>سبد خرید خالی است</strong><span>محصولات موردنیازتان را به سبد اضافه کنید.</span><router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent" @click="closeCartDrawer">مشاهده محصولات</router-link></div>
+      <template #footer>
         <footer v-if="cartStore.items.length" class="public-cart-drawer__footer">
           <div><span>جمع کل</span><strong>{{ Number(cartStore.subtotal).toLocaleString('fa-IR') }} ریال</strong></div>
           <button type="button" class="public-cart-continue" @click="closeCartDrawer">ادامه خرید</button>
           <router-link to="/checkout" class="tm-btn tm-btn--accent" @click="closeCartDrawer">ادامه و تسویه حساب <i class="pi pi-arrow-left"></i></router-link>
         </footer>
-      </aside>
-    </div>
+      </template>
+    </Drawer>
 
     <!-- Mobile navigation -->
     <div v-if="mobileMenuOpen" id="public-mobile-navigation" class="public-mobile-nav">
@@ -809,9 +830,10 @@ function logout() {
 /* Fixed notification drawer slides in from the physical left edge, like the dashboard inbox. */
 .public-notifications-actions { position: static; display: inline-flex; align-items: center; }
 .public-notifications-link { border: 0; background: transparent; cursor: pointer; }
-.public-notifications-layer { position: fixed; inset: 0; z-index: 1400; background: rgba(7,20,39,.38); }
-.public-notifications-drawer { position: absolute; inset-block: 0; left: 0; display: flex; flex-direction: column; width: min(410px,92vw); height: 100%; overflow: hidden; border-inline-end: 1px solid var(--tm-line); background: var(--tm-surface); box-shadow: 18px 0 48px rgba(7,20,39,.18); text-align: start; animation: public-notifications-enter .22s ease-out; }
-@keyframes public-notifications-enter { from { transform: translateX(-28px); opacity: .7; } to { transform: translateX(0); opacity: 1; } }
+.public-notifications-drawer { display: flex; flex-direction: column; height: 100%; overflow: hidden; border-inline-end: 1px solid var(--tm-line); background: var(--tm-surface); text-align: start; }
+.public-notifications-drawer .p-drawer-header,.public-cart-drawer .p-drawer-header { padding: 0; border: 0; }
+.public-notifications-drawer .p-drawer-content { display: flex; flex: 1; min-height: 0; flex-direction: column; padding: 0; }
+.public-notifications-drawer .p-drawer-footer { padding: 0; border-top: 1px solid var(--tm-line); }
 .public-notifications-menu__header { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 16px 18px; border-bottom: 1px solid var(--tm-line); color: var(--tm-ink); }
 .public-notifications-menu__heading { display: grid; flex: 1; gap: 4px; }
 .public-notifications-menu__heading strong { font-size: 15px; font-weight: 700; }
@@ -844,9 +866,9 @@ function logout() {
 .public-search-popover__field button{min-height:36px;padding:0 16px;border:0;border-radius:8px;background:var(--tm-blue);color:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .public-search-popover__field button:disabled{opacity:.45;cursor:not-allowed}
 .public-search-popover>span{display:block;margin-top:9px;color:var(--tm-muted);font-size:11px}
-.public-cart-layer{position:fixed;inset:0;z-index:1600;background:rgba(5,18,35,.46)}
-.public-cart-drawer{position:absolute;inset-block:0;left:0;display:flex;flex-direction:column;width:min(440px,94vw);height:100%;background:var(--tm-surface);box-shadow:18px 0 48px rgba(5,18,35,.2);animation:public-cart-enter .22s ease-out}
-@keyframes public-cart-enter{from{transform:translateX(-32px);opacity:.65}to{transform:translateX(0);opacity:1}}
+.public-cart-drawer{display:flex;flex-direction:column;height:100%;background:var(--tm-surface)}
+.public-cart-drawer .p-drawer-content{display:flex;flex:1;min-height:0;flex-direction:column;padding:0}
+.public-cart-drawer .p-drawer-footer{padding:0;border-top:1px solid var(--tm-line)}
 .public-cart-drawer__header{display:flex;align-items:center;justify-content:space-between;min-height:78px;padding:16px 20px;border-bottom:1px solid var(--tm-line)}
 .public-cart-drawer__header>div{display:grid;gap:4px}.public-cart-drawer__header strong{font-size:16px;color:var(--tm-ink)}.public-cart-drawer__header span{font-size:11px;color:var(--tm-muted)}
 .public-cart-drawer__header button{display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--tm-line);border-radius:9px;background:transparent;color:var(--tm-ink);cursor:pointer}
