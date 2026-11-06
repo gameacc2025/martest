@@ -2,8 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
 
-const { getProducts, routerPush, addToCart, addToWishlist, routeState } = vi.hoisted(() => ({
+const { getProducts, getPublicCompany, routerPush, addToCart, addToWishlist, routeState } = vi.hoisted(() => ({
   getProducts: vi.fn(),
+  getPublicCompany: vi.fn(),
   routerPush: vi.fn(),
   addToCart: vi.fn(),
   addToWishlist: vi.fn(),
@@ -14,6 +15,8 @@ vi.mock('vue-router', () => ({
   useRoute: () => routeState.current,
   useRouter: () => ({ push: routerPush }),
 }))
+
+vi.mock('../../stores/companies', () => ({ useCompanyStore: () => ({ getPublicCompany }) }))
 
 vi.mock('../../stores/products', () => ({
   useProductsStore: () => ({ getProducts }),
@@ -69,6 +72,7 @@ describe('Website Company Profile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     routeState.current = reactive({ params: { id: '37' } })
+    getPublicCompany.mockResolvedValue({ id: 37, name: 'شرکت ارتباطات نمونه', type: 'SUPPLIER', description: 'تأمین‌کننده تجهیزات شبکه', address: 'تهران', phone: '02112345678', email: 'info@example.test', website: 'https://example.test', isVerified: true, _count: { products: 1 } })
     getProducts.mockResolvedValue({
       data: [productFixture()],
       meta: { page: 1, limit: 12, total: 1, totalPages: 1 },
@@ -80,10 +84,11 @@ describe('Website Company Profile', () => {
     wrapper = undefined
   })
 
-  it('uses the public products API contract and derives public company details from published catalog data', async () => {
+  it('loads public company identity independently from the published product catalog', async () => {
     wrapper = mountCompanyProfile()
     await flushPromises()
 
+    expect(getPublicCompany).toHaveBeenCalledWith(37)
     expect(getProducts).toHaveBeenCalledWith({ page: 1, limit: 12, companyId: 37 })
     expect(wrapper.find('#company-profile-title').text()).toContain('شرکت ارتباطات نمونه')
     expect(wrapper.find('.company-hero__icon').exists()).toBe(true)
@@ -98,10 +103,12 @@ describe('Website Company Profile', () => {
     wrapper = mountCompanyProfile()
     await flushPromises()
     getProducts.mockClear()
+    getPublicCompany.mockClear()
 
     routeState.current.params.id = '45'
     await flushPromises()
 
+    expect(getPublicCompany).toHaveBeenCalledWith(45)
     expect(getProducts).toHaveBeenCalledWith({ page: 1, limit: 12, companyId: 45 })
   })
 
@@ -115,28 +122,30 @@ describe('Website Company Profile', () => {
     expect(wrapper.find('a[href="https://example.test"]').exists()).toBe(true)
   })
 
-  it('shows an explicit empty state when the company has no public products', async () => {
+  it('keeps company introduction visible even when there are no public products', async () => {
+    getPublicCompany.mockResolvedValueOnce({ id: 37, name: 'شرکت بدون محصول', description: 'معرفی مستقل شرکت', _count: { products: 0 } })
     getProducts.mockResolvedValueOnce({ data: [], meta: { total: 0 } })
     wrapper = mountCompanyProfile()
     await flushPromises()
 
-    expect(wrapper.find('[role="status"]').text()).toContain('محصول عمومی برای نمایش وجود ندارد')
+    expect(wrapper.text()).toContain('معرفی مستقل شرکت')
+    expect(wrapper.find('[role="status"]').text()).toContain('هنوز محصولی برای نمایش ثبت نشده است')
     expect(wrapper.find('.product-card').exists()).toBe(false)
   })
 
   it('announces API errors and retries with the same public catalog contract', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
-    getProducts.mockRejectedValueOnce(new Error('offline'))
+    getPublicCompany.mockRejectedValueOnce(new Error('offline'))
     wrapper = mountCompanyProfile()
     await flushPromises()
 
-    expect(wrapper.find('[role="alert"]').text()).toContain('دریافت اطلاعات شرکت ناموفق بود')
+    expect(wrapper.find('[role="alert"]').text()).toContain('دریافت صفحه شرکت ناموفق بود')
 
-    getProducts.mockResolvedValueOnce({ data: [productFixture()], meta: { total: 1 } })
+    getPublicCompany.mockResolvedValueOnce({ id: 37, name: 'شرکت ارتباطات نمونه', _count: { products: 1 } })
     await wrapper.find('[role="alert"] button').trigger('click')
     await flushPromises()
 
-    expect(getProducts).toHaveBeenLastCalledWith({ page: 1, limit: 12, companyId: 37 })
+    expect(getPublicCompany).toHaveBeenLastCalledWith(37)
     expect(wrapper.find('.product-card').exists()).toBe(true)
     consoleError.mockRestore()
   })
