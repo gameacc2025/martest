@@ -1,0 +1,154 @@
+name: Build Prisma Initial Baseline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/prisma-baseline-build.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prisma-baseline-main
+  cancel-in-progress: false
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:18.4
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: telecom_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d telecom_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/telecom_test?schema=public
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+      - name: Refresh npm lockfile and install
+        working-directory: backend
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm ci
+      - name: Validate schema and generate Prisma Client
+        working-directory: backend
+        run: |
+          npx prisma --version
+          npx prisma validate
+          npx prisma generate
+      - name: Generate clean initial migration
+        working-directory: backend
+        run: |
+          mkdir -p prisma/migrations/20261107000000_init
+          npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script --output prisma/migrations/20261107000000_init/migration.sql
+          cat >> prisma/migrations/20261107000000_init/migration.sql <<'SQL'
+
+          -- Domain invariants not expressible in Prisma Schema Language.
+          ALTER TABLE "Inquiry"
+            ADD CONSTRAINT "Inquiry_exactly_one_buyer_check"
+            CHECK (
+              ("companyId" IS NOT NULL AND "buyerUserId" IS NULL)
+              OR ("companyId" IS NULL AND "buyerUserId" IS NOT NULL)
+            );
+
+          ALTER TABLE "InquirySubscription"
+            ADD CONSTRAINT "InquirySubscription_exactly_one_owner_check"
+            CHECK (
+              ("companyId" IS NOT NULL AND "userId" IS NULL)
+              OR ("companyId" IS NULL AND "userId" IS NOT NULL)
+            );
+
+          ALTER TABLE "InquiryMessage"
+            ADD CONSTRAINT "InquiryMessage_sender_identity_check"
+            CHECK (("senderUserId" IS NOT NULL)::integer + ("senderCompanyId" IS NOT NULL)::integer = 1);
+
+          ALTER TABLE "InquiryMessage"
+            ADD CONSTRAINT "InquiryMessage_recipient_identity_check"
+            CHECK (("recipientUserId" IS NOT NULL)::integer + ("recipientCompanyId" IS NOT NULL)::integer = 1);
+
+          CREATE UNIQUE INDEX "Address_one_default_per_user_idx"
+            ON "Address"("userId") WHERE "isDefault" = true;
+
+          INSERT INTO "NotificationFolder" ("key", "name", "scope", "isSystem", "isActive", "sortOrder", "updatedAt")
+          VALUES
+            ('INBOX', 'دریافتی‌ها', 'ALL', true, true, 0, CURRENT_TIMESTAMP),
+            ('SAVED', 'ذخیره‌شده‌ها', 'ALL', true, true, 1, CURRENT_TIMESTAMP);
+
+          CREATE OR REPLACE FUNCTION notification_folder_default_inbox() RETURNS TRIGGER AS $$
+          BEGIN
+            INSERT INTO "NotificationFolderMembership" ("notificationId", "folderId")
+            SELECT NEW.id, id FROM "NotificationFolder" WHERE "key" = 'INBOX'
+            ON CONFLICT ("notificationId", "folderId") DO NOTHING;
+            RETURN NEW;
+          END;
+          $$ LANGUAGE plpgsql;
+
+          CREATE TRIGGER "Notification_default_inbox_membership"
+          AFTER INSERT ON "Notification"
+          FOR EACH ROW EXECUTE FUNCTION notification_folder_default_inbox();
+          SQL
+      - name: Remove superseded migration history
+        working-directory: backend
+        run: |
+          find prisma/migrations -mindepth 1 -maxdepth 1 -type d ! -name "20261107000000_init" -exec rm -rf {} +
+          test -s prisma/migrations/20261107000000_init/migration.sql
+          test -f prisma/migrations/migration_lock.toml
+      - name: Apply baseline to a fresh PostgreSQL 18 database
+        working-directory: backend
+        run: |
+          npx prisma migrate deploy
+          npx prisma migrate status
+      - name: Verify custom PostgreSQL invariants
+        working-directory: backend
+        run: |
+          node <<'NODE'
+          const { Pool } = require('pg');
+          (async () => {
+            const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+            try {
+              const result = await pool.query(`
+                SELECT
+                  (SELECT count(*) FROM pg_constraint WHERE conname IN (
+                    'Inquiry_exactly_one_buyer_check',
+                    'InquirySubscription_exactly_one_owner_check',
+                    'InquiryMessage_sender_identity_check',
+                    'InquiryMessage_recipient_identity_check'
+                  )) AS checks,
+                  (SELECT count(*) FROM pg_indexes WHERE indexname = 'Address_one_default_per_user_idx') AS partial_index,
+                  (SELECT count(*) FROM pg_trigger WHERE tgname = 'Notification_default_inbox_membership' AND NOT tgisinternal) AS inbox_trigger,
+                  (SELECT count(*) FROM "NotificationFolder" WHERE "key" IN ('INBOX', 'SAVED')) AS folders
+              `);
+              const row = result.rows[0];
+              if (Number(row.checks) !== 4 || Number(row.partial_index) !== 1 ||
+                  Number(row.inbox_trigger) !== 1 || Number(row.folders) !== 2) {
+                throw new Error('Custom migration invariants missing: ' + JSON.stringify(row));
+              }
+              process.stdout.write('Custom migration invariants verified: ' + JSON.stringify(row) + '\\n');
+            } finally {
+              await pool.end();
+            }
+          })().catch((error) => { console.error(error); process.exit(1); });
+          NODE
+      - name: Commit generated baseline and lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/package-lock.json backend/prisma/migrations
+          git rm .github/workflows/prisma-baseline-build.yml
+          git commit -m "chore(db): generate Prisma 7 baseline migration"
+          git push origin HEAD:main
