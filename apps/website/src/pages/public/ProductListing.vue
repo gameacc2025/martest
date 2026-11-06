@@ -231,7 +231,7 @@ onUnmounted(stopSlider)
           <h3>محدوده قیمت <small>ریال</small></h3>
           <div class="shop-price-inputs"><InputNumber v-model="minPrice" inputId="shop-min-price" placeholder="از" :useGrouping="true" /><span>تا</span><InputNumber v-model="maxPrice" inputId="shop-max-price" placeholder="تا" :useGrouping="true" /></div>
         </div>
-        <div class="shop-filter-section"><h3>نوع فروش</h3><label class="shop-retail-filter"><input v-model="retailOnly" type="checkbox" /><span class="shop-retail-filter__check"><i class="pi pi-check"></i></span><span><b>فقط محصولات خرده‌فروشی</b><small>فروش تکی این محصولات فعال است</small></span></label></div>
+        <div class="shop-filter-section"><h3>نوع فروش</h3><label class="shop-retail-filter"><input v-model="retailOnly" type="checkbox" @change="applyFilters" /><span class="shop-retail-filter__check"><i class="pi pi-check"></i></span><span><b>فقط محصولات خرده‌فروشی</b><small>فروش تکی این محصولات فعال است</small></span></label></div>
         <div class="shop-filter-section shop-filter-section--last">
           <h3>مرتب‌سازی</h3>
           <Select v-model="selectedSort" :options="sortOptions" optionLabel="label" optionValue="value" class="shop-sort-select" />
