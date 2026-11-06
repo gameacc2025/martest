@@ -1,0 +1,8 @@
+<script setup>
+
+defineProps({id:[String,Number],sender:String,subject:String,preview:String,time:String,selected:Boolean,starred:Boolean,unread:Boolean,tag:String});const emit=defineEmits(['select','toggle-star','open'])
+</script>
+<template><article class="tem-mail-row" :class="{unread,selected}" @click="emit('open',id)"><input type="checkbox" :checked="selected" :aria-label="'انتخاب '+subject" @click.stop @change="emit('select',$event.target.checked)"><button class="star" type="button" @click.stop="emit('toggle-star',id)">{{starred?'★':'☆'}}</button><slot name="avatar"><span class="avatar">{{sender?.slice(0,1)}}</span></slot><div class="content"><div class="line"><strong>{{sender}}</strong><span v-if="tag" class="tag">{{tag}}</span><time>{{time}}</time></div><b>{{subject}}</b><p>{{preview}}</p></div></article></template>
+<style scoped>
+.tem-mail-row{direction:rtl;display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--tm-line,#eceff5);cursor:pointer}.tem-mail-row:hover,.selected{background:#fafaff}.tem-mail-row input{accent-color:#8c7bf7}.star{border:0;background:none;color:#ffb830;font-size:18px;cursor:pointer}.avatar{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;background:#eeebfe;color:#7564dc;font-size:11px}.content{flex:1;min-width:0}.line{display:flex;align-items:center;gap:8px}.line strong,.content>b{font-size:11px}.line time{margin-inline-start:auto;color:var(--tm-muted,#8c97b2);font-size:10px}.content p{overflow:hidden;margin:3px 0 0;color:var(--tm-muted,#8c97b2);font-size:10px;text-overflow:ellipsis;white-space:nowrap}.unread .content>b,.unread .line strong{font-weight:800}.tag{padding:2px 5px;border-radius:3px;background:#e3f6fd;color:#1684a9;font-size:9px}
+</style>

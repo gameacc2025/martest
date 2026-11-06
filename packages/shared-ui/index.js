@@ -16,6 +16,8 @@ export { dashboardMenu, PUBLIC_SITE_URL } from './config/navigation/dashboardMen
 
 // Unified widget library (Website + Admin + Company)
 export * from './components/ui/index.js'
+// Myron/store-template reusable Vue widgets
+export * from './components/tem/index.js'
 // Operational module shell (CRM, finance, support and retail operations)
 export { default as OperationalWorkspace } from './components/operations/OperationalWorkspace.vue'
 export { default as TicketDeskWorkspace } from './components/operations/TicketDeskWorkspace.vue'

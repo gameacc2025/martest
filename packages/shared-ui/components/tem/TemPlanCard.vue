@@ -1,0 +1,8 @@
+<script setup>
+
+defineProps({name:String,description:String,price:[String,Number],period:{type:String,default:'ماهانه'},features:{type:Array,default:()=>[]},featured:Boolean,disabled:Boolean,buttonLabel:{type:String,default:'انتخاب پلن'}});const emit=defineEmits(['select'])
+</script>
+<template><article class="tem-plan-card" :class="{featured}"><span v-if="featured" class="ribbon">پیشنهاد ویژه</span><h3>{{name}}</h3><p>{{description}}</p><div class="price"><strong>{{price}}</strong><small>{{period}}</small></div><ul><li v-for="(item,i) in features" :key="i"><i class="pi pi-check"/> {{item}}</li></ul><slot/><button type="button" :disabled="disabled" @click="emit('select')">{{buttonLabel}}</button></article></template>
+<style scoped>
+.tem-plan-card{position:relative;direction:rtl;overflow:hidden;padding:20px;border:1px solid var(--tm-line,#eceff5);border-radius:6px;background:var(--tm-surface,#fff)}.tem-plan-card.featured{border-color:#8c7bf7;box-shadow:0 8px 25px #8c7bf71c}.tem-plan-card h3{margin:0;font-size:16px}.tem-plan-card p,.price small{color:var(--tm-muted,#8c97b2);font-size:10px}.price{display:flex;align-items:baseline;gap:8px;margin:15px 0}.price strong{font-size:25px}.tem-plan-card ul{display:grid;gap:8px;margin:14px 0;padding:0;list-style:none;font-size:11px}.tem-plan-card li i{color:#0ac655}.tem-plan-card>button{width:100%;min-height:38px;border:0;border-radius:4px;background:#8c7bf7;color:#fff;font:inherit;font-size:11px;cursor:pointer}.tem-plan-card>button:disabled{opacity:.5}.ribbon{position:absolute;top:12px;inset-inline-end:-28px;padding:4px 30px;background:#8c7bf7;color:white;font-size:9px;transform:rotate(35deg)}
+</style>
