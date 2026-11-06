@@ -67,6 +67,7 @@ export const dashboardMenu = [
       { title: 'کاربران', icon: 'pi pi-users', route: 'admin-users', permission: 'users.read' },
       { title: 'شرکت‌ها', icon: 'pi pi-building', route: 'admin-companies', permission: 'companies.read' },
       { title: 'دسته‌بندی‌ها', icon: 'pi pi-folder', route: 'admin-categories', permission: 'categories.read' },
+      { title: 'بنرهای تبلیغاتی', icon: 'pi pi-images', route: 'admin-banners', permission: 'banners.read' },
       // Flattened: was a "دسترسی‌ها" submenu with 2 children. A 2-item
       // dropdown adds a click for no grouping benefit — each is now its own
       // top-level link.
