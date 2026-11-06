@@ -20,6 +20,7 @@ const showMyInquiriesLink = computed(() => authStore.isAuthenticated && authStor
 
 const featuredProducts = ref([])
 const recentProducts = ref([])
+const retailLatestProducts = ref([])
 const promotionalBanners = ref([])
 const activeBannerIndex = ref(0)
 let bannerTimer = null
@@ -90,6 +91,9 @@ async function fetchProducts() {
 
     // Featured is a server-side product flag, not a slice of recent results.
     try {
+      const retailResponse = await productsApi.list({ page: 1, limit: 8, status: 'PUBLISHED', retailEnabled: true, sortBy: 'createdAt', sortOrder: 'desc' })
+      const retailItems = retailResponse?.data?.data ?? []
+      retailLatestProducts.value = Array.isArray(retailItems) ? retailItems.slice(0, 8) : []
       const featuredResponse = await productsApi.list({ ...params, limit: 8, featured: true })
       const featuredItems = featuredResponse?.data?.data ?? []
       featuredProducts.value = Array.isArray(featuredItems) ? featuredItems.slice(0, 8) : []
@@ -368,6 +372,17 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div>
       </section>
 
+
+      <section class="home-section home-retail-section" aria-labelledby="home-retail-latest">
+        <div class="site-section-title"><div><h2 id="home-retail-latest">جدیدترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">محصولاتی که امکان خرید تکی آن‌ها فعال شده است</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">همه محصولات خرده‌فروشی</router-link></div>
+        <div v-if="retailLatestProducts.length" class="home-product-grid">
+          <article v-for="product in retailLatestProducts" :key="product.id" class="product-card">
+            <router-link :to="productRoute(product)" class="product-card__main"><span class="product-card__media"><span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span><img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" /><i v-else class="pi pi-box" aria-hidden="true"></i></span>
+              <span class="product-card__body"><span class="product-card__brand">{{ product.brand || product.company?.name || 'تجهیزات شبکه و مخابرات' }}</span><span class="product-card__mode product-card__mode--fixed">فروش خرده‌فروشی</span><span class="product-card__name">{{ product.name || product.title }}</span><span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" class="product-sku" dir="ltr">{{ product.sku }}</b></span><span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span></span></router-link>
+            <div class="product-card__foot"><span class="product-card__price"><small>قیمت</small><b>{{ productPriceLabel(product) }}</b></span><router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></div>
+          </article>
+        </div><div v-else class="home-empty"><i class="pi pi-shopping-bag" aria-hidden="true"></i><p>در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</p></div>
+      </section>
 
       <!-- Inquiry CTA -->
       <section class="home-cta">
