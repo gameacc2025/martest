@@ -3871,4 +3871,4 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Full `npx vitest run` -> 58 files passed, 3 failed (5 tests): `Faq.test.js` (1), `Terms.test.js` (2), `WorkspacePageHeading.test.js` (2) — identical pre-existing failures; 358 tests passed.
   - `pnpm run build:website` -> Vite build succeeded (`✓ built in 6.80s`).
   - Browser/visual checks: **NOT RUN** (owner instruction prohibits browser automation/screenshot loops).
-- **Note:** `Telecom Market.html` remains untracked as design input and was not committed.
+- **Note:** `Telecom Market.html` is now tracked in the repo root as the design reference (commit `8ad51708`).

@@ -1,7 +1,7 @@
 ## Storefront widget extraction — 2026-11-07 (STORE-WIDGETS-01)
 - **Status:** DONE. Commit `194eed79` on `main` (not pushed).
 - New shared widgets in `packages/shared-ui/components/store/`: `StoreSectionHeading`, `StoreCategoryCard` (tile/panel), `StoreProductCard`, `StoreFilterPanel`, barrel `index.js`.
-- Home, ProductListing and Categories now consume these widgets instead of duplicated inline markup; dead card/category/heading CSS removed. The reference file `Telecom Market.html` stays untracked as design input.
+- Home, ProductListing and Categories now consume these widgets instead of duplicated inline markup; dead card/category/heading CSS removed. `Telecom Market.html` is tracked in the repo root as the design reference (commit `8ad51708`).
 - Preserved live APIs, routes/queries, RTL/Vazirmatn, `--tm-*` tokens, the 168–210px grid tracks and 4:5 / 11px / 44px card contracts. No backend/schema/API/auth changes; no fabricated stats/offers.
 - Verification: targeted suites 43/43 passed; full `npx vitest run` 358 passed with only the 5 known pre-existing failures (FAQ 1, Terms 2, WorkspacePageHeading 2); `pnpm run build:website` succeeded. Browser/visual checks **NOT RUN** (owner instruction).
 - **Next:** optional follow-up — apply `StoreProductCard` to SearchResults/Wishlist/CompanyProfile and retire the legacy `products/ProductCard.vue` if the owner wants one card everywhere; also decide whether `Telecom Market.html` should be kept in-repo.
