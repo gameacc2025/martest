@@ -2999,6 +2999,22 @@ Object.assign(docs, {
       },
     },
   },
+,
+  ['GET /api/v1/products/:id/similar']: {
+    summary: 'List matching products from other suppliers',
+    description: 'Returns published public listings from other active companies that share the same manufacturer/model catalogCode. Authentication required: none.',
+    tags: ['Products'],
+    authRequired: false,
+    params: idParam(),
+    responses: {
+      200: {
+        description: 'Matching supplier listings returned successfully.',
+        type: 'object',
+        required: ['data'],
+        properties: { data: { type: 'array', items: step16lPublicProductSchema } },
+      },
+    },
+  },
 });
 
 module.exports = docs;
