@@ -7,6 +7,12 @@
 
 
 
+## Website catalogue breadcrumb and spacing — 2026-11-06
+- Replaced the public catalogue's large WorkspacePageHeading and trust badge with the shared lightweight PageHeader breadcrumb.
+- Set the catalogue route meta title to “فروشگاه تجهیزات شبکه و مخابرات”; the breadcrumb home link points to the catalogue route.
+- Reduced PublicLayout main top padding from 24px to 10px. No API/backend changes.
+- Source edits committed directly to main. Build, tests and browser visual verification NOT RUN in this GitHub-only session.
+
 ## Website header and homepage consolidation — 2026-11-05
 
 - The root route now renders the existing ProductListing page; the legacy `/products` path remains an alias and query filters are preserved. The old separate Home page is no longer routed or shown in the primary navigation. ProductListing content and API behavior were not changed.
