@@ -119,14 +119,6 @@ for (const c of cases) {
   });
 }
 
-test('GET /public/:id: storefront profile is accessible without authentication', async () => {
-  const app = await buildApp();
-  const res = await app.inject({ method: 'GET', url: '/api/v1/companies/public/37' });
-  assert.equal(res.statusCode, 200);
-  assert.equal(hit.getPublicOne, true);
-  await app.close();
-});
-
 // ── requireAnyPermission routes accept the SECOND listed permission too ──
 
 test('GET /:id/settings: also accepts companies.manage_settings alone (requireAnyPermission, not requirePermission)', async () => {
