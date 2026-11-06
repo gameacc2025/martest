@@ -1,3 +1,11 @@
+## Storefront widget extraction — 2026-11-07 (STORE-WIDGETS-01)
+- **Status:** DONE. Commit `194eed79` on `main` (not pushed).
+- New shared widgets in `packages/shared-ui/components/store/`: `StoreSectionHeading`, `StoreCategoryCard` (tile/panel), `StoreProductCard`, `StoreFilterPanel`, barrel `index.js`.
+- Home, ProductListing and Categories now consume these widgets instead of duplicated inline markup; dead card/category/heading CSS removed. The reference file `Telecom Market.html` stays untracked as design input.
+- Preserved live APIs, routes/queries, RTL/Vazirmatn, `--tm-*` tokens, the 168–210px grid tracks and 4:5 / 11px / 44px card contracts. No backend/schema/API/auth changes; no fabricated stats/offers.
+- Verification: targeted suites 43/43 passed; full `npx vitest run` 358 passed with only the 5 known pre-existing failures (FAQ 1, Terms 2, WorkspacePageHeading 2); `pnpm run build:website` succeeded. Browser/visual checks **NOT RUN** (owner instruction).
+- **Next:** optional follow-up — apply `StoreProductCard` to SearchResults/Wishlist/CompanyProfile and retire the legacy `products/ProductCard.vue` if the owner wants one card everywhere; also decide whether `Telecom Market.html` should be kept in-repo.
+
 ## Website homepage motion & liveliness — 2026-11-07 (HOME-LIVELY-01)
 - **Status:** DONE. Homepage now has a reduced-motion-gated motion layer built from its existing elements; palette/style system unchanged. Commit b813e77a (pushed to origin/main).
 - `apps/website/src/pages/public/Home.vue`: `vReveal` directive + shared `IntersectionObserver` (sections, titles, category cards, product shelves, CTAs; bounded stagger); campaign-banner crossfade + subtle `home-hero-drift`; section-title underline sweep; product-card image zoom + CTA arrow nudge (hover/pointer:fine only); autoplay loops pause while the tab is hidden.

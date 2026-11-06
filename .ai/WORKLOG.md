@@ -3847,3 +3847,28 @@ This file is the shared, version-controlled memory for agents working on the rep
   - Full `npx vitest run` -> 57 files passed, 3 failed (5 tests): `Faq.test.js` (1), `Terms.test.js` (2), `WorkspacePageHeading.test.js` (2). These are the same pre-existing unrelated failures recorded in the preceding entry; none of the failing files is touched by this change.
   - Browser/visual checks: **NOT RUN** (owner instruction prohibits browser automation/screenshot loops).
 - **Known minor note:** the `home-hero-drift` scale resets when a banner is deactivated; it is eased over the same 0.9s crossfade so it is not a hard snap.
+
+## 2026-11-07 - STORE-WIDGETS-01 - Extract storefront widgets from `Telecom Market.html`
+- **Status:** DONE — commit `194eed79` on `main` (not pushed)
+- **Agent:** OpenCode (DeepSeek V4.1 Flash)
+- **Source reference:** `Telecom Market.html` (repo root, untracked): section heading (`.sh`), category tile/rail (`.cat`), product card (`.p`), filter sidebar (`.fl`), category panels (`.cb`).
+- **Goal:** Before redesigning, extract the reference's reusable storefront widgets into shared components and replace the duplicated inline widgets on Home, Products and Categories. Create components where none existed.
+- **Added widgets (packages/shared-ui/components/store/):**
+  - `StoreSectionHeading.vue` — title/eyebrow/subtitle + action link or `#actions` slot, gradient underline.
+  - `StoreCategoryCard.vue` — `tile` (reference `.cat`: centered icon above name/count) and `panel` (reference `.cb`: thumbnail, name, description, count, view-products affordance); renders router-link, button (`as="button"` + `select`) or article; `is-active` state.
+  - `StoreProductCard.vue` — reference `.p`: 4:5 portrait media, category/rank badges (rank only when real data is passed), brand, verified-supplier, featured/mode chips, two-line 44px title, model/SKU meta, price caption + label, default or slotted actions. No discount/sold/rating fabrication.
+  - `StoreFilterPanel.vue` — reference `.fl`: titled sidebar shell with clear action, default body slot and `#actions` footer.
+  - `index.js` — barrel exports.
+- **Consumers:**
+  - `Home.vue`: all five product shelves now use `StoreProductCard`; every section heading uses `StoreSectionHeading`; the category rail uses `StoreCategoryCard tile`; removed ~120 lines of dead inline card/category CSS while keeping the 168–210px grid and reveal-motion layer.
+  - `ProductListing.vue`: category strip uses `StoreCategoryCard tile`; headings use `StoreSectionHeading`; filters wrapped in `StoreFilterPanel`; catalogue grid uses `StoreProductCard`; removed duplicate card/tile/heading CSS.
+  - `Categories.vue`: panel cards use `StoreCategoryCard panel` (badge import and 77 lines of duplicated CSS removed).
+- **Preserved:** live public product/category APIs, route names/queries, retail deep link, loading/error/empty states, RTL + Vazirmatn, `--tm-*` tokens, and card dimensions (`aspect-ratio:4/5`, `padding:11px`, `min-height:44px`). No backend/schema/API/auth/permission changes. No fabricated statistics, testimonials, offers or best-seller rankings.
+- **Tests updated:** `Home.test.js` and `ProductListing.test.js` now read the shared card source for the extracted sizing contracts; `Categories.test.js` moved from `shallowMount` to `mount`; added `StoreProductCard.test.js` (7 cases: identity/route, verified gating, honest price caption, mode chip, no invented rank/discount, action slot, image fallback).
+- **Verification (actually run):**
+  - Targeted `npx vitest run` for the five touched suites -> 5 files, 43 tests passed.
+  - `npx vitest run --root apps/website` -> 15 files passed, 2 pre-existing unrelated failures (`Faq` 1, `Terms` 2); 108 tests passed.
+  - Full `npx vitest run` -> 58 files passed, 3 failed (5 tests): `Faq.test.js` (1), `Terms.test.js` (2), `WorkspacePageHeading.test.js` (2) — identical pre-existing failures; 358 tests passed.
+  - `pnpm run build:website` -> Vite build succeeded (`✓ built in 6.80s`).
+  - Browser/visual checks: **NOT RUN** (owner instruction prohibits browser automation/screenshot loops).
+- **Note:** `Telecom Market.html` remains untracked as design input and was not committed.
