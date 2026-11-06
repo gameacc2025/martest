@@ -934,7 +934,7 @@ async function listSimilarProducts(id) {
       visibility: 'PUBLIC',
       company: { status: 'ACTIVE', deletedAt: null },
     },
-    select: { id: true, catalogCode: true },
+    select: { id: true, companyId: true, catalogCode: true },
   });
   if (!source) return null;
   if (!source.catalogCode) return [];
@@ -942,6 +942,7 @@ async function listSimilarProducts(id) {
   return prisma.product.findMany({
     where: {
       id: { not: source.id },
+      companyId: { not: source.companyId },
       catalogCode: source.catalogCode,
       status: 'PUBLISHED',
       visibility: 'PUBLIC',
