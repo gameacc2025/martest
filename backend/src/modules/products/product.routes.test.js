@@ -29,7 +29,7 @@ injectMock('../../config/db', {});
 const hit = {};
 const trivialController = {};
 const controllerMethods = [
-  'list', 'getOne', 'getPriceHistory', 'myProducts', 'getHistory', 'getActivity', 'create', 'update', 'remove',
+  'list', 'getOne', 'getPriceHistory', 'getSimilar', 'myProducts', 'getHistory', 'getActivity', 'create', 'update', 'remove',
   'submitReview', 'approve', 'reject', 'publish', 'hide', 'archive', 'restoreDraft',
   'addPriceTier', 'updatePriceTier', 'deletePriceTier',
   'uploadImage', 'deleteImage', 'setPrimaryImage', 'sortImages',
@@ -80,6 +80,14 @@ test('GET /:id/price-history: public, reaches price history controller without a
   const res = await app.inject({ method: 'GET', url: '/api/v1/products/1/price-history' });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.getPriceHistory, true);
+  await app.close();
+});
+
+test('GET /:id/similar: public, reaches similar suppliers controller without auth', async () => {
+  const app = await buildApp();
+  const res = await app.inject({ method: 'GET', url: '/api/v1/products/1/similar' });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.getSimilar, true);
   await app.close();
 });
 
