@@ -1,3 +1,15 @@
+## 2026-11-06 — Reference-first public storefront rewrite (TM-REFERENCE-01)
+- **Status:** Implemented on main; local verification still required.
+- **Source of truth:** root Telecom Market.html. Homepage, product catalogue, category directory, public header/footer shell and shared product-card geometry were aligned to its RTL/Vazirmatn layout, gradient hero, category rail, compact catalogue filters, category panels and product-card dimensions.
+- **Live data:** homepage campaigns continue to use bannersApi.listActive('HOME_HERO'); products use the published product API; retail shelf uses retailEnabled: true; categories use the existing category store. Product and category pages retain their existing routes, query parameters, loading/error/empty states and pagination.
+- **No fabricated marketplace content:** no hard-coded seller/product counts, brands, testimonials, blog posts, discounts or best-seller rankings were added. The best-seller shelf remains an explicit unavailable state until real sales aggregates exist. Brand filtering and blog content remain dependent on their real data/API contracts.
+- **Side drawers:** notification and cart previews are already on main via merged PR #88; both use the same PrimeVue Drawer behavior.
+- **Changed:** Home.vue, ProductListing.vue, Categories.vue, PublicLayout.vue, StoreProductCard.vue, corresponding Home/ProductListing/Categories tests.
+- **Verification:** NOT RUN in this GitHub-only editing session. Run focused Website tests and pnpm run build:website locally; browser visual verification remains pending.
+- **Commits on main:** 5ec0a84 (drawer merge), 1a40052, e1cfe57, e2f6ba6, 65fa381, 635492c, 4d39fa9, 3cf4998, fb1078b, 0661e04, 5012ff9, 2271882, 33c11ba.
+- **Branch policy:** main is the only working branch. Delete the two obsolete remote branches from the local checkout with: git push origin --delete feat/tem-storefront-drawers feat/website-home-storefront; then remove local tracking branches if present.
+- **Next:** verify Vue SFC compilation/tests/build in the user's local checkout, visually compare Home/Products/Categories against Telecom Market.html, then continue extracting only the remaining reference components that have real data/actions.
+
 ## 2026-11-06 — Unified public-site side drawers (TEM-DRAWERS-01)
 - **Status:** IMPLEMENTED on `feat/tem-storefront-drawers`; awaiting local build/test verification and PR review.
 - Replaced the bespoke notification popover overlay and bespoke cart overlay with PrimeVue 4 `Drawer` instances. Both enter from the same physical left edge (matching the existing RTL storefront drawer behavior), use the same modal/backdrop, scroll locking, dismiss-on-backdrop, and Escape behavior.
