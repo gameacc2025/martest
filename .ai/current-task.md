@@ -778,3 +778,14 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 - Website product detail now shows same-model listings from other suppliers, and the shared catalog code is visible in the company and admin product tables. Demo product specifications are also emitted in the website's standard key/value format.
 - Regenerated the stale architecture dependency graph and changed CI sequencing so backend tests/build checks still execute after frontend test failures.
+
+## Current task — Website homepage and storefront composition (2026-11-06)
+- **Status:** Implemented remotely on feat/website-home-storefront; verification pending.
+- Homepage campaign hero uses the scheduled active Banner feed (HOME_HERO) and includes previous/next/dot controls plus a fallback state when no campaign is active.
+- Product categories are horizontally browsable directly below the hero; the all-categories link remains visible.
+- Featured listings remain explicitly labelled «محصولات منتخب». Do not call them «پرفروش‌ترین» until a verified sales aggregate/public API exists; the current marketplace has no authoritative sales ranking.
+- Recent published products remain a separate section. Introductory feature cards and inquiry/retail CTA panels remain before the public footer.
+- Header search is icon-triggered and opens a styled search popover. Cart opens a left-side drawer backed by the existing Pinia store, with thumbnails, price, quantity controls, remove, subtotal, continue shopping and checkout navigation.
+- Checkout remains a preview only; do not represent the drawer CTA as a completed order or payment.
+- No backend/schema/API/auth/permission changes. Updated source-contract tests. Vue compiler, tests, builds and browser rendering still need local execution.
+

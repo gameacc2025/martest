@@ -86,20 +86,25 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.find('.public-rfq-link').exists()).toBe(false)
   })
 
-  it('shows independent purchase and RFQ counts for signed-in customers', async () => {
-    mocks.auth.isAuthenticated = true
-    mocks.inquiriesList.mockResolvedValue({ data: { data: [{}], meta: { total: 12 } } })
+  it('opens the left-side cart drawer and exposes an empty-cart recovery action', async () => {
     wrapper = mountLayout()
     await flushPromises()
     await wrapper.get('.public-commerce-trigger').trigger('click')
     await nextTick()
 
-    const tabs = wrapper.findAll('.public-commerce-tab')
-    expect(tabs).toHaveLength(2)
-    expect(tabs[0].text()).toContain('خرید')
-    expect(tabs[0].text()).toContain('۰')
-    expect(tabs[1].text()).toContain('استعلام')
-    expect(tabs[1].text()).toContain('۱۲')
+    expect(wrapper.get('.public-cart-drawer').attributes('aria-label')).toBe('سبد خرید')
+    expect(wrapper.get('.public-cart-drawer__empty').text()).toContain('سبد خرید خالی است')
+    expect(wrapper.get('.public-cart-drawer__empty a').text()).toContain('مشاهده محصولات')
+  })
+
+  it('opens a searchable header popover from the search icon', async () => {
+    wrapper = mountLayout()
+    await flushPromises()
+    await wrapper.get('.public-search-trigger').trigger('click')
+    await nextTick()
+
+    expect(wrapper.get('#public-search-popover').exists()).toBe(true)
+    expect(wrapper.get('.public-search-popover__field').exists()).toBe(true)
   })
 
   it('shows only the catalogue entry in the primary navigation', async () => {

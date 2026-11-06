@@ -17,8 +17,6 @@ import { categoriesApi, inquiriesApi, endpoints } from '@telecom/api-client'
 import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import IconField from 'primevue/iconfield'
-import InputIcon from 'primevue/inputicon'
 import Menu from 'primevue/menu'
 import MegaMenu from '@telecom/shared-ui/components/common/MegaMenu.vue'
 import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
@@ -26,14 +24,15 @@ import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const cartItemCount = computed(() => cartStore.itemCount)
-const commerceMenuOpen = ref(false)
+const cartDrawerOpen = ref(false)
+const searchPanelOpen = ref(false)
 const myInquiryCount = ref(null)
 const router = useRouter()
 const route = useRoute()
 
 // Keep the responsive navigation in sync with route changes (including
 // browser back/forward) so it never remains open over a new page.
-watch(() => route.fullPath, () => { mobileMenuOpen.value = false; commerceMenuOpen.value = false })
+watch(() => route.fullPath, () => { mobileMenuOpen.value = false; cartDrawerOpen.value = false; searchPanelOpen.value = false })
 watch(() => [authStore.isAuthenticated, authStore.isCustomer], () => { fetchMyInquiryCount(); fetchHeaderNotifications() })
 
 // CUSTOMER notifications live on the website. COMPANY and STAFF users are
@@ -61,9 +60,6 @@ function goToAdminApp(path = '/') {
 
 const searchQuery = ref('')
 const mobileMenuOpen = ref(false)
-const headerSearchVisible = ref(false)
-const showHeaderSearch = computed(() => route.name !== 'products' || headerSearchVisible.value)
-function updateHeaderSearchVisibility() { headerSearchVisible.value = window.scrollY > 320 }
 const notificationCount = ref(0)
 const latestNotifications = ref([])
 const notificationMenuOpen = ref(false)
@@ -157,11 +153,10 @@ function countLabel(value) {
   return count > 99 ? '۹۹+' : count.toLocaleString('fa-IR')
 }
 
-function closeCommerceMenu() { commerceMenuOpen.value = false }
+function closeCartDrawer() { cartDrawerOpen.value = false }
 function closeNotificationMenu() { notificationMenuOpen.value = false }
 function handleDocumentPointerDown(event) {
   if (!(event.target instanceof Element)) return
-  if (!event.target.closest('.public-commerce-actions')) closeCommerceMenu()
   if (!event.target.closest('.public-notifications-actions')) closeNotificationMenu()
 }
 
@@ -221,9 +216,7 @@ const footerCategories = ref([])
 const megaMenuCategories = ref([])
 
 onMounted(async () => {
-  window.addEventListener('scroll', updateHeaderSearchVisibility, { passive: true })
   document.addEventListener('pointerdown', handleDocumentPointerDown)
-  updateHeaderSearchVisibility()
   fetchMyInquiryCount()
   // Keep the header badge and its five-message preview in sync with live notifications.
   await fetchHeaderNotifications()
@@ -242,7 +235,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', updateHeaderSearchVisibility)
   document.removeEventListener('pointerdown', handleDocumentPointerDown)
 })
 
@@ -250,6 +242,7 @@ function search() {
   if (searchQuery.value.trim()) {
     router.push({ name: 'search', query: { q: searchQuery.value } })
     searchQuery.value = ''
+    searchPanelOpen.value = false
     mobileMenuOpen.value = false
   }
 }
@@ -297,18 +290,9 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
-            <div v-if="showHeaderSearch" class="public-search-desktop">
-              <IconField>
-                <InputIcon class="pi pi-search" />
-                <InputText
-                  v-model="searchQuery"
-                  @keyup.enter="search"
-                  placeholder="جستجوی محصول، برند یا شرکت…"
-                  aria-label="جستجوی محصولات"
-                  class="public-search-input"
-                />
-              </IconField>
-            </div>
+            <button type="button" class="public-icon-link public-search-trigger" aria-label="جستجو" :aria-expanded="searchPanelOpen" aria-controls="public-search-popover" @click="searchPanelOpen = !searchPanelOpen">
+              <i class="pi pi-search" aria-hidden="true"></i>
+            </button>
 
             <div v-if="user" class="public-authenticated-actions">
               <div class="public-notifications-actions" @keydown.esc.stop.prevent="closeNotificationMenu">
@@ -340,15 +324,11 @@ function logout() {
 </div>
               </div>
 
-            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
-              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-commerce-menu" :aria-expanded="commerceMenuOpen" @click.stop="commerceMenuOpen = !commerceMenuOpen">
+            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCartDrawer">
+              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-cart-drawer" :aria-expanded="cartDrawerOpen" @click.stop="cartDrawerOpen = true">
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
                 <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
               </button>
-              <div v-if="commerceMenuOpen" id="public-commerce-menu" class="public-commerce-menu" role="group" aria-label="مسیرهای خرید و استعلام">
-                <router-link to="/cart" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-shopping-cart" aria-hidden="true"></i> سبد خرید</span><b>{{ countLabel(cartItemCount) }}</b></router-link>
-                <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" to="/my-inquiries" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-file-edit" aria-hidden="true"></i> استعلام</span><b v-if="myInquiryCount !== null">{{ countLabel(myInquiryCount) }}</b></router-link>
-              </div>
             </div>
 
               <button type="button" class="public-user-trigger" @click="toggleUserMenu" aria-haspopup="true">
@@ -368,15 +348,11 @@ function logout() {
               </router-link>
             </div>
 
-            <div v-if="!user" class="public-commerce-actions" @keydown.esc.stop.prevent="closeCommerceMenu">
-              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-commerce-menu" :aria-expanded="commerceMenuOpen" @click.stop="commerceMenuOpen = !commerceMenuOpen">
+            <div v-if="!user" class="public-commerce-actions" @keydown.esc.stop.prevent="closeCartDrawer">
+              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-cart-drawer" :aria-expanded="cartDrawerOpen" @click.stop="cartDrawerOpen = true">
                 <i class="pi pi-shopping-cart" aria-hidden="true"></i>
                 <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
               </button>
-              <div v-if="commerceMenuOpen" id="public-commerce-menu" class="public-commerce-menu" role="group" aria-label="مسیرهای خرید و استعلام">
-                <router-link to="/cart" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-shopping-cart" aria-hidden="true"></i> سبد خرید</span><b>{{ countLabel(cartItemCount) }}</b></router-link>
-                <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" to="/my-inquiries" class="public-commerce-tab" @click="closeCommerceMenu"><span><i class="pi pi-file-edit" aria-hidden="true"></i> استعلام</span><b v-if="myInquiryCount !== null">{{ countLabel(myInquiryCount) }}</b></router-link>
-              </div>
             </div>
 
             <PvButton
@@ -392,20 +368,50 @@ function logout() {
           </div>
         </div>
 
-        <div v-if="mobileMenuOpen && showHeaderSearch" class="public-search-mobile">
-          <IconField>
-            <InputIcon class="pi pi-search" />
-            <InputText
-              v-model="searchQuery"
-              @keyup.enter="search"
-              placeholder="جستجوی محصولات..."
-              aria-label="جستجوی محصولات"
-              class="public-search-input-full"
-            />
-          </IconField>
-        </div>
+        <form v-if="searchPanelOpen" id="public-search-popover" class="public-search-popover" role="search" @submit.prevent="search">
+          <label for="public-header-search">جستجوی سریع در بازارگاه</label>
+          <div class="public-search-popover__field">
+            <i class="pi pi-search" aria-hidden="true"></i>
+            <InputText id="public-header-search" v-model="searchQuery" autofocus placeholder="نام محصول، برند یا شرکت را بنویسید…" autocomplete="off" />
+            <button type="submit" :disabled="!searchQuery.trim()">جستجو</button>
+          </div>
+          <span>برای مشاهده نتایج، عبارت موردنظر را وارد کنید.</span>
+        </form>
       </div>
     </header>
+
+    <div v-if="cartDrawerOpen" class="public-cart-layer" @click.self="closeCartDrawer" @keydown.esc.stop.prevent="closeCartDrawer" tabindex="-1">
+      <aside id="public-cart-drawer" class="public-cart-drawer" role="dialog" aria-modal="true" aria-label="سبد خرید">
+        <header class="public-cart-drawer__header">
+          <div><strong>سبد خرید شما</strong><span>{{ countLabel(cartItemCount) }} قلم کالا</span></div>
+          <button type="button" aria-label="بستن سبد خرید" @click="closeCartDrawer"><i class="pi pi-times"></i></button>
+        </header>
+        <div v-if="cartStore.items.length" class="public-cart-drawer__items">
+          <article v-for="item in cartStore.items" :key="item.id" class="public-cart-item">
+            <router-link :to="{ name: 'product-details', params: { id: item.id } }" class="public-cart-item__image" @click="closeCartDrawer">
+              <img v-if="item.image" :src="item.image" :alt="item.name" loading="lazy" />
+              <i v-else class="pi pi-box" aria-hidden="true"></i>
+            </router-link>
+            <div class="public-cart-item__body">
+              <router-link :to="{ name: 'product-details', params: { id: item.id } }" @click="closeCartDrawer">{{ item.name }}</router-link>
+              <strong>{{ Number(item.price).toLocaleString('fa-IR') }} ریال</strong>
+              <div class="public-cart-item__controls">
+                <button type="button" :aria-label="'افزایش تعداد ' + item.name" @click="cartStore.updateQuantity(item.id, item.quantity + 1)"><i class="pi pi-plus"></i></button>
+                <span>{{ countLabel(item.quantity) }}</span>
+                <button type="button" :aria-label="'کاهش تعداد ' + item.name" :disabled="item.quantity <= 1" @click="cartStore.updateQuantity(item.id, item.quantity - 1)"><i class="pi pi-minus"></i></button>
+                <button type="button" class="remove" :aria-label="'حذف ' + item.name" @click="cartStore.removeItem(item.id)"><i class="pi pi-trash"></i></button>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div v-else class="public-cart-drawer__empty"><i class="pi pi-shopping-bag"></i><strong>سبد خرید خالی است</strong><span>محصولات موردنیازتان را به سبد اضافه کنید.</span><router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent" @click="closeCartDrawer">مشاهده محصولات</router-link></div>
+        <footer v-if="cartStore.items.length" class="public-cart-drawer__footer">
+          <div><span>جمع کل</span><strong>{{ Number(cartStore.subtotal).toLocaleString('fa-IR') }} ریال</strong></div>
+          <button type="button" class="public-cart-continue" @click="closeCartDrawer">ادامه خرید</button>
+          <router-link to="/checkout" class="tm-btn tm-btn--accent" @click="closeCartDrawer">ادامه و تسویه حساب <i class="pi pi-arrow-left"></i></router-link>
+        </footer>
+      </aside>
+    </div>
 
     <!-- Mobile navigation -->
     <div v-if="mobileMenuOpen" id="public-mobile-navigation" class="public-mobile-nav">
@@ -819,4 +825,41 @@ function logout() {
 .public-notifications-menu__all:hover { background: var(--tm-canvas); }
 .public-notification-item:focus-visible,.public-notifications-menu__all:focus-visible,.public-notifications-close:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
 @media (prefers-reduced-motion: reduce) { .public-notifications-drawer { animation: none; } }
+
+/* Search popover and physical-left cart drawer */
+.public-header .public-container{position:relative}
+.public-search-trigger{border:0;background:transparent;cursor:pointer}
+.public-search-popover{position:absolute;z-index:1300;top:calc(100% + 8px);inset-inline-end:16px;width:min(520px,calc(100vw - 32px));padding:18px;border:1px solid var(--tm-line);border-radius:14px;background:var(--tm-surface);box-shadow:var(--tm-shadow-lg);text-align:start}
+.public-search-popover>label{display:block;margin-bottom:10px;color:var(--tm-ink);font-size:13px;font-weight:750}
+.public-search-popover__field{display:flex;align-items:center;gap:9px;min-height:48px;padding:5px 10px;border:1px solid var(--tm-line);border-radius:10px;background:var(--tm-surface-alt)}
+.public-search-popover__field>i{color:var(--tm-muted)}
+.public-search-popover__field :deep(input){flex:1;min-width:0;border:0;outline:0;background:transparent;box-shadow:none}
+.public-search-popover__field button{min-height:36px;padding:0 16px;border:0;border-radius:8px;background:var(--tm-blue);color:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.public-search-popover__field button:disabled{opacity:.45;cursor:not-allowed}
+.public-search-popover>span{display:block;margin-top:9px;color:var(--tm-muted);font-size:11px}
+.public-cart-layer{position:fixed;inset:0;z-index:1600;background:rgba(5,18,35,.46)}
+.public-cart-drawer{position:absolute;inset-block:0;left:0;display:flex;flex-direction:column;width:min(440px,94vw);height:100%;background:var(--tm-surface);box-shadow:18px 0 48px rgba(5,18,35,.2);animation:public-cart-enter .22s ease-out}
+@keyframes public-cart-enter{from{transform:translateX(-32px);opacity:.65}to{transform:translateX(0);opacity:1}}
+.public-cart-drawer__header{display:flex;align-items:center;justify-content:space-between;min-height:78px;padding:16px 20px;border-bottom:1px solid var(--tm-line)}
+.public-cart-drawer__header>div{display:grid;gap:4px}.public-cart-drawer__header strong{font-size:16px;color:var(--tm-ink)}.public-cart-drawer__header span{font-size:11px;color:var(--tm-muted)}
+.public-cart-drawer__header button{display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--tm-line);border-radius:9px;background:transparent;color:var(--tm-ink);cursor:pointer}
+.public-cart-drawer__items{flex:1;overflow:auto;padding:4px 18px}
+.public-cart-item{display:flex;gap:13px;padding:16px 0;border-bottom:1px solid var(--tm-line)}
+.public-cart-item__image{display:grid;place-items:center;flex:0 0 82px;width:82px;height:82px;overflow:hidden;border:1px solid var(--tm-line);border-radius:10px;background:var(--tm-canvas);color:var(--tm-muted)}
+.public-cart-item__image img{width:100%;height:100%;object-fit:contain}
+.public-cart-item__body{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:7px}
+.public-cart-item__body>a{display:-webkit-box;overflow:hidden;color:var(--tm-ink);font-size:12px;font-weight:700;line-height:1.8;text-decoration:none;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.public-cart-item__body>strong{color:var(--tm-blue);font-size:12px}
+.public-cart-item__controls{display:flex;align-items:center;gap:9px;margin-top:auto}
+.public-cart-item__controls button{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--tm-line);border-radius:7px;background:var(--tm-surface);color:var(--tm-ink-soft);cursor:pointer}
+.public-cart-item__controls button:disabled{opacity:.35;cursor:not-allowed}.public-cart-item__controls .remove{margin-inline-start:5px;color:var(--tm-red)}
+.public-cart-item__controls span{min-width:18px;text-align:center;font-size:12px;font-weight:700}
+.public-cart-drawer__empty{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;color:var(--tm-muted)}
+.public-cart-drawer__empty>i{font-size:42px;color:var(--tm-cyan)}.public-cart-drawer__empty strong{color:var(--tm-ink);font-size:15px}.public-cart-drawer__empty span{font-size:12px}
+.public-cart-drawer__footer{display:grid;gap:12px;padding:18px 20px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--tm-line);background:var(--tm-surface)}
+.public-cart-drawer__footer>div{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;color:var(--tm-ink-soft);font-size:13px}
+.public-cart-drawer__footer>div strong{color:var(--tm-ink);font-size:16px}
+.public-cart-continue{min-height:42px;border:1px solid var(--tm-line);border-radius:9px;background:var(--tm-surface);color:var(--tm-ink);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.public-cart-drawer__footer>.tm-btn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+@media(prefers-reduced-motion:reduce){.public-cart-drawer{animation:none}}
 </style>

@@ -82,7 +82,7 @@ const features = [
   { icon: 'pi pi-building', title: 'شناخت تأمین‌کننده', text: 'مشخصات شرکت و وضعیت احراز آن را در صورت ثبت و تأیید مشاهده کنید.' },
   { icon: 'pi pi-shopping-cart', title: 'خرید یا استعلام', text: 'نوع ارائه، قیمت و شرایط هر محصول را پیش از مشاهده جزئیات بررسی کنید.' },
 ]
-const visibleCategories = computed(() => categories.value.slice(0, 8))
+const visibleCategories = computed(() => categories.value)
 
 async function fetchProducts() {
   try {
@@ -190,75 +190,32 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
 <template>
   <div class="home-page" dir="rtl">
-    <section class="home-hero-band">
-      <div class="home-container">
-        <section class="site-hero home-hero" aria-labelledby="home-title">
-          <div class="home-hero__copy">
-            <span class="home-hero__eyebrow"><i class="pi pi-broadcast" aria-hidden="true"></i> بازارگاه تخصصی تجهیزات مخابراتی</span>
-            <h1 id="home-title">تجهیزات مخابراتی برای خرید و پروژه</h1>
-            <p>محصولات شبکه را پیدا کنید، قیمت‌های قابل‌خرید را ببینید یا برای نیازهای سازمانی درخواست استعلام بفرستید.</p>
-            <form class="home-hero__search" role="search" @submit.prevent="heroSearch">
-              <i class="pi pi-search" aria-hidden="true"></i>
-              <input v-model="searchQuery" type="search" name="homepage-search" autocomplete="off" placeholder="نام محصول، برند یا دسته‌بندی را جستجو کنید…" aria-label="جستجوی محصولات" />
-              <button type="submit" class="tm-btn tm-btn--accent">جستجو</button>
-            </form>
-            <div class="home-hero__actions">
-              <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">مشاهده محصولات</router-link>
-              <router-link :to="{ name: 'my-inquiries' }" class="tm-btn tm-btn--outline">ثبت درخواست استعلام</router-link>
-            </div>
-            <div class="home-hero__links">
-              <router-link :to="{ name: 'products' }">همه محصولات</router-link>
-              <router-link :to="{ name: 'categories' }">دسته‌بندی‌ها</router-link>
-              <router-link v-if="showMyInquiriesLink" :to="{ name: 'my-inquiries' }">استعلام‌های من</router-link>
-            </div>
+    <section class="home-campaign-hero" aria-label="پیشنهادهای ویژه بازارگاه">
+      <div v-if="activeBanner" class="home-campaign-hero__slide">
+        <img class="home-campaign-hero__image" :src="activeBanner.imageUrl" :alt="activeBanner.title" fetchpriority="high" decoding="async" />
+        <div class="home-campaign-hero__shade"></div>
+        <div class="home-container home-campaign-hero__inner">
+          <div class="home-campaign-hero__copy">
+            <span class="home-campaign-hero__eyebrow"><i class="pi pi-bolt" aria-hidden="true"></i> پیشنهادهای ویژه بازارگاه</span>
+            <h1>{{ activeBanner.title }}</h1>
+            <p v-if="activeBanner.description">{{ activeBanner.description }}</p>
+            <a v-if="activeBanner.targetUrl" :href="activeBanner.targetUrl" class="tm-btn tm-btn--accent">{{ activeBanner.ctaLabel || 'مشاهده پیشنهاد' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></a>
+            <router-link v-else :to="{ name: 'products' }" class="tm-btn tm-btn--accent">{{ activeBanner.ctaLabel || 'مشاهده محصولات' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
           </div>
-          <div class="home-hero__visual" :class="{ 'home-hero__visual--no-banner': !activeBanner }" aria-label="اسلایدر محصولات منتخب و بنر تبلیغاتی">
-            <div v-if="activeFeaturedProduct" class="home-featured-slider" @mouseenter="stopSlider" @mouseleave="startSlider" @focusin="stopSlider" @focusout="handleSliderFocusOut">
-              <div class="home-featured-slider__media">
-                <img v-if="getProductImage(activeFeaturedProduct)" :src="getProductImage(activeFeaturedProduct).url" :alt="activeFeaturedProduct.name || activeFeaturedProduct.title || 'محصول منتخب'" width="560" height="390" fetchpriority="high" decoding="async" />
-                <i v-else class="pi pi-box" aria-hidden="true"></i>
-                <span class="home-featured-slider__flag"><i class="pi pi-star-fill" aria-hidden="true"></i> منتخب فروشگاه</span>
-              </div>
-              <div class="home-featured-slider__content">
-                <span class="home-featured-slider__eyebrow">{{ productCategoryName(activeFeaturedProduct) || 'تجهیزات تخصصی مخابراتی' }}</span>
-                <h2>{{ activeFeaturedProduct.name || activeFeaturedProduct.title }}</h2>
-                <p v-if="activeFeaturedProduct.company?.name">{{ activeFeaturedProduct.company.name }}</p>
-                <strong>{{ productPriceLabel(activeFeaturedProduct) }}</strong>
-                <router-link :to="productRoute(activeFeaturedProduct)" class="tm-btn tm-btn--accent">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-              </div>
-              <div v-if="featuredSlides.length > 1" class="home-featured-slider__controls" aria-label="کنترل اسلایدر">
-                <button type="button" aria-label="اسلاید قبلی" @click="previousSlide"><i class="pi pi-chevron-right" aria-hidden="true"></i></button>
-                <div class="home-featured-slider__dots">
-                  <button v-for="(slide, index) in featuredSlides" :key="slide.id" type="button" :class="{ 'is-active': index === activeSlide }" :aria-label="'نمایش اسلاید ' + (index + 1)" :aria-pressed="index === activeSlide" @click="goToSlide(index)"></button>
-                </div>
-                <button type="button" aria-label="اسلاید بعدی" @click="nextSlide"><i class="pi pi-chevron-left" aria-hidden="true"></i></button>
-              </div>
-            </div>
-            <div v-else class="home-hero__product">
-              <i class="pi pi-box" aria-hidden="true"></i>
-              <span class="home-hero__product-caption">محصولات تخصصی شبکه و مخابرات</span>
-            </div>
-            <div v-if="activeBanner" class="home-promo-banner" @mouseenter="stopBannerSlider" @mouseleave="startBannerSlider" @focusin="stopBannerSlider" @focusout="startBannerSlider">
-              <img :src="activeBanner.imageUrl" :alt="activeBanner.title" width="720" height="420" loading="eager" decoding="async" />
-              <span class="home-promo-banner__shade"></span>
-              <a v-if="activeBanner.targetUrl" class="home-promo-banner__hitarea" :href="activeBanner.targetUrl" :aria-label="activeBanner.title"></a>
-              <span class="home-promo-banner__content">
-                <span class="home-promo-banner__eyebrow">پیشنهاد ویژه بازارگاه</span>
-                <strong>{{ activeBanner.title }}</strong>
-                <span v-if="activeBanner.description">{{ activeBanner.description }}</span>
-                <span v-if="activeBanner.ctaLabel" class="home-promo-banner__cta">{{ activeBanner.ctaLabel }} <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
-              </span>
-              <span v-if="promotionalBanners.length > 1" class="home-promo-banner__dots" aria-label="اسلایدهای تبلیغاتی">
-                <button v-for="(banner, index) in promotionalBanners" :key="banner.id" type="button" :class="{ 'is-active': index === activeBannerIndex }" :aria-label="'نمایش بنر ' + (index + 1)" @click.prevent="activeBannerIndex = index; stopBannerSlider()"></button>
-              </span>
-            </div>
-            <ul class="home-hero__benefits">
-              <li><i class="pi pi-check-circle" aria-hidden="true"></i><span>کاتالوگ تخصصی تجهیزات شبکه</span></li>
-              <li><i class="pi pi-file-edit" aria-hidden="true"></i><span>مسیر جداگانه برای استعلام پروژه‌ای</span></li>
-              <li><i class="pi pi-building" aria-hidden="true"></i><span>اطلاعات تأمین‌کنندگان ثبت‌شده</span></li>
-            </ul>
+          <div v-if="promotionalBanners.length > 1" class="home-campaign-hero__controls" aria-label="کنترل اسلایدهای تبلیغاتی">
+            <button type="button" aria-label="اسلاید قبلی" @click="activeBannerIndex = (activeBannerIndex - 1 + promotionalBanners.length) % promotionalBanners.length"><i class="pi pi-chevron-right"></i></button>
+            <button v-for="(banner, index) in promotionalBanners" :key="banner.id" type="button" :class="{ 'is-active': index === activeBannerIndex }" :aria-label="'نمایش اسلاید ' + (index + 1)" @click="activeBannerIndex = index; stopBannerSlider()"></button>
+            <button type="button" aria-label="اسلاید بعدی" @click="activeBannerIndex = (activeBannerIndex + 1) % promotionalBanners.length"><i class="pi pi-chevron-left"></i></button>
           </div>
-        </section>
+        </div>
+      </div>
+      <div v-else class="home-campaign-hero__fallback">
+        <div class="home-container">
+          <span>بازارگاه تخصصی تجهیزات مخابراتی</span>
+          <h1>تجهیزات حرفه‌ای شبکه، یک‌جا و مطمئن</h1>
+          <p>محصولات تأمین‌کنندگان را بررسی کنید و برای نیازهای پروژه‌ای استعلام بگیرید.</p>
+          <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">مشاهده محصولات</router-link>
+        </div>
       </div>
     </section>
     <div class="home-container">
@@ -282,7 +239,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
           <p>دسته‌بندی‌ای برای نمایش ثبت نشده است.</p>
         </div>
 
-        <div v-else class="home-category-grid">
+        <div v-else class="home-category-track" aria-label="دسته‌بندی‌های محصولات">
           <button
             v-for="category in visibleCategories"
             :key="category.id"
@@ -299,7 +256,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
       <!-- Featured products -->
       <section class="home-section" aria-labelledby="home-featured">
         <div class="site-section-title">
-          <h2 id="home-featured">محصولات ویژه</h2>
+          <h2 id="home-featured">محصولات منتخب</h2>
           <router-link :to="{ name: 'products' }">همه محصولات</router-link>
         </div>
 
@@ -761,4 +718,25 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   .home-skeleton { animation: none; }
   .product-card:hover, .category-card:hover { transform: none; }
 }
+
+/* Campaign hero and horizontally browsable category rail */
+.home-campaign-hero{position:relative;min-height:clamp(330px,39vw,510px);overflow:hidden;background:#092747}
+.home-campaign-hero__slide,.home-campaign-hero__fallback{position:relative;min-height:inherit;display:flex;align-items:center}
+.home-campaign-hero__image,.home-campaign-hero__shade{position:absolute;inset:0;width:100%;height:100%}
+.home-campaign-hero__image{object-fit:cover}
+.home-campaign-hero__shade{background:linear-gradient(270deg,rgba(4,20,39,.9) 0%,rgba(4,20,39,.72) 42%,rgba(4,20,39,.12) 100%)}
+.home-campaign-hero__inner{position:relative;z-index:1;display:flex;align-items:center;min-height:inherit;padding-block:44px}
+.home-campaign-hero__copy{max-width:610px;color:#fff}
+.home-campaign-hero__eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;color:#8ce9e5;font-size:13px;font-weight:700}
+.home-campaign-hero__copy h1,.home-campaign-hero__fallback h1{margin:0 0 14px;font-size:clamp(27px,3.4vw,44px);line-height:1.55;font-weight:800}
+.home-campaign-hero__copy p,.home-campaign-hero__fallback p{max-width:560px;margin:0 0 24px;color:rgba(255,255,255,.82);font-size:15px;line-height:2.1}
+.home-campaign-hero__controls{position:absolute;bottom:28px;inset-inline-start:0;display:flex;align-items:center;gap:9px}
+.home-campaign-hero__controls button{display:grid;place-items:center;width:10px;height:10px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.48);cursor:pointer}
+.home-campaign-hero__controls button:first-child,.home-campaign-hero__controls button:last-child{width:34px;height:34px;background:rgba(255,255,255,.16);color:#fff}
+.home-campaign-hero__controls button.is-active{width:25px;border-radius:8px;background:var(--tm-cyan)}
+.home-campaign-hero__fallback{padding-block:52px;background:linear-gradient(115deg,#092747,#0d5770);color:#fff}
+.home-category-track{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.home-category-track .category-card{flex:0 0 clamp(190px,22%,250px);min-height:104px;scroll-snap-align:start}
+.home-category-track .category-card:hover{transform:translateY(-3px);border-color:var(--tm-cyan)}
+@media(max-width:640px){.home-campaign-hero,.home-campaign-hero__slide,.home-campaign-hero__fallback{min-height:360px}.home-campaign-hero__shade{background:linear-gradient(0deg,rgba(4,20,39,.92),rgba(4,20,39,.26))}.home-campaign-hero__inner{align-items:flex-end;padding-block:34px 74px}.home-campaign-hero__copy h1{font-size:27px}.home-campaign-hero__copy p{font-size:13px}.home-campaign-hero__controls{bottom:20px}.home-category-track .category-card{flex-basis:72vw}}
 </style>
