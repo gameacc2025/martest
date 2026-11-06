@@ -57,7 +57,8 @@ function stopSlider() {
 }
 function startBannerSlider() {
   if (bannerTimer) clearInterval(bannerTimer)
-  if (promotionalBanners.value.length > 1) bannerTimer = setInterval(() => { activeBannerIndex.value = (activeBannerIndex.value + 1) % promotionalBanners.value.length }, 7000)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  if (!reducedMotion && promotionalBanners.value.length > 1) bannerTimer = setInterval(() => { activeBannerIndex.value = (activeBannerIndex.value + 1) % promotionalBanners.value.length }, 7000)
 }
 function stopBannerSlider() {
   if (bannerTimer) clearInterval(bannerTimer)
