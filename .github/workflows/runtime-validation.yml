@@ -111,3 +111,54 @@ jobs:
         shell: bash
         run: |
           if [ -f .env ]; then docker compose down -v; fi
+
+
+  development-seed:
+    name: Development seed validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare development environment
+        run: cp backend/.env.example backend/.env
+
+      - name: Validate development Compose configuration
+        run: docker compose -f docker-compose.dev.yml config --quiet
+
+      - name: Start isolated PostgreSQL
+        run: docker compose -f docker-compose.dev.yml up -d postgres
+
+      - name: Rebuild development database and run repeatable seed
+        run: docker compose -f docker-compose.dev.yml run --rm backend npm run db:reset:dev
+
+      - name: Verify demo companies, accounts, categories, products and price history
+        shell: bash
+        run: |
+          set -euo pipefail
+          compose=(docker compose -f docker-compose.dev.yml exec -T postgres psql -U telecom -d telecom_marketplace -Atqc)
+
+          assert_count() {
+            local label="$1"
+            local sql="$2"
+            local expected="$3"
+            local actual
+            actual="$(${compose[@]} "$sql")"
+            echo "$label: $actual (expected $expected)"
+            test "$actual" = "$expected"
+          }
+
+          assert_count "Demo companies" 'SELECT COUNT(*) FROM "Company" WHERE name IN (\'آرمان شبکه پارس\',\'پارس فیبر ایرانیان\',\'فناوران ارتباطات شرق\',\'توسعه زیرساخت هوشمند\',\'تجهیزات شبکه آریا\',\'پیشگامان مخابرات خاورمیانه\',\'بازرگانی موج نو\',\'راهکارهای ارتباطی سپهر\',\'شبکه گستران ایران\',\'ارتباطات پایدار البرز\')' 10
+          assert_count "Company users" 'SELECT COUNT(*) FROM "User" WHERE phone BETWEEN \'09911000001\' AND \'09911000030\'' 30
+          assert_count "Customer users" 'SELECT COUNT(*) FROM "User" WHERE phone BETWEEN \'09912000001\' AND \'09912000005\'' 5
+          assert_count "Company accounts with three distinct scoped roles" 'SELECT COUNT(*) FROM (SELECT ap."companyId" FROM "AccessProfile" ap JOIN "User" u ON u.id = ap."userId" JOIN "UserRole" ur ON ur."userId" = u.id JOIN "Role" r ON r.id = ur."roleId" WHERE u.phone BETWEEN \'09911000001\' AND \'09911000030\' GROUP BY ap."companyId" HAVING COUNT(DISTINCT r.name) = 3) q' 10
+          assert_count "Demo product listings" 'SELECT COUNT(*) FROM "Product" WHERE slug LIKE \'demo-%\'' 150
+          assert_count "Distinct shared catalog identities" 'SELECT COUNT(DISTINCT "catalogCode") FROM "Product" WHERE slug LIKE \'demo-%\'' 75
+          assert_count "Models listed by two suppliers" 'SELECT COUNT(*) FROM (SELECT "catalogCode" FROM "Product" WHERE slug LIKE \'demo-%\' GROUP BY "catalogCode" HAVING COUNT(DISTINCT "companyId") = 2) q' 75
+          assert_count "Categories with ten listings" 'SELECT COUNT(*) FROM (SELECT "categoryId" FROM "Product" WHERE slug LIKE \'demo-%\' GROUP BY "categoryId" HAVING COUNT(*) = 10) q' 15
+          assert_count "Six-month price snapshots" 'SELECT COUNT(*) FROM "ProductPriceSnapshot" WHERE action = \'DEMO_SEED\'' 900
+
+      - name: Tear down development database
+        if: always()
+        run: docker compose -f docker-compose.dev.yml down -v
