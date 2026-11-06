@@ -789,3 +789,15 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Checkout remains a preview only; do not represent the drawer CTA as a completed order or payment.
 - No backend/schema/API/auth/permission changes. Updated source-contract tests. Vue compiler, tests, builds and browser rendering still need local execution.
 
+
+
+## 2026-11-06 — WEBSITE PRODUCT CARD CONSISTENCY AND HOMEPAGE COMPLETION
+
+- Standardized public product-card image proportions to portrait 4:5 across the homepage, primary catalogue, legacy product grid, search results, and the shared ProductCard component. Cards use compact typography/spacing and consistent grid sizing; mobile grids retain two columns where space allows.
+- Homepage featured and newest sections each request and render at most 8 products (two rows at four columns on desktop). Loading placeholders now follow the same count and card silhouette.
+- Added a live hero search form connected to the existing `search` route in both scheduled-campaign and no-campaign hero states.
+- Added three pre-footer discovery/promo cards linking only to existing routes and describing capabilities backed by current catalogue, company metadata and inquiry workflows.
+- Removed the catalogue's remaining violet accents in favor of the approved blue/cyan semantic tokens; homepage card focus uses the shared focus token.
+- **Bestseller data constraint:** no authoritative sales/order aggregate or public bestseller endpoint exists. The homepage section therefore remains honestly labelled «محصولات منتخب» and uses the existing featured flag; do not rename it «پرفروش‌ترین» or infer sales rank until a real aggregate/API is available.
+- No backend, schema, migration, API contract, authentication, permission or commerce behavior changed. Checkout remains a preview and fixed-price cart actions remain disabled.
+- Added/updated source-contract tests for homepage limits, card proportions, hero search, promo cards and catalogue card layout. Tests/build/browser visual checks were NOT RUN in this remote GitHub editing session.
