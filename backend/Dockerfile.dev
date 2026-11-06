@@ -27,4 +27,4 @@ RUN npx prisma generate
 EXPOSE 3000
 
 
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node prisma/seed.js && node --watch src/server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && node --watch src/server.js"]
