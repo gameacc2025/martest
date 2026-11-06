@@ -3775,3 +3775,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification result (code SHA `ee46af7`):** All tests covering the files changed for this task passed, as did backend tests and all frontend builds; Database Migration Validation passed. Overall frontend/shared tests remain red due to five unrelated existing tests: FAQ (1), Terms (2), WorkspacePageHeading (2). Runtime Validation (Compose startup, health, migrations and browser smoke) was still in progress at the time of this note. No manual visual review was possible in the remote source-edit session.
 
 - **Menu behavior compatibility:** Kept direct click-to-category navigation intact; hover/focus selects a category for subcategory discovery, subcategory buttons route to their filtered catalogue, and Escape closes the menu. Final menu commits: `5e2419c`, `cc6e80f`.
+
+
+## 2026-11-06 — WEBSITE-GLOBAL-PRODUCT-CARD-PARITY — Apply card sizing across all Website product surfaces
+- **Status:** IMPLEMENTED on `main`; CI pending for the newest commits.
+- Extended the 168–210px bounded card track (150–210px at <=520px) to SearchResults, legacy Products and Wishlist, in addition to Home and ProductListing. Responsive column count follows available content width rather than forcing large fluid cards.
+- Compact shared ProductCard and TemProductCard dimensions: 4:5 media, contain-fit images with 10px inset, 11px content padding, 44px two-line titles, compact footer; removed the old mobile-only shrinking on TEM cards.
+- Added a cross-surface contract test at `apps/website/src/pages/public/StorefrontCardSizing.test.js`.
+- No API, backend, schema or commerce behavior changes.
