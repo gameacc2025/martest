@@ -9,6 +9,13 @@
 - Best-selling retail products cannot be truthfully ranked yet: no Order/Sale model or aggregate exists. Featured products are not treated as best sellers.
 - Source commits were written individually to main; test/docs updates follow.
 - Verification: NOT RUN in this GitHub-only editing session; CI must be inspected before claiming success.
+## 2026-11-06 — Public company storefront correction
+- Replaced the sparse company profile layout with a proper storefront header, explicit “معرفی شرکت” section, contact details, verification and membership metadata.
+- Tightened product card layout: five columns on desktop, four/three on smaller desktop/tablet, two on mobile, with 10–12px gaps.
+- Fixed the structural reason company details disappeared for companies with no published products: introduced GET /companies/public/:id, an unauthenticated, allowlisted public projection for ACTIVE/non-deleted companies only. It deliberately excludes user profiles, inquiry data, settings and quota data.
+- Public product count is calculated only from PUBLISHED + PUBLIC products. Company introduction and catalog load independently, so catalog failure/empty state does not erase the company profile.
+- Added tests for service query scope, controller response, unauthenticated route and no-product storefront rendering. CI verification pending; do not claim passing until checked.
+
 # Agent Worklog — Telecom Marketplace
 
 This file is the shared, version-controlled memory for agents working on the repository. Append new entries; never erase completed work. Keep it factual and do not store secrets.
