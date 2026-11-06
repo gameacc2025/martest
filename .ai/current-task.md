@@ -1,3 +1,16 @@
+## Current active task — Telecom Market reference-first storefront (2026-11-06)
+- **Target branch:** main only. All new implementation commits are written directly to main; no feature branch or PR is used for the remaining rewrite.
+- **Source of truth:** root Telecom Market.html. Do not invent UI sections, content, metrics, sample products, supplier names, prices, testimonials, brands or offers outside this file.
+- **Implemented:** Home hero and homepage section structure aligned to the reference; Products page reduced to the reference breadcrumb/heading/filter/sidebar/product-grid structure; Categories page aligned to the reference three-column category panels; public shell palette/header/footer styling aligned; shared product-card media height changed to the reference's 130px compact media; notification and cart previews share PrimeVue side drawers (merged PR #88).
+- **Live data contracts preserved:** active HOME_HERO campaign API, published products API, retail-enabled product API, categories store, product detail/search/category routes, retail query filter, loading/error/empty states and pagination.
+- **Intentionally not fabricated:** marketplace metrics, seller counts, brand directory, testimonials, blog articles, limited-time offers and best-seller rankings. The best-seller section explains that real order/sales data is required. Brand filtering/blog content require confirmed API/CMS contracts.
+- **Changed files:** apps/website/src/pages/public/Home.vue, ProductListing.vue, Categories.vue; apps/website/src/layouts/PublicLayout.vue; packages/shared-ui/components/store/StoreProductCard.vue; matching page tests.
+- **Verification:** NOT RUN in this GitHub-only editing session. Local focused tests, Website build and browser comparison are still required.
+- **Local branch cleanup:** after git pull --ff-only origin main, delete obsolete remote refs using git push origin --delete feat/tem-storefront-drawers feat/website-home-storefront. Remove matching local branches only after switching to main.
+- **Next:** continue reference-driven component extraction, with no backend changes unless a verified missing API is separately required.
+
+---
+
 ## Current active task — Telecom Market storefront alignment + unified side drawers (2026-11-06)
 - **Status:** IN PROGRESS — first focused implementation slice committed on `feat/tem-storefront-drawers`.
 - **Reference:** root `Telecom Market.html`; public Home, Products and Categories must stay aligned with its design system and extracted shared widgets.
