@@ -775,3 +775,6 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 
 - Public product detail now exposes catalogCode and GET /api/v1/products/:id/similar returns matching public listings from other active suppliers. Product create/update derives the shared code from brand + model unless an explicit code is provided.
+
+- Website product detail now shows same-model listings from other suppliers, and the shared catalog code is visible in the company and admin product tables. Demo product specifications are also emitted in the website's standard key/value format.
+- Regenerated the stale architecture dependency graph and changed CI sequencing so backend tests/build checks still execute after frontend test failures.
