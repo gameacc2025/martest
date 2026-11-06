@@ -1,3 +1,8 @@
+## Public company storefront route hardening — 2026-11-06
+- Registered `GET /api/v1/companies/public/:id` directly on the root Fastify app scope instead of inside the company-management plugin. The route is therefore independent of the plugin's authentication hook.
+- Added a full-app route-registration regression assertion and synchronized API inventory/OpenAPI metadata to mark the route public.
+- The route still uses the same allowlisted controller/service projection; no private company relations are exposed.
+
 ﻿# Current Task — Full UI rebuild on the `tem/` visual language (UI-REDESIGN-TEM-01)
 
 **Status:** IN_PROGRESS — the first seller-dashboard and storefront implementation pass is committed directly to main. On 2026-11-05 the public catalogue was promoted to `/` without changing ProductListing content, the duplicate homepage navigation entry was removed, the category menu trigger was flattened, and the header gained a live five-notification preview beside the cart. Targeted regression coverage was added; execution and visual verification are still pending.
