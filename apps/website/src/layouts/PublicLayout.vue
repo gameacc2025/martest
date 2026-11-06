@@ -731,7 +731,7 @@ function logout() {
 .public-mobile-auth { border-top: 1px solid var(--tm-line); margin-top: 8px; padding-top: 8px; }
 
 /* ---------- Main ---------- */
-.public-main { flex: 1; padding: 24px 0 48px; }
+.public-main { flex: 1; padding: 10px 0 48px; }
 
 /* ---------- Footer ---------- */
 .public-footer {
