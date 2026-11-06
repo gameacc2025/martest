@@ -35,6 +35,7 @@ const categoriesError = ref(false)
 const error = ref(null)
 
 const searchQuery = ref('')
+const searchMode = ref('retail')
 const activeSlide = ref(0)
 let slideTimer = null
 const featuredSlides = computed(() => featuredProducts.value.slice(0, 5))
@@ -230,629 +231,176 @@ onUnmounted(() => {
   if (revealObserver) { revealObserver.disconnect(); revealObserver = null }
 })
 </script>
-
 <template>
-  <div class="home-page" dir="rtl">
-    <section class="home-campaign-hero" aria-label="پیشنهادهای ویژه بازارگاه">
-      <div v-if="activeBanner" class="home-campaign-hero__slide">
-        <img
-          v-for="(banner, index) in promotionalBanners"
-          :key="banner.id"
-          class="home-campaign-hero__image"
-          :class="{ 'is-active': index === activeBannerIndex }"
-          :src="banner.imageUrl"
-          :alt="index === activeBannerIndex ? banner.title : ''"
-          :fetchpriority="index === 0 ? 'high' : 'auto'"
-          decoding="async"
-        />
-        <div class="home-campaign-hero__shade"></div>
-        <div class="home-container home-campaign-hero__inner">
-          <div class="home-campaign-hero__copy">
-            <span class="home-campaign-hero__eyebrow"><i class="pi pi-bolt" aria-hidden="true"></i> پیشنهادهای ویژه بازارگاه</span>
-            <h1>{{ activeBanner.title }}</h1>
-            <p v-if="activeBanner.description">{{ activeBanner.description }}</p>
-            <a v-if="activeBanner.targetUrl" :href="activeBanner.targetUrl" class="tm-btn tm-btn--accent">{{ activeBanner.ctaLabel || 'مشاهده پیشنهاد' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></a>
-            <router-link v-else :to="{ name: 'products' }" class="tm-btn tm-btn--accent">{{ activeBanner.ctaLabel || 'مشاهده محصولات' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-            <form class="home-hero__search" role="search" aria-label="جستجوی محصولات" @submit.prevent="heroSearch">
-              <i class="pi pi-search" aria-hidden="true"></i>
-              <label class="sr-only" for="home-hero-search">جستجوی محصول</label>
-              <input id="home-hero-search" v-model="searchQuery" type="search" placeholder="نام محصول، برند یا مدل را جستجو کنید…" autocomplete="off" />
-              <button type="submit" class="tm-btn tm-btn--accent tm-btn--sm">جستجو</button>
-            </form>
+  <main class="home-page" dir="rtl">
+    <section class="home-hero" aria-label="بازارگاه تخصصی تجهیزات شبکه و مخابرات">
+      <div class="home-container home-hero__inner">
+        <div class="home-hero__copy">
+          <span class="home-hero__tag">{{ activeBanner?.eyebrow || 'بازارگاه تخصصی تجهیزات شبکه و مخابرات' }}</span>
+          <h1>تجهیزات پروژه‌تان را<br />سریع و مطمئن تأمین کنید</h1>
+          <p>{{ activeBanner?.description || 'هم خرید فوری با قیمت مشخص، هم استعلام و پیش‌فاکتور سازمانی از تأمین‌کنندگان بازارگاه.' }}</p>
+
+          <div class="home-hero__tabs" role="group" aria-label="نوع جستجو">
+            <button type="button" :class="{ 'is-active': searchMode === 'retail' }" @click="searchMode = 'retail'">خرید فوری</button>
+            <button type="button" :class="{ 'is-active': searchMode === 'inquiry' }" @click="searchMode = 'inquiry'">خرید سازمانی / استعلام</button>
           </div>
-          <div v-if="promotionalBanners.length > 1" class="home-campaign-hero__controls" aria-label="کنترل اسلایدهای تبلیغاتی">
-            <button type="button" aria-label="اسلاید قبلی" @click="activeBannerIndex = (activeBannerIndex - 1 + promotionalBanners.length) % promotionalBanners.length"><i class="pi pi-chevron-right"></i></button>
-            <button v-for="(banner, index) in promotionalBanners" :key="banner.id" type="button" :class="{ 'is-active': index === activeBannerIndex }" :aria-label="'نمایش اسلاید ' + (index + 1)" @click="activeBannerIndex = index; stopBannerSlider()"></button>
-            <button type="button" aria-label="اسلاید بعدی" @click="activeBannerIndex = (activeBannerIndex + 1) % promotionalBanners.length"><i class="pi pi-chevron-left"></i></button>
+
+          <form class="home-hero__search" role="search" aria-label="جستجوی محصولات" @submit.prevent="heroSearch">
+            <i class="pi pi-search" aria-hidden="true"></i>
+            <label class="sr-only" for="home-hero-search">جستجوی محصول</label>
+            <input id="home-hero-search" v-model="searchQuery" type="search" :placeholder="searchMode === 'retail' ? 'نام محصول، برند، مدل یا SKU را جستجو کنید…' : 'نام تجهیز یا مشخصات مورد نیاز پروژه را بنویسید…'" autocomplete="off" />
+            <button type="submit">جستجو</button>
+          </form>
+
+          <div class="home-hero__chips">
+            <span>پرتکرار:</span>
+            <button type="button" @click="searchQuery = 'OTDR'; heroSearch()">OTDR</button>
+            <button type="button" @click="searchQuery = 'Power Meter'; heroSearch()">Power Meter</button>
+            <button type="button" @click="searchQuery = 'Fusion Splicer'; heroSearch()">Fusion Splicer</button>
+            <button type="button" @click="searchQuery = 'آنتن'; heroSearch()">آنتن</button>
+          </div>
+
+          <div class="home-hero__actions">
+            <router-link :to="{ name: 'my-inquiries' }" class="home-btn home-btn--primary">ثبت درخواست استعلام</router-link>
+            <router-link :to="{ name: 'products' }" class="home-btn home-btn--outline">مشاهده همه محصولات</router-link>
+          </div>
+
+          <div v-if="promotionalBanners.length > 1" class="home-hero__dots" aria-label="اسلایدهای کمپین">
+            <button v-for="(banner, index) in promotionalBanners" :key="banner.id" type="button" :class="{ 'is-active': index === activeBannerIndex }" :aria-label="'نمایش اسلاید ' + (index + 1)" @click="activeBannerIndex = index; stopBannerSlider()" />
           </div>
         </div>
-      </div>
-      <div v-else class="home-campaign-hero__fallback">
-        <div class="home-container home-campaign-hero__fallback-inner">
-          <div class="home-campaign-hero__fallback-copy">
-            <span class="home-campaign-hero__eyebrow"><i class="pi pi-sitemap" aria-hidden="true"></i> بازارگاه تخصصی تجهیزات شبکه و مخابرات</span>
-            <h1>تجهیزات حرفه‌ای پروژه‌تان را هوشمندانه پیدا کنید</h1>
-            <p>محصولات تخصصی، مشخصات فنی و اطلاعات تأمین‌کنندگان را مقایسه کنید؛ برای خریدهای سازمانی هم درخواست استعلام ثبت کنید.</p>
-            <form class="home-hero__search" role="search" aria-label="جستجوی محصولات" @submit.prevent="heroSearch">
-              <i class="pi pi-search" aria-hidden="true"></i>
-              <label class="sr-only" for="home-hero-search-fallback">جستجوی محصول</label>
-              <input id="home-hero-search-fallback" v-model="searchQuery" type="search" placeholder="نام محصول، برند یا مدل را جستجو کنید…" autocomplete="off" />
-              <button type="submit" class="tm-btn tm-btn--accent tm-btn--sm">جستجو</button>
-            </form>
-            <div class="home-campaign-hero__quick-links">
-              <router-link :to="{ name: 'products' }">مشاهده همه محصولات <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-              <router-link :to="{ name: 'categories' }">مرور دسته‌بندی‌ها <i class="pi pi-th-large" aria-hidden="true"></i></router-link>
-            </div>
+
+        <router-link v-if="activeFeaturedProduct" :to="productRoute(activeFeaturedProduct)" class="home-hero__featured">
+          <div class="home-hero__featured-image">
+            <img v-if="getProductImage(activeFeaturedProduct)?.url" :src="getProductImage(activeFeaturedProduct).url" :alt="activeFeaturedProduct.name || activeFeaturedProduct.title" width="720" height="460" fetchpriority="high" />
+            <span v-else>{{ activeFeaturedProduct.brand || activeFeaturedProduct.company?.name || 'Telecom' }}</span>
           </div>
-          <router-link v-if="activeFeaturedProduct" :to="productRoute(activeFeaturedProduct)" class="home-campaign-hero__spotlight">
-            <span class="home-campaign-hero__spotlight-label"><i class="pi pi-star-fill" aria-hidden="true"></i> محصول منتخب</span>
-            <img v-if="getProductImage(activeFeaturedProduct)" :src="getProductImage(activeFeaturedProduct).url" :alt="activeFeaturedProduct.name || activeFeaturedProduct.title" />
-            <i v-else class="pi pi-box home-campaign-hero__spotlight-placeholder" aria-hidden="true"></i>
-            <strong>{{ activeFeaturedProduct.name || activeFeaturedProduct.title }}</strong>
-            <span>{{ productPriceLabel(activeFeaturedProduct) }}</span>
-          </router-link>
-          <div v-else class="home-campaign-hero__spotlight home-campaign-hero__spotlight--empty" aria-hidden="true">
-            <i class="pi pi-box"></i><span>کاتالوگ تخصصی تجهیزات</span>
+          <strong>{{ activeFeaturedProduct.name || activeFeaturedProduct.title }}</strong>
+          <small>{{ productCategoryName(activeFeaturedProduct) || 'تجهیزات شبکه و مخابرات' }}</small>
+          <div class="home-hero__featured-foot">
+            <b>{{ productPriceLabel(activeFeaturedProduct) }}</b>
+            <span>مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></span>
           </div>
+        </router-link>
+        <div v-else class="home-hero__featured home-hero__featured--empty">
+          <i class="pi pi-box" aria-hidden="true"></i>
+          <strong>کاتالوگ تجهیزات شبکه و مخابرات</strong>
+          <small>برای مشاهده محصولات منتشرشده وارد کاتالوگ شوید.</small>
+          <router-link :to="{ name: 'products' }">مشاهده محصولات <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
         </div>
       </div>
     </section>
-    <div class="home-container">
-      <!-- Categories -->
+
+    <div class="home-container home-content">
       <section class="home-section" aria-labelledby="home-categories">
-        <StoreSectionHeading
-          v-reveal
-          heading-id="home-categories"
-          title="دسته‌بندی محصولات"
-          action-label="همه دسته‌بندی‌ها"
-          :action-to="{ name: 'categories' }"
-        />
-
-        <div v-if="categoriesLoading" class="home-category-grid" aria-busy="true">
-          <div v-for="i in 8" :key="i" class="home-category-card home-skeleton"></div>
-        </div>
-
-        <div v-else-if="categoriesError" class="home-empty">
-          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i><p>دریافت دسته‌بندی‌ها با مشکل روبه‌رو شد.</p>
-          <button type="button" class="tm-btn tm-btn--sm" @click="fetchCategories">تلاش دوباره</button>
-        </div>
-        <div v-else-if="categories.length === 0" class="home-empty">
-          <i class="pi pi-th-large" aria-hidden="true"></i>
-          <p>دسته‌بندی‌ای برای نمایش ثبت نشده است.</p>
-        </div>
-
-        <div v-else class="home-category-track" aria-label="دسته‌بندی‌های محصولات">
-          <StoreCategoryCard
-            v-for="(category, index) in visibleCategories"
-            :key="category.id"
-            v-reveal
-            as="button"
-            variant="tile"
-            class="category-card"
-            :style="{ '--reveal-delay': revealDelay(index) }"
-            :category="category"
-            :icon="categoryIcon(category)"
-            :count="categoryProductCount(category)"
-            @select="viewCategoryProducts(category.id)"
-          />
+        <StoreSectionHeading heading-id="home-categories" title="دسته‌بندی محصولات" action-label="همه دسته‌بندی‌ها" :action-to="{ name: 'categories' }" />
+        <div v-if="categoriesLoading" class="home-category-track" aria-busy="true"><div v-for="i in 6" :key="i" class="home-loading-card" /></div>
+        <div v-else-if="categoriesError" class="home-state" role="alert"><i class="pi pi-exclamation-circle" aria-hidden="true" /><span>دریافت دسته‌بندی‌ها با مشکل روبه‌رو شد.</span><button type="button" @click="fetchCategories">تلاش دوباره</button></div>
+        <div v-else-if="!categories.length" class="home-state"><i class="pi pi-folder-open" aria-hidden="true" /><span>دسته‌بندی فعالی برای نمایش وجود ندارد.</span></div>
+        <div v-else class="home-category-track">
+          <StoreCategoryCard v-for="(category, index) in visibleCategories" :key="category.id" as="button" variant="tile" :category="category" :icon="categoryIcon(category)" :count="categoryProductCount(category)" @select="viewCategoryProducts(category.id)" />
         </div>
       </section>
 
-      <!-- Featured products -->
-      <section class="home-section" aria-labelledby="home-featured">
-        <StoreSectionHeading
-          v-reveal
-          heading-id="home-featured"
-          title="محصولات منتخب"
-          action-label="همه محصولات"
-          :action-to="{ name: 'products' }"
-        />
-
-        <div v-if="loading" class="home-product-grid" aria-busy="true">
-          <div v-for="i in 8" :key="i" class="product-card home-product-skeleton home-skeleton"></div>
-        </div>
-
-        <div v-else-if="error" class="home-empty">
-          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-          <p>{{ error }}</p>
-          <button type="button" class="tm-btn tm-btn--sm" @click="fetchProducts">تلاش دوباره</button>
-        </div>
-
-        <div v-else-if="featuredProducts.length === 0" class="home-empty">
-          <i class="pi pi-box" aria-hidden="true"></i>
-          <p>هنوز محصول ویژه‌ای منتشر نشده است. همه محصولات منتشرشده را ببینید.</p>
-          <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده محصولات</router-link>
-        </div>
-
+      <section class="home-section" aria-labelledby="home-latest">
+        <StoreSectionHeading heading-id="home-latest" title="تازه‌ترین محصولات" action-label="مشاهده همه" :action-to="{ name: 'products' }" />
+        <div v-if="loading" class="home-product-grid" aria-busy="true"><div v-for="i in 4" :key="i" class="home-loading-product" /></div>
+        <div v-else-if="error" class="home-state" role="alert"><i class="pi pi-exclamation-circle" aria-hidden="true" /><span>{{ error }}</span><button type="button" @click="fetchProducts">تلاش دوباره</button></div>
+        <div v-else-if="!recentProducts.length" class="home-state"><i class="pi pi-box" aria-hidden="true" /><span>هنوز محصول منتشرشده‌ای برای نمایش وجود ندارد.</span></div>
         <div v-else class="home-product-grid">
-          <StoreProductCard
-            v-for="(product, index) in featuredProducts.slice(0, 8)"
-            :key="product.id"
-            v-reveal
-            class="product-card"
-            :style="{ '--reveal-delay': revealDelay(index) }"
-            :product="product"
-            :to="productRoute(product)"
-            :category="productCategoryName(product)"
-            :verified="Boolean(product.company?.isVerified)"
-            :mode="productSalesMode(product)"
-            :price-label="productPriceLabel(product)"
-            :availability="productAvailabilityLabel(product)"
-          >
+          <StoreProductCard v-for="product in recentProducts.slice(0, 4)" :key="product.id" :product="product" :to="productRoute(product)" :category="productCategoryName(product)" :verified="Boolean(product.company?.isVerified)" :mode="productSalesMode(product)" :price-label="productPriceLabel(product)" :availability="productAvailabilityLabel(product)">
             <template #action>
-              <button v-if="productSalesMode(product).kind === 'fixed'" type="button" class="tm-btn tm-btn--accent tm-btn--sm" disabled :aria-label="'افزودن به سبد برای ' + (product.name || product.title) + ' غیرفعال است؛ سرویس سفارش و موجودی هنوز آماده نیست'" title="خرید مستقیم پس از راه‌اندازی سرویس سفارش و موجودی فعال می‌شود">افزودن به سبد</button>
-              <router-link v-else :to="productRoute(product)" class="product-card-cta" :aria-label="(productSalesMode(product).kind === 'volume' ? 'استعلام عمده: ' : 'درخواست استعلام: ') + (product.name || product.title)">{{ productSalesMode(product).kind === 'volume' ? 'استعلام عمده' : 'درخواست استعلام' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
+              <router-link :to="productRoute(product)" class="home-product-action">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true" /></router-link>
             </template>
           </StoreProductCard>
         </div>
       </section>
 
-      <!-- Recent products -->
-      <section class="home-section" aria-labelledby="home-recent">
-        <StoreSectionHeading
-          v-reveal
-          heading-id="home-recent"
-          title="تازه‌ترین محصولات"
-          action-label="مشاهده همه محصولات"
-          :action-to="{ name: 'products' }"
-        />
-
-        <div v-if="loading" class="home-product-grid" aria-busy="true">
-          <div v-for="n in 8" :key="n" class="product-card home-product-skeleton home-skeleton"></div>
-        </div>
-        <div v-else-if="error" class="home-empty">
-          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i><p>{{ error }}</p>
-          <button type="button" class="tm-btn tm-btn--sm" @click="fetchProducts">تلاش دوباره</button>
-        </div>
-        <div v-else-if="recentProducts.length === 0" class="home-empty">
-          <i class="pi pi-box" aria-hidden="true"></i><p>هنوز محصول تازه‌ای برای نمایش منتشر نشده است.</p>
-          <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده همه محصولات</router-link>
-        </div>
-        <div v-else class="home-product-grid home-product-grid--recent">
-          <StoreProductCard
-            v-for="(product, index) in recentProducts.slice(0, 8)"
-            :key="product.id"
-            v-reveal
-            class="product-card"
-            :style="{ '--reveal-delay': revealDelay(index) }"
-            :product="product"
-            :to="productRoute(product)"
-            :category="productCategoryName(product)"
-            :verified="Boolean(product.company?.isVerified)"
-            :mode="productSalesMode(product)"
-            :price-label="productPriceLabel(product)"
-            :availability="productAvailabilityLabel(product)"
-          >
-            <template #action>
-              <router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-            </template>
-          </StoreProductCard>
+      <section class="home-section" aria-labelledby="home-why">
+        <StoreSectionHeading heading-id="home-why" title="چرا Telecom Market؟" />
+        <div class="home-benefits">
+          <article><i class="pi pi-verified" aria-hidden="true" /><b>تأمین‌کننده قابل بررسی</b><p>اطلاعات شرکت عرضه‌کننده و وضعیت تأیید آن را در صفحه محصول ببینید.</p></article>
+          <article><i class="pi pi-shield" aria-hidden="true" /><b>اطلاعات شفاف محصول</b><p>مشخصات و شرایط ارائه محصول را پیش از ثبت درخواست بررسی کنید.</p></article>
+          <article><i class="pi pi-wrench" aria-hidden="true" /><b>تجهیزات تخصصی</b><p>محصولات شبکه و مخابرات را در دسته‌بندی‌های تخصصی مرور کنید.</p></article>
+          <article><i class="pi pi-file-edit" aria-hidden="true" /><b>استعلام سازمانی</b><p>برای نیازهای پروژه‌ای، درخواست استعلام خود را ثبت و پیگیری کنید.</p></article>
         </div>
       </section>
 
-
-      <section class="home-section home-retail-section" aria-labelledby="home-retail-latest">
-        <StoreSectionHeading
-          v-reveal
-          heading-id="home-retail-latest"
-          title="جدیدترین محصولات خرده‌فروشی"
-          subtitle="محصولاتی که امکان خرید تکی آن‌ها فعال شده است"
-          action-label="همه محصولات خرده‌فروشی"
-          :action-to="{ name: 'products', query: { retail: '1' } }"
-        />
+      <section class="home-section" aria-labelledby="home-retail-latest">
+        <StoreSectionHeading heading-id="home-retail-latest" title="جدیدترین محصولات خرده‌فروشی" action-label="همه محصولات خرده‌فروشی" :action-to="{ name: 'products', query: { retail: '1' } }" />
         <div v-if="retailLatestProducts.length" class="home-product-grid">
-          <StoreProductCard
-            v-for="(product, index) in retailLatestProducts"
-            :key="product.id"
-            v-reveal
-            class="product-card"
-            :style="{ '--reveal-delay': revealDelay(index) }"
-            :product="product"
-            :to="productRoute(product)"
-            :category="productCategoryName(product)"
-            :verified="Boolean(product.company?.isVerified)"
-            :mode="{ kind: 'fixed', label: 'فروش خرده‌فروشی' }"
-            price-caption="قیمت"
-            :price-label="productPriceLabel(product)"
-          >
-            <template #action>
-              <router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-            </template>
+          <StoreProductCard v-for="product in retailLatestProducts.slice(0, 4)" :key="product.id" :product="product" :to="productRoute(product)" :category="productCategoryName(product)" :verified="Boolean(product.company?.isVerified)" :mode="{ kind: 'fixed', label: 'فروش خرده‌فروشی' }" price-caption="قیمت" :price-label="productPriceLabel(product)">
+            <template #action><router-link :to="productRoute(product)" class="home-product-action">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true" /></router-link></template>
           </StoreProductCard>
-        </div><div v-else class="home-empty"><i class="pi pi-shopping-bag" aria-hidden="true"></i><p>در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</p></div>
-      </section>
-
-      <section class="home-section home-retail-bestsellers" aria-labelledby="home-retail-bestsellers">
-        <StoreSectionHeading
-          v-reveal
-          heading-id="home-retail-bestsellers"
-          title="پرفروش‌ترین محصولات خرده‌فروشی"
-          subtitle="رتبه‌بندی بر اساس تعداد فروش ثبت‌شده"
-          action-label="مشاهده محصولات خرده‌فروشی"
-          :action-to="{ name: 'products', query: { retail: '1' } }"
-        />
-        <div class="home-empty home-retail-bestsellers__unavailable" role="status"><i class="pi pi-chart-bar" aria-hidden="true"></i><p>با راه‌اندازی ثبت سفارش و گزارش فروش، این بخش بر اساس آمار واقعی فروش نمایش داده می‌شود.</p></div>
-      </section>
-
-      <!-- Inquiry CTA -->
-      <section v-reveal class="home-cta">
-        <div>
-          <h2>محصول مورد نظر را پیدا نکردید؟</h2>
-          <p>ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان، بدون نیاز به خرید مستقیم.</p>
         </div>
-        <router-link :to="{ name: 'my-inquiries' }" class="tm-btn tm-btn--accent">
-          <i class="pi pi-file-edit" aria-hidden="true"></i>
-          ثبت درخواست استعلام
-        </router-link>
+        <div v-else class="home-state"><i class="pi pi-shopping-bag" aria-hidden="true" /><span>در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</span></div>
       </section>
 
-      <!-- Promotional discovery cards -->
-      <section class="home-promo-grid" aria-label="راهکارهای بازارگاه">
-        <article v-reveal class="home-promo-card home-promo-card--catalog" :style="{ '--reveal-delay': '0ms' }">
-          <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-box"></i></span>
-          <span class="home-promo-card__eyebrow">کاتالوگ تخصصی</span>
-          <h2>تجهیزات مناسب پروژه‌تان را دقیق‌تر پیدا کنید</h2>
-          <p>دسته‌بندی‌ها و مشخصات محصولات منتشرشده را کنار هم بررسی کنید.</p>
-          <router-link :to="{ name: 'categories' }">مرور دسته‌بندی‌ها <i class="pi pi-arrow-left"></i></router-link>
-        </article>
-        <article v-reveal class="home-promo-card home-promo-card--suppliers" :style="{ '--reveal-delay': '90ms' }">
-          <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-building"></i></span>
-          <span class="home-promo-card__eyebrow">شبکه تأمین</span>
-          <h2>اطلاعات تأمین‌کننده را کنار محصول بررسی کنید</h2>
-          <p>نام شرکت عرضه‌کننده و وضعیت تأیید آن را در اطلاعات هر محصول ببینید.</p>
-          <router-link :to="{ name: 'products' }">مشاهده کاتالوگ محصولات <i class="pi pi-arrow-left"></i></router-link>
-        </article>
-        <article v-reveal class="home-promo-card home-promo-card--inquiry" :style="{ '--reveal-delay': '180ms' }">
-          <span class="home-promo-card__icon" aria-hidden="true"><i class="pi pi-file-edit"></i></span>
-          <span class="home-promo-card__eyebrow">نیازهای سازمانی</span>
-          <h2>برای خریدهای پروژه‌ای استعلام بگیرید</h2>
-          <p>نیاز خود را ثبت کنید و پاسخ تأمین‌کنندگان را از مسیر استعلام پیگیری کنید.</p>
-          <router-link :to="{ name: 'my-inquiries' }">ثبت درخواست استعلام <i class="pi pi-arrow-left"></i></router-link>
-        </article>
+      <section class="home-section" aria-labelledby="home-bestsellers">
+        <StoreSectionHeading heading-id="home-bestsellers" title="پرفروش‌ترین محصولات خرده‌فروشی" action-label="مشاهده محصولات" :action-to="{ name: 'products', query: { retail: '1' } }" />
+        <div class="home-state"><i class="pi pi-chart-bar" aria-hidden="true" /><span>رتبه‌بندی فروش تا زمان فراهم‌شدن دادهٔ واقعی سفارش و فروش نمایش داده نمی‌شود.</span></div>
       </section>
 
-      <section v-reveal class="home-cta home-cta--retail">
-        <div><h2>برای خرید مستقیم آماده‌اید؟</h2><p>محصولات دارای قیمت ثابت را در کاتالوگ پیدا کنید و جزئیات شرایط ارائه را بررسی کنید.</p></div>
-        <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent">جستجوی محصولات قیمت‌دار</router-link>
+      <section class="home-faq home-section" aria-labelledby="home-faq">
+        <StoreSectionHeading heading-id="home-faq" title="سؤالات متداول" />
+        <details open><summary>چطور درخواست استعلام ثبت کنم؟</summary><p>از طریق دکمه ثبت درخواست استعلام وارد مسیر مربوط شوید و اطلاعات نیاز پروژه را ثبت کنید.</p></details>
+        <details><summary>چطور محصول مناسب را پیدا کنم؟</summary><p>از جستجو و دسته‌بندی محصولات استفاده کنید و مشخصات محصول را در صفحه جزئیات بررسی کنید.</p></details>
+        <details><summary>خرید فوری با استعلام چه تفاوتی دارد؟</summary><p>برای محصولاتی که قیمت و امکان خرده‌فروشی آن‌ها فعال است، شرایط خرید در صفحه محصول نمایش داده می‌شود؛ سایر موارد از مسیر استعلام پیگیری می‌شوند.</p></details>
+        <details><summary>اطلاعات تأمین‌کننده را کجا ببینم؟</summary><p>اطلاعات عمومی شرکت عرضه‌کننده در صفحه جزئیات محصول در دسترس است.</p></details>
       </section>
 
+      <section class="home-rfq">
+        <div><h2>محصول مورد نظر را پیدا نکردید؟</h2><p>درخواست استعلام ثبت کنید تا نیاز پروژه‌تان از مسیر تأمین‌کنندگان پیگیری شود.</p></div>
+        <router-link :to="{ name: 'my-inquiries' }" class="home-btn home-btn--primary">ثبت درخواست استعلام <i class="pi pi-arrow-left" aria-hidden="true" /></router-link>
+      </section>
     </div>
-  </div>
+  </main>
 </template>
-
 <style scoped>
-.home-page { background: var(--tm-canvas); }
-.home-hero-band { width: 100%; padding-block: clamp(1rem, 2vw, 2rem); background: var(--tm-canvas); }
-.home-hero-band .home-container { padding-block: 0; }
-.home-hero { border:1px solid var(--tm-line); border-radius:4px; background:var(--tm-surface); box-shadow:var(--tm-card-shadow); padding:24px; }
-.home-hero__actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
-.home-hero__actions .tm-btn { min-height: 44px; }
-.home-hero__visual { display: grid; grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr); gap: 1rem; align-items: stretch; }
-.home-hero__visual--no-banner .home-featured-slider,
-.home-hero__visual--no-banner .home-hero__product { grid-column: 1 / -1; }
-.home-hero__visual .home-hero__benefits { grid-column: 1 / -1; }
-.home-promo-banner { position:relative; display:block; min-width:0; min-height:330px; overflow:hidden; border:1px solid var(--tm-line); border-radius:4px; background:var(--tm-surface-alt); color:#fff; text-decoration:none; box-shadow:var(--tm-card-shadow); isolation:isolate; }
-.home-promo-banner > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
-.home-promo-banner__shade { position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,rgba(5,18,39,.78),rgba(5,18,39,.12) 100%); }
-.home-promo-banner__hitarea { position:absolute; inset:0; z-index:0; }
-.home-promo-banner__content { position:absolute; pointer-events:none; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; gap:.65rem; padding:clamp(1.25rem,2.2vw,2rem); }
-.home-promo-banner__eyebrow { font-size:.75rem; font-weight:800; color:#d7f8ff; }
-.home-promo-banner__content strong { max-width:24ch; font-size:clamp(1.35rem,2vw,2rem); line-height:1.65; font-weight:900; }
-.home-promo-banner__content > span:not(.home-promo-banner__eyebrow):not(.home-promo-banner__cta) { max-width:38ch; font-size:.9rem; line-height:1.9; color:rgba(255,255,255,.9); }
-.home-promo-banner__cta { display:inline-flex; align-items:center; gap:.5rem; margin-top:.3rem; padding:.65rem 1rem; border-radius:4px; background:#fff; color:#132c4c; font-size:.8rem; font-weight:800; }
-.home-promo-banner__dots { position:absolute; z-index:2; inset-inline-start:1rem; top:1rem; display:flex; gap:.4rem; }
-.home-promo-banner__dots button { width:7px; height:7px; padding:0; border:0; border-radius:10px; background:rgba(255,255,255,.55); cursor:pointer; }
-.home-promo-banner__dots button.is-active { width:22px; background:#fff; }
-.home-hero__product { min-width: 0; min-height: 250px; display: grid; place-items: center; gap: .5rem; padding: 1rem; border: 1px solid var(--tm-line); border-radius: 4px; background: var(--tm-canvas); color: var(--tm-ink); }
-.home-hero__product img { width: 100%; max-height: 230px; object-fit: contain; }
-.home-hero__product > i { font-size: 5rem; color: var(--tm-violet); }
-.home-hero__product-caption { max-width: 100%; color: var(--tm-ink); font-size: .8125rem; text-align: center; overflow-wrap: anywhere; }
-.home-hero__benefits { display: grid; gap: .85rem; list-style: none; margin: 0; padding: 0; color: var(--tm-muted); font-size: .875rem; }
-.home-hero__benefits li { display: flex; gap: .55rem; align-items: flex-start; }
-.home-hero__benefits i { color: var(--tm-green); margin-top: .2rem; }
-.home-container {
-  width: 100%;
-  max-width: var(--ds-container-max-wide);
-  margin-inline: auto;
-  padding-inline: var(--ds-container-pad);
-  display: flex;
-  flex-direction: column;
-  gap: 34px;
-}
-
-
-.home-featured-slider { position: relative; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); min-height: 300px; overflow: hidden; border: 1px solid var(--tm-line); border-radius: 4px; background: var(--tm-surface); box-shadow: var(--tm-card-shadow); }
-.home-featured-slider__media { position: relative; display: grid; place-items: center; min-width: 0; padding: 1.25rem; background: var(--tm-blue-soft); }
-.home-featured-slider__media img { width: 100%; height: 230px; object-fit: contain; filter: drop-shadow(0 12px 14px rgba(0,0,0,.16)); }
-.home-featured-slider__media > i { font-size: 5rem; color: var(--tm-violet); }
-.home-featured-slider__flag { position: absolute; top: 12px; inset-inline-start: 12px; display: inline-flex; gap: 6px; align-items: center; padding: 5px 10px; border-radius: 3px; background: var(--tm-surface); color: var(--tm-blue); font-size: 12px; font-weight: 700; }
-.home-featured-slider__content { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: .7rem; min-width: 0; padding: 1.5rem; color: var(--tm-ink); }
-.home-featured-slider__eyebrow { color: var(--tm-blue); font-size: 12px; font-weight: 700; }
-.home-featured-slider__content h2 { margin: 0; color: var(--tm-ink); font-size: clamp(17px, 1.6vw, 23px); line-height: 1.7; overflow-wrap: anywhere; }
-.home-featured-slider__content p { margin: 0; color: var(--tm-muted); font-size: 13px; }
-.home-featured-slider__content strong { color: var(--tm-ink); font-size: 15px; }
-.home-featured-slider__controls { position: absolute; inset-inline: 14px; bottom: 12px; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
-.home-featured-slider__controls > button,.home-featured-slider__dots button { pointer-events: auto; }
-.home-featured-slider__controls > button { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgba(255,255,255,.3); border-radius: 4px; background: var(--tm-blue); color: var(--tm-surface); cursor: pointer; }
-.home-featured-slider__dots { display: flex; align-items: center; gap: 6px; }
-.home-featured-slider__dots button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 99px; background: var(--tm-line-strong); cursor: pointer; transition: width .18s ease, background .18s ease; }
-.home-featured-slider__dots button.is-active { width: 22px; background: var(--tm-blue); }
-.home-product-grid--recent { grid-template-columns: inherit; }
-
-/* Hero */
-.home-hero { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr); gap: 32px; align-items: center; }
-.home-hero__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 12px;
-  border-radius: 3px;
-  background: var(--tm-blue-soft);
-  border: 1px solid var(--tm-line-strong);
-  color: var(--tm-blue);
-  font-size: 13px;
-  font-weight: 600;
-}
-.home-hero h1 { margin: 12px 0 10px; font-size: clamp(20px, 2vw, 28px); line-height: 1.45; color: var(--tm-ink); }
-.home-hero p { margin: 0 0 22px; max-width: 56ch; color: var(--tm-muted); font-size: 14px; line-height: 1.9; }
-
-.home-hero__search { border:1px solid var(--tm-line-strong);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 6px 6px 14px;
-  background: var(--tm-surface);
-  border-radius: var(--tm-radius);
-  max-width: 620px;
-}
-.home-hero__search i { color: var(--tm-muted); font-size: 14px; }
-.home-hero__search:focus-within { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
-.home-hero__search input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  font-family: inherit;
-  font-size: 13.5px;
-  color: var(--tm-ink);
-  padding: 9px 0;
-}
-.home-hero__search .tm-btn { flex: none; }
-
-.home-hero__links { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; }
-.home-hero__links a { color: var(--tm-muted); font-size: 13px; font-weight: 600; text-decoration: none; }
-.home-hero__links a:hover { color: var(--tm-blue-strong); text-decoration: underline; }
-
-.home-hero__aside { display: flex; flex-direction: column; gap: 10px; }
-.home-hero__badge {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 16px;
-  border-radius: var(--tm-radius);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: var(--tm-muted);
-  font-size: 13px;
-  font-weight: 500;
-}
-.home-hero__badge i { color: var(--tm-cyan); }
-
-/* Sections */
-.home-section { min-width: 0; }
-.home-promo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.home-promo-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:220px;padding:20px;border:1px solid var(--tm-line);border-radius:5px;background:var(--tm-surface);box-shadow:var(--tm-card-shadow);overflow:hidden}
-.home-promo-card:before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:3px;background:var(--tm-cyan)}
-.home-promo-card__icon{display:grid;place-items:center;width:38px;height:38px;margin-bottom:12px;border-radius:5px;background:var(--tm-blue-soft);color:var(--tm-blue);font-size:17px}
-.home-promo-card__eyebrow{color:var(--tm-blue);font-size:11px;font-weight:700}
-.home-promo-card h2{margin:7px 0 5px;color:var(--tm-ink);font-size:15px;font-weight:700;line-height:1.7}
-.home-promo-card p{margin:0 0 16px;color:var(--tm-muted);font-size:12px;line-height:1.9}
-.home-promo-card>a{display:inline-flex;align-items:center;gap:8px;margin-top:auto;color:var(--tm-blue);font-size:12px;font-weight:700;text-decoration:none}
-.home-promo-card>a:hover{text-decoration:underline}
-@media(max-width:900px){.home-promo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:575px){.home-promo-grid{grid-template-columns:1fr}.home-promo-card{min-height:0;padding:16px}}
-
-
-.home-category-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.home-product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 210px));
-  justify-content: start;
-  align-items: stretch;
-  gap: 10px;
-}
-
-.home-recent__name { color: var(--tm-ink); font-weight: 600; text-decoration: none; }
-.home-recent__product { display: flex; align-items: center; gap: .7rem; color: var(--tm-ink); text-decoration: none; min-width: 220px; }
-.home-recent__product img { width: 52px; height: 52px; object-fit: contain; border-radius: 4px; background: var(--tm-surface-alt); }
-.home-recent__product-copy { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
-.home-recent__product-copy b { overflow-wrap: anywhere; }
-.home-recent__product-copy small { color: var(--tm-muted); font-size: 13px; }
-.home-recent__action { display: inline-flex; align-items: center; gap: .35rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
-.tm-table tbody tr[role='link'] { cursor: pointer; }
-.tm-table tbody tr[role='link']:hover { background: var(--tm-surface-alt); }
-.tm-table tbody tr[role='link']:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
-.home-recent__name:hover { color: var(--tm-blue); }
-
-
-.home-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 18px;
-  padding: 22px 24px;
-  border: 1px solid var(--tm-line);
-  border-radius: 4px;
-  background: var(--tm-surface);
-  box-shadow: var(--tm-card-shadow);
-  color: var(--tm-ink);
-}
-.home-cta h2 { margin: 0 0 6px; font-size: 19px; color: var(--tm-ink); }
-.home-cta--retail { background: var(--tm-surface); color: var(--tm-ink); border: 1px solid var(--tm-line); }
-.home-cta--retail h2 { color: var(--tm-ink); }
-.home-cta--retail p { color: var(--tm-muted); }
-.home-cta p { margin: 0; font-size: 13px; color: var(--tm-muted); }
-
-.home-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 38px 20px;
-  background: var(--tm-surface);
-  border: 1px dashed var(--tm-line-strong);
-  border-radius: 4px;
-  color: var(--tm-muted);
-  text-align: center;
-}
-.home-empty i { font-size: 24px; color: var(--tm-faint); }
-.home-empty p { margin: 0; font-size: 13px; }
-
-.product-card.home-product-skeleton{min-height:0;aspect-ratio:4 / 6.4}
-.home-skeleton {
-  min-height: 150px;
-  background: linear-gradient(90deg, var(--tm-surface-alt) 25%, var(--tm-canvas) 37%, var(--tm-surface-alt) 63%);
-  background-size: 400% 100%;
-  animation: home-shimmer 1.4s ease infinite;
-  border-radius: 4px;
-  border: 1px solid var(--tm-line);
-}
-@keyframes home-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-@media (max-width: 820px) {
-  .home-featured-slider { grid-template-columns: minmax(0,1fr); }
-  .home-featured-slider__media { min-height: 190px; }
-  .home-featured-slider__media img { height: 180px; }
-  .home-featured-slider__content { padding-bottom: 3.2rem; }
-  .home-hero { grid-template-columns: 1fr; }
-  .home-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .home-hero__visual { grid-template-columns: minmax(0, 1fr); }
-  .home-promo-banner { min-height:260px; }
-  .home-hero__visual .home-hero__benefits { grid-column:1; }
-  .home-hero__product { min-height: 180px; }
-  .home-hero__benefits { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-}
-@media (max-width: 700px) {
-  .tm-table { display: block; }
-  .tm-table thead { display: none; }
-  .tm-table tbody,.tm-table tr { display: grid; width: 100%; }
-  .tm-table tr { gap: .35rem; padding: .85rem; border-bottom: 1px solid var(--tm-line); }
-  .tm-table td { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; border: 0; padding: .25rem 0; text-align: start; }
-  .tm-table td::before { content: attr(data-label); color: var(--tm-muted); font-weight: 700; flex: none; }
-  .tm-table td:first-child { display: block; }
-  .tm-table td:first-child::before { display: none; }
-}
-@media (max-width: 575px) {
-  .home-featured-slider { min-height: 0; }
-  .home-promo-banner { min-height:230px; }
-  .home-featured-slider__content { padding: 1rem 1rem 3.2rem; }
-  .home-featured-slider__media { min-height: 150px; }
-  .home-featured-slider__media img { height: 145px; }
-  .home-hero__search { flex-wrap: wrap; }
-  .home-hero__search .tm-btn { width: 100%; }
-  .home-container { gap: 26px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-skeleton { animation: none; }
-}
-
-@media(max-width:520px){.home-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),210px));gap:8px}}
-
-/* Campaign hero and horizontally browsable category rail */
-.home-campaign-hero{position:relative;min-height:clamp(330px,39vw,510px);overflow:hidden;background:#092747}
-.home-campaign-hero__slide,.home-campaign-hero__fallback{position:relative;min-height:inherit;display:flex;align-items:center}
-.home-campaign-hero__image,.home-campaign-hero__shade{position:absolute;inset:0;width:100%;height:100%}
-.home-campaign-hero__image{object-fit:cover}
-.home-campaign-hero__shade{background:linear-gradient(270deg,rgba(4,20,39,.9) 0%,rgba(4,20,39,.72) 42%,rgba(4,20,39,.12) 100%)}
-.home-campaign-hero__inner{position:relative;z-index:1;display:flex;align-items:center;min-height:inherit;padding-block:44px}
-.home-campaign-hero__copy{max-width:610px;color:#fff}
-.home-campaign-hero__eyebrow{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;color:#8ce9e5;font-size:13px;font-weight:700}
-.home-campaign-hero__copy h1,.home-campaign-hero__fallback h1{margin:0 0 14px;font-size:clamp(27px,3.4vw,44px);line-height:1.55;font-weight:800}
-.home-campaign-hero__copy p,.home-campaign-hero__fallback p{max-width:560px;margin:0 0 24px;color:rgba(255,255,255,.82);font-size:15px;line-height:2.1}
-.home-campaign-hero__controls{position:absolute;bottom:28px;inset-inline-start:0;display:flex;align-items:center;gap:9px}
-.home-campaign-hero__controls button{display:grid;place-items:center;width:10px;height:10px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.48);cursor:pointer}
-.home-campaign-hero__controls button:first-child,.home-campaign-hero__controls button:last-child{width:34px;height:34px;background:rgba(255,255,255,.16);color:#fff}
-.home-campaign-hero__controls button.is-active{width:25px;border-radius:8px;background:var(--tm-cyan)}
-.home-campaign-hero__fallback{padding-block:52px;background:linear-gradient(115deg,#092747,#0d5770);color:#fff}
-.home-category-track{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x mandatory;scrollbar-width:thin}
-.home-category-track .category-card{flex:0 0 clamp(190px,22%,250px);min-height:104px;scroll-snap-align:start}
-.home-category-track .category-card:hover{transform:translateY(-3px);border-color:var(--tm-cyan)}
-@media(max-width:640px){.home-campaign-hero,.home-campaign-hero__slide,.home-campaign-hero__fallback{min-height:360px}.home-campaign-hero__shade{background:linear-gradient(0deg,rgba(4,20,39,.92),rgba(4,20,39,.26))}.home-campaign-hero__inner{align-items:flex-end;padding-block:34px 74px}.home-campaign-hero__copy h1{font-size:27px}.home-campaign-hero__copy p{font-size:13px}.home-campaign-hero__controls{bottom:20px}.home-category-track .category-card{flex-basis:72vw}}
-
-/* Card chrome now lives in the shared StoreProductCard widget; only the
-   homepage action slot needs size tuning. */
-.home-page .product-card__foot .tm-btn{min-height:32px;padding:6px 9px;font-size:10px}
-
-/* More intentional storefront composition: campaign, proof points, discovery and product shelves. */
-.home-container{gap:30px}
-.home-section{padding:0}
-.home-campaign-hero__fallback{width:100%;background:radial-gradient(circle at 15% 30%,rgba(18,184,166,.28),transparent 32%),linear-gradient(115deg,#082746 0%,#0c4268 58%,#126b83 100%)}
-.home-campaign-hero__fallback-inner{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);align-items:center;gap:clamp(24px,5vw,72px);padding-block:52px}
-.home-campaign-hero__fallback-copy{max-width:680px}
-.home-campaign-hero__fallback-copy h1{margin:0 0 12px;color:#fff;font-size:clamp(28px,3.5vw,46px);line-height:1.5;font-weight:850}
-.home-campaign-hero__fallback-copy p{margin:0 0 22px;color:rgba(255,255,255,.82);font-size:14px;line-height:2}
-.home-campaign-hero__fallback-copy .home-hero__search{max-width:600px;border:0;border-radius:6px;padding:6px;background:#fff;box-shadow:0 12px 30px rgba(0,0,0,.18)}
-.home-campaign-hero__fallback-copy .home-hero__search input{color:#17324f}
-.home-campaign-hero__fallback-copy .home-hero__search .tm-btn{min-height:42px}
-.home-campaign-hero__quick-links{display:flex;flex-wrap:wrap;gap:22px;margin-top:18px}
-.home-campaign-hero__quick-links a{display:inline-flex;align-items:center;gap:7px;color:#d6f7f5;font-size:12px;font-weight:700;text-decoration:none}
-.home-campaign-hero__spotlight{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-width:0;min-height:300px;padding:22px;border:1px solid rgba(255,255,255,.22);border-radius:8px;background:linear-gradient(145deg,rgba(255,255,255,.19),rgba(255,255,255,.07));color:#fff;text-align:center;text-decoration:none;backdrop-filter:blur(5px)}
-.home-campaign-hero__spotlight img{width:100%;height:190px;object-fit:contain;filter:drop-shadow(0 15px 18px rgba(0,0,0,.25))}
-.home-campaign-hero__spotlight>strong{max-width:32ch;font-size:14px;line-height:1.8}
-.home-campaign-hero__spotlight>span:last-child{color:#a9f2e8;font-size:13px;font-weight:700}
-.home-campaign-hero__spotlight-label{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;color:#a9f2e8;font-size:11px;font-weight:700}
-.home-campaign-hero__spotlight--empty{color:rgba(255,255,255,.75)}
-.home-campaign-hero__spotlight-placeholder{font-size:76px}
-.home-promo-card{border-radius:7px;transition:transform .18s,border-color .18s,box-shadow .18s}
-.home-promo-card:hover{transform:translateY(-3px);border-color:var(--tm-cyan);box-shadow:var(--tm-card-shadow-hover)}
-.home-cta{border-radius:7px;background:linear-gradient(110deg,var(--tm-surface),var(--tm-blue-soft))}
-@media(max-width:1200px){.home-campaign-hero__fallback-inner{gap:28px}}
-@media(max-width:820px){.home-campaign-hero__fallback-inner{grid-template-columns:1fr;padding-block:36px}.home-campaign-hero__spotlight{min-height:220px}.home-campaign-hero__spotlight img{height:130px}}
-@media(prefers-reduced-motion:reduce){.home-promo-card{transition:none}.home-promo-card:hover{transform:none}}
-
-/* ── Motion layer ──────────────────────────────────────────────
-   Storefront entrance choreography and interaction feedback. Every hidden
-   state lives inside prefers-reduced-motion: no-preference, so the reduced
-   page is the finished page. Only transform/opacity are animated. */
-.home-page{--home-ease-out:cubic-bezier(.22,1,.36,1);--home-ease-expo:cubic-bezier(.16,1,.3,1)}
-
-/* Crossfade between scheduled campaign banners (the one moving picture). */
-.home-campaign-hero__image{opacity:0}
-.home-campaign-hero__image.is-active{opacity:1}
-
-@media (prefers-reduced-motion: no-preference){
-  .home-reveal:not(.is-revealed){opacity:0}
-  .home-reveal.is-revealed{animation:home-reveal-in 720ms var(--home-ease-expo) var(--reveal-delay,0ms) backwards}
-
-  .home-campaign-hero__copy{animation:home-hero-in .7s var(--home-ease-out) both}
-  .home-campaign-hero__fallback-copy{animation:home-hero-in .7s var(--home-ease-out) .06s both}
-  .home-campaign-hero__spotlight{animation:home-hero-in .8s var(--home-ease-expo) .16s both}
-
-  .home-campaign-hero__image{transition:opacity .9s var(--home-ease-out),transform .9s var(--home-ease-out)}
-  .home-campaign-hero__image.is-active{animation:home-hero-drift 9s var(--home-ease-out) both}
-}
-
-@keyframes home-reveal-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-@keyframes home-hero-in{from{opacity:0;transform:translateY(16px)}}
-@keyframes home-hero-drift{from{transform:scale(1.015)}to{transform:scale(1.08)}}
-
-@media (prefers-reduced-motion:reduce){.home-campaign-hero__image.is-active{animation:none}}
+.home-page{--tm-canvas:#f4f5fa;--tm-surface:#fff;--tm-ink:#12182b;--tm-muted:#6b7390;--tm-line:#e4e7f2;--tm-blue:#6c5ce7;--tm-cyan:#2aa7e8;--tm-green:#0f9d73;--tm-chip:#eceaff;--tm-card-shadow:0 2px 10px rgba(20,30,70,.06);background:var(--tm-canvas);color:var(--tm-ink);font-family:Vazirmatn,Tahoma,sans-serif}
+.home-container{width:100%;max-width:1240px;margin-inline:auto;padding-inline:20px}
+.home-hero{position:relative;overflow:hidden;padding:44px 0 56px;background:linear-gradient(135deg,#0a2540,#126b8a);color:#fff}
+.home-hero__inner{display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center}
+.home-hero__copy{min-width:0}.home-hero__tag{color:#7fe3ff;font-size:13px;font-weight:600}
+.home-hero h1{margin:6px 0 10px;color:#fff;font-size:clamp(27px,3vw,38px);line-height:1.5;font-weight:800}
+.home-hero__copy>p{max-width:560px;margin:0;color:#cfe6f2;font-size:14px;line-height:2}
+.home-hero__tabs{display:inline-flex;gap:3px;margin:20px 0 12px;padding:4px;border-radius:12px;background:rgba(255,255,255,.12)}
+.home-hero__tabs button{padding:8px 18px;border:0;border-radius:9px;background:transparent;color:#d9ecf6;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.home-hero__tabs button.is-active{background:#fff;color:#12182b}
+.home-hero__search{display:flex;align-items:center;gap:4px;max-width:600px;padding:6px;border-radius:12px;background:#fff;color:#12182b}
+.home-hero__search>i{padding-inline:9px;color:#6c5ce7}.home-hero__search input{flex:1;min-width:0;height:40px;border:0;outline:0;background:transparent;color:#12182b;font:inherit;font-size:13px}
+.home-hero__search button{height:40px;padding:0 18px;border:0;border-radius:9px;background:linear-gradient(90deg,#6c5ce7,#2aa7e8);color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.home-hero__chips{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px;color:#bcd9e8;font-size:12px}
+.home-hero__chips button{padding:2px 12px;border:0;border-radius:99px;background:rgba(255,255,255,.14);color:#fff;font:inherit;font-size:12px;cursor:pointer}
+.home-hero__actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.home-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 18px;border:1px solid transparent;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none}
+.home-btn--primary{background:linear-gradient(90deg,#6c5ce7,#2aa7e8);color:#fff}
+.home-btn--outline{border-color:rgba(255,255,255,.5);background:transparent;color:#fff}
+.home-hero__featured{display:flex;flex-direction:column;min-width:0;padding:18px;border:1px solid rgba(255,255,255,.2);border-radius:18px;background:rgba(255,255,255,.1);color:#fff;text-decoration:none;backdrop-filter:blur(6px)}
+.home-hero__featured-image{display:grid;place-items:center;height:190px;overflow:hidden;border-radius:12px;background:linear-gradient(135deg,#1c5d7d,#2d8aa8);color:#fff;font-size:38px;font-weight:800}
+.home-hero__featured-image img{width:100%;height:100%;object-fit:contain;padding:12px}
+.home-hero__featured>strong{margin-top:12px;font-size:16px}.home-hero__featured>small{color:#bcd9e8;font-size:11px}
+.home-hero__featured-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}.home-hero__featured-foot b{font-size:13px}.home-hero__featured-foot span{display:flex;align-items:center;gap:7px;color:#7fe3ff}
+.home-hero__featured--empty{min-height:280px;justify-content:center;align-items:center;text-align:center;gap:12px}.home-hero__featured--empty>i{font-size:48px;color:#7fe3ff}.home-hero__featured--empty>small{max-width:28ch}.home-hero__featured--empty>a{color:#fff;font-size:13px}
+.home-hero__dots{display:flex;gap:8px;margin-top:16px}.home-hero__dots button{width:9px;height:9px;padding:0;border:0;border-radius:9px;background:rgba(255,255,255,.4);cursor:pointer}.home-hero__dots button.is-active{width:26px;background:#fff}
+.home-content{display:flex;flex-direction:column;gap:30px;padding-block:28px 40px}
+.home-section{min-width:0}.home-category-track{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}.home-category-track::-webkit-scrollbar{display:none}.home-category-track>:deep(.store-category-card){flex:0 0 172px;scroll-snap-align:start}
+.home-product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.home-benefits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.home-benefits article{min-width:0;padding:18px;border-radius:14px;background:#fff;box-shadow:var(--tm-card-shadow);font-size:13px;color:var(--tm-muted)}
+.home-benefits article>i{display:grid;place-items:center;width:42px;height:42px;margin-bottom:10px;border-radius:12px;background:var(--tm-chip);color:var(--tm-blue);font-size:19px}
+.home-benefits b{display:block;margin-bottom:4px;color:var(--tm-ink);font-size:14px}.home-benefits p{margin:0;font-size:12px;line-height:1.9}
+.home-product-action{display:inline-flex;align-items:center;gap:7px;color:var(--tm-blue);font-size:12px;font-weight:700;text-decoration:none}
+.home-state{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;min-height:110px;padding:22px;border:1px dashed var(--tm-line);border-radius:14px;background:#fff;color:var(--tm-muted);font-size:13px;text-align:center}
+.home-state>i{color:var(--tm-blue);font-size:22px}.home-state button{border:0;background:transparent;color:var(--tm-blue);font:inherit;font-weight:700;cursor:pointer}
+.home-loading-card{flex:0 0 172px;height:108px;border-radius:14px;background:linear-gradient(90deg,#eceef5,#f8f9fc,#eceef5);background-size:200% 100%;animation:home-shimmer 1.4s infinite}
+.home-loading-product{height:270px;border-radius:14px;background:linear-gradient(90deg,#eceef5,#f8f9fc,#eceef5);background-size:200% 100%;animation:home-shimmer 1.4s infinite}
+@keyframes home-shimmer{to{background-position-x:-200%}}
+.home-faq details{margin-bottom:10px;padding:14px 18px;border-radius:12px;background:#fff;box-shadow:var(--tm-card-shadow);font-size:13px}
+.home-faq summary{color:var(--tm-ink);font-weight:700;cursor:pointer}.home-faq details p{margin:8px 0 0;color:var(--tm-muted);font-size:12px;line-height:1.9}
+.home-rfq{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:4px 0 10px;padding:26px 30px;border:1px solid var(--tm-line);border-radius:18px;background:linear-gradient(90deg,var(--tm-chip),#fff)}
+.home-rfq h2{margin:0;color:var(--tm-ink);font-size:20px}.home-rfq p{margin:4px 0 0;color:var(--tm-muted);font-size:13px}
+@media(max-width:900px){.home-hero__inner{grid-template-columns:1fr}.home-hero__featured{max-width:560px}.home-benefits{grid-template-columns:repeat(2,minmax(0,1fr))}.home-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.home-container{padding-inline:14px}.home-hero{padding:30px 0 36px}.home-hero h1{font-size:27px}.home-hero__tabs{display:flex;width:100%}.home-hero__tabs button{flex:1;padding-inline:8px;font-size:11px}.home-hero__search input{font-size:11px}.home-hero__search button{padding-inline:10px}.home-benefits{grid-template-columns:1fr 1fr;gap:9px}.home-benefits article{padding:13px}.home-product-grid{gap:9px}.home-rfq{padding:20px}.home-rfq h2{font-size:17px}}
+@media(prefers-reduced-motion:reduce){.home-loading-card,.home-loading-product{animation:none}}
 </style>
