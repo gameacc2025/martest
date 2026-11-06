@@ -25,7 +25,7 @@ describe('Website Categories — Telecom Market reference', () => {
     wrapper = mountCategories()
     await flushPromises()
     expect(getCategories).toHaveBeenCalledOnce()
-    expect(wrapper.find('#categories-title').text()).toBe('دسته‌بندی محصولات')
+    expect(wrapper.find('#categories-title').text()).toBe('همه دسته‌بندی‌ها')
     expect(wrapper.find('.cat-name').text()).toBe('فیبر نوری')
     expect(wrapper.find('.cat-desc').text()).toContain('تجهیزات ارتباطی')
     expect(wrapper.find('.cat-thumb-img').attributes('src')).toBe('/categories/fiber.png')
