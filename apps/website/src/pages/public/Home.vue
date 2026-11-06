@@ -256,7 +256,8 @@ onUnmounted(() => {
 
       <section class="home-section" aria-labelledby="home-why">
         <StoreSectionHeading heading-id="home-why" title="چرا Telecom Market؟" />
-        <StoreBenefitGrid :items="benefits" />     </section>
+        <StoreBenefitGrid :items="benefits" />
+      </section>
 
       <section class="home-section" aria-labelledby="home-retail-latest">
         <StoreSectionHeading heading-id="home-retail-latest" title="جدیدترین محصولات خرده‌فروشی" action-label="همه محصولات خرده‌فروشی" :action-to="{ name: 'products', query: { retail: '1' } }" />
@@ -340,5 +341,4 @@ onUnmounted(() => {
 .home-content{display:flex;flex-direction:column;gap:30px;padding-block:28px 40px}
 .home-section{min-width:0}.home-category-track{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x mandatory;scrollbar-width:none}.home-category-track::-webkit-scrollbar{display:none}.home-category-track>:deep(.store-category-card){flex:0 0 172px;scroll-snap-align:start}
 .home-product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-@media(max-width:560px){.home-offer{padding:20px}.home-catalog-request{padding:18px}.home-catalog-request__form{display:grid;grid-template-columns:1fr}}
-</style>
+@media(max-width:560px){</style>
