@@ -107,12 +107,12 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-search-popover__field').exists()).toBe(true)
   })
 
-  it('shows only the catalogue entry in the primary navigation', async () => {
+  it('shows separate homepage and product-catalogue destinations in the primary navigation', async () => {
     wrapper = mountLayout()
     await flushPromises()
     const links = wrapper.findAll('.public-nav-link').map(link => link.text().trim())
-    expect(links).toContain('منوی اصلی')
-    expect(links).not.toContain('صفحه اصلی')
+    expect(links).toContain('صفحه اصلی')
+    expect(links).toContain('محصولات')
   })
 
 
