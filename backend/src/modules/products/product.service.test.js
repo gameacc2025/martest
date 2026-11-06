@@ -94,7 +94,7 @@ const mockPrisma = {
     create: async (args) => { recordCall('product.create', args); return fx.createdProduct; },
     update: async (args) => { recordCall('product.update', args); return fx.updatedProduct; },
     count: async () => 0,
-    findMany: async () => [],
+    findMany: async (args) => { recordCall('product.findMany', args); return []; },
   },
   category: { findUnique: async () => fx.category },
   subcategory: { findUnique: async () => fx.subcategory },
@@ -602,6 +602,18 @@ test('createProduct: derives a shared catalogCode from manufacturer and model wh
   }, companyA);
   const createArgs = calls['product.create'].at(-1);
   assert.equal(createArgs.data.catalogCode, 'TEL-CISCO-C9300-48P');
+});
+
+test('listSimilarProducts: resolves only published public listings with the same catalogCode', async () => {
+  fx.product = { id: 99, catalogCode: 'TEL-CISCO-C9300-48P' };
+  const result = await service.listSimilarProducts(99);
+  assert.deepEqual(result, []);
+  const query = calls['product.findMany'].at(-1);
+  assert.equal(query.where.catalogCode, 'TEL-CISCO-C9300-48P');
+  assert.equal(query.where.status, 'PUBLISHED');
+  assert.equal(query.where.visibility, 'PUBLIC');
+  assert.equal(query.where.deletedAt, null);
+  assert.equal(query.take, 20);
 });
 
 test('createProduct: rejects a missing title before touching the database', async () => {
