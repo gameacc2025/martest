@@ -941,3 +941,8 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - UI reference source: repository root `store-template/`. Its HTML/CSS/JS and demo data are design references only; do not load the template's localStorage-backed demo runtime into the marketplace apps.
 - Reusable Vue 3 widgets live in `packages/shared-ui/components/tem/` and are exported from the `@telecom/shared-ui` package root. Components are presentation primitives; data and behavior remain in Website/Admin/Company apps and use existing APIs and authorization.
 - Blog is not implemented yet. Public blog pages and Admin authoring/publishing are deferred to GitHub issue #84 and require real backend persistence, API endpoints, and STAFF permissions.
+## 2026-11-06 — Promotional banner campaigns
+- Promotional banners are a separate Banner model, not featured Products. Public home placement is HOME_HERO.
+- Public feed returns only PUBLISHED, isActive=true, non-deleted records within startsAt/endsAt. Staff CRUD and upload endpoints require STAFF context and banners.* / media.upload permissions.
+- Admin route is /banners; public homepage fetches through bannersApi.listActive('HOME_HERO'). The advertising carousel is independently timed and visually wider than the featured-product slider.
+- Apply migration 20261106100000_promotional_banners before running the app against a database. Local verification is still required; remote source editing did not execute Prisma, Node, or Vite checks.
