@@ -137,7 +137,7 @@ function goToProducts() {
       <template v-else>
         <header class="company-hero">
           <div class="company-hero__identity">
-            <span class="company-hero__icon" aria-hidden="true"><i class="pi pi-building"></i></span>
+            <span class="company-hero__icon" aria-hidden="true"><img v-if="company?.logo" :src="company.logo" :alt="company.name" /><i v-else class="pi pi-building"></i></span>
             <div class="company-hero__copy">
             <h1 id="company-profile-title" class="ds-h1">{{ company?.name || 'محصولات منتشرشده این شرکت' }}</h1>
             <p v-if="company?.type" class="company-type">{{ company.type }}</p>
