@@ -283,3 +283,12 @@ The current source of truth is packages/shared-ui/theme.js, packages/shared-ui/a
 - Public product listing now follows the `tem/shop.html` composition: product results on the left, filter panel on the right, compact product tiles, and a wider fluid container up to 1920px.
 - Catalogue page size defaults to 24 products, with 24/48/96 pagination choices. Product names and category labels wrap instead of being truncated with ellipses.
 - Product grid expands by available width on wide screens; category, price and search filters continue to use the existing live catalogue store/API. No unsupported brand/stock filter or sort API is fabricated.
+
+
+## Website product-card consistency — 2026-11-06
+
+- Public product cards use a portrait 4:5 image frame and compact content sizing across homepage, catalogue, search results and shared ProductCard consumers. Grid density follows available width, with four columns on desktop where the surrounding layout permits and two columns on mobile.
+- Homepage featured and newest sections are capped at eight products each (two four-column desktop rows). Keep the product source API-backed and the loading skeleton count/layout consistent with the real cards.
+- The hero includes a real search form wired to the existing search route. Pre-footer promo cards use only existing routes and substantiated marketplace capabilities.
+- Preserve the approved Telecom Market blue/cyan/navy identity; do not introduce violet/purple accents into public catalogue surfaces. Use semantic design tokens for focus, surface and accent states.
+- Do not label featured products as bestsellers: the current domain/public API has no verified sales aggregate. No sales ranking or order count may be fabricated.
