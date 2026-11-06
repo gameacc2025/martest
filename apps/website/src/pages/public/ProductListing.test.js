@@ -21,7 +21,7 @@ import ProductListing from './ProductListing.vue'
 describe('Website Product Listing — TEM storefront', () => {
   let wrapper
   const mountListing = () => mount(ProductListing, { global: { stubs: {
-    WorkspacePageHeading: { template: '<header><h1 id="products-page-title">فروشگاه</h1><slot name="actions" /></header>' },
+    PageHeader: { template: '<header><h1 id="products-page-title">فروشگاه</h1><slot /></header>' },
     RouterLink: { props: ['to'], template: '<a :data-route="to.name" :data-product-id="to.params?.id"><slot /></a>' },
     Button: { props: ['label'], template: '<button><slot />{{ label }}</button>' },
     InputText: { template: '<input />' },
