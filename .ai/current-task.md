@@ -764,3 +764,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - No blog work, cart/checkout behavior, product workflow or inquiry/RFQ behavior was changed.
 - **Do not claim tests/builds/migration passed:** they have not been executed in this remote source-edit session. Apply migration and run the documented checks locally.
 - **GitHub branch cleanup:** user requested deletion of feat/advertising-banners. The connected GitHub actions expose branch creation/ref movement but no branch/ref deletion action; do not claim deletion.
+
+## Current task — Reproducible development database and demo marketplace (2026-11-06)
+- Added a development-only repeatable seed extension: 10 demo companies across MANUFACTURER/IMPORTER/TELECOM_OPERATOR, 3 scoped users per company (manager/catalog/sales), 5 customer accounts, and 5 product families for each of the 15 top-level categories. Each family is listed by two suppliers.
+- Demo login password defaults to A123@456 and can be overridden with DEMO_USER_PASSWORD. Demo fixtures are skipped in production or when SEED_DEMO_DATA=false. Indicative prices and product reference specifications are marked as development data and require datasheet/supplier verification.
+- Added Product.catalogCode as shared manufacturer/model identity distinct from each seller's SKU. Inquiry publication resolves all active suppliers with a published matching catalogCode and retains STAFF notifications; buyer company is excluded.
+- Added a guarded development reset script requiring NODE_ENV=development and the telecom_marketplace database; it runs prisma db push --force-reset followed by the idempotent seed. Normal startup does not reset the database.
+- Historical migrations are preserved for production deployments; a new migration adds catalogCode for migration-based deployments.
+- Remote GitHub source edits only. Prisma validation, database reset, seed execution, Node tests, and app builds remain to be run locally; do not report them as passed.
