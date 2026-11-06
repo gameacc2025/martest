@@ -115,6 +115,18 @@ describe('PublicLayout responsive navigation', () => {
     expect(links).not.toContain('صفحه اصلی')
   })
 
+
+  it('routes the brand and primary homepage item to the real homepage, with a separate catalogue link', async () => {
+    wrapper = mountLayout()
+    await flushPromises()
+    const links = wrapper.findAll('.public-nav-link')
+    const homeLink = links.find(link => link.text().includes('صفحه اصلی'))
+    const productsLink = links.find(link => link.text().includes('محصولات'))
+    expect(homeLink).toBeTruthy()
+    expect(productsLink).toBeTruthy()
+    expect(wrapper.get('.public-logo').attributes('aria-label')).toContain('صفحه اصلی')
+  })
+
   it('loads and displays at most five recent notifications in a left-side drawer', async () => {
     mocks.auth.user = { id: 'customer-1' }
     mocks.auth.isAuthenticated = true
