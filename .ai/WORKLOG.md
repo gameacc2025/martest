@@ -3714,3 +3714,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Local recovery:** Rebuild and recreate only the backend service while renewing its anonymous dependency volume: `docker compose -f docker-compose.dev.yml up -d --build --force-recreate -V backend`. This does not remove or reset the PostgreSQL data volume.
 - **Verification:** Confirm `docker compose -f docker-compose.dev.yml exec -T backend npx prisma -v` reports 7.10.1, then run `docker compose -f docker-compose.dev.yml exec -T backend npx prisma validate` and `docker compose -f docker-compose.dev.yml exec -T backend npx prisma migrate status`. Do not run reset or manually resolve migrations as part of this container refresh.
 - **Remote edit note:** No lasting schema change is required; Prisma 7 datasource configuration remains unchanged.
+
+
+## 2026-11-06 — WEBSITE-LOGIN-ROUTE-RESOLUTION
+- **Issue:** The centralized Website login page linked its “back to site” action to the nonexistent named route `home`. Vue Router resolves `router-link` destinations during render, so this invalid target emitted `No match for { name: "home" }` even before the link was clicked; the same broken login page was reached by panel login redirects and logout redirects, making both flows appear broken and potentially leaving a blank page.
+- **Fix:** Changed the login back-link target to the actual public landing route `products` (the root `/` route and `/products` alias). Added a regression assertion to `AuthPages.test.js` that the login page uses the registered route and no longer references `home`.
+- **Scope:** Website login navigation only. No authentication API, token/session handling, PKCE handoff, panel router, backend, database, or migrations changed.
+- **Verification:** Source-level regression test added; test/build execution was not available in the remote GitHub editing session. Pull latest `main` and run the Website test suite/build locally.
+- **Commits:** Login fix `716d239`; regression test `041de07`.
