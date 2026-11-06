@@ -1199,7 +1199,7 @@ const managedProductResponseSchema = {
   properties: {
     id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
     shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
-    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
+    sku: { type: ['string', 'null'] }, catalogCode: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
     specifications: { type: ['object', 'array', 'null'] },
     status: { type: 'string' }, visibility: { type: 'string' }, isFeatured: { type: 'boolean' },
     companyId: { type: 'integer' }, categoryId: { type: 'integer' }, subcategoryId: { type: 'integer' },
@@ -1963,7 +1963,7 @@ const step16eManagedProductSchema = {
   properties: {
     id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
     shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
-    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
+    sku: { type: ['string', 'null'] }, catalogCode: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
     specifications: {}, status: { type: 'string', enum: ['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'PUBLISHED', 'HIDDEN', 'ARCHIVED'] },
     visibility: { type: 'string', enum: ['PUBLIC', 'PRIVATE', 'COMPANY_ONLY'] }, isFeatured: { type: 'boolean' },
     editsSinceApproval: { type: 'integer' }, companyId: { type: 'integer' }, categoryId: { type: 'integer' },
@@ -2288,7 +2288,7 @@ const step16fCompanyProductSchema = {
   properties: {
     id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
     shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
-    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
+    sku: { type: ['string', 'null'] }, catalogCode: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] },
     specifications: {}, status: { type: 'string', enum: ['DRAFT', 'PENDING_REVIEW', 'APPROVED', 'REJECTED', 'PUBLISHED', 'HIDDEN', 'ARCHIVED'] },
     visibility: { type: 'string', enum: ['PUBLIC', 'PRIVATE', 'COMPANY_ONLY'] }, isFeatured: { type: 'boolean' },
     editsSinceApproval: { type: 'integer' }, companyId: { type: 'integer' }, categoryId: { type: 'integer' },
@@ -2578,7 +2578,7 @@ const step16gAdminPendingProductSchema = {
   properties: {
     id: { type: 'integer' }, title: { type: 'string' }, slug: { type: 'string' },
     shortDescription: { type: ['string', 'null'] }, description: { type: ['string', 'null'] },
-    sku: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] }, specifications: {},
+    sku: { type: ['string', 'null'] }, catalogCode: { type: ['string', 'null'] }, brand: { type: ['string', 'null'] }, model: { type: ['string', 'null'] }, specifications: {},
     status: { type: 'string', enum: ['PENDING_REVIEW'] }, visibility: { type: 'string', enum: ['PUBLIC', 'PRIVATE', 'COMPANY_ONLY'] },
     isFeatured: { type: 'boolean' }, editsSinceApproval: { type: 'integer' },
     companyId: { type: 'integer' }, categoryId: { type: 'integer' }, subcategoryId: { type: 'integer' }, createdByUserId: { type: 'integer' },
