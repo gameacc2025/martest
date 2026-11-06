@@ -553,8 +553,8 @@ const isInWishlist = (productId) => {
 .section-actions { display: flex; align-items: center; gap: var(--ds-space-2); }
 .sort-dropdown { min-width: 12rem; }
 .products-grid { display: grid; gap: var(--ds-space-4); }
-.products-grid--4 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
-.products-grid--5 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+.products-grid--4, .products-grid--5 { grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); }
+
 .products-empty { display: flex; min-height: 14rem; flex-direction: column; align-items: center; justify-content: center; gap: var(--ds-space-3); padding: var(--ds-space-6); color: var(--ds-color-text-muted); text-align: center; }
 .products-empty > i { color: var(--ds-color-text-muted); font-size: 1.5rem; }
 .products-empty h3 { margin: 0; color: var(--ds-color-text); font-size: var(--ds-font-size-md); font-weight: var(--ds-font-weight-semibold); }
