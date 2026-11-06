@@ -12,6 +12,9 @@ import { useAuthStore } from '../../stores/auth'
 import { productsApi, bannersApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
+import StoreSectionHeading from '@telecom/shared-ui/components/store/StoreSectionHeading.vue'
+import StoreCategoryCard from '@telecom/shared-ui/components/store/StoreCategoryCard.vue'
+import StoreProductCard from '@telecom/shared-ui/components/store/StoreProductCard.vue'
 
 const router = useRouter()
 const productsStore = useProductsStore()
@@ -297,10 +300,13 @@ onUnmounted(() => {
     <div class="home-container">
       <!-- Categories -->
       <section class="home-section" aria-labelledby="home-categories">
-        <div v-reveal class="site-section-title">
-          <h2 id="home-categories">دسته‌بندی محصولات</h2>
-          <router-link :to="{ name: 'categories' }">همه دسته‌بندی‌ها</router-link>
-        </div>
+        <StoreSectionHeading
+          v-reveal
+          heading-id="home-categories"
+          title="دسته‌بندی محصولات"
+          action-label="همه دسته‌بندی‌ها"
+          :action-to="{ name: 'categories' }"
+        />
 
         <div v-if="categoriesLoading" class="home-category-grid" aria-busy="true">
           <div v-for="i in 8" :key="i" class="home-category-card home-skeleton"></div>
@@ -316,27 +322,31 @@ onUnmounted(() => {
         </div>
 
         <div v-else class="home-category-track" aria-label="دسته‌بندی‌های محصولات">
-          <button
+          <StoreCategoryCard
             v-for="(category, index) in visibleCategories"
             :key="category.id"
             v-reveal
-            type="button"
+            as="button"
+            variant="tile"
             class="category-card"
             :style="{ '--reveal-delay': revealDelay(index) }"
-            @click="viewCategoryProducts(category.id)"
-          >
-            <span class="category-card__icon" aria-hidden="true"><i :class="categoryIcon(category)"></i></span>
-            <span class="category-card__content"><span class="category-card__name">{{ category.nameFa || category.nameEn || category.name }}</span><small v-if="categoryProductCount(category) !== null">{{ categoryProductCount(category).toLocaleString('fa-IR') }} محصول</small></span>
-          </button>
+            :category="category"
+            :icon="categoryIcon(category)"
+            :count="categoryProductCount(category)"
+            @select="viewCategoryProducts(category.id)"
+          />
         </div>
       </section>
 
       <!-- Featured products -->
       <section class="home-section" aria-labelledby="home-featured">
-        <div v-reveal class="site-section-title">
-          <h2 id="home-featured">محصولات منتخب</h2>
-          <router-link :to="{ name: 'products' }">همه محصولات</router-link>
-        </div>
+        <StoreSectionHeading
+          v-reveal
+          heading-id="home-featured"
+          title="محصولات منتخب"
+          action-label="همه محصولات"
+          :action-to="{ name: 'products' }"
+        />
 
         <div v-if="loading" class="home-product-grid" aria-busy="true">
           <div v-for="i in 8" :key="i" class="product-card home-product-skeleton home-skeleton"></div>
@@ -355,38 +365,37 @@ onUnmounted(() => {
         </div>
 
         <div v-else class="home-product-grid">
-          <article v-for="(product, index) in featuredProducts.slice(0, 8)" :key="product.id" v-reveal class="product-card" :style="{ '--reveal-delay': revealDelay(index) }">
-            <router-link :to="productRoute(product)" class="product-card__main">
-              <span class="product-card__media">
-                <span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span>
-                <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" decoding="async" />
-                <i v-else class="pi pi-box" aria-hidden="true"></i>
-              </span>
-              <span class="product-card__body">
-                <span class="product-card__brand">{{ product.brand || product.company?.name || 'تجهیزات شبکه و مخابرات' }}</span>
-                <span v-if="product.company?.isVerified" class="product-card__verified"><i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده تأییدشده</span>
-                <span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span>
-                <span class="product-card__name">{{ product.name || product.title }}</span>
-                <span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" class="product-sku" dir="ltr">{{ product.sku }}</b><b v-if="productCategoryName(product)">{{ productCategoryName(product) }}</b></span>
-                <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
-                <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
-              </span>
-            </router-link>
-            <div class="product-card__foot">
-              <span class="product-card__price"><small>{{ product.prices?.length ? 'شروع قیمت از' : 'قیمت' }}</small><b>{{ productPriceLabel(product) }}</b></span>
+          <StoreProductCard
+            v-for="(product, index) in featuredProducts.slice(0, 8)"
+            :key="product.id"
+            v-reveal
+            class="product-card"
+            :style="{ '--reveal-delay': revealDelay(index) }"
+            :product="product"
+            :to="productRoute(product)"
+            :category="productCategoryName(product)"
+            :verified="Boolean(product.company?.isVerified)"
+            :mode="productSalesMode(product)"
+            :price-label="productPriceLabel(product)"
+            :availability="productAvailabilityLabel(product)"
+          >
+            <template #action>
               <button v-if="productSalesMode(product).kind === 'fixed'" type="button" class="tm-btn tm-btn--accent tm-btn--sm" disabled :aria-label="'افزودن به سبد برای ' + (product.name || product.title) + ' غیرفعال است؛ سرویس سفارش و موجودی هنوز آماده نیست'" title="خرید مستقیم پس از راه‌اندازی سرویس سفارش و موجودی فعال می‌شود">افزودن به سبد</button>
               <router-link v-else :to="productRoute(product)" class="product-card-cta" :aria-label="(productSalesMode(product).kind === 'volume' ? 'استعلام عمده: ' : 'درخواست استعلام: ') + (product.name || product.title)">{{ productSalesMode(product).kind === 'volume' ? 'استعلام عمده' : 'درخواست استعلام' }} <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-            </div>
-          </article>
+            </template>
+          </StoreProductCard>
         </div>
       </section>
 
       <!-- Recent products -->
       <section class="home-section" aria-labelledby="home-recent">
-        <div v-reveal class="site-section-title">
-          <h2 id="home-recent">تازه‌ترین محصولات</h2>
-          <router-link :to="{ name: 'products' }">مشاهده همه محصولات</router-link>
-        </div>
+        <StoreSectionHeading
+          v-reveal
+          heading-id="home-recent"
+          title="تازه‌ترین محصولات"
+          action-label="مشاهده همه محصولات"
+          :action-to="{ name: 'products' }"
+        />
 
         <div v-if="loading" class="home-product-grid" aria-busy="true">
           <div v-for="n in 8" :key="n" class="product-card home-product-skeleton home-skeleton"></div>
@@ -400,45 +409,68 @@ onUnmounted(() => {
           <router-link :to="{ name: 'products' }" class="tm-btn tm-btn--sm">مشاهده همه محصولات</router-link>
         </div>
         <div v-else class="home-product-grid home-product-grid--recent">
-          <article v-for="(product, index) in recentProducts.slice(0, 8)" :key="product.id" v-reveal class="product-card" :style="{ '--reveal-delay': revealDelay(index) }">
-            <router-link :to="productRoute(product)" class="product-card__main">
-              <span class="product-card__media">
-                <span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span>
-                <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" decoding="async" />
-                <i v-else class="pi pi-box" aria-hidden="true"></i>
-              </span>
-              <span class="product-card__body">
-                <span class="product-card__brand">{{ product.brand || product.company?.name || 'تجهیزات شبکه و مخابرات' }}</span>
-                <span v-if="product.company?.isVerified" class="product-card__verified"><i class="pi pi-verified" aria-hidden="true"></i> تأمین‌کننده تأییدشده</span>
-                <span class="product-card__mode" :class="'product-card__mode--' + productSalesMode(product).kind">{{ productSalesMode(product).label }}</span>
-                <span class="product-card__name">{{ product.name || product.title }}</span>
-                <span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" class="product-sku" dir="ltr">{{ product.sku }}</b><b v-if="productCategoryName(product)">{{ productCategoryName(product) }}</b></span>
-                <span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span>
-                <span v-if="productAvailabilityLabel(product)" class="product-card__availability">{{ productAvailabilityLabel(product) }}</span>
-              </span>
-            </router-link>
-            <div class="product-card__foot">
-              <span class="product-card__price"><small>{{ product.prices?.length ? 'شروع قیمت از' : 'قیمت' }}</small><b>{{ productPriceLabel(product) }}</b></span>
+          <StoreProductCard
+            v-for="(product, index) in recentProducts.slice(0, 8)"
+            :key="product.id"
+            v-reveal
+            class="product-card"
+            :style="{ '--reveal-delay': revealDelay(index) }"
+            :product="product"
+            :to="productRoute(product)"
+            :category="productCategoryName(product)"
+            :verified="Boolean(product.company?.isVerified)"
+            :mode="productSalesMode(product)"
+            :price-label="productPriceLabel(product)"
+            :availability="productAvailabilityLabel(product)"
+          >
+            <template #action>
               <router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
-            </div>
-          </article>
+            </template>
+          </StoreProductCard>
         </div>
       </section>
 
 
       <section class="home-section home-retail-section" aria-labelledby="home-retail-latest">
-        <div v-reveal class="site-section-title"><div><h2 id="home-retail-latest">جدیدترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">محصولاتی که امکان خرید تکی آن‌ها فعال شده است</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">همه محصولات خرده‌فروشی</router-link></div>
+        <StoreSectionHeading
+          v-reveal
+          heading-id="home-retail-latest"
+          title="جدیدترین محصولات خرده‌فروشی"
+          subtitle="محصولاتی که امکان خرید تکی آن‌ها فعال شده است"
+          action-label="همه محصولات خرده‌فروشی"
+          :action-to="{ name: 'products', query: { retail: '1' } }"
+        />
         <div v-if="retailLatestProducts.length" class="home-product-grid">
-          <article v-for="(product, index) in retailLatestProducts" :key="product.id" v-reveal class="product-card" :style="{ '--reveal-delay': revealDelay(index) }">
-            <router-link :to="productRoute(product)" class="product-card__main"><span class="product-card__media"><span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span><img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" /><i v-else class="pi pi-box" aria-hidden="true"></i></span>
-              <span class="product-card__body"><span class="product-card__brand">{{ product.brand || product.company?.name || 'تجهیزات شبکه و مخابرات' }}</span><span class="product-card__mode product-card__mode--fixed">فروش خرده‌فروشی</span><span class="product-card__name">{{ product.name || product.title }}</span><span class="product-card__specs"><b v-if="product.model">{{ product.model }}</b><b v-if="product.sku" class="product-sku" dir="ltr">{{ product.sku }}</b></span><span v-if="product.company?.name" class="product-card__company">{{ product.company.name }}</span></span></router-link>
-            <div class="product-card__foot"><span class="product-card__price"><small>قیمت</small><b>{{ productPriceLabel(product) }}</b></span><router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link></div>
-          </article>
+          <StoreProductCard
+            v-for="(product, index) in retailLatestProducts"
+            :key="product.id"
+            v-reveal
+            class="product-card"
+            :style="{ '--reveal-delay': revealDelay(index) }"
+            :product="product"
+            :to="productRoute(product)"
+            :category="productCategoryName(product)"
+            :verified="Boolean(product.company?.isVerified)"
+            :mode="{ kind: 'fixed', label: 'فروش خرده‌فروشی' }"
+            price-caption="قیمت"
+            :price-label="productPriceLabel(product)"
+          >
+            <template #action>
+              <router-link :to="productRoute(product)" class="product-card-cta">مشاهده محصول <i class="pi pi-arrow-left" aria-hidden="true"></i></router-link>
+            </template>
+          </StoreProductCard>
         </div><div v-else class="home-empty"><i class="pi pi-shopping-bag" aria-hidden="true"></i><p>در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</p></div>
       </section>
 
       <section class="home-section home-retail-bestsellers" aria-labelledby="home-retail-bestsellers">
-        <div v-reveal class="site-section-title"><div><h2 id="home-retail-bestsellers">پرفروش‌ترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">رتبه‌بندی بر اساس تعداد فروش ثبت‌شده</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">مشاهده محصولات خرده‌فروشی</router-link></div>
+        <StoreSectionHeading
+          v-reveal
+          heading-id="home-retail-bestsellers"
+          title="پرفروش‌ترین محصولات خرده‌فروشی"
+          subtitle="رتبه‌بندی بر اساس تعداد فروش ثبت‌شده"
+          action-label="مشاهده محصولات خرده‌فروشی"
+          :action-to="{ name: 'products', query: { retail: '1' } }"
+        />
         <div class="home-empty home-retail-bestsellers__unavailable" role="status"><i class="pi pi-chart-bar" aria-hidden="true"></i><p>با راه‌اندازی ثبت سفارش و گزارش فروش، این بخش بر اساس آمار واقعی فروش نمایش داده می‌شود.</p></div>
       </section>
 
@@ -627,36 +659,6 @@ onUnmounted(() => {
   gap: 12px;
 }
 
-.category-card {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 14px;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius);
-  background: var(--tm-surface);
-  box-shadow: var(--tm-card-shadow);
-  cursor: pointer;
-  text-align: start;
-  font-family: inherit;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
-}
-.category-card:hover { border-color: var(--tm-line-strong); box-shadow: var(--tm-card-shadow-hover); transform: none; }
-.category-card:focus-visible { outline: 2px solid var(--tm-cyan); outline-offset: 2px; }
-.category-card__icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 4px;
-  background: var(--tm-blue-soft);
-  color: var(--tm-blue);
-  flex: none;
-}
-.category-card__content { display: flex; flex-direction: column; min-width: 0; gap: .2rem; }
-.category-card__name { font-size: 13px; font-weight: 700; color: var(--tm-ink); line-height: 1.5; overflow-wrap: anywhere; }
-.category-card__content small { color: var(--tm-muted); font-size: 13px; }
-
 .home-product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 210px));
@@ -664,51 +666,6 @@ onUnmounted(() => {
   align-items: stretch;
   gap: 10px;
 }
-
-.product-card {
-  display: flex;
-  flex-direction: column;
-  background: var(--tm-surface);
-  border: 1px solid var(--tm-line);
-  border-radius: 4px;
-  box-shadow: var(--tm-card-shadow);
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
-}
-.product-card:hover { border-color: var(--tm-line-strong); box-shadow: var(--tm-card-shadow-hover); transform: none; }
-.product-card:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
-
-.product-card__main { display: flex; flex-direction: column; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
-.product-card__main:focus-visible { outline: 2px solid var(--tm-violet); outline-offset: 3px; border-radius: 4px; }
-.product-card__media {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 4 / 5;
-  background: var(--tm-surface-alt);
-  color: var(--tm-faint);
-  font-size: 30px;
-}
-.product-card__media img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
-
-.product-card__body { display: flex; flex-direction: column; gap: 5px; padding: 11px; flex: 1; }
-.product-card__name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--tm-ink);
-  line-height: 1.7;
-  display: block;
-  overflow-wrap: anywhere;
-}
-.product-card__company { font-size: 11.5px; color: var(--tm-muted); }
-.product-sku { font-size: 11px; color: var(--tm-faint); }
-.product-card__foot { margin-top: auto; padding: 9px 11px 11px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-.product-card__foot .tm-btn { min-height: 44px; }
-.product-card__price { font-size: 12px; font-weight: 700; color: var(--tm-blue); }
-.product-card-cta { font-size: 11.5px; font-weight: 700; color: var(--tm-blue); }
-.product-card-cta i { margin-inline-start: .3rem; }
-.product-card__body .tm-pill { align-self: flex-start; }
 
 .home-recent__name { color: var(--tm-ink); font-weight: 600; text-decoration: none; }
 .home-recent__product { display: flex; align-items: center; gap: .7rem; color: var(--tm-ink); text-decoration: none; min-width: 220px; }
@@ -815,7 +772,6 @@ onUnmounted(() => {
 }
 @media (prefers-reduced-motion: reduce) {
   .home-skeleton { animation: none; }
-  .product-card:hover, .category-card:hover { transform: none; }
 }
 
 @media(max-width:520px){.home-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),210px));gap:8px}}
@@ -841,36 +797,13 @@ onUnmounted(() => {
 .home-category-track .category-card:hover{transform:translateY(-3px);border-color:var(--tm-cyan)}
 @media(max-width:640px){.home-campaign-hero,.home-campaign-hero__slide,.home-campaign-hero__fallback{min-height:360px}.home-campaign-hero__shade{background:linear-gradient(0deg,rgba(4,20,39,.92),rgba(4,20,39,.26))}.home-campaign-hero__inner{align-items:flex-end;padding-block:34px 74px}.home-campaign-hero__copy h1{font-size:27px}.home-campaign-hero__copy p{font-size:13px}.home-campaign-hero__controls{bottom:20px}.home-category-track .category-card{flex-basis:72vw}}
 
-/* Match the product catalogue card dimensions and content rhythm exactly. */
-.home-page .product-card{min-width:0;min-height:0;border-radius:4px;box-shadow:var(--tm-card-shadow);transition:border-color .18s,box-shadow .18s}
-.home-page .product-card:hover{border-color:var(--tm-line-strong);box-shadow:0 5px 16px rgba(20,20,60,.09);transform:none}
-.home-page .product-card__main{min-height:0}
-.home-page .product-card__media{position:relative;aspect-ratio:4 / 5;min-height:0;background:#f4f5fa;color:#a5a9bb;font-size:36px;overflow:hidden}
-.home-page .product-card__media img{width:100%;height:100%;object-fit:contain;padding:10px}
-.home-page .product-card__media-category{position:absolute;z-index:1;top:10px;inset-inline-start:10px;max-width:70%;padding:4px 7px;border-radius:3px;background:#fff;color:#525a70;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.home-page .product-card__body{display:flex;flex:1;flex-direction:column;gap:4px;padding:11px}
-.home-page .product-card__brand{margin-bottom:2px;color:var(--tm-blue);font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.home-page .product-card__verified{display:inline-flex;align-items:center;gap:4px;color:#14846f;font-size:10px}
-.home-page .product-card__mode{align-self:flex-start;padding:2px 6px;border-radius:3px;background:var(--tm-blue-soft);color:var(--tm-blue);font-size:10px;font-weight:700}
-.home-page .product-card__name{display:-webkit-box;min-height:44px;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:var(--tm-ink);font-size:13px;font-weight:650;line-height:1.8}
-.home-page .product-card__specs{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:4px;color:var(--tm-muted);font-size:10px}
-.home-page .product-card__specs b{font-weight:500}
-.home-page .product-card__company,.home-page .product-card__availability{color:var(--tm-muted);font-size:10px}
-.home-page .product-card__foot{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-top:auto;padding:10px 11px 11px;border-top:1px solid var(--tm-line)}
-.home-page .product-card__price{display:flex;flex-direction:column;gap:3px;color:var(--tm-ink);font-size:12px}
-.home-page .product-card__price small{color:var(--tm-muted);font-size:10px;font-weight:400}
-.home-page .product-card__price b{font-size:12px;font-weight:700}
+/* Card chrome now lives in the shared StoreProductCard widget; only the
+   homepage action slot needs size tuning. */
 .home-page .product-card__foot .tm-btn{min-height:32px;padding:6px 9px;font-size:10px}
-.home-page .product-card-cta{display:inline-flex;align-items:center;gap:4px;color:var(--tm-blue);font-size:10px;font-weight:700;text-decoration:none}
-.home-page .product-card__main:focus-visible{outline:2px solid var(--ds-color-focus);outline-offset:-2px}
 
 /* More intentional storefront composition: campaign, proof points, discovery and product shelves. */
 .home-container{gap:30px}
 .home-section{padding:0}
-.home-section .site-section-title{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--tm-line)}
-.home-section .site-section-title h2{position:relative;margin:0;color:var(--tm-ink);font-size:19px;font-weight:800}
-.home-section .site-section-title h2:after{content:"";position:absolute;right:0;bottom:-11px;width:48px;height:3px;border-radius:4px;background:var(--tm-cyan)}
-.home-section .site-section-title>a{display:inline-flex;align-items:center;gap:7px;color:var(--tm-blue);font-size:12px;font-weight:700;text-decoration:none}
 .home-campaign-hero__fallback{width:100%;background:radial-gradient(circle at 15% 30%,rgba(18,184,166,.28),transparent 32%),linear-gradient(115deg,#082746 0%,#0c4268 58%,#126b83 100%)}
 .home-campaign-hero__fallback-inner{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);align-items:center;gap:clamp(24px,5vw,72px);padding-block:52px}
 .home-campaign-hero__fallback-copy{max-width:680px}
@@ -909,9 +842,6 @@ onUnmounted(() => {
   .home-reveal:not(.is-revealed){opacity:0}
   .home-reveal.is-revealed{animation:home-reveal-in 720ms var(--home-ease-expo) var(--reveal-delay,0ms) backwards}
 
-  .home-section .site-section-title.home-reveal h2:after{transform:scaleX(0);transform-origin:right}
-  .home-section .site-section-title.is-revealed h2:after{transform:scaleX(1);transition:transform 700ms var(--home-ease-expo) .34s}
-
   .home-campaign-hero__copy{animation:home-hero-in .7s var(--home-ease-out) both}
   .home-campaign-hero__fallback-copy{animation:home-hero-in .7s var(--home-ease-out) .06s both}
   .home-campaign-hero__spotlight{animation:home-hero-in .8s var(--home-ease-expo) .16s both}
@@ -923,14 +853,6 @@ onUnmounted(() => {
 @keyframes home-reveal-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 @keyframes home-hero-in{from{opacity:0;transform:translateY(16px)}}
 @keyframes home-hero-drift{from{transform:scale(1.015)}to{transform:scale(1.08)}}
-
-@media (hover:hover) and (pointer:fine){
-  .home-page .product-card__media img{transition:transform .5s var(--home-ease-out)}
-  .home-page .product-card:hover .product-card__media img{transform:scale(1.05)}
-  .home-page .product-card-cta i{transition:transform .3s var(--home-ease-out)}
-  .home-page .product-card:hover .product-card-cta i{transform:translateX(-4px)}
-  .home-category-track .category-card:hover .category-card__icon{background:var(--tm-cyan-soft);color:var(--tm-blue-strong)}
-}
 
 @media (prefers-reduced-motion:reduce){.home-campaign-hero__image.is-active{animation:none}}
 </style>

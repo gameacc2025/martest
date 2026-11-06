@@ -26,6 +26,16 @@ const productListingPath = [
 ].find(existsSync)
 if (!productListingPath) throw new Error('Could not locate ProductListing.vue')
 
+const readShared = (path) => {
+  const candidates = [
+    resolve(process.cwd(), 'packages/shared-ui', path),
+    resolve(process.cwd(), '../../packages/shared-ui', path),
+  ]
+  const file = candidates.find(existsSync)
+  if (!file) throw new Error(`Could not locate shared store widget: ${path}`)
+  return readFileSync(file, 'utf8')
+}
+
 describe('Website Product Listing — TEM storefront', () => {
   let wrapper
   const mountListing = () => mount(ProductListing, { global: { stubs: {
@@ -91,7 +101,7 @@ describe('Website Product Listing — TEM storefront', () => {
   it('links products to the existing product-details route', async () => {
     wrapper = mountListing()
     await flushPromises()
-    const link = wrapper.find('.product-card')
+    const link = wrapper.find('.shop-product-card .product-card__main')
     expect(link.attributes('data-route')).toBe('product-details')
     expect(link.attributes('data-product-id')).toBe('42')
   })
@@ -99,7 +109,7 @@ describe('Website Product Listing — TEM storefront', () => {
   it('renders supplier trust, product metadata and inquiry/retail price from API data', async () => {
     wrapper = mountListing()
     await flushPromises()
-    expect(wrapper.find('.shop-product-brand').text()).toContain('FiberPro')
+    expect(wrapper.find('.product-card__brand').text()).toContain('FiberPro')
     expect(wrapper.find('.product-meta').text()).toContain('XG-1200')
     expect(wrapper.find('.product-meta').text()).toContain('FP-XG1200')
     expect(wrapper.find('.product-verified').text()).toContain('تأمین‌کننده تأییدشده')
@@ -121,9 +131,11 @@ describe('Website Product Listing — TEM storefront', () => {
     wrapper = mountListing()
     await flushPromises()
     const source = readFileSync(productListingPath, 'utf8')
+    const cardSource = readShared('components/store/StoreProductCard.vue').replace(/\s+/g, '')
     expect(source).toContain('repeat(auto-fill,minmax(min(100%,168px),210px))')
-    expect(source).toContain('aspect-ratio:4 / 5')
-    expect(source).toContain('flex-direction:column;padding:11px')
+    expect(cardSource).toContain('aspect-ratio:4/5')
+    expect(cardSource).toContain('flex-direction:column')
+    expect(cardSource).toContain('padding:11px')
     expect(wrapper.find('.shop-product-card').exists()).toBe(true)
   })
 

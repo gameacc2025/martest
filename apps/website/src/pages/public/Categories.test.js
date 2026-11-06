@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { flushPromises, shallowMount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 
 const { getCategories } = vi.hoisted(() => ({ getCategories: vi.fn() }))
 
@@ -9,7 +9,7 @@ vi.mock('../../stores/products', () => ({
 
 import Categories from './Categories.vue'
 
-const mountCategories = () => shallowMount(Categories, {
+const mountCategories = () => mount(Categories, {
   global: {
     stubs: {
       Card: { template: '<article class="card-stub"><slot name="content" /></article>' },

@@ -11,6 +11,20 @@ const homePath = [
 if (!homePath) throw new Error('Could not locate the Website homepage source file')
 const source = readFileSync(homePath, 'utf8')
 
+const readShared = (path) => {
+  const candidates = [
+    resolve(process.cwd(), 'packages/shared-ui', path),
+    resolve(process.cwd(), '../../packages/shared-ui', path),
+  ]
+  const file = candidates.find(existsSync)
+  if (!file) throw new Error(`Could not locate shared store widget: ${path}`)
+  return readFileSync(file, 'utf8')
+}
+
+// Card chrome was extracted from Home.vue into the shared store widgets.
+const productCardSource = readShared('components/store/StoreProductCard.vue')
+const productCardCompact = productCardSource.replace(/\s+/g, '')
+
 describe('Website homepage contracts (tem redesign)', () => {
   it('keeps the production API and category store as the source of page data', () => {
     expect(source).toContain('productsApi.list(params)')
@@ -41,7 +55,7 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('class="category-card"')
     expect(source).toContain('<router-link')
     expect(source).toContain('class="product-card"')
-    expect(source).toContain('.product-card:focus-visible')
+    expect(productCardSource).toContain('.product-card__main:focus-visible')
   })
 
   it('uses scheduled database campaigns as the homepage hero and keeps category navigation live', () => {
@@ -64,7 +78,7 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('سرویس سفارش و موجودی هنوز آماده نیست')
     expect(source).toContain('disabled')
     expect(source).toContain('class="product-card-cta"')
-    expect(source).toContain('class="product-sku"')
+    expect(productCardSource).toContain('class="product-sku"')
   })
 
   it('limits each homepage product section to two desktop rows and uses portrait product imagery', () => {
@@ -72,7 +86,7 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('limit: 8, featured: true')
     expect(source).toContain('featuredProducts.slice(0, 8)')
     expect(source).toContain('recentProducts.slice(0, 8)')
-    expect(source).toContain('aspect-ratio: 4 / 5')
+    expect(productCardSource).toContain('aspect-ratio: 4 / 5')
     expect(source).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))')
   })
 
@@ -88,9 +102,9 @@ describe('Website homepage contracts (tem redesign)', () => {
 
   it('uses the same bounded product-card width as the catalogue', () => {
     expect(source).toContain('repeat(auto-fill, minmax(min(100%, 168px), 210px))')
-    expect(source).toContain('aspect-ratio:4 / 5')
-    expect(source).toContain('padding:11px')
-    expect(source).toContain('min-height:44px')
+    expect(productCardCompact).toContain('aspect-ratio:4/5')
+    expect(productCardCompact).toContain('padding:11px')
+    expect(productCardCompact).toContain('min-height:44px')
   })
 
   it('renders a real product spotlight without redundant marketplace benefit sections', () => {
@@ -151,7 +165,7 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain("addEventListener('visibilitychange', handleVisibilityChange)")
     expect(source).toContain('prefersReducedMotion()')
     // Interaction feedback animates transform/opacity only.
-    expect(source).toContain('.home-page .product-card:hover .product-card__media img')
+    expect(productCardSource).toContain('.store-product-card:hover .product-card__media img')
     expect(source).toContain('revealDelay(index)')
   })
 })

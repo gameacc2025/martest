@@ -3,6 +3,10 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import PageHeader from '@telecom/shared-ui/components/common/PageHeader.vue'
+import StoreSectionHeading from '@telecom/shared-ui/components/store/StoreSectionHeading.vue'
+import StoreCategoryCard from '@telecom/shared-ui/components/store/StoreCategoryCard.vue'
+import StoreProductCard from '@telecom/shared-ui/components/store/StoreProductCard.vue'
+import StoreFilterPanel from '@telecom/shared-ui/components/store/StoreFilterPanel.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
@@ -196,16 +200,33 @@ onUnmounted(stopSlider)
     </div>
 
     <section v-if="categoryOptions.length" class="shop-category-section">
-      <div class="shop-section-heading"><div><span>مرور سریع</span><h2>خرید بر اساس دسته‌بندی</h2></div><router-link :to="{ name: 'categories' }">همه دسته‌ها <i class="pi pi-arrow-left"></i></router-link></div>
+      <StoreSectionHeading
+        eyebrow="مرور سریع"
+        title="خرید بر اساس دسته‌بندی"
+        action-label="همه دسته‌ها"
+        :action-to="{ name: 'categories' }"
+      />
       <div class="shop-category-strip">
-        <button v-for="category in categoryOptions.slice(0, 8)" :key="category.id" type="button" class="shop-category-tile" :class="{ active: selectedCategory === category.id }" @click="chooseCategory(category.id)">
-          <i class="pi pi-box"></i><span>{{ category.label }}</span><small v-if="category.count">{{ category.count.toLocaleString('fa-IR') }} محصول</small>
-        </button>
+        <StoreCategoryCard
+          v-for="category in categoryOptions.slice(0, 8)"
+          :key="category.id"
+          as="button"
+          variant="tile"
+          :category="category"
+          icon="pi pi-box"
+          :count="category.count"
+          :active="selectedCategory === category.id"
+          @select="chooseCategory(category.id)"
+        />
       </div>
     </section>
 
     <section v-if="featuredProducts.length" class="shop-featured-section">
-      <div class="shop-section-heading"><div><span>انتخاب بازارگاه</span><h2>محصولات ویژه</h2></div><span class="shop-section-note">منتخب‌های منتشرشده از کاتالوگ تأمین‌کنندگان</span></div>
+      <StoreSectionHeading eyebrow="انتخاب بازارگاه" title="محصولات ویژه">
+        <template #actions>
+          <span class="shop-section-note">منتخب‌های منتشرشده از کاتالوگ تأمین‌کنندگان</span>
+        </template>
+      </StoreSectionHeading>
       <div class="shop-featured-grid">
         <router-link v-for="product in featuredProducts.slice(0, 4)" :key="product.id" :to="productRoute(product)" class="shop-mini-product">
           <span class="shop-mini-image"><img v-if="imageOf(product)?.url" :src="imageOf(product).url" :alt="productName(product)" loading="lazy" /><i v-else class="pi pi-box"></i></span>
@@ -216,8 +237,13 @@ onUnmounted(stopSlider)
     </section>
 
     <div class="shop-catalog-layout">
-      <aside class="shop-filter-sidebar" aria-label="فیلتر محصولات">
-        <div class="shop-filter-head"><div><i class="pi pi-sliders-h"></i><b>فیلتر محصولات</b></div><button type="button" @click="resetFilters">حذف همه</button></div>
+      <StoreFilterPanel
+        class="shop-filter-sidebar"
+        aria-label="فیلتر محصولات"
+        title="فیلتر محصولات"
+        clear-label="حذف همه"
+        @clear="resetFilters"
+      >
         <div class="shop-filter-section">
           <h3>جستجوی محصول</h3>
           <form class="shop-search" @submit.prevent="applyFilters"><InputText v-model="searchQuery" placeholder="نام، برند یا مدل محصول…" /><Button type="submit" icon="pi pi-search" aria-label="جستجو" /></form>
@@ -237,7 +263,7 @@ onUnmounted(stopSlider)
           <Select v-model="selectedSort" :options="sortOptions" optionLabel="label" optionValue="value" class="shop-sort-select" />
         </div>
         <div class="shop-filter-actions"><Button label="اعمال فیلترها" icon="pi pi-filter" @click="applyFilters" /><button type="button" @click="resetFilters">پاک کردن فیلترها</button></div>
-      </aside>
+      </StoreFilterPanel>
 
       <section class="shop-products-area" aria-label="محصولات فروشگاه" aria-live="polite" :aria-busy="loading">
         <div class="shop-results-toolbar">
@@ -250,21 +276,18 @@ onUnmounted(stopSlider)
         <div v-else-if="!products.length" class="shop-state"><i class="pi pi-search"></i><b>هیچ محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><Button label="حذف فیلترها" severity="secondary" @click="resetFilters" /></div>
         <template v-else>
           <div class="shop-product-grid">
-            <article v-for="product in remainingProducts" :key="product.id" class="shop-product-card">
-              <router-link :to="productRoute(product)" class="shop-product-image product-card">
-                <img v-if="imageOf(product)?.url" :src="imageOf(product).url" :alt="productName(product)" loading="lazy" width="480" height="360" />
-                <i v-else class="pi pi-box"></i>
-                <span v-if="categoryName(product)" class="shop-product-category">{{ categoryName(product) }}</span>
-                <span v-if="product.isFeatured" class="shop-product-featured"><i class="pi pi-star-fill"></i> ویژه</span>
-              </router-link>
-              <div class="shop-product-info">
-                <div class="shop-product-brand">{{ product.brand || product.company?.name || 'تجهیزات شبکه' }}</div>
-                <span v-if="product.company?.isVerified" class="product-verified"><i class="pi pi-verified"></i> تأمین‌کننده تأییدشده</span>
-                <router-link :to="productRoute(product)" class="shop-product-title">{{ productName(product) }}</router-link>
-                <div class="shop-product-specs product-meta"><span v-if="product.brand">{{ product.brand }}</span><span v-if="product.model">{{ product.model }}</span><span v-if="product.sku">شناسه: {{ product.sku }}</span></div>
-                <div class="shop-product-bottom product-card-footer"><div class="product-card-price"><small>{{ product.prices?.length ? 'شروع قیمت از' : 'قیمت' }}</small><b>{{ productPrice(product) }}</b></div><router-link :to="productRoute(product)" aria-label="مشاهده جزئیات"><i class="pi pi-arrow-left"></i><span>جزئیات محصول</span></router-link></div>
-              </div>
-            </article>
+            <StoreProductCard
+              v-for="product in remainingProducts"
+              :key="product.id"
+              class="shop-product-card"
+              :product="product"
+              :to="productRoute(product)"
+              :category="categoryName(product)"
+              :verified="Boolean(product.company?.isVerified)"
+              :brand="product.brand || product.company?.name || 'تجهیزات شبکه'"
+              :featured="Boolean(product.isFeatured)"
+              :price-label="productPrice(product)"
+            />
           </div>
           <div v-if="totalPages > 1" class="shop-pagination"><Paginator aria-label="صفحه‌بندی محصولات" :rows="filters.limit" :totalRecords="totalItems" :rowsPerPageOptions="[24, 48, 96]" @page="onPageChange" /></div>
         </template>
@@ -288,22 +311,22 @@ onUnmounted(stopSlider)
 .shop-hero-media img{position:relative;z-index:1;filter:drop-shadow(0 14px 18px rgba(0,0,0,.2));transition:transform .45s ease}
 .shop-hero-media:hover img{transform:scale(1.045)}.shop-hero-media img{width:100%;height:100%;object-fit:contain}.shop-hero-media>i{font-size:90px;color:#d6e8fa}.shop-hero-label{position:absolute;top:12px;inset-inline-start:12px;padding:5px 9px;background:var(--tm-blue);color:#fff;border-radius:3px;font-size:11px}.shop-slider-controls{display:flex;align-items:center;gap:10px;margin-top:18px}.shop-slider-controls>button{width:29px;height:29px;border:1px solid rgba(255,255,255,.35);border-radius:3px;background:transparent;color:#fff}.shop-slider-dots{display:flex;gap:6px}.shop-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:#9eb6d0}.shop-slider-dots button.active{width:21px;border-radius:4px;background:#fff}
 .shop-hero--loading{display:flex;justify-content:center;gap:14px;color:#fff;min-height:316px}
-.shop-category-section,.shop-featured-section{margin-bottom:28px}.shop-section-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:13px}.shop-section-heading>div>span,.shop-results-kicker{color:var(--tm-blue);font-size:11px;font-weight:600}.shop-section-heading h2{margin:4px 0 0;font-size:17px;font-weight:600}.shop-section-heading>a{color:var(--tm-blue);font-size:12px;text-decoration:none}.shop-section-heading>a i{margin-inline-start:5px}.shop-section-note{color:var(--tm-muted);font-size:11px}
-.shop-category-strip{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}.shop-category-tile{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0;min-height:102px;padding:14px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);text-align:start;cursor:pointer;transition:border-color .15s,background .15s}.shop-category-tile>i{display:grid;place-items:center;width:32px;height:32px;background:var(--tm-blue-soft);color:var(--tm-blue);border-radius:4px}.shop-category-tile span{font-size:12px;font-weight:600;overflow-wrap:anywhere}.shop-category-tile small{color:var(--tm-muted);font-size:10px}.shop-category-tile.active,.shop-category-tile:hover{border-color:var(--tm-blue);background:#f8f7ff}
+.shop-category-section,.shop-featured-section{margin-bottom:28px}.shop-results-kicker{color:var(--tm-blue);font-size:11px;font-weight:600}.shop-section-note{color:var(--tm-muted);font-size:11px}
+.shop-category-strip{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}
 .shop-featured-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.shop-mini-product{display:flex;align-items:center;gap:10px;min-width:0;padding:10px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;color:inherit;text-decoration:none;box-shadow:var(--tm-card-shadow)}.shop-mini-image{display:grid;place-items:center;flex:none;width:68px;height:68px;background:#f4f5fa;border-radius:3px;overflow:hidden}.shop-mini-image img{width:100%;height:100%;object-fit:contain;padding:5px}.shop-mini-image i{font-size:23px;color:var(--tm-blue)}.shop-mini-content{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}.shop-mini-content b{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.shop-mini-content small{color:var(--tm-muted);font-size:10px}.shop-mini-content strong{font-size:11px;color:var(--tm-blue)}.shop-mini-arrow{color:#9aa0b4}
 .shop-catalog-layout{display:grid;grid-template-columns:310px minmax(0,1fr);grid-template-areas:"filters products";gap:22px;align-items:start;direction:rtl}
 .shop-filter-sidebar{grid-area:filters;display:block!important;visibility:visible;min-width:0}
 .shop-products-area{grid-area:products;min-width:0}
-.shop-filter-head{background:#fbfbfe}
+
 .shop-filter-section h3{color:var(--tm-ink)}
 .shop-search :deep(.p-inputtext){text-align:right}
-.shop-search :deep(.p-inputtext)::placeholder{color:#9aa1b3}.shop-filter-sidebar{position:sticky;top:82px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);overflow:hidden}.shop-filter-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--tm-line)}.shop-filter-head>div{display:flex;align-items:center;gap:9px;font-size:14px}.shop-filter-head>div i{color:var(--tm-blue)}.shop-filter-head button,.shop-filter-actions>button{border:0;background:none;color:var(--tm-blue);font-size:11px;cursor:pointer}.shop-filter-section{padding:17px 16px;border-bottom:1px solid var(--tm-line)}.shop-filter-section h3{display:flex;justify-content:space-between;margin:0 0 12px;font-size:13px;font-weight:600}.shop-filter-section h3 small{color:var(--tm-muted);font-size:10px;font-weight:400}.shop-search{display:flex;gap:6px}.shop-search :deep(.p-inputtext){width:100%;min-width:0;height:38px;font-size:11px}.shop-search :deep(.p-button){flex:none;width:40px;background:var(--tm-blue);border-color:var(--tm-blue)}.shop-filter-option{display:flex;align-items:center;gap:9px;width:100%;padding:8px 0;border:0;background:none;color:var(--tm-ink-soft);text-align:start;font-size:12px;cursor:pointer}.shop-filter-option small{margin-inline-start:auto;color:var(--tm-muted);font-size:10px}.shop-check{width:15px;height:15px;flex:none;border:1px solid #cfd3e0;border-radius:3px}.shop-filter-option.active{color:var(--tm-blue);font-weight:600}.shop-filter-option.active .shop-check{border-color:var(--tm-blue);background:var(--tm-blue);box-shadow:inset 0 0 0 3px #fff}.shop-price-inputs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}.shop-price-inputs :deep(.p-inputnumber),.shop-price-inputs :deep(.p-inputtext){width:100%;min-width:0}.shop-price-inputs :deep(.p-inputtext){height:36px;padding:7px;font-size:11px}.shop-price-inputs>span{color:var(--tm-muted);font-size:10px}.shop-sort-select{width:100%}.shop-retail-filter{display:flex;align-items:flex-start;gap:9px;cursor:pointer;color:var(--tm-ink);font-size:12px;line-height:1.8}.shop-retail-filter input{position:absolute;opacity:0;pointer-events:none}.shop-retail-filter__check{display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;margin-top:3px;border:1px solid var(--tm-line);border-radius:3px;background:var(--tm-surface);color:transparent}.shop-retail-filter input:checked + .shop-retail-filter__check{border-color:var(--tm-blue);background:var(--tm-blue);color:#fff}.shop-retail-filter input:focus-visible + .shop-retail-filter__check{outline:2px solid var(--tm-blue);outline-offset:2px}.shop-retail-filter__check i{font-size:10px}.shop-retail-filter b,.shop-retail-filter small{display:block}.shop-retail-filter small{color:var(--tm-muted);font-size:11px}
+.shop-search :deep(.p-inputtext)::placeholder{color:#9aa1b3}.shop-filter-sidebar{position:sticky;top:82px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);overflow:hidden}.shop-filter-actions>button{border:0;background:none;color:var(--tm-blue);font-size:11px;cursor:pointer}.shop-filter-section{padding:17px 16px;border-bottom:1px solid var(--tm-line)}.shop-filter-section h3{display:flex;justify-content:space-between;margin:0 0 12px;font-size:13px;font-weight:600}.shop-filter-section h3 small{color:var(--tm-muted);font-size:10px;font-weight:400}.shop-search{display:flex;gap:6px}.shop-search :deep(.p-inputtext){width:100%;min-width:0;height:38px;font-size:11px}.shop-search :deep(.p-button){flex:none;width:40px;background:var(--tm-blue);border-color:var(--tm-blue)}.shop-filter-option{display:flex;align-items:center;gap:9px;width:100%;padding:8px 0;border:0;background:none;color:var(--tm-ink-soft);text-align:start;font-size:12px;cursor:pointer}.shop-filter-option small{margin-inline-start:auto;color:var(--tm-muted);font-size:10px}.shop-check{width:15px;height:15px;flex:none;border:1px solid #cfd3e0;border-radius:3px}.shop-filter-option.active{color:var(--tm-blue);font-weight:600}.shop-filter-option.active .shop-check{border-color:var(--tm-blue);background:var(--tm-blue);box-shadow:inset 0 0 0 3px #fff}.shop-price-inputs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}.shop-price-inputs :deep(.p-inputnumber),.shop-price-inputs :deep(.p-inputtext){width:100%;min-width:0}.shop-price-inputs :deep(.p-inputtext){height:36px;padding:7px;font-size:11px}.shop-price-inputs>span{color:var(--tm-muted);font-size:10px}.shop-sort-select{width:100%}.shop-retail-filter{display:flex;align-items:flex-start;gap:9px;cursor:pointer;color:var(--tm-ink);font-size:12px;line-height:1.8}.shop-retail-filter input{position:absolute;opacity:0;pointer-events:none}.shop-retail-filter__check{display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;margin-top:3px;border:1px solid var(--tm-line);border-radius:3px;background:var(--tm-surface);color:transparent}.shop-retail-filter input:checked + .shop-retail-filter__check{border-color:var(--tm-blue);background:var(--tm-blue);color:#fff}.shop-retail-filter input:focus-visible + .shop-retail-filter__check{outline:2px solid var(--tm-blue);outline-offset:2px}.shop-retail-filter__check i{font-size:10px}.shop-retail-filter b,.shop-retail-filter small{display:block}.shop-retail-filter small{color:var(--tm-muted);font-size:11px}
 .shop-filter-actions{display:grid;gap:9px;padding:14px 16px}.shop-filter-actions :deep(.p-button){height:39px;background:var(--tm-blue);border-color:var(--tm-blue);font-size:12px}.shop-filter-actions>button{padding:5px}
 .shop-results-toolbar{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:14px;padding:15px 17px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow)}.shop-results-toolbar h2{margin:3px 0;font-size:17px;font-weight:600}.shop-results-toolbar p{margin:0;color:var(--tm-muted);font-size:11px}.shop-results-tools{display:flex;align-items:center;gap:12px}.shop-results-tools>span{display:flex;align-items:center;gap:5px;color:var(--tm-muted);font-size:11px}.shop-results-tools :deep(.p-select){min-width:145px;font-size:11px}
-.shop-product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,168px),210px));justify-content:start;gap:10px}.shop-product-card{display:flex;flex-direction:column;min-width:0;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;box-shadow:var(--tm-card-shadow);overflow:hidden;transition:box-shadow .18s,border-color .18s}.shop-product-card:hover{border-color:var(--tm-line-strong);box-shadow:0 5px 16px rgba(20,20,60,.09)}.shop-product-image{position:relative;display:grid;place-items:center;aspect-ratio:4 / 5;min-height:0;background:#f4f5fa;overflow:hidden}.shop-product-image img{width:100%;height:100%;object-fit:contain;padding:10px}.shop-product-image>i{font-size:36px;color:#a5a9bb}.shop-product-category,.shop-product-featured{position:absolute;top:10px;padding:4px 7px;border-radius:3px;background:#fff;color:#525a70;font-size:10px}.shop-product-category{inset-inline-start:10px}.shop-product-featured{inset-inline-end:10px;background:var(--tm-blue-soft);color:var(--tm-blue)}.shop-product-info{display:flex;flex:1;flex-direction:column;padding:11px}.shop-product-brand{margin-bottom:5px;color:var(--tm-blue);font-size:10px;font-weight:600}.shop-product-title{display:-webkit-box;min-height:44px;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;color:var(--tm-ink);font-size:13px;font-weight:650;line-height:1.8;text-decoration:none}.shop-product-specs{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:8px;color:var(--tm-muted);font-size:10px}.shop-product-bottom{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-top:auto;padding-top:10px;border-top:1px solid var(--tm-line)}.shop-product-bottom small,.shop-product-bottom b{display:block}.shop-product-bottom small{color:var(--tm-muted);font-size:10px}.shop-product-bottom b{margin-top:4px;color:var(--tm-ink);font-size:12px;font-weight:700}.shop-product-bottom>a{display:grid;place-items:center;width:32px;height:32px;background:var(--tm-blue-soft);color:var(--tm-blue);border-radius:3px;text-decoration:none}
+.shop-product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,168px),210px));justify-content:start;gap:10px}
 .shop-state{display:flex;min-height:300px;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px;background:var(--tm-surface);border:1px dashed var(--tm-line-strong);border-radius:4px;color:var(--tm-muted);text-align:center}.shop-state>i{font-size:30px;color:var(--tm-blue)}.shop-state>b{color:var(--tm-ink);font-size:14px}.shop-state>span{font-size:12px}.shop-state--error>i{color:#d94848}.shop-pagination{margin-top:18px;background:var(--tm-surface);border:1px solid var(--tm-line);border-radius:4px;overflow:hidden}
 @media(max-width:1200px){.shop-hero{gap:18px;padding:22px}.shop-catalog-layout{grid-template-columns:280px minmax(0,1fr)}.shop-category-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.shop-featured-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.shop-catalog-layout{grid-template-columns:260px minmax(0,1fr)}}
 @media(max-width:820px){.shop-hero{grid-template-columns:minmax(0,1fr) minmax(220px,.75fr);padding:20px}.shop-hero-media{height:210px}.shop-catalog-layout{grid-template-columns:1fr;grid-template-areas:"filters" "products"}.shop-filter-sidebar{position:static}.shop-results-toolbar{align-items:flex-start;flex-direction:column}.shop-results-tools{width:100%;justify-content:space-between}}
 @media(max-width:520px){.shop-hero{grid-template-columns:1fr;padding:17px}.shop-hero-media{grid-row:1;height:190px}.shop-page{padding-inline:12px}.shop-category-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-featured-grid{grid-template-columns:1fr}.shop-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),210px));gap:8px}.shop-results-tools>span{display:none}}
-@media(prefers-reduced-motion:reduce){.shop-product-card,.shop-category-tile,.shop-hero-media img{transition:none}.shop-hero-copy,.shop-hero-media{animation:none}}
+@media(prefers-reduced-motion:reduce){.shop-hero-media img{transition:none}.shop-hero-copy,.shop-hero-media{animation:none}}
 </style>
