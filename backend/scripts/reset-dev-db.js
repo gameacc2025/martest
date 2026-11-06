@@ -28,5 +28,5 @@ console.warn('\nWARNING: DEVELOPMENT DATABASE RESET');
 console.warn('All tables and data in ' + databaseUrl.hostname + '/' + databaseName + ' will be erased.');
 console.warn('The schema will be recreated and the repeatable demo seed will run.\n');
 
-execFileSync('npx', ['prisma', 'db', 'push', '--force-reset', '--accept-data-loss'], { stdio: 'inherit' });
-execFileSync(process.execPath, ['prisma/seed.js'], { stdio: 'inherit' });
+execFileSync('npx', ['prisma', 'migrate', 'reset', '--force'], { stdio: 'inherit' });
+execFileSync('npx', ['prisma', 'db', 'seed'], { stdio: 'inherit' });
