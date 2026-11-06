@@ -88,7 +88,7 @@ function categoryIcon(category) {
               :aria-pressed="activeCategory?.id === cat.id"
               @mouseenter="setActiveCategory(cat)"
               @focus="setActiveCategory(cat)"
-              @click="setActiveCategory(cat)"
+              @click="goToCategory(cat.id)"
             >
               <i :class="categoryIcon(cat)" class="mega-cat-icon" aria-hidden="true"></i>
               <span class="mega-cat-name">{{ cat.nameFa || cat.name || cat.nameEn }}</span>
