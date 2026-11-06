@@ -44,19 +44,16 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('.product-card:focus-visible')
   })
 
-  it('uses a search-first hero wired to the search route', () => {
-    expect(source).toContain('class="home-hero__eyebrow"')
-    expect(source).toContain('ثبت درخواست استعلام')
-    expect(source).toContain('showMyInquiriesLink')
-    expect(source).toContain('productSalesMode(product)')
+  it('uses scheduled database campaigns as the homepage hero and keeps category navigation live', () => {
+    expect(source).toContain("bannersApi.listActive('HOME_HERO')")
+    expect(source).toContain('home-campaign-hero')
+    expect(source).toContain('activeBanner.title')
+    expect(source).toContain('setInterval(() => { activeBannerIndex.value')
+    expect(source).toContain('home-category-track')
+    expect(source).toContain('همه دسته‌بندی‌ها')
     expect(source).toContain('categoryIcon(category)')
     expect(source).toContain('چرا Telecom Market؟')
-    expect(source).toContain('role="search"')
-    expect(source).toContain('name="homepage-search"')
-    expect(source).toContain('autocomplete="off"')
-    expect(source).toContain('setInterval(nextSlide, 6500)')
-    expect(source).toContain("window.matchMedia?.('(prefers-reduced-motion: reduce)')")
-    expect(source).toContain('handleSliderFocusOut')
+    expect(source).toContain('ثبت درخواست استعلام')
   })
 
   it('shows supplier verification and explicit inquiry pricing when no price exists', () => {
@@ -82,9 +79,9 @@ describe('Website homepage contracts (tem redesign)', () => {
   it('uses the unified tem design system tokens', () => {
     expect(source).toContain('class="home-page"')
     expect(source).toContain('class="home-container"')
-    expect(source).toContain('class="site-hero home-hero"')
-    expect(source).toContain('home-featured-slider')
-    expect(source).toContain('aria-label="اسلایدر محصولات منتخب فروشگاه"')
+    expect(source).toContain('class="home-campaign-hero"')
+    expect(source).toContain('home-campaign-hero__controls')
+    expect(source).toContain('aria-label="پیشنهادهای ویژه بازارگاه"')
     expect(source).toContain('function nextSlide()')
     expect(source).toContain('onUnmounted(stopSlider)')
     expect(source).toContain('home-product-grid--recent')
