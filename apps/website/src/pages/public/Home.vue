@@ -357,6 +357,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
           <article v-for="product in recentProducts.slice(0, 8)" :key="product.id" class="product-card">
             <router-link :to="productRoute(product)" class="product-card__main">
               <span class="product-card__media">
+                <span v-if="productCategoryName(product)" class="product-card__media-category">{{ productCategoryName(product) }}</span>
                 <img v-if="getProductImage(product)" :src="getProductImage(product).url" :alt="product.name || product.title || 'تصویر محصول'" width="320" height="240" loading="lazy" decoding="async" />
                 <i v-else class="pi pi-box" aria-hidden="true"></i>
               </span>
@@ -609,7 +610,8 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
 
 .home-product-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 210px));
+  justify-content: start;
   align-items: stretch;
   gap: 10px;
 }
@@ -749,16 +751,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   border: 0;
 }
 
-@media (min-width: 1700px) {
-  .home-product-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-}
-
-@media (max-width: 1200px) {
-  .home-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
 @media (max-width: 820px) {
-  .home-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .home-featured-slider { grid-template-columns: minmax(0,1fr); }
   .home-featured-slider__media { min-height: 190px; }
   .home-featured-slider__media img { height: 180px; }
@@ -782,7 +775,7 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
   .tm-table td:first-child::before { display: none; }
 }
 @media (max-width: 575px) {
-  .home-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+   .home-product-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 8px; }
   .home-featured-slider { min-height: 0; }
   .home-promo-banner { min-height:230px; }
   .home-featured-slider__content { padding: 1rem 1rem 3.2rem; }
