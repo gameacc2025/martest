@@ -27,7 +27,7 @@ const routes = [
     path: "/",
     component: PublicLayout,
     children: [
-      { path: "", alias: "/products", name: "products", component: ProductListing, meta: { title: "همه محصولات" } },
+      { path: "", alias: "/products", name: "products", component: ProductListing, meta: { title: "فروشگاه تجهیزات شبکه و مخابرات" } },
       {
         path: "notifications",
         name: "notifications",
