@@ -139,6 +139,126 @@ async function upsertDemoUser(prisma, { phone, passwordHash, role, companyId = n
   return user;
 }
 
+function buildProductSpecifications(subcategory, item) {
+  const [brand, model, , equipmentType, capacity, interfaceType] = item;
+  const digits = Number.parseInt(String(capacity).match(/\d+/)?.[0] || '', 10) || null;
+  const common = {
+    manufacturer: brand,
+    model,
+    equipment_type: equipmentType,
+    capacity,
+    interface: interfaceType,
+    deployment: 'Telecom / Enterprise',
+    productDataStatus: 'DEMO_REFERENCE_VERIFY_DATASHEET',
+  };
+  const details = {
+    cable: {
+      cable_type: 'فیبر نوری',
+      fiber_or_pair_count: digits,
+      jacket_type: 'مطابق نسخه PE / LSZH',
+      installation_type: 'بیرونی / زیرساختی',
+    },
+    'switching-routing': {
+      equipment_type: equipmentType,
+      port_count: digits,
+      port_speed: interfaceType,
+      switching_capacity: 'طبق دیتاشیت دقیق SKU',
+      poe_support: /PoE/i.test(capacity) ? 'PoE' : 'ندارد',
+    },
+    'radio-access-units': {
+      equipment_type: equipmentType,
+      operating_frequency: 'مطابق باند فرکانسی مدل',
+      bandwidth: 'مطابق پیکربندی رادیویی',
+      port_count: digits,
+      output_power: 'طبق دیتاشیت دقیق SKU',
+    },
+    'transport-platforms': {
+      platform_type: equipmentType,
+      transmission_capacity: capacity,
+      channel_count: 'وابسته به کارت‌های line',
+      service_port_count: 'وابسته به کارت‌های سرویس',
+    },
+    'satellite-modems': {
+      download_speed: 'وابسته به waveform و پروفایل شبکه',
+      upload_speed: 'وابسته به waveform و پروفایل شبکه',
+      ethernet_ports: 1,
+    },
+    antennas: {
+      antenna_type: equipmentType,
+      gain: 'وابسته به باند و نسخه آنتن',
+      operating_frequency: interfaceType,
+      bandwidth: 'طبق دیتاشیت دقیق SKU',
+      polarization: '±45°',
+      vswr: 'طبق دیتاشیت سازنده',
+      beamwidth: 'وابسته به باند',
+    },
+    'towers-structures': {
+      structure_type: equipmentType,
+      height: digits,
+      wind_load: 'محاسبه بر اساس استاندارد و موقعیت سایت',
+      ice_load: 'محاسبه بر اساس شرایط اقلیمی سایت',
+      load_capacity: 'طبق محاسبات سازه و نقشه اجرایی',
+    },
+    'rectifiers-chargers': {
+      output_power: capacity,
+      output_voltage: '-48 VDC',
+      output_current: 'وابسته به مدل ماژول',
+      module_count: 'وابسته به آرایش رکتیفایر',
+      efficiency: 'طبق دیتاشیت دقیق SKU',
+    },
+    'shelters-cabinets': {
+      equipment_type: equipmentType,
+      rack_size: 'مطابق آرایش داخلی کابینت',
+      depth: 'مطابق مدل و سفارش',
+    },
+    'racks-cabinets': {
+      rack_type: equipmentType,
+      height: digits,
+      width: 600,
+      depth: 1070,
+      max_load: 'طبق دیتاشیت سازنده',
+    },
+    servers: {
+      server_type: equipmentType,
+      processor: interfaceType,
+      socket_count: 2,
+      ram: 'وابسته به پیکربندی؛ نسل حافظه طبق مدل',
+      drive_bays: 'گزینه‌های hot-swap وابسته به شاسی',
+      network_ports: 'وابسته به پیکربندی سفارش',
+    },
+    'firewalls-security-gateways': {
+      firewall_throughput: 'طبق دیتاشیت دقیق SKU',
+      ips_throughput: 'طبق دیتاشیت دقیق SKU',
+      max_vpn_tunnels: 'طبق لایسنس و نسخه نرم‌افزار',
+      max_connections: 'طبق دیتاشیت دقیق SKU',
+      port_count: 'طبق پیکربندی سخت‌افزار',
+      vpn_protocols: 'IPsec / SSL VPN؛ وابسته به مدل',
+    },
+    'pbx-systems': {
+      pbx_type: equipmentType,
+      extension_count: 'وابسته به لایسنس و پیکربندی',
+      concurrent_calls: 'وابسته به لایسنس و منابع سامانه',
+      fxs_ports: 'وابسته به شاسی و کارت',
+      fxo_ports: 'وابسته به شاسی و کارت',
+      sip_trunk: true,
+    },
+    'iot-gateways': {
+      gateway_type: equipmentType,
+      iot_protocols: interfaceType,
+      port_count: digits,
+      ram: 'طبق پیکربندی دقیق SKU',
+    },
+    'optical-test-equipment': {
+      equipment_type: equipmentType,
+      measurement_range: 'وابسته به ماژول و نسخه دستگاه',
+      accuracy: 'طبق دیتاشیت سازنده',
+      max_range: 'وابسته به نسخه OTDR',
+      wavelength: interfaceType,
+    },
+  };
+  return { ...common, ...(details[subcategory] || {}) };
+}
+
 async function seedDemoMarketplace(prisma, { permissionByName }) {
   if (process.env.NODE_ENV !== 'development' || process.env.SEED_DEMO_DATA === 'false') {
     console.log('Skipping demo marketplace data outside development.');
@@ -235,11 +355,7 @@ async function seedDemoMarketplace(prisma, { permissionByName }) {
           description: description + ' این رکورد مرجع آزمایشی است؛ پیش از عرضه تجاری باید با دیتاشیت سازنده و شرایط تأمین‌کننده تطبیق داده شود.',
           sku: 'SKU-' + String(company.id).padStart(4, '0') + '-' + normalizeCode(model),
           brand, model, catalogCode,
-          specifications: {
-            manufacturer: brand, model, equipmentType, capacity,
-            interface: interfaceType, deployment: 'Telecom / Enterprise',
-            productDataStatus: 'DEMO_REFERENCE_VERIFY_DATASHEET',
-          },
+          specifications: buildProductSpecifications(family.subcategory, item),
           status: 'PUBLISHED', visibility: 'PUBLIC',
           companyId: company.id, categoryId: category.id,
           subcategoryId: subcategory.id, createdByUserId: catalogUser.id,
