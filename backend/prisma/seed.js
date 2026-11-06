@@ -42,7 +42,7 @@ const prisma = new PrismaClient();
 const SUPER_ADMIN_USER = {
   email: process.env.SUPER_ADMIN_EMAIL || 'admin@telecommarketplace.local',
   phone: process.env.SUPER_ADMIN_PHONE || '09120000000',
-  password: process.env.SUPER_ADMIN_PASSWORD || 'Admin@123456',
+  password: process.env.SUPER_ADMIN_PASSWORD || (process.env.NODE_ENV === 'development' ? 'A123@456' : 'Admin@123456'),
   status: 'ACTIVE',
 };
 
