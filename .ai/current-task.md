@@ -822,3 +822,5 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Final alignment: Home and ProductListing now use the same 150–210px card track at the <=520px breakpoint as well; the catalogue no longer applies smaller mobile body/title overrides. MegaMenu now also closes on Escape and exposes `aria-controls`. Latest responsive/menu commits: `166e018`, `a06b76b`, `df3e22a`, `894a404`.
 
 - Verification update for code SHA `ee46af7`: changed-surface tests (Home, ProductListing, PublicLayout and MegaMenu) pass; all frontend builds and backend tests pass; Database Migration Validation passes. The aggregate frontend/shared test step still reports 5 unrelated existing failures in FAQ (1), Terms (2) and WorkspacePageHeading (2). Runtime Validation's disposable Compose/browser-smoke workflow is still running. No manual visual inspection of the homepage has been performed.
+
+- Menu interaction contract preserved after final review: clicking a top-level category navigates directly to its filtered catalogue; hover/focus reveals its subcategory panel; subcategory buttons route to their filtered catalogue. Escape closes the dropdown.
