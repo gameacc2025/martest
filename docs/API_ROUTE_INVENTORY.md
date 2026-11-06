@@ -129,10 +129,11 @@ Bearer authentication; operations are scoped to the current user profile.
 
 ### companies — `/api/v1/companies`
 
-All routes inherit bearer authentication; companyRouteAccess enforces STAFF or own-company context, plus the listed permission.
+The public storefront route is registered at the root app scope and requires no authentication. Remaining management routes inherit bearer authentication; companyRouteAccess enforces STAFF or own-company context, plus the listed permission.
 
 | Method | Full path | Route guard / scope |
 |---|---|---|
+| GET | `/api/v1/companies/public/:id` | `Public, allowlisted company profile; no authentication` |
 | GET | `/api/v1/companies` | `companyRouteAccess({ staffOnly: true }), requirePermission('companies.read')` |
 | GET | `/api/v1/companies/:id` | `companyRouteAccess(), requireAnyPermission('companies.read', 'company_profile.read')` |
 | GET | `/api/v1/companies/:id/products` | `companyRouteAccess(), requirePermission('companies.read')` |
