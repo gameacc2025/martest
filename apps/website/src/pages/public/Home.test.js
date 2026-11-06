@@ -93,10 +93,9 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('min-height:44px')
   })
 
-  it('renders a real product spotlight and marketplace benefits in the homepage hero area', () => {
+  it('renders a real product spotlight without redundant marketplace benefit sections', () => {
     expect(source).toContain('home-campaign-hero__spotlight')
     expect(source).toContain('activeFeaturedProduct')
-    expect(source).toContain('home-marketplace-benefits')
     expect(source).toContain('home-campaign-hero__quick-links')
   })
 
@@ -106,7 +105,10 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).not.toContain('+1,500')
     expect(source).not.toContain('+5,000')
     expect(source).toContain('ثبت درخواست برای دریافت پیشنهاد تأمین‌کنندگان')
-    expect(source).toContain('class="feature-icon"')
+    expect(source).not.toContain('home-marketplace-benefits')
+    expect(source).not.toContain('home-features')
+    expect(source).not.toContain('home-feature-grid')
+    expect(source).not.toContain('class="feature-icon"')
   })
 
   it('uses the unified tem design system tokens', () => {
