@@ -17,7 +17,8 @@ export {
   ordersApi,
   statsApi,
   adminApi,
-  inquiriesApi
+  inquiriesApi,
+  bannersApi
 } from './apiClient.js'
 export {
   handleApiError,
