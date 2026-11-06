@@ -47,6 +47,12 @@ async function getOne(request, reply) {
   return reply.send(success(product));
 }
 
+async function getSimilar(request, reply) {
+  const products = await svc.listSimilarProducts(request.params.id);
+  if (products === null) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'محصول یافت نشد' } });
+  return reply.send(success(products));
+}
+
 async function getPriceHistory(request, reply) {
   const history = await svc.getPublicPriceHistory(request.params.id);
   if (history === null) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'محصول یافت نشد' } });
@@ -162,6 +168,7 @@ module.exports = {
   getActivity,
   getOne,
   getPriceHistory,
+  getSimilar,
   create,
   update,
   remove,
