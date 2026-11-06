@@ -36,7 +36,8 @@
             <div class="product-meta">
               <span v-if="product.brand"><i class="pi pi-tag"></i>{{ product.brand }}</span>
               <span v-if="product.model"><i class="pi pi-box"></i>مدل {{ product.model }}</span>
-              <span v-if="product.sku" class="sku"><i class="pi pi-hashtag"></i>{{ product.sku }}</span>
+              <span v-if="product.sku" class="sku"><i class="pi pi-hashtag"></i>کد فروشنده: {{ product.sku }}</span>
+              <span v-if="product.catalogCode" class="catalog-code"><i class="pi pi-clone"></i>کد کالای مشترک: {{ product.catalogCode }}</span>
             </div>
           </div>
         </div>
@@ -108,6 +109,38 @@
                   <dd>{{ row.value }}</dd>
                 </div>
               </dl>
+            </section>
+
+            <section v-if="similarProductsLoading || similarProducts.length" class="content-card similar-products-card">
+              <div class="section-heading">
+                <span class="section-icon"><i class="pi pi-clone"></i></span>
+                <div>
+                  <h2>همین کالا نزد تأمین‌کنندگان دیگر</h2>
+                  <p>عرضه‌های دیگر با کد سازنده و مدل یکسان</p>
+                </div>
+                <span v-if="similarProducts.length" class="spec-count">{{ similarProducts.length }} عرضه</span>
+              </div>
+
+              <div v-if="similarProductsLoading" class="similar-products-loading" role="status">
+                در حال بررسی عرضه‌کنندگان دیگر...
+              </div>
+              <div v-else class="similar-products-list">
+                <article v-for="item in similarProducts" :key="item.id" class="similar-product-row">
+                  <div class="similar-product-image">
+                    <img v-if="item.images?.[0]?.url" :src="item.images[0].url" :alt="item.title" loading="lazy" />
+                    <i v-else class="pi pi-box"></i>
+                  </div>
+                  <div class="similar-product-copy">
+                    <strong>{{ item.title }}</strong>
+                    <span>{{ item.company?.name || 'تأمین‌کننده' }}</span>
+                    <small>{{ item.brand }} · {{ item.model }}</small>
+                  </div>
+                  <div class="similar-product-action">
+                    <strong>{{ similarPrice(item) }}</strong>
+                    <Button label="مشاهده" size="small" severity="secondary" outlined @click="viewSimilarProduct(item.id)" />
+                  </div>
+                </article>
+              </div>
             </section>
           </section>
 
@@ -271,6 +304,8 @@ const priceHistoryRecords = ref([])
 const priceHistoryLoading = ref(false)
 const priceHistoryError = ref('')
 const priceHistoryLoaded = ref(false)
+const similarProducts = ref([])
+const similarProductsLoading = ref(false)
 
 const canCreateInquiry = computed(() => authStore.isAuthenticated
   && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
@@ -281,6 +316,32 @@ const productTags = computed(() => {
   return [...new Set(tags.map(tag => String(typeof tag === 'object' ? (tag.name || tag.label || '') : tag).trim()).filter(Boolean))]
 })
 const priceHistoryPoints = computed(() => buildPriceHistoryPoints(priceHistoryRecords.value))
+
+const loadSimilarProducts = async (productId) => {
+  if (!product.value.catalogCode) {
+    similarProducts.value = []
+    return
+  }
+  similarProductsLoading.value = true
+  try {
+    const response = await apiGet(`/products/${productId}/similar`)
+    const payload = response?.data?.data ?? response?.data ?? response
+    similarProducts.value = Array.isArray(payload) ? payload : []
+  } catch {
+    // Similar listings are supplementary; a failed lookup must not break product details.
+    similarProducts.value = []
+  } finally {
+    similarProductsLoading.value = false
+  }
+}
+
+const similarPrice = (item) => {
+  const tiers = Array.isArray(item?.prices) ? item.prices : []
+  const retail = tiers.find(tier => Number(tier.minQuantity ?? tier.minOrderQty ?? 1) === 1) || tiers[0]
+  return retail?.price != null ? formatPrice(retail.price) : 'قیمت با استعلام'
+}
+
+const viewSimilarProduct = (productId) => router.push(`/products/${productId}`)
 
 const openPriceHistory = async () => {
   priceHistoryDialogOpen.value = true
@@ -387,6 +448,8 @@ const loadProduct = async () => {
     selectedImage.value = product.value.images?.find((image) => image?.isPrimary && image?.url)?.url
       || product.value.images?.find((image) => image?.url)?.url
       || ''
+    if (product.value.catalogCode) void loadSimilarProducts(productId)
+    else similarProducts.value = []
   } catch (err) {
     const status = err.status ?? err.response?.status
     loadError.value = err.response?.data?.error?.message
@@ -544,6 +607,36 @@ const goBack = () => router.push('/products')
 .product-meta span { display: inline-flex; align-items: center; gap: 5px; }
 .product-meta i { color: var(--tm-blue); font-size: 12px; }
 .product-meta .sku { direction: ltr; unicode-bidi: isolate; }
+.product-meta .catalog-code { direction: ltr; unicode-bidi: isolate; color: var(--tm-blue-strong); }
+
+.similar-products-list { display: flex; flex-direction: column; }
+.similar-product-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--tm-line);
+}
+.similar-product-image {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: var(--tm-radius-sm);
+  background: var(--tm-surface-alt);
+  color: var(--tm-muted);
+}
+.similar-product-image img { width: 100%; height: 100%; object-fit: contain; }
+.similar-product-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.similar-product-copy strong { color: var(--tm-ink); font-size: 12.5px; }
+.similar-product-copy span { color: var(--tm-ink-soft); font-size: 11.5px; }
+.similar-product-copy small { color: var(--tm-muted); font-size: 10.5px; }
+.similar-product-action { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.similar-product-action strong { color: var(--tm-ink); font-size: 11.5px; white-space: nowrap; }
+.similar-products-loading { padding: 14px 0; color: var(--tm-muted); font-size: 12px; }
+
 
 /* ---------- Layout ---------- */
 .product-layout {
@@ -919,6 +1012,9 @@ const goBack = () => router.push('/products')
   .product-heading { padding: 14px; }
   .product-title { font-size: var(--tm-fs-h2); }
   .specification-row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .similar-product-row { grid-template-columns: 52px minmax(0, 1fr); }
+  .similar-product-image { width: 52px; height: 48px; }
+  .similar-product-action { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; }
   .content-card, .purchase-card, .company-card, .tags-card, .help-card { padding: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
