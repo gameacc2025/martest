@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
+import { useCompanyStore } from '../../stores/companies'
 import { useCartStore } from '../../stores/cart'
 import { useWishlistStore } from '../../stores/wishlist'
 import Breadcrumb from 'primevue/breadcrumb'
@@ -13,69 +14,70 @@ import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
 const route = useRoute()
 const router = useRouter()
 const productsStore = useProductsStore()
+const companyStore = useCompanyStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 
 const company = ref(null)
 const products = ref([])
 const loading = ref(false)
-const errorMessage = ref('')
+const profileError = ref('')
+const productsError = ref('')
 const currentPage = ref(1)
 const perPage = ref(12)
 const totalProducts = ref(0)
-
 const home = { icon: 'pi pi-home', to: '/' }
 
-watch(
-  () => route.params.id,
-  () => {
-    currentPage.value = 1
-    loadCompanyProducts()
-  },
-  { immediate: true },
-)
+watch(() => route.params.id, () => {
+  currentPage.value = 1
+  loadCompanyPage()
+}, { immediate: true })
 
-async function loadCompanyProducts() {
+async function loadCompanyPage() {
   const companyId = Number(route.params.id)
   if (!Number.isInteger(companyId) || companyId < 1) {
     company.value = null
     products.value = []
     totalProducts.value = 0
-    errorMessage.value = 'شناسه شرکت معتبر نیست.'
+    profileError.value = 'شناسه شرکت معتبر نیست.'
     loading.value = false
     return
   }
 
   loading.value = true
-  errorMessage.value = ''
-  company.value = null
-  try {
-    // Public company reads, reviews, and follows are not exposed by the current
-    // backend contract. Use the public catalog endpoint, which explicitly
-    // supports companyId and returns only PUBLISHED + PUBLIC products.
-    const result = await productsStore.getProducts({
-      page: currentPage.value,
-      limit: perPage.value,
-      companyId,
-    })
-    const catalogProducts = Array.isArray(result?.data) ? result.data : []
-    products.value = catalogProducts.map(normalizeProduct)
+  profileError.value = ''
+  productsError.value = ''
+
+  const [profileResult, productsResult] = await Promise.allSettled([
+    companyStore.getPublicCompany(companyId),
+    productsStore.getProducts({ page: currentPage.value, limit: perPage.value, companyId }),
+  ])
+
+  if (profileResult.status === 'fulfilled') {
+    company.value = profileResult.value
+  } else {
+    company.value = null
+    profileError.value = 'دریافت معرفی عمومی شرکت ممکن نشد. لطفاً دوباره تلاش کنید.'
+    console.error('Error loading public company profile:', profileResult.reason)
+  }
+
+  if (productsResult.status === 'fulfilled') {
+    const result = productsResult.value
+    products.value = (Array.isArray(result?.data) ? result.data : []).map(normalizeProduct)
     totalProducts.value = result?.meta?.total ?? products.value.length
-    company.value = products.value.find(product => product.company)?.company ?? null
-  } catch (error) {
-    console.error('Error loading public company products:', error)
+  } else {
     products.value = []
     totalProducts.value = 0
-    errorMessage.value = 'دریافت محصولات عمومی این شرکت ممکن نشد. لطفاً دوباره تلاش کنید.'
-  } finally {
-    loading.value = false
+    productsError.value = 'دریافت محصولات این شرکت ممکن نشد.'
+    console.error('Error loading public company products:', productsResult.reason)
   }
+
+  loading.value = false
 }
 
 function normalizeProduct(product) {
   const images = Array.isArray(product?.images) ? product.images : []
-  const primaryImage = images.find(image => image?.isPrimary && image?.url)
-    || images.find(image => image?.url)
+  const primaryImage = images.find(image => image?.isPrimary && image?.url) || images.find(image => image?.url)
   const price = Number(product?.prices?.[0]?.price ?? product?.price ?? 0)
   return {
     ...product,
@@ -90,105 +92,102 @@ function normalizeProduct(product) {
 function onPageChange(event) {
   currentPage.value = event.page + 1
   perPage.value = event.rows
-  loadCompanyProducts()
+  loadCompanyPage()
 }
-
 function addToCart(product) {
-  cartStore.addToCart({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    image: product.image,
-    quantity: 1,
-  })
+  cartStore.addToCart({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 })
 }
-
-function addToWishlist(product) {
-  wishlistStore.addToWishlist(product)
-}
-
-function viewProduct(product) {
-  router.push({ name: 'product-details', params: { id: product.id } })
-}
-
-function goToProducts() {
-  router.push({ name: 'products' })
+function addToWishlist(product) { wishlistStore.addToWishlist(product) }
+function viewProduct(product) { router.push({ name: 'product-details', params: { id: product.id } }) }
+function goToProducts() { router.push({ name: 'products' }) }
+function companyTypeLabel(type) {
+  return ({ MANUFACTURER: 'تولیدکننده', IMPORTER: 'واردکننده', TELECOM_OPERATOR: 'اپراتور مخابراتی', SUPPLIER: 'تأمین‌کننده' })[type] || type || 'عضو بازارگاه'
 }
 </script>
 
 <template>
   <main class="company-profile-page ds-page" dir="rtl" aria-labelledby="company-profile-title" :aria-busy="loading">
-    <div class="company-profile-shell ds-container ds-stack">
+    <div class="company-profile-shell ds-container">
       <Breadcrumb :home="home" :model="[{ label: company?.name || 'صفحه شرکت' }]" aria-label="مسیر صفحه" />
 
-      <section v-if="loading" class="company-state ds-card" role="status" aria-live="polite" aria-busy="true">
-        <ProgressSpinner aria-label="در حال دریافت محصولات شرکت" />
-        <h1 id="company-profile-title">در حال دریافت محصولات شرکت</h1>
+      <section v-if="loading && !company" class="company-state ds-card" role="status" aria-live="polite">
+        <ProgressSpinner aria-label="در حال دریافت اطلاعات شرکت" />
+        <h1 id="company-profile-title">در حال دریافت صفحه شرکت</h1>
         <p>چند لحظه صبر کنید…</p>
       </section>
 
-      <section v-else-if="errorMessage" class="company-state company-state--error ds-card" role="alert">
+      <section v-else-if="profileError && !company" class="company-state company-state--error ds-card" role="alert">
         <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-        <h1 id="company-profile-title">دریافت اطلاعات شرکت ناموفق بود</h1>
-        <p>{{ errorMessage }}</p>
-        <Button label="تلاش دوباره" icon="pi pi-refresh" @click="loadCompanyProducts" />
+        <h1 id="company-profile-title">دریافت صفحه شرکت ناموفق بود</h1>
+        <p>{{ profileError }}</p>
+        <Button label="تلاش دوباره" icon="pi pi-refresh" @click="loadCompanyPage" />
       </section>
 
-      <template v-else>
+      <template v-else-if="company">
         <header class="company-hero">
-          <div class="company-hero__identity">
-            <span class="company-hero__icon" aria-hidden="true"><img v-if="company?.logo" :src="company.logo" :alt="company.name" /><i v-else class="pi pi-building"></i></span>
-            <div class="company-hero__copy">
-            <h1 id="company-profile-title" class="ds-h1">{{ company?.name || 'محصولات منتشرشده این شرکت' }}</h1>
-            <p v-if="company?.type" class="company-type">{{ company.type }}</p>
-            <p v-if="company?.description" class="company-description">{{ company.description }}</p>
-            <p class="ds-lead">
-              این فهرست فقط محصولاتی را نشان می‌دهد که در کاتالوگ عمومی منتشر شده‌اند.
-            </p>
+          <div class="company-hero__topline">
+            <div class="company-identity">
+              <div class="company-logo">
+                <img v-if="company.logo" :src="company.logo" :alt="'لوگوی ' + company.name" />
+                <i v-else class="pi pi-building" aria-hidden="true"></i>
+              </div>
+              <div class="company-title-wrap">
+                <div class="company-title-row">
+                  <h1 id="company-profile-title">{{ company.name }}</h1>
+                  <span v-if="company.isVerified" class="verified-pill"><i class="pi pi-verified"></i> تأییدشده</span>
+                </div>
+                <p class="company-kind">{{ companyTypeLabel(company.type) }}</p>
+                <p v-if="company.nameEn" class="company-name-en" dir="ltr">{{ company.nameEn }}</p>
+              </div>
+            </div>
+            <div class="company-hero__actions">
+              <span class="product-count"><strong>{{ Number(company._count?.products ?? totalProducts).toLocaleString('fa-IR') }}</strong> محصول منتشرشده</span>
+              <Button label="مشاهده همه محصولات" icon="pi pi-arrow-left" severity="secondary" outlined @click="goToProducts" />
             </div>
           </div>
-          <div class="company-hero__meta">
-            <span class="ds-badge ds-badge--info">{{ totalProducts.toLocaleString('fa-IR') }} محصول عمومی</span>
-            <Button label="همه محصولات" icon="pi pi-arrow-left" severity="secondary" outlined @click="goToProducts" />
+
+          <section class="company-introduction" aria-labelledby="company-intro-title">
+            <div class="intro-heading"><i class="pi pi-building" aria-hidden="true"></i><h2 id="company-intro-title">معرفی شرکت</h2></div>
+            <p v-if="company.description">{{ company.description }}</p>
+            <p v-else class="intro-empty">این شرکت هنوز توضیحی برای معرفی مجموعه خود ثبت نکرده است.</p>
+          </section>
+
+          <div class="company-contact-grid" aria-label="اطلاعات شرکت">
+            <div v-if="company.address" class="contact-item"><i class="pi pi-map-marker"></i><span><small>نشانی</small>{{ company.address }}</span></div>
+            <a v-if="company.phone" class="contact-item" :href="'tel:' + company.phone"><i class="pi pi-phone"></i><span><small>تلفن تماس</small>{{ company.phone }}</span></a>
+            <a v-if="company.email" class="contact-item" :href="'mailto:' + company.email"><i class="pi pi-envelope"></i><span><small>پست الکترونیکی</small>{{ company.email }}</span></a>
+            <a v-if="company.website" class="contact-item" :href="company.website" target="_blank" rel="noopener noreferrer"><i class="pi pi-globe"></i><span><small>وب‌سایت</small>{{ company.website }}</span></a>
+            <div v-if="company.createdAt" class="contact-item"><i class="pi pi-calendar"></i><span><small>عضویت در بازارگاه</small>{{ new Date(company.createdAt).toLocaleDateString('fa-IR') }}</span></div>
           </div>
         </header>
-        <section class="company-contact-strip" aria-label="اطلاعات تماس شرکت">
-          <div v-if="company?.address"><i class="pi pi-map-marker"></i><span><b>آدرس</b>{{ company.address }}</span></div><a v-if="company?.phone" :href="'tel:' + company.phone"><i class="pi pi-phone"></i><span><b>تلفن</b>{{ company.phone }}</span></a><a v-if="company?.email" :href="'mailto:' + company.email"><i class="pi pi-envelope"></i><span><b>ایمیل</b>{{ company.email }}</span></a><a v-if="company?.website" :href="company.website" target="_blank" rel="noopener noreferrer"><i class="pi pi-globe"></i><span><b>وب‌سایت</b>{{ company.website }}</span></a><span v-if="company?.isVerified" class="company-verified"><i class="pi pi-verified"></i> شرکت تأییدشده</span>
-        </section>
+
         <section class="company-products-section" aria-labelledby="company-products-title">
-          <header class="ds-section-head">
+          <header class="products-heading">
             <div>
-              <span class="ds-eyebrow">کاتالوگ عمومی</span>
-              <h2 id="company-products-title" class="ds-h2">محصولات منتشرشده</h2>
+              <span class="section-kicker">فروشگاه شرکت</span>
+              <h2 id="company-products-title">محصولات شرکت</h2>
+              <p>محصولات منتشرشده و قابل مشاهده در بازارگاه</p>
             </div>
+            <span class="products-total">{{ totalProducts.toLocaleString('fa-IR') }} کالا</span>
           </header>
 
-          <div v-if="products.length === 0" class="company-state ds-card" role="status">
-            <i class="pi pi-box" aria-hidden="true"></i>
-            <h3>محصول عمومی برای نمایش وجود ندارد</h3>
-            <p>اطلاعات عمومی شرکت از طریق محصولات منتشرشده در دسترس قرار می‌گیرد.</p>
-            <Button label="مشاهده همه محصولات" icon="pi pi-arrow-left" @click="goToProducts" />
+          <div v-if="productsError" class="company-inline-error" role="alert">
+            <span>{{ productsError }}</span><Button label="تلاش دوباره" size="small" text @click="loadCompanyPage" />
           </div>
-
+          <div v-else-if="!loading && products.length === 0" class="company-state company-empty-products" role="status">
+            <i class="pi pi-box" aria-hidden="true"></i>
+            <h3>هنوز محصولی برای نمایش ثبت نشده است</h3>
+            <p>برای آشنایی با سایر کالاهای بازارگاه، به فروشگاه عمومی مراجعه کنید.</p>
+            <Button label="رفتن به فروشگاه" icon="pi pi-arrow-left" @click="goToProducts" />
+          </div>
           <div v-else class="company-product-grid">
-            <ProductCard
-              v-for="product in products"
-              :key="product.id"
-              :product="product"
-              @add-to-cart="addToCart"
-              @toggle-wishlist="addToWishlist"
-              @view-product="viewProduct"
-            />
+            <ProductCard v-for="product in products" :key="product.id" :product="product"
+              @add-to-cart="addToCart" @toggle-wishlist="addToWishlist" @view-product="viewProduct" />
           </div>
 
           <div v-if="totalProducts > 0" class="company-paginator" aria-label="صفحه‌بندی محصولات شرکت">
-            <Paginator
-              :first="(currentPage - 1) * perPage"
-              :rows="perPage"
-              :totalRecords="totalProducts"
-              :rowsPerPageOptions="[12, 24, 48, 96]"
-              @page="onPageChange"
-            />
+            <Paginator :first="(currentPage - 1) * perPage" :rows="perPage" :totalRecords="totalProducts"
+              :rowsPerPageOptions="[12, 24, 48, 96]" @page="onPageChange" />
           </div>
         </section>
       </template>
@@ -198,91 +197,57 @@ function goToProducts() {
 
 <style scoped>
 .company-profile-page { direction: rtl; }
-.company-description{margin:.35rem 0 0;color:var(--ds-color-text-muted);font-size:.82rem;line-height:1.9}.company-contact-strip{display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;padding:.9rem 1rem;border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface)}.company-contact-strip>div,.company-contact-strip>a{display:flex;align-items:flex-start;gap:.5rem;min-width:0;color:var(--ds-color-text);font-size:.78rem;line-height:1.8;text-decoration:none;overflow-wrap:anywhere}.company-contact-strip i{margin-top:.2rem;color:var(--ds-color-primary-text)}.company-contact-strip b{display:block;color:var(--ds-color-text-muted);font-size:.68rem}.company-contact-strip .company-verified{display:inline-flex;align-items:center;gap:.35rem;color:var(--ds-color-primary-text);font-size:.75rem;font-weight:700}
-.company-profile-shell { padding-block: var(--ds-space-8) var(--ds-space-16); }
-.company-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: var(--ds-space-6);
-  padding: 0 0 var(--ds-space-5);
-  border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  background: transparent;
-  box-shadow: none;
+.company-profile-shell { display: flex; flex-direction: column; gap: 1.25rem; padding-block: 1.25rem 3rem; }
+.company-hero { overflow: hidden; border: 1px solid var(--ds-color-border); border-radius: 14px; background: var(--ds-color-surface); }
+.company-hero__topline { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.35rem 1.5rem; background: color-mix(in srgb, var(--ds-color-primary) 5%, var(--ds-color-surface)); }
+.company-identity { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.company-logo { display: grid; place-items: center; flex: 0 0 76px; width: 76px; height: 76px; overflow: hidden; border: 1px solid var(--ds-color-border); border-radius: 12px; background: var(--ds-color-surface); color: var(--ds-color-primary-text); font-size: 1.8rem; }
+.company-logo img { width: 100%; height: 100%; object-fit: contain; padding: .4rem; }
+.company-title-wrap { min-width: 0; }
+.company-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.company-title-row h1 { margin: 0; color: var(--ds-color-text); font-size: clamp(1.2rem, 2vw, 1.65rem); font-weight: 800; line-height: 1.5; }
+.verified-pill { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .55rem; border-radius: 999px; background: color-mix(in srgb, var(--ds-color-primary) 10%, transparent); color: var(--ds-color-primary-text); font-size: .7rem; font-weight: 700; }
+.company-kind { margin: .25rem 0 0; color: var(--ds-color-primary-text); font-size: .82rem; font-weight: 700; }
+.company-name-en { margin: .15rem 0 0; color: var(--ds-color-text-muted); font-size: .76rem; }
+.company-hero__actions { display: flex; flex-direction: column; align-items: flex-end; gap: .7rem; flex-shrink: 0; }
+.product-count { color: var(--ds-color-text-muted); font-size: .8rem; }
+.product-count strong { color: var(--ds-color-text); font-size: 1.1rem; }
+.company-hero__actions :deep(.p-button) { font-size: .78rem; }
+.company-introduction { margin: 0 1.5rem; padding: 1rem 0 1.1rem; border-bottom: 1px solid var(--ds-color-border); }
+.intro-heading { display: flex; align-items: center; gap: .5rem; margin-bottom: .45rem; color: var(--ds-color-primary-text); }
+.intro-heading h2 { margin: 0; color: var(--ds-color-text); font-size: .92rem; font-weight: 800; }
+.company-introduction > p { max-width: 100ch; margin: 0; color: var(--ds-color-text); font-size: .84rem; line-height: 2.1; white-space: pre-line; }
+.company-introduction > .intro-empty { color: var(--ds-color-text-muted); }
+.company-contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: .75rem; padding: 1rem 1.5rem 1.2rem; }
+.contact-item { display: flex; align-items: flex-start; gap: .6rem; min-width: 0; color: var(--ds-color-text); text-decoration: none; font-size: .78rem; line-height: 1.8; overflow-wrap: anywhere; }
+.contact-item > i { margin-top: .2rem; color: var(--ds-color-primary-text); }
+.contact-item small { display: block; color: var(--ds-color-text-muted); font-size: .68rem; }
+.company-products-section { display: flex; flex-direction: column; gap: .9rem; }
+.products-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; padding: .1rem .1rem .75rem; border-bottom: 1px solid var(--ds-color-border); }
+.section-kicker { color: var(--ds-color-primary-text); font-size: .7rem; font-weight: 700; }
+.products-heading h2 { margin: .15rem 0; color: var(--ds-color-text); font-size: 1.12rem; font-weight: 800; }
+.products-heading p { margin: 0; color: var(--ds-color-text-muted); font-size: .76rem; }
+.products-total { padding: .35rem .65rem; border-radius: 7px; background: var(--ds-color-surface-alt); color: var(--ds-color-text-muted); font-size: .75rem; white-space: nowrap; }
+.company-product-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: stretch; justify-items: center; gap: 12px; }
+.company-product-grid > * { width: 100%; max-width: 210px; min-width: 0; }
+.company-paginator { margin-top: .4rem; }
+.company-state { display: flex; min-height: 15rem; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; padding: 2rem; text-align: center; }
+.company-state > i { color: var(--ds-color-primary-text); font-size: 2rem; }
+.company-state h1, .company-state h3 { margin: 0; color: var(--ds-color-text); font-size: 1rem; font-weight: 800; }
+.company-state p { max-width: 55ch; margin: 0; color: var(--ds-color-text-muted); font-size: .82rem; line-height: 1.9; }
+.company-inline-error { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1rem; border: 1px solid var(--ds-status-danger-fg); border-radius: 8px; color: var(--ds-color-text); font-size: .82rem; }
+.company-state--error { border: 1px solid var(--ds-status-danger-fg); }
+@media (max-width: 1100px) { .company-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 850px) { .company-product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .company-hero__topline { align-items: flex-start; } }
+@media (max-width: 620px) {
+  .company-profile-shell { gap: 1rem; padding-block: .8rem 2rem; }
+  .company-hero__topline { flex-direction: column; gap: .85rem; padding: 1rem; }
+  .company-logo { flex-basis: 58px; width: 58px; height: 58px; }
+  .company-hero__actions { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .company-introduction { margin-inline: 1rem; }
+  .company-contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: .9rem 1rem 1rem; }
+  .company-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .products-heading h2 { font-size: 1rem; }
 }
-.company-hero__copy { min-width: 0; }
-.company-type { margin: var(--ds-space-2) 0 0; color: var(--ds-color-primary-text); font-weight: var(--ds-font-weight-bold); }
-.company-hero__meta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--ds-space-3); }
-.company-products-section { display: flex; flex-direction: column; gap: var(--ds-space-4); }
-.company-product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ds-space-5); }
-.company-state {
-  display: flex;
-  min-height: 16rem;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--ds-space-3);
-  padding: var(--ds-space-8);
-  text-align: center;
-}
-.company-state > i { font-size: 2.25rem; color: var(--ds-color-primary-text); }
-.company-state h1, .company-state h3 { margin: 0; color: var(--ds-color-text); font-size: var(--ds-font-size-lg); font-weight: var(--ds-font-weight-bold); }
-.company-state p { max-width: 60ch; margin: 0; color: var(--ds-color-text-muted); line-height: var(--ds-line-height-relaxed); }
-.company-state--error { border-color: var(--ds-status-danger-fg); }
-.company-paginator { margin-top: var(--ds-space-4); }
-@media (max-width: 1000px) {
-  .company-hero { grid-template-columns: minmax(0, 1fr); align-items: start; }
-  .company-hero__meta { grid-column: auto; flex-direction: row; align-items: center; flex-wrap: wrap; }
-  .company-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 640px) {
-  .company-hero { grid-template-columns: minmax(0, 1fr); }
-  .company-hero__meta { grid-column: auto; align-items: stretch; }
-  .company-product-grid { grid-template-columns: minmax(0, 1fr); }
-}
-
-.company-hero {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.15rem;
-  border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-lg);
-  background: color-mix(in srgb, var(--ds-color-primary) 4%, var(--ds-color-surface));
-  box-shadow: var(--ds-shadow-xs);
-}
-.company-hero__identity { display: flex; min-width: 0; align-items: center; gap: .85rem; }
-.company-hero__icon {
-  display: grid;
-  place-items: center;
-  flex: 0 0 2.8rem;
-  width: 2.8rem;
-  height: 2.8rem;
-  border: 1px solid color-mix(in srgb, var(--ds-color-primary) 18%, transparent);
-  border-radius: 10px;
-  background: var(--ds-color-primary-soft);
-  color: var(--ds-color-primary-text);
-  font-size: 1.1rem;
-}
-.company-hero__copy h1 { font-size: clamp(1.25rem, 2vw, 1.65rem); line-height: 1.45; }
-.company-hero__copy .ds-lead { margin-top: .3rem; font-size: .78rem; line-height: 1.7; }
-.company-type { font-size: .76rem; }
-.company-hero__meta { align-items: flex-end; gap: .5rem; }
-.company-hero__meta .ds-badge { font-size: .72rem; }
-.company-hero__meta :deep(.p-button) { min-height: 2.75rem; font-size: .76rem; }
-.company-products-section { gap: 1rem; }
-.company-products-section .ds-section-head { padding-bottom: .65rem; border-bottom: 1px solid var(--ds-color-border); }
-.company-products-section .ds-h2 { font-size: 1rem; }
-.company-state { border-radius: var(--ds-radius-lg); box-shadow: var(--ds-shadow-xs); }
-@media (max-width: 1000px) {
-  .company-hero { grid-template-columns: minmax(0,1fr); }
-  .company-hero__meta { align-items: flex-start; }
-}
-@media (max-width: 640px) {
-  .company-hero { padding: .85rem; }
-  .company-hero__identity { align-items: flex-start; }
-  .company-hero__icon { flex-basis: 2.4rem; width: 2.4rem; height: 2.4rem; }
-}
-
+@media (max-width: 360px) { .company-contact-grid { grid-template-columns: 1fr; } .company-product-grid { grid-template-columns: 1fr; } }
 </style>
