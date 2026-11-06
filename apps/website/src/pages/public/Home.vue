@@ -384,6 +384,11 @@ onUnmounted(() => { stopSlider(); stopBannerSlider() })
         </div><div v-else class="home-empty"><i class="pi pi-shopping-bag" aria-hidden="true"></i><p>در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</p></div>
       </section>
 
+      <section class="home-section home-retail-bestsellers" aria-labelledby="home-retail-bestsellers">
+        <div class="site-section-title"><div><h2 id="home-retail-bestsellers">پرفروش‌ترین محصولات خرده‌فروشی</h2><p class="home-retail-section__subtitle">رتبه‌بندی بر اساس تعداد فروش ثبت‌شده</p></div><router-link :to="{ name: 'products', query: { retail: '1' } }">مشاهده محصولات خرده‌فروشی</router-link></div>
+        <div class="home-empty home-retail-bestsellers__unavailable" role="status"><i class="pi pi-chart-bar" aria-hidden="true"></i><p>با راه‌اندازی ثبت سفارش و گزارش فروش، این بخش بر اساس آمار واقعی فروش نمایش داده می‌شود.</p></div>
+      </section>
+
       <!-- Inquiry CTA -->
       <section class="home-cta">
         <div>
