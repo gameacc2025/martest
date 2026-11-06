@@ -12,7 +12,10 @@ function validatePayload(data) {
   if (!title || title.length > 120) throw new AppError('عنوان بنر الزامی و حداکثر ۱۲۰ کاراکتر است.', 400, true, 'INVALID_BANNER_TITLE');
   if (!data.imageUrl || typeof data.imageUrl !== 'string' || data.imageUrl.length > 1000) throw new AppError('تصویر بنر الزامی است.', 400, true, 'BANNER_IMAGE_REQUIRED');
   if (data.targetUrl && !/^\/(?!\/)|^https:\/\//i.test(data.targetUrl)) throw new AppError('لینک مقصد باید مسیر داخلی یا آدرس HTTPS باشد.', 400, true, 'INVALID_BANNER_URL');
-  if (data.startsAt && data.endsAt && new Date(data.endsAt) <= new Date(data.startsAt)) throw new AppError('زمان پایان باید بعد از زمان شروع باشد.', 400, true, 'INVALID_BANNER_SCHEDULE');
+  const start = data.startsAt ? new Date(data.startsAt) : null;
+  const end = data.endsAt ? new Date(data.endsAt) : null;
+  if ((start && Number.isNaN(start.getTime())) || (end && Number.isNaN(end.getTime()))) throw new AppError('زمان‌بندی بنر معتبر نیست.', 400, true, 'INVALID_BANNER_SCHEDULE');
+  if (start && end && end <= start) throw new AppError('زمان پایان باید بعد از زمان شروع باشد.', 400, true, 'INVALID_BANNER_SCHEDULE');
 }
 
 function activeWhere(placement) {
@@ -64,8 +67,8 @@ async function create(data) {
 }
 
 async function update(id, data) {
-  await getById(id);
-  const merged = { ...(await getById(id)), ...data };
+  const existing = await getById(id);
+  const merged = { ...existing, ...data };
   validatePayload(merged);
   const updateData = {};
   for (const key of ['title','description','imageUrl','targetUrl','ctaLabel','placement','sortOrder','status','isActive']) {
