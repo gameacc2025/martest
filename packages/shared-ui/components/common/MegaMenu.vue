@@ -27,12 +27,13 @@ function handleClickOutside(e) {
   }
 }
 
-function toggleCategory(cat) {
-  if (activeCategory.value?.id === cat.id) {
-    activeCategory.value = null
-  } else {
-    activeCategory.value = cat
-  }
+function setActiveCategory(cat) {
+  activeCategory.value = cat
+}
+
+function toggleMenu() {
+  isMenuOpen.value = !isMenuOpen.value
+  if (!isMenuOpen.value) activeCategory.value = null
 }
 
 function goToCategory(categoryId) {
@@ -62,29 +63,34 @@ function categoryIcon(category) {
 <template>
   <div class="mega-menu-wrapper" ref="menuRef">
     <!-- Trigger Button -->
-    <button class="mega-trigger" @click="isMenuOpen = !isMenuOpen">
+    <button type="button" class="mega-trigger" :aria-expanded="isMenuOpen" aria-haspopup="true" @click="toggleMenu">
       <i class="pi pi-th-large" aria-hidden="true"></i>
       <span>دسته‌بندی محصولات</span>
     </button>
 
     <!-- Dropdown -->
     <Transition name="mega">
-      <div v-show="isMenuOpen" class="mega-dropdown">
+      <div v-if="isMenuOpen" class="mega-dropdown" role="region" aria-label="دسته‌بندی‌های محصولات">
         <div class="mega-content">
           <!-- Category List (right side in RTL) -->
-          <div class="mega-categories">
-            <div
+          <div v-if="props.categories.length" class="mega-categories">
+            <button
               v-for="cat in props.categories"
               :key="cat.id"
+              type="button"
               class="mega-cat-item"
               :class="{ 'is-active': activeCategory?.id === cat.id }"
-              @mouseenter="toggleCategory(cat)"
-              @click="goToCategory(cat.id)"
+              :aria-pressed="activeCategory?.id === cat.id"
+              @mouseenter="setActiveCategory(cat)"
+              @focus="setActiveCategory(cat)"
+              @click="setActiveCategory(cat)"
             >
-              <i  :class="categoryIcon(cat)" class="mega-cat-icon" aria-hidden="true"></i>
-              <span class="mega-cat-name">{{ cat.nameFa }}</span>
-            </div>
+              <i :class="categoryIcon(cat)" class="mega-cat-icon" aria-hidden="true"></i>
+              <span class="mega-cat-name">{{ cat.nameFa || cat.name || cat.nameEn }}</span>
+              <i class="pi pi-chevron-left mega-cat-chevron" aria-hidden="true"></i>
+            </button>
           </div>
+          <div v-else class="mega-categories-empty">دسته‌بندی‌ای برای نمایش وجود ندارد.</div>
 
           <!-- Subcategory Panel -->
           <div class="mega-subcats">
@@ -102,8 +108,8 @@ function categoryIcon(category) {
                   class="mega-subcat-item"
                   @click="goToSubcategory(activeCategory.id, sub.id)"
                 >
-                  <span class="mega-subcat-name">{{ sub.nameFa }}</span>
-                </div>
+                  <span class="mega-subcat-name">{{ sub.nameFa || sub.name || sub.nameEn }}</span>
+                </button>
               </div>
             </template>
             <div v-else class="mega-subcat-empty">
@@ -170,6 +176,11 @@ function categoryIcon(category) {
 }
 
 .mega-cat-item {
+  width:calc(100% - .75rem);
+  border:0;
+  background:transparent;
+  text-align:start;
+  font:inherit;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -180,7 +191,7 @@ function categoryIcon(category) {
   color: var(--text-color);
 }
 
-.mega-cat-item:hover,
+ .mega-cat-item:hover,.mega-cat-item:focus-visible,
 .mega-cat-item.is-active {
   background: var(--surface-hover);
 }
@@ -193,6 +204,8 @@ function categoryIcon(category) {
 
 .mega-cat-icon { flex: 0 0 18px; color: var(--ds-color-primary-text, var(--primary-color)); font-size: 14px; }
 .mega-cat-name { flex: 1; }
+.mega-cat-chevron{font-size:10px;color:var(--tm-muted)}
+.mega-categories-empty{padding:22px;color:var(--tm-muted);font-size:12px}
 
 /* Subcategories panel */
 .mega-subcats {
@@ -240,6 +253,11 @@ function categoryIcon(category) {
 }
 
 .mega-subcat-item {
+  width:100%;
+  border:0;
+  background:transparent;
+  text-align:start;
+  font:inherit;
   padding: 0.5rem 0.75rem;
   border-radius: var(--content-border-radius);
   cursor: pointer;
@@ -248,7 +266,7 @@ function categoryIcon(category) {
   color: var(--text-color);
 }
 
-.mega-subcat-item:hover {
+ .mega-subcat-item:hover,.mega-subcat-item:focus-visible {
   background: var(--surface-hover);
   color: var(--primary-color);
 }
