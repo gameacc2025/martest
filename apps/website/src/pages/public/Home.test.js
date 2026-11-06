@@ -117,6 +117,11 @@ describe('Website homepage contracts (tem redesign)', () => {
     expect(source).toContain('retailLatestProducts')
   })
 
+  it('keeps the best-selling retail section honest until sales data exists', () => {
+    expect(source).toContain('پرفروش‌ترین محصولات خرده‌فروشی')
+    expect(source).toContain('آمار واقعی فروش')
+  })
+
   it('uses the unified tem design system tokens', () => {
     expect(source).toContain('class="home-page"')
     expect(source).toContain('class="home-container"')
