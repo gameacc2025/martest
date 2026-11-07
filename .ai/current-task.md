@@ -1,5 +1,17 @@
 # Current Task — 2026-11-07
 
+## Latest task — Website fiber-optic loader + Hallmark skill integration
+- **Status:** Source and documentation changes committed to `main`; local installer execution and local tests/build remain pending.
+- **Skills:** Taste Skill was already installed at `.agents/skills/design-taste-frontend/SKILL.md`. Added Hallmark (`nutlope/hallmark`) to the all-agent project installer and documented it as a standard UI skill alongside Taste Skill, UI UX Pro Max, Impeccable and Vercel Web Design Guidelines. The installer now refreshes Taste Skill and installs Hallmark for every supported agent.
+- **Website loader:** Added a full-screen fiber-optic data-transfer animation to the Website's static startup HTML. It shows animated light packets travelling through a fiber strand, Persian loading text, Telecom Market branding, dark-mode styling and reduced-motion support. It remains visible until auth restoration and initial router readiness finish, and reappears for subsequent route navigation.
+- **Files:** `apps/website/index.html`, `apps/website/src/main.js`, new `apps/website/src/utils/pageLoading.js`, new `apps/website/src/utils/pageLoading.test.js`, `scripts/install-ui-skills.ps1`, `AGENTS.md`, `.ai/PROTOCOL.md`, `.ai/UI_SKILLS.md`, `.ai/WORKLOG.md`.
+- **Scope:** Website frontend and project-level agent skill setup only. No backend, API, database, authentication contract, permissions or business rules changed.
+- **Verification:** Test cases authored but not run. Website build not run. PowerShell skill installer not run in the remote GitHub session. Browser/screenshot verification NOT RUN per owner instruction.
+- **Next:** In the local Windows checkout run ` .\\scripts\\install-ui-skills.ps1`, then `pnpm --filter @telecom/website test -- src/utils/pageLoading.test.js` and `pnpm --filter @telecom/website build`. Do not run browser automation unless the owner authorizes it.
+
+---
+
+
 ## Website homepage sections and category product counts
 - Removed the homepage sections «چرا Telecom Market؟» and «پیشنهاد ویژه تجهیزات خرده‌فروشی», including their unused styles.
 - Homepage category tiles and the dedicated Categories page now fetch each category's published-product total through the existing Website products store/API (one-item paginated query, using `meta.total`); counts are formatted in Persian numerals.
