@@ -287,5 +287,7 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 
 .reference-products .products-area .ac .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 
-.reference-products .ac button{border:0;font-family:inherit;cursor:pointer}\n.reference-products .cart-feedback{margin:10px 0;color:var(--ok);font-size:12px}\n@media(prefers-color-scheme:dark){.reference-products:not([data-theme="light"]){--bg:#0e1220;--card:#171c30;--text:#eef0f8;--muted:#9aa3c2;--line:#262d49;--chip:#262a4d;--hero1:#06182c;--hero2:#0c4a63}}
+.reference-products .ac button{border:0;font-family:inherit;cursor:pointer}
+.reference-products .cart-feedback{margin:10px 0;color:var(--ok);font-size:12px}
+@media(prefers-color-scheme:dark){.reference-products:not([data-theme="light"]){--bg:#0e1220;--card:#171c30;--text:#eef0f8;--muted:#9aa3c2;--line:#262d49;--chip:#262a4d;--hero1:#06182c;--hero2:#0c4a63}}
 </style>
