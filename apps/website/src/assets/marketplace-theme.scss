@@ -1,0 +1,365 @@
+/* Telecom Market public storefront — visual tokens and effects from the owner-supplied prototype.
+   Scoped to the public Website shell; Admin and Company themes remain untouched. */
+
+.public-shell {
+  --ds-page-bg: #F8FAFC;
+  --ds-sidebar-bg: #FFFFFF;
+  --ds-header-bg: rgba(255, 255, 255, 0.92);
+  --ds-card-bg: #FFFFFF;
+  --ds-card-hover: #ECFEFF;
+  --ds-surface-secondary: #F1F5F9;
+  --ds-border: #E2E8F0;
+  --ds-text-primary: #0F172A;
+  --ds-text-secondary: #64748B;
+  --ds-text-muted: #94A3B8;
+
+  --ds-brand-primary: #22D3EE;
+  --ds-brand-primary-hover: #06B6D4;
+  --ds-brand-primary-active: #0891B2;
+  --ds-brand-primary-subtle: rgba(34, 211, 238, 0.12);
+  --ds-brand-secondary: #8B5CF6;
+  --ds-brand-accent: #0891B2;
+  --ds-primary-button: #22D3EE;
+  --ds-primary-button-hover: #06B6D4;
+  --ds-primary-button-text: #0A1625;
+  --ds-color-primary: #22D3EE;
+  --ds-color-primary-hover: #06B6D4;
+  --ds-color-primary-active: #0891B2;
+  --ds-color-primary-contrast: #0A1625;
+  --ds-color-primary-text: #0E7490;
+  --ds-color-primary-soft: rgba(34, 211, 238, 0.12);
+  --ds-color-focus: #0891B2;
+  --ds-color-surface-hover: #ECFEFF;
+  --ds-color-brand-deep: #0A1625;
+  --ds-color-brand-dark: #122438;
+  --ds-color-on-brand: #F8FAFC;
+  --ds-color-on-brand-muted: #94A3B8;
+  --ds-color-neutral: #64748B;
+  --ds-color-neutral-soft: #F1F5F9;
+
+  --tm-cyan: #22D3EE;
+  --tm-cyan-hover: #06B6D4;
+  --tm-navy: #0A1625;
+  --tm-petrol: #122438;
+  --tm-purple: #8B5CF6;
+  --tm-accent: #0891B2;
+  --tm-glass: rgba(18, 36, 56, 0.85);
+  --tm-glass-border: rgba(255, 255, 255, 0.08);
+  --tm-glow-cyan: 0 0 28px rgba(34, 211, 238, 0.14);
+  background: var(--ds-page-bg);
+  color: var(--ds-text-primary);
+}
+
+:global(.app-dark) .public-shell {
+  --ds-page-bg: #0A1625;
+  --ds-sidebar-bg: #0D1B2A;
+  --ds-header-bg: rgba(18, 36, 56, 0.88);
+  --ds-card-bg: #122438;
+  --ds-card-hover: #193149;
+  --ds-surface-secondary: #172B40;
+  --ds-border: #26384B;
+  --ds-text-primary: #F8FAFC;
+  --ds-text-secondary: #9FB3C8;
+  --ds-text-muted: #71869B;
+  --ds-brand-primary-subtle: rgba(34, 211, 238, 0.14);
+  --ds-color-primary-text: #67E8F9;
+  --ds-color-primary-soft: rgba(34, 211, 238, 0.14);
+  --ds-color-focus: #22D3EE;
+  --ds-color-surface-hover: #193149;
+  --ds-color-brand-deep: #060D17;
+  --ds-color-brand-dark: #122438;
+  --ds-color-on-brand: #F8FAFC;
+  --ds-color-on-brand-muted: #9FB3C8;
+  --ds-color-neutral: #9FB3C8;
+  --ds-color-neutral-soft: #172B40;
+  --tm-glass: rgba(18, 36, 56, 0.85);
+  --tm-glass-border: rgba(255, 255, 255, 0.08);
+}
+
+.public-shell .public-utility-bar {
+  background: linear-gradient(90deg, #060D17, #122438 50%, #060D17) !important;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.16);
+}
+
+.public-shell .public-header {
+  background: var(--ds-header-bg) !important;
+  border-bottom: 1px solid var(--ds-border) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 28px rgba(10, 22, 37, 0.06);
+}
+
+:global(.app-dark) .public-shell .public-header {
+  border-bottom-color: rgba(34, 211, 238, 0.16) !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.22);
+}
+
+.public-shell .public-logo-symbol {
+  background: linear-gradient(135deg, #22D3EE, #8B5CF6) !important;
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.2);
+}
+
+.public-shell .public-nav-link-active,
+.public-shell .public-icon-link:hover {
+  color: #0891B2 !important;
+}
+
+:global(.app-dark) .public-shell .public-nav-link-active,
+:global(.app-dark) .public-shell .public-icon-link:hover {
+  color: #22D3EE !important;
+}
+
+.public-shell .public-footer {
+  background: linear-gradient(135deg, #060D17, #0A1625 55%, #122438) !important;
+  border-top: 1px solid rgba(34, 211, 238, 0.14);
+}
+
+.public-shell .public-main {
+  background: var(--ds-page-bg) !important;
+  color: var(--ds-text-primary);
+}
+
+.public-shell .reference-home .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 16% 18%, rgba(34, 211, 238, 0.2), transparent 34%),
+    radial-gradient(ellipse at 82% 12%, rgba(139, 92, 246, 0.2), transparent 30%),
+    linear-gradient(135deg, #0A1625 0%, #122438 58%, #0A1625 100%);
+  border-bottom: 1px solid rgba(34, 211, 238, 0.18);
+}
+
+.public-shell .reference-home .hero::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.09) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, #000, transparent 92%);
+}
+
+.public-shell .reference-home .hero .w {
+  position: relative;
+  z-index: 1;
+}
+
+.public-shell .reference-home .tag,
+.public-shell .reference-home .sh a,
+.public-shell .reference-products .sh a,
+.public-shell .reference-categories .sh a {
+  color: #0891B2;
+}
+
+:global(.app-dark) .public-shell .reference-home .sh a,
+:global(.app-dark) .public-shell .reference-products .sh a,
+:global(.app-dark) .public-shell .reference-categories .sh a {
+  color: #22D3EE;
+}
+
+.public-shell .reference-home .feat {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  background: rgba(18, 36, 56, 0.78);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24), 0 0 34px rgba(34, 211, 238, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: tm-card-glow 5s ease-in-out infinite;
+}
+
+.public-shell .reference-home .feat::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.62), rgba(139, 92, 246, 0.34), transparent 72%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.public-shell .reference-home .feat .img,
+.public-shell .reference-home .p .im,
+.public-shell .reference-products .p .im {
+  background:
+    radial-gradient(circle at 22% 20%, rgba(34, 211, 238, 0.16), transparent 54%),
+    linear-gradient(135deg, #122438, #0A1625);
+}
+
+.public-shell .reference-home .p,
+.public-shell .reference-home .cat,
+.public-shell .reference-home .bi,
+.public-shell .reference-home .tc,
+.public-shell .reference-home .rfq,
+.public-shell .reference-products .p,
+.public-shell .reference-products .fl,
+.public-shell .reference-categories .cb {
+  border: 1px solid var(--ds-border);
+  box-shadow: 0 5px 18px rgba(10, 22, 37, 0.055);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+}
+
+:global(.app-dark) .public-shell .reference-home .p,
+:global(.app-dark) .public-shell .reference-home .cat,
+:global(.app-dark) .public-shell .reference-home .bi,
+:global(.app-dark) .public-shell .reference-home .tc,
+:global(.app-dark) .public-shell .reference-home .rfq,
+:global(.app-dark) .public-shell .reference-products .p,
+:global(.app-dark) .public-shell .reference-products .fl,
+:global(.app-dark) .public-shell .reference-categories .cb {
+  background-color: rgba(18, 36, 56, 0.9);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+}
+
+.public-shell .reference-home .p:hover,
+.public-shell .reference-home .cat:hover,
+.public-shell .reference-home .bi:hover,
+.public-shell .reference-products .p:hover,
+.public-shell .reference-products .fl:hover,
+.public-shell .reference-categories .cb:hover {
+  transform: translateY(-4px);
+  border-color: rgba(34, 211, 238, 0.58);
+  box-shadow: 0 14px 32px rgba(10, 22, 37, 0.12), 0 0 24px rgba(34, 211, 238, 0.12);
+}
+
+.public-shell .reference-home .cat i,
+.public-shell .reference-categories .cb .t i {
+  background: rgba(34, 211, 238, 0.12);
+  color: #0891B2;
+}
+
+:global(.app-dark) .public-shell .reference-home .cat i,
+:global(.app-dark) .public-shell .reference-categories .cb .t i {
+  background: rgba(34, 211, 238, 0.14);
+  color: #22D3EE;
+}
+
+.public-shell .reference-home .b1,
+.public-shell .reference-products .b1,
+.public-shell .reference-categories .b1,
+.public-shell .reference-home .fab,
+.public-shell .reference-products .fab,
+.public-shell .reference-categories .fab {
+  background: linear-gradient(100deg, #22D3EE, #0891B2);
+  color: #0A1625;
+  box-shadow: 0 8px 22px rgba(34, 211, 238, 0.2);
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.public-shell .reference-home .b1:hover,
+.public-shell .reference-products .b1:hover,
+.public-shell .reference-categories .b1:hover,
+.public-shell .reference-home .fab:hover,
+.public-shell .reference-products .fab:hover,
+.public-shell .reference-categories .fab:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(34, 211, 238, 0.28);
+}
+
+.public-shell .reference-home .b2,
+.public-shell .reference-products .b2,
+.public-shell .reference-categories .b2 {
+  border-color: rgba(8, 145, 178, 0.52);
+  color: #0E7490;
+}
+
+:global(.app-dark) .public-shell .reference-home .b2,
+:global(.app-dark) .public-shell .reference-products .b2,
+:global(.app-dark) .public-shell .reference-categories .b2 {
+  border-color: rgba(34, 211, 238, 0.42);
+  color: #67E8F9;
+}
+
+.public-shell .reference-home .sh h2::after,
+.public-shell .reference-products .sh h2::after,
+.public-shell .reference-categories .sh h2::after {
+  background: linear-gradient(90deg, #22D3EE, #8B5CF6);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.28);
+}
+
+.public-shell .reference-products .ph h1,
+.public-shell .reference-categories .ph h1 {
+  position: relative;
+  display: inline-block;
+}
+
+.public-shell .reference-products .ph h1::after,
+.public-shell .reference-categories .ph h1::after {
+  display: block;
+  width: 52px;
+  height: 3px;
+  margin-top: 7px;
+  border-radius: 99px;
+  content: "";
+  background: linear-gradient(90deg, #22D3EE, #8B5CF6);
+}
+
+.public-shell .reference-products .fl {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.public-shell .reference-home .stats .g {
+  border: 1px solid var(--ds-border);
+  box-shadow: 0 14px 38px rgba(10, 22, 37, 0.1);
+}
+
+.public-shell .reference-home .brands span {
+  border-color: color-mix(in srgb, var(--ds-brand-primary) 30%, var(--ds-border));
+  background: color-mix(in srgb, var(--ds-card-bg) 82%, var(--ds-brand-primary) 4%);
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.public-shell .reference-home .brands span:hover {
+  transform: translateY(-2px);
+  border-color: rgba(34, 211, 238, 0.55);
+}
+
+.public-shell .reference-home .rfq {
+  background:
+    linear-gradient(115deg, rgba(34, 211, 238, 0.08), transparent 55%),
+    var(--ds-card-bg);
+}
+
+.public-shell :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid #06B6D4;
+  outline-offset: 3px;
+}
+
+@keyframes tm-card-glow {
+  0%, 100% { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22), 0 0 24px rgba(34, 211, 238, 0.1); }
+  50% { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22), 0 0 36px rgba(139, 92, 246, 0.16); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-shell .reference-home .feat { animation: none; }
+  .public-shell .reference-home .p,
+  .public-shell .reference-home .cat,
+  .public-shell .reference-home .bi,
+  .public-shell .reference-products .p,
+  .public-shell .reference-products .fl,
+  .public-shell .reference-categories .cb {
+    transition: none;
+  }
+  .public-shell .reference-home .p:hover,
+  .public-shell .reference-home .cat:hover,
+  .public-shell .reference-home .bi:hover,
+  .public-shell .reference-products .p:hover,
+  .public-shell .reference-products .fl:hover,
+  .public-shell .reference-categories .cb:hover {
+    transform: none;
+  }
+}
