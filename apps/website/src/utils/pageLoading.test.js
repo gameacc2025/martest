@@ -15,7 +15,7 @@ function createDocumentStub() {
   }
   const app = {
     setAttribute: (name, value) => attributes.set(`app:${name}`, value),
-    getAttribute: (name) => attributes.get(`app:${name}'),
+    getAttribute: (name) => attributes.get(`app:${name}`),
   }
 
   return {
