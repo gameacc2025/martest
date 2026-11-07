@@ -122,7 +122,7 @@ async function updateFolder(folder, changes) {
 .page-heading{display:flex;justify-content:space-between;align-items:center;gap:1rem}
 h1{font-size:1.4rem;margin:0 0 .4rem}h2{font-size:1.05rem;margin:0 0 1rem}
 p{color:var(--text-color-secondary,var(--tm-muted));margin:.3rem 0 0;line-height:1.8}
-.panel{background:var(--surface-card,#fff);border:1px solid var(--surface-border,var(--tm-line));border-radius:8px;padding:1.25rem}
+.panel{background:var(--ds-color-surface);border:1px solid var(--ds-color-border);border-radius:var(--ds-card-radius);box-shadow:var(--ds-shadow-xs);padding:1.25rem}
 .create-form{display:grid;grid-template-columns:2fr 1fr 1fr auto;align-items:end;gap:1rem}
 label{display:grid;gap:.4rem;font-size:.9rem}
 input,select{min-width:0;width:100%;border:1px solid var(--surface-border,var(--tm-line-strong));border-radius:6px;padding:.65rem;background:var(--surface-ground,#fff);color:inherit}
@@ -140,12 +140,12 @@ button:disabled{opacity:.55;cursor:wait}.primary{background:var(--tm-cyan);color
   padding: var(--ds-space-5) var(--ds-space-6);
   background: var(--ds-color-surface);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
 }
 .folder-page .panel {
   border-color: var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
   background: var(--ds-color-surface);
 }
@@ -171,7 +171,7 @@ button:disabled{opacity:.55;cursor:wait}.primary{background:var(--tm-cyan);color
 .folder-page .page-heading {
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
@@ -219,7 +219,7 @@ button:disabled{opacity:.55;cursor:wait}.primary{background:var(--tm-cyan);color
   gap: 1rem;
   padding: var(--ds-space-5) var(--ds-space-6);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
@@ -242,7 +242,7 @@ button:disabled{opacity:.55;cursor:wait}.primary{background:var(--tm-cyan);color
 .folder-page .panel {
   padding: clamp(1rem, 2vw, 1.5rem);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
