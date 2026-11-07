@@ -4032,3 +4032,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** source reviewed after writes; tests/build/browser rendering **NOT RUN**. The owner explicitly requested no build. Visual behavior still needs confirmation in the user's browser.
 - **Scope:** Website frontend visuals only. No API/backend/database/auth/business logic changes.
 - **Commits:** `f958806`, `2d199cf`, `2cceb87`, `b5e87c6`.
+
+
+## 2026-11-07 — NEWTEMP-COMPLETE-REDESIGN — Phase 1: shared theme foundation
+- **Status:** Implemented on `ui/newtemp-complete-redesign`; local tests/build and visual review not run in this GitHub-only session.
+- **Authoritative reference:** Root `NewTemp.html` (not `store-template/`, not the older `Telecom Market.html`, and not the earlier Gemini-named upload). Exact reference URL: https://github.com/gameacc2025/martest/blob/main/NewTemp.html
+- **Phase 1 changes:** Added `packages/shared-ui/assets/design-system/newtemp-reference.scss` with the reference's light/dark semantic palette, typography, dimensions, spacing foundations, elevation, status colors and global PrimeVue overrides. Imported it after the existing shared design-system layers in `packages/shared-ui/assets/main.scss`, so Website, Admin and Company inherit one common token authority. Preserved the existing `.app-dark` selector used by the applications and mapped buttons, inputs, cards, tables, dialogs, sidebars and headers to semantic tokens.
+- **Regression coverage:** Extended `packages/shared-ui/design-system.test.js` to assert the NewTemp theme is loaded and includes its exact palette, dark theme, typography and data-table styling.
+- **Scope guard:** UI/CSS and design-system test only. No backend, API, database, route, auth, permissions, product/inquiry workflow or business logic changes.
+- **Verification:** Not run; source changes were made through GitHub repository operations without a local checkout/browser.
+- **Next phase:** Rebuild shared components (buttons, cards, form controls, badges, tables, loading/empty/error states, product/category cards, dashboard header/sidebar) around the NewTemp reference, then update each app's page layouts route-by-route.
