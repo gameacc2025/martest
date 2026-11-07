@@ -946,7 +946,9 @@ function logout() {
 }
 
 
-@media(prefers-color-scheme:dark){.public-shell:not([data-theme="light"]){--tm-canvas:#0e1220;--tm-surface:#171c30;--tm-line:#262d49;--tm-ink:#eef0f8;--tm-muted:#9aa3c2;background:#0e1220;color:#eef0f8}.public-shell:not([data-theme="light"]) .public-header{background:#171c30;border-bottom-color:#262d49}.public-shell:not([data-theme="light"]) .public-main{background:#0e1220}.public-shell:not([data-theme="light"]) .public-user-name{color:#eef0f8}}\n.public-guest-actions .public-login-link { order: 3; }\n/* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
+@media(prefers-color-scheme:dark){.public-shell:not([data-theme="light"]){--tm-canvas:#0e1220;--tm-surface:#171c30;--tm-line:#262d49;--tm-ink:#eef0f8;--tm-muted:#9aa3c2;background:#0e1220;color:#eef0f8}.public-shell:not([data-theme="light"]) .public-header{background:#171c30;border-bottom-color:#262d49}.public-shell:not([data-theme="light"]) .public-main{background:#0e1220}.public-shell:not([data-theme="light"]) .public-user-name{color:#eef0f8}}
+.public-guest-actions .public-login-link { order: 3; }
+/* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; }
 @media(max-width:1100px){.public-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:767px){.public-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
