@@ -3902,3 +3902,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added tablet/mobile layout rules for the hero, product grid, category rail, FAQ, and inquiry CTA.
 - Commit: `e7c8f630016698650733fd85f7bbfd7ecf211468` (directly on `main`).
 - Verified the updated GitHub file ends with the closed mobile media query and `</style>`; local Vite build and browser verification have not been run in this remote session.
+
+
+## 2026-11-07 — Fix PublicLayout setup crash
+- Removed an empty `onUnmounted(() => {})` lifecycle hook from `apps/website/src/layouts/PublicLayout.vue`; it was called without being imported and caused `ReferenceError: onUnmounted is not defined` during component setup.
+- Restored the complete layout file after the initial targeted edit accidentally truncated it; the restored version preserves the existing template, styles, drawers, navigation, and data-loading logic.
+- Verified the resulting file retains the complete 952-line layout and contains no remaining `onUnmounted(` call.
+- Commit: `375050506ece9c5e972e45618a77c85dcf092e8d` (directly on `main`).
+- Local Vite runtime/build verification remains pending; not run in this remote GitHub session.
