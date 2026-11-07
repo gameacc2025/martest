@@ -14,6 +14,7 @@ const products = ref([])
 const retailProducts = ref([])
 const featuredProducts = ref([])
 const categories = ref([])
+const categoryProductCounts = ref({})
 const banners = ref([])
 const loading = ref(false)
 const categoriesLoading = ref(false)
@@ -64,8 +65,22 @@ function productPrice(product) { const label = productPriceLabel(product); retur
 function productIsRetail(product) { return productSalesMode(product)?.kind === 'fixed' }
 function categoryTitle(category) { return category?.nameFa || category?.name || category?.nameEn || category?.slug || 'دسته‌بندی' }
 function categoryCount(category) {
-  const value = Number(category?.productCount ?? category?.productsCount ?? category?._count?.products)
+  const value = Number(categoryProductCounts.value[String(category?.id)] ?? category?.productCount ?? category?.productsCount ?? category?._count?.products)
   return Number.isFinite(value) && value >= 0 ? value.toLocaleString('fa-IR') : '—'
+}
+async function loadCategoryProductCounts(list) {
+  const entries = await Promise.all(list.map(async category => {
+    try {
+      const result = await productsStore.getProducts({
+        page: 1, limit: 1, status: 'PUBLISHED', categoryId: Number(category.id),
+      })
+      const total = Number(result?.meta?.total ?? result?.meta?.totalItems ?? result?.total)
+      return [String(category.id), Number.isFinite(total) && total >= 0 ? total : null]
+    } catch {
+      return [String(category.id), null]
+    }
+  }))
+  categoryProductCounts.value = Object.fromEntries(entries)
 }
 function categoryIcon(category) {
   const value = categoryTitle(category).toLowerCase()
@@ -128,6 +143,7 @@ async function loadCategories() {
   try {
     const result = await productsStore.getCategories()
     categories.value = Array.isArray(result) ? result : []
+    await loadCategoryProductCounts(categories.value.slice(0, 9))
   } catch {
     categoryError.value = true
     categories.value = []
@@ -192,10 +208,6 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
       <div v-else class="empty-state">هنوز محصول منتشرشده‌ای برای نمایش وجود ندارد.</div>
     </div>
 
-    <div class="sec"><div class="sh"><h2>چرا Telecom Market؟</h2></div><div class="why">
-      <div><b>اطلاعات تأمین‌کننده</b>مشاهده مشخصات عمومی شرکت عرضه‌کننده در صفحه محصول</div><div><b>اطلاعات فنی محصول</b>بررسی مشخصات و مدارک ثبت‌شده برای هر تجهیز</div><div><b>خرید خرده‌فروشی</b>یافتن محصولات دارای قیمت و امکان خرید تکی</div><div><b>استعلام سازمانی</b>پیگیری نیازهای پروژه از مسیر درخواست استعلام</div>
-    </div></div>
-
     <div class="sec"><div class="sh"><h2>جدیدترین محصولات خرده‌فروشی</h2><router-link :to="{ name: 'products', query: { retail: '1' } }">همه محصولات خرده‌فروشی</router-link></div>
       <div v-if="retailLatest.length" class="prods"><article v-for="product in retailLatest" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em></router-link><div class="bd"><div class="br">{{ productBrand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr">{{ productPrice(product) }}<small>قیمت ثبت‌شده در کاتالوگ</small></div></div><div class="ac"><button class="btn b1" type="button" @click.stop="addToCart(product)">افزودن به سبد</button><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div></article></div>
       <div v-else class="empty-state">در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</div>
@@ -205,8 +217,6 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
       <div v-if="selectedProducts.length" class="prods"><article v-for="(product, index) in selectedProducts" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em><i class="rk">#{{ (index + 1).toLocaleString('fa-IR') }}</i></router-link><div class="bd"><div class="br">{{ productBrand(product) }}</div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr" :class="{ q: !productIsRetail(product) }">{{ productPrice(product) }}<small>محصول منتخب</small></div></div><div class="ac"><button v-if="productIsRetail(product)" class="btn b1" type="button" @click.stop="addToCart(product)">افزودن به سبد</button><router-link v-else class="btn b1" :to="productLink(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div></article></div>
       <div v-else class="empty-state">محصولی با نشان منتخب برای نمایش دریافت نشد.</div>
     </div>
-
-    <div class="ofr"><div><h3>پیشنهاد ویژه تجهیزات خرده‌فروشی</h3><p>این جایگاه برای کمپین‌های تخفیف فعال طراحی شده است.</p><small>تا زمان اتصال داده‌های پیشنهاد و تخفیف، پیشنهاد یا شمارش معکوس فعالی نمایش داده نمی‌شود.</small></div><router-link class="btn" :to="{ name: 'products', query: { retail: '1' } }">مشاهده محصولات</router-link></div>
 
     <div class="sec"><div class="sh"><h2>آخرین اخبار و مطالب آموزشی</h2><span>نمونه چیدمان بخش وبلاگ</span></div><div class="bl"><article class="bf"><div class="im2">BLOG</div><div class="tx"><span class="bt t">نمونه</span> <span class="bd2">وبلاگ</span><h3>مطالب آموزشی تجهیزات شبکه و مخابرات</h3><p>محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده خواهد شد.</p></div></article><div class="bs"><article v-for="article in demoArticles" :key="article.title" class="bi"><i>✎</i><div><span class="bt">{{ article.kind }}</span> <span class="bd2">{{ article.date }}</span><h4>{{ article.title }}</h4><p>{{ article.description }}</p></div></article></div></div></div>
 
@@ -225,7 +235,6 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 .reference-home .p .im{display:grid;text-decoration:none}
 .reference-home .p .im span{align-self:center}
 .reference-home .loading-card{min-height:290px}
-.reference-home .ofr small{display:block;font-size:11px;opacity:.85}
 .reference-home .fm button:disabled,.reference-home .fm input:disabled{opacity:.65;cursor:not-allowed}
 
 :root{--bg:#f4f5fa;--card:#fff;--text:#12182b;--muted:#6b7390;--line:#e4e7f2;--pri:#6c5ce7;--pri2:#2aa7e8;--ok:#0f9d73;--hero1:#0a2540;--hero2:#126b8a;--chip:#eceaff;
@@ -292,9 +301,6 @@ h1{font-size:38px;line-height:1.5;font-weight:800;margin:6px 0 10px}
 .pr.q{color:var(--pri)}
 .ac{display:flex;gap:8px;padding:0 14px 14px}
 .ac .btn{padding:8px 0;flex:1;font-size:13px}
-.why{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.why div{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(20,30,70,.06);font-size:13px;color:var(--muted)}
-.why b{display:block;color:var(--text);font-size:15px;margin-bottom:4px}
 .rfq{margin:34px 0;border-radius:18px;background:linear-gradient(90deg,var(--chip),var(--card));padding:26px 30px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;border:1px solid var(--line)}
 .rfq h3{font-size:20px}.rfq p{font-size:13px;color:var(--muted)}
 footer{background:#0b1020;color:#9aa3c2;font-size:13px;padding:28px 0;margin-top:20px}
@@ -325,14 +331,12 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 .bf h3{font-size:18px;margin:8px 0 4px}.bf p,.bi p{font-size:13px;color:var(--muted)}.bd2{font-size:11px;color:var(--muted)}
 .bs{display:flex;flex-direction:column;gap:12px}.bi{background:var(--card);border-radius:14px;padding:14px 16px;box-shadow:0 2px 10px rgba(20,30,70,.06);display:flex;gap:12px;align-items:center;flex:1}.bi i{flex:0 0 64px;height:64px;border-radius:12px;background:var(--chip);color:var(--pri);display:grid;place-items:center;font-style:normal;font-size:24px}.bi h4{font-size:14px;margin:2px 0}
 .fab{position:fixed;left:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:20;background:linear-gradient(90deg,var(--pri),var(--pri2));color:#fff;border:0;border-radius:99px;padding:12px 20px;font:inherit;font-weight:700;font-size:13px;box-shadow:0 8px 24px rgba(40,60,140,.35);cursor:pointer}
-.ofr{margin-top:34px;border-radius:18px;background:linear-gradient(100deg,#7b2ff7,#2aa7e8);color:#fff;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.ofr h3{font-size:20px}.ofr p{font-size:13px;opacity:.9}
 .tm{display:flex;gap:8px;direction:ltr}.tm div{background:rgba(255,255,255,.18);border-radius:10px;padding:6px 12px;text-align:center;min-width:58px}.tm b{display:block;font-size:20px}.tm span{font-size:10px}
-.ofr .btn{background:#fff;color:#4b3bd6}
 .tms{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.tc{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(20,30,70,.06);font-size:13px;color:var(--muted)}.tc q{display:block;color:var(--text);font-size:14px;margin-bottom:12px;quotes:none}.tc b{color:var(--text);display:block}.tc .av{width:38px;height:38px;border-radius:50%;background:var(--chip);color:var(--pri);display:grid;place-items:center;font-weight:800;float:right;margin-left:10px}
 .cmp{display:block;padding:0 14px 8px;font-size:12px;color:var(--muted);cursor:pointer}
 .cbar{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));right:50%;transform:translateX(50%);z-index:20;background:var(--text);color:var(--bg);border-radius:99px;padding:10px 22px;font-size:13px;font-weight:700;display:none}
 @media(max-width:900px){.bl{grid-template-columns:1fr}.ha{display:none}}
-@media(max-width:900px){.hero .w{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}.prods,.why{grid-template-columns:repeat(2,1fr)}.stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.nav ul{display:none}h1{font-size:28px}}
+@media(max-width:900px){.hero .w{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}.prods{grid-template-columns:repeat(2,1fr)}.stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.nav ul{display:none}h1{font-size:28px}}
 
 
 .reference-home .feat{display:block;color:inherit;text-decoration:none}
