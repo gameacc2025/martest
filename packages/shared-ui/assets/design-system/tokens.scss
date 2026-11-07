@@ -1,68 +1,243 @@
-/* Telecom Market — approved shared design tokens. */
+/* Telecom Market — owner-approved design tokens. Primitive → semantic → component. */
 :root {
-  /* Shared brand primitives */
-  --ds-brand-primary:#22D3EE; --ds-brand-primary-hover:#06B6D4; --ds-brand-primary-active:#0891B2; --ds-brand-primary-subtle:#CFFAFE;
-  --ds-brand-secondary:#6366F1; --ds-brand-accent:#8B5CF6;
-  /* Theme-aware primary action */
-  --ds-color-primary:var(--p-primary-color,#0891B2); --ds-color-primary-contrast:var(--p-primary-contrast-color,#FFFFFF);
-  --ds-color-primary-hover:var(--p-primary-hover-color,#0E7490); --ds-color-primary-active:var(--p-primary-active-color,#0891B2);
-  --ds-primary-button:var(--p-primary-color,#0891B2); --ds-primary-button-hover:var(--p-primary-hover-color,#0E7490); --ds-primary-button-text:var(--p-primary-contrast-color,#FFFFFF);
-  --ds-color-secondary:#6366F1; --ds-color-secondary-contrast:#FFFFFF; --ds-color-secondary-hover:#4F46E5;
-  --ds-color-accent:var(--ds-brand-accent); --ds-color-on-accent:#FFFFFF;
-  --ds-accent:var(--ds-brand-primary); --ds-accent-end:var(--ds-brand-accent); --ds-turquoise:var(--ds-brand-primary); --ds-sky:var(--ds-brand-primary); --ds-tech-blue:var(--ds-brand-secondary); --ds-violet:var(--ds-brand-accent);
-  /* Light surfaces */
-  --ds-page-bg:#F0F7FA; --ds-sidebar-bg:#FFFFFF; --ds-header-bg:#FFFFFF; --ds-card-bg:#FFFFFF; --ds-card-hover:#F0FDFF; --ds-surface-secondary:#F1F5F9; --ds-border:#DCE8EF;
-  /* Light text */
-  --ds-text-primary:#102A43; --ds-text-secondary:#627D98; --ds-text-muted:#94A3B8;
-  /* Semantic aliases */
-  --ds-color-background:var(--ds-page-bg); --ds-color-surface:var(--ds-card-bg); --ds-color-surface-alt:var(--ds-surface-secondary); --ds-color-surface-hover:var(--ds-card-hover); --ds-color-border:var(--ds-border);
-  --ds-color-text:var(--ds-text-primary); --ds-color-text-muted:var(--ds-text-secondary); --ds-color-primary-text:#0E7490; --ds-color-link:#0E7490; --ds-color-link-hover:#155E75; --ds-color-primary-soft:var(--ds-brand-primary-subtle); --ds-color-focus:var(--ds-brand-primary-active);
-  --ds-color-neutral:var(--ds-text-secondary); --ds-color-neutral-soft:var(--ds-surface-secondary);
-  /* Compatibility shell tokens */
-  --ds-brand:var(--ds-brand-secondary); --ds-navy:#0A1625; --ds-amber:#F59E0B; --ds-green:#22C55E; --ds-canvas:var(--ds-page-bg); --ds-on-navy:#FFFFFF; --ds-on-navy-muted:#9FB3C8;
-  --ds-hero-gradient:linear-gradient(125deg,#0A1625 0%,#0D1B2A 58%,#164E63 100%); --ds-cta-gradient:linear-gradient(90deg,#0891B2 0%,#22D3EE 100%);
-  /* Sidebar */
-  --ds-sidebar-border:var(--ds-border); --ds-sidebar-fg:var(--ds-text-primary); --ds-sidebar-fg-strong:var(--ds-text-primary); --ds-sidebar-muted:var(--ds-text-secondary); --ds-sidebar-hover:var(--ds-surface-secondary); --ds-sidebar-active-bg:var(--ds-brand-primary-subtle); --ds-sidebar-active-fg:#0E7490; --ds-sidebar-accent:var(--ds-brand-primary-active);
-  /* Typography: Inter for Latin, Vazirmatn for Persian */
-  --ds-font-family:'Inter','Vazirmatn',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; --ds-font-family-persian:'Vazirmatn','Inter',Tahoma,sans-serif;
-  --ds-font-size-xs:.75rem; --ds-font-size-sm:.8125rem; --ds-font-size-md:.875rem; --ds-font-size-lg:1rem; --ds-font-size-xl:1.25rem; --ds-font-size-2xl:1.5rem; --ds-font-size-3xl:1.875rem; --ds-font-size-4xl:2rem;
-  --ds-font-weight-normal:400; --ds-font-weight-medium:500; --ds-font-weight-semibold:600; --ds-font-weight-bold:700;
-  --ds-line-height-tight:1.25; --ds-line-height-normal:1.5; --ds-line-height-relaxed:1.7;
-  /* 4px spacing base */
-  --ds-space-0:0; --ds-space-1:.25rem; --ds-space-2:.5rem; --ds-space-3:.75rem; --ds-space-4:1rem; --ds-space-5:1.25rem; --ds-space-6:1.5rem; --ds-space-8:2rem; --ds-space-10:2.5rem; --ds-space-12:3rem; --ds-space-16:4rem;
-  /* Layout */
-  --ds-container-max:1400px; --ds-container-max-wide:1760px; --ds-container-pad:clamp(1rem,1.4vw,1.5rem); --ds-container-pad-lg:clamp(1.5rem,2vw,2rem); --ds-container-pad-xl:clamp(2rem,2.2vw,3rem); --ds-prose-measure:70ch; --ds-section-gap:clamp(3rem,3.5vw,4rem);
-  --ds-header-height:68px; --ds-sidebar-width:260px; --ds-sidebar-collapsed-width:76px; --ds-footer-min-height:60px;
-  /* Component geometry */
-  --ds-button-sm-height:32px; --ds-button-md-height:40px; --ds-button-lg-height:48px; --ds-button-sm-radius:6px; --ds-button-md-radius:8px; --ds-button-lg-radius:10px;
-  --ds-input-height:44px; --ds-input-radius:8px; --ds-card-radius:12px; --ds-modal-radius:16px; --ds-dropdown-radius:10px; --ds-badge-height:24px; --ds-badge-radius:6px; --ds-table-row-height:56px;
-  --ds-radius-sm:6px; --ds-radius-md:8px; --ds-radius-lg:12px; --ds-radius-xl:16px; --ds-radius-pill:999px; --ds-radius-circle:50%;
-  /* Elevation */
-  --ds-shadow-xs:0 1px 2px rgba(16,42,67,.04); --ds-shadow-sm:0 2px 6px rgba(16,42,67,.06); --ds-shadow-md:0 6px 18px rgba(16,42,67,.08); --ds-shadow-lg:0 12px 28px rgba(16,42,67,.12); --ds-shadow-xl:0 20px 40px rgba(10,22,37,.18);
-  /* Motion / layering */
-  --ds-transition-fast:.15s ease; --ds-transition:var(--transition-duration,.2s) ease; --ds-transition-slow:.3s ease;
-  --ds-z-dropdown:1000; --ds-z-sticky:100; --ds-z-drawer:1001; --ds-z-overlay:1000; --ds-z-modal:1100; --ds-z-toast:1200;
-  /* Semantic status colors */
-  --ds-status-success-bg:#DCFCE7; --ds-status-success-fg:#22C55E; --ds-status-warning-bg:#FEF3C7; --ds-status-warning-fg:#F59E0B;
-  --ds-status-danger-bg:#FEE2E2; --ds-status-danger-fg:#EF4444; --ds-status-info-bg:#DBEAFE; --ds-status-info-fg:#3B82F6; --ds-status-muted-bg:#F1F5F9; --ds-status-muted-fg:#627D98;
-  --ds-color-success:var(--ds-status-success-fg); --ds-color-success-contrast:#FFFFFF; --ds-color-success-soft:var(--ds-status-success-bg);
-  --ds-color-warning:var(--ds-status-warning-fg); --ds-color-warning-contrast:#0A1625; --ds-color-warning-soft:var(--ds-status-warning-bg);
-  --ds-color-danger:var(--ds-status-danger-fg); --ds-color-danger-contrast:#FFFFFF; --ds-color-danger-soft:var(--ds-status-danger-bg);
-  --ds-color-info:var(--ds-status-info-fg); --ds-color-info-contrast:#FFFFFF; --ds-color-info-soft:var(--ds-status-info-bg);
-  --ds-color-expired:var(--ds-color-danger); --ds-status-expired-bg:var(--ds-status-danger-bg); --ds-status-expired-fg:var(--ds-status-danger-fg);
-  /* Backward-compatible aliases */
-  --ds-color-brand-deep:#0A1625; --ds-color-brand-dark:#0D1B2A; --ds-color-on-brand:#FFFFFF; --ds-color-on-brand-muted:#9FB3C8;
-  --ds-control-height:var(--ds-button-md-height); --ds-touch-target:44px;
+  color-scheme: light;
+  --ds-brand-primary: #22D3EE;
+  --ds-brand-primary-hover: #06B6D4;
+  --ds-brand-primary-active: #0891B2;
+  --ds-brand-primary-subtle: #CFFAFE;
+  --ds-brand-secondary: #6366F1;
+  --ds-brand-accent: #8B5CF6;
+
+  --ds-color-primary: var(--p-primary-color, #0891B2);
+  --ds-color-primary-contrast: var(--p-primary-contrast-color, #FFFFFF);
+  --ds-color-primary-hover: var(--p-primary-hover-color, #0E7490);
+  --ds-color-primary-active: var(--p-primary-active-color, #0891B2);
+  --ds-primary-button: var(--ds-color-primary);
+  --ds-primary-button-hover: var(--ds-color-primary-hover);
+  --ds-primary-button-text: var(--ds-color-primary-contrast);
+  --ds-color-secondary: var(--ds-brand-secondary);
+  --ds-color-secondary-contrast: #FFFFFF;
+  --ds-color-secondary-hover: var(--ds-brand-secondary);
+  --ds-color-accent: var(--ds-brand-accent);
+  --ds-color-on-accent: #FFFFFF;
+  --ds-button-danger: #DC2626;
+  --ds-button-success: #16A34A;
+
+  --ds-page-bg: #F0F7FA;
+  --ds-sidebar-bg: #FFFFFF;
+  --ds-header-bg: #FFFFFF;
+  --ds-card-bg: #FFFFFF;
+  --ds-card-hover: #F0FDFF;
+  --ds-surface-secondary: #F1F5F9;
+  --ds-border: #DCE8EF;
+  --ds-text-primary: #102A43;
+  --ds-text-secondary: #627D98;
+  --ds-text-muted: #94A3B8;
+
+  --ds-color-background: var(--ds-page-bg);
+  --ds-color-surface: var(--ds-card-bg);
+  --ds-color-surface-alt: var(--ds-surface-secondary);
+  --ds-color-surface-hover: var(--ds-card-hover);
+  --ds-color-border: var(--ds-border);
+  --ds-color-text: var(--ds-text-primary);
+  --ds-color-text-muted: var(--ds-text-secondary);
+  --ds-color-primary-text: #0E7490;
+  --ds-color-link: #0E7490;
+  --ds-color-link-hover: #155E75;
+  --ds-color-primary-soft: var(--ds-brand-primary-subtle);
+  --ds-color-focus: var(--ds-brand-primary-active);
+  --ds-color-neutral: var(--ds-text-secondary);
+  --ds-color-neutral-soft: var(--ds-surface-secondary);
+
+  /* Compatibility aliases; old consumers resolve to the approved palette. */
+  --ds-brand: var(--ds-brand-secondary);
+  --ds-navy: #0A1625;
+  --ds-amber: #F59E0B;
+  --ds-green: #22C55E;
+  --ds-canvas: var(--ds-page-bg);
+  --ds-on-navy: #FFFFFF;
+  --ds-on-navy-muted: #9FB3C8;
+  --ds-hero-gradient: #0D1B2A;
+  --ds-cta-gradient: var(--ds-primary-button);
+
+  --ds-sidebar-border: var(--ds-border);
+  --ds-sidebar-fg: var(--ds-text-primary);
+  --ds-sidebar-fg-strong: var(--ds-text-primary);
+  --ds-sidebar-muted: var(--ds-text-secondary);
+  --ds-sidebar-hover: var(--ds-surface-secondary);
+  --ds-sidebar-active-bg: var(--ds-brand-primary-subtle);
+  --ds-sidebar-active-fg: #0E7490;
+  --ds-sidebar-accent: var(--ds-brand-primary-active);
+
+  --ds-font-family: 'Inter', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ds-font-family-persian: 'Vazirmatn', 'Inter', Tahoma, sans-serif;
+  --ds-font-size-xs: 0.75rem;
+  --ds-font-size-sm: 0.8125rem;
+  --ds-font-size-md: 0.875rem;
+  --ds-font-size-base: 0.875rem;
+  --ds-font-size-lg: 1rem;
+  --ds-font-size-xl: 1.25rem;
+  --ds-font-size-2xl: 1.5rem;
+  --ds-font-size-3xl: 1.875rem;
+  --ds-font-size-4xl: 2rem;
+  --ds-heading-h1: 1.875rem;
+  --ds-heading-h2: 1.5rem;
+  --ds-heading-h3: 1.25rem;
+  --ds-font-weight-normal: 400;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-semibold: 600;
+  --ds-font-weight-bold: 700;
+  --ds-line-height-tight: 1.25;
+  --ds-line-height-normal: 1.5;
+  --ds-line-height-relaxed: 1.7;
+
+  --ds-space-0: 0;
+  --ds-space-1: 0.25rem;
+  --ds-space-2: 0.5rem;
+  --ds-space-3: 0.75rem;
+  --ds-space-4: 1rem;
+  --ds-space-5: 1.25rem;
+  --ds-space-6: 1.5rem;
+  --ds-space-8: 2rem;
+  --ds-space-10: 2.5rem;
+  --ds-space-12: 3rem;
+  --ds-space-16: 4rem;
+
+  --ds-container-max: 1400px;
+  --ds-container-max-wide: 1760px;
+  --ds-container-pad: clamp(1rem, 1.4vw, 1.5rem);
+  --ds-container-pad-lg: clamp(1.5rem, 2vw, 2rem);
+  --ds-container-pad-xl: clamp(2rem, 2.2vw, 3rem);
+  --ds-prose-measure: 70ch;
+  --ds-section-gap: clamp(3rem, 3.5vw, 4rem);
+  --ds-header-height: 68px;
+  --ds-sidebar-width: 260px;
+  --ds-sidebar-collapsed-width: 76px;
+  --ds-footer-min-height: 60px;
+
+  --ds-button-sm-height: 32px;
+  --ds-button-md-height: 40px;
+  --ds-button-lg-height: 48px;
+  --ds-button-sm-radius: 6px;
+  --ds-button-md-radius: 8px;
+  --ds-button-lg-radius: 10px;
+  --ds-input-height: 44px;
+  --ds-input-radius: 8px;
+  --ds-card-radius: 12px;
+  --ds-modal-radius: 16px;
+  --ds-dropdown-radius: 10px;
+  --ds-badge-height: 24px;
+  --ds-badge-radius: 6px;
+  --ds-table-row-height: 56px;
+  --ds-radius-sm: 6px;
+  --ds-radius-md: 8px;
+  --ds-radius-lg: 12px;
+  --ds-radius-xl: 16px;
+  --ds-radius-pill: 999px;
+  --ds-radius-circle: 50%;
+
+  --ds-shadow-xs: 0 1px 2px rgba(16, 42, 67, 0.04);
+  --ds-shadow-sm: 0 2px 6px rgba(16, 42, 67, 0.06);
+  --ds-shadow-md: 0 6px 18px rgba(16, 42, 67, 0.08);
+  --ds-shadow-lg: 0 12px 28px rgba(16, 42, 67, 0.12);
+  --ds-shadow-xl: 0 20px 40px rgba(10, 22, 37, 0.18);
+  --ds-transition-fast: 0.15s ease;
+  --ds-transition: var(--transition-duration, 0.2s) ease;
+  --ds-transition-slow: 0.3s ease;
+  --ds-z-dropdown: 1000;
+  --ds-z-sticky: 100;
+  --ds-z-drawer: 1001;
+  --ds-z-overlay: 1000;
+  --ds-z-modal: 1100;
+  --ds-z-toast: 1200;
+
+  --ds-status-success-bg: #DCFCE7;
+  --ds-status-success-fg: #22C55E;
+  --ds-status-warning-bg: #FEF3C7;
+  --ds-status-warning-fg: #F59E0B;
+  --ds-status-danger-bg: #FEE2E2;
+  --ds-status-danger-fg: #EF4444;
+  --ds-status-info-bg: #DBEAFE;
+  --ds-status-info-fg: #3B82F6;
+  --ds-status-muted-bg: #F1F5F9;
+  --ds-status-muted-fg: #627D98;
+  --ds-color-success: var(--ds-status-success-fg);
+  --ds-color-success-contrast: #FFFFFF;
+  --ds-color-success-soft: var(--ds-status-success-bg);
+  --ds-color-warning: var(--ds-status-warning-fg);
+  --ds-color-warning-contrast: #0A1625;
+  --ds-color-warning-soft: var(--ds-status-warning-bg);
+  --ds-color-danger: var(--ds-status-danger-fg);
+  --ds-color-danger-contrast: #FFFFFF;
+  --ds-color-danger-soft: var(--ds-status-danger-bg);
+  --ds-color-info: var(--ds-status-info-fg);
+  --ds-color-info-contrast: #FFFFFF;
+  --ds-color-info-soft: var(--ds-status-info-bg);
+  --ds-color-expired: var(--ds-color-danger);
+  --ds-status-expired-bg: var(--ds-status-danger-bg);
+  --ds-status-expired-fg: var(--ds-status-danger-fg);
+
+  --ds-color-brand-deep: #0A1625;
+  --ds-color-brand-dark: #0D1B2A;
+  --ds-color-on-brand: #FFFFFF;
+  --ds-color-on-brand-muted: #9FB3C8;
+  --ds-control-height: var(--ds-button-md-height);
+  --ds-touch-target: 44px;
 }
+
 :root.app-dark {
-  --ds-page-bg:#0A1625; --ds-sidebar-bg:#0D1B2A; --ds-header-bg:#0D1B2A; --ds-card-bg:#122438; --ds-card-hover:#193149; --ds-surface-secondary:#172B40; --ds-border:#24394D;
-  --ds-text-primary:#F0F9FF; --ds-text-secondary:#9FB3C8; --ds-text-muted:#71869B;
-  --ds-color-background:var(--ds-page-bg); --ds-color-surface:var(--ds-card-bg); --ds-color-surface-alt:var(--ds-surface-secondary); --ds-color-surface-hover:var(--ds-card-hover); --ds-color-border:var(--ds-border);
-  --ds-color-text:var(--ds-text-primary); --ds-color-text-muted:var(--ds-text-secondary); --ds-color-primary-text:#67E8F9; --ds-color-link:#67E8F9; --ds-color-link-hover:#A5F3FC; --ds-color-primary-soft:#164E63; --ds-color-focus:#67E8F9;
-  --ds-color-neutral:#9FB3C8; --ds-color-neutral-soft:#172B40;
-  --ds-sidebar-border:#24394D; --ds-sidebar-fg:#F0F9FF; --ds-sidebar-fg-strong:#F0F9FF; --ds-sidebar-muted:#9FB3C8; --ds-sidebar-hover:#193149; --ds-sidebar-active-bg:#164E63; --ds-sidebar-active-fg:#67E8F9; --ds-sidebar-accent:#22D3EE;
-  --ds-hero-gradient:linear-gradient(125deg,#0A1625 0%,#0D1B2A 58%,#164E63 100%); --ds-canvas:var(--ds-page-bg); --ds-color-brand-deep:#0A1625; --ds-color-brand-dark:#0D1B2A; --ds-color-on-brand:#F0F9FF; --ds-color-on-brand-muted:#9FB3C8;
-  --ds-status-success-bg:rgba(34,197,94,.16); --ds-status-warning-bg:rgba(245,158,11,.16); --ds-status-danger-bg:rgba(239,68,68,.16); --ds-status-info-bg:rgba(59,130,246,.16); --ds-status-muted-bg:rgba(159,179,200,.12);
-  --ds-color-success-contrast:#0A1625; --ds-color-warning-contrast:#0A1625; --ds-color-danger-contrast:#0A1625; --ds-color-info-contrast:#0A1625;
-  --ds-shadow-xs:0 2px 8px rgba(0,0,0,.24); --ds-shadow-sm:0 4px 12px rgba(0,0,0,.28); --ds-shadow-md:0 6px 18px rgba(0,0,0,.34); --ds-shadow-lg:0 12px 28px rgba(0,0,0,.42); --ds-shadow-xl:0 20px 40px rgba(0,0,0,.5);
+  color-scheme: dark;
+  --ds-page-bg: #0A1625;
+  --ds-sidebar-bg: #0D1B2A;
+  --ds-header-bg: #0D1B2A;
+  --ds-card-bg: #122438;
+  --ds-card-hover: #193149;
+  --ds-surface-secondary: #172B40;
+  --ds-border: #24394D;
+  --ds-text-primary: #F0F9FF;
+  --ds-text-secondary: #9FB3C8;
+  --ds-text-muted: #71869B;
+
+  --ds-color-background: var(--ds-page-bg);
+  --ds-color-surface: var(--ds-card-bg);
+  --ds-color-surface-alt: var(--ds-surface-secondary);
+  --ds-color-surface-hover: var(--ds-card-hover);
+  --ds-color-border: var(--ds-border);
+  --ds-color-text: var(--ds-text-primary);
+  --ds-color-text-muted: var(--ds-text-secondary);
+  --ds-color-primary-text: #67E8F9;
+  --ds-color-link: #67E8F9;
+  --ds-color-link-hover: #A5F3FC;
+  --ds-color-primary-soft: #164E63;
+  --ds-color-focus: #67E8F9;
+  --ds-color-neutral: #9FB3C8;
+  --ds-color-neutral-soft: #172B40;
+
+  --ds-primary-button: #22D3EE;
+  --ds-primary-button-hover: #67E8F9;
+  --ds-primary-button-text: #083344;
+  --ds-color-primary: #22D3EE;
+  --ds-color-primary-contrast: #083344;
+  --ds-color-primary-hover: #67E8F9;
+  --ds-color-primary-active: #0891B2;
+
+  --ds-sidebar-border: #24394D;
+  --ds-sidebar-fg: #F0F9FF;
+  --ds-sidebar-fg-strong: #F0F9FF;
+  --ds-sidebar-muted: #9FB3C8;
+  --ds-sidebar-hover: #193149;
+  --ds-sidebar-active-bg: #164E63;
+  --ds-sidebar-active-fg: #67E8F9;
+  --ds-sidebar-accent: #22D3EE;
+  --ds-canvas: var(--ds-page-bg);
+  --ds-color-brand-deep: #0A1625;
+  --ds-color-brand-dark: #0D1B2A;
+  --ds-color-on-brand: #F0F9FF;
+  --ds-color-on-brand-muted: #9FB3C8;
+
+  --ds-shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --ds-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.28);
+  --ds-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.34);
+  --ds-shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.42);
+  --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
