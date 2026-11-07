@@ -1022,4 +1022,18 @@ const goBack = () => router.push('/products')
 @media (prefers-reduced-motion: reduce) {
   .thumbnail-button { transition: none; }
 }
+
+/* NewTemp product-detail proportions and compact enterprise surfaces. */
+.product-shell{max-width:1200px;padding-inline:24px}
+.product-layout{grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:20px}
+.product-heading,.gallery-card,.content-card,.purchase-card,.company-card{border-radius:12px;border-color:var(--ds-color-border);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs)}
+.product-title{font-size:clamp(1.25rem,2vw,1.65rem);font-weight:800}
+.category-chip{border-radius:6px;background:var(--ds-color-primary-soft);color:var(--ds-color-primary-text);padding:3px 9px}
+.main-image-frame{border-radius:8px;background:var(--ds-surface-secondary)}
+.price-block{background:linear-gradient(135deg,var(--ds-color-brand-deep),var(--ds-color-brand-dark));border-radius:8px}
+.price-icon-actions :deep(.p-button){border-radius:8px}
+.price-tier{border-radius:6px;background:var(--ds-color-surface-alt);border-color:var(--ds-color-border)}
+@media(max-width:991px){.product-layout{grid-template-columns:1fr}.product-sidebar{position:static}}
+@media(max-width:640px){.product-shell{padding-inline:16px}.product-heading{padding:14px}.product-title{font-size:1.25rem}}
+
 </style>

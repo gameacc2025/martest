@@ -445,4 +445,15 @@ function logout() {
 @media (prefers-reduced-motion: reduce) {
   .dash-header * { transition: none !important; }
 }
+
+/* NewTemp shell metrics: compact header, quiet icon controls and squared search. */
+.dash-header{min-height:56px;padding-block:10px}
+.dash-header-icon-btn{width:36px;height:36px;min-width:36px;border:1px solid var(--ds-color-border);border-radius:8px;background:transparent;color:var(--ds-color-text);box-shadow:none}
+.dash-header-icon-btn:hover{background:var(--ds-color-surface-hover);color:var(--ds-color-link)}
+.dash-header-icon-btn i{font-size:16px}
+.dash-header-pill{height:38px;max-width:360px;border:1px solid var(--ds-color-border);border-radius:8px;background:var(--ds-color-surface-alt);box-shadow:none}
+.dash-header-pill-input{font-size:13px;color:var(--ds-color-text)}
+.dash-header-pill-go{width:32px;height:32px;border-radius:6px;color:var(--ds-color-primary-text)}
+.dash-header-pill-go:hover{background:var(--ds-color-primary-soft);color:var(--ds-color-primary-text)}
+@media(max-width:640px){.dash-header{min-height:52px;padding-block:8px}.dash-header-start,.dash-header-end{gap:6px}}
 </style>

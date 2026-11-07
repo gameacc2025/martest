@@ -422,9 +422,9 @@ const viewProduct = (product) => {
 }
 
 .sr-primary-button {
-  background: var(--ds-color-accent);
-  border-color: var(--ds-color-accent);
-  color: var(--ds-color-on-accent);
+  background: var(--ds-primary-button);
+  border-color: var(--ds-primary-button);
+  color: var(--ds-primary-button-text);
 }
 
 .sr-secondary-button {

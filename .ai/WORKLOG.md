@@ -4032,3 +4032,35 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** source reviewed after writes; tests/build/browser rendering **NOT RUN**. The owner explicitly requested no build. Visual behavior still needs confirmation in the user's browser.
 - **Scope:** Website frontend visuals only. No API/backend/database/auth/business logic changes.
 - **Commits:** `f958806`, `2d199cf`, `2cceb87`, `b5e87c6`.
+
+
+## 2026-11-07 — NEWTEMP-COMPLETE-REDESIGN — Phase 1: shared theme foundation
+- **Status:** Implemented on `ui/newtemp-complete-redesign`; local tests/build and visual review not run in this GitHub-only session.
+- **Authoritative reference:** Root `NewTemp.html` (not `store-template/`, not the older `Telecom Market.html`, and not the earlier Gemini-named upload). Exact reference URL: https://github.com/gameacc2025/martest/blob/main/NewTemp.html
+- **Phase 1 changes:** Added `packages/shared-ui/assets/design-system/newtemp-reference.scss` with the reference's light/dark semantic palette, typography, dimensions, spacing foundations, elevation, status colors and global PrimeVue overrides. Imported it after the existing shared design-system layers in `packages/shared-ui/assets/main.scss`, so Website, Admin and Company inherit one common token authority. Preserved the existing `.app-dark` selector used by the applications and mapped buttons, inputs, cards, tables, dialogs, sidebars and headers to semantic tokens.
+- **Regression coverage:** Extended `packages/shared-ui/design-system.test.js` to assert the NewTemp theme is loaded and includes its exact palette, dark theme, typography and data-table styling.
+- **Scope guard:** UI/CSS and design-system test only. No backend, API, database, route, auth, permissions, product/inquiry workflow or business logic changes.
+- **Verification:** Not run; source changes were made through GitHub repository operations without a local checkout/browser.
+- **Next phase:** Rebuild shared components (buttons, cards, form controls, badges, tables, loading/empty/error states, product/category cards, dashboard header/sidebar) around the NewTemp reference, then update each app's page layouts route-by-route.
+
+
+## 2026-11-07 — NEWTEMP-COMPLETE-REDESIGN — Phases 2–4 progress
+- **Status:** In progress on `ui/newtemp-complete-redesign`.
+- **Shared components:** Updated Tem buttons, badges, stat cards, alerts, mail rows, order/plan/price/progress/role/section/tracking widgets, shared storefront product/category/section/filter/benefit components, shared PageHeader and dashboard header/sidebar geometry. Removed legacy purple/orange values from the updated shared widgets. TEM buttons now use NewTemp contrast-safe light/dark text colors.
+- **Theme loading:** NewTemp is loaded last in Admin and Company after TEM + shared legacy styles, and last in Website after TEM + shared styles + Website token overrides. This prevents older shared Sakai/TEM rules from overriding the supplied reference. Added regression assertions for the import order.
+- **Website shell:** Reworked utility strip, navigation active states, search icon route, compact header, icon controls, notification/cart actions and four-column footer. Preserved live notification, cart, account, panel handoff, mobile navigation and route behavior.
+- **Website storefront:** Home, product listing and category pages now use the NewTemp CSS composition; category panels use the template's visual card structure and live category/subcategory data. Home brand strip derives from brands present in live product results. Product detail proportions and price panel updated while retaining gallery, supplier offers, tier pricing, price history, favorites/inquiry actions and real data flow. Search primary action and danger states use semantic tokens.
+- **Admin/Company:** Unified dashboard header/sidebar dimensions, page header surfaces, admin/company dashboard cards and management panels; updated admin/company product forms, lists, notification inbox surfaces, company settings status badges, preview card, notification management/folders/subscriptions and key list/dashboard cards. No API or business logic changes intended.
+- **Dark theme:** Completed missing semantic dark aliases for muted states, soft status surfaces, primary subtle and contrast colors.
+- **Tests:** Updated design-system, public layout, Home and Categories test expectations for the NewTemp structure and token loading. Tests have not been executed; GitHub commit status/workflow lookup returned no CI runs/statuses for the inspected commit. No browser screenshots or visual regression check have run.
+- **Next:** Continue page-by-page audit of every remaining Website, Admin and Company route; check responsive behavior, form states, drawers, tables, loading/empty/error states and any hardcoded legacy values. Then run tests/build/visual review in a local checkout or CI and fix findings. Keep backend/API/Prisma/routes/permissions unchanged.
+
+
+## 2026-11-07 — Magazine, navigation and header interaction follow-up
+- Added a public editorial magazine at `/magazine` and article routes at `/magazine/:slug` using a responsive two-column editorial layout.
+- Added category filtering and client-side article search, featured content, persistent latest-article sidebar, contextual recommendations, in-article related links, reading-time metadata and product discovery CTAs. Seeded the initial magazine with evergreen telecom/network buying guides and technical explainers; no article/news API or CMS endpoint was found in the current website source, so these are frontend editorial entries rather than live news.
+- Moved product search out of the header action cluster and into the desktop navigation as a search icon/link; also added it to mobile navigation.
+- Added the magazine link to desktop/mobile navigation and the footer.
+- Reduced the final desktop/mobile header row height from 56/58px to 52px, retaining the existing sticky header behavior and transitions.
+- Added coordinated enter/leave motion for PrimeVue drawers and popup menus, including reduced-motion overrides; notification and cart drawer content and actions remain unchanged.
+- **Verification:** inspected the updated route/layout/magazine sources and confirmed expected route names, navigation links, 52px header rule, article/related/latest sections and responsive rules are present. Per user direction, did not run or wait for tests/builds.

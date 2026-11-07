@@ -207,10 +207,10 @@ function continueToReview() {
 .section-heading p { margin: .3rem 0 0; color: var(--ds-color-text-muted); font-size: .8rem; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .form-field { display: flex; flex-direction: column; gap: .4rem; min-width: 0; color: var(--ds-color-text); font-size: .82rem; }
-.form-field > span b { color: var(--ds-color-danger, #EF4444); }
+.form-field > span b { color: var(--ds-color-danger, var(--ds-status-danger-fg)); }
 .form-field :deep(.p-inputtext), .form-field :deep(.p-textarea) { width: 100%; }
 .field-span { grid-column: 1 / -1; }
-.field-error { color: var(--ds-color-danger, #EF4444); font-size: .74rem; }
+.field-error { color: var(--ds-color-danger, var(--ds-status-danger-fg)); font-size: .74rem; }
 .form-actions, .review-actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; margin-top: 1.35rem; }
 .shipping-review { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.25rem; margin: 0; }
 .shipping-review div { min-width: 0; }

@@ -202,6 +202,7 @@ function toggleUserMenu(event) {
 
 
 const navItems = [
+  { name: 'سوالات متداول', path: '/faq', icon: 'pi pi-question-circle' },
   { name: 'درباره ما', path: '/about', icon: 'pi pi-info-circle' },
   { name: 'تماس با ما', path: '/contact', icon: 'pi pi-phone' }
 ]
@@ -228,7 +229,7 @@ function logout() {
     <!-- Utility strip -->
     <div class="public-utility-bar">
       <div class="public-container public-utility-inner">
-        <span class="public-utility-message"><b>آخرین خبر:</b> بازارگاه تخصصی تجهیزات شبکه و مخابرات</span>
+        <span class="public-utility-message">بازارگاه تخصصی تجهیزات شبکه و مخابرات؛ خرید فوری و استعلام سازمانی</span>
         <nav class="public-utility-links" aria-label="دسترسی‌های راهنما">
           <router-link :to="{ name: 'faq' }">راهنمای کاربران</router-link>
           <span aria-hidden="true">·</span>
@@ -251,7 +252,9 @@ function logout() {
               <router-link :to="{ name: 'home' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>صفحه اصلی</span></router-link>
               <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-box" aria-hidden="true"></i><span>محصولات</span></router-link>
               <router-link :to="{ name: 'categories' }" class="public-nav-link" active-class="public-nav-link-active"><span>دسته‌بندی</span></router-link>
-              <span class="public-nav-link public-nav-link--static">برندها</span>
+              <router-link :to="{ name: 'magazine' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-book-open" aria-hidden="true"></i><span>مجله و مقالات</span></router-link>
+              <router-link :to="{ name: 'search' }" class="public-nav-link public-nav-search" active-class="public-nav-link-active" aria-label="جستجوی محصولات"><i class="pi pi-search" aria-hidden="true"></i><span>جستجو</span></router-link>
+              <router-link :to="{ name: 'faq' }" class="public-nav-link" active-class="public-nav-link-active"><span>سوالات متداول</span></router-link>
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
             </nav>
@@ -430,6 +433,8 @@ function logout() {
               <span>دسته‌بندی محصولات</span>
             </router-link>
           </li>
+          <li><router-link :to="{ name: 'search' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-search"></i><span>جستجوی محصولات</span></router-link></li>
+          <li><router-link :to="{ name: 'magazine' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-book-open"></i><span>مجله و مقالات</span></router-link></li>
           <li v-for="item in navItems" :key="item.path">
             <router-link :to="item.path" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i :class="item.icon || 'pi pi-circle'" aria-hidden="true"></i><span>{{ item.name }}</span>
@@ -506,21 +511,17 @@ function logout() {
               <li><router-link :to="{ name: 'home' }" class="public-footer-link">صفحه اصلی</router-link></li>
               <li><router-link :to="{ name: 'products' }" class="public-footer-link">همه محصولات</router-link></li>
               <li><router-link :to="{ name: 'categories' }" class="public-footer-link">دسته‌بندی‌ها</router-link></li>
+              <li><router-link :to="{ name: 'magazine' }" class="public-footer-link">مجله و مقالات</router-link></li>
               <li><router-link :to="{ name: 'my-inquiries' }" class="public-footer-link">ثبت استعلام</router-link></li>
             </ul>
           </div>
           <div>
-            <h3 class="public-footer-heading">پشتیبانی</h3>
+            <h3 class="public-footer-heading">شرکت و پشتیبانی</h3>
             <ul class="public-footer-list">
               <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
               <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و مقررات</router-link></li>
-              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">حریم خصوصی</router-link></li>
               <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
             </ul>
-          </div>
-          <div>
-            <h3 class="public-footer-heading">آخرین مطالب وبلاگ</h3>
-            <p class="public-footer-about-text">مطالب آموزشی و اخبار پس از اتصال سرویس محتوای منتشرشده در این بخش نمایش داده می‌شوند.</p>
           </div>
           <div>
             <h3 class="public-footer-heading">ارتباط با ما</h3>
@@ -824,6 +825,13 @@ function logout() {
 .public-notification-item:focus-visible,.public-notifications-menu__all:focus-visible,.public-notifications-close:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
 @media (prefers-reduced-motion: reduce) { .public-notifications-drawer { animation: none; } }
 
+/* Smooth, consistent entry/exit for notification and cart drawers. */
+.public-shell :deep(.p-drawer-enter-active),.public-shell :deep(.p-drawer-leave-active) { transition: transform .34s cubic-bezier(.2,.8,.2,1), opacity .28s ease !important; }
+.public-shell :deep(.p-drawer-mask) { transition: opacity .28s ease !important; }
+.public-shell :deep(.p-menu-enter-active),.public-shell :deep(.p-menu-leave-active) { transform-origin: top right; transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1) !important; }
+.public-shell :deep(.p-menu-enter-from),.public-shell :deep(.p-menu-leave-to) { opacity: 0; transform: translateY(-7px) scale(.98); }
+@media(prefers-reduced-motion:reduce){.public-shell :deep(.p-drawer-enter-active),.public-shell :deep(.p-drawer-leave-active),.public-shell :deep(.p-menu-enter-active),.public-shell :deep(.p-menu-leave-active){transition:none!important}}
+
 /* Search popover and physical-left cart drawer */
 .public-header .public-container{position:relative}
 .public-search-trigger{border:0;background:transparent;cursor:pointer}
@@ -902,7 +910,14 @@ function logout() {
 .public-authenticated-actions,.public-guest-actions { display: contents; }
 .public-user-trigger { order: 3; }
 .public-header-actions > .public-mobile-toggle { order: 4; }
-.public-search-trigger,.public-search-popover { display: none !important; }
+ .public-search-trigger,.public-search-popover { display: none !important; }
+.public-nav-search { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ds-color-border); border-radius: 7px; }
+.public-nav-search i { display: inline-block !important; font-size: 12px; }
+.public-nav-search:hover { border-color: var(--ds-color-primary); }
+.public-header-row { min-height: 52px; }
+.public-logo-symbol { width: 28px; height: 28px; }
+.public-logo-symbol::before { top: 7px; }
+.public-logo-symbol::after { top: 7px; height: 13px; }
 @media(max-width:991px){.public-user-name{display:inline}}
 /* Telecom Market.html storefront shell alignment */
 .public-shell {
@@ -966,7 +981,7 @@ function logout() {
 .public-guest-actions .public-login-link { order: 3; }
  .public-nav-link--static { cursor: default; }
 .public-header-row { min-height: 60px; }
-@media(max-width:767px){.public-header-row{min-height:58px}}
+@media(max-width:767px){.public-header-row{min-height:52px}}
 /* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; }
 @media(max-width:1100px){.public-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -984,5 +999,40 @@ function logout() {
 .public-logo-symbol{background:var(--ds-brand-primary)!important}
 .public-nav-link-active{color:var(--ds-color-primary-text)!important;border-bottom-color:var(--ds-color-primary-text)!important}
 .public-icon-link:hover{background:var(--ds-color-surface-hover);color:var(--ds-color-primary-text)}
+
+
+/* NewTemp.html storefront shell — authoritative layout layer. */
+.public-utility-bar { background: var(--ds-color-brand-deep); color: var(--ds-color-on-brand-muted); font-size: 12px; }
+.public-utility-inner { min-height: 28px; }
+.public-utility-message { font-size: 12px; font-weight: 500; }
+.public-header { background: var(--ds-header-bg); border-bottom: 1px solid var(--ds-border); }
+ .public-header-row { min-height: 52px; gap: 12px; }
+.public-header-right { gap: 22px; }
+.public-logo { gap: 8px; }
+.public-logo-symbol { width: 30px; height: 30px; border-radius: 8px; background: var(--ds-color-brand-deep); border: 1px solid var(--ds-border); position: relative; display: inline-block; flex: none; }
+.public-logo-symbol::before { content: ''; position: absolute; inset-inline-start: 8px; top: 8px; width: 12px; height: 2px; border-radius: 2px; background: var(--ds-brand-primary); }
+.public-logo-symbol::after { content: ''; position: absolute; top: 8px; inset-inline-start: 14px; width: 2px; height: 15px; border-radius: 2px; background: var(--ds-brand-primary); }
+.public-logo-name strong { color: var(--ds-color-text); font-size: 17px; font-weight: 800; }
+.public-nav-desktop { gap: 4px; }
+.public-nav-link { padding: 6px 10px; border: 0; border-radius: 6px; color: var(--ds-color-text-muted); font-size: 13px; font-weight: 500; transition: color .2s, background .2s; }
+.public-nav-link:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-link); }
+.public-nav-link-active { background: var(--ds-color-primary-soft); color: var(--ds-color-primary-text); border: 0; }
+.public-header-actions { gap: 8px; }
+.public-icon-link { width: 36px; height: 36px; border: 1px solid var(--ds-color-border); border-radius: 8px; background: transparent; color: var(--ds-color-text); cursor: pointer; }
+.public-icon-link:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-link); }
+.public-notification-badge { top: -6px; inset-inline-end: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--ds-primary-button); color: var(--ds-primary-button-text); font-size: 10px; }
+.public-rfq-link { min-height: 36px; border-radius: 8px; padding: 0 16px; font-size: 13px; }
+.public-main { padding: 0 0 32px; }
+.public-footer { background: var(--ds-color-brand-deep); color: var(--ds-color-on-brand-muted); padding: 44px 0 20px; margin-top: 48px; }
+.public-footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1.2fr; gap: 28px; padding-bottom: 0; }
+.public-footer-heading { color: #fff; font-size: 14px; margin-bottom: 10px; }
+.public-footer-about-text,.public-footer-link { color: #9CC4D4; font-size: 13px; }
+.public-footer-link { padding: 3px 0; }
+.public-footer-link:hover { color: var(--ds-brand-primary); }
+.public-footer-bottom { border-top: 1px solid var(--ds-border); margin-top: 28px; padding-top: 14px; color: #9CC4D4; text-align: start; font-size: 12px; }
+@media (max-width: 1199px) { .public-header-right { gap: 12px; } .public-nav-desktop { gap: 2px; } }
+@media (max-width: 991px) {  .public-header-row { min-height: 52px; } .public-footer-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 560px) { .public-footer-grid { grid-template-columns: 1fr; gap: 20px; } .public-utility-links { gap: 8px; } }
+@media (prefers-reduced-motion: reduce) { .public-nav-link,.public-icon-link,.public-skip-link { transition: none; } }
 
 </style>

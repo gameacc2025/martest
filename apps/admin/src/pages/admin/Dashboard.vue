@@ -506,9 +506,9 @@ onMounted(() => {
   gap: 18px;
 }
 .admin-dashboard :deep(.tm-stat) { min-height: 137px; }
-.admin-dashboard :deep(.tm-panel) { border-radius: 4px; box-shadow: 0 1px 3px rgba(20,20,60,.04); }
-.admin-dashboard :deep(.tm-panel__head) { min-height: 56px; padding: 16px 20px; }
-.admin-dashboard :deep(.tm-panel__body) { padding: 18px 20px; }
+ .admin-dashboard :deep(.tm-panel) { border-radius: var(--ds-card-radius); box-shadow: var(--ds-shadow-xs); border-color: var(--ds-color-border); }
+ .admin-dashboard :deep(.tm-panel__head) { min-height: 52px; padding: 14px 18px; }
+ .admin-dashboard :deep(.tm-panel__body) { padding: 16px 18px; }
 
 .admin-dashboard-msg { margin: 0; }
 

@@ -1,5 +1,24 @@
 # Current Task — 2026-11-07
 
+## Active task — NEWTEMP-COMPLETE-REDESIGN
+- **Status:** In progress. Phases 1–2 implemented; Website storefront core, Admin/Company shell and key management pages updated. Verification pending.
+- **Owner instruction:** Rewrite the complete Website storefront, shared components, Admin and Company panels against the exact root-level `NewTemp.html`. Proceed phase-by-phase without asking the owner questions or stopping between phases. Before every next phase, perform an explicit internal completeness gate and continue only when the current phase meets its checklist.
+- **Authoritative source:** `NewTemp.html` at repository root. Do not use `store-template/`, older `Telecom Market.html`, or other prototypes as competing visual authorities.
+- **Reference palette (light):** cyan `#22D3EE`, hover `#06B6D4`, deep cyan/action `#0891B2`, indigo `#6366F1`, violet `#8B5CF6`, navy `#0A1625`, petrol `#122438`, canvas `#F0F7FA`, header/card `#FFFFFF`, hover surface `#F0FDFF`, secondary surface `#F1F5F9`, border `#DCE8EF`, text `#102A43`, secondary text `#627D98`, muted `#94A3B8`.
+- **Reference palette (dark):** canvas/navy `#0A1625`, header `#0D1B2A`, card/petrol `#122438`, hover `#193149`, secondary surface `#172B40`, border `#24394D`, text `#F0F9FF`, secondary text `#9FB3C8`, muted `#71869B`; action cyan `#22D3EE`, hover `#67E8F9`, action text `#083344`.
+- **Phase 1 completed:** shared semantic light/dark palette, component tokens and global PrimeVue overrides. NewTemp theme is imported last by each app entry so it wins over legacy shared/TEM styles.
+- **Phase 2 completed:** shared Tem/store widgets, dashboard shell controls, PageHeader, card, badge, button and table styles aligned to NewTemp tokens.
+- **Phase 3 in progress:** Website shell, Home, product listing, category listing and product details updated. Added responsive magazine/article hub with related/latest content, category filters and search; moved search into navigation and added magazine links to desktop/mobile/footer. Reduced header height to 52px and animated drawer/menu interactions. Remaining public routes are under audit; preserve live API/cart/inquiry/notification/account behavior.
+- **Phase 4 in progress:** Admin and Company shell, dashboards, key lists/forms/notification inbox and shared management components updated. Remaining routes are under audit.
+- **Branch:** `ui/newtemp-complete-redesign` (branched from current `main`).
+- **No-go areas:** Do not copy demo/sample content or fake commerce behavior from NewTemp. Preserve real API data, routes, cart, inquiry, auth/session, role/permission and existing backend contracts. No backend/database changes.
+- **Verification truth:** No local tests, build, browser screenshot or visual side-by-side check has run yet. Do not claim runtime or pixel-perfect verification until performed.
+- **Next:** Complete remaining Website, Admin and Company route audits; then responsive/accessibility/motion consistency and full regression review. Execute tests/build/browser visual checks when a local runtime or CI run is available.
+
+---
+
+# Current Task — 2026-11-07
+
 ## Active task — WEBSITE-PROTOTYPE-VISUAL-02
 - **Status:** Source changes committed to remote `main`. Build intentionally NOT run, per owner instruction. Browser review not run.
 - **Authoritative reference:** Latest uploaded `gemini-code-1794067101381.html`. This supersedes the earlier visual interpretation and the previous incorrect palette implementation.

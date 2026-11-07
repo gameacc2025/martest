@@ -120,22 +120,25 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-theme-toggle').attributes('aria-pressed')).toBe('true')
   })
 
-  it('keeps the reference header free of an extra search control and retains commerce actions', async () => {
+  it('exposes the NewTemp search icon and retains commerce actions', async () => {
     wrapper = mountLayout()
     await flushPromises()
-    expect(wrapper.find('.public-search-trigger').exists()).toBe(false)
+    expect(wrapper.get('.public-search-trigger').attributes('aria-label')).toBe('جستجوی محصولات')
+    await wrapper.get('.public-search-trigger').trigger('click')
+    expect(mocks.routerPush).toHaveBeenCalledWith({ name: 'search' })
     expect(wrapper.get('.public-commerce-trigger').attributes('aria-label')).toBe('سبد خرید')
     expect(wrapper.get('.public-login-link').exists()).toBe(true)
   })
 
-  it('matches the reference utility strip, simple category navigation and five-column footer', async () => {
+  it('matches the NewTemp utility strip, simple navigation and four-column footer', async () => {
     wrapper = mountLayout()
     await flushPromises()
-    expect(wrapper.get('.public-utility-message').text()).toContain('آخرین خبر')
+    expect(wrapper.get('.public-utility-message').text()).toContain('خرید فوری و استعلام سازمانی')
     const navLabels = wrapper.findAll('.public-nav-link').map(link => link.text().trim())
     expect(navLabels).toContain('دسته‌بندی')
-    expect(wrapper.find('.public-footer-grid').element.children).toHaveLength(5)
-    expect(wrapper.get('.public-footer-grid').text()).toContain('آخرین مطالب وبلاگ')
+    expect(navLabels).toContain('سوالات متداول')
+    expect(wrapper.find('.public-footer-grid').element.children).toHaveLength(4)
+    expect(wrapper.get('.public-footer-grid').text()).not.toContain('آخرین مطالب وبلاگ')
     expect(wrapper.get('.public-footer-grid').text()).toContain('تماس با ما')
     const faqFooterLink = wrapper.findAll('.public-footer-link').find(link => link.text().trim() === 'سوالات متداول')
     expect(faqFooterLink).toBeTruthy()

@@ -25,16 +25,17 @@ describe('Website Categories — Telecom Market.html reference', () => {
     expect(getCategories).toHaveBeenCalledOnce()
     expect(getProducts).toHaveBeenCalledWith({ page: 1, limit: 1, status: 'PUBLISHED', categoryId: 7 })
     expect(wrapper.find('.ph h1').text()).toBe('همه دسته‌بندی‌ها')
-    expect(wrapper.find('.cbig').exists()).toBe(true)
-    expect(wrapper.find('.cb .t h3').text()).toBe('فیبر نوری')
-    expect(wrapper.find('.cb .t small').text()).toContain('۱۲')
+    expect(wrapper.find('.g3').exists()).toBe(true)
+    expect(wrapper.find('.cb-header-img').exists()).toBe(true)
+    expect(wrapper.find('.cb-top-info h3').text()).toBe('فیبر نوری')
+    expect(wrapper.find('.cb-top-info small').text()).toContain('۱۲')
     expect(wrapper.findAll('.cb li').map(node => node.text())).toEqual(['کابل فیبر نوری', 'OTDR'])
   })
 
   it('navigates category panels to the existing products route using category IDs', async () => {
     wrapper = mountCategories()
     await flushPromises()
-    await wrapper.get('.cb button').trigger('click')
+    await wrapper.get('.cb-footer button').trigger('click')
     expect(routerPush).toHaveBeenCalledWith({ name: 'products', query: { category: 7 } })
   })
 
@@ -46,7 +47,7 @@ describe('Website Categories — Telecom Market.html reference', () => {
     expect(wrapper.find('[role="status"]').text()).toContain('در حال دریافت دسته‌بندی‌ها')
     resolveCategories([categoryFixture()])
     await flushPromises()
-    expect(wrapper.find('.cbig').exists()).toBe(true)
+    expect(wrapper.find('.g3').exists()).toBe(true)
     wrapper.unmount()
 
     getCategories.mockResolvedValueOnce([])

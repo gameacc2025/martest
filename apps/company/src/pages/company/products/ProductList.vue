@@ -423,8 +423,8 @@ onMounted(() => {
 .card {
   background: var(--surface-card);
   border: 1px solid var(--surface-border);
-  border-radius: var(--content-border-radius);
-  box-shadow: var(--ds-shadow-sm);
+  border-radius: var(--ds-card-radius);
+  box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
 

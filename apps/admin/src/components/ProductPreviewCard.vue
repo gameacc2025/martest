@@ -153,12 +153,12 @@ function formatPrice(value) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--p-primary-50, #eef2ff);
-  color: var(--p-primary-600, #1d4ed8);
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-color-primary-text);
   font-size: 0.85rem;
   padding: 0.6rem 0.9rem;
   border-radius: 8px;
-  border: 1px solid var(--p-primary-200, #c7d2fe);
+  border: 1px solid var(--ds-color-border);
   margin-bottom: 1.25rem;
 }
 
@@ -223,7 +223,7 @@ function formatPrice(value) {
 .company {
   margin: 0.5rem 0 0;
   font-weight: 600;
-  color: var(--p-primary-600, #1d4ed8);
+  color: var(--ds-color-primary-text);
 }
 
 .category {
@@ -257,7 +257,7 @@ function formatPrice(value) {
 
 .price-row .price {
   font-weight: 700;
-  color: var(--p-primary-700, #1e40af);
+  color: var(--ds-color-primary-text);
 }
 
 .no-price {
