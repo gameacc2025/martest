@@ -589,6 +589,45 @@
   --p-focus-ring-color: rgba(34,211,238,.28) !important;
 }
 
+
+/* Legacy semantic aliases still referenced by older public-page forms. */
+:root {
+  --primary-color: #0891B2;
+  --primary-contrast-color: #FFFFFF;
+  --primary-hover-color: #0E7490;
+  --primary-50: #ECFEFF;
+  --primary-100: #CFFAFE;
+  --surface-ground: #F0F7FA;
+  --surface-card: #FFFFFF;
+  --surface-border: #DCE8EF;
+  --surface-hover: #F0FDFF;
+  --text-color: #102A43;
+  --text-color-secondary: #627D98;
+  --green-50: #DCFCE7;
+  --green-700: #15803D;
+  --red-50: #FEE2E2;
+  --red-600: #EF4444;
+  --red-700: #EF4444;
+}
+:root.app-dark {
+  --primary-color: #22D3EE;
+  --primary-contrast-color: #083344;
+  --primary-hover-color: #67E8F9;
+  --primary-50: #164E63;
+  --primary-100: #155E75;
+  --surface-ground: #0A1625;
+  --surface-card: #122438;
+  --surface-border: #24394D;
+  --surface-hover: #193149;
+  --text-color: #F0F9FF;
+  --text-color-secondary: #9FB3C8;
+  --green-50: color-mix(in srgb,#22C55E 16%,#122438);
+  --green-700: #22C55E;
+  --red-50: color-mix(in srgb,#EF4444 16%,#122438);
+  --red-600: #F87171;
+  --red-700: #F87171;
+}
+
 /* Animated optical paths in the homepage hero — cyan and violet data packets. */
 .public-shell .reference-home .fiber-wave {
   animation: tm-fiber-wave 5s linear infinite;
