@@ -187,7 +187,7 @@ function formatPrice(price) {
 
 .company-products-create-link {
   display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: .5rem;
-  padding: .65rem 1rem; border-radius: var(--tm-radius); background: var(--tm-blue); color: #fff;
+  padding: .65rem 1rem; border-radius: var(--tm-radius); background: var(--ds-primary-button); color: var(--ds-primary-button-text);
   font-size: 12.5px; font-weight: 600; text-decoration: none;
 }
 
