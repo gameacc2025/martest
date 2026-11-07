@@ -63,7 +63,6 @@ async function loadProducts() {
   try {
     const params = { page: page.value, limit: pageSize.value, status: 'PUBLISHED' , sortBy: 'createdAt', sortOrder: 'desc' }
     if (selectedCategories.value.length === 1) params.categoryId = Number(selectedCategories.value[0])
-    else if (selectedCategories.value.length === 0 && route.query.category) params.categoryId = Number(route.query.category)
     if (minPrice.value !== '') params.minPrice = Number(minPrice.value)
     if (maxPrice.value !== '') params.maxPrice = Number(maxPrice.value)
     if (purchaseMode.value === 'retail') params.retailEnabled = true
