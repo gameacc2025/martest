@@ -40,7 +40,7 @@ const featuredProduct = computed(() => featuredProducts.value[0] || products.val
 const latestProducts = computed(() => products.value.slice(0, 4))
 const retailLatest = computed(() => retailProducts.value.slice(0, 4))
 const selectedProducts = computed(() => featuredProducts.value.slice(0, 4))
-const brandNames = computed(() => [...new Set([...products.value, ...retailProducts.value].map(productBrand).filter(brand => brand && brand !== '—'))].slice(0, 6))
+const brandNames = computed(() => [...new Set([...products.value, ...retailProducts.value].map(product => String(product?.brand || '').trim()).filter(Boolean))].slice(0, 6))
 const demoArticles = [
   { kind: 'آموزش', date: 'نمونه نمایشی', title: 'راهنمای انتخاب OTDR مناسب برای پروژه فیبر نوری', description: 'این جایگاه برای نمایش مطالب آموزشی منتشرشده در وبلاگ در نظر گرفته شده است.' },
   { kind: 'معرفی', date: 'نمونه نمایشی', title: 'تفاوت OTDR و Power Meter در عیب‌یابی شبکه', description: 'محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده می‌شود.' },
