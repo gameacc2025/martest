@@ -7,6 +7,7 @@ const theme = read('./theme.js')
 const legacy = read('./assets/design-system/tem.scss')
 const overrides = read('./assets/design-system/brand-overrides.scss')
 const newTemp = read('./assets/design-system/newtemp-reference.scss')
+const loading = read('./components/common/Loading.vue')
 const sharedStyles = read('./assets/main.scss')
 const adminEntry = read('../../apps/admin/src/main.js')
 const companyEntry = read('../../apps/company/src/main.js')
@@ -40,6 +41,17 @@ describe('approved Telecom Market design palette', () => {
     expect(newTemp).toContain(':root.app-dark')
     expect(newTemp).toContain("font-family:var(--ds-font-family-persian)")
     expect(newTemp).toContain('.p-datatable .p-datatable-tbody')
+    expect(newTemp).toContain('.tm-btn--accent')
+    expect(newTemp).toContain('var(--ds-primary-button-text)')
+    expect(newTemp).toContain('--ds-status-muted-bg:#172B40')
+  })
+
+  it('uses the animated fiber loader from NewTemp for fullscreen and inline loading states', () => {
+    expect(loading).toContain('fiber-loader-svg')
+    expect(loading).toContain('fiber-data-flow')
+    expect(loading).toContain('fiber-core-pulse')
+    expect(loading).toContain('prefers-reduced-motion: reduce')
+    expect(loading).not.toContain('ProgressSpinner')
   })
 
   it('defines the shared brand primitives and both theme surfaces', () => {
