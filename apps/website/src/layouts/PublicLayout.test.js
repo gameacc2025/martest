@@ -154,7 +154,7 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.findAll('.public-notification-item')).toHaveLength(5)
     expect(wrapper.get('.public-notifications-drawer').attributes('aria-label')).toBe('اعلان‌های اخیر')
     expect(wrapper.get('.public-notifications-drawer').attributes('position')).toBe('left')
-    expect(wrapper.get('.public-cart-drawer').exists()).toBe(false)
+    expect(wrapper.find('.public-cart-drawer').exists()).toBe(false)
     expect(wrapper.get('.public-notifications-drawer').element.querySelector('.public-notifications-menu__all')).toBeTruthy()
   })
 
