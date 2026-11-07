@@ -1042,7 +1042,7 @@ async function removeExistingDocument(docId) {
   padding: 0 10px;
   border: 1px solid var(--tm-line-strong);
   border-radius: var(--tm-radius);
-  background: #fff;
+  background: var(--ds-color-surface);
   color: var(--tm-ink-soft);
   font-size: var(--tm-fs-sm);
   font-weight: 600;
