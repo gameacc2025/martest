@@ -42,7 +42,7 @@ function brand(product) { return product?.brand || product?.company?.name || '�
 function sku(product) { return product?.sku || product?.SKU || product?.catalogCode || '—' }
 function category(product) { return product?.category?.nameFa || product?.category?.name || product?.category?.nameEn || '—' }
 function image(product) { return product?.images?.find(x => x?.isPrimary && x?.url)?.url || product?.images?.find(x => x?.url)?.url || '' }
-function price(product) { return productPriceLabel(product) || 'قیمت با استعلام' }
+function price(product) { const label = productPriceLabel(product); return !label || label === 'استعلامی' ? 'قیمت با استعلام' : label }
 function isRetail(product) { return productSalesMode(product)?.kind === 'fixed' }
 function routeToProduct(product) { return { name: 'product-details', params: { id: product.id } } }
 function fa(value) { return Number(value || 0).toLocaleString('fa-IR') }
