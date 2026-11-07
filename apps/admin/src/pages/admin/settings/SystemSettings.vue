@@ -122,7 +122,7 @@ onMounted(loadSettings)
   max-width: 56rem;
   padding: clamp(1rem, 2vw, 1.5rem);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-md);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
 }
 .system-setting-heading { display: flex; align-items: flex-start; gap: 1rem; }
