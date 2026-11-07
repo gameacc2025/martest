@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { reactive, nextTick } from 'vue'
+import { reactive, ref, nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 
 const mocks = vi.hoisted(() => ({
@@ -12,6 +12,8 @@ const mocks = vi.hoisted(() => ({
   apiGetPaginated: vi.fn(),
   logout: vi.fn(),
   auth: null,
+  theme: null,
+  toggleTheme: vi.fn(),
 }))
 
 vi.mock('vue-router', () => ({
@@ -21,6 +23,10 @@ vi.mock('vue-router', () => ({
 
 vi.mock('../stores/auth', () => ({
   useAuthStore: () => mocks.auth,
+}))
+
+vi.mock('@telecom/shared-ui', () => ({
+  useTheme: () => ({ theme: mocks.theme, toggle: mocks.toggleTheme }),
 }))
 
 vi.mock('@telecom/api-client', () => ({
@@ -41,6 +47,8 @@ describe('PublicLayout responsive navigation', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.theme = ref('light')
+    mocks.toggleTheme.mockImplementation(() => { mocks.theme.value = mocks.theme.value === 'dark' ? 'light' : 'dark' })
     setActivePinia(createPinia())
     mocks.route.current = reactive({ name: 'products', path: '/', fullPath: '/', query: {} })
     mocks.auth = {
@@ -97,6 +105,19 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-cart-drawer').attributes('position')).toBe('left')
     expect(wrapper.get('.public-cart-drawer__empty').text()).toContain('سبد خرید خالی است')
     expect(wrapper.get('.public-cart-drawer__empty a').text()).toContain('مشاهده محصولات')
+  })
+
+  it('exposes the persistent shared light/dark theme toggle in the public header', async () => {
+    wrapper = mountLayout()
+    await flushPromises()
+    const toggle = wrapper.get('.public-theme-toggle')
+    expect(toggle.attributes('aria-label')).toBe('تغییر به تم تیره')
+    expect(toggle.attributes('aria-pressed')).toBe('false')
+    await toggle.trigger('click')
+    await nextTick()
+    expect(mocks.toggleTheme).toHaveBeenCalledOnce()
+    expect(wrapper.get('.public-theme-toggle').attributes('aria-label')).toBe('تغییر به تم روشن')
+    expect(wrapper.get('.public-theme-toggle').attributes('aria-pressed')).toBe('true')
   })
 
   it('keeps the reference header free of an extra search control and retains commerce actions', async () => {
