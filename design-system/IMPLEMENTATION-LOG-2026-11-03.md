@@ -20,3 +20,8 @@
 - Scoped the new global surface/form/table styles to .dash-layout so the public website does not inherit the panel-only restyle. Restored the shared PrimeVue theme and base design tokens to their previous website palette.
 - Admin and Company page data, API contracts, routes, permissions and business logic were not intentionally changed. The dashboard visuals use existing API data only; no synthetic historical series was added.
 - UI build/browser tests were not run in this pass, per the current instruction.
+
+
+## 2026-11-07 — Owner-approved final palette
+
+The canonical Light/Dark palette, brand primitives, semantic states, component dimensions, typography and spacing are specified in [APPROVED-PALETTE.md](./APPROVED-PALETTE.md). The implementation source is `packages/shared-ui/assets/design-system/tokens.scss` and `packages/shared-ui/theme.js`; legacy TEM selectors resolve through these shared tokens.
