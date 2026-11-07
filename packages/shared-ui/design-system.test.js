@@ -8,6 +8,9 @@ const legacy = read('./assets/design-system/tem.scss')
 const overrides = read('./assets/design-system/brand-overrides.scss')
 const newTemp = read('./assets/design-system/newtemp-reference.scss')
 const sharedStyles = read('./assets/main.scss')
+const adminEntry = read('../../apps/admin/src/main.js')
+const companyEntry = read('../../apps/company/src/main.js')
+const websiteEntry = read('../../apps/website/src/main.js')
 const pages = read('./assets/design-system/pages.scss')
 const sidebar = read('./components/dashboard/DashboardSidebar.vue')
 const companyDashboard = read('../../apps/company/src/pages/user/dashboard/CompanyDashboard.vue')
@@ -25,7 +28,14 @@ const storeBenefitGrid = read('./components/store/StoreBenefitGrid.vue')
 
 describe('approved Telecom Market design palette', () => {
   it('loads the NewTemp.html reference theme as the final shared layer for all apps', () => {
-    expect(sharedStyles).toContain("@use './design-system/newtemp-reference.scss';")
+    expect(sharedStyles).not.toContain('newtemp-reference.scss')
+    for (const entry of [adminEntry, companyEntry]) {
+      expect(entry.indexOf('assets/design-system/tem.scss')).toBeLessThan(entry.indexOf('assets/main.scss'))
+      expect(entry.indexOf('assets/main.scss')).toBeLessThan(entry.indexOf('assets/design-system/newtemp-reference.scss'))
+    }
+    expect(websiteEntry.indexOf('assets/design-system/tem.scss')).toBeLessThan(websiteEntry.indexOf('assets/main.scss'))
+    expect(websiteEntry.indexOf('assets/main.scss')).toBeLessThan(websiteEntry.indexOf('marketplace-theme.scss'))
+    expect(websiteEntry.indexOf('marketplace-theme.scss')).toBeLessThan(websiteEntry.indexOf('assets/design-system/newtemp-reference.scss'))
     for (const value of ['#22D3EE', '#06B6D4', '#0891B2', '#6366F1', '#8B5CF6', '#0A1625', '#122438', '#F0F7FA', '#F0FDFF', '#DCE8EF', '#102A43', '#627D98', '#94A3B8', '#193149', '#24394D', '#F0F9FF', '#9FB3C8', '#71869B', '#67E8F9', '#083344']) expect(newTemp).toContain(value)
     expect(newTemp).toContain(':root.app-dark')
     expect(newTemp).toContain("font-family:var(--ds-font-family-persian)")
