@@ -119,7 +119,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--ds-space-2);
-  min-height: var(--ds-button-md-height);
+  min-height: var(--ds-touch-target);
   color: var(--ds-color-primary-text);
   font-size: var(--ds-font-size-sm);
   font-weight: var(--ds-font-weight-bold);
@@ -159,7 +159,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--ds-space-2);
-  min-height: var(--ds-touch-target);
+  min-height: var(--ds-button-md-height);
   padding-inline: var(--ds-space-5);
   border: 1px solid transparent;
   border-radius: var(--ds-radius-md);
