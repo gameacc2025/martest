@@ -48,7 +48,6 @@ const demoArticles = [
   { kind: 'معرفی', date: 'نمونه نمایشی', title: 'تفاوت OTDR و Power Meter در عیب‌یابی شبکه', description: 'محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده می‌شود.' },
   { kind: 'خبر', date: 'نمونه نمایشی', title: 'معرفی تجهیزات و فناوری‌های مخابراتی', description: 'این کارت صرفاً نمونه چیدمان بخش مطالب است.' },
 ]
-let demoSlideTimer = null
 
 function normalizeList(response) {
   const data = response?.data?.data ?? response?.data ?? response
@@ -69,7 +68,7 @@ function productIsRetail(product) { return productSalesMode(product)?.kind === '
 function categoryTitle(category) { return category?.nameFa || category?.name || category?.nameEn || category?.slug || 'دسته‌بندی' }
 function categoryCount(category) {
   const value = Number(category?.productCount ?? category?.productsCount ?? category?._count?.products)
-  return Number.isFinite(value) && value > 0 ? value.toLocaleString('fa-IR') : '—'
+  return Number.isFinite(value) && value >= 0 ? value.toLocaleString('fa-IR') : '—'
 }
 function categoryIcon(category) {
   const value = categoryTitle(category).toLowerCase()
