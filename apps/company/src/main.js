@@ -30,8 +30,9 @@ import Tooltip from 'primevue/tooltip'
 
 import App from './App.vue'
 import router from './router'
-import '@telecom/shared-ui/assets/main.scss'
 import '@telecom/shared-ui/assets/design-system/tem.scss'
+import '@telecom/shared-ui/assets/main.scss'
+import '@telecom/shared-ui/assets/design-system/newtemp-reference.scss'
 
 import { theme as TelecomPreset } from '@telecom/shared-ui'
 
