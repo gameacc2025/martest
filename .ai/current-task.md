@@ -1,5 +1,22 @@
 # Current Task — 2026-11-07
 
+## Active task — WEBSITE-PROTOTYPE-VISUAL-02
+- **Status:** Source changes committed to remote `main`. Build intentionally NOT run, per owner instruction. Browser review not run.
+- **Authoritative reference:** Latest uploaded `gemini-code-1794067101381.html`. This supersedes the earlier visual interpretation and the previous incorrect palette implementation.
+- **Exact light palette:** `#22D3EE` primary cyan, `#06B6D4` hover, `#0891B2` deep cyan/action, `#6366F1` indigo, `#8B5CF6` violet, `#0A1625` navy, `#122438` petrol, `#F0F7FA` page, `#FFFFFF` header/card, `#F0FDFF` hover surface, `#F1F5F9` secondary surface, `#DCE8EF` border, `#102A43` text, `#627D98` secondary text, `#94A3B8` muted text.
+- **Exact dark palette:** `#0A1625` page/navy, `#0D1B2A` header, `#122438` card/petrol, `#193149` hover, `#172B40` secondary surface, `#24394D` border, `#F0F9FF` text, `#9FB3C8` secondary text, `#71869B` muted text; cyan action `#22D3EE`, hover `#67E8F9`, action text `#083344`.
+- **Implemented now:** Replaced the previous incomplete theme layer with complete Website root semantic-token overrides plus PrimeVue primary/surface/text/form-field variables; styled the actual public utility strip, sticky header, brand mark, active navigation, theme control, cart/notification badges, buttons, mobile nav and footer; aligned Home, Product Listing and Categories surfaces/cards/forms; added cyan/violet fiber-network lines to the homepage hero; replaced the circular loader with the exact network transmission loader motif and Persian wait text; applies saved dark theme before first paint.
+- **Existing app behavior:** Uses existing shared persisted `useTheme`; API data, routing, inquiries, authentication, cart and backend untouched. No prototype hardcoded sample data copied.
+- **Admin/Company isolation:** All palette overrides are in the Website app bundle. Shared token source is not modified.
+- **Tests:** Updated theme contract tests to assert the latest prototype tokens, header and network loader. Tests not run (owner explicitly said not to build; no test command run either).
+- **Commits:** `349acf2`, `e4ce939`, `cc3ad85`, `ac39014`, `909a238`, `35ac545` on `main`.
+- **Visual review:** No browser screenshot/side-by-side review has been run. Do not claim pixel parity until inspected.
+- **Next:** If more work is requested, continue checking remaining public Website routes for page-local hardcoded legacy colors and map them to the same semantic tokens. Do not run a build unless the owner asks.
+
+---
+
+# Current Task — 2026-11-07
+
 ## Current active task — WEBSITE-PROTOTYPE-VISUAL-01
 - **Status:** IMPLEMENTATION COMMITTED ON `main`; runtime/build and browser visual verification pending.
 - **Owner request:** Treat the newly uploaded `telecom_market_platform (1)(1).html` as the mandatory source for Website colors and visual effects. Do not reinterpret or substitute its palette.
