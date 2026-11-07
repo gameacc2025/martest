@@ -74,3 +74,13 @@ html{font-size:14px;scroll-padding-top:60px}body,button,input,textarea,select,.p
 .tm-panel { border-radius: var(--ds-card-radius); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
 .tm-stat { border-radius: var(--ds-card-radius); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
 .tm-table-wrap { border-radius: var(--ds-card-radius); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
+
+/* Compact data-first typography and card geometry for management workspaces. */
+.page-header { margin-bottom: 1.25rem; }
+.page-header h1 { margin: 0; color: var(--ds-color-text); font-size: var(--ds-heading-h2); font-weight: 750; line-height: 1.35; }
+.page-header h2 { color: var(--ds-color-text); font-size: var(--ds-heading-h3); font-weight: 700; }
+.page-header h3 { color: var(--ds-color-text); font-size: var(--ds-font-size-lg); font-weight: 700; }
+.stat-card,.quick-action,.system-setting-card,.form-section { border-radius: var(--ds-card-radius); }
+.stat-card { background: var(--ds-color-surface); border-color: var(--ds-color-border); box-shadow: var(--ds-shadow-xs); }
+.quick-action { background: var(--ds-color-surface); border-color: var(--ds-color-border); border-radius: var(--ds-card-radius); color: var(--ds-color-text); }
+.quick-action:hover { background: var(--ds-color-surface-hover); border-color: var(--ds-color-primary); }
