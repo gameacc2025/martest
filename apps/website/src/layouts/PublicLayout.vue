@@ -558,7 +558,7 @@ function logout() {
 /* ---------- Utility strip ---------- */
 .public-utility-bar {
   background: var(--tm-navy);
-  color: #d5e2f0;
+  color: var(--ds-color-on-brand-muted);
   font-size: 13px;
 }
 .public-utility-inner {
@@ -571,7 +571,7 @@ function logout() {
 .public-utility-message { display: inline-flex; align-items: center; gap: 8px; }
 .public-utility-message i { color: var(--tm-cyan); font-size: 13px; }
 .public-utility-links { display: flex; align-items: center; gap: 18px; }
-.public-utility-links a { color: #d5e2f0; text-decoration: none; }
+.public-utility-links a { color: var(--ds-color-on-brand-muted); text-decoration: none; }
 .public-utility-links a:hover { color: var(--tm-cyan); }
 
 /* ---------- Header ---------- */
@@ -722,7 +722,7 @@ function logout() {
 
 /* ---------- Footer ---------- */
 .public-footer {
-  background: linear-gradient(180deg, var(--tm-navy) 0%, var(--tm-navy-deep) 100%);
+  background: var(--ds-color-brand-deep);
   color: rgba(255,255,255,.24);
   padding: 42px 0 0;
   margin-top: auto;
@@ -740,7 +740,7 @@ function logout() {
   color: var(--ds-card-bg);
 }
 .public-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.public-footer-link { color: #d5e2f0; font-size: 13px; text-decoration: none; }
+.public-footer-link { color: var(--ds-color-on-brand-muted); font-size: 13px; text-decoration: none; }
 .public-footer-link:hover { color: var(--tm-cyan); }
 .public-footer-brand { display: flex; align-items: center; gap: 9px; color: var(--ds-card-bg); font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 .public-footer-about-text { margin: 0 0 14px; font-size: 13px; line-height: 1.9; color: rgba(255,255,255,.72); }
@@ -891,10 +891,10 @@ function logout() {
 /* Telecom Market.html storefront shell alignment */
 .public-shell {
   --tm-blue: var(--ds-primary-button);
-  --tm-blue-strong: var(--ds-primary-button);
+  --tm-blue-strong: var(--ds-primary-button-hover);
   --tm-cyan: var(--ds-brand-primary);
-  --tm-cyan-strong: var(--ds-brand-primary);
-  --tm-cyan-deep: var(--ds-primary-button);
+  --tm-cyan-strong: var(--ds-brand-primary-hover);
+  --tm-cyan-deep: var(--ds-brand-primary-active);
   --tm-cyan-soft: var(--ds-color-primary-soft);
   --tm-blue-soft: var(--ds-color-primary-soft);
   --tm-navy: var(--ds-color-brand-deep);
@@ -906,7 +906,7 @@ function logout() {
   --tm-muted: var(--ds-text-secondary);
   background: var(--tm-canvas);
   color: var(--tm-ink);
-  font-family: Vazirmatn, Tahoma, sans-serif;
+  font-family: var(--ds-font-family);
 }
 .public-utility-bar { background: var(--ds-color-brand-deep); color: var(--ds-color-on-brand-muted); font-size: 12px; }
 .public-utility-message i { color: var(--ds-brand-primary); }
@@ -927,7 +927,7 @@ function logout() {
 .public-footer-heading { font-size: 14px; }
 .public-footer-link { color: var(--ds-color-on-brand-muted); }
 .public-footer-about-text { color: var(--ds-color-on-brand-muted); }
-.public-footer-bottom { border-top-color: #1d2440; }
+.public-footer-bottom { border-top-color: var(--ds-border); }
 @media (max-width: 1100px) {
   .public-header-right { gap: 14px; }
   .public-nav-desktop { gap: 13px; }
@@ -956,4 +956,17 @@ function logout() {
 @media(max-width:1100px){.public-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:767px){.public-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.public-footer-grid{grid-template-columns:1fr}}
+.public-shell{font-family:var(--ds-font-family);background:var(--ds-page-bg);color:var(--ds-text-primary)}
+.public-utility-bar{background:var(--ds-color-brand-deep)!important;color:var(--ds-color-on-brand-muted)!important}
+.public-utility-links a,.public-utility-message{color:var(--ds-color-on-brand-muted)}
+.public-header{background:var(--ds-header-bg)!important;border-bottom-color:var(--ds-border)!important}
+.public-main{background:var(--ds-page-bg)!important;color:var(--ds-text-primary)}
+.public-footer{background:var(--ds-color-brand-deep)!important;color:var(--ds-color-on-brand-muted)}
+.public-footer-heading,.public-footer-brand{color:var(--ds-color-on-brand)!important}
+.public-footer-link,.public-footer-about-text{color:var(--ds-color-on-brand-muted)!important}
+.public-footer-bottom{border-top-color:var(--ds-border)!important}
+.public-logo-symbol{background:var(--ds-brand-primary)!important}
+.public-nav-link-active{color:var(--ds-color-primary-text)!important;border-bottom-color:var(--ds-color-primary-text)!important}
+.public-icon-link:hover{background:var(--ds-color-surface-hover);color:var(--ds-color-primary-text)}
+
 </style>
