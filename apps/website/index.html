@@ -27,13 +27,11 @@
       .fiber-loader-svg .fiber-flow--violet { stroke: #8B5CF6; stroke-width: 3.5; animation-duration: 1.4s; }
       .fiber-loader-svg .fiber-flow--middle { stroke: #22D3EE; stroke-width: 3.5; animation-duration: 1s; }
       .fiber-loader-svg .fiber-led { fill: #22C55E; }
-      .fiber-loader-svg .fiber-signal { animation: fiber-signal 1.6s ease-in-out infinite alternate; transform-origin: center; }
       .wait-text { margin-top: 20px; color: #67E8F9; font-family: 'Vazirmatn', Tahoma, sans-serif; font-size: 16px; font-weight: 600; animation: fiber-text-pulse 1.5s ease-in-out infinite alternate; }
-      @keyframes fiber-transmit { to { stroke-dashoffset: -135; } }
-      @keyframes fiber-signal { from { opacity: .35; } to { opacity: 1; } }
+      @keyframes fiber-transmit { from { stroke-dashoffset: 135; } to { stroke-dashoffset: 0; } }
       @keyframes fiber-text-pulse { from { opacity: .65; } to { opacity: 1; } }
       @media (prefers-reduced-motion: reduce) {
-        .fiber-loader-svg .fiber-flow, .fiber-loader-svg .fiber-signal, .wait-text { animation: none !important; }
+        .fiber-loader-svg .fiber-flow, .wait-text { animation: none !important; }
       }
     </style>
     <title>Telecom Marketplace</title>
@@ -61,8 +59,6 @@
         <path class="fiber-flow fiber-flow--cyan" d="M115 120 L210 120"/>
         <path class="fiber-flow fiber-flow--violet" d="M290 120 L385 55"/>
         <path class="fiber-flow fiber-flow--middle" d="M290 120 L385 120"/>
-        <path class="fiber-flow fiber-flow--violet" d="M290 120 L385 185"/>
-        <circle class="fiber-signal" cx="250" cy="120" r="5" fill="#22D3EE"/>
       </svg>
       <div class="wait-text">لطفا منتظر بمانید...</div>
     </div>
