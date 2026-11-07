@@ -1,5 +1,21 @@
 # Current Task — 2026-11-07
 
+## Current active task — WEBSITE-PROTOTYPE-VISUAL-01
+- **Status:** IMPLEMENTATION COMMITTED ON `main`; runtime/build and browser visual verification pending.
+- **Owner request:** Treat the newly uploaded `telecom_market_platform (1)(1).html` as the mandatory source for Website colors and visual effects. Do not reinterpret or substitute its palette.
+- **Exact palette:** cyan `#22D3EE`, hover `#06B6D4`, navy `#0A1625`, petrol `#122438`, purple `#8B5CF6`, deep cyan `#0891B2`, light canvas `#F8FAFC`, card `#FFFFFF`, text `#0F172A`, border `#E2E8F0`.
+- **Implemented:** Added Website-only `marketplace-theme.scss` with light/dark variables, cyan/purple gradient hero and grid glow, glass surfaces, gradient borders, glow/shadow, hover lift, focus treatment and reduced-motion handling. Loaded it after the shared base theme. Added the persisted shared `useTheme` light/dark switch to the public header. Recolored the existing fiber loader to the prototype palette.
+- **Tests added/updated:** `marketplace-theme.test.js` asserts palette/effect/theme-loader contracts; `PublicLayout.test.js` covers the theme switch.
+- **Documentation:** `design-system/WEBSITE-PROTOTYPE-VISUALS.md` records the exact approved palette, effects and scope.
+- **Scope:** Website frontend only. No backend, API, database, auth contract, permissions, routes or business rules changed. Admin/Company shared theme remains untouched. No hardcoded demo data from the prototype was copied into the live app.
+- **Commits on main:** `63f2272`, `634fdf7`, `856df5f`, `2c2add3`, `f1071b9`, `08366e0`, `634776c`, `ab0dca0`.
+- **Verification:** Tests/build not run in this GitHub-only session. Browser side-by-side comparison not run; visual parity is NOT YET VERIFIED.
+- **Next:** Pull latest `main`; run `pnpm --filter @telecom/website test` and `pnpm run build:website`. Review Home, Products and Categories in both themes and responsive sizes; fix any mismatch before marking visual parity complete.
+
+---
+
+# Current Task — 2026-11-07
+
 ## Latest task — Apply the owner-approved final design palette
 - **Status:** IMPLEMENTED on `main`; tests/build/browser verification pending.
 - **Request:** Apply the final shared brand colors, complete Light/Dark theme, semantic states, component dimensions, button variants, typography and spacing.
