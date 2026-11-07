@@ -512,15 +512,6 @@ function logout() {
             </ul>
           </div>
           <div>
-            <h3 class="public-footer-heading">پشتیبانی</h3>
-            <ul class="public-footer-list">
-              <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
-              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و مقررات</router-link></li>
-              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">حریم خصوصی</router-link></li>
-              <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
-            </ul>
-          </div>
-          <div>
             <h3 class="public-footer-heading">شرکت و پشتیبانی</h3>
             <ul class="public-footer-list">
               <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
