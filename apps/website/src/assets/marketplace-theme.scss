@@ -172,12 +172,28 @@
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24), 0 0 34px rgba(34, 211, 238, 0.12);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+.public-shell .reference-home .feat::before {
+  position: absolute;
+  z-index: 0;
+  inset: 1px;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+  opacity: 0.1;
+  background: radial-gradient(ellipse at 18% 12%, rgba(34, 211, 238, 0.34), transparent 58%), radial-gradient(ellipse at 82% 90%, rgba(139, 92, 246, 0.28), transparent 58%);
   animation: tm-card-glow 5s ease-in-out infinite;
+}
+
+.public-shell .reference-home .feat > * {
+  position: relative;
+  z-index: 1;
 }
 
 .public-shell .reference-home .feat::after {
   position: absolute;
-  z-index: -1;
+  z-index: 2;
   inset: 0;
   padding: 1px;
   border-radius: inherit;
@@ -207,7 +223,7 @@
 .public-shell .reference-categories .cb {
   border: 1px solid var(--ds-border);
   box-shadow: 0 5px 18px rgba(10, 22, 37, 0.055);
-  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+  transition: transform 220ms ease;
 }
 
 .app-dark .public-shell .reference-home .p,
@@ -255,7 +271,7 @@
   background: linear-gradient(100deg, #22D3EE, #0891B2);
   color: #0A1625;
   box-shadow: 0 8px 22px rgba(34, 211, 238, 0.2);
-  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  transition: transform 180ms ease;
 }
 
 .public-shell .reference-home .b1:hover,
@@ -264,7 +280,6 @@
 .public-shell .reference-home .fab:hover,
 .public-shell .reference-products .fab:hover,
 .public-shell .reference-categories .fab:hover {
-  filter: brightness(1.06);
   transform: translateY(-1px);
   box-shadow: 0 12px 28px rgba(34, 211, 238, 0.28);
 }
@@ -320,7 +335,7 @@
 .public-shell .reference-home .brands span {
   border-color: color-mix(in srgb, var(--ds-brand-primary) 30%, var(--ds-border));
   background: color-mix(in srgb, var(--ds-card-bg) 82%, var(--ds-brand-primary) 4%);
-  transition: border-color 180ms ease, transform 180ms ease;
+  transition: transform 180ms ease;
 }
 
 .public-shell .reference-home .brands span:hover {
@@ -340,8 +355,8 @@
 }
 
 @keyframes tm-card-glow {
-  0%, 100% { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22), 0 0 24px rgba(34, 211, 238, 0.1); }
-  50% { box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22), 0 0 36px rgba(139, 92, 246, 0.16); }
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.24; }
 }
 
 @media (prefers-reduced-motion: reduce) {
