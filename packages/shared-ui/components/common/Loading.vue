@@ -80,7 +80,7 @@ const spinnerSize = computed(() => {
   min-width: 180px;
   padding: var(--ds-space-6);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-modal-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-lg);
 }
