@@ -140,7 +140,7 @@ async function loadBanners() {
   restartSlider()
 }
 onMounted(() => { loadProducts(); loadCategories(); loadBanners(); restartSlider() })
-onUnmounted(() => { if (slideTimer) clearInterval(slideTimer); if (demoSlideTimer) clearInterval(demoSlideTimer) })
+onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 </script>
 
 <template>
