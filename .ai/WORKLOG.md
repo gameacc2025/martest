@@ -3921,3 +3921,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Honest data gaps:** unavailable metrics remain dashes; brand strip items are explicitly marked illustrative; blog/testimonial/catalogue delivery/discount campaign areas are marked sample or unavailable; no countdown, fake seller count, review identity, bestseller ranking or discount is claimed. Featured products are presented as «محصولات منتخب».
 - **Regression tests:** updated `Home.test.js`, `ProductListing.test.js`, `Categories.test.js`, and `PublicLayout.test.js` for the new reference markup and retained behavior.
 - **Verification status:** remote source review only. Vue compiler, focused tests, Website build, and desktop/mobile browser comparison were NOT run here. User must pull `main` and perform local runtime/visual verification; do not report success before that.
+
+
+## Verification follow-up — 2026-11-07
+- Product-card actions now match the reference: fixed-price products call the existing Pinia cart store; inquiry-only products link to the real product detail/inquiry path. Cart additions show an accessible status message and update the existing cart state.
+- Latest CI build job: `pnpm build` succeeded for all frontend apps; backend tests succeeded.
+- Focused storefront suites passed: Home 9/9, ProductListing 10/10, Categories 3/3, PublicLayout 10/10, StorefrontCardSizing 3/3.
+- Full repository frontend/shared test step still reports five failures outside this task: one `Faq.test.js`, two `Terms.test.js`, and two `WorkspacePageHeading.test.js` cases. These files/components were not changed by the storefront rewrite.
+- Browser screenshot/side-by-side visual comparison has not been completed. The original CSS was copied verbatim into all three target pages, but final rendered visual review remains necessary after the user pulls the branch.
