@@ -229,7 +229,7 @@ a { color: var(--tm-blue); }
 }
 
 .tm-btn--accent {
-  background: linear-gradient(100deg, var(--tm-cyan-strong), var(--tm-cyan));
+  background: var(--ds-primary-button);
   color: #083344;
 }
 
@@ -1130,7 +1130,7 @@ body .company-management-toolbar {
 .tm-bars__fill {
   width: min(46px, 76%);
   border-radius: var(--tm-radius-sm) var(--tm-radius-sm) 2px 2px;
-  background: linear-gradient(180deg, var(--tm-cyan), var(--tm-cyan-strong));
+  background: var(--tm-cyan);
   min-height: 3px;
   transition: height 0.4s ease;
 }
@@ -1172,7 +1172,7 @@ body .company-management-toolbar {
 .tm-meter__fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--tm-cyan-strong), var(--tm-cyan));
+  background: var(--tm-blue);
 }
 
 /* ============================================================
