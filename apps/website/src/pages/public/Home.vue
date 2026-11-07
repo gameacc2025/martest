@@ -3,10 +3,13 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { productsApi, bannersApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
+import { useCartStore } from '../../stores/cart'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
 const router = useRouter()
 const productsStore = useProductsStore()
+const cartStore = useCartStore()
+const cartMessage = ref('')
 const products = ref([])
 const retailProducts = ref([])
 const featuredProducts = ref([])
@@ -79,6 +82,11 @@ function categoryIcon(category) {
   if (value.includes('ماهواره')) return '◉'
   if (value.includes('رادیو') || value.includes('آنتن')) return '⌁'
   return '⌘'
+}
+function addToCart(product) {
+  const price = Number(product?.finalPrice ?? product?.price ?? product?.prices?.[0]?.price ?? product?.priceTiers?.[0]?.unitPrice)
+  const added = cartStore.addItem({ ...product, price })
+  cartMessage.value = added ? 'محصول به سبد خرید اضافه شد.' : 'امکان افزودن این محصول به سبد خرید وجود ندارد.'
 }
 function goSearch(value = searchQuery.value) {
   const query = String(value || '').trim()
@@ -185,7 +193,7 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
       <div v-else-if="latestProducts.length" class="prods"><article v-for="product in latestProducts" :key="product.id" class="p">
         <router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em></router-link>
         <div class="bd"><div class="br">{{ productBrand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr" :class="{ q: !productIsRetail(product) }">{{ productPrice(product) }}<small>{{ productMode(product) }}</small></div></div>
-        <div class="ac"><router-link class="btn b1" :to="productLink(product)">مشاهده محصول</router-link><router-link class="btn b2" :to="productLink(product)">جزئیات</router-link></div>
+        <div class="ac"><button v-if="productIsRetail(product)" class="btn b1" type="button" @click.stop="addToCart(product)">افزودن به سبد</button><router-link v-else class="btn b1" :to="productLink(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div>
       </article></div>
       <div v-else class="empty-state">هنوز محصول منتشرشده‌ای برای نمایش وجود ندارد.</div>
     </div>
@@ -195,12 +203,12 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
     </div></div>
 
     <div class="sec"><div class="sh"><h2>جدیدترین محصولات خرده‌فروشی</h2><router-link :to="{ name: 'products', query: { retail: '1' } }">همه محصولات خرده‌فروشی</router-link></div>
-      <div v-if="retailLatest.length" class="prods"><article v-for="product in retailLatest" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em></router-link><div class="bd"><div class="br">{{ productBrand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr">{{ productPrice(product) }}<small>قیمت ثبت‌شده در کاتالوگ</small></div></div><div class="ac"><router-link class="btn b1" :to="productLink(product)">مشاهده محصول</router-link><router-link class="btn b2" :to="productLink(product)">جزئیات</router-link></div></article></div>
+      <div v-if="retailLatest.length" class="prods"><article v-for="product in retailLatest" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em></router-link><div class="bd"><div class="br">{{ productBrand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr">{{ productPrice(product) }}<small>قیمت ثبت‌شده در کاتالوگ</small></div></div><div class="ac"><button class="btn b1" type="button" @click.stop="addToCart(product)">افزودن به سبد</button><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div></article></div>
       <div v-else class="empty-state">در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</div>
     </div>
 
     <div class="sec"><div class="sh"><h2>محصولات منتخب</h2><router-link :to="{ name: 'products' }">مشاهده محصولات</router-link></div>
-      <div v-if="selectedProducts.length" class="prods"><article v-for="(product, index) in selectedProducts" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em><i class="rk">#{{ (index + 1).toLocaleString('fa-IR') }}</i></router-link><div class="bd"><div class="br">{{ productBrand(product) }}</div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr" :class="{ q: !productIsRetail(product) }">{{ productPrice(product) }}<small>محصول منتخب</small></div></div><div class="ac"><router-link class="btn b1" :to="productLink(product)">مشاهده محصول</router-link><router-link class="btn b2" :to="productLink(product)">جزئیات</router-link></div></article></div>
+      <div v-if="selectedProducts.length" class="prods"><article v-for="(product, index) in selectedProducts" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em><i class="rk">#{{ (index + 1).toLocaleString('fa-IR') }}</i></router-link><div class="bd"><div class="br">{{ productBrand(product) }}</div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr" :class="{ q: !productIsRetail(product) }">{{ productPrice(product) }}<small>محصول منتخب</small></div></div><div class="ac"><button v-if="productIsRetail(product)" class="btn b1" type="button" @click.stop="addToCart(product)">افزودن به سبد</button><router-link v-else class="btn b1" :to="productLink(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div></article></div>
       <div v-else class="empty-state">محصولی با نشان منتخب برای نمایش دریافت نشد.</div>
     </div>
 
@@ -343,7 +351,7 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 .reference-home .feat{display:block;color:inherit;text-decoration:none}
 .reference-home .cat{border:0;color:var(--text);font-family:inherit;font-size:13px;font-weight:700;line-height:inherit;cursor:pointer}
 .reference-home .chips button.c{border:0;background:rgba(255,255,255,.14);color:#bcd9e8;padding:2px 12px;border-radius:99px;font:inherit;font-size:12px;cursor:pointer}
-.reference-home .cta2 .btn,.reference-home .ac .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+ .reference-home .cta2 .btn,.reference-home .ac .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}\n.reference-home .ac button{border:0;font-family:inherit;cursor:pointer}\n.reference-home .cart-feedback{margin:10px 0;color:var(--ok);font-size:12px}
 
 @media(prefers-color-scheme:dark){.reference-home:not([data-theme="light"]){--bg:#0e1220;--card:#171c30;--text:#eef0f8;--muted:#9aa3c2;--line:#262d49;--chip:#262a4d;--hero1:#06182c;--hero2:#0c4a63}}
 </style>
