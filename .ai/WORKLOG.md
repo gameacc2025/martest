@@ -3989,3 +3989,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Added explicit Outline and Ghost button text tokens: Light `#0891B2`; Dark Outline `#67E8F9`, Dark Ghost `#22D3EE`.
 - **Verification:** Remote source inspection only. Tests, builds and rendered visual checks were not run.
 - **Commits:** Dashboard shell `3190c44`, `872de14`, `1e7538c`, `2c3d172`; Website pages/layout `a6a65e8`, `c24dba9`, `c10491c`, `342a3ac`, `e764c87`, `564fcd5`, `e571d69`, `6073ecb`; button variant tokens `be0a53c`, `1a85533`, `1ea7b0d`, `298f61b`.
+
+
+## 2026-11-07 — DESIGN-SYSTEM-COMPANY-ROLLOUT — Finish Company workspace palette alignment
+- Replaced the remaining legacy violet, emerald, amber and orange dashboard metric/chart colors with the approved brand-secondary and shared semantic status tokens.
+- Updated Company message badges, sample-note surface, sender avatars and unread indicators to use semantic danger, warning and secondary tokens.
+- Added static palette regression coverage for shared theme tokens and app surfaces.
+- **Scope:** Company frontend presentation only; no API, backend, database, permissions or business rules changed.
+- **Verification:** Static source review only. Tests/builds and rendered visual verification remain pending.
+- **Commits:** `42cec62c62065367991e7304626ff3c1348fa69f`, `62a5debe3b3791f87feee9cde60a1d88834133d2`.
