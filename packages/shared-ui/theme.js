@@ -1,7 +1,6 @@
 /**
- * Shared Telecom Market PrimeVue preset.
- * Palette is sampled from the approved mockup and tuned so primary controls,
- * links and semantic text retain WCAG AA contrast in both color schemes.
+ * Telecom Market — approved shared PrimeVue preset.
+ * Brand primitives stay constant; primary actions and surfaces adapt by theme.
  */
 import { definePreset } from '@primevue/themes'
 import Lara from '@primevue/themes/lara'
@@ -9,141 +8,39 @@ import Lara from '@primevue/themes/lara'
 const TelecomPreset = definePreset(Lara, {
   semantic: {
     primary: {
-      50: '#e8f5fc',
-      100: '#d1ebf8',
-      200: '#a4d7f1',
-      300: '#77c3e9',
-      400: '#3eaddf',
-      500: '#0790de',
-      600: '#0679bd',
-      700: '#075f96',
-      800: '#084b76',
-      900: '#073a5c',
-      950: '#062a43',
+      50:'#CFFAFE',100:'#A5F3FC',200:'#67E8F9',300:'#22D3EE',400:'#06B6D4',500:'#0891B2',
+      600:'#0891B2',700:'#0E7490',800:'#155E75',900:'#164E63',950:'#083344',
     },
-    formField: { borderRadius: '8px' },
-    content: { borderRadius: '8px' },
-    focusRing: { width: '2px', style: 'solid', color: '#0679bd', offset: '2px' },
-    colorScheme: {
-      light: {
-        primary: {
-          color: '{primary.600}',
-          contrastColor: '#ffffff',
-          hoverColor: '{primary.700}',
-          activeColor: '{primary.800}',
-        },
-        highlight: {
-          background: '#e3f1fd',
-          focusBackground: '#cbe5f7',
-          color: '#084b76',
-          focusColor: '#073a5c',
-        },
-        surface: {
-          0: '#ffffff',
-          50: '#f7f9fd',
-          100: '#eaeef9',
-          200: '#d8e1ef',
-          300: '#c0ccdf',
-          400: '#95a7c2',
-          500: '#657b99',
-          600: '#52678a',
-          700: '#3e536f',
-          800: '#263e59',
-          900: '#142f4a',
-          950: '#092643',
-        },
-        text: {
-          color: '#0f2d4d',
-          hoverColor: '#092643',
-          mutedColor: '#52678a',
-          hoverMutedColor: '#3e536f',
-        },
-        formField: {
-          background: '#ffffff',
-          borderColor: '#c0ccdf',
-          placeholderColor: '#52678a',
-        },
-        content: { background: '#ffffff', borderColor: '#d8e1ef' },
+    formField:{borderRadius:'8px'},
+    content:{borderRadius:'12px'},
+    focusRing:{width:'2px',style:'solid',color:'{primary.500}',offset:'2px'},
+    colorScheme:{
+      light:{
+        primary:{color:'#0891B2',contrastColor:'#FFFFFF',hoverColor:'#0E7490',activeColor:'#0891B2'},
+        highlight:{background:'#CFFAFE',focusBackground:'#A5F3FC',color:'#0E7490',focusColor:'#083344'},
+        surface:{0:'#FFFFFF',50:'#F0F7FA',100:'#F1F5F9',200:'#DCE8EF',300:'#C5D5E0',400:'#94A3B8',500:'#627D98',600:'#486581',700:'#334E68',800:'#243B53',900:'#102A43',950:'#0A1625'},
+        text:{color:'#102A43',hoverColor:'#0A1625',mutedColor:'#627D98',hoverMutedColor:'#486581'},
+        formField:{background:'#FFFFFF',borderColor:'#DCE8EF',placeholderColor:'#94A3B8'},
+        content:{background:'#FFFFFF',borderColor:'#DCE8EF'},
       },
-      dark: {
-        primary: {
-          color: '#27d3ee',
-          contrastColor: '#05213f',
-          hoverColor: '#4cd1f3',
-          activeColor: '#7fe8f7',
-        },
-        highlight: {
-          background: 'rgba(39, 211, 238, 0.14)',
-          focusBackground: 'rgba(39, 211, 238, 0.22)',
-          color: '#a4f0fa',
-          focusColor: '#d0f8fc',
-        },
-        surface: {
-          0: '#ffffff',
-          50: '#eaf3fc',
-          100: '#d8e7f5',
-          200: '#b7cbe0',
-          300: '#8ea9c5',
-          400: '#6e89a6',
-          500: '#4e6a89',
-          600: '#39536f',
-          700: '#273e5a',
-          800: '#162f4b',
-          900: '#0d2038',
-          950: '#071429',
-        },
-        text: {
-          color: '#eef3fb',
-          hoverColor: '#ffffff',
-          mutedColor: '#a9b8d6',
-          hoverMutedColor: '#dbe5f4',
-        },
-        formField: {
-          background: '#162f4b',
-          borderColor: '#39536f',
-          placeholderColor: '#a9b8d6',
-        },
-        content: { background: '#0d2038', borderColor: '#273e5a' },
+      dark:{
+        primary:{color:'#22D3EE',contrastColor:'#083344',hoverColor:'#67E8F9',activeColor:'#06B6D4'},
+        highlight:{background:'#164E63',focusBackground:'#155E75',color:'#67E8F9',focusColor:'#A5F3FC'},
+        surface:{0:'#F0F9FF',50:'#DCE8EF',100:'#24394D',200:'#193149',300:'#172B40',400:'#9FB3C8',500:'#71869B',600:'#627D98',700:'#24394D',800:'#193149',900:'#122438',950:'#0A1625'},
+        text:{color:'#F0F9FF',hoverColor:'#FFFFFF',mutedColor:'#9FB3C8',hoverMutedColor:'#C7D7E6'},
+        formField:{background:'#122438',borderColor:'#24394D',placeholderColor:'#71869B'},
+        content:{background:'#122438',borderColor:'#24394D'},
       },
     },
   },
-  components: {
-    button: {
-      root: {
-        borderRadius: '8px',
-        paddingX: '1rem',
-        paddingY: '0.625rem',
-        label: { fontWeight: '600' },
-      },
-    },
-    card: {
-      root: {
-        borderRadius: '12px',
-        shadow: '0 1px 2px rgba(9, 38, 67, 0.06)',
-      },
-      colorScheme: {
-        light: { root: { background: '#ffffff' } },
-        dark: { root: { background: '#0d2038' } },
-      },
-    },
-    tag: {
-      root: { fontSize: '0.8125rem', fontWeight: '600', borderRadius: '999px' },
-    },
-    datatable: {
-      colorScheme: {
-        light: {
-          header: { background: '#f7f9fd' },
-          headerCell: { background: '#f7f9fd', hoverBackground: '#eaeef9', color: '#52678a' },
-          row: { stripedBackground: '#f7f9fd' },
-        },
-        dark: {
-          header: { background: '#162f4b' },
-          headerCell: { background: '#162f4b', hoverBackground: '#273e5a', color: '#b6c7d8' },
-          row: { stripedBackground: '#0d2038' },
-        },
-      },
-    },
+  components:{
+    button:{root:{borderRadius:'8px',paddingX:'1rem',paddingY:'0.5rem',label:{fontWeight:'600'}}},
+    card:{root:{borderRadius:'12px',shadow:'0 2px 6px rgba(16,42,67,.06)'},colorScheme:{light:{root:{background:'#FFFFFF'}},dark:{root:{background:'#122438'}}}},
+    tag:{root:{fontSize:'0.75rem',fontWeight:'600',borderRadius:'6px'}},
+    datatable:{colorScheme:{
+      light:{header:{background:'#F1F5F9'},headerCell:{background:'#F1F5F9',hoverBackground:'#F0FDFF',color:'#627D98'},row:{stripedBackground:'#FFFFFF'}},
+      dark:{header:{background:'#172B40'},headerCell:{background:'#172B40',hoverBackground:'#193149',color:'#9FB3C8'},row:{stripedBackground:'#122438'}},
+    }},
   },
 })
-
 export default TelecomPreset
