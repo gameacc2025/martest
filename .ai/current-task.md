@@ -992,3 +992,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Verified the resulting file retains the complete 952-line layout and contains no remaining `onUnmounted(` call.
 - Commit: `375050506ece9c5e972e45618a77c85dcf092e8d` (directly on `main`).
 - Local Vite runtime/build verification remains pending; not run in this remote GitHub session.
+
+
+## 2026-11-07 — Website loader and homepage motion repair
+- Fixed the broad reduced-motion CSS wildcard that had reduced all public-site animations to 0.01ms; reduced-motion now slows the signature fiber data flow instead of silently freezing it.
+- Restored visible loader data packets with a tighter dash cycle and glow; added homepage network breathing/nodes, featured card float and slide-change copy entrance.
+- Added regression assertions. No build or tests run, per instruction; browser verification not performed.
+- No backend/API/database/auth/business behavior changed.
+- Commits: `f958806`, `2d199cf`, `2cceb87`, `b5e87c6`.
