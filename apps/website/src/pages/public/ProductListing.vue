@@ -288,4 +288,20 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 
 .reference-products .ac button{border:0;font-family:inherit;cursor:pointer}
 .reference-products .cart-feedback{margin:10px 0;color:var(--ok);font-size:12px}
+.reference-products{font-family:var(--ds-font-family);background:var(--ds-page-bg);color:var(--ds-text-primary)}
+.reference-products .top,.reference-products footer{background:var(--ds-color-brand-deep);color:var(--ds-color-on-brand-muted)}
+.reference-products .hero,.reference-products .feat .img,.reference-products .bf .im2{background:var(--ds-color-brand-dark);color:var(--ds-color-on-brand)}
+.reference-products .b1,.reference-products .fab{background:var(--ds-primary-button);color:var(--ds-primary-button-text)}
+.reference-products .b1:hover,.reference-products .fab:hover{background:var(--ds-primary-button-hover)}
+.reference-products .search{background:var(--ds-card-bg)}
+.reference-products .search input{color:var(--ds-text-primary)}
+.reference-products .tabs button.on{background:var(--ds-card-bg);color:var(--ds-text-primary)}
+.reference-products .ofr{background:var(--ds-brand-secondary);color:#FFFFFF}
+.reference-products .ofr .btn{background:var(--ds-card-bg);color:var(--ds-brand-secondary)}
+.reference-products .rfq,.reference-products .p .im{background:var(--ds-surface-secondary)}
+.reference-products .bt.n{background:var(--ds-status-danger-bg);color:var(--ds-status-danger-fg)}
+.reference-products .bt.t{background:var(--ds-status-success-bg);color:var(--ds-status-success-fg)}
+.reference-products footer a,.reference-products footer .nl input{color:var(--ds-color-on-brand-muted)}
+.reference-products .sh h2:after{background:var(--ds-brand-primary)}
+
 </style>
