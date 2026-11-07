@@ -37,7 +37,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   })
 
   it('contains every major homepage section from the supplied HTML reference', () => {
-    for (const section of ['stats', 'brands', 'cats', 'prods', 'bl', 'tms', 'rfq']) {
+    for (const section of ['stats', 'brands', 'g3', 'prods', 'bl', 'tms', 'rfq']) {
       expect(source).toContain('class="' + section)
     }
     expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
@@ -55,6 +55,9 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).toContain('v-for="product in latestProducts"')
     expect(source).toContain('v-for="product in retailLatest"')
     expect(source).toContain('v-for="category in categories.slice(0, 9)"')
+    expect(source).toContain('class="cb-header-img"')
+    expect(source).toContain('class="cb-sublist"')
+    expect(source).toContain('categoryChildren(category)')
     expect(source).toContain('productSalesMode(product)')
     expect(source).toContain('productPriceLabel(product)')
     expect(source).toContain('product.company?.isVerified')
@@ -76,10 +79,12 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   })
 
   it('uses the exact reference palette, gradients and responsive breakpoints', () => {
-    expect(source).toContain('--bg:#f4f5fa')
+    expect(source).toContain('--bg:var(--ds-page-bg)')
+    expect(source).toContain('--pri:var(--ds-brand-primary)')
     expect(source).toContain('linear-gradient(135deg,var(--hero1),var(--hero2))')
     expect(source).toContain('.p{background:var(--card)')
-    expect(source).toContain('@media(max-width:900px)')
+    expect(source).toContain('@media(max-width:1000px)')
+    expect(source).toContain('@media(max-width:640px)')
   })
 })
 
