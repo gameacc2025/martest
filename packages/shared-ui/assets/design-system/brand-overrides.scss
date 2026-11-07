@@ -1,36 +1,61 @@
-/* Visual direction sampled from the owner's dashboard mockup. Colors come from tokens.scss (--ds-*). */
-html { font-size:15px; }
-body,button,input,textarea,select,.p-component { font-family:'Vazirmatn','Inter',system-ui,sans-serif; }
-body { font-size:.9375rem; line-height:1.55; }
-h1 { font-size:clamp(1.55rem,2vw,1.95rem); line-height:1.35; }
-h2 { font-size:1.45rem; line-height:1.4; }
-h3 { font-size:1.2rem; line-height:1.45; }
-h4 { font-size:1.05rem; line-height:1.5; }
-.page-header { margin-bottom:1.25rem; }
-.page-header h1 { font-size:1.65rem; }
-.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success) { background:var(--ds-cta-gradient); border-color:transparent; color:#062f4f; font-weight:700; box-shadow:0 3px 10px rgba(39,211,238,.28); }
-.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):enabled:hover { background:linear-gradient(90deg,#27d3ee 0%,#3fc4f0 100%); border-color:transparent; color:#062f4f; box-shadow:0 5px 14px rgba(39,211,238,.38); }
-.p-button:not(.p-button-text):not(.p-button-outlined):focus-visible { outline:3px solid rgba(7,144,222,.45); outline-offset:2px; }
-.p-button.p-button-outlined { color:#0679bd; border-color:#0790de; }
-.p-button.p-button-text { color:#0679bd; }
-.p-button.p-button-secondary { background:#09d3d1; border-color:#09d3d1; color:#062f4f; font-weight:700; }
-.p-button.p-button-secondary:enabled:hover { background:#07888e; border-color:#07888e; }
-.dash-sidebar { background:var(--ds-sidebar-bg); color:var(--ds-sidebar-fg); border-inline-end:1px solid var(--ds-sidebar-border); }
-.dash-sidebar-brand { border-bottom-color:rgba(220,240,250,.14); }
-.dash-sidebar-brand-text { color:#fff; font-size:1rem; font-weight:700; }
-.dash-sidebar-brand-tagline,.dash-sidebar-section { color:var(--ds-sidebar-muted); }
-.dash-sidebar-link { color:var(--ds-sidebar-fg); border-radius:10px; min-height:42px; }
-.dash-sidebar-link-icon { color:var(--ds-sidebar-muted); }
-.dash-sidebar-link:hover { background:rgba(255,255,255,.08); color:#fff; }
-.dash-sidebar-link--active { color:#fff; background:var(--ds-sidebar-active-bg); box-shadow:inset 3px 0 0 var(--ds-sidebar-accent); }
-.dash-sidebar-link--active .dash-sidebar-link-icon { color:var(--ds-sidebar-accent); }
-.dash-sidebar-badge { background:var(--ds-accent); color:#062f4f; font-weight:700; }
-.dash-header { background:rgba(255,255,255,.94); border-bottom:1px solid #e5ebf6; box-shadow:0 3px 14px rgba(9,38,67,.045); }
-.dash-header-workspace-mark { color:#0679bd; background:#e3f4fd; }
-.dash-header-icon-btn:hover { color:#0679bd; background:#e8f5fd; }
-.public-header { background:rgba(255,255,255,.96); border-bottom:1px solid #e5ebf6; }
-.public-nav-link-active { color:#0679bd; }
-.p-card,.p-panel,.p-dialog,.p-popover,.p-menu { border-color:#e2e8f4; }
-.p-card { box-shadow:0 3px 14px rgba(9,38,67,.055); }
-.p-inputtext:focus,.p-select:focus-within,.p-dropdown:focus-within { border-color:#0790de; box-shadow:0 0 0 3px rgba(7,144,222,.14); }
-@media(max-width:767px) { .page-header { gap:.75rem; margin-bottom:1rem; } .page-header h1 { font-size:1.45rem; } }
+/* Shared component polish. All colors resolve through approved semantic tokens. */
+:root { color-scheme: light; }
+:root.app-dark { color-scheme: dark; }
+html { font-size: 14px; }
+body, button, input, textarea, select, .p-component { font-family: var(--ds-font-family); }
+body { font-size: var(--ds-font-size-base); line-height: var(--ds-line-height-normal); color: var(--ds-color-text); background: var(--ds-color-background); }
+h1, h2, h3, h4 { color: var(--ds-color-text); font-family: var(--ds-font-family); letter-spacing: 0; }
+h1 { font-size: var(--ds-heading-h1); line-height: 1.3; }
+h2 { font-size: var(--ds-heading-h2); line-height: 1.35; }
+h3 { font-size: var(--ds-heading-h3); line-height: 1.4; }
+small, .text-sm, .ds-text-sm { font-size: var(--ds-font-size-xs); }
+.page-header { margin-bottom: 1.25rem; }
+.page-header h1 { font-size: var(--ds-heading-h1); }
+
+.p-button { min-height: var(--ds-button-md-height); border-radius: var(--ds-button-md-radius); font-weight: var(--ds-font-weight-semibold); }
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success) {
+  background: var(--ds-primary-button); border-color: var(--ds-primary-button); color: var(--ds-primary-button-text); box-shadow: none;
+}
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):enabled:hover {
+  background: var(--ds-primary-button-hover); border-color: var(--ds-primary-button-hover); color: var(--ds-primary-button-text); box-shadow: none;
+}
+.p-button.p-button-secondary { background: var(--ds-brand-secondary); border-color: var(--ds-brand-secondary); color: #FFFFFF; }
+.p-button.p-button-secondary:enabled:hover { background: var(--ds-color-secondary-hover); border-color: var(--ds-color-secondary-hover); }
+.p-button.p-button-outlined { background: transparent; color: var(--ds-primary-button); border-color: currentColor; }
+.p-button.p-button-outlined:enabled:hover { background: var(--ds-color-surface-hover); color: var(--ds-primary-button-hover); }
+.p-button.p-button-text { background: transparent; color: var(--ds-primary-button); }
+.p-button.p-button-danger { background: var(--ds-button-danger); border-color: var(--ds-button-danger); color: #FFFFFF; }
+.p-button.p-button-success { background: var(--ds-button-success); border-color: var(--ds-button-success); color: #FFFFFF; }
+.p-button.p-button-sm { min-height: var(--ds-button-sm-height); border-radius: var(--ds-button-sm-radius); }
+.p-button.p-button-lg { min-height: var(--ds-button-lg-height); border-radius: var(--ds-button-lg-radius); }
+.p-button:focus-visible, .p-inputtext:focus-visible, .p-select:focus-within, .p-dropdown:focus-within, .p-textarea:focus-visible {
+  outline: 2px solid var(--ds-color-focus); outline-offset: 2px; box-shadow: none;
+}
+
+.dash-sidebar { background: var(--ds-sidebar-bg); color: var(--ds-sidebar-fg); border-inline-end: 1px solid var(--ds-sidebar-border); }
+.dash-sidebar-brand { border-bottom-color: var(--ds-sidebar-border); }
+.dash-sidebar-brand-text { color: var(--ds-sidebar-fg-strong); font-size: 1rem; font-weight: 700; }
+.dash-sidebar-brand-tagline, .dash-sidebar-section { color: var(--ds-sidebar-muted); }
+.dash-sidebar-link { color: var(--ds-sidebar-fg); border-radius: var(--ds-radius-md); min-height: 42px; }
+.dash-sidebar-link-icon { color: var(--ds-sidebar-muted); }
+.dash-sidebar-link:hover { background: var(--ds-sidebar-hover); color: var(--ds-sidebar-fg-strong); }
+.dash-sidebar-link--active { color: var(--ds-sidebar-active-fg); background: var(--ds-sidebar-active-bg); box-shadow: none; }
+.dash-sidebar-link--active .dash-sidebar-link-icon { color: var(--ds-sidebar-active-fg); }
+.dash-sidebar-badge { background: var(--ds-brand-primary); color: #083344; font-weight: 700; }
+.dash-header { background: var(--ds-header-bg); border-bottom: 1px solid var(--ds-border); box-shadow: none; }
+.dash-header-workspace-mark { color: var(--ds-color-primary-text); background: var(--ds-color-primary-soft); }
+.dash-header-icon-btn:hover { color: var(--ds-color-primary-text); background: var(--ds-color-surface-hover); }
+.public-header { background: var(--ds-header-bg); border-bottom: 1px solid var(--ds-border); }
+.public-nav-link-active { color: var(--ds-color-primary-text); }
+
+.p-card, .p-panel, .p-dialog, .p-popover, .p-menu { border-color: var(--ds-color-border); color: var(--ds-color-text); }
+.p-card { background: var(--ds-color-surface); border-radius: var(--ds-card-radius); box-shadow: var(--ds-shadow-xs); }
+.p-dialog { border-radius: var(--ds-modal-radius); }
+.p-select-overlay, .p-dropdown-panel, .p-multiselect-overlay, .p-menu { border-radius: var(--ds-dropdown-radius); }
+.p-tag, .p-badge { min-height: var(--ds-badge-height); border-radius: var(--ds-badge-radius); }
+.p-inputtext, .p-textarea, .p-select, .p-dropdown { min-height: var(--ds-input-height); border-radius: var(--ds-input-radius); }
+.p-inputtext:focus, .p-select:focus-within, .p-dropdown:focus-within {
+  border-color: var(--ds-color-focus); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ds-color-focus) 18%, transparent);
+}
+::selection { background: var(--ds-brand-primary-subtle); color: var(--ds-text-primary); }
+:root.app-dark ::selection { background: var(--ds-sidebar-active-bg); color: var(--ds-text-primary); }
