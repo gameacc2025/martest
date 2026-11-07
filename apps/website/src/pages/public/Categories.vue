@@ -6,12 +6,27 @@ import { useProductsStore } from '../../stores/products'
 const router = useRouter()
 const productsStore = useProductsStore()
 const categories = ref([])
+const categoryProductCounts = ref({})
 const loading = ref(false)
 const error = ref('')
 function title(category) { return category?.nameFa || category?.name || category?.nameEn || category?.slug || 'دسته‌بندی' }
 function count(category) {
-  const value = Number(category?.productCount ?? category?.productsCount ?? category?._count?.products)
+  const value = Number(categoryProductCounts.value[String(category?.id)] ?? category?.productCount ?? category?.productsCount ?? category?._count?.products)
   return Number.isFinite(value) && value >= 0 ? value.toLocaleString('fa-IR') : '—'
+}
+async function loadCategoryProductCounts(list) {
+  const entries = await Promise.all(list.map(async category => {
+    try {
+      const result = await productsStore.getProducts({
+        page: 1, limit: 1, status: 'PUBLISHED', categoryId: Number(category.id),
+      })
+      const total = Number(result?.meta?.total ?? result?.meta?.totalItems ?? result?.total)
+      return [String(category.id), Number.isFinite(total) && total >= 0 ? total : null]
+    } catch {
+      return [String(category.id), null]
+    }
+  }))
+  categoryProductCounts.value = Object.fromEntries(entries)
 }
 function icon(category) {
   const value = title(category).toLowerCase()
@@ -42,6 +57,7 @@ async function loadCategories() {
   try {
     const result = await productsStore.getCategories()
     categories.value = Array.isArray(result) ? result : []
+    await loadCategoryProductCounts(categories.value)
   } catch {
     error.value = 'دریافت دسته‌بندی‌ها ناموفق بود.'
     categories.value = []
