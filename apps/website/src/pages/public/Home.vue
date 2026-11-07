@@ -179,6 +179,7 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
     <circle class="fiber-node-pulse fiber-node-pulse--cyan" cx="1100" cy="200" r="5" fill="#22D3EE"/>
   </svg>
   <div class="w">
+    <Transition name="hero-content" mode="out-in">
     <div class="hero-copy" :key="activeSlide">
       <div class="tag">{{ activeSlideContent.title }}</div>
       <h1 v-html="activeSlideContent.headline"></h1>
@@ -188,6 +189,7 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
       <div class="chips">پرتکرار: <button class="c" type="button" @click="goSearch('OTDR')">OTDR</button><button class="c" type="button" @click="goSearch('Power Meter')">Power Meter</button><button class="c" type="button" @click="goSearch('Fusion Splicer')">Fusion Splicer</button><button class="c" type="button" @click="goSearch('آنتن')">آنتن</button></div>
       <div class="cta2"><router-link class="btn b1" :to="{ name: 'my-inquiries' }">ثبت درخواست استعلام</router-link><router-link class="btn b2" :to="{ name: 'products' }">مشاهده همه محصولات</router-link></div>
     </div>
+    </Transition>
     <router-link v-if="featuredProduct" class="feat" :to="productLink(featuredProduct)">
       <div class="img"><img v-if="productImage(featuredProduct)" :src="productImage(featuredProduct)" :alt="productTitle(featuredProduct)"><span v-else>{{ productBrand(featuredProduct) }}</span></div>
       <h3>{{ productTitle(featuredProduct) }}</h3><small>{{ productCategory(featuredProduct) }}</small>
@@ -530,5 +532,29 @@ footer .cp{border-top:1px solid #24394D;margin-top:28px;padding-top:14px;display
 @keyframes fy{50%{transform:translateY(-8px)}}
 @keyframes pgp{to{transform:scaleX(1)}}
 @keyframes pText{from{opacity:.4}to{opacity:1}}
+
+
+/* Animated hero network and slide transitions from the supplied prototype. */
+.reference-home .hero{position:relative;overflow:hidden;isolation:isolate}
+.reference-home .hero .w{position:relative;z-index:2}
+.reference-home .hero-bg-network{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.42;pointer-events:none}
+.reference-home .fiber-wave{fill:none;stroke-dasharray:20 180;stroke-dashoffset:200;animation:home-fiber-flow 5s linear infinite}
+.reference-home .fiber-wave--violet{stroke-dasharray:16 200;stroke-dashoffset:216;animation-duration:6.5s;animation-delay:.4s}
+.reference-home .fiber-node-pulse{transform-box:fill-box;transform-origin:center;animation:home-node-pulse 2.4s ease-in-out infinite}
+.reference-home .fiber-node-pulse--violet{animation-delay:.8s}
+.reference-home .hero-content-enter-active{transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1)}
+.reference-home .hero-content-leave-active{transition:opacity .22s ease,transform .22s ease}
+.reference-home .hero-content-enter-from{opacity:0;transform:translateY(18px)}
+.reference-home .hero-content-leave-to{opacity:0;transform:translateY(-10px)}
+.reference-home .dots{z-index:3}
+.reference-home .dots button{width:9px;height:9px;padding:0;border:0;border-radius:99px;background:rgba(255,255,255,.4);cursor:pointer;transition:width .25s,background .25s}
+.reference-home .dots button.on{width:26px;background:var(--ds-brand-primary)}
+.reference-home .ha{z-index:3;width:38px;height:38px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.12);backdrop-filter:blur(5px)}
+.reference-home .ha:hover{background:var(--ds-brand-primary);color:var(--ds-color-brand-deep)}
+@keyframes home-fiber-flow{to{stroke-dashoffset:-200}}
+@keyframes home-node-pulse{50%{opacity:.35;transform:scale(.68)}}
+@media(max-width:900px){.reference-home .hero .w{grid-template-columns:1fr;gap:22px}.reference-home .feat{max-width:560px}.reference-home .hero-bg-network{opacity:.24}}
+@media(max-width:640px){.reference-home .hero{padding:34px 0 56px}.reference-home .hero-copy{max-width:100%}.reference-home .dots{bottom:18px}.reference-home .ha{top:auto;bottom:14px}.reference-home .ha.pv{right:16px}.reference-home .ha.nx{left:16px}}
+@media(prefers-reduced-motion:reduce){.reference-home .fiber-wave,.reference-home .fiber-node-pulse,.reference-home .hero-content-enter-active,.reference-home .hero-content-leave-active{animation:none!important;transition:none!important}.reference-home .fiber-wave{stroke-dashoffset:0}}
 
 </style>
