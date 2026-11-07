@@ -13,13 +13,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
-import { categoriesApi, inquiriesApi, endpoints } from '@telecom/api-client'
+import { inquiriesApi, endpoints } from '@telecom/api-client'
 import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Menu from 'primevue/menu'
 import Drawer from 'primevue/drawer'
-import MegaMenu from '@telecom/shared-ui/components/common/MegaMenu.vue'
 import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 
 const authStore = useAuthStore()
@@ -209,25 +208,12 @@ const navItems = [
   { name: 'تماس با ما', path: '/contact', icon: 'pi pi-phone' }
 ]
 
-const footerCategories = ref([])
-const megaMenuCategories = ref([])
 
 onMounted(async () => {
   fetchMyInquiryCount()
   // Keep the header badge and its five-message preview in sync with live notifications.
   await fetchHeaderNotifications()
 
-  // Load categories for MegaMenu and footer
-  try {
-    const response = await categoriesApi.list()
-    const body = response.data
-    const items = body?.data || body || []
-    const allCategories = Array.isArray(items) ? items : []
-    megaMenuCategories.value = allCategories
-    footerCategories.value = allCategories.slice(0, 6)
-  } catch (err) {
-    console.error('Error loading categories:', err)
-  }
 })
 
 
