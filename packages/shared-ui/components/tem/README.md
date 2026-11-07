@@ -4,7 +4,7 @@ This directory contains Vue 3 components adapted from the reusable examples in t
 
 ## Usage
 
-All components are exported from the `@telecom/shared-ui` package root:
+All components are exported from the `@telecom/shared-ui` package root. Their visual source of truth is the root-level `NewTemp.html` prototype, implemented through the shared semantic tokens in `assets/design-system/newtemp-reference.scss`.
 
 ```vue
 <script setup>
@@ -51,5 +51,6 @@ import { TemProductCard, TemStatCard, TemDataCard } from '@telecom/shared-ui'
 - Components do not call APIs, access stores, or persist data.
 - Do not copy the template's demo records, localStorage cart, checkout, payment, or authentication logic into the marketplace.
 - Use the existing API client and domain stores in consuming pages. Keep RFQ/inquiry as the marketplace's primary commercial workflow; do not expose retail cart actions unless the product requirements explicitly enable them.
-- Keep Persian/RTL content and existing project tokens. The reference palette is a visual guide; do not globally replace the current brand palette as part of component adoption.
+- Keep Persian/RTL content and consume the shared NewTemp semantic tokens (`--ds-*`); do not introduce page-local palette overrides or hardcoded legacy colors.
+- Admin, Company and Website must use the same light/dark palette, typography, component geometry, status colors and interaction states. Application-specific layout composition may differ, but not the brand system.
 - The public/Admin blog examples in `store-template/admin/blog-create.html` and `blog-details.html` are deferred references only. Implementation is tracked in GitHub issue #84.
