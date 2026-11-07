@@ -50,7 +50,7 @@
   color: var(--ds-text-primary);
 }
 
-:global(.app-dark) .public-shell {
+.app-dark .public-shell {
   --ds-page-bg: #0A1625;
   --ds-sidebar-bg: #0D1B2A;
   --ds-header-bg: rgba(18, 36, 56, 0.88);
@@ -89,7 +89,7 @@
   box-shadow: 0 8px 28px rgba(10, 22, 37, 0.06);
 }
 
-:global(.app-dark) .public-shell .public-header {
+.app-dark .public-shell .public-header {
   border-bottom-color: rgba(34, 211, 238, 0.16) !important;
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.22);
 }
@@ -104,8 +104,8 @@
   color: #0891B2 !important;
 }
 
-:global(.app-dark) .public-shell .public-nav-link-active,
-:global(.app-dark) .public-shell .public-icon-link:hover {
+.app-dark .public-shell .public-nav-link-active,
+.app-dark .public-shell .public-icon-link:hover {
   color: #22D3EE !important;
 }
 
@@ -156,9 +156,9 @@
   color: #0891B2;
 }
 
-:global(.app-dark) .public-shell .reference-home .sh a,
-:global(.app-dark) .public-shell .reference-products .sh a,
-:global(.app-dark) .public-shell .reference-categories .sh a {
+.app-dark .public-shell .reference-home .sh a,
+.app-dark .public-shell .reference-products .sh a,
+.app-dark .public-shell .reference-categories .sh a {
   color: #22D3EE;
 }
 
@@ -210,14 +210,14 @@
   transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
 }
 
-:global(.app-dark) .public-shell .reference-home .p,
-:global(.app-dark) .public-shell .reference-home .cat,
-:global(.app-dark) .public-shell .reference-home .bi,
-:global(.app-dark) .public-shell .reference-home .tc,
-:global(.app-dark) .public-shell .reference-home .rfq,
-:global(.app-dark) .public-shell .reference-products .p,
-:global(.app-dark) .public-shell .reference-products .fl,
-:global(.app-dark) .public-shell .reference-categories .cb {
+.app-dark .public-shell .reference-home .p,
+.app-dark .public-shell .reference-home .cat,
+.app-dark .public-shell .reference-home .bi,
+.app-dark .public-shell .reference-home .tc,
+.app-dark .public-shell .reference-home .rfq,
+.app-dark .public-shell .reference-products .p,
+.app-dark .public-shell .reference-products .fl,
+.app-dark .public-shell .reference-categories .cb {
   background-color: rgba(18, 36, 56, 0.9);
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
@@ -240,8 +240,8 @@
   color: #0891B2;
 }
 
-:global(.app-dark) .public-shell .reference-home .cat i,
-:global(.app-dark) .public-shell .reference-categories .cb .t i {
+.app-dark .public-shell .reference-home .cat i,
+.app-dark .public-shell .reference-categories .cb .t i {
   background: rgba(34, 211, 238, 0.14);
   color: #22D3EE;
 }
@@ -276,9 +276,9 @@
   color: #0E7490;
 }
 
-:global(.app-dark) .public-shell .reference-home .b2,
-:global(.app-dark) .public-shell .reference-products .b2,
-:global(.app-dark) .public-shell .reference-categories .b2 {
+.app-dark .public-shell .reference-home .b2,
+.app-dark .public-shell .reference-products .b2,
+.app-dark .public-shell .reference-categories .b2 {
   border-color: rgba(34, 211, 238, 0.42);
   color: #67E8F9;
 }
