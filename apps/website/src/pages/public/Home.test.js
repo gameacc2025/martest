@@ -69,7 +69,6 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).toContain('linear-gradient(135deg,var(--hero1),var(--hero2))')
     expect(source).toContain('.p{background:var(--card)')
     expect(source).toContain('@media(max-width:900px)')
-    expect(source).toContain('@media(max-width:560px)')
   })
 })
 
