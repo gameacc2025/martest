@@ -1,5 +1,21 @@
 # Current Task — 2026-11-07
 
+## Active task — NEWTEMP-COMPLETE-REDESIGN
+- **Status:** In progress. Phase 1 shared theme foundation implemented on `ui/newtemp-complete-redesign`; verification pending.
+- **Owner instruction:** Rewrite the complete Website storefront, shared components, Admin and Company panels against the exact root-level `NewTemp.html`. Proceed phase-by-phase without asking the owner questions or stopping between phases. Before every next phase, perform an explicit internal completeness gate and continue only when the current phase meets its checklist.
+- **Authoritative source:** `NewTemp.html` at repository root. Do not use `store-template/`, older `Telecom Market.html`, or other prototypes as competing visual authorities.
+- **Reference palette (light):** cyan `#22D3EE`, hover `#06B6D4`, deep cyan/action `#0891B2`, indigo `#6366F1`, violet `#8B5CF6`, navy `#0A1625`, petrol `#122438`, canvas `#F0F7FA`, header/card `#FFFFFF`, hover surface `#F0FDFF`, secondary surface `#F1F5F9`, border `#DCE8EF`, text `#102A43`, secondary text `#627D98`, muted `#94A3B8`.
+- **Reference palette (dark):** canvas/navy `#0A1625`, header `#0D1B2A`, card/petrol `#122438`, hover `#193149`, secondary surface `#172B40`, border `#24394D`, text `#F0F9FF`, secondary text `#9FB3C8`, muted `#71869B`; action cyan `#22D3EE`, hover `#67E8F9`, action text `#083344`.
+- **Phase 1 completed in source:** created `packages/shared-ui/assets/design-system/newtemp-reference.scss`; imported it as the last shared theme layer in `packages/shared-ui/assets/main.scss`; added regression assertions in `packages/shared-ui/design-system.test.js`; recorded the phase in `.ai/WORKLOG.md`.
+- **Branch:** `ui/newtemp-complete-redesign` (branched from current `main`).
+- **No-go areas:** Do not copy demo/sample content or fake commerce behavior from NewTemp. Preserve real API data, routes, cart, inquiry, auth/session, role/permission and existing backend contracts. No backend/database changes.
+- **Verification truth:** No local tests, build, browser screenshot or visual side-by-side check has run yet. Do not claim runtime or pixel-perfect verification until performed.
+- **Next:** Phase 2 — rewrite shared UI primitives and storefront/dashboard shared components to consume the NewTemp visual language; then Phase 3 Website page-by-page; Phase 4 Admin and Company shells/pages; Phase 5 responsive/accessibility/motion consistency; Phase 6 full regression review and docs.
+
+---
+
+# Current Task — 2026-11-07
+
 ## Active task — WEBSITE-PROTOTYPE-VISUAL-02
 - **Status:** Source changes committed to remote `main`. Build intentionally NOT run, per owner instruction. Browser review not run.
 - **Authoritative reference:** Latest uploaded `gemini-code-1794067101381.html`. This supersedes the earlier visual interpretation and the previous incorrect palette implementation.
