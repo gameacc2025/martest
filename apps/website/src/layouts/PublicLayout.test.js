@@ -99,14 +99,12 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-cart-drawer__empty a').text()).toContain('مشاهده محصولات')
   })
 
-  it('opens a searchable header popover from the search icon', async () => {
+  it('keeps the reference header free of an extra search control and retains commerce actions', async () => {
     wrapper = mountLayout()
     await flushPromises()
-    await wrapper.get('.public-search-trigger').trigger('click')
-    await nextTick()
-
-    expect(wrapper.get('#public-search-popover').exists()).toBe(true)
-    expect(wrapper.get('.public-search-popover__field').exists()).toBe(true)
+    expect(wrapper.find('.public-search-trigger').exists()).toBe(false)
+    expect(wrapper.get('.public-commerce-trigger').attributes('aria-label')).toBe('سبد خرید')
+    expect(wrapper.get('.public-login-link').exists()).toBe(true)
   })
 
   it('matches the reference utility strip, simple category navigation and five-column footer', async () => {
