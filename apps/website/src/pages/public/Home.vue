@@ -27,7 +27,11 @@ const slides = [
   { title: 'خرید سازمانی', headline: 'استعلام ثبت کنید،<br>پیشنهاد تأمین بگیرید', description: 'نیاز پروژه را ثبت کنید و پاسخ تأمین‌کنندگان را از مسیر استعلام پیگیری کنید.', brand: 'B2B', product: 'تأمین سازمانی' },
 ]
 const activeBanner = computed(() => banners.value[activeSlide.value] || null)
-const activeSlideContent = computed(() => activeBanner.value || slides[activeSlide.value % slides.length])
+const activeSlideContent = computed(() => {
+  const fallback = slides[activeSlide.value % slides.length]
+  const banner = activeBanner.value
+  return banner ? { ...fallback, title: banner.title || fallback.title, description: banner.description || fallback.description } : fallback
+})
 const featuredProduct = computed(() => featuredProducts.value[0] || products.value[0] || null)
 const latestProducts = computed(() => products.value.slice(0, 4))
 const retailLatest = computed(() => retailProducts.value.slice(0, 4))
