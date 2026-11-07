@@ -249,6 +249,7 @@ function logout() {
               <router-link :to="{ name: 'home' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>صفحه اصلی</span></router-link>
               <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-box" aria-hidden="true"></i><span>محصولات</span></router-link>
               <router-link :to="{ name: 'categories' }" class="public-nav-link" active-class="public-nav-link-active"><span>دسته‌بندی</span></router-link>
+              <span class="public-nav-link public-nav-link--static">برندها</span>
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
             </nav>
@@ -948,7 +949,7 @@ function logout() {
 
 @media(prefers-color-scheme:dark){.public-shell:not([data-theme="light"]){--tm-canvas:#0e1220;--tm-surface:#171c30;--tm-line:#262d49;--tm-ink:#eef0f8;--tm-muted:#9aa3c2;background:#0e1220;color:#eef0f8}.public-shell:not([data-theme="light"]) .public-header{background:#171c30;border-bottom-color:#262d49}.public-shell:not([data-theme="light"]) .public-main{background:#0e1220}.public-shell:not([data-theme="light"]) .public-user-name{color:#eef0f8}}
 .public-guest-actions .public-login-link { order: 3; }
-/* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
+ .public-nav-link--static { cursor: default; }\n/* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; }
 @media(max-width:1100px){.public-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:767px){.public-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
