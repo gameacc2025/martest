@@ -3,12 +3,12 @@
 ## Latest task — Apply the owner-approved final design palette
 - **Status:** IMPLEMENTED on `main`; tests/build/browser verification pending.
 - **Request:** Apply the final shared brand colors, complete Light/Dark theme, semantic states, component dimensions, button variants, typography and spacing.
-- **Implementation:** `packages/shared-ui/assets/design-system/tokens.scss` is the semantic source of truth; `theme.js`, `brand-overrides.scss`, `tem.scss` and `pages.scss` consume it. The obsolete violet/blue legacy aliases and permanently dark dashboard sidebar now resolve through the approved theme tokens. Website, Company and Admin import the same shared styles and PrimeVue preset.
+- **Implementation:** `packages/shared-ui/assets/design-system/tokens.scss` is the semantic source of truth; `theme.js`, `brand-overrides.scss`, `tem.scss` and `pages.scss` consume it. DashboardSidebar/Header/Footer, Website Home/ProductListing/Categories and PublicLayout now use the approved theme-aware tokens. Retired purple primary aliases, OS-only dark overrides and the permanently dark sidebar were removed. Website, Company and Admin share the same base theme.
 - **Documentation:** Added `design-system/APPROVED-PALETTE.md` and aligned `design-system/MASTER.md`.
 - **Scope:** Shared frontend presentation only. No backend, API, database, auth, permissions, routes or business rules changed.
 - **Verification:** Source reviewed remotely. Shared UI tests and Website/Company/Admin builds NOT RUN; browser verification remains prohibited by the current project instruction.
-- **Code commits:** `7f4ef0e` through `d65c895` on `main`.
-- **Next:** Pull `main`, run shared-ui tests and Website/Company/Admin builds, then inspect Light/Dark visually when browser checks are authorized.
+- **Code commits:** `7f4ef0e` through `298f61b` on `main`; Website and dashboard component rollout is recorded in the latest WORKLOG entry.
+- **Next:** Pull `main`, run `pnpm --filter @telecom/shared-ui test`, then build Website, Company and Admin. Inspect Light/Dark visually when browser checks are authorized.
 
 ---
 
