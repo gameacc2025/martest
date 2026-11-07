@@ -945,4 +945,10 @@ function logout() {
   .public-footer-grid { grid-template-columns: 1fr; }
 }
 
+
+/* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
+.public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; }
+@media(max-width:1100px){.public-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:767px){.public-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.public-footer-grid{grid-template-columns:1fr}}
 </style>
