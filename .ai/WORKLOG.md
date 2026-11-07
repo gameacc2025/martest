@@ -1,3 +1,16 @@
+## 2026-11-07 — WEBSITE-PROTOTYPE-VISUAL-01 — Apply owner-supplied visual prototype
+- **Status:** Implementation committed on `main`; runtime/build and browser verification pending.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Use the newly uploaded `telecom_market_platform (1)(1).html` as the mandatory Website color and visual-effects reference.
+- **Scope:** Website public shell, homepage/catalogue/category presentation, fiber loader, focused tests and design documentation. No backend/API/business changes.
+- **Changes:** Added `apps/website/src/assets/marketplace-theme.scss` with exact prototype palette (cyan `#22D3EE`, hover `#06B6D4`, navy `#0A1625`, petrol `#122438`, purple `#8B5CF6`, accent `#0891B2`, light canvas/card/text/border `#F8FAFC`/`#FFFFFF`/`#0F172A`/`#E2E8F0`), light/dark surfaces, glass blur, cyan/purple gradient borders and hero glow/grid, card hover elevation, primary gradients, focus rings and reduced-motion handling. Imported it after the shared Website theme. Added the existing persisted shared `useTheme` control to the public header. Recolored the Website fiber loader. Added `design-system/WEBSITE-PROTOTYPE-VISUALS.md`.
+- **Tests:** Added `apps/website/src/assets/marketplace-theme.test.js`; updated `apps/website/src/layouts/PublicLayout.test.js` for the theme switch. NOT RUN in this GitHub-only session.
+- **Verification:** Build NOT RUN. Browser side-by-side review NOT RUN; visual parity is NOT VERIFIED.
+- **Commits:** `63f2272`, `634fdf7`, `856df5f`, `2c2add3`, `f1071b9`, `08366e0`, `634776c`, `ab0dca0`, `c5738d2` on `main`.
+- **Push:** Changes are committed directly to remote `main` through GitHub file operations.
+- **Risks / open questions:** Existing Home/ProductListing/Categories layout structure and real API behavior were intentionally preserved. The uploaded prototype contains hardcoded sample data and demo checkout behavior; none of that was copied. The old root `Telecom Market.html` remains a structural reference; the newly supplied prototype is now the Website palette/effects authority.
+- **Next action:** Pull `main`; run Website tests and build; visually compare Home, Products and Categories in both themes and at desktop/mobile widths, then fix any remaining visual differences.
+
 ## 2026-11-07 — WEBSITE-HOME-CATEGORY-COUNTS — Remove homepage sections and show category totals
 - **Status:** Implemented on `main`; CI verification pending.
 - **Request:** Remove «چرا Telecom Market؟» and «پیشنهاد ویژه تجهیزات خرده‌فروشی» from Home, and display category product counts on both Home and the Categories page.
