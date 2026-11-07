@@ -38,12 +38,20 @@ import { theme as TelecomPreset } from '@telecom/shared-ui'
 
 const app = createApp(App)
 const pageLoading = createPageLoadingController()
+let appBooted = false
 
-// Keep the fiber-optic overlay in sync with async route resolution. The
-// minimum display duration prevents a distracting flash on fast transitions.
-router.beforeEach(() => pageLoading.show())
-router.afterEach(() => pageLoading.hide())
-router.onError(() => pageLoading.hide({ immediate: true }))
+// Keep the fiber-optic overlay in sync with async route resolution after the
+// initial session + router bootstrap. The minimum display duration prevents
+// a distracting flash on fast transitions.
+router.beforeEach(() => {
+  if (appBooted) pageLoading.show()
+})
+router.afterEach(() => {
+  if (appBooted) pageLoading.hide()
+})
+router.onError(() => {
+  if (appBooted) pageLoading.hide({ immediate: true })
+})
 
 app.use(createPinia())
 app.use(router)
@@ -108,6 +116,7 @@ async function bootstrap() {
   }
 
   app.mount('#app')
+  appBooted = true
   pageLoading.hide()
 }
 
