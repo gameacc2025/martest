@@ -18,6 +18,7 @@ import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import Menu from 'primevue/menu'
 import Drawer from 'primevue/drawer'
+import { useTheme } from '@telecom/shared-ui'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
@@ -26,6 +27,7 @@ const cartDrawerOpen = ref(false)
 const myInquiryCount = ref(null)
 const router = useRouter()
 const route = useRoute()
+const { theme, toggle: toggleTheme } = useTheme()
 
 // Keep the responsive navigation in sync with route changes (including
 // browser back/forward) so it never remains open over a new page.
@@ -256,6 +258,15 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
+            <button
+              type="button"
+              class="public-icon-link public-theme-toggle"
+              :aria-label="theme === 'dark' ? 'تغییر به تم روشن' : 'تغییر به تم تیره'"
+              :aria-pressed="theme === 'dark'"
+              @click="toggleTheme"
+            >
+              <i :class="theme === 'dark' ? 'pi pi-sun' : 'pi pi-moon'" aria-hidden="true"></i>
+            </button>
             <div v-if="user" class="public-authenticated-actions">
               <div class="public-notifications-actions" @keydown.esc.stop.prevent="closeNotificationDrawer">
                 <button type="button" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها" aria-controls="public-notifications-menu"  :aria-expanded="notificationDrawerOpen" @click.stop="notificationDrawerOpen = true">
