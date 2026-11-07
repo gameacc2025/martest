@@ -8,14 +8,14 @@
     <style>
       #page-loading {
         position: fixed; inset: 0; z-index: 99999; display: grid; place-items: center;
-        overflow: hidden; background: #f4f5fa; opacity: 1; visibility: visible;
+        overflow: hidden; background: #F8FAFC; opacity: 1; visibility: visible;
         transition: opacity 300ms ease, visibility 300ms ease;
       }
       #page-loading.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-      .fiber-loader__visual { width: clamp(104px, 22vw, 136px); aspect-ratio: 1; filter: drop-shadow(0 0 18px rgba(1,190,194,.16)); }
+      .fiber-loader__visual { width: clamp(104px, 22vw, 136px); aspect-ratio: 1; filter: drop-shadow(0 0 18px rgba(34,211,238,.16)); }
       .fiber-loader__svg { display: block; width: 100%; height: 100%; overflow: visible; }
       .fiber-loader__track { fill: none; stroke: #dce6ef; stroke-width: 5; }
-      .fiber-loader__halo { fill: none; stroke: #01bec2; stroke-width: 8; opacity: .24; filter: url(#fiber-glow); }
+      .fiber-loader__halo { fill: none; stroke: #22D3EE; stroke-width: 8; opacity: .24; filter: url(#fiber-glow); }
       .fiber-loader__flow {
         fill: none; stroke: url(#fiber-gradient); stroke-width: 4; stroke-linecap: round;
         stroke-dasharray: 18 82; transform-origin: 60px 60px; animation: fiber-orbit 1.35s linear infinite; filter: url(#fiber-glow);
@@ -25,10 +25,10 @@
         opacity: .55; animation: fiber-orbit-reverse 4.5s linear infinite;
       }
       .fiber-loader__packets { transform-origin: 60px 60px; animation: fiber-orbit 2.1s linear infinite; }
-      .fiber-loader__packet { fill: #fff; stroke: #01bec2; stroke-width: 2; filter: url(#fiber-glow); }
-      .fiber-loader__packet--secondary { fill: #c9ffff; stroke: #2aa7e8; stroke-width: 1.5; }
+      .fiber-loader__packet { fill: #fff; stroke: #22D3EE; stroke-width: 2; filter: url(#fiber-glow); }
+      .fiber-loader__packet--secondary { fill: #c9ffff; stroke: #0891B2; stroke-width: 1.5; }
       .fiber-loader__core-halo {
-        fill: #01bec2; opacity: .18; filter: url(#fiber-glow);
+        fill: #22D3EE; opacity: .18; filter: url(#fiber-glow);
         transform-origin: 60px 60px; animation: fiber-pulse 1.7s ease-in-out infinite;
       }
       .fiber-loader__core { fill: url(#fiber-center); stroke: #fff; stroke-width: 2; }
@@ -39,9 +39,9 @@
         50% { opacity: .34; transform: scale(1.18); }
       }
       @media (prefers-color-scheme: dark) {
-        #page-loading { background: #0e1220; }
-        .fiber-loader__track { stroke: #27354a; }
-        .fiber-loader__inner { stroke: #8294ad; opacity: .42; }
+        #page-loading { background: #0A1625; }
+        .fiber-loader__track { stroke: #26384B; }
+        .fiber-loader__inner { stroke: #9FB3C8; opacity: .42; }
       }
       @media (prefers-reduced-motion: reduce) {
         .fiber-loader__flow, .fiber-loader__inner, .fiber-loader__packets, .fiber-loader__core-halo { animation: none !important; }
@@ -61,14 +61,14 @@
         <svg class="fiber-loader__svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="fiber-gradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#01bec2" />
-              <stop offset=".55" stop-color="#39d9f2" />
-              <stop offset="1" stop-color="#8b7cf6" />
+              <stop offset="0" stop-color="#22D3EE" />
+              <stop offset=".55" stop-color="#06B6D4" />
+              <stop offset="1" stop-color="#8B5CF6" />
             </linearGradient>
             <radialGradient id="fiber-center">
               <stop offset="0" stop-color="#fff" />
               <stop offset=".45" stop-color="#b9ffff" />
-              <stop offset="1" stop-color="#01bec2" />
+              <stop offset="1" stop-color="#22D3EE" />
             </radialGradient>
             <filter id="fiber-glow" x="-150%" y="-150%" width="400%" height="400%">
               <feGaussianBlur stdDeviation="3.5" />
