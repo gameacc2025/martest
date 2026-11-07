@@ -3910,3 +3910,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Verified the resulting file retains the complete 952-line layout and contains no remaining `onUnmounted(` call.
 - Commit: `375050506ece9c5e972e45618a77c85dcf092e8d` (directly on `main`).
 - Local Vite runtime/build verification remains pending; not run in this remote GitHub session.
+
+
+## 2026-11-07 — Corrective exact replacement from Telecom Market.html
+- **Reason:** the earlier storefront implementation did not reproduce the supplied HTML; it replaced major reference sections and styling with a different component-led layout. This corrective pass restores the actual reference composition instead of applying another visual approximation.
+- **Source of truth:** root `Telecom Market.html`, verified unchanged at SHA `3190fd1ca45bb035027dca3d7ee551376807825a`.
+- **Rebuilt pages:** `apps/website/src/pages/public/Home.vue`, `ProductListing.vue`, and `Categories.vue`. The pages now use the reference's own markup/class vocabulary and CSS for the hero, search/tabs, featured panel, category/product cards, filter sidebar, three-column category panels, offer/blog/testimonial/catalogue/FAQ/RFQ sections, and responsive breakpoints.
+- **Shell alignment:** `apps/website/src/layouts/PublicLayout.vue` now follows the reference utility strip, simple primary navigation, and five-column footer. Existing search, login/account branching, cart and notification drawers remain.
+- **Live integration retained:** published products, retail-enabled products, categories, campaign banners, product detail links, category IDs, retail query filters, loading/error/empty states and pagination continue to use the existing frontend API/store contracts. No backend, schema, migration, permissions or API contract was changed.
+- **Honest data gaps:** unavailable metrics remain dashes; brand strip items are explicitly marked illustrative; blog/testimonial/catalogue delivery/discount campaign areas are marked sample or unavailable; no countdown, fake seller count, review identity, bestseller ranking or discount is claimed. Featured products are presented as «محصولات منتخب».
+- **Regression tests:** updated `Home.test.js`, `ProductListing.test.js`, `Categories.test.js`, and `PublicLayout.test.js` for the new reference markup and retained behavior.
+- **Verification status:** remote source review only. Vue compiler, focused tests, Website build, and desktop/mobile browser comparison were NOT run here. User must pull `main` and perform local runtime/visual verification; do not report success before that.
