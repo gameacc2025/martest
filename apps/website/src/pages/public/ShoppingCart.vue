@@ -161,7 +161,7 @@ function goToCheckout() {
 .quantity-control button:disabled { opacity: .35; cursor: not-allowed; }
 .quantity-control output { min-width: 1.8rem; text-align: center; font-size: .85rem; font-variant-numeric: tabular-nums; }
 .remove-item { display: inline-flex; align-items: center; gap: .35rem; border: 0; background: transparent; color: var(--ds-color-text-muted); font: inherit; font-size: .78rem; cursor: pointer; }
-.remove-item:hover { color: var(--ds-color-danger, #b42318); }
+.remove-item:hover { color: var(--ds-color-danger, #EF4444); }
 .cart-item-total { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; white-space: nowrap; }
 .cart-item-total span { color: var(--ds-color-text-muted); font-size: .72rem; }
 .cart-item-total strong { font-size: .9rem; }
