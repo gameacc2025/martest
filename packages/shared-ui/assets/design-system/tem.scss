@@ -1063,9 +1063,7 @@ body .company-management-toolbar {
   position: relative;
   overflow: hidden;
   border-radius: var(--tm-radius-lg);
-  background:
-    radial-gradient(circle at 85% 20%, rgba(46, 211, 238, 0.3), transparent 45%),
-    linear-gradient(118deg, #0D1B2A 0%, #0D1B2A 60%, #164E63 100%);
+  background: var(--ds-color-brand-dark);
   color: #fff;
   padding: clamp(24px, 4vw, 46px);
 }
