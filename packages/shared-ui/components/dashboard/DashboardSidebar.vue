@@ -388,4 +388,13 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 @media (max-width: 991px) {
   .dash-sidebar { width: var(--ds-sidebar-width); }
 }
+
+/* NewTemp navigation geometry shared by Admin and Company. */
+.dash-sidebar{padding:16px 12px}
+.dash-sidebar-brand{margin-bottom:18px}
+.dash-sidebar-brand-text{font-size:16px;font-weight:700}
+.dash-sidebar-list,.dash-sidebar-sublist{gap:4px}
+.dash-sidebar-link{min-height:42px;padding:10px 12px;border-radius:8px}
+.dash-sidebar-count{min-width:20px;height:20px;border-radius:6px}
+@media(prefers-reduced-motion:reduce){.dash-sidebar,.dash-sidebar-link,.dash-sidebar-caret{transition:none}}
 </style>
