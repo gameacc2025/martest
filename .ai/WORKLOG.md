@@ -1,3 +1,15 @@
+## 2026-11-07 — WEBSITE-PROTOTYPE-VISUAL-02 — Match latest supplied loader, header and full-site palette
+- **Status:** Source committed to remote `main`; no build or tests run per owner instruction.
+- **Reference:** `gemini-code-1794067101381.html`, the latest owner-uploaded prototype. Supersedes prior palette guesses.
+- **Changes:** Rebuilt `apps/website/src/assets/marketplace-theme.scss` around exact light/dark design tokens from the latest prototype, including cyan/indigo/violet brand, navy/petrol surfaces, precise page/card/header/border/text values and semantic status colors. Mapped PrimeVue primary, highlight, surface, text, form-field and focus variables so component defaults do not retain the old primary color. Styled the actual public shell utility strip, sticky header, logo, nav, active link, icon controls, theme switch, notification/cart badges, primary CTA, mobile navigation and footer. Applied the same palette to Home, Product Listing and Categories page surfaces, cards, filters, product image wells, buttons and headings. Added animated cyan/violet fiber data paths behind the home hero. Replaced the existing circular loading graphic in `apps/website/index.html` with the prototype's network transmission diagram (network nodes, violet optical junction, moving cyan/violet packets and Persian wait text); saved theme preference is applied before first paint.
+- **Tests:** Updated `marketplace-theme.test.js` for exact palette, real header, loader and hero network. Not run.
+- **Docs:** Updated `design-system/WEBSITE-PROTOTYPE-VISUALS.md` and this task state.
+- **Scope:** Website app only. No Admin/Company shared token changes, backend/API/database/business rules or hardcoded prototype demo content.
+- **Commits:** `349acf2`, `e4ce939`, `cc3ad85`, `ac39014`, `909a238`, `35ac545`, `2ca751e` on `main`.
+- **Build:** Intentionally not run, as requested.
+- **Visual review:** No browser comparison has been run; don't claim pixel parity.
+- **Next:** Continue mapping any page-local legacy hardcoded colors in remaining Website routes to the same semantic tokens; no build unless requested.
+
 ## 2026-11-07 — WEBSITE-PROTOTYPE-VISUAL-01 — Apply owner-supplied visual prototype
 - **Status:** Implementation committed on `main`; runtime/build and browser verification pending.
 - **Agent:** ChatGPT via GitHub repository tools.
