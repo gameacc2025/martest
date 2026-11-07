@@ -4054,3 +4054,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Dark theme:** Completed missing semantic dark aliases for muted states, soft status surfaces, primary subtle and contrast colors.
 - **Tests:** Updated design-system, public layout, Home and Categories test expectations for the NewTemp structure and token loading. Tests have not been executed; GitHub commit status/workflow lookup returned no CI runs/statuses for the inspected commit. No browser screenshots or visual regression check have run.
 - **Next:** Continue page-by-page audit of every remaining Website, Admin and Company route; check responsive behavior, form states, drawers, tables, loading/empty/error states and any hardcoded legacy values. Then run tests/build/visual review in a local checkout or CI and fix findings. Keep backend/API/Prisma/routes/permissions unchanged.
+
+
+## 2026-11-07 — Magazine, navigation and header interaction follow-up
+- Added a public editorial magazine at `/magazine` and article routes at `/magazine/:slug` using a responsive two-column editorial layout.
+- Added category filtering and client-side article search, featured content, persistent latest-article sidebar, contextual recommendations, in-article related links, reading-time metadata and product discovery CTAs. Seeded the initial magazine with evergreen telecom/network buying guides and technical explainers; no article/news API or CMS endpoint was found in the current website source, so these are frontend editorial entries rather than live news.
+- Moved product search out of the header action cluster and into the desktop navigation as a search icon/link; also added it to mobile navigation.
+- Added the magazine link to desktop/mobile navigation and the footer.
+- Reduced the final desktop/mobile header row height from 56/58px to 52px, retaining the existing sticky header behavior and transitions.
+- Added coordinated enter/leave motion for PrimeVue drawers and popup menus, including reduced-motion overrides; notification and cart drawer content and actions remain unchanged.
+- **Verification:** inspected the updated route/layout/magazine sources and confirmed expected route names, navigation links, 52px header rule, article/related/latest sections and responsive rules are present. Per user direction, did not run or wait for tests/builds.
