@@ -15,6 +15,8 @@
   --ds-primary-button: var(--ds-color-primary);
   --ds-primary-button-hover: var(--ds-color-primary-hover);
   --ds-primary-button-text: var(--ds-color-primary-contrast);
+  --ds-outline-text: #0891B2;
+  --ds-ghost-text: #0891B2;
   --ds-color-secondary: var(--ds-brand-secondary);
   --ds-color-secondary-contrast: #FFFFFF;
   --ds-color-secondary-hover: var(--ds-brand-secondary);
@@ -216,6 +218,8 @@
   --ds-primary-button: #22D3EE;
   --ds-primary-button-hover: #67E8F9;
   --ds-primary-button-text: #083344;
+  --ds-outline-text: #67E8F9;
+  --ds-ghost-text: #22D3EE;
   --ds-color-primary: #22D3EE;
   --ds-color-primary-contrast: #083344;
   --ds-color-primary-hover: #67E8F9;
