@@ -165,13 +165,13 @@ onMounted(load)
 
 <style scoped>
 .banner-management { gap: 1.1rem; color: var(--ds-color-text); }
-.banner-intro { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.25rem 1.4rem; border:1px solid var(--ds-color-border); border-radius:var(--ds-radius-xl); background:linear-gradient(115deg,color-mix(in srgb,var(--ds-color-primary) 8%,var(--ds-color-surface)),var(--ds-color-surface) 72%); }
+.banner-intro { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.25rem 1.4rem; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:linear-gradient(115deg,color-mix(in srgb,var(--ds-color-primary) 8%,var(--ds-color-surface)),var(--ds-color-surface) 72%); }
 .banner-intro__eyebrow { color:var(--ds-color-primary); font-size:.75rem; font-weight:800; }
 .banner-intro h2 { margin:.3rem 0; font-size:1.15rem; }
 .banner-intro p { margin:0; color:var(--ds-color-text-muted); font-size:.85rem; line-height:1.8; }
 .banner-toolbar { display:flex; flex-wrap:wrap; gap:.65rem; }
 .banner-toolbar > :first-child { min-width:min(320px,100%); }
-.banner-table-wrap { overflow:hidden; border:1px solid var(--ds-color-border); border-radius:var(--ds-radius-xl); background:var(--ds-color-surface); }
+.banner-table-wrap { overflow:hidden; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:var(--ds-color-surface); }
 .banner-thumb { width:88px; height:54px; object-fit:cover; border-radius:8px; }
 .banner-empty { padding:2rem; text-align:center; color:var(--ds-color-text-muted); }
 .banner-form { display:grid; gap:1rem; }
