@@ -13,7 +13,7 @@ import ProductListing from './ProductListing.vue'
 
 const productFixture = (overrides = {}) => ({
   id: 42, title: 'مودم فیبر نوری', brand: 'FiberPro', model: 'XG-1200', sku: 'FP-XG1200',
-  retailEnabled: true, company: { name: 'تأمین‌کننده آزمایشی', isVerified: true },
+  retailEnabled: true, finalPrice: 1200000, company: { name: 'تأمین‌کننده آزمایشی', isVerified: true },
   prices: [{ price: 1200000 }], images: [{ isPrimary: true, url: '/product-42.png' }],
   category: { id: 7, nameFa: 'فیبر نوری' }, categoryId: 7, ...overrides,
 })
