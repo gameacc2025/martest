@@ -3959,3 +3959,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commits:** `7164445`, `d3d5d31`, `01fda02`, `bffc1bb`, `770ebfd`, `ac6590b`, `d632bd4`, `5cf619f`, `2db0e2f`, `d2772c5`, `4ef20ab`, `c4c6d24`, `0b7a86b`.
 - **Local install state:** Taste Skill is already present in the repository. Hallmark's project installer command is configured but has not been executed on the user's Windows checkout; run `.\scripts\install-ui-skills.ps1` from the repository root to materialize/update the agent skill copies.
 - **Next:** Run the PowerShell installer, then `pnpm --filter @telecom/website test -- src/utils/pageLoading.test.js` and `pnpm --filter @telecom/website build`. Inspect the loading animation in desktop/mobile browsers only if the owner later lifts the no-browser-testing instruction.
+
+
+## 2026-11-07 — WEBSITE-TEXTLESS-FIBER-SPINNER — Glowing visual-only page loader
+- **Status:** Implemented on `main`; runtime/build/browser verification not run in this remote GitHub session.
+- **Goal:** Replace the first fiber loader's wordmark and Persian loading copy with a single visual spinner, retaining the existing page-loading lifecycle.
+- **Changes:** Replaced the horizontal fiber line and all visible text in `apps/website/index.html` with a centered circular optical-fiber spinner: teal/cyan/violet luminous data arc, orbiting data packets, subtle inner fiber track, pulsing center, soft glow, dark-mode surface and reduced-motion fallback. Kept an invisible accessible status label; no visible wording or logo remains.
+- **Scope:** Static Website loading presentation only. `src/main.js`, controller timing, router hooks, auth restoration, API/backend, database and business rules are unchanged.
+- **Verification:** Reviewed the changed source via GitHub. Unit tests, Website build and rendered browser appearance: **NOT RUN**. Browser checks remain prohibited by the current project instruction.
+- **Commit:** `43f219ba4476f54c347879d7224ec8f63458cc9c`.
+- **Next:** Pull `main` and verify the spinner visually on desktop/mobile; run `pnpm --filter @telecom/website test -- src/utils/pageLoading.test.js` and `pnpm --filter @telecom/website build`.
