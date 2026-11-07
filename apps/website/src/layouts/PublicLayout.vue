@@ -252,6 +252,8 @@ function logout() {
               <router-link :to="{ name: 'home' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>صفحه اصلی</span></router-link>
               <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-box" aria-hidden="true"></i><span>محصولات</span></router-link>
               <router-link :to="{ name: 'categories' }" class="public-nav-link" active-class="public-nav-link-active"><span>دسته‌بندی</span></router-link>
+              <router-link :to="{ name: 'magazine' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-book-open" aria-hidden="true"></i><span>مجله و مقالات</span></router-link>
+              <router-link :to="{ name: 'search' }" class="public-nav-link public-nav-search" active-class="public-nav-link-active" aria-label="جستجوی محصولات"><i class="pi pi-search" aria-hidden="true"></i><span>جستجو</span></router-link>
               <router-link :to="{ name: 'faq' }" class="public-nav-link" active-class="public-nav-link-active"><span>سوالات متداول</span></router-link>
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
@@ -259,7 +261,6 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
-            <button type="button" class="public-icon-link public-search-trigger" aria-label="جستجوی محصولات" @click="router.push({ name: 'search' })"><i class="pi pi-search" aria-hidden="true"></i></button>
             <button
               type="button"
               class="public-icon-link public-theme-toggle"
@@ -432,6 +433,8 @@ function logout() {
               <span>دسته‌بندی محصولات</span>
             </router-link>
           </li>
+          <li><router-link :to="{ name: 'search' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-search"></i><span>جستجوی محصولات</span></router-link></li>
+          <li><router-link :to="{ name: 'magazine' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-book-open"></i><span>مجله و مقالات</span></router-link></li>
           <li v-for="item in navItems" :key="item.path">
             <router-link :to="item.path" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i :class="item.icon || 'pi pi-circle'" aria-hidden="true"></i><span>{{ item.name }}</span>
@@ -508,6 +511,7 @@ function logout() {
               <li><router-link :to="{ name: 'home' }" class="public-footer-link">صفحه اصلی</router-link></li>
               <li><router-link :to="{ name: 'products' }" class="public-footer-link">همه محصولات</router-link></li>
               <li><router-link :to="{ name: 'categories' }" class="public-footer-link">دسته‌بندی‌ها</router-link></li>
+              <li><router-link :to="{ name: 'magazine' }" class="public-footer-link">مجله و مقالات</router-link></li>
               <li><router-link :to="{ name: 'my-inquiries' }" class="public-footer-link">ثبت استعلام</router-link></li>
             </ul>
           </div>
@@ -821,6 +825,13 @@ function logout() {
 .public-notification-item:focus-visible,.public-notifications-menu__all:focus-visible,.public-notifications-close:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: -2px; }
 @media (prefers-reduced-motion: reduce) { .public-notifications-drawer { animation: none; } }
 
+/* Smooth, consistent entry/exit for notification and cart drawers. */
+.public-shell :deep(.p-drawer-enter-active),.public-shell :deep(.p-drawer-leave-active) { transition: transform .34s cubic-bezier(.2,.8,.2,1), opacity .28s ease !important; }
+.public-shell :deep(.p-drawer-mask) { transition: opacity .28s ease !important; }
+.public-shell :deep(.p-menu-enter-active),.public-shell :deep(.p-menu-leave-active) { transform-origin: top right; transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1) !important; }
+.public-shell :deep(.p-menu-enter-from),.public-shell :deep(.p-menu-leave-to) { opacity: 0; transform: translateY(-7px) scale(.98); }
+@media(prefers-reduced-motion:reduce){.public-shell :deep(.p-drawer-enter-active),.public-shell :deep(.p-drawer-leave-active),.public-shell :deep(.p-menu-enter-active),.public-shell :deep(.p-menu-leave-active){transition:none!important}}
+
 /* Search popover and physical-left cart drawer */
 .public-header .public-container{position:relative}
 .public-search-trigger{border:0;background:transparent;cursor:pointer}
@@ -899,7 +910,14 @@ function logout() {
 .public-authenticated-actions,.public-guest-actions { display: contents; }
 .public-user-trigger { order: 3; }
 .public-header-actions > .public-mobile-toggle { order: 4; }
-.public-search-trigger,.public-search-popover { display: none !important; }
+ .public-search-trigger,.public-search-popover { display: none !important; }
+.public-nav-search { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ds-color-border); border-radius: 7px; }
+.public-nav-search i { display: inline-block !important; font-size: 12px; }
+.public-nav-search:hover { border-color: var(--ds-color-primary); }
+.public-header-row { min-height: 52px; }
+.public-logo-symbol { width: 28px; height: 28px; }
+.public-logo-symbol::before { top: 7px; }
+.public-logo-symbol::after { top: 7px; height: 13px; }
 @media(max-width:991px){.public-user-name{display:inline}}
 /* Telecom Market.html storefront shell alignment */
 .public-shell {
@@ -963,7 +981,7 @@ function logout() {
 .public-guest-actions .public-login-link { order: 3; }
  .public-nav-link--static { cursor: default; }
 .public-header-row { min-height: 60px; }
-@media(max-width:767px){.public-header-row{min-height:58px}}
+@media(max-width:767px){.public-header-row{min-height:52px}}
 /* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; }
 @media(max-width:1100px){.public-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -988,7 +1006,7 @@ function logout() {
 .public-utility-inner { min-height: 28px; }
 .public-utility-message { font-size: 12px; font-weight: 500; }
 .public-header { background: var(--ds-header-bg); border-bottom: 1px solid var(--ds-border); }
-.public-header-row { min-height: 56px; gap: 12px; }
+ .public-header-row { min-height: 52px; gap: 12px; }
 .public-header-right { gap: 22px; }
 .public-logo { gap: 8px; }
 .public-logo-symbol { width: 30px; height: 30px; border-radius: 8px; background: var(--ds-color-brand-deep); border: 1px solid var(--ds-border); position: relative; display: inline-block; flex: none; }
@@ -1013,7 +1031,7 @@ function logout() {
 .public-footer-link:hover { color: var(--ds-brand-primary); }
 .public-footer-bottom { border-top: 1px solid var(--ds-border); margin-top: 28px; padding-top: 14px; color: #9CC4D4; text-align: start; font-size: 12px; }
 @media (max-width: 1199px) { .public-header-right { gap: 12px; } .public-nav-desktop { gap: 2px; } }
-@media (max-width: 991px) { .public-header-row { min-height: 56px; } .public-footer-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 991px) {  .public-header-row { min-height: 52px; } .public-footer-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 560px) { .public-footer-grid { grid-template-columns: 1fr; gap: 20px; } .public-utility-links { gap: 8px; } }
 @media (prefers-reduced-motion: reduce) { .public-nav-link,.public-icon-link,.public-skip-link { transition: none; } }
 
