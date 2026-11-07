@@ -653,7 +653,7 @@ function logout() {
   height: 17px;
   padding: 0 4px;
   background: var(--tm-red);
-  color: #fff;
+  color: var(--ds-card-bg);
   font-size: 13px;
   font-weight: 700;
   border-radius: var(--tm-radius-pill);
@@ -737,12 +737,12 @@ function logout() {
   margin: 0 0 14px;
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
+  color: var(--ds-card-bg);
 }
 .public-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .public-footer-link { color: #d5e2f0; font-size: 13px; text-decoration: none; }
 .public-footer-link:hover { color: var(--tm-cyan); }
-.public-footer-brand { display: flex; align-items: center; gap: 9px; color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.public-footer-brand { display: flex; align-items: center; gap: 9px; color: var(--ds-card-bg); font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 .public-footer-about-text { margin: 0 0 14px; font-size: 13px; line-height: 1.9; color: rgba(255,255,255,.72); }
 .public-footer-bottom {
   border-top: 1px solid rgba(207, 217, 238, 0.14);
@@ -816,7 +816,7 @@ function logout() {
 .public-search-popover__field{display:flex;align-items:center;gap:9px;min-height:48px;padding:5px 10px;border:1px solid var(--tm-line);border-radius:10px;background:var(--tm-surface-alt)}
 .public-search-popover__field>i{color:var(--tm-muted)}
 .public-search-popover__field :deep(input){flex:1;min-width:0;border:0;outline:0;background:transparent;box-shadow:none}
-.public-search-popover__field button{min-height:36px;padding:0 16px;border:0;border-radius:8px;background:var(--tm-blue);color:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.public-search-popover__field button{min-height:36px;padding:0 16px;border:0;border-radius:8px;background:var(--tm-blue);color:var(--ds-color-on-brand);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .public-search-popover__field button:disabled{opacity:.45;cursor:not-allowed}
 .public-search-popover>span{display:block;margin-top:9px;color:var(--tm-muted);font-size:11px}
 .public-cart-drawer{display:flex;flex-direction:column;height:100%;background:var(--tm-surface)}
@@ -848,17 +848,17 @@ function logout() {
 
 /* Match the reference Telecom Market.html storefront shell while retaining live account controls. */
 .public-utility-inner { min-height: 32px; }
-.public-utility-message { color: #c9d1ee; font-size: 12px; }
-.public-utility-message b { color: #7fe3ff; font-weight: 700; }
-.public-utility-links { gap: 7px; color: #c9d1ee; font-size: 12px; }
+.public-utility-message { color: var(--ds-color-on-brand-muted); font-size: 12px; }
+.public-utility-message b { color: var(--ds-brand-primary); font-weight: 700; }
+.public-utility-links { gap: 7px; color: var(--ds-color-on-brand-muted); font-size: 12px; }
 .public-header { position: relative; top: auto; }
 .public-header-row { min-height: 68px; }
 .public-header-right { gap: 22px; }
 .public-nav-desktop { gap: 22px; }
 .public-nav-link i { display: none; }
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; gap: 28px; }
-.public-footer-about-text { color: #9aa3c2; }
-.public-footer-link { color: #9aa3c2; }
+.public-footer-about-text { color: var(--ds-color-on-brand-muted); }
+.public-footer-link { color: var(--ds-color-on-brand-muted); }
 .public-footer-bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; text-align: start; }
 @media(max-width:1100px) {
   .public-header-right { gap: 14px; }
@@ -876,7 +876,7 @@ function logout() {
 }
 
 .public-container { max-width: 1240px; padding-inline: 20px; }
-.public-logo-symbol { display: block; flex: none; width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,#2aa7e8,#6c5ce7); }
+.public-logo-symbol { display: block; flex: none; width: 36px; height: 36px; border-radius: 10px; background: var(--ds-brand-primary); }
 .public-user-trigger { padding: 4px 0; border: 0; border-radius: 0; background: transparent; }
 .public-user-trigger:hover { border: 0; background: transparent; }
 .public-user-avatar,.public-user-caret { display: none; }
@@ -890,43 +890,43 @@ function logout() {
 @media(max-width:991px){.public-user-name{display:inline}}
 /* Telecom Market.html storefront shell alignment */
 .public-shell {
-  --tm-blue: #6c5ce7;
-  --tm-blue-strong: #6c5ce7;
-  --tm-cyan: #2aa7e8;
-  --tm-cyan-strong: #2aa7e8;
-  --tm-cyan-deep: #6c5ce7;
-  --tm-cyan-soft: #eceaff;
-  --tm-blue-soft: #eceaff;
-  --tm-navy: #0b1020;
-  --tm-navy-deep: #0b1020;
-  --tm-canvas: #f4f5fa;
-  --tm-surface: #fff;
-  --tm-line: #e4e7f2;
-  --tm-ink: #12182b;
-  --tm-muted: #6b7390;
+  --tm-blue: var(--ds-primary-button);
+  --tm-blue-strong: var(--ds-primary-button);
+  --tm-cyan: var(--ds-brand-primary);
+  --tm-cyan-strong: var(--ds-brand-primary);
+  --tm-cyan-deep: var(--ds-primary-button);
+  --tm-cyan-soft: var(--ds-color-primary-soft);
+  --tm-blue-soft: var(--ds-color-primary-soft);
+  --tm-navy: var(--ds-color-brand-deep);
+  --tm-navy-deep: var(--ds-color-brand-deep);
+  --tm-canvas: var(--ds-page-bg);
+  --tm-surface: var(--ds-card-bg);
+  --tm-line: var(--ds-border);
+  --tm-ink: var(--ds-text-primary);
+  --tm-muted: var(--ds-text-secondary);
   background: var(--tm-canvas);
   color: var(--tm-ink);
   font-family: Vazirmatn, Tahoma, sans-serif;
 }
-.public-utility-bar { background: #0b1020; color: #c9d1ee; font-size: 12px; }
-.public-utility-message i { color: #7fe3ff; }
-.public-header { background: #fff; border-bottom-color: #e4e7f2; }
+.public-utility-bar { background: var(--ds-color-brand-deep); color: var(--ds-color-on-brand-muted); font-size: 12px; }
+.public-utility-message i { color: var(--ds-brand-primary); }
+.public-header { background: var(--ds-header-bg); border-bottom-color: var(--ds-border); }
 .public-header-row { min-height: 68px; }
 .public-header-right { gap: 22px; }
 .public-nav-desktop { gap: 22px; }
 .public-nav-link { padding-block: 8px; font-size: 14px; font-weight: 500; }
 .public-nav-link i { display: none; }
-.public-nav-link-active { color: #6c5ce7; border-bottom-color: #6c5ce7; font-weight: 700; }
+.public-nav-link-active { color: var(--ds-color-primary-text); border-bottom-color: var(--ds-color-primary-text); font-weight: 700; }
 .public-logo-name strong { font-size: 18px; font-weight: 800; }
-.public-icon-link { border-radius: 10px; color: #6b7390; }
-.public-icon-link:hover { background: #eceaff; color: #6c5ce7; }
-.public-notification-badge { min-width: 17px; height: 17px; background: #6c5ce7; font-size: 10px; }
-.public-main { padding: 0; background: #f4f5fa; }
-.public-footer { background: #0b1020; padding-top: 40px; }
+.public-icon-link { border-radius: 10px; color: var(--ds-text-secondary); }
+.public-icon-link:hover { background: var(--ds-color-surface-hover); color: var(--ds-color-primary-text); }
+.public-notification-badge { min-width: 17px; height: 17px; background: var(--ds-primary-button); color: var(--ds-primary-button-text); font-size: 10px; }
+.public-main { padding: 0; background: var(--ds-page-bg); }
+.public-footer { background: var(--ds-color-brand-deep); padding-top: 40px; }
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 28px; }
 .public-footer-heading { font-size: 14px; }
-.public-footer-link { color: #9aa3c2; }
-.public-footer-about-text { color: #9aa3c2; }
+.public-footer-link { color: var(--ds-color-on-brand-muted); }
+.public-footer-about-text { color: var(--ds-color-on-brand-muted); }
 .public-footer-bottom { border-top-color: #1d2440; }
 @media (max-width: 1100px) {
   .public-header-right { gap: 14px; }
@@ -947,7 +947,6 @@ function logout() {
 }
 
 
-@media(prefers-color-scheme:dark){.public-shell:not([data-theme="light"]){--tm-canvas:#0e1220;--tm-surface:#171c30;--tm-line:#262d49;--tm-ink:#eef0f8;--tm-muted:#9aa3c2;background:#0e1220;color:#eef0f8}.public-shell:not([data-theme="light"]) .public-header{background:#171c30;border-bottom-color:#262d49}.public-shell:not([data-theme="light"]) .public-main{background:#0e1220}.public-shell:not([data-theme="light"]) .public-user-name{color:#eef0f8}}
 .public-guest-actions .public-login-link { order: 3; }
  .public-nav-link--static { cursor: default; }
 .public-header-row { min-height: 60px; }
