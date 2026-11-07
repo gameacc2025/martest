@@ -305,7 +305,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 .dash-sidebar-link:hover { background: var(--ds-sidebar-hover); color: var(--ds-sidebar-fg-strong); }
 .dash-sidebar-link--active {
   background: var(--ds-sidebar-active-bg);
-  color: #fff;
+  color: var(--ds-sidebar-active-fg);
   font-weight: 600;
   box-shadow: none;
 }
