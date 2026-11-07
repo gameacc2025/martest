@@ -7,7 +7,7 @@
 - **Files:** `apps/website/index.html`, `apps/website/src/main.js`, new `apps/website/src/utils/pageLoading.js`, new `apps/website/src/utils/pageLoading.test.js`, `scripts/install-ui-skills.ps1`, `AGENTS.md`, `.ai/PROTOCOL.md`, `.ai/UI_SKILLS.md`, `.ai/WORKLOG.md`.
 - **Scope:** Website frontend and project-level agent skill setup only. No backend, API, database, authentication contract, permissions or business rules changed.
 - **Verification:** Test cases authored but not run. Website build not run. PowerShell skill installer not run in the remote GitHub session. Browser/screenshot verification NOT RUN per owner instruction.
-- **Next:** In the local Windows checkout run `.\\scripts\\install-ui-skills.ps1`, then `pnpm --filter @telecom/website test -- src/utils/pageLoading.test.js` and `pnpm --filter @telecom/website build`. Do not run browser automation unless the owner authorizes it.
+- **Next:** In the local Windows checkout run `.\scripts\install-ui-skills.ps1`, then `pnpm --filter @telecom/website test -- src/utils/pageLoading.test.js` and `pnpm --filter @telecom/website build`. Do not run browser automation unless the owner authorizes it.
 
 ---
 
