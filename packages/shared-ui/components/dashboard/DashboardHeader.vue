@@ -265,7 +265,7 @@ function logout() {
   gap: 20px;
   min-height: 72px;
   padding: 14px clamp(14px, 1.6vw, 24px);
-  background: var(--tm-canvas);
+  background: var(--ds-header-bg);
   border: 0;
   box-shadow: none;
 }
@@ -285,7 +285,7 @@ function logout() {
   min-width: 46px;
   border: 0;
   border-radius: 50%;
-  background: #f3f6fc;
+  background: var(--ds-color-surface-hover);
   color: var(--tm-ink-soft);
   box-shadow: 0 2px 6px rgba(20, 40, 90, 0.08);
   text-decoration: none;
@@ -310,7 +310,7 @@ function logout() {
   height: 46px;
   padding: 0 18px 0 8px;
   border-radius: 6px;
-  background: #f3f6fc;
+  background: var(--ds-color-surface-hover);
   box-shadow: 0 2px 6px rgba(20, 40, 90, 0.05);
 }
 .dash-header-pill-input {
@@ -325,7 +325,7 @@ function logout() {
   font-family: inherit;
   font-size: 14px;
 }
-.dash-header-pill-input::placeholder { color: #6b7b99; }
+.dash-header-pill-input::placeholder { color: var(--ds-text-secondary); }
 .dash-header-pill-go {
   display: inline-flex;
   align-items: center;
@@ -336,7 +336,7 @@ function logout() {
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #6b7b99;
+  color: var(--ds-text-secondary);
   cursor: pointer;
 }
 .dash-header-pill-go:hover { color: var(--tm-blue); }
@@ -345,7 +345,7 @@ function logout() {
   height: 40px;
   padding: 0 14px;
   border-radius: 6px;
-  background: #f3f6fc;
+  background: var(--ds-color-surface-hover);
 }
 
 /* Company identity */
@@ -387,7 +387,7 @@ function logout() {
   color: var(--tm-ink);
   cursor: pointer;
 }
-.dash-header-user:hover { background: #f3f6fc; }
+.dash-header-user:hover { background: var(--ds-color-surface-hover); }
 .dash-header-avatar {
   display: inline-flex;
   align-items: center;
@@ -397,7 +397,7 @@ function logout() {
   overflow: hidden;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #7a5a3e;
+  background: var(--ds-brand-secondary);
   color: #fff;
   font-size: 16px;
   font-weight: 700;
@@ -417,7 +417,7 @@ function logout() {
   white-space: nowrap;
 }
 .dash-header-user-caret { font-size: 10px; color: var(--tm-muted); }
-.dash-header-user-role { color: #7686a3; font-size: 11px; }
+.dash-header-user-role { color: var(--ds-text-muted); font-size: 11px; }
 .dash-header-user-card { display: flex; align-items: center; gap: 0.75rem; min-width: 15rem; padding: 1rem; border-bottom: 1px solid var(--tm-line); }
 .dash-header-user-card-meta { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
 .dash-header-user-card-name { color: var(--tm-ink); font-size: 0.9rem; font-weight: 700; }
@@ -437,7 +437,7 @@ function logout() {
   .dash-header { gap: 10px; }
 }
 @media (max-width: 575px) {
-  .dash-header { min-height: 62px; padding: 10px 12px; }
+  .dash-header { min-height: 64px; padding: 10px 12px; }
   .dash-header-company-name,
   .dash-header-user-meta { display: none; }
   .dash-header-icon-btn { width: 42px; height: 42px; min-width: 42px; }
