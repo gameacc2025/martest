@@ -17,6 +17,10 @@ try {
     npx --yes skills add Leonxlnx/taste-skill --skill design-taste-frontend --agent '*' --yes
     if ($LASTEXITCODE -ne 0) { throw 'Taste Skill installation failed.' }
 
+    Write-Host 'Installing Hallmark for all supported agents...'
+    npx --yes skills add nutlope/hallmark --agent '*' --yes
+    if ($LASTEXITCODE -ne 0) { throw 'Hallmark skill installation failed.' }
+
     Write-Host 'Installing Impeccable for all supported agents...'
     npx --yes skills add pbakaus/impeccable --agent '*' --yes
     if ($LASTEXITCODE -ne 0) { throw 'Impeccable skill installation failed.' }
