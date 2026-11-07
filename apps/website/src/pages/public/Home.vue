@@ -169,12 +169,12 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
     <path d="M50 100 Q400 300 800 100 T1150 250" stroke="#1E3A5F" stroke-width="2"/>
     <path d="M100 200 Q300 100 600 200 T1100 200" class="fiber-wave fiber-wave--cyan" stroke="#22D3EE" stroke-width="4" stroke-linecap="round" stroke-dasharray="20 180"/>
     <path d="M50 100 Q400 300 800 100 T1150 250" class="fiber-wave fiber-wave--violet" stroke="#8B5CF6" stroke-width="3" stroke-linecap="round" stroke-dasharray="16 200"/>
-    <circle cx="100" cy="200" r="5" fill="#22D3EE"/>
-    <circle cx="600" cy="200" r="5" fill="#8B5CF6"/>
-    <circle cx="1100" cy="200" r="5" fill="#22D3EE"/>
+    <circle class="fiber-node-pulse fiber-node-pulse--cyan" cx="100" cy="200" r="5" fill="#22D3EE"/>
+    <circle class="fiber-node-pulse fiber-node-pulse--violet" cx="600" cy="200" r="5" fill="#8B5CF6"/>
+    <circle class="fiber-node-pulse fiber-node-pulse--cyan" cx="1100" cy="200" r="5" fill="#22D3EE"/>
   </svg>
   <div class="w">
-    <div>
+    <div class="hero-copy" :key="activeSlide">
       <div class="tag">{{ activeSlideContent.title }}</div>
       <h1 v-html="activeSlideContent.headline"></h1>
       <p>{{ activeSlideContent.description }}</p>
