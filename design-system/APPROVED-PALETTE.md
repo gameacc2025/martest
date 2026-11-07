@@ -68,7 +68,7 @@ The shared brand primitives remain stable in both themes. Theme-specific primary
 | Error | `#EF4444` | `#FEE2E2` |
 | Info | `#3B82F6` | `#DBEAFE` |
 
-Button variants use their separately specified action colors: Secondary `#6366F1` with white text; Danger `#DC2626` with white text; Success `#16A34A` with white text. Outline and Ghost use transparent surfaces and theme-aware primary text.
+Button variants use their separately specified action colors: Secondary `#6366F1` with white text; Danger `#DC2626` with white text; Success `#16A34A` with white text. Outline stays transparent with text `#0891B2` in Light and `#67E8F9` in Dark. Ghost stays transparent with text `#0891B2` in Light and `#22D3EE` in Dark.
 
 ## 5. Component geometry
 
