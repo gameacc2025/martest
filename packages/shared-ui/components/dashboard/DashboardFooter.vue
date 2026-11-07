@@ -19,6 +19,8 @@ const year = computed(() => new Date().getFullYear())
 <style scoped>
 .dash-footer {
   display: flex;
+  min-height: var(--ds-footer-min-height);
+  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
