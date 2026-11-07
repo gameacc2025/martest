@@ -25,6 +25,10 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
 
   it('recreates the reference hero, search tabs, featured card and slider controls', () => {
     expect(source).toContain('class="hero"')
+    expect(source).toContain('class="hero-bg-network"')
+    expect(source).toContain('<Transition name="hero-content" mode="out-in">')
+    expect(source).toContain('home-fiber-flow')
+    expect(source).toContain('.dots button.on')
     expect(source).toContain('تجهیزات پروژه‌تان را')
     expect(source).toContain('سریع و مطمئن تأمین کنید')
     expect(source).toContain('خرید فوری')
@@ -81,7 +85,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   it('uses the exact reference palette, gradients and responsive breakpoints', () => {
     expect(source).toContain('--bg:var(--ds-page-bg)')
     expect(source).toContain('--pri:var(--ds-brand-primary)')
-    expect(source).toContain('linear-gradient(135deg,var(--hero1),var(--hero2))')
+    expect(source).toContain('linear-gradient(135deg,var(--navy),var(--pet))')
     expect(source).toContain('.p{background:var(--card)')
     expect(source).toContain('@media(max-width:1000px)')
     expect(source).toContain('@media(max-width:640px)')
