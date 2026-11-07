@@ -337,21 +337,21 @@ onUnmounted(() => {
 .dash-layout-page:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
 .company-message-trigger{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px;border:1px solid var(--tm-line);border-radius:50%;background:var(--tm-surface);color:var(--tm-ink);cursor:pointer}
 .company-message-trigger:hover,.company-message-trigger.is-open{background:var(--tm-surface-alt);border-color:var(--tm-primary)}
-.company-message-trigger__badge{position:absolute;top:-4px;inset-inline-end:-4px;display:grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border:2px solid var(--tm-surface);border-radius:10px;background:#e34b58;color:#fff;font-size:10px;font-weight:700}
+.company-message-trigger__badge{position:absolute;top:-4px;inset-inline-end:-4px;display:grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border:2px solid var(--tm-surface);border-radius:10px;background:var(--ds-status-danger-fg);color:#FFFFFF;font-size:10px;font-weight:700}
 .company-message-backdrop{position:fixed;z-index:110;inset:4rem 0 0;background:rgba(17,25,40,.16)}
 .company-message-drawer{position:fixed;z-index:111;top:4rem;left:0;display:flex;flex-direction:column;width:min(390px,calc(100vw - 18px));height:calc(100vh - 4rem);overflow:hidden;border:1px solid var(--tm-line);border-top:0;border-radius:0 0 6px 0;background:var(--tm-surface);box-shadow:8px 10px 28px rgba(18,30,55,.16);direction:rtl}
 .company-message-drawer__head{display:flex;align-items:center;justify-content:space-between;padding:17px 18px 13px;border-bottom:1px solid var(--tm-line)}
 .company-message-drawer__head>div{display:flex;flex-direction:column;gap:3px}.company-message-drawer__head strong{color:var(--tm-ink);font-size:15px}.company-message-drawer__head span{color:var(--tm-muted);font-size:11px}
 .company-message-drawer__head button{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:4px;background:var(--tm-surface-alt);color:var(--tm-muted);cursor:pointer}
-.company-message-sample-note{display:flex;align-items:center;gap:7px;padding:9px 16px;background:#fff7e8;color:#94620e;font-size:10px}
+.company-message-sample-note{display:flex;align-items:center;gap:7px;padding:9px 16px;background:var(--ds-status-warning-bg);color:var(--ds-status-warning-fg);font-size:10px}
 .company-message-list{flex:1;overflow:auto}
 .company-message-item{display:flex;align-items:flex-start;gap:10px;padding:14px;border-bottom:1px solid var(--tm-line);color:inherit;text-decoration:none}
 .company-message-item:hover,.company-message-item.is-unread{background:var(--tm-surface-alt)}
-.company-message-item__avatar{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:#efedff;color:#7c6cf6}
+.company-message-item__avatar{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:color-mix(in srgb, var(--ds-brand-secondary) 12%, transparent);color:var(--ds-brand-secondary)}
 .company-message-item__body{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
 .company-message-item__top{display:flex;align-items:center;justify-content:space-between;gap:8px}.company-message-item__top strong{overflow:hidden;color:var(--tm-ink);font-size:11px;text-overflow:ellipsis;white-space:nowrap}.company-message-item__top time{flex:none;color:var(--tm-muted);font-size:10px}
 .company-message-item__body b{color:var(--tm-ink);font-size:12px;font-weight:650}.company-message-item__body small{overflow:hidden;color:var(--tm-muted);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
-.company-message-item__dot{width:7px;height:7px;flex:0 0 7px;margin-top:5px;border-radius:50%;background:#7c6cf6}
+.company-message-item__dot{width:7px;height:7px;flex:0 0 7px;margin-top:5px;border-radius:50%;background:var(--ds-brand-secondary)}
 .company-message-drawer__footer{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px;border-top:1px solid var(--tm-line);color:var(--tm-primary);font-size:12px;font-weight:700;text-decoration:none}
 @media(max-width:575px){.company-message-drawer{width:min(360px,calc(100vw - 12px))}}
 </style>
