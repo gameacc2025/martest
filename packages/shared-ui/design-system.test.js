@@ -6,6 +6,8 @@ const tokens = read('./assets/design-system/tokens.scss')
 const theme = read('./theme.js')
 const legacy = read('./assets/design-system/tem.scss')
 const overrides = read('./assets/design-system/brand-overrides.scss')
+const newTemp = read('./assets/design-system/newtemp-reference.scss')
+const sharedStyles = read('./assets/main.scss')
 const pages = read('./assets/design-system/pages.scss')
 const sidebar = read('./components/dashboard/DashboardSidebar.vue')
 const companyDashboard = read('../../apps/company/src/pages/user/dashboard/CompanyDashboard.vue')
@@ -14,6 +16,14 @@ const websiteHome = read('../../apps/website/src/pages/public/Home.vue')
 const publicLayout = read('../../apps/website/src/layouts/PublicLayout.vue')
 
 describe('approved Telecom Market design palette', () => {
+  it('loads the NewTemp.html reference theme as the final shared layer for all apps', () => {
+    expect(sharedStyles).toContain("@use './design-system/newtemp-reference.scss';")
+    for (const value of ['#22D3EE', '#06B6D4', '#0891B2', '#6366F1', '#8B5CF6', '#0A1625', '#122438', '#F0F7FA', '#F0FDFF', '#DCE8EF', '#102A43', '#627D98', '#94A3B8', '#193149', '#24394D', '#F0F9FF', '#9FB3C8', '#71869B', '#67E8F9', '#083344']) expect(newTemp).toContain(value)
+    expect(newTemp).toContain(':root.app-dark')
+    expect(newTemp).toContain("font-family:var(--ds-font-family-persian)")
+    expect(newTemp).toContain('.p-datatable .p-datatable-tbody')
+  })
+
   it('defines the shared brand primitives and both theme surfaces', () => {
     for (const value of [
       '#22D3EE', '#06B6D4', '#0891B2', '#CFFAFE', '#6366F1', '#8B5CF6',
