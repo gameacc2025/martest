@@ -1,3 +1,12 @@
+## Website FAQ page and homepage cleanup — 2026-11-07
+- Moved FAQ content out of the homepage; the homepage no longer renders an FAQ section or the disabled catalogue-request form.
+- Kept the dedicated public `/faq` route and added a clearly labelled «سوالات متداول» link in the public footer.
+- Changed FAQ interactions to a single-open accordion: opening one question closes the previously open question; clicking the active question closes it.
+- Added a clear active-state marker around each FAQ item (accent border and subtle surface treatment), while preserving RTL, keyboard focus, accessible expanded/controlled-region attributes and responsive layout.
+- Updated Home, FAQ and PublicLayout regression tests for section removal, exclusive accordion behavior, active-state styling and footer navigation.
+- Scope: Website UI only. No backend, database, API, authentication, permissions or business-rule changes.
+- Verification: source-level updates committed to `main`; test/build execution and browser visual review have not been run in this GitHub-only session.
+
 ## Current active task — Exact Telecom Market.html storefront replacement (2026-11-07)
 - **Target branch:** `main` only. Direct commits; no feature branch or PR.
 - **Source of truth:** the root `Telecom Market.html` file (reference SHA `3190fd1ca45bb035027dca3d7ee551376807825a`). Do not reinterpret its visual design or substitute a new design system.
