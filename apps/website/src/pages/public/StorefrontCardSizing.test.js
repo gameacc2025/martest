@@ -32,15 +32,17 @@ const surfaces = {
 }
 
 describe('Website storefront product-card sizing contract', () => {
-  it('keeps a shared 168–210px desktop/tablet card track on every product surface', () => {
-    for (const [surface, source] of Object.entries(surfaces)) {
-      expect(source, surface).toContain('repeat(auto-fill,minmax(min(100%,168px),210px))')
-    }
+  it('keeps the supplied reference HTML desktop grid geometry on home and catalogue', () => {
+    expect(surfaces.home).toContain('.prods{grid-template-columns:repeat(4,1fr)}')
+    expect(surfaces.catalogue).toContain('.pg.prods{grid-template-columns:repeat(3,1fr)}')
+    expect(surfaces.home).toContain('.prods,.why{grid-template-columns:repeat(2,1fr)}')
+    expect(surfaces.catalogue).toContain('.pg.prods,.cbig{grid-template-columns:repeat(2,1fr)}')
   })
 
-  it('uses the same compact 150–210px track on narrow screens', () => {
-    for (const [surface, source] of Object.entries(surfaces)) {
-      expect(source, surface).toContain('repeat(auto-fill,minmax(min(100%,150px),210px))')
+  it('retains compact shared card tracks on the other product surfaces', () => {
+    for (const surface of ['search', 'legacyCatalogue', 'wishlist']) {
+      expect(surfaces[surface], surface).toContain('repeat(auto-fill,minmax(min(100%,168px),210px))')
+      expect(surfaces[surface], surface).toContain('repeat(auto-fill,minmax(min(100%,150px),210px))')
     }
   })
 
