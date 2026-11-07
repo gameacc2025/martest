@@ -12,62 +12,60 @@
    ============================================================ */
 
 :root {
-  /* ---- Brand, surfaces and semantic states: aliases to tokens.scss ---- */
   --tm-navy: var(--ds-navy);
   --tm-navy-deep: var(--ds-color-brand-deep);
   --tm-navy-soft: var(--ds-color-brand-dark);
-  --tm-blue: #7c6cf6;
-  --tm-blue-strong: #6c5ce7;
-  --tm-blue-soft: #e8e6fb;
-  --tm-cyan: #2bb3e8;
-  --tm-cyan-strong: #8878f7;
-  --tm-cyan-deep: #6c5ce7;
-  --tm-cyan-soft: #d6edfa;
+  --tm-blue: var(--ds-primary-button);
+  --tm-blue-strong: var(--ds-primary-button-hover);
+  --tm-blue-soft: var(--ds-color-primary-soft);
+  --tm-cyan: var(--ds-brand-primary);
+  --tm-cyan-strong: var(--ds-brand-primary-hover);
+  --tm-cyan-deep: var(--ds-brand-primary-active);
+  --tm-cyan-soft: var(--ds-color-primary-soft);
   --tm-green: var(--ds-status-success-fg);
   --tm-green-soft: var(--ds-status-success-bg);
   --tm-amber: var(--ds-status-warning-fg);
   --tm-amber-soft: var(--ds-status-warning-bg);
   --tm-red: var(--ds-status-danger-fg);
   --tm-red-soft: var(--ds-status-danger-bg);
-  --tm-violet: #8878f7;
-  --tm-violet-soft: #e8e6fb;
-  --tm-pink: var(--ds-violet);
-  --tm-pink-soft: var(--ds-color-info-soft);
-  --tm-canvas: #f4f5fa;
-  --tm-surface: var(--ds-color-surface);
-  --tm-surface-alt: var(--ds-color-surface-alt);
-  --tm-surface-sunk: var(--ds-color-surface-alt);
-  --tm-line: var(--ds-color-border);
-  --tm-line-strong: var(--ds-color-border);
-  --tm-ink: var(--ds-color-text);
-  --tm-ink-soft: color-mix(in srgb, var(--ds-color-text) 82%, var(--ds-color-text-muted));
-  --tm-muted: var(--ds-color-text-muted);
-  --tm-faint: var(--ds-status-muted-fg);
+  --tm-violet: var(--ds-brand-accent);
+  --tm-violet-soft: color-mix(in srgb, var(--ds-brand-accent) 12%, transparent);
+  --tm-pink: var(--ds-brand-accent);
+  --tm-pink-soft: color-mix(in srgb, var(--ds-brand-accent) 12%, transparent);
+  --tm-canvas: var(--ds-page-bg);
+  --tm-surface: var(--ds-card-bg);
+  --tm-surface-alt: var(--ds-surface-secondary);
+  --tm-surface-sunk: var(--ds-surface-secondary);
+  --tm-line: var(--ds-border);
+  --tm-line-strong: var(--ds-border);
+  --tm-ink: var(--ds-text-primary);
+  --tm-ink-soft: var(--ds-text-primary);
+  --tm-muted: var(--ds-text-secondary);
+  --tm-faint: var(--ds-text-muted);
   --tm-radius-sm: var(--ds-radius-sm);
   --tm-radius: var(--ds-radius-md);
-  --tm-radius-lg: var(--ds-radius-lg);
+  --tm-radius-lg: var(--ds-card-radius);
   --tm-radius-pill: var(--ds-radius-pill);
   --tm-shadow-xs: var(--ds-shadow-xs);
   --tm-shadow-sm: var(--ds-shadow-sm);
   --tm-shadow-md: var(--ds-shadow-md);
   --tm-shadow-lg: var(--ds-shadow-lg);
-  --tm-card-shadow: 0 1px 3px rgba(20, 20, 60, 0.04);
-  --tm-card-shadow-hover: 0 4px 12px rgba(20, 20, 60, 0.08);
+  --tm-card-shadow: var(--ds-shadow-xs);
+  --tm-card-shadow-hover: var(--ds-shadow-sm);
   --tm-font: var(--ds-font-family);
   --tm-font-num: var(--ds-font-family);
-  --tm-fs-caption: 0.8125rem;
-  --tm-fs-tiny: 0.8125rem;
-  --tm-fs-sm: 0.875rem;
-  --tm-fs-body: 0.9375rem;
+  --tm-fs-caption: 0.75rem;
+  --tm-fs-tiny: 0.75rem;
+  --tm-fs-sm: 0.8125rem;
+  --tm-fs-body: 0.875rem;
   --tm-fs-lg: 1rem;
-  --tm-fs-title: 1.125rem;
-  --tm-fs-h2: 1.3125rem;
-  --tm-fs-h1: clamp(1.5rem, 1.8vw, 1.75rem);
+  --tm-fs-title: 1.25rem;
+  --tm-fs-h2: 1.5rem;
+  --tm-fs-h1: var(--ds-heading-h1);
   --tm-container-max: var(--ds-container-max-wide);
   color-scheme: light;
 }
-html {
-  font-size: 15px;
+html {\n  font-size: 14px;
 }
 
 body {
@@ -1273,3 +1271,46 @@ body .company-management-toolbar {
 @media (max-width: 991px) {
   .dash-sidebar { width: 280px; }
 }
+
+
+/* Owner-approved final theme and component contract (loaded after legacy rules). */
+:root.app-dark { color-scheme: dark; }
+body { background: var(--ds-page-bg); color: var(--ds-text-primary); font-size: 14px; }
+.dash-layout, .dash-layout-main { background: var(--ds-page-bg) !important; color: var(--ds-text-primary); }
+.dash-layout-sidebar, .dash-sidebar { background: var(--ds-sidebar-bg) !important; color: var(--ds-sidebar-fg); border-color: var(--ds-sidebar-border); }
+.dash-sidebar-brand-text { color: var(--ds-sidebar-fg-strong) !important; }
+.dash-sidebar-brand-tagline, .dash-sidebar-section, .dash-sidebar-link-icon { color: var(--ds-sidebar-muted) !important; }
+.dash-sidebar-link { color: var(--ds-sidebar-fg) !important; }
+.dash-sidebar-link:hover { background: var(--ds-sidebar-hover) !important; color: var(--ds-sidebar-fg-strong) !important; }
+.dash-sidebar-link--active { color: var(--ds-sidebar-active-fg) !important; background: var(--ds-sidebar-active-bg) !important; }
+.dash-sidebar-link--active .dash-sidebar-link-icon { color: var(--ds-sidebar-active-fg) !important; }
+.dash-sidebar-active-bar { background: var(--ds-sidebar-accent) !important; }
+.dash-header, .public-header, .site-header { background: var(--ds-header-bg) !important; border-color: var(--ds-border); box-shadow: none !important; }
+.tm-btn { min-height: var(--ds-button-md-height); border-radius: var(--ds-button-md-radius); background: var(--ds-primary-button); border-color: var(--ds-primary-button); color: var(--ds-primary-button-text); }
+.tm-btn:hover, .tm-btn--accent:hover { background: var(--ds-primary-button-hover); filter: none; }
+.tm-btn--accent { background: var(--ds-primary-button); border-color: var(--ds-primary-button); color: var(--ds-primary-button-text); }
+.p-button { min-height: var(--ds-button-md-height); border-radius: var(--ds-button-md-radius); }
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):not(.p-button-warn) { background: var(--ds-primary-button); border-color: var(--ds-primary-button); color: var(--ds-primary-button-text); box-shadow: none; }
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-danger):not(.p-button-success):not(.p-button-warn):enabled:hover { background: var(--ds-primary-button-hover); border-color: var(--ds-primary-button-hover); }
+.p-button.p-button-secondary { background: var(--ds-brand-secondary); border-color: var(--ds-brand-secondary); color: #FFFFFF; }
+.p-button.p-button-outlined { background: transparent; color: var(--ds-primary-button); border-color: currentColor; }
+.p-button.p-button-text { background: transparent; color: var(--ds-primary-button); }
+.p-button.p-button-danger { background: var(--ds-button-danger); border-color: var(--ds-button-danger); color: #FFFFFF; }
+.p-button.p-button-success { background: var(--ds-button-success); border-color: var(--ds-button-success); color: #FFFFFF; }
+.p-card { border-radius: var(--ds-card-radius); background: var(--ds-card-bg); }
+.p-dialog { border-radius: var(--ds-modal-radius); }
+.p-select-overlay, .p-dropdown-panel, .p-multiselect-overlay, .p-menu { border-radius: var(--ds-dropdown-radius); }
+.p-tag, .p-badge { min-height: var(--ds-badge-height); border-radius: var(--ds-badge-radius); }
+.p-tag.p-tag-success, .tm-pill--success { background: var(--ds-status-success-bg); color: var(--ds-status-success-fg); }
+.p-tag.p-tag-danger, .tm-pill--danger { background: var(--ds-status-danger-bg); color: var(--ds-status-danger-fg); }
+.p-tag.p-tag-warn, .tm-pill--warning { background: var(--ds-status-warning-bg); color: var(--ds-status-warning-fg); }
+.p-tag.p-tag-info, .tm-pill--info { background: var(--ds-status-info-bg); color: var(--ds-status-info-fg); }
+.p-tag.p-tag-secondary { background: var(--ds-status-muted-bg); color: var(--ds-status-muted-fg); }
+.tm-alert--info { background: var(--ds-status-info-bg); border-color: var(--ds-status-info-bg); color: var(--ds-status-info-fg); }
+.tm-alert--success { background: var(--ds-status-success-bg); border-color: var(--ds-status-success-bg); color: var(--ds-status-success-fg); }
+.tm-alert--warning { background: var(--ds-status-warning-bg); border-color: var(--ds-status-warning-bg); color: var(--ds-status-warning-fg); }
+.tm-alert--danger { background: var(--ds-status-danger-bg); border-color: var(--ds-status-danger-bg); color: var(--ds-status-danger-fg); }
+.p-datatable .p-datatable-tbody > tr > td { height: var(--ds-table-row-height); }
+.site-hero { background: var(--ds-color-brand-dark); color: #FFFFFF; }
+.tm-bars__fill { background: var(--tm-cyan); }
+.tm-meter__fill { background: var(--tm-blue); }
