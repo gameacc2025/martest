@@ -4023,3 +4023,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Scope:** Company frontend presentation only; no API, backend, database, permissions or business rules changed.
 - **Verification:** Static source review only. Tests/builds and rendered visual verification remain pending.
 - **Commits:** `42cec62c62065367991e7304626ff3c1348fa69f`, `62a5debe3b3791f87feee9cde60a1d88834133d2`.
+
+
+## 2026-11-07 — WEBSITE-MOTION-RELIABILITY — Restore loader and hero animation
+- Investigated the reported static loader/banner against the actual source. Found a broad reduced-motion wildcard that collapsed all public-shell animations to 0.01ms; the loader's own reduced-motion rule also disabled its packet animation.
+- Fixed loader dash cadence/glow and retained slow data-packet movement under reduced-motion preference. Added animated homepage network glow/nodes, featured-card float, and slide-change content entrance.
+- Added regression assertions for the motion contract. Updated design-system reference notes.
+- **Verification:** source reviewed after writes; tests/build/browser rendering **NOT RUN**. The owner explicitly requested no build. Visual behavior still needs confirmation in the user's browser.
+- **Scope:** Website frontend visuals only. No API/backend/database/auth/business logic changes.
+- **Commits:** `f958806`, `2d199cf`, `2cceb87`, `b5e87c6`.
