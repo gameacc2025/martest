@@ -24,7 +24,7 @@ const TelecomPreset = definePreset(Lara, {
         content:{background:'#FFFFFF',borderColor:'#DCE8EF'},
       },
       dark:{
-        primary:{color:'#22D3EE',contrastColor:'#083344',hoverColor:'#67E8F9',activeColor:'#06B6D4'},
+        primary:{color:'#22D3EE',contrastColor:'#083344',hoverColor:'#67E8F9',activeColor:'#0891B2'},
         highlight:{background:'#164E63',focusBackground:'#155E75',color:'#67E8F9',focusColor:'#A5F3FC'},
         surface:{0:'#F0F9FF',50:'#DCE8EF',100:'#24394D',200:'#193149',300:'#172B40',400:'#9FB3C8',500:'#71869B',600:'#627D98',700:'#24394D',800:'#193149',900:'#122438',950:'#0A1625'},
         text:{color:'#F0F9FF',hoverColor:'#FFFFFF',mutedColor:'#9FB3C8',hoverMutedColor:'#C7D7E6'},
