@@ -34,12 +34,13 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   })
 
   it('contains every major homepage section from the supplied HTML reference', () => {
-    for (const section of ['stats', 'brands', 'cats', 'prods', 'why', 'ofr', 'bl', 'tms', 'cg', 'faq', 'rfq']) {
+    for (const section of ['stats', 'brands', 'cats', 'prods', 'why', 'ofr', 'bl', 'tms', 'cg', 'rfq']) {
       expect(source).toContain('class="' + section)
     }
     expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
     expect(source).toContain('محصولات منتخب')
     expect(source).toContain('دانلود کاتالوگ محصولات')
+    expect(source).toContain('class="sec faq"')
     expect(source).toContain('سؤالات متداول')
   })
 
