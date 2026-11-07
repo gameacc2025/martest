@@ -26,8 +26,12 @@ function icon(category) {
   return '⌘'
 }
 function subcategories(category) {
-  const list = category?.children || category?.subcategories || category?.subCategories || []
-  return Array.isArray(list) ? list : []
+  const nested = category?.children || category?.subcategories || category?.subCategories
+  if (Array.isArray(nested) && nested.length) return nested
+  const id = String(category?.id ?? '')
+  const fromFlatList = categories.value.filter(item => String(item?.parentId ?? item?.parent?.id ?? '') === id)
+  if (fromFlatList.length) return fromFlatList
+  return category?.description ? [{ id: 'description-' + id, nameFa: category.description }] : []
 }
 function openCategory(category) {
   router.push({ name: 'products', query: { category: category.id } })
