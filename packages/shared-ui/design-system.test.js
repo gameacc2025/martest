@@ -7,6 +7,11 @@ const theme = read('./theme.js')
 const legacy = read('./assets/design-system/tem.scss')
 const overrides = read('./assets/design-system/brand-overrides.scss')
 const pages = read('./assets/design-system/pages.scss')
+const sidebar = read('./components/dashboard/DashboardSidebar.vue')
+const companyDashboard = read('../../apps/company/src/pages/user/dashboard/CompanyDashboard.vue')
+const companyLayout = read('../../apps/company/src/layouts/CompanyLayout.vue')
+const websiteHome = read('../../apps/website/src/pages/public/Home.vue')
+const publicLayout = read('../../apps/website/src/layouts/PublicLayout.vue')
 
 describe('approved Telecom Market design palette', () => {
   it('defines the shared brand primitives and both theme surfaces', () => {
@@ -29,6 +34,14 @@ describe('approved Telecom Market design palette', () => {
     expect(legacy).not.toMatch(/#7c6cf6|#6c5ce7|#8878f7|#2bb3e8|#0d2b53|#f4f5fa/i)
     expect(legacy).toContain('var(--ds-sidebar-bg)')
     expect(legacy).toContain('var(--ds-primary-button)')
+  })
+
+  it('keeps dashboard and public website surfaces on the approved theme tokens', () => {
+    expect(sidebar).toContain('var(--ds-sidebar-width)')
+    expect(sidebar).toContain('var(--ds-sidebar-active-bg)')
+    for (const source of [companyDashboard, companyLayout, websiteHome, publicLayout]) {
+      expect(source).not.toMatch(/#7c6cf6|#6c5ce7|#7b2ff7|#4b3bd6/i)
+    }
   })
 
   it('styles button variants through semantic tokens', () => {
