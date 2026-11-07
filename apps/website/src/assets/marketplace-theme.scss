@@ -375,6 +375,36 @@
   height: 100%;
   opacity: .5;
   pointer-events: none;
+  animation: fiber-network-glow 4.8s ease-in-out infinite alternate;
+}
+.public-shell .reference-home .hero-copy {
+  animation: hero-copy-enter .65s cubic-bezier(.2,.75,.25,1) both;
+}
+.public-shell .reference-home .hero .feat {
+  animation: hero-feature-float 7s ease-in-out infinite;
+  transform-origin: center;
+}
+.public-shell .reference-home .fiber-node-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fiber-node-pulse 2.6s ease-in-out infinite;
+}
+.public-shell .reference-home .fiber-node-pulse--violet { animation-delay: .8s; }
+@keyframes fiber-network-glow {
+  from { opacity: .34; }
+  to { opacity: .72; }
+}
+@keyframes hero-copy-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-feature-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes fiber-node-pulse {
+  0%, 100% { opacity: .62; transform: scale(.82); }
+  50% { opacity: 1; transform: scale(1.55); }
 }
 .public-shell .reference-home .hero .w { position: relative; z-index: 2; }
 .public-shell .reference-home .hero .tag { color: #22D3EE; }
@@ -676,6 +706,8 @@
 /* Animated optical paths in the homepage hero — cyan and violet data packets. */
 .public-shell .reference-home .fiber-wave {
   animation: tm-fiber-wave 5s linear infinite;
+  will-change: stroke-dashoffset;
+  filter: drop-shadow(0 0 5px rgba(34,211,238,.55));
 }
 .public-shell .reference-home .fiber-wave--violet {
   animation-duration: 6.5s;
@@ -687,7 +719,14 @@
 
 /* Keep page content legible when reduced motion is requested. */
 @media (prefers-reduced-motion: reduce) {
-  .public-shell *,
-  .public-shell *::before,
-  .public-shell *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  /* Keep the signature data-flow visible, but slow it down. Avoid the old
+     blanket wildcard that collapsed every Website animation to 0.01ms. */
+  .public-shell { scroll-behavior: auto !important; }
+  .public-shell .reference-home .fiber-wave,
+  .public-shell .reference-home .hero-bg-network { animation-duration: 18s !important; }
+  .public-shell .reference-home .hero-copy,
+  .public-shell .reference-home .hero .feat,
+  .public-shell .reference-home .fiber-node-pulse { animation: none !important; }
+  .public-shell .public-icon-link,
+  .public-shell .public-nav-link { transition-duration: .01ms !important; }
 }
