@@ -1,14 +1,14 @@
 # Current Task — 2026-11-07
 
-## Latest task — Text-free glowing fiber-optic spinner
-- **Status:** Implemented on `main`; tests/build/browser verification pending.
-- **Request:** Replace the text-led fiber loading panel with one visual spinner, glowing and conveying data transfer, with no visible text.
-- **Implementation:** `apps/website/index.html` now renders a centered circular optical-fiber spinner with luminous teal/cyan/violet data arc, orbiting light packets, subtle inner fiber track, pulsing center and soft glow. Removed visible brand mark, logo and all loading copy. Retained an accessible screen-reader-only status label, dark-mode background and reduced-motion fallback.
-- **Lifecycle:** Existing loader controller, minimum display duration, initial auth/session restore, initial router readiness and later route navigation behavior are unchanged.
-- **Scope:** Website loading presentation only; no API/backend/database/auth contracts or business rules changed.
-- **Verification:** Source reviewed remotely. Vitest, Website build and browser rendering NOT RUN; do not run browser automation under the existing project instruction.
-- **Commit:** `43f219ba4476f54c347879d7224ec8f63458cc9c`.
-- **Next:** Pull `main`, run the focused page-loading test and Website build, then visually inspect desktop/mobile when browser checks are authorized.
+## Latest task — Apply the owner-approved final design palette
+- **Status:** IMPLEMENTED on `main`; tests/build/browser verification pending.
+- **Request:** Apply the final shared brand colors, complete Light/Dark theme, semantic states, component dimensions, button variants, typography and spacing.
+- **Implementation:** `packages/shared-ui/assets/design-system/tokens.scss` is the semantic source of truth; `theme.js`, `brand-overrides.scss`, `tem.scss` and `pages.scss` consume it. The obsolete violet/blue legacy aliases and permanently dark dashboard sidebar now resolve through the approved theme tokens. Website, Company and Admin import the same shared styles and PrimeVue preset.
+- **Documentation:** Added `design-system/APPROVED-PALETTE.md` and aligned `design-system/MASTER.md`.
+- **Scope:** Shared frontend presentation only. No backend, API, database, auth, permissions, routes or business rules changed.
+- **Verification:** Source reviewed remotely. Shared UI tests and Website/Company/Admin builds NOT RUN; browser verification remains prohibited by the current project instruction.
+- **Code commits:** `7f4ef0e` through `d65c895` on `main`.
+- **Next:** Pull `main`, run shared-ui tests and Website/Company/Admin builds, then inspect Light/Dark visually when browser checks are authorized.
 
 ---
 
