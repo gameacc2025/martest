@@ -80,7 +80,7 @@ function toggleFaq(index) {
             </button>
           </h2>
           <div
-            v-if="faq.open"
+            v-if="activeFaqIndex === index"
             :id="`faq-answer-${index}`"
             class="faq-answer"
             role="region"
@@ -165,7 +165,7 @@ function toggleFaq(index) {
 }
 .faq-answer {
   max-width: 72ch;
-  padding: 0 0 var(--ds-space-5);
+  padding: 0 var(--ds-space-4) var(--ds-space-5);
   color: var(--ds-color-text-muted);
   line-height: var(--ds-line-height-relaxed);
 }
