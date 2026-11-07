@@ -568,9 +568,9 @@
 /* Approved button variants */
 .ds-btn--secondary { background: var(--ds-brand-secondary); color: #FFFFFF; }
 .ds-btn--secondary:hover { background: var(--ds-color-secondary-hover); }
-.ds-btn--outline { background: transparent; border-color: var(--ds-primary-button); color: var(--ds-primary-button); }
+.ds-btn--outline { background: transparent; border-color: var(--ds-outline-text); color: var(--ds-outline-text); }
 .ds-btn--outline:hover { background: var(--ds-color-surface-hover); }
-.ds-btn--ghost { background: transparent; color: var(--ds-primary-button); }
+.ds-btn--ghost { background: transparent; color: var(--ds-ghost-text); }
 .ds-btn--ghost:hover { background: var(--ds-color-surface-hover); }
 .ds-btn--danger { background: var(--ds-button-danger); color: #FFFFFF; }
 .ds-btn--success { background: var(--ds-button-success); color: #FFFFFF; }
