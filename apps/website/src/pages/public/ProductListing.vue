@@ -62,7 +62,8 @@ async function loadProducts() {
   error.value = ''
   try {
     const params = { page: page.value, limit: pageSize.value, status: 'PUBLISHED' , sortBy: 'createdAt', sortOrder: 'desc' }
-    if (route.query.category) params.categoryId = Number(route.query.category)
+    if (selectedCategories.value.length === 1) params.categoryId = Number(selectedCategories.value[0])
+    else if (selectedCategories.value.length === 0 && route.query.category) params.categoryId = Number(route.query.category)
     if (minPrice.value !== '') params.minPrice = Number(minPrice.value)
     if (maxPrice.value !== '') params.maxPrice = Number(maxPrice.value)
     if (purchaseMode.value === 'retail') params.retailEnabled = true
@@ -96,9 +97,11 @@ function changeSort(value) {
 function changePage(next) { page.value = Math.min(totalPages.value, Math.max(1, next)); loadProducts() }
 onMounted(async () => {
   if (route.query.retail === '1' || route.query.retail === 'true') purchaseMode.value = 'retail'
+  const initialCategory = Number(route.query.category)
+  if (Number.isInteger(initialCategory) && initialCategory > 0) selectedCategories.value = [initialCategory]
   await Promise.all([loadCategories(), loadProducts()])
 })
-watch(() => route.query.category, () => { page.value = 1; loadProducts() })
+watch(() => route.query.category, value => { const id = Number(value); selectedCategories.value = value && Number.isInteger(id) && id > 0 ? [id] : []; page.value = 1; loadProducts() })
 watch(() => route.query.retail, value => { purchaseMode.value = value === '1' || value === 'true' ? 'retail' : ''; page.value = 1; loadProducts() })
 </script>
 
@@ -273,4 +276,4 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 @media(max-width:900px){.bl{grid-template-columns:1fr}.ha{display:none}}
 @media(max-width:900px){.hero .w{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}.prods,.why{grid-template-columns:repeat(2,1fr)}.stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.nav ul{display:none}h1{font-size:28px}}
 
-</style>
+@media(prefers-color-scheme:dark){.reference-products:not([data-theme="light"]){--bg:#0e1220;--card:#171c30;--text:#eef0f8;--muted:#9aa3c2;--line:#262d49;--chip:#262a4d;--hero1:#06182c;--hero2:#0c4a63}}\n</style>
