@@ -1,5 +1,19 @@
 # Current Task — 2026-11-07
 
+## Latest task — Text-free glowing fiber-optic spinner
+- **Status:** Implemented on `main`; tests/build/browser verification pending.
+- **Request:** Replace the text-led fiber loading panel with one visual spinner, glowing and conveying data transfer, with no visible text.
+- **Implementation:** `apps/website/index.html` now renders a centered circular optical-fiber spinner with luminous teal/cyan/violet data arc, orbiting light packets, subtle inner fiber track, pulsing center and soft glow. Removed visible brand mark, logo and all loading copy. Retained an accessible screen-reader-only status label, dark-mode background and reduced-motion fallback.
+- **Lifecycle:** Existing loader controller, minimum display duration, initial auth/session restore, initial router readiness and later route navigation behavior are unchanged.
+- **Scope:** Website loading presentation only; no API/backend/database/auth contracts or business rules changed.
+- **Verification:** Source reviewed remotely. Vitest, Website build and browser rendering NOT RUN; do not run browser automation under the existing project instruction.
+- **Commit:** `43f219ba4476f54c347879d7224ec8f63458cc9c`.
+- **Next:** Pull `main`, run the focused page-loading test and Website build, then visually inspect desktop/mobile when browser checks are authorized.
+
+---
+
+# Current Task — 2026-11-07
+
 ## Latest task — Website fiber-optic loader + Hallmark skill integration
 - **Status:** Source and documentation changes committed to `main`; local installer execution and local tests/build remain pending.
 - **Skills:** Taste Skill was already installed at `.agents/skills/design-taste-frontend/SKILL.md`. Added Hallmark (`nutlope/hallmark`) to the all-agent project installer and documented it as a standard UI skill alongside Taste Skill, UI UX Pro Max, Impeccable and Vercel Web Design Guidelines. The installer now refreshes Taste Skill and installs Hallmark for every supported agent.
