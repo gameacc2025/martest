@@ -1,3 +1,12 @@
+# Current Task — 2026-11-07
+
+## Website homepage sections and category product counts
+- Removed the homepage sections «چرا Telecom Market؟» and «پیشنهاد ویژه تجهیزات خرده‌فروشی», including their unused styles.
+- Homepage category tiles and the dedicated Categories page now fetch each category's published-product total through the existing Website products store/API (one-item paginated query, using `meta.total`); counts are formatted in Persian numerals.
+- No backend, database, API contract, authentication, permissions, or commerce behavior changed. Existing category and product routes remain unchanged.
+- Updated Home and Categories regression tests for removed sections and live category totals.
+- Verification is pending; source edits were committed directly to `main`.
+
 ## Website FAQ page and homepage cleanup — 2026-11-07
 - Moved FAQ content out of the homepage; the homepage no longer renders an FAQ section or the disabled catalogue-request form.
 - Kept the dedicated public `/faq` route and added a clearly labelled «سوالات متداول» link in the public footer.
