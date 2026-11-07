@@ -901,3 +901,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Follow-up CI exposed a stale OpenAPI route inventory assertion (152 vs 153); updated the expected count to 153.
 - Updated CompanyProfile component tests to assert the current storefront markup (`company-logo`, `company-kind`, `product-count`) rather than obsolete selectors.
 - The public endpoint is registered at the Fastify root scope and its controller/service exports are present. Local Docker runtime still cannot be restarted from this remote session; deployment/restart state on the user's machine remains unverified.
+
+
+## 2026-11-07 — Fix Home.vue Vite/PostCSS unclosed CSS block
+- Fixed the truncated responsive CSS at the end of `apps/website/src/pages/public/Home.vue`.
+- Restored the missing style rules and closing braces for the mobile breakpoint and closed the scoped style block.
+- Added tablet/mobile layout rules for the hero, product grid, category rail, FAQ, and inquiry CTA.
+- Commit: `e7c8f630016698650733fd85f7bbfd7ecf211468` (directly on `main`).
+- Verified the updated GitHub file ends with the closed mobile media query and `</style>`; local Vite build and browser verification have not been run in this remote session.
