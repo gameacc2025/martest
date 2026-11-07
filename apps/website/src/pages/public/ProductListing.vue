@@ -2,10 +2,13 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
+import { useCartStore } from '../../stores/cart'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
 const route = useRoute()
 const productsStore = useProductsStore()
+const cartStore = useCartStore()
+const cartMessage = ref('')
 const products = ref([])
 const categories = ref([])
 const loading = ref(false)
@@ -93,6 +96,11 @@ function changeSort(value) {
   sortMode.value = value
   applyFilters()
 }
+function addToCart(product) {
+  const price = Number(product?.finalPrice ?? product?.price ?? product?.prices?.[0]?.price ?? product?.priceTiers?.[0]?.unitPrice)
+  const added = cartStore.addItem({ ...product, price })
+  cartMessage.value = added ? 'محصول به سبد خرید اضافه شد.' : 'امکان افزودن این محصول به سبد خرید وجود ندارد.'
+}
 function changePage(next) { page.value = Math.min(totalPages.value, Math.max(1, next)); loadProducts() }
 onMounted(async () => {
   if (route.query.retail === '1' || route.query.retail === 'true') purchaseMode.value = 'retail'
@@ -132,9 +140,10 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
           <article v-for="product in visibleProducts" :key="product.id" class="p">
             <router-link class="im" :to="routeToProduct(product)"><img v-if="image(product)" :src="image(product)" :alt="title(product)"><span v-else>{{ brand(product) }}</span><em>{{ category(product) }}</em></router-link>
             <div class="bd"><div class="br">{{ brand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ title(product) }}</h3><div class="sk">{{ sku(product) }}</div><div class="pr" :class="{ q: !isRetail(product) }">{{ price(product) }}<small>{{ isRetail(product) ? 'خرید خرده‌فروشی' : 'مناسب خرید سازمانی' }}</small></div></div>
-            <div class="ac"><router-link class="btn b1" :to="routeToProduct(product)">مشاهده محصول</router-link><router-link class="btn b2" :to="routeToProduct(product)">جزئیات</router-link></div>
+            <div class="ac"><button v-if="isRetail(product)" class="btn b1" type="button" @click.stop="addToCart(product)">افزودن به سبد</button><router-link v-else class="btn b1" :to="routeToProduct(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="routeToProduct(product)">مشاهده</router-link></div>
           </article>
         </div>
+        <p v-if="cartMessage" class="cart-feedback" role="status">{{ cartMessage }}</p>
         <div v-if="totalPages > 1" class="pagination"><button type="button" :disabled="page <= 1" @click="changePage(page - 1)">قبلی</button><span>صفحه {{ fa(page) }} از {{ fa(totalPages) }}</span><button type="button" :disabled="page >= totalPages" @click="changePage(page + 1)">بعدی</button></div>
       </section>
     </div>
@@ -278,5 +287,5 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 
 .reference-products .products-area .ac .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 
-@media(prefers-color-scheme:dark){.reference-products:not([data-theme="light"]){--bg:#0e1220;--card:#171c30;--text:#eef0f8;--muted:#9aa3c2;--line:#262d49;--chip:#262a4d;--hero1:#06182c;--hero2:#0c4a63}}
+.reference-products .ac button{border:0;font-family:inherit;cursor:pointer}\n.reference-products .cart-feedback{margin:10px 0;color:var(--ok);font-size:12px}\n@media(prefers-color-scheme:dark){.reference-products:not([data-theme="light"]){--bg:#0e1220;--card:#171c30;--text:#eef0f8;--muted:#9aa3c2;--line:#262d49;--chip:#262a4d;--hero1:#06182c;--hero2:#0c4a63}}
 </style>
