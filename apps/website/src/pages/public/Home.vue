@@ -339,5 +339,11 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 @media(max-width:900px){.bl{grid-template-columns:1fr}.ha{display:none}}
 @media(max-width:900px){.hero .w{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}.prods,.why{grid-template-columns:repeat(2,1fr)}.stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.nav ul{display:none}h1{font-size:28px}}
 
+
+.reference-home .feat{display:block;color:inherit;text-decoration:none}
+.reference-home .cat{border:0;color:var(--text);font-family:inherit;font-size:13px;font-weight:700;line-height:inherit;cursor:pointer}
+.reference-home .chips button.c{border:0;background:rgba(255,255,255,.14);color:#bcd9e8;padding:2px 12px;border-radius:99px;font:inherit;font-size:12px;cursor:pointer}
+.reference-home .cta2 .btn,.reference-home .ac .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+
 @media(prefers-color-scheme:dark){.reference-home:not([data-theme="light"]){--bg:#0e1220;--card:#171c30;--text:#eef0f8;--muted:#9aa3c2;--line:#262d49;--chip:#262a4d;--hero1:#06182c;--hero2:#0c4a63}}
 </style>
