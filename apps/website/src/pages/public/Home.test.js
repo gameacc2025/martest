@@ -10,64 +10,66 @@ const homePath = [
 if (!homePath) throw new Error('Could not locate the Website homepage source file')
 const source = readFileSync(homePath, 'utf8')
 
-describe('Website homepage — Telecom Market reference', () => {
-  it('uses live product, category and campaign APIs rather than fabricated catalogue data', () => {
+describe('Website homepage — Telecom Market.html exact composition', () => {
+  it('keeps live campaign, product and category sources connected', () => {
     expect(source).toContain("bannersApi.listActive('HOME_HERO')")
     expect(source).toContain('productsApi.list(params)')
     expect(source).toContain('productsApi.list({ ...params, featured: true })')
     expect(source).toContain('retailEnabled: true')
     expect(source).toContain('productsStore.getCategories()')
     expect(source).not.toContain('mockData')
-    expect(source).not.toContain('const stats =')
   })
 
-  it('matches the reference hero structure and supports both search modes', () => {
+  it('recreates the reference hero, search tabs, featured card and slider controls', () => {
+    expect(source).toContain('class="hero"')
     expect(source).toContain('تجهیزات پروژه‌تان را')
     expect(source).toContain('سریع و مطمئن تأمین کنید')
     expect(source).toContain('خرید فوری')
-    expect(source).toContain('خرید سازمانی / استعلام')
-    expect(source).toContain('searchMode')
-    expect(source).toContain('@submit.prevent="heroSearch"')
-    expect(source).toContain('home-hero__featured')
+    expect(source).toContain('استعلام سازمانی')
+    expect(source).toContain('class="search"')
+    expect(source).toContain('class="feat"')
+    expect(source).toContain('class="dots"')
+    expect(source).toContain('class="ha pv"')
+    expect(source).toContain('class="ha nx"')
   })
 
-  it('renders live categories and products through the shared storefront widgets', () => {
-    expect(source).toContain('StoreCategoryCard')
-    expect(source).toContain('StoreProductCard')
-    expect(source).toContain('home-category-track')
-    expect(source).toContain('recentProducts.slice(0, 4)')
-    expect(source).toContain('retailLatestProducts.slice(0, 4)')
-    expect(source).toContain('categoryIcon(category)')
-    expect(source).toContain('productRoute(product)')
+  it('contains every major homepage section from the supplied HTML reference', () => {
+    for (const section of ['stats', 'brands', 'cats', 'prods', 'why', 'ofr', 'bl', 'tms', 'cg', 'faq', 'rfq']) {
+      expect(source).toContain('class="' + section)
+    }
+    expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
+    expect(source).toContain('محصولات منتخب')
+    expect(source).toContain('دانلود کاتالوگ محصولات')
+    expect(source).toContain('سؤالات متداول')
   })
 
-  it('uses the extracted reference benefit, offer, FAQ and catalog widgets', () => {
-    expect(source).toContain('StoreBenefitGrid')
-    expect(source).toContain('StoreOfferBanner')
-    expect(source).toContain('StoreFaqList')
-    expect(source).toContain('StoreCatalogRequest')
-    expect(source).toContain('disabled-reason')
-  })
-
-  it('keeps the best-seller shelf honest until real order data exists', () => {
-    expect(source).toContain('پرفروش‌ترین محصولات خرده‌فروشی')
-    expect(source).toContain('دادهٔ واقعی سفارش و فروش')
-    expect(source).not.toContain('const bestSellingProducts')
-  })
-
-  it('uses the reference design tokens and responsive layouts', () => {
-    expect(source).toContain('--tm-canvas:#f4f5fa')
-    expect(source).toContain('linear-gradient(135deg,#0a2540,#126b8a)')
-    expect(source).toContain('grid-template-columns:repeat(4,minmax(0,1fr))')
-    expect(source).toContain('@media(max-width:900px)')
-    expect(source).toContain('prefers-reduced-motion:reduce')
-  })
-
-  it('keeps inquiry pricing and product presentation based on actual product fields', () => {
+  it('renders actual products and categories using the reference card geometry', () => {
+    expect(source).toContain('v-for="product in latestProducts"')
+    expect(source).toContain('v-for="product in retailLatest"')
+    expect(source).toContain('v-for="category in categories.slice(0, 9)"')
     expect(source).toContain('productSalesMode(product)')
     expect(source).toContain('productPriceLabel(product)')
-    expect(source).toContain('company?.isVerified')
-    expect(source).toContain("name: 'my-inquiries'")
+    expect(source).toContain('product.company?.isVerified')
+    expect(source).toContain("name: 'product-details'")
+    expect(source).toContain("name: 'categories'")
+  })
+
+  it('does not invent marketplace performance data or claim unavailable integrations are live', () => {
+    expect(source).toContain('تأمین‌کنندگان ثبت‌شده')
+    expect(source).toContain('<b>—</b>')
+    expect(source).toContain('نمونه نمایشی')
+    expect(source).toContain('سرویس در دسترس نیست')
+    expect(source).toContain('محصولی با نشان منتخب برای نمایش دریافت نشد')
+    expect(source).not.toContain('پرفروش‌ترین محصولات')
+    expect(source).not.toContain('setInterval(ct, 1000)')
+  })
+
+  it('uses the exact reference palette, gradients and responsive breakpoints', () => {
+    expect(source).toContain('--bg:#f4f5fa')
+    expect(source).toContain('linear-gradient(135deg,var(--hero1),var(--hero2))')
+    expect(source).toContain('.p{background:var(--card)')
+    expect(source).toContain('@media(max-width:900px)')
+    expect(source).toContain('@media(max-width:560px)')
   })
 })
 
