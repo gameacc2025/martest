@@ -3969,3 +3969,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Reviewed the changed source via GitHub. Unit tests, Website build and rendered browser appearance: **NOT RUN**. Browser checks remain prohibited by the current project instruction.
 - **Commit:** `43f219ba4476f54c347879d7224ec8f63458cc9c`.
 - **Next:** Pull `main` and verify the spinner visually on desktop/mobile; run `pnpm --filter @telecom/website test -- src/utils/pageLoading.test.js` and `pnpm --filter @telecom/website build`.
+
+
+## 2026-11-07 — DESIGN-SYSTEM-APPROVED-PALETTE — Apply owner-final Light/Dark palette
+- **Status:** IMPLEMENTED on `main`; local verification pending.
+- **Goal:** Make the owner's final brand palette, theme surfaces, button variants, component geometry, typography and spacing the canonical shared UI system.
+- **Changes:** Replaced the obsolete violet/blue legacy TEM aliases and fixed the permanently dark dashboard rail; aligned shared SCSS tokens, PrimeVue theme, button variants, surface states, typography, component dimensions and semantic status colors. Added `design-system/APPROVED-PALETTE.md` and aligned `design-system/MASTER.md`.
+- **Files:** `packages/shared-ui/assets/design-system/{tokens.scss,brand-overrides.scss,tem.scss,pages.scss}`, `packages/shared-ui/theme.js`, `design-system/MASTER.md`, `design-system/APPROVED-PALETTE.md`, `.ai/WORKLOG.md`, `.ai/current-task.md`.
+- **Code commits:** `7f4ef0e63f469056d013c29060f8c05db64136a2`, `834dbe7b01e2eb9fde7199dd942e862b4a613960`, `b27420058304161deadf9c3c981a952a9502b597`, `722a98c7254d408026ea1672c1ca157521fc7566`, `7700df370699d9abe669f9170ccc808ca1fd4752`, `8fb6b652a3e1d4fb725de0a6cfd0d22414261295`, `e5af7f0cdb85976456f90646272cf812b19cc919`, `d65c895a026134f0188f209646323958e7be4009`.
+- **Verification:** Source review only in the remote GitHub editing session. Shared UI tests and Website/Company/Admin builds are **NOT RUN**. Browser/theme visual checks are **NOT RUN** under the standing no-browser-testing instruction.
+- **Scope:** Shared frontend presentation only. No API, backend, database, authentication, permissions, routes or business behavior changed.
+- **Next:** Pull `main`; run shared-ui tests and Website/Company/Admin builds, then visually review both themes when browser checks are authorized.
