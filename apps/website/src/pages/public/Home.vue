@@ -161,9 +161,10 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer); if (demoSlideTime
       <div class="row"><b>{{ productPrice(featuredProduct) }}</b><span class="btn b1" style="padding:8px 16px">مشاهده</span></div>
     </router-link>
     <div v-else class="feat"><div class="img">Telecom Market</div><h3>تجهیزات شبکه و مخابرات</h3><small>برای مشاهده محصولات منتشرشده وارد کاتالوگ شوید.</small><div class="row"><b>کاتالوگ محصولات</b><router-link class="btn b1" :to="{ name: 'products' }">مشاهده</router-link></div></div>
-    <div class="dots"><button v-for="(_, index) in (banners.length || slides.length)" :key="index" :class="{ on: activeSlide === index }" type="button" :aria-label="'اسلاید ' + (index + 1)" @click="setSlide(index)"></button></div>
-    <button class="ha pv" type="button" aria-label="اسلاید قبلی" @click="setSlide(activeSlide - 1)">›</button><button class="ha nx" type="button" aria-label="اسلاید بعدی" @click="setSlide(activeSlide + 1)">‹</button>
-  </div></section>
+  </div>
+  <div class="dots"><button v-for="(_, index) in (banners.length || slides.length)" :key="index" :class="{ on: activeSlide === index }" type="button" :aria-label="'اسلاید ' + (index + 1)" @click="setSlide(index)"></button></div>
+  <button class="ha pv" type="button" aria-label="اسلاید قبلی" @click="setSlide(activeSlide - 1)">›</button><button class="ha nx" type="button" aria-label="اسلاید بعدی" @click="setSlide(activeSlide + 1)">‹</button>
+</section>
 
   <div class="stats"><div class="w"><div class="g">
     <div class="st"><b>—</b><span>تأمین‌کنندگان ثبت‌شده</span></div><div class="st"><b>{{ products.length ? products.length.toLocaleString('fa-IR') + '+' : '—' }}</b><span>محصول در این دریافت</span></div><div class="st"><b>—</b><span>پروژه‌های سازمانی</span></div><div class="st"><b>—</b><span>میانگین زمان پاسخ</span></div>
