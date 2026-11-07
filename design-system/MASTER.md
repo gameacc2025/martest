@@ -23,20 +23,16 @@ Apply that guidance as a restrained hybrid:
 
 Avoid neumorphism, excessive gradients, ornamental glass cards, over-animated dashboards, emoji icons, fake KPI data and arbitrary per-page palettes.
 
-## Brand and typography
+## Approved brand palette and typography
 
-The approved brand direction is **Sky Blue primary + Turquoise secondary with a dark navy sidebar**, matching the owner-approved dashboard reference. Use the shared tokens in `packages/shared-ui/assets/design-system/tokens.scss` and PrimeVue preset:
-- Primary sky blue: `#39BFE0` (vivid primary buttons, selected states and brand highlights).
-- Secondary turquoise: `#12B8A6` (complementary actions and secondary emphasis).
-- Technical blue: `#2878C7` (links and informational emphasis).
-- Deep navy: `#173B63`; dark sidebar: `#142B46`.
-- Warm amber: `#E7A64B` (warning/limited promotional emphasis).
-- Canvas: `#F2F7FA`; text: `#203247`.
-- Typeface: Vazirmatn through `--ds-font-family`.
-- Semantic colors: PrimeVue palette aliases through `--ds-color-*`.
-- Surfaces, borders, spacing, radii, shadows and motion: `--ds-*` tokens.
+The owner's final palette is documented in **[APPROVED-PALETTE.md](./APPROVED-PALETTE.md)** and implemented in `packages/shared-ui/assets/design-system/tokens.scss` plus `packages/shared-ui/theme.js`. These files supersede older color values in historical design notes.
 
-Keep primary buttons vivid sky blue (#39BFE0) with light text as approved by the owner; use restrained hover shifts rather than muting the base color. Keep the palette disciplined: navy anchors navigation, sky blue owns primary brand accents, turquoise is the complementary accent, amber is reserved for warnings. Do not import external fonts or add a second icon library; use installed PrimeIcons consistently.
+- Shared brand: Primary `#22D3EE`, Primary Hover `#06B6D4`, Primary Active `#0891B2`, Primary Subtle `#CFFAFE`; Secondary `#6366F1`; Accent `#8B5CF6`.
+- Light: page `#F0F7FA`, white sidebar/header/cards, hover `#F0FDFF`, secondary surface `#F1F5F9`, border `#DCE8EF`, text `#102A43`, secondary text `#627D98`, muted `#94A3B8`. Primary buttons use `#0891B2` / hover `#0E7490` with white text.
+- Dark: page `#0A1625`, sidebar/header `#0D1B2A`, card `#122438`, hover `#193149`, secondary surface `#172B40`, border `#24394D`, text `#F0F9FF`, secondary text `#9FB3C8`, muted `#71869B`. Primary buttons use `#22D3EE` / hover `#67E8F9` with `#083344` text.
+- Semantic success/warning/error/info colors and backgrounds are shared between themes; see the approved palette reference.
+- Typeface: Inter for English and Vazirmatn for Persian. Base size 14px; H1/H2/H3 are 30/24/20px; small text is 12px.
+- Keep the existing RTL-first Vue 3, PrimeVue 4, Sass and shared-ui implementation. Do not introduce a competing palette or font system.
 
 ## Layout and spacing
 
