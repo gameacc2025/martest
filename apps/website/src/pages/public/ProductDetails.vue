@@ -683,7 +683,7 @@ const goBack = () => router.push('/products')
   padding: 4px 10px;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-pill);
-  background: #fff;
+  background: var(--tm-surface);
   color: var(--tm-ink-soft);
   font-size: 11px;
   font-weight: 700;
@@ -700,7 +700,7 @@ const goBack = () => router.push('/products')
   padding: 2px;
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius-sm);
-  background: #fff;
+  background: var(--tm-surface);
   cursor: pointer;
   overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -798,7 +798,7 @@ const goBack = () => router.push('/products')
   padding: 3px 9px;
   border-radius: var(--tm-radius-pill);
   background: var(--tm-green-soft);
-  color: #0c8a6e;
+  color: var(--tm-green);
   font-size: 11px;
   font-weight: 700;
 }
@@ -807,7 +807,8 @@ const goBack = () => router.push('/products')
   padding: 16px;
   border-radius: var(--tm-radius);
   background:
-    radial-gradient(circle at 88% 18%, rgba(46, 211, 238, 0.22), transparent 46%),
+    radial-gradient(circle at 88% 18%, rgba(34, 211, 238, 0.22), transparent 46%),
+    radial-gradient(circle at 12% 90%, rgba(139, 92, 246, 0.16), transparent 48%),
     linear-gradient(118deg, var(--tm-navy), var(--tm-navy-soft));
   color: #fff;
 }
@@ -894,7 +895,7 @@ const goBack = () => router.push('/products')
   width: 36px;
   height: 36px;
   border-radius: var(--tm-radius);
-  background: #fff;
+  background: var(--tm-surface);
   color: var(--tm-cyan-deep);
   font-size: 15px;
 }
@@ -926,7 +927,7 @@ const goBack = () => router.push('/products')
   display: grid;
   place-items: center;
   padding: 18px;
-  background: rgba(10, 28, 63, 0.5);
+  background: rgba(10, 22, 37, 0.56);
   backdrop-filter: blur(2px);
 }
 .product-dialog {
@@ -935,7 +936,7 @@ const goBack = () => router.push('/products')
   overflow-y: auto;
   padding: 20px;
   border-radius: var(--tm-radius-lg);
-  background: #fff;
+  background: var(--tm-surface);
   box-shadow: var(--tm-shadow-lg);
 }
 .dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -950,7 +951,7 @@ const goBack = () => router.push('/products')
   padding: 9px 12px;
   border: 1px solid var(--tm-line-strong);
   border-radius: var(--tm-radius);
-  background: #fff;
+  background: var(--tm-surface);
   color: var(--tm-ink);
   font-family: inherit;
   font-size: 13px;
@@ -963,7 +964,7 @@ const goBack = () => router.push('/products')
   padding: 10px 12px;
   border-radius: var(--tm-radius-sm);
   background: var(--tm-red-soft);
-  color: #a72727;
+  color: var(--tm-red);
   font-size: 12.5px;
 }
 .dialog-success {
@@ -971,7 +972,7 @@ const goBack = () => router.push('/products')
   padding: 10px 12px;
   border-radius: var(--tm-radius-sm);
   background: var(--tm-green-soft);
-  color: #0a6f59;
+  color: var(--tm-green);
   font-size: 12.5px;
 }
 .dialog-actions { display: flex; justify-content: flex-start; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
