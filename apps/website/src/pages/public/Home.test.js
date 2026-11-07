@@ -17,6 +17,9 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).toContain('productsApi.list({ ...params, featured: true })')
     expect(source).toContain('retailEnabled: true')
     expect(source).toContain('productsStore.getCategories()')
+    expect(source).toContain('loadCategoryProductCounts(categories.value.slice(0, 9))')
+    expect(source).toContain('categoryId: Number(category.id)')
+    expect(source).toContain('result?.meta?.total')
     expect(source).not.toContain('mockData')
   })
 
@@ -34,11 +37,15 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   })
 
   it('contains every major homepage section from the supplied HTML reference', () => {
-    for (const section of ['stats', 'brands', 'cats', 'prods', 'why', 'ofr', 'bl', 'tms', 'rfq']) {
+    for (const section of ['stats', 'brands', 'cats', 'prods', 'bl', 'tms', 'rfq']) {
       expect(source).toContain('class="' + section)
     }
     expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
     expect(source).toContain('محصولات منتخب')
+    expect(source).not.toContain('چرا Telecom Market؟')
+    expect(source).not.toContain('پیشنهاد ویژه تجهیزات خرده‌فروشی')
+    expect(source).not.toContain('class="why"')
+    expect(source).not.toContain('class="ofr"')
     expect(source).not.toContain('دانلود کاتالوگ محصولات')
     expect(source).not.toContain('class="sec faq"')
     expect(source).not.toContain('faqItems')
