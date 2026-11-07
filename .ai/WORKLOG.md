@@ -3894,3 +3894,11 @@ This file is the shared, version-controlled memory for agents working on the rep
   - `pnpm run build:website` -> Vite build succeeded (`✓ built in 6.80s`).
   - Browser/visual checks: **NOT RUN** (owner instruction prohibits browser automation/screenshot loops).
 - **Note:** `Telecom Market.html` is now tracked in the repo root as the design reference (commit `8ad51708`).
+
+
+## 2026-11-07 — Fix Home.vue Vite/PostCSS unclosed CSS block
+- Fixed the truncated responsive CSS at the end of `apps/website/src/pages/public/Home.vue`.
+- Restored the missing style rules and closing braces for the mobile breakpoint and closed the scoped style block.
+- Added tablet/mobile layout rules for the hero, product grid, category rail, FAQ, and inquiry CTA.
+- Commit: `e7c8f630016698650733fd85f7bbfd7ecf211468` (directly on `main`).
+- Verified the updated GitHub file ends with the closed mobile media query and `</style>`; local Vite build and browser verification have not been run in this remote session.
