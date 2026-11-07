@@ -116,6 +116,9 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.find('.public-footer-grid').element.children).toHaveLength(5)
     expect(wrapper.get('.public-footer-grid').text()).toContain('آخرین مطالب وبلاگ')
     expect(wrapper.get('.public-footer-grid').text()).toContain('تماس با ما')
+    const faqFooterLink = wrapper.findAll('.public-footer-link').find(link => link.text().trim() === 'سوالات متداول')
+    expect(faqFooterLink).toBeTruthy()
+    expect(faqFooterLink.attributes('data-route')).toBe('faq')
   })
 
   it('shows separate homepage and product-catalogue destinations in the primary navigation', async () => {
