@@ -441,7 +441,7 @@ async function deleteRole() {
 .role-list-page .ds-page-heading { margin-bottom: 0; }
 .role-list-page .card {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
@@ -456,7 +456,7 @@ async function deleteRole() {
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
   box-shadow: var(--ds-shadow-xs);
 }
@@ -486,7 +486,7 @@ async function deleteRole() {
   font-weight: 800;
 }
 .access-management-intro p { margin: .35rem 0 0; color: var(--ds-color-text-muted); font-size: var(--ds-font-size-sm); }
-.role-list-page .card { border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
+.role-list-page .card { border-radius: var(--ds-card-radius); background: var(--ds-color-surface); box-shadow: var(--ds-shadow-xs); }
 @media (max-width: 640px) {
   .access-management-intro { align-items: flex-start; padding: 1rem; }
   .access-management-icon { width: 2.75rem; height: 2.75rem; }
@@ -497,7 +497,7 @@ async function deleteRole() {
 .management-data-surface {
   overflow: hidden;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
