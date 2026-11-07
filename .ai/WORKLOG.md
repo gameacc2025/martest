@@ -1,3 +1,12 @@
+## Website FAQ page and homepage cleanup — 2026-11-07
+- Moved FAQ content out of the homepage; the homepage no longer renders an FAQ section or the disabled catalogue-request form.
+- Kept the dedicated public `/faq` route and added a clearly labelled «سوالات متداول» link in the public footer.
+- Changed FAQ interactions to a single-open accordion: opening one question closes the previously open question; clicking the active question closes it.
+- Added a clear active-state marker around each FAQ item (accent border and subtle surface treatment), while preserving RTL, keyboard focus, accessible expanded/controlled-region attributes and responsive layout.
+- Updated Home, FAQ and PublicLayout regression tests for section removal, exclusive accordion behavior, active-state styling and footer navigation.
+- Scope: Website UI only. No backend, database, API, authentication, permissions or business-rule changes.
+- Verification: source-level updates committed to `main`; test/build execution and browser visual review have not been run in this GitHub-only session.
+
 ## 2026-11-06 — Reference-first public storefront rewrite (TM-REFERENCE-01)
 - **Status:** Implemented on main; local verification still required.
 - **Source of truth:** root Telecom Market.html. Homepage, product catalogue, category directory, public header/footer shell and shared product-card geometry were aligned to its RTL/Vazirmatn layout, gradient hero, category rail, compact catalogue filters, category panels and product-card dimensions. Extracted reusable StoreBenefitGrid, StoreFaqList, StoreOfferBanner, StoreCatalogRequest, StoreBreadcrumb and StorePageHeading widgets and exported them from the store component barrel.
