@@ -45,19 +45,23 @@ describe('Website FAQ', () => {
     expect(wrapper.find('#faq-answer-1').text()).toContain('دسترسی لازم')
   })
 
-  it('keeps multiple answers independently expandable', async () => {
+  it('allows only one answer to remain open at a time', async () => {
     wrapper = mountFaq()
 
     await wrapper.find('#faq-question-0').trigger('click')
     await wrapper.find('#faq-question-2').trigger('click')
 
-    expect(wrapper.find('#faq-question-0').attributes('aria-expanded')).toBe('true')
-    expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('true')
-
-    await wrapper.find('#faq-question-0').trigger('click')
-
     expect(wrapper.find('#faq-question-0').attributes('aria-expanded')).toBe('false')
     expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('true')
+    expect(wrapper.find('#faq-answer-0').exists()).toBe(false)
+    expect(wrapper.find('#faq-answer-2').exists()).toBe(true)
+    expect(wrapper.findAll('.faq-item--active')).toHaveLength(1)
+
+    await wrapper.find('#faq-question-2').trigger('click')
+
+    expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.find('#faq-answer-2').exists()).toBe(false)
+    expect(wrapper.findAll('.faq-item--active')).toHaveLength(0)
   })
 
   it('does not promise unsupported checkout, installment, return, or order-tracking flows', async () => {
