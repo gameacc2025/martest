@@ -253,13 +253,11 @@ function logout() {
     <!-- Utility strip -->
     <div class="public-utility-bar">
       <div class="public-container public-utility-inner">
-        <span class="public-utility-message">
-          <i class="pi pi-building" aria-hidden="true"></i>
-          بازارگاه تخصصی تجهیزات مخابراتی و خرید سازمانی
-        </span>
+        <span class="public-utility-message"><b>آخرین خبر:</b> بازارگاه تخصصی تجهیزات شبکه و مخابرات</span>
         <nav class="public-utility-links" aria-label="دسترسی‌های راهنما">
           <router-link :to="{ name: 'faq' }">راهنمای کاربران</router-link>
-          <router-link :to="{ name: 'contact' }">ارتباط با ما</router-link>
+          <span aria-hidden="true">·</span>
+          <router-link :to="{ name: 'contact' }">تماس با ما</router-link>
         </nav>
       </div>
     </div>
@@ -277,7 +275,7 @@ function logout() {
             <nav class="public-nav-desktop" aria-label="منوی اصلی">
               <router-link :to="{ name: 'home' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>صفحه اصلی</span></router-link>
               <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-box" aria-hidden="true"></i><span>محصولات</span></router-link>
-              <MegaMenu :categories="megaMenuCategories" />
+              <router-link :to="{ name: 'categories' }" class="public-nav-link" active-class="public-nav-link-active"><span>دسته‌بندی</span></router-link>
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
             </nav>
@@ -522,39 +520,35 @@ function logout() {
       <div class="public-container public-footer-inner">
         <div class="public-footer-grid">
           <div class="public-footer-about">
-            <div class="public-footer-brand">
-              <BrandMark :size="34" />
-              <span>Telecom Market</span>
-            </div>
-            <p class="public-footer-about-text">
-              بازارگاه تخصصی تجهیزات مخابراتی برای جستجوی محصولات، بررسی مشخصات و ثبت درخواست استعلام.
-            </p>
+            <div class="public-footer-brand"><BrandMark :size="34" /><span>Telecom Market</span></div>
+            <p class="public-footer-about-text">بازارگاه تخصصی تجهیزات شبکه و مخابرات؛ جستجوی محصولات، بررسی مشخصات و ثبت درخواست استعلام سازمانی.</p>
           </div>
-
           <div>
             <h3 class="public-footer-heading">دسترسی سریع</h3>
             <ul class="public-footer-list">
+              <li><router-link :to="{ name: 'home' }" class="public-footer-link">صفحه اصلی</router-link></li>
               <li><router-link :to="{ name: 'products' }" class="public-footer-link">همه محصولات</router-link></li>
-              <li><router-link to="/categories" class="public-footer-link">دسته‌بندی‌ها</router-link></li>
-              <li><router-link to="/about" class="public-footer-link">درباره ما</router-link></li>
-            </ul></div>
-
-          <div>
-            <h3 class="public-footer-heading">دسته‌بندی‌ها</h3>
-            <ul class="public-footer-list">
-              <li v-for="cat in footerCategories" :key="cat.id">
-                <router-link :to="{ name: 'products', query: { category: cat.id } }" class="public-footer-link">{{ cat.nameFa }}</router-link>
-              </li>
+              <li><router-link :to="{ name: 'categories' }" class="public-footer-link">دسته‌بندی‌ها</router-link></li>
+              <li><router-link :to="{ name: 'my-inquiries' }" class="public-footer-link">ثبت استعلام</router-link></li>
             </ul>
           </div>
-
           <div>
-            <h3 class="public-footer-heading">خدمات مشتری</h3>
+            <h3 class="public-footer-heading">پشتیبانی</h3>
             <ul class="public-footer-list">
-              <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
+              <li><router-link :to="{ name: 'faq' }" class="public-footer-link">راهنمای کاربران</router-link></li>
+              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و مقررات</router-link></li>
+              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">حریم خصوصی</router-link></li>
               <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
-              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و حریم خصوصی</router-link></li>
             </ul>
+          </div>
+          <div>
+            <h3 class="public-footer-heading">آخرین مطالب وبلاگ</h3>
+            <p class="public-footer-about-text">مطالب آموزشی و اخبار پس از اتصال سرویس محتوای منتشرشده در این بخش نمایش داده می‌شوند.</p>
+          </div>
+          <div>
+            <h3 class="public-footer-heading">ارتباط با ما</h3>
+            <p class="public-footer-about-text">برای ارتباط با پشتیبانی و ارسال پیام، از فرم تماس با ما استفاده کنید.</p>
+            <router-link :to="{ name: 'contact' }" class="public-footer-link">ورود به صفحه تماس با ما ←</router-link>
           </div>
         </div>
 
@@ -890,6 +884,35 @@ function logout() {
 .public-cart-drawer__footer>.tm-btn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
 @media(prefers-reduced-motion:reduce){.public-cart-drawer{animation:none}}
 
+
+/* Match the reference Telecom Market.html storefront shell while retaining live account controls. */
+.public-utility-inner { min-height: 32px; }
+.public-utility-message { color: #c9d1ee; font-size: 12px; }
+.public-utility-message b { color: #7fe3ff; font-weight: 700; }
+.public-utility-links { gap: 7px; color: #c9d1ee; font-size: 12px; }
+.public-header { position: relative; top: auto; }
+.public-header-row { min-height: 68px; }
+.public-header-right { gap: 22px; }
+.public-nav-desktop { gap: 22px; }
+.public-nav-link i { display: none; }
+.public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; gap: 28px; }
+.public-footer-about-text { color: #9aa3c2; }
+.public-footer-link { color: #9aa3c2; }
+.public-footer-bottom { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; text-align: start; }
+@media(max-width:1100px) {
+  .public-header-right { gap: 14px; }
+  .public-nav-desktop { gap: 13px; }
+  .public-nav-link { font-size: 12px; }
+  .public-footer-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media(max-width:767px) {
+  .public-header-row { min-height: 58px; }
+  .public-footer-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .public-footer-about { grid-column: 1/-1; }
+}
+@media(max-width:480px) {
+  .public-footer-grid { grid-template-columns: 1fr; }
+}
 /* Telecom Market.html storefront shell alignment */
 .public-shell {
   --tm-blue: #6c5ce7;
