@@ -112,7 +112,7 @@ function toggleFaq(index) {
 .faq-breadcrumb a { color: var(--ds-color-primary-text); text-decoration: none; }
 .faq-breadcrumb a:hover { text-decoration: underline; }
 .faq-hero {
-  padding: 0 var(--ds-space-4) var(--ds-space-5);
+  padding: 0 0 var(--ds-space-5);
   border-bottom: 1px solid var(--ds-color-border);
 }
 .faq-hero .ds-lead { max-width: 68ch; margin-bottom: 0; }
