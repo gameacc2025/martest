@@ -40,12 +40,6 @@ const latestProducts = computed(() => products.value.slice(0, 4))
 const retailLatest = computed(() => retailProducts.value.slice(0, 4))
 const selectedProducts = computed(() => featuredProducts.value.slice(0, 4))
 const brandNames = ['VIAVI', 'Anritsu', 'Yokogawa', 'EXFO', 'Huawei', 'Ubiquiti']
-const faqItems = [
-  ['چطور پیش‌فاکتور رسمی دریافت کنم؟', 'از صفحه محصول موردنظر، درخواست استعلام ثبت کنید و پاسخ را در بخش استعلام‌های من پیگیری کنید.'],
-  ['گارانتی و اصالت کالا چگونه مشخص می‌شود؟', 'اطلاعات گارانتی و وضعیت تأمین‌کننده باید در صفحه همان محصول و اطلاعات شرکت بررسی شود.'],
-  ['خرید فوری با استعلام چه فرقی دارد؟', 'محصولات دارای قیمت و امکان خرده‌فروشی از مسیر خرید مستقیم پیگیری می‌شوند؛ سایر موارد به استعلام نیاز دارند.'],
-  ['چطور محصولات موردنیازم را پیدا کنم؟', 'از جستجو، دسته‌بندی‌ها و فیلترهای فهرست محصولات استفاده کنید.'],
-]
 const demoArticles = [
   { kind: 'آموزش', date: 'نمونه نمایشی', title: 'راهنمای انتخاب OTDR مناسب برای پروژه فیبر نوری', description: 'این جایگاه برای نمایش مطالب آموزشی منتشرشده در وبلاگ در نظر گرفته شده است.' },
   { kind: 'معرفی', date: 'نمونه نمایشی', title: 'تفاوت OTDR و Power Meter در عیب‌یابی شبکه', description: 'محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده می‌شود.' },
@@ -218,9 +212,6 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 
     <div class="sec"><div class="sh"><h2>نظر مشتریان سازمانی</h2></div><div class="tms"><div class="tc"><q>جایگاه نمایش دیدگاه‌های تأییدشده مشتریان</q><div class="av">۱</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div><div class="tc"><q>متن دیدگاه فقط پس از ثبت و تأیید واقعی نمایش داده می‌شود.</q><div class="av">۲</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div><div class="tc"><q>در این بخش اطلاعات ساختگی مشتری یا شرکت نمایش داده نمی‌شود.</q><div class="av">۳</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div></div></div>
 
-    <div class="cg"><div><h3>دانلود کاتالوگ محصولات</h3><p>این فرم پس از اتصال سرویس ارسال کاتالوگ فعال خواهد شد.</p></div><div class="fm"><input disabled placeholder="نام شرکت"><input disabled placeholder="ایمیل سازمانی"><button class="btn b1" type="button" disabled>سرویس در دسترس نیست</button></div></div>
-
-    <div class="sec faq"><div class="sh"><h2>سؤالات متداول</h2></div><details v-for="(faq, index) in faqItems" :key="faq[0]" :open="index === 0"><summary>{{ faq[0] }}</summary><p>{{ faq[1] }}</p></details></div>
     <div class="rfq"><div><h3>محصول مورد نظر را پیدا نکردید؟</h3><p>درخواست استعلام ثبت کنید تا نیاز پروژه‌تان از مسیر تأمین‌کنندگان پیگیری شود.</p></div><router-link class="btn b1" :to="{ name: 'my-inquiries' }">ثبت درخواست استعلام</router-link></div>
   </div>
 </main>
@@ -338,12 +329,8 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 .tm{display:flex;gap:8px;direction:ltr}.tm div{background:rgba(255,255,255,.18);border-radius:10px;padding:6px 12px;text-align:center;min-width:58px}.tm b{display:block;font-size:20px}.tm span{font-size:10px}
 .ofr .btn{background:#fff;color:#4b3bd6}
 .tms{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.tc{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(20,30,70,.06);font-size:13px;color:var(--muted)}.tc q{display:block;color:var(--text);font-size:14px;margin-bottom:12px;quotes:none}.tc b{color:var(--text);display:block}.tc .av{width:38px;height:38px;border-radius:50%;background:var(--chip);color:var(--pri);display:grid;place-items:center;font-weight:800;float:right;margin-left:10px}
-.cg{margin-top:34px;border-radius:18px;background:var(--card);border:1px solid var(--line);padding:24px 28px;display:grid;grid-template-columns:1fr 1.2fr;gap:24px;align-items:center}.cg h3{font-size:20px}.cg p{font-size:13px;color:var(--muted)}
-.cg .fm{display:flex;gap:8px;flex-wrap:wrap}.cg input{flex:1;min-width:150px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:13px;background:var(--bg);color:var(--text)}.cg .ok{color:var(--ok);font-size:13px;margin-top:8px;width:100%}
-.faq details{background:var(--card);border-radius:12px;padding:14px 18px;margin-bottom:10px;box-shadow:0 2px 10px rgba(20,30,70,.05);font-size:14px}.faq summary{cursor:pointer;font-weight:700}.faq details p{color:var(--muted);font-size:13px;margin-top:8px}
 .cmp{display:block;padding:0 14px 8px;font-size:12px;color:var(--muted);cursor:pointer}
 .cbar{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));right:50%;transform:translateX(50%);z-index:20;background:var(--text);color:var(--bg);border-radius:99px;padding:10px 22px;font-size:13px;font-weight:700;display:none}
-@media(max-width:900px){.tms,.cg{grid-template-columns:1fr}}
 @media(max-width:900px){.bl{grid-template-columns:1fr}.ha{display:none}}
 @media(max-width:900px){.hero .w{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}.prods,.why{grid-template-columns:repeat(2,1fr)}.stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.nav ul{display:none}h1{font-size:28px}}
 
