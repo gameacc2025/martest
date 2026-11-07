@@ -40,7 +40,7 @@ const featuredProduct = computed(() => featuredProducts.value[0] || products.val
 const latestProducts = computed(() => products.value.slice(0, 4))
 const retailLatest = computed(() => retailProducts.value.slice(0, 4))
 const selectedProducts = computed(() => featuredProducts.value.slice(0, 4))
-const brandNames = ['VIAVI', 'Anritsu', 'Yokogawa', 'EXFO', 'Huawei', 'Ubiquiti']
+const brandNames = computed(() => [...new Set([...products.value, ...retailProducts.value].map(productBrand).filter(brand => brand && brand !== '—'))].slice(0, 6))
 const demoArticles = [
   { kind: 'آموزش', date: 'نمونه نمایشی', title: 'راهنمای انتخاب OTDR مناسب برای پروژه فیبر نوری', description: 'این جایگاه برای نمایش مطالب آموزشی منتشرشده در وبلاگ در نظر گرفته شده است.' },
   { kind: 'معرفی', date: 'نمونه نمایشی', title: 'تفاوت OTDR و Power Meter در عیب‌یابی شبکه', description: 'محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده می‌شود.' },
@@ -202,7 +202,7 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
   <div class="stats"><div class="w"><div class="g">
     <div class="st"><b>—</b><span>تأمین‌کنندگان ثبت‌شده</span></div><div class="st"><b>{{ products.length ? products.length.toLocaleString('fa-IR') + '+' : '—' }}</b><span>محصول در این دریافت</span></div><div class="st"><b>—</b><span>پروژه‌های سازمانی</span></div><div class="st"><b>—</b><span>میانگین زمان پاسخ</span></div>
   </div></div></div>
-  <div class="w"><div class="brands"><span v-for="brand in brandNames" :key="brand">{{ brand }}</span></div><small class="demo-note">نام برندها در این نوار، نمونه‌های نمایشی قالب هستند و فهرست تأمین‌کنندگان فعال محسوب نمی‌شوند.</small></div>
+  <div v-if="brandNames.length" class="w"><div class="brands"><span v-for="brand in brandNames" :key="brand">{{ brand }}</span></div></div>
 
   <div class="w">
     <div class="sec"><div class="sh"><h2>دسته‌بندی محصولات</h2><router-link :to="{ name: 'categories' }">همه دسته‌بندی‌ها</router-link></div>
