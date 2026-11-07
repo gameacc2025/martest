@@ -233,8 +233,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 
 <style scoped>
 .dash-sidebar {
-  --dash-sidebar-expanded: 256px;
-  --dash-sidebar-collapsed: 76px;
+  --dash-sidebar-expanded: var(--ds-sidebar-width);
+  --dash-sidebar-collapsed: var(--ds-sidebar-collapsed-width);
   display: flex;
   flex-direction: column;
   width: var(--dash-sidebar-expanded);
@@ -242,8 +242,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   overflow-x: hidden;
   overflow-y: auto;
   padding: 26px 14px;
-  background: linear-gradient(#0a1c3f, #08142e);
-  color: #cfd9ee;
+  background: var(--ds-sidebar-bg);
+  color: var(--ds-sidebar-fg);
   transition: width 0.24s ease;
 }
 
@@ -257,7 +257,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   line-height: 1.1;
 }
 .dash-sidebar-brand-text {
-  color: #fff;
+  color: var(--ds-sidebar-fg-strong);
   font-size: 20px;
   font-weight: 600;
   white-space: nowrap;
@@ -267,7 +267,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 .dash-sidebar-nav { padding: 0; }
 .dash-sidebar-section {
   margin: 14px 6px 6px;
-  color: #7f93b8;
+  color: var(--ds-sidebar-muted);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -293,7 +293,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #e2e9f7;
+  color: var(--ds-sidebar-fg);
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -302,9 +302,9 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   cursor: pointer;
   transition: background-color 0.16s ease, color 0.16s ease;
 }
-.dash-sidebar-link:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+.dash-sidebar-link:hover { background: var(--ds-sidebar-hover); color: var(--ds-sidebar-fg-strong); }
 .dash-sidebar-link--active {
-  background: linear-gradient(90deg, #17b4d9, #0f5f88);
+  background: var(--ds-sidebar-active-bg);
   color: #fff;
   font-weight: 600;
   box-shadow: none;
@@ -312,12 +312,12 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 .dash-sidebar-link-icon {
   width: 22px;
   flex-shrink: 0;
-  color: #a8bbd9;
+  color: var(--ds-sidebar-muted);
   font-size: 16px;
   text-align: center;
 }
 .dash-sidebar-link:hover .dash-sidebar-link-icon,
-.dash-sidebar-link--active .dash-sidebar-link-icon { color: #fff; }
+.dash-sidebar-link--active .dash-sidebar-link-icon { color: var(--ds-sidebar-active-fg); }
 .dash-sidebar-link-text {
   flex: 1;
   overflow: hidden;
@@ -334,8 +334,8 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   margin-inline-start: auto;
   padding: 0 5px;
   border-radius: 50%;
-  background: #2ed3ee;
-  color: #05213f;
+  background: var(--ds-brand-primary);
+  color: #083344;
   font-size: 11px;
   font-weight: 700;
   flex: none;
@@ -343,30 +343,30 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
 .dash-sidebar-caret { font-size: 0.7rem; transition: transform 0.2s; }
 .dash-sidebar-caret--open { transform: rotate(180deg); }
 .dash-sidebar-link--planned { opacity: 0.52; cursor: default; }
-.dash-sidebar-link--planned:hover { background: transparent; color: #e2e9f7; }
+.dash-sidebar-link--planned:hover { background: transparent; color: var(--ds-sidebar-fg); }
 .dash-sidebar-planned-badge {
   padding: 0.1rem 0.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid var(--ds-sidebar-border);
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--ds-sidebar-muted);
   font-size: 0.6rem;
 }
 .dash-sidebar-sublist {
   margin: 4px 0 4px;
   padding-inline-start: 0.75rem;
-  border-inline-start: 1px solid rgba(255, 255, 255, 0.12);
+  border-inline-start: 1px solid var(--ds-sidebar-border);
 }
 .dash-sidebar-sublink { min-height: 38px; padding-block: 8px; font-size: 13px; }
 .dash-submenu-enter-active,
 .dash-submenu-leave-active { overflow: hidden; max-height: 500px; transition: opacity 0.2s, max-height 0.25s; }
 .dash-submenu-enter-from,
 .dash-submenu-leave-to { max-height: 0; opacity: 0; }
-.dash-sidebar-link:focus-visible { outline: 2px solid #2ed3ee; outline-offset: 2px; }
+.dash-sidebar-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 2px; }
 
 .dash-sidebar-copyright {
   margin-top: auto;
   padding-top: 16px;
-  color: #9fb4d8;
+  color: var(--ds-sidebar-muted);
   font-size: 10px;
   text-align: center;
   direction: ltr;
@@ -386,6 +386,6 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   .dash-sidebar--collapsed .dash-sidebar-link-icon { width: auto; }
 }
 @media (max-width: 991px) {
-  .dash-sidebar { width: 256px; }
+  .dash-sidebar { width: var(--ds-sidebar-width); }
 }
 </style>
