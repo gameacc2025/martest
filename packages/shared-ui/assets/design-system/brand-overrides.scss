@@ -21,9 +21,9 @@ small, .text-sm, .ds-text-sm { font-size: var(--ds-font-size-xs); }
 }
 .p-button.p-button-secondary { background: var(--ds-brand-secondary); border-color: var(--ds-brand-secondary); color: #FFFFFF; }
 .p-button.p-button-secondary:enabled:hover { background: var(--ds-color-secondary-hover); border-color: var(--ds-color-secondary-hover); }
-.p-button.p-button-outlined { background: transparent; color: var(--ds-primary-button); border-color: currentColor; }
+.p-button.p-button-outlined { background: transparent; color: var(--ds-outline-text); border-color: currentColor; }
 .p-button.p-button-outlined:enabled:hover { background: var(--ds-color-surface-hover); color: var(--ds-primary-button-hover); }
-.p-button.p-button-text { background: transparent; color: var(--ds-primary-button); }
+.p-button.p-button-text { background: transparent; color: var(--ds-ghost-text); }
 .p-button.p-button-danger { background: var(--ds-button-danger); border-color: var(--ds-button-danger); color: #FFFFFF; }
 .p-button.p-button-success { background: var(--ds-button-success); border-color: var(--ds-button-success); color: #FFFFFF; }
 .p-button.p-button-sm { min-height: var(--ds-button-sm-height); border-radius: var(--ds-button-sm-radius); }
