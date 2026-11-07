@@ -33,7 +33,7 @@ const visibleProducts = computed(() => {
     if (selectedCategories.value.length && !selectedCategories.value.some(id => String(id) === String(categoryId))) return false
     return true
   })
-  if (sortMode.value === 'price') return list.slice().sort((a, b) => Number(a?.prices?.[0]?.price ?? Infinity) - Number(b?.prices?.[0]?.price ?? Infinity))
+  if (sortMode.value === 'price') return list.slice().sort((a, b) => Number(a?.finalPrice ?? a?.price ?? a?.prices?.[0]?.price ?? a?.priceTiers?.[0]?.unitPrice ?? Infinity) - Number(b?.finalPrice ?? b?.price ?? b?.prices?.[0]?.price ?? b?.priceTiers?.[0]?.unitPrice ?? Infinity))
   if (sortMode.value === 'featured') return list.slice().sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)))
   return list
 })
