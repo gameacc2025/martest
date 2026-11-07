@@ -202,4 +202,20 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 @media(max-width:900px){.bl{grid-template-columns:1fr}.ha{display:none}}
 @media(max-width:900px){.hero .w{grid-template-columns:1fr}.cats{grid-template-columns:repeat(3,1fr)}.prods,.why{grid-template-columns:repeat(2,1fr)}.stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.nav ul{display:none}h1{font-size:28px}}
 
+.reference-categories{font-family:var(--ds-font-family);background:var(--ds-page-bg);color:var(--ds-text-primary)}
+.reference-categories .top,.reference-categories footer{background:var(--ds-color-brand-deep);color:var(--ds-color-on-brand-muted)}
+.reference-categories .hero,.reference-categories .feat .img,.reference-categories .bf .im2{background:var(--ds-color-brand-dark);color:var(--ds-color-on-brand)}
+.reference-categories .b1,.reference-categories .fab{background:var(--ds-primary-button);color:var(--ds-primary-button-text)}
+.reference-categories .b1:hover,.reference-categories .fab:hover{background:var(--ds-primary-button-hover)}
+.reference-categories .search{background:var(--ds-card-bg)}
+.reference-categories .search input{color:var(--ds-text-primary)}
+.reference-categories .tabs button.on{background:var(--ds-card-bg);color:var(--ds-text-primary)}
+.reference-categories .ofr{background:var(--ds-brand-secondary);color:#FFFFFF}
+.reference-categories .ofr .btn{background:var(--ds-card-bg);color:var(--ds-brand-secondary)}
+.reference-categories .rfq,.reference-categories .p .im{background:var(--ds-surface-secondary)}
+.reference-categories .bt.n{background:var(--ds-status-danger-bg);color:var(--ds-status-danger-fg)}
+.reference-categories .bt.t{background:var(--ds-status-success-bg);color:var(--ds-status-success-fg)}
+.reference-categories footer a,.reference-categories footer .nl input{color:var(--ds-color-on-brand-muted)}
+.reference-categories .sh h2:after{background:var(--ds-brand-primary)}
+
 </style>
