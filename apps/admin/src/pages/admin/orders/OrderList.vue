@@ -215,7 +215,7 @@ onMounted(() => {
 .order-list-page { display: flex; flex-direction: column; gap: var(--ds-space-5); }
 .order-list-page .card {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
@@ -230,7 +230,7 @@ onMounted(() => {
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
