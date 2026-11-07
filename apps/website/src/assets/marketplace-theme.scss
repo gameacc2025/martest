@@ -520,12 +520,12 @@
 .public-shell .reference-products .pagination { background: var(--ds-card-bg); border-color: var(--ds-border); color: var(--ds-text-secondary); }
 .public-shell :is(a,button,input,select,textarea):focus-visible { outline: 2px solid #06B6D4; outline-offset: 3px; }
 .public-shell .p-component { font-family: var(--ds-font-family); }
-.public-shell .p-button:not(.p-button-text):not(.p-button-outlined) {
+.public-shell .p-button.p-button-primary {
   background: var(--ds-primary-button);
   border-color: var(--ds-primary-button);
   color: var(--ds-primary-button-text);
 }
-.public-shell .p-button:not(.p-button-text):not(.p-button-outlined):hover {
+.public-shell .p-button.p-button-primary:hover {
   background: var(--ds-primary-button-hover);
   border-color: var(--ds-primary-button-hover);
 }
@@ -559,6 +559,21 @@
   --p-form-field-color: #102A43 !important;
   --p-form-field-placeholder-color: #94A3B8 !important;
   --p-focus-ring-color: rgba(8,145,178,.24) !important;
+  --p-button-primary-background: #0891B2 !important;
+  --p-button-primary-border-color: #0891B2 !important;
+  --p-button-primary-color: #FFFFFF !important;
+  --p-button-primary-hover-background: #0E7490 !important;
+  --p-button-primary-hover-border-color: #0E7490 !important;
+  --p-button-primary-hover-color: #FFFFFF !important;
+  --p-red-50: #FEE2E2 !important;
+  --p-red-500: #EF4444 !important;
+  --p-red-600: #EF4444 !important;
+  --p-red-700: #EF4444 !important;
+  --p-green-50: #DCFCE7 !important;
+  --p-green-500: #22C55E !important;
+  --p-green-700: #15803D !important;
+  --p-blue-50: #DBEAFE !important;
+  --p-blue-500: #3B82F6 !important;
 }
 :root.app-dark {
   --p-primary-50: #083344 !important;
@@ -587,6 +602,21 @@
   --p-form-field-color: #F0F9FF !important;
   --p-form-field-placeholder-color: #71869B !important;
   --p-focus-ring-color: rgba(34,211,238,.28) !important;
+  --p-button-primary-background: #22D3EE !important;
+  --p-button-primary-border-color: #22D3EE !important;
+  --p-button-primary-color: #083344 !important;
+  --p-button-primary-hover-background: #67E8F9 !important;
+  --p-button-primary-hover-border-color: #67E8F9 !important;
+  --p-button-primary-hover-color: #083344 !important;
+  --p-red-50: color-mix(in srgb,#EF4444 16%,#122438) !important;
+  --p-red-500: #F87171 !important;
+  --p-red-600: #F87171 !important;
+  --p-red-700: #F87171 !important;
+  --p-green-50: color-mix(in srgb,#22C55E 16%,#122438) !important;
+  --p-green-500: #22C55E !important;
+  --p-green-700: #22C55E !important;
+  --p-blue-50: color-mix(in srgb,#3B82F6 16%,#122438) !important;
+  --p-blue-500: #60A5FA !important;
 }
 
 
