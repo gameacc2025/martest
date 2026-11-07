@@ -46,7 +46,13 @@ Semantic status colors from the prototype: success `#22C55E` / `#DCFCE7` / `#158
 - Dark-mode tokens are selected by the existing persisted `html.app-dark` class from the shared `useTheme` composable.
 - `apps/website/index.html` contains the prototype fiber-network loader and applies the saved theme class before first paint.
 - `apps/website/src/pages/public/Home.vue` includes the animated cyan/violet network paths in the hero.
+- Public header includes the prototype-style `ثبت استعلام` action. Remaining hardcoded legacy accents/surfaces in customer inquiries, notification center and product details were replaced with the same semantic tokens; older legacy form aliases are mapped to the prototype palette for account, address, contact, checkout and cart routes.
 - Existing API-backed data, routes, inquiry flows and business rules remain unchanged. Never copy prototype sample products, fake contact data or demo checkout behavior into production.
+
+## Regression coverage
+
+- `apps/website/src/assets/marketplace-theme.test.js` asserts the palette, dark mode, PrimeVue variables, public header CTA, loader, hero fiber paths and removal of known legacy teal values from the inquiry/notification/product detail pages.
+- The tests are authored but have not been run, per owner instruction.
 
 ## Guardrails
 
