@@ -17,22 +17,26 @@ const totalItems = ref(0)
 const purchaseMode = ref('')
 const selectedBrands = ref([])
 const selectedCategories = ref([])
-const sortBy = ref('createdAt')
-const sortOrder = ref('desc')
+const sortMode = ref('newest')
 const minPrice = ref('')
 const maxPrice = ref('')
 const brandOptions = computed(() => [...new Set(products.value.map(item => item.brand || item.company?.name).filter(Boolean))].sort((a,b) => a.localeCompare(b)))
 const categoryOptions = computed(() => categories.value.map(item => ({ id: item.id, name: item.nameFa || item.name || item.nameEn || item.slug, count: Number(item.productCount ?? item.productsCount ?? item._count?.products) || null })))
-const visibleProducts = computed(() => products.value.filter(product => {
-  const brand = product.brand || product.company?.name || ''
-  const categoryId = product.categoryId ?? product.category?.id
-  const isRetail = productSalesMode(product)?.kind === 'fixed'
-  if (purchaseMode.value === 'retail' && !isRetail) return false
-  if (purchaseMode.value === 'inquiry' && isRetail) return false
-  if (selectedBrands.value.length && !selectedBrands.value.includes(brand)) return false
-  if (selectedCategories.value.length && !selectedCategories.value.some(id => String(id) === String(categoryId))) return false
-  return true
-}))
+const visibleProducts = computed(() => {
+  const list = products.value.filter(product => {
+    const brand = product.brand || product.company?.name || ''
+    const categoryId = product.categoryId ?? product.category?.id
+    const isRetail = productSalesMode(product)?.kind === 'fixed'
+    if (purchaseMode.value === 'retail' && !isRetail) return false
+    if (purchaseMode.value === 'inquiry' && isRetail) return false
+    if (selectedBrands.value.length && !selectedBrands.value.includes(brand)) return false
+    if (selectedCategories.value.length && !selectedCategories.value.some(id => String(id) === String(categoryId))) return false
+    return true
+  })
+  if (sortMode.value === 'price') return list.slice().sort((a, b) => Number(a?.prices?.[0]?.price ?? Infinity) - Number(b?.prices?.[0]?.price ?? Infinity))
+  if (sortMode.value === 'featured') return list.slice().sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)))
+  return list
+})
 function title(product) { return product?.title || product?.name || 'محصول بدون عنوان' }
 function brand(product) { return product?.brand || product?.company?.name || '—' }
 function sku(product) { return product?.sku || product?.SKU || product?.catalogCode || '—' }
@@ -57,7 +61,7 @@ async function loadProducts() {
   loading.value = true
   error.value = ''
   try {
-    const params = { page: page.value, limit: pageSize.value, status: 'PUBLISHED', sortBy: sortBy.value, sortOrder: sortOrder.value }
+    const params = { page: page.value, limit: pageSize.value, status: 'PUBLISHED' , sortBy: 'createdAt', sortOrder: 'desc' }
     if (route.query.category) params.categoryId = Number(route.query.category)
     if (minPrice.value !== '') params.minPrice = Number(minPrice.value)
     if (maxPrice.value !== '') params.maxPrice = Number(maxPrice.value)
@@ -81,15 +85,12 @@ function clearFilters() {
   selectedCategories.value = []
   minPrice.value = ''
   maxPrice.value = ''
-  sortBy.value = 'createdAt'
-  sortOrder.value = 'desc'
+  sortMode.value = 'newest'
   page.value = 1
   loadProducts()
 }
 function changeSort(value) {
-  if (value === 'price') { sortBy.value = 'price'; sortOrder.value = 'asc' }
-  else if (value === 'featured') { sortBy.value = 'featured'; sortOrder.value = 'desc' }
-  else { sortBy.value = 'createdAt'; sortOrder.value = 'desc' }
+  sortMode.value = value
   applyFilters()
 }
 function changePage(next) { page.value = Math.min(totalPages.value, Math.max(1, next)); loadProducts() }
@@ -121,7 +122,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
         <button class="btn b1 apply-filter" type="button" @click="applyFilters">اعمال فیلترها</button>
       </aside>
       <section class="products-area" aria-label="فهرست محصولات" :aria-busy="loading">
-        <div class="bar"><span>{{ fa(totalItems) }} محصول</span><label>مرتب‌سازی: <select :value="sortBy === 'price' ? 'price' : sortBy === 'featured' ? 'featured' : 'newest'" @change="changeSort($event.target.value)"><option value="newest">جدیدترین</option><option value="featured">محصولات منتخب</option><option value="price">ارزان‌ترین</option></select></label></div>
+        <div class="bar"><span>{{ fa(totalItems) }} محصول</span><label>مرتب‌سازی: <select :value="sortMode" @change="changeSort($event.target.value)"><option value="newest">جدیدترین</option><option value="featured">محصولات منتخب</option><option value="price">ارزان‌ترین</option></select></label></div>
         <div v-if="loading" class="empty-state">در حال دریافت محصولات…</div>
         <div v-else-if="error" class="empty-state"><b>دریافت محصولات ناموفق بود</b><span>{{ error }}</span><button class="btn b2" type="button" @click="loadProducts">تلاش دوباره</button></div>
         <div v-else-if="!visibleProducts.length" class="empty-state"><b>محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><button class="btn b2" type="button" @click="clearFilters">حذف فیلترها</button></div>
