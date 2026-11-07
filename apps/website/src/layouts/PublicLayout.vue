@@ -7,7 +7,7 @@
  *
  * All existing behaviour is preserved verbatim: PKCE panel handoff links,
  * customer/company/staff menu branching, notification unread count, search
- * routing, category loading for the mega menu and footer, and mobile nav.
+ * routing, live notification, search, account, cart and mobile navigation behaviour.
  */
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -932,7 +932,7 @@ function logout() {
 .public-icon-link { border-radius: 10px; color: #6b7390; }
 .public-icon-link:hover { background: #eceaff; color: #6c5ce7; }
 .public-notification-badge { min-width: 17px; height: 17px; background: #6c5ce7; font-size: 10px; }
-.public-main { padding: 0 0 40px; background: #f4f5fa; }
+.public-main { padding: 0; background: #f4f5fa; }
 .public-footer { background: #0b1020; padding-top: 40px; }
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 28px; }
 .public-footer-heading { font-size: 14px; }
