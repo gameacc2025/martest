@@ -3980,3 +3980,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Source review only in the remote GitHub editing session. Shared UI tests and Website/Company/Admin builds are **NOT RUN**. Browser/theme visual checks are **NOT RUN** under the standing no-browser-testing instruction.
 - **Scope:** Shared frontend presentation only. No API, backend, database, authentication, permissions, routes or business behavior changed.
 - **Next:** Pull `main`; run shared-ui tests and Website/Company/Admin builds, then visually review both themes when browser checks are authorized.
+
+
+## 2026-11-07 — DESIGN-SYSTEM-PALETTE-ROLLOUT — Apply tokens to visible app surfaces
+- Updated the shared dashboard shell: sidebar now uses the exact 260px/76px theme-aware widths and active-menu colors; header uses the 72px desktop / 64px mobile range; footer uses the 60px minimum-height token.
+- Applied the approved semantic palette and explicit `.app-dark` theme behavior to Website Home, Product Listing, Categories and PublicLayout. Removed OS-preference-only dark overrides so the user-selected theme remains authoritative.
+- Replaced the old purple primary accents, always-dark rail, old public-site palette and decorative primary gradients with the approved cyan/indigo/navy tokens. English/Persian font stacks now use Inter/Vazirmatn tokens.
+- Added explicit Outline and Ghost button text tokens: Light `#0891B2`; Dark Outline `#67E8F9`, Dark Ghost `#22D3EE`.
+- **Verification:** Remote source inspection only. Tests, builds and rendered visual checks were not run.
+- **Commits:** Dashboard shell `3190c44`, `872de14`, `1e7538c`, `2c3d172`; Website pages/layout `a6a65e8`, `c24dba9`, `c10491c`, `342a3ac`, `e764c87`, `564fcd5`, `e571d69`, `6073ecb`; button variant tokens `be0a53c`, `1a85533`, `1ea7b0d`, `298f61b`.
