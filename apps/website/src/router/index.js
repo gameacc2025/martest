@@ -30,6 +30,8 @@ const routes = [
     children: [
       { path: "", name: "home", component: Home, meta: { title: "بازارگاه تجهیزات شبکه و مخابرات" } },
       { path: "products", name: "products", component: ProductListing, meta: { title: "فروشگاه تجهیزات شبکه و مخابرات" } },
+      { path: "magazine", name: "magazine", component: () => import("../pages/public/Magazine.vue"), meta: { title: "مجله و مقالات تخصصی" } },
+      { path: "magazine/:slug", name: "mag-article", component: () => import("../pages/public/Magazine.vue"), meta: { title: "مقاله تخصصی" } },
       {
         path: "notifications",
         name: "notifications",
