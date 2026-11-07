@@ -109,6 +109,17 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-search-popover__field').exists()).toBe(true)
   })
 
+  it('matches the reference utility strip, simple category navigation and five-column footer', async () => {
+    wrapper = mountLayout()
+    await flushPromises()
+    expect(wrapper.get('.public-utility-message').text()).toContain('آخرین خبر')
+    const navLabels = wrapper.findAll('.public-nav-link').map(link => link.text().trim())
+    expect(navLabels).toContain('دسته‌بندی')
+    expect(wrapper.find('.public-footer-grid').element.children).toHaveLength(5)
+    expect(wrapper.get('.public-footer-grid').text()).toContain('آخرین مطالب وبلاگ')
+    expect(wrapper.get('.public-footer-grid').text()).toContain('تماس با ما')
+  })
+
   it('shows separate homepage and product-catalogue destinations in the primary navigation', async () => {
     wrapper = mountLayout()
     await flushPromises()
