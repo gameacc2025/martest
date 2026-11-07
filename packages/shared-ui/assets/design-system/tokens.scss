@@ -1,292 +1,68 @@
-/* ============================================================
-   Telecom Market — Design System Tokens
-   ============================================================
-
-   A single source of truth for the B2B marketplace UI. Every token is a
-   semantic alias layered ON TOP of PrimeVue's own theme variables (the
-   `--p-*` custom properties emitted by the configured preset in main.js).
-
-   Why alias instead of hardcode?
-     - PrimeVue components keep working (we never fight the framework).
-     - Dark mode "just works": PrimeVue flips its `--p-*` values under
-       `.app-dark`, and because our tokens reference those, they flip too.
-     - Pages/components reference stable names (`--ds-color-primary`,
-       `--ds-space-4`, …) instead of raw hex or framework internals.
-
-   RULE: components and pages must consume `--ds-*` tokens (or the PrimeVue
-   `--*-color` aliases), never hardcoded hex/rgb values.
-   ============================================================ */
-
+/* Telecom Market — approved shared design tokens. */
 :root {
-  /* --------------------------------------------------------
-     COLORS — semantic, mapped to PrimeVue palette/scheme vars
-     -------------------------------------------------------- */
-
-  /* Brand */
-  --ds-color-primary: var(--p-primary-color);
-  --ds-color-primary-contrast: var(--p-primary-contrast-color);
-  --ds-color-primary-hover: var(--p-primary-hover-color, var(--p-primary-600));
-  --ds-color-primary-active: var(--p-primary-active-color, var(--p-primary-700));
-
-  /* Secondary (uses the neutral surface ramp for a calm B2B secondary) */
-  --ds-color-secondary: var(--p-surface-600);
-  --ds-color-secondary-contrast: var(--p-surface-0);
-  --ds-color-secondary-hover: var(--p-surface-700);
-
-  /* Structure */
-  --ds-color-background: var(--p-content-background, var(--surface-ground));
-  --ds-color-surface: var(--p-content-background, var(--surface-card));
-  --ds-color-surface-alt: var(--p-surface-100);
-  --ds-color-surface-hover: var(--surface-hover, var(--p-surface-100));
-  --ds-color-border: var(--p-content-border-color, var(--surface-border));
-
-  /* Text */
-  --ds-color-text: var(--p-text-color, var(--text-color));
-  --ds-color-text-muted: var(--p-text-muted-color, var(--text-color-secondary));
-
-  /* Status — anchored to PrimeVue's semantic palettes */
-  --ds-color-success: var(--ds-status-success-fg);
-  --ds-color-success-contrast: var(--p-surface-0);
-  --ds-color-success-soft: var(--ds-status-success-bg);
-
-  --ds-color-warning: var(--ds-status-warning-fg);
-  --ds-color-warning-contrast: var(--p-surface-950);
-  --ds-color-warning-soft: var(--ds-status-warning-bg);
-
-  --ds-color-danger: var(--ds-status-danger-fg);
-  --ds-color-danger-contrast: var(--p-surface-0);
-  --ds-color-danger-soft: var(--ds-status-danger-bg);
-
-  --ds-color-info: var(--ds-status-info-fg);
-  --ds-color-info-contrast: var(--p-primary-contrast-color);
-  --ds-color-info-soft: var(--ds-status-info-bg);
-
-  /* --------------------------------------------------------
-     BRAND + SHELL (constant brand surfaces; flipped in dark below)
-     Primary sky #0790de · secondary turquoise #09d3d1 · technical blue #0b7bc9.
-     Use these for hero/sidebar/footer surfaces instead of raw hex.
-     -------------------------------------------------------- */
-  --ds-brand: #7c6cf6;
-  --ds-accent: #2bb3e8;          /* cyan CTA / active accents (dark text on top) */
-  --ds-accent-end: #8878f7;
-  --ds-turquoise: #2bb3e8;       /* second chart series, "completed" accents */
-  --ds-sky: #2bb3e8;
-  --ds-tech-blue: #7c6cf6;
-  --ds-navy: #0d1420;
-  --ds-amber: #f5a623;
-  --ds-green: #22c55e;
-  --ds-violet: #8878f7;
-  --ds-canvas: #f4f5fa;
-  --ds-on-navy: #ffffff;
-  --ds-on-navy-muted: #a9b8d6;
-  --ds-hero-gradient: linear-gradient(135deg, #7c6cf6 0%, #2bb3e8 100%);
-  --ds-cta-gradient: linear-gradient(90deg, #7c6cf6 0%, #8878f7 100%);
-
-  --ds-sidebar-bg: #0d2b53;
-  --ds-sidebar-border: rgba(207, 225, 245, 0.16);
-  --ds-sidebar-fg: #d6dff0;
-  --ds-sidebar-fg-strong: #ffffff;
-  --ds-sidebar-muted: #a9b8d6;
-  --ds-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --ds-sidebar-active-bg: #7c6cf6;
-  --ds-sidebar-accent: #8878f7;
-
-  /* --------------------------------------------------------
-     TYPOGRAPHY SCALE (modular, ~1.2 ratio)
-     -------------------------------------------------------- */
-  --ds-font-family: var(--font-family, 'Vazirmatn', -apple-system, 'Segoe UI', Tahoma, sans-serif);
-
-  --ds-font-size-xs: 0.8125rem; /* 13px — captions, badges */
-  --ds-font-size-sm: 0.9375rem; /* 15px — body small, table cells */
-  --ds-font-size-md: 1rem;      /* 16px — base body */
-  --ds-font-size-lg: 1.125rem;  /* 18px — card titles */
-  --ds-font-size-xl: 1.375rem;  /* 22px — section headings */
-  --ds-font-size-2xl: 1.75rem;  /* 28px — page titles */
-  --ds-font-size-3xl: 2.25rem;  /* 36px — hero/stat numbers */
-
-  --ds-font-weight-normal: 400;
-  --ds-font-weight-medium: 500;
-  --ds-font-weight-semibold: 600;
-  --ds-font-weight-bold: 700;
-
-  --ds-line-height-tight: 1.25;
-  --ds-line-height-normal: 1.5;
-  --ds-line-height-relaxed: 1.7;
-
-  /* --------------------------------------------------------
-     SPACING SYSTEM (4px base scale)
-     -------------------------------------------------------- */
-  --ds-space-0: 0;
-  --ds-space-1: 0.25rem;  /* 4  */
-  --ds-space-2: 0.5rem;   /* 8  */
-  --ds-space-3: 0.75rem;  /* 12 */
-  --ds-space-4: 1rem;     /* 16 */
-  --ds-space-5: 1.25rem;  /* 20 */
-  --ds-space-6: 1.5rem;   /* 24 */
-  --ds-space-8: 2rem;     /* 32 */
-  --ds-space-10: 2.5rem;  /* 40 */
-  --ds-space-12: 3rem;    /* 48 */
-  --ds-space-16: 4rem;    /* 64 */
-
-  /* --------------------------------------------------------
-     LAYOUT — canonical content container.
-     Every page/section uses these so the whole marketplace has
-     ONE content width and ONE gutter scale (the biggest source
-     of the "misaligned / no proportions" look before).
-     -------------------------------------------------------- */
-  --ds-container-max: 1400px;
-  --ds-container-max-wide: 1760px;
-  --ds-container-pad: clamp(1rem, 1.4vw, 1.5rem);
-  --ds-container-pad-lg: clamp(1.5rem, 2vw, 2rem);
-  --ds-container-pad-xl: clamp(2rem, 2.2vw, 3rem);
-  --ds-prose-measure: 70ch;
-  --ds-section-gap: clamp(3rem, 3.5vw, 4rem);
-
-  /* --------------------------------------------------------
-     BORDER RADIUS
-     -------------------------------------------------------- */
-  --ds-radius-sm: 3px;
-  --ds-radius-md: 4px;
-  --ds-radius-lg: 4px;
-  --ds-radius-xl: 4px;
-  --ds-radius-pill: 999px;
-  --ds-radius-circle: 50%;
-
-  /* --------------------------------------------------------
-     SHADOW SYSTEM (elevation)
-     -------------------------------------------------------- */
-  /* Navy-tinted so elevation reads as part of the brand, not neutral grey. */
-  --ds-shadow-xs: 0 1px 3px rgba(20, 20, 60, 0.04);
-  --ds-shadow-sm: 0 1px 3px rgba(20, 20, 60, 0.04);
-  --ds-shadow-md: 0 4px 16px rgba(20, 20, 60, 0.09);
-  --ds-shadow-lg: 0 12px 28px rgba(20, 20, 60, 0.14);
-  --ds-shadow-xl: 0 20px 40px rgba(0, 58, 84, 0.16);
-
-  /* --------------------------------------------------------
-     MOTION
-     -------------------------------------------------------- */
-  --ds-transition-fast: 0.15s ease;
-  --ds-transition: var(--transition-duration, 0.2s) ease;
-  --ds-transition-slow: 0.3s ease;
-
-  /* --------------------------------------------------------
-     Z-INDEX SCALE
-     -------------------------------------------------------- */
-  --ds-z-dropdown: 1000;
-  --ds-z-sticky: 100;
-  --ds-z-drawer: 1001;
-  --ds-z-overlay: 1000;
-  --ds-z-modal: 1100;
-  --ds-z-toast: 1200;
-
-  /* Production-safe redesign aliases: no data or domain behavior implied. */
-  --ds-color-brand-deep: var(--p-primary-950, #062f4f);
-  --ds-color-brand-dark: var(--p-primary-900, #0b5551);
-  --ds-color-on-brand: #ffffff;
-  --ds-color-on-brand-muted: var(--p-primary-200, #b9dbe6);
-  --ds-color-accent: var(--p-primary-color);
-  --ds-color-on-accent: var(--p-primary-contrast-color);
-  --ds-color-primary-text: var(--p-primary-800, #084b76);
-  --ds-color-link: var(--ds-color-primary-text);
-  --ds-color-link-hover: var(--p-primary-900, #073a5c);
-  --ds-color-primary-soft: var(--p-primary-50, #e8f5fd);
-  --ds-color-focus: var(--p-primary-color);
-  --ds-container-max: 1400px;
-  --ds-container-max-wide: 1760px;
-  --ds-control-height: 40px;
-  --ds-touch-target: 44px;
-  --ds-color-neutral: var(--p-surface-600);
-  --ds-color-neutral-soft: var(--p-surface-100);
-  --ds-color-expired: var(--ds-color-danger);
-  --ds-status-expired-bg: var(--ds-status-danger-bg);
-  --ds-status-expired-fg: var(--ds-status-danger-fg);
-
-  --ds-status-success-bg: #e7f7ee;
-  --ds-status-success-fg: #14693a;
-  --ds-status-warning-bg: #fff1d6;
-  --ds-status-warning-fg: #8a4b00;
-  --ds-status-danger-bg: #fde8e8;
-  --ds-status-danger-fg: #9b1c1c;
-  --ds-status-info-bg: #e3f1fd;
-  --ds-status-info-fg: #0a4d7c;
-  --ds-status-muted-bg: #eceff1;
-  --ds-status-muted-fg: #37474f;
+  /* Shared brand primitives */
+  --ds-brand-primary:#22D3EE; --ds-brand-primary-hover:#06B6D4; --ds-brand-primary-active:#0891B2; --ds-brand-primary-subtle:#CFFAFE;
+  --ds-brand-secondary:#6366F1; --ds-brand-accent:#8B5CF6;
+  /* Theme-aware primary action */
+  --ds-color-primary:var(--p-primary-color,#0891B2); --ds-color-primary-contrast:var(--p-primary-contrast-color,#FFFFFF);
+  --ds-color-primary-hover:var(--p-primary-hover-color,#0E7490); --ds-color-primary-active:var(--p-primary-active-color,#0891B2);
+  --ds-primary-button:var(--p-primary-color,#0891B2); --ds-primary-button-hover:var(--p-primary-hover-color,#0E7490); --ds-primary-button-text:var(--p-primary-contrast-color,#FFFFFF);
+  --ds-color-secondary:#6366F1; --ds-color-secondary-contrast:#FFFFFF; --ds-color-secondary-hover:#4F46E5;
+  --ds-color-accent:var(--ds-brand-accent); --ds-color-on-accent:#FFFFFF;
+  --ds-accent:var(--ds-brand-primary); --ds-accent-end:var(--ds-brand-accent); --ds-turquoise:var(--ds-brand-primary); --ds-sky:var(--ds-brand-primary); --ds-tech-blue:var(--ds-brand-secondary); --ds-violet:var(--ds-brand-accent);
+  /* Light surfaces */
+  --ds-page-bg:#F0F7FA; --ds-sidebar-bg:#FFFFFF; --ds-header-bg:#FFFFFF; --ds-card-bg:#FFFFFF; --ds-card-hover:#F0FDFF; --ds-surface-secondary:#F1F5F9; --ds-border:#DCE8EF;
+  /* Light text */
+  --ds-text-primary:#102A43; --ds-text-secondary:#627D98; --ds-text-muted:#94A3B8;
+  /* Semantic aliases */
+  --ds-color-background:var(--ds-page-bg); --ds-color-surface:var(--ds-card-bg); --ds-color-surface-alt:var(--ds-surface-secondary); --ds-color-surface-hover:var(--ds-card-hover); --ds-color-border:var(--ds-border);
+  --ds-color-text:var(--ds-text-primary); --ds-color-text-muted:var(--ds-text-secondary); --ds-color-primary-text:#0E7490; --ds-color-link:#0E7490; --ds-color-link-hover:#155E75; --ds-color-primary-soft:var(--ds-brand-primary-subtle); --ds-color-focus:var(--ds-brand-primary-active);
+  --ds-color-neutral:var(--ds-text-secondary); --ds-color-neutral-soft:var(--ds-surface-secondary);
+  /* Compatibility shell tokens */
+  --ds-brand:var(--ds-brand-secondary); --ds-navy:#0A1625; --ds-amber:#F59E0B; --ds-green:#22C55E; --ds-canvas:var(--ds-page-bg); --ds-on-navy:#FFFFFF; --ds-on-navy-muted:#9FB3C8;
+  --ds-hero-gradient:linear-gradient(125deg,#0A1625 0%,#0D1B2A 58%,#164E63 100%); --ds-cta-gradient:linear-gradient(90deg,#0891B2 0%,#22D3EE 100%);
+  /* Sidebar */
+  --ds-sidebar-border:var(--ds-border); --ds-sidebar-fg:var(--ds-text-primary); --ds-sidebar-fg-strong:var(--ds-text-primary); --ds-sidebar-muted:var(--ds-text-secondary); --ds-sidebar-hover:var(--ds-surface-secondary); --ds-sidebar-active-bg:var(--ds-brand-primary-subtle); --ds-sidebar-active-fg:#0E7490; --ds-sidebar-accent:var(--ds-brand-primary-active);
+  /* Typography: Inter for Latin, Vazirmatn for Persian */
+  --ds-font-family:'Inter','Vazirmatn',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; --ds-font-family-persian:'Vazirmatn','Inter',Tahoma,sans-serif;
+  --ds-font-size-xs:.75rem; --ds-font-size-sm:.8125rem; --ds-font-size-md:.875rem; --ds-font-size-lg:1rem; --ds-font-size-xl:1.25rem; --ds-font-size-2xl:1.5rem; --ds-font-size-3xl:1.875rem; --ds-font-size-4xl:2rem;
+  --ds-font-weight-normal:400; --ds-font-weight-medium:500; --ds-font-weight-semibold:600; --ds-font-weight-bold:700;
+  --ds-line-height-tight:1.25; --ds-line-height-normal:1.5; --ds-line-height-relaxed:1.7;
+  /* 4px spacing base */
+  --ds-space-0:0; --ds-space-1:.25rem; --ds-space-2:.5rem; --ds-space-3:.75rem; --ds-space-4:1rem; --ds-space-5:1.25rem; --ds-space-6:1.5rem; --ds-space-8:2rem; --ds-space-10:2.5rem; --ds-space-12:3rem; --ds-space-16:4rem;
+  /* Layout */
+  --ds-container-max:1400px; --ds-container-max-wide:1760px; --ds-container-pad:clamp(1rem,1.4vw,1.5rem); --ds-container-pad-lg:clamp(1.5rem,2vw,2rem); --ds-container-pad-xl:clamp(2rem,2.2vw,3rem); --ds-prose-measure:70ch; --ds-section-gap:clamp(3rem,3.5vw,4rem);
+  --ds-header-height:68px; --ds-sidebar-width:260px; --ds-sidebar-collapsed-width:76px; --ds-footer-min-height:60px;
+  /* Component geometry */
+  --ds-button-sm-height:32px; --ds-button-md-height:40px; --ds-button-lg-height:48px; --ds-button-sm-radius:6px; --ds-button-md-radius:8px; --ds-button-lg-radius:10px;
+  --ds-input-height:44px; --ds-input-radius:8px; --ds-card-radius:12px; --ds-modal-radius:16px; --ds-dropdown-radius:10px; --ds-badge-height:24px; --ds-badge-radius:6px; --ds-table-row-height:56px;
+  --ds-radius-sm:6px; --ds-radius-md:8px; --ds-radius-lg:12px; --ds-radius-xl:16px; --ds-radius-pill:999px; --ds-radius-circle:50%;
+  /* Elevation */
+  --ds-shadow-xs:0 1px 2px rgba(16,42,67,.04); --ds-shadow-sm:0 2px 6px rgba(16,42,67,.06); --ds-shadow-md:0 6px 18px rgba(16,42,67,.08); --ds-shadow-lg:0 12px 28px rgba(16,42,67,.12); --ds-shadow-xl:0 20px 40px rgba(10,22,37,.18);
+  /* Motion / layering */
+  --ds-transition-fast:.15s ease; --ds-transition:var(--transition-duration,.2s) ease; --ds-transition-slow:.3s ease;
+  --ds-z-dropdown:1000; --ds-z-sticky:100; --ds-z-drawer:1001; --ds-z-overlay:1000; --ds-z-modal:1100; --ds-z-toast:1200;
+  /* Semantic status colors */
+  --ds-status-success-bg:#DCFCE7; --ds-status-success-fg:#22C55E; --ds-status-warning-bg:#FEF3C7; --ds-status-warning-fg:#F59E0B;
+  --ds-status-danger-bg:#FEE2E2; --ds-status-danger-fg:#EF4444; --ds-status-info-bg:#DBEAFE; --ds-status-info-fg:#3B82F6; --ds-status-muted-bg:#F1F5F9; --ds-status-muted-fg:#627D98;
+  --ds-color-success:var(--ds-status-success-fg); --ds-color-success-contrast:#FFFFFF; --ds-color-success-soft:var(--ds-status-success-bg);
+  --ds-color-warning:var(--ds-status-warning-fg); --ds-color-warning-contrast:#0A1625; --ds-color-warning-soft:var(--ds-status-warning-bg);
+  --ds-color-danger:var(--ds-status-danger-fg); --ds-color-danger-contrast:#FFFFFF; --ds-color-danger-soft:var(--ds-status-danger-bg);
+  --ds-color-info:var(--ds-status-info-fg); --ds-color-info-contrast:#FFFFFF; --ds-color-info-soft:var(--ds-status-info-bg);
+  --ds-color-expired:var(--ds-color-danger); --ds-status-expired-bg:var(--ds-status-danger-bg); --ds-status-expired-fg:var(--ds-status-danger-fg);
+  /* Backward-compatible aliases */
+  --ds-color-brand-deep:#0A1625; --ds-color-brand-dark:#0D1B2A; --ds-color-on-brand:#FFFFFF; --ds-color-on-brand-muted:#9FB3C8;
+  --ds-control-height:var(--ds-button-md-height); --ds-touch-target:44px;
 }
-
-/* ------------------------------------------------------------
-   Dark mode: PrimeVue flips its own `--p-*` variables under
-   `.app-dark`, so most tokens above adapt automatically. We only
-   need to soften the elevation shadows for dark surfaces.
-   ------------------------------------------------------------ */
 :root.app-dark {
-  --ds-hero-gradient: linear-gradient(135deg, #062f4f 0%, #086394 100%);
-  --ds-sidebar-bg: #0d2b53;
-  --ds-shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.34), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --ds-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.38), 0 1px 3px rgba(0, 0, 0, 0.24);
-  --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
-  --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
-  --ds-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.65);
-  --ds-color-primary-text: var(--p-primary-300, #7fe0f7);
-  --ds-color-primary-soft: color-mix(in srgb, var(--p-primary-color) 16%, transparent);
-  --ds-status-success-bg: rgba(34, 197, 94, 0.16);
-  --ds-status-success-fg: #86efac;
-  --ds-status-warning-bg: rgba(245, 158, 11, 0.16);
-  --ds-status-warning-fg: #fcd34d;
-  --ds-status-danger-bg: rgba(239, 68, 68, 0.16);
-  --ds-status-danger-fg: #fca5a5;
-  --ds-status-info-bg: rgba(9, 211, 209, 0.16);
-  --ds-status-info-fg: #8ce6dc;
-  --ds-status-muted-bg: rgba(148, 163, 184, 0.16);
-  --ds-status-muted-fg: #cbd5e1;
-}
-
-
-/* Wide responsive containers: content grows with the display, then caps. */
-@media (min-width: 1920px) { :root { --ds-container-max-wide: 1800px; } }
-@media (min-width: 2240px) { :root { --ds-container-max-wide: 1920px; } }
-@media (min-width: 2560px) { :root { --ds-container-max-wide: 1920px; } }
-
-
-/* Dark scheme overrides: semantic states stay legible on deep navy surfaces. */
-:root.app-dark {
-  --ds-color-brand-deep: #071429;
-  --ds-color-brand-dark: #092643;
-  --ds-color-on-brand: #ffffff;
-  --ds-color-on-brand-muted: #b6c7d8;
-  --ds-color-primary-text: #a4d7f1;
-  --ds-color-background: #071429;
-  --ds-color-surface: #0d2038;
-  --ds-color-surface-alt: #162f4b;
-  --ds-color-surface-hover: #273e5a;
-  --ds-color-border: #273e5a;
-  --ds-color-text: #eef3fb;
-  --ds-color-text-muted: #a9b8d6;
-  --ds-canvas: #071429;
-  --ds-color-link: #a4d7f1;
-  --ds-color-link-hover: #d0f8fc;
-  --ds-color-primary-soft: rgba(39, 211, 238, 0.14);
-  --ds-color-neutral: #b6c7d8;
-  --ds-color-neutral-soft: #1b344f;
-  --ds-color-success: #7ce0a5;
-  --ds-color-success-contrast: #071429;
-  --ds-color-success-soft: rgba(31, 191, 117, 0.16);
-  --ds-color-warning: #ffd08a;
-  --ds-color-warning-contrast: #071429;
-  --ds-color-warning-soft: rgba(240, 174, 69, 0.16);
-  --ds-color-danger: #ff9b9b;
-  --ds-color-danger-contrast: #071429;
-  --ds-color-danger-soft: rgba(238, 94, 94, 0.16);
-  --ds-color-info: #8ce6f0;
-  --ds-color-info-contrast: #05213f;
-  --ds-color-info-soft: rgba(39, 211, 238, 0.14);
-  --ds-status-success-bg: rgba(31, 191, 117, 0.16);
-  --ds-status-success-fg: #7ce0a5;
-  --ds-status-warning-bg: rgba(240, 174, 69, 0.16);
-  --ds-status-warning-fg: #ffd08a;
-  --ds-status-danger-bg: rgba(238, 94, 94, 0.16);
-  --ds-status-danger-fg: #ff9b9b;
-  --ds-status-info-bg: rgba(39, 211, 238, 0.14);
-  --ds-status-info-fg: #8ce6f0;
-  --ds-status-muted-bg: #1b344f;
-  --ds-status-muted-fg: #b6c7d8;
+  --ds-page-bg:#0A1625; --ds-sidebar-bg:#0D1B2A; --ds-header-bg:#0D1B2A; --ds-card-bg:#122438; --ds-card-hover:#193149; --ds-surface-secondary:#172B40; --ds-border:#24394D;
+  --ds-text-primary:#F0F9FF; --ds-text-secondary:#9FB3C8; --ds-text-muted:#71869B;
+  --ds-color-background:var(--ds-page-bg); --ds-color-surface:var(--ds-card-bg); --ds-color-surface-alt:var(--ds-surface-secondary); --ds-color-surface-hover:var(--ds-card-hover); --ds-color-border:var(--ds-border);
+  --ds-color-text:var(--ds-text-primary); --ds-color-text-muted:var(--ds-text-secondary); --ds-color-primary-text:#67E8F9; --ds-color-link:#67E8F9; --ds-color-link-hover:#A5F3FC; --ds-color-primary-soft:#164E63; --ds-color-focus:#67E8F9;
+  --ds-color-neutral:#9FB3C8; --ds-color-neutral-soft:#172B40;
+  --ds-sidebar-border:#24394D; --ds-sidebar-fg:#F0F9FF; --ds-sidebar-fg-strong:#F0F9FF; --ds-sidebar-muted:#9FB3C8; --ds-sidebar-hover:#193149; --ds-sidebar-active-bg:#164E63; --ds-sidebar-active-fg:#67E8F9; --ds-sidebar-accent:#22D3EE;
+  --ds-hero-gradient:linear-gradient(125deg,#0A1625 0%,#0D1B2A 58%,#164E63 100%); --ds-canvas:var(--ds-page-bg); --ds-color-brand-deep:#0A1625; --ds-color-brand-dark:#0D1B2A; --ds-color-on-brand:#F0F9FF; --ds-color-on-brand-muted:#9FB3C8;
+  --ds-status-success-bg:rgba(34,197,94,.16); --ds-status-warning-bg:rgba(245,158,11,.16); --ds-status-danger-bg:rgba(239,68,68,.16); --ds-status-info-bg:rgba(59,130,246,.16); --ds-status-muted-bg:rgba(159,179,200,.12);
+  --ds-color-success-contrast:#0A1625; --ds-color-warning-contrast:#0A1625; --ds-color-danger-contrast:#0A1625; --ds-color-info-contrast:#0A1625;
+  --ds-shadow-xs:0 2px 8px rgba(0,0,0,.24); --ds-shadow-sm:0 4px 12px rgba(0,0,0,.28); --ds-shadow-md:0 6px 18px rgba(0,0,0,.34); --ds-shadow-lg:0 12px 28px rgba(0,0,0,.42); --ds-shadow-xl:0 20px 40px rgba(0,0,0,.5);
 }
