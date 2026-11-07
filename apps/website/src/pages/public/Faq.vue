@@ -2,51 +2,45 @@
 import { ref } from 'vue'
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 
-const faqs = ref([
+const activeFaqIndex = ref(null)
+
+const faqs = [
   {
     question: 'بازارگاه مخابرات چه خدماتی ارائه می‌کند؟',
-    answer: 'این سامانه یک بازارگاه B2B برای پیدا کردن تجهیزات مخابراتی و شبکه، بررسی اطلاعات محصولات منتشرشده و ارتباط با تأمین‌کنندگان از طریق فرایند استعلام است.',
-    open: false,
+    answer: 'این سامانه یک بازارگاه B2B برای پیدا کردن تجهیزات مخابراتی و شبکه، بررسی اطلاعات محصولات منتشرشده و ارتباط با تأمین‌کنندگان از طریق فرایند استعلام است.'
   },
   {
     question: 'چه کسی می‌تواند درخواست استعلام ثبت کند؟',
-    answer: 'ثبت درخواست استعلام برای همه کاربران به‌صورت خودکار فعال نیست. حساب شما باید دسترسی لازم را داشته باشد و محدودیت‌ها یا سهمیه اشتراک مربوطه نیز باید اجازه ثبت درخواست را بدهند.',
-    open: false,
+    answer: 'ثبت درخواست استعلام برای همه کاربران به‌صورت خودکار فعال نیست. حساب شما باید دسترسی لازم را داشته باشد و محدودیت‌ها یا سهمیه اشتراک مربوطه نیز باید اجازه ثبت درخواست را بدهند.'
   },
   {
     question: 'چه کسی می‌تواند به استعلام پاسخ بدهد؟',
-    answer: 'پاسخ‌دهی از سوی کاربران شرکتیِ دارای مجوز مربوطه انجام می‌شود. دسترسی و سهمیه پاسخ‌دهی در سمت سامانه بررسی می‌شوند؛ داشتن حساب کاربری به‌تنهایی به معنی داشتن این دسترسی نیست.',
-    open: false,
+    answer: 'پاسخ‌دهی از سوی کاربران شرکتیِ دارای مجوز مربوطه انجام می‌شود. دسترسی و سهمیه پاسخ‌دهی در سمت سامانه بررسی می‌شوند؛ داشتن حساب کاربری به‌تنهایی به معنی داشتن این دسترسی نیست.'
   },
   {
     question: 'اگر قیمت محصول نمایش داده نشود، چه کار کنم؟',
-    answer: 'ممکن است قیمت در اطلاعات عمومی محصول ثبت نشده باشد یا لازم باشد شرایط تأمین مشخص شود. اگر دسترسی لازم را داشته باشید، گزینه ثبت استعلام قیمت در صفحه جزئیات محصول در دسترس خواهد بود.',
-    open: false,
+    answer: 'ممکن است قیمت در اطلاعات عمومی محصول ثبت نشده باشد یا لازم باشد شرایط تأمین مشخص شود. اگر دسترسی لازم را داشته باشید، گزینه ثبت استعلام قیمت در صفحه جزئیات محصول در دسترس خواهد بود.'
   },
   {
     question: 'پس از ثبت‌نام شرکت، حساب چه زمانی فعال می‌شود؟',
-    answer: 'ثبت‌نام شرکت به‌تنهایی به معنی فعال‌شدن فوری حساب نیست. اطلاعات شرکت باید طبق فرایند بررسی و تأیید سامانه تأیید شود؛ وضعیت حساب را از پیام‌های سامانه یا پشتیبانی پیگیری کنید.',
-    open: false,
+    answer: 'ثبت‌نام شرکت به‌تنهایی به معنی فعال‌شدن فوری حساب نیست. اطلاعات شرکت باید طبق فرایند بررسی و تأیید سامانه تأیید شود؛ وضعیت حساب را از پیام‌های سامانه یا پشتیبانی پیگیری کنید.'
   },
   {
     question: 'چرا محصولی که ثبت کرده‌ایم هنوز در کاتالوگ عمومی نیست؟',
-    answer: 'محصول باید اطلاعات لازم را داشته باشد، برای بررسی ارسال شود، توسط تیم مسئول تأیید شود و سپس شرکت آن را منتشر کند. محصول پیش‌نویس یا در انتظار بررسی در کاتالوگ عمومی نمایش داده نمی‌شود.',
-    open: false,
+    answer: 'محصول باید اطلاعات لازم را داشته باشد، برای بررسی ارسال شود، توسط تیم مسئول تأیید شود و سپس شرکت آن را منتشر کند. محصول پیش‌نویس یا در انتظار بررسی در کاتالوگ عمومی نمایش داده نمی‌شود.'
   },
   {
     question: 'آیا برای همه محصولات امکان خرید مستقیم و پرداخت آنلاین وجود دارد؟',
-    answer: 'نسخه فعلی بر فرایند B2B و استعلام متمرکز است؛ بنابراین وجود صفحه محصول به معنی فعال‌بودن خرید مستقیم یا پرداخت آنلاین برای آن محصول نیست. برای شرایط تأمین، از اطلاعات محصول و فرایند استعلام استفاده کنید.',
-    open: false,
+    answer: 'نسخه فعلی بر فرایند B2B و استعلام متمرکز است؛ بنابراین وجود صفحه محصول به معنی فعال‌بودن خرید مستقیم یا پرداخت آنلاین برای آن محصول نیست. برای شرایط تأمین، از اطلاعات محصول و فرایند استعلام استفاده کنید.'
   },
   {
     question: 'چطور با پشتیبانی تماس بگیرم؟',
-    answer: 'برای پرسش‌هایی که در این صفحه پاسخ داده نشده‌اند، از صفحه تماس با ما استفاده کنید و شرح مسئله را برای تیم پشتیبانی ارسال کنید.',
-    open: false,
+    answer: 'برای پرسش‌هایی که در این صفحه پاسخ داده نشده‌اند، از صفحه تماس با ما استفاده کنید و شرح مسئله را برای تیم پشتیبانی ارسال کنید.'
   },
-])
+]
 
 function toggleFaq(index) {
-  faqs.value[index].open = !faqs.value[index].open
+  activeFaqIndex.value = activeFaqIndex.value === index ? null : index
 }
 </script>
 
@@ -69,19 +63,19 @@ function toggleFaq(index) {
       />
 
       <section class="faq-list" aria-label="فهرست پرسش‌ها">
-        <article v-for="(faq, index) in faqs" :key="faq.question" class="faq-item ds-card">
+        <article v-for="(faq, index) in faqs" :key="faq.question" class="faq-item ds-card" :class="{ 'faq-item--active': activeFaqIndex === index }">
           <h2 class="faq-item__heading">
             <button
               :id="`faq-question-${index}`"
               type="button"
               class="faq-question"
-              :aria-expanded="faq.open"
+              :aria-expanded="activeFaqIndex === index"
               :aria-controls="`faq-answer-${index}`"
               @click="toggleFaq(index)"
             >
               <span>{{ faq.question }}</span>
               <span class="faq-question__icon" aria-hidden="true">
-                <i class="pi" :class="faq.open ? 'pi-minus' : 'pi-plus'"></i>
+                <i class="pi" :class="activeFaqIndex === index ? 'pi-minus' : 'pi-plus'"></i>
               </span>
             </button>
           </h2>
@@ -118,23 +112,26 @@ function toggleFaq(index) {
 .faq-breadcrumb a { color: var(--ds-color-primary-text); text-decoration: none; }
 .faq-breadcrumb a:hover { text-decoration: underline; }
 .faq-hero {
-  padding: 0 0 var(--ds-space-5);
+  padding: 0 var(--ds-space-4) var(--ds-space-5);
   border-bottom: 1px solid var(--ds-color-border);
 }
 .faq-hero .ds-lead { max-width: 68ch; margin-bottom: 0; }
 .faq-list {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--ds-color-border);
+  gap: var(--ds-space-3);
 }
 .faq-item {
-  border: 0;
-  border-bottom: 1px solid var(--ds-color-border);
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid var(--ds-color-border);
+  border-inline-start: 4px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg, 12px);
+  background: var(--ds-color-surface, #fff);
   box-shadow: none;
+  transition: border-color var(--ds-transition-fast), background var(--ds-transition-fast);
 }
 .faq-item__heading { margin: 0; font-size: inherit; }
+.faq-item--active { border-color: var(--ds-color-primary); border-inline-start-color: var(--ds-color-primary); background: var(--ds-color-primary-subtle, var(--ds-color-surface)); }
+.faq-item--active .faq-question { color: var(--ds-color-primary-text); }
 .faq-question {
   display: flex;
   width: 100%;
@@ -142,7 +139,7 @@ function toggleFaq(index) {
   align-items: center;
   justify-content: space-between;
   gap: var(--ds-space-4);
-  padding: var(--ds-space-4) 0;
+  padding: var(--ds-space-4);
   border: 0;
   background: transparent;
   color: var(--ds-color-text);
