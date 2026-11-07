@@ -6,6 +6,9 @@ const entry = readFileSync(new URL('../main.js', import.meta.url), 'utf8')
 const loader = readFileSync(new URL('../../index.html', import.meta.url), 'utf8')
 const home = readFileSync(new URL('../pages/public/Home.vue', import.meta.url), 'utf8')
 const layout = readFileSync(new URL('../layouts/PublicLayout.vue', import.meta.url), 'utf8')
+const inquiries = readFileSync(new URL('../pages/public/MyInquiries.vue', import.meta.url), 'utf8')
+const notifications = readFileSync(new URL('../pages/public/Notifications.vue', import.meta.url), 'utf8')
+const productDetails = readFileSync(new URL('../pages/public/ProductDetails.vue', import.meta.url), 'utf8')
 
 describe('Website visual system — latest owner-supplied prototype', () => {
   it('loads a Website-only palette with the exact light and dark prototype tokens', () => {
@@ -25,6 +28,10 @@ describe('Website visual system — latest owner-supplied prototype', () => {
   it('styles the real public header and all public page surfaces with the prototype tokens', () => {
     expect(layout).toContain('class="public-header"')
     expect(layout).toContain('class="public-theme-toggle"')
+    expect(layout).toContain('class="tm-btn tm-btn--accent public-rfq-link"')
+    expect(theme).toContain('--primary-color: #0891B2')
+    expect(theme).toContain('--surface-ground: #F0F7FA')
+    expect(theme).toContain('--p-red-500: #EF4444 !important')
     expect(theme).toContain('.public-shell .public-utility-bar')
     expect(theme).toContain('.public-shell .public-header')
     expect(theme).toContain('.public-shell .public-logo-symbol')
@@ -33,6 +40,17 @@ describe('Website visual system — latest owner-supplied prototype', () => {
     expect(theme).toContain('.reference-home')
     expect(theme).toContain('.reference-products')
     expect(theme).toContain('.reference-categories')
+  })
+
+  it('removes legacy teal and fixed white surfaces from public operational pages', () => {
+    expect(inquiries).not.toContain('#01bec2')
+    expect(inquiries).not.toContain('#01BEC2')
+    expect(notifications).not.toContain('#087f7818')
+    expect(notifications).not.toContain('background:#fff')
+    expect(notifications).toContain('var(--tm-cyan-soft)')
+    expect(productDetails).not.toContain('#0c8a6e')
+    expect(productDetails).not.toContain('#a72727')
+    expect(productDetails).toContain('background: var(--tm-surface)')
   })
 
   it('uses the network-transmission loader and animated cyan/violet fiber hero from the prototype', () => {
