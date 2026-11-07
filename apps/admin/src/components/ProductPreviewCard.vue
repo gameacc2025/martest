@@ -223,7 +223,7 @@ function formatPrice(value) {
 .company {
   margin: 0.5rem 0 0;
   font-weight: 600;
-  color: var(--p-primary-600, #1d4ed8);
+  color: var(--ds-color-primary-text);
 }
 
 .category {
