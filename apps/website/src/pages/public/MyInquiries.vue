@@ -457,7 +457,7 @@ onMounted(async () => {
 .eyebrow,.muted,.page-description{color:var(--text-color-secondary,var(--tm-muted))}
 .eyebrow{margin:0;font-size:.85rem}
 .page-description{margin:0;line-height:1.9}
-.list-panel,.detail-panel{background:var(--surface-card,#fff);border:1px solid var(--surface-border,var(--tm-line));border-radius:6px;padding:clamp(16px,3vw,28px);box-shadow:0 8px 24px var(--ds-shadow-xs)}
+.list-panel,.detail-panel{background:var(--surface-card,#fff);border:1px solid var(--surface-border,var(--tm-line));border-radius:6px;padding:clamp(16px,3vw,28px);box-shadow:var(--ds-shadow-xs)}
 .inquiry-list{display:grid;gap:10px}
 .inquiry-row{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border:1px solid var(--surface-border,var(--tm-line));border-radius:6px;background:transparent;color:inherit;text-align:right;cursor:pointer}
 .inquiry-row:hover{border-color:var(--tm-cyan);background:var(--ds-color-primary-soft)}
@@ -485,7 +485,7 @@ onMounted(async () => {
 .conversation-form select{padding:10px;border:1px solid var(--surface-border,var(--tm-line-strong));border-radius:8px;background:var(--surface-card,#fff);color:inherit}
 .conversation-actions small{color:var(--text-color-secondary,var(--tm-muted))}
 .conversation-sms-option{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-color-secondary,var(--tm-muted))}
-.conversation-sms-option input{width:1rem;height:1rem;accent-color:var(--primary-color,var(--tm-green))}
+.conversation-sms-option input{width:1rem;height:1rem;accent-color:var(--ds-color-primary)}
 .message-notice{color:var(--text-color-secondary,var(--tm-muted));font-size:.9rem;margin:0;line-height:1.7}
 .content-section h3{font-size:1.1rem;margin:0 0 14px}
 .item-row,.response-card{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:14px;border:1px solid var(--surface-border,var(--tm-line));border-radius:10px;margin-top:10px}
