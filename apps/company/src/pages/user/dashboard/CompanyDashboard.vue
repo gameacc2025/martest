@@ -455,9 +455,9 @@ onMounted(() => {
 <style scoped>
 .company-dashboard{direction:rtl;display:flex;flex-direction:column;gap:18px;min-width:0}
 .company-dashboard :deep(.tm-panel){height:100%;min-width:0;border:1px solid var(--ds-color-border);border-radius:var(--ds-card-radius);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs)}
-.company-dashboard :deep(.tm-panel__head){min-height:48px;padding:12px 15px}
+.company-dashboard :deep(.tm-panel__head){min-height:52px;padding:14px 18px}
 .company-dashboard :deep(.tm-panel__head h3){font-size:.9rem;font-weight:650}
-.company-dashboard :deep(.tm-panel__body){padding:12px 15px}
+.company-dashboard :deep(.tm-panel__body){padding:16px 18px}
 .cd-dashboard-overview{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:14px;align-items:stretch;margin-bottom:18px}
 .cd-dashboard-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(94px,auto);gap:8px;min-width:0}
 .cd-dashboard-quick-access{display:grid;min-width:0;align-content:stretch}
