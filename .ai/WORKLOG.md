@@ -1,3 +1,12 @@
+## 2026-11-07 — WEBSITE-HOME-CATEGORY-COUNTS — Remove homepage sections and show category totals
+- **Status:** Implemented on `main`; CI verification pending.
+- **Request:** Remove «چرا Telecom Market؟» and «پیشنهاد ویژه تجهیزات خرده‌فروشی» from Home, and display category product counts on both Home and the Categories page.
+- **Changes:** Removed both homepage sections and their unused CSS. Since the public categories endpoint returns category records without product aggregates, both Website pages now query the existing published-products listing with `page=1&limit=1&categoryId=...` per category and render the returned `meta.total` in Persian numerals. Failed count lookups remain visibly unavailable rather than displaying a false zero.
+- **Tests:** Updated Home source-contract assertions and Categories component tests to verify the per-category count request.
+- **Scope:** Website frontend only. No backend, database, API contract, auth, permissions, routes, or commerce behavior changed.
+- **Commits:** `931c485`, `98bb1c1`, `5bf6fea`, `a92209e`.
+- **Verification:** Tests/build not yet run in this remote GitHub editing session.
+
 ## Website FAQ page and homepage cleanup — 2026-11-07
 - Moved FAQ content out of the homepage; the homepage no longer renders an FAQ section or the disabled catalogue-request form.
 - Kept the dedicated public `/faq` route and added a clearly labelled «سوالات متداول» link in the public footer.
