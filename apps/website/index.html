@@ -22,16 +22,16 @@
       .fiber-loader-svg .fiber-node { fill: #0E1E30; stroke: #22D3EE; stroke-width: 2.5; }
       .fiber-loader-svg .fiber-node--core { fill: #122438; stroke: #8B5CF6; stroke-width: 2.5; }
       .fiber-loader-svg .fiber-track { fill: none; stroke: #1E3A5F; stroke-width: 3; }
-      .fiber-loader-svg .fiber-flow { fill: none; stroke-linecap: round; stroke-dasharray: 15 120; animation: fiber-transmit 1.2s linear infinite; }
+      .fiber-loader-svg .fiber-flow { fill: none; stroke-linecap: round; stroke-dasharray: 12 42; animation: fiber-transmit 1.15s linear infinite; will-change: stroke-dashoffset; }
       .fiber-loader-svg .fiber-flow--cyan { stroke: #22D3EE; stroke-width: 4; }
-      .fiber-loader-svg .fiber-flow--violet { stroke: #8B5CF6; stroke-width: 3.5; animation-duration: 1.4s; }
-      .fiber-loader-svg .fiber-flow--middle { stroke: #22D3EE; stroke-width: 3.5; animation-duration: 1s; }
+      .fiber-loader-svg .fiber-flow--violet { stroke: #8B5CF6; stroke-width: 3.5; animation-duration: 1.4s; filter: drop-shadow(0 0 5px rgba(139,92,246,.75)); }
+      .fiber-loader-svg .fiber-flow--middle { stroke: #22D3EE; stroke-width: 3.5; animation-duration: .95s; filter: drop-shadow(0 0 5px rgba(34,211,238,.75)); }
       .fiber-loader-svg .fiber-led { fill: #22C55E; }
       .wait-text { margin-top: 20px; color: #67E8F9; font-family: 'Vazirmatn', Tahoma, sans-serif; font-size: 16px; font-weight: 600; animation: fiber-text-pulse 1.5s ease-in-out infinite alternate; }
-      @keyframes fiber-transmit { from { stroke-dashoffset: 135; } to { stroke-dashoffset: 0; } }
+      @keyframes fiber-transmit { from { stroke-dashoffset: 54; } to { stroke-dashoffset: 0; } }
       @keyframes fiber-text-pulse { from { opacity: .65; } to { opacity: 1; } }
       @media (prefers-reduced-motion: reduce) {
-        .fiber-loader-svg .fiber-flow, .wait-text { animation: none !important; }
+        .fiber-loader-svg .fiber-flow { animation-duration: 4.8s !important; } .wait-text { animation: none !important; }
       }
     </style>
     <title>Telecom Marketplace</title>
