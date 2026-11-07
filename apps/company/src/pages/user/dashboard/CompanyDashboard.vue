@@ -454,7 +454,7 @@ onMounted(() => {
 
 <style scoped>
 .company-dashboard{direction:rtl;display:flex;flex-direction:column;gap:18px;min-width:0}
-.company-dashboard :deep(.tm-panel){height:100%;min-width:0;border:1px solid var(--tm-line);border-radius:4px;background:var(--tm-surface);box-shadow:0 1px 3px rgba(20,20,60,.04)}
+.company-dashboard :deep(.tm-panel){height:100%;min-width:0;border:1px solid var(--ds-color-border);border-radius:var(--ds-card-radius);background:var(--ds-color-surface);box-shadow:var(--ds-shadow-xs)}
 .company-dashboard :deep(.tm-panel__head){min-height:48px;padding:12px 15px}
 .company-dashboard :deep(.tm-panel__head h3){font-size:.9rem;font-weight:650}
 .company-dashboard :deep(.tm-panel__body){padding:12px 15px}
