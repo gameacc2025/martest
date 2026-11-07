@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
 
-const { getProducts, getCategories, routeState } = vi.hoisted(() => ({
+const { getProducts, getCategories, addItem, routeState } = vi.hoisted(() => ({
   getProducts: vi.fn(),
   getCategories: vi.fn(),
   addItem: vi.fn(),
