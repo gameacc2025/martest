@@ -12,9 +12,7 @@
 
 ---
 
-# Current Task — 2026-11-07
-
-## Latest task — Website fiber-optic loader + Hallmark skill integration
+## Previous task — Website fiber-optic loader + Hallmark skill integration
 - **Status:** Source and documentation changes committed to `main`; local installer execution and local tests/build remain pending.
 - **Skills:** Taste Skill was already installed at `.agents/skills/design-taste-frontend/SKILL.md`. Added Hallmark (`nutlope/hallmark`) to the all-agent project installer and documented it as a standard UI skill alongside Taste Skill, UI UX Pro Max, Impeccable and Vercel Web Design Guidelines. The installer now refreshes Taste Skill and installs Hallmark for every supported agent.
 - **Website loader:** Added a full-screen fiber-optic data-transfer animation to the Website's static startup HTML. It shows animated light packets travelling through a fiber strand, Persian loading text, Telecom Market branding, dark-mode styling and reduced-motion support. It remains visible until auth restoration and initial router readiness finish, and reappears for subsequent route navigation.
