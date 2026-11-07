@@ -370,17 +370,17 @@ const statusIcons = { ACTIVE: 'pi-check-circle', PENDING: 'pi-clock', INACTIVE: 
 .badge-success, .badge-verified {
   border: 1px solid color-mix(in srgb, var(--tm-green) 30%, transparent);
   background: var(--tm-green-soft);
-  color: #0c8a6e;
+  color: var(--ds-status-success-fg);
 }
 .badge-warn, .badge-pending {
   border: 1px solid color-mix(in srgb, var(--tm-amber) 30%, transparent);
   background: var(--tm-amber-soft);
-  color: #a86c05;
+  color: var(--ds-status-warning-fg);
 }
 .badge-danger {
   border: 1px solid color-mix(in srgb, var(--tm-red) 30%, transparent);
   background: var(--tm-red-soft);
-  color: #c92f2f;
+  color: var(--ds-status-danger-fg);
 }
 .badge-secondary {
   border: 1px solid var(--tm-line);
