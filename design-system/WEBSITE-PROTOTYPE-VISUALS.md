@@ -60,3 +60,13 @@ Semantic status colors from the prototype: success `#22C55E` / `#DCFCE7` / `#158
 - Do not modify shared Admin/Company tokens to achieve Website visuals.
 - Do not introduce a second theme store; use the shared persisted theme state.
 - Do not claim visual parity until a browser comparison has actually been performed.
+
+
+## Motion reliability follow-up — 2026-11-07
+
+- Root cause found in the prior implementation: a broad `@media (prefers-reduced-motion: reduce)` wildcard forced every animation under `.public-shell` to `.01ms`, effectively freezing the hero network and all other public-site motion for users whose OS/browser requests reduced motion. The loader separately disabled its packet/text animations completely in that mode.
+- Removed the blanket wildcard. Reduced-motion mode now slows the signature fiber data flow instead of collapsing it; non-essential entrance/float/pulse effects are disabled in that mode.
+- Loader packets now use a shorter, visible dash/gap cycle, glow, and a slower-but-still-moving reduced-motion fallback.
+- Homepage hero now animates the network glow and optical nodes, floats the featured-product glass card, and replays a short entrance animation whenever the carousel slide changes.
+- Updated source-contract tests. Tests/build and browser rendering remain **NOT RUN**; the owner's no-build instruction remains in force, so no runtime or pixel-parity claim is made.
+- Scope remains Website presentation only; no backend, API, database, auth, or business behavior changes.
