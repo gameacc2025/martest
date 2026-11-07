@@ -64,7 +64,7 @@ function productImage(product) {
 }
 function productLink(product) { return { name: 'product-details', params: { id: product.id } } }
 function productMode(product) { return productSalesMode(product)?.kind === 'fixed' ? 'قیمت مشخص' : 'قیمت با استعلام' }
-function productPrice(product) { return productPriceLabel(product) || 'قیمت با استعلام' }
+function productPrice(product) { const label = productPriceLabel(product); return !label || label === 'استعلامی' ? 'قیمت با استعلام' : label }
 function productIsRetail(product) { return productSalesMode(product)?.kind === 'fixed' }
 function categoryTitle(category) { return category?.nameFa || category?.name || category?.nameEn || category?.slug || 'دسته‌بندی' }
 function categoryCount(category) {
