@@ -260,7 +260,7 @@ onMounted(() => {
 .category-list-page .ds-page-heading { margin-bottom: 0; }
 .category-list-page .card {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
 }
@@ -275,7 +275,7 @@ onMounted(() => {
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: linear-gradient(110deg, color-mix(in srgb, var(--ds-color-primary) 8%, var(--ds-color-surface)), var(--ds-color-surface) 72%);
   box-shadow: var(--ds-shadow-xs);
 }
@@ -312,7 +312,7 @@ onMounted(() => {
 }
 .category-list-page .card {
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
@@ -327,7 +327,7 @@ onMounted(() => {
 .management-data-surface {
   overflow: hidden;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
   box-shadow: var(--ds-shadow-xs);
 }
