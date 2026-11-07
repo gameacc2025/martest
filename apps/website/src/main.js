@@ -34,6 +34,7 @@ import { createPageLoadingController } from './utils/pageLoading'
 import '@telecom/shared-ui/assets/main.scss'
 import '@telecom/shared-ui/assets/design-system/tem.scss'
 import './assets/marketplace-theme.scss'
+import './assets/newtemp-storefront.scss'
 
 import { theme as TelecomPreset } from '@telecom/shared-ui'
 
