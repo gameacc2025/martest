@@ -50,7 +50,7 @@
           <div class="cd-sales-chart">
             <div class="cd-sales-chart__summary"><strong>۵۶٫۸ <small>میلیون تومان</small></strong><span><i class="pi pi-arrow-up-left" aria-hidden="true"></i> ۱۸٫۶٪ <small>نسبت به ماه قبل</small></span></div>
             <svg class="cd-sales-chart__plot" viewBox="0 0 320 150" role="img" aria-label="نمودار نمونه فروش در دوازده ماه گذشته">
-              <defs><linearGradient id="cd-sales-area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#7c6cf6" stop-opacity=".24"/><stop offset="100%" stop-color="#7c6cf6" stop-opacity="0"/></linearGradient></defs>
+              <defs><linearGradient id="cd-sales-area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--ds-brand-secondary)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--ds-brand-secondary)" stop-opacity="0"/></linearGradient></defs>
               <path d="M8 120H312 M8 82H312 M8 44H312" class="cd-sales-chart__grid"/>
               <path d="M8 118 L35 108 L62 112 L89 91 L116 96 L143 76 L170 82 L197 59 L224 65 L251 42 L278 48 L312 18 L312 132 L8 132 Z" fill="url(#cd-sales-area)"/>
               <path d="M8 118 L35 108 L62 112 L89 91 L116 96 L143 76 L170 82 L197 59 L224 65 L251 42 L278 48 L312 18" class="cd-sales-chart__line"/>
@@ -465,20 +465,20 @@ onMounted(() => {
 .cd-dashboard-metric{display:flex;align-items:center;gap:8px;min-width:0;min-height:94px;padding:9px 10px;border:1px solid var(--tm-line);border-radius:4px;background:var(--tm-surface);box-shadow:0 1px 3px rgba(20,20,60,.04);color:var(--tm-ink);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
 .cd-dashboard-metric:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(20,20,60,.08)}
 .cd-dashboard-metric__icon{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:6px;font-size:14px}
-.cd-dashboard-metric--violet .cd-dashboard-metric__icon{color:#7c6cf6;background:#efedff}.cd-dashboard-metric--green .cd-dashboard-metric__icon{color:#16a765;background:#e7f8ef}.cd-dashboard-metric--cyan .cd-dashboard-metric__icon{color:#1699c9;background:#e5f6fc}.cd-dashboard-metric--amber .cd-dashboard-metric__icon{color:#c98712;background:#fff5df}.cd-dashboard-metric--orange .cd-dashboard-metric__icon{color:#e75f37;background:#fff0e9}
+.cd-dashboard-metric--violet .cd-dashboard-metric__icon{color:var(--ds-brand-secondary);background:color-mix(in srgb, var(--ds-brand-secondary) 12%, transparent)}.cd-dashboard-metric--green .cd-dashboard-metric__icon{color:var(--ds-status-success-fg);background:var(--ds-status-success-bg)}.cd-dashboard-metric--cyan .cd-dashboard-metric__icon{color:var(--ds-status-info-fg);background:var(--ds-status-info-bg)}.cd-dashboard-metric--amber .cd-dashboard-metric__icon{color:var(--ds-status-warning-fg);background:var(--ds-status-warning-bg)}.cd-dashboard-metric--orange .cd-dashboard-metric__icon{color:var(--ds-status-warning-fg);background:var(--ds-status-warning-bg)}
 .cd-dashboard-metric__content{display:flex;flex-direction:column;min-width:0;gap:3px}.cd-dashboard-metric__label{overflow:hidden;color:var(--tm-muted);font-size:.69rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.cd-dashboard-metric__content strong{color:var(--tm-ink);font-size:1rem;font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}.cd-dashboard-metric__content small{display:flex;align-items:center;gap:5px;min-height:15px;color:var(--tm-muted);font-size:.59rem;line-height:1.3}
-.cd-sample-tag{display:inline-flex;padding:1px 5px;border-radius:3px;background:#fff2d8;color:#98630b;font-size:.62rem;font-weight:700}
+.cd-sample-tag{display:inline-flex;padding:1px 5px;border-radius:3px;background:var(--ds-status-warning-bg);color:var(--ds-status-warning-fg);font-size:.62rem;font-weight:700}
 .cd-dashboard-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(290px,1fr);gap:18px;align-items:start}.cd-dashboard-main,.cd-dashboard-aside{display:grid;min-width:0;gap:18px}.cd-dashboard-two-up{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}.cd-dashboard-three-up{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
 .cd-sales-chart{display:flex;flex-direction:column;gap:9px;min-width:0}
 .cd-sales-chart__summary{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
 .cd-sales-chart__summary>strong{color:var(--tm-ink);font-size:1.25rem;font-weight:750;line-height:1.2}
 .cd-sales-chart__summary>strong small{color:var(--tm-muted);font-size:.68rem;font-weight:500}
-.cd-sales-chart__summary>span{display:flex;align-items:center;gap:3px;color:#16a765;font-size:.72rem;font-weight:700;white-space:nowrap}
+.cd-sales-chart__summary>span{display:flex;align-items:center;gap:3px;color:var(--ds-status-success-fg);font-size:.72rem;font-weight:700;white-space:nowrap}
 .cd-sales-chart__summary>span small{color:var(--tm-muted);font-size:.62rem;font-weight:500}
 .cd-sales-chart__plot{display:block;width:100%;height:auto;overflow:visible}
 .cd-sales-chart__grid{fill:none;stroke:var(--tm-line);stroke-width:1;stroke-dasharray:3 4}
-.cd-sales-chart__line{fill:none;stroke:#7c6cf6;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.cd-sales-chart__point{fill:#fff;stroke:#7c6cf6;stroke-width:3}
+.cd-sales-chart__line{fill:none;stroke:var(--ds-brand-secondary);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.cd-sales-chart__point{fill:var(--ds-card-bg);stroke:var(--ds-brand-secondary);stroke-width:3}
 .cd-sales-chart__months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px 2px;color:var(--tm-muted);font-size:.61rem;text-align:center}
 .cd-sales-chart__note{margin:0;padding-top:8px;border-top:1px solid var(--tm-line);color:var(--tm-muted);font-size:.65rem;line-height:1.6}
 @media(max-width:1000px){.cd-dashboard-overview{grid-template-columns:minmax(0,2fr) minmax(230px,1fr)}.cd-dashboard-columns{grid-template-columns:minmax(0,1fr)}.cd-dashboard-aside{grid-template-columns:minmax(0,1fr)}}
