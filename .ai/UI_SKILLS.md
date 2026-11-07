@@ -8,6 +8,7 @@ These skills are the project's reusable design and frontend-quality toolkit. The
 |---|---|---|
 | UI UX Pro Max | All assistants supported by `uipro init --ai all`; universal skill copy plus agent-specific locations; existing OpenCode copy: `.opencode/skills/ui-ux-pro-max` | Design-system decisions, layout patterns, palettes, typography pairings, component and page design guidance |
 | Taste Skill (`design-taste-frontend`) | All supported agent directories selected by Skills CLI `--agent '*'` (including `.agents/skills/`) | Distinctive art direction, composition, typography, spacing, visual hierarchy, motion, and avoiding generic/template-like UI |
+| Hallmark (`nutlope/hallmark`) | All supported agent directories selected by Skills CLI `--agent '*'` (including `.agents/skills/`) | Anti-AI-slop design floor, varied page macrostructures, and structured Build / Audit / Redesign / Study workflows |
 | Impeccable | All supported agent directories selected by Skills CLI `--agent '*'` (including `.agents/skills/`) | UX planning, critique, polish, responsive/accessibility audits, interaction and edge-case quality |
 | Vercel Web Design Guidelines | All supported agent directories selected by Skills CLI `--agent '*'` (including `.agents/skills/`) | Review UI implementation against current web-interface, accessibility, responsive, and interaction guidelines |
 
@@ -17,8 +18,8 @@ The upstream skills are maintained by their respective authors. Do not replace t
 
 1. Read `AGENTS.md`, `.ai/PROTOCOL.md`, this file, and the current handoff in `.ai/current-task.md`.
 2. Identify the surface and task type:
-   - Public/marketing/product page: use Taste Skill and UI UX Pro Max for direction and structure; use Impeccable for planning/polish.
-   - App/dashboard/admin/company workflow: use UI UX Pro Max for system consistency, Impeccable's Operate mode for task efficiency, and Taste Skill's app-screen guidance where applicable.
+   - Public/marketing/product page: use Hallmark to choose a non-template macrostructure and apply its anti-slop floor; use Taste Skill and UI UX Pro Max for art direction and structure; use Impeccable for planning/polish.
+   - App/dashboard/admin/company workflow: use UI UX Pro Max for system consistency, Impeccable's Operate mode for task efficiency, Taste Skill's app-screen guidance where applicable, and Hallmark Audit when an anti-pattern review is useful. Use Hallmark Redesign only when redesign is explicitly requested.
    - Shared component/design-token work: inspect the current design system first; use UI UX Pro Max and Impeccable to preserve consistency.
 3. Read the relevant `SKILL.md` files before design or UI edits. Follow the referenced playbooks and supporting files that apply to the task; do not assume a skill is loaded merely because it is installed.
 4. Inspect the existing implementation, design tokens, shared components, target route, responsive behavior, RTL/Persian content, and dark/light themes before changing anything.
@@ -53,4 +54,4 @@ Run from the repository root in PowerShell:
 .\scripts\install-ui-skills.ps1
 ```
 
-The script installs/updates all four upstream skills at project scope for all supported agents. UI UX Pro Max uses its native `uipro init --ai all` mode; the other three use the Skills CLI `--agent '*'` target. The Skills CLI documents `--agent '*'` as installing a specific skill to all supported agents. To update later, rerun the same script. Impeccable's native installer can optionally add agent-specific integrations via `npx impeccable install`; the shared skill itself is installed for all agents by the script. Upstream URLs and install names are maintained in the script. Do not commit generated local caches, browser binaries, credentials, or environment files.
+The script installs/updates all five upstream skills at project scope for all supported agents. UI UX Pro Max uses its native `uipro init --ai all` mode; the other four use the Skills CLI `--agent '*'` target. The Skills CLI documents `--agent '*'` as installing a specific skill to all supported agents. Taste Skill and Hallmark are both installed through this project-level route. To update later, rerun the same script. Impeccable's native installer can optionally add agent-specific integrations via `npx impeccable install`; the shared skill itself is installed for all agents by the script. Upstream URLs and install names are maintained in the script. Do not commit generated local caches, browser binaries, credentials, or environment files.
