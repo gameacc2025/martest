@@ -51,9 +51,9 @@ onMounted(loadCategories)
   <div class="w">
     <div class="bc"><router-link :to="{ name: 'home' }">صفحه اصلی</router-link> / همه دسته‌بندی‌ها</div>
     <div class="ph"><h1>همه دسته‌بندی‌ها</h1><p>تجهیزات را بر اساس حوزه کاربرد مرور کنید</p></div>
-    <div v-if="loading" class="category-state">در حال دریافت دسته‌بندی‌ها…</div>
-    <div v-else-if="error" class="category-state"><span>{{ error }}</span><button type="button" @click="loadCategories">تلاش دوباره</button></div>
-    <div v-else-if="!categories.length" class="category-state">دسته‌بندی فعالی برای نمایش وجود ندارد.</div>
+    <div v-if="loading" class="category-state" role="status">در حال دریافت دسته‌بندی‌ها…</div>
+    <div v-else-if="error" class="category-state" role="alert"><span>{{ error }}</span><button type="button" @click="loadCategories">تلاش دوباره</button></div>
+    <div v-else-if="!categories.length" class="category-state" role="status">دسته‌بندی فعالی برای نمایش وجود ندارد.</div>
     <div v-else class="cbig">
       <article v-for="category in categories" :key="category.id" class="cb">
         <div class="t"><i>{{ icon(category) }}</i><div><h3>{{ title(category) }}</h3><small>{{ count(category) }} محصول</small></div></div>
