@@ -345,4 +345,20 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 .reference-home .ac button{border:0;font-family:inherit;cursor:pointer}
 .reference-home .cart-feedback{margin:10px 0;color:var(--ok);font-size:12px}
 
+.reference-home{font-family:var(--ds-font-family);background:var(--ds-page-bg);color:var(--ds-text-primary)}
+.reference-home .top,.reference-home footer{background:var(--ds-color-brand-deep);color:var(--ds-color-on-brand-muted)}
+.reference-home .hero,.reference-home .feat .img,.reference-home .bf .im2{background:var(--ds-color-brand-dark);color:var(--ds-color-on-brand)}
+.reference-home .b1,.reference-home .fab{background:var(--ds-primary-button);color:var(--ds-primary-button-text)}
+.reference-home .b1:hover,.reference-home .fab:hover{background:var(--ds-primary-button-hover)}
+.reference-home .search{background:var(--ds-card-bg)}
+.reference-home .search input{color:var(--ds-text-primary)}
+.reference-home .tabs button.on{background:var(--ds-card-bg);color:var(--ds-text-primary)}
+.reference-home .ofr{background:var(--ds-brand-secondary);color:#FFFFFF}
+.reference-home .ofr .btn{background:var(--ds-card-bg);color:var(--ds-brand-secondary)}
+.reference-home .rfq,.reference-home .p .im{background:var(--ds-surface-secondary)}
+.reference-home .bt.n{background:var(--ds-status-danger-bg);color:var(--ds-status-danger-fg)}
+.reference-home .bt.t{background:var(--ds-status-success-bg);color:var(--ds-status-success-fg)}
+.reference-home footer a,.reference-home footer .nl input{color:var(--ds-color-on-brand-muted)}
+.reference-home .sh h2:after{background:var(--ds-brand-primary)}
+
 </style>
