@@ -5,10 +5,12 @@ import { reactive } from 'vue'
 const { getProducts, getCategories, routeState } = vi.hoisted(() => ({
   getProducts: vi.fn(),
   getCategories: vi.fn(),
+  addItem: vi.fn(),
   routeState: { current: null },
 }))
 vi.mock('vue-router', () => ({ useRoute: () => routeState.current }))
 vi.mock('../../stores/products', () => ({ useProductsStore: () => ({ getProducts, getCategories }) }))
+vi.mock('../../stores/cart', () => ({ useCartStore: () => ({ addItem }) }))
 import ProductListing from './ProductListing.vue'
 
 const productFixture = (overrides = {}) => ({
@@ -25,6 +27,7 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
   let wrapper
   beforeEach(() => {
     vi.clearAllMocks()
+    addItem.mockReturnValue(true)
     routeState.current = reactive({ name: 'products', query: { category: '7' } })
     getCategories.mockResolvedValue([{ id: 7, nameFa: 'فیبر نوری', productCount: 12 }])
     getProducts.mockResolvedValue({ data: [productFixture()], meta: { page: 1, limit: 24, total: 1, totalPages: 1 } })
@@ -68,6 +71,14 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     const link = wrapper.find('.products-area .p .im')
     expect(link.attributes('data-route')).toBe('product-details')
     expect(link.attributes('data-product-id')).toBe('42')
+  })
+
+  it('adds a fixed-price product to the existing cart store', async () => {
+    wrapper = mountListing()
+    await flushPromises()
+    await wrapper.get('.p .ac button').trigger('click')
+    expect(addItem).toHaveBeenCalledWith(expect.objectContaining({ id: 42, price: 1200000 }))
+    expect(wrapper.find('[role="status"]').text()).toContain('محصول به سبد خرید اضافه شد')
   })
 
   it('renders supplier verification, category, SKU and price from live product data', async () => {
