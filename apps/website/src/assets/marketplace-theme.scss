@@ -295,13 +295,13 @@
 .public-shell .public-logo-symbol::after {
   content: "";
   position: absolute;
-  width: 3px;
-  height: 14px;
+  width: 8px;
+  height: 18px;
   top: 12px;
-  left: 17px;
-  border-radius: 3px;
-  background: #22D3EE;
-  box-shadow: 0 14px 0 -0.2px #22D3EE;
+  left: 15px;
+  background:
+    linear-gradient(#22D3EE,#22D3EE) center top / 3px 13px no-repeat,
+    radial-gradient(circle at 50% 100%, #22D3EE 0 2px, transparent 2.5px) center bottom / 8px 6px no-repeat;
 }
 .public-shell .public-logo-name strong { color: var(--ds-text-primary); font-weight: 800; }
 .public-shell .public-nav-link { color: var(--ds-text-secondary); font-size: 14px; font-weight: 600; }
@@ -317,6 +317,19 @@
 .public-shell .public-notification-badge { background: #22D3EE; color: #083344; box-shadow: 0 0 0 2px var(--ds-header-bg); }
 .public-shell .public-commerce-actions { border-inline-end-color: var(--ds-border); }
 .public-shell .public-user-trigger { background: var(--ds-card-bg); border-color: var(--ds-border); color: var(--ds-text-primary); }
+.public-shell .public-rfq-link {
+  min-height: 40px;
+  padding-inline: 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.public-shell .public-rfq-link i { font-size: 14px; }
+@media (max-width: 575px) {
+  .public-shell .public-rfq-link { min-height: 36px; padding-inline: 10px; font-size: 12px; }
+  .public-shell .public-rfq-link i { display: none; }
+}
 .public-shell .public-login-link,
 .public-shell .tm-btn--accent {
   background: linear-gradient(100deg, #22D3EE, #0891B2) !important;
