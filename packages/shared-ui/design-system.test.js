@@ -14,6 +14,14 @@ const companyDashboard = read('../../apps/company/src/pages/user/dashboard/Compa
 const companyLayout = read('../../apps/company/src/layouts/CompanyLayout.vue')
 const websiteHome = read('../../apps/website/src/pages/public/Home.vue')
 const publicLayout = read('../../apps/website/src/layouts/PublicLayout.vue')
+const temButton = read('./components/tem/TemButton.vue')
+const temBadge = read('./components/tem/TemBadge.vue')
+const temStatCard = read('./components/tem/TemStatCard.vue')
+const storeProductCard = read('./components/store/StoreProductCard.vue')
+const storeCategoryCard = read('./components/store/StoreCategoryCard.vue')
+const storeSectionHeading = read('./components/store/StoreSectionHeading.vue')
+const storeFilterPanel = read('./components/store/StoreFilterPanel.vue')
+const storeBenefitGrid = read('./components/store/StoreBenefitGrid.vue')
 
 describe('approved Telecom Market design palette', () => {
   it('loads the NewTemp.html reference theme as the final shared layer for all apps', () => {
@@ -33,6 +41,15 @@ describe('approved Telecom Market design palette', () => {
       '#083344', '#164E63', '#22C55E', '#DCFCE7', '#F59E0B', '#FEF3C7',
       '#EF4444', '#FEE2E2', '#3B82F6', '#DBEAFE',
     ]) expect(tokens).toContain(value)
+  })
+
+  it('removes the retired purple/orange palette from shared store and Tem widgets', () => {
+    for (const source of [temButton, temBadge, temStatCard, storeProductCard, storeCategoryCard, storeSectionHeading, storeFilterPanel, storeBenefitGrid]) {
+      expect(source).not.toMatch(/#8c7bf7|#ff5c39|#eeebfe|#7564dc|#7c6cf6|#6c5ce7|#eceaff|#f4f5fa|#12182b|#6b7390/i)
+    }
+    expect(temButton).toContain('var(--ds-primary-button)')
+    expect(temBadge).toContain('var(--ds-status-success-bg)')
+    expect(temStatCard).toContain('var(--ds-color-surface)')
   })
 
   it('keeps PrimeVue primary actions theme-aware and uses the approved active color', () => {
