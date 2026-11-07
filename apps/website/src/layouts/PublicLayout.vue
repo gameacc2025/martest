@@ -16,23 +16,20 @@ import { useCartStore } from '../stores/cart'
 import { inquiriesApi, endpoints } from '@telecom/api-client'
 import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
-import InputText from 'primevue/inputtext'
 import Menu from 'primevue/menu'
 import Drawer from 'primevue/drawer'
-import BrandMark from '@telecom/shared-ui/components/common/BrandMark.vue'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const cartItemCount = computed(() => cartStore.itemCount)
 const cartDrawerOpen = ref(false)
-const searchPanelOpen = ref(false)
 const myInquiryCount = ref(null)
 const router = useRouter()
 const route = useRoute()
 
 // Keep the responsive navigation in sync with route changes (including
 // browser back/forward) so it never remains open over a new page.
-watch(() => route.fullPath, () => { mobileMenuOpen.value = false; cartDrawerOpen.value = false; notificationDrawerOpen.value = false; searchPanelOpen.value = false })
+watch(() => route.fullPath, () => { mobileMenuOpen.value = false; cartDrawerOpen.value = false; notificationDrawerOpen.value = false })
 watch(() => [authStore.isAuthenticated, authStore.isCustomer], () => { fetchMyInquiryCount(); fetchHeaderNotifications() })
 
 // CUSTOMER notifications live on the website. COMPANY and STAFF users are
@@ -58,7 +55,6 @@ function goToAdminApp(path = '/') {
 }
 
 
-const searchQuery = ref('')
 const mobileMenuOpen = ref(false)
 const notificationCount = ref(0)
 const latestNotifications = ref([])
@@ -217,15 +213,6 @@ onMounted(async () => {
 })
 
 
-function search() {
-  if (searchQuery.value.trim()) {
-    router.push({ name: 'search', query: { q: searchQuery.value } })
-    searchQuery.value = ''
-    searchPanelOpen.value = false
-    mobileMenuOpen.value = false
-  }
-}
-
 function logout() {
   authStore.logout()
   router.push({ name: 'products' })
@@ -254,7 +241,7 @@ function logout() {
         <div class="public-header-row">
           <div class="public-header-right">
             <router-link :to="{ name: 'home' }" class="public-logo" aria-label="صفحه اصلی بازارگاه تجهیزات مخابراتی">
-              <BrandMark class="public-logo-mark" :size="38" />
+              <i class="public-logo-symbol" aria-hidden="true"></i>
               <span class="public-logo-name"><strong>Telecom Market</strong></span>
             </router-link>
 
@@ -268,10 +255,6 @@ function logout() {
           </div>
 
           <div class="public-header-actions">
-            <button type="button" class="public-icon-link public-search-trigger" aria-label="جستجو" :aria-expanded="searchPanelOpen" aria-controls="public-search-popover" @click="searchPanelOpen = !searchPanelOpen">
-              <i class="pi pi-search" aria-hidden="true"></i>
-            </button>
-
             <div v-if="user" class="public-authenticated-actions">
               <div class="public-notifications-actions" @keydown.esc.stop.prevent="closeNotificationDrawer">
                 <button type="button" class="public-icon-link public-notifications-link" aria-label="اعلان‌ها" aria-controls="public-notifications-menu"  :aria-expanded="notificationDrawerOpen" @click.stop="notificationDrawerOpen = true">
@@ -359,15 +342,6 @@ function logout() {
           </div>
         </div>
 
-        <form v-if="searchPanelOpen" id="public-search-popover" class="public-search-popover" role="search" @submit.prevent="search">
-          <label for="public-header-search">جستجوی سریع در بازارگاه</label>
-          <div class="public-search-popover__field">
-            <i class="pi pi-search" aria-hidden="true"></i>
-            <InputText id="public-header-search" v-model="searchQuery" autofocus placeholder="نام محصول، برند یا شرکت را بنویسید…" autocomplete="off" />
-            <button type="submit" :disabled="!searchQuery.trim()">جستجو</button>
-          </div>
-          <span>برای مشاهده نتایج، عبارت موردنظر را وارد کنید.</span>
-        </form>
       </div>
     </header>
 
@@ -506,7 +480,7 @@ function logout() {
       <div class="public-container public-footer-inner">
         <div class="public-footer-grid">
           <div class="public-footer-about">
-            <div class="public-footer-brand"><BrandMark :size="34" /><span>Telecom Market</span></div>
+            <div class="public-footer-brand"><i class="public-logo-symbol" aria-hidden="true"></i><span>Telecom Market</span></div>
             <p class="public-footer-about-text">بازارگاه تخصصی تجهیزات شبکه و مخابرات؛ جستجوی محصولات، بررسی مشخصات و ثبت درخواست استعلام سازمانی.</p>
           </div>
           <div>
@@ -899,6 +873,20 @@ function logout() {
 @media(max-width:480px) {
   .public-footer-grid { grid-template-columns: 1fr; }
 }
+
+.public-container { max-width: 1240px; padding-inline: 20px; }
+.public-logo-symbol { display: block; flex: none; width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,#2aa7e8,#6c5ce7); }
+.public-user-trigger { padding: 4px 0; border: 0; border-radius: 0; background: transparent; }
+.public-user-trigger:hover { border: 0; background: transparent; }
+.public-user-avatar,.public-user-caret { display: none; }
+.public-user-name { display: inline; max-width: 180px; white-space: nowrap; }
+.public-commerce-actions { order: 1; border: 0; padding: 0; }
+.public-notifications-actions { order: 2; }
+.public-authenticated-actions,.public-guest-actions { display: contents; }
+.public-user-trigger { order: 3; }
+.public-header-actions > .public-mobile-toggle { order: 4; }
+.public-search-trigger,.public-search-popover { display: none !important; }
+@media(max-width:991px){.public-user-name{display:inline}}
 /* Telecom Market.html storefront shell alignment */
 .public-shell {
   --tm-blue: #6c5ce7;
