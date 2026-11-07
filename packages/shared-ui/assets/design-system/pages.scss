@@ -119,7 +119,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--ds-space-2);
-  min-height: var(--ds-touch-target);
+  min-height: var(--ds-button-md-height);
   color: var(--ds-color-primary-text);
   font-size: var(--ds-font-size-sm);
   font-weight: var(--ds-font-weight-bold);
@@ -132,7 +132,7 @@
 .ds-card {
   background: var(--ds-color-surface);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
 }
 
@@ -173,18 +173,18 @@
 }
 
 .ds-btn--lg {
-  min-height: 52px;
+  min-height: var(--ds-button-lg-height);
   padding-inline: var(--ds-space-8);
-  border-radius: var(--ds-radius-lg);
+  border-radius: var(--ds-button-lg-radius);
   font-size: var(--ds-font-size-md);
 }
 
 .ds-btn--primary {
-  background: var(--ds-color-accent);
-  color: var(--ds-color-on-accent);
+  background: var(--ds-primary-button);
+  color: var(--ds-primary-button-text);
 }
 
-.ds-btn--primary:hover { background: var(--ds-color-primary-hover); }
+.ds-btn--primary:hover { background: var(--ds-primary-button-hover); }
 
 .ds-btn--dark {
   background: var(--ds-color-brand-dark);
@@ -207,9 +207,9 @@
 .ds-badge {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
+  min-height: var(--ds-badge-height);
   padding-inline: var(--ds-space-3);
-  border-radius: var(--ds-radius-pill);
+  border-radius: var(--ds-badge-radius);
   font-size: var(--ds-font-size-xs);
   font-weight: var(--ds-font-weight-bold);
 }
@@ -308,7 +308,7 @@
   overflow: hidden;
   background: var(--ds-color-surface);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
 }
 
@@ -345,7 +345,7 @@
   padding: var(--ds-space-5);
   background: var(--ds-color-surface);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   box-shadow: var(--ds-shadow-xs);
 }
 
@@ -388,7 +388,7 @@
   padding: var(--ds-space-6);
   background: var(--ds-color-surface);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
 }
 
 .ds-detail-heading__identity {
@@ -418,7 +418,7 @@
   padding: var(--ds-space-6);
   background: var(--ds-color-surface);
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
 }
 
 .ds-form-section__title {
@@ -470,7 +470,7 @@
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--ds-color-border);
-  border-radius: var(--ds-radius-xl);
+  border-radius: var(--ds-card-radius);
   background: var(--ds-color-surface);
 }
 
@@ -563,3 +563,14 @@
   .ds-panel__body,
   .ds-form-section { padding: var(--ds-space-4); }
 }
+
+
+/* Approved button variants */
+.ds-btn--secondary { background: var(--ds-brand-secondary); color: #FFFFFF; }
+.ds-btn--secondary:hover { background: var(--ds-color-secondary-hover); }
+.ds-btn--outline { background: transparent; border-color: var(--ds-primary-button); color: var(--ds-primary-button); }
+.ds-btn--outline:hover { background: var(--ds-color-surface-hover); }
+.ds-btn--ghost { background: transparent; color: var(--ds-primary-button); }
+.ds-btn--ghost:hover { background: var(--ds-color-surface-hover); }
+.ds-btn--danger { background: var(--ds-button-danger); color: #FFFFFF; }
+.ds-btn--success { background: var(--ds-button-success); color: #FFFFFF; }
