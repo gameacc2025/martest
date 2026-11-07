@@ -530,6 +530,77 @@
   border-color: var(--ds-primary-button-hover);
 }
 
+
+/* PrimeVue semantic variables used by menus, dialogs, inputs, paginators and drawers. */
+:root {
+  --p-primary-50: #ECFEFF !important;
+  --p-primary-100: #CFFAFE !important;
+  --p-primary-200: #A5F3FC !important;
+  --p-primary-300: #67E8F9 !important;
+  --p-primary-400: #22D3EE !important;
+  --p-primary-500: #06B6D4 !important;
+  --p-primary-600: #0891B2 !important;
+  --p-primary-700: #0E7490 !important;
+  --p-primary-800: #155E75 !important;
+  --p-primary-900: #164E63 !important;
+  --p-primary-950: #083344 !important;
+  --p-primary-color: #0891B2 !important;
+  --p-primary-contrast-color: #FFFFFF !important;
+  --p-primary-hover-color: #0E7490 !important;
+  --p-primary-active-color: #0891B2 !important;
+  --p-highlight-background: #CFFAFE !important;
+  --p-highlight-color: #0E7490 !important;
+  --p-content-background: #FFFFFF !important;
+  --p-content-border-color: #DCE8EF !important;
+  --p-text-color: #102A43 !important;
+  --p-text-muted-color: #627D98 !important;
+  --p-form-field-background: #FFFFFF !important;
+  --p-form-field-border-color: #DCE8EF !important;
+  --p-form-field-color: #102A43 !important;
+  --p-form-field-placeholder-color: #94A3B8 !important;
+  --p-focus-ring-color: rgba(8,145,178,.24) !important;
+}
+:root.app-dark {
+  --p-primary-50: #083344 !important;
+  --p-primary-100: #164E63 !important;
+  --p-primary-200: #155E75 !important;
+  --p-primary-300: #0E7490 !important;
+  --p-primary-400: #0891B2 !important;
+  --p-primary-500: #22D3EE !important;
+  --p-primary-600: #67E8F9 !important;
+  --p-primary-700: #A5F3FC !important;
+  --p-primary-800: #CFFAFE !important;
+  --p-primary-900: #ECFEFF !important;
+  --p-primary-950: #F0FDFF !important;
+  --p-primary-color: #22D3EE !important;
+  --p-primary-contrast-color: #083344 !important;
+  --p-primary-hover-color: #67E8F9 !important;
+  --p-primary-active-color: #0891B2 !important;
+  --p-highlight-background: #164E63 !important;
+  --p-highlight-color: #67E8F9 !important;
+  --p-content-background: #122438 !important;
+  --p-content-border-color: #24394D !important;
+  --p-text-color: #F0F9FF !important;
+  --p-text-muted-color: #9FB3C8 !important;
+  --p-form-field-background: #122438 !important;
+  --p-form-field-border-color: #24394D !important;
+  --p-form-field-color: #F0F9FF !important;
+  --p-form-field-placeholder-color: #71869B !important;
+  --p-focus-ring-color: rgba(34,211,238,.28) !important;
+}
+
+/* Animated optical paths in the homepage hero — cyan and violet data packets. */
+.public-shell .reference-home .fiber-wave {
+  animation: tm-fiber-wave 5s linear infinite;
+}
+.public-shell .reference-home .fiber-wave--violet {
+  animation-duration: 6.5s;
+  animation-delay: -2s;
+}
+@keyframes tm-fiber-wave {
+  to { stroke-dashoffset: -400; }
+}
+
 /* Keep page content legible when reduced motion is requested. */
 @media (prefers-reduced-motion: reduce) {
   .public-shell *,
