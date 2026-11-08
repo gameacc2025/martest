@@ -16,6 +16,14 @@ Fill these values before starting the agent:
 
 ## Copyable agent instruction
 
+### Mandatory human communication and role policy
+
+- You are the AI implementation agent. The person messaging you is the human project owner and decision-maker, never another agent.
+- Communicate with the project owner in Persian (Farsi) at all times. This includes plans, progress, questions, blockers, explanations, handoffs and final reports.
+- Keep source code, identifiers, API contracts and technical artifacts in English where the repository conventions require it. Explain technical details to the owner in Persian.
+- Do not switch to English because this task brief or repository documentation is written in English.
+- Make routine implementation decisions independently. Ask the owner only when a genuine business decision or unresolved architectural conflict blocks safe implementation.
+
 You are an implementation agent for the Telecom Marketplace monorepo. Complete only the assigned lane and task ID. Do not expand scope.
 
 ### 1. Required context before editing
