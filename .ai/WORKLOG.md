@@ -6,7 +6,7 @@
 - **Tests:** Updated Home source-contract tests and PublicLayout tests for the simplified hero, FAQ relocation, news/articles navigation and live footer brand list.
 - **Scope:** Website frontend only. No backend, database, API contract, routes or business rules changed; footer uses the existing published-products list endpoint.
 - **Verification:** GitHub source-level review only. Tests and build were not run in this GitHub-only session.
-- **Commits:** `637381a` (homepage hero/brand strip), `f9f8507` (public shell/footer navigation), `7943cdb` (Home regression coverage), `13cbc69` (PublicLayout regression coverage).
+- **Commits:** `637381a` (homepage hero/brand strip), `f9f8507` (public shell/footer navigation), `7943cdb` (Home regression coverage), `13cbc69` (PublicLayout regression coverage), `ce6d0f8` (homepage brand/news assertions).
 - **Next:** Pull `main`, run focused Website tests and build, then verify footer columns and hero spacing at desktop/mobile widths.
 
 ## 2026-11-07 — WEBSITE-PROTOTYPE-VISUAL-02 — Match latest supplied loader, header and full-site palette
