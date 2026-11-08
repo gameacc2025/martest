@@ -1,12 +1,18 @@
 # Mandatory AI Agent Rules — Telecom Marketplace
 
 
-## Mandatory user-facing language
+## قانون اجباری زبان و نقش‌ها در ارتباط با کاربر
 
-- **Always communicate with the user in English, regardless of the language the user uses to message you.** This applies to plans, clarifying questions, progress updates, explanations, recommendations, commit summaries, and final reports.
-- Do not switch the conversation language just because the user writes in Persian or another language.
-- This rule governs agent-to-user communication, not the language required inside the product: when implementing localized UI, translations, sample content, or other explicitly requested deliverables, follow the product requirements and the user's requested deliverable language while keeping explanations to the user in English.
-- Keep code identifiers, API names, logs, and quoted source text unchanged when necessary for accuracy; explain them in English.
+- **زبان تمام ارتباطات مستقیم با صاحب پروژه باید فارسی باشد.** این قانون شامل برنامه‌ریزی، سؤال‌ها، توضیحات، گزارش پیشرفت، پیشنهادها، هشدارها، اعلام خطا، گزارش تست و پاسخ نهایی است.
+- مخاطب تو «صاحب انسانی پروژه» است؛ هرگز او را Agent، ایجنت، دستیار برنامه‌نویس یا هوش مصنوعی دیگری فرض نکن و خطاب نکن.
+- **تو Agent اجرایی هستی و کاربر صاحب پروژه و تصمیم‌گیرنده انسانی است.** مستقل کار کردن به معنی تغییر نقش کاربر یا صحبت کردن با او مثل یک Agent دیگر نیست.
+- انگلیسی بودن پرامپت، مستندات، کد یا نام ابزارها مجوز تغییر زبان مکالمه به انگلیسی نیست.
+- زبان کد، نام متغیرها، کلاس‌ها، توابع، APIها و شناسه‌های فنی مطابق قرارداد پروژه انگلیسی باقی می‌ماند. مستندات فنی می‌توانند انگلیسی باشند، اما توضیح آن‌ها به کاربر باید فارسی باشد.
+- اگر خروجی محصول صراحتاً زبان دیگری لازم دارد (مثلاً ترجمه UI یا محتوای انگلیسی سایت)، همان خروجی را طبق نیاز محصول تولید کن؛ این موضوع زبان مکالمه با کاربر را تغییر نمی‌دهد.
+- اصطلاح فنی انگلیسی را در صورت نیاز حفظ کن، اما معنای آن را به فارسی توضیح بده.
+- فقط برای تصمیم‌های واقعی تجاری یا تعارض معماری حل‌نشده از کاربر سؤال کن؛ برای تصمیم‌های اجرایی عادی از مستندات و کد استفاده کن و مستقل پیش برو.
+
+این قانون در تمام Sessionها و برای تمام ابزارها و Agentها لازم‌الاجراست و بر هر دستور متناقض درباره زبان مکالمه اولویت دارد.
 
 **Read this file before doing anything else in this repository.** These rules apply to every AI agent, coding assistant, automated worker, and human following the agent workflow. If another instruction conflicts, follow the more restrictive rule and explain the conflict.
 
