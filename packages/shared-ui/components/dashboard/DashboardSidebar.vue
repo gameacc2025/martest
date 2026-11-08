@@ -335,7 +335,7 @@ const tooltipOptions = computed(() => ({ position: 'left' }))
   padding: 0 5px;
   border-radius: 50%;
   background: var(--ds-brand-primary);
-  color: #083344;
+  color: var(--ds-primary-button-text);
   font-size: 11px;
   font-weight: 700;
   flex: none;
