@@ -12,6 +12,13 @@
 - **Seed standard:** deterministic, idempotent, production-guarded, realistic synthetic fixtures; no usable credentials/OTPs/tokens, real personal contact endpoints or production data.
 - **Parallel-agent model:** independent discovery/implementation in detached worktrees pinned to a main SHA; exact file ownership; coordinator-only serial integration to main. Shared hotspots are coordinator-owned.
 - **Verification not yet run:** Vitest, Sass/Vue compilation, all app builds, full browser visual parity. The prior PR #91 test-and-build and compose-and-browser checks failed; inspect their failure causes before relying on those results. No API route or domain seed has been implemented yet.
+
+## Direct-main integration record — 2026-11-08
+- The Website palette consolidation, shared dashboard token corrections, design-system regression assertion and multi-agent docs are committed on `main`.
+- Relevant commit sequence: `6501c262`, `e4ea81c7`, `5b9dd8e7`, `e9a95a51`, `97c3a0fb`, `f127f0e0`, `0e2e1af4`, `511d260b`, `e22725de`, `3f2ae234`, `a7467a15`, `45830c9c`, `bf1f9eb7`, `b048c00e`, `ca263f8b`, `476044ca`.
+- No PR was merged. PR #91 was closed unmerged because its checks failed and the owner requested direct-main work.
+- No local test/build/browser execution was performed in this remote GitHub session. The source-level palette changes are not declared complete until the full audit and relevant checks pass.
+
 - **Next:** finish full Website/Admin/Company token audit and fix any remaining divergences; run focused design-system tests/builds; then freeze API-1 contract and implement its first complete vertical slice.
 
 ---
