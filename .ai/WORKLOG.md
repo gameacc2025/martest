@@ -4113,7 +4113,7 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Important findings:** Current schema has 42 models / 21 enums. Core B2B marketplace is implemented. Support, CRM and finance screens are prototypes; Magazine content is static; cart/checkout is local UI only; there is no operational inventory/order/payment/settlement backend. AD-4 freezes B2C commerce but Website currently registers cart/checkout/orders routes; this conflict is documented as unresolved.
 - **Files:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`, `.ai/current-task.md`, `.ai/WORKLOG.md`.
 - **Verification:** Source/document cross-check only. No tests, builds, migrations or runtime workflows run (documentation-only task).
-- **Commits:** Backlog `bb319d529c8ecb97871164a69e2d25ad3361376a`; current-task `d08dee406adf55375d9a281b8244d46b889d306d`; worklog restoration/completion recorded in this commit.
+- **Commits:** Backlog `bb319d529c8ecb97871164a69e2d25ad3361376a`; task claim `d08dee406adf55375d9a281b8244d46b889d306d`; worklog restore/completion `b6b16983aeffedfff3dc0fad324fb11f932a83d7`; final handoff `127a627110ba37bca831c747d7d1253f7846cb0b`; project-context link `841910a7b30e39a84964c17b67c305271c19195f`.
 - **Push:** Direct commits to canonical `main` through GitHub repository operations.
 - **Risks / open questions:** Retail activation, currency/payment provider, commission/tax/shipping/returns policy, account recovery channel, support SLA, CMS editorial workflow and CRM ownership rules remain unapproved.
 - **Next action:** Begin DB-0: reconcile actual migration history, schema and database docs; refresh API route/client parity; then approve the near-term database batches before adding domain migrations.
