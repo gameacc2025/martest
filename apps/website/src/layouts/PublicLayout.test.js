@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   route: { current: null },
   routerPush: vi.fn(),
   categoryList: vi.fn(),
+  productsList: vi.fn(),
   inquiriesList: vi.fn(),
   apiGet: vi.fn(),
   apiGetPaginated: vi.fn(),
@@ -31,6 +32,7 @@ vi.mock('@telecom/shared-ui', () => ({
 
 vi.mock('@telecom/api-client', () => ({
   categoriesApi: { list: mocks.categoryList },
+  productsApi: { list: mocks.productsList },
   inquiriesApi: { list: mocks.inquiriesList },
   endpoints: { notifications: { unreadCount: '/notifications/unread-count', list: '/notifications' } },
 }))
@@ -61,6 +63,7 @@ describe('PublicLayout responsive navigation', () => {
       logout: mocks.logout,
     }
     mocks.categoryList.mockResolvedValue({ data: [] })
+    mocks.productsList.mockResolvedValue({ data: { data: [{ brand: 'Cisco' }, { brand: 'Nokia' }, { brand: 'Cisco' }] } })
     mocks.inquiriesList.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
     mocks.apiGet.mockResolvedValue({ count: 0 })
     mocks.apiGetPaginated.mockResolvedValue({ data: [] })
@@ -136,10 +139,14 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-utility-message').text()).toContain('خرید فوری و استعلام سازمانی')
     const navLabels = wrapper.findAll('.public-nav-link').map(link => link.text().trim())
     expect(navLabels).toContain('دسته‌بندی')
-    expect(navLabels).toContain('سوالات متداول')
-    expect(wrapper.find('.public-footer-grid').element.children).toHaveLength(4)
+    expect(navLabels).toContain('اخبار و مقالات')
+    expect(navLabels).not.toContain('سوالات متداول')
+    expect(wrapper.find('.public-footer-grid').element.children).toHaveLength(5)
     expect(wrapper.get('.public-footer-grid').text()).not.toContain('آخرین مطالب وبلاگ')
     expect(wrapper.get('.public-footer-grid').text()).toContain('تماس با ما')
+    expect(wrapper.get('.public-footer-grid').text()).toContain('برندها')
+    expect(wrapper.get('.public-footer-grid').text()).toContain('Cisco')
+    expect(wrapper.get('.public-footer-grid').text()).toContain('Nokia')
     const faqFooterLink = wrapper.findAll('.public-footer-link').find(link => link.text().trim() === 'سوالات متداول')
     expect(faqFooterLink).toBeTruthy()
     expect(faqFooterLink.attributes('data-route')).toBe('faq')
