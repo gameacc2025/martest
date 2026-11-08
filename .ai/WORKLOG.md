@@ -4064,3 +4064,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Reduced the final desktop/mobile header row height from 56/58px to 52px, retaining the existing sticky header behavior and transitions.
 - Added coordinated enter/leave motion for PrimeVue drawers and popup menus, including reduced-motion overrides; notification and cart drawer content and actions remain unchanged.
 - **Verification:** inspected the updated route/layout/magazine sources and confirmed expected route names, navigation links, 52px header rule, article/related/latest sections and responsive rules are present. Per user direction, did not run or wait for tests/builds.
+
+
+## 2026-11-08 — Restore compact homepage category cards
+- Replaced the oversized NewTemp header-image category cards on the homepage with compact horizontal cards matching the earlier storefront category rail: category icon, title, and live product count.
+- Kept the full header-image cards and subcategory list exclusively on the dedicated `Categories.vue` page; that page was not modified.
+- Preserved the existing category API/count loading, category navigation, empty/error states, NewTemp semantic color tokens, hover/focus states, and mobile sizing.
+- Updated `Home.test.js` to assert compact homepage markup and verify header-style cards remain on the dedicated categories page.
+- Commits on `main`: `e5c0538` (homepage UI), `15cb35f` (regression test).
+- Verification: source-level assertions reviewed. Local `pnpm test`/build and browser checks were not run in this GitHub-only session.
+- No backend, API, database, authentication, or business logic changed.
