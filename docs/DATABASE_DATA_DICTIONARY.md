@@ -39,7 +39,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `roles` | `RolePermission[]` | رابطه Prisma با جدول RolePermission (اتصال نقش و مجوز)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## RolePermission — اتصال نقش و مجوز
+## RolePermission — پیوند نقش و مجوز
 
 رابط چندبه‌چند نقش و مجوز؛ هر رکورد یک مجوز اعطاشده به یک نقش را ثبت می‌کند.
 
@@ -51,7 +51,7 @@
 | `permission` | `Permission` | رابطه Prisma با جدول Permission (مجوز)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `role` | `Role` | رابطه Prisma با جدول Role (نقش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## UserRole — تخصیص نقش
+## UserRole — تخصیص نقش به کاربر
 
 رابط تخصیص نقش به کاربر و زمان اعطای نقش.
 
@@ -79,7 +79,7 @@
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `company` | `Company?` | رابطه Prisma با جدول Company (شرکت)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## Profile — پروفایل
+## Profile — پروفایل کاربر
 
 اطلاعات شخصی و نمایشی کاربر که از اطلاعات ورود جدا نگهداری می‌شود.
 
@@ -223,7 +223,7 @@
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `retailOrders` | `RetailOrder[]` | رابطه Prisma با جدول RetailOrder (سفارش)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## RefreshToken — RefreshToken
+## RefreshToken — توکن نوسازی
 
 توکن‌های نوسازی نشست کاربر برای کنترل انقضا و ابطال نشست.
 
@@ -236,7 +236,7 @@
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## HandoffCode — HandoffCode
+## HandoffCode — کد انتقال نشست
 
 کد موقت انتقال امن نشست میان وب‌سایت و پنل‌ها؛ کد خام ذخیره نمی‌شود.
 
@@ -251,7 +251,7 @@
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## Category — Category
+## Category — دسته‌بندی
 
 دسته‌بندی‌های اصلی کاتالوگ محصولات و تنظیمات نمایش آن‌ها.
 
@@ -271,7 +271,7 @@
 | `products` | `Product[]` | رابطه Prisma با جدول Product (محصول)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `commissionRules` | `CommissionRule[]` | رابطه Prisma با جدول CommissionRule (CommissionRule)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## Subcategory — Subcategory
+## Subcategory — زیردسته
 
 زیر‌دسته هر دسته اصلی و ارتباط آن با قالب مشخصات و محصولات.
 
@@ -290,7 +290,7 @@
 | `specificationTemplate` | `SpecificationTemplate?` | رابطه Prisma با جدول SpecificationTemplate (SpecificationTemplate)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `products` | `Product[]` | رابطه Prisma با جدول Product (محصول)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SpecificationTemplate — SpecificationTemplate
+## SpecificationTemplate — قالب مشخصات فنی
 
 قالب مشخصات فنی قابل استفاده برای محصولات یک زیر‌دسته.
 
@@ -306,7 +306,7 @@
 | `subcategory` | `Subcategory` | رابطه Prisma با جدول Subcategory (Subcategory)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `fields` | `SpecificationField[]` | رابطه Prisma با جدول SpecificationField (SpecificationField)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SpecificationField — SpecificationField
+## SpecificationField — فیلد مشخصات فنی
 
 تعریف هر فیلد مشخصات فنی شامل نوع، واحد، اجباری بودن و گزینه‌ها.
 
@@ -325,7 +325,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `template` | `SpecificationTemplate` | رابطه Prisma با جدول SpecificationTemplate (SpecificationTemplate)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SpecificationLibraryField — SpecificationLibraryField
+## SpecificationLibraryField — کتابخانه فیلدهای فنی
 
 کتابخانه فیلدهای مشخصات فنی قابل استفاده مجدد در قالب‌های مختلف.
 
@@ -385,7 +385,7 @@
 | `inventoryReservations` | `InventoryReservation[]` | رابطه Prisma با جدول InventoryReservation (InventoryReservation)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `retailOrderItems` | `RetailOrderItem[]` | رابطه Prisma با جدول RetailOrderItem (RetailOrderItem)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ProductStatusHistory — ProductStatusHistory
+## ProductStatusHistory — تاریخچه وضعیت محصول
 
 تاریخچه تغییر وضعیت محصول، عامل تغییر و توضیح آن.
 
@@ -401,7 +401,7 @@
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `changedBy` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ProductActivityLog — ProductActivityLog
+## ProductActivityLog — گزارش فعالیت محصول
 
 رویدادها و فعالیت‌های انجام‌شده روی محصول برای پیگیری و ممیزی.
 
@@ -417,7 +417,7 @@
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `actor` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ProductImage — ProductImage
+## ProductImage — تصویر محصول
 
 تصاویر محصول و فراداده لازم برای نمایش و دسترس‌پذیری.
 
@@ -434,7 +434,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ProductDocument — ProductDocument
+## ProductDocument — سند محصول
 
 اسناد و فایل‌های پیوست محصول مانند دیتاشیت و کاتالوگ.
 
@@ -450,7 +450,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ProductPriceTier — ProductPriceTier
+## ProductPriceTier — سطح قیمت محصول
 
 قیمت جاری محصول بر اساس بازه حداقل و حداکثر تعداد سفارش.
 
@@ -468,7 +468,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ProductPriceSnapshot — ProductPriceSnapshot
+## ProductPriceSnapshot — تاریخچه قیمت محصول
 
 تصویر تاریخی قیمت هر سطح در زمان ثبت برای گزارش و نمودار تغییرات.
 
@@ -517,7 +517,7 @@
 | `messages` | `InquiryMessage[]` | رابطه Prisma با جدول InquiryMessage (InquiryMessage)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `statusHistory` | `InquiryStatusHistory[]` | رابطه Prisma با جدول InquiryStatusHistory (InquiryStatusHistory)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryMessage — InquiryMessage
+## InquiryMessage — پیام استعلام
 
 پیام‌های میان خریدار و شرکت‌های پاسخ‌دهنده درباره یک استعلام.
 
@@ -538,7 +538,7 @@
 | `recipientUser` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `recipientCompany` | `Company?` | رابطه Prisma با جدول Company (شرکت)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryStatusHistory — InquiryStatusHistory
+## InquiryStatusHistory — تاریخچه وضعیت استعلام
 
 تاریخچه تغییر وضعیت استعلام همراه با عامل و دلیل تغییر.
 
@@ -555,7 +555,7 @@
 | `inquiry` | `Inquiry` | رابطه Prisma با جدول Inquiry (استعلام)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `changedBy` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryItem — InquiryItem
+## InquiryItem — قلم استعلام
 
 اقلام و محصولات درخواست‌شده در یک استعلام به همراه تعداد و توضیح.
 
@@ -572,7 +572,7 @@
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `responseItems` | `InquiryResponseItem[]` | رابطه Prisma با جدول InquiryResponseItem (InquiryResponseItem)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryResponse — InquiryResponse
+## InquiryResponse — پاسخ استعلام
 
 پاسخ یا پیشنهاد یک شرکت تأمین‌کننده به یک استعلام.
 
@@ -590,7 +590,7 @@
 | `items` | `InquiryResponseItem[]` | رابطه Prisma با جدول InquiryResponseItem (InquiryResponseItem)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `attachments` | `InquiryResponseAttachment[]` | رابطه Prisma با جدول InquiryResponseAttachment (InquiryResponseAttachment)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryResponseAttachment — InquiryResponseAttachment
+## InquiryResponseAttachment — پیوست پاسخ استعلام
 
 فایل‌های پیوست یک پاسخ استعلام به همراه مشخصات فایل.
 
@@ -605,7 +605,7 @@
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `response` | `InquiryResponse` | رابطه Prisma با جدول InquiryResponse (InquiryResponse)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryResponseItem — InquiryResponseItem
+## InquiryResponseItem — قلم پیشنهاد تأمین
 
 قیمت و شرایط تأمین پیشنهادی شرکت برای یک قلم استعلام.
 
@@ -622,7 +622,7 @@
 | `response` | `InquiryResponse` | رابطه Prisma با جدول InquiryResponse (InquiryResponse)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `inquiryItem` | `InquiryItem` | رابطه Prisma با جدول InquiryItem (InquiryItem)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CompanyInquiryLimit — CompanyInquiryLimit
+## CompanyInquiryLimit — محدودیت استعلام شرکت
 
 محدودیت‌های کلی تعداد استعلام باز و پاسخ فعال هر شرکت در ساختار قدیمی.
 
@@ -636,7 +636,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `company` | `Company` | رابطه Prisma با جدول Company (شرکت)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CompanyLimit — CompanyLimit
+## CompanyLimit — محدودیت شرکت
 
 سقف‌ها و محدودیت‌های قابل پیکربندی هر شرکت به شکل کلید و مقدار.
 
@@ -650,7 +650,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `company` | `Company` | رابطه Prisma با جدول Company (شرکت)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryPlan — InquiryPlan
+## InquiryPlan — طرح اشتراک
 
 تعریف بسته اشتراک استعلام و سهمیه‌های قابل مصرف در هر دوره.
 
@@ -672,7 +672,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `subscriptions` | `InquirySubscription[]` | رابطه Prisma با جدول InquirySubscription (InquirySubscription)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquirySubscription — InquirySubscription
+## InquirySubscription — اشتراک استعلام
 
 اشتراک تخصیص‌یافته یا خریداری‌شده توسط شرکت/کاربر و بازه اعتبار آن.
 
@@ -700,7 +700,7 @@
 | `user` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `usage` | `InquiryUsageEvent[]` | رابطه Prisma با جدول InquiryUsageEvent (InquiryUsageEvent)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InquiryUsageEvent — InquiryUsageEvent
+## InquiryUsageEvent — رویداد مصرف اشتراک
 
 رویداد مصرف سهمیه اشتراک و مرجع عملیاتی آن برای محاسبه مصرف.
 
@@ -717,7 +717,7 @@
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `subscription` | `InquirySubscription` | رابطه Prisma با جدول InquirySubscription (InquirySubscription)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SystemSetting — SystemSetting
+## SystemSetting — تنظیم سامانه
 
 تنظیمات سراسری سامانه به شکل کلید و مقدار.
 
@@ -747,7 +747,7 @@
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `folderMemberships` | `NotificationFolderMembership[]` | رابطه Prisma با جدول NotificationFolderMembership (NotificationFolderMembership)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## NotificationFolder — NotificationFolder
+## NotificationFolder — پوشه اعلان
 
 تعریف پوشه‌های سیستمی یا مدیریتی اعلان و محدوده نمایش آن‌ها.
 
@@ -764,7 +764,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `memberships` | `NotificationFolderMembership[]` | رابطه Prisma با جدول NotificationFolderMembership (NotificationFolderMembership)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## NotificationFolderMembership — NotificationFolderMembership
+## NotificationFolderMembership — عضویت اعلان در پوشه
 
 ارتباط اعلان با پوشه؛ امکان عضویت یک اعلان در پوشه‌ها را ثبت می‌کند.
 
@@ -777,7 +777,7 @@
 | `notification` | `Notification` | رابطه Prisma با جدول Notification (اعلان)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `folder` | `NotificationFolder` | رابطه Prisma با جدول NotificationFolder (NotificationFolder)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## NotificationPreference — NotificationPreference
+## NotificationPreference — ترجیحات اعلان
 
 ترجیحات هر کاربر برای دریافت نوع مشخصی از اعلان از طریق یک کانال.
 
@@ -792,7 +792,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## NotificationDelivery — NotificationDelivery
+## NotificationDelivery — تحویل اعلان
 
 تلاش‌ها و وضعیت تحویل اعلان از طریق ایمیل، پیامک یا کانال دیگر.
 
@@ -804,7 +804,7 @@
 | `eventType` | `String` | نوع رویداد ثبت‌شده. |
 | `channel` | `NotificationChannel` | کانال ارسال یا دریافت. |
 | `status` | `NotificationDeliveryStatus` | وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند. |
-| `recipient` | `String?` | مقدار متنی recipient برای توصیف یا شناسایی NotificationDelivery. |
+| `recipient` | `String?` | مقصد واقعی تحویل اعلان را نگه می‌دارد؛ مانند نشانی ایمیل یا شماره تلفن گیرنده. |
 | `subject` | `String?` | موضوع پیام، تیکت یا فعالیت برای نمایش و جست‌وجو. |
 | `body` | `String?` | متن کامل پیام، یادداشت یا محتوای رکورد. |
 | `provider` | `String?` | نام درگاه یا سرویس بیرونی انجام‌دهنده عملیات. |
@@ -818,7 +818,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## Banner — Banner
+## Banner — بنر
 
 بنرهای وب‌سایت همراه با محتوا، مقصد کلیک، جایگاه و بازه نمایش.
 
@@ -840,7 +840,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `deletedAt` | `DateTime?` | زمان حذف نرم؛ NULL یعنی رکورد حذف نرم نشده است. |
 
-## AuthChallenge — AuthChallenge
+## AuthChallenge — چالش احراز هویت
 
 چالش یک‌بارمصرف احراز هویت/بازیابی حساب؛ فقط هش راز ذخیره و انقضا و تعداد تلاش کنترل می‌شود.
 
@@ -860,7 +860,7 @@
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `user` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## AuditLog — AuditLog
+## AuditLog — گزارش ممیزی
 
 رخدادهای ممیزی عملیات؛ عامل، شرکت، موجودیت هدف، نتیجه و مشخصات درخواست را به‌صورت ثبت غیرقابل‌ویرایش نگه می‌دارد.
 
@@ -883,7 +883,7 @@
 | `actor` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `company` | `Company?` | رابطه Prisma با جدول Company (شرکت)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportQueue — SupportQueue
+## SupportQueue — صف پشتیبانی
 
 صف‌های کاری تیم پشتیبانی برای دسته‌بندی و ارجاع تیکت‌ها.
 
@@ -900,7 +900,7 @@
 | `tickets` | `SupportTicket[]` | رابطه Prisma با جدول SupportTicket (تیکت پشتیبانی)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `assignments` | `SupportAssignment[]` | رابطه Prisma با جدول SupportAssignment (SupportAssignment)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportCategory — SupportCategory
+## SupportCategory — دسته پشتیبانی
 
 دسته‌بندی موضوعی تیکت‌های پشتیبانی و مبنای اتصال سیاست SLA.
 
@@ -917,7 +917,7 @@
 | `tickets` | `SupportTicket[]` | رابطه Prisma با جدول SupportTicket (تیکت پشتیبانی)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `slaPolicies` | `SupportSlaPolicy[]` | رابطه Prisma با جدول SupportSlaPolicy (SupportSlaPolicy)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportSlaPolicy — SupportSlaPolicy
+## SupportSlaPolicy — سیاست SLA
 
 زمان هدف پاسخ اولیه و حل تیکت بر اساس دسته و اولویت.
 
@@ -941,7 +941,7 @@
 | فیلد | نوع Prisma | توضیح |
 |---|---|---|
 | `id` | `Int` | شناسه یکتای رکورد و کلید اصلی جدول. |
-| `ticketNumber` | `String` | مقدار متنی ticketNumber برای توصیف یا شناسایی تیکت پشتیبانی. |
+| `ticketNumber` | `String` | شماره یکتای قابل نمایش تیکت برای جست‌وجو، مکاتبه و ارجاع به پشتیبانی. |
 | `requesterUserId` | `Int` | شناسه کاربر مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول User است. |
 | `requesterCompanyId` | `Int?` | شناسه شرکت مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول Company است. |
 | `categoryId` | `Int?` | شناسه SupportCategory مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول SupportCategory است. |
@@ -969,7 +969,7 @@
 | `statusHistory` | `SupportStatusHistory[]` | رابطه Prisma با جدول SupportStatusHistory (SupportStatusHistory)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `events` | `SupportEvent[]` | رابطه Prisma با جدول SupportEvent (SupportEvent)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportMessage — SupportMessage
+## SupportMessage — پیام پشتیبانی
 
 پیام‌های تیکت پشتیبانی با مشخص بودن نویسنده و سطح مشاهده عمومی/داخلی.
 
@@ -985,7 +985,7 @@
 | `sender` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `attachments` | `SupportAttachment[]` | رابطه Prisma با جدول SupportAttachment (SupportAttachment)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportAttachment — SupportAttachment
+## SupportAttachment — پیوست پشتیبانی
 
 فراداده فایل پیوست پیام پشتیبانی شامل مسیر ذخیره، نوع، اندازه و وضعیت بررسی.
 
@@ -1004,7 +1004,7 @@
 | `message` | `SupportMessage` | رابطه Prisma با جدول SupportMessage (SupportMessage)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `uploadedBy` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportAssignment — SupportAssignment
+## SupportAssignment — ارجاع پشتیبانی
 
 تاریخچه ارجاع تیکت به صف یا کارشناس با زمان شروع و پایان تخصیص.
 
@@ -1023,7 +1023,7 @@
 | `assignee` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `assignedBy` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportStatusHistory — SupportStatusHistory
+## SupportStatusHistory — تاریخچه وضعیت تیکت
 
 تاریخچه تغییر وضعیت تیکت همراه با عامل و دلیل تغییر.
 
@@ -1039,7 +1039,7 @@
 | `ticket` | `SupportTicket` | رابطه Prisma با جدول SupportTicket (تیکت پشتیبانی)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `actor` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SupportEvent — SupportEvent
+## SupportEvent — رویداد پشتیبانی
 
 رویدادهای دامنه پشتیبانی برای پردازش و جلوگیری از اجرای تکراری.
 
@@ -1088,7 +1088,7 @@
 | `revisions` | `ArticleRevision[]` | رابطه Prisma با جدول ArticleRevision (ArticleRevision)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `media` | `ArticleMedia[]` | رابطه Prisma با جدول ArticleMedia (ArticleMedia)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ArticleCategory — ArticleCategory
+## ArticleCategory — دسته مقاله
 
 دسته‌بندی مطالب مجله برای گروه‌بندی و فیلتر محتوا.
 
@@ -1103,7 +1103,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `articles` | `ArticleCategoryAssignment[]` | رابطه Prisma با جدول ArticleCategoryAssignment (ArticleCategoryAssignment)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ArticleTag — ArticleTag
+## ArticleTag — برچسب مقاله
 
 برچسب‌های موضوعی مطالب برای جست‌وجو و ارتباط محتوایی.
 
@@ -1115,7 +1115,7 @@
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `articles` | `ArticleTagAssignment[]` | رابطه Prisma با جدول ArticleTagAssignment (ArticleTagAssignment)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ArticleCategoryAssignment — ArticleCategoryAssignment
+## ArticleCategoryAssignment — اتصال مقاله به دسته
 
 رابط مقاله و دسته‌بندی به همراه ترتیب نمایش مقاله در دسته.
 
@@ -1127,7 +1127,7 @@
 | `article` | `Article` | رابطه Prisma با جدول Article (مقاله)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `category` | `ArticleCategory` | رابطه Prisma با جدول ArticleCategory (ArticleCategory)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ArticleTagAssignment — ArticleTagAssignment
+## ArticleTagAssignment — اتصال مقاله به برچسب
 
 رابط چندبه‌چند مقاله و برچسب.
 
@@ -1138,7 +1138,7 @@
 | `article` | `Article` | رابطه Prisma با جدول Article (مقاله)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `tag` | `ArticleTag` | رابطه Prisma با جدول ArticleTag (ArticleTag)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ArticleRevision — ArticleRevision
+## ArticleRevision — نسخه مقاله
 
 نسخه‌های محتوای مقاله به‌صورت snapshot برای نگهداری سابقه ویرایش.
 
@@ -1154,7 +1154,7 @@
 | `article` | `Article` | رابطه Prisma با جدول Article (مقاله)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `editor` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ArticleMedia — ArticleMedia
+## ArticleMedia — رسانه مقاله
 
 فراداده رسانه‌های مقاله شامل کلید ذخیره‌سازی و مشخصات فایل.
 
@@ -1172,7 +1172,7 @@
 | `article` | `Article` | رابطه Prisma با جدول Article (مقاله)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `uploadedBy` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CRMAccount — CRMAccount
+## CRMAccount — حساب CRM
 
 پرونده حساب مشتری/سازمان در CRM و پیوند آن به شرکت یا کاربر موجود.
 
@@ -1199,7 +1199,7 @@
 | `tasks` | `CRMTask[]` | رابطه Prisma با جدول CRMTask (CRMTask)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `notesLog` | `CRMNote[]` | رابطه Prisma با جدول CRMNote (CRMNote)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CRMContact — CRMContact
+## CRMContact — مخاطب CRM
 
 اشخاص رابط یک حساب CRM و اطلاعات تماس آن‌ها.
 
@@ -1219,7 +1219,7 @@
 | `account` | `CRMAccount` | رابطه Prisma با جدول CRMAccount (CRMAccount)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `user` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## LeadSource — LeadSource
+## LeadSource — منبع سرنخ
 
 منابع ورود سرنخ‌های فروش به شکل کد و عنوان قابل مدیریت.
 
@@ -1241,19 +1241,19 @@
 | فیلد | نوع Prisma | توضیح |
 |---|---|---|
 | `id` | `Int` | شناسه یکتای رکورد و کلید اصلی جدول. |
-| `leadNumber` | `String` | مقدار متنی leadNumber برای توصیف یا شناسایی سرنخ فروش. |
+| `leadNumber` | `String` | شماره یکتای قابل نمایش سرنخ فروش برای پیگیری در CRM. |
 | `displayName` | `String` | نام کامل/نمایشی این حساب یا سرنخ برای نمایش در CRM. |
 | `companyName` | `String?` | نام شرکت مرتبط با سرنخ. |
 | `email` | `String?` | نشانی ایمیل مرتبط. |
 | `phone` | `String?` | شماره تماس مرتبط. |
 | `sourceId` | `Int?` | شناسه LeadSource مرتبط با این سرنخ فروش؛ کلید خارجی به جدول LeadSource است. |
 | `status` | `CRMLeadStatus` | وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند. |
-| `score` | `Int` | مقدار عددی score برای سرنخ فروش. |
+| `score` | `Int` | امتیاز عددی سرنخ برای اولویت‌بندی و ارزیابی احتمال تبدیل آن به مشتری. |
 | `ownerUserId` | `Int` | شناسه کاربر مرتبط با این سرنخ فروش؛ کلید خارجی به جدول User است. |
 | `convertedAccountId` | `Int?` | شناسه CRMAccount مرتبط با این سرنخ فروش؛ کلید خارجی به جدول CRMAccount است. |
 | `convertedByUserId` | `Int?` | شناسه کاربر مرتبط با این سرنخ فروش؛ کلید خارجی به جدول User است. |
 | `convertedAt` | `DateTime?` | زمان converted این سرنخ فروش را ثبت می‌کند. |
-| `disqualifiedReason` | `String?` | مقدار متنی disqualifiedReason برای توصیف یا شناسایی سرنخ فروش. |
+| `disqualifiedReason` | `String?` | دلیل رد صلاحیت یا خارج‌کردن سرنخ از چرخه پیگیری فروش. |
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `source` | `LeadSource?` | رابطه Prisma با جدول LeadSource (LeadSource)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
@@ -1264,7 +1264,7 @@
 | `tasks` | `CRMTask[]` | رابطه Prisma با جدول CRMTask (CRMTask)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `notesLog` | `CRMNote[]` | رابطه Prisma با جدول CRMNote (CRMNote)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## Pipeline — Pipeline
+## Pipeline — قیف فروش
 
 تعریف قیف فروش CRM و تعیین قیف فعال یا پیش‌فرض.
 
@@ -1279,7 +1279,7 @@
 | `stages` | `PipelineStage[]` | رابطه Prisma با جدول PipelineStage (PipelineStage)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `opportunities` | `Opportunity[]` | رابطه Prisma با جدول Opportunity (فرصت فروش)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## PipelineStage — PipelineStage
+## PipelineStage — مرحله قیف فروش
 
 مراحل هر قیف فروش با ترتیب و احتمال موفقیت و نشانگر برد/باخت.
 
@@ -1327,7 +1327,7 @@
 | `tasks` | `CRMTask[]` | رابطه Prisma با جدول CRMTask (CRMTask)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `notesLog` | `CRMNote[]` | رابطه Prisma با جدول CRMNote (CRMNote)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## OpportunityStageHistory — OpportunityStageHistory
+## OpportunityStageHistory — تاریخچه مرحله فرصت
 
 تاریخچه جابه‌جایی فرصت فروش میان مراحل قیف.
 
@@ -1345,7 +1345,7 @@
 | `toStage` | `PipelineStage` | رابطه Prisma با جدول PipelineStage (PipelineStage)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `actor` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CRMActivity — CRMActivity
+## CRMActivity — فعالیت CRM
 
 فعالیت‌های ارتباطی و فروش مانند تماس، جلسه یا پیگیری و نتیجه آن.
 
@@ -1368,7 +1368,7 @@
 | `lead` | `Lead?` | رابطه Prisma با جدول Lead (سرنخ فروش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `opportunity` | `Opportunity?` | رابطه Prisma با جدول Opportunity (فرصت فروش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CRMTask — CRMTask
+## CRMTask — وظیفه CRM
 
 وظایف پیگیری CRM با مسئول، اولویت، وضعیت و مهلت انجام.
 
@@ -1394,7 +1394,7 @@
 | `lead` | `Lead?` | رابطه Prisma با جدول Lead (سرنخ فروش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `opportunity` | `Opportunity?` | رابطه Prisma با جدول Opportunity (فرصت فروش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CRMNote — CRMNote
+## CRMNote — یادداشت CRM
 
 یادداشت‌های مرتبط با حساب، سرنخ یا فرصت همراه با سطح مشاهده.
 
@@ -1413,7 +1413,7 @@
 | `lead` | `Lead?` | رابطه Prisma با جدول Lead (سرنخ فروش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `opportunity` | `Opportunity?` | رابطه Prisma با جدول Opportunity (فرصت فروش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InventoryBalance — InventoryBalance
+## InventoryBalance — مانده موجودی
 
 مانده فعلی موجودی هر محصول شامل تعداد موجود و تعداد رزروشده.
 
@@ -1427,7 +1427,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InventoryMovement — InventoryMovement
+## InventoryMovement — گردش موجودی
 
 دفتر تغییرات موجودی شامل نوع حرکت، تعداد، مرجع و عامل عملیات.
 
@@ -1447,14 +1447,14 @@
 | `product` | `Product` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `actor` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## RetailOrder — سفارش
+## RetailOrder — سفارش خرده‌فروشی
 
 سفارش اصلی خریدار، وضعیت سفارش و پرداخت، مبالغ، ارز و snapshot نشانی گیرنده.
 
 | فیلد | نوع Prisma | توضیح |
 |---|---|---|
 | `id` | `Int` | شناسه یکتای رکورد و کلید اصلی جدول. |
-| `orderNumber` | `String` | مقدار متنی orderNumber برای توصیف یا شناسایی سفارش. |
+| `orderNumber` | `String` | شماره یکتای قابل نمایش سفارش اصلی خریدار. |
 | `buyerUserId` | `Int` | شناسه کاربر مرتبط با این سفارش؛ کلید خارجی به جدول User است. |
 | `status` | `RetailOrderStatus` | وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند. |
 | `paymentStatus` | `RetailPaymentStatus` | وضعیت پرداخت سفارش، مستقل از وضعیت پردازش/ارسال سفارش. |
@@ -1498,7 +1498,7 @@
 | `id` | `Int` | شناسه یکتای رکورد و کلید اصلی جدول. |
 | `orderId` | `Int` | شناسه سفارش مرتبط با این سفارش فروشنده؛ کلید خارجی به جدول RetailOrder است. |
 | `companyId` | `Int` | شناسه شرکت مرتبط با این سفارش فروشنده؛ کلید خارجی به جدول Company است. |
-| `sellerOrderNumber` | `String` | مقدار متنی sellerOrderNumber برای توصیف یا شناسایی سفارش فروشنده. |
+| `sellerOrderNumber` | `String` | شماره یکتای قابل نمایش بخش سفارش متعلق به یک فروشنده. |
 | `status` | `SellerOrderStatus` | وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند. |
 | `currency` | `String` | کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد. |
 | `subtotal` | `Decimal` | جمع مبالغ پیش از تخفیف/مالیات/هزینه‌های افزوده. |
@@ -1523,7 +1523,7 @@
 | `sellerPayable` | `SellerPayable?` | رابطه Prisma با جدول SellerPayable (SellerPayable)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `invoices` | `FinanceInvoice[]` | رابطه Prisma با جدول FinanceInvoice (FinanceInvoice)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## RetailOrderItem — RetailOrderItem
+## RetailOrderItem — قلم سفارش
 
 اقلام سفارش با snapshot محصول/فروشنده، تعداد، قیمت، تخفیف و مالیات.
 
@@ -1551,7 +1551,7 @@
 | `product` | `Product?` | رابطه Prisma با جدول Product (محصول)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `returnItems` | `ReturnItem[]` | رابطه Prisma با جدول ReturnItem (ReturnItem)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## InventoryReservation — InventoryReservation
+## InventoryReservation — رزرو موجودی
 
 رزرو موقت موجودی برای خریدار/فرآیند سفارش همراه با انقضا و وضعیت.
 
@@ -1572,7 +1572,7 @@
 | `buyer` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `order` | `RetailOrder?` | رابطه Prisma با جدول RetailOrder (سفارش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## PaymentAttempt — PaymentAttempt
+## PaymentAttempt — تلاش پرداخت
 
 تلاش آغاز یا تکمیل پرداخت سفارش، درگاه، وضعیت و شناسه‌های پیگیری.
 
@@ -1595,7 +1595,7 @@
 | `transactions` | `PaymentTransaction[]` | رابطه Prisma با جدول PaymentTransaction (PaymentTransaction)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `webhookEvents` | `PaymentWebhookEvent[]` | رابطه Prisma با جدول PaymentWebhookEvent (PaymentWebhookEvent)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## PaymentTransaction — PaymentTransaction
+## PaymentTransaction — تراکنش پرداخت
 
 تراکنش پرداخت/بازپرداخت مرتبط با سفارش یا تلاش پرداخت.
 
@@ -1617,7 +1617,7 @@
 | `refunds` | `RetailRefund[]` | رابطه Prisma با جدول RetailRefund (RetailRefund)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `reconciliations` | `ReconciliationRecord[]` | رابطه Prisma با جدول ReconciliationRecord (ReconciliationRecord)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## PaymentWebhookEvent — PaymentWebhookEvent
+## PaymentWebhookEvent — رویداد وب‌هوک پرداخت
 
 رویداد دریافتی webhook درگاه با اعتبار امضا و نتیجه پردازش.
 
@@ -1635,7 +1635,7 @@
 | `lastError` | `String?` | آخرین خطای رخ‌داده هنگام پردازش/ارسال. |
 | `attempt` | `PaymentAttempt?` | رابطه Prisma با جدول PaymentAttempt (PaymentAttempt)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## RetailRefund — RetailRefund
+## RetailRefund — بازپرداخت
 
 درخواست و نتیجه بازپرداخت وجه سفارش.
 
@@ -1660,7 +1660,7 @@
 | `paymentTransaction` | `PaymentTransaction?` | رابطه Prisma با جدول PaymentTransaction (PaymentTransaction)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `requestedBy` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## Shipment — Shipment
+## Shipment — محموله ارسالی
 
 اطلاعات ارسال سفارش فروشنده شامل شرکت حمل، کد رهگیری و وضعیت.
 
@@ -1678,7 +1678,7 @@
 | `sellerOrder` | `SellerOrder` | رابطه Prisma با جدول SellerOrder (سفارش فروشنده)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `trackingEvents` | `TrackingEvent[]` | رابطه Prisma با جدول TrackingEvent (TrackingEvent)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## TrackingEvent — TrackingEvent
+## TrackingEvent — رویداد رهگیری
 
 رویدادهای رهگیری مرسوله شامل شرح، موقعیت و زمان وقوع.
 
@@ -1693,7 +1693,7 @@
 | `createdAt` | `DateTime` | زمان ایجاد رکورد. |
 | `shipment` | `Shipment` | رابطه Prisma با جدول Shipment (Shipment)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ReturnRequest — ReturnRequest
+## ReturnRequest — درخواست مرجوعی
 
 درخواست مرجوعی خریدار برای سفارش یا بخش فروشنده.
 
@@ -1716,7 +1716,7 @@
 | `buyer` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `items` | `ReturnItem[]` | رابطه Prisma با جدول ReturnItem (ReturnItem)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ReturnItem — ReturnItem
+## ReturnItem — قلم مرجوعی
 
 اقلام و تعدادهای مشمول درخواست مرجوعی و نتیجه بازرسی آن‌ها.
 
@@ -1732,7 +1732,7 @@
 | `returnRequest` | `ReturnRequest` | رابطه Prisma با جدول ReturnRequest (ReturnRequest)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `orderItem` | `RetailOrderItem` | رابطه Prisma با جدول RetailOrderItem (RetailOrderItem)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## LedgerAccount — LedgerAccount
+## LedgerAccount — حساب دفتر کل
 
 حساب دفتر کل با کد، نام، ماهیت حساب و ارز.
 
@@ -1749,7 +1749,7 @@
 | `updatedAt` | `DateTime` | آخرین زمان ویرایش رکورد. |
 | `lines` | `JournalLine[]` | رابطه Prisma با جدول JournalLine (JournalLine)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## JournalEntry — JournalEntry
+## JournalEntry — سند حسابداری
 
 سند حسابداری دفتر کل با منبع، وضعیت ثبت و ارتباط با سند معکوس.
 
@@ -1772,7 +1772,7 @@
 | `reversalOf` | `JournalEntry?` | رابطه Prisma با جدول JournalEntry (JournalEntry)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `reversals` | `JournalEntry[]` | رابطه Prisma با جدول JournalEntry (JournalEntry)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## JournalLine — JournalLine
+## JournalLine — سطر سند حسابداری
 
 سطر بدهکار/بستانکار سند حسابداری و حساب دفتر کل مربوط.
 
@@ -1788,7 +1788,7 @@
 | `journalEntry` | `JournalEntry` | رابطه Prisma با جدول JournalEntry (JournalEntry)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `account` | `LedgerAccount` | رابطه Prisma با جدول LedgerAccount (LedgerAccount)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CommissionRule — CommissionRule
+## CommissionRule — قاعده کمیسیون
 
 قاعده محاسبه کمیسیون بر اساس درصد/مبلغ ثابت، شرکت/دسته و بازه اعتبار.
 
@@ -1812,7 +1812,7 @@
 | `category` | `Category?` | رابطه Prisma با جدول Category (Category)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `snapshots` | `CommissionSnapshot[]` | رابطه Prisma با جدول CommissionSnapshot (CommissionSnapshot)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## CommissionSnapshot — CommissionSnapshot
+## CommissionSnapshot — تصویر کمیسیون
 
 snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده تا تغییر بعدی قانون، مبلغ تاریخی را عوض نکند.
 
@@ -1830,7 +1830,7 @@ snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده
 | `sellerOrder` | `SellerOrder` | رابطه Prisma با جدول SellerOrder (سفارش فروشنده)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `rule` | `CommissionRule?` | رابطه Prisma با جدول CommissionRule (CommissionRule)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SellerPayable — SellerPayable
+## SellerPayable — بدهی فروشنده
 
 بدهی خالص بازارگاه به فروشنده برای سفارش، پس از کمیسیون و کسورات.
 
@@ -1854,7 +1854,7 @@ snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده
 | `company` | `Company` | رابطه Prisma با جدول Company (شرکت)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `settlement` | `Settlement?` | رابطه Prisma با جدول Settlement (تسویه)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## Settlement — تسویه
+## Settlement — تسویه مالی
 
 پرونده تسویه مالی شرکت در یک دوره همراه با مبالغ و وضعیت تأیید/پرداخت.
 
@@ -1882,7 +1882,7 @@ snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده
 | `approvals` | `SettlementApproval[]` | رابطه Prisma با جدول SettlementApproval (SettlementApproval)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `payouts` | `SettlementPayout[]` | رابطه Prisma با جدول SettlementPayout (SettlementPayout)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SettlementApproval — SettlementApproval
+## SettlementApproval — تأیید تسویه
 
 تصمیم تأیید/رد پرونده تسویه، تأییدکننده و زمان تصمیم.
 
@@ -1897,7 +1897,7 @@ snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده
 | `settlement` | `Settlement` | رابطه Prisma با جدول Settlement (تسویه)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `approver` | `User` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## SettlementPayout — SettlementPayout
+## SettlementPayout — پرداخت تسویه
 
 اجرای پرداخت یک تسویه به فروشنده و نتیجه آن.
 
@@ -1920,7 +1920,7 @@ snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده
 | `executedBy` | `User?` | رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `reconciliations` | `ReconciliationRecord[]` | رابطه Prisma با جدول ReconciliationRecord (ReconciliationRecord)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## ReconciliationRecord — ReconciliationRecord
+## ReconciliationRecord — مغایرت‌گیری مالی
 
 تطبیق تراکنش یا پرداخت خروجی با گزارش ارائه‌دهنده مالی.
 
@@ -1939,7 +1939,7 @@ snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده
 | `paymentTransaction` | `PaymentTransaction?` | رابطه Prisma با جدول PaymentTransaction (PaymentTransaction)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `payout` | `SettlementPayout?` | رابطه Prisma با جدول SettlementPayout (SettlementPayout)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## FinanceInvoice — FinanceInvoice
+## FinanceInvoice — فاکتور مالی
 
 سربرگ فاکتور مالی مرتبط با خریدار، شرکت یا سفارش.
 
@@ -1965,7 +1965,7 @@ snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده
 | `sellerOrder` | `SellerOrder?` | رابطه Prisma با جدول SellerOrder (سفارش فروشنده)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 | `lines` | `FinanceInvoiceLine[]` | رابطه Prisma با جدول FinanceInvoiceLine (FinanceInvoiceLine)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست. |
 
-## FinanceInvoiceLine — FinanceInvoiceLine
+## FinanceInvoiceLine — ردیف فاکتور مالی
 
 ردیف جزئیات فاکتور شامل شرح، تعداد، قیمت، مالیات و جمع ردیف.
 
