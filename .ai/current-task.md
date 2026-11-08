@@ -1019,3 +1019,11 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Added regression assertions. No build or tests run, per instruction; browser verification not performed.
 - No backend/API/database/auth/business behavior changed.
 - Commits: `f958806`, `2d199cf`, `2cceb87`, `b5e87c6`.
+
+
+## 2026-11-08 — Homepage category card correction
+- Completed: homepage now uses compact horizontal category cards; full header-image category cards remain exclusive to the dedicated categories page.
+- Category API, product-count retrieval, click navigation, and loading/error/empty states remain unchanged.
+- Regression coverage added in `apps/website/src/pages/public/Home.test.js`.
+- Changes committed directly to `main`; no feature branch created.
+- Local test/build execution remains pending because this session only has remote GitHub file access.
