@@ -94,6 +94,7 @@ describe('Website Product Details', () => {
     expect(getProductById).toHaveBeenCalledWith('42')
     expect(wrapper.find('h1.product-title').text()).toContain('روتر فیبر نوری')
     expect(wrapper.find('.product-heading').exists()).toBe(true)
+    expect(wrapper.find('app-breadcrumb-stub').exists()).toBe(true)
     expect(wrapper.text()).toContain('شرکت نمونه')
     expect(wrapper.text()).toContain('مشخصات فنی')
     expect(wrapper.find('.main-image').attributes('src')).toBe('/primary.png')
