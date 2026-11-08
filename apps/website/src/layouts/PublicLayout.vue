@@ -202,12 +202,6 @@ function toggleUserMenu(event) {
 }
 
 
-const navItems = [
-  { name: 'درباره ما', path: '/about', icon: 'pi pi-info-circle' },
-  { name: 'تماس با ما', path: '/contact', icon: 'pi pi-phone' }
-]
-
-
 async function fetchFooterBrands() {
   try {
     const response = await productsApi.list({ page: 1, limit: 100, status: 'PUBLISHED' })
@@ -244,9 +238,7 @@ function logout() {
     <div class="public-utility-bar">
       <div class="public-container public-utility-inner">
         <span class="public-utility-message">بازارگاه تخصصی تجهیزات شبکه و مخابرات؛ خرید فوری و استعلام سازمانی</span>
-        <nav class="public-utility-links" aria-label="دسترسی‌های راهنما">
-          <router-link :to="{ name: 'contact' }">تماس با ما</router-link>
-        </nav>
+
       </div>
     </div>
 
@@ -265,13 +257,20 @@ function logout() {
               <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-box" aria-hidden="true"></i><span>محصولات</span></router-link>
               <router-link :to="{ name: 'categories' }" class="public-nav-link" active-class="public-nav-link-active"><span>دسته‌بندی</span></router-link>
               <router-link :to="{ name: 'magazine' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-book-open" aria-hidden="true"></i><span>اخبار و مقالات</span></router-link>
-              <router-link :to="{ name: 'search' }" class="public-nav-link public-nav-search" active-class="public-nav-link-active" aria-label="جستجوی محصولات"><i class="pi pi-search" aria-hidden="true"></i><span>جستجو</span></router-link>
-              <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
-              <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
+
             </nav>
           </div>
 
           <div class="public-header-actions">
+            <button
+              type="button"
+              class="public-icon-link public-search-trigger"
+              aria-label="جستجوی محصولات"
+              title="جستجوی محصولات"
+              @click="router.push({ name: 'search' })"
+            >
+              <i class="pi pi-search" aria-hidden="true"></i>
+            </button>
             <button
               type="button"
               class="public-icon-link public-theme-toggle"
@@ -446,12 +445,7 @@ function logout() {
           </li>
           <li><router-link :to="{ name: 'search' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-search"></i><span>جستجوی محصولات</span></router-link></li>
           <li><router-link :to="{ name: 'magazine' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-book-open"></i><span>اخبار و مقالات</span></router-link></li>
-          <li v-for="item in navItems" :key="item.path">
-            <router-link :to="item.path" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
-              <i :class="item.icon || 'pi pi-circle'" aria-hidden="true"></i><span>{{ item.name }}</span>
-            </router-link>
-          </li>
-          <li v-if="user" class="public-mobile-auth">
+           <li v-if="user" class="public-mobile-auth">
             <a v-if="canAccessDashboard" :href="panelStartUrl(adminAppUrl, '/admin-dashboard')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i class="pi pi-th-large"></i>
               <span>پنل مدیریت</span>
@@ -530,8 +524,9 @@ function logout() {
             <h3 class="public-footer-heading">شرکت و پشتیبانی</h3>
             <ul class="public-footer-list">
               <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
-              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و مقررات</router-link></li>
+              <li><router-link :to="{ name: 'about' }" class="public-footer-link">درباره ما</router-link></li>
               <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
+              <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و مقررات</router-link></li>
             </ul>
           </div>
           <div>
@@ -709,7 +704,7 @@ function logout() {
 }
 .public-user-trigger:hover { border-color: var(--tm-cyan-strong); }
 .public-user-trigger:focus-visible,.public-icon-link:focus-visible,.public-nav-link:focus-visible { outline: 2px solid var(--ds-color-focus); outline-offset: 3px; }
-.public-user-avatar {
+ .public-user-avatar {
   display: grid;
   place-items: center;
   width: 30px;
@@ -844,11 +839,11 @@ function logout() {
 @media (prefers-reduced-motion: reduce) { .public-notifications-drawer { animation: none; } }
 
 /* Smooth, consistent entry/exit for notification and cart drawers. */
-.public-shell :deep(.p-drawer-enter-active),.public-shell :deep(.p-drawer-leave-active) { transition: transform .34s cubic-bezier(.2,.8,.2,1), opacity .28s ease !important; }
-.public-shell :deep(.p-drawer-mask) { transition: opacity .28s ease !important; }
+:global(.p-drawer-enter-active),:global(.p-drawer-leave-active) { transition: transform .52s cubic-bezier(.2,.8,.2,1), opacity .38s ease !important; }
+:global(.p-drawer-mask) { transition: opacity .38s ease !important; }
 .public-shell :deep(.p-menu-enter-active),.public-shell :deep(.p-menu-leave-active) { transform-origin: top right; transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1) !important; }
 .public-shell :deep(.p-menu-enter-from),.public-shell :deep(.p-menu-leave-to) { opacity: 0; transform: translateY(-7px) scale(.98); }
-@media(prefers-reduced-motion:reduce){.public-shell :deep(.p-drawer-enter-active),.public-shell :deep(.p-drawer-leave-active),.public-shell :deep(.p-menu-enter-active),.public-shell :deep(.p-menu-leave-active){transition:none!important}}
+@media(prefers-reduced-motion:reduce){:global(.p-drawer-enter-active),:global(.p-drawer-leave-active),:global(.p-menu-enter-active),:global(.p-menu-leave-active){transition:none!important}}
 
 /* Search popover and physical-left cart drawer */
 .public-header .public-container{position:relative}
@@ -921,17 +916,18 @@ function logout() {
 .public-logo-symbol { display: block; flex: none; width: 36px; height: 36px; border-radius: 10px; background: var(--ds-brand-primary); }
 .public-user-trigger { padding: 4px 0; border: 0; border-radius: 0; background: transparent; }
 .public-user-trigger:hover { border: 0; background: transparent; }
-.public-user-avatar,.public-user-caret { display: none; }
+.public-user-avatar { display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px; overflow: hidden; border-radius: 50%; background: var(--ds-color-primary-soft); color: var(--ds-color-primary-text); font-size: 13px; font-weight: 800; }
+.public-user-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.public-user-caret { display: inline-block; color: var(--ds-text-secondary); font-size: 11px; }
+.public-user-trigger { display: inline-flex; align-items: center; gap: 8px; }
 .public-user-name { display: inline; max-width: 180px; white-space: nowrap; }
 .public-commerce-actions { order: 1; border: 0; padding: 0; }
 .public-notifications-actions { order: 2; }
 .public-authenticated-actions,.public-guest-actions { display: contents; }
 .public-user-trigger { order: 3; }
 .public-header-actions > .public-mobile-toggle { order: 4; }
- .public-search-trigger,.public-search-popover { display: none !important; }
-.public-nav-search { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ds-color-border); border-radius: 7px; }
-.public-nav-search i { display: inline-block !important; font-size: 12px; }
-.public-nav-search:hover { border-color: var(--ds-color-primary); }
+ .public-search-trigger { display: inline-flex; align-items: center; justify-content: center; }
+.public-search-popover { display: none !important; }
 .public-header-row { min-height: 52px; }
 .public-logo-symbol { width: 28px; height: 28px; }
 .public-logo-symbol::before { top: 7px; }
@@ -1001,6 +997,7 @@ function logout() {
 .public-header-row { min-height: 60px; }
 @media(max-width:767px){.public-header-row{min-height:52px}}
 /* Final responsive column contract from Telecom Market.html (after legacy shell rules). */
+.public-utility-links { display: none; }
 .public-footer-grid { grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.4fr; }
 @media(max-width:1100px){.public-footer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:767px){.public-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
