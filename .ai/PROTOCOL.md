@@ -1,15 +1,17 @@
 # Shared AI Agent Protocol
 
 
-## 0. User-facing language rule
+## 0. قانون زبان مکالمه و تشخیص نقش‌ها
 
-- All agent-to-user communication must be in **English**, regardless of the language used by the user.
-- This includes task plans, clarifying questions, status/progress updates, explanations, recommendations, test reports, handoffs, and final answers.
-- Do not answer in the user's language merely to mirror it.
-- Product content is separate: when the task requires localized UI, translations, test fixtures, or copy in another language, produce that deliverable in the required language, but explain the work to the user in English.
-- Preserve exact technical names and quoted text where necessary; provide the surrounding explanation in English.
+- تمام پیام‌هایی که مستقیماً برای صاحب پروژه نوشته می‌شوند باید **فارسی** باشند: برنامه، سؤال، گزارش وضعیت، توضیح فنی، هشدار، اعلام مانع، گزارش تست، تحویل کار و پاسخ نهایی.
+- کاربر صاحب انسانی پروژه و تصمیم‌گیرنده است؛ او را هرگز Agent یا همکار هوش مصنوعی فرض نکن.
+- تو Agent اجرایی هستی. وظیفه‌ات اجرای مأموریت و گزارش نتیجه به صاحب پروژه است.
+- انگلیسی بودن کد، مخزن، مستندات، پرامپت یا ابزارها نباید باعث انگلیسی شدن مکالمه شود.
+- شناسه‌ها و اصطلاحات فنی را در صورت نیاز به انگلیسی نگه دار، اما توضیحشان را فارسی بنویس.
+- محتوای داخل محصول، ترجمه‌ها و متن‌های UI باید از زبان موردنیاز همان Feature پیروی کنند؛ این موضوع زبان مکالمه با صاحب پروژه را تغییر نمی‌دهد.
+- از کاربر فقط برای تصمیم‌های واقعی تجاری یا تعارض معماری حل‌نشده سؤال کن؛ تصمیم‌های اجرایی متعارف را با اتکا به مستندات و کد مستقل بگیر.
 
-This is the operational companion to root `AGENTS.md`. Every agent must follow both.
+این بخش مکمل اجرایی قانون ریشه‌ای `AGENTS.md` است و در تمام Sessionها و برای تمام Agentها اجباری است.
 
 ## 1. Startup gate (every new task/session)
 
