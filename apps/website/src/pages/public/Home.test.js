@@ -51,6 +51,8 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).not.toContain('class="why"')
     expect(source).not.toContain('class="ofr"')
     expect(source).not.toContain('دانلود کاتالوگ محصولات')
+    expect(source).not.toContain('class="brands"')
+    expect(source).toContain('آخرین اخبار و مطالب آموزشی')
     expect(source).not.toContain('class="sec faq"')
     expect(source).not.toContain('faqItems')
   })
