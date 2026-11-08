@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const theme = readFileSync(new URL('./marketplace-theme.scss', import.meta.url), 'utf8')
+const sharedTheme = readFileSync(new URL('../../../../packages/shared-ui/assets/design-system/newtemp-reference.scss', import.meta.url), 'utf8')
+const primevueTheme = readFileSync(new URL('../../../../packages/shared-ui/theme.js', import.meta.url), 'utf8')
 const entry = readFileSync(new URL('../main.js', import.meta.url), 'utf8')
 const loader = readFileSync(new URL('../../index.html', import.meta.url), 'utf8')
 const home = readFileSync(new URL('../pages/public/Home.vue', import.meta.url), 'utf8')
@@ -11,27 +13,32 @@ const notifications = readFileSync(new URL('../pages/public/Notifications.vue', 
 const productDetails = readFileSync(new URL('../pages/public/ProductDetails.vue', import.meta.url), 'utf8')
 
 describe('Website visual system — latest owner-supplied prototype', () => {
-  it('loads a Website-only palette with the exact light and dark prototype tokens', () => {
+  it('uses the shared Website-approved light/dark tokens as the only root palette source', () => {
     expect(entry).toContain("import './assets/marketplace-theme.scss'")
+    expect(entry).toContain("import '@telecom/shared-ui/assets/design-system/newtemp-reference.scss'")
+    expect(entry.indexOf("marketplace-theme.scss")).toBeLessThan(entry.indexOf("newtemp-reference.scss"))
     for (const color of [
       '#22D3EE', '#06B6D4', '#0891B2', '#0E7490', '#6366F1', '#8B5CF6',
       '#0A1625', '#122438', '#F0F7FA', '#F0FDFF', '#F1F5F9', '#DCE8EF',
       '#102A43', '#627D98', '#94A3B8', '#0D1B2A', '#193149', '#172B40',
       '#24394D', '#F0F9FF', '#9FB3C8', '#71869B'
-    ]) expect(theme).toContain(color)
-    expect(theme).toContain(':root.app-dark')
-    expect(theme).toContain('--ds-color-primary: #0891B2')
-    expect(theme).toContain('--ds-primary-button: #22D3EE')
-    expect(theme).toContain('--p-primary-color: #0891B2 !important')
+    ]) expect(sharedTheme).toContain(color)
+    expect(sharedTheme).toContain(':root.app-dark')
+    expect(sharedTheme).toContain('--p-primary-color: #0891B2 !important')
+    expect(sharedTheme).toContain('--p-primary-color: #22D3EE !important')
+    expect(sharedTheme).toContain('--p-red-500: #EF4444 !important')
+    expect(primevueTheme).toContain("color:'#0891B2',contrastColor:'#FFFFFF',hoverColor:'#0E7490',activeColor:'#0891B2'")
+    expect(primevueTheme).toContain("color:'#22D3EE',contrastColor:'#083344',hoverColor:'#67E8F9',activeColor:'#0891B2'")
+    expect(theme).not.toMatch(/^\\s*:root(?:\\.app-dark)?\\s*\\{/m)
   })
 
   it('styles the real public header and all public page surfaces with the prototype tokens', () => {
     expect(layout).toContain('class="public-header"')
     expect(layout).toContain('class="public-theme-toggle"')
     expect(layout).toContain('class="tm-btn tm-btn--accent public-rfq-link"')
-    expect(theme).toContain('--primary-color: #0891B2')
-    expect(theme).toContain('--surface-ground: #F0F7FA')
-    expect(theme).toContain('--p-red-500: #EF4444 !important')
+    expect(sharedTheme).toContain('--primary-color: #0891B2')
+    expect(sharedTheme).toContain('--surface-ground: #F0F7FA')
+    expect(sharedTheme).toContain('--p-red-500: #EF4444 !important')
     expect(theme).toContain('.public-shell .public-utility-bar')
     expect(theme).toContain('.public-shell .public-header')
     expect(theme).toContain('.public-shell .public-logo-symbol')
