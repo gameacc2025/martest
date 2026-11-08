@@ -4154,6 +4154,6 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Next:** merge PR after repository's unrelated frontend/browser checks are resolved or explicitly waived by repository policy; then begin API stage DB-1 → DB-6 in the same bounded-context order. Do not implement UI until its API contract and permissions are tested.
 
 
-- **Final branch HEAD:** `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254` (schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; later documentation handoff commit is the final HEAD).
+- **Final branch HEAD:** `58f86414325fe39a11c0aeeb9bd540867dd7df94` (documentation handoff); schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; DB validation CI passed on identical schema/migration content at `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254`.
 - **Latest PR-head checks:** Database Migration Validation PASS; CI backend tests/builds PASS, frontend/shared test job FAILS on 23 assertions across 9 existing UI/shared test files; Runtime Validation still running at handoff.
 - **Merge decision:** PR #90 is open, mergeable but `unstable`; leave unmerged while unrelated frontend/browser checks are red. Database-specific validation is green.

@@ -974,3 +974,5 @@ Implementation is prepared on PR #90 (`feat/db0-db6-domain-schema`), not yet mer
 - **Final branch HEAD:** `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254` (schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; later documentation handoff commit is the final HEAD).
 - **Latest PR-head checks:** Database Migration Validation PASS; CI backend tests/builds PASS, frontend/shared test job FAILS on 23 assertions across 9 existing UI/shared test files; Runtime Validation still running at handoff.
 - **Merge decision:** PR #90 is open, mergeable but `unstable`; leave unmerged while unrelated frontend/browser checks are red. Database-specific validation is green.
+
+- Final documentation handoff commit: `58f86414325fe39a11c0aeeb9bd540867dd7df94`; schema/migration implementation commit: `dad8624138ccd397780e7ed9943533ac655f158d`. Database validation passed on the same schema/migration content before the docs-only handoff.

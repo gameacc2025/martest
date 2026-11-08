@@ -2,7 +2,7 @@
 
 ## Completed implementation — DB-DOMAIN-EXPANSION-01
 - **Status:** Database implementation complete on branch `feat/db0-db6-domain-schema`; PR #90 open, not merged.
-- **Final branch HEAD:** `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254`; schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`.
+- **Final branch HEAD:** `58f86414325fe39a11c0aeeb9bd540867dd7df94` (documentation handoff); schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; DB validation passed on identical schema/migration content at `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254`.
 - **PR:** https://github.com/gameacc2025/martest/pull/90
 - **Scope:** DB-0 baseline/document reconciliation; DB-1 AuthChallenge/AuditLog; DB-2 Support; DB-3 CMS; DB-4 CRM; DB-5 Retail; DB-6 Finance. Database only.
 - **Schema:** 97 models / 58 enums (55 new models / 37 new enums).
