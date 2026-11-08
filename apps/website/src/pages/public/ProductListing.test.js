@@ -49,7 +49,9 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
   it('renders the reference breadcrumb, filter sidebar and product-card markup', async () => {
     wrapper = mountListing()
     await flushPromises()
-    expect(wrapper.find('.breadcrumb').exists()).toBe(true)
+    expect(wrapper.find('.catalogue-breadcrumb').exists()).toBe(true)
+    expect(wrapper.find('.catalogue-breadcrumb .breadcrumb').exists()).toBe(true)
+    expect(wrapper.find('.catalogue-breadcrumb').element.nextElementSibling.classList.contains('ph')).toBe(true)
     expect(wrapper.find('.breadcrumb').text()).toContain('صفحه اصلی')
     expect(wrapper.find('.breadcrumb').text()).toContain('همه محصولات')
     expect(wrapper.find('.fl').exists()).toBe(true)
