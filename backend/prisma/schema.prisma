@@ -1472,7 +1472,7 @@ model NotificationDelivery {
   status         NotificationDeliveryStatus @default(PENDING)
   // Frozen snapshot of the message — the worker sends it without re-reading
   // the (possibly long-gone) business context that produced it.
-  /// مقدار متنی recipient برای توصیف یا شناسایی NotificationDelivery.
+  /// مقصد واقعی تحویل اعلان را نگه می‌دارد؛ مانند نشانی ایمیل یا شماره تلفن گیرنده.
   recipient      String?                    // email address (EMAIL); phone for future SMS
   /// موضوع پیام، تیکت یا فعالیت برای نمایش و جست‌وجو.
   subject        String?
@@ -1896,7 +1896,7 @@ model SupportSlaPolicy {
 model SupportTicket {
   /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int                 @id @default(autoincrement())
-  /// مقدار متنی ticketNumber برای توصیف یا شناسایی تیکت پشتیبانی.
+  /// شماره یکتای قابل نمایش تیکت برای جست‌وجو، مکاتبه و ارجاع به پشتیبانی.
   ticketNumber          String              @unique @db.VarChar(32)
   /// شناسه کاربر مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول User است.
   requesterUserId       Int
@@ -2478,7 +2478,7 @@ model LeadSource {
 model Lead {
   /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                 Int           @id @default(autoincrement())
-  /// مقدار متنی leadNumber برای توصیف یا شناسایی سرنخ فروش.
+  /// شماره یکتای قابل نمایش سرنخ فروش برای پیگیری در CRM.
   leadNumber         String        @unique @db.VarChar(32)
   /// نام کامل/نمایشی این حساب یا سرنخ برای نمایش در CRM.
   displayName        String        @db.VarChar(240)
@@ -2492,7 +2492,7 @@ model Lead {
   sourceId           Int?
   /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status             CRMLeadStatus @default(NEW)
-  /// مقدار عددی score برای سرنخ فروش.
+  /// امتیاز عددی سرنخ برای اولویت‌بندی و ارزیابی احتمال تبدیل آن به مشتری.
   score              Int           @default(0)
   /// شناسه کاربر مرتبط با این سرنخ فروش؛ کلید خارجی به جدول User است.
   ownerUserId        Int
@@ -2502,7 +2502,7 @@ model Lead {
   convertedByUserId  Int?
   /// زمان converted این سرنخ فروش را ثبت می‌کند.
   convertedAt        DateTime?
-  /// مقدار متنی disqualifiedReason برای توصیف یا شناسایی سرنخ فروش.
+  /// دلیل رد صلاحیت یا خارج‌کردن سرنخ از چرخه پیگیری فروش.
   disqualifiedReason String?       @db.VarChar(500)
   /// زمان ایجاد رکورد.
   createdAt          DateTime      @default(now())
@@ -2982,7 +2982,7 @@ model InventoryMovement {
 model RetailOrder {
   /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int                @id @default(autoincrement())
-  /// مقدار متنی orderNumber برای توصیف یا شناسایی سفارش.
+  /// شماره یکتای قابل نمایش سفارش اصلی خریدار.
   orderNumber           String             @unique @db.VarChar(40)
   /// شناسه کاربر مرتبط با این سفارش؛ کلید خارجی به جدول User است.
   buyerUserId           Int
@@ -3065,7 +3065,7 @@ model SellerOrder {
   orderId            Int
   /// شناسه شرکت مرتبط با این سفارش فروشنده؛ کلید خارجی به جدول Company است.
   companyId           Int
-  /// مقدار متنی sellerOrderNumber برای توصیف یا شناسایی سفارش فروشنده.
+  /// شماره یکتای قابل نمایش بخش سفارش متعلق به یک فروشنده.
   sellerOrderNumber   String           @unique @db.VarChar(48)
   /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status              SellerOrderStatus @default(PENDING_ACCEPTANCE)
