@@ -1,7 +1,7 @@
 # API + UI + Demo Seed Execution Roadmap
 
 **Document ID:** API-UI-SEED-01  
-**Status:** Execution baseline — planning artifact; implementation has not started  
+**Status:** IN_PROGRESS — M0 shared palette audit and cleanup started  
 **Updated:** 2026-11-08
 
 ## 1. Objective
@@ -58,6 +58,15 @@ The approved brand palette already exists in the shared design-system files and 
 - [ ] M0.7 Verify Admin and Company remain visually coherent while preserving different navigation and role-specific content.
 - [ ] M0.8 Add/update token-contract tests that fail when retired palette values return in dashboard/shared components.
 - [ ] M0.9 Update design-system documentation and record static checks. Browser checks remain NOT RUN under the current owner instruction unless separately authorized.
+
+### Progress — 2026-11-08
+
+- Confirmed Admin and Company both load the shared PrimeVue preset and the NewTemp reference layer after the main shared stylesheet.
+- Confirmed the owner-approved brand values are already defined in the shared theme; the demo purple/orange palette in store-template is not the dashboard brand source.
+- Found an optional legacy refinement mixin containing a retired purple/grey palette. Replaced its hardcoded palette and surface colors with shared semantic tokens so it cannot reintroduce the retired theme if enabled later.
+- Added a regression assertion to design-system.test.js for the optional refinement layer.
+- Static source verification: retired palette values no longer occur in skill-refinements.scss; Admin/Company import order remains correct. Vue/Sass compilation and Vitest have NOT RUN in this GitHub-only editing session.
+- This is a partial M0 correction, not a claim that every Admin/Company page has passed a full palette audit.
 
 ### Acceptance gate
 
