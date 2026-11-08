@@ -1,5 +1,17 @@
 # Current Task — 2026-11-08
 
+## Active task — DB-DATA-DICTIONARY-01
+- **Status:** IN_PROGRESS.
+- **Goal:** Document every database table and field in Prisma source and native PostgreSQL metadata comments.
+- **Scope:** All 97 Prisma models, all model fields, all physical table columns, comments-only migration, database docs/runbook, WORKLOG/current-task handoff.
+- **Safety:** No schema shape changes, data changes, API/UI/business-rule changes, or live database execution. The PostgreSQL migration must contain only COMMENT statements.
+- **Verification:** Model/field/table/column inventory parity, SQL syntax/escaping review, Prisma validation, and fresh/upgrade PostgreSQL migration where available.
+- **Next:** Complete Persian table/field comments in schema.prisma and PostgreSQL COMMENT ON TABLE/COLUMN metadata, then document coverage and migration instructions.
+
+---
+
+# Current Task — 2026-11-08
+
 ## Completed implementation — DB-DOMAIN-EXPANSION-01
 - **Status:** MERGED to canonical `main`.
 - **PR:** https://github.com/gameacc2025/martest/pull/90
