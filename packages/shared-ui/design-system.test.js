@@ -49,7 +49,7 @@ describe('approved Telecom Market design palette', () => {
 
   it('keeps Website, Admin and Company on one shared source of truth for brand and surface tokens', () => {
     expect(websiteEntry.indexOf('marketplace-theme.scss')).toBeLessThan(websiteEntry.indexOf('assets/design-system/newtemp-reference.scss'))
-    expect(websiteTheme).not.toMatch(/^\\s*:root(?:\\.app-dark)?\\s*\\{/m)
+    expect(websiteTheme).not.toMatch(/^\s*:root(?:\.app-dark)?\s*\{/m)
     expect(newTemp).toContain(':root {')
     expect(newTemp).toContain(':root.app-dark')
     for (const entry of [adminEntry, companyEntry, websiteEntry]) {
