@@ -1211,3 +1211,6 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - RefreshToken stores no device metadata. Current login revokes prior refresh tokens by default; logout-one and logout-all already exist.
 - The base seed already defines audit_logs.read, but there is no registered audit module or AuthChallenge request/verify route yet.
 - Session concurrency and MFA policy must be decided in the API-1 contract before changing token issuance or schema.
+
+- **PR:** Draft PR #91 — https://github.com/gameacc2025/martest/pull/91
+- **Current gate:** M0 code audit/token cleanup is committed; GitHub Actions test-and-build, prisma-migrations and compose-and-browser checks are in progress. Do not start API-1 implementation until this gate passes and the remaining M0 acceptance checks are reviewed.
