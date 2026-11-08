@@ -133,7 +133,7 @@ ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_requesterUserId_fkey" 
 ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_requesterCompanyId_fkey" FOREIGN KEY ("requesterCompanyId") REFERENCES "Company" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "SupportCategory" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_assignedQueueId_fkey" FOREIGN KEY ("assignedQueueId") REFERENCES "SupportQueue" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
-ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_assignedUserId_fkey" FOREIGN KEY ("assignedUserId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_assignedUserId_fkey" FOREIGN KEY ("assignedUserId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "SupportMessage" ADD CONSTRAINT "SupportMessage_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "SupportTicket" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "SupportMessage" ADD CONSTRAINT "SupportMessage_senderUserId_fkey" FOREIGN KEY ("senderUserId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "SupportAttachment" ADD CONSTRAINT "SupportAttachment_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "SupportMessage" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -143,7 +143,7 @@ ALTER TABLE "SupportAssignment" ADD CONSTRAINT "SupportAssignment_queueId_fkey" 
 ALTER TABLE "SupportAssignment" ADD CONSTRAINT "SupportAssignment_assignedUserId_fkey" FOREIGN KEY ("assignedUserId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "SupportAssignment" ADD CONSTRAINT "SupportAssignment_assignedByUserId_fkey" FOREIGN KEY ("assignedByUserId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "SupportStatusHistory" ADD CONSTRAINT "SupportStatusHistory_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "SupportTicket" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "SupportStatusHistory" ADD CONSTRAINT "SupportStatusHistory_actorUserId_fkey" FOREIGN KEY ("actorUserId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "SupportStatusHistory" ADD CONSTRAINT "SupportStatusHistory_actorUserId_fkey" FOREIGN KEY ("actorUserId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "SupportEvent" ADD CONSTRAINT "SupportEvent_ticketId_fkey" FOREIGN KEY ("ticketId") REFERENCES "SupportTicket" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "SupportEvent" ADD CONSTRAINT "SupportEvent_actorUserId_fkey" FOREIGN KEY ("actorUserId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE;
 CREATE INDEX "SupportQueue_isActive_sortOrder_idx" ON "SupportQueue" ("isActive", "sortOrder");

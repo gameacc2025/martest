@@ -92,7 +92,7 @@ CREATE TABLE "SellerOrder" (
   CONSTRAINT "SellerOrder_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "SellerOrder_sellerOrderNumber_key" UNIQUE ("sellerOrderNumber")
 );
-CREATE UNIQUE INDEX "SellerOrder_id_orderId_key" ON "SellerOrder" ("id", "orderId");
+ALTER TABLE "SellerOrder" ADD CONSTRAINT "SellerOrder_id_orderId_key" UNIQUE ("id", "orderId");
 
 CREATE TABLE "RetailOrderItem" (
   "id" SERIAL NOT NULL,

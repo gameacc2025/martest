@@ -1353,7 +1353,7 @@ model SupportStatusHistory {
   reason      String?             @db.VarChar(1000)
   createdAt   DateTime            @default(now())
   ticket      SupportTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  actor       User?               @relation("SupportStatusActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actor       User?               @relation("SupportStatusActor", fields: [actorUserId], references: [id], onDelete: Restrict)
 
   @@index([ticketId, createdAt])
   @@index([actorUserId, createdAt])
@@ -1967,7 +1967,7 @@ model InventoryMovement {
   metadata       Json?
   createdAt      DateTime              @default(now())
   product        Product               @relation(fields: [productId], references: [id], onDelete: Restrict)
-  actor          User?                 @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actor          User?                 @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
 
   @@index([productId, createdAt])
   @@index([movementType, createdAt])

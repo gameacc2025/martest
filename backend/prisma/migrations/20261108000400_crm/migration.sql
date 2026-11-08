@@ -92,7 +92,7 @@ CREATE TABLE "PipelineStage" (
   "isLost" BOOLEAN NOT NULL DEFAULT false,
   CONSTRAINT "PipelineStage_pkey" PRIMARY KEY ("id")
 );
-CREATE UNIQUE INDEX "PipelineStage_id_pipelineId_key" ON "PipelineStage" ("id", "pipelineId");
+ALTER TABLE "PipelineStage" ADD CONSTRAINT "PipelineStage_id_pipelineId_key" UNIQUE ("id", "pipelineId");
 
 CREATE TABLE "Opportunity" (
   "id" SERIAL NOT NULL,
