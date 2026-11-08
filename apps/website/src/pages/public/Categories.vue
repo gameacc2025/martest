@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
+import AppBreadcrumb from '../../components/AppBreadcrumb.vue'
 
 const router = useRouter()
 const productsStore = useProductsStore()
@@ -69,7 +70,7 @@ onMounted(loadCategories)
 <template>
 <main class="reference-categories" dir="rtl">
   <div class="w">
-    <div class="bc"><router-link :to="{ name: 'home' }">صفحه اصلی</router-link> / همه دسته‌بندی‌ها</div>
+    <AppBreadcrumb :items="[{ label: 'همه دسته‌بندی‌ها' }]" />
     <div class="ph"><h1>همه دسته‌بندی‌ها</h1><p>تجهیزات را بر اساس حوزه کاربرد مرور کنید</p></div>
     <div v-if="loading" class="category-state" role="status">در حال دریافت دسته‌بندی‌ها…</div>
     <div v-else-if="error" class="category-state" role="alert"><span>{{ error }}</span><button type="button" @click="loadCategories">تلاش دوباره</button></div>
