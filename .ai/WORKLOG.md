@@ -4166,3 +4166,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Database Migration Validation had passed on the exact schema/migration content before the documentation-only handoff and squash merge. The user's local/production database remains untouched.
 - The known unrelated frontend/shared unit test failures and two Website browser smoke failures remain; they were not changed as part of this database task.
 - **Next active stage:** API implementation, starting with AuthChallenge/AuditLog and Support, then CMS, CRM, then gated Retail/Finance. UI follows each tested API domain.
+
+
+## 2026-11-08 — DB-DATA-DICTIONARY-01 — Document all database tables and columns
+- **Status:** IN_PROGRESS.
+- **Agent:** ChatGPT via GitHub repository operations.
+- **Goal:** Add clear, maintainable descriptions for every Prisma model and field, and native PostgreSQL table/column comments visible in database clients.
+- **Claimed scope:** All 97 current models and their scalar/relation fields; a new additive comments-only migration; database documentation and migration runbook; task handoff files.
+- **Implementation constraints:** No table/column/type/constraint changes, no data updates, no API/UI/business-rule changes. PostgreSQL comments must be UTF-8 and safe to re-run; descriptions must explain purpose rather than merely repeat identifiers.
+- **Verification plan:** Compare model/table/field inventory against Prisma schema; statically verify one PostgreSQL table comment per model and one column comment per physical scalar field; inspect SQL escaping and migration order; run Prisma validation and a fresh/upgrade PostgreSQL migration if execution environment is available.
+- **Next:** Generate model/field documentation and COMMENT ON TABLE/COLUMN statements; review all 97 models before handoff.
