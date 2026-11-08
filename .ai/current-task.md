@@ -1,5 +1,19 @@
 # Current Task — 2026-11-08
 
+## Completed — DB-DATA-DICTIONARY-01
+- **Status:** Implementation complete on canonical main; runtime Prisma/PostgreSQL validation NOT RUN in this GitHub-only session.
+- **Goal:** Document all database tables and fields in Prisma source and PostgreSQL catalog metadata.
+- **Coverage:** 97/97 Prisma models; 1,294/1,294 Prisma fields (including 332 relation fields); 97 PostgreSQL table comments; 962 PostgreSQL physical column comments; 97 table sections and 1,294 field rows in the data dictionary.
+- **Files:** `backend/prisma/schema.prisma`; new migration `backend/prisma/migrations/20261108000700_database_comments/migration.sql`; new `docs/DATABASE_DATA_DICTIONARY.md`; updated `docs/DATABASE_DOCUMENTATION.md`, `docs/DATABASE_MIGRATION_RUNBOOK.md`, `.ai/WORKLOG.md`.
+- **Safety:** The migration contains only COMMENT statements. It does not create/drop/alter tables or columns and does not change data, constraints, APIs, UI or business rules.
+- **Static verification:** Exact table/column parity passed; no missing/extra comment targets; no non-COMMENT SQL; no generic placeholder descriptions or English-only table headings.
+- **NOT RUN:** Prisma validate/generate and PostgreSQL fresh/upgrade migration execution. No CI workflow run/status was available for the inspected commit.
+- **Next:** Pull latest main, check `prisma migrate status`, apply with `prisma migrate deploy`, then inspect comments in DBeaver/pgAdmin. Enum-value dictionary and code-wide inline comments are separate follow-up scopes.
+
+---
+
+# Current Task — 2026-11-08
+
 ## Active task — DB-DATA-DICTIONARY-01
 - **Status:** IN_PROGRESS.
 - **Goal:** Document every database table and field in Prisma source and native PostgreSQL metadata comments.
