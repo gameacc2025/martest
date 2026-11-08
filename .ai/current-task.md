@@ -1,5 +1,19 @@
 # Current Task — 2026-11-08
 
+## Active task — REMAINING-FEATURES-BACKLOG-01
+- **Status:** IN_PROGRESS — documentation and architecture reconciliation only.
+- **Goal:** Publish a source-backed, prioritized English master backlog of all remaining platform capabilities, including database-first dependencies, while keeping the owner-facing explanation Persian.
+- **Scope:** Audit current Prisma schema, registered Fastify routes, API-client definitions, three frontend routers, project decisions and existing domain designs. Create `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`. No database/API/UI implementation in this task.
+- **Important findings:** Core B2B marketplace domains are already implemented (identity/RBAC, companies, catalog/products, price history, RFQ/inquiry responses/messages, subscription/limits, notifications, customer addresses and banners). CRM, support and retail/finance pages are UI prototypes only. Magazine content is static. Retail cart/checkout is local UI only; no operational order/inventory/payment backend exists.
+- **Architecture conflict:** AD-4 in `.ai/decisions.md` freezes Cart/Checkout/Orders/Wishlist, but Website currently registers `/cart`, `/checkout`, and `/orders`. Treat this as unresolved and do not enable real commerce until explicitly decided.
+- **Database strategy:** Build additive, bounded-context migrations in dependency order; do not create one giant migration or duplicate existing core models. API and UI implementation follows the database design/approval phase.
+- **Verification:** Documentation/source cross-check only; no tests/build/migrations run.
+- **Next:** Complete the English backlog document, record exact dependencies and open business decisions, then update WORKLOG/current-task with commit SHA and handoff.
+
+---
+
+# Current Task — 2026-11-08
+
 ## Latest task — WEBSITE-SHARED-BREADCRUMB
 - **Status:** Implemented and committed directly to remote `main`; local test/build verification pending.
 - **Issue:** Active `/products` route rendered an inline `.bc` block instead of a reusable breadcrumb. Categories duplicated it and ProductDetails used PrimeVue Breadcrumb, resulting in inconsistent styling and no shared `.breadcrumb` class.
