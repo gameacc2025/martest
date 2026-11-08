@@ -1,3 +1,17 @@
+# Current Task — 2026-11-08
+
+## Latest task — HOMEPAGE-HERO-AND-FOOTER-NAV
+- **Status:** Implemented and committed directly to remote `main`; local test/build verification pending.
+- **Owner request:** Remove the homepage banner search box and the personal/organizational purchase selectors; move FAQ navigation to the footer; show «اخبار و مقالات» in the navigation instead; move brands from the homepage strip into the footer.
+- **Implemented:** Removed hero search, purchase-mode tabs and popular-search chips while retaining hero copy, featured product, carousel controls and existing product/inquiry links. Removed FAQ from desktop/mobile/utility navigation while retaining its dedicated page and footer link. Renamed the existing magazine navigation item to «اخبار و مقالات». Added a global footer «برندها» column fed by the existing published-products API, deduplicated brand links and a catalogue fallback. Removed the old homepage brand strip and adjusted the footer desktop grid.
+- **Tests:** Updated Home and PublicLayout source/component contract tests for the revised hero, nav and footer. Tests were authored but not run in this GitHub-only session.
+- **Scope:** Website frontend only. No backend, database, API contract, route or business-rule changes.
+- **Commits:** `637381a`, `f9f8507`, `7943cdb`, `13cbc69`; documentation commits follow.
+- **Verification truth:** Remote source checks only; no local test, build or browser review was available. Do not claim runtime verification.
+- **Next:** Pull `main`; run focused Website tests and build; check hero spacing and five-column footer at desktop, tablet and mobile widths.
+
+---
+
 # Current Task — 2026-11-07
 
 ## Active task — NEWTEMP-COMPLETE-REDESIGN
