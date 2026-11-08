@@ -4213,3 +4213,10 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Changes:** Replaced remaining audited dashboard color/shadow literals in DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace with approved semantic tokens. Extended design-system.test.js to assert the token contracts and prevent old palette leakage.
 - **Static verification:** Admin Dashboard, Admin OperationsHub, CompanyDashboard, shared dashboard header/sidebar, OperationalWorkspace and skill-refinements.scss contain no raw hex/RGB/HSL color declarations in the scanned source. Test literals are intentional regression patterns.
 - **Verification NOT RUN:** Vitest, Sass/Vue compilation and app builds.
+
+### API-1 discovery — 2026-11-08
+- AuthChallenge/AuditLog tables, indexes and append-only DB trigger already exist.
+- AuthChallenge supports password reset and phone/email verification, but not LOGIN_MFA.
+- RefreshToken has no device metadata; login revokes previous refresh tokens by default. Existing logout-one/logout-all endpoints are present.
+- Base seed includes audit_logs.read, but there is no registered audit module or challenge request/verify API.
+- Documented the findings and policy gates in the roadmap/current-task. No auth/session behavior or schema changed.
