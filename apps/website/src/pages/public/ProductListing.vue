@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import { useCartStore } from '../../stores/cart'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
+import AppBreadcrumb from '../../components/AppBreadcrumb.vue'
 
 const route = useRoute()
 const productsStore = useProductsStore()
@@ -115,7 +116,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
 <template>
 <main class="reference-products" dir="rtl">
   <div class="w pg">
-    <div class="bc"><router-link :to="{ name: 'home' }">صفحه اصلی</router-link> / همه محصولات</div>
+    <AppBreadcrumb :items="[{ label: 'همه محصولات' }]" />
     <div class="ph"><h1>همه محصولات</h1><p>محصولات تخصصی تأمین‌کنندگان؛ خرید فوری یا ثبت استعلام</p></div>
     <div class="lay">
       <aside class="fl">
@@ -245,7 +246,6 @@ h1{font-size:38px;line-height:1.5;font-weight:800;margin:6px 0 10px}
 footer{background:var(--ds-color-brand-deep);color:var(--ds-text-secondary);font-size:13px;padding:28px 0;margin-top:20px}
 footer .w{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .rk{position:absolute;top:10px;left:10px;background:var(--pri);color:var(--ds-color-on-brand);border-radius:8px;font-size:12px;padding:0 9px;font-style:normal}.pr small.sold{color:var(--ok)}
-.bc{font-size:13px;color:var(--muted);padding:18px 0 4px}.bc a{color:var(--pri);text-decoration:none}
 .ph{padding:6px 0 4px}.ph h1{font-size:28px;color:var(--text);margin:0}.ph p{color:var(--muted);font-size:14px}
 .lay{display:grid;grid-template-columns:250px 1fr;gap:20px;margin:18px 0}
 .fl{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(20,30,70,.06);align-self:start;font-size:13px}
