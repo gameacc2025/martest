@@ -1,3 +1,21 @@
+# Active Task — API-UI-SEED-01 (2026-11-08)
+
+## Current execution status
+- **Status:** IN_PROGRESS — shared Website-owned palette consolidation and multi-agent execution documentation applied directly to `main`; full visual audit and runtime verification remain.
+- **Canonical target:** `main` only. Owner instruction: do not create feature branches, temporary branches or PRs.
+- **PR #91:** Closed unmerged because its checks failed and owner requested direct-to-main integration. Its former branch was not merged; no further branches will be created.
+- **Roadmap:** `docs/API_UI_SEED_EXECUTION_ROADMAP.md`.
+- **Coordination board:** `.ai/agent-coordination/ACTIVE.md`.
+- **Decision:** Website palette is the single source of truth. `newtemp-reference.scss` is the canonical final token layer for Website/Admin/Company; Website `marketplace-theme.scss` is component/layout-only.
+- **Current palette changes on main:** removed six duplicate root token blocks from Website `marketplace-theme.scss`; replaced old dashboard/shared refinement values with semantic tokens in DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace; added a regression test for the shared source-of-truth rule.
+- **API plan:** API-1 Auth/Audit, API-2 Support, API-3 CMS, API-4 CRM, API-5 Retail (commercial approval gate), API-6 Finance (accounting/provider approval gate). Each includes backend, API client, UI, realistic synthetic seed, tests and docs.
+- **Seed standard:** deterministic, idempotent, production-guarded, realistic synthetic fixtures; no usable credentials/OTPs/tokens, real personal contact endpoints or production data.
+- **Parallel-agent model:** independent discovery/implementation in detached worktrees pinned to a main SHA; exact file ownership; coordinator-only serial integration to main. Shared hotspots are coordinator-owned.
+- **Verification not yet run:** Vitest, Sass/Vue compilation, all app builds, full browser visual parity. The prior PR #91 test-and-build and compose-and-browser checks failed; inspect their failure causes before relying on those results. No API route or domain seed has been implemented yet.
+- **Next:** finish full Website/Admin/Company token audit and fix any remaining divergences; run focused design-system tests/builds; then freeze API-1 contract and implement its first complete vertical slice.
+
+---
+
 # Current Task — 2026-11-08
 
 ## Completed — DB-DATA-DICTIONARY-01
