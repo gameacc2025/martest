@@ -143,3 +143,8 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 این تغییرات فقط **لایه دیتابیس** را آماده می‌کنند. هنوز هیچ route، service، API-client method، permission seed، worker، provider adapter، CMS admin workflow یا UI عملیاتی برای مدل‌های جدید اضافه نشده است. برای فعال‌سازی Retail/Finance، تصمیم‌های تجاری ثبت‌شده در backlog (درگاه، ارز، نقش بازارگاه، مالیات، کمیسیون، حمل و مرجوعی) همچنان لازم‌اند.
 ### آخرین اعتبارسنجی اجرایی
 در CI، Prisma validate و generate موفق بوده و PostgreSQL 18.4 روی دیتابیس کاملاً خالی، baseline و هر شش migration افزایشی را با موفقیت اعمال کرده است؛ `prisma migrate status` نیز موفق است. این نتیجه فقط دیتابیس موقت CI را پوشش می‌دهد و به معنی اجرای migration روی دیتابیس توسعه/عملیاتی مالک نیست.
+
+
+## فرهنگ داده و توضیحات قابل مشاهده در ابزارهای دیتابیس
+
+برای توضیح کامل هر ۹۷ جدول و همه ۱۲۹۴ فیلد Prisma (شامل فیلدهای رابطه‌ای)، به [`docs/DATABASE_DATA_DICTIONARY.md`](./DATABASE_DATA_DICTIONARY.md) مراجعه کنید. در خود `backend/prisma/schema.prisma` نیز برای تمام مدل‌ها و فیلدها مستندات فارسی `///` درج شده است. Migration افزایشی `20261108000700_database_comments` توضیحات بومی PostgreSQL را با ۹۷ دستور `COMMENT ON TABLE` و ۹۶۲ دستور `COMMENT ON COLUMN` ثبت می‌کند؛ این توضیحات در DBeaver، pgAdmin و سایر کلاینت‌های سازگار با PostgreSQL قابل مشاهده‌اند. این Migration فقط metadata توضیحی را تغییر می‌دهد و هیچ جدول، ستون، constraint یا داده‌ای را ایجاد، حذف یا تغییر نمی‌دهد.
