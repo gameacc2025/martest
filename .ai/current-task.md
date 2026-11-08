@@ -1,5 +1,21 @@
 # Current Task — 2026-11-08
 
+## Active task — DB-DOMAIN-EXPANSION-01
+- **Status:** IN_PROGRESS — schema/migrations/docs prepared; Prisma/CI validation pending.
+- **Branch:** `feat/db0-db6-domain-schema` from main HEAD `5d2a2f972acb1084e68cc0f4cbff6080f4d2257a`.
+- **Scope:** DB-0 baseline/document reconciliation; DB-1 AuthChallenge/AuditLog; DB-2 Support; DB-3 CMS; DB-4 CRM; DB-5 retail inventory/order/payment/fulfillment/returns; DB-6 ledger/commission/settlement. Database only.
+- **Current schema target:** 97 models / 58 enums, including 55 new models / 37 new enums.
+- **Migrations:** `20261108000100_auth_audit` through `20261108000600_finance`, additive after `20261106000000_init`.
+- **Docs:** `docs/DATABASE_DOCUMENTATION.md`, `docs/DATABASE_MIGRATION_RUNBOOK.md`, `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`.
+- **Safety constraints:** No API/UI/seed/permission/workers in this task. AD-4 remains in force; retail/finance schema is inert. Never reset or db-push a persistent DB.
+- **Static verification:** schema/model/migration inventory, FK target parity and now() defaults checked by repository-side static scripts.
+- **NOT RUN:** Prisma CLI validation/generation, PostgreSQL migrate deploy on fresh/existing DB, backend tests/builds. Live DB migration status not available.
+- **Next:** Commit the branch, open PR for CI, fix all validation failures, review, and merge after green checks.
+
+---
+
+# Current Task — 2026-11-08
+
 ## Completed task — REMAINING-FEATURES-BACKLOG-01
 - **Status:** DONE — documentation and architecture reconciliation only.
 - **Goal:** Publish a source-backed, prioritized English master backlog of all remaining platform capabilities, including database-first dependencies.

@@ -68,7 +68,7 @@ Enums تعریف‌شده در schema شامل این موارد هستند:
 
 ## Migration و استقرار
 
-Migrationها در `backend/prisma/migrations/` قرار دارند و با Prisma ORM 7.10.1 مدیریت می‌شوند. migration `20261027200000_customer_addresses` جدول `Address`، foreign key مالکیت و index یکتای جزئی برای حداکثر یک آدرس پیش‌فرض برای هر کاربر را ایجاد می‌کند. چون Prisma schema یکتایی جزئی را مدل نمی‌کند، index جزئی فقط در SQL migration تعریف شده و نباید از migration حذف شود. در توسعه و استقرار، `prisma migrate deploy` migrationهای ثبت‌شده را اعمال می‌کند. Prisma CLI تنظیمات اتصال و seed را از `backend/prisma.config.ts` می‌خواند؛ اتصال runtime با PrismaPg و node-postgres انجام می‌شود. نسخه Prisma CLI، Client و PostgreSQL adapter روی 7.10.1 قفل شده‌اند.
+Migrationها در `backend/prisma/migrations/` قرار دارند و با Prisma ORM 7.10.1 مدیریت می‌شوند. تاریخچه فعلی از baseline تجمیعی `20261106000000_init` آغاز می‌شود؛ این baseline از قبل شامل جدول `Address`، partial unique index آدرس پیش‌فرض، CHECK constraintهای مالکیت Inquiry و trigger عضویت INBOX اعلان‌هاست. در درخت فعلی migration، فایل مستقلی با نام `20261027200000_customer_addresses` وجود ندارد؛ ارجاع قدیمی به آن حذف شده است. پس از baseline، شش migration افزایشی DB-1 تا DB-6 برای احراز هویت/ممیزی، پشتیبانی، CMS، CRM، موجودی/سفارش/پرداخت و امور مالی اضافه شده‌اند. فهرست دقیق و ترتیب اجرا در `docs/DATABASE_MIGRATION_RUNBOOK.md` ثبت شده است. در توسعه و استقرار، `prisma migrate deploy` migrationهای ثبت‌شده را اعمال می‌کند. Prisma CLI تنظیمات اتصال و seed را از `backend/prisma.config.ts` می‌خواند؛ اتصال runtime با PrismaPg و node-postgres انجام می‌شود. نسخه Prisma CLI، Client و PostgreSQL adapter روی 7.10.1 قفل شده‌اند.
 
 قبل از migration محیط واقعی:
 1. مقصد دیتابیس و نسخه schema را بررسی کنید.
@@ -97,7 +97,7 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 
 ## سیاست تاریخچه Migration
 
-مخزن از یک baseline اولیه تولیدشده از schema فعلی و migrationهای افزایشی بعدی استفاده می‌کند. تغییر schema فقط با migration جدید انجام می‌شود؛ `db push` در startup یا reset روزمره استفاده نمی‌شود. Reset توسعه با `prisma migrate reset` و سپس `prisma db seed` انجام می‌شود و اسکریپت `db:reset:dev` مقصد را به development و دیتابیس `telecom_marketplace` محدود می‌کند. قاعده‌های PostgreSQL که Prisma Schema Language مدل نمی‌کند (CHECK constraintهای مالکیت، partial unique index آدرس پیش‌فرض و trigger عضویت INBOX) باید به‌صورت SQL صریح در baseline نگه‌داری شوند.
+مخزن از baseline تجمیعی `20261106000000_init` و migrationهای افزایشی مستقل استفاده می‌کند. تغییر schema فقط با migration جدید انجام می‌شود؛ `db push` در startup یا reset روزمره استفاده نمی‌شود. Reset توسعه با `prisma migrate reset` و سپس `prisma db seed` انجام می‌شود و اسکریپت `db:reset:dev` مقصد را به development و دیتابیس `telecom_marketplace` محدود می‌کند. قاعده‌های PostgreSQL که Prisma Schema Language مدل نمی‌کند (CHECK constraintهای مالکیت، partial unique index آدرس پیش‌فرض، trigger عضویت INBOX، append-only historyها و کنترل توازن دفتر کل) باید به‌صورت SQL صریح در migration مربوط نگه‌داری شوند.
 
 
 ### حساب‌های ورود آزمایشی
@@ -106,3 +106,34 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 - پنج مشتری عادی: 09912000001 تا 09912000005.
 - مدیر کل توسعه نیز از شماره پیش‌فرض Seed استفاده می‌کند و در صورت نبود SUPER_ADMIN_PASSWORD، رمز آن در محیط development برابر A123@456 است.
 - ترتیب شماره‌های شرکت‌ها مطابق ترتیب DEMO_COMPANIES در فایل backend/prisma/seeds/demo-marketplace.js است. Seed شماره‌ها و رمزها را در لاگ بک‌اند چاپ می‌کند.
+
+
+## وضعیت دیتابیس پس از DB-0 تا DB-6
+
+در شاخه پیاده‌سازی، schema شامل **۹۷ مدل و ۵۸ Enum** است: ۴۲ مدل و ۲۱ Enum هسته قبلی، به‌علاوه ۵۵ مدل و ۳۷ Enum جدید. شش migration افزایشی زیر به‌ترتیب زمانی اجرا می‌شوند. هیچ جدول یا داده‌ای از هسته قبلی حذف یا بازسازی نمی‌شود.
+
+| Migration | دامنه | مدل‌های جدید |
+|---|---|---|
+| `20261108000100_auth_audit` | بازیابی حساب و ممیزی | `AuthChallenge`, `AuditLog` |
+| `20261108000200_support` | پشتیبانی و SLA | `SupportQueue`, `SupportCategory`, `SupportSlaPolicy`, `SupportTicket`, `SupportMessage`, `SupportAttachment`, `SupportAssignment`, `SupportStatusHistory`, `SupportEvent` |
+| `20261108000300_cms` | مجله و مدیریت محتوا | `Article`, `ArticleCategory`, `ArticleTag`, `ArticleCategoryAssignment`, `ArticleTagAssignment`, `ArticleRevision`, `ArticleMedia` |
+| `20261108000400_crm` | CRM داخلی | `CRMAccount`, `CRMContact`, `LeadSource`, `Lead`, `Pipeline`, `PipelineStage`, `Opportunity`, `OpportunityStageHistory`, `CRMActivity`, `CRMTask`, `CRMNote` |
+| `20261108000500_retail` | موجودی، سفارش، پرداخت و مرجوعی | `InventoryBalance`, `InventoryMovement`, `InventoryReservation`, `RetailOrder`, `SellerOrder`, `RetailOrderItem`, `PaymentAttempt`, `PaymentTransaction`, `PaymentWebhookEvent`, `RetailRefund`, `Shipment`, `TrackingEvent`, `ReturnRequest`, `ReturnItem` |
+| `20261108000600_finance` | دفتر کل و تسویه | `LedgerAccount`, `JournalEntry`, `JournalLine`, `CommissionRule`, `CommissionSnapshot`, `SellerPayable`, `Settlement`, `SettlementApproval`, `SettlementPayout`, `ReconciliationRecord`, `FinanceInvoice`, `FinanceInvoiceLine` |
+
+### قواعد مهم دامنه‌های جدید
+
+- `AuthChallenge.secretHash` فقط hash توکن/OTP را نگه می‌دارد؛ secret خام نباید ذخیره شود. چالش دارای purpose، channel، expiry، مصرف یک‌باره و شمارنده تلاش است.
+- `AuditLog` append-only است. FKهای actor و company از حذف سخت جلوگیری می‌کنند؛ حذف/ویرایش رکورد ممیزی مجاز نیست.
+- در پشتیبانی، یادداشت داخلی از پیام عمومی با `SupportMessageVisibility` جدا شده است. پیام و تاریخچه وضعیت immutable هستند؛ Ticket باید بسته/آرشیو شود و حذف فیزیکی ندارد. فایل‌ها با storage key خصوصی و وضعیت اسکن ثبت می‌شوند.
+- CMS نسخه‌های مقاله را در `ArticleRevision` نگه می‌دارد. انتشار عمومی فقط باید رکوردهای PUBLISHED را ارائه کند؛ وضعیت SCHEDULED نیازمند `scheduledAt` است.
+- CRM به User و Company موجود لینک می‌شود و هویت تکراری ایجاد نمی‌کند. این دامنه برای STAFF طراحی شده و محدودیت دسترسی باید در API enforce شود.
+- موجودی MVP یک balance برای هر Product دارد؛ `onHand` و `reserved` نمی‌توانند منفی شوند و reserved از onHand بیشتر نمی‌شود. `InventoryMovement` و `TrackingEvent` append-only هستند. رزرو اتمیک و تطبیق موجودی با رزروها مسئولیت transaction/service در API آینده است.
+- سفارش، اقلام سفارش، فروشنده، قیمت و نشانی گیرنده snapshot دارند. `RetailOrderItem` و `ReturnRequest` با composite FK به همان SellerOrder/Order محدود می‌شوند. ارز سفارش اجباری است و default تجاری تحمیل نشده است.
+- در این مرحله Cart/CartItem دائمی ساخته نشده است؛ سبد فعلی local-only می‌ماند و تصمیم AD-4 درباره غیرفعال بودن B2C تغییر نکرده است. تمام جداول Retail/Payment/Shipment/Return فقط زیرساخت ذخیره‌سازی‌اند؛ هیچ API یا مسیر پرداختی فعال نشده است.
+- دفتر کل از سند دوطرفه استفاده می‌کند. JournalLine باید بدهکار/بستانکار یک‌طرفه و غیرمنفی باشد؛ trigger deferred توازن سند، حداقل دو خط و یکسان بودن ارز حساب‌ها با ارز سند را هنگام commit کنترل می‌کند. خطوط و اسناد POSTED قابل ویرایش/حذف نیستند؛ اصلاح با سند معکوس انجام می‌شود.
+- تأیید تسویه و اجرای payout دارای maker-checker هستند. درخواست‌دهنده نمی‌تواند تسویه خودش را تأیید یا پرداخت کند و تأییدکننده نمی‌تواند همان payout را اجرا کند.
+
+### محدوده‌ای که هنوز اجرا نشده است
+
+این تغییرات فقط **لایه دیتابیس** را آماده می‌کنند. هنوز هیچ route، service، API-client method، permission seed، worker، provider adapter، CMS admin workflow یا UI عملیاتی برای مدل‌های جدید اضافه نشده است. برای فعال‌سازی Retail/Finance، تصمیم‌های تجاری ثبت‌شده در backlog (درگاه، ارز، نقش بازارگاه، مالیات، کمیسیون، حمل و مرجوعی) همچنان لازم‌اند.

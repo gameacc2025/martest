@@ -959,3 +959,10 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 ## Remaining feature implementation baseline — 2026-11-08
 
 The source-backed, prioritized backlog for all remaining near-term and future domains is maintained in [docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md](../docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md). It distinguishes implemented core capabilities from partial flows, UI-only prototypes, legacy API-client definitions and deferred enterprise scope. Follow its database-first bounded-context sequence before adding new APIs or activating prototype UIs. The AD-4 B2C freeze versus currently registered Website cart/checkout/order routes remains an explicit unresolved conflict.
+
+
+## Database domain expansion — DB-0 through DB-6 (2026-11-08)
+
+The database-only expansion is tracked in `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` and deployed with instructions in `docs/DATABASE_MIGRATION_RUNBOOK.md`. The intended Prisma schema now contains 97 models and 58 enums (55 models / 37 enums beyond the 42-model / 21-enum core). Six additive migrations follow the existing `20261106000000_init` baseline. The new domains are AuthChallenge/AuditLog, Support, CMS, STAFF-only CRM, retail inventory/orders/payments/fulfillment/returns, and finance ledger/settlements.
+
+This schema work does not add API routes, permissions, workers, seeds or UI integrations. AD-4 remains unchanged: B2C Cart/Checkout/Orders/Wishlist are not activated; retail/finance tables are inert groundwork pending commercial and legal decisions. Before applying migrations to any persistent database, verify the baseline is marked applied and follow the runbook. PostgreSQL CHECK constraints, partial indexes and append-only/maker-checker triggers are part of the migration contract and must not be removed.

@@ -27,6 +27,7 @@ model Role {
 
   @@index([isSystem])
   @@index([scope])
+
 }
 
 enum RoleScope {
@@ -48,6 +49,7 @@ model Permission {
   roles RolePermission[]
 
   @@index([group])
+
 }
 
 model RolePermission {
@@ -59,6 +61,7 @@ model RolePermission {
 
   @@id([roleId, permissionId])
   @@index([permissionId])
+
 }
 
 model UserRole {
@@ -70,6 +73,7 @@ model UserRole {
 
   @@id([userId, roleId])
   @@index([roleId])
+
 }
 
 model AccessProfile {
@@ -86,6 +90,7 @@ model AccessProfile {
 
   @@index([type])
   @@index([companyId])
+
 }
 
 model Profile {
@@ -98,6 +103,7 @@ model Profile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
 }
 
 model Company {
@@ -127,11 +133,20 @@ model Company {
   inquirySubscriptions InquirySubscription[]
   sentInquiryMessages InquiryMessage[] @relation("InquiryMessageSenderCompany")
   receivedInquiryMessages InquiryMessage[] @relation("InquiryMessageRecipientCompany")
+  auditLogs AuditLog[] @relation("AuditCompany")
+  supportTickets SupportTicket[]
+  crmAccounts CRMAccount[]
+  sellerOrders SellerOrder[]
+  commissionRules CommissionRule[]
+  sellerPayables SellerPayable[]
+  settlements Settlement[]
+  financeInvoices FinanceInvoice[]
 
   @@index([status])
   @@index([deletedAt])
   @@index([isVerified])
   @@index([nationalId])
+
 }
 
 model User {
@@ -160,10 +175,46 @@ model User {
   sentInquiryMessages InquiryMessage[] @relation("InquiryMessageSenderUser")
   receivedInquiryMessages InquiryMessage[] @relation("InquiryMessageRecipientUser")
   addresses                Address[]
+  authChallenges AuthChallenge[]
+  auditLogs AuditLog[] @relation("AuditActor")
+  supportRequestedTickets SupportTicket[] @relation("SupportRequester")
+  supportCurrentAssignments SupportTicket[] @relation("SupportCurrentAssignee")
+  supportMessages SupportMessage[]
+  supportAttachments SupportAttachment[]
+  supportAssignmentsReceived SupportAssignment[] @relation("SupportAssignmentAssignee")
+  supportAssignmentsMade SupportAssignment[] @relation("SupportAssignmentActor")
+  supportStatusChanges SupportStatusHistory[] @relation("SupportStatusActor")
+  supportEvents SupportEvent[] @relation("SupportEventActor")
+  authoredArticles Article[] @relation("ArticleAuthor")
+  publishedArticles Article[] @relation("ArticlePublisher")
+  articleRevisions ArticleRevision[]
+  uploadedArticleMedia ArticleMedia[] @relation("ArticleMediaUploader")
+  crmAccounts CRMAccount[] @relation("CRMAccountUser")
+  ownedCrmAccounts CRMAccount[] @relation("CRMAccountOwner")
+  crmContacts CRMContact[]
+  ownedLeads Lead[] @relation("CRMLeadOwner")
+  convertedLeads Lead[] @relation("CRMLeadConverter")
+  ownedOpportunities Opportunity[] @relation("OpportunityOwner")
+  crmActivities CRMActivity[]
+  assignedCrmTasks CRMTask[] @relation("CRMTaskAssignee")
+  createdCrmTasks CRMTask[] @relation("CRMTaskCreator")
+  crmNotes CRMNote[]
+  inventoryMovements InventoryMovement[]
+  retailOrders RetailOrder[]
+  inventoryReservations InventoryReservation[]
+  retailRefunds RetailRefund[]
+  returnRequests ReturnRequest[]
+  journalEntries JournalEntry[] @relation("JournalEntryCreator")
+  settlementRequests Settlement[] @relation("SettlementRequester")
+  settlementApprovals SettlementApproval[]
+  payoutExecutions SettlementPayout[] @relation("PayoutExecutor")
+  financeInvoices FinanceInvoice[]
+  opportunityStageChanges OpportunityStageHistory[]
 
   @@index([email])
   @@index([status])
   @@index([phone])
+
 }
 
 model Address {
@@ -180,9 +231,11 @@ model Address {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  retailOrders   RetailOrder[]
 
   @@index([userId, isDefault])
   @@index([userId, createdAt])
+
 }
 
 model RefreshToken {
@@ -195,6 +248,7 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+
 }
 
 // One-time, PKCE-bound code used to hand a live session from the website
@@ -212,6 +266,7 @@ model HandoffCode {
 
   @@index([userId])
   @@index([expiresAt])
+
 }
 
 model Category {
@@ -227,10 +282,12 @@ model Category {
   updatedAt     DateTime       @updatedAt
   subcategories Subcategory[]
   products      Product[]
+  commissionRules CommissionRule[]
 
   @@index([status])
   @@index([showInMenu])
   @@index([sortOrder])
+
 }
 
 model Subcategory {
@@ -250,6 +307,7 @@ model Subcategory {
   @@index([categoryId])
   @@index([status])
   @@index([sortOrder])
+
 }
 
 model SpecificationTemplate {
@@ -264,6 +322,7 @@ model SpecificationTemplate {
   fields        SpecificationField[]
 
   @@index([isActive])
+
 }
 
 model SpecificationField {
@@ -283,6 +342,7 @@ model SpecificationField {
   @@unique([templateId, key])
   @@index([templateId])
   @@index([sortOrder])
+
 }
 
 // Global, reusable specification field library.
@@ -303,11 +363,11 @@ model SpecificationLibraryField {
 
   @@index([isActive])
   @@index([slug])
+
 }
 
 
 model Product {
-
   id               Int                @id @default(autoincrement())
   title            String
   slug             String             @unique
@@ -347,6 +407,10 @@ model Product {
   statusHistory    ProductStatusHistory[]
   activityLog      ProductActivityLog[]
   inquiryItems     InquiryItem[]
+  inventoryBalance InventoryBalance?
+  inventoryMovements InventoryMovement[]
+  inventoryReservations InventoryReservation[]
+  retailOrderItems RetailOrderItem[]
 
   @@index([companyId])
   @@index([categoryId])
@@ -357,6 +421,7 @@ model Product {
   @@index([deletedAt])
   @@index([sku])
   @@index([catalogCode])
+
 }
 
 model ProductStatusHistory {
@@ -374,6 +439,7 @@ model ProductStatusHistory {
   @@index([changedByUserId])
   @@index([newStatus])
   @@index([createdAt])
+
 }
 
 // Immutable audit trail of every product change: field edits, price-tier
@@ -395,6 +461,7 @@ model ProductActivityLog {
   @@index([actorUserId])
   @@index([action])
   @@index([createdAt])
+
 }
 
 model ProductImage {
@@ -412,6 +479,7 @@ model ProductImage {
   @@index([productId])
   @@index([isPrimary])
   @@index([sortOrder])
+
 }
 
 model ProductDocument {
@@ -428,6 +496,7 @@ model ProductDocument {
   @@index([productId])
   @@index([type])
   @@index([sortOrder])
+
 }
 
 model ProductPriceTier {
@@ -447,6 +516,7 @@ model ProductPriceTier {
   @@index([minQuantity])
   @@index([validFrom])
   @@index([validTo])
+
 }
 
 model ProductPriceSnapshot {
@@ -463,6 +533,7 @@ model ProductPriceSnapshot {
 
   @@index([productId, recordedAt])
   @@index([priceTierId])
+
 }
 
 model Inquiry {
@@ -513,6 +584,7 @@ model Inquiry {
   @@index([responseDeadline])
   @@index([revealedAt])
   @@index([closedAt])
+
 }
 
 
@@ -538,6 +610,7 @@ model InquiryMessage {
   @@index([senderCompanyId])
   @@index([recipientUserId])
   @@index([recipientCompanyId])
+
 }
 
 model InquiryStatusHistory {
@@ -556,6 +629,7 @@ model InquiryStatusHistory {
   @@index([changedByUserId])
   @@index([newStatus])
   @@index([createdAt])
+
 }
 
 model InquiryItem {
@@ -572,6 +646,7 @@ model InquiryItem {
 
   @@index([inquiryId])
   @@index([productId])
+
 }
 
 model InquiryResponse {
@@ -591,6 +666,7 @@ model InquiryResponse {
   @@index([inquiryId])
   @@index([companyId])
   @@index([status])
+
 }
 
 model InquiryResponseAttachment {
@@ -604,6 +680,7 @@ model InquiryResponseAttachment {
   response   InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
 
   @@index([responseId])
+
 }
 
 
@@ -623,6 +700,7 @@ model InquiryResponseItem {
   @@index([responseId])
   @@index([inquiryItemId])
   @@index([currency])
+
 }
 
 model CompanyInquiryLimit {
@@ -633,6 +711,7 @@ model CompanyInquiryLimit {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
 }
 
 model CompanyLimit {
@@ -647,6 +726,7 @@ model CompanyLimit {
   @@unique([companyId, key])
   @@index([companyId])
   @@index([key])
+
 }
 
 // Commercial plans and auditable usage for the RFQ/inquiry revenue model.
@@ -670,6 +750,7 @@ model InquiryPlan {
   subscriptions              InquirySubscription[]
 
   @@index([isActive])
+
 }
 
 model InquirySubscription {
@@ -698,6 +779,7 @@ model InquirySubscription {
   @@index([companyId, status, endsAt])
   @@index([userId, status, endsAt])
   @@index([planId])
+
 }
 
 model InquiryUsageEvent {
@@ -714,6 +796,7 @@ model InquiryUsageEvent {
 
   @@index([subscriptionId, usageType, createdAt])
   @@index([referenceType, referenceId])
+
 }
 
 enum InquirySubscriptionStatus {
@@ -742,6 +825,7 @@ model SystemSetting {
   updatedAt     DateTime @updatedAt
 
   @@index([key])
+
 }
 
 model Notification {
@@ -764,6 +848,7 @@ model Notification {
   @@index([isRead])
   @@index([createdAt])
   @@index([type])
+
 }
 
 // Per-user, per-event, per-channel opt-in/out matrix (flow/06 §3: NO channel
@@ -793,6 +878,7 @@ model NotificationFolder {
   memberships NotificationFolderMembership[]
 
   @@index([scope, isActive, sortOrder])
+
 }
 
 model NotificationFolderMembership {
@@ -805,6 +891,7 @@ model NotificationFolderMembership {
 
   @@unique([notificationId, folderId])
   @@index([folderId])
+
 }
 
 enum NotificationFolderScope {
@@ -826,6 +913,7 @@ model NotificationPreference {
 
   @@unique([userId, eventType, channel])
   @@index([userId])
+
 }
 
 // Delivery log + outbox — one row per (dispatch, recipient, channel).
@@ -893,6 +981,7 @@ model NotificationDelivery {
   @@index([userId])
   @@index([eventType])
   @@index([channel, status, nextAttemptAt])
+
 }
 
 enum NotificationChannel {
@@ -1044,10 +1133,1497 @@ model Banner {
   @@index([placement, status, isActive, sortOrder])
   @@index([startsAt, endsAt])
   @@index([deletedAt])
+
 }
 
 enum BannerStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+
+// ============================================================================
+// DB-1 — Authentication challenges and cross-domain audit
+// ============================================================================
+enum AuthChallengePurpose {
+  PASSWORD_RESET
+  PHONE_VERIFICATION
+  EMAIL_VERIFICATION
+}
+
+enum AuthChallengeChannel {
+  SMS
+  EMAIL
+}
+
+model AuthChallenge {
+  id           Int                  @id @default(autoincrement())
+  userId       Int
+  purpose      AuthChallengePurpose
+  channel      AuthChallengeChannel
+  destination  String               @db.VarChar(320)
+  secretHash   String               @unique @db.VarChar(255)
+  expiresAt    DateTime
+  consumedAt   DateTime?
+  attemptCount Int                  @default(0)
+  maxAttempts  Int                  @default(5)
+  invalidatedAt DateTime?
+  createdAt    DateTime             @default(now())
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose, createdAt])
+  @@index([expiresAt])
+  @@index([destination, purpose, createdAt])
+
+}
+
+model AuditLog {
+  id                BigInt    @id @default(autoincrement())
+  actorUserId       Int?
+  actorAccessType   String?   @db.VarChar(20)
+  companyId         Int?
+  action            String    @db.VarChar(120)
+  entityType        String    @db.VarChar(100)
+  entityId          String    @db.VarChar(100)
+  requestId         String?   @db.VarChar(100)
+  source            String?   @db.VarChar(40)
+  outcome           String    @default("SUCCESS") @db.VarChar(20)
+  ipAddress         String?   @db.VarChar(64)
+  userAgent         String?   @db.VarChar(500)
+  metadata          Json?
+  occurredAt        DateTime  @default(now())
+  actor             User?     @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+  company           Company?  @relation("AuditCompany", fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@index([actorUserId, occurredAt])
+  @@index([companyId, occurredAt])
+  @@index([entityType, entityId, occurredAt])
+  @@index([action, occurredAt])
+  @@index([requestId])
+
+}
+
+// ============================================================================
+// DB-2 — Multi-tenant support and ticketing
+// ============================================================================
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  WAITING_COMPANY
+  RESOLVED
+  CLOSED
+  SPAM
+}
+
+enum SupportPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum SupportMessageVisibility {
+  PUBLIC
+  INTERNAL
+}
+
+enum SupportCreatedFrom {
+  WEBSITE
+  COMPANY
+  ADMIN
+}
+
+enum SupportAttachmentStatus {
+  PENDING_SCAN
+  AVAILABLE
+  REJECTED
+}
+
+model SupportQueue {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(60)
+  name        String   @db.VarChar(120)
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tickets     SupportTicket[]
+  assignments SupportAssignment[]
+
+  @@index([isActive, sortOrder])
+
+}
+
+model SupportCategory {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(60)
+  name        String   @db.VarChar(120)
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tickets     SupportTicket[]
+  slaPolicies SupportSlaPolicy[]
+
+  @@index([isActive, sortOrder])
+
+}
+
+model SupportSlaPolicy {
+  id                    Int             @id @default(autoincrement())
+  categoryId            Int?
+  priority              SupportPriority
+  firstResponseMinutes  Int
+  resolutionMinutes     Int
+  workingCalendar        Json?
+  isActive              Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  category              SupportCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, priority])
+  @@index([isActive, priority])
+
+}
+
+model SupportTicket {
+  id                    Int                 @id @default(autoincrement())
+  ticketNumber          String              @unique @db.VarChar(32)
+  requesterUserId       Int
+  requesterCompanyId    Int?
+  categoryId            Int?
+  assignedQueueId       Int?
+  assignedUserId        Int?
+  createdFrom           SupportCreatedFrom
+  status                SupportTicketStatus @default(OPEN)
+  priority              SupportPriority     @default(NORMAL)
+  subject               String              @db.VarChar(200)
+  firstResponseDueAt    DateTime?
+  resolveDueAt          DateTime?
+  firstRespondedAt      DateTime?
+  resolvedAt            DateTime?
+  closedAt              DateTime?
+  lastActivityAt        DateTime            @default(now())
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  requester             User                @relation("SupportRequester", fields: [requesterUserId], references: [id], onDelete: Restrict)
+  requesterCompany      Company?            @relation(fields: [requesterCompanyId], references: [id], onDelete: Restrict)
+  category              SupportCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  assignedQueue         SupportQueue?        @relation(fields: [assignedQueueId], references: [id], onDelete: SetNull)
+  assignedUser          User?               @relation("SupportCurrentAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  messages              SupportMessage[]
+  assignments           SupportAssignment[]
+  statusHistory         SupportStatusHistory[]
+  events                SupportEvent[]
+
+  @@index([requesterUserId, status, updatedAt])
+  @@index([requesterCompanyId, status, updatedAt])
+  @@index([assignedQueueId, status, priority, lastActivityAt])
+  @@index([assignedUserId, status, priority])
+  @@index([status, priority, firstResponseDueAt])
+  @@index([status, resolveDueAt])
+  @@index([categoryId])
+
+}
+
+model SupportMessage {
+  id          Int                       @id @default(autoincrement())
+  ticketId    Int
+  senderUserId Int
+  visibility  SupportMessageVisibility  @default(PUBLIC)
+  body        String                    @db.VarChar(10000)
+  createdAt   DateTime                  @default(now())
+  ticket      SupportTicket             @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender      User                      @relation(fields: [senderUserId], references: [id], onDelete: Restrict)
+  attachments SupportAttachment[]
+
+  @@index([ticketId, createdAt])
+  @@index([senderUserId, createdAt])
+  @@index([ticketId, visibility, createdAt])
+
+}
+
+model SupportAttachment {
+  id             Int                     @id @default(autoincrement())
+  messageId      Int
+  uploadedByUserId Int
+  storageKey     String                  @unique @db.VarChar(500)
+  originalName   String                  @db.VarChar(255)
+  mimeType       String                  @db.VarChar(150)
+  sizeBytes      BigInt
+  checksum       String?                 @db.VarChar(128)
+  status         SupportAttachmentStatus @default(PENDING_SCAN)
+  createdAt      DateTime                @default(now())
+  message        SupportMessage          @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  uploadedBy     User                    @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([messageId])
+  @@index([uploadedByUserId, createdAt])
+  @@index([status, createdAt])
+
+}
+
+model SupportAssignment {
+  id                 Int          @id @default(autoincrement())
+  ticketId           Int
+  queueId            Int?
+  assignedUserId     Int?
+  assignedByUserId   Int
+  reason             String?      @db.VarChar(500)
+  assignedAt         DateTime     @default(now())
+  endedAt            DateTime?
+  ticket             SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  queue              SupportQueue? @relation(fields: [queueId], references: [id], onDelete: SetNull)
+  assignee           User?        @relation("SupportAssignmentAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  assignedBy         User         @relation("SupportAssignmentActor", fields: [assignedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, assignedAt])
+  @@index([assignedUserId, endedAt])
+  @@index([queueId, endedAt])
+
+}
+
+model SupportStatusHistory {
+  id          Int                 @id @default(autoincrement())
+  ticketId    Int
+  previous    SupportTicketStatus?
+  next        SupportTicketStatus
+  actorUserId Int?
+  reason      String?             @db.VarChar(1000)
+  createdAt   DateTime            @default(now())
+  ticket      SupportTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actor       User?               @relation("SupportStatusActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId, createdAt])
+  @@index([actorUserId, createdAt])
+
+}
+
+model SupportEvent {
+  id             BigInt    @id @default(autoincrement())
+  ticketId       Int?
+  actorUserId    Int?
+  eventType      String    @db.VarChar(100)
+  dedupeKey      String?   @unique @db.VarChar(160)
+  payload        Json?
+  occurredAt     DateTime  @default(now())
+  processedAt    DateTime?
+  ticket         SupportTicket? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  actor          User?     @relation("SupportEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId, occurredAt])
+  @@index([eventType, processedAt])
+
+}
+
+// ============================================================================
+// DB-3 — Editorial CMS
+// ============================================================================
+enum ArticleStatus {
+  DRAFT
+  IN_REVIEW
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ArticleType {
+  NEWS
+  ARTICLE
+  GUIDE
+}
+
+model Article {
+  id               Int          @id @default(autoincrement())
+  slug             String       @unique @db.VarChar(220)
+  title            String       @db.VarChar(240)
+  excerpt          String?      @db.VarChar(600)
+  content          String
+  contentFormat    String       @default("HTML") @db.VarChar(20)
+  type             ArticleType  @default(ARTICLE)
+  status           ArticleStatus @default(DRAFT)
+  coverImageKey    String?      @db.VarChar(500)
+  authorUserId     Int
+  publishedByUserId Int?
+  publishedAt      DateTime?
+  scheduledAt      DateTime?
+  metaTitle        String?      @db.VarChar(240)
+  metaDescription  String?      @db.VarChar(500)
+  canonicalUrl     String?      @db.VarChar(500)
+  isIndexable      Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  author           User         @relation("ArticleAuthor", fields: [authorUserId], references: [id], onDelete: Restrict)
+  publishedBy      User?        @relation("ArticlePublisher", fields: [publishedByUserId], references: [id], onDelete: SetNull)
+  categories       ArticleCategoryAssignment[]
+  tags             ArticleTagAssignment[]
+  revisions        ArticleRevision[]
+  media            ArticleMedia[]
+
+  @@index([status, publishedAt])
+  @@index([type, status, publishedAt])
+  @@index([authorUserId, updatedAt])
+  @@index([scheduledAt])
+
+}
+
+model ArticleCategory {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique @db.VarChar(120)
+  name      String   @db.VarChar(120)
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  articles  ArticleCategoryAssignment[]
+
+  @@index([isActive, sortOrder])
+
+}
+
+model ArticleTag {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique @db.VarChar(120)
+  name      String   @db.VarChar(120)
+  createdAt DateTime @default(now())
+  articles  ArticleTagAssignment[]
+
+}
+
+model ArticleCategoryAssignment {
+  articleId  Int
+  categoryId Int
+  sortOrder  Int      @default(0)
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  category   ArticleCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, categoryId])
+  @@index([categoryId, sortOrder])
+
+}
+
+model ArticleTagAssignment {
+  articleId Int
+  tagId     Int
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       ArticleTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+
+}
+
+model ArticleRevision {
+  id           BigInt   @id @default(autoincrement())
+  articleId    Int
+  editorUserId Int
+  revisionNo   Int
+  snapshot     Json
+  changeNote   String?  @db.VarChar(500)
+  createdAt    DateTime @default(now())
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  editor       User     @relation(fields: [editorUserId], references: [id], onDelete: Restrict)
+
+  @@unique([articleId, revisionNo])
+  @@index([articleId, createdAt])
+  @@index([editorUserId, createdAt])
+
+}
+
+model ArticleMedia {
+  id               Int      @id @default(autoincrement())
+  articleId        Int
+  uploadedByUserId Int
+  storageKey       String   @unique @db.VarChar(500)
+  originalName     String   @db.VarChar(255)
+  mimeType         String   @db.VarChar(150)
+  sizeBytes        BigInt
+  altText          String?  @db.VarChar(300)
+  createdAt        DateTime @default(now())
+  article          Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  uploadedBy       User     @relation("ArticleMediaUploader", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([articleId, createdAt])
+  @@index([uploadedByUserId])
+
+}
+
+// ============================================================================
+// DB-4 — STAFF-only CRM
+// ============================================================================
+enum CRMAccountType {
+  PROSPECT
+  CUSTOMER
+  PARTNER
+}
+
+enum CRMLeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  DISQUALIFIED
+  DUPLICATE
+  LOST
+}
+
+enum CRMOpportunityStatus {
+  OPEN
+  WON
+  LOST
+  ON_HOLD
+}
+
+enum CRMActivityType {
+  CALL
+  EMAIL
+  MEETING
+  NOTE
+  OTHER
+}
+
+enum CRMTaskStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CRMTaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum CRMNoteVisibility {
+  TEAM
+  PRIVATE
+}
+
+model CRMAccount {
+  id          Int            @id @default(autoincrement())
+  accountType CRMAccountType @default(PROSPECT)
+  displayName String         @db.VarChar(240)
+  companyId   Int?           @unique
+  userId      Int?           @unique
+  ownerUserId Int
+  lifecycle   String         @default("ACTIVE") @db.VarChar(40)
+  source      String?        @db.VarChar(100)
+  notes       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  company     Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  user        User?          @relation("CRMAccountUser", fields: [userId], references: [id], onDelete: SetNull)
+  owner       User           @relation("CRMAccountOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  contacts    CRMContact[]
+  leads       Lead[]
+  opportunities Opportunity[]
+  activities  CRMActivity[]
+  tasks       CRMTask[]
+  notesLog    CRMNote[]
+
+  @@index([ownerUserId, updatedAt])
+  @@index([accountType, lifecycle])
+  @@index([displayName])
+
+}
+
+model CRMContact {
+  id          Int       @id @default(autoincrement())
+  accountId   Int
+  userId      Int?
+  name        String    @db.VarChar(200)
+  title       String?   @db.VarChar(120)
+  email       String?   @db.VarChar(320)
+  phone       String?   @db.VarChar(40)
+  isPrimary   Boolean   @default(false)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  account     CRMAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([accountId, isPrimary])
+  @@index([email])
+  @@index([phone])
+
+}
+
+model LeadSource {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @db.VarChar(60)
+  label     String   @db.VarChar(120)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leads     Lead[]
+
+  @@index([isActive, sortOrder])
+
+}
+
+model Lead {
+  id                 Int           @id @default(autoincrement())
+  leadNumber         String        @unique @db.VarChar(32)
+  displayName        String        @db.VarChar(240)
+  companyName        String?       @db.VarChar(240)
+  email              String?       @db.VarChar(320)
+  phone              String?       @db.VarChar(40)
+  sourceId           Int?
+  status             CRMLeadStatus @default(NEW)
+  score              Int           @default(0)
+  ownerUserId        Int
+  convertedAccountId Int?
+  convertedByUserId  Int?
+  convertedAt        DateTime?
+  disqualifiedReason String?       @db.VarChar(500)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  source             LeadSource?   @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  owner              User          @relation("CRMLeadOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  convertedAccount   CRMAccount?   @relation(fields: [convertedAccountId], references: [id], onDelete: SetNull)
+  convertedBy        User?         @relation("CRMLeadConverter", fields: [convertedByUserId], references: [id], onDelete: SetNull)
+  activities         CRMActivity[]
+  tasks              CRMTask[]
+  notesLog           CRMNote[]
+
+  @@index([ownerUserId, status, updatedAt])
+  @@index([sourceId, createdAt])
+  @@index([status, score])
+  @@index([phone])
+  @@index([email])
+
+}
+
+model Pipeline {
+  id        Int             @id @default(autoincrement())
+  name      String          @db.VarChar(120)
+  isDefault Boolean         @default(false)
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  stages    PipelineStage[]
+  opportunities Opportunity[]
+
+  @@index([isActive, isDefault])
+
+}
+
+model PipelineStage {
+  id             Int          @id @default(autoincrement())
+  pipelineId     Int
+  code           String       @db.VarChar(60)
+  label          String       @db.VarChar(120)
+  sortOrder      Int          @default(0)
+  probability    Int          @default(0)
+  isWon          Boolean      @default(false)
+  isLost         Boolean      @default(false)
+  pipeline       Pipeline     @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  opportunities  Opportunity[]
+  fromHistories  OpportunityStageHistory[] @relation("OpportunityFromStage")
+  toHistories    OpportunityStageHistory[] @relation("OpportunityToStage")
+
+  @@unique([pipelineId, code])
+  @@unique([pipelineId, sortOrder])
+  @@unique([id, pipelineId])
+  @@index([pipelineId, isWon, isLost])
+
+}
+
+model Opportunity {
+  id                Int                  @id @default(autoincrement())
+  opportunityNumber String               @unique @db.VarChar(32)
+  accountId         Int
+  pipelineId        Int
+  stageId           Int
+  ownerUserId       Int
+  title             String               @db.VarChar(240)
+  amount            Decimal              @default(0) @db.Decimal(20, 2)
+  currency          String               @default("IRR") @db.VarChar(3)
+  expectedCloseAt   DateTime?
+  status            CRMOpportunityStatus @default(OPEN)
+  closedAt          DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  account           CRMAccount           @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  pipeline          Pipeline             @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
+  stage             PipelineStage        @relation(fields: [stageId, pipelineId], references: [id, pipelineId], onDelete: Restrict)
+  owner             User                 @relation("OpportunityOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  stageHistory      OpportunityStageHistory[]
+  activities        CRMActivity[]
+  tasks             CRMTask[]
+  notesLog          CRMNote[]
+
+  @@index([accountId, status])
+  @@index([ownerUserId, status, expectedCloseAt])
+  @@index([pipelineId, stageId])
+  @@index([status, expectedCloseAt])
+
+}
+
+model OpportunityStageHistory {
+  id            Int          @id @default(autoincrement())
+  opportunityId Int
+  fromStageId   Int?
+  toStageId     Int
+  actorUserId   Int
+  reason        String?      @db.VarChar(500)
+  createdAt     DateTime     @default(now())
+  opportunity   Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  fromStage     PipelineStage? @relation("OpportunityFromStage", fields: [fromStageId], references: [id], onDelete: SetNull)
+  toStage       PipelineStage @relation("OpportunityToStage", fields: [toStageId], references: [id], onDelete: Restrict)
+  actor         User         @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([opportunityId, createdAt])
+  @@index([actorUserId, createdAt])
+
+}
+
+model CRMActivity {
+  id             BigInt          @id @default(autoincrement())
+  type           CRMActivityType
+  subject        String          @db.VarChar(240)
+  body           String?
+  occurredAt     DateTime        @default(now())
+  durationMinutes Int?
+  outcome        String?         @db.VarChar(500)
+  actorUserId    Int
+  accountId      Int?
+  leadId         Int?
+  opportunityId  Int?
+  createdAt      DateTime        @default(now())
+  actor          User            @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+  account        CRMAccount?     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  lead           Lead?           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  opportunity    Opportunity?    @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, occurredAt])
+  @@index([leadId, occurredAt])
+  @@index([opportunityId, occurredAt])
+  @@index([actorUserId, occurredAt])
+
+}
+
+model CRMTask {
+  id             Int            @id @default(autoincrement())
+  title          String         @db.VarChar(240)
+  description    String?
+  status         CRMTaskStatus  @default(OPEN)
+  priority       CRMTaskPriority @default(NORMAL)
+  assigneeUserId Int
+  createdByUserId Int
+  dueAt          DateTime?
+  completedAt    DateTime?
+  accountId      Int?
+  leadId         Int?
+  opportunityId  Int?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  assignee       User           @relation("CRMTaskAssignee", fields: [assigneeUserId], references: [id], onDelete: Restrict)
+  createdBy      User           @relation("CRMTaskCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  account        CRMAccount?    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  lead           Lead?          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  opportunity    Opportunity?   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([assigneeUserId, status, dueAt])
+  @@index([createdByUserId, createdAt])
+  @@index([accountId, status])
+  @@index([leadId, status])
+  @@index([opportunityId, status])
+
+}
+
+model CRMNote {
+  id             BigInt            @id @default(autoincrement())
+  body           String
+  visibility     CRMNoteVisibility @default(TEAM)
+  authorUserId   Int
+  accountId      Int?
+  leadId         Int?
+  opportunityId  Int?
+  createdAt      DateTime          @default(now())
+  author         User              @relation(fields: [authorUserId], references: [id], onDelete: Restrict)
+  account        CRMAccount?       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  lead           Lead?             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  opportunity    Opportunity?      @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, createdAt])
+  @@index([leadId, createdAt])
+  @@index([opportunityId, createdAt])
+  @@index([authorUserId, createdAt])
+
+}
+
+// ============================================================================
+// DB-5 — Retail inventory, orders, payments, fulfillment and returns
+// These tables are inert until a separate product decision enables B2C.
+// ============================================================================
+enum InventoryMovementType {
+  RECEIPT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  RESERVATION
+  RELEASE
+  SALE
+  RETURN
+  DAMAGE
+}
+
+enum InventoryReservationStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
+  EXPIRED
+}
+
+enum RetailOrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PROCESSING
+  PARTIALLY_FULFILLED
+  FULFILLED
+  COMPLETED
+  CANCELLED
+  PAYMENT_EXPIRED
+  PARTIALLY_CANCELLED
+}
+
+enum RetailPaymentStatus {
+  UNPAID
+  PENDING
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+  FAILED
+}
+
+enum SellerOrderStatus {
+  PENDING_ACCEPTANCE
+  ACCEPTED
+  REJECTED
+  PROCESSING
+  READY_TO_SHIP
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURN_REQUESTED
+  PARTIALLY_RETURNED
+  RETURNED
+}
+
+enum PaymentAttemptStatus {
+  CREATED
+  REDIRECTED
+  PENDING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentTransactionType {
+  AUTHORIZE
+  CAPTURE
+  VOID
+  REFUND
+  CHARGEBACK
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REVERSED
+}
+
+enum PaymentWebhookStatus {
+  RECEIVED
+  VERIFIED
+  PROCESSED
+  REJECTED
+  FAILED
+}
+
+enum RefundStatus {
+  REQUESTED
+  APPROVED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REJECTED
+}
+
+enum ShipmentStatus {
+  LABEL_CREATED
+  READY_FOR_PICKUP
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+  RETURNED
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  IN_TRANSIT
+  RECEIVED
+  INSPECTED
+  REFUNDED
+  CLOSED
+}
+
+enum ReturnItemDisposition {
+  RESTOCK
+  DAMAGED
+  DISPOSED
+  REPAIR
+}
+
+model InventoryBalance {
+  id        Int      @id @default(autoincrement())
+  productId Int      @unique
+  onHand    Int      @default(0)
+  reserved  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+}
+
+model InventoryMovement {
+  id             BigInt                @id @default(autoincrement())
+  productId      Int
+  actorUserId    Int?
+  movementType   InventoryMovementType
+  quantityDelta  Int
+  referenceType  String?               @db.VarChar(60)
+  referenceId    String?               @db.VarChar(100)
+  idempotencyKey String?               @unique @db.VarChar(160)
+  reason         String?               @db.VarChar(500)
+  metadata       Json?
+  createdAt      DateTime              @default(now())
+  product        Product               @relation(fields: [productId], references: [id], onDelete: Restrict)
+  actor          User?                 @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([productId, createdAt])
+  @@index([movementType, createdAt])
+  @@index([referenceType, referenceId])
+  @@index([actorUserId, createdAt])
+
+}
+
+model RetailOrder {
+  id                    Int                @id @default(autoincrement())
+  orderNumber           String             @unique @db.VarChar(40)
+  buyerUserId           Int
+  status                RetailOrderStatus  @default(PENDING_PAYMENT)
+  paymentStatus         RetailPaymentStatus @default(UNPAID)
+  currency              String             @db.VarChar(3)
+  subtotal              Decimal            @default(0) @db.Decimal(20, 2)
+  discountTotal         Decimal            @default(0) @db.Decimal(20, 2)
+  shippingTotal         Decimal            @default(0) @db.Decimal(20, 2)
+  taxTotal              Decimal            @default(0) @db.Decimal(20, 2)
+  grandTotal            Decimal            @default(0) @db.Decimal(20, 2)
+  addressId             Int?
+  address               Address?           @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  recipientName         String             @db.VarChar(200)
+  recipientPhone        String             @db.VarChar(40)
+  province              String             @db.VarChar(120)
+  city                  String             @db.VarChar(120)
+  addressLine           String             @db.VarChar(1000)
+  postalCode            String?            @db.VarChar(30)
+  idempotencyKey        String             @unique @db.VarChar(160)
+  placedAt              DateTime           @default(now())
+  paidAt                DateTime?
+  completedAt            DateTime?
+  cancelledAt            DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  buyer                 User               @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  items                 RetailOrderItem[]
+  sellerOrders          SellerOrder[]
+  paymentAttempts       PaymentAttempt[]
+  paymentTransactions   PaymentTransaction[]
+  refunds               RetailRefund[]
+  reservations          InventoryReservation[]
+  returns               ReturnRequest[]
+  invoices              FinanceInvoice[]
+
+  @@index([buyerUserId, createdAt])
+  @@index([status, createdAt])
+  @@index([paymentStatus, createdAt])
+
+}
+
+model SellerOrder {
+  id                 Int              @id @default(autoincrement())
+  orderId            Int
+  companyId           Int
+  sellerOrderNumber   String           @unique @db.VarChar(48)
+  status              SellerOrderStatus @default(PENDING_ACCEPTANCE)
+  currency            String           @db.VarChar(3)
+  subtotal            Decimal          @default(0) @db.Decimal(20, 2)
+  discountTotal       Decimal          @default(0) @db.Decimal(20, 2)
+  shippingTotal       Decimal          @default(0) @db.Decimal(20, 2)
+  taxTotal            Decimal          @default(0) @db.Decimal(20, 2)
+  sellerNetTotal      Decimal          @default(0) @db.Decimal(20, 2)
+  companyNameSnapshot String           @db.VarChar(240)
+  companyIdSnapshot   String?          @db.VarChar(80)
+  acceptedAt          DateTime?
+  shippedAt           DateTime?
+  deliveredAt         DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  order               RetailOrder      @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  company             Company          @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  items               RetailOrderItem[]
+  shipments           Shipment[]
+  returns             ReturnRequest[]
+  refunds             RetailRefund[]
+  commissionSnapshot  CommissionSnapshot?
+  sellerPayable       SellerPayable?
+  invoices            FinanceInvoice[]
+
+  @@unique([orderId, companyId])
+  @@unique([id, orderId])
+  @@index([companyId, status, createdAt])
+  @@index([orderId, status])
+
+}
+
+model RetailOrderItem {
+  id                    Int         @id @default(autoincrement())
+  orderId               Int
+  sellerOrderId         Int
+  productId             Int?
+  productTitleSnapshot  String      @db.VarChar(240)
+  skuSnapshot           String?     @db.VarChar(120)
+  brandSnapshot         String?     @db.VarChar(160)
+  modelSnapshot         String?     @db.VarChar(160)
+  imageUrlSnapshot      String?     @db.VarChar(1000)
+  companyNameSnapshot   String      @db.VarChar(240)
+  quantity              Int
+  unitPrice             Decimal     @db.Decimal(20, 2)
+  discountAmount        Decimal     @default(0) @db.Decimal(20, 2)
+  taxAmount             Decimal     @default(0) @db.Decimal(20, 2)
+  lineTotal             Decimal     @db.Decimal(20, 2)
+  currency              String      @db.VarChar(3)
+  createdAt             DateTime    @default(now())
+  order                 RetailOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sellerOrder           SellerOrder @relation(fields: [sellerOrderId, orderId], references: [id, orderId], onDelete: Restrict)
+  product               Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+  returnItems           ReturnItem[]
+
+  @@index([orderId])
+  @@index([sellerOrderId])
+  @@index([productId])
+
+}
+
+model InventoryReservation {
+  id             BigInt                     @id @default(autoincrement())
+  productId      Int
+  buyerUserId    Int
+  orderId        Int?
+  quantity       Int
+  status         InventoryReservationStatus @default(ACTIVE)
+  checkoutKey    String                     @unique @db.VarChar(160)
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  releasedAt     DateTime?
+  createdAt      DateTime                   @default(now())
+  product        Product                    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  buyer          User                       @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  order          RetailOrder?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([productId, status, expiresAt])
+  @@index([buyerUserId, createdAt])
+  @@index([orderId])
+
+}
+
+model PaymentAttempt {
+  id             Int                 @id @default(autoincrement())
+  orderId        Int
+  provider       String              @db.VarChar(80)
+  status         PaymentAttemptStatus @default(CREATED)
+  amount         Decimal             @db.Decimal(20, 2)
+  currency       String              @db.VarChar(3)
+  idempotencyKey String              @unique @db.VarChar(160)
+  authority      String?             @unique @db.VarChar(200)
+  redirectUrl    String?             @db.VarChar(1000)
+  expiresAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  order          RetailOrder         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  transactions   PaymentTransaction[]
+  webhookEvents  PaymentWebhookEvent[]
+
+  @@index([orderId, createdAt])
+  @@index([provider, status, createdAt])
+
+}
+
+model PaymentTransaction {
+  id                  Int                      @id @default(autoincrement())
+  orderId             Int
+  attemptId           Int?
+  provider            String                   @db.VarChar(80)
+  providerTransactionId String?                @db.VarChar(200)
+  transactionType     PaymentTransactionType
+  status              PaymentTransactionStatus @default(PENDING)
+  amount              Decimal                  @db.Decimal(20, 2)
+  currency            String                   @db.VarChar(3)
+  verifiedAt          DateTime?
+  createdAt           DateTime                 @default(now())
+  order               RetailOrder              @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  attempt              PaymentAttempt?          @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  refunds             RetailRefund[]
+  reconciliations     ReconciliationRecord[]
+
+  @@unique([provider, providerTransactionId])
+  @@index([orderId, createdAt])
+  @@index([attemptId])
+  @@index([status, createdAt])
+
+}
+
+model PaymentWebhookEvent {
+  id             BigInt              @id @default(autoincrement())
+  provider       String              @db.VarChar(80)
+  providerEventId String             @db.VarChar(240)
+  attemptId      Int?
+  status         PaymentWebhookStatus @default(RECEIVED)
+  signatureValid Boolean             @default(false)
+  payload        Json
+  receivedAt     DateTime            @default(now())
+  processedAt    DateTime?
+  lastError      String?
+  attempt        PaymentAttempt?      @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([status, receivedAt])
+  @@index([attemptId])
+
+}
+
+model RetailRefund {
+  id                    Int           @id @default(autoincrement())
+  orderId               Int
+  sellerOrderId         Int?
+  paymentTransactionId  Int?
+  requestedByUserId     Int
+  amount                Decimal       @db.Decimal(20, 2)
+  currency              String        @db.VarChar(3)
+  status                RefundStatus  @default(REQUESTED)
+  reason                String        @db.VarChar(1000)
+  idempotencyKey        String        @unique @db.VarChar(160)
+  providerRefundId      String?       @unique @db.VarChar(200)
+  processedAt           DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  order                 RetailOrder   @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sellerOrder           SellerOrder?  @relation(fields: [sellerOrderId], references: [id], onDelete: SetNull)
+  paymentTransaction    PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id], onDelete: Restrict)
+  requestedBy           User          @relation(fields: [requestedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([orderId, createdAt])
+  @@index([sellerOrderId, status])
+  @@index([status, createdAt])
+
+}
+
+model Shipment {
+  id                Int            @id @default(autoincrement())
+  sellerOrderId     Int
+  carrier           String?        @db.VarChar(120)
+  trackingNumber    String?        @db.VarChar(160)
+  status            ShipmentStatus @default(LABEL_CREATED)
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  sellerOrder       SellerOrder    @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  trackingEvents    TrackingEvent[]
+
+  @@index([sellerOrderId, createdAt])
+  @@index([trackingNumber])
+  @@index([status, updatedAt])
+
+}
+
+model TrackingEvent {
+  id          BigInt        @id @default(autoincrement())
+  shipmentId  Int
+  eventCode   String?       @db.VarChar(80)
+  description String        @db.VarChar(500)
+  location    String?       @db.VarChar(240)
+  occurredAt  DateTime
+  createdAt   DateTime      @default(now())
+  shipment    Shipment      @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentId, occurredAt])
+
+}
+
+model ReturnRequest {
+  id              Int          @id @default(autoincrement())
+  orderId         Int
+  sellerOrderId   Int
+  buyerUserId     Int
+  returnNumber    String       @unique @db.VarChar(40)
+  status          ReturnStatus @default(REQUESTED)
+  reason          String       @db.VarChar(1000)
+  requestedAt     DateTime     @default(now())
+  receivedAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  order           RetailOrder  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sellerOrder     SellerOrder  @relation(fields: [sellerOrderId, orderId], references: [id, orderId], onDelete: Restrict)
+  buyer           User         @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  items           ReturnItem[]
+
+  @@index([orderId, status])
+  @@index([sellerOrderId, status])
+  @@index([buyerUserId, createdAt])
+
+}
+
+model ReturnItem {
+  id              Int                   @id @default(autoincrement())
+  returnRequestId Int
+  orderItemId     Int
+  quantity        Int
+  disposition     ReturnItemDisposition?
+  inspectionNote  String?
+  createdAt       DateTime              @default(now())
+  returnRequest   ReturnRequest         @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  orderItem       RetailOrderItem       @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+
+  @@unique([returnRequestId, orderItemId])
+  @@index([orderItemId])
+
+}
+
+// ============================================================================
+// DB-6 — Marketplace finance, immutable ledger and settlements
+// ============================================================================
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum JournalEntryStatus {
+  DRAFT
+  POSTED
+  REVERSED
+}
+
+enum CommissionCalculationType {
+  PERCENTAGE
+  FIXED_PER_ORDER
+}
+
+enum SellerPayableStatus {
+  PENDING
+  ON_HOLD
+  ELIGIBLE
+  INCLUDED_IN_SETTLEMENT
+  PAID
+  REVERSED
+}
+
+enum SettlementApprovalDecision {
+  APPROVE
+  REJECT
+  RETURN_FOR_REVISION
+}
+
+enum SettlementStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  PAYOUT_PENDING
+  PAID
+  RECONCILED
+  ON_HOLD
+  REJECTED
+  PAYOUT_FAILED
+  ADJUSTED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  VOID
+}
+
+model LedgerAccount {
+  id          Int               @id @default(autoincrement())
+  code        String            @unique @db.VarChar(80)
+  name        String            @db.VarChar(200)
+  accountType LedgerAccountType
+  currency    String            @db.VarChar(3)
+  isSystem    Boolean           @default(false)
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  lines       JournalLine[]
+
+  @@index([accountType, currency, isActive])
+
+}
+
+model JournalEntry {
+  id              BigInt            @id @default(autoincrement())
+  entryNumber     String            @unique @db.VarChar(48)
+  sourceType      String?           @db.VarChar(80)
+  sourceId        String?           @db.VarChar(120)
+  currency        String            @db.VarChar(3)
+  description     String?           @db.VarChar(1000)
+  status          JournalEntryStatus @default(DRAFT)
+  occurredAt      DateTime          @default(now())
+  postedAt        DateTime?
+  createdByUserId Int?
+  reversalOfId    BigInt?           @unique
+  createdAt       DateTime          @default(now())
+  lines           JournalLine[]
+  createdBy       User?             @relation("JournalEntryCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  reversalOf      JournalEntry?     @relation("JournalReversals", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  reversals       JournalEntry[]    @relation("JournalReversals")
+
+  @@index([sourceType, sourceId])
+  @@index([status, occurredAt])
+  @@index([currency, postedAt])
+
+}
+
+model JournalLine {
+  id             BigInt       @id @default(autoincrement())
+  journalEntryId BigInt
+  accountId      Int
+  debit          Decimal      @default(0) @db.Decimal(20, 2)
+  credit         Decimal      @default(0) @db.Decimal(20, 2)
+  memo           String?      @db.VarChar(500)
+  createdAt      DateTime     @default(now())
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Restrict)
+  account        LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([journalEntryId])
+  @@index([accountId, createdAt])
+
+}
+
+model CommissionRule {
+  id            Int                       @id @default(autoincrement())
+  code          String                    @unique @db.VarChar(80)
+  name          String                    @db.VarChar(200)
+  calculation   CommissionCalculationType
+  rate          Decimal                   @db.Decimal(12, 6)
+  currency      String?                   @db.VarChar(3)
+  companyId     Int?
+  categoryId    Int?
+  priority      Int                       @default(0)
+  validFrom     DateTime
+  validTo       DateTime?
+  isActive      Boolean                   @default(true)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  company       Company?                  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  category      Category?                 @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  snapshots     CommissionSnapshot[]
+
+  @@index([isActive, validFrom, validTo, priority])
+  @@index([companyId, categoryId])
+
+}
+
+model CommissionSnapshot {
+  id             Int            @id @default(autoincrement())
+  sellerOrderId  Int            @unique
+  ruleId         Int?
+  calculation    CommissionCalculationType
+  rate           Decimal        @db.Decimal(12, 6)
+  baseAmount     Decimal        @db.Decimal(20, 2)
+  commissionAmount Decimal      @db.Decimal(20, 2)
+  currency       String         @db.VarChar(3)
+  createdAt      DateTime       @default(now())
+  sellerOrder    SellerOrder    @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  rule           CommissionRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+
+}
+
+model SellerPayable {
+  id             BigInt             @id @default(autoincrement())
+  sellerOrderId  Int                @unique
+  companyId      Int
+  settlementId   Int?
+  currency       String             @db.VarChar(3)
+  grossAmount    Decimal            @db.Decimal(20, 2)
+  commissionAmount Decimal          @default(0) @db.Decimal(20, 2)
+  deductionAmount Decimal           @default(0) @db.Decimal(20, 2)
+  netAmount      Decimal            @db.Decimal(20, 2)
+  status         SellerPayableStatus @default(PENDING)
+  eligibleAt     DateTime?
+  paidAt         DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  sellerOrder    SellerOrder        @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  company        Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  settlement     Settlement?        @relation(fields: [settlementId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, status, eligibleAt])
+  @@index([settlementId])
+
+}
+
+model Settlement {
+  id               Int             @id @default(autoincrement())
+  settlementNumber String          @unique @db.VarChar(48)
+  companyId        Int
+  currency         String          @db.VarChar(3)
+  periodStart      DateTime
+  periodEnd        DateTime
+  grossAmount      Decimal         @default(0) @db.Decimal(20, 2)
+  deductionAmount  Decimal         @default(0) @db.Decimal(20, 2)
+  netAmount        Decimal         @default(0) @db.Decimal(20, 2)
+  status           SettlementStatus @default(REQUESTED)
+  requestedByUserId Int
+  requestedAt      DateTime        @default(now())
+  approvedAt       DateTime?
+  paidAt           DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  company          Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  requestedBy      User            @relation("SettlementRequester", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  payables         SellerPayable[]
+  approvals        SettlementApproval[]
+  payouts          SettlementPayout[]
+
+  @@index([companyId, status, createdAt])
+  @@index([status, requestedAt])
+  @@index([periodStart, periodEnd])
+
+}
+
+model SettlementApproval {
+  id             Int        @id @default(autoincrement())
+  settlementId   Int
+  approverUserId Int
+  decision       SettlementApprovalDecision
+  reason         String?    @db.VarChar(1000)
+  decidedAt      DateTime   @default(now())
+  settlement     Settlement @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+  approver       User       @relation(fields: [approverUserId], references: [id], onDelete: Restrict)
+
+  @@unique([settlementId, approverUserId])
+  @@index([settlementId, decidedAt])
+  @@index([approverUserId, decidedAt])
+
+}
+
+model SettlementPayout {
+  id                Int         @id @default(autoincrement())
+  settlementId      Int
+  provider           String?    @db.VarChar(80)
+  providerReference  String?    @unique @db.VarChar(200)
+  amount             Decimal    @db.Decimal(20, 2)
+  currency           String     @db.VarChar(3)
+  status             PayoutStatus @default(PENDING)
+  idempotencyKey     String     @unique @db.VarChar(160)
+  executedByUserId   Int?
+  executedAt         DateTime?
+  failureReason      String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  settlement         Settlement @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+  executedBy         User?      @relation("PayoutExecutor", fields: [executedByUserId], references: [id], onDelete: SetNull)
+  reconciliations    ReconciliationRecord[]
+
+  @@index([settlementId, createdAt])
+  @@index([status, createdAt])
+
+}
+
+model ReconciliationRecord {
+  id                    BigInt             @id @default(autoincrement())
+  provider              String             @db.VarChar(80)
+  externalReference     String             @db.VarChar(240)
+  amount                Decimal            @db.Decimal(20, 2)
+  currency              String             @db.VarChar(3)
+  matched                Boolean            @default(false)
+  paymentTransactionId  Int?
+  payoutId              Int?
+  notes                 String?
+  reconciledAt          DateTime            @default(now())
+  paymentTransaction    PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id], onDelete: SetNull)
+  payout                SettlementPayout?  @relation(fields: [payoutId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, externalReference])
+  @@index([matched, reconciledAt])
+  @@index([paymentTransactionId])
+  @@index([payoutId])
+
+}
+
+model FinanceInvoice {
+  id                Int           @id @default(autoincrement())
+  invoiceNumber     String        @unique @db.VarChar(48)
+  companyId         Int?
+  buyerUserId       Int?
+  orderId           Int?
+  sellerOrderId     Int?
+  status            InvoiceStatus @default(DRAFT)
+  currency          String        @db.VarChar(3)
+  subtotal          Decimal       @db.Decimal(20, 2)
+  taxTotal          Decimal       @default(0) @db.Decimal(20, 2)
+  grandTotal        Decimal       @db.Decimal(20, 2)
+  issuedAt          DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  company           Company?      @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  buyer             User?         @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  order             RetailOrder?  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  sellerOrder       SellerOrder?  @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  lines             FinanceInvoiceLine[]
+
+  @@index([companyId, createdAt])
+  @@index([buyerUserId, createdAt])
+  @@index([orderId])
+  @@index([sellerOrderId])
+
+}
+
+model FinanceInvoiceLine {
+  id          Int           @id @default(autoincrement())
+  invoiceId   Int
+  description String        @db.VarChar(500)
+  quantity    Decimal       @default(1) @db.Decimal(18, 4)
+  unitPrice   Decimal       @db.Decimal(20, 2)
+  taxAmount   Decimal       @default(0) @db.Decimal(20, 2)
+  lineTotal   Decimal       @db.Decimal(20, 2)
+  invoice     FinanceInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+
 }

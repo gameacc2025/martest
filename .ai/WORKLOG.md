@@ -4118,3 +4118,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Risks / open questions:** Retail activation, currency/payment provider, commission/tax/shipping/returns policy, account recovery channel, support SLA, CMS editorial workflow and CRM ownership rules remain unapproved.
 - **Next action:** Begin DB-0: reconcile actual migration history, schema and database docs; refresh API route/client parity; then approve the near-term database batches before adding domain migrations.
 
+
+
+## 2026-11-08 — DB-DOMAIN-EXPANSION-01 — DB-0 through DB-6 additive schema
+- **Status:** IN_PROGRESS — schema/migrations/docs prepared on a temporary implementation branch; Prisma/CI validation and review still pending.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Implement the approved database-first foundations for DB-0 through DB-6 without activating API/UI workflows or changing the B2C freeze.
+- **Claimed scope:** Reconcile current baseline/migration docs; add AuthChallenge/AuditLog, Support, CMS, CRM, Retail and Finance Prisma models/enums; add six additive PostgreSQL migrations; document migration operations and activation gates.
+- **Branch:** `feat/db0-db6-domain-schema`, created from main HEAD `5d2a2f972acb1084e68cc0f4cbff6080f4d2257a`.
+- **Source evidence:** Existing baseline `20261106000000_init` contains the 42-model core and already includes Address plus its partial unique index, inquiry ownership CHECKs and Notification INBOX trigger. Older documentation referenced a non-existent standalone address migration and has been corrected.
+- **Changes prepared:** Prisma schema expands to 97 models / 58 enums. Six additive migrations add 55 tables / 37 enum types. New runbook: `docs/DATABASE_MIGRATION_RUNBOOK.md`. Updated `docs/DATABASE_DOCUMENTATION.md` and master backlog.
+- **Safety:** No existing model/table is dropped or renamed. No data backfill. No API routes, permissions, seed data, workers or UI changes. AD-4 remains in force; retail/finance tables are inert and checkout/payment/payout are not activated.
+- **Static verification:** 97 schema models and 58 enums; 55 new tables and 37 new enum types; no duplicate table/enum names; all migration FK targets resolve to existing or earlier-created tables; all new Prisma relation FK declarations have matching SQL; all new `@default(now())` fields have database defaults. SQL static checks only; not a PostgreSQL parser/runtime migration.
+- **NOT RUN:** `prisma validate`, `prisma generate`, fresh PostgreSQL migration, upgrade migration against a representative database, backend tests, builds and runtime smoke tests.
+- **Next:** Commit branch files, open PR to trigger CI, resolve all schema/migration/test failures, then merge only after validation. Live database `_prisma_migrations` status remains unverified.

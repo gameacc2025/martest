@@ -375,3 +375,22 @@ These documents contain deeper contracts and should be updated rather than dupli
 ---
 
 **Current recommendation:** do not start by adding every table from the enterprise blueprint. First finish DB-0, then implement the approved operational domains (Support, CMS, account recovery and CRM) as bounded contexts. Treat Retail + Finance as a gated, policy-heavy program. Once the owner approves the database scope, finish the database layer in that order; only then proceed to API and UI work.
+
+
+## 2026-11-08 implementation update — DB-0 through DB-6 schema stage
+
+**Status:** Implemented in the database branch; pending Prisma/CI execution and review before merge. This is not an API/UI completion claim.
+
+- DB-0 migration-tree reconciliation: the actual tree contains the consolidated `20261106000000_init` baseline (not the obsolete standalone address migration referenced by older documentation). The baseline already includes Address, its default-address partial unique index, inquiry ownership CHECK constraints and the notification INBOX trigger. A migration runbook now records the baseline requirement and deployment procedure.
+- DB-1 through DB-6 add 55 Prisma models and 37 enums: account challenges/audit, support, CMS, CRM, retail inventory/order/payment/fulfillment/returns, and finance ledger/settlement.
+- Total Prisma schema after the change: 97 models and 58 enums.
+- Six additive migrations are timestamp-ordered from `20261108000100_auth_audit` through `20261108000600_finance`.
+- No existing model/table was removed or renamed; no existing data backfill was introduced.
+- Retail and finance tables are storage foundations only. AD-4 remains in force: no active cart/checkout/order/payment API or public commerce action is introduced. Retail currency is required at order creation rather than silently defaulted.
+- No API routes, API-client methods, permissions, workers, seeds or UI workflows were implemented in this database-only stage.
+- Static repository-side checks confirmed 97 models/58 enums, 55 new tables, 37 new enum types, all expected relation FK targets, and database defaults for all new `@default(now())` fields. Prisma validation, migration execution against PostgreSQL, tests and builds remain pending CI/runtime verification.
+
+**Runbook:** `docs/DATABASE_MIGRATION_RUNBOOK.md`.  
+**Schema reference:** `docs/DATABASE_DOCUMENTATION.md`.
+
+**Next:** run Prisma schema validation, fresh-database migration validation and backend regression tests; fix all migration/schema errors before merging. Then proceed to API implementation in the same domain order.
