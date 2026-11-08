@@ -12,6 +12,7 @@ const sharedStyles = read('./assets/main.scss')
 const adminEntry = read('../../apps/admin/src/main.js')
 const companyEntry = read('../../apps/company/src/main.js')
 const websiteEntry = read('../../apps/website/src/main.js')
+const websiteTheme = read('../../apps/website/src/assets/marketplace-theme.scss')
 const pages = read('./assets/design-system/pages.scss')
 const sidebar = read('./components/dashboard/DashboardSidebar.vue')
 const companyDashboard = read('../../apps/company/src/pages/user/dashboard/CompanyDashboard.vue')
@@ -44,6 +45,16 @@ describe('approved Telecom Market design palette', () => {
     expect(newTemp).toContain('.tm-btn--accent')
     expect(newTemp).toContain('var(--ds-primary-button-text)')
     expect(newTemp).toContain('--ds-status-muted-bg:#172B40')
+  })
+
+  it('keeps Website, Admin and Company on one shared source of truth for brand and surface tokens', () => {
+    expect(websiteEntry.indexOf('marketplace-theme.scss')).toBeLessThan(websiteEntry.indexOf('assets/design-system/newtemp-reference.scss'))
+    expect(websiteTheme).not.toMatch(/^\\s*:root(?:\\.app-dark)?\\s*\\{/m)
+    expect(newTemp).toContain(':root {')
+    expect(newTemp).toContain(':root.app-dark')
+    for (const entry of [adminEntry, companyEntry, websiteEntry]) {
+      expect(entry).toContain('assets/design-system/newtemp-reference.scss')
+    }
   })
 
   it('uses the animated fiber loader from NewTemp for fullscreen and inline loading states', () => {
