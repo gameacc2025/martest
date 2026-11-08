@@ -4207,3 +4207,9 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** GitHub branch updated through repository file commits; no direct local git push was performed.
 - **Risks / open questions:** Full Admin/Company page-level palette audit and runtime verification remain. Demo seed scripts have not been added. Retail and Finance activation still require explicit commercial/accounting decisions.
 - **Next action:** Finish M0 palette audit and verification, then implement API-1 as a complete backend + UI + seed + test vertical slice.
+
+
+### API-UI-SEED-01 — M0 follow-up
+- **Changes:** Replaced remaining audited dashboard color/shadow literals in DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace with approved semantic tokens. Extended design-system.test.js to assert the token contracts and prevent old palette leakage.
+- **Static verification:** Admin Dashboard, Admin OperationsHub, CompanyDashboard, shared dashboard header/sidebar, OperationalWorkspace and skill-refinements.scss contain no raw hex/RGB/HSL color declarations in the scanned source. Test literals are intentional regression patterns.
+- **Verification NOT RUN:** Vitest, Sass/Vue compilation and app builds.
