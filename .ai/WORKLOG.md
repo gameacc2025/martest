@@ -4095,3 +4095,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - Commits on `main`: `e5c0538` (homepage UI), `15cb35f` (regression test).
 - Verification: source-level assertions reviewed. Local `pnpm test`/build and browser checks were not run in this GitHub-only session.
 - No backend, API, database, authentication, or business logic changed.
+
+
+## 2026-11-08 — Public header, footer, drawers and catalogue breadcrumb refinement
+- Moved search out of the primary navigation into a dedicated icon-only header action; removed About and Contact links from desktop, mobile and utility navigation and retained both in the footer.
+- Restored the customer avatar in the account trigger, including the image when the authenticated profile supplies one and the existing initial fallback otherwise.
+- Slowed the PrimeVue notification/cart drawer entrance and exit transitions to a more deliberate 520ms motion, with reduced-motion users still receiving no transition.
+- Wrapped the product catalogue breadcrumb in a dedicated full-width block before the page heading and added explicit layout rules so it cannot sit inline beside the title or catalogue content.
+- Updated PublicLayout and ProductListing regression tests. Backend, API contracts and business logic were not changed.
+- Remote GitHub source edits only; local Vue compilation, tests, builds and browser visual inspection have not been run in this session.
