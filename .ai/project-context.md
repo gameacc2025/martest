@@ -954,3 +954,8 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 - Local destructive reset is explicit: npm run db:reset:dev only runs when NODE_ENV=development and DATABASE_URL points to telecom_marketplace. It performs db push --force-reset then seed. Normal container startup does not wipe data.
 - Keep migration history for production; do not delete migration directories to solve a development database state mismatch.
 - Demo product prices are indicative only; confirm product variants/specifications with manufacturer datasheets before commercial publication.
+
+
+## Remaining feature implementation baseline — 2026-11-08
+
+The source-backed, prioritized backlog for all remaining near-term and future domains is maintained in [docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md](../docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md). It distinguishes implemented core capabilities from partial flows, UI-only prototypes, legacy API-client definitions and deferred enterprise scope. Follow its database-first bounded-context sequence before adding new APIs or activating prototype UIs. The AD-4 B2C freeze versus currently registered Website cart/checkout/order routes remains an explicit unresolved conflict.
