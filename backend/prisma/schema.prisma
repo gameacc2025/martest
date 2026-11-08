@@ -27,7 +27,6 @@ model Role {
 
   @@index([isSystem])
   @@index([scope])
-
 }
 
 enum RoleScope {
@@ -49,7 +48,6 @@ model Permission {
   roles RolePermission[]
 
   @@index([group])
-
 }
 
 model RolePermission {
@@ -61,7 +59,6 @@ model RolePermission {
 
   @@id([roleId, permissionId])
   @@index([permissionId])
-
 }
 
 model UserRole {
@@ -73,7 +70,6 @@ model UserRole {
 
   @@id([userId, roleId])
   @@index([roleId])
-
 }
 
 model AccessProfile {
@@ -90,7 +86,6 @@ model AccessProfile {
 
   @@index([type])
   @@index([companyId])
-
 }
 
 model Profile {
@@ -103,7 +98,6 @@ model Profile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
 }
 
 model Company {
@@ -146,7 +140,6 @@ model Company {
   @@index([deletedAt])
   @@index([isVerified])
   @@index([nationalId])
-
 }
 
 model User {
@@ -214,7 +207,6 @@ model User {
   @@index([email])
   @@index([status])
   @@index([phone])
-
 }
 
 model Address {
@@ -235,7 +227,6 @@ model Address {
 
   @@index([userId, isDefault])
   @@index([userId, createdAt])
-
 }
 
 model RefreshToken {
@@ -248,7 +239,6 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
-
 }
 
 // One-time, PKCE-bound code used to hand a live session from the website
@@ -266,7 +256,6 @@ model HandoffCode {
 
   @@index([userId])
   @@index([expiresAt])
-
 }
 
 model Category {
@@ -287,7 +276,6 @@ model Category {
   @@index([status])
   @@index([showInMenu])
   @@index([sortOrder])
-
 }
 
 model Subcategory {
@@ -307,7 +295,6 @@ model Subcategory {
   @@index([categoryId])
   @@index([status])
   @@index([sortOrder])
-
 }
 
 model SpecificationTemplate {
@@ -322,7 +309,6 @@ model SpecificationTemplate {
   fields        SpecificationField[]
 
   @@index([isActive])
-
 }
 
 model SpecificationField {
@@ -342,7 +328,6 @@ model SpecificationField {
   @@unique([templateId, key])
   @@index([templateId])
   @@index([sortOrder])
-
 }
 
 // Global, reusable specification field library.
@@ -363,11 +348,11 @@ model SpecificationLibraryField {
 
   @@index([isActive])
   @@index([slug])
-
 }
 
 
 model Product {
+
   id               Int                @id @default(autoincrement())
   title            String
   slug             String             @unique
@@ -421,7 +406,6 @@ model Product {
   @@index([deletedAt])
   @@index([sku])
   @@index([catalogCode])
-
 }
 
 model ProductStatusHistory {
@@ -439,7 +423,6 @@ model ProductStatusHistory {
   @@index([changedByUserId])
   @@index([newStatus])
   @@index([createdAt])
-
 }
 
 // Immutable audit trail of every product change: field edits, price-tier
@@ -461,7 +444,6 @@ model ProductActivityLog {
   @@index([actorUserId])
   @@index([action])
   @@index([createdAt])
-
 }
 
 model ProductImage {
@@ -479,7 +461,6 @@ model ProductImage {
   @@index([productId])
   @@index([isPrimary])
   @@index([sortOrder])
-
 }
 
 model ProductDocument {
@@ -496,7 +477,6 @@ model ProductDocument {
   @@index([productId])
   @@index([type])
   @@index([sortOrder])
-
 }
 
 model ProductPriceTier {
@@ -516,7 +496,6 @@ model ProductPriceTier {
   @@index([minQuantity])
   @@index([validFrom])
   @@index([validTo])
-
 }
 
 model ProductPriceSnapshot {
@@ -533,7 +512,6 @@ model ProductPriceSnapshot {
 
   @@index([productId, recordedAt])
   @@index([priceTierId])
-
 }
 
 model Inquiry {
@@ -584,7 +562,6 @@ model Inquiry {
   @@index([responseDeadline])
   @@index([revealedAt])
   @@index([closedAt])
-
 }
 
 
@@ -610,7 +587,6 @@ model InquiryMessage {
   @@index([senderCompanyId])
   @@index([recipientUserId])
   @@index([recipientCompanyId])
-
 }
 
 model InquiryStatusHistory {
@@ -629,7 +605,6 @@ model InquiryStatusHistory {
   @@index([changedByUserId])
   @@index([newStatus])
   @@index([createdAt])
-
 }
 
 model InquiryItem {
@@ -646,7 +621,6 @@ model InquiryItem {
 
   @@index([inquiryId])
   @@index([productId])
-
 }
 
 model InquiryResponse {
@@ -666,7 +640,6 @@ model InquiryResponse {
   @@index([inquiryId])
   @@index([companyId])
   @@index([status])
-
 }
 
 model InquiryResponseAttachment {
@@ -680,7 +653,6 @@ model InquiryResponseAttachment {
   response   InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
 
   @@index([responseId])
-
 }
 
 
@@ -700,7 +672,6 @@ model InquiryResponseItem {
   @@index([responseId])
   @@index([inquiryItemId])
   @@index([currency])
-
 }
 
 model CompanyInquiryLimit {
@@ -711,7 +682,6 @@ model CompanyInquiryLimit {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
 }
 
 model CompanyLimit {
@@ -726,7 +696,6 @@ model CompanyLimit {
   @@unique([companyId, key])
   @@index([companyId])
   @@index([key])
-
 }
 
 // Commercial plans and auditable usage for the RFQ/inquiry revenue model.
@@ -750,7 +719,6 @@ model InquiryPlan {
   subscriptions              InquirySubscription[]
 
   @@index([isActive])
-
 }
 
 model InquirySubscription {
@@ -779,7 +747,6 @@ model InquirySubscription {
   @@index([companyId, status, endsAt])
   @@index([userId, status, endsAt])
   @@index([planId])
-
 }
 
 model InquiryUsageEvent {
@@ -796,7 +763,6 @@ model InquiryUsageEvent {
 
   @@index([subscriptionId, usageType, createdAt])
   @@index([referenceType, referenceId])
-
 }
 
 enum InquirySubscriptionStatus {
@@ -825,7 +791,6 @@ model SystemSetting {
   updatedAt     DateTime @updatedAt
 
   @@index([key])
-
 }
 
 model Notification {
@@ -848,7 +813,6 @@ model Notification {
   @@index([isRead])
   @@index([createdAt])
   @@index([type])
-
 }
 
 // Per-user, per-event, per-channel opt-in/out matrix (flow/06 §3: NO channel
@@ -878,7 +842,6 @@ model NotificationFolder {
   memberships NotificationFolderMembership[]
 
   @@index([scope, isActive, sortOrder])
-
 }
 
 model NotificationFolderMembership {
@@ -891,7 +854,6 @@ model NotificationFolderMembership {
 
   @@unique([notificationId, folderId])
   @@index([folderId])
-
 }
 
 enum NotificationFolderScope {
@@ -913,7 +875,6 @@ model NotificationPreference {
 
   @@unique([userId, eventType, channel])
   @@index([userId])
-
 }
 
 // Delivery log + outbox — one row per (dispatch, recipient, channel).
@@ -981,7 +942,6 @@ model NotificationDelivery {
   @@index([userId])
   @@index([eventType])
   @@index([channel, status, nextAttemptAt])
-
 }
 
 enum NotificationChannel {
@@ -1133,7 +1093,6 @@ model Banner {
   @@index([placement, status, isActive, sortOrder])
   @@index([startsAt, endsAt])
   @@index([deletedAt])
-
 }
 
 enum BannerStatus {
@@ -1142,8 +1101,6 @@ enum BannerStatus {
   ARCHIVED
 }
 
-
-// ============================================================================
 // DB-1 — Authentication challenges and cross-domain audit
 // ============================================================================
 enum AuthChallengePurpose {
