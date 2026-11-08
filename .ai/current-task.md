@@ -16,7 +16,7 @@
 
 
 - **Palette compatibility follow-up commits:** `025ea486` moved Website PrimeVue light/dark semantics into shared tokens; `f1af4e4b` and `3553cae3` updated/fixed Website palette regression tests; `f0045541` documented the correction; `6bbe619a` recorded CI findings; current task handoff refreshed at `199f7eaa`.
-- **Current main HEAD:** `199f7eaa332a9ce21855e9e4fa311950763eb4c1`.
+- **Main HEAD before this handoff note:** `199f7eaa332a9ce21855e9e4fa311950763eb4c1`.
 
 ## Direct-main integration record — 2026-11-08
 - The Website palette consolidation, shared dashboard token corrections, design-system regression assertion and multi-agent docs are committed on `main`.
