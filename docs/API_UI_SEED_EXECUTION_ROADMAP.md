@@ -85,13 +85,13 @@ The approved brand palette already exists in the shared design-system files and 
 ### Backend tasks
 
 - [ ] A1.1 Inventory current login, refresh, password reset, phone verification, session and token flows; map existing behavior before changing it.
-- [ ] A1.2 Confirm challenge purposes, delivery channels, expiry, attempt limits, replay protection and one-outstanding-challenge policy.
+- [ ] A1.2 Reconcile AuthChallengePurpose/AuthChallengeChannel with required flows. Current enums cover PASSWORD_RESET, PHONE_VERIFICATION and EMAIL_VERIFICATION only; add a LOGIN_MFA purpose through an additive migration if SMS/email second-factor login is approved. Define whether MFA is optional or mandatory by STAFF/COMPANY/CUSTOMER context before enforcement.
 - [ ] A1.3 Implement challenge request/verify/consume services; store only hashes of OTPs/tokens and never return secrets.
 - [ ] A1.4 Add abuse controls: rate limits, resend cooldown, attempt throttling, generic responses and invalidation rules.
-- [ ] A1.5 Implement session/device listing, revoke-one and revoke-all operations using the existing refresh/session model.
-- [ ] A1.6 Implement append-only AuditLog service with actor context, target, action, safe before/after metadata, source/IP/user-agent policy and correlation ID.
-- [ ] A1.7 Add staff-only audit search API with date, actor, action, target and result filters; redact credentials, OTPs, tokens and sensitive payloads.
-- [ ] A1.8 Add granular permissions and enforce them in service and route layers.
+- [ ] A1.5 Reconcile session policy before building device management: RefreshToken currently stores only token hash, userId, expiry and createdAt; login revokes prior refresh tokens by default, while logout-one/logout-all already exist. Decide whether multiple concurrent devices are allowed. If yes, add device/session metadata and change issuance/rotation without weakening token-reuse protection; otherwise present the single active session accurately.
+- [ ] A1.6 Implement an AuditLog module/service. The append-only table and database trigger already exist, but no audit module/routes are registered in backend/src/app.js. Capture actor context, target, action, safe before/after metadata, source/IP/user-agent policy and request correlation ID.
+- [ ] A1.7 Add staff-only audit search API with date, actor, action, target and result filters; the base seed already defines audit_logs.read, but no route currently consumes it. Redact credentials, OTPs, tokens and sensitive payloads.
+- [ ] A1.8 Add only missing granular permissions (for example auth_challenges.manage and audit_logs.export if export is approved) and enforce them in service and route layers; preserve the existing audit_logs.read permission.
 - [ ] A1.9 Add security tests: expired/replayed challenge, brute-force throttle, token redaction, cross-context denial, session revocation and immutable audit records.
 
 ### UI tasks
@@ -107,6 +107,15 @@ The approved brand palette already exists in the shared design-system files and 
 - [ ] A1.15 Add backend/prisma/seeds/auth-audit.js: synthetic users/devices, active and revoked sessions, successful/failed security events and challenge lifecycle examples.
 - [ ] A1.16 Never seed usable OTPs, raw tokens, passwords or real IP/person data. Use reserved/example values and clearly labelled demo metadata.
 - [ ] A1.17 Ensure seed is deterministic, idempotent and disabled in production.
+
+
+### API-1 discovery notes — 2026-11-08
+
+- AuthChallenge and AuditLog tables, indexes and constraints are already migrated. AuditLog is append-only at the PostgreSQL layer; do not recreate that trigger.
+- AuthChallenge currently supports PASSWORD_RESET, PHONE_VERIFICATION and EMAIL_VERIFICATION over SMS/EMAIL. Login MFA is not represented yet.
+- RefreshToken has no device name, user-agent, IP or last-used metadata. The current login path revokes prior refresh tokens by default; logout-current-device and logout-all endpoints already exist.
+- The base seed already defines audit_logs.read, but backend/src/app.js registers no audit module and the current auth routes expose no challenge request/verify endpoints.
+- The above session/MFA policy choices must be resolved in the API-1 contract before schema or login behavior changes; do not silently weaken current token rotation or session revocation.
 
 ## 6. API-2 — Support and Ticketing
 
