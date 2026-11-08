@@ -84,12 +84,13 @@ A log entry is not a substitute for updating the canonical documentation when be
 
 ## 6. Branch and commit policy
 
-- Canonical long-lived branch: `main`.
-- Do not create a long-lived feature branch unless explicitly requested. If a tool requires a temporary branch, merge only after review/tests and remove it only when authorized and safe.
+- Canonical and only integration branch: `main`.
+- For this project, do not create local or remote feature branches, temporary branches, or pull requests unless the owner explicitly changes this instruction.
+- Parallel agents may use isolated detached worktrees/checkouts pinned to a recorded `main` SHA; they must return patches for coordinator integration. The coordinator alone applies reviewed patches and commits them directly to the latest `main` head.
 - Never force-push, rewrite history, reset away user work, or stage all files blindly.
 - Commit only scoped, reviewed, verified files. Keep commits small and meaningful.
 - No push unless authorized. If authorized, push to `origin/main` only after verifying current branch, clean diff scope, and checks.
-- Concurrent agents must not edit the same files without coordination. A WORKLOG claim is a coordination hint, not a lock guaranteed by Git.
+- Concurrent agents must not edit the same files without coordination. The coordinator records exact file ownership in `.ai/agent-coordination/ACTIVE.md`; shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global design tokens) are coordinator-owned. A WORKLOG claim is a coordination hint, not a lock guaranteed by Git.
 
 ## 7. Security and architecture guardrails
 
@@ -101,7 +102,11 @@ A log entry is not a substitute for updating the canonical documentation when be
 - Preserve current marketplace identity and business decisions unless the user explicitly changes them.
 - For database/schema changes, inspect Prisma schema, related queries, seed scripts, backup/rollback strategy, and environment impact before proceeding.
 
-## 8. Completion checklist
+## 8. Parallel-agent handoff
+
+Every delegated agent must receive a bounded lane, unique task ID, base `main` SHA, explicit file ownership, dependencies, API/permission contract, seed requirements and acceptance tests. Each agent returns a patch/diff and the exact verification results; no agent commits to a branch. The coordinator reviews and integrates one patch at a time on `main`, resolving conflicts before the next patch. See `docs/API_UI_SEED_EXECUTION_ROADMAP.md` for the lane matrix and handoff template.
+
+## 9. Completion checklist
 
 - [ ] Required startup reading and status inspection completed.
 - [ ] Scope and root cause recorded.
@@ -114,6 +119,6 @@ A log entry is not a substitute for updating the canonical documentation when be
 - [ ] Final response lists outcome, evidence, commit/push, blockers, next action.
 
 
-## 9. Mandatory UI/UX skill workflow
+## 10. Mandatory UI/UX skill workflow
 
 For any UI/UX implementation, redesign, component styling, responsive behavior, accessibility refinement, or design-system change, agents must read `.ai/UI_SKILLS.md` and the relevant installed skill files before editing. The standard toolkit is UI UX Pro Max, Taste Skill (`design-taste-frontend`), Hallmark (`nutlope/hallmark`), Impeccable, and Vercel Web Design Guidelines. Use the skill routing and project-specific constraints in `.ai/UI_SKILLS.md`; do not let generic skill advice override explicit product requirements, accepted design decisions, existing Vue/PrimeVue architecture, or the current brand system. Do not change API/business behavior as a side effect of visual work. Browser-based verification is prohibited by the owner's standing instruction unless they later authorize it; mark such checks NOT RUN rather than simulating them. All-agent installation/update command: `scripts\install-ui-skills.ps1` from PowerShell at the repository root.
