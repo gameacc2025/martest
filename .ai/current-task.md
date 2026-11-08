@@ -14,6 +14,10 @@
 - **Parallel-agent model:** independent discovery/implementation in detached worktrees pinned to a main SHA; exact file ownership; coordinator-only serial integration to main. Shared hotspots are coordinator-owned.
 - **Verification not yet run:** Vitest, Sass/Vue compilation, all app builds, full browser visual parity. The prior PR #91 test-and-build and compose-and-browser checks failed; inspect their failure causes before relying on those results. No API route or domain seed has been implemented yet.
 
+
+- **Palette compatibility follow-up commits:** `025ea486` moved Website PrimeVue light/dark semantics into shared tokens; `f1af4e4b` and `3553cae3` updated/fixed Website palette regression tests; `f0045541` documented the correction; `6bbe619a` recorded CI findings; current task handoff refreshed at `199f7eaa`.
+- **Current main HEAD:** `199f7eaa332a9ce21855e9e4fa311950763eb4c1`.
+
 ## Direct-main integration record — 2026-11-08
 - The Website palette consolidation, shared dashboard token corrections, design-system regression assertion and multi-agent docs are committed on `main`.
 - Relevant commit sequence: `6501c262`, `e4ea81c7`, `5b9dd8e7`, `e9a95a51`, `97c3a0fb`, `f127f0e0`, `0e2e1af4`, `511d260b`, `e22725de`, `3f2ae234`, `a7467a15`, `45830c9c`, `bf1f9eb7`, `b048c00e`, `ca263f8b`, `476044ca`.
