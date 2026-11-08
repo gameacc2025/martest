@@ -186,3 +186,6 @@ CREATE TRIGGER "SupportTicket_no_delete" BEFORE DELETE ON "SupportTicket" FOR EA
 
 ALTER TABLE "SupportTicket" ADD CONSTRAINT "SupportTicket_company_origin_requires_company_check" CHECK ("createdFrom" <> 'COMPANY' OR "requesterCompanyId" IS NOT NULL);
 CREATE UNIQUE INDEX "SupportSlaPolicy_one_active_global_per_priority_idx" ON "SupportSlaPolicy" ("priority") WHERE "categoryId" IS NULL AND "isActive" = true;
+
+ALTER TABLE "SupportAssignment" ADD CONSTRAINT "SupportAssignment_has_queue_or_assignee_check" CHECK ("queueId" IS NOT NULL OR "assignedUserId" IS NOT NULL);
+CREATE UNIQUE INDEX "SupportAssignment_one_active_per_ticket_idx" ON "SupportAssignment" ("ticketId") WHERE "endedAt" IS NULL;

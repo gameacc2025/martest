@@ -394,3 +394,9 @@ These documents contain deeper contracts and should be updated rather than dupli
 **Schema reference:** `docs/DATABASE_DOCUMENTATION.md`.
 
 **Next:** run Prisma schema validation, fresh-database migration validation and backend regression tests; fix all migration/schema errors before merging. Then proceed to API implementation in the same domain order.
+
+
+### Database hardening follow-up
+- Added a partial unique index allowing only one unconsumed, non-invalidated AuthChallenge per user/purpose/channel; the issuing API must invalidate the previous challenge transactionally.
+- Added SupportAssignment invariants: every assignment needs a queue or assignee, and a ticket can have at most one open assignment.
+- Prisma schema validation and Client generation passed on the first CI attempt. Fresh-database migration execution then exposed a composite unique-key ordering/definition issue in DB-4; it was corrected by creating the referenced composite unique constraint before the FK. The next CI attempt exposed a dollar-quote delimiter typo in the DB-6 journal immutability function; this is corrected in the current branch revision and the full migration run is being repeated.

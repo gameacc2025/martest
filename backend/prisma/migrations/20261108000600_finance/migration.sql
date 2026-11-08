@@ -256,14 +256,14 @@ ALTER TABLE "FinanceInvoice" ADD CONSTRAINT "FinanceInvoice_single_recipient_che
 ALTER TABLE "FinanceInvoice" ADD CONSTRAINT "FinanceInvoice_single_source_check" CHECK (("orderId" IS NOT NULL)::int + ("sellerOrderId" IS NOT NULL)::int = 1);
 ALTER TABLE "FinanceInvoice" ADD CONSTRAINT "FinanceInvoice_amounts_check" CHECK ("subtotal" >= 0 AND "taxTotal" >= 0 AND "grandTotal" = "subtotal" + "taxTotal");
 ALTER TABLE "FinanceInvoiceLine" ADD CONSTRAINT "FinanceInvoiceLine_amount_quantity_check" CHECK ("quantity" > 0 AND "unitPrice" >= 0 AND "taxAmount" >= 0 AND "lineTotal" = ("quantity" * "unitPrice") + "taxAmount");
-CREATE OR REPLACE FUNCTION guard_posted_journal_entry() RETURNS trigger AS $
+CREATE OR REPLACE FUNCTION guard_posted_journal_entry() RETURNS trigger AS $$
 BEGIN
   IF TG_OP = 'DELETE' AND OLD."status" IN ('POSTED', 'REVERSED') THEN RAISE EXCEPTION 'Posted journal entries are immutable'; END IF;
   IF TG_OP = 'UPDATE' AND OLD."status" = 'POSTED' AND NEW."status" = 'REVERSED'
      AND (to_jsonb(NEW) - 'status') = (to_jsonb(OLD) - 'status') THEN RETURN NEW; END IF;
   IF TG_OP = 'UPDATE' AND OLD."status" IN ('POSTED', 'REVERSED') THEN RAISE EXCEPTION 'Posted journal entries are immutable'; END IF;
   IF TG_OP = 'DELETE' THEN RETURN OLD; ELSE RETURN NEW; END IF;
-END; $ LANGUAGE plpgsql;
+END; $$ LANGUAGE plpgsql;
 CREATE TRIGGER "JournalEntry_immutable_after_posting" BEFORE UPDATE OR DELETE ON "JournalEntry" FOR EACH ROW EXECUTE FUNCTION guard_posted_journal_entry();
 CREATE OR REPLACE FUNCTION guard_posted_journal_line() RETURNS trigger AS $$
 DECLARE entry_id BIGINT; entry_status "JournalEntryStatus";

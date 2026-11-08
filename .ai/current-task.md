@@ -1,3 +1,11 @@
+## Latest progress — DB-DOMAIN-EXPANSION-01
+- First CI attempt: Prisma schema validate/generate passed; DB-4 failed on the PipelineStage composite FK because its referenced unique key was not recognized at FK creation.
+- Second CI attempt: DB-1 through DB-5 succeeded on fresh PostgreSQL; DB-6 failed on a malformed dollar-quote delimiter in the JournalEntry trigger function.
+- Fixes prepared: explicit UNIQUE constraints for referenced composite keys, corrected PL/pgSQL $$ delimiters, immutable actor FKs changed to RESTRICT, plus AuthChallenge expiry/outstanding-challenge and SupportAssignment active-assignment constraints.
+- **Current:** re-run migration validation on the latest branch commit; continue until DB-6 and CI are verified. No migration has been applied to the user's live/dev database.
+
+---
+
 # Current Task — 2026-11-08
 
 ## Active task — DB-DOMAIN-EXPANSION-01

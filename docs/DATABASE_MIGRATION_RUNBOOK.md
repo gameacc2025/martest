@@ -83,7 +83,7 @@ Use the deployment's configured `DATABASE_URL` and Prisma config. Never use `pri
 - [ ] `_prisma_migrations` contains the baseline and all six DB-1..DB-6 migration names with successful completion.
 - [ ] `prisma validate` and `prisma generate` succeed.
 - [ ] Confirm expected new schema counts: 97 Prisma models and 58 enums.
-- [ ] Verify critical PostgreSQL constraints/triggers exist: AuditLog append-only, support message/history immutability, no physical SupportTicket deletion, inventory nonnegative/reservation checks, order/SellerOrder composite ownership FK, immutable inventory movements/tracking events, balanced posted journal entries, and settlement maker-checker.
+- [ ] Verify critical PostgreSQL constraints/triggers exist: AuditLog append-only; one outstanding AuthChallenge per user/purpose/channel; support message/history immutability, no physical SupportTicket deletion and one active assignment per ticket; inventory nonnegative/reservation checks; order/SellerOrder composite ownership FK; immutable inventory movements/tracking events; balanced posted journal entries; settlement maker-checker.
 - [ ] Run backend tests and application builds.
 - [ ] Confirm existing auth, company, product, inquiry, subscription, notification and address flows still work.
 - [ ] Confirm no Retail/Payment/Finance API or public checkout action has been enabled by this database-only change.
@@ -96,7 +96,11 @@ Use the deployment's configured `DATABASE_URL` and Prisma config. Never use `pri
 - If data integrity is uncertain, stop writes and restore the verified backup according to the deployment's recovery plan.
 - The migrations are not a substitute for application-level transaction logic: inventory reservation, order state transitions, payment verification, ledger posting and tenant authorization must be implemented and tested in the API stage.
 
-## 8. Activation gates
+## 8. Seed data policy
+
+No business defaults are seeded by these migrations. Support queues/categories/SLA, CRM lead sources and pipelines, and the finance chart of accounts/commission rules require explicit operational configuration. Add them through a reviewed seed or Admin setup workflow in the API stage; do not insert assumed commercial defaults into schema migrations.
+
+## 9. Activation gates
 
 The schema alone does not enable a feature. Keep the following disabled until the next stage:
 - Self-service password recovery until challenge issuance, rate limiting and notification delivery are implemented.

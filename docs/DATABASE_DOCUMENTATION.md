@@ -123,9 +123,9 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 
 ### قواعد مهم دامنه‌های جدید
 
-- `AuthChallenge.secretHash` فقط hash توکن/OTP را نگه می‌دارد؛ secret خام نباید ذخیره شود. چالش دارای purpose، channel، expiry، مصرف یک‌باره و شمارنده تلاش است.
+- `AuthChallenge.secretHash` فقط hash توکن/OTP را نگه می‌دارد؛ secret خام نباید ذخیره شود. چالش دارای purpose، channel، expiry، مصرف یک‌باره و شمارنده تلاش است. CHECK دیتابیس تضمین می‌کند expiry بعد از creation باشد و partial unique index اجازه بیش از یک challenge باز برای هر user/purpose/channel نمی‌دهد؛ API باید challenge قبلی را پیش از صدور جدید invalidate کند.
 - `AuditLog` append-only است. FKهای actor و company از حذف سخت جلوگیری می‌کنند؛ حذف/ویرایش رکورد ممیزی مجاز نیست.
-- در پشتیبانی، یادداشت داخلی از پیام عمومی با `SupportMessageVisibility` جدا شده است. پیام و تاریخچه وضعیت immutable هستند؛ Ticket باید بسته/آرشیو شود و حذف فیزیکی ندارد. فایل‌ها با storage key خصوصی و وضعیت اسکن ثبت می‌شوند.
+- در پشتیبانی، یادداشت داخلی از پیام عمومی با `SupportMessageVisibility` جدا شده است. پیام و تاریخچه وضعیت immutable هستند؛ Ticket باید بسته/آرشیو شود و حذف فیزیکی ندارد. فایل‌ها با storage key خصوصی و وضعیت اسکن ثبت می‌شوند. هر Ticket حداکثر یک assignment باز دارد و هر assignment باید queue یا assignee داشته باشد؛ به‌روزرسانی فیلدهای assigned جاری و تاریخچه assignment باید در یک تراکنش API انجام شود.
 - CMS نسخه‌های مقاله را در `ArticleRevision` نگه می‌دارد. انتشار عمومی فقط باید رکوردهای PUBLISHED را ارائه کند؛ وضعیت SCHEDULED نیازمند `scheduledAt` است.
 - CRM به User و Company موجود لینک می‌شود و هویت تکراری ایجاد نمی‌کند. این دامنه برای STAFF طراحی شده و محدودیت دسترسی باید در API enforce شود.
 - موجودی MVP یک balance برای هر Product دارد؛ `onHand` و `reserved` نمی‌توانند منفی شوند و reserved از onHand بیشتر نمی‌شود. `InventoryMovement` و `TrackingEvent` append-only هستند. رزرو اتمیک و تطبیق موجودی با رزروها مسئولیت transaction/service در API آینده است.
@@ -133,6 +133,10 @@ Prisma queryها باید مالکیت و visibility را در خود شرط que
 - در این مرحله Cart/CartItem دائمی ساخته نشده است؛ سبد فعلی local-only می‌ماند و تصمیم AD-4 درباره غیرفعال بودن B2C تغییر نکرده است. تمام جداول Retail/Payment/Shipment/Return فقط زیرساخت ذخیره‌سازی‌اند؛ هیچ API یا مسیر پرداختی فعال نشده است.
 - دفتر کل از سند دوطرفه استفاده می‌کند. JournalLine باید بدهکار/بستانکار یک‌طرفه و غیرمنفی باشد؛ trigger deferred توازن سند، حداقل دو خط و یکسان بودن ارز حساب‌ها با ارز سند را هنگام commit کنترل می‌کند. خطوط و اسناد POSTED قابل ویرایش/حذف نیستند؛ اصلاح با سند معکوس انجام می‌شود.
 - تأیید تسویه و اجرای payout دارای maker-checker هستند. درخواست‌دهنده نمی‌تواند تسویه خودش را تأیید یا پرداخت کند و تأییدکننده نمی‌تواند همان payout را اجرا کند.
+
+### Seed و راه‌اندازی اولیه
+
+هیچ Queue/Category/SLA، CRM LeadSource/Pipeline/Stage، LedgerAccount، CommissionRule یا تنظیم تجاری پیش‌فرض در migrationها seed نشده است؛ این داده‌ها باید در مرحله API/seed با سیاست و نقش‌های مجاز ایجاد شوند. این کار عمدی است تا بدون توافق SLA، pipeline فروش یا chart of accounts، مقدار پیش‌فرض تجاری تحمیل نشود.
 
 ### محدوده‌ای که هنوز اجرا نشده است
 

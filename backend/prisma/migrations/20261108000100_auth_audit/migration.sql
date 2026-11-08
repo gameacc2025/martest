@@ -50,3 +50,5 @@ CREATE INDEX "AuditLog_requestId_idx" ON "AuditLog" ("requestId");
 ALTER TABLE "AuthChallenge" ADD CONSTRAINT "AuthChallenge_attempts_check" CHECK ("attemptCount" >= 0 AND "maxAttempts" > 0 AND "attemptCount" <= "maxAttempts");
 CREATE OR REPLACE FUNCTION prevent_audit_log_mutation() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'AuditLog is append-only'; END; $$ LANGUAGE plpgsql;
 CREATE TRIGGER "AuditLog_no_update" BEFORE UPDATE OR DELETE ON "AuditLog" FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_mutation();
+ALTER TABLE "AuthChallenge" ADD CONSTRAINT "AuthChallenge_expiry_after_creation_check" CHECK ("expiresAt" > "createdAt");
+CREATE UNIQUE INDEX "AuthChallenge_one_outstanding_per_purpose_channel_idx" ON "AuthChallenge" ("userId", "purpose", "channel") WHERE "consumedAt" IS NULL AND "invalidatedAt" IS NULL;

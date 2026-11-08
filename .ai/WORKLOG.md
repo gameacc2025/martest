@@ -4132,3 +4132,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Static verification:** 97 schema models and 58 enums; 55 new tables and 37 new enum types; no duplicate table/enum names; all migration FK targets resolve to existing or earlier-created tables; all new Prisma relation FK declarations have matching SQL; all new `@default(now())` fields have database defaults. SQL static checks only; not a PostgreSQL parser/runtime migration.
 - **NOT RUN:** `prisma validate`, `prisma generate`, fresh PostgreSQL migration, upgrade migration against a representative database, backend tests, builds and runtime smoke tests.
 - **Next:** Commit branch files, open PR to trigger CI, resolve all schema/migration/test failures, then merge only after validation. Live database `_prisma_migrations` status remains unverified.
+
+
+## DB-DOMAIN-EXPANSION-01 — CI findings and corrections
+- **CI attempt 1:** Prisma schema validation and client generation passed. Fresh PostgreSQL migration failed in DB-4 because the composite key on PipelineStage was not present as a referenced unique constraint at FK creation.
+- **Correction:** replaced the pre-FK unique index with an explicit named PostgreSQL UNIQUE constraint for PipelineStage(id,pipelineId); applied the same explicit constraint strategy to SellerOrder(id,orderId) before DB-5 composite FKs.
+- **CI attempt 2:** DB-1 through DB-5 applied successfully on fresh PostgreSQL. DB-6 failed because a JavaScript replacement collapsed the dollar-quote delimiter in one PL/pgSQL function.
+- **Correction:** restored the exact $$ function delimiters; also aligned immutable-history actor FKs to RESTRICT and added one-outstanding-auth-challenge and one-active-support-assignment partial indexes plus their supporting CHECK constraints.
+- **Current revision:** `0d1049ad2b21a2aa80362645b23971a1f96e9840` plus pending follow-up commit for the above fixes.
+- **Next:** rerun full fresh-database migrations through DB-6; inspect any remaining DB-6 SQL/runtime issue; do not merge while database validation is red.
