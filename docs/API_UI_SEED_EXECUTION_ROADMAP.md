@@ -408,3 +408,14 @@ Start with M0.1–M0.9. The shared palette contract and app entry-point imports 
 - A red CI check caused by the change blocks completion. Existing unrelated failures must be identified precisely and documented; do not suppress or weaken tests.
 - Do not run migrations on a persistent user database without checking baseline, `prisma migrate status`, backup and the migration runbook. No `db push`, reset or destructive migration.
 - A completed source change is not the same as runtime verification. Report commits, tests and unverified items separately.
+
+
+### Direct-main integration update — 2026-11-08
+
+- Applied the initial shared palette corrections directly to `main`; no PR was merged. Draft PR #91 was closed unmerged after its CI checks failed.
+- Removed all six root-level token blocks from Website-only `marketplace-theme.scss`. The Website-specific stylesheet now owns component/layout presentation only.
+- Preserved the Website's PrimeVue semantic compatibility values by moving its light/dark `--p-*` and legacy aliases into the canonical shared `newtemp-reference.scss` root tokens. This is important: centralization must not silently discard the Website's existing component colors.
+- Updated Website and shared design-system tests to assert that the Website component stylesheet does not redeclare root tokens and that all three apps load the shared final theme.
+- Static verification: Website component stylesheet has zero root token blocks; shared theme has one light and one dark root block; Admin, Company and Website entrypoint order is correct; all 62 custom properties used by the shared refinement mixin are defined in shared tokens.
+- The earlier PR CI failure details were inspected: database migration validation passed; test-and-build had 23 failing assertions across 9 Website/shared-ui test files; browser smoke failed on existing Website mobile horizontal overflow (383px document at 360px viewport) and a missing storefront selector. The Website palette test failure was updated to match the new shared-token architecture. These failures still require fresh verification; they are not marked fixed by source inspection alone.
+- Current state remains IN_PROGRESS. Vitest, Sass/Vue compilation, builds and browser visual review have not been run on the latest main head.
