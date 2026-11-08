@@ -7,6 +7,7 @@ const theme = read('./theme.js')
 const legacy = read('./assets/design-system/tem.scss')
 const overrides = read('./assets/design-system/brand-overrides.scss')
 const newTemp = read('./assets/design-system/newtemp-reference.scss')
+const skillRefinements = read('./assets/design-system/skill-refinements.scss')
 const loading = read('./components/common/Loading.vue')
 const sharedStyles = read('./assets/main.scss')
 const adminEntry = read('../../apps/admin/src/main.js')
@@ -63,6 +64,20 @@ describe('approved Telecom Market design palette', () => {
       '#083344', '#164E63', '#22C55E', '#DCFCE7', '#F59E0B', '#FEF3C7',
       '#EF4444', '#FEE2E2', '#3B82F6', '#DBEAFE',
     ]) expect(tokens).toContain(value)
+  })
+
+  it('keeps optional shared refinements on semantic tokens and free of the retired palette', () => {
+    expect(skillRefinements).not.toMatch(/#7c6cf6|#6c5ce7|#6252d5|#8878f7|#2bb3e8|#f4f5fa|#1d2130|#eceef5|#8a90a6|#0d1420/i)
+    for (const token of [
+      'var(--ds-color-background)',
+      'var(--ds-color-surface)',
+      'var(--ds-color-border)',
+      'var(--ds-color-text)',
+      'var(--ds-primary-button)',
+      'var(--ds-sidebar-active-bg)',
+      'var(--ds-status-success-bg)',
+      'var(--ds-status-danger-bg)',
+    ]) expect(skillRefinements).toContain(token)
   })
 
   it('removes the retired purple/orange palette from shared store and Tem widgets', () => {
