@@ -4118,3 +4118,42 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Risks / open questions:** Retail activation, currency/payment provider, commission/tax/shipping/returns policy, account recovery channel, support SLA, CMS editorial workflow and CRM ownership rules remain unapproved.
 - **Next action:** Begin DB-0: reconcile actual migration history, schema and database docs; refresh API route/client parity; then approve the near-term database batches before adding domain migrations.
 
+
+
+## 2026-11-08 — DB-DOMAIN-EXPANSION-01 — DB-0 through DB-6 additive schema
+- **Status:** IN_PROGRESS — schema/migrations/docs prepared on a temporary implementation branch; Prisma/CI validation and review still pending.
+- **Agent:** ChatGPT via GitHub repository tools.
+- **Goal:** Implement the approved database-first foundations for DB-0 through DB-6 without activating API/UI workflows or changing the B2C freeze.
+- **Claimed scope:** Reconcile current baseline/migration docs; add AuthChallenge/AuditLog, Support, CMS, CRM, Retail and Finance Prisma models/enums; add six additive PostgreSQL migrations; document migration operations and activation gates.
+- **Branch:** `feat/db0-db6-domain-schema`, created from main HEAD `5d2a2f972acb1084e68cc0f4cbff6080f4d2257a`.
+- **Source evidence:** Existing baseline `20261106000000_init` contains the 42-model core and already includes Address plus its partial unique index, inquiry ownership CHECKs and Notification INBOX trigger. Older documentation referenced a non-existent standalone address migration and has been corrected.
+- **Changes prepared:** Prisma schema expands to 97 models / 58 enums. Six additive migrations add 55 tables / 37 enum types. New runbook: `docs/DATABASE_MIGRATION_RUNBOOK.md`. Updated `docs/DATABASE_DOCUMENTATION.md` and master backlog.
+- **Safety:** No existing model/table is dropped or renamed. No data backfill. No API routes, permissions, seed data, workers or UI changes. AD-4 remains in force; retail/finance tables are inert and checkout/payment/payout are not activated.
+- **Static verification:** 97 schema models and 58 enums; 55 new tables and 37 new enum types; no duplicate table/enum names; all migration FK targets resolve to existing or earlier-created tables; all new Prisma relation FK declarations have matching SQL; all new `@default(now())` fields have database defaults. SQL static checks only; not a PostgreSQL parser/runtime migration.
+- **NOT RUN:** `prisma validate`, `prisma generate`, fresh PostgreSQL migration, upgrade migration against a representative database, backend tests, builds and runtime smoke tests.
+- **Next:** Commit branch files, open PR to trigger CI, resolve all schema/migration/test failures, then merge only after validation. Live database `_prisma_migrations` status remains unverified.
+
+
+## DB-DOMAIN-EXPANSION-01 — CI findings and corrections
+- **CI attempt 1:** Prisma schema validation and client generation passed. Fresh PostgreSQL migration failed in DB-4 because the composite key on PipelineStage was not present as a referenced unique constraint at FK creation.
+- **Correction:** replaced the pre-FK unique index with an explicit named PostgreSQL UNIQUE constraint for PipelineStage(id,pipelineId); applied the same explicit constraint strategy to SellerOrder(id,orderId) before DB-5 composite FKs.
+- **CI attempt 2:** DB-1 through DB-5 applied successfully on fresh PostgreSQL. DB-6 failed because a JavaScript replacement collapsed the dollar-quote delimiter in one PL/pgSQL function.
+- **Correction:** restored the exact $$ function delimiters; also aligned immutable-history actor FKs to RESTRICT and added one-outstanding-auth-challenge and one-active-support-assignment partial indexes plus their supporting CHECK constraints.
+- **Current revision:** `0d1049ad2b21a2aa80362645b23971a1f96e9840` plus pending follow-up commit for the above fixes.
+- **Next:** rerun full fresh-database migrations through DB-6; inspect any remaining DB-6 SQL/runtime issue; do not merge while database validation is red.
+
+## DB-DOMAIN-EXPANSION-01 — Final CI verification
+- **Status:** IMPLEMENTED — database branch and PR prepared; not merged to main.
+- **Final head:** `dad8624138ccd397780e7ed9943533ac655f158d`.
+- **PR:** https://github.com/gameacc2025/martest/pull/90
+- **Database Migration Validation:** PASS. Prisma 7.10.1 validate + generate passed; fresh PostgreSQL 18.4 applied the baseline and all six incremental migrations; `prisma migrate status` passed.
+- **Runtime Validation:** Compose configuration, all service health endpoints, and migration verification passed. Browser smoke passed 6/8; two failures are Website-only pre-existing SPA/storefront selector/viewport checks. No frontend files changed in this PR.
+- **CI:** architecture graph check passed; backend tests passed; all three app builds passed. Frontend/shared tests failed with 23 assertions across 9 files, matching the previously recorded unrelated test debt.
+- **Database deliverables:** 97 Prisma models / 58 enums; six additive migrations; migration runbook and updated database/backlog/AI docs.
+- **No live DB action:** no migration was run against the user's local or production database. Only disposable CI PostgreSQL was migrated. Check baseline state before applying the runbook.
+- **Next:** merge PR after repository's unrelated frontend/browser checks are resolved or explicitly waived by repository policy; then begin API stage DB-1 → DB-6 in the same bounded-context order. Do not implement UI until its API contract and permissions are tested.
+
+
+- **Final branch HEAD:** `58f86414325fe39a11c0aeeb9bd540867dd7df94` (documentation handoff); schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; DB validation CI passed on identical schema/migration content at `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254`.
+- **Latest PR-head checks:** Database Migration Validation PASS; CI backend tests/builds PASS, frontend/shared test job FAILS on 23 assertions across 9 existing UI/shared test files; Runtime Validation still running at handoff.
+- **Merge decision:** PR #90 is open, mergeable but `unstable`; leave unmerged while unrelated frontend/browser checks are red. Database-specific validation is green.

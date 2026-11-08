@@ -959,3 +959,20 @@ The Paces Bootstrap base index (without query string) is accessible and provides
 ## Remaining feature implementation baseline — 2026-11-08
 
 The source-backed, prioritized backlog for all remaining near-term and future domains is maintained in [docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md](../docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md). It distinguishes implemented core capabilities from partial flows, UI-only prototypes, legacy API-client definitions and deferred enterprise scope. Follow its database-first bounded-context sequence before adding new APIs or activating prototype UIs. The AD-4 B2C freeze versus currently registered Website cart/checkout/order routes remains an explicit unresolved conflict.
+
+
+## Database domain expansion — DB-0 through DB-6 (2026-11-08)
+
+The database-only expansion is tracked in `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` and deployed with instructions in `docs/DATABASE_MIGRATION_RUNBOOK.md`. The intended Prisma schema now contains 97 models and 58 enums (55 models / 37 enums beyond the 42-model / 21-enum core). Six additive migrations follow the existing `20261106000000_init` baseline. The new domains are AuthChallenge/AuditLog, Support, CMS, STAFF-only CRM, retail inventory/orders/payments/fulfillment/returns, and finance ledger/settlements.
+
+This schema work does not add API routes, permissions, workers, seeds or UI integrations. AD-4 remains unchanged: B2C Cart/Checkout/Orders/Wishlist are not activated; retail/finance tables are inert groundwork pending commercial and legal decisions. Before applying migrations to any persistent database, verify the baseline is marked applied and follow the runbook. PostgreSQL CHECK constraints, partial indexes and append-only/maker-checker triggers are part of the migration contract and must not be removed.
+
+## DB-0 through DB-6 verification handoff — 2026-11-08
+
+Implementation is prepared on PR #90 (`feat/db0-db6-domain-schema`), not yet merged. The schema is 97 models / 58 enums. Fresh PostgreSQL 18.4 CI applied the baseline plus all six additive migrations; Prisma validate/generate and migrate status passed. Compose services and migration verification passed; backend tests and app builds passed. Existing unrelated frontend/shared test failures (23 assertions/9 files) and two Website browser smoke failures remain. No user/local/production database was accessed. Follow `docs/DATABASE_MIGRATION_RUNBOOK.md`; verify baseline history first. AD-4 remains in force; no API/UI workflow is activated by the new tables.
+
+- **Final branch HEAD:** `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254` (schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; later documentation handoff commit is the final HEAD).
+- **Latest PR-head checks:** Database Migration Validation PASS; CI backend tests/builds PASS, frontend/shared test job FAILS on 23 assertions across 9 existing UI/shared test files; Runtime Validation still running at handoff.
+- **Merge decision:** PR #90 is open, mergeable but `unstable`; leave unmerged while unrelated frontend/browser checks are red. Database-specific validation is green.
+
+- Final documentation handoff commit: `58f86414325fe39a11c0aeeb9bd540867dd7df94`; schema/migration implementation commit: `dad8624138ccd397780e7ed9943533ac655f158d`. Database validation passed on the same schema/migration content before the docs-only handoff.

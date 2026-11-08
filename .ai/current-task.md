@@ -1,5 +1,64 @@
 # Current Task — 2026-11-08
 
+## Completed implementation — DB-DOMAIN-EXPANSION-01
+- **Status:** Database implementation complete on branch `feat/db0-db6-domain-schema`; PR #90 open, not merged.
+- **Final branch HEAD:** `58f86414325fe39a11c0aeeb9bd540867dd7df94` (documentation handoff); schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; DB validation passed on identical schema/migration content at `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254`.
+- **PR:** https://github.com/gameacc2025/martest/pull/90
+- **Scope:** DB-0 baseline/document reconciliation; DB-1 AuthChallenge/AuditLog; DB-2 Support; DB-3 CMS; DB-4 CRM; DB-5 Retail; DB-6 Finance. Database only.
+- **Schema:** 97 models / 58 enums (55 new models / 37 new enums).
+- **Migrations:** six additive migrations after `20261106000000_init`.
+- **Database validation PASS:** Prisma validate/generate; fresh PostgreSQL 18.4 applied all seven migrations; migrate status passed.
+- **Other CI:** backend tests, all three builds and architecture graph passed. Frontend/shared tests failed with 23 assertions across 9 UI/shared test files. Runtime validation was still running at last handoff.
+- **Safety:** no existing tables dropped/renamed; no data backfill; no API/UI/permissions/seeds/workers; AD-4 B2C freeze remains.
+- **Live database:** not accessed or migrated. Apply only after verifying existing DB has baseline recorded; follow `docs/DATABASE_MIGRATION_RUNBOOK.md`.
+- **Merge:** PR remains open and unmerged because unrelated frontend/browser checks are red.
+- **Next:** resolve existing frontend/browser CI failures or obtain repository-owner decision on merge policy; then start API stage DB-1 → DB-6. UI follows tested APIs.
+
+---
+
+# Current Task — 2026-11-08
+
+## Completed implementation — DB-DOMAIN-EXPANSION-01
+- **Status:** IMPLEMENTED on branch `feat/db0-db6-domain-schema`; PR #90 is open and not merged.
+- **PR:** https://github.com/gameacc2025/martest/pull/90
+- **Final head:** `dad8624138ccd397780e7ed9943533ac655f158d`.
+- **Scope:** DB-0 migration baseline/document reconciliation; DB-1 AuthChallenge/AuditLog; DB-2 Support; DB-3 CMS; DB-4 CRM; DB-5 Retail; DB-6 Finance. Database only.
+- **Schema:** 97 models / 58 enums (55 new models / 37 new enums).
+- **Migrations:** six additive migrations after `20261106000000_init`.
+- **Verification PASS:** Prisma validate/generate; fresh PostgreSQL 18.4 applied all seven migrations; migrate status; Compose service health and runtime migration verification; backend tests; three app builds; architecture graph check.
+- **Known unrelated failures:** frontend/shared tests 23 failures across 9 files; browser smoke 6/8 with two Website-only selector/viewport failures. No frontend files were changed.
+- **Safety:** no existing tables dropped/renamed; no data backfill; no API/UI/permissions/seeds/workers; AD-4 B2C freeze remains.
+- **Live database:** not accessed or migrated. Apply only after verifying the existing DB has the baseline recorded as applied; follow `docs/DATABASE_MIGRATION_RUNBOOK.md`.
+- **Next:** API stage begins with DB-1 AuthChallenge/AuditLog and DB-2 Support, then CMS, CRM, then gated Retail/Finance. UI follows each tested API domain.
+
+---
+
+## Latest progress — DB-DOMAIN-EXPANSION-01
+- First CI attempt: Prisma schema validate/generate passed; DB-4 failed on the PipelineStage composite FK because its referenced unique key was not recognized at FK creation.
+- Second CI attempt: DB-1 through DB-5 succeeded on fresh PostgreSQL; DB-6 failed on a malformed dollar-quote delimiter in the JournalEntry trigger function.
+- Fixes prepared: explicit UNIQUE constraints for referenced composite keys, corrected PL/pgSQL $$ delimiters, immutable actor FKs changed to RESTRICT, plus AuthChallenge expiry/outstanding-challenge and SupportAssignment active-assignment constraints.
+- **Current:** re-run migration validation on the latest branch commit; continue until DB-6 and CI are verified. No migration has been applied to the user's live/dev database.
+
+---
+
+# Current Task — 2026-11-08
+
+## Active task — DB-DOMAIN-EXPANSION-01
+- **Status:** IN_PROGRESS — schema/migrations/docs prepared; Prisma/CI validation pending.
+- **Branch:** `feat/db0-db6-domain-schema` from main HEAD `5d2a2f972acb1084e68cc0f4cbff6080f4d2257a`.
+- **Scope:** DB-0 baseline/document reconciliation; DB-1 AuthChallenge/AuditLog; DB-2 Support; DB-3 CMS; DB-4 CRM; DB-5 retail inventory/order/payment/fulfillment/returns; DB-6 ledger/commission/settlement. Database only.
+- **Current schema target:** 97 models / 58 enums, including 55 new models / 37 new enums.
+- **Migrations:** `20261108000100_auth_audit` through `20261108000600_finance`, additive after `20261106000000_init`.
+- **Docs:** `docs/DATABASE_DOCUMENTATION.md`, `docs/DATABASE_MIGRATION_RUNBOOK.md`, `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`.
+- **Safety constraints:** No API/UI/seed/permission/workers in this task. AD-4 remains in force; retail/finance schema is inert. Never reset or db-push a persistent DB.
+- **Static verification:** schema/model/migration inventory, FK target parity and now() defaults checked by repository-side static scripts.
+- **NOT RUN:** Prisma CLI validation/generation, PostgreSQL migrate deploy on fresh/existing DB, backend tests/builds. Live DB migration status not available.
+- **Next:** Commit the branch, open PR for CI, fix all validation failures, review, and merge after green checks.
+
+---
+
+# Current Task — 2026-11-08
+
 ## Completed task — REMAINING-FEATURES-BACKLOG-01
 - **Status:** DONE — documentation and architecture reconciliation only.
 - **Goal:** Publish a source-backed, prioritized English master backlog of all remaining platform capabilities, including database-first dependencies.
