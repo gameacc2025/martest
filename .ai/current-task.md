@@ -1204,3 +1204,10 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 - **Additional M0 cleanup:** DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace now use semantic contrast, shadow, surface and status tokens instead of raw color/shadow values.
 - **Additional static scan:** Admin Dashboard, Admin OperationsHub, CompanyDashboard, shared dashboard header/sidebar, OperationalWorkspace and skill-refinements.scss contain no raw hex/RGB/HSL color declarations after the change. The test file intentionally contains retired color patterns as regression detectors.
+
+## API-1 discovery
+- AuthChallenge/AuditLog tables and indexes already exist; AuditLog has a PostgreSQL append-only trigger.
+- AuthChallenge supports PASSWORD_RESET, PHONE_VERIFICATION and EMAIL_VERIFICATION over SMS/EMAIL; no LOGIN_MFA purpose yet.
+- RefreshToken stores no device metadata. Current login revokes prior refresh tokens by default; logout-one and logout-all already exist.
+- The base seed already defines audit_logs.read, but there is no registered audit module or AuthChallenge request/verify route yet.
+- Session concurrency and MFA policy must be decided in the API-1 contract before changing token issuance or schema.
