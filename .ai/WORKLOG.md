@@ -4220,3 +4220,9 @@ This file is the shared, version-controlled memory for agents working on the rep
 - RefreshToken has no device metadata; login revokes previous refresh tokens by default. Existing logout-one/logout-all endpoints are present.
 - Base seed includes audit_logs.read, but there is no registered audit module or challenge request/verify API.
 - Documented the findings and policy gates in the roadmap/current-task. No auth/session behavior or schema changed.
+
+### PR and validation gate — 2026-11-08
+- Opened draft PR #91: https://github.com/gameacc2025/martest/pull/91.
+- Current branch head: f67e69cd8c210575c15827f6d6bd4bd7b3d833b9.
+- GitHub Actions checks test-and-build, prisma-migrations and compose-and-browser are running for the current PR head. M0 is not marked complete until their results are reviewed.
+- API-1 implementation remains gated behind M0 verification.
