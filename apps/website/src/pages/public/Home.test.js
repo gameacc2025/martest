@@ -23,7 +23,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).not.toContain('mockData')
   })
 
-  it('recreates the reference hero, search tabs, featured card and slider controls', () => {
+  it('keeps the hero focused on its message and featured card without embedded search or purchase tabs', () => {
     expect(source).toContain('class="hero"')
     expect(source).toContain('class="hero-bg-network"')
     expect(source).toContain('<Transition name="hero-content" mode="out-in">')
@@ -31,9 +31,9 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).toContain('.dots button.on')
     expect(source).toContain('تجهیزات پروژه‌تان را')
     expect(source).toContain('سریع و مطمئن تأمین کنید')
-    expect(source).toContain('خرید فوری')
-    expect(source).toContain('استعلام سازمانی')
-    expect(source).toContain('class="search"')
+    expect(source).not.toContain('class="search"')
+    expect(source).not.toContain('class="tabs"')
+    expect(source).not.toContain('class="chips"')
     expect(source).toContain('class="feat"')
     expect(source).toContain('class="dots"')
     expect(source).toContain('class="ha pv"')
@@ -41,7 +41,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   })
 
   it('contains every major homepage section from the supplied HTML reference', () => {
-    for (const section of ['stats', 'brands', 'g3', 'prods', 'bl', 'tms', 'rfq']) {
+    for (const section of ['stats', 'g3', 'prods', 'bl', 'tms', 'rfq']) {
       expect(source).toContain('class="' + section)
     }
     expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
