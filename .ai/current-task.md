@@ -1,5 +1,19 @@
 # Current Task — 2026-11-08
 
+## Latest task — WEBSITE-SHARED-BREADCRUMB
+- **Status:** Implemented and committed directly to remote `main`; local test/build verification pending.
+- **Issue:** Active `/products` route rendered an inline `.bc` block instead of a reusable breadcrumb. Categories duplicated it and ProductDetails used PrimeVue Breadcrumb, resulting in inconsistent styling and no shared `.breadcrumb` class.
+- **Implemented:** Created `apps/website/src/components/AppBreadcrumb.vue` with semantic accessible RTL navigation, home link, separators, linked parent items, current-page label, responsive wrapping and truncation, and the shared `.breadcrumb` class. Integrated it into ProductListing, Categories and ProductDetails. Existing page routes and data behavior are unchanged.
+- **Tests:** Added AppBreadcrumb tests and updated ProductListing, Categories and ProductDetails regression tests. Not executed in this GitHub-only session.
+- **Scope:** Website frontend only; no backend, API, database or business logic changes.
+- **Commits:** `c704d03`, `7bcb91a`, `d0f5f90`, `4632ae7`, `801ff18`, `9049330`, `11beb8d`, `9ae520e`; documentation commits follow.
+- **Verification truth:** Source-level checks only; no local test/build/browser review available.
+- **Next:** Pull `main`; run focused Website tests/build; check responsive breadcrumb display and long product titles.
+
+---
+
+# Current Task — 2026-11-08
+
 ## Latest task — HOMEPAGE-HERO-AND-FOOTER-NAV
 - **Status:** Implemented and committed directly to remote `main`; local test/build verification pending.
 - **Owner request:** Remove the homepage banner search box and the personal/organizational purchase selectors; move FAQ navigation to the footer; show «اخبار و مقالات» in the navigation instead; move brands from the homepage strip into the footer.
