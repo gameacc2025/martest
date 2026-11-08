@@ -25,6 +25,8 @@ describe('Website Categories — Telecom Market.html reference', () => {
     expect(getCategories).toHaveBeenCalledOnce()
     expect(getProducts).toHaveBeenCalledWith({ page: 1, limit: 1, status: 'PUBLISHED', categoryId: 7 })
     expect(wrapper.find('.ph h1').text()).toBe('همه دسته‌بندی‌ها')
+    expect(wrapper.find('.breadcrumb').text()).toContain('صفحه اصلی')
+    expect(wrapper.find('.breadcrumb').text()).toContain('همه دسته‌بندی‌ها')
     expect(wrapper.find('.g3').exists()).toBe(true)
     expect(wrapper.find('.cb-header-img').exists()).toBe(true)
     expect(wrapper.find('.cb-top-info h3').text()).toBe('فیبر نوری')
