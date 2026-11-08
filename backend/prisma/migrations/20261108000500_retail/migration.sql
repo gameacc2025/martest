@@ -92,6 +92,7 @@ CREATE TABLE "SellerOrder" (
   CONSTRAINT "SellerOrder_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "SellerOrder_sellerOrderNumber_key" UNIQUE ("sellerOrderNumber")
 );
+CREATE UNIQUE INDEX "SellerOrder_id_orderId_key" ON "SellerOrder" ("id", "orderId");
 
 CREATE TABLE "RetailOrderItem" (
   "id" SERIAL NOT NULL,
@@ -286,7 +287,6 @@ CREATE INDEX "RetailOrder_buyerUserId_createdAt_idx" ON "RetailOrder" ("buyerUse
 CREATE INDEX "RetailOrder_status_createdAt_idx" ON "RetailOrder" ("status", "createdAt");
 CREATE INDEX "RetailOrder_paymentStatus_createdAt_idx" ON "RetailOrder" ("paymentStatus", "createdAt");
 CREATE UNIQUE INDEX "SellerOrder_orderId_companyId_key" ON "SellerOrder" ("orderId", "companyId");
-CREATE UNIQUE INDEX "SellerOrder_id_orderId_key" ON "SellerOrder" ("id", "orderId");
 CREATE INDEX "SellerOrder_companyId_status_createdAt_idx" ON "SellerOrder" ("companyId", "status", "createdAt");
 CREATE INDEX "SellerOrder_orderId_status_idx" ON "SellerOrder" ("orderId", "status");
 CREATE INDEX "RetailOrderItem_orderId_idx" ON "RetailOrderItem" ("orderId");

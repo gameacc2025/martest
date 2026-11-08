@@ -92,6 +92,7 @@ CREATE TABLE "PipelineStage" (
   "isLost" BOOLEAN NOT NULL DEFAULT false,
   CONSTRAINT "PipelineStage_pkey" PRIMARY KEY ("id")
 );
+CREATE UNIQUE INDEX "PipelineStage_id_pipelineId_key" ON "PipelineStage" ("id", "pipelineId");
 
 CREATE TABLE "Opportunity" (
   "id" SERIAL NOT NULL,
@@ -215,7 +216,6 @@ CREATE INDEX "Lead_email_idx" ON "Lead" ("email");
 CREATE INDEX "Pipeline_isActive_isDefault_idx" ON "Pipeline" ("isActive", "isDefault");
 CREATE UNIQUE INDEX "PipelineStage_pipelineId_code_key" ON "PipelineStage" ("pipelineId", "code");
 CREATE UNIQUE INDEX "PipelineStage_pipelineId_sortOrder_key" ON "PipelineStage" ("pipelineId", "sortOrder");
-CREATE UNIQUE INDEX "PipelineStage_id_pipelineId_key" ON "PipelineStage" ("id", "pipelineId");
 CREATE INDEX "PipelineStage_pipelineId_isWon_isLost_idx" ON "PipelineStage" ("pipelineId", "isWon", "isLost");
 CREATE INDEX "Opportunity_accountId_status_idx" ON "Opportunity" ("accountId", "status");
 CREATE INDEX "Opportunity_ownerUserId_status_expectedCloseAt_idx" ON "Opportunity" ("ownerUserId", "status", "expectedCloseAt");
