@@ -4157,3 +4157,12 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Final branch HEAD:** `58f86414325fe39a11c0aeeb9bd540867dd7df94` (documentation handoff); schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; DB validation CI passed on identical schema/migration content at `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254`.
 - **Latest PR-head checks:** Database Migration Validation PASS; CI backend tests/builds PASS, frontend/shared test job FAILS on 23 assertions across 9 existing UI/shared test files; Runtime Validation still running at handoff.
 - **Merge decision:** PR #90 is open, mergeable but `unstable`; leave unmerged while unrelated frontend/browser checks are red. Database-specific validation is green.
+
+
+## DB-DOMAIN-EXPANSION-01 — Merge confirmation
+- PR #90 merged successfully to canonical `main`.
+- Merge commit / current main HEAD: `d509ade7d1dc452eabaccfa0edd2ef463cd23d94`.
+- Confirmed the DB-6 migration file and journal triggers are present on main.
+- Database Migration Validation had passed on the exact schema/migration content before the documentation-only handoff and squash merge. The user's local/production database remains untouched.
+- The known unrelated frontend/shared unit test failures and two Website browser smoke failures remain; they were not changed as part of this database task.
+- **Next active stage:** API implementation, starting with AuthChallenge/AuditLog and Support, then CMS, CRM, then gated Retail/Finance. UI follows each tested API domain.

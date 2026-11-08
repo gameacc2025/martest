@@ -1,6 +1,23 @@
 # Current Task — 2026-11-08
 
 ## Completed implementation — DB-DOMAIN-EXPANSION-01
+- **Status:** MERGED to canonical `main`.
+- **PR:** https://github.com/gameacc2025/martest/pull/90
+- **Merge commit / main HEAD:** `d509ade7d1dc452eabaccfa0edd2ef463cd23d94`.
+- **Scope:** DB-0 baseline/document reconciliation; DB-1 AuthChallenge/AuditLog; DB-2 Support; DB-3 CMS; DB-4 CRM; DB-5 Retail; DB-6 Finance. Database only.
+- **Schema:** 97 models / 58 enums (55 new models / 37 new enums).
+- **Migrations:** six additive migrations after `20261106000000_init`.
+- **Database validation PASS:** Prisma validate/generate; fresh PostgreSQL 18.4 applied all seven migrations; migrate status passed.
+- **Other CI:** backend tests, all three builds and architecture graph passed. Frontend/shared tests failed with 23 assertions across 9 UI/shared test files. Runtime Compose health and migration verification passed; browser smoke 6/8, with two Website-only failures (missing `.shop-page` selector and 383px document width at 360px viewport).
+- **Safety:** no existing tables dropped/renamed; no data backfill; no API/UI/permissions/seeds/workers; AD-4 B2C freeze remains.
+- **Live database:** not accessed or migrated. Apply only after verifying existing DB has baseline recorded; follow `docs/DATABASE_MIGRATION_RUNBOOK.md`.
+- **Next:** API stage DB-1 → DB-6, then UI for each tested API domain. Keep Retail/Finance workflows disabled until commercial decisions are approved.
+
+---
+
+# Current Task — 2026-11-08
+
+## Completed implementation — DB-DOMAIN-EXPANSION-01
 - **Status:** Database implementation complete on branch `feat/db0-db6-domain-schema`; PR #90 open, not merged.
 - **Final branch HEAD:** `58f86414325fe39a11c0aeeb9bd540867dd7df94` (documentation handoff); schema/migration implementation commit `dad8624138ccd397780e7ed9943533ac655f158d`; DB validation passed on identical schema/migration content at `77de43a90d8e2f3773b43d3d5f6dbf15a1ca4254`.
 - **PR:** https://github.com/gameacc2025/martest/pull/90

@@ -976,3 +976,6 @@ Implementation is prepared on PR #90 (`feat/db0-db6-domain-schema`), not yet mer
 - **Merge decision:** PR #90 is open, mergeable but `unstable`; leave unmerged while unrelated frontend/browser checks are red. Database-specific validation is green.
 
 - Final documentation handoff commit: `58f86414325fe39a11c0aeeb9bd540867dd7df94`; schema/migration implementation commit: `dad8624138ccd397780e7ed9943533ac655f158d`. Database validation passed on the same schema/migration content before the docs-only handoff.
+
+## DB-0 through DB-6 merged — 2026-11-08
+The database-only expansion is now merged to canonical `main` at `d509ade7d1dc452eabaccfa0edd2ef463cd23d94` (PR #90). The schema contains 97 models / 58 enums and six additive migrations after the consolidated baseline. Fresh PostgreSQL 18.4 CI migration validation passed. No user/local/production DB was touched. Existing frontend/shared test and Website browser smoke failures remain unrelated and are documented in WORKLOG. API and UI are still pending; AD-4 remains in force.
