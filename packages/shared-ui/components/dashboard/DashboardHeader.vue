@@ -287,7 +287,7 @@ function logout() {
   border-radius: 50%;
   background: var(--ds-color-surface-hover);
   color: var(--tm-ink-soft);
-  box-shadow: 0 2px 6px rgba(20, 40, 90, 0.08);
+  box-shadow: var(--ds-shadow-xs);
   text-decoration: none;
   cursor: pointer;
   transition: background-color 0.16s ease, color 0.16s ease;
@@ -311,7 +311,7 @@ function logout() {
   padding: 0 18px 0 8px;
   border-radius: 6px;
   background: var(--ds-color-surface-hover);
-  box-shadow: 0 2px 6px rgba(20, 40, 90, 0.05);
+  box-shadow: var(--ds-shadow-xs);
 }
 .dash-header-pill-input {
   flex: 1;
@@ -398,7 +398,7 @@ function logout() {
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--ds-brand-secondary);
-  color: #fff;
+  color: var(--ds-color-secondary-contrast);
   font-size: 16px;
   font-weight: 700;
 }
