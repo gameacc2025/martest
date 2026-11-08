@@ -1201,3 +1201,6 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **NOT RUN:** Vitest, Sass/Vue compilation, application builds and browser visual review are not available in this remote GitHub editing session.
 - **Safety:** No API routes, database schema, live data, business rules, authentication or permissions changed. No demo seed data added yet.
 - **Next:** Complete the Admin/Company page and shared-component palette audit, run the shared design-system tests/build in the project environment, then begin API-1 vertical slice (backend + UI + safe demo seed + tests) using the merged AuthChallenge/AuditLog models.
+
+- **Additional M0 cleanup:** DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace now use semantic contrast, shadow, surface and status tokens instead of raw color/shadow values.
+- **Additional static scan:** Admin Dashboard, Admin OperationsHub, CompanyDashboard, shared dashboard header/sidebar, OperationalWorkspace and skill-refinements.scss contain no raw hex/RGB/HSL color declarations after the change. The test file intentionally contains retired color patterns as regression detectors.
