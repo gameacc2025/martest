@@ -208,14 +208,15 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 
   <div class="w">
     <div class="sec"><div class="sh"><h2>دسته‌بندی محصولات</h2><router-link :to="{ name: 'categories' }">همه دسته‌بندی‌ها</router-link></div>
-      <div v-if="categoriesLoading" class="cats"><div v-for="i in 6" :key="i" class="cat">…</div></div>
+      <div v-if="categoriesLoading" class="cats" aria-label="در حال دریافت دسته‌بندی‌ها"><div v-for="i in 6" :key="i" class="cat home-category-card is-loading" aria-hidden="true">…</div></div>
       <div v-else-if="categoryError" class="empty-state"><span>دریافت دسته‌بندی‌ها ناموفق بود.</span><button type="button" @click="loadCategories">تلاش دوباره</button></div>
-      <div v-else-if="categories.length" class="g3"><button v-for="category in categories.slice(0, 9)" :key="category.id" class="cb" type="button" @click="chooseCategory(category)">
-        <div class="cb-header-img"><span class="dev-icon">{{ categoryIcon(category) }}</span></div>
-        <div class="cb-top"><div class="cb-top-info"><h3>{{ categoryTitle(category) }}</h3><small>{{ categoryCount(category) }} محصول</small></div><span class="cb-icon-box">{{ categoryIcon(category) }}</span></div>
-        <ul class="cb-sublist"><li v-for="child in categoryChildren(category).slice(0, 3)" :key="child.id">{{ child.nameFa || child.name || child.nameEn || child.slug }}</li><li v-if="!categoryChildren(category).length && category.description">{{ category.description }}</li></ul>
-        <div class="cb-footer"><span class="mo">مشاهده محصولات ←</span></div>
-      </button></div>
+      <div v-else-if="categories.length" class="cats" aria-label="دسته‌بندی محصولات">
+        <button v-for="category in categories.slice(0, 9)" :key="category.id" class="cat home-category-card" type="button" @click="chooseCategory(category)">
+          <i aria-hidden="true">{{ categoryIcon(category) }}</i>
+          <h3>{{ categoryTitle(category) }}</h3>
+          <small>{{ categoryCount(category) }} محصول</small>
+        </button>
+      </div>
       <div v-else class="empty-state">دسته‌بندی فعالی برای نمایش وجود ندارد.</div>
     </div>
 
@@ -362,6 +363,14 @@ footer{padding:40px 0 18px}footer .fg{display:grid;grid-template-columns:1.5fr 1
 
 .reference-home .feat{display:block;color:inherit;text-decoration:none}
 .reference-home .cat{border:0;color:var(--text);font-family:inherit;font-size:13px;font-weight:700;line-height:inherit;cursor:pointer}
+.reference-home .cats{display:flex;gap:14px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--ds-border) transparent;padding:4px 2px 12px}
+.reference-home .home-category-card{flex:0 0 172px;min-height:132px;padding:14px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--card);box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;scroll-snap-align:start;transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+.reference-home .home-category-card i{display:grid;place-items:center;width:44px;height:44px;margin:0 0 3px;border-radius:12px;background:var(--ch);color:var(--lk);font-style:normal;font-size:20px;line-height:1}
+.reference-home .home-category-card h3{max-width:100%;font-size:13px;font-weight:700;line-height:1.5;color:var(--tx);overflow-wrap:anywhere}
+.reference-home .home-category-card small{display:block;color:var(--mu);font-size:11px;font-weight:400}
+.reference-home .home-category-card:hover{transform:translateY(-3px);border-color:var(--pri);background:var(--hv);box-shadow:0 8px 20px rgba(16,42,67,.08)}
+.reference-home .home-category-card:focus-visible{outline:2px solid var(--pri);outline-offset:3px}
+.reference-home .home-category-card.is-loading{color:var(--mu);cursor:default;box-shadow:none}
 .reference-home .chips button.c{border:0;background:rgba(255,255,255,.14);color:var(--ds-color-on-brand-muted);padding:2px 12px;border-radius:99px;font:inherit;font-size:12px;cursor:pointer}
  .reference-home .cta2 .btn,.reference-home .ac .btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .reference-home .ac button{border:0;font-family:inherit;cursor:pointer}
@@ -528,7 +537,7 @@ footer h5{color:#fff;font-size:14px;margin:0 0 10px}footer a{display:block;color
 footer .cp{border-top:1px solid #24394D;margin-top:28px;padding-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);background:var(--navy);color:#fff;border-radius:99px;padding:10px 22px;font-size:13px;opacity:0;transition:.3s;z-index:50;pointer-events:none}
 .toast.s{opacity:1;transform:translate(-50%,0)}
-@media(max-width:1000px){.reference-home .hero .w{grid-template-columns:1fr;gap:26px}.reference-home .feat{max-width:560px}.reference-home .g4,.reference-home .g3,.reference-home .prods,.reference-home .why,.reference-categories .g3{grid-template-columns:repeat(2,minmax(0,1fr))}.reference-products .lay{grid-template-columns:1fr}.reference-products .fl{position:static}.reference-products .prods{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.reference-home .w,.reference-products .w,.reference-categories .w{padding-inline:16px}.reference-home .hero{padding:38px 0 60px}.reference-home h1{font-size:27px}.reference-home .stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.reference-home .st{border:0}.reference-home .g4,.reference-home .g3,.reference-home .prods,.reference-home .why,.reference-products .prods,.reference-categories .g3{grid-template-columns:1fr}.reference-products .lay{gap:14px}.reference-products .fl{padding:14px}.reference-products .bar{align-items:flex-start;flex-direction:column;gap:8px}.reference-products .ph h1,.reference-categories .ph h1{font-size:23px}.reference-home .band{padding:22px 18px}.reference-home .fm{grid-template-columns:1fr}.reference-home .fm .x{grid-column:auto}}@media(prefers-reduced-motion:reduce){.reference-home *, .reference-products *, .reference-categories *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:1000px){.reference-home .hero .w{grid-template-columns:1fr;gap:26px}.reference-home .feat{max-width:560px}.reference-home .g4,.reference-home .g3,.reference-home .prods,.reference-home .why,.reference-categories .g3{grid-template-columns:repeat(2,minmax(0,1fr))}.reference-products .lay{grid-template-columns:1fr}.reference-products .fl{position:static}.reference-products .prods{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.reference-home .home-category-card{flex-basis:148px;min-height:124px}.reference-home .w,.reference-products .w,.reference-categories .w{padding-inline:16px}.reference-home .hero{padding:38px 0 60px}.reference-home h1{font-size:27px}.reference-home .stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.reference-home .st{border:0}.reference-home .g4,.reference-home .g3,.reference-home .prods,.reference-home .why,.reference-products .prods,.reference-categories .g3{grid-template-columns:1fr}.reference-products .lay{gap:14px}.reference-products .fl{padding:14px}.reference-products .bar{align-items:flex-start;flex-direction:column;gap:8px}.reference-products .ph h1,.reference-categories .ph h1{font-size:23px}.reference-home .band{padding:22px 18px}.reference-home .fm{grid-template-columns:1fr}.reference-home .fm .x{grid-column:auto}}@media(prefers-reduced-motion:reduce){.reference-home *, .reference-products *, .reference-categories *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @keyframes fy{50%{transform:translateY(-8px)}}
 @keyframes pgp{to{transform:scaleX(1)}}
 @keyframes pText{from{opacity:.4}to{opacity:1}}
