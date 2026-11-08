@@ -20,8 +20,6 @@ const loading = ref(false)
 const categoriesLoading = ref(false)
 const error = ref('')
 const categoryError = ref(false)
-const searchQuery = ref('')
-const searchMode = ref('retail')
 const activeSlide = ref(0)
 let slideTimer = null
 
@@ -40,7 +38,6 @@ const featuredProduct = computed(() => featuredProducts.value[0] || products.val
 const latestProducts = computed(() => products.value.slice(0, 4))
 const retailLatest = computed(() => retailProducts.value.slice(0, 4))
 const selectedProducts = computed(() => featuredProducts.value.slice(0, 4))
-const brandNames = computed(() => [...new Set([...products.value, ...retailProducts.value].map(product => String(product?.brand || '').trim()).filter(Boolean))].slice(0, 6))
 const demoArticles = [
   { kind: 'آموزش', date: 'نمونه نمایشی', title: 'راهنمای انتخاب OTDR مناسب برای پروژه فیبر نوری', description: 'این جایگاه برای نمایش مطالب آموزشی منتشرشده در وبلاگ در نظر گرفته شده است.' },
   { kind: 'معرفی', date: 'نمونه نمایشی', title: 'تفاوت OTDR و Power Meter در عیب‌یابی شبکه', description: 'محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده می‌شود.' },
@@ -101,10 +98,6 @@ function addToCart(product) {
   const price = Number(product?.finalPrice ?? product?.price ?? product?.prices?.[0]?.price ?? product?.priceTiers?.[0]?.unitPrice)
   const added = cartStore.addItem({ ...product, price })
   cartMessage.value = added ? 'محصول به سبد خرید اضافه شد.' : 'امکان افزودن این محصول به سبد خرید وجود ندارد.'
-}
-function goSearch(value = searchQuery.value) {
-  const query = String(value || '').trim()
-  router.push({ name: 'search', query: query ? { q: query } : {} })
 }
 function chooseCategory(category) {
   router.push({ name: 'products', query: { category: category.id } })
@@ -184,9 +177,6 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
       <div class="tag">{{ activeSlideContent.title }}</div>
       <h1 v-html="activeSlideContent.headline"></h1>
       <p>{{ activeSlideContent.description }}</p>
-      <div class="tabs"><button :class="{ on: searchMode === 'retail' }" type="button" @click="searchMode = 'retail'">خرید فوری</button><button :class="{ on: searchMode === 'inquiry' }" type="button" @click="searchMode = 'inquiry'">استعلام سازمانی</button></div>
-      <form class="search" @submit.prevent="goSearch()"><input v-model="searchQuery" :placeholder="searchMode === 'retail' ? 'نام محصول، برند، مدل یا SKU را جستجو کنید…' : 'نام تجهیز یا مشخصات مورد نیاز پروژه را بنویسید…'"><button class="btn b1" type="submit">جستجو</button></form>
-      <div class="chips">پرتکرار: <button class="c" type="button" @click="goSearch('OTDR')">OTDR</button><button class="c" type="button" @click="goSearch('Power Meter')">Power Meter</button><button class="c" type="button" @click="goSearch('Fusion Splicer')">Fusion Splicer</button><button class="c" type="button" @click="goSearch('آنتن')">آنتن</button></div>
       <div class="cta2"><router-link class="btn b1" :to="{ name: 'my-inquiries' }">ثبت درخواست استعلام</router-link><router-link class="btn b2" :to="{ name: 'products' }">مشاهده همه محصولات</router-link></div>
     </div>
     </Transition>
@@ -204,7 +194,6 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
   <div class="stats"><div class="w"><div class="g">
     <div class="st"><b>—</b><span>تأمین‌کنندگان ثبت‌شده</span></div><div class="st"><b>{{ products.length ? products.length.toLocaleString('fa-IR') + '+' : '—' }}</b><span>محصول در این دریافت</span></div><div class="st"><b>—</b><span>پروژه‌های سازمانی</span></div><div class="st"><b>—</b><span>میانگین زمان پاسخ</span></div>
   </div></div></div>
-  <div v-if="brandNames.length" class="w"><div class="brands"><span v-for="brand in brandNames" :key="brand">{{ brand }}</span></div></div>
 
   <div class="w">
     <div class="sec"><div class="sh"><h2>دسته‌بندی محصولات</h2><router-link :to="{ name: 'categories' }">همه دسته‌بندی‌ها</router-link></div>
