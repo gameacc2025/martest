@@ -4202,3 +4202,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** Static source updates committed. Vitest, Sass/Vue compilation, builds and browser parity review: NOT RUN. The previous PR checks were red and must be investigated; do not claim M0 complete yet.
 - **Database/API safety:** No Prisma schema, migration, API route, permission behavior, live data or business workflow changed. No demo seed modules implemented yet.
 - **Next:** Finish page-level palette audit and resolve the failing checks; then freeze API-1 contract and deliver API-1 as backend + UI + synthetic seed + tests + docs.
+
+
+### API-UI-SEED-01 — Preserve Website PrimeVue semantics during palette centralization
+- **Correction:** The first token-centralization pass removed duplicate root blocks from Website `marketplace-theme.scss`; review showed those blocks also contained PrimeVue compatibility variables not duplicated in the shared file. Moved the Website's exact light/dark PrimeVue semantic values and legacy aliases into shared `newtemp-reference.scss` instead of dropping them.
+- **Tests:** Updated `apps/website/src/assets/marketplace-theme.test.js` to assert shared-token ownership and moved semantic variables; corrected the shared design-system test regex so it genuinely detects root token declarations.
+- **Static verification:** Website component stylesheet has zero root token blocks; shared theme has light/dark root blocks; all 62 custom properties consumed by the shared refinement mixin are defined. Website/Admin/Company import order is correct.
+- **CI findings from closed PR #91:** database migration validation PASS; test-and-build FAIL with 23 assertions across 9 Website/shared-ui files; compose-and-browser FAIL due Website mobile overflow (383px at 360px viewport) and missing storefront selector. The Website palette test was updated to the shared-source contract; other failures remain unresolved pending fresh checks.
+- **Verification NOT RUN:** latest-main Vitest, Sass/Vue compilation, app builds and browser review. No current-main workflow run is exposed for the latest direct commit.
