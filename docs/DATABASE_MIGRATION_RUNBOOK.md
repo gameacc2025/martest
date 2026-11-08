@@ -2,7 +2,7 @@
 
 **Scope:** additive PostgreSQL/Prisma schema expansion.  
 **Baseline:** `20261106000000_init`.  
-**Migration order:** DB-1 through DB-6, timestamp-ordered.  
+**Migration order:** DB-1 through DB-6, followed by the documentation-only PostgreSQL catalog comments migration.  
 **Prisma:** 7.10.1.  
 **Important:** this runbook does not authorize enabling B2C checkout, payment, seller payout, or any new API.
 
@@ -17,6 +17,7 @@
 | 4 | `20261108000400_crm` | Accounts, contacts, leads, pipelines, opportunities, activities, tasks |
 | 5 | `20261108000500_retail` | Inventory, retail orders, payment records, shipments, returns |
 | 6 | `20261108000600_finance` | Ledger, commissions, payables, settlements, payouts, reconciliation, invoices |
+| 7 | `20261108000700_database_comments` | Persian PostgreSQL comments for all 97 tables and 962 physical columns; no schema/data changes |
 
 All six new migrations are additive. They do not drop or rename existing core tables and do not backfill/alter existing marketplace records.
 
@@ -112,3 +113,15 @@ The schema alone does not enable a feature. Keep the following disabled until th
 - Compose runtime health and database migration verification passed.
 - Backend tests and all three app builds passed. Frontend/shared tests remain red (23 failures across 9 files); browser smoke is 6/8 with two pre-existing Website selector/viewport failures. No frontend source was changed in this DB PR.
 - PR #90 is intentionally not merged while unrelated frontend/browser checks remain red. Do not run the migration against a persistent user DB until its baseline state is confirmed and the owner applies the runbook.
+
+
+## 10. Database comments and data dictionary — 2026-11-08
+
+The additive migration `20261108000700_database_comments` adds PostgreSQL catalog descriptions only:
+- 97 `COMMENT ON TABLE` statements (one for every Prisma model/table).
+- 962 `COMMENT ON COLUMN` statements (one for every physical scalar/enum column).
+- The Prisma source has `///` documentation on all 97 models and all 1,294 model fields, including 332 relation fields. Relation fields are Prisma-level navigation properties and do not create PostgreSQL columns.
+- Full field-by-field Persian descriptions and Prisma types are published in `docs/DATABASE_DATA_DICTIONARY.md`.
+- Safe to apply to an already migrated database with `prisma migrate deploy`; comments are metadata and do not alter application data or schema structure. Existing comments on these objects, if any, are replaced by the new descriptions.
+- No reset, backfill, data rewrite or application downtime is required by the SQL statements themselves; normal deployment/backup policy still applies.
+
