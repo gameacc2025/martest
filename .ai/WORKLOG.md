@@ -1,3 +1,14 @@
+## 2026-11-08 — Homepage hero and public navigation cleanup
+- **Request:** Remove the homepage hero search and personal/organizational purchase selectors; move FAQ out of primary navigation; replace that navigation slot with news/articles; move the homepage brand strip into the global footer.
+- **Homepage hero:** Removed the search field, purchase-mode tabs, popular-search chips and their unused state/handler. Kept the hero headline/description, featured-product card, slider controls and the existing product/inquiry destination actions.
+- **Navigation:** Removed FAQ from desktop, mobile and utility navigation. The existing magazine route now appears as «اخبار و مقالات» in desktop/mobile navigation. The dedicated FAQ route remains available from the footer.
+- **Footer brands:** Removed the separate homepage brand strip. Added a global «برندها» footer column populated from the existing published-products API; deduplicated brand names link to the existing search route. A catalogue fallback link is shown when no brands are returned. Expanded the desktop footer grid to accommodate the additional column; existing tablet/mobile stacking remains intact.
+- **Tests:** Updated Home source-contract tests and PublicLayout tests for the simplified hero, FAQ relocation, news/articles navigation and live footer brand list.
+- **Scope:** Website frontend only. No backend, database, API contract, routes or business rules changed; footer uses the existing published-products list endpoint.
+- **Verification:** GitHub source-level review only. Tests and build were not run in this GitHub-only session.
+- **Commits:** `637381a` (homepage hero/brand strip), `f9f8507` (public shell/footer navigation), `7943cdb` (Home regression coverage), `13cbc69` (PublicLayout regression coverage).
+- **Next:** Pull `main`, run focused Website tests and build, then verify footer columns and hero spacing at desktop/mobile widths.
+
 ## 2026-11-07 — WEBSITE-PROTOTYPE-VISUAL-02 — Match latest supplied loader, header and full-site palette
 - **Status:** Source committed to remote `main`; no build or tests run per owner instruction.
 - **Reference:** `gemini-code-1794067101381.html`, the latest owner-uploaded prototype. Supersedes prior palette guesses.
