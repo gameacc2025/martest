@@ -1,7 +1,7 @@
 <template>
   <main class="product-page ds-page" dir="rtl" :aria-busy="loading">
     <div class="product-shell ds-container">
-      <Breadcrumb :home="home" :model="breadcrumbItems" class="product-breadcrumb" />
+      <AppBreadcrumb :items="breadcrumbItems" />
 
       <section v-if="loading" class="page-state" role="status" aria-live="polite">
         <ProgressSpinner />
@@ -279,7 +279,7 @@ import { useProductsStore } from '../../stores/products'
 import { useAuthStore } from '../../stores/auth'
 import { buildPriceHistoryPoints } from '../../utils/priceHistory'
 import { inquiriesApi } from '@telecom/api-client'
-import Breadcrumb from 'primevue/breadcrumb'
+import AppBreadcrumb from '../../components/AppBreadcrumb.vue'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
 
@@ -361,9 +361,8 @@ const openPriceHistory = async () => {
   }
 }
 
-const home = { icon: 'pi pi-home', to: '/' }
 const breadcrumbItems = computed(() => [
-  { label: 'محصولات', to: '/products' },
+  { label: 'محصولات', to: { name: 'products' } },
   { label: product.value.title || 'جزئیات محصول' }
 ])
 
@@ -532,8 +531,6 @@ const goBack = () => router.push('/products')
   margin-inline: auto;
   padding-inline: clamp(14px, 2vw, 28px);
 }
-
-.product-breadcrumb { margin-bottom: 14px; }
 
 /* ---------- States ---------- */
 .page-state {
