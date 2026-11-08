@@ -67,6 +67,8 @@ The approved brand palette already exists in the shared design-system files and 
 - Added a regression assertion to design-system.test.js for the optional refinement layer.
 - Static source verification: retired palette values no longer occur in skill-refinements.scss; Admin/Company import order remains correct. Vue/Sass compilation and Vitest have NOT RUN in this GitHub-only editing session.
 - This is a partial M0 correction, not a claim that every Admin/Company page has passed a full palette audit.
+- Extended the M0 cleanup to DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace: contrast text, shadows, notices and warning demo labels now consume semantic tokens.
+- Static source scan of Admin Dashboard, Admin OperationsHub, CompanyDashboard, shared dashboard header/sidebar, OperationalWorkspace and the optional refinement mixin found no raw hex/RGB/HSL color declarations in those audited files. The test file intentionally contains retired color patterns as regression detectors.
 
 ### Acceptance gate
 
