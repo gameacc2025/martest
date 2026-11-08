@@ -4189,3 +4189,21 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** Direct commits to canonical `main` through GitHub repository operations; latest implementation commit at handoff `726a513087749ab326bc9596a2d924b5bdc5fe50` before final AI handoff updates.
 - **Risks / open questions:** The new migration has not yet been executed against PostgreSQL in this session. Run `prisma migrate status`, then `prisma migrate deploy`, and verify the comments in DBeaver/pgAdmin. Enum value documentation can be expanded separately; this task focused on tables and fields.
 - **Next:** Pull latest `main`; apply the comments-only migration through the existing safe migration runbook; verify table/column descriptions in the database client. Continue the separate API implementation only after the database migration state is confirmed.
+
+
+## 2026-11-08 — API-UI-SEED-01 — API, UI and realistic demo seed execution plan
+- **Status:** IN_PROGRESS
+- **Agent:** ChatGPT via GitHub connector
+- **Goal:** Break down API-1 through API-6 into small vertical slices that include backend, UI, realistic synthetic seed data, security, tests and documentation; complete the shared Admin/Company palette first.
+- **Claimed scope:** Roadmap and first shared design-system cleanup only. No API or database implementation in this milestone.
+- **Changes:**
+  - Added docs/API_UI_SEED_EXECUTION_ROADMAP.md with per-module backend/UI/seed/test tasks, activation gates for Retail and Finance, shared seed safety rules and per-slice Definition of Done.
+  - Confirmed PR #90 merged the six domain database foundations; future API work must reuse the existing models.
+  - Confirmed Admin and Company load the shared approved theme layer. Removed retired palette literals from the optional skill-refinements.scss mixin by converting them to semantic tokens.
+  - Added a design-system regression assertion preventing the retired palette from returning to that refinement layer.
+  - Updated .ai/current-task.md with the task handoff.
+- **Verification:** Static source check confirmed the retired palette regex does not match skill-refinements.scss and both app entry points load newtemp-reference.scss after main.scss. Vitest, Sass/Vue compilation, builds and browser review: NOT RUN in this GitHub-only session.
+- **Commit:** Changes are committed on feat/api-ui-seed-roadmap; see branch history.
+- **Push:** GitHub branch updated through repository file commits; no direct local git push was performed.
+- **Risks / open questions:** Full Admin/Company page-level palette audit and runtime verification remain. Demo seed scripts have not been added. Retail and Finance activation still require explicit commercial/accounting decisions.
+- **Next action:** Finish M0 palette audit and verification, then implement API-1 as a complete backend + UI + seed + test vertical slice.
