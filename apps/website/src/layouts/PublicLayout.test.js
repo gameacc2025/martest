@@ -140,10 +140,15 @@ describe('PublicLayout responsive navigation', () => {
     const navLabels = wrapper.findAll('.public-nav-link').map(link => link.text().trim())
     expect(navLabels).toContain('دسته‌بندی')
     expect(navLabels).toContain('اخبار و مقالات')
+    expect(navLabels).not.toContain('جستجو')
+    expect(navLabels).not.toContain('درباره ما')
+    expect(navLabels).not.toContain('تماس با ما')
     expect(navLabels).not.toContain('سوالات متداول')
+    expect(wrapper.get('.public-search-trigger').text()).toBe('')
     expect(wrapper.find('.public-footer-grid').element.children).toHaveLength(5)
     expect(wrapper.get('.public-footer-grid').text()).not.toContain('آخرین مطالب وبلاگ')
     expect(wrapper.get('.public-footer-grid').text()).toContain('تماس با ما')
+    expect(wrapper.get('.public-footer-grid').text()).toContain('درباره ما')
     expect(wrapper.get('.public-footer-grid').text()).toContain('برندها')
     expect(wrapper.get('.public-footer-grid').text()).toContain('Cisco')
     expect(wrapper.get('.public-footer-grid').text()).toContain('Nokia')
@@ -173,6 +178,17 @@ describe('PublicLayout responsive navigation', () => {
     expect(productsLink.attributes('data-route')).toBe('products')
     expect(wrapper.get('.public-logo').attributes('data-route')).toBe('home')
     expect(wrapper.get('.public-logo').attributes('aria-label')).toContain('صفحه اصلی')
+  })
+
+
+  it('shows the account avatar beside the user menu trigger', async () => {
+    mocks.auth.user = { id: 'customer-1' }
+    mocks.auth.isAuthenticated = true
+    mocks.auth.profile = { firstName: 'مریم', avatar: 'https://cdn.example.test/avatar.png' }
+    wrapper = mountLayout()
+    await flushPromises()
+    expect(wrapper.get('.public-user-avatar img').attributes('src')).toBe('https://cdn.example.test/avatar.png')
+    expect(wrapper.get('.public-user-avatar').isVisible()).toBe(true)
   })
 
   it('loads and displays at most five recent notifications in a left-side drawer', async () => {
