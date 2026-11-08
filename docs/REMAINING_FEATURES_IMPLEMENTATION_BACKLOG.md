@@ -400,3 +400,23 @@ These documents contain deeper contracts and should be updated rather than dupli
 - Added a partial unique index allowing only one unconsumed, non-invalidated AuthChallenge per user/purpose/channel; the issuing API must invalidate the previous challenge transactionally.
 - Added SupportAssignment invariants: every assignment needs a queue or assignee, and a ticket can have at most one open assignment.
 - Prisma schema validation and Client generation passed on the first CI attempt. Fresh-database migration execution then exposed a composite unique-key ordering/definition issue in DB-4; it was corrected by creating the referenced composite unique constraint before the FK. The next CI attempt exposed a dollar-quote delimiter typo in the DB-6 journal immutability function; this is corrected in the current branch revision and the full migration run is being repeated.
+
+## Final verification — 2026-11-08
+
+**Database migration validation: PASS**
+- Prisma 7.10.1 schema validation: passed.
+- Prisma Client generation: passed.
+- Fresh PostgreSQL 18.4: baseline plus all six DB-1..DB-6 migrations applied successfully.
+- Prisma migration status: passed; no pending migrations.
+- Runtime Compose: PostgreSQL/backend/Website/Company/Admin started healthy and runtime migration verification passed.
+
+**Other CI results**
+- Backend tests: passed.
+- All three frontend builds: passed.
+- Architecture graph check: passed.
+- Frontend/shared unit tests: failed (23 assertions across 9 files). No frontend files are part of this PR; this matches the previously recorded repository test debt and is outside the database scope.
+- Browser smoke: 6 passed / 2 failed. Both failures are Website-only pre-existing checks (Website SPA/storefront selector/viewport containment); no Website files were changed by this PR.
+
+**Delivery state:** PR [#90](https://github.com/gameacc2025/martest/pull/90) remains open and unmerged because unrelated frontend/browser checks are red. Database-specific validation is green. No migration was applied to the user's local or production database; only the disposable CI PostgreSQL database was migrated.
+
+**Next implementation stage:** API implementation, beginning with AuthChallenge/AuditLog and Support, then CMS, CRM, and finally gated Retail/Finance. Keep AD-4 in force until the retail commercial decisions are explicitly approved.

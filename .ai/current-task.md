@@ -1,3 +1,20 @@
+# Current Task — 2026-11-08
+
+## Completed implementation — DB-DOMAIN-EXPANSION-01
+- **Status:** IMPLEMENTED on branch `feat/db0-db6-domain-schema`; PR #90 is open and not merged.
+- **PR:** https://github.com/gameacc2025/martest/pull/90
+- **Final head:** `dad8624138ccd397780e7ed9943533ac655f158d`.
+- **Scope:** DB-0 migration baseline/document reconciliation; DB-1 AuthChallenge/AuditLog; DB-2 Support; DB-3 CMS; DB-4 CRM; DB-5 Retail; DB-6 Finance. Database only.
+- **Schema:** 97 models / 58 enums (55 new models / 37 new enums).
+- **Migrations:** six additive migrations after `20261106000000_init`.
+- **Verification PASS:** Prisma validate/generate; fresh PostgreSQL 18.4 applied all seven migrations; migrate status; Compose service health and runtime migration verification; backend tests; three app builds; architecture graph check.
+- **Known unrelated failures:** frontend/shared tests 23 failures across 9 files; browser smoke 6/8 with two Website-only selector/viewport failures. No frontend files were changed.
+- **Safety:** no existing tables dropped/renamed; no data backfill; no API/UI/permissions/seeds/workers; AD-4 B2C freeze remains.
+- **Live database:** not accessed or migrated. Apply only after verifying the existing DB has the baseline recorded as applied; follow `docs/DATABASE_MIGRATION_RUNBOOK.md`.
+- **Next:** API stage begins with DB-1 AuthChallenge/AuditLog and DB-2 Support, then CMS, CRM, then gated Retail/Finance. UI follows each tested API domain.
+
+---
+
 ## Latest progress — DB-DOMAIN-EXPANSION-01
 - First CI attempt: Prisma schema validate/generate passed; DB-4 failed on the PipelineStage composite FK because its referenced unique key was not recognized at FK creation.
 - Second CI attempt: DB-1 through DB-5 succeeded on fresh PostgreSQL; DB-6 failed on a malformed dollar-quote delimiter in the JournalEntry trigger function.

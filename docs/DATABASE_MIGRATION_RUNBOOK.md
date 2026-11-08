@@ -106,3 +106,9 @@ The schema alone does not enable a feature. Keep the following disabled until th
 - Self-service password recovery until challenge issuance, rate limiting and notification delivery are implemented.
 - Support/CMS/CRM UI until permission-checked APIs and real workflow tests exist.
 - Retail checkout, payment, refunds and seller payouts until AD-4 is explicitly revisited and the commercial, legal, currency, provider, shipping, commission and returns policies are approved.
+
+## Verified execution result — 2026-11-08
+- Fresh PostgreSQL 18.4 CI run applied baseline `20261106000000_init` and all six DB-1..DB-6 migrations successfully; `prisma migrate status` passed.
+- Compose runtime health and database migration verification passed.
+- Backend tests and all three app builds passed. Frontend/shared tests remain red (23 failures across 9 files); browser smoke is 6/8 with two pre-existing Website selector/viewport failures. No frontend source was changed in this DB PR.
+- PR #90 is intentionally not merged while unrelated frontend/browser checks remain red. Do not run the migration against a persistent user DB until its baseline state is confirmed and the owner applies the runbook.

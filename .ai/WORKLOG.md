@@ -4141,3 +4141,14 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Correction:** restored the exact $$ function delimiters; also aligned immutable-history actor FKs to RESTRICT and added one-outstanding-auth-challenge and one-active-support-assignment partial indexes plus their supporting CHECK constraints.
 - **Current revision:** `0d1049ad2b21a2aa80362645b23971a1f96e9840` plus pending follow-up commit for the above fixes.
 - **Next:** rerun full fresh-database migrations through DB-6; inspect any remaining DB-6 SQL/runtime issue; do not merge while database validation is red.
+
+## DB-DOMAIN-EXPANSION-01 — Final CI verification
+- **Status:** IMPLEMENTED — database branch and PR prepared; not merged to main.
+- **Final head:** `dad8624138ccd397780e7ed9943533ac655f158d`.
+- **PR:** https://github.com/gameacc2025/martest/pull/90
+- **Database Migration Validation:** PASS. Prisma 7.10.1 validate + generate passed; fresh PostgreSQL 18.4 applied the baseline and all six incremental migrations; `prisma migrate status` passed.
+- **Runtime Validation:** Compose configuration, all service health endpoints, and migration verification passed. Browser smoke passed 6/8; two failures are Website-only pre-existing SPA/storefront selector/viewport checks. No frontend files changed in this PR.
+- **CI:** architecture graph check passed; backend tests passed; all three app builds passed. Frontend/shared tests failed with 23 assertions across 9 files, matching the previously recorded unrelated test debt.
+- **Database deliverables:** 97 Prisma models / 58 enums; six additive migrations; migration runbook and updated database/backlog/AI docs.
+- **No live DB action:** no migration was run against the user's local or production database. Only disposable CI PostgreSQL was migrated. Check baseline state before applying the runbook.
+- **Next:** merge PR after repository's unrelated frontend/browser checks are resolved or explicitly waived by repository policy; then begin API stage DB-1 → DB-6 in the same bounded-context order. Do not implement UI until its API contract and permissions are tested.
