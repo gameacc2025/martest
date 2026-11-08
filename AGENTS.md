@@ -44,13 +44,13 @@ If any required file is missing, record that fact and continue with the remainin
 
 ## Repository and branch discipline
 
-- Work from the canonical `main` branch unless the user explicitly authorizes a different branch or an environment requires a temporary branch. Do not create feature branches by default; the repository owner currently wants a single long-lived branch.
+- Work from the canonical `main` branch. The owner has explicitly required direct-to-main work: do not create local/remote feature branches, temporary branches, or pull requests unless the owner changes this instruction. Parallel agents must use isolated detached worktrees/checkouts pinned to a recorded main SHA and return patches; only the coordinator integrates reviewed patches directly onto the latest main.
 - Before editing, check for uncommitted changes. Preserve user changes. Never use `git reset --hard`, `git clean -fd`, force-push, history rewriting, or destructive checkout commands to make the workspace convenient.
 - If uncommitted changes exist, inspect and isolate them. Do not stage unrelated files or commit another person's work.
 - Never delete a branch or repository without explicit confirmation. If the task is to retain only main, first verify that any other branch's unique commits are safely integrated and explain whether deletion is actually available.
 - Use small, meaningful commits after verification. Do not amend or rewrite existing commits unless explicitly requested.
 - Push only when the user has authorized pushing in the current task/workflow, the intended target is confirmed, and verification is complete. Never push secrets or environment files.
-- If multiple agents share one checkout, use WORKLOG claims and coordinate before editing or committing. Avoid simultaneous writes to the same files.
+- For parallel agents, the coordinator assigns exact file ownership in `.ai/agent-coordination/ACTIVE.md`. Agents must not edit the same files concurrently. Shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global tokens) are coordinator-owned. Parallelize independent domain work in detached worktrees; serialize integration commits on main.
 
 ## Implementation and quality gates
 
