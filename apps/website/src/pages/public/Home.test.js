@@ -55,13 +55,30 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).not.toContain('faqItems')
   })
 
-  it('renders actual products and categories using the reference card geometry', () => {
+  it('renders compact category cards on the homepage while reserving header cards for the category page', () => {
     expect(source).toContain('v-for="product in latestProducts"')
     expect(source).toContain('v-for="product in retailLatest"')
     expect(source).toContain('v-for="category in categories.slice(0, 9)"')
-    expect(source).toContain('class="cb-header-img"')
-    expect(source).toContain('class="cb-sublist"')
-    expect(source).toContain('categoryChildren(category)')
+    expect(source).toContain('class="cats"')
+    expect(source).toContain('class="cat home-category-card"')
+    expect(source).toContain('<i aria-hidden="true">{{ categoryIcon(category) }}</i>')
+    expect(source).toContain('{{ categoryCount(category) }} محصول')
+    expect(source).not.toContain('class="cb-header-img"')
+    expect(source).not.toContain('class="cb-sublist"')
+    expect(source).not.toContain('categoryChildren(category)')
+    expect(source).toContain('.reference-home .home-category-card{flex:0 0 172px')
+    expect(source).toContain('.reference-home .home-category-card:hover')
+    const categoriesPath = [
+      resolve(process.cwd(), 'apps/website/src/pages/public/Categories.vue'),
+      resolve(process.cwd(), 'src/pages/public/Categories.vue'),
+    ].find(existsSync)
+    if (!categoriesPath) throw new Error('Could not locate the dedicated categories page source file')
+    const categoriesSource = readFileSync(categoriesPath, 'utf8')
+    expect(categoriesSource).toContain('class="cb-header-img"')
+    expect(categoriesSource).toContain('class="cb-sublist"')
+  })
+
+  it('renders product cards with the existing product presentation', () => {
     expect(source).toContain('productSalesMode(product)')
     expect(source).toContain('productPriceLabel(product)')
     expect(source).toContain('product.company?.isVerified')
