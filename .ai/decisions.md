@@ -161,3 +161,11 @@ Date: 2026-11-04
 Decision: TEM-derived widgets belong in packages/shared-ui as presentational Vue components; domain pages own data retrieval and permissions. Future CRM, finance, support and retail modules may receive UI-only prototypes when explicitly requested, but every prototype must be visibly marked as sample data and remain disconnected from guessed APIs or real business actions.
 Reason: Reuse the reference UI consistently across Admin and Company without duplicating components or coupling shared presentation to a specific backend domain. Explicit prototypes let product and engineering validate navigation and workflows before committing to backend contracts.
 Impact: Never treat prototype values as live metrics. Do not expose financial actions or tenant data without server-side RBAC, audit logging and domain APIs. See docs/OPERATIONS_UI_ROADMAP.md.
+
+
+---
+
+Date: 2026-11-08
+Decision: The public Website's approved design language is the single visual source of truth for Website, Admin and Company. Shared tokens live in `packages/shared-ui/assets/design-system/newtemp-reference.scss`, loaded as the final design-token layer by all three apps. Website-only `marketplace-theme.scss` may style Website-specific components but must not define root-level brand/surface/typography/radius/shadow/status tokens.
+Reason: The owner explicitly requires Admin and Company dashboards to follow the Website palette exactly; separate root token definitions drift and create inconsistent app surfaces.
+Impact: Design-system changes must update the canonical shared reference tokens and validate all three entrypoint orders. Do not introduce a separate Admin/Company palette or copy color literals into dashboard pages; use semantic tokens. Website-specific illustrations/hero art may retain scoped colors where they are part of the approved artwork.
