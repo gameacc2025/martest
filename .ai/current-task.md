@@ -1183,3 +1183,21 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - ProductListing breadcrumb has its own full-width row above the catalogue title and content, with regression assertions for the DOM order.
 - No backend, API, database, auth, permission or business logic changes.
 - Vue SFC compilation, unit tests, frontend builds and browser visual verification have not been run in this remote GitHub editing session.
+
+
+---
+
+# Current Task — 2026-11-08
+
+## Active task — API-UI-SEED-01
+
+- **Status:** IN_PROGRESS — execution roadmap committed; Milestone M0 shared Admin/Company palette audit is underway.
+- **Branch:** feat/api-ui-seed-roadmap (temporary task branch from current main).
+- **Roadmap:** docs/API_UI_SEED_EXECUTION_ROADMAP.md.
+- **Repository baseline:** DB foundations for Auth/Audit, Support, CMS, CRM, Retail and Finance were merged by PR #90. Reuse the merged schema; do not duplicate models.
+- **M0 findings:** Admin and Company both import the shared PrimeVue theme and load newtemp-reference.scss after main.scss. The approved brand palette already exists in the shared token/theme files. The store-template's standalone purple palette is not the Admin/Company brand source.
+- **M0 change:** Replaced the retired hardcoded palette in the optional skill-refinements.scss mixin with semantic design tokens; added a regression assertion in design-system.test.js.
+- **Static verification:** Confirmed the retired palette regex does not match the updated skill-refinements.scss; confirmed both app entry points preserve shared-theme import order. No browser checks were run.
+- **NOT RUN:** Vitest, Sass/Vue compilation, application builds and browser visual review are not available in this remote GitHub editing session.
+- **Safety:** No API routes, database schema, live data, business rules, authentication or permissions changed. No demo seed data added yet.
+- **Next:** Complete the Admin/Company page and shared-component palette audit, run the shared design-system tests/build in the project environment, then begin API-1 vertical slice (backend + UI + safe demo seed + tests) using the merged AuthChallenge/AuditLog models.
