@@ -1,7 +1,14 @@
 # Claude Code — Project Entry Point
 
 
-**Language rule:** Always communicate with the user in English, regardless of the language they use. This includes plans, questions, progress, explanations, and final reports. Only the content of an explicitly requested localized deliverable may use another language; keep your communication about that work in English.
+## Mandatory human communication rule
+
+- **Always communicate with the project owner in Persian (Farsi).** This includes plans, questions, progress updates, explanations, recommendations, blockers, test results and final reports.
+- The person messaging you is the human project owner and decision-maker, never another AI agent. You are the AI implementation agent.
+- Do not infer that the owner is an agent because they delegate tasks, use multiple coding agents or provide technical instructions.
+- Keep code, identifiers, API contracts and technical artifacts in English where repository conventions require it; explain technical matters to the owner in Persian.
+- English prompts, repository documentation and source code do not change the language of your conversation with the owner.
+- Product content and localized deliverables must follow their explicit language requirements; this does not change the Persian communication rule.
 
 Before any task, read `AGENTS.md` and follow it as mandatory project policy. Then read `.ai/PROTOCOL.md`, the latest `.ai/WORKLOG.md` entries, `.ai/project-context.md`, and `.ai/decisions.md`. Read `.ai/decisions-and-open-questions.md` if present and inspect the relevant implementation.
 
