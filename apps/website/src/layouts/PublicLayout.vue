@@ -13,7 +13,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
-import { inquiriesApi, endpoints } from '@telecom/api-client'
+import { inquiriesApi, productsApi, endpoints } from '@telecom/api-client'
 import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
 import Menu from 'primevue/menu'
@@ -25,6 +25,7 @@ const cartStore = useCartStore()
 const cartItemCount = computed(() => cartStore.itemCount)
 const cartDrawerOpen = ref(false)
 const myInquiryCount = ref(null)
+const footerBrandNames = ref([])
 const router = useRouter()
 const route = useRoute()
 const { theme, toggle: toggleTheme } = useTheme()
@@ -202,17 +203,30 @@ function toggleUserMenu(event) {
 
 
 const navItems = [
-  { name: 'سوالات متداول', path: '/faq', icon: 'pi pi-question-circle' },
   { name: 'درباره ما', path: '/about', icon: 'pi pi-info-circle' },
   { name: 'تماس با ما', path: '/contact', icon: 'pi pi-phone' }
 ]
 
 
+async function fetchFooterBrands() {
+  try {
+    const response = await productsApi.list({ page: 1, limit: 100, status: 'PUBLISHED' })
+    const payload = response?.data?.data ?? response?.data ?? response
+    const items = Array.isArray(payload) ? payload : payload?.products ?? payload?.items ?? []
+    footerBrandNames.value = [...new Set(items.map(product => {
+      const brand = product?.brand
+      return String((typeof brand === 'object' ? brand?.name : brand) || product?.company?.brandName || '').trim()
+    }).filter(Boolean))].slice(0, 12)
+  } catch {
+    footerBrandNames.value = []
+  }
+}
+
 onMounted(async () => {
   fetchMyInquiryCount()
+  fetchFooterBrands()
   // Keep the header badge and its five-message preview in sync with live notifications.
   await fetchHeaderNotifications()
-
 })
 
 
@@ -231,8 +245,6 @@ function logout() {
       <div class="public-container public-utility-inner">
         <span class="public-utility-message">بازارگاه تخصصی تجهیزات شبکه و مخابرات؛ خرید فوری و استعلام سازمانی</span>
         <nav class="public-utility-links" aria-label="دسترسی‌های راهنما">
-          <router-link :to="{ name: 'faq' }">راهنمای کاربران</router-link>
-          <span aria-hidden="true">·</span>
           <router-link :to="{ name: 'contact' }">تماس با ما</router-link>
         </nav>
       </div>
@@ -252,9 +264,8 @@ function logout() {
               <router-link :to="{ name: 'home' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-home" aria-hidden="true"></i><span>صفحه اصلی</span></router-link>
               <router-link :to="{ name: 'products' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-box" aria-hidden="true"></i><span>محصولات</span></router-link>
               <router-link :to="{ name: 'categories' }" class="public-nav-link" active-class="public-nav-link-active"><span>دسته‌بندی</span></router-link>
-              <router-link :to="{ name: 'magazine' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-book-open" aria-hidden="true"></i><span>مجله و مقالات</span></router-link>
+              <router-link :to="{ name: 'magazine' }" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-book-open" aria-hidden="true"></i><span>اخبار و مقالات</span></router-link>
               <router-link :to="{ name: 'search' }" class="public-nav-link public-nav-search" active-class="public-nav-link-active" aria-label="جستجوی محصولات"><i class="pi pi-search" aria-hidden="true"></i><span>جستجو</span></router-link>
-              <router-link :to="{ name: 'faq' }" class="public-nav-link" active-class="public-nav-link-active"><span>سوالات متداول</span></router-link>
               <router-link to="/about" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-info-circle" aria-hidden="true"></i><span>درباره ما</span></router-link>
               <router-link to="/contact" class="public-nav-link" active-class="public-nav-link-active"><i class="pi pi-phone" aria-hidden="true"></i><span>تماس با ما</span></router-link>
             </nav>
@@ -434,7 +445,7 @@ function logout() {
             </router-link>
           </li>
           <li><router-link :to="{ name: 'search' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-search"></i><span>جستجوی محصولات</span></router-link></li>
-          <li><router-link :to="{ name: 'magazine' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-book-open"></i><span>مجله و مقالات</span></router-link></li>
+          <li><router-link :to="{ name: 'magazine' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-book-open"></i><span>اخبار و مقالات</span></router-link></li>
           <li v-for="item in navItems" :key="item.path">
             <router-link :to="item.path" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
               <i :class="item.icon || 'pi pi-circle'" aria-hidden="true"></i><span>{{ item.name }}</span>
@@ -521,6 +532,13 @@ function logout() {
               <li><router-link :to="{ name: 'faq' }" class="public-footer-link">سوالات متداول</router-link></li>
               <li><router-link :to="{ name: 'terms' }" class="public-footer-link">قوانین و مقررات</router-link></li>
               <li><router-link :to="{ name: 'contact' }" class="public-footer-link">تماس با ما</router-link></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="public-footer-heading">برندها</h3>
+            <ul class="public-footer-list">
+              <li v-for="brand in footerBrandNames" :key="brand"><router-link :to="{ name: 'search', query: { q: brand } }" class="public-footer-link">{{ brand }}</router-link></li>
+              <li v-if="!footerBrandNames.length"><router-link :to="{ name: 'products' }" class="public-footer-link">مشاهده برندهای محصولات</router-link></li>
             </ul>
           </div>
           <div>
@@ -746,7 +764,7 @@ function logout() {
 }
 .public-footer-grid {
   display: grid;
-  grid-template-columns: minmax(260px, 1.6fr) repeat(3, minmax(180px, 1fr));
+  grid-template-columns: minmax(230px, 1.5fr) repeat(4, minmax(145px, 1fr));
   gap: clamp(1.25rem, 2vw, 2rem);
   padding-bottom: 32px;
 }
