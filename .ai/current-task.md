@@ -1,14 +1,16 @@
 # Current Task — 2026-11-08
 
-## Active task — REMAINING-FEATURES-BACKLOG-01
-- **Status:** IN_PROGRESS — documentation and architecture reconciliation only.
-- **Goal:** Publish a source-backed, prioritized English master backlog of all remaining platform capabilities, including database-first dependencies, while keeping the owner-facing explanation Persian.
-- **Scope:** Audit current Prisma schema, registered Fastify routes, API-client definitions, three frontend routers, project decisions and existing domain designs. Create `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`. No database/API/UI implementation in this task.
-- **Important findings:** Core B2B marketplace domains are already implemented (identity/RBAC, companies, catalog/products, price history, RFQ/inquiry responses/messages, subscription/limits, notifications, customer addresses and banners). CRM, support and retail/finance pages are UI prototypes only. Magazine content is static. Retail cart/checkout is local UI only; no operational order/inventory/payment backend exists.
-- **Architecture conflict:** AD-4 in `.ai/decisions.md` freezes Cart/Checkout/Orders/Wishlist, but Website currently registers `/cart`, `/checkout`, and `/orders`. Treat this as unresolved and do not enable real commerce until explicitly decided.
-- **Database strategy:** Build additive, bounded-context migrations in dependency order; do not create one giant migration or duplicate existing core models. API and UI implementation follows the database design/approval phase.
+## Completed task — REMAINING-FEATURES-BACKLOG-01
+- **Status:** DONE — documentation and architecture reconciliation only.
+- **Goal:** Publish a source-backed, prioritized English master backlog of all remaining platform capabilities, including database-first dependencies.
+- **Scope completed:** Audited Prisma schema, registered Fastify route inventory, API-client definitions, all three frontend routers, project decisions, and existing domain designs. No schema/API/UI implementation was performed.
+- **Main document:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` (commit `bb319d529c8ecb97871164a69e2d25ad3361376a`).
+- **Important findings:** Core B2B marketplace domains are implemented. CRM, support and finance screens are prototypes; Magazine content is static; cart/checkout is local UI only; no operational inventory/order/payment/settlement backend exists.
+- **Architecture conflict:** AD-4 freezes Cart/Checkout/Orders/Wishlist, but Website currently registers `/cart`, `/checkout`, and `/orders`. Recorded as unresolved; do not activate real commerce until explicitly decided.
+- **Database strategy:** Additive migrations by bounded context; no mega-migration and no duplicate core models. API and UI follow the approved database stage.
 - **Verification:** Documentation/source cross-check only; no tests/build/migrations run.
-- **Next:** Complete the English backlog document, record exact dependencies and open business decisions, then update WORKLOG/current-task with commit SHA and handoff.
+- **Documentation commits:** backlog `bb319d5`; worklog `b6b1698`; this handoff update follows.
+- **Next:** DB-0 — reconcile actual migration history, Prisma schema and database docs; refresh API route/client parity; then approve near-term database batches.
 
 ---
 
