@@ -1055,3 +1055,13 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - Regression coverage added in `apps/website/src/pages/public/Home.test.js`.
 - Changes committed directly to `main`; no feature branch created.
 - Local test/build execution remains pending because this session only has remote GitHub file access.
+
+
+## Current task — Public navigation, avatar, drawer motion and product breadcrumb (2026-11-08)
+- **Status:** Implemented on `main`; local verification pending.
+- Header search is now a single icon-only action. About and Contact are removed from desktop/mobile/utility navigation and remain accessible in the footer.
+- The account trigger displays the profile avatar image or a generated initial fallback.
+- Notification and cart drawers use a slower 520ms entrance/exit transition; reduced-motion preference is respected.
+- ProductListing breadcrumb has its own full-width row above the catalogue title and content, with regression assertions for the DOM order.
+- No backend, API, database, auth, permission or business logic changes.
+- Vue SFC compilation, unit tests, frontend builds and browser visual verification have not been run in this remote GitHub editing session.
