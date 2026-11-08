@@ -29,7 +29,7 @@ describe('Website visual system — latest owner-supplied prototype', () => {
     expect(sharedTheme).toContain('--p-red-500: #EF4444 !important')
     expect(primevueTheme).toContain("color:'#0891B2',contrastColor:'#FFFFFF',hoverColor:'#0E7490',activeColor:'#0891B2'")
     expect(primevueTheme).toContain("color:'#22D3EE',contrastColor:'#083344',hoverColor:'#67E8F9',activeColor:'#0891B2'")
-    expect(theme).not.toMatch(/^\\s*:root(?:\\.app-dark)?\\s*\\{/m)
+    expect(theme).not.toMatch(/^\s*:root(?:\.app-dark)?\s*\{/m)
   })
 
   it('styles the real public header and all public page surfaces with the prototype tokens', () => {
