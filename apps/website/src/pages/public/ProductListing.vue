@@ -116,7 +116,9 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
 <template>
 <main class="reference-products" dir="rtl">
   <div class="w pg">
-    <AppBreadcrumb :items="[{ label: 'همه محصولات' }]" />
+    <div class="catalogue-breadcrumb">
+      <AppBreadcrumb :items="[{ label: 'همه محصولات' }]" />
+    </div>
     <div class="ph"><h1>همه محصولات</h1><p>محصولات تخصصی تأمین‌کنندگان؛ خرید فوری یا ثبت استعلام</p></div>
     <div class="lay">
       <aside class="fl">
@@ -153,6 +155,10 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
 </template>
 <style scoped>
 .reference-products{--bg:var(--ds-page-bg);--card:var(--ds-card-bg);--text:var(--ds-text-primary);--muted:var(--ds-text-secondary);--line:var(--ds-border);--pri:var(--ds-primary-button);--pri2:var(--ds-brand-primary);--ok:var(--ds-status-success-fg);--chip:var(--ds-color-primary-soft);--hero1:var(--ds-color-brand-dark);--hero2:var(--ds-brand-primary-active);min-height:60vh;background:var(--bg);color:var(--text);font-family:var(--ds-font-family)}
+ .reference-products .w.pg{display:block;width:100%;padding-top:20px}
+.reference-products .catalogue-breadcrumb{display:block;position:relative;clear:both;width:100%;margin:0 0 16px}
+.reference-products .catalogue-breadcrumb .app-breadcrumb{display:block;width:100%;margin:0}
+.reference-products .ph{display:block;position:relative;clear:both;width:100%;padding:0 0 4px}
 .reference-products .filter-head{display:flex;align-items:center;justify-content:space-between;margin:-2px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .reference-products .filter-head h3{font-size:15px;margin:0}
 .reference-products .filter-head button{border:0;background:transparent;color:var(--pri);font:inherit;font-size:11px;cursor:pointer}
