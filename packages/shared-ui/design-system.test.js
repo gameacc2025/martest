@@ -15,6 +15,8 @@ const companyEntry = read('../../apps/company/src/main.js')
 const websiteEntry = read('../../apps/website/src/main.js')
 const pages = read('./assets/design-system/pages.scss')
 const sidebar = read('./components/dashboard/DashboardSidebar.vue')
+const dashboardHeader = read('./components/dashboard/DashboardHeader.vue')
+const operationsWorkspace = read('./components/operations/OperationalWorkspace.vue')
 const companyDashboard = read('../../apps/company/src/pages/user/dashboard/CompanyDashboard.vue')
 const companyLayout = read('../../apps/company/src/layouts/CompanyLayout.vue')
 const websiteHome = read('../../apps/website/src/pages/public/Home.vue')
@@ -103,6 +105,14 @@ describe('approved Telecom Market design palette', () => {
   it('keeps dashboard and public website surfaces on the approved theme tokens', () => {
     expect(sidebar).toContain('var(--ds-sidebar-width)')
     expect(sidebar).toContain('var(--ds-sidebar-active-bg)')
+    expect(sidebar).toContain('var(--ds-primary-button-text)')
+    expect(dashboardHeader).toContain('var(--ds-shadow-xs)')
+    expect(dashboardHeader).toContain('var(--ds-color-secondary-contrast)')
+    expect(companyDashboard).toContain('var(--ds-shadow-xs)')
+    expect(companyDashboard).toContain('var(--ds-shadow-sm)')
+    expect(companyDashboard).not.toMatch(/rgba\(20,20,60/)
+    expect(operationsWorkspace).toContain('var(--ds-status-warning-bg)')
+    expect(operationsWorkspace).not.toMatch(/#d8e8f1|#f2f8fc|#34556b|#9a6815|#fff5dc/i)
     for (const source of [companyDashboard, companyLayout, websiteHome, publicLayout]) {
       expect(source).not.toMatch(/#7c6cf6|#6c5ce7|#7b2ff7|#4b3bd6/i)
     }
