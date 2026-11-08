@@ -7,11 +7,17 @@ datasource db {
   provider = "postgresql"
 }
 
+/// نقش‌های قابل تخصیص به کاربران و زمینه مجاز هر نقش (کارمند، شرکت یا مشتری).
 model Role {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int              @id @default(autoincrement())
+  /// نام قابل نمایش موجودیت.
   name        String           @unique
+  /// برچسب یا عنوان کوتاه قابل نمایش.
   label       String
+  /// شرح تکمیلی موجودیت.
   description String?
+  /// سیستمی بودن رکورد و محدودیت مدیریت عادی آن.
   isSystem    Boolean          @default(false)
   // Which domain this role belongs to (STAFF / COMPANY / CUSTOMER). Set
   // explicitly when the role is created — NOT inferred from the role name.
@@ -19,10 +25,15 @@ model Role {
   // be correctly recognized as a company-scoped role without any code
   // change, and is the source of truth for GET /roles/assignable and for
   // the role-scope check in user.service.js createUser().
+  /// محدوده اعتبار یا نمایش رکورد.
   scope       RoleScope
+  /// زمان ایجاد رکورد.
   createdAt   DateTime         @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime         @updatedAt
+  /// ارتباط Prisma با جدول RolePermission (اتصال نقش و مجوز): مجموعه رکوردهای وابسته مرتبط با نقش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   permissions RolePermission[]
+  /// ارتباط Prisma با جدول UserRole (تخصیص نقش): مجموعه رکوردهای وابسته مرتبط با نقش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   users       UserRole[]
 
   @@index([isSystem])
@@ -35,105 +46,181 @@ enum RoleScope {
   CUSTOMER
 }
 
+/// فهرست مجوزهای ریزدانه و عملیات قابل کنترل در بخش‌های مختلف سامانه.
 model Permission {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int     @id @default(autoincrement())
+  /// نام قابل نمایش موجودیت.
   name        String  @unique
+  /// برچسب یا عنوان کوتاه قابل نمایش.
   label       String
+  /// شرح تکمیلی موجودیت.
   description String?
+  /// گروه منطقی برای دسته‌بندی این مجوز/مقدار.
   group       String?
 
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime @updatedAt
 
+  /// ارتباط Prisma با جدول RolePermission (اتصال نقش و مجوز): مجموعه رکوردهای وابسته مرتبط با مجوز؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   roles RolePermission[]
 
   @@index([group])
 }
 
+/// رابط چندبه‌چند نقش و مجوز؛ هر رکورد یک مجوز اعطاشده به یک نقش را ثبت می‌کند.
 model RolePermission {
+  /// شناسه نقش مرتبط با این اتصال نقش و مجوز؛ کلید خارجی به جدول Role است.
   roleId       Int
+  /// شناسه مجوز مرتبط با این اتصال نقش و مجوز؛ کلید خارجی به جدول Permission است.
   permissionId Int
+  /// زمان assigned این اتصال نقش و مجوز را ثبت می‌کند.
   assignedAt   DateTime   @default(now())
+  /// ارتباط Prisma با جدول Permission (مجوز): رکورد مرتبط مرتبط با اتصال نقش و مجوز؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Role (نقش): رکورد مرتبط مرتبط با اتصال نقش و مجوز؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
   @@index([permissionId])
 }
 
+/// رابط تخصیص نقش به کاربر و زمان اعطای نقش.
 model UserRole {
+  /// شناسه کاربر مرتبط با این تخصیص نقش؛ کلید خارجی به جدول User است.
   userId     Int
+  /// شناسه نقش مرتبط با این تخصیص نقش؛ کلید خارجی به جدول Role است.
   roleId     Int
+  /// زمان assigned این تخصیص نقش را ثبت می‌کند.
   assignedAt DateTime @default(now())
+  /// ارتباط Prisma با جدول Role (نقش): رکورد مرتبط مرتبط با تخصیص نقش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با تخصیص نقش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
   @@index([roleId])
 }
 
+/// زمینه دسترسی کاربر به برنامه و شرکت وابسته به آن، در صورت وجود.
 model AccessProfile {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int               @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این زمینه دسترسی؛ کلید خارجی به جدول User است.
   userId    Int               @unique
+  /// مقدار type برای نگهداری اطلاعات مرتبط با زمینه دسترسی.
   type      AccessProfileType
+  /// شناسه شرکت مرتبط با این زمینه دسترسی؛ کلید خارجی به جدول Company است.
   companyId Int?
+  /// فعال یا غیرفعال بودن رکورد.
   isActive  Boolean           @default(true)
+  /// زمان ایجاد رکورد.
   createdAt DateTime          @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime          @updatedAt
 
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با زمینه دسترسی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user      User              @relation(fields:[userId], references:[id], onDelete:Cascade)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با زمینه دسترسی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company   Company?          @relation(fields:[companyId], references:[id])
 
   @@index([type])
   @@index([companyId])
 }
 
+/// اطلاعات شخصی و نمایشی کاربر که از اطلاعات ورود جدا نگهداری می‌شود.
 model Profile {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این پروفایل؛ کلید خارجی به جدول User است.
   userId    Int      @unique
+  /// نام کوچک کاربر.
   firstName String?
+  /// نام خانوادگی کاربر.
   lastName  String?
+  /// نشانی یا کلید تصویر نمایه کاربر.
   avatar    String?
+  /// داده‌های تکمیلی ساختاریافته و وابسته به دامنه در قالب JSON.
   metadata  Json?
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با پروفایل؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+/// اطلاعات هویتی، ثبتی، تماس، نوع فعالیت و وضعیت شرکت‌های عضو بازارگاه.
 model Company {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                  Int                  @id @default(autoincrement())
+  /// نام قابل نمایش موجودیت.
   name                String               @unique
+  /// نام انگلیسی موجودیت.
   nameEn              String?
+  /// شناسه ملی شرکت/شخص برای شناسایی و تطبیق.
   nationalId          String?              @unique
+  /// شماره ثبت قانونی شرکت.
   registrationNumber  String?
+  /// مقدار type برای نگهداری اطلاعات مرتبط با شرکت.
   type                CompanyType?
+  /// شرح تکمیلی موجودیت.
   description         String?
+  /// نشانی یا کلید فایل لوگو.
   logo                String?
+  /// نشانی ایمیل مرتبط.
   email               String?
+  /// شماره تماس مرتبط.
   phone               String?
+  /// نشانی متنی یا اطلاعات آدرس.
   address             String?
+  /// نشانی وب‌سایت رسمی.
   website             String?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status              CompanyStatus        @default(PENDING)
+  /// تأیید شدن هویت یا اطلاعات این موجودیت.
   isVerified          Boolean              @default(false)
+  /// زمان ایجاد رکورد.
   createdAt           DateTime             @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt           DateTime             @updatedAt
+  /// زمان حذف نرم؛ مقدار NULL یعنی رکورد حذف نرم نشده است.
   deletedAt           DateTime?
+  /// ارتباط Prisma با جدول AccessProfile (زمینه دسترسی): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   accessProfiles      AccessProfile[]
+  /// ارتباط Prisma با جدول Product (محصول): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   products            Product[]
+  /// ارتباط Prisma با جدول Inquiry (استعلام): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiries           Inquiry[]
+  /// ارتباط Prisma با جدول InquiryResponse (InquiryResponse): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   responses           InquiryResponse[]
+  /// ارتباط Prisma با جدول CompanyInquiryLimit (CompanyInquiryLimit): رکورد مرتبط مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiryLimit        CompanyInquiryLimit?
+  /// ارتباط Prisma با جدول CompanyLimit (CompanyLimit): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   limits              CompanyLimit[]
+  /// ارتباط Prisma با جدول InquirySubscription (InquirySubscription): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquirySubscriptions InquirySubscription[]
+  /// ارتباط Prisma با جدول InquiryMessage (InquiryMessage): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sentInquiryMessages InquiryMessage[] @relation("InquiryMessageSenderCompany")
+  /// ارتباط Prisma با جدول InquiryMessage (InquiryMessage): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   receivedInquiryMessages InquiryMessage[] @relation("InquiryMessageRecipientCompany")
+  /// ارتباط Prisma با جدول AuditLog (AuditLog): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   auditLogs AuditLog[] @relation("AuditCompany")
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportTickets SupportTicket[]
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   crmAccounts CRMAccount[]
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrders SellerOrder[]
+  /// ارتباط Prisma با جدول CommissionRule (CommissionRule): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   commissionRules CommissionRule[]
+  /// ارتباط Prisma با جدول SellerPayable (SellerPayable): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerPayables SellerPayable[]
+  /// ارتباط Prisma با جدول Settlement (تسویه): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   settlements Settlement[]
+  /// ارتباط Prisma با جدول FinanceInvoice (FinanceInvoice): مجموعه رکوردهای وابسته مرتبط با شرکت؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   financeInvoices FinanceInvoice[]
 
   @@index([status])
@@ -142,66 +229,126 @@ model Company {
   @@index([nationalId])
 }
 
+/// هویت ورود حساب کاربری، وضعیت حساب و ارتباط آن با فعالیت‌های سامانه.
 model User {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id            Int              @id @default(autoincrement())
+  /// نشانی ایمیل مرتبط.
   email         String?          @unique
+  /// شماره تماس مرتبط.
   phone         String           @unique
+  /// هش رمز عبور؛ رمز خام نباید ذخیره شود.
   passwordHash  String
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status        UserStatus       @default(ACTIVE)
+  /// زمان ایجاد رکورد.
   createdAt     DateTime         @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt     DateTime         @updatedAt
 
+  /// ارتباط Prisma با جدول Profile (پروفایل): رکورد مرتبط مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   profile       Profile?
+  /// ارتباط Prisma با جدول AccessProfile (زمینه دسترسی): رکورد مرتبط مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   accessProfile   AccessProfile?
+  /// ارتباط Prisma با جدول UserRole (تخصیص نقش): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   roles         UserRole[]
+  /// ارتباط Prisma با جدول RefreshToken (RefreshToken): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   refreshTokens RefreshToken[]
+  /// ارتباط Prisma با جدول HandoffCode (HandoffCode): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   handoffCodes  HandoffCode[]
+  /// ارتباط Prisma با جدول Notification (اعلان): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   notifications Notification[]
+  /// ارتباط Prisma با جدول NotificationPreference (NotificationPreference): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   notificationPreferences NotificationPreference[]
+  /// ارتباط Prisma با جدول NotificationDelivery (NotificationDelivery): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   notificationDeliveries  NotificationDelivery[]
+  /// ارتباط Prisma با جدول Product (محصول): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   products      Product[]        @relation("ProductCreatedBy")
+  /// ارتباط Prisma با جدول ProductStatusHistory (ProductStatusHistory): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   productStatusChanges ProductStatusHistory[]
+  /// ارتباط Prisma با جدول ProductActivityLog (ProductActivityLog): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   productActivityLogs ProductActivityLog[]
+  /// ارتباط Prisma با جدول InquiryStatusHistory (InquiryStatusHistory): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiryStatusChanges InquiryStatusHistory[]
+  /// ارتباط Prisma با جدول Inquiry (استعلام): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   buyerInquiries      Inquiry[]          @relation("InquiryBuyer")
+  /// ارتباط Prisma با جدول InquirySubscription (InquirySubscription): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquirySubscriptions InquirySubscription[]
+  /// ارتباط Prisma با جدول InquiryMessage (InquiryMessage): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sentInquiryMessages InquiryMessage[] @relation("InquiryMessageSenderUser")
+  /// ارتباط Prisma با جدول InquiryMessage (InquiryMessage): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   receivedInquiryMessages InquiryMessage[] @relation("InquiryMessageRecipientUser")
+  /// ارتباط Prisma با جدول Address (نشانی): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   addresses                Address[]
+  /// ارتباط Prisma با جدول AuthChallenge (AuthChallenge): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   authChallenges AuthChallenge[]
+  /// ارتباط Prisma با جدول AuditLog (AuditLog): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   auditLogs AuditLog[] @relation("AuditActor")
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportRequestedTickets SupportTicket[] @relation("SupportRequester")
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportCurrentAssignments SupportTicket[] @relation("SupportCurrentAssignee")
+  /// ارتباط Prisma با جدول SupportMessage (SupportMessage): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportMessages SupportMessage[]
+  /// ارتباط Prisma با جدول SupportAttachment (SupportAttachment): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportAttachments SupportAttachment[]
+  /// ارتباط Prisma با جدول SupportAssignment (SupportAssignment): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportAssignmentsReceived SupportAssignment[] @relation("SupportAssignmentAssignee")
+  /// ارتباط Prisma با جدول SupportAssignment (SupportAssignment): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportAssignmentsMade SupportAssignment[] @relation("SupportAssignmentActor")
+  /// ارتباط Prisma با جدول SupportStatusHistory (SupportStatusHistory): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportStatusChanges SupportStatusHistory[] @relation("SupportStatusActor")
+  /// ارتباط Prisma با جدول SupportEvent (SupportEvent): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   supportEvents SupportEvent[] @relation("SupportEventActor")
+  /// ارتباط Prisma با جدول Article (مقاله): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   authoredArticles Article[] @relation("ArticleAuthor")
+  /// ارتباط Prisma با جدول Article (مقاله): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   publishedArticles Article[] @relation("ArticlePublisher")
+  /// ارتباط Prisma با جدول ArticleRevision (ArticleRevision): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   articleRevisions ArticleRevision[]
+  /// ارتباط Prisma با جدول ArticleMedia (ArticleMedia): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   uploadedArticleMedia ArticleMedia[] @relation("ArticleMediaUploader")
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   crmAccounts CRMAccount[] @relation("CRMAccountUser")
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   ownedCrmAccounts CRMAccount[] @relation("CRMAccountOwner")
+  /// ارتباط Prisma با جدول CRMContact (CRMContact): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   crmContacts CRMContact[]
+  /// ارتباط Prisma با جدول Lead (سرنخ فروش): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   ownedLeads Lead[] @relation("CRMLeadOwner")
+  /// ارتباط Prisma با جدول Lead (سرنخ فروش): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   convertedLeads Lead[] @relation("CRMLeadConverter")
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   ownedOpportunities Opportunity[] @relation("OpportunityOwner")
+  /// ارتباط Prisma با جدول CRMActivity (CRMActivity): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   crmActivities CRMActivity[]
+  /// ارتباط Prisma با جدول CRMTask (CRMTask): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignedCrmTasks CRMTask[] @relation("CRMTaskAssignee")
+  /// ارتباط Prisma با جدول CRMTask (CRMTask): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   createdCrmTasks CRMTask[] @relation("CRMTaskCreator")
+  /// ارتباط Prisma با جدول CRMNote (CRMNote): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   crmNotes CRMNote[]
+  /// ارتباط Prisma با جدول InventoryMovement (InventoryMovement): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inventoryMovements InventoryMovement[]
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   retailOrders RetailOrder[]
+  /// ارتباط Prisma با جدول InventoryReservation (InventoryReservation): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inventoryReservations InventoryReservation[]
+  /// ارتباط Prisma با جدول RetailRefund (RetailRefund): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   retailRefunds RetailRefund[]
+  /// ارتباط Prisma با جدول ReturnRequest (ReturnRequest): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   returnRequests ReturnRequest[]
+  /// ارتباط Prisma با جدول JournalEntry (JournalEntry): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   journalEntries JournalEntry[] @relation("JournalEntryCreator")
+  /// ارتباط Prisma با جدول Settlement (تسویه): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   settlementRequests Settlement[] @relation("SettlementRequester")
+  /// ارتباط Prisma با جدول SettlementApproval (SettlementApproval): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   settlementApprovals SettlementApproval[]
+  /// ارتباط Prisma با جدول SettlementPayout (SettlementPayout): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   payoutExecutions SettlementPayout[] @relation("PayoutExecutor")
+  /// ارتباط Prisma با جدول FinanceInvoice (FinanceInvoice): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   financeInvoices FinanceInvoice[]
+  /// ارتباط Prisma با جدول OpportunityStageHistory (OpportunityStageHistory): مجموعه رکوردهای وابسته مرتبط با کاربر؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunityStageChanges OpportunityStageHistory[]
 
   @@index([email])
@@ -209,32 +356,54 @@ model User {
   @@index([phone])
 }
 
+/// نشانی‌های تماس یا تحویل ثبت‌شده توسط کاربر.
 model Address {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int      @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این نشانی؛ کلید خارجی به جدول User است.
   userId         Int
+  /// برچسب یا عنوان کوتاه قابل نمایش.
   label          String   @default("خانه")
+  /// نام شخص دریافت‌کننده.
   recipientName  String
+  /// شماره تماس شخص دریافت‌کننده.
   recipientPhone String
+  /// استان نشانی.
   province       String
+  /// شهر نشانی.
   city           String
+  /// جزئیات نشانی پستی.
   addressLine    String
+  /// کد پستی.
   postalCode     String?
+  /// پیش‌فرض بودن این گزینه یا رکورد.
   isDefault      Boolean  @default(false)
+  /// زمان ایجاد رکورد.
   createdAt      DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt      DateTime @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با نشانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): مجموعه رکوردهای وابسته مرتبط با نشانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   retailOrders   RetailOrder[]
 
   @@index([userId, isDefault])
   @@index([userId, createdAt])
 }
 
+/// توکن‌های نوسازی نشست کاربر برای کنترل انقضا و ابطال نشست.
 model RefreshToken {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// توکن نشست/نوسازی؛ دسترسی به آن باید محدود و امن باشد.
   token     String   @unique
+  /// شناسه کاربر مرتبط با این RefreshToken؛ کلید خارجی به جدول User است.
   userId    Int
+  /// زمان انقضای اعتبار رکورد یا توکن.
   expiresAt DateTime
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با RefreshToken؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -244,33 +413,56 @@ model RefreshToken {
 // One-time, PKCE-bound code used to hand a live session from the website
 // to the admin/company panel (see handoff.service.js). Stored hashed;
 // single-use (deleted atomically on redeem); 60-second TTL.
+/// کد موقت انتقال امن نشست میان وب‌سایت و پنل‌ها؛ کد خام ذخیره نمی‌شود.
 model HandoffCode {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// هش کد انتقال؛ کد خام ذخیره نمی‌شود.
   codeHash  String   @unique
+  /// شناسه کاربر مرتبط با این HandoffCode؛ کلید خارجی به جدول User است.
   userId    Int
+  /// مقدار متنی app برای توصیف یا شناسایی HandoffCode.
   app       String   // 'admin' | 'company'
+  /// مقدار challenge رمزنگاری‌شده مرتبط با جریان PKCE.
   challenge String   // base64url(SHA-256(verifier)) supplied by the panel
+  /// زمان انقضای اعتبار رکورد یا توکن.
   expiresAt DateTime
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با HandoffCode؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
 }
 
+/// دسته‌بندی‌های اصلی کاتالوگ محصولات و تنظیمات نمایش آن‌ها.
 model Category {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id            Int            @id @default(autoincrement())
+  /// شناسه متنی خوانا و یکتای مناسب URL.
   slug          String         @unique
+  /// نام فارسی موجودیت.
   nameFa        String
+  /// نام انگلیسی موجودیت.
   nameEn        String
+  /// نشانی یا کلید تصویر مرتبط.
   image         String?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status        CategoryStatus @default(ACTIVE)
+  /// پرچم منطقی showInMenu برای کنترل رفتار Category.
   showInMenu    Boolean        @default(true)
+  /// ترتیب نمایش رکورد.
   sortOrder     Int            @default(0)
+  /// زمان ایجاد رکورد.
   createdAt     DateTime       @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt     DateTime       @updatedAt
+  /// ارتباط Prisma با جدول Subcategory (Subcategory): مجموعه رکوردهای وابسته مرتبط با Category؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   subcategories Subcategory[]
+  /// ارتباط Prisma با جدول Product (محصول): مجموعه رکوردهای وابسته مرتبط با Category؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   products      Product[]
+  /// ارتباط Prisma با جدول CommissionRule (CommissionRule): مجموعه رکوردهای وابسته مرتبط با Category؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   commissionRules CommissionRule[]
 
   @@index([status])
@@ -278,18 +470,31 @@ model Category {
   @@index([sortOrder])
 }
 
+/// زیر‌دسته هر دسته اصلی و ارتباط آن با قالب مشخصات و محصولات.
 model Subcategory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int                               @id @default(autoincrement())
+  /// شناسه Category مرتبط با این Subcategory؛ کلید خارجی به جدول Category است.
   categoryId            Int
+  /// شناسه متنی خوانا و یکتای مناسب URL.
   slug                  String                            @unique
+  /// نام فارسی موجودیت.
   nameFa                String
+  /// نام انگلیسی موجودیت.
   nameEn                String
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status                CategoryStatus                    @default(ACTIVE)
+  /// ترتیب نمایش رکورد.
   sortOrder             Int                               @default(0)
+  /// زمان ایجاد رکورد.
   createdAt             DateTime                          @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt             DateTime                          @updatedAt
+  /// ارتباط Prisma با جدول Category (Category): رکورد مرتبط مرتبط با Subcategory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   category              Category                          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول SpecificationTemplate (SpecificationTemplate): رکورد مرتبط مرتبط با Subcategory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   specificationTemplate SpecificationTemplate?
+  /// ارتباط Prisma با جدول Product (محصول): مجموعه رکوردهای وابسته مرتبط با Subcategory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   products              Product[]
 
   @@index([categoryId])
@@ -297,32 +502,55 @@ model Subcategory {
   @@index([sortOrder])
 }
 
+/// قالب مشخصات فنی قابل استفاده برای محصولات یک زیر‌دسته.
 model SpecificationTemplate {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id            Int                  @id @default(autoincrement())
+  /// شناسه Subcategory مرتبط با این SpecificationTemplate؛ کلید خارجی به جدول Subcategory است.
   subcategoryId Int                  @unique
+  /// نام قابل نمایش موجودیت.
   name          String
+  /// شرح تکمیلی موجودیت.
   description   String?
+  /// فعال یا غیرفعال بودن رکورد.
   isActive      Boolean              @default(true)
+  /// زمان ایجاد رکورد.
   createdAt     DateTime             @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt     DateTime             @updatedAt
+  /// ارتباط Prisma با جدول Subcategory (Subcategory): رکورد مرتبط مرتبط با SpecificationTemplate؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   subcategory   Subcategory          @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول SpecificationField (SpecificationField): مجموعه رکوردهای وابسته مرتبط با SpecificationTemplate؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   fields        SpecificationField[]
 
   @@index([isActive])
 }
 
+/// تعریف هر فیلد مشخصات فنی شامل نوع، واحد، اجباری بودن و گزینه‌ها.
 model SpecificationField {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id         Int                    @id @default(autoincrement())
+  /// شناسه SpecificationTemplate مرتبط با این SpecificationField؛ کلید خارجی به جدول SpecificationTemplate است.
   templateId Int
+  /// نام قابل نمایش موجودیت.
   name       String
+  /// کلید ماشینی تنظیم یا گزینه.
   key        String
+  /// مقدار type برای نگهداری اطلاعات مرتبط با SpecificationField.
   type       SpecificationFieldType
+  /// اجباری بودن تکمیل این فیلد.
   isRequired Boolean                @default(false)
+  /// واحد اندازه‌گیری یا فروش.
   unit       String?
+  /// داده ساختاریافته تکمیلی options برای SpecificationField؛ ساختار آن باید در لایه سرویس اعتبارسنجی شود.
   options    Json?
+  /// ترتیب نمایش رکورد.
   sortOrder  Int                    @default(0)
+  /// زمان ایجاد رکورد.
   createdAt  DateTime               @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt  DateTime               @updatedAt
+  /// ارتباط Prisma با جدول SpecificationTemplate (SpecificationTemplate): رکورد مرتبط مرتبط با SpecificationField؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   template   SpecificationTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@unique([templateId, key])
@@ -335,15 +563,25 @@ model SpecificationField {
 // of predefined fields (توان, ولتاژ, نوع کانکتور, ...) that can be
 // referenced when building product `attributes` (via fieldId) or when
 // composing subcategory templates.
+/// کتابخانه فیلدهای مشخصات فنی قابل استفاده مجدد در قالب‌های مختلف.
 model SpecificationLibraryField {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int                    @id @default(autoincrement())
+  /// عنوان اصلی قابل نمایش.
   title       String
+  /// شناسه متنی خوانا و یکتای مناسب URL.
   slug        String                 @unique
+  /// مقدار type برای نگهداری اطلاعات مرتبط با SpecificationLibraryField.
   type        SpecificationFieldType
+  /// مقدار متنی defaultUnit برای توصیف یا شناسایی SpecificationLibraryField.
   defaultUnit String?
+  /// شرح تکمیلی موجودیت.
   description String?
+  /// فعال یا غیرفعال بودن رکورد.
   isActive    Boolean                @default(true)
+  /// زمان ایجاد رکورد.
   createdAt   DateTime               @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime               @updatedAt
 
   @@index([isActive])
@@ -351,50 +589,88 @@ model SpecificationLibraryField {
 }
 
 
+/// اطلاعات اصلی محصول فروشنده شامل مشخصات، دسته‌بندی، مالکیت و وضعیت انتشار.
 model Product {
 
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id               Int                @id @default(autoincrement())
+  /// عنوان اصلی قابل نمایش.
   title            String
+  /// شناسه متنی خوانا و یکتای مناسب URL.
   slug             String             @unique
+  /// خلاصه کوتاه برای نمایش در فهرست‌ها و کارت‌ها.
   shortDescription String?
+  /// شرح تکمیلی موجودیت.
   description      String?
+  /// کد داخلی محصول نزد فروشنده.
   sku              String?
   // Shared manufacturer/model identity across supplier listings; not a seller SKU.
+  /// شناسه مشترک سازنده/مدل برای تطبیق فهرست‌های هم‌مدل.
   catalogCode      String?
+  /// نام برند سازنده یا عرضه‌کننده.
   brand            String?
+  /// نام یا شماره مدل محصول.
   model            String?
+  /// مقادیر ساختاریافته مشخصات فنی محصول در قالب JSON.
   specifications   Json?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status           ProductStatus      @default(DRAFT)
+  /// سطح مشاهده و دسترسی به محتوا.
   visibility       ProductVisibility  @default(PUBLIC)
   // Retail sales are explicitly opt-in. Existing products stay non-retail.
+  /// پرچم منطقی retailEnabled برای کنترل رفتار محصول.
   retailEnabled    Boolean            @default(false)
+  /// ویژه بودن محصول برای جایگاه‌های تبلیغاتی/برجسته.
   isFeatured       Boolean            @default(false)
   // Number of post-approval edits made by a company user. Reset to 0 on every
   // approve; once it reaches the system-configured review threshold the product
   // is automatically sent back to PENDING_REVIEW (see product.service.js).
+  /// مقدار عددی editsSinceApproval برای محصول.
   editsSinceApproval Int             @default(0)
+  /// شناسه شرکت مرتبط با این محصول؛ کلید خارجی به جدول Company است.
   companyId        Int
+  /// شناسه Category مرتبط با این محصول؛ کلید خارجی به جدول Category است.
   categoryId       Int
+  /// شناسه Subcategory مرتبط با این محصول؛ کلید خارجی به جدول Subcategory است.
   subcategoryId    Int
+  /// شناسه کاربر مرتبط با این محصول؛ کلید خارجی به جدول User است.
   createdByUserId  Int
+  /// زمان ایجاد رکورد.
   createdAt        DateTime           @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt        DateTime           @updatedAt
+  /// زمان حذف نرم؛ مقدار NULL یعنی رکورد حذف نرم نشده است.
   deletedAt        DateTime?
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company          Company            @relation(fields: [companyId], references: [id])
+  /// ارتباط Prisma با جدول Category (Category): رکورد مرتبط مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   category         Category           @relation(fields: [categoryId], references: [id])
+  /// ارتباط Prisma با جدول Subcategory (Subcategory): رکورد مرتبط مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   subcategory      Subcategory        @relation(fields: [subcategoryId], references: [id])
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   createdBy        User               @relation("ProductCreatedBy", fields: [createdByUserId], references: [id])
 
+  /// ارتباط Prisma با جدول ProductImage (ProductImage): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   images           ProductImage[]
+  /// ارتباط Prisma با جدول ProductDocument (ProductDocument): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   documents        ProductDocument[]
+  /// ارتباط Prisma با جدول ProductPriceTier (ProductPriceTier): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   prices           ProductPriceTier[]
+  /// ارتباط Prisma با جدول ProductPriceSnapshot (ProductPriceSnapshot): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   priceSnapshots   ProductPriceSnapshot[]
+  /// ارتباط Prisma با جدول ProductStatusHistory (ProductStatusHistory): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   statusHistory    ProductStatusHistory[]
+  /// ارتباط Prisma با جدول ProductActivityLog (ProductActivityLog): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   activityLog      ProductActivityLog[]
+  /// ارتباط Prisma با جدول InquiryItem (InquiryItem): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiryItems     InquiryItem[]
+  /// ارتباط Prisma با جدول InventoryBalance (InventoryBalance): رکورد مرتبط مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inventoryBalance InventoryBalance?
+  /// ارتباط Prisma با جدول InventoryMovement (InventoryMovement): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inventoryMovements InventoryMovement[]
+  /// ارتباط Prisma با جدول InventoryReservation (InventoryReservation): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inventoryReservations InventoryReservation[]
+  /// ارتباط Prisma با جدول RetailOrderItem (RetailOrderItem): مجموعه رکوردهای وابسته مرتبط با محصول؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   retailOrderItems RetailOrderItem[]
 
   @@index([companyId])
@@ -408,15 +684,25 @@ model Product {
   @@index([catalogCode])
 }
 
+/// تاریخچه تغییر وضعیت محصول، عامل تغییر و توضیح آن.
 model ProductStatusHistory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int           @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این ProductStatusHistory؛ کلید خارجی به جدول Product است.
   productId      Int
+  /// مقدار previousStatus برای نگهداری اطلاعات مرتبط با ProductStatusHistory.
   previousStatus ProductStatus
+  /// مقدار newStatus برای نگهداری اطلاعات مرتبط با ProductStatusHistory.
   newStatus      ProductStatus
+  /// شناسه کاربر مرتبط با این ProductStatusHistory؛ کلید خارجی به جدول User است.
   changedByUserId Int
+  /// توضیح ثبت‌شده درباره عملیات یا تغییر.
   comment        String?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime      @default(now())
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با ProductStatusHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product        Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با ProductStatusHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   changedBy      User          @relation(fields: [changedByUserId], references: [id])
 
   @@index([productId])
@@ -429,15 +715,25 @@ model ProductStatusHistory {
 // changes, media changes, and status workflow transitions. Unlike
 // ProductStatusHistory (which only records status transitions), this captures
 // every content mutation so staff can see exactly what a company changed.
+/// رویدادها و فعالیت‌های انجام‌شده روی محصول برای پیگیری و ممیزی.
 model ProductActivityLog {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id           Int                  @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این ProductActivityLog؛ کلید خارجی به جدول Product است.
   productId    Int
+  /// شناسه کاربر مرتبط با این ProductActivityLog؛ کلید خارجی به جدول User است.
   actorUserId  Int
+  /// نوع اقدام انجام‌شده.
   action       ProductActivityAction
+  /// مقدار متنی detail برای توصیف یا شناسایی ProductActivityLog.
   detail       String?
+  /// توضیح ثبت‌شده درباره عملیات یا تغییر.
   comment      String?
+  /// زمان ایجاد رکورد.
   createdAt    DateTime             @default(now())
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با ProductActivityLog؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با ProductActivityLog؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   actor        User                 @relation(fields: [actorUserId], references: [id])
 
   @@index([productId])
@@ -446,16 +742,27 @@ model ProductActivityLog {
   @@index([createdAt])
 }
 
+/// تصاویر محصول و فراداده لازم برای نمایش و دسترس‌پذیری.
 model ProductImage {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id           Int      @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این ProductImage؛ کلید خارجی به جدول Product است.
   productId    Int
+  /// نشانی فایل یا منبع مرتبط.
   url          String
+  /// نشانی تصویر بندانگشتی.
   thumbnailUrl String?
+  /// متن جایگزین تصویر برای دسترس‌پذیری و سئو.
   altText      String?
+  /// اصلی بودن این مورد در میان موارد مرتبط.
   isPrimary    Boolean  @default(false)
+  /// ترتیب نمایش رکورد.
   sortOrder    Int      @default(0)
+  /// زمان ایجاد رکورد.
   createdAt    DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt    DateTime @updatedAt
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با ProductImage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
@@ -463,15 +770,25 @@ model ProductImage {
   @@index([sortOrder])
 }
 
+/// اسناد و فایل‌های پیوست محصول مانند دیتاشیت و کاتالوگ.
 model ProductDocument {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int                 @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این ProductDocument؛ کلید خارجی به جدول Product است.
   productId Int
+  /// مقدار type برای نگهداری اطلاعات مرتبط با ProductDocument.
   type      ProductDocumentType
+  /// عنوان اصلی قابل نمایش.
   title     String?
+  /// نشانی فایل یا منبع مرتبط.
   url       String
+  /// ترتیب نمایش رکورد.
   sortOrder Int                 @default(0)
+  /// زمان ایجاد رکورد.
   createdAt DateTime            @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime            @updatedAt
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با ProductDocument؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
@@ -479,17 +796,29 @@ model ProductDocument {
   @@index([sortOrder])
 }
 
+/// قیمت جاری محصول بر اساس بازه حداقل و حداکثر تعداد سفارش.
 model ProductPriceTier {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int       @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این ProductPriceTier؛ کلید خارجی به جدول Product است.
   productId   Int
+  /// حداقل تعداد مشمول این سطح یا بازه.
   minQuantity Int
+  /// حداکثر تعداد مشمول این سطح؛ NULL یعنی سقف مشخص نشده است.
   maxQuantity Int?
+  /// مبلغ قیمت واحد یا پیشنهادی.
   price       Decimal   @db.Decimal(18, 2)
+  /// واحد اندازه‌گیری یا فروش.
   unit        String?
+  /// شروع اعتبار قیمت یا قاعده.
   validFrom   DateTime  @default(now())
+  /// پایان اعتبار؛ NULL یعنی تاریخ پایان تعیین نشده است.
   validTo     DateTime?
+  /// زمان ایجاد رکورد.
   createdAt   DateTime  @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime  @updatedAt
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با ProductPriceTier؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
@@ -498,58 +827,95 @@ model ProductPriceTier {
   @@index([validTo])
 }
 
+/// تصویر تاریخی قیمت هر سطح در زمان ثبت برای گزارش و نمودار تغییرات.
 model ProductPriceSnapshot {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int      @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این ProductPriceSnapshot؛ کلید خارجی به جدول Product است.
   productId   Int
+  /// شناسه رکورد مرتبط برای اتصال این ProductPriceSnapshot به موجودیت مرجع.
   priceTierId Int?
+  /// حداقل تعداد مشمول این سطح یا بازه.
   minQuantity Int
+  /// حداکثر تعداد مشمول این سطح؛ NULL یعنی سقف مشخص نشده است.
   maxQuantity Int?
+  /// مبلغ قیمت واحد یا پیشنهادی.
   price       Decimal  @db.Decimal(18, 2)
+  /// واحد اندازه‌گیری یا فروش.
   unit        String?
+  /// نوع اقدام انجام‌شده.
   action      String
+  /// زمان ثبت snapshot یا داده تاریخی.
   recordedAt  DateTime @default(now())
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با ProductPriceSnapshot؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, recordedAt])
   @@index([priceTierId])
 }
 
+/// درخواست خرید یا استعلام (RFQ) همراه با خریدار، وضعیت، محرمانگی و مهلت پاسخ.
 model Inquiry {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id               Int               @id @default(autoincrement())
+  /// عنوان اصلی قابل نمایش.
   title            String
+  /// شرح تکمیلی موجودیت.
   description      String?
   // Exactly one buyer identity is set: companyId for B2B company buyers,
   // buyerUserId for CUSTOMER buyers. Enforced by a PostgreSQL CHECK constraint.
+  /// شناسه شرکت مرتبط با این استعلام؛ کلید خارجی به جدول Company است.
   companyId        Int?
+  /// شناسه کاربر مرتبط با این استعلام؛ کلید خارجی به جدول User است.
   buyerUserId      Int?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status           InquiryStatus     @default(DRAFT)
 
   // ── Phase 2: professional inquiry model ────────────────────
+  /// اولویت رسیدگی یا پردازش.
   priority         InquiryPriority       @default(NORMAL)
+  /// مقدار visibilityMode برای نگهداری اطلاعات مرتبط با استعلام.
   visibilityMode   InquiryVisibilityMode @default(NORMAL)
+  /// پرچم منطقی confidential برای کنترل رفتار استعلام.
   confidential     Boolean               @default(false)
 
   // Scheduling
+  /// زمان مرتبط با publishDate در چرخه عمر استعلام.
   publishDate      DateTime?
+  /// زمان مرتبط با responseDeadline در چرخه عمر استعلام.
   responseDeadline DateTime?
+  /// پرچم منطقی autoClose برای کنترل رفتار استعلام.
   autoClose        Boolean               @default(true)
 
   // Sealed-bid reveal settings
+  /// مشخص می‌کند آیا allowEarlyReveal برای این استعلام فعال یا مجاز است.
   allowEarlyReveal Boolean               @default(false)
+  /// زمان revealed این استعلام را ثبت می‌کند.
   revealedAt       DateTime?
 
   // Response controls
+  /// مشخص می‌کند آیا allowEditResponse برای این استعلام فعال یا مجاز است.
   allowEditResponse     Boolean          @default(true)
+  /// مشخص می‌کند آیا allowWithdrawResponse برای این استعلام فعال یا مجاز است.
   allowWithdrawResponse Boolean          @default(false)
 
+  /// زمان بسته‌شدن پرونده یا فرآیند.
   closedAt         DateTime?
+  /// زمان ایجاد رکورد.
   createdAt        DateTime          @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt        DateTime          @updatedAt
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با استعلام؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company          Company?          @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با استعلام؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   buyerUser        User?              @relation("InquiryBuyer", fields: [buyerUserId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول InquiryItem (InquiryItem): مجموعه رکوردهای وابسته مرتبط با استعلام؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   items            InquiryItem[]
+  /// ارتباط Prisma با جدول InquiryResponse (InquiryResponse): مجموعه رکوردهای وابسته مرتبط با استعلام؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   responses        InquiryResponse[]
+  /// ارتباط Prisma با جدول InquiryMessage (InquiryMessage): مجموعه رکوردهای وابسته مرتبط با استعلام؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   messages         InquiryMessage[]
+  /// ارتباط Prisma با جدول InquiryStatusHistory (InquiryStatusHistory): مجموعه رکوردهای وابسته مرتبط با استعلام؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   statusHistory    InquiryStatusHistory[]
 
   @@index([companyId])
@@ -566,20 +932,35 @@ model Inquiry {
 
 
 
+/// پیام‌های میان خریدار و شرکت‌های پاسخ‌دهنده درباره یک استعلام.
 model InquiryMessage {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                Int       @id @default(autoincrement())
+  /// شناسه استعلام مرتبط با این InquiryMessage؛ کلید خارجی به جدول Inquiry است.
   inquiryId         Int
+  /// شناسه کاربر مرتبط با این InquiryMessage؛ کلید خارجی به جدول User است.
   senderUserId      Int?
+  /// شناسه شرکت مرتبط با این InquiryMessage؛ کلید خارجی به جدول Company است.
   senderCompanyId   Int?
+  /// شناسه کاربر مرتبط با این InquiryMessage؛ کلید خارجی به جدول User است.
   recipientUserId   Int?
+  /// شناسه شرکت مرتبط با این InquiryMessage؛ کلید خارجی به جدول Company است.
   recipientCompanyId Int?
+  /// متن کامل پیام، یادداشت یا محتوای رکورد.
   body              String    @db.VarChar(5000)
+  /// زمان ایجاد رکورد.
   createdAt         DateTime  @default(now())
+  /// زمان خوانده‌شدن پیام/اعلان.
   readAt            DateTime?
+  /// ارتباط Prisma با جدول Inquiry (استعلام): رکورد مرتبط مرتبط با InquiryMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiry           Inquiry   @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با InquiryMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   senderUser        User?     @relation("InquiryMessageSenderUser", fields: [senderUserId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با InquiryMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   senderCompany     Company?  @relation("InquiryMessageSenderCompany", fields: [senderCompanyId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با InquiryMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   recipientUser     User?     @relation("InquiryMessageRecipientUser", fields: [recipientUserId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با InquiryMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   recipientCompany  Company?  @relation("InquiryMessageRecipientCompany", fields: [recipientCompanyId], references: [id], onDelete: Cascade)
 
   @@index([inquiryId, createdAt])
@@ -589,16 +970,27 @@ model InquiryMessage {
   @@index([recipientCompanyId])
 }
 
+/// تاریخچه تغییر وضعیت استعلام همراه با عامل و دلیل تغییر.
 model InquiryStatusHistory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int           @id @default(autoincrement())
+  /// شناسه استعلام مرتبط با این InquiryStatusHistory؛ کلید خارجی به جدول Inquiry است.
   inquiryId      Int
+  /// مقدار previousStatus برای نگهداری اطلاعات مرتبط با InquiryStatusHistory.
   previousStatus InquiryStatus
+  /// مقدار newStatus برای نگهداری اطلاعات مرتبط با InquiryStatusHistory.
   newStatus      InquiryStatus
+  /// شناسه کاربر مرتبط با این InquiryStatusHistory؛ کلید خارجی به جدول User است.
   changedByUserId Int?
+  /// منبع ایجاد یا ثبت رکورد.
   source         String        @default("USER")
+  /// توضیح ثبت‌شده درباره عملیات یا تغییر.
   comment        String?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime      @default(now())
+  /// ارتباط Prisma با جدول Inquiry (استعلام): رکورد مرتبط مرتبط با InquiryStatusHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiry        Inquiry       @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با InquiryStatusHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   changedBy      User?         @relation(fields: [changedByUserId], references: [id])
 
   @@index([inquiryId])
@@ -607,33 +999,56 @@ model InquiryStatusHistory {
   @@index([createdAt])
 }
 
+/// اقلام و محصولات درخواست‌شده در یک استعلام به همراه تعداد و توضیح.
 model InquiryItem {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id            Int                   @id @default(autoincrement())
+  /// شناسه استعلام مرتبط با این InquiryItem؛ کلید خارجی به جدول Inquiry است.
   inquiryId     Int
+  /// شناسه محصول مرتبط با این InquiryItem؛ کلید خارجی به جدول Product است.
   productId     Int
+  /// شرح تکمیلی موجودیت.
   description   String?
+  /// تعداد واحدهای کالا یا مقدار موردنظر.
   quantity      Int
+  /// مقدار متنی attachment برای توصیف یا شناسایی InquiryItem.
   attachment    String?
+  /// زمان ایجاد رکورد.
   createdAt     DateTime              @default(now())
+  /// ارتباط Prisma با جدول Inquiry (استعلام): رکورد مرتبط مرتبط با InquiryItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiry       Inquiry               @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با InquiryItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product       Product               @relation(fields: [productId], references: [id])
+  /// ارتباط Prisma با جدول InquiryResponseItem (InquiryResponseItem): مجموعه رکوردهای وابسته مرتبط با InquiryItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   responseItems InquiryResponseItem[]
 
   @@index([inquiryId])
   @@index([productId])
 }
 
+/// پاسخ یا پیشنهاد یک شرکت تأمین‌کننده به یک استعلام.
 model InquiryResponse {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int                   @id @default(autoincrement())
+  /// شناسه استعلام مرتبط با این InquiryResponse؛ کلید خارجی به جدول Inquiry است.
   inquiryId   Int
+  /// شناسه شرکت مرتبط با این InquiryResponse؛ کلید خارجی به جدول Company است.
   companyId   Int
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status      InquiryResponseStatus @default(PENDING)
+  /// زمان withdrawn این InquiryResponse را ثبت می‌کند.
   withdrawnAt DateTime?
+  /// زمان ایجاد رکورد.
   createdAt   DateTime              @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime              @updatedAt
+  /// ارتباط Prisma با جدول Inquiry (استعلام): رکورد مرتبط مرتبط با InquiryResponse؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiry     Inquiry               @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با InquiryResponse؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company     Company               @relation(fields: [companyId], references: [id])
+  /// ارتباط Prisma با جدول InquiryResponseItem (InquiryResponseItem): مجموعه رکوردهای وابسته مرتبط با InquiryResponse؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   items       InquiryResponseItem[]
+  /// ارتباط Prisma با جدول InquiryResponseAttachment (InquiryResponseAttachment): مجموعه رکوردهای وابسته مرتبط با InquiryResponse؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   attachments InquiryResponseAttachment[]
 
   @@unique([inquiryId, companyId])
@@ -642,30 +1057,50 @@ model InquiryResponse {
   @@index([status])
 }
 
+/// فایل‌های پیوست یک پاسخ استعلام به همراه مشخصات فایل.
 model InquiryResponseAttachment {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id         Int             @id @default(autoincrement())
+  /// شناسه InquiryResponse مرتبط با این InquiryResponseAttachment؛ کلید خارجی به جدول InquiryResponse است.
   responseId Int
+  /// نشانی فایل یا منبع مرتبط.
   url        String
+  /// نام فایل.
   filename   String
+  /// مقدار متنی mimetype برای توصیف یا شناسایی InquiryResponseAttachment.
   mimetype   String?
+  /// اندازه فایل بر حسب بایت.
   size       Int?
+  /// زمان ایجاد رکورد.
   createdAt  DateTime        @default(now())
+  /// ارتباط Prisma با جدول InquiryResponse (InquiryResponse): رکورد مرتبط مرتبط با InquiryResponseAttachment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   response   InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
 
   @@index([responseId])
 }
 
 
+/// قیمت و شرایط تأمین پیشنهادی شرکت برای یک قلم استعلام.
 model InquiryResponseItem {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                Int             @id @default(autoincrement())
+  /// شناسه InquiryResponse مرتبط با این InquiryResponseItem؛ کلید خارجی به جدول InquiryResponse است.
   responseId        Int
+  /// شناسه InquiryItem مرتبط با این InquiryResponseItem؛ کلید خارجی به جدول InquiryItem است.
   inquiryItemId     Int
+  /// مبلغ قیمت واحد یا پیشنهادی.
   price             Decimal         @db.Decimal(18, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency          String          @default("IRR")
+  /// تعداد قابل تأمین در این پیشنهاد.
   availableQuantity Int
+  /// مقدار متنی deliveryTime برای توصیف یا شناسایی InquiryResponseItem.
   deliveryTime      String?
+  /// شرح تکمیلی موجودیت.
   description       String?
+  /// ارتباط Prisma با جدول InquiryResponse (InquiryResponse): رکورد مرتبط مرتبط با InquiryResponseItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   response          InquiryResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول InquiryItem (InquiryItem): رکورد مرتبط مرتبط با InquiryResponseItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   inquiryItem       InquiryItem     @relation(fields: [inquiryItemId], references: [id])
 
   @@unique([responseId, inquiryItemId])
@@ -674,23 +1109,39 @@ model InquiryResponseItem {
   @@index([currency])
 }
 
+/// محدودیت‌های کلی تعداد استعلام باز و پاسخ فعال هر شرکت در ساختار قدیمی.
 model CompanyInquiryLimit {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                 Int      @id @default(autoincrement())
+  /// شناسه شرکت مرتبط با این CompanyInquiryLimit؛ کلید خارجی به جدول Company است.
   companyId          Int      @unique
+  /// حد یا تعداد مجاز/ثبت‌شده برای CompanyInquiryLimit.
   maxOpenInquiries   Int      @default(5)
+  /// حد یا تعداد مجاز/ثبت‌شده برای CompanyInquiryLimit.
   maxActiveResponses Int      @default(20)
+  /// زمان ایجاد رکورد.
   createdAt          DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt          DateTime @updatedAt
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با CompanyInquiryLimit؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
+/// سقف‌ها و محدودیت‌های قابل پیکربندی هر شرکت به شکل کلید و مقدار.
 model CompanyLimit {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// شناسه شرکت مرتبط با این CompanyLimit؛ کلید خارجی به جدول Company است.
   companyId Int
+  /// کلید ماشینی تنظیم یا گزینه.
   key       String
+  /// مقدار تنظیم یا محدودیت؛ مفهوم آن با key مشخص می‌شود.
   value     Int
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime @updatedAt
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با CompanyLimit؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, key])
@@ -701,47 +1152,85 @@ model CompanyLimit {
 // Commercial plans and auditable usage for the RFQ/inquiry revenue model.
 // Enforcement is rollout-gated by SystemSetting key "inquiry.subscription_enforcement"
 // so deployment can be migrated before existing users are required to subscribe.
+/// تعریف بسته اشتراک استعلام و سهمیه‌های قابل مصرف در هر دوره.
 model InquiryPlan {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                         Int      @id @default(autoincrement())
+  /// کد ماشینی یا تجاری این موجودیت.
   code                       String   @unique
+  /// نام قابل نمایش موجودیت.
   name                       String
+  /// شرح تکمیلی موجودیت.
   description                String?
+  /// مدت دوره بر حسب روز.
   durationDays               Int
+  /// مبلغ قیمت واحد یا پیشنهادی.
   price                      Decimal  @db.Decimal(18, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency                   String   @default("IRR")
+  /// مقدار عددی inquiriesPerPeriod برای InquiryPlan.
   inquiriesPerPeriod         Int      @default(0)
+  /// مقدار عددی responsesPerPeriod برای InquiryPlan.
   responsesPerPeriod         Int      @default(0)
+  /// مقدار عددی internalMessagesPerPeriod برای InquiryPlan.
   internalMessagesPerPeriod  Int      @default(0)
+  /// مقدار عددی smsPerPeriod برای InquiryPlan.
   smsPerPeriod               Int      @default(0)
+  /// فعال یا غیرفعال بودن رکورد.
   isActive                   Boolean  @default(true)
+  /// زمان ایجاد رکورد.
   createdAt                  DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt                  DateTime @updatedAt
+  /// ارتباط Prisma با جدول InquirySubscription (InquirySubscription): مجموعه رکوردهای وابسته مرتبط با InquiryPlan؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   subscriptions              InquirySubscription[]
 
   @@index([isActive])
 }
 
+/// اشتراک تخصیص‌یافته یا خریداری‌شده توسط شرکت/کاربر و بازه اعتبار آن.
 model InquirySubscription {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int      @id @default(autoincrement())
+  /// شناسه InquiryPlan مرتبط با این InquirySubscription؛ کلید خارجی به جدول InquiryPlan است.
   planId      Int
+  /// شناسه شرکت مرتبط با این InquirySubscription؛ کلید خارجی به جدول Company است.
   companyId   Int?
+  /// شناسه کاربر مرتبط با این InquirySubscription؛ کلید خارجی به جدول User است.
   userId      Int?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status      InquirySubscriptionStatus @default(PENDING_PAYMENT)
+  /// زمان شروع اعتبار یا فعال‌بودن.
   startsAt    DateTime?
+  /// زمان پایان اعتبار یا فعال‌بودن.
   endsAt      DateTime?
+  /// مقدار عددی activatedBy برای InquirySubscription.
   activatedBy Int?
+  /// مقدار متنی paymentReference برای توصیف یا شناسایی InquirySubscription.
   paymentReference String? @unique
+  /// مقدار متنی paymentProvider برای توصیف یا شناسایی InquirySubscription.
   paymentProvider String?
+  /// مقدار متنی paymentAuthority برای توصیف یا شناسایی InquirySubscription.
   paymentAuthority String? @unique
+  /// شناسه رکورد مرتبط برای اتصال این InquirySubscription به موجودیت مرجع.
   paymentRefId String?
+  /// مبلغ paymentAmount برای این InquirySubscription؛ واحد پول در فیلد currency مشخص می‌شود.
   paymentAmount Int?
+  /// زمان paymentVerified این InquirySubscription را ثبت می‌کند.
   paymentVerifiedAt DateTime?
+  /// یادداشت‌های تکمیلی درباره رکورد.
   notes       String?
+  /// زمان ایجاد رکورد.
   createdAt   DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime @updatedAt
+  /// ارتباط Prisma با جدول InquiryPlan (InquiryPlan): رکورد مرتبط مرتبط با InquirySubscription؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   plan        InquiryPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با InquirySubscription؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company     Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با InquirySubscription؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user        User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول InquiryUsageEvent (InquiryUsageEvent): مجموعه رکوردهای وابسته مرتبط با InquirySubscription؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   usage       InquiryUsageEvent[]
 
   @@index([companyId, status, endsAt])
@@ -749,16 +1238,27 @@ model InquirySubscription {
   @@index([planId])
 }
 
+/// رویداد مصرف سهمیه اشتراک و مرجع عملیاتی آن برای محاسبه مصرف.
 model InquiryUsageEvent {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt   @id @default(autoincrement())
+  /// شناسه InquirySubscription مرتبط با این InquiryUsageEvent؛ کلید خارجی به جدول InquirySubscription است.
   subscriptionId Int
+  /// مقدار usageType برای نگهداری اطلاعات مرتبط با InquiryUsageEvent.
   usageType      InquiryUsageType
+  /// تعداد واحدهای کالا یا مقدار موردنظر.
   quantity       Int      @default(1)
+  /// مقدار متنی referenceType برای توصیف یا شناسایی InquiryUsageEvent.
   referenceType  String?
+  /// شناسه رکورد مرتبط برای اتصال این InquiryUsageEvent به موجودیت مرجع.
   referenceId    String?
+  /// کلید یکتای جلوگیری از اجرای تکراری درخواست/عملیات.
   idempotencyKey String?  @unique
+  /// داده‌های تکمیلی ساختاریافته و وابسته به دامنه در قالب JSON.
   metadata       Json?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime @default(now())
+  /// ارتباط Prisma با جدول InquirySubscription (InquirySubscription): رکورد مرتبط مرتبط با InquiryUsageEvent؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   subscription   InquirySubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId, usageType, createdAt])
@@ -782,31 +1282,49 @@ enum InquiryUsageType {
 
 // Platform-wide, admin-managed key/value settings (e.g. the threshold of
 // post-approval edits that pushes a PUBLISHED product back into review).
+/// تنظیمات سراسری سامانه به شکل کلید و مقدار.
 model SystemSetting {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id            Int      @id @default(autoincrement())
+  /// کلید ماشینی تنظیم یا گزینه.
   key           String   @unique
+  /// مقدار تنظیم یا محدودیت؛ مفهوم آن با key مشخص می‌شود.
   value         String
+  /// شناسه رکورد مرتبط برای اتصال این SystemSetting به موجودیت مرجع.
   updatedByUserId Int?
+  /// زمان ایجاد رکورد.
   createdAt     DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt     DateTime @updatedAt
 
   @@index([key])
 }
 
+/// اعلان اصلی متعلق به کاربر، شامل عنوان، متن، نوع و وضعیت خوانده‌شدن.
 model Notification {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این اعلان؛ کلید خارجی به جدول User است.
   userId    Int
   // Event key from src/modules/notifications/notification.events.js
   // (e.g. 'PRODUCT_STATUS_CHANGED'). Null = legacy/untyped row created
   // before the central dispatch service existed.
+  /// مقدار متنی type برای توصیف یا شناسایی اعلان.
   type      String?
   // Structured event payload (e.g. { productId, status }) for deep-linking.
+  /// داده تکمیلی اعلان/رویداد در قالب JSON.
   data      Json?
+  /// عنوان اصلی قابل نمایش.
   title     String
+  /// مقدار متنی message برای توصیف یا شناسایی اعلان.
   message   String
+  /// خوانده‌شدن اعلان توسط کاربر.
   isRead    Boolean  @default(false)
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با اعلان؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول NotificationFolderMembership (NotificationFolderMembership): مجموعه رکوردهای وابسته مرتبط با اعلان؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   folderMemberships NotificationFolderMembership[]
 
   @@index([userId])
@@ -829,27 +1347,45 @@ model Notification {
 // Admin-managed folders. INBOX and SAVED are immutable system folders.
 // Scope controls which app inboxes can display a folder; memberships are
 // associations, so copy adds a second association and move swaps one.
+/// تعریف پوشه‌های سیستمی یا مدیریتی اعلان و محدوده نمایش آن‌ها.
 model NotificationFolder {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// کلید ماشینی تنظیم یا گزینه.
   key       String   @unique
+  /// نام قابل نمایش موجودیت.
   name      String
+  /// محدوده اعتبار یا نمایش رکورد.
   scope     NotificationFolderScope @default(ALL)
+  /// سیستمی بودن رکورد و محدودیت مدیریت عادی آن.
   isSystem  Boolean  @default(false)
+  /// فعال یا غیرفعال بودن رکورد.
   isActive  Boolean  @default(true)
+  /// ترتیب نمایش رکورد.
   sortOrder Int      @default(0)
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime @updatedAt
+  /// ارتباط Prisma با جدول NotificationFolderMembership (NotificationFolderMembership): مجموعه رکوردهای وابسته مرتبط با NotificationFolder؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   memberships NotificationFolderMembership[]
 
   @@index([scope, isActive, sortOrder])
 }
 
+/// ارتباط اعلان با پوشه؛ امکان عضویت یک اعلان در پوشه‌ها را ثبت می‌کند.
 model NotificationFolderMembership {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int @id @default(autoincrement())
+  /// شناسه اعلان مرتبط با این NotificationFolderMembership؛ کلید خارجی به جدول Notification است.
   notificationId Int
+  /// شناسه NotificationFolder مرتبط با این NotificationFolderMembership؛ کلید خارجی به جدول NotificationFolder است.
   folderId       Int
+  /// زمان ایجاد رکورد.
   createdAt      DateTime @default(now())
+  /// ارتباط Prisma با جدول Notification (اعلان): رکورد مرتبط مرتبط با NotificationFolderMembership؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول NotificationFolder (NotificationFolder): رکورد مرتبط مرتبط با NotificationFolderMembership؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   folder         NotificationFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   @@unique([notificationId, folderId])
@@ -863,14 +1399,23 @@ enum NotificationFolderScope {
   ADMIN
 }
 
+/// ترجیحات هر کاربر برای دریافت نوع مشخصی از اعلان از طریق یک کانال.
 model NotificationPreference {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int                 @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این NotificationPreference؛ کلید خارجی به جدول User است.
   userId    Int
+  /// نوع رویداد ثبت‌شده.
   eventType String
+  /// کانال ارسال یا دریافت.
   channel   NotificationChannel
+  /// پرچم منطقی enabled برای کنترل رفتار NotificationPreference.
   enabled   Boolean
+  /// زمان ایجاد رکورد.
   createdAt DateTime            @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime            @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با NotificationPreference؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, eventType, channel])
@@ -890,8 +1435,11 @@ model NotificationPreference {
 // 1:1. `nextAttemptAt` DOES have a DB default (CURRENT_TIMESTAMP); `updatedAt`
 // does NOT (client-side `@updatedAt`). Rows with a NULL `dedupeKey` are exempt
 // from the unique index (PostgreSQL allows duplicate NULLs).
+/// تلاش‌ها و وضعیت تحویل اعلان از طریق ایمیل، پیامک یا کانال دیگر.
 model NotificationDelivery {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int                        @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این NotificationDelivery؛ کلید خارجی به جدول User است.
   userId         Int
   // Optional link to the in-app Notification row this delivery corresponds to.
   //
@@ -914,26 +1462,43 @@ model NotificationDelivery {
   // (all current rows are NULL). It is reserved for traceability if/when
   // IN_APP deliveries are logged as rows too. EMAIL rows are standalone
   // because a user may disable the in-app channel while keeping email.
+  /// شناسه رکورد مرتبط برای اتصال این NotificationDelivery به موجودیت مرجع.
   notificationId Int?
+  /// نوع رویداد ثبت‌شده.
   eventType      String
+  /// کانال ارسال یا دریافت.
   channel        NotificationChannel
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status         NotificationDeliveryStatus @default(PENDING)
   // Frozen snapshot of the message — the worker sends it without re-reading
   // the (possibly long-gone) business context that produced it.
+  /// مقدار متنی recipient برای توصیف یا شناسایی NotificationDelivery.
   recipient      String?                    // email address (EMAIL); phone for future SMS
+  /// مقدار متنی subject برای توصیف یا شناسایی NotificationDelivery.
   subject        String?
+  /// متن کامل پیام، یادداشت یا محتوای رکورد.
   body           String?
+  /// نام درگاه یا سرویس بیرونی انجام‌دهنده عملیات.
   provider       String?                    // adapter that (last) handled it: 'smtp' | 'console' | ...
+  /// تعداد تلاش‌های ارسال یا پردازش.
   attempts       Int                        @default(0)
+  /// حداکثر تعداد تلاش مجاز.
   maxAttempts    Int                        @default(3)
+  /// زمان nextAttempt این NotificationDelivery را ثبت می‌کند.
   nextAttemptAt  DateTime                   @default(now())
+  /// آخرین خطای رخ‌داده هنگام پردازش/ارسال.
   lastError      String?
+  /// زمان ارسال موفق پیام.
   sentAt         DateTime?
   // Event-level idempotency key. A second dispatch with the same
   // (eventType, dedupeKey, channel) is a silent no-op — safe duplicate dispatch.
+  /// کلید تشخیص و جلوگیری از ثبت/پردازش تکراری رویداد.
   dedupeKey      String?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime                   @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt      DateTime                   @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با NotificationDelivery؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user           User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Idempotency: the same (event, dedupeKey, channel) can only be queued once.
@@ -1073,21 +1638,37 @@ enum InquiryVisibilityMode {
 
 // Independent promotional campaigns. These records are managed by STAFF and
 // are never coupled to Product or its featured-product workflow.
+/// بنرهای وب‌سایت همراه با محتوا، مقصد کلیک، جایگاه و بازه نمایش.
 model Banner {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int         @id @default(autoincrement())
+  /// عنوان اصلی قابل نمایش.
   title       String      @db.VarChar(120)
+  /// شرح تکمیلی موجودیت.
   description String?     @db.VarChar(300)
+  /// نشانی تصویر.
   imageUrl    String
+  /// مقدار متنی targetUrl برای توصیف یا شناسایی Banner.
   targetUrl   String?
+  /// مقدار متنی ctaLabel برای توصیف یا شناسایی Banner.
   ctaLabel    String?     @db.VarChar(40)
+  /// مقدار متنی placement برای توصیف یا شناسایی Banner.
   placement   String      @default("HOME_HERO") @db.VarChar(40)
+  /// ترتیب نمایش رکورد.
   sortOrder   Int         @default(0)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status      BannerStatus @default(DRAFT)
+  /// فعال یا غیرفعال بودن رکورد.
   isActive    Boolean     @default(true)
+  /// زمان شروع اعتبار یا فعال‌بودن.
   startsAt    DateTime?
+  /// زمان پایان اعتبار یا فعال‌بودن.
   endsAt      DateTime?
+  /// زمان ایجاد رکورد.
   createdAt   DateTime    @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime    @updatedAt
+  /// زمان حذف نرم؛ مقدار NULL یعنی رکورد حذف نرم نشده است.
   deletedAt   DateTime?
 
   @@index([placement, status, isActive, sortOrder])
@@ -1114,19 +1695,33 @@ enum AuthChallengeChannel {
   EMAIL
 }
 
+/// چالش یک‌بارمصرف احراز هویت/بازیابی حساب؛ فقط هش راز ذخیره و انقضا و تعداد تلاش کنترل می‌شود.
 model AuthChallenge {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id           Int                  @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این AuthChallenge؛ کلید خارجی به جدول User است.
   userId       Int
+  /// هدف استفاده از چالش/کد.
   purpose      AuthChallengePurpose
+  /// کانال ارسال یا دریافت.
   channel      AuthChallengeChannel
+  /// مقصد ارسال کد یا پیام مانند شماره تلفن یا ایمیل.
   destination  String               @db.VarChar(320)
+  /// هش راز/کد یک‌بارمصرف؛ مقدار خام ذخیره نمی‌شود.
   secretHash   String               @unique @db.VarChar(255)
+  /// زمان انقضای اعتبار رکورد یا توکن.
   expiresAt    DateTime
+  /// زمان consumed این AuthChallenge را ثبت می‌کند.
   consumedAt   DateTime?
+  /// تعداد دفعات تلاش انجام‌شده.
   attemptCount Int                  @default(0)
+  /// حداکثر تعداد تلاش مجاز.
   maxAttempts  Int                  @default(5)
+  /// زمان invalidated این AuthChallenge را ثبت می‌کند.
   invalidatedAt DateTime?
+  /// زمان ایجاد رکورد.
   createdAt    DateTime             @default(now())
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با AuthChallenge؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, purpose, createdAt])
@@ -1135,22 +1730,39 @@ model AuthChallenge {
 
 }
 
+/// رخدادهای ممیزی عملیات؛ عامل، شرکت، موجودیت هدف، نتیجه و مشخصات درخواست را به‌صورت ثبت غیرقابل‌ویرایش نگه می‌دارد.
 model AuditLog {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                BigInt    @id @default(autoincrement())
+  /// شناسه کاربر مرتبط با این AuditLog؛ کلید خارجی به جدول User است.
   actorUserId       Int?
+  /// مقدار متنی actorAccessType برای توصیف یا شناسایی AuditLog.
   actorAccessType   String?   @db.VarChar(20)
+  /// شناسه شرکت مرتبط با این AuditLog؛ کلید خارجی به جدول Company است.
   companyId         Int?
+  /// نوع اقدام انجام‌شده.
   action            String    @db.VarChar(120)
+  /// مقدار متنی entityType برای توصیف یا شناسایی AuditLog.
   entityType        String    @db.VarChar(100)
+  /// شناسه رکورد مرتبط برای اتصال این AuditLog به موجودیت مرجع.
   entityId          String    @db.VarChar(100)
+  /// شناسه هم‌بستگی درخواست برای ردگیری در لاگ‌ها.
   requestId         String?   @db.VarChar(100)
+  /// منبع ایجاد یا ثبت رکورد.
   source            String?   @db.VarChar(40)
+  /// نتیجه فعالیت یا عملیات.
   outcome           String    @default("SUCCESS") @db.VarChar(20)
+  /// نشانی IP مبدأ درخواست برای ممیزی/امنیت.
   ipAddress         String?   @db.VarChar(64)
+  /// مشخصات مرورگر یا کلاینت درخواست‌دهنده.
   userAgent         String?   @db.VarChar(500)
+  /// داده‌های تکمیلی ساختاریافته و وابسته به دامنه در قالب JSON.
   metadata          Json?
+  /// زمان وقوع رویداد در منبع.
   occurredAt        DateTime  @default(now())
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با AuditLog؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   actor             User?     @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با AuditLog؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company           Company?  @relation("AuditCompany", fields: [companyId], references: [id], onDelete: Restrict)
 
   @@index([actorUserId, occurredAt])
@@ -1198,48 +1810,81 @@ enum SupportAttachmentStatus {
   REJECTED
 }
 
+/// صف‌های کاری تیم پشتیبانی برای دسته‌بندی و ارجاع تیکت‌ها.
 model SupportQueue {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int      @id @default(autoincrement())
+  /// کلید ماشینی تنظیم یا گزینه.
   key         String   @unique @db.VarChar(60)
+  /// نام قابل نمایش موجودیت.
   name        String   @db.VarChar(120)
+  /// شرح تکمیلی موجودیت.
   description String?
+  /// فعال یا غیرفعال بودن رکورد.
   isActive    Boolean  @default(true)
+  /// ترتیب نمایش رکورد.
   sortOrder   Int      @default(0)
+  /// زمان ایجاد رکورد.
   createdAt   DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime @updatedAt
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): مجموعه رکوردهای وابسته مرتبط با SupportQueue؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   tickets     SupportTicket[]
+  /// ارتباط Prisma با جدول SupportAssignment (SupportAssignment): مجموعه رکوردهای وابسته مرتبط با SupportQueue؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignments SupportAssignment[]
 
   @@index([isActive, sortOrder])
 
 }
 
+/// دسته‌بندی موضوعی تیکت‌های پشتیبانی و مبنای اتصال سیاست SLA.
 model SupportCategory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int      @id @default(autoincrement())
+  /// کلید ماشینی تنظیم یا گزینه.
   key         String   @unique @db.VarChar(60)
+  /// نام قابل نمایش موجودیت.
   name        String   @db.VarChar(120)
+  /// شرح تکمیلی موجودیت.
   description String?
+  /// فعال یا غیرفعال بودن رکورد.
   isActive    Boolean  @default(true)
+  /// ترتیب نمایش رکورد.
   sortOrder   Int      @default(0)
+  /// زمان ایجاد رکورد.
   createdAt   DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime @updatedAt
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): مجموعه رکوردهای وابسته مرتبط با SupportCategory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   tickets     SupportTicket[]
+  /// ارتباط Prisma با جدول SupportSlaPolicy (SupportSlaPolicy): مجموعه رکوردهای وابسته مرتبط با SupportCategory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   slaPolicies SupportSlaPolicy[]
 
   @@index([isActive, sortOrder])
 
 }
 
+/// زمان هدف پاسخ اولیه و حل تیکت بر اساس دسته و اولویت.
 model SupportSlaPolicy {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int             @id @default(autoincrement())
+  /// شناسه SupportCategory مرتبط با این SupportSlaPolicy؛ کلید خارجی به جدول SupportCategory است.
   categoryId            Int?
+  /// اولویت رسیدگی یا پردازش.
   priority              SupportPriority
+  /// مقدار عددی firstResponseMinutes برای SupportSlaPolicy.
   firstResponseMinutes  Int
+  /// مقدار عددی resolutionMinutes برای SupportSlaPolicy.
   resolutionMinutes     Int
+  /// تعریف تقویم/ساعات کاری مورد استفاده برای محاسبه SLA.
   workingCalendar        Json?
+  /// فعال یا غیرفعال بودن رکورد.
   isActive              Boolean         @default(true)
+  /// زمان ایجاد رکورد.
   createdAt             DateTime        @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt             DateTime        @updatedAt
+  /// ارتباط Prisma با جدول SupportCategory (SupportCategory): رکورد مرتبط مرتبط با SupportSlaPolicy؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   category              SupportCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, priority])
@@ -1247,34 +1892,63 @@ model SupportSlaPolicy {
 
 }
 
+/// پرونده اصلی درخواست پشتیبانی شامل درخواست‌کننده، موضوع، وضعیت، اولویت، مسئول و مهلت‌های SLA.
 model SupportTicket {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int                 @id @default(autoincrement())
+  /// مقدار متنی ticketNumber برای توصیف یا شناسایی تیکت پشتیبانی.
   ticketNumber          String              @unique @db.VarChar(32)
+  /// شناسه کاربر مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول User است.
   requesterUserId       Int
+  /// شناسه شرکت مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول Company است.
   requesterCompanyId    Int?
+  /// شناسه SupportCategory مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول SupportCategory است.
   categoryId            Int?
+  /// شناسه SupportQueue مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول SupportQueue است.
   assignedQueueId       Int?
+  /// شناسه کاربر مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول User است.
   assignedUserId        Int?
+  /// مقدار createdFrom برای نگهداری اطلاعات مرتبط با تیکت پشتیبانی.
   createdFrom           SupportCreatedFrom
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status                SupportTicketStatus @default(OPEN)
+  /// اولویت رسیدگی یا پردازش.
   priority              SupportPriority     @default(NORMAL)
+  /// مقدار متنی subject برای توصیف یا شناسایی تیکت پشتیبانی.
   subject               String              @db.VarChar(200)
+  /// مهلت هدف اولین پاسخ طبق SLA.
   firstResponseDueAt    DateTime?
+  /// مهلت هدف حل تیکت طبق SLA.
   resolveDueAt          DateTime?
+  /// زمان اولین پاسخ کارشناسی به تیکت.
   firstRespondedAt      DateTime?
+  /// زمان resolved این تیکت پشتیبانی را ثبت می‌کند.
   resolvedAt            DateTime?
+  /// زمان بسته‌شدن پرونده یا فرآیند.
   closedAt              DateTime?
+  /// زمان lastActivity این تیکت پشتیبانی را ثبت می‌کند.
   lastActivityAt        DateTime            @default(now())
+  /// زمان ایجاد رکورد.
   createdAt             DateTime            @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt             DateTime            @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   requester             User                @relation("SupportRequester", fields: [requesterUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   requesterCompany      Company?            @relation(fields: [requesterCompanyId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول SupportCategory (SupportCategory): رکورد مرتبط مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   category              SupportCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول SupportQueue (SupportQueue): رکورد مرتبط مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignedQueue         SupportQueue?        @relation(fields: [assignedQueueId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignedUser          User?               @relation("SupportCurrentAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول SupportMessage (SupportMessage): مجموعه رکوردهای وابسته مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   messages              SupportMessage[]
+  /// ارتباط Prisma با جدول SupportAssignment (SupportAssignment): مجموعه رکوردهای وابسته مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignments           SupportAssignment[]
+  /// ارتباط Prisma با جدول SupportStatusHistory (SupportStatusHistory): مجموعه رکوردهای وابسته مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   statusHistory         SupportStatusHistory[]
+  /// ارتباط Prisma با جدول SupportEvent (SupportEvent): مجموعه رکوردهای وابسته مرتبط با تیکت پشتیبانی؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   events                SupportEvent[]
 
   @@index([requesterUserId, status, updatedAt])
@@ -1287,15 +1961,25 @@ model SupportTicket {
 
 }
 
+/// پیام‌های تیکت پشتیبانی با مشخص بودن نویسنده و سطح مشاهده عمومی/داخلی.
 model SupportMessage {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int                       @id @default(autoincrement())
+  /// شناسه تیکت پشتیبانی مرتبط با این SupportMessage؛ کلید خارجی به جدول SupportTicket است.
   ticketId    Int
+  /// شناسه کاربر مرتبط با این SupportMessage؛ کلید خارجی به جدول User است.
   senderUserId Int
+  /// سطح مشاهده و دسترسی به محتوا.
   visibility  SupportMessageVisibility  @default(PUBLIC)
+  /// متن کامل پیام، یادداشت یا محتوای رکورد.
   body        String                    @db.VarChar(10000)
+  /// زمان ایجاد رکورد.
   createdAt   DateTime                  @default(now())
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): رکورد مرتبط مرتبط با SupportMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   ticket      SupportTicket             @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SupportMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sender      User                      @relation(fields: [senderUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول SupportAttachment (SupportAttachment): مجموعه رکوردهای وابسته مرتبط با SupportMessage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   attachments SupportAttachment[]
 
   @@index([ticketId, createdAt])
@@ -1304,18 +1988,31 @@ model SupportMessage {
 
 }
 
+/// فراداده فایل پیوست پیام پشتیبانی شامل مسیر ذخیره، نوع، اندازه و وضعیت بررسی.
 model SupportAttachment {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int                     @id @default(autoincrement())
+  /// شناسه SupportMessage مرتبط با این SupportAttachment؛ کلید خارجی به جدول SupportMessage است.
   messageId      Int
+  /// شناسه کاربر مرتبط با این SupportAttachment؛ کلید خارجی به جدول User است.
   uploadedByUserId Int
+  /// کلید فایل در فضای ذخیره‌سازی؛ خود فایل در دیتابیس ذخیره نمی‌شود.
   storageKey     String                  @unique @db.VarChar(500)
+  /// نام اصلی فایل پیش از ذخیره‌سازی.
   originalName   String                  @db.VarChar(255)
+  /// نوع رسانه‌ای فایل (MIME type).
   mimeType       String                  @db.VarChar(150)
+  /// اندازه فایل بر حسب بایت.
   sizeBytes      BigInt
+  /// چکیده محتوای فایل برای بررسی یکپارچگی.
   checksum       String?                 @db.VarChar(128)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status         SupportAttachmentStatus @default(PENDING_SCAN)
+  /// زمان ایجاد رکورد.
   createdAt      DateTime                @default(now())
+  /// ارتباط Prisma با جدول SupportMessage (SupportMessage): رکورد مرتبط مرتبط با SupportAttachment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   message        SupportMessage          @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SupportAttachment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   uploadedBy     User                    @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
 
   @@index([messageId])
@@ -1324,18 +2021,31 @@ model SupportAttachment {
 
 }
 
+/// تاریخچه ارجاع تیکت به صف یا کارشناس با زمان شروع و پایان تخصیص.
 model SupportAssignment {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                 Int          @id @default(autoincrement())
+  /// شناسه تیکت پشتیبانی مرتبط با این SupportAssignment؛ کلید خارجی به جدول SupportTicket است.
   ticketId           Int
+  /// شناسه SupportQueue مرتبط با این SupportAssignment؛ کلید خارجی به جدول SupportQueue است.
   queueId            Int?
+  /// شناسه کاربر مرتبط با این SupportAssignment؛ کلید خارجی به جدول User است.
   assignedUserId     Int?
+  /// شناسه کاربر مرتبط با این SupportAssignment؛ کلید خارجی به جدول User است.
   assignedByUserId   Int
+  /// علت درخواست، تغییر وضعیت یا تصمیم.
   reason             String?      @db.VarChar(500)
+  /// زمان assigned این SupportAssignment را ثبت می‌کند.
   assignedAt         DateTime     @default(now())
+  /// زمان ended این SupportAssignment را ثبت می‌کند.
   endedAt            DateTime?
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): رکورد مرتبط مرتبط با SupportAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   ticket             SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول SupportQueue (SupportQueue): رکورد مرتبط مرتبط با SupportAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   queue              SupportQueue? @relation(fields: [queueId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SupportAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignee           User?        @relation("SupportAssignmentAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SupportAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignedBy         User         @relation("SupportAssignmentActor", fields: [assignedByUserId], references: [id], onDelete: Restrict)
 
   @@index([ticketId, assignedAt])
@@ -1344,15 +2054,25 @@ model SupportAssignment {
 
 }
 
+/// تاریخچه تغییر وضعیت تیکت همراه با عامل و دلیل تغییر.
 model SupportStatusHistory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int                 @id @default(autoincrement())
+  /// شناسه تیکت پشتیبانی مرتبط با این SupportStatusHistory؛ کلید خارجی به جدول SupportTicket است.
   ticketId    Int
+  /// مقدار previous برای نگهداری اطلاعات مرتبط با SupportStatusHistory.
   previous    SupportTicketStatus?
+  /// مقدار next برای نگهداری اطلاعات مرتبط با SupportStatusHistory.
   next        SupportTicketStatus
+  /// شناسه کاربر مرتبط با این SupportStatusHistory؛ کلید خارجی به جدول User است.
   actorUserId Int?
+  /// علت درخواست، تغییر وضعیت یا تصمیم.
   reason      String?             @db.VarChar(1000)
+  /// زمان ایجاد رکورد.
   createdAt   DateTime            @default(now())
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): رکورد مرتبط مرتبط با SupportStatusHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   ticket      SupportTicket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SupportStatusHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   actor       User?               @relation("SupportStatusActor", fields: [actorUserId], references: [id], onDelete: Restrict)
 
   @@index([ticketId, createdAt])
@@ -1360,16 +2080,27 @@ model SupportStatusHistory {
 
 }
 
+/// رویدادهای دامنه پشتیبانی برای پردازش و جلوگیری از اجرای تکراری.
 model SupportEvent {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt    @id @default(autoincrement())
+  /// شناسه تیکت پشتیبانی مرتبط با این SupportEvent؛ کلید خارجی به جدول SupportTicket است.
   ticketId       Int?
+  /// شناسه کاربر مرتبط با این SupportEvent؛ کلید خارجی به جدول User است.
   actorUserId    Int?
+  /// نوع رویداد ثبت‌شده.
   eventType      String    @db.VarChar(100)
+  /// کلید تشخیص و جلوگیری از ثبت/پردازش تکراری رویداد.
   dedupeKey      String?   @unique @db.VarChar(160)
+  /// بدنه ساختاریافته یا خام رویداد دریافتی/داخلی.
   payload        Json?
+  /// زمان وقوع رویداد در منبع.
   occurredAt     DateTime  @default(now())
+  /// زمان پایان پردازش رویداد/عملیات.
   processedAt    DateTime?
+  /// ارتباط Prisma با جدول SupportTicket (تیکت پشتیبانی): رکورد مرتبط مرتبط با SupportEvent؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   ticket         SupportTicket? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SupportEvent؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   actor          User?     @relation("SupportEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
 
   @@index([ticketId, occurredAt])
@@ -1394,31 +2125,57 @@ enum ArticleType {
   GUIDE
 }
 
+/// محتوای مقاله/مجله شامل متن، وضعیت انتشار، نویسنده، زمان‌بندی و فراداده SEO.
 model Article {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id               Int          @id @default(autoincrement())
+  /// شناسه متنی خوانا و یکتای مناسب URL.
   slug             String       @unique @db.VarChar(220)
+  /// عنوان اصلی قابل نمایش.
   title            String       @db.VarChar(240)
+  /// چکیده کوتاه محتوا برای پیش‌نمایش.
   excerpt          String?      @db.VarChar(600)
+  /// محتوای اصلی متن یا مقاله.
   content          String
+  /// قالب یا نحوه تفسیر محتوای مقاله.
   contentFormat    String       @default("HTML") @db.VarChar(20)
+  /// مقدار type برای نگهداری اطلاعات مرتبط با مقاله.
   type             ArticleType  @default(ARTICLE)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status           ArticleStatus @default(DRAFT)
+  /// مقدار متنی coverImageKey برای توصیف یا شناسایی مقاله.
   coverImageKey    String?      @db.VarChar(500)
+  /// شناسه کاربر مرتبط با این مقاله؛ کلید خارجی به جدول User است.
   authorUserId     Int
+  /// شناسه کاربر مرتبط با این مقاله؛ کلید خارجی به جدول User است.
   publishedByUserId Int?
+  /// زمان انتشار عمومی محتوا.
   publishedAt      DateTime?
+  /// زمان برنامه‌ریزی‌شده انتشار.
   scheduledAt      DateTime?
+  /// عنوان SEO صفحه.
   metaTitle        String?      @db.VarChar(240)
+  /// توضیح SEO صفحه.
   metaDescription  String?      @db.VarChar(500)
+  /// نشانی canonical صفحه برای موتورهای جست‌وجو.
   canonicalUrl     String?      @db.VarChar(500)
+  /// اجازه ایندکس‌شدن صفحه توسط موتورهای جست‌وجو.
   isIndexable      Boolean      @default(true)
+  /// زمان ایجاد رکورد.
   createdAt        DateTime     @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt        DateTime     @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با مقاله؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   author           User         @relation("ArticleAuthor", fields: [authorUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با مقاله؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   publishedBy      User?        @relation("ArticlePublisher", fields: [publishedByUserId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول ArticleCategoryAssignment (ArticleCategoryAssignment): مجموعه رکوردهای وابسته مرتبط با مقاله؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   categories       ArticleCategoryAssignment[]
+  /// ارتباط Prisma با جدول ArticleTagAssignment (ArticleTagAssignment): مجموعه رکوردهای وابسته مرتبط با مقاله؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   tags             ArticleTagAssignment[]
+  /// ارتباط Prisma با جدول ArticleRevision (ArticleRevision): مجموعه رکوردهای وابسته مرتبط با مقاله؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   revisions        ArticleRevision[]
+  /// ارتباط Prisma با جدول ArticleMedia (ArticleMedia): مجموعه رکوردهای وابسته مرتبط با مقاله؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   media            ArticleMedia[]
 
   @@index([status, publishedAt])
@@ -1428,34 +2185,55 @@ model Article {
 
 }
 
+/// دسته‌بندی مطالب مجله برای گروه‌بندی و فیلتر محتوا.
 model ArticleCategory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// شناسه متنی خوانا و یکتای مناسب URL.
   slug      String   @unique @db.VarChar(120)
+  /// نام قابل نمایش موجودیت.
   name      String   @db.VarChar(120)
+  /// ترتیب نمایش رکورد.
   sortOrder Int      @default(0)
+  /// فعال یا غیرفعال بودن رکورد.
   isActive  Boolean  @default(true)
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime @updatedAt
+  /// ارتباط Prisma با جدول ArticleCategoryAssignment (ArticleCategoryAssignment): مجموعه رکوردهای وابسته مرتبط با ArticleCategory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   articles  ArticleCategoryAssignment[]
 
   @@index([isActive, sortOrder])
 
 }
 
+/// برچسب‌های موضوعی مطالب برای جست‌وجو و ارتباط محتوایی.
 model ArticleTag {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// شناسه متنی خوانا و یکتای مناسب URL.
   slug      String   @unique @db.VarChar(120)
+  /// نام قابل نمایش موجودیت.
   name      String   @db.VarChar(120)
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// ارتباط Prisma با جدول ArticleTagAssignment (ArticleTagAssignment): مجموعه رکوردهای وابسته مرتبط با ArticleTag؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   articles  ArticleTagAssignment[]
 
 }
 
+/// رابط مقاله و دسته‌بندی به همراه ترتیب نمایش مقاله در دسته.
 model ArticleCategoryAssignment {
+  /// شناسه مقاله مرتبط با این ArticleCategoryAssignment؛ کلید خارجی به جدول Article است.
   articleId  Int
+  /// شناسه ArticleCategory مرتبط با این ArticleCategoryAssignment؛ کلید خارجی به جدول ArticleCategory است.
   categoryId Int
+  /// ترتیب نمایش رکورد.
   sortOrder  Int      @default(0)
+  /// ارتباط Prisma با جدول Article (مقاله): رکورد مرتبط مرتبط با ArticleCategoryAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول ArticleCategory (ArticleCategory): رکورد مرتبط مرتبط با ArticleCategoryAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   category   ArticleCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([articleId, categoryId])
@@ -1463,10 +2241,15 @@ model ArticleCategoryAssignment {
 
 }
 
+/// رابط چندبه‌چند مقاله و برچسب.
 model ArticleTagAssignment {
+  /// شناسه مقاله مرتبط با این ArticleTagAssignment؛ کلید خارجی به جدول Article است.
   articleId Int
+  /// شناسه ArticleTag مرتبط با این ArticleTagAssignment؛ کلید خارجی به جدول ArticleTag است.
   tagId     Int
+  /// ارتباط Prisma با جدول Article (مقاله): رکورد مرتبط مرتبط با ArticleTagAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول ArticleTag (ArticleTag): رکورد مرتبط مرتبط با ArticleTagAssignment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   tag       ArticleTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([articleId, tagId])
@@ -1474,15 +2257,25 @@ model ArticleTagAssignment {
 
 }
 
+/// نسخه‌های محتوای مقاله به‌صورت snapshot برای نگهداری سابقه ویرایش.
 model ArticleRevision {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id           BigInt   @id @default(autoincrement())
+  /// شناسه مقاله مرتبط با این ArticleRevision؛ کلید خارجی به جدول Article است.
   articleId    Int
+  /// شناسه کاربر مرتبط با این ArticleRevision؛ کلید خارجی به جدول User است.
   editorUserId Int
+  /// مقدار عددی revisionNo برای ArticleRevision.
   revisionNo   Int
+  /// تصویر ثابت داده در زمان ثبت برای حفظ سابقه.
   snapshot     Json
+  /// مقدار متنی changeNote برای توصیف یا شناسایی ArticleRevision.
   changeNote   String?  @db.VarChar(500)
+  /// زمان ایجاد رکورد.
   createdAt    DateTime @default(now())
+  /// ارتباط Prisma با جدول Article (مقاله): رکورد مرتبط مرتبط با ArticleRevision؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با ArticleRevision؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   editor       User     @relation(fields: [editorUserId], references: [id], onDelete: Restrict)
 
   @@unique([articleId, revisionNo])
@@ -1491,17 +2284,29 @@ model ArticleRevision {
 
 }
 
+/// فراداده رسانه‌های مقاله شامل کلید ذخیره‌سازی و مشخصات فایل.
 model ArticleMedia {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id               Int      @id @default(autoincrement())
+  /// شناسه مقاله مرتبط با این ArticleMedia؛ کلید خارجی به جدول Article است.
   articleId        Int
+  /// شناسه کاربر مرتبط با این ArticleMedia؛ کلید خارجی به جدول User است.
   uploadedByUserId Int
+  /// کلید فایل در فضای ذخیره‌سازی؛ خود فایل در دیتابیس ذخیره نمی‌شود.
   storageKey       String   @unique @db.VarChar(500)
+  /// نام اصلی فایل پیش از ذخیره‌سازی.
   originalName     String   @db.VarChar(255)
+  /// نوع رسانه‌ای فایل (MIME type).
   mimeType         String   @db.VarChar(150)
+  /// اندازه فایل بر حسب بایت.
   sizeBytes        BigInt
+  /// متن جایگزین تصویر برای دسترس‌پذیری و سئو.
   altText          String?  @db.VarChar(300)
+  /// زمان ایجاد رکورد.
   createdAt        DateTime @default(now())
+  /// ارتباط Prisma با جدول Article (مقاله): رکورد مرتبط مرتبط با ArticleMedia؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   article          Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با ArticleMedia؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   uploadedBy       User     @relation("ArticleMediaUploader", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
 
   @@index([articleId, createdAt])
@@ -1562,26 +2367,47 @@ enum CRMNoteVisibility {
   PRIVATE
 }
 
+/// پرونده حساب مشتری/سازمان در CRM و پیوند آن به شرکت یا کاربر موجود.
 model CRMAccount {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int            @id @default(autoincrement())
+  /// ماهیت یا نوع حساب.
   accountType CRMAccountType @default(PROSPECT)
+  /// مقدار متنی displayName برای توصیف یا شناسایی CRMAccount.
   displayName String         @db.VarChar(240)
+  /// شناسه شرکت مرتبط با این CRMAccount؛ کلید خارجی به جدول Company است.
   companyId   Int?           @unique
+  /// شناسه کاربر مرتبط با این CRMAccount؛ کلید خارجی به جدول User است.
   userId      Int?           @unique
+  /// شناسه کاربر مرتبط با این CRMAccount؛ کلید خارجی به جدول User است.
   ownerUserId Int
+  /// مقدار متنی lifecycle برای توصیف یا شناسایی CRMAccount.
   lifecycle   String         @default("ACTIVE") @db.VarChar(40)
+  /// منبع ایجاد یا ثبت رکورد.
   source      String?        @db.VarChar(100)
+  /// یادداشت‌های تکمیلی درباره رکورد.
   notes       String?
+  /// زمان ایجاد رکورد.
   createdAt   DateTime       @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime       @updatedAt
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company     Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user        User?          @relation("CRMAccountUser", fields: [userId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   owner       User           @relation("CRMAccountOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول CRMContact (CRMContact): مجموعه رکوردهای وابسته مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   contacts    CRMContact[]
+  /// ارتباط Prisma با جدول Lead (سرنخ فروش): مجموعه رکوردهای وابسته مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   leads       Lead[]
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): مجموعه رکوردهای وابسته مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunities Opportunity[]
+  /// ارتباط Prisma با جدول CRMActivity (CRMActivity): مجموعه رکوردهای وابسته مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   activities  CRMActivity[]
+  /// ارتباط Prisma با جدول CRMTask (CRMTask): مجموعه رکوردهای وابسته مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   tasks       CRMTask[]
+  /// ارتباط Prisma با جدول CRMNote (CRMNote): مجموعه رکوردهای وابسته مرتبط با CRMAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   notesLog    CRMNote[]
 
   @@index([ownerUserId, updatedAt])
@@ -1590,19 +2416,33 @@ model CRMAccount {
 
 }
 
+/// اشخاص رابط یک حساب CRM و اطلاعات تماس آن‌ها.
 model CRMContact {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int       @id @default(autoincrement())
+  /// شناسه CRMAccount مرتبط با این CRMContact؛ کلید خارجی به جدول CRMAccount است.
   accountId   Int
+  /// شناسه کاربر مرتبط با این CRMContact؛ کلید خارجی به جدول User است.
   userId      Int?
+  /// نام قابل نمایش موجودیت.
   name        String    @db.VarChar(200)
+  /// عنوان اصلی قابل نمایش.
   title       String?   @db.VarChar(120)
+  /// نشانی ایمیل مرتبط.
   email       String?   @db.VarChar(320)
+  /// شماره تماس مرتبط.
   phone       String?   @db.VarChar(40)
+  /// اصلی بودن این مورد در میان موارد مرتبط.
   isPrimary   Boolean   @default(false)
+  /// یادداشت‌های تکمیلی درباره رکورد.
   notes       String?
+  /// زمان ایجاد رکورد.
   createdAt   DateTime  @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime  @updatedAt
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): رکورد مرتبط مرتبط با CRMContact؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   account     CRMAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با CRMContact؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([accountId, isPrimary])
@@ -1611,43 +2451,76 @@ model CRMContact {
 
 }
 
+/// منابع ورود سرنخ‌های فروش به شکل کد و عنوان قابل مدیریت.
 model LeadSource {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// کد ماشینی یا تجاری این موجودیت.
   code      String   @unique @db.VarChar(60)
+  /// برچسب یا عنوان کوتاه قابل نمایش.
   label     String   @db.VarChar(120)
+  /// فعال یا غیرفعال بودن رکورد.
   isActive  Boolean  @default(true)
+  /// ترتیب نمایش رکورد.
   sortOrder Int      @default(0)
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime @updatedAt
+  /// ارتباط Prisma با جدول Lead (سرنخ فروش): مجموعه رکوردهای وابسته مرتبط با LeadSource؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   leads     Lead[]
 
   @@index([isActive, sortOrder])
 
 }
 
+/// سرنخ بالقوه فروش تا زمان تبدیل یا رد، شامل منبع، امتیاز و مسئول پیگیری.
 model Lead {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                 Int           @id @default(autoincrement())
+  /// مقدار متنی leadNumber برای توصیف یا شناسایی سرنخ فروش.
   leadNumber         String        @unique @db.VarChar(32)
+  /// مقدار متنی displayName برای توصیف یا شناسایی سرنخ فروش.
   displayName        String        @db.VarChar(240)
+  /// مقدار متنی companyName برای توصیف یا شناسایی سرنخ فروش.
   companyName        String?       @db.VarChar(240)
+  /// نشانی ایمیل مرتبط.
   email              String?       @db.VarChar(320)
+  /// شماره تماس مرتبط.
   phone              String?       @db.VarChar(40)
+  /// شناسه LeadSource مرتبط با این سرنخ فروش؛ کلید خارجی به جدول LeadSource است.
   sourceId           Int?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status             CRMLeadStatus @default(NEW)
+  /// مقدار عددی score برای سرنخ فروش.
   score              Int           @default(0)
+  /// شناسه کاربر مرتبط با این سرنخ فروش؛ کلید خارجی به جدول User است.
   ownerUserId        Int
+  /// شناسه CRMAccount مرتبط با این سرنخ فروش؛ کلید خارجی به جدول CRMAccount است.
   convertedAccountId Int?
+  /// شناسه کاربر مرتبط با این سرنخ فروش؛ کلید خارجی به جدول User است.
   convertedByUserId  Int?
+  /// زمان converted این سرنخ فروش را ثبت می‌کند.
   convertedAt        DateTime?
+  /// مقدار متنی disqualifiedReason برای توصیف یا شناسایی سرنخ فروش.
   disqualifiedReason String?       @db.VarChar(500)
+  /// زمان ایجاد رکورد.
   createdAt          DateTime      @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt          DateTime      @updatedAt
+  /// ارتباط Prisma با جدول LeadSource (LeadSource): رکورد مرتبط مرتبط با سرنخ فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   source             LeadSource?   @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با سرنخ فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   owner              User          @relation("CRMLeadOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): رکورد مرتبط مرتبط با سرنخ فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   convertedAccount   CRMAccount?   @relation(fields: [convertedAccountId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با سرنخ فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   convertedBy        User?         @relation("CRMLeadConverter", fields: [convertedByUserId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول CRMActivity (CRMActivity): مجموعه رکوردهای وابسته مرتبط با سرنخ فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   activities         CRMActivity[]
+  /// ارتباط Prisma با جدول CRMTask (CRMTask): مجموعه رکوردهای وابسته مرتبط با سرنخ فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   tasks              CRMTask[]
+  /// ارتباط Prisma با جدول CRMNote (CRMNote): مجموعه رکوردهای وابسته مرتبط با سرنخ فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   notesLog           CRMNote[]
 
   @@index([ownerUserId, status, updatedAt])
@@ -1658,32 +2531,54 @@ model Lead {
 
 }
 
+/// تعریف قیف فروش CRM و تعیین قیف فعال یا پیش‌فرض.
 model Pipeline {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int             @id @default(autoincrement())
+  /// نام قابل نمایش موجودیت.
   name      String          @db.VarChar(120)
+  /// پیش‌فرض بودن این گزینه یا رکورد.
   isDefault Boolean         @default(false)
+  /// فعال یا غیرفعال بودن رکورد.
   isActive  Boolean         @default(true)
+  /// زمان ایجاد رکورد.
   createdAt DateTime        @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime        @updatedAt
+  /// ارتباط Prisma با جدول PipelineStage (PipelineStage): مجموعه رکوردهای وابسته مرتبط با Pipeline؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   stages    PipelineStage[]
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): مجموعه رکوردهای وابسته مرتبط با Pipeline؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunities Opportunity[]
 
   @@index([isActive, isDefault])
 
 }
 
+/// مراحل هر قیف فروش با ترتیب و احتمال موفقیت و نشانگر برد/باخت.
 model PipelineStage {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int          @id @default(autoincrement())
+  /// شناسه Pipeline مرتبط با این PipelineStage؛ کلید خارجی به جدول Pipeline است.
   pipelineId     Int
+  /// کد ماشینی یا تجاری این موجودیت.
   code           String       @db.VarChar(60)
+  /// برچسب یا عنوان کوتاه قابل نمایش.
   label          String       @db.VarChar(120)
+  /// ترتیب نمایش رکورد.
   sortOrder      Int          @default(0)
+  /// مقدار عددی probability برای PipelineStage.
   probability    Int          @default(0)
+  /// مشخص می‌کند آیا isWon برای این PipelineStage فعال یا مجاز است.
   isWon          Boolean      @default(false)
+  /// مشخص می‌کند آیا isLost برای این PipelineStage فعال یا مجاز است.
   isLost         Boolean      @default(false)
+  /// ارتباط Prisma با جدول Pipeline (Pipeline): رکورد مرتبط مرتبط با PipelineStage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   pipeline       Pipeline     @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): مجموعه رکوردهای وابسته مرتبط با PipelineStage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunities  Opportunity[]
+  /// ارتباط Prisma با جدول OpportunityStageHistory (OpportunityStageHistory): مجموعه رکوردهای وابسته مرتبط با PipelineStage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   fromHistories  OpportunityStageHistory[] @relation("OpportunityFromStage")
+  /// ارتباط Prisma با جدول OpportunityStageHistory (OpportunityStageHistory): مجموعه رکوردهای وابسته مرتبط با PipelineStage؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   toHistories    OpportunityStageHistory[] @relation("OpportunityToStage")
 
   @@unique([pipelineId, code])
@@ -1693,28 +2588,51 @@ model PipelineStage {
 
 }
 
+/// فرصت فروش مرتبط با حساب CRM، مبلغ، ارز، مرحله و مسئول آن.
 model Opportunity {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                Int                  @id @default(autoincrement())
+  /// مقدار متنی opportunityNumber برای توصیف یا شناسایی فرصت فروش.
   opportunityNumber String               @unique @db.VarChar(32)
+  /// شناسه CRMAccount مرتبط با این فرصت فروش؛ کلید خارجی به جدول CRMAccount است.
   accountId         Int
+  /// شناسه PipelineStage مرتبط با این فرصت فروش؛ کلید خارجی به جدول PipelineStage است.
   pipelineId        Int
+  /// شناسه PipelineStage مرتبط با این فرصت فروش؛ کلید خارجی به جدول PipelineStage است.
   stageId           Int
+  /// شناسه کاربر مرتبط با این فرصت فروش؛ کلید خارجی به جدول User است.
   ownerUserId       Int
+  /// عنوان اصلی قابل نمایش.
   title             String               @db.VarChar(240)
+  /// مبلغ مالی این رکورد.
   amount            Decimal              @default(0) @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency          String               @default("IRR") @db.VarChar(3)
+  /// زمان expectedClose این فرصت فروش را ثبت می‌کند.
   expectedCloseAt   DateTime?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status            CRMOpportunityStatus @default(OPEN)
+  /// زمان بسته‌شدن پرونده یا فرآیند.
   closedAt          DateTime?
+  /// زمان ایجاد رکورد.
   createdAt         DateTime             @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt         DateTime             @updatedAt
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): رکورد مرتبط مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   account           CRMAccount           @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Pipeline (Pipeline): رکورد مرتبط مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   pipeline          Pipeline             @relation(fields: [pipelineId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول PipelineStage (PipelineStage): رکورد مرتبط مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   stage             PipelineStage        @relation(fields: [stageId, pipelineId], references: [id, pipelineId], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   owner             User                 @relation("OpportunityOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول OpportunityStageHistory (OpportunityStageHistory): مجموعه رکوردهای وابسته مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   stageHistory      OpportunityStageHistory[]
+  /// ارتباط Prisma با جدول CRMActivity (CRMActivity): مجموعه رکوردهای وابسته مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   activities        CRMActivity[]
+  /// ارتباط Prisma با جدول CRMTask (CRMTask): مجموعه رکوردهای وابسته مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   tasks             CRMTask[]
+  /// ارتباط Prisma با جدول CRMNote (CRMNote): مجموعه رکوردهای وابسته مرتبط با فرصت فروش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   notesLog          CRMNote[]
 
   @@index([accountId, status])
@@ -1724,17 +2642,29 @@ model Opportunity {
 
 }
 
+/// تاریخچه جابه‌جایی فرصت فروش میان مراحل قیف.
 model OpportunityStageHistory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id            Int          @id @default(autoincrement())
+  /// شناسه فرصت فروش مرتبط با این OpportunityStageHistory؛ کلید خارجی به جدول Opportunity است.
   opportunityId Int
+  /// شناسه PipelineStage مرتبط با این OpportunityStageHistory؛ کلید خارجی به جدول PipelineStage است.
   fromStageId   Int?
+  /// شناسه PipelineStage مرتبط با این OpportunityStageHistory؛ کلید خارجی به جدول PipelineStage است.
   toStageId     Int
+  /// شناسه کاربر مرتبط با این OpportunityStageHistory؛ کلید خارجی به جدول User است.
   actorUserId   Int
+  /// علت درخواست، تغییر وضعیت یا تصمیم.
   reason        String?      @db.VarChar(500)
+  /// زمان ایجاد رکورد.
   createdAt     DateTime     @default(now())
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): رکورد مرتبط مرتبط با OpportunityStageHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunity   Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول PipelineStage (PipelineStage): رکورد مرتبط مرتبط با OpportunityStageHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   fromStage     PipelineStage? @relation("OpportunityFromStage", fields: [fromStageId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول PipelineStage (PipelineStage): رکورد مرتبط مرتبط با OpportunityStageHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   toStage       PipelineStage @relation("OpportunityToStage", fields: [toStageId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با OpportunityStageHistory؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   actor         User         @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
 
   @@index([opportunityId, createdAt])
@@ -1742,22 +2672,39 @@ model OpportunityStageHistory {
 
 }
 
+/// فعالیت‌های ارتباطی و فروش مانند تماس، جلسه یا پیگیری و نتیجه آن.
 model CRMActivity {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt          @id @default(autoincrement())
+  /// مقدار type برای نگهداری اطلاعات مرتبط با CRMActivity.
   type           CRMActivityType
+  /// مقدار متنی subject برای توصیف یا شناسایی CRMActivity.
   subject        String          @db.VarChar(240)
+  /// متن کامل پیام، یادداشت یا محتوای رکورد.
   body           String?
+  /// زمان وقوع رویداد در منبع.
   occurredAt     DateTime        @default(now())
+  /// مدت فعالیت بر حسب دقیقه.
   durationMinutes Int?
+  /// نتیجه فعالیت یا عملیات.
   outcome        String?         @db.VarChar(500)
+  /// شناسه کاربر مرتبط با این CRMActivity؛ کلید خارجی به جدول User است.
   actorUserId    Int
+  /// شناسه CRMAccount مرتبط با این CRMActivity؛ کلید خارجی به جدول CRMAccount است.
   accountId      Int?
+  /// شناسه سرنخ فروش مرتبط با این CRMActivity؛ کلید خارجی به جدول Lead است.
   leadId         Int?
+  /// شناسه فرصت فروش مرتبط با این CRMActivity؛ کلید خارجی به جدول Opportunity است.
   opportunityId  Int?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime        @default(now())
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با CRMActivity؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   actor          User            @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): رکورد مرتبط مرتبط با CRMActivity؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   account        CRMAccount?     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Lead (سرنخ فروش): رکورد مرتبط مرتبط با CRMActivity؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   lead           Lead?           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): رکورد مرتبط مرتبط با CRMActivity؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunity    Opportunity?    @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
 
   @@index([accountId, occurredAt])
@@ -1767,25 +2714,45 @@ model CRMActivity {
 
 }
 
+/// وظایف پیگیری CRM با مسئول، اولویت، وضعیت و مهلت انجام.
 model CRMTask {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int            @id @default(autoincrement())
+  /// عنوان اصلی قابل نمایش.
   title          String         @db.VarChar(240)
+  /// شرح تکمیلی موجودیت.
   description    String?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status         CRMTaskStatus  @default(OPEN)
+  /// اولویت رسیدگی یا پردازش.
   priority       CRMTaskPriority @default(NORMAL)
+  /// شناسه کاربر مرتبط با این CRMTask؛ کلید خارجی به جدول User است.
   assigneeUserId Int
+  /// شناسه کاربر مرتبط با این CRMTask؛ کلید خارجی به جدول User است.
   createdByUserId Int
+  /// مهلت انجام یا سررسید عملیات.
   dueAt          DateTime?
+  /// زمان تکمیل عملیات.
   completedAt    DateTime?
+  /// شناسه CRMAccount مرتبط با این CRMTask؛ کلید خارجی به جدول CRMAccount است.
   accountId      Int?
+  /// شناسه سرنخ فروش مرتبط با این CRMTask؛ کلید خارجی به جدول Lead است.
   leadId         Int?
+  /// شناسه فرصت فروش مرتبط با این CRMTask؛ کلید خارجی به جدول Opportunity است.
   opportunityId  Int?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime       @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt      DateTime       @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با CRMTask؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   assignee       User           @relation("CRMTaskAssignee", fields: [assigneeUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با CRMTask؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   createdBy      User           @relation("CRMTaskCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): رکورد مرتبط مرتبط با CRMTask؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   account        CRMAccount?    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Lead (سرنخ فروش): رکورد مرتبط مرتبط با CRMTask؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   lead           Lead?          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): رکورد مرتبط مرتبط با CRMTask؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunity    Opportunity?   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
 
   @@index([assigneeUserId, status, dueAt])
@@ -1796,18 +2763,31 @@ model CRMTask {
 
 }
 
+/// یادداشت‌های مرتبط با حساب، سرنخ یا فرصت همراه با سطح مشاهده.
 model CRMNote {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt            @id @default(autoincrement())
+  /// متن کامل پیام، یادداشت یا محتوای رکورد.
   body           String
+  /// سطح مشاهده و دسترسی به محتوا.
   visibility     CRMNoteVisibility @default(TEAM)
+  /// شناسه کاربر مرتبط با این CRMNote؛ کلید خارجی به جدول User است.
   authorUserId   Int
+  /// شناسه CRMAccount مرتبط با این CRMNote؛ کلید خارجی به جدول CRMAccount است.
   accountId      Int?
+  /// شناسه سرنخ فروش مرتبط با این CRMNote؛ کلید خارجی به جدول Lead است.
   leadId         Int?
+  /// شناسه فرصت فروش مرتبط با این CRMNote؛ کلید خارجی به جدول Opportunity است.
   opportunityId  Int?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime          @default(now())
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با CRMNote؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   author         User              @relation(fields: [authorUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول CRMAccount (CRMAccount): رکورد مرتبط مرتبط با CRMNote؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   account        CRMAccount?       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Lead (سرنخ فروش): رکورد مرتبط مرتبط با CRMNote؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   lead           Lead?             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول Opportunity (فرصت فروش): رکورد مرتبط مرتبط با CRMNote؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   opportunity    Opportunity?      @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
 
   @@index([accountId, createdAt])
@@ -1943,30 +2923,52 @@ enum ReturnItemDisposition {
   REPAIR
 }
 
+/// مانده فعلی موجودی هر محصول شامل تعداد موجود و تعداد رزروشده.
 model InventoryBalance {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id        Int      @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این InventoryBalance؛ کلید خارجی به جدول Product است.
   productId Int      @unique
+  /// مقدار عددی onHand برای InventoryBalance.
   onHand    Int      @default(0)
+  /// مقدار عددی reserved برای InventoryBalance.
   reserved  Int      @default(0)
+  /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt DateTime @updatedAt
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با InventoryBalance؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
 
 }
 
+/// دفتر تغییرات موجودی شامل نوع حرکت، تعداد، مرجع و عامل عملیات.
 model InventoryMovement {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt                @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این InventoryMovement؛ کلید خارجی به جدول Product است.
   productId      Int
+  /// شناسه کاربر مرتبط با این InventoryMovement؛ کلید خارجی به جدول User است.
   actorUserId    Int?
+  /// نوع حرکت یا رویداد تغییر موجودی.
   movementType   InventoryMovementType
+  /// مقدار عددی quantityDelta برای InventoryMovement.
   quantityDelta  Int
+  /// مقدار متنی referenceType برای توصیف یا شناسایی InventoryMovement.
   referenceType  String?               @db.VarChar(60)
+  /// شناسه رکورد مرتبط برای اتصال این InventoryMovement به موجودیت مرجع.
   referenceId    String?               @db.VarChar(100)
+  /// کلید یکتای جلوگیری از اجرای تکراری درخواست/عملیات.
   idempotencyKey String?               @unique @db.VarChar(160)
+  /// علت درخواست، تغییر وضعیت یا تصمیم.
   reason         String?               @db.VarChar(500)
+  /// داده‌های تکمیلی ساختاریافته و وابسته به دامنه در قالب JSON.
   metadata       Json?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime              @default(now())
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با InventoryMovement؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product        Product               @relation(fields: [productId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با InventoryMovement؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   actor          User?                 @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
 
   @@index([productId, createdAt])
@@ -1976,41 +2978,77 @@ model InventoryMovement {
 
 }
 
+/// سفارش اصلی خریدار، وضعیت سفارش و پرداخت، مبالغ، ارز و snapshot نشانی گیرنده.
 model RetailOrder {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int                @id @default(autoincrement())
+  /// مقدار متنی orderNumber برای توصیف یا شناسایی سفارش.
   orderNumber           String             @unique @db.VarChar(40)
+  /// شناسه کاربر مرتبط با این سفارش؛ کلید خارجی به جدول User است.
   buyerUserId           Int
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status                RetailOrderStatus  @default(PENDING_PAYMENT)
+  /// مقدار paymentStatus برای نگهداری اطلاعات مرتبط با سفارش.
   paymentStatus         RetailPaymentStatus @default(UNPAID)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency              String             @db.VarChar(3)
+  /// مبلغ subtotal برای این سفارش؛ واحد پول در فیلد currency مشخص می‌شود.
   subtotal              Decimal            @default(0) @db.Decimal(20, 2)
+  /// مبلغ discountTotal برای این سفارش؛ واحد پول در فیلد currency مشخص می‌شود.
   discountTotal         Decimal            @default(0) @db.Decimal(20, 2)
+  /// مبلغ shippingTotal برای این سفارش؛ واحد پول در فیلد currency مشخص می‌شود.
   shippingTotal         Decimal            @default(0) @db.Decimal(20, 2)
+  /// مبلغ taxTotal برای این سفارش؛ واحد پول در فیلد currency مشخص می‌شود.
   taxTotal              Decimal            @default(0) @db.Decimal(20, 2)
+  /// مبلغ grandTotal برای این سفارش؛ واحد پول در فیلد currency مشخص می‌شود.
   grandTotal            Decimal            @default(0) @db.Decimal(20, 2)
+  /// شناسه نشانی مرتبط با این سفارش؛ کلید خارجی به جدول Address است.
   addressId             Int?
+  /// ارتباط Prisma با جدول Address (نشانی): رکورد مرتبط مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   address               Address?           @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  /// نام شخص دریافت‌کننده.
   recipientName         String             @db.VarChar(200)
+  /// شماره تماس شخص دریافت‌کننده.
   recipientPhone        String             @db.VarChar(40)
+  /// استان نشانی.
   province              String             @db.VarChar(120)
+  /// شهر نشانی.
   city                  String             @db.VarChar(120)
+  /// جزئیات نشانی پستی.
   addressLine           String             @db.VarChar(1000)
+  /// کد پستی.
   postalCode            String?            @db.VarChar(30)
+  /// کلید یکتای جلوگیری از اجرای تکراری درخواست/عملیات.
   idempotencyKey        String             @unique @db.VarChar(160)
+  /// زمان placed این سفارش را ثبت می‌کند.
   placedAt              DateTime           @default(now())
+  /// زمان پرداخت موفق.
   paidAt                DateTime?
+  /// زمان تکمیل عملیات.
   completedAt            DateTime?
+  /// زمان cancelled این سفارش را ثبت می‌کند.
   cancelledAt            DateTime?
+  /// زمان ایجاد رکورد.
   createdAt             DateTime           @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt             DateTime           @updatedAt
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   buyer                 User               @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول RetailOrderItem (RetailOrderItem): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   items                 RetailOrderItem[]
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrders          SellerOrder[]
+  /// ارتباط Prisma با جدول PaymentAttempt (PaymentAttempt): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   paymentAttempts       PaymentAttempt[]
+  /// ارتباط Prisma با جدول PaymentTransaction (PaymentTransaction): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   paymentTransactions   PaymentTransaction[]
+  /// ارتباط Prisma با جدول RetailRefund (RetailRefund): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   refunds               RetailRefund[]
+  /// ارتباط Prisma با جدول InventoryReservation (InventoryReservation): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   reservations          InventoryReservation[]
+  /// ارتباط Prisma با جدول ReturnRequest (ReturnRequest): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   returns               ReturnRequest[]
+  /// ارتباط Prisma با جدول FinanceInvoice (FinanceInvoice): مجموعه رکوردهای وابسته مرتبط با سفارش؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   invoices              FinanceInvoice[]
 
   @@index([buyerUserId, createdAt])
@@ -2019,33 +3057,61 @@ model RetailOrder {
 
 }
 
+/// بخش سفارش متعلق به یک فروشنده از سفارش اصلی، همراه با وضعیت و مبالغ فروشنده.
 model SellerOrder {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                 Int              @id @default(autoincrement())
+  /// شناسه سفارش مرتبط با این سفارش فروشنده؛ کلید خارجی به جدول RetailOrder است.
   orderId            Int
+  /// شناسه شرکت مرتبط با این سفارش فروشنده؛ کلید خارجی به جدول Company است.
   companyId           Int
+  /// مقدار متنی sellerOrderNumber برای توصیف یا شناسایی سفارش فروشنده.
   sellerOrderNumber   String           @unique @db.VarChar(48)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status              SellerOrderStatus @default(PENDING_ACCEPTANCE)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency            String           @db.VarChar(3)
+  /// مبلغ subtotal برای این سفارش فروشنده؛ واحد پول در فیلد currency مشخص می‌شود.
   subtotal            Decimal          @default(0) @db.Decimal(20, 2)
+  /// مبلغ discountTotal برای این سفارش فروشنده؛ واحد پول در فیلد currency مشخص می‌شود.
   discountTotal       Decimal          @default(0) @db.Decimal(20, 2)
+  /// مبلغ shippingTotal برای این سفارش فروشنده؛ واحد پول در فیلد currency مشخص می‌شود.
   shippingTotal       Decimal          @default(0) @db.Decimal(20, 2)
+  /// مبلغ taxTotal برای این سفارش فروشنده؛ واحد پول در فیلد currency مشخص می‌شود.
   taxTotal            Decimal          @default(0) @db.Decimal(20, 2)
+  /// مبلغ sellerNetTotal برای این سفارش فروشنده؛ واحد پول در فیلد currency مشخص می‌شود.
   sellerNetTotal      Decimal          @default(0) @db.Decimal(20, 2)
+  /// مقدار متنی companyNameSnapshot برای توصیف یا شناسایی سفارش فروشنده.
   companyNameSnapshot String           @db.VarChar(240)
+  /// مقدار متنی companyIdSnapshot برای توصیف یا شناسایی سفارش فروشنده.
   companyIdSnapshot   String?          @db.VarChar(80)
+  /// زمان accepted این سفارش فروشنده را ثبت می‌کند.
   acceptedAt          DateTime?
+  /// زمان shipped این سفارش فروشنده را ثبت می‌کند.
   shippedAt           DateTime?
+  /// زمان delivered این سفارش فروشنده را ثبت می‌کند.
   deliveredAt         DateTime?
+  /// زمان ایجاد رکورد.
   createdAt           DateTime         @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt           DateTime         @updatedAt
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order               RetailOrder      @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company             Company          @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول RetailOrderItem (RetailOrderItem): مجموعه رکوردهای وابسته مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   items               RetailOrderItem[]
+  /// ارتباط Prisma با جدول Shipment (Shipment): مجموعه رکوردهای وابسته مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   shipments           Shipment[]
+  /// ارتباط Prisma با جدول ReturnRequest (ReturnRequest): مجموعه رکوردهای وابسته مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   returns             ReturnRequest[]
+  /// ارتباط Prisma با جدول RetailRefund (RetailRefund): مجموعه رکوردهای وابسته مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   refunds             RetailRefund[]
+  /// ارتباط Prisma با جدول CommissionSnapshot (CommissionSnapshot): رکورد مرتبط مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   commissionSnapshot  CommissionSnapshot?
+  /// ارتباط Prisma با جدول SellerPayable (SellerPayable): رکورد مرتبط مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerPayable       SellerPayable?
+  /// ارتباط Prisma با جدول FinanceInvoice (FinanceInvoice): مجموعه رکوردهای وابسته مرتبط با سفارش فروشنده؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   invoices            FinanceInvoice[]
 
   @@unique([orderId, companyId])
@@ -2055,27 +3121,49 @@ model SellerOrder {
 
 }
 
+/// اقلام سفارش با snapshot محصول/فروشنده، تعداد، قیمت، تخفیف و مالیات.
 model RetailOrderItem {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int         @id @default(autoincrement())
+  /// شناسه سفارش فروشنده مرتبط با این RetailOrderItem؛ کلید خارجی به جدول SellerOrder است.
   orderId               Int
+  /// شناسه سفارش فروشنده مرتبط با این RetailOrderItem؛ کلید خارجی به جدول SellerOrder است.
   sellerOrderId         Int
+  /// شناسه محصول مرتبط با این RetailOrderItem؛ کلید خارجی به جدول Product است.
   productId             Int?
+  /// مقدار متنی productTitleSnapshot برای توصیف یا شناسایی RetailOrderItem.
   productTitleSnapshot  String      @db.VarChar(240)
+  /// مقدار متنی skuSnapshot برای توصیف یا شناسایی RetailOrderItem.
   skuSnapshot           String?     @db.VarChar(120)
+  /// مقدار متنی brandSnapshot برای توصیف یا شناسایی RetailOrderItem.
   brandSnapshot         String?     @db.VarChar(160)
+  /// مقدار متنی modelSnapshot برای توصیف یا شناسایی RetailOrderItem.
   modelSnapshot         String?     @db.VarChar(160)
+  /// مقدار متنی imageUrlSnapshot برای توصیف یا شناسایی RetailOrderItem.
   imageUrlSnapshot      String?     @db.VarChar(1000)
+  /// مقدار متنی companyNameSnapshot برای توصیف یا شناسایی RetailOrderItem.
   companyNameSnapshot   String      @db.VarChar(240)
+  /// تعداد واحدهای کالا یا مقدار موردنظر.
   quantity              Int
+  /// مبلغ unitPrice برای این RetailOrderItem؛ واحد پول در فیلد currency مشخص می‌شود.
   unitPrice             Decimal     @db.Decimal(20, 2)
+  /// مبلغ discountAmount برای این RetailOrderItem؛ واحد پول در فیلد currency مشخص می‌شود.
   discountAmount        Decimal     @default(0) @db.Decimal(20, 2)
+  /// مبلغ taxAmount برای این RetailOrderItem؛ واحد پول در فیلد currency مشخص می‌شود.
   taxAmount             Decimal     @default(0) @db.Decimal(20, 2)
+  /// مبلغ lineTotal برای این RetailOrderItem؛ واحد پول در فیلد currency مشخص می‌شود.
   lineTotal             Decimal     @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency              String      @db.VarChar(3)
+  /// زمان ایجاد رکورد.
   createdAt             DateTime    @default(now())
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با RetailOrderItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order                 RetailOrder @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): رکورد مرتبط مرتبط با RetailOrderItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrder           SellerOrder @relation(fields: [sellerOrderId, orderId], references: [id, orderId], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با RetailOrderItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product               Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول ReturnItem (ReturnItem): مجموعه رکوردهای وابسته مرتبط با RetailOrderItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   returnItems           ReturnItem[]
 
   @@index([orderId])
@@ -2084,20 +3172,35 @@ model RetailOrderItem {
 
 }
 
+/// رزرو موقت موجودی برای خریدار/فرآیند سفارش همراه با انقضا و وضعیت.
 model InventoryReservation {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt                     @id @default(autoincrement())
+  /// شناسه محصول مرتبط با این InventoryReservation؛ کلید خارجی به جدول Product است.
   productId      Int
+  /// شناسه کاربر مرتبط با این InventoryReservation؛ کلید خارجی به جدول User است.
   buyerUserId    Int
+  /// شناسه سفارش مرتبط با این InventoryReservation؛ کلید خارجی به جدول RetailOrder است.
   orderId        Int?
+  /// تعداد واحدهای کالا یا مقدار موردنظر.
   quantity       Int
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status         InventoryReservationStatus @default(ACTIVE)
+  /// مقدار متنی checkoutKey برای توصیف یا شناسایی InventoryReservation.
   checkoutKey    String                     @unique @db.VarChar(160)
+  /// زمان انقضای اعتبار رکورد یا توکن.
   expiresAt      DateTime
+  /// زمان consumed این InventoryReservation را ثبت می‌کند.
   consumedAt     DateTime?
+  /// زمان released این InventoryReservation را ثبت می‌کند.
   releasedAt     DateTime?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime                   @default(now())
+  /// ارتباط Prisma با جدول Product (محصول): رکورد مرتبط مرتبط با InventoryReservation؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   product        Product                    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با InventoryReservation؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   buyer          User                       @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با InventoryReservation؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order          RetailOrder?               @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   @@index([productId, status, expiresAt])
@@ -2106,22 +3209,39 @@ model InventoryReservation {
 
 }
 
+/// تلاش آغاز یا تکمیل پرداخت سفارش، درگاه، وضعیت و شناسه‌های پیگیری.
 model PaymentAttempt {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int                 @id @default(autoincrement())
+  /// شناسه سفارش مرتبط با این PaymentAttempt؛ کلید خارجی به جدول RetailOrder است.
   orderId        Int
+  /// نام درگاه یا سرویس بیرونی انجام‌دهنده عملیات.
   provider       String              @db.VarChar(80)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status         PaymentAttemptStatus @default(CREATED)
+  /// مبلغ مالی این رکورد.
   amount         Decimal             @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency       String              @db.VarChar(3)
+  /// کلید یکتای جلوگیری از اجرای تکراری درخواست/عملیات.
   idempotencyKey String              @unique @db.VarChar(160)
+  /// مقدار متنی authority برای توصیف یا شناسایی PaymentAttempt.
   authority      String?             @unique @db.VarChar(200)
+  /// مقدار متنی redirectUrl برای توصیف یا شناسایی PaymentAttempt.
   redirectUrl    String?             @db.VarChar(1000)
+  /// زمان انقضای اعتبار رکورد یا توکن.
   expiresAt      DateTime?
+  /// زمان تکمیل عملیات.
   completedAt    DateTime?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime            @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt      DateTime            @updatedAt
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با PaymentAttempt؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order          RetailOrder         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول PaymentTransaction (PaymentTransaction): مجموعه رکوردهای وابسته مرتبط با PaymentAttempt؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   transactions   PaymentTransaction[]
+  /// ارتباط Prisma با جدول PaymentWebhookEvent (PaymentWebhookEvent): مجموعه رکوردهای وابسته مرتبط با PaymentAttempt؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   webhookEvents  PaymentWebhookEvent[]
 
   @@index([orderId, createdAt])
@@ -2129,21 +3249,37 @@ model PaymentAttempt {
 
 }
 
+/// تراکنش پرداخت/بازپرداخت مرتبط با سفارش یا تلاش پرداخت.
 model PaymentTransaction {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                  Int                      @id @default(autoincrement())
+  /// شناسه سفارش مرتبط با این PaymentTransaction؛ کلید خارجی به جدول RetailOrder است.
   orderId             Int
+  /// شناسه PaymentAttempt مرتبط با این PaymentTransaction؛ کلید خارجی به جدول PaymentAttempt است.
   attemptId           Int?
+  /// نام درگاه یا سرویس بیرونی انجام‌دهنده عملیات.
   provider            String                   @db.VarChar(80)
+  /// شناسه تراکنش نزد درگاه پرداخت.
   providerTransactionId String?                @db.VarChar(200)
+  /// نوع تراکنش مالی.
   transactionType     PaymentTransactionType
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status              PaymentTransactionStatus @default(PENDING)
+  /// مبلغ مالی این رکورد.
   amount              Decimal                  @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency            String                   @db.VarChar(3)
+  /// زمان verified این PaymentTransaction را ثبت می‌کند.
   verifiedAt          DateTime?
+  /// زمان ایجاد رکورد.
   createdAt           DateTime                 @default(now())
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با PaymentTransaction؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order               RetailOrder              @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول PaymentAttempt (PaymentAttempt): رکورد مرتبط مرتبط با PaymentTransaction؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   attempt              PaymentAttempt?          @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول RetailRefund (RetailRefund): مجموعه رکوردهای وابسته مرتبط با PaymentTransaction؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   refunds             RetailRefund[]
+  /// ارتباط Prisma با جدول ReconciliationRecord (ReconciliationRecord): مجموعه رکوردهای وابسته مرتبط با PaymentTransaction؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   reconciliations     ReconciliationRecord[]
 
   @@unique([provider, providerTransactionId])
@@ -2153,17 +3289,29 @@ model PaymentTransaction {
 
 }
 
+/// رویداد دریافتی webhook درگاه با اعتبار امضا و نتیجه پردازش.
 model PaymentWebhookEvent {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt              @id @default(autoincrement())
+  /// نام درگاه یا سرویس بیرونی انجام‌دهنده عملیات.
   provider       String              @db.VarChar(80)
+  /// شناسه رکورد مرتبط برای اتصال این PaymentWebhookEvent به موجودیت مرجع.
   providerEventId String             @db.VarChar(240)
+  /// شناسه PaymentAttempt مرتبط با این PaymentWebhookEvent؛ کلید خارجی به جدول PaymentAttempt است.
   attemptId      Int?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status         PaymentWebhookStatus @default(RECEIVED)
+  /// اعتبارسنجی امضای دیجیتال webhook را مشخص می‌کند.
   signatureValid Boolean             @default(false)
+  /// بدنه ساختاریافته یا خام رویداد دریافتی/داخلی.
   payload        Json
+  /// زمان دریافت رویداد یا درخواست.
   receivedAt     DateTime            @default(now())
+  /// زمان پایان پردازش رویداد/عملیات.
   processedAt    DateTime?
+  /// آخرین خطای رخ‌داده هنگام پردازش/ارسال.
   lastError      String?
+  /// ارتباط Prisma با جدول PaymentAttempt (PaymentAttempt): رکورد مرتبط مرتبط با PaymentWebhookEvent؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   attempt        PaymentAttempt?      @relation(fields: [attemptId], references: [id], onDelete: SetNull)
 
   @@unique([provider, providerEventId])
@@ -2172,24 +3320,43 @@ model PaymentWebhookEvent {
 
 }
 
+/// درخواست و نتیجه بازپرداخت وجه سفارش.
 model RetailRefund {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    Int           @id @default(autoincrement())
+  /// شناسه سفارش مرتبط با این RetailRefund؛ کلید خارجی به جدول RetailOrder است.
   orderId               Int
+  /// شناسه سفارش فروشنده مرتبط با این RetailRefund؛ کلید خارجی به جدول SellerOrder است.
   sellerOrderId         Int?
+  /// شناسه PaymentTransaction مرتبط با این RetailRefund؛ کلید خارجی به جدول PaymentTransaction است.
   paymentTransactionId  Int?
+  /// شناسه کاربر مرتبط با این RetailRefund؛ کلید خارجی به جدول User است.
   requestedByUserId     Int
+  /// مبلغ مالی این رکورد.
   amount                Decimal       @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency              String        @db.VarChar(3)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status                RefundStatus  @default(REQUESTED)
+  /// علت درخواست، تغییر وضعیت یا تصمیم.
   reason                String        @db.VarChar(1000)
+  /// کلید یکتای جلوگیری از اجرای تکراری درخواست/عملیات.
   idempotencyKey        String        @unique @db.VarChar(160)
+  /// شناسه رکورد مرتبط برای اتصال این RetailRefund به موجودیت مرجع.
   providerRefundId      String?       @unique @db.VarChar(200)
+  /// زمان پایان پردازش رویداد/عملیات.
   processedAt           DateTime?
+  /// زمان ایجاد رکورد.
   createdAt             DateTime      @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt             DateTime      @updatedAt
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با RetailRefund؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order                 RetailOrder   @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): رکورد مرتبط مرتبط با RetailRefund؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrder           SellerOrder?  @relation(fields: [sellerOrderId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول PaymentTransaction (PaymentTransaction): رکورد مرتبط مرتبط با RetailRefund؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   paymentTransaction    PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با RetailRefund؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   requestedBy           User          @relation(fields: [requestedByUserId], references: [id], onDelete: Restrict)
 
   @@index([orderId, createdAt])
@@ -2198,17 +3365,29 @@ model RetailRefund {
 
 }
 
+/// اطلاعات ارسال سفارش فروشنده شامل شرکت حمل، کد رهگیری و وضعیت.
 model Shipment {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                Int            @id @default(autoincrement())
+  /// شناسه سفارش فروشنده مرتبط با این Shipment؛ کلید خارجی به جدول SellerOrder است.
   sellerOrderId     Int
+  /// مقدار متنی carrier برای توصیف یا شناسایی Shipment.
   carrier           String?        @db.VarChar(120)
+  /// مقدار متنی trackingNumber برای توصیف یا شناسایی Shipment.
   trackingNumber    String?        @db.VarChar(160)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status            ShipmentStatus @default(LABEL_CREATED)
+  /// زمان shipped این Shipment را ثبت می‌کند.
   shippedAt         DateTime?
+  /// زمان delivered این Shipment را ثبت می‌کند.
   deliveredAt       DateTime?
+  /// زمان ایجاد رکورد.
   createdAt         DateTime       @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt         DateTime       @updatedAt
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): رکورد مرتبط مرتبط با Shipment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrder       SellerOrder    @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول TrackingEvent (TrackingEvent): مجموعه رکوردهای وابسته مرتبط با Shipment؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   trackingEvents    TrackingEvent[]
 
   @@index([sellerOrderId, createdAt])
@@ -2217,36 +3396,62 @@ model Shipment {
 
 }
 
+/// رویدادهای رهگیری مرسوله شامل شرح، موقعیت و زمان وقوع.
 model TrackingEvent {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          BigInt        @id @default(autoincrement())
+  /// شناسه Shipment مرتبط با این TrackingEvent؛ کلید خارجی به جدول Shipment است.
   shipmentId  Int
+  /// مقدار متنی eventCode برای توصیف یا شناسایی TrackingEvent.
   eventCode   String?       @db.VarChar(80)
+  /// شرح تکمیلی موجودیت.
   description String        @db.VarChar(500)
+  /// مقدار متنی location برای توصیف یا شناسایی TrackingEvent.
   location    String?       @db.VarChar(240)
+  /// زمان وقوع رویداد در منبع.
   occurredAt  DateTime
+  /// زمان ایجاد رکورد.
   createdAt   DateTime      @default(now())
+  /// ارتباط Prisma با جدول Shipment (Shipment): رکورد مرتبط مرتبط با TrackingEvent؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   shipment    Shipment      @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
 
   @@index([shipmentId, occurredAt])
 
 }
 
+/// درخواست مرجوعی خریدار برای سفارش یا بخش فروشنده.
 model ReturnRequest {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id              Int          @id @default(autoincrement())
+  /// شناسه سفارش فروشنده مرتبط با این ReturnRequest؛ کلید خارجی به جدول SellerOrder است.
   orderId         Int
+  /// شناسه سفارش فروشنده مرتبط با این ReturnRequest؛ کلید خارجی به جدول SellerOrder است.
   sellerOrderId   Int
+  /// شناسه کاربر مرتبط با این ReturnRequest؛ کلید خارجی به جدول User است.
   buyerUserId     Int
+  /// مقدار متنی returnNumber برای توصیف یا شناسایی ReturnRequest.
   returnNumber    String       @unique @db.VarChar(40)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status          ReturnStatus @default(REQUESTED)
+  /// علت درخواست، تغییر وضعیت یا تصمیم.
   reason          String       @db.VarChar(1000)
+  /// زمان ثبت درخواست.
   requestedAt     DateTime     @default(now())
+  /// زمان دریافت رویداد یا درخواست.
   receivedAt      DateTime?
+  /// زمان بسته‌شدن پرونده یا فرآیند.
   closedAt        DateTime?
+  /// زمان ایجاد رکورد.
   createdAt       DateTime     @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt       DateTime     @updatedAt
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با ReturnRequest؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order           RetailOrder  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): رکورد مرتبط مرتبط با ReturnRequest؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrder     SellerOrder  @relation(fields: [sellerOrderId, orderId], references: [id, orderId], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با ReturnRequest؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   buyer           User         @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول ReturnItem (ReturnItem): مجموعه رکوردهای وابسته مرتبط با ReturnRequest؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   items           ReturnItem[]
 
   @@index([orderId, status])
@@ -2255,15 +3460,25 @@ model ReturnRequest {
 
 }
 
+/// اقلام و تعدادهای مشمول درخواست مرجوعی و نتیجه بازرسی آن‌ها.
 model ReturnItem {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id              Int                   @id @default(autoincrement())
+  /// شناسه ReturnRequest مرتبط با این ReturnItem؛ کلید خارجی به جدول ReturnRequest است.
   returnRequestId Int
+  /// شناسه RetailOrderItem مرتبط با این ReturnItem؛ کلید خارجی به جدول RetailOrderItem است.
   orderItemId     Int
+  /// تعداد واحدهای کالا یا مقدار موردنظر.
   quantity        Int
+  /// نحوه تعیین تکلیف کالای برگشتی.
   disposition     ReturnItemDisposition?
+  /// مقدار متنی inspectionNote برای توصیف یا شناسایی ReturnItem.
   inspectionNote  String?
+  /// زمان ایجاد رکورد.
   createdAt       DateTime              @default(now())
+  /// ارتباط Prisma با جدول ReturnRequest (ReturnRequest): رکورد مرتبط مرتبط با ReturnItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   returnRequest   ReturnRequest         @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  /// ارتباط Prisma با جدول RetailOrderItem (RetailOrderItem): رکورد مرتبط مرتبط با ReturnItem؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   orderItem       RetailOrderItem       @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
 
   @@unique([returnRequestId, orderItemId])
@@ -2335,38 +3550,66 @@ enum InvoiceStatus {
   VOID
 }
 
+/// حساب دفتر کل با کد، نام، ماهیت حساب و ارز.
 model LedgerAccount {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int               @id @default(autoincrement())
+  /// کد ماشینی یا تجاری این موجودیت.
   code        String            @unique @db.VarChar(80)
+  /// نام قابل نمایش موجودیت.
   name        String            @db.VarChar(200)
+  /// ماهیت یا نوع حساب.
   accountType LedgerAccountType
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency    String            @db.VarChar(3)
+  /// سیستمی بودن رکورد و محدودیت مدیریت عادی آن.
   isSystem    Boolean           @default(false)
+  /// فعال یا غیرفعال بودن رکورد.
   isActive    Boolean           @default(true)
+  /// زمان ایجاد رکورد.
   createdAt   DateTime          @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt   DateTime          @updatedAt
+  /// ارتباط Prisma با جدول JournalLine (JournalLine): مجموعه رکوردهای وابسته مرتبط با LedgerAccount؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   lines       JournalLine[]
 
   @@index([accountType, currency, isActive])
 
 }
 
+/// سند حسابداری دفتر کل با منبع، وضعیت ثبت و ارتباط با سند معکوس.
 model JournalEntry {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id              BigInt            @id @default(autoincrement())
+  /// مقدار متنی entryNumber برای توصیف یا شناسایی JournalEntry.
   entryNumber     String            @unique @db.VarChar(48)
+  /// مقدار متنی sourceType برای توصیف یا شناسایی JournalEntry.
   sourceType      String?           @db.VarChar(80)
+  /// شناسه رکورد مرتبط برای اتصال این JournalEntry به موجودیت مرجع.
   sourceId        String?           @db.VarChar(120)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency        String            @db.VarChar(3)
+  /// شرح تکمیلی موجودیت.
   description     String?           @db.VarChar(1000)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status          JournalEntryStatus @default(DRAFT)
+  /// زمان وقوع رویداد در منبع.
   occurredAt      DateTime          @default(now())
+  /// زمان posted این JournalEntry را ثبت می‌کند.
   postedAt        DateTime?
+  /// شناسه کاربر مرتبط با این JournalEntry؛ کلید خارجی به جدول User است.
   createdByUserId Int?
+  /// شناسه JournalEntry مرتبط با این JournalEntry؛ کلید خارجی به جدول JournalEntry است.
   reversalOfId    BigInt?           @unique
+  /// زمان ایجاد رکورد.
   createdAt       DateTime          @default(now())
+  /// ارتباط Prisma با جدول JournalLine (JournalLine): مجموعه رکوردهای وابسته مرتبط با JournalEntry؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   lines           JournalLine[]
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با JournalEntry؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   createdBy       User?             @relation("JournalEntryCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول JournalEntry (JournalEntry): رکورد مرتبط مرتبط با JournalEntry؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   reversalOf      JournalEntry?     @relation("JournalReversals", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول JournalEntry (JournalEntry): مجموعه رکوردهای وابسته مرتبط با JournalEntry؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   reversals       JournalEntry[]    @relation("JournalReversals")
 
   @@index([sourceType, sourceId])
@@ -2375,15 +3618,25 @@ model JournalEntry {
 
 }
 
+/// سطر بدهکار/بستانکار سند حسابداری و حساب دفتر کل مربوط.
 model JournalLine {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt       @id @default(autoincrement())
+  /// شناسه JournalEntry مرتبط با این JournalLine؛ کلید خارجی به جدول JournalEntry است.
   journalEntryId BigInt
+  /// شناسه LedgerAccount مرتبط با این JournalLine؛ کلید خارجی به جدول LedgerAccount است.
   accountId      Int
+  /// مبلغ debit برای این JournalLine؛ واحد پول در فیلد currency مشخص می‌شود.
   debit          Decimal      @default(0) @db.Decimal(20, 2)
+  /// مبلغ credit برای این JournalLine؛ واحد پول در فیلد currency مشخص می‌شود.
   credit         Decimal      @default(0) @db.Decimal(20, 2)
+  /// شرح کوتاه سطر یا عملیات.
   memo           String?      @db.VarChar(500)
+  /// زمان ایجاد رکورد.
   createdAt      DateTime     @default(now())
+  /// ارتباط Prisma با جدول JournalEntry (JournalEntry): رکورد مرتبط مرتبط با JournalLine؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول LedgerAccount (LedgerAccount): رکورد مرتبط مرتبط با JournalLine؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   account        LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
 
   @@index([journalEntryId])
@@ -2391,23 +3644,41 @@ model JournalLine {
 
 }
 
+/// قاعده محاسبه کمیسیون بر اساس درصد/مبلغ ثابت، شرکت/دسته و بازه اعتبار.
 model CommissionRule {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id            Int                       @id @default(autoincrement())
+  /// کد ماشینی یا تجاری این موجودیت.
   code          String                    @unique @db.VarChar(80)
+  /// نام قابل نمایش موجودیت.
   name          String                    @db.VarChar(200)
+  /// روش محاسبه مقدار یا کمیسیون.
   calculation   CommissionCalculationType
+  /// نرخ یا درصد مورد استفاده در محاسبه.
   rate          Decimal                   @db.Decimal(12, 6)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency      String?                   @db.VarChar(3)
+  /// شناسه شرکت مرتبط با این CommissionRule؛ کلید خارجی به جدول Company است.
   companyId     Int?
+  /// شناسه Category مرتبط با این CommissionRule؛ کلید خارجی به جدول Category است.
   categoryId    Int?
+  /// اولویت رسیدگی یا پردازش.
   priority      Int                       @default(0)
+  /// شروع اعتبار قیمت یا قاعده.
   validFrom     DateTime
+  /// پایان اعتبار؛ NULL یعنی تاریخ پایان تعیین نشده است.
   validTo       DateTime?
+  /// فعال یا غیرفعال بودن رکورد.
   isActive      Boolean                   @default(true)
+  /// زمان ایجاد رکورد.
   createdAt     DateTime                  @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt     DateTime                  @updatedAt
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با CommissionRule؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company       Company?                  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Category (Category): رکورد مرتبط مرتبط با CommissionRule؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   category      Category?                 @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول CommissionSnapshot (CommissionSnapshot): مجموعه رکوردهای وابسته مرتبط با CommissionRule؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   snapshots     CommissionSnapshot[]
 
   @@index([isActive, validFrom, validTo, priority])
@@ -2415,38 +3686,68 @@ model CommissionRule {
 
 }
 
+/// snapshot کمیسیون محاسبه‌شده برای سفارش فروشنده تا تغییر بعدی قانون، مبلغ تاریخی را عوض نکند.
 model CommissionSnapshot {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int            @id @default(autoincrement())
+  /// شناسه سفارش فروشنده مرتبط با این CommissionSnapshot؛ کلید خارجی به جدول SellerOrder است.
   sellerOrderId  Int            @unique
+  /// شناسه CommissionRule مرتبط با این CommissionSnapshot؛ کلید خارجی به جدول CommissionRule است.
   ruleId         Int?
+  /// روش محاسبه مقدار یا کمیسیون.
   calculation    CommissionCalculationType
+  /// نرخ یا درصد مورد استفاده در محاسبه.
   rate           Decimal        @db.Decimal(12, 6)
+  /// مبلغ baseAmount برای این CommissionSnapshot؛ واحد پول در فیلد currency مشخص می‌شود.
   baseAmount     Decimal        @db.Decimal(20, 2)
+  /// مبلغ commissionAmount برای این CommissionSnapshot؛ واحد پول در فیلد currency مشخص می‌شود.
   commissionAmount Decimal      @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency       String         @db.VarChar(3)
+  /// زمان ایجاد رکورد.
   createdAt      DateTime       @default(now())
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): رکورد مرتبط مرتبط با CommissionSnapshot؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrder    SellerOrder    @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول CommissionRule (CommissionRule): رکورد مرتبط مرتبط با CommissionSnapshot؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   rule           CommissionRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
 
 }
 
+/// بدهی خالص بازارگاه به فروشنده برای سفارش، پس از کمیسیون و کسورات.
 model SellerPayable {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             BigInt             @id @default(autoincrement())
+  /// شناسه سفارش فروشنده مرتبط با این SellerPayable؛ کلید خارجی به جدول SellerOrder است.
   sellerOrderId  Int                @unique
+  /// شناسه شرکت مرتبط با این SellerPayable؛ کلید خارجی به جدول Company است.
   companyId      Int
+  /// شناسه تسویه مرتبط با این SellerPayable؛ کلید خارجی به جدول Settlement است.
   settlementId   Int?
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency       String             @db.VarChar(3)
+  /// مبلغ grossAmount برای این SellerPayable؛ واحد پول در فیلد currency مشخص می‌شود.
   grossAmount    Decimal            @db.Decimal(20, 2)
+  /// مبلغ commissionAmount برای این SellerPayable؛ واحد پول در فیلد currency مشخص می‌شود.
   commissionAmount Decimal          @default(0) @db.Decimal(20, 2)
+  /// مبلغ deductionAmount برای این SellerPayable؛ واحد پول در فیلد currency مشخص می‌شود.
   deductionAmount Decimal           @default(0) @db.Decimal(20, 2)
+  /// مبلغ netAmount برای این SellerPayable؛ واحد پول در فیلد currency مشخص می‌شود.
   netAmount      Decimal            @db.Decimal(20, 2)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status         SellerPayableStatus @default(PENDING)
+  /// زمان eligible این SellerPayable را ثبت می‌کند.
   eligibleAt     DateTime?
+  /// زمان پرداخت موفق.
   paidAt         DateTime?
+  /// زمان ایجاد رکورد.
   createdAt      DateTime           @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt      DateTime           @updatedAt
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): رکورد مرتبط مرتبط با SellerPayable؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrder    SellerOrder        @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با SellerPayable؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company        Company            @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول Settlement (تسویه): رکورد مرتبط مرتبط با SellerPayable؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   settlement     Settlement?        @relation(fields: [settlementId], references: [id], onDelete: SetNull)
 
   @@index([companyId, status, eligibleAt])
@@ -2454,27 +3755,49 @@ model SellerPayable {
 
 }
 
+/// پرونده تسویه مالی شرکت در یک دوره همراه با مبالغ و وضعیت تأیید/پرداخت.
 model Settlement {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id               Int             @id @default(autoincrement())
+  /// مقدار متنی settlementNumber برای توصیف یا شناسایی تسویه.
   settlementNumber String          @unique @db.VarChar(48)
+  /// شناسه شرکت مرتبط با این تسویه؛ کلید خارجی به جدول Company است.
   companyId        Int
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency         String          @db.VarChar(3)
+  /// زمان مرتبط با periodStart در چرخه عمر تسویه.
   periodStart      DateTime
+  /// زمان مرتبط با periodEnd در چرخه عمر تسویه.
   periodEnd        DateTime
+  /// مبلغ grossAmount برای این تسویه؛ واحد پول در فیلد currency مشخص می‌شود.
   grossAmount      Decimal         @default(0) @db.Decimal(20, 2)
+  /// مبلغ deductionAmount برای این تسویه؛ واحد پول در فیلد currency مشخص می‌شود.
   deductionAmount  Decimal         @default(0) @db.Decimal(20, 2)
+  /// مبلغ netAmount برای این تسویه؛ واحد پول در فیلد currency مشخص می‌شود.
   netAmount        Decimal         @default(0) @db.Decimal(20, 2)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status           SettlementStatus @default(REQUESTED)
+  /// شناسه کاربر مرتبط با این تسویه؛ کلید خارجی به جدول User است.
   requestedByUserId Int
+  /// زمان ثبت درخواست.
   requestedAt      DateTime        @default(now())
+  /// زمان تأیید.
   approvedAt       DateTime?
+  /// زمان پرداخت موفق.
   paidAt           DateTime?
+  /// زمان ایجاد رکورد.
   createdAt        DateTime        @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt        DateTime        @updatedAt
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با تسویه؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company          Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با تسویه؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   requestedBy      User            @relation("SettlementRequester", fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول SellerPayable (SellerPayable): مجموعه رکوردهای وابسته مرتبط با تسویه؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   payables         SellerPayable[]
+  /// ارتباط Prisma با جدول SettlementApproval (SettlementApproval): مجموعه رکوردهای وابسته مرتبط با تسویه؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   approvals        SettlementApproval[]
+  /// ارتباط Prisma با جدول SettlementPayout (SettlementPayout): مجموعه رکوردهای وابسته مرتبط با تسویه؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   payouts          SettlementPayout[]
 
   @@index([companyId, status, createdAt])
@@ -2483,14 +3806,23 @@ model Settlement {
 
 }
 
+/// تصمیم تأیید/رد پرونده تسویه، تأییدکننده و زمان تصمیم.
 model SettlementApproval {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id             Int        @id @default(autoincrement())
+  /// شناسه تسویه مرتبط با این SettlementApproval؛ کلید خارجی به جدول Settlement است.
   settlementId   Int
+  /// شناسه کاربر مرتبط با این SettlementApproval؛ کلید خارجی به جدول User است.
   approverUserId Int
+  /// نتیجه تصمیم ثبت‌شده.
   decision       SettlementApprovalDecision
+  /// علت درخواست، تغییر وضعیت یا تصمیم.
   reason         String?    @db.VarChar(1000)
+  /// زمان decided این SettlementApproval را ثبت می‌کند.
   decidedAt      DateTime   @default(now())
+  /// ارتباط Prisma با جدول Settlement (تسویه): رکورد مرتبط مرتبط با SettlementApproval؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   settlement     Settlement @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SettlementApproval؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   approver       User       @relation(fields: [approverUserId], references: [id], onDelete: Restrict)
 
   @@unique([settlementId, approverUserId])
@@ -2499,22 +3831,39 @@ model SettlementApproval {
 
 }
 
+/// اجرای پرداخت یک تسویه به فروشنده و نتیجه آن.
 model SettlementPayout {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                Int         @id @default(autoincrement())
+  /// شناسه تسویه مرتبط با این SettlementPayout؛ کلید خارجی به جدول Settlement است.
   settlementId      Int
+  /// نام درگاه یا سرویس بیرونی انجام‌دهنده عملیات.
   provider           String?    @db.VarChar(80)
+  /// شناسه مرجع عملیات نزد ارائه‌دهنده بیرونی.
   providerReference  String?    @unique @db.VarChar(200)
+  /// مبلغ مالی این رکورد.
   amount             Decimal    @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency           String     @db.VarChar(3)
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status             PayoutStatus @default(PENDING)
+  /// کلید یکتای جلوگیری از اجرای تکراری درخواست/عملیات.
   idempotencyKey     String     @unique @db.VarChar(160)
+  /// شناسه کاربر مرتبط با این SettlementPayout؛ کلید خارجی به جدول User است.
   executedByUserId   Int?
+  /// زمان executed این SettlementPayout را ثبت می‌کند.
   executedAt         DateTime?
+  /// علت شکست عملیات.
   failureReason      String?
+  /// زمان ایجاد رکورد.
   createdAt          DateTime   @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt          DateTime   @updatedAt
+  /// ارتباط Prisma با جدول Settlement (تسویه): رکورد مرتبط مرتبط با SettlementPayout؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   settlement         Settlement @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با SettlementPayout؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   executedBy         User?      @relation("PayoutExecutor", fields: [executedByUserId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول ReconciliationRecord (ReconciliationRecord): مجموعه رکوردهای وابسته مرتبط با SettlementPayout؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   reconciliations    ReconciliationRecord[]
 
   @@index([settlementId, createdAt])
@@ -2522,18 +3871,31 @@ model SettlementPayout {
 
 }
 
+/// تطبیق تراکنش یا پرداخت خروجی با گزارش ارائه‌دهنده مالی.
 model ReconciliationRecord {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                    BigInt             @id @default(autoincrement())
+  /// نام درگاه یا سرویس بیرونی انجام‌دهنده عملیات.
   provider              String             @db.VarChar(80)
+  /// شناسه مرجع رکورد در سامانه بیرونی.
   externalReference     String             @db.VarChar(240)
+  /// مبلغ مالی این رکورد.
   amount                Decimal            @db.Decimal(20, 2)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency              String             @db.VarChar(3)
+  /// پرچم منطقی matched برای کنترل رفتار ReconciliationRecord.
   matched                Boolean            @default(false)
+  /// شناسه PaymentTransaction مرتبط با این ReconciliationRecord؛ کلید خارجی به جدول PaymentTransaction است.
   paymentTransactionId  Int?
+  /// شناسه SettlementPayout مرتبط با این ReconciliationRecord؛ کلید خارجی به جدول SettlementPayout است.
   payoutId              Int?
+  /// یادداشت‌های تکمیلی درباره رکورد.
   notes                 String?
+  /// زمان reconciled این ReconciliationRecord را ثبت می‌کند.
   reconciledAt          DateTime            @default(now())
+  /// ارتباط Prisma با جدول PaymentTransaction (PaymentTransaction): رکورد مرتبط مرتبط با ReconciliationRecord؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   paymentTransaction    PaymentTransaction? @relation(fields: [paymentTransactionId], references: [id], onDelete: SetNull)
+  /// ارتباط Prisma با جدول SettlementPayout (SettlementPayout): رکورد مرتبط مرتبط با ReconciliationRecord؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   payout                SettlementPayout?  @relation(fields: [payoutId], references: [id], onDelete: Restrict)
 
   @@unique([provider, externalReference])
@@ -2543,25 +3905,45 @@ model ReconciliationRecord {
 
 }
 
+/// سربرگ فاکتور مالی مرتبط با خریدار، شرکت یا سفارش.
 model FinanceInvoice {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id                Int           @id @default(autoincrement())
+  /// مقدار متنی invoiceNumber برای توصیف یا شناسایی FinanceInvoice.
   invoiceNumber     String        @unique @db.VarChar(48)
+  /// شناسه شرکت مرتبط با این FinanceInvoice؛ کلید خارجی به جدول Company است.
   companyId         Int?
+  /// شناسه کاربر مرتبط با این FinanceInvoice؛ کلید خارجی به جدول User است.
   buyerUserId       Int?
+  /// شناسه سفارش مرتبط با این FinanceInvoice؛ کلید خارجی به جدول RetailOrder است.
   orderId           Int?
+  /// شناسه سفارش فروشنده مرتبط با این FinanceInvoice؛ کلید خارجی به جدول SellerOrder است.
   sellerOrderId     Int?
+  /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.
   status            InvoiceStatus @default(DRAFT)
+  /// کد سه‌حرفی ارز (ISO 4217) مبالغ این رکورد.
   currency          String        @db.VarChar(3)
+  /// مبلغ subtotal برای این FinanceInvoice؛ واحد پول در فیلد currency مشخص می‌شود.
   subtotal          Decimal       @db.Decimal(20, 2)
+  /// مبلغ taxTotal برای این FinanceInvoice؛ واحد پول در فیلد currency مشخص می‌شود.
   taxTotal          Decimal       @default(0) @db.Decimal(20, 2)
+  /// مبلغ grandTotal برای این FinanceInvoice؛ واحد پول در فیلد currency مشخص می‌شود.
   grandTotal        Decimal       @db.Decimal(20, 2)
+  /// زمان issued این FinanceInvoice را ثبت می‌کند.
   issuedAt          DateTime?
+  /// زمان ایجاد رکورد.
   createdAt         DateTime      @default(now())
+  /// آخرین زمان ویرایش رکورد.
   updatedAt         DateTime      @updatedAt
+  /// ارتباط Prisma با جدول Company (شرکت): رکورد مرتبط مرتبط با FinanceInvoice؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   company           Company?      @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول User (کاربر): رکورد مرتبط مرتبط با FinanceInvoice؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   buyer             User?         @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول RetailOrder (سفارش): رکورد مرتبط مرتبط با FinanceInvoice؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   order             RetailOrder?  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول SellerOrder (سفارش فروشنده): رکورد مرتبط مرتبط با FinanceInvoice؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   sellerOrder       SellerOrder?  @relation(fields: [sellerOrderId], references: [id], onDelete: Restrict)
+  /// ارتباط Prisma با جدول FinanceInvoiceLine (FinanceInvoiceLine): مجموعه رکوردهای وابسته مرتبط با FinanceInvoice؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   lines             FinanceInvoiceLine[]
 
   @@index([companyId, createdAt])
@@ -2571,14 +3953,23 @@ model FinanceInvoice {
 
 }
 
+/// ردیف جزئیات فاکتور شامل شرح، تعداد، قیمت، مالیات و جمع ردیف.
 model FinanceInvoiceLine {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
   id          Int           @id @default(autoincrement())
+  /// شناسه FinanceInvoice مرتبط با این FinanceInvoiceLine؛ کلید خارجی به جدول FinanceInvoice است.
   invoiceId   Int
+  /// شرح تکمیلی موجودیت.
   description String        @db.VarChar(500)
+  /// تعداد واحدهای کالا یا مقدار موردنظر.
   quantity    Decimal       @default(1) @db.Decimal(18, 4)
+  /// مبلغ unitPrice برای این FinanceInvoiceLine؛ واحد پول در فیلد currency مشخص می‌شود.
   unitPrice   Decimal       @db.Decimal(20, 2)
+  /// مبلغ taxAmount برای این FinanceInvoiceLine؛ واحد پول در فیلد currency مشخص می‌شود.
   taxAmount   Decimal       @default(0) @db.Decimal(20, 2)
+  /// مبلغ lineTotal برای این FinanceInvoiceLine؛ واحد پول در فیلد currency مشخص می‌شود.
   lineTotal   Decimal       @db.Decimal(20, 2)
+  /// ارتباط Prisma با جدول FinanceInvoice (FinanceInvoice): رکورد مرتبط مرتبط با FinanceInvoiceLine؛ این فیلد رابطه‌ای است و ستون مستقل در PostgreSQL ایجاد نمی‌کند.
   invoice     FinanceInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([invoiceId])
