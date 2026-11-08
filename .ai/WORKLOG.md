@@ -1,3 +1,13 @@
+## 2026-11-08 — Shared Website breadcrumb component
+- **Issue:** The live `/products` route uses `ProductListing.vue`, where the breadcrumb was inline markup with a local `.bc` class. Categories repeated the same pattern, while product details used PrimeVue's separate Breadcrumb component. There was no reusable Website breadcrumb component or consistent `.breadcrumb` class.
+- **Fix:** Added `apps/website/src/components/AppBreadcrumb.vue` with semantic `nav`/ordered-list markup, RTL direction, home link, separators, linked parent items, current-page state, responsive wrapping/truncation and a real `.breadcrumb` class.
+- **Applied to:** Product listing (`/products`), categories (`/categories`) and product details (`/products/:id`). Removed the listing's obsolete `.bc` styling and replaced the PrimeVue Breadcrumb on product details. Existing route names and page data remain unchanged.
+- **Tests:** Added component tests and updated listing, category and product-details regression tests.
+- **Scope:** Website frontend only; no API, backend, database or business-rule changes.
+- **Verification:** GitHub source-level review only. Tests/build were not run in this GitHub-only session.
+- **Commits:** `c704d03` (component), `7bcb91a` (listing), `d0f5f90` (categories), `4632ae7` (details), `801ff18`, `9049330`, `11beb8d`, `9ae520e` (tests).
+- **Next:** Pull `main` and run focused Website tests/build; visually check breadcrumb wrapping on mobile and long product titles.
+
 ## 2026-11-08 — Homepage hero and public navigation cleanup
 - **Request:** Remove the homepage hero search and personal/organizational purchase selectors; move FAQ out of primary navigation; replace that navigation slot with news/articles; move the homepage brand strip into the global footer.
 - **Homepage hero:** Removed the search field, purchase-mode tabs, popular-search chips and their unused state/handler. Kept the hero headline/description, featured-product card, slider controls and the existing product/inquiry destination actions.
