@@ -8,6 +8,7 @@
 - **Coordination board:** `.ai/agent-coordination/ACTIVE.md`.
 - **Decision:** Website palette is the single source of truth. `newtemp-reference.scss` is the canonical final token layer for Website/Admin/Company; Website `marketplace-theme.scss` is component/layout-only.
 - **Current palette changes on main:** removed six duplicate root token blocks from Website `marketplace-theme.scss`; replaced old dashboard/shared refinement values with semantic tokens in DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace; added a regression test for the shared source-of-truth rule.
+- **PrimeVue compatibility preservation:** moved Website light/dark `--p-*` semantic values and legacy aliases from the Website-only root blocks into shared `newtemp-reference.scss`; updated Website/shared design-system tests to assert the new ownership. Website component CSS now has zero root token blocks.
 - **API plan:** API-1 Auth/Audit, API-2 Support, API-3 CMS, API-4 CRM, API-5 Retail (commercial approval gate), API-6 Finance (accounting/provider approval gate). Each includes backend, API client, UI, realistic synthetic seed, tests and docs.
 - **Seed standard:** deterministic, idempotent, production-guarded, realistic synthetic fixtures; no usable credentials/OTPs/tokens, real personal contact endpoints or production data.
 - **Parallel-agent model:** independent discovery/implementation in detached worktrees pinned to a main SHA; exact file ownership; coordinator-only serial integration to main. Shared hotspots are coordinator-owned.
