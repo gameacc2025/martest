@@ -979,3 +979,19 @@ Implementation is prepared on PR #90 (`feat/db0-db6-domain-schema`), not yet mer
 
 ## DB-0 through DB-6 merged — 2026-11-08
 The database-only expansion is now merged to canonical `main` at `d509ade7d1dc452eabaccfa0edd2ef463cd23d94` (PR #90). The schema contains 97 models / 58 enums and six additive migrations after the consolidated baseline. Fresh PostgreSQL 18.4 CI migration validation passed. No user/local/production DB was touched. Existing frontend/shared test and Website browser smoke failures remain unrelated and are documented in WORKLOG. API and UI are still pending; AD-4 remains in force.
+
+
+## Current design-system source of truth — 2026-11-08
+- Owner-approved Website palette is authoritative for Website, Admin and Company.
+- `packages/shared-ui/assets/design-system/newtemp-reference.scss` is the canonical shared token layer and must load last in all three app entrypoints.
+- `apps/website/src/assets/marketplace-theme.scss` is Website component/layout styling only; it must not redeclare root-level brand, surface, typography, radius, shadow or status tokens.
+- Admin and Company must use the exact same semantic tokens and PrimeVue preset as Website; no independent panel palette.
+- Use semantic tokens for common UI surfaces, navigation, buttons, inputs, tables, status states, focus rings, shadows and light/dark modes. Scoped color literals are permitted only for intentional Website illustration/hero artwork, not shared components.
+- The binding decision is recorded in `.ai/decisions.md`; execution and acceptance gates are in `docs/API_UI_SEED_EXECUTION_ROADMAP.md`.
+
+## API vertical-slice and multi-agent execution contract — 2026-11-08
+- API-1 through API-6 are delivered as complete backend + API client + UI + realistic synthetic seed + tests + docs vertical slices.
+- Every seed module must be deterministic, idempotent, production-guarded, relationally valid and use synthetic records only; never seed usable credentials, real contact endpoints, payment secrets or production data.
+- Parallel agents use bounded ownership lanes and detached worktrees/checkouts pinned to a recorded main SHA; no branches are created. Only the coordinator integrates reviewed patches as serial commits directly onto main.
+- Shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global design tokens) are coordinator-owned.
+- Canonical lane matrix, handoff format, dependency order and acceptance criteria: `docs/API_UI_SEED_EXECUTION_ROADMAP.md`.
