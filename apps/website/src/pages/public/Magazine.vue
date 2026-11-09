@@ -119,44 +119,6 @@ watch(() => activeCategory.value, () => {
 watch(() => searchQuery.value, () => {
   currentPage.value = 1
 })
-</script> اتصال‌ها و سازگاری اجزا با تجهیزات انتهایی را بررسی کنید.', 'برای جلوگیری از دوباره‌کاری، فهرست اقلام را بر اساس نقشه مسیر، تعداد نقاط اتصال و ظرفیت توسعه تهیه کنید.'], related: ['fiber-optic-cable-guide', 'otdr-buying-guide'] },
-  { slug: 'network-rack-checklist', title: 'پیش از تجهیز رک شبکه چه مواردی را بررسی کنیم؟', excerpt: 'ابعاد رک، تهویه، توزیع برق، مدیریت کابل و ظرفیت توسعه را در یک برنامه مشخص قرار دهید.', category: 'زیرساخت', kind: 'چک‌لیست پروژه', readTime: '۵ دقیقه', dateLabel: 'چک‌لیست پروژه', icon: 'pi pi-server', tone: 'blue', featured: false, body: ['انتخاب رک باید با ابعاد تجهیزات، عمق موردنیاز، وزن قابل تحمل و محل نصب هماهنگ باشد.', 'تهویه، مسیر ورود کابل، ارت، PDU و دسترسی برای نگهداری را از ابتدا طراحی کنید.', 'فضای خالی برای توسعه آینده و مستندسازی محل نصب تجهیزات، هزینه نگهداری را کاهش می‌دهد.'], related: ['network-switch-selection', 'poe-switch-planning'] },
-  { slug: 'telecom-procurement-checklist', title: 'چک‌لیست استعلام خرید تجهیزات مخابراتی', excerpt: 'چطور درخواست استعلام دقیق بنویسیم تا پیشنهادهای تأمین‌کنندگان قابل مقایسه باشند؟', category: 'خرید سازمانی', kind: 'راهنمای خرید', readTime: '۶ دقیقه', dateLabel: 'راهنمای خرید', icon: 'pi pi-file-edit', tone: 'navy', featured: false, body: ['درخواست استعلام دقیق با شرح نیاز روشن شروع می‌شود. مدل، تعداد، مشخصات فنی، محل تحویل و زمان‌بندی را تا حد امکان مشخص کنید.', 'اگر معادل فنی قابل قبول است، معیارهای پذیرش را شفاف بنویسید تا پیشنهادهای جایگزین نیز قابل ارزیابی باشند.', 'شرایط گارانتی، اصالت کالا، اعتبار پیشنهاد و اقلام همراه را در پاسخ‌ها مقایسه کنید.'], related: ['network-switch-selection', 'fiber-optic-cable-guide'] },
-  { slug: 'telecom-equipment-authenticity', title: 'اصالت تجهیزات شبکه را پیش از تحویل چطور بررسی کنیم؟', excerpt: 'شماره سریال، مستندات، وضعیت ظاهری و تطابق مشخصات کالا با پیشنهاد را کنترل کنید.', category: 'خرید سازمانی', kind: 'کنترل کیفیت', readTime: '۵ دقیقه', dateLabel: 'کنترل کیفیت', icon: 'pi pi-shield-check', tone: 'amber', featured: false, body: ['کنترل اصالت باید از مرحله بررسی پیشنهاد آغاز شود. مدل و پارت‌نامبر را با مستندات سازنده تطبیق دهید.', 'هنگام تحویل، شماره سریال، پلمب، متعلقات، وضعیت ظاهری و مدارک گارانتی را ثبت کنید.', 'در خریدهای سازمانی، صورت‌جلسه تحویل و معیارهای پذیرش فنی از بروز اختلاف جلوگیری می‌کند.'], related: ['telecom-procurement-checklist', 'network-rack-checklist'] },
-]
-
-const categories = ['همه مطالب', ...new Set(articles.map(item => item.category))]
-const currentArticle = computed(() => articles.find(item => item.slug === route.params.slug) || null)
-const filteredArticles = computed(() => {
-  const query = searchQuery.value.trim().toLocaleLowerCase('fa')
-  return articles.filter(item => {
-    const categoryMatch = activeCategory.value === 'همه مطالب' || item.category === activeCategory.value
-    const text = `${item.title} ${item.excerpt} ${item.category}`.toLocaleLowerCase('fa')
-    return categoryMatch && (!query || text.includes(query))
-  })
-})
-const featuredArticles = computed(() => articles.filter(item => item.featured))
-const latestArticles = computed(() => articles.filter(item => item.slug !== currentArticle.value?.slug).slice(0, 5))
-const relatedArticles = computed(() => (currentArticle.value?.related || []).map(slug => articles.find(item => item.slug === slug)).filter(Boolean))
-const recommendations = computed(() => relatedArticles.value.length ? relatedArticles.value : latestArticles.value.slice(0, 3))
-const isArticle = computed(() => Boolean(route.params.slug))
-
-function openArticle(article) {
-  router.push({ name: 'mag-article', params: { slug: article.slug } })
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-function openMagazine() {
-  activeCategory.value = 'همه مطالب'
-  searchQuery.value = ''
-  router.push({ name: 'magazine' })
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-function formatCategory(category) { return category || 'مقاله تخصصی' }
-
-watch(() => route.params.slug, () => {
-  if (currentArticle.value) document.title = `${currentArticle.value.title} | مجله Telecom Market`
-  else document.title = 'مجله و مقالات تخصصی | Telecom Market'
-}, { immediate: true })
 </script>
 
 <template>
