@@ -91,6 +91,23 @@ async function setOpportunityStage(item, stageId) {
     actionError.value = errorMessage(err)
   }
 }
+async function exportLeadList() {
+  actionError.value = ''
+  try {
+    const response = await crmApi.exportLeads({ search: search.value || undefined, status: status.value || undefined })
+    const blob = unwrap(response)
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'crm-leads.csv'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    actionError.value = errorMessage(err)
+  }
+}
 async function createLead() {
   saving.value = true
   actionError.value = ''
@@ -243,6 +260,7 @@ onMounted(load)
     <section v-else class="crm-panel">
       <div class="crm-panel-head">
         <div><h2>صندوق سرنخ‌ها</h2><p>{{ leadMeta.total }} سرنخ ثبت‌شده</p></div>
+        <button type="button" class="crm-secondary" @click="exportLeadList">خروجی CSV</button>
         <div class="crm-filters">
           <input v-model="search" type="search" placeholder="جستجو در نام، شرکت، ایمیل یا تلفن" aria-label="جستجوی سرنخ‌ها">
           <select v-model="status" aria-label="فیلتر وضعیت">
