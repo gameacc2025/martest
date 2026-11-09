@@ -366,6 +366,17 @@ onMounted(load)
       </div>
     </section>
 
+    <div v-if="showOpportunityCreate" class="crm-modal-backdrop" @click.self="showOpportunityCreate = false">
+      <form class="crm-modal" @submit.prevent="createOpportunity">
+        <div class="crm-panel-head"><div><h2>ایجاد فرصت فروش</h2><p>فرصت جدید را به یک حساب CRM متصل کنید</p></div><button type="button" aria-label="بستن" @click="showOpportunityCreate = false">×</button></div>
+        <label>حساب CRM *<select v-model="opportunityForm.accountId" required><option value="">انتخاب حساب</option><option v-for="account in accounts" :key="account.id" :value="String(account.id)">{{ account.displayName }}</option></select></label>
+        <label>عنوان فرصت *<input v-model="opportunityForm.title" required maxlength="240"></label>
+        <div class="crm-form-grid"><label>مبلغ<input v-model="opportunityForm.amount" type="number" min="0"></label><label>ارز<input v-model="opportunityForm.currency" maxlength="3" required></label></div>
+        <label>تاریخ پیش‌بینی‌شده<input v-model="opportunityForm.expectedCloseAt" type="date"></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showOpportunityCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ثبت فرصت' }}</button></div>
+      </form>
+    </div>
+
     <div v-if="selectedAccount" class="crm-modal-backdrop" @click.self="selectedAccount = null">
       <section class="crm-modal">
         <div class="crm-panel-head"><div><h2>{{ selectedAccount.displayName }}</h2><p>اطلاعات حساب و مخاطبان</p></div><button type="button" aria-label="بستن" @click="selectedAccount = null">×</button></div>
