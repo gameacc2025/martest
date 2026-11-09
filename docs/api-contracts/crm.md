@@ -171,7 +171,7 @@ The following first vertical slice has been added to `main`:
 
 - Implement explicit lead merge with preserved relations and an audit trail, lead export, opportunity update/detail, pipeline update and stage update APIs.
 - Complete Admin CRM UI for account/contact detail and CRUD, opportunity creation/editing, task agenda and CRUD, source management, owner assignment, explicit merge and conversion confirmation; add full interaction forms for activities and notes.
-- Add missing automated route/service/authorization/privacy/idempotency/seed/UI tests and run backend/Admin test suites and builds in a real checkout.
+- Expand automated service/authorization/privacy/idempotency/seed/UI tests and run backend/Admin test suites and builds in a real checkout. A first route-boundary test file now covers unauthenticated, COMPANY wildcard, CUSTOMER legacy-lead permission and STAFF-without-CRM-permission denial.
 - Add automated route/service/authorization/privacy/idempotency/seed/UI tests and run backend/admin test suites and builds in a real checkout.
 - Verify seed behavior against the actual local database and inspect the Admin UI in the supported non-browser test workflow.
 
