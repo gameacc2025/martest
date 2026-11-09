@@ -328,6 +328,7 @@ export const crmApi = {
   changeLeadStatus: (id, status, reason) => api.post(endpoints.crm.leadStatus(id), { status, reason }),
   convertLead: (id) => api.post(endpoints.crm.convertLead(id)),
   getLeadDuplicates: (id) => api.get(endpoints.crm.leadDuplicates(id)),
+  mergeLead: (id, targetLeadId, reason) => api.post(endpoints.crm.mergeLead(id), { targetLeadId, reason }),
   getLeadTimeline: (id) => api.get(endpoints.crm.leadTimeline(id)),
   listAccounts: (params = {}) => api.get(endpoints.crm.accounts, { params }),
   listPipelines: () => api.get(endpoints.crm.pipelines),
