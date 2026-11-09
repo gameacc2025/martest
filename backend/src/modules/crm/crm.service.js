@@ -16,6 +16,7 @@ const idOf = (value) => {
 const pageOf = (v, d, max) => Number.isInteger(Number(v)) && Number(v) > 0 ? Math.min(Number(v), max) : d;
 const safe = (v) => {
   if (typeof v === 'bigint') return v.toString();
+  if (v && v.constructor && v.constructor.name === 'Decimal' && typeof v.toString === 'function') return v.toString();
   if (Array.isArray(v)) return v.map(safe);
   if (v && typeof v === 'object' && !(v instanceof Date)) return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, safe(x)]));
   return v;
