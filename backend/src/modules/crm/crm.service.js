@@ -308,12 +308,14 @@ async function createOpportunity(input, actorId) {
   if (!title) fail(400, 'CRM_OPPORTUNITY_TITLE_REQUIRED', 'عنوان فرصت الزامی است.');
   const currency = String(input.currency || 'IRR').trim().toUpperCase();
   if (!/^[A-Z]{3}$/.test(currency)) fail(400, 'CRM_CURRENCY_INVALID', 'کد ارز باید سه حرف باشد.');
+  const amount = Number(input.amount || 0);
+  if (!Number.isFinite(amount) || amount < 0) fail(400, 'CRM_AMOUNT_INVALID', 'مبلغ فرصت باید عددی نامنفی باشد.');
   const status = stage.isWon ? 'WON' : stage.isLost ? 'LOST' : 'OPEN';
   const opportunityNumber = 'CRM-OPP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
   return safe(await prisma.$transaction(async (tx) => {
     const row = await tx.opportunity.create({ data: {
       opportunityNumber, accountId, pipelineId, stageId, ownerUserId, title: title.slice(0, 240),
-      amount: String(input.amount || 0), currency, expectedCloseAt: input.expectedCloseAt ? new Date(input.expectedCloseAt) : null,
+      amount: String(amount), currency, expectedCloseAt: input.expectedCloseAt ? new Date(input.expectedCloseAt) : null,
       status, closedAt: status === 'OPEN' ? null : new Date(),
     }, include: { account: { select: { id: true, displayName: true } }, stage: true } });
     await tx.opportunityStageHistory.create({ data: { opportunityId: row.id, toStageId: stageId, actorUserId: creatorUserId, reason: 'ایجاد فرصت CRM' } });
@@ -469,7 +471,15 @@ async function updatePipelineStage(pipelineId, stageId, input) {
   const nextWon = data.isWon === undefined ? current.isWon : data.isWon;
   const nextLost = data.isLost === undefined ? current.isLost : data.isLost;
   if (nextWon && nextLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
-  return safe(await prisma.pipelineStage.update({ where: { id: stage }, data }));
+  return safe(await prisma.$transaction(async (tx) => {
+    const updated = await tx.pipelineStage.update({ where: { id: stage }, data });
+    const status = nextWon ? 'WON' : nextLost ? 'LOST' : 'OPEN';
+    await tx.opportunity.updateMany({
+      where: { pipelineId: pipeline, stageId: stage },
+      data: { status, closedAt: status === 'OPEN' ? null : new Date() },
+    });
+    return updated;
+  }));
 }
 async function getOpportunity(id) {
   const row = await prisma.opportunity.findUnique({ where: { id: idOf(id) }, include: {
@@ -482,7 +492,11 @@ async function getOpportunity(id) {
 async function updateOpportunity(id, input) {
   const opportunityId = idOf(id), data = {};
   if (input.title !== undefined) data.title = String(input.title).trim().slice(0, 240);
-  if (input.amount !== undefined) data.amount = String(input.amount);
+  if (input.amount !== undefined) {
+    const amount = Number(input.amount);
+    if (!Number.isFinite(amount) || amount < 0) fail(400, 'CRM_AMOUNT_INVALID', 'مبلغ فرصت باید عددی نامنفی باشد.');
+    data.amount = String(amount);
+  }
   if (input.currency !== undefined) {
     const currency = String(input.currency).trim().toUpperCase();
     if (!/^[A-Z]{3}$/.test(currency)) fail(400, 'CRM_CURRENCY_INVALID', 'کد ارز باید سه حرف باشد.');
