@@ -120,14 +120,25 @@ async function convertLead(id, actorId) {
       if (existing) return safe({ leadId, account: existing, alreadyConverted: true });
     }
     if (lead.status !== 'QUALIFIED') fail(409, 'CRM_LEAD_NOT_QUALIFIED', 'فقط سرنخ واجد شرایط قابل تبدیل است.');
+    // Claim the conversion atomically. A concurrent request can win only once.
+    const claimed = await tx.lead.updateMany({
+      where: { id: leadId, status: 'QUALIFIED', convertedAccountId: null },
+      data: { status: 'CONVERTED', convertedByUserId: converter, convertedAt: new Date() },
+    });
+    if (claimed.count !== 1) {
+      const latest = await tx.lead.findUnique({ where: { id: leadId } });
+      if (latest?.status === 'CONVERTED' && latest.convertedAccountId) {
+        const existing = await tx.cRMAccount.findUnique({ where: { id: latest.convertedAccountId }, include: { contacts: true } });
+        if (existing) return safe({ leadId, account: existing, alreadyConverted: true });
+      }
+      fail(409, 'CRM_CONVERSION_CONFLICT', 'تبدیل این سرنخ هم‌زمان توسط درخواست دیگری انجام شده است.');
+    }
     const account = await tx.cRMAccount.create({ data: {
       displayName: lead.companyName || lead.displayName, accountType: 'PROSPECT', ownerUserId: lead.ownerUserId,
       source: lead.sourceId ? String(lead.sourceId) : null,
       contacts: { create: { name: lead.displayName, email: lead.email, phone: lead.phone, isPrimary: true } },
     }, include: { contacts: true } });
-    await tx.lead.update({ where: { id: leadId }, data: {
-      status: 'CONVERTED', convertedAccountId: account.id, convertedByUserId: converter, convertedAt: new Date(),
-    } });
+    await tx.lead.update({ where: { id: leadId }, data: { convertedAccountId: account.id } });
     return safe({ leadId, account, alreadyConverted: false });
   });
 }
