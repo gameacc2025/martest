@@ -13,6 +13,8 @@ const leadMeta = ref({ total: 0, page: 1, limit: 25, totalPages: 0 })
 const sources = ref([])
 const tasks = ref([])
 const activities = ref([])
+const pipelines = ref([])
+const opportunities = ref([])
 const search = ref('')
 const status = ref('')
 const showCreate = ref(false)
@@ -47,24 +49,49 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const jobs = [crmApi.dashboard(), crmApi.listSources()]
-    if (activeSection.value !== 'activities') jobs.push(crmApi.listLeads({ page: 1, limit: 25, search: search.value || undefined, status: status.value || undefined }))
-    if (activeSection.value === 'activities') jobs.push(crmApi.listActivities())
-    if (activeSection.value === 'overview') jobs.push(crmApi.listTasks({ overdue: 'true' }))
-    const results = await Promise.all(jobs)
-    dashboard.value = unwrap(results[0])
-    sources.value = unwrap(results[1]) || []
-    if (activeSection.value === 'activities') activities.value = unwrap(results[2]) || []
-    else {
-      const page = unwrap(results[2])
-      leads.value = page?.data || []
-      leadMeta.value = page?.meta || leadMeta.value
-      if (activeSection.value === 'overview') tasks.value = unwrap(results[3]) || []
+    if (activeSection.value === 'pipeline') {
+      const results = await Promise.all([crmApi.dashboard(), crmApi.listPipelines(), crmApi.listOpportunities()])
+      dashboard.value = unwrap(results[0])
+      pipelines.value = unwrap(results[1]) || []
+      opportunities.value = unwrap(results[2]) || []
+    } else {
+      const jobs = [crmApi.dashboard(), crmApi.listSources()]
+      if (activeSection.value !== 'activities') jobs.push(crmApi.listLeads({ page: 1, limit: 25, search: search.value || undefined, status: status.value || undefined }))
+      if (activeSection.value === 'activities') jobs.push(crmApi.listActivities())
+      if (activeSection.value === 'overview') jobs.push(crmApi.listTasks({ overdue: 'true' }))
+      const results = await Promise.all(jobs)
+      dashboard.value = unwrap(results[0])
+      sources.value = unwrap(results[1]) || []
+      if (activeSection.value === 'activities') activities.value = unwrap(results[2]) || []
+      else {
+        const page = unwrap(results[2])
+        leads.value = page?.data || []
+        leadMeta.value = page?.meta || leadMeta.value
+        if (activeSection.value === 'overview') tasks.value = unwrap(results[3]) || []
+      }
     }
   } catch (err) {
     error.value = errorMessage(err)
   } finally {
     loading.value = false
+  }
+}
+const activePipeline = computed(() => pipelines.value.find((item) => item.isDefault) || pipelines.value[0] || null)
+const pipelineStages = computed(() => activePipeline.value?.stages || [])
+function opportunitiesFor(stageId) {
+  return opportunities.value.filter((item) => item.stageId === stageId)
+}
+async function advanceOpportunity(item) {
+  const stages = pipelineStages.value
+  const index = stages.findIndex((stage) => stage.id === item.stageId)
+  const nextStage = stages[index + 1]
+  if (!nextStage || nextStage.isWon || nextStage.isLost) return
+  actionError.value = ''
+  try {
+    await crmApi.changeOpportunityStage(item.id, { stageId: nextStage.id, reason: 'انتقال از برد CRM' })
+    await load()
+  } catch (err) {
+    actionError.value = errorMessage(err)
   }
 }
 async function createLead() {
@@ -169,6 +196,22 @@ onMounted(load)
       </div>
     </section>
 
+    <section v-else-if="activeSection === 'pipeline'" class="crm-panel">
+      <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div></div>
+      <div v-if="loading" class="crm-state">در حال دریافت فرصت‌ها…</div>
+      <div v-else-if="!pipelineStages.length" class="crm-state">برای نمایش قیف، ابتدا مراحل فروش را تعریف کنید.</div>
+      <div v-else class="crm-kanban">
+        <section v-for="stage in pipelineStages" :key="stage.id" class="crm-kanban-column">
+          <header><strong>{{ stage.label }}</strong><span>{{ opportunitiesFor(stage.id).length }}</span></header>
+          <article v-for="item in opportunitiesFor(stage.id)" :key="item.id" class="crm-opportunity">
+            <strong>{{ item.title }}</strong><small>{{ item.account?.displayName || 'حساب CRM' }}</small>
+            <div>{{ Number(item.amount || 0).toLocaleString('fa-IR') }} {{ item.currency }}</div>
+            <button v-if="!stage.isWon && !stage.isLost" type="button" @click="advanceOpportunity(item)">مرحله بعد</button>
+          </article>
+        </section>
+      </div>
+    </section>
+
     <section v-else-if="activeSection === 'activities'" class="crm-panel">
       <div class="crm-panel-head"><div><h2>تاریخچه تعاملات</h2><p>تماس‌ها، ایمیل‌ها و جلسات ثبت‌شده</p></div></div>
       <div v-if="loading" class="crm-state">در حال دریافت اطلاعات…</div>
@@ -264,7 +307,7 @@ onMounted(load)
 .crm-filters input{width:min(300px,35vw)}.crm-table-wrap{overflow:auto}.crm-table{width:100%;border-collapse:collapse;white-space:nowrap}.crm-table th,.crm-table td{text-align:right;padding:12px 10px;border-bottom:1px solid var(--surface-border,#e2e8f0);font-size:.84rem}.crm-table th{color:var(--text-color-secondary,#64748b);font-weight:650}.crm-table td small{display:block;color:var(--text-color-secondary,#64748b);margin-top:4px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
 .crm-status{display:inline-flex;border-radius:20px;padding:4px 9px;background:var(--surface-100,#f1f5f9);font-size:.75rem}.crm-status[data-status="QUALIFIED"]{background:#dcfce7;color:#166534}.crm-status[data-status="NEW"]{background:#e0f2fe;color:#075985}
 .crm-actions{display:flex;gap:5px}.crm-actions button,.crm-alert button{border:0;background:transparent;color:var(--primary-color,#0891b2);cursor:pointer;font:inherit;font-size:.78rem}
-.crm-state{padding:28px;text-align:center;color:var(--text-color-secondary,#64748b)}.crm-task,.crm-activity{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-task>div{display:grid;gap:4px;flex:1}.crm-task small,.crm-activity small{color:var(--text-color-secondary,#64748b)}.crm-activity p{margin:5px 0;font-size:.86rem}.crm-alert{padding:12px 15px;border-radius:9px;background:var(--red-50,#fef2f2);color:var(--red-700,#b91c1c);display:flex;justify-content:space-between;gap:12px}
+.crm-state{padding:28px;text-align:center;color:var(--text-color-secondary,#64748b)}.crm-kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:12px;overflow:auto;align-items:start}.crm-kanban-column{background:var(--surface-ground,#f8fafc);border:1px solid var(--surface-border,#e2e8f0);border-radius:10px;padding:10px;min-height:180px}.crm-kanban-column>header{display:flex;justify-content:space-between;padding:5px 3px 12px}.crm-opportunity{display:grid;gap:7px;background:var(--surface-card,#fff);border:1px solid var(--surface-border,#e2e8f0);border-radius:9px;padding:12px;margin-bottom:8px;font-size:.84rem}.crm-opportunity small{color:var(--text-color-secondary,#64748b)}.crm-opportunity button{justify-self:start;border:0;background:transparent;color:var(--primary-color,#0891b2);cursor:pointer;font:inherit}.crm-task,.crm-activity{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-task>div{display:grid;gap:4px;flex:1}.crm-task small,.crm-activity small{color:var(--text-color-secondary,#64748b)}.crm-activity p{margin:5px 0;font-size:.86rem}.crm-alert{padding:12px 15px;border-radius:9px;background:var(--red-50,#fef2f2);color:var(--red-700,#b91c1c);display:flex;justify-content:space-between;gap:12px}
 .crm-modal-backdrop{position:fixed;inset:0;z-index:1000;background:#0f172a88;display:grid;place-items:center;padding:16px}.crm-modal{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--surface-card,#fff);color:inherit;border-radius:14px;padding:20px;display:grid;gap:14px}.crm-modal label{display:grid;gap:6px;font-size:.86rem}.crm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.crm-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;background:var(--surface-ground,#f8fafc);border-radius:9px;font-size:.84rem}.crm-modal h3{font-size:.92rem;margin:8px 0 0}.crm-muted{color:var(--text-color-secondary,#64748b)}.crm-duplicate-list{margin:0;padding-inline-start:20px}.crm-timeline-item{padding:9px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-timeline-item p{margin:4px 0;font-size:.84rem}.crm-timeline-item small{color:var(--text-color-secondary,#64748b)}.crm-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
 @media(max-width:800px){.crm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.crm-heading,.crm-panel-head{align-items:flex-start;flex-direction:column}.crm-filters{width:100%;flex-wrap:wrap}.crm-filters input{width:100%}}
 @media(max-width:480px){.crm-form-grid{grid-template-columns:1fr}.crm-panel{padding:12px}.crm-stat{padding:12px}.crm-stat strong{font-size:1.1rem}}
