@@ -22,6 +22,8 @@ const accounts = ref([])
 const accountContacts = ref([])
 const selectedAccount = ref(null)
 const accountLoading = ref(false)
+const showOpportunityCreate = ref(false)
+const opportunityForm = ref({ accountId: '', title: '', amount: '0', currency: 'IRR', expectedCloseAt: '' })
 const search = ref('')
 const status = ref('')
 const showCreate = ref(false)
@@ -57,10 +59,12 @@ async function load() {
   error.value = ''
   try {
     if (activeSection.value === 'pipeline') {
-      const results = await Promise.all([crmApi.dashboard(), crmApi.listPipelines(), crmApi.listOpportunities()])
+      const results = await Promise.all([crmApi.dashboard(), crmApi.listPipelines(), crmApi.listOpportunities(), crmApi.listAccounts({ page: 1, limit: 100 })])
       dashboard.value = unwrap(results[0])
       pipelines.value = unwrap(results[1]) || []
       opportunities.value = unwrap(results[2]) || []
+      const accountPage = unwrap(results[3])
+      accounts.value = accountPage?.data || []
     } else if (activeSection.value === 'accounts') {
       const results = await Promise.all([crmApi.dashboard(), crmApi.listAccounts({ page: 1, limit: 50 })])
       dashboard.value = unwrap(results[0])
@@ -96,6 +100,18 @@ const activePipeline = computed(() => pipelines.value.find((item) => item.isDefa
 const pipelineStages = computed(() => activePipeline.value?.stages || [])
 function opportunitiesFor(stageId) {
   return opportunities.value.filter((item) => item.stageId === stageId)
+}
+async function createOpportunity() {
+  if (!activePipeline.value || !pipelineStages.value.length) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    await crmApi.createOpportunity({ ...opportunityForm.value, accountId: Number(opportunityForm.value.accountId), pipelineId: activePipeline.value.id, stageId: pipelineStages.value[0].id, amount: String(opportunityForm.value.amount) })
+    showOpportunityCreate.value = false
+    opportunityForm.value = { accountId: '', title: '', amount: '0', currency: 'IRR', expectedCloseAt: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
 }
 async function setOpportunityStage(item, stageId) {
   if (!stageId || Number(stageId) === item.stageId) return
