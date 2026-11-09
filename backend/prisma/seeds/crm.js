@@ -1,6 +1,4 @@
-const prisma = require('../../src/config/db');
-
-async function seedCrm() {
+async function seedCrm(prisma) {
   if (process.env.NODE_ENV === 'production') {
     console.log('[crm-seed] Production detected; demo CRM fixtures skipped.');
     return { skipped: true };
