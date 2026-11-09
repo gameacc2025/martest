@@ -312,3 +312,27 @@ export const auditLogsApi = {
   getById: (id) => api.get(endpoints.audit.get(id)),
   export: (params = {}) => api.get(endpoints.audit.export, { params, responseType: 'blob' }),
 }
+
+
+// CRM API — STAFF-only endpoints; authorization is enforced by the backend.
+export const crmApi = {
+  dashboard: () => api.get(endpoints.crm.dashboard),
+  listSources: () => api.get(endpoints.crm.sources),
+  createSource: (data) => api.post(endpoints.crm.sources, data),
+  updateSource: (id, data) => api.patch(endpoints.crm.source(id), data),
+  listLeads: (params = {}) => api.get(endpoints.crm.leads, { params }),
+  getLead: (id) => api.get(endpoints.crm.lead(id)),
+  createLead: (data) => api.post(endpoints.crm.leads, data),
+  updateLead: (id, data) => api.patch(endpoints.crm.lead(id), data),
+  assignLead: (id, ownerUserId) => api.post(endpoints.crm.assignLead(id), { ownerUserId }),
+  changeLeadStatus: (id, status, reason) => api.post(endpoints.crm.leadStatus(id), { status, reason }),
+  convertLead: (id) => api.post(endpoints.crm.convertLead(id)),
+  listAccounts: (params = {}) => api.get(endpoints.crm.accounts, { params }),
+  createAccount: (data) => api.post(endpoints.crm.accounts, data),
+  listTasks: (params = {}) => api.get(endpoints.crm.tasks, { params }),
+  createTask: (data) => api.post(endpoints.crm.tasks, data),
+  listActivities: (params = {}) => api.get(endpoints.crm.activities, { params }),
+  createActivity: (data) => api.post(endpoints.crm.activities, data),
+  listNotes: (params = {}) => api.get(endpoints.crm.notes, { params }),
+  createNote: (data) => api.post(endpoints.crm.notes, data),
+};
