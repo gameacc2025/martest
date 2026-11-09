@@ -141,6 +141,18 @@ async function openLead(lead) {
     detailLoading.value = false
   }
 }
+async function mergeDuplicate(item) {
+  const reason = window.prompt('دلیل ادغام این سرنخ در «' + selectedLead.value.displayName + '» را وارد کنید:')
+  if (!reason?.trim()) return
+  actionError.value = ''
+  try {
+    await crmApi.mergeLead(item.id, selectedLead.value.id, reason.trim())
+    selectedLead.value = null
+    await load()
+  } catch (err) {
+    actionError.value = errorMessage(err)
+  }
+}
 async function finishTask(task) {
   actionError.value = ''
   try {
@@ -270,7 +282,7 @@ onMounted(load)
         <div class="crm-detail-grid"><span>ایمیل: {{ selectedLead.email || '—' }}</span><span>تلفن: {{ selectedLead.phone || '—' }}</span><span>وضعیت: {{ statusLabel(selectedLead.status) }}</span><span>امتیاز: {{ selectedLead.score }}/100</span></div>
         <h3>موارد مشابه پیشنهادی</h3>
         <p v-if="!duplicates.length" class="crm-muted">مورد مشابهی پیدا نشد.</p>
-        <ul v-else class="crm-duplicate-list"><li v-for="item in duplicates" :key="item.id">{{ item.displayName }} — {{ item.matchReasons.join('، ') }}</li></ul>
+        <ul v-else class="crm-duplicate-list"><li v-for="item in duplicates" :key="item.id"><span>{{ item.displayName }} — {{ item.matchReasons.join('، ') }}</span><button type="button" @click="mergeDuplicate(item)">ادغام در این سرنخ</button></li></ul>
         <h3>تاریخچه سرنخ</h3>
         <div v-if="detailLoading" class="crm-state">در حال دریافت تاریخچه…</div>
         <div v-else-if="!leadTimeline.length" class="crm-state">هنوز فعالیت یا یادداشتی ثبت نشده است.</div>
@@ -314,7 +326,7 @@ onMounted(load)
 .crm-status{display:inline-flex;border-radius:20px;padding:4px 9px;background:var(--surface-100,#f1f5f9);font-size:.75rem}.crm-status[data-status="QUALIFIED"]{background:#dcfce7;color:#166534}.crm-status[data-status="NEW"]{background:#e0f2fe;color:#075985}
 .crm-actions{display:flex;gap:5px}.crm-actions button,.crm-alert button{border:0;background:transparent;color:var(--primary-color,#0891b2);cursor:pointer;font:inherit;font-size:.78rem}
 .crm-state{padding:28px;text-align:center;color:var(--text-color-secondary,#64748b)}.crm-kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:12px;overflow:auto;align-items:start}.crm-kanban-column{background:var(--surface-ground,#f8fafc);border:1px solid var(--surface-border,#e2e8f0);border-radius:10px;padding:10px;min-height:180px}.crm-kanban-column>header{display:flex;justify-content:space-between;padding:5px 3px 12px}.crm-opportunity{display:grid;gap:7px;background:var(--surface-card,#fff);border:1px solid var(--surface-border,#e2e8f0);border-radius:9px;padding:12px;margin-bottom:8px;font-size:.84rem}.crm-opportunity small{color:var(--text-color-secondary,#64748b)}.crm-opportunity button{justify-self:start;border:0;background:transparent;color:var(--primary-color,#0891b2);cursor:pointer;font:inherit}.crm-task,.crm-activity{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-task>div{display:grid;gap:4px;flex:1}.crm-task-complete{border:0;border-radius:7px;padding:6px 9px;background:var(--primary-50,#ecfeff);color:var(--primary-color,#0891b2);cursor:pointer;font:inherit;font-size:.78rem}.crm-task small,.crm-activity small{color:var(--text-color-secondary,#64748b)}.crm-activity p{margin:5px 0;font-size:.86rem}.crm-alert{padding:12px 15px;border-radius:9px;background:var(--red-50,#fef2f2);color:var(--red-700,#b91c1c);display:flex;justify-content:space-between;gap:12px}
-.crm-modal-backdrop{position:fixed;inset:0;z-index:1000;background:#0f172a88;display:grid;place-items:center;padding:16px}.crm-modal{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--surface-card,#fff);color:inherit;border-radius:14px;padding:20px;display:grid;gap:14px}.crm-modal label{display:grid;gap:6px;font-size:.86rem}.crm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.crm-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;background:var(--surface-ground,#f8fafc);border-radius:9px;font-size:.84rem}.crm-modal h3{font-size:.92rem;margin:8px 0 0}.crm-muted{color:var(--text-color-secondary,#64748b)}.crm-duplicate-list{margin:0;padding-inline-start:20px}.crm-timeline-item{padding:9px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-timeline-item p{margin:4px 0;font-size:.84rem}.crm-timeline-item small{color:var(--text-color-secondary,#64748b)}.crm-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.crm-modal-backdrop{position:fixed;inset:0;z-index:1000;background:#0f172a88;display:grid;place-items:center;padding:16px}.crm-modal{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--surface-card,#fff);color:inherit;border-radius:14px;padding:20px;display:grid;gap:14px}.crm-modal label{display:grid;gap:6px;font-size:.86rem}.crm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.crm-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;background:var(--surface-ground,#f8fafc);border-radius:9px;font-size:.84rem}.crm-modal h3{font-size:.92rem;margin:8px 0 0}.crm-muted{color:var(--text-color-secondary,#64748b)}.crm-duplicate-list{margin:0;padding-inline-start:20px}.crm-duplicate-list li{display:flex;justify-content:space-between;gap:10px;padding:6px 0}.crm-duplicate-list button{border:0;background:transparent;color:var(--primary-color,#0891b2);cursor:pointer;font:inherit;font-size:.8rem}.crm-timeline-item{padding:9px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-timeline-item p{margin:4px 0;font-size:.84rem}.crm-timeline-item small{color:var(--text-color-secondary,#64748b)}.crm-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
 @media(max-width:800px){.crm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.crm-heading,.crm-panel-head{align-items:flex-start;flex-direction:column}.crm-filters{width:100%;flex-wrap:wrap}.crm-filters input{width:100%}}
 @media(max-width:480px){.crm-form-grid{grid-template-columns:1fr}.crm-panel{padding:12px}.crm-stat{padding:12px}.crm-stat strong{font-size:1.1rem}}
 </style>
