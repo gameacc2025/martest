@@ -78,6 +78,16 @@ export const dashboardMenu = [
     ],
   },
   {
+    section: 'مدیریت محتوا',
+    items: [
+      { title: 'مقالات', icon: 'pi pi-file-edit', route: 'admin-cms-articles', permission: 'cms.articles.read' },
+      { title: 'دسته‌بندی مقالات', icon: 'pi pi-folder', route: 'admin-cms-categories', permission: 'cms.categories.read' },
+      { title: 'برچسب‌ها', icon: 'pi pi-tags', route: 'admin-cms-tags', permission: 'cms.tags.read' },
+      { title: 'سؤالات متداول', icon: 'pi pi-question-circle', route: 'admin-cms-faqs', permission: 'cms.faqs.read' },
+      { title: 'صفحات ثابت', icon: 'pi pi-file', route: 'admin-cms-pages', permission: 'cms.pages.read' },
+    ],
+  },
+  {
     section: '',
     items: [
       { title: 'محصولات', icon: 'pi pi-box', route: 'admin-products', permission: 'products.read' },
