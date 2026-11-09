@@ -270,7 +270,7 @@ export const endpoints = {
     sources: '/crm/lead-sources', source: (id) => `/crm/lead-sources/${id}`,
     leads: '/crm/leads', lead: (id) => `/crm/leads/${id}`,
     assignLead: (id) => `/crm/leads/${id}/assign`, leadStatus: (id) => `/crm/leads/${id}/status`, convertLead: (id) => `/crm/leads/${id}/convert`,
-    leadDuplicates: (id) => `/crm/leads/${id}/duplicates`, leadTimeline: (id) => `/crm/leads/${id}/timeline`,
+    leadDuplicates: (id) => `/crm/leads/${id}/duplicates`, leadTimeline: (id) => `/crm/leads/${id}/timeline`, mergeLead: (id) => `/crm/leads/${id}/merge`,
     accounts: '/crm/accounts', account: (id) => `/crm/accounts/${id}`, accountContacts: (id) => `/crm/accounts/${id}/contacts`, contact: (id) => `/crm/contacts/${id}`,
     tasks: '/crm/tasks', task: (id) => `/crm/tasks/${id}`, assignTask: (id) => `/crm/tasks/${id}/assign`, completeTask: (id) => `/crm/tasks/${id}/complete`, activities: '/crm/activities', notes: '/crm/notes',
     pipelines: '/crm/pipelines', pipelineStages: (id) => `/crm/pipelines/${id}/stages`,
