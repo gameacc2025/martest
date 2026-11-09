@@ -304,7 +304,7 @@ onMounted(load)
     </section>
 
     <section v-else-if="activeSection === 'pipeline'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div></div>
+      <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div><button v-if="activePipeline && pipelineStages.length" class="crm-primary" type="button" @click="showOpportunityCreate = true">ایجاد فرصت</button></div>
       <div v-if="loading" class="crm-state">در حال دریافت فرصت‌ها…</div>
       <div v-else-if="!pipelineStages.length" class="crm-state">برای نمایش قیف، ابتدا مراحل فروش را تعریف کنید.</div>
       <div v-else class="crm-kanban">
