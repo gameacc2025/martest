@@ -4,11 +4,13 @@ import { useRouter } from 'vue-router'
 import { productsApi, bannersApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
 import { useCartStore } from '../../stores/cart'
+import { useCmsStore } from '../../stores/cms'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
 const router = useRouter()
 const productsStore = useProductsStore()
 const cartStore = useCartStore()
+const cmsStore = useCmsStore()
 const cartMessage = ref('')
 const products = ref([])
 const retailProducts = ref([])
@@ -38,11 +40,7 @@ const featuredProduct = computed(() => featuredProducts.value[0] || products.val
 const latestProducts = computed(() => products.value.slice(0, 4))
 const retailLatest = computed(() => retailProducts.value.slice(0, 4))
 const selectedProducts = computed(() => featuredProducts.value.slice(0, 4))
-const demoArticles = [
-  { kind: 'آموزش', date: 'نمونه نمایشی', title: 'راهنمای انتخاب OTDR مناسب برای پروژه فیبر نوری', description: 'این جایگاه برای نمایش مطالب آموزشی منتشرشده در وبلاگ در نظر گرفته شده است.' },
-  { kind: 'معرفی', date: 'نمونه نمایشی', title: 'تفاوت OTDR و Power Meter در عیب‌یابی شبکه', description: 'محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده می‌شود.' },
-  { kind: 'خبر', date: 'نمونه نمایشی', title: 'معرفی تجهیزات و فناوری‌های مخابراتی', description: 'این کارت صرفاً نمونه چیدمان بخش مطالب است.' },
-]
+const featuredArticles = computed(() => cmsStore.featuredArticles)
 
 function normalizeList(response) {
   const data = response?.data?.data ?? response?.data ?? response
@@ -155,7 +153,7 @@ async function loadBanners() {
   } catch { banners.value = [] }
   restartSlider()
 }
-onMounted(() => { loadProducts(); loadCategories(); loadBanners(); restartSlider() })
+onMounted(() => { loadProducts(); loadCategories(); loadBanners(); cmsStore.fetchFeaturedArticles(3); restartSlider() })
 onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 </script>
 
@@ -230,7 +228,7 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
       <div v-else class="empty-state">محصولی با نشان منتخب برای نمایش دریافت نشد.</div>
     </div>
 
-    <div class="sec"><div class="sh"><h2>آخرین اخبار و مطالب آموزشی</h2><span>نمونه چیدمان بخش وبلاگ</span></div><div class="bl"><article class="bf"><div class="im2">BLOG</div><div class="tx"><span class="bt t">نمونه</span> <span class="bd2">وبلاگ</span><h3>مطالب آموزشی تجهیزات شبکه و مخابرات</h3><p>محتوای واقعی پس از اتصال سرویس وبلاگ نمایش داده خواهد شد.</p></div></article><div class="bs"><article v-for="article in demoArticles" :key="article.title" class="bi"><i>✎</i><div><span class="bt">{{ article.kind }}</span> <span class="bd2">{{ article.date }}</span><h4>{{ article.title }}</h4><p>{{ article.description }}</p></div></article></div></div></div>
+    <div class="sec"><div class="sh"><h2>آخرین اخبار و مطالب آموزشی</h2></div><div class="bl"><article class="bf"><div class="im2">BLOG</div><div class="tx"><span class="bt t">مقالات</span> <span class="bd2">مجله</span><h3>مقالات تخصصی و راهنماها</h3><p>مقالات منتشرشده در مجله مخابراتی</p></div></article><div class="bs"><article v-for="article in featuredArticles" :key="article.id" class="bi"><i>✎</i><div><span class="bt">{{ article.type }}</span> <span class="bd2">{{ article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('fa-IR') : 'منتشرشده' }}</span><h4>{{ article.title }}</h4><p>{{ article.excerpt }}</p></div></article><div v-if="!featuredArticles.length" class="empty-state">مقاله منتشر شده‌ای یافت نشد.</div></div></div></div>
 
     <div class="sec"><div class="sh"><h2>نظر مشتریان سازمانی</h2></div><div class="tms"><div class="tc"><q>جایگاه نمایش دیدگاه‌های تأییدشده مشتریان</q><div class="av">۱</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div><div class="tc"><q>متن دیدگاه فقط پس از ثبت و تأیید واقعی نمایش داده می‌شود.</q><div class="av">۲</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div><div class="tc"><q>در این بخش اطلاعات ساختگی مشتری یا شرکت نمایش داده نمی‌شود.</q><div class="av">۳</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div></div></div>
 

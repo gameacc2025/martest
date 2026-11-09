@@ -403,11 +403,20 @@ model RefreshToken {
   expiresAt DateTime
   /// زمان ایجاد رکورد.
   createdAt DateTime @default(now())
+  /// مشخصات مرورگر/دستگاه برای نمایش در مدیریت نشست‌ها.
+  userAgent String?
+  /// آدرس IP دستگاه برای ممیزی و تشخیص نشست‌های مشکوک.
+  ipAddress String?
+  /// نام قابل نمایش دستگاه (مثلاً "Chrome on Windows").
+  deviceName String?
+  /// زمان آخرین فعالیت در این نشست.
+  lastUsedAt DateTime?
   /// رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
+  @@index([lastUsedAt])
 }
 
 // One-time, PKCE-bound code used to hand a live session from the website
@@ -1688,6 +1697,7 @@ enum AuthChallengePurpose {
   PASSWORD_RESET
   PHONE_VERIFICATION
   EMAIL_VERIFICATION
+  LOGIN_MFA
 }
 
 enum AuthChallengeChannel {

@@ -12,6 +12,7 @@ import HandoffCallback from "@telecom/shared-ui/components/auth/HandoffCallback.
 
 // User Pages
 import UserProfile from "../pages/user/UserProfile.vue";
+import SecuritySettings from "../pages/company/security/SecuritySettings.vue";
 
 // Login/Register are centralized on the website app (see
 // apps/website/src/pages/public/{Login,Register}.vue). This app no longer
@@ -77,6 +78,7 @@ const routes = [
       { path: "/change-password", name: "change-password", component: () => import("../pages/user/ChangePassword.vue"), meta: { title: "تغییر رمز عبور" } },
       { path: "/notifications", name: "notifications", component: () => import("../pages/user/Notifications.vue"), meta: { title: "اعلان‌ها" } },
       { path: "/notification-preferences", name: "notification-preferences", component: () => import("../pages/user/NotificationPreferences.vue"), meta: { title: "تنظیمات اعلان‌ها" } },
+      { path: "/security", name: "company-security", component: SecuritySettings, meta: { title: "تنظیمات امنیتی" } },
       // Company product management (company users access via products permission)
       { path: "/products", name: "manage-products", component: () => import("../pages/company/products/ProductList.vue"), meta: { title: "مدیریت محصولات" } },
       { path: "/products/create", name: "manage-product-create", component: () => import("../pages/company/products/ProductForm.vue"), meta: { title: "ایجاد محصول جدید" } },

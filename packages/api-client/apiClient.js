@@ -67,7 +67,10 @@ export const authApi = {
   deleteAvatar: () => api.delete(`${endpoints.settings.profile}/avatar`),
   forgotPassword: (email) => api.post(endpoints.auth.forgotPassword, { email }),
   resetPassword: (data) => api.post(endpoints.auth.resetPassword, data),
-  verifyEmail: (token) => api.post(endpoints.auth.verifyEmail, { token })
+  verifyEmail: (token) => api.post(endpoints.auth.verifyEmail, { token }),
+  // Session management
+  getSessions: () => api.get(endpoints.auth.sessions),
+  revokeSession: (id) => api.delete(endpoints.auth.revokeSession(id)),
 }
 
 // Public contact form API
@@ -233,4 +236,79 @@ export const bannersApi = {
     formData.append('file', file);
     return api.post(endpoints.banners.upload, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
   },
+}
+
+// CMS Articles API
+export const cmsArticlesApi = {
+  list: (params = {}) => api.get(endpoints.cmsArticles.list, { params }),
+  getBySlug: (slug) => api.get(endpoints.cmsArticles.getBySlug(slug)),
+  getById: (id) => api.get(endpoints.cmsArticles.getById(id)),
+  listManage: (params = {}) => api.get(endpoints.cmsArticles.manage, { params }),
+  getManageById: (id) => api.get(endpoints.cmsArticles.getManage(id)),
+  create: (data) => api.post(endpoints.cmsArticles.create, data),
+  update: (id, data) => api.patch(endpoints.cmsArticles.update(id), data),
+  changeStatus: (id, status) => api.patch(endpoints.cmsArticles.changeStatus(id), { status }),
+  delete: (id) => api.delete(endpoints.cmsArticles.delete(id)),
+  listRevisions: (id) => api.get(endpoints.cmsArticles.listRevisions(id)),
+  getRevision: (id, revisionNo) => api.get(endpoints.cmsArticles.getRevision(id, revisionNo)),
+}
+
+// CMS Categories API
+export const cmsCategoriesApi = {
+  list: () => api.get(endpoints.cmsCategories.list),
+  listManage: (params = {}) => api.get(endpoints.cmsCategories.manage, { params }),
+  getById: (id) => api.get(endpoints.cmsCategories.get(id)),
+  create: (data) => api.post(endpoints.cmsCategories.create, data),
+  update: (id, data) => api.patch(endpoints.cmsCategories.update(id), data),
+  delete: (id) => api.delete(endpoints.cmsCategories.delete(id)),
+}
+
+// CMS Tags API
+export const cmsTagsApi = {
+  list: () => api.get(endpoints.cmsTags.list),
+  listManage: (params = {}) => api.get(endpoints.cmsTags.manage, { params }),
+  getById: (id) => api.get(endpoints.cmsTags.get(id)),
+  create: (data) => api.post(endpoints.cmsTags.create, data),
+  update: (id, data) => api.patch(endpoints.cmsTags.update(id), data),
+  delete: (id) => api.delete(endpoints.cmsTags.delete(id)),
+}
+
+// CMS FAQs API
+export const cmsFaqsApi = {
+  list: (params = {}) => api.get(endpoints.cmsFaqs.list, { params }),
+  listCategories: () => api.get(endpoints.cmsFaqs.categories),
+  listManage: (params = {}) => api.get(endpoints.cmsFaqs.manage, { params }),
+  getById: (id) => api.get(endpoints.cmsFaqs.get(id)),
+  create: (data) => api.post(endpoints.cmsFaqs.create, data),
+  update: (id, data) => api.patch(endpoints.cmsFaqs.update(id), data),
+  delete: (id) => api.delete(endpoints.cmsFaqs.delete(id)),
+}
+
+// CMS Pages API
+export const cmsPagesApi = {
+  list: () => api.get(endpoints.cmsPages.list),
+  getBySlug: (slug) => api.get(endpoints.cmsPages.get(slug)),
+  listManage: (params = {}) => api.get(endpoints.cmsPages.manage, { params }),
+  getManageById: (id) => api.get(endpoints.cmsPages.getManage(id)),
+  getManageBySlug: (slug) => api.get(endpoints.cmsPages.getBySlug(slug)),
+  create: (data) => api.post(endpoints.cmsPages.create, data),
+  update: (id, data) => api.patch(endpoints.cmsPages.update(id), data),
+  upsert: (slug, data) => api.put(endpoints.cmsPages.upsert(slug), data),
+  delete: (id) => api.delete(endpoints.cmsPages.delete(id)),
+}
+
+// Auth Challenges API
+export const authChallengesApi = {
+  request: (data) => api.post(endpoints.auth.challenges.request, data),
+  verify: (data) => api.post(endpoints.auth.challenges.verify, data),
+  consume: (data) => api.post(endpoints.auth.challenges.consume, data),
+  listMe: () => api.get(endpoints.auth.challenges.me),
+}
+
+// Audit Logs API
+export const auditLogsApi = {
+  search: (params = {}) => api.get(endpoints.audit.logs, { params }),
+  stats: (params = {}) => api.get(endpoints.audit.stats, { params }),
+  getById: (id) => api.get(endpoints.audit.get(id)),
+  export: (params = {}) => api.get(endpoints.audit.export, { params, responseType: 'blob' }),
 }

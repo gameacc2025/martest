@@ -27,7 +27,20 @@ Mixed public and authenticated session routes; see each row.
 | POST | `/api/v1/auth/handoff/redeem` | `requireTrustedOrigin` |
 | POST | `/api/v1/auth/logout-all` | `fastify.authenticate` |
 | GET | `/api/v1/auth/me` | `fastify.authenticate` |
+| GET | `/api/v1/auth/sessions` | `fastify.authenticate` |
+| DELETE | `/api/v1/auth/sessions/:id` | `fastify.authenticate` |
 | PATCH | `/api/v1/auth/users/:id/password` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('users.reset_password')` |
+
+### auth-challenges — `/api/v1/auth`
+
+All routes require authentication (handled by auth plugin).
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| POST | `/api/v1/auth/challenges` | `fastify.authenticate` |
+| POST | `/api/v1/auth/challenges/verify` | `fastify.authenticate` |
+| POST | `/api/v1/auth/challenges/consume` | `fastify.authenticate` |
+| GET | `/api/v1/auth/challenges/me` | `fastify.authenticate` |
 
 ### contact — `/api/v1/contact`
 
@@ -114,6 +127,17 @@ Every route requires bearer authentication, exact STAFF context and its listed p
 | PATCH | `/api/v1/admin/notifications/folders/:id` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('system_settings.manage')` |
 | GET | `/api/v1/admin/notifications/delivery-stats` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('delivery.view')` |
 | GET | `/api/v1/admin/notifications/deliveries` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('delivery.view')` |
+
+### audit — `/api/v1/audit`
+
+All routes require bearer authentication, exact STAFF context and audit_logs permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/audit/logs` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('audit_logs.read')` |
+| GET | `/api/v1/audit/logs/stats` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('audit_logs.read')` |
+| GET | `/api/v1/audit/logs/:id` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('audit_logs.read')` |
+| GET | `/api/v1/audit/logs/export` | `fastify.authenticate; requireExactAccessType('STAFF'), requirePermission('audit_logs.export')` |
 
 ### settings — `/api/v1/settings`
 

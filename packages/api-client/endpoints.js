@@ -20,9 +20,18 @@ export const endpoints = {
     handoff: '/auth/handoff',
     handoffRedeem: '/auth/handoff/redeem',
     me: '/auth/me',
+    // Session management
+    sessions: '/auth/sessions',
+    revokeSession: (id) => `/auth/sessions/${id}`,
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
-    verifyEmail: '/auth/verify-email'
+    verifyEmail: '/auth/verify-email',
+    challenges: {
+      request: '/auth/challenges',
+      verify: '/auth/challenges/verify',
+      consume: '/auth/challenges/consume',
+      me: '/auth/challenges/me',
+    }
   },
   // Users
   users: {
@@ -72,6 +81,60 @@ export const endpoints = {
     update: (id) => `/banners/manage/${id}`,
     archive: (id) => `/banners/manage/${id}`,
     upload: '/banners/manage/upload',
+  },
+  // CMS - Articles
+  cmsArticles: {
+    list: '/cms/articles',
+    getBySlug: (slug) => `/cms/articles/${slug}`,
+    getById: (id) => `/cms/articles/id/${id}`,
+    manage: '/cms/articles/manage',
+    getManage: (id) => `/cms/articles/manage/${id}`,
+    create: '/cms/articles/manage',
+    update: (id) => `/cms/articles/manage/${id}`,
+    changeStatus: (id) => `/cms/articles/manage/${id}/status`,
+    delete: (id) => `/cms/articles/manage/${id}`,
+    listRevisions: (id) => `/cms/articles/manage/${id}/revisions`,
+    getRevision: (id, revisionNo) => `/cms/articles/manage/${id}/revisions/${revisionNo}`,
+  },
+  // CMS - Categories
+  cmsCategories: {
+    list: '/cms/categories',
+    manage: '/cms/categories/manage',
+    get: (id) => `/cms/categories/manage/${id}`,
+    create: '/cms/categories/manage',
+    update: (id) => `/cms/categories/manage/${id}`,
+    delete: (id) => `/cms/categories/manage/${id}`,
+  },
+  // CMS - Tags
+  cmsTags: {
+    list: '/cms/tags',
+    manage: '/cms/tags/manage',
+    get: (id) => `/cms/tags/manage/${id}`,
+    create: '/cms/tags/manage',
+    update: (id) => `/cms/tags/manage/${id}`,
+    delete: (id) => `/cms/tags/manage/${id}`,
+  },
+  // CMS - FAQs
+  cmsFaqs: {
+    list: '/cms/faqs',
+    categories: '/cms/faqs/categories',
+    manage: '/cms/faqs/manage',
+    get: (id) => `/cms/faqs/manage/${id}`,
+    create: '/cms/faqs/manage',
+    update: (id) => `/cms/faqs/manage/${id}`,
+    delete: (id) => `/cms/faqs/manage/${id}`,
+  },
+  // CMS - Pages
+  cmsPages: {
+    list: '/cms/pages',
+    get: (slug) => `/cms/pages/${slug}`,
+    manage: '/cms/pages/manage',
+    getManage: (id) => `/cms/pages/manage/${id}`,
+    getBySlug: (slug) => `/cms/pages/manage/slug/${slug}`,
+    create: '/cms/pages/manage',
+    update: (id) => `/cms/pages/manage/${id}`,
+    upsert: (slug) => `/cms/pages/manage/slug/${slug}`,
+    delete: (id) => `/cms/pages/manage/${id}`,
   },
   // Products
   products: {
@@ -193,6 +256,14 @@ export const endpoints = {
     reject: (id) => `/admin/inquiry-subscriptions/${id}/reject`,
     grant: '/admin/inquiry-subscriptions/grant',
   },
+  // Audit Logs (STAFF only)
+  audit: {
+    logs: '/audit/logs',
+    stats: '/audit/logs/stats',
+    get: (id) => `/audit/logs/${id}`,
+    export: '/audit/logs/export',
+  },
+
   // Inquiries (RFQ)
   inquiries: {
     create: '/inquiries',

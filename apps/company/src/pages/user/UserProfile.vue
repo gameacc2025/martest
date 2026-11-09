@@ -3,8 +3,9 @@ import WorkspacePageHeading from '@telecom/shared-ui/components/common/Workspace
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { apiGet, apiPatch } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiPatch, apiDelete } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
+import { authApi } from '@telecom/api-client'
 import { useAuthStore } from '../../stores/auth'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -13,6 +14,7 @@ import Password from 'primevue/password'
 import Card from 'primevue/card'
 import Avatar from 'primevue/avatar'
 import Tag from 'primevue/tag'
+import Badge from 'primevue/badge'
 import Dialog from 'primevue/dialog'
 import Tabs from 'primevue/tabs'
 import TabList from 'primevue/tablist'
@@ -47,6 +49,11 @@ const editForm = ref({
   bio: '',
   avatarUrl: '',
 })
+
+// Session management
+const sessionsLoading = ref(false)
+const activeSessions = ref([])
+const loginHistory = ref([])
 
 onMounted(() => {
   fetchProfile()
@@ -162,6 +169,74 @@ async function submitPasswordChange() {
 // ── Logout ───────────────────────────────────────────────────
 function logout() {
   authStore.logout({ redirectTo: '/login' })
+}
+
+// ── Session Management ─────────────────────────────────────────
+const showSessionsDialog = ref(false)
+const showLoginHistoryDialog = ref(false)
+const revokingSession = ref(null)
+
+async function loadSessions() {
+  showSessionsDialog.value = true
+  sessionsLoading.value = true
+  try {
+    const { data } = await authApi.getSessions()
+    // Map the session data to include deviceIcon for display
+    activeSessions.value = (data.sessions || []).map(session => ({
+      ...session,
+      deviceIcon: detectDeviceIcon(session.userAgent),
+    }))
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت نشست‌ها', life: 3000 })
+  } finally {
+    sessionsLoading.value = false
+  }
+}
+
+async function loadLoginHistory() {
+  showLoginHistoryDialog.value = true
+  sessionsLoading.value = true
+  try {
+    // Login history is not implemented in the backend yet
+    // For now, show a message
+    loginHistory.value = []
+    toast.add({ severity: 'info', summary: 'اطلاع', detail: 'تاریخچه ورود هنوز پیاده‌سازی نشده است', life: 3000 })
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت تاریخچه ورود', life: 3000 })
+  } finally {
+    sessionsLoading.value = false
+  }
+}
+
+async function revokeSession(sessionId) {
+  revokingSession.value = sessionId
+  try {
+    await authApi.revokeSession(sessionId)
+    // If revoking the current session, the server clears the cookie
+    // The auth store will handle the redirect on the next request
+    const session = activeSessions.value.find(s => String(s.id) === String(sessionId))
+    if (session?.isCurrent) {
+      setTimeout(() => authStore.logout({ redirectTo: '/login' }), 1500)
+    }
+    activeSessions.value = activeSessions.value.filter(s => String(s.id) !== String(sessionId))
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نشست لغو شد', life: 3000 })
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در لغو نشست', life: 3000 })
+  } finally {
+    revokingSession.value = null
+  }
+}
+
+function detectDeviceIcon(userAgent) {
+  if (!userAgent) return 'pi pi-desktop'
+  const ua = userAgent.toLowerCase()
+  if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone') || ua.includes('ipad')) {
+    return 'pi pi-mobile'
+  }
+  if (ua.includes('tablet')) {
+    return 'pi pi-tablet'
+  }
+  return 'pi pi-desktop'
 }
 </script>
 
@@ -284,19 +359,19 @@ function logout() {
                 </div>
                 <Button label="تغییر رمز عبور" icon="pi pi-key" @click="openPasswordDialog" />
               </div>
-              <div class="security-row disabled">
+              <div class="security-row">
                 <div>
                   <h4>نشست‌های فعال</h4>
-                  <p>مدیریت دستگاه‌های واردشده — به‌زودی.</p>
+                  <p>دستگاه‌هایی که در حال حاضر در حساب شما وارد شده‌اند.</p>
                 </div>
-                <Tag severity="secondary">به‌زودی</Tag>
+                <Button label="مشاهده همه" icon="pi pi-list" severity="secondary" outlined @click="loadSessions" />
               </div>
-              <div class="security-row disabled">
+              <div class="security-row">
                 <div>
                   <h4>ورودهای اخیر</h4>
-                  <p>تاریخچه ورود به حساب — به‌زودی.</p>
+                  <p>تاریخچه ورودهای اخیر به حساب شما.</p>
                 </div>
-                <Tag severity="secondary">به‌زودی</Tag>
+                <Button label="مشاهده همه" icon="pi pi-list" severity="secondary" outlined @click="loadLoginHistory" />
               </div>
             </template>
           </Card>
@@ -321,6 +396,93 @@ function logout() {
       <template #footer>
         <Button label="لغو" icon="pi pi-times" severity="secondary" text @click="showPasswordDialog = false" />
         <Button label="ذخیره" icon="pi pi-check" :loading="changingPassword" @click="submitPasswordChange" />
+      </template>
+    </Dialog>
+
+    <!-- Active Sessions Dialog -->
+    <Dialog v-model:visible="showSessionsDialog" header="نشست‌های فعال" :modal="true" style="width: 50rem" :breakpoints="{ '640px': '95vw', '1024px': '75vw' }" class="p-fluid">
+      <div v-if="sessionsLoading" class="text-center py-6">
+        <ProgressSpinner style="width: 40px; height: 40px" />
+      </div>
+      <div v-else class="sessions-content">
+        <div v-if="activeSessions.length === 0" class="text-center py-4">
+          <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--text-color-secondary)" />
+          <p>نشست فعالی یافت نشد.</p>
+        </div>
+        <template v-else>
+          <div class="session-list">
+            <div class="session-header">
+              <span>دستگاه / مرورگر</span>
+              <span>IP</span>
+              <span>موقعیت</span>
+              <span>آخرین فعالیت</span>
+              <span>جریان</span>
+            </div>
+            <div class="session-item" v-for="session in activeSessions" :key="session.id">
+              <div class="session-device">
+                <i :class="session.deviceIcon || 'pi pi-desktop'" />
+                <span>{{ session.deviceName || session.userAgent || 'ناشناس' }}</span>
+                <Badge v-if="session.isCurrent" value="نشست جاری" severity="success" size="small" style="margin-right: 0.5rem" />
+              </div>
+              <div class="session-ip">{{ session.ipAddress || '—' }}</div>
+              <div class="session-location">{{ session.location || '—' }}</div>
+              <div class="session-last-activity">{{ formatDate(session.lastActivityAt) }}</div>
+              <div class="session-actions">
+                <Button
+                  v-if="!session.isCurrent"
+                  icon="pi pi-sign-out"
+                  severity="danger"
+                  rounded
+                  text
+                  size="small"
+                  @click="revokeSession(session.id)"
+                  :disabled="revokingSession === session.id"
+                />
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <template #footer>
+        <Button label="بستن" icon="pi pi-times" severity="secondary" text @click="showSessionsDialog = false" />
+      </template>
+    </Dialog>
+
+    <!-- Login History Dialog -->
+    <Dialog v-model:visible="showLoginHistoryDialog" header="ورودهای اخیر" :modal="true" style="width: 50rem" :breakpoints="{ '640px': '95vw', '1024px': '75vw' }" class="p-fluid">
+      <div v-if="sessionsLoading" class="text-center py-6">
+        <ProgressSpinner style="width: 40px; height: 40px" />
+      </div>
+      <div v-else class="login-history-content">
+        <div v-if="loginHistory.length === 0" class="text-center py-4">
+          <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--text-color-secondary)" />
+          <p>تاریخچه ورود یافت نشد.</p>
+        </div>
+        <template v-else>
+          <div class="login-history-list">
+            <div class="login-history-header">
+              <span>تاریخ و زمان</span>
+              <span>IP</span>
+              <span>موقعیت</span>
+              <span>دستگاه / مرورگر</span>
+              <span>نتیجه</span>
+            </div>
+            <div class="login-history-item" v-for="entry in loginHistory" :key="entry.id">
+              <div class="login-history-time">{{ formatDate(entry.createdAt) }}</div>
+              <div class="login-history-ip">{{ entry.ipAddress || '—' }}</div>
+              <div class="login-history-location">{{ entry.location || '—' }}</div>
+              <div class="login-history-device">{{ entry.userAgent || '—' }}</div>
+              <div class="login-history-result">
+                <Tag :severity="entry.success ? 'success' : 'danger'">
+                  {{ entry.success ? 'موفق' : 'ناموفق' }}
+                </Tag>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <template #footer>
+        <Button label="بستن" icon="pi pi-times" severity="secondary" text @click="showLoginHistoryDialog = false" />
       </template>
     </Dialog>
   </div>

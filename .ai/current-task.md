@@ -1,18 +1,49 @@
-# Active Task — API-UI-SEED-01 (2026-11-08)
+# Active Task — API-3 CMS (2026-11-09)
 
 ## Current execution status
-- **Status:** IN_PROGRESS — shared Website-owned palette consolidation and multi-agent execution documentation applied directly to `main`; full visual audit and runtime verification remain.
+- **Status:** IN_PROGRESS — Backend CMS module, API Client, Seed, and partial Website frontend completed
 - **Canonical target:** `main` only. Owner instruction: do not create feature branches, temporary branches or PRs.
-- **PR #91:** Closed unmerged because its checks failed and owner requested direct-to-main integration. Its former branch was not merged; no further branches will be created.
-- **Roadmap:** `docs/API_UI_SEED_EXECUTION_ROADMAP.md`.
+- **Roadmap:** `docs/API_UI_SEED_EXECUTION_ROADMAP.md` (API-3 CMS lane).
 - **Coordination board:** `.ai/agent-coordination/ACTIVE.md`.
-- **Decision:** Website palette is the single source of truth. `newtemp-reference.scss` is the canonical final token layer for Website/Admin/Company; Website `marketplace-theme.scss` is component/layout-only.
-- **Current palette changes on main:** removed six duplicate root token blocks from Website `marketplace-theme.scss`; replaced old dashboard/shared refinement values with semantic tokens in DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace; added a regression test for the shared source-of-truth rule.
-- **PrimeVue compatibility preservation:** moved Website light/dark `--p-*` semantic values and legacy aliases from the Website-only root blocks into shared `newtemp-reference.scss`; updated Website/shared design-system tests to assert the new ownership. Website component CSS now has zero root token blocks.
-- **API plan:** API-1 Auth/Audit, API-2 Support, API-3 CMS, API-4 CRM, API-5 Retail (commercial approval gate), API-6 Finance (accounting/provider approval gate). Each includes backend, API client, UI, realistic synthetic seed, tests and docs.
-- **Seed standard:** deterministic, idempotent, production-guarded, realistic synthetic fixtures; no usable credentials/OTPs/tokens, real personal contact endpoints or production data.
-- **Parallel-agent model:** independent discovery/implementation in detached worktrees pinned to a main SHA; exact file ownership; coordinator-only serial integration to main. Shared hotspots are coordinator-owned.
-- **Verification not yet run:** Vitest, Sass/Vue compilation, all app builds, full browser visual parity. The prior PR #91 test-and-build and compose-and-browser checks failed; inspect their failure causes before relying on those results. No API route or domain seed has been implemented yet.
+- **Base main SHA:** 22c6a8259bfd76a376936ac81c5dc9009c30b232
+
+## Completed Work
+
+### Backend CMS Module (Completed)
+- Created `backend/src/modules/cms/` with full CRUD for Articles, Article Categories, Article Tags, FAQs, Static Pages
+- Registered CMS routes in `backend/src/app.js` under `/api/v1/cms/`
+- Added CMS permissions to seed.js for SUPER_ADMIN and MODERATOR roles
+- Fixed missing `getAdminById` function in article.service.js
+
+### API Client (Completed)
+- Added CMS endpoints to `packages/api-client/endpoints.js`
+- Added CMS API methods to `packages/api-client/apiClient.js`
+- Exported new APIs from `packages/api-client/index.js`
+
+### Website Frontend (Partially Completed)
+- Created CMS store: `apps/website/src/stores/cms.js` with full API integration
+- Updated Home page (`Home.vue`) to use real CMS APIs for featured articles
+- Updated FAQ page (`Faq.vue`) to use real CMS APIs with category filtering
+- Updated AboutUs page (`AboutUs.vue`) to use CMS Pages API for dynamic content
+
+### Seed (Completed)
+- Created `backend/prisma/seeds/cms.js` with deterministic synthetic data:
+  - 5 Article Categories, 10 Article Tags, 9 Articles, 10 FAQs, 4 Static Pages
+- Added CMS seed import to `backend/prisma/seed.js`
+- Seed file passes syntax validation
+
+### Verification
+- CMS module loads successfully
+- CMS seed file passes syntax check (`node -c`)
+- Backend module loading verified
+
+## Remaining Work
+- Update ContactUs.vue and Terms.vue to use CMS Pages API
+- Update Magazine.vue to use real CMS APIs
+- Create Admin CMS management pages (ArticleManagement, CategoryManagement, TagManagement, FaqManagement, PageManagement)
+- Add Admin router entries for CMS pages
+- Create backend service/route tests for CMS module
+- Run frontend builds and verify integration
 
 
 - **Palette compatibility follow-up commits:** `025ea486` moved Website PrimeVue light/dark semantics into shared tokens; `f1af4e4b` and `3553cae3` updated/fixed Website palette regression tests; `f0045541` documented the correction; `6bbe619a` recorded CI findings; current task handoff refreshed at `199f7eaa`.

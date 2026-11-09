@@ -20,6 +20,21 @@ export const PERMISSIONS = {
     READ: 'dashboard.read',
   },
 
+  // ── Auth Challenges ────────────────────────────────────────
+  AUTH_CHALLENGES: {
+    CREATE: 'auth_challenges.create',
+    READ: 'auth_challenges.read',
+    VERIFY: 'auth_challenges.verify',
+    CONSUME: 'auth_challenges.consume',
+  },
+
+  // ── Audit Logs ─────────────────────────────────────────────
+  AUDIT_LOGS: {
+    READ: 'audit_logs.read',
+    SEARCH: 'audit_logs.search',
+    EXPORT: 'audit_logs.export',
+  },
+
   // ── Users ──────────────────────────────────────────────────
   USERS: {
     CREATE: 'users.create',
@@ -193,6 +208,8 @@ export const ALL_PERMISSIONS = Object.values(PERMISSIONS)
  */
 export const PERMISSION_GROUPS = [
   { key: 'DASHBOARD', label: 'داشبورد', permissions: Object.values(PERMISSIONS.DASHBOARD) },
+  { key: 'AUTH_CHALLENGES', label: 'چالش‌های احراز هویت', permissions: Object.values(PERMISSIONS.AUTH_CHALLENGES) },
+  { key: 'AUDIT_LOGS', label: 'ثبت‌رویدادها', permissions: Object.values(PERMISSIONS.AUDIT_LOGS) },
   { key: 'USERS', label: 'کاربران', permissions: Object.values(PERMISSIONS.USERS) },
   { key: 'ROLES', label: 'نقش‌ها', permissions: Object.values(PERMISSIONS.ROLES) },
   { key: 'COMPANIES', label: 'شرکت‌ها', permissions: Object.values(PERMISSIONS.COMPANIES) },

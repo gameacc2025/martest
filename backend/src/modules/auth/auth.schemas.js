@@ -200,6 +200,37 @@ const meResponse = {
   },
 };
 
+const sessionItemResponse = {
+  type: 'object',
+  properties: {
+    id: { type: 'string' },
+    userAgent: { type: ['string', 'null'] },
+    ipAddress: { type: ['string', 'null'] },
+    deviceName: { type: ['string', 'null'] },
+    lastActivityAt: { type: 'string', format: 'date-time' },
+    createdAt: { type: 'string', format: 'date-time' },
+    expiresAt: { type: 'string', format: 'date-time' },
+    isCurrent: { type: 'boolean' },
+  },
+};
+
+const sessionsResponse = {
+  200: {
+    type: 'object',
+    properties: {
+      data: {
+        type: 'object',
+        properties: {
+          sessions: {
+            type: 'array',
+            items: sessionItemResponse,
+          },
+        },
+      },
+    },
+  },
+};
+
 module.exports = {
   loginBody,
   changePasswordBody,
@@ -209,6 +240,7 @@ module.exports = {
   loginResponse,
   refreshResponse,
   meResponse,
+  sessionsResponse,
   userResponse,
   profileResponse,
   accessProfileResponse,

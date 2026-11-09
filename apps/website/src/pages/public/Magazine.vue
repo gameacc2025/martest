@@ -1,18 +1,125 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useCmsStore } from '../../stores/cms'
 
 const route = useRoute()
 const router = useRouter()
-const activeCategory = ref('همه مطالب')
-const searchQuery = ref('')
+const cmsStore = useCmsStore()
 
-const articles = [
-  { slug: 'fiber-optic-cable-guide', title: 'راهنمای انتخاب کابل فیبر نوری؛ از ساختار تا کاربرد', excerpt: 'برای انتخاب کابل مناسب پروژه، باید نوع فیبر، تعداد کور، ساختار حفاظتی و شرایط نصب را کنار هم بررسی کنید.', category: 'فیبر نوری', kind: 'راهنمای خرید', readTime: '۷ دقیقه', dateLabel: 'راهنمای تخصصی', icon: 'pi pi-share-alt', tone: 'cyan', featured: true, body: ['انتخاب کابل فیبر نوری فقط به تعداد کور محدود نمی‌شود. مسیر نصب، محیط بهره‌برداری، میزان رطوبت، فشار مکانیکی و شعاع خمش، همگی در انتخاب نهایی نقش دارند.', 'برای مسیرهای بیرونی، کابل باید متناسب با شرایط محیطی و روش نصب انتخاب شود. در مسیرهای داخلی، ابعاد، انعطاف‌پذیری و استانداردهای ایمنی ساختمان اهمیت بیشتری پیدا می‌کنند.', 'پیش از خرید، تعداد کور موردنیاز فعلی و ظرفیت توسعه آینده را مشخص کنید؛ سپس نوع فیبر، ساختار کابل و تجهیزات جانبی سازگار را با مشخصات فنی پروژه تطبیق دهید.'], related: ['otdr-buying-guide', 'fiber-accessories-checklist'] },
-  { slug: 'otdr-buying-guide', title: 'هنگام خرید OTDR به چه مشخصاتی توجه کنیم؟', excerpt: 'برد دینامیکی، ناحیه مرده، طول موج و دقت اندازه‌گیری را متناسب با شبکه خود مقایسه کنید.', category: 'تجهیزات تست', kind: 'راهنمای خرید', readTime: '۶ دقیقه', dateLabel: 'راهنمای تخصصی', icon: 'pi pi-chart-line', tone: 'blue', featured: true, body: ['OTDR یکی از ابزارهای اصلی عیب‌یابی لینک‌های فیبر نوری است؛ اما انتخاب مدل مناسب باید بر اساس نوع شبکه و سناریوی اندازه‌گیری انجام شود.', 'برد دینامیکی، ناحیه مرده رویداد و تضعیف، طول موج‌های پشتیبانی‌شده و امکان ذخیره و تحلیل گزارش از مشخصات مهم دستگاه هستند.', 'پیش از نهایی‌کردن خرید، سازگاری کانکتورها، اقلام همراه، خدمات کالیبراسیون و آموزش کاربری را نیز بررسی کنید.'], related: ['fiber-optic-cable-guide', 'fiber-accessories-checklist'] },
-  { slug: 'network-switch-selection', title: 'چطور سوئیچ شبکه مناسب پروژه سازمانی را انتخاب کنیم؟', excerpt: 'تعداد پورت، سرعت uplink، قابلیت مدیریتی و توان PoE را با نیاز واقعی شبکه تطبیق دهید.', category: 'تجهیزات شبکه', kind: 'آموزش فنی', readTime: '۸ دقیقه', dateLabel: 'آموزش فنی', icon: 'pi pi-sitemap', tone: 'navy', featured: true, body: ['در انتخاب سوئیچ سازمانی، ابتدا تعداد کاربران و تجهیزات متصل را به همراه رشد احتمالی شبکه برآورد کنید.', 'سرعت پورت‌ها، ظرفیت uplink، قابلیت‌های لایه ۲ و ۳، VLAN، افزونگی و توان PoE باید با طراحی شبکه هماهنگ باشند.', 'برای مقایسه پیشنهادها، مدل دقیق، نسخه نرم‌افزار، لایسنس‌ها، گارانتی و اقلام همراه را در یک جدول یکسان ثبت کنید.'], related: ['poe-switch-planning', 'network-rack-checklist'] },
-  { slug: 'poe-switch-planning', title: 'محاسبه توان PoE پیش از خرید سوئیچ', excerpt: 'بودجه توان کل، کلاس مصرف‌کننده‌ها و ظرفیت توسعه را قبل از انتخاب مدل محاسبه کنید.', category: 'تجهیزات شبکه', kind: 'آموزش فنی', readTime: '۵ دقیقه', dateLabel: 'آموزش فنی', icon: 'pi pi-bolt', tone: 'amber', featured: false, body: ['برای طراحی درست PoE، تنها جمع‌زدن تعداد پورت‌ها کافی نیست. توان موردنیاز هر مصرف‌کننده و بودجه توان کل دستگاه را بررسی کنید.', 'دوربین‌ها، تلفن‌های IP و اکسس‌پوینت‌ها ممکن است در شرایط کاری مختلف مصرف متفاوتی داشته باشند.', 'همیشه مقداری ظرفیت برای توسعه آینده در نظر بگیرید و محدودیت توان منبع تغذیه و دمای محیط را هم بسنجید.'], related: ['network-switch-selection', 'network-rack-checklist'] },
-  { slug: 'fiber-accessories-checklist', title: 'چک‌لیست تجهیزات جانبی اجرای پروژه فیبر نوری', excerpt: 'از پیگتیل و آداپتور تا پچ‌کورد، کاست و متعلقات مدیریت کابل؛ اقلام ضروری را فراموش نکنید.', category: 'فیبر نوری', kind: 'چک‌لیست پروژه', readTime: '۴ دقیقه', dateLabel: 'چک‌لیست پروژه', icon: 'pi pi-list-check', tone: 'cyan', featured: false, body: ['در برآورد پروژه فیبر نوری، اقلام جانبی باید از ابتدا در کنار کابل و تجهیزات فعال دیده شوند.', 'نوع کانکتور، پولیش، تعداد اتصال‌ها و سازگاری اجزا با تجهیزات انتهایی را بررسی کنید.', 'برای جلوگیری از دوباره‌کاری، فهرست اقلام را بر اساس نقشه مسیر، تعداد نقاط اتصال و ظرفیت توسعه تهیه کنید.'], related: ['fiber-optic-cable-guide', 'otdr-buying-guide'] },
+const activeCategory = ref('همه')
+const searchQuery = ref('')
+const loading = ref(false)
+const error = ref('')
+const currentPage = ref(1)
+const totalPages = ref(1)
+const articlesPerPage = 9
+
+const categories = computed(() => ['همه', ...cmsStore.publishedCategories.map(c => c.name)])
+const tags = computed(() => cmsStore.publishedTags)
+
+const filteredArticles = computed(() => {
+  let result = cmsStore.publishedArticles
+  if (activeCategory.value !== 'همه') {
+    result = result.filter(a => a.categories?.some(c => c.category.name === activeCategory.value))
+  }
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(a =>
+      a.title.toLowerCase().includes(q) ||
+      a.excerpt?.toLowerCase().includes(q)
+    )
+  }
+  return result
+})
+
+const paginatedArticles = computed(() => {
+  const start = (currentPage.value - 1) * articlesPerPage
+  return filteredArticles.value.slice(start, start + articlesPerPage)
+})
+
+const totalPagesComputed = computed(() => Math.ceil(filteredArticles.value.length / articlesPerPage))
+
+const articleDetail = ref(null)
+const showDetail = ref(false)
+
+async function loadData() {
+  loading.value = true
+  error.value = ''
+  try {
+    await Promise.all([
+      cmsStore.fetchArticles({ page: 1, limit: 50, featured: false }),
+      cmsStore.fetchCategories(),
+      cmsStore.fetchTags(),
+    ])
+    totalPages.value = totalPagesComputed.value
+  } catch (err) {
+    error.value = 'دریافت مقالات با خطا مواجه شد'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+function openArticle(article) {
+  articleDetail.value = article
+  showDetail.value = true
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function closeDetail() {
+  showDetail.value = false
+  articleDetail.value = null
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('fa-IR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+function getReadTime(content) {
+  if (!content) return '۵ دقیقه'
+  const words = content.split(/\s+/).length
+  const minutes = Math.ceil(words / 200)
+  return `${minutes} دقیقه`
+}
+
+onMounted(() => {
+  loadData()
+  if (route.params.slug) {
+    const slug = route.params.slug
+    cmsStore.fetchArticleBySlug(slug).then(article => {
+      openArticle(article)
+    }).catch(() => {
+      router.push({ name: 'magazine' })
+    })
+  }
+})
+
+watch(() => route.params.slug, (newSlug) => {
+  if (newSlug) {
+    cmsStore.fetchArticleBySlug(newSlug).then(article => {
+      openArticle(article)
+    }).catch(() => {
+      router.push({ name: 'magazine' })
+    })
+  } else {
+    closeDetail()
+  }
+})
+
+watch(() => activeCategory.value, () => {
+  currentPage.value = 1
+})
+
+watch(() => searchQuery.value, () => {
+  currentPage.value = 1
+})
+</script> اتصال‌ها و سازگاری اجزا با تجهیزات انتهایی را بررسی کنید.', 'برای جلوگیری از دوباره‌کاری، فهرست اقلام را بر اساس نقشه مسیر، تعداد نقاط اتصال و ظرفیت توسعه تهیه کنید.'], related: ['fiber-optic-cable-guide', 'otdr-buying-guide'] },
   { slug: 'network-rack-checklist', title: 'پیش از تجهیز رک شبکه چه مواردی را بررسی کنیم؟', excerpt: 'ابعاد رک، تهویه، توزیع برق، مدیریت کابل و ظرفیت توسعه را در یک برنامه مشخص قرار دهید.', category: 'زیرساخت', kind: 'چک‌لیست پروژه', readTime: '۵ دقیقه', dateLabel: 'چک‌لیست پروژه', icon: 'pi pi-server', tone: 'blue', featured: false, body: ['انتخاب رک باید با ابعاد تجهیزات، عمق موردنیاز، وزن قابل تحمل و محل نصب هماهنگ باشد.', 'تهویه، مسیر ورود کابل، ارت، PDU و دسترسی برای نگهداری را از ابتدا طراحی کنید.', 'فضای خالی برای توسعه آینده و مستندسازی محل نصب تجهیزات، هزینه نگهداری را کاهش می‌دهد.'], related: ['network-switch-selection', 'poe-switch-planning'] },
   { slug: 'telecom-procurement-checklist', title: 'چک‌لیست استعلام خرید تجهیزات مخابراتی', excerpt: 'چطور درخواست استعلام دقیق بنویسیم تا پیشنهادهای تأمین‌کنندگان قابل مقایسه باشند؟', category: 'خرید سازمانی', kind: 'راهنمای خرید', readTime: '۶ دقیقه', dateLabel: 'راهنمای خرید', icon: 'pi pi-file-edit', tone: 'navy', featured: false, body: ['درخواست استعلام دقیق با شرح نیاز روشن شروع می‌شود. مدل، تعداد، مشخصات فنی، محل تحویل و زمان‌بندی را تا حد امکان مشخص کنید.', 'اگر معادل فنی قابل قبول است، معیارهای پذیرش را شفاف بنویسید تا پیشنهادهای جایگزین نیز قابل ارزیابی باشند.', 'شرایط گارانتی، اصالت کالا، اعتبار پیشنهاد و اقلام همراه را در پاسخ‌ها مقایسه کنید.'], related: ['network-switch-selection', 'fiber-optic-cable-guide'] },
   { slug: 'telecom-equipment-authenticity', title: 'اصالت تجهیزات شبکه را پیش از تحویل چطور بررسی کنیم؟', excerpt: 'شماره سریال، مستندات، وضعیت ظاهری و تطابق مشخصات کالا با پیشنهاد را کنترل کنید.', category: 'خرید سازمانی', kind: 'کنترل کیفیت', readTime: '۵ دقیقه', dateLabel: 'کنترل کیفیت', icon: 'pi pi-shield-check', tone: 'amber', featured: false, body: ['کنترل اصالت باید از مرحله بررسی پیشنهاد آغاز شود. مدل و پارت‌نامبر را با مستندات سازنده تطبیق دهید.', 'هنگام تحویل، شماره سریال، پلمب، متعلقات، وضعیت ظاهری و مدارک گارانتی را ثبت کنید.', 'در خریدهای سازمانی، صورت‌جلسه تحویل و معیارهای پذیرش فنی از بروز اختلاف جلوگیری می‌کند.'], related: ['telecom-procurement-checklist', 'network-rack-checklist'] },

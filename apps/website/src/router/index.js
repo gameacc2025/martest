@@ -16,6 +16,7 @@ import ForgotPassword from "../pages/public/ForgotPassword.vue";
 import UserProfile from "../pages/public/UserProfile.vue";
 import Addresses from "../pages/public/Addresses.vue";
 import CompanyProfile from "../pages/public/CompanyProfile.vue";
+import SecuritySettings from "../pages/public/security/SecuritySettings.vue";
 import ContactUs from "../pages/public/ContactUs.vue";
 import AboutUs from "../pages/public/AboutUs.vue";
 import Faq from "../pages/public/Faq.vue";
@@ -73,6 +74,12 @@ const routes = [
         name: "profile",
         component: UserProfile,
         meta: { title: "پروفایل کاربر", requiresAuth: true, customerOnly: true, panelRedirect: "/profile" },
+      },
+      {
+        path: "security",
+        name: "security",
+        component: SecuritySettings,
+        meta: { title: "تنظیمات امنیتی", requiresAuth: true, customerOnly: true, panelRedirect: "/security" },
       },
       {
         path: "profile/addresses",

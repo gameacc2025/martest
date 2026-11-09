@@ -27,6 +27,7 @@ const {
   loginResponse,
   refreshResponse,
   meResponse,
+  sessionsResponse,
 } = require('./auth.schemas');
 
 async function authRoutes(fastify) {
@@ -170,6 +171,43 @@ async function authRoutes(fastify) {
       response: meResponse,
     },
   }, ctrl.me);
+
+  // ── Session management (authenticated user) ───────────────────
+
+  fastify.get('/sessions', {
+    onRequest: [fastify.authenticate],
+    schema: {
+      summary: 'List all active sessions for the current user',
+      tags: ['Auth'],
+      response: sessionsResponse,
+    },
+  }, ctrl.getSessions);
+
+  fastify.delete('/sessions/:id', {
+    onRequest: [fastify.authenticate],
+    schema: {
+      summary: 'Revoke a specific session (device) for the current user',
+      tags: ['Auth'],
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: { id: { type: 'integer', minimum: 1 } },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+    },
+  }, ctrl.revokeSession);
 
   // ── Admin: reset another user's password ────────────────────
   fastify.patch('/users/:id/password', {

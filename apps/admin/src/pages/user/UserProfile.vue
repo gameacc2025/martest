@@ -2,8 +2,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { apiGet, apiPatch } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiPatch, apiPost, apiDelete } from '@telecom/shared-core/http/apiClient'
 import { endpoints } from '@telecom/api-client'
+import { authApi } from '@telecom/api-client'
 import { useAuthStore } from '../../stores/auth'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -19,6 +20,8 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import ProgressSpinner from 'primevue/progressspinner'
+import Divider from 'primevue/divider'
+import Badge from 'primevue/badge'
 
 const toast = useToast()
 const route = useRoute()
@@ -42,6 +45,11 @@ const editForm = ref({
   bio: '',
   avatarUrl: '',
 })
+
+// Session management
+const sessionsLoading = ref(false)
+const activeSessions = ref([])
+const revokingSession = ref(null)
 
 onMounted(() => {
   fetchProfile()
@@ -157,6 +165,64 @@ async function submitPasswordChange() {
 // ── Logout ───────────────────────────────────────────────────
 function logout() {
   authStore.logout({ redirectTo: '/login' })
+}
+
+// ── Session Management ─────────────────────────────────────────
+async function loadSessions() {
+  sessionsLoading.value = true
+  try {
+    const { data } = await authApi.getSessions()
+    // Map the session data to include deviceIcon for display
+    activeSessions.value = (data.sessions || []).map(session => ({
+      ...session,
+      deviceIcon: detectDeviceIcon(session.userAgent),
+    }))
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت نشست‌ها', life: 3000 })
+  } finally {
+    sessionsLoading.value = false
+  }
+}
+
+async function revokeSession(sessionId) {
+  revokingSession.value = sessionId
+  try {
+    await authApi.revokeSession(sessionId)
+    // If revoking the current session, the server clears the cookie
+    // The auth store will handle the redirect on the next request
+    const session = activeSessions.value.find(s => String(s.id) === String(sessionId))
+    if (session?.isCurrent) {
+      setTimeout(() => authStore.logout({ redirectTo: '/login' }), 1500)
+    }
+    activeSessions.value = activeSessions.value.filter(s => String(s.id) !== String(sessionId))
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نشست لغو شد', life: 3000 })
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در لغو نشست', life: 3000 })
+  } finally {
+    revokingSession.value = null
+  }
+}
+
+async function revokeAllSessions() {
+  try {
+    await apiPost(endpoints.auth.logoutAll)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'تمام نشست‌ها لغو شدند', life: 3000 })
+    setTimeout(() => authStore.logout({ redirectTo: '/login' }), 1500)
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در لغو همه نشست‌ها', life: 3000 })
+  }
+}
+
+function detectDeviceIcon(userAgent) {
+  if (!userAgent) return 'pi pi-desktop'
+  const ua = userAgent.toLowerCase()
+  if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone') || ua.includes('ipad')) {
+    return 'pi pi-mobile'
+  }
+  if (ua.includes('tablet')) {
+    return 'pi pi-tablet'
+  }
+  return 'pi pi-desktop'
 }
 </script>
 
@@ -276,19 +342,73 @@ function logout() {
                 </div>
                 <Button label="تغییر رمز عبور" icon="pi pi-key" @click="openPasswordDialog" />
               </div>
-              <div class="security-row disabled">
+
+              <Divider />
+
+              <div class="security-row">
                 <div>
                   <h4>نشست‌های فعال</h4>
-                  <p>مدیریت دستگاه‌های واردشده — به‌زودی.</p>
+                  <p>لیست دستگاه‌هایی که در حال حاضر در حساب شما وارد شده‌اند.</p>
                 </div>
-                <Tag severity="secondary">به‌زودی</Tag>
               </div>
-              <div class="security-row disabled">
-                <div>
-                  <h4>ورودهای اخیر</h4>
-                  <p>تاریخچه ورود به حساب — به‌زودی.</p>
+
+              <div class="sessions-actions">
+                <Button
+                  label="بارگذاری نشست‌ها"
+                  icon="pi pi-refresh"
+                  severity="secondary"
+                  outlined
+                  @click="loadSessions"
+                  :loading="sessionsLoading"
+                />
+                <Button
+                  label="خروج از همه دستگاه‌ها"
+                  icon="pi pi-sign-out"
+                  severity="danger"
+                  outlined
+                  @click="revokeAllSessions"
+                />
+              </div>
+
+              <div v-if="sessionsLoading" class="text-center py-6">
+                <ProgressSpinner style="width: 40px; height: 40px" />
+              </div>
+
+              <div v-else-if="activeSessions.length === 0" class="text-center py-4">
+                <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--text-color-secondary)" />
+                <p>نشست فعالی یافت نشد. برای مشاهده، روی «بارگذاری نشست‌ها» کلیک کنید.</p>
+              </div>
+
+              <div v-else class="session-list">
+                <div class="session-header">
+                  <span>دستگاه / مرورگر</span>
+                  <span>IP</span>
+                  <span>موقعیت</span>
+                  <span>آخرین فعالیت</span>
+                  <span>جریان</span>
                 </div>
-                <Tag severity="secondary">به‌زودی</Tag>
+                <div class="session-item" v-for="session in activeSessions" :key="session.id">
+                  <div class="session-device">
+                    <i :class="session.deviceIcon || 'pi pi-desktop'" />
+                    <span>{{ session.deviceName || session.userAgent || 'ناشناس' }}</span>
+                    <Badge v-if="session.isCurrent" value="نشست جاری" severity="success" size="small" style="margin-right: 0.5rem" />
+                  </div>
+                  <div class="session-ip">{{ session.ipAddress || '—' }}</div>
+                  <div class="session-location">{{ session.location || '—' }}</div>
+                  <div class="session-last-activity">{{ formatDate(session.lastActivityAt) }}</div>
+                  <div class="session-actions">
+                    <Button
+                      v-if="!session.isCurrent"
+                      icon="pi pi-sign-out"
+                      severity="danger"
+                      rounded
+                      text
+                      size="small"
+                      @click="revokeSession(session.id)"
+                      :disabled="revokingSession === session.id"
+                    />
+                  </div>
+                </div>
               </div>
             </template>
           </Card>
@@ -427,6 +547,56 @@ function logout() {
   opacity: 0.6;
 }
 
+.sessions-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.session-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 2px solid var(--ds-color-border);
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  font-size: 0.85rem;
+}
+
+.session-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--ds-color-border);
+}
+
+.session-device {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.session-device i {
+  font-size: 1.25rem;
+  color: var(--ds-color-primary);
+}
+
+.session-ip,
+.session-location,
+.session-last-activity {
+  font-size: 0.85rem;
+  color: var(--ds-color-text);
+}
+
+.session-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 @media (max-width: 767px) {
   .account-grid,
   .form-grid {
@@ -490,6 +660,27 @@ function logout() {
 @media (max-width: 640px) {
   .profile-heading { align-items: flex-start; padding: 1rem; }
   .profile-heading-icon { width: 2.75rem; height: 2.75rem; }
+}
+
+@media (max-width: 767px) {
+  .session-header,
+  .session-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .security-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sessions-actions {
+    flex-direction: column;
+  }
+
+  .sessions-actions button {
+    width: 100%;
+  }
 }
 
 </style>

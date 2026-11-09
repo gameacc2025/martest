@@ -52,94 +52,135 @@
         </aside>
 
         <section class="profile-main" aria-labelledby="profile-details-title">
-          <Card class="profile-details-card">
-            <template #title>
-              <div class="profile-card-heading">
-                <div><h2 id="profile-details-title">اطلاعات حساب</h2><p>مشخصات ثبت‌شده برای حساب کاربری شما</p></div>
-              </div>
-            </template>
-            <template #content>
-              <dl class="profile-details-grid">
-                <div class="profile-detail-row"><dt>نام و نام خانوادگی</dt><dd>{{ user.fullName || user.displayName || user.name || 'ثبت نشده' }}</dd></div>
-                <div class="profile-detail-row"><dt>ایمیل</dt><dd>{{ user.email || 'ثبت نشده' }}</dd></div>
-                <div class="profile-detail-row"><dt>شماره تلفن</dt><dd>{{ user.phone || 'ثبت نشده' }}</dd></div>
-                <div class="profile-detail-row"><dt>تاریخ عضویت</dt><dd>{{ formatDate(user.createdAt) }}</dd></div>
-                <div class="profile-detail-row"><dt>نوع حساب</dt><dd><span class="profile-type-inline">{{ userTypeLabel }}</span></dd></div>
-              </dl>
-            </template>
-          </Card>
+          <Tabs v-model:value="activeTab">
+            <TabList>
+              <Tab value="account"><i class="pi pi-id-card"></i> اطلاعات حساب</Tab>
+              <Tab value="edit"><i class="pi pi-pencil"></i> ویرایش پروفایل</Tab>
+              <Tab value="security"><i class="pi pi-lock"></i> امنیت</Tab>
+            </TabList>
+            <TabPanels>
+              <!-- Account Info Tab -->
+              <TabPanel value="account">
+                <Card class="profile-details-card">
+                  <template #title>
+                    <div class="profile-card-heading">
+                      <div><h2 id="profile-details-title">اطلاعات حساب</h2><p>مشخصات ثبت‌شده برای حساب کاربری شما</p></div>
+                    </div>
+                  </template>
+                  <template #content>
+                    <dl class="profile-details-grid">
+                      <div class="profile-detail-row"><dt>نام و نام خانوادگی</dt><dd>{{ user.fullName || user.displayName || user.name || 'ثبت نشده' }}</dd></div>
+                      <div class="profile-detail-row"><dt>ایمیل</dt><dd>{{ user.email || 'ثبت نشده' }}</dd></div>
+                      <div class="profile-detail-row"><dt>شماره تلفن</dt><dd>{{ user.phone || 'ثبت نشده' }}</dd></div>
+                      <div class="profile-detail-row"><dt>تاریخ عضویت</dt><dd>{{ formatDate(user.createdAt) }}</dd></div>
+                      <div class="profile-detail-row"><dt>نوع حساب</dt><dd><span class="profile-type-inline">{{ userTypeLabel }}</span></dd></div>
+                    </dl>
+                  </template>
+                </Card>
+              </TabPanel>
+
+              <!-- Edit Profile Tab -->
+              <TabPanel value="edit">
+                <Card class="form-card">
+                  <template #title>ویرایش پروفایل</template>
+                  <template #content>
+                    <form @submit.prevent="saveProfile" class="space-y-4">
+                      <p v-if="formError" class="text-red-600 text-sm" role="alert">{{ formError }}</p>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label for="profile-first-name" class="profile-field-label">نام</label>
+                          <InputText
+                            id="profile-first-name"
+                            v-model="editForm.firstName"
+                            name="firstName"
+                            autocomplete="given-name"
+                            placeholder="نام خود را وارد کنید"
+                            class="w-full"
+                          />
+                        </div>
+                        <div>
+                          <label for="profile-last-name" class="profile-field-label">نام خانوادگی</label>
+                          <InputText
+                            id="profile-last-name"
+                            v-model="editForm.lastName"
+                            name="lastName"
+                            autocomplete="family-name"
+                            placeholder="نام خانوادگی خود را وارد کنید"
+                            class="w-full"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="profile-field-label">تصویر پروفایل</label>
+                        <FileUpload
+                          mode="basic"
+                          name="avatar"
+                          aria-label="انتخاب تصویر پروفایل"
+                          accept="image/jpeg,image/png,image/webp"
+                          :chooseLabel="saving ? 'در حال پردازش…' : 'انتخاب تصویر'"
+                          :maxFileSize="1000000"
+                          :disabled="saving"
+                          @select="onAvatarUpload"
+                          class="w-full"
+                        />
+                      </div>
+
+                      <div class="flex gap-2 justify-end">
+                        <Button
+                          type="button"
+                          label="انصراف"
+                          icon="pi pi-times"
+                          class="p-button-outlined"
+                          @click="editProfileDialog = false"
+                        />
+                        <Button
+                          type="submit"
+                          label="ذخیره تغییرات"
+                          icon="pi pi-check"
+                          class="p-button-primary"
+                          :loading="saving"
+                        />
+                      </div>
+                    </form>
+                  </template>
+                </Card>
+              </TabPanel>
+
+              <!-- Security Tab -->
+              <TabPanel value="security">
+                <Card class="form-card">
+                  <template #title>امنیت</template>
+                  <template #content>
+                    <div class="security-row">
+                      <div>
+                        <h4>رمز عبور</h4>
+                        <p>برای حفظ امنیت حساب، رمز عبور خود را به‌صورت دوره‌ای تغییر دهید.</p>
+                      </div>
+                      <Button label="تغییر رمز عبور" icon="pi pi-key" @click="changePassword" />
+                    </div>
+                    <div class="security-row">
+                      <div>
+                        <h4>نشست‌های فعال</h4>
+                        <p>دستگاه‌هایی که در حال حاضر در حساب شما وارد شده‌اند.</p>
+                      </div>
+                      <Button label="مشاهده همه" icon="pi pi-list" severity="secondary" outlined @click="loadSessions" />
+                    </div>
+                    <div class="security-row">
+                      <div>
+                        <h4>ورودهای اخیر</h4>
+                        <p>تاریخچه ورودهای اخیر به حساب شما.</p>
+                      </div>
+                      <Button label="مشاهده همه" icon="pi pi-list" severity="secondary" outlined @click="loadLoginHistory" />
+                    </div>
+                  </template>
+                </Card>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
         </section>
       </div>
     </main>
-
-    <!-- Edit Profile Dialog -->
-    <Dialog
-      v-model:visible="editProfileDialog"
-      header="ویرایش پروفایل"
-      :modal="true"
-      class="p-fluid"
-    >
-      <form @submit.prevent="saveProfile" class="space-y-4">
-        <p v-if="formError" class="text-red-600 text-sm" role="alert">{{ formError }}</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="profile-first-name" class="profile-field-label">نام</label>
-            <InputText
-              id="profile-first-name"
-              v-model="editForm.firstName"
-              name="firstName"
-              autocomplete="given-name"
-              placeholder="نام خود را وارد کنید"
-              class="w-full"
-            />
-          </div>
-          <div>
-            <label for="profile-last-name" class="profile-field-label">نام خانوادگی</label>
-            <InputText
-              id="profile-last-name"
-              v-model="editForm.lastName"
-              name="lastName"
-              autocomplete="family-name"
-              placeholder="نام خانوادگی خود را وارد کنید"
-              class="w-full"
-            />
-          </div>
-        </div>
-
-
-        <div>
-          <label class="profile-field-label">تصویر پروفایل</label>
-          <FileUpload
-            mode="basic"
-            name="avatar"
-            aria-label="انتخاب تصویر پروفایل"
-            accept="image/jpeg,image/png,image/webp"
-            :chooseLabel="saving ? 'در حال پردازش…' : 'انتخاب تصویر'"
-            :maxFileSize="1000000"
-            :disabled="saving"
-            @select="onAvatarUpload"
-            class="w-full"
-          />
-        </div>
-
-        <div class="flex gap-2 justify-end">
-          <Button
-            type="button"
-            label="انصراف"
-            icon="pi pi-times"
-            class="p-button-outlined"
-            @click="editProfileDialog = false"
-          />
-          <Button
-            type="submit"
-            label="ذخیره تغییرات"
-            icon="pi pi-check"
-            class="p-button-primary"
-            :loading="saving"
-          />
-        </div>
-      </form>
-    </Dialog>
 
     <!-- Change Password Dialog -->
     <Dialog
@@ -210,6 +251,93 @@
         </div>
       </form>
     </Dialog>
+
+    <!-- Active Sessions Dialog -->
+    <Dialog v-model:visible="showSessionsDialog" header="نشست‌های فعال" :modal="true" style="width: 50rem" :breakpoints="{ '640px': '95vw', '1024px': '75vw' }" class="p-fluid">
+      <div v-if="sessionsLoading" class="text-center py-6">
+        <ProgressSpinner style="width: 40px; height: 40px" />
+      </div>
+      <div v-else class="sessions-content">
+        <div v-if="activeSessions.length === 0" class="text-center py-4">
+          <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--text-color-secondary)" />
+          <p>نشست فعالی یافت نشد.</p>
+        </div>
+        <template v-else>
+          <div class="session-list">
+            <div class="session-header">
+              <span>دستگاه / مرورگر</span>
+              <span>IP</span>
+              <span>موقعیت</span>
+              <span>آخرین فعالیت</span>
+              <span>جریان</span>
+            </div>
+            <div class="session-item" v-for="session in activeSessions" :key="session.id">
+              <div class="session-device">
+                <i :class="session.deviceIcon || 'pi pi-desktop'" />
+                <span>{{ session.deviceName || session.userAgent || 'ناشناس' }}</span>
+                <Badge v-if="session.isCurrent" value="نشست جاری" severity="success" size="small" style="margin-right: 0.5rem" />
+              </div>
+              <div class="session-ip">{{ session.ipAddress || '—' }}</div>
+              <div class="session-location">{{ session.location || '—' }}</div>
+              <div class="session-last-activity">{{ formatDate(session.lastActivityAt) }}</div>
+              <div class="session-actions">
+                <Button
+                  v-if="!session.isCurrent"
+                  icon="pi pi-sign-out"
+                  severity="danger"
+                  rounded
+                  text
+                  size="small"
+                  @click="revokeSession(session.id)"
+                  :disabled="revokingSession === session.id"
+                />
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <template #footer>
+        <Button label="بستن" icon="pi pi-times" severity="secondary" text @click="showSessionsDialog = false" />
+      </template>
+    </Dialog>
+
+    <!-- Login History Dialog -->
+    <Dialog v-model:visible="showLoginHistoryDialog" header="ورودهای اخیر" :modal="true" style="width: 50rem" :breakpoints="{ '640px': '95vw', '1024px': '75vw' }" class="p-fluid">
+      <div v-if="sessionsLoading" class="text-center py-6">
+        <ProgressSpinner style="width: 40px; height: 40px" />
+      </div>
+      <div v-else class="login-history-content">
+        <div v-if="loginHistory.length === 0" class="text-center py-4">
+          <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--text-color-secondary)" />
+          <p>تاریخچه ورود یافت نشد.</p>
+        </div>
+        <template v-else>
+          <div class="login-history-list">
+            <div class="login-history-header">
+              <span>تاریخ و زمان</span>
+              <span>IP</span>
+              <span>موقعیت</span>
+              <span>دستگاه / مرورگر</span>
+              <span>نتیجه</span>
+            </div>
+            <div class="login-history-item" v-for="entry in loginHistory" :key="entry.id">
+              <div class="login-history-time">{{ formatDate(entry.createdAt) }}</div>
+              <div class="login-history-ip">{{ entry.ipAddress || '—' }}</div>
+              <div class="login-history-location">{{ entry.location || '—' }}</div>
+              <div class="login-history-device">{{ entry.userAgent || '—' }}</div>
+              <div class="login-history-result">
+                <Tag :severity="entry.success ? 'success' : 'danger'">
+                  {{ entry.success ? 'موفق' : 'ناموفق' }}
+                </Tag>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <template #footer>
+        <Button label="بستن" icon="pi pi-times" severity="secondary" text @click="showLoginHistoryDialog = false" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -225,6 +353,15 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import FileUpload from 'primevue/fileupload'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
+import Tag from 'primevue/tag'
+import Badge from 'primevue/badge'
+import ProgressSpinner from 'primevue/progressspinner'
+import Avatar from 'primevue/avatar'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -259,6 +396,14 @@ const passwordForm = ref({
   newPassword: '',
   confirmPassword: ''
 })
+
+// Session management
+const sessionsLoading = ref(false)
+const activeSessions = ref([])
+const loginHistory = ref([])
+const showSessionsDialog = ref(false)
+const showLoginHistoryDialog = ref(false)
+const revokingSession = ref(null)
 
 onMounted(async () => {
   await loadUserProfile()
@@ -402,6 +547,101 @@ const logout = async () => {
   if (saving.value) return
   await authStore.logout()
   router.push({ name: 'login' })
+}
+
+// Session management
+const activeTab = ref('account')
+
+async function loadSessions() {
+  showSessionsDialog.value = true
+  sessionsLoading.value = true
+  try {
+    // For now, we'll use mock data since the API endpoint doesn't exist yet
+    // TODO: Replace with actual API call when backend implements session management
+    // const { data } = await apiGet('/auth/sessions')
+    // activeSessions.value = data
+
+    // Mock data for demo
+    activeSessions.value = [
+      {
+        id: 'current',
+        deviceName: 'Chrome on Windows',
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        ipAddress: '192.168.1.100',
+        location: 'تهران، ایران',
+        lastActivityAt: new Date().toISOString(),
+        isCurrent: true,
+        deviceIcon: 'pi pi-desktop',
+      },
+      {
+        id: 'sess_2',
+        deviceName: 'Mobile App',
+        userAgent: 'TelecomMarket/1.0 (iOS 17.2)',
+        ipAddress: '192.168.1.101',
+        location: 'تهران، ایران',
+        lastActivityAt: new Date(Date.now() - 3600000).toISOString(),
+        isCurrent: false,
+        deviceIcon: 'pi pi-mobile',
+      },
+    ]
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت نشست‌ها', life: 3000 })
+  } finally {
+    sessionsLoading.value = false
+  }
+}
+
+async function loadLoginHistory() {
+  showLoginHistoryDialog.value = true
+  sessionsLoading.value = true
+  try {
+    // Mock data for demo
+    // TODO: Replace with actual API call when backend implements login history
+    loginHistory.value = [
+      {
+        id: 1,
+        createdAt: new Date().toISOString(),
+        ipAddress: '192.168.1.100',
+        location: 'تهران، ایران',
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        success: true,
+      },
+      {
+        id: 2,
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        ipAddress: '192.168.1.100',
+        location: 'تهران، ایران',
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        success: true,
+      },
+      {
+        id: 3,
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+        ipAddress: '192.168.1.50',
+        location: 'مشهد، ایران',
+        userAgent: 'Mozilla/5.0 (Linux; Android 14)',
+        success: false,
+      },
+    ]
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت تاریخچه ورود', life: 3000 })
+  } finally {
+    sessionsLoading.value = false
+  }
+}
+
+async function revokeSession(sessionId) {
+  revokingSession.value = sessionId
+  try {
+    // TODO: Replace with actual API call when backend implements session revocation
+    // await apiDelete(`/auth/sessions/${sessionId}`)
+    activeSessions.value = activeSessions.value.filter(s => s.id !== sessionId)
+    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'نشست لغو شد', life: 3000 })
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در لغو نشست', life: 3000 })
+  } finally {
+    revokingSession.value = null
+  }
 }
 </script>
 

@@ -125,6 +125,8 @@ async function buildApp() {
   app.get('/api/v1/companies/public/:id', require('./modules/companies/company.controller').getPublicOne);
 
   await app.register(require('./modules/auth/auth.routes'), { prefix: '/api/v1/auth' });
+  await app.register(require('./modules/auth-challenges/authChallenges.routes'), { prefix: '/api/v1/auth' });
+  await app.register(require('./modules/audit/audit.routes'), { prefix: '/api/v1' });
   await app.register(require('./modules/contact/contact.routes'), { prefix: '/api/v1/contact' });
   await app.register(require('./modules/banners/banner.routes'), { prefix: '/api/v1/banners' });
   await app.register(require('./modules/users/user.routes'), { prefix: '/api/v1/users' });
@@ -143,6 +145,7 @@ async function buildApp() {
   await app.register(require('./modules/specification-library/specification-library.routes'), { prefix: '/api/v1/specification-library' });
   await app.register(require('./modules/inquiries/inquiry.routes'), { prefix: '/api/v1/inquiries' });
   await app.register(require('./modules/notifications/notification.routes'), { prefix: '/api/v1/settings/notifications' });
+  await app.register(require('./modules/cms'), { prefix: '/api/v1' });
 
   // ── Health check (no auth) ────────────────────────────────────
   app.get('/health', {

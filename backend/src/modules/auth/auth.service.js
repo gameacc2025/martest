@@ -159,10 +159,10 @@ async function buildUserContext(userId) {
  *
  * @param {object} fastify
  * @param {object} params - { userId, email, roles, permissions, accessProfile }
- * @param {object} [options] - { revokeExisting = true }
+ * @param {object} [options] - { revokeExisting = true, deviceInfo = {} }
  */
 async function issueTokens(fastify, { userId, email, roles, permissions, accessProfile },
-                           { revokeExisting = true } = {}) {
+                           { revokeExisting = true, deviceInfo = {} } = {}) {
   const accessToken = signAccessToken(fastify, {
     id: userId,
     email,
@@ -183,6 +183,10 @@ async function issueTokens(fastify, { userId, email, roles, permissions, accessP
       token: hashRefreshToken(refreshToken),
       userId,
       expiresAt: getRefreshTokenExpiry(),
+      userAgent: deviceInfo.userAgent || null,
+      ipAddress: deviceInfo.ipAddress || null,
+      deviceName: deviceInfo.deviceName || null,
+      lastUsedAt: new Date(),
     },
   });
 
@@ -279,8 +283,9 @@ async function login(fastify, phone, password, app) {
  * Refresh token rotation.
  * @param {object} fastify
  * @param {object} tokenRecord - DB refresh-token record (includes user)
+ * @param {object} [deviceInfo] - Optional device info to update
  */
-async function refresh(fastify, tokenRecord) {
+async function refresh(fastify, tokenRecord, deviceInfo = {}) {
   if (!tokenRecord || !tokenRecord.user) {
     throw createError(401, 'INVALID_REFRESH_TOKEN', 'Refresh token معتبر نیست.');
   }
@@ -329,6 +334,10 @@ async function refresh(fastify, tokenRecord) {
       token: hashRefreshToken(newRefreshToken),
       userId: dbUser.id,
       expiresAt: getRefreshTokenExpiry(),
+      userAgent: deviceInfo.userAgent || tokenRecord.userAgent,
+      ipAddress: deviceInfo.ipAddress || tokenRecord.ipAddress,
+      deviceName: deviceInfo.deviceName || tokenRecord.deviceName,
+      lastUsedAt: new Date(),
     },
   });
 
@@ -351,6 +360,72 @@ async function logout(tokenRecordId) {
  */
 async function logoutAll(userId) {
   await prisma.refreshToken.deleteMany({ where: { userId } });
+}
+
+/**
+ * Get all active sessions for a user.
+ * Returns sessions ordered by last activity (most recent first).
+ */
+async function getSessions(userId) {
+  const sessions = await prisma.refreshToken.findMany({
+    where: {
+      userId,
+      expiresAt: { gt: new Date() }, // Only non-expired tokens
+    },
+    select: {
+      id: true,
+      userAgent: true,
+      ipAddress: true,
+      deviceName: true,
+      lastUsedAt: true,
+      createdAt: true,
+      expiresAt: true,
+    },
+    orderBy: { lastUsedAt: 'desc' },
+  });
+
+  // Add derived fields
+  return sessions.map(s => ({
+    id: String(s.id),
+    userAgent: s.userAgent,
+    ipAddress: s.ipAddress,
+    deviceName: s.deviceName,
+    lastActivityAt: s.lastUsedAt || s.createdAt,
+    createdAt: s.createdAt,
+    expiresAt: s.expiresAt,
+    isCurrent: false, // Will be set by controller based on current token
+  }));
+}
+
+/**
+ * Revoke a specific session (refresh token) for a user.
+ * Users can only revoke their own sessions.
+ */
+async function revokeSession(userId, sessionId) {
+  const session = await prisma.refreshToken.findUnique({
+    where: { id: Number(sessionId) },
+  });
+
+  if (!session) {
+    throw createError(404, 'SESSION_NOT_FOUND', 'نشست یافت نشد.');
+  }
+
+  if (session.userId !== userId) {
+    throw createError(403, 'FORBIDDEN', 'شما مجاز به لغو این نشست نیستید.');
+  }
+
+  await prisma.refreshToken.delete({ where: { id: Number(sessionId) } });
+}
+
+/**
+ * Update lastUsedAt timestamp for a session.
+ * Called on token refresh to track activity.
+ */
+async function updateSessionLastUsed(tokenRecordId) {
+  await prisma.refreshToken.update({
+    where: { id: tokenRecordId },
+    data: { lastUsedAt: new Date() },
+  });
 }
 
 /**
@@ -651,6 +726,10 @@ module.exports = {
   changeUserPassword,
   register,
   registerCompany,
+  // Session management
+  getSessions,
+  revokeSession,
+  updateSessionLastUsed,
   // Shared with handoff.service.js
   buildUserContext,
   issueTokens,

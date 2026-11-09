@@ -1,47 +1,51 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import { useCmsStore } from '../../stores/cms'
 
+const route = useRoute()
+const router = useRouter()
+const cmsStore = useCmsStore()
 const activeFaqIndex = ref(null)
+const loading = ref(false)
+const error = ref('')
+const faqCategories = ref([])
+const activeCategory = ref('عمومی')
 
-const faqs = [
-  {
-    question: 'بازارگاه مخابرات چه خدماتی ارائه می‌کند؟',
-    answer: 'این سامانه یک بازارگاه B2B برای پیدا کردن تجهیزات مخابراتی و شبکه، بررسی اطلاعات محصولات منتشرشده و ارتباط با تأمین‌کنندگان از طریق فرایند استعلام است.'
-  },
-  {
-    question: 'چه کسی می‌تواند درخواست استعلام ثبت کند؟',
-    answer: 'ثبت درخواست استعلام برای همه کاربران به‌صورت خودکار فعال نیست. حساب شما باید دسترسی لازم را داشته باشد و محدودیت‌ها یا سهمیه اشتراک مربوطه نیز باید اجازه ثبت درخواست را بدهند.'
-  },
-  {
-    question: 'چه کسی می‌تواند به استعلام پاسخ بدهد؟',
-    answer: 'پاسخ‌دهی از سوی کاربران شرکتیِ دارای مجوز مربوطه انجام می‌شود. دسترسی و سهمیه پاسخ‌دهی در سمت سامانه بررسی می‌شوند؛ داشتن حساب کاربری به‌تنهایی به معنی داشتن این دسترسی نیست.'
-  },
-  {
-    question: 'اگر قیمت محصول نمایش داده نشود، چه کار کنم؟',
-    answer: 'ممکن است قیمت در اطلاعات عمومی محصول ثبت نشده باشد یا لازم باشد شرایط تأمین مشخص شود. اگر دسترسی لازم را داشته باشید، گزینه ثبت استعلام قیمت در صفحه جزئیات محصول در دسترس خواهد بود.'
-  },
-  {
-    question: 'پس از ثبت‌نام شرکت، حساب چه زمانی فعال می‌شود؟',
-    answer: 'ثبت‌نام شرکت به‌تنهایی به معنی فعال‌شدن فوری حساب نیست. اطلاعات شرکت باید طبق فرایند بررسی و تأیید سامانه تأیید شود؛ وضعیت حساب را از پیام‌های سامانه یا پشتیبانی پیگیری کنید.'
-  },
-  {
-    question: 'چرا محصولی که ثبت کرده‌ایم هنوز در کاتالوگ عمومی نیست؟',
-    answer: 'محصول باید اطلاعات لازم را داشته باشد، برای بررسی ارسال شود، توسط تیم مسئول تأیید شود و سپس شرکت آن را منتشر کند. محصول پیش‌نویس یا در انتظار بررسی در کاتالوگ عمومی نمایش داده نمی‌شود.'
-  },
-  {
-    question: 'آیا برای همه محصولات امکان خرید مستقیم و پرداخت آنلاین وجود دارد؟',
-    answer: 'نسخه فعلی بر فرایند B2B و استعلام متمرکز است؛ بنابراین وجود صفحه محصول به معنی فعال‌بودن خرید مستقیم یا پرداخت آنلاین برای آن محصول نیست. برای شرایط تأمین، از اطلاعات محصول و فرایند استعلام استفاده کنید.'
-  },
-  {
-    question: 'چطور با پشتیبانی تماس بگیرم؟',
-    answer: 'برای پرسش‌هایی که در این صفحه پاسخ داده نشده‌اند، از صفحه تماس با ما استفاده کنید و شرح مسئله را برای تیم پشتیبانی ارسال کنید.'
-  },
-]
+async function loadFaqs() {
+  loading.value = true
+  error.value = ''
+  try {
+    await Promise.all([
+      cmsStore.fetchFaqs(),
+      cmsStore.fetchFaqCategories(),
+    ])
+    faqCategories.value = cmsStore.faqCategories || []
+  } catch (err) {
+    error.value = 'دریافت سوالات متداول با خطا مواجه شد'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+const faqs = computed(() => cmsStore.activeFaqs)
+
+const filteredFaqs = computed(() => {
+  if (activeCategory.value === 'عمومی') return faqs.value
+  return faqs.value.filter(f => f.category === activeCategory.value)
+})
 
 function toggleFaq(index) {
   activeFaqIndex.value = activeFaqIndex.value === index ? null : index
 }
+
+function getCategoryLabel(category) {
+  return category || 'عمومی'
+}
+
+onMounted(loadFaqs)
 </script>
 
 <template>
@@ -62,37 +66,60 @@ function toggleFaq(index) {
         heading-id="faq-title"
       />
 
-      <section class="faq-list" aria-label="فهرست پرسش‌ها">
-        <article v-for="(faq, index) in faqs" :key="faq.question" class="faq-item ds-card" :class="{ 'faq-item--active': activeFaqIndex === index }">
-          <h2 class="faq-item__heading">
-            <button
-              :id="`faq-question-${index}`"
-              type="button"
-              class="faq-question"
-              :aria-expanded="activeFaqIndex === index"
-              :aria-controls="`faq-answer-${index}`"
-              @click="toggleFaq(index)"
-            >
-              <span>{{ faq.question }}</span>
-              <span class="faq-question__icon" aria-hidden="true">
-                <i class="pi" :class="activeFaqIndex === index ? 'pi-minus' : 'pi-plus'"></i>
-              </span>
-            </button>
-          </h2>
-          <div
-            v-if="activeFaqIndex === index"
-            :id="`faq-answer-${index}`"
-            class="faq-answer"
-            role="region"
-            :aria-labelledby="`faq-question-${index}`"
+      <div v-if="loading" class="faq-loading">
+        <div class="spinner"></div>
+        <p>در حال بارگذاری سوالات متداول...</p>
+      </div>
+
+      <div v-else-if="error" class="faq-error">
+        <p>{{ error }}</p>
+        <button @click="loadFaqs" class="ds-btn ds-btn--primary">تلاش مجدد</button>
+      </div>
+
+      <div v-else>
+        <div class="faq-categories">
+          <button
+            v-for="cat in faqCategories"
+            :key="cat"
+            :class="['faq-category-btn', { active: activeCategory === cat }]"
+            @click="activeCategory = cat"
           >
-            <p>{{ faq.answer }}</p>
-            <router-link v-if="index === 7" :to="{ name: 'contact' }" class="ds-link">
-              رفتن به صفحه تماس با ما <i class="pi pi-arrow-left" aria-hidden="true"></i>
-            </router-link>
+            {{ getCategoryLabel(cat) }}
+          </button>
+        </div>
+
+        <section class="faq-list" aria-label="فهرست پرسش‌ها">
+          <article v-for="(faq, index) in filteredFaqs" :key="index" class="faq-item ds-card" :class="{ 'faq-item--active': activeFaqIndex === index }">
+            <h2 class="faq-item__heading">
+              <button
+                :id="`faq-question-${index}`"
+                type="button"
+                class="faq-question"
+                :aria-expanded="activeFaqIndex === index"
+                :aria-controls="`faq-answer-${index}`"
+                @click="toggleFaq(index)"
+              >
+                <span>{{ faq.question }}</span>
+                <span class="faq-question__icon" aria-hidden="true">
+                  <i class="pi" :class="activeFaqIndex === index ? 'pi-minus' : 'pi-plus'"></i>
+                </span>
+              </button>
+            </h2>
+            <div
+              v-if="activeFaqIndex === index"
+              :id="`faq-answer-${index}`"
+              class="faq-answer"
+              role="region"
+              :aria-labelledby="`faq-question-${index}`"
+            >
+              <p>{{ faq.answer }}</p>
+            </div>
+          </article>
+          <div v-if="filteredFaqs.length === 0" class="faq-empty">
+            <p>سوالی در این دسته‌بندی یافت نشد.</p>
           </div>
-        </article>
-      </section>
+        </section>
+      </div>
 
       <footer class="faq-support">
         <div>

@@ -35,6 +35,8 @@ const { DEFAULT_COMPANIES, seedCompanies, seedMainCompany } = require('./seeds/c
 const { LIBRARY_FIELDS, seedSpecificationLibrary } = require('./seeds/specification-library');
 const { seedSpecificationTemplates } = require('./seeds/specification-templates');
 const { seedDemoMarketplace } = require('./seeds/demo-marketplace');
+const { seedCms } = require('./seeds/cms');
+const { seedAuthAuditDemo } = require('./seeds/auth-audit');
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL, max: 5, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30000 }) });
 
@@ -280,6 +282,36 @@ const PERMISSIONS = [
   { name: 'system.jobs.retry',    label: 'اجرای مجدد Job',     group: 'سیستم', description: 'اجرای مجدد Jobهای ناموفق.' },
   { name: 'system.cache.clear',   label: 'پاک‌سازی Cache',      group: 'سیستم', description: 'پاک‌سازی Cache سیستم.' },
   { name: 'system.maintenance',   label: 'حالت نگهداری',       group: 'سیستم', description: 'فعال یا غیرفعال کردن حالت Maintenance سامانه.' },
+
+  // CMS - Articles
+  { name: 'cms.articles.read',   label: 'مشاهده مقالات',  group: 'مدیریت محتوا - مقالات', description: 'مشاهده لیست مقالات و جزئیات.' },
+  { name: 'cms.articles.create', label: 'ایجاد مقاله',    group: 'مدیریت محتوا - مقالات', description: 'ایجاد مقاله جدید.' },
+  { name: 'cms.articles.update', label: 'ویرایش مقاله',   group: 'مدیریت محتوا - مقالات', description: 'ویرایش محتوای مقاله.' },
+  { name: 'cms.articles.delete', label: 'حذف مقاله',     group: 'مدیریت محتوا - مقالات', description: 'حذف و آرشیو مقاله.' },
+
+  // CMS - Categories
+  { name: 'cms.categories.read',   label: 'مشاهده دسته‌بندی مقالات', group: 'مدیریت محتوا - دسته‌بندی‌ها', description: 'مشاهده دسته‌بندی‌های مقالات.' },
+  { name: 'cms.categories.create', label: 'ایجاد دسته‌بندی',         group: 'مدیریت محتوا - دسته‌بندی‌ها', description: 'ایجاد دسته‌بندی جدید.' },
+  { name: 'cms.categories.update', label: 'ویرایش دسته‌بندی',       group: 'مدیریت محتوا - دسته‌بندی‌ها', description: 'ویرایش دسته‌بندی.' },
+  { name: 'cms.categories.delete', label: 'حذف دسته‌بندی',         group: 'مدیریت محتوا - دسته‌بندی‌ها', description: 'حذف دسته‌بندی.' },
+
+  // CMS - Tags
+  { name: 'cms.tags.read',   label: 'مشاهده برچسب‌ها', group: 'مدیریت محتوا - برچسب‌ها', description: 'مشاهده برچسب‌های مقالات.' },
+  { name: 'cms.tags.create', label: 'ایجاد برچسب',    group: 'مدیریت محتوا - برچسب‌ها', description: 'ایجاد برچسب جدید.' },
+  { name: 'cms.tags.update', label: 'ویرایش برچسب',   group: 'مدیریت محتوا - برچسب‌ها', description: 'ویرایش برچسب.' },
+  { name: 'cms.tags.delete', label: 'حذف برچسب',     group: 'مدیریت محتوا - برچسب‌ها', description: 'حذف برچسب.' },
+
+  // CMS - FAQs
+  { name: 'cms.faqs.read',   label: 'مشاهده سوالات متداول', group: 'مدیریت محتوا - سوالات متداول', description: 'مشاهده سوالات متداول.' },
+  { name: 'cms.faqs.create', label: 'ایجاد سوال متداول',    group: 'مدیریت محتوا - سوالات متداول', description: 'ایجاد سوال متداول جدید.' },
+  { name: 'cms.faqs.update', label: 'ویرایش سوال متداول',   group: 'مدیریت محتوا - سوالات متداول', description: 'ویرایش سوال متداول.' },
+  { name: 'cms.faqs.delete', label: 'حذف سوال متداول',     group: 'مدیریت محتوا - سوالات متداول', description: 'حذف سوال متداول.' },
+
+  // CMS - Pages
+  { name: 'cms.pages.read',   label: 'مشاهده صفحات استاتیک', group: 'مدیریت محتوا - صفحات', description: 'مشاهده صفحات استاتیک.' },
+  { name: 'cms.pages.create', label: 'ایجاد صفحه استاتیک',    group: 'مدیریت محتوا - صفحات', description: 'ایجاد صفحه استاتیک جدید.' },
+  { name: 'cms.pages.update', label: 'ویرایش صفحه استاتیک',   group: 'مدیریت محتوا - صفحات', description: 'ویرایش صفحه استاتیک.' },
+  { name: 'cms.pages.delete', label: 'حذف صفحه استاتیک',     group: 'مدیریت محتوا - صفحات', description: 'حذف صفحه استاتیک.' },
 ];
 
 // ────────────────────────────────────────────────────────────
@@ -310,6 +342,12 @@ const ROLE_PERMISSIONS = {
     'banners.create', 'banners.read', 'banners.update', 'banners.delete',
     'media.upload', 'media.read', 'media.delete',
     'audit_logs.read',
+    // CMS
+    'cms.articles.read', 'cms.articles.create', 'cms.articles.update', 'cms.articles.delete',
+    'cms.categories.read', 'cms.categories.create', 'cms.categories.update', 'cms.categories.delete',
+    'cms.tags.read', 'cms.tags.create', 'cms.tags.update', 'cms.tags.delete',
+    'cms.faqs.read', 'cms.faqs.create', 'cms.faqs.update', 'cms.faqs.delete',
+    'cms.pages.read', 'cms.pages.create', 'cms.pages.update', 'cms.pages.delete',
   ],
 
   // MODERATOR (STAFF): content moderation
@@ -319,6 +357,12 @@ const ROLE_PERMISSIONS = {
     'product_images.read',
     'product_reviews.read', 'product_reviews.approve', 'product_reviews.reject', 'product_reviews.delete',
     'banners.read',
+    // CMS (read + moderation)
+    'cms.articles.read', 'cms.articles.update', 'cms.articles.delete',
+    'cms.categories.read', 'cms.categories.update',
+    'cms.tags.read', 'cms.tags.update',
+    'cms.faqs.read', 'cms.faqs.update',
+    'cms.pages.read', 'cms.pages.update',
   ],
 
   // COMPANY_MANAGER (COMPANY): full management of own company
@@ -485,6 +529,16 @@ async function main() {
   // ── 11. Development demo marketplace ────────────────────────
   const demoSeed = await seedDemoMarketplace(prisma, { permissionByName: permBy });
 
+  // ── 12. CMS seed ──────────────────────────────────────────────
+  console.log('Seeding CMS content...');
+  await seedCms();
+  console.log('  ✓ CMS content seeded');
+
+  // ── 13. Auth & Audit demo data ───────────────────────────────
+  console.log('Seeding Auth & Audit demo data...');
+  const authAuditSeed = await seedAuthAuditDemo();
+  console.log(`  ✓ AuthChallenges: ${authAuditSeed.authChallenges}, AuditLogs: ${authAuditSeed.auditLogs}`);
+
   // ── Summary ─────────────────────────────────────────────────
   console.log('\n─────────────────────────────────────────');
   console.log('Seed completed successfully!');
@@ -496,6 +550,13 @@ async function main() {
   console.log(`  Demo users:  ${demoSeed.users}`);
   console.log(`  Demo products: ${demoSeed.products}`);
   console.log(`  Spec Fields: ~${LIBRARY_FIELDS.length} predefined`);
+  console.log(`  CMS Articles: seeded`);
+  console.log(`  CMS Categories: seeded`);
+  console.log(`  CMS Tags: seeded`);
+  console.log(`  CMS FAQs: seeded`);
+  console.log(`  CMS Pages: seeded`);
+  console.log(`  AuthChallenges: ${authAuditSeed.authChallenges}`);
+  console.log(`  AuditLogs: ${authAuditSeed.auditLogs}`);
   console.log('\nSuper Admin login:');
   console.log(`  phone:    ${SUPER_ADMIN_USER.phone}`);
   console.log(`  password: ${SUPER_ADMIN_USER.password}`);

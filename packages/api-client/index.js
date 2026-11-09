@@ -18,7 +18,14 @@ export {
   statsApi,
   adminApi,
   inquiriesApi,
-  bannersApi
+  bannersApi,
+  cmsArticlesApi,
+  cmsCategoriesApi,
+  cmsTagsApi,
+  cmsFaqsApi,
+  cmsPagesApi,
+  authChallengesApi,
+  auditLogsApi,
 } from './apiClient.js'
 export {
   handleApiError,

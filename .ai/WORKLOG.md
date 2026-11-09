@@ -1,3 +1,67 @@
+## 2026-11-09 — API-3 CMS End-to-End Implementation
+- **Status:** IN_PROGRESS
+- **Agent:** CMS Agent
+- **Goal:** Complete End-to-End CMS implementation for managing static pages, magazine articles, FAQs, and homepage banners
+- **Claimed scope:** 
+  - Backend: CMS module (Article, ArticleCategory, ArticleTag, FAQ, Page) with full CRUD, public/private APIs, permissions, authorization
+  - Frontend Website: Home page, Magazine listing/detail, FAQ page, static pages (About, Contact, Terms) consuming real CMS APIs
+  - Frontend Admin: Article management, Category management, Tag management, FAQ management, Page management
+  - API Client: CMS endpoints for all operations
+  - Seed: Deterministic CMS seed with realistic synthetic data
+  - Tests: Backend service/route tests, frontend component tests
+- **Base main SHA:** 22c6a8259bfd76a376936ac81c5dc9009c30b232
+- **Verification plan:** Run backend tests, frontend builds, verify API integration
+
+### Progress Summary (2026-11-09):
+
+**Backend CMS Module (Completed):**
+- Created `backend/src/modules/cms/` with full CRUD for:
+  - Articles: `article.service.js`, `article.controller.js`, `article.routes.js`, `article.schemas.js`
+  - Article Categories: `category.service.js`, `category.controller.js`, `category.routes.js`, `category.schemas.js`
+  - Article Tags: `tag.service.js`, `tag.controller.js`, `tag.routes.js`, `tag.schemas.js`
+  - FAQs: `faq.service.js`, `faq.controller.js`, `faq.routes.js`, `faq.schemas.js`
+  - Static Pages: `page.service.js`, `page.controller.js`, `page.routes.js`, `page.schemas.js`
+  - Module index: `index.js` registering all routes under `/api/v1/cms/`
+- Registered CMS routes in `backend/src/app.js`
+- Added CMS permissions to seed.js for SUPER_ADMIN and MODERATOR roles:
+  - `cms.articles.*`, `cms.categories.*`, `cms.tags.*`, `cms.faqs.*`, `cms.pages.*`
+- Fixed missing `getAdminById` function in article.service.js
+
+**API Client (Completed):**
+- Added CMS endpoints to `packages/api-client/endpoints.js`:
+  - `cmsArticles`, `cmsCategories`, `cmsTags`, `cmsFaqs`, `cmsPages`
+- Added CMS API methods to `packages/api-client/apiClient.js`:
+  - `cmsArticlesApi`, `cmsCategoriesApi`, `cmsTagsApi`, `cmsFaqsApi`, `cmsPagesApi`
+- Exported new APIs from `packages/api-client/index.js`
+
+**Website Frontend (Partially Completed):**
+- Created CMS store: `apps/website/src/stores/cms.js` with full API integration
+- Updated Home page (`Home.vue`) to use real CMS APIs for featured articles
+- Updated FAQ page (`Faq.vue`) to use real CMS APIs with category filtering
+- Updated AboutUs page (`AboutUs.vue`) to use CMS Pages API for dynamic content
+- Fixed template syntax for dynamic page content rendering
+
+**Seed (Completed):**
+- Created `backend/prisma/seeds/cms.js` with deterministic synthetic data:
+  - 5 Article Categories (فایبر نوری، تجهیزات تست، تجهیزات شبکه، دیتاسنتر، مخابرات)
+  - 10 Article Tags (OTDR، پاور متر، سوئیچ، روتر، کابل فیبر، دیتاسنتر، شهروندی، چک‌لیست، راهنمای خرید، آموزش فنی)
+  - 9 Articles with various statuses (PUBLISHED, DRAFT, SCHEDULED)
+  - 10 FAQs across categories (عمومی، استعلام، محصولات، شرکت‌ها، پشتیبانی، مجله)
+  - 4 Static Pages (about، contact، terms، privacy)
+- Added CMS seed import to `backend/prisma/seed.js`
+- Seed file passes syntax validation
+
+**Verification:**
+- CMS module loads successfully
+- CMS seed file passes syntax check (`node -c`)
+- Backend module loading verified
+
+**Remaining Work:**
+- Update ContactUs.vue and Terms.vue to use CMS Pages API
+- Create Admin CMS management pages (ArticleManagement, CategoryManagement, TagManagement, FaqManagement, PageManagement)
+- Add Admin router entries for CMS pages
+- Create backend service/route tests for CMS module
+- Run frontend builds and verify integration
 ## 2026-11-08 — Shared Website breadcrumb component
 - **Issue:** The live `/products` route uses `ProductListing.vue`, where the breadcrumb was inline markup with a local `.bc` class. Categories repeated the same pattern, while product details used PrimeVue's separate Breadcrumb component. There was no reusable Website breadcrumb component or consistent `.breadcrumb` class.
 - **Fix:** Added `apps/website/src/components/AppBreadcrumb.vue` with semantic `nav`/ordered-list markup, RTL direction, home link, separators, linked parent items, current-page state, responsive wrapping/truncation and a real `.breadcrumb` class.

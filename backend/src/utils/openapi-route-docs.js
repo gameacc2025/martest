@@ -129,6 +129,368 @@ const docs = {
     responses: messageResponse('User password reset successfully.'),
   },
 
+  // Auth Sessions
+  'GET /api/v1/auth/sessions': {
+    summary: 'List active sessions',
+    description: 'Returns all active sessions (devices) for the authenticated user with device metadata.',
+    tags: ['Authentication'],
+    responses: {
+      200: {
+        description: 'Active sessions returned successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              sessions: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer' },
+                    deviceName: { type: 'string' },
+                    userAgent: { type: 'string' },
+                    ipAddress: { type: 'string' },
+                    location: { type: 'string' },
+                    lastUsedAt: { type: 'string', format: 'date-time' },
+                    isCurrent: { type: 'boolean' },
+                    createdAt: { type: 'string', format: 'date-time' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+  'DELETE /api/v1/auth/sessions/:id': {
+    summary: 'Revoke a session',
+    description: 'Revokes a specific session (device) for the authenticated user.',
+    tags: ['Authentication'],
+    params: idParam(),
+    responses: {
+      200: {
+        description: 'Session revoked successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+      404: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+
+  // Auth Challenges
+  'POST /api/v1/auth/challenges': {
+    summary: 'Request a new OTP challenge',
+    description: 'Request a new challenge (SMS/Email) for password reset, phone/email verification, or MFA login.',
+    tags: ['Auth Challenges'],
+    responses: {
+      200: {
+        description: 'Challenge created successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              challengeId: { type: 'integer' },
+              expiresIn: { type: 'integer' },
+              resendCooldown: { type: 'integer' },
+            },
+          },
+        },
+      },
+      400: { $ref: '#/components/schemas/ErrorResponse' },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+      429: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+  'POST /api/v1/auth/challenges/verify': {
+    summary: 'Verify challenge code without consuming',
+    description: 'Verify a challenge code to check validity without marking it as consumed.',
+    tags: ['Auth Challenges'],
+    responses: {
+      200: {
+        description: 'Challenge verification result.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              valid: { type: 'boolean' },
+              purpose: { type: 'string' },
+              remainingAttempts: { type: 'integer' },
+            },
+          },
+        },
+      },
+      400: { $ref: '#/components/schemas/ErrorResponse' },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+      404: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+  'POST /api/v1/auth/challenges/consume': {
+    summary: 'Consume challenge (verify + mark consumed)',
+    description: 'Verify a challenge code and mark it as consumed. Final step for password reset, verification flows.',
+    tags: ['Auth Challenges'],
+    responses: {
+      200: {
+        description: 'Challenge consumed successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              consumed: { type: 'boolean' },
+              purpose: { type: 'string' },
+              userId: { type: 'integer' },
+            },
+          },
+        },
+      },
+      400: { $ref: '#/components/schemas/ErrorResponse' },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+      404: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+  'GET /api/v1/auth/challenges/me': {
+    summary: 'List current user\'s challenges',
+    description: 'Get all challenges for the authenticated user for session management UI.',
+    tags: ['Auth Challenges'],
+    responses: {
+      200: {
+        description: 'User challenges returned successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              challenges: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer' },
+                    purpose: { type: 'string' },
+                    channel: { type: 'string' },
+                    destinationMasked: { type: 'string' },
+                    expiresAt: { type: 'string', format: 'date-time' },
+                    attemptCount: { type: 'integer' },
+                    maxAttempts: { type: 'integer' },
+                    status: { type: 'string', enum: ['PENDING', 'CONSUMED', 'INVALIDATED', 'EXPIRED'] },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+
+  // Audit Logs
+  'GET /api/v1/audit/logs': {
+    summary: 'Search audit logs',
+    description: 'Search and filter audit logs with pagination. STAFF only with audit_logs.read permission.',
+    tags: ['Audit Logs'],
+    permission: 'audit_logs.read',
+    querystring: {
+      type: 'object',
+      properties: {
+        action: { type: 'string' },
+        entityType: { type: 'string' },
+        entityId: { type: 'string', pattern: '^\\d+$' },
+        userId: { type: 'string', pattern: '^\\d+$' },
+        ipAddress: { type: 'string' },
+        severity: { type: 'string', enum: ['INFO', 'WARN', 'ERROR', 'CRITICAL'] },
+        dateFrom: { type: 'string', format: 'date-time' },
+        dateTo: { type: 'string', format: 'date-time' },
+        page: { type: 'integer', minimum: 1, default: 1 },
+        pageSize: { type: 'integer', minimum: 1, maximum: 500, default: 50 },
+        sortBy: { type: 'string', enum: ['occurredAt', 'action', 'entityType', 'entityId', 'actorUserId', 'ipAddress', 'severity'], default: 'occurredAt' },
+        sortOrder: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+      },
+    },
+    responses: {
+      200: {
+        description: 'Audit logs returned successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer' },
+                action: { type: 'string' },
+                entityType: { type: 'string' },
+                entityId: { type: 'integer' },
+                userId: { type: 'integer' },
+                userEmail: { type: 'string' },
+                userPhone: { type: 'string' },
+                ipAddress: { type: 'string' },
+                userAgent: { type: 'string' },
+                severity: { type: 'string', enum: ['INFO', 'WARN', 'ERROR', 'CRITICAL'] },
+                metadata: { type: 'object' },
+                createdAt: { type: 'string', format: 'date-time' },
+              },
+            },
+          },
+          meta: {
+            type: 'object',
+            properties: {
+              total: { type: 'integer' },
+              page: { type: 'integer' },
+              pageSize: { type: 'integer' },
+              totalPages: { type: 'integer' },
+            },
+          },
+        },
+      },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+  'GET /api/v1/audit/logs/stats': {
+    summary: 'Get audit log statistics',
+    description: 'Get aggregated statistics for audit log dashboard. STAFF only with audit_logs.read permission.',
+    tags: ['Audit Logs'],
+    permission: 'audit_logs.read',
+    querystring: {
+      type: 'object',
+      properties: {
+        dateFrom: { type: 'string', format: 'date-time' },
+        dateTo: { type: 'string', format: 'date-time' },
+      },
+    },
+    responses: {
+      200: {
+        description: 'Audit log statistics returned successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              total: { type: 'integer' },
+              bySeverity: { type: 'object' },
+              topActions: {
+                type: 'array',
+                items: { type: 'object', properties: { action: { type: 'string' }, count: { type: 'integer' } } },
+              },
+              topEntityTypes: {
+                type: 'array',
+                items: { type: 'object', properties: { entityType: { type: 'string' }, count: { type: 'integer' } } },
+              },
+              recentErrors: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer' },
+                    action: { type: 'string' },
+                    entityType: { type: 'string' },
+                    entityId: { type: 'integer' },
+                    severity: { type: 'string' },
+                    createdAt: { type: 'string', format: 'date-time' },
+                    metadata: { type: 'object' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+  'GET /api/v1/audit/logs/:id': {
+    summary: 'Get audit log by ID',
+    description: 'Retrieve a single audit log entry. STAFF only with audit_logs.read permission.',
+    tags: ['Audit Logs'],
+    permission: 'audit_logs.read',
+    params: idParam(),
+    responses: {
+      200: {
+        description: 'Audit log entry returned successfully.',
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          data: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer' },
+              action: { type: 'string' },
+              entityType: { type: 'string' },
+              entityId: { type: 'integer' },
+              userId: { type: 'integer' },
+              userEmail: { type: 'string' },
+              userPhone: { type: 'string' },
+              ipAddress: { type: 'string' },
+              userAgent: { type: 'string' },
+              severity: { type: 'string', enum: ['INFO', 'WARN', 'ERROR', 'CRITICAL'] },
+              metadata: { type: 'object' },
+              createdAt: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+      },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+      404: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+  'GET /api/v1/audit/logs/export': {
+    summary: 'Export audit logs',
+    description: 'Export audit logs as CSV or JSON. STAFF only with audit_logs.export permission.',
+    tags: ['Audit Logs'],
+    permission: 'audit_logs.export',
+    querystring: {
+      type: 'object',
+      properties: {
+        format: { type: 'string', enum: ['csv', 'json'], default: 'json' },
+        action: { type: 'string' },
+        entityType: { type: 'string' },
+        entityId: { type: 'string', pattern: '^\\d+$' },
+        userId: { type: 'string', pattern: '^\\d+$' },
+        ipAddress: { type: 'string' },
+        severity: { type: 'string', enum: ['INFO', 'WARN', 'ERROR', 'CRITICAL'] },
+        dateFrom: { type: 'string', format: 'date-time' },
+        dateTo: { type: 'string', format: 'date-time' },
+        sortBy: { type: 'string', enum: ['occurredAt', 'action', 'entityType', 'entityId', 'actorUserId', 'ipAddress', 'severity'], default: 'occurredAt' },
+        sortOrder: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+      },
+    },
+    responses: {
+      200: {
+        description: 'CSV or JSON file download',
+      },
+      401: { $ref: '#/components/schemas/ErrorResponse' },
+      403: { $ref: '#/components/schemas/ErrorResponse' },
+    },
+  },
+
   'GET /api/v1/users': {
     summary: 'List users',
     description: 'Lists users with pagination and optional search filters. Authentication required: Bearer JWT. Permission required: users.read.',

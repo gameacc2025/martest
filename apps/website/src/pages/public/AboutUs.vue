@@ -1,17 +1,22 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { productsApi } from '@telecom/api-client'
+import { useCmsStore } from '../../stores/cms'
 import { formatPrice } from '../../utils/helpers'
 import Breadcrumb from 'primevue/breadcrumb'
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import Button from 'primevue/button'
 
+const cmsStore = useCmsStore()
 const home = { icon: 'pi pi-home', to: '/' }
 const breadcrumbItems = [{ label: 'درباره ما' }]
 
 const featuredProducts = ref([])
 const productsLoading = ref(false)
 const productsError = ref('')
+const pageContent = ref(null)
+const pageLoading = ref(false)
+const pageError = ref('')
 
 const values = [
   {
@@ -50,7 +55,12 @@ const steps = [
   },
 ]
 
-onMounted(fetchProducts)
+onMounted(async () => {
+  await Promise.all([
+    fetchProducts(),
+    fetchPageContent(),
+  ])
+})
 
 async function fetchProducts() {
   productsLoading.value = true
@@ -67,6 +77,20 @@ async function fetchProducts() {
     productsError.value = 'دریافت محصولات ویژه ممکن نشد. دوباره تلاش کنید.'
   } finally {
     productsLoading.value = false
+  }
+}
+
+async function fetchPageContent() {
+  pageLoading.value = true
+  pageError.value = ''
+  try {
+    const page = await cmsStore.fetchPageBySlug('about')
+    pageContent.value = page
+  } catch (error) {
+    console.error('Error loading page content:', error)
+    pageError.value = 'دریافت محتوای صفحه با خطا مواجه شد.'
+  } finally {
+    pageLoading.value = false
   }
 }
 
@@ -98,7 +122,10 @@ function getProductImage(product) {
         </template>
       </WorkspacePageHeading>
 
-      <section class="about-section" aria-labelledby="about-mission-title">
+      <section class="about-section" v-if="pageContent" v-html="pageContent.content" aria-labelledby="about-content-title">
+      </section>
+
+      <section class="about-section" v-else aria-labelledby="about-mission-title">
         <header class="ds-section-head">
           <h2 id="about-mission-title" class="ds-h2">اتصال نیازهای واقعی به تأمین‌کنندگان مناسب</h2>
         </header>

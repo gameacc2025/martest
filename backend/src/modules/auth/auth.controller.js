@@ -327,6 +327,46 @@ async function redeemHandoff(request, reply) {
 }
 
 
+/**
+ * GET /api/v1/auth/sessions
+ * List all active sessions for the current user.
+ */
+async function getSessions(request, reply) {
+  const sessions = await authService.getSessions(request.user.id);
+
+  // Mark the current session based on the refresh token in the request
+  const currentTokenId = request.refreshTokenRecord?.id;
+  if (currentTokenId) {
+    sessions.forEach(s => {
+      s.isCurrent = String(s.id) === String(currentTokenId);
+    });
+  }
+
+  return reply.send(success({ sessions }));
+}
+
+
+/**
+ * DELETE /api/v1/auth/sessions/:id
+ * Revoke a specific session (refresh token) for the current user.
+ */
+async function revokeSession(request, reply) {
+  const sessionId = Number(request.params.id);
+
+  await authService.revokeSession(request.user.id, sessionId);
+
+  // If revoking the current session, clear the cookie
+  const currentTokenId = request.refreshTokenRecord?.id;
+  if (currentTokenId && Number(currentTokenId) === sessionId) {
+    reply.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
+  }
+
+  return reply.code(200).send(success({
+    message: 'نشست با موفقیت لغو شد.',
+  }));
+}
+
+
 module.exports = {
   login,
   refresh,
@@ -338,4 +378,7 @@ module.exports = {
   registerCompany,
   createHandoff,
   redeemHandoff,
+  // Session management
+  getSessions,
+  revokeSession,
 };
