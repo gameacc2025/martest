@@ -1213,3 +1213,19 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - ProductListing breadcrumb has its own full-width row above the catalogue title and content, with regression assertions for the DOM order.
 - No backend, API, database, auth, permission or business logic changes.
 - Vue SFC compilation, unit tests, frontend builds and browser visual verification have not been run in this remote GitHub editing session.
+
+
+---
+
+# Active task — API-4-CRM-01 (2026-11-09)
+
+- **Status:** Discovery complete; CRM API contract drafted; implementation pending.
+- **Lane:** API-4 — CRM / Lead Management.
+- **Contract:** `docs/api-contracts/crm.md`.
+- **Verified existing DB foundation:** CRMAccount, CRMContact, LeadSource, Lead, Pipeline, PipelineStage, Opportunity, OpportunityStageHistory, CRMActivity, CRMTask and CRMNote already exist in schema/migration. Do not recreate them; no migration currently indicated.
+- **Verified code gaps:** No backend CRM module or registered CRM routes; no CRM API-client methods; Admin CRM routes currently render sample-only OperationsHub data.
+- **Security constraint:** Existing `leads.*` permissions are shared with Inquiry/RFQ and granted to non-STAFF contexts. CRM must use separate `crm.*` permissions and strict STAFF AccessProfile checks.
+- **Main commits:** contract `770c299dd4f12c32717a568065cff60e38d1819f`; coordination claim `c1760a8af1b77125c3edc8600d3b44945f961ce7`; worklog `aaa354196df69aadd5fe6f43f61de691a4682d90`.
+- **Verification:** No tests/builds run. Current session has GitHub remote repository access but no local checkout/runtime.
+- **Next implementation sequence:** CRM backend services/routes/tests; coordinator-owned permission/route/API-client/seed registration; Admin CRM pages and stores wired to real APIs; deterministic guarded CRM seed; CI and integration verification.
+- **Completion state:** NOT COMPLETE. Do not mark API-4 done until all roadmap acceptance criteria and runtime checks pass.
