@@ -3,7 +3,7 @@
 
 ## Language of communication
 
-All agents must communicate with the user in **English**, no matter what language the user writes in. This applies to plans, questions, progress updates, explanations, recommendations, and final reports. Do not mirror the user's language. The language of product deliverables (for example, Persian UI copy or translation files) should follow the product requirements or explicit deliverable request; the agent's explanations to the user must still be in English.
+All agents must communicate with the project owner in **Persian (Farsi)**, including plans, questions, progress updates, explanations, recommendations, blockers, test results and final reports. The project owner is the human decision-maker, never another AI agent. The language of product deliverables (for example, Persian UI copy or translation files) should follow the product requirements or explicit deliverable request; the agent's explanations to the user must still be in English.
 
 **Mandatory companion:** [`AGENTS.md`](../AGENTS.md). All agents must read it and [`.ai/PROTOCOL.md`](../.ai/PROTOCOL.md) before work.
 
@@ -56,3 +56,12 @@ Install/update the agent skills from the repository root in PowerShell with:
 ```
 
 The owner has asked agents not to focus on browser testing. Browser automation, screenshot loops, and interactive visual checks remain NOT RUN unless explicitly re-authorized. Static review and writing regression tests are still expected where applicable. See `.ai/UI_SKILLS.md` for the complete routing and verification policy.
+
+
+## Mandatory per-task Git and GitHub publishing
+
+Every independently completable task or subtask must be committed and published to GitHub immediately after it is completed, reviewed, and its relevant checks/documentation are updated. Do not batch several finished tasks into a later commit.
+
+For parallel work, execution agents use isolated detached worktrees pinned to the same recorded `main` SHA. They must not push directly to `main`; each agent returns a clean, scoped patch and exact verification evidence as soon as its task is complete. The Integration Coordinator reviews and integrates one task at a time onto the latest `main`, creates a descriptive commit, pushes it to GitHub immediately, and verifies the remote `main` SHA before integrating the next task.
+
+A task is not fully handed off until its commit SHA and GitHub push status are recorded in `.ai/WORKLOG.md`, and `.ai/current-task.md` plus relevant docs are synchronized. If commit/push cannot happen, explicitly mark `NOT COMMITTED` / `NOT PUSHED`, explain the blocker, preserve the patch, and never claim synchronization. Apply this cycle to each independently verifiable slice, not only at the end of an entire feature lane.
