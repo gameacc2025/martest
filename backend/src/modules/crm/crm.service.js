@@ -332,5 +332,58 @@ async function changeOpportunityStage(id, input, actorId) {
   }));
 }
 
-module.exports = { listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
+
+async function getAccount(id) {
+  const row = await prisma.cRMAccount.findUnique({ where: { id: idOf(id) }, include: { contacts: true } });
+  if (!row) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
+  return safe(row);
+}
+async function updateAccount(id, input) {
+  const accountId = idOf(id), data = {};
+  for (const key of ['displayName', 'lifecycle', 'source', 'notes']) if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
+  if (input.ownerUserId !== undefined) data.ownerUserId = await assertStaff(prisma, input.ownerUserId);
+  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
+  try { return safe(await prisma.cRMAccount.update({ where: { id: accountId }, data, include: { contacts: true } })); }
+  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.'); throw error; }
+}
+async function listContacts(accountId) {
+  const id = idOf(accountId);
+  if (!(await prisma.cRMAccount.findUnique({ where: { id }, select: { id: true } }))) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
+  return safe(await prisma.cRMContact.findMany({ where: { accountId: id }, orderBy: [{ isPrimary: 'desc' }, { name: 'asc' }] }));
+}
+async function createContact(accountId, input) {
+  const id = idOf(accountId), name = String(input.name || '').trim();
+  if (!name) fail(400, 'CRM_CONTACT_NAME_REQUIRED', 'نام مخاطب الزامی است.');
+  if (!(await prisma.cRMAccount.findUnique({ where: { id }, select: { id: true } }))) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
+  return safe(await prisma.cRMContact.create({ data: { accountId: id, name: name.slice(0, 200), title: input.title || null, email: input.email || null, phone: input.phone || null, isPrimary: Boolean(input.isPrimary), notes: input.notes || null } }));
+}
+async function updateContact(id, input) {
+  const contactId = idOf(id), data = {};
+  for (const key of ['name', 'title', 'email', 'phone', 'notes']) if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
+  if (input.isPrimary !== undefined) data.isPrimary = Boolean(input.isPrimary);
+  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
+  try { return safe(await prisma.cRMContact.update({ where: { id: contactId }, data })); }
+  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_CONTACT_NOT_FOUND', 'مخاطب پیدا نشد.'); throw error; }
+}
+async function updateTask(id, input) {
+  const taskId = idOf(id), data = {};
+  for (const key of ['title', 'description', 'priority', 'status']) if (input[key] !== undefined) data[key] = input[key];
+  if (input.dueAt !== undefined) data.dueAt = input.dueAt ? new Date(input.dueAt) : null;
+  if (input.status === 'COMPLETED') data.completedAt = new Date();
+  else if (input.status && input.status !== 'COMPLETED') data.completedAt = null;
+  try { return safe(await prisma.cRMTask.update({ where: { id: taskId }, data })); }
+  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.'); throw error; }
+}
+async function assignTask(id, assigneeId) {
+  const taskId = idOf(id), assigneeUserId = await assertStaff(prisma, assigneeId);
+  try { return safe(await prisma.cRMTask.update({ where: { id: taskId }, data: { assigneeUserId } })); }
+  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.'); throw error; }
+}
+async function completeTask(id) {
+  const taskId = idOf(id);
+  try { return safe(await prisma.cRMTask.update({ where: { id: taskId }, data: { status: 'COMPLETED', completedAt: new Date() } })); }
+  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.'); throw error; }
+}
+
+module.exports = { getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
   listSources, manageSource, dashboard, listAccounts, createAccount, listTasks, createTask, listActivities, createActivity, listNotes, createNote };
