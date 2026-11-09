@@ -1,0 +1,219 @@
+const prisma = require('../../config/db');
+const { createError } = require('../audit/audit.utils');
+
+const transitions = {
+  NEW: ['CONTACTED', 'QUALIFIED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'],
+  CONTACTED: ['QUALIFIED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'],
+  QUALIFIED: ['CONVERTED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'],
+  CONVERTED: [], DISQUALIFIED: [], DUPLICATE: [], LOST: [],
+};
+const fail = (status, code, message) => { throw createError(status, code, message); };
+const idOf = (value) => {
+  const id = Number(value);
+  if (!Number.isSafeInteger(id) || id < 1) fail(400, 'INVALID_ID', 'شناسه نامعتبر است.');
+  return id;
+};
+const pageOf = (v, d, max) => Number.isInteger(Number(v)) && Number(v) > 0 ? Math.min(Number(v), max) : d;
+const safe = (v) => {
+  if (typeof v === 'bigint') return v.toString();
+  if (Array.isArray(v)) return v.map(safe);
+  if (v && typeof v === 'object' && !(v instanceof Date)) return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, safe(x)]));
+  return v;
+};
+async function assertStaff(db, userId) {
+  const id = idOf(userId);
+  const profile = await db.accessProfile.findFirst({ where: { userId: id, type: 'STAFF', isActive: true }, select: { userId: true } });
+  if (!profile) fail(400, 'CRM_STAFF_REQUIRED', 'مسئول انتخاب‌شده باید کارمند فعال سامانه باشد.');
+  return id;
+}
+function exactlyOneParent(input) {
+  const keys = ['leadId', 'accountId', 'opportunityId'].filter((k) => input[k] !== undefined && input[k] !== null && input[k] !== '');
+  if (keys.length !== 1) fail(400, 'CRM_PARENT_REQUIRED', 'رکورد باید دقیقاً به یک سرنخ، حساب یا فرصت متصل باشد.');
+  return { [keys[0]]: idOf(input[keys[0]]) };
+}
+const leadInclude = { source: { select: { id: true, code: true, label: true } }, owner: { select: { id: true, email: true } } };
+const leadDto = (x) => safe({
+  id: x.id, leadNumber: x.leadNumber, displayName: x.displayName, companyName: x.companyName,
+  email: x.email, phone: x.phone, status: x.status, score: x.score, sourceId: x.sourceId,
+  ownerUserId: x.ownerUserId, convertedAccountId: x.convertedAccountId, convertedAt: x.convertedAt,
+  disqualifiedReason: x.disqualifiedReason, createdAt: x.createdAt, updatedAt: x.updatedAt,
+  source: x.source, owner: x.owner,
+});
+async function listLeads(q = {}) {
+  const page = pageOf(q.page, 1, 100000), limit = pageOf(q.limit, 25, 100);
+  const where = {};
+  if (q.status) where.status = q.status;
+  if (q.sourceId) where.sourceId = idOf(q.sourceId);
+  if (q.ownerUserId) where.ownerUserId = idOf(q.ownerUserId);
+  if (q.search) {
+    const search = String(q.search).trim().slice(0, 120);
+    where.OR = ['displayName', 'companyName', 'email', 'phone', 'leadNumber'].map((key) => ({ [key]: { contains: search, mode: 'insensitive' } }));
+  }
+  if (q.scoreMin !== undefined || q.scoreMax !== undefined) {
+    where.score = {};
+    if (q.scoreMin !== undefined) where.score.gte = Math.max(0, Math.min(100, Number(q.scoreMin)));
+    if (q.scoreMax !== undefined) where.score.lte = Math.max(0, Math.min(100, Number(q.scoreMax)));
+  }
+  const [total, rows] = await Promise.all([
+    prisma.lead.count({ where }),
+    prisma.lead.findMany({ where, include: leadInclude, orderBy: { createdAt: 'desc' }, skip: (page - 1) * limit, take: limit }),
+  ]);
+  return { data: rows.map(leadDto), meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+}
+async function getLead(id) {
+  const row = await prisma.lead.findUnique({ where: { id: idOf(id) }, include: leadInclude });
+  if (!row) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+  return leadDto(row);
+}
+async function createLead(input, actorId) {
+  const ownerUserId = input.ownerUserId ? await assertStaff(prisma, input.ownerUserId) : await assertStaff(prisma, actorId);
+  const displayName = String(input.displayName || '').trim();
+  const score = input.score === undefined ? 0 : Number(input.score);
+  if (!displayName) fail(400, 'CRM_NAME_REQUIRED', 'نام سرنخ الزامی است.');
+  if (!Number.isInteger(score) || score < 0 || score > 100) fail(400, 'CRM_INVALID_SCORE', 'امتیاز باید بین صفر تا صد باشد.');
+  const leadNumber = 'CRM-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  const row = await prisma.lead.create({ data: {
+    leadNumber, displayName: displayName.slice(0, 240),
+    companyName: input.companyName ? String(input.companyName).trim().slice(0, 240) : null,
+    email: input.email ? String(input.email).trim().toLowerCase().slice(0, 320) : null,
+    phone: input.phone ? String(input.phone).trim().slice(0, 40) : null,
+    sourceId: input.sourceId ? idOf(input.sourceId) : null, score, ownerUserId,
+  }, include: leadInclude });
+  return leadDto(row);
+}
+async function updateLead(id, input) {
+  const leadId = idOf(id);
+  const current = await prisma.lead.findUnique({ where: { id: leadId }, select: { status: true } });
+  if (!current) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+  if (['CONVERTED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'].includes(current.status)) fail(409, 'CRM_LEAD_TERMINAL', 'سرنخ پایانی قابل ویرایش نیست.');
+  const data = {};
+  for (const key of ['displayName', 'companyName', 'email', 'phone']) if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
+  if (input.score !== undefined) {
+    const score = Number(input.score);
+    if (!Number.isInteger(score) || score < 0 || score > 100) fail(400, 'CRM_INVALID_SCORE', 'امتیاز باید بین صفر تا صد باشد.');
+    data.score = score;
+  }
+  if (input.sourceId !== undefined) data.sourceId = input.sourceId === null ? null : idOf(input.sourceId);
+  return leadDto(await prisma.lead.update({ where: { id: leadId }, data, include: leadInclude }));
+}
+async function assignLead(id, ownerId) {
+  const leadId = idOf(id), ownerUserId = await assertStaff(prisma, ownerId);
+  if (!(await prisma.lead.findUnique({ where: { id: leadId }, select: { id: true } }))) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+  return leadDto(await prisma.lead.update({ where: { id: leadId }, data: { ownerUserId }, include: leadInclude }));
+}
+async function changeLeadStatus(id, status, reason) {
+  const leadId = idOf(id), current = await prisma.lead.findUnique({ where: { id: leadId } });
+  if (!current) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+  if (!transitions[current.status] || !transitions[current.status].includes(status)) fail(409, 'CRM_INVALID_LEAD_TRANSITION', 'تغییر وضعیت مجاز نیست.');
+  if (status === 'CONVERTED') fail(409, 'CRM_CONVERSION_REQUIRED', 'برای تبدیل از عملیات تبدیل استفاده کنید.');
+  return leadDto(await prisma.lead.update({ where: { id: leadId }, data: {
+    status, disqualifiedReason: ['DISQUALIFIED', 'LOST'].includes(status) ? String(reason || '').slice(0, 500) || null : null,
+  }, include: leadInclude }));
+}
+async function convertLead(id, actorId) {
+  const leadId = idOf(id), converter = await assertStaff(prisma, actorId);
+  return prisma.$transaction(async (tx) => {
+    const lead = await tx.lead.findUnique({ where: { id: leadId } });
+    if (!lead) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+    if (lead.status === 'CONVERTED' && lead.convertedAccountId) {
+      const existing = await tx.cRMAccount.findUnique({ where: { id: lead.convertedAccountId }, include: { contacts: true } });
+      if (existing) return safe({ leadId, account: existing, alreadyConverted: true });
+    }
+    if (lead.status !== 'QUALIFIED') fail(409, 'CRM_LEAD_NOT_QUALIFIED', 'فقط سرنخ واجد شرایط قابل تبدیل است.');
+    const account = await tx.cRMAccount.create({ data: {
+      displayName: lead.companyName || lead.displayName, accountType: 'PROSPECT', ownerUserId: lead.ownerUserId,
+      source: lead.sourceId ? String(lead.sourceId) : null,
+      contacts: { create: { name: lead.displayName, email: lead.email, phone: lead.phone, isPrimary: true } },
+    }, include: { contacts: true } });
+    await tx.lead.update({ where: { id: leadId }, data: {
+      status: 'CONVERTED', convertedAccountId: account.id, convertedByUserId: converter, convertedAt: new Date(),
+    } });
+    return safe({ leadId, account, alreadyConverted: false });
+  });
+}
+async function listSources() {
+  return prisma.leadSource.findMany({ where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { label: 'asc' }], select: { id: true, code: true, label: true, sortOrder: true } });
+}
+async function manageSource(input, id) {
+  const data = {};
+  if (input.code !== undefined) data.code = String(input.code).trim().toUpperCase().slice(0, 60);
+  if (input.label !== undefined) data.label = String(input.label).trim().slice(0, 120);
+  if (input.isActive !== undefined) data.isActive = Boolean(input.isActive);
+  if (input.sortOrder !== undefined) data.sortOrder = Number(input.sortOrder) || 0;
+  if (!id) {
+    if (!data.code || !data.label) fail(400, 'CRM_SOURCE_FIELDS_REQUIRED', 'کد و عنوان الزامی است.');
+    return prisma.leadSource.create({ data });
+  }
+  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
+  return prisma.leadSource.update({ where: { id: idOf(id) }, data });
+}
+async function dashboard() {
+  const [total, fresh, qualified, converted, openTasks, overdueTasks, opportunities] = await Promise.all([
+    prisma.lead.count(), prisma.lead.count({ where: { status: 'NEW' } }),
+    prisma.lead.count({ where: { status: 'QUALIFIED' } }), prisma.lead.count({ where: { status: 'CONVERTED' } }),
+    prisma.cRMTask.count({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] } } }),
+    prisma.cRMTask.count({ where: { status: { in: ['OPEN', 'IN_PROGRESS'] }, dueAt: { lt: new Date() } } }),
+    prisma.opportunity.groupBy({ by: ['currency', 'status'], _sum: { amount: true }, _count: { id: true } }),
+  ]);
+  return { leads: { total, new: fresh, qualified, converted }, tasks: { open: openTasks, overdue: overdueTasks },
+    opportunitiesByCurrency: opportunities.map((x) => ({ currency: x.currency, status: x.status, amount: x._sum.amount, count: x._count.id })) };
+}
+async function listAccounts(q = {}) {
+  const page = pageOf(q.page, 1, 100000), limit = pageOf(q.limit, 25, 100);
+  const where = q.search ? { displayName: { contains: String(q.search).slice(0, 120), mode: 'insensitive' } } : {};
+  const [total, data] = await Promise.all([
+    prisma.cRMAccount.count({ where }),
+    prisma.cRMAccount.findMany({ where, include: { contacts: true }, orderBy: { updatedAt: 'desc' }, skip: (page - 1) * limit, take: limit }),
+  ]);
+  return { data: safe(data), meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+}
+async function createAccount(input, actorId) {
+  const ownerUserId = input.ownerUserId ? await assertStaff(prisma, input.ownerUserId) : await assertStaff(prisma, actorId);
+  const displayName = String(input.displayName || '').trim();
+  if (!displayName) fail(400, 'CRM_ACCOUNT_NAME_REQUIRED', 'نام حساب الزامی است.');
+  return safe(await prisma.cRMAccount.create({ data: { displayName: displayName.slice(0, 240), accountType: input.accountType || 'PROSPECT', ownerUserId, source: input.source || null, notes: input.notes || null } }));
+}
+async function listTasks(q = {}) {
+  const where = {};
+  if (q.status) where.status = q.status;
+  if (q.assigneeUserId) where.assigneeUserId = idOf(q.assigneeUserId);
+  if (q.overdue === 'true') where.dueAt = { lt: new Date() };
+  return safe(await prisma.cRMTask.findMany({ where, include: {
+    assignee: { select: { id: true, email: true } },
+    lead: { select: { id: true, leadNumber: true, displayName: true } },
+    account: { select: { id: true, displayName: true } },
+  }, orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }], take: 100 }));
+}
+async function createTask(input, actorId) {
+  const creator = await assertStaff(prisma, actorId), assignee = input.assigneeUserId ? await assertStaff(prisma, input.assigneeUserId) : creator;
+  const parent = exactlyOneParent(input), title = String(input.title || '').trim();
+  if (!title) fail(400, 'CRM_TASK_TITLE_REQUIRED', 'عنوان وظیفه الزامی است.');
+  return safe(await prisma.cRMTask.create({ data: { ...parent, title: title.slice(0, 240), description: input.description || null,
+    priority: input.priority || 'NORMAL', dueAt: input.dueAt ? new Date(input.dueAt) : null, assigneeUserId: assignee, createdByUserId: creator } }));
+}
+async function listActivities(q = {}) {
+  const where = {};
+  for (const key of ['leadId', 'accountId', 'opportunityId']) if (q[key]) where[key] = idOf(q[key]);
+  return safe(await prisma.cRMActivity.findMany({ where, orderBy: { occurredAt: 'desc' }, take: 100,
+    select: { id: true, type: true, subject: true, body: true, occurredAt: true, durationMinutes: true, outcome: true, actorUserId: true, accountId: true, leadId: true, opportunityId: true } }));
+}
+async function createActivity(input, actorId) {
+  const actorUserId = await assertStaff(prisma, actorId), parent = exactlyOneParent(input), subject = String(input.subject || '').trim();
+  if (!subject) fail(400, 'CRM_ACTIVITY_SUBJECT_REQUIRED', 'موضوع فعالیت الزامی است.');
+  return safe(await prisma.cRMActivity.create({ data: { ...parent, actorUserId, type: input.type || 'OTHER', subject: subject.slice(0, 240),
+    body: input.body || null, occurredAt: input.occurredAt ? new Date(input.occurredAt) : new Date(),
+    durationMinutes: input.durationMinutes ? Number(input.durationMinutes) : null, outcome: input.outcome || null } }));
+}
+async function listNotes(q = {}, actorId) {
+  const where = { OR: [{ visibility: 'TEAM' }, { visibility: 'PRIVATE', authorUserId: Number(actorId) }] };
+  for (const key of ['leadId', 'accountId', 'opportunityId']) if (q[key]) where[key] = idOf(q[key]);
+  return safe(await prisma.cRMNote.findMany({ where, orderBy: { createdAt: 'desc' }, take: 100,
+    select: { id: true, body: true, visibility: true, authorUserId: true, accountId: true, leadId: true, opportunityId: true, createdAt: true } }));
+}
+async function createNote(input, actorId) {
+  const authorUserId = await assertStaff(prisma, actorId), parent = exactlyOneParent(input), body = String(input.body || '').trim();
+  if (!body) fail(400, 'CRM_NOTE_BODY_REQUIRED', 'متن یادداشت الزامی است.');
+  return safe(await prisma.cRMNote.create({ data: { ...parent, authorUserId, body, visibility: input.visibility === 'PRIVATE' ? 'PRIVATE' : 'TEAM' } }));
+}
+module.exports = { listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
+  listSources, manageSource, dashboard, listAccounts, createAccount, listTasks, createTask, listActivities, createActivity, listNotes, createNote };
