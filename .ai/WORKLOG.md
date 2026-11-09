@@ -4212,3 +4212,18 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification NOT RUN:** latest-main Vitest, Sass/Vue compilation, app builds and browser review. No current-main workflow run is exposed for the latest direct commit.
 
 - **Palette compatibility follow-up commit references:** `025ea486` (move Website PrimeVue light/dark semantics into shared tokens), `f1af4e4b` (Website palette test architecture), `3553cae3` (fix test assertion regex), `f0045541` (roadmap CI/token update), `6bbe619a` (worklog CI findings), `199f7eaa` and `a34e516e`/`314cd9ff` (current-task handoff corrections).
+
+
+## 2026-11-09 — API-4-CRM-01 — CRM discovery and contract
+
+- **Status:** DISCOVERY COMPLETE; CONTRACT DRAFTED; implementation not yet complete.
+- **Agent:** ChatGPT — API-4.
+- **Base main SHA:** `22c6a8259bfd76a376936ac81c5dc9009c30b232`.
+- **Goal:** Deliver the CRM/Lead Management vertical slice end-to-end without rewriting Company, User or Inquiry.
+- **Verified schema:** Existing migration `20261108000400_crm` and Prisma models already provide CRMAccount, CRMContact, LeadSource, Lead, Pipeline, PipelineStage, Opportunity, OpportunityStageHistory, CRMActivity, CRMTask and CRMNote. No new migration is currently justified.
+- **Verified implementation gaps:** `backend/src/modules` has no CRM module; `backend/src/app.js` does not register CRM routes; `packages/api-client` has no CRM API methods; Admin `OperationsHub.vue` exposes CRM sample arrays and `apps/admin/src/router/index.js` routes CRM pages to that prototype.
+- **Critical security finding:** Existing `leads.*` permissions are used by Inquiry/RFQ and are assigned to COMPANY/CUSTOMER roles as well as STAFF. CRM MUST use a separate `crm.*` permission namespace and strict STAFF AccessProfile checks. Reusing `leads.*` would expose CRM data across app contexts.
+- **Contract:** Added `docs/api-contracts/crm.md` (commit `770c299dd4f12c32717a568065cff60e38d1819f`) defining API routes, STAFF-only access, owner assignment, duplicate suggestions/manual merge, idempotent lead conversion, pipeline history, private notes, currency-safe analytics, seed safety and test acceptance.
+- **Coordination:** Updated `.ai/agent-coordination/ACTIVE.md` to claim API-4 and record the contract gate (commit `c1760a8af1b77125c3edc8600d3b44945f961ce7`).
+- **Tests/builds:** NOT RUN. This execution environment currently has remote GitHub repository read/write access but no mounted local checkout or Node/pnpm/PostgreSQL runtime. No implementation or runtime success is claimed.
+- **Next:** Implement the CRM backend module and tests; coordinate shared integration points (`backend/src/app.js`, `backend/prisma/seed.js`, API-client exports, Admin route/menu, seed entrypoint) against the contract; replace the sample-only CRM UI with API-backed screens; run CI/local validation before declaring completion.
