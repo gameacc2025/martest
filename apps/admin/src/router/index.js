@@ -82,11 +82,11 @@ const routes = [
       { path: "/orders", name: "admin-orders", redirect: { name: "admin-retail-orders" }, meta: { title: "سفارش‌های خرده‌فروشی" } },
       // ── Inquiries ─────────────────────────────────────────
       // Operational modules: UI-first, demo data until domain APIs are delivered.
-      { path: "/crm", name: "admin-crm", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "crm" }, meta: { title: "مدیریت ارتباط با مشتریان" } },
+      { path: "/crm", name: "admin-crm", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "overview" }, meta: { title: "مدیریت ارتباط با مشتریان" } },
       { path: "/finance", name: "admin-finance", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "finance" }, meta: { title: "مالی و تسویه حساب" } },
-      { path: "/crm/leads", name: "admin-crm-leads", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "crmLeads" }, meta: { title: "سرنخ‌ها و مشتریان بالقوه" } },
-      { path: "/crm/pipeline", name: "admin-crm-pipeline", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "crmPipeline" }, meta: { title: "قیف فرصت‌های فروش" } },
-      { path: "/crm/activities", name: "admin-crm-activities", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "crmActivities" }, meta: { title: "تعاملات و پیگیری‌ها" } },
+      { path: "/crm/leads", name: "admin-crm-leads", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "leads" }, meta: { title: "سرنخ‌ها و مشتریان بالقوه" } },
+      { path: "/crm/pipeline", name: "admin-crm-pipeline", redirect: { name: "admin-crm-leads" }, meta: { title: "قیف فرصت‌های فروش" } },
+      { path: "/crm/activities", name: "admin-crm-activities", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "activities" }, meta: { title: "تعاملات و پیگیری‌ها" } },
       { path: "/finance/settlements", name: "admin-finance-settlements", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeSettlements" }, meta: { title: "تسویه با شرکت‌ها" } },
       { path: "/finance/transactions", name: "admin-finance-transactions", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeTransactions" }, meta: { title: "تراکنش‌ها و گردش حساب" } },
       { path: "/finance/invoices", name: "admin-finance-invoices", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeInvoices" }, meta: { title: "صورتحساب‌ها و اسناد مالی" } },
