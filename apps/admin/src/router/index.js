@@ -78,6 +78,13 @@ const routes = [
       // ── Categories ────────────────────────────────────────
       { path: "/categories", name: "admin-categories", component: () => import("../pages/admin/categories/CategoryList.vue"), meta: { title: "مدیریت دسته‌بندی‌ها" } },
       { path: "/banners", name: "admin-banners", component: () => import("../pages/admin/banners/BannerManagement.vue"), meta: { title: "مدیریت بنرهای تبلیغاتی" } },
+      // ── CMS / Content management ───────────────────────────
+      { path: "/cms/articles", name: "admin-cms-articles", component: () => import("../pages/admin/cms/ArticleManagement.vue"), meta: { title: "مدیریت مقالات", requiredPermission: "cms.articles.read" } },
+      { path: "/cms/categories", name: "admin-cms-categories", component: () => import("../pages/admin/cms/CategoryManagement.vue"), meta: { title: "دسته‌بندی مقالات", requiredPermission: "cms.categories.read" } },
+      { path: "/cms/tags", name: "admin-cms-tags", component: () => import("../pages/admin/cms/TagManagement.vue"), meta: { title: "مدیریت برچسب‌ها", requiredPermission: "cms.tags.read" } },
+      { path: "/cms/faqs", name: "admin-cms-faqs", component: () => import("../pages/admin/cms/FaqManagement.vue"), meta: { title: "مدیریت سؤالات متداول", requiredPermission: "cms.faqs.read" } },
+      { path: "/cms/pages", name: "admin-cms-pages", component: () => import("../pages/admin/cms/PageManagement.vue"), meta: { title: "مدیریت صفحات ثابت", requiredPermission: "cms.pages.read" } },
+
       // ── Orders ────────────────────────────────────────────
       { path: "/orders", name: "admin-orders", redirect: { name: "admin-retail-orders" }, meta: { title: "سفارش‌های خرده‌فروشی" } },
       // ── Inquiries ─────────────────────────────────────────
@@ -164,6 +171,13 @@ router.beforeEach(async (to, from, next) => {
     await authStore.logout({ redirectTo: null });
     window.location.href = target;
     return;
+  }
+
+  // 5. Enforce route-level permissions as well as hiding unauthorized menu items.
+  // Backend CMS routes independently enforce STAFF access and the same cms.* permission.
+  const requiredPermission = to.meta.requiredPermission;
+  if (requiredPermission && !authStore.hasPermission(requiredPermission)) {
+    return next({ name: "admin-dashboard" });
   }
 
   next();
