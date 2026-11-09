@@ -4227,3 +4227,15 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Coordination:** Updated `.ai/agent-coordination/ACTIVE.md` to claim API-4 and record the contract gate (commit `c1760a8af1b77125c3edc8600d3b44945f961ce7`).
 - **Tests/builds:** NOT RUN. This execution environment currently has remote GitHub repository read/write access but no mounted local checkout or Node/pnpm/PostgreSQL runtime. No implementation or runtime success is claimed.
 - **Next:** Implement the CRM backend module and tests; coordinate shared integration points (`backend/src/app.js`, `backend/prisma/seed.js`, API-client exports, Admin route/menu, seed entrypoint) against the contract; replace the sample-only CRM UI with API-backed screens; run CI/local validation before declaring completion.
+
+
+## 2026-11-09 — AGENT-GIT-DELIVERY-01 — Mandatory per-task GitHub publishing
+- **Status:** DONE — policy documentation updated on `main`.
+- **Agent:** ChatGPT — documentation/integration coordinator.
+- **Goal:** Require Git/GitHub registration after every completed task or independently verifiable subtask, rather than batching work until the end of a feature lane.
+- **Changes:** Added the task-by-task commit/publish rule to `AGENTS.md`, `.ai/PROTOCOL.md`, `docs/AI_AGENT_WORKFLOW.md` and `.ai/agent-coordination/ACTIVE.md`; clarified the Claude Code entrypoint in `CLAUDE.md`. Corrected the contradictory English-only communication instruction in `docs/AI_AGENT_WORKFLOW.md` to the repository-wide Persian rule.
+- **Verification:** Read the policy files before editing; each GitHub update returned a commit SHA on `main`. Runtime tests are not applicable to this documentation-only change.
+- **Commit:** Five consecutive GitHub commits were created for the five policy-file updates; see the latest `main` history.
+- **Push:** GitHub contents API applied each commit directly to `main`; latest commit returned by the final update is the current remote head for this task.
+- **Risks / open questions:** Parallel execution agents must not race-push to `main`; the coordinator is the sole integration/push owner.
+- **Next action:** Give each active agent the updated instruction and require immediate task-level patch handoff to INT.
