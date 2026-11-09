@@ -32,6 +32,8 @@ async function crmRoutes(fastify) {
   fastify.get('/leads', { preHandler: guard(permissions.leadsRead) }, route((r) => service.listLeads(r.query)));
   fastify.post('/leads', { preHandler: guard(permissions.leadsCreate) }, route((r) => service.createLead(body(r), r.user.id)));
   fastify.get('/leads/:id', { preHandler: guard(permissions.leadsRead) }, route((r) => service.getLead(r.params.id)));
+  fastify.get('/leads/:id/duplicates', { preHandler: guard(permissions.leadsRead) }, route((r) => service.duplicateCandidates(r.params.id)));
+  fastify.get('/leads/:id/timeline', { preHandler: guard(permissions.leadsRead) }, route((r) => service.leadTimeline(r.params.id, r.user.id)));
   fastify.patch('/leads/:id', { preHandler: guard(permissions.leadsUpdate) }, route((r) => service.updateLead(r.params.id, body(r))));
   fastify.post('/leads/:id/assign', { preHandler: guard(permissions.leadsAssign) }, route((r) => service.assignLead(r.params.id, body(r).ownerUserId)));
   fastify.post('/leads/:id/status', { preHandler: guard(permissions.leadsUpdate) }, route((r) => service.changeLeadStatus(r.params.id, body(r).status, body(r).reason)));
