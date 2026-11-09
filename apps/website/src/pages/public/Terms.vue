@@ -1,5 +1,30 @@
 <script setup>
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import { ref, onMounted } from 'vue'
+import { useCmsStore } from '../../stores/cms'
+
+const cmsStore = useCmsStore()
+const termsContent = ref(null)
+const privacyContent = ref(null)
+const loading = ref(false)
+
+onMounted(async () => {
+  await loadPages()
+})
+
+async function loadPages() {
+  loading.value = true
+  try {
+    await Promise.all([
+      cmsStore.fetchPageBySlug('terms').then(p => { termsContent.value = p }),
+      cmsStore.fetchPageBySlug('privacy').then(p => { privacyContent.value = p })
+    ])
+  } catch (error) {
+    console.error('Failed to load terms/privacy pages:', error)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -20,79 +45,25 @@ import WorkspacePageHeading from '@telecom/shared-ui/components/common/Workspace
         heading-id="terms-title"
       />
 
-      <div class="terms-sections" aria-label="متن قوانین و حریم خصوصی">
-        <section class="terms-section ds-card" aria-labelledby="terms-intro">
-          <h2 id="terms-intro" class="terms-section__title">مقدمه</h2>
-          <p>
-            به بازار آنلاین تجهیزات مخابراتی خوش آمدید. با استفاده از خدمات ما، شما موافقت خود را با شرایط و قوانین زیر اعلام میکنید.
-            لطفاً این صفحه را با دقت مطالعه فرمایید.
-          </p>
+      <div v-if="loading" class="terms-loading ds-stack">
+        <div class="spinner"></div>
+        <p>در حال بارگذاری محتوا...</p>
+      </div>
+
+      <div v-else class="terms-sections" aria-label="متن قوانین و حریم خصوصی">
+        <section v-if="termsContent" class="terms-section ds-card" aria-labelledby="terms-content-title">
+          <h2 id="terms-content-title" class="terms-section__title" style="display:none;">شرایط استفاده</h2>
+          <div class="ds-prose" v-html="termsContent.content"></div>
         </section>
 
-        <section class="terms-section ds-card" aria-labelledby="terms-usage">
-          <h2 id="terms-usage" class="terms-section__title">شرایط استفاده</h2>
-          <div class="terms-subsections">
-            <article>
-              <h3>1. پذیرش شرایط</h3>
-              <p>
-                با دسترسی و استفاده از این وبسایت، شما شرایط و قوانین مندرج در این صفحه را میپذیرید.
-                اگر با این شرایط موافق نیستید، لطفاً از استفاده از خدمات ما خودداری فرمایید.
-              </p>
-            </article>
-
-            <article>
-              <h3>2. تغییرات در شرایط</h3>
-              <p>
-                ما حق داریم در هر زمان شرایط استفاده از خدمات را تغییر دهیم. تغییرات از زمان انتشار در این صفحه لازم الاجرا خواهند بود.
-                استفاده مستمر شما از خدمات پس از انتشار تغییرات، به منزله پذیرش شرایط جدید تلقی میشود.
-              </p>
-            </article>
-
-            <article>
-              <h3>3. حساب کاربری</h3>
-              <p>
-                برای استفاده از برخی امکانات وبسایت، نیاز به ایجاد حساب کاربری دارید. شما مسئول حفظ محرمانگی اطلاعات حساب کاربری خود هستید
-                و تمامی فعالیتهایی که از طریق حساب کاربری شما انجام میشود، تحت مسئولیت شما خواهد بود.
-              </p>
-            </article>
-          </div>
+        <section v-if="privacyContent" class="terms-section ds-card" aria-labelledby="privacy-content-title">
+          <h2 id="privacy-content-title" class="terms-section__title" style="display:none;">سیاست حریم خصوصی</h2>
+          <div class="ds-prose" v-html="privacyContent.content"></div>
         </section>
 
-        <section class="terms-section ds-card" aria-labelledby="terms-privacy">
-          <h2 id="terms-privacy" class="terms-section__title">حریم خصوصی</h2>
-          <div class="terms-subsections">
-            <article>
-              <h3>1. جمع آوری اطلاعات</h3>
-              <p>
-                ما ممکن است اطلاعات شخصی شما را به منظور ارائه خدمات بهتر جمع آوری کنیم. این اطلاعات شامل نام، ایمیل، شماره تلفن و سایر اطلاعات تماس میباشد.
-              </p>
-            </article>
-
-            <article>
-              <h3>2. استفاده از اطلاعات</h3>
-              <p>
-                اطلاعات جمع آوری شده صرفاً برای ارائه خدمات، بهبود تجربه کاربری و ارتباط با شما استفاده میشود.
-                ما اطلاعات شما را به اشخاص ثالث بدون رضایت شما منتقل نخواهیم کرد، مگر در مواردی که قانون ما را ملزم به این کار کند.
-              </p>
-            </article>
-
-            <article>
-              <h3>3. امنیت اطلاعات</h3>
-              <p>
-                ما از تدابیر امنیتی مناسب برای حفاظت از اطلاعات شما استفاده میکنیم. با این حال، هیچ روش انتقال اطلاعات در اینترنت 100% امن نیست
-                و ما نمیتوانیم امنیت کامل اطلاعات را تضمین کنیم.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section class="terms-section ds-card" aria-labelledby="terms-privacy-changes">
-          <h2 id="terms-privacy-changes" class="terms-section__title">تغییرات در سیاست حریم خصوصی</h2>
-          <p>
-            ما حق داریم در هر زمان سیاست حریم خصوصی خود را تغییر دهیم. تغییرات از زمان انتشار در این صفحه لازم الاجرا خواهند بود.
-            توصیه میکنیم به طور منظم این صفحه را بررسی کنید تا از آخرین تغییرات مطلع شوید.
-          </p>
-        </section>
+        <div v-if="!termsContent && !privacyContent && !loading" class="terms-empty ds-card">
+          <p>محتوا در دسترس نیست. لطفاً بعداً مراجعه کنید.</p>
+        </div>
       </div>
     </div>
   </main>
@@ -165,5 +136,44 @@ import WorkspacePageHeading from '@telecom/shared-ui/components/common/Workspace
 .terms-section h3 { scroll-margin-top: 6rem; }
 @media (max-width: 640px) {
   .terms-section { padding-block: var(--ds-space-4); }
+}
+
+/* Loading & Empty States */
+.terms-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: var(--ds-space-4);
+  color: var(--ds-color-text-muted);
+}
+
+.terms-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ds-color-border);
+  border-top-color: var(--ds-color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.terms-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: var(--ds-space-8);
+  text-align: center;
+  border-color: var(--ds-color-border);
+}
+
+.terms-empty p {
+  margin: 0;
+  color: var(--ds-color-text-muted);
 }
 </style>

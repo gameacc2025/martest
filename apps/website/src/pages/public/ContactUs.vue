@@ -1,3 +1,91 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useCmsStore } from '../../stores/cms'
+import { contactApi } from '@telecom/api-client'
+import { useToast } from 'primevue/usetoast'
+
+const cmsStore = useCmsStore()
+const toast = useToast()
+
+const pageContent = ref(null)
+const pageLoading = ref(false)
+
+const home = { icon: 'pi pi-home', to: '/' }
+const items = [{ label: 'تماس با ما' }]
+
+const form = reactive({
+  name: '',
+  email: '',
+  phone: '',
+  subject: '',
+  message: ''
+})
+
+const errors = reactive({
+  name: '',
+  email: '',
+  phone: '',
+  subject: '',
+  message: '',
+  general: ''
+})
+
+const successMessage = ref('')
+
+const subjectOptions = [
+  { label: 'پشتیبانی فنی', value: 'technical' },
+  { label: 'استعلام و خرید', value: 'sales' },
+  { label: 'همکاری و شراکت', value: 'partnership' },
+  { label: 'سایر', value: 'other' }
+]
+
+onMounted(async () => {
+  await loadContactPage()
+})
+
+async function loadContactPage() {
+  pageLoading.value = true
+  try {
+    const page = await cmsStore.fetchPageBySlug('contact')
+    pageContent.value = page
+  } catch (error) {
+    console.error('Failed to load contact page:', error)
+  } finally {
+    pageLoading.value = false
+  }
+}
+
+function validateForm() {
+  errors.name = form.name.trim() ? '' : 'نام الزامی است'
+  errors.email = form.email.trim() ? (/\S+@\S+\.\S+/.test(form.email) ? '' : 'ایمیل معتبر نیست') : 'ایمیل الزامی است'
+  errors.phone = ''
+  errors.subject = form.subject ? '' : 'موضوع الزامی است'
+  errors.message = form.message.trim().length >= 10 ? '' : 'پیام باید حداقل ۱۰ کاراکتر باشد'
+  errors.general = ''
+
+  return !Object.values(errors).some(e => e)
+}
+
+async function handleSubmit() {
+  if (!validateForm()) return
+
+  try {
+    await contactApi.sendMessage({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      subject: form.subject,
+      message: form.message.trim()
+    })
+    successMessage.value = 'پیام شما با موفقیت ارسال شد. به زودی پاسخ خواهیم داد.'
+    Object.keys(form).forEach(k => form[k] = '')
+  } catch (error) {
+    errors.general = error?.message || 'ارسال پیام با خطا مواجه شد. دوباره تلاش کنید.'
+    toast.add({ severity: 'error', summary: 'خطا', detail: errors.general, life: 3000 })
+  }
+}
+</script>
+
 <template>
   <div class="contact-page">
 
@@ -130,80 +218,16 @@
       </aside>
     </div>
 
+    <!-- Contact Information from CMS -->
+    <section v-if="pageContent" class="contact-cms-content" aria-labelledby="contact-info-title">
+      <div class="ds-container ds-stack">
+        <h2 id="contact-info-title" class="ds-h2">اطلاعات تماس</h2>
+        <div class="ds-prose" v-html="pageContent.content"></div>
+      </div>
+    </section>
+
   </div>
 </template>
-
-<script setup>
-import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
-import { ref } from 'vue'
-import { contactApi } from '@telecom/api-client'
-import Breadcrumb from 'primevue/breadcrumb'
-import Button from 'primevue/button'
-import Card from 'primevue/card'
-import InputText from 'primevue/inputtext'
-import Textarea from 'primevue/textarea'
-import Select from 'primevue/select'
-import { FormSection, FormField, FormGrid, FormActions, FormAlert } from '@telecom/shared-ui/components/common/form'
-
-
-const form = ref({ name: '', email: '', phone: '', subject: null, message: '' })
-const errors = ref({})
-const successMessage = ref('')
-const loading = ref(false)
-
-const home = ref({ icon: 'pi pi-home', to: '/' })
-const items = ref([{ label: 'تماس با ما' }])
-
-const subjectOptions = ref([
-  { label: 'سوال در مورد محصول', value: 'product_question' },
-  { label: 'مشکل در سفارش', value: 'order_issue' },
-  { label: 'پیشنهاد همکاری', value: 'partnership' },
-  { label: 'گزارش مشکل', value: 'bug_report' },
-  { label: 'سوال عمومی', value: 'general_question' }
-])
-
-const handleSubmit = async () => {
-  errors.value = {}
-  successMessage.value = ''
-  if (!validateForm()) return
-
-  loading.value = true
-  try {
-    await contactApi.sendMessage({
-      name: form.value.name.trim(),
-      email: form.value.email.trim(),
-      phone: form.value.phone.trim(),
-      subject: form.value.subject,
-      message: form.value.message.trim(),
-    })
-    resetForm()
-    successMessage.value = 'پیام شما با موفقیت به صندوق پشتیبانی تحویل داده شد.'
-  } catch (error) {
-    errors.value = {
-      general: error?.message || 'ارسال پیام انجام نشد. لطفاً کمی بعد دوباره تلاش کنید.'
-    }
-  } finally {
-    loading.value = false
-  }
-}
-
-const validateForm = () => {
-  errors.value = {}
-  if (!form.value.name) { errors.value.name = 'نام الزامی است'; return false }
-  if (!form.value.email) { errors.value.email = 'ایمیل الزامی است'; return false }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) { errors.value.email = 'ایمیل معتبر نیست'; return false }
-  if (!form.value.subject) { errors.value.subject = 'موضوع الزامی است'; return false }
-  if (!form.value.message) { errors.value.message = 'پیام الزامی است'; return false }
-  if (form.value.message.length < 10) { errors.value.message = 'پیام باید حداقل ۱۰ کاراکتر باشد'; return false }
-  return true
-}
-
-const resetForm = () => {
-  form.value = { name: '', email: '', phone: '', subject: null, message: '' }
-  errors.value = {}
-  successMessage.value = ''
-}
-</script>
 
 <style scoped>
 .contact-page {
@@ -446,5 +470,59 @@ const resetForm = () => {
   .contact-page-heading { align-items: flex-start; flex-direction: column; }
   .contact-page .form-actions { flex-wrap: wrap; }
   .contact-page .form-actions :deep(.p-button) { flex: 1 1 auto; }
+}
+
+/* CMS Content Section */
+.contact-cms-content {
+  margin-top: var(--ds-space-8);
+  padding: var(--ds-space-6);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.contact-cms-content .ds-h2 {
+  margin-bottom: var(--ds-space-4);
+  color: var(--ds-color-text);
+}
+
+.contact-cms-content .ds-prose {
+  color: var(--ds-color-text);
+  line-height: var(--ds-line-height-relaxed);
+}
+
+.contact-cms-content .ds-prose h2,
+.contact-cms-content .ds-prose h3,
+.contact-cms-content .ds-prose h4 {
+  color: var(--ds-color-text);
+  margin-top: var(--ds-space-5);
+  margin-bottom: var(--ds-space-3);
+}
+
+.contact-cms-content .ds-prose ul,
+.contact-cms-content .ds-prose ol {
+  margin: var(--ds-space-4) 0;
+  padding-right: var(--ds-space-6);
+}
+
+.contact-cms-content .ds-prose li {
+  margin: var(--ds-space-2) 0;
+}
+
+.contact-cms-content .ds-prose p {
+  margin: var(--ds-space-3) 0;
+}
+
+.contact-cms-content .ds-prose strong {
+  color: var(--ds-color-text);
+  font-weight: var(--ds-font-weight-bold);
+}
+
+@media (max-width: 640px) {
+  .contact-cms-content {
+    padding: var(--ds-space-4);
+    margin-top: var(--ds-space-6);
+  }
 }
 </style>
