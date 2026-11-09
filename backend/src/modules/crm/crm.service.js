@@ -463,9 +463,11 @@ async function updatePipelineStage(pipelineId, stageId, input) {
   }
   if (input.isWon !== undefined) data.isWon = Boolean(input.isWon);
   if (input.isLost !== undefined) data.isLost = Boolean(input.isLost);
-  if (data.isWon && data.isLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
-  const current = await prisma.pipelineStage.findFirst({ where: { id: stage, pipelineId: pipeline }, select: { id: true } });
+  const current = await prisma.pipelineStage.findFirst({ where: { id: stage, pipelineId: pipeline }, select: { id: true, isWon: true, isLost: true } });
   if (!current) fail(404, 'CRM_STAGE_NOT_FOUND', 'مرحله در این قیف پیدا نشد.');
+  const nextWon = data.isWon === undefined ? current.isWon : data.isWon;
+  const nextLost = data.isLost === undefined ? current.isLost : data.isLost;
+  if (nextWon && nextLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
   return safe(await prisma.pipelineStage.update({ where: { id: stage }, data }));
 }
 async function getOpportunity(id) {
