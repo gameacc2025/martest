@@ -203,6 +203,7 @@ onMounted(load)
               <td><span class="crm-status" :data-status="lead.status">{{ statusLabel(lead.status) }}</span></td>
               <td>{{ formatDate(lead.createdAt) }}</td>
               <td class="crm-actions">
+                <button type="button" @click="openLead(lead)">جزئیات</button>
                 <button v-if="lead.status === 'NEW'" type="button" @click="changeStatus(lead, 'CONTACTED')">ثبت تماس</button>
                 <button v-if="lead.status === 'CONTACTED'" type="button" @click="changeStatus(lead, 'QUALIFIED')">واجد شرایط</button>
                 <button v-if="lead.status === 'QUALIFIED'" type="button" @click="convertLead(lead)">تبدیل به حساب</button>
