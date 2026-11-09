@@ -81,14 +81,11 @@ const pipelineStages = computed(() => activePipeline.value?.stages || [])
 function opportunitiesFor(stageId) {
   return opportunities.value.filter((item) => item.stageId === stageId)
 }
-async function advanceOpportunity(item) {
-  const stages = pipelineStages.value
-  const index = stages.findIndex((stage) => stage.id === item.stageId)
-  const nextStage = stages[index + 1]
-  if (!nextStage || nextStage.isWon || nextStage.isLost) return
+async function setOpportunityStage(item, stageId) {
+  if (!stageId || Number(stageId) === item.stageId) return
   actionError.value = ''
   try {
-    await crmApi.changeOpportunityStage(item.id, { stageId: nextStage.id, reason: 'انتقال از برد CRM' })
+    await crmApi.changeOpportunityStage(item.id, { stageId: Number(stageId), reason: 'به‌روزرسانی مرحله از برد CRM' })
     await load()
   } catch (err) {
     actionError.value = errorMessage(err)
@@ -215,7 +212,7 @@ onMounted(load)
           <article v-for="item in opportunitiesFor(stage.id)" :key="item.id" class="crm-opportunity">
             <strong>{{ item.title }}</strong><small>{{ item.account?.displayName || 'حساب CRM' }}</small>
             <div>{{ Number(item.amount || 0).toLocaleString('fa-IR') }} {{ item.currency }}</div>
-            <button v-if="!stage.isWon && !stage.isLost" type="button" @click="advanceOpportunity(item)">مرحله بعد</button>
+            <select v-if="!stage.isWon && !stage.isLost" :value="item.stageId" aria-label="تغییر مرحله فرصت" @change="setOpportunityStage(item, $event.target.value)"><option v-for="target in pipelineStages" :key="target.id" :value="target.id">{{ target.label }}</option></select>
           </article>
         </section>
       </div>
