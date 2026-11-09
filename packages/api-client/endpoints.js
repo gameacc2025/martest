@@ -272,6 +272,8 @@ export const endpoints = {
     assignLead: (id) => `/crm/leads/${id}/assign`, leadStatus: (id) => `/crm/leads/${id}/status`, convertLead: (id) => `/crm/leads/${id}/convert`,
     leadDuplicates: (id) => `/crm/leads/${id}/duplicates`, leadTimeline: (id) => `/crm/leads/${id}/timeline`,
     accounts: '/crm/accounts', tasks: '/crm/tasks', activities: '/crm/activities', notes: '/crm/notes',
+    pipelines: '/crm/pipelines', pipelineStages: (id) => `/crm/pipelines/${id}/stages`,
+    opportunities: '/crm/opportunities', opportunityStage: (id) => `/crm/opportunities/${id}/stage`,
   },
   // Inquiries (RFQ)
   inquiries: {
