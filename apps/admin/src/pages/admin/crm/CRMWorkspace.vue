@@ -15,6 +15,10 @@ const tasks = ref([])
 const activities = ref([])
 const pipelines = ref([])
 const opportunities = ref([])
+const accounts = ref([])
+const accountContacts = ref([])
+const selectedAccount = ref(null)
+const accountLoading = ref(false)
 const search = ref('')
 const status = ref('')
 const showCreate = ref(false)
@@ -54,6 +58,15 @@ async function load() {
       dashboard.value = unwrap(results[0])
       pipelines.value = unwrap(results[1]) || []
       opportunities.value = unwrap(results[2]) || []
+    } else if (activeSection.value === 'accounts') {
+      const results = await Promise.all([crmApi.dashboard(), crmApi.listAccounts({ page: 1, limit: 50 })])
+      dashboard.value = unwrap(results[0])
+      const page = unwrap(results[1])
+      accounts.value = page?.data || []
+    } else if (activeSection.value === 'tasks') {
+      const results = await Promise.all([crmApi.dashboard(), crmApi.listTasks()])
+      dashboard.value = unwrap(results[0])
+      tasks.value = unwrap(results[1]) || []
     } else {
       const jobs = [crmApi.dashboard(), crmApi.listSources()]
       if (activeSection.value !== 'activities') jobs.push(crmApi.listLeads({ page: 1, limit: 25, search: search.value || undefined, status: status.value || undefined }))
@@ -157,6 +170,24 @@ async function openLead(lead) {
   } finally {
     detailLoading.value = false
   }
+}
+async function openAccount(account) {
+  selectedAccount.value = account
+  accountLoading.value = true
+  try {
+    const results = await Promise.all([crmApi.getAccount(account.id), crmApi.listContacts(account.id)])
+    selectedAccount.value = unwrap(results[0])
+    accountContacts.value = unwrap(results[1]) || []
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { accountLoading.value = false }
+}
+async function addAccountContact() {
+  const name = window.prompt('نام مخاطب را وارد کنید:')
+  if (!name?.trim() || !selectedAccount.value) return
+  try {
+    await crmApi.createContact(selectedAccount.value.id, { name: name.trim() })
+    accountContacts.value = unwrap(await crmApi.listContacts(selectedAccount.value.id)) || []
+  } catch (err) { actionError.value = errorMessage(err) }
 }
 async function mergeDuplicate(item) {
   const reason = window.prompt('دلیل ادغام این سرنخ در «' + selectedLead.value.displayName + '» را وارد کنید:')
