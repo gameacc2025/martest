@@ -66,7 +66,7 @@ async function getLead(id) {
   return leadDto(row);
 }
 async function createLead(input, actorId) {
-  const ownerUserId = input.ownerUserId ? await assertStaff(prisma, input.ownerUserId) : await assertStaff(prisma, actorId);
+  const ownerUserId = await assertStaff(prisma, actorId);
   const displayName = String(input.displayName || '').trim();
   const score = input.score === undefined ? 0 : Number(input.score);
   if (!displayName) fail(400, 'CRM_NAME_REQUIRED', 'نام سرنخ الزامی است.');
@@ -215,5 +215,39 @@ async function createNote(input, actorId) {
   if (!body) fail(400, 'CRM_NOTE_BODY_REQUIRED', 'متن یادداشت الزامی است.');
   return safe(await prisma.cRMNote.create({ data: { ...parent, authorUserId, body, visibility: input.visibility === 'PRIVATE' ? 'PRIVATE' : 'TEAM' } }));
 }
-module.exports = { listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
+
+async function duplicateCandidates(id) {
+  const leadId = idOf(id);
+  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  if (!lead) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+  const or = [];
+  if (lead.email) or.push({ email: { equals: lead.email, mode: 'insensitive' } });
+  if (lead.phone) or.push({ phone: lead.phone });
+  if (lead.displayName) or.push({ displayName: { equals: lead.displayName, mode: 'insensitive' } });
+  if (lead.companyName) or.push({ companyName: { equals: lead.companyName, mode: 'insensitive' } });
+  if (!or.length) return [];
+  const rows = await prisma.lead.findMany({ where: { id: { not: leadId }, OR: or }, include: leadInclude, take: 20, orderBy: { updatedAt: 'desc' } });
+  return rows.map((row) => ({ ...leadDto(row), matchReasons: [
+    ...(lead.email && row.email && lead.email.toLowerCase() === row.email.toLowerCase() ? ['EMAIL'] : []),
+    ...(lead.phone && row.phone === lead.phone ? ['PHONE'] : []),
+    ...(lead.displayName.toLowerCase() === row.displayName.toLowerCase() ? ['NAME'] : []),
+    ...(lead.companyName && row.companyName && lead.companyName.toLowerCase() === row.companyName.toLowerCase() ? ['COMPANY'] : []),
+  ] }));
+}
+async function leadTimeline(id, actorId) {
+  const leadId = idOf(id);
+  if (!(await prisma.lead.findUnique({ where: { id: leadId }, select: { id: true } }))) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+  const [activities, tasks, notes] = await Promise.all([
+    prisma.cRMActivity.findMany({ where: { leadId }, orderBy: { occurredAt: 'desc' }, take: 100 }),
+    prisma.cRMTask.findMany({ where: { leadId }, orderBy: { createdAt: 'desc' }, take: 100 }),
+    prisma.cRMNote.findMany({ where: { leadId, OR: [{ visibility: 'TEAM' }, { visibility: 'PRIVATE', authorUserId: Number(actorId) }] }, orderBy: { createdAt: 'desc' }, take: 100 }),
+  ]);
+  return safe([
+    ...activities.map((x) => ({ kind: 'ACTIVITY', id: x.id, at: x.occurredAt, title: x.subject, body: x.body, type: x.type })),
+    ...tasks.map((x) => ({ kind: 'TASK', id: x.id, at: x.createdAt, title: x.title, status: x.status, dueAt: x.dueAt })),
+    ...notes.map((x) => ({ kind: 'NOTE', id: x.id, at: x.createdAt, body: x.body, visibility: x.visibility })),
+  ].sort((a, b) => new Date(b.at) - new Date(a.at)));
+}
+
+module.exports = { duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
   listSources, manageSource, dashboard, listAccounts, createAccount, listTasks, createTask, listActivities, createActivity, listNotes, createNote };
