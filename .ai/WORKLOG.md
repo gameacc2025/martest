@@ -4305,3 +4305,17 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Push:** GitHub contents API applied each commit directly to `main`; latest commit returned by the final update is the current remote head for this task.
 - **Risks / open questions:** Parallel execution agents must not race-push to `main`; the coordinator is the sole integration/push owner.
 - **Next action:** Give each active agent the updated instruction and require immediate task-level patch handoff to INT.
+
+
+## 2026-11-09 — API-4-CRM-01 — First CRM vertical implementation slice
+- **Status:** PARTIAL — initial live CRM slice committed; API-4 acceptance criteria remain open.
+- **Agent:** ChatGPT — API-4 owner.
+- **Base:** Main at the start of this implementation followed the CRM contract/coordination commits; work was applied as sequential commits directly to `main`.
+- **Goal:** Replace the sample-only CRM entry points with a STAFF-only API-backed lead workflow and deterministic development fixtures.
+- **Changes:** Added CRM services/routes; registered `/api/v1/crm`; introduced the separate `crm.*` permission catalogue and ADMIN grants; added CRM API-client endpoint/method/barrel exports; added Admin CRM overview, lead inbox, lead detail timeline and duplicate suggestions; permission-gated CRM navigation; added production-guarded synthetic CRM seed and registered it in the seed orchestrator. Updated CRM contract, ACTIVE board and current-task handoff.
+- **Key commits:** `e459557` service; `faa600d` routes; `ecc1c24` app registration; `65f415c` permissions; `9c821b3` endpoints; `638b1b7` API client; `a8be303` API export; `c6f2399` CRM seed; `43fc31c` seed orchestration; `d2ed483` Admin workspace; `70d138f` router; `5624a3c` navigation; `156a250` owner enforcement/lead insights; `48f1168` duplicate/timeline routes; `0be1f76` insight endpoint definitions; `5ca5309` API client methods; `b558aa7` detail modal; `8978175` lead detail action; `d1a4bc8` contract status; `327fb49` coordination status; `19ad47c` task handoff.
+- **Verification:** Source-level GitHub review only. No Node syntax checks, Prisma validation, DB seed execution, unit tests, Admin tests or builds were run. All runtime checks are `NOT RUN`. GitHub combined status for `5ca5309` returned no status entries; no passing CI claim is made.
+- **Not yet implemented:** pipeline/stage and opportunity workflows; contacts CRUD and full account detail/update; task update/assignment/completion; explicit lead merge with audit trail; export; full Kanban/task agenda and remaining UI workflows.
+- **Security notes:** CRM route guards use strict STAFF AccessProfile context plus specific `crm.*` permissions. New lead ownership defaults to authenticated STAFF; reassignment is a separate guarded route. CRM notes restrict PRIVATE visibility to author. CRM does not reuse RFQ `leads.*`.
+- **Risks / open questions:** Code has not been executed against Prisma Client/runtime. Review delegate naming, Fastify route registration, response envelope behavior, and seed FK/idempotency against a real local DB before treating this slice as verified. Concurrent lead conversion idempotency should be stress-tested.
+- **Next action:** Pull latest `main`, run backend tests and Prisma validation, execute guarded development seed, fix any runtime issues, then implement pipeline/opportunity and remaining CRM workflows in separately committed slices.
