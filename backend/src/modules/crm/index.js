@@ -10,6 +10,8 @@ const permissions = {
   tasksRead: 'crm.tasks.read', tasksCreate: 'crm.tasks.create',
   activitiesRead: 'crm.activities.read', activitiesCreate: 'crm.activities.create',
   notesRead: 'crm.notes.read', notesCreate: 'crm.notes.create',
+  pipelinesRead: 'crm.pipelines.read', pipelinesManage: 'crm.pipelines.manage',
+  opportunitiesRead: 'crm.opportunities.read', opportunitiesCreate: 'crm.opportunities.create', opportunitiesUpdate: 'crm.opportunities.update',
 };
 const ok = (data, meta) => meta ? ({ success: true, data, meta }) : ({ success: true, data });
 const route = (handler) => async (request, reply) => {
@@ -41,6 +43,13 @@ async function crmRoutes(fastify) {
 
   fastify.get('/accounts', { preHandler: guard(permissions.accountsRead) }, route((r) => service.listAccounts(r.query)));
   fastify.post('/accounts', { preHandler: guard(permissions.accountsCreate) }, route((r) => service.createAccount(body(r), r.user.id)));
+
+  fastify.get('/pipelines', { preHandler: guard(permissions.pipelinesRead) }, route(() => service.listPipelines()));
+  fastify.post('/pipelines', { preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipeline(body(r))));
+  fastify.post('/pipelines/:id/stages', { preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipelineStage(r.params.id, body(r))));
+  fastify.get('/opportunities', { preHandler: guard(permissions.opportunitiesRead) }, route((r) => service.listOpportunities(r.query)));
+  fastify.post('/opportunities', { preHandler: guard(permissions.opportunitiesCreate) }, route((r) => service.createOpportunity(body(r), r.user.id)));
+  fastify.post('/opportunities/:id/stage', { preHandler: guard(permissions.opportunitiesUpdate) }, route((r) => service.changeOpportunityStage(r.params.id, body(r), r.user.id)));
 
   fastify.get('/tasks', { preHandler: guard(permissions.tasksRead) }, route((r) => service.listTasks(r.query)));
   fastify.post('/tasks', { preHandler: guard(permissions.tasksCreate) }, route((r) => service.createTask(body(r), r.user.id)));
