@@ -4337,3 +4337,13 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Commit:** `3aa0a2926be1450e6cf04daf3cd431a11162061f`.
 - **Verification:** Test source committed to GitHub. Test execution, backend suite, Prisma validation and Admin build are NOT RUN because this session has no local Node/database runtime. GitHub combined commit status returned no status entries; no CI pass is claimed.
 - **Next action:** Run `pnpm --dir backend test` (or the repository's supported backend test command) in the synchronized local checkout, then continue remaining CRM acceptance criteria.
+
+
+## 2026-11-09 — API-4-CRM-01 — CRM merge, export, pipeline management and Admin surfaces
+- **Status:** PARTIAL — additional core API and UI capabilities committed; full lane remains open pending Admin CRUD completion and runtime verification.
+- **Changes:** Added explicit transactional lead merge that moves activities/tasks/notes, marks the duplicate, and inserts an AuditLog record; added bounded 5,000-row CSV export with spreadsheet formula-injection mitigation. Added pipeline/stage update and opportunity detail/update APIs, amount validation, stage outcome synchronization, account/contact detail UI, task agenda, opportunity creation form, pipeline board stage selection, and permission-gated merge UI. CRM workspace now uses live APIs for the available screens.
+- **Additional commits:** `67c7ff2`, `66ecabb`, `0af35b0`, `18d3989`, `d4df045`, `e8d7f84`, `c141858`, `916e5f7`, `142a49b`, `271868d`, `7c2b3a7`, `8c38499`, `4eba82b`, `fa05f08`, `951b08a`, `4acb908`, `663d06d`, `e5f5f84`, `2eca59e`, `13aa8b2`, `65c3219`, `b2fcefc`, `e21c5c2`, `3d29258`, `c5a8e96`, `6176e8b`, `18cc0cb`, `36753d0`, `0e95829`, `e865d4d`.
+- **Documentation:** Updated `docs/api-contracts/crm.md` and replaced the stale API-4 handoff in `.ai/current-task.md` with the current implemented/remaining state.
+- **Verification:** Static GitHub source inspection only. No Node syntax checks, Prisma validation, DB seed, unit tests, Admin tests/builds or visual verification were run. The GitHub combined status endpoint returned no status entries; CI success is not claimed.
+- **Remaining:** Complete Admin create/edit/assignment flows for accounts, contacts, opportunities, tasks and sources; add activity/note forms and conversion confirmation; expand tests and run everything in a synchronized local runtime.
+- **Next action:** Pull latest `main`, run backend tests and Prisma validation, apply the guarded development seed, then complete the remaining Admin UI workflows based on any runtime issues found.
