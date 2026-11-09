@@ -164,13 +164,13 @@ The following first vertical slice has been added to `main`:
 - Lead conversion is transactional and returns the already-linked CRMAccount on a repeat request. It creates a primary CRMContact and does not create or mutate marketplace Company/User identities.
 - Private notes are returned only to their author; TEAM notes are available to CRM readers.
 - API client methods are registered in `packages/api-client/endpoints.js`, `apiClient.js` and `index.js`.
-- Admin routes now use `apps/admin/src/pages/admin/crm/CRMWorkspace.vue` for overview, lead inbox and interaction history. The CRM navigation is permission-gated. The CRM pipeline route now renders a live opportunity board using real pipeline stages and opportunities; stage changes are persisted through the API and append stage history.
+- Admin routes now use `apps/admin/src/pages/admin/crm/CRMWorkspace.vue` for overview, lead inbox and interaction history. The CRM navigation is permission-gated. The CRM pipeline route now renders a live opportunity board using real pipeline stages and opportunities; stage changes are persisted through the API and append stage history. Explicit lead merge moves related activities/tasks/notes to the surviving lead and writes an AuditLog entry; CSV export is bounded to 5,000 rows and mitigates spreadsheet formula injection.
 - Synthetic CRM fixtures are in `backend/prisma/seeds/crm.js` and invoked from the existing seed orchestrator. Stable lead/source/opportunity keys are used; the module skips production and skips safely if no active STAFF profile exists.
 
 ### Remaining before API-4 can be marked DONE
 
-- Implement explicit lead merge with preserved relations and an audit trail, lead export, opportunity update/detail, pipeline update and stage update APIs.
-- Complete Admin CRM UI for account/contact detail and CRUD, opportunity creation/editing, task agenda and CRUD, source management, owner assignment, explicit merge and conversion confirmation; add full interaction forms for activities and notes.
+- Implement opportunity detail/update, pipeline update and stage update APIs.
+- Complete Admin CRM UI for account/contact create/edit, opportunity creation/editing, task creation/editing/assignment, source management and owner assignment; add full interaction forms for activities and notes and a conversion confirmation step.
 - Expand automated service/authorization/privacy/idempotency/seed/UI tests and run backend/Admin test suites and builds in a real checkout. A first route-boundary test file now covers unauthenticated, COMPANY wildcard, CUSTOMER legacy-lead permission and STAFF-without-CRM-permission denial.
 - Add automated route/service/authorization/privacy/idempotency/seed/UI tests and run backend/admin test suites and builds in a real checkout.
 - Verify seed behavior against the actual local database and inspect the Admin UI in the supported non-browser test workflow.
