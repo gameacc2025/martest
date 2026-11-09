@@ -1,7 +1,7 @@
 # CRM and Lead Management API Contract
 
 **Task ID:** API-4-CRM-01  
-**Status:** CONTRACT DRAFT — implementation not started  
+**Status:** PARTIALLY IMPLEMENTED — backend lead workflows, CRM API client, Admin lead workspace and synthetic seed are present; remaining acceptance criteria and runtime verification are open  
 **Owner lane:** API-4  
 **Base branch:** main  
 **Scope:** STAFF-only CRM workflows in Admin; reuse existing Company, User and Inquiry identities without rewriting those domains.
@@ -152,3 +152,27 @@ Do not edit these shared files independently. No Prisma migration is expected un
 ## 10. Completion handoff
 
 Report exact base main SHA, changed files, endpoints and permission matrix, models reused, migration decision, seed/idempotency behavior, tests and exact results, unresolved blockers, and integration requests. Any test/build/runtime check not actually executed must be marked NOT RUN.
+
+
+## 11. Implementation snapshot — 2026-11-09
+
+The following first vertical slice has been added to `main`:
+
+- Backend module: `backend/src/modules/crm/crm.service.js` and `backend/src/modules/crm/index.js`; registered at `/api/v1/crm` in `backend/src/app.js`.
+- Implemented routes: dashboard; lead sources list/create/update; lead list/create/detail/update; lead assignment; validated lead status changes; lead conversion; duplicate suggestions; lead timeline; account list/create; task list/create; activity list/create; note list/create.
+- Route guards combine `requireExactAccessType('STAFF')` with the corresponding `crm.*` permission. CRM never uses the RFQ `leads.*` permissions. Lead/task/account owners and activity/note authors are checked against active STAFF AccessProfiles. New leads default to the authenticated STAFF creator; assignment is a separate permission-gated command.
+- Lead conversion is transactional and returns the already-linked CRMAccount on a repeat request. It creates a primary CRMContact and does not create or mutate marketplace Company/User identities.
+- Private notes are returned only to their author; TEAM notes are available to CRM readers.
+- API client methods are registered in `packages/api-client/endpoints.js`, `apiClient.js` and `index.js`.
+- Admin routes now use `apps/admin/src/pages/admin/crm/CRMWorkspace.vue` for overview, lead inbox and interaction history. The CRM navigation is permission-gated. The previous pipeline link redirects to the live lead inbox until pipeline UI/API is implemented; sample-only pipeline metrics are no longer presented from that route.
+- Synthetic CRM fixtures are in `backend/prisma/seeds/crm.js` and invoked from the existing seed orchestrator. Stable lead/source/opportunity keys are used; the module skips production and skips safely if no active STAFF profile exists.
+
+### Remaining before API-4 can be marked DONE
+
+- Implement pipeline/stage management and opportunity CRUD/stage transition with immutable history.
+- Implement contact CRUD, account detail/update, task update/assignment/completion, explicit lead merge with preserved relations and audit trail, lead export and complete duplicate/merge workflows.
+- Complete Admin CRM UI for account/contact detail, opportunity Kanban, task agenda, source management, assignment, merge and conversion confirmation; remove all remaining CRM prototype-only surfaces.
+- Add automated route/service/authorization/privacy/idempotency/seed/UI tests and run backend/admin test suites and builds in a real checkout.
+- Verify seed behavior against the actual local database and inspect the Admin UI in the supported non-browser test workflow.
+
+**Verification status:** GitHub source review only. No Node.js syntax check, Prisma validation, database seed execution, unit tests or app build has been run in this remote-only session. All are `NOT RUN`; API-4 remains `PARTIAL`, not complete.
