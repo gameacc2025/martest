@@ -268,7 +268,7 @@ export const endpoints = {
   crm: {
     dashboard: '/crm/dashboard',
     sources: '/crm/lead-sources', source: (id) => `/crm/lead-sources/${id}`,
-    leads: '/crm/leads', lead: (id) => `/crm/leads/${id}`,
+    leads: '/crm/leads', leadsExport: '/crm/leads/export', lead: (id) => `/crm/leads/${id}`,
     assignLead: (id) => `/crm/leads/${id}/assign`, leadStatus: (id) => `/crm/leads/${id}/status`, convertLead: (id) => `/crm/leads/${id}/convert`,
     leadDuplicates: (id) => `/crm/leads/${id}/duplicates`, leadTimeline: (id) => `/crm/leads/${id}/timeline`, mergeLead: (id) => `/crm/leads/${id}/merge`,
     accounts: '/crm/accounts', account: (id) => `/crm/accounts/${id}`, accountContacts: (id) => `/crm/accounts/${id}/contacts`, contact: (id) => `/crm/contacts/${id}`,
