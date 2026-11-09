@@ -169,10 +169,9 @@ The following first vertical slice has been added to `main`:
 
 ### Remaining before API-4 can be marked DONE
 
-- Implement opportunity detail/update, pipeline update and stage update APIs.
-- Complete Admin CRM UI for account/contact create/edit, opportunity creation/editing, task creation/editing/assignment, source management and owner assignment; add full interaction forms for activities and notes and a conversion confirmation step.
-- Expand automated service/authorization/privacy/idempotency/seed/UI tests and run backend/Admin test suites and builds in a real checkout. A first route-boundary test file now covers unauthenticated, COMPANY wildcard, CUSTOMER legacy-lead permission and STAFF-without-CRM-permission denial.
-- Add automated route/service/authorization/privacy/idempotency/seed/UI tests and run backend/admin test suites and builds in a real checkout.
-- Verify seed behavior against the actual local database and inspect the Admin UI in the supported non-browser test workflow.
+- Complete Admin CRM UI for account/contact create/edit, opportunity detail/edit, task creation/editing/assignment, source management and owner assignment; add full interaction forms for activities and notes and a conversion confirmation step.
+- Expand automated service/authorization/privacy/idempotency/seed/UI tests. The initial route-boundary test file covers unauthenticated, COMPANY wildcard, CUSTOMER legacy-lead permission and STAFF-without-CRM-permission denial.
+- Run backend/Admin test suites and builds in a real checkout; validate Prisma Client compatibility and execute the guarded seed against a development database.
+- Verify the UI using the project's permitted non-browser test workflow and document any unavailable visual checks.
 
 **Verification status:** GitHub source review only. No Node.js syntax check, Prisma validation, database seed execution, unit tests or app build has been run in this remote-only session. All are `NOT RUN`; API-4 remains `PARTIAL`, not complete.
