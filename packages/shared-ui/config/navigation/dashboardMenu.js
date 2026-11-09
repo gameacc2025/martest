@@ -150,6 +150,8 @@ export const dashboardMenu = [
         children: [
           { title: 'نمای کلی CRM', icon: 'pi pi-th-large', route: 'admin-crm', permission: 'crm.dashboard.read' },
           { title: 'سرنخ‌ها و مشتریان بالقوه', icon: 'pi pi-user-plus', route: 'admin-crm-leads', permission: 'crm.leads.read' },
+          { title: 'حساب‌ها و مخاطبان', icon: 'pi pi-building', route: 'admin-crm-accounts', permission: 'crm.accounts.read' },
+          { title: 'وظایف و پیگیری‌ها', icon: 'pi pi-calendar-clock', route: 'admin-crm-tasks', permission: 'crm.tasks.read' },
           { title: 'قیف فرصت‌های فروش', icon: 'pi pi-filter', route: 'admin-crm-pipeline', permission: 'crm.pipelines.read' },
           { title: 'تعاملات و پیگیری‌ها', icon: 'pi pi-calendar-clock', route: 'admin-crm-activities', permission: 'crm.activities.read' },
         ],
