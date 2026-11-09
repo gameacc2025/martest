@@ -411,10 +411,11 @@ async function mergeLeads(sourceId, targetId, reason, actorId) {
       sourceId: target.sourceId || source.sourceId,
       score: Math.max(target.score, source.score),
     }, include: leadInclude });
-    await tx.lead.update({ where: { id: sourceLeadId }, data: {
-      status: 'DUPLICATE',
-      disqualifiedReason: ('MERGED_INTO:' + targetLeadId + ' — ' + note).slice(0, 500),
-    } });
+    const marked = await tx.lead.updateMany({
+      where: { id: sourceLeadId, status: { notIn: ['CONVERTED', 'DUPLICATE'] } },
+      data: { status: 'DUPLICATE', disqualifiedReason: ('MERGED_INTO:' + targetLeadId + ' — ' + note).slice(0, 500) },
+    });
+    if (marked.count !== 1) fail(409, 'CRM_MERGE_CONFLICT', 'این سرنخ هم‌زمان توسط عملیات دیگری تغییر کرده است.');
     await tx.auditLog.create({ data: {
       actorUserId, actorAccessType: 'STAFF', action: 'CRM_LEAD_MERGED',
       entityType: 'Lead', entityId: String(targetLeadId), source: 'ADMIN',
