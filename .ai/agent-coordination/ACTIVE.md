@@ -18,6 +18,14 @@
 | API-6 — Finance | BLOCKED_BY_DECISION | Not assigned | Commission/ledger/reconciliation/settlement APIs and Admin finance UI, `backend/prisma/seeds/finance.js` | Owner approval for accounting basis, commission, tax, currency, invoice, reconciliation, payout and legal/provider boundaries |
 | INT — Integration | ACTIVE | Coordinator | `backend/src/app.js`, Prisma schema/migrations, permissions registry, global seed orchestrator, shared API-client exports, package manifests, global route/menu registration, global design tokens and cross-domain docs | All lanes |
 
+## Per-task GitHub delivery gate
+
+- Each lane must return every independently completed task/slice immediately; do not hold completed work until the whole lane is finished.
+- Execution agents commit locally only if that is part of their isolated-worktree workflow, but they must not push directly to `main`. They return the scoped patch and evidence to INT.
+- INT reviews and integrates one task at a time on the latest `main`, commits and pushes that task to GitHub immediately, verifies remote `main`, then proceeds to the next patch.
+- Every task handoff must include task ID, commit SHA (or NOT COMMITTED), GitHub push state (or NOT PUSHED), remote SHA verification, tests/checks and documentation/worklog updates.
+- A task is not marked DONE until the accepted changes are on GitHub. Blocked pushes must be visible as BLOCKED/PARTIAL, never silently deferred.
+
 ## File ownership and no-overlap rules
 
 - The lane paths above are proposed ownership boundaries. An agent must list exact files in its claim before editing.
