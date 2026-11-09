@@ -13,7 +13,7 @@
 | API-1 — Auth + Audit | READY_FOR_CONTRACT | Auth/Audit agent (assign) | `backend/src/modules/auth-challenges/**`, `backend/src/modules/audit/**`, domain API-client files, security pages/components, `backend/prisma/seeds/auth-audit.js`, domain tests/docs | M0 token contract; MFA/session policy decisions |
 | API-2 — Support | READY_FOR_CONTRACT | Support agent (assign) | `backend/src/modules/support/**`, support API-client module, support UI workspaces/pages, `backend/prisma/seeds/support.js`, domain tests/docs | M0; shared attachment/notification contract |
 | API-3 — CMS | READY_FOR_CONTRACT | CMS agent (assign) | `backend/src/modules/cms/**`, CMS API-client module, Admin content editor and Website CMS rendering, `backend/prisma/seeds/cms.js`, domain tests/docs | M0; media/slug/publication contract |
-| API-4 — CRM | READY_FOR_CONTRACT | CRM agent (assign) | `backend/src/modules/crm/**`, CRM API-client module, Admin CRM pages, `backend/prisma/seeds/crm.js`, domain tests/docs | M0; Company/User/Inquiry identity contract |
+| API-4 — CRM | CONTRACT_DRAFTED / IMPLEMENTATION_PENDING | ChatGPT — API-4 | `backend/src/modules/crm/**`, CRM API-client module, Admin CRM pages, `backend/prisma/seeds/crm.js`, domain tests/docs; shared files remain INT-owned | M0 token contract; Company/User/Inquiry identity contract; CRM contract at `docs/api-contracts/crm.md` |
 | API-5 — Retail | BLOCKED_BY_DECISION | Not assigned | Inventory/order/reservation/fulfillment APIs, Admin/Website UI, `backend/prisma/seeds/retail.js` | Owner approval for seller eligibility, stock ownership, reservation, cancellation/returns, shipping/tax/pricing/payment and AD-4 |
 | API-6 — Finance | BLOCKED_BY_DECISION | Not assigned | Commission/ledger/reconciliation/settlement APIs and Admin finance UI, `backend/prisma/seeds/finance.js` | Owner approval for accounting basis, commission, tax, currency, invoice, reconciliation, payout and legal/provider boundaries |
 | INT — Integration | ACTIVE | Coordinator | `backend/src/app.js`, Prisma schema/migrations, permissions registry, global seed orchestrator, shared API-client exports, package manifests, global route/menu registration, global design tokens and cross-domain docs | All lanes |
@@ -59,7 +59,7 @@ Before implementation, each domain agent writes or updates its domain contract u
 - API-1: decide whether LOGIN_MFA is required and for which access contexts; decide concurrent device/session policy. Do not change existing refresh-token revocation behavior without approval.
 - API-2: confirm initial SLA defaults, requester attachment limits and notification behavior against current schema and existing provider constraints.
 - API-3: confirm editorial roles, approval/publishing permissions, Persian/English locale policy and media storage limits.
-- API-4: confirm lead ownership/assignment policy, duplicate handling and conversion semantics.
+- API-4: conservative contract drafted — new `crm.*` permissions (never reuse RFQ `leads.*`), STAFF-only CRM, creator-default lead owner with explicit assignment permission, duplicate suggestions only (never auto-merge), transactional/idempotent lead conversion. Validate these against the existing implementation before coding; escalate only if code/business rules contradict them.
 - API-5: blocked until explicit commercial approval.
 - API-6: blocked until explicit accounting/legal/provider policy approval.
 
