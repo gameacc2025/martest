@@ -273,8 +273,8 @@ export const endpoints = {
     leadDuplicates: (id) => `/crm/leads/${id}/duplicates`, leadTimeline: (id) => `/crm/leads/${id}/timeline`, mergeLead: (id) => `/crm/leads/${id}/merge`,
     accounts: '/crm/accounts', account: (id) => `/crm/accounts/${id}`, accountContacts: (id) => `/crm/accounts/${id}/contacts`, contact: (id) => `/crm/contacts/${id}`,
     tasks: '/crm/tasks', task: (id) => `/crm/tasks/${id}`, assignTask: (id) => `/crm/tasks/${id}/assign`, completeTask: (id) => `/crm/tasks/${id}/complete`, activities: '/crm/activities', notes: '/crm/notes',
-    pipelines: '/crm/pipelines', pipelineStages: (id) => `/crm/pipelines/${id}/stages`,
-    opportunities: '/crm/opportunities', opportunityStage: (id) => `/crm/opportunities/${id}/stage`,
+    pipelines: '/crm/pipelines', pipeline: (id) => `/crm/pipelines/${id}`, pipelineStages: (id) => `/crm/pipelines/${id}/stages`, pipelineStage: (id, stageId) => `/crm/pipelines/${id}/stages/${stageId}`,
+    opportunities: '/crm/opportunities', opportunity: (id) => `/crm/opportunities/${id}`, opportunityStage: (id) => `/crm/opportunities/${id}/stage`,
   },
   // Inquiries (RFQ)
   inquiries: {
