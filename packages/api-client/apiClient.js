@@ -327,6 +327,8 @@ export const crmApi = {
   assignLead: (id, ownerUserId) => api.post(endpoints.crm.assignLead(id), { ownerUserId }),
   changeLeadStatus: (id, status, reason) => api.post(endpoints.crm.leadStatus(id), { status, reason }),
   convertLead: (id) => api.post(endpoints.crm.convertLead(id)),
+  getLeadDuplicates: (id) => api.get(endpoints.crm.leadDuplicates(id)),
+  getLeadTimeline: (id) => api.get(endpoints.crm.leadTimeline(id)),
   listAccounts: (params = {}) => api.get(endpoints.crm.accounts, { params }),
   createAccount: (data) => api.post(endpoints.crm.accounts, data),
   listTasks: (params = {}) => api.get(endpoints.crm.tasks, { params }),
