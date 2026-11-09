@@ -6,8 +6,9 @@ const permissions = {
   leadsRead: 'crm.leads.read', leadsCreate: 'crm.leads.create', leadsUpdate: 'crm.leads.update',
   leadsAssign: 'crm.leads.assign', leadsConvert: 'crm.leads.convert',
   sourcesRead: 'crm.sources.read', sourcesManage: 'crm.sources.manage',
-  accountsRead: 'crm.accounts.read', accountsCreate: 'crm.accounts.create',
-  tasksRead: 'crm.tasks.read', tasksCreate: 'crm.tasks.create',
+  accountsRead: 'crm.accounts.read', accountsCreate: 'crm.accounts.create', accountsUpdate: 'crm.accounts.update',
+  contactsRead: 'crm.contacts.read', contactsCreate: 'crm.contacts.create', contactsUpdate: 'crm.contacts.update',
+  tasksRead: 'crm.tasks.read', tasksCreate: 'crm.tasks.create', tasksUpdate: 'crm.tasks.update', tasksAssign: 'crm.tasks.assign',
   activitiesRead: 'crm.activities.read', activitiesCreate: 'crm.activities.create',
   notesRead: 'crm.notes.read', notesCreate: 'crm.notes.create',
   pipelinesRead: 'crm.pipelines.read', pipelinesManage: 'crm.pipelines.manage',
@@ -43,6 +44,11 @@ async function crmRoutes(fastify) {
 
   fastify.get('/accounts', { preHandler: guard(permissions.accountsRead) }, route((r) => service.listAccounts(r.query)));
   fastify.post('/accounts', { preHandler: guard(permissions.accountsCreate) }, route((r) => service.createAccount(body(r), r.user.id)));
+  fastify.get('/accounts/:id', { preHandler: guard(permissions.accountsRead) }, route((r) => service.getAccount(r.params.id)));
+  fastify.patch('/accounts/:id', { preHandler: guard(permissions.accountsUpdate) }, route((r) => service.updateAccount(r.params.id, body(r))));
+  fastify.get('/accounts/:id/contacts', { preHandler: guard(permissions.contactsRead) }, route((r) => service.listContacts(r.params.id)));
+  fastify.post('/accounts/:id/contacts', { preHandler: guard(permissions.contactsCreate) }, route((r) => service.createContact(r.params.id, body(r))));
+  fastify.patch('/contacts/:id', { preHandler: guard(permissions.contactsUpdate) }, route((r) => service.updateContact(r.params.id, body(r))));
 
   fastify.get('/pipelines', { preHandler: guard(permissions.pipelinesRead) }, route(() => service.listPipelines()));
   fastify.post('/pipelines', { preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipeline(body(r))));
@@ -53,6 +59,9 @@ async function crmRoutes(fastify) {
 
   fastify.get('/tasks', { preHandler: guard(permissions.tasksRead) }, route((r) => service.listTasks(r.query)));
   fastify.post('/tasks', { preHandler: guard(permissions.tasksCreate) }, route((r) => service.createTask(body(r), r.user.id)));
+  fastify.patch('/tasks/:id', { preHandler: guard(permissions.tasksUpdate) }, route((r) => service.updateTask(r.params.id, body(r))));
+  fastify.post('/tasks/:id/assign', { preHandler: guard(permissions.tasksAssign) }, route((r) => service.assignTask(r.params.id, body(r).assigneeUserId)));
+  fastify.post('/tasks/:id/complete', { preHandler: guard(permissions.tasksUpdate) }, route((r) => service.completeTask(r.params.id)));
 
   fastify.get('/activities', { preHandler: guard(permissions.activitiesRead) }, route((r) => service.listActivities(r.query)));
   fastify.post('/activities', { preHandler: guard(permissions.activitiesCreate) }, route((r) => service.createActivity(body(r), r.user.id)));
