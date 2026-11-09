@@ -439,5 +439,57 @@ async function exportLeads(query = {}) {
   return rows.map(leadDto);
 }
 
-module.exports = { exportLeads, mergeLeads, getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
+
+async function updatePipeline(id, input) {
+  const pipelineId = idOf(id), data = {};
+  if (input.name !== undefined) data.name = String(input.name).trim().slice(0, 120);
+  if (input.isActive !== undefined) data.isActive = Boolean(input.isActive);
+  if (input.isDefault !== undefined) data.isDefault = Boolean(input.isDefault);
+  return prisma.$transaction(async (tx) => {
+    if (data.isDefault) await tx.pipeline.updateMany({ where: { id: { not: pipelineId } }, data: { isDefault: false } });
+    try { return safe(await tx.pipeline.update({ where: { id: pipelineId }, data })); }
+    catch (error) { if (error.code === 'P2025') fail(404, 'CRM_PIPELINE_NOT_FOUND', 'قیف فروش پیدا نشد.'); throw error; }
+  });
+}
+async function updatePipelineStage(pipelineId, stageId, input) {
+  const pipeline = idOf(pipelineId), stage = idOf(stageId), data = {};
+  if (input.code !== undefined) data.code = String(input.code).trim().toUpperCase().slice(0, 60);
+  if (input.label !== undefined) data.label = String(input.label).trim().slice(0, 120);
+  if (input.sortOrder !== undefined) data.sortOrder = Number(input.sortOrder);
+  if (input.probability !== undefined) {
+    const probability = Number(input.probability);
+    if (!Number.isInteger(probability) || probability < 0 || probability > 100) fail(400, 'CRM_STAGE_INVALID', 'احتمال مرحله باید بین صفر تا صد باشد.');
+    data.probability = probability;
+  }
+  if (input.isWon !== undefined) data.isWon = Boolean(input.isWon);
+  if (input.isLost !== undefined) data.isLost = Boolean(input.isLost);
+  if (data.isWon && data.isLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
+  const current = await prisma.pipelineStage.findFirst({ where: { id: stage, pipelineId: pipeline }, select: { id: true } });
+  if (!current) fail(404, 'CRM_STAGE_NOT_FOUND', 'مرحله در این قیف پیدا نشد.');
+  return safe(await prisma.pipelineStage.update({ where: { id: stage }, data }));
+}
+async function getOpportunity(id) {
+  const row = await prisma.opportunity.findUnique({ where: { id: idOf(id) }, include: {
+    account: { include: { contacts: true } }, pipeline: { include: { stages: { orderBy: { sortOrder: 'asc' } } } },
+    stage: true, owner: { select: { id: true, email: true } }, stageHistory: { include: { fromStage: true, toStage: true }, orderBy: { createdAt: 'desc' } },
+  } });
+  if (!row) fail(404, 'CRM_OPPORTUNITY_NOT_FOUND', 'فرصت فروش پیدا نشد.');
+  return safe(row);
+}
+async function updateOpportunity(id, input) {
+  const opportunityId = idOf(id), data = {};
+  if (input.title !== undefined) data.title = String(input.title).trim().slice(0, 240);
+  if (input.amount !== undefined) data.amount = String(input.amount);
+  if (input.currency !== undefined) {
+    const currency = String(input.currency).trim().toUpperCase();
+    if (!/^[A-Z]{3}$/.test(currency)) fail(400, 'CRM_CURRENCY_INVALID', 'کد ارز باید سه حرف باشد.');
+    data.currency = currency;
+  }
+  if (input.expectedCloseAt !== undefined) data.expectedCloseAt = input.expectedCloseAt ? new Date(input.expectedCloseAt) : null;
+  if (input.ownerUserId !== undefined) data.ownerUserId = await assertStaff(prisma, input.ownerUserId);
+  try { return safe(await prisma.opportunity.update({ where: { id: opportunityId }, data })); }
+  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_OPPORTUNITY_NOT_FOUND', 'فرصت فروش پیدا نشد.'); throw error; }
+}
+
+module.exports = { updatePipeline, updatePipelineStage, getOpportunity, updateOpportunity, exportLeads, mergeLeads, getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
   listSources, manageSource, dashboard, listAccounts, createAccount, listTasks, createTask, listActivities, createActivity, listNotes, createNote };
