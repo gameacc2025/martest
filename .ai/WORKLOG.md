@@ -4329,3 +4329,11 @@ This file is the shared, version-controlled memory for agents working on the rep
 - **Verification:** GitHub source review only. No Node syntax checks, Prisma validation, DB seed execution, automated tests, package builds or visual checks were run. Mark all as `NOT RUN`.
 - **Remaining:** Explicit lead merge with preserved relations/audit trail, lead export, pipeline/stage update, opportunity detail/update, complete Admin account/contact/task agenda and CRUD, source management UI, opportunity creation/edit forms, activity/note creation UI, comprehensive tests and real DB verification.
 - **Next action:** Run targeted backend syntax/tests, Prisma validation and the guarded seed from a synchronized local checkout; fix runtime failures before expanding remaining workflows.
+
+
+## 2026-11-09 — API-4-CRM-01 — CRM authorization regression tests
+- **Status:** PARTIAL — route-boundary tests authored; execution not available.
+- **Changes:** Added `backend/src/modules/crm/crm.routes.test.js` with four Fastify-inject checks: unauthenticated access, COMPANY wildcard denial, CUSTOMER legacy `leads.*` denial, and STAFF denial without the exact CRM permission.
+- **Commit:** `3aa0a2926be1450e6cf04daf3cd431a11162061f`.
+- **Verification:** Test source committed to GitHub. Test execution, backend suite, Prisma validation and Admin build are NOT RUN because this session has no local Node/database runtime. GitHub combined commit status returned no status entries; no CI pass is claimed.
+- **Next action:** Run `pnpm --dir backend test` (or the repository's supported backend test command) in the synchronized local checkout, then continue remaining CRM acceptance criteria.
