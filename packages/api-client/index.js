@@ -26,6 +26,7 @@ export {
   cmsPagesApi,
   authChallengesApi,
   auditLogsApi,
+  crmApi,
 } from './apiClient.js'
 export {
   handleApiError,
