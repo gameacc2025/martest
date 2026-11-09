@@ -18,6 +18,9 @@ const status = ref('')
 const showCreate = ref(false)
 const form = ref({ displayName: '', companyName: '', email: '', phone: '', score: 0, sourceId: '' })
 const selectedLead = ref(null)
+const leadTimeline = ref([])
+const duplicates = ref([])
+const detailLoading = ref(false)
 const actionError = ref('')
 
 const stats = computed(() => [
@@ -94,6 +97,24 @@ async function convertLead(lead) {
     await load()
   } catch (err) {
     actionError.value = errorMessage(err)
+  }
+}
+async function openLead(lead) {
+  selectedLead.value = lead
+  detailLoading.value = true
+  leadTimeline.value = []
+  duplicates.value = []
+  try {
+    const [timelineResponse, duplicateResponse] = await Promise.all([
+      crmApi.getLeadTimeline(lead.id),
+      crmApi.getLeadDuplicates(lead.id),
+    ])
+    leadTimeline.value = unwrap(timelineResponse) || []
+    duplicates.value = unwrap(duplicateResponse) || []
+  } catch (err) {
+    actionError.value = errorMessage(err)
+  } finally {
+    detailLoading.value = false
   }
 }
 async function createFollowUp(lead) {
@@ -193,6 +214,23 @@ onMounted(load)
       </div>
     </section>
 
+    <div v-if="selectedLead" class="crm-modal-backdrop" @click.self="selectedLead = null">
+      <section class="crm-modal crm-detail-modal">
+        <div class="crm-panel-head"><div><h2>{{ selectedLead.displayName }}</h2><p>{{ selectedLead.companyName || selectedLead.leadNumber }}</p></div><button type="button" aria-label="بستن" @click="selectedLead = null">×</button></div>
+        <div class="crm-detail-grid"><span>ایمیل: {{ selectedLead.email || '—' }}</span><span>تلفن: {{ selectedLead.phone || '—' }}</span><span>وضعیت: {{ statusLabel(selectedLead.status) }}</span><span>امتیاز: {{ selectedLead.score }}/100</span></div>
+        <h3>موارد مشابه پیشنهادی</h3>
+        <p v-if="!duplicates.length" class="crm-muted">مورد مشابهی پیدا نشد.</p>
+        <ul v-else class="crm-duplicate-list"><li v-for="item in duplicates" :key="item.id">{{ item.displayName }} — {{ item.matchReasons.join('، ') }}</li></ul>
+        <h3>تاریخچه سرنخ</h3>
+        <div v-if="detailLoading" class="crm-state">در حال دریافت تاریخچه…</div>
+        <div v-else-if="!leadTimeline.length" class="crm-state">هنوز فعالیت یا یادداشتی ثبت نشده است.</div>
+        <article v-for="item in leadTimeline" :key="item.kind + '-' + item.id" class="crm-timeline-item">
+          <strong>{{ item.title || (item.kind === 'NOTE' ? 'یادداشت' : item.kind === 'TASK' ? 'وظیفه' : 'تعامل') }}</strong>
+          <p>{{ item.body || item.status || '' }}</p><small>{{ item.kind }} · {{ formatDate(item.at) }}</small>
+        </article>
+      </section>
+    </div>
+
     <div v-if="showCreate" class="crm-modal-backdrop" @click.self="showCreate = false">
       <form class="crm-modal" @submit.prevent="createLead">
         <div class="crm-panel-head"><div><h2>ثبت سرنخ جدید</h2><p>اطلاعات تماس و منبع آشنایی را وارد کنید</p></div><button type="button" aria-label="بستن" @click="showCreate = false">×</button></div>
@@ -226,7 +264,7 @@ onMounted(load)
 .crm-status{display:inline-flex;border-radius:20px;padding:4px 9px;background:var(--surface-100,#f1f5f9);font-size:.75rem}.crm-status[data-status="QUALIFIED"]{background:#dcfce7;color:#166534}.crm-status[data-status="NEW"]{background:#e0f2fe;color:#075985}
 .crm-actions{display:flex;gap:5px}.crm-actions button,.crm-alert button{border:0;background:transparent;color:var(--primary-color,#0891b2);cursor:pointer;font:inherit;font-size:.78rem}
 .crm-state{padding:28px;text-align:center;color:var(--text-color-secondary,#64748b)}.crm-task,.crm-activity{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-task>div{display:grid;gap:4px;flex:1}.crm-task small,.crm-activity small{color:var(--text-color-secondary,#64748b)}.crm-activity p{margin:5px 0;font-size:.86rem}.crm-alert{padding:12px 15px;border-radius:9px;background:var(--red-50,#fef2f2);color:var(--red-700,#b91c1c);display:flex;justify-content:space-between;gap:12px}
-.crm-modal-backdrop{position:fixed;inset:0;z-index:1000;background:#0f172a88;display:grid;place-items:center;padding:16px}.crm-modal{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--surface-card,#fff);color:inherit;border-radius:14px;padding:20px;display:grid;gap:14px}.crm-modal label{display:grid;gap:6px;font-size:.86rem}.crm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.crm-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.crm-modal-backdrop{position:fixed;inset:0;z-index:1000;background:#0f172a88;display:grid;place-items:center;padding:16px}.crm-modal{width:min(620px,100%);max-height:90vh;overflow:auto;background:var(--surface-card,#fff);color:inherit;border-radius:14px;padding:20px;display:grid;gap:14px}.crm-modal label{display:grid;gap:6px;font-size:.86rem}.crm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.crm-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;background:var(--surface-ground,#f8fafc);border-radius:9px;font-size:.84rem}.crm-modal h3{font-size:.92rem;margin:8px 0 0}.crm-muted{color:var(--text-color-secondary,#64748b)}.crm-duplicate-list{margin:0;padding-inline-start:20px}.crm-timeline-item{padding:9px 0;border-bottom:1px solid var(--surface-border,#e2e8f0)}.crm-timeline-item p{margin:4px 0;font-size:.84rem}.crm-timeline-item small{color:var(--text-color-secondary,#64748b)}.crm-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
 @media(max-width:800px){.crm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.crm-heading,.crm-panel-head{align-items:flex-start;flex-direction:column}.crm-filters{width:100%;flex-wrap:wrap}.crm-filters input{width:100%}}
 @media(max-width:480px){.crm-form-grid{grid-template-columns:1fr}.crm-panel{padding:12px}.crm-stat{padding:12px}.crm-stat strong{font-size:1.1rem}}
 </style>
