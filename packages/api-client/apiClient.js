@@ -321,6 +321,7 @@ export const crmApi = {
   createSource: (data) => api.post(endpoints.crm.sources, data),
   updateSource: (id, data) => api.patch(endpoints.crm.source(id), data),
   listLeads: (params = {}) => api.get(endpoints.crm.leads, { params }),
+  exportLeads: (params = {}) => api.get(endpoints.crm.leadsExport, { params, responseType: 'blob' }),
   getLead: (id) => api.get(endpoints.crm.lead(id)),
   createLead: (data) => api.post(endpoints.crm.leads, data),
   updateLead: (id, data) => api.patch(endpoints.crm.lead(id), data),
