@@ -196,7 +196,7 @@ async function listTasks(q = {}) {
   }, orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }], take: 100 }));
 }
 async function createTask(input, actorId) {
-  const creator = await assertStaff(prisma, actorId), assignee = input.assigneeUserId ? await assertStaff(prisma, input.assigneeUserId) : creator;
+  const creator = await assertStaff(prisma, actorId), assignee = creator;
   const parent = exactlyOneParent(input), title = String(input.title || '').trim();
   if (!title) fail(400, 'CRM_TASK_TITLE_REQUIRED', 'عنوان وظیفه الزامی است.');
   return safe(await prisma.cRMTask.create({ data: { ...parent, title: title.slice(0, 240), description: input.description || null,
@@ -294,7 +294,8 @@ async function listOpportunities(query = {}) {
   }));
 }
 async function createOpportunity(input, actorId) {
-  const ownerUserId = input.ownerUserId ? await assertStaff(prisma, input.ownerUserId) : await assertStaff(prisma, actorId);
+  const creatorUserId = await assertStaff(prisma, actorId);
+  const ownerUserId = input.ownerUserId ? await assertStaff(prisma, input.ownerUserId) : creatorUserId;
   const accountId = idOf(input.accountId), pipelineId = idOf(input.pipelineId), stageId = idOf(input.stageId);
   const [account, stage] = await Promise.all([
     prisma.cRMAccount.findUnique({ where: { id: accountId }, select: { id: true } }),
@@ -314,7 +315,7 @@ async function createOpportunity(input, actorId) {
       amount: String(input.amount || 0), currency, expectedCloseAt: input.expectedCloseAt ? new Date(input.expectedCloseAt) : null,
       status, closedAt: status === 'OPEN' ? null : new Date(),
     }, include: { account: { select: { id: true, displayName: true } }, stage: true } });
-    await tx.opportunityStageHistory.create({ data: { opportunityId: row.id, toStageId: stageId, actorUserId: ownerUserId, reason: 'ایجاد فرصت CRM' } });
+    await tx.opportunityStageHistory.create({ data: { opportunityId: row.id, toStageId: stageId, actorUserId: creatorUserId, reason: 'ایجاد فرصت CRM' } });
     return row;
   }));
 }
