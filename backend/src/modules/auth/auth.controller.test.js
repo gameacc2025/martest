@@ -58,6 +58,17 @@ const mockAuthService = {
 
 injectMock('./auth.service', mockAuthService);
 injectMock('../../config/env', { nodeEnv: 'development' }); // secure:false path
+// Mock db module to avoid DATABASE_URL requirement
+injectMock('../../config/db', {
+  $disconnect: async () => {},
+  user: {},
+  profile: {},
+  accessProfile: {},
+  userRole: {},
+  refreshToken: {},
+  authChallenge: {},
+  auditLog: {},
+});
 const controller = require('./auth.controller');
 
 test.beforeEach(() => resetMocks());

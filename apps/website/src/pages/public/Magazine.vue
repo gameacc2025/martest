@@ -18,10 +18,36 @@ const articlesPerPage = 9
 const categories = computed(() => ['همه', ...cmsStore.publishedCategories.map(c => c.name)])
 const tags = computed(() => cmsStore.publishedTags)
 
+// Map CMS categories to display names, icons, tones, and kinds
+const categoryMap = {
+  'فایبر نوری': { icon: 'pi pi-share-alt', tone: 'cyan', kind: 'راهنمای خرید' },
+  'تجهیزات تست': { icon: 'pi pi-chart-line', tone: 'blue', kind: 'راهنمای خرید' },
+  'تجهیزات شبکه': { icon: 'pi pi-sitemap', tone: 'navy', kind: 'آموزش فنی' },
+  'دیتاسنتر': { icon: 'pi pi-server', tone: 'teal', kind: 'آموزش فنی' },
+  'مخابرات': { icon: 'pi pi-globe', tone: 'red', kind: 'خبر' },
+}
+
+function mapArticle(article) {
+  const cat = article.categories?.[0]?.category?.name || 'مقاله تخصصی'
+  const catInfo = categoryMap[cat] || { icon: 'pi pi-file', tone: 'gray', kind: 'مقاله' }
+  return {
+    ...article,
+    slug: article.slug,
+    category: cat,
+    kind: catInfo.kind,
+    icon: catInfo.icon,
+    tone: catInfo.tone,
+    readTime: getReadTime(article.content),
+    excerpt: article.excerpt || '',
+  }
+}
+
+const mappedArticles = computed(() => cmsStore.publishedArticles.map(mapArticle))
+
 const filteredArticles = computed(() => {
-  let result = cmsStore.publishedArticles
+  let result = mappedArticles.value
   if (activeCategory.value !== 'همه') {
-    result = result.filter(a => a.categories?.some(c => c.category.name === activeCategory.value))
+    result = result.filter(a => a.category === activeCategory.value)
   }
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
@@ -103,7 +129,8 @@ onMounted(() => {
 watch(() => route.params.slug, (newSlug) => {
   if (newSlug) {
     cmsStore.fetchArticleBySlug(newSlug).then(article => {
-      openArticle(article)
+      articleDetail.value = mapArticle(article)
+      showDetail.value = true
     }).catch(() => {
       router.push({ name: 'magazine' })
     })
@@ -119,6 +146,38 @@ watch(() => activeCategory.value, () => {
 watch(() => searchQuery.value, () => {
   currentPage.value = 1
 })
+
+const featuredArticles = computed(() => mappedArticles.value.slice(0, 3))
+
+const currentArticle = computed(() => {
+  if (!route.params.slug) return null
+  return mappedArticles.value.find(a => a.slug === route.params.slug) || null
+})
+
+const isArticle = computed(() => Boolean(route.params.slug))
+
+const relatedArticles = computed(() => {
+  if (!currentArticle.value) return []
+  const related = currentArticle.value.related || []
+  return related.map(slug => mappedArticles.value.find(a => a.slug === slug)).filter(Boolean)
+})
+
+const latestArticles = computed(() => {
+  if (!currentArticle.value) return mappedArticles.value.slice(0, 5)
+  return mappedArticles.value.filter(a => a.slug !== currentArticle.value.slug).slice(0, 5)
+})
+
+const recommendations = computed(() => relatedArticles.value.length ? relatedArticles.value : latestArticles.value.slice(0, 3))
+
+function formatCategory(category) {
+  return category || 'مقاله تخصصی'
+}
+
+function openMagazine() {
+  activeCategory.value = 'همه'
+  searchQuery.value = ''
+  router.push({ name: 'magazine' })
+}
 </script>
 
 <template>
@@ -175,7 +234,7 @@ watch(() => searchQuery.value, () => {
               <div class="mag-detail-content">
                 <div class="mag-detail-meta"><span class="mag-category">{{ currentArticle.category }}</span><span><i class="pi pi-clock"></i>{{ currentArticle.readTime }} مطالعه</span></div>
                 <h2>{{ currentArticle.title }}</h2><p class="mag-detail-lead">{{ currentArticle.excerpt }}</p>
-                <div class="mag-article-prose"><p v-for="(paragraph, index) in currentArticle.body" :key="index">{{ paragraph }}</p></div>
+                <div class="mag-article-prose" v-html="currentArticle.content"></div>
                 <div class="mag-detail-cta"><div><strong>برای تأمین تجهیزات پروژه آماده‌اید؟</strong><span>محصولات و تأمین‌کنندگان را در بازارگاه بررسی کنید.</span></div><router-link :to="{ name: 'products' }">مشاهده محصولات <i class="pi pi-arrow-left"></i></router-link></div>
               </div>
             </article>

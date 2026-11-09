@@ -54,6 +54,14 @@ function loadDbModule(envOverride) {
     else delete require.cache[envPath];
   });
 
+  // Set dummy DATABASE_URL before requiring db.js
+  const originalDbUrl = process.env.DATABASE_URL;
+  process.env.DATABASE_URL = 'postgresql://dummy:dummy@localhost:5432/dummy';
+  test.after(() => {
+    if (originalDbUrl !== undefined) process.env.DATABASE_URL = originalDbUrl;
+    else delete process.env.DATABASE_URL;
+  });
+
   // Clear the db module from cache so it re-executes
   const dbPath = require.resolve('./db');
   const originalDb = require.cache[dbPath];

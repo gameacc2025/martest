@@ -7,7 +7,7 @@ import { apiGet, apiPatch, apiPost, apiDelete } from '@telecom/shared-core/http/
 import { endpoints } from '@telecom/api-client'
 import { authChallengesApi } from '@telecom/api-client'
 import { authApi } from '@telecom/api-client'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '../../../stores/auth'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
@@ -233,7 +233,7 @@ async function verifyEmailCode() {
 }
 
 function openEmailVerifyDialog() {
-  emailVerifyStep.value = 'request
+  emailVerifyStep.value = 'request'
   emailForm.value.code = ''
   showEmailVerifyDialog.value = true
 }
