@@ -262,6 +262,28 @@ onMounted(load)
       </div>
     </section>
 
+    <section v-else-if="activeSection === 'accounts'" class="crm-panel">
+      <div class="crm-panel-head"><div><h2>حساب‌ها و مشتریان بالقوه</h2><p>{{ accounts.length }} حساب در این صفحه</p></div></div>
+      <div v-if="loading" class="crm-state">در حال دریافت حساب‌ها…</div>
+      <div v-else-if="!accounts.length" class="crm-state">حسابی ثبت نشده است.</div>
+      <div v-else class="crm-account-grid">
+        <button v-for="account in accounts" :key="account.id" type="button" class="crm-account-card" @click="openAccount(account)">
+          <i class="pi pi-building" aria-hidden="true"></i><strong>{{ account.displayName }}</strong><small>{{ account.accountType }} · {{ account.lifecycle }}</small><span>{{ account.contacts?.length || 0 }} مخاطب</span>
+        </button>
+      </div>
+    </section>
+
+    <section v-else-if="activeSection === 'tasks'" class="crm-panel">
+      <div class="crm-panel-head"><div><h2>برنامه پیگیری‌ها</h2><p>وظایف تخصیص‌یافته به کارکنان</p></div></div>
+      <div v-if="loading" class="crm-state">در حال دریافت وظایف…</div>
+      <div v-else-if="!tasks.length" class="crm-state">وظیفه‌ای برای نمایش وجود ندارد.</div>
+      <article v-for="task in tasks" :key="task.id" class="crm-task">
+        <div><strong>{{ task.title }}</strong><small>{{ task.lead?.displayName || task.account?.displayName || 'رکورد CRM' }}</small></div>
+        <span>{{ formatDate(task.dueAt) }}</span>
+        <button v-if="task.status !== 'COMPLETED'" type="button" class="crm-task-complete" @click="finishTask(task)">تکمیل شد</button>
+      </article>
+    </section>
+
     <section v-else-if="activeSection === 'pipeline'" class="crm-panel">
       <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div></div>
       <div v-if="loading" class="crm-state">در حال دریافت فرصت‌ها…</div>
