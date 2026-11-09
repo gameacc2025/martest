@@ -146,12 +146,11 @@ export const dashboardMenu = [
       {
         title: 'مدیریت ارتباط با مشتری',
         icon: 'pi pi-address-book',
-        roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
+        permission: 'crm.dashboard.read',
         children: [
-          { title: 'نمای کلی CRM', icon: 'pi pi-th-large', route: 'admin-crm' },
-          { title: 'سرنخ‌ها و مشتریان بالقوه', icon: 'pi pi-user-plus', route: 'admin-crm-leads' },
-          { title: 'قیف فرصت‌های فروش', icon: 'pi pi-filter', route: 'admin-crm-pipeline' },
-          { title: 'تعاملات و پیگیری‌ها', icon: 'pi pi-calendar-clock', route: 'admin-crm-activities' },
+          { title: 'نمای کلی CRM', icon: 'pi pi-th-large', route: 'admin-crm', permission: 'crm.dashboard.read' },
+          { title: 'سرنخ‌ها و مشتریان بالقوه', icon: 'pi pi-user-plus', route: 'admin-crm-leads', permission: 'crm.leads.read' },
+          { title: 'تعاملات و پیگیری‌ها', icon: 'pi pi-calendar-clock', route: 'admin-crm-activities', permission: 'crm.activities.read' },
         ],
       },
     ],
