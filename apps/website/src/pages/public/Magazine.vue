@@ -114,6 +114,17 @@ function getReadTime(content) {
   return `${minutes} دقیقه`
 }
 
+function formatCategory(category) {
+  return category || 'مقاله تخصصی'
+}
+
+function getRelatedArticles(article) {
+  if (!article) return []
+  return mappedArticles.value
+    .filter(a => a.slug !== article.slug)
+    .slice(0, 3)
+}
+
 onMounted(() => {
   loadData()
   if (route.params.slug) {
@@ -158,8 +169,7 @@ const isArticle = computed(() => Boolean(route.params.slug))
 
 const relatedArticles = computed(() => {
   if (!currentArticle.value) return []
-  const related = currentArticle.value.related || []
-  return related.map(slug => mappedArticles.value.find(a => a.slug === slug)).filter(Boolean)
+  return getRelatedArticles(currentArticle.value)
 })
 
 const latestArticles = computed(() => {
@@ -168,10 +178,6 @@ const latestArticles = computed(() => {
 })
 
 const recommendations = computed(() => relatedArticles.value.length ? relatedArticles.value : latestArticles.value.slice(0, 3))
-
-function formatCategory(category) {
-  return category || 'مقاله تخصصی'
-}
 
 function openMagazine() {
   activeCategory.value = 'همه'
