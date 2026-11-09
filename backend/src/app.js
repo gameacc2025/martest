@@ -146,6 +146,7 @@ async function buildApp() {
   await app.register(require('./modules/inquiries/inquiry.routes'), { prefix: '/api/v1/inquiries' });
   await app.register(require('./modules/notifications/notification.routes'), { prefix: '/api/v1/settings/notifications' });
   await app.register(require('./modules/cms'), { prefix: '/api/v1' });
+  await app.register(require('./modules/crm'), { prefix: '/api/v1/crm' });
 
   // ── Health check (no auth) ────────────────────────────────────
   app.get('/health', {
