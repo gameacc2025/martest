@@ -32,6 +32,21 @@ async function crmRoutes(fastify) {
   fastify.post('/lead-sources', { preHandler: guard(permissions.sourcesManage) }, route((r) => service.manageSource(body(r))));
   fastify.patch('/lead-sources/:id', { preHandler: guard(permissions.sourcesManage) }, route((r) => service.manageSource(body(r), r.params.id)));
 
+  fastify.get('/leads/export', { preHandler: guard('crm.leads.export') }, async (request, reply) => {
+    const rows = await service.exportLeads(request.query || {});
+    const headers = ['leadNumber', 'displayName', 'companyName', 'email', 'phone', 'status', 'score', 'createdAt'];
+    const cell = (value) => {
+      if (value === null || value === undefined) return '';
+      let text = String(value);
+      if (/^\\s*[=+\\-@]/.test(text)) text = "'" + text;
+      return '"' + text.replace(/"/g, '""') + '"';
+    };
+    const csv = [headers.join(','), ...rows.map((row) => headers.map((key) => cell(row[key])).join(','))].join('\\r\\n');
+    return reply
+      .header('Content-Type', 'text/csv; charset=utf-8')
+      .header('Content-Disposition', 'attachment; filename="crm-leads.csv"')
+      .send('\\uFEFF' + csv);
+  });
   fastify.get('/leads', { preHandler: guard(permissions.leadsRead) }, route((r) => service.listLeads(r.query)));
   fastify.post('/leads', { preHandler: guard(permissions.leadsCreate) }, route((r) => service.createLead(body(r), r.user.id)));
   fastify.get('/leads/:id', { preHandler: guard(permissions.leadsRead) }, route((r) => service.getLead(r.params.id)));
