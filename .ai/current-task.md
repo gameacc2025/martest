@@ -1251,7 +1251,7 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 # Active task — API-4-CRM-01 (2026-11-09)
 
-- **Status:** PARTIALLY IMPLEMENTED; lead, pipeline/opportunity, account/contact and task API slices plus live Admin CRM pages are committed. Remaining workflows and all runtime verification are pending.
+- **Status:** PARTIALLY IMPLEMENTED; lead, pipeline/opportunity, account/contact and task API slices plus live Admin CRM pages are committed. Initial STAFF-boundary route tests are authored but not run. Remaining workflows and runtime verification are pending.
 - **Lane:** API-4 — CRM / Lead Management.
 - **Contract:** `docs/api-contracts/crm.md`.
 - **Verified existing DB foundation:** CRMAccount, CRMContact, LeadSource, Lead, Pipeline, PipelineStage, Opportunity, OpportunityStageHistory, CRMActivity, CRMTask and CRMNote already exist in schema/migration. Do not recreate them; no migration currently indicated.
