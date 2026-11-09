@@ -386,5 +386,43 @@ async function completeTask(id) {
   catch (error) { if (error.code === 'P2025') fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.'); throw error; }
 }
 
-module.exports = { getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
+
+async function mergeLeads(sourceId, targetId, reason, actorId) {
+  const sourceLeadId = idOf(sourceId), targetLeadId = idOf(targetId), actorUserId = await assertStaff(prisma, actorId);
+  if (sourceLeadId === targetLeadId) fail(400, 'CRM_MERGE_SAME_LEAD', 'ادغام یک سرنخ در خودش مجاز نیست.');
+  const note = String(reason || '').trim();
+  if (!note) fail(400, 'CRM_MERGE_REASON_REQUIRED', 'دلیل ادغام الزامی است.');
+  return prisma.$transaction(async (tx) => {
+    const [source, target] = await Promise.all([
+      tx.lead.findUnique({ where: { id: sourceLeadId } }),
+      tx.lead.findUnique({ where: { id: targetLeadId } }),
+    ]);
+    if (!source || !target) fail(404, 'CRM_LEAD_NOT_FOUND', 'یکی از سرنخ‌های انتخاب‌شده پیدا نشد.');
+    if (source.status === 'CONVERTED' || source.status === 'DUPLICATE') fail(409, 'CRM_LEAD_NOT_MERGEABLE', 'سرنخ تبدیل‌شده یا ادغام‌شده قابل ادغام مجدد نیست.');
+    if (target.status === 'DUPLICATE' || target.status === 'DISQUALIFIED' || target.status === 'LOST') fail(409, 'CRM_TARGET_NOT_MERGEABLE', 'سرنخ مقصد در وضعیت قابل پذیرش نیست.');
+
+    await tx.cRMActivity.updateMany({ where: { leadId: sourceLeadId }, data: { leadId: targetLeadId } });
+    await tx.cRMTask.updateMany({ where: { leadId: sourceLeadId }, data: { leadId: targetLeadId } });
+    await tx.cRMNote.updateMany({ where: { leadId: sourceLeadId }, data: { leadId: targetLeadId } });
+    const merged = await tx.lead.update({ where: { id: targetLeadId }, data: {
+      email: target.email || source.email,
+      phone: target.phone || source.phone,
+      companyName: target.companyName || source.companyName,
+      sourceId: target.sourceId || source.sourceId,
+      score: Math.max(target.score, source.score),
+    }, include: leadInclude });
+    await tx.lead.update({ where: { id: sourceLeadId }, data: {
+      status: 'DUPLICATE',
+      disqualifiedReason: ('MERGED_INTO:' + targetLeadId + ' — ' + note).slice(0, 500),
+    } });
+    await tx.auditLog.create({ data: {
+      actorUserId, actorAccessType: 'STAFF', action: 'CRM_LEAD_MERGED',
+      entityType: 'Lead', entityId: String(targetLeadId), source: 'ADMIN',
+      metadata: { sourceLeadId, targetLeadId, reason: note },
+    } });
+    return { mergedLead: leadDto(merged), duplicateLeadId: sourceLeadId, movedRelations: true };
+  });
+}
+
+module.exports = { mergeLeads, getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
   listSources, manageSource, dashboard, listAccounts, createAccount, listTasks, createTask, listActivities, createActivity, listNotes, createNote };
