@@ -56,6 +56,8 @@
 - CMS seed file passes syntax check (`node -c`)
 - Backend module loading verified
 
+**Commit:** `989c031d` (pushed to origin/main)
+
 **Remaining Work:**
 - Update ContactUs.vue and Terms.vue to use CMS Pages API
 - Create Admin CMS management pages (ArticleManagement, CategoryManagement, TagManagement, FaqManagement, PageManagement)
