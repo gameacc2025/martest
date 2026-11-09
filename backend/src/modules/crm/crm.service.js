@@ -260,5 +260,77 @@ async function leadTimeline(id, actorId) {
   ].sort((a, b) => new Date(b.at) - new Date(a.at)));
 }
 
-module.exports = { duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
+
+async function listPipelines() {
+  return safe(await prisma.pipeline.findMany({
+    where: { isActive: true },
+    include: { stages: { orderBy: { sortOrder: 'asc' }, select: { id: true, pipelineId: true, code: true, label: true, sortOrder: true, probability: true, isWon: true, isLost: true } } },
+    orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+  }));
+}
+async function createPipeline(input) {
+  const name = String(input.name || '').trim();
+  if (!name) fail(400, 'CRM_PIPELINE_NAME_REQUIRED', 'نام قیف فروش الزامی است.');
+  return safe(await prisma.pipeline.create({ data: { name: name.slice(0, 120), isDefault: Boolean(input.isDefault), isActive: true } }));
+}
+async function createPipelineStage(pipelineId, input) {
+  const id = idOf(pipelineId), pipeline = await prisma.pipeline.findUnique({ where: { id }, select: { id: true } });
+  if (!pipeline) fail(404, 'CRM_PIPELINE_NOT_FOUND', 'قیف فروش پیدا نشد.');
+  const code = String(input.code || '').trim().toUpperCase();
+  const label = String(input.label || '').trim();
+  const probability = Number(input.probability ?? 0);
+  if (!code || !label || !Number.isInteger(probability) || probability < 0 || probability > 100) fail(400, 'CRM_STAGE_INVALID', 'کد، عنوان و احتمال معتبر مرحله الزامی است.');
+  if (input.isWon && input.isLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'یک مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
+  return safe(await prisma.pipelineStage.create({ data: { pipelineId: id, code: code.slice(0, 60), label: label.slice(0, 120), sortOrder: Number(input.sortOrder) || 0, probability, isWon: Boolean(input.isWon), isLost: Boolean(input.isLost) } }));
+}
+async function listOpportunities(query = {}) {
+  const where = {};
+  if (query.pipelineId) where.pipelineId = idOf(query.pipelineId);
+  if (query.stageId) where.stageId = idOf(query.stageId);
+  if (query.status) where.status = query.status;
+  return safe(await prisma.opportunity.findMany({
+    where, include: { account: { select: { id: true, displayName: true } }, stage: { select: { id: true, label: true, code: true, probability: true, isWon: true, isLost: true } }, owner: { select: { id: true, email: true } } },
+    orderBy: [{ expectedCloseAt: 'asc' }, { updatedAt: 'desc' }], take: 200,
+  }));
+}
+async function createOpportunity(input, actorId) {
+  const ownerUserId = input.ownerUserId ? await assertStaff(prisma, input.ownerUserId) : await assertStaff(prisma, actorId);
+  const accountId = idOf(input.accountId), pipelineId = idOf(input.pipelineId), stageId = idOf(input.stageId);
+  const [account, stage] = await Promise.all([
+    prisma.cRMAccount.findUnique({ where: { id: accountId }, select: { id: true } }),
+    prisma.pipelineStage.findFirst({ where: { id: stageId, pipelineId }, select: { id: true, isWon: true, isLost: true } }),
+  ]);
+  if (!account) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
+  if (!stage) fail(400, 'CRM_STAGE_PIPELINE_MISMATCH', 'مرحله انتخاب‌شده متعلق به این قیف نیست.');
+  const title = String(input.title || '').trim();
+  if (!title) fail(400, 'CRM_OPPORTUNITY_TITLE_REQUIRED', 'عنوان فرصت الزامی است.');
+  const currency = String(input.currency || 'IRR').trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(currency)) fail(400, 'CRM_CURRENCY_INVALID', 'کد ارز باید سه حرف باشد.');
+  const status = stage.isWon ? 'WON' : stage.isLost ? 'LOST' : 'OPEN';
+  const opportunityNumber = 'CRM-OPP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  return safe(await prisma.$transaction(async (tx) => {
+    const row = await tx.opportunity.create({ data: {
+      opportunityNumber, accountId, pipelineId, stageId, ownerUserId, title: title.slice(0, 240),
+      amount: String(input.amount || 0), currency, expectedCloseAt: input.expectedCloseAt ? new Date(input.expectedCloseAt) : null,
+      status, closedAt: status === 'OPEN' ? null : new Date(),
+    }, include: { account: { select: { id: true, displayName: true } }, stage: true } });
+    await tx.opportunityStageHistory.create({ data: { opportunityId: row.id, toStageId: stageId, actorUserId: ownerUserId, reason: 'ایجاد فرصت CRM' } });
+    return row;
+  }));
+}
+async function changeOpportunityStage(id, input, actorId) {
+  const opportunityId = idOf(id), actorUserId = await assertStaff(prisma, actorId), stageId = idOf(input.stageId);
+  return safe(await prisma.$transaction(async (tx) => {
+    const current = await tx.opportunity.findUnique({ where: { id: opportunityId } });
+    if (!current) fail(404, 'CRM_OPPORTUNITY_NOT_FOUND', 'فرصت فروش پیدا نشد.');
+    const target = await tx.pipelineStage.findFirst({ where: { id: stageId, pipelineId: current.pipelineId } });
+    if (!target) fail(400, 'CRM_STAGE_PIPELINE_MISMATCH', 'مرحله انتخاب‌شده متعلق به قیف این فرصت نیست.');
+    const status = target.isWon ? 'WON' : target.isLost ? 'LOST' : 'OPEN';
+    const updated = await tx.opportunity.update({ where: { id: opportunityId }, data: { stageId, status, closedAt: status === 'OPEN' ? null : new Date() } });
+    await tx.opportunityStageHistory.create({ data: { opportunityId, fromStageId: current.stageId, toStageId: stageId, actorUserId, reason: input.reason ? String(input.reason).slice(0, 500) : null } });
+    return updated;
+  }));
+}
+
+module.exports = { listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
   listSources, manageSource, dashboard, listAccounts, createAccount, listTasks, createTask, listActivities, createActivity, listNotes, createNote };
