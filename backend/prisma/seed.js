@@ -37,6 +37,7 @@ const { seedSpecificationTemplates } = require('./seeds/specification-templates'
 const { seedDemoMarketplace } = require('./seeds/demo-marketplace');
 const { seedCms } = require('./seeds/cms');
 const { seedAuthAuditDemo } = require('./seeds/auth-audit');
+const seedCrm = require('./seeds/crm');
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL, max: 5, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30000 }) });
 
@@ -582,6 +583,10 @@ async function main() {
   console.log('Seeding Auth & Audit demo data...');
   const authAuditSeed = await seedAuthAuditDemo();
   console.log(`  ✓ AuthChallenges: ${authAuditSeed.authChallenges}, AuditLogs: ${authAuditSeed.auditLogs}`);
+
+  // ── 14. CRM demo data (STAFF-owned, synthetic, production-guarded) ──
+  const crmSeed = await seedCrm(prisma);
+  if (!crmSeed.skipped) console.log(`  ✓ CRM leads: ${crmSeed.leads}, sources: ${crmSeed.sources}, opportunities: ${crmSeed.opportunities}`);
 
   // ── Summary ─────────────────────────────────────────────────
   console.log('\n─────────────────────────────────────────');
