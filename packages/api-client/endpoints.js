@@ -264,6 +264,14 @@ export const endpoints = {
     export: '/audit/logs/export',
   },
 
+  // CRM — STAFF-only customer relationship management
+  crm: {
+    dashboard: '/crm/dashboard',
+    sources: '/crm/lead-sources', source: (id) => `/crm/lead-sources/${id}`,
+    leads: '/crm/leads', lead: (id) => `/crm/leads/${id}`,
+    assignLead: (id) => `/crm/leads/${id}/assign`, leadStatus: (id) => `/crm/leads/${id}/status`, convertLead: (id) => `/crm/leads/${id}/convert`,
+    accounts: '/crm/accounts', tasks: '/crm/tasks', activities: '/crm/activities', notes: '/crm/notes',
+  },
   // Inquiries (RFQ)
   inquiries: {
     create: '/inquiries',
