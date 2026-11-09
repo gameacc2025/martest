@@ -1,8 +1,11 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { crmApi } from '@telecom/api-client'
+import { useAuthStore } from '../../../stores/auth'
 
 const props = defineProps({ section: { type: String, default: 'overview' } })
+const authStore = useAuthStore()
+const canMergeLeads = computed(() => authStore.hasPermission('crm.leads.merge'))
 const activeSection = computed(() => props.section)
 const loading = ref(false)
 const saving = ref(false)
@@ -230,7 +233,7 @@ onMounted(load)
     <header class="crm-heading">
       <div>
         <span class="crm-eyebrow">CUSTOMER RELATIONSHIP MANAGEMENT</span>
-        <h1>{{ activeSection === 'activities' ? 'تعاملات CRM' : activeSection === 'leads' ? 'سرنخ‌های فروش' : 'مرکز ارتباط با مشتریان' }}</h1>
+        <h1>{{ ({ activities: 'تعاملات CRM', leads: 'سرنخ‌های فروش', accounts: 'حساب‌ها و مخاطبان CRM', tasks: 'وظایف و پیگیری‌های CRM', pipeline: 'قیف فرصت‌های فروش' })[activeSection] || 'مرکز ارتباط با مشتریان' }}</h1>
         <p>مدیریت سرنخ‌ها، حساب‌ها و پیگیری‌های تیم فروش بر پایه اطلاعات واقعی سامانه</p>
       </div>
       <button v-if="activeSection !== 'activities'" class="crm-primary" type="button" @click="showCreate = true">
@@ -366,7 +369,7 @@ onMounted(load)
         <div class="crm-detail-grid"><span>ایمیل: {{ selectedLead.email || '—' }}</span><span>تلفن: {{ selectedLead.phone || '—' }}</span><span>وضعیت: {{ statusLabel(selectedLead.status) }}</span><span>امتیاز: {{ selectedLead.score }}/100</span></div>
         <h3>موارد مشابه پیشنهادی</h3>
         <p v-if="!duplicates.length" class="crm-muted">مورد مشابهی پیدا نشد.</p>
-        <ul v-else class="crm-duplicate-list"><li v-for="item in duplicates" :key="item.id"><span>{{ item.displayName }} — {{ item.matchReasons.join('، ') }}</span><button type="button" @click="mergeDuplicate(item)">ادغام در این سرنخ</button></li></ul>
+        <ul v-else class="crm-duplicate-list"><li v-for="item in duplicates" :key="item.id"><span>{{ item.displayName }} — {{ item.matchReasons.join('، ') }}</span><button v-if="canMergeLeads" type="button" @click="mergeDuplicate(item)">ادغام در این سرنخ</button></li></ul>
         <h3>تاریخچه سرنخ</h3>
         <div v-if="detailLoading" class="crm-state">در حال دریافت تاریخچه…</div>
         <div v-else-if="!leadTimeline.length" class="crm-state">هنوز فعالیت یا یادداشتی ثبت نشده است.</div>
