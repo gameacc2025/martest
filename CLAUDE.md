@@ -12,4 +12,4 @@
 
 Before any task, read `AGENTS.md` and follow it as mandatory project policy. Then read `.ai/PROTOCOL.md`, the latest `.ai/WORKLOG.md` entries, `.ai/project-context.md`, and `.ai/decisions.md`. Read `.ai/decisions-and-open-questions.md` if present and inspect the relevant implementation.
 
-Do not start editing before completing the required reading and checking `git status`. Follow the task coordination, approval, testing, documentation, commit, and handoff rules in `AGENTS.md`. Do not create a branch by default; `main` is the canonical long-lived branch. Preserve user changes and never claim unrun checks passed.
+Do not start editing before completing the required reading and checking `git status`. Follow the task coordination, approval, testing, documentation, commit, and handoff rules in `AGENTS.md`. **Every completed task/slice must be committed and published to GitHub immediately after review; parallel agents hand off patches, and the coordinator integrates/pushes each accepted task to `main` one at a time.** Do not create a branch by default; `main` is the canonical long-lived branch. Preserve user changes and never claim unrun checks passed.
