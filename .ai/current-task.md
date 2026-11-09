@@ -1251,13 +1251,15 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 # Active task — API-4-CRM-01 (2026-11-09)
 
-- **Status:** Discovery complete; CRM API contract drafted; implementation pending.
+- **Status:** PARTIALLY IMPLEMENTED; remaining API/UI acceptance criteria and all runtime verification are pending.
 - **Lane:** API-4 — CRM / Lead Management.
 - **Contract:** `docs/api-contracts/crm.md`.
 - **Verified existing DB foundation:** CRMAccount, CRMContact, LeadSource, Lead, Pipeline, PipelineStage, Opportunity, OpportunityStageHistory, CRMActivity, CRMTask and CRMNote already exist in schema/migration. Do not recreate them; no migration currently indicated.
 - **Verified code gaps:** No backend CRM module or registered CRM routes; no CRM API-client methods; Admin CRM routes currently render sample-only OperationsHub data.
 - **Security constraint:** Existing `leads.*` permissions are shared with Inquiry/RFQ and granted to non-STAFF contexts. CRM must use separate `crm.*` permissions and strict STAFF AccessProfile checks.
-- **Main commits:** contract `770c299dd4f12c32717a568065cff60e38d1819f`; coordination claim `c1760a8af1b77125c3edc8600d3b44945f961ce7`; worklog `aaa354196df69aadd5fe6f43f61de691a4682d90`.
-- **Verification:** No tests/builds run. Current session has GitHub remote repository access but no local checkout/runtime.
+- **Main commits:** initial contract `770c299dd4f12c32717a568065cff60e38d1819f`; implementation slice commits include `e459557`, `faa600d`, `ecc1c24`, `65f415c`, `9c821b3`, `638b1b7`, `a8be303`, `c6f2399`, `43fc31c`, `d2ed483`, `70d138f`, `5624a3c`, `156a250`, `48f1168`, `0be1f76`, `5ca5309`, `b558aa7`, `8978175`.
+- **Implemented:** STAFF-only CRM backend service/routes for dashboard, sources, lead CRUD/status/assignment/conversion, duplicate suggestions, timeline, accounts list/create, tasks list/create, activities list/create and private/team notes; route registration; dedicated `crm.*` permissions granted to ADMIN only; API-client endpoints/methods/exports; Admin API-backed overview/lead inbox/activities page; permission-gated navigation; deterministic production-guarded CRM seed.
+- **Not yet implemented:** pipeline/stage/opportunity APIs and Kanban UI, contact CRUD/account detail/update, task update/assignment/completion, explicit merge/audit trail, export and complete remaining CRM workflows.
+- **Verification:** GitHub source review only. Node syntax checks, Prisma validation, seed execution, unit tests and builds are NOT RUN because no local checkout/runtime is available.
 - **Next implementation sequence:** CRM backend services/routes/tests; coordinator-owned permission/route/API-client/seed registration; Admin CRM pages and stores wired to real APIs; deterministic guarded CRM seed; CI and integration verification.
-- **Completion state:** NOT COMPLETE. Do not mark API-4 done until all roadmap acceptance criteria and runtime checks pass.
+- **Completion state:** PARTIAL — do not mark API-4 done until remaining acceptance criteria and runtime checks pass.
