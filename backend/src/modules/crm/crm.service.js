@@ -424,5 +424,19 @@ async function mergeLeads(sourceId, targetId, reason, actorId) {
   });
 }
 
-module.exports = { mergeLeads, getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
+
+async function exportLeads(query = {}) {
+  const where = {};
+  if (query.status) where.status = query.status;
+  if (query.sourceId) where.sourceId = idOf(query.sourceId);
+  if (query.ownerUserId) where.ownerUserId = idOf(query.ownerUserId);
+  if (query.search) {
+    const search = String(query.search).trim().slice(0, 120);
+    where.OR = ['displayName', 'companyName', 'email', 'phone', 'leadNumber'].map((key) => ({ [key]: { contains: search, mode: 'insensitive' } }));
+  }
+  const rows = await prisma.lead.findMany({ where, include: leadInclude, orderBy: { createdAt: 'desc' }, take: 5000 });
+  return rows.map(leadDto);
+}
+
+module.exports = { exportLeads, mergeLeads, getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
   listSources, manageSource, dashboard, listAccounts, createAccount, listTasks, createTask, listActivities, createActivity, listNotes, createNote };
