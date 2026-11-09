@@ -252,7 +252,7 @@ onMounted(load)
         <h1>{{ ({ activities: 'تعاملات CRM', leads: 'سرنخ‌های فروش', accounts: 'حساب‌ها و مخاطبان CRM', tasks: 'وظایف و پیگیری‌های CRM', pipeline: 'قیف فرصت‌های فروش' })[activeSection] || 'مرکز ارتباط با مشتریان' }}</h1>
         <p>مدیریت سرنخ‌ها، حساب‌ها و پیگیری‌های تیم فروش بر پایه اطلاعات واقعی سامانه</p>
       </div>
-      <button v-if="activeSection !== 'activities'" class="crm-primary" type="button" @click="showCreate = true">
+      <button v-if="['overview', 'leads'].includes(activeSection)" class="crm-primary" type="button" @click="showCreate = true">
         <i class="pi pi-plus" aria-hidden="true"></i> ثبت سرنخ جدید
       </button>
     </header>
