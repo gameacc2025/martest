@@ -7,6 +7,7 @@ const theme = read('./theme.js')
 const legacy = read('./assets/design-system/tem.scss')
 const overrides = read('./assets/design-system/brand-overrides.scss')
 const newTemp = read('./assets/design-system/newtemp-reference.scss')
+const skillRefinements = read('./assets/design-system/skill-refinements.scss')
 const loading = read('./components/common/Loading.vue')
 const sharedStyles = read('./assets/main.scss')
 const adminEntry = read('../../apps/admin/src/main.js')
@@ -15,6 +16,8 @@ const websiteEntry = read('../../apps/website/src/main.js')
 const websiteTheme = read('../../apps/website/src/assets/marketplace-theme.scss')
 const pages = read('./assets/design-system/pages.scss')
 const sidebar = read('./components/dashboard/DashboardSidebar.vue')
+const dashboardHeader = read('./components/dashboard/DashboardHeader.vue')
+const operationsWorkspace = read('./components/operations/OperationalWorkspace.vue')
 const companyDashboard = read('../../apps/company/src/pages/user/dashboard/CompanyDashboard.vue')
 const companyLayout = read('../../apps/company/src/layouts/CompanyLayout.vue')
 const websiteHome = read('../../apps/website/src/pages/public/Home.vue')
@@ -76,6 +79,20 @@ describe('approved Telecom Market design palette', () => {
     ]) expect(tokens).toContain(value)
   })
 
+  it('keeps optional shared refinements on semantic tokens and free of the retired palette', () => {
+    expect(skillRefinements).not.toMatch(/#7c6cf6|#6c5ce7|#6252d5|#8878f7|#2bb3e8|#f4f5fa|#1d2130|#eceef5|#8a90a6|#0d1420/i)
+    for (const token of [
+      'var(--ds-color-background)',
+      'var(--ds-color-surface)',
+      'var(--ds-color-border)',
+      'var(--ds-color-text)',
+      'var(--ds-primary-button)',
+      'var(--ds-sidebar-active-bg)',
+      'var(--ds-status-success-bg)',
+      'var(--ds-status-danger-bg)',
+    ]) expect(skillRefinements).toContain(token)
+  })
+
   it('removes the retired purple/orange palette from shared store and Tem widgets', () => {
     for (const source of [temButton, temBadge, temStatCard, storeProductCard, storeCategoryCard, storeSectionHeading, storeFilterPanel, storeBenefitGrid]) {
       expect(source).not.toMatch(/#8c7bf7|#ff5c39|#eeebfe|#7564dc|#7c6cf6|#6c5ce7|#eceaff|#f4f5fa|#12182b|#6b7390/i)
@@ -99,6 +116,14 @@ describe('approved Telecom Market design palette', () => {
   it('keeps dashboard and public website surfaces on the approved theme tokens', () => {
     expect(sidebar).toContain('var(--ds-sidebar-width)')
     expect(sidebar).toContain('var(--ds-sidebar-active-bg)')
+    expect(sidebar).toContain('var(--ds-primary-button-text)')
+    expect(dashboardHeader).toContain('var(--ds-shadow-xs)')
+    expect(dashboardHeader).toContain('var(--ds-color-secondary-contrast)')
+    expect(companyDashboard).toContain('var(--ds-shadow-xs)')
+    expect(companyDashboard).toContain('var(--ds-shadow-sm)')
+    expect(companyDashboard).not.toMatch(/rgba\(20,20,60/)
+    expect(operationsWorkspace).toContain('var(--ds-status-warning-bg)')
+    expect(operationsWorkspace).not.toMatch(/#d8e8f1|#f2f8fc|#34556b|#9a6815|#fff5dc/i)
     for (const source of [companyDashboard, companyLayout, websiteHome, publicLayout]) {
       expect(source).not.toMatch(/#7c6cf6|#6c5ce7|#7b2ff7|#4b3bd6/i)
     }

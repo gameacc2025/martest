@@ -1262,6 +1262,7 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 
 ---
 
+<<<<<<< HEAD
 # Active task — API-4-CRM-01 (2026-11-09)
 
 - **Status:** PARTIALLY IMPLEMENTED. Core STAFF-only CRM backend workflows, API client, synthetic seed, and live Admin views are committed. Admin CRUD completeness and all runtime verification remain open.
@@ -1276,3 +1277,32 @@ Company-owned API/tenant-isolation audit and SMS/provider integration remain sep
 - **Key implementation commits:** `e459557`, `faa600d`, `ecc1c24`, `65f415c`, `9c821b3`, `638b1b7`, `a8be303`, `c6f2399`, `43fc31c`, `d2ed483`, `70d138f`, `5624a3c`, `156a250`, `48f1168`, `0be1f76`, `5ca5309`, `b558aa7`, `8978175`, `766bd7e`, `37d9ed3`, `fad1f05`, `8dc0858`, `779a220`, `90171af`, `f769e59`, `53c1f46`, `341e396`, `47f1b06`, `b8ff547`, `d2f1e7b`, `387c72b`, `3aa0a29`, `67c7ff2`, `66ecabb`, `0af35b0`, `18d3989`, `d4df045`, `e8d7f84`, `c141858`, `916e5f7`, `142a49b`, `271868d`, `7c2b3a7`, `8c38499`, `4eba82b`, `fa05f08`, `951b08a`, `4acb908`, `663d06d`, `e5f5f84`, `2eca59e`, `13aa8b2`, `65c3219`, `b2fcefc`, `e21c5c2`, `3d29258`, `c5a8e96`, `6176e8b`, `18cc0cb`, `36753d0`, `08abee8`.
 - **Verification:** GitHub source inspection only. Node syntax checks, backend tests, Prisma validation, seed execution, Admin tests/builds and visual verification are all `NOT RUN`; no passing CI status was returned by GitHub status lookup.
 - **Completion state:** PARTIAL — do not mark API-4 done until remaining Admin workflows and real runtime checks pass.
+=======
+# Current Task — 2026-11-08
+
+## Active task — API-UI-SEED-01
+
+- **Status:** IN_PROGRESS — execution roadmap committed; Milestone M0 shared Admin/Company palette audit is underway.
+- **Branch:** feat/api-ui-seed-roadmap (temporary task branch from current main).
+- **Roadmap:** docs/API_UI_SEED_EXECUTION_ROADMAP.md.
+- **Repository baseline:** DB foundations for Auth/Audit, Support, CMS, CRM, Retail and Finance were merged by PR #90. Reuse the merged schema; do not duplicate models.
+- **M0 findings:** Admin and Company both import the shared PrimeVue theme and load newtemp-reference.scss after main.scss. The approved brand palette already exists in the shared token/theme files. The store-template's standalone purple palette is not the Admin/Company brand source.
+- **M0 change:** Replaced the retired hardcoded palette in the optional skill-refinements.scss mixin with semantic design tokens; added a regression assertion in design-system.test.js.
+- **Static verification:** Confirmed the retired palette regex does not match the updated skill-refinements.scss; confirmed both app entry points preserve shared-theme import order. No browser checks were run.
+- **NOT RUN:** Vitest, Sass/Vue compilation, application builds and browser visual review are not available in this remote GitHub editing session.
+- **Safety:** No API routes, database schema, live data, business rules, authentication or permissions changed. No demo seed data added yet.
+- **Next:** Complete the Admin/Company page and shared-component palette audit, run the shared design-system tests/build in the project environment, then begin API-1 vertical slice (backend + UI + safe demo seed + tests) using the merged AuthChallenge/AuditLog models.
+
+- **Additional M0 cleanup:** DashboardSidebar, DashboardHeader, CompanyDashboard and OperationalWorkspace now use semantic contrast, shadow, surface and status tokens instead of raw color/shadow values.
+- **Additional static scan:** Admin Dashboard, Admin OperationsHub, CompanyDashboard, shared dashboard header/sidebar, OperationalWorkspace and skill-refinements.scss contain no raw hex/RGB/HSL color declarations after the change. The test file intentionally contains retired color patterns as regression detectors.
+
+## API-1 discovery
+- AuthChallenge/AuditLog tables and indexes already exist; AuditLog has a PostgreSQL append-only trigger.
+- AuthChallenge supports PASSWORD_RESET, PHONE_VERIFICATION and EMAIL_VERIFICATION over SMS/EMAIL; no LOGIN_MFA purpose yet.
+- RefreshToken stores no device metadata. Current login revokes prior refresh tokens by default; logout-one and logout-all already exist.
+- The base seed already defines audit_logs.read, but there is no registered audit module or AuthChallenge request/verify route yet.
+- Session concurrency and MFA policy must be decided in the API-1 contract before changing token issuance or schema.
+
+- **PR:** Draft PR #91 — https://github.com/gameacc2025/martest/pull/91
+- **Current gate:** M0 code audit/token cleanup is committed; GitHub Actions test-and-build, prisma-migrations and compose-and-browser checks are in progress. Do not start API-1 implementation until this gate passes and the remaining M0 acceptance checks are reviewed.
+>>>>>>> origin/feat/api-ui-seed-roadmap
