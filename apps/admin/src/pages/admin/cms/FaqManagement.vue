@@ -6,163 +6,202 @@
       <Button v-if="canCreate" label="سوال جدید" icon="pi pi-plus" @click="openCreate" />
     </div>
     <div class="faq-toolbar">
-      <InputText v-model="search" placeholder="جستجو در عنوان بنر…" @keyup.enter="load" />
+      <InputText v-model="search" placeholder="جستجو در متن سوال…" @keyup.enter="load" />
       <Select v-model="statusFilter" :options="statusOptions" option-label="label" option-value="value" placeholder="همه وضعیت‌ها" show-clear @change="load" />
       <Button label="جستجو" icon="pi pi-search" severity="secondary" outlined @click="load" />
     </div>
     <div class="faq-table-wrap">
-      <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows>
-        <Column header="تصویر" style="width: 120px">
-          <template #body="{ data }"><img v-if="data.imageUrl" :src="data.imageUrl" :alt="data.title" class="faq-thumb" /><span v-else>—</span></template>
-        </Column>
-        <Column field="title" header="عنوان" />
-        <Column field="placement" header="جایگاه" />
-        <Column header="وضعیت">
-          <template #body="{ data }"><Tag :value="statusLabel(data.status)" :severity="statusTone(data.status)" /></template>
-        </Column>
-        <Column header="نمایش">
-          <template #body="{ data }"><Tag :value="data.isActive ? 'فعال' : 'غیرفعال'" :severity="data.isActive ? 'success' : 'secondary'" /></template>
-        </Column>
-        <Column header="زمان‌بندی">
-          <template #body="{ data }"><small>{{ dateLabel(data.startsAt) }} تا {{ dateLabel(data.endsAt) }}</small></template>
+      <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows :paginator="true" :rows="10" :totalRecords="totalRecords" @page="onPage">
+        <Column field="question" header="سوال" style="min-width: 300px" />
+        <Column field="category" header="دسته‌بندی" style="width: 150px" />
+        <Column field="sortOrder" header="ترتیب" style="width: 100px" />
+        <Column header="وضعیت" style="width: 130px">
+          <template #body="{ data }"><Tag :value="statusLabel(data.isActive)" :severity="statusTone(data.isActive)" /></template>
         </Column>
         <Column header="عملیات" style="width: 130px">
           <template #body="{ data }">
-            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش بنر" @click="edit(data)" />
-            <Button v-if="canDelete" icon="pi pi-inbox" text rounded severity="danger" aria-label="آرشیو بنر" @click="archive(data)" />
+            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش سوال" @click="edit(data)" />
+            <Button v-if="canDelete" icon="pi pi-trash" text rounded severity="danger" aria-label="حذف سوال" @click="deleteFaq(data)" />
           </template>
         </Column>
-        <template #empty><div class="faq-empty">هنوز بنر تبلیغاتی ثبت نشده است.</div></template>
+        <template #empty><div class="faq-empty">هنوز سوالی ثبت نشده است.</div></template>
       </DataTable>
+      <div class="faq-pagination" v-if="totalRecords > 10">
+        <Paginator :first="first" :rows="rows" :totalRecords="totalRecords" @page="onPage" :pageLinkSize="5" />
+      </div>
     </div>
 
-    <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش بنر' : 'ایجاد بنر تبلیغاتی'" modal :style="{ width: 'min(760px, 94vw)' }" :closable="!saving">
+    <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش سوال' : 'ایجاد سوال جدید'" modal :style="{ width: 'min(600px, 94vw)' }" :closable="!saving">
       <div class="faq-form">
-        <div class="faq-form__field"><label for="faq-title">عنوان بنر *</label><InputText id="faq-title" v-model="form.title" maxlength="120" /></div>
-        <div class="faq-form__field"><label for="faq-description">متن کوتاه</label><Textarea id="faq-description" v-model="form.description" rows="2" maxlength="300" auto-resize /></div>
-        <div class="faq-form__field"><label>پاسخ *</label><div class="faq-upload"><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage" /><Button v-if="canUpload" label="انتخاب تصویر" icon="pi pi-upload" severity="secondary" outlined :loading="uploading" @click="fileInput?.click()" /><span>{{ form.imageUrl ? 'تصویر بارگذاری شده است' : 'JPG، PNG یا WebP — حداکثر ۸ مگابایت' }}</span></div><img v-if="form.imageUrl" :src="form.imageUrl" alt="پیش‌نمایش بنر" class="faq-preview" /></div>
+        <div class="faq-form__field"><label for="faq-question">سوال *</label><InputText id="faq-question" v-model="form.question" maxlength="500" /></div>
+        <div class="faq-form__field"><label for="faq-answer">پاسخ *</label><Textarea id="faq-answer" v-model="form.answer" rows="4" maxlength="2000" auto-resize /></div>
+        <div class="faq-form__field"><label for="faq-category">دسته‌بندی</label><InputText id="faq-category" v-model="form.category" maxlength="100" placeholder="مثال: خرید، پرداخت، حساب کاربری" /></div>
         <div class="faq-form__grid">
-          <div class="faq-form__field"><label for="faq-target">لینک مقصد</label><InputText id="faq-target" v-model="form.targetUrl" placeholder="/products یا https://…" /></div>
-          <div class="faq-form__field"><label for="faq-cta">متن دکمه</label><InputText id="faq-cta" v-model="form.ctaLabel" maxlength="40" placeholder="مشاهده جشنواره" /></div>
-          <div class="faq-form__field"><label for="faq-order">اولویت نمایش</label><InputNumber id="faq-order" v-model="form.sortOrder" :min="0" :max="100000" /></div>
-          <div class="faq-form__field"><label for="faq-status">وضعیت انتشار</label><Select id="faq-status" v-model="form.status" :options="statusOptions" option-label="label" option-value="value" /></div>
-          <div class="faq-form__field"><label for="faq-start">شروع نمایش</label><InputText id="faq-start" v-model="form.startsAt" type="datetime-local" /></div>
-          <div class="faq-form__field"><label for="faq-end">پایان نمایش</label><InputText id="faq-end" v-model="form.endsAt" type="datetime-local" /></div>
+          <div class="faq-form__field"><label for="faq-sort">ترتیب نمایش</label><InputNumber id="faq-sort" v-model="form.sortOrder" :min="0" /></div>
+          <div class="faq-form__field"><label for="faq-status">وضعیت</label><Select id="faq-status" v-model="form.isActive" :options="statusOptions" option-label="label" option-value="value" placeholder="وضعیت را انتخاب کنید" /></div>
         </div>
-        <div class="faq-form__field faq-form__switch"><Checkbox v-model="form.isActive" input-id="faq-active" faqary /><label for="faq-active">بنر فعال باشد</label></div>
+
+        <div class="faq-form__actions">
+          <Button label="انصراف" icon="pi pi-times" text @click="closeDialog" :disabled="saving" />
+          <Button label="ذخیره" icon="pi pi-check" @click="save" :loading="saving" />
+        </div>
       </div>
-      <template #footer><Button label="انصراف" severity="secondary" text @click="dialog = false" /><Button v-if="(editingId && canUpdate) || (!editingId && canCreate)" label="ذخیره بنر" icon="pi pi-check" :loading="saving" @click="save" /></template>
     </Dialog>
+
+    <ConfirmDialog />
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue'
-import { faqsApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
-import { useAuthStore } from '../../../stores/auth'
-import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import { useConfirm } from 'primevue/useconfirm'
+import { cmsFaqsApi } from '@telecom/api-client'
+import { usePermissions } from '@/composables/usePermissions'
 
 const toast = useToast()
-const authStore = useAuthStore()
-const canCreate = authStore.hasPermission('faqs.create')
-const canUpdate = authStore.hasPermission('faqs.update')
-const canDelete = authStore.hasPermission('faqs.delete')
-const canUpload = authStore.hasPermission('media.upload')
+const confirm = useConfirm()
+const { can: canCreate } = usePermissions()
+const { can: canUpdate } = usePermissions()
+const { can: canDelete } = usePermissions()
+
 const items = ref([])
 const loading = ref(false)
-const saving = ref(false)
-const uploading = ref(false)
+const totalRecords = ref(0)
+const first = ref(0)
+const rows = ref(10)
+
+const search = ref('')
+const statusFilter = ref('')
+const currentPage = ref(1)
+
 const dialog = ref(false)
 const editingId = ref(null)
-const search = ref('')
-const statusFilter = ref(null)
-const fileInput = ref(null)
-const statusOptions = [
-  { label: 'پیش‌نویس', value: 'DRAFT' },
-  { label: 'منتشرشده', value: 'PUBLISHED' },
-  { label: 'آرشیوشده', value: 'ARCHIVED' },
-]
-const emptyForm = () => ({ title: '', description: '', imageUrl: '', targetUrl: '', ctaLabel: '', placement: 'HOME_HERO', sortOrder: 0, status: 'DRAFT', isActive: true, startsAt: '', endsAt: '' })
-const form = ref(emptyForm())
-const statusLabel = (status) => statusOptions.find((item) => item.value === status)?.label || status
-const statusTone = (status) => status === 'PUBLISHED' ? 'success' : status === 'ARCHIVED' ? 'secondary' : 'warn'
-const dateLabel = (value) => value ? new Date(value).toLocaleString('fa-IR') : 'بدون محدودیت'
+const saving = ref(false)
 
-function toLocalDateTime(value) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-  return local.toISOString().slice(0, 16)
-}
-function normalizeDate(value) {
-  if (!value) return null
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date.toISOString()
-}
+const form = ref({
+  question: '',
+  answer: '',
+  category: '',
+  sortOrder: 0,
+  isActive: true,
+})
+
+const statusOptions = [
+  { label: 'فعال', value: true },
+  { label: 'غیرفعال', value: false },
+]
+
+const statusLabel = (isActive) => isActive ? 'فعال' : 'غیرفعال'
+const statusTone = (isActive) => isActive ? 'success' : 'secondary'
+
 async function load() {
   loading.value = true
   try {
-    const response = await faqsApi.list({ page: 1, limit: 100, search: search.value, status: statusFilter.value || undefined })
-    const body = response?.data
-    items.value = body?.data?.data || body?.data || []
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'دریافت بنرها ناموفق بود.', life: 3500 })
-  } finally { loading.value = false }
+    const params = {
+      page: currentPage.value,
+      limit: rows.value,
+      search: search.value || undefined,
+      isActive: statusFilter.value !== '' ? statusFilter.value : undefined,
+    }
+    const res = await cmsFaqsApi.listManage(params)
+    const data = res.data?.data || res.data || { items: [], meta: {} }
+    items.value = data.items || data.data || []
+    totalRecords.value = data.meta?.total || data.total || items.value.length
+    first.value = (currentPage.value - 1) * rows.value
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'بارگذاری سوالات با خطا مواجه شد', life: 3500 })
+    items.value = []
+    totalRecords.value = 0
+  } finally {
+    loading.value = false
+  }
 }
+
+function onPage(event) {
+  currentPage.value = event.page + 1
+  first.value = event.first
+  rows.value = event.rows
+  load()
+}
+
 function openCreate() {
+  form.value = { question: '', answer: '', category: '', sortOrder: 0, isActive: true }
   editingId.value = null
-  form.value = emptyForm()
   dialog.value = true
 }
-function edit(item) {
-  editingId.value = item.id
-  form.value = { ...emptyForm(), ...item, startsAt: toLocalDateTime(item.startsAt), endsAt: toLocalDateTime(item.endsAt) }
-  dialog.value = true
-}
-async function uploadImage(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-  uploading.value = true
+
+async function edit(item) {
   try {
-    const response = await faqsApi.uploadImage(file)
-    form.value.imageUrl = response?.data?.data?.url || response?.data?.url
-    toast.add({ severity: 'success', summary: 'تصویر بارگذاری شد', detail: 'تصویر بنر آماده استفاده است.', life: 2500 })
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا در بارگذاری', detail: error?.message || 'بارگذاری تصویر انجام نشد.', life: 3500 })
-  } finally { uploading.value = false; event.target.value = '' }
+    const res = await cmsFaqsApi.getById(item.id)
+    const data = res.data?.data || res.data
+    if (!data) throw new Error('سوال یافت نشد')
+    form.value = { question: data.question || '', answer: data.answer || '', category: data.category || '', sortOrder: data.sortOrder || 0, isActive: data.isActive !== false }
+    editingId.value = item.id
+    dialog.value = true
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'بارگذاری سوال ناموفق بود', life: 3500 })
+  }
 }
+
+function closeDialog() {
+  dialog.value = false
+  editingId.value = null
+  form.value = { question: '', answer: '', category: '', sortOrder: 0, isActive: true }
+}
+
 async function save() {
-  if (!form.value.title.trim() || !form.value.imageUrl) {
-    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'عنوان و تصویر بنر الزامی هستند.', life: 3000 })
+  if (!form.value.question.trim()) {
+    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'متن سوال الزامی است', life: 3000 })
+    return
+  }
+  if (!form.value.answer.trim()) {
+    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'پاسخ سوال الزامی است', life: 3000 })
     return
   }
   saving.value = true
-  const payload = { ...form.value, startsAt: normalizeDate(form.value.startsAt), endsAt: normalizeDate(form.value.endsAt) }
   try {
-    if (editingId.value) await faqsApi.update(editingId.value, payload)
-    else await faqsApi.create(payload)
+    const payload = {
+      question: form.value.question.trim(),
+      answer: form.value.answer.trim(),
+      category: form.value.category?.trim() || '',
+      sortOrder: form.value.sortOrder || 0,
+      isActive: form.value.isActive,
+    }
+    if (editingId.value) {
+      await cmsFaqsApi.update(editingId.value, payload)
+    } else {
+      await cmsFaqsApi.create(payload)
+    }
     dialog.value = false
-    toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات بنر ذخیره شد.', life: 2500 })
+    toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات سوال متداول ذخیره شد', life: 2500 })
     await load()
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره بنر ناموفق بود.', life: 3500 })
-  } finally { saving.value = false }
-}
-async function archive(item) {
-  if (!window.confirm(`بنر «${item.title}» به آرشیو منتقل شود؟`)) return
-  try {
-    await faqsApi.archive(item.id)
-    toast.add({ severity: 'success', summary: 'آرشیو شد', detail: 'بنر از نمایش عمومی خارج شد.', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'آرشیو بنر انجام نشد.', life: 3500 })
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره سوال متداول ناموفق بود', life: 3500 })
+  } finally {
+    saving.value = false
   }
 }
+
+async function deleteFaq(item) {
+  const confirmed = await confirm.require({
+    message: 'سوال «' + (item.question?.substring(0, 50) || 'بدون عنوان') + '...' + '» به‌طور دائمی حذف شود؟ این عملیات غیرقابل بازگشت است.',
+    header: 'تایید حذف',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'بله، حذف شود',
+    rejectLabel: 'انصراف',
+  })
+  if (!confirmed) return
+  try {
+    await cmsFaqsApi.delete(item.id)
+    toast.add({ severity: 'success', summary: 'حذف شد', detail: 'سوال متداول با موفقیت حذف شد', life: 2500 })
+    await load()
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف سوال متداول انجام نشد', life: 3500 })
+  }
+}
+
 onMounted(load)
 </script>
-
 <style scoped>
 .faq-management { gap: 1.1rem; color: var(--ds-color-text); }
 .faq-intro { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.25rem 1.4rem; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:linear-gradient(115deg,color-mix(in srgb,var(--ds-color-primary) 8%,var(--ds-color-surface)),var(--ds-color-surface) 72%); }
@@ -172,16 +211,12 @@ onMounted(load)
 .faq-toolbar { display:flex; flex-wrap:wrap; gap:.65rem; }
 .faq-toolbar > :first-child { min-width:min(320px,100%); }
 .faq-table-wrap { overflow:hidden; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:var(--ds-color-surface); }
-.faq-thumb { width:88px; height:54px; object-fit:cover; border-radius:8px; }
 .faq-empty { padding:2rem; text-align:center; color:var(--ds-color-text-muted); }
+.faq-pagination { padding: 1rem; }
 .faq-form { display:grid; gap:1rem; }
 .faq-form__field { display:grid; gap:.45rem; min-width:0; }
 .faq-form__field label { font-size:.83rem; font-weight:700; }
 .faq-form__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
-.faq-upload { display:flex; align-items:center; flex-wrap:wrap; gap:.75rem; }
-.faq-upload input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
-.faq-upload span { color:var(--ds-color-text-muted); font-size:.75rem; }
-.faq-preview { display:block; width:100%; max-height:230px; object-fit:contain; border:1px solid var(--ds-color-border); border-radius:10px; background:var(--ds-color-surface-alt); }
-.faq-form__switch { display:flex; align-items:center; gap:.6rem; }
+.faq-form__actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:.5rem; padding-top:.5rem; border-top:1px solid var(--ds-color-border); }
 @media(max-width:640px) { .faq-intro { align-items:flex-start; flex-direction:column; } .faq-form__grid { grid-template-columns:1fr; } .faq-toolbar > * { width:100%; } }
 </style>

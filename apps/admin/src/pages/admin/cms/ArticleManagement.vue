@@ -1,166 +1,278 @@
-<template>
-  <div class="article-management ds-stack" dir="rtl">
-    <WorkspacePageHeading title="مدیریت مقالات مجله" heading-id="article-management-title" />
-    <div class="article-intro">
-      <div><span class="article-intro__eyebrow">مقالات مجله</span><h2>فهرست مقالات</h2><p>مقالات منتشرشده، پیش‌نویس‌ها و زمان‌بندی‌شده را مدیریت کنید.</p></div>
-      <Button v-if="canCreate" label="مقاله جدید" icon="pi pi-plus" @click="openCreate" />
-    </div>
-    <div class="article-toolbar">
-      <InputText v-model="search" placeholder="جستجو در عنوان بنر…" @keyup.enter="load" />
-      <Select v-model="statusFilter" :options="statusOptions" option-label="label" option-value="value" placeholder="همه وضعیت‌ها" show-clear @change="load" />
-      <Button label="جستجو" icon="pi pi-search" severity="secondary" outlined @click="load" />
-    </div>
-    <div class="article-table-wrap">
-      <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows>
-        <Column header="تصویر" style="width: 120px">
-          <template #body="{ data }"><img v-if="data.imageUrl" :src="data.imageUrl" :alt="data.title" class="article-thumb" /><span v-else>—</span></template>
-        </Column>
-        <Column field="title" header="عنوان" />
-        <Column field="placement" header="جایگاه" />
-        <Column header="وضعیت">
-          <template #body="{ data }"><Tag :value="statusLabel(data.status)" :severity="statusTone(data.status)" /></template>
-        </Column>
-        <Column header="نمایش">
-          <template #body="{ data }"><Tag :value="data.isActive ? 'فعال' : 'غیرفعال'" :severity="data.isActive ? 'success' : 'secondary'" /></template>
-        </Column>
-        <Column header="زمان‌بندی">
-          <template #body="{ data }"><small>{{ dateLabel(data.startsAt) }} تا {{ dateLabel(data.endsAt) }}</small></template>
-        </Column>
-        <Column header="عملیات" style="width: 130px">
-          <template #body="{ data }">
-            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش بنر" @click="edit(data)" />
-            <Button v-if="canDelete" icon="pi pi-inbox" text rounded severity="danger" aria-label="آرشیو بنر" @click="archive(data)" />
-          </template>
-        </Column>
-        <template #empty><div class="article-empty">هنوز بنر تبلیغاتی ثبت نشده است.</div></template>
-      </DataTable>
-    </div>
-
-    <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش بنر' : 'ایجاد بنر تبلیغاتی'" modal :style="{ width: 'min(760px, 94vw)' }" :closable="!saving">
-      <div class="article-form">
-        <div class="article-form__field"><label for="article-title">عنوان بنر *</label><InputText id="article-title" v-model="form.title" maxlength="120" /></div>
-        <div class="article-form__field"><label for="article-description">متن کوتاه</label><Textarea id="article-description" v-model="form.description" rows="2" maxlength="300" auto-resize /></div>
-        <div class="article-form__field"><label>تصویر جلد *</label><div class="article-upload"><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage" /><Button v-if="canUpload" label="انتخاب تصویر" icon="pi pi-upload" severity="secondary" outlined :loading="uploading" @click="fileInput?.click()" /><span>{{ form.imageUrl ? 'تصویر بارگذاری شده است' : 'JPG، PNG یا WebP — حداکثر ۸ مگابایت' }}</span></div><img v-if="form.imageUrl" :src="form.imageUrl" alt="پیش‌نمایش بنر" class="article-preview" /></div>
-        <div class="article-form__grid">
-          <div class="article-form__field"><label for="article-target">لینک مقصد</label><InputText id="article-target" v-model="form.targetUrl" placeholder="/products یا https://…" /></div>
-          <div class="article-form__field"><label for="article-cta">متن دکمه</label><InputText id="article-cta" v-model="form.ctaLabel" maxlength="40" placeholder="مشاهده جشنواره" /></div>
-          <div class="article-form__field"><label for="article-order">اولویت نمایش</label><InputNumber id="article-order" v-model="form.sortOrder" :min="0" :max="100000" /></div>
-          <div class="article-form__field"><label for="article-status">وضعیت انتشار</label><Select id="article-status" v-model="form.status" :options="statusOptions" option-label="label" option-value="value" /></div>
-          <div class="article-form__field"><label for="article-start">شروع نمایش</label><InputText id="article-start" v-model="form.startsAt" type="datetime-local" /></div>
-          <div class="article-form__field"><label for="article-end">پایان نمایش</label><InputText id="article-end" v-model="form.endsAt" type="datetime-local" /></div>
-        </div>
-        <div class="article-form__field article-form__switch"><Checkbox v-model="form.isActive" input-id="article-active" artary /><label for="article-active">بنر فعال باشد</label></div>
-      </div>
-      <template #footer><Button label="انصراف" severity="secondary" text @click="dialog = false" /><Button v-if="(editingId && canUpdate) || (!editingId && canCreate)" label="ذخیره بنر" icon="pi pi-check" :loading="saving" @click="save" /></template>
-    </Dialog>
-  </div>
-</template>
-
 <script setup>
-import { ref, onMounted } from 'vue'
-import { articlesApi } from '@telecom/api-client'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { useAuthStore } from '../../../stores/auth'
-import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import { useConfirm } from 'primevue/useconfirm'
+import { cmsArticlesApi, cmsCategoriesApi, cmsTagsApi } from '@telecom/api-client'
+import { usePermissions } from '@/composables/usePermissions'
 
+const route = useRoute()
+const router = useRouter()
 const toast = useToast()
-const authStore = useAuthStore()
-const canCreate = authStore.hasPermission('articles.create')
-const canUpdate = authStore.hasPermission('articles.update')
-const canDelete = authStore.hasPermission('articles.delete')
-const canUpload = authStore.hasPermission('media.upload')
+const confirm = useConfirm()
+const { can: canCreate } = usePermissions()
+const { can: canUpdate } = usePermissions()
+const { can: canDelete } = usePermissions()
+const { can: canUpload } = usePermissions()
+
 const items = ref([])
 const loading = ref(false)
-const saving = ref(false)
-const uploading = ref(false)
+const error = ref('')
+const totalRecords = ref(0)
+const first = ref(0)
+const rows = ref(10)
+
+const search = ref('')
+const statusFilter = ref('')
+const typeFilter = ref('')
+const currentPage = ref(1)
+
 const dialog = ref(false)
 const editingId = ref(null)
-const search = ref('')
-const statusFilter = ref(null)
-const fileInput = ref(null)
+const saving = ref(false)
+const uploading = ref(false)
+
+const form = ref({
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  contentFormat: 'HTML',
+  type: 'ARTICLE',
+  status: 'DRAFT',
+  coverImageKey: null,
+  scheduledAt: null,
+  categories: [],
+  tags: [],
+  metaTitle: '',
+  metaDescription: '',
+  canonicalUrl: '',
+  isIndexable: true,
+})
+
+const categoryOptions = ref([])
+const tagOptions = ref([])
+const typeOptions = [
+  { label: 'خبر', value: 'NEWS' },
+  { label: 'مقاله', value: 'ARTICLE' },
+  { label: 'راهنما', value: 'GUIDE' },
+]
 const statusOptions = [
   { label: 'پیش‌نویس', value: 'DRAFT' },
+  { label: 'در بازبینی', value: 'IN_REVIEW' },
+  { label: 'زمان‌بندی', value: 'SCHEDULED' },
   { label: 'منتشرشده', value: 'PUBLISHED' },
-  { label: 'آرشیوشده', value: 'ARCHIVED' },
+  { label: 'بایگانی', value: 'ARCHIVED' },
 ]
-const emptyForm = () => ({ title: '', description: '', imageUrl: '', targetUrl: '', ctaLabel: '', placement: 'HOME_HERO', sortOrder: 0, status: 'DRAFT', isActive: true, startsAt: '', endsAt: '' })
-const form = ref(emptyForm())
-const statusLabel = (status) => statusOptions.find((item) => item.value === status)?.label || status
-const statusTone = (status) => status === 'PUBLISHED' ? 'success' : status === 'ARCHIVED' ? 'secondary' : 'warn'
-const dateLabel = (value) => value ? new Date(value).toLocaleString('fa-IR') : 'بدون محدودیت'
 
-function toLocalDateTime(value) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-  return local.toISOString().slice(0, 16)
+const editorPlugins = [
+  'Bold', 'Italic', 'Underline', 'Strike', 'Heading', 'Alignment',
+  'BulletList', 'NumberedList', 'Indent', 'Outdent', 'Link', 'Image',
+  'Table', 'CodeBlock', 'BlockQuote', 'Undo', 'Redo'
+]
+
+const statusLabel = (status) => {
+  const labels = {
+    DRAFT: 'پیش‌نویس',
+    IN_REVIEW: 'در بازبینی',
+    SCHEDULED: 'زمان‌بندی',
+    PUBLISHED: 'منتشرشده',
+    ARCHIVED: 'بایگانی',
+  }
+  return labels[status] || status
 }
-function normalizeDate(value) {
-  if (!value) return null
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date.toISOString()
+
+const statusTone = (status) => {
+  const tones = {
+    DRAFT: 'secondary',
+    IN_REVIEW: 'warn',
+    SCHEDULED: 'info',
+    PUBLISHED: 'success',
+    ARCHIVED: 'danger',
+  }
+  return tones[status] || 'secondary'
 }
+
+const typeLabel = (type) => {
+  const labels = { NEWS: 'خبر', ARTICLE: 'مقاله', GUIDE: 'راهنما' }
+  return labels[type] || type
+}
+
+async function fetchCategories() {
+  try {
+    const res = await cmsCategoriesApi.list()
+    categoryOptions.value = (res.data?.data || res.data || []).map(c => ({ id: c.id, name: c.name }))
+  } catch (err) {
+    console.error('Failed to fetch categories:', err)
+  }
+}
+
+async function fetchTags() {
+  try {
+    const res = await cmsTagsApi.list()
+    tagOptions.value = (res.data?.data || res.data || []).map(t => ({ id: t.id, name: t.name }))
+  } catch (err) {
+    console.error('Failed to fetch tags:', err)
+  }
+}
+
 async function load() {
   loading.value = true
+  error.value = ''
   try {
-    const response = await articlesApi.list({ page: 1, limit: 100, search: search.value, status: statusFilter.value || undefined })
-    const body = response?.data
-    items.value = body?.data?.data || body?.data || []
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'دریافت بنرها ناموفق بود.', life: 3500 })
-  } finally { loading.value = false }
+    const params = {
+      page: currentPage.value,
+      limit: rows.value,
+      search: search.value || undefined,
+      status: statusFilter.value || undefined,
+      type: typeFilter.value || undefined,
+    }
+    const res = await cmsArticlesApi.listManage(params)
+    const data = res.data?.data || res.data || { items: [], meta: {} }
+    items.value = data.items || data.data || []
+    totalRecords.value = data.meta?.total || data.total || items.value.length
+    first.value = (currentPage.value - 1) * rows.value
+  } catch (err) {
+    error.value = err.message || 'بارگذاری مقالات با خطا مواجه شد'
+    toast.add({ severity: 'error', summary: 'خطا', detail: error.value, life: 3500 })
+    items.value = []
+    totalRecords.value = 0
+  } finally {
+    loading.value = false
+  }
 }
+
+function onPage(event) {
+  currentPage.value = event.page + 1
+  first.value = event.first
+  rows.value = event.rows
+  load()
+}
+
 function openCreate() {
+  form.value = {
+    title: '', slug: '', excerpt: '', content: '', contentFormat: 'HTML',
+    type: 'ARTICLE', status: 'DRAFT', coverImageKey: null, scheduledAt: null,
+    categories: [], tags: [], metaTitle: '', metaDescription: '', canonicalUrl: '', isIndexable: true,
+  }
   editingId.value = null
-  form.value = emptyForm()
   dialog.value = true
 }
-function edit(item) {
-  editingId.value = item.id
-  form.value = { ...emptyForm(), ...item, startsAt: toLocalDateTime(item.startsAt), endsAt: toLocalDateTime(item.endsAt) }
-  dialog.value = true
-}
-async function uploadImage(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-  uploading.value = true
+
+async function edit(item) {
   try {
-    const response = await articlesApi.uploadImage(file)
-    form.value.imageUrl = response?.data?.data?.url || response?.data?.url
-    toast.add({ severity: 'success', summary: 'تصویر بارگذاری شد', detail: 'تصویر بنر آماده استفاده است.', life: 2500 })
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا در بارگذاری', detail: error?.message || 'بارگذاری تصویر انجام نشد.', life: 3500 })
-  } finally { uploading.value = false; event.target.value = '' }
+    const res = await cmsArticlesApi.getManageById(item.id)
+    const data = res.data?.data || res.data
+    if (!data) throw new Error('مقاله یافت نشد')
+    form.value = {
+      title: data.title || '',
+      slug: data.slug || '',
+      excerpt: data.excerpt || '',
+      content: data.content || '',
+      contentFormat: data.contentFormat || 'HTML',
+      type: data.type || 'ARTICLE',
+      status: data.status || 'DRAFT',
+      coverImageKey: data.coverImageKey || null,
+      scheduledAt: data.scheduledAt ? new Date(data.scheduledAt).toISOString().slice(0, 16) : null,
+      categories: (data.categories || []).map(c => c.categoryId || c.category?.id || c.id).filter(Boolean),
+      tags: (data.tags || []).map(t => t.tagId || t.tag?.id || t.id).filter(Boolean),
+      metaTitle: data.metaTitle || '',
+      metaDescription: data.metaDescription || '',
+      canonicalUrl: data.canonicalUrl || '',
+      isIndexable: data.isIndexable !== false,
+    }
+    editingId.value = item.id
+    dialog.value = true
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'بارگذاری مقاله ناموفق بود', life: 3500 })
+  }
 }
+
+function closeDialog() {
+  dialog.value = false
+  editingId.value = null
+  form.value = {
+    title: '', slug: '', excerpt: '', content: '', contentFormat: 'HTML',
+    type: 'ARTICLE', status: 'DRAFT', coverImageKey: null, scheduledAt: null,
+    categories: [], tags: [], metaTitle: '', metaDescription: '', canonicalUrl: '', isIndexable: true,
+  }
+}
+
 async function save() {
-  if (!form.value.title.trim() || !form.value.imageUrl) {
-    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'عنوان و تصویر بنر الزامی هستند.', life: 3000 })
+  if (!form.value.title.trim() || !form.value.excerpt.trim() || !form.value.content.trim()) {
+    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'عنوان، چکیده و محتوا الزامی هستند', life: 3000 })
+    return
+  }
+  if (!form.value.categories.length) {
+    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'حداقل یک دسته‌بندی الزامی است', life: 3000 })
     return
   }
   saving.value = true
-  const payload = { ...form.value, startsAt: normalizeDate(form.value.startsAt), endsAt: normalizeDate(form.value.endsAt) }
   try {
-    if (editingId.value) await articlesApi.update(editingId.value, payload)
-    else await articlesApi.create(payload)
+    const payload = {
+      title: form.value.title.trim(),
+      slug: form.value.slug.trim() || undefined,
+      excerpt: form.value.excerpt.trim(),
+      content: form.value.content,
+      contentFormat: form.value.contentFormat,
+      type: form.value.type,
+      status: form.value.status,
+      coverImageKey: form.value.coverImageKey,
+      scheduledAt: form.value.scheduledAt ? new Date(form.value.scheduledAt).toISOString() : null,
+      categories: form.value.categories,
+      tags: form.value.tags,
+      metaTitle: form.value.metaTitle?.trim() || null,
+      metaDescription: form.value.metaDescription?.trim() || null,
+      canonicalUrl: form.value.canonicalUrl?.trim() || null,
+      isIndexable: form.value.isIndexable,
+    }
+    if (editingId.value) {
+      await cmsArticlesApi.update(editingId.value, payload)
+    } else {
+      await cmsArticlesApi.create(payload)
+    }
     dialog.value = false
-    toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات بنر ذخیره شد.', life: 2500 })
+    toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات مقاله ذخیره شد', life: 2500 })
     await load()
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره بنر ناموفق بود.', life: 3500 })
-  } finally { saving.value = false }
-}
-async function archive(item) {
-  if (!window.confirm(`بنر «${item.title}» به آرشیو منتقل شود؟`)) return
-  try {
-    await articlesApi.archive(item.id)
-    toast.add({ severity: 'success', summary: 'آرشیو شد', detail: 'بنر از نمایش عمومی خارج شد.', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'آرشیو بنر انجام نشد.', life: 3500 })
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره مقاله ناموفق بود', life: 3500 })
+  } finally {
+    saving.value = false
   }
 }
-onMounted(load)
+
+async function deleteArticle(item) {
+  const confirmed = await confirm.require({
+    message: 'مقاله «' + item.title + '» به‌طور دائمی حذف شود؟ این عملیات غیرقابل بازگشت است.',
+    header: 'تایید حذف',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'بله، حذف شود',
+    rejectLabel: 'انصراف',
+  })
+  if (!confirmed) return
+  try {
+    await cmsArticlesApi.delete(item.id)
+    toast.add({ severity: 'success', summary: 'حذف شد', detail: 'مقاله با موفقیت حذف شد', life: 2500 })
+    await load()
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف مقاله انجام نشد', life: 3500 })
+  }
+}
+
+async function archiveArticle(item) {
+  try {
+    await cmsArticlesApi.changeStatus(item.id, 'ARCHIVED')
+    toast.add({ severity: 'success', summary: 'بایگانی شد', detail: 'مقاله بایگانی و از نمایش عمومی خارج شد', life: 2500 })
+    await load()
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'بایگانی مقاله انجام نشد', life: 3500 })
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([fetchCategories(), fetchTags()])
+  load()
+})
 </script>
 
 <style scoped>
@@ -172,16 +284,102 @@ onMounted(load)
 .article-toolbar { display:flex; flex-wrap:wrap; gap:.65rem; }
 .article-toolbar > :first-child { min-width:min(320px,100%); }
 .article-table-wrap { overflow:hidden; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:var(--ds-color-surface); }
-.article-thumb { width:88px; height:54px; object-fit:cover; border-radius:8px; }
+.article-thumb { width:80px; height:50px; object-fit:cover; border-radius:8px; }
 .article-empty { padding:2rem; text-align:center; color:var(--ds-color-text-muted); }
+.article-pagination { padding: 1rem; }
 .article-form { display:grid; gap:1rem; }
 .article-form__field { display:grid; gap:.45rem; min-width:0; }
 .article-form__field label { font-size:.83rem; font-weight:700; }
 .article-form__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.article-form__fieldset { border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); padding:1rem; margin:.5rem 0; }
+.article-form__fieldset legend { font-weight:700; color:var(--ds-color-primary); padding:0 .5rem; }
 .article-upload { display:flex; align-items:center; flex-wrap:wrap; gap:.75rem; }
 .article-upload input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
 .article-upload span { color:var(--ds-color-text-muted); font-size:.75rem; }
-.article-preview { display:block; width:100%; max-height:230px; object-fit:contain; border:1px solid var(--ds-color-border); border-radius:10px; background:var(--ds-color-surface-alt); }
-.article-form__switch { display:flex; align-items:center; gap:.6rem; }
+.article-preview { display:block; width:100%; max-height:200px; object-fit:contain; border:1px solid var(--ds-color-border); border-radius:10px; background:var(--ds-color-surface-alt); }
+.article-form__actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:.5rem; padding-top:.5rem; border-top:1px solid var(--ds-color-border); }
 @media(max-width:640px) { .article-intro { align-items:flex-start; flex-direction:column; } .article-form__grid { grid-template-columns:1fr; } .article-toolbar > * { width:100%; } }
 </style>
+<template>
+  <div class="article-management ds-stack" dir="rtl">
+    <WorkspacePageHeading title="مدیریت مقالات مجله" heading-id="article-management-title" />
+    <div class="article-intro">
+      <div><span class="article-intro__eyebrow">مقالات مجله</span><h2>فهرست مقالات</h2><p>مقالات منتشرشده، پیش‌نویس‌ها، در بازبینی و زمان‌بندی‌شده را مدیریت کنید.</p></div>
+      <Button v-if="canCreate" label="مقاله جدید" icon="pi pi-plus" @click="openCreate" />
+    </div>
+    <div class="article-toolbar">
+      <InputText v-model="search" placeholder="جستجو در عنوان، چکیده یا محتوا…" @keyup.enter="load" />
+      <Select v-model="statusFilter" :options="statusOptions" option-label="label" option-value="value" placeholder="همه وضعیت‌ها" show-clear @change="load" />
+      <Select v-model="typeFilter" :options="typeOptions" option-label="label" option-value="value" placeholder="همه انواع" show-clear @change="load" />
+      <Button label="جستجو" icon="pi pi-search" severity="secondary" outlined @click="load" />
+    </div>
+    <div class="article-table-wrap">
+      <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows :paginator="true" :rows="10" :totalRecords="totalRecords" @page="onPage">
+        <Column header="تصویر" style="width: 100px">
+          <template #body="{ data }"><img v-if="data.coverImageKey" :src="`/api/v1/uploads/${data.coverImageKey}`" :alt="data.title" class="article-thumb" /><span v-else>—</span></template>
+        </Column>
+        <Column field="title" header="عنوان" style="min-width: 250px" />
+        <Column field="type" header="نوع" style="width: 100px" />
+        <Column header="دسته‌بندی‌ها" style="width: 180px">
+          <template #body="{ data }"><span v-if="data.categories?.length">{{ data.categories.map(c => c.category?.name).filter(Boolean).join('، ') }}</span><span v-else>—</span></template>
+        </Column>
+        <Column header="برچسب‌ها" style="width: 150px">
+          <template #body="{ data }"><span v-if="data.tags?.length">{{ data.tags.map(t => t.tag?.name).filter(Boolean).join('، ') }}</span><span v-else>—</span></template>
+        </Column>
+        <Column header="وضعیت" style="width: 130px">
+          <template #body="{ data }"><Tag :value="statusLabel(data.status)" :severity="statusTone(data.status)" /></template>
+        </Column>
+        <Column header="انتشار" style="width: 160px">
+          <template #body="{ data }"><small v-if="data.publishedAt">{{ formatDate(data.publishedAt) }}</small><span v-else-if="data.scheduledAt">{{ formatDate(data.scheduledAt) }} (زمان‌بندی)</span><span v-else>—</span></template>
+        </Column>
+        <Column header="عملیات" style="width: 150px">
+          <template #body="{ data }">
+            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش مقاله" @click="edit(data)" />
+            <Button v-if="canDelete && data.status !== 'PUBLISHED'" icon="pi pi-trash" text rounded severity="danger" aria-label="حذف مقاله" @click="deleteArticle(data)" />
+            <Button v-if="canUpdate && data.status === 'PUBLISHED'" icon="pi pi-archive" text rounded severity="warn" aria-label="بایگانی مقاله" @click="archiveArticle(data)" />
+          </template>
+        </Column>
+        <template #empty><div class="article-empty">هنوز مقاله‌ای ثبت نشده است.</div></template>
+      </DataTable>
+      <div class="article-pagination" v-if="totalRecords > 10">
+        <Paginator :first="first" :rows="rows" :totalRecords="totalRecords" @page="onPage" :pageLinkSize="5" />
+      </div>
+    </div>
+
+    <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش مقاله' : 'ایجاد مقاله جدید'" modal :style="{ width: 'min(900px, 96vw)' }" :closable="!saving">
+      <div class="article-form">
+        <div class="article-form__field"><label for="article-title">عنوان *</label><InputText id="article-title" v-model="form.title" maxlength="220" /></div>
+        <div class="article-form__field"><label for="article-slug">اسلاگ (شناسه URL) *</label><InputText id="article-slug" v-model="form.slug" maxlength="220" placeholder="به‌صورت خودکار از عنوان تولید می‌شود" /></div>
+        <div class="article-form__field"><label for="article-excerpt">چکیده *</label><Textarea id="article-excerpt" v-model="form.excerpt" rows="3" maxlength="500" auto-resize placeholder="خلاصه کوتاه برای نمایش در لیست و SEO" /></div>
+        <div class="article-form__field"><label for="article-content">محتوا *</label><Editor v-model="form.content" :editorStyle="{ height: '400px' }" :plugins="editorPlugins" toolbar="bold italic underline strikethrough | heading | alignleft aligncenter alignright | bullist numlist | outdent indent | link image table | code blockquote | undo redo" /></div>
+        <div class="article-form__grid">
+          <div class="article-form__field"><label for="article-type">نوع مقاله *</label><Select id="article-type" v-model="form.type" :options="typeOptions" option-label="label" option-value="value" placeholder="نوع را انتخاب کنید" /></div>
+          <div class="article-form__field"><label for="article-status">وضعیت *</label><Select id="article-status" v-model="form.status" :options="statusOptions" option-label="label" option-value="value" placeholder="وضعیت را انتخاب کنید" /></div>
+        </div>
+        <div class="article-form__grid">
+          <div class="article-form__field"><label for="article-cover">تصویر جلد</label><div class="article-upload"><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage" /><Button v-if="canUpload" label="انتخاب تصویر" icon="pi pi-upload" severity="secondary" outlined :loading="uploading" @click="fileInput?.click()" /><span>{{ form.coverImageKey ? 'تصویر بارگذاری شده است' : 'JPG، PNG یا WebP — حداکثر ۸ مگابایت' }}</span></div><img v-if="form.coverImageKey" :src="`/api/v1/uploads/${form.coverImageKey}`" alt="پیش‌نمایش تصویر جلد" class="article-preview" /></div>
+          <div class="article-form__field"><label for="article-scheduled">زمان‌بندی انتشار</label><InputText id="article-scheduled" v-model="form.scheduledAt" placeholder="تاریخ و ساعت انتشار (اختیاری)" type="datetime-local" /></div>
+        </div>
+        <div class="article-form__field"><label>دسته‌بندی‌ها *</label><MultiSelect v-model="form.categories" :options="categoryOptions" option-label="name" option-value="id" placeholder="دسته‌بندی‌ها را انتخاب کنید" display="chip" maxSelectedLabels="3" /></div>
+        <div class="article-form__field"><label>برچسب‌ها</label><MultiSelect v-model="form.tags" :options="tagOptions" option-label="name" option-value="id" placeholder="برچسب‌ها را انتخاب کنید" display="chip" /></div>
+
+        <fieldset class="article-form__fieldset">
+          <legend>تنظیمات SEO</legend>
+          <div class="article-form__grid">
+            <div class="article-form__field"><label for="article-meta-title">عنوان SEO (Meta Title)</label><InputText id="article-meta-title" v-model="form.metaTitle" maxlength="70" placeholder="حداکثر ۷۰ کاراکتر" /></div>
+            <div class="article-form__field"><label for="article-meta-desc">توضیحات SEO (Meta Description)</label><InputText id="article-meta-desc" v-model="form.metaDescription" maxlength="160" placeholder="حداکثر ۱۶۰ کاراکتر" /></div>
+          </div>
+          <div class="article-form__field"><label for="article-canonical">Canonical URL</label><InputText id="article-canonical" v-model="form.canonicalUrl" placeholder="https://example.com/articles/slug" /></div>
+          <div class="article-form__field"><label for="article-indexable">قابل ایندکس‌سازی</label><InputSwitch id="article-indexable" v-model="form.isIndexable" /></div>
+        </fieldset>
+
+        <div class="article-form__actions">
+          <Button label="انصراف" icon="pi pi-times" text @click="closeDialog" :disabled="saving" />
+          <Button label="ذخیره" icon="pi pi-check" @click="save" :loading="saving" />
+        </div>
+      </div>
+    </Dialog>
+
+    <ConfirmDialog />
+  </div>
+</template>
