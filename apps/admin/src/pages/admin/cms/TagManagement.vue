@@ -6,160 +6,201 @@
       <Button v-if="canCreate" label="برچسب جدید" icon="pi pi-plus" @click="openCreate" />
     </div>
     <div class="tag-toolbar">
-      <InputText v-model="search" placeholder="جستجو در عنوان بنر…" @keyup.enter="load" />
+      <InputText v-model="search" placeholder="جستجو در نام برچسب…" @keyup.enter="load" />
       <Select v-model="statusFilter" :options="statusOptions" option-label="label" option-value="value" placeholder="همه وضعیت‌ها" show-clear @change="load" />
       <Button label="جستجو" icon="pi pi-search" severity="secondary" outlined @click="load" />
     </div>
     <div class="tag-table-wrap">
-      <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows>
-        <Column header="تصویر" style="width: 120px">
-          <template #body="{ data }"><img v-if="data.imageUrl" :src="data.imageUrl" :alt="data.title" class="tag-thumb" /><span v-else>—</span></template>
+      <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows :paginator="true" :rows="10" :totalRecords="totalRecords" @page="onPage">
+        <Column field="name" header="نام" style="min-width: 250px" />
+        <Column field="slug" header="اسلاگ" style="width: 180px" />
+        <Column field="sortOrder" header="ترتیب" style="width: 100px" />
+        <Column header="وضعیت" style="width: 130px">
+          <template #body="{ data }"><Tag :value="statusLabel(data.isActive)" :severity="statusTone(data.isActive)" /></template>
         </Column>
-        <Column field="title" header="عنوان" />
-        <Column field="placement" header="جایگاه" />
-        <Column header="وضعیت">
-          <template #body="{ data }"><Tag :value="statusLabel(data.status)" :severity="statusTone(data.status)" /></template>
-        </Column>
-        <Column header="نمایش">
-          <template #body="{ data }"><Tag :value="data.isActive ? 'فعال' : 'غیرفعال'" :severity="data.isActive ? 'success' : 'secondary'" /></template>
-        </Column>
-        <Column header="زمان‌بندی">
-          <template #body="{ data }"><small>{{ dateLabel(data.startsAt) }} تا {{ dateLabel(data.endsAt) }}</small></template>
+        <Column header="تعداد مقالات" style="width: 120px">
+          <template #body="{ data }">{{ data._count?.articles || 0 }}</template>
         </Column>
         <Column header="عملیات" style="width: 130px">
           <template #body="{ data }">
-            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش بنر" @click="edit(data)" />
-            <Button v-if="canDelete" icon="pi pi-inbox" text rounded severity="danger" aria-label="آرشیو بنر" @click="archive(data)" />
+            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش برچسب" @click="edit(data)" />
+            <Button v-if="canDelete" icon="pi pi-trash" text rounded severity="danger" aria-label="حذف برچسب" @click="deleteTag(data)" />
           </template>
         </Column>
-        <template #empty><div class="tag-empty">هنوز بنر تبلیغاتی ثبت نشده است.</div></template>
+        <template #empty><div class="tag-empty">هنوز برچسب‌ای ثبت نشده است.</div></template>
       </DataTable>
+      <div class="tag-pagination" v-if="totalRecords > 10">
+        <Paginator :first="first" :rows="rows" :totalRecords="totalRecords" @page="onPage" :pageLinkSize="5" />
+      </div>
     </div>
 
-    <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش بنر' : 'ایجاد بنر تبلیغاتی'" modal :style="{ width: 'min(760px, 94vw)' }" :closable="!saving">
+    <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش برچسب' : 'ایجاد برچسب جدید'" modal :style="{ width: 'min(500px, 94vw)' }" :closable="!saving">
       <div class="tag-form">
-        <div class="tag-form__field"><label for="tag-title">عنوان بنر *</label><InputText id="tag-title" v-model="form.title" maxlength="120" /></div>
-        <div class="tag-form__field"><label for="tag-description">متن کوتاه</label><Textarea id="tag-description" v-model="form.description" rows="2" maxlength="300" auto-resize /></div>
-        <div class="tag-form__field"><label>نام *</label><div class="tag-upload"><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage" /><Button v-if="canUpload" label="انتخاب تصویر" icon="pi pi-upload" severity="secondary" outlined :loading="uploading" @click="fileInput?.click()" /><span>{{ form.imageUrl ? 'تصویر بارگذاری شده است' : 'JPG، PNG یا WebP — حداکثر ۸ مگابایت' }}</span></div><img v-if="form.imageUrl" :src="form.imageUrl" alt="پیش‌نمایش بنر" class="tag-preview" /></div>
+        <div class="tag-form__field"><label for="tag-name">نام *</label><InputText id="tag-name" v-model="form.name" maxlength="100" /></div>
+        <div class="tag-form__field"><label for="tag-slug">اسلاگ *</label><InputText id="tag-slug" v-model="form.slug" maxlength="100" placeholder="به‌صورت خودکار از نام تولید می‌شود" /></div>
+        <div class="tag-form__field"><label for="tag-description">توضیحات</label><Textarea id="tag-description" v-model="form.description" rows="3" maxlength="500" auto-resize /></div>
         <div class="tag-form__grid">
-          <div class="tag-form__field"><label for="tag-target">لینک مقصد</label><InputText id="tag-target" v-model="form.targetUrl" placeholder="/products یا https://…" /></div>
-          <div class="tag-form__field"><label for="tag-cta">متن دکمه</label><InputText id="tag-cta" v-model="form.ctaLabel" maxlength="40" placeholder="مشاهده جشنواره" /></div>
-          <div class="tag-form__field"><label for="tag-order">اولویت نمایش</label><InputNumber id="tag-order" v-model="form.sortOrder" :min="0" :max="100000" /></div>
-          <div class="tag-form__field"><label for="tag-status">وضعیت انتشار</label><Select id="tag-status" v-model="form.status" :options="statusOptions" option-label="label" option-value="value" /></div>
-          <div class="tag-form__field"><label for="tag-start">شروع نمایش</label><InputText id="tag-start" v-model="form.startsAt" type="datetime-local" /></div>
-          <div class="tag-form__field"><label for="tag-end">پایان نمایش</label><InputText id="tag-end" v-model="form.endsAt" type="datetime-local" /></div>
+          <div class="tag-form__field"><label for="tag-sort">ترتیب نمایش</label><InputNumber id="tag-sort" v-model="form.sortOrder" :min="0" /></div>
+          <div class="tag-form__field"><label for="tag-status">وضعیت</label><Select id="tag-status" v-model="form.isActive" :options="statusOptions" option-label="label" option-value="value" placeholder="وضعیت را انتخاب کنید" /></div>
         </div>
-        <div class="tag-form__field tag-form__switch"><Checkbox v-model="form.isActive" input-id="tag-active" tagary /><label for="tag-active">بنر فعال باشد</label></div>
+
+        <div class="tag-form__actions">
+          <Button label="انصراف" icon="pi pi-times" text @click="closeDialog" :disabled="saving" />
+          <Button label="ذخیره" icon="pi pi-check" @click="save" :loading="saving" />
+        </div>
       </div>
-      <template #footer><Button label="انصراف" severity="secondary" text @click="dialog = false" /><Button v-if="(editingId && canUpdate) || (!editingId && canCreate)" label="ذخیره بنر" icon="pi pi-check" :loading="saving" @click="save" /></template>
     </Dialog>
+
+    <ConfirmDialog />
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue'
-import { tagsApi } from '@telecom/api-client'
 import { useToast } from 'primevue/usetoast'
-import { useAuthStore } from '../../../stores/auth'
-import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
+import { useConfirm } from 'primevue/useconfirm'
+import { cmsTagsApi } from '@telecom/api-client'
+import { usePermissions } from '@/composables/usePermissions'
 
 const toast = useToast()
-const authStore = useAuthStore()
-const canCreate = authStore.hasPermission('tags.create')
-const canUpdate = authStore.hasPermission('tags.update')
-const canDelete = authStore.hasPermission('tags.delete')
-const canUpload = authStore.hasPermission('media.upload')
+const confirm = useConfirm()
+const { can: canCreate } = usePermissions()
+const { can: canUpdate } = usePermissions()
+const { can: canDelete } = usePermissions()
+
 const items = ref([])
 const loading = ref(false)
-const saving = ref(false)
-const uploading = ref(false)
+const totalRecords = ref(0)
+const first = ref(0)
+const rows = ref(10)
+
+const search = ref('')
+const statusFilter = ref('')
+const currentPage = ref(1)
+
 const dialog = ref(false)
 const editingId = ref(null)
-const search = ref('')
-const statusFilter = ref(null)
-const fileInput = ref(null)
-const statusOptions = [
-  { label: 'پیش‌نویس', value: 'DRAFT' },
-  { label: 'منتشرشده', value: 'PUBLISHED' },
-  { label: 'آرشیوشده', value: 'ARCHIVED' },
-]
-const emptyForm = () => ({ title: '', description: '', imageUrl: '', targetUrl: '', ctaLabel: '', placement: 'HOME_HERO', sortOrder: 0, status: 'DRAFT', isActive: true, startsAt: '', endsAt: '' })
-const form = ref(emptyForm())
-const statusLabel = (status) => statusOptions.find((item) => item.value === status)?.label || status
-const statusTone = (status) => status === 'PUBLISHED' ? 'success' : status === 'ARCHIVED' ? 'secondary' : 'warn'
-const dateLabel = (value) => value ? new Date(value).toLocaleString('fa-IR') : 'بدون محدودیت'
+const saving = ref(false)
 
-function toLocalDateTime(value) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-  return local.toISOString().slice(0, 16)
-}
-function normalizeDate(value) {
-  if (!value) return null
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date.toISOString()
-}
+const form = ref({
+  name: '',
+  slug: '',
+  description: '',
+  sortOrder: 0,
+  isActive: true,
+})
+
+const statusOptions = [
+  { label: 'فعال', value: true },
+  { label: 'غیرفعال', value: false },
+]
+
+const statusLabel = (isActive) => isActive ? 'فعال' : 'غیرفعال'
+const statusTone = (isActive) => isActive ? 'success' : 'secondary'
+
 async function load() {
   loading.value = true
   try {
-    const response = await tagsApi.list({ page: 1, limit: 100, search: search.value, status: statusFilter.value || undefined })
-    const body = response?.data
-    items.value = body?.data?.data || body?.data || []
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'دریافت بنرها ناموفق بود.', life: 3500 })
-  } finally { loading.value = false }
+    const params = {
+      page: currentPage.value,
+      limit: rows.value,
+      search: search.value || undefined,
+      isActive: statusFilter.value !== '' ? statusFilter.value : undefined,
+    }
+    const res = await cmsTagsApi.listManage(params)
+    const data = res.data?.data || res.data || { items: [], meta: {} }
+    items.value = data.items || data.data || []
+    totalRecords.value = data.meta?.total || data.total || items.value.length
+    first.value = (currentPage.value - 1) * rows.value
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'بارگذاری برچسب‌ها با خطا مواجه شد', life: 3500 })
+    items.value = []
+    totalRecords.value = 0
+  } finally {
+    loading.value = false
+  }
 }
+
+function onPage(event) {
+  currentPage.value = event.page + 1
+  first.value = event.first
+  rows.value = event.rows
+  load()
+}
+
 function openCreate() {
+  form.value = { name: '', slug: '', description: '', sortOrder: 0, isActive: true }
   editingId.value = null
-  form.value = emptyForm()
   dialog.value = true
 }
-function edit(item) {
-  editingId.value = item.id
-  form.value = { ...emptyForm(), ...item, startsAt: toLocalDateTime(item.startsAt), endsAt: toLocalDateTime(item.endsAt) }
-  dialog.value = true
-}
-async function uploadImage(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-  uploading.value = true
+
+async function edit(item) {
   try {
-    const response = await tagsApi.uploadImage(file)
-    form.value.imageUrl = response?.data?.data?.url || response?.data?.url
-    toast.add({ severity: 'success', summary: 'تصویر بارگذاری شد', detail: 'تصویر بنر آماده استفاده است.', life: 2500 })
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا در بارگذاری', detail: error?.message || 'بارگذاری تصویر انجام نشد.', life: 3500 })
-  } finally { uploading.value = false; event.target.value = '' }
+    const res = await cmsTagsApi.getById(item.id)
+    const data = res.data?.data || res.data
+    if (!data) throw new Error('برچسب یافت نشد')
+    form.value = { name: data.name || '', slug: data.slug || '', description: data.description || '', sortOrder: data.sortOrder || 0, isActive: data.isActive !== false }
+    editingId.value = item.id
+    dialog.value = true
+  } catch (err) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'بارگذاری برچسب ناموفق بود', life: 3500 })
+  }
 }
+
+function closeDialog() {
+  dialog.value = false
+  editingId.value = null
+  form.value = { name: '', slug: '', description: '', sortOrder: 0, isActive: true }
+}
+
 async function save() {
-  if (!form.value.title.trim() || !form.value.imageUrl) {
-    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'عنوان و تصویر بنر الزامی هستند.', life: 3000 })
+  if (!form.value.name.trim()) {
+    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'نام برچسب الزامی است', life: 3000 })
     return
   }
   saving.value = true
-  const payload = { ...form.value, startsAt: normalizeDate(form.value.startsAt), endsAt: normalizeDate(form.value.endsAt) }
   try {
-    if (editingId.value) await tagsApi.update(editingId.value, payload)
-    else await tagsApi.create(payload)
+    const payload = {
+      name: form.value.name.trim(),
+      slug: form.value.slug.trim() || undefined,
+      description: form.value.description?.trim() || '',
+      sortOrder: form.value.sortOrder || 0,
+      isActive: form.value.isActive,
+    }
+    if (editingId.value) {
+      await cmsTagsApi.update(editingId.value, payload)
+    } else {
+      await cmsTagsApi.create(payload)
+    }
     dialog.value = false
-    toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات بنر ذخیره شد.', life: 2500 })
+    toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات برچسب ذخیره شد', life: 2500 })
     await load()
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره بنر ناموفق بود.', life: 3500 })
-  } finally { saving.value = false }
-}
-async function archive(item) {
-  if (!window.confirm(`بنر «${item.title}» به آرشیو منتقل شود؟`)) return
-  try {
-    await tagsApi.archive(item.id)
-    toast.add({ severity: 'success', summary: 'آرشیو شد', detail: 'بنر از نمایش عمومی خارج شد.', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'آرشیو بنر انجام نشد.', life: 3500 })
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره برچسب ناموفق بود', life: 3500 })
+  } finally {
+    saving.value = false
   }
 }
+
+async function deleteTag(item) {
+  const confirmed = await confirm.require({
+    message: 'برچسب «' + item.name + '» به‌طور دائمی حذف شود؟ این عملیات غیرقابل بازگشت است.',
+    header: 'تایید حذف',
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: 'بله، حذف شود',
+    rejectLabel: 'انصراف',
+  })
+  if (!confirmed) return
+  try {
+    await cmsTagsApi.delete(item.id)
+    toast.add({ severity: 'success', summary: 'حذف شد', detail: 'برچسب با موفقیت حذف شد', life: 2500 })
+    await load()
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف برچسب انجام نشد', life: 3500 })
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -172,16 +213,12 @@ onMounted(load)
 .tag-toolbar { display:flex; flex-wrap:wrap; gap:.65rem; }
 .tag-toolbar > :first-child { min-width:min(320px,100%); }
 .tag-table-wrap { overflow:hidden; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:var(--ds-color-surface); }
-.tag-thumb { width:88px; height:54px; object-fit:cover; border-radius:8px; }
 .tag-empty { padding:2rem; text-align:center; color:var(--ds-color-text-muted); }
+.tag-pagination { padding: 1rem; }
 .tag-form { display:grid; gap:1rem; }
 .tag-form__field { display:grid; gap:.45rem; min-width:0; }
 .tag-form__field label { font-size:.83rem; font-weight:700; }
 .tag-form__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
-.tag-upload { display:flex; align-items:center; flex-wrap:wrap; gap:.75rem; }
-.tag-upload input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
-.tag-upload span { color:var(--ds-color-text-muted); font-size:.75rem; }
-.tag-preview { display:block; width:100%; max-height:230px; object-fit:contain; border:1px solid var(--ds-color-border); border-radius:10px; background:var(--ds-color-surface-alt); }
-.tag-form__switch { display:flex; align-items:center; gap:.6rem; }
+.tag-form__actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:.5rem; padding-top:.5rem; border-top:1px solid var(--ds-color-border); }
 @media(max-width:640px) { .tag-intro { align-items:flex-start; flex-direction:column; } .tag-form__grid { grid-template-columns:1fr; } .tag-toolbar > * { width:100%; } }
 </style>
