@@ -16,14 +16,14 @@
 ## 1. Startup gate (every new task/session)
 
 - [ ] Read `AGENTS.md` and this protocol.
-- [ ] Read the last 10 relevant entries in `.ai/WORKLOG.md` and check for active claims.
+- [ ] Read only the latest 3–5 concise relevant entries in `.ai/WORKLOG.md`; search older history by task ID only when needed.
 - [ ] Read `.ai/current-task.md` without treating stale content as current truth.
-- [ ] Read `.ai/project-context.md`, `.ai/decisions.md`, and open questions where relevant.
-- [ ] Read relevant architecture/API/database/frontend docs and the code/tests themselves.
+- [ ] Read the relevant headings/sections of `.ai/project-context.md`, `.ai/decisions.md`, and open questions; do not load large files wholesale.
+- [ ] Read only relevant architecture/API/database/frontend sections and inspect source/tests for the assigned scope.
 - [ ] Run `git status --short --branch`, inspect recent commits, and preserve all existing changes.
 - [ ] Confirm scope, expected outcome, and verification criteria.
 
-Do not skip this gate for “small” fixes; the reading may be focused only after the common files have been read.
+Do not skip this gate for “small” fixes. Keep startup reading token-efficient: AGENTS + PROTOCOL fully, current-task fully (kept short), last 3–5 WORKLOG entries, then only relevant sections of large context/docs.
 
 ## 2. Task lifecycle
 
@@ -42,7 +42,7 @@ Use a stable ID such as `AGENT-2026-10-25-01` or the existing project task ID.
 
 ## 3. Worklog format
 
-Append one entry per task; do not erase completed entries.
+Keep the active WORKLOG concise (target 10–25 lines per task, latest 3–5 entries readily visible). Detailed historical entries remain recoverable from Git history; do not paste raw logs or duplicate reports.
 
 ```md
 ## YYYY-MM-DD — TASK-ID — Short title
@@ -88,7 +88,7 @@ A log entry is not a substitute for updating the canonical documentation when be
 
 - Canonical and only integration branch: `main`.
 - For this project, do not create local or remote feature branches, temporary branches, or pull requests unless the owner explicitly changes this instruction.
-- Parallel agents may use isolated detached worktrees/checkouts pinned to a recorded `main` SHA; they must return patches for coordinator integration. The coordinator alone applies reviewed patches and commits them directly to the latest `main` head.
+- No branches, worktrees, detached checkouts or PRs. Agents use the existing main checkout with lead-assigned, non-overlapping file ownership. Read-only inspections may run concurrently; writes are serialized. Workers return scoped diffs/evidence and never commit or push; the lead alone integrates, commits and pushes reviewed changes to main.
 - Never force-push, rewrite history, reset away user work, or stage all files blindly.
 - Commit only scoped, reviewed, verified files. Keep commits small and meaningful.
 - No push unless authorized. If authorized, push to `origin/main` only after verifying current branch, clean diff scope, and checks.
@@ -134,4 +134,4 @@ Every delegated agent must receive a bounded lane, unique task ID, base `main` S
 
 ## 10. Mandatory UI/UX skill workflow
 
-For any UI/UX implementation, redesign, component styling, responsive behavior, accessibility refinement, or design-system change, agents must read `.ai/UI_SKILLS.md` and the relevant installed skill files before editing. The standard toolkit is UI UX Pro Max, Taste Skill (`design-taste-frontend`), Hallmark (`nutlope/hallmark`), Impeccable, and Vercel Web Design Guidelines. Use the skill routing and project-specific constraints in `.ai/UI_SKILLS.md`; do not let generic skill advice override explicit product requirements, accepted design decisions, existing Vue/PrimeVue architecture, or the current brand system. Do not change API/business behavior as a side effect of visual work. Browser-based verification is prohibited by the owner's standing instruction unless they later authorize it; mark such checks NOT RUN rather than simulating them. All-agent installation/update command: `scripts\install-ui-skills.ps1` from PowerShell at the repository root.
+For any UI/UX implementation, redesign, component styling, responsive behavior, accessibility refinement, or design-system change, agents must read `.ai/UI_SKILLS.md` and the relevant installed skill files before editing. The standard toolkit is UI UX Pro Max, Taste Skill (`design-taste-frontend`), Hallmark (`nutlope/hallmark`), Impeccable, and Vercel Web Design Guidelines. Use the skill routing and project-specific constraints in `.ai/UI_SKILLS.md`; do not let generic skill advice override explicit product requirements, accepted design decisions, existing Vue/PrimeVue architecture, or the current brand system. Do not change API/business behavior as a side effect of visual work. Browser-based verification is authorized for the current CRM acceptance workflow. Use Playwright CLI, run sessions sequentially, close sessions after use, and record actual evidence. Do not assume a blanket browser-testing prohibition. All-agent installation/update command: `scripts\install-ui-skills.ps1` from PowerShell at the repository root.
