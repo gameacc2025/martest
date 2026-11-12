@@ -21,8 +21,8 @@
 Before planning, editing, running migrations, or executing write commands:
 
 1. Read this file completely.
-2. Read `.ai/PROTOCOL.md` and the latest entries in `.ai/WORKLOG.md`.
-3. Read `.ai/project-context.md`, `.ai/decisions.md`, and `.ai/decisions-and-open-questions.md` if that file exists.
+2. Read `.ai/PROTOCOL.md` and only the latest 3–5 relevant concise entries in `.ai/WORKLOG.md`.
+3. Read only the relevant headings/sections of `.ai/project-context.md`, `.ai/decisions.md`, and `.ai/decisions-and-open-questions.md` if that file exists; do not load large context files wholesale.
 4. Read `Telecom_Marketplace_Project_Architecture_and_Roadmap.md` and the relevant area of `docs/`.
 5. Inspect the actual implementation, tests, package scripts, and configuration relevant to the task. Documentation is not proof of current behavior.
 6. Run `git status --short --branch` and inspect the current branch and recent commits before changing anything.
