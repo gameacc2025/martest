@@ -9,7 +9,7 @@ A Persian B2B telecom equipment marketplace built as a pnpm monorepo with three 
 
 1. Read [`AGENTS.md`](AGENTS.md) before doing anything.
 2. Read [`.ai/PROTOCOL.md`](.ai/PROTOCOL.md), recent [`.ai/WORKLOG.md`](.ai/WORKLOG.md) entries, and [`.ai/current-task.md`](.ai/current-task.md).
-3. Read [`.ai/project-context.md`](.ai/project-context.md), [`.ai/decisions.md`](.ai/decisions.md), and the relevant architecture/domain docs.
+3. Read only relevant sections of [`.ai/project-context.md`](.ai/project-context.md), [`.ai/decisions.md`](.ai/decisions.md), and the applicable architecture/domain docs; avoid loading large files wholesale.
 4. Inspect the actual code and `git status --short --branch` before editing.
 
 **Do not begin implementation before this reading and repository-state check.** High-impact or ambiguous changes require a plan and explicit approval. Every task must record tests, changes, commit/push state, blockers, and next steps in project memory.
@@ -67,7 +67,7 @@ Some commands may require environment variables or services such as PostgreSQL. 
 ## Working with agents
 
 Use the shared, version-controlled memory rather than relying on chat history:
-- `.ai/WORKLOG.md` — append-only task history and verification evidence
+- `.ai/WORKLOG.md` — concise recent task index; use Git history for older detail
 - `.ai/current-task.md` — current focus / handoff
 - `.ai/project-context.md` — durable architecture and current-state facts
 - `.ai/decisions.md` — accepted decisions and rationale
