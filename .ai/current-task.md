@@ -1,63 +1,66 @@
-# Current Task — PHASE-0 Repository Audit & Agent Handoff
+# Current Task — PROJECT SOURCE AUDIT & PRIORITIZED BACKLOG
 
-**Status:** PARTIAL — remote documentation/GitHub audit completed; local Windows workspace, Docker runtime and PostgreSQL state NOT VERIFIED.
-**Canonical repository:** `gameacc2025/martest`
-**Canonical branch:** `main`
-**Audited remote HEAD:** `928c221e50f8470f60b1a475c90cebf21b8b16f7` (2026-11-10)
+**Updated:** 2026-11-13  
+**Status:** REMOTE SOURCE AUDIT COMPLETE; CI NOT GREEN; LOCAL RUNTIME NOT VERIFIED.  
+**Canonical repository:** `gameacc2025/martest`  
+**Canonical branch:** `main` only.  
+**Audited code baseline:** `48e73952e277703b70a351d4f0569fed48944b76`  
+**Audit document:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`  
 **Owner communication:** Persian.
-**Integration policy:** main only; no feature branches, worktrees, detached checkouts or PRs. Only the lead integrates, commits and pushes after review.
 
-## Confirmed findings
+## Verified current state
 
-1. Previous version of this file was 153,075 characters / 1,368 lines and contained unresolved Git conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`). Replaced with this canonical handoff.
-2. Previous WORKLOG was 547,035 characters / 4,393 lines. Historical task detail is preserved in Git commit history; WORKLOG is now a concise current-state index.
-3. README.md contradicted AGENTS.md on communication language. Persian is canonical.
-4. docs/AI_AGENT_WORKFLOW.md contradicted itself on response language and instructed detached worktrees, conflicting with owner policy.
-5. AGENTS.md and .ai/PROTOCOL.md prohibited browser testing based on an older instruction. Owner has since explicitly authorized Playwright/browser validation for the current CRM acceptance work.
-6. ACTIVE.md described stale API-1..API-4 statuses and an old 2026-11-08 assignment board; it is reset to an audit-first queue.
-7. .ai/project-context.md is 106 KB / 998 lines. Do not read it wholesale on every task; use its headings and retrieve only relevant sections.
-8. .ai/decisions.md is the accepted-decision source. Do not convert open questions into decisions.
+1. The GitHub `main` branch was verified at code baseline `48e73952`; this audit updated the backlog directly on `main`.
+2. GitHub Actions for the audited code baseline:
+   - Database migration validation: PASS.
+   - Backend tests and Prisma Client generation: PASS.
+   - Workspace dependency installation: FAIL.
+   - Frontend/shared tests: SKIPPED because installation failed.
+   - Frontend build step: FAILURE.
+   - Runtime/Compose/browser workflow: failed at dependency installation; Compose and browser steps SKIPPED.
+3. `apps/admin/package.json` declares `quill`, but the `apps/admin` importer in `pnpm-lock.yaml` does not. Resolve the lockfile mismatch first; do not assume the remaining build errors are independent until installation succeeds.
+4. CMS Article/Category/Tag APIs and UI exist, but FAQ/Page services call `prisma.faq` and `prisma.page` although those models are absent from Prisma schema. The FAQ/Page routes are therefore not accepted as operational.
+5. Auth self-service recovery is incomplete: client calls `/auth/forgot-password` and `/auth/reset-password`, but backend routes are absent. AuthChallenge routes require authentication and code delivery remains TODO.
+6. Support models/migration exist; no Support backend module/routes/API-client methods exist. Three app surfaces use sample data and disabled controls.
+7. CRM models, service/routes, API client, seed and Admin workspace exist. Acceptance is incomplete: only four route authorization tests were found, CRM routes lack Fastify request schemas, and no CRM Playwright workflow exists.
+8. Retail and Finance schema/migrations exist, but operational API/services do not. Retail cart is local-only and checkout is disabled; Finance/Settlement UI still contains sample values.
+9. Generic notification dispatch does not queue SMS. Twilio adapter presence does not prove event-driven SMS delivery.
+10. API documentation/inventory omits mounted CMS and CRM routes; the inventory test does not scan those modules.
+11. Root agent docs contain conflicting detached-worktree instructions; AGENTS also retains the old primary color while the current shared token file uses the new cyan palette.
+12. Local Windows Git status, untracked files, stashes, Docker, PostgreSQL and local seed outcome are NOT VERIFIED.
 
-## Current work queue
+## Current execution queue
 
-### P0 — Local/runtime reconciliation (BLOCKED on local agent execution)
-- Inspect local `git status --short --branch`, HEAD, origin/main, stashes and untracked files.
-- Preserve all local modifications; reconcile local HEAD with audited remote SHA.
-- Inspect Docker health and bounded logs; no `docker logs -f` long-running sessions.
-- Verify PostgreSQL connectivity and current migration status read-only.
-- Inspect all seed imports, especially the historical `prisma/seeds/cms.js` password utility import failure.
-- Never reset, truncate, drop, delete volumes or destroy user data.
+### P0 — Restore a trustworthy baseline
+1. **P0-1 — Lockfile and CI:** reconcile the Admin quill dependency with pnpm-lock; run frozen install; frontend/shared tests; all three app builds; inspect resulting CI.
+2. **P0-2 — CMS integrity:** choose and implement one consistent FAQ/Page data model strategy; align Prisma, migrations, services, routes, API client, admin/public UI and seeds; add tests.
+3. **P0-3 — Account recovery:** implement a public, secure recovery flow using an approved channel, real provider delivery, rate limits, single-use challenges, password reset and session invalidation.
+4. **P0-4 — Contracts/docs:** document CMS/CRM routes; extend route inventory tests; remove conflicting worktree policy and stale design-token guidance.
+5. **P0-5 — Runtime/seed:** after P0 fixes, verify safe migration status, seed execution and two-run idempotency. Preserve all local data; no destructive reset/drop/volume actions.
 
-### P1 — CRM acceptance (highest implementation priority)
-- Verify Prisma schema and migrations.
-- Run the development seed and prove idempotency using safe checks.
-- Verify backend tests, CRM API authorization and role/tenant boundaries.
-- Fix Playwright PKCE/session persistence and run real Admin CRM browser workflows.
-- Capture exact commands, exit codes and concise evidence. Report blocked checks honestly.
+### P1 — Complete operational domains
+- CRM functional/security validation, request schemas, seed idempotency and Playwright workflows.
+- Support backend/API/client and real Website/Company/Admin workflows.
+- SMS event dispatch, opt-in/quota/rate limit/retry/idempotency and Audit coverage.
+- Replace sample dashboard/settlement metrics with authorized real aggregates.
+- Full three-app regression, responsive/RTL/accessibility and browser workflows.
 
-### P2 — Whole-project audit
-- Backend modules: Auth, Users/Roles/Permissions, Companies, Products/Categories/Specs, Inquiries/Responses, Notifications, CMS, CRM, Support, Audit, Retail, Finance.
-- Frontends: Website, Company, Admin; classify pages REAL API / PARTIAL / MOCK / STATIC / MISSING.
-- Shared packages, design tokens, RTL, auth, permissions, API client and responsive behavior.
-- Build/test/CI inventory with actual evidence.
+### P2 — Gated programs
+- Retail/Inventory/Orders/Payments/Fulfillment/Returns only after explicit commercial approval.
+- Finance/Settlement only after Retail lifecycle, currency, commission, tax, legal and payout policies are approved.
 
-### P3 — Roadmap execution
-- M0 design-system reconciliation; API-1 Auth/Audit; API-2 Support; API-3 CMS verification; Marketplace/RFQ audit.
-- API-5 Retail and API-6 Finance remain blocked until explicit commercial/accounting/legal approval.
+### P3 — Deferred
+Procurement, HR, advanced warehouse/logistics, projects, marketing automation, BI and integrations require separate approved scope.
 
-## Agent execution rules
+## Agent / Git rules
 
-- Work autonomously; do not ask the owner to collect logs or run routine commands.
-- Execute heavy checks sequentially to control memory. Avoid persistent log-following processes.
-- No concurrent edits to shared files. Lead owns shared registries, app registration, Prisma schema/migrations, seed orchestrator, package manifests, shared exports and global tokens.
-- Do not create branches/worktrees/PRs. Domain agents return scoped patches; lead integrates serially on main.
-- Do not claim PASS without observed successful output. Distinguish PASS / FAIL / BLOCKED / NOT RUN.
-- No destructive database, Docker or Git operations without explicit owner approval.
+- No Claude-specific dependency is required for this audit; remote repository inspection and documentation updates were performed directly.
+- Main only. No branches, worktrees, detached checkouts or PRs.
+- Preserve local edits, untracked files, stashes and DB data.
+- No worker commits/pushes; lead alone integrates approved changes.
+- Do not bypass Fact-Forcing Gate or Auto Mode.
+- Report PASS only with observed evidence; distinguish FAIL, SKIPPED, BLOCKED and NOT VERIFIED.
 
 ## Required handoff
 
-Persian report with: phase, exact SHA, files changed, commands and exit codes, test counts, seed outcome, browser evidence, blockers, commit SHA and remote main verification.
-
-## Source of truth
-
-Code + observed runtime > current contracts/decisions > this handoff > historical WORKLOG entries. Older claims are not proof of current behavior.
+Persian report with task/lane, exact base and resulting main SHA, exact paths, commands/exit codes, test counts, seed/browser evidence, risks and blockers. Local/runtime facts must remain NOT VERIFIED until observed on the user's environment.
