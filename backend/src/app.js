@@ -126,7 +126,7 @@ async function buildApp() {
 
   await app.register(require('./modules/auth/auth.routes'), { prefix: '/api/v1/auth' });
   await app.register(require('./modules/auth-challenges/authChallenges.routes'), { prefix: '/api/v1/auth' });
-  await app.register(require('./modules/audit/audit.routes'), { prefix: '/api/v1' });
+  await app.register(require('./modules/audit/audit.routes'), { prefix: '/api/v1/audit' });
   await app.register(require('./modules/contact/contact.routes'), { prefix: '/api/v1/contact' });
   await app.register(require('./modules/banners/banner.routes'), { prefix: '/api/v1/banners' });
   await app.register(require('./modules/users/user.routes'), { prefix: '/api/v1/users' });
