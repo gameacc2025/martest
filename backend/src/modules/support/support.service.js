@@ -74,8 +74,19 @@ function ticketNumber() {
   return 'SUP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
 }
 async function getSla(prismaClient, categoryId, priority) {
-  const policy = (categoryId ? await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId, priority, isActive: true } }) : null)
-    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: null, priority, isActive: true } });
+  // Prefer the category-specific policy, then an explicit global policy.
+  // If neither exists, fall back to an active policy for the same priority.
+  // This keeps uncategorized tickets inside the SLA contract when a project
+  // has only category-scoped seed policies.
+  const categoryPolicy = categoryId
+    ? await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId, priority, isActive: true } })
+    : null;
+  const defaultPolicy = categoryPolicy || await prismaClient.supportSlaPolicy.findFirst({
+    where: { categoryId: null, priority, isActive: true },
+  });
+  const policy = defaultPolicy || await prismaClient.supportSlaPolicy.findFirst({
+    where: { priority, isActive: true },
+  });
   if (!policy) return {};
   const now = Date.now();
   return {
@@ -274,4 +285,4 @@ async function assignTicket(user, ticketId, input) {
   });
 }
 
-module.exports = { listCategories, listQueues, listTickets, getTicket, createTicket, addMessage, changeStatus, assignTicket };
+module.exports = { listCategories, listQueues, listTickets, getTicket, createTicket, addMessage, changeStatus, assignTicket, getSla };
