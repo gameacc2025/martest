@@ -1,3 +1,11 @@
+## 2026-11-13 — CMS-API-CONTRACT-SOURCE-AUDIT
+
+- **Status:** PARTIAL source audit; no runtime acceptance claimed.
+- **Verified:** five CMS backend route modules (articles/categories/tags/FAQs/pages) register public read and STAFF-only management CRUD routes with per-resource permissions and request schemas.
+- **Finding:** featured article query is declared boolean; Fastify AJV coercion is enabled; article controller compares the received value to string `'true'`. A boolean `true` can be converted to false before service filtering. Regression test/fix required.
+- **Not run:** CMS route/service tests, browser CRUD, public rendering, XSS/media authorization checks. Local runtime remains NOT VERIFIED.
+- **Next:** add focused regression coverage and fix the featured filter, then test CMS CRUD and publication journeys.
+
 ## 2026-11-13 — PROJECT-SOURCE-AUDIT-CMS-CLARIFICATION
 
 - **Status:** SOURCE AUDIT UPDATE — CMS Admin UI presence verified; functional acceptance remains open.
