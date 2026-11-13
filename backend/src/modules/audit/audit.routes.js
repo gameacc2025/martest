@@ -16,8 +16,8 @@ async function auditRoutes(fastify) {
   // All routes require authentication + STAFF context
   fastify.addHook('preHandler', fastify.authenticate);
 
-  // GET /audit/logs - Search audit logs
-  fastify.get('/audit/logs', {
+  // GET /logs - Search audit logs
+  fastify.get('/logs', {
     schema: {
       tags: ['Audit Logs'],
       summary: 'Search audit logs',
@@ -82,8 +82,8 @@ async function auditRoutes(fastify) {
     handler: controller.searchAuditLogsHandler,
   });
 
-  // GET /audit/logs/stats - Get audit log statistics
-  fastify.get('/audit/logs/stats', {
+  // GET /logs/stats - Get audit log statistics
+  fastify.get('/logs/stats', {
     schema: {
       tags: ['Audit Logs'],
       summary: 'Get audit log statistics',
@@ -139,8 +139,8 @@ async function auditRoutes(fastify) {
     handler: controller.getAuditStatsHandler,
   });
 
-  // GET /audit/logs/:id - Get single audit log entry
-  fastify.get('/audit/logs/:id', {
+  // GET /logs/:id - Get single audit log entry
+  fastify.get('/logs/:id', {
     schema: {
       tags: ['Audit Logs'],
       summary: 'Get audit log by ID',
@@ -183,8 +183,8 @@ async function auditRoutes(fastify) {
     handler: controller.getAuditLogByIdHandler,
   });
 
-  // GET /audit/logs/export - Export audit logs
-  fastify.get('/audit/logs/export', {
+  // GET /logs/export - Export audit logs
+  fastify.get('/logs/export', {
     schema: {
       tags: ['Audit Logs'],
       summary: 'Export audit logs',
