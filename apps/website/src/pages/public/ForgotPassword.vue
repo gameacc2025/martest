@@ -90,7 +90,7 @@ const errors = ref({})
 const handleRequest = async () => {
   errors.value = {}
   const normalized = phone.value.trim()
-  if (!/^[+]?[d\s()-]{7,20}$/.test(normalized)) {
+  if (!/^[+]?[\d\s()-]{7,20}$/.test(normalized)) {
     errors.value.phone = 'شماره موبایل معتبر وارد کنید.'
     return
   }
