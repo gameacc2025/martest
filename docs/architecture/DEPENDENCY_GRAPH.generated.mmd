@@ -46,7 +46,9 @@ flowchart LR
   api --> rbac["Auth / RBAC middleware"]
   api --> mod_addresses["addresses module"]
   api --> mod_admin["admin module"]
+  api --> mod_audit["audit module"]
   api --> mod_auth["auth module"]
+  api --> mod_auth_challenges["auth-challenges module"]
   api --> mod_banners["banners module"]
   api --> mod_categories["categories module"]
   api --> mod_companies["companies module"]
@@ -62,7 +64,9 @@ flowchart LR
   rbac --> db
   mod_addresses --> db
   mod_admin --> db
+  mod_audit --> db
   mod_auth --> db
+  mod_auth_challenges --> db
   mod_banners --> db
   mod_categories --> db
   mod_companies --> db
