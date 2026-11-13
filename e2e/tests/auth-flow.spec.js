@@ -19,6 +19,23 @@ test('STAFF can log in through Website, reach Admin by handoff, and log out', as
   await expect(page.getByRole('heading', { name: 'سرنخ‌های فروش' })).toBeVisible();
   await expect(page.locator('.crm-table tbody tr').first()).toBeVisible({ timeout: 20_000 });
 
+  await page.goto('http://localhost:3003/support/tickets', { waitUntil: 'networkidle' });
+  await expect(page.locator('.tm-ticket-desk')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('button', { name: 'ایجاد تیکت جدید' }).click();
+  const supportSubject = 'E2E Support ticket ' + Date.now();
+  const supportMessage = 'Support ticket body created by browser acceptance.';
+  await page.getByLabel('موضوع تیکت').fill(supportSubject);
+  await page.getByLabel('شرح درخواست').fill(supportMessage);
+  await page.getByRole('button', { name: 'ثبت تیکت' }).click();
+  const createdTicket = page.locator('.tm-ticket-desk__ticket').filter({ hasText: supportSubject });
+  await expect(createdTicket).toBeVisible({ timeout: 20_000 });
+  await createdTicket.click();
+  await expect(page.locator('.tm-ticket-desk__messages')).toContainText(supportMessage);
+  const supportReply = 'Support reply verified by browser acceptance.';
+  await page.getByLabel('متن پاسخ').fill(supportReply);
+  await page.getByRole('button', { name: 'ارسال پاسخ' }).click();
+  await expect(page.locator('.tm-ticket-desk__messages')).toContainText(supportReply, { timeout: 20_000 });
+
   await page.locator('button.dash-header-user').click();
   await page.getByText('خروج', { exact: true }).click();
   await expect(page).toHaveURL(/http:\/\/localhost:3001\/login(?:[/?#]|$)/, { timeout: 20_000 });
