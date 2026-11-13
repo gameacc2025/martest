@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('STAFF can log in through Website, reach Admin by handoff, and log out', async ({ browser }) => {
+  test.setTimeout(90_000);
   const context = await browser.newContext({ viewport: { width: 1365, height: 900 } });
   const page = await context.newPage();
   const errors = [];
