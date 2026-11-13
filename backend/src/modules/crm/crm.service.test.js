@@ -142,6 +142,7 @@ test('changeLeadStatus permits a valid transition and rejects an invalid transit
   assert.equal(calls.update[0].data.status, 'CONTACTED');
 
   reset();
+  currentLead.status = 'QUALIFIED';
   await assert.rejects(
     () => service.changeLeadStatus(41, 'CONVERTED'),
     (error) => error.code === 'CRM_CONVERSION_REQUIRED' && error.status === 409,
