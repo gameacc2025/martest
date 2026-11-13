@@ -4,7 +4,7 @@
 **Status:** P0 CI / migration / Runtime / seed / browser PASS was recorded on code baseline `0d0a386`; later code commits are now on `main`, so those checks are NOT REVALIDATED for current HEAD. CRM and Support remain PARTIAL.  
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main` only.  
-**Latest inspected main HEAD:** `ace67cccc6a4b09b8cf8258dc814aedbb5d0b71b` (latest code-bearing commit in this audit: `e0cdfdd3006cfe68c86aa280b2a7aabdb008f4a9`)  
+**Code baseline inspected before documentation updates:** `ace67cccc6a4b09b8cf8258dc814aedbb5d0b71b` (latest code-bearing commit in this audit: `e0cdfdd3006cfe68c86aa280b2a7aabdb008f4a9`)  
 **Previously recorded CI (baseline `0d0a386`, not current HEAD):** [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592)  
 **Previously recorded migration validation (baseline `0d0a386`):** [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157)  
 **Previously recorded Runtime (baseline `0d0a386`):** [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935)  
