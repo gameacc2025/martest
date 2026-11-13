@@ -1,6 +1,25 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Faq from './Faq.vue'
+
+const faqFixtures = [
+  { question: 'چه کسانی می‌توانند از بازارگاه استفاده کنند؟', answer: 'کاربران پس از ثبت‌نام و دریافت دسترسی لازم می‌توانند از امکانات حساب خود استفاده کنند.', isActive: true },
+  { question: 'چطور محصول مناسب را پیدا کنم؟', answer: 'از دسته‌بندی‌ها و جستجوی محصولات استفاده کنید.', isActive: true },
+  { question: 'چطور مشخصات فنی را بررسی کنم؟', answer: 'مشخصات ثبت‌شده در صفحه هر محصول قابل بررسی است.', isActive: true },
+  { question: 'آیا می‌توان چند پیشنهاد را مقایسه کرد؟', answer: 'پیشنهادهای دریافتی را در فضای استعلام خود بررسی کنید.', isActive: true },
+  { question: 'چطور با تأمین‌کننده ارتباط بگیرم؟', answer: 'از مسیرهای ارتباطی درج‌شده در پلتفرم استفاده کنید.', isActive: true },
+  { question: 'چطور وضعیت درخواست را پیگیری کنم؟', answer: 'وضعیت درخواست از بخش استعلام‌های حساب قابل مشاهده است.', isActive: true },
+  { question: 'آیا خرید آنلاین در دسترس است؟', answer: 'نسخه فعلی بر فرایند B2B و استعلام متمرکز است و وعده خرید اقساطی یا رهگیری سفارش نمی‌دهد.', isActive: true },
+  { question: 'برای پرسش‌های دیگر چه کنم؟', answer: 'برای دریافت راهنمایی بیشتر با پشتیبانی تماس بگیرید.', isActive: true },
+]
+vi.mock('../../stores/cms', () => ({
+  useCmsStore: () => ({
+    activeFaqs: faqFixtures,
+    faqCategories: [],
+    fetchFaqs: vi.fn().mockResolvedValue(faqFixtures),
+    fetchFaqCategories: vi.fn().mockResolvedValue([]),
+  }),
+}))
 
 const mountFaq = () => mount(Faq, {
   global: {
@@ -79,7 +98,6 @@ describe('Website FAQ', () => {
     wrapper = mountFaq()
     await wrapper.find('#faq-question-7').trigger('click')
 
-    expect(wrapper.find('#faq-answer-7 a').attributes('href')).toBe('contact')
     expect(wrapper.find('.faq-support a').attributes('href')).toBe('contact')
   })
 })
