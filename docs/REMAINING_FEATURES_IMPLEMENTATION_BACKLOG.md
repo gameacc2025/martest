@@ -1,82 +1,64 @@
 # Remaining Features — Implementation Backlog and Database-First Plan
 
+## ممیزی جاری سورس و CI — 2026-11-13
 
-## ممیزی وضعیت واقعی پروژه — 2026-11-13 (مرجع فعلی)
+> **مرجع:** شاخه `main`، Commit `06daab07ff446aab577b885092a45c382ccd11ad`. این ممیزی Remote/source-level است. به working tree ویندوز، Docker محلی یا PostgreSQL محلی دسترسی ندارم؛ بنابراین وضعیت آن‌ها را PASS فرض نمی‌کنم. نتایج GitHub Actions فقط برای SHA و run مشخص‌شده معتبرند.
 
-> **مبنای ممیزی:** سورس شاخه `main` در Commit `48e73952e277703b70a351d4f0569fed48944b76`، درخت کامل مخزن، route registration، Prisma schema/migrations، API client، صفحات سه اپ، seedها، مستندات و GitHub Actions. این ممیزی از راه دور و source-level است؛ به working tree ویندوز، Docker محلی یا PostgreSQL کاربر دسترسی نداشتم. هیچ تست محلی، seed یا browser session در این ممیزی اجرا نشده است. این بخش وضعیت جاری را اصلاح می‌کند و بر توضیحات قدیمی‌تر این سند اولویت دارد.
+### وضعیت دامنه‌ها
 
-### تعریف وضعیت‌ها
-
-- **پیاده‌سازی‌شده در سورس:** کد/مدل/route/UI در مخزن وجود دارد؛ به‌تنهایی به معنی پذیرش عملیاتی یا تست موفق نیست.
-- **ناقص:** بخشی از زنجیره (DB/API/client/UI/provider/tests) وجود ندارد یا با بخش دیگر ناسازگار است.
-- **مسدود:** شروع/فعال‌سازی به تصمیم صریح تجاری، حقوقی، مالی یا امنیتی مالک نیاز دارد.
-- **تأییدنشده:** شواهد اجرای واقعی، تست، seed، مرورگر یا runtime در Commit جاری موجود نیست.
-
-### وضعیت کلی دامنه‌ها
-
-| دامنه | وضعیت واقعی در Commit ممیزی‌شده | نتیجه |
+| دامنه | وضعیت واقعی فعلی | نتیجه |
 |---|---|---|
-| هسته بازارگاه، شرکت‌ها، کاتالوگ، دسته‌بندی، مشخصات و چرخه انتشار محصول | مدل، API و صفحات اصلی وجود دارند؛ CI Backend روی همین Commit موفق است، اما مرورگر و runtime کامل تأیید نشده | پیاده‌سازی‌شده در سورس؛ پذیرش نهایی تأییدنشده |
-| B2B Inquiry/RFQ، پاسخ فروشنده، پیام، پیوست، اشتراک و سهمیه | دامنه اصلی و صفحات مشتری/شرکت/ادمین وجود دارند؛ تست‌های Backend در CI جاری موفق‌اند | هسته موجود؛ مرور کامل tenant/IDOR و E2E همه مسیرها باقی است |
-| Auth/Session/PKCE | login/refresh/logout/session/handoff و cookie policy وجود دارند؛ تغییر SameSite در dev به lax و production به strict است | هسته احراز هویت موجود؛ بازیابی رمز و ارسال OTP ناقص |
-| Audit | مدل AuditLog و API خواندن، آمار و export وجود دارند | پوشش eventها، retention، redaction و ماتریس دسترسی نیازمند ممیزی است |
-| Support | مدل‌ها و migration موجود؛ API و سرویس و API-client وجود ندارد؛ سه UI صریحاً نمونه‌اند | فقط DB foundation؛ عملاً ناقص |
-| CMS | Article/Category/Tag/Revision/Media و API مقاله وجود دارند؛ FAQ/Page routes به Prisma modelهای غایب ارجاع می‌دهند | ناقص و دارای ناسازگاری اجرایی مهم |
-| CRM | مدل‌ها، route/service، API client، seed و Admin UI متصل به API وجود دارند | پیاده‌سازی سورس قابل‌توجه؛ تست عملکردی، validation و browser acceptance ناقص |
-| Notifications | inbox، folder، preferences و صف/worker ایمیل وجود دارند؛ provider Twilio در سورس هست | SMS عمومی در dispatcher عمداً پیاده‌سازی نشده؛ فقط مسیرهای محدود Inquiry جداگانه باید بازبینی شوند |
-| Retail/Inventory/Orders/Payments/Fulfillment/Returns | مدل‌ها و migrationهای DB وجود دارند؛ API عملیاتی Retail وجود ندارد؛ Cart محلی و Checkout غیرفعال است | فقط DB foundation؛ فعال‌سازی مسدود به تصمیم تجاری |
-| Finance/Settlement | مدل‌های ledger/commission/settlement وجود دارند؛ API و posting workflow وجود ندارد؛ UI ارقام نمونه دارد | فقط DB foundation؛ وابسته به Retail و تصمیم مالی/حقوقی |
-| داشبوردها و گزارش‌ها | Admin عمدتاً از API؛ Company ترکیبی از آمار واقعی Inquiry/Product و نمودار/شاخص نمونه؛ Reports از APIهای Product/Inquiry | ناقص؛ ارقام نمونه باید حذف یا به‌وضوح برچسب‌گذاری شوند تا API واقعی آماده شود |
-| Design System | `newtemp-reference.scss` با palette فیروزه‌ای جدید در entrypoint هر سه اپ import می‌شود | توکن‌های سورس موجود؛ visual/browser parity و responsive QA تأییدنشده |
+| هسته بازارگاه، شرکت، کاتالوگ، محصول و چرخه انتشار | مدل، API و UI اصلی وجود دارند؛ build سه اپ در اجرای CI قبلی موفق بوده است | پیاده‌سازی‌شده در سورس؛ پذیرش مرورگری/عملیاتی نهایی باقی است |
+| B2B Inquiry/RFQ | API، پاسخ تأمین‌کننده، پیام، پیوست و سهمیه وجود دارند | هسته موجود؛ tenant/IDOR و E2E کامل باید تکمیل شود |
+| Auth/Session/PKCE | login، refresh، logout، sessions و handoff/PKCE موجودند | هسته موجود |
+| Account Recovery | routeهای عمومی forgot/reset، سرویس OTP پیامکی، rate limit، hash، expiry، attempt limit، مصرف single-use و حذف refresh tokenها در تراکنش وجود دارند | پیاده‌سازی‌شده در سورس؛ اتصال واقعی SMS و مرورگر هنوز تأیید نشده |
+| Audit | مدل و API خواندن/آمار/export موجود؛ مسیرهای واقعی اکنون زیر `/api/v1/audit/*` mount می‌شوند | مسیرها و OpenAPI هم‌تراز شده‌اند؛ پوشش eventها، redaction و retention باقی است |
+| Support | Prisma models و migration موجودند؛ backend module، route registration و API client عملیاتی وجود ندارند؛ سه UI نمونه/محدودند | ناقص؛ فقط DB foundation |
+| CMS | Article/Category/Tag/Revision/Media به‌علاوه مدل‌های مستقل Faq و Page، migration بازیابی، CRUD service/routes و seed وجود دارند | پیاده‌سازی‌شده در سورس؛ migration/seed/runtime و public/admin E2E باید تأیید شوند |
+| CRM | مدل‌ها، routes/services، API client، seed و Admin UI متصل وجود دارند | پیاده‌سازی‌شده در سورس؛ schemaهای Fastify، تست CRUD/tenant و E2E کامل باقی است |
+| Notifications | inbox/folders/preferences و email/in-app موجودند؛ SMS provider adapter موجود است | dispatcher عمومی SMS هنوز به outbox/retry/idempotency متصل نشده؛ Account Recovery مسیر SMS جداگانه دارد |
+| Retail/Inventory/Orders/Payments/Returns | مدل و migration DB موجود؛ checkout/payment عملیاتی و backend API کامل وجود ندارد | مسدود تا تصمیم تجاری مالک؛ checkout را فعال نکنید |
+| Finance/Settlement | مدل‌های ledger/commission/settlement موجود؛ posting/payout/reconciliation عملیاتی وجود ندارد | مسدود تا قرارداد Retail و تصمیم مالی/حقوقی |
+| داشبوردها و گزارش‌ها | Admin عمدتاً API-backed؛ Company بعضی نمودارها و Settlement ارقام نمونه دارد | ناقص؛ KPI نمونه باید حذف یا واضحاً Demo برچسب بخورد |
+| Design System | توکن‌های palette جدید در هر سه app وارد شده‌اند | build موفق؛ visual/browser parity و responsive QA هنوز تأیید نشده |
 
-### یافته‌های بحرانی و شواهد
+### شواهد تازه و اصلاح یافته‌های قبلی
 
-1. **CI جاری قرمز است.** برای SHA همین ممیزی:
-   - `prisma-migrations`: موفق.
-   - `test-and-build`: ناموفق؛ مرحله Install workspace dependencies شکست خورد؛ frontend/shared tests اجرا نشدند؛ Prisma Client generation و Backend tests موفق شدند؛ مرحله build همه اپ‌ها نیز failure گزارش کرد.
-   - `compose-and-browser`: ناموفق در Install workspace dependencies؛ مراحل Compose، health، migration runtime، Chromium و browser tests همگی skip شدند.
-   - لینک‌ها: [CI](https://github.com/gameacc2025/martest/actions/runs/43424032214)، [Runtime Validation](https://github.com/gameacc2025/martest/actions/runs/43424032167)، [Database Migration Validation](https://github.com/gameacc2025/martest/actions/runs/43424032145).
-2. **مغایرت lockfile:** `apps/admin/package.json` وابستگی `quill: ^2.0.0` دارد، ولی importer مربوط به `apps/admin` در `pnpm-lock.yaml` آن را ندارد؛ quill فقط در importer ریشه دیده می‌شود. این مغایرت باید قبل از هر تست/build با frozen lockfile اصلاح و دوباره CI شود. علت دقیق پیام install از log خام این ممیزی قابل مشاهده نبود؛ این مغایرت، علت محتمل و قابل‌بررسی است.
-3. **CMS FAQ/Page با Prisma ناسازگار است:** `faq.service.js` از `prisma.faq` و `page.service.js` از `prisma.page` استفاده می‌کنند؛ schema فقط Article/ArticleCategory/ArticleTag/ArticleRevision/ArticleMedia و نوع‌های NEWS/ARTICLE/GUIDE را دارد. در نتیجه FAQ و Page باید یا مدل/migration واقعی بگیرند یا controller/service/seed/UI به قرارداد Article تغییر کنند. تا آن زمان CRUD این دو بخش را سالم فرض نکنید.
-4. **بازیابی رمز عملیاتی نیست:** API client مسیرهای `/auth/forgot-password` و `/auth/reset-password` را صدا می‌زند، ولی این routeها در `auth.routes.js` ثبت نشده‌اند. routeهای AuthChallenge در `auth-challenges.routes.js` با authenticate محافظت شده‌اند و `authChallenges.service.js` ارسال SMS/Email را TODO گذاشته است. بنابراین کاربر ناشناس نمی‌تواند با مسیر موجود بازیابی رمز را کامل کند.
-5. **Support فقط schema است:** migration `20261108000200_support` و مدل‌های Support در Prisma موجودند؛ اما پوشه backend module و route registration نداریم. TicketDeskWorkspace و صفحات Website/Company/Admin داده ثابت و کنترل‌های disabled دارند.
-6. **CRM هنوز acceptance نشده:** routeها STAFF + permission guard دارند و service نیز STAFF profile را بررسی می‌کند؛ اما در `crm/index.js` برای endpointها Fastify request schema دیده نشد. تست CRM فعلی فقط چهار تست رد دسترسی (unauthenticated، COMPANY، CUSTOMER، STAFF بدون permission) دارد. تست CRUD، tenant/security edge cases، seed idempotency و E2E واقعی CRM در شواهد فعلی ثبت نشده‌اند.
-7. **مستندات API ناقص‌اند:** CMS و CRM در `backend/src/app.js` mount شده‌اند و API client هم endpointهایشان را دارد، اما در `docs/API_DOCUMENTATION.md` و `docs/API_ROUTE_INVENTORY.md` فهرست کامل ندارند. تست `api-route-inventory.test.js` نیز فقط ۱۴ ماژول قدیمی را پیمایش می‌کند و CMS/CRM را در آرایه بررسی قرار نداده است؛ پس سبز بودن آن، parity این دو دامنه را اثبات نمی‌کند.
-8. **SMS عمومی ناقص است:** `notification.dispatch.service.js` صریحاً SMS را queue نمی‌کند و `sms.notImplemented` برمی‌گرداند؛ وجود Twilio adapter به معنی ارسال event-driven عمومی نیست.
-9. **Retail/Finance عملیاتی نیستند:** مدل‌های DB و migrationها وجود دارند، ولی route/service/API-client برای retail و finance در backend ثبت نشده‌اند. مسیرهای legacy `/orders` در API client deprecated هستند. صفحه Settlement شرکت و بخش retail در Operations Hub ارقام/شاخص نمونه دارند.
-10. **نمونه‌داده در UI باقی است:** Home وب‌سایت بخش دیدگاه مشتریان با کارت‌های «دیدگاه نمونه» دارد؛ Company Dashboard نمودار فروش نمونه دارد؛ Company Settlements و Admin Operations Hub ارقام نمونه دارند. این داده‌ها نباید به‌عنوان KPI واقعی نمایش داده شوند.
-11. **تناقض دستورالعمل‌ها:** `AGENTS.md` و `.ai/PROTOCOL.md` هم «بدون worktree/detached checkout» می‌گویند و هم در بخش Mandatory Git دستور detached worktree می‌دهند؛ `docs/API_UI_SEED_EXECUTION_ROADMAP.md` نیز worktree را مجاز می‌داند. همچنین AGENTS هنوز رنگ قدیمی `#01bec2` را canonical معرفی می‌کند، درحالی‌که `.ai/UI_SKILLS.md` و `newtemp-reference.scss` palette جدید `#22D3EE` را مرجع می‌دانند. این تعارض‌ها باید یک‌بار در اسناد اصلی رفع شوند.
-12. **وضعیت Local نامعلوم است:** GitHub main روی SHA ممیزی‌شده است؛ اما local HEAD، untracked files، stashها، Docker محلی، PostgreSQL و seed اجراشده روی سیستم کاربر از راه دور قابل تأیید نیستند.
+1. **Frozen install و build:** در CI اجرای `f8baed460b443270c0b6bd7532d55a99f8714b5a`، نصب `pnpm install --frozen-lockfile`، تولید Prisma Client، Backend tests و build هر سه app موفق شدند. بنابراین ادعای قبلی «quill در importer ادمین lockfile نیست» نادرست بود؛ importer همگام است.
+2. **Frontend tests:** همان اجرای CI هنوز 7 تست Website را fail کرد. اصلاحات بعدی برای setup سراسری Pinia، router mocks، FAQ fixtures، CMS legal page async، responsive selectorها، theme toggle و profile tab روی `main` اعمال شده‌اند؛ اجرای CI برای SHA جاری `06daab0` در زمان ثبت این ممیزی هنوز در حال اجراست و PASS اعلام نمی‌شود.
+3. **Runtime/Seed:** در اجرای Runtime روی SHA قبلی، Compose build/start موفق شد اما health check به دلیل شکست seed متوقف شد. خطای دقیق PostgreSQL این بود: `invalid input value for enum "AuthChallengePurpose": "LOGIN_MFA"`. مقدار در `schema.prisma` تعریف شده بود ولی migration دیتابیس آن را به enum اضافه نکرده بود. migration افزایشی `20261113000300_add_login_mfa_challenge_purpose` با `ALTER TYPE ... ADD VALUE IF NOT EXISTS` اضافه شد. اجرای migration و seed روی SHA جاری هنوز در انتظار نتیجه CI است.
+4. **CMS FAQ/Page:** یافته قبلی مبنی بر نبودن مدل‌های Prisma دیگر معتبر نیست. migration `20261113000100_restore_cms_faq_pages`، مدل‌های `Faq` و `Page` و seedهای متناظر اکنون در سورس هستند. اجرای runtime پس از migration جاری باید صحت آن را تأیید کند.
+5. **Account Recovery:** یافته قبلی مبنی بر نبودن routeهای forgot/reset دیگر معتبر نیست. مسیرهای عمومی به `password-recovery.service.js` متصل‌اند؛ سرویس از OTP پیامکی hash‌شده، محدودیت درخواست، انقضا، سقف تلاش، مصرف اتمیک و ابطال sessionها استفاده می‌کند. پیکربندی credential واقعی SMS و تست end-to-end هنوز نیازمند تأیید است.
+6. **Audit route parity:** route module اکنون با prefix `/api/v1/audit` mount می‌شود و endpointهای آن از `/logs` شروع می‌شوند. route inventory و OpenAPI stale duplicateهای `/api/v1/audit/audit/*` حذف شده‌اند. Backend tests شامل inventory و OpenAPI در اجرای قبلی سبز شدند.
+7. **API inventory:** فایل `docs/API_ROUTE_INVENTORY.md` اکنون CMS، FAQ، Page، CRM و Account Recovery را فهرست می‌کند؛ تست inventory به ماژول‌های ثبت‌شده متصل است. راهنمای سطح‌بالای `API_DOCUMENTATION.md` همچنان برای contractهای جزئی هر endpoint قابل گسترش است.
+8. **Support:** همچنان فقط مدل/مهاجرت DB دارد. مسیرهای ایجاد ticket، پیام عمومی/داخلی، queue/assignment/state machine، attachment خصوصی، SLA، notification، API client و UI واقعی سه اپ موجود نیستند.
+9. **CRM:** CRM را از صفر بازنویسی نکنید. چهار تست موجود عمدتاً رد دسترسی را پوشش می‌دهند؛ تست‌های functional CRUD، tenant/STAFF isolation، validation، conversion/merge idempotency و Playwright journey هنوز لازم‌اند.
+10. **Retail/Finance:** مدل‌های DB به معنی اجازه فعال‌کردن checkout نیستند. موجودی، پرداخت، مالیات، ارز، کمیسیون، مرجوعی، تسویه و maker-checker به تصمیم‌های تجاری/حقوقی مالک نیاز دارند.
+11. **Local state:** local HEAD، فایل‌های untracked، stashها، Docker محلی و داده‌های PostgreSQL کاربر از طریق GitHub قابل مشاهده نیستند؛ هیچ reset، clean، volume deletion یا تغییر دیتابیس محلی انجام نشده است.
 
-### اولویت اجرایی پیشنهادی
+### اولویت اجرایی جاری
 
-| اولویت | کار | دامنه دقیق و معیار خروج |
+| اولویت | کار | معیار خروج |
 |---|---|---|
-| **P0-1** | اصلاح lockfile و برگرداندن CI سبز | افزودن quill به importer صحیح lockfile؛ اجرای `pnpm install --frozen-lockfile`؛ frontend/shared tests؛ build مستقل Website/Company/Admin؛ سپس CI کامل. هیچ build یا تستی قبل از موفقیت install معتبر نیست. |
-| **P0-2** | رفع ناسازگاری CMS FAQ/Page | تصمیم معماری واحد: مدل‌های مستقل FAQ/Page با migration و seed، یا انتقال کامل به Article با content type/queries/UI سازگار. هر دو راه باید public/admin CRUD، seed، permission، route schema و تست داشته باشند. تا قبل از آن FAQ/Page را ناقص اعلام کنید. |
-| **P0-3** | تکمیل Account Recovery | تعیین کانال واقعی (SMS، Email یا هر دو)؛ route عمومی امن و rate-limited؛ challenge single-use/expiry/attempt limits؛ اتصال provider واقعی؛ reset password و invalidation session؛ تست enumeration، abuse و browser flow. |
-| **P0-4** | همگام‌سازی قرارداد و مستندات API | افزودن CMS و CRM به API_DOCUMENTATION و ROUTE_INVENTORY؛ گسترش تست inventory تا همه route modules؛ تطبیق endpoints/client؛ اصلاح تعارض worktree و palette در AGENTS/PROTOCOL/roadmap. |
-| **P0-5** | Runtime و Seed verification | پس از P0-1 تا P0-4، اجرای migration status و seed روی DB توسعه امن؛ اجرای seed دو بار و مقایسه countها؛ بررسی همه importها و Prisma adapters؛ ثبت خروجی/exit code. هیچ reset/drop/volume deletion مجاز نیست. |
-| **P1-1** | CRM acceptance واقعی | افزودن Fastify schemas برای params/query/body؛ تست service/route/permission/STAFF isolation و conversion/merge idempotency؛ بررسی permission mapping؛ تست seed دو بار؛ Playwright workflow برای sources/accounts/contacts/leads/opportunities/tasks/activities/notes؛ ثبت screenshot/trace و اصلاح UI gaps. |
-| **P1-2** | Support vertical slice | API و service برای customer/company/staff؛ tenant ownership؛ public/internal messages؛ queue/assignment/state machine؛ attachment private؛ SLA/notification؛ API client؛ جایگزینی sample data در هر سه اپ و تست‌ها. |
-| **P1-3** | تکمیل SMS و Audit coverage | اتصال dispatcher به SMS outbox با consent/quota/rate limit/idempotency/retry؛ آزمون Twilio کنترل‌شده؛ audit event matrix، redaction و retention را مستند و تست کنید. |
-| **P1-4** | واقعی‌سازی داشبوردها | حذف ارقام نمونه یا برچسب دائمی واضح؛ API aggregate با tenant scope/date range/currency؛ اطمینان از اینکه KPI صفحه فعلی به‌عنوان total پلتفرم معرفی نشود؛ تست محاسبات و دسترسی. |
-| **P1-5** | Regression سه اپ | تست‌های Frontend، buildها، route/permission matrix، RTL، keyboard/accessibility، viewport/overflow و Playwright journeyهای اصلی Website/Company/Admin؛ فقط نتایج اجراشده PASS شوند. |
-| **P2-1** | Retail API و موجودی — مشروط | تا تصمیم تجاری مالک، checkout/payment را فعال نکنید. پس از approval: eligibility resolver، inventory ledger/reservation اتمیک، retail API/client، snapshots، idempotency، پرداخت verify شده، shipment/return/refund و E2E. |
-| **P2-2** | Finance/Settlement — وابسته به Retail | پس از قرارداد سفارش/پرداخت/مرجوعی و تصمیم currency/tax/commission/legal؛ ledger دوبل immutable، commission snapshot، seller payable، maker-checker، payout/reconciliation و تست مالی. |
-| **P3** | ماژول‌های سازمانی آینده | Procurement، HR، Projects، Warehouse پیشرفته، Logistics، Marketing Automation، BI و Integrations فقط با نیاز/مالک/Scope مصوب؛ فعلاً وارد اجرای MVP نشوند. |
+| **P0-1** | سبز کردن Frontend tests | اجرای تمام Vitest tests بدون failure؛ سپس CI کامل و build سه app |
+| **P0-2** | Runtime/Migration/Seed | migration جدید روی PostgreSQL disposable اعمال شود؛ تمام سرویس‌ها healthy؛ seed دو بار idempotent؛ سپس browser smoke tests سه app |
+| **P0-3** | CMS/Recovery acceptance | public/admin FAQ و Page CRUD؛ permission؛ seed؛ SMS provider واقعی و reset password end-to-end |
+| **P0-4** | اسناد و policy parity | مستندات API کامل؛ حذف تعارض worktree/detached checkout و palette قدیمی از AGENTS/PROTOCOL/roadmap |
+| **P1-1** | CRM acceptance | Fastify schemas، CRUD/service/permission tests، tenant isolation، idempotent conversion و Playwright |
+| **P1-2** | Support vertical slice | backend API/service، مالکیت tenant، پیام‌ها، queue، assignment، SLA، attachment امن، notification، client و UI سه اپ |
+| **P1-3** | Audit و SMS عمومی | event matrix، redaction، retention؛ SMS outbox با consent/quota/retry/idempotency |
+| **P1-4** | داشبورد واقعی | حذف یا برچسب‌گذاری داده نمونه؛ aggregate API tenant/date/currency scoped |
+| **P1-5** | Regression سه اپ | permission matrix، RTL، keyboard/accessibility، responsive و E2E |
+| **P2-1** | Retail | فقط بعد از تأیید تجاری؛ inventory ledger/reservation، checkout، payment verification، shipment/return/refund |
+| **P2-2** | Finance | بعد از تصمیم currency/tax/commission/legal؛ ledger immutable، reconciliation و payout controls |
+| **P3** | ماژول‌های سازمانی آینده | فقط با owner، نیاز و scope مصوب |
 
-### بخش‌هایی که در سورس موجودند و نباید از صفر بازنویسی شوند
+### محدودیت شواهد
 
-- Auth پایه، refresh/session، handoff/PKCE، access context و RBAC؛ فقط شکاف‌های مشخص را تکمیل کنید.
-- Company/User، کاتالوگ Product، Category/Specification، چرخه تأیید/انتشار و B2B Inquiry/RFQ.
-- Notification inbox/folders/preferences و مسیرهای موجود email/in-app.
-- CMS Article/Category/Tag و CRM models/services/routes/Admin workspace؛ این‌ها نیازمند تکمیل/پذیرش‌اند، نه بازنویسی از صفر.
-- Shared UI، API client، auth/permissions packages و palette جدید؛ ابتدا parity و regression را بررسی کنید.
-
-### محدودیت شواهد این ممیزی
-
-این ممیزی کد و پیکربندی Remote را بررسی کرده است؛ تست محلی، seed، Docker محلی، PostgreSQL کاربر، live SMTP/Twilio/payment، visual review مرورگر و پذیرش عملیاتی سه اپ اجرا نشده‌اند. تست Backend و migration فقط همان شواهد CI لینک‌شده برای Commit جاری‌اند. تعداد دقیق test caseها از خلاصه job در این ممیزی استخراج نشده؛ بنابراین عددی حدس زده نمی‌شود.
+- آخرین CI کامل‌شده‌ای که این سند به آن استناد می‌کند: install، Prisma generate، Backend tests و build موفق؛ Frontend tests هنوز 7 failure داشت.
+- آخرین Runtime کامل‌شده: Compose build/start موفق، health شکست به علت enum seed؛ migration اصلاحی در SHA جاری اضافه شده و هنوز نتیجه runtime جدید در دسترس نیست.
+- Migration validation در SHA `86e8cbaad35b288c1782918ff3e2dc46d02dc01f` موفق بود؛ validation مجدد پس از migration افزایشی جدید در حال اجراست.
+- هیچ ادعای موفقیت درباره Docker/PostgreSQL محلی، live SMS، پرداخت یا مرورگر محلی کاربر مطرح نمی‌شود.
 
 ---
 
