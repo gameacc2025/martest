@@ -44,7 +44,7 @@ injectMock('../../config/db', {});
 
 const hit = {};
 const trivialController = {};
-for (const name of ['login', 'register', 'registerCompany', 'refresh', 'logout', 'logoutAll', 'me', 'adminChangeUserPassword', 'createHandoff', 'redeemHandoff', 'getSessions', 'revokeSession']) {
+for (const name of ['login', 'register', 'registerCompany', 'forgotPassword', 'resetPassword', 'refresh', 'logout', 'logoutAll', 'me', 'adminChangeUserPassword', 'createHandoff', 'redeemHandoff', 'getSessions', 'revokeSession']) {
   trivialController[name] = async (request, reply) => {
     hit[name] = true;
     return reply.code(200).send({ ok: true });
