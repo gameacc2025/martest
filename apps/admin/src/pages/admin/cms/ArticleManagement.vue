@@ -117,6 +117,22 @@ async function fetchTags() {
   }
 }
 
+function unpackCmsListResponse(response) {
+  const body = response?.data ?? response
+  const nested = body?.data
+  const rows = Array.isArray(nested)
+    ? nested
+    : Array.isArray(nested?.data)
+      ? nested.data
+      : Array.isArray(body?.items)
+        ? body.items
+        : Array.isArray(nested?.items)
+          ? nested.items
+          : []
+  const meta = body?.meta ?? nested?.meta ?? {}
+  return { rows, total: Number(meta.total ?? body?.total ?? rows.length) }
+}
+
 async function load() {
   loading.value = true
   error.value = ''
@@ -129,9 +145,9 @@ async function load() {
       type: typeFilter.value || undefined,
     }
     const res = await cmsArticlesApi.listManage(params)
-    const data = res.data?.data || res.data || { items: [], meta: {} }
-    items.value = data.items || data.data || []
-    totalRecords.value = data.meta?.total || data.total || items.value.length
+    const page = unpackCmsListResponse(res)
+    items.value = page.rows
+    totalRecords.value = page.total
     first.value = (currentPage.value - 1) * rows.value
   } catch (err) {
     error.value = err.message || 'بارگذاری مقالات با خطا مواجه شد'

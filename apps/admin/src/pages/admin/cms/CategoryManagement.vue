@@ -106,6 +106,22 @@ const statusOptions = [
   { label: 'غیرفعال', value: false },
 ]
 
+function unpackCmsListResponse(response) {
+  const body = response?.data ?? response
+  const nested = body?.data
+  const rows = Array.isArray(nested)
+    ? nested
+    : Array.isArray(nested?.data)
+      ? nested.data
+      : Array.isArray(body?.items)
+        ? body.items
+        : Array.isArray(nested?.items)
+          ? nested.items
+          : []
+  const meta = body?.meta ?? nested?.meta ?? {}
+  return { rows, total: Number(meta.total ?? body?.total ?? rows.length) }
+}
+
 async function load() {
   loading.value = true
   try {
@@ -115,9 +131,9 @@ async function load() {
       search: search.value.trim() || undefined,
       isActive: statusFilter.value !== '' ? statusFilter.value : undefined,
     })
-    const payload = response?.data?.data ?? response?.data ?? response
-    items.value = Array.isArray(payload?.data) ? payload.data : Array.isArray(payload?.items) ? payload.items : []
-    totalRecords.value = Number(payload?.meta?.total ?? payload?.total ?? items.value.length)
+    const page = unpackCmsListResponse(response)
+    items.value = page.rows
+    totalRecords.value = page.total
     first.value = (currentPage.value - 1) * rows.value
   } catch (error) {
     items.value = []
