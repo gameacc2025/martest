@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 
 const { getCategories, getProducts, routerPush } = vi.hoisted(() => ({ getCategories: vi.fn(), getProducts: vi.fn(), routerPush: vi.fn() }))
-vi.mock('vue-router', () => ({ useRouter: () => ({ push: routerPush }) }))
+vi.mock('vue-router', () => ({ useRouter: () => ({ push: routerPush }), RouterLink: { props: ['to'], template: '<a><slot /></a>' } }))
 vi.mock('../../stores/products', () => ({ useProductsStore: () => ({ getCategories, getProducts }) }))
 import Categories from './Categories.vue'
 
