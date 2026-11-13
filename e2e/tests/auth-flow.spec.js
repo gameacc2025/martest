@@ -14,6 +14,11 @@ test('STAFF can log in through Website, reach Admin by handoff, and log out', as
   await expect(page).toHaveURL(/http:\/\/localhost:3003\/admin-dashboard(?:[/?#]|$)/, { timeout: 45_000 });
   await expect(page.locator('.dash-layout')).toBeVisible({ timeout: 15_000 });
 
+  await page.goto('http://localhost:3003/crm/leads', { waitUntil: 'networkidle' });
+  await expect(page.locator('.crm-page')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'سرنخ‌های فروش' })).toBeVisible();
+  await expect(page.locator('.crm-table tbody tr').first()).toBeVisible({ timeout: 20_000 });
+
   await page.locator('button.dash-header-user').click();
   await page.getByText('خروج', { exact: true }).click();
   await expect(page).toHaveURL(/http:\/\/localhost:3001\/login(?:[/?#]|$)/, { timeout: 20_000 });
