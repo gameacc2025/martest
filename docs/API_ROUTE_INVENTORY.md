@@ -295,10 +295,10 @@ STAFF-only audit log read/export operations.
 
 | Method | Full path | Route guard / scope |
 |---|---|---|
-| GET | `/api/v1/audit/audit/logs` | `STAFF + audit log permission` |
-| GET | `/api/v1/audit/audit/logs/stats` | `STAFF + audit log permission` |
-| GET | `/api/v1/audit/audit/logs/:id` | `STAFF + audit log permission` |
-| GET | `/api/v1/audit/audit/logs/export` | `STAFF + audit log permission` |
+| GET | `/api/v1/audit/logs` | `STAFF + audit log permission` |
+| GET | `/api/v1/audit/logs/stats` | `STAFF + audit log permission` |
+| GET | `/api/v1/audit/logs/:id` | `STAFF + audit log permission` |
+| GET | `/api/v1/audit/logs/export` | `STAFF + audit log permission` |
 
 ### banners — `/api/v1/banners`
 
