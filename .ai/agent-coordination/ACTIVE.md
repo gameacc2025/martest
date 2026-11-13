@@ -3,7 +3,8 @@
 **Updated:** 2026-11-13  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Current code-fix baseline:** `06daab07ff446aab577b885092a45c382ccd11ad`  
+**Verified code baseline:** `4e5d25e38ecc63a40fe1477b9b47091340b5b298`  
+**Latest docs commit:** `0c11f53f550b35eb3900c66b4fb60140a3dc1f58`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -21,30 +22,29 @@
 
 | Priority | Lane | Status | Scope / exit criteria |
 |---|---|---|---|
-| P0-1 | Frontend test recovery | IN PROGRESS | Resolve remaining Website test failures; all Vitest suites green; then verify three app builds |
-| P0-2 | Runtime/migration/seed | IN PROGRESS | Added missing `LOGIN_MFA` enum migration after runtime seed failure; verify all health checks, migration deploy, seed twice/idempotency and Chromium smoke |
-| P0-3 | CMS + account recovery acceptance | SOURCE PRESENT / RUNTIME PENDING | Faq/Page models/migration/services/routes/seed and public SMS OTP reset flow exist; verify CRUD, permissions, provider config and browser flow |
-| P0-4 | Docs + policy parity | IN PROGRESS | Backlog/current-task/worklog refreshed; finish contradictory worktree and palette instructions; keep API/OpenAPI inventory aligned |
-| P1-1 | CRM acceptance | WAITING P0 | Add Fastify schemas, functional/service/tenant/permission tests, seed idempotency and Playwright CRM workflows |
+| P0-1 | Frontend tests + CI + build | PASS | Run `43460213725`: install, Frontend/Shared tests, Backend tests, Prisma generation and all three builds |
+| P0-2 | Migration validation | PASS | Run `43460213720`: fresh PostgreSQL migration apply and state verification |
+| P0-3 | Runtime + seeds + browser smoke | PASS | Run `43460213998`: Compose, all health checks, migration status, seed twice, Chromium and 8/8 Playwright tests |
+| P0-4 | E2E selector fix + evidence docs | PASS | `4e5d25e3` corrected stale selector; `0c11f53f` refreshed backlog |
+| P1-1 | CRM acceptance | NEXT | Add Fastify schemas, functional CRUD/service/tenant/permission tests, conversion/merge idempotency and Playwright CRM journey |
 | P1-2 | Support vertical slice | NOT STARTED | Backend API/client, tenant isolation, messages/attachments/queues/SLA and real UI in all apps |
-| P1-3 | Notifications + Audit | PARTIAL | Generic SMS outbox and event delivery; audit event matrix, redaction, retention |
-| P1-4 | Dashboards/reporting | PARTIAL | Replace sample KPIs with tenant-scoped real aggregates |
-| P1-5 | Three-app regression | WAITING P0 | Browser journeys, RTL/accessibility/responsive and permission matrix |
+| P1-3 | CMS + password recovery acceptance | SOURCE PRESENT / ACCEPTANCE PARTIAL | Public/admin CRUD and permissions, actual SMS provider delivery, reset flow E2E |
+| P1-4 | Notifications + Audit | PARTIAL | Generic SMS outbox/retry/consent/quota/idempotency; audit event matrix, redaction, retention |
+| P1-5 | Dashboards/reporting | PARTIAL | Replace sample KPIs with tenant-scoped real aggregates |
+| P1-6 | Three-app regression | PARTIAL | Expand beyond smoke to visual, RTL, accessibility, keyboard and feature-level journeys |
 | P2 | Retail/Inventory/Orders | HOLD — OWNER DECISION | No checkout/payment activation before commercial approval |
 | P2 | Finance/Settlement | HOLD — OWNER DECISION | Requires Retail lifecycle and currency/tax/commission/legal/payout policies |
 | P3 | Enterprise future modules | DEFERRED | Separate approved scope required |
 
 ## Verified blockers / risks
 
-1. Frozen dependency install passes; previous quill/lockfile mismatch finding was incorrect.
-2. Latest completed CI evidence: Prisma generation, Backend tests and three-app build PASS; frontend suite had 7 Website failures. Follow-up fixes are committed; latest rerun pending.
-3. Runtime Compose build/start passed, but health failed because PostgreSQL enum lacked `LOGIN_MFA`; additive migration `20261113000300_add_login_mfa_challenge_purpose` was added. Runtime rerun pending.
-4. CMS FAQ/Page models and migration are now present; do not repeat prior stale finding that Prisma delegates are missing.
-5. Public password recovery routes/service are present; real SMS provider and browser acceptance remain unverified.
-6. Audit mount path normalized; backend route inventory/OpenAPI tests passed in prior CI run.
-7. Support still has DB models only; CRM functional schemas/tests/E2E remain incomplete.
-8. Generic SMS dispatch is still not implemented; Retail/Finance remain gated.
-9. Local runtime, working tree, stash/untracked and database status remain NOT VERIFIED.
+1. All P0 automated checks are green on the verified SHA and run IDs above.
+2. Runtime is proven only on disposable GitHub Actions infrastructure; local Windows/Docker/PostgreSQL remain NOT VERIFIED.
+3. Real SMS provider delivery and password recovery end-to-end are not proven by unit tests/seeds.
+4. CRM source exists, but route schemas and functional/tenant/E2E acceptance remain incomplete.
+5. Support still has DB models only; no operational backend/API/UI vertical slice.
+6. Generic SMS dispatch is still not implemented; Retail/Finance remain gated.
+7. Sample Company dashboard/Settlement/Operations values require replacement or explicit Demo labeling.
 
 ## Required handoff
 
