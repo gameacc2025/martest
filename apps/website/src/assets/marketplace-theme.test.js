@@ -1,16 +1,21 @@
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-const theme = readFileSync(new URL('./marketplace-theme.scss', import.meta.url), 'utf8')
-const sharedTheme = readFileSync(new URL('../../../../packages/shared-ui/assets/design-system/newtemp-reference.scss', import.meta.url), 'utf8')
-const primevueTheme = readFileSync(new URL('../../../../packages/shared-ui/theme.js', import.meta.url), 'utf8')
-const entry = readFileSync(new URL('../main.js', import.meta.url), 'utf8')
-const loader = readFileSync(new URL('../../index.html', import.meta.url), 'utf8')
-const home = readFileSync(new URL('../pages/public/Home.vue', import.meta.url), 'utf8')
-const layout = readFileSync(new URL('../layouts/PublicLayout.vue', import.meta.url), 'utf8')
-const inquiries = readFileSync(new URL('../pages/public/MyInquiries.vue', import.meta.url), 'utf8')
-const notifications = readFileSync(new URL('../pages/public/Notifications.vue', import.meta.url), 'utf8')
-const productDetails = readFileSync(new URL('../pages/public/ProductDetails.vue', import.meta.url), 'utf8')
+const root = process.cwd()
+const website = (path) => readFileSync(resolve(root, 'apps/website', path), 'utf8')
+const shared = (path) => readFileSync(resolve(root, 'packages/shared-ui', path), 'utf8')
+
+const theme = website('src/assets/marketplace-theme.scss')
+const sharedTheme = shared('assets/design-system/newtemp-reference.scss')
+const primevueTheme = shared('theme.js')
+const entry = website('src/main.js')
+const loader = website('index.html')
+const home = website('src/pages/public/Home.vue')
+const layout = website('src/layouts/PublicLayout.vue')
+const inquiries = website('src/pages/public/MyInquiries.vue')
+const notifications = website('src/pages/public/Notifications.vue')
+const productDetails = website('src/pages/public/ProductDetails.vue')
 
 describe('Website visual system — latest owner-supplied prototype', () => {
   it('uses the shared Website-approved light/dark tokens as the only root palette source', () => {
