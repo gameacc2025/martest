@@ -152,7 +152,7 @@ async function edit(item) {
 function closeDialog() {
   dialog.value = false
   editingId.value = null
-  form.value = { title: '', slug: '', content: '', sortOrder: 0, isActive: true }
+  form.value = { title: '', slug: '', content: '', isActive: true }
 }
 
 async function save() {
