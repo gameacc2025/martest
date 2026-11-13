@@ -354,7 +354,7 @@ function logout() {
               </button>
             </div>
 
-            <router-link :to="{ name: 'my-inquiries' }" class="tm-btn tm-btn--accent public-rfq-link">
+            <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" :to="{ name: 'my-inquiries' }" class="tm-btn tm-btn--accent public-rfq-link">
               <i class="pi pi-file-edit" aria-hidden="true"></i>
               <span>ثبت استعلام</span>
             </router-link>
