@@ -18,6 +18,15 @@ const modules = [
   ['specification-library', 'specification-library.routes.js', '/specification-library'],
   ['inquiries', 'inquiry.routes.js', '/inquiries'],
   ['notifications', 'notification.routes.js', '/settings/notifications'],
+  ['auth-challenges', 'authChallenges.routes.js', '/auth'],
+  ['audit', 'audit.routes.js', '/audit'],
+  ['banners', 'banner.routes.js', '/banners'],
+  ['cms', 'article.routes.js', '/cms/articles'],
+  ['cms', 'category.routes.js', '/cms/categories'],
+  ['cms', 'tag.routes.js', '/cms/tags'],
+  ['cms', 'faq.routes.js', '/cms/faqs'],
+  ['cms', 'page.routes.js', '/cms/pages'],
+  ['crm', 'index.js', '/crm'],
 ];
 
 const inventoryPath = path.join(__dirname, '../../../docs/API_ROUTE_INVENTORY.md');
