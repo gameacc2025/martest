@@ -5,13 +5,15 @@
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main` only.  
 **Latest inspected main HEAD:** `ace67cccc6a4b09b8cf8258dc814aedbb5d0b71b` (latest code-bearing commit in this audit: `e0cdfdd3006cfe68c86aa280b2a7aabdb008f4a9`)  
-**Latest CI:** [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592)  
-**Latest migration validation:** [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157)  
-**Latest Runtime:** [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935)  
+**Previously recorded CI (baseline `0d0a386`, not current HEAD):** [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592)  
+**Previously recorded migration validation (baseline `0d0a386`):** [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157)  
+**Previously recorded Runtime (baseline `0d0a386`):** [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935)  
 **Backlog:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`  
 **Owner communication:** Persian.
 
-## Verified completed work
+## Previously verified work (baseline `0d0a386`; not revalidated on current HEAD)
+
+> Items 1–4 and their workflow links below are historical PASS evidence for the stated baseline only. They are not a current-HEAD validation.
 
 1. CI PASS: frozen install, architecture graph, all Frontend/Shared tests, Prisma Client generation, Backend tests and Website/Company/Admin builds.
 2. Migration Validation PASS: fresh PostgreSQL migration apply and migration-state verification.
