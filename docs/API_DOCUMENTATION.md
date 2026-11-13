@@ -45,6 +45,7 @@
 | بنرها | `/banners` | `backend/src/modules/banners/banner.routes.js` |
 | CMS (مقاله، دسته، برچسب، FAQ و صفحه ثابت) | `/cms/*` | `backend/src/modules/cms/*` |
 | CRM داخلی STAFF | `/crm` | `backend/src/modules/crm/index.js` |
+| Support tickets | `/support/*` | `backend/src/modules/support/index.js`, `support.service.js` |
 
 ## فهرست کامل endpointها
 
