@@ -23,6 +23,7 @@
 8. Support seed is idempotent in CI and creates 5 categories, 3 queues and 20 category/priority SLA policies.
 9. CRM lead schemas exist for create/update/assign/status/merge; service tests cover normalization, score bounds, active STAFF ownership, terminal lead protection and state transitions; Playwright confirms Leads list rendering.
 10. CMS FAQ/Page models, migration, services/routes and seeds exist; runtime seed passes. Account recovery routes/service exist with hashed one-time OTP controls; actual SMS provider delivery remains unverified.
+11. Admin CMS source audit: all five management pages (articles, categories, tags, FAQs, static pages), their Admin routes, permission metadata and navigation entries are present on `main`. This confirms source/UI presence only; API-backed CRUD, permission matrix and browser acceptance for these screens are still NOT VERIFIED.
 
 ## Remaining execution queue
 
