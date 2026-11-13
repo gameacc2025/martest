@@ -40,7 +40,7 @@ describe('Website FAQ', () => {
     wrapper = undefined
   })
 
-  it('renders the B2B inquiry questions and shared design-system page structure', () => {
+  it('renders the B2B inquiry questions and shared design-system page structure', async () => {
     wrapper = mountFaq()
     await flushPromises()
 
