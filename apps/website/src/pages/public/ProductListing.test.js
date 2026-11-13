@@ -8,7 +8,7 @@ const { getProducts, getCategories, addItem, routeState } = vi.hoisted(() => ({
   addItem: vi.fn(),
   routeState: { current: null },
 }))
-vi.mock('vue-router', () => ({ useRoute: () => routeState.current }))
+vi.mock('vue-router', () => ({ useRoute: () => routeState.current, RouterLink: { props: ['to'], template: '<a><slot /></a>' } }))
 vi.mock('../../stores/products', () => ({ useProductsStore: () => ({ getProducts, getCategories }) }))
 vi.mock('../../stores/cart', () => ({ useCartStore: () => ({ addItem }) }))
 import ProductListing from './ProductListing.vue'
