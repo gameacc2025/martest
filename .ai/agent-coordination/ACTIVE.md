@@ -3,7 +3,7 @@
 **Updated:** 2026-11-13 (cross-domain source audit refresh)  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest inspected main HEAD:** `ace67cccc6a4b09b8cf8258dc814aedbb5d0b71b`  
+**Code baseline inspected before documentation updates:** `ace67cccc6a4b09b8cf8258dc814aedbb5d0b71b`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
