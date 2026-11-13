@@ -8,18 +8,18 @@ const idParams = {
 };
 const leadCreateSchema = { body: { type: 'object', required: ['displayName'], additionalProperties: false, properties: {
   displayName: { type: 'string', minLength: 1, maxLength: 240 },
-  companyName: { type: ['string', 'null'], maxLength: 240 },
-  email: { type: ['string', 'null'], maxLength: 320 },
-  phone: { type: ['string', 'null'], maxLength: 40 },
-  sourceId: { type: ['integer', 'string', 'null'] },
+  companyName: { anyOf: [{ type: 'string' }, { type: 'null' }], maxLength: 240 },
+  email: { anyOf: [{ type: 'string' }, { type: 'null' }], maxLength: 320 },
+  phone: { anyOf: [{ type: 'string' }, { type: 'null' }], maxLength: 40 },
+  sourceId: { anyOf: [{ type: 'integer' }, { type: 'string' }, { type: 'null' }] },
   score: { type: 'integer', minimum: 0, maximum: 100 },
 } } };
 const leadUpdateSchema = { params: idParams, body: { type: 'object', minProperties: 1, additionalProperties: false, properties: {
-  displayName: { type: ['string', 'null'], maxLength: 240 },
-  companyName: { type: ['string', 'null'], maxLength: 240 },
-  email: { type: ['string', 'null'], maxLength: 320 },
-  phone: { type: ['string', 'null'], maxLength: 40 },
-  sourceId: { type: ['integer', 'string', 'null'] },
+  displayName: { anyOf: [{ type: 'string' }, { type: 'null' }], maxLength: 240 },
+  companyName: { anyOf: [{ type: 'string' }, { type: 'null' }], maxLength: 240 },
+  email: { anyOf: [{ type: 'string' }, { type: 'null' }], maxLength: 320 },
+  phone: { anyOf: [{ type: 'string' }, { type: 'null' }], maxLength: 40 },
+  sourceId: { anyOf: [{ type: 'integer' }, { type: 'string' }, { type: 'null' }] },
   score: { type: 'integer', minimum: 0, maximum: 100 },
 } } };
 const leadAssignSchema = { params: idParams, body: { type: 'object', required: ['ownerUserId'], additionalProperties: false, properties: { ownerUserId: { type: 'integer', minimum: 1 } } } };
