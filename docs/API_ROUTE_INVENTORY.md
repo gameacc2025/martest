@@ -436,6 +436,21 @@ All routes inherit bearer authentication and require STAFF context plus the oper
 | GET | `/api/v1/crm/notes` | `Bearer auth; STAFF + operation-specific crm.* permission` |
 | POST | `/api/v1/crm/notes` | `Bearer auth; STAFF + operation-specific crm.* permission` |
 
+### support — `/api/v1/support`
+
+Authenticated CUSTOMER, COMPANY and STAFF users can create/read/reply to their own tickets; service-level tenant scope is enforced. Internal notes, queue listing, assignment and status changes are STAFF-only with the existing tickets.* permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/support/categories` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.read` |
+| GET | `/api/v1/support/tickets` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.read; requester/company scope in service` |
+| POST | `/api/v1/support/tickets` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.create` |
+| GET | `/api/v1/support/tickets/:id` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.read; requester/company scope in service` |
+| POST | `/api/v1/support/tickets/:id/messages` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.reply; INTERNAL visibility requires STAFF + tickets.update` |
+| PATCH | `/api/v1/support/tickets/:id/status` | `Bearer auth; exact STAFF + tickets.update` |
+| POST | `/api/v1/support/tickets/:id/assign` | `Bearer auth; exact STAFF + tickets.update` |
+| GET | `/api/v1/support/queues` | `Bearer auth; exact STAFF + tickets.read` |
+
 ### Health
 
 | Method | Full path | Route guard / scope |
@@ -450,6 +465,7 @@ All routes inherit bearer authentication and require STAFF context plus the oper
 - `backend/src/modules/banners/banner.routes.js`
 - `backend/src/modules/cms/article.routes.js`, `category.routes.js`, `tag.routes.js`, `faq.routes.js`, `page.routes.js`
 - `backend/src/modules/crm/index.js`
+- `backend/src/modules/support/index.js`, `support.service.js`
 - `backend/src/modules/users/user.routes.js`
 - `backend/src/modules/addresses/address.routes.js`
 - `backend/src/modules/roles/role.routes.js`
