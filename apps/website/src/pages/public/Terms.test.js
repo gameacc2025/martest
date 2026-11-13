@@ -1,6 +1,22 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Terms from './Terms.vue'
+
+const { pageFixtures } = vi.hoisted(() => ({
+  pageFixtures: {
+    terms: {
+      content: '<h2 id="terms-usage">شرایط استفاده</h2><p>با استفاده از خدمات ما، شما موافقت خود را با شرایط و قوانین زیر اعلام میکنید.</p><p>شما مسئول حفظ محرمانگی اطلاعات حساب کاربری خود هستید.</p>',
+    },
+    privacy: {
+      content: '<h2 id="terms-privacy">سیاست حریم خصوصی</h2><p>این اطلاعات شامل نام، ایمیل، شماره تلفن و سایر اطلاعات تماس میباشد.</p><p>ما اطلاعات شما را به اشخاص ثالث بدون رضایت شما منتقل نخواهیم کرد.</p><p>هیچ روش انتقال اطلاعات در اینترنت 100% امن نیست.</p><p>توصیه میکنیم به طور منظم این صفحه را بررسی کنید.</p>',
+    },
+  },
+}))
+vi.mock('../../stores/cms', () => ({
+  useCmsStore: () => ({
+    fetchPageBySlug: vi.fn(async (slug) => pageFixtures[slug]),
+  }),
+}))
 
 const mountTerms = () => mount(Terms, {
   global: {
@@ -26,7 +42,7 @@ describe('Website Terms and Privacy page', () => {
 
     expect(wrapper.find('main[dir="rtl"][aria-labelledby="terms-title"]').exists()).toBe(true)
     expect(wrapper.find('#terms-title').text()).toBe('قوانین و حریم خصوصی')
-    expect(wrapper.findAll('.terms-section')).toHaveLength(4)
+    expect(wrapper.findAll('.terms-section')).toHaveLength(2)
     expect(wrapper.find('.terms-breadcrumb a').attributes('href')).toBe('home')
   })
 
