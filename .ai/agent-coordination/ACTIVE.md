@@ -17,13 +17,15 @@
 - Browser automation is authorized for acceptance; run sequentially and record evidence.
 - Local Windows workspace, Docker and PostgreSQL remain NOT VERIFIED.
 
-## Verified P0 checks
+## Previously verified P0 checks — baseline `0d0a386` only
+
+> These workflow results predate later CMS code commits on `main`; they are not evidence for the current HEAD. Rerun all gates before release.
 
 | Lane | Status | Evidence |
 |---|---|---|
-| CI + build | PASS | [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592): install, architecture graph, Frontend/Shared, Backend, Prisma and all three builds |
-| Migration validation | PASS | [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157): fresh PostgreSQL migration apply |
-| Runtime + seeds + browser | PASS | [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935): Compose, health, migrations, seed twice, Chromium, 8/8 Playwright |
+| CI + build | PASS on `0d0a386`; current HEAD NOT VERIFIED | [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592): install, architecture graph, Frontend/Shared, Backend, Prisma and all three builds |
+| Migration validation | PASS on `0d0a386`; current HEAD NOT VERIFIED | [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157): fresh PostgreSQL migration apply |
+| Runtime + seeds + browser | PASS on `0d0a386`; current HEAD NOT VERIFIED | [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935): Compose, health, migrations, seed twice, Chromium, 8/8 Playwright |
 
 ## Prioritized queue
 
