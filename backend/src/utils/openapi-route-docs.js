@@ -4007,6 +4007,62 @@ Object.assign(docs, {
     authRequired: true,
     responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 429: { description: 'Rate limit exceeded.' }, 500: { description: 'Unexpected server error.' } },
   },
+  'GET /api/v1/support/categories': {
+    summary: 'دریافت دسته‌بندی‌های فعال پشتیبانی',
+    description: 'فهرست دسته‌بندی‌های قابل انتخاب برای ثبت تیکت.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/support/tickets': {
+    summary: 'دریافت فهرست تیکت‌های پشتیبانی',
+    description: 'فهرست صفحه‌بندی‌شده تیکت‌ها با محدودسازی بر اساس کاربر درخواست‌دهنده یا شرکت فعال؛ STAFF با مجوز tickets.read دسترسی عملیاتی دارد.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'POST /api/v1/support/tickets': {
+    summary: 'ثبت تیکت پشتیبانی',
+    description: 'ثبت تیکت و پیام اولیه؛ هویت درخواست‌دهنده و شرکت از نشست احراز هویت‌شده استخراج می‌شود.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/support/tickets/:id': {
+    summary: 'دریافت جزئیات تیکت',
+    description: 'دریافت جزئیات و پیام‌های مجاز تیکت با کنترل مالکیت؛ پیام‌های داخلی فقط برای STAFF نمایش داده می‌شوند.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'POST /api/v1/support/tickets/:id/messages': {
+    summary: 'ثبت پیام تیکت',
+    description: 'ثبت پاسخ عمومی یا یادداشت داخلی؛ یادداشت داخلی فقط برای STAFF دارای tickets.update مجاز است.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'PATCH /api/v1/support/tickets/:id/status': {
+    summary: 'تغییر وضعیت تیکت',
+    description: 'تغییر وضعیت با کنترل انتقال state machine؛ فقط STAFF دارای tickets.update.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'POST /api/v1/support/tickets/:id/assign': {
+    summary: 'تخصیص تیکت به صف یا کارشناس',
+    description: 'ثبت تاریخچه تخصیص و بستن تخصیص قبلی؛ فقط STAFF دارای tickets.update.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/support/queues': {
+    summary: 'دریافت صف‌های فعال پشتیبانی',
+    description: 'فهرست صف‌های فعال برای STAFF دارای tickets.read.',
+    tags: ['Support'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
 });
 
 module.exports = docs;
