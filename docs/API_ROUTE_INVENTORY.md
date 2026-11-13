@@ -1,10 +1,10 @@
 # API route inventory
 
-Generated from the Fastify route registrations on `main` at 2026-11-03. All paths below include the `/api/v1` prefix.
+Updated from the Fastify route registrations on `main` at 2026-11-13. All paths below include the `/api/v1` prefix.
 
 ## How to read this inventory
 
-- The method and path are the registered HTTP route, not a frontend URL.
+- The method and path are the registered HTTP route, not a frontend URL. The inventory test covers all registered modules, including CMS and CRM.
 - The guard column summarizes route-level `onRequest`/`preHandler` and inherited module hooks. `AccessProfile` app context is independent of role names and wildcard permissions.
 - Resource ownership and tenant filters are also enforced in services; a route guard alone is not the complete authorization contract.
 - Request/response JSON schemas, limits, and examples remain in the source route/schema files. This inventory does not invent schemas for routes that currently omit them.
@@ -21,6 +21,8 @@ Mixed public and authenticated session routes; see each row.
 | POST | `/api/v1/auth/login` | `Public` |
 | POST | `/api/v1/auth/register` | `Public` |
 | POST | `/api/v1/auth/register-company` | `Public` |
+| POST | `/api/v1/auth/forgot-password` | `Public; 5 requests / 15 minutes / IP; SMS provider required` |
+| POST | `/api/v1/auth/reset-password` | `Public; 10 requests / 15 minutes / IP; single-use SMS OTP; revokes all sessions` |
 | POST | `/api/v1/auth/refresh` | `requireTrustedOrigin, fastify.authenticateRefresh` |
 | POST | `/api/v1/auth/logout` | `requireTrustedOrigin, fastify.authenticateRefresh` |
 | POST | `/api/v1/auth/handoff` | `fastify.authenticate` |
@@ -287,6 +289,153 @@ All routes inherit bearer authentication; service derives app scope from the tok
 | GET | `/api/v1/settings/notifications/preferences` | `Inherited: bearer authentication; token-derived app scope + user ownership` |
 | PATCH | `/api/v1/settings/notifications/preferences` | `Inherited: bearer authentication; token-derived app scope + user ownership` |
 
+### audit — `/api/v1/audit`
+
+STAFF-only audit log read/export operations.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/audit/audit/logs` | `STAFF + audit log permission` |
+| GET | `/api/v1/audit/audit/logs/stats` | `STAFF + audit log permission` |
+| GET | `/api/v1/audit/audit/logs/:id` | `STAFF + audit log permission` |
+| GET | `/api/v1/audit/audit/logs/export` | `STAFF + audit log permission` |
+
+### banners — `/api/v1/banners`
+
+Public active-banner read; management requires STAFF permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/banners/active` | `Public` |
+| GET | `/api/v1/banners/manage` | `STAFF + banner permission` |
+| GET | `/api/v1/banners/manage/:id` | `STAFF + banner permission` |
+| POST | `/api/v1/banners/manage` | `STAFF + banner permission` |
+| PATCH | `/api/v1/banners/manage/:id` | `STAFF + banner permission` |
+| DELETE | `/api/v1/banners/manage/:id` | `STAFF + banner permission` |
+| POST | `/api/v1/banners/manage/upload` | `STAFF + banner permission` |
+
+### cms-articles — `/api/v1/cms/articles`
+
+Public read routes are unauthenticated; management routes require STAFF context and cms.* permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/cms/articles` | `Public` |
+| GET | `/api/v1/cms/articles/:slug` | `Public` |
+| GET | `/api/v1/cms/articles/id/:id` | `Public` |
+| GET | `/api/v1/cms/articles/manage` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/articles/manage/:id` | `STAFF + cms.* permission` |
+| POST | `/api/v1/cms/articles/manage` | `STAFF + cms.* permission` |
+| PATCH | `/api/v1/cms/articles/manage/:id` | `STAFF + cms.* permission` |
+| PATCH | `/api/v1/cms/articles/manage/:id/status` | `STAFF + cms.* permission` |
+| DELETE | `/api/v1/cms/articles/manage/:id` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/articles/manage/:id/revisions` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/articles/manage/:id/revisions/:revisionNo` | `STAFF + cms.* permission` |
+
+### cms-categories — `/api/v1/cms/categories`
+
+Public read routes are unauthenticated; management routes require STAFF context and cms.* permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/cms/categories` | `Public` |
+| GET | `/api/v1/cms/categories/manage` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/categories/manage/:id` | `STAFF + cms.* permission` |
+| POST | `/api/v1/cms/categories/manage` | `STAFF + cms.* permission` |
+| PATCH | `/api/v1/cms/categories/manage/:id` | `STAFF + cms.* permission` |
+| DELETE | `/api/v1/cms/categories/manage/:id` | `STAFF + cms.* permission` |
+
+### cms-tags — `/api/v1/cms/tags`
+
+Public read routes are unauthenticated; management routes require STAFF context and cms.* permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/cms/tags` | `Public` |
+| GET | `/api/v1/cms/tags/manage` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/tags/manage/:id` | `STAFF + cms.* permission` |
+| POST | `/api/v1/cms/tags/manage` | `STAFF + cms.* permission` |
+| PATCH | `/api/v1/cms/tags/manage/:id` | `STAFF + cms.* permission` |
+| DELETE | `/api/v1/cms/tags/manage/:id` | `STAFF + cms.* permission` |
+
+### cms-faqs — `/api/v1/cms/faqs`
+
+Public read routes are unauthenticated; management routes require STAFF context and cms.* permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/cms/faqs` | `Public` |
+| GET | `/api/v1/cms/faqs/categories` | `Public` |
+| GET | `/api/v1/cms/faqs/manage` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/faqs/manage/:id` | `STAFF + cms.* permission` |
+| POST | `/api/v1/cms/faqs/manage` | `STAFF + cms.* permission` |
+| PATCH | `/api/v1/cms/faqs/manage/:id` | `STAFF + cms.* permission` |
+| DELETE | `/api/v1/cms/faqs/manage/:id` | `STAFF + cms.* permission` |
+
+### cms-pages — `/api/v1/cms/pages`
+
+Public read routes are unauthenticated; management routes require STAFF context and cms.* permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/cms/pages` | `Public` |
+| GET | `/api/v1/cms/pages/:slug` | `Public` |
+| GET | `/api/v1/cms/pages/manage` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/pages/manage/:id` | `STAFF + cms.* permission` |
+| GET | `/api/v1/cms/pages/manage/slug/:slug` | `STAFF + cms.* permission` |
+| POST | `/api/v1/cms/pages/manage` | `STAFF + cms.* permission` |
+| PATCH | `/api/v1/cms/pages/manage/:id` | `STAFF + cms.* permission` |
+| PUT | `/api/v1/cms/pages/manage/slug/:slug` | `STAFF + cms.* permission` |
+| DELETE | `/api/v1/cms/pages/manage/:id` | `STAFF + cms.* permission` |
+
+### crm — `/api/v1/crm`
+
+All routes inherit bearer authentication and require STAFF context plus the operation-specific crm.* permission.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/crm/dashboard` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/lead-sources` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/lead-sources` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/lead-sources/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/leads/export` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/leads` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/leads` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/leads/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/leads/:id/duplicates` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/leads/:id/merge` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/leads/:id/timeline` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/leads/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/leads/:id/assign` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/leads/:id/status` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/leads/:id/convert` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/accounts` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/accounts` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/accounts/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/accounts/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/accounts/:id/contacts` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/accounts/:id/contacts` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/contacts/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/pipelines` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/pipelines` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/pipelines/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/pipelines/:id/stages` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/pipelines/:id/stages/:stageId` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/opportunities` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/opportunities/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/opportunities/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/opportunities` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/opportunities/:id/stage` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/tasks` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/tasks` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| PATCH | `/api/v1/crm/tasks/:id` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/tasks/:id/assign` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/tasks/:id/complete` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/activities` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/activities` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| GET | `/api/v1/crm/notes` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+| POST | `/api/v1/crm/notes` | `Bearer auth; STAFF + operation-specific crm.* permission` |
+
 ### Health
 
 | Method | Full path | Route guard / scope |
@@ -295,7 +444,12 @@ All routes inherit bearer authentication; service derives app scope from the tok
 
 ## Source files
 
-- `backend/src/modules/auth/auth.routes.js`
+- `backend/src/modules/auth/auth.routes.js` — includes public SMS password recovery.
+- `backend/src/modules/auth-challenges/authChallenges.routes.js`
+- `backend/src/modules/audit/audit.routes.js`
+- `backend/src/modules/banners/banner.routes.js`
+- `backend/src/modules/cms/article.routes.js`, `category.routes.js`, `tag.routes.js`, `faq.routes.js`, `page.routes.js`
+- `backend/src/modules/crm/index.js`
 - `backend/src/modules/users/user.routes.js`
 - `backend/src/modules/addresses/address.routes.js`
 - `backend/src/modules/roles/role.routes.js`
