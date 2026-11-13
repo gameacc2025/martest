@@ -74,6 +74,13 @@ const stats = computed(() => [
 function unwrap(response) {
   return response?.data?.data ?? response?.data ?? response
 }
+function unwrapPage(response) {
+  const payload = response?.data && !Array.isArray(response.data) ? response.data : response
+  return {
+    data: Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [],
+    meta: payload?.meta || {},
+  }
+}
 function errorMessage(err) {
   return err?.response?.data?.message || err?.message || 'دریافت اطلاعات با خطا مواجه شد.'
 }
@@ -93,13 +100,13 @@ async function load() {
       dashboard.value = unwrap(results[0])
       pipelines.value = unwrap(results[1]) || []
       opportunities.value = unwrap(results[2]) || []
-      const accountPage = unwrap(results[3])
-      accounts.value = accountPage?.data || []
+      const accountPage = unwrapPage(results[3])
+      accounts.value = accountPage.data
     } else if (activeSection.value === 'accounts') {
       const results = await Promise.all([crmApi.dashboard(), crmApi.listAccounts({ page: 1, limit: 50 })])
       dashboard.value = unwrap(results[0])
-      const page = unwrap(results[1])
-      accounts.value = page?.data || []
+      const page = unwrapPage(results[1])
+      accounts.value = page.data
     } else if (activeSection.value === 'tasks') {
       const results = await Promise.all([crmApi.dashboard(), crmApi.listTasks()])
       dashboard.value = unwrap(results[0])
@@ -114,9 +121,9 @@ async function load() {
       sources.value = unwrap(results[1]) || []
       if (activeSection.value === 'activities') activities.value = unwrap(results[2]) || []
       else {
-        const page = unwrap(results[2])
-        leads.value = page?.data || []
-        leadMeta.value = page?.meta || leadMeta.value
+        const page = unwrapPage(results[2])
+        leads.value = page.data
+        leadMeta.value = page.meta || leadMeta.value
         if (activeSection.value === 'overview') tasks.value = unwrap(results[3]) || []
       }
     }
