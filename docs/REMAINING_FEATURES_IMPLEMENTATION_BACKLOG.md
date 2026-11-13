@@ -1,8 +1,8 @@
 # Remaining Features — Implementation Backlog and Database-First Plan
 
-## ممیزی جاری سورس و CI — 2026-11-13
+## آخرین اعتبارسنجی CI و Runtime — 2026-11-13
 
-> **مرجع:** شاخه `main`، Commit `06daab07ff446aab577b885092a45c382ccd11ad`. این ممیزی Remote/source-level است. به working tree ویندوز، Docker محلی یا PostgreSQL محلی دسترسی ندارم؛ بنابراین وضعیت آن‌ها را PASS فرض نمی‌کنم. نتایج GitHub Actions فقط برای SHA و run مشخص‌شده معتبرند.
+> **مرجع:** شاخه `main`، Commit `4e5d25e38ecc63a40fe1477b9b47091340b5b298`. این ممیزی Remote/source-level است. به working tree ویندوز، Docker محلی یا PostgreSQL محلی دسترسی ندارم؛ بنابراین وضعیت آن‌ها را PASS فرض نمی‌کنم. نتایج GitHub Actions فقط برای SHA و run مشخص‌شده معتبرند.
 
 ### وضعیت دامنه‌ها
 
@@ -20,13 +20,13 @@
 | Retail/Inventory/Orders/Payments/Returns | مدل و migration DB موجود؛ checkout/payment عملیاتی و backend API کامل وجود ندارد | مسدود تا تصمیم تجاری مالک؛ checkout را فعال نکنید |
 | Finance/Settlement | مدل‌های ledger/commission/settlement موجود؛ posting/payout/reconciliation عملیاتی وجود ندارد | مسدود تا قرارداد Retail و تصمیم مالی/حقوقی |
 | داشبوردها و گزارش‌ها | Admin عمدتاً API-backed؛ Company بعضی نمودارها و Settlement ارقام نمونه دارد | ناقص؛ KPI نمونه باید حذف یا واضحاً Demo برچسب بخورد |
-| Design System | توکن‌های palette جدید در هر سه app وارد شده‌اند | build موفق؛ visual/browser parity و responsive QA هنوز تأیید نشده |
+| Design System | توکن‌های palette جدید در هر سه app وارد شده‌اند | build سه اپ و smoke مرورگری در پنج عرض 360/768/1366/1920/2560 موفق؛ بررسی بصری کامل هنوز انجام نشده |
 
 ### شواهد تازه و اصلاح یافته‌های قبلی
 
-1. **Frozen install و build:** در CI اجرای `f8baed460b443270c0b6bd7532d55a99f8714b5a`، نصب `pnpm install --frozen-lockfile`، تولید Prisma Client، Backend tests و build هر سه app موفق شدند. بنابراین ادعای قبلی «quill در importer ادمین lockfile نیست» نادرست بود؛ importer همگام است.
-2. **Frontend tests:** همان اجرای CI هنوز 7 تست Website را fail کرد. اصلاحات بعدی برای setup سراسری Pinia، router mocks، FAQ fixtures، CMS legal page async، responsive selectorها، theme toggle و profile tab روی `main` اعمال شده‌اند؛ اجرای CI برای SHA جاری `06daab0` در زمان ثبت این ممیزی هنوز در حال اجراست و PASS اعلام نمی‌شود.
-3. **Runtime/Seed:** در اجرای Runtime روی SHA قبلی، Compose build/start موفق شد اما health check به دلیل شکست seed متوقف شد. خطای دقیق PostgreSQL این بود: `invalid input value for enum "AuthChallengePurpose": "LOGIN_MFA"`. مقدار در `schema.prisma` تعریف شده بود ولی migration دیتابیس آن را به enum اضافه نکرده بود. migration افزایشی `20261113000300_add_login_mfa_challenge_purpose` با `ALTER TYPE ... ADD VALUE IF NOT EXISTS` اضافه شد. اجرای migration و seed روی SHA جاری هنوز در انتظار نتیجه CI است.
+1. **Frozen install و build:** در CI اجرای `4e5d25e38ecc63a40fe1477b9b47091340b5b298`، نصب `pnpm install --frozen-lockfile`، تولید Prisma Client، تمام Frontend/Shared tests، Backend tests و build هر سه app موفق شدند. importer مربوط به quill همگام است.
+2. **Frontend tests:** در اجرای CI روی SHA `4e5d25e38ecc63a40fe1477b9b47091340b5b298` تمام تست‌های Frontend/Shared موفق شدند. اجرای CI: `43460213725`.
+3. **Runtime/Seed/Browser:** اجرای Runtime روی SHA `4e5d25e38ecc63a40fe1477b9b47091340b5b298` موفق شد: Compose build/start، health چهار endpoint، migration status، اجرای دوباره تمام seedها و هر ۸ تست Playwright. selector تست صفحه اصلی از `.shop-page` قدیمی به `.reference-home` واقعی اصلاح شد. Run: `43460213998`.
 4. **CMS FAQ/Page:** یافته قبلی مبنی بر نبودن مدل‌های Prisma دیگر معتبر نیست. migration `20261113000100_restore_cms_faq_pages`، مدل‌های `Faq` و `Page` و seedهای متناظر اکنون در سورس هستند. اجرای runtime پس از migration جاری باید صحت آن را تأیید کند.
 5. **Account Recovery:** یافته قبلی مبنی بر نبودن routeهای forgot/reset دیگر معتبر نیست. مسیرهای عمومی به `password-recovery.service.js` متصل‌اند؛ سرویس از OTP پیامکی hash‌شده، محدودیت درخواست، انقضا، سقف تلاش، مصرف اتمیک و ابطال sessionها استفاده می‌کند. پیکربندی credential واقعی SMS و تست end-to-end هنوز نیازمند تأیید است.
 6. **Audit route parity:** route module اکنون با prefix `/api/v1/audit` mount می‌شود و endpointهای آن از `/logs` شروع می‌شوند. route inventory و OpenAPI stale duplicateهای `/api/v1/audit/audit/*` حذف شده‌اند. Backend tests شامل inventory و OpenAPI در اجرای قبلی سبز شدند.
@@ -38,10 +38,10 @@
 
 ### اولویت اجرایی جاری
 
-| اولویت | کار | معیار خروج |
+| اولویت | کار | وضعیت / معیار خروج |
 |---|---|---|
-| **P0-1** | سبز کردن Frontend tests | اجرای تمام Vitest tests بدون failure؛ سپس CI کامل و build سه app |
-| **P0-2** | Runtime/Migration/Seed | migration جدید روی PostgreSQL disposable اعمال شود؛ تمام سرویس‌ها healthy؛ seed دو بار idempotent؛ سپس browser smoke tests سه app |
+| **P0-1** | Frontend tests و build | **PASS** — همه تست‌های Frontend/Shared، Backend tests و build سه app در CI `43460213725` موفق |
+| **P0-2** | Runtime/Migration/Seed/Browser | **PASS** — migration status، health، seed دو بار و ۸ تست Playwright در Runtime `43460213998` موفق |
 | **P0-3** | CMS/Recovery acceptance | public/admin FAQ و Page CRUD؛ permission؛ seed؛ SMS provider واقعی و reset password end-to-end |
 | **P0-4** | اسناد و policy parity | مستندات API کامل؛ حذف تعارض worktree/detached checkout و palette قدیمی از AGENTS/PROTOCOL/roadmap |
 | **P1-1** | CRM acceptance | Fastify schemas، CRUD/service/permission tests، tenant isolation، idempotent conversion و Playwright |
@@ -55,8 +55,8 @@
 
 ### محدودیت شواهد
 
-- آخرین CI کامل‌شده‌ای که این سند به آن استناد می‌کند: install، Prisma generate، Backend tests و build موفق؛ Frontend tests هنوز 7 failure داشت.
-- آخرین Runtime کامل‌شده: Compose build/start موفق، health شکست به علت enum seed؛ migration اصلاحی در SHA جاری اضافه شده و هنوز نتیجه runtime جدید در دسترس نیست.
+- آخرین CI کامل‌شده: install، Prisma generate، Frontend/Shared tests، Backend tests و build سه app همگی PASS؛ run `43460213725`.
+- آخرین Runtime کامل‌شده: Compose، health، migration، seed دو باره و browser smoke همگی PASS؛ run `43460213998`.
 - Migration validation در SHA `86e8cbaad35b288c1782918ff3e2dc46d02dc01f` موفق بود؛ validation مجدد پس از migration افزایشی جدید در حال اجراست.
 - هیچ ادعای موفقیت درباره Docker/PostgreSQL محلی، live SMS، پرداخت یا مرورگر محلی کاربر مطرح نمی‌شود.
 
@@ -64,7 +64,7 @@
 
 **Document ID:** REMAINING-FEATURES-01  
 **Status:** Source-backed planning baseline; not an implementation claim  
-**Last reviewed:** 2026-11-08  
+**Last reviewed:** 2026-11-13  
 **Canonical branch:** `main`
 
 > This document reconciles the current implementation with the existing domain designs. It is intentionally written in English for coding agents. A feature listed here is not considered implemented merely because a route, menu item, UI prototype, API-client constant, or design document exists.
