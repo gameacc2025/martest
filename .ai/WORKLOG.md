@@ -2,17 +2,18 @@
 
 این فایل شاخص وضعیت جاری و تحویل‌های تأییدشده است؛ تاریخچه کامل در Git نگهداری می‌شود.
 
-## 2026-11-13 — CRM-LEAD-REQUEST-VALIDATION
+## 2026-11-13 — CRM-LEAD-END-TO-END-ACCEPTANCE
 
-- **Status:** PARTIAL implementation; request validation tests PASS in full CI.
-- **Changes:** Fastify JSON schemas added for CRM lead create/update/assign/status/merge; tests cover required fields, score bounds, id format, assignment/status/merge contracts and permission denial.
-- **Implementation commits:** `724d603744443377ed52b20221928eb5f04f1aab`, `a6b36a58a66b2850dc0c2c6b8880cb13418095bd`, `430e74edcf866b57fd5961731cf1480f5c93c5a8`, `369500e0659a508eb371a16dd226220de78c45b6`, `0b78ae7ff24e55e9beec55a53739d059952bab56`.
-- **Validation detail:** Fastify removes additional body properties by default; tests assert actual validation behavior. Nullable fields use JSON Schema `anyOf` to avoid Ajv strict-union warnings.
-- **CI:** run `43461538717` PASS — frozen install, frontend/shared tests, Prisma generation, backend tests and all three builds.
-- **Migration validation:** run `43461538821` PASS.
-- **Runtime:** run `43461538743` PASS — Compose, health, migration status, seeds twice, Chromium and browser smoke 8/8.
-- **Docs:** backlog refreshed with CRM partial state and current workflow evidence; commit `c00307d9e27b7898833a3a6f3bae16903e60a205`.
-- **Still required for CRM:** schemas for remaining endpoint families, functional CRUD/service tests, STAFF/tenant isolation, conversion/merge idempotency and CRM Playwright journey.
+- **Status:** CRM lead request/service/UI smoke acceptance PARTIAL and verified; broader CRM route coverage remains.
+- **Request schemas:** Fastify schemas for lead create/update/assign/status/merge. Tests cover required fields, score bounds, ID format, assignment/status/merge contracts and permission denial.
+- **Service tests:** lead normalization, score validation, active STAFF ownership, terminal lead protection and state-machine transitions.
+- **UI bug fixed:** CRMWorkspace had unwrapped paginated API data into an array, then attempted to read `.data`, resulting in an empty Leads/Accounts view despite HTTP 200 and seeded rows. Added `unwrapPage` and applied it to lead/account lists.
+- **Browser acceptance:** 8/8 Playwright tests PASS; STAFF login → PKCE handoff → CRM Leads; API returns seeded rows and the table is visible. Run `43463018256`.
+- **CI:** run `43463018169` PASS — frozen install, Frontend/Shared tests, Prisma generation, Backend tests and all three builds.
+- **Migration validation:** run `43463018358` PASS.
+- **Code baseline:** `a281e3fb84978457e34d816b519ba2f664ea8caa`.
+- **Docs:** backlog updated with CRM service/UI evidence; commit `db4d7dea29aa323c4061965e1b620b52f9960691`.
+- **Still required for CRM:** schemas for remaining endpoint families, broader CRUD/service/permission/STAFF isolation, conversion/merge idempotency and create/update/assign/status Playwright journeys.
 - **Other remaining:** Support vertical slice; CMS public/admin acceptance and real SMS delivery; generic SMS dispatcher; Audit event coverage; dashboard sample data; visual/accessibility regression.
 - **Gated:** Retail/Finance activation requires explicit owner commercial/legal decisions.
 - **Local state:** Windows working tree, stashes/untracked files, Docker and user PostgreSQL NOT VERIFIED; no local destructive action taken.
