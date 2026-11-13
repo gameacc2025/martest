@@ -47,6 +47,13 @@
 | CRM داخلی STAFF | `/crm` | `backend/src/modules/crm/index.js` |
 | Support tickets | `/support/*` | `backend/src/modules/support/index.js`, `support.service.js` |
 
+## پشتیبانی و تیکت‌ها — برش عملیاتی اولیه
+
+- `GET /api/v1/support/categories`، `GET /api/v1/support/tickets`، `POST /api/v1/support/tickets` و `GET /api/v1/support/tickets/:id` برای زمینه‌های CUSTOMER، COMPANY و STAFF با permissionهای `tickets.read` و `tickets.create` ثبت شده‌اند. سرویس، مالکیت را بر اساس requester user یا requester company محدود می‌کند.
+- `POST /api/v1/support/tickets/:id/messages` به `tickets.reply` نیاز دارد. پیام‌های PUBLIC برای مشارکت‌کنندگان قابل مشاهده‌اند؛ INTERNAL فقط برای STAFF دارای `tickets.update` مجاز است.
+- `PATCH /api/v1/support/tickets/:id/status` و `POST /api/v1/support/tickets/:id/assign` فقط برای STAFF با `tickets.update` هستند؛ `GET /api/v1/support/queues` نیز STAFF و `tickets.read` می‌خواهد.
+- دسته‌بندی‌ها، صف‌ها و SLAهای پایه با seed تکرارپذیر `backend/prisma/seeds/support.js` ایجاد می‌شوند. SLA فعلی بر اساس دقیقه سپری‌شده محاسبه می‌شود؛ تقویم کاری، آپلود/دانلود خصوصی پیوست، اعلان خودکار و مدیریت پیشرفته صف هنوز پیاده‌سازی نشده‌اند.
+
 ## فهرست کامل endpointها
 
 فهرست تمام routeهای ثبت‌شده Fastify شامل متد HTTP، مسیر کامل زیر `/api/v1` و خلاصه guardهای دسترسی در [API_ROUTE_INVENTORY.md](./API_ROUTE_INVENTORY.md) قرار دارد. این فهرست از فایل‌های route ماژول‌ها استخراج شده و تست `backend/src/utils/api-route-inventory.test.js` بررسی می‌کند که هر route ثبت‌شده در مستندات حضور داشته باشد.
