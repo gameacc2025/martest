@@ -95,7 +95,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).toContain('تأمین‌کنندگان ثبت‌شده')
     expect(source).toContain('<b>—</b>')
     expect(source).toContain('دیدگاه نمونه')
-    expect(source).toContain('سرویس در دسترس نیست')
+    expect(source).toContain('پس از اتصال سرویس نظرات')
     expect(source).toContain('محصولی با نشان منتخب برای نمایش دریافت نشد')
     expect(source).not.toContain('پرفروش‌ترین محصولات')
     expect(source).not.toContain('setInterval(ct, 1000)')
