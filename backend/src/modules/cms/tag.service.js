@@ -41,7 +41,6 @@ function tagSelectAdmin() {
     slug: true,
     name: true,
     createdAt: true,
-    updatedAt: true,
     _count: { select: { articles: true } },
   };
 }
