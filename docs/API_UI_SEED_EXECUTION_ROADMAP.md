@@ -21,7 +21,7 @@ The first implementation milestone is to make the Website's approved visual lang
 - B2C Cart / Checkout / Orders / Wishlist and retail payment/payout remain frozen under AD-4 until the owner approves the commercial decisions.
 - Finance and retail database foundations may remain inert until their activation gates are approved.
 - Keep Persian copy, Vazirmatn, RTL, responsive layouts, light/dark themes and accessible interaction states.
-- **Branch policy:** work directly on `main`; do not create feature branches, temporary branches or PRs. Agents may work in isolated detached worktrees/checkouts, but only the coordinator integrates reviewed patches as small commits onto the current `main` head. Never force-push.
+- **Branch policy:** work directly on `main`; do not create feature branches, temporary branches or PRs. Do not create branches, worktrees or detached checkouts. Read-only audits may run concurrently; the lead serializes all writes in the existing `main` checkout and owns every commit/push. Never force-push.
 - Never use production data as demo data. Demo records must be clearly synthetic and safe for local/development/test environments only.
 
 ## 3. Global delivery rules for every module
