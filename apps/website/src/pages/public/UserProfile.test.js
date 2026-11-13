@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
+import { computed, h, inject, provide } from 'vue'
+
+const TabsContext = Symbol('TabsContext')
 
 const { getProfile, updateProfile, changePassword, uploadAvatar, logout, routerPush } = vi.hoisted(() => ({
   getProfile: vi.fn(),
@@ -64,11 +67,34 @@ describe('Website account profile workspace', () => {
           },
           InputText: { inheritAttrs: false, props: ['modelValue'], emits: ['update:modelValue'], template: '<input :value="modelValue" v-bind="$attrs" @input="$emit(\'update:modelValue\', $event.target.value)" />' },
           Password: { inheritAttrs: false, props: ['modelValue'], emits: ['update:modelValue'], template: '<input :value="modelValue" v-bind="$attrs" @input="$emit(\'update:modelValue\', $event.target.value)" />' },
-          Tabs: { props: ['value'], emits: ['update:value'], template: '<div><slot /></div>' },
+          Tabs: {
+            props: ['value'],
+            emits: ['update:value'],
+            setup(props, { emit, slots }) {
+              provide(TabsContext, { value: computed(() => props.value), select: (value) => emit('update:value', value) })
+              return () => h('div', slots.default?.())
+            },
+          },
           TabList: { template: '<div><slot /></div>' },
-          Tab: { props: ['value'], template: '<button type="button"><slot /></button>' },
+          Tab: {
+            props: ['value'],
+            setup(props, { slots }) {
+              const tabs = inject(TabsContext)
+              return () => h('button', {
+                type: 'button',
+                'aria-selected': String(tabs?.value.value === props.value),
+                onClick: () => tabs?.select(props.value),
+              }, slots.default?.())
+            },
+          },
           TabPanels: { template: '<div><slot /></div>' },
-          TabPanel: { props: ['value'], template: '<div><slot /></div>' },
+          TabPanel: {
+            props: ['value'],
+            setup(props, { slots }) {
+              const tabs = inject(TabsContext)
+              return () => tabs?.value.value === props.value ? h('div', slots.default?.()) : null
+            },
+          },
           FileUpload: { template: '<button type="button">انتخاب تصویر</button>' },
         },
       },
@@ -98,7 +124,7 @@ describe('Website account profile workspace', () => {
     await wrapper.find('.profile-primary-actions button').trigger('click')
     await flushPromises()
 
-    expect(wrapper.find('[role="dialog"]').text()).toContain('ویرایش پروفایل')
+    expect(wrapper.find('button[aria-selected="true"]').text()).toContain('ویرایش پروفایل')
     expect(wrapper.find('#profile-first-name').exists()).toBe(true)
     expect(wrapper.find('#profile-last-name').exists()).toBe(true)
   })
