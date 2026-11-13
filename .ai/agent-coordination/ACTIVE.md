@@ -1,51 +1,54 @@
 # Agent Coordination — Current Board
 
-**Updated:** 2026-11-13
-**Repository:** `gameacc2025/martest`
-**Integration branch:** `main` only
-**Base audited remote SHA:** `928c221e50f8470f60b1a475c90cebf21b8b16f7`
-**Coordinator:** Main/lead agent
+**Updated:** 2026-11-13  
+**Repository:** `gameacc2025/martest`  
+**Integration branch:** `main` only  
+**Audited code baseline:** `48e73952e277703b70a351d4f0569fed48944b76`  
+**Latest documentation handoff before this board update:** see Git history after `2b7ca663`  
+**Coordinator:** Lead  
 **Owner communication:** Persian
 
 ## Operating policy
+
 - No new branches, worktrees, detached checkouts or pull requests.
-- No worker commits or pushes. Agents inspect and return scoped patches/evidence; lead alone integrates serially on main.
-- No overlapping file ownership. Lead owns shared files: app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global design tokens.
-- Preserve all local changes and database data. No destructive Git, Docker or DB operations without explicit approval.
-- Browser automation is authorized for CRM acceptance; run heavy tasks sequentially and close browser sessions after use.
-- Agents must inspect actual code/runtime, not infer completion from docs or prior summaries. Persian user-facing reports only.
+- Workers do not commit or push. Lead alone integrates reviewed changes on `main`.
+- No overlapping file ownership. Lead owns app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global tokens.
+- Preserve local edits, untracked files, stashes and database data.
+- No destructive Git/Docker/DB actions without explicit approval. Never bypass Fact-Forcing Gate or Auto Mode.
+- Browser automation is authorized for acceptance; run sequentially and record evidence.
+- Read-only remote source audit is complete. Local Windows workspace, Docker and PostgreSQL remain NOT VERIFIED.
 
-## Queue (do not start parallel implementation until local state is reconciled)
+## Prioritized queue
 
-| Priority | Lane | Status | Owner | Scope |
-|---|---|---|---|---|
-| P0 | Local Git/runtime reconciliation | READY | Lead | Local HEAD/status/stashes, Docker, PostgreSQL, migrations, seed import resolution |
-| P1 | CRM acceptance | WAITING P0 | CRM agent | Backend/API permissions, seed/idempotency, PKCE, Playwright end-to-end flows |
-| P2 | Backend inventory | WAITING P0 | Backend audit agent | All domain modules, authz/ownership, tests, seed coverage |
-| P2 | Website audit | WAITING P0 | Website agent | Routes/pages, real API integration, RFQ, CMS, auth, RTL/responsive |
-| P2 | Company audit | WAITING P0 | Company agent | Dashboard, products, company users, inquiries, ownership and API integration |
-| P2 | Admin audit | WAITING P0 | Admin agent | Admin routes/modules, CRUD, permissions, loading/error/empty states |
-| P2 | Shared architecture/UI | WAITING P0 | Lead + audit agent | Shared packages, design tokens, auth/API client, RTL and cross-app consistency |
-| P3 | Roadmap contracts | BLOCKED/REVIEW | Lead | API-1, API-2, API-3 and Marketplace/RFQ priorities |
-| HOLD | API-5 Retail | BLOCKED_BY_OWNER_DECISION | Unassigned | Requires commercial policy approval |
-| HOLD | API-6 Finance | BLOCKED_BY_OWNER_DECISION | Unassigned | Requires accounting/legal/payment policy approval |
+| Priority | Lane | Status | Scope / exit criteria |
+|---|---|---|---|
+| P0-1 | Workspace dependency + CI recovery | READY | Fix Admin quill importer in pnpm-lock; frozen install; frontend/shared tests; three app builds; green CI |
+| P0-2 | CMS FAQ/Page integrity | BLOCKER | Resolve missing Prisma FAQ/Page delegates; align schema/migration/services/routes/client/UI/seed/tests |
+| P0-3 | Account recovery | BLOCKER | Public secure reset flow; real SMS/Email delivery; challenge limits/expiry/consume; reset + session invalidation |
+| P0-4 | API/docs + agent-policy reconciliation | READY AFTER P0-1 | Add CMS/CRM route docs and inventory coverage; remove conflicting detached-worktree and stale palette guidance |
+| P0-5 | Runtime/migration/seed verification | WAITING P0-1..P0-4 | Safe Docker/Postgres checks, migration status, seed run and two-run idempotency; preserve all data |
+| P1-1 | CRM acceptance | WAITING P0 | Add request schemas and functional/security tests; seed idempotency; Playwright CRM workflows |
+| P1-2 | Support vertical slice | WAITING P0 | Backend API/client, tenant isolation, messages/attachments/queues/SLA and real UI in all apps |
+| P1-3 | Notifications + Audit | WAITING P0 | Generic SMS event dispatch and complete audit coverage/retention/redaction |
+| P1-4 | Dashboards/reporting | WAITING P0 | Replace sample KPIs with real tenant-scoped aggregates |
+| P1-5 | Three-app regression | WAITING CI | Frontend/shared tests, builds, browser journeys, RTL/accessibility/responsive checks |
+| P2 | Retail/Inventory/Orders | HOLD — OWNER DECISION | No checkout/payment activation before commercial approval and full server-side lifecycle |
+| P2 | Finance/Settlement | HOLD — OWNER DECISION | Depends on Retail plus currency/commission/tax/legal/payout policies |
+| P3 | Enterprise future modules | DEFERRED | Procurement, HR, projects, advanced logistics/warehouse, marketing automation, BI and integrations need separate scope |
 
-## P0 acceptance
-- [ ] Local main and origin/main relationship recorded; local edits/stashes preserved.
-- [ ] Docker containers and health inspected with bounded commands.
-- [ ] PostgreSQL connectivity and migration status checked read-only.
-- [ ] Every seed import resolves to a real file; CMS password import discrepancy resolved.
-- [ ] No destructive operation performed.
-- [ ] Concise evidence added to WORKLOG and current-task.
+## Verified blockers / risks
 
-## P1 CRM acceptance
-- [ ] Prisma validation and migration status verified.
-- [ ] Development seed succeeds and safe rerun/idempotency verified.
-- [ ] Backend CRM routes/services/validation and access boundaries verified.
-- [ ] Admin build and API client tests pass.
-- [ ] PKCE/session persistence works in Playwright.
-- [ ] Sources, Accounts, Contacts, Leads/conversion, Opportunities, Tasks, Activities and Notes browser workflows pass.
-- [ ] Screenshots/trace or equivalent evidence retained; failures fixed and retested.
+1. Current code SHA `48e73952`: migration workflow PASS; backend tests and Prisma Client generation PASS; workspace dependency install FAIL; frontend/shared tests SKIPPED; frontend build FAILURE; runtime Compose/browser workflow skipped after install failure.
+2. `apps/admin/package.json` includes quill but the apps/admin importer in `pnpm-lock.yaml` does not.
+3. CMS FAQ/Page services use Prisma delegates absent from schema.
+4. Forgot/reset password client endpoints are not registered in backend; AuthChallenge route requires authentication and provider send is TODO.
+5. Support schema exists but no backend module/routes/API client; UI remains preview.
+6. CRM API/UI/seed source exists, but request schemas, functional tests and CRM E2E are incomplete.
+7. Retail/Finance are DB foundations only; UI contains preview/sample values.
+8. API route docs/inventory omit CMS/CRM; route inventory test excludes them.
+9. Generic SMS dispatch is explicitly not implemented.
+10. Local runtime and seed status remain NOT VERIFIED.
 
-## Handoff format
-Persian summary; task/lane; base main SHA; exact changed paths; commands and exit codes; tests and counts; seed/browser evidence; risks/blockers; commit SHA and remote-main verification.
+## Required handoff
+
+Persian summary; task/lane; exact base main SHA; exact paths; commands and exit codes; test counts; seed/browser evidence; risks/blockers; commit SHA and verified remote-main SHA.
