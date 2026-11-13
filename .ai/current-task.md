@@ -1,43 +1,38 @@
 # Current Task — CI / Runtime Recovery and Project Backlog
 
 **Updated:** 2026-11-13  
-**Status:** SOURCE FIXES IN PROGRESS; CI/RUNTIME RE-RUNS PENDING.  
+**Status:** P0 CI / Runtime / Seed / Browser acceptance PASS; P1 implementation remains.  
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main` only.  
-**Current source baseline:** `06daab07ff446aab577b885092a45c382ccd11ad` (docs updates follow in Git history).  
-**Audit/backlog:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`  
+**Verified code baseline:** `4e5d25e38ecc63a40fe1477b9b47091340b5b298`  
+**Latest docs commit:** `0c11f53f550b35eb3900c66b4fb60140a3dc1f58`  
+**Backlog:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`  
 **Owner communication:** Persian.
 
-## Confirmed progress
+## Verified completed work
 
-1. Frozen workspace install now passes; `apps/admin` quill is present in its lockfile importer. The earlier lockfile-mismatch diagnosis was incorrect.
-2. Last completed CI run on `f8baed460b443270c0b6bd7532d55a99f8714b5a`: Prisma Client generation, Backend tests and Website/Company/Admin build PASS. Frontend/shared tests still had 7 failures; follow-up test and source fixes were pushed through `06daab0`; rerun is pending.
-3. Audit route mounting is normalized to `/api/v1/audit/*`; stale duplicate OpenAPI keys removed. Backend route inventory/OpenAPI tests passed in the previous completed CI run.
-4. CMS FAQ/Page models, migration `20261113000100_restore_cms_faq_pages`, service/routes and seed now exist. Runtime verification is pending.
-5. Public password recovery routes and SMS OTP service exist, including hashed single-use challenge, rate limits, expiry, attempt limits, atomic password update and refresh-session revocation. Real SMS provider configuration and browser acceptance remain unverified.
-6. Runtime failure was traced to PostgreSQL enum drift: schema included `LOGIN_MFA`, but DB enum did not. Added additive migration `20261113000300_add_login_mfa_challenge_purpose`. Migration validation and runtime/seed reruns are pending.
-7. Support is still DB foundation only; CRM source exists but request schemas/functional tests/E2E are incomplete. Retail and Finance remain gated by owner decisions.
+1. CI `43460213725`: frozen workspace install, architecture graph, all Frontend/Shared tests, Prisma Client generation, Backend tests, and Website/Company/Admin builds all PASS.
+2. Database migration validation `43460213720`: fresh PostgreSQL migration apply and migration-state verification PASS.
+3. Runtime `43460213998`: Compose configuration/build/start, Backend + three panel health checks, migration status, all development seeds run twice, Chromium install and browser smoke PASS.
+4. All 8 Playwright tests PASS: Website/Company/Admin SPA rendering at 360/768/1366/1920/2560, API proxy checks for all three panels, STAFF login → PKCE handoff to Admin → logout, and storefront viewport containment.
+5. Fixed stale E2E selector `.shop-page` to actual homepage root `.reference-home`; commit `4e5d25e38ecc63a40fe1477b9b47091340b5b298`.
+6. Updated prioritized backlog with exact CI/runtime evidence; docs commit `0c11f53f550b35eb3900c66b4fb60140a3dc1f58`.
 
-## Current execution queue
+## Remaining execution queue
 
-### P0 — Establish reliable CI and runtime
-1. **P0-1 Frontend tests:** get all Vitest suites green; then CI and three-app builds.
-2. **P0-2 Runtime:** apply all migrations on disposable PostgreSQL; all Compose services healthy; run seeds twice; complete Chromium/browser smoke for Website/Company/Admin.
-3. **P0-3 CMS/Recovery acceptance:** FAQ/Page public/admin CRUD and permissions; SMS provider config and reset flow E2E.
-4. **P0-4 Docs/policy:** keep API inventory/OpenAPI aligned; remove conflicting worktree/detached checkout rules and stale palette references.
+### P1 — operational domain completion
+- **CRM acceptance:** add Fastify request/response schemas, functional CRUD/service/permission tests, STAFF/tenant isolation checks, conversion/merge idempotency coverage and a real Playwright CRM journey. Preserve existing CRM implementation; do not rewrite from scratch.
+- **Support vertical slice:** implement tenant-safe backend routes/services, public/internal messages, queues/assignment/state machine, private authorized attachments, SLA, notifications, API client and real Website/Company/Admin screens. Existing support UI is preview-only and DB models alone are not completion.
+- **CMS/Recovery acceptance:** source includes FAQ/Page models/migrations/services/routes/seeds and password-recovery OTP flow. Add/verify public/admin CRUD and permissions, real SMS provider configuration, and full password-reset browser test. CI seed success does not prove live SMS delivery.
+- **Notifications/Audit:** generic SMS outbox/retry/consent/quota/idempotency; audit event coverage, redaction and retention.
+- **Dashboards:** replace or clearly mark sample Company/Settlement/Operations KPIs; use tenant/date/currency-scoped aggregates.
+- **UI regression:** expand beyond smoke to visual, RTL, keyboard/accessibility and feature-level journeys.
 
-### P1 — Operational domain completion
-- CRM Fastify schemas, CRUD/service/tenant/permission tests, seed idempotency and Playwright workflow.
-- Support backend/service/API client plus tenant-safe Website/Company/Admin ticket journeys, private attachments, queues, assignment and SLA.
-- Generic SMS outbox/retry/consent/quota/idempotency; Audit event coverage, redaction and retention.
-- Replace sample Company dashboard/Settlement/Operations KPIs with real tenant-scoped aggregates.
-- Three-app RTL, responsive, keyboard/accessibility and browser regression.
-
-### P2 — Explicitly gated
+### P2 — explicitly gated
 - Retail/Inventory/Orders/Payments/Fulfillment/Returns: do not activate checkout until owner approves commercial rules.
 - Finance/Settlement: wait for currency, tax, commission, legal and payout decisions plus Retail lifecycle.
 
-### P3 — Deferred
+### P3 — deferred
 Procurement, HR, projects, advanced logistics/warehouse, marketing automation, BI and integrations need separate approved scope.
 
 ## Git / safety rules
@@ -47,8 +42,8 @@ Procurement, HR, projects, advanced logistics/warehouse, marketing automation, B
 - Preserve local edits, untracked files, stashes and DB data.
 - No reset/clean/force push, local DB reset/drop, or volume deletion.
 - Do not bypass Fact-Forcing Gate or Auto Mode.
-- Report PASS only with exact observed CI/runtime/browser evidence.
+- CI Runtime was tested on disposable GitHub Actions infrastructure; local Windows working tree/Docker/PostgreSQL remain NOT VERIFIED.
 
 ## Handoff requirements
 
-Persian report with exact base/resulting main SHA, changed paths, workflow URLs, test counts, migration/seed idempotency, browser evidence and blockers. Local Windows Git/Docker/PostgreSQL remain NOT VERIFIED until directly observed.
+Persian report with exact main SHA, changed paths, workflow URLs, test counts, migration/seed idempotency, browser evidence and blockers. Local environment remains NOT VERIFIED until directly observed.
