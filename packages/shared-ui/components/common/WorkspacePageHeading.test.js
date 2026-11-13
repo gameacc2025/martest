@@ -11,18 +11,20 @@ describe('WorkspacePageHeading', () => {
     expect(wrapper.find('h1').text()).toBe('مدیریت محصولات')
   })
 
-  it('keeps the heading visible by default (no sr-only modifier)', () => {
+  it('keeps the heading available to assistive technology by default', () => {
     const wrapper = mount(WorkspacePageHeading, {
       props: { title: 'مدیریت شرکت‌ها' },
     })
-    expect(wrapper.find('.workspace-page-heading--sr-only').exists()).toBe(false)
+    expect(wrapper.find('h1').exists()).toBe(true)
+    expect(wrapper.find('.workspace-page-heading-copy--sr-only').exists()).toBe(true)
   })
 
   it('applies the sr-only modifier when requested (breadcrumb already shows location)', () => {
     const wrapper = mount(WorkspacePageHeading, {
       props: { title: 'مدیریت نقش‌ها', srOnly: true },
     })
-    expect(wrapper.find('.workspace-page-heading--sr-only').exists()).toBe(true)
+    expect(wrapper.find('h1').exists()).toBe(true)
+    expect(wrapper.find('.workspace-page-heading-copy--sr-only').exists()).toBe(true)
   })
 
   it('supports optional actions and omits an empty description', () => {
