@@ -2,23 +2,26 @@
 
 این فایل شاخص وضعیت جاری و تحویل‌های تأییدشده است؛ تاریخچه کامل در Git نگهداری می‌شود.
 
-## 2026-11-13 — CI-RUNTIME-RECOVERY
+## 2026-11-13 — CRM-LEAD-REQUEST-VALIDATION
 
-- **Status:** P0 CI, migration, runtime, seed and browser smoke acceptance PASS.
-- **Code fix:** `e2e/tests/panels.spec.js` changed stale `.shop-page` selector to actual `.reference-home`; commit `4e5d25e38ecc63a40fe1477b9b47091340b5b298`.
-- **CI:** run `43460213725` PASS — frozen install, architecture graph, Frontend/Shared tests, Prisma generation, Backend tests, all three app builds.
-- **Migration validation:** run `43460213720` PASS — fresh PostgreSQL migration apply and migration state.
-- **Runtime:** run `43460213998` PASS — Compose build/start, all service health endpoints, migration status, all development seeds twice, Chromium, browser smoke.
-- **Browser:** 8/8 Playwright tests PASS — Website/Company/Admin SPA at five viewport widths, three API proxies, STAFF login → Admin handoff → logout, storefront responsive containment.
-- **Docs:** backlog refreshed with evidence and priorities; commit `0c11f53f550b35eb3900c66b4fb60140a3dc1f58`.
-- **Remaining:** CRM functional/schema/tenant/E2E acceptance; Support operational vertical slice; CMS public/admin acceptance + real SMS delivery; generic SMS dispatcher; Audit event coverage; dashboard sample data; visual/accessibility regression.
+- **Status:** PARTIAL implementation; request validation tests PASS in full CI.
+- **Changes:** Fastify JSON schemas added for CRM lead create/update/assign/status/merge; tests cover required fields, score bounds, id format, assignment/status/merge contracts and permission denial.
+- **Implementation commits:** `724d603744443377ed52b20221928eb5f04f1aab`, `a6b36a58a66b2850dc0c2c6b8880cb13418095bd`, `430e74edcf866b57fd5961731cf1480f5c93c5a8`, `369500e0659a508eb371a16dd226220de78c45b6`, `0b78ae7ff24e55e9beec55a53739d059952bab56`.
+- **Validation detail:** Fastify removes additional body properties by default; tests assert actual validation behavior. Nullable fields use JSON Schema `anyOf` to avoid Ajv strict-union warnings.
+- **CI:** run `43461538717` PASS — frozen install, frontend/shared tests, Prisma generation, backend tests and all three builds.
+- **Migration validation:** run `43461538821` PASS.
+- **Runtime:** run `43461538743` PASS — Compose, health, migration status, seeds twice, Chromium and browser smoke 8/8.
+- **Docs:** backlog refreshed with CRM partial state and current workflow evidence; commit `c00307d9e27b7898833a3a6f3bae16903e60a205`.
+- **Still required for CRM:** schemas for remaining endpoint families, functional CRUD/service tests, STAFF/tenant isolation, conversion/merge idempotency and CRM Playwright journey.
+- **Other remaining:** Support vertical slice; CMS public/admin acceptance and real SMS delivery; generic SMS dispatcher; Audit event coverage; dashboard sample data; visual/accessibility regression.
 - **Gated:** Retail/Finance activation requires explicit owner commercial/legal decisions.
 - **Local state:** Windows working tree, stashes/untracked files, Docker and user PostgreSQL NOT VERIFIED; no local destructive action taken.
 
-## 2026-11-13 — PROJECT-SOURCE-AUDIT
+## 2026-11-13 — CI-RUNTIME-RECOVERY
 
-- Remote source audit and prioritized backlog completed. Initial findings were corrected as new commits and CI evidence became available.
-- See `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` for current status matrix, evidence, risks and priorities.
+- P0 CI, migration, runtime, seed and browser smoke acceptance PASS.
+- E2E stale selector corrected from `.shop-page` to `.reference-home`; commit `4e5d25e38ecc63a40fe1477b9b47091340b5b298`.
+- See `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` for evidence and priorities.
 
 ## Current verified project facts
 
