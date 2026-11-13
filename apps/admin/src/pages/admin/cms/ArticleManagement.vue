@@ -301,3 +301,86 @@ onMounted(async () => {
 .article-form__actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:.5rem; padding-top:.5rem; border-top:1px solid var(--ds-color-border); }
 @media(max-width:640px) { .article-intro { align-items:flex-start; flex-direction:column; } .article-form__grid { grid-template-columns:1fr; } .article-toolbar > * { width:100%; } }
 </style>
+<template>
+  <div class="article-management ds-stack" dir="rtl">
+    <WorkspacePageHeading title="مدیریت مقالات مجله" heading-id="article-management-title" />
+    <div class="article-intro">
+      <div><span class="article-intro__eyebrow">مقالات مجله</span><h2>فهرست مقالات</h2><p>مقالات منتشرشده، پیش‌نویس‌ها، در بازبینی و زمان‌بندی‌شده را مدیریت کنید.</p></div>
+      <Button v-if="canCreate" label="مقاله جدید" icon="pi pi-plus" @click="openCreate" />
+    </div>
+    <div class="article-toolbar">
+      <InputText v-model="search" placeholder="جستجو در عنوان، چکیده یا محتوا…" @keyup.enter="load" />
+      <Select v-model="statusFilter" :options="statusOptions" option-label="label" option-value="value" placeholder="همه وضعیت‌ها" show-clear @change="load" />
+      <Select v-model="typeFilter" :options="typeOptions" option-label="label" option-value="value" placeholder="همه انواع" show-clear @change="load" />
+      <Button label="جستجو" icon="pi pi-search" severity="secondary" outlined @click="load" />
+    </div>
+    <div class="article-table-wrap">
+      <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows :paginator="true" :rows="10" :totalRecords="totalRecords" @page="onPage">
+        <Column header="تصویر" style="width: 100px">
+          <template #body="{ data }"><img v-if="data.coverImageKey" :src="`/api/v1/uploads/${data.coverImageKey}`" :alt="data.title" class="article-thumb" /><span v-else>—</span></template>
+        </Column>
+        <Column field="title" header="عنوان" style="min-width: 250px" />
+        <Column field="type" header="نوع" style="width: 100px" />
+        <Column header="دسته‌بندی‌ها" style="width: 180px">
+          <template #body="{ data }"><span v-if="data.categories?.length">{{ data.categories.map(c => c.category?.name).filter(Boolean).join('، ') }}</span><span v-else>—</span></template>
+        </Column>
+        <Column header="برچسب‌ها" style="width: 150px">
+          <template #body="{ data }"><span v-if="data.tags?.length">{{ data.tags.map(t => t.tag?.name).filter(Boolean).join('، ') }}</span><span v-else>—</span></template>
+        </Column>
+        <Column header="وضعیت" style="width: 130px">
+          <template #body="{ data }"><Tag :value="statusLabel(data.status)" :severity="statusTone(data.status)" /></template>
+        </Column>
+        <Column header="انتشار" style="width: 160px">
+          <template #body="{ data }"><small v-if="data.publishedAt">{{ formatDate(data.publishedAt) }}</small><span v-else-if="data.scheduledAt">{{ formatDate(data.scheduledAt) }} (زمان‌بندی)</span><span v-else>—</span></template>
+        </Column>
+        <Column header="عملیات" style="width: 150px">
+          <template #body="{ data }">
+            <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش مقاله" @click="edit(data)" />
+            <Button v-if="canDelete && data.status !== 'PUBLISHED'" icon="pi pi-trash" text rounded severity="danger" aria-label="حذف مقاله" @click="deleteArticle(data)" />
+            <Button v-if="canUpdate && data.status === 'PUBLISHED'" icon="pi pi-archive" text rounded severity="warn" aria-label="بایگانی مقاله" @click="archiveArticle(data)" />
+          </template>
+        </Column>
+        <template #empty><div class="article-empty">هنوز مقاله‌ای ثبت نشده است.</div></template>
+      </DataTable>
+      <div class="article-pagination" v-if="totalRecords > 10">
+        <Paginator :first="first" :rows="rows" :totalRecords="totalRecords" @page="onPage" :pageLinkSize="5" />
+      </div>
+    </div>
+
+    <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش مقاله' : 'ایجاد مقاله جدید'" modal :style="{ width: 'min(900px, 96vw)' }" :closable="!saving">
+      <div class="article-form">
+        <div class="article-form__field"><label for="article-title">عنوان *</label><InputText id="article-title" v-model="form.title" maxlength="220" /></div>
+        <div class="article-form__field"><label for="article-slug">اسلاگ (شناسه URL) *</label><InputText id="article-slug" v-model="form.slug" maxlength="220" placeholder="به‌صورت خودکار از عنوان تولید می‌شود" /></div>
+        <div class="article-form__field"><label for="article-excerpt">چکیده *</label><Textarea id="article-excerpt" v-model="form.excerpt" rows="3" maxlength="500" auto-resize placeholder="خلاصه کوتاه برای نمایش در لیست و SEO" /></div>
+        <div class="article-form__field"><label for="article-content">محتوا *</label><Editor v-model="form.content" :editorStyle="{ height: '400px' }" :plugins="editorPlugins" toolbar="bold italic underline strikethrough | heading | alignleft aligncenter alignright | bullist numlist | outdent indent | link image table | code blockquote | undo redo" /></div>
+        <div class="article-form__grid">
+          <div class="article-form__field"><label for="article-type">نوع مقاله *</label><Select id="article-type" v-model="form.type" :options="typeOptions" option-label="label" option-value="value" placeholder="نوع را انتخاب کنید" /></div>
+          <div class="article-form__field"><label for="article-status">وضعیت *</label><Select id="article-status" v-model="form.status" :options="statusOptions" option-label="label" option-value="value" placeholder="وضعیت را انتخاب کنید" /></div>
+        </div>
+        <div class="article-form__grid">
+          <div class="article-form__field"><label for="article-cover">تصویر جلد</label><div class="article-upload"><input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="uploadImage" /><Button v-if="canUpload" label="انتخاب تصویر" icon="pi pi-upload" severity="secondary" outlined :loading="uploading" @click="fileInput?.click()" /><span>{{ form.coverImageKey ? 'تصویر بارگذاری شده است' : 'JPG، PNG یا WebP — حداکثر ۸ مگابایت' }}</span></div><img v-if="form.coverImageKey" :src="`/api/v1/uploads/${form.coverImageKey}`" alt="پیش‌نمایش تصویر جلد" class="article-preview" /></div>
+          <div class="article-form__field"><label for="article-scheduled">زمان‌بندی انتشار</label><InputText id="article-scheduled" v-model="form.scheduledAt" placeholder="تاریخ و ساعت انتشار (اختیاری)" type="datetime-local" /></div>
+        </div>
+        <div class="article-form__field"><label>دسته‌بندی‌ها *</label><MultiSelect v-model="form.categories" :options="categoryOptions" option-label="name" option-value="id" placeholder="دسته‌بندی‌ها را انتخاب کنید" display="chip" maxSelectedLabels="3" /></div>
+        <div class="article-form__field"><label>برچسب‌ها</label><MultiSelect v-model="form.tags" :options="tagOptions" option-label="name" option-value="id" placeholder="برچسب‌ها را انتخاب کنید" display="chip" /></div>
+
+        <fieldset class="article-form__fieldset">
+          <legend>تنظیمات SEO</legend>
+          <div class="article-form__grid">
+            <div class="article-form__field"><label for="article-meta-title">عنوان SEO (Meta Title)</label><InputText id="article-meta-title" v-model="form.metaTitle" maxlength="70" placeholder="حداکثر ۷۰ کاراکتر" /></div>
+            <div class="article-form__field"><label for="article-meta-desc">توضیحات SEO (Meta Description)</label><InputText id="article-meta-desc" v-model="form.metaDescription" maxlength="160" placeholder="حداکثر ۱۶۰ کاراکتر" /></div>
+          </div>
+          <div class="article-form__field"><label for="article-canonical">Canonical URL</label><InputText id="article-canonical" v-model="form.canonicalUrl" placeholder="https://example.com/articles/slug" /></div>
+          <div class="article-form__field"><label for="article-indexable">قابل ایندکس‌سازی</label><InputSwitch id="article-indexable" v-model="form.isIndexable" /></div>
+        </fieldset>
+
+        <div class="article-form__actions">
+          <Button label="انصراف" icon="pi pi-times" text @click="closeDialog" :disabled="saving" />
+          <Button label="ذخیره" icon="pi pi-check" @click="save" :loading="saving" />
+        </div>
+      </div>
+    </Dialog>
+
+    <ConfirmDialog />
+  </div>
+</template>
