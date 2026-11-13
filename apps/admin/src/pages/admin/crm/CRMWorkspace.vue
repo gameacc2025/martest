@@ -6,6 +6,13 @@ import { useAuthStore } from '../../../stores/auth'
 const props = defineProps({ section: { type: String, default: 'overview' } })
 const authStore = useAuthStore()
 const canMergeLeads = computed(() => authStore.hasPermission('crm.leads.merge'))
+const canManageSources = computed(() => authStore.hasPermission('crm.sources.manage'))
+const canManageAccounts = computed(() => authStore.hasPermission('crm.accounts.create') || authStore.hasPermission('crm.accounts.update'))
+const canManageContacts = computed(() => authStore.hasPermission('crm.contacts.create') || authStore.hasPermission('crm.contacts.update'))
+const canManageOpportunities = computed(() => authStore.hasPermission('crm.opportunities.create') || authStore.hasPermission('crm.opportunities.update'))
+const canManageTasks = computed(() => authStore.hasPermission('crm.tasks.create') || authStore.hasPermission('crm.tasks.update') || authStore.hasPermission('crm.tasks.assign'))
+const canManageActivities = computed(() => authStore.hasPermission('crm.activities.create'))
+const canManageNotes = computed(() => authStore.hasPermission('crm.notes.create'))
 const activeSection = computed(() => props.section)
 const loading = ref(false)
 const saving = ref(false)
@@ -23,16 +30,39 @@ const accountContacts = ref([])
 const selectedAccount = ref(null)
 const accountLoading = ref(false)
 const showOpportunityCreate = ref(false)
+const showOpportunityEdit = ref(false)
+const editingOpportunity = ref(null)
 const opportunityForm = ref({ accountId: '', title: '', amount: '0', currency: 'IRR', expectedCloseAt: '' })
 const search = ref('')
 const status = ref('')
 const showCreate = ref(false)
+const showSourceCreate = ref(false)
+const showSourceEdit = ref(false)
+const editingSource = ref(null)
+const sourceForm = ref({ code: '', label: '', isActive: true, sortOrder: 0 })
 const form = ref({ displayName: '', companyName: '', email: '', phone: '', score: 0, sourceId: '' })
 const selectedLead = ref(null)
 const leadTimeline = ref([])
 const duplicates = ref([])
 const detailLoading = ref(false)
 const actionError = ref('')
+const showConvertConfirm = ref(false)
+const showAccountCreate = ref(false)
+const showAccountEdit = ref(false)
+const editingAccount = ref(null)
+const accountForm = ref({ displayName: '', accountType: 'PROSPECT', lifecycle: 'ACTIVE', source: '', notes: '', ownerUserId: '' })
+const showContactCreate = ref(false)
+const showContactEdit = ref(false)
+const editingContact = ref(null)
+const contactForm = ref({ name: '', title: '', email: '', phone: '', isPrimary: false, notes: '' })
+const showTaskCreate = ref(false)
+const showTaskEdit = ref(false)
+const editingTask = ref(null)
+const taskForm = ref({ title: '', description: '', priority: 'NORMAL', dueAt: '', leadId: '', accountId: '', opportunityId: '', assigneeUserId: '' })
+const showActivityCreate = ref(false)
+const activityForm = ref({ type: 'CALL', subject: '', body: '', durationMinutes: null, outcome: '', leadId: '', accountId: '', opportunityId: '' })
+const showNoteCreate = ref(false)
+const noteForm = ref({ body: '', visibility: 'TEAM', leadId: '', accountId: '', opportunityId: '' })
 
 const stats = computed(() => [
   { label: 'کل سرنخ‌ها', value: dashboard.value?.leads?.total ?? '—', icon: 'pi pi-users' },
@@ -240,6 +270,242 @@ async function createFollowUp(lead) {
     actionError.value = errorMessage(err)
   }
 }
+
+// ===== SOURCE MANAGEMENT =====
+async function createSource() {
+  if (!canManageSources.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    await crmApi.createSource({ ...sourceForm.value, sortOrder: Number(sourceForm.value.sortOrder), isActive: Boolean(sourceForm.value.isActive) })
+    showSourceCreate.value = false
+    sourceForm.value = { code: '', label: '', isActive: true, sortOrder: 0 }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+async function editSource(source) {
+  if (!canManageSources.value) return
+  editingSource.value = source
+  sourceForm.value = { code: source.code, label: source.label, isActive: source.isActive, sortOrder: source.sortOrder }
+  showSourceEdit.value = true
+}
+async function updateSource() {
+  if (!canManageSources.value || !editingSource.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    await crmApi.updateSource(editingSource.value.id, { ...sourceForm.value, sortOrder: Number(sourceForm.value.sortOrder), isActive: Boolean(sourceForm.value.isActive) })
+    showSourceEdit.value = false
+    editingSource.value = null
+    sourceForm.value = { code: '', label: '', isActive: true, sortOrder: 0 }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+
+// ===== ACCOUNT MANAGEMENT =====
+async function createAccount() {
+  if (!canManageAccounts.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    const payload = { ...accountForm.value }
+    if (payload.ownerUserId === '') delete payload.ownerUserId
+    await crmApi.createAccount(payload)
+    showAccountCreate.value = false
+    accountForm.value = { displayName: '', accountType: 'PROSPECT', lifecycle: 'ACTIVE', source: '', notes: '', ownerUserId: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+async function editAccount(account) {
+  if (!canManageAccounts.value) return
+  editingAccount.value = account
+  accountForm.value = { displayName: account.displayName, accountType: account.accountType || 'PROSPECT', lifecycle: account.lifecycle || 'ACTIVE', source: account.source || '', notes: account.notes || '', ownerUserId: account.ownerUserId ? String(account.ownerUserId) : '' }
+  showAccountEdit.value = true
+}
+async function updateAccount() {
+  if (!canManageAccounts.value || !editingAccount.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    const payload = { ...accountForm.value }
+    if (payload.ownerUserId === '') delete payload.ownerUserId
+    await crmApi.updateAccount(editingAccount.value.id, payload)
+    showAccountEdit.value = false
+    editingAccount.value = null
+    accountForm.value = { displayName: '', accountType: 'PROSPECT', lifecycle: 'ACTIVE', source: '', notes: '', ownerUserId: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+
+// ===== CONTACT MANAGEMENT =====
+async function createContact() {
+  if (!canManageContacts.value || !selectedAccount.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    await crmApi.createContact(selectedAccount.value.id, { ...contactForm.value, isPrimary: Boolean(contactForm.value.isPrimary) })
+    showContactCreate.value = false
+    contactForm.value = { name: '', title: '', email: '', phone: '', isPrimary: false, notes: '' }
+    accountContacts.value = unwrap(await crmApi.listContacts(selectedAccount.value.id)) || []
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+async function editContact(contact) {
+  if (!canManageContacts.value) return
+  editingContact.value = contact
+  contactForm.value = { name: contact.name, title: contact.title || '', email: contact.email || '', phone: contact.phone || '', isPrimary: contact.isPrimary, notes: contact.notes || '' }
+  showContactEdit.value = true
+}
+async function updateContact() {
+  if (!canManageContacts.value || !editingContact.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    await crmApi.updateContact(editingContact.value.id, { ...contactForm.value, isPrimary: Boolean(contactForm.value.isPrimary) })
+    showContactEdit.value = false
+    editingContact.value = null
+    contactForm.value = { name: '', title: '', email: '', phone: '', isPrimary: false, notes: '' }
+    if (selectedAccount.value) accountContacts.value = unwrap(await crmApi.listContacts(selectedAccount.value.id)) || []
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+
+// ===== OPPORTUNITY EDIT =====
+async function editOpportunity(opp) {
+  if (!canManageOpportunities.value) return
+  editingOpportunity.value = opp
+  opportunityForm.value = { accountId: String(opp.accountId), title: opp.title, amount: String(opp.amount || 0), currency: opp.currency || 'IRR', expectedCloseAt: opp.expectedCloseAt ? new Date(opp.expectedCloseAt).toISOString().slice(0, 10) : '' }
+  showOpportunityEdit.value = true
+}
+async function updateOpportunity() {
+  if (!canManageOpportunities.value || !editingOpportunity.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    await crmApi.updateOpportunity(editingOpportunity.value.id, { ...opportunityForm.value, accountId: Number(opportunityForm.value.accountId), amount: String(opportunityForm.value.amount) })
+    showOpportunityEdit.value = false
+    editingOpportunity.value = null
+    opportunityForm.value = { accountId: '', title: '', amount: '0', currency: 'IRR', expectedCloseAt: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+
+// ===== CONVERSION CONFIRMATION =====
+async function confirmConvertLead(lead) {
+  if (!authStore.hasPermission('crm.leads.convert')) return
+  showConvertConfirm.value = true
+  selectedLead.value = lead
+}
+async function executeConvertLead() {
+  if (!selectedLead.value) return
+  actionError.value = ''
+  try {
+    await crmApi.convertLead(selectedLead.value.id)
+    showConvertConfirm.value = false
+    selectedLead.value = null
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+}
+
+// ===== TASK MANAGEMENT =====
+async function createTask() {
+  if (!canManageTasks.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    const payload = { ...taskForm.value }
+    if (payload.leadId) payload.leadId = Number(payload.leadId)
+    if (payload.accountId) payload.accountId = Number(payload.accountId)
+    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
+    if (payload.assigneeUserId) payload.assigneeUserId = Number(payload.assigneeUserId)
+    if (payload.dueAt) payload.dueAt = new Date(payload.dueAt)
+    await crmApi.createTask(payload)
+    showTaskCreate.value = false
+    taskForm.value = { title: '', description: '', priority: 'NORMAL', dueAt: '', leadId: '', accountId: '', opportunityId: '', assigneeUserId: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+async function editTask(task) {
+  if (!canManageTasks.value) return
+  editingTask.value = task
+  taskForm.value = { title: task.title, description: task.description || '', priority: task.priority || 'NORMAL', dueAt: task.dueAt ? new Date(task.dueAt).toISOString().slice(0, 16) : '', leadId: task.leadId ? String(task.leadId) : '', accountId: task.accountId ? String(task.accountId) : '', opportunityId: task.opportunityId ? String(task.opportunityId) : '', assigneeUserId: task.assigneeUserId ? String(task.assigneeUserId) : '' }
+  showTaskEdit.value = true
+}
+async function updateTask() {
+  if (!canManageTasks.value || !editingTask.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    const payload = { ...taskForm.value }
+    if (payload.leadId) payload.leadId = Number(payload.leadId)
+    if (payload.accountId) payload.accountId = Number(payload.accountId)
+    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
+    if (payload.assigneeUserId) payload.assigneeUserId = Number(payload.assigneeUserId)
+    if (payload.dueAt) payload.dueAt = new Date(payload.dueAt)
+    await crmApi.updateTask(editingTask.value.id, payload)
+    showTaskEdit.value = false
+    editingTask.value = null
+    taskForm.value = { title: '', description: '', priority: 'NORMAL', dueAt: '', leadId: '', accountId: '', opportunityId: '', assigneeUserId: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+async function assignTaskDialog(task) {
+  if (!authStore.hasPermission('crm.tasks.assign')) return
+  const assigneeId = window.prompt('شناسه کارمند مسئول را وارد کنید:')
+  if (!assigneeId?.trim()) return
+  actionError.value = ''
+  try {
+    await crmApi.assignTask(task.id, Number(assigneeId))
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+}
+
+// ===== ACTIVITY CREATION =====
+async function createActivity() {
+  if (!canManageActivities.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    const payload = { ...activityForm.value }
+    if (payload.leadId) payload.leadId = Number(payload.leadId)
+    if (payload.accountId) payload.accountId = Number(payload.accountId)
+    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
+    if (payload.durationMinutes) payload.durationMinutes = Number(payload.durationMinutes)
+    if (payload.occurredAt) payload.occurredAt = new Date(payload.occurredAt)
+    else payload.occurredAt = new Date()
+    await crmApi.createActivity(payload)
+    showActivityCreate.value = false
+    activityForm.value = { type: 'CALL', subject: '', body: '', durationMinutes: null, outcome: '', leadId: '', accountId: '', opportunityId: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+
+// ===== NOTE CREATION =====
+async function createNote() {
+  if (!canManageNotes.value) return
+  saving.value = true
+  actionError.value = ''
+  try {
+    const payload = { ...noteForm.value }
+    if (payload.leadId) payload.leadId = Number(payload.leadId)
+    if (payload.accountId) payload.accountId = Number(payload.accountId)
+    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
+    await crmApi.createNote(payload)
+    showNoteCreate.value = false
+    noteForm.value = { body: '', visibility: 'TEAM', leadId: '', accountId: '', opportunityId: '' }
+    await load()
+  } catch (err) { actionError.value = errorMessage(err) }
+  finally { saving.value = false }
+}
+
 watch([search, status, activeSection], load)
 onMounted(load)
 </script>
@@ -252,9 +518,26 @@ onMounted(load)
         <h1>{{ ({ activities: 'تعاملات CRM', leads: 'سرنخ‌های فروش', accounts: 'حساب‌ها و مخاطبان CRM', tasks: 'وظایف و پیگیری‌های CRM', pipeline: 'قیف فرصت‌های فروش' })[activeSection] || 'مرکز ارتباط با مشتریان' }}</h1>
         <p>مدیریت سرنخ‌ها، حساب‌ها و پیگیری‌های تیم فروش بر پایه اطلاعات واقعی سامانه</p>
       </div>
-      <button v-if="['overview', 'leads'].includes(activeSection)" class="crm-primary" type="button" @click="showCreate = true">
-        <i class="pi pi-plus" aria-hidden="true"></i> ثبت سرنخ جدید
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button v-if="['overview', 'leads'].includes(activeSection)" class="crm-primary" type="button" @click="showCreate = true">
+          <i class="pi pi-plus" aria-hidden="true"></i> ثبت سرنخ جدید
+        </button>
+        <button v-if="activeSection === 'leads' && canManageSources.value" class="crm-primary" type="button" @click="showSourceCreate = true">
+          <i class="pi pi-tag" aria-hidden="true"></i> مدیریت منابع
+        </button>
+        <button v-if="activeSection === 'accounts' && canManageAccounts.value" class="crm-primary" type="button" @click="showAccountCreate = true">
+          <i class="pi pi-building" aria-hidden="true"></i> ایجاد حساب
+        </button>
+        <button v-if="activeSection === 'pipeline' && canManageOpportunities.value" class="crm-primary" type="button" @click="showOpportunityCreate = true">
+          <i class="pi pi-briefcase" aria-hidden="true"></i> ایجاد فرصت
+        </button>
+        <button v-if="activeSection === 'tasks' && canManageTasks.value" class="crm-primary" type="button" @click="showTaskCreate = true">
+          <i class="pi pi-plus" aria-hidden="true"></i> ایجاد وظیفه
+        </button>
+        <button v-if="activeSection === 'activities' && canManageActivities.value" class="crm-primary" type="button" @click="showActivityCreate = true">
+          <i class="pi pi-comments" aria-hidden="true"></i> ثبت تعامل
+        </button>
+      </div>
     </header>
 
     <div v-if="error" class="crm-alert" role="alert">
@@ -282,7 +565,7 @@ onMounted(load)
     </section>
 
     <section v-else-if="activeSection === 'accounts'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>حساب‌ها و مشتریان بالقوه</h2><p>{{ accounts.length }} حساب در این صفحه</p></div></div>
+      <div class="crm-panel-head"><div><h2>حساب‌ها و مشتریان بالقوه</h2><p>{{ accounts.length }} حساب در این صفحه</p></div><button v-if="canManageAccounts.value" class="crm-primary" type="button" @click="showAccountCreate = true"><i class="pi pi-plus" aria-hidden="true"></i> ایجاد حساب</button></div>
       <div v-if="loading" class="crm-state">در حال دریافت حساب‌ها…</div>
       <div v-else-if="!accounts.length" class="crm-state">حسابی ثبت نشده است.</div>
       <div v-else class="crm-account-grid">
@@ -293,18 +576,20 @@ onMounted(load)
     </section>
 
     <section v-else-if="activeSection === 'tasks'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>برنامه پیگیری‌ها</h2><p>وظایف تخصیص‌یافته به کارکنان</p></div></div>
+      <div class="crm-panel-head"><div><h2>برنامه پیگیری‌ها</h2><p>وظایف تخصیص‌یافته به کارکنان</p></div><button v-if="canManageTasks.value" class="crm-primary" type="button" @click="showTaskCreate = true"><i class="pi pi-plus" aria-hidden="true"></i> ایجاد وظیفه</button></div>
       <div v-if="loading" class="crm-state">در حال دریافت وظایف…</div>
       <div v-else-if="!tasks.length" class="crm-state">وظیفه‌ای برای نمایش وجود ندارد.</div>
       <article v-for="task in tasks" :key="task.id" class="crm-task">
         <div><strong>{{ task.title }}</strong><small>{{ task.lead?.displayName || task.account?.displayName || 'رکورد CRM' }}</small></div>
         <span>{{ formatDate(task.dueAt) }}</span>
         <button v-if="task.status !== 'COMPLETED'" type="button" class="crm-task-complete" @click="finishTask(task)">تکمیل شد</button>
+        <button v-if="canManageTasks.value" type="button" class="crm-secondary" @click="editTask(task)">ویرایش</button>
+        <button v-if="authStore.hasPermission('crm.tasks.assign')" type="button" class="crm-secondary" @click="assignTaskDialog(task)">انتساب</button>
       </article>
     </section>
 
     <section v-else-if="activeSection === 'pipeline'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div><button v-if="activePipeline && pipelineStages.length" class="crm-primary" type="button" @click="showOpportunityCreate = true">ایجاد فرصت</button></div>
+      <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div><button v-if="activePipeline && pipelineStages.length && canManageOpportunities.value" class="crm-primary" type="button" @click="showOpportunityCreate = true">ایجاد فرصت</button></div>
       <div v-if="loading" class="crm-state">در حال دریافت فرصت‌ها…</div>
       <div v-else-if="!pipelineStages.length" class="crm-state">برای نمایش قیف، ابتدا مراحل فروش را تعریف کنید.</div>
       <div v-else class="crm-kanban">
@@ -314,6 +599,7 @@ onMounted(load)
             <strong>{{ item.title }}</strong><small>{{ item.account?.displayName || 'حساب CRM' }}</small>
             <div>{{ Number(item.amount || 0).toLocaleString('fa-IR') }} {{ item.currency }}</div>
             <select v-if="!stage.isWon && !stage.isLost" :value="item.stageId" aria-label="تغییر مرحله فرصت" @change="setOpportunityStage(item, $event.target.value)"><option v-for="target in pipelineStages" :key="target.id" :value="target.id">{{ target.label }}</option></select>
+            <button v-if="canManageOpportunities.value" type="button" class="crm-secondary" @click="editOpportunity(item)">ویرایش</button>
           </article>
         </section>
       </div>
@@ -329,18 +615,15 @@ onMounted(load)
       </article>
     </section>
 
-    <section v-else class="crm-panel">
-      <div class="crm-panel-head">
-        <div><h2>صندوق سرنخ‌ها</h2><p>{{ leadMeta.total }} سرنخ ثبت‌شده</p></div>
-        <button type="button" class="crm-secondary" @click="exportLeadList">خروجی CSV</button>
-        <div class="crm-filters">
-          <input v-model="search" type="search" placeholder="جستجو در نام، شرکت، ایمیل یا تلفن" aria-label="جستجوی سرنخ‌ها">
-          <select v-model="status" aria-label="فیلتر وضعیت">
-            <option value="">همه وضعیت‌ها</option>
-            <option value="NEW">جدید</option><option value="CONTACTED">تماس گرفته‌شده</option><option value="QUALIFIED">واجد شرایط</option>
-            <option value="CONVERTED">تبدیل‌شده</option><option value="DISQUALIFIED">رد صلاحیت</option><option value="LOST">از دست‌رفته</option>
-          </select>
-        </div>
+    <section v-else-if="activeSection === 'leads'" class="crm-panel">
+      <div class="crm-panel-head"><div><h2>صندوق سرنخ‌ها</h2><p>{{ leadMeta.total }} سرنخ ثبت‌شده</p></div><button v-if="canManageSources.value" type="button" class="crm-secondary" @click="showSourceCreate = true">مدیریت منابع</button><button type="button" class="crm-secondary" @click="exportLeadList">خروجی CSV</button></div>
+      <div class="crm-filters">
+        <input v-model="search" type="search" placeholder="جستجو در نام، شرکت، ایمیل یا تلفن" aria-label="جستجوی سرنخ‌ها">
+        <select v-model="status" aria-label="فیلتر وضعیت">
+          <option value="">همه وضعیت‌ها</option>
+          <option value="NEW">جدید</option><option value="CONTACTED">تماس گرفته‌شده</option><option value="QUALIFIED">واجد شرایط</option>
+          <option value="CONVERTED">تبدیل‌شده</option><option value="DISQUALIFIED">رد صلاحیت</option><option value="LOST">از دست‌رفته</option>
+        </select>
       </div>
       <div v-if="loading" class="crm-state">در حال دریافت سرنخ‌ها…</div>
       <div v-else-if="!leads.length" class="crm-state">سرنخی با این شرایط پیدا نشد.</div>
@@ -383,9 +666,13 @@ onMounted(load)
         <div v-if="accountLoading" class="crm-state">در حال دریافت اطلاعات…</div>
         <template v-else>
           <div class="crm-detail-grid"><span>نوع حساب: {{ selectedAccount.accountType }}</span><span>چرخه عمر: {{ selectedAccount.lifecycle }}</span><span>منبع: {{ selectedAccount.source || '—' }}</span></div>
-          <div class="crm-panel-head"><h3>مخاطبان</h3><button type="button" class="crm-secondary" @click="addAccountContact">افزودن مخاطب</button></div>
+          <div class="crm-panel-head"><h3>مخاطبان</h3><button v-if="canManageContacts.value" type="button" class="crm-secondary" @click="showContactCreate = true">افزودن مخاطب</button><button v-if="canManageAccounts.value" type="button" class="crm-secondary" @click="editAccount(selectedAccount)">ویرایش حساب</button></div>
           <div v-if="!accountContacts.length" class="crm-state">مخاطبی ثبت نشده است.</div>
-          <article v-for="contact in accountContacts" :key="contact.id" class="crm-task"><div><strong>{{ contact.name }}</strong><small>{{ contact.title || contact.email || contact.phone || 'بدون اطلاعات تکمیلی' }}</small></div><span v-if="contact.isPrimary">مخاطب اصلی</span></article>
+          <article v-for="contact in accountContacts" :key="contact.id" class="crm-task">
+            <div><strong>{{ contact.name }}</strong><small>{{ contact.title || contact.email || contact.phone || 'بدون اطلاعات تکمیلی' }}</small></div>
+            <span v-if="contact.isPrimary">مخاطب اصلی</span>
+            <button v-if="canManageContacts.value" type="button" class="crm-secondary" @click="editContact(contact)">ویرایش</button>
+          </article>
         </template>
       </section>
     </div>
@@ -394,6 +681,12 @@ onMounted(load)
       <section class="crm-modal crm-detail-modal">
         <div class="crm-panel-head"><div><h2>{{ selectedLead.displayName }}</h2><p>{{ selectedLead.companyName || selectedLead.leadNumber }}</p></div><button type="button" aria-label="بستن" @click="selectedLead = null">×</button></div>
         <div class="crm-detail-grid"><span>ایمیل: {{ selectedLead.email || '—' }}</span><span>تلفن: {{ selectedLead.phone || '—' }}</span><span>وضعیت: {{ statusLabel(selectedLead.status) }}</span><span>امتیاز: {{ selectedLead.score }}/100</span></div>
+        <div class="crm-actions" style="margin-top:12px;">
+          <button v-if="selectedLead.status === 'QUALIFIED' && authStore.hasPermission('crm.leads.convert')" type="button" class="crm-primary" @click="confirmConvertLead(selectedLead)">تبدیل به حساب</button>
+          <button v-if="!['CONVERTED','DISQUALIFIED','DUPLICATE','LOST'].includes(selectedLead.status)" type="button" class="crm-secondary" @click="createFollowUp(selectedLead)">ایجاد پیگیری</button>
+          <button v-if="canManageActivities.value" type="button" class="crm-secondary" @click="showActivityCreate = true; activityForm.leadId = String(selectedLead.id)">ثبت تعامل</button>
+          <button v-if="canManageNotes.value" type="button" class="crm-secondary" @click="showNoteCreate = true; noteForm.leadId = String(selectedLead.id)">ایجاد یادداشت</button>
+        </div>
         <h3>موارد مشابه پیشنهادی</h3>
         <p v-if="!duplicates.length" class="crm-muted">مورد مشابهی پیدا نشد.</p>
         <ul v-else class="crm-duplicate-list"><li v-for="item in duplicates" :key="item.id"><span>{{ item.displayName }} — {{ item.matchReasons.join('، ') }}</span><button v-if="canMergeLeads" type="button" @click="mergeDuplicate(item)">ادغام در این سرنخ</button></li></ul>
@@ -418,6 +711,168 @@ onMounted(load)
           <label>امتیاز (۰ تا ۱۰۰)<input v-model.number="form.score" type="number" min="0" max="100"></label>
         </div>
         <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ثبت سرنخ' }}</button></div>
+      </form>
+    </div>
+
+    <!-- SOURCE MANAGEMENT MODALS -->
+    <div v-if="showSourceCreate" class="crm-modal-backdrop" @click.self="showSourceCreate = false">
+      <form class="crm-modal" @submit.prevent="createSource">
+        <div class="crm-panel-head"><div><h2>ایجاد منبع سرنخ</h2></div><button type="button" aria-label="بستن" @click="showSourceCreate = false">×</button></div>
+        <label>کد *<input v-model="sourceForm.code" required maxlength="60"></label>
+        <label>عنوان *<input v-model="sourceForm.label" required maxlength="120"></label>
+        <div class="crm-form-grid"><label>فعال<input v-model="sourceForm.isActive" type="checkbox"></label><label>ترتیب<input v-model.number="sourceForm.sortOrder" type="number" min="0"></label></div>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showSourceCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ایجاد منبع' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="showSourceEdit" class="crm-modal-backdrop" @click.self="showSourceEdit = false">
+      <form class="crm-modal" @submit.prevent="updateSource">
+        <div class="crm-panel-head"><div><h2>ویرایش منبع سرنخ</h2></div><button type="button" aria-label="بستن" @click="showSourceEdit = false">×</button></div>
+        <label>کد *<input v-model="sourceForm.code" required maxlength="60"></label>
+        <label>عنوان *<input v-model="sourceForm.label" required maxlength="120"></label>
+        <div class="crm-form-grid"><label>فعال<input v-model="sourceForm.isActive" type="checkbox"></label><label>ترتیب<input v-model.number="sourceForm.sortOrder" type="number" min="0"></label></div>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showSourceEdit = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'به‌روزرسانی' }}</button></div>
+      </form>
+    </div>
+
+    <!-- ACCOUNT MODALS -->
+    <div v-if="showAccountCreate" class="crm-modal-backdrop" @click.self="showAccountCreate = false">
+      <form class="crm-modal" @submit.prevent="createAccount">
+        <div class="crm-panel-head"><div><h2>ایجاد حساب CRM</h2></div><button type="button" aria-label="بستن" @click="showAccountCreate = false">×</button></div>
+        <label>نام حساب *<input v-model="accountForm.displayName" required maxlength="240"></label>
+        <div class="crm-form-grid">
+          <label>نوع حساب<select v-model="accountForm.accountType"><option value="PROSPECT">Prospect</option><option value="CUSTOMER">Customer</option><option value="PARTNER">Partner</option><option value="VENDOR">Vendor</option></select></label>
+          <label>چرخه عمر<select v-model="accountForm.lifecycle"><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option><option value="ARCHIVED">Archived</option></select></label>
+        </div>
+        <label>منبع<input v-model="accountForm.source" maxlength="100"></label>
+        <label>یادداشت‌ها<textarea v-model="accountForm.notes" rows="3"></textarea></label>
+        <label>مسئول (شناسه کارمند)<input v-model="accountForm.ownerUserId" type="number" min="1" placeholder="اختیاری"></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showAccountCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ایجاد حساب' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="showAccountEdit" class="crm-modal-backdrop" @click.self="showAccountEdit = false">
+      <form class="crm-modal" @submit.prevent="updateAccount">
+        <div class="crm-panel-head"><div><h2>ویرایش حساب CRM</h2></div><button type="button" aria-label="بستن" @click="showAccountEdit = false">×</button></div>
+        <label>نام حساب *<input v-model="accountForm.displayName" required maxlength="240"></label>
+        <div class="crm-form-grid">
+          <label>نوع حساب<select v-model="accountForm.accountType"><option value="PROSPECT">Prospect</option><option value="CUSTOMER">Customer</option><option value="PARTNER">Partner</option><option value="VENDOR">Vendor</option></select></label>
+          <label>چرخه عمر<select v-model="accountForm.lifecycle"><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option><option value="ARCHIVED">Archived</option></select></label>
+        </div>
+        <label>منبع<input v-model="accountForm.source" maxlength="100"></label>
+        <label>یادداشت‌ها<textarea v-model="accountForm.notes" rows="3"></textarea></label>
+        <label>مسئول (شناسه کارمند)<input v-model="accountForm.ownerUserId" type="number" min="1" placeholder="اختیاری"></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showAccountEdit = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'به‌روزرسانی' }}</button></div>
+      </form>
+    </div>
+
+    <!-- CONTACT MODALS -->
+    <div v-if="showContactCreate" class="crm-modal-backdrop" @click.self="showContactCreate = false">
+      <form class="crm-modal" @submit.prevent="createContact">
+        <div class="crm-panel-head"><div><h2>ایجاد مخاطب</h2></div><button type="button" aria-label="بستن" @click="showContactCreate = false">×</button></div>
+        <label>نام *<input v-model="contactForm.name" required maxlength="200"></label>
+        <label>عنوان<input v-model="contactForm.title" maxlength="120"></label>
+        <div class="crm-form-grid"><label>ایمیل<input v-model="contactForm.email" type="email" maxlength="320"></label><label>تلفن<input v-model="contactForm.phone" maxlength="40"></label></div>
+        <div class="crm-form-grid"><label>مخاطب اصلی<input v-model="contactForm.isPrimary" type="checkbox"></label></div>
+        <label>یادداشت‌ها<textarea v-model="contactForm.notes" rows="3"></textarea></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showContactCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ایجاد مخاطب' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="showContactEdit" class="crm-modal-backdrop" @click.self="showContactEdit = false">
+      <form class="crm-modal" @submit.prevent="updateContact">
+        <div class="crm-panel-head"><div><h2>ویرایش مخاطب</h2></div><button type="button" aria-label="بستن" @click="showContactEdit = false">×</button></div>
+        <label>نام *<input v-model="contactForm.name" required maxlength="200"></label>
+        <label>عنوان<input v-model="contactForm.title" maxlength="120"></label>
+        <div class="crm-form-grid"><label>ایمیل<input v-model="contactForm.email" type="email" maxlength="320"></label><label>تلفن<input v-model="contactForm.phone" maxlength="40"></label></div>
+        <div class="crm-form-grid"><label>مخاطب اصلی<input v-model="contactForm.isPrimary" type="checkbox"></label></div>
+        <label>یادداشت‌ها<textarea v-model="contactForm.notes" rows="3"></textarea></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showContactEdit = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'به‌روزرسانی' }}</button></div>
+      </form>
+    </div>
+
+    <!-- OPPORTUNITY EDIT MODAL -->
+    <div v-if="showOpportunityEdit" class="crm-modal-backdrop" @click.self="showOpportunityEdit = false">
+      <form class="crm-modal" @submit.prevent="updateOpportunity">
+        <div class="crm-panel-head"><div><h2>ویرایش فرصت فروش</h2></div><button type="button" aria-label="بستن" @click="showOpportunityEdit = false">×</button></div>
+        <label>حساب CRM *<select v-model="opportunityForm.accountId" required><option value="">انتخاب حساب</option><option v-for="account in accounts" :key="account.id" :value="String(account.id)">{{ account.displayName }}</option></select></label>
+        <label>عنوان فرصت *<input v-model="opportunityForm.title" required maxlength="240"></label>
+        <div class="crm-form-grid"><label>مبلغ<input v-model="opportunityForm.amount" type="number" min="0"></label><label>ارز<input v-model="opportunityForm.currency" maxlength="3" required></label></div>
+        <label>تاریخ پیش‌بینی‌شده<input v-model="opportunityForm.expectedCloseAt" type="date"></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showOpportunityEdit = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'به‌روزرسانی' }}</button></div>
+      </form>
+    </div>
+
+    <!-- CONVERSION CONFIRMATION MODAL -->
+    <div v-if="showConvertConfirm" class="crm-modal-backdrop" @click.self="showConvertConfirm = false">
+      <section class="crm-modal">
+        <div class="crm-panel-head"><div><h2>تأیید تبدیل سرنخ</h2></div><button type="button" aria-label="بستن" @click="showConvertConfirm = false">×</button></div>
+        <p v-if="selectedLead">آیا مطمئن هستید که می‌خواهید سرنخ «{{ selectedLead.displayName }}» را به حساب مشتری تبدیل کنید؟ این عملیات برگشت‌نیز است.</p>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showConvertConfirm = false">انصراف</button><button class="crm-primary" type="button" @click="executeConvertLead" :disabled="saving">{{ saving ? 'در حال تبدیل…' : 'تأیید و تبدیل' }}</button></div>
+      </section>
+    </div>
+
+    <!-- TASK MODALS -->
+    <div v-if="showTaskCreate" class="crm-modal-backdrop" @click.self="showTaskCreate = false">
+      <form class="crm-modal" @submit.prevent="createTask">
+        <div class="crm-panel-head"><div><h2>ایجاد وظیفه</h2></div><button type="button" aria-label="بستن" @click="showTaskCreate = false">×</button></div>
+        <label>عنوان *<input v-model="taskForm.title" required maxlength="240"></label>
+        <label>توضیحات<textarea v-model="taskForm.description" rows="3"></textarea></label>
+        <div class="crm-form-grid"><label>اولویت<select v-model="taskForm.priority"><option value="LOW">Low</option><option value="NORMAL">Normal</option><option value="HIGH">High</option><option value="URGENT">Urgent</option></select></label><label>مهلت<input v-model="taskForm.dueAt" type="datetime-local"></label></div>
+        <div class="crm-form-grid">
+          <label>مرتبط با سرنخ<select v-model="taskForm.leadId"><option value="">بدون</option><option v-for="l in leads" :key="l.id" :value="String(l.id)">{{ l.displayName }} ({{ l.leadNumber }})</option></select></label>
+          <label>مرتبط با حساب<select v-model="taskForm.accountId"><option value="">بدون</option><option v-for="a in accounts" :key="a.id" :value="String(a.id)">{{ a.displayName }}</option></select></label>
+        </div>
+        <label>مرتبط با فرصت<select v-model="taskForm.opportunityId"><option value="">بدون</option><option v-for="o in opportunities" :key="o.id" :value="String(o.id)">{{ o.title }}</option></select></label>
+        <label>مسئول (شناسه کارمند)<input v-model="taskForm.assigneeUserId" type="number" min="1" placeholder="اختیاری"></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showTaskCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ایجاد وظیفه' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="showTaskEdit" class="crm-modal-backdrop" @click.self="showTaskEdit = false">
+      <form class="crm-modal" @submit.prevent="updateTask">
+        <div class="crm-panel-head"><div><h2>ویرایش وظیفه</h2></div><button type="button" aria-label="بستن" @click="showTaskEdit = false">×</button></div>
+        <label>عنوان *<input v-model="taskForm.title" required maxlength="240"></label>
+        <label>توضیحات<textarea v-model="taskForm.description" rows="3"></textarea></label>
+        <div class="crm-form-grid"><label>اولویت<select v-model="taskForm.priority"><option value="LOW">Low</option><option value="NORMAL">Normal</option><option value="HIGH">High</option><option value="URGENT">Urgent</option></select></label><label>مهلت<input v-model="taskForm.dueAt" type="datetime-local"></label></div>
+        <div class="crm-form-grid">
+          <label>مرتبط با سرنخ<select v-model="taskForm.leadId"><option value="">بدون</option><option v-for="l in leads" :key="l.id" :value="String(l.id)">{{ l.displayName }} ({{ l.leadNumber }})</option></select></label>
+          <label>مرتبط با حساب<select v-model="taskForm.accountId"><option value="">بدون</option><option v-for="a in accounts" :key="a.id" :value="String(a.id)">{{ a.displayName }}</option></select></label>
+        </div>
+        <label>مرتبط با فرصت<select v-model="taskForm.opportunityId"><option value="">بدون</option><option v-for="o in opportunities" :key="o.id" :value="String(o.id)">{{ o.title }}</option></select></label>
+        <label>مسئول (شناسه کارمند)<input v-model="taskForm.assigneeUserId" type="number" min="1" placeholder="اختیاری"></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showTaskEdit = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'به‌روزرسانی' }}</button></div>
+      </form>
+    </div>
+
+    <!-- ACTIVITY CREATION MODAL -->
+    <div v-if="showActivityCreate" class="crm-modal-backdrop" @click.self="showActivityCreate = false">
+      <form class="crm-modal" @submit.prevent="createActivity">
+        <div class="crm-panel-head"><div><h2>ثبت تعامل</h2></div><button type="button" aria-label="بستن" @click="showActivityCreate = false">×</button></div>
+        <div class="crm-form-grid"><label>نوع<select v-model="activityForm.type"><option value="CALL">تماس</option><option value="EMAIL">ایمیل</option><option value="MEETING">جلسه</option><option value="NOTE">یادداشت</option><option value="OTHER">سایر</option></select></label><label>موضوع *<input v-model="activityForm.subject" required maxlength="240"></label></div>
+        <label>توضیحات<textarea v-model="activityForm.body" rows="3"></textarea></label>
+        <div class="crm-form-grid"><label>مدت (دقیقه)<input v-model.number="activityForm.durationMinutes" type="number" min="0"></label><label>نتیجه<input v-model="activityForm.outcome" maxlength="500"></label></div>
+        <div class="crm-form-grid">
+          <label>مرتبط با سرنخ<select v-model="activityForm.leadId"><option value="">بدون</option><option v-for="l in leads" :key="l.id" :value="String(l.id)">{{ l.displayName }} ({{ l.leadNumber }})</option></select></label>
+          <label>مرتبط با حساب<select v-model="activityForm.accountId"><option value="">بدون</option><option v-for="a in accounts" :key="a.id" :value="String(a.id)">{{ a.displayName }}</option></select></label>
+        </div>
+        <label>مرتبط با فرصت<select v-model="activityForm.opportunityId"><option value="">بدون</option><option v-for="o in opportunities" :key="o.id" :value="String(o.id)">{{ o.title }}</option></select></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showActivityCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ثبت تعامل' }}</button></div>
+      </form>
+    </div>
+
+    <!-- NOTE CREATION MODAL -->
+    <div v-if="showNoteCreate" class="crm-modal-backdrop" @click.self="showNoteCreate = false">
+      <form class="crm-modal" @submit.prevent="createNote">
+        <div class="crm-panel-head"><div><h2>ایجاد یادداشت</h2></div><button type="button" aria-label="بستن" @click="showNoteCreate = false">×</button></div>
+        <label>متن *<textarea v-model="noteForm.body" required rows="4"></textarea></label>
+        <label>مشاهده<select v-model="noteForm.visibility"><option value="TEAM">تیمی</option><option value="PRIVATE">خصوصی</option></select></label>
+        <div class="crm-form-grid">
+          <label>مرتبط با سرنخ<select v-model="noteForm.leadId"><option value="">بدون</option><option v-for="l in leads" :key="l.id" :value="String(l.id)">{{ l.displayName }} ({{ l.leadNumber }})</option></select></label>
+          <label>مرتبط با حساب<select v-model="noteForm.accountId"><option value="">بدون</option><option v-for="a in accounts" :key="a.id" :value="String(a.id)">{{ a.displayName }}</option></select></label>
+        </div>
+        <label>مرتبط با فرصت<select v-model="noteForm.opportunityId"><option value="">بدون</option><option v-for="o in opportunities" :key="o.id" :value="String(o.id)">{{ o.title }}</option></select></label>
+        <div class="crm-modal-actions"><button type="button" class="crm-secondary" @click="showNoteCreate = false">انصراف</button><button class="crm-primary" type="submit" :disabled="saving">{{ saving ? 'در حال ثبت…' : 'ایجاد یادداشت' }}</button></div>
       </form>
     </div>
   </section>

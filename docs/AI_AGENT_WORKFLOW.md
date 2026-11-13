@@ -14,7 +14,7 @@ The repository is the shared memory for all coding agents. Conversations and mod
 ## Start every task
 
 1. Read root `AGENTS.md`, `.ai/PROTOCOL.md`, recent `.ai/WORKLOG.md` entries, and `.ai/current-task.md`.
-2. Read `.ai/project-context.md`, `.ai/decisions.md`, and any applicable open questions.
+2. Read `.ai/project-context.md`, `.ai/decisions.md`.
 3. Read relevant architecture, API, database, deployment, and frontend docs plus the actual implementation.
 4. Inspect `git status --short --branch` and recent commits. Preserve existing changes.
 5. Claim the task, define acceptance criteria, and plan before implementation. For high-impact or ambiguous work, wait for approval.
@@ -29,7 +29,6 @@ The repository is the shared memory for all coding agents. Conversations and mod
 - `.ai/current-task.md`: active task/handoff, not a replacement for history.
 - `.ai/project-context.md`: durable architecture and current implementation facts.
 - `.ai/decisions.md`: accepted architectural decisions and their rationale.
-- `.ai/decisions-and-open-questions.md`: open questions and explicit decisions, when present.
 - `Telecom_Marketplace_Project_Architecture_and_Roadmap.md`: product/domain vision and roadmap.
 
 ## Completion is not just code
@@ -47,7 +46,7 @@ At the end of a session, record what changed, commands and results, commit SHA, 
 
 ## Mandatory UI/UX skills
 
-Every meaningful UI change must follow `.ai/UI_SKILLS.md` and load the relevant installed skill instructions before editing. The shared toolkit is UI UX Pro Max, Taste Skill, Impeccable, and Vercel Web Design Guidelines. Use each skill according to the surface and task type, while preserving the repository's Vue/PrimeVue/Tailwind architecture, current design system, Persian/RTL support, accessibility, API contracts, and business behavior. Do not follow a generic recommendation that conflicts with an explicit product decision.
+Every meaningful UI change must follow `.ai/UI_SKILLS.md` and load the relevant installed skill instructions before editing. The shared toolkit is UI UX Pro Max, Taste Skill, Impeccable, and Vercel Web Design Guidelines. Use each skill according to the surface and task type, while preserving the repository's Vue/PrimeVue architecture, current design system, Persian/RTL support, accessibility, API contracts, and business behavior. Do not follow a generic recommendation that conflicts with an explicit product decision.
 
 Install/update the agent skills from the repository root in PowerShell with:
 

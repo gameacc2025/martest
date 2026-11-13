@@ -10,7 +10,7 @@
 
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
-const { hashPassword } = require('../src/utils/password');
+const { hashPassword } = require('../../src/utils/password');
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
@@ -135,7 +135,6 @@ async function seedAuthAuditDemo() {
       accessProfile: true,
       roles: { include: { role: true } },
       profile: true,
-      company: true,
     },
   });
 

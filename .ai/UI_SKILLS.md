@@ -29,8 +29,8 @@ The upstream skills are maintained by their respective authors. Do not replace t
 
 ## Project-specific guardrails
 
-- Stack is Vue 3 + Vite + Pinia + PrimeVue 4 + Tailwind, JavaScript only. Do not introduce React, TypeScript, another UI kit, or new dependencies without explicit approval.
-- Respect the current brand/design tokens and shared components. The historical primary token is `#01bec2`; inspect the live design-system files before relying on any remembered value.
+- Stack is Vue 3 + Vite + Pinia + PrimeVue 4, JavaScript only. Do not introduce React, TypeScript, another UI kit, or new dependencies without explicit approval. (Tailwind is not used — PrimeVue theming via `@primevue/themes` + SCSS).
+- Respect the current brand/design tokens and shared components. The canonical shared token layer is `packages/shared-ui/assets/design-system/newtemp-reference.scss`, loaded last in all three app entrypoints. Website-only `marketplace-theme.scss` styles Website-specific components only.
 - Preserve Vazirmatn, Persian copy, RTL behavior, correct Persian/Arabic shaping, and localized number/date conventions where already used.
 - All three apps must remain coherent while retaining their distinct user contexts: Website/CUSTOMER, Company/COMPANY, Admin/STAFF.
 - Do not add fake content, unsupported business claims, invented contact details, vanity metrics, decorative controls, or nonfunctional interactions.

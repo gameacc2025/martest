@@ -36,7 +36,7 @@ If any required file is missing, record that fact and continue with the remainin
 - `.ai/WORKLOG.md` is the durable task journal. Update it after claiming a task, after meaningful milestones when useful, and before handing work off.
 - `.ai/current-task.md` records the current focus and must be updated when the active task changes; do not overwrite useful history—move completed task details into WORKLOG first.
 - `.ai/project-context.md` captures durable architecture/current-state facts. Update it only when the facts actually change.
-- `.ai/decisions.md` and `.ai/decisions-and-open-questions.md` capture decisions and unresolved questions. Do not convert an assumption into an accepted decision.
+- `.ai/decisions.md` captures accepted architectural decisions and their rationale. Do not convert an assumption into an accepted decision.
 - Never claim to have updated ChatGPT's private memory. Project memory means version-controlled files in this repository.
 
 ## Task coordination and planning
@@ -80,7 +80,6 @@ Before declaring a task complete:
 - Ensure the final report distinguishes completed, tested, not tested, and blocked work.
 
 
-
 ## Mandatory per-task Git and GitHub synchronization
 
 - **Every independently completable task or subtask must be recorded in Git and published to GitHub immediately after that task is completed and reviewed.** Do not accumulate several completed tasks into one later commit/push.
@@ -110,7 +109,7 @@ Always report:
 - Risks, blocked items, and `NOT VERIFIED` items
 - Exact next step, if any
 
-Do not say “done” for partially implemented or unverified work. If context is running low, first write a durable handoff in WORKLOG and current-task, then report the remaining work.
+Do not say "done" for partially implemented or unverified work. If context is running low, first write a durable handoff in WORKLOG and current-task, then report the remaining work.
 
 
 ## Mandatory UI skill usage

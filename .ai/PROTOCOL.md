@@ -70,7 +70,6 @@ Keep entries factual, concise, and durable. Do not store credentials, access tok
 | `.ai/current-task.md` | Current focus and handoff | Task starts, finishes, or is blocked |
 | `.ai/project-context.md` | Current architecture and durable facts | Implementation/architecture facts change |
 | `.ai/decisions.md` | Accepted architectural decisions | A consequential decision is accepted |
-| `.ai/decisions-and-open-questions.md` | Open questions and explicit decisions | Questions/answers change |
 | `docs/` | Human-facing domain/API/database/deployment docs | Public contracts or system behavior change |
 
 A log entry is not a substitute for updating the canonical documentation when behavior or an API contract changes.
@@ -93,7 +92,6 @@ A log entry is not a substitute for updating the canonical documentation when be
 - Commit only scoped, reviewed, verified files. Keep commits small and meaningful.
 - No push unless authorized. If authorized, push to `origin/main` only after verifying current branch, clean diff scope, and checks.
 - Concurrent agents must not edit the same files without coordination. The coordinator records exact file ownership in `.ai/agent-coordination/ACTIVE.md`; shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global design tokens) are coordinator-owned. A WORKLOG claim is a coordination hint, not a lock guaranteed by Git.
-
 
 
 ## Mandatory per-task Git and GitHub synchronization

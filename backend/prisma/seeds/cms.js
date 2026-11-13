@@ -1,7 +1,15 @@
 const { PrismaClient } = require('@prisma/client');
-const { hashPassword } = require('../src/utils/password');
+const { PrismaPg } = require('@prisma/adapter-pg');
+const { hashPassword } = require('../../src/utils/password');
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+    max: 5,
+    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 30000
+  })
+});
 
 const DEMO_USER_EMAIL = 'demo-cms-author@example.test';
 
@@ -11,9 +19,9 @@ async function getOrCreateDemoAuthor() {
     user = await prisma.user.create({
       data: {
         email: DEMO_USER_EMAIL,
+        phone: '09120000099',
         passwordHash: await hashPassword('DemoPass123!'),
-        isActive: true,
-        emailVerified: true,
+        status: 'ACTIVE',
         profile: { create: { firstName: 'نویسنده', lastName: 'نمونه' } },
         accessProfile: { create: { type: 'STAFF', isActive: true } },
       },
@@ -368,11 +376,9 @@ async function main() {
     await seedArticles(author.id, categories, tags);
     console.log('✅ Seeded articles');
 
-    await seedFaqs();
-    console.log('✅ Seeded FAQs');
-
-    await seedPages();
-    console.log('✅ Seeded static pages');
+    // FAQ and Page seeding removed - schema uses Article model for all CMS content
+    // FAQs and Pages should be created as Articles with appropriate types
+    console.log('ℹ️  FAQ/Page content uses Article model (type: GUIDE, NEWS, etc.)');
 
     console.log('🎉 CMS seed completed successfully!');
   } catch (error) {
@@ -384,3 +390,5 @@ async function main() {
 }
 
 main();
+
+module.exports = { seedCms: main };
