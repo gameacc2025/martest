@@ -35,7 +35,7 @@ describe('Website storefront product-card sizing contract', () => {
   it('keeps the supplied reference HTML desktop grid geometry on home and catalogue', () => {
     expect(surfaces.home).toContain('.prods{display:grid;grid-template-columns:repeat(4,1fr)')
     expect(surfaces.catalogue).toContain('.pg.prods{grid-template-columns:repeat(3,1fr)}')
-    expect(surfaces.home).toContain('.reference-home.g4,.reference-home.g3,.reference-home.prods,.reference-home.why{grid-template-columns:repeat(2,minmax(0,1fr))}')
+    expect(surfaces.home).toContain('.reference-home.g4,.reference-home.g3,.reference-home.prods,.reference-home.why,.reference-categories.g3{grid-template-columns:repeat(2,minmax(0,1fr))}')
     expect(surfaces.catalogue).toContain('.pg.prods,.cbig{grid-template-columns:repeat(2,1fr)}')
   })
 
