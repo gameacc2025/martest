@@ -315,6 +315,17 @@ export const auditLogsApi = {
 
 
 // CRM API — STAFF-only endpoints; authorization is enforced by the backend.
+export const supportApi = {
+  listCategories: () => api.get(endpoints.support.categories),
+  listTickets: (params = {}) => api.get(endpoints.support.tickets, { params }),
+  getTicket: (id) => api.get(endpoints.support.ticket(id)),
+  createTicket: (data) => api.post(endpoints.support.tickets, data),
+  addMessage: (id, data) => api.post(endpoints.support.messages(id), data),
+  changeStatus: (id, data) => api.patch(endpoints.support.status(id), data),
+  assignTicket: (id, data) => api.post(endpoints.support.assign(id), data),
+  listQueues: () => api.get(endpoints.support.queues),
+}
+
 export const crmApi = {
   dashboard: () => api.get(endpoints.crm.dashboard),
   listSources: () => api.get(endpoints.crm.sources),
