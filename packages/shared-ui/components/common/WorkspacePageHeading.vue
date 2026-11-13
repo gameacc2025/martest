@@ -23,7 +23,6 @@ defineProps({
 
 <template>
   <header
-    v-if="!srOnly || $slots.actions"
     class="workspace-page-heading tm-page-head"
     :aria-labelledby="headingId"
   >
