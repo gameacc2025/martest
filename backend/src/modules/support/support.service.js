@@ -74,9 +74,8 @@ function ticketNumber() {
   return 'SUP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
 }
 async function getSla(prismaClient, categoryId, priority) {
-  const policy = await prismaClient.supportSlaPolicy.findFirst({
-    where: { categoryId: categoryId || null, priority, isActive: true },
-  });
+  const policy = (categoryId ? await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId, priority, isActive: true } }) : null)
+    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: null, priority, isActive: true } });
   if (!policy) return {};
   const now = Date.now();
   return {
@@ -101,7 +100,10 @@ async function listQueues() {
 async function listTickets(user, query = {}) {
   const ctx = context(user);
   const where = scopeWhere(ctx);
-  if (query.status && STATUSES.has(query.status)) where.status = query.status;
+  if (query.status) {
+    if (!STATUSES.has(query.status)) fail(400, 'SUPPORT_STATUS_INVALID', 'وضعیت انتخاب‌شده معتبر نیست.');
+    where.status = query.status;
+  }
   if (query.categoryId) where.categoryId = toId(query.categoryId, 'category');
   const page = Math.max(1, Number(query.page) || 1);
   const limit = Math.min(100, Math.max(1, Number(query.limit) || 25));
@@ -193,8 +195,15 @@ async function addMessage(user, ticketId, input) {
     });
     const data = { lastActivityAt: now };
     if (ctx.accessType === 'STAFF' && visibility === 'PUBLIC' && !ticket.firstRespondedAt) data.firstRespondedAt = now;
-    if (ctx.accessType !== 'STAFF' && ['WAITING_CUSTOMER', 'WAITING_COMPANY'].includes(ticket.status)) data.status = 'IN_PROGRESS';
+    const reopened = ctx.accessType !== 'STAFF' && ['WAITING_CUSTOMER', 'WAITING_COMPANY', 'RESOLVED'].includes(ticket.status);
+    if (reopened) {
+      data.status = 'IN_PROGRESS';
+      data.resolvedAt = null;
+    }
     await tx.supportTicket.update({ where: { id }, data });
+    if (reopened) {
+      await tx.supportStatusHistory.create({ data: { ticketId: id, previous: ticket.status, next: 'IN_PROGRESS', actorUserId: ctx.userId, reason: 'Requester replied to the ticket' } });
+    }
     await tx.supportEvent.create({
       data: {
         ticketId: id, actorUserId: ctx.userId, eventType: 'MESSAGE_CREATED',
@@ -219,7 +228,7 @@ async function changeStatus(user, ticketId, next, reason) {
       where: { id },
       data: {
         status: next,
-        resolvedAt: next === 'RESOLVED' ? now : current.resolvedAt,
+        resolvedAt: next === 'RESOLVED' ? now : next === 'IN_PROGRESS' ? null : current.resolvedAt,
         closedAt: next === 'CLOSED' ? now : next === 'IN_PROGRESS' ? null : current.closedAt,
         lastActivityAt: now,
       },
@@ -247,6 +256,7 @@ async function assignTicket(user, ticketId, input) {
   return prisma.$transaction(async (tx) => {
     const ticket = await tx.supportTicket.findUnique({ where: { id } });
     if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
+    if (['CLOSED', 'SPAM'].includes(ticket.status)) fail(409, 'SUPPORT_TICKET_LOCKED', 'تیکت بسته یا هرزنامه قابل تخصیص نیست.');
     const now = new Date();
     await tx.supportAssignment.updateMany({ where: { ticketId: id, endedAt: null }, data: { endedAt: now } });
     await tx.supportAssignment.create({
