@@ -14,7 +14,6 @@
       <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows :paginator="true" :rows="10" :totalRecords="totalRecords" @page="onPage">
         <Column field="title" header="عنوان" style="min-width: 250px" />
         <Column field="slug" header="اسلاگ" style="width: 180px" />
-        <Column field="sortOrder" header="ترتیب" style="width: 100px" />
         <Column header="وضعیت" style="width: 130px">
           <template #body="{ data }"><Tag :value="statusLabel(data.isActive)" :severity="statusTone(data.isActive)" /></template>
         </Column>
@@ -34,12 +33,9 @@
     <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش صفحه' : 'ایجاد صفحه جدید'" modal :style="{ width: 'min(800px, 94vw)' }" :closable="!saving">
       <div class="page-form">
         <div class="page-form__field"><label for="page-title">عنوان *</label><InputText id="page-title" v-model="form.title" maxlength="200" /></div>
-        <div class="page-form__field"><label for="page-slug">اسلاگ *</label><InputText id="page-slug" v-model="form.slug" maxlength="200" placeholder="به‌صورت خودکار از عنوان تولید می‌شود" /></div>
+        <div class="page-form__field"><label for="page-slug">اسلاگ *</label><InputText id="page-slug" v-model="form.slug" maxlength="100" :disabled="Boolean(editingId)" placeholder="about، contact، terms، privacy، faq یا custom-..." /><small>اسلاگ پس از ایجاد قابل تغییر نیست. صفحه سفارشی باید با custom- شروع شود.</small></div>
         <div class="page-form__field"><label for="page-content">محتوا *</label><Editor v-model="form.content" :editorStyle="{ height: '400px' }" :plugins="editorPlugins" toolbar="bold italic underline strikethrough | heading | alignleft aligncenter alignright | bullist numlist | outdent indent | link image table | code blockquote | undo redo" /></div>
-        <div class="page-form__grid">
-          <div class="page-form__field"><label for="page-sort">ترتیب نمایش</label><InputNumber id="page-sort" v-model="form.sortOrder" :min="0" /></div>
-          <div class="page-form__field"><label for="page-status">وضعیت</label><Select id="page-status" v-model="form.isActive" :options="statusOptions" option-label="label" option-value="value" placeholder="وضعیت را انتخاب کنید" /></div>
-        </div>
+        <div class="page-form__field"><label for="page-status">وضعیت</label><Select id="page-status" v-model="form.isActive" :options="statusOptions" option-label="label" option-value="value" placeholder="وضعیت را انتخاب کنید" /></div>
 
         <div class="page-form__actions">
           <Button label="انصراف" icon="pi pi-times" text @click="closeDialog" :disabled="saving" />
@@ -85,7 +81,6 @@ const form = ref({
   title: '',
   slug: '',
   content: '',
-  sortOrder: 0,
   isActive: true,
 })
 
@@ -136,7 +131,7 @@ function onPage(event) {
 }
 
 function openCreate() {
-  form.value = { title: '', slug: '', content: '', sortOrder: 0, isActive: true }
+  form.value = { title: '', slug: '', content: '', isActive: true }
   editingId.value = null
   dialog.value = true
 }
@@ -146,7 +141,7 @@ async function edit(item) {
     const res = await cmsPagesApi.getManageById(item.id)
     const data = res.data?.data || res.data
     if (!data) throw new Error('صفحه یافت نشد')
-    form.value = { title: data.title || '', slug: data.slug || '', content: data.content || '', sortOrder: data.sortOrder || 0, isActive: data.isActive !== false }
+    form.value = { title: data.title || '', slug: data.slug || '', content: data.content || '', isActive: data.isActive !== false }
     editingId.value = item.id
     dialog.value = true
   } catch (err) {
@@ -161,56 +156,58 @@ function closeDialog() {
 }
 
 async function save() {
-  if (!form.value.title.trim()) {
+  const title = form.value.title.trim()
+  const slug = form.value.slug.trim().toLowerCase()
+  const content = form.value.content.trim()
+  if (!title) {
     toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'عنوان صفحه الزامی است', life: 3000 })
     return
   }
-  if (!form.value.content.trim()) {
-    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'محتوا صفحه الزامی است', life: 3000 })
+  if (!slug) {
+    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'اسلاگ صفحه الزامی است', life: 3000 })
+    return
+  }
+  if (!['about', 'contact', 'terms', 'privacy', 'faq'].includes(slug) && !slug.startsWith('custom-')) {
+    toast.add({ severity: 'warn', summary: 'اسلاگ نامعتبر', detail: 'برای صفحه سفارشی، اسلاگ باید با custom- شروع شود', life: 3500 })
+    return
+  }
+  if (!content) {
+    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'محتوای صفحه الزامی است', life: 3000 })
     return
   }
   saving.value = true
   try {
-    const payload = {
-      title: form.value.title.trim(),
-      slug: form.value.slug.trim() || undefined,
-      content: form.value.content.trim(),
-      sortOrder: form.value.sortOrder || 0,
-      isActive: form.value.isActive,
-    }
-    if (editingId.value) {
-      await cmsPagesApi.update(editingId.value, payload)
-    } else {
-      await cmsPagesApi.create(payload)
-    }
+    const payload = { title, content, isActive: form.value.isActive }
+    if (!editingId.value) payload.slug = slug
+    if (editingId.value) await cmsPagesApi.update(editingId.value, payload)
+    else await cmsPagesApi.create(payload)
     dialog.value = false
     toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات صفحه ذخیره شد', life: 2500 })
     await load()
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره صفحه ناموفق بود', life: 3500 })
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.response?.data?.message || error?.message || 'ذخیره صفحه ناموفق بود', life: 3500 })
   } finally {
     saving.value = false
   }
 }
-
-async function deletePage(item) {
-  const confirmed = await confirm.require({
+function deletePage(item) {
+  confirm.require({
     message: 'صفحه «' + item.title + '» به‌طور دائمی حذف شود؟ این عملیات غیرقابل بازگشت است.',
     header: 'تایید حذف',
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'بله، حذف شود',
     rejectLabel: 'انصراف',
+    accept: async () => {
+      try {
+        await cmsPagesApi.delete(item.id)
+        toast.add({ severity: 'success', summary: 'حذف شد', detail: 'صفحه با موفقیت حذف شد', life: 2500 })
+        await load()
+      } catch (error) {
+        toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف صفحه انجام نشد', life: 3500 })
+      }
+    },
   })
-  if (!confirmed) return
-  try {
-    await cmsPagesApi.delete(item.id)
-    toast.add({ severity: 'success', summary: 'حذف شد', detail: 'صفحه با موفقیت حذف شد', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف صفحه انجام نشد', life: 3500 })
-  }
 }
-
 onMounted(load)
 </script>
 <style scoped>
@@ -229,112 +226,5 @@ onMounted(load)
 .page-form__field label { font-size:.83rem; font-weight:700; }
 .page-form__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
 .page-form__actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:.5rem; padding-top:.5rem; border-top:1px solid var(--ds-color-border); }
-@media(max-width:640px) { .page-intro { align-items:flex-start; flex-direction:column; } .page-form__grid { grid-template-columns:1fr; } .page-toolbar > * { width:100%; } }
-</style>
-const statusOptions = [
-  { label: 'پیش‌نویس', value: 'DRAFT' },
-  { label: 'منتشرشده', value: 'PUBLISHED' },
-  { label: 'آرشیوشده', value: 'ARCHIVED' },
-]
-const emptyForm = () => ({ title: '', description: '', imageUrl: '', targetUrl: '', ctaLabel: '', placement: 'HOME_HERO', sortOrder: 0, status: 'DRAFT', isActive: true, startsAt: '', endsAt: '' })
-const form = ref(emptyForm())
-const statusLabel = (status) => statusOptions.find((item) => item.value === status)?.label || status
-const statusTone = (status) => status === 'PUBLISHED' ? 'success' : status === 'ARCHIVED' ? 'secondary' : 'warn'
-const dateLabel = (value) => value ? new Date(value).toLocaleString('fa-IR') : 'بدون محدودیت'
-
-function toLocalDateTime(value) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-  return local.toISOString().slice(0, 16)
-}
-function normalizeDate(value) {
-  if (!value) return null
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? null : date.toISOString()
-}
-async function load() {
-  loading.value = true
-  try {
-    const response = await pagesApi.list({ page: 1, limit: 100, search: search.value, status: statusFilter.value || undefined })
-    const body = response?.data
-    items.value = body?.data?.data || body?.data || []
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'دریافت بنرها ناموفق بود.', life: 3500 })
-  } finally { loading.value = false }
-}
-function openCreate() {
-  editingId.value = null
-  form.value = emptyForm()
-  dialog.value = true
-}
-function edit(item) {
-  editingId.value = item.id
-  form.value = { ...emptyForm(), ...item, startsAt: toLocalDateTime(item.startsAt), endsAt: toLocalDateTime(item.endsAt) }
-  dialog.value = true
-}
-async function uploadImage(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-  uploading.value = true
-  try {
-    const response = await pagesApi.uploadImage(file)
-    form.value.imageUrl = response?.data?.data?.url || response?.data?.url
-    toast.add({ severity: 'success', summary: 'تصویر بارگذاری شد', detail: 'تصویر بنر آماده استفاده است.', life: 2500 })
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا در بارگذاری', detail: error?.message || 'بارگذاری تصویر انجام نشد.', life: 3500 })
-  } finally { uploading.value = false; event.target.value = '' }
-}
-async function save() {
-  if (!form.value.title.trim() || !form.value.imageUrl) {
-    toast.add({ severity: 'warn', summary: 'اطلاعات ناقص', detail: 'عنوان و تصویر بنر الزامی هستند.', life: 3000 })
-    return
-  }
-  saving.value = true
-  const payload = { ...form.value, startsAt: normalizeDate(form.value.startsAt), endsAt: normalizeDate(form.value.endsAt) }
-  try {
-    if (editingId.value) await pagesApi.update(editingId.value, payload)
-    else await pagesApi.create(payload)
-    dialog.value = false
-    toast.add({ severity: 'success', summary: 'ذخیره شد', detail: 'اطلاعات بنر ذخیره شد.', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ذخیره بنر ناموفق بود.', life: 3500 })
-  } finally { saving.value = false }
-}
-async function archive(item) {
-  if (!window.confirm(`بنر «${item.title}» به آرشیو منتقل شود؟`)) return
-  try {
-    await pagesApi.archive(item.id)
-    toast.add({ severity: 'success', summary: 'آرشیو شد', detail: 'بنر از نمایش عمومی خارج شد.', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'آرشیو بنر انجام نشد.', life: 3500 })
-  }
-}
-onMounted(load)
-
-
-<style scoped>
-.page-management { gap: 1.1rem; color: var(--ds-color-text); }
-.page-intro { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.25rem 1.4rem; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:linear-gradient(115deg,color-mix(in srgb,var(--ds-color-primary) 8%,var(--ds-color-surface)),var(--ds-color-surface) 72%); }
-.page-intro__eyebrow { color:var(--ds-color-primary); font-size:.75rem; font-weight:800; }
-.page-intro h2 { margin:.3rem 0; font-size:1.15rem; }
-.page-intro p { margin:0; color:var(--ds-color-text-muted); font-size:.85rem; line-height:1.8; }
-.page-toolbar { display:flex; flex-wrap:wrap; gap:.65rem; }
-.page-toolbar > :first-child { min-width:min(320px,100%); }
-.page-table-wrap { overflow:hidden; border:1px solid var(--ds-color-border); border-radius:var(--ds-card-radius); background:var(--ds-color-surface); }
-.page-thumb { width:88px; height:54px; object-fit:cover; border-radius:8px; }
-.page-empty { padding:2rem; text-align:center; color:var(--ds-color-text-muted); }
-.page-form { display:grid; gap:1rem; }
-.page-form__field { display:grid; gap:.45rem; min-width:0; }
-.page-form__field label { font-size:.83rem; font-weight:700; }
-.page-form__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
-.page-upload { display:flex; align-items:center; flex-wrap:wrap; gap:.75rem; }
-.page-upload input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
-.page-upload span { color:var(--ds-color-text-muted); font-size:.75rem; }
-.page-preview { display:block; width:100%; max-height:230px; object-fit:contain; border:1px solid var(--ds-color-border); border-radius:10px; background:var(--ds-color-surface-alt); }
-.page-form__switch { display:flex; align-items:center; gap:.6rem; }
 @media(max-width:640px) { .page-intro { align-items:flex-start; flex-direction:column; } .page-form__grid { grid-template-columns:1fr; } .page-toolbar > * { width:100%; } }
 </style>

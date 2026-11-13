@@ -183,24 +183,24 @@ async function save() {
   }
 }
 
-async function deleteFaq(item) {
-  const confirmed = await confirm.require({
+function deleteFaq(item) {
+  confirm.require({
     message: 'سوال «' + (item.question?.substring(0, 50) || 'بدون عنوان') + '...' + '» به‌طور دائمی حذف شود؟ این عملیات غیرقابل بازگشت است.',
     header: 'تایید حذف',
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'بله، حذف شود',
     rejectLabel: 'انصراف',
+    accept: async () => {
+      try {
+        await cmsFaqsApi.delete(item.id)
+        toast.add({ severity: 'success', summary: 'حذف شد', detail: 'سوال متداول با موفقیت حذف شد', life: 2500 })
+        await load()
+      } catch (error) {
+        toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف سوال متداول انجام نشد', life: 3500 })
+      }
+    },
   })
-  if (!confirmed) return
-  try {
-    await cmsFaqsApi.delete(item.id)
-    toast.add({ severity: 'success', summary: 'حذف شد', detail: 'سوال متداول با موفقیت حذف شد', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف سوال متداول انجام نشد', life: 3500 })
-  }
 }
-
 onMounted(load)
 </script>
 <style scoped>

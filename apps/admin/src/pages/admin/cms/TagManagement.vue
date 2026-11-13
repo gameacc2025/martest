@@ -184,24 +184,24 @@ async function save() {
   }
 }
 
-async function deleteTag(item) {
-  const confirmed = await confirm.require({
+function deleteTag(item) {
+  confirm.require({
     message: 'برچسب «' + item.name + '» به‌طور دائمی حذف شود؟ این عملیات غیرقابل بازگشت است.',
     header: 'تایید حذف',
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'بله، حذف شود',
     rejectLabel: 'انصراف',
+    accept: async () => {
+      try {
+        await cmsTagsApi.delete(item.id)
+        toast.add({ severity: 'success', summary: 'حذف شد', detail: 'برچسب با موفقیت حذف شد', life: 2500 })
+        await load()
+      } catch (error) {
+        toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف برچسب انجام نشد', life: 3500 })
+      }
+    },
   })
-  if (!confirmed) return
-  try {
-    await cmsTagsApi.delete(item.id)
-    toast.add({ severity: 'success', summary: 'حذف شد', detail: 'برچسب با موفقیت حذف شد', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'حذف برچسب انجام نشد', life: 3500 })
-  }
 }
-
 onMounted(load)
 </script>
 

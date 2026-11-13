@@ -192,24 +192,24 @@ async function save() {
   }
 }
 
-async function deleteCategory(item) {
-  const confirmed = await confirm.require({
+function deleteCategory(item) {
+  confirm.require({
     message: 'دسته‌بندی «' + item.name + '» حذف شود؟ اگر مقاله‌ای به آن متصل باشد، حذف انجام نمی‌شود.',
     header: 'تأیید حذف دسته‌بندی',
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: 'بله، حذف شود',
     rejectLabel: 'انصراف',
+    accept: async () => {
+      try {
+        await cmsCategoriesApi.delete(item.id)
+        toast.add({ severity: 'success', summary: 'حذف شد', detail: 'دسته‌بندی حذف شد', life: 2500 })
+        await load()
+      } catch (error) {
+        toast.add({ severity: 'error', summary: 'خطا', detail: error?.response?.data?.message || error?.message || 'حذف دسته‌بندی ناموفق بود', life: 3500 })
+      }
+    },
   })
-  if (!confirmed) return
-  try {
-    await cmsCategoriesApi.delete(item.id)
-    toast.add({ severity: 'success', summary: 'حذف شد', detail: 'دسته‌بندی حذف شد', life: 2500 })
-    await load()
-  } catch (error) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: error?.response?.data?.message || error?.message || 'حذف دسته‌بندی ناموفق بود', life: 3500 })
-  }
 }
-
 onMounted(load)
 </script>
 
