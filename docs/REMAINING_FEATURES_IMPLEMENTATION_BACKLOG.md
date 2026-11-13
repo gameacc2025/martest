@@ -482,3 +482,14 @@ These documents contain deeper contracts and should be updated rather than dupli
 **Delivery state:** PR [#90](https://github.com/gameacc2025/martest/pull/90) remains open and unmerged because unrelated frontend/browser checks are red. Database-specific validation is green. No migration was applied to the user's local or production database; only the disposable CI PostgreSQL database was migrated.
 
 **Next implementation stage:** API implementation, beginning with AuthChallenge/AuditLog and Support, then CMS, CRM, and finally gated Retail/Finance. Keep AD-4 in force until the retail commercial decisions are explicitly approved.
+
+## 2026-11-13 source audit correction — CMS Admin UI
+
+The current `main` source contains all five Admin CMS management screens:
+- `apps/admin/src/pages/admin/cms/ArticleManagement.vue`
+- `apps/admin/src/pages/admin/cms/CategoryManagement.vue`
+- `apps/admin/src/pages/admin/cms/TagManagement.vue`
+- `apps/admin/src/pages/admin/cms/FaqManagement.vue`
+- `apps/admin/src/pages/admin/cms/PageManagement.vue`
+
+The Admin router registers `/cms/articles`, `/cms/categories`, `/cms/tags`, `/cms/faqs` and `/cms/pages`; `dashboardMenu.js` exposes the five entries with corresponding `cms.*.read` permissions. These are implemented source/UI surfaces, not proof of end-to-end acceptance. Remaining CMS work is to verify CRUD requests and response handling against registered backend routes, enforce and test the full permission matrix server-side, validate public FAQ/static-page rendering, and add dedicated browser journeys for create/update/delete and publish/visibility behavior. Do not count the five Admin screens as missing pages, and do not mark CMS complete until those checks pass.
