@@ -27,6 +27,7 @@ const modules = [
   ['cms', 'faq.routes.js', '/cms/faqs'],
   ['cms', 'page.routes.js', '/cms/pages'],
   ['crm', 'index.js', '/crm'],
+  ['support', 'index.js', '/support'],
 ];
 
 const inventoryPath = path.join(__dirname, '../../../docs/API_ROUTE_INVENTORY.md');
