@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import Faq from './Faq.vue'
 
 const { faqFixtures } = vi.hoisted(() => ({ faqFixtures: [
@@ -42,6 +42,7 @@ describe('Website FAQ', () => {
 
   it('renders the B2B inquiry questions and shared design-system page structure', () => {
     wrapper = mountFaq()
+    await flushPromises()
 
     expect(wrapper.find('#faq-title').text()).toBe('سوالات متداول')
     expect(wrapper.findAll('.faq-question')).toHaveLength(8)
@@ -51,6 +52,7 @@ describe('Website FAQ', () => {
 
   it('toggles answers with accessible expanded and controlled-region semantics', async () => {
     wrapper = mountFaq()
+    await flushPromises()
     const question = wrapper.find('#faq-question-1')
 
     expect(question.attributes('aria-expanded')).toBe('false')
@@ -66,6 +68,7 @@ describe('Website FAQ', () => {
 
   it('allows only one answer to remain open at a time', async () => {
     wrapper = mountFaq()
+    await flushPromises()
 
     await wrapper.find('#faq-question-0').trigger('click')
     await wrapper.find('#faq-question-2').trigger('click')
@@ -85,6 +88,7 @@ describe('Website FAQ', () => {
 
   it('does not promise unsupported checkout, installment, return, or order-tracking flows', async () => {
     wrapper = mountFaq()
+    await flushPromises()
     await wrapper.find('#faq-question-6').trigger('click')
     const text = wrapper.text()
 
@@ -96,6 +100,7 @@ describe('Website FAQ', () => {
 
   it('links support questions to the existing contact route', async () => {
     wrapper = mountFaq()
+    await flushPromises()
     await wrapper.find('#faq-question-7').trigger('click')
 
     expect(wrapper.find('.faq-support a').attributes('href')).toBe('contact')
