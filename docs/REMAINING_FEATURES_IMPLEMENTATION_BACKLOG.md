@@ -493,3 +493,10 @@ The current `main` source contains all five Admin CMS management screens:
 - `apps/admin/src/pages/admin/cms/PageManagement.vue`
 
 The Admin router registers `/cms/articles`, `/cms/categories`, `/cms/tags`, `/cms/faqs` and `/cms/pages`; `dashboardMenu.js` exposes the five entries with corresponding `cms.*.read` permissions. These are implemented source/UI surfaces, not proof of end-to-end acceptance. Remaining CMS work is to verify CRUD requests and response handling against registered backend routes, enforce and test the full permission matrix server-side, validate public FAQ/static-page rendering, and add dedicated browser journeys for create/update/delete and publish/visibility behavior. Do not count the five Admin screens as missing pages, and do not mark CMS complete until those checks pass.
+
+### CMS API contract audit — additional source findings (2026-11-13)
+
+- Backend module registration loads separate article/category/tag/FAQ/page route modules.
+- All five modules expose public read routes and STAFF-only management CRUD routes with `requireExactAccessType('STAFF')` plus resource-specific `cms.*` permissions. Route files also define request schemas for list filters, IDs and create/update bodies.
+- **Code defect to verify/fix:** `backend/src/modules/cms/article.routes.js` declares `featured` as a JSON Schema boolean. Fastify AJV is configured with `coerceTypes: true` in `backend/src/app.js`, while `article.controller.js` currently converts the value using `featured === 'true'`. A query value coerced to boolean `true` will therefore be passed to the service as `false`. Add a regression test for `?featured=true` and normalize the boolean safely before considering the public article filter accepted.
+- **Acceptance still open:** route/schema presence does not prove service correctness, permission denial behavior, XSS/content sanitization, media authorization, revision/status transitions, or public page rendering. Add targeted service/route tests and browser journeys before marking CMS complete.
