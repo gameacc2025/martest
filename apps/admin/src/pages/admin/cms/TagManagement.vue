@@ -7,20 +7,16 @@
     </div>
     <div class="tag-toolbar">
       <InputText v-model="search" placeholder="جستجو در نام برچسب…" @keyup.enter="load" />
-      <Select v-model="statusFilter" :options="statusOptions" option-label="label" option-value="value" placeholder="همه وضعیت‌ها" show-clear @change="load" />
       <Button label="جستجو" icon="pi pi-search" severity="secondary" outlined @click="load" />
     </div>
     <div class="tag-table-wrap">
       <DataTable :value="items" :loading="loading" data-key="id" responsive-layout="scroll" striped-rows :paginator="true" :rows="10" :totalRecords="totalRecords" @page="onPage">
         <Column field="name" header="نام" style="min-width: 250px" />
         <Column field="slug" header="اسلاگ" style="width: 180px" />
-        <Column field="sortOrder" header="ترتیب" style="width: 100px" />
-        <Column header="وضعیت" style="width: 130px">
-          <template #body="{ data }"><Tag :value="statusLabel(data.isActive)" :severity="statusTone(data.isActive)" /></template>
-        </Column>
         <Column header="تعداد مقالات" style="width: 120px">
           <template #body="{ data }">{{ data._count?.articles || 0 }}</template>
         </Column>
+        <Column field="createdAt" header="تاریخ ایجاد" style="width: 180px"><template #body="{ data }">{{ data.createdAt ? new Date(data.createdAt).toLocaleDateString("fa-IR") : "—" }}</template></Column>
         <Column header="عملیات" style="width: 130px">
           <template #body="{ data }">
             <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش برچسب" @click="edit(data)" />
@@ -37,12 +33,7 @@
     <Dialog v-model:visible="dialog" :header="editingId ? 'ویرایش برچسب' : 'ایجاد برچسب جدید'" modal :style="{ width: 'min(500px, 94vw)' }" :closable="!saving">
       <div class="tag-form">
         <div class="tag-form__field"><label for="tag-name">نام *</label><InputText id="tag-name" v-model="form.name" maxlength="100" /></div>
-        <div class="tag-form__field"><label for="tag-slug">اسلاگ *</label><InputText id="tag-slug" v-model="form.slug" maxlength="100" placeholder="به‌صورت خودکار از نام تولید می‌شود" /></div>
-        <div class="tag-form__field"><label for="tag-description">توضیحات</label><Textarea id="tag-description" v-model="form.description" rows="3" maxlength="500" auto-resize /></div>
-        <div class="tag-form__grid">
-          <div class="tag-form__field"><label for="tag-sort">ترتیب نمایش</label><InputNumber id="tag-sort" v-model="form.sortOrder" :min="0" /></div>
-          <div class="tag-form__field"><label for="tag-status">وضعیت</label><Select id="tag-status" v-model="form.isActive" :options="statusOptions" option-label="label" option-value="value" placeholder="وضعیت را انتخاب کنید" /></div>
-        </div>
+        <div v-if="editingId" class="tag-form__field"><label for="tag-slug">اسلاگ تولیدشده</label><InputText id="tag-slug" :model-value="form.slug" disabled /><small>اسلاگ به‌صورت خودکار از نام ساخته می‌شود.</small></div>
 
         <div class="tag-form__actions">
           <Button label="انصراف" icon="pi pi-times" text @click="closeDialog" :disabled="saving" />
@@ -77,28 +68,13 @@ const first = ref(0)
 const rows = ref(10)
 
 const search = ref('')
-const statusFilter = ref('')
 const currentPage = ref(1)
 
 const dialog = ref(false)
 const editingId = ref(null)
 const saving = ref(false)
 
-const form = ref({
-  name: '',
-  slug: '',
-  description: '',
-  sortOrder: 0,
-  isActive: true,
-})
-
-const statusOptions = [
-  { label: 'فعال', value: true },
-  { label: 'غیرفعال', value: false },
-]
-
-const statusLabel = (isActive) => isActive ? 'فعال' : 'غیرفعال'
-const statusTone = (isActive) => isActive ? 'success' : 'secondary'
+const form = ref({ name: '', slug: '' })
 
 function unpackCmsListResponse(response) {
   const body = response?.data ?? response
@@ -123,7 +99,6 @@ async function load() {
       page: currentPage.value,
       limit: rows.value,
       search: search.value || undefined,
-      isActive: statusFilter.value !== '' ? statusFilter.value : undefined,
     }
     const res = await cmsTagsApi.listManage(params)
     const page = unpackCmsListResponse(res)
@@ -147,7 +122,7 @@ function onPage(event) {
 }
 
 function openCreate() {
-  form.value = { name: '', slug: '', description: '', sortOrder: 0, isActive: true }
+  form.value = { name: '', slug: '' }
   editingId.value = null
   dialog.value = true
 }
@@ -157,7 +132,7 @@ async function edit(item) {
     const res = await cmsTagsApi.getById(item.id)
     const data = res.data?.data || res.data
     if (!data) throw new Error('برچسب یافت نشد')
-    form.value = { name: data.name || '', slug: data.slug || '', description: data.description || '', sortOrder: data.sortOrder || 0, isActive: data.isActive !== false }
+    form.value = { name: data.name || '', slug: data.slug || '' }
     editingId.value = item.id
     dialog.value = true
   } catch (err) {
@@ -168,7 +143,7 @@ async function edit(item) {
 function closeDialog() {
   dialog.value = false
   editingId.value = null
-  form.value = { name: '', slug: '', description: '', sortOrder: 0, isActive: true }
+  form.value = { name: '', slug: '' }
 }
 
 async function save() {
@@ -178,13 +153,7 @@ async function save() {
   }
   saving.value = true
   try {
-    const payload = {
-      name: form.value.name.trim(),
-      slug: form.value.slug.trim() || undefined,
-      description: form.value.description?.trim() || '',
-      sortOrder: form.value.sortOrder || 0,
-      isActive: form.value.isActive,
-    }
+    const payload = { name: form.value.name.trim() }
     if (editingId.value) {
       await cmsTagsApi.update(editingId.value, payload)
     } else {

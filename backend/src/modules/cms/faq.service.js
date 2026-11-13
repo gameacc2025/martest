@@ -40,7 +40,7 @@ async function listAdmin({ page = 1, limit = 50, search = '', category, isActive
   const where = {
     ...(search ? { OR: [{ question: { contains: search, mode: 'insensitive' } }, { answer: { contains: search, mode: 'insensitive' } }] } : {}),
     ...(category ? { category } : {}),
-    ...(isActive !== undefined ? { isActive: isActive === 'true' } : {}),
+    ...(isActive !== undefined ? { isActive: isActive === true || isActive === 'true' } : {}),
   };
 
   const [data, total] = await Promise.all([

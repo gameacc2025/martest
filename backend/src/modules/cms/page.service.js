@@ -55,7 +55,7 @@ async function getPublicBySlug(slug) {
 async function listAdmin({ page = 1, limit = 50, search = '', isActive } = {}) {
   const where = {
     ...(search ? { OR: [{ title: { contains: search, mode: 'insensitive' } }, { slug: { contains: search, mode: 'insensitive' } }] } : {}),
-    ...(isActive !== undefined ? { isActive: isActive === 'true' } : {}),
+    ...(isActive !== undefined ? { isActive: isActive === true || isActive === 'true' } : {}),
   };
 
   const [data, total] = await Promise.all([
