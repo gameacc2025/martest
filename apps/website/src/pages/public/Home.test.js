@@ -41,7 +41,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   })
 
   it('contains every major homepage section from the supplied HTML reference', () => {
-    for (const section of ['stats', 'g3', 'prods', 'bl', 'tms', 'rfq']) {
+    for (const section of ['stats', 'cats', 'prods', 'bl', 'tms', 'rfq']) {
       expect(source).toContain('class="' + section)
     }
     expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
@@ -94,7 +94,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
   it('does not invent marketplace performance data or claim unavailable integrations are live', () => {
     expect(source).toContain('تأمین‌کنندگان ثبت‌شده')
     expect(source).toContain('<b>—</b>')
-    expect(source).toContain('نمونه نمایشی')
+    expect(source).toContain('دیدگاه نمونه')
     expect(source).toContain('سرویس در دسترس نیست')
     expect(source).toContain('محصولی با نشان منتخب برای نمایش دریافت نشد')
     expect(source).not.toContain('پرفروش‌ترین محصولات')
