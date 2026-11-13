@@ -1,43 +1,61 @@
-# Current Task — CRM Acceptance and Remaining Domain Work
+# Current Task — CRM / Support Acceptance and Remaining Domains
 
 **Updated:** 2026-11-13  
-**Status:** P0 CI / Runtime / Seed / Browser PASS; CRM lead request/service/UI smoke acceptance PARTIAL and verified; broader P1 work remains.  
+**Status:** P0 CI / migration / Runtime / seed / browser PASS. CRM and Support are PARTIAL operational vertical slices; remaining acceptance is tracked below.  
 **Repository:** `gameacc2025/martest`  
 **Canonical branch:** `main` only.  
-**Verified code baseline:** `a281e3fb84978457e34d816b519ba2f664ea8caa`  
-**Latest docs commit:** `db4d7dea29aa323c4061965e1b620b52f9960691`  
+**Verified code baseline:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`  
+**Latest CI:** [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592)  
+**Latest migration validation:** [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157)  
+**Latest Runtime:** [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935)  
 **Backlog:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`  
 **Owner communication:** Persian.
 
 ## Verified completed work
 
-1. CI `43463018169`: frozen workspace install, architecture graph, all Frontend/Shared tests, Prisma Client generation, Backend tests and Website/Company/Admin builds PASS.
-2. Database migration validation `43463018358`: fresh PostgreSQL migration apply and migration-state verification PASS.
-3. Runtime `43463018256`: Compose configuration/build/start, Backend + three panel health checks, migration status, all development seeds run twice, Chromium and browser smoke PASS.
-4. All 8 Playwright tests PASS. STAFF login → PKCE handoff to Admin → CRM Leads route; CRM list endpoint returns 200 and the seeded lead table is visible. Website/Company/Admin rendering, API proxies and storefront viewport checks remain green.
-5. Fixed stale E2E selector `.shop-page` to actual homepage root `.reference-home`; commit `4e5d25e38ecc63a40fe1477b9b47091340b5b298`.
-6. CRM lead mutation validation: Fastify schemas for create/update/assign/status/merge and request validation tests.
-7. CRM service tests: lead normalization, score bounds, active STAFF owner, terminal lead protection and valid/invalid status transitions.
-8. CRM UI pagination fix: `unwrapPage` preserves both rows and metadata for lead/account list responses. The Playwright CRM journey caught the prior empty-table bug; after fix, the seeded rows are visible.
-9. CRM code commits include `724d603744443377ed52b20221928eb5f04f1aab`, `a6b36a58a66b2850dc0c2c6b8880cb13418095bd`, `430e74edcf866b57fd5961731cf1480f5c93c5a8`, `369500e0659a508eb371a16dd226220de78c45b6`, `0b78ae7ff24e55e9beec55a53739d059952bab56`, `2be13ce77d5c37cf6c4bf355cbe88d1fe9c60b31`, `82dee880ad974f746bc16b612fe470f853623ab3`, `a281e3fb84978457e34d816b519ba2f664ea8caa`.
-10. Backlog refreshed with the CRM service/UI evidence; docs commit `db4d7dea29aa323c4061965e1b620b52f9960691`.
+1. CI PASS: frozen install, architecture graph, all Frontend/Shared tests, Prisma Client generation, Backend tests and Website/Company/Admin builds.
+2. Migration Validation PASS: fresh PostgreSQL migration apply and migration-state verification.
+3. Runtime PASS: disposable Compose configuration/build/start; Backend + three panels healthy; migrations current; all development seeds run twice; Chromium installed; browser smoke PASS.
+4. Playwright 8/8 PASS: STAFF login → PKCE handoff to Admin → CRM Leads seeded rows visible; Support ticket creation and reply; Website/Company/Admin render and API proxies; storefront responsive containment.
+5. Fixed stale route-count assertion in `backend/src/app.test.js`: expected registered API routes corrected from 256 to 264.
+6. Support is now an operational partial slice: module/routes/service, RBAC, API client, shared workspace in all three apps, migration and seed; E2E create/reply passes.
+7. Fixed Support SLA fallback for uncategorized tickets: category-specific policy → global policy → active policy for the same priority. Added unit tests for fallback and precedence.
+8. Support seed is idempotent in CI and creates 5 categories, 3 queues and 20 category/priority SLA policies.
+9. CRM lead schemas exist for create/update/assign/status/merge; service tests cover normalization, score bounds, active STAFF ownership, terminal lead protection and state transitions; Playwright confirms Leads list rendering.
+10. CMS FAQ/Page models, migration, services/routes and seeds exist; runtime seed passes. Account recovery routes/service exist with hashed one-time OTP controls; actual SMS provider delivery remains unverified.
 
 ## Remaining execution queue
 
-### P1 — operational domain completion
-- **CRM acceptance:** complete request schemas for remaining route families; add broader functional CRUD/service tests, full permission matrix, STAFF isolation, conversion/merge idempotency and Playwright create/update/assign/status journey. Preserve existing CRM implementation; do not rewrite from scratch.
-- **Support vertical slice:** implement tenant-safe backend routes/services, public/internal messages, queues/assignment/state machine, private authorized attachments, SLA, notifications, API client and real Website/Company/Admin screens. Existing support UI is preview-only and DB models alone are not completion.
-- **CMS/Recovery acceptance:** source includes FAQ/Page models/migrations/services/routes/seeds and password-recovery OTP flow. Add/verify public/admin CRUD and permissions, real SMS provider configuration, and full password-reset browser test. CI seed success does not prove live SMS delivery.
-- **Notifications/Audit:** generic SMS outbox/retry/consent/quota/idempotency; audit event coverage, redaction and retention.
-- **Dashboards:** replace or clearly mark sample Company/Settlement/Operations KPIs; use tenant/date/currency-scoped aggregates.
-- **UI regression:** expand beyond smoke to visual, RTL, keyboard/accessibility and feature-level journeys.
+### P1 — CRM acceptance
+- Add Fastify JSON schemas to remaining CRM route families (accounts, contacts, pipelines/stages, opportunities, tasks, activities, notes, sources and query filters).
+- Add functional CRUD/service tests, permission matrix and STAFF isolation.
+- Prove conversion and merge idempotency/transaction safety.
+- Add Playwright create/update/assign/status journey; preserve current CRM implementation.
 
-### P2 — explicitly gated
-- Retail/Inventory/Orders/Payments/Fulfillment/Returns: do not activate checkout until owner approves commercial rules.
-- Finance/Settlement: wait for currency, tax, commission, legal and payout decisions plus Retail lifecycle.
+### P1 — Support completion
+- Add private attachment upload/download with authorization, storage validation and scanning lifecycle.
+- Connect ticket/message/status events to notifications with retry/idempotency.
+- Implement SLA working calendars, pause/resume, escalation worker and metrics; current SLA deadlines are calculated but no worker/calendar is verified.
+- Add queue-level visibility and agent assignment UX; improve list pagination (current shared UI fetches at most 100).
+- Expand service tests for create/message/status/assignment and tenant/permission isolation.
+
+### P1 — CMS / Recovery / Notifications / Audit
+- FAQ/Page public/admin CRUD, permission and browser E2E.
+- Real SMS provider configuration and password-reset E2E in staging.
+- Generic SMS outbox, consent/quota, retries and idempotency.
+- Audit event coverage, redaction and retention.
+
+### P1 — Dashboards and regression
+- Replace or explicitly label sample Company/Settlement/Operations metrics.
+- Use tenant/date/currency-scoped aggregate APIs.
+- Expand RTL, keyboard/accessibility and visual QA beyond smoke.
+
+### P2 — gated by owner decision
+- Retail/Inventory/Orders/Payments/Fulfillment/Returns: no checkout activation before explicit commercial approval.
+- Finance/Settlement: wait for currency, tax, commission, legal and payout policies plus Retail lifecycle.
 
 ### P3 — deferred
-Procurement, HR, projects, advanced logistics/warehouse, marketing automation, BI and integrations need separate approved scope.
+Procurement, HR, projects, advanced logistics/warehouse, marketing automation, BI and integrations need separately approved scope.
 
 ## Git / safety rules
 
@@ -46,8 +64,8 @@ Procurement, HR, projects, advanced logistics/warehouse, marketing automation, B
 - Preserve local edits, untracked files, stashes and DB data.
 - No reset/clean/force push, local DB reset/drop, or volume deletion.
 - Do not bypass Fact-Forcing Gate or Auto Mode.
-- CI Runtime was tested on disposable GitHub Actions infrastructure; local Windows working tree/Docker/PostgreSQL remain NOT VERIFIED.
+- GitHub Runtime is proven only on disposable Actions infrastructure; local Windows working tree/Docker/PostgreSQL remain NOT VERIFIED.
 
 ## Handoff requirements
 
-Persian report with exact main SHA, changed paths, workflow URLs, test counts, migration/seed idempotency, browser evidence and blockers. Local environment remains NOT VERIFIED until directly observed.
+Persian report with exact main SHA, changed paths, workflow URLs, test counts, migration/seed idempotency, browser evidence and blockers. Never report local environment as PASS without direct access.
