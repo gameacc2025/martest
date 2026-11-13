@@ -1,6 +1,10 @@
 # Remaining Features — Implementation Backlog and Database-First Plan
 
-## آخرین اعتبارسنجی و ممیزی — 2026-11-13
+> **اجرای تسک‌ها:** این Backlog به تسک‌های کوچک و دارای وابستگی در [AGENT_TASKS_PHASED_PLAN.md](AGENT_TASKS_PHASED_PLAN.md) شکسته شده است. برای واگذاری به ایجنت‌ها از شناسه‌های همان سند استفاده کنید؛ ACTIVE.md مرجع claim و مالکیت فایل‌هاست. این فایل مرجع وضعیت دامنه‌ها و شواهد تاریخی باقی می‌ماند.
+
+## آخرین شواهد ثبت‌شده و محدودیت اعتبارسنجی — 2026-11-13
+
+> شواهد PASS در جدول زیر متعلق به baseline `0d0a386` است و اعتبار آن برای HEAD فعلی اثبات نشده است. برای کار اجرایی جدید، ابتدا تسک `BASE-01` در برنامه فازبندی اجرا شود.
 
 > **کد مبنا:** `main`، commit `0d0a3866c6ff387978f8c5244f6ca936248f508d`. این ممیزی از سورس GitHub و GitHub Actions است. working tree ویندوز، Docker محلی، PostgreSQL محلی، stashها و فایل‌های untracked دستگاه کاربر قابل مشاهده نیستند و NOT VERIFIED باقی می‌مانند.
 
