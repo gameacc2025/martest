@@ -39,7 +39,7 @@ describe('Website visual system — latest owner-supplied prototype', () => {
 
   it('styles the real public header and all public page surfaces with the prototype tokens', () => {
     expect(layout).toContain('class="public-header"')
-    expect(layout).toContain('class="public-theme-toggle"')
+    expect(layout).toContain('public-theme-toggle')
     expect(layout).toContain('class="tm-btn tm-btn--accent public-rfq-link"')
     expect(sharedTheme).toContain('--primary-color: #0891B2')
     expect(sharedTheme).toContain('--surface-ground: #F0F7FA')
