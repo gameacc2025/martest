@@ -265,6 +265,12 @@ export const endpoints = {
   },
 
   // CRM — STAFF-only customer relationship management
+  support: {
+    categories: '/support/categories',
+    tickets: '/support/tickets', ticket: (id) => `/support/tickets/${id}`,
+    messages: (id) => `/support/tickets/${id}/messages`, status: (id) => `/support/tickets/${id}/status`,
+    assign: (id) => `/support/tickets/${id}/assign`, queues: '/support/queues',
+  },
   crm: {
     dashboard: '/crm/dashboard',
     sources: '/crm/lead-sources', source: (id) => `/crm/lead-sources/${id}`,
