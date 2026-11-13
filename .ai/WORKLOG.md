@@ -14,6 +14,7 @@
 - **Not proven:** live CRUD behavior for every CMS resource, complete backend permission matrix, public FAQ/Page rendering, publish/visibility workflow and dedicated Playwright journeys.
 - **Documentation:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` and `.ai/current-task.md` clarified so existing screens are not mislabeled as missing.
 - **Verification:** GitHub source inspection only; tests/builds NOT RUN in this documentation-only audit. Local Windows/Docker/PostgreSQL remain NOT VERIFIED.
+- **Published documentation commits:** `1c4bc94e` (current-task CMS UI clarification), `0e2f7d96` (backlog CMS UI correction), `b985fd94` (worklog audit entry), `d4bc17ab` (coordination board), `fa8df04e` (CMS API audit and featured-filter finding), `d88f98c9` (current-task Backend finding), `00f210c2` (CMS API audit worklog). All updates were written to `main` and re-fetched successfully.
 - **Next:** audit CMS route/service/API contract parity and then continue CRM/Support/Audit/Notifications/dashboard coverage.
 
 ## 2026-11-13 — SUPPORT-SLA-FALLBACK-AND-ACCEPTANCE
