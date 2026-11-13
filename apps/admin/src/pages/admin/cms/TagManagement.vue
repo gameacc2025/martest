@@ -57,7 +57,7 @@
 
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { cmsTagsApi } from '@telecom/api-client'
@@ -65,9 +65,10 @@ import { usePermissions } from '@/composables/usePermissions'
 
 const toast = useToast()
 const confirm = useConfirm()
-const { can: canCreate } = usePermissions()
-const { can: canUpdate } = usePermissions()
-const { can: canDelete } = usePermissions()
+const { can } = usePermissions()
+const canCreate = computed(() => can('cms.tags.create'))
+const canUpdate = computed(() => can('cms.tags.update'))
+const canDelete = computed(() => can('cms.tags.delete'))
 
 const items = ref([])
 const loading = ref(false)

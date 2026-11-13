@@ -52,7 +52,7 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { cmsFaqsApi } from '@telecom/api-client'
@@ -60,9 +60,10 @@ import { usePermissions } from '@/composables/usePermissions'
 
 const toast = useToast()
 const confirm = useConfirm()
-const { can: canCreate } = usePermissions()
-const { can: canUpdate } = usePermissions()
-const { can: canDelete } = usePermissions()
+const { can } = usePermissions()
+const canCreate = computed(() => can('cms.faqs.create'))
+const canUpdate = computed(() => can('cms.faqs.update'))
+const canDelete = computed(() => can('cms.faqs.delete'))
 
 const items = ref([])
 const loading = ref(false)
