@@ -2136,6 +2136,59 @@ enum ArticleType {
 }
 
 /// محتوای مقاله/مجله شامل متن، وضعیت انتشار، نویسنده، زمان‌بندی و فراداده SEO.
+/// پرسش‌های متداول قابل انتشار در وب‌سایت و قابل مدیریت در پنل STAFF.
+model Faq {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
+  id        Int      @id @default(autoincrement())
+  /// متن پرسش؛ برای جلوگیری از رکورد تکراری یکتا است.
+  question  String   @unique @db.VarChar(500)
+  /// پاسخ کامل پرسش متداول.
+  answer    String   @db.Text
+  /// دسته‌بندی نمایشی پرسش.
+  category  String   @default("عمومی") @db.VarChar(100)
+  /// ترتیب نمایش در دسته‌بندی.
+  sortOrder Int      @default(0)
+  /// فعال یا غیرفعال بودن برای نمایش عمومی.
+  isActive  Boolean  @default(true)
+  /// زمان ایجاد رکورد.
+  createdAt DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
+  updatedAt DateTime @updatedAt
+
+  @@index([category, sortOrder])
+  @@index([isActive])
+}
+
+/// صفحات ثابت و محتوای حقوقی/معرفی قابل مدیریت در CMS.
+model Page {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
+  id              Int      @id @default(autoincrement())
+  /// شناسه متنی یکتا برای URL صفحه.
+  slug            String   @unique @db.VarChar(100)
+  /// عنوان قابل نمایش صفحه.
+  title           String   @db.VarChar(240)
+  /// محتوای صفحه.
+  content         String   @db.Text
+  /// قالب تفسیر محتوا.
+  contentFormat   String   @default("HTML") @db.VarChar(20)
+  /// عنوان SEO صفحه.
+  metaTitle       String?  @db.VarChar(240)
+  /// توضیح SEO صفحه.
+  metaDescription String?  @db.VarChar(500)
+  /// نشانی canonical صفحه.
+  canonicalUrl    String?  @db.VarChar(500)
+  /// اجازه ایندکس‌شدن صفحه توسط موتورهای جست‌وجو.
+  isIndexable     Boolean  @default(true)
+  /// فعال یا غیرفعال بودن صفحه.
+  isActive        Boolean  @default(true)
+  /// زمان ایجاد رکورد.
+  createdAt       DateTime @default(now())
+  /// آخرین زمان ویرایش رکورد.
+  updatedAt       DateTime @updatedAt
+
+  @@index([isActive])
+}
+
 model Article {
   /// شناسه یکتای رکورد و کلید اصلی جدول.
   id               Int          @id @default(autoincrement())

@@ -328,7 +328,11 @@ async function seedFaqs() {
   ];
 
   for (const faq of faqs) {
-    await prisma.faq.create({ data: faq });
+    await prisma.faq.upsert({
+      where: { question: faq.question },
+      update: faq,
+      create: faq,
+    });
   }
 }
 
@@ -376,9 +380,11 @@ async function main() {
     await seedArticles(author.id, categories, tags);
     console.log('✅ Seeded articles');
 
-    // FAQ and Page seeding removed - schema uses Article model for all CMS content
-    // FAQs and Pages should be created as Articles with appropriate types
-    console.log('ℹ️  FAQ/Page content uses Article model (type: GUIDE, NEWS, etc.)');
+    await seedFaqs();
+    console.log('✅ Seeded FAQs');
+
+    await seedPages();
+    console.log('✅ Seeded static pages');
 
     console.log('🎉 CMS seed completed successfully!');
   } catch (error) {
