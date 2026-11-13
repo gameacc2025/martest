@@ -1,3 +1,15 @@
+## 2026-11-13 — CROSS-DOMAIN-SOURCE-AUDIT-REFRESH
+
+- **Inspected main HEAD:** `ace67cccc6a4b09b8cf8258dc814aedbb5d0b71b`; latest inspected code-bearing commit `e0cdfdd3006cfe68c86aa280b2a7aabdb008f4a9`.
+- **CMS:** `e0cdfdd` corrected Boolean handling for category/FAQ/page admin filters. Article `featured` remains defective/incomplete: boolean schema + AJV coercion + string comparison in controller; service does not filter and Article has no `featured` field.
+- **CRM:** exact STAFF/per-action guards are present. Request schemas cover lead operations only; other CRM route families omit schemas. Inspected route tests cover access denial and lead validation; service tests are lead-focused. Conversion/merge concurrency/idempotency lacks inspected test coverage.
+- **Support:** customer/company ownership scopes, INTERNAL note denial and SLA fallback/precedence are tested. Current SLA is elapsed-minute arithmetic; no business-hours calendar/escalation worker or attachment upload/download path found in inspected service/routes.
+- **Notifications:** central transactional IN_APP/EMAIL dispatch, dedupe and email retry/backoff worker exist. SMS is explicitly unimplemented; preferences report `smsAvailable: false`.
+- **Audit:** model and STAFF-only read/search/stats/export routes exist; inspected service is read/export only. Full event producer coverage, redaction and retention remain unverified.
+- **Dashboards:** Admin OperationsHub CRM/Finance/Support values are hard-coded; CompanyDashboard primary inquiry/product KPIs are API-backed but some panels are labeled sample. Admin `orders` statistic currently maps to inquiry count.
+- **Verification:** GitHub source inspection only. No tests/builds/migration/seed/Actions/local Docker/PostgreSQL executed. Earlier P0 green evidence belongs to `0d0a386`, not current HEAD.
+- **Next:** resolve CMS featured contract; complete CRM schemas and transactional tests; Support attachments/SLA worker; event coverage; replace dashboard samples; rerun all P0 gates on current main.
+
 ## 2026-11-13 — CMS-API-CONTRACT-SOURCE-AUDIT
 
 - **Status:** PARTIAL source audit; no runtime acceptance claimed.
