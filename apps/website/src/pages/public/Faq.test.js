@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Faq from './Faq.vue'
 
-const faqFixtures = [
+const { faqFixtures } = vi.hoisted(() => ({ faqFixtures: [
   { question: 'چه کسانی می‌توانند از بازارگاه استفاده کنند؟', answer: 'کاربران پس از ثبت‌نام و دریافت دسترسی لازم می‌توانند از امکانات حساب خود استفاده کنند.', isActive: true },
   { question: 'چطور محصول مناسب را پیدا کنم؟', answer: 'از دسته‌بندی‌ها و جستجوی محصولات استفاده کنید.', isActive: true },
   { question: 'چطور مشخصات فنی را بررسی کنم؟', answer: 'مشخصات ثبت‌شده در صفحه هر محصول قابل بررسی است.', isActive: true },
@@ -11,7 +11,7 @@ const faqFixtures = [
   { question: 'چطور وضعیت درخواست را پیگیری کنم؟', answer: 'وضعیت درخواست از بخش استعلام‌های حساب قابل مشاهده است.', isActive: true },
   { question: 'آیا خرید آنلاین در دسترس است؟', answer: 'نسخه فعلی بر فرایند B2B و استعلام متمرکز است و وعده خرید اقساطی یا رهگیری سفارش نمی‌دهد.', isActive: true },
   { question: 'برای پرسش‌های دیگر چه کنم؟', answer: 'برای دریافت راهنمایی بیشتر با پشتیبانی تماس بگیرید.', isActive: true },
-]
+ ] }))
 vi.mock('../../stores/cms', () => ({
   useCmsStore: () => ({
     activeFaqs: faqFixtures,
