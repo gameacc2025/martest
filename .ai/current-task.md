@@ -1,4 +1,16 @@
-# Current Task — CRM / Support Acceptance and Remaining Domains
+
+## Active handoff — 2026-11-14
+
+**Current status:** READY FOR AGENT DELEGATION. This is a documentation/planning handoff; no implementation ticket was started or completed.
+
+**Authoritative small-task plan:** [docs/AGENT_TASKS_PHASED_PLAN.md](../docs/AGENT_TASKS_PHASED_PLAN.md)
+**Coordination board:** [.ai/agent-coordination/ACTIVE.md](agent-coordination/ACTIVE.md)
+**First ticket:** `BASE-01` — inspect latest main SHA and current GitHub Actions runs; classify historical vs current-HEAD evidence. Read-only.
+
+**Agent rule:** one ticket per agent at a time; claim before work; exact non-overlapping file ownership; no worker commit/push; lead integrates reviewed work directly to existing `main`. Parallelize read-only inspection, serialize shared-file writes. Do not start dependent tickets before their gate.
+
+**Current code audit baseline:** `ace67cccc6a4b09b8cf8258dc814aedbb5d0b71b`. Latest documentation commit for the phased plan: `55f27519096ccab1623379b2ca4439b3b244dfd2`. This plan commit is not a code-validation result.
+# Current Task — Agent Task Delegation / Phase 0 Baseline
 
 **Updated:** 2026-11-13 (source audit refresh)  
 **Status:** P0 CI / migration / Runtime / seed / browser PASS was recorded on code baseline `0d0a386`; later code commits are now on `main`, so those checks are NOT REVALIDATED for current HEAD. CRM and Support remain PARTIAL.  
