@@ -1762,6 +1762,8 @@ model AuditLog {
   source            String?   @db.VarChar(40)
   /// نتیجه فعالیت یا عملیات.
   outcome           String    @default("SUCCESS") @db.VarChar(20)
+  /// سطح اهمیت رخداد برای فیلتر و گزارش‌گیری ممیزی.
+  severity          String    @default("INFO") @db.VarChar(20)
   /// نشانی IP مبدأ درخواست برای ممیزی/امنیت.
   ipAddress         String?   @db.VarChar(64)
   /// مشخصات مرورگر یا کلاینت درخواست‌دهنده.
@@ -1780,6 +1782,7 @@ model AuditLog {
   @@index([entityType, entityId, occurredAt])
   @@index([action, occurredAt])
   @@index([requestId])
+  @@index([severity, occurredAt])
 
 }
 

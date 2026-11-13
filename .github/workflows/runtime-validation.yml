@@ -82,6 +82,10 @@ jobs:
 
       - name: Verify all migrations are applied to PostgreSQL
         run: docker compose exec -T backend npx prisma migrate status
+      - name: Run all development seeds twice to verify idempotency
+        run: |
+          docker compose exec -T -e NODE_ENV=development backend node prisma/seed.js
+          docker compose exec -T -e NODE_ENV=development backend node prisma/seed.js
 
       - name: Install isolated browser-test dependency
         run: npm install --prefix e2e --no-package-lock --no-audit --no-fund

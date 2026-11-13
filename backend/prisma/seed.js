@@ -581,7 +581,7 @@ async function main() {
 
   // ── 13. Auth & Audit demo data ───────────────────────────────
   console.log('Seeding Auth & Audit demo data...');
-  const authAuditSeed = await seedAuthAuditDemo();
+  const authAuditSeed = await seedAuthAuditDemo(prisma);
   console.log(`  ✓ AuthChallenges: ${authAuditSeed.authChallenges}, AuditLogs: ${authAuditSeed.auditLogs}`);
 
   // ── 14. CRM demo data (STAFF-owned, synthetic, production-guarded) ──
