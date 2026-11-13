@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import Terms from './Terms.vue'
 
 const { pageFixtures } = vi.hoisted(() => ({
@@ -18,7 +18,7 @@ vi.mock('../../stores/cms', () => ({
   }),
 }))
 
-const mountTerms = () => mount(Terms, {
+const mountTerms = async () => { const wrapper = mount(Terms, {
   global: {
     stubs: {
       RouterLink: {
@@ -27,7 +27,7 @@ const mountTerms = () => mount(Terms, {
       },
     },
   },
-})
+}); await flushPromises(); return wrapper }
 
 describe('Website Terms and Privacy page', () => {
   let wrapper
@@ -37,8 +37,8 @@ describe('Website Terms and Privacy page', () => {
     wrapper = undefined
   })
 
-  it('renders the legal page using the shared design system and RTL semantics', () => {
-    wrapper = mountTerms()
+  it('renders the legal page using the shared design system and RTL semantics', async () => {
+    wrapper = await mountTerms()
 
     expect(wrapper.find('main[dir="rtl"][aria-labelledby="terms-title"]').exists()).toBe(true)
     expect(wrapper.find('#terms-title').text()).toBe('قوانین و حریم خصوصی')
@@ -46,8 +46,8 @@ describe('Website Terms and Privacy page', () => {
     expect(wrapper.find('.terms-breadcrumb a').attributes('href')).toBe('home')
   })
 
-  it('preserves the existing terms and privacy sections and their meaning', () => {
-    wrapper = mountTerms()
+  it('preserves the existing terms and privacy sections and their meaning', async () => {
+    wrapper = await mountTerms()
     const content = wrapper.text()
 
     for (const phrase of [
@@ -62,8 +62,8 @@ describe('Website Terms and Privacy page', () => {
     }
   })
 
-  it('does not introduce unsupported legal, security, or compliance claims', () => {
-    wrapper = mountTerms()
+  it('does not introduce unsupported legal, security, or compliance claims', async () => {
+    wrapper = await mountTerms()
     const content = wrapper.text()
 
     expect(content).not.toContain('گواهینامه امنیتی')
@@ -71,8 +71,8 @@ describe('Website Terms and Privacy page', () => {
     expect(content).not.toContain('مطابق GDPR')
   })
 
-  it('uses semantic section headings and token-based styling', () => {
-    wrapper = mountTerms()
+  it('uses semantic section headings and token-based styling', async () => {
+    wrapper = await mountTerms()
 
     expect(wrapper.find('#terms-usage').element.tagName).toBe('H2')
     expect(wrapper.find('#terms-privacy').element.tagName).toBe('H2')
