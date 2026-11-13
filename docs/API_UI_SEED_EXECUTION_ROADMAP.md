@@ -64,7 +64,7 @@ The work is split into bounded agent lanes. Parallelize discovery, contract draf
 
 1. At task start every agent reads `AGENTS.md`, `.ai/PROTOCOL.md`, `.ai/UI_SKILLS.md`, `.ai/current-task.md`, latest relevant WORKLOG entries, domain docs, Prisma schema/migrations, route registration, API-client conventions and tests.
 2. The coordinator assigns a unique task ID, lane, exact file ownership, allowed dependencies and acceptance tests in `.ai/agent-coordination/ACTIVE.md`. An agent must not edit files owned by another active lane.
-3. Agents can investigate and implement in isolated detached worktrees/checkouts pinned to a recorded `main` SHA. Do not create local or remote branches. Agents return a patch/diff plus changed-file list, tests, migration/seed notes and unresolved questions.
+3. Read-only audits can run concurrently. All implementation edits happen serially in the existing `main` checkout; no branches, worktrees or detached checkouts are permitted. The lead owns shared files, commits and pushes; no worker commits/pushes.
 4. Only the coordinator integrates patches. Before each integration, fetch latest `main`, inspect changed paths and reapply the patch against the new head. Commit each bounded slice directly to `main`; never force-push.
 5. Shared hotspots are coordinator-owned unless explicitly delegated: `backend/src/app.js`, Prisma schema/migrations, permission registry/seed entrypoint, shared API client exports, package manifests, global route/menu registration, global design tokens and global test setup.
 6. Domain agents own their module directory, domain-specific API-client module, domain UI pages/components, domain seed module and domain tests. They request coordinator integration for shared registries and cross-domain schema edits.
