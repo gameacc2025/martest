@@ -8,6 +8,7 @@ const { listProducts, routerPush } = vi.hoisted(() => ({
 
 vi.mock('@telecom/api-client', () => ({
   productsApi: { list: listProducts },
+  cmsPagesApi: { getBySlug: vi.fn().mockResolvedValue({ data: null }) },
 }))
 
 vi.mock('vue-router', () => ({
