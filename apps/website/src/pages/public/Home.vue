@@ -77,11 +77,6 @@ async function loadCategoryProductCounts(list) {
   }))
   categoryProductCounts.value = Object.fromEntries(entries)
 }
-function categoryChildren(category) {
-  const nested = category?.children || category?.subcategories || category?.subCategories
-  if (Array.isArray(nested) && nested.length) return nested
-  return categories.value.filter(item => String(item?.parentId ?? item?.parent?.id ?? '') === String(category?.id ?? ''))
-}
 function categoryIcon(category) {
   const value = categoryTitle(category).toLowerCase()
   if (value.includes('فیبر') || value.includes('fiber')) return '◎'
