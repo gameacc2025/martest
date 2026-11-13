@@ -16,7 +16,8 @@ permissions:
 
 jobs:
   compose-and-browser:
-    runs-on: ubuntu-latest
+    # Playwright's pinned Chromium build does not yet support ubuntu-26.04 runners.
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - name: Checkout
