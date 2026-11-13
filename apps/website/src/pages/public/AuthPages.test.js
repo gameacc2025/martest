@@ -60,9 +60,12 @@ describe('Website authentication page accessibility contracts', () => {
     expect(register).toContain('inputId="acceptTerms"')
   })
 
-  it('provides a labelled password-reset email field and announced feedback', () => {
-    expect(forgotPassword).toContain('<label for="forgot-password-email">')
-    expect(forgotPassword).toContain('id="forgot-password-email"')
+  it('provides labelled SMS password-reset controls and announced feedback', () => {
+    expect(forgotPassword).toContain('<label for="forgot-password-phone">')
+    expect(forgotPassword).toContain('id="forgot-password-phone"')
+    expect(forgotPassword).toContain('<label for="forgot-password-code">')
+    expect(forgotPassword).toContain('id="forgot-password-code"')
+    expect(forgotPassword).toContain('id="forgot-password-new"')
     expect(forgotPassword).toContain('role="alert"')
     expect(forgotPassword).toContain('role="status"')
   })
