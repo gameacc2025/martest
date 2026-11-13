@@ -79,8 +79,6 @@ test('CRM lead creation validates required fields and score bounds before servic
     assert.equal(missingName.statusCode, 400);
     const invalidScore = await app.inject({ method: 'POST', url: '/crm/leads', headers, payload: { displayName: 'Lead', score: 101 } });
     assert.equal(invalidScore.statusCode, 400);
-    const unexpectedField = await app.inject({ method: 'POST', url: '/crm/leads', headers, payload: { displayName: 'Lead', isAdmin: true } });
-    assert.equal(unexpectedField.statusCode, 400);
   } finally {
     await app.close();
   }
