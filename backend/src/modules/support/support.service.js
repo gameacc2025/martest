@@ -24,7 +24,7 @@ function toId(value, field = 'id') {
 }
 function context(user) {
   if (!user?.id) fail(401, 'UNAUTHORIZED', 'برای ادامه وارد حساب شوید.');
-  const accessType = user.accessType || (user.roles || []).includes('CUSTOMER_USER') ? (user.accessType || 'CUSTOMER') : user.accessType;
+  const accessType = user.accessType || ((user.roles || []).includes('CUSTOMER_USER') ? 'CUSTOMER' : null);
   return {
     userId: toId(user.id, 'user'),
     accessType: accessType || null,
@@ -180,7 +180,7 @@ async function addMessage(user, ticketId, input) {
   const body = String(input.body || '').trim();
   if (!body || body.length > 10_000) fail(400, 'SUPPORT_MESSAGE_INVALID', 'متن پیام الزامی و حداکثر ۱۰۰۰۰ نویسه است.');
   const visibility = input.visibility === 'INTERNAL' && ctx.accessType === 'STAFF' ? 'INTERNAL' : 'PUBLIC';
-  if (input.visibility === 'INTERNAL' && ctx.accessType !== 'STAFF') fail(403, 'SUPPORT_INTERNAL_MESSAGE_FORBIDDEN', 'یادداشت داخلی فقط برای کارکنان مجاز است.');
+  if (input.visibility === 'INTERNAL' && (ctx.accessType !== 'STAFF' || !(user.permissions || []).some((permission) => permission === '*' || permission === 'tickets.update'))) fail(403, 'SUPPORT_INTERNAL_MESSAGE_FORBIDDEN', 'یادداشت داخلی فقط برای کارکنان دارای دسترسی ویرایش تیکت مجاز است.');
   const id = toId(ticketId);
   const ticket = await prisma.supportTicket.findFirst({ where: { id, ...scopeWhere(ctx) } });
   if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
