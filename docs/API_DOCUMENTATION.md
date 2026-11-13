@@ -559,8 +559,8 @@ Both `{ companyIds }` and `{ roles, companyId }` descriptors are restricted to A
 
 ### وضعیت موجودی مسیرها پس از افزودن فرم تماس — 2026-11-03
 
-- تعداد مسیرهای ماژولی ثبت‌شده در `docs/API_ROUTE_INVENTORY.md` اکنون 151 است.
-- مسیر `POST /api/v1/contact/messages` در Fastify، فهرست مسیرها و رجیستری OpenAPI ثبت شده و تست‌های پوشش inventory نیز به 151 مسیر به‌روزرسانی شده‌اند.
+- تعداد مسیرهای ماژولی ثبت‌شده در `docs/API_ROUTE_INVENTORY.md` اکنون 257 است.
+- مسیر `POST /api/v1/contact/messages` در Fastify، فهرست مسیرها و رجیستری OpenAPI ثبت شده و تست‌های پوشش inventory نیز برای تمام route moduleهای ثبت‌شده (از جمله CMS و CRM) پوشش داده می‌شود؛ تعداد ردیف‌های مسیر در inventory برابر 257 است.
 - این به‌روزرسانی فقط تعداد و قرارداد مسیر جدید را ثبت می‌کند؛ هیچ نتیجه اجرای تست یا Build ادعا نمی‌شود.
 
 
