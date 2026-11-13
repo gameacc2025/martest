@@ -26,17 +26,17 @@ const wrap = (handler) => async (request, reply) => reply.send(ok(await handler(
 
 async function supportRoutes(fastify) {
   fastify.addHook('onRequest', fastify.authenticate);
-  const allUsers = [requireAccessType('CUSTOMER', 'COMPANY', 'STAFF')];
+  const allUsers = (permission) => [requireAccessType('CUSTOMER', 'COMPANY', 'STAFF'), requirePermission(permission)];
   const staff = (permission) => [requireExactAccessType('STAFF'), requirePermission(permission)];
 
-  fastify.get('/categories', { preHandler: allUsers }, wrap(() => service.listCategories()));
-  fastify.get('/tickets', { preHandler: allUsers }, wrap((r) => service.listTickets(r.user, r.query)));
-  fastify.post('/tickets', { schema: ticketCreateSchema, preHandler: allUsers }, wrap((r) => service.createTicket(r.user, r.body)));
-  fastify.get('/tickets/:id', { schema: { params: idParams }, preHandler: allUsers }, wrap((r) => service.getTicket(r.user, r.params.id)));
-  fastify.post('/tickets/:id/messages', { schema: messageSchema, preHandler: allUsers }, wrap((r) => service.addMessage(r.user, r.params.id, r.body)));
-  fastify.patch('/tickets/:id/status', { schema: statusSchema, preHandler: staff('support.tickets.status') }, wrap((r) => service.changeStatus(r.user, r.params.id, r.body.status, r.body.reason)));
-  fastify.post('/tickets/:id/assign', { schema: assignSchema, preHandler: staff('support.tickets.assign') }, wrap((r) => service.assignTicket(r.user, r.params.id, r.body)));
-  fastify.get('/queues', { preHandler: staff('support.queues.read') }, wrap(() => service.listQueues()));
+  fastify.get('/categories', { preHandler: allUsers('tickets.read') }, wrap(() => service.listCategories()));
+  fastify.get('/tickets', { preHandler: allUsers('tickets.read') }, wrap((r) => service.listTickets(r.user, r.query)));
+  fastify.post('/tickets', { schema: ticketCreateSchema, preHandler: allUsers('tickets.create') }, wrap((r) => service.createTicket(r.user, r.body)));
+  fastify.get('/tickets/:id', { schema: { params: idParams }, preHandler: allUsers('tickets.read') }, wrap((r) => service.getTicket(r.user, r.params.id)));
+  fastify.post('/tickets/:id/messages', { schema: messageSchema, preHandler: allUsers('tickets.reply') }, wrap((r) => service.addMessage(r.user, r.params.id, r.body)));
+  fastify.patch('/tickets/:id/status', { schema: statusSchema, preHandler: staff('tickets.update') }, wrap((r) => service.changeStatus(r.user, r.params.id, r.body.status, r.body.reason)));
+  fastify.post('/tickets/:id/assign', { schema: assignSchema, preHandler: staff('tickets.update') }, wrap((r) => service.assignTicket(r.user, r.params.id, r.body)));
+  fastify.get('/queues', { preHandler: staff('tickets.read') }, wrap(() => service.listQueues()));
 }
 
 module.exports = supportRoutes;
