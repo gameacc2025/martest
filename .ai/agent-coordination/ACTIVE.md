@@ -31,7 +31,7 @@
 |---|---|---|---|
 | P1-1 | CRM acceptance | PARTIAL | schemas for all remaining route families; CRUD/service/permission/STAFF tests; conversion/merge idempotency; Playwright mutations |
 | P1-2 | Support completion | PARTIAL | secure attachments, notifications, SLA calendar/worker/escalation, queue-level visibility, agent assignment, pagination and deeper tests |
-| P1-3 | CMS + password recovery | SOURCE PRESENT / ACCEPTANCE PARTIAL | FAQ/Page CRUD and permissions; real SMS provider and reset E2E |
+| P1-3 | CMS + password recovery | ADMIN UI PRESENT / ACCEPTANCE PARTIAL | Five Admin CMS screens/routes/navigation exist; verify API CRUD, backend permission matrix, public FAQ/Page and browser E2E; real SMS provider and reset E2E |
 | P1-4 | Notifications + Audit | PARTIAL | generic SMS outbox/retry/consent/quota/idempotency; audit event matrix, redaction and retention |
 | P1-5 | Dashboards/reporting | PARTIAL | replace sample KPIs with tenant/date/currency-scoped aggregates |
 | P1-6 | Three-app regression | PARTIAL | expand beyond smoke to visual, RTL, accessibility, keyboard and feature journeys |
