@@ -558,11 +558,11 @@ export function createAuthStore() {
 
     // ── Password recovery ────────────────────────────────────
 
-    async function forgotPassword(email) {
+    async function forgotPassword(phone) {
       try {
         loading.value = true
         error.value = null
-        await apiPost(endpoints.auth.forgotPassword, { email })
+        await apiPost(endpoints.auth.forgotPassword, { phone })
         return true
       } catch (err) {
         error.value = handleApiError(err).message || 'خطا در ارسال ایمیل'

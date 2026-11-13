@@ -367,8 +367,33 @@ async function revokeSession(request, reply) {
 }
 
 
+/**
+ * POST /auth/forgot-password — public, enumeration-safe SMS OTP request.
+ */
+async function forgotPassword(request, reply) {
+  await require('./password-recovery.service').requestPasswordReset({
+    phone: request.body.phone,
+    ipAddress: request.ip,
+  });
+  reply.header('Cache-Control', 'no-store');
+  return reply.send(success({
+    message: 'اگر حساب فعالی با این شماره وجود داشته باشد، کد بازنشانی ارسال می‌شود.',
+  }));
+}
+
+/**
+ * POST /auth/reset-password — consumes the OTP and revokes all existing sessions.
+ */
+async function resetPassword(request, reply) {
+  await require('./password-recovery.service').resetPassword(request.body);
+  reply.header('Cache-Control', 'no-store');
+  return reply.send(success({ message: 'رمز عبور با موفقیت تغییر کرد. دوباره وارد شوید.' }));
+}
+
 module.exports = {
   login,
+  forgotPassword,
+  resetPassword,
   refresh,
   logout,
   logoutAll,
