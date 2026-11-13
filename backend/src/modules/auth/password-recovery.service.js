@@ -20,6 +20,22 @@ function normalizePhone(phone) {
   return digits ? '+' + digits : null;
 }
 
+function phoneLookupCandidates(phone) {
+  const raw = String(phone || '').trim();
+  const digits = raw.replace(/\\D/g, '');
+  const candidates = new Set([raw, digits]);
+  if (digits.startsWith('09') && digits.length === 11) {
+    candidates.add('+98' + digits.slice(1));
+  } else if (digits.startsWith('989') && digits.length === 12) {
+    candidates.add('0' + digits.slice(2));
+    candidates.add('+' + digits);
+  } else if (digits.startsWith('9') && digits.length === 10) {
+    candidates.add('0' + digits);
+    candidates.add('+98' + digits);
+  }
+  return [...candidates].filter(Boolean);
+}
+
 function invalidCode() {
   return createError(400, 'INVALID_RESET_CODE', 'کد بازنشانی معتبر نیست یا منقضی شده است.');
 }
@@ -36,8 +52,8 @@ async function requestPasswordReset({ phone, ipAddress }) {
     throw createError(503, 'PASSWORD_RECOVERY_UNAVAILABLE', 'بازیابی رمز عبور در حال حاضر در دسترس نیست.');
   }
 
-  const user = await prisma.user.findUnique({
-    where: { phone: rawPhone },
+  const user = await prisma.user.findFirst({
+    where: { phone: { in: phoneLookupCandidates(rawPhone) } },
     select: { id: true, phone: true, status: true, accessProfile: { select: { type: true, isActive: true } } },
   });
 
@@ -109,8 +125,8 @@ async function resetPassword({ phone, code, newPassword }) {
     throw createError(400, 'WEAK_PASSWORD', 'رمز عبور باید حداقل ۸ و حداکثر ۱۲۸ نویسه باشد.');
   }
 
-  const user = await prisma.user.findUnique({
-    where: { phone: rawPhone },
+  const user = await prisma.user.findFirst({
+    where: { phone: { in: phoneLookupCandidates(rawPhone) } },
     select: { id: true, status: true, accessProfile: { select: { isActive: true } } },
   });
   if (!user || user.status !== 'ACTIVE' || user.accessProfile?.isActive === false) throw invalidCode();
