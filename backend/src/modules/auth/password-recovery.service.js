@@ -14,7 +14,7 @@ const MAX_DESTINATION_REQUESTS = 5;
 const MAX_ATTEMPTS = 5;
 
 function normalizePhone(phone) {
-  const digits = String(phone || '').replace(/\\D/g, '');
+  const digits = String(phone || '').replace(/\D/g, '');
   if (digits.startsWith('09') && digits.length === 11) return '+98' + digits.slice(1);
   if (digits.startsWith('989') && digits.length === 12) return '+' + digits;
   return digits ? '+' + digits : null;
@@ -102,7 +102,7 @@ async function requestPasswordReset({ phone, ipAddress }) {
 async function resetPassword({ phone, code, newPassword }) {
   const rawPhone = String(phone || '').trim();
   const otp = String(code || '').trim();
-  if (rawPhone.length < 7 || rawPhone.length > 20 || !/^\\d{6}$/.test(otp)) {
+  if (rawPhone.length < 7 || rawPhone.length > 20 || !/^\d{6}$/.test(otp)) {
     throw invalidCode();
   }
   if (typeof newPassword !== 'string' || newPassword.length < 8 || newPassword.length > 128) {
