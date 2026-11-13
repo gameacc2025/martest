@@ -4,17 +4,14 @@
 
 ## 2026-11-13 — CI-RUNTIME-RECOVERY
 
-- **Status:** اصلاحات سورس روی `main` انجام شده؛ اجرای CI و Runtime برای SHA جدید در انتظار تکمیل است.
-- **Latest code fix before docs:** `06daab07ff446aab577b885092a45c382ccd11ad`.
-- **Backlog refresh:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` با شواهد جدید به‌روز شد.
-- **Frozen install:** PASS در CI قبلی؛ quill در importer ادمین lockfile ثبت است، تشخیص mismatch قبلی رد شد.
-- **Backend tests + Prisma generation + three-app build:** PASS در اجرای CI قبلی.
-- **Frontend tests:** 7 تست Website در اجرای قبلی fail؛ test setup، FAQ fixture، CMS legal page async، responsive selector، theme assertion و profile-tab behavior اصلاح شده‌اند؛ اجرای جدید باید نتیجه را تأیید کند.
-- **Audit routes:** mount زیر `/api/v1/audit` و حذف OpenAPI stale duplicateها؛ route inventory/OpenAPI tests در CI قبلی PASS.
-- **CMS:** مدل‌های Faq/Page، migration `20261113000100_restore_cms_faq_pages`، CRUD و seed در سورس موجودند.
-- **Account Recovery:** forgot/reset routes و SMS OTP service موجودند؛ real provider config و browser flow تأییدنشده‌اند.
-- **Runtime root cause:** PostgreSQL enum `AuthChallengePurpose` مقدار `LOGIN_MFA` را نداشت؛ seed شکست می‌خورد و health check را خراب می‌کرد. migration افزایشی `20261113000300_add_login_mfa_challenge_purpose` اضافه شد؛ اجرای آن و seed دو باره منتظر CI است.
-- **Still incomplete:** Support vertical slice، CRM functional/E2E acceptance، generic SMS dispatcher، Audit event coverage، واقعی‌سازی داشبوردها.
+- **Status:** P0 CI, migration, runtime, seed and browser smoke acceptance PASS.
+- **Code fix:** `e2e/tests/panels.spec.js` changed stale `.shop-page` selector to actual `.reference-home`; commit `4e5d25e38ecc63a40fe1477b9b47091340b5b298`.
+- **CI:** run `43460213725` PASS — frozen install, architecture graph, Frontend/Shared tests, Prisma generation, Backend tests, all three app builds.
+- **Migration validation:** run `43460213720` PASS — fresh PostgreSQL migration apply and migration state.
+- **Runtime:** run `43460213998` PASS — Compose build/start, all service health endpoints, migration status, all development seeds twice, Chromium, browser smoke.
+- **Browser:** 8/8 Playwright tests PASS — Website/Company/Admin SPA at five viewport widths, three API proxies, STAFF login → Admin handoff → logout, storefront responsive containment.
+- **Docs:** backlog refreshed with evidence and priorities; commit `0c11f53f550b35eb3900c66b4fb60140a3dc1f58`.
+- **Remaining:** CRM functional/schema/tenant/E2E acceptance; Support operational vertical slice; CMS public/admin acceptance + real SMS delivery; generic SMS dispatcher; Audit event coverage; dashboard sample data; visual/accessibility regression.
 - **Gated:** Retail/Finance activation requires explicit owner commercial/legal decisions.
 - **Local state:** Windows working tree, stashes/untracked files, Docker and user PostgreSQL NOT VERIFIED; no local destructive action taken.
 
