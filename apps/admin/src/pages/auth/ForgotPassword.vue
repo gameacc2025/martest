@@ -1,163 +1,150 @@
 <template>
-  <div class="forgot-password-page">
+  <main class="forgot-password-page" aria-labelledby="forgot-password-title" :aria-busy="loading">
     <div class="fp-container">
       <div class="fp-inner">
         <Card>
           <template #title>
             <div class="fp-title">
-              <i class="pi pi-lock"></i>
-              <h1>فراموشی رمز عبور</h1>
+              <h1 id="forgot-password-title">بازیابی رمز عبور</h1>
             </div>
           </template>
           <template #content>
-            <div v-if="!emailSent">
-              <p class="fp-desc fp-text-center">
-                ایمیل خود را وارد کنید تا لینک بازنشانی رمز عبور برای شما ارسال شود
-              </p>
-
-              <form @submit.prevent="handleSubmit" class="fp-form">
-                <div class="field">
-                  <label for="forgot-password-email">آدرس ایمیل</label>
-                  <InputText
-                    id="forgot-password-email"
-                    v-model="email"
-                    placeholder="آدرس ایمیل خود را وارد کنید"
-                    type="email"
-                    required
-                    autocomplete="email"
-                    :aria-invalid="errors.email ? 'true' : undefined"
-                    :aria-describedby="errors.email ? 'forgot-password-email-error' : undefined"
-                    class="fp-input"
-                    :class="{ 'p-invalid': errors.email }"
-                  />
-                  <small v-if="errors.email" id="forgot-password-email-error" class="p-error block" role="alert">{{ errors.email }}</small>
-                </div>
-
-                <Button
-                  type="submit"
-                  label="ارسال لینک بازنشانی"
-                  icon="pi pi-send"
-                  class="fp-input p-button-primary"
-                  :loading="loading"
-                />
-              </form>
-
-              <div class="fp-back-link">
-                <Button
-                  label="بازگشت به صفحه ورود"
-                  icon="pi pi-arrow-right"
-                  class="p-button-text p-button-link"
-                  @click="goToLogin"
-                />
-              </div>
+            <div v-if="completed" class="fp-text-center" role="status">
+              <i class="pi pi-check-circle fp-success-icon" aria-hidden="true"></i>
+              <h2 class="fp-success-title">رمز عبور تغییر کرد</h2>
+              <p class="fp-desc">برای ورود با رمز جدید، به صفحه ورود بروید.</p>
+              <router-link :to="{ name: 'login' }" class="fp-input fp-back-link__anchor">بازگشت به صفحه ورود</router-link>
             </div>
 
-            <div v-else class="fp-text-center">
-              <i class="pi pi-envelope fp-success-icon"></i>
-              <h2 class="fp-success-title">لینک بازنشانی ارسال شد!</h2>
-              <p class="fp-desc">
-                لینک بازنشانی رمز عبور به آدرس ایمیل {{ email }} ارسال شد.
-                لطفاً ایمیل خود را بررسی کنید.
-              </p>
-
-              <div class="fp-action-list">
-                <Button
-                  label="بررسی ایمیل"
-                  icon="pi pi-external-link"
-                  class="fp-input p-button-primary"
-                  @click="checkEmail"
+            <form v-else-if="step === 'request'" @submit.prevent="handleRequest" class="fp-form">
+              <p class="fp-desc">شماره موبایلی را وارد کنید که با آن در بازارگاه ثبت‌نام کرده‌اید. در صورت وجود حساب فعال، کد یک‌بارمصرف برای همان شماره ارسال می‌شود.</p>
+              <div class="field">
+                <label for="forgot-password-phone">شماره موبایل</label>
+                <InputText
+                  id="forgot-password-phone"
+                  v-model="phone"
+                  type="tel"
+                  inputmode="tel"
+                  autocomplete="tel"
+                  placeholder="مثلاً 09123456789"
+                  required
+                  maxlength="20"
+                  class="fp-input"
+                  :class="{ 'p-invalid': errors.phone }"
+                  :aria-invalid="errors.phone ? 'true' : undefined"
+                  aria-describedby="forgot-password-phone-help"
                 />
-                <Button
-                  label="ارسال مجدد لینک"
-                  icon="pi pi-refresh"
-                  class="fp-input p-button-outlined"
-                  @click="resendLink"
-                />
-                <Button
-                  label="بازگشت به صفحه ورود"
-                  icon="pi pi-arrow-right"
-                  class="fp-input p-button-text"
-                  @click="goToLogin"
-                />
+                <small id="forgot-password-phone-help" class="fp-desc">کد بازنشانی فقط از طریق پیامک ارسال می‌شود.</small>
+                <small v-if="errors.phone" class="p-error" role="alert">{{ errors.phone }}</small>
               </div>
+              <small v-if="errors.request" class="p-error" role="alert">{{ errors.request }}</small>
+              <Button type="submit" label="ارسال کد بازنشانی" icon="pi pi-send" class="fp-input p-button-primary" :loading="loading" />
+            </form>
+
+            <form v-else @submit.prevent="handleReset" class="fp-form">
+              <p class="fp-desc">کد پیامک‌شده به {{ phone }} و رمز عبور جدید را وارد کنید. کد پس از استفاده باطل می‌شود و نشست‌های قبلی شما بسته خواهند شد.</p>
+              <div class="field">
+                <label for="forgot-password-code">کد یک‌بارمصرف</label>
+                <InputText id="forgot-password-code" v-model="code" class="fp-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="کد ۶ رقمی" required />
+              </div>
+              <div class="field">
+                <label for="forgot-password-new">رمز عبور جدید</label>
+                <InputText id="forgot-password-new" v-model="newPassword" class="fp-input" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
+              </div>
+              <div class="field">
+                <label for="forgot-password-confirm">تکرار رمز عبور جدید</label>
+                <InputText id="forgot-password-confirm" v-model="confirmPassword" class="fp-input" type="password" autocomplete="new-password" minlength="8" maxlength="128" required />
+              </div>
+              <small v-if="errors.reset" class="p-error" role="alert">{{ errors.reset }}</small>
+              <Button type="submit" label="تغییر رمز عبور" icon="pi pi-lock" class="fp-input p-button-primary" :loading="loading" />
+              <Button type="button" label="ارسال دوباره کد / تغییر شماره" icon="pi pi-refresh" class="fp-input p-button-text" :disabled="loading" @click="backToRequest" />
+            </form>
+
+            <div class="fp-back-link">
+              <router-link :to="{ name: 'login' }" class="fp-back-link__anchor">بازگشت به صفحه ورود</router-link>
             </div>
           </template>
         </Card>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 
-const router = useRouter()
 const authStore = useAuthStore()
-
-const email = ref('')
-const emailSent = ref(false)
+const phone = ref('')
+const code = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const step = ref('request')
+const completed = ref(false)
 const loading = ref(false)
 const errors = ref({})
 
-const handleSubmit = async () => {
+const handleRequest = async () => {
   errors.value = {}
+  const normalized = phone.value.trim()
+  if (!/^[+]?[d\s()-]{7,20}$/.test(normalized)) {
+    errors.value.phone = 'شماره موبایل معتبر وارد کنید.'
+    return
+  }
+
   loading.value = true
-
   try {
-    if (!validateForm()) {
-      loading.value = false
-      return
-    }
-
-    await authStore.forgotPassword(email.value)
-    emailSent.value = true
+    await authStore.forgotPassword(normalized)
+    phone.value = normalized
+    step.value = 'reset'
   } catch (error) {
-    console.error('Forgot password error:', error)
-    errors.value = {
-      email: error.message || 'خطا در ارسال لینک بازنشانی. لطفاً مجدداً تلاش کنید.'
-    }
+    errors.value.request = error?.message || 'ارسال کد ممکن نشد. لطفاً بعداً تلاش کنید.'
   } finally {
     loading.value = false
   }
 }
 
-const validateForm = () => {
+const handleReset = async () => {
   errors.value = {}
-
-  if (!email.value) {
-    errors.value.email = 'وارد کردن ایمیل الزامی است'
-    return false
+  if (!/^\d{6}$/.test(code.value.trim())) {
+    errors.value.reset = 'کد باید دقیقاً ۶ رقم باشد.'
+    return
+  }
+  if (newPassword.value.length < 8 || newPassword.value.length > 128) {
+    errors.value.reset = 'رمز عبور باید بین ۸ تا ۱۲۸ نویسه باشد.'
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    errors.value.reset = 'تکرار رمز عبور با رمز جدید یکسان نیست.'
+    return
   }
 
-  if (!isValidEmail(email.value)) {
-    errors.value.email = 'ایمیل وارد شده معتبر نیست'
-    return false
+  loading.value = true
+  try {
+    await authStore.resetPassword({
+      phone: phone.value,
+      code: code.value.trim(),
+      newPassword: newPassword.value,
+    })
+    completed.value = true
+    code.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+  } catch (error) {
+    errors.value.reset = error?.message || 'کد معتبر نیست یا منقضی شده است.'
+  } finally {
+    loading.value = false
   }
-
-  return true
 }
 
-const isValidEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-const checkEmail = () => {
-  // Open user's email client
-  window.location.href = `mailto:${email.value}`
-}
-
-const resendLink = () => {
-  emailSent.value = false
-}
-
-const goToLogin = () => {
-  router.push({ name: 'login' })
+const backToRequest = () => {
+  code.value = ''
+  newPassword.value = ''
+  confirmPassword.value = ''
+  step.value = 'request'
 }
 </script>
 
