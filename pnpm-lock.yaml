@@ -51,6 +51,9 @@ importers:
       primevue:
         specifier: ^4.0.0
         version: 4.5.5(vue@3.5.40)
+      quill:
+        specifier: ^2.0.0
+        version: 2.0.3
       vue:
         specifier: ^3.4.5
         version: 3.5.40
