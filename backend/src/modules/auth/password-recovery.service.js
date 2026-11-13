@@ -22,7 +22,7 @@ function normalizePhone(phone) {
 
 function phoneLookupCandidates(phone) {
   const raw = String(phone || '').trim();
-  const digits = raw.replace(/\\D/g, '');
+  const digits = raw.replace(/\D/g, '');
   const candidates = new Set([raw, digits]);
   if (digits.startsWith('09') && digits.length === 11) {
     candidates.add('+98' + digits.slice(1));
