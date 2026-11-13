@@ -1,3 +1,13 @@
+## 2026-11-13 — PROJECT-SOURCE-AUDIT-CMS-CLARIFICATION
+
+- **Status:** SOURCE AUDIT UPDATE — CMS Admin UI presence verified; functional acceptance remains open.
+- **Base:** `main` code baseline `0d0a3866c6ff387978f8c5244f6ca936248f508d`.
+- **Verified source:** five CMS management pages, five Admin routes with `cms.*.read` metadata, and five permission-gated navigation entries exist.
+- **Not proven:** live CRUD behavior for every CMS resource, complete backend permission matrix, public FAQ/Page rendering, publish/visibility workflow and dedicated Playwright journeys.
+- **Documentation:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md` and `.ai/current-task.md` clarified so existing screens are not mislabeled as missing.
+- **Verification:** GitHub source inspection only; tests/builds NOT RUN in this documentation-only audit. Local Windows/Docker/PostgreSQL remain NOT VERIFIED.
+- **Next:** audit CMS route/service/API contract parity and then continue CRM/Support/Audit/Notifications/dashboard coverage.
+
 ## 2026-11-13 — SUPPORT-SLA-FALLBACK-AND-ACCEPTANCE
 
 - **Code baseline:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`.
