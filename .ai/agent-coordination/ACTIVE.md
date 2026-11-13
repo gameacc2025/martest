@@ -17,6 +17,25 @@
 - Browser automation is authorized for acceptance; run sequentially and record evidence.
 - Local Windows workspace, Docker and PostgreSQL remain NOT VERIFIED.
 
+## Agent task assignments — 2026-11-14
+
+**Task plan:** [docs/AGENT_TASKS_PHASED_PLAN.md](../../docs/AGENT_TASKS_PHASED_PLAN.md)
+
+| Ticket | Lane / role | Status | Exclusive ownership / output | Dependency |
+|---|---|---|---|---|
+| BASE-01 | Agent A — read-only baseline auditor | READY | GitHub Actions/workflow evidence only; no code writes | None |
+| BASE-02 | Agent B — read-only DB verifier | WAITING | Migration workflow evidence only; no Prisma/schema writes | BASE-01 |
+| BASE-03 | Agent C — read-only seed verifier | WAITING | Seed workflow/test evidence only; no seed writes | BASE-01 |
+| BASE-04 | Agent D — read-only E2E verifier | WAITING | Playwright workflow/spec evidence only; no test edits | BASE-01 |
+| CRM-01 | CRM backend agent | WAITING | CRM account/contact schemas + focused route tests; exclusive lock on shared `crm/index.js` | BASE-01 |
+| SUP-01 | Support security analyst | READY — read-only | New attachment threat-model/API-contract note only | BASE-01 |
+| CMS-01 | CMS contract analyst | READY — read-only | New Featured decision note only; no schema/migration | BASE-01 |
+| NTF-01 | Notifications analyst | READY — read-only | New event-to-producer/channel matrix only | BASE-01 |
+| AUD-01 | Audit analyst | READY — read-only | New audit producer coverage matrix only | BASE-01 |
+| DASH-05 | Company dashboard analyst | READY — read-only | Inventory sample panels and backing APIs; no UI writes | BASE-01 |
+
+**Coordination constraints:** Agent A–D and analysts may inspect in parallel. Only read-only tickets may start concurrently before BASE-01 closes. Code writers must wait for an explicit lead assignment and exact file ownership. The shared main working tree is not a multi-writer lock; serialize writes. Do not claim a ticket already assigned. No agent commits/pushes.
+
 ## Previously verified P0 checks — baseline `0d0a386` only
 
 > These workflow results predate later CMS code commits on `main`; they are not evidence for the current HEAD. Rerun all gates before release.
