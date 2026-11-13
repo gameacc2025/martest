@@ -8,7 +8,7 @@ test('STAFF can log in through Website, reach Admin by handoff, and log out', as
 
   await page.goto('http://localhost:3001/login', { waitUntil: 'networkidle' });
   await page.getByPlaceholder('شماره تلفن خود را وارد کنید').fill(process.env.E2E_ADMIN_PHONE || '09120000000');
-  await page.getByPlaceholder('رمز عبور خود را وارد کنید').fill(process.env.E2E_ADMIN_PASSWORD || 'Admin@123456');
+  await page.getByPlaceholder('رمز عبور خود را وارد کنید').fill(process.env.E2E_ADMIN_PASSWORD || 'A123@456');
   await page.getByRole('button', { name: 'ورود' }).click();
 
   await expect(page).toHaveURL(/http:\/\/localhost:3003\/admin-dashboard(?:[/?#]|$)/, { timeout: 45_000 });

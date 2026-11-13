@@ -28,7 +28,7 @@ const IS_PRODUCTION = nodeEnv === 'production';
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: IS_PRODUCTION,
-  sameSite: 'strict',
+  sameSite: IS_PRODUCTION ? 'strict' : 'lax',
   path: '/api/v1/auth',
   maxAge: 7 * 24 * 60 * 60,
 };

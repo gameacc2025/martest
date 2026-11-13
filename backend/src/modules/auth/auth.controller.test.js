@@ -120,7 +120,7 @@ test('login: trims the phone before passing it to the service', async () => {
   assert.equal(app, 'company');
 });
 
-test('login: sets the refresh cookie with the correct security flags (dev: secure=false)', async () => {
+test('login: sets the refresh cookie with the correct security flags (dev: secure=false, sameSite=lax)', async () => {
   fx.loginResult = { user: {}, profile: {}, accessProfile: {}, roles: [], permissions: [], accessToken: 'AT', refreshToken: 'RT', expiresIn: 900 };
   const reply = makeReply();
   await controller.login(makeRequest({ body: { phone: '09120000000', password: 'x' } }), reply);
@@ -131,7 +131,30 @@ test('login: sets the refresh cookie with the correct security flags (dev: secur
   assert.equal(value, 'RT');
   assert.equal(opts.httpOnly, true);   // XSS protection — never negotiable
   assert.equal(opts.secure, false);    // dev env in this test
-  assert.equal(opts.sameSite, 'strict'); // CSRF protection
+  assert.equal(opts.sameSite, 'lax');  // CSRF protection; 'lax' in dev for cross-port localhost
+  assert.equal(opts.path, '/api/v1/auth');
+});
+
+test('login: sets the refresh cookie with strict flags in production (secure=true, sameSite=strict)', async () => {
+  // Mock production environment - need to clear controller cache and re-require
+  const prodEnv = { nodeEnv: 'production' };
+  injectMock('../../config/env', prodEnv);
+  // Clear controller cache so it picks up the new env
+  const controllerPath = require.resolve('./auth.controller');
+  if (require.cache[controllerPath]) delete require.cache[controllerPath];
+  const prodController = require('./auth.controller');
+
+  fx.loginResult = { user: {}, profile: {}, accessProfile: {}, roles: [], permissions: [], accessToken: 'AT', refreshToken: 'RT', expiresIn: 900 };
+  const reply = makeReply();
+  await prodController.login(makeRequest({ body: { phone: '09120000000', password: 'x' } }), reply);
+
+  assert.equal(reply._cookies.length, 1);
+  const { name, value, opts } = reply._cookies[0];
+  assert.equal(name, 'refreshToken');
+  assert.equal(value, 'RT');
+  assert.equal(opts.httpOnly, true);   // XSS protection — never negotiable
+  assert.equal(opts.secure, true);     // production: HTTPS only
+  assert.equal(opts.sameSite, 'strict'); // production: strict CSRF
   assert.equal(opts.path, '/api/v1/auth');
 });
 
