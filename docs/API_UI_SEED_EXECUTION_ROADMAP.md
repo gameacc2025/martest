@@ -1,10 +1,12 @@
 # API + UI + Demo Seed Execution Roadmap
 
 **Document ID:** API-UI-SEED-01  
-**Status:** IN_PROGRESS — direct-to-main execution; shared website-owned palette consolidation applied, runtime verification pending  
-**Updated:** 2026-11-08
+**Status:** Historical domain roadmap; current agent delegation is governed by [docs/AGENT_TASKS_PHASED_PLAN.md](AGENT_TASKS_PHASED_PLAN.md). Use its ticket IDs, dependencies and ACTIVE.md ownership board before starting work.  
+**Updated:** 2026-11-14 (delegation plan linked)
 
 ## 1. Objective
+> **Current execution order:** This older vertical-slice roadmap is retained for architecture/history. Do not use its old lane ordering as a live task queue. The current, smaller, dependency-gated tickets are in `docs/AGENT_TASKS_PHASED_PLAN.md`.
+
 
 Deliver the six planned API domains as complete vertical slices. Every domain ships its backend contract, persistence integration, permission enforcement, real UI workflows, deterministic realistic demo data, automated tests, and operator documentation together. UI is not deferred until all APIs are complete.
 
