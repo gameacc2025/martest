@@ -132,7 +132,7 @@
                           label="انصراف"
                           icon="pi pi-times"
                           class="p-button-outlined"
-                          @click="editProfileDialog = false"
+                          @click="activeTab = 'account'"
                         />
                         <Button
                           type="submit"
@@ -372,7 +372,6 @@ const profileError = ref('')
 const userInitial = computed(() => (user.value.fullName || user.value.email || 'ک').trim().slice(0, 1).toLocaleUpperCase('fa-IR'))
 const userTypeLabel = computed(() => ({ STAFF: 'کارمند بازارگاه', COMPANY: 'کاربر شرکت', CUSTOMER: 'کاربر عادی' }[user.value.userType] || 'کاربر'))
 
-const editProfileDialog = ref(false)
 const changePasswordDialog = ref(false)
 const saving = ref(false)
 const formError = ref('')
@@ -443,7 +442,7 @@ const formatDate = (date) => {
 
 const editProfile = () => {
   formError.value = ''
-  editProfileDialog.value = true
+  activeTab.value = 'edit'
 }
 
 const changePassword = () => {
@@ -471,7 +470,7 @@ const saveProfile = async () => {
     // The backend profile API accepts only firstName and lastName here.
     await authStore.updateProfile({ firstName, lastName })
     await loadUserProfile()
-    editProfileDialog.value = false
+    activeTab.value = 'account'
   } catch (error) {
     formError.value = error?.serverMessage || error?.message || 'ذخیره پروفایل ناموفق بود.'
   } finally {
