@@ -41,6 +41,10 @@
 | کتابخانه مشخصات | `/specification-library` | `backend/src/modules/specification-library/specification-library.routes.js` |
 | استعلام، پاسخ و اشتراک | `/inquiries` | `backend/src/modules/inquiries/inquiry.routes.js` |
 | اعلان‌ها و ترجیحات | `/settings/notifications` | `backend/src/modules/notifications/notification.routes.js` |
+| ممیزی و گزارش رخداد | `/audit` | `backend/src/modules/audit/audit.routes.js` |
+| بنرها | `/banners` | `backend/src/modules/banners/banner.routes.js` |
+| CMS (مقاله، دسته، برچسب، FAQ و صفحه ثابت) | `/cms/*` | `backend/src/modules/cms/*` |
+| CRM داخلی STAFF | `/crm` | `backend/src/modules/crm/index.js` |
 
 ## فهرست کامل endpointها
 
@@ -54,6 +58,12 @@
 
 در `/api/v1/auth` مسیرهای ورود، ثبت‌نام مشتری/شرکت، refresh، logout، handoff/redeem، دریافت کاربر جاری و تغییر رمز عبور ثبت شده‌اند. قرارداد دقیق body، cookie و token را از `auth.routes.js` و `auth.schemas.js` بخوانید. هر refresh JWT شامل `jti` تصادفی است تا صدورهای تکراری در یک ثانیه توکن یکسان نسازند؛ hash توکن refresh در دیتابیس ذخیره می‌شود.
 
+#### بازیابی رمز عبور (SMS OTP)
+
+- `POST /api/v1/auth/forgot-password` عمومی است و شماره موبایل ثبت‌شده را دریافت می‌کند. پاسخ برای حساب ناشناخته/غیرفعال و حساب واجد شرایط یکسان است تا وجود حساب افشا نشود.
+- در صورت وجود حساب فعال، کد ۶ رقمی به شماره ثبت‌شده پیامک می‌شود. کد در DB فقط به‌صورت hash ذخیره می‌شود، ۱۵ دقیقه اعتبار دارد، حداکثر ۵ تلاش می‌پذیرد و درخواست‌های تکراری با محدودیت IP، کاربر، مقصد و cooldown کنترل می‌شوند.
+- `POST /api/v1/auth/reset-password` شماره، کد و رمز جدید را می‌گیرد. مصرف کد، تغییر رمز و حذف تمام RefreshTokenهای کاربر در یک تراکنش انجام می‌شود؛ کد پس از مصرف قابل استفاده مجدد نیست.
+- فعال‌بودن این قابلیت در محیط واقعی به تنظیم `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` و `TWILIO_FROM_NUMBER` در محیط Backend وابسته است. در صورت نبود پیکربندی، endpoint با خطای 503 fail-closed پاسخ می‌دهد و هیچ کد خامی در log یا response افشا نمی‌شود.
 ### کاربران و دسترسی‌ها
 
 در `/api/v1/users` عملیات فهرست، ایجاد، مشاهده، ویرایش، حذف، تغییر وضعیت دسترسی و عملیات مربوط به شرکت ثبت شده‌اند. محدودیت مالکیت و زمینه دسترسی باید در route و service هر عملیات بررسی شود؛ پنهان‌کردن دکمه در frontend کافی نیست.
