@@ -1,33 +1,37 @@
 # Project Worklog — Compact Index
 
-This file is a concise navigation and current-state index, not a raw transcript archive. Detailed historical implementation and commit evidence remains in Git history. Append only concise, verified entries (target 10–25 lines per task); never paste raw logs or duplicate full reports.
+این فایل فقط شاخص وضعیت جاری و تحویل‌های تأییدشده است؛ تاریخچه جزئی در Git نگهداری می‌شود.
+
+## 2026-11-13 — PROJECT-SOURCE-AUDIT — ممیزی کامل سورس و اولویت‌بندی
+
+- **Status:** ممیزی Remote source-level انجام شد؛ runtime محلی و Docker/PostgreSQL کاربر NOT VERIFIED.
+- **Code baseline:** `48e73952e277703b70a351d4f0569fed48944b76`.
+- **Documentation commit:** `d891824aad406b9017e09ea45a189d4584cdbab3` — به‌روزرسانی `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`.
+- **Memory handoff commit:** `3d450b6431ea2b8ee7df700e032441fa9af879ce` — به‌روزرسانی `.ai/current-task.md`.
+- **GitHub Actions evidence on code baseline:** Prisma migrations PASS؛ Prisma Client generation و Backend tests PASS؛ workspace dependency installation FAIL؛ frontend/shared tests SKIPPED؛ frontend build FAILURE؛ Runtime Validation FAIL در dependency installation و Compose/browser مراحل بعدی SKIPPED.
+- **Key source findings:** Admin quill dependency با importer در pnpm-lock mismatch؛ CMS FAQ/Page service به Prisma delegateهای غایب ارجاع می‌دهند؛ self-service forgot/reset routes غایب و AuthChallenge delivery TODO/authenticated است؛ Support فقط DB foundation و UI نمونه دارد؛ CRM source موجود اما schema/functional tests/E2E ناکافی؛ Retail/Finance فقط DB foundation و UIهای preview؛ SMS عمومی در dispatcher queue نمی‌شود؛ API docs/inventory CMS/CRM را کامل پوشش نمی‌دهند؛ agent policy و palette docs تناقض دارند.
+- **Priority:** P0 lockfile/CI → CMS FAQ/Page consistency → account recovery → API/docs/policy reconciliation → safe runtime/seed validation. سپس P1 CRM acceptance، Support vertical slice، SMS/Audit، real dashboards و سه اپ regression. Retail/Finance در P2 و gated باقی می‌مانند.
+- **No local claims:** local Git status، stash/untracked، Docker، PostgreSQL و اجرای seed روی سیستم کاربر بررسی نشده‌اند.
+- **Audit detail:** `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`; current handoff: `.ai/current-task.md`.
 
 ## 2026-11-13 — PHASE-0-DOC-AUDIT — Documentation and agent-memory normalization
-- **Status:** DONE for remote documentation edits; local workspace/runtime verification remains NOT RUN.
-- **Repository:** `gameacc2025/martest`, branch `main`.
-- **Audited base:** `928c221e50f8470f60b1a475c90cebf21b8b16f7`.
-- **Confirmed:** current-task was 153,075 chars / 1,368 lines and contained merge-conflict markers; WORKLOG was 547,035 chars / 4,393 lines; README language contradicted AGENTS; AI workflow contradicted itself and owner branch policy; browser-testing prohibition was stale relative to owner's later explicit Playwright authorization; ACTIVE board was stale.
-- **Changes:** compacted current-task and WORKLOG; reset ACTIVE board to audit-first; aligned Persian communication, main-only/no-worktree policy, and explicit Playwright authorization in root instructions.
-- **Verification:** remote source files fetched from main and inspected. No local Git commands, Docker commands, database commands, builds, unit tests, or browser tests were run in this remote documentation pass.
-- **Commit/push:** see commits created by this documentation update; verify remote main after each update.
-- **Next:** local/runtime reconciliation and CRM acceptance; see `.ai/current-task.md`.
 
-## Current verified project facts (source-level only)
-- Monorepo: Vue 3/Vite/Pinia/PrimeVue frontend apps; Fastify/Prisma/PostgreSQL backend; JavaScript.
-- Apps: `apps/website` CUSTOMER, `apps/company` COMPANY, `apps/admin` STAFF.
-- Shared packages: `api-client`, `auth`, `permissions`, `shared-core`, `shared-ui`, `vite-config`.
-- API prefix: `/api/v1`.
-- Canonical branch: `main`; no branches, worktrees, detached checkouts or PRs.
-- Browser automation is authorized for the current CRM acceptance workflow; run sequentially and record evidence.
-- Retail/API-5 and Finance/API-6 require explicit owner business-policy approval.
+- Remote docs were normalized; current-task/WORKLOG/ACTIVE were compacted and Persian communication, main-only policy and browser-testing authorization were recorded.
+- Previous oversized task/worklog histories remain available in Git history.
+- Local workspace/runtime checks were not run in that documentation-only pass.
 
-## Latest reported CRM state — NOT independently re-verified here
-- Agent recap reported 1,531 backend tests, Admin build and API client tests passing, and Docker seed running.
-- Remaining reported work: Playwright PKCE/session persistence and real CRM visual/browser workflows.
-- Earlier observed Docker failure: `backend/prisma/seeds/cms.js` could not resolve `../src/utils/password`. A later agent recap claimed the seed runs; resolve this discrepancy by inspecting current code and rerunning safely against development DB.
-- Treat all above as reported claims until exact current-run output and exit codes are recorded.
+## Current verified project facts (source-level)
+
+- Monorepo: Vue 3/Vite/Pinia/PrimeVue frontend; Fastify/Prisma/PostgreSQL backend; JavaScript and pnpm workspace.
+- Apps: Website/CUSTOMER, Company/COMPANY, Admin/STAFF.
+- Core source areas exist for Auth/session/PKCE, company/product/catalog, B2B Inquiry/RFQ, notifications, CMS Article, and CRM.
+- Support, Retail and Finance are not operational vertical slices despite their Prisma DB foundations.
+- Canonical branch is `main`; no branches/worktrees/detached checkouts/PRs.
+- Browser automation is authorized for acceptance workflows; run sequentially and record exact evidence.
+- Retail and Finance activation require owner decisions.
 
 ## Worklog rules
-- Keep each new entry concise: task ID, status, scope, changed paths, exact checks/results, commit SHA, push verification, blockers, next action.
-- Do not store credentials, secrets, personal data, full command logs, or repeated implementation summaries.
-- Use Git history for detailed historical task chronology; link commit SHAs rather than copying old entries.
+
+- Append concise verified entries only: task ID, status, scope, exact checks/results, commit SHA, push verification, blockers and next action.
+- Do not store credentials, secrets, personal data or raw command logs.
+- Use Git history for detailed chronology; do not treat historical claims as current proof.
