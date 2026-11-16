@@ -40,5 +40,5 @@ defineProps({
 
 <style scoped>
 .tm-panel__heading { min-width: 0; }
-.tm-panel__icon { margin-inline-end: 6px; color: var(--tm-cyan-deep); font-size: 0.95em; }
+.tm-panel__icon { margin-inline-end: 6px; color: var(--ds-color-primary); font-size: 0.95em; }
 </style>

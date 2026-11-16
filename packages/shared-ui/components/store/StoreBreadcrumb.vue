@@ -16,7 +16,7 @@ defineProps({
 </template>
 
 <style scoped>
-.store-breadcrumb{display:flex;align-items:center;gap:7px;padding:18px 0 4px;color:var(--tm-muted,#6b7390);font-size:13px}
-.store-breadcrumb a{color:var(--tm-blue,#6c5ce7);text-decoration:none}
+.store-breadcrumb{display:flex;align-items:center;gap:7px;padding:18px 0 4px;color:var(--tm-muted);font-size:13px}
+.store-breadcrumb a{color:var(--tm-blue);text-decoration:none}
 .store-breadcrumb i{font-size:11px}
 </style>

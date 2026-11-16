@@ -1,15 +1,17 @@
 // =============================================================
-// Audit Log Service — Business logic for AuditLog queries
+// Audit Log Service — Business logic for AuditLog queries AND creation
 //
 // Responsibilities:
-//   - Staff-only audit log search with filters
-//   - Export audit logs (CSV/JSON)
+//   - Staff-only audit log search with filters (existing)
+//   - Export audit logs (CSV/JSON) (existing)
+//   - Create audit log entries (NEW - append-only)
 //   - Access control: only STAFF with audit_logs.read/search permissions
 //
 // Security:
 //   - All methods require STAFF context (validated by caller)
 //   - No customer/company data exposed
 //   - Append-only table enforced by DB trigger
+//   - Sensitive data redaction in metadata
 // =============================================================
 
 const prisma = require('../../config/db');
@@ -18,6 +20,278 @@ const { createError } = require('./audit.utils');
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 500;
 const EXPORT_MAX_ROWS = 50000;
+
+// Fields that should NEVER be stored in audit metadata
+const SENSITIVE_FIELDS = new Set([
+  'password',
+  'passwordHash',
+  'currentPassword',
+  'newPassword',
+  'confirmPassword',
+  'token',
+  'refreshToken',
+  'accessToken',
+  'secret',
+  'secretHash',
+  'otp',
+  'code',
+  'challenge',
+  'verifier',
+  'apiKey',
+  'apiSecret',
+  'privateKey',
+  'creditCard',
+  'cardNumber',
+  'cvv',
+  'ssn',
+  'nationalId',
+  'bankAccount',
+  'iban',
+]);
+
+/**
+ * Redact sensitive fields from an object recursively.
+ * @param {object} obj - Object to sanitize
+ * @param {number} depth - Current recursion depth
+ * @returns {object} Sanitized object
+ */
+function redactSensitiveData(obj, depth = 0) {
+  if (!obj || typeof obj !== 'object' || depth > 10) return obj;
+  if (Array.isArray(obj)) return obj.map(item => redactSensitiveData(item, depth + 1));
+  if (obj instanceof Date) return obj;
+
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const lowerKey = key.toLowerCase();
+    if (SENSITIVE_FIELDS.has(lowerKey) || SENSITIVE_FIELDS.some(f => lowerKey.includes(f))) {
+      sanitized[key] = '[REDACTED]';
+    } else if (value && typeof value === 'object') {
+      sanitized[key] = redactSensitiveData(value, depth + 1);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
+/**
+ * Create a safe metadata object with before/after snapshots.
+ * @param {object} params
+ * @param {object} [params.before] - State before the action
+ * @param {object} [params.after] - State after the action
+ * @param {object} [params.extra] - Additional context
+ * @returns {object} Sanitized metadata
+ */
+function buildMetadata({ before, after, extra } = {}) {
+  const metadata = {};
+  if (before) metadata.before = redactSensitiveData(before);
+  if (after) metadata.after = redactSensitiveData(after);
+  if (extra) metadata.extra = redactSensitiveData(extra);
+  return Object.keys(metadata).length > 0 ? metadata : null;
+}
+
+/**
+ * Extract client IP from request.
+ * @param {object} request - Fastify request
+ * @returns {string} IP address
+ */
+function getClientIp(request) {
+  const forwarded = request.headers['x-forwarded-for'];
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  const realIp = request.headers['x-real-ip'];
+  if (realIp) {
+    return realIp;
+  }
+  return request.ip || request.socket?.remoteAddress || 'unknown';
+}
+
+/**
+ * Extract user agent from request.
+ * @param {object} request - Fastify request
+ * @returns {string} User agent string
+ */
+function getUserAgent(request) {
+  return request.headers['user-agent'] || 'unknown';
+}
+
+/**
+ * Get or generate request correlation ID.
+ * @param {object} request - Fastify request
+ * @returns {string} Correlation ID
+ */
+function getCorrelationId(request) {
+  // Check if already set by middleware
+  if (request.correlationId) return request.correlationId;
+  // Check headers
+  const headerId = request.headers['x-request-id'] || request.headers['x-correlation-id'];
+  if (headerId) return headerId;
+  // Generate new one
+  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Record an audit log entry.
+ * This is the primary write method for audit logging.
+ * Append-only: no update/delete operations provided.
+ *
+ * @param {object} params
+ * @param {object} params.request - Fastify request object (for context extraction)
+ * @param {string} params.action - Action name (e.g., 'USER_CREATE', 'PRODUCT_UPDATE')
+ * @param {string} params.entityType - Entity type (e.g., 'User', 'Product', 'Company')
+ * @param {string|number} params.entityId - Entity ID
+ * @param {object} [params.metadata] - Optional pre-built metadata (will be merged with request context)
+ * @param {object} [params.before] - State before action (for metadata)
+ * @param {object} [params.after] - State after action (for metadata)
+ * @param {string} [params.outcome='SUCCESS'] - Outcome: SUCCESS, FAILURE, ERROR
+ * @param {string} [params.severity='INFO'] - Severity: INFO, WARN, ERROR, CRITICAL
+ * @param {string} [params.source] - Source: ADMIN, WEBSITE, COMPANY, SYSTEM, SEED
+ * @returns {Promise<object>} Created audit log entry
+ */
+async function recordAuditLog({
+  request,
+  action,
+  entityType,
+  entityId,
+  metadata,
+  before,
+  after,
+  outcome = 'SUCCESS',
+  severity = 'INFO',
+  source = 'ADMIN',
+}) {
+  // Extract actor context from request
+  const user = request.user;
+  const actorUserId = user?.id || null;
+  const actorAccessType = user?.accessType || null;
+  const companyId = user?.companyId || null;
+
+  // Extract request context
+  const ipAddress = getClientIp(request);
+  const userAgent = getUserAgent(request);
+  const requestId = getCorrelationId(request);
+
+  // Build metadata with before/after if provided
+  const builtMetadata = buildMetadata({ before, after, extra: metadata });
+
+  // Create audit log entry
+  const log = await prisma.auditLog.create({
+    data: {
+      actorUserId,
+      actorAccessType,
+      companyId,
+      action,
+      entityType,
+      entityId: String(entityId),
+      requestId,
+      source,
+      outcome,
+      severity,
+      ipAddress,
+      userAgent,
+      metadata: builtMetadata,
+      occurredAt: new Date(),
+    },
+    select: {
+      id: true,
+      action: true,
+      entityType: true,
+      entityId: true,
+      actorUserId: true,
+      actorAccessType: true,
+      companyId: true,
+      requestId: true,
+      source: true,
+      outcome: true,
+      severity: true,
+      ipAddress: true,
+      userAgent: true,
+      metadata: true,
+      occurredAt: true,
+    },
+  });
+
+  return log;
+}
+
+/**
+ * Record an audit log entry with explicit actor context (for non-HTTP contexts).
+ * @param {object} params
+ * @param {number} [params.actorUserId] - Actor user ID
+ * @param {string} [params.actorAccessType] - Actor access type (STAFF, COMPANY, CUSTOMER, SYSTEM)
+ * @param {number} [params.companyId] - Company ID
+ * @param {string} params.action - Action name
+ * @param {string} params.entityType - Entity type
+ * @param {string|number} params.entityId - Entity ID
+ * @param {object} [params.metadata] - Pre-built metadata
+ * @param {object} [params.before] - State before
+ * @param {object} [params.after] - State after
+ * @param {string} [params.outcome='SUCCESS'] - Outcome
+ * @param {string} [params.severity='INFO'] - Severity
+ * @param {string} [params.source='SYSTEM'] - Source
+ * @param {string} [params.ipAddress] - IP address
+ * @param {string} [params.userAgent] - User agent
+ * @param {string} [params.requestId] - Correlation ID
+ * @returns {Promise<object>} Created audit log entry
+ */
+async function recordAuditLogExplicit({
+  actorUserId = null,
+  actorAccessType = 'SYSTEM',
+  companyId = null,
+  action,
+  entityType,
+  entityId,
+  metadata,
+  before,
+  after,
+  outcome = 'SUCCESS',
+  severity = 'INFO',
+  source = 'SYSTEM',
+  ipAddress = 'unknown',
+  userAgent = 'unknown',
+  requestId = `sys-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+}) {
+  const builtMetadata = buildMetadata({ before, after, extra: metadata });
+
+  const log = await prisma.auditLog.create({
+    data: {
+      actorUserId,
+      actorAccessType,
+      companyId,
+      action,
+      entityType,
+      entityId: String(entityId),
+      requestId,
+      source,
+      outcome,
+      severity,
+      ipAddress,
+      userAgent,
+      metadata: builtMetadata,
+      occurredAt: new Date(),
+    },
+    select: {
+      id: true,
+      action: true,
+      entityType: true,
+      entityId: true,
+      actorUserId: true,
+      actorAccessType: true,
+      companyId: true,
+      requestId: true,
+      source: true,
+      outcome: true,
+      severity: true,
+      ipAddress: true,
+      userAgent: true,
+      metadata: true,
+      occurredAt: true,
+    },
+  });
+
+  return log;
+}
 
 /**
  * Search audit logs with filters, pagination, and sorting.
@@ -111,6 +385,11 @@ async function searchAuditLogs({ filters = {}, page = 1, pageSize = DEFAULT_PAGE
             phone: true,
           },
         },
+        actorAccessType: true,
+        companyId: true,
+        requestId: true,
+        source: true,
+        outcome: true,
         ipAddress: true,
         userAgent: true,
         severity: true,
@@ -129,6 +408,11 @@ async function searchAuditLogs({ filters = {}, page = 1, pageSize = DEFAULT_PAGE
     entityType: log.entityType,
     entityId: log.entityId,
     userId: log.actorUserId,
+    actorAccessType: log.actorAccessType,
+    companyId: log.companyId,
+    requestId: log.requestId,
+    source: log.source,
+    outcome: log.outcome,
     userEmail: log.actor?.email ?? null,
     userPhone: log.actor?.phone ?? null,
     ipAddress: log.ipAddress,
@@ -227,6 +511,11 @@ async function getAuditLogById(id) {
       entityType: true,
       entityId: true,
       actorUserId: true,
+      actorAccessType: true,
+      companyId: true,
+      requestId: true,
+      source: true,
+      outcome: true,
       actor: { select: { email: true, phone: true } },
       ipAddress: true,
       userAgent: true,
@@ -244,6 +533,11 @@ async function getAuditLogById(id) {
     entityType: log.entityType,
     entityId: log.entityId,
     userId: log.actorUserId,
+    actorAccessType: log.actorAccessType,
+    companyId: log.companyId,
+    requestId: log.requestId,
+    source: log.source,
+    outcome: log.outcome,
     userEmail: log.actor?.email ?? null,
     userPhone: log.actor?.phone ?? null,
     ipAddress: log.ipAddress,
@@ -295,6 +589,11 @@ async function exportAuditLogs({ filters = {}, sortBy = 'occurredAt', sortOrder 
       entityType: true,
       entityId: true,
       actorUserId: true,
+      actorAccessType: true,
+      companyId: true,
+      requestId: true,
+      source: true,
+      outcome: true,
       actor: { select: { email: true, phone: true } },
       ipAddress: true,
       userAgent: true,
@@ -310,6 +609,11 @@ async function exportAuditLogs({ filters = {}, sortBy = 'occurredAt', sortOrder 
     entityType: log.entityType,
     entityId: log.entityId,
     userId: log.actorUserId,
+    actorAccessType: log.actorAccessType,
+    companyId: log.companyId,
+    requestId: log.requestId,
+    source: log.source,
+    outcome: log.outcome,
     userEmail: log.actor?.email ?? null,
     userPhone: log.actor?.phone ?? null,
     ipAddress: log.ipAddress,
@@ -321,11 +625,24 @@ async function exportAuditLogs({ filters = {}, sortBy = 'occurredAt', sortOrder 
 }
 
 module.exports = {
+  // Write operations (NEW)
+  recordAuditLog,
+  recordAuditLogExplicit,
+  buildMetadata,
+  redactSensitiveData,
+  getClientIp,
+  getUserAgent,
+  getCorrelationId,
+
+  // Read operations (existing)
   searchAuditLogs,
   getAuditStats,
   getAuditLogById,
   exportAuditLogs,
+
+  // Constants
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
   EXPORT_MAX_ROWS,
+  SENSITIVE_FIELDS,
 };

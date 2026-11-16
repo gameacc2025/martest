@@ -1040,16 +1040,16 @@ async function removeExistingDocument(docId) {
   justify-content: center;
   min-height: 38px;
   padding: 0 10px;
-  border: 1px solid var(--tm-line-strong);
-  border-radius: var(--tm-radius);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
   background: var(--ds-color-surface);
-  color: var(--tm-ink-soft);
-  font-size: var(--tm-fs-sm);
+  color: var(--ds-color-text-muted);
+  font-size: var(--ds-font-size-sm);
   font-weight: 600;
   text-decoration: none;
 }
 .product-back-link:hover,
-.product-cancel-link:hover { background: var(--tm-surface-alt); color: var(--tm-ink); }
+.product-cancel-link:hover { background: var(--ds-color-surface-alt); color: var(--ds-color-text); }
 
 .form-grid {
   display: grid;
@@ -1061,9 +1061,9 @@ async function removeExistingDocument(docId) {
 .form-section {
   min-width: 0;
   padding: 20px;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-lg);
-  background: var(--tm-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
 }
 
 .form-section.full-width { grid-column: 1 / -1; }
@@ -1075,7 +1075,7 @@ async function removeExistingDocument(docId) {
   align-items: center;
   gap: 4px;
   margin-bottom: 6px;
-  color: var(--tm-ink);
+  color: var(--ds-color-text);
   font-size: 12.5px;
   font-weight: 600;
 }
@@ -1094,14 +1094,14 @@ async function removeExistingDocument(docId) {
   flex: 1;
 }
 
-.required { color: var(--tm-red); }
+.required { color: var(--ds-color-danger); }
 
 .empty-section {
   padding: 28px;
-  border: 1px dashed var(--tm-line-strong);
-  border-radius: var(--tm-radius-lg);
-  background: var(--tm-surface-alt);
-  color: var(--tm-muted);
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface-alt);
+  color: var(--ds-color-text-muted);
   text-align: center;
 }
 
@@ -1114,7 +1114,7 @@ async function removeExistingDocument(docId) {
 
 .spec-unit {
   margin-inline-start: 4px;
-  color: var(--tm-muted);
+  color: var(--ds-color-text-muted);
   font-size: 0.85em;
   font-weight: 400;
 }
@@ -1122,7 +1122,7 @@ async function removeExistingDocument(docId) {
 .custom-specs {
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px dashed var(--tm-line);
+  border-top: 1px dashed var(--ds-color-border);
 }
 .custom-specs .section-header {
   display: flex;
@@ -1133,7 +1133,7 @@ async function removeExistingDocument(docId) {
 }
 .custom-specs .section-header h3 {
   margin: 0;
-  color: var(--tm-ink);
+  color: var(--ds-color-text);
   font-size: 13px;
   font-weight: 700;
 }
@@ -1148,9 +1148,9 @@ async function removeExistingDocument(docId) {
   align-items: flex-end;
   gap: 10px;
   padding: 14px;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius);
-  background: var(--tm-surface-alt);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
 }
 
 .documents-list { display: flex; flex-direction: column; gap: 8px; }
@@ -1159,9 +1159,9 @@ async function removeExistingDocument(docId) {
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius);
-  background: var(--tm-surface-alt);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-surface-alt);
 }
 
 .images-grid {
@@ -1173,8 +1173,8 @@ async function removeExistingDocument(docId) {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-md);
 }
 .image-item img { width: 100%; height: 100%; object-fit: cover; }
 .image-actions {

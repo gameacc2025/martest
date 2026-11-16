@@ -9,11 +9,11 @@
 /* Header: the prototype's slim dark utility strip + translucent sticky command bar. */
 .public-shell { background: var(--ds-page-bg); color: var(--ds-text-primary); }
 .public-shell .public-utility-bar {
-  background: linear-gradient(90deg, #060D17, #122438 50%, #060D17) !important;
-  color: #B9D6E2;
-  border-bottom: 1px solid rgba(34,211,238,.16);
+  background: linear-gradient(90deg, var(--ds-color-brand-deep), var(--ds-color-brand-dark) 50%, var(--ds-color-brand-deep)) !important;
+  color: var(--ds-color-on-brand-muted);
+  border-bottom: 1px solid rgba(var(--ds-brand-primary), .16);
 }
-.public-shell .public-utility-message b { color: #22D3EE; }
+.public-shell .public-utility-message b { color: var(--ds-brand-primary); }
 .public-shell .public-header {
   min-height: 68px;
   background: color-mix(in srgb, var(--ds-header-bg) 92%, transparent) !important;
@@ -24,7 +24,7 @@
 }
 :root.app-dark .public-shell .public-header {
   background: rgba(13,27,42,.92) !important;
-  border-bottom-color: rgba(34,211,238,.16) !important;
+  border-bottom-color: rgba(var(--ds-brand-primary), .16) !important;
   box-shadow: 0 10px 32px rgba(0,0,0,.26);
 }
 .public-shell .public-header-row { min-height: 68px; }
@@ -34,10 +34,10 @@
   flex: none;
   width: 38px;
   height: 38px;
-  border: 1px solid #24394D;
+  border: 1px solid var(--ds-border);
   border-radius: 10px;
-  background: linear-gradient(135deg, #0A1625, #122438) !important;
-  box-shadow: 0 6px 20px rgba(34,211,238,.12);
+  background: var(--ds-hero-gradient) !important;
+  box-shadow: 0 6px 20px rgba(var(--ds-brand-primary), .12);
 }
 .public-shell .public-logo-symbol::before {
   content: "";
@@ -47,7 +47,7 @@
   top: 12px;
   left: 9px;
   border-radius: 4px;
-  background: #22D3EE;
+  background: var(--ds-brand-primary);
 }
 .public-shell .public-logo-symbol::after {
   content: "";
@@ -57,21 +57,21 @@
   top: 12px;
   left: 15px;
   background:
-    linear-gradient(#22D3EE,#22D3EE) center top / 3px 13px no-repeat,
-    radial-gradient(circle at 50% 100%, #22D3EE 0 2px, transparent 2.5px) center bottom / 8px 6px no-repeat;
+    linear-gradient(var(--ds-brand-primary), var(--ds-brand-primary)) center top / 3px 13px no-repeat,
+    radial-gradient(circle at 50% 100%, var(--ds-brand-primary) 0 2px, transparent 2.5px) center bottom / 8px 6px no-repeat;
 }
 .public-shell .public-logo-name strong { color: var(--ds-text-primary); font-weight: 800; }
 .public-shell .public-nav-link { color: var(--ds-text-secondary); font-size: 14px; font-weight: 600; }
 .public-shell .public-nav-link:hover,
-.public-shell .public-nav-link-active { color: #0891B2; }
-.public-shell .public-nav-link-active { border-bottom-color: #22D3EE; }
+.public-shell .public-nav-link-active { color: var(--ds-color-primary); }
+.public-shell .public-nav-link-active { border-bottom-color: var(--ds-brand-primary); }
 :root.app-dark .public-shell .public-nav-link:hover,
-:root.app-dark .public-shell .public-nav-link-active { color: #22D3EE; }
+:root.app-dark .public-shell .public-nav-link-active { color: var(--ds-brand-primary); }
 .public-shell .public-icon-link { color: var(--ds-text-primary); border-radius: 9px; transition: background-color .2s, color .2s, transform .2s; }
-.public-shell .public-icon-link:hover { background: rgba(34,211,238,.12); color: #0891B2; transform: translateY(-1px); }
-:root.app-dark .public-shell .public-icon-link:hover { color: #22D3EE; }
+.public-shell .public-icon-link:hover { background: rgba(var(--ds-brand-primary), .12); color: var(--ds-color-primary); transform: translateY(-1px); }
+:root.app-dark .public-shell .public-icon-link:hover { color: var(--ds-brand-primary); }
 .public-shell .public-theme-toggle { border: 1px solid var(--ds-border); background: var(--ds-card-bg); }
-.public-shell .public-notification-badge { background: #22D3EE; color: #083344; box-shadow: 0 0 0 2px var(--ds-header-bg); }
+.public-shell .public-notification-badge { background: var(--ds-brand-primary); color: var(--ds-color-primary-contrast); box-shadow: 0 0 0 2px var(--ds-header-bg); }
 .public-shell .public-commerce-actions { border-inline-end-color: var(--ds-border); }
 .public-shell .public-user-trigger { background: var(--ds-card-bg); border-color: var(--ds-border); color: var(--ds-text-primary); }
 .public-shell .public-rfq-link {
@@ -89,25 +89,25 @@
 }
 .public-shell .public-login-link,
 .public-shell .tm-btn--accent {
-  background: linear-gradient(100deg, #22D3EE, #0891B2) !important;
+  background: linear-gradient(100deg, var(--ds-brand-primary), var(--ds-primary-button)) !important;
   border-color: transparent !important;
-  color: #083344 !important;
-  box-shadow: 0 7px 20px rgba(34,211,238,.18);
+  color: var(--ds-color-primary-contrast) !important;
+  box-shadow: 0 7px 20px rgba(var(--ds-brand-primary), .18);
 }
 .public-shell .public-login-link:hover,
-.public-shell .tm-btn--accent:hover { background: linear-gradient(100deg, #06B6D4, #0891B2) !important; box-shadow: 0 10px 26px rgba(34,211,238,.25); }
+.public-shell .tm-btn--accent:hover { background: linear-gradient(100deg, var(--ds-brand-primary-hover), var(--ds-primary-button)) !important; box-shadow: 0 10px 26px rgba(var(--ds-brand-primary), .25); }
 .public-shell .public-mobile-nav { background: var(--ds-card-bg); border-color: var(--ds-border); }
 .public-shell .public-mobile-nav-link:hover { background: var(--ds-card-hover); color: var(--ds-color-primary-text); }
 .public-shell .public-main { background: var(--ds-page-bg); color: var(--ds-text-primary); }
 .public-shell .public-footer {
-  background: linear-gradient(135deg, #060D17, #0A1625 55%, #122438) !important;
-  border-top: 1px solid rgba(34,211,238,.14);
+  background: linear-gradient(135deg, var(--ds-color-brand-deep), var(--ds-color-brand-deep) 55%, var(--ds-color-brand-dark)) !important;
+  border-top: 1px solid rgba(var(--ds-brand-primary), .14);
 }
-.public-shell .public-footer-brand { color: #FFFFFF; }
+.public-shell .public-footer-brand { color: var(--ds-color-on-brand); }
 .public-shell .public-footer-about-text,
-.public-shell .public-footer-bottom { color: #9CC4D4; }
-.public-shell .public-footer-link { color: #9CC4D4; }
-.public-shell .public-footer-link:hover { color: #22D3EE; }
+.public-shell .public-footer-bottom { color: var(--ds-color-on-brand-muted); }
+.public-shell .public-footer-link { color: var(--ds-color-on-brand-muted); }
+.public-shell .public-footer-link:hover { color: var(--ds-brand-primary); }
 
 /* Home hero: navy/petrol depth, cyan + violet network light, and animated fiber packets. */
 .public-shell .reference-home .hero {
@@ -116,11 +116,11 @@
   overflow: hidden;
   padding-block: 64px 88px;
   background:
-    radial-gradient(ellipse at 16% 18%, rgba(34,211,238,.20), transparent 34%),
-    radial-gradient(ellipse at 82% 12%, rgba(139,92,246,.20), transparent 30%),
-    linear-gradient(135deg, #0A1625 0%, #122438 58%, #0A1625 100%) !important;
-  border-bottom: 1px solid rgba(34,211,238,.18);
-  color: #FFFFFF;
+    radial-gradient(ellipse at 16% 18%, rgba(var(--ds-brand-primary), .20), transparent 34%),
+    radial-gradient(ellipse at 82% 12%, rgba(var(--ds-brand-accent), .20), transparent 30%),
+    var(--ds-hero-gradient) !important;
+  border-bottom: 1px solid rgba(var(--ds-brand-primary), .18);
+  color: var(--ds-color-on-brand);
 }
 .public-shell .reference-home .hero-bg-network {
   position: absolute;
@@ -162,16 +162,16 @@
   50% { opacity: 1; transform: scale(1.55); }
 }
 .public-shell .reference-home .hero .w { position: relative; z-index: 2; }
-.public-shell .reference-home .hero .tag { color: #22D3EE; }
-.public-shell .reference-home .hero h1 { color: #FFFFFF; }
-.public-shell .reference-home .hero p { color: #C3DDE8; }
+.public-shell .reference-home .hero .tag { color: var(--ds-brand-primary); }
+.public-shell .reference-home .hero h1 { color: var(--ds-color-on-brand); }
+.public-shell .reference-home .hero p { color: var(--ds-color-on-brand-muted); }
 .public-shell .reference-home .hero .feat {
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.18);
   border-radius: 18px;
-  background: rgba(18,36,56,.76);
-  box-shadow: 0 24px 64px rgba(0,0,0,.24), 0 0 34px rgba(34,211,238,.12);
+  background: rgba(var(--ds-color-brand-dark), .76);
+  box-shadow: 0 24px 64px rgba(0,0,0,.24), 0 0 34px rgba(var(--ds-brand-primary), .12);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -181,30 +181,30 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(135deg, rgba(34,211,238,.18), transparent 46%, rgba(139,92,246,.14));
+  background: linear-gradient(135deg, rgba(var(--ds-brand-primary), .18), transparent 46%, rgba(var(--ds-brand-accent), .14));
 }
 .public-shell .reference-home .hero .feat > * { position: relative; z-index: 1; }
 .public-shell .reference-home .hero .feat .img {
-  background: radial-gradient(circle at 22% 20%, rgba(34,211,238,.16), transparent 54%), linear-gradient(135deg,#122438,#0A1625);
+  background: radial-gradient(circle at 22% 20%, rgba(var(--ds-brand-primary), .16), transparent 54%), var(--ds-hero-gradient);
 }
 .public-shell .reference-home .hero .b1 {
-  background: #22D3EE !important;
-  color: #083344 !important;
-  box-shadow: 0 8px 22px rgba(34,211,238,.20);
+  background: var(--ds-brand-primary) !important;
+  color: var(--ds-color-primary-contrast) !important;
+  box-shadow: 0 8px 22px rgba(var(--ds-brand-primary), .20);
 }
-.public-shell .reference-home .hero .b1:hover { background: #67E8F9 !important; }
-.public-shell .reference-home .hero .b2 { color: #FFFFFF !important; border-color: rgba(255,255,255,.48) !important; }
+.public-shell .reference-home .hero .b1:hover { background: var(--ds-brand-primary-hover) !important; }
+.public-shell .reference-home .hero .b2 { color: var(--ds-color-on-brand) !important; border-color: rgba(255,255,255,.48) !important; }
 .public-shell .reference-home .hero .tabs { background: rgba(255,255,255,.10); }
-.public-shell .reference-home .hero .tabs button { color: #D6EAF2; }
-.public-shell .reference-home .hero .tabs button.on { background: #FFFFFF; color: #0A1625; }
-.public-shell .reference-home .hero .search { background: #FFFFFF; border: 1px solid rgba(34,211,238,.24); }
-.public-shell .reference-home .hero .search input { color: #102A43; }
-.public-shell .reference-home .hero .chips { color: #9CC4D4; }
-.public-shell .reference-home .hero .chips button { background: rgba(255,255,255,.12); color: #FFFFFF; }
+.public-shell .reference-home .hero .tabs button { color: var(--ds-color-on-brand-muted); }
+.public-shell .reference-home .hero .tabs button.on { background: var(--ds-color-on-brand); color: var(--ds-color-brand-deep); }
+.public-shell .reference-home .hero .search { background: var(--ds-color-on-brand); border: 1px solid rgba(var(--ds-brand-primary), .24); }
+.public-shell .reference-home .hero .search input { color: var(--ds-color-text); }
+.public-shell .reference-home .hero .chips { color: var(--ds-color-on-brand-muted); }
+.public-shell .reference-home .hero .chips button { background: rgba(255,255,255,.12); color: var(--ds-color-on-brand); }
 .public-shell .reference-home .hero .dots button { background: rgba(255,255,255,.38); }
-.public-shell .reference-home .hero .dots button.on { background: #22D3EE; }
-.public-shell .reference-home .hero .ha { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.24); color: #FFFFFF; }
-.public-shell .reference-home .hero .ha:hover { background: #22D3EE; color: #083344; }
+.public-shell .reference-home .hero .dots button.on { background: var(--ds-brand-primary); }
+.public-shell .reference-home .hero .ha { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.24); color: var(--ds-color-on-brand); }
+.public-shell .reference-home .hero .ha:hover { background: var(--ds-brand-primary); color: var(--ds-color-primary-contrast); }
 
 /* Every Website surface consumes the same prototype semantic tokens. */
 .public-shell .reference-home,
@@ -219,8 +219,8 @@
 .public-shell .reference-home .sh h2::after,
 .public-shell .reference-products .ph h1::after,
 .public-shell .reference-categories .ph h1::after {
-  background: linear-gradient(90deg, #22D3EE, #8B5CF6);
-  box-shadow: 0 0 14px rgba(34,211,238,.26);
+  background: linear-gradient(90deg, var(--ds-brand-primary), var(--ds-brand-accent));
+  box-shadow: 0 0 14px rgba(var(--ds-brand-primary), .26);
 }
 .public-shell .reference-home .p,
 .public-shell .reference-home .cat,
@@ -254,18 +254,18 @@
 .public-shell .reference-products .fl:hover,
 .public-shell .reference-categories .cb:hover {
   transform: translateY(-4px);
-  border-color: rgba(34,211,238,.58);
-  box-shadow: 0 14px 32px rgba(10,22,37,.12), 0 0 24px rgba(34,211,238,.12);
+  border-color: rgba(var(--ds-brand-primary), .58);
+  box-shadow: 0 14px 32px rgba(10,22,37,.12), 0 0 24px rgba(var(--ds-brand-primary), .12);
 }
 .public-shell .reference-home .cat i,
 .public-shell .reference-categories .cb .t i,
 .public-shell .reference-home .bi i {
-  background: rgba(34,211,238,.12);
-  color: #0891B2;
+  background: rgba(var(--ds-brand-primary), .12);
+  color: var(--ds-color-primary);
 }
 :root.app-dark .public-shell .reference-home .cat i,
 :root.app-dark .public-shell .reference-categories .cb .t i,
-:root.app-dark .public-shell .reference-home .bi i { background: rgba(34,211,238,.14); color: #22D3EE; }
+:root.app-dark .public-shell .reference-home .bi i { background: rgba(var(--ds-brand-primary), .14); color: var(--ds-brand-primary); }
 
 .public-shell .reference-home .b1,
 .public-shell .reference-products .b1,
@@ -273,10 +273,10 @@
 .public-shell .reference-home .fab,
 .public-shell .reference-products .fab,
 .public-shell .reference-categories .fab {
-  background: linear-gradient(100deg, #22D3EE, #0891B2);
-  color: #083344;
+  background: linear-gradient(100deg, var(--ds-brand-primary), var(--ds-primary-button));
+  color: var(--ds-color-primary-contrast);
   border-color: transparent;
-  box-shadow: 0 8px 22px rgba(34,211,238,.20);
+  box-shadow: 0 8px 22px rgba(var(--ds-brand-primary), .20);
 }
 .public-shell .reference-home .b1:hover,
 .public-shell .reference-products .b1:hover,
@@ -284,19 +284,19 @@
 .public-shell .reference-home .fab:hover,
 .public-shell .reference-products .fab:hover,
 .public-shell .reference-categories .fab:hover {
-  background: linear-gradient(100deg, #06B6D4, #0891B2);
-  box-shadow: 0 12px 28px rgba(34,211,238,.28);
+  background: linear-gradient(100deg, var(--ds-brand-primary-hover), var(--ds-primary-button));
+  box-shadow: 0 12px 28px rgba(var(--ds-brand-primary), .28);
 }
 .public-shell .reference-home .b2,
 .public-shell .reference-products .b2,
-.public-shell .reference-categories .b2 { border-color: rgba(8,145,178,.52); color: #0E7490; }
+.public-shell .reference-categories .b2 { border-color: rgba(var(--ds-color-primary), .52); color: var(--ds-color-primary-text); }
 :root.app-dark .public-shell .reference-home .b2,
 :root.app-dark .public-shell .reference-products .b2,
-:root.app-dark .public-shell .reference-categories .b2 { border-color: rgba(34,211,238,.42); color: #67E8F9; }
+:root.app-dark .public-shell .reference-categories .b2 { border-color: rgba(var(--ds-brand-primary), .42); color: var(--ds-brand-primary-hover); }
 
 .public-shell .reference-home .p .im,
 .public-shell .reference-products .p .im {
-  background: radial-gradient(circle at 22% 20%, rgba(34,211,238,.14), transparent 54%), linear-gradient(135deg,#122438,#0A1625);
+  background: radial-gradient(circle at 22% 20%, rgba(var(--ds-brand-primary), .14), transparent 54%), var(--ds-hero-gradient);
 }
 .public-shell .reference-home .rfq { background: linear-gradient(115deg,rgba(34,211,238,.08),transparent 55%),var(--ds-card-bg); }
 .public-shell .reference-home .brands span {

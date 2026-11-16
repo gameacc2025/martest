@@ -52,7 +52,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 .landing-gate i {
   font-size: 2rem;

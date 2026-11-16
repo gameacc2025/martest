@@ -531,7 +531,7 @@ function formatPrice(price) {
 
 .info-label {
   font-size: 0.875rem;
-  color: var(--tm-muted);
+  color: var(--ds-color-text-muted);
 }
 
 .info-value {
@@ -539,7 +539,7 @@ function formatPrice(price) {
 }
 
 .text-danger {
-  color: var(--tm-red);
+  color: var(--ds-color-danger);
 }
 
 .ms-1 {
@@ -547,8 +547,8 @@ function formatPrice(price) {
 }
 
 .response-card {
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-lg);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-card-radius);
   padding: 1rem;
   margin-bottom: 1rem;
 }
@@ -576,8 +576,8 @@ function formatPrice(price) {
 }
 
 .response-item-form {
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-lg);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-card-radius);
   padding: 1rem;
   margin-bottom: 1rem;
 }
@@ -585,13 +585,13 @@ function formatPrice(price) {
 .attachments {
   margin-top: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px dashed var(--tm-line);
+  border-top: 1px dashed var(--ds-color-border);
 }
 
 .attachments-label {
   display: block;
   font-size: 0.85rem;
-  color: var(--tm-muted);
+  color: var(--ds-color-text-muted);
   margin-bottom: 0.5rem;
 }
 
@@ -606,7 +606,7 @@ function formatPrice(price) {
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  border: 1px solid var(--tm-line);
+  border: 1px solid var(--ds-color-border);
   border-radius: var(--tm-radius-lg);
   background: var(--tm-canvas);
 }

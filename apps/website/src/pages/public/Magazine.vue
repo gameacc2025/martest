@@ -14,6 +14,7 @@ const error = ref('')
 const currentPage = ref(1)
 const totalPages = ref(1)
 const articlesPerPage = 9
+const isPreview = ref(false)
 
 const categories = computed(() => ['همه', ...cmsStore.publishedCategories.map(c => c.name)])
 const tags = computed(() => cmsStore.publishedTags)
@@ -127,7 +128,21 @@ function getRelatedArticles(article) {
 
 onMounted(() => {
   loadData()
-  if (route.params.slug) {
+  if (route.params.token) {
+    // Preview mode
+    isPreview.value = true
+    cmsStore.fetchArticleByPreviewToken(route.params.token).then(article => {
+      if (article) {
+        articleDetail.value = mapArticle(article)
+        showDetail.value = true
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        router.push({ name: 'magazine' })
+      }
+    }).catch(() => {
+      router.push({ name: 'magazine' })
+    })
+  } else if (route.params.slug) {
     const slug = route.params.slug
     cmsStore.fetchArticleBySlug(slug).then(article => {
       openArticle(article)
@@ -137,15 +152,34 @@ onMounted(() => {
   }
 })
 
+watch(() => route.params.token, (newToken) => {
+  if (newToken) {
+    isPreview.value = true
+    cmsStore.fetchArticleByPreviewToken(newToken).then(article => {
+      if (article) {
+        articleDetail.value = mapArticle(article)
+        showDetail.value = true
+      } else {
+        router.push({ name: 'magazine' })
+      }
+    }).catch(() => {
+      router.push({ name: 'magazine' })
+    })
+  } else {
+    isPreview.value = false
+    closeDetail()
+  }
+})
+
 watch(() => route.params.slug, (newSlug) => {
-  if (newSlug) {
+  if (newSlug && !route.params.token) {
     cmsStore.fetchArticleBySlug(newSlug).then(article => {
       articleDetail.value = mapArticle(article)
       showDetail.value = true
     }).catch(() => {
       router.push({ name: 'magazine' })
     })
-  } else {
+  } else if (!newSlug && !route.params.token) {
     closeDetail()
   }
 })

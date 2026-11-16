@@ -549,9 +549,9 @@ async function submitInquiry() {
 }
 
 .inquiry-stepper {
-  background: var(--tm-surface);
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-lg);
+  background: var(--ds-color-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-card-radius);
   padding: 1rem;
 }
 
@@ -564,11 +564,11 @@ async function submitInquiry() {
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0 0 1.25rem;
-  color: var(--tm-ink);
+  color: var(--ds-color-text);
 }
 
 .step-hint {
-  color: var(--tm-muted);
+  color: var(--ds-color-text-muted);
   margin: 0 0 1rem;
 }
 
@@ -585,12 +585,12 @@ async function submitInquiry() {
 }
 
 .field-hint {
-  color: var(--tm-muted);
+  color: var(--ds-color-text-muted);
   font-size: 0.8rem;
 }
 
 .required {
-  color: var(--tm-red);
+  color: var(--ds-color-danger);
 }
 
 .w-full {

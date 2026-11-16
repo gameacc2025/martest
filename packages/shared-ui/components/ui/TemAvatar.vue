@@ -9,12 +9,12 @@ const props = defineProps({
 })
 
 const PALETTE = [
-  { bg: '#e8f1fe', fg: '#1155b0' },
-  { bg: '#e4f8fd', fg: '#0f5f88' },
-  { bg: '#ddf8f1', fg: '#0c8a6e' },
-  { bg: '#fdf1da', fg: '#a86c05' },
-  { bg: '#ece7fd', fg: '#6042d8' },
-  { bg: '#fde8f1', fg: '#b83d72' },
+  { bg: 'var(--ds-color-primary-soft, #e8f1fe)', fg: 'var(--ds-color-primary, #0891B2)' },
+  { bg: 'var(--ds-color-primary-soft, #e4f8fd)', fg: 'var(--ds-brand-primary, #0891B2)' },
+  { bg: 'var(--ds-status-success-bg, #ddf8f1)', fg: 'var(--ds-status-success-fg, #15803D)' },
+  { bg: 'var(--ds-status-warning-bg, #fdf1da)', fg: 'var(--ds-status-warning-fg, #B45309)' },
+  { bg: 'color-mix(in srgb, var(--ds-brand-accent) 12%, transparent)', fg: 'var(--ds-brand-accent, #8B5CF6)' },
+  { bg: 'color-mix(in srgb, var(--ds-brand-accent) 12%, transparent)', fg: 'var(--ds-brand-accent, #8B5CF6)' },
 ]
 
 const initials = computed(() => {

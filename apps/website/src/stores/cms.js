@@ -70,6 +70,21 @@ export const useCmsStore = defineStore('cms', () => {
     }
   }
 
+  async function fetchArticleByPreviewToken(token) {
+    articlesLoading.value = true
+    articlesError.value = ''
+    try {
+      const response = await cmsArticlesApi.getByPreviewToken(token)
+      const data = response.data?.data ?? response.data ?? response
+      return data
+    } catch (error) {
+      articlesError.value = error.message || 'دریافت پیش‌نمایش با خطا مواجه شد'
+      throw error
+    } finally {
+      articlesLoading.value = false
+    }
+  }
+
 async function fetchCategories() {
     categoriesLoading.value = true
     try {
@@ -192,6 +207,7 @@ async function fetchCategories() {
     fetchArticles,
     fetchFeaturedArticles,
     fetchArticleBySlug,
+    fetchArticleByPreviewToken,
     fetchCategories,
     fetchTags,
     fetchFaqs,

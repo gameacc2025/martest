@@ -263,6 +263,80 @@ const EVENT_CATALOG = {
       data: { orderId: order?.id, companyId: company?.id },
     }),
   },
+
+  // ── Support Ticketing ─────────────────────────────────────────
+  SUPPORT_TICKET_CREATED: {
+    key: 'SUPPORT_TICKET_CREATED',
+    label: 'ایجاد تیکت پشتیبانی',
+    recipients: 'Ticket requester + assigned staff/queue members',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ ticket }) => ({
+      title: 'تیکت پشتیبانی ایجاد شد',
+      message: `تیکت «${ticket?.subject || ticket?.ticketNumber || ''}» با شماره ${ticket?.ticketNumber || ''} ثبت شد.`,
+      data: { ticketId: ticket?.id, ticketNumber: ticket?.ticketNumber },
+    }),
+  },
+
+  SUPPORT_MESSAGE_RECEIVED: {
+    key: 'SUPPORT_MESSAGE_RECEIVED',
+    label: 'پیام جدید در تیکت پشتیبانی',
+    recipients: 'Ticket participants (requester, assignee, queue members)',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ ticket, message, sender }) => ({
+      title: 'پیام جدید در تیکت پشتیبانی',
+      message: `پیام جدیدی در تیکت «${ticket?.subject || ticket?.ticketNumber || ''}» ثبت شد.`,
+      data: { ticketId: ticket?.id, ticketNumber: ticket?.ticketNumber, messageId: message?.id },
+    }),
+  },
+
+  SUPPORT_TICKET_STATUS_CHANGED: {
+    key: 'SUPPORT_TICKET_STATUS_CHANGED',
+    label: 'تغییر وضعیت تیکت پشتیبانی',
+    recipients: 'Ticket participants',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ ticket, status, previousStatus }) => ({
+      title: 'تغییر وضعیت تیکت پشتیبانی',
+      message: `وضعیت تیکت «${ticket?.subject || ticket?.ticketNumber || ''}» از ${previousStatus || '—'} به ${status} تغییر کرد.`,
+      data: { ticketId: ticket?.id, ticketNumber: ticket?.ticketNumber, status, previousStatus },
+    }),
+  },
+
+  SUPPORT_TICKET_ASSIGNED: {
+    key: 'SUPPORT_TICKET_ASSIGNED',
+    label: 'تخصیص تیکت پشتیبانی',
+    recipients: 'Assigned staff member + ticket requester',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ ticket, assignee, queue }) => ({
+      title: 'تیکت پشتیبانی به شما تخصیص داده شد',
+      message: `تیکت «${ticket?.subject || ticket?.ticketNumber || ''}» به شما ارجاع داده شد.`,
+      data: { ticketId: ticket?.id, ticketNumber: ticket?.ticketNumber, assigneeId: assignee?.id, queueId: queue?.id },
+    }),
+  },
+
+  // SLA Escalation and Warning events
+  SUPPORT_SLA_ESCALATED: {
+    key: 'SUPPORT_SLA_ESCALATED',
+    label: 'نقض مهلت SLA تیکت',
+    recipients: 'Assigned staff, queue members, and supervisors',
+    channels: { IN_APP: true, EMAIL: true, SMS: true },
+    template: ({ ticket, escalationType, slaDetails }) => ({
+      title: '⚠️ نقض مهلت SLA',
+      message: `تیکت «${ticket?.subject || ticket?.ticketNumber || ''}» مهلت ${escalationType === 'FIRST_RESPONSE_BREACHED' ? 'پاسخ اول' : 'حل'} را از دست داد.`,
+      data: { ticketId: ticket?.id, ticketNumber: ticket?.ticketNumber, escalationType, slaDetails },
+    }),
+  },
+
+  SUPPORT_SLA_WARNING: {
+    key: 'SUPPORT_SLA_WARNING',
+    label: 'هشدار نزدیک بودن مهلت SLA',
+    recipients: 'Assigned staff and queue members',
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
+    template: ({ ticket, warningType, slaInfo }) => ({
+      title: '⏰ هشدار مهلت SLA',
+      message: `تیکت «${ticket?.subject || ticket?.ticketNumber || ''}» در حال نزدیک شدن به مهلت ${warningType === 'FIRST_RESPONSE_AT_RISK' ? 'پاسخ اول' : 'حل'} است.`,
+      data: { ticketId: ticket?.id, ticketNumber: ticket?.ticketNumber, warningType, slaInfo },
+    }),
+  },
 };
 
 // Default channel matrix for every event (flow/06 §4): in-app + email ON,

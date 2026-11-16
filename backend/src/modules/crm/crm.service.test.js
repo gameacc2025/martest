@@ -77,6 +77,19 @@ const prisma = {
       return currentLead;
     },
   },
+  leadStatusHistory: {
+    create: async (args) => {
+      calls.create.push(args);
+      return { ...args.data, id: Date.now() };
+    },
+  },
+  cRMFieldAudit: {
+    createMany: async (args) => {
+      calls.create.push(args);
+      return { count: args.data.length };
+    },
+  },
+  $transaction: async (fn) => fn(prisma),
 };
 
 injectMock('../../config/db', prisma);
@@ -101,10 +114,16 @@ test('createLead normalizes contact fields and assigns the authenticated active 
   assert.equal(result.email, 'sales@example.test');
   assert.equal(result.phone, '09120000000');
   assert.equal(result.score, 75);
-  assert.equal(calls.create.length, 1);
-  assert.equal(calls.create[0].data.ownerUserId, 7);
+  // createLead now creates 1 lead + multiple CRMFieldAudit entries
+  // Filter to find the lead creation call
+  const leadCreateCalls = calls.create.filter(c => c.data && c.data.ownerUserId !== undefined);
+  assert.equal(leadCreateCalls.length, 1);
+  assert.equal(leadCreateCalls[0].data.ownerUserId, 7);
   assert.equal(calls.staff[0].where.type, 'STAFF');
   assert.equal(calls.staff[0].where.isActive, true);
+  // Verify CRMFieldAudit.createMany was called
+  const auditCalls = calls.create.filter(c => c.data && Array.isArray(c.data));
+  assert.ok(auditCalls.length > 0, 'CRMFieldAudit.createMany should have been called');
 });
 
 test('createLead rejects invalid scores and inactive/non-STAFF owners', async () => {
@@ -134,9 +153,33 @@ test('updateLead refuses terminal leads before issuing a database update', async
   assert.equal(calls.update.length, 0);
 });
 
+test('updateLead creates CRMFieldAudit records for changed fields', async () => {
+  reset();
+  const result = await service.updateLead(41, { displayName: 'Updated Lead', score: 85 }, 7);
+  assert.equal(result.displayName, 'Updated Lead');
+  assert.equal(result.score, 85);
+  assert.equal(calls.update.length, 1);
+  // Check that CRMFieldAudit.createMany was called
+  const auditCalls = calls.create.filter(c => c.data && Array.isArray(c.data));
+  assert.ok(auditCalls.length > 0, 'CRMFieldAudit.createMany should have been called');
+  const auditData = auditCalls[0].data;
+  assert.ok(auditData.some(a => a.fieldName === 'displayName' && a.entityType === 'Lead'));
+  assert.ok(auditData.some(a => a.fieldName === 'score' && a.entityType === 'Lead'));
+});
+
+test('updateLead does not create audit entries when no fields change', async () => {
+  reset();
+  // Update with same values
+  await service.updateLead(41, { displayName: 'Existing Lead', score: 10 }, 7);
+  const auditCalls = calls.create.filter(c => c.data && Array.isArray(c.data));
+  // Filter out leadStatusHistory calls (which have single object data, not array)
+  const fieldAuditCalls = auditCalls.filter(c => c.data.every?.(d => d.entityType === 'Lead'));
+  assert.equal(fieldAuditCalls.length, 0, 'No field audit entries should be created when values are unchanged');
+});
+
 test('changeLeadStatus permits a valid transition and rejects an invalid transition', async () => {
   reset();
-  const result = await service.changeLeadStatus(41, 'CONTACTED');
+  const result = await service.changeLeadStatus(41, 'CONTACTED', null, 7);
   assert.equal(result.status, 'CONTACTED');
   assert.equal(calls.update.length, 1);
   assert.equal(calls.update[0].data.status, 'CONTACTED');
@@ -144,7 +187,7 @@ test('changeLeadStatus permits a valid transition and rejects an invalid transit
   reset();
   currentLead.status = 'QUALIFIED';
   await assert.rejects(
-    () => service.changeLeadStatus(41, 'CONVERTED'),
+    () => service.changeLeadStatus(41, 'CONVERTED', null, 7),
     (error) => error.code === 'CRM_CONVERSION_REQUIRED' && error.status === 409,
   );
   assert.equal(calls.update.length, 0);

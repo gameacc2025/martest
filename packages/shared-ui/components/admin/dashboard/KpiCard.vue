@@ -75,14 +75,14 @@ function faNumber(value) {
   width: 3.5rem;
   height: 1.6rem;
   border-radius: 5px;
-  background: var(--tm-surface-sunk);
+  background: var(--ds-color-surface-alt);
   animation: kpi-pulse 1.2s ease-in-out infinite;
 }
 .kpi-card-destination {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--tm-blue);
+  color: var(--ds-color-primary);
   font-weight: 600;
 }
 .kpi-card { text-decoration: none; color: inherit; }

@@ -76,13 +76,13 @@ const arcs = computed(() => {
 }
 
 .donut-track {
-  stroke: var(--surface-200, var(--tm-line));
+  stroke: var(--ds-color-border);
 }
 
 .donut-total {
   font-size: 1.4rem;
   font-weight: 700;
-  fill: var(--text-color, var(--tm-ink));
+  fill: var(--ds-color-text);
 }
 
 .donut-legend {
@@ -110,7 +110,7 @@ const arcs = computed(() => {
 }
 
 .legend-label {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .legend-value {

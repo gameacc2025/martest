@@ -61,7 +61,7 @@ const arcs = computed(() => {
     <svg class="tm-donut" viewBox="0 0 100 100" role="img" :aria-label="accessibleLabel">
       <circle
         cx="50" cy="50" :r="RADIUS"
-        fill="none" stroke="var(--tm-surface-sunk)" :stroke-width="thickness"
+        fill="none" stroke="var(--ds-color-surface-alt)" :stroke-width="thickness"
       />
       <circle
         v-for="arc in arcs"
@@ -91,6 +91,6 @@ const arcs = computed(() => {
 
 <style scoped>
 .tm-donut-wrap { display: grid; place-items: center; width: 100%; }
-.tm-donut__value { font-size: 15px; font-weight: 700; fill: var(--tm-ink); font-family: var(--tm-font); }
-.tm-donut__label { font-size: 7px; fill: var(--tm-muted); font-family: var(--tm-font); }
+.tm-donut__value { font-size: 15px; font-weight: 700; fill: var(--ds-color-text); font-family: var(--tm-font); }
+.tm-donut__label { font-size: 7px; fill: var(--ds-color-text-muted); font-family: var(--tm-font); }
 </style>

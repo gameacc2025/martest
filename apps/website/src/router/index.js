@@ -33,6 +33,7 @@ const routes = [
       { path: "products", name: "products", component: ProductListing, meta: { title: "فروشگاه تجهیزات شبکه و مخابرات" } },
       { path: "magazine", name: "magazine", component: () => import("../pages/public/Magazine.vue"), meta: { title: "مجله و مقالات تخصصی" } },
       { path: "magazine/:slug", name: "mag-article", component: () => import("../pages/public/Magazine.vue"), meta: { title: "مقاله تخصصی" } },
+      { path: "magazine/preview/:token", name: "mag-preview", component: () => import("../pages/public/Magazine.vue"), meta: { title: "پیش‌نمایش مقاله" } },
       {
         path: "notifications",
         name: "notifications",

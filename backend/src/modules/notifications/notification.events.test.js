@@ -66,6 +66,14 @@ const EXPECTED_EVENT_KEYS = [
   'ORDER_ITEM_STATUS_CHANGED',
   'ORDER_UNANSWERED_REMINDER',
   'ADMIN_ANNOUNCEMENT',
+  // support ticketing (NTF-01)
+  'SUPPORT_TICKET_CREATED',
+  'SUPPORT_MESSAGE_RECEIVED',
+  'SUPPORT_TICKET_STATUS_CHANGED',
+  'SUPPORT_TICKET_ASSIGNED',
+  // SLA escalation and warnings
+  'SUPPORT_SLA_ESCALATED',
+  'SUPPORT_SLA_WARNING',
 ];
 
 test('catalog: every event promised by flow/06 §5 exists', () => {
@@ -87,6 +95,9 @@ test('catalog: keys are unique and match their entries', () => {
 });
 
 test('catalog: every event declares all three channels with boolean defaults', () => {
+  // Events that intentionally enable SMS by default for critical alerts
+  const smsEnabledEvents = new Set(['SUPPORT_SLA_ESCALATED']);
+
   for (const event of listEvents()) {
     assert.equal(typeof event.channels.IN_APP, 'boolean', `${event.key}.IN_APP`);
     assert.equal(typeof event.channels.EMAIL, 'boolean', `${event.key}.EMAIL`);
@@ -95,7 +106,8 @@ test('catalog: every event declares all three channels with boolean defaults', (
     // in-app + email on. SMS is opt-in by default.
     assert.equal(event.channels.IN_APP, true, `${event.key} defaults IN_APP on`);
     assert.equal(event.channels.EMAIL, true, `${event.key} defaults EMAIL on`);
-    assert.equal(event.channels.SMS, false, `${event.key} defaults SMS off`);
+    const expectedSms = smsEnabledEvents.has(event.key);
+    assert.equal(event.channels.SMS, expectedSms, `${event.key} defaults SMS ${expectedSms ? 'on' : 'off'}`);
   }
 });
 
@@ -122,6 +134,12 @@ test('catalog: templates produce { title, message, data } from context', () => {
     ORDER_ITEM_STATUS_CHANGED: { order: { id: 2 }, item: { id: 3, name: 'item' }, status: 'SHIPPED' },
     ORDER_UNANSWERED_REMINDER: { order: { id: 9 }, company: { id: 1 } },
     ADMIN_ANNOUNCEMENT: { title: 'اطلاعیه آزمایشی', message: 'متن اطلاعیه' },
+    SUPPORT_TICKET_CREATED: { ticket: { id: 1, ticketNumber: 'SUP-123', subject: 'Test ticket' } },
+    SUPPORT_MESSAGE_RECEIVED: { ticket: { id: 1, ticketNumber: 'SUP-123', subject: 'Test ticket' }, message: { id: 2 }, sender: { id: 3 } },
+    SUPPORT_TICKET_STATUS_CHANGED: { ticket: { id: 1, ticketNumber: 'SUP-123', subject: 'Test ticket' }, status: 'RESOLVED', previousStatus: 'OPEN' },
+    SUPPORT_TICKET_ASSIGNED: { ticket: { id: 1, ticketNumber: 'SUP-123', subject: 'Test ticket' }, assignee: { id: 3 }, queue: { id: 2 } },
+    SUPPORT_SLA_ESCALATED: { ticket: { id: 1, ticketNumber: 'SUP-123', subject: 'Test ticket', status: 'OPEN', priority: 'HIGH' }, escalationType: 'FIRST_RESPONSE_BREACHED', slaDetails: {} },
+    SUPPORT_SLA_WARNING: { ticket: { id: 1, ticketNumber: 'SUP-123', subject: 'Test ticket', status: 'OPEN', priority: 'HIGH' }, warningType: 'FIRST_RESPONSE_AT_RISK', slaInfo: {} },
   };
 
   for (const event of listEvents()) {

@@ -59,10 +59,10 @@ describe('Website visual system — latest owner-supplied prototype', () => {
     expect(inquiries).not.toContain('#01BEC2')
     expect(notifications).not.toContain('#087f7818')
     expect(notifications).not.toContain('background:#fff')
-    expect(notifications).toContain('var(--tm-cyan-soft)')
+    expect(notifications).toContain('var(--ds-color-primary-soft)')
     expect(productDetails).not.toContain('#0c8a6e')
     expect(productDetails).not.toContain('#a72727')
-    expect(productDetails).toContain('background: var(--tm-surface)')
+    expect(productDetails).toContain('background: var(--ds-card-bg)')
   })
 
   it('uses the network-transmission loader and animated cyan/violet fiber hero from the prototype', () => {

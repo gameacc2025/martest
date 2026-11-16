@@ -1,4 +1,9 @@
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
+const { dispatchNotification } = require('../notifications/notification.dispatch.service');
 
 const STATUSES = new Set(['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY', 'RESOLVED', 'CLOSED', 'SPAM']);
 const TRANSITIONS = {
@@ -73,6 +78,164 @@ function ticketInclude(staff, messages = false) {
 function ticketNumber() {
   return 'SUP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
 }
+
+// ─── Attachment constants ───
+const SUPPORT_UPLOAD_ROOT = path.join(process.cwd(), 'uploads', 'support');
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 MB
+const SUPPORTED_ATTACHMENT_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'text/plain',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+]);
+
+function sanitizeFilename(filename) {
+  const ext = path.extname(filename || '').toLowerCase();
+  const basename = path.basename(filename || 'file', ext).replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 60) || 'file';
+  return `${Date.now()}-${crypto.randomBytes(8).toString('hex')}-${basename}${ext}`;
+}
+
+function assertUploadedFile(file) {
+  if (!file) throw { statusCode: 400, code: 'FILE_REQUIRED', message: 'A file upload is required.' };
+}
+
+function assertFileType(file, allowedTypes, code) {
+  const ext = path.extname(file.filename || '').toLowerCase();
+  if (!allowedTypes.has(file.mimetype)) {
+    throw { statusCode: 400, code, message: `Unsupported file type: ${file.mimetype || ext}.` };
+  }
+}
+
+async function saveUploadedFile(file, folder, maxBytes) {
+  const uploadDir = path.join(SUPPORT_UPLOAD_ROOT, folder);
+  await fs.promises.mkdir(uploadDir, { recursive: true });
+
+  const filename = sanitizeFilename(file.filename);
+  const destination = path.join(uploadDir, filename);
+  let bytesWritten = 0;
+
+  file.file.on('data', (chunk) => {
+    bytesWritten += chunk.length;
+    if (bytesWritten > maxBytes) file.file.destroy(Object.assign(new Error('File too large'), { statusCode: 413 }));
+  });
+
+  try {
+    await pipeline(file.file, fs.createWriteStream(destination));
+  } catch (error) {
+    await fs.promises.rm(destination, { force: true }).catch(() => {});
+    throw { statusCode: error.statusCode || 413, code: 'FILE_TOO_LARGE', message: 'Uploaded file exceeds the allowed size.' };
+  }
+
+  // Compute checksum for integrity
+  const hash = crypto.createHash('sha256');
+  const buffer = await fs.promises.readFile(destination);
+  hash.update(buffer);
+  const checksum = hash.digest('hex');
+
+  return {
+    storageKey: `/support/${folder}/${filename}`,
+    url: destination,
+    bytes: bytesWritten,
+    checksum,
+  };
+}
+
+async function removeStoredFile(storageKey) {
+  if (!storageKey || !storageKey.startsWith('/support/')) return;
+  const relativePath = storageKey.replace(/^\/support\//, '');
+  const filePath = path.join(SUPPORT_UPLOAD_ROOT, relativePath);
+  await fs.promises.rm(filePath, { force: true }).catch(() => {});
+}
+// ─── SLA Calculation with Working Calendar ───
+
+// Default working calendar: Mon-Fri 09:00-18:00 (Iran time), no holidays
+const DEFAULT_WORKING_CALENDAR = {
+  timezone: 'Asia/Tehran',
+  workDays: [1, 2, 3, 4, 5], // Mon-Fri (1=Mon, 7=Sun)
+  workStartHour: 9,
+  workEndHour: 18,
+  holidays: [], // Array of 'YYYY-MM-DD' strings
+};
+
+function parseWorkingCalendar(calendarJson) {
+  if (!calendarJson) return DEFAULT_WORKING_CALENDAR;
+  try {
+    const cal = typeof calendarJson === 'string' ? JSON.parse(calendarJson) : calendarJson;
+    return {
+      timezone: cal.timezone || DEFAULT_WORKING_CALENDAR.timezone,
+      workDays: Array.isArray(cal.workDays) ? cal.workDays : DEFAULT_WORKING_CALENDAR.workDays,
+      workStartHour: Number.isInteger(cal.workStartHour) ? cal.workStartHour : DEFAULT_WORKING_CALENDAR.workStartHour,
+      workEndHour: Number.isInteger(cal.workEndHour) ? cal.workEndHour : DEFAULT_WORKING_CALENDAR.workEndHour,
+      holidays: Array.isArray(cal.holidays) ? cal.holidays : DEFAULT_WORKING_CALENDAR.holidays,
+    };
+  } catch {
+    return DEFAULT_WORKING_CALENDAR;
+  }
+}
+
+function isWorkingDay(date, calendar) {
+  const dayOfWeek = date.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat (local time)
+  const isWorkDay = calendar.workDays.includes(dayOfWeek === 0 ? 7 : dayOfWeek);
+  if (!isWorkDay) return false;
+  const dateStr = date.toISOString().split('T')[0];
+  return !calendar.holidays.includes(dateStr);
+}
+
+function addWorkingMinutes(startDate, minutes, calendar) {
+  let current = new Date(startDate);
+  let remainingMinutes = minutes;
+
+  while (remainingMinutes > 0) {
+    // If current time is before work start, move to work start
+    if (current.getHours() < calendar.workStartHour || (current.getHours() === calendar.workStartHour && current.getMinutes() === 0)) {
+      current.setHours(calendar.workStartHour, 0, 0, 0);
+    }
+
+    // If current time is after work end, move to next working day start
+    if (current.getHours() >= calendar.workEndHour) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(calendar.workStartHour, 0, 0, 0);
+      // Skip non-working days
+      while (!isWorkingDay(current, calendar)) {
+        current.setDate(current.getDate() + 1);
+      }
+      continue;
+    }
+
+    // If not a working day, move to next working day
+    if (!isWorkingDay(current, calendar)) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(calendar.workStartHour, 0, 0, 0);
+      continue;
+    }
+
+    // Calculate minutes until end of work day
+    const workEndMs = new Date(current).setHours(calendar.workEndHour, 0, 0, 0);
+    const availableMinutes = Math.floor((workEndMs - current.getTime()) / 60000);
+
+    if (remainingMinutes <= availableMinutes) {
+      current.setTime(current.getTime() + remainingMinutes * 60000);
+      remainingMinutes = 0;
+    } else {
+      remainingMinutes -= availableMinutes;
+      // Move to next working day start
+      current.setDate(current.getDate() + 1);
+      current.setHours(calendar.workStartHour, 0, 0, 0);
+      while (!isWorkingDay(current, calendar)) {
+        current.setDate(current.getDate() + 1);
+      }
+    }
+  }
+
+  return current;
+}
+
 async function getSla(prismaClient, categoryId, priority) {
   // Prefer the category-specific policy, then an explicit global policy.
   // If neither exists, fall back to an active policy for the same priority.
@@ -88,12 +251,135 @@ async function getSla(prismaClient, categoryId, priority) {
     where: { priority, isActive: true },
   });
   if (!policy) return {};
-  const now = Date.now();
+
+  const calendar = parseWorkingCalendar(policy.workingCalendar);
+  const now = new Date();
+
   return {
-    firstResponseDueAt: new Date(now + policy.firstResponseMinutes * 60_000),
-    resolveDueAt: new Date(now + policy.resolutionMinutes * 60_000),
+    firstResponseDueAt: addWorkingMinutes(now, policy.firstResponseMinutes, calendar),
+    resolveDueAt: addWorkingMinutes(now, policy.resolutionMinutes, calendar),
+    slaPolicyId: policy.id,
   };
 }
+
+// Calculate remaining SLA time in minutes (negative = overdue)
+function calculateSlaRemaining(dueAt) {
+  if (!dueAt) return null;
+  const now = new Date();
+  const diffMs = new Date(dueAt).getTime() - now.getTime();
+  return Math.floor(diffMs / 60000);
+}
+
+// Check if SLA is breached
+function isSlaBreached(dueAt) {
+  const remaining = calculateSlaRemaining(dueAt);
+  return remaining !== null && remaining < 0;
+}
+
+// Check if SLA is at risk (within 20% of deadline)
+function isSlaAtRisk(dueAt, totalMinutes) {
+  if (!dueAt || !totalMinutes) return false;
+  const remaining = calculateSlaRemaining(dueAt);
+  if (remaining === null) return false;
+  const threshold = Math.ceil(totalMinutes * 0.2);
+  return remaining <= threshold && remaining >= 0;
+}
+
+async function getSlaDetails(prismaClient, ticketId) {
+  const ticket = await prismaClient.supportTicket.findUnique({
+    where: { id: ticketId },
+    include: {
+      category: { include: { slaPolicies: { where: { isActive: true } } } },
+    },
+  });
+  if (!ticket) return null;
+
+  const policy = ticket.category?.slaPolicies?.find(p => p.priority === ticket.priority)
+    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: ticket.categoryId, priority: ticket.priority, isActive: true } })
+    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: null, priority: ticket.priority, isActive: true } })
+    || await prismaClient.supportSlaPolicy.findFirst({ where: { priority: ticket.priority, isActive: true } });
+
+  if (!policy) return null;
+
+  const calendar = parseWorkingCalendar(policy.workingCalendar);
+  const now = new Date();
+
+  const firstResponseDueAt = ticket.firstResponseDueAt || addWorkingMinutes(ticket.createdAt, policy.firstResponseMinutes, calendar);
+  const resolveDueAt = ticket.resolveDueAt || addWorkingMinutes(ticket.createdAt, policy.resolutionMinutes, calendar);
+
+  return {
+    policy: {
+      id: policy.id,
+      firstResponseMinutes: policy.firstResponseMinutes,
+      resolutionMinutes: policy.resolutionMinutes,
+    },
+    firstResponse: {
+      dueAt: firstResponseDueAt,
+      remainingMinutes: calculateSlaRemaining(firstResponseDueAt),
+      isBreached: isSlaBreached(firstResponseDueAt),
+      isAtRisk: isSlaAtRisk(firstResponseDueAt, policy.firstResponseMinutes),
+      respondedAt: ticket.firstRespondedAt,
+    },
+    resolution: {
+      dueAt: resolveDueAt,
+      remainingMinutes: calculateSlaRemaining(resolveDueAt),
+      isBreached: isSlaBreached(resolveDueAt),
+      isAtRisk: isSlaAtRisk(resolveDueAt, policy.resolutionMinutes),
+      resolvedAt: ticket.resolvedAt,
+    },
+  };
+}
+
+async function pauseSla(prismaClient, ticketId, userId, reason) {
+  // SLA pause is recorded as an event; actual pause logic handled by worker
+  return prismaClient.supportEvent.create({
+    data: {
+      ticketId,
+      actorUserId: userId,
+      eventType: 'SLA_PAUSED',
+      dedupeKey: `sla-paused:${ticketId}:${Date.now()}`,
+      payload: { reason: String(reason).slice(0, 500) },
+    },
+  });
+}
+
+async function resumeSla(prismaClient, ticketId, userId, reason) {
+  // SLA resume is recorded as an event; actual resume logic handled by worker
+  return prismaClient.supportEvent.create({
+    data: {
+      ticketId,
+      actorUserId: userId,
+      eventType: 'SLA_RESUMED',
+      dedupeKey: `sla-resumed:${ticketId}:${Date.now()}`,
+      payload: { reason: String(reason).slice(0, 500) },
+    },
+  });
+}
+
+module.exports = {
+  listCategories,
+  listQueues,
+  listTickets,
+  getTicket,
+  createTicket,
+  addMessage,
+  changeStatus,
+  assignTicket,
+  getSla,
+  getSlaDetails,
+  uploadAttachment,
+  downloadAttachment,
+  deleteAttachment,
+  // SLA utilities
+  parseWorkingCalendar,
+  addWorkingMinutes,
+  isWorkingDay,
+  calculateSlaRemaining,
+  isSlaBreached,
+  isSlaAtRisk,
+  pauseSla,
+  resumeSla,
+};
 
 async function listCategories() {
   return prisma.supportCategory.findMany({
@@ -185,6 +471,19 @@ async function createTicket(user, input) {
         payload: { createdFrom: createdFrom(ctx.accessType), categoryId },
       },
     });
+
+    // Notify ticket requester
+    await dispatchNotification('SUPPORT_TICKET_CREATED', [ctx.userId], { ticket }, {
+      tx,
+      dedupeKey: `ticket-created:${ticket.id}-requester`,
+    });
+
+    // Notify staff with tickets.read permission
+    await dispatchNotification('SUPPORT_TICKET_CREATED', { permission: 'tickets.read' }, { ticket }, {
+      tx,
+      dedupeKey: (uid) => `ticket-created:${ticket.id}-staff-${uid}`,
+    });
+
     return { ...ticket, messages: [message] };
   });
 }
@@ -222,6 +521,40 @@ async function addMessage(user, ticketId, input) {
         payload: { visibility },
       },
     });
+
+    // Notify ticket participants (requester + assignee) if message is public
+    if (visibility === 'PUBLIC') {
+      const recipientIds = [];
+      if (ticket.requesterUserId && ticket.requesterUserId !== ctx.userId) {
+        recipientIds.push(ticket.requesterUserId);
+      }
+      if (ticket.assignedUserId && ticket.assignedUserId !== ctx.userId) {
+        recipientIds.push(ticket.assignedUserId);
+      }
+      // Also notify queue members if assigned queue
+      if (ticket.assignedQueueId) {
+        const queueMembers = await tx.user.findMany({
+          where: {
+            accessProfile: { type: 'STAFF', isActive: true },
+            status: 'ACTIVE',
+          },
+          select: { id: true },
+        });
+        for (const member of queueMembers) {
+          if (!recipientIds.includes(member.id) && member.id !== ctx.userId) {
+            recipientIds.push(member.id);
+          }
+        }
+      }
+
+      if (recipientIds.length > 0) {
+        await dispatchNotification('SUPPORT_MESSAGE_RECEIVED', recipientIds, { ticket, message, sender: user }, {
+          tx,
+          dedupeKey: (uid) => `ticket-message:${id}:${message.id}-${uid}`,
+        });
+      }
+    }
+
     return message;
   });
 }
@@ -250,6 +583,38 @@ async function changeStatus(user, ticketId, next, reason) {
     await tx.supportEvent.create({
       data: { ticketId: id, actorUserId: ctx.userId, eventType: 'STATUS_CHANGED', payload: { previous: current.status, next } },
     });
+
+    // Notify ticket participants (requester + assignee) of status change
+    const recipientIds = [];
+    if (current.requesterUserId) {
+      recipientIds.push(current.requesterUserId);
+    }
+    if (current.assignedUserId && current.assignedUserId !== current.requesterUserId) {
+      recipientIds.push(current.assignedUserId);
+    }
+    // Also notify queue members
+    if (current.assignedQueueId) {
+      const queueMembers = await tx.user.findMany({
+        where: {
+          accessProfile: { type: 'STAFF', isActive: true },
+          status: 'ACTIVE',
+        },
+        select: { id: true },
+      });
+      for (const member of queueMembers) {
+        if (!recipientIds.includes(member.id)) {
+          recipientIds.push(member.id);
+        }
+      }
+    }
+
+    if (recipientIds.length > 0) {
+      await dispatchNotification('SUPPORT_TICKET_STATUS_CHANGED', recipientIds, { ticket: current, status: next, previousStatus: current.status }, {
+        tx,
+        dedupeKey: (uid) => `ticket-status:${id}:${next}-${uid}`,
+      });
+    }
+
     return updated;
   });
 }
@@ -281,8 +646,295 @@ async function assignTicket(user, ticketId, input) {
     await tx.supportEvent.create({
       data: { ticketId: id, actorUserId: ctx.userId, eventType: 'TICKET_ASSIGNED', payload: { queueId, assigneeId } },
     });
+
+    // Notify assignee
+    if (assigneeId) {
+      await dispatchNotification('SUPPORT_TICKET_ASSIGNED', [assigneeId], { ticket, assignee: { id: assigneeId }, queue: { id: queueId } }, {
+        tx,
+        dedupeKey: `ticket-assigned:${id}:${assigneeId}`,
+      });
+    }
+
+    // Notify requester
+    if (ticket.requesterUserId && ticket.requesterUserId !== assigneeId) {
+      await dispatchNotification('SUPPORT_TICKET_ASSIGNED', [ticket.requesterUserId], { ticket, assignee: { id: assigneeId }, queue: { id: queueId } }, {
+        tx,
+        dedupeKey: `ticket-assigned:${id}:requester-${ticket.requesterUserId}`,
+      });
+    }
+
     return updated;
   });
 }
 
-module.exports = { listCategories, listQueues, listTickets, getTicket, createTicket, addMessage, changeStatus, assignTicket, getSla };
+// ─── Attachment functions ───
+async function uploadAttachment(user, ticketId, messageId, file) {
+  const ctx = context(user);
+  const ticket = await prisma.supportTicket.findFirst({
+    where: { id: toId(ticketId), ...scopeWhere(ctx) },
+    select: { id: true, requesterUserId: true, requesterCompanyId: true, assignedUserId: true },
+  });
+  if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
+
+  // Verify message exists and belongs to this ticket
+  const message = await prisma.supportMessage.findFirst({
+    where: { id: toId(messageId), ticketId: ticket.id },
+    select: { id: true, senderUserId: true, visibility: true },
+  });
+  if (!message) fail(404, 'SUPPORT_MESSAGE_NOT_FOUND', 'پیام پیدا نشد.');
+
+  // Permission check: users can only attach to their own messages, STAFF can attach to any
+  const isOwnMessage = message.senderUserId === ctx.userId;
+  const isStaff = ctx.accessType === 'STAFF';
+  if (!isOwnMessage && !isStaff) fail(403, 'SUPPORT_ATTACHMENT_FORBIDDEN', 'شما نمی‌توانید به پیام دیگران فایل پیوست کنید.');
+
+  // For internal messages, only STAFF can attach
+  if (message.visibility === 'INTERNAL' && !isStaff) fail(403, 'SUPPORT_ATTACHMENT_FORBIDDEN', 'پیوست به یادداشت داخلی فقط برای کارکنان مجاز است.');
+
+  assertUploadedFile(file);
+  assertFileType(file, SUPPORTED_ATTACHMENT_TYPES, 'SUPPORT_INVALID_FILE_TYPE');
+
+  const stored = await saveUploadedFile(file, 'attachments', MAX_ATTACHMENT_BYTES);
+
+  return prisma.$transaction(async (tx) => {
+    const attachment = await tx.supportAttachment.create({
+      data: {
+        messageId: message.id,
+        uploadedByUserId: ctx.userId,
+        storageKey: stored.storageKey,
+        originalName: file.filename,
+        mimeType: file.mimetype,
+        sizeBytes: stored.bytes,
+        checksum: stored.checksum,
+        status: 'AVAILABLE',
+      },
+    });
+
+    // Notify ticket participants if message is public
+    if (message.visibility === 'PUBLIC') {
+      const recipientIds = [];
+      if (ticket.requesterUserId && ticket.requesterUserId !== ctx.userId) {
+        recipientIds.push(ticket.requesterUserId);
+      }
+      if (ticket.assignedUserId && ticket.assignedUserId !== ctx.userId) {
+        recipientIds.push(ticket.assignedUserId);
+      }
+      if (recipientIds.length > 0) {
+        await dispatchNotification('SUPPORT_MESSAGE_RECEIVED', recipientIds, {
+          ticket,
+          message: { ...message, attachments: [attachment] },
+          sender: user,
+        }, { tx, dedupeKey: (uid) => `ticket-message:${ticket.id}:${message.id}-${uid}` });
+      }
+    }
+
+    return attachment;
+  });
+}
+
+async function downloadAttachment(user, ticketId, attachmentId) {
+  const ctx = context(user);
+  const ticket = await prisma.supportTicket.findFirst({
+    where: { id: toId(ticketId), ...scopeWhere(ctx) },
+    select: { id: true, requesterUserId: true, requesterCompanyId: true, assignedUserId: true },
+  });
+  if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
+
+  const attachment = await prisma.supportAttachment.findFirst({
+    where: { id: toId(attachmentId), message: { ticketId: ticket.id } },
+    include: { message: { select: { visibility: true } } },
+  });
+  if (!attachment) fail(404, 'SUPPORT_ATTACHMENT_NOT_FOUND', 'پیوست پیدا نشد.');
+
+  // Check authorization: internal attachments only for STAFF
+  if (attachment.message.visibility === 'INTERNAL' && ctx.accessType !== 'STAFF') {
+    fail(403, 'SUPPORT_ATTACHMENT_FORBIDDEN', 'دسترسی به این پیوست مجاز نیست.');
+  }
+
+  // Only allow download of AVAILABLE attachments
+  if (attachment.status !== 'AVAILABLE') {
+    fail(404, 'SUPPORT_ATTACHMENT_NOT_FOUND', 'پیوست برای دانلود موجود نیست.');
+  }
+
+  const filePath = path.join(SUPPORT_UPLOAD_ROOT, attachment.storageKey.replace(/^\/support\//, ''));
+  const exists = await fs.promises.access(filePath).then(() => true).catch(() => false);
+  if (!exists) {
+    fail(404, 'SUPPORT_ATTACHMENT_NOT_FOUND', 'فایل پیوست در سرور یافت نشد.');
+  }
+
+  return {
+    filePath,
+    originalName: attachment.originalName,
+    mimeType: attachment.mimeType,
+    sizeBytes: attachment.sizeBytes,
+  };
+}
+
+async function deleteAttachment(user, ticketId, attachmentId) {
+  const ctx = context(user);
+  const ticket = await prisma.supportTicket.findFirst({
+    where: { id: toId(ticketId), ...scopeWhere(ctx) },
+    select: { id: true },
+  });
+  if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
+
+  const attachment = await prisma.supportAttachment.findFirst({
+    where: { id: toId(attachmentId), message: { ticketId: ticket.id } },
+    include: { message: { select: { senderUserId: true, visibility: true } } },
+  });
+  if (!attachment) fail(404, 'SUPPORT_ATTACHMENT_NOT_FOUND', 'پیوست پیدا نشد.');
+
+  // Permission check: only uploader or STAFF can delete
+  const isUploader = attachment.uploadedByUserId === ctx.userId;
+  const isStaff = ctx.accessType === 'STAFF';
+  if (!isUploader && !isStaff) fail(403, 'SUPPORT_ATTACHMENT_FORBIDDEN', 'شما نمی‌توانید این پیوست را حذف کنید.');
+
+  await prisma.$transaction(async (tx) => {
+    await tx.supportAttachment.delete({ where: { id: attachment.id } });
+    await removeStoredFile(attachment.storageKey);
+  });
+
+  return { success: true };
+}
+
+// ─── Queue-level Authorization & Visibility ───
+
+async function listTicketsByQueue(user, queueId, query = {}) {
+  const ctx = context(user);
+  if (ctx.accessType !== 'STAFF') fail(403, 'SUPPORT_STAFF_ONLY', 'فقط کارکنان می‌توانند تیکت‌های صف را ببینند.');
+
+  // Verify queue exists and is active
+  const queue = await prisma.supportQueue.findFirst({ where: { id: queueId, isActive: true }, select: { id: true } });
+  if (!queue) fail(404, 'SUPPORT_QUEUE_NOT_FOUND', 'صف پیدا نشد.');
+
+  const where = { assignedQueueId: queueId };
+  if (query.status) {
+    if (!STATUSES.has(query.status)) fail(400, 'SUPPORT_STATUS_INVALID', 'وضعیت انتخاب‌شده معتبر نیست.');
+    where.status = query.status;
+  }
+  const page = Math.max(1, Number(query.page) || 1);
+  const limit = Math.min(100, Math.max(1, Number(query.limit) || 25));
+  const [rows, total] = await Promise.all([
+    prisma.supportTicket.findMany({
+      where,
+      include: { ...ticketInclude(true), _count: { select: { messages: true } } },
+      orderBy: [{ lastActivityAt: 'desc' }, { id: 'desc' }],
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.supportTicket.count({ where }),
+  ]);
+  return { data: rows, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+}
+
+async function getQueueStats(user, queueId) {
+  const ctx = context(user);
+  if (ctx.accessType !== 'STAFF') fail(403, 'SUPPORT_STAFF_ONLY', 'فقط کارکنان می‌توانند آمار صف را ببینند.');
+
+  const queue = await prisma.supportQueue.findFirst({ where: { id: queueId, isActive: true }, select: { id: true, name: true } });
+  if (!queue) fail(404, 'SUPPORT_QUEUE_NOT_FOUND', 'صف پیدا نشد.');
+
+  const [
+    total,
+    open,
+    inProgress,
+    waitingCustomer,
+    waitingCompany,
+    resolved,
+    closed,
+    spam,
+    highPriority,
+    urgentPriority,
+    slaBreached,
+    slaAtRisk,
+    unassigned,
+  ] = await Promise.all([
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, status: 'OPEN' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, status: 'IN_PROGRESS' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, status: 'WAITING_CUSTOMER' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, status: 'WAITING_COMPANY' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, status: 'RESOLVED' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, status: 'CLOSED' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, status: 'SPAM' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, priority: 'HIGH' } }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, priority: 'URGENT' } }),
+    prisma.supportTicket.count({
+      where: {
+        assignedQueueId: queueId,
+        status: { in: ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY'] },
+        OR: [
+          { firstResponseDueAt: { lt: new Date() }, firstRespondedAt: null },
+          { resolveDueAt: { lt: new Date() }, resolvedAt: null, closedAt: null },
+        ],
+      },
+    }),
+    prisma.supportTicket.count({
+      where: {
+        assignedQueueId: queueId,
+        status: { in: ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY'] },
+        OR: [
+          { firstResponseDueAt: { lte: new Date(Date.now() + 2 * 60 * 60 * 1000) }, firstRespondedAt: null },
+          { resolveDueAt: { lte: new Date(Date.now() + 2 * 60 * 60 * 1000) }, resolvedAt: null, closedAt: null },
+        ],
+      },
+    }),
+    prisma.supportTicket.count({ where: { assignedQueueId: queueId, assignedUserId: null } }),
+  ]);
+
+  return {
+    queue: { id: queue.id, name: queue.name },
+    totals: {
+      total,
+      byStatus: { open, inProgress, waitingCustomer, waitingCompany, resolved, closed, spam },
+      byPriority: { high: highPriority, urgent: urgentPriority },
+      sla: { breached: slaBreached, atRisk: slaAtRisk },
+      unassigned,
+    },
+  };
+}
+
+async function getQueueAssignments(queueId) {
+  const queue = await prisma.supportQueue.findFirst({ where: { id: queueId, isActive: true }, select: { id: true } });
+  if (!queue) fail(404, 'SUPPORT_QUEUE_NOT_FOUND', 'صف پیدا نشد.');
+
+  const assignments = await prisma.supportAssignment.findMany({
+    where: { queueId, endedAt: null },
+    include: {
+      assignee: { select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } } },
+      assignedBy: { select: { id: true, email: true } },
+    },
+    orderBy: { assignedAt: 'desc' },
+  });
+
+  return assignments;
+}
+
+module.exports = {
+  listCategories,
+  listQueues,
+  listTickets,
+  getTicket,
+  createTicket,
+  addMessage,
+  changeStatus,
+  assignTicket,
+  getSla,
+  getSlaDetails,
+  uploadAttachment,
+  downloadAttachment,
+  deleteAttachment,
+  // Queue-level
+  listTicketsByQueue,
+  getQueueStats,
+  getQueueAssignments,
+  // SLA utilities
+  parseWorkingCalendar,
+  addWorkingMinutes,
+  isWorkingDay,
+  calculateSlaRemaining,
+  isSlaBreached,
+  isSlaAtRisk,
+  pauseSla,
+  resumeSla,
+};

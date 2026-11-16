@@ -95,6 +95,9 @@ export const endpoints = {
     delete: (id) => `/cms/articles/manage/${id}`,
     listRevisions: (id) => `/cms/articles/manage/${id}/revisions`,
     getRevision: (id, revisionNo) => `/cms/articles/manage/${id}/revisions/${revisionNo}`,
+    restoreRevision: (id, revisionNo) => `/cms/articles/manage/${id}/revisions/${revisionNo}/restore`,
+    previewToken: (id) => `/cms/articles/manage/${id}/preview-token`,
+    getByPreviewToken: (token) => `/cms/articles/preview/${token}`,
   },
   // CMS - Categories
   cmsCategories: {
@@ -135,6 +138,11 @@ export const endpoints = {
     update: (id) => `/cms/pages/manage/${id}`,
     upsert: (slug) => `/cms/pages/manage/slug/${slug}`,
     delete: (id) => `/cms/pages/manage/${id}`,
+  },
+  // CMS - Sitemap
+  cmsSitemap: {
+    get: '/cms/sitemap/sitemap.xml',
+    getRoot: '/cms/sitemap',
   },
   // Products
   products: {
@@ -270,6 +278,16 @@ export const endpoints = {
     tickets: '/support/tickets', ticket: (id) => `/support/tickets/${id}`,
     messages: (id) => `/support/tickets/${id}/messages`, status: (id) => `/support/tickets/${id}/status`,
     assign: (id) => `/support/tickets/${id}/assign`, queues: '/support/queues',
+    // Attachments
+    attachments: (id, messageId) => `/support/tickets/${id}/messages/${messageId}/attachments`,
+    attachmentDownload: (id, messageId, attachmentId) => `/support/tickets/${id}/messages/${messageId}/attachments/${attachmentId}/download`,
+    // SLA
+    sla: (id) => `/support/tickets/${id}/sla`,
+    slaPause: (id) => `/support/tickets/${id}/sla/pause`,
+    slaResume: (id) => `/support/tickets/${id}/sla/resume`,
+    // Queue-level (STAFF only)
+    queueTickets: (queueId) => `/support/queues/${queueId}/tickets`,
+    queueStats: (queueId) => `/support/queues/${queueId}/stats`,
   },
   crm: {
     dashboard: '/crm/dashboard',

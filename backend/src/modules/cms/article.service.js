@@ -325,6 +325,78 @@ async function getRevision(articleId, revisionNo) {
   });
 }
 
+async function restoreRevision(articleId, revisionNo, editorUserId) {
+  const revision = await getRevision(articleId, revisionNo);
+  if (!revision) throw new AppError('نسخه درخواستی یافت نشد.', 404, true, 'REVISION_NOT_FOUND');
+
+  const existing = await getAdminById(articleId);
+
+  // Extract fields from snapshot that we want to restore
+  const snapshot = revision.snapshot;
+  const allowedFields = [
+    'title', 'excerpt', 'content', 'contentFormat', 'type', 'status',
+    'coverImageKey', 'metaTitle', 'metaDescription', 'canonicalUrl', 'isIndexable',
+    'scheduledAt',
+  ];
+
+  const updateData = {};
+  for (const field of allowedFields) {
+    if (snapshot[field] !== undefined) {
+      if (field === 'scheduledAt') {
+        updateData[field] = snapshot[field] ? new Date(snapshot[field]) : null;
+      } else if (typeof snapshot[field] === 'string') {
+        updateData[field] = snapshot[field].trim() || null;
+      } else {
+        updateData[field] = snapshot[field];
+      }
+    }
+  }
+
+  // If the restored snapshot has a different title, regenerate slug
+  if (snapshot.title && snapshot.title !== existing.title) {
+    updateData.slug = await generateUniqueSlug(slugify(snapshot.title), articleId);
+  }
+
+  // Handle status transitions
+  if (snapshot.status === 'PUBLISHED' && existing.status !== 'PUBLISHED') {
+    updateData.publishedAt = new Date();
+    updateData.publishedByUserId = editorUserId;
+  }
+  if (snapshot.status === 'SCHEDULED' && snapshot.scheduledAt) {
+    const scheduledAt = new Date(snapshot.scheduledAt);
+    if (scheduledAt <= new Date()) {
+      updateData.status = 'PUBLISHED';
+      updateData.publishedAt = new Date();
+      updateData.publishedByUserId = editorUserId;
+    }
+  }
+
+  // Restore categories and tags from snapshot
+  if (snapshot.categories) {
+    await prisma.articleCategoryAssignment.deleteMany({ where: { articleId } });
+    if (snapshot.categories.length > 0) {
+      updateData.categories = { create: snapshot.categories.map((c, i) => ({ categoryId: c.categoryId || c.category?.id || c.id, sortOrder: c.sortOrder ?? i })) };
+    }
+  }
+  if (snapshot.tags) {
+    await prisma.articleTagAssignment.deleteMany({ where: { articleId } });
+    if (snapshot.tags.length > 0) {
+      updateData.tags = { create: snapshot.tags.map(t => ({ tagId: t.tagId || t.tag?.id || t.id })) };
+    }
+  }
+
+  const article = await prisma.article.update({
+    where: { id: articleId },
+    data: updateData,
+    select: articleSelectAdmin(),
+  });
+
+  const nextRevisionNo = await prisma.articleRevision.count({ where: { articleId } }) + 1;
+  await createRevision(articleId, editorUserId, nextRevisionNo, article, `بازگردانی به نسخه ${revisionNo}: ${revision.changeNote || ''}`);
+
+  return article;
+}
+
 module.exports = {
   listPublic,
   getPublicBySlug,
@@ -337,6 +409,7 @@ module.exports = {
   deleteArticle,
   listRevisions,
   getRevision,
+  restoreRevision,
   slugify,
   generateUniqueSlug,
 };

@@ -477,7 +477,7 @@ export default { tableColumns }
 }
 
 .text-muted {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .detail-content {
@@ -489,8 +489,8 @@ export default { tableColumns }
 .detail-section h4 {
   margin: 0 0 0.75rem;
   font-size: 0.9rem;
-  color: var(--primary-color);
-  border-bottom: 1px solid var(--surface-border);
+  color: var(--ds-color-primary);
+  border-bottom: 1px solid var(--ds-color-border);
   padding-bottom: 0.35rem;
 }
 
@@ -510,7 +510,7 @@ export default { tableColumns }
 }
 
 .detail-row span {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.8rem;
   font-weight: 600;
 }

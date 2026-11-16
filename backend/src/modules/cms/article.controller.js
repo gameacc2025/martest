@@ -1,4 +1,5 @@
 const service = require('./article.service');
+const previewService = require('./preview.service');
 const { success } = require('../../utils/success');
 
 async function listPublic(request, reply) {
@@ -63,6 +64,28 @@ async function getRevision(request, reply) {
   return reply.send(success(await service.getRevision(Number(request.params.id), Number(request.params.revisionNo))));
 }
 
+async function restoreRevision(request, reply) {
+  return reply.send(success(await service.restoreRevision(Number(request.params.id), Number(request.params.revisionNo), request.user.id)));
+}
+
+async function generatePreviewToken(request, reply) {
+  const articleId = Number(request.params.id);
+  // Verify article exists and user has access
+  await service.getAdminById(articleId);
+  const { token, expiresAt } = await previewService.generatePreviewToken(articleId, request.user.id);
+  return reply.send(success({ token, expiresAt }));
+}
+
+async function getByPreviewToken(request, reply) {
+  const { token } = request.params;
+  const article = await previewService.validatePreviewToken(token);
+  if (!article) {
+    return reply.code(404).send(success({ message: 'پیش‌نمایش نامعتبر یا منقضی شده است.' }));
+  }
+  // Return full article data (including draft content)
+  return reply.send(success(article));
+}
+
 module.exports = {
   listPublic,
   getPublicBySlug,
@@ -75,4 +98,7 @@ module.exports = {
   deleteArticle,
   listRevisions,
   getRevision,
+  restoreRevision,
+  generatePreviewToken,
+  getByPreviewToken,
 };

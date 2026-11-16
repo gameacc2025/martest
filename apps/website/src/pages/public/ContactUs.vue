@@ -266,7 +266,7 @@ async function handleSubmit() {
   font-weight: 700;
   font-size: 1.1rem;
 }
-.card-title-row i { color: var(--tm-cyan-deep); }
+.card-title-row i { color: var(--ds-brand-primary-active); }
 .form-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -296,23 +296,23 @@ async function handleSubmit() {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 0.5rem;
-  background: var(--tm-cyan-soft);
+  background: var(--ds-color-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.info-icon i { font-size: 1.1rem; color: var(--tm-ink); }
+.info-icon i { font-size: 1.1rem; color: var(--ds-text-primary); }
 .info-card-inner h4 {
   margin: 0 0 0.25rem;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--text-color);
+  color: var(--ds-text-primary);
 }
 .info-card-inner p {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-text-secondary);
   line-height: 1.6;
 }
 
@@ -323,8 +323,8 @@ async function handleSubmit() {
   justify-content: space-between;
   font-size: 0.8rem;
 }
-.hour-value { font-weight: 600; color: var(--text-color); }
-.hour-closed { color: var(--p-red-500); font-weight: 600; }
+.hour-value { font-weight: 600; color: var(--ds-text-primary); }
+.hour-closed { color: var(--ds-color-danger); font-weight: 600; }
 
 /* Social */
 .social-icons { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
@@ -332,17 +332,17 @@ async function handleSubmit() {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: var(--tm-cyan-soft);
+  background: var(--ds-color-primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--tm-ink);
+  color: var(--ds-text-primary);
   text-decoration: none;
   transition: background-color var(--ds-transition-fast), color var(--ds-transition-fast), border-color var(--ds-transition-fast);
 }
 .social-link:hover {
-  background: var(--tm-ink);
-  color: #fff;
+  background: var(--ds-text-primary);
+  color: var(--ds-card-bg);
 }
 
 /* Map */

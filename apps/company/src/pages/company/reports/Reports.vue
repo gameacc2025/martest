@@ -255,25 +255,25 @@ function exportInquiriesCSV() {
 .reports-page .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 
 .reports-page :deep(.p-tabs),
-.reports-page :deep(.p-tablist) { border-color: var(--tm-line); }
+.reports-page :deep(.p-tablist) { border-color: var(--ds-color-border); }
 
 .reports-page :deep(.p-tabpanels) { background: transparent; padding-inline: 0; }
 
 .reports-page :deep(.p-tablist) {
   padding: .35rem;
-  border: 1px solid var(--tm-line);
-  border-radius: var(--tm-radius-lg);
-  background: var(--tm-surface);
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
 }
 
 .reports-page :deep(.p-tab) {
-  border-radius: var(--tm-radius);
+  border-radius: var(--ds-radius-md);
   font-weight: 600;
 }
 
 .reports-page :deep(.p-tab[aria-selected="true"]) {
-  background: var(--tm-blue-soft);
-  color: var(--tm-blue);
+  background: var(--ds-color-primary-soft);
+  color: var(--ds-brand-primary);
 }
 
 .reports-page :deep(.p-tabpanels) { padding-top: 16px; }
@@ -286,16 +286,16 @@ function exportInquiriesCSV() {
   justify-content: center;
   gap: .65rem;
   padding: 20px;
-  border: 1px dashed var(--tm-line);
-  border-radius: var(--tm-radius-lg);
-  background: var(--tm-surface);
-  color: var(--tm-muted);
+  border: 1px dashed var(--ds-color-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-color-surface);
+  color: var(--ds-color-text-muted);
   text-align: center;
 }
 
-.reports-error-state > i { color: var(--tm-red); font-size: 2rem; }
+.reports-error-state > i { color: var(--ds-status-danger-fg); font-size: 2rem; }
 
-.reports-error-state h3 { margin: 0; color: var(--tm-ink); }
+.reports-error-state h3 { margin: 0; color: var(--ds-color-text); }
 
 .reports-error-state p { margin: 0; max-width: 32rem; }
 

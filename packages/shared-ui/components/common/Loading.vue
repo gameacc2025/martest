@@ -73,8 +73,8 @@ const loaderWidth = computed(() => ({ sm: '250px', md: '360px', lg: '440px' })[p
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--ds-color-brand-deep, #0A1625);
-  color: #FFFFFF;
+  background: var(--ds-color-brand-deep);
+  color: var(--ds-color-on-brand);
 }
 .app-loading-content {
   display: flex;

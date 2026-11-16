@@ -57,6 +57,10 @@ async function buildApp() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
+  // ── Correlation ID (must be before auth and routes) ───────────
+  // Attaches x-correlation-id to request/reply for tracing and audit logs
+  await app.register(require('./middlewares/correlationId'));
+
   // ── Security headers (helmet) ──────────────────────────────────
   // Sets CSP, HSTS, X-Frame-Options, X-Content-Type-Options, etc.
   // crossOriginResourcePolicy is relaxed to "cross-origin" so that
@@ -142,6 +146,7 @@ async function buildApp() {
   await app.register(require('./modules/companies/company.routes'), { prefix: '/api/v1/companies' });
   await app.register(require('./modules/categories/category.routes'), { prefix: '/api/v1/categories' });
   await app.register(require('./modules/products/product.routes'), { prefix: '/api/v1/products' });
+  await app.register(require('./modules/inventory/inventory.routes'), { prefix: '/api/v1/inventory' });
   await app.register(require('./modules/specification-library/specification-library.routes'), { prefix: '/api/v1/specification-library' });
   await app.register(require('./modules/inquiries/inquiry.routes'), { prefix: '/api/v1/inquiries' });
   await app.register(require('./modules/notifications/notification.routes'), { prefix: '/api/v1/settings/notifications' });

@@ -39,6 +39,7 @@ const { seedCms } = require('./seeds/cms');
 const { seedAuthAuditDemo } = require('./seeds/auth-audit');
 const seedCrm = require('./seeds/crm');
 const { seedSupport } = require('./seeds/support');
+const seedRetail = require('./seeds/retail');
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL, max: 5, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30000 }) });
 
@@ -592,6 +593,10 @@ async function main() {
   // ── 15. Support foundation (queues, categories and SLA policies) ──
   const supportSeed = await seedSupport(prisma);
   console.log(`  ✓ Support categories: ${supportSeed.categories}, queues: ${supportSeed.queues}, SLA policies: ${supportSeed.policies}`);
+
+  // ── 16. Retail inventory demo data (inventory balance, movements, reservations) ──
+  const retailSeed = await seedRetail(prisma);
+  if (!retailSeed.skipped) console.log(`  ✓ Retail balances: ${retailSeed.balancesCreated + retailSeed.balancesUpdated}, movements: ${retailSeed.movementsCreated}, reservations: ${retailSeed.reservationsCreated}`);
 
   // ── Summary ─────────────────────────────────────────────────
   console.log('\n─────────────────────────────────────────');

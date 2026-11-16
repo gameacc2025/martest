@@ -15,6 +15,7 @@ const canCreate = computed(() => can('cms.articles.create'))
 const canUpdate = computed(() => can('cms.articles.update'))
 const canDelete = computed(() => can('cms.articles.delete'))
 const canUpload = computed(() => can('media.upload'))
+const canPreview = computed(() => can('cms.articles.read'))
 
 const items = ref([])
 const loading = ref(false)
@@ -286,6 +287,20 @@ async function archiveArticle(item) {
   }
 }
 
+async function previewArticle(item) {
+  try {
+    const res = await cmsArticlesApi.generatePreviewToken(item.id)
+    const token = res.data?.data?.token || res.data?.token
+    if (!token) throw new Error('توکن پیش‌نمایش دریافت نشد')
+    // Open preview in new tab
+    const previewUrl = `${window.location.origin}/magazine/preview/${token}`
+    window.open(previewUrl, '_blank', 'noopener,noreferrer')
+    toast.add({ severity: 'success', summary: 'پیش‌نمایش باز شد', detail: 'پیش‌نمایش مقاله در تب جدید باز شد', life: 2500 })
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'خطا', detail: error?.message || 'ایجاد پیش‌نمایش ناموفق بود', life: 3500 })
+  }
+}
+
 onMounted(async () => {
   await Promise.all([fetchCategories(), fetchTags()])
   load()
@@ -349,9 +364,10 @@ onMounted(async () => {
         <Column header="انتشار" style="width: 160px">
           <template #body="{ data }"><small v-if="data.publishedAt">{{ formatDate(data.publishedAt) }}</small><span v-else-if="data.scheduledAt">{{ formatDate(data.scheduledAt) }} (زمان‌بندی)</span><span v-else>—</span></template>
         </Column>
-        <Column header="عملیات" style="width: 150px">
+        <Column header="عملیات" style="width: 180px">
           <template #body="{ data }">
             <Button v-if="canUpdate" icon="pi pi-pencil" text rounded aria-label="ویرایش مقاله" @click="edit(data)" />
+            <Button v-if="canPreview && (data.status === 'DRAFT' || data.status === 'IN_REVIEW' || data.status === 'SCHEDULED')" icon="pi pi-eye" text rounded severity="info" aria-label="پیش‌نمایش مقاله" @click="previewArticle(data)" />
             <Button v-if="canDelete && data.status !== 'PUBLISHED'" icon="pi pi-trash" text rounded severity="danger" aria-label="حذف مقاله" @click="deleteArticle(data)" />
             <Button v-if="canUpdate && data.status === 'PUBLISHED'" icon="pi pi-archive" text rounded severity="warn" aria-label="بایگانی مقاله" @click="archiveArticle(data)" />
           </template>

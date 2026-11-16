@@ -251,6 +251,9 @@ export const cmsArticlesApi = {
   delete: (id) => api.delete(endpoints.cmsArticles.delete(id)),
   listRevisions: (id) => api.get(endpoints.cmsArticles.listRevisions(id)),
   getRevision: (id, revisionNo) => api.get(endpoints.cmsArticles.getRevision(id, revisionNo)),
+  restoreRevision: (id, revisionNo) => api.post(endpoints.cmsArticles.restoreRevision(id, revisionNo)),
+  generatePreviewToken: (id) => api.post(endpoints.cmsArticles.previewToken(id)),
+  getByPreviewToken: (token) => api.get(endpoints.cmsArticles.getByPreviewToken(token)),
 }
 
 // CMS Categories API
@@ -297,6 +300,12 @@ export const cmsPagesApi = {
   delete: (id) => api.delete(endpoints.cmsPages.delete(id)),
 }
 
+// CMS Sitemap API
+export const cmsSitemapApi = {
+  get: () => api.get(endpoints.cmsSitemap.get),
+  getRoot: () => api.get(endpoints.cmsSitemap.getRoot),
+}
+
 // Auth Challenges API
 export const authChallengesApi = {
   request: (data) => api.post(endpoints.auth.challenges.request, data),
@@ -324,6 +333,19 @@ export const supportApi = {
   changeStatus: (id, data) => api.patch(endpoints.support.status(id), data),
   assignTicket: (id, data) => api.post(endpoints.support.assign(id), data),
   listQueues: () => api.get(endpoints.support.queues),
+  // Attachments
+  uploadAttachment: (id, messageId, formData) => api.post(endpoints.support.attachments(id, messageId), formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  downloadAttachment: (id, messageId, attachmentId) => api.get(endpoints.support.attachmentDownload(id, messageId, attachmentId), { responseType: 'blob' }),
+  deleteAttachment: (id, messageId, attachmentId) => api.delete(endpoints.support.attachmentDownload(id, messageId, attachmentId).replace('/download', '')),
+  // SLA
+  getSlaDetails: (id) => api.get(endpoints.support.sla(id)),
+  pauseSla: (id, reason) => api.post(endpoints.support.slaPause(id), { reason }),
+  resumeSla: (id, reason) => api.post(endpoints.support.slaResume(id), { reason }),
+  // Queue-level (STAFF only)
+  listQueueTickets: (queueId, params = {}) => api.get(endpoints.support.queueTickets(queueId), { params }),
+  getQueueStats: (queueId) => api.get(endpoints.support.queueStats(queueId)),
 }
 
 export const crmApi = {

@@ -114,13 +114,13 @@ function setAction(event) {
   min-height: 0;
   border: 0;
   border-radius: 14px;
-  background: var(--tm-surface, #FFFFFF);
-  box-shadow: var(--tm-card-shadow, 0 2px 8px rgba(9, 38, 67, 0.06));
+  background: var(--ds-color-surface, #FFFFFF);
+  box-shadow: var(--ds-shadow-xs, 0 2px 8px rgba(9, 38, 67, 0.06));
   overflow: hidden;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .product-card.store-product-card:hover {
-  border-color: var(--tm-line-strong, #DCE8EF);
+  border-color: var(--ds-color-border, #DCE8EF);
   box-shadow: 0 5px 16px rgba(20, 20, 60, 0.09);
 }
 .product-card.store-product-card:focus-within { outline: 2px solid var(--ds-color-focus, #0891B2); outline-offset: -2px; }
@@ -140,8 +140,8 @@ function setAction(event) {
   height: 130px;
   min-height: 130px;
   aspect-ratio: auto;
-  background: linear-gradient(135deg, var(--tm-chip, #CFFAFE), var(--tm-canvas, #F0F7FA));
-  color: var(--tm-blue, #0E7490);
+  background: linear-gradient(135deg, var(--ds-color-primary-soft, #CFFAFE), var(--ds-page-bg, #F0F7FA));
+  color: var(--ds-color-primary, #0E7490);
   font-size: 22px;
   overflow: hidden;
 }

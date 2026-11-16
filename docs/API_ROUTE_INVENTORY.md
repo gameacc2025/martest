@@ -323,6 +323,7 @@ Public read routes are unauthenticated; management routes require STAFF context 
 | GET | `/api/v1/cms/articles` | `Public` |
 | GET | `/api/v1/cms/articles/:slug` | `Public` |
 | GET | `/api/v1/cms/articles/id/:id` | `Public` |
+| GET | `/api/v1/cms/articles/preview/:token` | `Public` |
 | GET | `/api/v1/cms/articles/manage` | `STAFF + cms.* permission` |
 | GET | `/api/v1/cms/articles/manage/:id` | `STAFF + cms.* permission` |
 | POST | `/api/v1/cms/articles/manage` | `STAFF + cms.* permission` |
@@ -331,6 +332,31 @@ Public read routes are unauthenticated; management routes require STAFF context 
 | DELETE | `/api/v1/cms/articles/manage/:id` | `STAFF + cms.* permission` |
 | GET | `/api/v1/cms/articles/manage/:id/revisions` | `STAFF + cms.* permission` |
 | GET | `/api/v1/cms/articles/manage/:id/revisions/:revisionNo` | `STAFF + cms.* permission` |
+| POST | `/api/v1/cms/articles/manage/:id/revisions/:revisionNo/restore` | `STAFF + cms.* permission` |
+| POST | `/api/v1/cms/articles/manage/:id/preview-token` | `STAFF + cms.* permission` |
+
+### support — `/api/v1/support`
+
+Authenticated CUSTOMER, COMPANY and STAFF users can create/read/reply to their own tickets; service-level tenant scope is enforced. Internal notes, queue listing, assignment and status changes are STAFF-only with the existing tickets.* permissions.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/support/categories` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.read` |
+| GET | `/api/v1/support/tickets` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.read; requester/company scope in service` |
+| POST | `/api/v1/support/tickets` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.create` |
+| GET | `/api/v1/support/tickets/:id` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.read; requester/company scope in service` |
+| POST | `/api/v1/support/tickets/:id/messages` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.reply; INTERNAL visibility requires STAFF + tickets.update` |
+| PATCH | `/api/v1/support/tickets/:id/status` | `Bearer auth; exact STAFF + tickets.update` |
+| POST | `/api/v1/support/tickets/:id/assign` | `Bearer auth; exact STAFF + tickets.update` |
+| GET | `/api/v1/support/queues` | `Bearer auth; exact STAFF + tickets.read` |
+| GET | `/api/v1/support/tickets/:id/sla` | `Bearer auth; exact STAFF + tickets.read` |
+| POST | `/api/v1/support/tickets/:id/sla/pause` | `Bearer auth; exact STAFF + tickets.update` |
+| POST | `/api/v1/support/tickets/:id/sla/resume` | `Bearer auth; exact STAFF + tickets.update` |
+| GET | `/api/v1/support/queues/:queueId/tickets` | `Bearer auth; exact STAFF + tickets.read` |
+| GET | `/api/v1/support/queues/:queueId/stats` | `Bearer auth; exact STAFF + tickets.read` |
+| POST | `/api/v1/support/tickets/:id/messages/:messageId/attachments` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.reply` |
+| GET | `/api/v1/support/tickets/:id/messages/:messageId/attachments/:attachmentId/download` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.reply; service checks ownership` |
+| DELETE | `/api/v1/support/tickets/:id/messages/:messageId/attachments/:attachmentId` | `Bearer auth; CUSTOMER/COMPANY/STAFF + tickets.reply; service checks ownership` |
 
 ### cms-categories — `/api/v1/cms/categories`
 
@@ -387,6 +413,15 @@ Public read routes are unauthenticated; management routes require STAFF context 
 | PATCH | `/api/v1/cms/pages/manage/:id` | `STAFF + cms.* permission` |
 | PUT | `/api/v1/cms/pages/manage/slug/:slug` | `STAFF + cms.* permission` |
 | DELETE | `/api/v1/cms/pages/manage/:id` | `STAFF + cms.* permission` |
+
+### cms-sitemap — `/api/v1/cms/sitemap`
+
+Sitemap generation is public.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/cms/sitemap/sitemap.xml` | `Public` |
+| GET | `/api/v1/cms/sitemap` | `Public` |
 
 ### crm — `/api/v1/crm`
 

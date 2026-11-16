@@ -701,20 +701,20 @@ async function deleteUser() {
 }
 
 .company-cell i {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.85rem;
 }
 
 .text-muted {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 /* ── Form layout ─────────────────────────────────────────── */
 .form-section-title {
   margin: 1rem 0 0.75rem;
   font-size: 0.9rem;
-  color: var(--primary-color);
-  border-bottom: 1px solid var(--surface-border);
+  color: var(--ds-color-primary);
+  border-bottom: 1px solid var(--ds-color-border);
   padding-bottom: 0.35rem;
 }
 .form-section-title:first-child {
@@ -734,11 +734,11 @@ async function deleteUser() {
 }
 
 .req {
-  color: var(--red-500, var(--tm-red));
+  color: var(--ds-color-danger);
 }
 
 .opt {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.8rem;
   font-weight: 400;
 }
@@ -747,12 +747,12 @@ async function deleteUser() {
   display: block;
   margin-top: 0.35rem;
   font-size: 0.75rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .field-hint-inline {
   font-size: 0.72rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .field-checkbox {
@@ -774,8 +774,8 @@ async function deleteUser() {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border-radius: var(--content-border-radius, 8px);
-  background: var(--surface-ground);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-background);
 }
 
 .profile-meta h3 {
@@ -785,7 +785,7 @@ async function deleteUser() {
 
 .profile-meta p {
   margin: 0.15rem 0 0.5rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.85rem;
 }
 
@@ -798,8 +798,8 @@ async function deleteUser() {
 .info-section h4 {
   margin: 0 0 0.5rem;
   font-size: 0.9rem;
-  color: var(--primary-color);
-  border-bottom: 1px solid var(--surface-border);
+  color: var(--ds-color-primary);
+  border-bottom: 1px solid var(--ds-color-border);
   padding-bottom: 0.35rem;
 }
 
@@ -812,7 +812,7 @@ async function deleteUser() {
 }
 
 .info-row span {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .info-row-block {

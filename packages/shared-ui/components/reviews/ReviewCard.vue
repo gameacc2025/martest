@@ -196,7 +196,7 @@ const openImage = (imageUrl) => {
 
 .review-date {
   font-size: 0.75rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   margin: 0;
 }
 
@@ -215,7 +215,7 @@ const openImage = (imageUrl) => {
 
 .review-comment {
   font-size: 0.875rem;
-  color: var(--text-color);
+  color: var(--ds-color-text);
   margin: 0 0 0.75rem 0;
 }
 
@@ -271,7 +271,7 @@ const openImage = (imageUrl) => {
 .cons-section ul {
   list-style: disc;
   list-style-position: inside;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   padding-inline-end: 1rem;
   margin: 0;
 }
@@ -290,7 +290,7 @@ const openImage = (imageUrl) => {
   gap: 1rem;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid var(--surface-border);
+  border-top: 1px solid var(--ds-color-border);
   flex-wrap: wrap;
 }
 
@@ -299,12 +299,12 @@ const openImage = (imageUrl) => {
 }
 
 .review-report-btn {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .review-helpful-count {
   font-size: 0.75rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .review-card :deep(.p-card) {

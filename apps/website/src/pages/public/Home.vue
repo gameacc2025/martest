@@ -156,13 +156,13 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 <main class="reference-home" dir="rtl">
   <section class="hero">
   <svg class="hero-bg-network" viewBox="0 0 1200 400" preserveAspectRatio="none" fill="none" aria-hidden="true">
-    <path d="M100 200 Q300 100 600 200 T1100 200" stroke="#1E3A5F" stroke-width="2"/>
-    <path d="M50 100 Q400 300 800 100 T1150 250" stroke="#1E3A5F" stroke-width="2"/>
-    <path d="M100 200 Q300 100 600 200 T1100 200" class="fiber-wave fiber-wave--cyan" stroke="#22D3EE" stroke-width="4" stroke-linecap="round" stroke-dasharray="20 180"/>
-    <path d="M50 100 Q400 300 800 100 T1150 250" class="fiber-wave fiber-wave--violet" stroke="#8B5CF6" stroke-width="3" stroke-linecap="round" stroke-dasharray="16 200"/>
-    <circle class="fiber-node-pulse fiber-node-pulse--cyan" cx="100" cy="200" r="5" fill="#22D3EE"/>
-    <circle class="fiber-node-pulse fiber-node-pulse--violet" cx="600" cy="200" r="5" fill="#8B5CF6"/>
-    <circle class="fiber-node-pulse fiber-node-pulse--cyan" cx="1100" cy="200" r="5" fill="#22D3EE"/>
+    <path d="M100 200 Q300 100 600 200 T1100 200" stroke="var(--ds-color-brand-dark)" stroke-width="2"/>
+    <path d="M50 100 Q400 300 800 100 T1150 250" stroke="var(--ds-color-brand-dark)" stroke-width="2"/>
+    <path d="M100 200 Q300 100 600 200 T1100 200" class="fiber-wave fiber-wave--cyan" stroke="var(--ds-brand-primary)" stroke-width="4" stroke-linecap="round" stroke-dasharray="20 180"/>
+    <path d="M50 100 Q400 300 800 100 T1150 250" class="fiber-wave fiber-wave--violet" stroke="var(--ds-brand-accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="16 200"/>
+    <circle class="fiber-node-pulse fiber-node-pulse--cyan" cx="100" cy="200" r="5" fill="var(--ds-brand-primary)"/>
+    <circle class="fiber-node-pulse fiber-node-pulse--violet" cx="600" cy="200" r="5" fill="var(--ds-brand-accent)"/>
+    <circle class="fiber-node-pulse fiber-node-pulse--cyan" cx="1100" cy="200" r="5" fill="var(--ds-brand-primary)"/>
   </svg>
   <div class="w">
     <Transition name="hero-content" mode="out-in">

@@ -152,7 +152,7 @@ onUnmounted(() => {
 
   display: flex;
   min-height: 100vh;
-  background: var(--tm-canvas);
+  background: var(--ds-page-bg);
   direction: rtl;
 }
 
@@ -259,7 +259,7 @@ onUnmounted(() => {
 
 /* tem canvas + full-bleed workspace proportions. */
 .dash-layout {
-  background: var(--tm-canvas);
+  background: var(--ds-page-bg);
 }
 
 .dash-layout-content {

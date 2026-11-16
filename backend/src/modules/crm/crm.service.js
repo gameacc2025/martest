@@ -80,14 +80,33 @@ async function createLead(input, actorId) {
     phone: input.phone ? String(input.phone).trim().slice(0, 40) : null,
     sourceId: input.sourceId ? idOf(input.sourceId) : null, score, ownerUserId,
   }, include: leadInclude });
+  // Audit lead creation
+  const actorUserId = await assertStaff(prisma, actorId);
+  const auditEntries = [];
+  if (input.displayName) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'displayName', oldValue: null, newValue: JSON.stringify(row.displayName), actorUserId, action: 'CREATE' });
+  if (input.companyName) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'companyName', oldValue: null, newValue: JSON.stringify(row.companyName), actorUserId, action: 'CREATE' });
+  if (input.email) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'email', oldValue: null, newValue: JSON.stringify(row.email), actorUserId, action: 'CREATE' });
+  if (input.phone) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'phone', oldValue: null, newValue: JSON.stringify(row.phone), actorUserId, action: 'CREATE' });
+  if (input.sourceId) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'sourceId', oldValue: null, newValue: JSON.stringify(row.sourceId), actorUserId, action: 'CREATE' });
+  if (input.score !== undefined) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'score', oldValue: null, newValue: JSON.stringify(row.score), actorUserId, action: 'CREATE' });
+  if (auditEntries.length > 0) {
+    await prisma.cRMFieldAudit.createMany({ data: auditEntries });
+  }
   return leadDto(row);
 }
-async function updateLead(id, input) {
+async function updateLead(id, input, actorId) {
   const leadId = idOf(id);
-  const current = await prisma.lead.findUnique({ where: { id: leadId }, select: { status: true } });
+  const current = await prisma.lead.findUnique({ where: { id: leadId } });
   if (!current) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
   if (['CONVERTED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'].includes(current.status)) fail(409, 'CRM_LEAD_TERMINAL', 'سرنخ پایانی قابل ویرایش نیست.');
   const data = {};
+  const fieldsToAudit = ['displayName', 'companyName', 'email', 'phone', 'score', 'sourceId'];
+  const oldValues = {};
+  for (const key of fieldsToAudit) {
+    if (input[key] !== undefined) {
+      oldValues[key] = current[key];
+    }
+  }
   for (const key of ['displayName', 'companyName', 'email', 'phone']) if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
   if (input.score !== undefined) {
     const score = Number(input.score);
@@ -95,21 +114,63 @@ async function updateLead(id, input) {
     data.score = score;
   }
   if (input.sourceId !== undefined) data.sourceId = input.sourceId === null ? null : idOf(input.sourceId);
-  return leadDto(await prisma.lead.update({ where: { id: leadId }, data, include: leadInclude }));
+  const updated = await prisma.lead.update({ where: { id: leadId }, data, include: leadInclude });
+  // Audit field changes
+  if (actorId && Object.keys(data).length > 0) {
+    const actorUserId = await assertStaff(prisma, actorId);
+    const auditEntries = [];
+    for (const key of fieldsToAudit) {
+      if (input[key] !== undefined && String(data[key]) !== String(oldValues[key])) {
+        auditEntries.push({
+          entityType: 'Lead',
+          entityId: String(leadId),
+          fieldName: key,
+          oldValue: oldValues[key] === null ? null : JSON.stringify(oldValues[key]),
+          newValue: data[key] === null ? null : JSON.stringify(data[key]),
+          actorUserId,
+          action: 'UPDATE',
+        });
+      }
+    }
+    if (auditEntries.length > 0) {
+      await prisma.cRMFieldAudit.createMany({ data: auditEntries });
+    }
+  }
+  return leadDto(updated);
 }
-async function assignLead(id, ownerId) {
-  const leadId = idOf(id), ownerUserId = await assertStaff(prisma, ownerId);
-  if (!(await prisma.lead.findUnique({ where: { id: leadId }, select: { id: true } }))) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
-  return leadDto(await prisma.lead.update({ where: { id: leadId }, data: { ownerUserId }, include: leadInclude }));
+async function assignLead(id, ownerId, actorId) {
+  const leadId = idOf(id), ownerUserId = await assertStaff(prisma, ownerId), actorUserId = await assertStaff(prisma, actorId);
+  const current = await prisma.lead.findUnique({ where: { id: leadId } });
+  if (!current) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+  return await prisma.$transaction(async (tx) => {
+    const updated = await tx.lead.update({ where: { id: leadId }, data: { ownerUserId }, include: leadInclude });
+    // Record assignment in LeadStatusHistory as a status-less audit trail (status unchanged but owner changed)
+    await tx.leadStatusHistory.create({ data: { leadId, previousStatus: current.status, newStatus: current.status, actorUserId, reason: `اعمال مسئول جدید: ${ownerUserId}` } });
+    // Audit owner change
+    await tx.cRMFieldAudit.create({ data: {
+      entityType: 'Lead',
+      entityId: String(leadId),
+      fieldName: 'ownerUserId',
+      oldValue: JSON.stringify(current.ownerUserId),
+      newValue: JSON.stringify(ownerUserId),
+      actorUserId,
+      action: 'UPDATE',
+    } });
+    return leadDto(updated);
+  });
 }
-async function changeLeadStatus(id, status, reason) {
-  const leadId = idOf(id), current = await prisma.lead.findUnique({ where: { id: leadId } });
+async function changeLeadStatus(id, status, reason, actorId) {
+  const leadId = idOf(id), actorUserId = await assertStaff(prisma, actorId);
+  const current = await prisma.lead.findUnique({ where: { id: leadId } });
   if (!current) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
   if (!transitions[current.status] || !transitions[current.status].includes(status)) fail(409, 'CRM_INVALID_LEAD_TRANSITION', 'تغییر وضعیت مجاز نیست.');
   if (status === 'CONVERTED') fail(409, 'CRM_CONVERSION_REQUIRED', 'برای تبدیل از عملیات تبدیل استفاده کنید.');
-  return leadDto(await prisma.lead.update({ where: { id: leadId }, data: {
-    status, disqualifiedReason: ['DISQUALIFIED', 'LOST'].includes(status) ? String(reason || '').slice(0, 500) || null : null,
-  }, include: leadInclude }));
+  const disqualifiedReason = ['DISQUALIFIED', 'LOST'].includes(status) ? String(reason || '').slice(0, 500) || null : null;
+  return await prisma.$transaction(async (tx) => {
+    const updated = await tx.lead.update({ where: { id: leadId }, data: { status, disqualifiedReason }, include: leadInclude });
+    await tx.leadStatusHistory.create({ data: { leadId, previousStatus: current.status, newStatus: status, actorUserId, reason: disqualifiedReason } });
+    return leadDto(updated);
+  });
 }
 async function convertLead(id, actorId) {
   const leadId = idOf(id), converter = await assertStaff(prisma, actorId);
@@ -140,6 +201,15 @@ async function convertLead(id, actorId) {
       contacts: { create: { name: lead.displayName, email: lead.email, phone: lead.phone, isPrimary: true } },
     }, include: { contacts: true } });
     await tx.lead.update({ where: { id: leadId }, data: { convertedAccountId: account.id } });
+    // Record conversion in LeadStatusHistory
+    await tx.leadStatusHistory.create({ data: { leadId, previousStatus: 'QUALIFIED', newStatus: 'CONVERTED', actorUserId: converter, reason: `تبدیل به حساب CRM ${account.id}` } });
+    // Audit conversion fields
+    await tx.cRMFieldAudit.createMany({ data: [
+      { entityType: 'Lead', entityId: String(leadId), fieldName: 'status', oldValue: JSON.stringify('QUALIFIED'), newValue: JSON.stringify('CONVERTED'), actorUserId: converter, action: 'UPDATE' },
+      { entityType: 'Lead', entityId: String(leadId), fieldName: 'convertedAccountId', oldValue: null, newValue: JSON.stringify(account.id), actorUserId: converter, action: 'UPDATE' },
+      { entityType: 'Lead', entityId: String(leadId), fieldName: 'convertedByUserId', oldValue: null, newValue: JSON.stringify(converter), actorUserId: converter, action: 'UPDATE' },
+      { entityType: 'Lead', entityId: String(leadId), fieldName: 'convertedAt', oldValue: null, newValue: JSON.stringify(new Date().toISOString()), actorUserId: converter, action: 'UPDATE' },
+    ] });
     return safe({ leadId, account, alreadyConverted: false });
   });
 }
@@ -419,6 +489,18 @@ async function mergeLeads(sourceId, targetId, reason, actorId) {
       data: { status: 'DUPLICATE', disqualifiedReason: ('MERGED_INTO:' + targetLeadId + ' — ' + note).slice(0, 500) },
     });
     if (marked.count !== 1) fail(409, 'CRM_MERGE_CONFLICT', 'این سرنخ هم‌زمان توسط عملیات دیگری تغییر کرده است.');
+    // Record merge in LeadStatusHistory for the source lead (marked as DUPLICATE)
+    await tx.leadStatusHistory.create({ data: { leadId: sourceLeadId, previousStatus: source.status, newStatus: 'DUPLICATE', actorUserId, reason: `ادغام شده در سرنخ ${targetLeadId}: ${note}` } });
+    // Audit merge changes on target lead
+    const auditEntries = [];
+    if (source.email && !target.email) auditEntries.push({ entityType: 'Lead', entityId: String(targetLeadId), fieldName: 'email', oldValue: JSON.stringify(target.email), newValue: JSON.stringify(source.email), actorUserId, action: 'UPDATE' });
+    if (source.phone && !target.phone) auditEntries.push({ entityType: 'Lead', entityId: String(targetLeadId), fieldName: 'phone', oldValue: JSON.stringify(target.phone), newValue: JSON.stringify(source.phone), actorUserId, action: 'UPDATE' });
+    if (source.companyName && !target.companyName) auditEntries.push({ entityType: 'Lead', entityId: String(targetLeadId), fieldName: 'companyName', oldValue: JSON.stringify(target.companyName), newValue: JSON.stringify(source.companyName), actorUserId, action: 'UPDATE' });
+    if (source.sourceId && !target.sourceId) auditEntries.push({ entityType: 'Lead', entityId: String(targetLeadId), fieldName: 'sourceId', oldValue: JSON.stringify(target.sourceId), newValue: JSON.stringify(source.sourceId), actorUserId, action: 'UPDATE' });
+    if (source.score > target.score) auditEntries.push({ entityType: 'Lead', entityId: String(targetLeadId), fieldName: 'score', oldValue: JSON.stringify(target.score), newValue: JSON.stringify(source.score), actorUserId, action: 'UPDATE' });
+    if (auditEntries.length > 0) {
+      await tx.cRMFieldAudit.createMany({ data: auditEntries });
+    }
     await tx.auditLog.create({ data: {
       actorUserId, actorAccessType: 'STAFF', action: 'CRM_LEAD_MERGED',
       entityType: 'Lead', entityId: String(targetLeadId), source: 'ADMIN',

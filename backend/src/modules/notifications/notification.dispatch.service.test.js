@@ -283,23 +283,54 @@ test('dispatchNotification: duplicate dispatch with the same dedupeKey queues no
   assert.equal(calls('notificationDelivery.createMany')[1].data[0].dedupeKey, 'order:1');
 });
 
-// ── SMS is architecture-only ─────────────────────────────────
+// ── SMS is now implemented with opt-in, quota, and provider checks ──────
 
-test('dispatchNotification: SMS-enabled user is counted as notImplemented, never queued', async () => {
+test('dispatchNotification: SMS-enabled user with quota and valid phone queues SMS delivery', async () => {
+  fx.users = [{ id: 7, phone: '09123456789', email: 'user@test.com' }];
   fx.preferences = [
     { userId: 7, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
   ];
+
+  // Mock consumeUsage to succeed (quota available)
+  const originalConsumeUsage = require('../inquiries/inquiry-subscription.service').consumeUsage;
+  const mockConsumeUsage = async () => ({ enforced: true, used: 1, limit: 10, remaining: 9, subscriptionId: 1 });
+  injectMock('../inquiries/inquiry-subscription.service', { consumeUsage: mockConsumeUsage });
 
   const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [7], {
     product: { id: 1, title: 'X' }, status: 'APPROVED',
   });
 
-  assert.equal(summary.sms.notImplemented, 1);
+  // SMS should be queued
+  assert.equal(summary.sms.queued, 1);
+  assert.equal(summary.sms.notImplemented, 0);
+  const smsRows = deliveryRows().filter(r => r.channel === 'SMS');
+  assert.equal(smsRows.length, 1);
+  assert.equal(smsRows[0].recipient, '09123456789');
+  assert.equal(smsRows[0].status, 'PENDING');
+});
+
+test('dispatchNotification: SMS skipped when quota exceeded', async () => {
+  fx.users = [{ id: 8, phone: '09123456789', email: 'user2@test.com' }];
+  fx.preferences = [
+    { userId: 8, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+  ];
+
+  // Mock consumeUsage to throw quota exceeded
+  const mockConsumeUsageQuotaExceeded = async () => {
+    const error = new Error('سهمیه این قابلیت در اشتراک شما به پایان رسیده است.');
+    error.code = 'INQUIRY_QUOTA_EXCEEDED';
+    error.statusCode = 403;
+    throw error;
+  };
+  injectMock('../inquiries/inquiry-subscription.service', { consumeUsage: mockConsumeUsageQuotaExceeded });
+
+  const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [8], {
+    product: { id: 1, title: 'X' }, status: 'APPROVED',
+  });
+
+  // SMS should be skipped due to quota
   assert.equal(summary.sms.queued, 0);
-  // Only EMAIL rows are ever written to the delivery table.
-  for (const row of deliveryRows()) {
-    assert.equal(row.channel, 'EMAIL');
-  }
+  assert.equal(summary.sms.quotaExceeded, 1);
 });
 
 // ── Recipient resolution ─────────────────────────────────────

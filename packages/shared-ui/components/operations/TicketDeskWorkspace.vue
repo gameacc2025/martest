@@ -380,7 +380,7 @@ onMounted(async () => {
 .tm-ticket-desk__actions select{max-width:150px;border:1px solid var(--tm-line);border-radius:8px;padding:8px;background:var(--tm-surface);color:var(--tm-ink)}
 .tm-ticket-desk__internal-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--tm-muted)}
 .tm-ticket-desk__composer textarea{resize:vertical}
-.tm-ticket-desk__composer button.send{display:flex;align-items:center;gap:7px;margin-inline-start:auto;border:0;border-radius:8px;padding:9px 14px;background:var(--tm-blue);color:#fff}
+.tm-ticket-desk__composer button.send{display:flex;align-items:center;gap:7px;margin-inline-start:auto;border:0;border-radius:8px;padding:9px 14px;background:var(--tm-blue);color:var(--tm-blue-contrast, #fff)}
 .tm-ticket-desk__composer button:disabled{opacity:.55;cursor:not-allowed}
 .tm-ticket-desk__notice--error button{margin-inline-start:auto;border:1px solid currentColor;border-radius:7px;padding:5px 9px;background:transparent;color:inherit}
 @media(max-width:760px){.tm-ticket-desk__layout{grid-template-columns:minmax(0,1fr);min-height:0}.tm-ticket-desk__inbox{max-height:480px}.tm-ticket-desk__stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tm-ticket-desk__actions{width:100%}}

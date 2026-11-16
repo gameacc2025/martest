@@ -11,8 +11,8 @@
 //      outbox rows are written through the caller's `tx` so they commit /
 //      roll back atomically with the business operation that requested them.
 //   2. EXTERNAL DELIVERY IS SEPARATE — dispatch only queues PENDING
-//      NotificationDelivery rows; the email provider is contacted later by
-//      the delivery worker (notification.delivery.service.js). An email
+//      NotificationDelivery rows; the email/SMS provider is contacted later by
+//      the delivery worker (notification.delivery.service.js). An email/SMS
 //      outage therefore can never corrupt or block the business transaction
 //      that requested the notification.
 //   3. PREFERENCES — every (user, event, channel) can be disabled by the
@@ -22,20 +22,56 @@
 //   4. DUPLICATE DISPATCH IS SAFE — with a dedupeKey, the unique index on
 //      (eventType, dedupeKey, channel) + createMany({ skipDuplicates: true })
 //      makes re-dispatching the same event a no-op instead of a double send.
-//   5. SMS IS NOT IMPLEMENTED — the channel exists in the enum and in
-//      preferences (flow/06 §3.3: architecture must be ready), but dispatch
-//      never queues SMS rows; users who enabled SMS for an event are counted
-//      in the returned summary as sms.notImplemented (observable, not silent).
+//   5. SMS IS IMPLEMENTED — queues SMS delivery rows when:
+//      - recipient has opted in (NotificationPreference SMS enabled for event)
+//      - recipient has a valid phone number
+//      - sender has available SMS quota (via inquiry-subscription service)
+//      - Twilio provider is configured (checked by delivery worker)
 // =============================================================
 
 const prisma = require('../../config/db');
 const { getEvent, DEFAULT_CHANNELS } = require('./notification.events');
 
+// consumeUsage is required dynamically inside dispatchNotification to support
+// test mocking via require.cache replacement (the function reference would
+// otherwise be captured at module load time before test mocks are installed).
+function getConsumeUsage() {
+  return require('../inquiries/inquiry-subscription.service').consumeUsage;
+}
+
 const CHANNELS = ['IN_APP', 'EMAIL', 'SMS'];
 
-// Max provider attempts stamped onto queued email rows (the delivery worker
+// Max provider attempts stamped onto queued email/SMS rows (the delivery worker
 // applies exponential backoff between attempts). Mirrored in config/env.js.
 const DEFAULT_MAX_ATTEMPTS = 3;
+
+// Validate phone number format for Iranian numbers
+function validatePhoneNumber(phone) {
+  if (!phone || typeof phone !== 'string') return false;
+  const trimmed = phone.trim();
+  // Accept Iranian mobile numbers: 09XXXXXXXXX or +989XXXXXXXXX or 989XXXXXXXXX
+  const iranMobileRegex = /^(?:09|\+989|989)\d{9}$/;
+  return iranMobileRegex.test(trimmed);
+}
+
+function normalizePhoneNumber(phone) {
+  if (!phone || typeof phone !== 'string') return null;
+  const trimmed = phone.trim();
+  // Normalize to 09XXXXXXXXX format
+  if (trimmed.startsWith('+989')) return '0' + trimmed.slice(3);
+  if (trimmed.startsWith('989')) return '0' + trimmed.slice(2);
+  if (trimmed.startsWith('09')) return trimmed;
+  return null;
+}
+
+// Check if SMS provider is configured (Twilio)
+function hasSmsProvider() {
+  return Boolean(
+    String(process.env.TWILIO_ACCOUNT_SID || '').trim()
+    && String(process.env.TWILIO_AUTH_TOKEN || '').trim()
+    && String(process.env.TWILIO_FROM_NUMBER || '').trim()
+  );
+}
 
 // ── Recipient resolution ─────────────────────────────────────
 //
@@ -132,6 +168,21 @@ async function fillMissingEmails(client, resolved) {
   });
   const emailById = new Map(users.map((u) => [u.id, u.email]));
   return resolved.map((r) => ({ ...r, email: r.email || emailById.get(r.userId) || null }));
+}
+
+/**
+ * Fill in phone numbers for recipients where the caller didn't provide one.
+ * @private
+ */
+async function fillMissingPhones(client, resolved) {
+  const missing = resolved.filter((r) => !r.phone).map((r) => r.userId);
+  if (!missing.length) return resolved;
+  const users = await client.user.findMany({
+    where: { id: { in: missing } },
+    select: { id: true, phone: true },
+  });
+  const phoneById = new Map(users.map((u) => [u.id, u.phone]));
+  return resolved.map((r) => ({ ...r, phone: r.phone || phoneById.get(r.userId) || null }));
 }
 
 /**
@@ -243,8 +294,86 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
     }
   }
 
-  // ── Channel: SMS — preferences supported, delivery NOT implemented ──
-  summary.sms.notImplemented = userIds.filter((id) => channelEnabled(id, 'SMS')).length;
+  // ── Channel: SMS — queued PENDING; the delivery worker sends later ──
+  const smsRecipients = userIds.filter((id) => channelEnabled(id, 'SMS'));
+  summary.sms.preferenceDisabled = userIds.length - smsRecipients.length;
+  summary.sms.notImplemented = 0; // Legacy field kept for backward compatibility
+  summary.sms.providerNotConfigured = 0;
+  summary.sms.noPhoneNumber = 0;
+  summary.sms.quotaExceeded = 0;
+  summary.sms.duplicates = 0;
+
+  if (smsRecipients.length) {
+    // Fill in phone numbers for SMS recipients
+    resolved = await fillMissingPhones(client, resolved);
+    const content = event.template(context);
+
+    const smsRows = [];
+    for (const userId of smsRecipients) {
+      const phone = resolved.find((r) => r.userId === userId)?.phone;
+      const normalizedPhone = phone ? normalizePhoneNumber(phone) : null;
+
+      if (!normalizedPhone || !validatePhoneNumber(normalizedPhone)) {
+        summary.sms.noPhoneNumber += 1;
+        continue;
+      }
+
+      // Determine the quota owner for SMS consumption
+      // For support tickets, the quota owner is typically the company sending the notification
+      // We'll track this via context.smsQuotaOwner if provided
+      const quotaOwnerType = context?.smsQuotaOwner?.type || 'user';
+      const quotaOwnerId = context?.smsQuotaOwner?.id || userId;
+
+      // Check SMS quota before queuing (only if enforcement is enabled for the event)
+      let quotaSkipped = false;
+      try {
+        // Use forceEnforcement: true for SMS since it's a paid service
+        await getConsumeUsage()({
+          ownerType: quotaOwnerType,
+          ownerId: quotaOwnerId,
+          usageType: 'SMS',
+          referenceType: event.key,
+          referenceId: context?.referenceId || null,
+          forceEnforcement: true,
+          tx: client,
+        });
+      } catch (error) {
+        if (error?.code === 'INQUIRY_QUOTA_EXCEEDED' || error?.code === 'INQUIRY_SUBSCRIPTION_REQUIRED') {
+          summary.sms.quotaExceeded += 1;
+          quotaSkipped = true;
+        } else if (error?.code !== 'INVALID_INQUIRY_USAGE_TYPE' && error?.code !== 'SUBSCRIPTION_STATE_CHANGED') {
+          // For other errors (provider not configured, etc.), we still queue the SMS
+          // The delivery worker will handle provider configuration errors
+        }
+      }
+
+      if (quotaSkipped) continue;
+
+      smsRows.push({
+        userId,
+        eventType: event.key,
+        channel: 'SMS',
+        status: 'PENDING',
+        recipient: normalizedPhone,
+        subject: null,
+        body: content.message,
+        maxAttempts: DEFAULT_MAX_ATTEMPTS,
+        dedupeKey: typeof dedupeKey === 'function' ? dedupeKey(userId) : dedupeKey,
+      });
+    }
+
+    if (smsRows.length) {
+      const result = await client.notificationDelivery.createMany({
+        data: smsRows,
+        // Duplicate dispatch with the same (eventType, dedupeKey, channel) is
+        // dropped by the unique index + skipDuplicates — retries are safe.
+        skipDuplicates: true,
+      });
+      const created = Number(result?.count ?? smsRows.length);
+      summary.sms.queued = created;
+      summary.sms.duplicates = smsRows.length - created;
+    }
+  }
 
   return summary;
 }
@@ -254,4 +383,7 @@ module.exports = {
   dispatchNotification,
   resolveRecipients,
   fillMissingEmails,
+  fillMissingPhones,
+  validatePhoneNumber,
+  normalizePhoneNumber,
 };

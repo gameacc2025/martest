@@ -39,12 +39,13 @@ services:
   # Backend (Development)
   # ────────────────────────────────────────────────────────────
   backend:
+    image: telecom-marketplace-backend:latest
+
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
 
     container_name: telecom_backend_dev
-
     restart: unless-stopped
 
     mem_limit: 1g
@@ -72,10 +73,6 @@ services:
       postgres:
         condition: service_healthy
 
-    # The backend entrypoint runs `prisma migrate deploy` + `prisma db seed` before the HTTP
-    # server starts listening on 3000. Without a healthcheck the Vite dev
-    # servers (which proxy /api to this container) come up first and return
-    # "502 Bad Gateway" until the API is actually ready.
     healthcheck:
       test:
         - CMD
@@ -95,6 +92,8 @@ services:
   # Website (Development - Vite hot reload)
   # ────────────────────────────────────────────────────────────
   website:
+    image: telecom-marketplace-website:latest
+
     build:
       context: .
       dockerfile: apps/website/Dockerfile.dev
@@ -143,6 +142,8 @@ services:
   # Company (Development - Vite hot reload)
   # ────────────────────────────────────────────────────────────
   company:
+    image: telecom-marketplace-company:latest
+
     build:
       context: .
       dockerfile: apps/company/Dockerfile.dev
@@ -190,6 +191,8 @@ services:
   # Admin (Development - Vite hot reload)
   # ────────────────────────────────────────────────────────────
   admin:
+    image: telecom-marketplace-admin:latest
+
     build:
       context: .
       dockerfile: apps/admin/Dockerfile.dev
@@ -240,3 +243,5 @@ networks:
 
 volumes:
   postgres_data_dev:
+    external: true
+    name: telecom-marketplace_postgres_data_dev

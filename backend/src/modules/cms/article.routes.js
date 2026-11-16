@@ -19,6 +19,8 @@ const publicQuery = {
   },
 };
 
+const previewTokenParams = { type: 'object', required: ['token'], properties: { token: { type: 'string', minLength: 64, maxLength: 64 } } };
+
 const adminQuery = {
   type: 'object',
   properties: {
@@ -40,6 +42,11 @@ async function articleRoutes(fastify) {
   fastify.get('/', { schema: { tags: ['CMS - Articles (Public)'], summary: 'List published articles', querystring: publicQuery } }, ctrl.listPublic);
   fastify.get('/:slug', { schema: { tags: ['CMS - Articles (Public)'], summary: 'Get published article by slug', params: slugParams } }, ctrl.getPublicBySlug);
   fastify.get('/id/:id', { schema: { tags: ['CMS - Articles (Public)'], summary: 'Get published article by ID', params: idParams } }, ctrl.getPublicById);
+
+  // Public preview route (for draft/review articles via signed token)
+  fastify.get('/preview/:token', {
+    schema: { tags: ['CMS - Articles (Public)'], summary: 'Get article by preview token (draft/review)', params: previewTokenParams },
+  }, ctrl.getByPreviewToken);
 
   // Admin routes
   fastify.get('/manage', {
@@ -89,6 +96,18 @@ async function articleRoutes(fastify) {
     preHandler: [requireExactAccessType('STAFF'), requirePermission('cms.articles.read')],
     schema: { tags: ['CMS - Articles (Admin)'], summary: 'Get article revision', params: revisionParams },
   }, ctrl.getRevision);
+
+  fastify.post('/manage/:id/revisions/:revisionNo/restore', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('cms.articles.update')],
+    schema: { tags: ['CMS - Articles (Admin)'], summary: 'Restore article to a specific revision', params: revisionParams },
+  }, ctrl.restoreRevision);
+
+  fastify.post('/manage/:id/preview-token', {
+    onRequest: [fastify.authenticate],
+    preHandler: [requireExactAccessType('STAFF'), requirePermission('cms.articles.read')],
+    schema: { tags: ['CMS - Articles (Admin)'], summary: 'Generate preview token for draft/review article', params: idParams },
+  }, ctrl.generatePreviewToken);
 }
 
 module.exports = articleRoutes;

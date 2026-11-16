@@ -119,7 +119,7 @@
     <!-- Reject product dialog -->
     <Dialog v-model:visible="showRejectDialog" header="رد محصول" :modal="true" :style="{ width: '32rem' }" :breakpoints="{ '640px': '92vw' }">
       <div class="field">
-        <label>علت رد <span style="color: var(--p-red-500)">*</span></label>
+        <label>علت رد <span style="color: var(--ds-color-danger)">*</span></label>
         <Textarea v-model="rejectReason" placeholder="علت رد محصول را وارد کنید..." rows="3" class="w-full" />
       </div>
       <template #footer>

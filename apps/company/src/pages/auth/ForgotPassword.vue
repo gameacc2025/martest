@@ -170,7 +170,7 @@ const backToRequest = () => {
 
 .fp-title i {
   font-size: 1.875rem;
-  color: var(--primary-color);
+  color: var(--ds-color-primary);
   margin-bottom: 0.5rem;
 }
 
@@ -185,7 +185,7 @@ const backToRequest = () => {
 }
 
 .fp-desc {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   margin-bottom: 1.5rem;
 }
 
@@ -206,7 +206,7 @@ const backToRequest = () => {
 
 .fp-success-icon {
   font-size: 2.5rem;
-  color: var(--p-green-500);
+  color: var(--ds-color-success);
   margin-bottom: 1rem;
 }
 

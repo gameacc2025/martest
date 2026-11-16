@@ -64,13 +64,13 @@ function format(value) {
 .tm-chart { width: 100%; min-width: 0; }
 .tm-bars { align-items: flex-end; }
 .tm-bars__col { justify-content: flex-end; }
-.tm-bars__value { font-size: 13px; color: var(--tm-muted); font-variant-numeric: tabular-nums; }
+.tm-bars__value { font-size: 13px; color: var(--ds-color-text-muted); font-variant-numeric: tabular-nums; }
 .tm-bars__track { min-height: 0; }
 .tm-chart__skeleton { display: flex; align-items: flex-end; gap: 12px; height: 100%; }
 .tm-chart__skeleton span {
   flex: 1;
   border-radius: 8px 8px 2px 2px;
-  background: var(--tm-surface-sunk);
+  background: var(--ds-color-surface-alt);
   animation: tm-pulse 1.4s ease-in-out infinite;
 }
 @keyframes tm-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }

@@ -375,7 +375,7 @@ function detectDeviceIcon(userAgent) {
               </div>
 
               <div v-else-if="activeSessions.length === 0" class="text-center py-4">
-                <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--text-color-secondary)" />
+                <i class="pi pi-info-circle" style="font-size: 2rem; color: var(--ds-color-text-muted)" />
                 <p>نشست فعالی یافت نشد. برای مشاهده، روی «بارگذاری نشست‌ها» کلیک کنید.</p>
               </div>
 
@@ -474,7 +474,7 @@ function detectDeviceIcon(userAgent) {
 
 .summary-inner p {
   margin: 0;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.85rem;
 }
 
@@ -487,12 +487,12 @@ function detectDeviceIcon(userAgent) {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--ds-color-border);
   font-size: 0.9rem;
 }
 
 .detail-row span {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .form-grid {
@@ -511,7 +511,7 @@ function detectDeviceIcon(userAgent) {
 
 .field label {
   font-size: 0.85rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .field-full {
@@ -520,7 +520,7 @@ function detectDeviceIcon(userAgent) {
 
 .field-note {
   font-size: 0.8rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   margin: 0 0 1rem;
 }
 
@@ -530,7 +530,7 @@ function detectDeviceIcon(userAgent) {
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--ds-color-border);
 }
 
 .security-row h4 {
@@ -540,7 +540,7 @@ function detectDeviceIcon(userAgent) {
 .security-row p {
   margin: 0;
   font-size: 0.85rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .security-row.disabled {
@@ -561,7 +561,7 @@ function detectDeviceIcon(userAgent) {
   padding: 0.75rem 0;
   border-bottom: 2px solid var(--ds-color-border);
   font-weight: 600;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.85rem;
 }
 

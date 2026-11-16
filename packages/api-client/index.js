@@ -24,6 +24,7 @@ export {
   cmsTagsApi,
   cmsFaqsApi,
   cmsPagesApi,
+  cmsSitemapApi,
   authChallengesApi,
   auditLogsApi,
   crmApi,

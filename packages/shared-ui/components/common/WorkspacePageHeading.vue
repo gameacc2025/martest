@@ -61,13 +61,13 @@ defineProps({
 .workspace-page-heading-eyebrow {
   display: block;
   margin-bottom: 2px;
-  color: var(--tm-cyan-deep);
+  color: var(--ds-color-primary);
   font-size: 12px;
   font-weight: 700;
 }
 .workspace-page-heading-title {
   margin: 0;
-  color: var(--tm-ink);
+  color: var(--ds-color-text);
   font-size: 24px;
   font-weight: 700;
   line-height: 1.35;
@@ -76,7 +76,7 @@ defineProps({
 }
 .workspace-page-heading-description {
   margin: 6px 0 0;
-  color: var(--tm-muted);
+  color: var(--ds-color-text-muted);
   font-size: 14px;
   line-height: 1.7;
   max-width: 68ch;

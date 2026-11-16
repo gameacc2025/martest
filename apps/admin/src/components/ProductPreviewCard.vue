@@ -139,7 +139,7 @@ function formatPrice(value) {
   justify-content: center;
   gap: 0.5rem;
   padding: 3rem 1.5rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.9rem;
   text-align: center;
 }
@@ -172,8 +172,8 @@ function formatPrice(value) {
   height: 220px;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-hover);
+  border: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-hover);
 }
 
 .preview-image img {
@@ -189,7 +189,7 @@ function formatPrice(value) {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.85rem;
 }
 
@@ -206,18 +206,18 @@ function formatPrice(value) {
 .preview-info h2 {
   margin: 0.5rem 0 0.25rem;
   font-size: 1.3rem;
-  color: var(--text-color);
+  color: var(--ds-color-text);
 }
 
 .meta {
   margin: 0.15rem 0;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.9rem;
 }
 
 .meta.sku {
   font-size: 0.78rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
 }
 
 .company {
@@ -228,7 +228,7 @@ function formatPrice(value) {
 
 .category {
   margin: 0.15rem 0 0.9rem;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -250,7 +250,7 @@ function formatPrice(value) {
   justify-content: space-between;
   align-items: center;
   padding: 0.4rem 0.75rem;
-  background: var(--surface-hover);
+  background: var(--ds-color-surface-hover);
   border-radius: 8px;
   font-size: 0.9rem;
 }
@@ -261,7 +261,7 @@ function formatPrice(value) {
 }
 
 .no-price {
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   font-size: 0.85rem;
 }
 
@@ -272,14 +272,14 @@ function formatPrice(value) {
 .section h3 {
   font-size: 1rem;
   margin: 0 0 0.5rem;
-  color: var(--text-color);
-  border-bottom: 1px solid var(--surface-border);
+  color: var(--ds-color-text);
+  border-bottom: 1px solid var(--ds-color-border);
   padding-bottom: 0.4rem;
 }
 
 .description {
   margin: 0;
-  color: var(--text-color-secondary);
+  color: var(--ds-color-text-muted);
   line-height: 1.9;
   font-size: 0.92rem;
   white-space: pre-line;
@@ -295,15 +295,15 @@ function formatPrice(value) {
 
 .spec-table td {
   padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--surface-border);
-  color: var(--text-color);
+  border-bottom: 1px solid var(--ds-color-border);
+  color: var(--ds-color-text);
 }
 
 .spec-table td.spec-title {
   width: 40%;
   font-weight: 600;
-  color: var(--text-color-secondary);
-  background: var(--surface-hover);
+  color: var(--ds-color-text-muted);
+  background: var(--ds-color-surface-hover);
 }
 
 @media (max-width: 640px) {

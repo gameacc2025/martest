@@ -9,6 +9,8 @@ const buildApp = require('./app');
 const { port, nodeEnv } = require('./config/env');
 const { processPendingDeliveries, processPendingSmsDeliveries } = require('./modules/notifications/notification.delivery.service');
 const { processInquiryLifecycle } = require('./modules/inquiries/inquiry.lifecycle.service');
+const { runOnce: runCmsScheduledPublish } = require('./workers/cms-scheduled-publish.worker');
+const { runOnce: runSlaMonitor } = require('./workers/sla-monitor.worker');
 
 async function start() {
   const app = await buildApp();
@@ -74,6 +76,56 @@ async function start() {
 
   // Run once immediately on startup
   setImmediate(runDeliveryWorker);
+
+  // ── CMS Scheduled Publish worker ───────────────────────────────
+  // Auto-publishes SCHEDULED articles when their scheduledAt <= now.
+  let cmsScheduledWorkerRunning = false;
+  async function runCmsScheduledWorker() {
+    if (cmsScheduledWorkerRunning) return;
+    cmsScheduledWorkerRunning = true;
+    try {
+      const result = await runCmsScheduledPublish();
+      if (result.published) {
+        app.log.info(result, 'CMS scheduled articles published');
+      }
+    } catch (err) {
+      app.log.error(err, 'CMS scheduled publish worker error');
+    } finally {
+      cmsScheduledWorkerRunning = false;
+    }
+  }
+
+  const cmsScheduledPollInterval = parseInt(process.env.CMS_SCHEDULED_WORKER_INTERVAL_MS, 10) || 60000;
+  if (nodeEnv !== 'test') {
+    setInterval(runCmsScheduledWorker, cmsScheduledPollInterval);
+    app.log.info(`CMS scheduled publish worker started — polling every ${cmsScheduledPollInterval}ms`);
+  }
+  setImmediate(runCmsScheduledWorker);
+
+  // ── SLA Monitor worker ───────────────────────────────────────────
+  // Monitors SLA deadlines, triggers escalations, and updates ticket statuses
+  let slaMonitorWorkerRunning = false;
+  async function runSlaMonitorWorker() {
+    if (slaMonitorWorkerRunning) return;
+    slaMonitorWorkerRunning = true;
+    try {
+      const result = await runSlaMonitor();
+      if (result.escalated || result.warned || result.breached) {
+        app.log.info(result, 'SLA escalations and warnings processed');
+      }
+    } catch (err) {
+      app.log.error(err, 'SLA monitor worker error');
+    } finally {
+      slaMonitorWorkerRunning = false;
+    }
+  }
+
+  const slaMonitorPollInterval = parseInt(process.env.SLA_WORKER_INTERVAL_MS, 10) || 300000;
+  if (nodeEnv !== 'test') {
+    setInterval(runSlaMonitorWorker, slaMonitorPollInterval);
+    app.log.info(`SLA monitor worker started — polling every ${slaMonitorPollInterval}ms`);
+  }
+  setImmediate(runSlaMonitorWorker);
 }
 
 start();

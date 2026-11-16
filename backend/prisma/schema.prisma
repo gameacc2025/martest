@@ -350,6 +350,10 @@ model User {
   financeInvoices FinanceInvoice[]
   /// رابطه Prisma با جدول OpportunityStageHistory (OpportunityStageHistory)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
   opportunityStageChanges OpportunityStageHistory[]
+  /// رابطه Prisma با جدول LeadStatusHistory (LeadStatusHistory)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
+  leadStatusChanges LeadStatusHistory[]
+  /// رابطه Prisma با جدول CRMFieldAudit (CRMFieldAudit)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
+  crmFieldAudits CRMFieldAudit[]
 
   @@index([email])
   @@index([status])
@@ -2588,6 +2592,8 @@ model Lead {
   tasks              CRMTask[]
   /// رابطه Prisma با جدول CRMNote (CRMNote)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
   notesLog           CRMNote[]
+  /// رابطه Prisma با جدول LeadStatusHistory (LeadStatusHistory)؛ مجموعه رکوردهای وابسته را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
+  statusHistory      LeadStatusHistory[]
 
   @@index([ownerUserId, status, updatedAt])
   @@index([sourceId, createdAt])
@@ -2595,6 +2601,62 @@ model Lead {
   @@index([phone])
   @@index([email])
 
+}
+
+/// تاریخچه تغییر وضعیت سرنخ با عامل، زمان و دلیل برای ممیزی چرخه عمر.
+model LeadStatusHistory {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
+  id             Int            @id @default(autoincrement())
+  /// شناسه سرنخ فروش مرتبط با این LeadStatusHistory؛ کلید خارجی به جدول Lead است.
+  leadId         Int
+  /// وضعیت قبلی رکورد پیش از تغییر.
+  previousStatus CRMLeadStatus?
+  /// وضعیت جدید رکورد پس از تغییر.
+  newStatus      CRMLeadStatus
+  /// شناسه کاربر مرتبط با این LeadStatusHistory؛ کلید خارجی به جدول User است.
+  actorUserId    Int
+  /// دلیل تغییر وضعیت؛ برای انتقال به CONVERTED، DISQUALIFIED یا LOST الزامی است.
+  reason         String?        @db.VarChar(500)
+  /// زمان ایجاد رکورد.
+  createdAt      DateTime       @default(now())
+  /// رابطه Prisma با جدول Lead (سرنخ فروش)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
+  lead           Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  /// رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
+  actor          User           @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([leadId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([newStatus, createdAt])
+}
+
+/// ممیزی تغییرات فیلدهای حساس CRM برای پاسخ‌گویی و ممیزی تجاری.
+model CRMFieldAudit {
+  /// شناسه یکتای رکورد و کلید اصلی جدول.
+  id            BigInt   @id @default(autoincrement())
+  /// نوع موجودیت هدف عملیات ممیزی (Lead, CRMAccount, Opportunity, ...).
+  entityType    String   @db.VarChar(60)
+  /// شناسه رکورد هدف در موجودیت ثبت‌شده در entityType.
+  entityId      String   @db.VarChar(100)
+  /// نام فیلد تغییر کرده.
+  fieldName     String   @db.VarChar(100)
+  /// مقدار قبلی (JSON-serialized).
+  oldValue      String?
+  /// مقدار جدید (JSON-serialized).
+  newValue      String?
+  /// شناسه کاربر مرتبط با این CRMFieldAudit؛ کلید خارجی به جدول User است.
+  actorUserId   Int
+  /// نوع اقدام انجام‌شده.
+  action        String   @db.VarChar(60)
+  /// شناسه هم‌بستگی درخواست برای ردگیری در لاگ‌ها.
+  requestId     String?  @db.VarChar(100)
+  /// زمان وقوع رویداد در منبع.
+  occurredAt    DateTime @default(now())
+  /// رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
+  actor         User     @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+
+  @@index([entityType, entityId, occurredAt])
+  @@index([actorUserId, occurredAt])
+  @@index([fieldName, occurredAt])
 }
 
 /// تعریف قیف فروش CRM و تعیین قیف فعال یا پیش‌فرض.
