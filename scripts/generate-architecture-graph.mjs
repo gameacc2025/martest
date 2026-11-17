@@ -12,9 +12,19 @@ const packages = listDirs('packages').map((dir) => ({ dir, pkg: readJson(path.jo
 const appSource = fs.readFileSync(path.join(root, 'backend/src/app.js'), 'utf8');
 const modulesDir = path.join(root, 'backend/src/modules');
 const modules = fs.readdirSync(modulesDir, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && fs.readdirSync(path.join(modulesDir, entry.name)).some((file) => file.endsWith('.routes.js')))
+  .filter((entry) => {
+    if (!entry.isDirectory()) return false;
+    const files = fs.readdirSync(path.join(modulesDir, entry.name));
+    // A module can expose its Fastify plugin through index.js rather than a
+    // conventionally named *.routes.js file (e.g. CMS, CRM and Support).
+    return files.some((file) => file.endsWith('.routes.js')) || files.includes('index.js');
+  })
   .map((entry) => entry.name)
-  .filter((name) => appSource.includes(`./modules/${name}/`))
+  .filter((name) => (
+    appSource.includes(`./modules/${name}/`)
+    || appSource.includes(`./modules/${name}'`)
+    || appSource.includes(`./modules/${name}"`)
+  ))
   .sort();
 const id = (name) => name.replace(/^@telecom\//, '').replace(/[^a-zA-Z0-9_]/g, '_');
 const label = (name) => name.replace(/^@telecom\//, '');
