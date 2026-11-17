@@ -51,8 +51,10 @@ flowchart LR
   api --> mod_auth_challenges["auth-challenges module"]
   api --> mod_banners["banners module"]
   api --> mod_categories["categories module"]
+  api --> mod_cms["cms module"]
   api --> mod_companies["companies module"]
   api --> mod_contact["contact module"]
+  api --> mod_crm["crm module"]
   api --> mod_inquiries["inquiries module"]
   api --> mod_notifications["notifications module"]
   api --> mod_permissions["permissions module"]
@@ -60,6 +62,7 @@ flowchart LR
   api --> mod_roles["roles module"]
   api --> mod_settings["settings module"]
   api --> mod_specification_library["specification-library module"]
+  api --> mod_support["support module"]
   api --> mod_users["users module"]
   rbac --> db
   mod_addresses --> db
@@ -69,8 +72,10 @@ flowchart LR
   mod_auth_challenges --> db
   mod_banners --> db
   mod_categories --> db
+  mod_cms --> db
   mod_companies --> db
   mod_contact --> db
+  mod_crm --> db
   mod_inquiries --> db
   mod_notifications --> db
   mod_permissions --> db
@@ -78,5 +83,6 @@ flowchart LR
   mod_roles --> db
   mod_settings --> db
   mod_specification_library --> db
+  mod_support --> db
   mod_users --> db
   db --- migrations["backend/prisma/migrations/*"]
