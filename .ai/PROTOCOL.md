@@ -37,7 +37,7 @@ Use a stable ID such as `AGENT-2026-10-25-01` or the existing project task ID.
 6. **Review:** inspect full diff, whitespace, staged paths, secrets, authorization/ownership, regression risks, and docs.
 7. **Commit:** commit verified work with a descriptive message. If unable to commit, record why and leave a clean, understandable handoff.
 8. **Synchronize:** update WORKLOG, current-task, and durable context/decision/API docs as needed.
-9. **Push:** only when explicitly authorized by the user or a standing instruction that clearly covers the current task. Verify remote HEAD if pushed.
+9. **Push:** the owner's standing project instruction authorizes the lead to publish each independently completed, reviewed, and verified task slice directly to `origin/main`. Workers never push. If checks fail or a blocker remains, preserve the patch and report `NOT PUSHED`; never bypass verification.
 10. **Handoff:** report changed files, tests, commit, push state, risks, and next steps.
 
 ## 3. Worklog format
@@ -90,13 +90,13 @@ A log entry is not a substitute for updating the canonical documentation when be
 - No branches, worktrees, detached checkouts or PRs. Agents use the existing main checkout with lead-assigned, non-overlapping file ownership. Read-only inspections may run concurrently; writes are serialized. Workers return scoped diffs/evidence and never commit or push; the lead alone integrates, commits and pushes reviewed changes to main.
 - Never force-push, rewrite history, reset away user work, or stage all files blindly.
 - Commit only scoped, reviewed, verified files. Keep commits small and meaningful.
-- No push unless authorized. If authorized, push to `origin/main` only after verifying current branch, clean diff scope, and checks.
+- The owner's standing direct-to-main workflow is the authorization for the lead to push each reviewed and verified task slice to `origin/main`. Verify the checked-out branch is `main`, review the scoped diff, run applicable checks, and verify the remote SHA after pushing. Never force-push or rewrite history.
 - Concurrent agents must not edit the same files without coordination. The coordinator records exact file ownership in `.ai/agent-coordination/ACTIVE.md`; shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global design tokens) are coordinator-owned. A WORKLOG claim is a coordination hint, not a lock guaranteed by Git.
 
 
 ## Mandatory per-task Git and GitHub synchronization
 
-- **Every independently completable task or subtask must be recorded in Git and published to GitHub immediately after that task is completed and reviewed.** Do not accumulate several completed tasks into one later commit/push.
+- **Every independently completable task or subtask must be recorded in Git and published to GitHub immediately after it is completed, reviewed, and its applicable checks pass.** This is covered by the owner's standing direct-to-main instruction for the lead; workers never commit or push. Do not accumulate several completed tasks into one later commit/push.
 - A task is not considered fully handed off until its scoped changes, relevant tests, and documentation/worklog updates have been committed and the resulting commit is present on the GitHub integration target. Record the commit SHA and push/remote status.
 - In this repository, all edits and integrations happen in the existing `main` checkout. Do not create branches, worktrees or detached checkouts. Read-only inspections may run concurrently; writes are serialized by the lead. Workers never commit or push. The lead reviews, tests, commits and pushes each completed task directly to `main`, then verifies the remote SHA.
 - If a task is split into independently verifiable slices, each completed slice follows the same commit-and-publish cycle. Do not wait for the entire lane/epic to finish.
