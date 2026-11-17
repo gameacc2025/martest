@@ -13,8 +13,8 @@ The repository is the shared memory for all coding agents. Conversations and mod
 
 ## Start every task
 
-1. Read root `AGENTS.md`, `.ai/PROTOCOL.md`, recent `.ai/WORKLOG.md` entries, and `.ai/current-task.md`.
-2. Read `.ai/project-context.md`, `.ai/decisions.md`.
+1. Read root `AGENTS.md` and `.ai/PROTOCOL.md` completely; read `.ai/current-task.md` and only the latest 3–5 relevant concise entries in `.ai/WORKLOG.md`.
+2. Read only relevant sections of `.ai/project-context.md`, `.ai/decisions.md`, and `.ai/decisions-and-open-questions.md` if present. Do not load large context files wholesale; report missing files rather than assuming their contents.
 3. Read relevant architecture, API, database, deployment, and frontend docs plus the actual implementation.
 4. Inspect `git status --short --branch` and recent commits. Preserve existing changes.
 5. Claim the task, define acceptance criteria, and plan before implementation. For high-impact or ambiguous work, wait for approval.
