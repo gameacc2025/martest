@@ -1,6 +1,16 @@
 # martest — Project Context
 
-_Baseline architecture notes originated 2026-08-08; current-state corrections last reconciled 2026-10-29. Read the final “Current state and audit corrections” section below before relying on older details.
+_Baseline architecture notes originated 2026-08-08. Historical sections below contain dated snapshots and must not be treated as current without checking source code._
+
+## Current-state reconciliation — 2026-11-17
+
+- **Repository:** `gameacc2025/martest`; **integration branch:** `main` only. No feature branches, worktrees, detached checkouts, or PRs unless the owner explicitly changes this policy.
+- **Reviewed application-code baseline:** `344a2ee049ac9a28eab48b53ce96b118d8224fc3`. Subsequent commits in this rules-audit task are documentation/workflow changes; check the live `main` HEAD before starting new work.
+- **Application boundaries:** Website/CUSTOMER, Company Portal/COMPANY, Admin/STAFF. Backend is a shared Fastify/Prisma/PostgreSQL modular monolith; do not infer that a UI prototype means an operational backend feature exists.
+- **Recent implementation status reported by commit `344a2ee0`:** CRM lead lifecycle plus Account/Contact/Pipeline/Opportunity/Task/Activity/Note route families; Support attachments, SLA calendar/worker/escalation and queue authorization; CMS scheduled publishing, revisions, preview, sitemap and password recovery; notification outbox and audit capabilities. The commit message reports 1646 backend, 371 frontend, and 305 security tests passing. These are historical commit claims, not proof that the latest `main` HEAD has passed CI.
+- **Known incomplete lanes:** Audit retention/coverage still requires explicit verification; dashboards/reporting aggregates and broader three-app visual/RTL/accessibility/keyboard/user-journey regression remain partial. Retail checkout/orders and Finance/settlement remain gated by owner commercial/legal decisions.
+- **Verification boundary:** GitHub source and workflow state can be inspected remotely. The owner's Windows working tree, local Docker daemon, and local PostgreSQL instance cannot; mark them `NOT VERIFIED` unless the owner or a local execution agent supplies fresh evidence.
+- **Source-of-truth order:** actual implementation and tests for current behavior; accepted decisions in `.ai/decisions.md`; current task/coordination board for ownership; architecture and historical context docs for intent. Report contradictions; do not silently assume old dated notes are still true.
 
 ## 1. Project identity
 Telecom B2B marketplace ("telecom-marketplace"). Companies (manufacturers/
@@ -992,6 +1002,6 @@ The database-only expansion is now merged to canonical `main` at `d509ade7d1dc45
 ## API vertical-slice and multi-agent execution contract — 2026-11-08
 - API-1 through API-6 are delivered as complete backend + API client + UI + realistic synthetic seed + tests + docs vertical slices.
 - Every seed module must be deterministic, idempotent, production-guarded, relationally valid and use synthetic records only; never seed usable credentials, real contact endpoints, payment secrets or production data.
-- Parallel agents use bounded ownership lanes and detached worktrees/checkouts pinned to a recorded main SHA; no branches are created. Only the coordinator integrates reviewed patches as serial commits directly onto main.
+- Parallel agents use bounded, non-overlapping ownership lanes in the existing `main` checkout. Do not create branches, worktrees, or detached checkouts. Read-only audits may run concurrently; writes are serialized. Workers return patches/evidence and never commit or push; only the lead integrates, commits, and publishes reviewed changes to `main`.
 - Shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global design tokens) are coordinator-owned.
 - Canonical lane matrix, handoff format, dependency order and acceptance criteria: `docs/API_UI_SEED_EXECUTION_ROADMAP.md`.
