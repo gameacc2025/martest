@@ -36,8 +36,8 @@ You are an implementation agent for the Telecom Marketplace monorepo. Complete o
 
 ### 2. Branch and parallel-work policy
 - The owner requires direct-to-`main` work. Do not create a local or remote branch, temporary branch, or PR.
-- If multiple agents run in parallel, work in an isolated detached worktree/checkout pinned to the recorded main SHA. Do not share a mutable checkout with another agent.
-- Do not commit your isolated worktree to a branch. Return a patch/diff and a list of changed files to INT.
+- If multiple agents run in parallel, use bounded, non-overlapping file ownership in the existing `main` checkout. Do not create branches, worktrees, or detached checkouts. Read-only audits may run concurrently; serialize all writes through the lead/coordinator.
+- Workers never commit or push. Return a scoped patch/diff, exact changed paths, and verification evidence to the lead for review and integration on `main`.
 - Only INT integrates reviewed patches. INT fetches the latest main, applies one patch at a time, runs checks and creates small direct-to-main commits.
 - Never force-push, reset user changes, or edit another lane's owned files.
 
