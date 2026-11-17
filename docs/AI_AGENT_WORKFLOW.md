@@ -37,7 +37,7 @@ A task is complete only when applicable tests/checks have been run and reported 
 
 ## Branch and commit discipline
 
-`main` is the only intended long-lived branch. Do not create feature branches by default. Never rewrite history or discard user work. Commit verified, scoped changes with a descriptive message. Push only when authorized. Never delete a branch without verifying that its work is safely integrated and that deletion is authorized and supported.
+`main` is the only integration branch. Do not create branches, worktrees, detached checkouts or PRs unless the owner explicitly changes this policy. Never rewrite history or discard user work. Workers never commit or push; the lead reviews, commits and publishes each independently completed, verified slice directly to `origin/main` under the owner's standing direct-to-main instruction, then verifies the remote SHA. Never force-push.
 
 ## Agent handoff
 
