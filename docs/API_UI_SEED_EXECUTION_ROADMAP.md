@@ -16,7 +16,7 @@ The first implementation milestone is to make the Website's approved visual lang
 - Do not recreate those models. Inspect the merged Prisma schema and migrations before adding any follow-up schema change.
 - Existing schema foundations are not equivalent to implemented APIs or enabled workflows.
 - Existing Admin CRM and Support experiences are prototypes in places. Replace sample-only behavior with real API calls as each vertical slice becomes available.
-- Stack: Vue 3, Vite, Pinia, PrimeVue 4, Tailwind and JavaScript. Keep the existing API client/fetch wrapper; do not introduce Axios or TypeScript.
+- Stack: Vue 3, Vite, Pinia where used, PrimeVue 4, SCSS and JavaScript. This repository is Tailwind-free; do not introduce Tailwind, another UI kit, Axios, TypeScript, or new dependencies without explicit owner approval. Keep the existing canonical `@telecom/api-client` patterns.
 - Maintain strict STAFF / COMPANY / CUSTOMER application-context boundaries and server-side authorization.
 - B2C Cart / Checkout / Orders / Wishlist and retail payment/payout remain frozen under AD-4 until the owner approves the commercial decisions.
 - Finance and retail database foundations may remain inert until their activation gates are approved.
