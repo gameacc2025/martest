@@ -2,7 +2,7 @@ name: Database Migration Validation
 
 on:
   push:
-    branches: [main, feature/inquiry-completion]
+    branches: [main]
   pull_request:
     branches: [main]
 
