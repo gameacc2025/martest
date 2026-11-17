@@ -122,7 +122,7 @@ default-deny).
 ## 10. Testing
 **Backend**: Node's built-in `node:test` runner with co-located `*.test.js` files. Run `npm test --prefix backend` or `pnpm --dir backend test`. Coverage includes auth/RBAC, products and price snapshots, inquiry lifecycle/quotas/responses, notification inbox/delivery, address ownership/default invariants, payment callback/retry idempotency, refresh-token uniqueness, and handoff context checks. Tests mock Prisma/provider boundaries unless specifically running the disposable runtime workflow.
 **Frontend**: Vitest projects are configured for shared packages and all three apps. Website coverage includes auth-store profile response normalization and the pure six-month price-history transformation; company/admin and shared packages have their own regression tests. Root command: `pnpm test`.
-**Browser E2E**: Playwright smoke tests are committed in `e2e/` and run through `.github/workflows/runtime-validation.yml`; the owner explicitly instructed not to block further work waiting for live browser execution. Never claim E2E passed unless the workflow result is observed.
+**Browser E2E**: Playwright tests are committed in `e2e/` and run through `.github/workflows/runtime-validation.yml`. Run browser checks when the task's acceptance criteria require them or the owner explicitly requests them; do not delay unrelated work for out-of-scope browser checks. Never claim E2E passed unless the matching workflow result is observed.
 
 ## 11. Docker / development
 `docker-compose.yml` (production) and `docker-compose.dev.yml` (development)
