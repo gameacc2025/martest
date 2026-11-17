@@ -93,10 +93,10 @@ Impact: Do not create feature branches by default. Preserve user changes, coordi
 
 ---
 
-Date: 2026-10-25
-Decision: All AI agents and coding assistants must communicate with the user in English regardless of the language used in the user's messages.
-Reason: The user explicitly requires consistent English communication across all models and agents.
-Impact: Plans, questions, progress updates, explanations, recommendations, and final reports are English. Product deliverables such as localized UI text or translations may use their required language, while explanations to the user remain English.
+Date: 2026-11-17
+Decision: All AI agents and coding assistants must communicate directly with the human project owner in Persian (Farsi), regardless of the language used in prompts, code, repository documentation, or tools.
+Reason: The owner requires Persian communication across all assistants so that plans, questions, progress, blockers, test results, and final reports are consistently understandable.
+Impact: Plans, questions, progress updates, explanations, recommendations, warnings, blockers, test reports, and handoffs are Persian. Code identifiers, API contracts, and technical artifacts remain in English where repository conventions require it. Product deliverables follow their explicit localization requirements. This decision supersedes the contradictory 2026-10-25 English-language entry and agrees with root AGENTS.md and .ai/PROTOCOL.md.
 
 
 ---
