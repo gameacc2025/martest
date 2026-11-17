@@ -40,11 +40,11 @@ The upstream skills are maintained by their respective authors. Do not replace t
 
 ## Verification policy
 
-- The repository owner has explicitly asked not to focus on browser testing. Do not run browser automation, screenshot inspection, or browser-based skill loops unless the owner later authorizes them.
-- Static code review, targeted Vercel guideline review, existing test authoring, and non-browser checks remain appropriate. Do not claim a visual/runtime check was performed when it was not.
-- If a skill's default workflow requires a browser, screenshots, or an interactive visual picker, follow its non-browser/static guidance where possible and record that step as `NOT RUN — owner instruction`; never fake its output.
-- Add or update tests for behavior changed by UI work, but do not execute tests/builds when the owner has instructed not to run them. Record `NOT RUN` accurately.
-- Resolve conflicts in this order: explicit user request and product requirements; repository architecture/brand/accepted decisions; these project guardrails; skill recommendations. Skills are expert references, not permission to override project constraints.
+- Choose verification from the task's acceptance criteria and risk. Use static review and component/unit tests for isolated changes; use browser automation when the task changes real user journeys, navigation, authentication, responsive behavior, accessibility, or cross-app integration, or when the owner explicitly requests it.
+- Browser automation is authorized for acceptance work, including the current CRM workflow. Run sessions sequentially when resource constraints make parallel browsers unsafe, close sessions after use, and record exact URLs, steps, outcomes, and artifacts. Do not infer a visual pass from a build or unit test.
+- If browser execution is unavailable, unsafe, or outside the approved scope, record `NOT RUN` with the concrete reason. Never claim visual/runtime behavior was verified when it was not.
+- Run relevant tests/builds unless the owner explicitly instructs otherwise or the required environment is unavailable. Record exact commands and outcomes; use `NOT RUN` or `NOT VERIFIED` honestly.
+- Resolve conflicts in this order: explicit owner request and accepted product requirements; repository architecture/brand/accepted decisions; these project guardrails; skill recommendations.ills are expert references, not permission to override project constraints.
 
 ## Installation and updates
 
