@@ -6,6 +6,14 @@
 **Prisma:** 7.10.1.  
 **Important:** this runbook does not authorize enabling B2C checkout, payment, seller payout, or any new API.
 
+## CRITICAL — Schema/migration parity blocker (2026-11-17)
+
+The current Prisma schema declares 101 models and 58 enums, but the migration SQL currently creates only 97 tables. The following four Prisma models have no CREATE TABLE statement and no table/column comments in the migration chain: Faq, Page, LeadStatusHistory and CRMFieldAudit.
+
+This is not detected by the current migration workflow because it runs prisma validate, prisma generate, prisma migrate deploy and prisma migrate status, but does not compare the migrated PostgreSQL catalog with every Prisma model or run the development seeds. The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit. A fresh migrated database is therefore not yet proven application-ready.
+
+**Do not treat the current fresh-DB migration PASS as schema parity.** Add a new forward-only migration for the four missing tables, their constraints/indexes and catalog comments; then test fresh PostgreSQL, an existing-database upgrade with backup and representative data, and seed execution twice. Do not edit applied migrations, use db push, reset a persistent database, or remove user data.
+
 ## 1. Migration inventory
 
 | Order | Migration directory | Domain |
@@ -83,7 +91,7 @@ Use the deployment's configured `DATABASE_URL` and Prisma config. Never use `pri
 - [ ] `prisma migrate status` reports no pending migrations.
 - [ ] `_prisma_migrations` contains the baseline and all six DB-1..DB-6 migration names with successful completion.
 - [ ] `prisma validate` and `prisma generate` succeed.
-- [ ] Confirm expected new schema counts: 97 Prisma models and 58 enums.
+- [ ] After the parity repair, confirm 101 physical tables for 101 Prisma models and 58 enums. Current migration chain is blocked at 97 tables; Faq, Page, LeadStatusHistory and CRMFieldAudit are missing.
 - [ ] Verify critical PostgreSQL constraints/triggers exist: AuditLog append-only; one outstanding AuthChallenge per user/purpose/channel; support message/history immutability, no physical SupportTicket deletion and one active assignment per ticket; inventory nonnegative/reservation checks; order/SellerOrder composite ownership FK; immutable inventory movements/tracking events; balanced posted journal entries; settlement maker-checker.
 - [ ] Run backend tests and application builds.
 - [ ] Confirm existing auth, company, product, inquiry, subscription, notification and address flows still work.
@@ -118,8 +126,8 @@ The schema alone does not enable a feature. Keep the following disabled until th
 ## 10. Database comments and data dictionary — 2026-11-08
 
 The additive migration `20261108000700_database_comments` adds PostgreSQL catalog descriptions only:
-- 97 `COMMENT ON TABLE` statements (one for every Prisma model/table).
-- 962 `COMMENT ON COLUMN` statements (one for every physical scalar/enum column).
+- 97 `COMMENT ON TABLE` statements and 962 `COMMENT ON COLUMN` statements were generated in this migration as of 2026-11-08.
+- The current Prisma schema now declares 101 models; the four missing models (Faq, Page, LeadStatusHistory, CRMFieldAudit) also lack catalog comments until a forward migration is added.
 - The Prisma source has `///` documentation on all 97 models and all 1,294 model fields, including 332 relation fields. Relation fields are Prisma-level navigation properties and do not create PostgreSQL columns.
 - Full field-by-field Persian descriptions and Prisma types are published in `docs/DATABASE_DATA_DICTIONARY.md`.
 - Safe to apply to an already migrated database with `prisma migrate deploy`; comments are metadata and do not alter application data or schema structure. Existing comments on these objects, if any, are replaced by the new descriptions.
