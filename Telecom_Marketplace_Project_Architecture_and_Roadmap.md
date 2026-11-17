@@ -784,10 +784,28 @@ Backend همچنان API مشترک است.
 Design tokens فعلی:
 
 ```text
-Primary: #01bec2
+Brand Primary: #22D3EE
+Primary Hover: #06B6D4
+Primary Active: #0891B2
+Primary Subtle: #CFFAFE
+Secondary: #6366F1
+Accent: #8B5CF6
 Font: Vazirmatn
 Spacing base: 4px
-Radius: 8px
+Base radius: 8px
+
+Light surfaces:
+  Page: #F0F7FA
+  Header / Sidebar / Card: #FFFFFF
+  Card Hover: #F0FDFF
+
+Dark surfaces:
+  Page: #0A1625
+  Header / Sidebar: #0D1B2A
+  Card: #122438
+  Card Hover: #193149
+
+Canonical implementation: packages/shared-ui/assets/design-system/newtemp-reference.scss
 ```
 
 اصل:
