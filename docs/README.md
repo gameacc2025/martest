@@ -34,7 +34,7 @@
 | Frontend | Vue 3، Vite، Vue Router، Pinia در بخش‌های مورد استفاده |
 | UI | PrimeVue و بسته‌های مشترک UI |
 | Backend | Node.js 22، Fastify 4 |
-| Database/ORM | PostgreSQL و Prisma 6 |
+| Database/ORM | PostgreSQL و Prisma 7.10.1 |
 | Workspace | pnpm 9 |
 | API prefix | `/api/v1` |
 
