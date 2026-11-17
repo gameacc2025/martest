@@ -2,7 +2,7 @@ name: Runtime Validation
 
 on:
   push:
-    branches: [main, runtime-validation-main]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
