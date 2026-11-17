@@ -1,3 +1,22 @@
+## 2026-11-17 — DAILY-SOURCE-AUDIT — Application, Security and Database Acceptance
+
+- **Application-code baseline:** 344a2ee049ac9a28eab48b53ce96b118d8224fc3; **main HEAD before this audit:** cab169e497248d5cd8c8f5fe193638977b964de9.
+- **Progress check:** 43 commits / 25 files after the code baseline are governance, docs, workflows and generated architecture graph only. No application code, Prisma schema or migration changed. 56536dc → cab169e is Worklog-only.
+- **CI:** PASS on 56536dc, run [44024957523](https://github.com/gameacc2025/martest/actions/runs/44024957523); architecture graph, frontend/shared tests, backend tests and three builds completed.
+- **Database Migration:** PASS on 56536dc, run [44024957659](https://github.com/gameacc2025/martest/actions/runs/44024957659); fresh PostgreSQL migration deploy and status passed.
+- **Runtime:** run [44024957549](https://github.com/gameacc2025/martest/actions/runs/44024957549) was CANCELLED at service-health wait. Compose validation and build/start passed; health, migration verification, seed-twice and browser smoke were cancelled/skipped. Do not treat this as Runtime PASS.
+- **P0 schema drift:** Prisma declares 101 models / 58 enums; migration SQL creates 97 tables. Missing tables and comments: Faq, Page, LeadStatusHistory, CRMFieldAudit. CMS seed uses Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit. Migration CI does not check live schema parity or run seeds.
+- **CRM:** 41 route handlers / 21 named schemas. POST /leads/:id/status omits actorUserId although service requires it. 6 service + 7 route tests do not exercise valid status-route success or all non-Lead CRUD/transaction paths.
+- **Support:** attachments and working-calendar tests exist (45 service tests). Pause/resume only records events; worker pause check is a placeholder. SLA warning/escalation recipient lookup sends to all active STAFF when a queue is assigned; no queue filter or worker test was found.
+- **Audit:** PostgreSQL append-only trigger confirmed. Redaction matcher has mixed-case key mismatch for apiKey/privateKey/creditCard/cardNumber/nationalId/bankAccount. Existing 17 service tests cover reads/queries/export, not writer/redaction. Retention/archival not found.
+- **Notifications:** SMS outbox and quota/dedupe tests exist, but preference service still returns smsAvailable=false while SUPPORT_SLA_ESCALATED defaults SMS=true; missing preference falls back to that event default. Provider delivery not verified.
+- **Dashboards / Website / Company:** admin orders count aliases inquiries; OperationsHub and retail-order pages contain sample rows; Company sales chart is sample. Website Cart/Checkout/Orders routes remain registered despite AD-4, though checkout submission is disabled and cart is local-only.
+- **Owner decisions:** AD-1 CUSTOMER RFQ, AD-3 COMPANY_MANAGER user permissions, AD-4 B2C routes remain unchanged pending approval.
+- **Local verification:** no local Windows/Docker/PostgreSQL/tests/builds were available or run. No product code or database was changed.
+- **Documentation:** current-task, ACTIVE, backlog and migration runbook updated with this audit.
+
+---
+
 ## 2026-11-17 — Validation refresh after decision-drift findings
 
 - **Reviewed main SHA:** `56536dc1e6cbcea3f5ae295102a008c470360c7b`.
