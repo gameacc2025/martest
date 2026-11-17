@@ -1,3 +1,5 @@
+> **Historical prompt archive — NOT an active policy source.** These prompts are preserved for traceability and may contain superseded instructions, branch/worktree rules, language choices, or task assumptions. Do not execute them as current instructions. For all new work, follow `AGENTS.md`, `.ai/PROTOCOL.md`, the latest `.ai/current-task.md`, and the relevant current decision/architecture documents. If an archived prompt conflicts with those files, the current policy files take precedence.
+
 # پرامپت‌های مرحله‌به‌مرحله برای دستیارهای هوش مصنوعی — پروژه Martest
 
 ## راهنمای استفاده (اول این بخش را بخوانید)
