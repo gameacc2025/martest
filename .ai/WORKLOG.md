@@ -1,12 +1,13 @@
 ## 2026-11-17 — POLICY-AUDIT-2026-11-17 — Repository rules reconciliation
 
-- **Status:** PARTIAL — confirmed policy conflicts corrected and published; repository-wide source audit and latest CI verification remain open.
-- **Baseline:** application code `344a2ee049ac9a28eab48b53ce96b118d8224fc3`; all edits remain on `main`.
-- **Findings fixed:** Copilot English-only rule; stale English decision; blanket browser-test prohibition; ambiguous lead push authorization; feature-branch CI triggers; detached-worktree instruction; stale/contradictory coordination blockers; outdated project context and design palette.
-- **Files:** `AGENTS.md`, `.ai/PROTOCOL.md`, `.ai/UI_SKILLS.md`, `.ai/decisions.md`, `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, `.ai/project-context.md`, `.github/copilot-instructions.md`, `.github/workflows/database-migration-validation.yml`, `.github/workflows/runtime-validation.yml`, `docs/AI_AGENT_WORKFLOW.md`, `Telecom_Marketplace_Project_Architecture_and_Roadmap.md`.
-- **Commits:** `6399106b`, `9dab428c`, `0d32abc2`, `bf67c537`, `5562f41f`, `32a8ed10`, `e7bd0218`, `4ce322e4`, `f05efee5`, `6ea90955`, `092c85ab`, followed by this handoff update.
-- **Verification:** Confirmed token values from `newtemp-reference.scss`; inspected the 5,098-blob repository tree and key governance documents. No local tests/builds were run. Latest CI/migration/runtime checks must be verified on the final HEAD; local Windows/Docker/PostgreSQL remain `NOT VERIFIED`.
-- **Next:** Check latest GitHub Actions results; audit all remaining tool-specific entrypoints and source-backed open lanes (Audit retention, dashboards, three-app regression); update this task only with observed evidence.
+- **Status:** PARTIAL — confirmed rule conflicts and architecture-graph CI failure corrected; final CI/Runtime reruns are pending.
+- **Application-code baseline:** `344a2ee049ac9a28eab48b53ce96b118d8224fc3`; all policy/documentation changes published directly to `main`.
+- **Findings fixed:** Copilot English-only rule; stale English decision; blanket browser-test prohibition; ambiguous startup/push rules; non-main workflow triggers; detached-worktree instructions; stale Tailwind stack references; old palette; contradictory Support/CMS status; obsolete project-context snapshots; unmarked legacy prompt archives.
+- **CI defect fixed:** architecture graph generator missed plugin-style CMS/CRM/Support modules and Inventory. Updated generator and generated graph; graph-check PASS observed on subsequent CI run.
+- **Files:** `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.ai/PROTOCOL.md`, `.ai/UI_SKILLS.md`, `.ai/decisions.md`, `.ai/project-context.md`, `.ai/agent-coordination/ACTIVE.md`, `.ai/current-task.md`, `.ai/WORKLOG.md`, `PROMPTS.md`, `.ai/PROMPTS.md`, `.github/workflows/database-migration-validation.yml`, `.github/workflows/runtime-validation.yml`, `docs/AI_AGENT_WORKFLOW.md`, `docs/AGENT_TASK_BRIEF_API_UI_SEED.md`, `docs/API_UI_SEED_EXECUTION_ROADMAP.md`, `Telecom_Marketplace_Project_Architecture_and_Roadmap.md`, `scripts/generate-architecture-graph.mjs`, `docs/architecture/DEPENDENCY_GRAPH.generated.mmd`.
+- **Verification:** repository tree inventory (5,098 blobs; not all file contents read); canonical design tokens checked. CI on `8f9993f2` PASS (graph, frontend/shared tests, backend tests, three builds): https://github.com/gameacc2025/martest/actions/runs/44022899028 . Migration validation on `f12782af` PASS: https://github.com/gameacc2025/martest/actions/runs/44023060315 . CI and Runtime on `f12782af` still running at handoff.
+- **Local verification:** no local Windows shell, Docker, or developer PostgreSQL access; these remain `NOT VERIFIED`. No local tests/builds were run.
+- **Next:** wait for latest CI/Runtime; inspect remaining source-backed Audit retention, dashboard aggregate, and three-app regression gaps. Keep all writes serialized on `main`.
 
 ---
 
