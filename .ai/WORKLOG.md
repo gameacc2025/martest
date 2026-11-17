@@ -1,3 +1,15 @@
+## 2026-11-17 — POLICY-AUDIT-2026-11-17 — Repository rules reconciliation
+
+- **Status:** PARTIAL — confirmed policy conflicts corrected and published; repository-wide source audit and latest CI verification remain open.
+- **Baseline:** application code `344a2ee049ac9a28eab48b53ce96b118d8224fc3`; all edits remain on `main`.
+- **Findings fixed:** Copilot English-only rule; stale English decision; blanket browser-test prohibition; ambiguous lead push authorization; feature-branch CI triggers; detached-worktree instruction; stale/contradictory coordination blockers; outdated project context and design palette.
+- **Files:** `AGENTS.md`, `.ai/PROTOCOL.md`, `.ai/UI_SKILLS.md`, `.ai/decisions.md`, `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, `.ai/project-context.md`, `.github/copilot-instructions.md`, `.github/workflows/database-migration-validation.yml`, `.github/workflows/runtime-validation.yml`, `docs/AI_AGENT_WORKFLOW.md`, `Telecom_Marketplace_Project_Architecture_and_Roadmap.md`.
+- **Commits:** `6399106b`, `9dab428c`, `0d32abc2`, `bf67c537`, `5562f41f`, `32a8ed10`, `e7bd0218`, `4ce322e4`, `f05efee5`, `6ea90955`, `092c85ab`, followed by this handoff update.
+- **Verification:** Confirmed token values from `newtemp-reference.scss`; inspected the 5,098-blob repository tree and key governance documents. No local tests/builds were run. Latest CI/migration/runtime checks must be verified on the final HEAD; local Windows/Docker/PostgreSQL remain `NOT VERIFIED`.
+- **Next:** Check latest GitHub Actions results; audit all remaining tool-specific entrypoints and source-backed open lanes (Audit retention, dashboards, three-app regression); update this task only with observed evidence.
+
+---
+
 ## 2026-11-13 — SUPPORT-SLA-FALLBACK-AND-ACCEPTANCE
 
 - **Code baseline:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`.
