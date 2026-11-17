@@ -23,6 +23,8 @@
   - کاربران را **فعال/غیرفعال** کند (`users.activate` / `users.deactivate` محدود به شرکت خود).
 - permissionهای `users.create`، `users.update`، `users.delete`، `users.assign_roles` نباید در نقش‌های COMPANY باشند.
 
+**Implementation drift found (2026-11-17):** `backend/prisma/seed.js` still grants `users.create`, `users.update`, and `users.assign_roles` to `COMPANY_MANAGER`. The current `user.service.js` rejects COMPANY create/edit/role-assignment operations with `COMPANY_USER_MANAGEMENT_RESTRICTED`, and unit tests cover those denials, so this is a stale/over-broad permission grant rather than a confirmed service-level bypass. The seed should revoke these grants idempotently; because this changes permission assignments, make the correction only under the owner's explicit security/permission-change approval and verify existing database role grants are reconciled.
+
 ### AD-4 — Commerce فاز آینده B2C است (Disabled، نه Deleted)
 - Cart / Checkout / Orders / Wishlist مربوط به فاز آینده B2C هستند.
 - فعلاً **حذف نمی‌شوند**، فقط **غیرفعال** می‌شوند.
