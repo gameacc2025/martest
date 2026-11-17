@@ -1,111 +1,68 @@
-# CRM-00 — CRM — Task 1: Reconcile CRM Domain Design with Prisma Models; Implement Lead Create/List/Detail/Update with Source, Score, Owner, Lifecycle History
+# POLICY-AUDIT-2026-11-17 — Repository Rules and Agent Workflow Reconciliation
 
-**Task ID:** CRM-00-T1  
-**Lane:** API-4 CRM Lane  
-**Status:** COMPLETED  
-**Base SHA:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`  
-**Completed:** 2026-11-15
+**Task ID:** POLICY-AUDIT-2026-11-17  
+**Status:** IN_PROGRESS — confirmed contradictions corrected and published; latest CI validation pending.  
+**Repository:** `gameacc2025/martest`  
+**Integration branch:** `main` only  
+**Application-code baseline reviewed:** `344a2ee049ac9a28eab48b53ce96b118d8224fc3`  
+**Owner communication:** Persian
 
 ## Objective
-Reconcile CRM domain design with Prisma models; implement lead create/list/detail/update with source, score, owner, lifecycle history.
 
-## Scope Completed
+Audit the repository's authoritative AI/developer instructions, agent coordination rules, workflow triggers, design-system constraints, and project-state documents. Remove contradictions, make the main-only/lead-only workflow executable, and prevent stale historical notes from being mistaken for current verification.
 
-### 1. Backend Service (`backend/src/modules/crm/crm.service.js`)
-- **Lead CRUD operations** with full lifecycle management:
-  - `createLead` — Creates lead with source, score, owner, displayName, companyName, email, phone; validates score (0-100); requires STAFF owner; generates unique leadNumber
-  - `listLeads` — Paginated listing with filters (status, sourceId, ownerUserId, search, scoreMin/Max); includes source and owner relations
-  - `getLead` — Detail view with source and owner
-  - `updateLead` — Updates mutable fields (displayName, companyName, email, phone, score, sourceId); prevents updates on terminal statuses (CONVERTED, DISQUALIFIED, DUPLICATE, LOST)
-  - `assignLead` — Reassigns owner; records in LeadStatusHistory and CRMFieldAudit
-  - `changeLeadStatus` — Validates state transitions (NEW→CONTACTED→QUALIFIED→CONVERTED; exits: DISQUALIFIED, DUPLICATE, LOST); requires reason for DISQUALIFIED/LOST
-  - `convertLead` — Atomic conversion: creates CRMAccount + primary CRMContact; updates lead with convertedAccountId, convertedByUserId, convertedAt; records in LeadStatusHistory and CRMFieldAudit
-  - `duplicateCandidates` — Finds potential duplicates by email, phone, displayName, companyName
-  - `mergeLeads` — Merges source into target; moves activities/tasks/notes; updates target with best values; marks source as DUPLICATE; records in LeadStatusHistory and CRMFieldAudit
-  - `leadTimeline` — Unified timeline of activities, tasks, notes for a lead
+## Confirmed findings and changes published
 
-- **LeadSource management**:
-  - `listSources` — Active sources ordered by sortOrder/label
-  - `manageSource` — Create/update source (code, label, isActive, sortOrder)
+- Corrected `.github/copilot-instructions.md`: it previously required English communication, directly contradicting `AGENTS.md` and `.ai/PROTOCOL.md`.
+- Corrected the stale English-language architectural decision in `.ai/decisions.md`; Persian owner communication is now the current decision.
+- Reconciled browser-testing rules in `.ai/UI_SKILLS.md`: removed the blanket prohibition and made browser testing conditional on acceptance criteria/explicit authorization, consistent with `AGENTS.md`.
+- Reconciled push authorization in `AGENTS.md`, `.ai/PROTOCOL.md`, and `docs/AI_AGENT_WORKFLOW.md`: workers never commit/push; the lead publishes each reviewed, verified slice to `origin/main` under the owner's standing direct-to-main workflow; no force-push.
+- Removed non-main branch triggers from database-migration and runtime-validation workflows.
+- Corrected `.ai/agent-coordination/ACTIVE.md`: historical workflow runs are labelled historical; conflicting Support/CMS blocker statements were removed; open Audit, Dashboard, Regression, Retail/Finance and local-verification gaps are stated separately.
+- Added a dated current-state reconciliation to `.ai/project-context.md` and removed its obsolete detached-worktree instruction.
+- Aligned the architecture roadmap palette with the canonical `newtemp-reference.scss` tokens.
 
-- **Dashboard aggregation**:
-  - `dashboard` — Lead counts (total, new, qualified, converted), task counts (open, overdue), opportunities by currency/status
+## Files changed
 
-### 2. CRMFieldAudit Integration (Field-Level Audit Trail)
-All lead mutating operations now record field changes in `CRMFieldAudit`:
-- **createLead** — Audits all provided fields as CREATE actions
-- **updateLead** — Audits only changed fields as UPDATE actions with old/new values
-- **assignLead** — Audits ownerUserId change
-- **changeLeadStatus** — Status change already recorded in LeadStatusHistory
-- **convertLead** — Audits status, convertedAccountId, convertedByUserId, convertedAt
-- **mergeLeads** — Audits fields copied from source to target
+- `.github/copilot-instructions.md`
+- `.ai/UI_SKILLS.md`
+- `.ai/decisions.md`
+- `.ai/PROTOCOL.md`
+- `AGENTS.md`
+- `.github/workflows/database-migration-validation.yml`
+- `.github/workflows/runtime-validation.yml`
+- `.ai/agent-coordination/ACTIVE.md`
+- `.ai/project-context.md`
+- `Telecom_Marketplace_Project_Architecture_and_Roadmap.md`
+- `docs/AI_AGENT_WORKFLOW.md`
 
-### 3. LeadStatusHistory Integration (Lifecycle History)
-All status transitions recorded with actor, timestamp, reason:
-- `changeLeadStatus` — Records previous/new status
-- `convertLead` — Records QUALIFIED→CONVERTED
-- `assignLead` — Records status-less assignment (same status, notes owner change)
-- `mergeLeads` — Records source lead status change to DUPLICATE
+## Verification and limitations
 
-### 4. API Routes (`backend/src/modules/crm/index.js`)
-- **Lead endpoints** (STAFF-only, permission-gated):
-  - `GET /leads` — List with query params
-  - `POST /leads` — Create (schema validated)
-  - `GET /leads/:id` — Detail
-  - `PATCH /leads/:id` — Update (schema validated, includes actorId)
-  - `POST /leads/:id/assign` — Assign owner
-  - `POST /leads/:id/status` — Change status
-  - `POST /leads/:id/convert` — Convert to account
-  - `GET /leads/:id/duplicates` — Find duplicates
-  - `POST /leads/:id/merge` — Merge into target
-  - `GET /leads/:id/timeline` — Activity/task/note timeline
-  - `GET /leads/export` — CSV export
-- **LeadSource endpoints**:
-  - `GET /lead-sources` — List
-  - `POST /lead-sources` — Create
-  - `PATCH /lead-sources/:id` — Update
-- **Dashboard**:
-  - `GET /dashboard` — Aggregated stats
-- All endpoints require STAFF access type + specific CRM permissions
+- Repository tree inventory: 5,098 tracked blobs at application-code baseline `344a2ee0`; this is a file inventory, not a claim that every source file has been read.
+- Confirmed canonical light/dark palette directly against `packages/shared-ui/assets/design-system/newtemp-reference.scss`.
+- Latest workflow checks must be read from GitHub Actions for the latest `main` SHA. The older run IDs in ACTIVE.md are historical and do not certify the current HEAD.
+- No local Windows shell, Docker daemon, or developer PostgreSQL access in this review. Local status/runtime remains `NOT VERIFIED`.
+- No source-code tests were run by this remote documentation-only pass.
 
-### 5. Tests (13 tests passing)
-- **Service unit tests** (6 tests): createLead, updateLead (terminal refusal, field audit, no-change audit), changeLeadStatus (valid/invalid transitions)
-- **Route integration tests** (7 tests): unauthenticated rejection, COMPANY/CUSTOMER rejection, STAFF without permission rejection, schema validation for create/update/assign/status/merge
+## Remaining audit work
 
-### 6. Database Models (already in Prisma schema)
-- `Lead` — leadNumber (unique), displayName, companyName, email, phone, sourceId, status (CRMLeadStatus), score (0-100), ownerUserId, convertedAccountId, convertedByUserId, convertedAt, disqualifiedReason
-- `LeadStatusHistory` — leadId, previousStatus, newStatus, actorUserId, reason, createdAt
-- `CRMFieldAudit` — entityType, entityId, fieldName, oldValue, newValue, actorUserId, action, requestId, occurredAt
-- `LeadSource` — code (unique), label, isActive, sortOrder
-- `CRMAccount`, `CRMContact`, `Opportunity`, `Pipeline`, `PipelineStage`, `CRMActivity`, `CRMTask`, `CRMNote` — full CRM domain models
+1. Reconcile the full current-task/worklog index and check all tool-specific instruction entrypoints for contradictions.
+2. Inspect the actual source/tests for the open Audit retention/coverage, dashboard aggregation, and three-app regression items before changing their status.
+3. Review the remaining implementation and CI evidence by bounded domain; do not infer completion from old roadmap prose or commit messages.
+4. Wait for CI, migration, and runtime workflows on the final documentation commit; fix any failures caused by the rule/workflow edits.
+5. Keep all changes on `main`; lead-only commits/pushes; no destructive Git commands.
 
-## File Ownership
-- `backend/src/modules/crm/**` ✅
-- `backend/prisma/seeds/crm.js` ✅ (demo fixtures)
-- `apps/admin/src/pages/admin/crm/**` (UI - already exists, uses these APIs)
+## Latest integration history for this audit
 
-## Dependencies
-- Company/User/Inquiry identity contract ✅ (models exist, relations defined)
-- M0 design tokens ✅ (shared theme loaded)
+- Copilot: `6399106b78a31ffd205122964c61b6be92c5f717`
+- UI skill verification policy: `9dab428cd28bad80ac317c4b3290390842e3c857`
+- Language decision: `0d32abc220a64f14bc639141b88218f51019c175`
+- Shared publishing protocol: `bf67c53741c13db5f9234c3af001f99fc3f0e627`
+- Root agent rules: `5562f41f605638bf318204e191adcf909eeac61a`
+- Migration workflow: `32a8ed10a230a187d7861448f6e7559922ad1fb1`
+- Runtime workflow: `e7bd021876a754cbeea0e58d0cd5fac841126f9e`
+- Coordination board: `4ce322e44ebc9144c174ec76ddf34c80beeffcd1`
+- Project context: `f05efee5adf029c3b58a36a8bcab0043459c4209`
+- Architecture palette: `6ea90955a023884331e7748d4762f1cf3033d9dc`
+- Human-facing agent workflow: `092c85ab8afefb8def544f1be7cf683f3d557641`
 
-## Verification Results
-- ✅ All 13 CRM service/route tests pass
-- ✅ Full backend test suite runs (1606 pass, 1 pre-existing failure in notifications module unrelated to CRM)
-- ✅ Prisma client generated successfully
-- ✅ Field audit trail working on all mutating operations
-- ✅ Lifecycle history recorded for all status transitions
-- ✅ STAFF-only access enforced with granular permissions
-- ✅ Terminal lead protection prevents unauthorized modifications
-- ✅ Concurrent conversion protection with atomic claim pattern
-- ✅ Idempotent duplicate merge with full audit trail
-
-## Remaining Work (Future Tasks)
-- T2: Account/Contact CRUD API endpoints
-- T3: Pipeline/Opportunity CRUD and stage history
-- T4: Activity/Task/Note CRUD
-- T5: Admin UI integration (already partially exists in CRMWorkspace.vue)
-- T6: Connection to Inquiry/Order/Ticket for lead source tracking
-- T7: Lead scoring rules engine (currently manual score entry)
-
-## Notes
-This task completes the first phase of CRM-00: Lead lifecycle management with full audit trail. The Prisma models for the entire CRM domain (Account, Contact, Opportunity, Pipeline, Activity, Task, Note) are already in place. The service implements the Lead aggregate root with proper domain events (status history, field audit) per CRM_DOMAIN_DESIGN.md.
