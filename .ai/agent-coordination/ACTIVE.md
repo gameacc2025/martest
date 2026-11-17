@@ -67,6 +67,8 @@ The historical workflow runs listed below were executed against their own record
 5. Retail checkout/orders and Finance/settlement remain HOLD pending explicit commercial, tax, currency, commission, legal, and payout decisions.
 6. Local Windows workspace, Docker, and developer PostgreSQL state remain NOT VERIFIED from this remote-only review.
 7. AD-4 implementation drift: `apps/website/src/router/index.js` registers `/cart`, `/checkout`, and `/orders` although AD-4 requires B2C routes/UI to be disabled. Owner decision required; no route behavior was changed by this audit.
+8. AD-1 implementation drift: CUSTOMER_USER seed grants `leads.create` and `inquiries.create`; the inquiry POST route and service support customer-originated RFQs. Owner must choose whether to keep RFQ creation and revise AD-1 or disable it.
+9. AD-3 seed drift: COMPANY_MANAGER receives `users.create`, `users.update`, and `users.assign_roles` even though user.service.js and tests deny these operations in COMPANY context. Explicit security/permission approval is required before reconciling existing role grants.
 
 ## Active Task Assignments
 
