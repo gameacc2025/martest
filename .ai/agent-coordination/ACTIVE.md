@@ -66,6 +66,7 @@ The historical workflow runs listed below were executed against their own record
 4. P1-6 three-app regression remains PARTIAL beyond smoke coverage: visual, RTL, accessibility, keyboard, and feature-journey coverage still needs evidence.
 5. Retail checkout/orders and Finance/settlement remain HOLD pending explicit commercial, tax, currency, commission, legal, and payout decisions.
 6. Local Windows workspace, Docker, and developer PostgreSQL state remain NOT VERIFIED from this remote-only review.
+7. AD-4 implementation drift: `apps/website/src/router/index.js` registers `/cart`, `/checkout`, and `/orders` although AD-4 requires B2C routes/UI to be disabled. Owner decision required; no route behavior was changed by this audit.
 
 ## Active Task Assignments
 
