@@ -4,6 +4,7 @@
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
 **Reviewed application-code baseline:** `344a2ee049ac9a28eab48b53ce96b118d8224fc3`  
+**Latest main HEAD before audit:** `cab169e497248d5cd8c8f5fe193638977b964de9`  
 **Rules-audit integration:** follow the latest `main` HEAD; this board is documentation and may advance independently of the application-code baseline.  
 **Coordinator:** Lead  
 **Owner communication:** Persian
@@ -22,24 +23,26 @@
 
 The historical workflow runs listed below were executed against their own recorded commit, not automatically against the current `main` HEAD. They are historical evidence only; never treat them as proof that the latest commit is green.
 
-| Check | Historical run | Interpretation |
+| Check | Latest observed run | Interpretation |
 |---|---|---|
-| CI + build | [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592) | Historical PASS; current HEAD requires its own run |
-| Migration validation | [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157) | Historical PASS; current HEAD requires its own run |
-| Runtime + seeds + browser | [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935) | Historical PASS; current HEAD requires its own run |
+| CI + build | [44024957523](https://github.com/gameacc2025/martest/actions/runs/44024957523) on 56536dc | PASS — graph, frontend/shared, backend and three builds |
+| Migration validation | [44024957659](https://github.com/gameacc2025/martest/actions/runs/44024957659) on 56536dc | PASS — fresh PostgreSQL deploy/status; does not prove Prisma schema parity |
+| Runtime + seeds + browser | [44024957549](https://github.com/gameacc2025/martest/actions/runs/44024957549) on 56536dc | CANCELLED at health wait; migration verify, seed twice and browser smoke skipped |
+
+The exact pre-audit HEAD cab169e has no combined-status contexts. Only Worklog changed between 56536dc and cab169e; app code is identical, but do not label exact-HEAD checks independently green.
 
 `main` is the only integration branch. Local Windows workspace, Docker daemon, and any developer PostgreSQL instance cannot be inspected through the GitHub repository connection and must remain `NOT VERIFIED` unless checked locally.
 
-## Initial 9 Tasks — VERIFIED (2026-11-16)
+## Initial 9 Tasks — implementation outputs with current acceptance blockers (reviewed 2026-11-17)
 
 | Task | Status | Tests | Key Findings |
 |---|---|---|---|
 | WH-00 Warehouse | ✅ COMPLETED | 49 PASS (18 unit + 31 integration) | Atomic stock ops, row-level locking, idempotency, invariants enforced (onHand≥0, reserved≥0, available≥0) |
-| CRM-00 Lead Lifecycle | ✅ COMPLETED | 13 PASS (6 service + 7 routes), 1606 backend | Full Lead CRUD, CRMFieldAudit + LeadStatusHistory, STAFF-only, conversion idempotent |
-| SUP-01 Support Foundation | ✅ COMPLETED | 12 PASS | Ticket lifecycle, tenant isolation, SLA fallback, internal notes STAFF-only |
-| CMS-01 Content Inventory | ✅ COMPLETED | Models/Seed verified | Article/Category/Tag/Page/Faq/Banner/Revision/Media models, slug strategy, lifecycle. Gaps: scheduled worker, preview, sitemap |
-| NTF-01 Notifications | ✅ COMPLETED | 69 notification + 1608 backend PASS | Generic SMS outbox, retry/idempotency/consent/quota, 4 Support events, Iranian phone validation |
-| AUD-01 Audit Log | ✅ COMPLETED | 17 audit + 1608 backend PASS | Actor context, safe metadata, redaction, correlation ID, STAFF-only /api/v1/audit |
+| CRM-00 Lead Lifecycle | IMPLEMENTED / BLOCKED | 13 tests (6 service + 7 routes) | Lead lifecycle source exists; 2 required tables missing from migrations; status route omits actorUserId; route success and non-Lead CRUD coverage incomplete |
+| SUP-01 Support Foundation | IMPLEMENTED / PARTIAL ACCEPTANCE | 45 service tests + 5 route tests | Attachments/calendar/worker exist; pause/resume is event-only, worker pause check is placeholder, queue notification fan-out is too broad |
+| CMS-01 Content Inventory | IMPLEMENTED / DB BLOCKED | Models and seed source present | Faq/Page tables are absent from migration chain although cms seed upserts both; do not claim fresh-DB seed acceptance |
+| NTF-01 Notifications | IMPLEMENTED / CONSENT MISMATCH | Dispatcher SMS queue tests exist | Preference API says smsAvailable=false while SUPPORT_SLA_ESCALATED defaults SMS=true; provider delivery unverified |
+| AUD-01 Audit Log | PARTIAL ACCEPTANCE | 17 read/query/export tests | DB append-only trigger exists; mixed-case redaction keys can escape; writer tests and retention/archival are missing |
 | DASH-00 Design System | ✅ COMPLETED | 60+ files, 3 apps build + unit tests PASS | Semantic --ds-* tokens, newtemp-reference.scss last, RTL/Vazirmatn preserved |
 | WEB-00 Website Tokens | ✅ COMPLETED | 8 files, 371 tests PASS | marketplace-theme.scss component-only, legacy --tm-* removed |
 | COMPANY-00 Company Tokens | ✅ COMPLETED | 10 files, build PASS, 371 tests PASS | Visual parity with Admin, CSS fixes in InquiryDetail.vue |
@@ -48,10 +51,11 @@ The historical workflow runs listed below were executed against their own record
 
 | Priority | Lane | Status | Scope / exit criteria |
 |---|---|---|---|
-| P1-1 | CRM acceptance | ✅ **COMPLETED (2026-11-16)** | All 7 remaining route families implemented: Account, Contact, Pipeline, PipelineStage, Opportunity, Task, Activity, Note. 27 endpoints, 16 schemas, STAFF-only + granular permissions. 8 CRM tests PASS, 1646/1646 backend PASS. |
-| P1-2 | Support completion | ✅ **COMPLETED (2026-11-16)** | Private attachments, SLA calendar/worker/escalation, queue-level authorization, API client integration. 45 service + 5 route + 10 notification tests PASS. 1646/1646 backend PASS. |
-| P1-3 | CMS + password recovery | ✅ **COMPLETED (2026-11-16)** | Scheduled publish worker, revision restore API, preview system, sitemap generator, password recovery (forgot/reset). 1646/1646 backend PASS. |
-| P1-4 | Notifications + Audit | PARTIAL | generic SMS outbox/retry/consent/quota/idempotency ✅; audit event matrix, redaction and retention |
+| P0 | Prisma migration parity | **BLOCKED** | Schema declares 101 models/58 enums; migrations create 97 tables. Missing: Faq, Page, LeadStatusHistory, CRMFieldAudit. Forward-only migration + comments + fresh/upgrade DB + seed-twice validation required. |
+| P1-1 | CRM acceptance | **PARTIAL** | 41 route handlers, 21 named schemas. POST /leads/:id/status omits actorUserId; LeadStatusHistory/CRMFieldAudit tables are missing from migrations; only 6 service + 7 route tests and no valid status-route success test. |
+| P1-2 | Support completion | **PARTIAL** | Attachments and calendar/worker exist; pause/resume does not affect due dates and worker checkPausedSlas is a placeholder. SLA notifications query all active STAFF instead of queue-specific assignments. |
+| P1-3 | CMS + password recovery | **PARTIAL** | CMS source/seed exists, but Faq and Page have no migration tables; fresh-DB seed acceptance is blocked until forward migration. |
+| P1-4 | Notifications + Audit | PARTIAL | SMS preference/default consent mismatch; audit redaction case mismatch, writer tests, producer coverage and retention/archival remain open |
 | P1-5 | Dashboards/reporting | PARTIAL | replace sample KPIs with tenant/date/currency-scoped aggregates |
 | P1-6 | Three-app regression | PARTIAL | expand beyond smoke to visual, RTL, accessibility, keyboard and feature journeys |
 | P2 | Retail/Inventory/Orders | HOLD — OWNER DECISION | no checkout/payment activation before commercial approval |
@@ -60,15 +64,22 @@ The historical workflow runs listed below were executed against their own record
 
 ## Current risks / open acceptance
 
-1. P1-1 CRM, P1-2 Support, and P1-3 CMS are reported implemented in commit `344a2ee0`; the commit message reports 1646 backend, 371 frontend, and 305 security tests passing. These counts are commit claims, not a fresh run against the current documentation HEAD.
-2. P1-4 Audit/Notifications remains PARTIAL: audit retention is explicitly called out as a gap in the implementation commit; inspect the audit service, direct write call sites, event registry, retention policy, and tests before declaring closure.
+1. Commit 344a2ee0 contains substantial CRM/Support/CMS implementation, but current source audit found acceptance blockers: missing four migration tables (including two CRM and two CMS), a CRM status-route actor argument defect, and ineffective Support SLA pause/resume.
+2. P1-4 Audit/Notifications remains PARTIAL: AuditLog DB trigger is append-only, but redaction matching misses several mixed-case sensitive keys; current 17 audit tests do not cover writer/redaction; no retention/archival implementation found. SMS preference API and event defaults conflict.
 3. P1-5 dashboards/reporting remains PARTIAL until KPIs are backed by tenant/date/currency-scoped persisted aggregates.
 4. P1-6 three-app regression remains PARTIAL beyond smoke coverage: visual, RTL, accessibility, keyboard, and feature-journey coverage still needs evidence.
 5. Retail checkout/orders and Finance/settlement remain HOLD pending explicit commercial, tax, currency, commission, legal, and payout decisions.
 6. Local Windows workspace, Docker, and developer PostgreSQL state remain NOT VERIFIED from this remote-only review.
-7. AD-4 implementation drift: `apps/website/src/router/index.js` registers `/cart`, `/checkout`, and `/orders` although AD-4 requires B2C routes/UI to be disabled. Owner decision required; no route behavior was changed by this audit.
+7. AD-4 implementation drift: Website /cart, /checkout, /orders and Company /retail/orders remain registered. Cart is local-only and checkout submit is disabled; owner must decide disablement versus prototype exception.
 8. AD-1 implementation drift: CUSTOMER_USER seed grants `leads.create` and `inquiries.create`; the inquiry POST route and service support customer-originated RFQs. Owner must choose whether to keep RFQ creation and revise AD-1 or disable it.
 9. AD-3 seed drift: COMPANY_MANAGER receives `users.create`, `users.update`, and `users.assign_roles` even though user.service.js and tests deny these operations in COMPANY context. Explicit security/permission approval is required before reconciling existing role grants.
+
+10. P0 migration parity: Prisma declares 101 models/58 enums; current migration SQL creates 97 tables. Missing model tables/comments are Faq, Page, LeadStatusHistory and CRMFieldAudit. CMS seed and CRM service already query/write them. Migration CI does not detect this drift and Runtime was cancelled before seed.
+11. CRM route defect: backend/src/modules/crm/index.js:223 omits r.user.id when calling changeLeadStatus; service requires actorId. Existing route test only exercises an invalid payload.
+12. Support SLA/queue: pause/resume only appends events; worker pause check returns zero as a placeholder. Queue escalation/warning queries all active STAFF, not queue-specific active assignments.
+13. Audit redaction: mixed-case sensitive field names are compared to a lowercased key without lowercasing the set entries; add writer/redaction tests and a retention policy.
+14. Notifications SMS: dispatcher queues SMS, but preferences say unavailable; SUPPORT_SLA_ESCALATED defaults SMS on when no preference row exists. Require explicit owner-approved consent semantics.
+15. Dashboard data: admin orders is actually Inquiry count; OperationsHub and retail-order pages use hardcoded rows; Company sales chart is sample.
 
 ## Active Task Assignments
 
@@ -83,7 +94,7 @@ The historical workflow runs listed below were executed against their own record
 - **Findings:** Full implementation verified — service (adjustStock, reserveStock, releaseReservation, consumeReservation, expireReservations), routes (read: COMPANY/STAFF, write: STAFF only), duplicate route registration fixed, retail seed created (InventoryBalance with 50-250 units, RECEIPT movements, sample reservations, expired reservations), seed orchestrator updated. **49 tests PASS** (18 unit + 31 integration). Atomic conditional stock updates with row-level locking, idempotency keys, movement audit trail, onHand>=0, reserved>=0, available>=0 invariants enforced. AD-4 freeze respected — only inventory foundation, no checkout/payment.
 
 ### CRM-00 — CRM — API-4 CRM Lane
-- **Status:** ✅ COMPLETED — Full Route Families (Verified 2026-11-16)
+- **Status:** IMPLEMENTED — ACCEPTANCE BLOCKED (2026-11-17)
 - **Assigned Agent:** backend + frontend (paired) — AG-CRM
 - **Base main SHA:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`
 - **Scope:** Lead/account/contact/pipeline/opportunity/activity/task/note CRUD, STAFF-only access, conversion idempotency, Kanban UI
@@ -98,10 +109,10 @@ The historical workflow runs listed below were executed against their own record
   - CRMTask: CRUD + assign/complete, due dates, reminders
   - CRMActivity: Completed interactions/timeline
   - CRMNote: Visibility-controlled (TEAM/PRIVATE)
-- **Implementation:** 16 Fastify schemas, 27 new routes, all STAFF-only + granular `crm.*` permissions, Note visibility filtering, 8 CRM tests PASS, **1646/1646 backend tests PASS**.
+- **Implementation:** 21 named Fastify schema constants and 41 route handlers are present with granular crm.* guards. The status route omits actorUserId; the 6 service + 7 route tests do not exercise a successful status request or all non-Lead CRUD families. LeadStatusHistory/CRMFieldAudit are missing from migration SQL.
 
 ### SUP-01 — پشتیبانی (Support) — API-2 Support Lane
-- **Status:** ✅ COMPLETED — Full Vertical Slice (Verified 2026-11-16)
+- **Status:** IMPLEMENTED — SLA/QUEUE ACCEPTANCE PARTIAL (2026-11-17)
 - **Assigned Agent:** backend + frontend + database (triad) — AG-SUP
 - **Base main SHA:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`
 - **Scope:** Ticket lifecycle, queues/SLA, private attachments, notifications, Admin/Company/Customer UI, assignment, pagination
@@ -109,19 +120,19 @@ The historical workflow runs listed below were executed against their own record
 - **Dependencies:** Shared API conventions; M0 design tokens; notification/file infrastructure
 - **Foundation (T1):** ✅ COMPLETED — Ticket create/list/detail, tenant isolation, SLA fallback, internal notes STAFF-only, 12 tests PASS
 - **Attachments (T2):** ✅ COMPLETED — upload/download/delete with ownership checks, MIME/size validation (10MB), secure storage, SHA-256 checksums, internal message restrictions, 18 new tests PASS
-- **SLA Calendar/Worker/Escalation (T3):** ✅ COMPLETED — Working calendar (Mon-Fri 09-18 Iran), holidays, addWorkingMinutes, isWorkingDay, calculateSlaRemaining, isSlaBreached/AtRisk, getSlaDetails, pauseSla/resumeSla events. **SLA Monitor Worker** implemented (5-min interval), escalation to assignee+queue members, warning at 20% threshold. **Notification events**: SUPPORT_SLA_ESCALATED (SMS enabled), SUPPORT_SLA_WARNING. 20 new tests PASS.
-- **Queue-level Authorization & Visibility (T3+):** ✅ COMPLETED — listTicketsByQueue, getQueueStats (SLA breached/at-risk counts, priority breakdown), getQueueAssignments. Routes: GET /queues/:queueId/tickets, GET /queues/:queueId/stats. API client: listQueueTickets, getQueueStats.
+- **SLA Calendar/Worker/Escalation (T3):** PARTIAL — working calendar and escalation/warning worker exist, but pauseSla/resumeSla only append events, getSlaDetails does not account for paused time, and checkPausedSlas() is a placeholder. The worker's queue fan-out queries all active STAFF without filtering by queue/active SupportAssignment; no dedicated worker tests found.
+- **Queue-level Authorization & Visibility (T3+):** STAFF-only queue routes and stats exist, but service/worker do not establish queue-member scoping; notification fan-out is currently STAFF-wide. Confirm intended queue membership policy and test it.
 - **API Client & Endpoints:** ✅ COMPLETED — All new endpoints in endpoints.js and apiClient.js
 - **Test Results:** 45 support service tests PASS, 5 support route tests PASS, 10 notification events tests PASS, **1646/1646 backend tests PASS**
 
 ### CMS-01 — CMS — API-3 CMS Lane
-- **Status:** ✅ COMPLETED — Full Vertical Slice + Password Recovery (Verified 2026-11-16)
+- **Status:** IMPLEMENTED — FRESH-DB ACCEPTANCE BLOCKED (2026-11-17)
 - **Assigned Agent:** backend + frontend (paired) — AG-CMS
 - **Base main SHA:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`
 - **Scope:** Article/Page/FAQ/Banner CRUD, draft→review→scheduled/published→archived, revisions, SEO, public read APIs, Admin editor, Website rendering
 - **File Ownership:** `backend/src/modules/cms/**`, `backend/prisma/seeds/cms.js`, `apps/admin/src/pages/admin/cms/**`, `apps/website/src/pages/public/cms/**`
 - **Dependencies:** Shared media/API conventions; M0 design tokens
-- **Content Inventory (T1):** ✅ COMPLETED — Models, slug strategy, lifecycle, admin UI, seed, public APIs
+- **Content Inventory (T1):** IMPLEMENTED — Models, slug strategy, lifecycle, admin UI, seed and public APIs; Faq/Page migration tables are missing although the seed upserts them.
 - **Scheduled Publish Worker (T3):** ✅ COMPLETED — `cms-scheduled-publish.worker.js`: auto-publishes SCHEDULED articles when `scheduledAt <= now`, creates revision, configurable interval/batch. Registered in `server.js`.
 - **Revision Restore API (T3):** ✅ COMPLETED — `POST /cms/articles/manage/:id/revisions/:revisionNo/restore`, restores title/content/status/categories/tags/SEO from snapshot, creates new revision.
 - **Preview System (T3):** ✅ COMPLETED — `preview.service.js`: signed tokens (1hr TTL, single-use), `generatePreviewToken`, `validatePreviewToken`, `cleanupExpiredTokens`. Routes: POST `/cms/articles/manage/:id/preview-token` (admin), GET `/cms/articles/preview/:token` (public). Admin UI: Preview button. Website: `/magazine/preview/:token` route.
@@ -131,24 +142,24 @@ The historical workflow runs listed below were executed against their own record
 - **Test Results:** **1646/1646 backend tests PASS**
 
 ### NTF-01 — اعلان‌ها (Notifications) — API-1 Auth/Audit Lane (part)
-- **Status:** ✅ COMPLETED — Generic SMS Outbox (Verified 2026-11-16)
+- **Status:** IMPLEMENTED — PREFERENCE/CONSENT ACCEPTANCE PARTIAL (2026-11-17)
 - **Assigned Agent:** backend + frontend (paired) — AG-NTF
 - **Base main SHA:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`
 - **Scope:** Generic SMS outbox, retry/idempotency/consent/quota, notification event dispatch, inbox/folders/preferences
 - **File Ownership:** `backend/src/modules/notifications/**`, `backend/prisma/seeds/auth-audit.js` (notification events), `apps/admin/src/pages/admin/notifications/**`, `apps/company/src/pages/company/notifications/**`, `apps/website/src/pages/public/notifications/**`
 - **Dependencies:** AuthChallenge foundation; M0 design tokens
 - **First Task:** Implement generic SMS outbox with retry/idempotency/consent/quota; connect ticket/message/status events to notifications idempotently — **COMPLETED**
-- **Findings:** Generic SMS outbox implemented with retry/idempotency/consent/quota. 4 Support events added (TICKET_CREATED, MESSAGE_RECEIVED, STATUS_CHANGED, TICKET_ASSIGNED). Support service dispatches notifications transactionally with dedupeKey. Phone validation/normalization for Iranian formats (09X, +989X, 989X). Quota enforcement via consumeUsage (forceEnforcement: true). **69 notification tests + 1608 backend tests PASS**.
+- **Findings:** Dispatcher queues SMS with quota/dedupe and tests cover queue/quota. However preference service returns smsAvailable=false while SUPPORT_SLA_ESCALATED defaults SMS=true; missing stored preference falls back to event default. Explicit consent semantics and provider delivery remain unverified. Delivery-worker comments still describe SMS as inquiry-only although dispatcher queues generic event SMS.
 
 ### AUD-01 — Audit — API-1 Auth/Audit Lane (part)
-- **Status:** ✅ COMPLETED — AuditLog Module (Verified 2026-11-16)
+- **Status:** IMPLEMENTED — REDACTION/RETENTION ACCEPTANCE PARTIAL (2026-11-17)
 - **Assigned Agent:** backend + database (paired) — AG-AUD
 - **Base main SHA:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`
 - **Scope:** AuditLog module/service, append-only semantics, actor context capture, staff search API, redaction/retention
 - **File Ownership:** `backend/src/modules/audit/**`, `backend/prisma/seeds/auth-audit.js`
 - **Dependencies:** AuthChallenge foundation; security policy; correlationId middleware (WH-00)
 - **First Task:** Implement AuditLog module/service; capture actor context, target, action, safe before/after metadata, source/IP/user-agent policy, request correlation ID — **COMPLETED**
-- **Findings:** Full implementation verified — 7 service functions, 4 routes (search, stats, byId, export CSV/JSON), append-only with DB trigger `prevent_audit_log_mutation`, 50+ sensitive fields redacted recursively, correlation ID from WH-00 middleware. **17 audit service tests + 1608 backend tests PASS**. STAFF-only /api/v1/audit with audit_logs.read/export permissions.
+- **Findings:** STAFF-only read/export routes and DB append-only trigger prevent_audit_log_mutation exist. Redaction helper is called by writers, but mixed-case keys such as apiKey/privateKey/creditCard/cardNumber/nationalId/bankAccount evade the lowercased comparison. The 17 current tests cover read/query/export, not writer/redaction; no retention/archival worker or policy found.
 
 ### DASH-00 — داشبورد مدیریت (Admin Dashboard) — M0 Design System Lane
 - **Status:** ✅ COMPLETED — Design System Alignment (Verified 2026-11-16)
