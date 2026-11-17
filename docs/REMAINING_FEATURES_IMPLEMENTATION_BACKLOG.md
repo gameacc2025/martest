@@ -1,6 +1,66 @@
 # Remaining Features — Implementation Backlog and Database-First Plan
 
-## آخرین اعتبارسنجی و ممیزی — 2026-11-13
+## آخرین ممیزی سورس و اعتبارسنجی — 2026-11-17
+
+> **کد مبنا:** 344a2ee049ac9a28eab48b53ce96b118d8224fc3؛ **HEAD قبل از این ممیزی:** cab169e497248d5cd8c8f5fe193638977b964de9. از کد مبنا تا HEAD، 43 commit و 25 فایل فقط در حوزه مستندات/حاکمیت/Workflow/گراف معماری تغییر کرده‌اند؛ کد محصول، Prisma Schema و Migrationها تغییر نکرده‌اند.
+
+### شواهد CI / Migration / Runtime
+
+| کنترل | نتیجه | شواهد |
+|---|---|---|
+| CI | PASS روی 56536dc1e6cbcea3f5ae295102a008c470360c7b | [44024957523](https://github.com/gameacc2025/martest/actions/runs/44024957523) — graph، frontend/shared، backend و build سه اپ |
+| Migration Validation | PASS روی همان SHA | [44024957659](https://github.com/gameacc2025/martest/actions/runs/44024957659) — Prisma validate/generate، deploy روی PostgreSQL تازه و migrate status |
+| Runtime Validation | **CANCELLED، نه PASS** | [44024957549](https://github.com/gameacc2025/martest/actions/runs/44024957549) — Compose config و build/start موفق؛ health check لغو و migration verify، seed دوباره و browser smoke اجرا نشدند |
+| آخرین HEAD | status context قابل مشاهده ندارد | CI/DB بالا روی SHA قبلی است؛ بین آن و HEAD فقط Worklog تغییر کرده، اما exact-HEAD status ثبت نشده |
+
+محیط محلی Windows، Docker و PostgreSQL در این ممیزی در دسترس نبودند. هیچ تست یا Build محلی اجرا نشد.
+
+### P0 — ناسازگاری Prisma Schema و Migrationها
+
+- Prisma Schema فعلی: **101 مدل و 58 enum**.
+- کل migration SQLها: **97 جدول** و migration کامنت‌ها: **97 جدول / 962 ستون**.
+- چهار مدل فاقد CREATE TABLE و COMMENT در migration chain: Faq، Page، LeadStatusHistory و CRMFieldAudit.
+- CMS seed از prisma.faq.upsert() و prisma.page.upsert() استفاده می‌کند.
+- CRM service در update/assignment/status/conversion/merge به leadStatusHistory و cRMFieldAudit می‌نویسد.
+- Migration workflow فقط validate/generate/deploy/status انجام می‌دهد و schema-to-database parity یا Seed را اجرا نمی‌کند. Runtime جدید پیش از Seed لغو شد.
+
+**معیار خروج:** migration افزایشی جدید برای چهار جدول و constraint/indexهای لازم؛ چهار table/column comment؛ تست PostgreSQL تازه و ارتقای دیتابیس موجود با backup/داده نماینده؛ اجرای seedها دو بار؛ تست‌های CMS/CRM. هیچ migration اعمال‌شده‌ای ویرایش نشود و از db push، reset یا حذف داده استفاده نشود.
+
+### وضعیت دامنه‌ها بر اساس سورس
+
+| دامنه | تأییدشده | نیازمند اصلاح / پذیرش |
+|---|---|---|
+| CRM | 41 route handler، 21 schema ثابت، LeadStatusHistory و CRMFieldAudit در schema/service | هر دو جدول در migration نیستند؛ route تغییر وضعیت Lead، actorUserId را به service نمی‌دهد؛ 6 service + 7 route tests مسیر موفق status و همه CRUDهای غیر-Lead را پوشش نمی‌دهند |
+| Support | attachment upload/download/delete، ownership checks، working calendar، SLA worker و 45 service tests | pause/resume فقط event ثبت می‌کند؛ worker pause-check placeholder است؛ fan-out صف به‌جای اعضای صف به همه STAFF فعال می‌رود؛ worker test پیدا نشد |
+| Audit | STAFF + permission guards؛ DB trigger برای جلوگیری از UPDATE/DELETE؛ writer و redaction helper موجود | تطبیق case-sensitive بعضی کلیدها (apiKey, privateKey, creditCard, cardNumber, nationalId, bankAccount) را redact نمی‌کند؛ 17 تست فعلی read/query/export هستند؛ retention/archival پیدا نشد |
+| Notifications | dispatcher می‌تواند SMS را با quota/dedupe در outbox قرار دهد؛ تست queue و quota وجود دارد | preferences هنوز smsAvailable=false می‌دهد، اما SUPPORT_SLA_ESCALATED پیش‌فرض SMS=true دارد؛ نبود preference به event default می‌افتد و می‌تواند بدون opt-in صریح SMS queue کند؛ provider واقعی تأیید نشده |
+| Admin Dashboard | آمار اصلی از API دریافت می‌شود | orders در admin.service برابر totalInquiries است؛ OperationsHub آمار/ردیف‌های CRM/Finance/Support/Orders را hardcode کرده |
+| Company Dashboard | Inquiry/Product KPIها از API | نمودار فروش صریحاً sample است؛ صفحه Company Retail Orders ردیف‌های hardcode دارد |
+| Website / Company | Cart محلی و checkout preview؛ دکمه نهایی ثبت سفارش disabled است | مسیرهای Website /cart, /checkout, /orders و Company /retail/orders ثبت شده‌اند؛ این با AD-4 که route/UI را disabled می‌خواهد ناسازگار است؛ API عملیاتی Order/Payment در ثبت Route Backend پیدا نشد |
+| Database | 58 enum؛ migrationها additive و fresh-DB deploy workflow موجود | 4 مدل/جدول missing؛ runbook count 97 model دیگر با schema فعلی 101 model همخوان نیست؛ existing local DB NOT VERIFIED |
+
+### تصمیم‌های مالک که هنوز نباید خودسرانه تغییر کنند
+
+- AD-1: CUSTOMER RFQ creation در seed/route/service مجاز است ولی تصمیم معماری آن را منع می‌کند.
+- AD-3: COMPANY_MANAGER سه permission مدیریت کاربر را در seed می‌گیرد، ولی service و unit tests عملیات را در COMPANY context رد می‌کنند.
+- AD-4: مسیرهای B2C در Website/Company ثبت‌اند، اما خرید عملیاتی فعال نیست و تصمیم می‌گوید UI/routes غیرفعال بمانند.
+
+### اولویت اجرایی بعدی
+
+| اولویت | اقدام | شرط پذیرش |
+|---|---|---|
+| **P0** | Migration parity برای Faq/Page/LeadStatusHistory/CRMFieldAudit | forward migration، constraints/indexes/comments، fresh + upgrade DB test، seed twice |
+| **P1** | CRM status route و پوشش CRUD | actorId صحیح، موفقیت status route، تست non-Lead CRUD، conversion/merge transaction/idempotency |
+| **P1** | Support SLA/Queue | pause/resume مؤثر بر deadline، worker واقعی و تست‌شده، recipients بر اساس assignment/queue |
+| **P1** | Audit | نرمال‌سازی نام کلیدها، writer/redaction tests، retention/archival policy |
+| **P1** | Notifications | تصمیم صریح SMS opt-in/defaults، هماهنگی preference API و event catalog، staging provider test |
+| **P1** | Dashboards | اصلاح orders/inquiries، حذف یا برچسب‌گذاری نمونه‌ها، aggregateهای tenant/date/currency-scoped |
+| **P1** | Website/Company | تعیین تکلیف AD-4 و نگه‌داشتن checkout/payment غیرفعال تا تأیید تجاری |
+| **P1** | Regression | Runtime، seed twice، Playwright، RTL، accessibility، keyboard و visual QA روی SHA ثابت |
+
+---
+
+## ممیزی تاریخی — 2026-11-13 (با ممیزی 2026-11-17 جایگزین شده است)
 
 > **کد مبنا:** `main`، commit `0d0a3866c6ff387978f8c5244f6ca936248f508d`. این ممیزی از سورس GitHub و GitHub Actions است. working tree ویندوز، Docker محلی، PostgreSQL محلی، stashها و فایل‌های untracked دستگاه کاربر قابل مشاهده نیستند و NOT VERIFIED باقی می‌مانند.
 
@@ -71,7 +131,7 @@
 
 ## 1. Executive summary
 
-The marketplace core is already substantial. The current Prisma schema contains 42 models and 21 enums covering identity/RBAC, companies, product catalog and lifecycle, pricing history, B2B inquiries and supplier responses, inquiry subscriptions/quotas, notifications, customer addresses, settings and banners.
+The marketplace core is already substantial. The current Prisma schema at the 2026-11-17 source audit contains 101 models and 58 enums across identity/RBAC, companies, catalog, inquiries, notifications, Auth/Audit, Support, CMS, CRM, Inventory/Retail and Finance. The current migration SQL creates only 97 tables; Faq, Page, LeadStatusHistory and CRMFieldAudit are missing from the migration chain and comments migration. See the P0 parity blocker above.
 
 The remaining work is not a rewrite of that core. It is the completion of several adjacent domains and the operationalization of existing UI prototypes:
 
