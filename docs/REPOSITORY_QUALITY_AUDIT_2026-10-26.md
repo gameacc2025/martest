@@ -1,3 +1,5 @@
+> **Historical audit snapshot (2026-10-26; last historical refresh 2026-10-29).** This report preserves evidence and findings from that audit window; its workflow/test/browser instructions and status statements are not current policy or current release status. For current policy use `AGENTS.md`, `.ai/PROTOCOL.md`, and `.ai/UI_SKILLS.md`; for current project status use `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, and the latest GitHub Actions runs.
+
 # Repository Quality Audit — 2026-10-26
 
 ## Current status (history refreshed 2026-10-29; see final current-state addendum)
