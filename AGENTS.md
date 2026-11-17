@@ -55,7 +55,7 @@ If any required file is missing, record that fact and continue with the remainin
 - If uncommitted changes exist, inspect and isolate them. Do not stage unrelated files or commit another person's work.
 - Never delete a branch or repository without explicit confirmation. If the task is to retain only main, first verify that any other branch's unique commits are safely integrated and explain whether deletion is actually available.
 - Use small, meaningful commits after verification. Do not amend or rewrite existing commits unless explicitly requested.
-- Push only when the user has authorized pushing in the current task/workflow, the intended target is confirmed, and verification is complete. Never push secrets or environment files.
+- The owner's standing direct-to-main instruction authorizes the lead (not workers) to push each independently completed, reviewed, and verified task slice to `origin/main`. Confirm branch, scoped diff, and applicable checks first; verify remote HEAD afterward. If blocked, preserve the patch and report `NOT PUSHED`. Never force-push, rewrite history, or push secrets/environment files.
 - For parallel agents, the coordinator assigns exact file ownership in `.ai/agent-coordination/ACTIVE.md`. Agents must not edit the same files concurrently. Shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global tokens) are lead-owned. Parallelize read-only audits; serialize all writes and integration on main. Do not create branches, worktrees or detached checkouts.
 
 ## Implementation and quality gates
@@ -97,7 +97,7 @@ Before declaring a task complete:
 4. Stage explicit file paths only; inspect `git diff --cached`.
 5. Commit using a clear conventional message, e.g. `fix: enforce company ownership for product updates` or `docs: define mandatory agent workflow`.
 6. Record the commit SHA and validation evidence in WORKLOG.
-7. Push only when authorized and safe; verify remote HEAD after pushing.
+7. The lead pushes the reviewed, verified slice to `origin/main` under the owner's standing authorization; workers never push. Verify remote HEAD afterward. If blocked, record `NOT PUSHED`.
 
 ## Handoff / final response format
 
