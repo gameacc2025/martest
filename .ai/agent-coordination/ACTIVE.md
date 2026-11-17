@@ -1,9 +1,10 @@
 # Agent Coordination — Current Board
 
-**Updated:** 2026-11-16  
+**Updated:** 2026-11-17  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Verified code baseline:** `0d0a3866c6ff387978f8c5244f6ca936248f508d`  
+**Reviewed application-code baseline:** `344a2ee049ac9a28eab48b53ce96b118d8224fc3`  
+**Rules-audit integration:** follow the latest `main` HEAD; this board is documentation and may advance independently of the application-code baseline.  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,13 +18,17 @@
 - Browser automation is authorized for acceptance; run sequentially and record evidence.
 - Local Windows workspace, Docker and PostgreSQL remain NOT VERIFIED.
 
-## Verified P0 checks
+## CI evidence and verification boundary
 
-| Lane | Status | Evidence |
+The historical workflow runs listed below were executed against their own recorded commit, not automatically against the current `main` HEAD. They are historical evidence only; never treat them as proof that the latest commit is green.
+
+| Check | Historical run | Interpretation |
 |---|---|---|
-| CI + build | PASS | [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592): install, architecture graph, Frontend/Shared, Backend, Prisma and all three builds |
-| Migration validation | PASS | [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157): fresh PostgreSQL migration apply |
-| Runtime + seeds + browser | PASS | [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935): Compose, health, migrations, seed twice, Chromium, 8/8 Playwright |
+| CI + build | [43474183592](https://github.com/gameacc2025/martest/actions/runs/43474183592) | Historical PASS; current HEAD requires its own run |
+| Migration validation | [43474183157](https://github.com/gameacc2025/martest/actions/runs/43474183157) | Historical PASS; current HEAD requires its own run |
+| Runtime + seeds + browser | [43474183935](https://github.com/gameacc2025/martest/actions/runs/43474183935) | Historical PASS; current HEAD requires its own run |
+
+`main` is the only integration branch. Local Windows workspace, Docker daemon, and any developer PostgreSQL instance cannot be inspected through the GitHub repository connection and must remain `NOT VERIFIED` unless checked locally.
 
 ## Initial 9 Tasks — VERIFIED (2026-11-16)
 
@@ -53,15 +58,14 @@
 | P2 | Finance/Settlement | HOLD — OWNER DECISION | requires Retail lifecycle and currency/tax/commission/legal/payout rules |
 | P3 | Enterprise future modules | DEFERRED | separately approved scope required |
 
-## Verified blockers / risks
+## Current risks / open acceptance
 
-1. All P0 automated checks are green on the verified SHA and run IDs above.
-2. Support create/reply browser journey passes, but secure attachments, notifications and SLA worker/calendar are not implemented/verified.
-3. CRM Leads list browser journey passes; full mutation and permission/tenant matrix acceptance remains.
-4. CMS FAQ/Page CRUD browser acceptance and real SMS delivery remain unverified.
-5. Generic SMS dispatch, audit coverage and sample dashboard data remain open.
-6. Retail/Finance remain gated by owner decisions.
-7. Local Windows/Docker/PostgreSQL remain NOT VERIFIED.
+1. P1-1 CRM, P1-2 Support, and P1-3 CMS are reported implemented in commit `344a2ee0`; the commit message reports 1646 backend, 371 frontend, and 305 security tests passing. These counts are commit claims, not a fresh run against the current documentation HEAD.
+2. P1-4 Audit/Notifications remains PARTIAL: audit retention is explicitly called out as a gap in the implementation commit; inspect the audit service, direct write call sites, event registry, retention policy, and tests before declaring closure.
+3. P1-5 dashboards/reporting remains PARTIAL until KPIs are backed by tenant/date/currency-scoped persisted aggregates.
+4. P1-6 three-app regression remains PARTIAL beyond smoke coverage: visual, RTL, accessibility, keyboard, and feature-journey coverage still needs evidence.
+5. Retail checkout/orders and Finance/settlement remain HOLD pending explicit commercial, tax, currency, commission, legal, and payout decisions.
+6. Local Windows workspace, Docker, and developer PostgreSQL state remain NOT VERIFIED from this remote-only review.
 
 ## Active Task Assignments
 
