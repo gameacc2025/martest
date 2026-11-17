@@ -1,3 +1,14 @@
+## 2026-11-17 — Validation refresh after decision-drift findings
+
+- **Reviewed main SHA:** `56536dc1e6cbcea3f5ae295102a008c470360c7b`.
+- **CI:** PASS — run 3422, including architecture graph check, frontend/shared tests, backend tests, and three app builds: https://github.com/gameacc2025/martest/actions/runs/44024957523
+- **Database Migration Validation:** PASS — run 2998: https://github.com/gameacc2025/martest/actions/runs/44024957659
+- **Runtime Validation:** IN PROGRESS — run 2801. Compose configuration passed; build/start of PostgreSQL, backend, and three frontend panels was running at last inspection: https://github.com/gameacc2025/martest/actions/runs/44024957549
+- **Decision drift:** AD-1 CUSTOMER RFQ creation, AD-3 COMPANY_MANAGER over-broad seed permissions, and AD-4 active B2C routes are now recorded in Architecture Decisions, role-access matrix, project context and ACTIVE board. No business or permission behavior changed without owner approval.
+- **Next:** wait for Runtime Validation; request owner decisions for AD-1/AD-3/AD-4 before changing behavior.
+
+---
+
 ## 2026-11-17 — POLICY-AUDIT-2026-11-17 — Governance and source-backed decision audit
 
 - **Status:** PARTIAL — governance rules reconciled; three source/decision mismatches documented for owner decision; Runtime Validation was still running at last check.
