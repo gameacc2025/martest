@@ -9,6 +9,8 @@
 - نقش `CUSTOMER_USER` نباید permissionهای `inquiries.create` یا `leads.create` داشته باشد.
 - هیچ Route یا UI برای ثبت Inquiry توسط CUSTOMER نباید فعال باشد.
 
+**Implementation drift found (2026-11-17):** `backend/prisma/seed.js` grants `CUSTOMER_USER` both `leads.create` and `inquiries.create`; `POST /api/v1/inquiries` allows CUSTOMER access when one of those permissions is present; and `createInquiry()` explicitly creates a buyer-owned OPEN inquiry for a CUSTOMER. This directly conflicts with AD-1. The owner must decide whether to remove CUSTOMER RFQ creation (including permissions/UI/route behavior) or formally revise AD-1 to allow customer-originated RFQs. Do not silently change either side during this audit.
+
 ### AD-2 — هر User فقط متعلق به یک Company است
 - Multi Company Membership وجود **ندارد**.
 - رابطه User→Company یک‌به‌چند از سمت Company است (هر User حداکثر یک `companyId`).
