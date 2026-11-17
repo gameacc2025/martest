@@ -26,6 +26,8 @@
 - فعلاً **حذف نمی‌شوند**، فقط **غیرفعال** می‌شوند.
 - هیچ Route فعال، هیچ UI فعال، و هیچ لینک/ارجاع فعالی به آن‌ها نباید وجود داشته باشد.
 
+**Implementation drift found (2026-11-17):** `apps/website/src/router/index.js` currently registers the `/cart`, `/checkout`, and `/orders` routes. These active frontend route registrations conflict with this accepted decision even though the operational order/payment backend is not established by this inspection. Do not silently change the business decision or remove these routes as part of a documentation audit. The owner must decide whether to disable the routes/UI to enforce AD-4 or formally revise AD-4 to permit a clearly labelled prototype.
+
 ### AD-5 — بدون تغییر معماریِ تأییدنشده
 - ممیزی، تحلیل، مقایسه تصمیم‌ها با کد واقعی و پیشنهاد اصلاح همواره مجاز است؛ به‌ویژه وقتی مالک پروژه آن را درخواست کرده باشد.
 - تغییر معماری یا Refactor پرریسک بدون شواهد، برنامه اثرات، طرح بازگشت و تأیید صریح مالک انجام نمی‌شود.
