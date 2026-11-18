@@ -272,7 +272,7 @@ The writers await the database insert; they are not fire-and-forget. Use `record
 | `auth_challenges.request` | Request a challenge for self | CUSTOMER, COMPANY, STAFF | CUSTOMER_USER, COMPANY_MANAGER, STAFF_ADMIN |
 | `auth_challenges.verify` | Verify/consume challenge (public) | Public (no auth) | — |
 | `audit_logs.read` | Search/view audit logs | STAFF only | STAFF_ADMIN, STAFF_AUDITOR |
-| `audit_logs.export` | Bulk export (if approved) | STAFF only | STAFF_ADMIN |
+| `audit_logs.export` | Export matching audit entries as JSON/CSV | STAFF only | STAFF_ADMIN |
 
 **Notes:**
 - `auth_challenges.verify/consume` are public endpoints (no auth required) — authorization is via challenge ownership (challengeId + code).
@@ -333,7 +333,7 @@ CREATED (PENDING)
 
 | Route | Screen | States |
 |-------|--------|--------|
-| `/admin/security/audit` | Security Event Explorer | Loading, Empty, Error, Results (paginated, filterable) |
+| `/admin/security/audit` | Security Event Explorer | UI route; API calls use `/api/v1/audit/logs` (paginated, filterable) |
 | `/admin/security/audit/:id` | Event Detail | Loading, Error, Detail (with safe metadata diff) |
 | `/admin/users/:id/sessions` | User Session Management | Loading, Empty, Error, Active Sessions (with revoke) |
 
@@ -454,7 +454,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.SEED_DEMO_DATA) {
 | **Concurrent devices** | Allow multiple (add device metadata to RefreshToken) / Single active session (current behavior) | Keep single-session for now; add device metadata in follow-up |
 | **MFA mandatory for STAFF** | Yes / No / Opt-in | Opt-in (configurable per-role later) |
 | **Audit log retention/archival** | Owner/legal-approved period and archive destination | **OPEN — do not purge or archive automatically.** AuditLog is append-only and the DB trigger rejects UPDATE/DELETE; retention requires an explicit compliance decision and an approved archive design. |
-| **Audit export permission** | Add `audit_logs.export` / Not needed | Not needed for MVP |
+| **Audit export permission** | Add `audit_logs.export` / Not needed | IMPLEMENTED — export route requires STAFF + `audit_logs.export`. |
 
 ---
 
