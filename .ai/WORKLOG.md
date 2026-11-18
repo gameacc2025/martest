@@ -97,3 +97,16 @@
 ## Worklog rules
 
 Append only concise verified entries: task ID, exact source SHA, changed paths, checks/results, commit SHA, blockers and next action. Never store credentials, secrets, personal data or raw logs.
+
+
+---
+
+## 2026-11-18 — PROJECT-WIDE-AUDIT-AND-REPAIR
+
+- **Status:** IN_PROGRESS — project-wide source audit and staged repairs underway.
+- **Baseline:** `cef559d4ffa9dc3c5c3c98967ea08cd4e522060d`; all changes below were committed directly to existing `main`.
+- **Fixes:** Audit redaction key normalization + nested/case-variant test (`3cb9f940`, `2316e552`); CRM lead-status route now passes actor ID + route contract test (`0281b639`, `849df765`); corrected stale Tailwind architecture description (`c4590a27`); added forward-only migration for Faq, Page, LeadStatusHistory and CRMFieldAudit with indexes/FKs/comments (`784999f1`); updated DB runbook (`3403c0d1`) and migration CI table-existence assertion (`eb1511a2`).
+- **Verification:** No local tests/builds/DB commands were run. GitHub push-triggered CI and migration workflow for the new HEAD are **PENDING / NOT VERIFIED**; fresh DB, seed-twice and existing DB upgrade remain unverified.
+- **Scope boundary:** GitHub connector only; Windows working tree, Docker daemon and local PostgreSQL are inaccessible. No production DB or secrets were accessed.
+- **Open blockers:** Support SLA pause/resume and queue recipient scoping; audit writer coverage and retention; SMS event-default/consent mismatch; misleading dashboard sample data; source drift against accepted AD-1/AD-3/AD-4; three-app regression and remaining domain audits.
+- **Next:** Inspect Support SLA worker/assignment schema and implement a tested, queue-scoped pause/resume slice. Continue the whole-repository audit in bounded slices.
