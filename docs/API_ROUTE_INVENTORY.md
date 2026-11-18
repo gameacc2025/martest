@@ -4,7 +4,7 @@ Updated from the Fastify route registrations on `main` at 2026-11-13. All paths 
 
 ## How to read this inventory
 
-- The method and path are the registered HTTP route, not a frontend URL. The inventory test covers all registered modules, including CMS and CRM.
+- The method and path are an active registered HTTP route, not a frontend URL. The inventory test covers every registered module, including CMS and CRM. Retail stock/reservation endpoints are intentionally unregistered under AD-4 and therefore do not appear here.
 - The guard column summarizes route-level `onRequest`/`preHandler` and inherited module hooks. `AccessProfile` app context is independent of role names and wildcard permissions.
 - Resource ownership and tenant filters are also enforced in services; a route guard alone is not the complete authorization contract.
 - Request/response JSON schemas, limits, and examples remain in the source route/schema files. This inventory does not invent schemas for routes that currently omit them.
