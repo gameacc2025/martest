@@ -301,6 +301,7 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
   summary.sms.providerNotConfigured = 0;
   summary.sms.noPhoneNumber = 0;
   summary.sms.quotaExceeded = 0;
+  summary.sms.quotaCheckFailed = 0;
   summary.sms.duplicates = 0;
 
   if (smsRecipients.length && !hasSmsProvider()) {
@@ -347,10 +348,11 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
           summary.sms.quotaExceeded += 1;
           quotaSkipped = true;
         } else {
-          // SMS is a paid, quota-enforced channel. Any uncertainty about quota
-          // or subscription state must fail closed; never queue billable delivery
-          // when the quota check itself could not be completed safely.
-          throw error;
+          // Fail closed for SMS, but do not roll back the business transaction
+          // that requested the notification. An unavailable quota service or
+          // changed subscription state must never create an unmetered SMS row.
+          summary.sms.quotaCheckFailed += 1;
+          quotaSkipped = true;
         }
       }
 
