@@ -308,6 +308,7 @@ const similarProducts = ref([])
 const similarProductsLoading = ref(false)
 
 const canCreateInquiry = computed(() => authStore.isAuthenticated
+  && !authStore.isCustomer
   && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
 const productTags = computed(() => {
   const tags = Array.isArray(product.value.tags) ? product.value.tags
