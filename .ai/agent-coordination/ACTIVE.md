@@ -3,7 +3,7 @@
 **Updated:** 2026-11-18  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code baseline:** `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`  
+**Latest tested code baseline:** `24be9b53af92ca1d37f3dd7cf2fd2fc17e47e4f3`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,9 +17,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 | Slice | Status | Evidence |
 |---|---|---|
-| CI | PASS | [44304118782](https://github.com/gameacc2025/martest/actions/runs/44304118782): 385 Frontend/Shared tests, 18 architecture/session tests, 1,688 Backend tests, all three app builds |
-| Prisma migration parity | PASS | [44304118529](https://github.com/gameacc2025/martest/actions/runs/44304118529): fresh PostgreSQL migration and all Prisma model/table checks |
-| Runtime + browser | PASS | [44304118441](https://github.com/gameacc2025/martest/actions/runs/44304118441): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
+| CI | PASS | [44305796094](https://github.com/gameacc2025/martest/actions/runs/44305796094): 385 Frontend/Shared tests, 18 architecture/session tests, 1,689 Backend tests, all three app builds |
+| Prisma migration parity | PASS | [44305796146](https://github.com/gameacc2025/martest/actions/runs/44305796146): fresh PostgreSQL migration and all Prisma model/table checks |
+| Runtime + browser | PASS | [44305795993](https://github.com/gameacc2025/martest/actions/runs/44305795993): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
 | Support SLA | IMPLEMENTED + VERIFIED | Pause/resume, queue-scoped recipients, import-safe worker, timezone-aware calendar, input validation, applied-policy FK |
 | CRM audit/status | IMPLEMENTED + VERIFIED | Actor ID forwarded; transaction-aware central audit writer |
 | Audit hardening | IMPLEMENTED + TESTED | Recursive case-insensitive redaction; safe IP; bounded correlation IDs; writer tests |
