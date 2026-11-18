@@ -66,20 +66,18 @@ describe('Company dashboard compact ecommerce metrics', () => {
       stats: { received: { byStatus: { SUBMITTED: 2, OPEN: 3, CLOSED: 4, COMPLETED: 1 } }, responses: { total: 7 } },
       productStatusCounts: { APPROVED: 16, PUBLISHED: 4, PENDING_REVIEW: 2, DRAFT: 1, REJECTED: 1 },
     })
-    expect(metrics.find(item => item.key === 'active-inquiries')).toMatchObject({ value: 5, sample: false })
-    expect(metrics.find(item => item.key === 'answered-inquiries')).toMatchObject({ value: 5, sample: false })
-    expect(metrics.find(item => item.key === 'participated-inquiries')).toMatchObject({ value: 7, sample: false })
-    expect(metrics.find(item => item.key === 'approved-products')).toMatchObject({ value: 20, sample: false })
-    expect(metrics.find(item => item.key === 'pending-products')).toMatchObject({ value: 4, sample: false })
+    expect(metrics.find(item => item.key === 'active-inquiries')).toMatchObject({ value: 5, hint: 'بر اساس استعلام‌های دریافتی' })
+    expect(metrics.find(item => item.key === 'answered-inquiries')).toMatchObject({ value: 5, hint: 'بر اساس استعلام‌های دریافتی' })
+    expect(metrics.find(item => item.key === 'participated-inquiries')).toMatchObject({ value: 7, hint: 'بر اساس پاسخ‌های ثبت‌شده' })
+    expect(metrics.find(item => item.key === 'approved-products')).toMatchObject({ value: 20, hint: 'بر اساس کاتالوگ شرکت' })
+    expect(metrics.find(item => item.key === 'pending-products')).toMatchObject({ value: 4, hint: 'بر اساس کاتالوگ شرکت' })
+    expect(metrics.every(item => !Object.hasOwn(item, 'sample'))).toBe(true)
   })
 
-  it('marks unsupported order and inventory numbers as sample data', () => {
+  it('shows unavailable values instead of fabricated numbers and omits disabled retail routes', () => {
     const metrics = buildCompanyDashboardMetrics({ stats: null, productStatusCounts: null })
-    expect(metrics).toHaveLength(8)
-    expect(metrics.filter(item => item.sample).map(item => item.key)).toEqual([
-      'active-inquiries', 'answered-inquiries', 'participated-inquiries', 'approved-products',
-      'pending-products', 'active-orders', 'shipping-orders', 'delivered-orders',
-    ])
-    expect(metrics.find(item => item.key === 'active-orders').value).toBe(11)
+    expect(metrics).toHaveLength(5)
+    expect(metrics.every(item => item.value === null && item.hint === 'داده در دسترس نیست')).toBe(true)
+    expect(metrics.some(item => item.to.name === 'company-retail-orders')).toBe(false)
   })
 })
