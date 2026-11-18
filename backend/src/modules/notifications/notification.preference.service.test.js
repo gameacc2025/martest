@@ -41,6 +41,35 @@ const mockPrisma = {
   },
 };
 
+
+async function withSmsProvider(callback) {
+  const keys = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM_NUMBER'];
+  const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  process.env.TWILIO_ACCOUNT_SID = 'AC_TEST_ACCOUNT';
+  process.env.TWILIO_AUTH_TOKEN = 'test-auth-token';
+  process.env.TWILIO_FROM_NUMBER = '+15551234567';
+  try { return await callback(); }
+  finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
+}
+
+async function withoutSmsProvider(callback) {
+  const keys = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM_NUMBER'];
+  const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  for (const key of keys) delete process.env[key];
+  try { return await callback(); }
+  finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
+}
+
 resetMocks();
 injectMock('../../config/db', mockPrisma);
 
@@ -142,4 +171,41 @@ test('preferences API contract: matches expected shape', async () => {
     assert.ok(event.channels);
     assert.ok(event.defaults);
   }
+});
+
+test('getPreferences: legacy SMS opt-ins are ineffective without a configured provider', async () => {
+  await withoutSmsProvider(async () => {
+    resetMocks();
+    fx.prefRows = [
+      { userId: 5, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+    ];
+    const result = await getPreferences(5);
+    assert.equal(result.smsAvailable, false);
+    const event = result.data.find((row) => row.eventType === 'PRODUCT_STATUS_CHANGED');
+    assert.equal(event.channels.SMS, false);
+  });
+});
+
+test('updatePreferences: rejects enabling SMS when the provider is not configured', async () => {
+  await withoutSmsProvider(async () => {
+    resetMocks();
+    await assert.rejects(
+      () => updatePreferences(5, [{ eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true }]),
+      (error) => error.statusCode === 503 && error.code === 'SMS_PROVIDER_NOT_CONFIGURED',
+    );
+    assert.equal(fx.upsertArgs.length, 0);
+  });
+});
+
+test('updatePreferences: allows SMS opt-in only when the provider is configured', async () => {
+  await withSmsProvider(async () => {
+    resetMocks();
+    const result = await updatePreferences(5, [
+      { eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+    ]);
+    assert.equal(fx.upsertArgs.length, 1);
+    assert.equal(result.smsAvailable, true);
+    const event = result.data.find((row) => row.eventType === 'PRODUCT_STATUS_CHANGED');
+    assert.equal(event.channels.SMS, true);
+  });
 });
