@@ -148,6 +148,8 @@ export const dashboardMenu = [
       { title: 'ارتباطات سازمانی و کمپین‌ها', icon: 'pi pi-comments', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'مرکز دانش و محتوا', icon: 'pi pi-book', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'ممیزی و انطباق', icon: 'pi pi-check-circle', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'فروش خرده‌فروشی و سفارشات', icon: 'pi pi-shopping-cart', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'مالی و تسویه حساب', icon: 'pi pi-wallet', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
     ],
   },
   {
@@ -191,63 +193,6 @@ export const dashboardMenu = [
           { title: 'تیکت‌های بسته‌شده', icon: 'pi pi-check-circle', route: 'company-tickets', query: { status: 'CLOSED' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
         ],
       },
-    ],
-  },
-  {
-    section: 'مالی',
-    items: [
-      {
-        title: 'مالی و حسابداری',
-        icon: 'pi pi-wallet',
-        roles: ['SUPER_ADMIN', 'ADMIN'],
-        children: [
-          { title: 'نمای کلی مالی', icon: 'pi pi-chart-pie', route: 'admin-finance' },
-          { title: 'تسویه با شرکت‌ها', icon: 'pi pi-building', route: 'admin-finance-settlements' },
-          { title: 'تراکنش‌ها و گردش حساب', icon: 'pi pi-arrow-right-arrow-left', route: 'admin-finance-transactions' },
-          { title: 'صورتحساب‌ها و اسناد', icon: 'pi pi-file-invoice', route: 'admin-finance-invoices' },
-        ],
-      },
-    ],
-  },
-  {
-    section: 'فروش خرده‌فروشی',
-    items: [
-      {
-        title: 'سفارشات',
-        icon: 'pi pi-shopping-cart',
-        roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'],
-        children: [
-          { title: 'همه سفارش‌ها', icon: 'pi pi-list', route: 'admin-retail-orders', query: { status: 'همه' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-          { title: 'در انتظار پردازش', icon: 'pi pi-hourglass', route: 'admin-retail-orders', query: { status: 'در انتظار پردازش' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-          { title: 'ارسال‌شده', icon: 'pi pi-truck', route: 'admin-retail-orders', query: { status: 'ارسال‌شده' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-          { title: 'تحویل‌شده', icon: 'pi pi-check-circle', route: 'admin-retail-orders', query: { status: 'تحویل‌شده' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-          { title: 'مرجوعی', icon: 'pi pi-replay', route: 'admin-retail-orders', query: { status: 'مرجوعی' }, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'] },
-        ],
-      },
-    ],
-  },
-  {
-    section: 'فروش خرده‌فروشی شرکت',
-    items: [
-      {
-        title: 'سفارشات',
-        icon: 'pi pi-shopping-cart',
-        roles: ['COMPANY_MANAGER', 'COMPANY_USER'],
-        children: [
-          { title: 'همه سفارش‌ها', icon: 'pi pi-list', route: 'company-retail-orders', query: { status: 'همه' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
-          { title: 'جدید؛ نیازمند پذیرش', icon: 'pi pi-inbox', route: 'company-retail-orders', query: { status: 'جدید؛ نیازمند پذیرش' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
-          { title: 'در حال آماده‌سازی', icon: 'pi pi-box', route: 'company-retail-orders', query: { status: 'در حال آماده‌سازی' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
-          { title: 'ارسال‌شده', icon: 'pi pi-truck', route: 'company-retail-orders', query: { status: 'ارسال‌شده' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
-          { title: 'تحویل‌شده', icon: 'pi pi-check-circle', route: 'company-retail-orders', query: { status: 'تحویل‌شده' }, roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
-        ],
-      },
-      { title: 'موجودی محصولات', icon: 'pi pi-box', planned: true, roles: ['COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'پس از اتصال سرویس', severity: 'secondary' } },
-    ],
-  },
-  {
-    section: 'مالی شرکت',
-    items: [
-      { title: 'وضعیت تسویه‌ها', icon: 'pi pi-wallet', route: 'company-finance-settlements', roles: ['COMPANY_MANAGER', 'COMPANY_USER'] },
     ],
   },
   {
