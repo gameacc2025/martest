@@ -7,12 +7,11 @@
  *
  * All existing behaviour is preserved verbatim: PKCE panel handoff links,
  * customer/company/staff menu branching, notification unread count, search
- * routing, live notification, search, account, cart and mobile navigation behaviour.
+ * routing, live notification, search, account and mobile navigation behaviour.
  */
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { useCartStore } from '../stores/cart'
 import { inquiriesApi, productsApi, endpoints } from '@telecom/api-client'
 import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
 import PvButton from 'primevue/button'
@@ -21,9 +20,6 @@ import Drawer from 'primevue/drawer'
 import { useTheme } from '@telecom/shared-ui'
 
 const authStore = useAuthStore()
-const cartStore = useCartStore()
-const cartItemCount = computed(() => cartStore.itemCount)
-const cartDrawerOpen = ref(false)
 const myInquiryCount = ref(null)
 const footerBrandNames = ref([])
 const router = useRouter()
@@ -32,7 +28,7 @@ const { theme, toggle: toggleTheme } = useTheme()
 
 // Keep the responsive navigation in sync with route changes (including
 // browser back/forward) so it never remains open over a new page.
-watch(() => route.fullPath, () => { mobileMenuOpen.value = false; cartDrawerOpen.value = false; notificationDrawerOpen.value = false })
+watch(() => route.fullPath, () => { mobileMenuOpen.value = false; notificationDrawerOpen.value = false })
 watch(() => [authStore.isAuthenticated, authStore.isCustomer], () => { fetchMyInquiryCount(); fetchHeaderNotifications() })
 
 // CUSTOMER notifications live on the website. COMPANY and STAFF users are
@@ -96,7 +92,6 @@ const userMenuItems = computed(() => {
         { label: 'پروفایل', icon: 'pi pi-user', command: () => router.push('/profile') },
         { label: 'آدرس‌های من', icon: 'pi pi-map-marker', command: () => router.push('/profile/addresses') },
         { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => router.push('/my-inquiries') },
-        { label: 'سفارش‌های من', icon: 'pi pi-shopping-bag', command: () => router.push('/orders') },
         { label: 'پشتیبانی و تیکت‌ها', icon: 'pi pi-headphones', command: () => router.push('/support/tickets') },
       ]
     : canAccessDashboard.value
@@ -152,7 +147,6 @@ function countLabel(value) {
   return count > 99 ? '۹۹+' : count.toLocaleString('fa-IR')
 }
 
-function closeCartDrawer() { cartDrawerOpen.value = false }
 function closeNotificationDrawer() { notificationDrawerOpen.value = false }
 
 function normalizeHeaderNotifications(result) {
@@ -323,12 +317,6 @@ function logout() {
                 </Drawer>
               </div>
 
-            <div class="public-commerce-actions" @keydown.esc.stop.prevent="closeCartDrawer">
-              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-cart-drawer" :aria-expanded="cartDrawerOpen" @click.stop="cartDrawerOpen = true">
-                <i class="pi pi-shopping-cart" aria-hidden="true"></i>
-                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
-              </button>
-            </div>
 
               <button type="button" class="public-user-trigger" @click="toggleUserMenu" aria-haspopup="true">
                 <span class="public-user-avatar">
@@ -347,16 +335,10 @@ function logout() {
               </router-link>
             </div>
 
-            <div v-if="!user" class="public-commerce-actions" @keydown.esc.stop.prevent="closeCartDrawer">
-              <button type="button" class="public-icon-link public-commerce-trigger" aria-label="سبد خرید" aria-controls="public-cart-drawer" :aria-expanded="cartDrawerOpen" @click.stop="cartDrawerOpen = true">
-                <i class="pi pi-shopping-cart" aria-hidden="true"></i>
-                <span v-if="cartItemCount > 0" class="public-notification-badge">{{ countLabel(cartItemCount) }}</span>
-              </button>
-            </div>
 
             <router-link v-if="authStore.isAuthenticated && authStore.isCustomer" :to="{ name: 'my-inquiries' }" class="tm-btn tm-btn--accent public-rfq-link">
               <i class="pi pi-file-edit" aria-hidden="true"></i>
-              <span>ثبت استعلام</span>
+              <span>استعلام‌های من</span>
             </router-link>
 
             <PvButton
@@ -375,51 +357,6 @@ function logout() {
       </div>
     </header>
 
-    <Drawer
-      id="public-cart-drawer"
-      v-model:visible="cartDrawerOpen"
-      position="left"
-      :modal="true"
-      :dismissable="true"
-      :block-scroll="true"
-      :show-close-icon="false"
-      class="public-cart-drawer"
-      :style="{ width: 'min(440px, 94vw)' }"
-      aria-label="سبد خرید"
-    >
-      <template #header>
-        <header class="public-cart-drawer__header">
-          <div><strong>سبد خرید شما</strong><span>{{ countLabel(cartItemCount) }} قلم کالا</span></div>
-          <button type="button" aria-label="بستن سبد خرید" @click="closeCartDrawer"><i class="pi pi-times"></i></button>
-        </header>
-      </template>
-      <div v-if="cartStore.items.length" class="public-cart-drawer__items">
-        <article v-for="item in cartStore.items" :key="item.id" class="public-cart-item">
-          <router-link :to="{ name: 'product-details', params: { id: item.id } }" class="public-cart-item__image" @click="closeCartDrawer">
-            <img v-if="item.image" :src="item.image" :alt="item.name" loading="lazy" />
-            <i v-else class="pi pi-box" aria-hidden="true"></i>
-          </router-link>
-          <div class="public-cart-item__body">
-            <router-link :to="{ name: 'product-details', params: { id: item.id } }" @click="closeCartDrawer">{{ item.name }}</router-link>
-            <strong>{{ Number(item.price).toLocaleString('fa-IR') }} ریال</strong>
-            <div class="public-cart-item__controls">
-              <button type="button" :aria-label="'افزایش تعداد ' + item.name" @click="cartStore.updateQuantity(item.id, item.quantity + 1)"><i class="pi pi-plus"></i></button>
-              <span>{{ countLabel(item.quantity) }}</span>
-              <button type="button" :aria-label="'کاهش تعداد ' + item.name" :disabled="item.quantity <= 1" @click="cartStore.updateQuantity(item.id, item.quantity - 1)"><i class="pi pi-minus"></i></button>
-              <button type="button" class="remove" :aria-label="'حذف ' + item.name" @click="cartStore.removeItem(item.id)"><i class="pi pi-trash"></i></button>
-            </div>
-          </div>
-        </article>
-      </div>
-      <div v-else class="public-cart-drawer__empty"><i class="pi pi-shopping-bag"></i><strong>سبد خرید خالی است</strong><span>محصولات موردنیازتان را به سبد اضافه کنید.</span><router-link :to="{ name: 'products' }" class="tm-btn tm-btn--accent" @click="closeCartDrawer">مشاهده محصولات</router-link></div>
-      <template #footer>
-        <footer v-if="cartStore.items.length" class="public-cart-drawer__footer">
-          <div><span>جمع کل</span><strong>{{ Number(cartStore.subtotal).toLocaleString('fa-IR') }} ریال</strong></div>
-          <button type="button" class="public-cart-continue" @click="closeCartDrawer">ادامه خرید</button>
-          <router-link to="/checkout" class="tm-btn tm-btn--accent" @click="closeCartDrawer">ادامه و تسویه حساب <i class="pi pi-arrow-left"></i></router-link>
-        </footer>
-      </template>
-    </Drawer>
 
     <!-- Mobile navigation -->
     <div v-if="mobileMenuOpen" id="public-mobile-navigation" class="public-mobile-nav">
@@ -517,7 +454,7 @@ function logout() {
               <li><router-link :to="{ name: 'products' }" class="public-footer-link">همه محصولات</router-link></li>
               <li><router-link :to="{ name: 'categories' }" class="public-footer-link">دسته‌بندی‌ها</router-link></li>
               <li><router-link :to="{ name: 'magazine' }" class="public-footer-link">مجله و مقالات</router-link></li>
-              <li><router-link :to="{ name: 'my-inquiries' }" class="public-footer-link">ثبت استعلام</router-link></li>
+              <li><router-link :to="{ name: 'my-inquiries' }" class="public-footer-link">استعلام‌های من</router-link></li>
             </ul>
           </div>
           <div>
