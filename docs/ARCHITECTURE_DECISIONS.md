@@ -11,6 +11,8 @@
 
 **Owner authorization and remediation (2026-11-18):** The owner authorized project-wide correction against accepted decisions. `CUSTOMER_USER` no longer receives `leads.read`, `leads.create` or `inquiries.create`; the seed revokes stale grants as well. The inquiry POST route accepts only STAFF/COMPANY; `createInquiry()` independently rejects CUSTOMER contexts; the Website product CTA is hidden for CUSTOMER; and the empty state no longer directs customers to create an RFQ. Customers retain read/ownership-checked actions on existing inquiries using `inquiries.read`. AD-1 itself is unchanged.
 
+**Inquiry mutation authorization invariant (2026-11-18):** Buyer ownership scopes an inquiry but does not replace a COMPANY user's write permission. COMPANY callers must hold `leads.update` or `inquiries.update` to change inquiry lifecycle state or mutate inquiry items. `COMPANY_USER` with `inquiries.read` alone is read-only for buyer-side mutations; supplier response actions remain separately gated by `inquiries.respond`. CUSTOMER's existing owner-checked legacy actions remain intact, and CUSTOMER lifecycle transitions remain limited to cancellation.
+
 ### AD-2 — هر User فقط متعلق به یک Company است
 - Multi Company Membership وجود **ندارد**.
 - رابطه User→Company یک‌به‌چند از سمت Company است (هر User حداکثر یک `companyId`).
