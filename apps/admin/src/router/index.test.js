@@ -85,7 +85,6 @@ describe('route table', () => {
       'admin-products',
       'admin-roles',
       'admin-permissions',
-      'admin-orders',
       'admin-settings',
       'not-found',
     ]
@@ -102,8 +101,12 @@ describe('route table', () => {
     expect(router.resolve({ name: 'auth-callback' }).meta.requiresAuth).toBeUndefined()
   })
 
-  it('redirects unknown paths to the root gate', async () => {
-    await router.push('/definitely/not/a/route')
+  it('does not register B2C retail order routes and sends those paths to the root gate', async () => {
+    expect(router.hasRoute('admin-orders')).toBe(false)
+    expect(router.hasRoute('admin-retail-orders')).toBe(false)
+    await router.push('/orders')
+    expect(router.currentRoute.value.name).toBe('root')
+    await router.push('/retail/orders')
     expect(router.currentRoute.value.name).toBe('root')
   })
 })
@@ -169,7 +172,7 @@ describe('app selection (accessProfile.type only — roles never select the app)
 
     await router.push({ path: '/login', query: { redirect: '/orders' } })
 
-    expect(router.currentRoute.value.path).toBe('/retail/orders')
+    expect(router.currentRoute.value.name).toBe('root')
   })
 
   it('never lets a COMPANY user reach an admin page — logs them out and exits', async () => {
