@@ -296,7 +296,8 @@ function resetMocks() {
 
 const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF', companyId: null };
 const companySuperAdmin = { id: 9, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'COMPANY', companyId: 20 };
-const buyer = { id: 2, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], accessType: 'COMPANY', companyId: 10 };
+const buyer = { id: 2, roles: ['COMPANY_MANAGER'], permissions: ['inquiries.read', 'leads.update'], accessType: 'COMPANY', companyId: 10 };
+const companyReader = { id: 8, roles: ['COMPANY_USER'], permissions: ['inquiries.read'], accessType: 'COMPANY', companyId: 10 };
 const seller = { id: 3, roles: ['COMPANY_ADMIN'], permissions: ['inquiries.read'], accessType: 'COMPANY', companyId: 20 };
 const orphan = { id: 4, roles: ['USER'], permissions: ['inquiries.read'], companyId: null };
 
@@ -796,6 +797,17 @@ test('changeInquiryStatus: a missing RFQ is 404', async () => {
   );
 });
 
+test('changeInquiryStatus: a read-only COMPANY buyer cannot change inquiry lifecycle state', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  await assert.rejects(
+    () => inquiryService.changeInquiryStatus(1, 'SUBMITTED', companyReader),
+    (err) => err.statusCode === 403 && err.code === 'INQUIRY_UPDATE_PERMISSION_REQUIRED',
+  );
+  assert.equal(calls['inquiry.update'], undefined);
+  assert.equal(calls['inquiryStatusHistory.create'], undefined);
+});
+
 test('changeInquiryStatus: another company cannot transition the RFQ (404)', async () => {
   resetMocks();
   nextFindUnique = draftInquiry();
@@ -956,6 +968,16 @@ test('addInquiryItem: appends an item to a DRAFT RFQ', async () => {
   assert.equal(args.data.quantity, 3);
 });
 
+test('addInquiryItem: a read-only COMPANY buyer cannot mutate a draft with inquiries.read alone', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  await assert.rejects(
+    () => inquiryService.addInquiryItem(1, { productId: 4, quantity: 1 }, companyReader),
+    (err) => err.statusCode === 403 && err.code === 'INQUIRY_UPDATE_PERMISSION_REQUIRED',
+  );
+  assert.equal(calls['inquiryItem.create'], undefined);
+});
+
 test('addInquiryItem: SUPER_ADMIN may edit another company\'s DRAFT', async () => {
   resetMocks();
   nextFindUnique = draftInquiry({ companyId: 999 });
@@ -1008,6 +1030,16 @@ test('updateInquiryItem: re-validates the product when productId changes', async
   assert.equal(args.data.quantity, 7);
 });
 
+test('updateInquiryItem: a read-only COMPANY buyer cannot edit inquiry items', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  await assert.rejects(
+    () => inquiryService.updateInquiryItem(1, 22, { quantity: 2 }, companyReader),
+    (err) => err.statusCode === 403 && err.code === 'INQUIRY_UPDATE_PERMISSION_REQUIRED',
+  );
+  assert.equal(calls['inquiryItem.update'], undefined);
+});
+
 test('updateInquiryItem: a missing item is 404', async () => {
   resetMocks();
   nextFindUnique = draftInquiry();
@@ -1042,6 +1074,16 @@ test('deleteInquiryItem: removes an item when others remain', async () => {
   fx.inquiryItem = { id: 22 };
   await inquiryService.deleteInquiryItem(1, 22, buyer);
   assert.equal(calls['inquiryItem.delete'].at(-1).where.id, 22);
+});
+
+test('deleteInquiryItem: a read-only COMPANY buyer cannot delete inquiry items', async () => {
+  resetMocks();
+  nextFindUnique = draftInquiry();
+  await assert.rejects(
+    () => inquiryService.deleteInquiryItem(1, 22, companyReader),
+    (err) => err.statusCode === 403 && err.code === 'INQUIRY_UPDATE_PERMISSION_REQUIRED',
+  );
+  assert.equal(calls['inquiryItem.delete'], undefined);
 });
 
 test('deleteInquiryItem: the last item may not be removed', async () => {
