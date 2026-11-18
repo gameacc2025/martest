@@ -783,7 +783,7 @@ test('getStatistics: scopes user counts through AccessProfile.companyId, not a U
   assert.deepEqual(calls.userCount[1].where, { accessProfile: { companyId: 9 }, status: 'ACTIVE' });
 });
 
-test('getStatistics: assembles counts + recentProducts + recentOrders', async () => {
+test('getStatistics: reports inquiry aggregates and recent inquiries under the correct domain names', async () => {
   resetMocks();
   fx.company = { id: 9 };
   fx.productCount = 3;
@@ -794,10 +794,12 @@ test('getStatistics: assembles counts + recentProducts + recentOrders', async ()
 
   const result = await getStatistics(9);
   assert.deepEqual(result.counts, {
-    products: 3, publishedProducts: 3, orders: 2, pendingOrders: 2, users: 4, activeUsers: 4,
+    products: 3, publishedProducts: 3, inquiries: 2, draftInquiries: 2, users: 4, activeUsers: 4,
   });
   assert.deepEqual(result.recentProducts, [{ id: 1 }]);
-  assert.deepEqual(result.recentOrders, [{ id: 2 }]);
+  assert.deepEqual(result.recentInquiries, [{ id: 2 }]);
+  assert.equal(Object.hasOwn(result.counts, 'orders'), false);
+  assert.equal(Object.hasOwn(result, 'recentOrders'), false);
 });
 
 // ── getCompanyProducts ────────────────────────────────────────
