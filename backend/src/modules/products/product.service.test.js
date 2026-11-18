@@ -585,6 +585,21 @@ test('createProduct: a company user cannot spoof a companyId that isn\'t their o
   );
 });
 
+test('createProduct: CUSTOMER cannot impersonate a company through a stale companyId claim', async () => {
+  const customer = {
+    id: 8,
+    accessType: 'CUSTOMER',
+    roles: ['CUSTOMER_USER'],
+    permissions: ['products.create', 'products.read'],
+    companyId: 10,
+  };
+  await assert.rejects(
+    () => service.createProduct({ title: 'Spoofed', categoryId: 1, subcategoryId: 1 }, customer),
+    (error) => error.statusCode === 403 && error.code === 'COMPANY_CONTEXT_REQUIRED',
+  );
+  assert.equal(calls['product.create'].length, 0);
+});
+
 test('createProduct: retail eligibility is explicit and passed through only when enabled', async () => {
   await service.createProduct({
     title: 'Retail candidate',
