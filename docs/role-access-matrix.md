@@ -68,7 +68,7 @@
 - سرویس باید این مرز را مستقل از route guard enforce کند؛ فیلتر نهایی دریافتی‌ها نیز باید بر اساس مالکیت محصول شرکت احراز‌شده اعمال شود.
 - مشتری فاقد AccessProfile با نقش CUSTOMER_USER و accessType: null فقط در محدوده Website و استعلام‌های متعلق به buyerUserId خودش عمل می‌کند.
 
-> **اجرای AD-1 (2026-11-18):** CUSTOMER امکان ایجاد Inquiry ندارد. Seed مجوزهای `leads.create` و `inquiries.create` را حذف و grants قدیمی را نیز idempotently revoke می‌کند؛ route و service بک‌اند هر دو ایجاد RFQ توسط CUSTOMER را رد می‌کنند. مشتری فقط می‌تواند Inquiryهای متعلق به خودش را با `inquiries.read` مشاهده و اقدامات مجاز روی همان رکورد را انجام دهد.
+> **اجرای AD-1 (2026-11-18):** CUSTOMER نه مجوز داخلی `leads.read` دارد و نه امکان ایجاد Inquiry (`leads.create` / `inquiries.create`). Seed مجوزهای legacy را نیز از دیتابیس‌های قبلی idempotently revoke می‌کند؛ route و service بک‌اند هر دو ایجاد RFQ توسط CUSTOMER را رد می‌کنند. مشتری فقط می‌تواند Inquiryهای متعلق به خودش را با `inquiries.read` مشاهده و اقدامات مجاز روی همان رکورد را انجام دهد.
 
 
 ### اشتراک و سهمیه استعلام
