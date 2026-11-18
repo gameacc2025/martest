@@ -172,3 +172,14 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Security review remains bounded:** company/user/product service checks and company-owned routes were inspected; this does not constitute an exhaustive tenant/IDOR sign-off. Continue reviewing all resource-specific endpoints and direct service paths.
 - **Documentation:** refreshed `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, `.ai/project-context.md`, backlog and migration runbook with the exact tested baseline and evidence.
 - **NOT VERIFIED:** owner's Windows working tree, local Docker/PostgreSQL, live SMTP/Twilio/payment providers and production deployment.
+
+## 2026-11-18 — PROJECT-WIDE-AUDIT-AND-REPAIR (SMS quota fail-closed acceptance)
+
+- **Exact tested application-code SHA:** `10c41cf52dc5ba01ab90a4c64e09a4c5fdf96f01`. Documentation-only synchronization commits followed; no application source changed after this SHA.
+- **CI:** [44368210815](https://github.com/gameacc2025/martest/actions/runs/44368210815) PASS — 68 Frontend/Shared test files / 385 tests; 18 architecture/session tests; 1,701 Backend tests; all three production builds.
+- **Migration:** [44368210798](https://github.com/gameacc2025/martest/actions/runs/44368210798) PASS — Prisma validation/client generation, all migrations on fresh PostgreSQL, every non-ignored Prisma model has a migrated table.
+- **Runtime:** [44368210958](https://github.com/gameacc2025/martest/actions/runs/44368210958) PASS — Compose health, migration/parity, all seeds twice, AD-1/AD-3 grant reconciliation, and 8/8 Playwright browser smoke tests across all panels/API proxies.
+- **SMS quota fail-closed:** a quota-service failure or changed subscription state no longer permits a paid SMS to be queued. The dispatcher reports `quotaCheckFailed`, skips that SMS, and preserves the requesting business transaction; regression tests cover subscription-state and database-unavailable failures.
+- **Test maintenance:** corrected the CUSTOMER product-management denial assertion to match the actual 403 contract and made the zero-create assertion safe when no mock call was recorded. No authorization behavior was weakened.
+- **Remaining:** exhaustive company tenant/IDOR review; central AuditLog action registry and producer normalization; owner/legal decision for AuditLog retention/archival; live SMTP/Twilio/payment provider and production deployment verification. Local Windows workspace/Docker/PostgreSQL remain NOT VERIFIED.
+- **Next:** continue bounded tenant/IDOR and cross-domain audit producer review. Preserve AD-1 through AD-4; do not invent legal retention or commercial policy.
