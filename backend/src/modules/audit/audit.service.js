@@ -63,7 +63,7 @@ function redactSensitiveData(obj, depth = 0) {
   const sanitized = {};
   for (const [key, value] of Object.entries(obj)) {
     const lowerKey = key.toLowerCase();
-    if (SENSITIVE_FIELDS.has(lowerKey) || SENSITIVE_FIELDS.some(f => lowerKey.includes(f))) {
+    if (SENSITIVE_FIELDS.has(lowerKey) || [...SENSITIVE_FIELDS].some((field) => lowerKey.includes(field))) {
       sanitized[key] = '[REDACTED]';
     } else if (value && typeof value === 'object') {
       sanitized[key] = redactSensitiveData(value, depth + 1);
