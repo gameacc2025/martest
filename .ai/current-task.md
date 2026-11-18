@@ -30,6 +30,7 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 - **Company statistics contract:** fixed the service to return `inquiries`, `draftInquiries`, and `recentInquiries` instead of incorrectly labelling Inquiry records as orders.
 - **Website/UI/tests:** buyer inquiry text, product listing fixtures and text-free loading-screen assertions aligned with current behavior; stale dashboard-menu tests fixed.
 - **Routing:** Admin/Company callback-style guards explicitly abort when session restoration fails or navigation leaves for another app.
+- **Agent governance:** deduplicated repeated direct-to-main, worker ownership, commit/push, and handoff rules across `AGENTS.md`, `.ai/PROTOCOL.md`, and `docs/AI_AGENT_WORKFLOW.md` without changing policy.
 - **Docker/seed security:** backend image includes parity scripts; production/staging seed requires explicit `SUPER_ADMIN_PASSWORD` of at least 32 characters; env example leaves it blank; CMS synthetic author seed skips Production; admin/demo passwords are not logged; Runtime CI generates and masks ephemeral PostgreSQL/admin/JWT credentials.
 
 ## Verified GitHub acceptance
