@@ -28,6 +28,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends openssl \
 # from the builder rather than triggering a network install through npx.
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY package.json ./
