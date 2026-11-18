@@ -110,3 +110,20 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Scope boundary:** GitHub connector only; Windows working tree, Docker daemon and local PostgreSQL are inaccessible. No production DB or secrets were accessed.
 - **Open blockers:** Support SLA pause/resume and queue recipient scoping; audit writer coverage and retention; SMS event-default/consent mismatch; misleading dashboard sample data; source drift against accepted AD-1/AD-3/AD-4; three-app regression and remaining domain audits.
 - **Next:** Inspect Support SLA worker/assignment schema and implement a tested, queue-scoped pause/resume slice. Continue the whole-repository audit in bounded slices.
+
+
+---
+
+## 2026-11-18 — PROJECT-WIDE-AUDIT-AND-REPAIR (second slice)
+
+- **Status:** IN_PROGRESS — multiple source-backed repairs committed; three GitHub Actions workflows are running for current main.
+- **Main SHA:** `58c8de6102181630903883cf56a2adb8535e21f5`.
+- **Support SLA:** fixed worker import/startup behavior and exported `runOnce` used by server; scoped recipients to active STAFF assignees in the same queue and removed broad all-staff fallback; implemented pause/resume by elapsed working minutes and persisted deadline shifts. Added worker/service tests.
+- **AD-1 / AD-3:** CUSTOMER RFQ creation denied in route and service; seed removes create grants and reconciles stale COMPANY user-management grants; customers retain owner-checked actions on existing inquiries. Added backend tests.
+- **AD-4:** removed active cart/checkout/orders routes and global cart UI; removed cart actions from Home/ProductListing/SearchResults/CompanyProfile; shared ProductCard cart/wishlist controls are opt-in and default off. Added Website/shared UI tests; dormant future-phase components/stores retained.
+- **Audit:** CRM lead merge now calls transaction-aware central audit writer; added HTTP/explicit writer tests for request context and sensitive-field redaction. Audit retention period/archival remains unresolved and is not being guessed.
+- **Notifications:** all event SMS defaults are OFF; Twilio configuration is validated and required before preferences or queueing; SMS remains explicit opt-in + quota. Added provider/default/quota tests and corrected notification docs. Live Twilio delivery is NOT VERIFIED.
+- **Database:** added complete Prisma-model-to-PostgreSQL table parity checker and tests; migration and runtime workflows now invoke it. Runbook updated.
+- **CI evidence:** CI run `44227272875`, Database Migration Validation `44227272649`, Runtime Validation `44227272595` are **IN_PROGRESS** for the current main SHA. Frontend/shared tests are running; migration and Compose checks have not completed. No local test command was run in this session.
+- **Remaining:** make SLA working-calendar calculations respect the configured timezone; verify all audit producers use the central writer and decide retention/archival; replace dashboard sample metrics with scoped real aggregates; continue auth/RBAC/CMS/catalog/retail/finance and three-app regression audits.
+- **Next:** poll the three current workflow runs, fix any failures, then continue the timezone-aware SLA and audit-producer slices.
