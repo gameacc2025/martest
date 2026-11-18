@@ -303,6 +303,11 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
   summary.sms.quotaExceeded = 0;
   summary.sms.duplicates = 0;
 
+  if (smsRecipients.length && !hasSmsProvider()) {
+    summary.sms.providerNotConfigured = smsRecipients.length;
+    return summary;
+  }
+
   if (smsRecipients.length) {
     // Fill in phone numbers for SMS recipients
     resolved = await fillMissingPhones(client, resolved);
