@@ -49,18 +49,20 @@ export function buildCompanyDashboardMetrics({ stats, productStatusCounts }) {
   const answered = Number(by.CLOSED || 0) + Number(by.COMPLETED || 0)
   const approvedProducts = productStatusCounts && Number.isFinite(productStatusCounts.APPROVED) && Number.isFinite(productStatusCounts.PUBLISHED) ? productStatusCounts.APPROVED + productStatusCounts.PUBLISHED : null
   const unapprovedProducts = productStatusCounts && ['PENDING_REVIEW', 'DRAFT', 'REJECTED'].every(status => Number.isFinite(productStatusCounts[status])) ? productStatusCounts.PENDING_REVIEW + productStatusCounts.DRAFT + productStatusCounts.REJECTED : null
-  const make = (key, label, actual, sampleValue, icon, tone, to, hint = '') => ({
-    key, label, value: actual == null ? sampleValue : actual,
-    sample: actual == null, icon, tone, to, hint,
+  const make = (key, label, value, icon, tone, to, hint = '') => ({
+    key,
+    label,
+    value: value == null ? null : Number(value),
+    icon,
+    tone,
+    to,
+    hint: value == null ? 'داده در دسترس نیست' : hint,
   })
   return [
-    make('active-inquiries', 'استعلام‌های فعال', stats?.received?.byStatus ? active : null, 18, 'pi pi-inbox', 'violet', { name: 'company-inquiries', query: { scope: 'received', status: 'OPEN' } }, 'آمار واقعی استعلام‌ها'),
-    make('answered-inquiries', 'استعلام‌های پاسخ‌داده‌شده', stats?.received?.byStatus ? answered : null, 12, 'pi pi-reply', 'green', { name: 'company-inquiries', query: { scope: 'received' } }, 'آمار واقعی استعلام‌ها'),
-    make('participated-inquiries', 'استعلام‌های مشارکت‌شده', responseTotal, 9, 'pi pi-send', 'cyan', { name: 'company-inquiries' }),
-    make('approved-products', 'محصولات تأییدشده', approvedProducts, 24, 'pi pi-check-circle', 'green', { name: 'manage-products', query: { status: 'APPROVED' } }, 'آمار واقعی کاتالوگ'),
-    make('pending-products', 'محصولات تأییدنشده', unapprovedProducts, 5, 'pi pi-clock', 'amber', { name: 'manage-products', query: { status: 'PENDING_REVIEW' } }),
-    make('active-orders', 'سفارش‌های فعال', null, 11, 'pi pi-shopping-cart', 'violet', { name: 'company-retail-orders' }),
-    make('shipping-orders', 'سفارش‌های در حال ارسال', null, 4, 'pi pi-truck', 'cyan', { name: 'company-retail-orders' }),
-    make('delivered-orders', 'سفارش‌های تحویل‌شده', null, 28, 'pi pi-check-square', 'green', { name: 'company-retail-orders' }),
+    make('active-inquiries', 'استعلام‌های فعال', stats?.received?.byStatus ? active : null, 'pi pi-inbox', 'violet', { name: 'company-inquiries', query: { scope: 'received', status: 'OPEN' } }, 'بر اساس استعلام‌های دریافتی'),
+    make('answered-inquiries', 'استعلام‌های پاسخ‌داده‌شده', stats?.received?.byStatus ? answered : null, 'pi pi-reply', 'green', { name: 'company-inquiries', query: { scope: 'received' } }, 'بر اساس استعلام‌های دریافتی'),
+    make('participated-inquiries', 'استعلام‌های مشارکت‌شده', responseTotal, 'pi pi-send', 'cyan', { name: 'company-inquiries' }, 'بر اساس پاسخ‌های ثبت‌شده'),
+    make('approved-products', 'محصولات تأییدشده', approvedProducts, 'pi pi-check-circle', 'green', { name: 'manage-products', query: { status: 'APPROVED' } }, 'بر اساس کاتالوگ شرکت'),
+    make('pending-products', 'محصولات تأییدنشده', unapprovedProducts, 'pi pi-clock', 'amber', { name: 'manage-products', query: { status: 'PENDING_REVIEW' } }, 'بر اساس کاتالوگ شرکت'),
   ]
 }
