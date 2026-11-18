@@ -14,6 +14,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { useStatsStore } from '../../stores/stats'
 import { productsApi, companiesApi, inquiriesApi } from '@telecom/api-client'
+import { getActiveInquiryCount } from './dashboardMetrics.js'
 
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
@@ -188,9 +189,7 @@ async function fetchInquiryStats() {
     const res = await inquiriesApi.getStats()
     const body = res?.data ?? res
     const data = body?.data ?? body
-    // Be tolerant of shape: prefer an explicit "active/open" count if present.
-    activeInquiries.value =
-      data?.active ?? data?.open ?? data?.activeInquiries ?? data?.counts?.active ?? data?.total ?? 0
+    activeInquiries.value = getActiveInquiryCount(data)
   } catch (err) {
     console.error('Error fetching inquiry stats:', err)
     activeInquiries.value = null
