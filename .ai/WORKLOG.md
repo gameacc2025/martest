@@ -127,3 +127,22 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **CI evidence:** CI run `44227272875`, Database Migration Validation `44227272649`, Runtime Validation `44227272595` are **IN_PROGRESS** for the current main SHA. Frontend/shared tests are running; migration and Compose checks have not completed. No local test command was run in this session.
 - **Remaining:** make SLA working-calendar calculations respect the configured timezone; verify all audit producers use the central writer and decide retention/archival; replace dashboard sample metrics with scoped real aggregates; continue auth/RBAC/CMS/catalog/retail/finance and three-app regression audits.
 - **Next:** poll the three current workflow runs, fix any failures, then continue the timezone-aware SLA and audit-producer slices.
+
+
+---
+
+## 2026-11-18 — PROJECT-WIDE-AUDIT-AND-REPAIR (verified checkpoint)
+
+- **Status:** Core repair slice and all three GitHub acceptance workflows PASS; project-wide source audit remains IN_PROGRESS.
+- **Tested code SHA:** `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`. Later main commits in this checkpoint are documentation-only.
+- **CI:** [44304118782](https://github.com/gameacc2025/martest/actions/runs/44304118782) PASS — architecture graph; 68 Frontend/Shared test files and 385 tests; 18 architecture/session tests; 1,688 Backend tests; Website, Company and Admin production builds.
+- **Migration:** [44304118529](https://github.com/gameacc2025/martest/actions/runs/44304118529) PASS — fresh PostgreSQL migration application and Prisma model/table parity.
+- **Runtime:** [44304118441](https://github.com/gameacc2025/martest/actions/runs/44304118441) PASS — Compose config/build, all service health endpoints, migrations, Prisma parity, all seeds twice, AD-1/AD-3 grant reconciliation and 8/8 Playwright browser smoke tests across all panels/API proxies.
+- **Support:** persisted applied SLA policy FK; pause/resume adjusts deadlines by working minutes; queue recipients scoped to active STAFF assignments; worker import-safe; configured IANA timezone/local holiday calculations and calendar validation; tests added.
+- **Audit/security:** case-insensitive recursive redaction; CRM uses transaction-aware central writer; audit client IP ignores untrusted forwarding headers; correlation IDs validated/bounded; audit API contract corrected to implemented STAFF-only paths and query fields.
+- **AD-1/AD-3/AD-4:** CUSTOMER RFQ create denied; COMPANY user-management grants reconciled; retail/checkout/cart/wishlist and finance/settlement routes/navigation dormant pending owner decisions.
+- **Seed credential security:** production/staging seed requires explicit `SUPER_ADMIN_PASSWORD` >=32 chars; env example is blank; synthetic CMS author seed skips Production; admin/demo passwords removed from seed logs; Runtime CI generates and masks ephemeral PostgreSQL/admin/JWT credentials. Runtime log review found no credential values after this change.
+- **Docs reconciled:** `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`, `docs/DATABASE_MIGRATION_RUNBOOK.md`, `docs/DOCKER_DEPLOYMENT.md`, `docs/api-contracts/auth-audit.md`; older API/Backend/Retail audit snapshots explicitly marked historical.
+- **Still open:** exhaustive company tenant/IDOR review; central audit action registry/producer normalization; owner/legal decision and archive design for AuditLog retention; remaining sample dashboard metrics; live SMTP/Twilio/payment and production deployment verification.
+- **Local Windows working tree, local Docker and developer PostgreSQL:** NOT VERIFIED; GitHub connector cannot inspect them.
+- **Next:** continue bounded tenant/IDOR and dashboard/reporting source audits. Do not invent commercial or retention policy; preserve AD-1 through AD-4.
