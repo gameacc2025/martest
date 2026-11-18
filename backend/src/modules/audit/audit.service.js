@@ -96,14 +96,9 @@ function buildMetadata({ before, after, extra } = {}) {
  * @returns {string} IP address
  */
 function getClientIp(request) {
-  const forwarded = request.headers['x-forwarded-for'];
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
-  }
-  const realIp = request.headers['x-real-ip'];
-  if (realIp) {
-    return realIp;
-  }
+  // Fastify's request.ip is derived from the socket unless trustProxy is
+  // explicitly configured. Never trust caller-controlled forwarding headers
+  // here: accepting them without a trusted proxy lets clients spoof audit IPs.
   return request.ip || request.socket?.remoteAddress || 'unknown';
 }
 
