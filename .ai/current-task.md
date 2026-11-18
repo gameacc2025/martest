@@ -1,10 +1,10 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18
 
 **Task ID:** PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18  
-**Status:** IN_PROGRESS — core repair slices and three GitHub acceptance workflows pass; remaining source/security/product audits are queued  
+**Status:** IN_PROGRESS — latest notification/security repair slice passed all three GitHub acceptance workflows; remaining source/security/product audits are queued  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `9bb73c5735dbf3eddeff35375b381cc7a37586db`  
+**Latest tested code:** `10c41cf52dc5ba01ab90a4c64e09a4c5fdf96f01`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -24,7 +24,7 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 - **AD-1:** CUSTOMER cannot create new RFQs; existing buyer-owned inquiry operations remain ownership checked.
 - **AD-3:** COMPANY user-management grants are removed, including stale persisted grants during seed reconciliation.
 - **AD-4:** retail/checkout/cart/wishlist and finance/settlement remain dormant; Admin/Company routes and active navigation are disabled until owner-approved domain rules/APIs exist.
-- **Notifications:** SMS defaults OFF and queueing requires validated provider configuration, explicit opt-in and quota; live provider delivery remains unverified.
+- **Notifications:** SMS defaults OFF and queueing requires validated provider configuration, explicit opt-in and quota. If quota verification fails or subscription state changes, SMS is skipped with `quotaCheckFailed`; the business transaction is not aborted and no unmetered SMS row is queued. Live provider delivery remains unverified.
 - **Support SLA IDOR:** `GET /tickets/:id/sla` now scopes its ticket lookup to the authenticated CUSTOMER requester, COMPANY requesterCompanyId, or STAFF platform context; service and route regression tests cover the boundary.
 - **Company dashboard:** removed fabricated inquiry/product fallback numbers and sample sales chart; unavailable aggregates render as `—`; removed links to disabled retail-order routes.
 - **Company statistics contract:** fixed the service to return `inquiries`, `draftInquiries`, and `recentInquiries` instead of incorrectly labelling Inquiry records as orders.
@@ -38,11 +38,11 @@ All three workflows passed on the exact main code SHA `9bb73c5735dbf3eddeff35375
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44316798356](https://github.com/gameacc2025/martest/actions/runs/44316798356) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,694 backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44316798384](https://github.com/gameacc2025/martest/actions/runs/44316798384) | **PASS** |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44316799468](https://github.com/gameacc2025/martest/actions/runs/44316799468) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44368210815](https://github.com/gameacc2025/martest/actions/runs/44368210815) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,701 backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44368210798](https://github.com/gameacc2025/martest/actions/runs/44368210798) | **PASS** |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44368210958](https://github.com/gameacc2025/martest/actions/runs/44368210958) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
 
-Documentation-only commits followed the tested code SHA; they do not change application source. The current main HEAD can therefore be newer than the tested code baseline.
+Documentation-only synchronization commits may follow the tested code SHA; they do not change application source. The tested code SHA is recorded separately from the current documentation HEAD.
 
 ## Confirmed remaining work
 
