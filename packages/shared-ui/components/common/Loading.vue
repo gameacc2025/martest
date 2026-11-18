@@ -27,6 +27,7 @@ const loaderWidth = computed(() => ({ sm: '250px', md: '360px', lg: '440px' })[p
     role="status"
     aria-live="polite"
     aria-busy="true"
+    aria-label="در حال بارگذاری"
   >
     <div class="app-loading-content">
       <svg
@@ -51,7 +52,6 @@ const loaderWidth = computed(() => ({ sm: '250px', md: '360px', lg: '440px' })[p
         <path d="M290 120 L385 185" class="fiber-flow fiber-flow-cyan fiber-flow-delay-long" />
         <circle cx="250" cy="120" r="7" class="fiber-core-dot" />
       </svg>
-      <p v-if="text" class="app-loading-text">{{ text }}</p>
     </div>
   </div>
 
