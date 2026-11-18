@@ -16,12 +16,15 @@ function injectMock(relativePath, exportsObj) {
   });
 }
 
-const calls = { sms: [], challengeCreate: [], challengeUpdateMany: [], userUpdate: [], sessionDelete: [] };
+const calls = { sms: [], challengeCreate: [], challengeUpdateMany: [], userUpdate: [], sessionDelete: [], userLocks: [], challengeCounts: [] };
 let user;
 let challenge;
 let providerReady = true;
 let passwordValid = true;
 let conflictOnNextFailedAttempt = false;
+let userRequestCount = 0;
+let destinationRequestCount = 0;
+let recentChallenge = null;
 
 function reset() {
   calls.sms = [];
@@ -46,17 +49,36 @@ function reset() {
   providerReady = true;
   passwordValid = true;
   conflictOnNextFailedAttempt = false;
+  userRequestCount = 0;
+  destinationRequestCount = 0;
+  recentChallenge = null;
+  calls.userLocks = [];
+  calls.challengeCounts = [];
 }
 reset();
 
 const tx = {
+  $queryRaw: async (strings, ...values) => {
+    calls.userLocks.push({ query: strings.join('?'), values });
+    return [{ id: user.id }];
+  },
   authChallenge: {
+    count: async (args) => {
+      calls.challengeCounts.push(args);
+      return args.where.destination ? destinationRequestCount : userRequestCount;
+    },
+    findFirst: async () => recentChallenge,
+    create: async (args) => {
+      calls.challengeCreate.push(args);
+      return { id: 32 };
+    },
     updateMany: async (args) => {
       calls.challengeUpdateMany.push(args);
       return { count: 1 };
     },
   },
   user: {
+    findUnique: async () => user,
     update: async (args) => {
       calls.userUpdate.push(args);
       return { id: args.where.id };
@@ -127,6 +149,30 @@ test('requestPasswordReset returns the same accepted shape for unknown accounts'
   assert.deepEqual(result, { accepted: true });
   assert.equal(calls.sms.length, 0);
   assert.equal(calls.challengeCreate.length, 0);
+});
+
+test('requestPasswordReset serializes per-user and per-destination limits under a row lock', async () => {
+  reset();
+  const result = await service.requestPasswordReset({ phone: '09123456789' });
+
+  assert.deepEqual(result, { accepted: true });
+  assert.equal(calls.userLocks.length, 1);
+  assert.match(calls.userLocks[0].query, /FOR UPDATE/);
+  assert.deepEqual(calls.userLocks[0].values, [7]);
+  assert.equal(calls.challengeCounts.length, 2);
+  assert.equal(calls.challengeCreate.length, 1);
+});
+
+test('requestPasswordReset preserves enumeration-safe response when the locked user is rate limited', async () => {
+  reset();
+  userRequestCount = 3;
+
+  const result = await service.requestPasswordReset({ phone: '09123456789' });
+
+  assert.deepEqual(result, { accepted: true });
+  assert.equal(calls.userLocks.length, 1);
+  assert.equal(calls.challengeCreate.length, 0);
+  assert.equal(calls.sms.length, 0);
 });
 
 test('requestPasswordReset fails closed when SMS is not configured', async () => {
