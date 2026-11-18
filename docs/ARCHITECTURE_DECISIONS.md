@@ -30,7 +30,7 @@
 - فعلاً **حذف نمی‌شوند**، فقط **غیرفعال** می‌شوند.
 - هیچ Route فعال، هیچ UI فعال، و هیچ لینک/ارجاع فعالی به آن‌ها نباید وجود داشته باشد.
 
-**Owner authorization and remediation (2026-11-18):** The Website no longer registers `/cart`, `/checkout`, or `/orders`; its global cart drawer, header entry points and order-menu link were removed. The `ShoppingCart.vue`, `Checkout.vue`, `RetailOrders.vue` components and cart store remain in the repository as dormant future-phase code. No active Wishlist route was present. AD-4 is unchanged.
+**Owner authorization and remediation (2026-11-18):** The Website no longer registers `/cart`, `/checkout`, or `/orders`; its global cart drawer, header entry points and order-menu link were removed. Cart actions were also removed from Home, ProductListing, SearchResults and CompanyProfile; the shared ProductCard hides cart/wishlist controls by default and the Website opts out explicitly. `ShoppingCart.vue`, `Checkout.vue`, `RetailOrders.vue`, cart/wishlist stores and related components remain in the repository as dormant future-phase code. No active Wishlist route was present. AD-4 is unchanged.
 
 ### AD-5 — بدون تغییر معماریِ تأییدنشده
 - ممیزی، تحلیل، مقایسه تصمیم‌ها با کد واقعی و پیشنهاد اصلاح همواره مجاز است؛ به‌ویژه وقتی مالک پروژه آن را درخواست کرده باشد.
