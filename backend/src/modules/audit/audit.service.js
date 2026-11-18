@@ -47,7 +47,7 @@ const SENSITIVE_FIELDS = new Set([
   'nationalId',
   'bankAccount',
   'iban',
-]);
+].map((field) => field.toLowerCase()));
 
 /**
  * Redact sensitive fields from an object recursively.
