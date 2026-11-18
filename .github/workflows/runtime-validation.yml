@@ -113,7 +113,7 @@ jobs:
                     OR (r.name = 'CUSTOMER_USER' AND p.name = ANY($2::text[]))`,
                 [
                   ['users.create', 'users.update', 'users.delete', 'users.assign_roles'],
-                  ['leads.create', 'inquiries.create'],
+                  ['leads.read', 'leads.create', 'inquiries.create'],
                 ],
               );
               if (result.rows.length) {
