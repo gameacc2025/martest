@@ -62,51 +62,65 @@ async function requestPasswordReset({ phone, ipAddress }) {
     return { accepted: true };
   }
 
-  const destination = normalizePhone(user.phone);
-  const now = new Date();
-  const windowStart = new Date(now.getTime() - REQUEST_WINDOW_MS);
-  const destinationStart = new Date(now.getTime() - DESTINATION_WINDOW_MS);
-  const [userRequests, destinationRequests, recentChallenge] = await Promise.all([
-    prisma.authChallenge.count({ where: { userId: user.id, purpose: PURPOSE, channel: CHANNEL, createdAt: { gte: windowStart } } }),
-    prisma.authChallenge.count({ where: { destination, purpose: PURPOSE, channel: CHANNEL, createdAt: { gte: destinationStart } } }),
-    prisma.authChallenge.findFirst({
-      where: { userId: user.id, purpose: PURPOSE, channel: CHANNEL, createdAt: { gte: new Date(now.getTime() - 60_000) } },
-      select: { id: true },
-    }),
-  ]);
-
-  if (userRequests >= MAX_USER_REQUESTS || destinationRequests >= MAX_DESTINATION_REQUESTS || recentChallenge) {
-    return { accepted: true };
-  }
-
-  await prisma.authChallenge.updateMany({
-    where: { userId: user.id, purpose: PURPOSE, channel: CHANNEL, consumedAt: null, invalidatedAt: null, expiresAt: { gt: now } },
-    data: { invalidatedAt: now },
-  });
-
   const code = String(crypto.randomInt(100000, 1000000));
   const secretHash = await hashPassword(code);
-  const challenge = await prisma.authChallenge.create({
-    data: {
-      userId: user.id,
-      purpose: PURPOSE,
-      channel: CHANNEL,
-      destination,
-      secretHash,
-      expiresAt: new Date(now.getTime() + CHALLENGE_TTL_MS),
-      maxAttempts: MAX_ATTEMPTS,
-    },
-    select: { id: true },
+  const reservation = await prisma.$transaction(async (tx) => {
+    // User.phone is unique. Locking the user row serializes reservations for
+    // this destination so parallel requests cannot all pass the count checks.
+    await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
+    const currentUser = await tx.user.findUnique({
+      where: { id: user.id },
+      select: { id: true, phone: true, status: true, accessProfile: { select: { isActive: true } } },
+    });
+    if (!currentUser || currentUser.status !== 'ACTIVE' || currentUser.accessProfile?.isActive === false) return null;
+
+    const destination = normalizePhone(currentUser.phone);
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - REQUEST_WINDOW_MS);
+    const destinationStart = new Date(now.getTime() - DESTINATION_WINDOW_MS);
+    const [userRequests, destinationRequests, recentChallenge] = await Promise.all([
+      tx.authChallenge.count({ where: { userId: currentUser.id, purpose: PURPOSE, channel: CHANNEL, createdAt: { gte: windowStart } } }),
+      tx.authChallenge.count({ where: { destination, purpose: PURPOSE, channel: CHANNEL, createdAt: { gte: destinationStart } } }),
+      tx.authChallenge.findFirst({
+        where: { userId: currentUser.id, purpose: PURPOSE, channel: CHANNEL, createdAt: { gte: new Date(now.getTime() - 60_000) } },
+        select: { id: true },
+      }),
+    ]);
+
+    if (userRequests >= MAX_USER_REQUESTS || destinationRequests >= MAX_DESTINATION_REQUESTS || recentChallenge) {
+      return null;
+    }
+
+    await tx.authChallenge.updateMany({
+      where: { userId: currentUser.id, purpose: PURPOSE, channel: CHANNEL, consumedAt: null, invalidatedAt: null, expiresAt: { gt: now } },
+      data: { invalidatedAt: now },
+    });
+
+    const challenge = await tx.authChallenge.create({
+      data: {
+        userId: currentUser.id,
+        purpose: PURPOSE,
+        channel: CHANNEL,
+        destination,
+        secretHash,
+        expiresAt: new Date(now.getTime() + CHALLENGE_TTL_MS),
+        maxAttempts: MAX_ATTEMPTS,
+      },
+      select: { id: true },
+    });
+    return { challengeId: challenge.id, destination, code };
   });
+
+  if (!reservation) return { accepted: true };
 
   try {
     await smsProvider.sendSms({
-      to: destination,
-      body: `کد بازنشانی رمز عبور بازارگاه مخابرات: ${code} — اعتبار: ۱۵ دقیقه`,
+      to: reservation.destination,
+      body: `کد بازنشانی رمز عبور بازارگاه مخابرات: ${reservation.code} — اعتبار: ۱۵ دقیقه`,
     });
   } catch {
     await prisma.authChallenge.updateMany({
-      where: { id: challenge.id, consumedAt: null },
+      where: { id: reservation.challengeId, consumedAt: null },
       data: { invalidatedAt: new Date() },
     });
     throw createError(503, 'PASSWORD_RECOVERY_UNAVAILABLE', 'ارسال کد بازنشانی ممکن نشد. لطفاً بعداً تلاش کنید.');
