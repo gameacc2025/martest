@@ -469,7 +469,7 @@ async function seedDemoMarketplace(prisma, { permissionByName }) {
     }
   }
   console.log('Demo marketplace: 10 companies, 30 company users, 5 customers, ' + productCount + ' product listings.');
-  console.log('Demo account password: ' + demoPassword);
+  console.log('Demo account credentials are intentionally not written to logs.');
   console.log('Company demo phones: 09911000001-09911000030 (manager, catalog, sales in groups of three).');
   console.log('Customer demo phones: 09912000001-09912000005.');
   return { companies: companyRows.length, users: 35, products: productCount };
