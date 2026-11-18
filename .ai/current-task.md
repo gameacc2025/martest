@@ -1,10 +1,10 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18
 
 **Task ID:** PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18  
-**Status:** IN_PROGRESS — source repairs committed; full runtime/browser acceptance still running  
+**Status:** IN_PROGRESS — core repair slices and three GitHub acceptance workflows pass; remaining source/security/product audits are queued  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest audited main:** `10e0e9ef6bf215b66afa5c0eac571bc9d4e9faaa`  
+**Latest tested code:** `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -17,37 +17,40 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 ## Repairs committed on main
 
 - **Database parity:** forward-only migration adds `Faq`, `Page`, `LeadStatusHistory`, and `CRMFieldAudit`; Prisma model/table parity checks run in migration and runtime workflows.
+- **Support schema:** additive migration adds nullable `SupportTicket.slaPolicyId`, index and FK to preserve the SLA policy applied at ticket creation.
 - **CRM:** lead-status route forwards authenticated actor ID; lead merge uses transaction-aware central audit writer.
-- **Support:** SLA pause/resume extends both deadlines by working minutes; queue notifications target active STAFF assignments in the ticket queue; worker no longer starts a duplicate loop when imported; due-time arithmetic uses configured IANA timezone and local holidays; invalid calendar settings fail safely.
-- **Support schema:** `SupportTicket.slaPolicyId` persists the SLA policy applied at creation through an additive migration and nullable FK.
-- **Audit:** sensitive-key redaction is case-insensitive and recursive; writer tests cover explicit/HTTP writers; direct service-layer writes are routed through the central writer; untrusted forwarding headers no longer control stored IP; inbound correlation IDs are validated and bounded.
+- **Support:** SLA pause/resume extends both deadlines by working minutes; queue notifications target active STAFF assignments in the ticket queue; worker is import-safe; due-time arithmetic uses configured IANA timezone/local holidays and validates persisted calendar settings.
+- **Audit:** recursive case-insensitive sensitive-key redaction; central writer tests; safe socket-derived IP (untrusted forwarding headers ignored); bounded safe correlation IDs; audit API documentation aligned with actual STAFF-only routes and query parameters.
 - **AD-1:** CUSTOMER cannot create new RFQs; existing buyer-owned inquiry operations remain ownership checked.
 - **AD-3:** COMPANY user-management grants are removed, including stale persisted grants during seed reconciliation.
 - **AD-4:** retail/checkout/cart/wishlist and finance/settlement remain dormant; Admin/Company routes and active navigation are disabled until owner-approved domain rules/APIs exist.
 - **Notifications:** SMS defaults OFF and queueing requires validated provider configuration, explicit opt-in and quota; live provider delivery remains unverified.
-- **Website UI/tests:** buyer inquiry text, product listing test fixtures and text-free loading-screen assertions aligned with current behavior.
-- **Routing:** stale retail/finance dashboard-menu tests updated; Admin/Company callback-style guards explicitly abort when session restoration fails or navigation leaves for another app.
-- **Docker:** runtime image includes backend parity scripts.
+- **Website/UI/tests:** buyer inquiry text, product listing fixtures and text-free loading-screen assertions aligned with current behavior; stale dashboard-menu tests fixed.
+- **Routing:** Admin/Company callback-style guards explicitly abort when session restoration fails or navigation leaves for another app.
+- **Docker/seed security:** backend image includes parity scripts; production/staging seed requires explicit `SUPER_ADMIN_PASSWORD` of at least 32 characters; env example leaves it blank; CMS synthetic author seed skips Production; admin/demo passwords are not logged; Runtime CI generates and masks ephemeral PostgreSQL/admin/JWT credentials.
 
-## Latest GitHub verification
+## Verified GitHub acceptance
+
+All three workflows passed on tested code SHA `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`.
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared tests, Backend tests, three app builds | [44301790110](https://github.com/gameacc2025/martest/actions/runs/44301790110) | **PASS** |
-| Fresh PostgreSQL migration + all Prisma model/table parity | [44301790094](https://github.com/gameacc2025/martest/actions/runs/44301790094) | **PASS** |
-| Docker Compose + runtime + seeds + browser smoke | [44301790032](https://github.com/gameacc2025/martest/actions/runs/44301790032) | **IN PROGRESS** — Docker build, health checks, migrations, model parity, seed twice, and AD-1/AD-3 grant checks passed; browser smoke across all panels/API proxies is running |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44304118782](https://github.com/gameacc2025/martest/actions/runs/44304118782) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,688 backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44304118529](https://github.com/gameacc2025/martest/actions/runs/44304118529) | **PASS** |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44304118441](https://github.com/gameacc2025/martest/actions/runs/44304118441) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
 
-Local Windows workspace, local Docker and developer PostgreSQL: **NOT VERIFIED**. Live SMTP/Twilio/payment providers: **NOT VERIFIED**.
+Documentation-only commits followed the tested code SHA; they do not change application source. The current main HEAD can therefore be newer than the tested code baseline.
 
 ## Confirmed remaining work
 
-1. Finish browser smoke; inspect failures and repair them before claiming runtime acceptance.
-2. Reconcile stale API/domain documents with current source, beginning with `docs/api-contracts/auth-audit.md` (its AuditLog URLs, query fields, write API, access matrix and retention text do not match implementation).
-3. Audit remaining company-owned endpoints for tenant/IDOR boundaries; current review is broad but not an exhaustive security sign-off.
-4. Dashboard/reporting: use tenant-scoped persisted aggregates or clearly labelled unavailable/sample values; do not show retail/finance prototypes as live operations.
-5. Audit retention/archival: keep append-only logs; do not delete/archive until the owner/legal policy sets retention and approved archival storage.
-6. Continue source review of authentication/PKCE, RBAC, catalog, inquiry/subscriptions, CMS, notifications, deployment and observability.
+1. Continue company-owned endpoint tenant/IDOR review; current review is broad but is not an exhaustive security sign-off.
+2. Audit retention/archival: keep append-only logs; do not delete/archive until the owner/legal policy sets retention and an approved archival destination/design.
+3. Central audit action registry and full producer normalization remain follow-up work; do not claim all action names are standardized.
+4. Dashboard/reporting: replace remaining sample metrics with tenant-scoped persisted aggregates or clearly labelled unavailable values. Retail/finance prototypes remain dormant.
+5. Continue auth/PKCE, RBAC, catalog, inquiry/subscriptions, CMS, notification, deployment and observability source review.
+6. Live SMTP/Twilio/payment-provider delivery and production deployment remain NOT VERIFIED without credentials and a controlled environment.
+7. Local Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED.
 
 ## Next action
 
-Poll Runtime Validation run `44301790032`; fix any browser/API proxy failures. Then reconcile the Audit API contract and refresh WORKLOG/ACTIVE with final run evidence. Keep every claim tied to an observed workflow or source check.
+Continue bounded source-level tenant/IDOR and dashboard/reporting audits; update the backlog and Worklog only with evidence-backed status. Preserve AD-1 through AD-4 and do not invent retention or commercial policy.
