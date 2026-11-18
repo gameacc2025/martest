@@ -89,6 +89,8 @@ jobs:
 
       - name: Verify all migrations are applied to PostgreSQL
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend npx prisma migrate status
+      - name: Verify every Prisma model has a migrated PostgreSQL table
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-schema-parity.js
       - name: Run all development seeds twice to verify idempotency
         run: |
           docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T -e NODE_ENV=development backend node prisma/seed.js
