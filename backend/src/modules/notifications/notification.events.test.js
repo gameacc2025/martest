@@ -209,3 +209,10 @@ test('catalog: SLA escalation never sends SMS without an explicit user preferenc
   assert.ok(event);
   assert.equal(event.channels.SMS, false);
 });
+
+
+test('catalog: every event keeps SMS disabled by default', () => {
+  for (const event of listEvents()) {
+    assert.equal(event.channels.SMS ?? DEFAULT_CHANNELS.SMS, false, event.key);
+  }
+});
