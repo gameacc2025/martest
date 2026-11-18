@@ -75,6 +75,26 @@ function ticketInclude(staff, messages = false) {
   };
   return include;
 }
+async function getActiveQueueStaffIds(tx, queueId) {
+  if (!queueId) return [];
+  const assignments = await tx.supportAssignment.findMany({
+    where: { queueId, endedAt: null, assignedUserId: { not: null } },
+    select: { assignedUserId: true },
+  });
+  const assignedUserIds = [...new Set(assignments.map((assignment) => assignment.assignedUserId).filter(Boolean))];
+  if (assignedUserIds.length === 0) return [];
+
+  const activeStaff = await tx.user.findMany({
+    where: {
+      id: { in: assignedUserIds },
+      accessProfile: { type: 'STAFF', isActive: true },
+      status: 'ACTIVE',
+    },
+    select: { id: true },
+  });
+  return [...new Set(activeStaff.map((member) => member.id))];
+}
+
 function ticketNumber() {
   return 'SUP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
 }
@@ -687,16 +707,10 @@ async function addMessage(user, ticketId, input) {
       }
       // Also notify queue members if assigned queue
       if (ticket.assignedQueueId) {
-        const queueMembers = await tx.user.findMany({
-          where: {
-            accessProfile: { type: 'STAFF', isActive: true },
-            status: 'ACTIVE',
-          },
-          select: { id: true },
-        });
-        for (const member of queueMembers) {
-          if (!recipientIds.includes(member.id) && member.id !== ctx.userId) {
-            recipientIds.push(member.id);
+        const queueMemberIds = await getActiveQueueStaffIds(tx, ticket.assignedQueueId);
+        for (const memberId of queueMemberIds) {
+          if (!recipientIds.includes(memberId) && memberId !== ctx.userId) {
+            recipientIds.push(memberId);
           }
         }
       }
@@ -748,16 +762,10 @@ async function changeStatus(user, ticketId, next, reason) {
     }
     // Also notify queue members
     if (current.assignedQueueId) {
-      const queueMembers = await tx.user.findMany({
-        where: {
-          accessProfile: { type: 'STAFF', isActive: true },
-          status: 'ACTIVE',
-        },
-        select: { id: true },
-      });
-      for (const member of queueMembers) {
-        if (!recipientIds.includes(member.id)) {
-          recipientIds.push(member.id);
+      const queueMemberIds = await getActiveQueueStaffIds(tx, current.assignedQueueId);
+      for (const memberId of queueMemberIds) {
+        if (!recipientIds.includes(memberId)) {
+          recipientIds.push(memberId);
         }
       }
     }
