@@ -158,3 +158,17 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Documentation reconciliation:** corrected the stale AD-4 warning in `docs/README.md`; refreshed exact-main evidence in backlog, migration runbook, current-task and active coordination board.
 - **Security review slice:** Company route guards derive company context from authenticated AccessProfile and scope self-service profile operations to the same company; user service rejects COMPANY create/edit/delete/role assignment and allows only own-company read/activate/deactivate per AD-3; product mutation service rechecks tenant ownership. This is a bounded source review, not exhaustive tenant/IDOR sign-off.
 - **Still NOT VERIFIED:** owner Windows working tree, local Docker/PostgreSQL, live SMTP/Twilio/payment providers and production deployment. Continue tenant/IDOR and dashboard/reporting review; do not invent retention or commercial policy.
+
+
+## 2026-11-18 — PROJECT-WIDE-AUDIT-AND-REPAIR (SLA IDOR and dashboard truthfulness)
+
+- **Exact tested application-code SHA:** `9bb73c5735dbf3eddeff35375b381cc7a37586db`.
+- **CI:** [44316798356](https://github.com/gameacc2025/martest/actions/runs/44316798356) PASS — architecture graph; 68 Frontend/Shared test files / 385 tests; 18 architecture/session tests; 1,694 Backend tests; all three production builds.
+- **Migration:** [44316798384](https://github.com/gameacc2025/martest/actions/runs/44316798384) PASS — Prisma validation/client generation; all migrations on fresh PostgreSQL; every non-ignored Prisma model has a database table.
+- **Runtime:** [44316799468](https://github.com/gameacc2025/martest/actions/runs/44316799468) PASS — Compose config/build, all service health endpoints, migration/parity checks, all development seeds twice, AD-1/AD-3 grant reconciliation and **8/8 Playwright browser smoke tests** across all three panels and API proxies.
+- **Support IDOR:** `GET /tickets/:id/sla` previously fetched by ticket ID alone after only a generic `tickets.read` guard. It now passes the authenticated caller to `getSlaDetails`, which scopes lookup through the same `scopeWhere(context(user))` contract as ticket reads. Regression coverage includes CUSTOMER requester ownership, COMPANY requesterCompanyId, STAFF platform scope, invalid context denial, and route-to-service caller forwarding.
+- **Company dashboard truthfulness:** removed fabricated fallback counts for inquiries/products, removed the sample sales graph and sample revenue/growth claims, render unavailable values as `—`, and removed links to unregistered retail-order routes. Dormant Retail/Finance prototypes remain unreachable under AD-4.
+- **Company statistics contract:** corrected the service's inquiry counts/rows from misleading `orders` / `recentOrders` names to `inquiries` / `recentInquiries`; backend test asserts that order fields are not returned for Inquiry data. Existing API documentation already described the correct inquiry contract.
+- **Security review remains bounded:** company/user/product service checks and company-owned routes were inspected; this does not constitute an exhaustive tenant/IDOR sign-off. Continue reviewing all resource-specific endpoints and direct service paths.
+- **Documentation:** refreshed `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, `.ai/project-context.md`, backlog and migration runbook with the exact tested baseline and evidence.
+- **NOT VERIFIED:** owner's Windows working tree, local Docker/PostgreSQL, live SMTP/Twilio/payment providers and production deployment.
