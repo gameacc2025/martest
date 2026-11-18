@@ -416,7 +416,7 @@ const ROLE_PERMISSIONS = {
   COMPANY_MANAGER: [
     'dashboard.read',
     'company_profile.read', 'company_profile.update',
-    'users.create', 'users.read', 'users.update', 'users.activate', 'users.deactivate', 'users.assign_roles',
+    'users.read', 'users.activate', 'users.deactivate',
     'products.create', 'products.read', 'products.update', 'products.delete', 'products.submit_review', 'products.publish', 'products.import', 'products.export',
     'product_images.create', 'product_images.update', 'product_images.delete',
     'product_documents.create', 'product_documents.update', 'product_documents.delete',
@@ -444,12 +444,13 @@ const ROLE_PERMISSIONS = {
     'media.upload', 'media.read',
   ],
 
-  // CUSTOMER_USER (CUSTOMER): catalog + RFQ (no admin/company panels)
+  // CUSTOMER_USER (CUSTOMER): catalog and read-only access to their existing inquiries.
+  // AD-1: customer-originated RFQ creation is disabled.
   CUSTOMER_USER: [
     'products.read',
     'companies.read',
-    'leads.create', 'leads.read',
-    'inquiries.create', 'inquiries.read',
+    'leads.read',
+    'inquiries.read',
     'notifications.read',
     'tickets.create', 'tickets.read', 'tickets.reply',
   ],
@@ -521,6 +522,26 @@ async function main() {
       });
       assignmentCount++;
     }
+  }
+  // Reconcile existing databases too: removing a permission from ROLE_PERMISSIONS
+  // alone would leave stale RolePermission rows behind because the seed is additive.
+  const companyRoleIds = Object.values(roleBy)
+    .filter((role) => role.scope === 'COMPANY')
+    .map((role) => role.id);
+  const companyForbiddenPermissionIds = [
+    'users.create',
+    'users.update',
+    'users.delete',
+    'users.assign_roles',
+  ].map((name) => permBy[name]?.id).filter(Boolean);
+  if (companyRoleIds.length && companyForbiddenPermissionIds.length) {
+    const revoked = await prisma.rolePermission.deleteMany({
+      where: {
+        roleId: { in: companyRoleIds },
+        permissionId: { in: companyForbiddenPermissionIds },
+      },
+    });
+    console.log(`  ✓ revoked ${revoked.count} forbidden COMPANY user-management grants`);
   }
   console.log(`  ✓ ${assignmentCount} role-permission assignments`);
 
