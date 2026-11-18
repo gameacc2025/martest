@@ -33,6 +33,7 @@ const calls = {
   challengeCreate: [],
   challengeFindUnique: [],
   challengeFindMany: [],
+  challengeFindFirst: [],
   challengeUpdate: [],
   challengeUpdateMany: [],
   challengeCount: [],
@@ -50,6 +51,7 @@ function resetMocks() {
     user: { id: 1, phone: '09120000000', email: 'test@example.com', status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
     challenge: { id: 10, userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '+989120000000', secretHash: 'hashed:123456', expiresAt: new Date(Date.now() + 15 * 60 * 1000), attemptCount: 0, maxAttempts: 5, consumedAt: null, invalidatedAt: null, createdAt: new Date() },
     updateManyCount: 1,
+    recentChallenge: null,
     smsProviderReady: true,
     emailProviderReady: true,
     smsDeliveryFails: false,
@@ -84,6 +86,10 @@ const mockPrisma = {
     findMany: async (args) => {
       calls.challengeFindMany.push(args);
       return [fx.challenge];
+    },
+    findFirst: async (args) => {
+      calls.challengeFindFirst.push(args);
+      return fx.recentChallenge;
     },
     update: async (args) => {
       calls.challengeUpdate.push(args);
@@ -225,6 +231,20 @@ test('requestChallenge: rate limits per user/purpose/channel', async () => {
     () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000', ipAddress: '1.2.3.4' }),
     (err) => err.status === 429 && err.code === 'RATE_LIMITED',
   );
+});
+
+test('requestChallenge: enforces the advertised resend cooldown before creating another code', async () => {
+  baseResetAll();
+  fx.recentChallenge = { id: 9 };
+
+  await assert.rejects(
+    () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
+    (err) => err.status === 429 && err.code === 'RESEND_COOLDOWN' && err.retryAfter === 60,
+  );
+
+  assert.equal(calls.challengeCreate.length, 0);
+  assert.equal(calls.sms.length, 0);
+  assert.equal(calls.challengeFindFirst.length, 1);
 });
 
 test('requestChallenge: rate limits per destination per hour', async () => {
