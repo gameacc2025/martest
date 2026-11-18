@@ -43,7 +43,9 @@ async function verifySchemaParity() {
   const schemaPath = path.resolve(__dirname, '../prisma/schema.prisma');
   const schemaText = fs.readFileSync(schemaPath, 'utf8');
   const expected = extractExpectedTables(schemaText);
-  const client = new Client({ connectionString: databaseUrl });
+  const connectionUrl = new URL(databaseUrl);
+  connectionUrl.searchParams.delete('schema');
+  const client = new Client({ connectionString: connectionUrl.toString() });
 
   await client.connect();
   try {
