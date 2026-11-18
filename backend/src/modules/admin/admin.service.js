@@ -60,6 +60,7 @@ async function getStats() {
     totalProducts,
     pendingProducts,
     totalInquiries,
+    totalOrders,
     totalRoles,
     totalPermissions,
   ] = await Promise.all([
@@ -69,6 +70,7 @@ async function getStats() {
     prisma.product.count(),
     prisma.product.count({ where: { status: 'PENDING_REVIEW' } }),
     prisma.inquiry.count(),
+    prisma.retailOrder.count(),
     prisma.role.count(),
     prisma.permission.count(),
   ]);
@@ -112,7 +114,8 @@ async function getStats() {
       companies: totalCompanies,
       products: totalProducts,
       pendingProducts,
-      orders: totalInquiries,
+      inquiries: totalInquiries,
+      orders: totalOrders,
       roles: totalRoles,
       permissions: totalPermissions,
     },
