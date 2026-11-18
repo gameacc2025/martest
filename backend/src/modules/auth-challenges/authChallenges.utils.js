@@ -86,17 +86,10 @@ function validateBody(body, schema) {
  * Extract IP address from request for rate limiting.
  */
 function getClientIp(request) {
-  // Check standard proxy headers first
-  const forwarded = request.headers['x-forwarded-for'];
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
-  }
-  const realIp = request.headers['x-real-ip'];
-  if (realIp) {
-    return realIp;
-  }
-  // Fallback to Fastify's remoteAddress
-  return request.ip || request.socket?.remoteAddress || 'unknown';
+  // Use Fastify's resolved client address. Raw X-Forwarded-For / X-Real-IP
+  // headers are attacker-controlled unless trustProxy is explicitly configured
+  // with a trusted proxy allow-list; this app does not enable trustProxy.
+  return request?.ip || request?.socket?.remoteAddress || 'unknown';
 }
 
 module.exports = {
