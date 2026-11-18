@@ -4,7 +4,7 @@
 
 > This status block supersedes older audit snapshots and tables below where they conflict. Historical findings are retained for traceability, not as current implementation claims.
 
-- **Latest tested application-code SHA:** `10c41cf52dc5ba01ab90a4c64e09f6f01`. Documentation-only synchronization commits followed this code SHA; no application source changed afterward. The CI, migration and runtime workflows below ran against this exact application-code SHA.
+- **Latest tested application-code SHA:** `10c41cf52dc5ba01ab90a4c64e09a4c5fdf96f01`. Documentation-only synchronization commits followed this code SHA; no application source changed afterward. The CI, migration and runtime workflows below ran against this exact application-code SHA.
 - **CI:** PASS [44368210815](https://github.com/gameacc2025/martest/actions/runs/44368210815) — architecture graph; 68 Frontend/Shared test files / 385 tests; 18 architecture/session tests; 1,701 Backend tests; Website, Company and Admin production builds.
 - **Fresh PostgreSQL migration validation:** PASS [44368210798](https://github.com/gameacc2025/martest/actions/runs/44368210798) — schema validation/generation, fresh database migrations and all Prisma model/table parity.
 - **Runtime Validation:** PASS [44368210958](https://github.com/gameacc2025/martest/actions/runs/44368210958) — Docker Compose, all health checks, migrations, schema parity, seeds twice, AD-1/AD-3 role reconciliation and **8/8 Playwright browser smoke tests** across panels/API proxies.
