@@ -7,6 +7,8 @@ function createPrismaMock() {
   let nextQueueId = 1;
   let nextPolicyId = 1;
   const globalPolicies = new Map();
+  const categories = new Map();
+  const queues = new Map();
   const calls = {
     categoryPolicyUpserts: [],
     globalFinds: [],
@@ -18,20 +20,24 @@ function createPrismaMock() {
     calls,
     globalPolicies,
     supportCategory: {
-      upsert: async ({ where, create, update }) => ({
-        id: Number(Object.keys({ ...create }).length) + Number(where.key.length),
-        key: where.key,
-        ...create,
-        ...update,
-      }),
+      upsert: async ({ where, create, update }) => {
+        const existing = categories.get(where.key);
+        const row = existing
+          ? { ...existing, ...update }
+          : { id: nextCategoryId++, ...create };
+        categories.set(where.key, row);
+        return row;
+      },
     },
     supportQueue: {
-      upsert: async ({ where, create, update }) => ({
-        id: nextQueueId++,
-        key: where.key,
-        ...create,
-        ...update,
-      }),
+      upsert: async ({ where, create, update }) => {
+        const existing = queues.get(where.key);
+        const row = existing
+          ? { ...existing, ...update }
+          : { id: nextQueueId++, ...create };
+        queues.set(where.key, row);
+        return row;
+      },
     },
     supportSlaPolicy: {
       upsert: async (args) => {
