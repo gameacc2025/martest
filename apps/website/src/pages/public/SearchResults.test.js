@@ -6,15 +6,11 @@ const {
   routerPush,
   searchProducts,
   getCategories,
-  addToCart,
-  addToWishlist,
   routeState,
 } = vi.hoisted(() => ({
   routerPush: vi.fn(),
   searchProducts: vi.fn(),
   getCategories: vi.fn(),
-  addToCart: vi.fn(),
-  addToWishlist: vi.fn(),
   routeState: { current: null },
 }))
 
@@ -25,14 +21,6 @@ vi.mock('vue-router', () => ({
 
 vi.mock('../../stores/products', () => ({
   useProductsStore: () => ({ searchProducts, getCategories }),
-}))
-
-vi.mock('../../stores/cart', () => ({
-  useCartStore: () => ({ addToCart }),
-}))
-
-vi.mock('../../stores/wishlist', () => ({
-  useWishlistStore: () => ({ addToWishlist }),
 }))
 
 import SearchResults from './SearchResults.vue'
@@ -71,7 +59,7 @@ const mountSearchResults = () => mount(SearchResults, {
       Paginator: { template: '<nav class="paginator-stub" />' },
       ProductCard: {
         props: ['product'],
-        emits: ['view-product', 'add-to-cart', 'toggle-wishlist'],
+        emits: ['view-product'],
         template: '<article class="product-card"><h3>{{ product.name }}</h3><button type="button" @click="$emit(&quot;view-product&quot;, product)">مشاهده محصول</button></article>',
       },
     },
