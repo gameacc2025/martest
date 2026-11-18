@@ -352,3 +352,31 @@ test('recordAuditLogExplicit writes through the supplied transaction client', as
   assert.equal(transactionArgs.data.metadata.extra.apiSecret, '[REDACTED]');
   assert.equal(log.id, 123);
 });
+
+
+test('recordAuditLog captures HTTP actor and request context through the central writer', async () => {
+  baseResetAll();
+  await service.recordAuditLog({
+    request: {
+      user: { id: 17, accessType: 'STAFF', companyId: null },
+      headers: {
+        'x-forwarded-for': '203.0.113.10, 10.0.0.1',
+        'user-agent': 'Audit-Test/1.0',
+        'x-request-id': 'req-http-audit',
+      },
+      ip: '127.0.0.1',
+    },
+    action: 'CRM_LEAD_UPDATED',
+    entityType: 'Lead',
+    entityId: 77,
+    metadata: { nested: { refreshToken: 'must-not-persist' } },
+  });
+
+  const data = calls.auditLogCreate[0].data;
+  assert.equal(data.actorUserId, 17);
+  assert.equal(data.actorAccessType, 'STAFF');
+  assert.equal(data.ipAddress, '203.0.113.10');
+  assert.equal(data.userAgent, 'Audit-Test/1.0');
+  assert.equal(data.requestId, 'req-http-audit');
+  assert.equal(data.metadata.extra.nested.refreshToken, '[REDACTED]');
+});
