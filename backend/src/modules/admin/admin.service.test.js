@@ -28,6 +28,7 @@ function injectMock(relativePath, exportsObj) {
 const calls = {
   userCount: [],
   productCount: [],
+  retailOrderCount: [],
   userFindMany: [],
   productFindMany: [],
   systemSettingFindUnique: [],
@@ -43,6 +44,7 @@ function resetMocks() {
     totalProducts: 0,
     pendingProducts: 0,
     totalInquiries: 0,
+    totalOrders: 0,
     totalRoles: 0,
     totalPermissions: 0,
     recentUsers: [],
@@ -65,6 +67,7 @@ const mockPrisma = {
     },
   },
   company: { count: async () => fx.totalCompanies },
+  retailOrder: { count: async (args) => { calls.retailOrderCount.push(args); return fx.totalOrders; } },
   product: {
     count: async (args) => {
       calls.productCount.push(args);
@@ -103,6 +106,7 @@ test('getStats: assembles all counts into the counts object with correct key nam
   fx.totalProducts = 300;
   fx.pendingProducts = 12;
   fx.totalInquiries = 50;
+  fx.totalOrders = 8;
   fx.totalRoles = 6;
   fx.totalPermissions = 40;
 
@@ -114,7 +118,8 @@ test('getStats: assembles all counts into the counts object with correct key nam
     companies: 15,
     products: 300,
     pendingProducts: 12,
-    orders: 50, // NOTE: totalInquiries is exposed under the `orders` key
+    inquiries: 50,
+    orders: 8,
     roles: 6,
     permissions: 40,
   });
@@ -152,6 +157,7 @@ test('getStats: returns an empty-but-well-formed shape when there is no data yet
     companies: 0,
     products: 0,
     pendingProducts: 0,
+    inquiries: 0,
     orders: 0,
     roles: 0,
     permissions: 0,
