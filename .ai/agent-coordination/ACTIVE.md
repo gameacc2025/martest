@@ -12,7 +12,7 @@
 ## 2026-11-18 — Project-wide audit and repair
 
 **Task:** `PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18` — IN_PROGRESS  
-**Latest recorded main:** `c2c0c8afc4ad1d157410b498fac347b9cf4c9a17`
+**Latest recorded main at handoff update:** `22a2bc74ed4ae9a25528c96e8c853dfa6afd9a38`
 
 | Slice | Status | Evidence / scope | Verification |
 |---|---|---|---|
