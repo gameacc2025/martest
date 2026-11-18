@@ -18,6 +18,8 @@ const crypto = require('crypto');
 const prisma = require('../../config/db');
 const { hashPassword: bcryptHash, verifyPassword: bcryptVerify } = require('../../utils/password');
 const { createError } = require('./authChallenges.utils');
+const smsProvider = require('../notifications/notification.sms.provider');
+const emailProvider = require('../notifications/notification.email.provider');
 
 const CHALLENGE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const RESEND_COOLDOWN_MS = 60 * 1000;    // 60 seconds
@@ -206,6 +208,13 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
     throw createError(400, 'DESTINATION_MISMATCH', 'مقصد ارسال با اطلاعات تأییدشده کاربر مطابقت ندارد.');
   }
 
+  // Do not create a challenge unless a real delivery provider is configured.
+  // Authentication codes must never be returned to the caller or written to logs.
+  const providerReady = channel === 'SMS' ? smsProvider.hasRealProvider() : emailProvider.hasRealProvider();
+  if (!providerReady) {
+    throw createError(503, 'CHALLENGE_DELIVERY_UNAVAILABLE', 'درگاه ارسال کد تأیید در حال حاضر در دسترس نیست.');
+  }
+
   // Check rate limits
   const rateLimit = await checkRateLimits(userId, purpose, channel, normalizedDestination, ipAddress);
   if (!rateLimit.allowed) {
@@ -234,8 +243,32 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
     select: { id: true },
   });
 
-  // TODO: Send code via SMS/Email provider (integration point)
-  // await notificationService.sendChallenge({ destination: normalizedDestination, channel, code, purpose });
+  const purposeLabel = {
+    PASSWORD_RESET: 'بازنشانی رمز عبور',
+    PHONE_VERIFICATION: 'تأیید شماره تلفن',
+    EMAIL_VERIFICATION: 'تأیید ایمیل',
+    LOGIN_MFA: 'تأیید ورود',
+  }[purpose] || 'تأیید هویت';
+  const message = `کد ${purposeLabel} بازارگاه مخابرات: ${code} — اعتبار: ۱۵ دقیقه`;
+
+  try {
+    if (channel === 'SMS') {
+      await smsProvider.sendSms({ to: normalizedDestination, body: message });
+    } else {
+      await emailProvider.sendEmail({
+        to: normalizedDestination,
+        subject: `کد ${purposeLabel} بازارگاه مخابرات`,
+        text: message,
+        allowConsoleFallback: false,
+      });
+    }
+  } catch {
+    await prisma.authChallenge.updateMany({
+      where: { id: challenge.id, consumedAt: null, invalidatedAt: null },
+      data: { invalidatedAt: new Date() },
+    });
+    throw createError(503, 'CHALLENGE_DELIVERY_FAILED', 'ارسال کد تأیید ممکن نشد. لطفاً بعداً تلاش کنید.');
+  }
 
   return {
     challengeId: challenge.id,
