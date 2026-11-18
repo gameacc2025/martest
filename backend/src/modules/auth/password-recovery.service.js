@@ -115,6 +115,41 @@ async function requestPasswordReset({ phone, ipAddress }) {
   return { accepted: true };
 }
 
+async function recordFailedResetAttempt(challengeId, now = new Date()) {
+  // Retry compare-and-swap conflicts instead of silently dropping a failed
+  // guess. Concurrent requests must each consume one attempt or observe that
+  // another request has already exhausted/invalidated the challenge.
+  for (let retry = 0; retry < MAX_ATTEMPTS; retry += 1) {
+    const latest = await prisma.authChallenge.findUnique({ where: { id: challengeId } });
+    if (
+      !latest
+      || latest.consumedAt
+      || latest.invalidatedAt
+      || latest.expiresAt <= now
+      || latest.attemptCount >= latest.maxAttempts
+    ) {
+      return false;
+    }
+
+    const nextAttemptCount = latest.attemptCount + 1;
+    const updated = await prisma.authChallenge.updateMany({
+      where: {
+        id: challengeId,
+        consumedAt: null,
+        invalidatedAt: null,
+        expiresAt: { gt: now },
+        attemptCount: latest.attemptCount,
+      },
+      data: {
+        attemptCount: { increment: 1 },
+        ...(nextAttemptCount >= latest.maxAttempts ? { invalidatedAt: now } : {}),
+      },
+    });
+    if (updated.count === 1) return true;
+  }
+  return false;
+}
+
 async function resetPassword({ phone, code, newPassword }) {
   const rawPhone = String(phone || '').trim();
   const otp = String(code || '').trim();
@@ -147,14 +182,7 @@ async function resetPassword({ phone, code, newPassword }) {
 
   const valid = await verifyPassword(otp, challenge.secretHash);
   if (!valid) {
-    const nextAttemptCount = challenge.attemptCount + 1;
-    await prisma.authChallenge.updateMany({
-      where: { id: challenge.id, consumedAt: null, invalidatedAt: null, attemptCount: challenge.attemptCount },
-      data: {
-        attemptCount: { increment: 1 },
-        ...(nextAttemptCount >= challenge.maxAttempts ? { invalidatedAt: now } : {}),
-      },
-    });
+    await recordFailedResetAttempt(challenge.id, now);
     throw invalidCode();
   }
 
