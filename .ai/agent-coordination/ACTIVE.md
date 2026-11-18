@@ -3,7 +3,7 @@
 **Updated:** 2026-11-18  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code baseline:** `10c41cf52dc5ba01ab90a4c64e09a4c5fdf96f01`  
+**Latest tested code baseline:** `34d737ac73087f27b121eb6825ac2afe9ae3c19c`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,9 +17,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 | Slice | Status | Evidence |
 |---|---|---|
-| CI | PASS | [44368210815](https://github.com/gameacc2025/martest/actions/runs/44368210815): 385 Frontend/Shared tests, 18 architecture/session tests, 1,701 Backend tests, all three app builds |
-| Prisma migration parity | PASS | [44368210798](https://github.com/gameacc2025/martest/actions/runs/44368210798): fresh PostgreSQL migration and all Prisma model/table checks |
-| Runtime + browser | PASS | [44368210958](https://github.com/gameacc2025/martest/actions/runs/44368210958): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
+| CI | PASS | [44371231375](https://github.com/gameacc2025/martest/actions/runs/44371231375): 385 Frontend/Shared tests, 18 architecture/session tests, 1,709 Backend tests, all three app builds |
+| Prisma migration parity | PASS | [44371231516](https://github.com/gameacc2025/martest/actions/runs/44371231516): fresh PostgreSQL migration and all Prisma model/table checks |
+| Runtime + browser | PASS | [44371231280](https://github.com/gameacc2025/martest/actions/runs/44371231280): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
 | Support SLA | IMPLEMENTED + VERIFIED | Pause/resume, queue-scoped recipients, import-safe worker, timezone-aware calendar, input validation, applied-policy FK |
 | CRM audit/status | IMPLEMENTED + VERIFIED | Actor ID forwarded; transaction-aware central audit writer |
 | Audit hardening | IMPLEMENTED + TESTED | Recursive case-insensitive redaction; safe IP; bounded correlation IDs; writer tests |
@@ -28,6 +28,7 @@ The owner authorized project-wide review and corrections. Work is performed on e
 | AD-3 | PASS | COMPANY user-management grants revoked/reconciled |
 | AD-4 | ENFORCED | Retail/checkout and finance routes/navigation dormant pending owner-approved decisions |
 | SMS | HARDENED + VERIFIED | Defaults OFF; explicit opt-in/provider/quota gates; quota uncertainty skips SMS without aborting business transaction; live delivery NOT VERIFIED |
+| OTP abuse controls | HARDENED + VERIFIED | Atomic failed-attempt limits, atomic one-time consume, per-IP verify/consume limits, spoofed forwarding headers ignored |
 
 ## Main repairs in this audit
 
@@ -35,6 +36,7 @@ The owner authorized project-wide review and corrections. Work is performed on e
 - Fixed Support SLA pause/resume, queue scoping, worker import behavior, timezone/holiday arithmetic and validation.
 - Centralized CRM merge audit writes; hardened redaction, client IP and correlation IDs.
 - Hardened paid SMS quota handling: quota/subscription uncertainty fails closed for SMS without rolling back the business operation; added regression tests.
+- Hardened OTP challenges against concurrent brute-force attempts; verify/consume use atomic attempt state and route-level rate limits; trusted IP comes from Fastify, not raw forwarding headers.
 - Reconciled AD-1/AD-3 grants and disabled AD-4 retail/finance navigation/routes.
 - Fixed Website test expectations and Admin/Company router abort behavior.
 - Removed known admin password from env example; require 32+ character explicit password outside development; prevent production CMS demo author seeding; stop logging demo/admin passwords.
