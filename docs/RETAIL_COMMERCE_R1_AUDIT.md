@@ -1,5 +1,7 @@
 # Retail Commerce R1 — Backend Readiness Audit
 
+> **Historical design/readiness snapshot (2026-11-04).** Retail and Finance remain gated by AD-4. Current active-route state and verification are tracked in `docs/ARCHITECTURE_DECISIONS.md` and `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`; do not treat the old R1 runtime status as current.
+
 **Date:** 2026-11-04  
 **Status:** R1 audit complete; R1a opt-in product flag implemented; retail catalogue and inventory remain disabled.  
 **Branch:** main
