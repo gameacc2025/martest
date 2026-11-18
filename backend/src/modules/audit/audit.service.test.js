@@ -274,3 +274,22 @@ test('exportAuditLogs: respects EXPORT_MAX_ROWS limit', async () => {
   const logs = await service.exportAuditLogs({});
   assert.ok(logs.length <= 50000); // EXPORT_MAX_ROWS
 });
+
+test('redactSensitiveData is case-insensitive for sensitive keys at every nesting level', () => {
+  const input = {
+    apiKey: 'api-secret',
+    APIKEY: 'upper-secret',
+    privateKey: 'private-secret',
+    creditCard: 'card-secret',
+    cardNumber: 'number-secret',
+    nationalId: 'national-secret',
+    bankAccount: 'bank-secret',
+    nested: [{ refreshToken: 'refresh-secret', safeLabel: 'visible' }],
+  };
+  const result = service.redactSensitiveData(input);
+  for (const key of ['apiKey', 'APIKEY', 'privateKey', 'creditCard', 'cardNumber', 'nationalId', 'bankAccount']) {
+    assert.equal(result[key], '[REDACTED]', key);
+  }
+  assert.equal(result.nested[0].refreshToken, '[REDACTED]');
+  assert.equal(result.nested[0].safeLabel, 'visible');
+});
