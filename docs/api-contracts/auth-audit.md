@@ -223,7 +223,7 @@ Audit writers recursively redact sensitive metadata keys (case-insensitive, incl
 
 Audit metadata must never be treated as a secret store. Add new sensitive aliases to `SENSITIVE_FIELDS` and tests when a new credential or regulated identifier is introduced.
 
-Client IP is taken from Fastify's `request.ip` (or socket fallback). Forwarding headers are not trusted by the audit service unless a trusted-proxy policy is explicitly configured in Fastify. Correlation IDs are accepted only when bounded and composed of safe characters; invalid IDs are replaced with a UUID.
+Client IP is taken from Fastify's `request.ip` (or socket fallback). Forwarding headers are not trusted by the audit service unless a trusted-proxy policy is explicitly configured in Fastify. Correlation IDs are accepted only when bounded and composed of safe characters; invalid IDs are replaced with a UUID. When a producer omits `source`, HTTP and explicit-context writers derive it from actor type (`STAFF` → `ADMIN`, `COMPANY` → `COMPANY`, `CUSTOMER` → `WEBSITE`); anonymous/system contexts retain the `ADMIN` HTTP fallback or `SYSTEM` explicit fallback respectively. Producers may still pass an explicit source when the event originates from a known subsystem.
 
 ### 3.5 Action naming convention — not yet centrally enforced
 
