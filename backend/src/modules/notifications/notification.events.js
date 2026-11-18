@@ -20,10 +20,10 @@
 //              dispatched by existing modules (products) the templates
 //              reproduce the EXACT strings those call sites used before.
 //
-// ORDER_* events are reserved: the legacy orders module was removed and
-// the Order/Cart domain is being re-introduced separately. The event keys
-// below are the agreed contract — order modules should dispatch these
-// keys and MUST NOT invent their own names (see docs/NOTIFICATIONS.md).
+// ORDER_* events are reserved: retail-order data models exist, but active
+// B2C routes and cart/checkout/order UI are disabled by AD-4. Keep these keys
+// as the agreed contract for a future approved commerce phase; do not invent
+// alternative event names (see docs/NOTIFICATIONS.md).
 // =============================================================
 
 // =============================================================
