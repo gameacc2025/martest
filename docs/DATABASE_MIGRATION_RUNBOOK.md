@@ -39,11 +39,12 @@ DB-1 through DB-6 and the later repair migrations are forward-only/additive. The
 
 1. Confirm the deployed application revision contains the exact migrations listed above.
 2. Confirm `DATABASE_URL` points to the intended database. Never paste its credential into logs or chat.
-3. Run `prisma migrate status` and inspect `_prisma_migrations`. The existing baseline must be recognized as applied before applying the six incremental migrations.
-4. If the database does not recognize `20261106000000_init`, stop. Do not run `migrate resolve`, `db push`, or a reset as a shortcut. Reconcile the actual database history first.
-5. Take a tested, restorable PostgreSQL backup/snapshot and verify free disk space.
-6. Apply and verify on a staging database with a representative data copy before production.
-7. Schedule the deployment window and ensure the application version is compatible with a schema that contains unused new tables.
+3. If the deployment runs `node prisma/seed.js` outside `NODE_ENV=development`, provide a unique `SUPER_ADMIN_PASSWORD` of at least 32 characters through the secret manager/environment. The checked-in example leaves it blank; seed fails closed without it and does not print credentials.
+4. Run `prisma migrate status` and inspect `_prisma_migrations`. The existing baseline must be recognized as applied before applying any unapplied additive migrations listed in the inventory above.
+5. If the database does not recognize `20261106000000_init`, stop. Do not run `migrate resolve`, `db push`, or a reset as a shortcut. Reconcile the actual database history first.
+6. Take a tested, restorable PostgreSQL backup/snapshot and verify free disk space.
+7. Apply and verify on a staging database with a representative data copy before production.
+8. Schedule the deployment window and ensure the application version is compatible with a schema that contains unused new tables.
 
 ## 3. Local development — Docker Compose
 
