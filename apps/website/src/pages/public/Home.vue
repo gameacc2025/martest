@@ -505,7 +505,7 @@ h1{font-size:36px;line-height:1.5;font-weight:800;margin:8px 0 12px}
 #ld{position:fixed;inset:0;background:#060D17;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .4s}
 #ld.x{opacity:0;pointer-events:none;visibility:hidden}
 .fiber-loader-svg{width:min(440px,90vw);height:auto}
-.wait-text{margin-top:20px;font-size:16px;font-weight:600;color:#67E8F9;animation:pText 1.5s ease-in-out infinite alternate}
+
 
 #pb{position:fixed;top:0;right:0;height:3px;width:0;background:var(--pri);box-shadow:0 0 10px var(--pri);z-index:60}
 
@@ -526,7 +526,7 @@ footer .cp{border-top:1px solid #24394D;margin-top:28px;padding-top:14px;display
 @media(max-width:1000px){.reference-home .hero .w{grid-template-columns:1fr;gap:26px}.reference-home .feat{max-width:560px}.reference-home .g4,.reference-home .g3,.reference-home .prods,.reference-home .why,.reference-categories .g3{grid-template-columns:repeat(2,minmax(0,1fr))}.reference-products .lay{grid-template-columns:1fr}.reference-products .fl{position:static}.reference-products .prods{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.reference-home .home-category-card{flex-basis:148px;min-height:124px}.reference-home .w,.reference-products .w,.reference-categories .w{padding-inline:16px}.reference-home .hero{padding:38px 0 60px}.reference-home h1{font-size:27px}.reference-home .stats .g{grid-template-columns:repeat(2,1fr);gap:12px}.reference-home .st{border:0}.reference-home .g4,.reference-home .g3,.reference-home .prods,.reference-home .why,.reference-products .prods,.reference-categories .g3{grid-template-columns:1fr}.reference-products .lay{gap:14px}.reference-products .fl{padding:14px}.reference-products .bar{align-items:flex-start;flex-direction:column;gap:8px}.reference-products .ph h1,.reference-categories .ph h1{font-size:23px}.reference-home .band{padding:22px 18px}.reference-home .fm{grid-template-columns:1fr}.reference-home .fm .x{grid-column:auto}}@media(prefers-reduced-motion:reduce){.reference-home *, .reference-products *, .reference-categories *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @keyframes fy{50%{transform:translateY(-8px)}}
 @keyframes pgp{to{transform:scaleX(1)}}
-@keyframes pText{from{opacity:.4}to{opacity:1}}
+
 
 
 /* Animated hero network and slide transitions from the supplied prototype. */
