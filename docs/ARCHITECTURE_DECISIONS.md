@@ -9,7 +9,7 @@
 - نقش `CUSTOMER_USER` نباید permissionهای `inquiries.create` یا `leads.create` داشته باشد.
 - هیچ Route یا UI برای ثبت Inquiry توسط CUSTOMER نباید فعال باشد.
 
-**Owner authorization and remediation (2026-11-18):** The owner authorized project-wide correction against accepted decisions. `CUSTOMER_USER` no longer receives `leads.create` / `inquiries.create`; the inquiry POST route accepts only STAFF/COMPANY; `createInquiry()` independently rejects CUSTOMER contexts; the Website product CTA is hidden for CUSTOMER; and the empty state no longer directs customers to create an RFQ. Customers retain read/ownership-checked actions on existing inquiries using `inquiries.read`. AD-1 itself is unchanged.
+**Owner authorization and remediation (2026-11-18):** The owner authorized project-wide correction against accepted decisions. `CUSTOMER_USER` no longer receives `leads.read`, `leads.create` or `inquiries.create`; the seed revokes stale grants as well. The inquiry POST route accepts only STAFF/COMPANY; `createInquiry()` independently rejects CUSTOMER contexts; the Website product CTA is hidden for CUSTOMER; and the empty state no longer directs customers to create an RFQ. Customers retain read/ownership-checked actions on existing inquiries using `inquiries.read`. AD-1 itself is unchanged.
 
 ### AD-2 — هر User فقط متعلق به یک Company است
 - Multi Company Membership وجود **ندارد**.
