@@ -182,111 +182,88 @@ GET /api/v1/auth/challenges/me
 
 ## 3. Audit Log — API Contract
 
-### 3.1 Endpoints
+### 3.1 Implemented endpoints (source of truth)
+
+The module is mounted in `backend/src/app.js` at `/api/v1/audit`. All endpoints below require authentication and exact `STAFF` access type.
 
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
-| `GET` | `/api/v1/audit-logs` | STAFF + `audit_logs.read` | Search/filter audit log entries. |
-| `GET` | `/api/v1/audit-logs/:id` | STAFF + `audit_logs.read` | Get single audit entry with full metadata. |
+| `GET` | `/api/v1/audit/logs` | STAFF + `audit_logs.read` | Search and paginate audit entries. |
+| `GET` | `/api/v1/audit/logs/stats` | STAFF + `audit_logs.read` | Aggregate audit statistics. |
+| `GET` | `/api/v1/audit/logs/:id` | STAFF + `audit_logs.read` | Retrieve one audit entry. |
+| `GET` | `/api/v1/audit/logs/export` | STAFF + `audit_logs.export` | Export matching rows as JSON or CSV. |
 
-### 3.2 Query Parameters (Search)
+Do not use the obsolete `/api/v1/audit-logs` paths in clients or examples.
+
+### 3.2 Search query parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `from` | ISO8601 datetime | Start of `occurredAt` range (inclusive) |
-| `to` | ISO8601 datetime | End of `occurredAt` range (inclusive) |
-| `actorUserId` | integer | Filter by actor user ID |
-| `actorAccessType` | STAFF\|COMPANY\|CUSTOMER | Filter by actor's access context |
-| `companyId` | integer | Filter by company (tenant scope) |
-| `action` | string | Exact action match (e.g., `user.login`, `product.publish`) |
-| `entityType` | string | Target entity type (e.g., `User`, `Product`, `Company`) |
-| `entityId` | string | Target entity ID |
-| `outcome` | SUCCESS\|FAILURE\|ERROR | Filter by outcome |
-| `requestId` | string | Correlation ID for request tracing |
-| `page` | integer (default 1) | Page number |
-| `limit` | integer (default 50, max 200) | Page size |
+| `action` | string | Exact action filter. Existing producers are not yet governed by a central action registry. |
+| `entityType` | string | Target entity type. |
+| `entityId` | digit string | Target entity ID. |
+| `userId` | digit string | Actor user ID; mapped to `actorUserId`. |
+| `ipAddress` | string | IP filter. |
+| `severity` | `INFO` / `WARN` / `ERROR` / `CRITICAL` | Severity filter. |
+| `dateFrom`, `dateTo` | ISO date-time | Inclusive lower and exclusive upper time bounds in the service query. |
+| `page` | integer, default 1 | Page number. |
+| `pageSize` | integer, default 50, max 500 | Page size. |
+| `sortBy` | enum | `occurredAt`, `action`, `entityType`, `entityId`, `actorUserId`, `ipAddress`, `severity`. |
+| `sortOrder` | `asc` / `desc` | Sort direction; defaults to `desc`. |
 
-### 3.3 Response Schema
+### 3.3 Response and export behavior
 
-```json
-GET /api/v1/audit-logs
-{
-  "data": [
-    {
-      "id": "12345",
-      "actorUserId": 10,
-      "actorAccessType": "STAFF",
-      "companyId": 5,
-      "action": "user.login",
-      "entityType": "User",
-      "entityId": "10",
-      "requestId": "req_abc123",
-      "source": "admin",
-      "outcome": "SUCCESS",
-      "ipAddress": "203.0.113.45",
-      "userAgent": "Mozilla/5.0...",
-      "metadata": { "loginApp": "admin", "mfaUsed": false },
-      "occurredAt": "2026-11-09T10:30:00Z"
-    }
-  ],
-  "meta": {
-    "page": 1,
-    "limit": 50,
-    "total": 1234,
-    "totalPages": 25
-  }
-}
-```
+Search returns the controller's `{ success, data, meta }` envelope. `meta` includes `total`, `page`, `pageSize`, and `totalPages`. The serialized DTO uses the API names `userId` and `createdAt` for the stored `actorUserId` and `occurredAt` fields. The stats endpoint returns aggregate counts; export returns JSON or CSV and is capped by the service's `EXPORT_MAX_ROWS` limit (50,000).
 
-### 3.4 Redaction Rules
+Do not copy the legacy example below this section from older API versions: its paths, query names, and response field names do not match the current route schemas.
 
-The following fields MUST be redacted (set to `null` or omitted) in API responses:
-- `metadata.passwordHash`, `metadata.currentPassword`, `metadata.newPassword`
-- `metadata.otp`, `metadata.code`, `metadata.secret`, `metadata.token`
-- `metadata.refreshToken`, `metadata.accessToken`
-- `metadata.creditCard`, `metadata.bankAccount`
-- Any field matching `/secret|password|token|otp|code|key/i` in metadata keys
+### 3.4 Redaction rules
 
-Redaction is applied in the service layer before serialization; the database stores full metadata for forensic integrity.
+Audit writers recursively redact sensitive metadata keys (case-insensitive, including nested objects) to the literal value `[REDACTED]` before persistence. The current sensitive-key set includes password/passwordHash, current/new/confirm password, token/refreshToken/accessToken, secret/secretHash, OTP/code/challenge/verifier, API/private keys, card/CVV, SSN/national ID, bank account and IBAN variants. Redaction applies to `before`, `after`, and `extra` metadata snapshots.
 
-### 3.5 Action Taxonomy (Standardized)
+Audit metadata must never be treated as a secret store. Add new sensitive aliases to `SENSITIVE_FIELDS` and tests when a new credential or regulated identifier is introduced.
 
-| Domain | Action Format | Examples |
-|--------|---------------|----------|
-| Auth | `auth.{login,logout,refresh,password_change,password_reset_request,password_reset_consume,phone_verify_request,phone_verify_consume,email_verify_request,email_verify_consume,mfa_request,mfa_consume,handoff_create,handoff_redeem}` | `auth.login`, `auth.password_reset_consume` |
-| User | `user.{create,update,delete,activate,deactivate,role_assign,role_revoke}` | `user.create`, `user.role_assign` |
-| Company | `company.{create,update,delete,activate,deactivate,verify,settings_change}` | `company.activate` |
-| Product | `product.{create,update,delete,publish,hide,archive,approve,reject,feature,status_change}` | `product.publish` |
-| Inquiry | `inquiry.{create,respond,status_change,reveal,item_add,item_update}` | `inquiry.respond` |
-| Settings | `settings.{profile_update,password_change,notification_prefs_update,avatar_upload,avatar_delete}` | `settings.profile_update` |
-| Admin | `admin.{role_create,role_update,role_delete,permission_assign,system_setting_change}` | `admin.system_setting_change` |
+Client IP is taken from Fastify's `request.ip` (or socket fallback). Forwarding headers are not trusted by the audit service unless a trusted-proxy policy is explicitly configured in Fastify. Correlation IDs are accepted only when bounded and composed of safe characters; invalid IDs are replaced with a UUID.
 
-### 3.6 Audit Service — Write Path (Internal)
+### 3.5 Action naming convention — not yet centrally enforced
 
-Other modules call `auditService.log({ ... })` — NOT a public API.
+The following lowercase dotted names are the preferred convention for new producers, not a guaranteed registry of every existing audit event:
+
+| Domain | Preferred examples |
+|--------|--------------------|
+| Auth | `auth.login`, `auth.logout`, `auth.password_reset_consume`, `auth.handoff_redeem` |
+| User | `user.create`, `user.update`, `user.role_assign` |
+| Company | `company.create`, `company.verify`, `company.settings_change` |
+| Product | `product.create`, `product.publish`, `product.status_change` |
+| Inquiry | `inquiry.create`, `inquiry.respond`, `inquiry.status_change` |
+| Settings | `settings.profile_update`, `settings.password_change` |
+
+Existing producers still include domain-specific or generic action strings. A central event registry and full producer normalization remain follow-up work; do not assume all events already conform.
+
+### 3.6 Internal write API (not an HTTP endpoint)
+
+The implemented writer functions are exported from `backend/src/modules/audit/audit.service.js`:
+
+- `recordAuditLog({ request, action, entityType, entityId, metadata, before, after, outcome, severity, source })` — captures actor and HTTP request context from the authenticated Fastify request.
+- `recordAuditLogExplicit({ tx, actorUserId, actorAccessType, companyId, action, entityType, entityId, metadata, before, after, outcome, severity, source, ipAddress, userAgent, requestId })` — supports workers/domain services and an optional Prisma transaction client.
+- `buildMetadata()` and `redactSensitiveData()` — shared metadata construction and redaction helpers.
+
+Example:
 
 ```javascript
-await auditService.log({
-  actorUserId: request.user?.id ?? null,
-  actorAccessType: request.user?.accessType ?? null, // 'STAFF' | 'COMPANY' | 'CUSTOMER'
-  companyId: request.user?.companyId ?? null,
-  action: 'auth.login',
-  entityType: 'User',
-  entityId: String(request.user?.id ?? 'anonymous'),
-  requestId: request.id, // Fastify request ID
-  source: 'admin' | 'company' | 'website' | 'api',
-  outcome: 'SUCCESS' | 'FAILURE' | 'ERROR',
-  ipAddress: request.ip,
-  userAgent: request.headers['user-agent'],
-  metadata: { /* safe, serializable context */ }
+const { recordAuditLog } = require('../audit/audit.service');
+
+await recordAuditLog({
+  request,
+  action: 'inquiry.status_change',
+  entityType: 'Inquiry',
+  entityId: inquiry.id,
+  before: { status: previousStatus },
+  after: { status: inquiry.status },
 });
 ```
 
-- Fire-and-forget (non-blocking): failures logged but don't break primary operation.
-- `actorUserId` nullable for unauthenticated actions (e.g., public registration attempt).
-- `companyId` derived from actor's AccessProfile for tenant scoping.
-
----
+The writers await the database insert; they are not fire-and-forget. Use `recordAuditLogExplicit({ tx })` when the audit row must commit or roll back atomically with the domain mutation. Do not write to `prisma.auditLog.create()` directly outside the central audit service.
 
 ## 4. Permission Matrix
 
@@ -308,13 +285,14 @@ await auditService.log({
 
 | Resource | Owner | STAFF Access | COMPANY Access | CUSTOMER Access |
 |----------|-------|--------------|----------------|-----------------|
-| AuthChallenge | User (via userId) | Full (any user in system) | Own company users only | Own challenges only |
-| AuditLog | System (append-only) | Full (all tenants) | Own company only (via companyId filter) | Denied |
+| AuthChallenge | User (via userId) | Route-specific administrative access | Own company users only where explicitly authorized | Own challenges only |
+| AuditLog | System (append-only) | Search, view and export only with the matching `audit_logs.*` permission | Denied | Denied |
 
-- **AuthChallenge**: STAFF can view any user's challenges via admin user management. COMPANY users can only see challenges for users in their company (via AccessProfile.companyId). CUSTOMER users see only their own.
-- **AuditLog**: STAFF sees all. COMPANY sees only entries where `companyId` matches their company. CUSTOMER denied entirely.
-
----
+- Audit read/stats/detail require exact `STAFF` access plus `audit_logs.read`.
+- Audit export requires exact `STAFF` access plus `audit_logs.export`.
+- COMPANY and CUSTOMER contexts are denied even if a permission is accidentally present.
+- There is no COMPANY tenant-scoped AuditLog API in the current route module. Do not document or build one without an explicit security decision.
+- AuditLog database rows are append-only; the database trigger rejects UPDATE and DELETE.
 
 ## 6. State Transitions
 
@@ -475,7 +453,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.SEED_DEMO_DATA) {
 | **LOGIN_MFA purpose** | Add to enum + implement / Defer to later | Defer — no policy approval yet |
 | **Concurrent devices** | Allow multiple (add device metadata to RefreshToken) / Single active session (current behavior) | Keep single-session for now; add device metadata in follow-up |
 | **MFA mandatory for STAFF** | Yes / No / Opt-in | Opt-in (configurable per-role later) |
-| **Audit log retention** | Infinite (current) / 2 years / Configurable | Infinite (append-only, compliance) |
+| **Audit log retention/archival** | Owner/legal-approved period and archive destination | **OPEN — do not purge or archive automatically.** AuditLog is append-only and the DB trigger rejects UPDATE/DELETE; retention requires an explicit compliance decision and an approved archive design. |
 | **Audit export permission** | Add `audit_logs.export` / Not needed | Not needed for MVP |
 
 ---
