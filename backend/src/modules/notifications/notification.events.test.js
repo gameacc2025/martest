@@ -202,3 +202,10 @@ test('catalog: lookups behave (getEvent/isKnownEvent)', () => {
   assert.equal(getEvent('NOT_A_THING'), null);
   assert.equal(getEvent('COMPANY_REGISTERED').key, 'COMPANY_REGISTERED');
 });
+
+
+test('catalog: SLA escalation never sends SMS without an explicit user preference', () => {
+  const event = getEvent('SUPPORT_SLA_ESCALATED');
+  assert.ok(event);
+  assert.equal(event.channels.SMS, false);
+});
