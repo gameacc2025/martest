@@ -245,7 +245,7 @@ API prefix:
 - Vite
 - Pinia
 - PrimeVue
-- Tailwind / CSS موجود پروژه
+- SCSS و Design Tokens مشترک؛ Admin و Company از PrimeVue 4 و `@primevue/themes` استفاده می‌کنند. Tailwind در پشته فعلی پروژه استفاده نمی‌شود.
 - JavaScript
 
 ### اصل
