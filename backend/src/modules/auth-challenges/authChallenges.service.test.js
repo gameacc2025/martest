@@ -300,6 +300,21 @@ test('verifyChallenge: rejects after max attempts', async () => {
   assert.ok(calls.challengeUpdateMany[0].data.invalidatedAt instanceof Date);
 });
 
+test('verifyChallenge: valid code on the last remaining attempt can still be consumed', async () => {
+  baseResetAll();
+  fx.challenge = { ...fx.challenge, attemptCount: 4, maxAttempts: 5 };
+  const verified = await service.verifyChallenge({ challengeId: '10', code: '123456' });
+  assert.equal(verified.valid, true);
+  assert.equal(verified.remainingAttempts, 1);
+  assert.equal(calls.challengeUpdateMany.length, 0);
+
+  const consumed = await service.consumeChallenge({ challengeId: '10', code: '123456' });
+  assert.equal(consumed.consumed, true);
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.equal(calls.challengeUpdateMany[0].data.attemptCount.increment, 1);
+  assert.ok(calls.challengeUpdateMany[0].data.consumedAt instanceof Date);
+});
+
 test('verifyChallenge: rejects wrong code, increments attempt count', async () => {
   baseResetAll();
   nextVerifyResult = false;
@@ -341,10 +356,8 @@ test('verifyChallenge: succeeds with correct code', async () => {
   const result = await service.verifyChallenge({ challengeId: '10', code: '123456' });
   assert.equal(result.valid, true);
   assert.equal(result.purpose, 'PASSWORD_RESET');
-  assert.equal(result.remainingAttempts, 4); // maxAttempts - attemptCount - 1
-  assert.equal(calls.challengeUpdateMany.length, 1);
-  assert.equal(calls.challengeUpdateMany[0].data.attemptCount.increment, 1);
-  assert.deepEqual(calls.challengeUpdateMany[0].where.attemptCount, { equals: 0, lt: 5 });
+  assert.equal(result.remainingAttempts, 5); // successful verification does not consume a failed-attempt allowance
+  assert.equal(calls.challengeUpdateMany.length, 0);
 });
 
 // ── consumeChallenge ─────────────────────────────────────────
