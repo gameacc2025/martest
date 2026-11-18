@@ -17,7 +17,7 @@ The first implementation milestone is to make the Website's approved visual lang
 - The six domain database foundations were merged through PR #90 (merge commit d509ade7d1dc452eabaccfa0edd2ef463cd23d94): AuthChallenge/AuditLog, Support, CMS, CRM, Retail, and Finance.
 - Do not recreate those models. Inspect the merged Prisma schema and migrations before adding any follow-up schema change.
 - Existing schema foundations are not equivalent to implemented APIs or enabled workflows.
-- Existing Admin CRM and Support experiences are prototypes in places. Replace sample-only behavior with real API calls as each vertical slice becomes available.
+- CRM and Support have API-backed workspaces. The unregistered `OperationsHub.vue` is a dormant sample-only prototype and must not be exposed as live data.
 - Stack: Vue 3, Vite, Pinia where used, PrimeVue 4, SCSS and JavaScript. This repository is Tailwind-free; do not introduce Tailwind, another UI kit, Axios, TypeScript, or new dependencies without explicit owner approval. Keep the existing canonical `@telecom/api-client` patterns.
 - Maintain strict STAFF / COMPANY / CUSTOMER application-context boundaries and server-side authorization.
 - B2C Cart / Checkout / Orders / Wishlist and retail payment/payout remain frozen under AD-4 until the owner approves the commercial decisions.
@@ -398,11 +398,11 @@ Retail and Finance must not be activated merely because their database tables ex
 - No unrelated behavior, production data or persistent database is changed.
 - Changes are reviewed and committed as a small milestone before the next module begins.
 
-## 14. Immediate next action
+## 14. Handoff pointer — 2026-11-18
 
-Start with M0.1–M0.9. The shared palette contract and app entry-point imports already exist; the first code change must be driven by a source audit that identifies actual legacy-color leaks or missing component coverage. Do not alter palette values just to create visible churn. Once M0 passes, begin API-1 using the merged AuthChallenge/AuditLog foundation.
+The original M0-to-API-1 sequence is historical and must not be restarted. Current implementation status and the active next action are maintained in `.ai/current-task.md` and `.ai/agent-coordination/ACTIVE.md`. Continue the bounded project-wide audit: resource-specific tenant/IDOR checks, AuditLog producer/action consistency, the central action registry, and the owner/legal retention decision. Preserve AD-1 through AD-4; do not invent commercial or legal policy.
 
-## 13. Main-branch and completion policy
+## 15. Main-branch and completion policy
 
 - Canonical target is `main`. Do not create a new branch or pull request for these tasks.
 - Integrate one reviewed vertical slice at a time as a small commit directly to `main`.
