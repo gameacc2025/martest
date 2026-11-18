@@ -91,23 +91,21 @@ describe('PublicLayout responsive navigation', () => {
     })
   }
 
-  it('keeps the RFQ destination hidden for guests and exposes the commerce menu trigger' , async () => {
+  it('keeps the customer RFQ destination hidden for guests and disables B2C commerce controls', async () => {
     wrapper = mountLayout()
     await flushPromises()
-    expect(wrapper.find('.public-commerce-trigger').attributes('aria-label')).toBe('سبد خرید')
     expect(wrapper.find('.public-rfq-link').exists()).toBe(false)
+    expect(wrapper.find('.public-commerce-trigger').exists()).toBe(false)
+    expect(wrapper.find('.public-cart-drawer').exists()).toBe(false)
   })
 
-  it('opens the left-side cart drawer and exposes an empty-cart recovery action', async () => {
+  it('does not expose cart or checkout controls in the public shell', async () => {
     wrapper = mountLayout()
     await flushPromises()
-    await wrapper.get('.public-commerce-trigger').trigger('click')
-    await nextTick()
-
-    expect(wrapper.get('.public-cart-drawer').attributes('aria-label')).toBe('سبد خرید')
-    expect(wrapper.get('.public-cart-drawer').attributes('position')).toBe('left')
-    expect(wrapper.get('.public-cart-drawer__empty').text()).toContain('سبد خرید خالی است')
-    expect(wrapper.get('.public-cart-drawer__empty a').text()).toContain('مشاهده محصولات')
+    expect(wrapper.find('.public-commerce-trigger').exists()).toBe(false)
+    expect(wrapper.find('.public-cart-drawer').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('سبد خرید شما')
+    expect(wrapper.text()).not.toContain('ادامه و تسویه حساب')
   })
 
   it('exposes the persistent shared light/dark theme toggle in the public header', async () => {
