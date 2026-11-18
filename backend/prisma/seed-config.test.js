@@ -9,7 +9,7 @@ test('uses the documented local-only bootstrap password in development', () => {
 test('prefers an explicitly configured bootstrap password in every environment', () => {
   assert.equal(
     resolveSuperAdminPassword({ NODE_ENV: 'production', SUPER_ADMIN_PASSWORD: 'runtime-only-secret-0123456789-abcdef' }),
-    'runtime-only-secret',
+    'runtime-only-secret-0123456789-abcdef',
   );
 });
 
