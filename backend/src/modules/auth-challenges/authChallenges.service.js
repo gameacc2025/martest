@@ -85,13 +85,13 @@ function maskDestination(destination, channel) {
  * Check rate limits for challenge requests.
  * Returns { allowed: boolean, retryAfter?: number, errorCode?: string }
  */
-async function checkRateLimits(userId, purpose, channel, destination, ipAddress) {
+async function checkRateLimits(userId, purpose, channel, destination, ipAddress, prismaClient = prisma) {
   const now = new Date();
   const windowStart = new Date(now.getTime() - REQUEST_WINDOW_MS);
   const hourStart = new Date(now.getTime() - 60 * 60 * 1000);
 
   // 1. Per-user, per-purpose, per-channel limit
-  const userRequests = await prisma.authChallenge.count({
+  const userRequests = await prismaClient.authChallenge.count({
     where: {
       userId,
       purpose,
@@ -104,7 +104,7 @@ async function checkRateLimits(userId, purpose, channel, destination, ipAddress)
   }
 
   // 2. Per-destination (phone/email) per hour
-  const destRequests = await prisma.authChallenge.count({
+  const destRequests = await prismaClient.authChallenge.count({
     where: {
       destination,
       createdAt: { gte: hourStart },
@@ -126,8 +126,8 @@ async function checkRateLimits(userId, purpose, channel, destination, ipAddress)
 /**
  * Invalidate previous pending challenges for same user/purpose/channel.
  */
-async function invalidatePreviousChallenges(userId, purpose, channel) {
-  await prisma.authChallenge.updateMany({
+async function invalidatePreviousChallenges(userId, purpose, channel, prismaClient = prisma) {
+  await prismaClient.authChallenge.updateMany({
     where: {
       userId,
       purpose,
@@ -170,77 +170,68 @@ async function verifyCode(code, hash) {
  * @returns {Promise<{challengeId, expiresIn, resendCooldown}>}
  */
 async function requestChallenge({ userId, purpose, channel, destination, ipAddress }) {
-  // Validate purpose
   if (!PURPOSE_CHANNEL_MAP[purpose]) {
     throw createError(400, 'INVALID_PURPOSE', 'هدف چالش معتبر نیست.');
   }
 
-  // Validate channel/purpose combination
   const allowedChannels = PURPOSE_CHANNEL_MAP[purpose];
   if (!allowedChannels.includes(channel)) {
     throw createError(400, 'INVALID_CHANNEL', 'کانال ارسال برای این هدف مجاز نیست.');
   }
 
-  // Fetch user to validate destination ownership
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { phone: true, email: true, status: true, accessProfile: { select: { isActive: true, type: true } } },
   });
-
-  if (!user) {
-    throw createError(404, 'NOT_FOUND', 'کاربر یافت نشد.');
-  }
-
-  if (user.status !== 'ACTIVE') {
-    throw createError(403, 'ACCOUNT_DISABLED', 'حساب کاربری غیرفعال است.');
-  }
-
-  // Panel users (STAFF/COMPANY) must have active AccessProfile
+  if (!user) throw createError(404, 'NOT_FOUND', 'کاربر یافت نشد.');
+  if (user.status !== 'ACTIVE') throw createError(403, 'ACCOUNT_DISABLED', 'حساب کاربری غیرفعال است.');
   if ((user.accessProfile?.type === 'STAFF' || user.accessProfile?.type === 'COMPANY') && user.accessProfile?.isActive === false) {
     throw createError(403, 'ACCESS_DISABLED', 'دسترسی این حساب کاربری غیرفعال شده است.');
   }
 
-  // Validate destination matches user's verified contact
   const normalizedDestination = channel === 'SMS' ? normalizePhone(destination) : normalizeEmail(destination);
   const userContact = channel === 'SMS' ? normalizePhone(user.phone) : normalizeEmail(user.email);
-
   if (normalizedDestination !== userContact) {
     throw createError(400, 'DESTINATION_MISMATCH', 'مقصد ارسال با اطلاعات تأییدشده کاربر مطابقت ندارد.');
   }
 
-  // Do not create a challenge unless a real delivery provider is configured.
-  // Authentication codes must never be returned to the caller or written to logs.
   const providerReady = channel === 'SMS' ? smsProvider.hasRealProvider() : emailProvider.hasRealProvider();
   if (!providerReady) {
     throw createError(503, 'CHALLENGE_DELIVERY_UNAVAILABLE', 'درگاه ارسال کد تأیید در حال حاضر در دسترس نیست.');
   }
 
-  // Check rate limits
-  const rateLimit = await checkRateLimits(userId, purpose, channel, normalizedDestination, ipAddress);
-  if (!rateLimit.allowed) {
-    throw createError(429, rateLimit.errorCode, 'تعداد درخواست‌ها از حد مجاز گذشته است. لطفاً بعداً تلاش کنید.', { retryAfter: rateLimit.retryAfter });
-  }
-
-  // Invalidate previous pending challenges for same purpose/channel
-  await invalidatePreviousChallenges(userId, purpose, channel);
-
-  // Generate code and hash
   const code = generateCode();
   const secretHash = await hashCode(code);
-  const expiresAt = new Date(Date.now() + CHALLENGE_TTL_MS);
+  const reservation = await prisma.$transaction(async (tx) => {
+    // User IDs are unique and the contact destination belongs to this user.
+    // Serialize rate-limit checks + invalidation + creation to prevent parallel
+    // requests from leaving multiple valid challenges for the same purpose.
+    await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${userId} FOR UPDATE`;
+    const currentUser = await tx.user.findUnique({
+      where: { id: userId },
+      select: { phone: true, email: true, status: true, accessProfile: { select: { isActive: true, type: true } } },
+    });
+    if (!currentUser || currentUser.status !== 'ACTIVE' || currentUser.accessProfile?.isActive === false) {
+      throw createError(403, 'ACCESS_DISABLED', 'دسترسی این حساب کاربری غیرفعال است.');
+    }
 
-  // Create challenge record
-  const challenge = await prisma.authChallenge.create({
-    data: {
-      userId,
-      purpose,
-      channel,
-      destination: normalizedDestination,
-      secretHash,
-      expiresAt,
-      maxAttempts: 5,
-    },
-    select: { id: true },
+    const currentContact = channel === 'SMS' ? normalizePhone(currentUser.phone) : normalizeEmail(currentUser.email);
+    if (currentContact !== normalizedDestination) {
+      throw createError(400, 'DESTINATION_MISMATCH', 'مقصد ارسال با اطلاعات تأییدشده کاربر مطابقت ندارد.');
+    }
+
+    const rateLimit = await checkRateLimits(userId, purpose, channel, normalizedDestination, ipAddress, tx);
+    if (!rateLimit.allowed) {
+      throw createError(429, rateLimit.errorCode, 'تعداد درخواست‌ها از حد مجاز گذشته است. لطفاً بعداً تلاش کنید.', { retryAfter: rateLimit.retryAfter });
+    }
+
+    await invalidatePreviousChallenges(userId, purpose, channel, tx);
+    const expiresAt = new Date(Date.now() + CHALLENGE_TTL_MS);
+    const challenge = await tx.authChallenge.create({
+      data: { userId, purpose, channel, destination: normalizedDestination, secretHash, expiresAt, maxAttempts: 5 },
+      select: { id: true },
+    });
+    return { challengeId: challenge.id };
   });
 
   const purposeLabel = {
@@ -264,14 +255,14 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
     }
   } catch {
     await prisma.authChallenge.updateMany({
-      where: { id: challenge.id, consumedAt: null, invalidatedAt: null },
+      where: { id: reservation.challengeId, consumedAt: null, invalidatedAt: null },
       data: { invalidatedAt: new Date() },
     });
     throw createError(503, 'CHALLENGE_DELIVERY_FAILED', 'ارسال کد تأیید ممکن نشد. لطفاً بعداً تلاش کنید.');
   }
 
   return {
-    challengeId: challenge.id,
+    challengeId: reservation.challengeId,
     expiresIn: Math.ceil(CHALLENGE_TTL_MS / 1000),
     resendCooldown: Math.ceil(RESEND_COOLDOWN_MS / 1000),
   };
