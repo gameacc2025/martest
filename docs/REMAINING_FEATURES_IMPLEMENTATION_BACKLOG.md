@@ -4,7 +4,7 @@
 
 > This status block supersedes older audit snapshots and tables below where they conflict. Historical findings are retained for traceability, not as current implementation claims.
 
-- **Current main HEAD (documentation-only after tested code):** `4d8c716317b62c157e751742d18e1d113b47d624`.
+- **Current main HEAD (documentation-only after tested code):** `161773891a9dd4b32303f86395de4f7ef19c254f`.
 - **Latest tested code baseline:** `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`.
 - **CI:** PASS [44304118782](https://github.com/gameacc2025/martest/actions/runs/44304118782) — architecture graph; 68 Frontend/Shared test files / 385 tests; 18 architecture/session tests; 1,688 Backend tests; Website, Company and Admin production builds.
 - **Fresh PostgreSQL migration validation:** PASS [44304118529](https://github.com/gameacc2025/martest/actions/runs/44304118529) — schema validation/generation, fresh database migrations and all Prisma model/table parity.
