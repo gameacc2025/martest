@@ -1,10 +1,10 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18
 
 **Task ID:** PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18  
-**Status:** IN_PROGRESS — latest notification/security repair slice passed all three GitHub acceptance workflows on current main; selected Company/User tenant checks reviewed, broader source/security/product audits remain queued  
+**Status:** IN_PROGRESS — Inquiry least-privilege and Admin dashboard metric repairs passed CI, migration and runtime/browser acceptance on current main; broader tenant/security audits remain queued  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `cbf3af8e391c292ce105199a845fb83c813a3bad`  
+**Latest tested code:** `8bb1904afddb9103e25bdd862f967165efa05f20`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -33,17 +33,22 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 - **Website/UI/tests:** buyer inquiry text, product listing fixtures and text-free loading-screen assertions aligned with current behavior; stale dashboard-menu tests fixed.
 - **Routing:** Admin/Company callback-style guards explicitly abort when session restoration fails or navigation leaves for another app.
 - **Agent governance:** deduplicated repeated direct-to-main, worker ownership, commit/push, and handoff rules across `AGENTS.md`, `.ai/PROTOCOL.md`, and `docs/AI_AGENT_WORKFLOW.md` without changing policy. Corrected a malformed conflict-order sentence in `.ai/UI_SKILLS.md`; skill recommendations remain subordinate to owner/product and repository rules.
+- **Inquiry least privilege:** COMPANY buyer-side lifecycle and item mutations now require `leads.update` or `inquiries.update` in both Route and Service; `COMPANY_USER` with only `inquiries.read` is denied. Existing CUSTOMER owner-checked actions and customer cancellation behavior remain unchanged. Added route/service regression coverage.
+- **Admin dashboard KPI:** active inquiry count now reads the actual nested `InquiryStats.received.new` / `received.byStatus.OPEN` contract and never substitutes the total inquiry count. Added 5 focused dashboard-metric tests.
+- **Prototype isolation:** `OperationsHub.vue` is unregistered and explicitly marked as a sample-only dormant prototype; a visible warning prevents its hard-coded CRM/Support/Retail/Finance values being mistaken for live metrics if reused accidentally.
+- **Additional read-only review:** Product service ownership and public visibility rules; Notification per-user ownership and app-scoped folder membership; CMS STAFF-only management and published-only public article/page routes. No new defect confirmed in these selected paths; review remains non-exhaustive.
+- **Instruction audit:** reviewed `AGENTS.md`, `.ai/PROTOCOL.md`, `CLAUDE.md`, Copilot instructions, `docs/AI_AGENT_WORKFLOW.md`, and both legacy prompt archives. Active main-only/lead-only/Persian rules agree; prompt archives are explicitly marked historical, not policy.
 - **Docker/seed security:** backend image includes parity scripts; production/staging seed requires explicit `SUPER_ADMIN_PASSWORD` of at least 32 characters; env example leaves it blank; CMS synthetic author seed skips Production; admin/demo passwords are not logged; Runtime CI generates and masks ephemeral PostgreSQL/admin/JWT credentials.
 
 ## Verified GitHub acceptance
 
-All three workflows passed on the exact main code SHA `9bb73c5735dbf3eddeff35375b381cc7a37586db`.
+All three workflows passed on the exact application-code SHA `8bb1904afddb9103e25bdd862f967165efa05f20`.
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44372181158](https://github.com/gameacc2025/martest/actions/runs/44371231375) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,709 backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44372181187](https://github.com/gameacc2025/martest/actions/runs/44371231516) | **PASS** |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44372180970](https://github.com/gameacc2025/martest/actions/runs/44371231280) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44385311835](https://github.com/gameacc2025/martest/actions/runs/44385311835) | **PASS** — 69 frontend/shared test files / 390 tests; 18 architecture/session tests; 1,715 backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44385311985](https://github.com/gameacc2025/martest/actions/runs/44385311985) | **PASS** |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44385312248](https://github.com/gameacc2025/martest/actions/runs/44385312248) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
 
 Documentation-only synchronization commits may follow the tested code SHA; they do not change application source. The tested code SHA is recorded separately from the current documentation HEAD.
 
@@ -51,14 +56,14 @@ Documentation-only synchronization commits may follow the tested code SHA; they 
 
 - **Targeted tenant review (2026-11-18):** inspected Company route guards and route tests for profile, product listing, statistics, logo, settings and lifecycle operations; COMPANY context is constrained to its own company, STAFF-only controls are blocked to COMPANY even with wildcard/SUPER_ADMIN role. Reviewed User service role-scope and cross-company guards/tests; no new defect confirmed in these selected paths. This is not exhaustive tenant/IDOR sign-off.
 
-1. Continue company-owned endpoint tenant/IDOR review; current review is broad but is not an exhaustive security sign-off.
+1. Continue resource-specific tenant/IDOR review across Products, Inquiry, Support, CMS, Notifications and Auth; selected Product/Inquiry/Company/User/Notification/CMS paths are reviewed but this is not an exhaustive security sign-off.
 2. Audit retention/archival: keep append-only logs; do not delete/archive until the owner/legal policy sets retention and an approved archival destination/design.
 3. Central audit action registry and full producer normalization remain follow-up work; do not claim all action names are standardized.
-4. Dashboard/reporting: active Company dashboard no longer shows sample metrics; remaining hardcoded sample values are confined to dormant, unregistered Retail/Finance prototypes and must stay unreachable until owner approval.
+4. Dashboard/reporting: Company dashboard uses real API data; Admin active-inquiry KPI now maps the nested stats contract. `OperationsHub.vue` remains an unregistered sample-only prototype.
 5. Continue auth/PKCE, RBAC, catalog, inquiry/subscriptions, CMS, notification, deployment and observability source review.
 6. Live SMTP/Twilio/payment-provider delivery and production deployment remain NOT VERIFIED without credentials and a controlled environment.
 7. Local Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED.
 
 ## Next action
 
-Continue the remaining backend tenant/IDOR audit by resource (Products, Inquiry, Support, CMS, Notifications, Auth), then review AuditLog producer/action consistency and active dashboard contracts. Update docs only with evidence-backed status. Preserve AD-1 through AD-4 and do not invent retention or commercial policy.
+Continue the remaining backend tenant/IDOR audit by resource (Support, CMS, Auth and remaining product surfaces), then review AuditLog producer/action consistency, the central action registry, and retention/archival decision. Update docs only with evidence-backed status. Preserve AD-1 through AD-4 and do not invent retention or commercial policy.
