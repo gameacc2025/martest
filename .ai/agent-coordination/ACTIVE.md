@@ -3,7 +3,7 @@
 **Updated:** 2026-11-18  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code baseline:** `24be9b53af92ca1d37f3dd7cf2fd2fc17e47e4f3`  
+**Latest tested code baseline:** `9bb73c5735dbf3eddeff35375b381cc7a37586db`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,9 +17,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 | Slice | Status | Evidence |
 |---|---|---|
-| CI | PASS | [44305796094](https://github.com/gameacc2025/martest/actions/runs/44305796094): 385 Frontend/Shared tests, 18 architecture/session tests, 1,689 Backend tests, all three app builds |
-| Prisma migration parity | PASS | [44305796146](https://github.com/gameacc2025/martest/actions/runs/44305796146): fresh PostgreSQL migration and all Prisma model/table checks |
-| Runtime + browser | PASS | [44305795993](https://github.com/gameacc2025/martest/actions/runs/44305795993): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
+| CI | PASS | [44316798356](https://github.com/gameacc2025/martest/actions/runs/44316798356): 385 Frontend/Shared tests, 18 architecture/session tests, 1,694 Backend tests, all three app builds |
+| Prisma migration parity | PASS | [44316798384](https://github.com/gameacc2025/martest/actions/runs/44316798384): fresh PostgreSQL migration and all Prisma model/table checks |
+| Runtime + browser | PASS | [44316799468](https://github.com/gameacc2025/martest/actions/runs/44316799468): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
 | Support SLA | IMPLEMENTED + VERIFIED | Pause/resume, queue-scoped recipients, import-safe worker, timezone-aware calendar, input validation, applied-policy FK |
 | CRM audit/status | IMPLEMENTED + VERIFIED | Actor ID forwarded; transaction-aware central audit writer |
 | Audit hardening | IMPLEMENTED + TESTED | Recursive case-insensitive redaction; safe IP; bounded correlation IDs; writer tests |
@@ -38,13 +38,16 @@ The owner authorized project-wide review and corrections. Work is performed on e
 - Fixed Website test expectations and Admin/Company router abort behavior.
 - Removed known admin password from env example; require 32+ character explicit password outside development; prevent production CMS demo author seeding; stop logging demo/admin passwords.
 - Generated and masked ephemeral runtime database/admin/JWT secrets.
+- Closed Support SLA detail IDOR by scoping `getSlaDetails` to the authenticated ticket owner/context; added CUSTOMER, COMPANY, STAFF and route-forwarding regression tests.
+- Removed fabricated Company dashboard KPI fallbacks and sample sales chart; unavailable values now show a dash, and gated retail-order links are absent.
+- Corrected Company statistics response keys so inquiry counts and recent inquiry rows are not mislabeled as orders.
 
 ## Remaining queue
 
 1. Continue company-owned endpoint tenant/IDOR review; no exhaustive security sign-off yet.
 2. Decide AuditLog retention/archival with owner/legal input. Keep append-only protection; do not purge or invent a period.
 3. Add central audit action registry and normalize remaining producers.
-4. Replace remaining sample dashboard metrics with tenant-scoped aggregates or clearly labelled unavailable values; keep retail/finance dormant.
+4. Active Company dashboard sample values have been removed; hardcoded samples remain only in dormant, unregistered Retail/Finance prototypes, which must stay unreachable until owner approval.
 5. Continue auth/PKCE, RBAC, catalog, inquiry/subscriptions, CMS, notifications, deployment and observability review.
 6. Live SMTP/Twilio/payment providers and production deployment are NOT VERIFIED.
 7. Owner's Windows working tree, local Docker and developer PostgreSQL are NOT VERIFIED by the GitHub connection.
