@@ -155,7 +155,7 @@ test('SLA holidays are interpreted as dates in the configured timezone', () => {
   assert.equal(service.isWorkingDay(monday, holidayCalendar), false);
   assert.equal(
     service.addWorkingMinutes(monday, 60, holidayCalendar).toISOString(),
-    '2026-11-17T06:00:00.000Z', // Tuesday 09:30 in Tehran
+    '2026-11-17T06:30:00.000Z', // Tuesday 10:00 in Tehran
   );
 });
 
