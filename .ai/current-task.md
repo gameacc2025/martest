@@ -1,51 +1,53 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18
 
 **Task ID:** PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18  
-**Status:** IN_PROGRESS — source audit and staged repairs underway  
+**Status:** IN_PROGRESS — broad source review, staged repairs and CI verification underway  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
 **Audit baseline:** `cef559d4ffa9dc3c5c3c98967ea08cd4e522060d`  
-**Latest recorded main SHA:** `eb1511a2efef6325c2e6b392d25b55b86365cdb5`  
-**Owner authorization:** broad project-wide repair approved on 2026-11-18  
+**Last audited main before this handoff update:** `8fa82417b0176bd14872d5166251e6738acb9ee8`  
+**Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
 ## Scope and execution boundary
 
-Review project rules, architecture, backend modules, Prisma schema/migrations, seeds, API contracts, all three frontend apps, shared packages, CI/runtime workflows, tests and operational documentation. Fix verified defects in bounded slices. Preserve accepted business decisions unless implementation is being aligned to an already accepted decision. Do not invent behavior or claim unrun checks passed.
+Review repository rules, architecture, Prisma schema/migrations/seeds, backend modules, API contracts, Website/Company/Admin apps, shared packages, CI/runtime workflows, tests and operational documentation. Fix verified defects in bounded slices. Preserve accepted business decisions unless aligning implementation to them. Do not invent behavior or claim unrun checks passed.
 
-This session can inspect and update the connected GitHub repository but cannot access the owner's Windows working tree, local Docker daemon, local PostgreSQL or local browser. Those remain `NOT VERIFIED`. All writes are serialized directly on existing `main`; no branches, worktrees, detached checkouts, force-pushes, resets or clean operations.
+This session can inspect/update the connected GitHub repository but cannot access the owner's Windows working tree, local Docker daemon, local PostgreSQL or local browser. Those remain **NOT VERIFIED**. All writes are serialized directly on existing `main`; no branches, worktrees, detached checkouts, force-pushes, resets or clean operations.
 
-## Completed slices on main
+## Completed implementation slices on main
 
-| Area | Change | Commit |
-|---|---|---|
-| Audit redaction | Normalize sensitive-key catalogue before case-insensitive matching | `3cb9f9400d0c43993f6525814d68ceccddd86b03` |
-| Audit tests | Cover mixed-case and nested sensitive keys | `2316e5526b7890e56a648a657f3e4ebff150ac75` |
-| CRM route | Forward authenticated actor ID to lead status service | `0281b63946e691daaa62bbcab54e5fde705985cc` |
-| CRM tests | Assert route forwards actor identity | `849df76593b5f54cb81471ab9241d0ba023f372c` |
-| Architecture docs | Correct stale Tailwind stack description to PrimeVue 4 + SCSS | `c4590a27cb6e9ebd1792b0ed04427568924839a9` |
-| Database | Add forward-only migration for Faq, Page, LeadStatusHistory and CRMFieldAudit, with indexes, FKs and Persian comments | `784999f1c6bd91b6323b4d6a3e485e78e07b8c0c` |
-| DB runbook | Record migration and revised parity acceptance | `3403c0d15d7c0a4f4d59e145eaaa40c54682639a` |
-| DB CI | Assert the four previously missing tables exist after migrate deploy | `eb1511a2efef6325c2e6b392d25b55b86365cdb5` |
+| Area | Implemented change |
+|---|---|
+| Audit redaction | Case-insensitive sensitive-key normalization and nested/case-variant tests |
+| CRM status | Authenticated actor ID forwarded from route to lead-status service, with route test |
+| CRM audit | Lead merge uses transaction-aware central audit writer; request-context and redaction tests |
+| Support SLA worker | Exported `runOnce`; removed import-time duplicate worker loop; recipients limited to active STAFF assignees in the same queue; broad all-staff fallback removed |
+| Support SLA pause/resume | Pause state derived from events; working-minute duration extends both deadlines on resume; duplicate pause/resume guards; worker/service tests |
+| AD-1 | CUSTOMER RFQ creation denied at route and service; seed removes create grants; existing buyer-owned inquiry actions remain ownership checked |
+| AD-3 | COMPANY user-management grants removed; seed deletes stale grants from existing databases |
+| AD-4 | Website cart/checkout/orders routes and active cart/wishlist UI disabled; future components/stores retained dormant |
+| SMS notifications | Event defaults OFF; SMS preference/dispatch require validated Twilio configuration, explicit opt-in and quota; tests and docs updated |
+| Database parity | Forward-only migration adds Faq, Page, LeadStatusHistory and CRMFieldAudit; all-model Prisma/PostgreSQL parity script and CI/runtime checks added |
 
 ## Verification status
 
-- Targeted local tests: **NOT RUN** — no local repository runtime is available in this session.
-- GitHub CI / migration workflow for the new HEAD: **PENDING / NOT VERIFIED** — current connector exposes no push-triggered run result for this commit.
-- Fresh PostgreSQL migration and seed-twice runtime: **NOT VERIFIED** until the corresponding workflows complete.
-- Existing development/production database upgrade: **NOT VERIFIED**; do not apply to a persistent database without backup and observed migration result.
-- No production data, credentials or environment files were accessed.
+- Local backend/frontend tests, builds, Docker, PostgreSQL and browser runs: **NOT RUN** in this session.
+- Latest observed GitHub Actions for SHA `58c8de6102181630903883cf56a2adb8535e21f5`: CI `44227272875`, Database Migration Validation `44227272649`, Runtime Validation `44227272595` were **IN_PROGRESS** at last poll. Frontend/shared tests and Compose configuration were still running; DB migration/parity, backend tests, seeds and browser checks had not completed.
+- Documentation-only commits were made after that poll; poll Actions again for the current `main` HEAD. Do not treat the earlier run state as final.
+- Fresh PostgreSQL migration, existing-database upgrade, seed-twice, full schema parity, RBAC reconciliation and browser journeys: **NOT VERIFIED** until their current workflows pass.
+- Live SMTP/Twilio delivery: **NOT VERIFIED**.
+- No production DB, secrets or environment files were accessed.
 
 ## Remaining confirmed work
 
-1. **Support SLA:** `pauseSla` / `resumeSla` currently record events without extending deadlines; worker pause handling is a placeholder. Queue notification fan-out must be scoped to actual queue assignments.
-2. **Audit:** add writer/redaction tests, verify all producers use the central writer, and define a retention/archival policy with safe controls.
-3. **Notifications:** reconcile `SUPPORT_SLA_ESCALATED` SMS default with explicit consent and the preference API's `smsAvailable` response; align docs, code and tests.
-4. **Dashboards:** replace misleading inquiry-as-order counts and sample operational/sales metrics with real scoped aggregates or clearly label unavailable data.
-5. **Decision drift:** reconcile implementation with accepted AD-1 (CUSTOMER RFQ), AD-3 (COMPANY user-management permissions) and AD-4 (B2C routes disabled). Preserve the accepted decisions; do not silently rewrite them.
-6. **Three-app regression:** inspect and validate Website, Company and Admin routes, permissions, RTL, accessibility, responsive behavior and real user journeys.
-7. **Whole-repository review:** continue beyond the above modules across auth, RBAC, catalog, inquiry, subscriptions, CMS, inventory, retail, finance, shared packages, UI and deployment.
+1. **SLA calendar:** `addWorkingMinutes`, `isWorkingDay` and pause accounting still need to honor the configured calendar timezone rather than the host process timezone. The pause implementation currently follows existing calendar arithmetic; validate and correct timezone behavior before production use.
+2. **Audit:** search every producer for direct `auditLog.create` bypasses; centralize them; agree an audit retention/archival period with the owner before implementing deletion or archival.
+3. **Dashboards:** replace inquiry-as-order counts and sample operational/sales metrics with tenant-scoped real aggregates or clearly labelled unavailable data.
+4. **Whole-repository review:** continue auth/session/PKCE, RBAC, catalog, inquiry, subscriptions, CMS, support, CRM, notifications, retail, finance, shared packages, deployment and observability.
+5. **Three-app regression:** validate Website, Company and Admin routes, permission boundaries, RTL, accessibility, responsive behavior and real user journeys.
+6. **Database:** confirm all 101 non-ignored Prisma models, catalog comments, migration order, fresh DB and upgrade path via current workflows.
 
 ## Next action
 
-Inspect the exact Support SLA worker and assignment schema, then implement pause/resume and queue-scoped recipients with focused tests. Continue one independently verifiable slice at a time, update WORKLOG/current-task, and verify CI/remote HEAD after each slice.
+Poll the three GitHub Actions workflows for the current main SHA, inspect failed job steps/logs and fix failures. Then continue with timezone-aware SLA calculations and the remaining audit-producer review. Update this file and WORKLOG after each independently verified slice.
