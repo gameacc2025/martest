@@ -218,6 +218,7 @@ async function recordAuditLog({
 /**
  * Record an audit log entry with explicit actor context (for non-HTTP contexts).
  * @param {object} params
+ * @param {object} [params.tx] - Optional Prisma transaction client
  * @param {number} [params.actorUserId] - Actor user ID
  * @param {string} [params.actorAccessType] - Actor access type (STAFF, COMPANY, CUSTOMER, SYSTEM)
  * @param {number} [params.companyId] - Company ID
@@ -236,6 +237,7 @@ async function recordAuditLog({
  * @returns {Promise<object>} Created audit log entry
  */
 async function recordAuditLogExplicit({
+  tx = null,
   actorUserId = null,
   actorAccessType = 'SYSTEM',
   companyId = null,
@@ -253,8 +255,9 @@ async function recordAuditLogExplicit({
   requestId = `sys-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
 }) {
   const builtMetadata = buildMetadata({ before, after, extra: metadata });
+  const db = tx || prisma;
 
-  const log = await prisma.auditLog.create({
+  const log = await db.auditLog.create({
     data: {
       actorUserId,
       actorAccessType,
