@@ -8,11 +8,9 @@
 
 ## CRITICAL — Schema/migration parity blocker (2026-11-17)
 
-The current Prisma schema declares 101 models and 58 enums, but the migration SQL currently creates only 97 tables. The following four Prisma models have no CREATE TABLE statement and no table/column comments in the migration chain: Faq, Page, LeadStatusHistory and CRMFieldAudit.
+Historical migration chain (through DB-6 and the comments migration) declared 101 Prisma models but created only 97 tables. The forward-only migration `20261118000100_complete_cms_crm_tables` now adds the four missing models: Faq, Page, LeadStatusHistory and CRMFieldAudit, including indexes, foreign keys and catalog comments. Fresh-database and existing-database compatibility still require CI/runtime verification; the conditional table/index/FK creation is intended to tolerate databases where these tables were already created outside the migration chain.
 
-This is not detected by the current migration workflow because it runs prisma validate, prisma generate, prisma migrate deploy and prisma migrate status, but does not compare the migrated PostgreSQL catalog with every Prisma model or run the development seeds. The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit. A fresh migrated database is therefore not yet proven application-ready.
-
-**Do not treat the current fresh-DB migration PASS as schema parity.** Add a new forward-only migration for the four missing tables, their constraints/indexes and catalog comments; then test fresh PostgreSQL, an existing-database upgrade with backup and representative data, and seed execution twice. Do not edit applied migrations, use db push, reset a persistent database, or remove user data.
+The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit. Do not declare schema parity until the migration validation workflow confirms all four tables and the runtime workflow completes seed execution twice. Do not edit applied migrations, use db push, reset a persistent database, or remove user data.
 
 ## 1. Migration inventory
 
@@ -25,7 +23,8 @@ This is not detected by the current migration workflow because it runs prisma va
 | 4 | `20261108000400_crm` | Accounts, contacts, leads, pipelines, opportunities, activities, tasks |
 | 5 | `20261108000500_retail` | Inventory, retail orders, payment records, shipments, returns |
 | 6 | `20261108000600_finance` | Ledger, commissions, payables, settlements, payouts, reconciliation, invoices |
-| 7 | `20261108000700_database_comments` | Persian PostgreSQL comments for all 97 tables and 962 physical columns; no schema/data changes |
+| 7 | `20261108000700_database_comments` | Persian PostgreSQL comments for the original 97 tables and 962 physical columns |
+| 8 | `20261118000100_complete_cms_crm_tables` | Forward-only creation/repair of Faq, Page, LeadStatusHistory and CRMFieldAudit, indexes, foreign keys and Persian comments |
 
 All six new migrations are additive. They do not drop or rename existing core tables and do not backfill/alter existing marketplace records.
 
@@ -89,9 +88,9 @@ Use the deployment's configured `DATABASE_URL` and Prisma config. Never use `pri
 ## 6. Post-migration verification
 
 - [ ] `prisma migrate status` reports no pending migrations.
-- [ ] `_prisma_migrations` contains the baseline and all six DB-1..DB-6 migration names with successful completion.
+- [ ] `_prisma_migrations` contains the baseline, DB-1..DB-6, the database-comments migration, and `20261118000100_complete_cms_crm_tables` with successful completion.
 - [ ] `prisma validate` and `prisma generate` succeed.
-- [ ] After the parity repair, confirm 101 physical tables for 101 Prisma models and 58 enums. Current migration chain is blocked at 97 tables; Faq, Page, LeadStatusHistory and CRMFieldAudit are missing.
+- [ ] Confirm all 101 Prisma models have corresponding physical tables; specifically verify Faq, Page, LeadStatusHistory and CRMFieldAudit after migration `20261118000100_complete_cms_crm_tables`.
 - [ ] Verify critical PostgreSQL constraints/triggers exist: AuditLog append-only; one outstanding AuthChallenge per user/purpose/channel; support message/history immutability, no physical SupportTicket deletion and one active assignment per ticket; inventory nonnegative/reservation checks; order/SellerOrder composite ownership FK; immutable inventory movements/tracking events; balanced posted journal entries; settlement maker-checker.
 - [ ] Run backend tests and application builds.
 - [ ] Confirm existing auth, company, product, inquiry, subscription, notification and address flows still work.
