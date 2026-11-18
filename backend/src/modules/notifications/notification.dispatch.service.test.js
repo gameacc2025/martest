@@ -8,7 +8,7 @@
 //   - notification creation via the event templates
 //   - disabled channel preferences (per user × event × channel)
 //   - duplicate dispatch safety (dedupeKey + skipDuplicates)
-//   - SMS architecture-only behavior (never queued)
+//   - SMS requires explicit per-event opt-in, quota and a configured Twilio provider
 //   - transactional persistence (rows written through the caller's tx)
 //
 // Run with:  node --test
@@ -80,6 +80,35 @@ function resetMocks() {
   fx.preferences = [];
   fx.duplicateEmailRows = 0;
   fx.calls = {};
+}
+
+
+async function withSmsProvider(callback) {
+  const keys = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM_NUMBER'];
+  const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  process.env.TWILIO_ACCOUNT_SID = 'AC_TEST_ACCOUNT';
+  process.env.TWILIO_AUTH_TOKEN = 'test-auth-token';
+  process.env.TWILIO_FROM_NUMBER = '+15551234567';
+  try { return await callback(); }
+  finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
+}
+
+async function withoutSmsProvider(callback) {
+  const keys = ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM_NUMBER'];
+  const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+  for (const key of keys) delete process.env[key];
+  try { return await callback(); }
+  finally {
+    for (const key of keys) {
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
+    }
+  }
 }
 
 resetMocks();
@@ -285,52 +314,67 @@ test('dispatchNotification: duplicate dispatch with the same dedupeKey queues no
 
 // ── SMS is now implemented with opt-in, quota, and provider checks ──────
 
-test('dispatchNotification: SMS-enabled user with quota and valid phone queues SMS delivery', async () => {
-  fx.users = [{ id: 7, phone: '09123456789', email: 'user@test.com' }];
-  fx.preferences = [
-    { userId: 7, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
-  ];
+test('dispatchNotification: opted-in user with quota and configured provider queues SMS delivery', async () => {
+  await withSmsProvider(async () => {
+    fx.users = [{ id: 7, phone: '09123456789', email: 'user@test.com' }];
+    fx.preferences = [
+      { userId: 7, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+    ];
 
-  // Mock consumeUsage to succeed (quota available)
-  const originalConsumeUsage = require('../inquiries/inquiry-subscription.service').consumeUsage;
-  const mockConsumeUsage = async () => ({ enforced: true, used: 1, limit: 10, remaining: 9, subscriptionId: 1 });
-  injectMock('../inquiries/inquiry-subscription.service', { consumeUsage: mockConsumeUsage });
+    const mockConsumeUsage = async () => ({ enforced: true, used: 1, limit: 10, remaining: 9, subscriptionId: 1 });
+    injectMock('../inquiries/inquiry-subscription.service', { consumeUsage: mockConsumeUsage });
 
-  const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [7], {
-    product: { id: 1, title: 'X' }, status: 'APPROVED',
+    const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [7], {
+      product: { id: 1, title: 'X' }, status: 'APPROVED',
+    });
+
+    assert.equal(summary.sms.queued, 1);
+    assert.equal(summary.sms.notImplemented, 0);
+    const smsRows = deliveryRows().filter(r => r.channel === 'SMS');
+    assert.equal(smsRows.length, 1);
+    assert.equal(smsRows[0].recipient, '09123456789');
+    assert.equal(smsRows[0].status, 'PENDING');
   });
-
-  // SMS should be queued
-  assert.equal(summary.sms.queued, 1);
-  assert.equal(summary.sms.notImplemented, 0);
-  const smsRows = deliveryRows().filter(r => r.channel === 'SMS');
-  assert.equal(smsRows.length, 1);
-  assert.equal(smsRows[0].recipient, '09123456789');
-  assert.equal(smsRows[0].status, 'PENDING');
 });
 
-test('dispatchNotification: SMS skipped when quota exceeded', async () => {
-  fx.users = [{ id: 8, phone: '09123456789', email: 'user2@test.com' }];
-  fx.preferences = [
-    { userId: 8, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
-  ];
+test('dispatchNotification: SMS is skipped when quota is exceeded', async () => {
+  await withSmsProvider(async () => {
+    fx.users = [{ id: 8, phone: '09123456789', email: 'user2@test.com' }];
+    fx.preferences = [
+      { userId: 8, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+    ];
 
-  // Mock consumeUsage to throw quota exceeded
-  const mockConsumeUsageQuotaExceeded = async () => {
-    const error = new Error('سهمیه این قابلیت در اشتراک شما به پایان رسیده است.');
-    error.code = 'INQUIRY_QUOTA_EXCEEDED';
-    error.statusCode = 403;
-    throw error;
-  };
-  injectMock('../inquiries/inquiry-subscription.service', { consumeUsage: mockConsumeUsageQuotaExceeded });
+    const mockConsumeUsageQuotaExceeded = async () => {
+      const error = new Error('سهمیه این قابلیت در اشتراک شما به پایان رسیده است.');
+      error.code = 'INQUIRY_QUOTA_EXCEEDED';
+      error.statusCode = 403;
+      throw error;
+    };
+    injectMock('../inquiries/inquiry-subscription.service', { consumeUsage: mockConsumeUsageQuotaExceeded });
 
-  const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [8], {
-    product: { id: 1, title: 'X' }, status: 'APPROVED',
+    const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [8], {
+      product: { id: 1, title: 'X' }, status: 'APPROVED',
+    });
+
+    assert.equal(summary.sms.queued, 0);
+    assert.equal(summary.sms.quotaExceeded, 1);
   });
+});
 
-  // SMS should be skipped due to quota
-  assert.equal(summary.sms.queued, 0);
-  assert.equal(summary.sms.quotaExceeded, 1);
+
+test('dispatchNotification: opted-in SMS is not queued when the provider is unavailable', async () => {
+  await withoutSmsProvider(async () => {
+    fx.users = [{ id: 9, phone: '09123456789', email: 'user3@test.com' }];
+    fx.preferences = [
+      { userId: 9, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+    ];
+    const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [9], {
+      product: { id: 1, title: 'X' }, status: 'APPROVED',
+    });
+    assert.equal(summary.sms.queued, 0);
+    assert.equal(summary.sms.providerNotConfigured, 1);
+    assert.equal(deliveryRows().filter((row) => row.channel === 'SMS').length, 0);
+  });
 });
 
 // ── Recipient resolution ─────────────────────────────────────
