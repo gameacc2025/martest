@@ -40,7 +40,7 @@ Admin routes are registered under the admin API prefix (verify the registration 
 | GET | `/notifications/delivery-stats` | `delivery.view` | Read delivery statistics |
 | GET | `/notifications/deliveries` | `delivery.view` | List delivery attempts/results |
 
-Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, and `STAFF`. Admin announcement send channels are `IN_APP` and `EMAIL`; SMS is not enabled for announcements. Separately, explicit inquiry-message alerts can queue SMS: the sender must set `notifyBySms`, the recipient must opt in to `INQUIRY_MESSAGE_RECEIVED/SMS`, Twilio must be configured, and the sender must have paid SMS quota. The quota event and SMS outbox row are written in the inquiry-message transaction. The central event dispatcher still intentionally does not queue generic event-driven SMS. Request schema limits and accepted announcement values are defined in `backend/src/modules/admin/admin.routes.js` and remain the source of truth.
+Announcement audiences currently include `ALL_ACTIVE`, `CUSTOMER`, `COMPANY`, and `STAFF`. Admin announcement send channels are `IN_APP` and `EMAIL`; SMS is not enabled for announcements. Other catalog events may queue SMS only when the recipient explicitly enables that event/channel, Twilio credentials are configured, the phone number is valid, and paid SMS quota is consumed. Every event defaults SMS to OFF. The preferences API reports `smsAvailable` from the Twilio provider configuration and rejects enabling SMS while the provider is unavailable. Inquiry-message alerts additionally require the sender to set `notifyBySms` and the recipient to opt in to `INQUIRY_MESSAGE_RECEIVED/SMS`; quota and outbox insertion are transactional. Request schema limits and accepted announcement values are defined in `backend/src/modules/admin/admin.routes.js` and remain the source of truth.
 
 ## Frontend entry points
 
@@ -72,14 +72,14 @@ Single click opens/selects without changing read state; double-click marks read 
 
 The Inquiry service dispatches catalog events through `notification.dispatch.service.js` inside the same Prisma transaction as the business change:
 
-- `INQUIRY_PUBLISHED`: when a customer submits a product inquiry immediately, when a company inquiry transitions to OPEN, or when a scheduled SUBMITTED inquiry becomes due. Recipients are companies that own the requested products and STAFF users with `leads.read`.
+- `INQUIRY_PUBLISHED`: when an authorized company/staff-created inquiry transitions to OPEN or when a scheduled SUBMITTED inquiry becomes due. CUSTOMER cannot originate new RFQs under AD-1; existing buyer-owned inquiries remain readable and manageable within ownership checks. Recipients are companies that own the requested products and STAFF users with `leads.read`.
 - `INQUIRY_RESPONSE_RECEIVED`: delivered to the owning customer user or the requesting company when a supplier submits a quote.
 - `INQUIRY_STATUS_CHANGED`: delivered to the inquiry owner and companies that have active responses when an inquiry closes, expires, completes, or is cancelled.
 - `INQUIRY_RESPONSE_SELECTED`: delivered to the supplier whose quote was selected.
 - `INQUIRY_RESPONSE_REJECTED`: delivered when the buyer manually rejects one quote.
 - `INQUIRY_RESPONSE_AUTO_REJECTED`: delivered to pending suppliers whose quotes are rejected atomically after another quote is selected.
 
-The dispatcher applies each recipient's channel preferences, persists in-app notifications and queues email deliveries transactionally, and deduplicates event dispatch. It intentionally reports generic event-driven SMS as `notImplemented`. This is separate from the explicit inquiry-message SMS path described above, which queues an outbox row after recipient opt-in and paid sender quota checks. Scheduled publishing and auto-expiry are processed by the backend inquiry lifecycle worker; live SMTP/Twilio delivery still requires a configured environment and controlled verification.
+The dispatcher applies each recipient's channel preferences, persists in-app notifications, queues email deliveries, and queues SMS only after explicit per-event opt-in, Twilio provider checks, phone validation and paid quota enforcement. Outbox writes and deduplication remain transactional. The explicit inquiry-message SMS path adds the sender's `notifyBySms` choice and recipient opt-in. Scheduled publishing and auto-expiry are processed by the backend inquiry lifecycle worker; live SMTP/Twilio delivery still requires a configured environment and controlled verification.
 
 ## Delivery and operational requirements
 
@@ -170,14 +170,23 @@ Interaction contract:
 Do not claim a browser E2E run passed unless a completed Playwright job explicitly reports success. Unit tests and the CI browser job are separate evidence.
 
 
-## SMS implementation boundary — source rechecked 2026-10-29
+## SMS implementation boundary — historical snapshot (2026-10-29; superseded 2026-11-18)
 
 - Present: Twilio adapter (`notification.sms.provider.js`), SMS outbox processing/retry in `notification.delivery.service.js`, worker invocation in `notification-delivery.worker.js`, paid SMS quota accounting, and unit tests.
-- Missing integration: `notification.dispatch.service.js` intentionally never queues SMS rows and returns `sms.notImplemented`. The channel therefore is not end-to-end available for notification events.
-- Follow-up: queue SMS only for explicit user opt-in and supported events; resolve and validate recipient phone; consume the paid quota safely before queueing; add dedupe and failure/retry regression tests; verify with configured Twilio credentials and a controlled recipient.
-- Status: **PARTIAL / live provider NOT VERIFIED**. Admin announcements remain IN_APP/EMAIL only.
+- Historical status only: at that time, generic event-dispatch SMS was not queued. The later 2026-11-18 implementation below supersedes this note.
+- Status at the time: **PARTIAL / live provider NOT VERIFIED**. Admin announcements remained IN_APP/EMAIL only.
 null
 
-## SMS implementation status update — 2026-10-31
+## SMS implementation status update — historical snapshot (2026-10-31; superseded 2026-11-18)
 
-The 2026-10-29 note above remains accurate only for generic event-driven SMS from `notification.dispatch.service.js`. A separate explicit inquiry-message SMS path is now implemented: `sendInquiryMessage` queues `INQUIRY_MESSAGE_RECEIVED` only when the sender explicitly requests it, the recipient has opted in, Twilio configuration is valid, and paid sender quota is available. Recipient accounts must be active; company recipients use an active COMPANY AccessProfile in the target company. Quota and outbox insertion are transactional. The worker sends and retries the queued SMS. Generic event-dispatch SMS and SMS for admin announcements remain unsupported; live Twilio delivery remains NOT VERIFIED.
+The 2026-10-31 state was limited to explicit inquiry-message SMS. It is retained here as historical context; the current event-dispatch SMS contract is recorded below.
+
+
+## SMS implementation status — current source review (2026-11-18)
+
+- Generic event SMS is implemented in `notification.dispatch.service.js` and processed by `notification.delivery.service.js`.
+- SMS is OFF by default for every event, including `SUPPORT_SLA_ESCALATED`; users must explicitly opt in per event.
+- SMS preferences are available only when `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_NUMBER` are configured. The preference service rejects enabling SMS without the provider; stale enabled rows are ineffective while unavailable.
+- The dispatcher fails closed when Twilio is not configured, validates recipient phone numbers, consumes paid SMS quota, and uses the notification outbox dedupe key.
+- Inquiry-message SMS additionally requires sender `notifyBySms` and recipient `INQUIRY_MESSAGE_RECEIVED/SMS` opt-in. Admin announcements remain IN_APP/EMAIL only.
+- Automated unit coverage exists for opt-in, provider-unavailable, quota-exceeded, and default-off behavior. **Live Twilio delivery remains NOT VERIFIED** until a controlled send is completed with real configured credentials.
