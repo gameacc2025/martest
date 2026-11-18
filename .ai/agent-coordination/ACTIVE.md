@@ -12,19 +12,26 @@
 ## 2026-11-18 — Project-wide audit and repair
 
 **Task:** `PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18` — IN_PROGRESS  
-**Latest recorded main:** `3e66fe8f751f4b4eebd45d0a604cbc3b34b8acdd`
+**Latest recorded main:** `c2c0c8afc4ad1d157410b498fac347b9cf4c9a17`
 
-| Slice | Status | Commit(s) | Verification |
+| Slice | Status | Evidence / scope | Verification |
 |---|---|---|---|
-| Audit case-insensitive secret redaction + tests | IMPLEMENTED | `3cb9f940`, `2316e552` | CI pending / not verified |
-| CRM status route actor forwarding + route test | IMPLEMENTED | `0281b639`, `849df765` | CI pending / not verified |
-| Frontend stack documentation correction | DONE | `c4590a27` | Source manifests inspected |
-| Missing CMS/CRM tables forward migration | IMPLEMENTED | `784999f1` | Fresh DB and upgrade not verified |
-| Migration runbook + four-table CI assertion | DONE | `3403c0d1`, `eb1511a2` | Workflow result pending / not verified |
+| Audit redaction | IMPLEMENTED | Case-insensitive sensitive-key normalization + nested tests | CI running |
+| CRM status actor | IMPLEMENTED | Route forwards authenticated actor ID + route test | CI running |
+| CRM audit writer | IMPLEMENTED | Lead merge uses transaction-aware central writer; redaction/request-context tests | CI running |
+| Support SLA worker | IMPLEMENTED | Exported `runOnce`; no import-time duplicate loop; active queue-assignee scope; no broad staff broadcast | CI running |
+| Support SLA pause/resume | IMPLEMENTED | Working-minute pause accounting, persisted due-date extension, duplicate-pause guards | CI running |
+| AD-1 | IMPLEMENTED | CUSTOMER cannot create RFQ; existing buyer-owned inquiry actions remain permission/ownership checked | CI + runtime seed check running |
+| AD-3 | IMPLEMENTED | COMPANY user-management grants removed and stale rows revoked by seed | Runtime seed check running |
+| AD-4 | IMPLEMENTED | B2C routes and active cart/wishlist UI disabled; future components/stores retained dormant | CI running |
+| SMS notifications | IMPLEMENTED | Default OFF, provider-aware preference and queue gates, opt-in and quota checks | CI running; live Twilio NOT VERIFIED |
+| DB schema parity | IMPLEMENTED | Forward migration for four missing models; all-model parity script and runtime/DB workflow checks | Migration/runtime workflows running |
 
-**Current open work:** Support SLA pause/resume and queue recipient scoping; audit writer coverage/retention; SMS preference/default consent; dashboard sample data; AD-1/AD-3/AD-4 implementation drift; three-app regression; remaining auth/RBAC/catalog/inquiry/subscription/CMS/retail/finance/shared-package audits.
+**Current GitHub Actions runs for the latest tested revision:** CI `44227272875`; Database Migration Validation `44227272649`; Runtime Validation `44227272595`. All were observed **IN_PROGRESS** at the latest poll; frontend/shared tests and Compose configuration were still running, migration and runtime checks had not completed.
 
-**Execution boundary:** GitHub-connected source only. Local Windows workspace, Docker, PostgreSQL and browser remain NOT VERIFIED. Continue on `main` only; no branches/worktrees/detached checkouts; workers never commit/push; no destructive Git/DB operations.
+**Open work:** timezone-aware SLA calendar calculations; audit producer coverage and an owner-approved retention/archival policy; dashboard sample metrics and tenant-scoped aggregates; continued auth/RBAC/CMS/catalog/retail/finance review; full Website/Company/Admin regression. Do not claim completion until CI and database/runtime checks pass.
+
+**Execution boundary:** GitHub-connected source only. Local Windows workspace and local Docker/browser remain NOT VERIFIED. Continue on `main` only; no branches/worktrees/detached checkouts; workers never commit/push; no destructive Git/DB operations.
 
 ## Operating policy
 
