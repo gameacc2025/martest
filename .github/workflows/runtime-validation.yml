@@ -44,8 +44,12 @@ jobs:
           set -euo pipefail
           POSTGRES_PASSWORD="$(openssl rand -hex 32)"
           SUPER_ADMIN_PASSWORD="$(openssl rand -hex 24)"
+          JWT_ACCESS_SECRET="$(openssl rand -hex 32)"
+          JWT_REFRESH_SECRET="$(openssl rand -hex 32)"
           echo "::add-mask::$POSTGRES_PASSWORD"
           echo "::add-mask::$SUPER_ADMIN_PASSWORD"
+          echo "::add-mask::$JWT_ACCESS_SECRET"
+          echo "::add-mask::$JWT_REFRESH_SECRET"
           echo "E2E_ADMIN_PASSWORD=$SUPER_ADMIN_PASSWORD" >> "$GITHUB_ENV"
           cat > .env <<EOF
           POSTGRES_USER=telecom
@@ -61,9 +65,9 @@ jobs:
                 SUPER_ADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD:?SUPER_ADMIN_PASSWORD is required for CI seed}
           EOF
           cp backend/.env.example backend/.env
-          cat >> backend/.env <<'EOF'
-          JWT_ACCESS_SECRET=ci_access_secret_only_32_chars_93a1
-          JWT_REFRESH_SECRET=ci_refresh_secret_only_32_chars_93a1
+          cat >> backend/.env <<EOF
+          JWT_ACCESS_SECRET=$JWT_ACCESS_SECRET
+          JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET
           ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3002,http://localhost:3003
           EOF
 
