@@ -249,6 +249,51 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
  * @param {object} params - { challengeId, code }
  * @returns {Promise<{valid, purpose, remainingAttempts}>}
  */
+async function loadChallengeForRetry(challengeId) {
+  return prisma.authChallenge.findUnique({ where: { id: Number(challengeId) } });
+}
+
+async function assertChallengeAttemptState(challengeId) {
+  const latest = await loadChallengeForRetry(challengeId);
+  if (!latest) throw createError(404, 'CHALLENGE_NOT_FOUND', 'چالش یافت نشد.');
+  if (latest.consumedAt) throw createError(400, 'CHALLENGE_CONSUMED', 'این چالش قبلاً مصرف شده است.');
+  if (latest.invalidatedAt) throw createError(400, 'CHALLENGE_INVALIDATED', 'این چالش باطل شده است.');
+  if (latest.expiresAt < new Date()) throw createError(400, 'CHALLENGE_EXPIRED', 'این چالش منقضی شده است.');
+  if (latest.attemptCount >= latest.maxAttempts) {
+    await prisma.authChallenge.updateMany({
+      where: { id: latest.id, consumedAt: null, invalidatedAt: null },
+      data: { invalidatedAt: new Date() },
+    });
+    throw createError(400, 'MAX_ATTEMPTS_EXCEEDED', 'حداکثر تعداد تلاش‌ها انجام شده است.');
+  }
+  throw createError(409, 'CHALLENGE_STATE_CHANGED', 'وضعیت چالش هم‌زمان تغییر کرده است. دوباره تلاش کنید.');
+}
+
+async function incrementChallengeAttempt(challenge, now = new Date()) {
+  const updated = await prisma.authChallenge.updateMany({
+    where: {
+      id: challenge.id,
+      consumedAt: null,
+      invalidatedAt: null,
+      expiresAt: { gt: now },
+      // Compare-and-swap prevents concurrent requests from exceeding maxAttempts.
+      attemptCount: { equals: challenge.attemptCount, lt: challenge.maxAttempts },
+    },
+    data: { attemptCount: { increment: 1 } },
+  });
+  if (updated.count !== 1) {
+    await assertChallengeAttemptState(challenge.id);
+  }
+  return challenge.attemptCount + 1;
+}
+
+/**
+ * Verify a challenge code WITHOUT consuming it.
+ * The attempt counter is updated with a conditional database write so
+ * concurrent requests cannot bypass maxAttempts.
+ * @param {object} params - { challengeId, code }
+ * @returns {Promise<{valid, purpose, remainingAttempts}>}
+ */
 async function verifyChallenge({ challengeId, code }) {
   const challenge = await prisma.authChallenge.findUnique({
     where: { id: Number(challengeId) },
@@ -266,43 +311,48 @@ async function verifyChallenge({ challengeId, code }) {
     throw createError(400, 'CHALLENGE_INVALIDATED', 'این چالش باطل شده است.');
   }
 
-  if (challenge.expiresAt < new Date()) {
+  const now = new Date();
+  if (challenge.expiresAt < now) {
     throw createError(400, 'CHALLENGE_EXPIRED', 'این چالش منقضی شده است.');
   }
 
   if (challenge.attemptCount >= challenge.maxAttempts) {
-    // Auto-invalidate on max attempts
-    await prisma.authChallenge.update({
-      where: { id: challenge.id },
-      data: { invalidatedAt: new Date() },
+    await prisma.authChallenge.updateMany({
+      where: { id: challenge.id, consumedAt: null, invalidatedAt: null },
+      data: { invalidatedAt: now },
     });
     throw createError(400, 'MAX_ATTEMPTS_EXCEEDED', 'حداکثر تعداد تلاش‌ها انجام شده است.');
   }
 
-  // Verify code
   const valid = await verifyCode(code, challenge.secretHash);
-
-  // Increment attempt count regardless of success (prevents timing attacks)
-  await prisma.authChallenge.update({
-    where: { id: challenge.id },
-    data: { attemptCount: { increment: 1 } },
-  });
+  const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
+  const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
 
   if (!valid) {
-    const remaining = challenge.maxAttempts - challenge.attemptCount - 1;
-    throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts: Math.max(0, remaining) });
+    if (remainingAttempts === 0) {
+      await prisma.authChallenge.updateMany({
+        where: {
+          id: challenge.id,
+          attemptCount: nextAttemptCount,
+          consumedAt: null,
+          invalidatedAt: null,
+        },
+        data: { invalidatedAt: now },
+      });
+    }
+    throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts });
   }
 
   return {
     valid: true,
     purpose: challenge.purpose,
-    remainingAttempts: challenge.maxAttempts - challenge.attemptCount - 1,
+    remainingAttempts,
   };
 }
 
 /**
  * Consume a challenge (verify + mark consumed).
- * This is the final step for password reset, phone/email verification.
+ * The successful attempt increment and consumedAt transition are atomic.
  * @param {object} params - { challengeId, code }
  * @returns {Promise<{consumed, purpose, userId}>}
  */
@@ -317,7 +367,8 @@ async function consumeChallenge({ challengeId, code }) {
   }
 
   if (challenge.consumedAt) {
-    // Idempotent: return success if already consumed
+    // Preserve idempotency for the owner after a successful request whose
+    // response may have been lost in transit.
     return { consumed: true, purpose: challenge.purpose, userId: challenge.userId };
   }
 
@@ -325,37 +376,58 @@ async function consumeChallenge({ challengeId, code }) {
     throw createError(400, 'CHALLENGE_INVALIDATED', 'این چالش باطل شده است.');
   }
 
-  if (challenge.expiresAt < new Date()) {
+  const now = new Date();
+  if (challenge.expiresAt < now) {
     throw createError(400, 'CHALLENGE_EXPIRED', 'این چالش منقضی شده است.');
   }
 
   if (challenge.attemptCount >= challenge.maxAttempts) {
-    await prisma.authChallenge.update({
-      where: { id: challenge.id },
-      data: { invalidatedAt: new Date() },
+    await prisma.authChallenge.updateMany({
+      where: { id: challenge.id, consumedAt: null, invalidatedAt: null },
+      data: { invalidatedAt: now },
     });
     throw createError(400, 'MAX_ATTEMPTS_EXCEEDED', 'حداکثر تعداد تلاش‌ها انجام شده است.');
   }
 
-  // Verify code
   const valid = await verifyCode(code, challenge.secretHash);
-
-  // Increment attempt count
-  await prisma.authChallenge.update({
-    where: { id: challenge.id },
-    data: { attemptCount: { increment: 1 } },
-  });
-
   if (!valid) {
-    const remaining = challenge.maxAttempts - challenge.attemptCount - 1;
-    throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts: Math.max(0, remaining) });
+    const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
+    const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
+    if (remainingAttempts === 0) {
+      await prisma.authChallenge.updateMany({
+        where: {
+          id: challenge.id,
+          attemptCount: nextAttemptCount,
+          consumedAt: null,
+          invalidatedAt: null,
+        },
+        data: { invalidatedAt: now },
+      });
+    }
+    throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts });
   }
 
-  // Mark as consumed
-  await prisma.authChallenge.update({
-    where: { id: challenge.id },
-    data: { consumedAt: new Date() },
+  const consumed = await prisma.authChallenge.updateMany({
+    where: {
+      id: challenge.id,
+      consumedAt: null,
+      invalidatedAt: null,
+      expiresAt: { gt: now },
+      attemptCount: { equals: challenge.attemptCount, lt: challenge.maxAttempts },
+    },
+    data: {
+      attemptCount: { increment: 1 },
+      consumedAt: now,
+    },
   });
+
+  if (consumed.count !== 1) {
+    const latest = await loadChallengeForRetry(challenge.id);
+    if (latest?.consumedAt) {
+      return { consumed: true, purpose: latest.purpose, userId: latest.userId };
+    }
+    await assertChallengeAttemptState(challenge.id);
+  }
 
   return { consumed: true, purpose: challenge.purpose, userId: challenge.userId };
 }
