@@ -407,6 +407,7 @@ test('resolveRecipients: { permission } includes SUPER_ADMIN and permission hold
 
   const args = calls('user.findMany').at(-1);
   assert.deepEqual(args.select, { id: true, email: true });
+  assert.deepEqual(args.where.accessProfile, { type: 'STAFF', isActive: true });
   assert.deepEqual(args.where.OR, [
     { roles: { some: { role: { name: 'SUPER_ADMIN' } } } },
     { roles: { some: { role: { permissions: { some: { permission: { name: 'companies.activate' } } } } } } },
@@ -422,6 +423,14 @@ test('resolveRecipients: { roles, companyId } scopes role lookup to one company'
   assert.deepEqual(args.where.roles, { some: { role: { name: { in: ['COMPANY_MANAGER'] } } } });
   assert.deepEqual(args.where.accessProfile, { companyId: 10, type: 'COMPANY', isActive: true });
   assert.equal(resolved[0].userId, 8);
+});
+
+test('resolveRecipients: { roles } defaults to active STAFF context when no company is supplied', async () => {
+  fx.users = [{ id: 9, email: 'staff@example.test' }];
+  await resolveRecipients(mockPrisma, { roles: ['SUPER_ADMIN'] });
+  const args = calls('user.findMany').at(-1);
+  assert.deepEqual(args.where.accessProfile, { type: 'STAFF', isActive: true });
+  assert.equal(args.where.status, 'ACTIVE');
 });
 
 test('resolveRecipients: null/undefined recipients resolve to nobody', async () => {
