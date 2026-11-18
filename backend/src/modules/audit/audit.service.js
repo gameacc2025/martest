@@ -156,13 +156,18 @@ async function recordAuditLog({
   after,
   outcome = 'SUCCESS',
   severity = 'INFO',
-  source = 'ADMIN',
+  source = null,
 }) {
   // Extract actor context from request
   const user = request.user;
   const actorUserId = user?.id || null;
   const actorAccessType = user?.accessType || null;
   const companyId = user?.companyId || null;
+  const resolvedSource = source || ({
+    STAFF: 'ADMIN',
+    COMPANY: 'COMPANY',
+    CUSTOMER: 'WEBSITE',
+  }[actorAccessType] || 'ADMIN');
 
   // Extract request context
   const ipAddress = getClientIp(request);
@@ -182,7 +187,7 @@ async function recordAuditLog({
       entityType,
       entityId: String(entityId),
       requestId,
-      source,
+      source: resolvedSource,
       outcome,
       severity,
       ipAddress,
