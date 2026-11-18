@@ -113,6 +113,9 @@ async function resolveRecipients(client, recipients) {
     const users = await client.user.findMany({
       where: {
         status: 'ACTIVE',
+        // Permission-based recipients are platform alerts. A COMPANY/CUSTOMER
+        // account with a stale or misassigned STAFF role must never receive them.
+        accessProfile: { type: 'STAFF', isActive: true },
         OR: [
           { roles: { some: { role: { name: 'SUPER_ADMIN' } } } },
           {
@@ -133,9 +136,9 @@ async function resolveRecipients(client, recipients) {
       where: {
         status: 'ACTIVE',
         roles: { some: { role: { name: { in: recipients.roles.map(String) } } } },
-        ...(recipients.companyId !== undefined ? {
-          accessProfile: { companyId: Number(recipients.companyId), type: 'COMPANY', isActive: true },
-        } : {}),
+        accessProfile: recipients.companyId !== undefined
+          ? { companyId: Number(recipients.companyId), type: 'COMPANY', isActive: true }
+          : { type: 'STAFF', isActive: true },
       },
       select: { id: true, email: true },
     });
