@@ -17,6 +17,20 @@ const MANAGE_TYPES = ['STAFF', 'COMPANY'];
 // records, but must never impersonate a supplier when submitting or editing quotes.
 const SUPPLIER_TYPES = ['COMPANY'];
 
+// Buyer ownership is not a substitute for a company's write permission.
+// CUSTOMER's legacy owner-checked actions remain available through their
+// explicit read permission; COMPANY callers must hold an update permission.
+async function requireCompanyInquiryUpdatePermission(request, reply) {
+  if (request.user?.accessType !== 'COMPANY') return;
+  const permissions = Array.isArray(request.user.permissions) ? request.user.permissions : [];
+  if (permissions.includes('leads.update') || permissions.includes('inquiries.update')) return;
+  return reply.code(403).send({
+    error: true,
+    code: 'INQUIRY_UPDATE_PERMISSION_REQUIRED',
+    message: 'Updating an inquiry requires leads.update or inquiries.update.',
+  });
+}
+
 const INQUIRY_PRIORITIES = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
 
 const INQUIRY_VISIBILITY_MODES = ['NORMAL', 'SEALED', 'ANONYMOUS_SEALED'];
@@ -271,7 +285,7 @@ async function inquiryRoutes(fastify) {
   // Buyers may cancel their own inquiry; STAFF/COMPANY lifecycle changes
   // still require the corresponding update permission and are owner-scoped in the service.
   fastify.patch('/:id/status', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read'), requireCompanyInquiryUpdatePermission],
     schema: { params: inquiryParamsSchema, body: statusBodySchema },
   }, ctrl.changeStatus);
 
@@ -281,17 +295,17 @@ async function inquiryRoutes(fastify) {
   }, ctrl.revealResponses);
 
   fastify.post('/:id/items', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read'), requireCompanyInquiryUpdatePermission],
     schema: { params: inquiryParamsSchema, body: itemBodySchema },
   }, ctrl.addItem);
 
   fastify.patch('/:id/items/:itemId', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read'), requireCompanyInquiryUpdatePermission],
     schema: { params: inquiryItemParamsSchema, body: itemUpdateBodySchema },
   }, ctrl.updateItem);
 
   fastify.delete('/:id/items/:itemId', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.delete', 'inquiries.update', 'inquiries.read')],
+    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read'), requireCompanyInquiryUpdatePermission],
     schema: { params: inquiryItemParamsSchema },
   }, ctrl.deleteItem);
 
