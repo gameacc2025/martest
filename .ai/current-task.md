@@ -1,10 +1,10 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18
 
 **Task ID:** PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18  
-**Status:** IN_PROGRESS — latest notification/security repair slice passed all three GitHub acceptance workflows; remaining source/security/product audits are queued  
+**Status:** IN_PROGRESS — latest notification/security repair slice passed all three GitHub acceptance workflows on current main; selected Company/User tenant checks reviewed, broader source/security/product audits remain queued  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `34d737ac73087f27b121eb6825ac2afe9ae3c19c`  
+**Latest tested code:** `cbf3af8e391c292ce105199a845fb83c813a3bad`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -41,13 +41,15 @@ All three workflows passed on the exact main code SHA `9bb73c5735dbf3eddeff35375
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44371231375](https://github.com/gameacc2025/martest/actions/runs/44371231375) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,709 backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44371231516](https://github.com/gameacc2025/martest/actions/runs/44371231516) | **PASS** |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44371231280](https://github.com/gameacc2025/martest/actions/runs/44371231280) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44372181158](https://github.com/gameacc2025/martest/actions/runs/44371231375) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,709 backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44372181187](https://github.com/gameacc2025/martest/actions/runs/44371231516) | **PASS** |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44372180970](https://github.com/gameacc2025/martest/actions/runs/44371231280) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
 
 Documentation-only synchronization commits may follow the tested code SHA; they do not change application source. The tested code SHA is recorded separately from the current documentation HEAD.
 
 ## Confirmed remaining work
+
+- **Targeted tenant review (2026-11-18):** inspected Company route guards and route tests for profile, product listing, statistics, logo, settings and lifecycle operations; COMPANY context is constrained to its own company, STAFF-only controls are blocked to COMPANY even with wildcard/SUPER_ADMIN role. Reviewed User service role-scope and cross-company guards/tests; no new defect confirmed in these selected paths. This is not exhaustive tenant/IDOR sign-off.
 
 1. Continue company-owned endpoint tenant/IDOR review; current review is broad but is not an exhaustive security sign-off.
 2. Audit retention/archival: keep append-only logs; do not delete/archive until the owner/legal policy sets retention and an approved archival destination/design.
@@ -59,4 +61,4 @@ Documentation-only synchronization commits may follow the tested code SHA; they 
 
 ## Next action
 
-Continue bounded source-level tenant/IDOR and dashboard/reporting audits; update the backlog and Worklog only with evidence-backed status. Preserve AD-1 through AD-4 and do not invent retention or commercial policy.
+Continue the remaining backend tenant/IDOR audit by resource (Products, Inquiry, Support, CMS, Notifications, Auth), then review AuditLog producer/action consistency and active dashboard contracts. Update docs only with evidence-backed status. Preserve AD-1 through AD-4 and do not invent retention or commercial policy.
