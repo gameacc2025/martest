@@ -396,3 +396,15 @@ test('getClientIp ignores untrusted forwarding headers and uses Fastify socket-d
     '127.0.0.1',
   );
 });
+
+
+test('getCorrelationId rejects unbounded or unsafe request IDs', () => {
+  const generated = service.getCorrelationId({
+    headers: { 'x-request-id': 'x'.repeat(101) },
+  });
+  assert.match(generated, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+  assert.equal(service.getCorrelationId({
+    correlationId: 'safe:trace-42',
+    headers: { 'x-request-id': 'unsafe value' },
+  }), 'safe:trace-42');
+});
