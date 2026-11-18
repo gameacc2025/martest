@@ -36,7 +36,7 @@
           <div v-if="product.discount > 0" class="product-discount">
             <Badge :value="`${product.discount}%`" severity="danger" class="discount-badge" />
           </div>
-          <div class="product-wishlist">
+          <div v-if="showCommerceActions" class="product-wishlist">
             <Button
               type="button"
               icon="pi pi-heart"
@@ -96,6 +96,7 @@
             @click="$emit('view-product', product)"
           />
           <Button
+            v-if="showCommerceActions"
             label="افزودن به سبد"
             icon="pi pi-shopping-cart"
             class="p-button-primary product-action"
@@ -115,6 +116,8 @@ import Rating from 'primevue/rating'
 
 const props = defineProps({
   skeleton: { type: Boolean, default: false },
+  // B2C cart/wishlist controls remain disabled until the commerce phase is approved.
+  showCommerceActions: { type: Boolean, default: false },
   product: {
     type: Object,
     required: false,
