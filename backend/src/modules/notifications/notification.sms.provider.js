@@ -1,11 +1,10 @@
 // Twilio SMS adapter used by the notification outbox worker.
 // SMS is queued only after per-event opt-in, paid quota and provider checks.
 function hasRealProvider() {
-  return Boolean(
-    String(process.env.TWILIO_ACCOUNT_SID || '').trim()
-    && String(process.env.TWILIO_AUTH_TOKEN || '').trim()
-    && String(process.env.TWILIO_FROM_NUMBER || '').trim(),
-  );
+  const accountSid = String(process.env.TWILIO_ACCOUNT_SID || '').trim();
+  const authToken = String(process.env.TWILIO_AUTH_TOKEN || '').trim();
+  const from = String(process.env.TWILIO_FROM_NUMBER || '').trim();
+  return Boolean(accountSid.startsWith('AC') && authToken && from && from.length <= 40);
 }
 
 async function sendSms({ to, body }) {
