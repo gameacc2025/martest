@@ -15,6 +15,7 @@
 // =============================================================
 
 const prisma = require('../../config/db');
+const { randomUUID } = require('node:crypto');
 const { createError } = require('./audit.utils');
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -117,13 +118,14 @@ function getUserAgent(request) {
  * @returns {string} Correlation ID
  */
 function getCorrelationId(request) {
-  // Check if already set by middleware
-  if (request.correlationId) return request.correlationId;
-  // Check headers
-  const headerId = request.headers['x-request-id'] || request.headers['x-correlation-id'];
-  if (headerId) return headerId;
-  // Generate new one
-  return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  // Prefer the value normalized by the correlation middleware.
+  const candidate = request.correlationId
+    || request.headers?.['x-request-id']
+    || request.headers?.['x-correlation-id'];
+  if (typeof candidate === 'string' && candidate.length <= 100 && /^[A-Za-z0-9._:-]+$/.test(candidate)) {
+    return candidate;
+  }
+  return randomUUID();
 }
 
 /**
