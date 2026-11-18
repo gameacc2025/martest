@@ -4,7 +4,7 @@
 **Status:** IN_PROGRESS — latest notification/security repair slice passed all three GitHub acceptance workflows; remaining source/security/product audits are queued  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `10c41cf52dc5ba01ab90a4c64e09a4c5fdf96f01`  
+**Latest tested code:** `34d737ac73087f27b121eb6825ac2afe9ae3c19c`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -25,6 +25,8 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 - **AD-3:** COMPANY user-management grants are removed, including stale persisted grants during seed reconciliation.
 - **AD-4:** retail/checkout/cart/wishlist and finance/settlement remain dormant; Admin/Company routes and active navigation are disabled until owner-approved domain rules/APIs exist.
 - **Notifications:** SMS defaults OFF and queueing requires validated provider configuration, explicit opt-in and quota. If quota verification fails or subscription state changes, SMS is skipped with `quotaCheckFailed`; the business transaction is not aborted and no unmetered SMS row is queued. Live provider delivery remains unverified.
+- **OTP brute-force protection:** `verify`/`consume` routes have per-IP limits; failed-attempt increments use compare-and-swap (`updateMany`) so concurrent requests cannot exceed `maxAttempts`; successful consumption atomically increments and sets `consumedAt`; valid verification does not consume a failed-attempt allowance.
+- **OTP IP rate-limit integrity:** `getClientIp` now uses Fastify's resolved `request.ip`/socket address and ignores untrusted `X-Forwarded-For` / `X-Real-IP` headers; added regression tests.
 - **Support SLA IDOR:** `GET /tickets/:id/sla` now scopes its ticket lookup to the authenticated CUSTOMER requester, COMPANY requesterCompanyId, or STAFF platform context; service and route regression tests cover the boundary.
 - **Company dashboard:** removed fabricated inquiry/product fallback numbers and sample sales chart; unavailable aggregates render as `—`; removed links to disabled retail-order routes.
 - **Company statistics contract:** fixed the service to return `inquiries`, `draftInquiries`, and `recentInquiries` instead of incorrectly labelling Inquiry records as orders.
@@ -39,9 +41,9 @@ All three workflows passed on the exact main code SHA `9bb73c5735dbf3eddeff35375
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44368210815](https://github.com/gameacc2025/martest/actions/runs/44368210815) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,701 backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44368210798](https://github.com/gameacc2025/martest/actions/runs/44368210798) | **PASS** |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44368210958](https://github.com/gameacc2025/martest/actions/runs/44368210958) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44371231375](https://github.com/gameacc2025/martest/actions/runs/44371231375) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,709 backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44371231516](https://github.com/gameacc2025/martest/actions/runs/44371231516) | **PASS** |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44371231280](https://github.com/gameacc2025/martest/actions/runs/44371231280) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
 
 Documentation-only synchronization commits may follow the tested code SHA; they do not change application source. The tested code SHA is recorded separately from the current documentation HEAD.
 
