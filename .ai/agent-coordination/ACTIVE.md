@@ -3,7 +3,7 @@
 **Updated:** 2026-11-18  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code baseline:** `cbf3af8e391c292ce105199a845fb83c813a3bad`  
+**Latest tested code baseline:** `8bb1904afddb9103e25bdd862f967165efa05f20`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,9 +17,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 | Slice | Status | Evidence |
 |---|---|---|
-| CI | PASS | [44372181158](https://github.com/gameacc2025/martest/actions/runs/44371231375): 385 Frontend/Shared tests, 18 architecture/session tests, 1,709 Backend tests, all three app builds |
-| Prisma migration parity | PASS | [44372181187](https://github.com/gameacc2025/martest/actions/runs/44371231516): fresh PostgreSQL migration and all Prisma model/table checks |
-| Runtime + browser | PASS | [44372180970](https://github.com/gameacc2025/martest/actions/runs/44371231280): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
+| CI | PASS | [44385311835](https://github.com/gameacc2025/martest/actions/runs/44385311835): 390 Frontend/Shared tests (69 files), 18 architecture/session tests, 1,715 Backend tests, all three app builds |
+| Prisma migration parity | PASS | [44385311985](https://github.com/gameacc2025/martest/actions/runs/44385311985): fresh PostgreSQL migration and all Prisma model/table checks |
+| Runtime + browser | PASS | [44385312248](https://github.com/gameacc2025/martest/actions/runs/44385312248): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
 | Support SLA | IMPLEMENTED + VERIFIED | Pause/resume, queue-scoped recipients, import-safe worker, timezone-aware calendar, input validation, applied-policy FK |
 | CRM audit/status | IMPLEMENTED + VERIFIED | Actor ID forwarded; transaction-aware central audit writer |
 | Audit hardening | IMPLEMENTED + TESTED | Recursive case-insensitive redaction; safe IP; bounded correlation IDs; writer tests |
@@ -33,6 +33,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 ## Main repairs in this audit
 
 - Added forward-only migrations for missing CMS/CRM tables and the Support ticket applied-SLA relation.
+- Inquiry buyer-side mutations now require `leads.update`/`inquiries.update` for COMPANY context at both route and service layers; read-only COMPANY_USER denial has route/service tests. CUSTOMER legacy owner-checked actions remain unchanged.
+- Admin active-inquiry KPI now reads `received.new` / `received.byStatus.OPEN`; 5 helper tests prevent the old total-count fallback. OperationsHub is clearly marked sample-only and remains unregistered.
+- Read-only source review covered Product visibility/tenant checks, Notification user ownership/app-scoped folders and CMS route visibility/STAFF management; no new issue confirmed in those selected files.
 - Fixed Support SLA pause/resume, queue scoping, worker import behavior, timezone/holiday arithmetic and validation.
 - Centralized CRM merge audit writes; hardened redaction, client IP and correlation IDs.
 - Hardened paid SMS quota handling: quota/subscription uncertainty fails closed for SMS without rolling back the business operation; added regression tests.
@@ -49,7 +52,7 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 - **Targeted Company/User tenant review (2026-11-18):** Company route guards and tests enforce own-company scoping and STAFF-only settings/lifecycle actions; User service has context and role-scope guards. No new defect confirmed in the reviewed paths; this is not a full sign-off.
 
-1. Continue resource-specific tenant/IDOR review across Products, Inquiry, Support, CMS, Notifications and Auth; no exhaustive security sign-off yet.
+1. Continue resource-specific tenant/IDOR review across Support, CMS, Auth and remaining Product surfaces; no exhaustive security sign-off yet.
 2. Decide AuditLog retention/archival with owner/legal input. Keep append-only protection; do not purge or invent a period.
 3. Add central audit action registry and normalize remaining producers.
 4. Active Company dashboard sample values have been removed; hardcoded samples remain only in dormant, unregistered Retail/Finance prototypes, which must stay unreachable until owner approval.
