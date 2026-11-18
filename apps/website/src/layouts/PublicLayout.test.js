@@ -121,13 +121,13 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-theme-toggle').attributes('aria-pressed')).toBe('true')
   })
 
-  it('exposes the NewTemp search icon and retains commerce actions', async () => {
+  it('exposes search and login while keeping B2C commerce actions disabled', async () => {
     wrapper = mountLayout()
     await flushPromises()
     expect(wrapper.get('.public-search-trigger').attributes('aria-label')).toBe('جستجوی محصولات')
     await wrapper.get('.public-search-trigger').trigger('click')
     expect(mocks.routerPush).toHaveBeenCalledWith({ name: 'search' })
-    expect(wrapper.get('.public-commerce-trigger').attributes('aria-label')).toBe('سبد خرید')
+    expect(wrapper.find('.public-commerce-trigger').exists()).toBe(false)
     expect(wrapper.get('.public-login-link').exists()).toBe(true)
   })
 
