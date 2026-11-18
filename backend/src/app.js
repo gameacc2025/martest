@@ -139,14 +139,13 @@ async function buildApp() {
   await app.register(require('./modules/permissions/permission.routes'), { prefix: '/api/v1/permissions' });
   await app.register(require('./modules/admin/admin.routes'), { prefix: '/api/v1/admin' });
   await app.register(require('./modules/settings/settings.routes'), { prefix: '/api/v1/settings' });
-  // NOTE: No active B2C order/cart API is registered under AD-4. RetailOrder
-  // and SellerOrder persistence models are reserved for a future approved
-  // commerce phase; current buyer/seller interactions use the Inquiry domain.
-  // Keep dormant order modules unregistered until the owner reopens that phase.
+  // AD-4 freeze: retail inventory, reservations, cart, checkout and order APIs
+  // are intentionally not registered. RetailOrder/SellerOrder and inventory
+  // persistence remain dormant until the owner approves the commerce model.
+  // Current buyer/seller interactions use the Inquiry domain.
   await app.register(require('./modules/companies/company.routes'), { prefix: '/api/v1/companies' });
   await app.register(require('./modules/categories/category.routes'), { prefix: '/api/v1/categories' });
   await app.register(require('./modules/products/product.routes'), { prefix: '/api/v1/products' });
-  await app.register(require('./modules/inventory/inventory.routes'), { prefix: '/api/v1/inventory' });
   await app.register(require('./modules/specification-library/specification-library.routes'), { prefix: '/api/v1/specification-library' });
   await app.register(require('./modules/inquiries/inquiry.routes'), { prefix: '/api/v1/inquiries' });
   await app.register(require('./modules/notifications/notification.routes'), { prefix: '/api/v1/settings/notifications' });
