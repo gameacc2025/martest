@@ -85,19 +85,15 @@ const routes = [
       { path: "/cms/faqs", name: "admin-cms-faqs", component: () => import("../pages/admin/cms/FaqManagement.vue"), meta: { title: "مدیریت سؤالات متداول", requiredPermission: "cms.faqs.read" } },
       { path: "/cms/pages", name: "admin-cms-pages", component: () => import("../pages/admin/cms/PageManagement.vue"), meta: { title: "مدیریت صفحات ثابت", requiredPermission: "cms.pages.read" } },
 
-      // ── Orders ────────────────────────────────────────────
-      // ── Inquiries ─────────────────────────────────────────
-      // Operational modules: UI-first, demo data until domain APIs are delivered.
+      // ── Inquiries and operational modules ─────────────────
+      // CRM and Support use live backend APIs. Retail and Finance remain dormant
+      // until the owner approves their business rules and APIs (AD-4).
       { path: "/crm", name: "admin-crm", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "overview" }, meta: { title: "مدیریت ارتباط با مشتریان" } },
-      { path: "/finance", name: "admin-finance", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "finance" }, meta: { title: "مالی و تسویه حساب" } },
       { path: "/crm/leads", name: "admin-crm-leads", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "leads" }, meta: { title: "سرنخ‌ها و مشتریان بالقوه" } },
       { path: "/crm/pipeline", name: "admin-crm-pipeline", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "pipeline" }, meta: { title: "قیف فرصت‌های فروش" } },
       { path: "/crm/activities", name: "admin-crm-activities", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "activities" }, meta: { title: "تعاملات و پیگیری‌ها" } },
       { path: "/crm/accounts", name: "admin-crm-accounts", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "accounts" }, meta: { title: "حساب‌ها و مخاطبان CRM" } },
       { path: "/crm/tasks", name: "admin-crm-tasks", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "tasks" }, meta: { title: "وظایف و پیگیری‌های CRM" } },
-      { path: "/finance/settlements", name: "admin-finance-settlements", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeSettlements" }, meta: { title: "تسویه با شرکت‌ها" } },
-      { path: "/finance/transactions", name: "admin-finance-transactions", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeTransactions" }, meta: { title: "تراکنش‌ها و گردش حساب" } },
-      { path: "/finance/invoices", name: "admin-finance-invoices", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeInvoices" }, meta: { title: "صورتحساب‌ها و اسناد مالی" } },
       { path: "/support/tickets", name: "admin-tickets", component: () => import("../pages/admin/support/TicketDesk.vue"), meta: { title: "مرکز پشتیبانی و تیکت‌ها" } },
       { path: "/inquiry-subscriptions", name: "admin-inquiry-subscriptions", component: () => import("../pages/admin/inquiries/InquirySubscriptions.vue"), meta: { title: "اشتراک‌های استعلام" } },
       { path: "/inquiries", name: "admin-inquiries", component: () => import("../pages/admin/inquiries/InquiryList.vue"), meta: { title: "مدیریت استعلام‌ها" } },
