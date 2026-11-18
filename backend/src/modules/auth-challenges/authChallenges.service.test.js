@@ -37,6 +37,8 @@ const calls = {
   challengeUpdateMany: [],
   challengeCount: [],
   userFindUnique: [],
+  sms: [],
+  email: [],
 };
 
 let fx;
@@ -47,6 +49,10 @@ function resetMocks() {
     user: { id: 1, phone: '09120000000', email: 'test@example.com', status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
     challenge: { id: 10, userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '+989120000000', secretHash: 'hashed:123456', expiresAt: new Date(Date.now() + 15 * 60 * 1000), attemptCount: 0, maxAttempts: 5, consumedAt: null, invalidatedAt: null, createdAt: new Date() },
     updateManyCount: 1,
+    smsProviderReady: true,
+    emailProviderReady: true,
+    smsDeliveryFails: false,
+    emailDeliveryFails: false,
   };
 }
 resetMocks();
@@ -93,6 +99,23 @@ injectMock('../../config/db', mockPrisma);
 // ── Mock utils/password ──────────────────────────────────────
 let nextVerifyResult = true;
 const passwordCalls = { verify: [], hash: [] };
+injectMock('../notifications/notification.sms.provider', {
+  hasRealProvider: () => fx.smsProviderReady,
+  sendSms: async (payload) => {
+    calls.sms.push(payload);
+    if (fx.smsDeliveryFails) throw new Error('simulated SMS provider failure');
+    return { provider: 'test-sms' };
+  },
+});
+injectMock('../notifications/notification.email.provider', {
+  hasRealProvider: () => fx.emailProviderReady,
+  sendEmail: async (payload) => {
+    calls.email.push(payload);
+    if (fx.emailDeliveryFails) throw new Error('simulated email provider failure');
+    return { provider: 'test-email' };
+  },
+});
+
 injectMock('../../utils/password', {
   hashPassword: async (plain) => {
     passwordCalls.hash.push(plain);
@@ -229,6 +252,42 @@ test('requestChallenge: creates challenge with hashed code', async () => {
   assert.ok(createArgs.data.secretHash.startsWith('hashed:'));
   assert.ok(createArgs.data.expiresAt instanceof Date);
   assert.equal(createArgs.data.maxAttempts, 5);
+  assert.equal(calls.sms.length, 1);
+  assert.match(calls.sms[0].body, /\d{6}/);
+  assert.equal(calls.sms[0].body.match(/\d{6}/)[0], createArgs.data.secretHash.replace('hashed:', ''));
+});
+
+test('requestChallenge: sends email OTP without allowing console fallback', async () => {
+  baseResetAll();
+  const result = await service.requestChallenge({ userId: 1, purpose: 'EMAIL_VERIFICATION', channel: 'EMAIL', destination: 'test@example.com' });
+  assert.ok(result.challengeId);
+  assert.equal(calls.email.length, 1);
+  assert.equal(calls.email[0].to, 'test@example.com');
+  assert.equal(calls.email[0].allowConsoleFallback, false);
+  assert.match(calls.email[0].text, /\d{6}/);
+});
+
+test('requestChallenge: fails closed before creating a challenge when no real provider is configured', async () => {
+  baseResetAll();
+  fx.smsProviderReady = false;
+  await assert.rejects(
+    () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
+    (err) => err.status === 503 && err.code === 'CHALLENGE_DELIVERY_UNAVAILABLE',
+  );
+  assert.equal(calls.challengeCreate.length, 0);
+  assert.equal(calls.sms.length, 0);
+});
+
+test('requestChallenge: invalidates the challenge when provider delivery fails', async () => {
+  baseResetAll();
+  fx.smsDeliveryFails = true;
+  await assert.rejects(
+    () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
+    (err) => err.status === 503 && err.code === 'CHALLENGE_DELIVERY_FAILED',
+  );
+  assert.equal(calls.challengeCreate.length, 1);
+  assert.equal(calls.challengeUpdateMany.at(-1).where.id, 10);
+  assert.ok(calls.challengeUpdateMany.at(-1).data.invalidatedAt instanceof Date);
 });
 
 test('requestChallenge: invalidates previous pending challenges', async () => {
