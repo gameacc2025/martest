@@ -380,3 +380,19 @@ test('recordAuditLog captures HTTP actor and request context through the central
   assert.equal(data.requestId, 'req-http-audit');
   assert.equal(data.metadata.extra.nested.refreshToken, '[REDACTED]');
 });
+
+
+test('getClientIp ignores untrusted forwarding headers and uses Fastify socket-derived IP', () => {
+  assert.equal(
+    service.getClientIp({
+      headers: { 'x-forwarded-for': '198.51.100.10', 'x-real-ip': '203.0.113.5' },
+      ip: '10.0.0.8',
+      socket: { remoteAddress: '10.0.0.8' },
+    }),
+    '10.0.0.8',
+  );
+  assert.equal(
+    service.getClientIp({ headers: { 'x-forwarded-for': '198.51.100.10' }, socket: { remoteAddress: '127.0.0.1' } }),
+    '127.0.0.1',
+  );
+});
