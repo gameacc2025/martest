@@ -184,3 +184,14 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Remaining:** exhaustive company tenant/IDOR review; central AuditLog action registry and producer normalization; owner/legal decision for AuditLog retention/archival; live SMTP/Twilio/payment provider and production deployment verification. Local Windows workspace/Docker/PostgreSQL remain NOT VERIFIED.
 - **Next:** continue bounded tenant/IDOR and cross-domain audit producer review. Preserve AD-1 through AD-4; do not invent legal retention or commercial policy.
 - **Agent governance cleanup:** removed repeated direct-to-main/worker/commit/handoff paragraphs from `AGENTS.md`, `.ai/PROTOCOL.md`, and `docs/AI_AGENT_WORKFLOW.md`; all restrictions and owner authorization remain intact.
+## 2026-11-18 — PROJECT-WIDE-AUDIT-AND-REPAIR (OTP brute-force and IP spoofing hardening)
+
+- **Exact tested application-code SHA:** `34d737ac73087f27b121eb6825ac2afe9ae3c19c`. Documentation-only synchronization commits followed; no application source changed after this SHA.
+- **CI:** [44371231375](https://github.com/gameacc2025/martest/actions/runs/44371231375) PASS — 68 Frontend/Shared test files / 385 tests; 18 architecture/session tests; 1,709 Backend tests; all three production builds.
+- **Migration:** [44371231516](https://github.com/gameacc2025/martest/actions/runs/44371231516) PASS — fresh PostgreSQL migration and Prisma model/table parity.
+- **Runtime:** [44371231280](https://github.com/gameacc2025/martest/actions/runs/44371231280) PASS — Compose health, migrations/parity, all seeds twice, AD-1/AD-3 grant reconciliation and 8/8 browser smoke tests.
+- **OTP attempt limits:** failed attempts use a compare-and-swap `updateMany` condition on the persisted attempt count; parallel requests cannot exceed `maxAttempts`. Successful consume atomically increments the attempt count and sets `consumedAt`. Successful non-consuming verification does not spend a failed-attempt allowance, so a valid code on the final available attempt can still be consumed.
+- **OTP request limits:** `/challenges/verify` and `/challenges/consume` now have 20 requests / 15 minutes per resolved client IP. `getClientIp` trusts Fastify's resolved IP/socket only; raw `X-Forwarded-For` and `X-Real-IP` are ignored because the app does not enable `trustProxy`.
+- **Regression tests:** atomic attempt conflicts, final-attempt valid consume, per-route rate-limit configuration, and spoofed forwarding-header rejection.
+- **Still open:** exhaustive company tenant/IDOR review; central AuditLog action registry and producer normalization; owner/legal AuditLog retention/archival decision; live SMTP/Twilio/payment provider and production deployment verification. Local Windows workspace/Docker/PostgreSQL remain NOT VERIFIED.
+- **Next:** continue resource-specific tenant/IDOR review and audit event producer inventory; preserve AD-1 through AD-4 and do not invent retention or commercial policy.
