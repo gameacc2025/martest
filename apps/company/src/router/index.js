@@ -91,7 +91,6 @@ const routes = [
       // ── Users (company members) ──────────────────────────
       { path: "/users", name: "company-users", component: () => import("../pages/company/users/UserList.vue"), meta: { title: "کاربران شرکت" } },
       // ── Retail seller orders (UI prototype; retail APIs pending) ─
-      { path: "/retail/orders", name: "company-retail-orders", component: () => import("../pages/company/orders/RetailOrders.vue"), meta: { title: "سفارش‌های خرده‌فروشی شرکت" } },
       // ── Company finance (UI prototype; settlement APIs pending) ─
       { path: "/finance/settlements", name: "company-finance-settlements", component: () => import("../pages/company/finance/Settlements.vue"), meta: { title: "وضعیت تسویه‌های شرکت" } },
       // ── Support desk ──────────────────────────────────────
