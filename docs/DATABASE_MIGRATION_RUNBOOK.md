@@ -8,10 +8,10 @@
 
 ## Current migration verification — 2026-11-18
 
-- **Latest tested code baseline:** `10c41cf52dc5ba01ab90a4c64e09a4c5fdf96f01`; current main may be newer due to documentation-only commits.
-- **CI:** [44368210815](https://github.com/gameacc2025/martest/actions/runs/44368210815) PASS.
-- **Fresh PostgreSQL migration validation:** [44368210798](https://github.com/gameacc2025/martest/actions/runs/44368210798) PASS — schema validation/generation, fresh migration deploy and Prisma model/table parity.
-- **Runtime Validation:** [44368210958](https://github.com/gameacc2025/martest/actions/runs/44368210958) PASS — Compose health, migrations, schema parity, seed twice, AD-1/AD-3 role reconciliation and 8/8 browser smoke tests.
+- **Latest tested code baseline:** `34d737ac73087f27b121eb6825ac2afe9ae3c19c`; current main may be newer due to documentation-only commits.
+- **CI:** [44371231375](https://github.com/gameacc2025/martest/actions/runs/44371231375) PASS.
+- **Fresh PostgreSQL migration validation:** [44371231516](https://github.com/gameacc2025/martest/actions/runs/44371231516) PASS — schema validation/generation, fresh migration deploy and Prisma model/table parity.
+- **Runtime Validation:** [44371231280](https://github.com/gameacc2025/martest/actions/runs/44371231280) PASS — Compose health, migrations, schema parity, seed twice, AD-1/AD-3 role reconciliation and 8/8 browser smoke tests.
 - **Fresh database:** verified by the migration workflow. **Existing production/developer database upgrade:** not verified in this session; follow the backup and staging procedure below before applying to a shared database.
 - `backend/scripts/verify-schema-parity.js` compares every non-ignored Prisma model (including `@@map`/`@@schema`) against PostgreSQL catalog tables.
 
