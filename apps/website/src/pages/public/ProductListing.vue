@@ -2,14 +2,11 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
-import { useCartStore } from '../../stores/cart'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 import AppBreadcrumb from '../../components/AppBreadcrumb.vue'
 
 const route = useRoute()
 const productsStore = useProductsStore()
-const cartStore = useCartStore()
-const cartMessage = ref('')
 const products = ref([])
 const categories = ref([])
 const loading = ref(false)
@@ -97,11 +94,6 @@ function changeSort(value) {
   sortMode.value = value
   applyFilters()
 }
-function addToCart(product) {
-  const price = Number(product?.finalPrice ?? product?.price ?? product?.prices?.[0]?.price ?? product?.priceTiers?.[0]?.unitPrice)
-  const added = cartStore.addItem({ ...product, price })
-  cartMessage.value = added ? 'محصول به سبد خرید اضافه شد.' : 'امکان افزودن این محصول به سبد خرید وجود ندارد.'
-}
 function changePage(next) { page.value = Math.min(totalPages.value, Math.max(1, next)); loadProducts() }
 onMounted(async () => {
   if (route.query.retail === '1' || route.query.retail === 'true') purchaseMode.value = 'retail'
@@ -119,12 +111,12 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
     <div class="catalogue-breadcrumb">
       <AppBreadcrumb :items="[{ label: 'همه محصولات' }]" />
     </div>
-    <div class="ph"><h1>همه محصولات</h1><p>محصولات تخصصی تأمین‌کنندگان؛ خرید فوری یا ثبت استعلام</p></div>
+    <div class="ph"><h1>همه محصولات</h1><p>مشاهده قیمت‌های کاتالوگ و ثبت استعلام سازمانی</p></div>
     <div class="lay">
       <aside class="fl">
         <div class="filter-head"><h3>فیلتر محصولات</h3><button type="button" @click="clearFilters">حذف همه</button></div>
         <h4>نوع خرید</h4>
-        <select v-model="purchaseMode" class="filter-select" @change="applyFilters"><option value="">همه محصولات</option><option value="retail">خرید فوری (قیمت مشخص)</option><option value="inquiry">فقط استعلامی</option></select>
+        <select v-model="purchaseMode" class="filter-select" @change="applyFilters"><option value="">همه محصولات</option><option value="retail">قیمت مشخص (بدون ثبت سفارش آنلاین)</option><option value="inquiry">فقط استعلامی</option></select>
         <hr><h4>برند</h4>
         <div v-if="brandOptions.length"><label v-for="item in brandOptions" :key="item"><input type="checkbox" :checked="selectedBrands.includes(item)" @change="toggle(selectedBrands, item); applyFilters()"><span>{{ item }}</span></label></div>
         <small v-else class="filter-empty">برندی در این صفحه دریافت نشده است.</small>
@@ -142,11 +134,10 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
         <div v-else class="prods">
           <article v-for="product in visibleProducts" :key="product.id" class="p">
             <router-link class="im" :to="routeToProduct(product)"><img v-if="image(product)" :src="image(product)" :alt="title(product)"><span v-else>{{ brand(product) }}</span><em>{{ category(product) }}</em></router-link>
-            <div class="bd"><div class="br">{{ brand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ title(product) }}</h3><div class="sk">{{ sku(product) }}</div><div class="pr" :class="{ q: !isRetail(product) }">{{ price(product) }}<small>{{ isRetail(product) ? 'خرید خرده‌فروشی' : 'مناسب خرید سازمانی' }}</small></div></div>
-            <div class="ac"><button v-if="isRetail(product)" class="btn b1" type="button" @click.stop="addToCart(product)">افزودن به سبد</button><router-link v-else class="btn b1" :to="routeToProduct(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="routeToProduct(product)">مشاهده</router-link></div>
+            <div class="bd"><div class="br">{{ brand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ title(product) }}</h3><div class="sk">{{ sku(product) }}</div><div class="pr" :class="{ q: !isRetail(product) }">{{ price(product) }}<small>{{ isRetail(product) ? 'قیمت مشخص در کاتالوگ' : 'مناسب خرید سازمانی' }}</small></div></div>
+            <div class="ac"><router-link v-if="!isRetail(product)" class="btn b1" :to="routeToProduct(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="routeToProduct(product)">مشاهده</router-link></div>
           </article>
         </div>
-        <p v-if="cartMessage" class="cart-feedback" role="status">{{ cartMessage }}</p>
         <div v-if="totalPages > 1" class="pagination"><button type="button" :disabled="page <= 1" @click="changePage(page - 1)">قبلی</button><span>صفحه {{ fa(page) }} از {{ fa(totalPages) }}</span><button type="button" :disabled="page >= totalPages" @click="changePage(page + 1)">بعدی</button></div>
       </section>
     </div>
