@@ -60,7 +60,7 @@ const EXPECTED_EVENT_KEYS = [
   'INQUIRY_RESPONSE_REJECTED',
   'INQUIRY_RESPONSE_WITHDRAWN',
   'INQUIRY_RESPONSE_AUTO_REJECTED',
-  // order/cart (flow/04) — reserved contract, no Order model yet
+  // order/cart (flow/04) — reserved contract; consumer flow disabled by AD-4
   'ORDER_PLACED',
   'ORDER_PAYMENT_FAILED',
   'ORDER_ITEM_STATUS_CHANGED',
