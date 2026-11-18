@@ -314,23 +314,22 @@ async function getSla(prismaClient, categoryId, priority) {
 }
 
 // Calculate remaining SLA time in minutes (negative = overdue)
-function calculateSlaRemaining(dueAt) {
+function calculateSlaRemaining(dueAt, now = new Date()) {
   if (!dueAt) return null;
-  const now = new Date();
-  const diffMs = new Date(dueAt).getTime() - now.getTime();
+  const diffMs = new Date(dueAt).getTime() - new Date(now).getTime();
   return Math.floor(diffMs / 60000);
 }
 
 // Check if SLA is breached
-function isSlaBreached(dueAt) {
-  const remaining = calculateSlaRemaining(dueAt);
+function isSlaBreached(dueAt, now = new Date()) {
+  const remaining = calculateSlaRemaining(dueAt, now);
   return remaining !== null && remaining < 0;
 }
 
 // Check if SLA is at risk (within 20% of deadline)
-function isSlaAtRisk(dueAt, totalMinutes) {
+function isSlaAtRisk(dueAt, totalMinutes, now = new Date()) {
   if (!dueAt || !totalMinutes) return false;
-  const remaining = calculateSlaRemaining(dueAt);
+  const remaining = calculateSlaRemaining(dueAt, now);
   if (remaining === null) return false;
   const threshold = Math.ceil(totalMinutes * 0.2);
   return remaining <= threshold && remaining >= 0;
@@ -375,14 +374,14 @@ async function getSlaDetails(prismaClient, ticketId, now = new Date()) {
       dueAt: firstResponseDueAt,
       remainingMinutes: Math.floor((new Date(firstResponseDueAt).getTime() - new Date(now).getTime()) / 60000),
       isBreached: new Date(firstResponseDueAt).getTime() < new Date(now).getTime(),
-      isAtRisk: isSlaAtRisk(firstResponseDueAt, policy.firstResponseMinutes),
+      isAtRisk: isSlaAtRisk(firstResponseDueAt, policy.firstResponseMinutes, now),
       respondedAt: ticket.firstRespondedAt,
     },
     resolution: {
       dueAt: resolveDueAt,
       remainingMinutes: Math.floor((new Date(resolveDueAt).getTime() - new Date(now).getTime()) / 60000),
       isBreached: new Date(resolveDueAt).getTime() < new Date(now).getTime(),
-      isAtRisk: isSlaAtRisk(resolveDueAt, policy.resolutionMinutes),
+      isAtRisk: isSlaAtRisk(resolveDueAt, policy.resolutionMinutes, now),
       resolvedAt: ticket.resolvedAt,
     },
   };
@@ -427,13 +426,17 @@ async function resumeSla(prismaClient, ticketId, userId, reason, now = new Date(
     const policy = await findSlaPolicy(tx, ticket);
     const calendar = parseWorkingCalendar(policy?.workingCalendar);
     const pausedWorkingMinutes = calculateWorkingMinutesBetween(activePause.occurredAt, now, calendar);
+    const baseFirstResponseDueAt = ticket.firstResponseDueAt
+      || (policy ? addWorkingMinutes(ticket.createdAt, policy.firstResponseMinutes, calendar) : null);
+    const baseResolveDueAt = ticket.resolveDueAt
+      || (policy ? addWorkingMinutes(ticket.createdAt, policy.resolutionMinutes, calendar) : null);
     const update = {};
     if (pausedWorkingMinutes > 0) {
-      if (ticket.firstResponseDueAt) {
-        update.firstResponseDueAt = addWorkingMinutes(ticket.firstResponseDueAt, pausedWorkingMinutes, calendar);
+      if (baseFirstResponseDueAt) {
+        update.firstResponseDueAt = addWorkingMinutes(baseFirstResponseDueAt, pausedWorkingMinutes, calendar);
       }
-      if (ticket.resolveDueAt) {
-        update.resolveDueAt = addWorkingMinutes(ticket.resolveDueAt, pausedWorkingMinutes, calendar);
+      if (baseResolveDueAt) {
+        update.resolveDueAt = addWorkingMinutes(baseResolveDueAt, pausedWorkingMinutes, calendar);
       }
     }
 
