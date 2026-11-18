@@ -130,23 +130,12 @@ async function escalateTicket(prismaClient, ticket, escalationType, slaDetails) 
     });
   }
 
-  // Fallback: all STAFF with tickets.read permission
   if (recipientIds.size === 0) {
-    const staff = await prismaClient.user.findMany({
-      where: {
-        status: 'ACTIVE',
-        OR: [
-          { roles: { some: { role: { name: 'SUPER_ADMIN' } } } },
-          {
-            roles: {
-              some: { role: { permissions: { some: { permission: { name: 'tickets.read' } } } } },
-            },
-          },
-        ],
-      },
-      select: { id: true },
+    console.warn('[sla-monitor] escalation has no eligible assignee; broad staff broadcast skipped', {
+      ticketId: ticket.id,
+      ticketNumber: ticket.ticketNumber,
+      queueId: ticket.assignedQueueId,
     });
-    staff.forEach(s => recipientIds.add(s.id));
   }
 
   // Send escalation notification
