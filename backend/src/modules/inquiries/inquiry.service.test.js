@@ -601,8 +601,8 @@ test('createInquiry: CUSTOMER cannot originate an RFQ even with a legacy create 
     }, customer),
     (error) => error.statusCode === 403 && error.code === 'CUSTOMER_INQUIRY_CREATION_DISABLED',
   );
-  assert.equal(calls['inquiry.create'].length, 0);
-  assert.equal(calls.dispatchNotification.length, 0);
+  assert.equal((calls['inquiry.create'] || []).length, 0);
+  assert.equal((calls.dispatchNotification || []).length, 0);
 });
 
 test('createInquiry: AccessProfile-less CUSTOMER_USER cannot originate an RFQ', async () => {
@@ -622,13 +622,13 @@ test('createInquiry: AccessProfile-less CUSTOMER_USER cannot originate an RFQ', 
 test('createInquiry: rejects a response deadline that is already past', async () => {
   resetMocks();
   fx.products = publishedProducts(41);
-  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  const companyBuyer = { ...buyer, permissions: ['inquiries.create'] };
   await assert.rejects(
     () => inquiryService.createInquiry({
       title: 'Expired price request',
       responseDeadline: new Date(Date.now() - 60_000).toISOString(),
       items: [{ productId: 41, quantity: 1 }],
-    }, customer),
+    }, companyBuyer),
     (err) => err.code === 'INVALID_INQUIRY_DATE_WINDOW',
   );
   assert.equal((calls['inquiry.create'] || []).length, 0);
@@ -2172,20 +2172,19 @@ test('listInquiries: CUSTOMER_USER without an AccessProfile sees only inquiries 
   assert.equal(where.AND.some((clause) => clause.companyId !== undefined), false);
 });
 
-test('createInquiry: CUSTOMER_USER without an AccessProfile creates a user-owned OPEN inquiry', async () => {
+test('createInquiry: AccessProfile-less CUSTOMER_USER cannot create a user-owned RFQ', async () => {
   resetMocks();
-  fx.products = [{ id: 41, status: 'PUBLISHED', company: { status: 'ACTIVE' } }];
   const customer = { id: 77, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
 
-  await inquiryService.createInquiry({
-    title: 'Customer price request',
-    items: [{ productId: 41, quantity: 2 }],
-  }, customer);
+  await assert.rejects(
+    () => inquiryService.createInquiry({
+      title: 'Customer price request',
+      items: [{ productId: 41, quantity: 2 }],
+    }, customer),
+    (error) => error.statusCode === 403 && error.code === 'CUSTOMER_INQUIRY_CREATION_DISABLED',
+  );
 
-  const create = calls['inquiry.create'][0];
-  assert.equal(create.data.companyId, null);
-  assert.equal(create.data.buyerUserId, 77);
-  assert.equal(create.data.status, 'OPEN');
+  assert.equal((calls['inquiry.create'] || []).length, 0);
 });
 
 test('createInquiry: STAFF with a stray companyId must explicitly select the target company', async () => {
@@ -2405,21 +2404,22 @@ test('sendInquiryMessage: enforced owner quota records one INTERNAL_MESSAGE usag
 });
 
 
-test('createInquiry: enforced Website quota is charged to the authenticated customer user', async () => {
+test('createInquiry: disabled CUSTOMER RFQ path does not consume a user inquiry quota', async () => {
   resetMocks();
   subscriptionEnforcementEnabled = true;
-  fx.products = [{ id: 41, status: 'PUBLISHED', company: { status: 'ACTIVE' } }];
   const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
 
-  await inquiryService.createInquiry({
-    title: 'Quota-backed customer RFQ',
-    items: [{ productId: 41, quantity: 1 }],
-  }, customer);
+  await assert.rejects(
+    () => inquiryService.createInquiry({
+      title: 'Quota-backed customer RFQ',
+      items: [{ productId: 41, quantity: 1 }],
+    }, customer),
+    (error) => error.statusCode === 403 && error.code === 'CUSTOMER_INQUIRY_CREATION_DISABLED',
+  );
 
-  assert.ok(calls['inquirySubscription.findFirst'].some(({ where }) => where.userId === 77 && where.companyId === undefined));
-  assert.equal(smsUsageEvents.length, 1);
-  assert.equal(smsUsageEvents[0].usageType, 'INQUIRY_CREATE');
-  assert.equal(smsUsageEvents[0].referenceId, '7');
+  assert.equal((calls['inquiry.create'] || []).length, 0);
+  assert.equal((calls['inquirySubscription.findFirst'] || []).length, 0);
+  assert.equal(smsUsageEvents.length, 0);
 });
 
 
