@@ -178,7 +178,7 @@ function parseWorkingCalendar(calendarJson) {
     const holidays = Array.isArray(cal.holidays) ? cal.holidays : DEFAULT_WORKING_CALENDAR.holidays;
     if (!workDays.length || workDays.some((day) => !Number.isInteger(day) || day < 1 || day > 7)) return DEFAULT_WORKING_CALENDAR;
     if (workStartHour < 0 || workStartHour > 23 || workEndHour < 1 || workEndHour > 24 || workEndHour <= workStartHour) return DEFAULT_WORKING_CALENDAR;
-    if (holidays.some((holiday) => typeof holiday !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(holiday))) return DEFAULT_WORKING_CALENDAR;
+    if (holidays.some((holiday) => typeof holiday !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(holiday))) return DEFAULT_WORKING_CALENDAR;
     return { timezone, workDays, workStartHour, workEndHour, holidays };
   } catch {
     return DEFAULT_WORKING_CALENDAR;
@@ -263,7 +263,7 @@ function addWorkingMinutes(startDate, minutes, calendar) {
     }
 
     if (localMinutes < startMinutes) {
-      current = zonedDateTimeToUtc({ ...parts, hour: calendar.workStartHour }, calendar.timezone);
+      current = zonedDateTimeToUtc({ ...parts, hour: calendar.workStartHour, minute: 0 }, calendar.timezone);
       continue;
     }
 
