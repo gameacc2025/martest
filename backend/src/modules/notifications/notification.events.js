@@ -339,8 +339,8 @@ const EVENT_CATALOG = {
   },
 };
 
-// Default channel matrix for every event (flow/06 §4): in-app + email ON,
-// SMS off until the SMS credit system ships (future, per flow/06 §3.3).
+// Default channel matrix for every event: in-app + email ON, SMS OFF.
+// SMS opt-in is available only when Twilio is configured; dispatch enforces quota.
 const DEFAULT_CHANNELS = Object.freeze({
   IN_APP: true,
   EMAIL: true,
