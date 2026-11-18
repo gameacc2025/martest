@@ -116,6 +116,12 @@ async function escalateTicket(prismaClient, ticket, escalationType, slaDetails) 
         queueId: ticket.assignedQueueId,
         endedAt: null,
         assignedUserId: { not: null },
+        assignee: {
+          is: {
+            status: 'ACTIVE',
+            accessProfile: { is: { type: 'STAFF', isActive: true } },
+          },
+        },
       },
       select: { assignedUserId: true },
     });
@@ -201,6 +207,12 @@ async function warnTicketStakeholders(prismaClient, ticket, warningType, slaInfo
         queueId: ticket.assignedQueueId,
         endedAt: null,
         assignedUserId: { not: null },
+        assignee: {
+          is: {
+            status: 'ACTIVE',
+            accessProfile: { is: { type: 'STAFF', isActive: true } },
+          },
+        },
       },
       select: { assignedUserId: true },
     });
