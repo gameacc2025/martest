@@ -53,6 +53,34 @@ jobs:
         working-directory: backend
         run: npx prisma migrate deploy
 
+      - name: Verify previously missing CMS and CRM tables exist
+        working-directory: backend
+        run: |
+          node <<'NODE'
+          const { Client } = require('pg');
+          (async () => {
+            const client = new Client({ connectionString: process.env.DATABASE_URL });
+            await client.connect();
+            try {
+              const required = ['Faq', 'Page', 'LeadStatusHistory', 'CRMFieldAudit'];
+              const result = await client.query(
+                "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public' AND tablename = ANY($1::text[])",
+                [required],
+              );
+              const present = new Set(result.rows.map((row) => row.tablename));
+              const missing = required.filter((name) => !present.has(name));
+              if (missing.length) {
+                throw new Error('Missing migrated Prisma tables: ' + missing.join(', '));
+              }
+              console.log('Verified migrated tables: ' + required.join(', '));
+            } finally {
+              await client.end();
+            }
+          })().catch((error) => {
+            console.error(error);
+            process.exitCode = 1;
+          });
+          NODE
       - name: Verify migration state
         working-directory: backend
         run: npx prisma migrate status
