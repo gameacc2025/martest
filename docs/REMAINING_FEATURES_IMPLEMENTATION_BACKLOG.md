@@ -4,12 +4,12 @@
 
 > This status block supersedes older audit snapshots and tables below where they conflict. Historical findings are retained for traceability, not as current implementation claims.
 
-- **Current main HEAD:** `41ea770fc7132c4fc1a4b2c0f1431ace928c916c`.
-- **Last fully verified code baseline:** `10e0e9ef6bf215b66afa5c0eac571bc9d4e9faaa`.
-- **CI:** PASS on baseline `10e0e9e` — architecture graph, Frontend/Shared tests, Backend tests and all three app builds.
-- **Fresh PostgreSQL migration validation:** PASS on baseline `10e0e9e`; all Prisma models mapped to migrated tables.
-- **Runtime Validation:** PASS on baseline `10e0e9e` — Docker Compose, all service health checks, migrations, schema parity, seeds twice, AD-1/AD-3 grant reconciliation and **8/8 Playwright browser smoke tests**.
-- **Current HEAD validation:** Migration Validation PASS on `41ea770`; CI and Runtime Validation are still running after the seed/credential-hardening changes. Do not transfer the older baseline's PASS to the newer HEAD until those runs finish.
+- **Current main HEAD (documentation-only after tested code):** `4d8c716317b62c157e751742d18e1d113b47d624`.
+- **Latest tested code baseline:** `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`.
+- **CI:** PASS [44304118782](https://github.com/gameacc2025/martest/actions/runs/44304118782) — architecture graph; 68 Frontend/Shared test files / 385 tests; 18 architecture/session tests; 1,688 Backend tests; Website, Company and Admin production builds.
+- **Fresh PostgreSQL migration validation:** PASS [44304118529](https://github.com/gameacc2025/martest/actions/runs/44304118529) — schema validation/generation, fresh database migrations and all Prisma model/table parity.
+- **Runtime Validation:** PASS [44304118441](https://github.com/gameacc2025/martest/actions/runs/44304118441) — Docker Compose, all health checks, migrations, schema parity, seeds twice, AD-1/AD-3 role reconciliation and **8/8 Playwright browser smoke tests** across panels/API proxies.
+- **Credential hardening:** verified in Runtime Validation; ephemeral PostgreSQL/admin/JWT credentials were generated and masked, and seed/browser logs did not print their values. Production seed requires explicit 32+ character `SUPER_ADMIN_PASSWORD`; no known production fallback remains.
 - **Source repairs since the 2026-11-17 snapshot:** four missing Prisma tables added by additive migration; CRM status actor context and merge audit writer fixed; Support SLA pause/resume, queue-scoped recipients, import-safe worker, timezone-aware working calendar and persisted applied-policy FK fixed; Audit redaction/writer/IP/correlation handling hardened; AD-1/AD-3 grants reconciled; AD-4 retail/finance routes and active navigation disabled; SMS defaults and provider/consent gates hardened; admin/company route guards and website loading/inquiry tests corrected.
 - **Credential hardening currently under verification:** production/staging seed now requires an explicit strong `SUPER_ADMIN_PASSWORD`; env example no longer contains a known admin password; CMS synthetic demo seed skips production; seed scripts no longer print demo/admin passwords; Runtime CI now generates and masks ephemeral PostgreSQL/admin/JWT credentials.
 - **Still open:** owner/legal decision for AuditLog retention/archival; central audit action registry and exhaustive producer normalization; exhaustive tenant/IDOR review; replace or remove remaining clearly labelled sample dashboard metrics; live SMTP/Twilio/payment-provider verification; production deployment sign-off.
