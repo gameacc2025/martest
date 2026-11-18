@@ -382,6 +382,26 @@ test('recordAuditLog captures HTTP actor and request context through the central
 });
 
 
+test('recordAuditLog derives its default source from COMPANY and CUSTOMER access context', async () => {
+  for (const [accessType, expectedSource] of [
+    ['COMPANY', 'COMPANY'],
+    ['CUSTOMER', 'WEBSITE'],
+  ]) {
+    baseResetAll();
+    await service.recordAuditLog({
+      request: {
+        user: { id: 27, accessType, companyId: accessType === 'COMPANY' ? 9 : null },
+        headers: { 'user-agent': 'Audit-Source-Test/1.0' },
+        ip: '127.0.0.1',
+      },
+      action: 'PROFILE_UPDATED',
+      entityType: 'Profile',
+      entityId: 27,
+    });
+    assert.equal(calls.auditLogCreate[0].data.source, expectedSource);
+  }
+});
+
 test('getClientIp ignores untrusted forwarding headers and uses Fastify socket-derived IP', () => {
   assert.equal(
     service.getClientIp({
