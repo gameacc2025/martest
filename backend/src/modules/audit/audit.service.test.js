@@ -33,6 +33,7 @@ const calls = {
   auditLogFindMany: [],
   auditLogGroupBy: [],
   auditLogFindUnique: [],
+  auditLogCreate: [],
 };
 
 let fx;
@@ -136,6 +137,10 @@ const mockPrisma = {
         return fx.logs.find(l => l.id === args.where.id) || null;
       }
       return null;
+    },
+    create: async (args) => {
+      calls.auditLogCreate.push(args);
+      return { id: 99, ...args.data };
     },
   },
 };
@@ -292,4 +297,58 @@ test('redactSensitiveData is case-insensitive for sensitive keys at every nestin
   }
   assert.equal(result.nested[0].refreshToken, '[REDACTED]');
   assert.equal(result.nested[0].safeLabel, 'visible');
+});
+
+
+test('recordAuditLogExplicit uses the central writer and redacts nested metadata', async () => {
+  baseResetAll();
+  const log = await service.recordAuditLogExplicit({
+    actorUserId: 12,
+    actorAccessType: 'STAFF',
+    action: 'CRM_LEAD_MERGED',
+    entityType: 'Lead',
+    entityId: 42,
+    source: 'ADMIN',
+    requestId: 'req-audit-42',
+    before: { apiKey: 'before-secret', label: 'visible' },
+    after: { Password: 'after-secret' },
+    metadata: { nested: { privateKey: 'nested-secret' } },
+  });
+
+  assert.equal(calls.auditLogCreate.length, 1);
+  const data = calls.auditLogCreate[0].data;
+  assert.equal(data.requestId, 'req-audit-42');
+  assert.equal(data.metadata.before.apiKey, '[REDACTED]');
+  assert.equal(data.metadata.before.label, 'visible');
+  assert.equal(data.metadata.after.Password, '[REDACTED]');
+  assert.equal(data.metadata.extra.nested.privateKey, '[REDACTED]');
+  assert.equal(log.action, 'CRM_LEAD_MERGED');
+});
+
+test('recordAuditLogExplicit writes through the supplied transaction client', async () => {
+  baseResetAll();
+  let transactionArgs;
+  const tx = {
+    auditLog: {
+      create: async (args) => {
+        transactionArgs = args;
+        return { id: 123, ...args.data };
+      },
+    },
+  };
+
+  const log = await service.recordAuditLogExplicit({
+    tx,
+    actorUserId: 13,
+    actorAccessType: 'STAFF',
+    action: 'CRM_LEAD_MERGED',
+    entityType: 'Lead',
+    entityId: 43,
+    metadata: { apiSecret: 'secret' },
+  });
+
+  assert.equal(calls.auditLogCreate.length, 0);
+  assert.equal(transactionArgs.data.actorUserId, 13);
+  assert.equal(transactionArgs.data.metadata.extra.apiSecret, '[REDACTED]');
+  assert.equal(log.id, 123);
 });
