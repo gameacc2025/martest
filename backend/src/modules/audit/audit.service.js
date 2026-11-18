@@ -251,13 +251,18 @@ async function recordAuditLogExplicit({
   after,
   outcome = 'SUCCESS',
   severity = 'INFO',
-  source = 'SYSTEM',
+  source = null,
   ipAddress = 'unknown',
   userAgent = 'unknown',
   requestId = `sys-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
 }) {
   const builtMetadata = buildMetadata({ before, after, extra: metadata });
   const db = tx || prisma;
+  const resolvedSource = source || ({
+    STAFF: 'ADMIN',
+    COMPANY: 'COMPANY',
+    CUSTOMER: 'WEBSITE',
+  }[actorAccessType] || 'SYSTEM');
 
   const log = await db.auditLog.create({
     data: {
@@ -268,7 +273,7 @@ async function recordAuditLogExplicit({
       entityType,
       entityId: String(entityId),
       requestId,
-      source,
+      source: resolvedSource,
       outcome,
       severity,
       ipAddress,
