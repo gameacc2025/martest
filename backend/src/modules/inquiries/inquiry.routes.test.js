@@ -304,6 +304,38 @@ test('PATCH /:id/status: CUSTOMER with inquiries.read can request own cancellati
   await app.close();
 });
 
+test('COMPANY with inquiries.read only cannot change inquiry status or items', async () => {
+  const app = await buildApp();
+  const headers = userHeader('COMPANY', ['inquiries.read']);
+  const attempts = [
+    { method: 'PATCH', url: '/api/v1/inquiries/42/status', payload: { status: 'SUBMITTED' }, controller: 'changeStatus' },
+    { method: 'POST', url: '/api/v1/inquiries/42/items', payload: { productId: 1, quantity: 2 }, controller: 'addItem' },
+    { method: 'PATCH', url: '/api/v1/inquiries/42/items/7', payload: { quantity: 3 }, controller: 'updateItem' },
+    { method: 'DELETE', url: '/api/v1/inquiries/42/items/7', controller: 'deleteItem' },
+  ];
+
+  for (const attempt of attempts) {
+    const res = await app.inject({ method: attempt.method, url: attempt.url, headers, payload: attempt.payload });
+    assert.equal(res.statusCode, 403, `${attempt.method} ${attempt.url}`);
+    assert.equal(hit[attempt.controller], undefined, `${attempt.controller} must not run`);
+  }
+  await app.close();
+});
+
+test('COMPANY with leads.update can mutate its own inquiry through the guarded routes', async () => {
+  const app = await buildApp();
+  const headers = userHeader('COMPANY', ['leads.update']);
+  const status = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/inquiries/42/status',
+    headers,
+    payload: { status: 'SUBMITTED' },
+  });
+  assert.equal(status.statusCode, 200);
+  assert.equal(hit.changeStatus, true);
+  await app.close();
+});
+
 test('PATCH /:id/responses/:responseId/decision: buyer read permission reaches decision handler', async () => {
   const app = await buildApp();
   const res = await app.inject({
