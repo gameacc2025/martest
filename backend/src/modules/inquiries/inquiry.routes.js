@@ -286,7 +286,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.addItem);
 
   fastify.patch('/:id/items/:itemId', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.create')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read')],
     schema: { params: inquiryItemParamsSchema, body: itemUpdateBodySchema },
   }, ctrl.updateItem);
 
