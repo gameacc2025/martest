@@ -39,6 +39,7 @@ const calls = {
   userFindUnique: [],
   sms: [],
   email: [],
+  userLocks: [],
 };
 
 let fx;
@@ -58,6 +59,11 @@ function resetMocks() {
 resetMocks();
 
 const mockPrisma = {
+  $queryRaw: async (strings, ...values) => {
+    calls.userLocks.push({ query: strings.join('?'), values });
+    return [{ id: fx.user?.id }];
+  },
+  $transaction: async (callback) => callback(mockPrisma),
   user: {
     findUnique: async (args) => {
       calls.userFindUnique.push(args);
@@ -234,6 +240,18 @@ test('requestChallenge: rate limits per destination per hour', async () => {
     () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
     (err) => err.status === 429 && err.code === 'RATE_LIMITED',
   );
+});
+
+test('requestChallenge: serializes rate-limit checks and pending-code replacement per user', async () => {
+  baseResetAll();
+  mockPrisma.authChallenge.count = async () => 0;
+
+  await service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' });
+
+  assert.equal(calls.userLocks.length, 1);
+  assert.match(calls.userLocks[0].query, /FOR UPDATE/);
+  assert.deepEqual(calls.userLocks[0].values, [1]);
+  assert.equal(calls.challengeCreate.length, 1);
 });
 
 test('requestChallenge: creates challenge with hashed code', async () => {
