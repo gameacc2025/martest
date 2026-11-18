@@ -53,6 +53,7 @@ async function authChallengesRoutes(fastify) {
 
   // POST /auth/challenges/verify - Verify challenge code
   fastify.post('/challenges/verify', {
+    config: { rateLimit: { max: 20, timeWindow: '15 minutes' } },
     schema: {
       tags: ['Auth Challenges'],
       summary: 'Verify challenge code without consuming',
@@ -88,6 +89,7 @@ async function authChallengesRoutes(fastify) {
 
   // POST /auth/challenges/consume - Consume challenge
   fastify.post('/challenges/consume', {
+    config: { rateLimit: { max: 20, timeWindow: '15 minutes' } },
     schema: {
       tags: ['Auth Challenges'],
       summary: 'Consume challenge (verify + mark consumed)',
