@@ -615,8 +615,8 @@ test('createInquiry: AccessProfile-less CUSTOMER_USER cannot originate an RFQ', 
     }, customer),
     (error) => error.statusCode === 403 && error.code === 'CUSTOMER_INQUIRY_CREATION_DISABLED',
   );
-  assert.equal(calls['inquiry.create'].length, 0);
-  assert.equal(calls.dispatchNotification.length, 0);
+  assert.equal((calls['inquiry.create'] || []).length, 0);
+  assert.equal((calls.dispatchNotification || []).length, 0);
 });
 
 test('createInquiry: rejects a response deadline that is already past', async () => {
@@ -2216,7 +2216,7 @@ test('sendInquiryMessage: CUSTOMER_USER without an AccessProfile can message a r
   resetMocks();
   nextFindUnique = { id: 1, companyId: null, buyerUserId: 10, status: 'OPEN' };
   fx.response = { id: 90 };
-  const customer = { id: 10, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  const customer = { id: 10, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
 
   const result = await inquiryService.sendInquiryMessage(
     1,
@@ -2617,7 +2617,7 @@ test('updateInquiry and reveal serialize on the same parent inquiry lock used by
 
 test('changeInquiryStatus: CUSTOMER can cancel their own inquiry but cannot advance or close it', async () => {
   resetMocks();
-  const customer = { id: 77, accessType: 'CUSTOMER', roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  const customer = { id: 77, accessType: 'CUSTOMER', roles: ['CUSTOMER_USER'], permissions: ['inquiries.read'] };
   nextFindUnique = openInquiry({ companyId: null, buyerUserId: 77 });
   await assert.rejects(
     () => inquiryService.changeInquiryStatus(1, 'CLOSED', customer),
