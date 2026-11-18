@@ -4,7 +4,7 @@
 **Status:** IN_PROGRESS — core repair slices and three GitHub acceptance workflows pass; remaining source/security/product audits are queued  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`  
+**Latest tested code:** `24be9b53af92ca1d37f3dd7cf2fd2fc17e47e4f3`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -31,13 +31,13 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 
 ## Verified GitHub acceptance
 
-All three workflows passed on tested code SHA `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`.
+All three workflows passed on the exact main code SHA `fb608ebcb3a03dc0b920fa2d11f4d9c09c97241d`.
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44304118782](https://github.com/gameacc2025/martest/actions/runs/44304118782) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,688 backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44304118529](https://github.com/gameacc2025/martest/actions/runs/44304118529) | **PASS** |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44304118441](https://github.com/gameacc2025/martest/actions/runs/44304118441) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44305796094](https://github.com/gameacc2025/martest/actions/runs/44305796094) | **PASS** — 68 frontend/shared test files / 385 tests; 18 architecture/session tests; 1,689 backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44305796146](https://github.com/gameacc2025/martest/actions/runs/44305796146) | **PASS** |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44305795993](https://github.com/gameacc2025/martest/actions/runs/44305795993) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
 
 Documentation-only commits followed the tested code SHA; they do not change application source. The current main HEAD can therefore be newer than the tested code baseline.
 
