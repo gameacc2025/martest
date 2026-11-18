@@ -344,7 +344,7 @@ const EVENT_CATALOG = {
 const DEFAULT_CHANNELS = Object.freeze({
   IN_APP: true,
   EMAIL: true,
-  SMS: false, // opt-in only — and SMS delivery is NOT implemented yet
+  SMS: false, // explicit opt-in only; provider and quota checks apply
 });
 
 /** @returns {NotificationEvent} */
