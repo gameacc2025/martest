@@ -8,7 +8,7 @@
 
 ## Current migration verification — 2026-11-18
 
-- **Latest tested code baseline:** `9bb73c5735dbf3eddeff35375b381cc7a37586db`; current main may be newer due to documentation-only commits.
+- **Latest tested code baseline:** `10c41cf52dc5ba01ab90a4c64e09a4c5fdf96f01`; current main may be newer due to documentation-only commits.
 - **CI:** [44316798356](https://github.com/gameacc2025/martest/actions/runs/44305796094) PASS.
 - **Fresh PostgreSQL migration validation:** [44316798384](https://github.com/gameacc2025/martest/actions/runs/44305796146) PASS — schema validation/generation, fresh migration deploy and Prisma model/table parity.
 - **Runtime Validation:** [44316799468](https://github.com/gameacc2025/martest/actions/runs/44305795993) PASS — Compose health, migrations, schema parity, seed twice, AD-1/AD-3 role reconciliation and 8/8 browser smoke tests.
