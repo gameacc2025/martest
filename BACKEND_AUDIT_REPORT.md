@@ -1,5 +1,7 @@
 # Backend Architecture Audit Report
 
+> **Historical report — not current source of truth.** This audit predates the AuthChallenge/AuditLog and later domain migrations. Its model names, claims such as the absence of an AuditLog model, and file lists describe an older baseline. For current architecture and status use `backend/prisma/schema.prisma`, `docs/ARCHITECTURE_DECISIONS.md`, `.ai/current-task.md`, and the current backlog.
+
 **Date:** 2026-07-31  
 **Task:** Complete migration from legacy User model to new architecture  
 **Status:** ✅ COMPLETED
