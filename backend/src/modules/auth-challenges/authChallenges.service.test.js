@@ -330,8 +330,9 @@ test('verifyChallenge: rejects wrong code, increments attempt count', async () =
 test('verifyChallenge: rejects a concurrent attempt when compare-and-swap loses', async () => {
   baseResetAll();
   fx.updateManyCount = 0;
+  nextVerifyResult = false;
   await assert.rejects(
-    () => service.verifyChallenge({ challengeId: '10', code: '123456' }),
+    () => service.verifyChallenge({ challengeId: '10', code: 'wrong' }),
     (err) => err.status === 409 && err.code === 'CHALLENGE_STATE_CHANGED',
   );
   assert.equal(calls.challengeUpdateMany.length, 1);
@@ -344,7 +345,7 @@ test('verifyChallenge: invalidates immediately when the final allowed attempt is
   nextVerifyResult = false;
   await assert.rejects(
     () => service.verifyChallenge({ challengeId: '10', code: 'wrong' }),
-    (err) => err.status === 400 && err.code === 'INVALID_CODE' && err.details.remainingAttempts === 0,
+    (err) => err.status === 400 && err.code === 'INVALID_CODE' && err.meta.remainingAttempts === 0,
   );
   assert.equal(calls.challengeUpdateMany.length, 2);
   assert.ok(calls.challengeUpdateMany[1].data.invalidatedAt instanceof Date);
