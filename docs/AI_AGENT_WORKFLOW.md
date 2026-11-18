@@ -59,8 +59,4 @@ Browser automation is explicitly authorized for the current CRM acceptance workf
 
 ## Mandatory per-task Git and GitHub publishing
 
-Every independently completable task or subtask must be committed and published to GitHub immediately after it is completed, reviewed, and its relevant checks/documentation are updated. Do not batch several finished tasks into a later commit.
-
-Parallel agents must not create branches, worktrees, detached checkouts or PRs. They work in the existing main checkout only under lead-assigned, non-overlapping file ownership. To avoid concurrent working-tree conflicts, execute independent inspection tasks in parallel only when read-only; serialize all writes. Workers do not commit or push. The lead reviews and integrates one scoped change at a time on `main`, then verifies the remote SHA.
-
-A task is not fully handed off until its commit SHA and GitHub push status are recorded in `.ai/WORKLOG.md`, and `.ai/current-task.md` plus relevant docs are synchronized. If commit/push cannot happen, explicitly mark `NOT COMMITTED` / `NOT PUSHED`, explain the blocker, preserve the patch, and never claim synchronization. Apply this cycle to each independently verifiable slice, not only at the end of an entire feature lane.
+Apply the per-slice publication cycle above to every independently verifiable task: the lead commits and publishes each reviewed slice to `main` immediately, verifies the remote SHA, and records evidence in `.ai/WORKLOG.md`. Workers remain read-only unless assigned a non-overlapping edit; they never create branches/worktrees or commit/push. If publication is blocked, preserve the patch and record `NOT COMMITTED` / `NOT PUSHED`.
