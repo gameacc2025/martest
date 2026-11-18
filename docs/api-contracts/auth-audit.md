@@ -1,9 +1,9 @@
 # API-1 Domain Contract: Auth Challenges & Audit Log
 
-**Status:** DRAFT — awaiting review/freeze before implementation  
+**Status:** IMPLEMENTED — source-aligned reference; central audit action registry and retention/archival policy remain open  
 **Document ID:** API-1-AUTH-AUDIT-CONTRACT  
-**Last Updated:** 2026-11-09  
-**Base main SHA:** (to be recorded at freeze)
+**Last Updated:** 2026-11-18  
+**Verified application-code baseline:** `00d139282fed93fee0225febb19516d3f3bd118f` (subsequent main commits are documentation-only)
 
 ---
 
