@@ -325,6 +325,24 @@ test('recordAuditLogExplicit uses the central writer and redacts nested metadata
   assert.equal(log.action, 'CRM_LEAD_MERGED');
 });
 
+test('recordAuditLogExplicit derives its default source from non-HTTP actor context', async () => {
+  for (const [actorAccessType, expectedSource] of [
+    ['COMPANY', 'COMPANY'],
+    ['CUSTOMER', 'WEBSITE'],
+  ]) {
+    baseResetAll();
+    await service.recordAuditLogExplicit({
+      actorUserId: 27,
+      actorAccessType,
+      companyId: actorAccessType === 'COMPANY' ? 9 : null,
+      action: 'PROFILE_UPDATED',
+      entityType: 'Profile',
+      entityId: 27,
+    });
+    assert.equal(calls.auditLogCreate[0].data.source, expectedSource);
+  }
+});
+
 test('recordAuditLogExplicit writes through the supplied transaction client', async () => {
   baseResetAll();
   let transactionArgs;
