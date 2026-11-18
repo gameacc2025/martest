@@ -325,10 +325,9 @@ async function verifyChallenge({ challengeId, code }) {
   }
 
   const valid = await verifyCode(code, challenge.secretHash);
-  const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
-  const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
-
   if (!valid) {
+    const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
+    const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
     if (remainingAttempts === 0) {
       await prisma.authChallenge.updateMany({
         where: {
@@ -343,10 +342,12 @@ async function verifyChallenge({ challengeId, code }) {
     throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts });
   }
 
+  // Successful verification does not consume a failed-attempt allowance.
+  // The final one-time consume operation records the successful use atomically.
   return {
     valid: true,
     purpose: challenge.purpose,
-    remainingAttempts,
+    remainingAttempts: Math.max(0, challenge.maxAttempts - challenge.attemptCount),
   };
 }
 
