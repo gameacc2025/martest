@@ -133,7 +133,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
       </aside>
       <section class="products-area" aria-label="فهرست محصولات" :aria-busy="loading">
         <div class="bar"><span>{{ fa(totalItems) }} محصول</span><label>مرتب‌سازی: <select :value="sortMode" @change="changeSort($event.target.value)"><option value="newest">جدیدترین</option><option value="featured">محصولات منتخب</option><option value="price">ارزان‌ترین</option></select></label></div>
-        <div v-if="loading" class="empty-state">در حال دریافت محصولات…</div>
+        <div v-if="loading" class="prods product-loading-grid" role="status" aria-label="در حال بارگذاری محصولات"><div v-for="i in 8" :key="i" class="p loading-card" aria-hidden="true"></div></div>
         <div v-else-if="error" class="empty-state"><b>دریافت محصولات ناموفق بود</b><span>{{ error }}</span><button class="btn b2" type="button" @click="loadProducts">تلاش دوباره</button></div>
         <div v-else-if="!visibleProducts.length" class="empty-state"><b>محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><button class="btn b2" type="button" @click="clearFilters">حذف فیلترها</button></div>
         <div v-else class="prods">
@@ -172,6 +172,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
 .reference-products .price-fields span { font-size: 10px; color: var(--ds-text-secondary); }
 .reference-products .apply-filter { width: 100%; margin-top: 10px; }
 .reference-products .products-area { min-width: 0; }
+.product-loading-grid{min-height:320px}.loading-card{min-height:290px;overflow:hidden;background:linear-gradient(90deg,var(--card) 25%,rgba(34,211,238,.12) 50%,var(--card) 75%);background-size:200% 100%;animation:product-shimmer 1.6s ease-in-out infinite}@keyframes product-shimmer{to{background-position:-200% 0}}
 .pg .prods{grid-template-columns:repeat(3,1fr)}
 .reference-products .products-area .prods { grid-template-columns: repeat(3,minmax(0,1fr)); }
 .reference-products .products-area .im { display: grid; text-decoration: none; }
