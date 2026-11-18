@@ -129,3 +129,32 @@ test('pause rejects a second active pause and resume rejects an unpaused ticket'
     (error) => error.code === 'SUPPORT_SLA_NOT_PAUSED' && error.statusCode === 409,
   );
 });
+
+
+test('SLA working hours use the configured IANA timezone, not the host timezone', () => {
+  const tehranCalendar = { ...calendar, timezone: 'Asia/Tehran' };
+  const start = new Date('2026-11-16T05:00:00.000Z'); // Monday 08:30 in Tehran
+  const end = new Date('2026-11-16T08:00:00.000Z'); // Monday 11:30 in Tehran
+
+  assert.equal(service.isWorkingDay(start, tehranCalendar), true);
+  assert.equal(service.calculateWorkingMinutesBetween(start, end, tehranCalendar), 150);
+  assert.equal(
+    service.addWorkingMinutes(start, 120, tehranCalendar).toISOString(),
+    '2026-11-16T07:30:00.000Z', // Monday 11:00 in Tehran
+  );
+});
+
+test('SLA holidays are interpreted as dates in the configured timezone', () => {
+  const holidayCalendar = {
+    ...calendar,
+    timezone: 'Asia/Tehran',
+    holidays: ['2026-11-16'],
+  };
+  const monday = new Date('2026-11-16T05:00:00.000Z');
+
+  assert.equal(service.isWorkingDay(monday, holidayCalendar), false);
+  assert.equal(
+    service.addWorkingMinutes(monday, 60, holidayCalendar).toISOString(),
+    '2026-11-17T06:00:00.000Z', // Tuesday 09:30 in Tehran
+  );
+});
