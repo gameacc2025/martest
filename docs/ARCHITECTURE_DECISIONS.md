@@ -9,7 +9,7 @@
 - نقش `CUSTOMER_USER` نباید permissionهای `inquiries.create` یا `leads.create` داشته باشد.
 - هیچ Route یا UI برای ثبت Inquiry توسط CUSTOMER نباید فعال باشد.
 
-**Implementation drift found (2026-11-17):** `backend/prisma/seed.js` grants `CUSTOMER_USER` both `leads.create` and `inquiries.create`; `POST /api/v1/inquiries` allows CUSTOMER access when one of those permissions is present; and `createInquiry()` explicitly creates a buyer-owned OPEN inquiry for a CUSTOMER. This directly conflicts with AD-1. The owner must decide whether to remove CUSTOMER RFQ creation (including permissions/UI/route behavior) or formally revise AD-1 to allow customer-originated RFQs. Do not silently change either side during this audit.
+**Owner authorization and remediation (2026-11-18):** The owner authorized project-wide correction against accepted decisions. `CUSTOMER_USER` no longer receives `leads.create` / `inquiries.create`; the inquiry POST route accepts only STAFF/COMPANY; `createInquiry()` independently rejects CUSTOMER contexts; the Website product CTA is hidden for CUSTOMER; and the empty state no longer directs customers to create an RFQ. Customers retain read/ownership-checked actions on existing inquiries using `inquiries.read`. AD-1 itself is unchanged.
 
 ### AD-2 — هر User فقط متعلق به یک Company است
 - Multi Company Membership وجود **ندارد**.
@@ -23,14 +23,14 @@
   - کاربران را **فعال/غیرفعال** کند (`users.activate` / `users.deactivate` محدود به شرکت خود).
 - permissionهای `users.create`، `users.update`، `users.delete`، `users.assign_roles` نباید در نقش‌های COMPANY باشند.
 
-**Implementation drift found (2026-11-17):** `backend/prisma/seed.js` still grants `users.create`, `users.update`, and `users.assign_roles` to `COMPANY_MANAGER`. The current `user.service.js` rejects COMPANY create/edit/role-assignment operations with `COMPANY_USER_MANAGEMENT_RESTRICTED`, and unit tests cover those denials, so this is a stale/over-broad permission grant rather than a confirmed service-level bypass. The seed should revoke these grants idempotently; because this changes permission assignments, make the correction only under the owner's explicit security/permission-change approval and verify existing database role grants are reconciled.
+**Owner authorization and remediation (2026-11-18):** The seed no longer grants `users.create`, `users.update`, `users.delete`, or `users.assign_roles` to COMPANY roles. It also idempotently deletes any existing COMPANY `RolePermission` rows for those permissions, so previously seeded databases are reconciled on the next seed run. `users.read`, `users.activate`, and `users.deactivate` remain available within the service's company-ownership checks. Existing service guards and tests remain in place. AD-3 is unchanged.
 
 ### AD-4 — Commerce فاز آینده B2C است (Disabled، نه Deleted)
 - Cart / Checkout / Orders / Wishlist مربوط به فاز آینده B2C هستند.
 - فعلاً **حذف نمی‌شوند**، فقط **غیرفعال** می‌شوند.
 - هیچ Route فعال، هیچ UI فعال، و هیچ لینک/ارجاع فعالی به آن‌ها نباید وجود داشته باشد.
 
-**Implementation drift found (2026-11-17):** `apps/website/src/router/index.js` currently registers the `/cart`, `/checkout`, and `/orders` routes. These active frontend route registrations conflict with this accepted decision even though the operational order/payment backend is not established by this inspection. Do not silently change the business decision or remove these routes as part of a documentation audit. The owner must decide whether to disable the routes/UI to enforce AD-4 or formally revise AD-4 to permit a clearly labelled prototype.
+**Owner authorization and remediation (2026-11-18):** The Website no longer registers `/cart`, `/checkout`, or `/orders`; its global cart drawer, header entry points and order-menu link were removed. The `ShoppingCart.vue`, `Checkout.vue`, `RetailOrders.vue` components and cart store remain in the repository as dormant future-phase code. No active Wishlist route was present. AD-4 is unchanged.
 
 ### AD-5 — بدون تغییر معماریِ تأییدنشده
 - ممیزی، تحلیل، مقایسه تصمیم‌ها با کد واقعی و پیشنهاد اصلاح همواره مجاز است؛ به‌ویژه وقتی مالک پروژه آن را درخواست کرده باشد.
