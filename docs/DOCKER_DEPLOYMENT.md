@@ -22,6 +22,7 @@
 - دسترسی به مخزن و فضای کافی برای build چهار image
 - مقدار امن `POSTGRES_PASSWORD` در فایل محیطی ریشه؛ Compose در صورت نبودن آن باید fail شود و نباید از رمز پیش‌فرض ناامن استفاده کند.
 - فایل `backend/.env` با تنظیمات محیطی لازم بک‌اند، از جمله secrets احراز هویت و providerهایی که قرار است فعال باشند.
+- اگر قرار است `node prisma/seed.js` خارج از محیط Development اجرا شود، مقدار یکتای `SUPER_ADMIN_PASSWORD` را از secret manager یا محیط امن به فرایند بدهید. Seed در staging/production بدون این مقدار fail-closed می‌شود؛ هیچ رمز پیش‌فرض مدیریتی برای این محیط‌ها وجود ندارد. رمز مدیر و رمز حساب‌های demo نباید در لاگ چاپ شوند.
 
 هرگز فایل‌های `.env`، رمزها، tokenها یا credentialهای واقعی را commit نکنید. از `.env.example` برای متغیرهای ریشه و `backend/.env.example` برای تنظیمات بک‌اند استفاده کنید.
 
@@ -53,7 +54,7 @@ docker compose logs --tail=200 postgres
 docker compose logs --tail=200 backend
 ```
 
-Backend در Dockerfile فعلی دستورهای `prisma migrate deploy` و سپس `node prisma/seed.js` را قبل از شروع سرور اجرا می‌کند. image runtime باید Prisma CLI و OpenSSL را از build stage دریافت کند؛ به اجرای دانلودی `npx prisma` در زمان شروع یا دسترسی اینترنتی کانتینر وابسته نباشید. قبل از اجرای آن در محیط واقعی، مقصد دیتابیس، backup و برنامه بازگشت را بررسی کنید. اجرای seed جایگزین backup نیست.
+Backend در Dockerfile فعلی دستورهای `prisma migrate deploy` و سپس `node prisma/seed.js` را قبل از شروع سرور اجرا می‌کند. برای bootstrap مدیر در staging/production، `SUPER_ADMIN_PASSWORD` باید از منبع امن و با مقدار تصادفی یکتا تزریق شود؛ فایل نمونه این مقدار را خالی می‌گذارد و seed خارج از Development بدون مقدار صریح اجرا نمی‌شود. Seedهای محتوای نمایشی CMS در Production اجرا نمی‌شوند. image runtime باید Prisma CLI و OpenSSL را از build stage دریافت کند؛ به اجرای دانلودی `npx prisma` در زمان شروع یا دسترسی اینترنتی کانتینر وابسته نباشید. قبل از اجرای آن در محیط واقعی، مقصد دیتابیس، backup و برنامه بازگشت را بررسی کنید. اجرای seed جایگزین backup نیست.
 
 ## URLهای پیش‌فرض میزبان
 
