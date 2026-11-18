@@ -244,7 +244,16 @@ function assertCanReadInquiry(inquiry, caller) {
 
 function assertCanManageInquiry(inquiry, caller) {
   if (!inquiry) throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
-  if (isInquiryBuyer(inquiry, caller)) return;
+  if (isInquiryBuyer(inquiry, caller)) {
+    // Buyer ownership scopes the resource, but does not grant COMPANY_USER
+    // write privileges. Company readers need an explicit update permission;
+    // CUSTOMER-owned legacy inquiry actions remain separately constrained by
+    // their CUSTOMER lifecycle rules and ownership checks.
+    if (caller?.accessType === 'COMPANY' && !hasAnyPermission(caller, 'leads.update', 'inquiries.update')) {
+      throw { statusCode: 403, code: 'INQUIRY_UPDATE_PERMISSION_REQUIRED', message: 'Updating an inquiry requires leads.update or inquiries.update.' };
+    }
+    return;
+  }
   if (isStaffWithPermission(caller, 'leads.update', 'inquiries.update')) return;
   throw { statusCode: 404, code: 'INQUIRY_NOT_FOUND', message: 'درخواست یافت نشد.' };
 }
