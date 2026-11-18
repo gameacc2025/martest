@@ -158,3 +158,14 @@ test('SLA holidays are interpreted as dates in the configured timezone', () => {
     '2026-11-17T06:00:00.000Z', // Tuesday 09:30 in Tehran
   );
 });
+
+
+test('invalid persisted SLA timezone or working hours fall back to the safe default calendar', () => {
+  const invalidTimezone = service.parseWorkingCalendar({ ...calendar, timezone: 'Not/A_Timezone' });
+  const invalidHours = service.parseWorkingCalendar({ ...calendar, workStartHour: 19, workEndHour: 9 });
+
+  assert.equal(invalidTimezone.timezone, 'Asia/Tehran');
+  assert.equal(invalidHours.timezone, 'Asia/Tehran');
+  assert.equal(invalidHours.workStartHour, 9);
+  assert.equal(invalidHours.workEndHour, 18);
+});
