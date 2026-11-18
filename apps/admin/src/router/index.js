@@ -86,7 +86,6 @@ const routes = [
       { path: "/cms/pages", name: "admin-cms-pages", component: () => import("../pages/admin/cms/PageManagement.vue"), meta: { title: "مدیریت صفحات ثابت", requiredPermission: "cms.pages.read" } },
 
       // ── Orders ────────────────────────────────────────────
-      { path: "/orders", name: "admin-orders", redirect: { name: "admin-retail-orders" }, meta: { title: "سفارش‌های خرده‌فروشی" } },
       // ── Inquiries ─────────────────────────────────────────
       // Operational modules: UI-first, demo data until domain APIs are delivered.
       { path: "/crm", name: "admin-crm", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "overview" }, meta: { title: "مدیریت ارتباط با مشتریان" } },
@@ -100,7 +99,6 @@ const routes = [
       { path: "/finance/transactions", name: "admin-finance-transactions", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeTransactions" }, meta: { title: "تراکنش‌ها و گردش حساب" } },
       { path: "/finance/invoices", name: "admin-finance-invoices", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "financeInvoices" }, meta: { title: "صورتحساب‌ها و اسناد مالی" } },
       { path: "/support/tickets", name: "admin-tickets", component: () => import("../pages/admin/support/TicketDesk.vue"), meta: { title: "مرکز پشتیبانی و تیکت‌ها" } },
-      { path: "/retail/orders", name: "admin-retail-orders", component: () => import("../pages/admin/OperationsHub.vue"), props: { module: "orders" }, meta: { title: "سفارش‌های خرده‌فروشی" } },
       { path: "/inquiry-subscriptions", name: "admin-inquiry-subscriptions", component: () => import("../pages/admin/inquiries/InquirySubscriptions.vue"), meta: { title: "اشتراک‌های استعلام" } },
       { path: "/inquiries", name: "admin-inquiries", component: () => import("../pages/admin/inquiries/InquiryList.vue"), meta: { title: "مدیریت استعلام‌ها" } },
       { path: "/inquiries/create", name: "admin-inquiry-create", component: () => import("../pages/admin/inquiries/InquiryCreate.vue"), meta: { title: "ایجاد استعلام جدید" } },
