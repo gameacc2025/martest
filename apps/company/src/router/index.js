@@ -90,9 +90,8 @@ const routes = [
       { path: "/inquiries/:id", name: "company-inquiry-detail", component: () => import("../pages/company/inquiries/InquiryDetail.vue"), meta: { title: "جزئیات استعلام" } },
       // ── Users (company members) ──────────────────────────
       { path: "/users", name: "company-users", component: () => import("../pages/company/users/UserList.vue"), meta: { title: "کاربران شرکت" } },
-      // ── Retail seller orders (UI prototype; retail APIs pending) ─
-      // ── Company finance (UI prototype; settlement APIs pending) ─
-      { path: "/finance/settlements", name: "company-finance-settlements", component: () => import("../pages/company/finance/Settlements.vue"), meta: { title: "وضعیت تسویه‌های شرکت" } },
+      // Retail orders, inventory and finance/settlements remain dormant
+      // until the owner approves the corresponding business rules and APIs (AD-4).
       // ── Support desk ──────────────────────────────────────
       { path: "/support/tickets", name: "company-tickets", component: () => import("../pages/company/support/SupportTickets.vue"), meta: { title: "پشتیبانی و تیکت‌ها" } },
       // ── Reports ──────────────────────────────────────────
