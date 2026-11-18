@@ -22,7 +22,7 @@
 | عملیات شرکت | زمینه COMPANY و مالکیت شرکت، یا زمینه STAFF همراه با permission دقیق برای عملیات سراسری |
 | مدیریت کاربران شرکت | فقط مشاهده کاربران شرکت خود و فعال/غیرفعال‌سازی با permission دقیق؛ ایجاد/حذف/تغییر نقش یا انتقال شرکت برای COMPANY ممنوع |
 
-> **تعارض seed (2026-11-17):** `COMPANY_MANAGER` در `backend/prisma/seed.js` هنوز `users.create`، `users.update` و `users.assign_roles` می‌گیرد؛ اما `user.service.js` این عملیات را برای COMPANY رد می‌کند و تست‌های سرویس این مرز را پوشش می‌دهند. این permissionهای اضافی باید با تصمیم/تأیید تغییر مجوزها به‌صورت idempotent از نقش و دیتابیس حذف شوند؛ تا آن زمان service guard مرز اجرایی است و این seed drift باز است.
+> **اجرای AD-3 (2026-11-18):** Seed مجوزهای `users.create`، `users.update`، `users.delete` و `users.assign_roles` را از همه نقش‌های COMPANY حذف می‌کند و grants موجود را نیز idempotently revoke می‌کند. `users.read` و فعال/غیرفعال‌سازی باقی می‌مانند و service ownership guard همچنان مرز داده شرکت را enforce می‌کند.
 | مدیریت نقش‌ها و permissionها | فقط STAFF؛ تطبیق scope نقش با زمینه کاربر هدف |
 | محصولات | محصول عمومی فقط در وضعیت/visibility مجاز؛ نوشتن COMPANY محدود به شرکت خودش؛ STAFF برای عملیات بین‌شرکتی به permission مربوط نیاز دارد |
 | استعلام و پیشنهاد | CUSTOMER فقط استعلام‌های خودش؛ COMPANY فقط پاسخ‌های مجاز به‌عنوان تأمین‌کننده؛ STAFF نباید با جعل companyId به‌جای تأمین‌کننده یا خریدار عمل کند |
@@ -68,7 +68,7 @@
 - سرویس باید این مرز را مستقل از route guard enforce کند؛ فیلتر نهایی دریافتی‌ها نیز باید بر اساس مالکیت محصول شرکت احراز‌شده اعمال شود.
 - مشتری فاقد AccessProfile با نقش CUSTOMER_USER و accessType: null فقط در محدوده Website و استعلام‌های متعلق به buyerUserId خودش عمل می‌کند.
 
-> **تعارض AD-1 (2026-11-17):** برخلاف تصمیم معماری مبنی بر ممنوعیت ایجاد Inquiry توسط CUSTOMER، seed نقش `CUSTOMER_USER` را با `leads.create` و `inquiries.create` می‌سازد؛ route ایجاد Inquiry نیز CUSTOMER را می‌پذیرد و service برای او Inquiry با `buyerUserId` ایجاد می‌کند. این تعارض محصولی/مجوزی نیازمند تصمیم صریح مالک است؛ تا تعیین تکلیف، هیچ‌یک از دو سمت را بدون تأیید تغییر ندهید.
+> **اجرای AD-1 (2026-11-18):** CUSTOMER امکان ایجاد Inquiry ندارد. Seed مجوزهای `leads.create` و `inquiries.create` را حذف و grants قدیمی را نیز idempotently revoke می‌کند؛ route و service بک‌اند هر دو ایجاد RFQ توسط CUSTOMER را رد می‌کنند. مشتری فقط می‌تواند Inquiryهای متعلق به خودش را با `inquiries.read` مشاهده و اقدامات مجاز روی همان رکورد را انجام دهد.
 
 
 ### اشتراک و سهمیه استعلام
