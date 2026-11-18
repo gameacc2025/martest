@@ -158,8 +158,6 @@
               v-for="product in products"
               :key="product.id"
               :product="product"
-              @add-to-cart="addToCart"
-              @toggle-wishlist="addToWishlist"
               @view-product="viewProduct"
             />
           </div>
@@ -183,8 +181,6 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
-import { useCartStore } from '../../stores/cart'
-import { useWishlistStore } from '../../stores/wishlist'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Tree from 'primevue/tree'
@@ -201,8 +197,6 @@ import ProductCard from '@telecom/shared-ui/components/products/ProductCard.vue'
 const route = useRoute()
 const router = useRouter()
 const productsStore = useProductsStore()
-const cartStore = useCartStore()
-const wishlistStore = useWishlistStore()
 
 const query = ref(route.query.q || '')
 const searchQuery = ref(query.value)
@@ -364,20 +358,6 @@ const formatPrice = (price) => new Intl.NumberFormat('fa-IR', {
   style: 'currency',
   currency: 'IRR'
 }).format(price)
-
-const addToCart = (product) => {
-  cartStore.addToCart({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    image: product.image,
-    quantity: 1
-  })
-}
-
-const addToWishlist = (product) => {
-  wishlistStore.addToWishlist(product)
-}
 
 const viewProduct = (product) => {
   router.push({ name: 'product-details', params: { id: product.id } })
