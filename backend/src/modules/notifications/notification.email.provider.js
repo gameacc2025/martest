@@ -18,9 +18,15 @@ const { smtpHost, smtpPort, smtpUser, smtpPass, smtpFrom, nodeEnv } = require('.
  * @param {string} [opts.html] - Optional HTML body
  * @returns {Promise<{ messageId: string, provider: string }>} Provider-specific result
  */
-async function sendEmail({ to, subject, text, html }) {
+async function sendEmail({ to, subject, text, html, allowConsoleFallback = true }) {
   // If SMTP is not configured, fall back to console adapter (dev/test only)
   if (!smtpHost || nodeEnv === 'test') {
+    if (!allowConsoleFallback) {
+      const error = new Error('درگاه ایمیل واقعی برای ارسال امن این پیام پیکربندی نشده است.');
+      error.code = 'EMAIL_PROVIDER_NOT_CONFIGURED';
+      error.statusCode = 503;
+      throw error;
+    }
     return sendEmailConsole({ to, subject, text, html });
   }
 
@@ -29,7 +35,13 @@ async function sendEmail({ to, subject, text, html }) {
   try {
     nodemailer = require('nodemailer');
   } catch {
-    // nodemailer not installed — use console adapter
+    // Never write one-time authentication codes to logs as a fallback.
+    if (!allowConsoleFallback) {
+      const error = new Error('کتابخانه ارسال ایمیل روی سرور نصب نشده است.');
+      error.code = 'EMAIL_PROVIDER_NOT_CONFIGURED';
+      error.statusCode = 503;
+      throw error;
+    }
     console.warn('[email] nodemailer not installed, using console adapter');
     return sendEmailConsole({ to, subject, text, html });
   }
