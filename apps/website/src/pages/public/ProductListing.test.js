@@ -93,6 +93,7 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     hasAnyPermission.mockReturnValue(true)
     wrapper = mountListing()
     await flushPromises()
+    expect(wrapper.find('.ph').text()).toContain('ثبت استعلام سازمانی')
     expect(wrapper.find('.p .ac').text()).toContain('استعلام قیمت')
   })
 
@@ -102,6 +103,7 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     hasAnyPermission.mockReturnValue(true)
     wrapper = mountListing()
     await flushPromises()
+    expect(wrapper.find('.ph').text()).toContain('ثبت استعلام سازمانی از پنل شرکت انجام می‌شود')
     expect(wrapper.find('.p .ac').text()).not.toContain('استعلام قیمت')
     expect(wrapper.find('.p .ac').text()).toContain('مشاهده')
   })
