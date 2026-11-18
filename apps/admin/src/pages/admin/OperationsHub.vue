@@ -1,4 +1,7 @@
 <script setup>
+// DORMANT PROTOTYPE: Retail and Finance/Settlement modules are not routed or navigable.
+// Re-enable only after the owner approves business rules, APIs, and acceptance tests (AD-4).
+
 import { computed } from 'vue'
 import OperationalWorkspace from '@telecom/shared-ui/components/operations/OperationalWorkspace.vue'
 
