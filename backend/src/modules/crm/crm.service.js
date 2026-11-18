@@ -1,5 +1,6 @@
 const prisma = require('../../config/db');
 const { createError } = require('../audit/audit.utils');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
 
 const transitions = {
   NEW: ['CONTACTED', 'QUALIFIED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'],
@@ -501,11 +502,16 @@ async function mergeLeads(sourceId, targetId, reason, actorId) {
     if (auditEntries.length > 0) {
       await tx.cRMFieldAudit.createMany({ data: auditEntries });
     }
-    await tx.auditLog.create({ data: {
-      actorUserId, actorAccessType: 'STAFF', action: 'CRM_LEAD_MERGED',
-      entityType: 'Lead', entityId: String(targetLeadId), source: 'ADMIN',
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      action: 'CRM_LEAD_MERGED',
+      entityType: 'Lead',
+      entityId: targetLeadId,
+      source: 'ADMIN',
       metadata: { sourceLeadId, targetLeadId, reason: note },
-    } });
+    });
     return { mergedLead: leadDto(merged), duplicateLeadId: sourceLeadId, movedRelations: true };
   });
 }
