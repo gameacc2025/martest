@@ -125,8 +125,8 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
 
 /**
  * Process pending SMS deliveries through the configured Twilio adapter.
- * SMS rows are only queued when a sender explicitly requests a text alert and
- * the recipient has opted into SMS for INQUIRY_MESSAGE_RECEIVED.
+ * SMS rows are queued only for recipients with an explicit per-event opt-in,
+ * after quota checks and only when the Twilio provider is configured.
  */
 async function processPendingSmsDeliveries({ limit = POLL_LIMIT } = {}) {
   if (!smsProvider.hasRealProvider()) {
