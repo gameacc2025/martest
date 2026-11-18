@@ -122,11 +122,9 @@ const quickActions = [
   { label: 'مدیریت شرکت‌ها', icon: 'pi pi-building', to: { name: 'admin-companies' }, tone: 'info' },
   { label: 'مدیریت محصولات', icon: 'pi pi-box', to: { name: 'admin-products' }, tone: 'success' },
   { label: 'دسته‌بندی‌ها', icon: 'pi pi-folder', to: { name: 'admin-categories' }, tone: 'warning' },
-  { label: 'سفارشات', icon: 'pi pi-shopping-cart', to: { name: 'admin-orders' }, tone: 'primary' },
   { label: 'استعلام‌ها', icon: 'pi pi-inbox', to: { name: 'admin-inquiries' }, tone: 'danger' },
   { label: 'مرکز CRM', icon: 'pi pi-address-book', to: { name: 'admin-crm' }, tone: 'info' },
   { label: 'تیکت‌ها', icon: 'pi pi-headphones', to: { name: 'admin-tickets' }, tone: 'primary' },
-  { label: 'سفارش خرده‌فروشی', icon: 'pi pi-shopping-cart', to: { name: 'admin-retail-orders' }, tone: 'success' },
 ]
 
 // ── Formatting / label helpers ──────────────────────────────
