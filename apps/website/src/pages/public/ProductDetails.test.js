@@ -196,6 +196,8 @@ describe('Website Product Details', () => {
     await flushPromises()
 
     expect(wrapper.find('[aria-label="ثبت استعلام قیمت"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('قیمت این محصول از طریق فرایند استعلام سازمانی اعلام می‌شود.')
+    expect(wrapper.text()).not.toContain('برای اطلاع از قیمت و شرایط فروش، استعلام بگیرید.')
   })
 
 })
