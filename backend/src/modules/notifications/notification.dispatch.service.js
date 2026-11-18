@@ -346,9 +346,11 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
         if (error?.code === 'INQUIRY_QUOTA_EXCEEDED' || error?.code === 'INQUIRY_SUBSCRIPTION_REQUIRED') {
           summary.sms.quotaExceeded += 1;
           quotaSkipped = true;
-        } else if (error?.code !== 'INVALID_INQUIRY_USAGE_TYPE' && error?.code !== 'SUBSCRIPTION_STATE_CHANGED') {
-          // For other errors (provider not configured, etc.), we still queue the SMS
-          // The delivery worker will handle provider configuration errors
+        } else {
+          // SMS is a paid, quota-enforced channel. Any uncertainty about quota
+          // or subscription state must fail closed; never queue billable delivery
+          // when the quota check itself could not be completed safely.
+          throw error;
         }
       }
 
