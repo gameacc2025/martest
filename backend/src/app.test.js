@@ -85,7 +85,7 @@ test('GET /api/v1/companies/public/:id is registered at the root scope', () => {
 
 // ── The generated OpenAPI document must match the real registered routes ──
 
-test('OpenAPI JSON contains every inventory route with effective security and global error responses', async () => {
+test('OpenAPI JSON contains every documented active route with effective security and global error responses', async () => {
   const specResponse = await app.inject({ method: 'GET', url: '/docs/json' });
   assert.equal(specResponse.statusCode, 200);
   const spec = specResponse.json();
