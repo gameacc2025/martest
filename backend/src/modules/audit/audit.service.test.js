@@ -375,7 +375,7 @@ test('recordAuditLog captures HTTP actor and request context through the central
   const data = calls.auditLogCreate[0].data;
   assert.equal(data.actorUserId, 17);
   assert.equal(data.actorAccessType, 'STAFF');
-  assert.equal(data.ipAddress, '203.0.113.10');
+  assert.equal(data.ipAddress, '127.0.0.1'); // forwarding headers are untrusted unless Fastify trustProxy is configured
   assert.equal(data.userAgent, 'Audit-Test/1.0');
   assert.equal(data.requestId, 'req-http-audit');
   assert.equal(data.metadata.extra.nested.refreshToken, '[REDACTED]');
