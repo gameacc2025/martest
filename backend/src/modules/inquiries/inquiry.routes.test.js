@@ -397,6 +397,32 @@ test('DELETE /:id/items/:itemId: STAFF with leads.delete -> 200', async () => {
   await app.close();
 });
 
+test('CUSTOMER with inquiries.read retains owner-checked actions on existing inquiries', async () => {
+  const app = await buildApp();
+  const headers = userHeader('CUSTOMER', ['inquiries.read']);
+
+  const addItem = await app.inject({
+    method: 'POST',
+    url: '/api/v1/inquiries/42/items',
+    headers,
+    payload: { productId: 1, quantity: 2 },
+  });
+  assert.equal(addItem.statusCode, 200);
+  assert.equal(hit.addItem, true);
+
+  delete hit.addItem;
+  const sendMessage = await app.inject({
+    method: 'POST',
+    url: '/api/v1/inquiries/42/messages',
+    headers,
+    payload: { message: 'Please clarify the delivery lead time.' },
+  });
+  assert.equal(sendMessage.statusCode, 200);
+  assert.equal(hit.sendMessage, true);
+
+  await app.close();
+});
+
 // ── POST /:id/responses — MANAGE_TYPES ───────────────────────
 
 test('POST /:id/responses: COMPANY with inquiries.respond -> 200', async () => {
