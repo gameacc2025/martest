@@ -41,16 +41,24 @@ jobs:
       - name: Prepare disposable Compose environment
         shell: bash
         run: |
-          cat > .env <<'EOF'
+          set -euo pipefail
+          POSTGRES_PASSWORD="$(openssl rand -hex 32)"
+          SUPER_ADMIN_PASSWORD="$(openssl rand -hex 24)"
+          echo "::add-mask::$POSTGRES_PASSWORD"
+          echo "::add-mask::$SUPER_ADMIN_PASSWORD"
+          echo "E2E_ADMIN_PASSWORD=$SUPER_ADMIN_PASSWORD" >> "$GITHUB_ENV"
+          cat > .env <<EOF
           POSTGRES_USER=telecom
-          POSTGRES_PASSWORD=ci_only_password_93a1c2
+          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
           POSTGRES_DB=telecom_marketplace
+          SUPER_ADMIN_PASSWORD=$SUPER_ADMIN_PASSWORD
           EOF
           cat > docker-compose.ci.yml <<'EOF'
           services:
             backend:
               environment:
                 NODE_ENV: development
+                SUPER_ADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD:?SUPER_ADMIN_PASSWORD is required for CI seed}
           EOF
           cp backend/.env.example backend/.env
           cat >> backend/.env <<'EOF'
@@ -144,7 +152,6 @@ jobs:
           COMPANY_URL: http://localhost:3002/
           ADMIN_URL: http://localhost:3003/
           E2E_ADMIN_PHONE: "09120000000"
-          E2E_ADMIN_PASSWORD: Admin@123456
 
       - name: Collect service logs on failure
         if: failure()
