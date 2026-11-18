@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Fastify = require('fastify');
 const crmRoutes = require('./index');
+const crmService = require('./crm.service');
 
 async function buildTestApp() {
   const app = Fastify();
@@ -123,6 +124,30 @@ test('CRM lead assignment, status and merge commands validate their required con
     });
     assert.equal(merge.statusCode, 400);
   } finally {
+    await app.close();
+  }
+});
+
+
+test('CRM lead status route forwards the authenticated actor to the service', async () => {
+  const original = crmService.changeLeadStatus;
+  let received;
+  crmService.changeLeadStatus = async (...args) => {
+    received = args;
+    return { id: 1, status: args[1] };
+  };
+  const app = await buildTestApp();
+  try {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/crm/leads/1/status',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.leads.update' },
+      payload: { status: 'CONTACTED', reason: 'Initial contact' },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(received, ['1', 'CONTACTED', 'Initial contact', 1]);
+  } finally {
+    crmService.changeLeadStatus = original;
     await app.close();
   }
 });
