@@ -220,7 +220,7 @@ async function crmRoutes(fastify) {
   fastify.get('/leads/:id/timeline', { preHandler: guard(permissions.leadsRead) }, route((r) => service.leadTimeline(r.params.id, r.user.id)));
   fastify.patch('/leads/:id', { schema: leadUpdateSchema, preHandler: guard(permissions.leadsUpdate) }, route((r) => service.updateLead(r.params.id, body(r), r.user.id)));
   fastify.post('/leads/:id/assign', { schema: leadAssignSchema, preHandler: guard(permissions.leadsAssign) }, route((r) => service.assignLead(r.params.id, body(r).ownerUserId, r.user.id)));
-  fastify.post('/leads/:id/status', { schema: leadStatusSchema, preHandler: guard(permissions.leadsUpdate) }, route((r) => service.changeLeadStatus(r.params.id, body(r).status, body(r).reason)));
+  fastify.post('/leads/:id/status', { schema: leadStatusSchema, preHandler: guard(permissions.leadsUpdate) }, route((r) => service.changeLeadStatus(r.params.id, body(r).status, body(r).reason, r.user.id)));
   fastify.post('/leads/:id/convert', { preHandler: guard(permissions.leadsConvert) }, route((r) => service.convertLead(r.params.id, r.user.id)));
 
   fastify.get('/accounts', { preHandler: guard(permissions.accountsRead) }, route((r) => service.listAccounts(r.query)));
