@@ -3,14 +3,16 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { productsApi, bannersApi } from '@telecom/api-client'
 import { useProductsStore } from '../../stores/products'
+import { useAuthStore } from '../../stores/auth'
 import { useCmsStore } from '../../stores/cms'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 
 const router = useRouter()
 const productsStore = useProductsStore()
+const authStore = useAuthStore()
 const cmsStore = useCmsStore()
 const products = ref([])
-const retailProducts = ref([])
+const totalProductCount = ref(null)
 const featuredProducts = ref([])
 const categories = ref([])
 const categoryProductCounts = ref({})
@@ -25,7 +27,7 @@ let slideTimer = null
 const slides = [
   { title: 'بازارگاه تخصصی تجهیزات شبکه و مخابرات', headline: 'تجهیزات پروژه‌تان را<br>سریع و مطمئن تأمین کنید', description: 'مشاهده قیمت‌های مشخص و دریافت پیش‌فاکتور سازمانی از تأمین‌کنندگان.', brand: 'Telecom Market', product: 'تجهیزات شبکه و مخابرات' },
   { title: 'تجهیزات تست فیبر نوری', headline: 'تست و عیب‌یابی فیبر<br>با تجهیزات تخصصی', description: 'OTDR، پاورمتر و تجهیزات اندازه‌گیری را در کاتالوگ محصولات بررسی کنید.', brand: 'Fiber Optic', product: 'تجهیزات تست و اندازه‌گیری' },
-  { title: 'خرید سازمانی', headline: 'استعلام ثبت کنید،<br>پیشنهاد تأمین بگیرید', description: 'نیاز پروژه را ثبت کنید و پاسخ تأمین‌کنندگان را از مسیر استعلام پیگیری کنید.', brand: 'B2B', product: 'تأمین سازمانی' },
+  { title: 'تأمین سازمانی', headline: 'تأمین پروژه را<br>از مسیر استعلام پیگیری کنید', description: 'ثبت درخواست جدید از پنل شرکت انجام می‌شود؛ پاسخ تأمین‌کنندگان را از مسیر استعلام پیگیری کنید.', brand: 'B2B', product: 'تأمین سازمانی' },
 ]
 const activeBanner = computed(() => banners.value[activeSlide.value] || null)
 const activeSlideContent = computed(() => {
@@ -35,14 +37,30 @@ const activeSlideContent = computed(() => {
 })
 const featuredProduct = computed(() => featuredProducts.value[0] || products.value[0] || null)
 const latestProducts = computed(() => products.value.slice(0, 4))
-const retailLatest = computed(() => retailProducts.value.slice(0, 4))
 const selectedProducts = computed(() => featuredProducts.value.slice(0, 4))
+const canCreateInquiry = computed(() => authStore.isAuthenticated
+  && !authStore.isCustomer
+  && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
 const featuredArticles = computed(() => cmsStore.featuredArticles)
 
 function normalizeList(response) {
   const data = response?.data?.data ?? response?.data ?? response
   if (Array.isArray(data)) return data
   return data?.products ?? data?.items ?? []
+}
+function responseTotal(response, list) {
+  const payload = response?.data?.data ?? response?.data ?? response
+  const candidates = [
+    response?.meta?.total,
+    response?.pagination?.total,
+    response?.data?.meta?.total,
+    response?.data?.pagination?.total,
+    payload?.meta?.total,
+    payload?.total,
+  ]
+  const total = candidates.find(value => value !== undefined && value !== null)
+  const parsed = Number(total)
+  return total !== undefined && Number.isFinite(parsed) && parsed >= 0 ? parsed : list.length
 }
 function productTitle(product) { return product?.title || product?.name || 'محصول بدون عنوان' }
 function productBrand(product) { return product?.brand || product?.company?.name || '—' }
@@ -104,19 +122,18 @@ async function loadProducts() {
   error.value = ''
   try {
     const params = { page: 1, limit: 8, status: 'PUBLISHED', sortBy: 'createdAt', sortOrder: 'desc' }
-    const [latest, retail, featured] = await Promise.allSettled([
+    const [latest, featured] = await Promise.allSettled([
       productsApi.list(params),
-      productsApi.list({ ...params, retailEnabled: true }),
       productsApi.list({ ...params, featured: true }),
     ])
     if (latest.status === 'rejected') throw latest.reason
     products.value = normalizeList(latest.value)
-    retailProducts.value = retail.status === 'fulfilled' ? normalizeList(retail.value) : []
+    totalProductCount.value = responseTotal(latest.value, products.value)
     featuredProducts.value = featured.status === 'fulfilled' ? normalizeList(featured.value) : []
   } catch {
     error.value = 'دریافت محصولات با مشکل روبه‌رو شد.'
     products.value = []
-    retailProducts.value = []
+    totalProductCount.value = null
     featuredProducts.value = []
   } finally { loading.value = false }
 }
@@ -177,7 +194,7 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 </section>
 
   <div class="stats"><div class="w"><div class="g">
-    <div class="st"><b>—</b><span>تأمین‌کنندگان ثبت‌شده</span></div><div class="st"><b>{{ products.length ? products.length.toLocaleString('fa-IR') + '+' : '—' }}</b><span>محصول در این دریافت</span></div><div class="st"><b>—</b><span>پروژه‌های سازمانی</span></div><div class="st"><b>—</b><span>میانگین زمان پاسخ</span></div>
+    <div class="st"><b>—</b><span>تأمین‌کنندگان ثبت‌شده</span></div><div class="st"><b>{{ totalProductCount !== null ? totalProductCount.toLocaleString('fa-IR') : '—' }}</b><span>محصول منتشرشده</span></div><div class="st"><b>—</b><span>پروژه‌های سازمانی</span></div><div class="st"><b>—</b><span>میانگین زمان پاسخ</span></div>
   </div></div></div>
 
   <div class="w">
@@ -194,23 +211,18 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
       <div v-else class="empty-state">دسته‌بندی فعالی برای نمایش وجود ندارد.</div>
     </div>
 
-    <div class="sec"><div class="sh"><h2>تازه‌ترین محصولات</h2><router-link :to="{ name: 'products' }">مشاهده همه</router-link></div>
+    <div class="sec"><div class="sh"><h2>تازه‌ترین محصولات</h2><span class="section-count">{{ latestProducts.length.toLocaleString('fa-IR') }} نمایش</span><router-link :to="{ name: 'products' }">مشاهده همه</router-link></div>
       <div v-if="loading" class="prods"><div v-for="i in 4" :key="i" class="p loading-card"></div></div>
       <div v-else-if="error" class="empty-state"><span>{{ error }}</span><button type="button" @click="loadProducts">تلاش دوباره</button></div>
       <div v-else-if="latestProducts.length" class="prods"><article v-for="product in latestProducts" :key="product.id" class="p">
         <router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em></router-link>
         <div class="bd"><div class="br">{{ productBrand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr" :class="{ q: !productIsRetail(product) }">{{ productPrice(product) }}<small>{{ productMode(product) }}</small></div></div>
-        <div class="ac"><router-link v-if="!productIsRetail(product)" class="btn b1" :to="productLink(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div>
+        <div class="ac"><router-link v-if="!productIsRetail(product) && canCreateInquiry" class="btn b1" :to="productLink(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div>
       </article></div>
       <div v-else class="empty-state">هنوز محصول منتشرشده‌ای برای نمایش وجود ندارد.</div>
     </div>
 
-    <div class="sec"><div class="sh"><h2>جدیدترین محصولات خرده‌فروشی</h2><router-link :to="{ name: 'products', query: { retail: '1' } }">همه محصولات خرده‌فروشی</router-link></div>
-      <div v-if="retailLatest.length" class="prods"><article v-for="product in retailLatest" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em></router-link><div class="bd"><div class="br">{{ productBrand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr">{{ productPrice(product) }}<small>قیمت ثبت‌شده در کاتالوگ</small></div></div><div class="ac"><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div></article></div>
-      <div v-else class="empty-state">در حال حاضر محصول خرده‌فروشی منتشرشده‌ای برای نمایش وجود ندارد.</div>
-    </div>
-
-    <div class="sec"><div class="sh"><h2>محصولات منتخب</h2><router-link :to="{ name: 'products' }">مشاهده محصولات</router-link></div>
+    <div class="sec"><div class="sh"><h2>محصولات منتخب</h2><span class="section-count">{{ selectedProducts.length.toLocaleString('fa-IR') }} نمایش</span><router-link :to="{ name: 'products' }">مشاهده محصولات</router-link></div>
       <div v-if="selectedProducts.length" class="prods"><article v-for="(product, index) in selectedProducts" :key="product.id" class="p"><router-link class="im" :to="productLink(product)"><img v-if="productImage(product)" :src="productImage(product)" :alt="productTitle(product)"><span v-else>{{ productBrand(product) }}</span><em>{{ productCategory(product) }}</em><i class="rk">#{{ (index + 1).toLocaleString('fa-IR') }}</i></router-link><div class="bd"><div class="br">{{ productBrand(product) }}</div><h3>{{ productTitle(product) }}</h3><div class="sk">{{ productSku(product) }}</div><div class="pr" :class="{ q: !productIsRetail(product) }">{{ productPrice(product) }}<small>محصول منتخب</small></div></div><div class="ac"><router-link v-if="!productIsRetail(product)" class="btn b1" :to="productLink(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="productLink(product)">مشاهده</router-link></div></article></div>
       <div v-else class="empty-state">محصولی با نشان منتخب برای نمایش دریافت نشد.</div>
     </div>
@@ -219,7 +231,7 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer) })
 
     <div class="sec"><div class="sh"><h2>نظر مشتریان سازمانی</h2></div><div class="tms"><div class="tc"><q>جایگاه نمایش دیدگاه‌های تأییدشده مشتریان</q><div class="av">۱</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div><div class="tc"><q>متن دیدگاه فقط پس از ثبت و تأیید واقعی نمایش داده می‌شود.</q><div class="av">۲</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div><div class="tc"><q>در این بخش اطلاعات ساختگی مشتری یا شرکت نمایش داده نمی‌شود.</q><div class="av">۳</div><b>دیدگاه نمونه</b><span>پس از اتصال سرویس نظرات</span></div></div></div>
 
-    <div class="rfq"><div><h3>محصول مورد نظر را پیدا نکردید؟</h3><p>درخواست استعلام ثبت کنید تا نیاز پروژه‌تان از مسیر تأمین‌کنندگان پیگیری شود.</p></div><router-link class="btn b1" :to="{ name: 'my-inquiries' }">ثبت درخواست استعلام</router-link></div>
+    <div class="rfq"><div><h3>استعلام سازمانی دارید؟</h3><p>استعلام‌های ثبت‌شده خود را از این بخش پیگیری کنید؛ ثبت درخواست جدید از پنل شرکت انجام می‌شود.</p></div><router-link class="btn b1" :to="{ name: 'my-inquiries' }">پیگیری استعلام‌ها</router-link></div>
   </div>
 </main>
 </template>
@@ -277,7 +289,7 @@ h1{font-size:38px;line-height:1.5;font-weight:800;margin:6px 0 10px}
 .brands span{padding:6px 22px;border:1px dashed var(--line);border-radius:10px;letter-spacing:.5px}
 .sec{padding:30px 0 4px}
 .sh{display:flex;justify-content:space-between;align-items:end;border-bottom:1px solid var(--line);margin-bottom:18px;padding-bottom:8px}
-.sh h2{font-size:22px;position:relative;font-weight:800}
+.section-count{color:var(--mu);font-size:12px;font-weight:600;white-space:nowrap}.sh h2{font-size:22px;position:relative;font-weight:800}
 .sh h2:after{content:"";position:absolute;right:0;bottom:-10px;width:44px;height:3px;border-radius:3px;background:var(--ds-brand-primary)}
 .sh a{font-size:13px;color:var(--pri);text-decoration:none;font-weight:700}
 .cats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
