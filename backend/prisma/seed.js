@@ -30,6 +30,7 @@
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const { hashPassword } = require('../src/utils/password');
+const { resolveSuperAdminPassword } = require('./seed-config');
 const { countTaxonomy, seedMarketplaceCategories } = require('./seeds/categories');
 const { DEFAULT_COMPANIES, seedCompanies, seedMainCompany } = require('./seeds/companies');
 const { LIBRARY_FIELDS, seedSpecificationLibrary } = require('./seeds/specification-library');
@@ -48,8 +49,6 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: proc
 const SUPER_ADMIN_USER = {
   email: process.env.SUPER_ADMIN_EMAIL || 'admin@telecommarketplace.local',
   phone: process.env.SUPER_ADMIN_PHONE || '09120000000',
-  // No known bootstrap credential outside local development.
-  password: process.env.SUPER_ADMIN_PASSWORD || (process.env.NODE_ENV === 'development' ? 'A123@456' : null),
   status: 'ACTIVE',
 };
 
@@ -457,9 +456,7 @@ const ROLE_PERMISSIONS = {
 };
 
 async function main() {
-  if (!SUPER_ADMIN_USER.password) {
-    throw new Error('SUPER_ADMIN_PASSWORD must be set before running the seed outside development.');
-  }
+  const superAdminPassword = resolveSuperAdminPassword();
   console.log('Seeding default marketplace system data...\n');
 
   // ── 1. Default Main company ─────────────────────────────────
@@ -568,7 +565,7 @@ async function main() {
   // ── 8. Super Admin user (identity) + AccessProfile ──────────
   // STAFF users have NO profile (Profile is customer-only in the seed).
   console.log('Creating Super Admin...');
-  const passwordHash = await hashPassword(SUPER_ADMIN_USER.password);
+  const passwordHash = await hashPassword(superAdminPassword);
 
   const admin = await prisma.user.upsert({
     where: { phone: SUPER_ADMIN_USER.phone },
