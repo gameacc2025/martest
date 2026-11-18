@@ -145,7 +145,9 @@ router.beforeEach(async (to, from, next) => {
   // 2. Protected routes
   if (to.meta.requiresAuth) {
     const ok = await authStore.ensureAuthenticated(to.fullPath);
-    if (!ok) return;
+    // Callback-style Vue Router guards must explicitly abort when session
+    // restoration fails; returning undefined leaves the navigation pending.
+    if (!ok) return next(false);
   }
 
   const isAuthed = authStore.isAuthenticated;
@@ -164,7 +166,7 @@ router.beforeEach(async (to, from, next) => {
       : websiteUrl;
     await authStore.logout({ redirectTo: null });
     window.location.href = target;
-    return;
+    return next(false);
   }
 
   // 5. Enforce route-level permissions as well as hiding unauthorized menu items.
