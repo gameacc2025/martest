@@ -6,8 +6,6 @@
 
 > This document preserves the domain delivery contract and historical sequence. Do not treat its original 2026-11-08 status or milestone ordering as current project status; current code and CI evidence supersede it.
 
-**Updated:** 2026-11-08
-
 ## 1. Objective
 
 Deliver the six planned API domains as complete vertical slices. Every domain ships its backend contract, persistence integration, permission enforcement, real UI workflows, deterministic realistic demo data, automated tests, and operator documentation together. UI is not deferred until all APIs are complete.
