@@ -449,7 +449,6 @@ const ROLE_PERMISSIONS = {
   CUSTOMER_USER: [
     'products.read',
     'companies.read',
-    'leads.read',
     'inquiries.read',
     'notifications.read',
     'tickets.create', 'tickets.read', 'tickets.reply',
@@ -543,6 +542,23 @@ async function main() {
     });
     console.log(`  ✓ revoked ${revoked.count} forbidden COMPANY user-management grants`);
   }
+
+  // CUSTOMER_USER is a buyer, not an internal CRM lead reader. Remove stale
+  // legacy grants as well as keeping them out of the desired role map.
+  const customerRoleIds = roleBy.CUSTOMER_USER ? [roleBy.CUSTOMER_USER.id] : [];
+  const customerForbiddenPermissionIds = ['leads.read', 'leads.create', 'inquiries.create']
+    .map((name) => permBy[name]?.id)
+    .filter(Boolean);
+  if (customerRoleIds.length && customerForbiddenPermissionIds.length) {
+    const revoked = await prisma.rolePermission.deleteMany({
+      where: {
+        roleId: { in: customerRoleIds },
+        permissionId: { in: customerForbiddenPermissionIds },
+      },
+    });
+    console.log(`  ✓ revoked ${revoked.count} legacy CUSTOMER lead/RFQ creation grants`);
+  }
+
   console.log(`  ✓ ${assignmentCount} role-permission assignments`);
 
   // ── 8. Super Admin user (identity) + AccessProfile ──────────
