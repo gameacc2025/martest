@@ -2,13 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
 
-const { getProducts, getCategories, routeState } = vi.hoisted(() => ({
+const { getProducts, getCategories, routeState, authState, hasAnyPermission } = vi.hoisted(() => ({
   getProducts: vi.fn(),
   getCategories: vi.fn(),
   routeState: { current: null },
+  authState: { isAuthenticated: false, isCustomer: false },
+  hasAnyPermission: vi.fn(() => false),
 }))
 vi.mock('vue-router', () => ({ useRoute: () => routeState.current, RouterLink: { props: ['to'], template: '<a><slot /></a>' } }))
 vi.mock('../../stores/products', () => ({ useProductsStore: () => ({ getProducts, getCategories }) }))
+vi.mock('../../stores/auth', () => ({ useAuthStore: () => ({ ...authState, hasAnyPermission }) }))
 import ProductListing from './ProductListing.vue'
 
 const productFixture = (overrides = {}) => ({
@@ -26,6 +29,9 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     routeState.current = reactive({ name: 'products', query: { category: '7' } })
+    authState.isAuthenticated = false
+    authState.isCustomer = false
+    hasAnyPermission.mockReset().mockReturnValue(false)
     getCategories.mockResolvedValue([{ id: 7, nameFa: 'فیبر نوری', productCount: 12 }])
     getProducts.mockResolvedValue({ data: [productFixture()], meta: { page: 1, limit: 24, total: 1, totalPages: 1 } })
   })
@@ -79,6 +85,25 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     await flushPromises()
     expect(wrapper.find('.p .ac button').exists()).toBe(false)
     expect(wrapper.find('.p .ac a').text()).toContain('مشاهده')
+  })
+
+  it('shows inquiry actions only to authenticated company/staff users with permission', async () => {
+    authState.isAuthenticated = true
+    authState.isCustomer = false
+    hasAnyPermission.mockReturnValue(true)
+    wrapper = mountListing()
+    await flushPromises()
+    expect(wrapper.find('.p .ac').text()).toContain('استعلام قیمت')
+  })
+
+  it('keeps inquiry actions hidden for CUSTOMER even when a stale permission exists', async () => {
+    authState.isAuthenticated = true
+    authState.isCustomer = true
+    hasAnyPermission.mockReturnValue(true)
+    wrapper = mountListing()
+    await flushPromises()
+    expect(wrapper.find('.p .ac').text()).not.toContain('استعلام قیمت')
+    expect(wrapper.find('.p .ac').text()).toContain('مشاهده')
   })
 
   it('renders supplier verification, category, SKU and price from live product data', async () => {
