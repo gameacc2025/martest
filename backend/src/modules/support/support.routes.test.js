@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Fastify = require('fastify');
 const supportRoutes = require('./index');
+const supportService = require('./support.service');
 
 async function buildTestApp() {
   const app = Fastify();
@@ -75,6 +76,35 @@ test('support request schemas reject invalid ticket payloads and IDs', async () 
     });
     assert.equal(invalidId.statusCode, 400);
   } finally {
+    await app.close();
+  }
+});
+
+test('SLA detail route forwards authenticated caller context for service-level tenant scoping', async () => {
+  const original = supportService.getSlaDetails;
+  let received;
+  supportService.getSlaDetails = async (...args) => {
+    received = args;
+    return { isPaused: false };
+  };
+  const app = await buildTestApp();
+  try {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/support/tickets/42/sla',
+      headers: { 'x-test-access': 'CUSTOMER', 'x-test-permissions': 'tickets.read' },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(received[1], 42);
+    assert.deepEqual(received[2], {
+      id: 1,
+      accessType: 'CUSTOMER',
+      companyId: null,
+      roles: ['CUSTOMER_USER'],
+      permissions: ['tickets.read'],
+    });
+  } finally {
+    supportService.getSlaDetails = original;
     await app.close();
   }
 });
