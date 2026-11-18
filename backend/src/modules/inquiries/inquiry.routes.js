@@ -305,7 +305,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.updateItem);
 
   fastify.delete('/:id/items/:itemId', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read'), requireCompanyInquiryUpdatePermission],
+    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.delete', 'leads.update', 'inquiries.update', 'inquiries.read'), requireCompanyInquiryUpdatePermission],
     schema: { params: inquiryItemParamsSchema },
   }, ctrl.deleteItem);
 
