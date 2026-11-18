@@ -49,11 +49,11 @@ async function runOnce() {
             articleId: article.id,
             editorUserId: updated.authorUserId, // Use original author as editor
             revisionNo: nextRevisionNo,
-            snapshot: {
+            snapshot: JSON.parse(JSON.stringify({
               ...updated,
               status: 'PUBLISHED',
               publishedAt: now,
-            },
+            })),
             changeNote: 'انتشار خودکار بر اساس زمان‌بندی',
           },
         });
