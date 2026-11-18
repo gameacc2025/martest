@@ -68,7 +68,7 @@ async function supportRoutes(fastify) {
   fastify.get('/queues', { preHandler: staff('tickets.read') }, wrap(() => service.listQueues()));
 
   // SLA endpoints
-  fastify.get('/tickets/:id/sla', { schema: { params: slaParamsSchema }, preHandler: allUsers('tickets.read') }, wrap((r) => service.getSlaDetails(prisma, toId(r.params.id))));
+  fastify.get('/tickets/:id/sla', { schema: { params: slaParamsSchema }, preHandler: allUsers('tickets.read') }, wrap((r) => service.getSlaDetails(prisma, toId(r.params.id), r.user)));
   fastify.post('/tickets/:id/sla/pause', { schema: { params: slaParamsSchema, body: { type: 'object', required: ['reason'], properties: { reason: { type: 'string', maxLength: 500 } } } }, preHandler: staff('tickets.update') }, wrap((r) => service.pauseSla(prisma, toId(r.params.id), r.user.id, r.body.reason)));
   fastify.post('/tickets/:id/sla/resume', { schema: { params: slaParamsSchema, body: { type: 'object', required: ['reason'], properties: { reason: { type: 'string', maxLength: 500 } } } }, preHandler: staff('tickets.update') }, wrap((r) => service.resumeSla(prisma, toId(r.params.id), r.user.id, r.body.reason)));
 
