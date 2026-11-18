@@ -99,6 +99,7 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     authState.isAuthenticated = true
     authState.isCustomer = false
     hasAnyPermission.mockReturnValue(true)
+    getProducts.mockResolvedValueOnce({ data: [productFixture({ retailEnabled: false, salesMode: 'INQUIRY_ONLY', prices: [] })], meta: { total: 1, totalPages: 1 } })
     wrapper = mountListing()
     await flushPromises()
     expect(wrapper.find('.ph').text()).toContain('ثبت استعلام سازمانی')
@@ -109,6 +110,7 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     authState.isAuthenticated = true
     authState.isCustomer = true
     hasAnyPermission.mockReturnValue(true)
+    getProducts.mockResolvedValueOnce({ data: [productFixture({ retailEnabled: false, salesMode: 'INQUIRY_ONLY', prices: [] })], meta: { total: 1, totalPages: 1 } })
     wrapper = mountListing()
     await flushPromises()
     expect(wrapper.find('.ph').text()).toContain('ثبت استعلام سازمانی از پنل شرکت انجام می‌شود')
