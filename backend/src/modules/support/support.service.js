@@ -167,13 +167,19 @@ function parseWorkingCalendar(calendarJson) {
   if (!calendarJson) return DEFAULT_WORKING_CALENDAR;
   try {
     const cal = typeof calendarJson === 'string' ? JSON.parse(calendarJson) : calendarJson;
-    return {
-      timezone: cal.timezone || DEFAULT_WORKING_CALENDAR.timezone,
-      workDays: Array.isArray(cal.workDays) ? cal.workDays : DEFAULT_WORKING_CALENDAR.workDays,
-      workStartHour: Number.isInteger(cal.workStartHour) ? cal.workStartHour : DEFAULT_WORKING_CALENDAR.workStartHour,
-      workEndHour: Number.isInteger(cal.workEndHour) ? cal.workEndHour : DEFAULT_WORKING_CALENDAR.workEndHour,
-      holidays: Array.isArray(cal.holidays) ? cal.holidays : DEFAULT_WORKING_CALENDAR.holidays,
-    };
+    const timezone = typeof cal.timezone === 'string' && cal.timezone.trim()
+      ? cal.timezone.trim()
+      : DEFAULT_WORKING_CALENDAR.timezone;
+    // Validate the IANA timezone once while parsing persisted policy data.
+    new Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+    const workDays = Array.isArray(cal.workDays) ? cal.workDays : DEFAULT_WORKING_CALENDAR.workDays;
+    const workStartHour = Number.isInteger(cal.workStartHour) ? cal.workStartHour : DEFAULT_WORKING_CALENDAR.workStartHour;
+    const workEndHour = Number.isInteger(cal.workEndHour) ? cal.workEndHour : DEFAULT_WORKING_CALENDAR.workEndHour;
+    const holidays = Array.isArray(cal.holidays) ? cal.holidays : DEFAULT_WORKING_CALENDAR.holidays;
+    if (!workDays.length || workDays.some((day) => !Number.isInteger(day) || day < 1 || day > 7)) return DEFAULT_WORKING_CALENDAR;
+    if (workStartHour < 0 || workStartHour > 23 || workEndHour < 1 || workEndHour > 24 || workEndHour <= workStartHour) return DEFAULT_WORKING_CALENDAR;
+    if (holidays.some((holiday) => typeof holiday !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(holiday))) return DEFAULT_WORKING_CALENDAR;
+    return { timezone, workDays, workStartHour, workEndHour, holidays };
   } catch {
     return DEFAULT_WORKING_CALENDAR;
   }
