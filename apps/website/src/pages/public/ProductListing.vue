@@ -116,7 +116,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
     <div class="catalogue-breadcrumb">
       <AppBreadcrumb :items="[{ label: 'همه محصولات' }]" />
     </div>
-    <div class="ph"><h1>همه محصولات</h1><p>مشاهده قیمت‌های کاتالوگ و ثبت استعلام سازمانی</p></div>
+    <div class="ph"><h1>همه محصولات</h1><p v-if="canCreateInquiry">مشاهده قیمت‌های کاتالوگ و ثبت استعلام سازمانی</p><p v-else>مشاهده محصولات و قیمت‌های کاتالوگ؛ ثبت استعلام سازمانی از پنل شرکت انجام می‌شود.</p></div>
     <div class="lay">
       <aside class="fl">
         <div class="filter-head"><h3>فیلتر محصولات</h3><button type="button" @click="clearFilters">حذف همه</button></div>
