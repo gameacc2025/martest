@@ -2,6 +2,17 @@
 
 _Baseline architecture notes originated 2026-08-08. Historical sections below contain dated snapshots and must not be treated as current without checking source code._
 
+## Current-state reconciliation — 2026-11-18 (authoritative over all historical notes below)
+
+- **Repository / branch:** `gameacc2025/martest` / existing `main` only. All integration writes are serialized by the lead; no branches, worktrees, detached checkouts, force-pushes, resets or destructive cleanup. Workers never commit/push.
+- **Latest tested application-code SHA:** `24be9b53af92ca1d37f3dd7cf2fd2fc17e47e4f3`. Later commits in this audit only synchronize documentation and project memory; check the live main head before each new task.
+- **Acceptance evidence on that exact application-code SHA:** CI [44305796094](https://github.com/gameacc2025/martest/actions/runs/44305796094) PASS (68 Frontend/Shared test files / 385 tests, 18 architecture/session tests, 1,689 Backend tests, all three app builds); fresh PostgreSQL migration + Prisma model/table parity [44305796146](https://github.com/gameacc2025/martest/actions/runs/44305796146) PASS; Docker runtime [44305795993](https://github.com/gameacc2025/martest/actions/runs/44305795993) PASS (all services healthy, migrations/parity, all seeds twice, AD-1/AD-3 grant reconciliation, 8/8 Playwright browser smoke tests across all three panels/API proxies).
+- **Confirmed repairs:** four missing Prisma tables added through forward-only migration; Support applied SLA policy FK; Support pause/resume/queue scoping/timezone worker fixes; CRM status actor/audit fixes; audit redaction/writer/IP/correlation hardening; AD-1 CUSTOMER RFQ creation denied; AD-3 COMPANY user management restricted to own-company read/activate/deactivate; AD-4 retail/checkout/cart/wishlist and finance/settlement routes/navigation dormant; SMS opt-in/provider/quota gates; seed credential hardening.
+- **Current accepted boundaries:** AD-1 through AD-4 remain authoritative. Do not activate commerce or finance, invent commercial rules, or decide audit retention/archival without owner/legal approval.
+- **Open work:** exhaustive company tenant/IDOR review; central audit action registry and remaining producer normalization; owner/legal retention and archival decision/design; dashboard/reporting sample metrics; broader auth/RBAC/catalog/inquiry/CMS/notification/deployment/observability review.
+- **Not verified by GitHub:** owner's Windows working tree, local Docker daemon and developer PostgreSQL. Live SMTP/Twilio/payment provider delivery and production deployment are also NOT VERIFIED.
+- **Source of truth:** current code, tests, migrations, workflow results and accepted architecture decisions outrank historical status blocks below. Update this block whenever a later verified code baseline or acceptance run supersedes it.
+
 ## Current-state reconciliation — 2026-11-17
 
 - **Repository:** `gameacc2025/martest`; **integration branch:** `main` only. No feature branches, worktrees, detached checkouts, or PRs unless the owner explicitly changes this policy.
