@@ -2,12 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
 
-const { getProducts, getPublicCompany, routerPush, addToCart, addToWishlist, routeState } = vi.hoisted(() => ({
+const { getProducts, getPublicCompany, routerPush, routeState } = vi.hoisted(() => ({
   getProducts: vi.fn(),
   getPublicCompany: vi.fn(),
   routerPush: vi.fn(),
-  addToCart: vi.fn(),
-  addToWishlist: vi.fn(),
   routeState: { current: null },
 }))
 
@@ -20,14 +18,6 @@ vi.mock('../../stores/companies', () => ({ useCompanyStore: () => ({ getPublicCo
 
 vi.mock('../../stores/products', () => ({
   useProductsStore: () => ({ getProducts }),
-}))
-
-vi.mock('../../stores/cart', () => ({
-  useCartStore: () => ({ addToCart }),
-}))
-
-vi.mock('../../stores/wishlist', () => ({
-  useWishlistStore: () => ({ addToWishlist }),
 }))
 
 import CompanyProfile from './CompanyProfile.vue'
@@ -59,7 +49,7 @@ const mountCompanyProfile = () => mount(CompanyProfile, {
       },
       ProductCard: {
         props: ['product'],
-        emits: ['view-product', 'add-to-cart', 'toggle-wishlist'],
+        emits: ['view-product'],
         template: '<article class="product-card"><h3>{{ product.name }}</h3><button type="button" @click="$emit(&quot;view-product&quot;, product)">مشاهده</button></article>',
       },
     },
