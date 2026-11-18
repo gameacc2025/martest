@@ -383,9 +383,10 @@ function isSlaAtRisk(dueAt, totalMinutes, now = new Date()) {
   return remaining <= threshold && remaining >= 0;
 }
 
-async function getSlaDetails(prismaClient, ticketId, now = new Date()) {
-  const ticket = await prismaClient.supportTicket.findUnique({
-    where: { id: ticketId },
+async function getSlaDetails(prismaClient, ticketId, user, now = new Date()) {
+  const ctx = context(user);
+  const ticket = await prismaClient.supportTicket.findFirst({
+    where: { id: toId(ticketId), ...scopeWhere(ctx) },
     include: {
       category: { include: { slaPolicies: { where: { isActive: true } } } },
     },
