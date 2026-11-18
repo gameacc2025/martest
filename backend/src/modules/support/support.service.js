@@ -236,6 +236,57 @@ function addWorkingMinutes(startDate, minutes, calendar) {
   return current;
 }
 
+function calculateWorkingMinutesBetween(startDate, endDate, calendar) {
+  const startMs = new Date(startDate).getTime();
+  const endMs = new Date(endDate).getTime();
+  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return 0;
+
+  let totalMinutes = 0;
+  const cursor = new Date(startMs);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (cursor.getTime() < endMs) {
+    if (isWorkingDay(cursor, calendar)) {
+      const workStart = new Date(cursor);
+      workStart.setHours(calendar.workStartHour, 0, 0, 0);
+      const workEnd = new Date(cursor);
+      workEnd.setHours(calendar.workEndHour, 0, 0, 0);
+      const overlapStart = Math.max(startMs, workStart.getTime());
+      const overlapEnd = Math.min(endMs, workEnd.getTime());
+      if (overlapEnd > overlapStart) {
+        totalMinutes += Math.floor((overlapEnd - overlapStart) / 60000);
+      }
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return totalMinutes;
+}
+
+async function findSlaPolicy(prismaClient, ticket) {
+  return ticket.category?.slaPolicies?.find((policy) => policy.priority === ticket.priority)
+    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: ticket.categoryId, priority: ticket.priority, isActive: true } })
+    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: null, priority: ticket.priority, isActive: true } })
+    || await prismaClient.supportSlaPolicy.findFirst({ where: { priority: ticket.priority, isActive: true } });
+}
+
+async function getActiveSlaPause(prismaClient, ticketId) {
+  const [lastPause, lastResume] = await Promise.all([
+    prismaClient.supportEvent.findFirst({
+      where: { ticketId, eventType: 'SLA_PAUSED' },
+      orderBy: { occurredAt: 'desc' },
+    }),
+    prismaClient.supportEvent.findFirst({
+      where: { ticketId, eventType: 'SLA_RESUMED' },
+      orderBy: { occurredAt: 'desc' },
+    }),
+  ]);
+
+  if (!lastPause) return null;
+  if (lastResume && new Date(lastResume.occurredAt).getTime() >= new Date(lastPause.occurredAt).getTime()) return null;
+  return lastPause;
+}
+
 async function getSla(prismaClient, categoryId, priority) {
   // Prefer the category-specific policy, then an explicit global policy.
   // If neither exists, fall back to an active policy for the same priority.
@@ -285,7 +336,7 @@ function isSlaAtRisk(dueAt, totalMinutes) {
   return remaining <= threshold && remaining >= 0;
 }
 
-async function getSlaDetails(prismaClient, ticketId) {
+async function getSlaDetails(prismaClient, ticketId, now = new Date()) {
   const ticket = await prismaClient.supportTicket.findUnique({
     where: { id: ticketId },
     include: {
@@ -294,20 +345,27 @@ async function getSlaDetails(prismaClient, ticketId) {
   });
   if (!ticket) return null;
 
-  const policy = ticket.category?.slaPolicies?.find(p => p.priority === ticket.priority)
-    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: ticket.categoryId, priority: ticket.priority, isActive: true } })
-    || await prismaClient.supportSlaPolicy.findFirst({ where: { categoryId: null, priority: ticket.priority, isActive: true } })
-    || await prismaClient.supportSlaPolicy.findFirst({ where: { priority: ticket.priority, isActive: true } });
-
+  const policy = await findSlaPolicy(prismaClient, ticket);
   if (!policy) return null;
 
   const calendar = parseWorkingCalendar(policy.workingCalendar);
-  const now = new Date();
+  const activePause = await getActiveSlaPause(prismaClient, ticketId);
+  const pausedWorkingMinutes = activePause
+    ? calculateWorkingMinutesBetween(activePause.occurredAt, now, calendar)
+    : 0;
 
-  const firstResponseDueAt = ticket.firstResponseDueAt || addWorkingMinutes(ticket.createdAt, policy.firstResponseMinutes, calendar);
-  const resolveDueAt = ticket.resolveDueAt || addWorkingMinutes(ticket.createdAt, policy.resolutionMinutes, calendar);
+  const baseFirstResponseDueAt = ticket.firstResponseDueAt || addWorkingMinutes(ticket.createdAt, policy.firstResponseMinutes, calendar);
+  const baseResolveDueAt = ticket.resolveDueAt || addWorkingMinutes(ticket.createdAt, policy.resolutionMinutes, calendar);
+  const firstResponseDueAt = pausedWorkingMinutes > 0
+    ? addWorkingMinutes(baseFirstResponseDueAt, pausedWorkingMinutes, calendar)
+    : baseFirstResponseDueAt;
+  const resolveDueAt = pausedWorkingMinutes > 0
+    ? addWorkingMinutes(baseResolveDueAt, pausedWorkingMinutes, calendar)
+    : baseResolveDueAt;
 
   return {
+    isPaused: Boolean(activePause),
+    pausedAt: activePause?.occurredAt || null,
     policy: {
       id: policy.id,
       firstResponseMinutes: policy.firstResponseMinutes,
@@ -315,45 +373,88 @@ async function getSlaDetails(prismaClient, ticketId) {
     },
     firstResponse: {
       dueAt: firstResponseDueAt,
-      remainingMinutes: calculateSlaRemaining(firstResponseDueAt),
-      isBreached: isSlaBreached(firstResponseDueAt),
+      remainingMinutes: Math.floor((new Date(firstResponseDueAt).getTime() - new Date(now).getTime()) / 60000),
+      isBreached: new Date(firstResponseDueAt).getTime() < new Date(now).getTime(),
       isAtRisk: isSlaAtRisk(firstResponseDueAt, policy.firstResponseMinutes),
       respondedAt: ticket.firstRespondedAt,
     },
     resolution: {
       dueAt: resolveDueAt,
-      remainingMinutes: calculateSlaRemaining(resolveDueAt),
-      isBreached: isSlaBreached(resolveDueAt),
+      remainingMinutes: Math.floor((new Date(resolveDueAt).getTime() - new Date(now).getTime()) / 60000),
+      isBreached: new Date(resolveDueAt).getTime() < new Date(now).getTime(),
       isAtRisk: isSlaAtRisk(resolveDueAt, policy.resolutionMinutes),
       resolvedAt: ticket.resolvedAt,
     },
   };
 }
 
-async function pauseSla(prismaClient, ticketId, userId, reason) {
-  // SLA pause is recorded as an event; actual pause logic handled by worker
-  return prismaClient.supportEvent.create({
-    data: {
-      ticketId,
-      actorUserId: userId,
-      eventType: 'SLA_PAUSED',
-      dedupeKey: `sla-paused:${ticketId}:${Date.now()}`,
-      payload: { reason: String(reason).slice(0, 500) },
-    },
-  });
+async function pauseSla(prismaClient, ticketId, userId, reason, now = new Date()) {
+  const execute = async (tx) => {
+    const ticket = await tx.supportTicket.findUnique({ where: { id: ticketId }, select: { id: true, status: true } });
+    if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
+    if (['RESOLVED', 'CLOSED', 'SPAM'].includes(ticket.status)) {
+      fail(409, 'SUPPORT_SLA_TICKET_LOCKED', 'برای تیکت حل‌شده یا بسته‌شده امکان توقف SLA وجود ندارد.');
+    }
+    if (await getActiveSlaPause(tx, ticketId)) {
+      fail(409, 'SUPPORT_SLA_ALREADY_PAUSED', 'SLA این تیکت از قبل متوقف شده است.');
+    }
+    return tx.supportEvent.create({
+      data: {
+        ticketId,
+        actorUserId: userId,
+        eventType: 'SLA_PAUSED',
+        dedupeKey: `sla-paused:${ticketId}:${now.getTime()}`,
+        occurredAt: now,
+        payload: { reason: String(reason).slice(0, 500) },
+      },
+    });
+  };
+  return typeof prismaClient.$transaction === 'function'
+    ? prismaClient.$transaction(execute)
+    : execute(prismaClient);
 }
 
-async function resumeSla(prismaClient, ticketId, userId, reason) {
-  // SLA resume is recorded as an event; actual resume logic handled by worker
-  return prismaClient.supportEvent.create({
-    data: {
-      ticketId,
-      actorUserId: userId,
-      eventType: 'SLA_RESUMED',
-      dedupeKey: `sla-resumed:${ticketId}:${Date.now()}`,
-      payload: { reason: String(reason).slice(0, 500) },
-    },
-  });
+async function resumeSla(prismaClient, ticketId, userId, reason, now = new Date()) {
+  const execute = async (tx) => {
+    const ticket = await tx.supportTicket.findUnique({
+      where: { id: ticketId },
+      include: { category: { include: { slaPolicies: { where: { isActive: true } } } } },
+    });
+    if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
+    const activePause = await getActiveSlaPause(tx, ticketId);
+    if (!activePause) fail(409, 'SUPPORT_SLA_NOT_PAUSED', 'SLA این تیکت متوقف نیست.');
+
+    const policy = await findSlaPolicy(tx, ticket);
+    const calendar = parseWorkingCalendar(policy?.workingCalendar);
+    const pausedWorkingMinutes = calculateWorkingMinutesBetween(activePause.occurredAt, now, calendar);
+    const update = {};
+    if (pausedWorkingMinutes > 0) {
+      if (ticket.firstResponseDueAt) {
+        update.firstResponseDueAt = addWorkingMinutes(ticket.firstResponseDueAt, pausedWorkingMinutes, calendar);
+      }
+      if (ticket.resolveDueAt) {
+        update.resolveDueAt = addWorkingMinutes(ticket.resolveDueAt, pausedWorkingMinutes, calendar);
+      }
+    }
+
+    if (Object.keys(update).length) {
+      await tx.supportTicket.update({ where: { id: ticketId }, data: update });
+    }
+
+    return tx.supportEvent.create({
+      data: {
+        ticketId,
+        actorUserId: userId,
+        eventType: 'SLA_RESUMED',
+        dedupeKey: `sla-resumed:${ticketId}:${now.getTime()}`,
+        occurredAt: now,
+        payload: { reason: String(reason).slice(0, 500), pausedWorkingMinutes },
+      },
+    });
+  };
+  return typeof prismaClient.$transaction === 'function'
+    ? prismaClient.$transaction(execute)
+    : execute(prismaClient);
 }
 
 module.exports = {
@@ -373,6 +474,7 @@ module.exports = {
   // SLA utilities
   parseWorkingCalendar,
   addWorkingMinutes,
+  calculateWorkingMinutesBetween,
   isWorkingDay,
   calculateSlaRemaining,
   isSlaBreached,
