@@ -129,11 +129,12 @@ async function requestPasswordReset({ phone, ipAddress }) {
   return { accepted: true };
 }
 
-async function recordFailedResetAttempt(challengeId, now = new Date()) {
+async function recordFailedResetAttempt(challengeId) {
   // Retry compare-and-swap conflicts instead of silently dropping a failed
   // guess. Concurrent requests must each consume one attempt or observe that
   // another request has already exhausted/invalidated the challenge.
   for (let retry = 0; retry < MAX_ATTEMPTS; retry += 1) {
+    const now = new Date();
     const latest = await prisma.authChallenge.findUnique({ where: { id: challengeId } });
     if (
       !latest
@@ -196,7 +197,7 @@ async function resetPassword({ phone, code, newPassword }) {
 
   const valid = await verifyPassword(otp, challenge.secretHash);
   if (!valid) {
-    await recordFailedResetAttempt(challenge.id, now);
+    await recordFailedResetAttempt(challenge.id);
     throw invalidCode();
   }
 
