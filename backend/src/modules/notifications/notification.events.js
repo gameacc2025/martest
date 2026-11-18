@@ -318,7 +318,7 @@ const EVENT_CATALOG = {
     key: 'SUPPORT_SLA_ESCALATED',
     label: 'نقض مهلت SLA تیکت',
     recipients: 'Assigned staff, queue members, and supervisors',
-    channels: { IN_APP: true, EMAIL: true, SMS: true },
+    channels: { IN_APP: true, EMAIL: true, SMS: false },
     template: ({ ticket, escalationType, slaDetails }) => ({
       title: '⚠️ نقض مهلت SLA',
       message: `تیکت «${ticket?.subject || ticket?.ticketNumber || ''}» مهلت ${escalationType === 'FIRST_RESPONSE_BREACHED' ? 'پاسخ اول' : 'حل'} را از دست داد.`,
