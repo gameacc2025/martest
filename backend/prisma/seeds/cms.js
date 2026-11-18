@@ -362,9 +362,10 @@ async function seedPages() {
 async function main() {
   console.log('🌱 Starting CMS seed...');
 
-  if (process.env.NODE_ENV === 'production' && !process.env.FORCE_SEED) {
-    console.error('❌ Seed refused: production environment detected. Set FORCE_SEED=1 to override.');
-    process.exit(1);
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Skipping synthetic CMS demo fixtures in production.');
+    await prisma.$disconnect();
+    return;
   }
 
   try {
