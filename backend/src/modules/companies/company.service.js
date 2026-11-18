@@ -518,8 +518,8 @@ async function getStatistics(id) {
   const [
     totalProducts,
     publishedProducts,
-    totalOrders,
-    pendingOrders,
+    totalInquiries,
+    draftInquiries,
     totalUsers,
     activeUsers,
   ] = await Promise.all([
@@ -540,7 +540,7 @@ async function getStatistics(id) {
     select: { id: true, title: true, status: true, createdAt: true },
   });
 
-  const recentOrders = await prisma.inquiry.findMany({
+  const recentInquiries = await prisma.inquiry.findMany({
     where: { companyId: Number(id) },
     take: 5,
     orderBy: { createdAt: 'desc' },
@@ -551,13 +551,13 @@ async function getStatistics(id) {
     counts: {
       products: totalProducts,
       publishedProducts,
-      orders: totalOrders,
-      pendingOrders,
+      inquiries: totalInquiries,
+      draftInquiries,
       users: totalUsers,
       activeUsers,
     },
     recentProducts,
-    recentOrders,
+    recentInquiries,
   };
 }
 
