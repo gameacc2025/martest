@@ -179,58 +179,100 @@ function parseWorkingCalendar(calendarJson) {
   }
 }
 
+function getCalendarDateParts(date, timezone) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(date));
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const weekdayByName = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
+  return {
+    year: Number(values.year),
+    month: Number(values.month),
+    day: Number(values.day),
+    weekday: weekdayByName[values.weekday],
+    hour: Number(values.hour),
+    minute: Number(values.minute),
+  };
+}
+
+function calendarDateKey(parts) {
+  return `${String(parts.year).padStart(4, '0')}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
+}
+
+function addCalendarDays(parts, days) {
+  const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + days));
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() };
+}
+
+function zonedDateTimeToUtc({ year, month, day, hour = 0, minute = 0 }, timezone) {
+  const targetUtc = Date.UTC(year, month - 1, day, hour, minute);
+  let candidate = targetUtc;
+  // Resolve the IANA timezone offset iteratively. This avoids relying on the
+  // host/container timezone and handles DST offset changes for the target date.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const local = getCalendarDateParts(new Date(candidate), timezone);
+    const representedUtc = Date.UTC(local.year, local.month - 1, local.day, local.hour, local.minute);
+    const offset = representedUtc - candidate;
+    const next = targetUtc - offset;
+    if (next === candidate) break;
+    candidate = next;
+  }
+  return new Date(candidate);
+}
+
 function isWorkingDay(date, calendar) {
-  const dayOfWeek = date.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat (local time)
-  const isWorkDay = calendar.workDays.includes(dayOfWeek === 0 ? 7 : dayOfWeek);
-  if (!isWorkDay) return false;
-  const dateStr = date.toISOString().split('T')[0];
-  return !calendar.holidays.includes(dateStr);
+  const parts = getCalendarDateParts(date, calendar.timezone);
+  return calendar.workDays.includes(parts.weekday) && !calendar.holidays.includes(calendarDateKey(parts));
 }
 
 function addWorkingMinutes(startDate, minutes, calendar) {
   let current = new Date(startDate);
-  let remainingMinutes = minutes;
+  let remainingMinutes = Math.max(0, Number(minutes) || 0);
+  if (!Number.isFinite(current.getTime())) throw new TypeError('Invalid SLA start date');
+  if (remainingMinutes === 0) return current;
 
+  let guard = 0;
   while (remainingMinutes > 0) {
-    // If current time is before work start, move to work start
-    if (current.getHours() < calendar.workStartHour || (current.getHours() === calendar.workStartHour && current.getMinutes() === 0)) {
-      current.setHours(calendar.workStartHour, 0, 0, 0);
-    }
+    if (++guard > 10000) throw new Error('SLA working calendar exceeded its safety limit');
+    const parts = getCalendarDateParts(current, calendar.timezone);
+    const localMinutes = parts.hour * 60 + parts.minute;
+    const startMinutes = calendar.workStartHour * 60;
+    const endMinutes = calendar.workEndHour * 60;
 
-    // If current time is after work end, move to next working day start
-    if (current.getHours() >= calendar.workEndHour) {
-      current.setDate(current.getDate() + 1);
-      current.setHours(calendar.workStartHour, 0, 0, 0);
-      // Skip non-working days
-      while (!isWorkingDay(current, calendar)) {
-        current.setDate(current.getDate() + 1);
+    if (!calendar.workDays.includes(parts.weekday) || calendar.holidays.includes(calendarDateKey(parts)) || localMinutes >= endMinutes) {
+      let nextDay = addCalendarDays(parts, 1);
+      while (!calendar.workDays.includes(getCalendarDateParts(zonedDateTimeToUtc(nextDay, calendar.timezone), calendar.timezone).weekday)
+        || calendar.holidays.includes(calendarDateKey(nextDay))) {
+        nextDay = addCalendarDays(nextDay, 1);
       }
+      current = zonedDateTimeToUtc({ ...nextDay, hour: calendar.workStartHour }, calendar.timezone);
       continue;
     }
 
-    // If not a working day, move to next working day
-    if (!isWorkingDay(current, calendar)) {
-      current.setDate(current.getDate() + 1);
-      current.setHours(calendar.workStartHour, 0, 0, 0);
+    if (localMinutes < startMinutes) {
+      current = zonedDateTimeToUtc({ ...parts, hour: calendar.workStartHour }, calendar.timezone);
       continue;
     }
 
-    // Calculate minutes until end of work day
-    const workEndMs = new Date(current).setHours(calendar.workEndHour, 0, 0, 0);
-    const availableMinutes = Math.floor((workEndMs - current.getTime()) / 60000);
-
+    const availableMinutes = endMinutes - localMinutes;
     if (remainingMinutes <= availableMinutes) {
-      current.setTime(current.getTime() + remainingMinutes * 60000);
-      remainingMinutes = 0;
-    } else {
-      remainingMinutes -= availableMinutes;
-      // Move to next working day start
-      current.setDate(current.getDate() + 1);
-      current.setHours(calendar.workStartHour, 0, 0, 0);
-      while (!isWorkingDay(current, calendar)) {
-        current.setDate(current.getDate() + 1);
-      }
+      return new Date(current.getTime() + remainingMinutes * 60000);
     }
+
+    remainingMinutes -= availableMinutes;
+    let nextDay = addCalendarDays(parts, 1);
+    while (!calendar.workDays.includes(getCalendarDateParts(zonedDateTimeToUtc(nextDay, calendar.timezone), calendar.timezone).weekday)
+      || calendar.holidays.includes(calendarDateKey(nextDay))) {
+      nextDay = addCalendarDays(nextDay, 1);
+    }
+    current = zonedDateTimeToUtc({ ...nextDay, hour: calendar.workStartHour }, calendar.timezone);
   }
 
   return current;
@@ -242,22 +284,22 @@ function calculateWorkingMinutesBetween(startDate, endDate, calendar) {
   if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return 0;
 
   let totalMinutes = 0;
-  const cursor = new Date(startMs);
-  cursor.setHours(0, 0, 0, 0);
+  let day = getCalendarDateParts(new Date(startMs), calendar.timezone);
+  day = { year: day.year, month: day.month, day: day.day };
+  const finalDay = getCalendarDateParts(new Date(endMs), calendar.timezone);
+  const finalDateKey = calendarDateKey(finalDay);
+  let guard = 0;
 
-  while (cursor.getTime() < endMs) {
-    if (isWorkingDay(cursor, calendar)) {
-      const workStart = new Date(cursor);
-      workStart.setHours(calendar.workStartHour, 0, 0, 0);
-      const workEnd = new Date(cursor);
-      workEnd.setHours(calendar.workEndHour, 0, 0, 0);
-      const overlapStart = Math.max(startMs, workStart.getTime());
-      const overlapEnd = Math.min(endMs, workEnd.getTime());
-      if (overlapEnd > overlapStart) {
-        totalMinutes += Math.floor((overlapEnd - overlapStart) / 60000);
-      }
+  while (calendarDateKey(day) <= finalDateKey) {
+    if (++guard > 10000) throw new Error('SLA working calendar exceeded its safety limit');
+    if (isWorkingDay(zonedDateTimeToUtc(day, calendar.timezone), calendar)) {
+      const workStart = zonedDateTimeToUtc({ ...day, hour: calendar.workStartHour }, calendar.timezone).getTime();
+      const workEnd = zonedDateTimeToUtc({ ...day, hour: calendar.workEndHour }, calendar.timezone).getTime();
+      const overlapStart = Math.max(startMs, workStart);
+      const overlapEnd = Math.min(endMs, workEnd);
+      if (overlapEnd > overlapStart) totalMinutes += Math.floor((overlapEnd - overlapStart) / 60000);
     }
-    cursor.setDate(cursor.getDate() + 1);
+    day = addCalendarDays(day, 1);
   }
 
   return totalMinutes;
