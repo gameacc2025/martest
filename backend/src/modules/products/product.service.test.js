@@ -595,7 +595,7 @@ test('createProduct: CUSTOMER cannot impersonate a company through a stale compa
   };
   await assert.rejects(
     () => service.createProduct({ title: 'Spoofed', categoryId: 1, subcategoryId: 1 }, customer),
-    (error) => error.statusCode === 403 && error.code === 'COMPANY_CONTEXT_REQUIRED',
+    (error) => error.statusCode === 403 && error.code === 'FORBIDDEN',
   );
   assert.equal(calls['product.create'].length, 0);
 });
