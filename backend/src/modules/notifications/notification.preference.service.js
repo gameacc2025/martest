@@ -15,6 +15,7 @@
 // =============================================================
 
 const prisma = require('../../config/db');
+const smsProvider = require('./notification.sms.provider');
 const { getEvent, isKnownEvent, listEventKeys, listEvents, DEFAULT_CHANNELS } = require('./notification.events');
 
 // Channel order is significant for the preferences UI (IN_APP, EMAIL, SMS).
@@ -33,12 +34,14 @@ async function getPreferences(userId) {
   });
   const storedBySlot = new Map(stored.map((row) => [`${row.eventType}:${row.channel}`, row.enabled]));
 
+  const smsAvailable = smsProvider.hasRealProvider();
   const data = listEvents().map((event) => {
     const channels = {};
     for (const channel of Object.keys(DEFAULT_CHANNELS)) {
       const stored = storedBySlot.get(`${event.key}:${channel}`);
-      channels[channel] =
-        stored === undefined ? (event.channels[channel] ?? DEFAULT_CHANNELS[channel]) : stored;
+      channels[channel] = channel === 'SMS' && !smsAvailable
+        ? false
+        : (stored === undefined ? (event.channels[channel] ?? DEFAULT_CHANNELS[channel]) : stored);
     }
     return {
       eventType: event.key,
@@ -48,9 +51,9 @@ async function getPreferences(userId) {
     };
   });
 
-  // SMS delivery is not implemented yet (flow/06 §3.3): the toggle exists
-  // but the UI should present it as unavailable.
-  return { data, smsAvailable: false };
+  // SMS is available only when the Twilio adapter has valid server credentials.
+  // Even then, every event defaults to OFF and requires an explicit user opt-in.
+  return { data, smsAvailable };
 }
 
 /**
@@ -89,6 +92,13 @@ async function updatePreferences(userId, updates) {
         statusCode: 400,
         code: 'INVALID_PREFERENCE_ENABLED',
         message: 'enabled must be a boolean.',
+      };
+    }
+    if (channel === 'SMS' && enabled && !smsProvider.hasRealProvider()) {
+      throw {
+        statusCode: 503,
+        code: 'SMS_PROVIDER_NOT_CONFIGURED',
+        message: 'درگاه پیامک روی سرور پیکربندی نشده است.',
       };
     }
   }
