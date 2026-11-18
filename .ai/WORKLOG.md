@@ -195,3 +195,4 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Regression tests:** atomic attempt conflicts, final-attempt valid consume, per-route rate-limit configuration, and spoofed forwarding-header rejection.
 - **Still open:** exhaustive company tenant/IDOR review; central AuditLog action registry and producer normalization; owner/legal AuditLog retention/archival decision; live SMTP/Twilio/payment provider and production deployment verification. Local Windows workspace/Docker/PostgreSQL remain NOT VERIFIED.
 - **Next:** continue resource-specific tenant/IDOR review and audit event producer inventory; preserve AD-1 through AD-4 and do not invent retention or commercial policy.
+- **UI skill policy cleanup:** corrected a malformed sentence in `.ai/UI_SKILLS.md`; clarified that skill recommendations are expert references and cannot override owner/product requirements or repository architecture.
