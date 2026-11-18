@@ -21,6 +21,7 @@ let user;
 let challenge;
 let providerReady = true;
 let passwordValid = true;
+let conflictOnNextFailedAttempt = false;
 
 function reset() {
   calls.sms = [];
@@ -44,6 +45,7 @@ function reset() {
   };
   providerReady = true;
   passwordValid = true;
+  conflictOnNextFailedAttempt = false;
 }
 reset();
 
@@ -79,8 +81,24 @@ const prisma = {
       calls.challengeCreate.push(args);
       return { id: 32 };
     },
+    findUnique: async () => ({ ...challenge }),
     updateMany: async (args) => {
       calls.challengeUpdateMany.push(args);
+      if (args.data.attemptCount?.increment) {
+        if (conflictOnNextFailedAttempt) {
+          conflictOnNextFailedAttempt = false;
+          challenge.attemptCount += 1;
+          if (challenge.attemptCount >= challenge.maxAttempts) challenge.invalidatedAt = new Date();
+          return { count: 0 };
+        }
+        if (
+          args.where.attemptCount !== challenge.attemptCount
+          || challenge.consumedAt
+          || challenge.invalidatedAt
+        ) return { count: 0 };
+        challenge.attemptCount += args.data.attemptCount.increment;
+        if (args.data.invalidatedAt) challenge.invalidatedAt = args.data.invalidatedAt;
+      }
       return { count: 1 };
     },
   },
@@ -132,6 +150,37 @@ test('requestPasswordReset creates a hashed, expiring challenge and sends SMS', 
   assert.match(calls.challengeCreate[0].data.secretHash, /^hash:\d{6}$/);
   assert.equal(calls.sms.length, 1);
   assert.match(calls.sms[0].body, /\d{6}/);
+});
+
+test('resetPassword retries a failed-attempt CAS conflict instead of dropping the guess', async () => {
+  reset();
+  passwordValid = false;
+  conflictOnNextFailedAttempt = true;
+
+  await assert.rejects(
+    () => service.resetPassword({ phone: '09123456789', code: '000000', newPassword: 'NewSecurePass123' }),
+    (error) => error.code === 'INVALID_RESET_CODE',
+  );
+
+  assert.equal(calls.challengeUpdateMany.length, 2);
+  assert.equal(challenge.attemptCount, 2);
+  assert.equal(challenge.invalidatedAt, null);
+});
+
+test('resetPassword stops when a concurrent request exhausts the challenge', async () => {
+  reset();
+  passwordValid = false;
+  challenge.attemptCount = 4;
+  conflictOnNextFailedAttempt = true;
+
+  await assert.rejects(
+    () => service.resetPassword({ phone: '09123456789', code: '000000', newPassword: 'NewSecurePass123' }),
+    (error) => error.code === 'INVALID_RESET_CODE',
+  );
+
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.equal(challenge.attemptCount, 5);
+  assert.ok(challenge.invalidatedAt instanceof Date);
 });
 
 test('resetPassword consumes the OTP, changes password and revokes all sessions atomically', async () => {
