@@ -16,7 +16,7 @@ const {
   apiGet: vi.fn(),
   createInquiry: vi.fn(),
   hasAnyPermission: vi.fn(),
-  authState: { isAuthenticated: false },
+  authState: { isAuthenticated: false, isCustomer: false },
   routeState: { current: null },
 }))
 
@@ -32,6 +32,7 @@ vi.mock('../../stores/products', () => ({
 vi.mock('../../stores/auth', () => ({
   useAuthStore: () => ({
     get isAuthenticated() { return authState.isAuthenticated },
+    get isCustomer() { return authState.isCustomer },
     hasAnyPermission,
   }),
 }))
@@ -75,6 +76,7 @@ describe('Website Product Details', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     authState.isAuthenticated = false
+    authState.isCustomer = false
     hasAnyPermission.mockReturnValue(false)
     routeState.current = reactive({ params: { id: '42' }, query: {} })
     getProductById.mockResolvedValue(productFixture())
@@ -186,4 +188,15 @@ describe('Website Product Details', () => {
     expect(hasAnyPermission).toHaveBeenCalledWith(['inquiries.create', 'leads.create'])
     expect(wrapper.find('[aria-label="ثبت استعلام قیمت"]').exists()).toBe(true)
   })
+  it('never exposes RFQ creation to CUSTOMER even if a stale create permission remains', async () => {
+    authState.isAuthenticated = true
+    authState.isCustomer = true
+    hasAnyPermission.mockReturnValue(true)
+    wrapper = shallowMount(ProductDetails)
+    await flushPromises()
+
+    expect(hasAnyPermission).toHaveBeenCalledWith(['inquiries.create', 'leads.create'])
+    expect(wrapper.find('[aria-label="ثبت استعلام قیمت"]').exists()).toBe(false)
+  })
+
 })
