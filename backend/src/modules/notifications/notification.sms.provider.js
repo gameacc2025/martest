@@ -1,5 +1,5 @@
 // Twilio SMS adapter used by the notification outbox worker.
-// Inquiry SMS is queued only after the sender's paid SMS allowance is consumed.
+// SMS is queued only after per-event opt-in, paid quota and provider checks.
 function hasRealProvider() {
   return Boolean(
     String(process.env.TWILIO_ACCOUNT_SID || '').trim()
