@@ -174,7 +174,7 @@ function companyTypeLabel(type) {
           </div>
           <div v-else class="company-product-grid">
             <ProductCard v-for="product in products" :key="product.id" :product="product"
-              @view-product="viewProduct" />
+              :show-commerce-actions="false" @view-product="viewProduct" />
           </div>
 
           <div v-if="totalProducts > 0" class="company-paginator" aria-label="صفحه‌بندی محصولات شرکت">
