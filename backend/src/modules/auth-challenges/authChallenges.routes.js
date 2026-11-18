@@ -17,6 +17,7 @@ async function authChallengesRoutes(fastify) {
 
   // POST /auth/challenges - Request new challenge
   fastify.post('/challenges', {
+    config: { rateLimit: { max: 5, timeWindow: '15 minutes' } },
     schema: {
       tags: ['Auth Challenges'],
       summary: 'Request a new OTP challenge',
