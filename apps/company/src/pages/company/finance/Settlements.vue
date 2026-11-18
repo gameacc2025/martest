@@ -1,4 +1,7 @@
 <script setup>
+// DORMANT PROTOTYPE: Finance/Settlement is intentionally unregistered and absent from navigation.
+// Re-enable only after owner approval of the accounting and settlement model (AD-4).
+
 import OperationalWorkspace from '@telecom/shared-ui/components/operations/OperationalWorkspace.vue'
 
 const stats = [
