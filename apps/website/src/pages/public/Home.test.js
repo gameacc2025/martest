@@ -15,7 +15,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     expect(source).toContain("bannersApi.listActive('HOME_HERO')")
     expect(source).toContain('productsApi.list(params)')
     expect(source).toContain('productsApi.list({ ...params, featured: true })')
-    expect(source).toContain('retailEnabled: true')
+    expect(source).not.toContain('retailEnabled: true')
     expect(source).toContain('productsStore.getCategories()')
     expect(source).toContain('loadCategoryProductCounts(categories.value.slice(0, 9))')
     expect(source).toContain('categoryId: Number(category.id)')
@@ -44,7 +44,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     for (const section of ['stats', 'cats', 'prods', 'bl', 'tms', 'rfq']) {
       expect(source).toContain('class="' + section)
     }
-    expect(source).toContain('جدیدترین محصولات خرده‌فروشی')
+    expect(source).not.toContain('جدیدترین محصولات خرده‌فروشی')
     expect(source).toContain('محصولات منتخب')
     expect(source).not.toContain('چرا Telecom Market؟')
     expect(source).not.toContain('پیشنهاد ویژه تجهیزات خرده‌فروشی')
@@ -59,7 +59,7 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
 
   it('renders compact category cards on the homepage while reserving header cards for the category page', () => {
     expect(source).toContain('v-for="product in latestProducts"')
-    expect(source).toContain('v-for="product in retailLatest"')
+    expect(source).not.toContain('retailLatest')
     expect(source).toContain('v-for="category in categories.slice(0, 9)"')
     expect(source).toContain('class="cats"')
     expect(source).toContain('class="cat home-category-card"')
@@ -78,6 +78,27 @@ describe('Website homepage — Telecom Market.html exact composition', () => {
     const categoriesSource = readFileSync(categoriesPath, 'utf8')
     expect(categoriesSource).toContain('class="cb-header-img"')
     expect(categoriesSource).toContain('class="cb-sublist"')
+  })
+
+
+
+  it('shows accurate product counts and only exposes RFQ creation to authorized company/staff users', () => {
+    expect(source).toContain('totalProductCount')
+    expect(source).toContain('responseTotal(latest.value, products.value)')
+    expect(source).toContain('latestProducts.length.toLocaleString')
+    expect(source).toContain('selectedProducts.length.toLocaleString')
+    expect(source).toContain('canCreateInquiry')
+    expect(source).toContain('!productIsRetail(product) && canCreateInquiry')
+    expect(source).toContain('پیگیری استعلام‌ها')
+    expect(source).not.toContain('ثبت درخواست استعلام')
+  })
+
+  it('keeps the first-load fiber preloader free of visible copy', () => {
+    const indexPath = resolve(process.cwd(), 'apps/website/index.html')
+    const indexSource = readFileSync(indexPath, 'utf8')
+    expect(indexSource).not.toContain('wait-text')
+    expect(indexSource).not.toContain('لطفا منتظر بمانید')
+    expect(indexSource).toContain('fiber-loader-svg')
   })
 
   it('renders product cards with the existing product presentation', () => {
