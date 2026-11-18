@@ -21,3 +21,18 @@ test('refuses to seed outside development without an explicit bootstrap password
     );
   }
 });
+
+
+test('rejects a weak explicitly configured bootstrap password', () => {
+  assert.throws(
+    () => resolveSuperAdminPassword({ NODE_ENV: 'production', SUPER_ADMIN_PASSWORD: 'too-short' }),
+    /at least 32 characters/,
+  );
+});
+
+test('environment example never contains a preconfigured administrator password', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const example = fs.readFileSync(path.join(__dirname, '../.env.example'), 'utf8');
+  assert.match(example, /^SUPER_ADMIN_PASSWORD=\s*$/m);
+});
