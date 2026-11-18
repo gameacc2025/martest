@@ -17,7 +17,6 @@ async function runOnce() {
     where: {
       status: 'SCHEDULED',
       scheduledAt: { lte: now },
-      isActive: true,
     },
     select: { id: true, slug: true, scheduledAt: true },
     take: batchSize,
@@ -95,13 +94,15 @@ function stop(signal) {
   console.log(`[cms-scheduled-worker] received ${signal}; stopping after current batch`);
 }
 
-process.on('SIGINT', () => stop('SIGINT'));
-process.on('SIGTERM', () => stop('SIGTERM'));
+if (require.main === module) {
+  process.on('SIGINT', () => stop('SIGINT'));
+  process.on('SIGTERM', () => stop('SIGTERM'));
 
-main().catch(async (error) => {
-  console.error('[cms-scheduled-worker] fatal error', error?.message || error);
-  await prisma.$disconnect();
-  process.exitCode = 1;
-});
+  main().catch(async (error) => {
+    console.error('[cms-scheduled-worker] fatal error', error?.message || error);
+    await prisma.$disconnect();
+    process.exitCode = 1;
+  });
+}
 
-module.exports = { runOnce };
+module.exports = { runOnce, main };
