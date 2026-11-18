@@ -6,11 +6,11 @@
 **Prisma:** 7.10.1.  
 **Important:** this runbook does not authorize enabling B2C checkout, payment, seller payout, or any new API.
 
-## CRITICAL — Schema/migration parity blocker (2026-11-17)
+## Schema/migration parity repair (2026-11-18)
 
-Historical migration chain (through DB-6 and the comments migration) declared 101 Prisma models but created only 97 tables. The forward-only migration `20261118000100_complete_cms_crm_tables` now adds the four missing models: Faq, Page, LeadStatusHistory and CRMFieldAudit, including indexes, foreign keys and catalog comments. Fresh-database and existing-database compatibility still require CI/runtime verification; the conditional table/index/FK creation is intended to tolerate databases where these tables were already created outside the migration chain.
+Historical migration chain (through DB-6 and the comments migration) declared 101 Prisma models but created only 97 tables. The forward-only migration `20261118000100_complete_cms_crm_tables` now adds the four missing models: Faq, Page, LeadStatusHistory and CRMFieldAudit, including indexes, foreign keys and catalog comments. A new `backend/scripts/verify-schema-parity.js` compares every non-ignored Prisma model (including `@@map`/`@@schema`) against PostgreSQL catalog tables. Fresh-database and existing-database compatibility remain **NOT VERIFIED** until the migration and runtime CI workflows complete.
 
-The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit. Do not declare schema parity until the migration validation workflow confirms all four tables and the runtime workflow completes seed execution twice. Do not edit applied migrations, use db push, reset a persistent database, or remove user data.
+The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit. Do not declare schema parity until `node scripts/verify-schema-parity.js` passes for all 101 Prisma models and the runtime workflow completes seed execution twice. CI results are currently **PENDING / NOT VERIFIED**. Do not edit applied migrations, use db push, reset a persistent database, or remove user data.
 
 ## 1. Migration inventory
 
@@ -26,7 +26,7 @@ The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudi
 | 7 | `20261108000700_database_comments` | Persian PostgreSQL comments for the original 97 tables and 962 physical columns |
 | 8 | `20261118000100_complete_cms_crm_tables` | Forward-only creation/repair of Faq, Page, LeadStatusHistory and CRMFieldAudit, indexes, foreign keys and Persian comments |
 
-All six new migrations are additive. They do not drop or rename existing core tables and do not backfill/alter existing marketplace records.
+DB-1 through DB-6 and the later repair migrations are forward-only/additive. They do not drop or rename existing core tables or backfill/alter existing marketplace records.
 
 ## 2. Before applying to any shared or production database
 
@@ -61,7 +61,7 @@ Check the backend startup logs and then run `migrate status`. Do not run `db:res
 
 ## 4. Fresh local database
 
-On a truly empty disposable development database only, `prisma migrate deploy` applies the baseline first and then DB-1 through DB-6 in timestamp order. Run the normal project seed only after migrations succeed:
+On a truly empty disposable development database only, `prisma migrate deploy` applies the baseline and all DB-1 through DB-6, comments, and forward-repair migrations in timestamp order. Run full schema parity and the normal project seed only after migrations succeed:
 
 ```powershell
 docker compose -f docker-compose.dev.yml exec backend npx prisma migrate deploy
@@ -90,7 +90,7 @@ Use the deployment's configured `DATABASE_URL` and Prisma config. Never use `pri
 - [ ] `prisma migrate status` reports no pending migrations.
 - [ ] `_prisma_migrations` contains the baseline, DB-1..DB-6, the database-comments migration, and `20261118000100_complete_cms_crm_tables` with successful completion.
 - [ ] `prisma validate` and `prisma generate` succeed.
-- [ ] Confirm all 101 Prisma models have corresponding physical tables; specifically verify Faq, Page, LeadStatusHistory and CRMFieldAudit after migration `20261118000100_complete_cms_crm_tables`.
+- [ ] Run `node scripts/verify-schema-parity.js` and confirm all 101 non-ignored Prisma models have corresponding physical PostgreSQL tables.
 - [ ] Verify critical PostgreSQL constraints/triggers exist: AuditLog append-only; one outstanding AuthChallenge per user/purpose/channel; support message/history immutability, no physical SupportTicket deletion and one active assignment per ticket; inventory nonnegative/reservation checks; order/SellerOrder composite ownership FK; immutable inventory movements/tracking events; balanced posted journal entries; settlement maker-checker.
 - [ ] Run backend tests and application builds.
 - [ ] Confirm existing auth, company, product, inquiry, subscription, notification and address flows still work.
@@ -116,7 +116,7 @@ The schema alone does not enable a feature. Keep the following disabled until th
 - Retail checkout, payment, refunds and seller payouts until AD-4 is explicitly revisited and the commercial, legal, currency, provider, shipping, commission and returns policies are approved.
 
 ## Verified execution result — 2026-11-08
-- Fresh PostgreSQL 18.4 CI run applied baseline `20261106000000_init` and all six DB-1..DB-6 migrations successfully; `prisma migrate status` passed.
+- Historical CI result (2026-11-06): Fresh PostgreSQL 18.4 applied the baseline and DB-1..DB-6 migrations; the later comments and parity-repair migrations were not part of that run.
 - Compose runtime health and database migration verification passed.
 - Backend tests and all three app builds passed. Frontend/shared tests remain red (23 failures across 9 files); browser smoke is 6/8 with two pre-existing Website selector/viewport failures. No frontend source was changed in this DB PR.
 - PR #90 is intentionally not merged while unrelated frontend/browser checks remain red. Do not run the migration against a persistent user DB until its baseline state is confirmed and the owner applies the runbook.
@@ -125,8 +125,7 @@ The schema alone does not enable a feature. Keep the following disabled until th
 ## 10. Database comments and data dictionary — 2026-11-08
 
 The additive migration `20261108000700_database_comments` adds PostgreSQL catalog descriptions only:
-- 97 `COMMENT ON TABLE` statements and 962 `COMMENT ON COLUMN` statements were generated in this migration as of 2026-11-08.
-- The current Prisma schema now declares 101 models; the four missing models (Faq, Page, LeadStatusHistory, CRMFieldAudit) also lack catalog comments until a forward migration is added.
+- Historical state (2026-11-08): 97 `COMMENT ON TABLE` statements and 962 `COMMENT ON COLUMN` statements covered the original migration tables. The 2026-11-18 forward repair migration adds table and column comments for Faq, Page, LeadStatusHistory and CRMFieldAudit; verify all 101 models with the parity script.
 - The Prisma source has `///` documentation on all 97 models and all 1,294 model fields, including 332 relation fields. Relation fields are Prisma-level navigation properties and do not create PostgreSQL columns.
 - Full field-by-field Persian descriptions and Prisma types are published in `docs/DATABASE_DATA_DICTIONARY.md`.
 - Safe to apply to an already migrated database with `prisma migrate deploy`; comments are metadata and do not alter application data or schema structure. Existing comments on these objects, if any, are replaced by the new descriptions.
