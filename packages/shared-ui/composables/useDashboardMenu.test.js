@@ -38,38 +38,22 @@ describe('useDashboardMenu role resolution', () => {
     routerMock.hasRoute.mockReturnValue(true)
   })
 
-  it('shows Admin dashboard and order submenus for a platform admin', () => {
+  it('shows the Admin dashboard without exposing dormant retail order navigation', () => {
     const items = visibleItemsFor(['ADMIN'])
     expect(findItem(items, 'داشبورد')?.route).toBe('admin-dashboard')
-
-    const orders = findItem(items, 'سفارشات')
-    expect(orders?.children.map((child) => child.query.status)).toEqual([
-      'همه',
-      'در انتظار پردازش',
-      'ارسال‌شده',
-      'تحویل‌شده',
-      'مرجوعی',
-    ])
+    expect(findItem(items, 'سفارشات')).toBeUndefined()
   })
 
-  it('shows Company dashboard and order submenus for a company user', () => {
+  it('shows the Company dashboard without exposing dormant retail order navigation', () => {
     const items = visibleItemsFor(['COMPANY_USER'])
     expect(findItem(items, 'داشبورد')?.route).toBe('company-dashboard')
-
-    const orders = findItem(items, 'سفارشات')
-    expect(orders?.children.map((child) => child.query.status)).toEqual([
-      'همه',
-      'جدید؛ نیازمند پذیرش',
-      'در حال آماده‌سازی',
-      'ارسال‌شده',
-      'تحویل‌شده',
-    ])
+    expect(findItem(items, 'سفارشات')).toBeUndefined()
   })
 
   it('supports role objects returned by compatible auth contexts', () => {
     const items = visibleItemsFor([{ name: 'COMPANY_MANAGER' }])
     expect(findItem(items, 'داشبورد')?.route).toBe('company-dashboard')
-    expect(findItem(items, 'سفارشات')?.children).toHaveLength(5)
+    expect(findItem(items, 'سفارشات')).toBeUndefined()
   })
 
   it('does not show another app dashboard when the user has no matching role', () => {
