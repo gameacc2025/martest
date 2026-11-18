@@ -251,9 +251,9 @@ async function inquiryRoutes(fastify) {
     schema: { params: inquiryParamsSchema },
   }, ctrl.getById);
 
+  // AD-1: CUSTOMER is a buyer only and cannot originate new RFQs.
   fastify.post('/', {
-
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.create', 'inquiries.create')],
+    preHandler: [requireAccessType('STAFF', 'COMPANY'), requireAnyPermission('leads.create', 'inquiries.create')],
     schema: { body: inquiryBodySchema },
   }, ctrl.create);
 
@@ -271,7 +271,7 @@ async function inquiryRoutes(fastify) {
   // Buyers may cancel their own inquiry; STAFF/COMPANY lifecycle changes
   // still require the corresponding update permission and are owner-scoped in the service.
   fastify.patch('/:id/status', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.create')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read')],
     schema: { params: inquiryParamsSchema, body: statusBodySchema },
   }, ctrl.changeStatus);
 
@@ -281,7 +281,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.revealResponses);
 
   fastify.post('/:id/items', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.create')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('leads.update', 'inquiries.update', 'inquiries.read')],
     schema: { params: inquiryParamsSchema, body: itemBodySchema },
   }, ctrl.addItem);
 
@@ -291,7 +291,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.updateItem);
 
   fastify.delete('/:id/items/:itemId', {
-    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.delete', 'inquiries.create')],
+    preHandler: [requireAccessType(...MANAGE_TYPES), requireAnyPermission('leads.delete', 'inquiries.update', 'inquiries.read')],
     schema: { params: inquiryItemParamsSchema },
   }, ctrl.deleteItem);
 
@@ -304,7 +304,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.listMessages);
 
   fastify.post('/:id/messages', {
-    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.create', 'inquiries.respond')],
+    preHandler: [requireAccessType('COMPANY', 'CUSTOMER'), requireAnyPermission('inquiries.read', 'inquiries.respond')],
     schema: {
       params: inquiryParamsSchema,
       body: {
@@ -336,7 +336,7 @@ async function inquiryRoutes(fastify) {
   }, ctrl.submitResponse);
 
   fastify.patch('/:id/responses/:responseId/decision', {
-    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('inquiries.create', 'inquiries.update', 'leads.update')],
+    preHandler: [requireAccessType(...ALL_TYPES), requireAnyPermission('inquiries.read', 'inquiries.update', 'leads.update')],
     schema: {
       params: inquiryResponseParamsSchema,
       body: {
