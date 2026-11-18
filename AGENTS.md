@@ -82,12 +82,9 @@ Before declaring a task complete:
 
 ## Mandatory per-task Git and GitHub synchronization
 
-- **Every independently completable task or subtask must be recorded in Git and published to GitHub immediately after that task is completed and reviewed.** Do not accumulate several completed tasks into one later commit/push.
-- A task is not considered fully handed off until its scoped changes, relevant tests, and documentation/worklog updates have been committed and the resulting commit is present on the GitHub integration target. Record the commit SHA and push/remote status.
-- In this repository, all edits and integrations happen in the existing `main` checkout. Do not create branches, worktrees or detached checkouts. Read-only inspections may run concurrently; all writes are serialized by the lead. Workers never commit or push. The lead reviews, tests, commits and pushes each completed task directly to `main`, then verifies the remote SHA.
-- If a task is split into independently verifiable slices, each completed slice follows the same commit-and-publish cycle. Do not wait for the entire lane/epic to finish.
-- If commit or push is blocked, report `NOT COMMITTED` / `NOT PUSHED` explicitly, explain the blocker, preserve the patch, and notify the coordinator/owner. Never claim GitHub synchronization occurred unless the remote result was verified.
-- After each integrated task, append its task ID, concise outcome, commit SHA, GitHub push/remote verification, exact checks, and next action to `.ai/WORKLOG.md`; update `.ai/current-task.md` and relevant docs before handoff.
+- Publish each independently completed, reviewed, and verified task slice to GitHub immediately; do not batch completed slices. Only the lead commits and pushes to the existing `main` branch, following the branch discipline and commit protocol above.
+- A handoff is complete only when the scoped changes, tests, and required documentation are committed on `main` and the remote SHA is verified. If blocked, record `NOT COMMITTED` / `NOT PUSHED`, explain why, preserve the patch, and never claim synchronization.
+- After each slice, record its task ID, outcome, commit SHA, remote verification, exact checks, unresolved risks, and next action in `.ai/WORKLOG.md`; synchronize `.ai/current-task.md` and relevant docs.
 
 ## Commit protocol
 
