@@ -1,13 +1,30 @@
 # Agent Coordination — Current Board
 
-**Updated:** 2026-11-17  
+**Updated:** 2026-11-18  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
 **Reviewed application-code baseline:** `344a2ee049ac9a28eab48b53ce96b118d8224fc3`  
-**Latest main HEAD before audit:** `cab169e497248d5cd8c8f5fe193638977b964de9`  
+**Latest main HEAD:** `3e66fe8f751f4b4eebd45d0a604cbc3b34b8acdd`  
 **Rules-audit integration:** follow the latest `main` HEAD; this board is documentation and may advance independently of the application-code baseline.  
 **Coordinator:** Lead  
 **Owner communication:** Persian
+
+## 2026-11-18 — Project-wide audit and repair
+
+**Task:** `PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18` — IN_PROGRESS  
+**Latest recorded main:** `3e66fe8f751f4b4eebd45d0a604cbc3b34b8acdd`
+
+| Slice | Status | Commit(s) | Verification |
+|---|---|---|---|
+| Audit case-insensitive secret redaction + tests | IMPLEMENTED | `3cb9f940`, `2316e552` | CI pending / not verified |
+| CRM status route actor forwarding + route test | IMPLEMENTED | `0281b639`, `849df765` | CI pending / not verified |
+| Frontend stack documentation correction | DONE | `c4590a27` | Source manifests inspected |
+| Missing CMS/CRM tables forward migration | IMPLEMENTED | `784999f1` | Fresh DB and upgrade not verified |
+| Migration runbook + four-table CI assertion | DONE | `3403c0d1`, `eb1511a2` | Workflow result pending / not verified |
+
+**Current open work:** Support SLA pause/resume and queue recipient scoping; audit writer coverage/retention; SMS preference/default consent; dashboard sample data; AD-1/AD-3/AD-4 implementation drift; three-app regression; remaining auth/RBAC/catalog/inquiry/subscription/CMS/retail/finance/shared-package audits.
+
+**Execution boundary:** GitHub-connected source only. Local Windows workspace, Docker, PostgreSQL and browser remain NOT VERIFIED. Continue on `main` only; no branches/worktrees/detached checkouts; workers never commit/push; no destructive Git/DB operations.
 
 ## Operating policy
 
