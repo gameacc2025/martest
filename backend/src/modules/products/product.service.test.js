@@ -597,7 +597,7 @@ test('createProduct: CUSTOMER cannot impersonate a company through a stale compa
     () => service.createProduct({ title: 'Spoofed', categoryId: 1, subcategoryId: 1 }, customer),
     (error) => error.statusCode === 403 && error.code === 'FORBIDDEN',
   );
-  assert.equal(calls['product.create'].length, 0);
+  assert.equal(calls['product.create']?.length ?? 0, 0);
 });
 
 test('createProduct: retail eligibility is explicit and passed through only when enabled', async () => {
