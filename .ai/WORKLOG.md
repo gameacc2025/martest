@@ -146,3 +146,15 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Still open:** exhaustive company tenant/IDOR review; central audit action registry/producer normalization; owner/legal decision and archive design for AuditLog retention; remaining sample dashboard metrics; live SMTP/Twilio/payment and production deployment verification.
 - **Local Windows working tree, local Docker and developer PostgreSQL:** NOT VERIFIED; GitHub connector cannot inspect them.
 - **Next:** continue bounded tenant/IDOR and dashboard/reporting source audits. Do not invent commercial or retention policy; preserve AD-1 through AD-4.
+
+
+## 2026-11-18 — PROJECT-WIDE-AUDIT-AND-REPAIR (latest exact-main acceptance)
+
+- **Exact tested application code SHA:** `24be9b53af92ca1d37f3dd7cf2fd2fc17e47e4f3`.
+- **CI:** [44305796094](https://github.com/gameacc2025/martest/actions/runs/44305796094) PASS — 68 Frontend/Shared test files / 385 tests; 18 architecture/session tests; 1,689 Backend tests; all three production builds.
+- **Migration:** [44305796146](https://github.com/gameacc2025/martest/actions/runs/44305796146) PASS — Prisma validation/client generation; all migrations on fresh PostgreSQL; every non-ignored Prisma model has a database table.
+- **Runtime:** [44305795993](https://github.com/gameacc2025/martest/actions/runs/44305795993) PASS — Compose config/build, all service health endpoints, migration/parity checks, all development seeds twice, AD-1/AD-3 grant reconciliation and **8/8 Playwright browser smoke tests** across all three panels and API proxies.
+- **Counts:** Frontend/Shared 385; architecture/session 18; Backend 1,689. These are CI run outputs, not local Windows execution.
+- **Documentation reconciliation:** corrected the stale AD-4 warning in `docs/README.md`; refreshed exact-main evidence in backlog, migration runbook, current-task and active coordination board.
+- **Security review slice:** Company route guards derive company context from authenticated AccessProfile and scope self-service profile operations to the same company; user service rejects COMPANY create/edit/delete/role assignment and allows only own-company read/activate/deactivate per AD-3; product mutation service rechecks tenant ownership. This is a bounded source review, not exhaustive tenant/IDOR sign-off.
+- **Still NOT VERIFIED:** owner Windows working tree, local Docker/PostgreSQL, live SMTP/Twilio/payment providers and production deployment. Continue tenant/IDOR and dashboard/reporting review; do not invent retention or commercial policy.
