@@ -48,7 +48,8 @@ const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: proc
 const SUPER_ADMIN_USER = {
   email: process.env.SUPER_ADMIN_EMAIL || 'admin@telecommarketplace.local',
   phone: process.env.SUPER_ADMIN_PHONE || '09120000000',
-  password: process.env.SUPER_ADMIN_PASSWORD || (process.env.NODE_ENV === 'development' ? 'A123@456' : 'Admin@123456'),
+  // No known bootstrap credential outside local development.
+  password: process.env.SUPER_ADMIN_PASSWORD || (process.env.NODE_ENV === 'development' ? 'A123@456' : null),
   status: 'ACTIVE',
 };
 
@@ -456,6 +457,9 @@ const ROLE_PERMISSIONS = {
 };
 
 async function main() {
+  if (!SUPER_ADMIN_USER.password) {
+    throw new Error('SUPER_ADMIN_PASSWORD must be set before running the seed outside development.');
+  }
   console.log('Seeding default marketplace system data...\n');
 
   // ── 1. Default Main company ─────────────────────────────────
@@ -653,10 +657,8 @@ async function main() {
   console.log(`  CMS Pages: seeded`);
   console.log(`  AuthChallenges: ${authAuditSeed.authChallenges}`);
   console.log(`  AuditLogs: ${authAuditSeed.auditLogs}`);
-  console.log('\nSuper Admin login:');
-  console.log(`  phone:    ${SUPER_ADMIN_USER.phone}`);
-  console.log(`  password: ${SUPER_ADMIN_USER.password}`);
-  console.log('\n⚠️  After first login, change the password from the admin panel.');
+  console.log('\nSuper Admin bootstrap completed. Credentials are intentionally not written to logs.');
+  console.log('Use the configured SUPER_ADMIN_PHONE and SUPER_ADMIN_PASSWORD values to sign in.');
   console.log('─────────────────────────────────────────');
 }
 
