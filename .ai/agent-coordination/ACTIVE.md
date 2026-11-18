@@ -3,7 +3,7 @@
 **Updated:** 2026-11-18  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code baseline:** `34d737ac73087f27b121eb6825ac2afe9ae3c19c`  
+**Latest tested code baseline:** `cbf3af8e391c292ce105199a845fb83c813a3bad`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,9 +17,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 | Slice | Status | Evidence |
 |---|---|---|
-| CI | PASS | [44371231375](https://github.com/gameacc2025/martest/actions/runs/44371231375): 385 Frontend/Shared tests, 18 architecture/session tests, 1,709 Backend tests, all three app builds |
-| Prisma migration parity | PASS | [44371231516](https://github.com/gameacc2025/martest/actions/runs/44371231516): fresh PostgreSQL migration and all Prisma model/table checks |
-| Runtime + browser | PASS | [44371231280](https://github.com/gameacc2025/martest/actions/runs/44371231280): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
+| CI | PASS | [44372181158](https://github.com/gameacc2025/martest/actions/runs/44371231375): 385 Frontend/Shared tests, 18 architecture/session tests, 1,709 Backend tests, all three app builds |
+| Prisma migration parity | PASS | [44372181187](https://github.com/gameacc2025/martest/actions/runs/44371231516): fresh PostgreSQL migration and all Prisma model/table checks |
+| Runtime + browser | PASS | [44372180970](https://github.com/gameacc2025/martest/actions/runs/44371231280): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
 | Support SLA | IMPLEMENTED + VERIFIED | Pause/resume, queue-scoped recipients, import-safe worker, timezone-aware calendar, input validation, applied-policy FK |
 | CRM audit/status | IMPLEMENTED + VERIFIED | Actor ID forwarded; transaction-aware central audit writer |
 | Audit hardening | IMPLEMENTED + TESTED | Recursive case-insensitive redaction; safe IP; bounded correlation IDs; writer tests |
@@ -47,7 +47,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 ## Remaining queue
 
-1. Continue company-owned endpoint tenant/IDOR review; no exhaustive security sign-off yet.
+- **Targeted Company/User tenant review (2026-11-18):** Company route guards and tests enforce own-company scoping and STAFF-only settings/lifecycle actions; User service has context and role-scope guards. No new defect confirmed in the reviewed paths; this is not a full sign-off.
+
+1. Continue resource-specific tenant/IDOR review across Products, Inquiry, Support, CMS, Notifications and Auth; no exhaustive security sign-off yet.
 2. Decide AuditLog retention/archival with owner/legal input. Keep append-only protection; do not purge or invent a period.
 3. Add central audit action registry and normalize remaining producers.
 4. Active Company dashboard sample values have been removed; hardcoded samples remain only in dormant, unregistered Retail/Finance prototypes, which must stay unreachable until owner approval.
