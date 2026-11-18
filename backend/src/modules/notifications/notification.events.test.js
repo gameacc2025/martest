@@ -96,7 +96,7 @@ test('catalog: keys are unique and match their entries', () => {
 
 test('catalog: every event declares all three channels with boolean defaults', () => {
   // Events that intentionally enable SMS by default for critical alerts
-  const smsEnabledEvents = new Set(['SUPPORT_SLA_ESCALATED']);
+  const smsEnabledEvents = new Set();
 
   for (const event of listEvents()) {
     assert.equal(typeof event.channels.IN_APP, 'boolean', `${event.key}.IN_APP`);
