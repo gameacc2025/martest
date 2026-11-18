@@ -87,6 +87,14 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     expect(wrapper.find('.p .ac a').text()).toContain('مشاهده')
   })
 
+  it('uses text-free product skeletons while loading', async () => {
+    getProducts.mockImplementation(() => new Promise(() => {}))
+    wrapper = mountListing()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.product-loading-grid').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('در حال دریافت محصولات')
+  })
+
   it('shows inquiry actions only to authenticated company/staff users with permission', async () => {
     authState.isAuthenticated = true
     authState.isCustomer = false
