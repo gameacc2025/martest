@@ -375,10 +375,9 @@ test('dispatchNotification: fails closed when SMS subscription state changes dur
       consumeUsage: async () => { throw error; },
     });
 
-    await assert.rejects(
-      () => dispatchNotification('PRODUCT_STATUS_CHANGED', [10], { product: { id: 1 }, status: 'APPROVED' }),
-      (caught) => caught === error,
-    );
+    const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [10], { product: { id: 1 }, status: 'APPROVED' });
+    assert.equal(summary.sms.queued, 0);
+    assert.equal(summary.sms.quotaCheckFailed, 1);
     assert.equal(deliveryRows().filter((row) => row.channel === 'SMS').length, 0);
   });
 });
@@ -395,10 +394,9 @@ test('dispatchNotification: fails closed when SMS quota service is unavailable',
       consumeUsage: async () => { throw error; },
     });
 
-    await assert.rejects(
-      () => dispatchNotification('PRODUCT_STATUS_CHANGED', [11], { product: { id: 1 }, status: 'APPROVED' }),
-      (caught) => caught === error,
-    );
+    const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [11], { product: { id: 1 }, status: 'APPROVED' });
+    assert.equal(summary.sms.queued, 0);
+    assert.equal(summary.sms.quotaCheckFailed, 1);
     assert.equal(deliveryRows().filter((row) => row.channel === 'SMS').length, 0);
   });
 });
