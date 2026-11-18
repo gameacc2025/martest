@@ -97,8 +97,9 @@ describe('route table', () => {
     expect(router.resolve({ name: 'auth-callback' }).meta.requiresAuth).toBeUndefined()
   })
 
-  it('redirects unknown paths to the root gate', async () => {
-    await router.push('/definitely/not/a/route')
+  it('does not register B2C retail order routes and sends the path to the root gate', async () => {
+    expect(router.hasRoute('company-retail-orders')).toBe(false)
+    await router.push('/retail/orders')
     expect(router.currentRoute.value.name).toBe('root')
   })
 })
