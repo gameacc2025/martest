@@ -184,7 +184,7 @@ test('GET /:id: STAFF with leads.read -> 200', async () => {
   await app.close();
 });
 
-// ── POST / (create) — ALL_TYPES + leads.create/inquiries.create
+// ── POST / (create) — STAFF/COMPANY only; AD-1 forbids CUSTOMER-originated RFQs
 
 test('POST /: STAFF with leads.create -> 200', async () => {
   const app = await buildApp();
@@ -196,6 +196,19 @@ test('POST /: STAFF with leads.create -> 200', async () => {
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.create, true);
+  await app.close();
+});
+
+test('POST /: CUSTOMER is denied even with stale inquiries.create and leads.create permissions', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/v1/inquiries',
+    headers: userHeader('CUSTOMER', ['inquiries.create', 'leads.create']),
+    payload: { title: 'Forbidden customer RFQ', items: [{ productId: 1, quantity: 10 }] },
+  });
+  assert.equal(res.statusCode, 403);
+  assert.equal(hit.create, undefined);
   await app.close();
 });
 
@@ -278,12 +291,12 @@ test('PATCH /:id/status: STAFF with leads.update -> 200', async () => {
   await app.close();
 });
 
-test('PATCH /:id/status: CUSTOMER with inquiries.create can request own cancellation', async () => {
+test('PATCH /:id/status: CUSTOMER with inquiries.read can request own cancellation', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'PATCH',
     url: '/api/v1/inquiries/42/status',
-    headers: userHeader('CUSTOMER', ['inquiries.create']),
+    headers: userHeader('CUSTOMER', ['inquiries.read']),
     payload: { status: 'CANCELLED' },
   });
   assert.equal(res.statusCode, 200);
@@ -291,12 +304,12 @@ test('PATCH /:id/status: CUSTOMER with inquiries.create can request own cancella
   await app.close();
 });
 
-test('PATCH /:id/responses/:responseId/decision: buyer permission reaches decision handler', async () => {
+test('PATCH /:id/responses/:responseId/decision: buyer read permission reaches decision handler', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'PATCH',
     url: '/api/v1/inquiries/42/responses/9/decision',
-    headers: userHeader('CUSTOMER', ['inquiries.create']),
+    headers: userHeader('CUSTOMER', ['inquiries.read']),
     payload: { decision: 'SELECTED' },
   });
   assert.equal(res.statusCode, 200);
@@ -309,7 +322,7 @@ test('PATCH /:id/responses/:responseId/decision: invalid decision is rejected by
   const res = await app.inject({
     method: 'PATCH',
     url: '/api/v1/inquiries/42/responses/9/decision',
-    headers: userHeader('CUSTOMER', ['inquiries.create']),
+    headers: userHeader('CUSTOMER', ['inquiries.read']),
     payload: { decision: 'MAYBE' },
   });
   assert.equal(res.statusCode, 400);
