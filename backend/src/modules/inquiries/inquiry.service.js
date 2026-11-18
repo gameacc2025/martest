@@ -986,14 +986,21 @@ async function getInquiry(inquiryId, caller) {
 }
 
 async function createInquiry(data, caller) {
-  const isCustomerBuyer = isCustomerContext(caller);
-  const buyerUserId = isCustomerBuyer ? assertAuthenticatedUser(caller) : null;
-  const companyId = isCustomerBuyer ? null : resolveCompanyId(data, caller);
+  // AD-1: CUSTOMER may read/manage only existing buyer-owned inquiries; it
+  // cannot originate a new RFQ. Enforce this in the service as well as the route.
+  if (isCustomerContext(caller)) {
+    throw {
+      statusCode: 403,
+      code: 'CUSTOMER_INQUIRY_CREATION_DISABLED',
+      message: 'ثبت استعلام جدید از حساب مشتری فعال نیست.',
+    };
+  }
 
-  if (!isCustomerBuyer) ensureCompanyId(companyId);
+  const companyId = resolveCompanyId(data, caller);
+  ensureCompanyId(companyId);
 
   return prisma.$transaction(async (tx) => {
-    if (companyId) await validateInquiryCreationCapacity(companyId, tx);
+    await validateInquiryCreationCapacity(companyId, tx);
     await validateInquiryProducts(data.items, tx);
 
     if (data.status && data.status !== 'DRAFT') {
@@ -1001,9 +1008,6 @@ async function createInquiry(data, caller) {
     }
 
     const settings = buildInquirySettings(data, { partial: false });
-    // Website quick inquiries are actionable immediately. Company-authored RFQs
-    // retain the established DRAFT -> SUBMITTED -> OPEN workflow.
-    if (isCustomerBuyer) settings.publishDate = new Date();
     assertInquiryDateWindow(settings.publishDate, settings.responseDeadline);
 
     const inquiry = await tx.inquiry.create({
@@ -1011,23 +1015,15 @@ async function createInquiry(data, caller) {
         title: data.title,
         description: data.description,
         companyId,
-        buyerUserId,
-        status: isCustomerBuyer ? 'OPEN' : 'DRAFT',
+        buyerUserId: null,
+        status: 'DRAFT',
         ...settings,
         items: normalizeInquiryItems(data.items),
       },
       include: inquiryInclude,
     });
 
-    if (companyId) {
-      await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
-    } else if (buyerUserId) {
-      await consumeUsage({ ownerType: 'user', ownerId: buyerUserId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
-    }
-
-    if (isCustomerBuyer) {
-      await notifyInquiryPublished(tx, inquiry);
-    }
+    await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
     return shapeInquiryForCaller(inquiry, caller);
   });
 }
