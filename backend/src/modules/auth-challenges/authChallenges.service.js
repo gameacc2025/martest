@@ -114,7 +114,21 @@ async function checkRateLimits(userId, purpose, channel, destination, ipAddress,
     return { allowed: false, retryAfter: 3600, errorCode: 'RATE_LIMITED' };
   }
 
-  // 3. Global IP limit (if provided)
+  // 3. Enforce the advertised resend cooldown, including sequential requests.
+  const recentChallenge = await prismaClient.authChallenge.findFirst({
+    where: {
+      userId,
+      purpose,
+      channel,
+      createdAt: { gte: new Date(now.getTime() - RESEND_COOLDOWN_MS) },
+    },
+    select: { id: true },
+  });
+  if (recentChallenge) {
+    return { allowed: false, retryAfter: Math.ceil(RESEND_COOLDOWN_MS / 1000), errorCode: 'RESEND_COOLDOWN' };
+  }
+
+  // 4. Global IP limit (if provided)
   if (ipAddress) {
     // Note: This would require storing IP on AuthChallenge or a separate rate-limit table.
     // For now, rely on route-level rate limiting in Fastify.
