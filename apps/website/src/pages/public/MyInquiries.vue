@@ -428,9 +428,9 @@ onMounted(async () => {
         </div>
         <div v-else-if="!inquiries.length" class="empty-state">
           <i class="pi pi-file-edit"></i>
-          <h2>هنوز استعلامی ثبت نکرده‌اید</h2>
-          <p>برای دریافت قیمت و شرایط فروش، وارد صفحه یک محصول شوید و گزینه استعلام قیمت را انتخاب کنید.</p>
-          <Button label="مشاهده محصولات" icon="pi pi-shopping-bag" @click="router.push('/products')" />
+          <h2>هنوز استعلامی برای این حساب ثبت نشده است</h2>
+          <p>طبق سیاست فعلی سامانه، ثبت استعلام خرید از حساب مشتری غیرفعال است. برای راهنمایی و پیگیری، با پشتیبانی در ارتباط باشید.</p>
+          <Button label="ثبت تیکت پشتیبانی" icon="pi pi-headphones" @click="router.push('/support/tickets')" />
         </div>
         <div v-else class="inquiry-list">
           <button v-for="inquiry in inquiries" :key="inquiry.id" type="button" class="inquiry-row" @click="openInquiry(inquiry)">
