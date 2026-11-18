@@ -160,7 +160,8 @@
                 </template>
                 <div v-else class="price-unavailable">
                   <i class="pi pi-info-circle"></i>
-                  <span>برای اطلاع از قیمت و شرایط فروش، استعلام بگیرید.</span>
+                  <span v-if="canCreateInquiry">برای اطلاع از قیمت و شرایط فروش، استعلام بگیرید.</span>
+                  <span v-else>قیمت این محصول از طریق فرایند استعلام سازمانی اعلام می‌شود.</span>
                 </div>
               </div>
 
