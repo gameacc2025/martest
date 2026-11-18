@@ -1036,6 +1036,7 @@ module.exports = {
   // SLA utilities
   parseWorkingCalendar,
   addWorkingMinutes,
+  calculateWorkingMinutesBetween,
   isWorkingDay,
   calculateSlaRemaining,
   isSlaBreached,
