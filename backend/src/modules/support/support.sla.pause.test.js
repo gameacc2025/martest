@@ -55,6 +55,7 @@ function makePrisma() {
   const prisma = {
     supportTicket: {
       findUnique: async () => ({ ...ticket }),
+      findFirst: async ({ where }) => where.id === ticket.id ? { ...ticket } : null,
       update: async ({ data }) => {
         Object.assign(ticket, data);
         return { ...ticket };
@@ -90,7 +91,7 @@ test('active SLA pause freezes both displayed deadlines by working time', async 
   const now = new Date(2026, 10, 16, 11, 0);
   await service.pauseSla(prisma, 51, 7, 'Waiting for customer', pausedAt);
 
-  const details = await service.getSlaDetails(prisma, 51, now);
+  const details = await service.getSlaDetails(prisma, 51, { id: 7, accessType: 'STAFF' }, now);
   assert.equal(details.isPaused, true);
   assert.equal(details.pausedAt.getTime(), pausedAt.getTime());
   assert.equal(details.firstResponse.dueAt.getTime(), new Date(2026, 10, 16, 16, 0).getTime());
@@ -109,7 +110,7 @@ test('resume SLA persists the paused working minutes into both due dates', async
   assert.equal(events.at(-1).eventType, 'SLA_RESUMED');
   assert.equal(events.at(-1).payload.pausedWorkingMinutes, 60);
 
-  const details = await service.getSlaDetails(prisma, 51, resumedAt);
+  const details = await service.getSlaDetails(prisma, 51, { id: 7, accessType: 'STAFF' }, resumedAt);
   assert.equal(details.isPaused, false);
   assert.equal(details.firstResponse.dueAt.getTime(), ticket.firstResponseDueAt.getTime());
 });
