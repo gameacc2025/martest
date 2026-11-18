@@ -46,6 +46,7 @@ function resetMocks() {
   fx = {
     user: { id: 1, phone: '09120000000', email: 'test@example.com', status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
     challenge: { id: 10, userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '+989120000000', secretHash: 'hashed:123456', expiresAt: new Date(Date.now() + 15 * 60 * 1000), attemptCount: 0, maxAttempts: 5, consumedAt: null, invalidatedAt: null, createdAt: new Date() },
+    updateManyCount: 1,
   };
 }
 resetMocks();
@@ -78,7 +79,7 @@ const mockPrisma = {
     },
     updateMany: async (args) => {
       calls.challengeUpdateMany.push(args);
-      return { count: 1 };
+      return { count: fx.updateManyCount };
     },
     count: async (args) => {
       calls.challengeCount.push(args);
@@ -295,8 +296,8 @@ test('verifyChallenge: rejects after max attempts', async () => {
     (err) => err.status === 400 && err.code === 'MAX_ATTEMPTS_EXCEEDED',
   );
   // Should auto-invalidate
-  assert.equal(calls.challengeUpdate.length, 1);
-  assert.ok(calls.challengeUpdate[0].data.invalidatedAt instanceof Date);
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.ok(calls.challengeUpdateMany[0].data.invalidatedAt instanceof Date);
 });
 
 test('verifyChallenge: rejects wrong code, increments attempt count', async () => {
@@ -306,8 +307,32 @@ test('verifyChallenge: rejects wrong code, increments attempt count', async () =
     () => service.verifyChallenge({ challengeId: '10', code: 'wrong' }),
     (err) => err.status === 400 && err.code === 'INVALID_CODE',
   );
-  assert.equal(calls.challengeUpdate.length, 1);
-  assert.equal(calls.challengeUpdate[0].data.attemptCount.increment, 1);
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.equal(calls.challengeUpdateMany[0].data.attemptCount.increment, 1);
+  assert.deepEqual(calls.challengeUpdateMany[0].where.attemptCount, { equals: 0, lt: 5 });
+});
+
+test('verifyChallenge: rejects a concurrent attempt when compare-and-swap loses', async () => {
+  baseResetAll();
+  fx.updateManyCount = 0;
+  await assert.rejects(
+    () => service.verifyChallenge({ challengeId: '10', code: '123456' }),
+    (err) => err.status === 409 && err.code === 'CHALLENGE_STATE_CHANGED',
+  );
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.deepEqual(calls.challengeUpdateMany[0].where.attemptCount, { equals: 0, lt: 5 });
+});
+
+test('verifyChallenge: invalidates immediately when the final allowed attempt is wrong', async () => {
+  baseResetAll();
+  fx.challenge = { ...fx.challenge, attemptCount: 4, maxAttempts: 5 };
+  nextVerifyResult = false;
+  await assert.rejects(
+    () => service.verifyChallenge({ challengeId: '10', code: 'wrong' }),
+    (err) => err.status === 400 && err.code === 'INVALID_CODE' && err.details.remainingAttempts === 0,
+  );
+  assert.equal(calls.challengeUpdateMany.length, 2);
+  assert.ok(calls.challengeUpdateMany[1].data.invalidatedAt instanceof Date);
 });
 
 test('verifyChallenge: succeeds with correct code', async () => {
@@ -317,8 +342,9 @@ test('verifyChallenge: succeeds with correct code', async () => {
   assert.equal(result.valid, true);
   assert.equal(result.purpose, 'PASSWORD_RESET');
   assert.equal(result.remainingAttempts, 4); // maxAttempts - attemptCount - 1
-  assert.equal(calls.challengeUpdate.length, 1);
-  assert.equal(calls.challengeUpdate[0].data.attemptCount.increment, 1);
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.equal(calls.challengeUpdateMany[0].data.attemptCount.increment, 1);
+  assert.deepEqual(calls.challengeUpdateMany[0].where.attemptCount, { equals: 0, lt: 5 });
 });
 
 // ── consumeChallenge ─────────────────────────────────────────
@@ -377,6 +403,17 @@ test('consumeChallenge: rejects wrong code', async () => {
   );
 });
 
+test('consumeChallenge: rejects a concurrent consume when compare-and-swap loses', async () => {
+  baseResetAll();
+  fx.updateManyCount = 0;
+  await assert.rejects(
+    () => service.consumeChallenge({ challengeId: '10', code: '123456' }),
+    (err) => err.status === 409 && err.code === 'CHALLENGE_STATE_CHANGED',
+  );
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.deepEqual(calls.challengeUpdateMany[0].where.attemptCount, { equals: 0, lt: 5 });
+});
+
 test('consumeChallenge: succeeds and marks consumed', async () => {
   baseResetAll();
   nextVerifyResult = true;
@@ -385,7 +422,7 @@ test('consumeChallenge: succeeds and marks consumed', async () => {
   assert.equal(result.purpose, 'PASSWORD_RESET');
   assert.equal(result.userId, 1);
   // Should update with consumedAt
-  const updateCall = calls.challengeUpdate.find(c => c.data.consumedAt !== undefined);
+  const updateCall = calls.challengeUpdateMany.find(c => c.data.consumedAt !== undefined);
   assert.ok(updateCall, 'consumedAt should be set');
   assert.ok(updateCall.data.consumedAt instanceof Date);
 });
