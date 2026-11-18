@@ -3,8 +3,6 @@ import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import { useCompanyStore } from '../../stores/companies'
-import { useCartStore } from '../../stores/cart'
-import { useWishlistStore } from '../../stores/wishlist'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import Paginator from 'primevue/paginator'
@@ -15,8 +13,6 @@ const route = useRoute()
 const router = useRouter()
 const productsStore = useProductsStore()
 const companyStore = useCompanyStore()
-const cartStore = useCartStore()
-const wishlistStore = useWishlistStore()
 
 const company = ref(null)
 const products = ref([])
@@ -94,10 +90,6 @@ function onPageChange(event) {
   perPage.value = event.rows
   loadCompanyPage()
 }
-function addToCart(product) {
-  cartStore.addToCart({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 })
-}
-function addToWishlist(product) { wishlistStore.addToWishlist(product) }
 function viewProduct(product) { router.push({ name: 'product-details', params: { id: product.id } }) }
 function goToProducts() { router.push({ name: 'products' }) }
 function companyTypeLabel(type) {
@@ -182,7 +174,7 @@ function companyTypeLabel(type) {
           </div>
           <div v-else class="company-product-grid">
             <ProductCard v-for="product in products" :key="product.id" :product="product"
-              @add-to-cart="addToCart" @toggle-wishlist="addToWishlist" @view-product="viewProduct" />
+              @view-product="viewProduct" />
           </div>
 
           <div v-if="totalProducts > 0" class="company-paginator" aria-label="صفحه‌بندی محصولات شرکت">
