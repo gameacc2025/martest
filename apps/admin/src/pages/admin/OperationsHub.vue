@@ -1,6 +1,10 @@
 <script setup>
-// DORMANT PROTOTYPE: Retail and Finance/Settlement modules are not routed or navigable.
-// Re-enable only after the owner approves business rules, APIs, and acceptance tests (AD-4).
+// DORMANT SAMPLE PROTOTYPE: this entire component (CRM, Support, Retail,
+// Finance, HR and other modules) contains hard-coded demonstration records.
+// It is intentionally not registered in the Admin router. Never present these
+// values as live metrics or reconnect this component to navigation. Live CRM
+// and Support workspaces use their dedicated API-backed pages. Retail/Finance
+// remain gated by AD-4 until the owner approves their business rules and APIs.
 
 import { computed } from 'vue'
 import OperationalWorkspace from '@telecom/shared-ui/components/operations/OperationalWorkspace.vue'
@@ -203,6 +207,10 @@ const page = computed(() => modules[props.module] || modules.tickets)
 </script>
 
 <template>
+  <div class="prototype-warning" role="status">
+    <strong>نمونه نمایشی غیرفعال</strong>
+    <span>تمام اعداد و ردیف‌های این صفحه ساختگی‌اند و به داده زنده متصل نیستند.</span>
+  </div>
   <OperationalWorkspace
     :title="page.title"
     :eyebrow="page.eyebrow"
@@ -213,3 +221,21 @@ const page = computed(() => modules[props.module] || modules.tickets)
     :rows="page.rows"
   />
 </template>
+<style scoped>
+.prototype-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--warning-300, #fcd34d);
+  border-radius: 0.75rem;
+  background: var(--warning-50, #fffbeb);
+  color: var(--text-color, #334155);
+  font-size: 0.875rem;
+}
+.prototype-warning strong {
+  font-weight: 700;
+}
+</style>
