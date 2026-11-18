@@ -55,13 +55,23 @@ async function seedSupport(prisma) {
       policies += 1;
     }
   }
-  // Add global SLA policies (no category)
+  // A nullable categoryId cannot be used in Prisma's generated composite
+  // unique selector. Reconcile global policies by lookup, then update/create.
   for (const [priority, values] of Object.entries(SLA)) {
-    await prisma.supportSlaPolicy.upsert({
-      where: { categoryId_priority: { categoryId: null, priority } },
-      create: { categoryId: null, priority, ...values, isActive: true },
-      update: { ...values, isActive: true },
+    const existing = await prisma.supportSlaPolicy.findFirst({
+      where: { categoryId: null, priority },
+      orderBy: { id: 'asc' },
     });
+    if (existing) {
+      await prisma.supportSlaPolicy.update({
+        where: { id: existing.id },
+        data: { ...values, isActive: true },
+      });
+    } else {
+      await prisma.supportSlaPolicy.create({
+        data: { categoryId: null, priority, ...values, isActive: true },
+      });
+    }
     policies += 1;
   }
   return { categories: categories.length, queues: queues.length, policies };
