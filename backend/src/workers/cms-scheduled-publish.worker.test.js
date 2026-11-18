@@ -102,7 +102,7 @@ test('runOnce publishes due articles and stores a JSON-safe revision snapshot', 
     assert.equal(revisionData.editorUserId, 7);
     assert.equal(revisionData.revisionNo, 3);
     assert.equal(revisionData.snapshot.status, 'PUBLISHED');
-    assert.equal(revisionData.snapshot.publishedAt, updatedArticle.publishedAt.toISOString());
+    assert.equal(revisionData.snapshot.publishedAt, updateArgs.data.publishedAt.toISOString());
     assert.doesNotThrow(() => JSON.stringify(revisionData.snapshot));
   } finally {
     loaded.restore();
