@@ -109,16 +109,19 @@ async function escalateTicket(prismaClient, ticket, escalationType, slaDetails) 
   // Current assignee
   if (ticket.assignedUserId) recipientIds.add(ticket.assignedUserId);
 
-  // Queue members
+  // Notify only active staff who currently hold assignments in this queue.
   if (ticket.assignedQueueId) {
-    const queueMembers = await prismaClient.user.findMany({
+    const queueAssignments = await prismaClient.supportAssignment.findMany({
       where: {
-        accessProfile: { type: 'STAFF', isActive: true },
-        status: 'ACTIVE',
+        queueId: ticket.assignedQueueId,
+        endedAt: null,
+        assignedUserId: { not: null },
       },
-      select: { id: true },
+      select: { assignedUserId: true },
     });
-    queueMembers.forEach(m => recipientIds.add(m.id));
+    queueAssignments.forEach((assignment) => {
+      if (assignment.assignedUserId) recipientIds.add(assignment.assignedUserId);
+    });
   }
 
   // Fallback: all STAFF with tickets.read permission
@@ -191,15 +194,19 @@ async function warnTicketStakeholders(prismaClient, ticket, warningType, slaInfo
   const recipientIds = new Set();
   if (ticket.assignedUserId) recipientIds.add(ticket.assignedUserId);
 
+  // Include only active staff currently assigned within this queue.
   if (ticket.assignedQueueId) {
-    const queueMembers = await prismaClient.user.findMany({
+    const queueAssignments = await prismaClient.supportAssignment.findMany({
       where: {
-        accessProfile: { type: 'STAFF', isActive: true },
-        status: 'ACTIVE',
+        queueId: ticket.assignedQueueId,
+        endedAt: null,
+        assignedUserId: { not: null },
       },
-      select: { id: true },
+      select: { assignedUserId: true },
     });
-    queueMembers.forEach(m => recipientIds.add(m.id));
+    queueAssignments.forEach((assignment) => {
+      if (assignment.assignedUserId) recipientIds.add(assignment.assignedUserId);
+    });
   }
 
   if (recipientIds.size > 0) {
@@ -219,26 +226,14 @@ async function warnTicketStakeholders(prismaClient, ticket, warningType, slaInfo
   }
 }
 
-async function checkPausedSlas() {
-  // Check for tickets with paused SLA that should be auto-resumed
-  // This is a placeholder for future implementation of SLA pause/resume logic
-  // Could check for events like SLA_PAUSED and auto-resume after certain conditions
-  return { resumed: 0 };
-}
-
 async function runOnce() {
-  const startedAt = Date.now();
   try {
-    const [escalationResult, resumeResult] = await Promise.all([
-      checkAndEscalateTickets(),
-      checkPausedSlas(),
-    ]);
-
-    const total = escalationResult.escalated + escalationResult.warned + escalationResult.breached + resumeResult.resumed;
+    const result = await checkAndEscalateTickets();
+    const total = result.escalated + result.warned + result.breached;
     if (total > 0) {
-      console.log('[sla-monitor] batch completed', JSON.stringify({ ...escalationResult, ...resumeResult }));
+      console.log('[sla-monitor] batch completed', JSON.stringify(result));
     }
-    return { ...escalationResult, ...resumeResult };
+    return result;
   } catch (error) {
     console.error('[sla-monitor] batch failed', error?.message || error);
     throw error;
@@ -269,13 +264,15 @@ function stop(signal) {
   console.log(`[sla-monitor] received ${signal}; stopping after current batch`);
 }
 
-process.on('SIGINT', () => stop('SIGINT'));
-process.on('SIGTERM', () => stop('SIGTERM'));
+module.exports = { runOnce, checkAndEscalateTickets, escalateTicket, warnTicketStakeholders };
 
-main().catch(async (error) => {
-  console.error('[sla-monitor] fatal error', error?.message || error);
-  await prisma.$disconnect();
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  process.on('SIGINT', () => stop('SIGINT'));
+  process.on('SIGTERM', () => stop('SIGTERM'));
 
-module.exports = { checkAndEscalateTickets, escalateTicket, warnTicketStakeholders };
+  main().catch(async (error) => {
+    console.error('[sla-monitor] fatal error', error?.message || error);
+    await prisma.$disconnect();
+    process.exitCode = 1;
+  });
+}
