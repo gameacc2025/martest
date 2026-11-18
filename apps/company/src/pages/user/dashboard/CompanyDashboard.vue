@@ -11,8 +11,8 @@
         <router-link v-for="metric in dashboardMetrics" :key="metric.key" :to="metric.to" class="cd-dashboard-metric" :class="`cd-dashboard-metric--${metric.tone}`">
           <span class="cd-dashboard-metric__icon"><i :class="metric.icon" aria-hidden="true"></i></span>
           <span class="cd-dashboard-metric__content">
-            <span class="cd-dashboard-metric__label">{{ metric.label }}</span><strong>{{ Number(metric.value).toLocaleString('fa-IR') }}</strong>
-            <small><span v-if="metric.sample" class="cd-sample-tag">نمونه</span>{{ metric.sample ? 'عدد نمایشی تا اتصال API' : metric.hint }}</small>
+            <span class="cd-dashboard-metric__label">{{ metric.label }}</span><strong>{{ metric.value == null ? '—' : Number(metric.value).toLocaleString('fa-IR') }}</strong>
+            <small>{{ metric.hint }}</small>
           </span>
         </router-link>
       </div>
@@ -45,20 +45,10 @@
         </div>
       </div>
       <aside class="cd-dashboard-aside">
-        <TemPanel title="میزان فروش" icon="pi pi-chart-line">
-          <template #actions><span class="cd-sample-tag">داده نمونه</span></template>
-          <div class="cd-sales-chart">
-            <div class="cd-sales-chart__summary"><strong>۵۶٫۸ <small>میلیون تومان</small></strong><span><i class="pi pi-arrow-up-left" aria-hidden="true"></i> ۱۸٫۶٪ <small>نسبت به ماه قبل</small></span></div>
-            <svg class="cd-sales-chart__plot" viewBox="0 0 320 150" role="img" aria-label="نمودار نمونه فروش در دوازده ماه گذشته">
-              <defs><linearGradient id="cd-sales-area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--ds-brand-secondary)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--ds-brand-secondary)" stop-opacity="0"/></linearGradient></defs>
-              <path d="M8 120H312 M8 82H312 M8 44H312" class="cd-sales-chart__grid"/>
-              <path d="M8 118 L35 108 L62 112 L89 91 L116 96 L143 76 L170 82 L197 59 L224 65 L251 42 L278 48 L312 18 L312 132 L8 132 Z" fill="url(#cd-sales-area)"/>
-              <path d="M8 118 L35 108 L62 112 L89 91 L116 96 L143 76 L170 82 L197 59 L224 65 L251 42 L278 48 L312 18" class="cd-sales-chart__line"/>
-              <circle cx="312" cy="18" r="4" class="cd-sales-chart__point"/>
-            </svg>
-            <div class="cd-sales-chart__months"><span>آذر</span><span>دی</span><span>بهمن</span><span>اسفند</span><span>فروردین</span><span>اردیبهشت</span><span>خرداد</span><span>تیر</span><span>مرداد</span><span>شهریور</span><span>مهر</span><span>آبان</span></div>
-            <p class="cd-sales-chart__note">مقادیر نمایشی هستند و پس از آماده‌شدن API فروش با داده واقعی جایگزین می‌شوند.</p>
-          </div>
+        <TemPanel title="گزارش فروش" icon="pi pi-chart-line">
+          <p class="cd-dashboard-unavailable" role="status">
+            داده فروش در دسترس نیست؛ این گزارش پس از تصویب و راه‌اندازی دامنه سفارش و مالی فعال می‌شود.
+          </p>
         </TemPanel>
       </aside>
     </section>
@@ -466,20 +456,8 @@ onMounted(() => {
 .cd-dashboard-metric__icon{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:8px;font-size:14px}
 .cd-dashboard-metric--violet .cd-dashboard-metric__icon{color:var(--ds-brand-secondary);background:color-mix(in srgb, var(--ds-brand-secondary) 12%, transparent)}.cd-dashboard-metric--green .cd-dashboard-metric__icon{color:var(--ds-status-success-fg);background:var(--ds-status-success-bg)}.cd-dashboard-metric--cyan .cd-dashboard-metric__icon{color:var(--ds-status-info-fg);background:var(--ds-status-info-bg)}.cd-dashboard-metric--amber .cd-dashboard-metric__icon{color:var(--ds-status-warning-fg);background:var(--ds-status-warning-bg)}.cd-dashboard-metric--orange .cd-dashboard-metric__icon{color:var(--ds-status-warning-fg);background:var(--ds-status-warning-bg)}
 .cd-dashboard-metric__content{display:flex;flex-direction:column;min-width:0;gap:3px}.cd-dashboard-metric__label{overflow:hidden;color:var(--ds-color-text-muted);font-size:.69rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.cd-dashboard-metric__content strong{color:var(--ds-color-text);font-size:1rem;font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}.cd-dashboard-metric__content small{display:flex;align-items:center;gap:5px;min-height:15px;color:var(--ds-color-text-muted);font-size:.59rem;line-height:1.3}
-.cd-sample-tag{display:inline-flex;padding:1px 5px;border-radius:6px;background:var(--ds-status-warning-bg);color:var(--ds-status-warning-fg);font-size:.62rem;font-weight:700}
 .cd-dashboard-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(290px,1fr);gap:18px;align-items:start}.cd-dashboard-main,.cd-dashboard-aside{display:grid;min-width:0;gap:18px}.cd-dashboard-two-up{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}.cd-dashboard-three-up{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
-.cd-sales-chart{display:flex;flex-direction:column;gap:9px;min-width:0}
-.cd-sales-chart__summary{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
-.cd-sales-chart__summary>strong{color:var(--ds-color-text);font-size:1.25rem;font-weight:750;line-height:1.2}
-.cd-sales-chart__summary>strong small{color:var(--ds-color-text-muted);font-size:.68rem;font-weight:500}
-.cd-sales-chart__summary>span{display:flex;align-items:center;gap:3px;color:var(--ds-status-success-fg);font-size:.72rem;font-weight:700;white-space:nowrap}
-.cd-sales-chart__summary>span small{color:var(--ds-color-text-muted);font-size:.62rem;font-weight:500}
-.cd-sales-chart__plot{display:block;width:100%;height:auto;overflow:visible}
-.cd-sales-chart__grid{fill:none;stroke:var(--ds-color-border);stroke-width:1;stroke-dasharray:3 4}
-.cd-sales-chart__line{fill:none;stroke:var(--ds-brand-secondary);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.cd-sales-chart__point{fill:var(--ds-color-surface);stroke:var(--ds-brand-secondary);stroke-width:3}
-.cd-sales-chart__months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px 2px;color:var(--ds-color-text-muted);font-size:.61rem;text-align:center}
-.cd-sales-chart__note{margin:0;padding-top:8px;border-top:1px solid var(--ds-color-border);color:var(--ds-color-text-muted);font-size:.65rem;line-height:1.6}
+.cd-dashboard-unavailable{margin:0;padding:14px 0;color:var(--ds-color-text-muted);font-size:.82rem;line-height:1.8}
 @media(max-width:1000px){.cd-dashboard-overview{grid-template-columns:minmax(0,2fr) minmax(230px,1fr)}.cd-dashboard-columns{grid-template-columns:minmax(0,1fr)}.cd-dashboard-aside{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:720px){.cd-dashboard-overview{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(86px,auto);gap:7px}.cd-dashboard-two-up,.cd-dashboard-three-up,.cd-dashboard-aside{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metric{min-height:86px;padding:8px;gap:7px}.cd-dashboard-metric__icon{width:29px;height:29px;flex-basis:29px}.cd-dashboard-metric__content strong{font-size:.96rem}}
 @media(max-width:460px){.cd-dashboard-metrics{grid-template-columns:minmax(0,1fr)}}
