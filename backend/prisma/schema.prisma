@@ -1903,6 +1903,8 @@ model SupportSlaPolicy {
   updatedAt             DateTime        @updatedAt
   /// رابطه Prisma با جدول SupportCategory (SupportCategory)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
   category              SupportCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  /// مجموعه تیکت‌هایی که این سیاست SLA هنگام ایجاد روی آن‌ها اعمال شده است.
+  tickets               SupportTicket[]
 
   @@unique([categoryId, priority])
   @@index([isActive, priority])
@@ -1921,6 +1923,8 @@ model SupportTicket {
   requesterCompanyId    Int?
   /// شناسه SupportCategory مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول SupportCategory است.
   categoryId            Int?
+  /// شناسه سیاست SLA اعمال‌شده هنگام ایجاد تیکت؛ کلید خارجی به جدول SupportSlaPolicy است.
+  slaPolicyId           Int?
   /// شناسه SupportQueue مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول SupportQueue است.
   assignedQueueId       Int?
   /// شناسه کاربر مرتبط با این تیکت پشتیبانی؛ کلید خارجی به جدول User است.
@@ -1955,6 +1959,8 @@ model SupportTicket {
   requesterCompany      Company?            @relation(fields: [requesterCompanyId], references: [id], onDelete: Restrict)
   /// رابطه Prisma با جدول SupportCategory (SupportCategory)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
   category              SupportCategory?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  /// رابطه Prisma با سیاست SLA اعمال‌شده روی تیکت؛ حذف سیاست، تاریخچه تیکت را حفظ و فقط ارجاع را خالی می‌کند.
+  slaPolicy             SupportSlaPolicy?   @relation(fields: [slaPolicyId], references: [id], onDelete: SetNull)
   /// رابطه Prisma با جدول SupportQueue (SupportQueue)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
   assignedQueue         SupportQueue?        @relation(fields: [assignedQueueId], references: [id], onDelete: SetNull)
   /// رابطه Prisma با جدول User (کاربر)؛ رکورد مرتبط را در کد در دسترس قرار می‌دهد و ستون مستقل PostgreSQL نیست.
@@ -1975,6 +1981,7 @@ model SupportTicket {
   @@index([status, priority, firstResponseDueAt])
   @@index([status, resolveDueAt])
   @@index([categoryId])
+  @@index([slaPolicyId])
 
 }
 
