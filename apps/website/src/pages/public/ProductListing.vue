@@ -2,11 +2,13 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
+import { useAuthStore } from '../../stores/auth'
 import { productSalesMode, productPriceLabel } from './homePresentation.js'
 import AppBreadcrumb from '../../components/AppBreadcrumb.vue'
 
 const route = useRoute()
 const productsStore = useProductsStore()
+const authStore = useAuthStore()
 const products = ref([])
 const categories = ref([])
 const loading = ref(false)
@@ -23,6 +25,9 @@ const minPrice = ref('')
 const maxPrice = ref('')
 const brandOptions = computed(() => [...new Set(products.value.map(item => item.brand || item.company?.name).filter(Boolean))].sort((a,b) => a.localeCompare(b)))
 const categoryOptions = computed(() => categories.value.map(item => ({ id: item.id, name: item.nameFa || item.name || item.nameEn || item.slug, count: Number(item.productCount ?? item.productsCount ?? item._count?.products) || null })))
+const canCreateInquiry = computed(() => authStore.isAuthenticated
+  && !authStore.isCustomer
+  && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
 const visibleProducts = computed(() => {
   const list = products.value.filter(product => {
     const brand = product.brand || product.company?.name || ''
@@ -135,7 +140,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
           <article v-for="product in visibleProducts" :key="product.id" class="p">
             <router-link class="im" :to="routeToProduct(product)"><img v-if="image(product)" :src="image(product)" :alt="title(product)"><span v-else>{{ brand(product) }}</span><em>{{ category(product) }}</em></router-link>
             <div class="bd"><div class="br">{{ brand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ title(product) }}</h3><div class="sk">{{ sku(product) }}</div><div class="pr" :class="{ q: !isRetail(product) }">{{ price(product) }}<small>{{ isRetail(product) ? 'قیمت مشخص در کاتالوگ' : 'مناسب خرید سازمانی' }}</small></div></div>
-            <div class="ac"><router-link v-if="!isRetail(product)" class="btn b1" :to="routeToProduct(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="routeToProduct(product)">مشاهده</router-link></div>
+            <div class="ac"><router-link v-if="!isRetail(product) && canCreateInquiry" class="btn b1" :to="routeToProduct(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="routeToProduct(product)">مشاهده</router-link></div>
           </article>
         </div>
         <div v-if="totalPages > 1" class="pagination"><button type="button" :disabled="page <= 1" @click="changePage(page - 1)">قبلی</button><span>صفحه {{ fa(page) }} از {{ fa(totalPages) }}</span><button type="button" :disabled="page >= totalPages" @click="changePage(page + 1)">بعدی</button></div>
