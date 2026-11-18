@@ -362,6 +362,47 @@ test('dispatchNotification: SMS is skipped when quota is exceeded', async () => 
 });
 
 
+test('dispatchNotification: fails closed when SMS subscription state changes during quota verification', async () => {
+  await withSmsProvider(async () => {
+    fx.users = [{ id: 10, phone: '09123456789', email: 'user10@test.com' }];
+    fx.preferences = [
+      { userId: 10, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+    ];
+    const error = new Error('Subscription state changed during quota check');
+    error.code = 'SUBSCRIPTION_STATE_CHANGED';
+    error.statusCode = 409;
+    injectMock('../inquiries/inquiry-subscription.service', {
+      consumeUsage: async () => { throw error; },
+    });
+
+    await assert.rejects(
+      () => dispatchNotification('PRODUCT_STATUS_CHANGED', [10], { product: { id: 1 }, status: 'APPROVED' }),
+      (caught) => caught === error,
+    );
+    assert.equal(deliveryRows().filter((row) => row.channel === 'SMS').length, 0);
+  });
+});
+
+test('dispatchNotification: fails closed when SMS quota service is unavailable', async () => {
+  await withSmsProvider(async () => {
+    fx.users = [{ id: 11, phone: '09123456789', email: 'user11@test.com' }];
+    fx.preferences = [
+      { userId: 11, eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
+    ];
+    const error = new Error('Quota database unavailable');
+    error.code = 'P1001';
+    injectMock('../inquiries/inquiry-subscription.service', {
+      consumeUsage: async () => { throw error; },
+    });
+
+    await assert.rejects(
+      () => dispatchNotification('PRODUCT_STATUS_CHANGED', [11], { product: { id: 1 }, status: 'APPROVED' }),
+      (caught) => caught === error,
+    );
+    assert.equal(deliveryRows().filter((row) => row.channel === 'SMS').length, 0);
+  });
+});
+
 test('dispatchNotification: opted-in SMS is not queued when the provider is unavailable', async () => {
   await withoutSmsProvider(async () => {
     fx.users = [{ id: 9, phone: '09123456789', email: 'user3@test.com' }];
