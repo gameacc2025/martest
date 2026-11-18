@@ -591,40 +591,32 @@ test('createInquiry: SUPER_ADMIN creates a DRAFT under the supplied companyId wi
   assert.equal(args.data.items.create[0].quantity, 5);
 });
 
-test('createInquiry: CUSTOMER creates an immediately open inquiry owned by the authenticated user', async () => {
+test('createInquiry: CUSTOMER cannot originate an RFQ even with a legacy create permission', async () => {
   resetMocks();
-  fx.products = [{ id: 41, status: 'PUBLISHED', company: { status: 'ACTIVE' } }];
-  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
-  const inquiry = await inquiryService.createInquiry({
-    title: 'Customer price request',
-    items: [{ productId: 41, quantity: 2 }],
-  }, customer);
-  const create = calls['inquiry.create'][0];
-  assert.equal(create.data.companyId, null);
-  assert.equal(create.data.buyerUserId, 77);
-  assert.equal(create.data.status, 'OPEN');
-  assert.ok(create.data.publishDate instanceof Date);
-  assert.equal(inquiry.id, 7);
-  assert.ok(calls.dispatchNotification.some(([event]) => event === 'INQUIRY_PUBLISHED'));
+  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create', 'leads.create'] };
+  await assert.rejects(
+    () => inquiryService.createInquiry({
+      title: 'Customer price request',
+      items: [{ productId: 41, quantity: 2 }],
+    }, customer),
+    (error) => error.statusCode === 403 && error.code === 'CUSTOMER_INQUIRY_CREATION_DISABLED',
+  );
+  assert.equal(calls['inquiry.create'].length, 0);
+  assert.equal(calls.dispatchNotification.length, 0);
 });
 
-test('createInquiry: published RFQ notifies every active supplier carrying the same catalogCode', async () => {
+test('createInquiry: AccessProfile-less CUSTOMER_USER cannot originate an RFQ', async () => {
   resetMocks();
-  const catalogCode = 'TEL-CISCO-C9300-48P';
-  fx.products = [
-    { id: 41, companyId: 20, catalogCode, status: 'PUBLISHED', company: { status: 'ACTIVE' } },
-    { id: 42, companyId: 30, catalogCode, status: 'PUBLISHED', company: { status: 'ACTIVE' } },
-  ];
-  fx.notificationInquiryItems = [{ product: { companyId: 20, catalogCode } }];
-  const customer = { id: 77, accessType: 'CUSTOMER', companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
-  await inquiryService.createInquiry({
-    title: 'Cisco Catalyst request',
-    items: [{ productId: 41, quantity: 2 }],
-  }, customer);
-  const supplierDispatch = calls.dispatchNotification.find(([event, recipients]) =>
-    event === 'INQUIRY_PUBLISHED' && Array.isArray(recipients?.companyIds));
-  assert.ok(supplierDispatch);
-  assert.deepEqual(supplierDispatch[1].companyIds, [20, 30]);
+  const customer = { id: 77, accessType: null, companyId: null, roles: ['CUSTOMER_USER'], permissions: ['inquiries.create'] };
+  await assert.rejects(
+    () => inquiryService.createInquiry({
+      title: 'Customer price request',
+      items: [{ productId: 41, quantity: 2 }],
+    }, customer),
+    (error) => error.statusCode === 403 && error.code === 'CUSTOMER_INQUIRY_CREATION_DISABLED',
+  );
+  assert.equal(calls['inquiry.create'].length, 0);
+  assert.equal(calls.dispatchNotification.length, 0);
 });
 
 test('createInquiry: rejects a response deadline that is already past', async () => {
