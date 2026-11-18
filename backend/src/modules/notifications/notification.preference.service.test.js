@@ -37,7 +37,16 @@ function resetMocks() {
 const mockPrisma = {
   notificationPreference: {
     findMany: async (args) => { record('notificationPreference.findMany', args); return fx.prefRows; },
-    upsert: async (args) => { record('notificationPreference.upsert', args); fx.upsertArgs.push(args); return { id: 1, ...args.data }; },
+    upsert: async (args) => {
+      record('notificationPreference.upsert', args);
+      fx.upsertArgs.push(args);
+      const row = { id: 1, ...args.create, ...args.update };
+      const index = fx.prefRows.findIndex((item) => item.userId === args.create.userId
+        && item.eventType === args.create.eventType && item.channel === args.create.channel);
+      if (index >= 0) fx.prefRows[index] = { ...fx.prefRows[index], ...args.update };
+      else fx.prefRows.push(row);
+      return row;
+    },
   },
 };
 
