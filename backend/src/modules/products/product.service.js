@@ -322,6 +322,9 @@ function resolveCompanyId(data, caller) {
     return toPositiveInt(data.companyId, 'companyId');
   }
   if (!caller?.companyId) throw { statusCode: 400, code: 'COMPANY_REQUIRED', message: 'Authenticated user must belong to a company.' };
+  if (caller?.accessType !== 'COMPANY') {
+    throw { statusCode: 403, code: 'COMPANY_CONTEXT_REQUIRED', message: 'Product creation requires a COMPANY access context or an authorized STAFF context.' };
+  }
   if (data.companyId && Number(data.companyId) !== Number(caller.companyId)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'Company users can only manage their own products.' };
   }
