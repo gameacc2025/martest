@@ -101,13 +101,14 @@ describe('route table', () => {
     expect(router.resolve({ name: 'auth-callback' }).meta.requiresAuth).toBeUndefined()
   })
 
-  it('does not register B2C retail order routes and sends those paths to the root gate', async () => {
-    expect(router.hasRoute('admin-orders')).toBe(false)
-    expect(router.hasRoute('admin-retail-orders')).toBe(false)
-    await router.push('/orders')
-    expect(router.currentRoute.value.name).toBe('root')
-    await router.push('/retail/orders')
-    expect(router.currentRoute.value.name).toBe('root')
+  it('keeps retail and finance routes disabled until owner approval', async () => {
+    for (const name of ['admin-orders', 'admin-retail-orders', 'admin-finance', 'admin-finance-settlements', 'admin-finance-transactions', 'admin-finance-invoices']) {
+      expect(router.hasRoute(name), `unexpected active route: ${name}`).toBe(false)
+    }
+    for (const path of ['/orders', '/retail/orders', '/finance', '/finance/settlements', '/finance/transactions', '/finance/invoices']) {
+      await router.push(path)
+      expect(router.currentRoute.value.name).toBe('root')
+    }
   })
 })
 
