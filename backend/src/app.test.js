@@ -239,6 +239,17 @@ for (const probe of publicProbes) {
   });
 }
 
+test('retail inventory and reservation APIs remain unregistered under AD-4', async () => {
+  for (const probe of [
+    { method: 'GET', url: '/api/v1/inventory/1/balance' },
+    { method: 'GET', url: '/api/v1/inventory/1/available' },
+    { method: 'POST', url: '/api/v1/inventory/1/adjust', payload: { quantityDelta: 1, movementType: 'RECEIPT' } },
+  ]) {
+    const res = await app.inject(probe);
+    assert.equal(res.statusCode, 404, `${probe.method} ${probe.url} must remain unavailable until AD-4 is approved`);
+  }
+});
+
 // ── A route that genuinely doesn't exist is a real 404 (sanity check) ──
 
 test('GET /api/v1/this-route-does-not-exist: a genuinely unmatched route is a 404', async () => {
