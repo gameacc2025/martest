@@ -1,7 +1,11 @@
 # API + UI + Demo Seed Execution Roadmap
 
 **Document ID:** API-UI-SEED-01  
-**Status:** IN_PROGRESS — direct-to-main execution; shared website-owned palette consolidation applied, runtime verification pending  
+**Status:** Historical execution plan; current implementation status is tracked in `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, and the 2026-11-18 section at the top of `docs/REMAINING_FEATURES_IMPLEMENTATION_BACKLOG.md`.  
+**Updated:** 2026-11-18  
+
+> This document preserves the domain delivery contract and historical sequence. Do not treat its original 2026-11-08 status or milestone ordering as current project status; current code and CI evidence supersede it.
+
 **Updated:** 2026-11-08
 
 ## 1. Objective
