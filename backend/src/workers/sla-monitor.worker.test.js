@@ -5,6 +5,8 @@ const Module = require('node:module');
 
 const workerDir = __dirname;
 const calls = { assignments: [], events: [], notifications: [] };
+let pendingTickets = [];
+let currentSlaDetails = null;
 
 const prisma = {
   supportEvent: {
@@ -26,7 +28,7 @@ const prisma = {
     },
   },
   supportTicket: {
-    findMany: async () => [],
+    findMany: async () => pendingTickets,
   },
   $disconnect: async () => {},
 };
@@ -51,7 +53,7 @@ injectMock('../modules/notifications/notification.dispatch.service', {
   },
 });
 injectMock('../modules/support/support.service', {
-  getSlaDetails: async () => null,
+  getSlaDetails: async () => currentSlaDetails,
 });
 
 const worker = require('./sla-monitor.worker');
@@ -85,6 +87,12 @@ test('SLA escalation notifies the assignee and only active assignees in the same
     queueId: 5,
     endedAt: null,
     assignedUserId: { not: null },
+    assignee: {
+      is: {
+        status: 'ACTIVE',
+        accessProfile: { is: { type: 'STAFF', isActive: true } },
+      },
+    },
   });
   assert.deepEqual(calls.notifications[0][1], [10, 20, 30]);
   assert.equal(calls.notifications[0][0], 'SUPPORT_SLA_ESCALATED');
@@ -98,7 +106,36 @@ test('SLA warning uses the same queue-scoped recipient set', async () => {
     queueId: 5,
     endedAt: null,
     assignedUserId: { not: null },
+    assignee: {
+      is: {
+        status: 'ACTIVE',
+        accessProfile: { is: { type: 'STAFF', isActive: true } },
+      },
+    },
   });
   assert.deepEqual(calls.notifications[0][1], [10, 20, 30]);
   assert.equal(calls.notifications[0][0], 'SUPPORT_SLA_WARNING');
+});
+
+
+test('paused tickets with extended deadlines are not escalated or warned', async () => {
+  reset();
+  pendingTickets = [{
+    ...ticket,
+    firstRespondedAt: null,
+    resolvedAt: null,
+    closedAt: null,
+    firstResponseDueAt: new Date(Date.now() - 60_000),
+    resolveDueAt: new Date(Date.now() - 60_000),
+  }];
+  currentSlaDetails = {
+    firstResponse: { isBreached: false, isAtRisk: false },
+    resolution: { isBreached: false, isAtRisk: false },
+  };
+
+  const result = await worker.checkAndEscalateTickets();
+  assert.deepEqual(result, { escalated: 0, warned: 0, breached: 0 });
+  assert.equal(calls.notifications.length, 0);
+  pendingTickets = [];
+  currentSlaDetails = null;
 });
