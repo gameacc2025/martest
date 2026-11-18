@@ -31,6 +31,7 @@
 
 const prisma = require('../../config/db');
 const { getEvent, DEFAULT_CHANNELS } = require('./notification.events');
+const smsProvider = require('./notification.sms.provider');
 
 // consumeUsage is required dynamically inside dispatchNotification to support
 // test mocking via require.cache replacement (the function reference would
@@ -64,13 +65,9 @@ function normalizePhoneNumber(phone) {
   return null;
 }
 
-// Check if SMS provider is configured (Twilio)
+// Use the provider adapter's validated configuration check as the single source of truth.
 function hasSmsProvider() {
-  return Boolean(
-    String(process.env.TWILIO_ACCOUNT_SID || '').trim()
-    && String(process.env.TWILIO_AUTH_TOKEN || '').trim()
-    && String(process.env.TWILIO_FROM_NUMBER || '').trim()
-  );
+  return smsProvider.hasRealProvider();
 }
 
 // ── Recipient resolution ─────────────────────────────────────
