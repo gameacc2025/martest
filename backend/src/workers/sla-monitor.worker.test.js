@@ -7,6 +7,12 @@ const workerDir = __dirname;
 const calls = { assignments: [], events: [], notifications: [] };
 let pendingTickets = [];
 let currentSlaDetails = null;
+let queueAssignments = [
+  { assignedUserId: 20 },
+  { assignedUserId: 20 },
+  { assignedUserId: 30 },
+  { assignedUserId: null },
+];
 
 const prisma = {
   supportEvent: {
@@ -19,12 +25,7 @@ const prisma = {
   supportAssignment: {
     findMany: async (args) => {
       calls.assignments.push(args);
-      return [
-        { assignedUserId: 20 },
-        { assignedUserId: 20 },
-        { assignedUserId: 30 },
-        { assignedUserId: null },
-      ];
+      return queueAssignments;
     },
   },
   supportTicket: {
@@ -62,6 +63,12 @@ function reset() {
   calls.assignments.length = 0;
   calls.events.length = 0;
   calls.notifications.length = 0;
+  queueAssignments = [
+    { assignedUserId: 20 },
+    { assignedUserId: 20 },
+    { assignedUserId: 30 },
+    { assignedUserId: null },
+  ];
 }
 
 const ticket = {
@@ -138,4 +145,12 @@ test('paused tickets with extended deadlines are not escalated or warned', async
   assert.equal(calls.notifications.length, 0);
   pendingTickets = [];
   currentSlaDetails = null;
+});
+
+
+test('SLA escalation fails closed when neither the ticket nor queue has an eligible assignee', async () => {
+  reset();
+  queueAssignments = [];
+  await worker.escalateTicket(prisma, { ...ticket, assignedUserId: null }, 'FIRST_RESPONSE_BREACHED', {});
+  assert.equal(calls.notifications.length, 0);
 });
