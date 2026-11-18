@@ -6,11 +6,17 @@
 **Prisma:** 7.10.1.  
 **Important:** this runbook does not authorize enabling B2C checkout, payment, seller payout, or any new API.
 
-## Schema/migration parity repair (2026-11-18)
+## Current migration verification — 2026-11-18
 
-Historical migration chain (through DB-6 and the comments migration) declared 101 Prisma models but created only 97 tables. The forward-only migration `20261118000100_complete_cms_crm_tables` now adds the four missing models: Faq, Page, LeadStatusHistory and CRMFieldAudit, including indexes, foreign keys and catalog comments. A new `backend/scripts/verify-schema-parity.js` compares every non-ignored Prisma model (including `@@map`/`@@schema`) against PostgreSQL catalog tables. Fresh-database and existing-database compatibility remain **NOT VERIFIED** until the migration and runtime CI workflows complete.
+- **Current main HEAD:** `41ea770fc7132c4fc1a4b2c0f1431ace928c916c`.
+- **Last complete CI/runtime acceptance baseline:** `10e0e9ef6bf215b66afa5c0eac571bc9d4e9faaa`; CI, fresh PostgreSQL migration validation and Runtime Validation passed. Runtime verified Compose health, all migrations, Prisma table parity, two seed passes, AD-1/AD-3 grants and 8/8 Playwright browser smoke tests.
+- **Current HEAD migration validation:** [44303564164](https://github.com/gameacc2025/martest/actions/runs/44303564164) PASS. CI and Runtime Validation are still running after seed credential-hardening changes.
+- **Fresh database:** verified by the migration workflow. **Existing production/developer database upgrade:** not verified in this session; follow the backup and staging procedure below before applying to a shared database.
+- `backend/scripts/verify-schema-parity.js` compares every non-ignored Prisma model (including `@@map`/`@@schema`) against PostgreSQL catalog tables.
 
-The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit. Do not declare schema parity until `node scripts/verify-schema-parity.js` passes for all 101 Prisma models and the runtime workflow completes seed execution twice. CI results are currently **PENDING / NOT VERIFIED**. Do not edit applied migrations, use db push, reset a persistent database, or remove user data.
+The historical migration chain declared 101 Prisma models but initially created only 97 tables. Forward-only migration `20261118000100_complete_cms_crm_tables` adds Faq, Page, LeadStatusHistory and CRMFieldAudit. Migration `20261118000200_support_ticket_sla_policy_relation` adds nullable `SupportTicket.slaPolicyId`, its index and FK to preserve the SLA policy applied when a ticket was created.
+
+The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudit; Support stores the applied SLA policy. Do not edit applied migrations, use db push, reset a persistent database, or remove user data.
 
 ## 1. Migration inventory
 
@@ -25,6 +31,7 @@ The CMS seed queries Faq/Page; CRM service writes LeadStatusHistory/CRMFieldAudi
 | 6 | `20261108000600_finance` | Ledger, commissions, payables, settlements, payouts, reconciliation, invoices |
 | 7 | `20261108000700_database_comments` | Persian PostgreSQL comments for the original 97 tables and 962 physical columns |
 | 8 | `20261118000100_complete_cms_crm_tables` | Forward-only creation/repair of Faq, Page, LeadStatusHistory and CRMFieldAudit, indexes, foreign keys and Persian comments |
+| 9 | `20261118000200_support_ticket_sla_policy_relation` | Persist applied SLA policy on SupportTicket with nullable FK, index and column comment |
 
 DB-1 through DB-6 and the later repair migrations are forward-only/additive. They do not drop or rename existing core tables or backfill/alter existing marketplace records.
 
