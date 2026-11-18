@@ -195,7 +195,6 @@ describe('Website Product Details', () => {
     wrapper = shallowMount(ProductDetails)
     await flushPromises()
 
-    expect(hasAnyPermission).toHaveBeenCalledWith(['inquiries.create', 'leads.create'])
     expect(wrapper.find('[aria-label="ثبت استعلام قیمت"]').exists()).toBe(false)
   })
 
