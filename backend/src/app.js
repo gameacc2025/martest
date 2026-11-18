@@ -139,10 +139,10 @@ async function buildApp() {
   await app.register(require('./modules/permissions/permission.routes'), { prefix: '/api/v1/permissions' });
   await app.register(require('./modules/admin/admin.routes'), { prefix: '/api/v1/admin' });
   await app.register(require('./modules/settings/settings.routes'), { prefix: '/api/v1/settings' });
-  // NOTE: The legacy "orders" module was removed. There is no Order model in
-  // the schema; buyer/seller interactions are modeled through the Inquiry
-  // domain (see modules/inquiries). Keeping the dead module registered would
-  // crash on any call and leaked the removed User.username field.
+  // NOTE: No active B2C order/cart API is registered under AD-4. RetailOrder
+  // and SellerOrder persistence models are reserved for a future approved
+  // commerce phase; current buyer/seller interactions use the Inquiry domain.
+  // Keep dormant order modules unregistered until the owner reopens that phase.
   await app.register(require('./modules/companies/company.routes'), { prefix: '/api/v1/companies' });
   await app.register(require('./modules/categories/category.routes'), { prefix: '/api/v1/categories' });
   await app.register(require('./modules/products/product.routes'), { prefix: '/api/v1/products' });
