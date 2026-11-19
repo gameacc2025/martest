@@ -15,13 +15,13 @@ function slugify(text) {
     .replace(/-+$/, '');
 }
 
-async function generateUniqueSlug(baseSlug, excludeId = null) {
+async function generateUniqueSlug(baseSlug, excludeId = null, client = prisma) {
   let slug = baseSlug;
   let counter = 1;
   while (true) {
     const where = { slug };
     if (excludeId) where.id = { not: excludeId };
-    const existing = await prisma.article.findFirst({ where });
+    const existing = await client.article.findFirst({ where });
     if (!existing) return slug;
     slug = `${baseSlug}-${counter}`;
     counter++;
@@ -167,8 +167,8 @@ async function listAdmin({ page = 1, limit = 20, search = '', status, type, auth
   return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 }
 
-async function getAdminById(id) {
-  const article = await prisma.article.findUnique({
+async function getAdminById(id, client = prisma) {
+  const article = await client.article.findUnique({
     where: { id },
     select: articleSelectAdmin(),
   });
@@ -209,18 +209,19 @@ async function createArticle(data, authorUserId) {
     }
   }
 
-  const article = await prisma.article.create({
-    data: {
-      ...articleData,
-      categories: data.categories ? { create: data.categories.map((c, i) => ({ categoryId: c, sortOrder: c.sortOrder ?? i })) } : undefined,
-      tags: data.tags ? { create: data.tags.map(t => ({ tagId: t })) } : undefined,
-    },
-    select: articleSelectAdmin(),
+  return prisma.$transaction(async (tx) => {
+    const article = await tx.article.create({
+      data: {
+        ...articleData,
+        categories: data.categories ? { create: data.categories.map((c, i) => ({ categoryId: c, sortOrder: c.sortOrder ?? i })) } : undefined,
+        tags: data.tags ? { create: data.tags.map(t => ({ tagId: t })) } : undefined,
+      },
+      select: articleSelectAdmin(),
+    });
+
+    await createRevision(article.id, authorUserId, 1, article, 'ایجاد مقاله', tx);
+    return article;
   });
-
-  await createRevision(article.id, authorUserId, 1, article, 'ایجاد مقاله');
-
-  return article;
 }
 
 async function updateArticle(id, data, editorUserId) {
@@ -263,29 +264,31 @@ async function updateArticle(id, data, editorUserId) {
     }
   }
 
-  if (data.categories !== undefined) {
-    await prisma.articleCategoryAssignment.deleteMany({ where: { articleId: id } });
-    if (data.categories.length > 0) {
-      updateData.categories = { create: data.categories.map((c, i) => ({ categoryId: c, sortOrder: c.sortOrder ?? i })) };
-    }
+  if (data.categories !== undefined && data.categories.length > 0) {
+    updateData.categories = { create: data.categories.map((c, i) => ({ categoryId: c, sortOrder: c.sortOrder ?? i })) };
   }
-  if (data.tags !== undefined) {
-    await prisma.articleTagAssignment.deleteMany({ where: { articleId: id } });
-    if (data.tags.length > 0) {
-      updateData.tags = { create: data.tags.map(t => ({ tagId: t })) };
-    }
+  if (data.tags !== undefined && data.tags.length > 0) {
+    updateData.tags = { create: data.tags.map(t => ({ tagId: t })) };
   }
 
-  const article = await prisma.article.update({
-    where: { id },
-    data: updateData,
-    select: articleSelectAdmin(),
+  return prisma.$transaction(async (tx) => {
+    if (data.categories !== undefined) {
+      await tx.articleCategoryAssignment.deleteMany({ where: { articleId: id } });
+    }
+    if (data.tags !== undefined) {
+      await tx.articleTagAssignment.deleteMany({ where: { articleId: id } });
+    }
+
+    const article = await tx.article.update({
+      where: { id },
+      data: updateData,
+      select: articleSelectAdmin(),
+    });
+
+    const nextRevisionNo = await tx.articleRevision.count({ where: { articleId: id } }) + 1;
+    await createRevision(id, editorUserId, nextRevisionNo, article, data.changeNote || 'ویرایش مقاله', tx);
+    return article;
   });
-
-  const nextRevisionNo = await prisma.articleRevision.count({ where: { articleId: id } }) + 1;
-  await createRevision(id, editorUserId, nextRevisionNo, article, data.changeNote || 'ویرایش مقاله');
-
-  return article;
 }
 
 async function changeStatus(id, status, userId) {
@@ -300,27 +303,38 @@ async function changeStatus(id, status, userId) {
     updateData.isIndexable = false;
   }
 
-  const updated = await prisma.article.update({
-    where: { id },
-    data: updateData,
-    select: articleSelectAdmin(),
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.article.update({
+      where: { id },
+      data: updateData,
+      select: articleSelectAdmin(),
+    });
+
+    const nextRevisionNo = await tx.articleRevision.count({ where: { articleId: id } }) + 1;
+    await createRevision(id, userId, nextRevisionNo, updated, `تغییر وضعیت به ${status}`, tx);
+    return updated;
   });
-
-  const nextRevisionNo = await prisma.articleRevision.count({ where: { articleId: id } }) + 1;
-  await createRevision(id, userId, nextRevisionNo, updated, `تغییر وضعیت به ${status}`);
-
-  return updated;
 }
 
-async function deleteArticle(id) {
+async function deleteArticle(id, editorUserId = null) {
   await getAdminById(id);
-  await prisma.article.update({ where: { id }, data: { status: 'ARCHIVED', isActive: false } });
-  return { success: true };
+  return prisma.$transaction(async (tx) => {
+    const archived = await tx.article.update({
+      where: { id },
+      data: { status: 'ARCHIVED', isActive: false, isIndexable: false },
+      select: articleSelectAdmin(),
+    });
+    const nextRevisionNo = await tx.articleRevision.count({ where: { articleId: id } }) + 1;
+    await createRevision(id, editorUserId, nextRevisionNo, archived, 'آرشیو مقاله', tx);
+    return { success: true };
+  });
 }
 
-async function createRevision(articleId, editorUserId, revisionNo, snapshot, changeNote) {
-  return prisma.articleRevision.create({
-    data: { articleId, editorUserId, revisionNo, snapshot, changeNote },
+async function createRevision(articleId, editorUserId, revisionNo, snapshot, changeNote, client = prisma) {
+  // Prisma Json fields cannot safely receive Date instances or other non-JSON values.
+  const jsonSnapshot = JSON.parse(JSON.stringify(snapshot));
+  return client.articleRevision.create({
+    data: { articleId, editorUserId, revisionNo, snapshot: jsonSnapshot, changeNote },
   });
 }
 
@@ -386,29 +400,31 @@ async function restoreRevision(articleId, revisionNo, editorUserId) {
   }
 
   // Restore categories and tags from snapshot
-  if (snapshot.categories) {
-    await prisma.articleCategoryAssignment.deleteMany({ where: { articleId } });
-    if (snapshot.categories.length > 0) {
-      updateData.categories = { create: snapshot.categories.map((c, i) => ({ categoryId: c.categoryId || c.category?.id || c.id, sortOrder: c.sortOrder ?? i })) };
-    }
+  if (snapshot.categories?.length > 0) {
+    updateData.categories = { create: snapshot.categories.map((c, i) => ({ categoryId: c.categoryId || c.category?.id || c.id, sortOrder: c.sortOrder ?? i })) };
   }
-  if (snapshot.tags) {
-    await prisma.articleTagAssignment.deleteMany({ where: { articleId } });
-    if (snapshot.tags.length > 0) {
-      updateData.tags = { create: snapshot.tags.map(t => ({ tagId: t.tagId || t.tag?.id || t.id })) };
-    }
+  if (snapshot.tags?.length > 0) {
+    updateData.tags = { create: snapshot.tags.map(t => ({ tagId: t.tagId || t.tag?.id || t.id })) };
   }
 
-  const article = await prisma.article.update({
-    where: { id: articleId },
-    data: updateData,
-    select: articleSelectAdmin(),
+  return prisma.$transaction(async (tx) => {
+    if (snapshot.categories) {
+      await tx.articleCategoryAssignment.deleteMany({ where: { articleId } });
+    }
+    if (snapshot.tags) {
+      await tx.articleTagAssignment.deleteMany({ where: { articleId } });
+    }
+
+    const article = await tx.article.update({
+      where: { id: articleId },
+      data: updateData,
+      select: articleSelectAdmin(),
+    });
+
+    const nextRevisionNo = await tx.articleRevision.count({ where: { articleId } }) + 1;
+    await createRevision(articleId, editorUserId, nextRevisionNo, article, `بازگردانی به نسخه ${revisionNo}: ${revision.changeNote || ''}`, tx);
+    return article;
   });
-
-  const nextRevisionNo = await prisma.articleRevision.count({ where: { articleId } }) + 1;
-  await createRevision(articleId, editorUserId, nextRevisionNo, article, `بازگردانی به نسخه ${revisionNo}: ${revision.changeNote || ''}`);
-
-  return article;
 }
 
 module.exports = {
