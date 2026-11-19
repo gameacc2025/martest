@@ -64,6 +64,8 @@ const calls = {
   userRoleCreate: [],
   userRoleCount: [],
   companyFindUnique: [],
+  audit: [],
+  audit: [],
   transaction: [],
 };
 
@@ -164,6 +166,12 @@ const mockPrisma = {
     findUnique: async (args) => {
       calls.companyFindUnique.push(args);
       return fx.company;
+    },
+  },
+  auditLog: {
+    create: async (args) => {
+      calls.audit.push(args);
+      return { id: calls.audit.length, ...args.data };
     },
   },
   $transaction: async (arg) => {
@@ -525,6 +533,16 @@ test('createUser: STAFF admin can create a user for another company and receive 
   assert.equal(result.id, 100);
   assert.equal(result.accessProfile.companyId, 20);
   assert.equal(calls.accessProfileCreate[0].data.companyId, 20);
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'USER_CREATED');
+  assert.deepEqual(calls.audit[0].data.metadata.after, {
+    accessType: 'COMPANY',
+    companyId: 20,
+    status: 'ACTIVE',
+    roleIds: [2],
+  });
+  assert.equal(JSON.stringify(calls.audit[0].data.metadata).includes('plaintext'), false);
+  assert.equal(JSON.stringify(calls.audit[0].data.metadata).includes('09120000000'), false);
   resetAccessFx();
 });
 
@@ -567,6 +585,10 @@ test('updateUser: changing a contact clears only that contact verification times
   assert.equal(calls.userUpdate[0].data.email, 'new@example.com');
   assert.equal(calls.userUpdate[0].data.emailVerifiedAt, null);
   assert.equal(Object.hasOwn(calls.userUpdate[0].data, 'phoneVerifiedAt'), false);
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'USER_UPDATED');
+  assert.deepEqual(calls.audit[0].data.metadata.extra.changedFields, ['email']);
+  assert.equal(JSON.stringify(calls.audit[0].data.metadata).includes('new@example.com'), false);
 });
 
 test('updateUser: changing phone clears phone verification and keeps email verification', async () => {
