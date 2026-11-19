@@ -80,11 +80,11 @@ Before declaring a task complete:
 - Ensure the final report distinguishes completed, tested, not tested, and blocked work.
 
 
-## Mandatory per-task Git and GitHub synchronization
+## Per-task synchronization and handoff
 
-- Publish each independently completed, reviewed, and verified task slice to GitHub immediately; do not batch completed slices. Only the lead commits and pushes to the existing `main` branch, following the branch discipline and commit protocol above.
-- A handoff is complete only when the scoped changes, tests, and required documentation are committed on `main` and the remote SHA is verified. If blocked, record `NOT COMMITTED` / `NOT PUSHED`, explain why, preserve the patch, and never claim synchronization.
-- After each slice, record its task ID, outcome, commit SHA, remote verification, exact checks, unresolved risks, and next action in `.ai/WORKLOG.md`; synchronize `.ai/current-task.md` and relevant docs.
+- Complete, review, commit and publish each independently verified slice immediately under the single authoritative policy in **Repository and branch discipline**; do not batch finished work.
+- A handoff is complete only after scoped code, tests and required documentation are committed on `main` and the remote SHA is verified. If blocked, preserve the work and record `NOT COMMITTED` / `NOT PUSHED` with the reason.
+- After each slice, update the append-only `.ai/WORKLOG.md`, concise `.ai/current-task.md`, and only the durable docs affected by the change. Record exact checks, commit/remote SHA, unresolved risks and next action.
 
 ## Commit protocol
 
@@ -94,7 +94,7 @@ Before declaring a task complete:
 4. Stage explicit file paths only; inspect `git diff --cached`.
 5. Commit using a clear conventional message, e.g. `fix: enforce company ownership for product updates` or `docs: define mandatory agent workflow`.
 6. Record the commit SHA and validation evidence in WORKLOG.
-7. The lead pushes the reviewed, verified slice to `origin/main` under the owner's standing authorization; workers never push. Verify remote HEAD afterward. If blocked, record `NOT PUSHED`.
+7. Verify the remote `main` SHA after publication under the authoritative branch discipline above; if publication is blocked, record `NOT PUSHED`.
 
 ## Handoff / final response format
 
