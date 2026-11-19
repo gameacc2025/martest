@@ -3,13 +3,13 @@
 **Status:** IN PROGRESS — source and exact-main acceptance verified; tenant/audit coverage review continues.  
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Current main / latest fully tested application-code SHA:** 4c4bd815c6be81518faae5d6dd871f66428e8e47
+**Current main / latest fully tested SHA:** fdb9423f986b5ca04a216eb1393f4ba7900cbaa8
 
 ## Exact-main verification
 
-- **CI PASS:** 44471408709 — 69 Frontend/Shared test files, 390 Frontend/Shared tests, 18 architecture/session tests, 1,748 Backend tests; Website, Company and Admin production builds.
-- **Fresh PostgreSQL migration PASS:** 44471408725 — Prisma validation/client generation, all migrations on a fresh database, Prisma model/table parity and migration-state verification.
-- **Runtime PASS:** 44471408712 — Compose config/build, PostgreSQL/backend/all panels healthy, migrations and model/table parity, all development seeds run twice, AD-1/AD-3 grants reconciled, 8/8 Playwright smoke tests, teardown succeeded.
+- **CI PASS:** 44472290269 — 69 Frontend/Shared test files, 390 Frontend/Shared tests, 18 architecture/session tests, 1,751 Backend tests; Website, Company and Admin production builds.
+- **Fresh PostgreSQL migration PASS:** 44472290263 — Prisma validation/client generation, all migrations on a fresh database, Prisma model/table parity and migration-state verification.
+- **Runtime PASS:** 44472290208 — Compose config/build, PostgreSQL/backend/all panels healthy, migrations and model/table parity, all development seeds run twice, AD-1/AD-3 grants reconciled, 8/8 Playwright smoke tests, teardown succeeded.
 
 ## Repairs verified in this audit
 
