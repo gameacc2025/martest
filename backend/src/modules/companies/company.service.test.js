@@ -56,6 +56,7 @@ const calls = {
   userCount: [],
   userUpdateMany: [],
   accessProfileUpdateMany: [],
+  audit: [],
   transaction: [],
 };
 
@@ -156,6 +157,12 @@ const mockPrisma = {
     updateMany: async (args) => {
       calls.accessProfileUpdateMany.push(args);
       return { count: 0 };
+    },
+  },
+  auditLog: {
+    create: async (args) => {
+      calls.audit.push(args);
+      return { id: calls.audit.length, ...args.data };
     },
   },
   $transaction: async (arg) => {
