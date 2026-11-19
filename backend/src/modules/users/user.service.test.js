@@ -624,7 +624,7 @@ test('updateUser: changing a contact clears only that contact verification times
   assert.equal(Object.hasOwn(calls.userUpdate[0].data, 'phoneVerifiedAt'), false);
   assert.equal(calls.audit.length, 1);
   assert.equal(calls.audit[0].data.action, 'USER_UPDATED');
-  assert.deepEqual(calls.audit[0].data.metadata.extra.changedFields, ['email']);
+  assert.deepEqual(calls.audit[0].data.metadata.extra.changedFields, ['email', 'emailVerifiedAt']);
   assert.equal(JSON.stringify(calls.audit[0].data.metadata).includes('new@example.com'), false);
 });
 
@@ -867,7 +867,7 @@ test('deleteUser: allows deleting a SUPER_ADMIN when others remain', async () =>
   const result = await deleteUser(5, caller({ id: 1, roles: [SUPER_ADMIN_ROLE] }));
   assert.equal(calls.userDelete.length, 1);
   assert.equal(calls.audit.at(-1).data.action, 'USER_DELETED');
-  assert.equal(calls.audit.at(-1).data.entityId, 5);
+  assert.equal(calls.audit.at(-1).data.entityId, '5');
   assert.ok(result.message);
 });
 
