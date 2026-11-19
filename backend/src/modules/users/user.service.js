@@ -227,6 +227,11 @@ async function createUser(data, caller) {
     }
   }
 
+  if (accessType === 'COMPANY') {
+    const company = await prisma.company.findUnique({ where: { id: companyId }, select: { id: true } });
+    if (!company) throw { statusCode: 404, code: 'COMPANY_NOT_FOUND', message: 'شرکت انتخاب‌شده یافت نشد.' };
+  }
+
   if (!data.phone) {
     throw { statusCode: 400, code: 'PHONE_REQUIRED', message: 'شماره تلفن الزامی است.' };
   }
