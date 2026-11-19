@@ -192,6 +192,16 @@ test('createRole: rejects a duplicate role name', async () => {
   );
 });
 
+test('createRole: duplicate check uses the normalized role name', async () => {
+  resetMocks();
+  fx.roleByName = { id: 1 };
+  await assert.rejects(
+    () => createRole({ name: '  sales manager  ', label: 'Sales Manager', scope: 'COMPANY' }),
+    (error) => error.code === 'DUPLICATE_ROLE',
+  );
+  assert.deepEqual(calls.roleFindUnique[0].where, { name: 'SALES_MANAGER' });
+});
+
 test('createRole: normalizes the name (trim, uppercase, spaces->underscores)', async () => {
   resetMocks();
   fx.roleByName = null;
