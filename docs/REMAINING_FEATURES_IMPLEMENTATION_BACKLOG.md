@@ -2,13 +2,14 @@
 
 ## Current source and verification status — 2026-11-19
 
-> **Exact-SHA verification:** all three workflows passed on current main SHA fdb9423f986b5ca04a216eb1393f4ba7900cbaa8. This block supersedes older snapshots and tables below where they conflict.
+> **Exact-SHA verification:** all three workflows passed on current main SHA ee81257b18424554ccf4b31dbdc2c93fa2581a85. This block supersedes older snapshots and tables below where they conflict.
 
-- **Latest tested main SHA:** fdb9423f986b5ca04a216eb1393f4ba7900cbaa8.
-- **CI PASS:** [44472290269](https://github.com/gameacc2025/martest/actions/runs/44472290269) — 69 Frontend/Shared test files / 390 tests; 18 architecture/session tests; 1,751 Backend tests; Website, Company and Admin production builds.
-- **Fresh PostgreSQL migration PASS:** [44472290263](https://github.com/gameacc2025/martest/actions/runs/44472290263) — Prisma validation/client generation, fresh migration deploy, every Prisma model/table parity and migration state.
-- **Runtime PASS:** [44472290208](https://github.com/gameacc2025/martest/actions/runs/44472290208) — Compose health, migrations/parity, all development seeds twice, AD-1/AD-3 grant reconciliation and 8/8 Playwright smoke tests across all panels/API proxies; teardown succeeded.
-- **Non-blocking test warnings:** frontend tests still emit unresolved `tooltip` directive and `router-link` component warnings in some test mounts; all test suites and builds pass, but these warnings should be cleaned up in the relevant test setup.
+- **Latest tested main SHA:** ee81257b18424554ccf4b31dbdc2c93fa2581a85.
+- **CI PASS:** [44531746720](https://github.com/gameacc2025/martest/actions/runs/44531746720) — 69 Frontend/Shared test files / 390 tests; 18 architecture/session tests; 1,753 Backend tests; Website, Company and Admin production builds.
+- **Fresh PostgreSQL migration PASS:** [44531746798](https://github.com/gameacc2025/martest/actions/runs/44531746798) — Prisma validation/client generation, fresh migration deploy, every Prisma model/table parity and migration state.
+- **Runtime PASS:** [44531746905](https://github.com/gameacc2025/martest/actions/runs/44531746905) — Compose health, migrations/parity, all development seeds twice, AD-1/AD-3 grant reconciliation and 8/8 Playwright smoke tests across all panels/API proxies; teardown succeeded.
+- **Test setup warnings:** unresolved `tooltip` and `router-link` warnings were fixed by registering the directive and stubbing router-link in affected component tests; the latest CI log contains zero of those warnings.
+- **Audit coverage added:** Inquiry create/update/status/reveal and Support ticket/message/status/assignment now write redaction-safe central AuditLog events within their existing database transactions. The central action registry has uniqueness/format tests.
 - **Security and correctness repairs in this slice:** CMS publication-window/search composition; OTP challenge ownership regression; COMPANY login/refresh rejection for inactive/suspended/deleted companies; duplicate user contact conflicts; company existence validation; transactional AuditLog events for CRM lead, User and Company lifecycle operations; sensitive metadata normalization/redaction.
 - **Agent governance:** AGENTS.md, .ai/PROTOCOL.md and docs/AI_AGENT_WORKFLOW.md now have one authoritative main-only/publishing policy rather than repeated variants. AD-3 title now matches its limited read/activate/deactivate permissions.
 - **Still open:** exhaustive tenant/IDOR review; AuditLog producers for Product, Inquiry, Support, CMS and remaining sensitive operations; owner/legal retention/archival decision; public product visibility policy for inactive/suspended/deleted sellers; dashboard/reporting completeness; live SMTP/Twilio/payment-provider and production deployment verification.
