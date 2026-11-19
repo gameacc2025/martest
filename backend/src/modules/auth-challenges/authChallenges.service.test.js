@@ -49,11 +49,9 @@ let fx;
 function resetMocks() {
   Object.keys(calls).forEach((k) => (calls[k] = []));
   fx = {
-    user: { id: 1, phone: '09120000000', email: 'test@example.com', status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
+    user: { id: 1, phone: '09120000000', email: 'test@example.com', phoneVerifiedAt: null, emailVerifiedAt: null, status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
     challenge: { id: 10, userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '+989120000000', secretHash: 'hashed:123456', expiresAt: new Date(Date.now() + 15 * 60 * 1000), attemptCount: 0, maxAttempts: 5, consumedAt: null, invalidatedAt: null, createdAt: new Date() },
     updateManyCount: 1,
-    phoneVerifiedAt: null,
-    emailVerifiedAt: null,
     countResult: 0,
     countResults: null,
     recentChallenge: null,
