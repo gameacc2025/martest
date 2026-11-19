@@ -1536,6 +1536,19 @@ test('updateProduct: full tier reconciliation does not record wholesale price ch
   assert.equal(calls['productPriceSnapshot.create']?.length || 0, 0);
 });
 
+test('public retail price history requires an active, non-deleted seller', async () => {
+  resetMocks();
+  let capturedWhere;
+  fx.product = { id: 1 };
+  mockPrisma.product.findFirst = async (args) => {
+    capturedWhere = args.where;
+    return fx.product;
+  };
+
+  await service.getPublicPriceHistory(1);
+  assert.deepEqual(capturedWhere.company, { status: 'ACTIVE', deletedAt: null });
+});
+
 test('public retail price history is not exposed for unpublished products', async () => {
   resetMocks();
   // Prisma enforces the status/visibility predicate; the unit mock represents
