@@ -37,7 +37,7 @@ Use a stable ID such as `AGENT-2026-10-25-01` or the existing project task ID.
 6. **Review:** inspect full diff, whitespace, staged paths, secrets, authorization/ownership, regression risks, and docs.
 7. **Commit:** commit verified work with a descriptive message. If unable to commit, record why and leave a clean, understandable handoff.
 8. **Synchronize:** update WORKLOG, current-task, and durable context/decision/API docs as needed.
-9. **Push:** the owner's standing project instruction authorizes the lead to publish each independently completed, reviewed, and verified task slice directly to `origin/main`. Workers never push. If checks fail or a blocker remains, preserve the patch and report `NOT PUSHED`; never bypass verification.
+9. **Push:** follow the single authoritative rule in Section 6. Workers never push. If checks fail or a blocker remains, preserve the patch and report `NOT PUSHED`; never bypass verification.
 10. **Handoff:** report changed files, tests, commit, push state, risks, and next steps.
 
 ## 3. Worklog format
@@ -94,11 +94,11 @@ A log entry is not a substitute for updating the canonical documentation when be
 - Concurrent agents must not edit the same files without coordination. The coordinator records exact file ownership in `.ai/agent-coordination/ACTIVE.md`; shared hotspots (app registration, Prisma schema/migrations, permission registry, seed orchestrator, package manifests, shared API exports and global design tokens) are coordinator-owned. A WORKLOG claim is a coordination hint, not a lock guaranteed by Git.
 
 
-## Mandatory per-task Git and GitHub synchronization
+## Per-task recordkeeping and handoff
 
-- Publish each independently verified task slice immediately; do not batch completed work. The lead alone commits and pushes to the existing `main` branch under the authorization and safeguards in this section.
-- A slice is handed off only after its scoped code, tests, and required docs are committed and the remote SHA is verified. If blocked, preserve the patch and record `NOT COMMITTED` / `NOT PUSHED` with the reason.
-- Record the task ID, outcome, commit SHA, remote verification, exact checks, blockers, and next action in `.ai/WORKLOG.md`; synchronize `.ai/current-task.md` and relevant docs.
+- After each independently verified slice, append a concise factual entry to `.ai/WORKLOG.md` and synchronize `.ai/current-task.md`.
+- Update domain/API/database/architecture docs only when the implementation or an accepted decision changes; do not duplicate full reports across files.
+- A handoff must state exact checks, commit and remote SHA, blockers, risks and one actionable next step. If blocked, preserve the patch and record `NOT COMMITTED` / `NOT PUSHED`.
 
 ## 7. Security and architecture guardrails
 
