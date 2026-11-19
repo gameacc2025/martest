@@ -477,6 +477,21 @@ test('createUser: an invalid role id (not found in DB) is rejected', async () =>
   );
 });
 
+test('createUser: rejects a nonexistent target company with 404 before creating an account', async () => {
+  resetMocks();
+  fx.company = null;
+
+  await assert.rejects(
+    () => createUser(
+      { phone: '09120000000', password: 'secret', type: 'COMPANY', companyId: 999 },
+      caller({ roles: [SUPER_ADMIN_ROLE] }),
+    ),
+    (err) => err.statusCode === 404 && err.code === 'COMPANY_NOT_FOUND',
+  );
+  assert.equal(calls.userCreate.length, 0);
+  assert.equal(calls.transaction.length, 0);
+});
+
 test('createUser: assigning roles requires users.assign_roles', async () => {
   resetMocks();
   fx.userByEmail = null;
@@ -521,6 +536,7 @@ test('createUser: STAFF admin can create a user for another company and receive 
   fx.userByPhone = null;
   fx.userByEmail = null;
   fx.userById = dbUser({ id: 100, accessProfile: { id: 9, type: 'COMPANY', companyId: 20, isActive: true } });
+  fx.company = { id: 20, name: 'ACME' };
   fx.roles = [{ id: 2, name: 'COMPANY_USER', scope: 'COMPANY' }];
   accessFx = { roles: ['COMPANY_USER'], permissions: ['products.read'] };
 
