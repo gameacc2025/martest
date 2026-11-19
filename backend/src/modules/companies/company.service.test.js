@@ -622,6 +622,7 @@ test('changeStatus: 400s an invalid status value (whitelist)', async () => {
 test('changeStatus: plain transition runs transactionally with its audit event', async () => {
   resetMocks();
   fx.company = { id: 1, deletedAt: null, status: 'ACTIVE' };
+  fx.updatedCompany = { id: 1, status: 'SUSPENDED' };
   await changeStatus(1, 'SUSPENDED', { id: 7, accessType: 'STAFF' });
 
   assert.equal(calls.transaction.length, 1);
