@@ -13,7 +13,7 @@ const { createError, getClientIp, validateBody } = require('./authChallenges.uti
 
 // Request body validation schemas
 const REQUEST_CHALLENGE_SCHEMA = {
-  purpose: { required: true, type: 'string', enum: ['PASSWORD_RESET', 'PHONE_VERIFICATION', 'EMAIL_VERIFICATION', 'LOGIN_MFA'] },
+  purpose: { required: true, type: 'string', enum: ['PASSWORD_RESET', 'PHONE_VERIFICATION', 'EMAIL_VERIFICATION'] },
   channel: { required: true, type: 'string', enum: ['SMS', 'EMAIL'] },
   destination: { required: true, type: 'string', minLength: 3, maxLength: 255 },
 };
