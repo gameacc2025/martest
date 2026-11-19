@@ -587,6 +587,7 @@ test('getInquiry: CUSTOMER_USER without an AccessProfile can read only its own u
 
 test('createInquiry writes a redaction-safe central audit event inside the same transaction', async () => {
   resetMocks();
+  fx.products = publishedProducts(1);
   const result = await inquiryService.createInquiry(
     { title: 'Audit trail RFQ', description: 'Do not copy content to global audit', companyId: 42, items: [{ productId: 1, quantity: 5 }] },
     superAdmin,
