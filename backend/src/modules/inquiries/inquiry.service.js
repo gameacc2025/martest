@@ -7,6 +7,8 @@ const fs = require('fs');
 const path = require('path');
 const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
 const { dispatchNotification } = require('../notifications/notification.dispatch.service');
 const { consumeUsage } = require('./inquiry-subscription.service');
@@ -1033,6 +1035,16 @@ async function createInquiry(data, caller) {
     });
 
     await consumeUsage({ ownerType: 'company', ownerId: companyId, usageType: 'INQUIRY_CREATE', referenceType: 'Inquiry', referenceId: inquiry.id, tx });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller?.id || null,
+      actorAccessType: caller?.accessType || (isCustomerContext(caller) ? 'CUSTOMER' : 'SYSTEM'),
+      companyId,
+      action: AUDIT_ACTIONS.INQUIRY_CREATED,
+      entityType: 'Inquiry',
+      entityId: inquiry.id,
+      metadata: { status: inquiry.status, itemCount: Array.isArray(data.items) ? data.items.length : 0 },
+    });
     return shapeInquiryForCaller(inquiry, caller);
   });
 }
@@ -1075,6 +1087,16 @@ async function updateInquiry(inquiryId, data, caller) {
       data: updateData,
       include: inquiryInclude,
     });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller?.id || null,
+      actorAccessType: caller?.accessType || (isCustomerContext(caller) ? 'CUSTOMER' : 'SYSTEM'),
+      companyId: inquiry.companyId || caller?.companyId || null,
+      action: AUDIT_ACTIONS.INQUIRY_UPDATED,
+      entityType: 'Inquiry',
+      entityId: numericInquiryId,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
     return shapeInquiryForCaller(updated, caller);
   });
 }
@@ -1114,6 +1136,16 @@ async function changeInquiryStatus(inquiryId, nextStatus, caller, comment) {
       where: { id: numericInquiryId },
       data: buildStatusTransitionData(nextStatus),
       include: inquiryInclude,
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: changedByUserId,
+      actorAccessType: caller?.accessType || (isCustomerContext(caller) ? 'CUSTOMER' : 'SYSTEM'),
+      companyId: inquiry.companyId || caller?.companyId || null,
+      action: AUDIT_ACTIONS.INQUIRY_STATUS_CHANGED,
+      entityType: 'Inquiry',
+      entityId: numericInquiryId,
+      metadata: { previousStatus: inquiry.status, nextStatus },
     });
 
     if (nextStatus === 'OPEN') {
@@ -1163,6 +1195,16 @@ async function revealInquiryResponses(inquiryId, caller) {
       where: { id: numericInquiryId },
       data: { revealedAt: new Date() },
       include: inquiryInclude,
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller?.id || null,
+      actorAccessType: caller?.accessType || (isCustomerContext(caller) ? 'CUSTOMER' : 'SYSTEM'),
+      companyId: inquiry.companyId || caller?.companyId || null,
+      action: AUDIT_ACTIONS.INQUIRY_RESPONSES_REVEALED,
+      entityType: 'Inquiry',
+      entityId: numericInquiryId,
+      metadata: { visibilityMode: inquiry.visibilityMode },
     });
     return shapeInquiryForCaller(updated, caller);
   });
