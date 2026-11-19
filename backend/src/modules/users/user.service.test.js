@@ -570,6 +570,17 @@ test('updateUser: a non-admin caller from a different company is rejected (403)'
   );
 });
 
+test('updateUser: audit records an explicit move to a null company without leaking contact values', async () => {
+  resetMocks();
+  fx.userById = dbUser({ accessProfile: { type: 'COMPANY', companyId: 20, isActive: true } });
+
+  await updateUser(5, { companyId: null }, caller({ roles: [SUPER_ADMIN_ROLE] }));
+
+  assert.equal(calls.audit.at(-1).data.action, 'USER_UPDATED');
+  assert.equal(calls.audit.at(-1).data.metadata.after.companyId, null);
+  assert.deepEqual(calls.audit.at(-1).data.metadata.extra.changedFields, ['companyId']);
+});
+
 test('updateUser: changing a contact clears only that contact verification timestamp', async () => {
   resetMocks();
   fx.userById = dbUser({
