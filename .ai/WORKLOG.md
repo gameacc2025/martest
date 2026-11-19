@@ -1,3 +1,18 @@
+## 2026-11-19 — TENANT-SCOPE-REVIEW — Product, CMS and Notifications
+
+- **Status:** PARTIAL — source and targeted tests reviewed; full endpoint-by-endpoint IDOR sign-off remains open.
+- **Verified main baseline:** `0f6d846280c879c6f107bbeb45f4b18a8a45e330`; latest code slice includes the Inquiry/Support AuditLog changes recorded below.
+- **Product:** company management paths enforce owning-company checks; public list/detail enforce PUBLISHED + PUBLIC and owning company ACTIVE + not soft-deleted. Tests cover cross-company read/write, company-context SUPER_ADMIN isolation, product lifecycle transitions and nested asset ownership.
+- **Inquiry:** buyer/company/supplier ownership checks and STAFF context separation are enforced in service; tests cover unrelated-company 404, CUSTOMER own-inquiry access, stray STAFF companyId and COMPANY-context SUPER_ADMIN isolation.
+- **Support:** COMPANY ticket scope is requesterCompanyId; CUSTOMER scope is requesterUserId; attachment access checks ticket ownership, message ownership and INTERNAL visibility. Queue staff access remains STAFF-permission-based; no stronger tenant boundary is inferred.
+- **Notifications:** CRUD operations query by authenticated userId; bulk operations are user-scoped. Folder selection is validated against the app scope derived from verified accessType, not client query/body. Preferences are user-scoped; SMS defaults off and requires explicit per-event opt-in and a configured provider.
+- **CMS:** FAQ/Page/Category/Tag and Article mutation routes require exact STAFF context plus resource-specific cms.* permissions. Services are not tenant-partitioned; transaction consistency and central audit coverage remain review items.
+- **Evidence:** backend service/controller tests cover Product/Inquiry/Support/Notification ownership and scope behavior; latest CI/migration/runtime evidence is linked in the current backlog and ACTIVE board.
+- **Still open:** inspect Product price/image/document endpoints and status mutations; CMS Article revision/category/tag consistency and FAQ/Page mutation transactions; Auth/session recovery and admin-only endpoints; add central AuditLog where domain history is insufficient; retention policy needs owner/legal direction.
+- **Next:** continue Product nested resources and CMS mutation transaction review without changing commercial or legal policy.
+
+---
+
 ## 2026-11-19 — PROJECT-WIDE-AUDIT-AND-REPAIR — Inquiry/Support audit coverage and exact-main acceptance
 
 - **Status:** PARTIAL / IN PROGRESS — this slice is verified; broader tenant/IDOR and domain coverage continues.
