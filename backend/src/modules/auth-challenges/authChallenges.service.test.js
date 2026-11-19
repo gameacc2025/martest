@@ -42,6 +42,7 @@ const calls = {
   email: [],
   userLocks: [],
   userUpdate: [],
+  userUpdateManyCount: 1,
 };
 
 let fx;
@@ -52,6 +53,7 @@ function resetMocks() {
     user: { id: 1, phone: '09120000000', email: 'test@example.com', phoneVerifiedAt: null, emailVerifiedAt: null, status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
     challenge: { id: 10, userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '+989120000000', secretHash: 'hashed:123456', expiresAt: new Date(Date.now() + 15 * 60 * 1000), attemptCount: 0, maxAttempts: 5, consumedAt: null, invalidatedAt: null, createdAt: new Date() },
     updateManyCount: 1,
+    userUpdateManyCount: 1,
     countResult: 0,
     countResults: null,
     recentChallenge: null,
@@ -75,10 +77,14 @@ const mockPrisma = {
       if (args.where.id !== undefined) return fx.user;
       return null;
     },
-    update: async (args) => {
+    updateMany: async (args) => {
       calls.userUpdate.push(args);
+      if (fx.userUpdateManyCount !== 1) return { count: fx.userUpdateManyCount };
+      const matchesPhone = args.where.phone === undefined || args.where.phone === fx.user.phone;
+      const matchesEmail = args.where.email === undefined || args.where.email === fx.user.email;
+      if (!matchesPhone || !matchesEmail) return { count: 0 };
       fx.user = { ...fx.user, ...args.data };
-      return fx.user;
+      return { count: 1 };
     },
   },
   authChallenge: {
@@ -577,6 +583,7 @@ test('consumeChallenge: atomically verifies the stored phone and persists phoneV
   assert.equal(result.consumed, true);
   assert.equal(calls.userUpdate.length, 1);
   assert.equal(calls.userUpdate[0].where.id, 1);
+  assert.equal(calls.userUpdate[0].where.phone, '09120000000');
   assert.ok(calls.userUpdate[0].data.phoneVerifiedAt instanceof Date);
   assert.equal(fx.user.phoneVerifiedAt, calls.userUpdate[0].data.phoneVerifiedAt);
   assert.equal(fx.user.emailVerifiedAt, null);
@@ -591,6 +598,19 @@ test('consumeChallenge: atomically verifies the stored email and persists emailV
   assert.equal(result.consumed, true);
   assert.equal(calls.userUpdate.length, 1);
   assert.ok(calls.userUpdate[0].data.emailVerifiedAt instanceof Date);
+  assert.equal(fx.user.phoneVerifiedAt, null);
+});
+
+test('consumeChallenge: rolls back contact verification if the contact changes during consume', async () => {
+  baseResetAll();
+  fx.challenge = { ...fx.challenge, purpose: 'PHONE_VERIFICATION', channel: 'SMS', destination: '+989120000000' };
+  fx.userUpdateManyCount = 0;
+
+  await assert.rejects(
+    () => service.consumeChallenge({ challengeId: '10', code: '123456' }),
+    (err) => err.status === 409 && err.code === 'CHALLENGE_DESTINATION_CHANGED',
+  );
+  assert.equal(calls.userUpdate.length, 1);
   assert.equal(fx.user.phoneVerifiedAt, null);
 });
 

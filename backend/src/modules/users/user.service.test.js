@@ -215,6 +215,8 @@ function dbUser(overrides = {}) {
     id: 5,
     email: 'user@example.com',
     phone: null,
+    phoneVerifiedAt: null,
+    emailVerifiedAt: null,
     status: 'ACTIVE',
     accessProfile: { companyId: 10 },
     ...overrides,
@@ -549,6 +551,38 @@ test('updateUser: a non-admin caller from a different company is rejected (403)'
       return true;
     }
   );
+});
+
+test('updateUser: changing a contact clears only that contact verification timestamp', async () => {
+  resetMocks();
+  fx.userById = dbUser({
+    email: 'old@example.com',
+    phone: '09120000000',
+    emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
+    phoneVerifiedAt: new Date('2026-01-02T00:00:00.000Z'),
+  });
+
+  await updateUser(5, { email: 'new@example.com' }, caller({ roles: [SUPER_ADMIN_ROLE] }));
+
+  assert.equal(calls.userUpdate[0].data.email, 'new@example.com');
+  assert.equal(calls.userUpdate[0].data.emailVerifiedAt, null);
+  assert.equal(Object.hasOwn(calls.userUpdate[0].data, 'phoneVerifiedAt'), false);
+});
+
+test('updateUser: changing phone clears phone verification and keeps email verification', async () => {
+  resetMocks();
+  fx.userById = dbUser({
+    email: 'user@example.com',
+    phone: '09120000000',
+    emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
+    phoneVerifiedAt: new Date('2026-01-02T00:00:00.000Z'),
+  });
+
+  await updateUser(5, { phone: '09129999999' }, caller({ roles: [SUPER_ADMIN_ROLE] }));
+
+  assert.equal(calls.userUpdate[0].data.phone, '09129999999');
+  assert.equal(calls.userUpdate[0].data.phoneVerifiedAt, null);
+  assert.equal(Object.hasOwn(calls.userUpdate[0].data, 'emailVerifiedAt'), false);
 });
 
 test('updateUser: changing panel access requires the matching activate/deactivate permission', async () => {

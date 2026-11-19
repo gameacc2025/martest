@@ -484,9 +484,17 @@ async function consumeChallenge({ challengeId, code }) {
 
     // Persist verification in the same transaction as challenge consumption.
     if (challenge.purpose === 'PHONE_VERIFICATION') {
-      await tx.user.update({ where: { id: challenge.userId }, data: { phoneVerifiedAt: now } });
+      const verified = await tx.user.updateMany({
+        where: { id: challenge.userId, phone: user.phone },
+        data: { phoneVerifiedAt: now },
+      });
+      if (verified.count !== 1) throw createError(409, 'CHALLENGE_DESTINATION_CHANGED', 'شماره تلفن پس از بررسی تغییر کرده است؛ کد جدید درخواست کنید.');
     } else if (challenge.purpose === 'EMAIL_VERIFICATION') {
-      await tx.user.update({ where: { id: challenge.userId }, data: { emailVerifiedAt: now } });
+      const verified = await tx.user.updateMany({
+        where: { id: challenge.userId, email: user.email },
+        data: { emailVerifiedAt: now },
+      });
+      if (verified.count !== 1) throw createError(409, 'CHALLENGE_DESTINATION_CHANGED', 'نشانی ایمیل پس از بررسی تغییر کرده است؛ کد جدید درخواست کنید.');
     }
     return { count: 1 };
   });

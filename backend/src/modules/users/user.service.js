@@ -34,6 +34,8 @@ const USER_SELECT = {
   id: true,
   email: true,
   phone: true,
+  phoneVerifiedAt: true,
+  emailVerifiedAt: true,
   status: true,
   createdAt: true,
   updatedAt: true,
@@ -292,12 +294,18 @@ async function updateUser(userId, data, caller) {
 
   // User identity fields
   const userData = {};
-  if (data.email !== undefined) userData.email = data.email === null ? null : data.email.toLowerCase().trim();
+  if (data.email !== undefined) {
+    const nextEmail = data.email === null ? null : data.email.toLowerCase().trim();
+    userData.email = nextEmail;
+    if (nextEmail !== existing.email) userData.emailVerifiedAt = null;
+  }
   if (data.phone !== undefined) {
     if (data.phone === null || data.phone === '') {
       throw { statusCode: 400, code: 'PHONE_REQUIRED', message: 'شماره تلفن نمی‌تواند خالی باشد.' };
     }
-    userData.phone = String(data.phone).trim();
+    const nextPhone = String(data.phone).trim();
+    userData.phone = nextPhone;
+    if (nextPhone !== existing.phone) userData.phoneVerifiedAt = null;
   }
   if (data.status !== undefined) userData.status = data.status;
   else if (data.isActive !== undefined) userData.status = data.isActive ? 'ACTIVE' : 'PENDING';
