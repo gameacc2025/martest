@@ -619,21 +619,26 @@ test('changeStatus: 400s an invalid status value (whitelist)', async () => {
   });
 });
 
-test('changeStatus: plain transition (not PENDING->ACTIVE) is a single update, no transaction', async () => {
+test('changeStatus: plain transition runs transactionally with its audit event', async () => {
   resetMocks();
   fx.company = { id: 1, deletedAt: null, status: 'ACTIVE' };
-  await changeStatus(1, 'SUSPENDED');
+  await changeStatus(1, 'SUSPENDED', { id: 7, accessType: 'STAFF' });
 
-  assert.equal(calls.transaction.length, 0);
+  assert.equal(calls.transaction.length, 1);
   assert.deepEqual(calls.companyUpdate[0].data, { status: 'SUSPENDED' });
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'COMPANY_STATUS_CHANGED');
+  assert.equal(calls.audit[0].data.actorUserId, 7);
+  assert.deepEqual(calls.audit[0].data.metadata.before, { status: 'ACTIVE' });
+  assert.deepEqual(calls.audit[0].data.metadata.after, { status: 'SUSPENDED' });
 });
 
-test('changeStatus: ACTIVE from a non-PENDING status is also a plain update (no side effects)', async () => {
+test('changeStatus: ACTIVE from a non-PENDING status is transactional but has no activation side effects', async () => {
   resetMocks();
   fx.company = { id: 1, deletedAt: null, status: 'SUSPENDED' };
   await changeStatus(1, 'ACTIVE');
 
-  assert.equal(calls.transaction.length, 0);
+  assert.equal(calls.transaction.length, 1);
   assert.equal(calls.userUpdateMany.length, 0);
   assert.equal(calls.accessProfileUpdateMany.length, 0);
 });
