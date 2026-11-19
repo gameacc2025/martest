@@ -300,6 +300,35 @@ test('redactSensitiveData is case-insensitive for sensitive keys at every nestin
 });
 
 
+test('redactSensitiveData truncates objects beyond the maximum depth instead of returning unredacted secrets', () => {
+  const input = {};
+  let cursor = input;
+  for (let depth = 0; depth < 11; depth += 1) {
+    cursor.next = {};
+    cursor = cursor.next;
+  }
+  cursor.apiKey = 'deeply-nested-secret';
+
+  const result = service.redactSensitiveData(input);
+  let truncated = result;
+  for (let depth = 0; depth < 11; depth += 1) truncated = truncated.next;
+
+  assert.equal(truncated, '[TRUNCATED]');
+  assert.equal(JSON.stringify(result).includes('deeply-nested-secret'), false);
+
+  const withinLimit = {};
+  let withinCursor = withinLimit;
+  for (let depth = 0; depth < 10; depth += 1) {
+    withinCursor.next = {};
+    withinCursor = withinCursor.next;
+  }
+  withinCursor.apiKey = 'secret-at-limit';
+  const withinResult = service.redactSensitiveData(withinLimit);
+  let redacted = withinResult;
+  for (let depth = 0; depth < 10; depth += 1) redacted = redacted.next;
+  assert.equal(redacted.apiKey, '[REDACTED]');
+});
+
 test('recordAuditLogExplicit uses the central writer and redacts nested metadata', async () => {
   baseResetAll();
   const log = await service.recordAuditLogExplicit({
