@@ -3,7 +3,7 @@
 **Updated:** 2026-11-19  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code baseline:** `2f9643ceb7cba299d2f9ffe95e64da0d59cedd62`  
+**Latest tested code baseline:** `d4ce6dcfb63a3009e2be69759e69d232d82184c2`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,9 +17,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 | Slice | Status | Evidence |
 |---|---|---|
-| CI | PASS | [44462840522](https://github.com/gameacc2025/martest/actions/runs/44460407273): 69 Frontend/Shared test files, 390 Frontend/Shared tests, 18 architecture/session tests, 1,731 Backend tests, all three app builds |
-| Prisma migration parity | PASS | [44462840673](https://github.com/gameacc2025/martest/actions/runs/44460407198): fresh PostgreSQL migration and all Prisma model/table checks |
-| Runtime + browser | PASS | [44462840477](https://github.com/gameacc2025/martest/actions/runs/44460407552): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
+| CI | PASS | [44468714009](https://github.com/gameacc2025/martest/actions/runs/44460407273): 69 Frontend/Shared test files, 390 Frontend/Shared tests, 18 architecture/session tests, 1,736 Backend tests, all three app builds |
+| Prisma migration parity | PASS | [44468713969](https://github.com/gameacc2025/martest/actions/runs/44460407198): fresh PostgreSQL migration and all Prisma model/table checks |
+| Runtime + browser | PASS | [44468714094](https://github.com/gameacc2025/martest/actions/runs/44460407552): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
 | Support SLA | IMPLEMENTED + VERIFIED | Pause/resume, queue-scoped recipients, import-safe worker, timezone-aware calendar, input validation, applied-policy FK |
 | CRM audit/status | IMPLEMENTED + VERIFIED | Actor ID forwarded; transaction-aware central audit writer |
 | Audit hardening | IMPLEMENTED + TESTED | Recursive case-insensitive redaction; safe IP; bounded correlation IDs; writer tests |
@@ -39,7 +39,7 @@ The owner authorized project-wide review and corrections. Work is performed on e
 - Fixed Support SLA pause/resume, queue scoping, worker import behavior, timezone/holiday arithmetic and validation.
 - Centralized CRM merge audit writes; hardened redaction, client IP and correlation IDs.
 - Hardened paid SMS quota handling: quota/subscription uncertainty fails closed for SMS without rolling back the business operation; added regression tests.
-- Hardened OTP challenges against concurrent brute-force attempts; verify/consume use atomic attempt state and route-level rate limits; trusted IP comes from Fastify, not raw forwarding headers.
+- Hardened OTP challenges against concurrent brute-force attempts; verify/consume use atomic attempt state and route-level rate limits; trusted IP comes from Fastify, not raw forwarding headers. Added controller regression tests for cross-user challenge ownership.
 - Reconciled AD-1/AD-3 grants and disabled AD-4 retail/finance navigation/routes.
 - Fixed Website test expectations and Admin/Company router abort behavior.
 - Removed known admin password from env example; require 32+ character explicit password outside development; prevent production CMS demo author seeding; stop logging demo/admin passwords.
@@ -68,9 +68,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 - Lead owns shared hotspots: app registration, Prisma schema/migrations, permission registry, seed orchestrator, manifests, shared API exports and global design tokens.
 - Workers receive exact non-overlapping file ownership and return scoped evidence; workers never commit or push.
 - Preserve existing local edits, untracked files, stashes and DB data. Do not use destructive Git or database operations.
-- Browser automation is authorized for acceptance; run sequentially when resource constraints require it and record exact evidence.
+- Browser automation is authorized for acceptance; run sequentially when resource constraints require it and record exact evidence. CI actions now use Node 24-compatible major versions (`checkout@v7`, `setup-node@v7`, `pnpm/action-setup@v6`).
 - GitHub connection cannot inspect the owner's Windows workspace, local Docker daemon or developer PostgreSQL.
-- Never claim external SMTP, Twilio, payment or production deployment success without live provider/environment evidence.
+- Never claim external SMTP, Twilio, payment or production deployment success without live provider/environment evidence. Repository rulesets currently return an empty list; branch-protection settings are NOT VERIFIED because the GitHub integration cannot read that endpoint (403).
 
 ## Handoff
 
