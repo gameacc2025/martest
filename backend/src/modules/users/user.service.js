@@ -426,7 +426,7 @@ async function setUserAccess(userId, roleId, permissionIds, caller) {
   const rId = roleId ? Number(roleId) : null;
 
   if (rId) {
-    const role = await prisma.role.findUnique({ where: { id: rId }, select: { id: true, scope: true } });
+    const role = await prisma.role.findUnique({ where: { id: rId }, select: { id: true, name: true, scope: true } });
     if (!role) throw { statusCode: 400, code: 'INVALID_ROLE', message: 'نقش نامعتبر.' };
     // A COMPANY-scoped caller (e.g. COMPANY_MANAGER) can only assign a
     // COMPANY-domain role — this closes the same privilege-escalation path
