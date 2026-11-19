@@ -4,7 +4,7 @@
 **Status:** IN_PROGRESS — 2026-11-19 latest main `2f9643c` passes CI, fresh PostgreSQL migration validation and Docker runtime/seed/RBAC/8-of-8 browser smoke; resource-by-resource tenant/IDOR and audit governance review continues  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `2f9643ceb7cba299d2f9ffe95e64da0d59cedd62`  
+**Latest tested code:** `d4ce6dcfb63a3009e2be69759e69d232d82184c2`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -45,13 +45,13 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 
 ## Verified GitHub acceptance
 
-All three workflows passed on the exact application-code SHA `2f9643ceb7cba299d2f9ffe95e64da0d59cedd62`.
+All three workflows passed on the exact application-code SHA `d4ce6dcfb63a3009e2be69759e69d232d82184c2`.
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44462840522](https://github.com/gameacc2025/martest/actions/runs/44460407273) | **PASS** — 69 Frontend/Shared test files; 390 Frontend/Shared tests; 18 architecture/session tests; 1,731 Backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44462840673](https://github.com/gameacc2025/martest/actions/runs/44460407198) | **PASS** — schema validation/generation, fresh migrations and full model/table parity |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44462840477](https://github.com/gameacc2025/martest/actions/runs/44460407552) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests** |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44468714009](https://github.com/gameacc2025/martest/actions/runs/44460407273) | **PASS** — 69 Frontend/Shared test files; 390 Frontend/Shared tests; 18 architecture/session tests; 1,736 Backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44468713969](https://github.com/gameacc2025/martest/actions/runs/44460407198) | **PASS** — schema validation/generation, fresh migrations and full model/table parity |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44468714094](https://github.com/gameacc2025/martest/actions/runs/44460407552) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests** |
 
 Documentation-only synchronization commits may follow the tested code SHA; they do not change application source. The tested code SHA is recorded separately from the current documentation HEAD.
 
@@ -67,6 +67,6 @@ Documentation-only synchronization commits may follow the tested code SHA; they 
 6. Live SMTP/Twilio/payment-provider delivery and production deployment remain NOT VERIFIED without credentials and a controlled environment.
 7. Local Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED.
 
-## Next action
+## GitHub-side governance visibility — 2026-11-19\n\n- The repository rulesets endpoint returned an empty list. The branch-protection endpoint returned HTTP 403 (`Resource not accessible by integration`), so server-side branch protection is **NOT VERIFIED**; do not claim that main-only rules are enforced by GitHub settings. The repository files and workflows document main-only policy, and the Git refs endpoint currently shows only `refs/heads/main`.\n- Upgraded `.github/workflows/ci.yml`, `database-migration-validation.yml`, and `runtime-validation.yml` from Node 20 action majors to `actions/checkout@v7`, `actions/setup-node@v7`, and `pnpm/action-setup@v6` (Node 24). On the latest run, action setup succeeded and the former Node 20 deprecation warning did not recur.\n- Added controller-level regression tests proving another authenticated user cannot verify or consume someone else's OTP challenge, and that the owner can reach the service.\n\n## Next action
 
 Continue the remaining backend tenant/IDOR audit by resource (Support, CMS, Auth and remaining product surfaces), then review AuditLog producer/action consistency, the central action registry, and retention/archival decision. Update docs only with evidence-backed status. Preserve AD-1 through AD-4 and do not invent retention or commercial policy.
