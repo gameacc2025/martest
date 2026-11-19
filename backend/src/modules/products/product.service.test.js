@@ -281,6 +281,18 @@ test('getProductById: an anonymous visitor only sees PUBLISHED + PUBLIC products
   assert.ok(await service.getProductById(1, anonymous));
 });
 
+test('getProductById: public detail requires an active, non-deleted seller', async () => {
+  let capturedWhere;
+  fx.product = draftProduct({ status: 'PUBLISHED', visibility: 'PUBLIC' });
+  mockPrisma.product.findFirst = async (args) => {
+    capturedWhere = args.where;
+    return fx.product;
+  };
+
+  assert.ok(await service.getProductById(1, anonymous));
+  assert.deepEqual(capturedWhere.company, { status: 'ACTIVE', deletedAt: null });
+});
+
 test('getProductById: public detail excludes internal status history', async () => {
   let capturedSelect;
   fx.product = draftProduct({ status: 'PUBLISHED', visibility: 'PUBLIC' });
@@ -364,6 +376,17 @@ test('listProducts: even STAFF sessions on the public route remain clamped to PU
   });
   assert.equal(capturedWhere.status, 'PUBLISHED');
   assert.equal(capturedWhere.visibility, 'PUBLIC');
+});
+
+test('listProducts: public catalog excludes products from inactive or soft-deleted sellers', async () => {
+  let capturedWhere;
+  mockPrisma.product.findMany = async (args) => {
+    capturedWhere = args.where;
+    return [];
+  };
+
+  await service.listProducts({ skip: 0, take: 10, caller: anonymous, publicOnly: true });
+  assert.deepEqual(capturedWhere.company, { status: 'ACTIVE', deletedAt: null });
 });
 
 test('listProducts: public catalog excludes internal status history', async () => {
