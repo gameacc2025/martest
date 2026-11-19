@@ -901,6 +901,14 @@ test('changeInquiryStatus: DRAFT → SUBMITTED writes history and clears closedA
   const update = calls['inquiry.update'].at(-1);
   assert.equal(update.data.status, 'SUBMITTED');
   assert.equal(update.data.closedAt, null);
+
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'INQUIRY_STATUS_CHANGED');
+  assert.equal(auditCalls[0].entityId, 1);
+  assert.equal(auditCalls[0].actorUserId, buyer.id);
+  assert.equal(auditCalls[0].companyId, buyer.companyId);
+  assert.equal(auditCalls[0].tx, mockPrisma);
+  assert.deepEqual(auditCalls[0].metadata, { previousStatus: 'DRAFT', nextStatus: 'SUBMITTED' });
 });
 
 test('changeInquiryStatus: a closing transition stamps closedAt', async () => {
