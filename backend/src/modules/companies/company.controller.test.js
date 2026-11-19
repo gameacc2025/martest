@@ -72,7 +72,7 @@ function makeReply() {
 }
 
 function makeRequest(overrides = {}) {
-  return { query: {}, params: {}, body: {}, ...overrides };
+  return { query: {}, params: {}, body: {}, user: { id: 7, accessType: 'STAFF', companyId: null }, ...overrides };
 }
 
 // ── list ──────────────────────────────────────────────────────
@@ -143,6 +143,7 @@ test('create: passes the body through and replies 201 with the created company',
   await controller.create(makeRequest({ body: { name: 'New Co' } }), reply);
 
   assert.deepEqual(calls.createCompany[0], { name: 'New Co' });
+  assert.equal(calls.createCompany[1].id, 7);
   assert.equal(reply._statusCode, 201);
   assert.deepEqual(reply._body, { data: { id: 5, name: 'New Co' } });
 });
@@ -168,6 +169,7 @@ test('remove: replies 204 with no body', async () => {
   assert.equal(reply._statusCode, 204);
   assert.equal(reply._body, undefined);
   assert.equal(calls.deleteCompany[0], '1');
+  assert.equal(calls.deleteCompany[1].id, 7);
 });
 
 // ── restore / changeStatus / toggleVerify / updateLogo ─────────
@@ -177,6 +179,7 @@ test('restore: forwards id and wraps the result', async () => {
   const reply = makeReply();
   await controller.restore(makeRequest({ params: { id: '1' } }), reply);
   assert.equal(calls.restoreCompany[0], '1');
+  assert.equal(calls.restoreCompany[1].id, 7);
   assert.deepEqual(reply._body, { data: fx.restored });
 });
 
@@ -186,6 +189,7 @@ test('changeStatus: extracts status from the body', async () => {
   await controller.changeStatus(makeRequest({ params: { id: '1' }, body: { status: 'SUSPENDED' } }), reply);
   assert.equal(calls.changeStatus[0], '1');
   assert.equal(calls.changeStatus[1], 'SUSPENDED');
+  assert.equal(calls.changeStatus[2].id, 7);
 });
 
 test('toggleVerify: extracts isVerified from the body', async () => {
@@ -194,6 +198,7 @@ test('toggleVerify: extracts isVerified from the body', async () => {
   await controller.toggleVerify(makeRequest({ params: { id: '1' }, body: { isVerified: true } }), reply);
   assert.equal(calls.setVerification[0], '1');
   assert.equal(calls.setVerification[1], true);
+  assert.equal(calls.setVerification[2].id, 7);
 });
 
 test('updateLogo: extracts logo from the body', async () => {
@@ -202,6 +207,7 @@ test('updateLogo: extracts logo from the body', async () => {
   await controller.updateLogo(makeRequest({ params: { id: '1' }, body: { logo: 'a.png' } }), reply);
   assert.equal(calls.updateLogo[0], '1');
   assert.equal(calls.updateLogo[1], 'a.png');
+  assert.equal(calls.updateLogo[2].id, 7);
 });
 
 // ── getSettings / updateSettings / getStatistics ────────────────
@@ -220,6 +226,7 @@ test('updateSettings: forwards id and body', async () => {
   await controller.updateSettings(makeRequest({ params: { id: '1' }, body: { limits: {} } }), reply);
   assert.equal(calls.updateSettings[0], '1');
   assert.deepEqual(calls.updateSettings[1], { limits: {} });
+  assert.equal(calls.updateSettings[2].id, 7);
 });
 
 test('getStatistics: forwards id and wraps the result', async () => {
