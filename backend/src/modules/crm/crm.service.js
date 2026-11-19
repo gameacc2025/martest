@@ -1,6 +1,7 @@
 const prisma = require('../../config/db');
 const { createError } = require('../audit/audit.utils');
 const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const transitions = {
   NEW: ['CONTACTED', 'QUALIFIED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'],
@@ -68,76 +69,103 @@ async function getLead(id) {
   return leadDto(row);
 }
 async function createLead(input, actorId) {
-  const ownerUserId = await assertStaff(prisma, actorId);
+  const actorUserId = await assertStaff(prisma, actorId);
   const displayName = String(input.displayName || '').trim();
   const score = input.score === undefined ? 0 : Number(input.score);
   if (!displayName) fail(400, 'CRM_NAME_REQUIRED', 'نام سرنخ الزامی است.');
   if (!Number.isInteger(score) || score < 0 || score > 100) fail(400, 'CRM_INVALID_SCORE', 'امتیاز باید بین صفر تا صد باشد.');
   const leadNumber = 'CRM-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  const row = await prisma.lead.create({ data: {
-    leadNumber, displayName: displayName.slice(0, 240),
-    companyName: input.companyName ? String(input.companyName).trim().slice(0, 240) : null,
-    email: input.email ? String(input.email).trim().toLowerCase().slice(0, 320) : null,
-    phone: input.phone ? String(input.phone).trim().slice(0, 40) : null,
-    sourceId: input.sourceId ? idOf(input.sourceId) : null, score, ownerUserId,
-  }, include: leadInclude });
-  // Audit lead creation
-  const actorUserId = await assertStaff(prisma, actorId);
-  const auditEntries = [];
-  if (input.displayName) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'displayName', oldValue: null, newValue: JSON.stringify(row.displayName), actorUserId, action: 'CREATE' });
-  if (input.companyName) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'companyName', oldValue: null, newValue: JSON.stringify(row.companyName), actorUserId, action: 'CREATE' });
-  if (input.email) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'email', oldValue: null, newValue: JSON.stringify(row.email), actorUserId, action: 'CREATE' });
-  if (input.phone) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'phone', oldValue: null, newValue: JSON.stringify(row.phone), actorUserId, action: 'CREATE' });
-  if (input.sourceId) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'sourceId', oldValue: null, newValue: JSON.stringify(row.sourceId), actorUserId, action: 'CREATE' });
-  if (input.score !== undefined) auditEntries.push({ entityType: 'Lead', entityId: String(row.id), fieldName: 'score', oldValue: null, newValue: JSON.stringify(row.score), actorUserId, action: 'CREATE' });
-  if (auditEntries.length > 0) {
-    await prisma.cRMFieldAudit.createMany({ data: auditEntries });
-  }
+
+  const row = await prisma.$transaction(async (tx) => {
+    const created = await tx.lead.create({ data: {
+      leadNumber, displayName: displayName.slice(0, 240),
+      companyName: input.companyName ? String(input.companyName).trim().slice(0, 240) : null,
+      email: input.email ? String(input.email).trim().toLowerCase().slice(0, 320) : null,
+      phone: input.phone ? String(input.phone).trim().slice(0, 40) : null,
+      sourceId: input.sourceId ? idOf(input.sourceId) : null, score, ownerUserId: actorUserId,
+    }, include: leadInclude });
+
+    const auditEntries = [];
+    if (input.displayName) auditEntries.push({ entityType: 'Lead', entityId: String(created.id), fieldName: 'displayName', oldValue: null, newValue: JSON.stringify(created.displayName), actorUserId, action: 'CREATE' });
+    if (input.companyName) auditEntries.push({ entityType: 'Lead', entityId: String(created.id), fieldName: 'companyName', oldValue: null, newValue: JSON.stringify(created.companyName), actorUserId, action: 'CREATE' });
+    if (input.email) auditEntries.push({ entityType: 'Lead', entityId: String(created.id), fieldName: 'email', oldValue: null, newValue: JSON.stringify(created.email), actorUserId, action: 'CREATE' });
+    if (input.phone) auditEntries.push({ entityType: 'Lead', entityId: String(created.id), fieldName: 'phone', oldValue: null, newValue: JSON.stringify(created.phone), actorUserId, action: 'CREATE' });
+    if (input.sourceId) auditEntries.push({ entityType: 'Lead', entityId: String(created.id), fieldName: 'sourceId', oldValue: null, newValue: JSON.stringify(created.sourceId), actorUserId, action: 'CREATE' });
+    if (input.score !== undefined) auditEntries.push({ entityType: 'Lead', entityId: String(created.id), fieldName: 'score', oldValue: null, newValue: JSON.stringify(created.score), actorUserId, action: 'CREATE' });
+    if (auditEntries.length > 0) await tx.cRMFieldAudit.createMany({ data: auditEntries });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      action: AUDIT_ACTIONS.CRM_LEAD_CREATED,
+      entityType: 'Lead',
+      entityId: created.id,
+      source: 'ADMIN',
+      after: { leadNumber: created.leadNumber, status: created.status, ownerUserId: created.ownerUserId },
+    });
+    return created;
+  });
   return leadDto(row);
 }
+
 async function updateLead(id, input, actorId) {
   const leadId = idOf(id);
-  const current = await prisma.lead.findUnique({ where: { id: leadId } });
-  if (!current) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
-  if (['CONVERTED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'].includes(current.status)) fail(409, 'CRM_LEAD_TERMINAL', 'سرنخ پایانی قابل ویرایش نیست.');
-  const data = {};
-  const fieldsToAudit = ['displayName', 'companyName', 'email', 'phone', 'score', 'sourceId'];
-  const oldValues = {};
-  for (const key of fieldsToAudit) {
-    if (input[key] !== undefined) {
-      oldValues[key] = current[key];
-    }
-  }
-  for (const key of ['displayName', 'companyName', 'email', 'phone']) if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
-  if (input.score !== undefined) {
-    const score = Number(input.score);
-    if (!Number.isInteger(score) || score < 0 || score > 100) fail(400, 'CRM_INVALID_SCORE', 'امتیاز باید بین صفر تا صد باشد.');
-    data.score = score;
-  }
-  if (input.sourceId !== undefined) data.sourceId = input.sourceId === null ? null : idOf(input.sourceId);
-  const updated = await prisma.lead.update({ where: { id: leadId }, data, include: leadInclude });
-  // Audit field changes
-  if (actorId && Object.keys(data).length > 0) {
-    const actorUserId = await assertStaff(prisma, actorId);
-    const auditEntries = [];
+  return prisma.$transaction(async (tx) => {
+    const current = await tx.lead.findUnique({ where: { id: leadId } });
+    if (!current) fail(404, 'CRM_LEAD_NOT_FOUND', 'سرنخ پیدا نشد.');
+    if (['CONVERTED', 'DISQUALIFIED', 'DUPLICATE', 'LOST'].includes(current.status)) fail(409, 'CRM_LEAD_TERMINAL', 'سرنخ پایانی قابل ویرایش نیست.');
+
+    const data = {};
+    const fieldsToAudit = ['displayName', 'companyName', 'email', 'phone', 'score', 'sourceId'];
+    const oldValues = {};
     for (const key of fieldsToAudit) {
-      if (input[key] !== undefined && String(data[key]) !== String(oldValues[key])) {
-        auditEntries.push({
-          entityType: 'Lead',
-          entityId: String(leadId),
-          fieldName: key,
-          oldValue: oldValues[key] === null ? null : JSON.stringify(oldValues[key]),
-          newValue: data[key] === null ? null : JSON.stringify(data[key]),
+      if (input[key] !== undefined) oldValues[key] = current[key];
+    }
+    for (const key of ['displayName', 'companyName', 'email', 'phone']) {
+      if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
+    }
+    if (input.score !== undefined) {
+      const nextScore = Number(input.score);
+      if (!Number.isInteger(nextScore) || nextScore < 0 || nextScore > 100) fail(400, 'CRM_INVALID_SCORE', 'امتیاز باید بین صفر تا صد باشد.');
+      data.score = nextScore;
+    }
+    if (input.sourceId !== undefined) data.sourceId = input.sourceId === null ? null : idOf(input.sourceId);
+
+    const auditEntries = [];
+    if (actorId) {
+      const actorUserId = await assertStaff(tx, actorId);
+      for (const key of fieldsToAudit) {
+        if (input[key] !== undefined && String(data[key]) !== String(oldValues[key])) {
+          auditEntries.push({
+            entityType: 'Lead',
+            entityId: String(leadId),
+            fieldName: key,
+            oldValue: oldValues[key] === null ? null : JSON.stringify(oldValues[key]),
+            newValue: data[key] === null ? null : JSON.stringify(data[key]),
+            actorUserId,
+            action: 'UPDATE',
+          });
+        }
+      }
+      if (auditEntries.length > 0) {
+        await tx.cRMFieldAudit.createMany({ data: auditEntries });
+        await recordAuditLogExplicit({
+          tx,
           actorUserId,
-          action: 'UPDATE',
+          actorAccessType: 'STAFF',
+          action: AUDIT_ACTIONS.CRM_LEAD_UPDATED,
+          entityType: 'Lead',
+          entityId: leadId,
+          source: 'ADMIN',
+          metadata: { changedFields: auditEntries.map((entry) => entry.fieldName) },
         });
       }
     }
-    if (auditEntries.length > 0) {
-      await prisma.cRMFieldAudit.createMany({ data: auditEntries });
-    }
-  }
-  return leadDto(updated);
+
+    const updated = await tx.lead.update({ where: { id: leadId }, data, include: leadInclude });
+    return leadDto(updated);
+  });
 }
 async function assignLead(id, ownerId, actorId) {
   const leadId = idOf(id), ownerUserId = await assertStaff(prisma, ownerId), actorUserId = await assertStaff(prisma, actorId);
