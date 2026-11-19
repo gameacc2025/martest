@@ -57,7 +57,7 @@ async function getOne(request, reply) {
  * POST /api/v1/companies
  */
 async function create(request, reply) {
-  const company = await companyService.createCompany(request.body);
+  const company = await companyService.createCompany(request.body, request.user);
   return reply.code(201).send(success(company));
 }
 
@@ -73,7 +73,7 @@ async function update(request, reply) {
  * DELETE /api/v1/companies/:id
  */
 async function remove(request, reply) {
-  await companyService.deleteCompany(request.params.id);
+  await companyService.deleteCompany(request.params.id, request.user);
   return reply.code(204).send();
 }
 
@@ -81,7 +81,7 @@ async function remove(request, reply) {
  * PATCH /api/v1/companies/:id/restore
  */
 async function restore(request, reply) {
-  const company = await companyService.restoreCompany(request.params.id);
+  const company = await companyService.restoreCompany(request.params.id, request.user);
   return reply.send(success(company));
 }
 
@@ -90,7 +90,7 @@ async function restore(request, reply) {
  */
 async function changeStatus(request, reply) {
   const { status } = request.body;
-  const company = await companyService.changeStatus(request.params.id, status);
+  const company = await companyService.changeStatus(request.params.id, status, request.user);
   return reply.send(success(company));
 }
 
@@ -99,7 +99,7 @@ async function changeStatus(request, reply) {
  */
 async function toggleVerify(request, reply) {
   const { isVerified } = request.body;
-  const company = await companyService.setVerification(request.params.id, isVerified);
+  const company = await companyService.setVerification(request.params.id, isVerified, request.user);
   return reply.send(success(company));
 }
 
@@ -108,7 +108,7 @@ async function toggleVerify(request, reply) {
  */
 async function updateLogo(request, reply) {
   const { logo } = request.body;
-  const company = await companyService.updateLogo(request.params.id, logo);
+  const company = await companyService.updateLogo(request.params.id, logo, request.user);
   return reply.send(success(company));
 }
 
@@ -124,7 +124,7 @@ async function getSettings(request, reply) {
  * PATCH /api/v1/companies/:id/settings
  */
 async function updateSettings(request, reply) {
-  const settings = await companyService.updateSettings(request.params.id, request.body);
+  const settings = await companyService.updateSettings(request.params.id, request.body, request.user);
   return reply.send(success(settings));
 }
 
