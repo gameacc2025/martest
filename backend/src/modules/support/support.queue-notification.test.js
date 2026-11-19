@@ -4,9 +4,12 @@ const Module = require('node:module');
 
 const dbPath = require.resolve('../../config/db');
 const notificationPath = require.resolve('../notifications/notification.dispatch.service');
+const auditPath = require.resolve('../audit/audit.service');
 const previousDb = require.cache[dbPath];
 const previousNotification = require.cache[notificationPath];
+const previousAudit = require.cache[auditPath];
 
+const auditCalls = [];
 const calls = { assignmentQueries: [], userQueries: [], notifications: [] };
 const ticket = {
   id: 51,
@@ -80,6 +83,11 @@ require.cache[notificationPath].exports = {
   },
 };
 require.cache[notificationPath].loaded = true;
+require.cache[auditPath] = new Module(auditPath);
+require.cache[auditPath].exports = {
+  recordAuditLogExplicit: async (entry) => { auditCalls.push(entry); return { id: auditCalls.length }; },
+};
+require.cache[auditPath].loaded = true;
 
 const service = require('./support.service');
 const staff = { id: 99, accessType: 'STAFF', permissions: ['tickets.read', 'tickets.reply', 'tickets.update'] };
@@ -89,12 +97,15 @@ test.after(() => {
   else delete require.cache[dbPath];
   if (previousNotification) require.cache[notificationPath] = previousNotification;
   else delete require.cache[notificationPath];
+  if (previousAudit) require.cache[auditPath] = previousAudit;
+  else delete require.cache[auditPath];
 });
 
 function resetCalls() {
   calls.assignmentQueries.length = 0;
   calls.userQueries.length = 0;
   calls.notifications.length = 0;
+  auditCalls.length = 0;
   ticket.status = 'OPEN';
 }
 
@@ -105,6 +116,13 @@ test('public ticket message notifies requester, assignee and only active staff a
 
   assert.equal(calls.notifications.length, 1);
   assert.equal(calls.notifications[0][0], 'SUPPORT_MESSAGE_RECEIVED');
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'SUPPORT_MESSAGE_CREATED');
+  assert.equal(auditCalls[0].entityType, 'SupportTicket');
+  assert.equal(auditCalls[0].entityId, 51);
+  assert.equal(auditCalls[0].actorUserId, staff.id);
+  assert.equal(auditCalls[0].tx, prisma);
+  assert.deepEqual(auditCalls[0].metadata, { messageId: 100, visibility: 'PUBLIC', reopened: false });
   assert.deepEqual(calls.notifications[0][1], [12, 20, 31, 32]);
   assert.deepEqual(calls.assignmentQueries[0].where, {
     queueId: 7,
@@ -125,6 +143,11 @@ test('ticket status notifications use the same active queue-assignment scope', a
 
   assert.equal(calls.notifications.length, 1);
   assert.equal(calls.notifications[0][0], 'SUPPORT_TICKET_STATUS_CHANGED');
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'SUPPORT_TICKET_STATUS_CHANGED');
+  assert.equal(auditCalls[0].entityId, 51);
+  assert.equal(auditCalls[0].tx, prisma);
+  assert.deepEqual(auditCalls[0].metadata, { previousStatus: 'OPEN', nextStatus: 'RESOLVED' });
   assert.deepEqual(calls.notifications[0][1], [12, 20, 31, 32]);
   assert.deepEqual(calls.assignmentQueries[0].where, {
     queueId: 7,
