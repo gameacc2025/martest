@@ -2,12 +2,12 @@
 
 ## Current source and verification status — 2026-11-19
 
-> **Exact-SHA verification:** all three workflows passed on application-code SHA `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`. Later documentation synchronization does not change application code. This block supersedes older snapshots and tables below where they conflict.
+> **Exact-SHA verification:** all three workflows passed on application-code SHA `2f9643ceb7cba299d2f9ffe95e64da0d59cedd62`. The latest source SHA is the exact code revision validated by all three workflows. This block supersedes older snapshots and tables below where they conflict.
 
 - **Latest tested application-code SHA:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`.
-- **CI:** PASS [44460407273](https://github.com/gameacc2025/martest/actions/runs/44460407273) — architecture graph; 69 Frontend/Shared test files; 18 architecture/session tests; 1,725 Backend tests; Website, Company and Admin production builds.
-- **Fresh PostgreSQL migration validation:** PASS [44460407198](https://github.com/gameacc2025/martest/actions/runs/44460407198) — Prisma schema validation/generation, fresh migration deploy and all model/table parity checks.
-- **Runtime Validation:** PASS [44460407552](https://github.com/gameacc2025/martest/actions/runs/44460407552) — Compose health, migrations, schema parity, seeds twice, AD-1/AD-3 grant reconciliation and **8/8 Playwright browser smoke tests** across panels/API proxies.
+- **CI:** PASS [44462840522](https://github.com/gameacc2025/martest/actions/runs/44462840522) — architecture graph; 69 Frontend/Shared test files, 390 tests; 18 architecture/session tests; 1,731 Backend tests; Website, Company and Admin production builds.
+- **Fresh PostgreSQL migration validation:** PASS [44462840673](https://github.com/gameacc2025/martest/actions/runs/44462840673) — Prisma schema validation/generation, fresh migration deploy and all model/table parity checks.
+- **Runtime Validation:** PASS [44462840477](https://github.com/gameacc2025/martest/actions/runs/44462840477) — Compose health, migrations, schema parity, seeds twice, AD-1/AD-3 grant reconciliation and **8/8 Playwright browser smoke tests** across panels/API proxies.
 - **2026-11-19 auth corrections:** resend-cooldown test isolation fixed; `LOGIN_MFA` is rejected by the active challenge API until approved login enforcement exists; Auth Challenge contract now matches authenticated route paths, ownership checks, six-digit code format, route-level IP limits and separate public password recovery.
 - **Source repairs:** four missing Prisma tables; Support applied SLA FK, pause/resume, queue recipients, timezone-aware worker and SLA ownership; CRM actor/audit fixes; audit redaction/writer/IP/correlation hardening; AD-1/AD-3/AD-4 enforcement; SMS provider/consent/quota gates; atomic OTP attempt/consume and spoofed-IP hardening; seed secret hardening; Company/Admin dashboard metric corrections; dormant sample prototype isolation.
 - **Still open:** exhaustive tenant/IDOR review; central audit action registry and producer normalization; owner/legal AuditLog retention/archival decision; remaining dashboard/reporting completeness; live SMTP/Twilio/payment-provider verification; production deployment sign-off.
