@@ -16,7 +16,7 @@ function injectMock(relativePath, exportsObj) {
   });
 }
 
-const calls = { staff: [], create: [], update: [], find: [] };
+const calls = { staff: [], create: [], update: [], find: [], audit: [] };
 let activeStaff = true;
 let currentLead;
 
@@ -25,6 +25,7 @@ function reset() {
   calls.create = [];
   calls.update = [];
   calls.find = [];
+  calls.audit = [];
   activeStaff = true;
   currentLead = {
     id: 41,
@@ -88,6 +89,16 @@ const prisma = {
       calls.create.push(args);
       return { count: args.data.length };
     },
+    create: async (args) => {
+      calls.create.push(args);
+      return { id: 1, ...args.data };
+    },
+  },
+  auditLog: {
+    create: async (args) => {
+      calls.audit.push(args);
+      return { id: calls.audit.length, ...args.data };
+    },
   },
   $transaction: async (fn) => fn(prisma),
 };
@@ -124,6 +135,8 @@ test('createLead normalizes contact fields and assigns the authenticated active 
   // Verify CRMFieldAudit.createMany was called
   const auditCalls = calls.create.filter(c => c.data && Array.isArray(c.data));
   assert.ok(auditCalls.length > 0, 'CRMFieldAudit.createMany should have been called');
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'CRM_LEAD_CREATED');
 });
 
 test('createLead rejects invalid scores and inactive/non-STAFF owners', async () => {
@@ -165,6 +178,9 @@ test('updateLead creates CRMFieldAudit records for changed fields', async () => 
   const auditData = auditCalls[0].data;
   assert.ok(auditData.some(a => a.fieldName === 'displayName' && a.entityType === 'Lead'));
   assert.ok(auditData.some(a => a.fieldName === 'score' && a.entityType === 'Lead'));
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'CRM_LEAD_UPDATED');
+  assert.deepEqual(calls.audit[0].data.metadata.extra.changedFields.sort(), ['displayName', 'score']);
 });
 
 test('updateLead does not create audit entries when no fields change', async () => {
@@ -175,6 +191,17 @@ test('updateLead does not create audit entries when no fields change', async () 
   // Filter out leadStatusHistory calls (which have single object data, not array)
   const fieldAuditCalls = auditCalls.filter(c => c.data.every?.(d => d.entityType === 'Lead'));
   assert.equal(fieldAuditCalls.length, 0, 'No field audit entries should be created when values are unchanged');
+  assert.equal(calls.audit.length, 0, 'No global audit event should be created when values are unchanged');
+});
+
+test('assignLead records a central audit event with old and new owner IDs', async () => {
+  reset();
+  const result = await service.assignLead(41, 8, 7);
+  assert.equal(result.ownerUserId, 8);
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'CRM_LEAD_ASSIGNED');
+  assert.equal(calls.audit[0].data.metadata.before.ownerUserId, 7);
+  assert.equal(calls.audit[0].data.metadata.after.ownerUserId, 8);
 });
 
 test('changeLeadStatus permits a valid transition and rejects an invalid transition', async () => {
@@ -183,6 +210,8 @@ test('changeLeadStatus permits a valid transition and rejects an invalid transit
   assert.equal(result.status, 'CONTACTED');
   assert.equal(calls.update.length, 1);
   assert.equal(calls.update[0].data.status, 'CONTACTED');
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'CRM_LEAD_STATUS_CHANGED');
 
   reset();
   currentLead.status = 'QUALIFIED';
