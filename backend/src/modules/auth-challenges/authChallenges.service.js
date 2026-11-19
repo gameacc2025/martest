@@ -32,7 +32,7 @@ const PURPOSE_CHANNEL_MAP = {
   PASSWORD_RESET: ['SMS', 'EMAIL'],
   PHONE_VERIFICATION: ['SMS'],
   EMAIL_VERIFICATION: ['EMAIL'],
-  LOGIN_MFA: ['SMS', 'EMAIL'],
+  // LOGIN_MFA remains deferred until an approved login-enforcement flow exists.
 };
 
 /**
