@@ -269,6 +269,43 @@ test('login: rejects a deactivated STAFF AccessProfile with ACCESS_DISABLED', as
   );
 });
 
+test('login: blocks COMPANY users when their company is suspended', async () => {
+  baseResetAll();
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
+  fx.accessProfile = {
+    id: 1,
+    type: 'COMPANY',
+    companyId: 10,
+    isActive: true,
+    company: { id: 10, status: 'SUSPENDED', deletedAt: null },
+  };
+
+  await assert.rejects(
+    () => authService.login(fakeFastify, '09120000000', 'pw', 'company'),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_ACCESS_DISABLED',
+  );
+  assert.equal(calls.refreshTokenCreate.length, 0);
+});
+
+test('login: blocks COMPANY users when their company is soft-deleted', async () => {
+  baseResetAll();
+  fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
+  fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
+  fx.accessProfile = {
+    id: 1,
+    type: 'COMPANY',
+    companyId: 10,
+    isActive: true,
+    company: { id: 10, status: 'INACTIVE', deletedAt: new Date('2026-11-19T00:00:00.000Z') },
+  };
+
+  await assert.rejects(
+    () => authService.login(fakeFastify, '09120000000', 'pw', 'company'),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_ACCESS_DISABLED',
+  );
+});
+
 test('login: does NOT gate a deactivated CUSTOMER access (no panel)', async () => {
   baseResetAll();
   fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
@@ -283,7 +320,7 @@ test('login: app="admin" rejects a non-STAFF access type with APP_ACCESS_DENIED'
   baseResetAll();
   fx.userByPhone = { id: 1, phone: '09120000000', status: 'ACTIVE', passwordHash: 'h' };
   fx.userById = { id: 1, phone: '09120000000', status: 'ACTIVE' };
-  fx.accessProfile = { id: 1, type: 'COMPANY', companyId: 10, isActive: true };
+  fx.accessProfile = { id: 1, type: 'COMPANY', companyId: 10, isActive: true, company: { id: 10, status: 'ACTIVE', deletedAt: null } };
   nextAccess = { roles: ['COMPANY_ADMIN'], permissions: [] };
   await assert.rejects(
     () => authService.login(fakeFastify, '09120000000', 'pw', 'admin'),
@@ -376,6 +413,24 @@ test('refresh: rejects a deactivated STAFF/COMPANY panel user', async () => {
     () => authService.refresh(fakeFastify, { id: 1, user: { id: 5, status: 'ACTIVE' } }),
     (err) => err.statusCode === 403 && err.code === 'ACCESS_DISABLED',
   );
+});
+
+test('refresh: blocks a COMPANY session when the company is inactive', async () => {
+  baseResetAll();
+  fx.refreshTokenDeleteCount = 1;
+  fx.accessProfile = {
+    id: 1,
+    type: 'COMPANY',
+    companyId: 10,
+    isActive: true,
+    company: { id: 10, status: 'INACTIVE', deletedAt: null },
+  };
+
+  await assert.rejects(
+    () => authService.refresh(fakeFastify, { id: 1, user: { id: 5, status: 'ACTIVE' } }),
+    (err) => err.statusCode === 403 && err.code === 'COMPANY_ACCESS_DISABLED',
+  );
+  assert.equal(calls.refreshTokenCreate.length, 0);
 });
 
 test('refresh: rotates the token and returns a new pair', async () => {
