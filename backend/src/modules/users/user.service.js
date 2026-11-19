@@ -307,10 +307,17 @@ async function updateUser(userId, data, caller) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط به کاربران شرکت خود دسترسی دارید.' };
   }
 
-  // User identity fields
+  // User identity fields. Resolve uniqueness conflicts before writing so a
+  // duplicate contact value is a stable 409 response, not a database 500.
   const userData = {};
   if (data.email !== undefined) {
     const nextEmail = data.email === null ? null : data.email.toLowerCase().trim();
+    if (nextEmail && nextEmail !== existing.email) {
+      const duplicateEmail = await prisma.user.findUnique({ where: { email: nextEmail }, select: { id: true } });
+      if (duplicateEmail && Number(duplicateEmail.id) !== Number(userId)) {
+        throw { statusCode: 409, code: 'DUPLICATE_EMAIL', message: 'ایمیل قبلاً ثبت شده است.' };
+      }
+    }
     userData.email = nextEmail;
     if (nextEmail !== existing.email) userData.emailVerifiedAt = null;
   }
@@ -319,6 +326,12 @@ async function updateUser(userId, data, caller) {
       throw { statusCode: 400, code: 'PHONE_REQUIRED', message: 'شماره تلفن نمی‌تواند خالی باشد.' };
     }
     const nextPhone = String(data.phone).trim();
+    if (nextPhone !== existing.phone) {
+      const duplicatePhone = await prisma.user.findUnique({ where: { phone: nextPhone }, select: { id: true } });
+      if (duplicatePhone && Number(duplicatePhone.id) !== Number(userId)) {
+        throw { statusCode: 409, code: 'DUPLICATE_PHONE', message: 'شماره تلفن قبلاً ثبت شده است.' };
+      }
+    }
     userData.phone = nextPhone;
     if (nextPhone !== existing.phone) userData.phoneVerifiedAt = null;
   }
