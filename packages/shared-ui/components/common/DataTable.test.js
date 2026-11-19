@@ -15,6 +15,7 @@ function mountTable(props = {}) {
       ...props,
     },
     global: {
+      directives: { tooltip: {} },
       stubs: {
         DataTable: PrimeTableStub,
         Column: true,
