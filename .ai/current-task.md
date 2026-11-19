@@ -1,10 +1,10 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18
 
 **Task ID:** PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18  
-**Status:** IN_PROGRESS — 2026-11-19 auth-challenge policy and test-isolation repairs passed CI, fresh PostgreSQL migration validation, Docker runtime, seed-twice, RBAC reconciliation and 8/8 browser smoke; broader tenant/security audits remain queued  
+**Status:** IN_PROGRESS — 2026-11-19 latest main `2f9643c` passes CI, fresh PostgreSQL migration validation and Docker runtime/seed/RBAC/8-of-8 browser smoke; resource-by-resource tenant/IDOR and audit governance review continues  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`  
+**Latest tested code:** `2f9643ceb7cba299d2f9ffe95e64da0d59cedd62`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -45,19 +45,19 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 
 ## Verified GitHub acceptance
 
-All three workflows passed on the exact application-code SHA `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`.
+All three workflows passed on the exact application-code SHA `2f9643ceb7cba299d2f9ffe95e64da0d59cedd62`.
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44460407273](https://github.com/gameacc2025/martest/actions/runs/44460407273) | **PASS** — 69 Frontend/Shared test files; 18 architecture/session tests; 1,725 Backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44460407198](https://github.com/gameacc2025/martest/actions/runs/44460407198) | **PASS** — schema validation/generation, fresh migrations and full model/table parity |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44460407552](https://github.com/gameacc2025/martest/actions/runs/44460407552) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests** |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44462840522](https://github.com/gameacc2025/martest/actions/runs/44460407273) | **PASS** — 69 Frontend/Shared test files; 390 Frontend/Shared tests; 18 architecture/session tests; 1,731 Backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44462840673](https://github.com/gameacc2025/martest/actions/runs/44460407198) | **PASS** — schema validation/generation, fresh migrations and full model/table parity |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44462840477](https://github.com/gameacc2025/martest/actions/runs/44460407552) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests** |
 
 Documentation-only synchronization commits may follow the tested code SHA; they do not change application source. The tested code SHA is recorded separately from the current documentation HEAD.
 
 ## Confirmed remaining work
 
-- **Targeted tenant review (2026-11-18):** inspected Company route guards and route tests for profile, product listing, statistics, logo, settings and lifecycle operations; COMPANY context is constrained to its own company, STAFF-only controls are blocked to COMPANY even with wildcard/SUPER_ADMIN role. Reviewed User service role-scope and cross-company guards/tests; no new defect confirmed in these selected paths. This is not exhaustive tenant/IDOR sign-off.
+- **Targeted tenant review (2026-11-18/19):** inspected Company route guards and route tests for profile, product listing, statistics, logo, settings and lifecycle operations; COMPANY context is constrained to its own company, STAFF-only controls are blocked to COMPANY even with wildcard/SUPER_ADMIN role. Reviewed User service role-scope and cross-company guards/tests; Support ticket and SLA detail reads are scoped by requester user/company, and Auth Challenge verify/consume handlers explicitly compare challenge.userId with the authenticated user. No new defect confirmed in these selected paths. This is not exhaustive tenant/IDOR sign-off.
 
 1. Continue resource-specific tenant/IDOR review across Products, Inquiry, Support, CMS, Notifications and Auth; selected Product/Inquiry/Company/User/Notification/CMS paths are reviewed but this is not an exhaustive security sign-off.
 2. Audit retention/archival: keep append-only logs; do not delete/archive until the owner/legal policy sets retention and an approved archival destination/design.
