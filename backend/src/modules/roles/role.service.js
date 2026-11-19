@@ -12,6 +12,8 @@
 
 const prisma = require('../../config/db');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const ROLE_SELECT = {
   id: true, name: true, label: true, description: true, isSystem: true, scope: true,
@@ -74,7 +76,7 @@ async function getRole(roleId) {
   return role;
 }
 
-async function createRole(data) {
+async function createRole(data, actor = null) {
   const exists = await prisma.role.findUnique({ where: { name: data.name } });
   if (exists) throw { statusCode: 409, code: 'DUPLICATE_ROLE', message: 'این نام نقش قبلاً ثبت شده است.' };
 
@@ -84,22 +86,35 @@ async function createRole(data) {
     if (count !== permIds.length) throw { statusCode: 400, code: 'INVALID_PERMISSION', message: 'دسترسی نامعتبر.' };
   }
 
-  return prisma.role.create({
-    data: {
-      name: data.name.trim().toUpperCase().replace(/\s+/g, '_'),
-      label: data.label.trim(),
-      description: data.description || null,
-      scope: data.scope,
-      isSystem: false,
-      permissions: permIds.length
-        ? { create: permIds.map((id) => ({ permissionId: id })) }
-        : undefined,
-    },
-    select: ROLE_SELECT,
+  return prisma.$transaction(async (tx) => {
+    const role = await tx.role.create({
+      data: {
+        name: data.name.trim().toUpperCase().replace(/\s+/g, '_'),
+        label: data.label.trim(),
+        description: data.description || null,
+        scope: data.scope,
+        isSystem: false,
+        permissions: permIds.length
+          ? { create: permIds.map((id) => ({ permissionId: id })) }
+          : undefined,
+      },
+      select: ROLE_SELECT,
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.ROLE_CREATED,
+      entityType: 'Role',
+      entityId: role.id,
+      metadata: { name: role.name, scope: role.scope, permissionCount: permIds.length },
+    });
+    return role;
   });
 }
 
-async function updateRole(roleId, data) {
+async function updateRole(roleId, data, actor = null) {
   const role = await prisma.role.findUnique({ where: { id: roleId } });
   if (!role) throw { statusCode: 404, code: 'NOT_FOUND', message: 'نقش یافت نشد.' };
 
@@ -116,24 +131,41 @@ async function updateRole(roleId, data) {
   }
 
   const permIds = (data.permissionIds || []).map(Number);
-  if (data.permissionIds !== undefined) {
-    if (permIds.length) {
-      const count = await prisma.permission.count({ where: { id: { in: permIds } } });
-      if (count !== permIds.length) throw { statusCode: 400, code: 'INVALID_PERMISSION', message: 'دسترسی نامعتبر.' };
-    }
-    await prisma.$transaction([
-      prisma.rolePermission.deleteMany({ where: { roleId } }),
-      ...(permIds.length ? [prisma.rolePermission.createMany({
-        data: permIds.map((permissionId) => ({ roleId, permissionId })),
-        skipDuplicates: true,
-      })] : []),
-    ]);
+  if (data.permissionIds !== undefined && permIds.length) {
+    const count = await prisma.permission.count({ where: { id: { in: permIds } } });
+    if (count !== permIds.length) throw { statusCode: 400, code: 'INVALID_PERMISSION', message: 'دسترسی نامعتبر.' };
   }
 
-  return prisma.role.update({ where: { id: roleId }, data: updateData, select: ROLE_SELECT });
+  return prisma.$transaction(async (tx) => {
+    if (data.permissionIds !== undefined) {
+      await tx.rolePermission.deleteMany({ where: { roleId } });
+      if (permIds.length) {
+        await tx.rolePermission.createMany({
+          data: permIds.map((permissionId) => ({ roleId, permissionId })),
+          skipDuplicates: true,
+        });
+      }
+    }
+
+    const updated = await tx.role.update({ where: { id: roleId }, data: updateData, select: ROLE_SELECT });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.ROLE_UPDATED,
+      entityType: 'Role',
+      entityId: roleId,
+      metadata: {
+        changedFields: [...Object.keys(updateData), ...(data.permissionIds !== undefined ? ['permissionIds'] : [])],
+        permissionCount: data.permissionIds !== undefined ? permIds.length : undefined,
+      },
+    });
+    return updated;
+  });
 }
 
-async function deleteRole(roleId) {
+async function deleteRole(roleId, actor = null) {
   const role = await prisma.role.findUnique({ where: { id: roleId } });
   if (!role) throw { statusCode: 404, code: 'NOT_FOUND', message: 'نقش یافت نشد.' };
 
@@ -141,7 +173,19 @@ async function deleteRole(roleId) {
     throw { statusCode: 400, code: 'SYSTEM_ROLE', message: 'نقش‌های سیستمی قابل حذف نیستند.' };
   }
 
-  await prisma.role.delete({ where: { id: roleId } });
+  await prisma.$transaction(async (tx) => {
+    await tx.role.delete({ where: { id: roleId } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.ROLE_DELETED,
+      entityType: 'Role',
+      entityId: roleId,
+      metadata: { name: role.name, scope: role.scope },
+    });
+  });
   return { message: 'نقش با موفقیت حذف شد.' };
 }
 
