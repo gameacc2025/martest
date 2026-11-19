@@ -26,6 +26,7 @@ function injectMock(relativePath, exportsObj) {
   return resolved;
 }
 
+const auditCalls = [];
 const calls = {
   roleFindMany: [],
   roleFindUnique: [],
@@ -39,6 +40,7 @@ const calls = {
 let fx;
 function resetMocks() {
   Object.keys(calls).forEach((k) => (calls[k] = []));
+  auditCalls.length = 0;
   fx = {
     roles: [],
     total: 0,
@@ -97,6 +99,12 @@ const mockPrisma = {
 };
 
 injectMock('../../config/db', mockPrisma);
+injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (entry) => {
+    auditCalls.push(entry);
+    return { id: auditCalls.length };
+  },
+});
 
 const {
   listRoles,
@@ -227,6 +235,12 @@ test('createRole: wires permissionIds into a nested create when provided', async
     { permissionId: 1 },
     { permissionId: 2 },
   ]);
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'ROLE_CREATED');
+  assert.equal(auditCalls[0].entityType, 'Role');
+  assert.equal(auditCalls[0].entityId, 1);
+  assert.equal(auditCalls[0].tx, mockPrisma);
+  assert.deepEqual(auditCalls[0].metadata, { name: 'X', scope: 'STAFF', permissionCount: 2 });
 });
 
 // ── updateRole ───────────────────────────────────────────────
@@ -292,7 +306,13 @@ test('updateRole: replaces permissions via delete-then-create in a transaction',
   await updateRole(1, { permissionIds: [1, 2] });
 
   assert.equal(calls.transaction.length, 1);
-  assert.ok(Array.isArray(calls.transaction[0]));
+  assert.equal(typeof calls.transaction[0], 'function');
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'ROLE_UPDATED');
+  assert.equal(auditCalls[0].entityId, 1);
+  assert.equal(auditCalls[0].tx, mockPrisma);
+  assert.deepEqual(auditCalls[0].metadata.changedFields, ['permissionIds']);
+  assert.equal(auditCalls[0].metadata.permissionCount, 2);
 });
 
 test('updateRole: passing an empty permissionIds array clears all permissions (delete only, no create)', async () => {
@@ -301,8 +321,10 @@ test('updateRole: passing an empty permissionIds array clears all permissions (d
 
   await updateRole(1, { permissionIds: [] });
 
-  const txArg = calls.transaction[0];
-  assert.equal(txArg.length, 1, 'only the deleteMany, no createMany');
+  assert.equal(typeof calls.transaction[0], 'function');
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'ROLE_UPDATED');
+  assert.equal(auditCalls[0].metadata.permissionCount, 0);
 });
 
 // ── deleteRole ───────────────────────────────────────────────
@@ -337,4 +359,9 @@ test('deleteRole: deletes a non-system role', async () => {
 
   assert.equal(calls.roleDelete.length, 1);
   assert.ok(result.message);
+  assert.equal(calls.transaction.length, 1);
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'ROLE_DELETED');
+  assert.equal(auditCalls[0].entityId, 1);
+  assert.equal(auditCalls[0].tx, mockPrisma);
 });
