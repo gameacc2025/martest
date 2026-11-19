@@ -144,6 +144,9 @@ const service = require('./authChallenges.service');
 
 function baseResetAll() {
   resetMocks();
+  // Tests override count() to simulate throttling; restore its default on every
+  // fixture reset so a previous test cannot leak a rate-limit response.
+  mockPrisma.authChallenge.count = async () => 0;
   nextVerifyResult = true;
   passwordCalls.verify = [];
   passwordCalls.hash = [];
