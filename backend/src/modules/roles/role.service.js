@@ -77,7 +77,8 @@ async function getRole(roleId) {
 }
 
 async function createRole(data, actor = null) {
-  const exists = await prisma.role.findUnique({ where: { name: data.name } });
+  const normalizedName = data.name.trim().toUpperCase().replace(/\s+/g, '_');
+  const exists = await prisma.role.findUnique({ where: { name: normalizedName } });
   if (exists) throw { statusCode: 409, code: 'DUPLICATE_ROLE', message: 'این نام نقش قبلاً ثبت شده است.' };
 
   const permIds = (data.permissionIds || []).map(Number);
@@ -89,7 +90,7 @@ async function createRole(data, actor = null) {
   return prisma.$transaction(async (tx) => {
     const role = await tx.role.create({
       data: {
-        name: data.name.trim().toUpperCase().replace(/\s+/g, '_'),
+        name: normalizedName,
         label: data.label.trim(),
         description: data.description || null,
         scope: data.scope,
