@@ -1,5 +1,7 @@
 const prisma = require('../../config/db');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const PUBLIC_STATUS = 'PUBLISHED';
 
@@ -220,6 +222,16 @@ async function createArticle(data, authorUserId) {
     });
 
     await createRevision(article.id, authorUserId, 1, article, 'ایجاد مقاله', tx);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: authorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_ARTICLE_CREATED,
+      entityType: 'Article',
+      entityId: article.id,
+      metadata: { status: article.status, type: article.type, revisionNo: 1 },
+    });
     return article;
   });
 }
@@ -287,6 +299,16 @@ async function updateArticle(id, data, editorUserId) {
 
     const nextRevisionNo = await tx.articleRevision.count({ where: { articleId: id } }) + 1;
     await createRevision(id, editorUserId, nextRevisionNo, article, data.changeNote || 'ویرایش مقاله', tx);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: editorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_ARTICLE_UPDATED,
+      entityType: 'Article',
+      entityId: id,
+      metadata: { changedFields: Object.keys(updateData), revisionNo: nextRevisionNo },
+    });
     return article;
   });
 }
@@ -312,6 +334,16 @@ async function changeStatus(id, status, userId) {
 
     const nextRevisionNo = await tx.articleRevision.count({ where: { articleId: id } }) + 1;
     await createRevision(id, userId, nextRevisionNo, updated, `تغییر وضعیت به ${status}`, tx);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: userId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_ARTICLE_STATUS_CHANGED,
+      entityType: 'Article',
+      entityId: id,
+      metadata: { previousStatus: article.status, nextStatus: status, revisionNo: nextRevisionNo },
+    });
     return updated;
   });
 }
@@ -326,6 +358,16 @@ async function deleteArticle(id, editorUserId = null) {
     });
     const nextRevisionNo = await tx.articleRevision.count({ where: { articleId: id } }) + 1;
     await createRevision(id, editorUserId, nextRevisionNo, archived, 'آرشیو مقاله', tx);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: editorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_ARTICLE_ARCHIVED,
+      entityType: 'Article',
+      entityId: id,
+      metadata: { previousStatus: (await getAdminById(id, tx)).status, nextStatus: 'ARCHIVED', revisionNo: nextRevisionNo },
+    });
     return { success: true };
   });
 }
@@ -423,6 +465,16 @@ async function restoreRevision(articleId, revisionNo, editorUserId) {
 
     const nextRevisionNo = await tx.articleRevision.count({ where: { articleId } }) + 1;
     await createRevision(articleId, editorUserId, nextRevisionNo, article, `بازگردانی به نسخه ${revisionNo}: ${revision.changeNote || ''}`, tx);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: editorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_ARTICLE_REVISION_RESTORED,
+      entityType: 'Article',
+      entityId: articleId,
+      metadata: { sourceRevisionNo: revisionNo, revisionNo: nextRevisionNo },
+    });
     return article;
   });
 }
