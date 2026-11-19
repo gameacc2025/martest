@@ -13,6 +13,7 @@ _Baseline architecture notes originated 2026-08-08. Historical sections below co
 - **Open work:** exhaustive resource-by-resource tenant/IDOR review; central audit action registry and producer normalization; owner/legal AuditLog retention/archival decision; remaining dashboard/reporting completeness and broader catalog/inquiry/CMS/notification/observability review.
 - **Not verified:** owner's Windows working tree, local Docker daemon and developer PostgreSQL; live SMTP/Twilio/payment-provider delivery; production deployment.
 - **Source of truth:** current code/tests/migrations and exact workflow runs, followed by accepted architecture decisions. Dated sections below are historical snapshots unless explicitly reconciled.
+
 ## Historical snapshot — 2026-11-18 (superseded by the 2026-11-19 reconciliation above)
 
 - **Repository / branch:** `gameacc2025/martest` / existing `main` only. All integration writes are serialized by the lead; no branches, worktrees, detached checkouts, force-pushes, resets or destructive cleanup. Workers never commit/push.

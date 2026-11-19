@@ -47,11 +47,13 @@ This contract defines the complete API surface, data models, permission matrix, 
 ```json
 POST /api/v1/auth/challenges
 {
-  "purpose": "PASSWORD_RESET" | "PHONE_VERIFICATION" | "EMAIL_VERIFICATION", (LOGIN_MFA is deferred)
-  "channel": "SMS" | "EMAIL",
-  "destination": "string (phone or email, max 255 chars)"
+  "purpose": "PHONE_VERIFICATION",
+  "channel": "SMS",
+  "destination": "09120000000"
 }
 ```
+
+Allowed purposes: `PASSWORD_RESET`, `PHONE_VERIFICATION`, `EMAIL_VERIFICATION`. `LOGIN_MFA` remains deferred and is rejected by the active API. Destination must match the authenticated user's stored contact (maximum 255 characters).
 
 **Response (200):**
 ```json
@@ -80,8 +82,8 @@ POST /api/v1/auth/challenges
 ```json
 POST /api/v1/auth/challenges/verify
 {
-  "challengeId": "integer",
-  "code": "string (exactly 6 digits)"
+  "challengeId": "123",
+  "code": "123456"
 }
 ```
 
@@ -149,7 +151,7 @@ GET /api/v1/auth/challenges/me
       "expiresAt": "2026-11-09T12:00:00Z",
       "attemptCount": 0,
       "maxAttempts": 5,
-      "status": "PENDING" | "CONSUMED" | "EXPIRED" | "INVALIDATED"
+      "status": "PENDING"
     }
     ]
   }
@@ -281,15 +283,13 @@ The writers await the database insert; they are not fire-and-forget. Use `record
 
 | Permission Key | Description | Context | Default Roles |
 |----------------|-------------|---------|---------------|
-| `auth_challenges.request` | Request a challenge for self | CUSTOMER, COMPANY, STAFF | CUSTOMER_USER, COMPANY_MANAGER, STAFF_ADMIN |
-| `auth_challenges.verify` | Verify a user's own challenge | Authenticated STAFF / COMPANY / CUSTOMER; owner-only | CUSTOMER_USER, COMPANY_MANAGER, STAFF_ADMIN |
 | `audit_logs.read` | Search/view audit logs | STAFF only | STAFF_ADMIN, STAFF_AUDITOR |
 | `audit_logs.export` | Export matching audit entries as JSON/CSV | STAFF only | STAFF_ADMIN |
 
 **Notes:**
 - All `/auth/challenges` routes require authentication. Verify and consume additionally check that `AuthChallenge.userId` equals the authenticated user ID. Public password recovery uses the separate `/auth/forgot-password` and `/auth/reset-password` endpoints.
 - `audit_logs.read` requires `STAFF` AccessProfile + permission. COMPANY/CUSTOMER contexts are denied even with permission.
-- No `auth_challenges.manage` — users only manage their own challenges via `/me` endpoint.
+- Auth Challenge routes do not require a separate `auth_challenges.*` permission; they require authentication, and verify/consume enforce exact user ownership. `/me` returns only the authenticated user's records.
 
 ---
 
@@ -297,7 +297,7 @@ The writers await the database insert; they are not fire-and-forget. Use `record
 
 | Resource | Owner | STAFF Access | COMPANY Access | CUSTOMER Access |
 |----------|-------|--------------|----------------|-----------------|
-| AuthChallenge | User (via userId) | Route-specific administrative access | Own company users only where explicitly authorized | Own challenges only |
+| AuthChallenge | User (via userId) | Own challenges only | Own challenges only | Own challenges only |
 | AuditLog | System (append-only) | Search, view and export only with the matching `audit_logs.*` permission | Denied | Denied |
 
 - Audit read/stats/detail require exact `STAFF` access plus `audit_logs.read`.
@@ -429,14 +429,12 @@ if (process.env.NODE_ENV === 'production' && !process.env.SEED_DEMO_DATA) {
 
 | Test | Command | Expected |
 |------|---------|----------|
-| Challenge request rate limit | `pnpm --filter backend test auth-challenges.rate-limit` | 429 after 3 requests/15min |
-| Challenge verify consumes attempt | `pnpm --filter backend test auth-challenges.verify-attempts` | attemptCount increments |
-| Challenge consume invalidates | `pnpm --filter backend test auth-challenges.consume-invalidates` | Challenge status = CONSUMED |
-| Challenge expiry | `pnpm --filter backend test auth-challenges.expiry` | 400 CHALLENGE_EXPIRED |
-| Max attempts → invalidated | `pnpm --filter backend test auth-challenges.max-attempts` | status = INVALIDATED |
-| Cross-context denial (audit) | `pnpm --filter backend test audit-logs.company-denied` | 403 for COMPANY |
-| Audit redaction | `pnpm --filter backend test audit-logs.redaction` | No secrets in response |
-| Audit cross-context denial | audit route/service tests | COMPANY and CUSTOMER contexts are denied; STAFF-only access |
+| Challenge service, ownership, cooldown and attempt limits | `cd backend && node --test src/modules/auth-challenges/authChallenges.service.test.js` | Per-user/per-destination limits, 60-second cooldown, ownership and atomic attempt/consume behavior |
+| Challenge route rate limits | `cd backend && node --test src/modules/auth-challenges/authChallenges.routes.test.js` | Request 5/15m; verify and consume 20/15m |
+| Challenge utility validation | `cd backend && node --test src/modules/auth-challenges/authChallenges.utils.test.js` | Input validation, normalized/masked destination and trusted client IP behavior |
+| Audit service and redaction | `cd backend && node --test src/modules/audit/audit.service.test.js` | Central writer/read/export and sensitive-field redaction behavior |
+| Full backend suite | `cd backend && npm test` | Complete backend regression suite |
+| Runtime seed and browser acceptance | GitHub Actions Runtime Validation | Seed idempotency twice, AD-1/AD-3 grants and browser smoke across all panels/API proxies |
 
 ### 11.2 UI Component/Page
 
