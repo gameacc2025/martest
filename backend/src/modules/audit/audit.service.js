@@ -49,6 +49,10 @@ const SENSITIVE_FIELDS = new Set([
   'nationalId',
   'bankAccount',
   'iban',
+  'authorization',
+  'cookie',
+  'sessionId',
+  'sessionToken',
 ].map((field) => field.toLowerCase()));
 
 /**
@@ -67,8 +71,10 @@ function redactSensitiveData(obj, depth = 0) {
 
   const sanitized = {};
   for (const [key, value] of Object.entries(obj)) {
-    const lowerKey = key.toLowerCase();
-    if (SENSITIVE_FIELDS.has(lowerKey) || [...SENSITIVE_FIELDS].some((field) => lowerKey.includes(field))) {
+    // Normalize separators so snake_case/kebab-case variants cannot bypass
+    // the same sensitive-key policy as camelCase and compact keys.
+    const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if ([...SENSITIVE_FIELDS].some((field) => normalizedKey.includes(field))) {
       sanitized[key] = '[REDACTED]';
     } else if (value && typeof value === 'object') {
       sanitized[key] = redactSensitiveData(value, depth + 1);
