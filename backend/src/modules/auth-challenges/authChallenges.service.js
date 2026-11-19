@@ -447,18 +447,19 @@ async function consumeChallenge({ challengeId, code }) {
   }
 
   const consumed = await prisma.$transaction(async (tx) => {
+    let verificationUser = null;
     // Contact-verification challenges are only valid for the exact contact
     // value that was verified when the challenge was issued.
     if (challenge.purpose === 'PHONE_VERIFICATION' || challenge.purpose === 'EMAIL_VERIFICATION') {
-      const user = await tx.user.findUnique({
+      verificationUser = await tx.user.findUnique({
         where: { id: challenge.userId },
         select: { phone: true, email: true },
       });
-      if (!user) throw createError(404, 'USER_NOT_FOUND', 'کاربر یافت نشد.');
+      if (!verificationUser) throw createError(404, 'USER_NOT_FOUND', 'کاربر یافت نشد.');
 
       const storedDestination = challenge.purpose === 'PHONE_VERIFICATION'
-        ? normalizePhone(user.phone)
-        : normalizeEmail(user.email);
+        ? normalizePhone(verificationUser.phone)
+        : normalizeEmail(verificationUser.email);
       const challengeDestination = challenge.purpose === 'PHONE_VERIFICATION'
         ? normalizePhone(challenge.destination)
         : normalizeEmail(challenge.destination);
@@ -485,13 +486,13 @@ async function consumeChallenge({ challengeId, code }) {
     // Persist verification in the same transaction as challenge consumption.
     if (challenge.purpose === 'PHONE_VERIFICATION') {
       const verified = await tx.user.updateMany({
-        where: { id: challenge.userId, phone: user.phone },
+        where: { id: challenge.userId, phone: verificationUser.phone },
         data: { phoneVerifiedAt: now },
       });
       if (verified.count !== 1) throw createError(409, 'CHALLENGE_DESTINATION_CHANGED', 'شماره تلفن پس از بررسی تغییر کرده است؛ کد جدید درخواست کنید.');
     } else if (challenge.purpose === 'EMAIL_VERIFICATION') {
       const verified = await tx.user.updateMany({
-        where: { id: challenge.userId, email: user.email },
+        where: { id: challenge.userId, email: verificationUser.email },
         data: { emailVerifiedAt: now },
       });
       if (verified.count !== 1) throw createError(409, 'CHALLENGE_DESTINATION_CHANGED', 'نشانی ایمیل پس از بررسی تغییر کرده است؛ کد جدید درخواست کنید.');
